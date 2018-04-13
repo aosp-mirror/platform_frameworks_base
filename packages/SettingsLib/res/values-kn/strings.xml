@@ -141,7 +141,7 @@
     <string name="launch_defaults_some" msgid="313159469856372621">"ಕೆಲವು ಡೀಫಾಲ್ಟ್‌ಗಳನ್ನು ಹೊಂದಿಸಲಾಗಿದೆ"</string>
     <string name="launch_defaults_none" msgid="4241129108140034876">"ಡೀಫಾಲ್ಟ್‌ಗಳನ್ನು ಹೊಂದಿಸಲಾಗಿಲ್ಲ"</string>
     <string name="tts_settings" msgid="8186971894801348327">"ಪಠ್ಯದಿಂದ ಧ್ವನಿಯ ಸೆಟ್ಟಿಂಗ್‌ಗಳು"</string>
-    <string name="tts_settings_title" msgid="1237820681016639683">"ಧ್ವನಿಗೆ-ಪಠ್ಯದ ಔಟ್‌ಪುಟ್‌"</string>
+    <string name="tts_settings_title" msgid="1237820681016639683">"ಪಠ್ಯದಿಂದ ಧ್ವನಿ ಔಟ್‌ಪುಟ್‌"</string>
     <string name="tts_default_rate_title" msgid="6030550998379310088">"ಧ್ವನಿಯ ಪ್ರಮಾಣ"</string>
     <string name="tts_default_rate_summary" msgid="4061815292287182801">"ಪಠ್ಯವನ್ನು ಹೇಳಿದ ವೇಗ"</string>
     <string name="tts_default_pitch_title" msgid="6135942113172488671">"ಪಿಚ್"</string>
@@ -152,7 +152,7 @@
     <string name="tts_default_lang_summary" msgid="5219362163902707785">"ಮಾತಿನ ಪಠ್ಯಕ್ಕೆ ಭಾಷಾ-ನಿರ್ದಿಷ್ಟ ಧ್ವನಿಯನ್ನು ಹೊಂದಿಸುತ್ತದೆ"</string>
     <string name="tts_play_example_title" msgid="7094780383253097230">"ಉದಾಹರಣೆಯೊಂದನ್ನು ಆಲಿಸಿ"</string>
     <string name="tts_play_example_summary" msgid="8029071615047894486">"ಧ್ವನಿ ಸಮನ್ವಯದ ಕಿರು ಪ್ರಾತ್ಯಕ್ಷಿಕೆಯನ್ನು ಪ್ಲೇ ಮಾಡು"</string>
-    <string name="tts_install_data_title" msgid="4264378440508149986">"ಧ್ವನಿ ಡೇಟಾವನ್ನು ಸ್ಥಾಪಿಸಿ"</string>
+    <string name="tts_install_data_title" msgid="4264378440508149986">"ಧ್ವನಿ ಡೇಟಾವನ್ನು ಇನ್‍ಸ್ಟಾಲ್ ಮಾಡಿ"</string>
     <string name="tts_install_data_summary" msgid="5742135732511822589">"ಧ್ವನಿ ಸಮನ್ವಯಕ್ಕಾಗಿ ಅಗತ್ಯವಿರುವ ಧ್ವನಿ ಡೇಟಾ ಸ್ಥಾಪಿಸಿ"</string>
     <string name="tts_engine_security_warning" msgid="8786238102020223650">"ಪಾಸ್‌ವರ್ಡ್‌ಗಳು ಮತ್ತು ಕ್ರೆಡಿಟ್‌ ಕಾರ್ಡ್‌ ಸಂಖ್ಯೆಗಳಂತಹ ವೈಯಕ್ತಿಕ ಡೇಟಾ ಒಳಗೊಂಡಂತೆ ಮಾತನಾಡುವ ಎಲ್ಲ ಪಠ್ಯವನ್ನು ಸಂಗ್ರಹಿಸಲು ಈ ಧ್ವನಿ ಸಮನ್ವಯ ಎಂಜಿನ್‌ಗೆ ಸಾಧ್ಯವಾಗಬಹುದು. ಇದು <xliff:g id="TTS_PLUGIN_ENGINE_NAME">%s</xliff:g> ಎಂಜಿನ್‌ನಿಂದ ಬರುತ್ತದೆ. ಈ ಧ್ವನಿ ಸಮನ್ವಯ ಎಂಜಿನ್ ಬಳಕೆಯನ್ನು ಸಕ್ರಿಯಗೊಳಿಸುವುದೇ?"</string>
     <string name="tts_engine_network_required" msgid="1190837151485314743">"ಪಠ್ಯದಿಂದ ಧ್ವನಿ ಔಟ್‌ಪುಟ್‌‌ಗಾಗಿ ಈ ಭಾಷೆಗೆ ಕಾರ್ಯನಿರತವಾದ ನೆಟ್‌ವರ್ಕ್‌ನ ಅಗತ್ಯವಿದೆ."</string>
@@ -196,7 +196,7 @@
     <string name="bugreport_in_power_summary" msgid="1778455732762984579">"ದೋಷ ವರದಿ ಮಾಡಲು ಪವರ್ ಮೆನುನಲ್ಲಿ ಬಟನ್ ತೋರಿಸು"</string>
     <string name="keep_screen_on" msgid="1146389631208760344">"ಎಚ್ಚರವಾಗಿರು"</string>
     <string name="keep_screen_on_summary" msgid="2173114350754293009">"ಚಾರ್ಜ್ ಮಾಡುವಾಗ ಪರದೆಯು ಎಂದಿಗೂ ನಿದ್ರಾವಸ್ಥೆಗೆ ಹೋಗುವುದಿಲ್ಲ"</string>
-    <string name="bt_hci_snoop_log" msgid="3340699311158865670">"ಬ್ಲೂಟೂತ್‌‌ HCI ಸ್ನೂಪ್‌ಲಾಗ್"</string>
+    <string name="bt_hci_snoop_log" msgid="3340699311158865670">"ಬ್ಲೂಟೂತ್‌‌ HCI ಸ್ನೂಪ್‌ ಲಾಗ್ ಸಕ್ರಿಯಗೊಳಿಸಿ"</string>
     <string name="bt_hci_snoop_log_summary" msgid="366083475849911315">"ಫೈಲ್‌ನಲ್ಲಿ ಎಲ್ಲ ಬ್ಲೂಟೂತ್ HCI ಪ್ಯಾಕೆಟ್‌ಗಳನ್ನು ಸೆರೆಹಿಡಿಯಿರಿ (ಈ ಸೆಟ್ಟಿಂಗ್ ಅನ್ನು ಬದಲಾಯಿಸಿದ ನಂತರ ಬ್ಲೂಟೂತ್ ಟಾಗಲ್ ಮಾಡಿ)"</string>
     <string name="oem_unlock_enable" msgid="6040763321967327691">"OEM ಅನ್‌ಲಾಕ್‌ ಮಾಡಲಾಗುತ್ತಿದೆ"</string>
     <string name="oem_unlock_enable_summary" msgid="4720281828891618376">"ಬೂಟ್‌ಲೋಡರ್‌ ಅನ್‌ಲಾಕ್‌ ಮಾಡಲು ಅನುಮತಿಸಿ"</string>
@@ -216,20 +216,15 @@
     <string name="bluetooth_select_avrcp_version_string" msgid="3750059931120293633">"ಬ್ಲೂಟೂತ್ AVRCP ಆವೃತ್ತಿ"</string>
     <string name="bluetooth_select_avrcp_version_dialog_title" msgid="7277329668298705702">"ಬ್ಲೂಟೂತ್ AVRCP ಆವೃತ್ತಿಯನ್ನು ಆಯ್ಕೆ ಮಾಡಿ"</string>
     <string name="bluetooth_select_a2dp_codec_type" msgid="90597356942154882">"ಬ್ಲೂಟೂತ್ ಆಡಿಯೋ ಕೋಡೆಕ್"</string>
-    <!-- no translation found for bluetooth_select_a2dp_codec_type_dialog_title (8436224899475822557) -->
-    <skip />
+    <string name="bluetooth_select_a2dp_codec_type_dialog_title" msgid="8436224899475822557">"ಬ್ಲೂಟೂತ್ ಆಡಿಯೋ ಕೋಡೆಕ್ ಅನ್ನು ಟ್ರಿಗ್ಗರ್ ಮಾಡಿ\nಆಯ್ಕೆ"</string>
     <string name="bluetooth_select_a2dp_codec_sample_rate" msgid="4788245703824623062">"ಬ್ಲೂಟೂತ್ ಆಡಿಯೋ ಮಾದರಿ ದರ"</string>
-    <!-- no translation found for bluetooth_select_a2dp_codec_sample_rate_dialog_title (8010380028880963535) -->
-    <skip />
+    <string name="bluetooth_select_a2dp_codec_sample_rate_dialog_title" msgid="8010380028880963535">"ಬ್ಲೂಟೂತ್ ಆಡಿಯೋ ಕೋಡೆಕ್ ಅನ್ನು ಟ್ರಿಗ್ಗರ್ ಮಾಡಿ\nಆಯ್ಕೆ: ಮಾದರಿ ರೇಟ್"</string>
     <string name="bluetooth_select_a2dp_codec_bits_per_sample" msgid="2099645202720164141">"ಬ್ಲೂಟೂತ್‌ ಆಡಿಯೊ ಬಿಟ್ಸ್‌‌ನ ಪ್ರತಿ ಮಾದರಿ"</string>
-    <!-- no translation found for bluetooth_select_a2dp_codec_bits_per_sample_dialog_title (8063859754619484760) -->
-    <skip />
+    <string name="bluetooth_select_a2dp_codec_bits_per_sample_dialog_title" msgid="8063859754619484760">"ಬ್ಲೂಟೂತ್ ಆಡಿಯೋ ಕೋಡೆಕ್ ಅನ್ನು ಟ್ರಿಗ್ಗರ್ ಮಾಡಿ \nಆಯ್ಕೆ: ಬಿಟ್ಸ್‌‌ನ ಪ್ರತಿ ಮಾದರಿ"</string>
     <string name="bluetooth_select_a2dp_codec_channel_mode" msgid="884855779449390540">"ಬ್ಲೂಟೂತ್ ಆಡಿಯೋ ಚಾನೆಲ್ ಮೋಡ್"</string>
-    <!-- no translation found for bluetooth_select_a2dp_codec_channel_mode_dialog_title (7234956835280563341) -->
-    <skip />
+    <string name="bluetooth_select_a2dp_codec_channel_mode_dialog_title" msgid="7234956835280563341">"ಬ್ಲೂಟೂತ್ ಆಡಿಯೋ ಕೋಡೆಕ್ ಅನ್ನು ಟ್ರಿಗ್ಗರ್ ಮಾಡಿ\nಆಯ್ಕೆ: ಚಾನಲ್ ಮೋಡ್"</string>
     <string name="bluetooth_select_a2dp_codec_ldac_playback_quality" msgid="3619694372407843405">"ಬ್ಲೂಟೂತ್‌ ಆಡಿಯೊ LDAC ಕೋಡೆಕ್: ಪ್ಲೇಬ್ಯಾಕ್ ಗುಣಮಟ್ಟ"</string>
-    <!-- no translation found for bluetooth_select_a2dp_codec_ldac_playback_quality_dialog_title (7595776220458732825) -->
-    <skip />
+    <string name="bluetooth_select_a2dp_codec_ldac_playback_quality_dialog_title" msgid="7595776220458732825">"ಬ್ಲೂಟೂತ್ ಆಡಿಯೋ LDAC ಕೋಡೆಕ್ ಅನ್ನು ಟ್ರಿಗ್ಗರ್ ಮಾಡಿ\nಆಯ್ಕೆ: ಪ್ಲೇಬ್ಯಾಕ್ ಗುಣಮಟ್ಟ"</string>
     <string name="bluetooth_select_a2dp_codec_streaming_label" msgid="5347862512596240506">"ಸ್ಟ್ರೀಮಿಂಗ್: <xliff:g id="STREAMING_PARAMETER">%1$s</xliff:g>"</string>
     <string name="select_private_dns_configuration_title" msgid="3700456559305263922">"ಖಾಸಗಿ DNS"</string>
     <string name="select_private_dns_configuration_dialog_title" msgid="9221994415765826811">"ಖಾಸಗಿ DNS ಮೋಡ್ ಆಯ್ಕೆಮಾಡಿ"</string>
@@ -299,7 +294,7 @@
     <string name="disable_overlays_summary" msgid="3578941133710758592">"ಸ್ಕ್ರೀನ್ ಸಂಯೋಜನೆಗಾಗಿ ಯಾವಾಗಲೂ GPU ಬಳಸಿ"</string>
     <string name="simulate_color_space" msgid="6745847141353345872">"ಬಣ್ಣದ ಸ್ಥಳ ಸಿಮ್ಯುಲೇಟ್‌"</string>
     <string name="enable_opengl_traces_title" msgid="6790444011053219871">"OpenGL ಕುರುಹುಗಳನ್ನು ಸಕ್ರಿಯಗೊಳಿಸಿ"</string>
-    <string name="usb_audio_disable_routing" msgid="8114498436003102671">"USB ಆಡಿಯೋ ರೂಟಿಂಗ್ ನಿಷ್ಕ್ರಿ."</string>
+    <string name="usb_audio_disable_routing" msgid="8114498436003102671">"USB ಆಡಿಯೋ ರೂಟಿಂಗ್ ನಿಷ್ಕ್ರಿಯಗೊಳಿಸಿ"</string>
     <string name="usb_audio_disable_routing_summary" msgid="980282760277312264">"USB ಆಡಿಯೊ ಸಲಕರಣೆಗಳಿಗೆ ಸ್ವಯಂ ರೂಟಿಂಗ್ ನಿಷ್ಕ್ರಿಯ."</string>
     <string name="debug_layout" msgid="5981361776594526155">"ಲೇಔಟ್ ಪರಿಮಿತಿಗಳನ್ನು ತೋರಿಸು"</string>
     <string name="debug_layout_summary" msgid="2001775315258637682">"ಕ್ಲಿಪ್‌ನ ಗಡಿಗಳು, ಅಂಚುಗಳು, ಇತ್ಯಾದಿ ತೋರಿಸು."</string>

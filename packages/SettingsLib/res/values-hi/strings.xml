@@ -40,10 +40,8 @@
     <string name="connected_via_passpoint" msgid="2826205693803088747">"%1$s के द्वारा उपलब्ध"</string>
     <string name="available_via_passpoint" msgid="1617440946846329613">"%1$s के द्वारा उपलब्ध"</string>
     <string name="wifi_connected_no_internet" msgid="8202906332837777829">"कनेक्ट हो गया है, लेकिन इंटरनेट नहीं है"</string>
-    <!-- no translation found for wifi_status_no_internet (5784710974669608361) -->
-    <skip />
-    <!-- no translation found for wifi_status_sign_in_required (123517180404752756) -->
-    <skip />
+    <string name="wifi_status_no_internet" msgid="5784710974669608361">"इंटरनेट कनेक्शन नहीं है"</string>
+    <string name="wifi_status_sign_in_required" msgid="123517180404752756">"साइन इन करना ज़रूरी है"</string>
     <string name="wifi_ap_unable_to_handle_new_sta" msgid="5348824313514404541">"एक्सेस प्वाइंट फ़िलहाल भरा हुआ है"</string>
     <string name="connected_via_carrier" msgid="7583780074526041912">"%1$s के ज़रिए कनेक्ट"</string>
     <string name="available_via_carrier" msgid="1469036129740799053">"%1$s के ज़रिए उपलब्ध"</string>
@@ -67,12 +65,9 @@
     <string name="bluetooth_connected_no_headset_battery_level" msgid="1610296229139400266">"जुड़ गया (फ़ोन के ऑडियो को छोड़कर), बैटरी का लेवल <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g><xliff:g id="ACTIVE_DEVICE">%2$s</xliff:g>"</string>
     <string name="bluetooth_connected_no_a2dp_battery_level" msgid="3908466636369853652">"जुड़ गया (मीडिया ऑडियो को छोड़कर), बैटरी का लेवल <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g><xliff:g id="ACTIVE_DEVICE">%2$s</xliff:g>"</string>
     <string name="bluetooth_connected_no_headset_no_a2dp_battery_level" msgid="1163440823807659316">"जुड़ गया (फ़ोन या मीडिया ऑडियो को छोड़कर), बैटरी का लेवल <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g><xliff:g id="ACTIVE_DEVICE">%2$s</xliff:g>"</string>
-    <!-- no translation found for bluetooth_active_battery_level (3149689299296462009) -->
-    <skip />
-    <!-- no translation found for bluetooth_battery_level (1447164613319663655) -->
-    <skip />
-    <!-- no translation found for bluetooth_active_no_battery_level (8380223546730241956) -->
-    <skip />
+    <string name="bluetooth_active_battery_level" msgid="3149689299296462009">"चालू, <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> बैटरी"</string>
+    <string name="bluetooth_battery_level" msgid="1447164613319663655">"<xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> बैटरी"</string>
+    <string name="bluetooth_active_no_battery_level" msgid="8380223546730241956">"चालू"</string>
     <string name="bluetooth_profile_a2dp" msgid="2031475486179830674">"मीडिया ऑडियो"</string>
     <string name="bluetooth_profile_headset" msgid="7815495680863246034">"फ़ोन कॉल"</string>
     <string name="bluetooth_profile_opp" msgid="9168139293654233697">"फ़ाइल स्थानांतरण"</string>
@@ -119,14 +114,10 @@
     <string name="bluetooth_talkback_headphone" msgid="26580326066627664">"हेडफ़ोन"</string>
     <string name="bluetooth_talkback_input_peripheral" msgid="5165842622743212268">"इनपुट पेरिफ़ेरल"</string>
     <string name="bluetooth_talkback_bluetooth" msgid="5615463912185280812">"ब्लूटूथ"</string>
-    <!-- no translation found for bluetooth_hearingaid_left_pairing_message (7378813500862148102) -->
-    <skip />
-    <!-- no translation found for bluetooth_hearingaid_right_pairing_message (1550373802309160891) -->
-    <skip />
-    <!-- no translation found for bluetooth_hearingaid_left_battery_level (8797811465352097562) -->
-    <skip />
-    <!-- no translation found for bluetooth_hearingaid_right_battery_level (7309476148173459677) -->
-    <skip />
+    <string name="bluetooth_hearingaid_left_pairing_message" msgid="7378813500862148102">"सुनने में मदद करने वाला बाईं ओर का डिवाइस जोड़ा जा रहा है…"</string>
+    <string name="bluetooth_hearingaid_right_pairing_message" msgid="1550373802309160891">"सुनने में मदद करने वाला दाईं ओर का डिवाइस जोड़ा जा रहा है…"</string>
+    <string name="bluetooth_hearingaid_left_battery_level" msgid="8797811465352097562">"बाईं ओर का डिवाइस - <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> बैटरी"</string>
+    <string name="bluetooth_hearingaid_right_battery_level" msgid="7309476148173459677">"दाईं ओर का डिवाइस - <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> बैटरी"</string>
     <string name="accessibility_wifi_off" msgid="1166761729660614716">"वाई-फ़ाई बंद है."</string>
     <string name="accessibility_no_wifi" msgid="8834610636137374508">"वाई-फ़ाई डिसकनेक्ट है."</string>
     <string name="accessibility_wifi_one_bar" msgid="4869376278894301820">"वाई-फ़ाई का एक बार है."</string>
@@ -150,7 +141,7 @@
     <string name="launch_defaults_some" msgid="313159469856372621">"कुछ डिफ़ॉल्‍ट सेट हैं"</string>
     <string name="launch_defaults_none" msgid="4241129108140034876">"कोई डिफ़ॉल्‍ट सेट नहीं है"</string>
     <string name="tts_settings" msgid="8186971894801348327">"लेख से बोली सेटिंग"</string>
-    <string name="tts_settings_title" msgid="1237820681016639683">"लेख को सुनें"</string>
+    <string name="tts_settings_title" msgid="1237820681016639683">"लिखाई को बोली में बदलना"</string>
     <string name="tts_default_rate_title" msgid="6030550998379310088">"बोली दर"</string>
     <string name="tts_default_rate_summary" msgid="4061815292287182801">"बोलने की गति तय करें"</string>
     <string name="tts_default_pitch_title" msgid="6135942113172488671">"पिच"</string>
@@ -205,9 +196,9 @@
     <string name="bugreport_in_power_summary" msgid="1778455732762984579">"गड़बड़ी की रिपोर्ट लेने के लिए पावर मेन्यू में कोई बटन दिखाएं"</string>
     <string name="keep_screen_on" msgid="1146389631208760344">"स्क्रीन को चालू रखें"</string>
     <string name="keep_screen_on_summary" msgid="2173114350754293009">"चार्ज करते समय स्‍क्रीन कभी भी कम बैटरी मोड में नहीं जाएगी"</string>
-    <string name="bt_hci_snoop_log" msgid="3340699311158865670">"ब्लूटूथ HCI स्‍नूप लॉग चालू करें"</string>
+    <string name="bt_hci_snoop_log" msgid="3340699311158865670">"ब्लूटूथ एचसीआई स्‍नूप लॉग चालू करें"</string>
     <string name="bt_hci_snoop_log_summary" msgid="366083475849911315">"सभी ब्लूटूथ एचसीआई पैकेट एक फ़ाइल में कैप्चर करें (यह सेटिंग बदलने के बाद ब्लूटूथ टॉगल करें)"</string>
-    <string name="oem_unlock_enable" msgid="6040763321967327691">"OEM अनलॉक करना"</string>
+    <string name="oem_unlock_enable" msgid="6040763321967327691">"ओईएम अनलॉक करना"</string>
     <string name="oem_unlock_enable_summary" msgid="4720281828891618376">"बूटलोडर को अनलाॅक किए जाने की अनुमति दें"</string>
     <string name="confirm_enable_oem_unlock_title" msgid="4802157344812385674">"OEM अनलॉक करने की अनुमति दें?"</string>
     <string name="confirm_enable_oem_unlock_text" msgid="5517144575601647022">"चेतावनी: इस सेटिंग के चालू रहने पर डिवाइस सुरक्षा सुविधाएं इस डिवाइस पर काम नहीं करेंगी."</string>
@@ -225,20 +216,15 @@
     <string name="bluetooth_select_avrcp_version_string" msgid="3750059931120293633">"ब्लूटूथ AVRCP वर्शन"</string>
     <string name="bluetooth_select_avrcp_version_dialog_title" msgid="7277329668298705702">"ब्लूटूथ AVRCP वर्शन चुनें"</string>
     <string name="bluetooth_select_a2dp_codec_type" msgid="90597356942154882">"ब्लूटूथ ऑडियो कोडेक"</string>
-    <!-- no translation found for bluetooth_select_a2dp_codec_type_dialog_title (8436224899475822557) -->
-    <skip />
+    <string name="bluetooth_select_a2dp_codec_type_dialog_title" msgid="8436224899475822557">"ब्लूटूथ ऑडियो कोडेक का\nविकल्प चालू करें"</string>
     <string name="bluetooth_select_a2dp_codec_sample_rate" msgid="4788245703824623062">"ब्लूटूथ ऑडियो नमूना दर"</string>
-    <!-- no translation found for bluetooth_select_a2dp_codec_sample_rate_dialog_title (8010380028880963535) -->
-    <skip />
+    <string name="bluetooth_select_a2dp_codec_sample_rate_dialog_title" msgid="8010380028880963535">"ब्लूटूथ ऑडियो कोडेक का\nयह विकल्प चालू करें: सैंपल की दर"</string>
     <string name="bluetooth_select_a2dp_codec_bits_per_sample" msgid="2099645202720164141">"ब्लूटूथ ऑडियो बिट प्रति नमूना"</string>
-    <!-- no translation found for bluetooth_select_a2dp_codec_bits_per_sample_dialog_title (8063859754619484760) -->
-    <skip />
+    <string name="bluetooth_select_a2dp_codec_bits_per_sample_dialog_title" msgid="8063859754619484760">"ब्लूटूथ ऑडियो कोडेक का\nयह विकल्प चालू करें: हर सैंपल के लिए बिट की संख्या"</string>
     <string name="bluetooth_select_a2dp_codec_channel_mode" msgid="884855779449390540">"ब्लूटूथ ऑडियो चैनल मोड"</string>
-    <!-- no translation found for bluetooth_select_a2dp_codec_channel_mode_dialog_title (7234956835280563341) -->
-    <skip />
+    <string name="bluetooth_select_a2dp_codec_channel_mode_dialog_title" msgid="7234956835280563341">"ब्लूटूथ ऑडियो कोडेक का\nयह विकल्प चालू करें: चैनल मोड"</string>
     <string name="bluetooth_select_a2dp_codec_ldac_playback_quality" msgid="3619694372407843405">"ब्लूटूथ ऑडियो LDAC कोडेक: प्लेबैक क्वालिटी"</string>
-    <!-- no translation found for bluetooth_select_a2dp_codec_ldac_playback_quality_dialog_title (7595776220458732825) -->
-    <skip />
+    <string name="bluetooth_select_a2dp_codec_ldac_playback_quality_dialog_title" msgid="7595776220458732825">"ब्लूटूथ ऑडियो एलडीएसी कोडेक का\nयह विकल्प चालू करें: प्लेबैक क्वालिटी"</string>
     <string name="bluetooth_select_a2dp_codec_streaming_label" msgid="5347862512596240506">"चलाया जा रहा है: <xliff:g id="STREAMING_PARAMETER">%1$s</xliff:g>"</string>
     <string name="select_private_dns_configuration_title" msgid="3700456559305263922">"निजी DNS"</string>
     <string name="select_private_dns_configuration_dialog_title" msgid="9221994415765826811">"निजी DNS मोड चुनें"</string>
@@ -246,15 +232,12 @@
     <string name="private_dns_mode_opportunistic" msgid="8314986739896927399">"अपने आप"</string>
     <string name="private_dns_mode_provider" msgid="8354935160639360804">"निजी DNS सेवा देने वाले का होस्टनाम"</string>
     <string name="private_dns_mode_provider_hostname_hint" msgid="2487492386970928143">"DNS सेवा देने वाले का होस्टनाम डालें"</string>
-    <!-- no translation found for private_dns_mode_provider_failure (231837290365031223) -->
-    <skip />
+    <string name="private_dns_mode_provider_failure" msgid="231837290365031223">"कनेक्‍ट नहीं हो सका"</string>
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"वायरलेस दिखाई देने के लिए प्रमाणन विकल्प दिखाएं"</string>
     <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"वाई-फ़ाई प्रवेश स्तर बढ़ाएं, वाई-फ़ाई पिकर में प्रति SSID RSSI दिखाएं"</string>
     <string name="wifi_connected_mac_randomization_summary" msgid="1743059848752201485">"वाई-फ़ाई से जुड़ते समय अलग-अलग एमएसी पते इस्तेमाल करें"</string>
-    <!-- no translation found for wifi_metered_label (4514924227256839725) -->
-    <skip />
-    <!-- no translation found for wifi_unmetered_label (6124098729457992931) -->
-    <skip />
+    <string name="wifi_metered_label" msgid="4514924227256839725">"डेटा इस्तेमाल करने की सीमा तय की गई है"</string>
+    <string name="wifi_unmetered_label" msgid="6124098729457992931">"डेटा इस्तेमाल करने की सीमा तय नहीं की गई है"</string>
     <string name="select_logd_size_title" msgid="7433137108348553508">"लॉगर बफ़र आकार"</string>
     <string name="select_logd_size_dialog_title" msgid="1206769310236476760">"प्रति लॉग बफ़र लॉगर आकार चुनें"</string>
     <string name="dev_logpersist_clear_warning_title" msgid="684806692440237967">"लॉगर सतत मेमोरी साफ़ करें?"</string>
@@ -279,7 +262,7 @@
     <string name="bluetooth_disable_absolute_volume_summary" msgid="6031284410786545957">"दूर के डिवाइस पर आवाज़ बहुत बढ़ जाने या उससे नियंत्रण हटने जैसी समस्याएं होने पर, यह ब्लूटूथ के ज़रिए आवाज़ के नियंत्रण की सुविधा रोक देता है."</string>
     <string name="enable_terminal_title" msgid="95572094356054120">"स्थानीय टर्मिनल"</string>
     <string name="enable_terminal_summary" msgid="67667852659359206">"लोकल शेल तक पहुंचने की सुविधा देने वाले टर्मिनल ऐप को चालू करें"</string>
-    <string name="hdcp_checking_title" msgid="8605478913544273282">"HDCP जाँच"</string>
+    <string name="hdcp_checking_title" msgid="8605478913544273282">"एचडीसीपी जाँच"</string>
     <string name="hdcp_checking_dialog_title" msgid="5141305530923283">"HDCP जाँच व्‍यवहार सेट करें"</string>
     <string name="debug_debugging_category" msgid="6781250159513471316">"डीबग करना"</string>
     <string name="debug_app" msgid="8349591734751384446">"डीबग ऐप्स  को चुनें"</string>
@@ -330,15 +313,15 @@
     <string name="debug_applications_category" msgid="4206913653849771549">"ऐप"</string>
     <string name="immediately_destroy_activities" msgid="1579659389568133959">"गतिविधियों को न रखें"</string>
     <string name="immediately_destroy_activities_summary" msgid="3592221124808773368">"उपयोगकर्ता के छोड़ते ही हर गतिविधि को खत्म करें"</string>
-    <string name="app_process_limit_title" msgid="4280600650253107163">"पृष्ठभूमि प्रक्रिया सीमा"</string>
+    <string name="app_process_limit_title" msgid="4280600650253107163">"बैकग्राउंड प्रोसेस सीमित करें"</string>
     <string name="show_all_anrs" msgid="4924885492787069007">"बैकग्राउंड के एएनआर दिखाएं"</string>
     <string name="show_all_anrs_summary" msgid="6636514318275139826">"बैकग्राउंड में चलने वाले ऐप्लिकेशन के लिए, यह ऐप्लिकेशन नहीं चल रहा मैसेज दिखाएं"</string>
     <string name="show_notification_channel_warnings" msgid="1399948193466922683">"सूचना चैनल चेतावनी दिखाएं"</string>
-    <string name="show_notification_channel_warnings_summary" msgid="5536803251863694895">"ऐप सही चैनल के बिना सूचना पोस्ट करे तो स्क्रीन पर चेतावनी दिखाएं"</string>
-    <string name="force_allow_on_external" msgid="3215759785081916381">"ऐप्स को बाहरी मेमोरी पर बाध्‍य करें"</string>
-    <string name="force_allow_on_external_summary" msgid="3640752408258034689">"इससे कोई भी ऐप बाहरी मेमोरी में रखने लायक बन जाता है चाहे उसकी मेनिफ़ेस्ट वैल्यू कुछ भी हो"</string>
-    <string name="force_resizable_activities" msgid="8615764378147824985">"आकार बदले जाने के लिए गतिविधियों को बाध्य करें"</string>
-    <string name="force_resizable_activities_summary" msgid="6667493494706124459">"सभी गतिविधियों को मल्टी-विंडो (एक से ज़्यादा ऐप, एक साथ) के लिए आकार बदलने लायक बनाएं, चाहे उनकी मेनिफ़ेस्ट वैल्यू कुछ भी हो."</string>
+    <string name="show_notification_channel_warnings_summary" msgid="5536803251863694895">"ऐप्लिकेशन, मान्य चैनल के बिना सूचना पोस्ट करे तो स्क्रीन पर चेतावनी दिखाएं"</string>
+    <string name="force_allow_on_external" msgid="3215759785081916381">"ऐप्लिकेशन को बाहरी मेमोरी पर ही चलाएं"</string>
+    <string name="force_allow_on_external_summary" msgid="3640752408258034689">"इससे कोई भी ऐप्लिकेशन बाहरी मेमोरी में रखने लायक बन जाता है चाहे उसकी मेनिफ़ेस्ट वैल्यू कुछ भी हो"</string>
+    <string name="force_resizable_activities" msgid="8615764378147824985">"विंडो के हिसाब से गतिविधियों का आकार बदल दें"</string>
+    <string name="force_resizable_activities_summary" msgid="6667493494706124459">"सभी गतिविधियों को मल्टी-विंडो (एक से ज़्यादा ऐप्लिकेशन, एक साथ) के लिए आकार बदलने लायक बनाएं, चाहे उनकी मेनिफ़ेस्ट वैल्यू कुछ भी हो."</string>
     <string name="enable_freeform_support" msgid="1461893351278940416">"फ़्रीफ़ॉर्म विंडो (एक साथ कई विंडो दिखाना) चालू करें"</string>
     <string name="enable_freeform_support_summary" msgid="8247310463288834487">"जाँच के लिए बनी फ़्रीफ़ॉर्म विंडो के लिए सहायता चालू करें."</string>
     <string name="local_backup_password_title" msgid="3860471654439418822">"डेस्‍कटॉप बैकअप पासवर्ड"</string>
@@ -357,12 +340,12 @@
     <item msgid="8280754435979370728">"आंखों को दिखाई देने वाले प्राकृतिक रंग"</item>
     <item msgid="5363960654009010371">"डिजिटल सामग्री के लिए ऑप्टिमाइज़़ किए गए रंग"</item>
   </string-array>
-    <string name="inactive_apps_title" msgid="9042996804461901648">"स्टैंडबाय ऐप्लिकेशन"</string>
+    <string name="inactive_apps_title" msgid="9042996804461901648">"स्टैंडबाइ ऐप्लिकेशन"</string>
     <string name="inactive_app_inactive_summary" msgid="5091363706699855725">"बंद है. टॉगल करने के लिए टैप करें."</string>
     <string name="inactive_app_active_summary" msgid="4174921824958516106">"सक्रिय. टॉगल करने के लिए टैप करें."</string>
     <string name="standby_bucket_summary" msgid="6567835350910684727">"ऐप्लिकेशन स्टैंडबाय की स्थिति:<xliff:g id="BUCKET"> %s</xliff:g>"</string>
     <string name="runningservices_settings_title" msgid="8097287939865165213">"चल रही सेवाएं"</string>
-    <string name="runningservices_settings_summary" msgid="854608995821032748">"वर्तमान में चल रही सेवाओं को देखें और नियंत्रित करें"</string>
+    <string name="runningservices_settings_summary" msgid="854608995821032748">"इस समय चल रही सेवाओं को देखें और नियंत्रित करें"</string>
     <string name="select_webview_provider_title" msgid="4628592979751918907">"वेबव्यू लागू करें"</string>
     <string name="select_webview_provider_dialog_title" msgid="4370551378720004872">"वेबव्यू सेट करें"</string>
     <string name="select_webview_provider_toast_text" msgid="5466970498308266359">"यह चयन अब मान्य नहीं है. पुनः प्रयास करें."</string>
@@ -416,7 +399,7 @@
     <string name="disabled" msgid="9206776641295849915">"बंद किया गया"</string>
     <string name="external_source_trusted" msgid="2707996266575928037">"अनुमति है"</string>
     <string name="external_source_untrusted" msgid="2677442511837596726">"अनुमति नहीं है"</string>
-    <string name="install_other_apps" msgid="6986686991775883017">"अनजान ऐप इंस्टॉल करें"</string>
+    <string name="install_other_apps" msgid="6986686991775883017">"अनजान ऐप्लिकेशन इंस्टॉल करने का एक्सेस"</string>
     <string name="home" msgid="3256884684164448244">"सेटिंग का होम पेज"</string>
   <string-array name="battery_labels">
     <item msgid="8494684293649631252">"0%"</item>

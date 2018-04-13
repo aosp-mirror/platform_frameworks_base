@@ -114,8 +114,8 @@
     <string name="bluetooth_talkback_headphone" msgid="26580326066627664">"Навушнікі"</string>
     <string name="bluetooth_talkback_input_peripheral" msgid="5165842622743212268">"Перыферыйная прылада ўводу"</string>
     <string name="bluetooth_talkback_bluetooth" msgid="5615463912185280812">"Bluetooth"</string>
-    <string name="bluetooth_hearingaid_left_pairing_message" msgid="7378813500862148102">"Спалучаецца левы навушнік…"</string>
-    <string name="bluetooth_hearingaid_right_pairing_message" msgid="1550373802309160891">"Спалучаецца правы навушнік…"</string>
+    <string name="bluetooth_hearingaid_left_pairing_message" msgid="7378813500862148102">"Спалучаецца левы слыхавы апарат…"</string>
+    <string name="bluetooth_hearingaid_right_pairing_message" msgid="1550373802309160891">"Спалучаецца правы слыхавы апарат…"</string>
     <string name="bluetooth_hearingaid_left_battery_level" msgid="8797811465352097562">"Левы – узровень зараду <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
     <string name="bluetooth_hearingaid_right_battery_level" msgid="7309476148173459677">"Правы – узровень зараду <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
     <string name="accessibility_wifi_off" msgid="1166761729660614716">"Wi-Fi выключаны."</string>
@@ -195,15 +195,15 @@
     <string name="bugreport_in_power" msgid="7923901846375587241">"Ярлык для справаздачы пра памылкі"</string>
     <string name="bugreport_in_power_summary" msgid="1778455732762984579">"Паказаць кнопку для прыняцця справаздачы пра памылку ў меню сілкавання"</string>
     <string name="keep_screen_on" msgid="1146389631208760344">"Прадухіляць ад пераходу ў рэжым сну"</string>
-    <string name="keep_screen_on_summary" msgid="2173114350754293009">"Экран ніколі не ўвайдзе ў рэжым сну падчас зарадкі"</string>
+    <string name="keep_screen_on_summary" msgid="2173114350754293009">"Падчас зарадкі экран будзе пастаянна ўключаны"</string>
     <string name="bt_hci_snoop_log" msgid="3340699311158865670">"Уключыць журнал адсочвання Bluetooth HCI"</string>
     <string name="bt_hci_snoop_log_summary" msgid="366083475849911315">"Захоўваць усе пакеты Bluetooth HCI у файле (пераключыце Bluetooth пасля змены гэтай налады)"</string>
     <string name="oem_unlock_enable" msgid="6040763321967327691">"Разблакіроўка OEM"</string>
     <string name="oem_unlock_enable_summary" msgid="4720281828891618376">"Дазволіць разблакіроўку загрузчыка"</string>
     <string name="confirm_enable_oem_unlock_title" msgid="4802157344812385674">"Дазволіць разблакіроўку OEM?"</string>
     <string name="confirm_enable_oem_unlock_text" msgid="5517144575601647022">"ПАПЯРЭДЖАННЕ: Пакуль гэты параметр уключаны, абарона прылады не функцыянуе."</string>
-    <string name="mock_location_app" msgid="7966220972812881854">"Выбраць дадатак эмуляцыі месцазнаходжання"</string>
-    <string name="mock_location_app_not_set" msgid="809543285495344223">"Няма дадатку эмуляцыі месцазнаходжання"</string>
+    <string name="mock_location_app" msgid="7966220972812881854">"Выбраць праграму для фіктыўных месцазнаходжанняў"</string>
+    <string name="mock_location_app_not_set" msgid="809543285495344223">"Няма праграмы для фіктыўных месцазнаходжанняў"</string>
     <string name="mock_location_app_set" msgid="8966420655295102685">"Дадатак эмуляцыі месцазнаходжання: <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="debug_networking_category" msgid="7044075693643009662">"Сеткі"</string>
     <string name="wifi_display_certification" msgid="8611569543791307533">"Сертыфікацыя бесправаднога дысплея"</string>
@@ -216,20 +216,15 @@
     <string name="bluetooth_select_avrcp_version_string" msgid="3750059931120293633">"Версія Bluetooth AVRCP"</string>
     <string name="bluetooth_select_avrcp_version_dialog_title" msgid="7277329668298705702">"Выбраць версію Bluetooth AVRCP"</string>
     <string name="bluetooth_select_a2dp_codec_type" msgid="90597356942154882">"Кодэк Bluetooth Audio"</string>
-    <!-- no translation found for bluetooth_select_a2dp_codec_type_dialog_title (8436224899475822557) -->
-    <skip />
+    <string name="bluetooth_select_a2dp_codec_type_dialog_title" msgid="8436224899475822557">"Уключыць кодэк Bluetooth Audio\nВыбар"</string>
     <string name="bluetooth_select_a2dp_codec_sample_rate" msgid="4788245703824623062">"Частата дыскрэтызацыі Bluetooth Audio"</string>
-    <!-- no translation found for bluetooth_select_a2dp_codec_sample_rate_dialog_title (8010380028880963535) -->
-    <skip />
+    <string name="bluetooth_select_a2dp_codec_sample_rate_dialog_title" msgid="8010380028880963535">"Уключыць кодэк Bluetooth Audio\nВыбар: частата дыскрэтызацыі"</string>
     <string name="bluetooth_select_a2dp_codec_bits_per_sample" msgid="2099645202720164141">"Біты на сэмпл для Bluetooth Audio"</string>
-    <!-- no translation found for bluetooth_select_a2dp_codec_bits_per_sample_dialog_title (8063859754619484760) -->
-    <skip />
+    <string name="bluetooth_select_a2dp_codec_bits_per_sample_dialog_title" msgid="8063859754619484760">"Уключыць кодэк Bluetooth Audio\nВыбар: біты на дыскрэтызацыю"</string>
     <string name="bluetooth_select_a2dp_codec_channel_mode" msgid="884855779449390540">"Канальны рэжым Bluetooth Audio"</string>
-    <!-- no translation found for bluetooth_select_a2dp_codec_channel_mode_dialog_title (7234956835280563341) -->
-    <skip />
+    <string name="bluetooth_select_a2dp_codec_channel_mode_dialog_title" msgid="7234956835280563341">"Уключыць кодэк Bluetooth Audio\nВыбар: канальны рэжым"</string>
     <string name="bluetooth_select_a2dp_codec_ldac_playback_quality" msgid="3619694372407843405">"Аўдыякодэк Bluetooth LDAC: якасць прайгравання"</string>
-    <!-- no translation found for bluetooth_select_a2dp_codec_ldac_playback_quality_dialog_title (7595776220458732825) -->
-    <skip />
+    <string name="bluetooth_select_a2dp_codec_ldac_playback_quality_dialog_title" msgid="7595776220458732825">"Уключыць кодэк Bluetooth Audio LDAC\nВыбар: якасць прайгравання"</string>
     <string name="bluetooth_select_a2dp_codec_streaming_label" msgid="5347862512596240506">"Перадача плынню: <xliff:g id="STREAMING_PARAMETER">%1$s</xliff:g>"</string>
     <string name="select_private_dns_configuration_title" msgid="3700456559305263922">"Прыватная DNS"</string>
     <string name="select_private_dns_configuration_dialog_title" msgid="9221994415765826811">"Выберыце рэжым прыватнай DNS"</string>
@@ -270,7 +265,7 @@
     <string name="hdcp_checking_title" msgid="8605478913544273282">"Праверка HDCP"</string>
     <string name="hdcp_checking_dialog_title" msgid="5141305530923283">"Усталяваць рэжым праверкі HDCP"</string>
     <string name="debug_debugging_category" msgid="6781250159513471316">"Адладка"</string>
-    <string name="debug_app" msgid="8349591734751384446">"Выберыце прыкладанне для адладкi"</string>
+    <string name="debug_app" msgid="8349591734751384446">"Выберыце праграму для адладкі"</string>
     <string name="debug_app_not_set" msgid="718752499586403499">"Няма прыкладанняў для адладкi"</string>
     <string name="debug_app_set" msgid="2063077997870280017">"Адладка прыкладання: <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="select_application" msgid="5156029161289091703">"Выберыце прыкладанне"</string>
@@ -285,7 +280,7 @@
     <string name="strict_mode" msgid="1938795874357830695">"Уключаны строгі рэжым"</string>
     <string name="strict_mode_summary" msgid="142834318897332338">"Міг. экр., калі пр.. вык. працяг. апер. ў асн. пат."</string>
     <string name="pointer_location" msgid="6084434787496938001">"Пазіцыя паказальніка"</string>
-    <string name="pointer_location_summary" msgid="840819275172753713">"Наклад на экран з бягучым выкар. сэнсар. дадзеных"</string>
+    <string name="pointer_location_summary" msgid="840819275172753713">"Паказваць на экране націсканні і жэсты"</string>
     <string name="show_touches" msgid="2642976305235070316">"Паказваць дотыкі"</string>
     <string name="show_touches_summary" msgid="6101183132903926324">"Паказваць візуалізацыю дотыкаў"</string>
     <string name="show_screen_updates" msgid="5470814345876056420">"Паказ. абнаўл. паверхні"</string>
@@ -317,7 +312,7 @@
     <string name="overlay_display_devices_title" msgid="5364176287998398539">"Мадэляванне другасных дысплеяў"</string>
     <string name="debug_applications_category" msgid="4206913653849771549">"Праграмы"</string>
     <string name="immediately_destroy_activities" msgid="1579659389568133959">"Не захоўваць дзеянні"</string>
-    <string name="immediately_destroy_activities_summary" msgid="3592221124808773368">"Знішч. кож.дзеянне, як толькі карыст.пакідае яго"</string>
+    <string name="immediately_destroy_activities_summary" msgid="3592221124808773368">"Выдаляць усе дзеянні пасля выхаду карыстальніка"</string>
     <string name="app_process_limit_title" msgid="4280600650253107163">"Ліміт фонавага працэсу"</string>
     <string name="show_all_anrs" msgid="4924885492787069007">"Памылкі ANR"</string>
     <string name="show_all_anrs_summary" msgid="6636514318275139826">"Паведамляць аб тым, што праграма не адказвае"</string>

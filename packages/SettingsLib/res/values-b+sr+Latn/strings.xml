@@ -216,20 +216,15 @@
     <string name="bluetooth_select_avrcp_version_string" msgid="3750059931120293633">"Verzija Bluetooth AVRCP-a"</string>
     <string name="bluetooth_select_avrcp_version_dialog_title" msgid="7277329668298705702">"Izaberite verziju Bluetooth AVRCP-a"</string>
     <string name="bluetooth_select_a2dp_codec_type" msgid="90597356942154882">"Bluetooth audio kodek"</string>
-    <!-- no translation found for bluetooth_select_a2dp_codec_type_dialog_title (8436224899475822557) -->
-    <skip />
+    <string name="bluetooth_select_a2dp_codec_type_dialog_title" msgid="8436224899475822557">"Izaberite Bluetooth audio kodek\n"</string>
     <string name="bluetooth_select_a2dp_codec_sample_rate" msgid="4788245703824623062">"Brzina uzorkovanja za Bluetooth audio"</string>
-    <!-- no translation found for bluetooth_select_a2dp_codec_sample_rate_dialog_title (8010380028880963535) -->
-    <skip />
+    <string name="bluetooth_select_a2dp_codec_sample_rate_dialog_title" msgid="8010380028880963535">"Izaberite Bluetooth audio kodek:\n brzina uzorkovanja"</string>
     <string name="bluetooth_select_a2dp_codec_bits_per_sample" msgid="2099645202720164141">"Bitova po uzorku za Bluetooth audio"</string>
-    <!-- no translation found for bluetooth_select_a2dp_codec_bits_per_sample_dialog_title (8063859754619484760) -->
-    <skip />
+    <string name="bluetooth_select_a2dp_codec_bits_per_sample_dialog_title" msgid="8063859754619484760">"Izaberite Bluetooth audio kodek:\n broj bitova po uzorku"</string>
     <string name="bluetooth_select_a2dp_codec_channel_mode" msgid="884855779449390540">"Režim kanala za Bluetooth audio"</string>
-    <!-- no translation found for bluetooth_select_a2dp_codec_channel_mode_dialog_title (7234956835280563341) -->
-    <skip />
+    <string name="bluetooth_select_a2dp_codec_channel_mode_dialog_title" msgid="7234956835280563341">"Izaberite Bluetooth audio kodek:\n režim kanala"</string>
     <string name="bluetooth_select_a2dp_codec_ldac_playback_quality" msgid="3619694372407843405">"Bluetooth audio kodek LDAC: kvalitet reprodukcije"</string>
-    <!-- no translation found for bluetooth_select_a2dp_codec_ldac_playback_quality_dialog_title (7595776220458732825) -->
-    <skip />
+    <string name="bluetooth_select_a2dp_codec_ldac_playback_quality_dialog_title" msgid="7595776220458732825">"Izaberite Bluetooth audio LDAC kodek:\n kvalitet snimka"</string>
     <string name="bluetooth_select_a2dp_codec_streaming_label" msgid="5347862512596240506">"Strimovanje: <xliff:g id="STREAMING_PARAMETER">%1$s</xliff:g>"</string>
     <string name="select_private_dns_configuration_title" msgid="3700456559305263922">"Privatni DNS"</string>
     <string name="select_private_dns_configuration_dialog_title" msgid="9221994415765826811">"Izaberite režim privatnog DNS-a"</string>
@@ -397,7 +392,7 @@
     <string name="battery_info_status_charging_lower" msgid="8689770213898117994">"puni se"</string>
     <string name="battery_info_status_discharging" msgid="310932812698268588">"Ne puni se"</string>
     <string name="battery_info_status_not_charging" msgid="8523453668342598579">"Priključeno je, ali punjenje trenutno nije moguće"</string>
-    <string name="battery_info_status_full" msgid="2824614753861462808">"Puno"</string>
+    <string name="battery_info_status_full" msgid="2824614753861462808">"Puna"</string>
     <string name="disabled_by_admin_summary_text" msgid="6750513964908334617">"Kontroliše administrator"</string>
     <string name="enabled_by_admin" msgid="5302986023578399263">"Omogućio je administrator"</string>
     <string name="disabled_by_admin" msgid="8505398946020816620">"Administrator je onemogućio"</string>

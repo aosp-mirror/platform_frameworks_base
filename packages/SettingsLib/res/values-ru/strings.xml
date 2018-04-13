@@ -216,24 +216,19 @@
     <string name="bluetooth_select_avrcp_version_string" msgid="3750059931120293633">"Версия Bluetooth AVRCP"</string>
     <string name="bluetooth_select_avrcp_version_dialog_title" msgid="7277329668298705702">"Выберите версию Bluetooth AVRCP"</string>
     <string name="bluetooth_select_a2dp_codec_type" msgid="90597356942154882">"Аудиокодек для передачи через Bluetooth"</string>
-    <!-- no translation found for bluetooth_select_a2dp_codec_type_dialog_title (8436224899475822557) -->
-    <skip />
+    <string name="bluetooth_select_a2dp_codec_type_dialog_title" msgid="8436224899475822557">"Запустить аудиокодек для Bluetooth\nВыбор"</string>
     <string name="bluetooth_select_a2dp_codec_sample_rate" msgid="4788245703824623062">"Частота дискретизации при передаче через Bluetooth"</string>
-    <!-- no translation found for bluetooth_select_a2dp_codec_sample_rate_dialog_title (8010380028880963535) -->
-    <skip />
+    <string name="bluetooth_select_a2dp_codec_sample_rate_dialog_title" msgid="8010380028880963535">"Запустить аудиокодек для Bluetooth\nВыбор: частота дискретизации"</string>
     <string name="bluetooth_select_a2dp_codec_bits_per_sample" msgid="2099645202720164141">"Глубина кодирования звука при передаче через Bluetooth"</string>
-    <!-- no translation found for bluetooth_select_a2dp_codec_bits_per_sample_dialog_title (8063859754619484760) -->
-    <skip />
+    <string name="bluetooth_select_a2dp_codec_bits_per_sample_dialog_title" msgid="8063859754619484760">"Запустить аудиокодек для Bluetooth\nВыбор: разрядность"</string>
     <string name="bluetooth_select_a2dp_codec_channel_mode" msgid="884855779449390540">"Режим аудиоканала Bluetooth"</string>
-    <!-- no translation found for bluetooth_select_a2dp_codec_channel_mode_dialog_title (7234956835280563341) -->
-    <skip />
+    <string name="bluetooth_select_a2dp_codec_channel_mode_dialog_title" msgid="7234956835280563341">"Запустить аудиокодек для Bluetooth\nВыбор: режим канала"</string>
     <string name="bluetooth_select_a2dp_codec_ldac_playback_quality" msgid="3619694372407843405">"Аудиокодек LDAC для Bluetooth: качество воспроизведения"</string>
-    <!-- no translation found for bluetooth_select_a2dp_codec_ldac_playback_quality_dialog_title (7595776220458732825) -->
-    <skip />
+    <string name="bluetooth_select_a2dp_codec_ldac_playback_quality_dialog_title" msgid="7595776220458732825">"Запустить аудиокодек LDAC для Bluetooth\nВыбор: качество воспроизведения"</string>
     <string name="bluetooth_select_a2dp_codec_streaming_label" msgid="5347862512596240506">"Потоковая передача: <xliff:g id="STREAMING_PARAMETER">%1$s</xliff:g>"</string>
     <string name="select_private_dns_configuration_title" msgid="3700456559305263922">"Персональный DNS-сервер"</string>
     <string name="select_private_dns_configuration_dialog_title" msgid="9221994415765826811">"Выберите режим персонального DNS-сервера"</string>
-    <string name="private_dns_mode_off" msgid="8236575187318721684">"ВЫКЛ"</string>
+    <string name="private_dns_mode_off" msgid="8236575187318721684">"Отключено"</string>
     <string name="private_dns_mode_opportunistic" msgid="8314986739896927399">"Автоматический режим"</string>
     <string name="private_dns_mode_provider" msgid="8354935160639360804">"Имя хоста поставщика персонального DNS-сервера"</string>
     <string name="private_dns_mode_provider_hostname_hint" msgid="2487492386970928143">"Введите имя хоста поставщика услуг DNS"</string>
@@ -254,7 +249,7 @@
     <string name="allow_mock_location" msgid="2787962564578664888">"Фиктивные местоположения"</string>
     <string name="allow_mock_location_summary" msgid="317615105156345626">"Разрешить использование фиктивных местоположений"</string>
     <string name="debug_view_attributes" msgid="6485448367803310384">"Включить проверку атрибутов"</string>
-    <string name="mobile_data_always_on_summary" msgid="8149773901431697910">"Не отключать передачу данных по мобильной сети даже при активном Wi-Fi-подключении (для быстрого переключения между сетями)."</string>
+    <string name="mobile_data_always_on_summary" msgid="8149773901431697910">"Не отключать передачу данных по мобильной сети даже при активном Wi-Fi-подключении (для быстрого переключения между сетями)"</string>
     <string name="tethering_hardware_offload_summary" msgid="7726082075333346982">"Использовать аппаратное ускорение в режиме модема (если доступно)"</string>
     <string name="adb_warning_title" msgid="6234463310896563253">"Разрешить отладку по USB?"</string>
     <string name="adb_warning_message" msgid="7316799925425402244">"Отладка по USB – это режим, который позволяет использовать ваше устройство как внешний накопитель: перемещать файлы (с компьютера и на компьютер), напрямую устанавливать приложения, а также просматривать системные журналы."</string>
@@ -264,7 +259,7 @@
     <string name="verify_apps_over_usb_title" msgid="4177086489869041953">"Проверять приложения при установке"</string>
     <string name="verify_apps_over_usb_summary" msgid="9164096969924529200">"Выполнять проверку безопасности приложений при установке через ADB/ADT"</string>
     <string name="bluetooth_show_devices_without_names_summary" msgid="2351196058115755520">"Показывать Bluetooth-устройства без названий (только с MAC-адресами)"</string>
-    <string name="bluetooth_disable_absolute_volume_summary" msgid="6031284410786545957">"Отключить абсолютный уровень громкости Bluetooth при возникновении проблем на удаленных устройствах, например при слишком громком звучании или невозможности контролировать настройку."</string>
+    <string name="bluetooth_disable_absolute_volume_summary" msgid="6031284410786545957">"Отключить абсолютный уровень громкости Bluetooth при возникновении проблем на удаленных устройствах, например при слишком громком звучании или невозможности контролировать настройку"</string>
     <string name="enable_terminal_title" msgid="95572094356054120">"Локальный терминальный доступ"</string>
     <string name="enable_terminal_summary" msgid="67667852659359206">"Разрешить терминальный доступ к локальной оболочке"</string>
     <string name="hdcp_checking_title" msgid="8605478913544273282">"Проверка HDCP"</string>
@@ -275,7 +270,7 @@
     <string name="debug_app_set" msgid="2063077997870280017">"Отладка приложения \"<xliff:g id="APP_NAME">%1$s</xliff:g>\""</string>
     <string name="select_application" msgid="5156029161289091703">"Выбор приложения"</string>
     <string name="no_application" msgid="2813387563129153880">"Нет"</string>
-    <string name="wait_for_debugger" msgid="1202370874528893091">"Подождите, пока подключится отладчик"</string>
+    <string name="wait_for_debugger" msgid="1202370874528893091">"Ждать подключения отладчика"</string>
     <string name="wait_for_debugger_summary" msgid="1766918303462746804">"Приложение ожидает подключения отладчика"</string>
     <string name="debug_input_category" msgid="1811069939601180246">"Ввод"</string>
     <string name="debug_drawing_category" msgid="6755716469267367852">"Отрисовка"</string>
@@ -317,7 +312,7 @@
     <string name="overlay_display_devices_title" msgid="5364176287998398539">"Эмуляция доп. экранов"</string>
     <string name="debug_applications_category" msgid="4206913653849771549">"Приложения"</string>
     <string name="immediately_destroy_activities" msgid="1579659389568133959">"Вытеснение фоновых Activity"</string>
-    <string name="immediately_destroy_activities_summary" msgid="3592221124808773368">"Удалять сводку действий после их завершения"</string>
+    <string name="immediately_destroy_activities_summary" msgid="3592221124808773368">"Удалять все Activity после выхода пользователя"</string>
     <string name="app_process_limit_title" msgid="4280600650253107163">"Лимит фоновых процессов"</string>
     <string name="show_all_anrs" msgid="4924885492787069007">"ANR в фоновом режиме"</string>
     <string name="show_all_anrs_summary" msgid="6636514318275139826">"Уведомлять о том, что приложение, запущенное в фоновом режиме, не отвечает"</string>

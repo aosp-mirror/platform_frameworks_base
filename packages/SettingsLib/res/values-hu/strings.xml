@@ -216,20 +216,15 @@
     <string name="bluetooth_select_avrcp_version_string" msgid="3750059931120293633">"A Bluetooth AVRCP-verziója"</string>
     <string name="bluetooth_select_avrcp_version_dialog_title" msgid="7277329668298705702">"A Bluetooth AVRCP-verziójának kiválasztása"</string>
     <string name="bluetooth_select_a2dp_codec_type" msgid="90597356942154882">"Bluetooth hang – Kodek"</string>
-    <!-- no translation found for bluetooth_select_a2dp_codec_type_dialog_title (8436224899475822557) -->
-    <skip />
+    <string name="bluetooth_select_a2dp_codec_type_dialog_title" msgid="8436224899475822557">"Bluetooth-hangkodek aktiválása\nKiválasztás"</string>
     <string name="bluetooth_select_a2dp_codec_sample_rate" msgid="4788245703824623062">"Bluetooth hang – mintavételezési gyakoriság"</string>
-    <!-- no translation found for bluetooth_select_a2dp_codec_sample_rate_dialog_title (8010380028880963535) -->
-    <skip />
+    <string name="bluetooth_select_a2dp_codec_sample_rate_dialog_title" msgid="8010380028880963535">"Bluetooth-hangkodek aktiválása\nKiválasztás: Mintavételezési gyakoriság"</string>
     <string name="bluetooth_select_a2dp_codec_bits_per_sample" msgid="2099645202720164141">"Bluetooth hang – bit/minta"</string>
-    <!-- no translation found for bluetooth_select_a2dp_codec_bits_per_sample_dialog_title (8063859754619484760) -->
-    <skip />
+    <string name="bluetooth_select_a2dp_codec_bits_per_sample_dialog_title" msgid="8063859754619484760">"Bluetooth-hangkodek aktiválása\nKiválasztás: Bit/minta"</string>
     <string name="bluetooth_select_a2dp_codec_channel_mode" msgid="884855779449390540">"Bluetooth hang – Csatornamód"</string>
-    <!-- no translation found for bluetooth_select_a2dp_codec_channel_mode_dialog_title (7234956835280563341) -->
-    <skip />
+    <string name="bluetooth_select_a2dp_codec_channel_mode_dialog_title" msgid="7234956835280563341">"Bluetooth-hangkodek aktiválása\nKiválasztás: Csatornamód"</string>
     <string name="bluetooth_select_a2dp_codec_ldac_playback_quality" msgid="3619694372407843405">"Bluetooth LDAC hangkodek: lejátszási minőség"</string>
-    <!-- no translation found for bluetooth_select_a2dp_codec_ldac_playback_quality_dialog_title (7595776220458732825) -->
-    <skip />
+    <string name="bluetooth_select_a2dp_codec_ldac_playback_quality_dialog_title" msgid="7595776220458732825">"Bluetooth LDAC hangkodek aktiválása\nKiválasztás: Lejátszási minőség"</string>
     <string name="bluetooth_select_a2dp_codec_streaming_label" msgid="5347862512596240506">"Streamelés: <xliff:g id="STREAMING_PARAMETER">%1$s</xliff:g>"</string>
     <string name="select_private_dns_configuration_title" msgid="3700456559305263922">"Privát DNS"</string>
     <string name="select_private_dns_configuration_dialog_title" msgid="9221994415765826811">"„Privát DNS” mód kiválasztása"</string>
@@ -270,7 +265,7 @@
     <string name="hdcp_checking_title" msgid="8605478913544273282">"HDCP ellenőrzés"</string>
     <string name="hdcp_checking_dialog_title" msgid="5141305530923283">"HDCP-ellenőrzés beállítása"</string>
     <string name="debug_debugging_category" msgid="6781250159513471316">"Hibakeresés"</string>
-    <string name="debug_app" msgid="8349591734751384446">"Válassza az alkalmazás hibakeresése lehetőséget"</string>
+    <string name="debug_app" msgid="8349591734751384446">"Hibakereső alkalmazás kiválasztása"</string>
     <string name="debug_app_not_set" msgid="718752499586403499">"Nincs beállítva alkalmazás hibakereséshez"</string>
     <string name="debug_app_set" msgid="2063077997870280017">"A(z) <xliff:g id="APP_NAME">%1$s</xliff:g> alkalmazás hibakeresése"</string>
     <string name="select_application" msgid="5156029161289091703">"Alkalmazás kiválasztása"</string>

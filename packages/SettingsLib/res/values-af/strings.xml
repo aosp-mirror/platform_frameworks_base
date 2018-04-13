@@ -195,7 +195,7 @@
     <string name="bugreport_in_power" msgid="7923901846375587241">"Kortpad na foutverslag"</string>
     <string name="bugreport_in_power_summary" msgid="1778455732762984579">"Wys \'n knoppie in die kragkieslys om \'n foutverslag te doen"</string>
     <string name="keep_screen_on" msgid="1146389631208760344">"Bly wakker"</string>
-    <string name="keep_screen_on_summary" msgid="2173114350754293009">"Skerm sal nooit slaap terwyl laai nie"</string>
+    <string name="keep_screen_on_summary" msgid="2173114350754293009">"Skerm sal nooit slaap terwyl dit laai nie"</string>
     <string name="bt_hci_snoop_log" msgid="3340699311158865670">"Aktiveer Bluetooth HCI-loerloglêer"</string>
     <string name="bt_hci_snoop_log_summary" msgid="366083475849911315">"Vang alle Bluetooth HCI-pakkette in \'n lêer vas (Wissel Bluetooth nadat jy hierdie instelling verander het)"</string>
     <string name="oem_unlock_enable" msgid="6040763321967327691">"OEM-ontsluit"</string>
@@ -216,20 +216,15 @@
     <string name="bluetooth_select_avrcp_version_string" msgid="3750059931120293633">"Bluetooth AVRCP-weergawe"</string>
     <string name="bluetooth_select_avrcp_version_dialog_title" msgid="7277329668298705702">"Kies Bluetooth AVRCP-weergawe"</string>
     <string name="bluetooth_select_a2dp_codec_type" msgid="90597356942154882">"Bluetooth-oudiokodek"</string>
-    <!-- no translation found for bluetooth_select_a2dp_codec_type_dialog_title (8436224899475822557) -->
-    <skip />
+    <string name="bluetooth_select_a2dp_codec_type_dialog_title" msgid="8436224899475822557">"Gebruik Bluetooth-oudiokodek\nKeuse"</string>
     <string name="bluetooth_select_a2dp_codec_sample_rate" msgid="4788245703824623062">"Bluetooth-oudiovoorbeeldkoers"</string>
-    <!-- no translation found for bluetooth_select_a2dp_codec_sample_rate_dialog_title (8010380028880963535) -->
-    <skip />
+    <string name="bluetooth_select_a2dp_codec_sample_rate_dialog_title" msgid="8010380028880963535">"Gebruik Bluetooth-oudiokodek\nKeuse: monsterkoers"</string>
     <string name="bluetooth_select_a2dp_codec_bits_per_sample" msgid="2099645202720164141">"Bluetooth-oudiobisse per voorbeeld"</string>
-    <!-- no translation found for bluetooth_select_a2dp_codec_bits_per_sample_dialog_title (8063859754619484760) -->
-    <skip />
+    <string name="bluetooth_select_a2dp_codec_bits_per_sample_dialog_title" msgid="8063859754619484760">"Gebruik Bluetooth-oudiokodek\nKeuse: bisse per monster"</string>
     <string name="bluetooth_select_a2dp_codec_channel_mode" msgid="884855779449390540">"Bluetooth-oudiokanaalmodus"</string>
-    <!-- no translation found for bluetooth_select_a2dp_codec_channel_mode_dialog_title (7234956835280563341) -->
-    <skip />
+    <string name="bluetooth_select_a2dp_codec_channel_mode_dialog_title" msgid="7234956835280563341">"Gebruik Bluetooth-oudiokodek\nKeuse: kanaalmodus"</string>
     <string name="bluetooth_select_a2dp_codec_ldac_playback_quality" msgid="3619694372407843405">"Bluetooth-oudio-LDAC-kodek: Speelgehalte"</string>
-    <!-- no translation found for bluetooth_select_a2dp_codec_ldac_playback_quality_dialog_title (7595776220458732825) -->
-    <skip />
+    <string name="bluetooth_select_a2dp_codec_ldac_playback_quality_dialog_title" msgid="7595776220458732825">"Gebruik Bluetooth-LDAC-oudiokodek\nKeuse: speelgehalte"</string>
     <string name="bluetooth_select_a2dp_codec_streaming_label" msgid="5347862512596240506">"Stroming: <xliff:g id="STREAMING_PARAMETER">%1$s</xliff:g>"</string>
     <string name="select_private_dns_configuration_title" msgid="3700456559305263922">"Private DNS"</string>
     <string name="select_private_dns_configuration_dialog_title" msgid="9221994415765826811">"Kies private DNS-modus"</string>
@@ -283,7 +278,7 @@
     <string name="media_category" msgid="4388305075496848353">"Media"</string>
     <string name="debug_monitoring_category" msgid="7640508148375798343">"Monitering"</string>
     <string name="strict_mode" msgid="1938795874357830695">"Strengmodus geaktiveer"</string>
-    <string name="strict_mode_summary" msgid="142834318897332338">"Flits skerm as programme lang handelinge doen op die hoofdraad"</string>
+    <string name="strict_mode_summary" msgid="142834318897332338">"Flits skerm as programme lang bewerkings uitvoer op die hoofdraad"</string>
     <string name="pointer_location" msgid="6084434787496938001">"Wyserligging"</string>
     <string name="pointer_location_summary" msgid="840819275172753713">"Skermlaag wys huidige raakdata"</string>
     <string name="show_touches" msgid="2642976305235070316">"Wys tikke"</string>
@@ -324,7 +319,7 @@
     <string name="show_notification_channel_warnings" msgid="1399948193466922683">"Wys kennisgewingkanaalwaarskuwings"</string>
     <string name="show_notification_channel_warnings_summary" msgid="5536803251863694895">"Wys waarskuwing op skerm wanneer \'n program \'n kennisgewing sonder \'n geldige kanaal plaas"</string>
     <string name="force_allow_on_external" msgid="3215759785081916381">"Programme verplig ekstern toegelaat"</string>
-    <string name="force_allow_on_external_summary" msgid="3640752408258034689">"Maak dat enige program in eksterne berging geskryf kan word, ongeag manifeswaardes"</string>
+    <string name="force_allow_on_external_summary" msgid="3640752408258034689">"Maak dat enige program na eksterne berging geskryf kan word, ongeag manifeswaardes"</string>
     <string name="force_resizable_activities" msgid="8615764378147824985">"Verplig verstelbare groottes vir aktiwiteite"</string>
     <string name="force_resizable_activities_summary" msgid="6667493494706124459">"Maak die groottes van alle aktiwiteite verstelbaar vir veelvuldige vensters, ongeag manifeswaardes."</string>
     <string name="enable_freeform_support" msgid="1461893351278940416">"Aktiveer vormvrye-Windows"</string>

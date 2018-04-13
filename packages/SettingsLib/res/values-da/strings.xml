@@ -65,9 +65,9 @@
     <string name="bluetooth_connected_no_headset_battery_level" msgid="1610296229139400266">"Tilsluttet <xliff:g id="ACTIVE_DEVICE">%2$s</xliff:g> (ingen telefon) – batteriniveau <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
     <string name="bluetooth_connected_no_a2dp_battery_level" msgid="3908466636369853652">"Tilsluttet <xliff:g id="ACTIVE_DEVICE">%2$s</xliff:g> (ingen medier) – batteriniveau <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
     <string name="bluetooth_connected_no_headset_no_a2dp_battery_level" msgid="1163440823807659316">"Tilsluttet <xliff:g id="ACTIVE_DEVICE">%2$s</xliff:g> (ingen telefon eller medier) – batteriniveau <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
-    <string name="bluetooth_active_battery_level" msgid="3149689299296462009">"Aktiv, <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> batteri"</string>
+    <string name="bluetooth_active_battery_level" msgid="3149689299296462009">"Aktivt, <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> batteri"</string>
     <string name="bluetooth_battery_level" msgid="1447164613319663655">"<xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> batteri"</string>
-    <string name="bluetooth_active_no_battery_level" msgid="8380223546730241956">"Aktiv"</string>
+    <string name="bluetooth_active_no_battery_level" msgid="8380223546730241956">"Aktivt"</string>
     <string name="bluetooth_profile_a2dp" msgid="2031475486179830674">"Medielyd"</string>
     <string name="bluetooth_profile_headset" msgid="7815495680863246034">"Telefonopkald"</string>
     <string name="bluetooth_profile_opp" msgid="9168139293654233697">"Filoverførsel"</string>
@@ -216,20 +216,15 @@
     <string name="bluetooth_select_avrcp_version_string" msgid="3750059931120293633">"AVRCP-version for Bluetooth"</string>
     <string name="bluetooth_select_avrcp_version_dialog_title" msgid="7277329668298705702">"Vælg AVRCP-version for Bluetooth"</string>
     <string name="bluetooth_select_a2dp_codec_type" msgid="90597356942154882">"Bluetooth-lydcodec"</string>
-    <!-- no translation found for bluetooth_select_a2dp_codec_type_dialog_title (8436224899475822557) -->
-    <skip />
+    <string name="bluetooth_select_a2dp_codec_type_dialog_title" msgid="8436224899475822557">"Udløs codec for Bluetooth-lyd\nValg"</string>
     <string name="bluetooth_select_a2dp_codec_sample_rate" msgid="4788245703824623062">"Eksempelfrekvens for Bluetooth-lyd"</string>
-    <!-- no translation found for bluetooth_select_a2dp_codec_sample_rate_dialog_title (8010380028880963535) -->
-    <skip />
+    <string name="bluetooth_select_a2dp_codec_sample_rate_dialog_title" msgid="8010380028880963535">"Udløs codec for Bluetooth-lyd\nValg: Samplingfrekvens"</string>
     <string name="bluetooth_select_a2dp_codec_bits_per_sample" msgid="2099645202720164141">"Bit pr. eksempel for Bluetooth-lyd"</string>
-    <!-- no translation found for bluetooth_select_a2dp_codec_bits_per_sample_dialog_title (8063859754619484760) -->
-    <skip />
+    <string name="bluetooth_select_a2dp_codec_bits_per_sample_dialog_title" msgid="8063859754619484760">"Udløs codec for Bluetooth-lyd\nValg: Bits pr. sampling"</string>
     <string name="bluetooth_select_a2dp_codec_channel_mode" msgid="884855779449390540">"Kanaltilstand for Bluetooth-lyd"</string>
-    <!-- no translation found for bluetooth_select_a2dp_codec_channel_mode_dialog_title (7234956835280563341) -->
-    <skip />
+    <string name="bluetooth_select_a2dp_codec_channel_mode_dialog_title" msgid="7234956835280563341">"Udløs codec for Bluetooth-lyd\nValg: Kanaltilstand"</string>
     <string name="bluetooth_select_a2dp_codec_ldac_playback_quality" msgid="3619694372407843405">"LDAC-codec for Bluetooth-lyd: Afspilningskvalitet"</string>
-    <!-- no translation found for bluetooth_select_a2dp_codec_ldac_playback_quality_dialog_title (7595776220458732825) -->
-    <skip />
+    <string name="bluetooth_select_a2dp_codec_ldac_playback_quality_dialog_title" msgid="7595776220458732825">"Udløs LDAC-codec for Bluetooth-lyd\nValg: Afspilningskvalitet"</string>
     <string name="bluetooth_select_a2dp_codec_streaming_label" msgid="5347862512596240506">"Streamer: <xliff:g id="STREAMING_PARAMETER">%1$s</xliff:g>"</string>
     <string name="select_private_dns_configuration_title" msgid="3700456559305263922">"Privat DNS"</string>
     <string name="select_private_dns_configuration_dialog_title" msgid="9221994415765826811">"Vælg privat DNS-tilstand"</string>
@@ -397,7 +392,7 @@
     <string name="battery_info_status_charging_lower" msgid="8689770213898117994">"oplader"</string>
     <string name="battery_info_status_discharging" msgid="310932812698268588">"Oplader ikke"</string>
     <string name="battery_info_status_not_charging" msgid="8523453668342598579">"Enheden er tilsluttet en strømkilde. Det er ikke muligt at oplade på nuværende tidspunkt."</string>
-    <string name="battery_info_status_full" msgid="2824614753861462808">"Fuld"</string>
+    <string name="battery_info_status_full" msgid="2824614753861462808">"Fuldt"</string>
     <string name="disabled_by_admin_summary_text" msgid="6750513964908334617">"Kontrolleret af administratoren"</string>
     <string name="enabled_by_admin" msgid="5302986023578399263">"Aktiveret af administratoren"</string>
     <string name="disabled_by_admin" msgid="8505398946020816620">"Deaktiveret af administratoren"</string>
