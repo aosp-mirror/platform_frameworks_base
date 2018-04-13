@@ -42,6 +42,7 @@ import android.provider.Settings;
 import android.util.Slog;
 
 import com.android.server.LocationManagerService;
+import com.android.server.PendingIntentUtils;
 
 public class GeofenceManager implements LocationListener, PendingIntent.OnFinished {
     private static final String TAG = "GeofenceManager";
@@ -401,7 +402,8 @@ public class GeofenceManager implements LocationListener, PendingIntent.OnFinish
         mWakeLock.acquire();
         try {
             pendingIntent.send(mContext, 0, intent, this, null,
-                    android.Manifest.permission.ACCESS_FINE_LOCATION);
+                    android.Manifest.permission.ACCESS_FINE_LOCATION,
+                    PendingIntentUtils.createDontSendToRestrictedAppsBundle(null));
         } catch (PendingIntent.CanceledException e) {
             removeFence(null, pendingIntent);
             mWakeLock.release();
