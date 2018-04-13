@@ -25,6 +25,7 @@ import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.net.Uri;
 import android.os.Bundle;
+import android.text.BidiFormatter;
 import android.util.Log;
 import android.widget.CheckBox;
 import android.widget.TextView;
@@ -50,8 +51,10 @@ public class SlicePermissionActivity extends Activity implements OnClickListener
 
         try {
             PackageManager pm = getPackageManager();
-            CharSequence app1 = pm.getApplicationInfo(mCallingPkg, 0).loadLabel(pm);
-            CharSequence app2 = pm.getApplicationInfo(mProviderPkg, 0).loadLabel(pm);
+            CharSequence app1 = BidiFormatter.getInstance().unicodeWrap(
+                    pm.getApplicationInfo(mCallingPkg, 0).loadSafeLabel(pm).toString());
+            CharSequence app2 = BidiFormatter.getInstance().unicodeWrap(
+                    pm.getApplicationInfo(mProviderPkg, 0).loadSafeLabel(pm).toString());
             AlertDialog dialog = new AlertDialog.Builder(this)
                     .setTitle(getString(R.string.slice_permission_title, app1, app2))
                     .setView(R.layout.slice_permission_request)
