@@ -393,16 +393,10 @@ public class BatteryMeterDrawableBase extends Drawable {
                         mPlusFrame.top + mPlusPoints[1] * mPlusFrame.height());
             }
 
-            float fillPct = (mPlusFrame.bottom - levelTop) / (mPlusFrame.bottom - mPlusFrame.top);
-            fillPct = Math.min(Math.max(fillPct, 0), 1);
-            if (fillPct <= BOLT_LEVEL_THRESHOLD) {
-                // draw the plus if opaque
+            // Always cut out of the whole shape, and sometimes filled colorError
+            mShapePath.op(mPlusPath, Path.Op.DIFFERENCE);
+            if (mPowerSaveAsColorError) {
                 c.drawPath(mPlusPath, mPlusPaint);
-            } else {
-                mShapePath.op(mPlusPath, Path.Op.DIFFERENCE);
-                if (mPowerSaveAsColorError) {
-                    c.drawPath(mPlusPath, mPlusPaint);
-                }
             }
         }
 
