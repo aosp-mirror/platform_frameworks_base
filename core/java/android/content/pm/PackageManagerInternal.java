@@ -302,6 +302,12 @@ public abstract class PackageManagerInternal {
     public abstract boolean isPackageDataProtected(int userId, String packageName);
 
     /**
+     * Returns {@code true} if a given package's state is protected, e.g. it cannot be force
+     * stopped, suspended, disabled or hidden. Otherwise, returns {@code false}.
+     */
+    public abstract boolean isPackageStateProtected(String packageName, int userId);
+
+    /**
      * Returns {@code true} if a given package is installed as ephemeral. Otherwise, returns
      * {@code false}.
      */

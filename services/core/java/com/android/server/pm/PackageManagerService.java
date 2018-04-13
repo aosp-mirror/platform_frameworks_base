@@ -23856,6 +23856,11 @@ Slog.v(TAG, ":: stepped forward, applying functor at tag " + parser.getName());
         }
 
         @Override
+        public boolean isPackageStateProtected(String packageName, int userId) {
+            return mProtectedPackages.isPackageStateProtected(userId, packageName);
+        }
+
+        @Override
         public boolean isPackageEphemeral(int userId, String packageName) {
             synchronized (mPackages) {
                 final PackageSetting ps = mSettings.mPackages.get(packageName);
