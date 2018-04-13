@@ -138,7 +138,7 @@ public class StorageStatsService extends IStorageStatsManager.Stub {
     }
 
     private void enforcePermission(int callingUid, String callingPackage) {
-        final int mode = mAppOps.checkOp(AppOpsManager.OP_GET_USAGE_STATS,
+        final int mode = mAppOps.noteOp(AppOpsManager.OP_GET_USAGE_STATS,
                 callingUid, callingPackage);
         switch (mode) {
             case AppOpsManager.MODE_ALLOWED:
