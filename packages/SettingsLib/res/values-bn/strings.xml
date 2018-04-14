@@ -40,10 +40,8 @@
     <string name="connected_via_passpoint" msgid="2826205693803088747">"%1$s মাধ্যমে সংযুক্ত হয়েছে"</string>
     <string name="available_via_passpoint" msgid="1617440946846329613">"%1$s এর মাধ্যমে উপলব্ধ"</string>
     <string name="wifi_connected_no_internet" msgid="8202906332837777829">"সংযুক্ত, ইন্টারনেট নেই"</string>
-    <!-- no translation found for wifi_status_no_internet (5784710974669608361) -->
-    <skip />
-    <!-- no translation found for wifi_status_sign_in_required (123517180404752756) -->
-    <skip />
+    <string name="wifi_status_no_internet" msgid="5784710974669608361">"ইন্টারনেট কানেকশন নেই"</string>
+    <string name="wifi_status_sign_in_required" msgid="123517180404752756">"সাইন-ইন করা দরকার"</string>
     <string name="wifi_ap_unable_to_handle_new_sta" msgid="5348824313514404541">"এই মুহূর্তে অ্যাক্সেস পয়েন্টের কোনও কানেকশন ফাঁকা নেই"</string>
     <string name="connected_via_carrier" msgid="7583780074526041912">"%1$s এর মাধ্যমে সংযুক্ত হয়েছে"</string>
     <string name="available_via_carrier" msgid="1469036129740799053">"%1$s এর মাধ্যমে পাওয়া যাচ্ছে"</string>
@@ -67,12 +65,9 @@
     <string name="bluetooth_connected_no_headset_battery_level" msgid="1610296229139400266">"কানেক্ট করা আছে (ফোনের অডিও ছাড়া), ব্যাটারি <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g><xliff:g id="ACTIVE_DEVICE">%2$s</xliff:g>"</string>
     <string name="bluetooth_connected_no_a2dp_battery_level" msgid="3908466636369853652">"কানেক্ট করা আছে (মিডিয়ার অডিও ছাড়া), ব্যাটারি <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g><xliff:g id="ACTIVE_DEVICE">%2$s</xliff:g>"</string>
     <string name="bluetooth_connected_no_headset_no_a2dp_battery_level" msgid="1163440823807659316">"কানেক্ট করা আছে (ফোনের বা মিডিয়ার অডিও ছাড়া), ব্যাটারি <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g><xliff:g id="ACTIVE_DEVICE">%2$s</xliff:g>"</string>
-    <!-- no translation found for bluetooth_active_battery_level (3149689299296462009) -->
-    <skip />
-    <!-- no translation found for bluetooth_battery_level (1447164613319663655) -->
-    <skip />
-    <!-- no translation found for bluetooth_active_no_battery_level (8380223546730241956) -->
-    <skip />
+    <string name="bluetooth_active_battery_level" msgid="3149689299296462009">"চালু আছে, চার্জ <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
+    <string name="bluetooth_battery_level" msgid="1447164613319663655">"চার্জ <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
+    <string name="bluetooth_active_no_battery_level" msgid="8380223546730241956">"চালু আছে"</string>
     <string name="bluetooth_profile_a2dp" msgid="2031475486179830674">"মিডিয়া অডিও"</string>
     <string name="bluetooth_profile_headset" msgid="7815495680863246034">"ফোন কল"</string>
     <string name="bluetooth_profile_opp" msgid="9168139293654233697">"ফাইল স্থানান্তর"</string>
@@ -119,14 +114,10 @@
     <string name="bluetooth_talkback_headphone" msgid="26580326066627664">"হেডফোন"</string>
     <string name="bluetooth_talkback_input_peripheral" msgid="5165842622743212268">"পেরিফেরাল ইনপুট"</string>
     <string name="bluetooth_talkback_bluetooth" msgid="5615463912185280812">"ব্লুটুথ"</string>
-    <!-- no translation found for bluetooth_hearingaid_left_pairing_message (7378813500862148102) -->
-    <skip />
-    <!-- no translation found for bluetooth_hearingaid_right_pairing_message (1550373802309160891) -->
-    <skip />
-    <!-- no translation found for bluetooth_hearingaid_left_battery_level (8797811465352097562) -->
-    <skip />
-    <!-- no translation found for bluetooth_hearingaid_right_battery_level (7309476148173459677) -->
-    <skip />
+    <string name="bluetooth_hearingaid_left_pairing_message" msgid="7378813500862148102">"বাঁদিকের হিয়ারিং এডটি পেয়ার করা হচ্ছে..."</string>
+    <string name="bluetooth_hearingaid_right_pairing_message" msgid="1550373802309160891">"ডানদিকের হিয়ারিং এড পেয়ার করা হচ্ছে…"</string>
+    <string name="bluetooth_hearingaid_left_battery_level" msgid="8797811465352097562">"<xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> চার্জ বাকি আছে"</string>
+    <string name="bluetooth_hearingaid_right_battery_level" msgid="7309476148173459677">"ডানদিকের - চার্জ <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
     <string name="accessibility_wifi_off" msgid="1166761729660614716">"ওয়াই ফাই বন্ধ৷"</string>
     <string name="accessibility_no_wifi" msgid="8834610636137374508">"ওয়াই ফাই এর সংযোগ বিচ্ছিন্ন হয়েছে৷"</string>
     <string name="accessibility_wifi_one_bar" msgid="4869376278894301820">"ওয়াই ফাই এ একটি দণ্ড৷"</string>
@@ -225,20 +216,15 @@
     <string name="bluetooth_select_avrcp_version_string" msgid="3750059931120293633">"ব্লুটুথ AVRCP ভার্সন"</string>
     <string name="bluetooth_select_avrcp_version_dialog_title" msgid="7277329668298705702">"ব্লুটুথ AVRCP ভার্সন বেছে নিন"</string>
     <string name="bluetooth_select_a2dp_codec_type" msgid="90597356942154882">"ব্লুটুথ অডিও কোডেক"</string>
-    <!-- no translation found for bluetooth_select_a2dp_codec_type_dialog_title (8436224899475822557) -->
-    <skip />
+    <string name="bluetooth_select_a2dp_codec_type_dialog_title" msgid="8436224899475822557">"ব্লুটুথ অডিও কোডেক ট্রিগার করুন\nএটি বেছে নেওয়া আছে"</string>
     <string name="bluetooth_select_a2dp_codec_sample_rate" msgid="4788245703824623062">"ব্লুটুথ অডিওর নমুনা হার"</string>
-    <!-- no translation found for bluetooth_select_a2dp_codec_sample_rate_dialog_title (8010380028880963535) -->
-    <skip />
+    <string name="bluetooth_select_a2dp_codec_sample_rate_dialog_title" msgid="8010380028880963535">"ব্লুটুথ অডিও কোডেক ট্রিগার করুন\nএটি বেছে নেওয়া আছে: স্যাম্পল রেট"</string>
     <string name="bluetooth_select_a2dp_codec_bits_per_sample" msgid="2099645202720164141">"নমুনা প্রতি ব্লুটুথ অডিও বিট"</string>
-    <!-- no translation found for bluetooth_select_a2dp_codec_bits_per_sample_dialog_title (8063859754619484760) -->
-    <skip />
+    <string name="bluetooth_select_a2dp_codec_bits_per_sample_dialog_title" msgid="8063859754619484760">"ব্লুটুথ অডিও কোডেক ট্রিগার করুন\nএটি বেছে নেওয়া আছে: বিট্স পার স্যাম্পল"</string>
     <string name="bluetooth_select_a2dp_codec_channel_mode" msgid="884855779449390540">"ব্লুটুথ অডিও চ্যানেল মোড"</string>
-    <!-- no translation found for bluetooth_select_a2dp_codec_channel_mode_dialog_title (7234956835280563341) -->
-    <skip />
+    <string name="bluetooth_select_a2dp_codec_channel_mode_dialog_title" msgid="7234956835280563341">"ব্লুটুথ অডিও কোডেক ট্রিগার করুন\nএটি বেছে নেওয়া আছে: চ্যানেল মোড"</string>
     <string name="bluetooth_select_a2dp_codec_ldac_playback_quality" msgid="3619694372407843405">"ব্লুটুথ অডিও LDAC কোডেক: প্লেব্যাক গুণমান"</string>
-    <!-- no translation found for bluetooth_select_a2dp_codec_ldac_playback_quality_dialog_title (7595776220458732825) -->
-    <skip />
+    <string name="bluetooth_select_a2dp_codec_ldac_playback_quality_dialog_title" msgid="7595776220458732825">"ব্লুটুথ অডিও LDAC কোডেক ট্রিগার করুন\nএটি বেছে নেওয়া আছে: প্লেব্যাকের গুণমান"</string>
     <string name="bluetooth_select_a2dp_codec_streaming_label" msgid="5347862512596240506">"স্ট্রিমিং: <xliff:g id="STREAMING_PARAMETER">%1$s</xliff:g>"</string>
     <string name="select_private_dns_configuration_title" msgid="3700456559305263922">"ব্যক্তিগত ডিএনএস"</string>
     <string name="select_private_dns_configuration_dialog_title" msgid="9221994415765826811">"ব্যক্তিগত ডিএনএস মোড বেছে নিন"</string>
@@ -246,15 +232,12 @@
     <string name="private_dns_mode_opportunistic" msgid="8314986739896927399">"অটোমেটিক"</string>
     <string name="private_dns_mode_provider" msgid="8354935160639360804">"ব্যক্তিগত ডিএনএস প্রদানকারীর হোস্টনেম"</string>
     <string name="private_dns_mode_provider_hostname_hint" msgid="2487492386970928143">"ডিএনএস প্রদানকারীর হোস্টনেম লিখুন"</string>
-    <!-- no translation found for private_dns_mode_provider_failure (231837290365031223) -->
-    <skip />
+    <string name="private_dns_mode_provider_failure" msgid="231837290365031223">"কানেক্ট করা যায়নি"</string>
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"ওয়্যারলেস প্রদর্শন সার্টিফিকেশন জন্য বিকল্পগুলি দেখান"</string>
     <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"ওয়াই-ফাই লগিং স্তর বাড়ান, ওয়াই-ফাই চয়নকারীতে SSID RSSI অনুযায়ী দেখান"</string>
     <string name="wifi_connected_mac_randomization_summary" msgid="1743059848752201485">"ওয়াই-ফাই নেটওয়ার্কে সংযুক্ত করার সময় MAC অ্যাড্রেস র‍্যান্ডমাইজ করুন"</string>
-    <!-- no translation found for wifi_metered_label (4514924227256839725) -->
-    <skip />
-    <!-- no translation found for wifi_unmetered_label (6124098729457992931) -->
-    <skip />
+    <string name="wifi_metered_label" msgid="4514924227256839725">"পরিমাপ করা"</string>
+    <string name="wifi_unmetered_label" msgid="6124098729457992931">"পরিমাপ করা নয়"</string>
     <string name="select_logd_size_title" msgid="7433137108348553508">"লগার বাফারের আকারগুলি"</string>
     <string name="select_logd_size_dialog_title" msgid="1206769310236476760">"লগ বাফার প্রতি অপেক্ষাকৃত বড় আকারগুলির বেছে নিন"</string>
     <string name="dev_logpersist_clear_warning_title" msgid="684806692440237967">"লগারের স্টোরেজ সাফ করবেন?"</string>

@@ -216,20 +216,15 @@
     <string name="bluetooth_select_avrcp_version_string" msgid="3750059931120293633">"Versioni AVRCP i Bluetooth-it"</string>
     <string name="bluetooth_select_avrcp_version_dialog_title" msgid="7277329668298705702">"Zgjidh versionin AVRCP të Bluetooth-it"</string>
     <string name="bluetooth_select_a2dp_codec_type" msgid="90597356942154882">"Kodeku Bluetooth Audio"</string>
-    <!-- no translation found for bluetooth_select_a2dp_codec_type_dialog_title (8436224899475822557) -->
-    <skip />
+    <string name="bluetooth_select_a2dp_codec_type_dialog_title" msgid="8436224899475822557">"Aktivizo kodekun e audios me Bluetooth\nZgjedhja"</string>
     <string name="bluetooth_select_a2dp_codec_sample_rate" msgid="4788245703824623062">"Shpejtësia e shembullit të Bluetooth Audio"</string>
-    <!-- no translation found for bluetooth_select_a2dp_codec_sample_rate_dialog_title (8010380028880963535) -->
-    <skip />
+    <string name="bluetooth_select_a2dp_codec_sample_rate_dialog_title" msgid="8010380028880963535">"Aktivizo kodekun e audios me Bluetooth\nZgjedhja: Shpejtësia e shembullit"</string>
     <string name="bluetooth_select_a2dp_codec_bits_per_sample" msgid="2099645202720164141">"Bite për shembull Bluetooth Audio"</string>
-    <!-- no translation found for bluetooth_select_a2dp_codec_bits_per_sample_dialog_title (8063859754619484760) -->
-    <skip />
+    <string name="bluetooth_select_a2dp_codec_bits_per_sample_dialog_title" msgid="8063859754619484760">"Aktivizo kodekun e audios me Bluetooth\nZgjedhja: Bite për shembull"</string>
     <string name="bluetooth_select_a2dp_codec_channel_mode" msgid="884855779449390540">"Regjimi i kanalit Bluetooth Audio"</string>
-    <!-- no translation found for bluetooth_select_a2dp_codec_channel_mode_dialog_title (7234956835280563341) -->
-    <skip />
+    <string name="bluetooth_select_a2dp_codec_channel_mode_dialog_title" msgid="7234956835280563341">"Aktivizo kodekun e audios me Bluetooth\nZgjedhja: Modaliteti i kanalit"</string>
     <string name="bluetooth_select_a2dp_codec_ldac_playback_quality" msgid="3619694372407843405">"Kodeku LDAC i audios së Bluetooth-it: Cilësia e luajtjes"</string>
-    <!-- no translation found for bluetooth_select_a2dp_codec_ldac_playback_quality_dialog_title (7595776220458732825) -->
-    <skip />
+    <string name="bluetooth_select_a2dp_codec_ldac_playback_quality_dialog_title" msgid="7595776220458732825">"Aktivizo kodekun LDAC të audios me Bluetooth\nZgjedhja: Cilësia e luajtjes"</string>
     <string name="bluetooth_select_a2dp_codec_streaming_label" msgid="5347862512596240506">"Transmetimi: <xliff:g id="STREAMING_PARAMETER">%1$s</xliff:g>"</string>
     <string name="select_private_dns_configuration_title" msgid="3700456559305263922">"DNS-ja private"</string>
     <string name="select_private_dns_configuration_dialog_title" msgid="9221994415765826811">"Zgjidh modalitetin e DNS-së private"</string>

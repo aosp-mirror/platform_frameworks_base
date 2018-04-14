@@ -40,10 +40,8 @@
     <string name="connected_via_passpoint" msgid="2826205693803088747">"Connectada mitjançant %1$s"</string>
     <string name="available_via_passpoint" msgid="1617440946846329613">"Disponible mitjançant %1$s"</string>
     <string name="wifi_connected_no_internet" msgid="8202906332837777829">"Connectada, sense Internet"</string>
-    <!-- no translation found for wifi_status_no_internet (5784710974669608361) -->
-    <skip />
-    <!-- no translation found for wifi_status_sign_in_required (123517180404752756) -->
-    <skip />
+    <string name="wifi_status_no_internet" msgid="5784710974669608361">"Sense connexió a Internet"</string>
+    <string name="wifi_status_sign_in_required" msgid="123517180404752756">"Cal iniciar la sessió"</string>
     <string name="wifi_ap_unable_to_handle_new_sta" msgid="5348824313514404541">"El punt d\'accés està temporalment ple"</string>
     <string name="connected_via_carrier" msgid="7583780074526041912">"Connectat mitjançant %1$s"</string>
     <string name="available_via_carrier" msgid="1469036129740799053">"Disponible mitjançant %1$s"</string>
@@ -67,12 +65,9 @@
     <string name="bluetooth_connected_no_headset_battery_level" msgid="1610296229139400266">"<xliff:g id="ACTIVE_DEVICE">%2$s</xliff:g> connectat (sense accés al telèfon), <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> de bateria"</string>
     <string name="bluetooth_connected_no_a2dp_battery_level" msgid="3908466636369853652">"<xliff:g id="ACTIVE_DEVICE">%2$s</xliff:g> connectat (sense accés al contingut multimèdia), <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> de bateria"</string>
     <string name="bluetooth_connected_no_headset_no_a2dp_battery_level" msgid="1163440823807659316">"<xliff:g id="ACTIVE_DEVICE">%2$s</xliff:g> connectat (sense accés al telèfon ni al contingut multimèdia), <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> de bateria"</string>
-    <!-- no translation found for bluetooth_active_battery_level (3149689299296462009) -->
-    <skip />
-    <!-- no translation found for bluetooth_battery_level (1447164613319663655) -->
-    <skip />
-    <!-- no translation found for bluetooth_active_no_battery_level (8380223546730241956) -->
-    <skip />
+    <string name="bluetooth_active_battery_level" msgid="3149689299296462009">"Actiu, <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> de bateria"</string>
+    <string name="bluetooth_battery_level" msgid="1447164613319663655">"<xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> de bateria"</string>
+    <string name="bluetooth_active_no_battery_level" msgid="8380223546730241956">"Actiu"</string>
     <string name="bluetooth_profile_a2dp" msgid="2031475486179830674">"Àudio multimèdia"</string>
     <string name="bluetooth_profile_headset" msgid="7815495680863246034">"Trucades telefòniques"</string>
     <string name="bluetooth_profile_opp" msgid="9168139293654233697">"Transferència del fitxer"</string>
@@ -119,14 +114,10 @@
     <string name="bluetooth_talkback_headphone" msgid="26580326066627664">"Auricular"</string>
     <string name="bluetooth_talkback_input_peripheral" msgid="5165842622743212268">"Perifèric d\'entrada"</string>
     <string name="bluetooth_talkback_bluetooth" msgid="5615463912185280812">"Bluetooth"</string>
-    <!-- no translation found for bluetooth_hearingaid_left_pairing_message (7378813500862148102) -->
-    <skip />
-    <!-- no translation found for bluetooth_hearingaid_right_pairing_message (1550373802309160891) -->
-    <skip />
-    <!-- no translation found for bluetooth_hearingaid_left_battery_level (8797811465352097562) -->
-    <skip />
-    <!-- no translation found for bluetooth_hearingaid_right_battery_level (7309476148173459677) -->
-    <skip />
+    <string name="bluetooth_hearingaid_left_pairing_message" msgid="7378813500862148102">"S\'està vinculant l\'audiòfon esquerre…"</string>
+    <string name="bluetooth_hearingaid_right_pairing_message" msgid="1550373802309160891">"S\'està vinculant l\'audiòfon dret…"</string>
+    <string name="bluetooth_hearingaid_left_battery_level" msgid="8797811465352097562">"Esquerre: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> de bateria"</string>
+    <string name="bluetooth_hearingaid_right_battery_level" msgid="7309476148173459677">"Dret: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> de bateria"</string>
     <string name="accessibility_wifi_off" msgid="1166761729660614716">"Wi-Fi desactivada."</string>
     <string name="accessibility_no_wifi" msgid="8834610636137374508">"Wi-Fi desconnectada."</string>
     <string name="accessibility_wifi_one_bar" msgid="4869376278894301820">"Senyal Wi-Fi: una barra."</string>
@@ -225,20 +216,15 @@
     <string name="bluetooth_select_avrcp_version_string" msgid="3750059931120293633">"Versió AVRCP de Bluetooth"</string>
     <string name="bluetooth_select_avrcp_version_dialog_title" msgid="7277329668298705702">"Selecciona la versió AVRCP de Bluetooth"</string>
     <string name="bluetooth_select_a2dp_codec_type" msgid="90597356942154882">"Còdec d\'àudio per Bluetooth"</string>
-    <!-- no translation found for bluetooth_select_a2dp_codec_type_dialog_title (8436224899475822557) -->
-    <skip />
+    <string name="bluetooth_select_a2dp_codec_type_dialog_title" msgid="8436224899475822557">"Activa el còdec d\'àudio per Bluetooth\nSelecció"</string>
     <string name="bluetooth_select_a2dp_codec_sample_rate" msgid="4788245703824623062">"Velocitat de mostra d’àudio per Bluetooth"</string>
-    <!-- no translation found for bluetooth_select_a2dp_codec_sample_rate_dialog_title (8010380028880963535) -->
-    <skip />
+    <string name="bluetooth_select_a2dp_codec_sample_rate_dialog_title" msgid="8010380028880963535">"Activa el còdec d\'àudio per Bluetooth\nSelecció: freqüència de mostratge"</string>
     <string name="bluetooth_select_a2dp_codec_bits_per_sample" msgid="2099645202720164141">"Bits per mostra de l\'àudio per Bluetooth"</string>
-    <!-- no translation found for bluetooth_select_a2dp_codec_bits_per_sample_dialog_title (8063859754619484760) -->
-    <skip />
+    <string name="bluetooth_select_a2dp_codec_bits_per_sample_dialog_title" msgid="8063859754619484760">"Activa el còdec d\'àudio per Bluetooth\nSelecció: bits per mostra"</string>
     <string name="bluetooth_select_a2dp_codec_channel_mode" msgid="884855779449390540">"Mode de canal de l\'àudio per Bluetooth"</string>
-    <!-- no translation found for bluetooth_select_a2dp_codec_channel_mode_dialog_title (7234956835280563341) -->
-    <skip />
+    <string name="bluetooth_select_a2dp_codec_channel_mode_dialog_title" msgid="7234956835280563341">"Activa el còdec d\'àudio per Bluetooth\nSelecció: mode de canal"</string>
     <string name="bluetooth_select_a2dp_codec_ldac_playback_quality" msgid="3619694372407843405">"Còdec LDAC d\'àudio per Bluetooth: qualitat de reproducció"</string>
-    <!-- no translation found for bluetooth_select_a2dp_codec_ldac_playback_quality_dialog_title (7595776220458732825) -->
-    <skip />
+    <string name="bluetooth_select_a2dp_codec_ldac_playback_quality_dialog_title" msgid="7595776220458732825">"Activa el còdec d\'àudio per Bluetooth LDAC\nSelecció: qualitat de reproducció"</string>
     <string name="bluetooth_select_a2dp_codec_streaming_label" msgid="5347862512596240506">"S\'està reproduint en temps real: <xliff:g id="STREAMING_PARAMETER">%1$s</xliff:g>"</string>
     <string name="select_private_dns_configuration_title" msgid="3700456559305263922">"DNS privat"</string>
     <string name="select_private_dns_configuration_dialog_title" msgid="9221994415765826811">"Selecciona el mode de DNS privat"</string>
@@ -246,15 +232,12 @@
     <string name="private_dns_mode_opportunistic" msgid="8314986739896927399">"Automàtic"</string>
     <string name="private_dns_mode_provider" msgid="8354935160639360804">"Nom d\'amfitrió del proveïdor de DNS privat"</string>
     <string name="private_dns_mode_provider_hostname_hint" msgid="2487492386970928143">"Introdueix el nom d\'amfitrió del proveïdor de DNS"</string>
-    <!-- no translation found for private_dns_mode_provider_failure (231837290365031223) -->
-    <skip />
+    <string name="private_dns_mode_provider_failure" msgid="231837290365031223">"No s\'ha pogut connectar"</string>
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"Mostra les opcions de certificació de pantalla sense fil"</string>
     <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"Augmenta nivell de registre Wi‑Fi i mostra\'l per SSID RSSI al Selector de Wi‑Fi"</string>
     <string name="wifi_connected_mac_randomization_summary" msgid="1743059848752201485">"Aleatoritza l\'adreça MAC quan estiguis connectat a una xarxa Wi-Fi"</string>
-    <!-- no translation found for wifi_metered_label (4514924227256839725) -->
-    <skip />
-    <!-- no translation found for wifi_unmetered_label (6124098729457992931) -->
-    <skip />
+    <string name="wifi_metered_label" msgid="4514924227256839725">"Amb límit de dades"</string>
+    <string name="wifi_unmetered_label" msgid="6124098729457992931">"Sense límit de dades"</string>
     <string name="select_logd_size_title" msgid="7433137108348553508">"Mides memòria intermèdia Logger"</string>
     <string name="select_logd_size_dialog_title" msgid="1206769310236476760">"Mida Logger per memòria intermèdia"</string>
     <string name="dev_logpersist_clear_warning_title" msgid="684806692440237967">"Vols esborrar l\'emmagatzematge persistent del registrador?"</string>

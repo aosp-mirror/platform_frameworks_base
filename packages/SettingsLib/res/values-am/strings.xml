@@ -216,20 +216,15 @@
     <string name="bluetooth_select_avrcp_version_string" msgid="3750059931120293633">"የብሉቱዝ AVRCP ስሪት"</string>
     <string name="bluetooth_select_avrcp_version_dialog_title" msgid="7277329668298705702">"የብሉቱዝ AVRCP ስሪት ይምረጡ"</string>
     <string name="bluetooth_select_a2dp_codec_type" msgid="90597356942154882">"የብሉቱዝ ኦዲዮ ኮዴክ"</string>
-    <!-- no translation found for bluetooth_select_a2dp_codec_type_dialog_title (8436224899475822557) -->
-    <skip />
+    <string name="bluetooth_select_a2dp_codec_type_dialog_title" msgid="8436224899475822557">"የብሉቱዝ ኦዲዮ ኮዴክ አስጀምር\nምርጫ"</string>
     <string name="bluetooth_select_a2dp_codec_sample_rate" msgid="4788245703824623062">"የብሉቱዝ ኦዲዮ ናሙና ፍጥነት"</string>
-    <!-- no translation found for bluetooth_select_a2dp_codec_sample_rate_dialog_title (8010380028880963535) -->
-    <skip />
+    <string name="bluetooth_select_a2dp_codec_sample_rate_dialog_title" msgid="8010380028880963535">"የብሉቱዝ ኦዲዮ ኮዴክን አስጀምር\nምርጫ፦ የናሙና ደረጃ አሰጣጥ"</string>
     <string name="bluetooth_select_a2dp_codec_bits_per_sample" msgid="2099645202720164141">"የብሉቱዝ ኦዲዮ ቢት በናሙና"</string>
-    <!-- no translation found for bluetooth_select_a2dp_codec_bits_per_sample_dialog_title (8063859754619484760) -->
-    <skip />
+    <string name="bluetooth_select_a2dp_codec_bits_per_sample_dialog_title" msgid="8063859754619484760">"የብሉቱዝ ኦዲዮ ኮዴክን አስጀምር\nምርጫ፦ ቢትስ በናሙና"</string>
     <string name="bluetooth_select_a2dp_codec_channel_mode" msgid="884855779449390540">"የብሉቱዝ ኦዲዮ ሰርጥ ሁነታ"</string>
-    <!-- no translation found for bluetooth_select_a2dp_codec_channel_mode_dialog_title (7234956835280563341) -->
-    <skip />
+    <string name="bluetooth_select_a2dp_codec_channel_mode_dialog_title" msgid="7234956835280563341">"የብሉቱዝ ኦዲዮ ኮዴክን አስጀምር\nምርጫ፦ የሰርጥ ሁነታ"</string>
     <string name="bluetooth_select_a2dp_codec_ldac_playback_quality" msgid="3619694372407843405">"የብሉቱዝ ኦዲዮ LDAC ኮዴክ ይምረጡ፦ የመልሶ ማጫወት ጥራት"</string>
-    <!-- no translation found for bluetooth_select_a2dp_codec_ldac_playback_quality_dialog_title (7595776220458732825) -->
-    <skip />
+    <string name="bluetooth_select_a2dp_codec_ldac_playback_quality_dialog_title" msgid="7595776220458732825">"የብሉቱዝ ኦዲዮ LDAC ኮዴክ አስጀምር\nምርጫ፦ የመልሶ ማጫወት ጥራት"</string>
     <string name="bluetooth_select_a2dp_codec_streaming_label" msgid="5347862512596240506">"ዥረት፦ <xliff:g id="STREAMING_PARAMETER">%1$s</xliff:g>"</string>
     <string name="select_private_dns_configuration_title" msgid="3700456559305263922">"የግል ዲኤንኤስ"</string>
     <string name="select_private_dns_configuration_dialog_title" msgid="9221994415765826811">"የግል ዲኤንኤስ ሁነታ ይምረጡ"</string>

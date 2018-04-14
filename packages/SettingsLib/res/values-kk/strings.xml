@@ -114,7 +114,7 @@
     <string name="bluetooth_talkback_headphone" msgid="26580326066627664">"Құлақаспап"</string>
     <string name="bluetooth_talkback_input_peripheral" msgid="5165842622743212268">"Кіріс құралы"</string>
     <string name="bluetooth_talkback_bluetooth" msgid="5615463912185280812">"Bluetooth"</string>
-    <string name="bluetooth_hearingaid_left_pairing_message" msgid="7378813500862148102">"Сол жақ есту аппаратын жұпталуда…"</string>
+    <string name="bluetooth_hearingaid_left_pairing_message" msgid="7378813500862148102">"Сол жақ есту аппараты жұпталуда…"</string>
     <string name="bluetooth_hearingaid_right_pairing_message" msgid="1550373802309160891">"Оң жақ есту аппараты жұпталуда…"</string>
     <string name="bluetooth_hearingaid_left_battery_level" msgid="8797811465352097562">"Сол жақ. Батарея қуаты: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
     <string name="bluetooth_hearingaid_right_battery_level" msgid="7309476148173459677">"Оң жақ. Батарея қуаты: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
@@ -185,7 +185,7 @@
     <string name="development_settings_title" msgid="215179176067683667">"Әзірлеуші опциялары"</string>
     <string name="development_settings_enable" msgid="542530994778109538">"Әзірлеуші ​​параметрлерін қосу"</string>
     <string name="development_settings_summary" msgid="1815795401632854041">"Қолданба дамыту үшін опцияларын реттеу"</string>
-    <string name="development_settings_not_available" msgid="4308569041701535607">"Бұл пайдаланушы үшін дамытушы опциялары қол жетімсіз"</string>
+    <string name="development_settings_not_available" msgid="4308569041701535607">"Бұл пайдаланушы үшін әзірлеуші опциялары қол жетімсіз"</string>
     <string name="vpn_settings_not_available" msgid="956841430176985598">"VPN параметрлері осы пайдаланушы үшін қол жетімді емес"</string>
     <string name="tethering_settings_not_available" msgid="6765770438438291012">"Тетеринг параметрлері осы пайдаланушы үшін қол жетімді емес"</string>
     <string name="apn_settings_not_available" msgid="7873729032165324000">"Кіру нүктесі атауының параметрлері осы пайдаланушы үшін қол жетімді емес"</string>
@@ -216,20 +216,15 @@
     <string name="bluetooth_select_avrcp_version_string" msgid="3750059931120293633">"Bluetooth AVRCP нұсқасы"</string>
     <string name="bluetooth_select_avrcp_version_dialog_title" msgid="7277329668298705702">"Bluetooth AVRCP нұсқасын таңдау"</string>
     <string name="bluetooth_select_a2dp_codec_type" msgid="90597356942154882">"Bluetooth аудимазмұн кодегі"</string>
-    <!-- no translation found for bluetooth_select_a2dp_codec_type_dialog_title (8436224899475822557) -->
-    <skip />
+    <string name="bluetooth_select_a2dp_codec_type_dialog_title" msgid="8436224899475822557">"Bluetooth аудиокодегін іске қосу\nТаңдау"</string>
     <string name="bluetooth_select_a2dp_codec_sample_rate" msgid="4788245703824623062">"Bluetooth аудиомазмұны бойынша үлгі жиілігі"</string>
-    <!-- no translation found for bluetooth_select_a2dp_codec_sample_rate_dialog_title (8010380028880963535) -->
-    <skip />
+    <string name="bluetooth_select_a2dp_codec_sample_rate_dialog_title" msgid="8010380028880963535">"Bluetooth аудиокодегін іске қосу\nТаңдау: іріктеу жылдамдығы"</string>
     <string name="bluetooth_select_a2dp_codec_bits_per_sample" msgid="2099645202720164141">"Bluetooth аудиомазмұны бойынша әр үлгіге келетін биттер саны"</string>
-    <!-- no translation found for bluetooth_select_a2dp_codec_bits_per_sample_dialog_title (8063859754619484760) -->
-    <skip />
+    <string name="bluetooth_select_a2dp_codec_bits_per_sample_dialog_title" msgid="8063859754619484760">"Bluetooth аудиокодегін іске қосу\nТаңдау: разрядтылық"</string>
     <string name="bluetooth_select_a2dp_codec_channel_mode" msgid="884855779449390540">"Bluetooth аудиомазмұны бойынша арна режимі"</string>
-    <!-- no translation found for bluetooth_select_a2dp_codec_channel_mode_dialog_title (7234956835280563341) -->
-    <skip />
+    <string name="bluetooth_select_a2dp_codec_channel_mode_dialog_title" msgid="7234956835280563341">"Bluetooth аудиокодегін іске қосу\nТаңдау: арна режимі"</string>
     <string name="bluetooth_select_a2dp_codec_ldac_playback_quality" msgid="3619694372407843405">"Bluetooth LDAC аудиокодегі: ойнату сапасы"</string>
-    <!-- no translation found for bluetooth_select_a2dp_codec_ldac_playback_quality_dialog_title (7595776220458732825) -->
-    <skip />
+    <string name="bluetooth_select_a2dp_codec_ldac_playback_quality_dialog_title" msgid="7595776220458732825">"Bluetooth LDAC аудиокодегін іске қосу\nТаңдау: ойнату сапасы"</string>
     <string name="bluetooth_select_a2dp_codec_streaming_label" msgid="5347862512596240506">"Трансляция: <xliff:g id="STREAMING_PARAMETER">%1$s</xliff:g>"</string>
     <string name="select_private_dns_configuration_title" msgid="3700456559305263922">"Жеке DNS"</string>
     <string name="select_private_dns_configuration_dialog_title" msgid="9221994415765826811">"Жеке DNS режимін таңдаңыз"</string>
@@ -397,7 +392,7 @@
     <string name="battery_info_status_charging_lower" msgid="8689770213898117994">"зарядталуда"</string>
     <string name="battery_info_status_discharging" msgid="310932812698268588">"Зарядталу орындалып жатқан жоқ"</string>
     <string name="battery_info_status_not_charging" msgid="8523453668342598579">"Қосылған, зарядталмайды"</string>
-    <string name="battery_info_status_full" msgid="2824614753861462808">"Толық"</string>
+    <string name="battery_info_status_full" msgid="2824614753861462808">"Толы"</string>
     <string name="disabled_by_admin_summary_text" msgid="6750513964908334617">"Әкімші басқарады"</string>
     <string name="enabled_by_admin" msgid="5302986023578399263">"Әкімші қосқан"</string>
     <string name="disabled_by_admin" msgid="8505398946020816620">"Әкімші өшірген"</string>

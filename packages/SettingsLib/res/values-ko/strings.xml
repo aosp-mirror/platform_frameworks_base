@@ -216,20 +216,15 @@
     <string name="bluetooth_select_avrcp_version_string" msgid="3750059931120293633">"블루투스 AVRCP 버전"</string>
     <string name="bluetooth_select_avrcp_version_dialog_title" msgid="7277329668298705702">"블루투스 AVRCP 버전 선택"</string>
     <string name="bluetooth_select_a2dp_codec_type" msgid="90597356942154882">"블루투스 오디오 코덱"</string>
-    <!-- no translation found for bluetooth_select_a2dp_codec_type_dialog_title (8436224899475822557) -->
-    <skip />
+    <string name="bluetooth_select_a2dp_codec_type_dialog_title" msgid="8436224899475822557">"블루투스 오디오 코덱 실행\n선택"</string>
     <string name="bluetooth_select_a2dp_codec_sample_rate" msgid="4788245703824623062">"블루투스 오디오 샘플링 비율"</string>
-    <!-- no translation found for bluetooth_select_a2dp_codec_sample_rate_dialog_title (8010380028880963535) -->
-    <skip />
+    <string name="bluetooth_select_a2dp_codec_sample_rate_dialog_title" msgid="8010380028880963535">"블루투스 오디오 코덱 실행\n선택: 샘플링 비율"</string>
     <string name="bluetooth_select_a2dp_codec_bits_per_sample" msgid="2099645202720164141">"블루투스 오디오 샘플당 비트"</string>
-    <!-- no translation found for bluetooth_select_a2dp_codec_bits_per_sample_dialog_title (8063859754619484760) -->
-    <skip />
+    <string name="bluetooth_select_a2dp_codec_bits_per_sample_dialog_title" msgid="8063859754619484760">"블루투스 오디오 코덱 실행\n선택: 샘플당 비트"</string>
     <string name="bluetooth_select_a2dp_codec_channel_mode" msgid="884855779449390540">"블루투스 오디오 채널 모드"</string>
-    <!-- no translation found for bluetooth_select_a2dp_codec_channel_mode_dialog_title (7234956835280563341) -->
-    <skip />
+    <string name="bluetooth_select_a2dp_codec_channel_mode_dialog_title" msgid="7234956835280563341">"블루투스 오디오 코덱 실행\n선택: 채널 모드"</string>
     <string name="bluetooth_select_a2dp_codec_ldac_playback_quality" msgid="3619694372407843405">"블루투스 오디오 LDAC 코덱: 재생 품질"</string>
-    <!-- no translation found for bluetooth_select_a2dp_codec_ldac_playback_quality_dialog_title (7595776220458732825) -->
-    <skip />
+    <string name="bluetooth_select_a2dp_codec_ldac_playback_quality_dialog_title" msgid="7595776220458732825">"블루투스 오디오 LDAC 코덱 실행\n선택: 재생 품질"</string>
     <string name="bluetooth_select_a2dp_codec_streaming_label" msgid="5347862512596240506">"스트리밍: <xliff:g id="STREAMING_PARAMETER">%1$s</xliff:g>"</string>
     <string name="select_private_dns_configuration_title" msgid="3700456559305263922">"비공개 DNS"</string>
     <string name="select_private_dns_configuration_dialog_title" msgid="9221994415765826811">"비공개 DNS 모드 선택"</string>
@@ -239,7 +234,7 @@
     <string name="private_dns_mode_provider_hostname_hint" msgid="2487492386970928143">"DNS 제공업체의 호스트 이름 입력"</string>
     <string name="private_dns_mode_provider_failure" msgid="231837290365031223">"연결할 수 없음"</string>
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"무선 디스플레이 인증서 옵션 표시"</string>
-    <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"Wi‑Fi 로깅 수준을 높이고, Wi‑Fi 선택도구에서 SSID RSSI당 값을 표시합니다."</string>
+    <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"Wi‑Fi 로깅 수준을 높이고, Wi‑Fi 선택도구에서 SSID RSSI당 값을 표시"</string>
     <string name="wifi_connected_mac_randomization_summary" msgid="1743059848752201485">"Wi‑Fi 네트워크에 연결할 때 MAC 주소 임의 선택"</string>
     <string name="wifi_metered_label" msgid="4514924227256839725">"종량제"</string>
     <string name="wifi_unmetered_label" msgid="6124098729457992931">"무제한"</string>
@@ -254,7 +249,7 @@
     <string name="allow_mock_location" msgid="2787962564578664888">"모의 위치 허용"</string>
     <string name="allow_mock_location_summary" msgid="317615105156345626">"모의 위치 허용"</string>
     <string name="debug_view_attributes" msgid="6485448367803310384">"보기 속성 검사 사용"</string>
-    <string name="mobile_data_always_on_summary" msgid="8149773901431697910">"Wi‑Fi가 활성화되어 있을 때에도 빠른 네트워크 전환을 위하여 항상 모바일 데이터를 활성 상태로 유지합니다."</string>
+    <string name="mobile_data_always_on_summary" msgid="8149773901431697910">"Wi‑Fi가 활성화되어 있을 때에도 빠른 네트워크 전환을 위하여 항상 모바일 데이터를 활성 상태로 유지"</string>
     <string name="tethering_hardware_offload_summary" msgid="7726082075333346982">"가능한 경우 테더링 하드웨어 가속 사용"</string>
     <string name="adb_warning_title" msgid="6234463310896563253">"USB 디버깅을 허용하시겠습니까?"</string>
     <string name="adb_warning_message" msgid="7316799925425402244">"USB 디버깅은 개발용으로만 설계되었습니다. 이 기능을 사용하면 컴퓨터와 기기 간에 데이터를 복사하고 알림 없이 기기에 앱을 설치하며 로그 데이터를 읽을 수 있습니다."</string>
@@ -262,9 +257,9 @@
     <string name="dev_settings_warning_title" msgid="7244607768088540165">"개발자 설정을 허용하시겠습니까?"</string>
     <string name="dev_settings_warning_message" msgid="2298337781139097964">"이 설정은 개발자용으로만 설계되었습니다. 이 설정을 사용하면 기기 및 애플리케이션에 예기치 않은 중단이나 오류가 발생할 수 있습니다."</string>
     <string name="verify_apps_over_usb_title" msgid="4177086489869041953">"USB를 통해 설치된 앱 확인"</string>
-    <string name="verify_apps_over_usb_summary" msgid="9164096969924529200">"ADB/ADT을 통해 설치된 앱에 유해한 동작이 있는지 확인"</string>
-    <string name="bluetooth_show_devices_without_names_summary" msgid="2351196058115755520">"이름이 없이 MAC 주소만 있는 블루투스 기기가 표시됩니다."</string>
-    <string name="bluetooth_disable_absolute_volume_summary" msgid="6031284410786545957">"참기 어려울 정도로 볼륨이 크거나 제어가 되지 않는 등 원격 기기에서 볼륨 문제가 발생할 경우 블루투스 절대 볼륨 기능을 사용 중지합니다."</string>
+    <string name="verify_apps_over_usb_summary" msgid="9164096969924529200">"ADB/ADT를 통해 설치된 앱에 유해한 동작이 있는지 확인"</string>
+    <string name="bluetooth_show_devices_without_names_summary" msgid="2351196058115755520">"이름이 없이 MAC 주소만 있는 블루투스 기기 표시"</string>
+    <string name="bluetooth_disable_absolute_volume_summary" msgid="6031284410786545957">"참기 어려울 정도로 볼륨이 크거나 제어가 되지 않는 등 원격 기기에서 볼륨 문제가 발생할 경우 블루투스 절대 볼륨 기능을 사용 중지"</string>
     <string name="enable_terminal_title" msgid="95572094356054120">"로컬 터미널"</string>
     <string name="enable_terminal_summary" msgid="67667852659359206">"로컬 셸 액세스를 제공하는 터미널 앱 사용"</string>
     <string name="hdcp_checking_title" msgid="8605478913544273282">"HDCP 확인"</string>
@@ -322,7 +317,7 @@
     <string name="show_all_anrs" msgid="4924885492787069007">"백그라운드 ANR 표시"</string>
     <string name="show_all_anrs_summary" msgid="6636514318275139826">"백그라운드 앱과 관련해 앱 응답 없음 대화상자 표시"</string>
     <string name="show_notification_channel_warnings" msgid="1399948193466922683">"알림 채널 경고 표시"</string>
-    <string name="show_notification_channel_warnings_summary" msgid="5536803251863694895">"앱에서 유효한 채널 없이 알림을 게시하면 화면에 경고가 표시됩니다."</string>
+    <string name="show_notification_channel_warnings_summary" msgid="5536803251863694895">"앱에서 유효한 채널 없이 알림을 게시하면 화면에 경고 표시"</string>
     <string name="force_allow_on_external" msgid="3215759785081916381">"외부에서 앱 강제 허용"</string>
     <string name="force_allow_on_external_summary" msgid="3640752408258034689">"매니페스트 값과 관계없이 모든 앱이 외부 저장소에 작성되도록 허용"</string>
     <string name="force_resizable_activities" msgid="8615764378147824985">"활동의 크기가 조정 가능하도록 설정"</string>

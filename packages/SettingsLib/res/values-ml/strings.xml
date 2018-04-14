@@ -195,7 +195,7 @@
     <string name="bugreport_in_power" msgid="7923901846375587241">"ബഗ് റിപ്പോർട്ട് കുറുക്കുവഴി"</string>
     <string name="bugreport_in_power_summary" msgid="1778455732762984579">"ബഗ് റിപ്പോർട്ട് എടുക്കുന്നതിന് പവർ മെനുവിൽ ഒരു ബട്ടൺ കാണിക്കുക"</string>
     <string name="keep_screen_on" msgid="1146389631208760344">"സജീവമായി തുടരുക"</string>
-    <string name="keep_screen_on_summary" msgid="2173114350754293009">"ചാർജ്ജുചെയ്യുമ്പോൾ സ്‌ക്രീൻ ഒരിക്കലും സുഷുപ്തിയിലാകില്ല"</string>
+    <string name="keep_screen_on_summary" msgid="2173114350754293009">"ചാർജ്ജ് ചെയ്യുമ്പോൾ സ്‌ക്രീൻ ഒരിക്കലും ഉറങ്ങില്ല"</string>
     <string name="bt_hci_snoop_log" msgid="3340699311158865670">"ബ്ലൂടൂത്ത് HCI സ്‌നൂപ്പ് ലോഗ് സജീവമാക്കൂ"</string>
     <string name="bt_hci_snoop_log_summary" msgid="366083475849911315">"എല്ലാ Bluetooth HCI പാക്കറ്റുകളും ഒരു ഫയലിൽ ക്യാപ്‌ചർ ചെയ്യുക (ഈ ക്രമീകരണം മാറ്റിയ ശേഷം Bluetooth മാറ്റുക)"</string>
     <string name="oem_unlock_enable" msgid="6040763321967327691">"OEM അൺലോക്കുചെയ്യൽ"</string>
@@ -203,7 +203,7 @@
     <string name="confirm_enable_oem_unlock_title" msgid="4802157344812385674">"OEM അൺലോക്കുചെയ്യൽ അനുവദിക്കണോ?"</string>
     <string name="confirm_enable_oem_unlock_text" msgid="5517144575601647022">"മുന്നറിയിപ്പ്: ഈ ക്രമീകരണം ഓണായിരിക്കുമ്പോൾ, ഉപകരണ സുരക്ഷാ ഫീച്ചറുകൾ ഈ ഉപകരണത്തിൽ പ്രവർത്തിക്കില്ല."</string>
     <string name="mock_location_app" msgid="7966220972812881854">"മോക്ക്‌ലൊക്കേഷൻ ആപ്പ് തിരഞ്ഞെടുക്കൂ"</string>
-    <string name="mock_location_app_not_set" msgid="809543285495344223">"വ്യാജ ലൊക്കേഷൻ ആപ്പ് സജ്ജമാക്കിയിട്ടില്ല"</string>
+    <string name="mock_location_app_not_set" msgid="809543285495344223">"മോക്ക് ലൊക്കേഷൻ ആപ്പ് സജ്ജമാക്കിയിട്ടില്ല"</string>
     <string name="mock_location_app_set" msgid="8966420655295102685">"വ്യാജ ലൊക്കേഷൻ ആപ്പ്: <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="debug_networking_category" msgid="7044075693643009662">"നെറ്റ്‍വര്‍ക്കിംഗ്"</string>
     <string name="wifi_display_certification" msgid="8611569543791307533">"വയർലെസ് ഡിസ്‌പ്ലേ സർട്ടിഫിക്കേഷൻ"</string>
@@ -216,20 +216,15 @@
     <string name="bluetooth_select_avrcp_version_string" msgid="3750059931120293633">"Bluetooth AVRCP പതിപ്പ്"</string>
     <string name="bluetooth_select_avrcp_version_dialog_title" msgid="7277329668298705702">"Bluetooth AVRCP പതിപ്പ് തിരഞ്ഞെടുക്കുക"</string>
     <string name="bluetooth_select_a2dp_codec_type" msgid="90597356942154882">"Bluetooth ഓഡിയോ കോഡെക്"</string>
-    <!-- no translation found for bluetooth_select_a2dp_codec_type_dialog_title (8436224899475822557) -->
-    <skip />
+    <string name="bluetooth_select_a2dp_codec_type_dialog_title" msgid="8436224899475822557">"Bluetooth Audio Codec\nSelection ട്രിഗ്ഗര്‍ ചെയ്യുക"</string>
     <string name="bluetooth_select_a2dp_codec_sample_rate" msgid="4788245703824623062">"Bluetooth ഓഡിയോ സാമ്പിൾ നിരക്ക്"</string>
-    <!-- no translation found for bluetooth_select_a2dp_codec_sample_rate_dialog_title (8010380028880963535) -->
-    <skip />
+    <string name="bluetooth_select_a2dp_codec_sample_rate_dialog_title" msgid="8010380028880963535">"Bluetooth Audio Codec\nSelection ട്രിഗ്ഗര്‍ ചെയ്യുക: സാമ്പിൾ റേറ്റ്"</string>
     <string name="bluetooth_select_a2dp_codec_bits_per_sample" msgid="2099645202720164141">"പ്രതി സാമ്പിളിലെ Bluetooth ഓഡിയോ ബിറ്റ് നി"</string>
-    <!-- no translation found for bluetooth_select_a2dp_codec_bits_per_sample_dialog_title (8063859754619484760) -->
-    <skip />
+    <string name="bluetooth_select_a2dp_codec_bits_per_sample_dialog_title" msgid="8063859754619484760">"Bluetooth Audio Codec\nSelection ട്രിഗ്ഗര്‍ ചെയ്യുക: ഓരോ സാമ്പിളിനുള്ള ബിറ്റുകൾ"</string>
     <string name="bluetooth_select_a2dp_codec_channel_mode" msgid="884855779449390540">"Bluetooth ഓഡിയോ ചാനൽ മോഡ്"</string>
-    <!-- no translation found for bluetooth_select_a2dp_codec_channel_mode_dialog_title (7234956835280563341) -->
-    <skip />
+    <string name="bluetooth_select_a2dp_codec_channel_mode_dialog_title" msgid="7234956835280563341">"Bluetooth Audio Codec\nSelection ട്രിഗ്ഗര്‍ ചെയ്യുക: ചാനൽ മോഡ്"</string>
     <string name="bluetooth_select_a2dp_codec_ldac_playback_quality" msgid="3619694372407843405">"Bluetooth ഓഡിയോ LDAC കോഡെക്: പ്ലേബാക്ക് ‌നിലവാരം"</string>
-    <!-- no translation found for bluetooth_select_a2dp_codec_ldac_playback_quality_dialog_title (7595776220458732825) -->
-    <skip />
+    <string name="bluetooth_select_a2dp_codec_ldac_playback_quality_dialog_title" msgid="7595776220458732825">"Bluetooth Audio LDAC Codec\nSelection ട്രിഗ്ഗര്‍ ചെയ്യുക: പ്ലേബാക്ക് ‌നിലവാരം"</string>
     <string name="bluetooth_select_a2dp_codec_streaming_label" msgid="5347862512596240506">"സ്ട്രീമിംഗ്: <xliff:g id="STREAMING_PARAMETER">%1$s</xliff:g>"</string>
     <string name="select_private_dns_configuration_title" msgid="3700456559305263922">"സ്വകാര്യ DNS"</string>
     <string name="select_private_dns_configuration_dialog_title" msgid="9221994415765826811">"സ്വകാര്യ DNS മോഡ് തിരഞ്ഞെടുക്കുക"</string>
@@ -322,11 +317,11 @@
     <string name="show_all_anrs" msgid="4924885492787069007">"പശ്ചാത്തല ANR-കൾ കാണിക്കുക"</string>
     <string name="show_all_anrs_summary" msgid="6636514318275139826">"പ‌ശ്ചാത്തല ആപ്പുകൾക്കായി \'ആപ്പ് പ്രതികരിക്കുന്നില്ല\' ഡയലോഗ് പ്രദര്‍ശിപ്പിക്കുക"</string>
     <string name="show_notification_channel_warnings" msgid="1399948193466922683">"ചാനൽ മുന്നറിയിപ്പ് കാണിക്കൂ"</string>
-    <string name="show_notification_channel_warnings_summary" msgid="5536803251863694895">"സാധുതയുള്ള ചാനലില്ലാതെ ഒരു ആപ്പ്, അറിയിപ്പ് പോസ്റ്റുചെയ്യുമ്പോൾ ഓൺ-സ്‌ക്രീൻ മുന്നറിയിപ്പ് ‌പ്രദർശിപ്പിക്കുന്നു"</string>
+    <string name="show_notification_channel_warnings_summary" msgid="5536803251863694895">"സാധുതയുള്ള ചാനലിൽ അല്ലാതെ ഒരു ആപ്പ്, അറിയിപ്പ് പോസ്റ്റ് ചെയ്യുമ്പോൾ ഓൺ-സ്‌ക്രീൻ മുന്നറിയിപ്പ് ‌പ്രദർശിപ്പിക്കുന്നു"</string>
     <string name="force_allow_on_external" msgid="3215759785081916381">"ബാഹ്യമായതിൽ നിർബന്ധിച്ച് അനുവദിക്കുക"</string>
     <string name="force_allow_on_external_summary" msgid="3640752408258034689">"മാനിഫെസ്റ്റ് മൂല്യങ്ങൾ പരിഗണിക്കാതെ, ബാഹ്യ സ്റ്റോറേജിലേക്ക് എഴുതപ്പെടുന്നതിന് ഏതൊരു ആപ്പിനെയും യോഗ്യമാക്കുന്നു"</string>
-    <string name="force_resizable_activities" msgid="8615764378147824985">"വലിപ്പം മാറ്റാൻ പ്രവർത്തനങ്ങളെ നിർബന്ധിക്കുക"</string>
-    <string name="force_resizable_activities_summary" msgid="6667493494706124459">"മാനിഫെസ്റ്റ് മൂല്യങ്ങൾ പരിഗണിക്കാതെ, എല്ലാ ആക്ടിവിറ്റികളെയും മൾട്ടി-വിൻഡോയ്ക്കായി വലിപ്പം മാറ്റുക."</string>
+    <string name="force_resizable_activities" msgid="8615764378147824985">"വലുപ്പം മാറ്റാൻ പ്രവർത്തനങ്ങളെ നിർബന്ധിക്കുക"</string>
+    <string name="force_resizable_activities_summary" msgid="6667493494706124459">"മാനിഫെസ്റ്റ് മൂല്യങ്ങൾ പരിഗണിക്കാതെ, എല്ലാ ആക്ടിവിറ്റികളെയും മൾട്ടി-വിൻഡോയ്ക്കായി വലുപ്പം മാറ്റുക."</string>
     <string name="enable_freeform_support" msgid="1461893351278940416">"ഫ്രീഫോം വിൻഡോകൾ പ്രവർത്തനക്ഷമമാക്കുക"</string>
     <string name="enable_freeform_support_summary" msgid="8247310463288834487">"പരീക്ഷണാത്മക ഫ്രീഫോം വിൻഡോകൾക്കുള്ള പിന്തുണ പ്രവർത്തനക്ഷമമാക്കുക."</string>
     <string name="local_backup_password_title" msgid="3860471654439418822">"ഡെ‌സ്‌ക്ടോപ്പ് ബാക്കപ്പ് പാസ്‌വേഡ്"</string>
