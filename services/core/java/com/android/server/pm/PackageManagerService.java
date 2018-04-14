@@ -202,6 +202,7 @@ import android.database.ContentObserver;
 import android.graphics.Bitmap;
 import android.hardware.display.DisplayManager;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Binder;
 import android.os.Build;
 import android.os.Bundle;
@@ -8696,7 +8697,7 @@ public class PackageManagerService extends IPackageManager.Stub
                         }
                     }
                     // we're updating the disabled package, so, scan it as the package setting
-                    final ScanRequest request = new ScanRequest(pkg, sharedUserSetting,
+                    final ScanRequest request = new ScanRequest(pkg, sharedUserSetting, null,
                             disabledPkgSetting /* pkgSetting */, null /* disabledPkgSetting */,
                             null /* originalPkgSetting */, null, parseFlags, scanFlags,
                             (pkg == mPlatformPackage), user);
@@ -9874,6 +9875,8 @@ public class PackageManagerService extends IPackageManager.Stub
     private static class ScanRequest {
         /** The parsed package */
         @NonNull public final PackageParser.Package pkg;
+        /** The package this package replaces */
+        @Nullable public final PackageParser.Package oldPkg;
         /** Shared user settings, if the package has a shared user */
         @Nullable public final SharedUserSetting sharedUserSetting;
         /**
@@ -9899,6 +9902,7 @@ public class PackageManagerService extends IPackageManager.Stub
         public ScanRequest(
                 @NonNull PackageParser.Package pkg,
                 @Nullable SharedUserSetting sharedUserSetting,
+                @Nullable PackageParser.Package oldPkg,
                 @Nullable PackageSetting pkgSetting,
                 @Nullable PackageSetting disabledPkgSetting,
                 @Nullable PackageSetting originalPkgSetting,
@@ -9908,6 +9912,7 @@ public class PackageManagerService extends IPackageManager.Stub
                 boolean isPlatformPackage,
                 @Nullable UserHandle user) {
             this.pkg = pkg;
+            this.oldPkg = oldPkg;
             this.pkgSetting = pkgSetting;
             this.sharedUserSetting = sharedUserSetting;
             this.oldPkgSetting = pkgSetting == null ? null : new PackageSetting(pkgSetting);
@@ -10037,8 +10042,9 @@ public class PackageManagerService extends IPackageManager.Stub
 
             boolean scanSucceeded = false;
             try {
-                final ScanRequest request = new ScanRequest(pkg, sharedUserSetting, pkgSetting,
-                        disabledPkgSetting, originalPkgSetting, realPkgName, parseFlags, scanFlags,
+                final ScanRequest request = new ScanRequest(pkg, sharedUserSetting,
+                        pkgSetting == null ? null : pkgSetting.pkg, pkgSetting, disabledPkgSetting,
+                        originalPkgSetting, realPkgName, parseFlags, scanFlags,
                         (pkg == mPlatformPackage), user);
                 final ScanResult result = scanPackageOnlyLI(request, mFactoryTest, currentTime);
                 if (result.success) {
@@ -10068,6 +10074,7 @@ public class PackageManagerService extends IPackageManager.Stub
     private void commitScanResultsLocked(@NonNull ScanRequest request, @NonNull ScanResult result)
             throws PackageManagerException {
         final PackageParser.Package pkg = request.pkg;
+        final PackageParser.Package oldPkg = request.oldPkg;
         final @ParseFlags int parseFlags = request.parseFlags;
         final @ScanFlags int scanFlags = request.scanFlags;
         final PackageSetting oldPkgSetting = request.oldPkgSetting;
@@ -10237,7 +10244,7 @@ public class PackageManagerService extends IPackageManager.Stub
         } else {
             final int userId = user == null ? 0 : user.getIdentifier();
             // Modify state for the given package setting
-            commitPackageSettings(pkg, pkgSetting, user, scanFlags,
+            commitPackageSettings(pkg, oldPkg, pkgSetting, user, scanFlags,
                     (parseFlags & PackageParser.PARSE_CHATTY) != 0 /*chatty*/);
             if (pkgSetting.getInstantApp(userId)) {
                 mInstantAppRegistry.addInstantAppLPw(userId, pkgSetting.appId);
@@ -11163,8 +11170,9 @@ public class PackageManagerService extends IPackageManager.Stub
      * Adds a scanned package to the system. When this method is finished, the package will
      * be available for query, resolution, etc...
      */
-    private void commitPackageSettings(PackageParser.Package pkg, PackageSetting pkgSetting,
-            UserHandle user, final @ScanFlags int scanFlags, boolean chatty) {
+    private void commitPackageSettings(PackageParser.Package pkg,
+            @Nullable PackageParser.Package oldPkg, PackageSetting pkgSetting, UserHandle user,
+            final @ScanFlags int scanFlags, boolean chatty) {
         final String pkgName = pkg.packageName;
         if (mCustomResolverComponentName != null &&
                 mCustomResolverComponentName.getPackageName().equals(pkg.packageName)) {
@@ -11503,6 +11511,22 @@ public class PackageManagerService extends IPackageManager.Stub
                         mProtectedBroadcasts.add(pkg.protectedBroadcasts.get(i));
                     }
                 }
+            }
+
+            if (oldPkg != null) {
+                // We need to call revokeRuntimePermissionsIfGroupChanged async as permission
+                // revoke callbacks from this method might need to kill apps which need the
+                // mPackages lock on a different thread. This would dead lock.
+                //
+                // Hence create a copy of all package names and pass it into
+                // revokeRuntimePermissionsIfGroupChanged. Only for those permissions might get
+                // revoked. If a new package is added before the async code runs the permission
+                // won't be granted yet, hence new packages are no problem.
+                final ArrayList<String> allPackageNames = new ArrayList<>(mPackages.keySet());
+
+                AsyncTask.execute(() ->
+                        mPermissionManager.revokeRuntimePermissionsIfGroupChanged(pkg, oldPkg,
+                                allPackageNames, mPermissionCallback));
             }
         }
 
