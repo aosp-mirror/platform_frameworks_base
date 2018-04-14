@@ -68,7 +68,7 @@
     <string name="print_no_printers" msgid="4869403323900054866">"कुनै प्रिन्टरहरू भेटाइएन"</string>
     <string name="cannot_add_printer" msgid="7840348733668023106">"प्रिन्टरहरू थप्न सक्दैन"</string>
     <string name="select_to_add_printers" msgid="3800709038689830974">"प्रिन्टर थप्नका लागि चयन गर्नुहोस्"</string>
-    <string name="enable_print_service" msgid="3482815747043533842">"सक्षम गर्नका लागि चयन गर्नुहोस्"</string>
+    <string name="enable_print_service" msgid="3482815747043533842">"सक्षम गर्नाका लागि चयन गर्नुहोस्"</string>
     <string name="enabled_services_title" msgid="7036986099096582296">"सक्षम गरिएका सेवाहरू"</string>
     <string name="recommended_services_title" msgid="3799434882937956924">"सिफारिस गरिएका सेवाहरू"</string>
     <string name="disabled_services_title" msgid="7313253167968363211">"असक्षम गरिएका सेवाहरू"</string>
