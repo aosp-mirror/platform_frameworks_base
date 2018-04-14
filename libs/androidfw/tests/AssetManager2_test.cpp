@@ -329,6 +329,17 @@ TEST_F(AssetManager2Test, MergesStylesWithParentFromSingleApkAssets) {
   EXPECT_EQ(0, bag_two->entries[5].cookie);
 }
 
+TEST_F(AssetManager2Test, MergeStylesCircularDependency) {
+  AssetManager2 assetmanager;
+  assetmanager.SetApkAssets({style_assets_.get()});
+
+  // GetBag should stop traversing the parents of styles when a circular
+  // dependency is detected
+  const ResolvedBag* bag_one = assetmanager.GetBag(app::R::style::StyleFour);
+  ASSERT_NE(nullptr, bag_one);
+  ASSERT_EQ(3u, bag_one->entry_count);
+}
+
 TEST_F(AssetManager2Test, ResolveReferenceToResource) {
   AssetManager2 assetmanager;
   assetmanager.SetApkAssets({basic_assets_.get()});

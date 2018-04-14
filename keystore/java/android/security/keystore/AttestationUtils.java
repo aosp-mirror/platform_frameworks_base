@@ -156,7 +156,7 @@ public abstract class AttestationUtils {
                     break;
                 }
                 case ID_TYPE_MEID: {
-                    final String meid = telephonyService.getDeviceId();
+                    final String meid = telephonyService.getMeid(0);
                     if (meid == null) {
                         throw new DeviceIdAttestationException("Unable to retrieve MEID");
                     }

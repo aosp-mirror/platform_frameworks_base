@@ -175,7 +175,7 @@
   <string-array name="window_animation_scale_entries">
     <item msgid="8134156599370824081">"Animación desactivada"</item>
     <item msgid="6624864048416710414">"Escala de animación 0,5x"</item>
-    <item msgid="2219332261255416635">"Escala de animación 1x"</item>
+    <item msgid="2219332261255416635">"Escala de animación de 1x"</item>
     <item msgid="3544428804137048509">"Escala de animación 1,5x"</item>
     <item msgid="3110710404225974514">"Escala de animación 2x"</item>
     <item msgid="4402738611528318731">"Escala de animación 5x"</item>
@@ -184,11 +184,11 @@
   <string-array name="transition_animation_scale_entries">
     <item msgid="8464255836173039442">"Animación desactivada"</item>
     <item msgid="3375781541913316411">"Escala de animación 0,5x"</item>
-    <item msgid="1991041427801869945">"Escala da animación de 1x"</item>
+    <item msgid="1991041427801869945">"Escala de animación de 1x"</item>
     <item msgid="4012689927622382874">"Escala de animación 1,5x"</item>
     <item msgid="3289156759925947169">"Escala de animación 2x"</item>
-    <item msgid="7705857441213621835">"Escala da animación de 5x"</item>
-    <item msgid="6660750935954853365">"Escala da animación de 10x"</item>
+    <item msgid="7705857441213621835">"Escala de animación de 5x"</item>
+    <item msgid="6660750935954853365">"Escala de animación de 10x"</item>
   </string-array>
   <string-array name="animator_duration_scale_entries">
     <item msgid="6039901060648228241">"Animación desactivada"</item>
@@ -196,7 +196,7 @@
     <item msgid="4394388961370833040">"Escala de animación de 1x"</item>
     <item msgid="8125427921655194973">"Escala de animación de 1,5x"</item>
     <item msgid="3334024790739189573">"Escala de animación de 2x"</item>
-    <item msgid="3170120558236848008">"Escala da animación de 5x"</item>
+    <item msgid="3170120558236848008">"Escala de animación de 5x"</item>
     <item msgid="1069584980746680398">"Escala de animación de 10x"</item>
   </string-array>
   <string-array name="overlay_display_devices_entries">

@@ -217,7 +217,7 @@ public class QSCustomizer extends LinearLayout implements OnMenuItemClickListene
     }
 
     public boolean isCustomizing() {
-        return mCustomizing;
+        return mCustomizing || mOpening;
     }
 
     @Override

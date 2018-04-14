@@ -109,7 +109,7 @@
     <string name="bluetooth_pairing_rejected_error_message" msgid="1648157108520832454">"ការ​ផ្គូផ្គង​បាន​បដិសេធ​ដោយ <xliff:g id="DEVICE_NAME">%1$s</xliff:g> ។"</string>
     <string name="bluetooth_talkback_computer" msgid="4875089335641234463">"កុំព្យូទ័រ"</string>
     <string name="bluetooth_talkback_headset" msgid="5140152177885220949">"កាស"</string>
-    <string name="bluetooth_talkback_phone" msgid="4260255181240622896">"ទូរស័ព្ទ"</string>
+    <string name="bluetooth_talkback_phone" msgid="4260255181240622896">"ទូរសព្ទ"</string>
     <string name="bluetooth_talkback_imaging" msgid="551146170554589119">"កំពុងបង្ហាញ"</string>
     <string name="bluetooth_talkback_headphone" msgid="26580326066627664">"កាស"</string>
     <string name="bluetooth_talkback_input_peripheral" msgid="5165842622743212268">"ធាតុបញ្ចូលបន្ថែម"</string>
@@ -216,20 +216,15 @@
     <string name="bluetooth_select_avrcp_version_string" msgid="3750059931120293633">"កំណែប្ល៊ូធូស AVRCP"</string>
     <string name="bluetooth_select_avrcp_version_dialog_title" msgid="7277329668298705702">"ជ្រើសរើសកំណែប្ល៊ូធូស AVRCP"</string>
     <string name="bluetooth_select_a2dp_codec_type" msgid="90597356942154882">"កូឌិក​សំឡេង​ប៊្លូធូស"</string>
-    <!-- no translation found for bluetooth_select_a2dp_codec_type_dialog_title (8436224899475822557) -->
-    <skip />
+    <string name="bluetooth_select_a2dp_codec_type_dialog_title" msgid="8436224899475822557">"ជំរុញ​ការជ្រើសរើស​កូឌិក​សំឡេង​\n​ប៊្លូធូស"</string>
     <string name="bluetooth_select_a2dp_codec_sample_rate" msgid="4788245703824623062">"អត្រា​គំរូ​សំឡេង​ប៊្លូធូស"</string>
-    <!-- no translation found for bluetooth_select_a2dp_codec_sample_rate_dialog_title (8010380028880963535) -->
-    <skip />
+    <string name="bluetooth_select_a2dp_codec_sample_rate_dialog_title" msgid="8010380028880963535">"ជំរុញ​ការជ្រើសរើស​កូឌិក​សំឡេង\n​ប៊្លូធូស​៖ អត្រា​គំរូ"</string>
     <string name="bluetooth_select_a2dp_codec_bits_per_sample" msgid="2099645202720164141">"កម្រិត​ប៊ីត​ក្នុង​មួយ​គំរូ​នៃ​សំឡេង​ប៊្លូធូស"</string>
-    <!-- no translation found for bluetooth_select_a2dp_codec_bits_per_sample_dialog_title (8063859754619484760) -->
-    <skip />
+    <string name="bluetooth_select_a2dp_codec_bits_per_sample_dialog_title" msgid="8063859754619484760">"ជំរុញ​ការជ្រើសរើស​កូឌិក​សំឡេង​\nប៊្លូធូស៖ កម្រិត​ប៊ីត​ក្នុង​មួយ​គំរូ"</string>
     <string name="bluetooth_select_a2dp_codec_channel_mode" msgid="884855779449390540">"មុខ​ងារ​រលកសញ្ញា​សំឡេង​ប៊្លូធូស"</string>
-    <!-- no translation found for bluetooth_select_a2dp_codec_channel_mode_dialog_title (7234956835280563341) -->
-    <skip />
+    <string name="bluetooth_select_a2dp_codec_channel_mode_dialog_title" msgid="7234956835280563341">"ជំរុញ​ការជ្រើសរើស​កូឌិក​សំឡេង\nប៊្លូធូស៖ ប្រភេទ​សំឡេង"</string>
     <string name="bluetooth_select_a2dp_codec_ldac_playback_quality" msgid="3619694372407843405">"កូឌិកប្រភេទ LDAC នៃសំឡេង​ប៊្លូធូស៖ គុណភាព​ចាក់​សំឡេង"</string>
-    <!-- no translation found for bluetooth_select_a2dp_codec_ldac_playback_quality_dialog_title (7595776220458732825) -->
-    <skip />
+    <string name="bluetooth_select_a2dp_codec_ldac_playback_quality_dialog_title" msgid="7595776220458732825">"ជំរុញ​ការជ្រើសរើស​កូឌិក​ប្រភេទ​ LDAC នៃសំឡេង​\nប៊្លូធូស៖ គុណភាព​ចាក់​សំឡេង"</string>
     <string name="bluetooth_select_a2dp_codec_streaming_label" msgid="5347862512596240506">"កំពុង​ចាក់៖ <xliff:g id="STREAMING_PARAMETER">%1$s</xliff:g>"</string>
     <string name="select_private_dns_configuration_title" msgid="3700456559305263922">"DNS ឯកជន"</string>
     <string name="select_private_dns_configuration_dialog_title" msgid="9221994415765826811">"ជ្រើសរើសមុខងារ DNS ឯកជន"</string>

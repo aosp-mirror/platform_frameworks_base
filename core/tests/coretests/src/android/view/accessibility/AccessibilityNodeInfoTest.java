@@ -16,6 +16,8 @@
 
 package android.view.accessibility;
 
+import static junit.framework.Assert.assertEquals;
+
 import static org.hamcrest.Matchers.emptyCollectionOf;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasItem;
@@ -33,6 +35,8 @@ import com.android.internal.util.CollectionUtils;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 
 @LargeTest
@@ -41,13 +45,19 @@ public class AccessibilityNodeInfoTest {
     // The number of fields tested in the corresponding CTS AccessibilityNodeInfoTest:
     // See fullyPopulateAccessibilityNodeInfo, assertEqualsAccessibilityNodeInfo,
     // and assertAccessibilityNodeInfoCleared in that class.
-    private static final int NUM_MARSHALLED_PROPERTIES = 35;
+    private static final int NUM_MARSHALLED_PROPERTIES = 33;
 
     /**
      * The number of properties that are purposely not marshalled
      * mOriginalText - Used when resolving clickable spans; intentionally not parceled
+     * mSealed - Unparceling sets the sealed bit
+     * mConnectionId - Set after unparceling. Actually is parceled, but probably shouldn't be.
      */
-    private static final int NUM_NONMARSHALLED_PROPERTIES = 1;
+    private static final int NUM_NONMARSHALLED_PROPERTIES = 3;
+
+    // The number of flags held in boolean properties. Their values should also be double-checked
+    // in the methods above.
+    private static final int NUM_BOOLEAN_PROPERTIES = 22;
 
     @Test
     public void testStandardActions_serializationFlagIsValid() {
@@ -129,5 +139,20 @@ public class AccessibilityNodeInfoTest {
     public void dontForgetToUpdateCtsParcelingTestWhenYouAddNewFields() {
         AccessibilityEventTest.assertNoNewNonStaticFieldsAdded(AccessibilityNodeInfo.class,
                 NUM_MARSHALLED_PROPERTIES + NUM_NONMARSHALLED_PROPERTIES);
+    }
+
+    @Test
+    public void updateCtsToTestNewBooleanProperties() {
+        int booleanPropertiesCount = 0;
+
+        for (Field field : AccessibilityNodeInfo.class.getDeclaredFields()) {
+            if (((field.getModifiers() & Modifier.STATIC) != 0)
+                    && (field.getName().contains("BOOLEAN_PROPERTY"))) {
+                booleanPropertiesCount++;
+            }
+        }
+
+        assertEquals("New boolean properties. Make sure you're testing them in CTS",
+                NUM_BOOLEAN_PROPERTIES, booleanPropertiesCount);
     }
 }

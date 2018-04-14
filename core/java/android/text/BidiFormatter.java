@@ -21,6 +21,8 @@ import static android.text.TextDirectionHeuristics.FIRSTSTRONG_LTR;
 import android.annotation.Nullable;
 import android.view.View;
 
+import com.android.internal.annotations.VisibleForTesting;
+
 import java.util.Locale;
 
 /**
@@ -570,8 +572,10 @@ public final class BidiFormatter {
     /**
      * An object that estimates the directionality of a given string by various methods.
      *
+     * @hide
      */
-    private static class DirectionalityEstimator {
+    @VisibleForTesting
+    public static class DirectionalityEstimator {
 
         // Internal static variables and constants.
 
@@ -598,7 +602,11 @@ public final class BidiFormatter {
             }
         }
 
-        private static byte getDirectionality(int codePoint) {
+        /**
+         * Return Character directionality. Same as {@link Character#getDirectionality(int)} except
+         * it overrides values for newest emoji that are not covered by ICU.
+         */
+        public static byte getDirectionality(int codePoint) {
             if (Emoji.isNewEmoji(codePoint)) {
                 // TODO: Fix or remove once emoji-data.text 5.0 is in ICU or update to 6.0.
                 return Character.DIRECTIONALITY_OTHER_NEUTRALS;

@@ -216,20 +216,15 @@
     <string name="bluetooth_select_avrcp_version_string" msgid="3750059931120293633">"Versión AVRCP de Bluetooth"</string>
     <string name="bluetooth_select_avrcp_version_dialog_title" msgid="7277329668298705702">"Selecciona a versión AVRCP de Bluetooth"</string>
     <string name="bluetooth_select_a2dp_codec_type" msgid="90597356942154882">"Códec de audio por Bluetooth"</string>
-    <!-- no translation found for bluetooth_select_a2dp_codec_type_dialog_title (8436224899475822557) -->
-    <skip />
+    <string name="bluetooth_select_a2dp_codec_type_dialog_title" msgid="8436224899475822557">"Activar códec de audio por Bluetooth\nSelección"</string>
     <string name="bluetooth_select_a2dp_codec_sample_rate" msgid="4788245703824623062">"Taxa de mostraxe de audio por Bluetooth"</string>
-    <!-- no translation found for bluetooth_select_a2dp_codec_sample_rate_dialog_title (8010380028880963535) -->
-    <skip />
+    <string name="bluetooth_select_a2dp_codec_sample_rate_dialog_title" msgid="8010380028880963535">"Activar códec de audio por Bluetooth\nSelección: taxa de mostraxe"</string>
     <string name="bluetooth_select_a2dp_codec_bits_per_sample" msgid="2099645202720164141">"Bits por mostra de audio por Bluetooth"</string>
-    <!-- no translation found for bluetooth_select_a2dp_codec_bits_per_sample_dialog_title (8063859754619484760) -->
-    <skip />
+    <string name="bluetooth_select_a2dp_codec_bits_per_sample_dialog_title" msgid="8063859754619484760">"Activar códec de audio por Bluetooth\nSelección: bits por mostra"</string>
     <string name="bluetooth_select_a2dp_codec_channel_mode" msgid="884855779449390540">"Modo de canle de audio por Bluetooth"</string>
-    <!-- no translation found for bluetooth_select_a2dp_codec_channel_mode_dialog_title (7234956835280563341) -->
-    <skip />
+    <string name="bluetooth_select_a2dp_codec_channel_mode_dialog_title" msgid="7234956835280563341">"Activar códec de audio por Bluetooth\nSelección: modo de canle"</string>
     <string name="bluetooth_select_a2dp_codec_ldac_playback_quality" msgid="3619694372407843405">"Códec LDAC de audio por Bluetooth: calidade de reprodución"</string>
-    <!-- no translation found for bluetooth_select_a2dp_codec_ldac_playback_quality_dialog_title (7595776220458732825) -->
-    <skip />
+    <string name="bluetooth_select_a2dp_codec_ldac_playback_quality_dialog_title" msgid="7595776220458732825">"Activar códec LDAC de audio por Bluetooth\nSelección: calidade de reprodución"</string>
     <string name="bluetooth_select_a2dp_codec_streaming_label" msgid="5347862512596240506">"Reprodución en tempo real: <xliff:g id="STREAMING_PARAMETER">%1$s</xliff:g>"</string>
     <string name="select_private_dns_configuration_title" msgid="3700456559305263922">"DNS privado"</string>
     <string name="select_private_dns_configuration_dialog_title" msgid="9221994415765826811">"Selecciona o modo de DNS privado"</string>
@@ -247,7 +242,7 @@
     <string name="select_logd_size_dialog_title" msgid="1206769310236476760">"Seleccionar tamaños por búfer"</string>
     <string name="dev_logpersist_clear_warning_title" msgid="684806692440237967">"Queres borrar o almacenamento continuo do rexistrador?"</string>
     <string name="dev_logpersist_clear_warning_message" msgid="2256582531342994562">"Cando xa non se supervisa a actividade co rexistrador de forma continua, debemos borrar os datos do rexistrador almacenados no dispositivo."</string>
-    <string name="select_logpersist_title" msgid="7530031344550073166">"Gardar datos de forma continua"</string>
+    <string name="select_logpersist_title" msgid="7530031344550073166">"Gardar datos de rexistrador de forma continua"</string>
     <string name="select_logpersist_dialog_title" msgid="4003400579973269060">"Seleccionar búfers de rexistro para gardalos de forma continua no dispositivo"</string>
     <string name="select_usb_configuration_title" msgid="2649938511506971843">"Seleccionar configuración USB"</string>
     <string name="select_usb_configuration_dialog_title" msgid="6385564442851599963">"Seleccionar configuración USB"</string>
@@ -292,7 +287,7 @@
     <string name="show_screen_updates_summary" msgid="2569622766672785529">"Iluminar superficies de ventás ao actualizarse"</string>
     <string name="show_hw_screen_updates" msgid="4117270979975470789">"Mostrar actualizacións"</string>
     <string name="show_hw_screen_updates_summary" msgid="6506943466625875655">"Actualiza as vistas das ventás creadas"</string>
-    <string name="show_hw_layers_updates" msgid="5645728765605699821">"Ver actualizacións capas"</string>
+    <string name="show_hw_layers_updates" msgid="5645728765605699821">"Ver act. capas hardware"</string>
     <string name="show_hw_layers_updates_summary" msgid="5296917233236661465">"Iluminar capas hardware en verde ao actualizarse"</string>
     <string name="debug_hw_overdraw" msgid="2968692419951565417">"Depurar superposición GPU"</string>
     <string name="disable_overlays" msgid="2074488440505934665">"Desact. superposicións HW"</string>
@@ -310,7 +305,7 @@
     <string name="show_non_rect_clip" msgid="505954950474595172">"Depurar operacións recorte non rectangulares"</string>
     <string name="track_frame_time" msgid="6094365083096851167">"Perfil procesamento HWUI"</string>
     <string name="enable_gpu_debug_layers" msgid="3848838293793255097">"Activar depuración da GPU"</string>
-    <string name="enable_gpu_debug_layers_summary" msgid="8009136940671194940">"Permite capas da GPU para aplicación de depuración"</string>
+    <string name="enable_gpu_debug_layers_summary" msgid="8009136940671194940">"Permite capas da GPU para apps de depuración"</string>
     <string name="window_animation_scale_title" msgid="6162587588166114700">"Escala animación da ventá"</string>
     <string name="transition_animation_scale_title" msgid="387527540523595875">"Escala anim. transición"</string>
     <string name="animator_duration_scale_title" msgid="3406722410819934083">"Escala duración animador"</string>
@@ -318,7 +313,7 @@
     <string name="debug_applications_category" msgid="4206913653849771549">"Aplicacións"</string>
     <string name="immediately_destroy_activities" msgid="1579659389568133959">"Non manter actividades"</string>
     <string name="immediately_destroy_activities_summary" msgid="3592221124808773368">"Destruír actividades cando o usuario non as use"</string>
-    <string name="app_process_limit_title" msgid="4280600650253107163">"Límite proceso 2º plano"</string>
+    <string name="app_process_limit_title" msgid="4280600650253107163">"Límite procesos 2º plano"</string>
     <string name="show_all_anrs" msgid="4924885492787069007">"Mostrar ANR en segundo plano"</string>
     <string name="show_all_anrs_summary" msgid="6636514318275139826">"Indica que unha aplicación en segundo plano non responde"</string>
     <string name="show_notification_channel_warnings" msgid="1399948193466922683">"Mostrar avisos de notificacións"</string>

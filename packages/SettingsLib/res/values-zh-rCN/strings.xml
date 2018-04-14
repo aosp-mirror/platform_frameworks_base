@@ -34,7 +34,7 @@
     <string name="wifi_not_in_range" msgid="1136191511238508967">"不在范围内"</string>
     <string name="wifi_no_internet_no_reconnect" msgid="5724903347310541706">"无法自动连接"</string>
     <string name="wifi_no_internet" msgid="4663834955626848401">"无法访问互联网"</string>
-    <string name="saved_network" msgid="4352716707126620811">"由<xliff:g id="NAME">%1$s</xliff:g>保存"</string>
+    <string name="saved_network" msgid="4352716707126620811">"由“<xliff:g id="NAME">%1$s</xliff:g>”保存"</string>
     <string name="connected_via_network_scorer" msgid="5713793306870815341">"已通过%1$s自动连接"</string>
     <string name="connected_via_network_scorer_default" msgid="7867260222020343104">"已自动连接（通过网络评分服务提供方）"</string>
     <string name="connected_via_passpoint" msgid="2826205693803088747">"已通过%1$s连接"</string>
@@ -129,7 +129,7 @@
     <string name="process_kernel_label" msgid="3916858646836739323">"Android 操作系统"</string>
     <string name="data_usage_uninstalled_apps" msgid="614263770923231598">"已删除的应用"</string>
     <string name="data_usage_uninstalled_apps_users" msgid="7986294489899813194">"已删除的应用和用户"</string>
-    <string name="tether_settings_title_usb" msgid="6688416425801386511">"USB网络共享"</string>
+    <string name="tether_settings_title_usb" msgid="6688416425801386511">"USB 网络共享"</string>
     <string name="tether_settings_title_wifi" msgid="3277144155960302049">"便携式热点"</string>
     <string name="tether_settings_title_bluetooth" msgid="355855408317564420">"蓝牙网络共享"</string>
     <string name="tether_settings_title_usb_bluetooth" msgid="5355828977109785001">"网络共享"</string>
@@ -190,7 +190,7 @@
     <string name="tethering_settings_not_available" msgid="6765770438438291012">"此用户无权修改网络共享设置"</string>
     <string name="apn_settings_not_available" msgid="7873729032165324000">"此用户无权修改接入点名称设置"</string>
     <string name="enable_adb" msgid="7982306934419797485">"USB 调试"</string>
-    <string name="enable_adb_summary" msgid="4881186971746056635">"连接USB后启用调试模式"</string>
+    <string name="enable_adb_summary" msgid="4881186971746056635">"连接 USB 后启用调试模式"</string>
     <string name="clear_adb_keys" msgid="4038889221503122743">"撤消 USB 调试授权"</string>
     <string name="bugreport_in_power" msgid="7923901846375587241">"错误报告快捷方式"</string>
     <string name="bugreport_in_power_summary" msgid="1778455732762984579">"在电源菜单中显示用于提交错误报告的按钮"</string>
@@ -207,7 +207,7 @@
     <string name="mock_location_app_set" msgid="8966420655295102685">"模拟位置信息应用：<xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="debug_networking_category" msgid="7044075693643009662">"网络"</string>
     <string name="wifi_display_certification" msgid="8611569543791307533">"无线显示认证"</string>
-    <string name="wifi_verbose_logging" msgid="4203729756047242344">"启用WLAN详细日志记录功能"</string>
+    <string name="wifi_verbose_logging" msgid="4203729756047242344">"启用 WLAN 详细日志记录功能"</string>
     <string name="wifi_connected_mac_randomization" msgid="3168165236877957767">"连接时随机选择 MAC 网址"</string>
     <string name="mobile_data_always_on" msgid="8774857027458200434">"始终开启移动数据网络"</string>
     <string name="tethering_hardware_offload" msgid="7470077827090325814">"网络共享硬件加速"</string>
@@ -216,20 +216,15 @@
     <string name="bluetooth_select_avrcp_version_string" msgid="3750059931120293633">"蓝牙 AVRCP 版本"</string>
     <string name="bluetooth_select_avrcp_version_dialog_title" msgid="7277329668298705702">"选择蓝牙 AVRCP 版本"</string>
     <string name="bluetooth_select_a2dp_codec_type" msgid="90597356942154882">"蓝牙音频编解码器"</string>
-    <!-- no translation found for bluetooth_select_a2dp_codec_type_dialog_title (8436224899475822557) -->
-    <skip />
+    <string name="bluetooth_select_a2dp_codec_type_dialog_title" msgid="8436224899475822557">"触发蓝牙音频编解码器\n选择"</string>
     <string name="bluetooth_select_a2dp_codec_sample_rate" msgid="4788245703824623062">"蓝牙音频采样率"</string>
-    <!-- no translation found for bluetooth_select_a2dp_codec_sample_rate_dialog_title (8010380028880963535) -->
-    <skip />
+    <string name="bluetooth_select_a2dp_codec_sample_rate_dialog_title" msgid="8010380028880963535">"触发蓝牙音频编解码器\n选择：采样率"</string>
     <string name="bluetooth_select_a2dp_codec_bits_per_sample" msgid="2099645202720164141">"蓝牙音频每样本位数"</string>
-    <!-- no translation found for bluetooth_select_a2dp_codec_bits_per_sample_dialog_title (8063859754619484760) -->
-    <skip />
+    <string name="bluetooth_select_a2dp_codec_bits_per_sample_dialog_title" msgid="8063859754619484760">"触发蓝牙音频编解码器\n选择：每样本位数"</string>
     <string name="bluetooth_select_a2dp_codec_channel_mode" msgid="884855779449390540">"蓝牙音频声道模式"</string>
-    <!-- no translation found for bluetooth_select_a2dp_codec_channel_mode_dialog_title (7234956835280563341) -->
-    <skip />
+    <string name="bluetooth_select_a2dp_codec_channel_mode_dialog_title" msgid="7234956835280563341">"触发蓝牙音频编解码器\n选择：声道模式"</string>
     <string name="bluetooth_select_a2dp_codec_ldac_playback_quality" msgid="3619694372407843405">"蓝牙音频 LDAC 编解码器：播放质量"</string>
-    <!-- no translation found for bluetooth_select_a2dp_codec_ldac_playback_quality_dialog_title (7595776220458732825) -->
-    <skip />
+    <string name="bluetooth_select_a2dp_codec_ldac_playback_quality_dialog_title" msgid="7595776220458732825">"触发蓝牙音频 LDAC 编解码器\n选择：播放质量"</string>
     <string name="bluetooth_select_a2dp_codec_streaming_label" msgid="5347862512596240506">"正在流式传输：<xliff:g id="STREAMING_PARAMETER">%1$s</xliff:g>"</string>
     <string name="select_private_dns_configuration_title" msgid="3700456559305263922">"私人 DNS"</string>
     <string name="select_private_dns_configuration_dialog_title" msgid="9221994415765826811">"选择私人 DNS 模式"</string>
@@ -239,7 +234,7 @@
     <string name="private_dns_mode_provider_hostname_hint" msgid="2487492386970928143">"输入 DNS 提供商的主机名"</string>
     <string name="private_dns_mode_provider_failure" msgid="231837290365031223">"无法连接"</string>
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"显示无线显示认证选项"</string>
-    <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"提升WLAN日志记录级别（在WLAN选择器中显示每个SSID的RSSI）"</string>
+    <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"提升 WLAN 日志记录级别（在 WLAN 选择器中显示每个 SSID 的 RSSI）"</string>
     <string name="wifi_connected_mac_randomization_summary" msgid="1743059848752201485">"连接到 WLAN 网络时随机选择 MAC 地址"</string>
     <string name="wifi_metered_label" msgid="4514924227256839725">"按流量计费"</string>
     <string name="wifi_unmetered_label" msgid="6124098729457992931">"不按流量计费"</string>
@@ -299,8 +294,8 @@
     <string name="disable_overlays_summary" msgid="3578941133710758592">"始终使用 GPU 进行屏幕合成"</string>
     <string name="simulate_color_space" msgid="6745847141353345872">"模拟颜色空间"</string>
     <string name="enable_opengl_traces_title" msgid="6790444011053219871">"启用 OpenGL 跟踪"</string>
-    <string name="usb_audio_disable_routing" msgid="8114498436003102671">"关闭USB音频转接"</string>
-    <string name="usb_audio_disable_routing_summary" msgid="980282760277312264">"关闭自动转接至USB音频外围设备的功能"</string>
+    <string name="usb_audio_disable_routing" msgid="8114498436003102671">"关闭 USB 音频转接"</string>
+    <string name="usb_audio_disable_routing_summary" msgid="980282760277312264">"关闭自动转接至 USB 音频外围设备的功能"</string>
     <string name="debug_layout" msgid="5981361776594526155">"显示布局边界"</string>
     <string name="debug_layout_summary" msgid="2001775315258637682">"显示剪辑边界、边距等。"</string>
     <string name="force_rtl_layout_all_locales" msgid="2259906643093138978">"强制使用从右到左的布局方向"</string>
