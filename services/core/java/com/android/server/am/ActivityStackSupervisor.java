@@ -1195,6 +1195,18 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
     }
 
     ActivityRecord topRunningActivityLocked() {
+        return topRunningActivityLocked(false /* considerKeyguardState */);
+    }
+
+    /**
+     * Returns the top running activity in the focused stack. In the case the focused stack has no
+     * such activity, the next focusable stack on top of a display is returned.
+     * @param considerKeyguardState Indicates whether the locked state should be considered. if
+     *                            {@code true} and the keyguard is locked, only activities that
+     *                            can be shown on top of the keyguard will be considered.
+     * @return The top running activity. {@code null} if none is available.
+     */
+    ActivityRecord topRunningActivityLocked(boolean considerKeyguardState) {
         final ActivityStack focusedStack = mFocusedStack;
         ActivityRecord r = focusedStack.topRunningActivityLocked();
         if (r != null) {
@@ -1213,16 +1225,33 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
             if (display == null) {
                 continue;
             }
-            for (int j = display.getChildCount() - 1; j >= 0; --j) {
-                final ActivityStack stack = display.getChildAt(j);
-                if (stack != focusedStack && stack.isTopStackOnDisplay() && stack.isFocusable()) {
-                    r = stack.topRunningActivityLocked();
-                    if (r != null) {
-                        return r;
-                    }
-                }
+
+            // TODO: We probably want to consider the top fullscreen stack as we could have a pinned
+            // stack on top.
+            final ActivityStack topStack = display.getTopStack();
+
+            // Only consider focusable top stacks other than the current focused one.
+            if (topStack == null || !topStack.isFocusable() || topStack == focusedStack) {
+                continue;
+            }
+
+            final ActivityRecord topActivity = topStack.topRunningActivityLocked();
+
+            // Skip if no top activity.
+            if (topActivity == null) {
+                continue;
+            }
+
+            final boolean keyguardLocked = getKeyguardController().isKeyguardLocked();
+
+            // This activity can be considered the top running activity if we are not
+            // considering the locked state, the keyguard isn't locked, or we can show when
+            // locked.
+            if (!considerKeyguardState || !keyguardLocked || topActivity.canShowWhenLocked()) {
+                return topActivity;
             }
         }
+
         return null;
     }
 

@@ -3797,7 +3797,11 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
         // and the resumed activity is not yet visible, then hold off on
         // finishing until the resumed one becomes visible.
 
-        final ActivityRecord next = mStackSupervisor.topRunningActivityLocked();
+        // The activity that we are finishing may be over the lock screen. In this case, we do not
+        // want to consider activities that cannot be shown on the lock screen as running and should
+        // proceed with finishing the activity if there is no valid next top running activity.
+        final ActivityRecord next = mStackSupervisor.topRunningActivityLocked(
+                true /* considerKeyguardState */);
 
         if (mode == FINISH_AFTER_VISIBLE && (r.visible || r.nowVisible)
                 && next != null && !next.nowVisible) {
