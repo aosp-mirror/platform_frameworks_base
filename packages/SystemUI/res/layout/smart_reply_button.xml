@@ -18,7 +18,7 @@
 
 <!-- android:paddingHorizontal is set dynamically in SmartReplyView. -->
 <Button xmlns:android="http://schemas.android.com/apk/res/android"
-        style="@android:style/Widget.Material.Button.Borderless.Small"
+        style="@android:style/Widget.Material.Button"
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
         android:minWidth="0dp"
@@ -26,7 +26,7 @@
         android:paddingVertical="@dimen/smart_reply_button_padding_vertical"
         android:background="@drawable/smart_reply_button_background"
         android:gravity="center"
-        android:fontFamily="sans-serif"
+        android:fontFamily="sans-serif-medium"
         android:textSize="@dimen/smart_reply_button_font_size"
         android:lineSpacingExtra="@dimen/smart_reply_button_line_spacing_extra"
         android:textColor="@color/smart_reply_button_text"

@@ -915,7 +915,7 @@ public class Build {
          * even if there is no excess space.</li>
          * </ul>
          */
-        public static final int P = CUR_DEVELOPMENT; // STOPSHIP Replace with the real version.
+        public static final int P = 28;
     }
 
     /** The type of build, like "user" or "eng". */

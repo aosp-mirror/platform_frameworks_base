@@ -789,11 +789,20 @@ public class RecoverableKeyStoreDb {
     }
 
     /**
-     * Updates the snapshot version.
+     * Updates a flag indicating that a new snapshot should be created.
+     * It will be {@code false} until the first application key is added.
+     * After that, the flag will be set to true, if one of the following values is updated:
+     * <ul>
+     *     <li> List of application keys
+     *     <li> Server params.
+     *     <li> Lock-screen secret.
+     *     <li> Lock-screen secret type.
+     *     <li> Trusted hardware certificate.
+     * </ul>
      *
      * @param userId The userId of the profile the application is running under.
      * @param uid The uid of the application.
-     * @param pending The server parameters.
+     * @param pending Should create snapshot flag.
      * @return The primary key of the inserted row, or -1 if failed.
      *
      * @hide
@@ -809,7 +818,7 @@ public class RecoverableKeyStoreDb {
      *
      * @param userId The userId of the profile the application is running under.
      * @param uid The uid of the application who initialized the local recovery components.
-     * @return snapshot outdated flag.
+     * @return should create snapshot flag
      *
      * @hide
      */

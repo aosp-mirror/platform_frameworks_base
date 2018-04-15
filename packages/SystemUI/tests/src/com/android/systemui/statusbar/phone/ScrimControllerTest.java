@@ -43,6 +43,7 @@ import android.testing.TestableLooper;
 import android.view.View;
 
 import com.android.internal.colorextraction.ColorExtractor.GradientColors;
+import com.android.internal.util.function.TriConsumer;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.statusbar.ScrimView;
@@ -66,9 +67,7 @@ public class ScrimControllerTest extends SysuiTestCase {
     private SynchronousScrimController mScrimController;
     private ScrimView mScrimBehind;
     private ScrimView mScrimInFront;
-    private Consumer<Float> mScrimBehindAlphaCallback;
-    private Consumer<GradientColors> mScrimInFrontColorCallback;
-    private Consumer<Integer> mScrimVisibilityCallback;
+    private ScrimState mScrimState;
     private float mScrimBehindAlpha;
     private GradientColors mScrimInFrontColor;
     private int mScrimVisibility;
@@ -77,6 +76,7 @@ public class ScrimControllerTest extends SysuiTestCase {
     private boolean mAlwaysOnEnabled;
     private AlarmManager mAlarmManager;
 
+
     @Before
     public void setup() {
         mScrimBehind = spy(new ScrimView(getContext()));
@@ -84,15 +84,16 @@ public class ScrimControllerTest extends SysuiTestCase {
         mWakeLock = mock(WakeLock.class);
         mAlarmManager = mock(AlarmManager.class);
         mAlwaysOnEnabled = true;
-        mScrimBehindAlphaCallback = (Float alpha) -> mScrimBehindAlpha = alpha;
-        mScrimInFrontColorCallback = (GradientColors color) -> mScrimInFrontColor = color;
-        mScrimVisibilityCallback = (Integer visible) -> mScrimVisibility = visible;
         mDozeParamenters = mock(DozeParameters.class);
         when(mDozeParamenters.getAlwaysOn()).thenAnswer(invocation -> mAlwaysOnEnabled);
         when(mDozeParamenters.getDisplayNeedsBlanking()).thenReturn(true);
         mScrimController = new SynchronousScrimController(mScrimBehind, mScrimInFront,
-                mScrimBehindAlphaCallback, mScrimInFrontColorCallback, mScrimVisibilityCallback,
-                mDozeParamenters, mAlarmManager);
+                (scrimState, scrimBehindAlpha, scrimInFrontColor) -> {
+                    mScrimState = scrimState;
+                    mScrimBehindAlpha = scrimBehindAlpha;
+                    mScrimInFrontColor = scrimInFrontColor;
+                },
+                visible -> mScrimVisibility = visible, mDozeParamenters, mAlarmManager);
     }
 
     @Test
@@ -208,6 +209,21 @@ public class ScrimControllerTest extends SysuiTestCase {
         // Back scrim should be visible after start dragging
         mScrimController.setPanelExpansion(0.5f);
         assertScrimVisibility(VISIBILITY_FULLY_TRANSPARENT, VISIBILITY_SEMI_TRANSPARENT);
+    }
+
+    @Test
+    public void scrimStateCallback() {
+        mScrimController.transitionTo(ScrimState.UNLOCKED);
+        mScrimController.finishAnimationsImmediately();
+        Assert.assertEquals(mScrimState, ScrimState.UNLOCKED);
+
+        mScrimController.transitionTo(ScrimState.BOUNCER);
+        mScrimController.finishAnimationsImmediately();
+        Assert.assertEquals(mScrimState, ScrimState.BOUNCER);
+
+        mScrimController.transitionTo(ScrimState.BOUNCER_SCRIMMED);
+        mScrimController.finishAnimationsImmediately();
+        Assert.assertEquals(mScrimState, ScrimState.BOUNCER_SCRIMMED);
     }
 
     @Test
@@ -559,12 +575,11 @@ public class ScrimControllerTest extends SysuiTestCase {
         boolean mOnPreDrawCalled;
 
         SynchronousScrimController(ScrimView scrimBehind, ScrimView scrimInFront,
-                Consumer<Float> scrimBehindAlphaListener,
-                Consumer<GradientColors> scrimInFrontColorListener,
+                TriConsumer<ScrimState, Float, GradientColors> scrimStateListener,
                 Consumer<Integer> scrimVisibleListener, DozeParameters dozeParameters,
                 AlarmManager alarmManager) {
-            super(scrimBehind, scrimInFront, scrimBehindAlphaListener, scrimInFrontColorListener,
-                    scrimVisibleListener, dozeParameters, alarmManager);
+            super(scrimBehind, scrimInFront, scrimStateListener, scrimVisibleListener,
+                    dozeParameters, alarmManager);
             mHandler = new FakeHandler(Looper.myLooper());
         }
 

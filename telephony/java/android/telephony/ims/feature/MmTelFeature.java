@@ -18,7 +18,6 @@ package android.telephony.ims.feature;
 
 import android.annotation.IntDef;
 import android.annotation.SystemApi;
-import android.net.Uri;
 import android.os.Bundle;
 import android.os.Message;
 import android.os.RemoteException;
@@ -613,7 +612,19 @@ public class MmTelFeature extends ImsFeature {
      *         {@link TelecomManager#TTY_MODE_FULL},
      *         {@link TelecomManager#TTY_MODE_HCO},
      *         {@link TelecomManager#TTY_MODE_VCO}
-     * @param onCompleteMessage A {@link Message} to be used when the mode has been set.
+     * @param onCompleteMessage If non-null, this MmTelFeature should call this {@link Message} when
+     *         the operation is complete by using the associated {@link android.os.Messenger} in
+     *         {@link Message#replyTo}. For example:
+     * {@code
+     *     // Set UI TTY Mode and other operations...
+     *     try {
+     *         // Notify framework that the mode was changed.
+     *         Messenger uiMessenger = onCompleteMessage.replyTo;
+     *         uiMessenger.send(onCompleteMessage);
+     *     } catch (RemoteException e) {
+     *         // Remote side is dead
+     *     }
+     * }
      */
     public void setUiTtyMode(int mode, Message onCompleteMessage) {
         // Base Implementation - Should be overridden

@@ -2841,70 +2841,78 @@
 
     <public type="string" name="autofill" id="0x0104001a"/>
 
-    <!-- ===============================================================
-         Resources added in version P of the platform
-
-         NOTE: add <public> elements within a <public-group> like so:
-
-         <public-group type="attr" first-id="0x01010531">
-             <public name="exampleAttr1" />
-             <public name="exampleAttr2" />
-         </public-group>
-
-         To add a new public-group block, choose an id value that is 1 greater
-         than the last of that item above. For example, the last "attr" id
-         value above is 0x01010530, so the public-group of attrs below has
-         the id value of 0x01010531.
-         =============================================================== -->
+  <!-- ===============================================================
+       Resources added in version P of the platform
+       =============================================================== -->
     <eat-comment />
 
-    <public-group type="attr" first-id="0x0101056e">
-      <public name="cantSaveState" />
-      <public name="ttcIndex" />
-      <public name="fontVariationSettings" />
-      <public name="dialogCornerRadius" />
-      <!-- @hide For use by platform and tools only. Developers should not specify this value. -->
-      <public name="compileSdkVersion" />
-      <!-- @hide For use by platform and tools only. Developers should not specify this value. -->
-      <public name="compileSdkVersionCodename" />
-      <public name="screenReaderFocusable" />
-      <public name="buttonCornerRadius" />
-      <public name="versionCodeMajor" />
-      <public name="versionMajor" />
-      <!-- @hide @SystemApi -->
-      <public name="isVrOnly"/>
-      <public name="widgetFeatures" />
-      <public name="appComponentFactory" />
-      <public name="fallbackLineSpacing" />
-      <public name="accessibilityPaneTitle" />
-      <public name="firstBaselineToTopHeight" />
-      <public name="lastBaselineToBottomHeight" />
-      <public name="lineHeight" />
-      <public name="accessibilityHeading" />
-      <public name="outlineSpotShadowColor" />
-      <public name="outlineAmbientShadowColor" />
-      <public name="maxLongVersionCode" />
-      <!-- @hide @SystemApi -->
-      <public name="userRestriction" />
-      <public name="textFontWeight" />
-      <public name="windowLayoutInDisplayCutoutMode" />
+    <public type="attr" name="cantSaveState" id="0x0101056e" />
+    <public type="attr" name="ttcIndex" id="0x0101056f" />
+    <public type="attr" name="fontVariationSettings" id="0x01010570" />
+    <public type="attr" name="dialogCornerRadius" id="0x01010571" />
+    <!-- @hide For use by platform and tools only. Developers should not specify this value. -->
+    <public type="attr" name="compileSdkVersion" id="0x01010572" />
+    <!-- @hide For use by platform and tools only. Developers should not specify this value. -->
+    <public type="attr" name="compileSdkVersionCodename" id="0x01010573" />
+    <public type="attr" name="screenReaderFocusable" id="0x01010574" />
+    <public type="attr" name="buttonCornerRadius" id="0x01010575" />
+    <public type="attr" name="versionCodeMajor" id="0x01010576" />
+    <public type="attr" name="versionMajor" id="0x01010577" />
+    <!-- @hide @SystemApi -->
+    <public type="attr" name="isVrOnly" id="0x01010578" />
+    <public type="attr" name="widgetFeatures" id="0x01010579" />
+    <public type="attr" name="appComponentFactory" id="0x0101057a" />
+    <public type="attr" name="fallbackLineSpacing" id="0x0101057b" />
+    <public type="attr" name="accessibilityPaneTitle" id="0x0101057c" />
+    <public type="attr" name="firstBaselineToTopHeight" id="0x0101057d" />
+    <public type="attr" name="lastBaselineToBottomHeight" id="0x0101057e" />
+    <public type="attr" name="lineHeight" id="0x0101057f" />
+    <public type="attr" name="accessibilityHeading" id="0x01010580" />
+    <public type="attr" name="outlineSpotShadowColor" id="0x01010581" />
+    <public type="attr" name="outlineAmbientShadowColor" id="0x01010582" />
+    <public type="attr" name="maxLongVersionCode" id="0x01010583" />
+    <!-- @hide @SystemApi -->
+    <public type="attr" name="userRestriction" id="0x01010584" />
+    <public type="attr" name="textFontWeight" id="0x01010585" />
+    <public type="attr" name="windowLayoutInDisplayCutoutMode" id="0x01010586" />
+
+    <public type="style" name="Widget.DeviceDefault.Button.Colored" id="0x010302e0" />
+    <public type="style" name="Widget.DeviceDefault.Button.Borderless.Colored" id="0x010302e1" />
+
+    <public type="id" name="accessibilityActionShowTooltip" id="0x01020044" />
+    <public type="id" name="accessibilityActionHideTooltip" id="0x01020045" />
+
+    <!-- An interpolator which accelerates fast but decelerates extra slowly. -->
+    <public type="interpolator" name="fast_out_extra_slow_in" id="0x10c001a"/>
+
+  <!-- ===============================================================
+       Resources added in version Q of the platform
+
+       NOTE: add <public> elements within a <public-group> like so:
+
+       <public-group type="attr" first-id="0x01010531">
+           <public name="exampleAttr1" />
+           <public name="exampleAttr2" />
+       </public-group>
+
+       To add a new public-group block, choose an id value that is 1 greater
+       than the last of that item above. For example, the last "attr" id
+       value above is 0x01010530, so the public-group of attrs below has
+       the id value of 0x01010531.
+       =============================================================== -->
+  <eat-comment />
+
+    <public-group type="attr" first-id="0x01010587">
     </public-group>
 
-    <public-group type="style" first-id="0x010302e0">
-      <public name="Widget.DeviceDefault.Button.Colored" />
-      <public name="Widget.DeviceDefault.Button.Borderless.Colored" />
+    <public-group type="style" first-id="0x010302e2">
     </public-group>
 
-    <public-group type="id" first-id="0x01020044">
-      <public name="accessibilityActionShowTooltip" />
-      <public name="accessibilityActionHideTooltip" />
+    <public-group type="id" first-id="0x01020046">
     </public-group>
 
     <public-group type="string" first-id="0x0104001b">
     </public-group>
-
-    <!-- An interpolator which accelerates fast but decelerates extra slowly. -->
-    <public type="interpolator" name="fast_out_extra_slow_in" id="0x10c001a"/>
 
   <!-- ===============================================================
        DO NOT ADD UN-GROUPED ITEMS HERE

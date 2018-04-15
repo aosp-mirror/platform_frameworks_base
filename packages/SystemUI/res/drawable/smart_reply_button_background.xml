@@ -19,11 +19,16 @@
 <ripple xmlns:android="http://schemas.android.com/apk/res/android"
         android:color="@color/notification_ripple_untinted_color">
     <item>
-        <shape android:shape="rectangle">
-            <!-- Use non-zero corner radius to work around b/73285195. The actual corner radius is
-                 set dynamically at runtime in SmartReplyView. -->
-            <corners android:radius="1dp"/>
-            <solid android:color="@color/smart_reply_button_background"/>
-        </shape>
+        <inset
+            android:insetLeft="0dp"
+            android:insetTop="7dp"
+            android:insetRight="0dp"
+            android:insetBottom="5dp">
+            <shape android:shape="rectangle">
+                <corners android:radius="8dp" />
+                <stroke android:width="1dp" android:color="@color/smart_reply_button_stroke" />
+                <solid android:color="@color/smart_reply_button_background"/>
+            </shape>
+        </inset>
     </item>
 </ripple>

@@ -421,11 +421,17 @@ Landroid/bluetooth/BluetoothGattDescriptor;->mCharacteristic:Landroid/bluetooth/
 Landroid/bluetooth/BluetoothGattDescriptor;->mInstance:I
 Landroid/bluetooth/BluetoothGatt;->mAuthRetryState:I
 Landroid/bluetooth/BluetoothGatt;->refresh()Z
+Landroid/bluetooth/BluetoothHeadset;->ACTION_ACTIVE_DEVICE_CHANGED:Ljava/lang/String;
 Landroid/bluetooth/BluetoothHeadset;->close()V
 Landroid/bluetooth/BluetoothHeadset;->connectAudio()Z
 Landroid/bluetooth/BluetoothHeadset;->disconnectAudio()Z
+Landroid/bluetooth/BluetoothHeadset;->getActiveDevice()Landroid/bluetooth/BluetoothDevice;
+Landroid/bluetooth/BluetoothHeadset;->setActiveDevice(Landroid/bluetooth/BluetoothDevice;)Z
 Landroid/bluetooth/BluetoothHeadset;->startScoUsingVirtualVoiceCall(Landroid/bluetooth/BluetoothDevice;)Z
 Landroid/bluetooth/BluetoothHeadset;->stopScoUsingVirtualVoiceCall(Landroid/bluetooth/BluetoothDevice;)Z
+Landroid/bluetooth/BluetoothHearingAid;->ACTION_ACTIVE_DEVICE_CHANGED:Ljava/lang/String;
+Landroid/bluetooth/BluetoothHearingAid;->getActiveDevices()Ljava/util/List;
+Landroid/bluetooth/BluetoothHearingAid;->setActiveDevice(Landroid/bluetooth/BluetoothDevice;)Z
 Landroid/bluetooth/BluetoothMapClient;->sendMessage(Landroid/bluetooth/BluetoothDevice;[Landroid/net/Uri;Ljava/lang/String;Landroid/app/PendingIntent;Landroid/app/PendingIntent;)Z
 Landroid/bluetooth/BluetoothPan;->close()V
 Landroid/bluetooth/BluetoothPan;->connect(Landroid/bluetooth/BluetoothDevice;)Z
