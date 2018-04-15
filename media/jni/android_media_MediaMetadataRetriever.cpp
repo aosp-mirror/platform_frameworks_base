@@ -263,7 +263,9 @@ static void rotate(T *dst, const T *src, size_t width, size_t height, int angle)
 static jobject getBitmapFromVideoFrame(
         JNIEnv *env, VideoFrame *videoFrame, jint dst_width, jint dst_height,
         SkColorType outColorType) {
-    ALOGV("getBitmapFromVideoFrame: dimension = %dx%d and bytes = %d",
+    ALOGV("getBitmapFromVideoFrame: dimension = %dx%d, displaySize = %dx%d, bytes = %d",
+            videoFrame->mWidth,
+            videoFrame->mHeight,
             videoFrame->mDisplayWidth,
             videoFrame->mDisplayHeight,
             videoFrame->mSize);
@@ -330,8 +332,7 @@ static jobject getBitmapFromVideoFrame(
         dst_height = std::round(displayHeight * factor);
     }
 
-    if ((uint32_t)dst_width != videoFrame->mWidth ||
-        (uint32_t)dst_height != videoFrame->mHeight) {
+    if ((uint32_t)dst_width != width || (uint32_t)dst_height != height) {
         ALOGV("Bitmap dimension is scaled from %dx%d to %dx%d",
                 width, height, dst_width, dst_height);
         jobject scaledBitmap = env->CallStaticObjectMethod(fields.bitmapClazz,
@@ -431,6 +432,61 @@ static jobject android_media_MediaMetadataRetriever_getImageAtIndex(
     SkColorType outColorType = setOutColorType(env, colorFormat, params);
 
     return getBitmapFromVideoFrame(env, videoFrame, -1, -1, outColorType);
+}
+
+static jobject android_media_MediaMetadataRetriever_getThumbnailImageAtIndex(
+        JNIEnv *env, jobject thiz, jint index, jobject params, jint targetSize, jint maxPixels)
+{
+    ALOGV("getThumbnailImageAtIndex: index %d", index);
+
+    sp<MediaMetadataRetriever> retriever = getRetriever(env, thiz);
+    if (retriever == 0) {
+        jniThrowException(env, "java/lang/IllegalStateException", "No retriever available");
+        return NULL;
+    }
+
+    int colorFormat = getColorFormat(env, params);
+    jint dst_width = -1, dst_height = -1;
+
+    // Call native method to retrieve an image
+    VideoFrame *videoFrame = NULL;
+    sp<IMemory> frameMemory = retriever->getImageAtIndex(
+            index, colorFormat, true /*metaOnly*/, true /*thumbnail*/);
+    if (frameMemory != 0) {
+        videoFrame = static_cast<VideoFrame *>(frameMemory->pointer());
+        int32_t thumbWidth = videoFrame->mWidth;
+        int32_t thumbHeight = videoFrame->mHeight;
+        videoFrame = NULL;
+        int64_t thumbPixels = thumbWidth * thumbHeight;
+
+        // Here we try to use the included thumbnail if it's not too shabby.
+        // If this fails ThumbnailUtils would have to decode the full image and
+        // downscale which could take long.
+        if (thumbWidth >= targetSize || thumbHeight >= targetSize
+                || thumbPixels * 6 >= maxPixels) {
+            frameMemory = retriever->getImageAtIndex(
+                    index, colorFormat, false /*metaOnly*/, true /*thumbnail*/);
+            videoFrame = static_cast<VideoFrame *>(frameMemory->pointer());
+
+            if (thumbPixels > maxPixels) {
+                int downscale = ceil(sqrt(thumbPixels / (float)maxPixels));
+                dst_width = thumbWidth / downscale;
+                dst_height = thumbHeight /downscale;
+            }
+        }
+    }
+    if (videoFrame == NULL) {
+        ALOGV("getThumbnailImageAtIndex: no suitable thumbnails available");
+        return NULL;
+    }
+
+    // Ignore rotation for thumbnail extraction to be consistent with
+    // thumbnails extracted by BitmapFactory APIs.
+    videoFrame->mRotationAngle = 0;
+
+    SkColorType outColorType = setOutColorType(env, colorFormat, params);
+
+    return getBitmapFromVideoFrame(env, videoFrame, dst_width, dst_height, outColorType);
 }
 
 static jobject android_media_MediaMetadataRetriever_getFrameAtIndex(
@@ -661,6 +717,12 @@ static const JNINativeMethod nativeMethods[] = {
             "_getImageAtIndex",
             "(ILandroid/media/MediaMetadataRetriever$BitmapParams;)Landroid/graphics/Bitmap;",
             (void *)android_media_MediaMetadataRetriever_getImageAtIndex
+        },
+
+        {
+            "getThumbnailImageAtIndex",
+            "(ILandroid/media/MediaMetadataRetriever$BitmapParams;II)Landroid/graphics/Bitmap;",
+            (void *)android_media_MediaMetadataRetriever_getThumbnailImageAtIndex
         },
 
         {
