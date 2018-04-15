@@ -142,6 +142,22 @@ public final class Settings {
             "android.settings.LOCATION_SOURCE_SETTINGS";
 
     /**
+     * Activity Action: Show scanning settings to allow configuration of Wi-Fi
+     * and Bluetooth scanning settings.
+     * <p>
+     * In some cases, a matching Activity may not exist, so ensure you
+     * safeguard against this.
+     * <p>
+     * Input: Nothing.
+     * <p>
+     * Output: Nothing.
+     * @hide
+     */
+    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
+    public static final String ACTION_LOCATION_SCANNING_SETTINGS =
+            "android.settings.LOCATION_SCANNING_SETTINGS";
+
+    /**
      * Activity Action: Show settings to allow configuration of users.
      * <p>
      * In some cases, a matching Activity may not exist, so ensure you
