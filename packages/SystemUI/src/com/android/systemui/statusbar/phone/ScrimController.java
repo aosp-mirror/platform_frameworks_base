@@ -41,6 +41,7 @@ import com.android.internal.colorextraction.ColorExtractor;
 import com.android.internal.colorextraction.ColorExtractor.GradientColors;
 import com.android.internal.colorextraction.ColorExtractor.OnColorsChangedListener;
 import com.android.internal.graphics.ColorUtils;
+import com.android.internal.util.function.TriConsumer;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.systemui.Dependency;
 import com.android.systemui.Dumpable;
@@ -144,8 +145,7 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, OnCo
     private int mCurrentBehindTint;
     private boolean mWallpaperVisibilityTimedOut;
     private int mScrimsVisibility;
-    private final Consumer<GradientColors> mScrimInFrontColorListener;
-    private final Consumer<Float> mScrimBehindAlphaListener;
+    private final TriConsumer<ScrimState, Float, GradientColors> mScrimStateListener;
     private final Consumer<Integer> mScrimVisibleListener;
     private boolean mBlankScreen;
     private boolean mScreenBlankingCallbackCalled;
@@ -163,14 +163,12 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, OnCo
     private boolean mKeyguardOccluded;
 
     public ScrimController(ScrimView scrimBehind, ScrimView scrimInFront,
-            Consumer<Float> scrimBehindAlphaListener,
-            Consumer<GradientColors> scrimInFrontColorListener,
+            TriConsumer<ScrimState, Float, GradientColors> scrimStateListener,
             Consumer<Integer> scrimVisibleListener, DozeParameters dozeParameters,
             AlarmManager alarmManager) {
         mScrimBehind = scrimBehind;
         mScrimInFront = scrimInFront;
-        mScrimBehindAlphaListener = scrimBehindAlphaListener;
-        mScrimInFrontColorListener = scrimInFrontColorListener;
+        mScrimStateListener = scrimStateListener;
         mScrimVisibleListener = scrimVisibleListener;
         mContext = scrimBehind.getContext();
         mUnlockMethodCache = UnlockMethodCache.getInstance(mContext);
@@ -300,6 +298,8 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, OnCo
         } else {
             scheduleUpdate();
         }
+
+        dispatchScrimState(mScrimBehind.getViewAlpha());
     }
 
     public ScrimState getState() {
@@ -375,7 +375,7 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, OnCo
             setOrAdaptCurrentAnimation(mScrimBehind);
             setOrAdaptCurrentAnimation(mScrimInFront);
 
-            mScrimBehindAlphaListener.accept(mScrimBehind.getViewAlpha());
+            dispatchScrimState(mScrimBehind.getViewAlpha());
         }
     }
 
@@ -484,7 +484,7 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, OnCo
             float minOpacity = ColorUtils.calculateMinimumBackgroundAlpha(textColor, mainColor,
                     4.5f /* minimumContrast */) / 255f;
             mScrimBehindAlpha = Math.max(mScrimBehindAlphaResValue, minOpacity);
-            mScrimInFrontColorListener.accept(mScrimInFront.getColors());
+            dispatchScrimState(mScrimBehind.getViewAlpha());
         }
 
         // We want to override the back scrim opacity for the AOD state
@@ -501,6 +501,10 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, OnCo
         setScrimBehindAlpha(mCurrentBehindAlpha);
 
         dispatchScrimsVisible();
+    }
+
+    private void dispatchScrimState(float alpha) {
+        mScrimStateListener.accept(mState, alpha, mScrimInFront.getColors());
     }
 
     private void dispatchScrimsVisible() {
@@ -712,7 +716,7 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, OnCo
         }
 
         if (scrim == mScrimBehind) {
-            mScrimBehindAlphaListener.accept(alpha);
+            dispatchScrimState(alpha);
         }
 
         final boolean wantsAlphaUpdate = alpha != currentAlpha;
