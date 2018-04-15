@@ -1691,8 +1691,7 @@
     <string name="package_installed_device_owner" msgid="6875717669960212648">"آپ کے منتظم کے ذریعے انسٹال کیا گیا"</string>
     <string name="package_updated_device_owner" msgid="1847154566357862089">"آپ کے منتظم کے ذریعے اپ ڈیٹ کیا گیا"</string>
     <string name="package_deleted_device_owner" msgid="2307122077550236438">"آپ کے منتظم کے ذریعے حذف کیا گیا"</string>
-    <!-- no translation found for battery_saver_description (769989536172631582) -->
-    <skip />
+    <string name="battery_saver_description" msgid="769989536172631582">"آپ کی بیٹری لائف کو بڑھانے کیلئے، بیٹری سیور آلہ کی کچھ خصوصیات کو آف اور ایپس کو محدود کرتا ہے۔"</string>
     <string name="data_saver_description" msgid="6015391409098303235">"ڈیٹا کے استعمال کو کم کرنے میں مدد کیلئے، ڈیٹا سیور پس منظر میں کچھ ایپس کو ڈیٹا بھیجنے یا موصول کرنے سے روکتا ہے۔ آپ جو ایپ فی الحال استعمال کر رہے ہیں وہ ڈیٹا پر رسائی کر سکتی ہے مگر ہو سکتا ہے ایسا زیادہ نہ ہو۔ اس کا مطلب مثال کے طور پر یہ ہو سکتا ہے کہ تصاویر تھپتھپانے تک ظاہر نہ ہوں۔"</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"ڈیٹا سیور آن کریں؟"</string>
     <string name="data_saver_enable_button" msgid="7147735965247211818">"آن کریں"</string>
@@ -1874,12 +1873,12 @@
     <string name="volume_dialog_ringer_guidance_silent" msgid="2128975224280276122">"کالز اور اطلاعات کی آواز خاموش کر دی جائے گی"</string>
     <string name="notification_channel_system_changes" msgid="5072715579030948646">"سسٹم کی تبدیلیاں"</string>
     <string name="notification_channel_do_not_disturb" msgid="6766940333105743037">"ڈسٹرب نہ کریں"</string>
-    <!-- no translation found for zen_upgrade_notification_visd_title (3288313883409759733) -->
-    <skip />
-    <!-- no translation found for zen_upgrade_notification_visd_content (5533674060311631165) -->
-    <skip />
+    <string name="zen_upgrade_notification_visd_title" msgid="3288313883409759733">"نئی: \'ڈسٹرب نہ کریں\' اطلاعات کو چھپا رہی ہے"</string>
+    <string name="zen_upgrade_notification_visd_content" msgid="5533674060311631165">"مزید جاننے اور تبدیل کرنے کیلئے تھپتھپائیں۔"</string>
     <string name="zen_upgrade_notification_title" msgid="3799603322910377294">"\'ڈسٹرب نہ کریں\' تبدیل ہو گيا ہے"</string>
     <string name="zen_upgrade_notification_content" msgid="1794994264692424562">"مسدود کی گئی چیزوں کو چیک کرنے کے لیے تھپتھپائیں۔"</string>
     <string name="notification_app_name_system" msgid="4205032194610042794">"سسٹم"</string>
     <string name="notification_app_name_settings" msgid="7751445616365753381">"ترتیبات"</string>
+    <!-- no translation found for car_loading_profile (3545132581795684027) -->
+    <skip />
 </resources>

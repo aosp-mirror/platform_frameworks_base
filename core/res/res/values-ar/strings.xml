@@ -310,13 +310,13 @@
     <string name="permgroupdesc_sensors" msgid="7147968539346634043">"الوصول إلى بيانات المستشعر حول علاماتك الحيوية"</string>
     <string name="permgrouprequest_sensors" msgid="6349806962814556786">"‏هل تريد السماح لتطبيق &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; بالدخول إلى بيانات المستشعر حول علاماتك الحيوية؟"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"استرداد محتوى النافذة"</string>
-    <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"فحص محتوى نافذة يتم التفاعل معها."</string>
+    <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"فحص محتوى نافذة يتم التفاعل معها"</string>
     <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"تشغيل الاستكشاف باللمس"</string>
     <string name="capability_desc_canRequestTouchExploration" msgid="7543249041581408313">"سيتم نطق العناصر التي تم النقر عليها بصوت عال ويمكن استكشاف الشاشة باستخدام الإيماءات."</string>
     <string name="capability_title_canRequestFilterKeyEvents" msgid="2103440391902412174">"ملاحظة النص الذي تكتبه"</string>
     <string name="capability_desc_canRequestFilterKeyEvents" msgid="7463135292204152818">"يتضمن بيانات شخصية مثل أرقام بطاقات الائتمان وكلمات المرور."</string>
     <string name="capability_title_canControlMagnification" msgid="3593493281059424855">"التحكم في تكبير الشاشة"</string>
-    <string name="capability_desc_canControlMagnification" msgid="4791858203568383773">"يمكنك التحكم في مستوى التكبير/التصغير للشاشة وتحديد الموضع."</string>
+    <string name="capability_desc_canControlMagnification" msgid="4791858203568383773">"يمكنك التحكّم في مستوى تكبير/تصغير الشاشة وتحديد الموضع."</string>
     <string name="capability_title_canPerformGestures" msgid="7418984730362576862">"تنفيذ إيماءات"</string>
     <string name="capability_desc_canPerformGestures" msgid="8296373021636981249">"يمكن النقر والتمرير بسرعة والتصغير وتنفيذ إيماءات أخرى."</string>
     <string name="capability_title_canCaptureFingerprintGestures" msgid="6309568287512278670">"إيماءات بصمات الإصبع"</string>
@@ -1913,12 +1913,9 @@
     <string name="language_picker_section_all" msgid="3097279199511617537">"جميع اللغات"</string>
     <string name="region_picker_section_all" msgid="8966316787153001779">"كل المناطق"</string>
     <string name="locale_search_menu" msgid="2560710726687249178">"البحث"</string>
-    <!-- no translation found for app_suspended_title (1919029799438164552) -->
-    <skip />
-    <!-- no translation found for app_suspended_default_message (7875306315686531621) -->
-    <skip />
-    <!-- no translation found for app_suspended_more_details (1131804827776778187) -->
-    <skip />
+    <string name="app_suspended_title" msgid="1919029799438164552">"يتعذّر فتح التطبيق"</string>
+    <string name="app_suspended_default_message" msgid="7875306315686531621">"التطبيق <xliff:g id="APP_NAME_0">%1$s</xliff:g> غير متاح الآن، وهو مُدار بواسطة <xliff:g id="APP_NAME_1">%2$s</xliff:g>."</string>
+    <string name="app_suspended_more_details" msgid="1131804827776778187">"مزيد من المعلومات"</string>
     <string name="work_mode_off_title" msgid="1118691887588435530">"تفعيل الملف الشخصي للعمل؟"</string>
     <string name="work_mode_off_message" msgid="5130856710614337649">"سيتم تفعيل تطبيقات العمل التي تستخدمها والإشعارات والبيانات وغيرها من ميزات الملف الشخصي للعمل"</string>
     <string name="work_mode_turn_on" msgid="2062544985670564875">"تشغيل"</string>
@@ -2018,4 +2015,6 @@
     <string name="zen_upgrade_notification_content" msgid="1794994264692424562">"انقر للاطّلاع على ما تم حظره."</string>
     <string name="notification_app_name_system" msgid="4205032194610042794">"النظام"</string>
     <string name="notification_app_name_settings" msgid="7751445616365753381">"الإعدادات"</string>
+    <!-- no translation found for car_loading_profile (3545132581795684027) -->
+    <skip />
 </resources>

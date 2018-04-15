@@ -1536,7 +1536,7 @@
     <string name="wireless_display_route_description" msgid="9070346425023979651">"Беспроводной монитор"</string>
     <string name="media_route_button_content_description" msgid="591703006349356016">"Транслировать."</string>
     <string name="media_route_chooser_title" msgid="1751618554539087622">"Подключение к устройству"</string>
-    <string name="media_route_chooser_title_for_remote_display" msgid="3395541745872017583">"Подключение к удаленному дисплею"</string>
+    <string name="media_route_chooser_title_for_remote_display" msgid="3395541745872017583">"Трансляция экрана"</string>
     <string name="media_route_chooser_searching" msgid="4776236202610828706">"Поиск устройств…"</string>
     <string name="media_route_chooser_extended_settings" msgid="87015534236701604">"Настройки"</string>
     <string name="media_route_controller_disconnect" msgid="8966120286374158649">"Отключить"</string>
@@ -1948,4 +1948,6 @@
     <string name="zen_upgrade_notification_content" msgid="1794994264692424562">"Нажмите, чтобы проверить настройки."</string>
     <string name="notification_app_name_system" msgid="4205032194610042794">"Система"</string>
     <string name="notification_app_name_settings" msgid="7751445616365753381">"Настройки"</string>
+    <!-- no translation found for car_loading_profile (3545132581795684027) -->
+    <skip />
 </resources>

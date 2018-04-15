@@ -297,15 +297,15 @@
     <string name="permgrouplab_sensors" msgid="416037179223226722">"Kropssensorer"</string>
     <string name="permgroupdesc_sensors" msgid="7147968539346634043">"få adgang til sensordata om dine livstegn"</string>
     <string name="permgrouprequest_sensors" msgid="6349806962814556786">"Vil du give &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; adgang til sensordata om dine livstegn?"</string>
-    <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"hente indholdet i vinduet"</string>
-    <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"undersøge indholdet i et vindue, du interagerer med."</string>
-    <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"aktivere Udforsk ved berøring"</string>
+    <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"Hente indholdet i vinduet"</string>
+    <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"Undersøge indholdet i et vindue, du interagerer med."</string>
+    <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"Aktivere Udforsk ved berøring"</string>
     <string name="capability_desc_canRequestTouchExploration" msgid="7543249041581408313">"De elementer, der trykkes på, læses højt, og skærmen kan udforskes ved hjælp af bevægelser."</string>
-    <string name="capability_title_canRequestFilterKeyEvents" msgid="2103440391902412174">"observere tekst, du skriver"</string>
+    <string name="capability_title_canRequestFilterKeyEvents" msgid="2103440391902412174">"Observere tekst, du skriver"</string>
     <string name="capability_desc_canRequestFilterKeyEvents" msgid="7463135292204152818">"Dette omfatter personlige data såsom kreditkortnumre og adgangskoder."</string>
-    <string name="capability_title_canControlMagnification" msgid="3593493281059424855">"administrere skærmforstørrelsen"</string>
+    <string name="capability_title_canControlMagnification" msgid="3593493281059424855">"Administrere skærmforstørrelsen"</string>
     <string name="capability_desc_canControlMagnification" msgid="4791858203568383773">"Tjek skærmens zoomniveau og position."</string>
-    <string name="capability_title_canPerformGestures" msgid="7418984730362576862">"Udfør bevægelser"</string>
+    <string name="capability_title_canPerformGestures" msgid="7418984730362576862">"Udføre bevægelser"</string>
     <string name="capability_desc_canPerformGestures" msgid="8296373021636981249">"Kan trykke, stryge, knibe sammen og udføre andre bevægelser."</string>
     <string name="capability_title_canCaptureFingerprintGestures" msgid="6309568287512278670">"Fingeraftryksbevægelser"</string>
     <string name="capability_desc_canCaptureFingerprintGestures" msgid="4386487962402228670">"Kan registrere bevægelser, der foretages på enhedens fingeraftrykslæser."</string>
@@ -1878,4 +1878,6 @@
     <string name="zen_upgrade_notification_content" msgid="1794994264692424562">"Tryk for at se, hvad der er blokeret."</string>
     <string name="notification_app_name_system" msgid="4205032194610042794">"System"</string>
     <string name="notification_app_name_settings" msgid="7751445616365753381">"Indstillinger"</string>
+    <!-- no translation found for car_loading_profile (3545132581795684027) -->
+    <skip />
 </resources>

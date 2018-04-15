@@ -301,7 +301,7 @@
     <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"Kiểm tra nội dung của cửa sổ bạn đang tương tác."</string>
     <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"Bật Khám phá bằng cách chạm"</string>
     <string name="capability_desc_canRequestTouchExploration" msgid="7543249041581408313">"Đọc to các mục được nhấn và cho phép khám phá màn hình bằng cử chỉ."</string>
-    <string name="capability_title_canRequestFilterKeyEvents" msgid="2103440391902412174">"Xem nội dung bạn nhập"</string>
+    <string name="capability_title_canRequestFilterKeyEvents" msgid="2103440391902412174">"Quan sát nội dung bạn nhập"</string>
     <string name="capability_desc_canRequestFilterKeyEvents" msgid="7463135292204152818">"Bao gồm dữ liệu cá nhân chẳng hạn như số thẻ tín dụng và mật khẩu."</string>
     <string name="capability_title_canControlMagnification" msgid="3593493281059424855">"Kiểm soát thu phóng màn hình"</string>
     <string name="capability_desc_canControlMagnification" msgid="4791858203568383773">"Kiểm soát vị trí và mức thu phóng của màn hình."</string>
@@ -1878,4 +1878,6 @@
     <string name="zen_upgrade_notification_content" msgid="1794994264692424562">"Nhấn để xem những thông báo bị chặn."</string>
     <string name="notification_app_name_system" msgid="4205032194610042794">"Hệ thống"</string>
     <string name="notification_app_name_settings" msgid="7751445616365753381">"Cài đặt"</string>
+    <!-- no translation found for car_loading_profile (3545132581795684027) -->
+    <skip />
 </resources>
