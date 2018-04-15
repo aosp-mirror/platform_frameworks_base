@@ -270,8 +270,12 @@ public class NetworkPolicyManager {
 
             @Override
             public Pair<ZonedDateTime, ZonedDateTime> next() {
-                final Range<ZonedDateTime> r = it.next();
-                return Pair.create(r.getLower(), r.getUpper());
+                if (hasNext()) {
+                    final Range<ZonedDateTime> r = it.next();
+                    return Pair.create(r.getLower(), r.getUpper());
+                } else {
+                    return Pair.create(null, null);
+                }
             }
         };
     }
