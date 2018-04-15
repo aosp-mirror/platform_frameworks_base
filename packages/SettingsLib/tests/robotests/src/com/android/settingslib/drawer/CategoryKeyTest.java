@@ -42,6 +42,7 @@ public class CategoryKeyTest {
 
         // DO NOT REMOVE ANYTHING BELOW
         allKeys.add(CategoryKey.CATEGORY_HOMEPAGE);
+        allKeys.add(CategoryKey.CATEGORY_CONNECT);
         allKeys.add(CategoryKey.CATEGORY_DEVICE);
         allKeys.add(CategoryKey.CATEGORY_APPS);
         allKeys.add(CategoryKey.CATEGORY_APPS_DEFAULT);
@@ -58,6 +59,6 @@ public class CategoryKeyTest {
         allKeys.add(CategoryKey.CATEGORY_SYSTEM_DEVELOPMENT);
         // DO NOT REMOVE ANYTHING ABOVE
 
-        assertThat(allKeys.size()).isEqualTo(15);
+        assertThat(allKeys.size()).isEqualTo(16);
     }
 }
