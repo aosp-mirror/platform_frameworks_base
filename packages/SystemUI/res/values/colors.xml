@@ -150,8 +150,9 @@
 
     <color name="zen_introduction">#ffffffff</color>
 
-    <color name="smart_reply_button_text">#de000000</color> <!-- 87% black -->
-    <color name="smart_reply_button_background">#fff2f2f2</color>
+    <color name="smart_reply_button_text">#5F6368</color>
+    <color name="smart_reply_button_background">#feffffff</color>
+    <color name="smart_reply_button_stroke">#ffdadce0</color>
 
     <!-- Fingerprint dialog colors -->
     <color name="fingerprint_dialog_bg_color">#ffffffff</color> <!-- 100% white -->
