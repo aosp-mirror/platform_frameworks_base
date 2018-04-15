@@ -23,6 +23,7 @@
     android:id="@+id/smart_reply_view"
     android:layout_height="wrap_content"
     android:layout_width="wrap_content"
+    android:layout_marginStart="12dp"
     systemui:spacing="@dimen/smart_reply_button_spacing"
     systemui:singleLineButtonPaddingHorizontal="@dimen/smart_reply_button_padding_horizontal_single_line"
     systemui:doubleLineButtonPaddingHorizontal="@dimen/smart_reply_button_padding_horizontal_double_line">
