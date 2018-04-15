@@ -3000,6 +3000,21 @@ public class RemoteViews implements Parcelable, Filter {
     }
 
     /**
+     * Call a method taking one ColorStateList on a view in the layout for this RemoteViews.
+     *
+     * @param viewId The id of the view on which to call the method.
+     * @param methodName The name of the method to call.
+     * @param value The value to pass to the method.
+     *
+     * @hide
+     */
+    public void setColorStateList(int viewId, String methodName, ColorStateList value) {
+        addAction(new ReflectionAction(viewId, methodName, ReflectionAction.COLOR_STATE_LIST,
+                value));
+    }
+
+
+    /**
      * Call a method taking one long on a view in the layout for this RemoteViews.
      *
      * @param viewId The id of the view on which to call the method.

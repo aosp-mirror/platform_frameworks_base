@@ -163,6 +163,7 @@ public interface StatusBarIconController {
                 StatusBarIconHolder holder) {
             StatusIconDisplayable view = addHolder(index, slot, blocked, holder);
             view.setStaticDrawableColor(mColor);
+            view.setDecorColor(mColor);
         }
 
         public void setTint(int color) {
@@ -172,6 +173,7 @@ public interface StatusBarIconController {
                 if (child instanceof StatusIconDisplayable) {
                     StatusIconDisplayable icon = (StatusIconDisplayable) child;
                     icon.setStaticDrawableColor(mColor);
+                    icon.setDecorColor(mColor);
                 }
             }
         }
@@ -289,8 +291,7 @@ public interface StatusBarIconController {
         }
 
         private StatusBarWifiView onCreateStatusBarWifiView(String slot) {
-            StatusBarWifiView view = StatusBarWifiView.fromContext(mContext);
-            view.setSlot(slot);
+            StatusBarWifiView view = StatusBarWifiView.fromContext(mContext, slot);
             return view;
         }
 

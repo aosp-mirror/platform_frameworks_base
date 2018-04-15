@@ -24,17 +24,17 @@ import "frameworks/base/libs/incident/proto/android/privacy.proto";
 
 // Dump from StatLogger.
 message StatLoggerProto {
-  option (.android.msg_privacy).dest = DEST_AUTOMATIC;
-
-  message Event {
     option (.android.msg_privacy).dest = DEST_AUTOMATIC;
 
-    optional int32 eventId = 1;
-    // Labels are hard-coded in Android framework code.
-    optional string label = 2;
-    optional int32 count = 3;
-    optional int64 total_duration_micros = 4;
-  }
+    message Event {
+        option (.android.msg_privacy).dest = DEST_AUTOMATIC;
 
-  repeated Event events = 1;
+        optional int32 eventId = 1;
+        // Labels are hard-coded in Android framework code.
+        optional string label = 2;
+        optional int32 count = 3;
+        optional int64 total_duration_micros = 4;
+    }
+
+    repeated Event events = 1;
 }

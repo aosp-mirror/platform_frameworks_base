@@ -23,11 +23,14 @@ import android.content.IntentFilter;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.media.IMediaExtractorUpdateService;
+import android.os.Build;
 import android.os.IBinder;
 import android.os.Handler;
 import android.os.PatternMatcher;
 import android.os.ServiceManager;
+import android.os.SystemProperties;
 import android.os.UserHandle;
+import android.text.TextUtils;
 import android.util.Log;
 import android.util.Slog;
 import com.android.server.SystemService;
@@ -36,7 +39,8 @@ import com.android.server.SystemService;
 public class MediaUpdateService extends SystemService {
     private static final String TAG = "MediaUpdateService";
     private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
-    private static final String MEDIA_UPDATE_PACKAGE_NAME = "com.android.media.update";
+    private static final String MEDIA_UPDATE_PACKAGE_NAME =
+            SystemProperties.get("ro.mediacomponents.package");
     private static final String EXTRACTOR_UPDATE_SERVICE_NAME = "media.extractor.update";
 
     private IMediaExtractorUpdateService mMediaExtractorUpdateService;
@@ -49,7 +53,8 @@ public class MediaUpdateService extends SystemService {
 
     @Override
     public void onStart() {
-        if ("userdebug".equals(android.os.Build.TYPE) || "eng".equals(android.os.Build.TYPE)) {
+        if (("userdebug".equals(android.os.Build.TYPE) || "eng".equals(android.os.Build.TYPE))
+                && !TextUtils.isEmpty(MEDIA_UPDATE_PACKAGE_NAME)) {
             connect();
             registerBroadcastReceiver();
         }
@@ -132,6 +137,12 @@ public class MediaUpdateService extends SystemService {
             pluginsAvailable = packageInfo.enabled;
         } catch (Exception e) {
             Slog.v(TAG, "package '" + MEDIA_UPDATE_PACKAGE_NAME + "' not installed");
+        }
+        if (packageInfo != null && Build.VERSION.SDK_INT != packageInfo.targetSdkVersion) {
+            Slog.w(TAG, "This update package is not for this platform version. Ignoring. "
+                    + "platform:" + Build.VERSION.SDK_INT
+                    + " targetSdk:" + packageInfo.targetSdkVersion);
+            pluginsAvailable = false;
         }
         loadExtractorPlugins(
                 (packageInfo != null && pluginsAvailable) ? packageInfo.sourceDir : "");

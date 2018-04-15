@@ -1014,8 +1014,7 @@
     <string name="dial" msgid="1253998302767701559">"Soita"</string>
     <string name="dial_desc" msgid="6573723404985517250">"Soita valittuun puhelinnumeroon"</string>
     <string name="map" msgid="5441053548030107189">"Kartta"</string>
-    <!-- no translation found for map_desc (1836995341943772348) -->
-    <skip />
+    <string name="map_desc" msgid="1836995341943772348">"Etsi valittu osoite kartalta"</string>
     <string name="browse" msgid="1245903488306147205">"Avaa"</string>
     <string name="browse_desc" msgid="8220976549618935044">"Avaa valittu URL-osoite"</string>
     <string name="sms" msgid="4560537514610063430">"Viesti"</string>
@@ -1691,7 +1690,7 @@
     <string name="package_installed_device_owner" msgid="6875717669960212648">"Järjestelmänvalvoja asensi tämän."</string>
     <string name="package_updated_device_owner" msgid="1847154566357862089">"Järjestelmänvalvoja päivitti tämän."</string>
     <string name="package_deleted_device_owner" msgid="2307122077550236438">"Järjestelmänvalvoja poisti tämän."</string>
-    <string name="battery_saver_description" msgid="4660824093877546730">"Parantaakseen akun kestoa virransäästö vähentää laitteesi suorituskykyä ja rajoittaa värinää, sijaintipalveluita ja taustadataa tai poistaa ne käytöstä. Sähköposti, viestit ja muut synkronointiin perustuvat sovellukset eivät välttämättä päivity, ellet avaa niitä.\n\nVirransäästö poistuu käytöstä automaattisesti, kun laitteesi latautuu."</string>
+    <string name="battery_saver_description" msgid="769989536172631582">"Virransäästö poistaa joitakin laitteen ominaisuuksia käytöstä ja rajoittaa sovelluksia parantaakseen akunkestoa."</string>
     <string name="data_saver_description" msgid="6015391409098303235">"Data Saver estää joitakin sovelluksia lähettämästä tai vastaanottamasta tietoja taustalla, jotta datan käyttöä voidaan vähentää. Käytössäsi oleva sovellus voi yhä käyttää dataa, mutta se saattaa tehdä niin tavallista harvemmin. Tämä voi tarkoittaa esimerkiksi sitä, että kuva ladataan vasta, kun kosketat sitä."</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"Otetaanko Data Saver käyttöön?"</string>
     <string name="data_saver_enable_button" msgid="7147735965247211818">"Ota käyttöön"</string>
@@ -1778,6 +1777,12 @@
     <string name="language_picker_section_all" msgid="3097279199511617537">"Kaikki kielet"</string>
     <string name="region_picker_section_all" msgid="8966316787153001779">"Kaikki alueet"</string>
     <string name="locale_search_menu" msgid="2560710726687249178">"Haku"</string>
+    <!-- no translation found for app_suspended_title (1919029799438164552) -->
+    <skip />
+    <!-- no translation found for app_suspended_default_message (7875306315686531621) -->
+    <skip />
+    <!-- no translation found for app_suspended_more_details (1131804827776778187) -->
+    <skip />
     <string name="work_mode_off_title" msgid="1118691887588435530">"Otetaanko työprofiili käyttöön?"</string>
     <string name="work_mode_off_message" msgid="5130856710614337649">"Työsovellukset, ‑ilmoitukset, ‑tiedot ja muut työprofiiliominaisuudet otetaan käyttöön"</string>
     <string name="work_mode_turn_on" msgid="2062544985670564875">"Ota käyttöön"</string>
@@ -1867,8 +1872,8 @@
     <string name="volume_dialog_ringer_guidance_silent" msgid="2128975224280276122">"Puhelut ja ilmoitukset mykistetään"</string>
     <string name="notification_channel_system_changes" msgid="5072715579030948646">"Järjestelmän muutokset"</string>
     <string name="notification_channel_do_not_disturb" msgid="6766940333105743037">"Älä häiritse"</string>
-    <string name="zen_upgrade_notification_visd_title" msgid="4168873821019741166">"Älä häiritse ‑tila piilottaa ilmoitukset, jotta voit keskittyä paremmin"</string>
-    <string name="zen_upgrade_notification_visd_content" msgid="6776377368195804354">"Tämä toiminto on muuttunut. Muuta napauttamalla."</string>
+    <string name="zen_upgrade_notification_visd_title" msgid="3288313883409759733">"Uutta: Älä häiritse ‑tila piilottaa ilmoitukset"</string>
+    <string name="zen_upgrade_notification_visd_content" msgid="5533674060311631165">"Napauta, jos haluat lukea lisää ja tehdä muutoksia."</string>
     <string name="zen_upgrade_notification_title" msgid="3799603322910377294">"Älä häiritse ‑tila muuttui"</string>
     <string name="zen_upgrade_notification_content" msgid="1794994264692424562">"Napauta niin näet, mitä on estetty."</string>
     <string name="notification_app_name_system" msgid="4205032194610042794">"Järjestelmä"</string>

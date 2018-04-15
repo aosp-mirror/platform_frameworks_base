@@ -26,7 +26,7 @@
     <item msgid="8513729475867537913">"ချိတ်ဆက်နေသည်"</item>
     <item msgid="515055375277271756">"စစ်မှန်ကြောင်းအတည်ပြုနေသည်"</item>
     <item msgid="1943354004029184381">"အိုင်ပီလိပ်စာရယူနေသည်"</item>
-    <item msgid="4221763391123233270">"ဆက်သွယ်ထားပြီး"</item>
+    <item msgid="4221763391123233270">"ချိတ်ဆက်ထားသည်"</item>
     <item msgid="624838831631122137">"ဆိုင်းငံ့ထားသည်"</item>
     <item msgid="7979680559596111948">"အဆက်အသွယ်ဖြတ်တောက်နေသည်"</item>
     <item msgid="1634960474403853625">"ချိတ်ဆက်မှုပြတ်တောက်သည်"</item>
@@ -55,7 +55,7 @@
   </string-array>
   <string-array name="hdcp_checking_summaries">
     <item msgid="505558545611516707">"HDCP checking အား ဘယ်တော့မှ မသုံးပါနှင့်"</item>
-    <item msgid="3878793616631049349">"DRMအကြောင်းအရာအတွက် HDCPစစ်ဆေးခြင်းကိုသုံးမည်"</item>
+    <item msgid="3878793616631049349">"DRM အကြောင်းအရာအတွက်သာ HDCP စစ်ဆေးမည်"</item>
     <item msgid="45075631231212732">"HDCP checkingအားအမြဲသုံးပါ"</item>
   </string-array>
   <string-array name="bluetooth_avrcp_versions">
@@ -200,7 +200,7 @@
     <item msgid="1069584980746680398">"လှုပ်ရှားသက်ဝင်ပုံရိပ် စကေး ၁၀ဆ"</item>
   </string-array>
   <string-array name="overlay_display_devices_entries">
-    <item msgid="1606809880904982133">"တစ်ခုမှမဟုတ်ပါ"</item>
+    <item msgid="1606809880904982133">"တစ်ခုမျှ မဟုတ်ပါ"</item>
     <item msgid="9033194758688161545">"480p"</item>
     <item msgid="1025306206556583600">"480p (secure)"</item>
     <item msgid="1853913333042744661">"720p"</item>
@@ -214,7 +214,7 @@
     <item msgid="1311305077526792901">"720p, 1080p (dual screen)"</item>
   </string-array>
   <string-array name="enable_opengl_traces_entries">
-    <item msgid="3191973083884253830">"တစ်ခုမှမဟုတ်ပါ"</item>
+    <item msgid="3191973083884253830">"တစ်ခုမျှ မဟုတ်ပါ"</item>
     <item msgid="9089630089455370183">"လော့ဂ်ကက်"</item>
     <item msgid="5397807424362304288">"စနစ်ခြေရာခံခြင်း (ရုပ်ပုံများ)"</item>
     <item msgid="1340692776955662664">"glGetError အမှားတက်လျှင်ခေါ်သောလုပ်ငန်းစဉ်"</item>

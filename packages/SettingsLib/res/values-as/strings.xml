@@ -216,20 +216,15 @@
     <string name="bluetooth_select_avrcp_version_string" msgid="3750059931120293633">"ব্লুটুথ AVRCP সংস্কৰণ"</string>
     <string name="bluetooth_select_avrcp_version_dialog_title" msgid="7277329668298705702">"ব্লুটুথ AVRCP সংস্কৰণ বাছনি কৰক"</string>
     <string name="bluetooth_select_a2dp_codec_type" msgid="90597356942154882">"ব্লুটুথ অডিঅ’ ক’ডেক"</string>
-    <!-- no translation found for bluetooth_select_a2dp_codec_type_dialog_title (8436224899475822557) -->
-    <skip />
+    <string name="bluetooth_select_a2dp_codec_type_dialog_title" msgid="8436224899475822557">"ব্লুটুথ অডিঅ\' ক\'ডেকৰ বাছনি\nআৰম্ভ কৰক"</string>
     <string name="bluetooth_select_a2dp_codec_sample_rate" msgid="4788245703824623062">"ব্লুটুথ অডিঅ\' ছেম্পল ৰেইট"</string>
-    <!-- no translation found for bluetooth_select_a2dp_codec_sample_rate_dialog_title (8010380028880963535) -->
-    <skip />
+    <string name="bluetooth_select_a2dp_codec_sample_rate_dialog_title" msgid="8010380028880963535">"ব্লুটুথ অডিঅ\' LDAC বাছনি\nআৰম্ভ কৰক: নমুনাৰ হাৰ"</string>
     <string name="bluetooth_select_a2dp_codec_bits_per_sample" msgid="2099645202720164141">"প্ৰতি ছেম্পলত ব্লুটুথ অডিঅ\' বিটসমূহ"</string>
-    <!-- no translation found for bluetooth_select_a2dp_codec_bits_per_sample_dialog_title (8063859754619484760) -->
-    <skip />
+    <string name="bluetooth_select_a2dp_codec_bits_per_sample_dialog_title" msgid="8063859754619484760">"ব্লুটুথ অডিঅ\' ক\'ডেকৰ বাছনি\nআৰম্ভ কৰক: প্ৰতি নমুনা ইমান বিট"</string>
     <string name="bluetooth_select_a2dp_codec_channel_mode" msgid="884855779449390540">"ব্লুটুথ অডিঅ\' চেনেল ম\'ড"</string>
-    <!-- no translation found for bluetooth_select_a2dp_codec_channel_mode_dialog_title (7234956835280563341) -->
-    <skip />
+    <string name="bluetooth_select_a2dp_codec_channel_mode_dialog_title" msgid="7234956835280563341">"ব্লুটুথ অডিঅ\' ক\'ডেকৰ বাছনি\nআৰম্ভ কৰক: চ্চেনেল ম\'ড"</string>
     <string name="bluetooth_select_a2dp_codec_ldac_playback_quality" msgid="3619694372407843405">"ব্লুটুথ অডিঅ’ LDAC ক’ডেক: পৰিৱেশনৰ মান"</string>
-    <!-- no translation found for bluetooth_select_a2dp_codec_ldac_playback_quality_dialog_title (7595776220458732825) -->
-    <skip />
+    <string name="bluetooth_select_a2dp_codec_ldac_playback_quality_dialog_title" msgid="7595776220458732825">"ব্লুটুথ অডিঅ\' LDAC ক\'ডেকৰ বাছনি\nআৰম্ভ কৰক: পৰিবেশনৰ গুণাগুণ"</string>
     <string name="bluetooth_select_a2dp_codec_streaming_label" msgid="5347862512596240506">"ষ্ট্ৰীম কৰি থকা হৈছে: <xliff:g id="STREAMING_PARAMETER">%1$s</xliff:g>"</string>
     <string name="select_private_dns_configuration_title" msgid="3700456559305263922">"ব্যক্তিগত DNS"</string>
     <string name="select_private_dns_configuration_dialog_title" msgid="9221994415765826811">"ব্যক্তিগত DNS ম\'ড বাছনি কৰক"</string>

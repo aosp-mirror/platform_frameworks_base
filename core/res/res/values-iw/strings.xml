@@ -1054,8 +1054,7 @@
     <string name="dial" msgid="1253998302767701559">"שיחה"</string>
     <string name="dial_desc" msgid="6573723404985517250">"התקשרות למספר הטלפון שנבחר"</string>
     <string name="map" msgid="5441053548030107189">"מפה"</string>
-    <!-- no translation found for map_desc (1836995341943772348) -->
-    <skip />
+    <string name="map_desc" msgid="1836995341943772348">"מיקום הכתובת שנבחרה"</string>
     <string name="browse" msgid="1245903488306147205">"פתיחה"</string>
     <string name="browse_desc" msgid="8220976549618935044">"פתיחה של כתובת האתר שנבחרה"</string>
     <string name="sms" msgid="4560537514610063430">"הודעה"</string>
@@ -1741,7 +1740,7 @@
     <string name="package_installed_device_owner" msgid="6875717669960212648">"הותקנה על ידי מנהל המערכת"</string>
     <string name="package_updated_device_owner" msgid="1847154566357862089">"עודכנה על ידי מנהל המערכת"</string>
     <string name="package_deleted_device_owner" msgid="2307122077550236438">"נמחקה על ידי מנהל המערכת"</string>
-    <string name="battery_saver_description" msgid="4660824093877546730">"כדי להאריך את חיי הסוללה, תכונת החיסכון בסוללה מצמצמת את ביצועי המכשיר ומגבילה רטט, שירותי מיקום ונתוני רקע, או מכבה אותם. הודעות אימייל, העברת הודעות ואפליקציות אחרות המסתמכות על סנכרון עשויות שלא להתעדכן, אלא אם תפתח/י אותן.\n\nתכונת החיסכון בסוללה מושבתת אוטומטית כשהמכשיר בטעינה."</string>
+    <string name="battery_saver_description" msgid="769989536172631582">"כדי להאריך את חיי הסוללה, מצב החיסכון בסוללה מכבה תכונות מסוימות במכשיר ומגביל אפליקציות."</string>
     <string name="data_saver_description" msgid="6015391409098303235">"‏כדי לסייע בהפחתת השימוש בנתונים, חוסך הנתונים (Data Saver) מונע מאפליקציות מסוימות שליחה או קבלה של נתונים ברקע. אפליקציה שבה אתה משתמש כרגע יכולה לגשת לנתונים, אבל בתדירות נמוכה יותר. משמעות הדבר היא, למשל, שתמונות יוצגו רק לאחר שתקיש עליהן."</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"‏האם להפעיל את חוסך הנתונים (Data Saver)?"</string>
     <string name="data_saver_enable_button" msgid="7147735965247211818">"הפעל"</string>
@@ -1846,6 +1845,12 @@
     <string name="language_picker_section_all" msgid="3097279199511617537">"כל השפות"</string>
     <string name="region_picker_section_all" msgid="8966316787153001779">"כל האזורים"</string>
     <string name="locale_search_menu" msgid="2560710726687249178">"חיפוש"</string>
+    <!-- no translation found for app_suspended_title (1919029799438164552) -->
+    <skip />
+    <!-- no translation found for app_suspended_default_message (7875306315686531621) -->
+    <skip />
+    <!-- no translation found for app_suspended_more_details (1131804827776778187) -->
+    <skip />
     <string name="work_mode_off_title" msgid="1118691887588435530">"להפעיל את פרופיל העבודה?"</string>
     <string name="work_mode_off_message" msgid="5130856710614337649">"אפליקציות העבודה, הודעות, נתונים ותכונות נוספות של פרופיל העבודה יופעלו"</string>
     <string name="work_mode_turn_on" msgid="2062544985670564875">"הפעל"</string>
@@ -1937,8 +1942,8 @@
     <string name="volume_dialog_ringer_guidance_silent" msgid="2128975224280276122">"שיחות והודעות יושתקו"</string>
     <string name="notification_channel_system_changes" msgid="5072715579030948646">"שינויי מערכת"</string>
     <string name="notification_channel_do_not_disturb" msgid="6766940333105743037">"נא לא להפריע"</string>
-    <string name="zen_upgrade_notification_visd_title" msgid="4168873821019741166">"מצב \'נא לא להפריע\' מסתיר הודעות כדי לעזור לך להתרכז"</string>
-    <string name="zen_upgrade_notification_visd_content" msgid="6776377368195804354">"זו התנהגות חדשה. יש להקיש כדי לשנות."</string>
+    <string name="zen_upgrade_notification_visd_title" msgid="3288313883409759733">"חדש: מצב \'נא לא להפריע\' מסתיר הודעות"</string>
+    <string name="zen_upgrade_notification_visd_content" msgid="5533674060311631165">"ניתן להקיש כדי לקבל מידע נוסף ולשנות."</string>
     <string name="zen_upgrade_notification_title" msgid="3799603322910377294">"ההגדרה \'נא לא להפריע\' השתנתה"</string>
     <string name="zen_upgrade_notification_content" msgid="1794994264692424562">"יש להקיש כדי לבדוק מה חסום."</string>
     <string name="notification_app_name_system" msgid="4205032194610042794">"מערכת"</string>

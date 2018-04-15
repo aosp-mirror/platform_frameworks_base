@@ -4718,7 +4718,7 @@ public class ActivityManagerService extends IActivityManager.Stub
     }
 
     private boolean hasUsageStatsPermission(String callingPackage) {
-        final int mode = mAppOpsService.checkOperation(AppOpsManager.OP_GET_USAGE_STATS,
+        final int mode = mAppOpsService.noteOperation(AppOpsManager.OP_GET_USAGE_STATS,
                 Binder.getCallingUid(), callingPackage);
         if (mode == AppOpsManager.MODE_DEFAULT) {
             return checkCallingPermission(Manifest.permission.PACKAGE_USAGE_STATS)
@@ -6771,6 +6771,13 @@ public class ActivityManagerService extends IActivityManager.Stub
                 int[] users = userId == UserHandle.USER_ALL
                         ? mUserController.getUsers() : new int[] { userId };
                 for (int user : users) {
+                    if (getPackageManagerInternalLocked().isPackageStateProtected(
+                            packageName, user)) {
+                        Slog.w(TAG, "Ignoring request to force stop protected package "
+                                + packageName + " u" + user);
+                        return;
+                    }
+
                     int pkgUid = -1;
                     try {
                         pkgUid = pm.getPackageUid(packageName, MATCH_DEBUG_TRIAGED_MISSING,
@@ -8687,7 +8694,7 @@ public class ActivityManagerService extends IActivityManager.Stub
     }
 
     @Override
-    public boolean isAppForeground(int uid) throws RemoteException {
+    public boolean isAppForeground(int uid) {
         synchronized (this) {
             UidRecord uidRec = mActiveUids.get(uid);
             if (uidRec == null || uidRec.idle) {
@@ -14155,12 +14162,16 @@ public class ActivityManagerService extends IActivityManager.Stub
     public boolean isUidActive(int uid, String callingPackage) {
         if (!hasUsageStatsPermission(callingPackage)) {
             enforceCallingPermission(android.Manifest.permission.PACKAGE_USAGE_STATS,
-                    "getPackageProcessState");
+                    "isUidActive");
         }
         synchronized (this) {
-            final UidRecord uidRecord = mActiveUids.get(uid);
-            return uidRecord != null && !uidRecord.setIdle;
+            return isUidActiveLocked(uid);
         }
+    }
+
+    boolean isUidActiveLocked(int uid) {
+        final UidRecord uidRecord = mActiveUids.get(uid);
+        return uidRecord != null && !uidRecord.setIdle;
     }
 
     @Override
@@ -21146,6 +21157,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                 }
             }
             if (brOptions.isDontSendToRestrictedApps()
+                    && !isUidActiveLocked(callingUid)
                     && isBackgroundRestrictedNoCheck(callingUid, callerPackage)) {
                 Slog.i(TAG, "Not sending broadcast " + action + " - app " + callerPackage
                         + " has background restrictions");

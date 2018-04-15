@@ -26,7 +26,7 @@ import "frameworks/base/libs/incident/proto/android/privacy.proto";
  * An android.app.PendingIntent object.
  */
 message PendingIntentProto {
-  option (android.msg_privacy).dest = DEST_AUTOMATIC;
+    option (android.msg_privacy).dest = DEST_AUTOMATIC;
 
-  optional string target = 1;
+    optional string target = 1;
 }

@@ -570,7 +570,7 @@
     <string name="permdesc_bindCarrierMessagingService" msgid="2762882888502113944">"Иесіне оператордың хабар алмасу қызметінің жоғарғы деңгейлі интерфейсіне байластыруға рұқсат етеді. Қалыпты қолданбалар үшін ешқашан қажет болмайды."</string>
     <string name="permlab_bindCarrierServices" msgid="3233108656245526783">"оператор қызметтеріне қосылу"</string>
     <string name="permdesc_bindCarrierServices" msgid="1391552602551084192">"Иесіне оператор қызметтеріне қосылуға мүмкіндік береді. Қалыпты қолданбалар үшін қажет болмайды."</string>
-    <string name="permlab_access_notification_policy" msgid="4247510821662059671">"«Мазаламау» режиміне кіру"</string>
+    <string name="permlab_access_notification_policy" msgid="4247510821662059671">"\"Мазаламау\" режиміне кіру"</string>
     <string name="permdesc_access_notification_policy" msgid="3296832375218749580">"Қолданбаға «Мазаламау» конфигурациясын оқу және жазу мүмкіндігін береді."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Құпия сөз ережелерін тағайындау"</string>
     <string name="policydesc_limitPassword" msgid="2502021457917874968">"Экран бекітпесінің құпия сөздерінің және PIN кодтарының ұзындығын және оларда рұқсат етілген таңбаларды басқару."</string>
@@ -1014,8 +1014,7 @@
     <string name="dial" msgid="1253998302767701559">"Қоңырау шалу"</string>
     <string name="dial_desc" msgid="6573723404985517250">"Таңдалған телефон нөміріне қоңырау шалу"</string>
     <string name="map" msgid="5441053548030107189">"Map"</string>
-    <!-- no translation found for map_desc (1836995341943772348) -->
-    <skip />
+    <string name="map_desc" msgid="1836995341943772348">"Таңдалған мекенжайдың орналасқан жерін анықтау"</string>
     <string name="browse" msgid="1245903488306147205">"Ашу"</string>
     <string name="browse_desc" msgid="8220976549618935044">"Таңдалған URL мекенжайын ашу"</string>
     <string name="sms" msgid="4560537514610063430">"Хабар"</string>
@@ -1692,7 +1691,7 @@
     <string name="package_installed_device_owner" msgid="6875717669960212648">"Әкімші орнатқан"</string>
     <string name="package_updated_device_owner" msgid="1847154566357862089">"Әкімші жаңартқан"</string>
     <string name="package_deleted_device_owner" msgid="2307122077550236438">"Әкімші жойған"</string>
-    <string name="battery_saver_description" msgid="4660824093877546730">"Батарея жұмысының ұзақтығын арттыру үшін Battery Saver құрылғының жұмыс өнімділігін төмендетеді және діріл функциясын, орынды анықтау қызметтерін, фондық деректі өшіреді. Синхрондауға негізделген электрондық пошта, хабар алмасу және басқа қолданбалар ашылмайынша жаңартылмайды.\n\nҚұрылғы зарядталып жатқанда, Battery Saver автоматты түрде өшеді."</string>
+    <string name="battery_saver_description" msgid="769989536172631582">"Батарея жұмысының ұзақтығын арттыру үшін Battery Saver функциясы кейбір құрылғы мүмкіндіктерін өшіреді және қолданбаларды шектейді."</string>
     <string name="data_saver_description" msgid="6015391409098303235">"Деректердің пайдаланылуын азайту үшін Трафикті үнемдеу функциясы кейбір қолданбаларға деректерді фондық режимде жіберуге немесе қабылдауға жол бермейді. Қазір қолданылып жатқан қолданба деректерді пайдалануы мүмкін, бірақ жиі емес. Мысалы, кескіндер оларды түрткенге дейін көрсетілмейді."</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"Data Saver функциясын қосу керек пе?"</string>
     <string name="data_saver_enable_button" msgid="7147735965247211818">"Қосу"</string>
@@ -1779,6 +1778,12 @@
     <string name="language_picker_section_all" msgid="3097279199511617537">"Барлық тілдер"</string>
     <string name="region_picker_section_all" msgid="8966316787153001779">"Барлық аймақтар"</string>
     <string name="locale_search_menu" msgid="2560710726687249178">"Іздеу"</string>
+    <!-- no translation found for app_suspended_title (1919029799438164552) -->
+    <skip />
+    <!-- no translation found for app_suspended_default_message (7875306315686531621) -->
+    <skip />
+    <!-- no translation found for app_suspended_more_details (1131804827776778187) -->
+    <skip />
     <string name="work_mode_off_title" msgid="1118691887588435530">"Жұмыс профилі қосылсын ба?"</string>
     <string name="work_mode_off_message" msgid="5130856710614337649">"Жұмыс қолданбалары, хабарландырулар, деректер және басқа да жұмыс профильдерінің мүмкіндіктері қосылады"</string>
     <string name="work_mode_turn_on" msgid="2062544985670564875">"Қосу"</string>
@@ -1868,8 +1873,8 @@
     <string name="volume_dialog_ringer_guidance_silent" msgid="2128975224280276122">"Қоңыраулар мен хабарландырулардың дыбыстық сигналы өшіріледі"</string>
     <string name="notification_channel_system_changes" msgid="5072715579030948646">"Жүйе өзгерістері"</string>
     <string name="notification_channel_do_not_disturb" msgid="6766940333105743037">"\"Мазаламау\" режимі"</string>
-    <string name="zen_upgrade_notification_visd_title" msgid="4168873821019741166">"Көңіліңізді бөлмеу үшін \"Мазаламау\" режимі хабарландыруларды жасырады"</string>
-    <string name="zen_upgrade_notification_visd_content" msgid="6776377368195804354">"Бұл – жаңа параметр. Оны өзгерту үшін түртіңіз."</string>
+    <string name="zen_upgrade_notification_visd_title" msgid="3288313883409759733">"Жаңа: \"Мазаламау\" режимі хабарландыруларды жасыруда"</string>
+    <string name="zen_upgrade_notification_visd_content" msgid="5533674060311631165">"Толығырақ ақпарат алу және өзгерту үшін түртіңіз."</string>
     <string name="zen_upgrade_notification_title" msgid="3799603322910377294">"\"Мазаламау\" режимі өзгерді"</string>
     <string name="zen_upgrade_notification_content" msgid="1794994264692424562">"Түймені түртіп, неге тыйым салынатынын көріңіз."</string>
     <string name="notification_app_name_system" msgid="4205032194610042794">"Жүйе"</string>

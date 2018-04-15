@@ -1014,8 +1014,7 @@
     <string name="dial" msgid="1253998302767701559">"Hívás"</string>
     <string name="dial_desc" msgid="6573723404985517250">"Kiválasztott telefonszám hívása"</string>
     <string name="map" msgid="5441053548030107189">"Térkép"</string>
-    <!-- no translation found for map_desc (1836995341943772348) -->
-    <skip />
+    <string name="map_desc" msgid="1836995341943772348">"Kiválasztott cím megkeresése a térképen"</string>
     <string name="browse" msgid="1245903488306147205">"Megnyitás"</string>
     <string name="browse_desc" msgid="8220976549618935044">"Kiválasztott URL megnyitása"</string>
     <string name="sms" msgid="4560537514610063430">"Üzenet"</string>
@@ -1691,7 +1690,7 @@
     <string name="package_installed_device_owner" msgid="6875717669960212648">"A rendszergazda által telepítve"</string>
     <string name="package_updated_device_owner" msgid="1847154566357862089">"A rendszergazda által frissítve"</string>
     <string name="package_deleted_device_owner" msgid="2307122077550236438">"A rendszergazda által törölve"</string>
-    <string name="battery_saver_description" msgid="4660824093877546730">"Az akkumulátor üzemidejének növelése érdekében az Akkumulátorkímélő mód csökkenti az eszköz teljesítményét, és korlátozza vagy kikapcsolja a rezgést, a helyszolgáltatásokat, valamint a háttéradatokat. Előfordulhat, hogy azok az e-mail-, üzenetküldő és egyéb alkalmazások, amelyek szinkronizálást használnak, csak akkor frissítenek, ha megnyitja őket.\n\nAz Akkumulátorkímélő mód automatikusan kikapcsol, ha az eszköz töltőn van."</string>
+    <string name="battery_saver_description" msgid="769989536172631582">"Az akkumulátor üzemidejének növelése érdekében az Akkumulátorkímélő mód kikapcsol egyes eszközfunkciókat, és korlátoz bizonyos alkalmazásokat."</string>
     <string name="data_saver_description" msgid="6015391409098303235">"Az adatforgalom csökkentése érdekében az Adatforgalom-csökkentő megakadályozza, hogy egyes alkalmazások adatokat küldjenek vagy fogadjanak a háttérben. Az Ön által aktuálisan használt alkalmazások hozzáférhetnek az adatokhoz, de csak ritkábban. Ez például azt jelentheti, hogy a képek csak rákoppintás után jelennek meg."</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"Bekapcsolja az Adatforgalom-csökkentőt?"</string>
     <string name="data_saver_enable_button" msgid="7147735965247211818">"Bekapcsolás"</string>
@@ -1778,6 +1777,12 @@
     <string name="language_picker_section_all" msgid="3097279199511617537">"Minden nyelv"</string>
     <string name="region_picker_section_all" msgid="8966316787153001779">"Minden régió"</string>
     <string name="locale_search_menu" msgid="2560710726687249178">"Keresés"</string>
+    <!-- no translation found for app_suspended_title (1919029799438164552) -->
+    <skip />
+    <!-- no translation found for app_suspended_default_message (7875306315686531621) -->
+    <skip />
+    <!-- no translation found for app_suspended_more_details (1131804827776778187) -->
+    <skip />
     <string name="work_mode_off_title" msgid="1118691887588435530">"Bekapcsolja a munkaprofilt?"</string>
     <string name="work_mode_off_message" msgid="5130856710614337649">"A munkahelyi alkalmazások, értesítések, adatok és a munkaprofilhoz tartozó egyéb funkciók be lesznek kapcsolva"</string>
     <string name="work_mode_turn_on" msgid="2062544985670564875">"Bekapcsolás"</string>
@@ -1867,8 +1872,8 @@
     <string name="volume_dialog_ringer_guidance_silent" msgid="2128975224280276122">"A hívások és az értesítések némák"</string>
     <string name="notification_channel_system_changes" msgid="5072715579030948646">"Rendszermódosítások"</string>
     <string name="notification_channel_do_not_disturb" msgid="6766940333105743037">"Ne zavarjanak"</string>
-    <string name="zen_upgrade_notification_visd_title" msgid="4168873821019741166">"A Ne zavarjanak mód elrejti az értesítéseket, hogy segítsen az összpontosításban"</string>
-    <string name="zen_upgrade_notification_visd_content" msgid="6776377368195804354">"Ez új viselkedés. Koppintson a módosításhoz."</string>
+    <string name="zen_upgrade_notification_visd_title" msgid="3288313883409759733">"Újdonság: A Ne zavarjanak mód elrejti az értesítéseket"</string>
+    <string name="zen_upgrade_notification_visd_content" msgid="5533674060311631165">"Koppintással további információhoz juthat, és elvégezheti a módosítást."</string>
     <string name="zen_upgrade_notification_title" msgid="3799603322910377294">"Módosultak a Ne zavarjanak mód beállításai"</string>
     <string name="zen_upgrade_notification_content" msgid="1794994264692424562">"Koppintson a letiltott elemek megtekintéséhez."</string>
     <string name="notification_app_name_system" msgid="4205032194610042794">"Rendszer"</string>

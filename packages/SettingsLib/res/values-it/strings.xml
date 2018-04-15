@@ -104,7 +104,7 @@
     <string name="bluetooth_pairing_decline" msgid="4185420413578948140">"Annulla"</string>
     <string name="bluetooth_pairing_will_share_phonebook" msgid="4982239145676394429">"L\'accoppiamento consente l\'accesso ai tuoi contatti e alla cronologia chiamate quando i dispositivi sono connessi."</string>
     <string name="bluetooth_pairing_error_message" msgid="3748157733635947087">"Impossibile eseguire l\'accoppiamento con <xliff:g id="DEVICE_NAME">%1$s</xliff:g>."</string>
-    <string name="bluetooth_pairing_pin_error_message" msgid="8337234855188925274">"Impossibile eseguire l\'accoppiamento con <xliff:g id="DEVICE_NAME">%1$s</xliff:g>. La passkey o il PIN è errato."</string>
+    <string name="bluetooth_pairing_pin_error_message" msgid="8337234855188925274">"Impossibile eseguire l\'accoppiamento con <xliff:g id="DEVICE_NAME">%1$s</xliff:g>. La passkey o il PIN sono errati."</string>
     <string name="bluetooth_pairing_device_down_error_message" msgid="7870998403045801381">"Impossibile comunicare con <xliff:g id="DEVICE_NAME">%1$s</xliff:g>."</string>
     <string name="bluetooth_pairing_rejected_error_message" msgid="1648157108520832454">"Accoppiamento rifiutato da <xliff:g id="DEVICE_NAME">%1$s</xliff:g>."</string>
     <string name="bluetooth_talkback_computer" msgid="4875089335641234463">"Computer"</string>
@@ -216,24 +216,19 @@
     <string name="bluetooth_select_avrcp_version_string" msgid="3750059931120293633">"Versione Bluetooth AVRCP"</string>
     <string name="bluetooth_select_avrcp_version_dialog_title" msgid="7277329668298705702">"Seleziona versione Bluetooth AVRCP"</string>
     <string name="bluetooth_select_a2dp_codec_type" msgid="90597356942154882">"Codec audio Bluetooth"</string>
-    <!-- no translation found for bluetooth_select_a2dp_codec_type_dialog_title (8436224899475822557) -->
-    <skip />
+    <string name="bluetooth_select_a2dp_codec_type_dialog_title" msgid="8436224899475822557">"Attiva il codec audio Bluetooth\nSelezione"</string>
     <string name="bluetooth_select_a2dp_codec_sample_rate" msgid="4788245703824623062">"Frequenza di campionamento audio Bluetooth"</string>
-    <!-- no translation found for bluetooth_select_a2dp_codec_sample_rate_dialog_title (8010380028880963535) -->
-    <skip />
+    <string name="bluetooth_select_a2dp_codec_sample_rate_dialog_title" msgid="8010380028880963535">"Attiva il codec audio Bluetooth\nSelezione: Frequenza di campionamento"</string>
     <string name="bluetooth_select_a2dp_codec_bits_per_sample" msgid="2099645202720164141">"Bit per campione dell\'audio Bluetooth"</string>
-    <!-- no translation found for bluetooth_select_a2dp_codec_bits_per_sample_dialog_title (8063859754619484760) -->
-    <skip />
+    <string name="bluetooth_select_a2dp_codec_bits_per_sample_dialog_title" msgid="8063859754619484760">"Attiva il codec audio Bluetooth\nSelezione: bit per campione"</string>
     <string name="bluetooth_select_a2dp_codec_channel_mode" msgid="884855779449390540">"Modalità canale audio Bluetooth"</string>
-    <!-- no translation found for bluetooth_select_a2dp_codec_channel_mode_dialog_title (7234956835280563341) -->
-    <skip />
+    <string name="bluetooth_select_a2dp_codec_channel_mode_dialog_title" msgid="7234956835280563341">"Attiva il codec audio Bluetooth\nSelezione: Modalità canale"</string>
     <string name="bluetooth_select_a2dp_codec_ldac_playback_quality" msgid="3619694372407843405">"Codec LDAC audio Bluetooth: qualità di riproduzione"</string>
-    <!-- no translation found for bluetooth_select_a2dp_codec_ldac_playback_quality_dialog_title (7595776220458732825) -->
-    <skip />
+    <string name="bluetooth_select_a2dp_codec_ldac_playback_quality_dialog_title" msgid="7595776220458732825">"Attiva il codec LDAC audio Bluetooth\nSelezione: Qualità di riproduzione"</string>
     <string name="bluetooth_select_a2dp_codec_streaming_label" msgid="5347862512596240506">"Streaming: <xliff:g id="STREAMING_PARAMETER">%1$s</xliff:g>"</string>
     <string name="select_private_dns_configuration_title" msgid="3700456559305263922">"DNS privato"</string>
     <string name="select_private_dns_configuration_dialog_title" msgid="9221994415765826811">"Seleziona modalità DNS privato"</string>
-    <string name="private_dns_mode_off" msgid="8236575187318721684">"Non attiva"</string>
+    <string name="private_dns_mode_off" msgid="8236575187318721684">"Non attivo"</string>
     <string name="private_dns_mode_opportunistic" msgid="8314986739896927399">"Automatico"</string>
     <string name="private_dns_mode_provider" msgid="8354935160639360804">"Nome host del provider DNS privato"</string>
     <string name="private_dns_mode_provider_hostname_hint" msgid="2487492386970928143">"Inserisci il nome host del provider DNS"</string>
@@ -264,7 +259,7 @@
     <string name="verify_apps_over_usb_title" msgid="4177086489869041953">"Verifica app tramite USB"</string>
     <string name="verify_apps_over_usb_summary" msgid="9164096969924529200">"Controlla che le app installate tramite ADB/ADT non abbiano un comportamento dannoso."</string>
     <string name="bluetooth_show_devices_without_names_summary" msgid="2351196058115755520">"Verranno mostrati solo dispositivi Bluetooth senza nome (solo indirizzo MAC)"</string>
-    <string name="bluetooth_disable_absolute_volume_summary" msgid="6031284410786545957">"Consente di disattivare la funzione del volume assoluto Bluetooth in caso di problemi con il volume dei dispositivi remoti, ad esempio un volume troppo alto o la mancanza di controllo."</string>
+    <string name="bluetooth_disable_absolute_volume_summary" msgid="6031284410786545957">"Disattiva la funzione del volume assoluto Bluetooth in caso di problemi con il volume dei dispositivi remoti, ad esempio un volume troppo alto o la mancanza di controllo."</string>
     <string name="enable_terminal_title" msgid="95572094356054120">"Terminale locale"</string>
     <string name="enable_terminal_summary" msgid="67667852659359206">"Abilita l\'app Terminale che offre l\'accesso alla shell locale"</string>
     <string name="hdcp_checking_title" msgid="8605478913544273282">"Verifica HDCP"</string>
@@ -332,7 +327,7 @@
     <string name="enable_freeform_support" msgid="1461893351278940416">"Attiva finestre a forma libera"</string>
     <string name="enable_freeform_support_summary" msgid="8247310463288834487">"Attiva il supporto delle finestre a forma libera sperimentali."</string>
     <string name="local_backup_password_title" msgid="3860471654439418822">"Password di backup desktop"</string>
-    <string name="local_backup_password_summary_none" msgid="6951095485537767956">"I backup desktop completi non sono attualmente protetti."</string>
+    <string name="local_backup_password_summary_none" msgid="6951095485537767956">"I backup desktop completi non sono attualmente protetti"</string>
     <string name="local_backup_password_summary_change" msgid="5376206246809190364">"Tocca per modificare o rimuovere la password per i backup desktop completi"</string>
     <string name="local_backup_password_toast_success" msgid="582016086228434290">"Nuova password di backup impostata"</string>
     <string name="local_backup_password_toast_confirmation_mismatch" msgid="7805892532752708288">"Le password inserite non corrispondono"</string>

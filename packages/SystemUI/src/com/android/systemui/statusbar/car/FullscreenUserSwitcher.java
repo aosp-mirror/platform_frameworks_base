@@ -21,10 +21,11 @@ import android.animation.AnimatorListenerAdapter;
 import android.content.Context;
 import android.view.View;
 import android.view.ViewStub;
-import android.widget.ProgressBar;
 
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
+
+import com.android.settingslib.users.UserManagerHelper;
 import com.android.systemui.R;
 import com.android.systemui.statusbar.phone.StatusBar;
 
@@ -35,10 +36,10 @@ public class FullscreenUserSwitcher {
     private final View mContainer;
     private final View mParent;
     private final UserGridRecyclerView mUserGridView;
-    private final ProgressBar mSwitchingUsers;
     private final int mShortAnimDuration;
     private final StatusBar mStatusBar;
-
+    private final UserManagerHelper mUserManagerHelper;
+    private int mCurrentForegroundUserId;
     private boolean mShowing;
 
     public FullscreenUserSwitcher(StatusBar statusBar, ViewStub containerStub, Context context) {
@@ -52,10 +53,11 @@ public class FullscreenUserSwitcher {
         mUserGridView.buildAdapter();
         mUserGridView.setUserSelectionListener(this::onUserSelected);
 
+        mUserManagerHelper = new UserManagerHelper(context);
+        updateCurrentForegroundUser();
+
         mShortAnimDuration = mContainer.getResources()
             .getInteger(android.R.integer.config_shortAnimTime);
-
-        mSwitchingUsers = mParent.findViewById(R.id.switching_users);
     }
 
     public void show() {
@@ -73,28 +75,44 @@ public class FullscreenUserSwitcher {
     }
 
     public void onUserSwitched(int newUserId) {
-        mParent.post(this::showOfflineAuthUi);
+        // The logic for foreground user change is needed here to exclude the reboot case. On
+        // reboot, system fires ACTION_USER_SWITCHED change from -1 to 0 user. This is not an actual
+        // user switch. We only want to trigger keyguard dismissal when foreground user changes.
+        if (foregroundUserChanged()) {
+            updateCurrentForegroundUser();
+            mParent.post(this::dismissKeyguard);
+        }
+    }
+
+    private boolean foregroundUserChanged() {
+        return mCurrentForegroundUserId != mUserManagerHelper.getForegroundUserId();
+    }
+
+    private void updateCurrentForegroundUser() {
+        mCurrentForegroundUserId = mUserManagerHelper.getForegroundUserId();
     }
 
     private void onUserSelected(UserGridRecyclerView.UserRecord record) {
         if (record.mIsForeground) {
-            showOfflineAuthUi();
+            dismissKeyguard();
             return;
         }
         toggleSwitchInProgress(true);
     }
 
-    private void showOfflineAuthUi() {
+    // Dismisses the keyguard and shows bouncer if authentication is necessary.
+    private void dismissKeyguard() {
         mStatusBar.executeRunnableDismissingKeyguard(null/* runnable */, null /* cancelAction */,
                 true /* dismissShade */, true /* afterKeyguardGone */, true /* deferred */);
     }
 
     private void toggleSwitchInProgress(boolean inProgress) {
         if (inProgress) {
-            crossFade(mSwitchingUsers, mContainer);
+            crossFade(mParent, mContainer);
         } else {
-            crossFade(mContainer, mSwitchingUsers);
+            crossFade(mContainer, mParent);
         }
+
     }
 
     private void crossFade(View incoming, View outgoing) {

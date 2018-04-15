@@ -20,11 +20,19 @@ package android.service;
 option java_multiple_files = true;
 option java_outer_classname = "GraphicsStatsServiceProto";
 
+import "frameworks/base/libs/incident/proto/android/privacy.proto";
+
+// This file is based on frameworks/base/libs/hwui/protos/graphicsstats.proto.
+// Please try to keep the two files in sync.
+
 message GraphicsStatsServiceDumpProto {
+    option (android.msg_privacy).dest = DEST_AUTOMATIC;
+
     repeated GraphicsStatsProto stats = 1;
 }
 
 message GraphicsStatsProto {
+    option (android.msg_privacy).dest = DEST_AUTOMATIC;
 
     // The package name of the app
     optional string package_name = 1;
@@ -46,6 +54,8 @@ message GraphicsStatsProto {
 }
 
 message GraphicsStatsJankSummaryProto {
+    option (android.msg_privacy).dest = DEST_AUTOMATIC;
+
     // Distinct frame count.
     optional int32 total_frames = 1;
 
@@ -73,6 +83,8 @@ message GraphicsStatsJankSummaryProto {
 }
 
 message GraphicsStatsHistogramBucketProto {
+    option (android.msg_privacy).dest = DEST_AUTOMATIC;
+
     // Lower bound of render time in milliseconds.
     optional int32 render_millis = 1;
     // Number of frames in the bucket.

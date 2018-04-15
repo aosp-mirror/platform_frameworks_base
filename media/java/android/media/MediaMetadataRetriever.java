@@ -567,6 +567,25 @@ public class MediaMetadataRetriever
     }
 
     /**
+     * @hide
+     *
+     * This method retrieves the thumbnail image for a still image if it's available.
+     * It should only be called after {@link #setDataSource}.
+     *
+     * @param imageIndex 0-based index of the image, negative value indicates primary image.
+     * @param params BitmapParams that controls the returned bitmap config (such as pixel formats).
+     * @param targetSize intended size of one edge (wdith or height) of the thumbnail,
+     *                   this is a heuristic for the framework to decide whether the embedded
+     *                   thumbnail should be used.
+     * @param maxPixels maximum pixels of thumbnail, this is a heuristic for the frameowrk to
+     *                  decide whehther the embedded thumnbail (or a downscaled version of it)
+     *                  should be used.
+     * @return the retrieved thumbnail, or null if no suitable thumbnail is available.
+     */
+    public native @Nullable Bitmap getThumbnailImageAtIndex(
+            int imageIndex, @NonNull BitmapParams params, int targetSize, int maxPixels);
+
+    /**
      * This method is similar to {@link #getImageAtIndex(int, BitmapParams)} except that
      * the default for {@link BitmapParams} will be used.
      *

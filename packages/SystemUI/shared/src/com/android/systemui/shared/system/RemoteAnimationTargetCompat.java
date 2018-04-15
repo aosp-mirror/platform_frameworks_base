@@ -16,8 +16,7 @@
 
 package com.android.systemui.shared.system;
 
-import static android.app.WindowConfiguration.ACTIVITY_TYPE_ASSISTANT;
-
+import android.app.WindowConfiguration;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.view.RemoteAnimationTarget;
@@ -29,9 +28,16 @@ public class RemoteAnimationTargetCompat {
 
     public static final int MODE_OPENING = RemoteAnimationTarget.MODE_OPENING;
     public static final int MODE_CLOSING = RemoteAnimationTarget.MODE_CLOSING;
+    public final int mode;
+
+    public static final int ACTIVITY_TYPE_UNDEFINED = WindowConfiguration.ACTIVITY_TYPE_UNDEFINED;
+    public static final int ACTIVITY_TYPE_STANDARD = WindowConfiguration.ACTIVITY_TYPE_STANDARD;
+    public static final int ACTIVITY_TYPE_HOME = WindowConfiguration.ACTIVITY_TYPE_HOME;
+    public static final int ACTIVITY_TYPE_RECENTS = WindowConfiguration.ACTIVITY_TYPE_RECENTS;
+    public static final int ACTIVITY_TYPE_ASSISTANT = WindowConfiguration.ACTIVITY_TYPE_ASSISTANT;
+    public final int activityType;
 
     public final int taskId;
-    public final int mode;
     public final SurfaceControlCompat leash;
     public final boolean isTranslucent;
     public final Rect clipRect;
@@ -39,11 +45,9 @@ public class RemoteAnimationTargetCompat {
     public final Point position;
     public final Rect sourceContainerBounds;
     public final boolean isNotInRecents;
-
-    private final RemoteAnimationTarget mTarget;
+    public final Rect contentInsets;
 
     public RemoteAnimationTargetCompat(RemoteAnimationTarget app) {
-        mTarget = app;
         taskId = app.taskId;
         mode = app.mode;
         leash = new SurfaceControlCompat(app.leash);
@@ -53,6 +57,8 @@ public class RemoteAnimationTargetCompat {
         sourceContainerBounds = app.sourceContainerBounds;
         prefixOrderIndex = app.prefixOrderIndex;
         isNotInRecents = app.isNotInRecents;
+        contentInsets = app.contentInsets;
+        activityType = app.windowConfiguration.getActivityType();
     }
 
     public static RemoteAnimationTargetCompat[] wrap(RemoteAnimationTarget[] apps) {
@@ -62,19 +68,5 @@ public class RemoteAnimationTargetCompat {
             appsCompat[i] = new RemoteAnimationTargetCompat(apps[i]);
         }
         return appsCompat;
-    }
-
-    /**
-     * TODO: Get as a method for compatibility (will move into ctor once Launcher updates)
-     */
-    public Rect getContentInsets() {
-        return mTarget.contentInsets;
-    }
-
-    /**
-     * TODO: Get as a method for compatibility (will move into ctor once Launcher updates)
-     */
-    public boolean isAssistantActivityType() {
-        return mTarget.windowConfiguration.getActivityType() == ACTIVITY_TYPE_ASSISTANT;
     }
 }

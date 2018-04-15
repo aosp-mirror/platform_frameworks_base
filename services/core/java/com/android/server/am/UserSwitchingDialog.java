@@ -39,7 +39,7 @@ import com.android.internal.annotations.GuardedBy;
  * in the background rather than just freeze the screen and not know if the user-switch affordance
  * was being handled.
  */
-final class UserSwitchingDialog extends AlertDialog
+class UserSwitchingDialog extends AlertDialog
         implements ViewTreeObserver.OnWindowShownListener {
     private static final String TAG = "ActivityManagerUserSwitchingDialog";
 
@@ -51,53 +51,69 @@ final class UserSwitchingDialog extends AlertDialog
     private static final int MSG_START_USER = 1;
     @GuardedBy("this")
     private boolean mStartedUser;
+    final protected UserInfo mOldUser;
+    final protected UserInfo mNewUser;
+    final private String mSwitchingFromSystemUserMessage;
+    final private String mSwitchingToSystemUserMessage;
+    final protected Context mContext;
 
     public UserSwitchingDialog(ActivityManagerService service, Context context, UserInfo oldUser,
             UserInfo newUser, boolean aboveSystem, String switchingFromSystemUserMessage,
             String switchingToSystemUserMessage) {
         super(context);
 
+        mContext = context;
         mService = service;
         mUserId = newUser.id;
+        mOldUser = oldUser;
+        mNewUser = newUser;
+        mSwitchingFromSystemUserMessage = switchingFromSystemUserMessage;
+        mSwitchingToSystemUserMessage = switchingToSystemUserMessage;
 
+        inflateContent();
+
+        if (aboveSystem) {
+            getWindow().setType(WindowManager.LayoutParams.TYPE_SYSTEM_ERROR);
+        }
+
+        WindowManager.LayoutParams attrs = getWindow().getAttributes();
+        attrs.privateFlags = WindowManager.LayoutParams.PRIVATE_FLAG_SYSTEM_ERROR |
+            WindowManager.LayoutParams.PRIVATE_FLAG_SHOW_FOR_ALL_USERS;
+        getWindow().setAttributes(attrs);
+    }
+
+    void inflateContent() {
         // Set up the dialog contents
         setCancelable(false);
         Resources res = getContext().getResources();
         // Custom view due to alignment and font size requirements
-        View view = LayoutInflater.from(getContext()).inflate(R.layout.user_switching_dialog, null);
+        View view = LayoutInflater.from(getContext()).inflate(R.layout.user_switching_dialog,
+            null);
 
         String viewMessage = null;
-        if (UserManager.isSplitSystemUser() && newUser.id == UserHandle.USER_SYSTEM) {
-            viewMessage = res.getString(R.string.user_logging_out_message, oldUser.name);
-        } else if (UserManager.isDeviceInDemoMode(context)) {
-            if (oldUser.isDemo()) {
+        if (UserManager.isSplitSystemUser() && mNewUser.id == UserHandle.USER_SYSTEM) {
+            viewMessage = res.getString(R.string.user_logging_out_message, mOldUser.name);
+        } else if (UserManager.isDeviceInDemoMode(mContext)) {
+            if (mOldUser.isDemo()) {
                 viewMessage = res.getString(R.string.demo_restarting_message);
             } else {
                 viewMessage = res.getString(R.string.demo_starting_message);
             }
         } else {
-            if (oldUser.id == UserHandle.USER_SYSTEM) {
-                viewMessage = switchingFromSystemUserMessage;
-            } else if (newUser.id == UserHandle.USER_SYSTEM) {
-                viewMessage = switchingToSystemUserMessage;
+            if (mOldUser.id == UserHandle.USER_SYSTEM) {
+                viewMessage = mSwitchingFromSystemUserMessage;
+            } else if (mNewUser.id == UserHandle.USER_SYSTEM) {
+                viewMessage = mSwitchingToSystemUserMessage;
             }
 
             // If switchingFromSystemUserMessage or switchingToSystemUserMessage is null, fallback
             // to system message.
             if (viewMessage == null) {
-                viewMessage = res.getString(R.string.user_switching_message, newUser.name);
+                viewMessage = res.getString(R.string.user_switching_message, mNewUser.name);
             }
         }
         ((TextView) view.findViewById(R.id.message)).setText(viewMessage);
         setView(view);
-
-        if (aboveSystem) {
-            getWindow().setType(WindowManager.LayoutParams.TYPE_SYSTEM_ERROR);
-        }
-        WindowManager.LayoutParams attrs = getWindow().getAttributes();
-        attrs.privateFlags = WindowManager.LayoutParams.PRIVATE_FLAG_SYSTEM_ERROR |
-                WindowManager.LayoutParams.PRIVATE_FLAG_SHOW_FOR_ALL_USERS;
-        getWindow().setAttributes(attrs);
     }
 
     @Override

@@ -16,29 +16,56 @@
 
 package com.android.systemui.statusbar.phone;
 
+import static com.android.systemui.statusbar.StatusBarIconView.STATE_ICON;
+import static com.android.systemui.statusbar.StatusBarIconView.STATE_DOT;
+import static com.android.systemui.statusbar.StatusBarIconView.STATE_HIDDEN;
+
 import android.annotation.Nullable;
 import android.content.Context;
+import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.Paint;
+import android.graphics.Paint.Style;
 import android.util.AttributeSet;
 import android.util.Log;
 
 import android.view.View;
+import android.view.ViewGroup;
 import com.android.keyguard.AlphaOptimizedLinearLayout;
 import com.android.systemui.R;
 import com.android.systemui.statusbar.StatusIconDisplayable;
 import com.android.systemui.statusbar.stack.ViewState;
+import java.lang.ref.WeakReference;
+import java.util.ArrayList;
 
 /**
  * A container for Status bar system icons. Limits the number of system icons and handles overflow
- * similar to NotificationIconController. Can be used to layout nested StatusIconContainers
+ * similar to {@link NotificationIconContainer}.
  *
- * Children are expected to be of type StatusBarIconView.
+ * Children are expected to implement {@link StatusIconDisplayable}
  */
 public class StatusIconContainer extends AlphaOptimizedLinearLayout {
 
     private static final String TAG = "StatusIconContainer";
     private static final boolean DEBUG = false;
-    private static final int MAX_ICONS = 5;
+    private static final boolean DEBUG_OVERFLOW = false;
+    // Max 5 status icons including battery
+    private static final int MAX_ICONS = 4;
     private static final int MAX_DOTS = 3;
+
+    private int mDotPadding;
+    private int mStaticDotDiameter;
+    private int mUnderflowWidth;
+    private int mUnderflowStart = 0;
+    // Whether or not we can draw into the underflow space
+    private boolean mNeedsUnderflow;
+    // Individual StatusBarIconViews draw their etc dots centered in this width
+    private int mIconDotFrameWidth;
+    private boolean mShouldRestrictIcons = true;
+    // Used to count which states want to be visible during layout
+    private ArrayList<StatusIconState> mLayoutStates = new ArrayList<>();
+    // So we can count and measure properly
+    private ArrayList<View> mMeasureViews = new ArrayList<>();
 
     public StatusIconContainer(Context context) {
         this(context, null);
@@ -46,6 +73,27 @@ public class StatusIconContainer extends AlphaOptimizedLinearLayout {
 
     public StatusIconContainer(Context context, AttributeSet attrs) {
         super(context, attrs);
+    }
+
+    @Override
+    protected void onFinishInflate() {
+        super.onFinishInflate();
+        setWillNotDraw(!DEBUG_OVERFLOW);
+        initDimens();
+    }
+
+    public void setShouldRestrictIcons(boolean should) {
+        mShouldRestrictIcons = should;
+    }
+
+    private void initDimens() {
+        // This is the same value that StatusBarIconView uses
+        mIconDotFrameWidth = getResources().getDimensionPixelSize(
+                com.android.internal.R.dimen.status_bar_icon_size);
+        mDotPadding = getResources().getDimensionPixelSize(R.dimen.overflow_icon_dot_padding);
+        int radius = getResources().getDimensionPixelSize(R.dimen.overflow_dot_radius);
+        mStaticDotDiameter = 2 * radius;
+        mUnderflowWidth = mIconDotFrameWidth + 2 * (mStaticDotDiameter + mDotPadding);
     }
 
     @Override
@@ -67,23 +115,80 @@ public class StatusIconContainer extends AlphaOptimizedLinearLayout {
     }
 
     @Override
+    protected void onDraw(Canvas canvas) {
+        super.onDraw(canvas);
+        if (DEBUG_OVERFLOW) {
+            Paint paint = new Paint();
+            paint.setStyle(Style.STROKE);
+            paint.setColor(Color.RED);
+
+            // Show bounding box
+            canvas.drawRect(getPaddingStart(), 0, getWidth() - getPaddingEnd(), getHeight(), paint);
+
+            // Show etc box
+            paint.setColor(Color.GREEN);
+            canvas.drawRect(
+                    mUnderflowStart, 0, mUnderflowStart + mUnderflowWidth, getHeight(), paint);
+        }
+    }
+
+    @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-        super.onMeasure(widthMeasureSpec, heightMeasureSpec);
-
-        int width = MeasureSpec.getSize(widthMeasureSpec);
-        int widthSpec = MeasureSpec.makeMeasureSpec(width, MeasureSpec.UNSPECIFIED);
-
+        mMeasureViews.clear();
+        int mode = MeasureSpec.getMode(widthMeasureSpec);
+        final int width = MeasureSpec.getSize(widthMeasureSpec);
         final int count = getChildCount();
-        // Measure all children so that they report the correct width
+        // Collect all of the views which want to be laid out
         for (int i = 0; i < count; i++) {
-            measureChild(getChildAt(i), widthSpec, heightMeasureSpec);
+            StatusIconDisplayable icon = (StatusIconDisplayable) getChildAt(i);
+            if (icon.isIconVisible() && !icon.isIconBlocked()) {
+                mMeasureViews.add((View) icon);
+            }
+        }
+
+        int visibleCount = mMeasureViews.size();
+        int maxVisible = visibleCount <= MAX_ICONS ? MAX_ICONS : MAX_ICONS - 1;
+        int totalWidth = getPaddingStart() + getPaddingEnd();
+        boolean trackWidth = true;
+
+        // Measure all children so that they report the correct width
+        int childWidthSpec = MeasureSpec.makeMeasureSpec(width, MeasureSpec.UNSPECIFIED);
+        mNeedsUnderflow = mShouldRestrictIcons && visibleCount > MAX_ICONS;
+        for (int i = 0; i < mMeasureViews.size(); i++) {
+            // Walking backwards
+            View child = mMeasureViews.get(visibleCount - i - 1);
+            measureChild(child, childWidthSpec, heightMeasureSpec);
+            if (mShouldRestrictIcons) {
+                if (i < maxVisible && trackWidth) {
+                    totalWidth += getViewTotalMeasuredWidth(child);
+                } else if (trackWidth) {
+                    // We've hit the icon limit; add space for dots
+                    totalWidth += mUnderflowWidth;
+                    trackWidth = false;
+                }
+            } else {
+                totalWidth += getViewTotalMeasuredWidth(child);
+            }
+        }
+
+        if (mode == MeasureSpec.EXACTLY) {
+            if (!mNeedsUnderflow && totalWidth > width) {
+                mNeedsUnderflow = true;
+            }
+            setMeasuredDimension(width, MeasureSpec.getSize(heightMeasureSpec));
+        } else {
+            if (mode == MeasureSpec.AT_MOST && totalWidth > width) {
+                mNeedsUnderflow = true;
+                totalWidth = width;
+            }
+            setMeasuredDimension(totalWidth, MeasureSpec.getSize(heightMeasureSpec));
         }
     }
 
     @Override
     public void onViewAdded(View child) {
         super.onViewAdded(child);
-        ViewState vs = new ViewState();
+        StatusIconState vs = new StatusIconState();
         child.setTag(R.id.status_bar_view_state_tag, vs);
     }
 
@@ -97,6 +202,7 @@ public class StatusIconContainer extends AlphaOptimizedLinearLayout {
      * Layout is happening from end -> start
      */
     private void calculateIconTranslations() {
+        mLayoutStates.clear();
         float width = getWidth() - getPaddingEnd();
         float translationX = width;
         float contentStart = getPaddingStart();
@@ -106,45 +212,57 @@ public class StatusIconContainer extends AlphaOptimizedLinearLayout {
         if (DEBUG) android.util.Log.d(TAG, "calculateIconTransitions: start=" + translationX
                 + " width=" + width);
 
-        //TODO: Dots
+        // Collect all of the states which want to be visible
         for (int i = childCount - 1; i >= 0; i--) {
             View child = getChildAt(i);
-            if (!(child instanceof StatusIconDisplayable)) {
-                if (DEBUG) Log.d(TAG, "skipping child (wrong type)");
-                continue;
-            }
-
             StatusIconDisplayable iconView = (StatusIconDisplayable) child;
-
-            ViewState childState = getViewStateFromChild(child);
-            if (childState == null ) {
-                if (DEBUG) Log.d(TAG, "skipping child (" + iconView.getSlot() + ") no ViewState");
-                continue;
-            }
+            StatusIconState childState = getViewStateFromChild(child);
 
             if (!iconView.isIconVisible() || iconView.isIconBlocked()) {
-                childState.hidden = true;
+                childState.visibleState = STATE_HIDDEN;
                 if (DEBUG) Log.d(TAG, "skipping child (" + iconView.getSlot() + ") not visible");
                 continue;
             }
 
-            childState.xTranslation = translationX - child.getWidth();
+            childState.visibleState = STATE_ICON;
+            childState.xTranslation = translationX - getViewTotalWidth(child);
+            mLayoutStates.add(0, childState);
 
-            if (childState.xTranslation < contentStart) {
-                if (firstUnderflowIndex == -1) {
-                    firstUnderflowIndex = i;
-                }
+            translationX -= getViewTotalWidth(child);
+        }
+
+        // Show either 1-4 dots, or 3 dots + overflow
+        int totalVisible = mLayoutStates.size();
+        int maxVisible = totalVisible <= MAX_ICONS ? MAX_ICONS : MAX_ICONS - 1;
+
+        mUnderflowStart = 0;
+        int visible = 0;
+        firstUnderflowIndex = -1;
+        for (int i = totalVisible - 1; i >= 0; i--) {
+            StatusIconState state = mLayoutStates.get(i);
+            // Allow room for underflow if we found we need it in onMeasure
+            if (mNeedsUnderflow && (state.xTranslation < (contentStart + mUnderflowWidth))||
+                    (mShouldRestrictIcons && visible >= maxVisible)) {
+                firstUnderflowIndex = i;
+                break;
             }
-
-            translationX -= child.getWidth();
+            mUnderflowStart = (int) Math.max(contentStart, state.xTranslation - mUnderflowWidth);
+            visible++;
         }
 
         if (firstUnderflowIndex != -1) {
-            for (int i = 0; i <= firstUnderflowIndex; i++) {
-                View child = getChildAt(i);
-                ViewState vs = getViewStateFromChild(child);
-                if (vs != null) {
-                    vs.hidden = true;
+            int totalDots = 0;
+            int dotWidth = mStaticDotDiameter + mDotPadding;
+            int dotOffset = mUnderflowStart + mUnderflowWidth - mIconDotFrameWidth;
+            for (int i = firstUnderflowIndex; i >= 0; i--) {
+                StatusIconState state = mLayoutStates.get(i);
+                if (totalDots < MAX_DOTS) {
+                    state.xTranslation = dotOffset;
+                    state.visibleState = STATE_DOT;
+                    dotOffset -= dotWidth;
+                    totalDots++;
+                } else {
+                    state.visibleState = STATE_HIDDEN;
                 }
             }
         }
@@ -153,7 +271,7 @@ public class StatusIconContainer extends AlphaOptimizedLinearLayout {
         if (isLayoutRtl()) {
             for (int i = 0; i < childCount; i++) {
                 View child = getChildAt(i);
-                ViewState state = getViewStateFromChild(child);
+                StatusIconState state = getViewStateFromChild(child);
                 state.xTranslation = width - state.xTranslation - child.getWidth();
             }
         }
@@ -162,7 +280,7 @@ public class StatusIconContainer extends AlphaOptimizedLinearLayout {
     private void applyIconStates() {
         for (int i = 0; i < getChildCount(); i++) {
             View child = getChildAt(i);
-            ViewState vs = getViewStateFromChild(child);
+            StatusIconState vs = getViewStateFromChild(child);
             if (vs != null) {
                 vs.applyToView(child);
             }
@@ -172,7 +290,7 @@ public class StatusIconContainer extends AlphaOptimizedLinearLayout {
     private void resetViewStates() {
         for (int i = 0; i < getChildCount(); i++) {
             View child = getChildAt(i);
-            ViewState vs = getViewStateFromChild(child);
+            StatusIconState vs = getViewStateFromChild(child);
             if (vs == null) {
                 continue;
             }
@@ -187,7 +305,29 @@ public class StatusIconContainer extends AlphaOptimizedLinearLayout {
         }
     }
 
-    private static @Nullable ViewState getViewStateFromChild(View child) {
-        return (ViewState) child.getTag(R.id.status_bar_view_state_tag);
+    private static @Nullable StatusIconState getViewStateFromChild(View child) {
+        return (StatusIconState) child.getTag(R.id.status_bar_view_state_tag);
+    }
+
+    private static int getViewTotalMeasuredWidth(View child) {
+        return child.getMeasuredWidth() + child.getPaddingStart() + child.getPaddingEnd();
+    }
+
+    private static int getViewTotalWidth(View child) {
+        return child.getWidth() + child.getPaddingStart() + child.getPaddingEnd();
+    }
+
+    public static class StatusIconState extends ViewState {
+        /// StatusBarIconView.STATE_*
+        public int visibleState = STATE_ICON;
+
+        @Override
+        public void applyToView(View view) {
+            if (view instanceof  StatusIconDisplayable) {
+                StatusIconDisplayable icon = (StatusIconDisplayable) view;
+                icon.setVisibleState(visibleState);
+            }
+            super.applyToView(view);
+        }
     }
 }

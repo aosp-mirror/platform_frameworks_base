@@ -216,20 +216,15 @@
     <string name="bluetooth_select_avrcp_version_string" msgid="3750059931120293633">"Верзија Bluetooth AVRCP"</string>
     <string name="bluetooth_select_avrcp_version_dialog_title" msgid="7277329668298705702">"Изберете верзија Bluetooth AVRCP"</string>
     <string name="bluetooth_select_a2dp_codec_type" msgid="90597356942154882">"Кодек за аудио преку Bluetooth"</string>
-    <!-- no translation found for bluetooth_select_a2dp_codec_type_dialog_title (8436224899475822557) -->
-    <skip />
+    <string name="bluetooth_select_a2dp_codec_type_dialog_title" msgid="8436224899475822557">"Вклучете го аудио кодекот преку Bluetooth\nСелекција"</string>
     <string name="bluetooth_select_a2dp_codec_sample_rate" msgid="4788245703824623062">"Стапка на семпл преку Bluetooth"</string>
-    <!-- no translation found for bluetooth_select_a2dp_codec_sample_rate_dialog_title (8010380028880963535) -->
-    <skip />
+    <string name="bluetooth_select_a2dp_codec_sample_rate_dialog_title" msgid="8010380028880963535">"Вклучете го аудио кодекот преку Bluetooth\nСелекција: стапка на примерокот"</string>
     <string name="bluetooth_select_a2dp_codec_bits_per_sample" msgid="2099645202720164141">"Аудио бит-по-семпл преку Bluetooth"</string>
-    <!-- no translation found for bluetooth_select_a2dp_codec_bits_per_sample_dialog_title (8063859754619484760) -->
-    <skip />
+    <string name="bluetooth_select_a2dp_codec_bits_per_sample_dialog_title" msgid="8063859754619484760">"Вклучете го аудио кодекот преку Bluetooth\nСелекција: бит-по-семпл"</string>
     <string name="bluetooth_select_a2dp_codec_channel_mode" msgid="884855779449390540">"Режим на канал за аудио преку Bluetooth"</string>
-    <!-- no translation found for bluetooth_select_a2dp_codec_channel_mode_dialog_title (7234956835280563341) -->
-    <skip />
+    <string name="bluetooth_select_a2dp_codec_channel_mode_dialog_title" msgid="7234956835280563341">"Вклучете го аудио кодекот преку Bluetooth\nСелекција: режим на канал"</string>
     <string name="bluetooth_select_a2dp_codec_ldac_playback_quality" msgid="3619694372407843405">"Кодек за LDAC-аудио преку Bluetooth: квалитет на репродукција"</string>
-    <!-- no translation found for bluetooth_select_a2dp_codec_ldac_playback_quality_dialog_title (7595776220458732825) -->
-    <skip />
+    <string name="bluetooth_select_a2dp_codec_ldac_playback_quality_dialog_title" msgid="7595776220458732825">"Вклучете кодек за LDAC-аудио преку Bluetooth\nСелекција: квалитет на репродукција"</string>
     <string name="bluetooth_select_a2dp_codec_streaming_label" msgid="5347862512596240506">"Емитување: <xliff:g id="STREAMING_PARAMETER">%1$s</xliff:g>"</string>
     <string name="select_private_dns_configuration_title" msgid="3700456559305263922">"Приватен DNS"</string>
     <string name="select_private_dns_configuration_dialog_title" msgid="9221994415765826811">"Изберете режим на приватен DNS"</string>
@@ -279,7 +274,7 @@
     <string name="wait_for_debugger_summary" msgid="1766918303462746804">"Пред да се изврши, апликација за отстранување грешки чека програмата за отстранување грешки да се закачи"</string>
     <string name="debug_input_category" msgid="1811069939601180246">"Внес"</string>
     <string name="debug_drawing_category" msgid="6755716469267367852">"Цртање"</string>
-    <string name="debug_hw_drawing_category" msgid="6220174216912308658">"Прикажување забрзување на хардвер"</string>
+    <string name="debug_hw_drawing_category" msgid="6220174216912308658">"Хардверско забрзување"</string>
     <string name="media_category" msgid="4388305075496848353">"Медиуми"</string>
     <string name="debug_monitoring_category" msgid="7640508148375798343">"Следење"</string>
     <string name="strict_mode" msgid="1938795874357830695">"Овозможен е строг режим"</string>
@@ -303,14 +298,14 @@
     <string name="usb_audio_disable_routing_summary" msgid="980282760277312264">"Исклучи автоматско пренасочување до USB-аудиоуреди"</string>
     <string name="debug_layout" msgid="5981361776594526155">"Прикажи граници на слој"</string>
     <string name="debug_layout_summary" msgid="2001775315258637682">"Прикажи граници на клип, маргини, итн."</string>
-    <string name="force_rtl_layout_all_locales" msgid="2259906643093138978">"Сила на RTL за насока на слој"</string>
+    <string name="force_rtl_layout_all_locales" msgid="2259906643093138978">"Принудно користи RTL за насока"</string>
     <string name="force_rtl_layout_all_locales_summary" msgid="9192797796616132534">"Присилно постави насока на распоред на екран во РТЛ за сите локални стандарди"</string>
     <string name="force_hw_ui" msgid="6426383462520888732">"Присили рендерирање на GPU"</string>
     <string name="force_hw_ui_summary" msgid="5535991166074861515">"Присилно користење на GPU за цртеж 2D"</string>
-    <string name="force_msaa" msgid="7920323238677284387">"Сила 4x MSAA"</string>
+    <string name="force_msaa" msgid="7920323238677284387">"Принудно користи 4x MSAA"</string>
     <string name="force_msaa_summary" msgid="9123553203895817537">"Овозможи 4x MSAA за апликации OpenGL ES 2.0"</string>
     <string name="show_non_rect_clip" msgid="505954950474595172">"Отстрани грешка на неправоаголни клип операции"</string>
-    <string name="track_frame_time" msgid="6146354853663863443">"Прикажување пофил на GPU"</string>
+    <string name="track_frame_time" msgid="6146354853663863443">"Прикажување профил на GPU"</string>
     <string name="enable_gpu_debug_layers" msgid="3848838293793255097">"Овозм. отстр. греш. на GPU"</string>
     <string name="enable_gpu_debug_layers_summary" msgid="8009136940671194940">"Дозволи отстр. греш. на GPU за поправање апликации"</string>
     <string name="window_animation_scale_title" msgid="6162587588166114700">"Опсег на аним. на прозор."</string>

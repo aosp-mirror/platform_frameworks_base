@@ -80,6 +80,7 @@ public class NotificationContentView extends FrameLayout {
     private RemoteInputView mHeadsUpRemoteInput;
 
     private SmartReplyConstants mSmartReplyConstants;
+    private SmartReplyView mExpandedSmartReplyView;
     private SmartReplyLogger mSmartReplyLogger;
 
     private NotificationViewWrapper mContractedWrapper;
@@ -184,7 +185,11 @@ public class NotificationContentView extends FrameLayout {
         }
         int maxChildHeight = 0;
         if (mExpandedChild != null) {
-            int size = Math.min(maxSize, mNotificationMaxHeight);
+            int notificationMaxHeight = mNotificationMaxHeight;
+            if (mExpandedSmartReplyView != null) {
+                notificationMaxHeight += mExpandedSmartReplyView.getHeightUpperLimit();
+            }
+            int size = Math.min(maxSize, notificationMaxHeight);
             ViewGroup.LayoutParams layoutParams = mExpandedChild.getLayoutParams();
             boolean useExactly = false;
             if (layoutParams.height >= 0) {
@@ -234,7 +239,9 @@ public class NotificationContentView extends FrameLayout {
             }
         }
         if (mHeadsUpChild != null) {
-            int size = Math.min(maxSize, mHeadsUpHeight);
+            int maxHeight = mHeadsUpHeight;
+            maxHeight += mHeadsUpWrapper.getExtraMeasureHeight();
+            int size = Math.min(maxSize, maxHeight);
             ViewGroup.LayoutParams layoutParams = mHeadsUpChild.getLayoutParams();
             boolean useExactly = false;
             if (layoutParams.height >= 0) {
@@ -1348,10 +1355,10 @@ public class NotificationContentView extends FrameLayout {
     private void applySmartReplyView(RemoteInput remoteInput, PendingIntent pendingIntent,
             NotificationData.Entry entry) {
         if (mExpandedChild != null) {
-            SmartReplyView view =
+            mExpandedSmartReplyView =
                     applySmartReplyView(mExpandedChild, remoteInput, pendingIntent, entry);
-            if (view != null && remoteInput != null && remoteInput.getChoices() != null
-                    && remoteInput.getChoices().length > 0) {
+            if (mExpandedSmartReplyView != null && remoteInput != null
+                    && remoteInput.getChoices() != null && remoteInput.getChoices().length > 0) {
                 mSmartReplyLogger.smartRepliesAdded(entry, remoteInput.getChoices().length);
             }
         }

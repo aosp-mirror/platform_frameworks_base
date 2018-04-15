@@ -91,8 +91,12 @@ public class UserGridRecyclerView extends RecyclerView implements
     private List<UserRecord> createUserRecords(List<UserInfo> userInfoList) {
         List<UserRecord> userRecords = new ArrayList<>();
         for (UserInfo userInfo : userInfoList) {
+            if (userInfo.isGuest()) {
+                // Don't display guests in the switcher.
+                continue;
+            }
             boolean isForeground = mUserManagerHelper.getForegroundUserId() == userInfo.id;
-            UserRecord record = new UserRecord(userInfo, false /* isGuest */,
+            UserRecord record = new UserRecord(userInfo, false /* isStartGuestSession */,
                     false /* isAddUser */, isForeground);
             userRecords.add(record);
         }
@@ -116,7 +120,7 @@ public class UserGridRecyclerView extends RecyclerView implements
     private UserRecord addGuestUserRecord() {
         UserInfo userInfo = new UserInfo();
         userInfo.name = mContext.getString(R.string.car_guest);
-        return new UserRecord(userInfo, true /* isGuest */,
+        return new UserRecord(userInfo, true /* isStartGuestSession */,
                 false /* isAddUser */, false /* isForeground */);
     }
 
@@ -126,7 +130,7 @@ public class UserGridRecyclerView extends RecyclerView implements
     private UserRecord addUserRecord() {
         UserInfo userInfo = new UserInfo();
         userInfo.name = mContext.getString(R.string.car_add_user);
-        return new UserRecord(userInfo, false /* isGuest */,
+        return new UserRecord(userInfo, false /* isStartGuestSession */,
                 true /* isAddUser */, false /* isForeground */);
     }
 
@@ -198,8 +202,8 @@ public class UserGridRecyclerView extends RecyclerView implements
                     mUserSelectionListener.onUserSelected(userRecord);
                 }
 
-                // If the user selects Guest, switch to Guest profile
-                if (userRecord.mIsGuest) {
+                // If the user selects Guest, start the guest session.
+                if (userRecord.mIsStartGuestSession) {
                     mUserManagerHelper.switchToGuest(mGuestName);
                     return;
                 }
@@ -263,13 +267,13 @@ public class UserGridRecyclerView extends RecyclerView implements
             GradientDrawable shape = new GradientDrawable();
             shape.setShape(GradientDrawable.RADIAL_GRADIENT);
             shape.setGradientRadius(1.0f);
-            shape.setColor(mContext.getColor(R.color.car_user_switcher_no_user_image_bgcolor));
+            shape.setColor(mContext.getColor(R.color.car_grey_50));
             shape.setBounds(0, 0, mPodImageAvatarWidth, mPodImageAvatarHeight);
             shape.draw(canvas);
 
             // Draw the letter in the center.
             Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG);
-            paint.setColor(mContext.getColor(R.color.car_user_switcher_no_user_image_fgcolor));
+            paint.setColor(mContext.getColor(R.color.car_grey_900));
             paint.setTextAlign(Align.CENTER);
             if (isAddUserText) {
                 paint.setTextSize(mRes.getDimensionPixelSize(
@@ -313,14 +317,14 @@ public class UserGridRecyclerView extends RecyclerView implements
     public static final class UserRecord {
 
         public final UserInfo mInfo;
-        public final boolean mIsGuest;
+        public final boolean mIsStartGuestSession;
         public final boolean mIsAddUser;
         public final boolean mIsForeground;
 
-        public UserRecord(UserInfo userInfo, boolean isGuest, boolean isAddUser,
+        public UserRecord(UserInfo userInfo, boolean isStartGuestSession, boolean isAddUser,
                 boolean isForeground) {
             mInfo = userInfo;
-            mIsGuest = isGuest;
+            mIsStartGuestSession = isStartGuestSession;
             mIsAddUser = isAddUser;
             mIsForeground = isForeground;
         }

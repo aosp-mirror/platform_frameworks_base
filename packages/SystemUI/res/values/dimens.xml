@@ -185,6 +185,9 @@
     <!-- the padding on the start of the statusbar -->
     <dimen name="status_bar_padding_start">6dp</dimen>
 
+    <!-- the padding on the end of the statusbar -->
+    <dimen name="status_bar_padding_end">8dp</dimen>
+
     <!-- the radius of the overflow dot in the status bar -->
     <dimen name="overflow_dot_radius">1dp</dimen>
 
@@ -274,7 +277,9 @@
     <!-- The width of the panel that holds the quick settings. -->
     <dimen name="qs_panel_width">@dimen/notification_panel_width</dimen>
 
-    <dimen name="volume_dialog_panel_transparent_padding">8dp</dimen>
+    <dimen name="volume_dialog_panel_transparent_padding_right">8dp</dimen>
+
+    <dimen name="volume_dialog_panel_transparent_padding">20dp</dimen>
 
     <!-- the amount the volume panel should be offset at the end from the view next to it (or
     the screen edge, in portrait-->
@@ -927,16 +932,21 @@
     <!-- Smart reply button -->
     <dimen name="smart_reply_button_spacing">8dp</dimen>
     <dimen name="smart_reply_button_padding_vertical">10dp</dimen>
-    <dimen name="smart_reply_button_padding_horizontal_single_line">12dp</dimen>
+    <dimen name="smart_reply_button_padding_horizontal_single_line">16dp</dimen>
     <dimen name="smart_reply_button_padding_horizontal_double_line">16dp</dimen>
-    <dimen name="smart_reply_button_min_height">40dp</dimen>
+    <dimen name="smart_reply_button_min_height">32dp</dimen>
     <dimen name="smart_reply_button_font_size">14sp</dimen>
     <dimen name="smart_reply_button_line_spacing_extra">6sp</dimen> <!-- Total line height 20sp. -->
+
+    <!-- A reasonable upper bound for the height of the smart reply button. The measuring code
+            needs to start with a guess for the maximum size. Currently two-line smart reply buttons
+            add about 88dp of height to the notifications. -->
+    <dimen name="smart_reply_button_max_height">100dp</dimen>
 
     <!-- Fingerprint Dialog values -->
     <dimen name="fingerprint_dialog_fp_icon_size">64dp</dimen>
     <dimen name="fingerprint_dialog_animation_translation_offset">350dp</dimen>
-    <dimen name="fingerprint_dialog_corner_size">2dp</dimen>
+    <dimen name="fingerprint_dialog_corner_size">4dp</dimen>
 
     <!-- Wireless Charging Animation values -->
     <dimen name="wireless_charging_dots_radius_start">0dp</dimen>

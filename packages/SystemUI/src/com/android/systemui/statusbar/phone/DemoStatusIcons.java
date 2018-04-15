@@ -198,8 +198,7 @@ public class DemoStatusIcons extends StatusIconContainer implements DemoMode, Da
 
     public void addDemoWifiView(WifiIconState state) {
         Log.d(TAG, "addDemoWifiView: ");
-        StatusBarWifiView view = StatusBarWifiView.fromContext(mContext);
-        view.setSlot(state.slot);
+        StatusBarWifiView view = StatusBarWifiView.fromContext(mContext, state.slot);
 
         int viewIndex = getChildCount();
         // If we have mobile views, put wifi before them

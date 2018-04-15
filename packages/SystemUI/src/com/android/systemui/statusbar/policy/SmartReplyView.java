@@ -25,6 +25,7 @@ import com.android.systemui.Dependency;
 import com.android.systemui.R;
 import com.android.systemui.statusbar.NotificationData;
 import com.android.systemui.statusbar.SmartReplyLogger;
+import com.android.systemui.statusbar.notification.NotificationUtils;
 import com.android.systemui.statusbar.phone.KeyguardDismissUtil;
 
 import java.text.BreakIterator;
@@ -48,6 +49,12 @@ public class SmartReplyView extends ViewGroup {
     private final SmartReplyConstants mConstants;
     private final KeyguardDismissUtil mKeyguardDismissUtil;
 
+    /**
+     * The upper bound for the height of this view in pixels. Notifications are automatically
+     * recreated on density or font size changes so caching this should be fine.
+     */
+    private final int mHeightUpperLimit;
+
     /** Spacing to be applied between views. */
     private final int mSpacing;
 
@@ -68,6 +75,9 @@ public class SmartReplyView extends ViewGroup {
         super(context, attrs);
         mConstants = Dependency.get(SmartReplyConstants.class);
         mKeyguardDismissUtil = Dependency.get(KeyguardDismissUtil.class);
+
+        mHeightUpperLimit = NotificationUtils.getFontScaledHeight(mContext,
+            R.dimen.smart_reply_button_max_height);
 
         int spacing = 0;
         int singleLineButtonPaddingHorizontal = 0;
@@ -98,8 +108,17 @@ public class SmartReplyView extends ViewGroup {
         mSingleToDoubleLineButtonWidthIncrease =
                 2 * (doubleLineButtonPaddingHorizontal - singleLineButtonPaddingHorizontal);
 
+
         mBreakIterator = BreakIterator.getLineInstance();
         reallocateCandidateButtonQueueForSqueezing();
+    }
+
+    /**
+     * Returns an upper bound for the height of this view in pixels. This method is intended to be
+     * invoked before onMeasure, so it doesn't do any analysis on the contents of the buttons.
+     */
+    public int getHeightUpperLimit() {
+       return mHeightUpperLimit;
     }
 
     private void reallocateCandidateButtonQueueForSqueezing() {
@@ -280,8 +299,8 @@ public class SmartReplyView extends ViewGroup {
         // We're done squeezing buttons, so we can clear the priority queue.
         mCandidateButtonQueueForSqueezing.clear();
 
-        // Finally, we need to update corner radius and re-measure some buttons.
-        updateCornerRadiusAndRemeasureButtonsIfNecessary(buttonPaddingHorizontal, maxChildHeight);
+        // Finally, we need to re-measure some buttons.
+        remeasureButtonsIfNecessary(buttonPaddingHorizontal, maxChildHeight);
 
         setMeasuredDimension(
                 resolveSize(Math.max(getSuggestedMinimumWidth(), measuredWidth), widthMeasureSpec),
@@ -393,9 +412,8 @@ public class SmartReplyView extends ViewGroup {
         }
     }
 
-    private void updateCornerRadiusAndRemeasureButtonsIfNecessary(
+    private void remeasureButtonsIfNecessary(
             int buttonPaddingHorizontal, int maxChildHeight) {
-        final float cornerRadius = ((float) maxChildHeight) / 2;
         final int maxChildHeightMeasure =
                 MeasureSpec.makeMeasureSpec(maxChildHeight, MeasureSpec.EXACTLY);
 
@@ -406,11 +424,6 @@ public class SmartReplyView extends ViewGroup {
             if (!lp.show) {
                 continue;
             }
-
-            // Update corner radius.
-            GradientDrawable backgroundDrawable =
-                    (GradientDrawable) ((RippleDrawable) child.getBackground()).getDrawable(0);
-            backgroundDrawable.setCornerRadius(cornerRadius);
 
             boolean requiresNewMeasure = false;
             int newWidth = child.getMeasuredWidth();

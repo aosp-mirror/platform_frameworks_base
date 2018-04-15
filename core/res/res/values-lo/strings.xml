@@ -1014,8 +1014,7 @@
     <string name="dial" msgid="1253998302767701559">"ໂທ"</string>
     <string name="dial_desc" msgid="6573723404985517250">"ໂທຫາເບີໂທລະສັບທີ່ເລືອກ"</string>
     <string name="map" msgid="5441053548030107189">"ແຜນທີ່"</string>
-    <!-- no translation found for map_desc (1836995341943772348) -->
-    <skip />
+    <string name="map_desc" msgid="1836995341943772348">"ຊອກຫາທີ່ຢູ່ທີ່ເລືອກ"</string>
     <string name="browse" msgid="1245903488306147205">"ເປີດ"</string>
     <string name="browse_desc" msgid="8220976549618935044">"ເປີດ URL ທີ່ເລືອກ"</string>
     <string name="sms" msgid="4560537514610063430">"ຂໍ້ຄວາມ"</string>
@@ -1691,7 +1690,7 @@
     <string name="package_installed_device_owner" msgid="6875717669960212648">"ຖືກຕິດຕັ້ງໂດຍຜູ້ເບິ່ງແຍງລະບົບຂອງທ່ານ"</string>
     <string name="package_updated_device_owner" msgid="1847154566357862089">"ຖືກອັບໂຫລດໂດຍຜູ້ເບິ່ງແຍງລະບົບຂອງທ່ານ"</string>
     <string name="package_deleted_device_owner" msgid="2307122077550236438">"ຖືກລຶບອອກໂດຍຜູ້ເບິ່ງແຍງລະບົບຂອງທ່ານ"</string>
-    <string name="battery_saver_description" msgid="4660824093877546730">"ເພື່ອຂະຫຍາຍອາຍຸແບັດເຕີຣີ, ຕົວປະຢັດແບັດເຕີຣີຈະຫຼຸດປະສິດທິພາບອຸປະກອນຂອງທ່ານ ແລະ ຈຳກັດ ຫຼື ປິດການສັ່ນເຕືອນ, ບໍລິການສະຖານທີ່ ແລະ ຂໍ້ມູນພື້ນຫຼັງໄວ້. ອີເມວ, ຂໍ້ຄວາມ ແລະ ແອັບອື່ນໆທີ່ອີງອາໃສການຊິ້ງຂໍ້ມູນອາດຈະບໍ່ອັບເດດເວັ້ນເສຍແຕ່ທ່ານຈະເປີດພວກມັນ.\n\nຕົວປະຢັດບັດເຕີຣີຈະປິດອັດຕະໂນມັດເມື່ອສາກໄຟອຸປະກອນຂອງທ່ານ."</string>
+    <string name="battery_saver_description" msgid="769989536172631582">"ເພື່ອຂະຫຍາຍອາຍຸແບັດເຕີຣີຂອງທ່ານ, ຕົວປະຢັດແບັດເຕີຣີຈະປິດຄຸນສົມບັດອຸປະກອນບາງຢ່າງ ແລະ ຈຳກັດແອັບໄວ້."</string>
     <string name="data_saver_description" msgid="6015391409098303235">"ເພື່ອຊ່ວຍຫຼຸດຜ່ອນການນຳໃຊ້ຂໍ້ມູນ, ຕົວປະຢັດຂໍ້ມູນຈະປ້ອງກັນບໍ່ໃຫ້ບາງແອັບສົ່ງ ຫຼື ຮັບຂໍ້ມູນໃນພື້ນຫຼັງ. ແອັບໃດໜຶ່ງທີ່ທ່ານກຳລັງໃຊ້ຢູ່ຈະສາມາດເຂົ້າເຖິງຂໍ້ມູນໄດ້ ແຕ່ອາດເຂົ້າເຖິງໄດ້ຖີ່ໜ້ອຍລົງ. ນີ້ອາດໝາຍຄວາມວ່າ ຮູບພາບຕ່າງໆອາດບໍ່ສະແດງຈົນກວ່າທ່ານຈະແຕະໃສ່ກ່ອນ."</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"ເປີດໃຊ້ຕົວປະຢັດຂໍ້ມູນບໍ?"</string>
     <string name="data_saver_enable_button" msgid="7147735965247211818">"ເປີດໃຊ້"</string>
@@ -1778,6 +1777,12 @@
     <string name="language_picker_section_all" msgid="3097279199511617537">"ທຸກພາ​ສາ​"</string>
     <string name="region_picker_section_all" msgid="8966316787153001779">"ທຸກຂົງເຂດ"</string>
     <string name="locale_search_menu" msgid="2560710726687249178">"ຄົ້ນຫາ"</string>
+    <!-- no translation found for app_suspended_title (1919029799438164552) -->
+    <skip />
+    <!-- no translation found for app_suspended_default_message (7875306315686531621) -->
+    <skip />
+    <!-- no translation found for app_suspended_more_details (1131804827776778187) -->
+    <skip />
     <string name="work_mode_off_title" msgid="1118691887588435530">"ເປີດໃຊ້ໂປຣໄຟລ໌ບ່ອນເຮັດວຽກບໍ?"</string>
     <string name="work_mode_off_message" msgid="5130856710614337649">"ແອັບວຽກຂອງທ່ານ, ການແຈ້ງເຕືອນ, ຂໍ້ມູນ ແລະ ຄຸນສົມບັດໂປຣໄຟລ໌ວຽກຈະຖືກເປີດໃຊ້"</string>
     <string name="work_mode_turn_on" msgid="2062544985670564875">"ເປີດ​"</string>
@@ -1867,8 +1872,8 @@
     <string name="volume_dialog_ringer_guidance_silent" msgid="2128975224280276122">"ການໂທ ແລະ ການແຈ້ງເຕືອນຈະບໍ່ມີສຽງ"</string>
     <string name="notification_channel_system_changes" msgid="5072715579030948646">"ການປ່ຽນແປງລະບົບ"</string>
     <string name="notification_channel_do_not_disturb" msgid="6766940333105743037">"ຫ້າມລົບກວນ"</string>
-    <string name="zen_upgrade_notification_visd_title" msgid="4168873821019741166">"ໂໝດຫ້າມລົບກວນຈະເຊື່ອງການແຈ້ງເຕືອນເພື່ອຊ່ວຍໃຫ້ທ່ານສຸມໃສ່ວຽກໄດ້"</string>
-    <string name="zen_upgrade_notification_visd_content" msgid="6776377368195804354">"ນີ້ເປັນພຶດຕິກຳໃໝ່. ແຕະເພື່ອປ່ຽນແປງ."</string>
+    <string name="zen_upgrade_notification_visd_title" msgid="3288313883409759733">"ໃໝ່: ໂໝດຫ້າມລົບກວນຈະເຊື່ອງການແຈ້ງເຕືອນໄວ້"</string>
+    <string name="zen_upgrade_notification_visd_content" msgid="5533674060311631165">"ແຕະເພື່ອສຶກສາເພີ່ມເຕີມ ແລະ ປ່ຽນແປງ."</string>
     <string name="zen_upgrade_notification_title" msgid="3799603322910377294">"ປ່ຽນໂໝດຫ້າມລົບກວນແລ້ວ"</string>
     <string name="zen_upgrade_notification_content" msgid="1794994264692424562">"ແຕະເພື່ອກວດສອບວ່າມີຫຍັງຖືກບລັອກໄວ້ແດ່."</string>
     <string name="notification_app_name_system" msgid="4205032194610042794">"ລະບົບ"</string>

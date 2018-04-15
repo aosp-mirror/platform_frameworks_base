@@ -275,7 +275,7 @@
     <string name="permgrouprequest_contacts" msgid="6032805601881764300">"Vumela i-&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ukuthi ithole ukufinyelela koxhumana nabo?"</string>
     <string name="permgrouplab_location" msgid="7275582855722310164">"Indawo"</string>
     <string name="permgroupdesc_location" msgid="1346617465127855033">"finyelela kundawo yale divayisi"</string>
-    <string name="permgrouprequest_location" msgid="3788275734953323491">"Vumela i-&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ukuthi ifinyelele indawo yale divayisi?"</string>
+    <string name="permgrouprequest_location" msgid="3788275734953323491">"Vumela i-&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ukuthi ingene kundawo yale divayisi?"</string>
     <string name="permgrouplab_calendar" msgid="5863508437783683902">"Ikhalenda"</string>
     <string name="permgroupdesc_calendar" msgid="3889615280211184106">"finyelela kukhalenda yakho"</string>
     <string name="permgrouprequest_calendar" msgid="289900767793189421">"Vumela i-&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ukuthi ifinyelele kukhalenda yakho?"</string>
@@ -1014,8 +1014,7 @@
     <string name="dial" msgid="1253998302767701559">"Shaya"</string>
     <string name="dial_desc" msgid="6573723404985517250">"Ikholi ikhethe inombolo yefoni"</string>
     <string name="map" msgid="5441053548030107189">"Imephu"</string>
-    <!-- no translation found for map_desc (1836995341943772348) -->
-    <skip />
+    <string name="map_desc" msgid="1836995341943772348">"Thola ikheli elikhethiwe"</string>
     <string name="browse" msgid="1245903488306147205">"Vula"</string>
     <string name="browse_desc" msgid="8220976549618935044">"Vula i-URL ekhethiwe"</string>
     <string name="sms" msgid="4560537514610063430">"Umlayezo"</string>
@@ -1691,7 +1690,7 @@
     <string name="package_installed_device_owner" msgid="6875717669960212648">"Kufakwe umlawuli wakho"</string>
     <string name="package_updated_device_owner" msgid="1847154566357862089">"Kubuyekezwe umlawuli wakho"</string>
     <string name="package_deleted_device_owner" msgid="2307122077550236438">"Kususwe umlawuli wakho"</string>
-    <string name="battery_saver_description" msgid="4660824093877546730">"Ukuze kunwetshwe impilo yebhethri, Isilondolozi sebhethri sehlisa ukusebenza kwedivayisi yakho siphinde sikhawulele noma sivale ukudlidliza, amasevisi endawo, nedatha engemuva. I-imeyili, ukulayeza, nezinye izinhlelo zokusebenza ezithembele ekuvunyelanisweni kungenzeka zingabuyekezi ngaphandle kokuthi uzivule.\n\nIsilondolozi sebhethri sivalwa ngokuzenzakalela uma idivayisi yakho ishaja."</string>
+    <string name="battery_saver_description" msgid="769989536172631582">"Ukuze unwebise impilo yebhethri, iseva yebhethri iyavala ezinye izici zedivayisi futhi ikhawulele izinhlelo zokusebenza."</string>
     <string name="data_saver_description" msgid="6015391409098303235">"Ukusiza ukwehlisa ukusetshenziswa kwedatha, iseva yedatha igwema ezinye izinhlelo zokusebenza ukuthi zithumele noma zamukele idatha ngasemuva. Uhlelo lokusebenza olisebenzisa okwamanje lingafinyelela idatha, kodwa lingenza kanjalo kancane. Lokhu kungachaza, isibonelo, ukuthi izithombe azibonisi uze uzithephe."</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"Vula iseva yedatha?"</string>
     <string name="data_saver_enable_button" msgid="7147735965247211818">"Vula"</string>
@@ -1778,6 +1777,12 @@
     <string name="language_picker_section_all" msgid="3097279199511617537">"Zonke izilimi"</string>
     <string name="region_picker_section_all" msgid="8966316787153001779">"Zonke izifunda"</string>
     <string name="locale_search_menu" msgid="2560710726687249178">"Sesha"</string>
+    <!-- no translation found for app_suspended_title (1919029799438164552) -->
+    <skip />
+    <!-- no translation found for app_suspended_default_message (7875306315686531621) -->
+    <skip />
+    <!-- no translation found for app_suspended_more_details (1131804827776778187) -->
+    <skip />
     <string name="work_mode_off_title" msgid="1118691887588435530">"Vula iphrofayela yomsebenzi?"</string>
     <string name="work_mode_off_message" msgid="5130856710614337649">"Izinhlelo zakho zokusebenza zomsebenzi, izaziso, idatha, nezinye izici zephrofayela yomsebenzi kuzovulwa"</string>
     <string name="work_mode_turn_on" msgid="2062544985670564875">"Vula"</string>
@@ -1867,8 +1872,8 @@
     <string name="volume_dialog_ringer_guidance_silent" msgid="2128975224280276122">"Amakholi nezaziso zizothuliswa"</string>
     <string name="notification_channel_system_changes" msgid="5072715579030948646">"Ushintsho lwesistimu"</string>
     <string name="notification_channel_do_not_disturb" msgid="6766940333105743037">"Ungaphazamasi"</string>
-    <string name="zen_upgrade_notification_visd_title" msgid="4168873821019741166">"Okuthi Ungaphazamisi kufihla izaziso ukukusiza ukuthi ugxile"</string>
-    <string name="zen_upgrade_notification_visd_content" msgid="6776377368195804354">"Lokhu ukuziphatha okusha. Thepha ukuze ushintshe."</string>
+    <string name="zen_upgrade_notification_visd_title" msgid="3288313883409759733">"Ukungaphazamisi kufihle izaziso"</string>
+    <string name="zen_upgrade_notification_visd_content" msgid="5533674060311631165">"Thepha ukuze ufunde kabanzi futhi ushintshe."</string>
     <string name="zen_upgrade_notification_title" msgid="3799603322910377294">"Ukungaphazamisi kushintshile"</string>
     <string name="zen_upgrade_notification_content" msgid="1794994264692424562">"Thepha ukuze uhlole ukuthi yini evinjelwe."</string>
     <string name="notification_app_name_system" msgid="4205032194610042794">"Isistimu"</string>

@@ -308,7 +308,7 @@ public class NotificationInfo extends LinearLayout implements NotificationGuts.G
         minimize.setOnClickListener(mOnStopOrMinimizeNotifications);
 
         if (mIsNonblockable) {
-            keep.setText(R.string.notification_done);
+            keep.setText(android.R.string.ok);
             block.setVisibility(GONE);
             minimize.setVisibility(GONE);
         } else if (mIsForeground) {
@@ -523,7 +523,7 @@ public class NotificationInfo extends LinearLayout implements NotificationGuts.G
                 } else {
                     // For notifications with more than one channel, update notification enabled
                     // state. If the importance was lowered, we disable notifications.
-                    mINotificationManager.setNotificationsEnabledForPackage(
+                    mINotificationManager.setNotificationsEnabledWithImportanceLockForPackage(
                             mPackageName, mAppUid, mNewImportance >= mCurrentImportance);
                 }
             } catch (RemoteException e) {

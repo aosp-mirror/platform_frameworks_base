@@ -220,7 +220,7 @@
     <string name="global_action_bug_report" msgid="7934010578922304799">"အမှားရှာဖွေပြင်ဆင်မှုမှတ်တမ်း"</string>
     <string name="global_action_logout" msgid="935179188218826050">"သတ်မှတ်ပေးထားသည့်အချိန် ပြီးဆုံးပြီ"</string>
     <string name="global_action_screenshot" msgid="8329831278085426283">"ဖန်သားပြင်ဓာတ်ပုံ"</string>
-    <string name="bugreport_title" msgid="2667494803742548533">"အမှားရှာဖွေပြင်ဆင်မှုမှတ်တမ်းအား ယူရန်"</string>
+    <string name="bugreport_title" msgid="2667494803742548533">"ချွတ်ယွင်းမှုမှတ်တမ်း ယူခြင်း"</string>
     <string name="bugreport_message" msgid="398447048750350456">"သင့်ရဲ့ လက်ရှိ စက်အခြေအနေ အချက်အလက်များကို အီးမေးလ် အနေဖြင့် ပေးပို့ရန် စုဆောင်းပါမည်။ အမှားရှာဖွေပြင်ဆင်မှုမှတ်တမ်းမှ ပေးပို့ရန် အသင့်ဖြစ်သည်အထိ အချိန် အနည်းငယ်ကြာမြင့်မှာ ဖြစ်သဖြင့် သည်းခံပြီး စောင့်ပါရန်"</string>
     <string name="bugreport_option_interactive_title" msgid="8635056131768862479">"လက်ငင်းတုံ့ပြန်နိုင်သည့် အစီရင်ခံချက်"</string>
     <string name="bugreport_option_interactive_summary" msgid="229299488536107968">"အခြေအနေတော်တော်များများတွင် ၎င်းကိုအသုံးပြုပါ။ ၎င်းသည် အစီရင်ခံစာကို မှတ်သားခြင်း၊ ပြဿနာအကြောင်း နောက်ထပ်အသေးစိတ်များကို ထည့်သွင်းခြင်းနှင့် မျက်နှာပြင်ပုံဖမ်းယူခြင်းတို့ကို ပြုလုပ်ခွင့်ပေးပါသည်။ ပေးပို့ရန် အလွန်ကြာပြီး အသုံးပြုခြင်းနည်းပါးသည့်အပိုင်းကို ၎င်းက ချန်ခဲ့နိုင်ပါသည်။"</string>
@@ -304,7 +304,7 @@
     <string name="capability_title_canRequestFilterKeyEvents" msgid="2103440391902412174">"ရိုက်သောစာများကို စောင့်ကြည့်ရန်"</string>
     <string name="capability_desc_canRequestFilterKeyEvents" msgid="7463135292204152818">"ကိုယ်ရေးအချက်အလက်များဖြစ်သော ခရက်ဒစ်ကဒ်နံပါတ်နှင့် စကားဝှက်များ ပါဝင်သည်။"</string>
     <string name="capability_title_canControlMagnification" msgid="3593493281059424855">"မျက်နှာပြင် ချဲ့ခြင်းကို ထိန်းချုပ်ရန်"</string>
-    <string name="capability_desc_canControlMagnification" msgid="4791858203568383773">"မျက်နှာပြင် ဇူးမ်အရွယ်နှင့် နေရာချထားခြင်းကို ထိန်းချုပ်ပါ။"</string>
+    <string name="capability_desc_canControlMagnification" msgid="4791858203568383773">"မျက်နှာပြင် ဇူးမ်အရွယ်နှင့် နေရာချထားခြင်းကို ထိန်းချုပ်ပါသည်။"</string>
     <string name="capability_title_canPerformGestures" msgid="7418984730362576862">"လက်ဟန်များ အသုံးပြုပါ"</string>
     <string name="capability_desc_canPerformGestures" msgid="8296373021636981249">"တို့ခြင်း၊ ပွတ်ဆွဲခြင်း၊ နှင့် အခြား လက်ဟန်များကို အသုံးပြုနိုင်ပါသည်။"</string>
     <string name="capability_title_canCaptureFingerprintGestures" msgid="6309568287512278670">"လက်ဗွေရာများ"</string>
@@ -601,7 +601,7 @@
     <string name="policydesc_encryptedStorage" msgid="2637732115325316992">"အပလီကေးရှင်းမှ သိမ်းဆည်းထားသော အရာများအား လျို့ဝှက် အသွင်းပြောင်းရန် လိုအပ်ခြင်း"</string>
     <string name="policylab_disableCamera" msgid="6395301023152297826">"ကင်မရာအား ပိတ်ခြင်း"</string>
     <string name="policydesc_disableCamera" msgid="2306349042834754597">"စက်မှ ကင်မရာအားလုံး အသုံးပြုမှုအား ကန့်သတ်ရန်"</string>
-    <string name="policylab_disableKeyguardFeatures" msgid="8552277871075367771">"ဖန်သားပြင်သော့ခတ်နိုင်သည့်အင်္ဂါရပ် အချို့အား ပိတ်ထားပါ"</string>
+    <string name="policylab_disableKeyguardFeatures" msgid="8552277871075367771">"ဖန်သားပြင် လော့ခ်ချသည့် ဝန်ဆောင်မှုအချို့ ပိတ်ခြင်း"</string>
     <string name="policydesc_disableKeyguardFeatures" msgid="2044755691354158439">"ဖန်သားပြင်သော့ခတ်နိုင်သည့်အင်္ဂါရပ် အချို့ အသုံးပြုမှုအား ကာကွယ်ပါ။"</string>
   <string-array name="phoneTypes">
     <item msgid="8901098336658710359">"အိမ်"</item>
@@ -1014,8 +1014,7 @@
     <string name="dial" msgid="1253998302767701559">"ခေါ်ဆိုရန်"</string>
     <string name="dial_desc" msgid="6573723404985517250">"ရွေးထားသည့် ဖုန်းနံပါတ်ကို ခေါ်ရန်"</string>
     <string name="map" msgid="5441053548030107189">"မြေပုံ"</string>
-    <!-- no translation found for map_desc (1836995341943772348) -->
-    <skip />
+    <string name="map_desc" msgid="1836995341943772348">"ရွေးထားသည့် လိပ်စာကို ရှာဖွေရန်"</string>
     <string name="browse" msgid="1245903488306147205">"ဖွင့်ရန်"</string>
     <string name="browse_desc" msgid="8220976549618935044">"ရွေးထားသည့် URL ကို ဖွင့်ရန်"</string>
     <string name="sms" msgid="4560537514610063430">"SMS"</string>
@@ -1654,7 +1653,7 @@
     <string name="mediasize_unknown_landscape" msgid="4876995327029361552">"အလျားလိုက် အရွယ်မသိ"</string>
     <string name="write_fail_reason_cancelled" msgid="7091258378121627624">"ဖျက်သိမ်းလိုက်ပြီး"</string>
     <string name="write_fail_reason_cannot_write" msgid="8132505417935337724">"အချက်အလက်များ ရိုက်ကူးစဉ် အမှားပေါ်နေ"</string>
-    <string name="reason_unknown" msgid="6048913880184628119">"အကြောင်းအရာ မသိရှိပါ"</string>
+    <string name="reason_unknown" msgid="6048913880184628119">"မသိပါ"</string>
     <string name="reason_service_unavailable" msgid="7824008732243903268">"စာထုတ်သောဆားဗစ်အားဖွင့်မထားပါ"</string>
     <string name="print_service_installed_title" msgid="2246317169444081628">"<xliff:g id="NAME">%s</xliff:g> ဆားဗစ် ထည့်သွင်းပြီး"</string>
     <string name="print_service_installed_message" msgid="5897362931070459152">"ထိတို့ခြင်းဖြင့် ဖွင့်ပါ"</string>
@@ -1692,7 +1691,7 @@
     <string name="package_installed_device_owner" msgid="6875717669960212648">"သင်၏ စီမံခန့်ခွဲသူက ထည့်သွင်းထားသည်"</string>
     <string name="package_updated_device_owner" msgid="1847154566357862089">"သင်၏ စီမံခန့်ခွဲသူက အပ်ဒိတ်လုပ်ထားသည်"</string>
     <string name="package_deleted_device_owner" msgid="2307122077550236438">"သင်၏ စီမံခန့်ခွဲသူက ဖျက်လိုက်ပါပြီ"</string>
-    <string name="battery_saver_description" msgid="4660824093877546730">"ဘက်ထရီသက်တမ်း တိုးရန် \'ဘက်ထရီအားထိန်း\' သည် သင့်စက်ပစ္စည်း၏ စွမ်းဆောင်ရည်ကို လျှော့ချပေးပြီး တုန်ခါမှု၊ တည်နေရာ ဝန်ဆောင်မှုများနှင့် နောက်ခံဒေတာများကို ကန့်သတ်ခြင်း သို့မဟုတ် ပိတ်ခြင်းများ ပြုလုပ်ပေးပါသည်။ စင့်ခ်လုပ်ခြင်းအပေါ် အားထားနေရသည့် အီးမေးလ်၊ မက်ဆေ့ဂျ်ပို့ခြင်းနှင့် အခြားအက်ပ်များကို သင်မဖွင့်လျှင် အပ်ဒိတ်ဖြစ်တော့မည် မဟုတ်ပါ။\n\nသင့်စက်ပစ္စည်းကို အားသွင်းနေသည့်အခါ \'ဘက်ထရီအားထိန်း\' ကို အလိုအလျောက် ပိတ်သွားပါမည်။"</string>
+    <string name="battery_saver_description" msgid="769989536172631582">"ဘက်ထရီသက်တမ်း တိုးလာစေရန် \'ဘက်ထရီအားထိန်း\' သည် အချို့သော စက်ပစ္စည်းဝန်ဆောင်မှုများကို ပိတ်ပြီး အက်ပ်များကို ကန့်သတ်ပေးပါသည်။"</string>
     <string name="data_saver_description" msgid="6015391409098303235">"ဒေတာအသုံးလျှော့ချနိုင်ရန် အက်ပ်များကို နောက်ခံတွင် ဒေတာပို့ခြင်းနှင့် လက်ခံခြင်းမရှိစေရန် ဒေတာချွေတာမှုစနစ်က တားဆီးထားပါသည်။ ယခုအက်ပ်ဖြင့် ဒေတာအသုံးပြုနိုင်သော်လည်း အကြိမ်လျှော့၍သုံးရပါမည်။ ဥပမာ၊ သင် မတို့မချင်း ပုံများပေါ်လာမည် မဟုတ်ပါ။"</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"ဒေတာအသုံးပြုမှု ချွေတာမှုစနစ်ကို ဖွင့်မလား။"</string>
     <string name="data_saver_enable_button" msgid="7147735965247211818">"ဖွင့်ပါ"</string>
@@ -1738,7 +1737,7 @@
     <string name="zen_mode_downtime_feature_name" msgid="2626974636779860146">"ကျချိန်"</string>
     <string name="zen_mode_default_weeknights_name" msgid="3081318299464998143">"ကြားရက်ည"</string>
     <string name="zen_mode_default_weekends_name" msgid="2786495801019345244">"စနေ၊ တနင်္ဂနွေ"</string>
-    <string name="zen_mode_default_events_name" msgid="8158334939013085363">"ဖြစ်ရပ်"</string>
+    <string name="zen_mode_default_events_name" msgid="8158334939013085363">"အစီအစဉ်"</string>
     <string name="zen_mode_default_every_night_name" msgid="3012363838882944175">"အိပ်နေချိန်"</string>
     <string name="muted_by" msgid="6147073845094180001">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g> အသံပိတ်သည်"</string>
     <string name="system_error_wipe_data" msgid="6608165524785354962">"သင့်ကိရိယာအတွင်းပိုင်းတွင် ပြဿနာရှိနေပြီး၊ မူလစက်ရုံထုတ်အခြေအနေအဖြစ် ပြန်လည်ရယူနိုင်သည်အထိ အခြေအနေမတည်ငြိမ်နိုင်ပါ။"</string>
@@ -1779,6 +1778,12 @@
     <string name="language_picker_section_all" msgid="3097279199511617537">"ဘာသာစကားများအားလုံး"</string>
     <string name="region_picker_section_all" msgid="8966316787153001779">"ဒေသအားလုံး"</string>
     <string name="locale_search_menu" msgid="2560710726687249178">"ရှာဖွေရန်"</string>
+    <!-- no translation found for app_suspended_title (1919029799438164552) -->
+    <skip />
+    <!-- no translation found for app_suspended_default_message (7875306315686531621) -->
+    <skip />
+    <!-- no translation found for app_suspended_more_details (1131804827776778187) -->
+    <skip />
     <string name="work_mode_off_title" msgid="1118691887588435530">"အလုပ်ပရိုဖိုင် ဖွင့်လိုသလား။"</string>
     <string name="work_mode_off_message" msgid="5130856710614337649">"သင်၏ အလုပ်အက်ပ်၊ အကြောင်းကြားချက်၊ ဒေတာနှင့် အခြားအလုပ်ပရိုဖိုင် ဝန်ဆောင်မှုများကို ဖွင့်လိုက်ပါမည်"</string>
     <string name="work_mode_turn_on" msgid="2062544985670564875">"ဖွင့်ပါ"</string>
@@ -1868,8 +1873,8 @@
     <string name="volume_dialog_ringer_guidance_silent" msgid="2128975224280276122">"ခေါ်ဆိုမှုများနှင့် အကြောင်းကြားချက်များကို အသံပိတ်ထားပါမည်"</string>
     <string name="notification_channel_system_changes" msgid="5072715579030948646">"စနစ် အပြောင်းအလဲများ"</string>
     <string name="notification_channel_do_not_disturb" msgid="6766940333105743037">"မနှောင့်ယှက်ရ"</string>
-    <string name="zen_upgrade_notification_visd_title" msgid="4168873821019741166">"သင်အာရုံစိုက်နိုင်စေရန် \'မနှောင့်ယှက်ရ\' က အကြောင်းကြားချက်များကို ဖျောက်ထားသည်"</string>
-    <string name="zen_upgrade_notification_visd_content" msgid="6776377368195804354">"၎င်းသည် အမူအကျင့်အသစ်ဖြစ်သည်။ ပြောင်းရန် တို့ပါ။"</string>
+    <string name="zen_upgrade_notification_visd_title" msgid="3288313883409759733">"အသစ်− \'မနှောင့်ယှက်ရ\' က အကြောင်းကြားချက်များကို ဖျောက်ထားသည်"</string>
+    <string name="zen_upgrade_notification_visd_content" msgid="5533674060311631165">"ပိုမိုလေ့လာရန်နှင့် ပြောင်းလဲရန် တို့ပါ။"</string>
     <string name="zen_upgrade_notification_title" msgid="3799603322910377294">"\'မနှောင့်ယှက်ရ\' ပြောင်းလဲသွားပါပြီ"</string>
     <string name="zen_upgrade_notification_content" msgid="1794994264692424562">"ပိတ်ထားသည့်အရာများကို ကြည့်ရန် တို့ပါ။"</string>
     <string name="notification_app_name_system" msgid="4205032194610042794">"စနစ်"</string>

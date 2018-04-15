@@ -19,6 +19,7 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="unknown_user_label" msgid="4323896111737677955">"Sconosciuto"</string>
-    <string name="start_driving" msgid="864023351402918991">"Inizia la guida"</string>
+    <string name="car_guest" msgid="3738772168718508650">"Ospite"</string>
+    <string name="car_add_user" msgid="5245196248349230898">"Aggiungi utente"</string>
+    <string name="car_new_user" msgid="8142927244990323906">"Nuovo utente"</string>
 </resources>

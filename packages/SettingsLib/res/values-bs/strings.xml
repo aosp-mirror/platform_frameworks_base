@@ -141,7 +141,7 @@
     <string name="launch_defaults_some" msgid="313159469856372621">"Neke zadane vrijednosti su postavljene"</string>
     <string name="launch_defaults_none" msgid="4241129108140034876">"Nema postavljenih zadanih vrijednosti"</string>
     <string name="tts_settings" msgid="8186971894801348327">"Postavke za pretvaranje teksta u govor"</string>
-    <string name="tts_settings_title" msgid="1237820681016639683">"Pretvaranje teksta u govor"</string>
+    <string name="tts_settings_title" msgid="1237820681016639683">"Pretv. teksta u govor"</string>
     <string name="tts_default_rate_title" msgid="6030550998379310088">"Brzina govora"</string>
     <string name="tts_default_rate_summary" msgid="4061815292287182801">"Brzina kojom se izgovara tekst"</string>
     <string name="tts_default_pitch_title" msgid="6135942113172488671">"Visina"</string>
@@ -216,20 +216,15 @@
     <string name="bluetooth_select_avrcp_version_string" msgid="3750059931120293633">"Bluetooth AVRCP verzija"</string>
     <string name="bluetooth_select_avrcp_version_dialog_title" msgid="7277329668298705702">"Odaberite Bluetooth AVRCP verziju"</string>
     <string name="bluetooth_select_a2dp_codec_type" msgid="90597356942154882">"Bluetooth Audio kodek"</string>
-    <!-- no translation found for bluetooth_select_a2dp_codec_type_dialog_title (8436224899475822557) -->
-    <skip />
+    <string name="bluetooth_select_a2dp_codec_type_dialog_title" msgid="8436224899475822557">"Aktivirajte Bluetooth Audio Codec\nOdabir"</string>
     <string name="bluetooth_select_a2dp_codec_sample_rate" msgid="4788245703824623062">"Brzina uzorkovanja za Bluetooth audio"</string>
-    <!-- no translation found for bluetooth_select_a2dp_codec_sample_rate_dialog_title (8010380028880963535) -->
-    <skip />
+    <string name="bluetooth_select_a2dp_codec_sample_rate_dialog_title" msgid="8010380028880963535">"Aktivirajte Bluetooth Audio Codec\nOdabir: Brzina semplova"</string>
     <string name="bluetooth_select_a2dp_codec_bits_per_sample" msgid="2099645202720164141">"Bluetooth audio bitovi po uzorku"</string>
-    <!-- no translation found for bluetooth_select_a2dp_codec_bits_per_sample_dialog_title (8063859754619484760) -->
-    <skip />
+    <string name="bluetooth_select_a2dp_codec_bits_per_sample_dialog_title" msgid="8063859754619484760">"Aktivirajte Bluetooth Audio Codec\nOdabir: Bitovi po semplu"</string>
     <string name="bluetooth_select_a2dp_codec_channel_mode" msgid="884855779449390540">"Način Bluetooth audio kanala"</string>
-    <!-- no translation found for bluetooth_select_a2dp_codec_channel_mode_dialog_title (7234956835280563341) -->
-    <skip />
+    <string name="bluetooth_select_a2dp_codec_channel_mode_dialog_title" msgid="7234956835280563341">"Aktivirajte Bluetooth Audio Codec\nOdabir: Način rada po kanalima"</string>
     <string name="bluetooth_select_a2dp_codec_ldac_playback_quality" msgid="3619694372407843405">"Bluetooth Audio LDAC kodek: Kvalitet reprodukcije"</string>
-    <!-- no translation found for bluetooth_select_a2dp_codec_ldac_playback_quality_dialog_title (7595776220458732825) -->
-    <skip />
+    <string name="bluetooth_select_a2dp_codec_ldac_playback_quality_dialog_title" msgid="7595776220458732825">"Aktivirajte Bluetooth Audio Codec\nOdabir: Kvalitet reprodukcije"</string>
     <string name="bluetooth_select_a2dp_codec_streaming_label" msgid="5347862512596240506">"Prijenos: <xliff:g id="STREAMING_PARAMETER">%1$s</xliff:g>"</string>
     <string name="select_private_dns_configuration_title" msgid="3700456559305263922">"Privatni DNS"</string>
     <string name="select_private_dns_configuration_dialog_title" msgid="9221994415765826811">"Odaberite način rada privatnog DNS-a"</string>
@@ -245,7 +240,7 @@
     <string name="wifi_unmetered_label" msgid="6124098729457992931">"Mreža bez ograničenja prometa"</string>
     <string name="select_logd_size_title" msgid="7433137108348553508">"Veličine bafera za zapisnik"</string>
     <string name="select_logd_size_dialog_title" msgid="1206769310236476760">"Odaberite veličine za Logger prema međumemoriji evidencije"</string>
-    <string name="dev_logpersist_clear_warning_title" msgid="684806692440237967">"Želite li izbrisati trajnu pohranu zapisivača?"</string>
+    <string name="dev_logpersist_clear_warning_title" msgid="684806692440237967">"Želite li obrisati trajnu pohranu zapisivača?"</string>
     <string name="dev_logpersist_clear_warning_message" msgid="2256582531342994562">"Kada više ne pratimo trajnog zapisivača, trebamo u potpunosti izbrisati podatke zapisivača na vašem uređaju."</string>
     <string name="select_logpersist_title" msgid="7530031344550073166">"Trajno pohranjuj podatke zapisivača na uređaju"</string>
     <string name="select_logpersist_dialog_title" msgid="4003400579973269060">"Odaberite međuspremnike zapisnika za trajno pohranjivanje na uređaju"</string>
@@ -261,8 +256,8 @@
     <string name="adb_keys_warning_message" msgid="5659849457135841625">"Opozvati pristup otklanjanju grešaka putem uređaja spojenog na USB za sve računare koje ste prethodno ovlastili?"</string>
     <string name="dev_settings_warning_title" msgid="7244607768088540165">"Dopustiti postavke za razvoj?"</string>
     <string name="dev_settings_warning_message" msgid="2298337781139097964">"Ove postavke su namijenjene samo za svrhe razvoja. Mogu izazvati pogrešno ponašanje uređaja i aplikacija na njemu."</string>
-    <string name="verify_apps_over_usb_title" msgid="4177086489869041953">"Verifikuj aplikacije putem USB-a"</string>
-    <string name="verify_apps_over_usb_summary" msgid="9164096969924529200">"Provjerava da li se u aplikacijama instaliranim putem ADB-a/ADT-a javlja zlonamerno ponašanje."</string>
+    <string name="verify_apps_over_usb_title" msgid="4177086489869041953">"Verificiraj aplikacije putem USB-a"</string>
+    <string name="verify_apps_over_usb_summary" msgid="9164096969924529200">"Provjerava da li se u aplikacijama instaliranim putem ADB-a/ADT-a javlja zlonamjerno ponašanje."</string>
     <string name="bluetooth_show_devices_without_names_summary" msgid="2351196058115755520">"Prikazat će se Bluetooth uređaji bez naziva (samo MAC adrese)"</string>
     <string name="bluetooth_disable_absolute_volume_summary" msgid="6031284410786545957">"Onemogućava opciju Bluetooth apsolutne jačine zvuka u slučaju problema s jačinom zvuka na udaljenim uređajima, kao što je neprihvatljivo glasan zvuk ili nedostatak kontrole."</string>
     <string name="enable_terminal_title" msgid="95572094356054120">"Lokalni terminal"</string>
@@ -285,15 +280,15 @@
     <string name="strict_mode" msgid="1938795874357830695">"Omogućen strogi režim"</string>
     <string name="strict_mode_summary" msgid="142834318897332338">"Prikaži ekran uz treptanje kada aplikacije vrše duge operacije u glavnoj niti"</string>
     <string name="pointer_location" msgid="6084434787496938001">"Lokacija pokazivača"</string>
-    <string name="pointer_location_summary" msgid="840819275172753713">"Trenutni podaci o dodirivanju prikazuje se u nadsloju preko ekrana"</string>
+    <string name="pointer_location_summary" msgid="840819275172753713">"Trenutni podaci o dodirivanju prikazuju se u nadsloju preko ekrana"</string>
     <string name="show_touches" msgid="2642976305235070316">"Prikaži dodirivanja"</string>
     <string name="show_touches_summary" msgid="6101183132903926324">"Prikaži vizuelne povratne informacije za dodirivanja"</string>
     <string name="show_screen_updates" msgid="5470814345876056420">"Prikaži ažuriranja za površinu"</string>
-    <string name="show_screen_updates_summary" msgid="2569622766672785529">"Prikazi cijele površine prozora uz treptanje prilikom ažuriranja"</string>
+    <string name="show_screen_updates_summary" msgid="2569622766672785529">"Prikaži cijele površine prozora uz treptanje prilikom ažuriranja"</string>
     <string name="show_hw_screen_updates" msgid="5036904558145941590">"Pok. ažur. za GPU prikaz"</string>
     <string name="show_hw_screen_updates_summary" msgid="1115593565980196197">"Prikazi uz treptanje unutar prozora kada se crta koristeći GPU"</string>
     <string name="show_hw_layers_updates" msgid="5645728765605699821">"Prikaži dodatne informacije za ažuriranja za hardver"</string>
-    <string name="show_hw_layers_updates_summary" msgid="5296917233236661465">"Trepći hardverske slojeve zeleno kada se ažuriraju"</string>
+    <string name="show_hw_layers_updates_summary" msgid="5296917233236661465">"Hardverski slojevi trepću zelenom bojom pri ažuriranju"</string>
     <string name="debug_hw_overdraw" msgid="2968692419951565417">"Otkl. greške GPU preklap."</string>
     <string name="disable_overlays" msgid="2074488440505934665">"Onemog. HW preklapanja"</string>
     <string name="disable_overlays_summary" msgid="3578941133710758592">"Uvijek koristi GPU za kompoziciju ekrana"</string>
@@ -307,26 +302,26 @@
     <string name="force_rtl_layout_all_locales_summary" msgid="9192797796616132534">"Prisilno postavi raspored ekrana s desna u lijevo za sve regije"</string>
     <string name="force_hw_ui" msgid="6426383462520888732">"Prisili GPU iscrtavanje"</string>
     <string name="force_hw_ui_summary" msgid="5535991166074861515">"Prisilno koristite GPU za 2d crtanje"</string>
-    <string name="force_msaa" msgid="7920323238677284387">"Prinudno primjeni 4x MSAA"</string>
+    <string name="force_msaa" msgid="7920323238677284387">"Prinudno primijeni 4x MSAA"</string>
     <string name="force_msaa_summary" msgid="9123553203895817537">"Omogući 4x MSAA u OpenGL ES 2.0 aplikacijama"</string>
-    <string name="show_non_rect_clip" msgid="505954950474595172">"Ispravi pogreške na nepravougaonim operacijama isecanja"</string>
+    <string name="show_non_rect_clip" msgid="505954950474595172">"Ispravi pogreške na nepravougaonim operacijama isjecanja"</string>
     <string name="track_frame_time" msgid="6146354853663863443">"Profil GPU iscrtavanja"</string>
     <string name="enable_gpu_debug_layers" msgid="3848838293793255097">"Omogući slojeve za otklanjanje grešaka na GPU-u"</string>
     <string name="enable_gpu_debug_layers_summary" msgid="8009136940671194940">"Omogući učitavanje slojeva za otklanjanje grešaka na GPU-u za aplikacije za otklanjanje grešaka"</string>
     <string name="window_animation_scale_title" msgid="6162587588166114700">"Skala animacije prozora"</string>
-    <string name="transition_animation_scale_title" msgid="387527540523595875">"Skaliranje animacije prijelaza"</string>
+    <string name="transition_animation_scale_title" msgid="387527540523595875">"Skala animacije prijelaza"</string>
     <string name="animator_duration_scale_title" msgid="3406722410819934083">"Skala trajanja animatora"</string>
     <string name="overlay_display_devices_title" msgid="5364176287998398539">"Simuliraj sekundarne ekrane"</string>
     <string name="debug_applications_category" msgid="4206913653849771549">"Aplikacije"</string>
     <string name="immediately_destroy_activities" msgid="1579659389568133959">"Ne čuvaj aktivnosti"</string>
-    <string name="immediately_destroy_activities_summary" msgid="3592221124808773368">"Obustavi svaku aktivnosti čim je korisnik napusti"</string>
+    <string name="immediately_destroy_activities_summary" msgid="3592221124808773368">"Obustavi svaku aktivnost čim je korisnik napusti"</string>
     <string name="app_process_limit_title" msgid="4280600650253107163">"Ograničenje procesa u pozadini"</string>
     <string name="show_all_anrs" msgid="4924885492787069007">"Prikaži ANR-e u pozadini"</string>
     <string name="show_all_anrs_summary" msgid="6636514318275139826">"Prikaži dijalog \"Aplikacija ne reagira\" za aplikacije pokrenute u pozadini"</string>
     <string name="show_notification_channel_warnings" msgid="1399948193466922683">"Prikaz upozorenja na obavještenju o kanalu"</string>
-    <string name="show_notification_channel_warnings_summary" msgid="5536803251863694895">"Prikaz upozorenja ekranu kada aplikacija pošalje obavještenje bez važećeg kanala."</string>
+    <string name="show_notification_channel_warnings_summary" msgid="5536803251863694895">"Prikaz upozorenja na ekranu kada aplikacija pošalje obavještenje bez važećeg kanala."</string>
     <string name="force_allow_on_external" msgid="3215759785081916381">"Nametni aplikacije na vanjskoj pohrani"</string>
-    <string name="force_allow_on_external_summary" msgid="3640752408258034689">"Omogućava da svaka aplikacija bude pogodna za upisivanje na vanjsku pohranu, bez obzira na prikazane vrijednosti"</string>
+    <string name="force_allow_on_external_summary" msgid="3640752408258034689">"Omogućava da svaka aplikacija može upisivati na vanjsku pohranu, bez obzira na prikazane vrijednosti"</string>
     <string name="force_resizable_activities" msgid="8615764378147824985">"Nametni aktivnostima mijenjanje veličina"</string>
     <string name="force_resizable_activities_summary" msgid="6667493494706124459">"Neka sve aktivnosti budu takve da mogu mijenjati veličinu za prikaz sa više prozora, bez obzira na prikazane vrijednosti."</string>
     <string name="enable_freeform_support" msgid="1461893351278940416">"Omogući prozore nepravilnih oblika"</string>
@@ -368,7 +363,7 @@
     <string name="daltonizer_mode_monochromacy" msgid="8485709880666106721">"Crno-bijelo"</string>
     <string name="daltonizer_mode_deuteranomaly" msgid="5475532989673586329">"Deuteranomalija (crveno-zeleno)"</string>
     <string name="daltonizer_mode_protanomaly" msgid="8424148009038666065">"Protanomalija (crveno-zeleno)"</string>
-    <string name="daltonizer_mode_tritanomaly" msgid="481725854987912389">"Tritanomalija (plavo-žuta)"</string>
+    <string name="daltonizer_mode_tritanomaly" msgid="481725854987912389">"Tritanomalija (plavo-žuto)"</string>
     <string name="accessibility_display_daltonizer_preference_title" msgid="5800761362678707872">"Ispravka boje"</string>
     <string name="accessibility_display_daltonizer_preference_subtitle" msgid="3484969015295282911">"Ova funkcija je eksperimentalna i može uticati na performanse."</string>
     <string name="daltonizer_type_overridden" msgid="3116947244410245916">"Zamjenjuje <xliff:g id="TITLE">%1$s</xliff:g>"</string>

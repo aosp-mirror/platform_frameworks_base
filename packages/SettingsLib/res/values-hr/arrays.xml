@@ -235,7 +235,7 @@
     <item msgid="2290859360633824369">"Prikaži područja za deuteranomaliju"</item>
   </string-array>
   <string-array name="app_process_limit_entries">
-    <item msgid="3401625457385943795">"Standardna ograničenje"</item>
+    <item msgid="3401625457385943795">"Standardno ograničenje"</item>
     <item msgid="4071574792028999443">"Nema pozadinskih procesa"</item>
     <item msgid="4810006996171705398">"Najviše 1 proces"</item>
     <item msgid="8586370216857360863">"Najviše 2 procesa"</item>

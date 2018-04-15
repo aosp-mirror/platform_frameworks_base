@@ -36,11 +36,6 @@ interface ISystemUiProxy {
     void startScreenPinning(int taskId) = 1;
 
     /**
-     * Specifies the text to be shown for onboarding the new swipe-up gesture to access recents.
-     */
-    void setRecentsOnboardingText(CharSequence text) = 3;
-
-    /**
      * Enables/disables launcher/overview interaction features {@link InteractionType}.
      */
     void setInteractionState(int flags) = 4;

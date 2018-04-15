@@ -1014,8 +1014,7 @@
     <string name="dial" msgid="1253998302767701559">"Call"</string>
     <string name="dial_desc" msgid="6573723404985517250">"Call selected phone number"</string>
     <string name="map" msgid="5441053548030107189">"Map"</string>
-    <!-- no translation found for map_desc (1836995341943772348) -->
-    <skip />
+    <string name="map_desc" msgid="1836995341943772348">"Locate selected address"</string>
     <string name="browse" msgid="1245903488306147205">"Open"</string>
     <string name="browse_desc" msgid="8220976549618935044">"Open selected URL"</string>
     <string name="sms" msgid="4560537514610063430">"Message"</string>
@@ -1691,7 +1690,7 @@
     <string name="package_installed_device_owner" msgid="6875717669960212648">"Installed by your admin"</string>
     <string name="package_updated_device_owner" msgid="1847154566357862089">"Updated by your admin"</string>
     <string name="package_deleted_device_owner" msgid="2307122077550236438">"Deleted by your admin"</string>
-    <string name="battery_saver_description" msgid="4660824093877546730">"To extend battery life, Battery Saver reduces your device\'s performance and limits or turns off vibration, Location Services and background data. Email, messaging and other apps that rely on syncing may not update unless you open them.\n\nBattery Saver turns off automatically when your device is charging."</string>
+    <string name="battery_saver_description" msgid="769989536172631582">"To extend your battery life, Battery Saver turns off some device features and restricts apps."</string>
     <string name="data_saver_description" msgid="6015391409098303235">"To help reduce data usage, Data Saver prevents some apps from sending or receiving data in the background. An app that you’re currently using can access data, but may do so less frequently. This may mean, for example, that images don’t display until you tap them."</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"Turn on Data Saver?"</string>
     <string name="data_saver_enable_button" msgid="7147735965247211818">"Turn on"</string>
@@ -1778,6 +1777,12 @@
     <string name="language_picker_section_all" msgid="3097279199511617537">"All languages"</string>
     <string name="region_picker_section_all" msgid="8966316787153001779">"All regions"</string>
     <string name="locale_search_menu" msgid="2560710726687249178">"Search"</string>
+    <!-- no translation found for app_suspended_title (1919029799438164552) -->
+    <skip />
+    <!-- no translation found for app_suspended_default_message (7875306315686531621) -->
+    <skip />
+    <!-- no translation found for app_suspended_more_details (1131804827776778187) -->
+    <skip />
     <string name="work_mode_off_title" msgid="1118691887588435530">"Turn on work profile?"</string>
     <string name="work_mode_off_message" msgid="5130856710614337649">"Your work apps, notifications, data and other work profile features will be turned on"</string>
     <string name="work_mode_turn_on" msgid="2062544985670564875">"Turn on"</string>
@@ -1831,7 +1836,7 @@
     <string name="autofill_save_title_with_2types" msgid="5214035651838265325">"Save <xliff:g id="TYPE_0">%1$s</xliff:g> and <xliff:g id="TYPE_1">%2$s</xliff:g> to &lt;b&gt;<xliff:g id="LABEL">%3$s</xliff:g>&lt;/b&gt;?"</string>
     <string name="autofill_save_title_with_3types" msgid="6943161834231458441">"Save <xliff:g id="TYPE_0">%1$s</xliff:g>, <xliff:g id="TYPE_1">%2$s</xliff:g>, and <xliff:g id="TYPE_2">%3$s</xliff:g> to &lt;b&gt;<xliff:g id="LABEL">%4$s</xliff:g>&lt;/b&gt;?"</string>
     <string name="autofill_save_yes" msgid="6398026094049005921">"Save"</string>
-    <string name="autofill_save_no" msgid="2625132258725581787">"No thanks"</string>
+    <string name="autofill_save_no" msgid="2625132258725581787">"No, thanks"</string>
     <string name="autofill_save_type_password" msgid="5288448918465971568">"password"</string>
     <string name="autofill_save_type_address" msgid="4936707762193009542">"address"</string>
     <string name="autofill_save_type_credit_card" msgid="7127694776265563071">"credit card"</string>
@@ -1866,9 +1871,9 @@
     <string name="volume_dialog_ringer_guidance_vibrate" msgid="8902050240801159042">"Calls and notifications will vibrate"</string>
     <string name="volume_dialog_ringer_guidance_silent" msgid="2128975224280276122">"Calls and notifications will be muted"</string>
     <string name="notification_channel_system_changes" msgid="5072715579030948646">"System changes"</string>
-    <string name="notification_channel_do_not_disturb" msgid="6766940333105743037">"Do Not Disturb"</string>
-    <string name="zen_upgrade_notification_visd_title" msgid="4168873821019741166">"Do Not Disturb is Hiding Notifications to help you Focus"</string>
-    <string name="zen_upgrade_notification_visd_content" msgid="6776377368195804354">"This is new behaviour. Tap to change."</string>
+    <string name="notification_channel_do_not_disturb" msgid="6766940333105743037">"Do not disturb"</string>
+    <string name="zen_upgrade_notification_visd_title" msgid="3288313883409759733">"New: Do Not Disturb is hiding notifications"</string>
+    <string name="zen_upgrade_notification_visd_content" msgid="5533674060311631165">"Tap to find out more and change."</string>
     <string name="zen_upgrade_notification_title" msgid="3799603322910377294">"Do Not Disturb has changed"</string>
     <string name="zen_upgrade_notification_content" msgid="1794994264692424562">"Tap to check what\'s blocked."</string>
     <string name="notification_app_name_system" msgid="4205032194610042794">"System"</string>

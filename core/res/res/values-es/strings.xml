@@ -601,7 +601,7 @@
     <string name="policydesc_encryptedStorage" msgid="2637732115325316992">"Exige que se cifren los datos de la aplicación almacenados."</string>
     <string name="policylab_disableCamera" msgid="6395301023152297826">"Inhabilitar cámaras"</string>
     <string name="policydesc_disableCamera" msgid="2306349042834754597">"Evitar el uso de las cámaras del dispositivo"</string>
-    <string name="policylab_disableKeyguardFeatures" msgid="8552277871075367771">"Inhab. alg. func. bloq. pant."</string>
+    <string name="policylab_disableKeyguardFeatures" msgid="8552277871075367771">"Inhabilitar algunas funciones del bloque de pantalla"</string>
     <string name="policydesc_disableKeyguardFeatures" msgid="2044755691354158439">"Evita el uso de algunas funciones del bloqueo de pantalla."</string>
   <string-array name="phoneTypes">
     <item msgid="8901098336658710359">"Casa"</item>
@@ -1014,8 +1014,7 @@
     <string name="dial" msgid="1253998302767701559">"Llamar"</string>
     <string name="dial_desc" msgid="6573723404985517250">"Llamar al número de teléfono seleccionado"</string>
     <string name="map" msgid="5441053548030107189">"Mapa"</string>
-    <!-- no translation found for map_desc (1836995341943772348) -->
-    <skip />
+    <string name="map_desc" msgid="1836995341943772348">"Buscar la dirección seleccionada"</string>
     <string name="browse" msgid="1245903488306147205">"Abrir"</string>
     <string name="browse_desc" msgid="8220976549618935044">"Abrir la URL seleccionada"</string>
     <string name="sms" msgid="4560537514610063430">"Mensaje"</string>
@@ -1261,7 +1260,7 @@
     <string name="share_remote_bugreport_action" msgid="6249476773913384948">"COMPARTIR"</string>
     <string name="decline_remote_bugreport_action" msgid="6230987241608770062">"RECHAZAR"</string>
     <string name="select_input_method" msgid="8547250819326693584">"Cambiar teclado"</string>
-    <string name="show_ime" msgid="2506087537466597099">"Sigue en pantalla mientras el teclado físico está activo"</string>
+    <string name="show_ime" msgid="2506087537466597099">"Mantener en la pantalla mientras el teclado físico está activo"</string>
     <string name="hardware" msgid="194658061510127999">"Mostrar teclado virtual"</string>
     <string name="select_keyboard_layout_notification_title" msgid="597189518763083494">"Configura el teclado físico"</string>
     <string name="select_keyboard_layout_notification_message" msgid="8084622969903004900">"Toca para seleccionar el idioma y el diseño"</string>
@@ -1691,8 +1690,8 @@
     <string name="package_installed_device_owner" msgid="6875717669960212648">"Instalado por el administrador"</string>
     <string name="package_updated_device_owner" msgid="1847154566357862089">"Actualizado por el administrador"</string>
     <string name="package_deleted_device_owner" msgid="2307122077550236438">"Eliminado por el administrador"</string>
-    <string name="battery_saver_description" msgid="4660824093877546730">"Para aumentar la duración de la batería, la función Ahorro de batería reduce el rendimiento del dispositivo y limita o desactiva la vibración, los servicios de ubicación y los datos en segundo plano. Es posible que las aplicaciones que se sincronizan, como las de correo y mensajes, no se actualicen a menos que las abras.\n\nLa función Ahorro de batería se desactiva automáticamente cuando el dispositivo se está cargando."</string>
-    <string name="data_saver_description" msgid="6015391409098303235">"El ahorro de datos evita que algunas aplicaciones envíen o reciban datos en segundo plano, lo que permite reducir el uso de datos. Una aplicación activa podrá acceder a los datos, aunque con menos frecuencia. Esto significa que, por ejemplo, algunas imágenes no se muestren hasta que no las toques."</string>
+    <string name="battery_saver_description" msgid="769989536172631582">"Para aumentar la duración de la batería, el Ahorro de batería desactiva algunas funciones del dispositivo y limita aplicaciones."</string>
+    <string name="data_saver_description" msgid="6015391409098303235">"El ahorro de datos evita que algunas aplicaciones envíen o reciban datos en segundo plano, lo que permite reducir el uso de datos. Una aplicación activa podrá acceder a los datos, aunque con menos frecuencia. Esto significa que, por ejemplo, algunas imágenes no se mostrarán hasta que las toques."</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"¿Activar ahorro de datos?"</string>
     <string name="data_saver_enable_button" msgid="7147735965247211818">"Activar"</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="4367877408072000848">
@@ -1778,6 +1777,12 @@
     <string name="language_picker_section_all" msgid="3097279199511617537">"Todos los idiomas"</string>
     <string name="region_picker_section_all" msgid="8966316787153001779">"Todas las regiones"</string>
     <string name="locale_search_menu" msgid="2560710726687249178">"Buscar"</string>
+    <!-- no translation found for app_suspended_title (1919029799438164552) -->
+    <skip />
+    <!-- no translation found for app_suspended_default_message (7875306315686531621) -->
+    <skip />
+    <!-- no translation found for app_suspended_more_details (1131804827776778187) -->
+    <skip />
     <string name="work_mode_off_title" msgid="1118691887588435530">"¿Activar el perfil de trabajo?"</string>
     <string name="work_mode_off_message" msgid="5130856710614337649">"Tus aplicaciones, notificaciones, datos y otras funciones del perfil de trabajo se activarán"</string>
     <string name="work_mode_turn_on" msgid="2062544985670564875">"Activar"</string>
@@ -1867,8 +1872,8 @@
     <string name="volume_dialog_ringer_guidance_silent" msgid="2128975224280276122">"Las llamadas y las notificaciones se silenciarán"</string>
     <string name="notification_channel_system_changes" msgid="5072715579030948646">"Cambios del sistema"</string>
     <string name="notification_channel_do_not_disturb" msgid="6766940333105743037">"No molestar"</string>
-    <string name="zen_upgrade_notification_visd_title" msgid="4168873821019741166">"El modo No molestar oculta las notificaciones para no distraerte"</string>
-    <string name="zen_upgrade_notification_visd_content" msgid="6776377368195804354">"Este comportamiento es nuevo. Toca para cambiarlo."</string>
+    <string name="zen_upgrade_notification_visd_title" msgid="3288313883409759733">"Novedad: El modo No molestar oculta las notificaciones"</string>
+    <string name="zen_upgrade_notification_visd_content" msgid="5533674060311631165">"Toca para obtener más información y hacer cambios."</string>
     <string name="zen_upgrade_notification_title" msgid="3799603322910377294">"Ha cambiado el modo No molestar"</string>
     <string name="zen_upgrade_notification_content" msgid="1794994264692424562">"Toca para consultar lo que se está bloqueando."</string>
     <string name="notification_app_name_system" msgid="4205032194610042794">"Sistema"</string>

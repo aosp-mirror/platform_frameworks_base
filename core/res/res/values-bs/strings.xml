@@ -165,8 +165,8 @@
     <string name="contentServiceSyncNotificationTitle" msgid="7036196943673524858">"Nije moguće sinhronizirati"</string>
     <string name="contentServiceTooManyDeletesNotificationDesc" msgid="4884451152168188763">"Pokušali ste izbrisati previše sadržaja iz kategorije <xliff:g id="CONTENT_TYPE">%s</xliff:g>."</string>
     <string name="low_memory" product="tablet" msgid="6494019234102154896">"Pohrana tableta je puna. Izbrišite fajlove kako biste oslobodili prostor."</string>
-    <string name="low_memory" product="watch" msgid="4415914910770005166">"Prostor za gledanje je pun. Obrišite neke fajlove da oslobodite prostor."</string>
-    <string name="low_memory" product="tv" msgid="516619861191025923">"Prostor TV-a za pohranu je pun. Obrišite neke fajlove da oslobodite prostor."</string>
+    <string name="low_memory" product="watch" msgid="4415914910770005166">"Prostor za gledanje je pun. Izbrišite neke fajlove da oslobodite prostor."</string>
+    <string name="low_memory" product="tv" msgid="516619861191025923">"Prostor TV-a za pohranu je pun. Izbrišite neke fajlove da oslobodite prostor."</string>
     <string name="low_memory" product="default" msgid="3475999286680000541">"Pohrana telefona je puna. Izbrišite fajlove kako biste oslobodili prostor."</string>
     <plurals name="ssl_ca_cert_warning" formatted="false" msgid="5106721205300213569">
       <item quantity="one">Instalirane su ustanove za izdavanje certifikata</item>
@@ -1034,8 +1034,7 @@
     <string name="dial" msgid="1253998302767701559">"Pozovite"</string>
     <string name="dial_desc" msgid="6573723404985517250">"Pozovite odabrani broj telefona"</string>
     <string name="map" msgid="5441053548030107189">"Mapa"</string>
-    <!-- no translation found for map_desc (1836995341943772348) -->
-    <skip />
+    <string name="map_desc" msgid="1836995341943772348">"Lociranje odabrane adrese"</string>
     <string name="browse" msgid="1245903488306147205">"Otvorite"</string>
     <string name="browse_desc" msgid="8220976549618935044">"Otvorite odabrani URL"</string>
     <string name="sms" msgid="4560537514610063430">"Poruka"</string>
@@ -1419,7 +1418,7 @@
     <string name="gpsVerifNo" msgid="1146564937346454865">"Ne"</string>
     <string name="sync_too_many_deletes" msgid="5296321850662746890">"Granica za brisanje prekoračena"</string>
     <string name="sync_too_many_deletes_desc" msgid="496551671008694245">"Izbrisano je <xliff:g id="NUMBER_OF_DELETED_ITEMS">%1$d</xliff:g> stavki za <xliff:g id="TYPE_OF_SYNC">%2$s</xliff:g>, račun <xliff:g id="ACCOUNT_NAME">%3$s</xliff:g>. Šta želite uraditi?"</string>
-    <string name="sync_really_delete" msgid="2572600103122596243">"Obriši stavke"</string>
+    <string name="sync_really_delete" msgid="2572600103122596243">"Izbriši stavke"</string>
     <string name="sync_undo_deletes" msgid="2941317360600338602">"Poništiti brisanje"</string>
     <string name="sync_do_nothing" msgid="3743764740430821845">"Ne radi ništa za sada"</string>
     <string name="choose_account_label" msgid="5655203089746423927">"Odaberite račun"</string>
@@ -1718,7 +1717,7 @@
     <string name="package_installed_device_owner" msgid="6875717669960212648">"Instalirao je vaš administrator"</string>
     <string name="package_updated_device_owner" msgid="1847154566357862089">"Ažurirao je vaš administrator"</string>
     <string name="package_deleted_device_owner" msgid="2307122077550236438">"Izbrisao je vaš administrator"</string>
-    <string name="battery_saver_description" msgid="4660824093877546730">"Za produženje vijeka trajanja baterije, Ušteda umanjuje performanse uređaja i ograničava ili isključuje vibriranje, usluge lokacije i pozadinske podatke. Moguće je da se aplikacije za e-poštu, razmjenu poruka i druge aplikacije koje se oslanjaju na sinhronizaciju neće ažurirati dok ih ne otvorite.\n\nUšteda baterije se automatski isključuje prilikom punjenja uređaja."</string>
+    <string name="battery_saver_description" msgid="769989536172631582">"Kako bi se produžio vijek trajanja baterije, Ušteda baterije isključuje neke funkcije uređaja i ograničava aplikacije."</string>
     <string name="data_saver_description" msgid="6015391409098303235">"Da bi se smanjio prijenos podataka, usluga Ušteda podataka sprečava da neke aplikacije šalju ili primaju podatke u pozadini. Aplikacija koju trenutno koristite može pristupiti podacima, ali se to može desiti rjeđe. To može značiti, naprimjer, da se slike ne prikazuju sve dok ih ne dodirnete."</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"Uključiti Uštedu podataka?"</string>
     <string name="data_saver_enable_button" msgid="7147735965247211818">"Uključi"</string>
@@ -1814,6 +1813,12 @@
     <string name="language_picker_section_all" msgid="3097279199511617537">"Svi jezici"</string>
     <string name="region_picker_section_all" msgid="8966316787153001779">"Sve regije"</string>
     <string name="locale_search_menu" msgid="2560710726687249178">"Pretraga"</string>
+    <!-- no translation found for app_suspended_title (1919029799438164552) -->
+    <skip />
+    <!-- no translation found for app_suspended_default_message (7875306315686531621) -->
+    <skip />
+    <!-- no translation found for app_suspended_more_details (1131804827776778187) -->
+    <skip />
     <string name="work_mode_off_title" msgid="1118691887588435530">"Uključiti radni profil?"</string>
     <string name="work_mode_off_message" msgid="5130856710614337649">"Uključit će se poslovne aplikacije, obavještenja, podaci i druge funkcije radnog profila"</string>
     <string name="work_mode_turn_on" msgid="2062544985670564875">"Uključi"</string>
@@ -1904,8 +1909,8 @@
     <string name="volume_dialog_ringer_guidance_silent" msgid="2128975224280276122">"Pozivi i obavještenja će se isključiti"</string>
     <string name="notification_channel_system_changes" msgid="5072715579030948646">"Sistemske promjene"</string>
     <string name="notification_channel_do_not_disturb" msgid="6766940333105743037">"Ne ometaj"</string>
-    <string name="zen_upgrade_notification_visd_title" msgid="4168873821019741166">"Način rada Ne ometaj sakriva obavještenja da se lakše fokusirate"</string>
-    <string name="zen_upgrade_notification_visd_content" msgid="6776377368195804354">"Ovo je novo ponašanje. Dodirnite da promijenite."</string>
+    <string name="zen_upgrade_notification_visd_title" msgid="3288313883409759733">"Novo: Način rada Ne ometaj sakriva obavještenja"</string>
+    <string name="zen_upgrade_notification_visd_content" msgid="5533674060311631165">"Dodirnite da saznate više i izvršite promjene."</string>
     <string name="zen_upgrade_notification_title" msgid="3799603322910377294">"Način rada Ne ometaj je promijenjen"</string>
     <string name="zen_upgrade_notification_content" msgid="1794994264692424562">"Dodirnite da provjerite šta je blokirano."</string>
     <string name="notification_app_name_system" msgid="4205032194610042794">"Sistem"</string>

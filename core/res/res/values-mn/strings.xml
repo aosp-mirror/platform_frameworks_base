@@ -236,7 +236,7 @@
     <string name="global_actions_toggle_airplane_mode" msgid="5884330306926307456">"Нислэгийн горим"</string>
     <string name="global_actions_airplane_mode_on_status" msgid="2719557982608919750">"Нислэгийн горим асав"</string>
     <string name="global_actions_airplane_mode_off_status" msgid="5075070442854490296">"Нислэгийн горим унтарсан"</string>
-    <string name="global_action_toggle_battery_saver" msgid="708515500418994208">"Тэжээл хэмнэгч"</string>
+    <string name="global_action_toggle_battery_saver" msgid="708515500418994208">"Батарей хэмнэгч"</string>
     <string name="global_action_battery_saver_on_status" msgid="484059130698197787">"Тэжээл хэмнэгч УНТРААЛТТАЙ байна"</string>
     <string name="global_action_battery_saver_off_status" msgid="75550964969478405">"Тэжээл хэмнэгч АСААЛТТАЙ байна"</string>
     <string name="global_action_settings" msgid="1756531602592545966">"Тохиргоо"</string>
@@ -282,7 +282,7 @@
     <string name="permgrouplab_sms" msgid="228308803364967808">"Мессеж"</string>
     <string name="permgroupdesc_sms" msgid="4656988620100940350">"SMS мессежийг илгээх, харах"</string>
     <string name="permgrouprequest_sms" msgid="7168124215838204719">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;-д SMS мессеж илгээх болон харахыг зөвшөөрөх үү?"</string>
-    <string name="permgrouplab_storage" msgid="1971118770546336966">"Сан"</string>
+    <string name="permgrouplab_storage" msgid="1971118770546336966">"Хадгалах сан"</string>
     <string name="permgroupdesc_storage" msgid="637758554581589203">"Tөхөөрөмж дээрх зураг, медиа болон файлд хандалт хийх"</string>
     <string name="permgrouprequest_storage" msgid="7885942926944299560">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;-д таны төхөөрөмжийн зураг, медиа болон файлд хандахыг зөвшөөрөх үү?"</string>
     <string name="permgrouplab_microphone" msgid="171539900250043464">"Микрофон"</string>
@@ -1014,8 +1014,7 @@
     <string name="dial" msgid="1253998302767701559">"Залгах"</string>
     <string name="dial_desc" msgid="6573723404985517250">"Сонгосон утасны дугаар руу залгах"</string>
     <string name="map" msgid="5441053548030107189">"Газрын зураг"</string>
-    <!-- no translation found for map_desc (1836995341943772348) -->
-    <skip />
+    <string name="map_desc" msgid="1836995341943772348">"Сонгосон хаягийг байршуулах"</string>
     <string name="browse" msgid="1245903488306147205">"Нээх"</string>
     <string name="browse_desc" msgid="8220976549618935044">"Сонгосон URL-г нээх"</string>
     <string name="sms" msgid="4560537514610063430">"Зурвас"</string>
@@ -1691,7 +1690,7 @@
     <string name="package_installed_device_owner" msgid="6875717669960212648">"Таны админ суулгасан"</string>
     <string name="package_updated_device_owner" msgid="1847154566357862089">"Таны админ шинэчилсэн"</string>
     <string name="package_deleted_device_owner" msgid="2307122077550236438">"Таны админ устгасан"</string>
-    <string name="battery_saver_description" msgid="4660824093877546730">"Батерейны амийг уртасгахын тулд Батерей хэмнэгч таны төхөөрөмжийн гүйцэтгэлийг багасгаж, чичиргээ, байршлын үйлчилгээ болон цаана өгөгдлийг хязгаарлах буюу эсвэл унтраадаг. Синкээр ажилладаг имэйл, зурвас болон бусад аппыг нээхээс нааш шинэчлэх боломжгүй. \n\nТаны төхөөрөмжийг цэнэглэж байх үед Батерей хэмнэгч автоматаар унтарна."</string>
+    <string name="battery_saver_description" msgid="769989536172631582">"Батарейны ажиллах хугацааг ихэсгэхийн тулд Батарей хэмнэгч төхөөрөмжийн зарим онцлогийг унтрааж аппуудыг хязгаарладаг."</string>
     <string name="data_saver_description" msgid="6015391409098303235">"Дата ашиглалтыг багасгахын тулд дата хэмнэгч нь зарим апп-г өгөгдлийг дэвсгэрт илгээх болон авахаас сэргийлдэг. Таны одоогийн ашиглаж буй апп нь өгөгдөлд хандах боломжтой хэдий ч цөөн үйлдэл хийнэ. Жишээлбэл зураг харахын тулд та товших шаардлагатай болно."</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"Өгөгдөл хамгаалагчийг асаах уу?"</string>
     <string name="data_saver_enable_button" msgid="7147735965247211818">"Асаах"</string>
@@ -1778,6 +1777,12 @@
     <string name="language_picker_section_all" msgid="3097279199511617537">"Бүх хэл"</string>
     <string name="region_picker_section_all" msgid="8966316787153001779">"Бүх бүс нутаг"</string>
     <string name="locale_search_menu" msgid="2560710726687249178">"Хайх"</string>
+    <!-- no translation found for app_suspended_title (1919029799438164552) -->
+    <skip />
+    <!-- no translation found for app_suspended_default_message (7875306315686531621) -->
+    <skip />
+    <!-- no translation found for app_suspended_more_details (1131804827776778187) -->
+    <skip />
     <string name="work_mode_off_title" msgid="1118691887588435530">"Ажлын профайлыг асаах уу?"</string>
     <string name="work_mode_off_message" msgid="5130856710614337649">"Таны ажлын апп, мэдэгдэл, өгөгдөл болон бусад ажлын профайлын онцлогийг асаана"</string>
     <string name="work_mode_turn_on" msgid="2062544985670564875">"Асаах"</string>
@@ -1867,8 +1872,8 @@
     <string name="volume_dialog_ringer_guidance_silent" msgid="2128975224280276122">"Дуудлага болон мэдэгдлийн дууг хаана"</string>
     <string name="notification_channel_system_changes" msgid="5072715579030948646">"Системийн өөрчлөлт"</string>
     <string name="notification_channel_do_not_disturb" msgid="6766940333105743037">"Бүү саад бол"</string>
-    <string name="zen_upgrade_notification_visd_title" msgid="4168873821019741166">"Бүү саад бол горим нь таныг төвлөрөхөд туслахын тулд мэдэгдлийг нууж байна"</string>
-    <string name="zen_upgrade_notification_visd_content" msgid="6776377368195804354">"Энэ нь шинэ төлөв юм. Өөрчлөхийн тулд товшино уу."</string>
+    <string name="zen_upgrade_notification_visd_title" msgid="3288313883409759733">"Шинэ: Бүү саад бол горим мэдэгдлийг нууж байна"</string>
+    <string name="zen_upgrade_notification_visd_content" msgid="5533674060311631165">"Илүү ихийг мэдэж, өөрчлөхийн тулд товшино уу."</string>
     <string name="zen_upgrade_notification_title" msgid="3799603322910377294">"Бүү саад бол горимыг өөрчилсөн"</string>
     <string name="zen_upgrade_notification_content" msgid="1794994264692424562">"Блоклосон зүйлийг шалгахын тулд товшино уу."</string>
     <string name="notification_app_name_system" msgid="4205032194610042794">"Систем"</string>

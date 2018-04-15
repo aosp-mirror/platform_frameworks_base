@@ -44,7 +44,6 @@ import android.content.pm.PackageManagerInternal;
 import android.content.pm.ResolveInfo;
 import android.net.Uri;
 import android.os.Binder;
-import android.os.Environment;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
@@ -52,7 +51,6 @@ import android.os.Process;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.util.ArrayMap;
-import android.util.AtomicFile;
 import android.util.Slog;
 import android.util.Xml.Encoding;
 
@@ -71,9 +69,7 @@ import org.xmlpull.v1.XmlSerializer;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -136,11 +132,16 @@ public class SliceManagerService extends ISliceManager.Stub {
     @Override
     public Uri[] getPinnedSlices(String pkg) {
         verifyCaller(pkg);
+        int callingUser = Binder.getCallingUserHandle().getIdentifier();
         ArrayList<Uri> ret = new ArrayList<>();
         synchronized (mLock) {
             for (PinnedSliceState state : mPinnedSlicesByUri.values()) {
                 if (Objects.equals(pkg, state.getPkg())) {
-                    ret.add(state.getUri());
+                    Uri uri = state.getUri();
+                    int userId = ContentProvider.getUserIdFromUri(uri, callingUser);
+                    if (userId == callingUser) {
+                        ret.add(ContentProvider.getUriWithoutUserId(uri));
+                    }
                 }
             }
         }

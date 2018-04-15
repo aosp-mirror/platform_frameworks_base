@@ -232,9 +232,6 @@ public class RecoverableKeyStoreManager {
             throw new ServiceSpecificException(ERROR_INVALID_CERTIFICATE, e.getMessage());
         }
 
-        boolean wasInitialized = mDatabase.getRecoveryServiceCertPath(userId, uid,
-                rootCertificateAlias) != null;
-
         // Save the chosen and validated certificate into database
         try {
             Log.d(TAG, "Saving the randomly chosen endpoint certificate to database");
@@ -242,9 +239,11 @@ public class RecoverableKeyStoreManager {
                     certPath) > 0) {
                 mDatabase.setRecoveryServiceCertSerial(userId, uid, rootCertificateAlias,
                         newSerial);
-                if (wasInitialized) {
-                    Log.i(TAG, "This is a certificate change. Snapshot pending.");
+                if (mDatabase.getSnapshotVersion(userId, uid) != null) {
                     mDatabase.setShouldCreateSnapshot(userId, uid, true);
+                    Log.i(TAG, "This is a certificate change. Snapshot must be updated");
+                } else {
+                    Log.i(TAG, "This is a certificate change. Snapshot didn't exist");
                 }
                 mDatabase.setCounterId(userId, uid, new SecureRandom().nextLong());
             }
@@ -350,8 +349,12 @@ public class RecoverableKeyStoreManager {
             return;
         }
 
-        Log.i(TAG, "Updated server params. Snapshot pending.");
-        mDatabase.setShouldCreateSnapshot(userId, uid, true);
+        if (mDatabase.getSnapshotVersion(userId, uid) != null) {
+            mDatabase.setShouldCreateSnapshot(userId, uid, true);
+            Log.i(TAG, "Updated server params. Snapshot must be updated");
+        } else {
+            Log.i(TAG, "Updated server params. Snapshot didn't exist");
+        }
     }
 
     /**
@@ -407,7 +410,12 @@ public class RecoverableKeyStoreManager {
         }
 
         Log.i(TAG, "Updated secret types. Snapshot pending.");
-        mDatabase.setShouldCreateSnapshot(userId, uid, true);
+        if (mDatabase.getSnapshotVersion(userId, uid) != null) {
+            mDatabase.setShouldCreateSnapshot(userId, uid, true);
+            Log.i(TAG, "Updated secret types. Snapshot must be updated");
+        } else {
+            Log.i(TAG, "Updated secret types. Snapshot didn't exist");
+        }
     }
 
     /**

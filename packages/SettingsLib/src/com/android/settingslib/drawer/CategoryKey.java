@@ -25,6 +25,7 @@ public final class CategoryKey {
 
     // Top level category.
     public static final String CATEGORY_NETWORK = "com.android.settings.category.ia.wireless";
+    public static final String CATEGORY_CONNECT = "com.android.settings.category.ia.connect";
     public static final String CATEGORY_DEVICE = "com.android.settings.category.ia.device";
     public static final String CATEGORY_APPS = "com.android.settings.category.ia.apps";
     public static final String CATEGORY_APPS_DEFAULT =

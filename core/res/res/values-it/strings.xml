@@ -305,7 +305,7 @@
     <string name="capability_desc_canRequestFilterKeyEvents" msgid="7463135292204152818">"Sono inclusi dati personali come numeri di carte di credito e password."</string>
     <string name="capability_title_canControlMagnification" msgid="3593493281059424855">"Controllare l\'ingrandimento del display"</string>
     <string name="capability_desc_canControlMagnification" msgid="4791858203568383773">"Controlla il livello di zoom e la posizione del display."</string>
-    <string name="capability_title_canPerformGestures" msgid="7418984730362576862">"Esegui gesti"</string>
+    <string name="capability_title_canPerformGestures" msgid="7418984730362576862">"Eseguire gesti"</string>
     <string name="capability_desc_canPerformGestures" msgid="8296373021636981249">"Consente di toccare, far scorrere, pizzicare ed eseguire altri gesti."</string>
     <string name="capability_title_canCaptureFingerprintGestures" msgid="6309568287512278670">"Gesti con sensore di impronte digitali"</string>
     <string name="capability_desc_canCaptureFingerprintGestures" msgid="4386487962402228670">"È in grado di rilevare i gesti compiuti con il sensore di impronte digitali dei dispositivi."</string>
@@ -572,36 +572,36 @@
     <string name="permdesc_bindCarrierServices" msgid="1391552602551084192">"Consente al titolare di collegarsi a servizi dell\'operatore. Non dovrebbe mai essere necessaria per le normali app."</string>
     <string name="permlab_access_notification_policy" msgid="4247510821662059671">"accesso alla funzione Non disturbare"</string>
     <string name="permdesc_access_notification_policy" msgid="3296832375218749580">"Consente all\'app di leggere e modificare la configurazione della funzione Non disturbare."</string>
-    <string name="policylab_limitPassword" msgid="4497420728857585791">"Impostazione regole password"</string>
+    <string name="policylab_limitPassword" msgid="4497420728857585791">"Impostare regole per le password"</string>
     <string name="policydesc_limitPassword" msgid="2502021457917874968">"Controlla la lunghezza e i caratteri ammessi nelle password e nei PIN del blocco schermo."</string>
-    <string name="policylab_watchLogin" msgid="5091404125971980158">"Monitora tentativi di sblocco dello schermo"</string>
+    <string name="policylab_watchLogin" msgid="5091404125971980158">"Monitorare tentativi di sblocco dello schermo"</string>
     <string name="policydesc_watchLogin" product="tablet" msgid="3215729294215070072">"Monitora il numero di password errate digitate durante lo sblocco dello schermo e blocca il tablet o cancella tutti i dati del tablet se vengono digitate troppe password errate."</string>
     <string name="policydesc_watchLogin" product="TV" msgid="2707817988309890256">"Consente di monitorare il numero di password sbagliate inserite per sbloccare lo schermo, nonché di bloccare la TV e cancellarne tutti i dati se vengono digitate troppe password errate."</string>
     <string name="policydesc_watchLogin" product="default" msgid="5712323091846761073">"Monitora il numero di password errate digitate durante lo sblocco dello schermo e blocca il telefono o cancella tutti i dati del telefono se vengono digitate troppe password errate."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="tablet" msgid="4280246270601044505">"Monitora il numero di password errate digitate durante lo sblocco dello schermo e blocca il tablet o resetta tutti i dati dell\'utente se è stato raggiunto il limite massimo consentito."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="TV" msgid="3484832653564483250">"Monitora il numero di password errate digitate durante lo sblocco dello schermo e blocca la TV o resetta tutti i dati dell\'utente se è stato raggiunto il limite massimo consentito."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="default" msgid="2185480427217127147">"Monitora il numero di password errate digitate durante lo sblocco dello schermo e blocca il telefono o resetta tutti i dati dell\'utente se è stato raggiunto il limite massimo consentito."</string>
-    <string name="policylab_resetPassword" msgid="4934707632423915395">"Modifica blocco schermo"</string>
+    <string name="policylab_resetPassword" msgid="4934707632423915395">"Modificare il blocco schermo"</string>
     <string name="policydesc_resetPassword" msgid="1278323891710619128">"Modifica il blocco schermo."</string>
-    <string name="policylab_forceLock" msgid="2274085384704248431">"Blocco dello schermo"</string>
+    <string name="policylab_forceLock" msgid="2274085384704248431">"Bloccare lo schermo"</string>
     <string name="policydesc_forceLock" msgid="1141797588403827138">"Controlla come e quando si blocca lo schermo."</string>
-    <string name="policylab_wipeData" msgid="3910545446758639713">"Cancellazione di tutti i dati"</string>
+    <string name="policylab_wipeData" msgid="3910545446758639713">"Cancellare tutti i dati"</string>
     <string name="policydesc_wipeData" product="tablet" msgid="4306184096067756876">"Cancella i dati del tablet senza preavviso eseguendo un ripristino dati di fabbrica."</string>
     <string name="policydesc_wipeData" product="tv" msgid="5816221315214527028">"Consente di cancellare i dati della TV senza preavviso eseguendo un ripristino dei dati di fabbrica."</string>
     <string name="policydesc_wipeData" product="default" msgid="5096895604574188391">"Cancella i dati del telefono senza preavviso eseguendo un ripristino dati di fabbrica."</string>
-    <string name="policylab_wipeData_secondaryUser" msgid="8362863289455531813">"Resetta i dati dell\'utente"</string>
+    <string name="policylab_wipeData_secondaryUser" msgid="8362863289455531813">"Resettare i dati dell\'utente"</string>
     <string name="policydesc_wipeData_secondaryUser" product="tablet" msgid="6336255514635308054">"Resetta i dati dell\'utente sul tablet senza preavviso."</string>
     <string name="policydesc_wipeData_secondaryUser" product="tv" msgid="2086473496848351810">"Resetta i dati dell\'utente sulla TV senza preavviso."</string>
     <string name="policydesc_wipeData_secondaryUser" product="default" msgid="6787904546711590238">"Resetta i dati dell\'utente sul telefono senza preavviso."</string>
-    <string name="policylab_setGlobalProxy" msgid="2784828293747791446">"Imposta il proxy globale del dispositivo"</string>
+    <string name="policylab_setGlobalProxy" msgid="2784828293747791446">"Impostare il proxy globale del dispositivo"</string>
     <string name="policydesc_setGlobalProxy" msgid="8459859731153370499">"Imposta il proxy globale del dispositivo in modo da utilizzarlo mentre la norma è attiva. Il proxy globale può essere impostato solo dal proprietario del dispositivo."</string>
-    <string name="policylab_expirePassword" msgid="5610055012328825874">"Imposta scadenza password blocco schermo"</string>
+    <string name="policylab_expirePassword" msgid="5610055012328825874">"Impostare la scadenza della password blocco schermo"</string>
     <string name="policydesc_expirePassword" msgid="5367525762204416046">"Cambia la frequenza di modifica di password, PIN o sequenza del blocco schermo."</string>
-    <string name="policylab_encryptedStorage" msgid="8901326199909132915">"Impostazione crittografia archivio"</string>
+    <string name="policylab_encryptedStorage" msgid="8901326199909132915">"Impostare la crittografia archivio"</string>
     <string name="policydesc_encryptedStorage" msgid="2637732115325316992">"Richiede la crittografia dei dati applicazione memorizzati."</string>
-    <string name="policylab_disableCamera" msgid="6395301023152297826">"Disattivazione fotocamere"</string>
+    <string name="policylab_disableCamera" msgid="6395301023152297826">"Disattivare le fotocamere"</string>
     <string name="policydesc_disableCamera" msgid="2306349042834754597">"Impedisci l\'utilizzo di tutte le fotocamere del dispositivo."</string>
-    <string name="policylab_disableKeyguardFeatures" msgid="8552277871075367771">"Disattiva alcune funzioni di blocco schermo"</string>
+    <string name="policylab_disableKeyguardFeatures" msgid="8552277871075367771">"Disattivare alcune funzioni di blocco schermo"</string>
     <string name="policydesc_disableKeyguardFeatures" msgid="2044755691354158439">"Impedisce di utilizzare alcune funzioni di blocco schermo."</string>
   <string-array name="phoneTypes">
     <item msgid="8901098336658710359">"Casa"</item>
@@ -739,7 +739,7 @@
     <string name="lockscreen_password_wrong" msgid="5737815393253165301">"Riprova"</string>
     <string name="lockscreen_storage_locked" msgid="9167551160010625200">"Sblocca per accedere a funzioni e dati"</string>
     <string name="faceunlock_multiple_failures" msgid="754137583022792429">"Numero massimo di tentativi di Sblocco col sorriso superato"</string>
-    <string name="lockscreen_missing_sim_message_short" msgid="5099439277819215399">"Nessuna scheda SIM"</string>
+    <string name="lockscreen_missing_sim_message_short" msgid="5099439277819215399">"Nessuna SIM"</string>
     <string name="lockscreen_missing_sim_message" product="tablet" msgid="151659196095791474">"Nessuna scheda SIM presente nel tablet."</string>
     <string name="lockscreen_missing_sim_message" product="tv" msgid="1943633865476989599">"Nessuna scheda SIM nella TV."</string>
     <string name="lockscreen_missing_sim_message" product="default" msgid="2186920585695169078">"Nessuna SIM presente nel telefono."</string>
@@ -1014,8 +1014,7 @@
     <string name="dial" msgid="1253998302767701559">"Chiama"</string>
     <string name="dial_desc" msgid="6573723404985517250">"Chiama il numero di telefono selezionato"</string>
     <string name="map" msgid="5441053548030107189">"Mappa"</string>
-    <!-- no translation found for map_desc (1836995341943772348) -->
-    <skip />
+    <string name="map_desc" msgid="1836995341943772348">"Localizza l\'indirizzo selezionato"</string>
     <string name="browse" msgid="1245903488306147205">"Apri"</string>
     <string name="browse_desc" msgid="8220976549618935044">"Apri l\'URL selezionato"</string>
     <string name="sms" msgid="4560537514610063430">"Invia messaggio"</string>
@@ -1491,7 +1490,7 @@
     <string name="wireless_display_route_description" msgid="9070346425023979651">"Visualizzazione wireless"</string>
     <string name="media_route_button_content_description" msgid="591703006349356016">"Trasmetti"</string>
     <string name="media_route_chooser_title" msgid="1751618554539087622">"Connetti al dispositivo"</string>
-    <string name="media_route_chooser_title_for_remote_display" msgid="3395541745872017583">"Trasmetti schermo al dispositivo"</string>
+    <string name="media_route_chooser_title_for_remote_display" msgid="3395541745872017583">"Trasmetti schermo a"</string>
     <string name="media_route_chooser_searching" msgid="4776236202610828706">"Ricerca di dispositivi in corso…"</string>
     <string name="media_route_chooser_extended_settings" msgid="87015534236701604">"Impostazioni"</string>
     <string name="media_route_controller_disconnect" msgid="8966120286374158649">"Disconnetti"</string>
@@ -1554,7 +1553,7 @@
     <string name="disable_accessibility_shortcut" msgid="627625354248453445">"Disattiva scorciatoia"</string>
     <string name="leave_accessibility_shortcut_on" msgid="7653111894438512680">"Usa scorciatoia"</string>
     <string name="color_inversion_feature_name" msgid="4231186527799958644">"Inversione colori"</string>
-    <string name="color_correction_feature_name" msgid="6779391426096954933">"Correzione colore"</string>
+    <string name="color_correction_feature_name" msgid="6779391426096954933">"Correzione del colore"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="7771852911861522636">"La scorciatoia Accessibilità ha attivato <xliff:g id="SERVICE_NAME">%1$s</xliff:g>"</string>
     <string name="accessibility_shortcut_disabling_service" msgid="2747243438223109821">"La scorciatoia Accessibilità ha disattivato <xliff:g id="SERVICE_NAME">%1$s</xliff:g>"</string>
     <string name="accessibility_button_prompt_text" msgid="4234556536456854251">"Scegli una funzione da usare quando tocchi il pulsante Accessibilità:"</string>
@@ -1691,7 +1690,7 @@
     <string name="package_installed_device_owner" msgid="6875717669960212648">"Installato dall\'amministratore"</string>
     <string name="package_updated_device_owner" msgid="1847154566357862089">"Aggiornato dall\'amministratore"</string>
     <string name="package_deleted_device_owner" msgid="2307122077550236438">"Eliminato dall\'amministratore"</string>
-    <string name="battery_saver_description" msgid="4660824093877546730">"Per prolungare la durata della batteria, la funzione Risparmio energetico riduce le prestazioni del dispositivo e limita o disattiva la vibrazione, i servizi di geolocalizzazione e i dati in background. Email, Messaggi e altre app basate sulla sincronizzazione potrebbero non essere aggiornate finché non le apri.\n\nLa funzione Risparmio energetico viene disattivata automaticamente quando il dispositivo è in carica."</string>
+    <string name="battery_saver_description" msgid="769989536172631582">"Per aumentare la durata della batteria, il Risparmio energetico disattiva alcune funzioni del dispositivo e limita le app."</string>
     <string name="data_saver_description" msgid="6015391409098303235">"Per contribuire a ridurre l\'utilizzo dei dati, la funzione Risparmio dati impedisce ad alcune app di inviare o ricevere dati in background. Un\'app in uso può accedere ai dati, ma potrebbe farlo con meno frequenza. Esempio: le immagini non vengono visualizzate finché non le tocchi."</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"Attivare Risparmio dati?"</string>
     <string name="data_saver_enable_button" msgid="7147735965247211818">"Attiva"</string>
@@ -1738,7 +1737,7 @@
     <string name="zen_mode_default_weeknights_name" msgid="3081318299464998143">"Notte di un giorno feriale"</string>
     <string name="zen_mode_default_weekends_name" msgid="2786495801019345244">"Fine settimana"</string>
     <string name="zen_mode_default_events_name" msgid="8158334939013085363">"Evento"</string>
-    <string name="zen_mode_default_every_night_name" msgid="3012363838882944175">"Sleeping (Notte)"</string>
+    <string name="zen_mode_default_every_night_name" msgid="3012363838882944175">"Sonno"</string>
     <string name="muted_by" msgid="6147073845094180001">"Audio disattivato da <xliff:g id="THIRD_PARTY">%1$s</xliff:g>"</string>
     <string name="system_error_wipe_data" msgid="6608165524785354962">"Si è verificato un problema interno con il dispositivo, che potrebbe essere instabile fino al ripristino dei dati di fabbrica."</string>
     <string name="system_error_manufacturer" msgid="8086872414744210668">"Si è verificato un problema interno con il dispositivo. Per informazioni dettagliate, contatta il produttore."</string>
@@ -1778,6 +1777,12 @@
     <string name="language_picker_section_all" msgid="3097279199511617537">"Tutte le lingue"</string>
     <string name="region_picker_section_all" msgid="8966316787153001779">"Tutte le aree geografiche"</string>
     <string name="locale_search_menu" msgid="2560710726687249178">"Cerca"</string>
+    <!-- no translation found for app_suspended_title (1919029799438164552) -->
+    <skip />
+    <!-- no translation found for app_suspended_default_message (7875306315686531621) -->
+    <skip />
+    <!-- no translation found for app_suspended_more_details (1131804827776778187) -->
+    <skip />
     <string name="work_mode_off_title" msgid="1118691887588435530">"Attivare il profilo di lavoro?"</string>
     <string name="work_mode_off_message" msgid="5130856710614337649">"Le tue app di lavoro, le notifiche, i dati e altri elementi del profilo di lavoro saranno attivati."</string>
     <string name="work_mode_turn_on" msgid="2062544985670564875">"Attiva"</string>
@@ -1867,8 +1872,8 @@
     <string name="volume_dialog_ringer_guidance_silent" msgid="2128975224280276122">"L\'audio di chiamate e notifiche sarà disattivato"</string>
     <string name="notification_channel_system_changes" msgid="5072715579030948646">"Modifiche al sistema"</string>
     <string name="notification_channel_do_not_disturb" msgid="6766940333105743037">"Non disturbare"</string>
-    <string name="zen_upgrade_notification_visd_title" msgid="4168873821019741166">"La modalità Non disturbare nasconde le notifiche per favorire la concentrazione"</string>
-    <string name="zen_upgrade_notification_visd_content" msgid="6776377368195804354">"Si tratta di un nuovo comportamento. Tocca per cambiarlo."</string>
+    <string name="zen_upgrade_notification_visd_title" msgid="3288313883409759733">"Novità: la modalità Non disturbare nasconde le notifiche"</string>
+    <string name="zen_upgrade_notification_visd_content" msgid="5533674060311631165">"Tocca per avere ulteriori informazioni e modificare."</string>
     <string name="zen_upgrade_notification_title" msgid="3799603322910377294">"L\'impostazione Non disturbare è cambiata"</string>
     <string name="zen_upgrade_notification_content" msgid="1794994264692424562">"Tocca per controllare le notifiche bloccate."</string>
     <string name="notification_app_name_system" msgid="4205032194610042794">"Sistema"</string>

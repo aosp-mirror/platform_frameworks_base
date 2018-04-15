@@ -27,31 +27,31 @@ package android.app;
  * An android.app.AlarmManager object.
  */
 message AlarmManagerProto {
-  enum AlarmType {
-    // Alarm time in System.currentTimeMillis() (wall clock time in UTC), which
-    // will wake up the device when it goes off.
-    RTC_WAKEUP = 0;
-    // Alarm time in System.currentTimeMillis() (wall clock time in UTC).  This
-    // alarm does not wake the device up; if it goes off while the device is
-    // asleep, it will not be delivered until the next time the device wakes up.
-    RTC = 1;
-    // Alarm time in SystemClock.elapsedRealtime() (time since boot, including
-    // sleep), which will wake up the device when it goes off.
-    ELAPSED_REALTIME_WAKEUP = 2;
-    // Alarm time in SystemClock.elapsedRealtime() (time since boot, including
-    // sleep). This alarm does not wake the device up; if it goes off while the
-    // device is asleep, it will not be delivered until the next time the device
-    // wakes up.
-    ELAPSED_REALTIME = 3;
-  }
+    enum AlarmType {
+        // Alarm time in System.currentTimeMillis() (wall clock time in UTC), which
+        // will wake up the device when it goes off.
+        RTC_WAKEUP = 0;
+        // Alarm time in System.currentTimeMillis() (wall clock time in UTC). This
+        // alarm does not wake the device up; if it goes off while the device is
+        // asleep, it will not be delivered until the next time the device wakes up.
+        RTC = 1;
+        // Alarm time in SystemClock.elapsedRealtime() (time since boot, including
+        // sleep), which will wake up the device when it goes off.
+        ELAPSED_REALTIME_WAKEUP = 2;
+        // Alarm time in SystemClock.elapsedRealtime() (time since boot, including
+        // sleep). This alarm does not wake the device up; if it goes off while the
+        // device is asleep, it will not be delivered until the next time the device
+        // wakes up.
+        ELAPSED_REALTIME = 3;
+    }
 }
 
 // An android.app.AlarmManager.AlarmClockInfo object.
 message AlarmClockInfoProto {
-  option (android.msg_privacy).dest = DEST_AUTOMATIC;
+    option (android.msg_privacy).dest = DEST_AUTOMATIC;
 
-  // This value is UTC wall clock time in milliseconds, as returned by
-  // System#currentTimeMillis() for example.
-  optional int64 trigger_time_ms = 1;
-  optional android.app.PendingIntentProto show_intent = 2;
+    // This value is UTC wall clock time in milliseconds, as returned by
+    // System#currentTimeMillis() for example.
+    optional int64 trigger_time_ms = 1;
+    optional android.app.PendingIntentProto show_intent = 2;
 }

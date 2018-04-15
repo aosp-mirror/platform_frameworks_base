@@ -131,7 +131,7 @@
     <string name="data_usage_uninstalled_apps_users" msgid="7986294489899813194">"削除されたアプリとユーザー"</string>
     <string name="tether_settings_title_usb" msgid="6688416425801386511">"USB テザリング"</string>
     <string name="tether_settings_title_wifi" msgid="3277144155960302049">"ポータブルアクセスポイント"</string>
-    <string name="tether_settings_title_bluetooth" msgid="355855408317564420">"Bluetoothテザリング"</string>
+    <string name="tether_settings_title_bluetooth" msgid="355855408317564420">"Bluetooth テザリング"</string>
     <string name="tether_settings_title_usb_bluetooth" msgid="5355828977109785001">"テザリング"</string>
     <string name="tether_settings_title_all" msgid="8356136101061143841">"テザリングとポータブルアクセスポイント"</string>
     <string name="managed_user_title" msgid="8109605045406748842">"すべての仕事用アプリ"</string>
@@ -216,20 +216,15 @@
     <string name="bluetooth_select_avrcp_version_string" msgid="3750059931120293633">"Bluetooth AVRCP バージョン"</string>
     <string name="bluetooth_select_avrcp_version_dialog_title" msgid="7277329668298705702">"Bluetooth AVRCP バージョンを選択する"</string>
     <string name="bluetooth_select_a2dp_codec_type" msgid="90597356942154882">"Bluetooth オーディオ コーデック"</string>
-    <!-- no translation found for bluetooth_select_a2dp_codec_type_dialog_title (8436224899475822557) -->
-    <skip />
+    <string name="bluetooth_select_a2dp_codec_type_dialog_title" msgid="8436224899475822557">"Bluetooth オーディオ コーデックを起動\n選択"</string>
     <string name="bluetooth_select_a2dp_codec_sample_rate" msgid="4788245703824623062">"Bluetooth オーディオ サンプルレート"</string>
-    <!-- no translation found for bluetooth_select_a2dp_codec_sample_rate_dialog_title (8010380028880963535) -->
-    <skip />
+    <string name="bluetooth_select_a2dp_codec_sample_rate_dialog_title" msgid="8010380028880963535">"Bluetooth オーディオ コーデックを起動\n選択: サンプルレート"</string>
     <string name="bluetooth_select_a2dp_codec_bits_per_sample" msgid="2099645202720164141">"サンプルあたりの Bluetooth オーディオ ビット"</string>
-    <!-- no translation found for bluetooth_select_a2dp_codec_bits_per_sample_dialog_title (8063859754619484760) -->
-    <skip />
+    <string name="bluetooth_select_a2dp_codec_bits_per_sample_dialog_title" msgid="8063859754619484760">"Bluetooth オーディオ コーデックを起動\n選択: サンプルあたりのビット数"</string>
     <string name="bluetooth_select_a2dp_codec_channel_mode" msgid="884855779449390540">"Bluetooth オーディオ チャンネル モード"</string>
-    <!-- no translation found for bluetooth_select_a2dp_codec_channel_mode_dialog_title (7234956835280563341) -->
-    <skip />
+    <string name="bluetooth_select_a2dp_codec_channel_mode_dialog_title" msgid="7234956835280563341">"Bluetooth オーディオ コーデックを起動\n選択: チャンネル モード"</string>
     <string name="bluetooth_select_a2dp_codec_ldac_playback_quality" msgid="3619694372407843405">"Bluetooth オーディオ LDAC コーデック: 再生音質"</string>
-    <!-- no translation found for bluetooth_select_a2dp_codec_ldac_playback_quality_dialog_title (7595776220458732825) -->
-    <skip />
+    <string name="bluetooth_select_a2dp_codec_ldac_playback_quality_dialog_title" msgid="7595776220458732825">"Bluetooth オーディオ LDAC コーデックを起動\n選択: 再生音質"</string>
     <string name="bluetooth_select_a2dp_codec_streaming_label" msgid="5347862512596240506">"ストリーミング: <xliff:g id="STREAMING_PARAMETER">%1$s</xliff:g>"</string>
     <string name="select_private_dns_configuration_title" msgid="3700456559305263922">"プライベート DNS"</string>
     <string name="select_private_dns_configuration_dialog_title" msgid="9221994415765826811">"プライベート DNS モードを選択"</string>
@@ -264,7 +259,7 @@
     <string name="verify_apps_over_usb_title" msgid="4177086489869041953">"USB経由のアプリを確認"</string>
     <string name="verify_apps_over_usb_summary" msgid="9164096969924529200">"ADB/ADT経由でインストールされたアプリに不正な動作がないかを確認する"</string>
     <string name="bluetooth_show_devices_without_names_summary" msgid="2351196058115755520">"Bluetooth デバイスを名前なしで（MAC アドレスのみで）表示します"</string>
-    <string name="bluetooth_disable_absolute_volume_summary" msgid="6031284410786545957">"リモート端末で音量に関する問題（音量が大きすぎる、制御できないなど）が発生した場合に、Bluetooth の絶対音量の機能を無効にする。"</string>
+    <string name="bluetooth_disable_absolute_volume_summary" msgid="6031284410786545957">"リモート端末で音量に関する問題（音量が大きすぎる、制御できないなど）が発生した場合に、Bluetooth の絶対音量の機能を無効にする"</string>
     <string name="enable_terminal_title" msgid="95572094356054120">"ローカルターミナル"</string>
     <string name="enable_terminal_summary" msgid="67667852659359206">"ローカルシェルアクセスを提供するターミナルアプリを有効にします"</string>
     <string name="hdcp_checking_title" msgid="8605478913544273282">"HDCPチェック"</string>

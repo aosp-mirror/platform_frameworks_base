@@ -1014,8 +1014,7 @@
     <string name="dial" msgid="1253998302767701559">"Ligar"</string>
     <string name="dial_desc" msgid="6573723404985517250">"Ligar para o número de telefone selecionado"</string>
     <string name="map" msgid="5441053548030107189">"Mapa"</string>
-    <!-- no translation found for map_desc (1836995341943772348) -->
-    <skip />
+    <string name="map_desc" msgid="1836995341943772348">"Localizar endereço selecionado"</string>
     <string name="browse" msgid="1245903488306147205">"Abrir"</string>
     <string name="browse_desc" msgid="8220976549618935044">"Abrir URL selecionado"</string>
     <string name="sms" msgid="4560537514610063430">"Mensagem"</string>
@@ -1691,7 +1690,7 @@
     <string name="package_installed_device_owner" msgid="6875717669960212648">"Instalado pelo seu administrador"</string>
     <string name="package_updated_device_owner" msgid="1847154566357862089">"Atualizado pelo seu administrador"</string>
     <string name="package_deleted_device_owner" msgid="2307122077550236438">"Excluído pelo seu administrador"</string>
-    <string name="battery_saver_description" msgid="4660824093877546730">"Para aumentar a duração da bateria, a Economia de bateria reduz o desempenho do seu dispositivo e limita ou desativa a vibração, os serviços de localização e os dados em segundo plano. E-mails, mensagens e outros apps que dependem da sincronização só podem ser atualizados se estão abertos.\n\nA Economia de bateria é desativada automaticamente quando o dispositivo está sendo carregado."</string>
+    <string name="battery_saver_description" msgid="769989536172631582">"A Economia de bateria desativa alguns recursos do dispositivo e restringe apps para aumentar a duração da bateria."</string>
     <string name="data_saver_description" msgid="6015391409098303235">"Para ajudar a reduzir o uso de dados, a Economia de dados impede que alguns apps enviem ou recebam dados em segundo plano. Um app que você esteja usando no momento pode acessar dados, mas com menos frequência. Isso pode significar que as imagens não serão exibidas até que você toque nelas."</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"Ativar Economia de dados?"</string>
     <string name="data_saver_enable_button" msgid="7147735965247211818">"Ativar"</string>
@@ -1778,6 +1777,12 @@
     <string name="language_picker_section_all" msgid="3097279199511617537">"Todos os idiomas"</string>
     <string name="region_picker_section_all" msgid="8966316787153001779">"Todas as regiões"</string>
     <string name="locale_search_menu" msgid="2560710726687249178">"Pesquisa"</string>
+    <!-- no translation found for app_suspended_title (1919029799438164552) -->
+    <skip />
+    <!-- no translation found for app_suspended_default_message (7875306315686531621) -->
+    <skip />
+    <!-- no translation found for app_suspended_more_details (1131804827776778187) -->
+    <skip />
     <string name="work_mode_off_title" msgid="1118691887588435530">"Ativar o perfil de trabalho?"</string>
     <string name="work_mode_off_message" msgid="5130856710614337649">"Seus apps, notificações, dados e outros recursos do perfil de trabalho serão ativados"</string>
     <string name="work_mode_turn_on" msgid="2062544985670564875">"Ativar"</string>
@@ -1867,8 +1872,8 @@
     <string name="volume_dialog_ringer_guidance_silent" msgid="2128975224280276122">"Chamadas e notificações ficarão silenciadas"</string>
     <string name="notification_channel_system_changes" msgid="5072715579030948646">"Alterações do sistema"</string>
     <string name="notification_channel_do_not_disturb" msgid="6766940333105743037">"Não perturbe"</string>
-    <string name="zen_upgrade_notification_visd_title" msgid="4168873821019741166">"O modo \"Não perturbe\" está ocultando notificações para ajudar você a se concentrar"</string>
-    <string name="zen_upgrade_notification_visd_content" msgid="6776377368195804354">"Este é um novo comportamento. Toque para alterar."</string>
+    <string name="zen_upgrade_notification_visd_title" msgid="3288313883409759733">"Novo: o modo Não perturbe está ocultando as notificações"</string>
+    <string name="zen_upgrade_notification_visd_content" msgid="5533674060311631165">"Toque para saber mais e fazer alterações."</string>
     <string name="zen_upgrade_notification_title" msgid="3799603322910377294">"O modo \"Não perturbe\" foi alterado"</string>
     <string name="zen_upgrade_notification_content" msgid="1794994264692424562">"Toque para verificar o que está bloqueado."</string>
     <string name="notification_app_name_system" msgid="4205032194610042794">"Sistema"</string>

@@ -1014,8 +1014,7 @@
     <string name="dial" msgid="1253998302767701559">"Ring"</string>
     <string name="dial_desc" msgid="6573723404985517250">"Ring valt telefonnummer"</string>
     <string name="map" msgid="5441053548030107189">"Karta"</string>
-    <!-- no translation found for map_desc (1836995341943772348) -->
-    <skip />
+    <string name="map_desc" msgid="1836995341943772348">"Hitta den valda adressen"</string>
     <string name="browse" msgid="1245903488306147205">"Öppna"</string>
     <string name="browse_desc" msgid="8220976549618935044">"Öppna vald webbadress"</string>
     <string name="sms" msgid="4560537514610063430">"Sms:a"</string>
@@ -1691,7 +1690,7 @@
     <string name="package_installed_device_owner" msgid="6875717669960212648">"Administratören installerade paketet"</string>
     <string name="package_updated_device_owner" msgid="1847154566357862089">"Administratören uppdaterade paketet"</string>
     <string name="package_deleted_device_owner" msgid="2307122077550236438">"Administratören raderade paketet"</string>
-    <string name="battery_saver_description" msgid="4660824093877546730">"I batterisparläget reduceras enhetens prestanda så att batteriet ska räcka längre. Vibration, platstjänster och bakgrundsdata begränsas eller inaktiveras. Det kan hända att appar för e-post, sms och annat som kräver synkronisering inte uppdateras förrän du öppnar dem.\n\nBatterisparläget inaktiveras automatiskt när enheten laddas."</string>
+    <string name="battery_saver_description" msgid="769989536172631582">"Batterisparläget förlänger batteritiden genom att inaktivera vissa enhetsfunktioner och begränsa appar"</string>
     <string name="data_saver_description" msgid="6015391409098303235">"Med databesparing kan du minska dataanvändningen genom att hindra en del appar från att skicka eller ta emot data i bakgrunden. Appar som du använder kan komma åt data, men det sker kanske inte lika ofta. Detta innebär t.ex. att bilder inte visas förrän du trycker på dem."</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"Aktivera Databesparing?"</string>
     <string name="data_saver_enable_button" msgid="7147735965247211818">"Aktivera"</string>
@@ -1778,6 +1777,12 @@
     <string name="language_picker_section_all" msgid="3097279199511617537">"Alla språk"</string>
     <string name="region_picker_section_all" msgid="8966316787153001779">"Alla regioner"</string>
     <string name="locale_search_menu" msgid="2560710726687249178">"Söka"</string>
+    <!-- no translation found for app_suspended_title (1919029799438164552) -->
+    <skip />
+    <!-- no translation found for app_suspended_default_message (7875306315686531621) -->
+    <skip />
+    <!-- no translation found for app_suspended_more_details (1131804827776778187) -->
+    <skip />
     <string name="work_mode_off_title" msgid="1118691887588435530">"Vill du aktivera jobbprofilen?"</string>
     <string name="work_mode_off_message" msgid="5130856710614337649">"Jobbappar, aviseringar, data och andra funktioner i jobbprofilen aktiveras"</string>
     <string name="work_mode_turn_on" msgid="2062544985670564875">"Aktivera"</string>
@@ -1867,8 +1872,8 @@
     <string name="volume_dialog_ringer_guidance_silent" msgid="2128975224280276122">"Ljudet stängs av för samtal och aviseringar"</string>
     <string name="notification_channel_system_changes" msgid="5072715579030948646">"Systemändringar"</string>
     <string name="notification_channel_do_not_disturb" msgid="6766940333105743037">"Stör ej"</string>
-    <string name="zen_upgrade_notification_visd_title" msgid="4168873821019741166">"I läget Stör ej döljs aviseringar så att du kan fokusera på det viktigaste"</string>
-    <string name="zen_upgrade_notification_visd_content" msgid="6776377368195804354">"Detta är en ny inställning. Tryck om du vill ändra."</string>
+    <string name="zen_upgrade_notification_visd_title" msgid="3288313883409759733">"Nytt: Aviseringar döljs av Stör ej"</string>
+    <string name="zen_upgrade_notification_visd_content" msgid="5533674060311631165">"Tryck här om du vill läsa mer och ändra inställningarna."</string>
     <string name="zen_upgrade_notification_title" msgid="3799603322910377294">"Stör ej har ändrats"</string>
     <string name="zen_upgrade_notification_content" msgid="1794994264692424562">"Tryck om du vill se vad som blockeras."</string>
     <string name="notification_app_name_system" msgid="4205032194610042794">"System"</string>

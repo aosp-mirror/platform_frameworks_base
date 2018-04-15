@@ -24,10 +24,10 @@ option java_multiple_files = true;
 // Reasons a job is stopped.
 // Primarily used in android.app.job.JobParameters.java.
 enum StopReasonEnum {
-  STOP_REASON_UNKNOWN = -1;
-  STOP_REASON_CANCELLED = 0;
-  STOP_REASON_CONSTRAINTS_NOT_SATISFIED = 1;
-  STOP_REASON_PREEMPT = 2;
-  STOP_REASON_TIMEOUT = 3;
-  STOP_REASON_DEVICE_IDLE = 4;
+    STOP_REASON_UNKNOWN = -1;
+    STOP_REASON_CANCELLED = 0;
+    STOP_REASON_CONSTRAINTS_NOT_SATISFIED = 1;
+    STOP_REASON_PREEMPT = 2;
+    STOP_REASON_TIMEOUT = 3;
+    STOP_REASON_DEVICE_IDLE = 4;
 }

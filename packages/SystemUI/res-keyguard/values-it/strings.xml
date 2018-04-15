@@ -40,7 +40,7 @@
     <string name="keyguard_low_battery" msgid="9218432555787624490">"Collega il caricabatterie."</string>
     <string name="keyguard_instructions_when_pattern_disabled" msgid="8566679946700751371">"Premi Menu per sbloccare."</string>
     <string name="keyguard_network_locked_message" msgid="6743537524631420759">"Rete bloccata"</string>
-    <string name="keyguard_missing_sim_message_short" msgid="6327533369959764518">"Nessuna scheda SIM"</string>
+    <string name="keyguard_missing_sim_message_short" msgid="6327533369959764518">"Nessuna SIM"</string>
     <string name="keyguard_missing_sim_message" product="tablet" msgid="4550152848200783542">"Nessuna scheda SIM presente nel tablet."</string>
     <string name="keyguard_missing_sim_message" product="default" msgid="6585414237800161146">"Nessuna scheda SIM presente nel telefono."</string>
     <string name="keyguard_missing_sim_instructions" msgid="7350295932015220392">"Inserisci una scheda SIM."</string>

@@ -309,11 +309,11 @@
     <string name="capability_desc_canRequestTouchExploration" msgid="7543249041581408313">"Po klepnutí na položku sa vysloví jej názov a obrazovku je možné preskúmať pomocou gest."</string>
     <string name="capability_title_canRequestFilterKeyEvents" msgid="2103440391902412174">"Sledovať zadávaný text"</string>
     <string name="capability_desc_canRequestFilterKeyEvents" msgid="7463135292204152818">"Sledovanie zahŕňa osobné údaje ako sú čísla kreditných kariet a heslá."</string>
-    <string name="capability_title_canControlMagnification" msgid="3593493281059424855">"Ovládanie priblíženia obrazovky"</string>
+    <string name="capability_title_canControlMagnification" msgid="3593493281059424855">"Ovládať priblíženie obrazovky"</string>
     <string name="capability_desc_canControlMagnification" msgid="4791858203568383773">"Ovládajte umiestnenie a úroveň priblíženia obrazovky."</string>
     <string name="capability_title_canPerformGestures" msgid="7418984730362576862">"Gestá"</string>
     <string name="capability_desc_canPerformGestures" msgid="8296373021636981249">"Je možné použiť klepnutie, prejdenie, stiahnutie prstami a ďalšie gestá."</string>
-    <string name="capability_title_canCaptureFingerprintGestures" msgid="6309568287512278670">"Gestá odtlačkov prstov"</string>
+    <string name="capability_title_canCaptureFingerprintGestures" msgid="6309568287512278670">"Gestá odtlačkom prstu"</string>
     <string name="capability_desc_canCaptureFingerprintGestures" msgid="4386487962402228670">"Dokáže zaznamenať gestá na senzore odtlačkov prstov zariadenia."</string>
     <string name="permlab_statusBar" msgid="7417192629601890791">"zakázanie alebo zmeny stavového riadka"</string>
     <string name="permdesc_statusBar" msgid="8434669549504290975">"Umožňuje aplikácii vypnúť stavový riadok alebo pridať a odstrániť systémové ikony."</string>
@@ -607,7 +607,7 @@
     <string name="policydesc_encryptedStorage" msgid="2637732115325316992">"Vyžadovať šifrovanie uložených údajov aplikácií."</string>
     <string name="policylab_disableCamera" msgid="6395301023152297826">"Zakázať fotoaparáty"</string>
     <string name="policydesc_disableCamera" msgid="2306349042834754597">"Zakázať používanie všetkých fotoaparátov zariadenia."</string>
-    <string name="policylab_disableKeyguardFeatures" msgid="8552277871075367771">"Deaktivácia niektorých funkcií zámky obrazovky"</string>
+    <string name="policylab_disableKeyguardFeatures" msgid="8552277871075367771">"Deaktivovať niektoré funkcie zámky obrazovky"</string>
     <string name="policydesc_disableKeyguardFeatures" msgid="2044755691354158439">"Zabráňte používaniu niektorých funkcií zámky obrazovky."</string>
   <string-array name="phoneTypes">
     <item msgid="8901098336658710359">"Domov"</item>
@@ -1054,8 +1054,7 @@
     <string name="dial" msgid="1253998302767701559">"Volať"</string>
     <string name="dial_desc" msgid="6573723404985517250">"Zavolať na vybraté telefónne číslo"</string>
     <string name="map" msgid="5441053548030107189">"Mapa"</string>
-    <!-- no translation found for map_desc (1836995341943772348) -->
-    <skip />
+    <string name="map_desc" msgid="1836995341943772348">"Nájsť vybranú adresu"</string>
     <string name="browse" msgid="1245903488306147205">"Otvoriť"</string>
     <string name="browse_desc" msgid="8220976549618935044">"Otvoriť vybratú webovú adresu"</string>
     <string name="sms" msgid="4560537514610063430">"Správa"</string>
@@ -1741,7 +1740,7 @@
     <string name="package_installed_device_owner" msgid="6875717669960212648">"Nainštaloval správca"</string>
     <string name="package_updated_device_owner" msgid="1847154566357862089">"Aktualizoval správca"</string>
     <string name="package_deleted_device_owner" msgid="2307122077550236438">"Odstránil správca"</string>
-    <string name="battery_saver_description" msgid="4660824093877546730">"Šetrič batérie zníži výkonnosť zariadenia a obmedzí alebo vypne vibrácie, služby určovania polohy a dátové prenosy na pozadí, aby predĺžil výdrž batérie. Pošta, SMS a MMS i ďalšie aplikácie, ktoré sú založené na synchronizácii, sa možno nebudú aktualizovať, dokým ich neotvoríte.\n\nPri nabíjaní zariadenia sa šetrič batérie automaticky vypne."</string>
+    <string name="battery_saver_description" msgid="769989536172631582">"S cieľom predĺžiť výdrž batérie vypne Šetrič batérie niektoré funkcie zariadenia a obmedzí aplikácie."</string>
     <string name="data_saver_description" msgid="6015391409098303235">"Šetrič dát bráni niektorým aplikáciám odosielať alebo prijímať dáta na pozadí s cieľom znížiť spotrebu dát. Aplikácia, ktorú momentálne používate, môže prenášať dáta, ale môže to robiť menej často. Znamená to napríklad, že sa nezobrazia obrázky, kým na ne neklepnete."</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"Chcete zapnúť šetrič dát?"</string>
     <string name="data_saver_enable_button" msgid="7147735965247211818">"Zapnúť"</string>
@@ -1846,6 +1845,12 @@
     <string name="language_picker_section_all" msgid="3097279199511617537">"Všetky jazyky"</string>
     <string name="region_picker_section_all" msgid="8966316787153001779">"Všetky regióny"</string>
     <string name="locale_search_menu" msgid="2560710726687249178">"Vyhľadávanie"</string>
+    <!-- no translation found for app_suspended_title (1919029799438164552) -->
+    <skip />
+    <!-- no translation found for app_suspended_default_message (7875306315686531621) -->
+    <skip />
+    <!-- no translation found for app_suspended_more_details (1131804827776778187) -->
+    <skip />
     <string name="work_mode_off_title" msgid="1118691887588435530">"Zapnúť pracovný profil?"</string>
     <string name="work_mode_off_message" msgid="5130856710614337649">"Pracovné aplikácie, upozornenia, dáta a ďalšie funkcie pracovného profilu sa zapnú"</string>
     <string name="work_mode_turn_on" msgid="2062544985670564875">"Zapnúť"</string>
@@ -1937,8 +1942,8 @@
     <string name="volume_dialog_ringer_guidance_silent" msgid="2128975224280276122">"Hovory a upozornenia budú stlmené"</string>
     <string name="notification_channel_system_changes" msgid="5072715579030948646">"Zmeny systému"</string>
     <string name="notification_channel_do_not_disturb" msgid="6766940333105743037">"Nerušiť"</string>
-    <string name="zen_upgrade_notification_visd_title" msgid="4168873821019741166">"Režim Nerušiť skrýva upozornenia, aby vám pomáhal sústrediť sa"</string>
-    <string name="zen_upgrade_notification_visd_content" msgid="6776377368195804354">"Toto je nové správanie. Zmeníte ho klepnutím."</string>
+    <string name="zen_upgrade_notification_visd_title" msgid="3288313883409759733">"Novinka: režim Nerušiť skrýva upozornenia"</string>
+    <string name="zen_upgrade_notification_visd_content" msgid="5533674060311631165">"Klepnutím získate ďalšie informácie a budete môcť vykonať zmeny."</string>
     <string name="zen_upgrade_notification_title" msgid="3799603322910377294">"Nastavenie Nerušiť sa zmenilo"</string>
     <string name="zen_upgrade_notification_content" msgid="1794994264692424562">"Klepnutím skontrolujete, čo je blokované."</string>
     <string name="notification_app_name_system" msgid="4205032194610042794">"Systém"</string>

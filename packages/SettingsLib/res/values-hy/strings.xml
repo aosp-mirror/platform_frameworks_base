@@ -34,7 +34,7 @@
     <string name="wifi_not_in_range" msgid="1136191511238508967">"Ընդգրկույթից դուրս է"</string>
     <string name="wifi_no_internet_no_reconnect" msgid="5724903347310541706">"Չի միանա ավտոմատ"</string>
     <string name="wifi_no_internet" msgid="4663834955626848401">"Ինտերնետ կապ չկա"</string>
-    <string name="saved_network" msgid="4352716707126620811">"Պահել է՝ <xliff:g id="NAME">%1$s</xliff:g>"</string>
+    <string name="saved_network" msgid="4352716707126620811">"Ով է պահել՝ <xliff:g id="NAME">%1$s</xliff:g>"</string>
     <string name="connected_via_network_scorer" msgid="5713793306870815341">"Ավտոմատ կերպով կապակցվել է %1$s-ի միջոցով"</string>
     <string name="connected_via_network_scorer_default" msgid="7867260222020343104">"Ավտոմատ կերպով միացել է ցանցի վարկանիշի ծառայության մատակարարի միջոցով"</string>
     <string name="connected_via_passpoint" msgid="2826205693803088747">"Կապակցված է %1$s-ի միջոցով"</string>
@@ -216,20 +216,15 @@
     <string name="bluetooth_select_avrcp_version_string" msgid="3750059931120293633">"Bluetooth AVRCP տարբերակը"</string>
     <string name="bluetooth_select_avrcp_version_dialog_title" msgid="7277329668298705702">"Ընտրել Bluetooth AVRCP տարբերակը"</string>
     <string name="bluetooth_select_a2dp_codec_type" msgid="90597356942154882">"Bluetooth աուդիո կոդեկ"</string>
-    <!-- no translation found for bluetooth_select_a2dp_codec_type_dialog_title (8436224899475822557) -->
-    <skip />
+    <string name="bluetooth_select_a2dp_codec_type_dialog_title" msgid="8436224899475822557">"Գործարկել Bluetooth աուդիո կոդեկը\nԸնտրություն"</string>
     <string name="bluetooth_select_a2dp_codec_sample_rate" msgid="4788245703824623062">"Bluetooth աուդիոյի Ընդհատավորման հաճախականությունը"</string>
-    <!-- no translation found for bluetooth_select_a2dp_codec_sample_rate_dialog_title (8010380028880963535) -->
-    <skip />
+    <string name="bluetooth_select_a2dp_codec_sample_rate_dialog_title" msgid="8010380028880963535">"Գործարկել Bluetooth աուդիո կոդեկը\nԸնտրություն՝ ընդհատավորման հաճախականություն"</string>
     <string name="bluetooth_select_a2dp_codec_bits_per_sample" msgid="2099645202720164141">"Bluetooth աուդիո, բիթ / նմուշ"</string>
-    <!-- no translation found for bluetooth_select_a2dp_codec_bits_per_sample_dialog_title (8063859754619484760) -->
-    <skip />
+    <string name="bluetooth_select_a2dp_codec_bits_per_sample_dialog_title" msgid="8063859754619484760">"Գործարկել Bluetooth աուդիո կոդեկը\nԸնտրություն՝ բիթ/նմուշ"</string>
     <string name="bluetooth_select_a2dp_codec_channel_mode" msgid="884855779449390540">"Bluetooth աուդիո կապուղու ռեժիմը"</string>
-    <!-- no translation found for bluetooth_select_a2dp_codec_channel_mode_dialog_title (7234956835280563341) -->
-    <skip />
+    <string name="bluetooth_select_a2dp_codec_channel_mode_dialog_title" msgid="7234956835280563341">"Գործարկել Bluetooth աուդիո կոդեկը\nԸնտրություն՝ կապուղու ռեժիմ"</string>
     <string name="bluetooth_select_a2dp_codec_ldac_playback_quality" msgid="3619694372407843405">"Bluetooth աուդիո LDAC կոդեկ՝ նվագարկման որակ"</string>
-    <!-- no translation found for bluetooth_select_a2dp_codec_ldac_playback_quality_dialog_title (7595776220458732825) -->
-    <skip />
+    <string name="bluetooth_select_a2dp_codec_ldac_playback_quality_dialog_title" msgid="7595776220458732825">"Գործարկել Bluetooth աուդիո LDAC կոդեկը\nԸնտրություն՝ նվագարկման որակ"</string>
     <string name="bluetooth_select_a2dp_codec_streaming_label" msgid="5347862512596240506">"Հեռարձակում՝ <xliff:g id="STREAMING_PARAMETER">%1$s</xliff:g>"</string>
     <string name="select_private_dns_configuration_title" msgid="3700456559305263922">"Անհատական DNS"</string>
     <string name="select_private_dns_configuration_dialog_title" msgid="9221994415765826811">"Ընտրեք անհատական DNS սերվերի ռեժիմը"</string>
@@ -399,7 +394,7 @@
     <string name="battery_info_status_charging_lower" msgid="8689770213898117994">"լիցքավորում"</string>
     <string name="battery_info_status_discharging" msgid="310932812698268588">"Չի լիցքավորվում"</string>
     <string name="battery_info_status_not_charging" msgid="8523453668342598579">"Միացված է հոսանքի աղբյուրին, սակայն այս պահին չի կարող լիցքավորվել"</string>
-    <string name="battery_info_status_full" msgid="2824614753861462808">"Լիցքավորված"</string>
+    <string name="battery_info_status_full" msgid="2824614753861462808">"Լիցքավորված է"</string>
     <string name="disabled_by_admin_summary_text" msgid="6750513964908334617">"Վերահսկվում է ադմինիստրատորի կողմից"</string>
     <string name="enabled_by_admin" msgid="5302986023578399263">"Միացված է ադմինիստրատորի կողմից"</string>
     <string name="disabled_by_admin" msgid="8505398946020816620">"Անջատվել է ադմինիստրատորի կողմից"</string>

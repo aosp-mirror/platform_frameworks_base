@@ -141,7 +141,7 @@
     <string name="launch_defaults_some" msgid="313159469856372621">"కొన్ని డిఫాల్ట్‌లు సెట్ చేయబడ్డాయి"</string>
     <string name="launch_defaults_none" msgid="4241129108140034876">"డిఫాల్ట్‌లు ఏవీ సెట్ చేయబడలేదు"</string>
     <string name="tts_settings" msgid="8186971894801348327">"వచనం నుండి ప్రసంగం సెట్టింగ్‌లు"</string>
-    <string name="tts_settings_title" msgid="1237820681016639683">"వచనం నుండి ప్రసంగం అవుట్‌పుట్"</string>
+    <string name="tts_settings_title" msgid="1237820681016639683">"వచనం నుండి మాట అవుట్‌పుట్"</string>
     <string name="tts_default_rate_title" msgid="6030550998379310088">"ప్రసంగం రేట్"</string>
     <string name="tts_default_rate_summary" msgid="4061815292287182801">"వచనాన్ని చదివి వినిపించాల్సిన వేగం"</string>
     <string name="tts_default_pitch_title" msgid="6135942113172488671">"పిచ్"</string>
@@ -193,8 +193,8 @@
     <string name="enable_adb_summary" msgid="4881186971746056635">"USB కనెక్ట్ చేయబడినప్పుడు డీబగ్ మోడ్"</string>
     <string name="clear_adb_keys" msgid="4038889221503122743">"USB డీబగ్ ప్రామాణీకరణలను ఉపసంహరించు"</string>
     <string name="bugreport_in_power" msgid="7923901846375587241">"బగ్ నివేదిక షార్ట్‌కట్"</string>
-    <string name="bugreport_in_power_summary" msgid="1778455732762984579">"బగ్ నివేదికను తీసుకోవడానికి పవర్ మెనులో బటన్‌ను చూపు"</string>
-    <string name="keep_screen_on" msgid="1146389631208760344">"సక్రియంగా ఉంచు"</string>
+    <string name="bugreport_in_power_summary" msgid="1778455732762984579">"బగ్ నివేదికను తీసుకోవడానికి పవర్ మెనూలో బటన్‌ను చూపు"</string>
+    <string name="keep_screen_on" msgid="1146389631208760344">"యాక్టివ్‌గా ఉంచు"</string>
     <string name="keep_screen_on_summary" msgid="2173114350754293009">"ఛార్జ్ చేస్తున్నప్పుడు స్క్రీన్ ఎప్పటికీ నిద్రావస్థలోకి వెళ్లదు"</string>
     <string name="bt_hci_snoop_log" msgid="3340699311158865670">"బ్లూటూత్ HCI రహస్య లాగ్‌ను ప్రారంభించు"</string>
     <string name="bt_hci_snoop_log_summary" msgid="366083475849911315">"ఫైల్‌లో అన్ని బ్లూటూత్ HCI ప్యాకెట్‌లను క్యాప్చర్ చేస్తుంది (ఈ సెట్టింగ్‌ని మార్చిన తర్వాత బ్లూటూత్‌ని టోగుల్ చేయండి)"</string>
@@ -202,34 +202,29 @@
     <string name="oem_unlock_enable_summary" msgid="4720281828891618376">"బూట్‌లోడర్ అన్‌లాక్ కావడానికి అనుమతించు"</string>
     <string name="confirm_enable_oem_unlock_title" msgid="4802157344812385674">"OEM అన్‌లాకింగ్‌ను అనుమతించాలా?"</string>
     <string name="confirm_enable_oem_unlock_text" msgid="5517144575601647022">"హెచ్చరిక: ఈ సెట్టింగ్ ఆన్ చేయబడినప్పుడు పరికరం రక్షణ లక్షణాలు ఈ పరికరంలో పని చేయవు."</string>
-    <string name="mock_location_app" msgid="7966220972812881854">"అనుకృత స్థాన అనువర్తనాన్ని ఎంచుకోండి"</string>
+    <string name="mock_location_app" msgid="7966220972812881854">"అనుకృత స్థాన యాప్‌ను ఎంచుకోండి"</string>
     <string name="mock_location_app_not_set" msgid="809543285495344223">"అనుకృత స్థాన యాప్ ఏదీ సెట్ చేయబడలేదు"</string>
     <string name="mock_location_app_set" msgid="8966420655295102685">"అనుకృత స్థాన యాప్: <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="debug_networking_category" msgid="7044075693643009662">"నెట్‌వర్కింగ్"</string>
     <string name="wifi_display_certification" msgid="8611569543791307533">"వైర్‌లెస్ ప్రదర్శన ప్రమాణీకరణ"</string>
     <string name="wifi_verbose_logging" msgid="4203729756047242344">"Wi‑Fi విశదీకృత లాగింగ్‌ను ప్రారంభించండి"</string>
     <string name="wifi_connected_mac_randomization" msgid="3168165236877957767">"MAC యాదృచ్ఛికతకు కనెక్ట్ చేయబడింది"</string>
-    <string name="mobile_data_always_on" msgid="8774857027458200434">"మొబైల్ డేటాని ఎల్లప్పుడూ సక్రియంగా ఉంచు"</string>
+    <string name="mobile_data_always_on" msgid="8774857027458200434">"మొబైల్ డేటాని ఎల్లప్పుడూ యాక్టివ్‌గా ఉంచు"</string>
     <string name="tethering_hardware_offload" msgid="7470077827090325814">"టెథెరింగ్ హార్డ్‌వేర్ వేగవృద్ధి"</string>
     <string name="bluetooth_show_devices_without_names" msgid="4708446092962060176">"పేర్లు లేని బ్లూటూత్ పరికరాలు  చూపించు"</string>
     <string name="bluetooth_disable_absolute_volume" msgid="2660673801947898809">"సంపూర్ణ వాల్యూమ్‌‍ను నిలిపివేయి"</string>
     <string name="bluetooth_select_avrcp_version_string" msgid="3750059931120293633">"బ్లూటూత్ AVRCP వెర్షన్"</string>
     <string name="bluetooth_select_avrcp_version_dialog_title" msgid="7277329668298705702">"బ్లూటూత్ AVRCP సంస్కరణను ఎంచుకోండి"</string>
     <string name="bluetooth_select_a2dp_codec_type" msgid="90597356942154882">"బ్లూటూత్ ఆడియో కోడెక్"</string>
-    <!-- no translation found for bluetooth_select_a2dp_codec_type_dialog_title (8436224899475822557) -->
-    <skip />
+    <string name="bluetooth_select_a2dp_codec_type_dialog_title" msgid="8436224899475822557">"బ్లూటూత్ ఆడియో కోడెక్‌ని సక్రియం చేయండి\nఎంపిక"</string>
     <string name="bluetooth_select_a2dp_codec_sample_rate" msgid="4788245703824623062">"బ్లూటూత్ ఆడియో నమూనా రేట్"</string>
-    <!-- no translation found for bluetooth_select_a2dp_codec_sample_rate_dialog_title (8010380028880963535) -->
-    <skip />
+    <string name="bluetooth_select_a2dp_codec_sample_rate_dialog_title" msgid="8010380028880963535">"బ్లూటూత్ ఆడియో కోడెక్‌ని సక్రియం చేయండి\nఎంపిక: నమూనా రేట్"</string>
     <string name="bluetooth_select_a2dp_codec_bits_per_sample" msgid="2099645202720164141">"ఒక్కో నమూనాకు బ్లూటూత్ ఆడియో బిట్‌లు"</string>
-    <!-- no translation found for bluetooth_select_a2dp_codec_bits_per_sample_dialog_title (8063859754619484760) -->
-    <skip />
+    <string name="bluetooth_select_a2dp_codec_bits_per_sample_dialog_title" msgid="8063859754619484760">"బ్లూటూత్ ఆడియో కోడెక్‌ని సక్రియం చేయండి\nఎంపిక: ఒక్కో నమూనాలో బిట్‌లు"</string>
     <string name="bluetooth_select_a2dp_codec_channel_mode" msgid="884855779449390540">"బ్లూటూత్ ఆడియో ఛానెల్ మోడ్"</string>
-    <!-- no translation found for bluetooth_select_a2dp_codec_channel_mode_dialog_title (7234956835280563341) -->
-    <skip />
+    <string name="bluetooth_select_a2dp_codec_channel_mode_dialog_title" msgid="7234956835280563341">"బ్లూటూత్ ఆడియో కోడెక్‌ని సక్రియం చేయండి\nఎంపిక: ఛానెల్ మోడ్"</string>
     <string name="bluetooth_select_a2dp_codec_ldac_playback_quality" msgid="3619694372407843405">"బ్లూటూత్ ఆడియో LDAC కోడెక్: ప్లేబ్యాక్ నాణ్యత"</string>
-    <!-- no translation found for bluetooth_select_a2dp_codec_ldac_playback_quality_dialog_title (7595776220458732825) -->
-    <skip />
+    <string name="bluetooth_select_a2dp_codec_ldac_playback_quality_dialog_title" msgid="7595776220458732825">"బ్లూటూత్ ఆడియో LDAC కోడెక్‌ని సక్రియం చేయండి\nఎంపిక: ప్లేబ్యాక్ నాణ్యత"</string>
     <string name="bluetooth_select_a2dp_codec_streaming_label" msgid="5347862512596240506">"ప్రసారం చేస్తోంది: <xliff:g id="STREAMING_PARAMETER">%1$s</xliff:g>"</string>
     <string name="select_private_dns_configuration_title" msgid="3700456559305263922">"ప్రైవేట్ DNS"</string>
     <string name="select_private_dns_configuration_dialog_title" msgid="9221994415765826811">"ప్రైవేట్ DNS మోడ్‌ను ఎంచుకోండి"</string>
@@ -254,23 +249,23 @@
     <string name="allow_mock_location" msgid="2787962564578664888">"అనుకృత స్థానాలను అనుమతించు"</string>
     <string name="allow_mock_location_summary" msgid="317615105156345626">"అనుకృత స్థానాలను అనుమతించు"</string>
     <string name="debug_view_attributes" msgid="6485448367803310384">"వీక్షణ లక్షణ పర్యవేక్షణను ప్రారంభించు"</string>
-    <string name="mobile_data_always_on_summary" msgid="8149773901431697910">"ఎల్లప్పుడూ మొబైల్ డేటాను సక్రియంగా ఉంచు, Wi‑Fi సక్రియంగా ఉన్నా కూడా (వేగవంతమైన నెట్‌వర్క్ మార్పు కోసం)."</string>
+    <string name="mobile_data_always_on_summary" msgid="8149773901431697910">"ఎల్లప్పుడూ మొబైల్ డేటాను యాక్టివ్‌గా ఉంచు, Wi‑Fi యాక్టివ్‌గా ఉన్నా కూడా (వేగవంతమైన నెట్‌వర్క్ మార్పు కోసం)."</string>
     <string name="tethering_hardware_offload_summary" msgid="7726082075333346982">"అందుబాటులో ఉంటే టెథెరింగ్ హార్డ్‌వేర్ వేగవృద్ధిని ఉపయోగించండి"</string>
     <string name="adb_warning_title" msgid="6234463310896563253">"USB డీబగ్గింగ్‌ను అనుమతించాలా?"</string>
     <string name="adb_warning_message" msgid="7316799925425402244">"USB డీబగ్గింగ్ అనేది అభివృద్ధి ప్రయోజనాల కోసం మాత్రమే ఉద్దేశించబడింది. మీ కంప్యూటర్ మరియు మీ పరికరం మధ్య డేటాను కాపీ చేయడానికి, నోటిఫికేషన్ లేకుండా మీ పరికరంలో అనువర్తనాలను ఇన్‌స్టాల్ చేయడానికి మరియు లాగ్ డేటాను చదవడానికి దీన్ని ఉపయోగించండి."</string>
     <string name="adb_keys_warning_message" msgid="5659849457135841625">"మీరు గతంలో ప్రామాణీకరించిన అన్ని కంప్యూటర్‌ల నుండి USB డీబగ్గింగ్‌కు ప్రాప్యతను ఉపసంహరించాలా?"</string>
     <string name="dev_settings_warning_title" msgid="7244607768088540165">"అభివృద్ధి సెట్టింగ్‌లను అనుమతించాలా?"</string>
     <string name="dev_settings_warning_message" msgid="2298337781139097964">"ఈ సెట్టింగ్‌లు అభివృద్ధి వినియోగం కోసం మాత్రమే ఉద్దేశించబడినవి. వీటి వలన మీ పరికరం మరియు దీనిలోని యాప్‌లు విచ్ఛిన్నం కావచ్చు లేదా తప్పుగా ప్రవర్తించవచ్చు."</string>
-    <string name="verify_apps_over_usb_title" msgid="4177086489869041953">"USB ద్వారా అనువర్తనాలను ధృవీకరించు"</string>
-    <string name="verify_apps_over_usb_summary" msgid="9164096969924529200">"హానికరమైన ప్రవర్తన కోసం ADB/ADT ద్వారా ఇన్‌స్టాల్ చేయబడిన అనువర్తనాలను తనిఖీ చేయి."</string>
+    <string name="verify_apps_over_usb_title" msgid="4177086489869041953">"USB ద్వారా యాప్‌లను ధృవీకరించు"</string>
+    <string name="verify_apps_over_usb_summary" msgid="9164096969924529200">"హానికరమైన ప్రవర్తన కోసం ADB/ADT ద్వారా ఇన్‌స్టాల్ చేయబడిన యాప్‌లను తనిఖీ చేయి."</string>
     <string name="bluetooth_show_devices_without_names_summary" msgid="2351196058115755520">"పేర్లు (MAC చిరునామాలు మాత్రమే) లేని బ్లూటూత్ పరికరాలు ప్రదర్శించబడతాయి"</string>
-    <string name="bluetooth_disable_absolute_volume_summary" msgid="6031284410786545957">"రిమోట్ పరికరాల్లో ఆమోదించలేని స్థాయిలో అధిక వాల్యూమ్ ఉండటం లేదా వాల్యూమ్ నియంత్రణ లేకపోవడం వంటి సమస్యలు ఉంటే బ్లూటూత్ సంపూర్ణ వాల్యూమ్ లక్షణాన్ని నిలిపివేస్తుంది."</string>
+    <string name="bluetooth_disable_absolute_volume_summary" msgid="6031284410786545957">"రిమోట్ పరికరాల్లో ఆమోదించలేని స్థాయిలో అధిక వాల్యూమ్ ఉండటం లేదా వాల్యూమ్ నియంత్రణ లేకపోవడం వంటి సమస్యలు ఉంటే బ్లూటూత్ సంపూర్ణ వాల్యూమ్ ఫీచర్‌ని నిలిపివేస్తుంది."</string>
     <string name="enable_terminal_title" msgid="95572094356054120">"స్థానిక టెర్మినల్"</string>
     <string name="enable_terminal_summary" msgid="67667852659359206">"స్థానిక షెల్ ప్రాప్యతను అందించే టెర్మినల్ అనువర్తనాన్ని ప్రారంభించు"</string>
     <string name="hdcp_checking_title" msgid="8605478913544273282">"HDCP తనిఖీ"</string>
     <string name="hdcp_checking_dialog_title" msgid="5141305530923283">"HDCP తనిఖీ ప్రవర్తనను సెట్ చేయండి"</string>
     <string name="debug_debugging_category" msgid="6781250159513471316">"డీబగ్గింగ్"</string>
-    <string name="debug_app" msgid="8349591734751384446">"డీబగ్ అనువర్తనాన్ని ఎంచుకోండి"</string>
+    <string name="debug_app" msgid="8349591734751384446">"డీబగ్ యాప్‌ను ఎంచుకోండి"</string>
     <string name="debug_app_not_set" msgid="718752499586403499">"డీబగ్ యాప్ సెట్ చేయబడలేదు"</string>
     <string name="debug_app_set" msgid="2063077997870280017">"డీబగ్గింగ్ యాప్: <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="select_application" msgid="5156029161289091703">"అనువర్తనాన్ని ఎంచుకోండి"</string>
@@ -279,38 +274,38 @@
     <string name="wait_for_debugger_summary" msgid="1766918303462746804">"డీబగ్ చేయబడిన యాప్ అమలు కావడానికి ముందు జోడించాల్సిన డీబగ్గర్ కోసం వేచి ఉంటుంది"</string>
     <string name="debug_input_category" msgid="1811069939601180246">"ఇన్‌పుట్"</string>
     <string name="debug_drawing_category" msgid="6755716469267367852">"డ్రాయింగ్"</string>
-    <string name="debug_hw_drawing_category" msgid="6220174216912308658">"హార్డ్‌వేర్ వేగవంతమైన భాషాంతరీకరణ"</string>
+    <string name="debug_hw_drawing_category" msgid="6220174216912308658">"హార్డ్‌వేర్‌తో వేగవంతమైన రెండరింగ్"</string>
     <string name="media_category" msgid="4388305075496848353">"మీడియా"</string>
     <string name="debug_monitoring_category" msgid="7640508148375798343">"పర్యవేక్షణ"</string>
     <string name="strict_mode" msgid="1938795874357830695">"ఖచ్చితమైన మోడ్ ప్రారంభించబడింది"</string>
-    <string name="strict_mode_summary" msgid="142834318897332338">"అనువర్తనాలు ప్రధాన థ్రెడ్‌లో సుదీర్ఘ చర్యలు చేసేటప్పుడు స్క్రీన్‌ను ఫ్లాష్ చేయండి"</string>
+    <string name="strict_mode_summary" msgid="142834318897332338">"యాప్‌లు ప్రధాన థ్రెడ్‌లో సుదీర్ఘ చర్యలు చేసేటప్పుడు స్క్రీన్‌ను ఫ్లాష్ చేయండి"</string>
     <string name="pointer_location" msgid="6084434787496938001">"పాయింటర్ స్థానం"</string>
     <string name="pointer_location_summary" msgid="840819275172753713">"ప్రస్తుత స్పర్శ డేటాను చూపేలా స్క్రీన్ అతివ్యాప్తి చేయండి"</string>
     <string name="show_touches" msgid="2642976305235070316">"నొక్కినవి చూపు"</string>
-    <string name="show_touches_summary" msgid="6101183132903926324">"నొక్కినవాటికి సంబంధించిన దృశ్య అభిప్రాయాన్ని చూపు"</string>
+    <string name="show_touches_summary" msgid="6101183132903926324">"నొక్కినప్పుడు దృశ్యపరమైన ప్రతిస్పందన చూపు"</string>
     <string name="show_screen_updates" msgid="5470814345876056420">"సర్ఫేస్ అప్‌డేట్‌లను చూపండి"</string>
-    <string name="show_screen_updates_summary" msgid="2569622766672785529">"పూర్తి విండో ఉపరితలాలు నవీకరించబడినప్పుడు వాటిని ఫ్లాష్ చేయండి"</string>
-    <string name="show_hw_screen_updates" msgid="5036904558145941590">"GPU వీక్షణ అప్‌డేట్‌లను చూపండి"</string>
-    <string name="show_hw_screen_updates_summary" msgid="1115593565980196197">"GPUతో గీసినప్పుడు విండోల లోపల వీక్షణలను ఫ్లాష్ చేయండి"</string>
-    <string name="show_hw_layers_updates" msgid="5645728765605699821">"హార్డ్‌వేర్ లేయర్‌ల అప్‌డేట్‌లను చూపండి"</string>
-    <string name="show_hw_layers_updates_summary" msgid="5296917233236661465">"హార్డ్‌వేర్ లేయర్‌లు నవీకరించబడినప్పుడు వాటిని ఆకుపచ్చ రంగులో ఫ్లాష్ చేయండి"</string>
+    <string name="show_screen_updates_summary" msgid="2569622766672785529">"పూర్తి విండో ఉపరితలాలు అప్‌డేట్‌ చేయబడినప్పుడు వాటిని ఫ్లాష్ చేయండి"</string>
+    <string name="show_hw_screen_updates" msgid="5036904558145941590">"GPU వీక్షణ అప్‌డేట్‌లను చూపు"</string>
+    <string name="show_hw_screen_updates_summary" msgid="1115593565980196197">"GPUతో డ్రా చేసినప్పుడు విండోల లోపలి వీక్షణలను ఫ్లాష్ చేయి"</string>
+    <string name="show_hw_layers_updates" msgid="5645728765605699821">"హార్డ్‌వేర్ లేయర్‌ల అప్‌డేట్‌లను చూపు"</string>
+    <string name="show_hw_layers_updates_summary" msgid="5296917233236661465">"హార్డ్‌వేర్ లేయర్‌లు అప్‌డేట్‌ చేయబడినప్పుడు వాటిని ఆకుపచ్చ రంగులో ఫ్లాష్ చేయి"</string>
     <string name="debug_hw_overdraw" msgid="2968692419951565417">"GPU ఓవర్‌డ్రాను డీబగ్ చేయండి"</string>
     <string name="disable_overlays" msgid="2074488440505934665">"HW అతివ్యాప్తులను నిలిపివేయి"</string>
-    <string name="disable_overlays_summary" msgid="3578941133710758592">"స్క్రీన్ కంపోజిషనింగ్ కోసం ఎల్లప్పుడూ GPUని ఉపయోగించు"</string>
+    <string name="disable_overlays_summary" msgid="3578941133710758592">"స్క్రీన్ కంపాజిటింగ్‌కు ఎల్లప్పుడూ GPUని ఉపయోగించు"</string>
     <string name="simulate_color_space" msgid="6745847141353345872">"రంగు అంతరాన్ని అనుకరించు"</string>
     <string name="enable_opengl_traces_title" msgid="6790444011053219871">"OpenGL ట్రేస్‌లను ప్రారంభించండి"</string>
-    <string name="usb_audio_disable_routing" msgid="8114498436003102671">"USB ఆడియో రూటిం. నిలిపి."</string>
-    <string name="usb_audio_disable_routing_summary" msgid="980282760277312264">"USB ఆడియో పరికరాలకు స్వయం. రూటింగ్‌ను నిలిపివేయండి"</string>
+    <string name="usb_audio_disable_routing" msgid="8114498436003102671">"USB ఆడియో రూటింగ్ నిలిపివేయి"</string>
+    <string name="usb_audio_disable_routing_summary" msgid="980282760277312264">"USB ఆడియో పరికరాలకు ఆటో. రూటింగ్‌ను నిలిపివేయండి"</string>
     <string name="debug_layout" msgid="5981361776594526155">"లేఅవుట్ బౌండ్‌లు చూపు"</string>
     <string name="debug_layout_summary" msgid="2001775315258637682">"క్లిప్ సరిహద్దులు, అంచులు మొ. చూపు"</string>
     <string name="force_rtl_layout_all_locales" msgid="2259906643093138978">"RTL లేఅవుట్ దిశను నిర్భందం చేయండి"</string>
     <string name="force_rtl_layout_all_locales_summary" msgid="9192797796616132534">"అన్ని లొకేల్‌ల కోసం RTLకి స్క్రీన్ లేఅవుట్ దిశను నిర్భందించు"</string>
-    <string name="force_hw_ui" msgid="6426383462520888732">"నిర్బంధంగా GPU భాషాంతరీకరణ"</string>
+    <string name="force_hw_ui" msgid="6426383462520888732">"తప్పనిసరి GPU రెండరింగ్"</string>
     <string name="force_hw_ui_summary" msgid="5535991166074861515">"2d డ్రాయింగ్ కోసం GPU నిర్భంద వినియోగం"</string>
     <string name="force_msaa" msgid="7920323238677284387">"నిర్భందం 4x MSAA"</string>
-    <string name="force_msaa_summary" msgid="9123553203895817537">"OpenGL ES 2.0 అనువర్తనాల్లో 4x MSAAను ప్రారంభించండి"</string>
+    <string name="force_msaa_summary" msgid="9123553203895817537">"OpenGL ES 2.0 యాప్‌లలో 4x MSAAను ప్రారంభించండి"</string>
     <string name="show_non_rect_clip" msgid="505954950474595172">"దీర్ఘ చతురస్రం కాని క్లిప్ చర్యలను డీబగ్ చేయండి"</string>
-    <string name="track_frame_time" msgid="6146354853663863443">"ప్రొఫైల్ GPU భాషాంతరీకరణ"</string>
+    <string name="track_frame_time" msgid="6146354853663863443">"ప్రొఫైల్ GPU రెండరింగ్"</string>
     <string name="enable_gpu_debug_layers" msgid="3848838293793255097">"GPU డీబగ్ లేయర్‌లను ప్రారంభించండి"</string>
     <string name="enable_gpu_debug_layers_summary" msgid="8009136940671194940">"డీబగ్ యాప్‌ల కోసం GPU డీబగ్ లేయర్‌లను లోడ్ చేయడాన్ని అనుమతించండి"</string>
     <string name="window_animation_scale_title" msgid="6162587588166114700">"విండో యానిమేషన్ ప్రమాణం"</string>
@@ -318,17 +313,17 @@
     <string name="animator_duration_scale_title" msgid="3406722410819934083">"యానిమేటర్ వ్యవధి ప్రమాణం"</string>
     <string name="overlay_display_devices_title" msgid="5364176287998398539">"ప్రత్యామ్నాయ ప్రదర్శనలను అనుకరించండి"</string>
     <string name="debug_applications_category" msgid="4206913653849771549">"యాప్‌లు"</string>
-    <string name="immediately_destroy_activities" msgid="1579659389568133959">"కార్యాచరణలను ఉంచవద్దు"</string>
+    <string name="immediately_destroy_activities" msgid="1579659389568133959">"కార్యకలాపాలను ఉంచవద్దు"</string>
     <string name="immediately_destroy_activities_summary" msgid="3592221124808773368">"ప్రతి కార్యాచరణను వినియోగదారు నిష్క్రమించిన వెంటనే తొలగించండి"</string>
     <string name="app_process_limit_title" msgid="4280600650253107163">"నేపథ్య ప్రాసెస్ పరిమితి"</string>
     <string name="show_all_anrs" msgid="4924885492787069007">"నేపథ్య ANRలను చూపు"</string>
     <string name="show_all_anrs_summary" msgid="6636514318275139826">"నేపథ్య యాప్‌ల కోసం యాప్ ప్రతిస్పందించడం లేదు అనే డైలాగ్‌ను చూపు"</string>
     <string name="show_notification_channel_warnings" msgid="1399948193466922683">"ఛానెల్ హెచ్చరికల నోటిఫికేషన్‌‌ను చూపు"</string>
     <string name="show_notification_channel_warnings_summary" msgid="5536803251863694895">"చెల్లుబాటు అయ్యే ఛానెల్ లేకుండా యాప్ నోటిఫికేషన్‌ను పోస్ట్ చేస్తున్నప్పుడు స్క్రీన్‌పై హెచ్చరికను చూపిస్తుంది"</string>
-    <string name="force_allow_on_external" msgid="3215759785081916381">"అనువర్తనాలను బాహ్య నిల్వలో నిర్బంధంగా అనుమతించు"</string>
-    <string name="force_allow_on_external_summary" msgid="3640752408258034689">"ఏ అనువర్తనాన్ని అయినా మానిఫెస్ట్ విలువలతో సంబంధం లేకుండా బాహ్య నిల్వలో వ్రాయడానికి అనుమతిస్తుంది"</string>
-    <string name="force_resizable_activities" msgid="8615764378147824985">"కార్యాచరణలను పరిమాణం మార్చగలిగేలా నిర్బంధించు"</string>
-    <string name="force_resizable_activities_summary" msgid="6667493494706124459">"మానిఫెస్ట్ విలువలతో సంబంధం లేకుండా అన్ని కార్యాచరణలను పలు రకాల విండోల్లో సరిపోయేట్లు పరిమాణం మార్చగలిగేలా చేస్తుంది."</string>
+    <string name="force_allow_on_external" msgid="3215759785081916381">"యాప్‌లను బాహ్య నిల్వలో తప్పనిసరిగా అనుమతించు"</string>
+    <string name="force_allow_on_external_summary" msgid="3640752408258034689">"ఏ యాప్‌ని అయినా మానిఫెస్ట్ విలువలతో సంబంధం లేకుండా బాహ్య నిల్వలో సేవ్ చేయడానికి అనుమతిస్తుంది"</string>
+    <string name="force_resizable_activities" msgid="8615764378147824985">"కార్యకలాపాలను పరిమాణం మార్చగలిగేలా నిర్బంధించు"</string>
+    <string name="force_resizable_activities_summary" msgid="6667493494706124459">"మానిఫెస్ట్ విలువలతో సంబంధం లేకుండా అన్ని కార్యకలాపాలను పలు రకాల విండోల్లో సరిపోయేట్లు పరిమాణం మార్చగలిగేలా చేస్తుంది."</string>
     <string name="enable_freeform_support" msgid="1461893351278940416">"స్వతంత్ర రూప విండోలను ప్రారంభించండి"</string>
     <string name="enable_freeform_support_summary" msgid="8247310463288834487">"ప్రయోగాత్మక స్వతంత్ర రూప విండోల కోసం మద్దతును ప్రారంభిస్తుంది."</string>
     <string name="local_backup_password_title" msgid="3860471654439418822">"డెస్క్‌టాప్ బ్యాకప్ పాస్‌వర్డ్"</string>

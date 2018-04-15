@@ -25,6 +25,7 @@ import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
+import com.android.internal.widget.NotificationActionListLayout;
 import com.android.systemui.statusbar.CrossFadeHelper;
 import com.android.systemui.statusbar.ExpandableNotificationRow;
 import com.android.systemui.statusbar.TransformableView;
@@ -47,6 +48,7 @@ public class NotificationTemplateViewWrapper extends NotificationHeaderViewWrapp
 
     private int mContentHeight;
     private int mMinHeightHint;
+    private NotificationActionListLayout mActions;
 
     protected NotificationTemplateViewWrapper(Context ctx, View view,
             ExpandableNotificationRow row) {
@@ -133,6 +135,7 @@ public class NotificationTemplateViewWrapper extends NotificationHeaderViewWrapp
             mProgressBar = null;
         }
         mActionsContainer = mView.findViewById(com.android.internal.R.id.actions_container);
+        mActions = mView.findViewById(com.android.internal.R.id.actions);
         mReplyAction = mView.findViewById(com.android.internal.R.id.reply_icon_action);
     }
 
@@ -283,5 +286,14 @@ public class NotificationTemplateViewWrapper extends NotificationHeaderViewWrapp
             mActionsContainer.setTranslationY(constrainedContentHeight - mView.getHeight()
                     - getHeaderTranslation());
         }
+    }
+
+    @Override
+    public int getExtraMeasureHeight() {
+        int extra = 0;
+        if (mActions != null) {
+            extra = mActions.getExtraMeasureHeight();
+        }
+        return extra + super.getExtraMeasureHeight();
     }
 }

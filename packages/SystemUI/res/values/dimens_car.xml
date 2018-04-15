@@ -20,7 +20,7 @@
     <dimen name="car_margin_standard">112dp</dimen>
 
     <!-- TODO replace with car support lib sizes when available -->
-    <dimen name="car_fullscreen_user_pod_icon_text_size">32sp</dimen>
+    <dimen name="car_fullscreen_user_pod_icon_text_size">64sp</dimen>
     <dimen name="car_fullscreen_user_pod_width">243dp</dimen>
     <dimen name="car_fullscreen_user_pod_height">356dp</dimen>
     <dimen name="car_fullscreen_user_pod_image_avatar_width">96dp</dimen>

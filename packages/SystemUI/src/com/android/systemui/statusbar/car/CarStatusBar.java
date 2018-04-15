@@ -25,9 +25,7 @@ import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewGroup.LayoutParams;
-import android.view.ViewStub;
 import android.view.WindowManager;
-import android.widget.LinearLayout;
 
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.systemui.BatteryMeterView;
@@ -406,9 +404,12 @@ public class CarStatusBar extends StatusBar implements
     private class TaskStackListenerImpl extends SysUiTaskStackChangeListener {
         @Override
         public void onTaskStackChanged() {
-            ActivityManager.RunningTaskInfo runningTaskInfo =
-                    ActivityManagerWrapper.getInstance().getRunningTask();
-            mCarFacetButtonController.taskChanged(runningTaskInfo);
+            try {
+                mCarFacetButtonController.taskChanged(
+                        ActivityManager.getService().getAllStackInfos());
+            } catch (Exception e) {
+                Log.e(TAG, "Getting StackInfo from activity manager failed", e);
+            }
         }
     }
 

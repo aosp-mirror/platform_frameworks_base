@@ -1014,8 +1014,7 @@
     <string name="dial" msgid="1253998302767701559">"Appel"</string>
     <string name="dial_desc" msgid="6573723404985517250">"Téléphoner au numéro sélectionné"</string>
     <string name="map" msgid="5441053548030107189">"Carte"</string>
-    <!-- no translation found for map_desc (1836995341943772348) -->
-    <skip />
+    <string name="map_desc" msgid="1836995341943772348">"Localiser l\'adresse sélectionnée"</string>
     <string name="browse" msgid="1245903488306147205">"Ouvrir"</string>
     <string name="browse_desc" msgid="8220976549618935044">"Ouvrir l\'adresse URL sélectionnée"</string>
     <string name="sms" msgid="4560537514610063430">"Message"</string>
@@ -1691,7 +1690,7 @@
     <string name="package_installed_device_owner" msgid="6875717669960212648">"Installé par votre administrateur"</string>
     <string name="package_updated_device_owner" msgid="1847154566357862089">"Mise à jour par votre administrateur"</string>
     <string name="package_deleted_device_owner" msgid="2307122077550236438">"Supprimé par votre administrateur"</string>
-    <string name="battery_saver_description" msgid="4660824093877546730">"Pour améliorer l\'autonomie de la pile, la fonction Économie d\'énergie réduit les performances de votre appareil et limite ou désactive la vibration, les services de localisation ainsi que la plupart des données en arrière-plan. Les applications de courriels, de messages et d\'autres qui reposent sur la synchronisation ne peuvent pas se mettre à jour, sauf si vous les ouvrez.\n\nLa fonction Économie d\'énergie se désactive automatiquement lorsque votre appareil est en charge."</string>
+    <string name="battery_saver_description" msgid="769989536172631582">"Pour augmenter l\'autonomie de votre appareil, le mode Économie d\'énergie désactive certaines fonctionnalités et restreint les applications"</string>
     <string name="data_saver_description" msgid="6015391409098303235">"Pour aider à diminuer l\'utilisation des données, la fonction Économiseur de données empêche certaines applications d\'envoyer ou de recevoir des données en arrière-plan. Une application que vous utilisez actuellement peut accéder à des données, mais peut le faire moins souvent. Cela peut signifier, par exemple, que les images ne s\'affichent pas jusqu\'à ce que vous les touchiez."</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"Activer l\'Économiseur de données?"</string>
     <string name="data_saver_enable_button" msgid="7147735965247211818">"Activer"</string>
@@ -1778,6 +1777,12 @@
     <string name="language_picker_section_all" msgid="3097279199511617537">"Toutes les langues"</string>
     <string name="region_picker_section_all" msgid="8966316787153001779">"Toutes les régions"</string>
     <string name="locale_search_menu" msgid="2560710726687249178">"Rechercher"</string>
+    <!-- no translation found for app_suspended_title (1919029799438164552) -->
+    <skip />
+    <!-- no translation found for app_suspended_default_message (7875306315686531621) -->
+    <skip />
+    <!-- no translation found for app_suspended_more_details (1131804827776778187) -->
+    <skip />
     <string name="work_mode_off_title" msgid="1118691887588435530">"Activer le profil professionnel?"</string>
     <string name="work_mode_off_message" msgid="5130856710614337649">"Vos applications professionnelles, vos notifications, vos données et les autres fonctionnalités de profil professionnel seront activées"</string>
     <string name="work_mode_turn_on" msgid="2062544985670564875">"Activer"</string>
@@ -1867,8 +1872,8 @@
     <string name="volume_dialog_ringer_guidance_silent" msgid="2128975224280276122">"Les appels et les notifications seront silencieux"</string>
     <string name="notification_channel_system_changes" msgid="5072715579030948646">"Changements système"</string>
     <string name="notification_channel_do_not_disturb" msgid="6766940333105743037">"Ne pas déranger"</string>
-    <string name="zen_upgrade_notification_visd_title" msgid="4168873821019741166">"Le mode Ne pas déranger masque les notifications pour vous aider à vous concentrer"</string>
-    <string name="zen_upgrade_notification_visd_content" msgid="6776377368195804354">"C\'est un nouveau comportement. Touchez l\'écran pour changer vos options."</string>
+    <string name="zen_upgrade_notification_visd_title" msgid="3288313883409759733">"Nouveau : Le mode Ne pas déranger masque les notifications"</string>
+    <string name="zen_upgrade_notification_visd_content" msgid="5533674060311631165">"Touchez ici pour en savoir plus et changer les paramètres"</string>
     <string name="zen_upgrade_notification_title" msgid="3799603322910377294">"Les paramètres du mode Ne pas déranger ont changé"</string>
     <string name="zen_upgrade_notification_content" msgid="1794994264692424562">"Touchez l\'écran pour vérifier ce qui est bloqué."</string>
     <string name="notification_app_name_system" msgid="4205032194610042794">"Système"</string>
