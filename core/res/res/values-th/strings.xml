@@ -1690,8 +1690,7 @@
     <string name="package_installed_device_owner" msgid="6875717669960212648">"ติดตั้งโดยผู้ดูแลระบบ"</string>
     <string name="package_updated_device_owner" msgid="1847154566357862089">"อัปเดตโดยผู้ดูแลระบบ"</string>
     <string name="package_deleted_device_owner" msgid="2307122077550236438">"ลบโดยผู้ดูแลระบบ"</string>
-    <!-- no translation found for battery_saver_description (769989536172631582) -->
-    <skip />
+    <string name="battery_saver_description" msgid="769989536172631582">"โหมดประหยัดแบตเตอรี่จะปิดบางฟีเจอร์ในอุปกรณ์และจำกัดการใช้งานแอปเพื่อยืดอายุการใช้งานแบตเตอรี่"</string>
     <string name="data_saver_description" msgid="6015391409098303235">"เพื่อช่วยลดปริมาณการใช้อินเทอร์เน็ต โปรแกรมประหยัดอินเทอร์เน็ตจะช่วยป้องกันไม่ให้บางแอปส่งหรือรับข้อมูลเครือข่ายมือถือในการทำงานเบื้องหลัง แอปที่คุณกำลังใช้งานสามารถเข้าถึงข้อมูลเครือข่ายมือถือได้ แต่อาจไม่บ่อยเท่าเดิม ตัวอย่างเช่น ภาพต่างๆ จะไม่แสดงจนกว่าคุณจะแตะที่ภาพเหล่านั้น"</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"เปิดการประหยัดอินเทอร์เน็ตไหม"</string>
     <string name="data_saver_enable_button" msgid="7147735965247211818">"เปิด"</string>
@@ -1778,9 +1777,12 @@
     <string name="language_picker_section_all" msgid="3097279199511617537">"ทุกภาษา"</string>
     <string name="region_picker_section_all" msgid="8966316787153001779">"ภูมิภาคทั้งหมด"</string>
     <string name="locale_search_menu" msgid="2560710726687249178">"ค้นหา"</string>
-    <string name="app_suspended_title" msgid="5360409799785895488">"ไม่อนุญาตให้ดำเนินการนี้"</string>
-    <string name="app_suspended_default_message" msgid="5876776530189983288">"แอปพลิเคชัน <xliff:g id="APP_NAME">%1$s</xliff:g> ปิดการใช้งานอยู่ในขณะนี้"</string>
-    <string name="app_suspended_more_details" msgid="2901244470963918402">"รายละเอียดเพิ่มเติม"</string>
+    <!-- no translation found for app_suspended_title (1919029799438164552) -->
+    <skip />
+    <!-- no translation found for app_suspended_default_message (7875306315686531621) -->
+    <skip />
+    <!-- no translation found for app_suspended_more_details (1131804827776778187) -->
+    <skip />
     <string name="work_mode_off_title" msgid="1118691887588435530">"เปิดโปรไฟล์งานไหม"</string>
     <string name="work_mode_off_message" msgid="5130856710614337649">"ระบบจะเปิดแอปงาน การแจ้งเตือน ข้อมูล และฟีเจอร์อื่นๆ ในโปรไฟล์งาน"</string>
     <string name="work_mode_turn_on" msgid="2062544985670564875">"เปิด"</string>
@@ -1870,12 +1872,12 @@
     <string name="volume_dialog_ringer_guidance_silent" msgid="2128975224280276122">"สายเรียกเข้าและการแจ้งเตือนจะไม่ส่งเสียง"</string>
     <string name="notification_channel_system_changes" msgid="5072715579030948646">"การเปลี่ยนแปลงระบบ"</string>
     <string name="notification_channel_do_not_disturb" msgid="6766940333105743037">"ห้ามรบกวน"</string>
-    <!-- no translation found for zen_upgrade_notification_visd_title (3288313883409759733) -->
-    <skip />
-    <!-- no translation found for zen_upgrade_notification_visd_content (5533674060311631165) -->
-    <skip />
+    <string name="zen_upgrade_notification_visd_title" msgid="3288313883409759733">"ใหม่: โหมดห้ามรบกวนซ่อนการแจ้งเตือนไว้"</string>
+    <string name="zen_upgrade_notification_visd_content" msgid="5533674060311631165">"แตะเพื่อดูข้อมูลเพิ่มเติมและเปลี่ยนแปลง"</string>
     <string name="zen_upgrade_notification_title" msgid="3799603322910377294">"เปลี่ยน \"ห้ามรบกวน\" แล้ว"</string>
     <string name="zen_upgrade_notification_content" msgid="1794994264692424562">"แตะเพื่อดูรายการที่ถูกบล็อก"</string>
     <string name="notification_app_name_system" msgid="4205032194610042794">"ระบบ"</string>
     <string name="notification_app_name_settings" msgid="7751445616365753381">"การตั้งค่า"</string>
+    <!-- no translation found for car_loading_profile (3545132581795684027) -->
+    <skip />
 </resources>

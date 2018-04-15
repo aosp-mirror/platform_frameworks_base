@@ -1690,8 +1690,7 @@
     <string name="package_installed_device_owner" msgid="6875717669960212648">"已由您的管理員安裝"</string>
     <string name="package_updated_device_owner" msgid="1847154566357862089">"已由您的管理員更新"</string>
     <string name="package_deleted_device_owner" msgid="2307122077550236438">"已由您的管理員刪除"</string>
-    <!-- no translation found for battery_saver_description (769989536172631582) -->
-    <skip />
+    <string name="battery_saver_description" msgid="769989536172631582">"為延長電池壽命，「省電模式」會停用部分裝置功能，並限制應用程式"</string>
     <string name="data_saver_description" msgid="6015391409098303235">"「數據節省模式」可防止部分應用程式在背景收發資料，以節省數據用量。您正在使用的應用程式可存取資料，但次數可能會減少。例如，圖片可能需要輕按才會顯示。"</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"要開啟「數據節省模式」嗎？"</string>
     <string name="data_saver_enable_button" msgid="7147735965247211818">"開啟"</string>
@@ -1778,9 +1777,12 @@
     <string name="language_picker_section_all" msgid="3097279199511617537">"所有語言"</string>
     <string name="region_picker_section_all" msgid="8966316787153001779">"所有國家/地區"</string>
     <string name="locale_search_menu" msgid="2560710726687249178">"搜尋"</string>
-    <string name="app_suspended_title" msgid="5360409799785895488">"不允許此操作"</string>
-    <string name="app_suspended_default_message" msgid="5876776530189983288">"<xliff:g id="APP_NAME">%1$s</xliff:g> 應用程式目前已停用。"</string>
-    <string name="app_suspended_more_details" msgid="2901244470963918402">"更多詳情"</string>
+    <!-- no translation found for app_suspended_title (1919029799438164552) -->
+    <skip />
+    <!-- no translation found for app_suspended_default_message (7875306315686531621) -->
+    <skip />
+    <!-- no translation found for app_suspended_more_details (1131804827776778187) -->
+    <skip />
     <string name="work_mode_off_title" msgid="1118691887588435530">"要開啟工作設定檔嗎？"</string>
     <string name="work_mode_off_message" msgid="5130856710614337649">"系統將開啟您的工作應用程式、通知、資料和其他工作設定檔功能"</string>
     <string name="work_mode_turn_on" msgid="2062544985670564875">"開啟"</string>
@@ -1870,12 +1872,12 @@
     <string name="volume_dialog_ringer_guidance_silent" msgid="2128975224280276122">"有來電和通知時會靜音"</string>
     <string name="notification_channel_system_changes" msgid="5072715579030948646">"系統變更"</string>
     <string name="notification_channel_do_not_disturb" msgid="6766940333105743037">"請勿騷擾"</string>
-    <!-- no translation found for zen_upgrade_notification_visd_title (3288313883409759733) -->
-    <skip />
-    <!-- no translation found for zen_upgrade_notification_visd_content (5533674060311631165) -->
-    <skip />
+    <string name="zen_upgrade_notification_visd_title" msgid="3288313883409759733">"新通知：「請勿騷擾」模式目前隱藏通知"</string>
+    <string name="zen_upgrade_notification_visd_content" msgid="5533674060311631165">"輕按即可瞭解詳情和作出變更。"</string>
     <string name="zen_upgrade_notification_title" msgid="3799603322910377294">"請勿騷擾已變更"</string>
     <string name="zen_upgrade_notification_content" msgid="1794994264692424562">"輕按即可查看封鎖內容。"</string>
     <string name="notification_app_name_system" msgid="4205032194610042794">"系統"</string>
     <string name="notification_app_name_settings" msgid="7751445616365753381">"設定"</string>
+    <!-- no translation found for car_loading_profile (3545132581795684027) -->
+    <skip />
 </resources>

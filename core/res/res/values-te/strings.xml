@@ -601,7 +601,7 @@
     <string name="policydesc_encryptedStorage" msgid="2637732115325316992">"నిల్వ చేయబడిన యాప్ డేటా గుప్తీకరించబడి ఉండటం అవసరం."</string>
     <string name="policylab_disableCamera" msgid="6395301023152297826">"కెమెరాలను నిలిపివేయండి"</string>
     <string name="policydesc_disableCamera" msgid="2306349042834754597">"అన్ని పరికర కెమెరాల వినియోగాన్ని నిరోధించండి."</string>
-    <string name="policylab_disableKeyguardFeatures" msgid="8552277871075367771">"కొన్ని స్క్రీన్ లాక్ లక్షణాలు నిలిపివేయండి"</string>
+    <string name="policylab_disableKeyguardFeatures" msgid="8552277871075367771">"కొన్ని స్క్రీన్ లాక్ ఫీచర్‌లు నిలిపివేయండి"</string>
     <string name="policydesc_disableKeyguardFeatures" msgid="2044755691354158439">"కొన్ని స్క్రీన్ లాక్ లక్షణాల వినియోగాన్ని నిరోధిస్తుంది."</string>
   <string-array name="phoneTypes">
     <item msgid="8901098336658710359">"ఇల్లు"</item>
@@ -1691,8 +1691,7 @@
     <string name="package_installed_device_owner" msgid="6875717669960212648">"మీ నిర్వాహకులు ఇన్‌స్టాల్ చేసారు"</string>
     <string name="package_updated_device_owner" msgid="1847154566357862089">"మీ నిర్వాహకులు నవీకరించారు"</string>
     <string name="package_deleted_device_owner" msgid="2307122077550236438">"మీ నిర్వాహకులు తొలగించారు"</string>
-    <!-- no translation found for battery_saver_description (769989536172631582) -->
-    <skip />
+    <string name="battery_saver_description" msgid="769989536172631582">"మీ బ్యాటరీ జీవితకాలాన్ని పెంచుకోవాలనుకుంటే, బ్యాటరీ సేవర్ కొన్ని పరికర ఫీచర్‌లను ఆఫ్ చేస్తుంది మరియు కొన్ని యాప్‌లను పరిమితం చేస్తుంది."</string>
     <string name="data_saver_description" msgid="6015391409098303235">"డేటా వినియోగాన్ని తగ్గించడంలో సహాయకరంగా ఉండటానికి, డేటా సేవర్ కొన్ని యాప్‌లను నేపథ్యంలో డేటాను పంపకుండా లేదా స్వీకరించకుండా నిరోధిస్తుంది. మీరు ప్రస్తుతం ఉపయోగిస్తున్న యాప్‌ డేటాను యాక్సెస్ చేయగలదు కానీ అలా అరుదుగా చేయవచ్చు. అంటే, ఉదాహరణకు, మీరు ఆ చిత్రాలను నొక్కే వరకు అవి ప్రదర్శించబడవు."</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"డేటా సేవర్‌ను ఆన్ చేయాలా?"</string>
     <string name="data_saver_enable_button" msgid="7147735965247211818">"ఆన్ చేయి"</string>
@@ -1779,11 +1778,11 @@
     <string name="language_picker_section_all" msgid="3097279199511617537">"అన్ని భాషలు"</string>
     <string name="region_picker_section_all" msgid="8966316787153001779">"అన్ని ప్రాంతాలు"</string>
     <string name="locale_search_menu" msgid="2560710726687249178">"వెతుకు"</string>
-    <!-- no translation found for app_suspended_title (5360409799785895488) -->
+    <!-- no translation found for app_suspended_title (1919029799438164552) -->
     <skip />
-    <!-- no translation found for app_suspended_default_message (5876776530189983288) -->
+    <!-- no translation found for app_suspended_default_message (7875306315686531621) -->
     <skip />
-    <!-- no translation found for app_suspended_more_details (2901244470963918402) -->
+    <!-- no translation found for app_suspended_more_details (1131804827776778187) -->
     <skip />
     <string name="work_mode_off_title" msgid="1118691887588435530">"కార్యాలయ ప్రొఫైల్‌ని ఆన్ చేయాలా?"</string>
     <string name="work_mode_off_message" msgid="5130856710614337649">"మీ కార్యాలయ యాప్‌లు, నోటిఫికేషన్‌లు, డేటా మరియు ఇతర కార్యాలయ ప్రొఫైల్ ఫీచర్‌లు ఆన్ చేయబడతాయి"</string>
@@ -1874,12 +1873,12 @@
     <string name="volume_dialog_ringer_guidance_silent" msgid="2128975224280276122">"కాల్‌లు మరియు నోటిఫికేషన్‌లు మ్యూట్ చేయబడతాయి"</string>
     <string name="notification_channel_system_changes" msgid="5072715579030948646">"సిస్టమ్ మార్పులు"</string>
     <string name="notification_channel_do_not_disturb" msgid="6766940333105743037">"అంతరాయం కలిగించవద్దు"</string>
-    <!-- no translation found for zen_upgrade_notification_visd_title (3288313883409759733) -->
-    <skip />
-    <!-- no translation found for zen_upgrade_notification_visd_content (5533674060311631165) -->
-    <skip />
+    <string name="zen_upgrade_notification_visd_title" msgid="3288313883409759733">"కొత్తది: అంతరాయం కలిగించవద్దు నోటిఫికేషన్‌లను దాస్తోంది"</string>
+    <string name="zen_upgrade_notification_visd_content" msgid="5533674060311631165">"మరింత తెలుసుకోవడానికి మరియు మార్చడానికి నొక్కండి."</string>
     <string name="zen_upgrade_notification_title" msgid="3799603322910377294">"అంతరాయం కలిగించవద్దు మార్చబడింది"</string>
     <string name="zen_upgrade_notification_content" msgid="1794994264692424562">"బ్లాక్ చేయబడిన దాన్ని తనిఖీ చేయడానికి నొక్కండి."</string>
     <string name="notification_app_name_system" msgid="4205032194610042794">"సిస్టమ్"</string>
     <string name="notification_app_name_settings" msgid="7751445616365753381">"సెట్టింగ్‌లు"</string>
+    <!-- no translation found for car_loading_profile (3545132581795684027) -->
+    <skip />
 </resources>

@@ -1778,11 +1778,11 @@
     <string name="language_picker_section_all" msgid="3097279199511617537">"ସମସ୍ତ ଭାଷା"</string>
     <string name="region_picker_section_all" msgid="8966316787153001779">"ସମସ୍ତ ଅଞ୍ଚଳ"</string>
     <string name="locale_search_menu" msgid="2560710726687249178">"ସର୍ଚ୍ଚ କରନ୍ତୁ"</string>
-    <!-- no translation found for app_suspended_title (5360409799785895488) -->
+    <!-- no translation found for app_suspended_title (1919029799438164552) -->
     <skip />
-    <!-- no translation found for app_suspended_default_message (5876776530189983288) -->
+    <!-- no translation found for app_suspended_default_message (7875306315686531621) -->
     <skip />
-    <!-- no translation found for app_suspended_more_details (2901244470963918402) -->
+    <!-- no translation found for app_suspended_more_details (1131804827776778187) -->
     <skip />
     <string name="work_mode_off_title" msgid="1118691887588435530">"ୱର୍କ ପ୍ରୋଫାଇଲ୍‌କୁ ଚାଲୁ କରିବେ?"</string>
     <string name="work_mode_off_message" msgid="5130856710614337649">"ଆପଣଙ୍କର କାର୍ଯ୍ୟକାରୀ ଆପ୍‌, ବିଜ୍ଞପ୍ତି, ଡାଟା ଓ ଅନ୍ୟ ୱର୍କ ପ୍ରୋଫାଇଲ୍‌ଗୁଡ଼ିକ ଚାଲୁ ହୋଇଯିବ"</string>
@@ -1881,4 +1881,6 @@
     <string name="zen_upgrade_notification_content" msgid="1794994264692424562">"କ’ଣ ଅବରୋଧ ହୋଇଛି ଯାଞ୍ଚ କରିବା ପାଇଁ ଟାପ୍ କରନ୍ତୁ।"</string>
     <string name="notification_app_name_system" msgid="4205032194610042794">"ସିଷ୍ଟମ୍‌"</string>
     <string name="notification_app_name_settings" msgid="7751445616365753381">"ସେଟିଙ୍ଗ"</string>
+    <!-- no translation found for car_loading_profile (3545132581795684027) -->
+    <skip />
 </resources>

@@ -242,7 +242,7 @@
     <string name="global_actions_toggle_airplane_mode" msgid="5884330306926307456">"Режим польоту"</string>
     <string name="global_actions_airplane_mode_on_status" msgid="2719557982608919750">"Режим польоту ВВІМК."</string>
     <string name="global_actions_airplane_mode_off_status" msgid="5075070442854490296">"Режим польоту ВИМК."</string>
-    <string name="global_action_toggle_battery_saver" msgid="708515500418994208">"Режим економії заряду акумулятора"</string>
+    <string name="global_action_toggle_battery_saver" msgid="708515500418994208">"Режим енергозбереження"</string>
     <string name="global_action_battery_saver_on_status" msgid="484059130698197787">"Режим економії заряду акумулятора ВИМКНЕНО"</string>
     <string name="global_action_battery_saver_off_status" msgid="75550964969478405">"Режим економії заряду акумулятора ВВІМКНЕНО"</string>
     <string name="global_action_settings" msgid="1756531602592545966">"Налаштування"</string>
@@ -1740,8 +1740,7 @@
     <string name="package_installed_device_owner" msgid="6875717669960212648">"Установлено адміністратором"</string>
     <string name="package_updated_device_owner" msgid="1847154566357862089">"Оновлено адміністратором"</string>
     <string name="package_deleted_device_owner" msgid="2307122077550236438">"Видалено адміністратором"</string>
-    <!-- no translation found for battery_saver_description (769989536172631582) -->
-    <skip />
+    <string name="battery_saver_description" msgid="769989536172631582">"Щоб пристрій працював довше, режим економії заряду акумулятора вимикає деякі його функції й обмежує роботу додатків."</string>
     <string name="data_saver_description" msgid="6015391409098303235">"Щоб зменшити використання трафіку, функція \"Заощадження трафіку\" не дозволяє деяким додаткам надсилати чи отримувати дані у фоновому режимі. Поточний додаток зможе отримувати доступ до таких даних, але рідше. Наприклад, зображення не відображатиметься, доки ви не торкнетеся його."</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"Увімкнути Заощадження трафіку?"</string>
     <string name="data_saver_enable_button" msgid="7147735965247211818">"Увімкнути"</string>
@@ -1846,9 +1845,12 @@
     <string name="language_picker_section_all" msgid="3097279199511617537">"Усі мови"</string>
     <string name="region_picker_section_all" msgid="8966316787153001779">"Усі регіони"</string>
     <string name="locale_search_menu" msgid="2560710726687249178">"Пошук"</string>
-    <string name="app_suspended_title" msgid="5360409799785895488">"Дію не дозволено"</string>
-    <string name="app_suspended_default_message" msgid="5876776530189983288">"Наразі додаток <xliff:g id="APP_NAME">%1$s</xliff:g> вимкнено."</string>
-    <string name="app_suspended_more_details" msgid="2901244470963918402">"Докладніше"</string>
+    <!-- no translation found for app_suspended_title (1919029799438164552) -->
+    <skip />
+    <!-- no translation found for app_suspended_default_message (7875306315686531621) -->
+    <skip />
+    <!-- no translation found for app_suspended_more_details (1131804827776778187) -->
+    <skip />
     <string name="work_mode_off_title" msgid="1118691887588435530">"Увімкнути робочий профіль?"</string>
     <string name="work_mode_off_message" msgid="5130856710614337649">"Додатки, сповіщення, дані й інші функції робочого профілю буде ввімкнено"</string>
     <string name="work_mode_turn_on" msgid="2062544985670564875">"Увімкнути"</string>
@@ -1940,12 +1942,12 @@
     <string name="volume_dialog_ringer_guidance_silent" msgid="2128975224280276122">"Звуковий сигнал для викликів і сповіщень вимкнено"</string>
     <string name="notification_channel_system_changes" msgid="5072715579030948646">"Системні зміни"</string>
     <string name="notification_channel_do_not_disturb" msgid="6766940333105743037">"Не турбувати"</string>
-    <!-- no translation found for zen_upgrade_notification_visd_title (3288313883409759733) -->
-    <skip />
-    <!-- no translation found for zen_upgrade_notification_visd_content (5533674060311631165) -->
-    <skip />
+    <string name="zen_upgrade_notification_visd_title" msgid="3288313883409759733">"Нове: у режимі \"Не турбувати\" сповіщення ховаються"</string>
+    <string name="zen_upgrade_notification_visd_content" msgid="5533674060311631165">"Торкніться, щоб дізнатися більше та змінити."</string>
     <string name="zen_upgrade_notification_title" msgid="3799603322910377294">"Налаштування режиму \"Не турбувати\" змінено"</string>
     <string name="zen_upgrade_notification_content" msgid="1794994264692424562">"Торкніться, щоб перевірити, що заблоковано."</string>
     <string name="notification_app_name_system" msgid="4205032194610042794">"Система"</string>
     <string name="notification_app_name_settings" msgid="7751445616365753381">"Налаштування"</string>
+    <!-- no translation found for car_loading_profile (3545132581795684027) -->
+    <skip />
 </resources>

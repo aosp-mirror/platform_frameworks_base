@@ -300,16 +300,16 @@
     <string name="permgrouplab_sensors" msgid="416037179223226722">"Senzori corporali"</string>
     <string name="permgroupdesc_sensors" msgid="7147968539346634043">"acceseze datele de la senzori despre semnele vitale"</string>
     <string name="permgrouprequest_sensors" msgid="6349806962814556786">"Permiteți &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; să acceseze datele de la senzori despre semnele dvs. vitale?"</string>
-    <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"Recuperează conținutul ferestrei"</string>
+    <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"Analizează conținutul ferestrei"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"Inspectează conținutul unei ferestre cu care interacționați."</string>
     <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"Activează funcția Explorați prin atingere"</string>
     <string name="capability_desc_canRequestTouchExploration" msgid="7543249041581408313">"Elementele atinse vor fi rostite cu voce tare, iar ecranul poate fi explorat utilizând gesturi."</string>
     <string name="capability_title_canRequestFilterKeyEvents" msgid="2103440391902412174">"Remarcă textul pe care îl introduceți"</string>
     <string name="capability_desc_canRequestFilterKeyEvents" msgid="7463135292204152818">"Include date personale, cum ar fi numere ale cardurilor de credit sau parole."</string>
-    <string name="capability_title_canControlMagnification" msgid="3593493281059424855">"Controlați mărirea pe afișaj"</string>
-    <string name="capability_desc_canControlMagnification" msgid="4791858203568383773">"Controlați nivelul de zoom și poziționarea afișajului."</string>
-    <string name="capability_title_canPerformGestures" msgid="7418984730362576862">"Folosiți gesturi"</string>
-    <string name="capability_desc_canPerformGestures" msgid="8296373021636981249">"Se poate atinge, glisa, ciupi și se pot folosi alte gesturi."</string>
+    <string name="capability_title_canControlMagnification" msgid="3593493281059424855">"Controlează mărirea pe afișaj"</string>
+    <string name="capability_desc_canControlMagnification" msgid="4791858203568383773">"Controlează nivelul de zoom și poziționarea afișajului."</string>
+    <string name="capability_title_canPerformGestures" msgid="7418984730362576862">"Folosește gesturi"</string>
+    <string name="capability_desc_canPerformGestures" msgid="8296373021636981249">"Poate atinge, glisa, ciupi sau folosi alte gesturi."</string>
     <string name="capability_title_canCaptureFingerprintGestures" msgid="6309568287512278670">"Gesturi ce implică amprente"</string>
     <string name="capability_desc_canCaptureFingerprintGestures" msgid="4386487962402228670">"Poate reda gesturile făcute pe senzorul de amprentă al dispozitivului."</string>
     <string name="permlab_statusBar" msgid="7417192629601890791">"dezactivare sau modificare bare de stare"</string>
@@ -604,7 +604,7 @@
     <string name="policydesc_encryptedStorage" msgid="2637732115325316992">"Necesită ca datele aplicației stocate să fie criptate."</string>
     <string name="policylab_disableCamera" msgid="6395301023152297826">"Dezactivați camerele foto"</string>
     <string name="policydesc_disableCamera" msgid="2306349042834754597">"Împiedicați utilizarea camerelor foto de pe dispozitiv."</string>
-    <string name="policylab_disableKeyguardFeatures" msgid="8552277871075367771">"Opriți funcții de blocare ecran"</string>
+    <string name="policylab_disableKeyguardFeatures" msgid="8552277871075367771">"Să oprească funcții de blocare ecran"</string>
     <string name="policydesc_disableKeyguardFeatures" msgid="2044755691354158439">"Împiedicați folosirea unor funcții de blocare a ecranului."</string>
   <string-array name="phoneTypes">
     <item msgid="8901098336658710359">"Domiciliu"</item>
@@ -1811,9 +1811,9 @@
     <string name="language_picker_section_all" msgid="3097279199511617537">"Toate limbile"</string>
     <string name="region_picker_section_all" msgid="8966316787153001779">"Toate regiunile"</string>
     <string name="locale_search_menu" msgid="2560710726687249178">"Căutați"</string>
-    <string name="app_suspended_title" msgid="5360409799785895488">"Acțiunea nu este permisă"</string>
-    <string name="app_suspended_default_message" msgid="5876776530189983288">"Momentan, aplicația <xliff:g id="APP_NAME">%1$s</xliff:g> este dezactivată."</string>
-    <string name="app_suspended_more_details" msgid="2901244470963918402">"Mai multe detalii"</string>
+    <string name="app_suspended_title" msgid="1919029799438164552">"Nu se poate deschide aplicația"</string>
+    <string name="app_suspended_default_message" msgid="7875306315686531621">"Momentan, aplicația <xliff:g id="APP_NAME_0">%1$s</xliff:g> nu este disponibilă. Aceasta este gestionată de <xliff:g id="APP_NAME_1">%2$s</xliff:g>."</string>
+    <string name="app_suspended_more_details" msgid="1131804827776778187">"Aflați mai multe"</string>
     <string name="work_mode_off_title" msgid="1118691887588435530">"Activați profilul de serviciu?"</string>
     <string name="work_mode_off_message" msgid="5130856710614337649">"Se vor activa aplicațiile dvs. de serviciu, notificările, datele și alte funcții ale profilului de serviciu"</string>
     <string name="work_mode_turn_on" msgid="2062544985670564875">"Activați"</string>
@@ -1910,4 +1910,6 @@
     <string name="zen_upgrade_notification_content" msgid="1794994264692424562">"Atingeți pentru a verifica ce este blocat."</string>
     <string name="notification_app_name_system" msgid="4205032194610042794">"Sistem"</string>
     <string name="notification_app_name_settings" msgid="7751445616365753381">"Setări"</string>
+    <!-- no translation found for car_loading_profile (3545132581795684027) -->
+    <skip />
 </resources>

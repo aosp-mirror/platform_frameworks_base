@@ -1262,7 +1262,7 @@
     <string name="share_remote_bugreport_action" msgid="6249476773913384948">"БӨЛҮШҮҮ"</string>
     <string name="decline_remote_bugreport_action" msgid="6230987241608770062">"ЧЕТКЕ КАГУУ"</string>
     <string name="select_input_method" msgid="8547250819326693584">"Баскычтопту өзгөртүү"</string>
-    <string name="show_ime" msgid="2506087537466597099">"Баскычтоп иштетилгенде экранда көрүнүп турсун"</string>
+    <string name="show_ime" msgid="2506087537466597099">"Баскычтоп иштетилгенде экранда көрүнүп турат"</string>
     <string name="hardware" msgid="194658061510127999">"Виртуалдык баскычтоп"</string>
     <string name="select_keyboard_layout_notification_title" msgid="597189518763083494">"Аппараттык баскычтопту конфигурациялоо"</string>
     <string name="select_keyboard_layout_notification_message" msgid="8084622969903004900">"Тил жана калып тандоо үчүн таптап коюңуз"</string>
@@ -1692,8 +1692,7 @@
     <string name="package_installed_device_owner" msgid="6875717669960212648">"Администраторуңуз орнотуп койгон"</string>
     <string name="package_updated_device_owner" msgid="1847154566357862089">"Администраторуңуз жаңыртып койгон"</string>
     <string name="package_deleted_device_owner" msgid="2307122077550236438">"Администраторуңуз жок кылып салган"</string>
-    <!-- no translation found for battery_saver_description (769989536172631582) -->
-    <skip />
+    <string name="battery_saver_description" msgid="769989536172631582">"Батареянын кубатынын мөөнөтүн узартуу үчүн Батареяны үнөмдөгүч түзмөгүңүздүн айрым функцияларын өчүрүп, колдонмолорду чектейт."</string>
     <string name="data_saver_description" msgid="6015391409098303235">"Трафикти үнөмдөө режиминде айрым колдонмолор дайындарды фондо өткөрө алышпайт. Учурда сиз пайдаланып жаткан колдонмо дайындарды жөнөтүп/ала алат, бирок адаттагыдан азыраак өткөргөндүктөн, анын айрым функциялары талаптагыдай иштебей коюшу мүмкүн. Мисалы, сүрөттөр басылмайынча жүктөлбөйт."</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"Дайындарды үнөмдөгүч күйсүнбү?"</string>
     <string name="data_saver_enable_button" msgid="7147735965247211818">"Күйгүзүү"</string>
@@ -1773,16 +1772,19 @@
     <string name="importance_from_person" msgid="9160133597262938296">"Булар сиз үчүн маанилүү адамдар."</string>
     <string name="user_creation_account_exists" msgid="1942606193570143289">"<xliff:g id="APP">%1$s</xliff:g> колдонмосу <xliff:g id="ACCOUNT">%2$s</xliff:g> аккаунту менен жаңы колдонуучу түзө берсинби?"</string>
     <string name="user_creation_adding" msgid="4482658054622099197">"<xliff:g id="APP">%1$s</xliff:g> колдонмосуна <xliff:g id="ACCOUNT">%2$s</xliff:g> аккаунту үчүн жаңы колдонуучу түзгөнгө уруксат бересизби (мындай аккаунту бар колдонуучу мурунтан эле бар)?"</string>
-    <string name="language_selection_title" msgid="2680677278159281088">"Тил кошуңуз"</string>
+    <string name="language_selection_title" msgid="2680677278159281088">"Тил кошуу"</string>
     <string name="country_selection_title" msgid="2954859441620215513">"Чөлкөмдүк жөндөөлөр"</string>
     <string name="search_language_hint" msgid="7042102592055108574">"Тилди киргизиңиз"</string>
     <string name="language_picker_section_suggested" msgid="8414489646861640885">"Сунушталган"</string>
     <string name="language_picker_section_all" msgid="3097279199511617537">"Бардык тилдер"</string>
     <string name="region_picker_section_all" msgid="8966316787153001779">"Бардык аймактар"</string>
     <string name="locale_search_menu" msgid="2560710726687249178">"Издөө"</string>
-    <string name="app_suspended_title" msgid="5360409799785895488">"Аракетке уруксат жок"</string>
-    <string name="app_suspended_default_message" msgid="5876776530189983288">"<xliff:g id="APP_NAME">%1$s</xliff:g> колдонмосу учурда өчүрүлгөн."</string>
-    <string name="app_suspended_more_details" msgid="2901244470963918402">"Толук маалымат"</string>
+    <!-- no translation found for app_suspended_title (1919029799438164552) -->
+    <skip />
+    <!-- no translation found for app_suspended_default_message (7875306315686531621) -->
+    <skip />
+    <!-- no translation found for app_suspended_more_details (1131804827776778187) -->
+    <skip />
     <string name="work_mode_off_title" msgid="1118691887588435530">"Жумуш профили күйгүзүлсүнбү?"</string>
     <string name="work_mode_off_message" msgid="5130856710614337649">"Жумуш колдонмолоруңуз, эскертмелериңиз, дайындарыңыз жана жумуш профилинин башка функциялары күйгүзүлөт."</string>
     <string name="work_mode_turn_on" msgid="2062544985670564875">"Күйгүзүү"</string>
@@ -1872,12 +1874,12 @@
     <string name="volume_dialog_ringer_guidance_silent" msgid="2128975224280276122">"Чалуулар менен эскертмелердин үнү өчүрүлөт"</string>
     <string name="notification_channel_system_changes" msgid="5072715579030948646">"Тутум өзгөрүүлөрү"</string>
     <string name="notification_channel_do_not_disturb" msgid="6766940333105743037">"Тынчымды алба"</string>
-    <!-- no translation found for zen_upgrade_notification_visd_title (3288313883409759733) -->
-    <skip />
-    <!-- no translation found for zen_upgrade_notification_visd_content (5533674060311631165) -->
-    <skip />
+    <string name="zen_upgrade_notification_visd_title" msgid="3288313883409759733">"Жаңы: \"Тынчымды алба\" режими эскертмелерди жашырууда"</string>
+    <string name="zen_upgrade_notification_visd_content" msgid="5533674060311631165">"Көбүрөөк маалымат алып, өзгөртүү үчүн таптаңыз."</string>
     <string name="zen_upgrade_notification_title" msgid="3799603322910377294">"\"Тынчымды алба\" режими өзгөрдү"</string>
     <string name="zen_upgrade_notification_content" msgid="1794994264692424562">"Бөгөттөлгөн нерселерди көрүү үчүн таптаңыз."</string>
     <string name="notification_app_name_system" msgid="4205032194610042794">"Тутум"</string>
     <string name="notification_app_name_settings" msgid="7751445616365753381">"Жөндөөлөр"</string>
+    <!-- no translation found for car_loading_profile (3545132581795684027) -->
+    <skip />
 </resources>

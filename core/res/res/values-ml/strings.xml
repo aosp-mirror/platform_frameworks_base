@@ -299,7 +299,7 @@
     <string name="permgrouprequest_sensors" msgid="6349806962814556786">"നിങ്ങളുടെ ജീവധാരണ ലക്ഷണങ്ങളെ കുറിച്ചുള്ള സെൻസർ ഡാറ്റ ആക്‌സസ് ചെയ്യാൻ &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ആപ്പിനെ അനുവദിക്കണോ?"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"വിൻഡോ ഉള്ളടക്കം വീണ്ടെടുക്കുക"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"നിങ്ങൾ സംവദിക്കുന്ന ഒരു വിൻഡോയുടെ ഉള്ളടക്കം പരിശോധിക്കുക."</string>
-    <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"സ്‌പർശനം വഴി പര്യവേക്ഷണം ചെയ്യുക ഓൺ ചെയ്യുക"</string>
+    <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"സ്‌പർശനം വഴി പര്യവേക്ഷണം ചെയ്യുക, ഓണാക്കുക"</string>
     <string name="capability_desc_canRequestTouchExploration" msgid="7543249041581408313">"ടാപ്പുചെയ്ത ഇനങ്ങൾ ഉച്ചത്തിൽ പറയപ്പെടും, ജെസ്റ്ററുകൾ ഉപയോഗിച്ച് സ്‌ക്രീൻ അടുത്തറിയാവുന്നതാണ്."</string>
     <string name="capability_title_canRequestFilterKeyEvents" msgid="2103440391902412174">"നിങ്ങൾ ടൈപ്പ് ചെയ്യുന്ന ടെക്സ്റ്റ് നിരീക്ഷിക്കുക"</string>
     <string name="capability_desc_canRequestFilterKeyEvents" msgid="7463135292204152818">"ക്രെഡിറ്റ് കാർഡ് നമ്പറുകളും പാസ്‌വേഡുകളും പോലുള്ള വ്യക്തിഗത ഡാറ്റ ഉൾപ്പെടുന്നു."</string>
@@ -1691,8 +1691,7 @@
     <string name="package_installed_device_owner" msgid="6875717669960212648">"നിങ്ങളുടെ അഡ്‌മിൻ ഇൻസ്റ്റാൾ ചെയ്യുന്നത്"</string>
     <string name="package_updated_device_owner" msgid="1847154566357862089">"നിങ്ങളുടെ അഡ്‌മിൻ അപ്‌ഡേറ്റ് ചെയ്യുന്നത്"</string>
     <string name="package_deleted_device_owner" msgid="2307122077550236438">"നിങ്ങളുടെ അഡ്‌മിൻ ഇല്ലാതാക്കുന്നത്"</string>
-    <!-- no translation found for battery_saver_description (769989536172631582) -->
-    <skip />
+    <string name="battery_saver_description" msgid="769989536172631582">"നിങ്ങളുടെ ബാറ്ററി ലൈഫ് ദീർഘിപ്പിക്കാൻ, ബാറ്ററി ലാഭിക്കൽ, ചില ഉപകരണ ഫീച്ചറുകളെ ഓഫാക്കുകയും ആപ്പുകളെ നിയന്ത്രിക്കുകയും ചെയ്യുന്നു.‌"</string>
     <string name="data_saver_description" msgid="6015391409098303235">"ഡാറ്റാ ഉപയോഗം കുറയ്ക്കാൻ സഹായിക്കുന്നതിന്, പശ്ചാത്തലത്തിൽ ഡാറ്റ അയയ്ക്കുകയോ സ്വീകരിക്കുകയോ ചെയ്യുന്നതിൽ നിന്ന് ചില ആപ്‌സിനെ ഡാറ്റ സേവർ തടയുന്നു. നിങ്ങൾ നിലവിൽ ഉപയോഗിക്കുന്ന ഒരു ആപ്പിന് ഡാറ്റ ആക്സസ്സ് ചെയ്യാൻ കഴിയും, എന്നാൽ കുറഞ്ഞ ആവൃത്തിയിലാണിത് നടക്കുക. ഇതിനർത്ഥം, നിങ്ങൾ ടാപ്പുചെയ്യുന്നത് വരെ ചിത്രങ്ങൾ കാണിക്കുകയില്ല എന്നാണ്."</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"ഡാറ്റ സേവർ ഓണാക്കണോ?"</string>
     <string name="data_saver_enable_button" msgid="7147735965247211818">"ഓണാക്കുക"</string>
@@ -1779,11 +1778,11 @@
     <string name="language_picker_section_all" msgid="3097279199511617537">"എല്ലാ ഭാഷകളും"</string>
     <string name="region_picker_section_all" msgid="8966316787153001779">"എല്ലാ പ്രദേശങ്ങളും"</string>
     <string name="locale_search_menu" msgid="2560710726687249178">"തിരയുക"</string>
-    <!-- no translation found for app_suspended_title (5360409799785895488) -->
+    <!-- no translation found for app_suspended_title (1919029799438164552) -->
     <skip />
-    <!-- no translation found for app_suspended_default_message (5876776530189983288) -->
+    <!-- no translation found for app_suspended_default_message (7875306315686531621) -->
     <skip />
-    <!-- no translation found for app_suspended_more_details (2901244470963918402) -->
+    <!-- no translation found for app_suspended_more_details (1131804827776778187) -->
     <skip />
     <string name="work_mode_off_title" msgid="1118691887588435530">"ഔദ്യോഗിക പ്രൊഫൈൽ ഓണാക്കണോ?"</string>
     <string name="work_mode_off_message" msgid="5130856710614337649">"നിങ്ങളുടെ ഔദ്യോഗിക ആപ്പുകൾ, അറിയിപ്പുകൾ, ഡാറ്റ, മറ്റ് ഔദ്യോഗിക പ്രൊഫൈൽ ഫീച്ചറുകൾ എന്നിവ ഓണാക്കും"</string>
@@ -1874,12 +1873,12 @@
     <string name="volume_dialog_ringer_guidance_silent" msgid="2128975224280276122">"കോളുകളും അറിയിപ്പുകളും മ്യൂട്ട് ചെയ്യപ്പെടും"</string>
     <string name="notification_channel_system_changes" msgid="5072715579030948646">"സിസ്‌റ്റത്തിലെ മാറ്റങ്ങൾ"</string>
     <string name="notification_channel_do_not_disturb" msgid="6766940333105743037">"ശല്യപ്പെടുത്തരുത്"</string>
-    <!-- no translation found for zen_upgrade_notification_visd_title (3288313883409759733) -->
-    <skip />
-    <!-- no translation found for zen_upgrade_notification_visd_content (5533674060311631165) -->
-    <skip />
+    <string name="zen_upgrade_notification_visd_title" msgid="3288313883409759733">"പുതിയത്: അറിയിപ്പുകളെ \'ശല്യപ്പെടുത്തരുത്\' അദൃശ്യമാക്കുന്നു"</string>
+    <string name="zen_upgrade_notification_visd_content" msgid="5533674060311631165">"കൂടുതലറിയാനും മാറ്റാനും ടാപ്പ് ചെയ്യുക."</string>
     <string name="zen_upgrade_notification_title" msgid="3799603322910377294">"\'ശല്യപ്പെടുത്തരുത്\' മാറ്റി"</string>
     <string name="zen_upgrade_notification_content" msgid="1794994264692424562">"എന്തിനെയാണ് ബ്ലോക്ക് ചെയ്‌തതെന്ന് പരിശോധിക്കാൻ ടാപ്പ് ചെയ്യുക."</string>
     <string name="notification_app_name_system" msgid="4205032194610042794">"സിസ്റ്റം"</string>
     <string name="notification_app_name_settings" msgid="7751445616365753381">"ക്രമീകരണം"</string>
+    <!-- no translation found for car_loading_profile (3545132581795684027) -->
+    <skip />
 </resources>

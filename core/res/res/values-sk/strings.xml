@@ -309,11 +309,11 @@
     <string name="capability_desc_canRequestTouchExploration" msgid="7543249041581408313">"Po klepnutí na položku sa vysloví jej názov a obrazovku je možné preskúmať pomocou gest."</string>
     <string name="capability_title_canRequestFilterKeyEvents" msgid="2103440391902412174">"Sledovať zadávaný text"</string>
     <string name="capability_desc_canRequestFilterKeyEvents" msgid="7463135292204152818">"Sledovanie zahŕňa osobné údaje ako sú čísla kreditných kariet a heslá."</string>
-    <string name="capability_title_canControlMagnification" msgid="3593493281059424855">"Ovládanie priblíženia obrazovky"</string>
+    <string name="capability_title_canControlMagnification" msgid="3593493281059424855">"Ovládať priblíženie obrazovky"</string>
     <string name="capability_desc_canControlMagnification" msgid="4791858203568383773">"Ovládajte umiestnenie a úroveň priblíženia obrazovky."</string>
     <string name="capability_title_canPerformGestures" msgid="7418984730362576862">"Gestá"</string>
     <string name="capability_desc_canPerformGestures" msgid="8296373021636981249">"Je možné použiť klepnutie, prejdenie, stiahnutie prstami a ďalšie gestá."</string>
-    <string name="capability_title_canCaptureFingerprintGestures" msgid="6309568287512278670">"Gestá odtlačkov prstov"</string>
+    <string name="capability_title_canCaptureFingerprintGestures" msgid="6309568287512278670">"Gestá odtlačkom prstu"</string>
     <string name="capability_desc_canCaptureFingerprintGestures" msgid="4386487962402228670">"Dokáže zaznamenať gestá na senzore odtlačkov prstov zariadenia."</string>
     <string name="permlab_statusBar" msgid="7417192629601890791">"zakázanie alebo zmeny stavového riadka"</string>
     <string name="permdesc_statusBar" msgid="8434669549504290975">"Umožňuje aplikácii vypnúť stavový riadok alebo pridať a odstrániť systémové ikony."</string>
@@ -607,7 +607,7 @@
     <string name="policydesc_encryptedStorage" msgid="2637732115325316992">"Vyžadovať šifrovanie uložených údajov aplikácií."</string>
     <string name="policylab_disableCamera" msgid="6395301023152297826">"Zakázať fotoaparáty"</string>
     <string name="policydesc_disableCamera" msgid="2306349042834754597">"Zakázať používanie všetkých fotoaparátov zariadenia."</string>
-    <string name="policylab_disableKeyguardFeatures" msgid="8552277871075367771">"Deaktivácia niektorých funkcií zámky obrazovky"</string>
+    <string name="policylab_disableKeyguardFeatures" msgid="8552277871075367771">"Deaktivovať niektoré funkcie zámky obrazovky"</string>
     <string name="policydesc_disableKeyguardFeatures" msgid="2044755691354158439">"Zabráňte používaniu niektorých funkcií zámky obrazovky."</string>
   <string-array name="phoneTypes">
     <item msgid="8901098336658710359">"Domov"</item>
@@ -1845,9 +1845,12 @@
     <string name="language_picker_section_all" msgid="3097279199511617537">"Všetky jazyky"</string>
     <string name="region_picker_section_all" msgid="8966316787153001779">"Všetky regióny"</string>
     <string name="locale_search_menu" msgid="2560710726687249178">"Vyhľadávanie"</string>
-    <string name="app_suspended_title" msgid="5360409799785895488">"Akcia nie je povolená"</string>
-    <string name="app_suspended_default_message" msgid="5876776530189983288">"Aplikácia <xliff:g id="APP_NAME">%1$s</xliff:g> je momentálne deaktivovaná."</string>
-    <string name="app_suspended_more_details" msgid="2901244470963918402">"Ďalšie podrobnosti"</string>
+    <!-- no translation found for app_suspended_title (1919029799438164552) -->
+    <skip />
+    <!-- no translation found for app_suspended_default_message (7875306315686531621) -->
+    <skip />
+    <!-- no translation found for app_suspended_more_details (1131804827776778187) -->
+    <skip />
     <string name="work_mode_off_title" msgid="1118691887588435530">"Zapnúť pracovný profil?"</string>
     <string name="work_mode_off_message" msgid="5130856710614337649">"Pracovné aplikácie, upozornenia, dáta a ďalšie funkcie pracovného profilu sa zapnú"</string>
     <string name="work_mode_turn_on" msgid="2062544985670564875">"Zapnúť"</string>
@@ -1945,4 +1948,6 @@
     <string name="zen_upgrade_notification_content" msgid="1794994264692424562">"Klepnutím skontrolujete, čo je blokované."</string>
     <string name="notification_app_name_system" msgid="4205032194610042794">"Systém"</string>
     <string name="notification_app_name_settings" msgid="7751445616365753381">"Nastavenia"</string>
+    <!-- no translation found for car_loading_profile (3545132581795684027) -->
+    <skip />
 </resources>
