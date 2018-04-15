@@ -28,6 +28,7 @@ import android.content.pm.PackageParser.Permission;
 import com.android.server.pm.SharedUserSetting;
 import com.android.server.pm.permission.PermissionManagerInternal.PermissionCallback;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
@@ -89,6 +90,22 @@ public abstract class PermissionManagerInternal {
             @NonNull Collection<PackageParser.Package> allPacakges, PermissionCallback callback);
     public abstract void updateAllPermissions(@Nullable String volumeUuid, boolean sdkUpdated,
             @NonNull Collection<PackageParser.Package> allPacakges, PermissionCallback callback);
+
+    /**
+     * We might auto-grant permissions if any permission of the group is already granted. Hence if
+     * the group of a granted permission changes we need to revoke it to avoid having permissions of
+     * the new group auto-granted.
+     *
+     * @param newPackage The new package that was installed
+     * @param oldPackage The old package that was updated
+     * @param allPackageNames All packages
+     * @param permissionCallback Callback for permission changed
+     */
+    public abstract void revokeRuntimePermissionsIfGroupChanged(
+            @NonNull PackageParser.Package newPackage,
+            @NonNull PackageParser.Package oldPackage,
+            @NonNull ArrayList<String> allPackageNames,
+            @NonNull PermissionCallback permissionCallback);
 
     /**
      * Add all permissions in the given package.
