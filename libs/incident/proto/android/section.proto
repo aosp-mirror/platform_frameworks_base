@@ -51,6 +51,7 @@ enum SectionType {
 message SectionFlags {
   optional SectionType type = 1 [default = SECTION_NONE];
   optional string args = 2;
+  optional bool device_specific = 3 [default = false];
 }
 
 extend google.protobuf.FieldOptions {
