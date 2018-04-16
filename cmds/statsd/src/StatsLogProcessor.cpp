@@ -485,6 +485,15 @@ void StatsLogProcessor::informPullAlarmFired(const int64_t timestampNs) {
     mStatsPullerManager.OnAlarmFired(timestampNs);
 }
 
+int64_t StatsLogProcessor::getLastReportTimeNs(const ConfigKey& key) {
+    auto it = mMetricsManagers.find(key);
+    if (it == mMetricsManagers.end()) {
+        return 0;
+    } else {
+        return it->second->getLastReportTimeNs();
+    }
+}
+
 }  // namespace statsd
 }  // namespace os
 }  // namespace android
