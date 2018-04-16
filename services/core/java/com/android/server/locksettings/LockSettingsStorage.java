@@ -484,6 +484,7 @@ class LockSettingsStorage {
     }
 
     public void writeSyntheticPasswordState(int userId, long handle, String name, byte[] data) {
+        ensureSyntheticPasswordDirectoryForUser(userId);
         writeFile(getSynthenticPasswordStateFilePathForUser(userId, handle, name), data);
     }
 
@@ -541,14 +542,19 @@ class LockSettingsStorage {
         return new File(Environment.getDataSystemDeDirectory(userId) ,SYNTHETIC_PASSWORD_DIRECTORY);
     }
 
-    @VisibleForTesting
-    protected String getSynthenticPasswordStateFilePathForUser(int userId, long handle,
-            String name) {
+    /** Ensure per-user directory for synthetic password state exists */
+    private void ensureSyntheticPasswordDirectoryForUser(int userId) {
         File baseDir = getSyntheticPasswordDirectoryForUser(userId);
-        String baseName = String.format("%016x.%s", handle, name);
         if (!baseDir.exists()) {
             baseDir.mkdir();
         }
+    }
+
+    @VisibleForTesting
+    protected String getSynthenticPasswordStateFilePathForUser(int userId, long handle,
+            String name) {
+        final File baseDir = getSyntheticPasswordDirectoryForUser(userId);
+        final String baseName = String.format("%016x.%s", handle, name);
         return new File(baseDir, baseName).getAbsolutePath();
     }
 
