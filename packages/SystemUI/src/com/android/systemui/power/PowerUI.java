@@ -66,7 +66,8 @@ public class PowerUI extends SystemUI {
     private static final long SIX_HOURS_MILLIS = Duration.ofHours(6).toMillis();
 
     private final Handler mHandler = new Handler();
-    private final Receiver mReceiver = new Receiver();
+    @VisibleForTesting
+    final Receiver mReceiver = new Receiver();
 
     private PowerManager mPowerManager;
     private HardwarePropertiesManager mHardwarePropertiesManager;
@@ -180,11 +181,13 @@ public class PowerUI extends SystemUI {
         throw new RuntimeException("not possible!");
     }
 
-    private final class Receiver extends BroadcastReceiver {
+    @VisibleForTesting
+    final class Receiver extends BroadcastReceiver {
 
         public void init() {
             // Register for Intent broadcasts for...
             IntentFilter filter = new IntentFilter();
+            filter.addAction(PowerManager.ACTION_POWER_SAVE_MODE_CHANGED);
             filter.addAction(Intent.ACTION_BATTERY_CHANGED);
             filter.addAction(Intent.ACTION_SCREEN_OFF);
             filter.addAction(Intent.ACTION_SCREEN_ON);
@@ -195,7 +198,13 @@ public class PowerUI extends SystemUI {
         @Override
         public void onReceive(Context context, Intent intent) {
             String action = intent.getAction();
-            if (action.equals(Intent.ACTION_BATTERY_CHANGED)) {
+            if (PowerManager.ACTION_POWER_SAVE_MODE_CHANGED.equals(action)) {
+                ThreadUtils.postOnBackgroundThread(() -> {
+                    if (mPowerManager.isPowerSaveMode()) {
+                        mWarnings.dismissLowBatteryWarning();
+                    }
+                });
+            } else if (Intent.ACTION_BATTERY_CHANGED.equals(action)) {
                 final int oldBatteryLevel = mBatteryLevel;
                 mBatteryLevel = intent.getIntExtra(BatteryManager.EXTRA_LEVEL, 100);
                 final int oldBatteryStatus = mBatteryStatus;
