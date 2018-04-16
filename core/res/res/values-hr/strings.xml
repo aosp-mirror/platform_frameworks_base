@@ -308,7 +308,7 @@
     <string name="capability_desc_canRequestFilterKeyEvents" msgid="7463135292204152818">"Uključuje osobne podatke kao što su brojevi kreditnih kartica i zaporke."</string>
     <string name="capability_title_canControlMagnification" msgid="3593493281059424855">"Kontrolirati uvećanje zaslona"</string>
     <string name="capability_desc_canControlMagnification" msgid="4791858203568383773">"Kontrolirat će stupanj i mjesto zumiranja."</string>
-    <string name="capability_title_canPerformGestures" msgid="7418984730362576862">"Izvođenje pokreta"</string>
+    <string name="capability_title_canPerformGestures" msgid="7418984730362576862">"Izvoditi pokrete"</string>
     <string name="capability_desc_canPerformGestures" msgid="8296373021636981249">"Može dodirnuti, prijeći prstom, spojiti prste i izvoditi druge pokrete."</string>
     <string name="capability_title_canCaptureFingerprintGestures" msgid="6309568287512278670">"Pokreti za otisak prsta"</string>
     <string name="capability_desc_canCaptureFingerprintGestures" msgid="4386487962402228670">"Može snimati pokrete izvršene na senzoru otiska prsta na uređaju."</string>
@@ -1811,9 +1811,9 @@
     <string name="language_picker_section_all" msgid="3097279199511617537">"Svi jezici"</string>
     <string name="region_picker_section_all" msgid="8966316787153001779">"Sve regije"</string>
     <string name="locale_search_menu" msgid="2560710726687249178">"Pretraži"</string>
-    <string name="app_suspended_title" msgid="5360409799785895488">"Radnja nije dopuštena"</string>
-    <string name="app_suspended_default_message" msgid="5876776530189983288">"Aplikacija <xliff:g id="APP_NAME">%1$s</xliff:g> trenutačno je onemogućena."</string>
-    <string name="app_suspended_more_details" msgid="2901244470963918402">"Više pojedinosti"</string>
+    <string name="app_suspended_title" msgid="1919029799438164552">"Aplikacija se ne može otvoriti"</string>
+    <string name="app_suspended_default_message" msgid="7875306315686531621">"Aplikacija <xliff:g id="APP_NAME_0">%1$s</xliff:g> trenutačno nije dostupna. Ovime upravlja aplikacija <xliff:g id="APP_NAME_1">%2$s</xliff:g>."</string>
+    <string name="app_suspended_more_details" msgid="1131804827776778187">"Saznajte više"</string>
     <string name="work_mode_off_title" msgid="1118691887588435530">"Želite uključiti radni profil?"</string>
     <string name="work_mode_off_message" msgid="5130856710614337649">"Uključit će se vaše radne aplikacije, obavijesti, podaci i druge značajke radnog profila"</string>
     <string name="work_mode_turn_on" msgid="2062544985670564875">"Uključi"</string>
@@ -1910,4 +1910,6 @@
     <string name="zen_upgrade_notification_content" msgid="1794994264692424562">"Dodirnite da biste provjerili što je blokirano."</string>
     <string name="notification_app_name_system" msgid="4205032194610042794">"Sustav"</string>
     <string name="notification_app_name_settings" msgid="7751445616365753381">"Postavke"</string>
+    <!-- no translation found for car_loading_profile (3545132581795684027) -->
+    <skip />
 </resources>

@@ -300,7 +300,7 @@
     <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"Truy xuất nội dung cửa sổ"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"Kiểm tra nội dung của cửa sổ bạn đang tương tác."</string>
     <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"Bật Khám phá bằng cách chạm"</string>
-    <string name="capability_desc_canRequestTouchExploration" msgid="7543249041581408313">"Mục đã nhấn sẽ được nói to và bạn có thể khám phá màn hình bằng cử chỉ."</string>
+    <string name="capability_desc_canRequestTouchExploration" msgid="7543249041581408313">"Đọc to các mục được nhấn và cho phép khám phá màn hình bằng cử chỉ."</string>
     <string name="capability_title_canRequestFilterKeyEvents" msgid="2103440391902412174">"Xem nội dung bạn nhập"</string>
     <string name="capability_desc_canRequestFilterKeyEvents" msgid="7463135292204152818">"Bao gồm dữ liệu cá nhân chẳng hạn như số thẻ tín dụng và mật khẩu."</string>
     <string name="capability_title_canControlMagnification" msgid="3593493281059424855">"Kiểm soát thu phóng màn hình"</string>
@@ -1690,8 +1690,7 @@
     <string name="package_installed_device_owner" msgid="6875717669960212648">"Do quản trị viên của bạn cài đặt"</string>
     <string name="package_updated_device_owner" msgid="1847154566357862089">"Do quản trị viên của bạn cập nhật"</string>
     <string name="package_deleted_device_owner" msgid="2307122077550236438">"Do quản trị viên của bạn xóa"</string>
-    <!-- no translation found for battery_saver_description (769989536172631582) -->
-    <skip />
+    <string name="battery_saver_description" msgid="769989536172631582">"Để kéo dài thời lượng pin, Trình tiết kiệm pin sẽ tắt một số tính năng của thiết bị và hạn chế các ứng dụng."</string>
     <string name="data_saver_description" msgid="6015391409098303235">"Để giúp giảm mức sử dụng dữ liệu, Trình tiết kiệm dữ liệu chặn một số ứng dụng gửi hoặc nhận dữ liệu trong nền. Ứng dụng mà bạn hiện sử dụng có thể truy cập dữ liệu nhưng có thể thực hiện việc đó ít thường xuyên hơn. Ví dụ: hình ảnh sẽ không hiển thị cho đến khi bạn nhấn vào hình ảnh đó."</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"Bật Trình tiết kiệm dữ liệu?"</string>
     <string name="data_saver_enable_button" msgid="7147735965247211818">"Bật"</string>
@@ -1778,9 +1777,12 @@
     <string name="language_picker_section_all" msgid="3097279199511617537">"Tất cả ngôn ngữ"</string>
     <string name="region_picker_section_all" msgid="8966316787153001779">"Tất cả khu vực"</string>
     <string name="locale_search_menu" msgid="2560710726687249178">"Tìm kiếm"</string>
-    <string name="app_suspended_title" msgid="5360409799785895488">"Hành động không được phép"</string>
-    <string name="app_suspended_default_message" msgid="5876776530189983288">"Ứng dụng <xliff:g id="APP_NAME">%1$s</xliff:g> hiện đã bị vô hiệu hóa."</string>
-    <string name="app_suspended_more_details" msgid="2901244470963918402">"Chi tiết khác"</string>
+    <!-- no translation found for app_suspended_title (1919029799438164552) -->
+    <skip />
+    <!-- no translation found for app_suspended_default_message (7875306315686531621) -->
+    <skip />
+    <!-- no translation found for app_suspended_more_details (1131804827776778187) -->
+    <skip />
     <string name="work_mode_off_title" msgid="1118691887588435530">"Bạn muốn bật hồ sơ công việc?"</string>
     <string name="work_mode_off_message" msgid="5130856710614337649">"Ứng dụng công việc, thông báo, dữ liệu và các tính năng khác của hồ sơ công việc sẽ được bật"</string>
     <string name="work_mode_turn_on" msgid="2062544985670564875">"Bật"</string>
@@ -1870,12 +1872,12 @@
     <string name="volume_dialog_ringer_guidance_silent" msgid="2128975224280276122">"Cuộc gọi và thông báo sẽ tắt tiếng"</string>
     <string name="notification_channel_system_changes" msgid="5072715579030948646">"Thay đổi hệ thống"</string>
     <string name="notification_channel_do_not_disturb" msgid="6766940333105743037">"Không làm phiền"</string>
-    <!-- no translation found for zen_upgrade_notification_visd_title (3288313883409759733) -->
-    <skip />
-    <!-- no translation found for zen_upgrade_notification_visd_content (5533674060311631165) -->
-    <skip />
+    <string name="zen_upgrade_notification_visd_title" msgid="3288313883409759733">"Mới: Chế độ Không làm phiền sẽ ẩn thông báo"</string>
+    <string name="zen_upgrade_notification_visd_content" msgid="5533674060311631165">"Nhấn để tìm hiểu thêm và thay đổi."</string>
     <string name="zen_upgrade_notification_title" msgid="3799603322910377294">"Cài đặt Không làm phiền đã thay đổi"</string>
     <string name="zen_upgrade_notification_content" msgid="1794994264692424562">"Nhấn để xem những thông báo bị chặn."</string>
     <string name="notification_app_name_system" msgid="4205032194610042794">"Hệ thống"</string>
     <string name="notification_app_name_settings" msgid="7751445616365753381">"Cài đặt"</string>
+    <!-- no translation found for car_loading_profile (3545132581795684027) -->
+    <skip />
 </resources>

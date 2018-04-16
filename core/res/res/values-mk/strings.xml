@@ -145,7 +145,7 @@
     <string name="fcError" msgid="3327560126588500777">"Проблем со поврзувањето или неважечки код за карактеристиката."</string>
     <string name="httpErrorOk" msgid="1191919378083472204">"Во ред"</string>
     <string name="httpError" msgid="7956392511146698522">"Настана грешка на мрежа."</string>
-    <string name="httpErrorLookup" msgid="4711687456111963163">"Не можеше да се најде УРЛ."</string>
+    <string name="httpErrorLookup" msgid="4711687456111963163">"Не можеше да се најде URL."</string>
     <string name="httpErrorUnsupportedAuthScheme" msgid="6299980280442076799">"Шемата за автентикација на локацијата не е поддржана."</string>
     <string name="httpErrorAuth" msgid="1435065629438044534">"Не можеше да се автентицира."</string>
     <string name="httpErrorProxyAuth" msgid="1788207010559081331">"Автентикацијата преку прокси серверот беше неуспешна."</string>
@@ -155,7 +155,7 @@
     <string name="httpErrorRedirectLoop" msgid="8679596090392779516">"Страницата содржи премногу пренасочувања од серверот."</string>
     <string name="httpErrorUnsupportedScheme" msgid="5015730812906192208">"Протоколот не е поддржан."</string>
     <string name="httpErrorFailedSslHandshake" msgid="96549606000658641">"Не можеше да се воспостави безбедна врска."</string>
-    <string name="httpErrorBadUrl" msgid="3636929722728881972">"Страницата не можеше да се отвори, бидејќи УРЛ е неважечки."</string>
+    <string name="httpErrorBadUrl" msgid="3636929722728881972">"Страницата не можеше да се отвори, бидејќи URL е неважечки."</string>
     <string name="httpErrorFile" msgid="2170788515052558676">"Не можеше да се пристапи до датотеката."</string>
     <string name="httpErrorFileNotFound" msgid="6203856612042655084">"Не можеше да се најде бараната датотека."</string>
     <string name="httpErrorTooManyRequests" msgid="1235396927087188253">"Се обработуваат премногу барања. Обидете се повторно подоцна."</string>
@@ -560,12 +560,12 @@
     <string name="permdesc_accessNetworkConditions" msgid="6899102075825272211">"Овозможува апликацијата да слуша за набљудувања во врска со условите на мрежата. Не треба да се користи за стандардни апликации."</string>
     <string name="permlab_setInputCalibration" msgid="4902620118878467615">"промени калибрирање на уред за внес"</string>
     <string name="permdesc_setInputCalibration" msgid="4527511047549456929">"Дозволува апликацијата да ги изменува калибрирачките параметри на екранот на допир. Не треба да се користи за стандардни апликации."</string>
-    <string name="permlab_accessDrmCertificates" msgid="7436886640723203615">"пристап до ДРМ-сертификати"</string>
-    <string name="permdesc_accessDrmCertificates" msgid="8073288354426159089">"Дозволува апликацијата да обезбедува и користи ДРМ-сертификати. Не треба да се користи за стандардни апликации."</string>
+    <string name="permlab_accessDrmCertificates" msgid="7436886640723203615">"пристап до DRM-сертификати"</string>
+    <string name="permdesc_accessDrmCertificates" msgid="8073288354426159089">"Дозволува апликацијата да обезбедува и користи DRM-сертификати. Не треба да се користи за стандардни апликации."</string>
     <string name="permlab_handoverStatus" msgid="7820353257219300883">"добивање статус на пренос на Android Beam"</string>
     <string name="permdesc_handoverStatus" msgid="4788144087245714948">"Ѝ дозволува на оваа апликација да добива информации за моменталните трансфери на Android Beam"</string>
-    <string name="permlab_removeDrmCertificates" msgid="7044888287209892751">"отстранување ДРМ-сетификати"</string>
-    <string name="permdesc_removeDrmCertificates" msgid="7272999075113400993">"Дозволува апликација да отстранува ДРМ-сертификати. Не треба да се користи за стандардни апликации."</string>
+    <string name="permlab_removeDrmCertificates" msgid="7044888287209892751">"отстранување DRM-сетификати"</string>
+    <string name="permdesc_removeDrmCertificates" msgid="7272999075113400993">"Дозволува апликација да отстранува DRM-сертификати. Не треба да се користи за стандардни апликации."</string>
     <string name="permlab_bindCarrierMessagingService" msgid="1490229371796969158">"сврзување со давателот на услугата за пораки"</string>
     <string name="permdesc_bindCarrierMessagingService" msgid="2762882888502113944">"Дозволува сопственикот да се сврзе со интерфејсот од највисоко ниво на давателот на услугата за пораки. Не треба да се користи за стандардни апликации."</string>
     <string name="permlab_bindCarrierServices" msgid="3233108656245526783">"поврзи се со услуги на операторот"</string>
@@ -854,7 +854,7 @@
     <string name="autofill_area" msgid="3547409050889952423">"Област"</string>
     <string name="autofill_emirate" msgid="2893880978835698818">"Емират"</string>
     <string name="permlab_readHistoryBookmarks" msgid="3775265775405106983">"прочитај ги своите веб обележувачи и историја"</string>
-    <string name="permdesc_readHistoryBookmarks" msgid="8462378226600439658">"Овозможува апликацијата да ја чита историјата на сите УРЛ кои ги посетил прелистувачот и сите обележувачи на прелистувачот. Напомена: оваа дозвола не може да ја наметнат прелистувачи на трети лица или други апликации со способности за прелистување на интернет."</string>
+    <string name="permdesc_readHistoryBookmarks" msgid="8462378226600439658">"Овозможува апликацијата да ја чита историјата на сите URL кои ги посетил прелистувачот и сите обележувачи на прелистувачот. Напомена: оваа дозвола не може да ја наметнат прелистувачи на трети лица или други апликации со способности за прелистување на интернет."</string>
     <string name="permlab_writeHistoryBookmarks" msgid="3714785165273314490">"напиши веб обележувачи и историја"</string>
     <string name="permdesc_writeHistoryBookmarks" product="tablet" msgid="6825527469145760922">"Овозможува апликацијата да ја менува историјата на прелистувачот или обележувачите зачувани во вашиот таблет. Ова може да овозможи апликацијата да избрише или да измени податоци за прелистувач. Напомена: оваа дозвола не може да ја наметнат прелистувачи на трети лица или други апликации со способности за прелистување на интернет."</string>
     <string name="permdesc_writeHistoryBookmarks" product="tv" msgid="7007393823197766548">"Дозволува апликацијата да ги менува историјата на прелистувачот или обележувачите складирани во вашиот телевизор. Ова може да ѝ дозволи на апликацијата да ги брише или менува податоците на прелистувачот. Забелешка: оваа дозвола не може да биде наметната од прелистувачи на трети лица или други апликации со можности за прелистување."</string>
@@ -999,7 +999,7 @@
     <string name="paste_as_plain_text" msgid="5427792741908010675">"Залепи како обичен текст"</string>
     <string name="replace" msgid="5781686059063148930">"Замени..."</string>
     <string name="delete" msgid="6098684844021697789">"Избриши"</string>
-    <string name="copyUrl" msgid="2538211579596067402">"Копирај УРЛ"</string>
+    <string name="copyUrl" msgid="2538211579596067402">"Копирај URL"</string>
     <string name="selectTextMode" msgid="1018691815143165326">"Избери текст"</string>
     <string name="undo" msgid="7905788502491742328">"Врати"</string>
     <string name="redo" msgid="7759464876566803888">"Повтори"</string>
@@ -1693,8 +1693,7 @@
     <string name="package_installed_device_owner" msgid="6875717669960212648">"Инсталирано од администраторот"</string>
     <string name="package_updated_device_owner" msgid="1847154566357862089">"Ажурирано од администраторот"</string>
     <string name="package_deleted_device_owner" msgid="2307122077550236438">"Избришано од администраторот"</string>
-    <!-- no translation found for battery_saver_description (769989536172631582) -->
-    <skip />
+    <string name="battery_saver_description" msgid="769989536172631582">"За да го продолжи траењето на батеријата, „Штедачот на батерија“ исклучува некои функции на уредот и ограничува апликации."</string>
     <string name="data_saver_description" msgid="6015391409098303235">"За да се намали користењето интернет, Штедачот на интернет спречува дел од апликациите да испраќаат или да примаат податоци во заднина. Апликацијата што ја користите во моментов можеби ќе пристапува до интернет, но тоа ќе го прави поретко. Ова значи, на пример, дека сликите нема да се прикажат додека не ги допрете."</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"Вклучете Штедач на интернет?"</string>
     <string name="data_saver_enable_button" msgid="7147735965247211818">"Вклучи"</string>
@@ -1781,9 +1780,12 @@
     <string name="language_picker_section_all" msgid="3097279199511617537">"Сите јазици"</string>
     <string name="region_picker_section_all" msgid="8966316787153001779">"Сите региони"</string>
     <string name="locale_search_menu" msgid="2560710726687249178">"Пребарај"</string>
-    <string name="app_suspended_title" msgid="5360409799785895488">"Дејството не е дозволено"</string>
-    <string name="app_suspended_default_message" msgid="5876776530189983288">"Апликацијата <xliff:g id="APP_NAME">%1$s</xliff:g> моментално е оневозможена."</string>
-    <string name="app_suspended_more_details" msgid="2901244470963918402">"Повеќе детали"</string>
+    <!-- no translation found for app_suspended_title (1919029799438164552) -->
+    <skip />
+    <!-- no translation found for app_suspended_default_message (7875306315686531621) -->
+    <skip />
+    <!-- no translation found for app_suspended_more_details (1131804827776778187) -->
+    <skip />
     <string name="work_mode_off_title" msgid="1118691887588435530">"Да се вклучи работниот профил?"</string>
     <string name="work_mode_off_message" msgid="5130856710614337649">"Вашите работни апликации, известувања, податоци и други функции на работниот профил ќе бидат вклучени"</string>
     <string name="work_mode_turn_on" msgid="2062544985670564875">"Вклучи"</string>
@@ -1873,12 +1875,12 @@
     <string name="volume_dialog_ringer_guidance_silent" msgid="2128975224280276122">"Повиците и известувањата нема да имаат звук"</string>
     <string name="notification_channel_system_changes" msgid="5072715579030948646">"Системски промени"</string>
     <string name="notification_channel_do_not_disturb" msgid="6766940333105743037">"Не вознемирувај"</string>
-    <!-- no translation found for zen_upgrade_notification_visd_title (3288313883409759733) -->
-    <skip />
-    <!-- no translation found for zen_upgrade_notification_visd_content (5533674060311631165) -->
-    <skip />
+    <string name="zen_upgrade_notification_visd_title" msgid="3288313883409759733">"Ново: режимот „Не вознемирувај“ ги крие известувањата"</string>
+    <string name="zen_upgrade_notification_visd_content" msgid="5533674060311631165">"Допрете за да дознаете повеќе и да ги промените поставките."</string>
     <string name="zen_upgrade_notification_title" msgid="3799603322910377294">"Поставките за „Не вознемирувај“ се изменија"</string>
     <string name="zen_upgrade_notification_content" msgid="1794994264692424562">"Допрете за да проверите што е блокирано."</string>
     <string name="notification_app_name_system" msgid="4205032194610042794">"Систем"</string>
     <string name="notification_app_name_settings" msgid="7751445616365753381">"Поставки"</string>
+    <!-- no translation found for car_loading_profile (3545132581795684027) -->
+    <skip />
 </resources>

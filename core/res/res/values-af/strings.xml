@@ -298,13 +298,13 @@
     <string name="permgroupdesc_sensors" msgid="7147968539346634043">"toegang te verkry tot sensordata oor jou lewenstekens"</string>
     <string name="permgrouprequest_sensors" msgid="6349806962814556786">"Gee &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; toegang tot sensordata oor jou lewenstekens?"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"Venster-inhoud ophaal"</string>
-    <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"Ondersoek die inhoud van \'n venster waarmee jy interaksie het."</string>
+    <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"Die inhoud ondersoek van \'n venster waarmee jy interaksie het ."</string>
     <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"Verken deur raak aanskakel"</string>
     <string name="capability_desc_canRequestTouchExploration" msgid="7543249041581408313">"Items waarop getik word, sal hardop gesê word en die skerm kan met behulp van gebare verken word."</string>
     <string name="capability_title_canRequestFilterKeyEvents" msgid="2103440391902412174">"Teks wat jy tik waarneem"</string>
-    <string name="capability_desc_canRequestFilterKeyEvents" msgid="7463135292204152818">"Sluit persoonlike data soos kredietkaartnommers en wagwoorde in."</string>
+    <string name="capability_desc_canRequestFilterKeyEvents" msgid="7463135292204152818">"Dit sluit persoonlike data soos kredietkaartnommers en wagwoorde in."</string>
     <string name="capability_title_canControlMagnification" msgid="3593493281059424855">"Vertoonskermvergroting beheer"</string>
-    <string name="capability_desc_canControlMagnification" msgid="4791858203568383773">"Beheer die vertoonskerm se zoemvlak en posisionering."</string>
+    <string name="capability_desc_canControlMagnification" msgid="4791858203568383773">"Die vertoonskerm se zoemvlak en posisionering beheer."</string>
     <string name="capability_title_canPerformGestures" msgid="7418984730362576862">"Voer gebare uit"</string>
     <string name="capability_desc_canPerformGestures" msgid="8296373021636981249">"Kan tik, swiep, knyp en ander gebare uitvoer."</string>
     <string name="capability_title_canCaptureFingerprintGestures" msgid="6309568287512278670">"Vingerafdrukgebare"</string>
@@ -1266,7 +1266,7 @@
     <string name="select_keyboard_layout_notification_message" msgid="8084622969903004900">"Tik om taal en uitleg te kies"</string>
     <string name="fast_scroll_alphabet" msgid="5433275485499039199">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="4030170524595123610">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
-    <string name="alert_windows_notification_channel_group_name" msgid="1463953341148606396">"Wys oor ander programme"</string>
+    <string name="alert_windows_notification_channel_group_name" msgid="1463953341148606396">"Wys bo-oor ander programme"</string>
     <string name="alert_windows_notification_channel_name" msgid="3116610965549449803">"<xliff:g id="NAME">%s</xliff:g> word bo-oor ander programme gewys"</string>
     <string name="alert_windows_notification_title" msgid="3697657294867638947">"<xliff:g id="NAME">%s</xliff:g> wys bo-oor ander programme"</string>
     <string name="alert_windows_notification_message" msgid="8917232109522912560">"As jy nie wil hê dat <xliff:g id="NAME">%s</xliff:g> hierdie kenmerk gebruik nie, tik om instellings oop te maak en skakel dit af."</string>
@@ -1777,9 +1777,12 @@
     <string name="language_picker_section_all" msgid="3097279199511617537">"Alle tale"</string>
     <string name="region_picker_section_all" msgid="8966316787153001779">"Allle streke"</string>
     <string name="locale_search_menu" msgid="2560710726687249178">"Soek"</string>
-    <string name="app_suspended_title" msgid="5360409799785895488">"Handeling nie toegelaat nie"</string>
-    <string name="app_suspended_default_message" msgid="5876776530189983288">"Hierdie program <xliff:g id="APP_NAME">%1$s</xliff:g> is tans gedeaktiveer."</string>
-    <string name="app_suspended_more_details" msgid="2901244470963918402">"Meer besonderhede"</string>
+    <!-- no translation found for app_suspended_title (1919029799438164552) -->
+    <skip />
+    <!-- no translation found for app_suspended_default_message (7875306315686531621) -->
+    <skip />
+    <!-- no translation found for app_suspended_more_details (1131804827776778187) -->
+    <skip />
     <string name="work_mode_off_title" msgid="1118691887588435530">"Skakel werkprofiel aan?"</string>
     <string name="work_mode_off_message" msgid="5130856710614337649">"Jou werkprogramme, kennisgewings, data en ander werkprofielkenmerke sal aangeskakel word"</string>
     <string name="work_mode_turn_on" msgid="2062544985670564875">"Skakel aan"</string>
@@ -1875,4 +1878,6 @@
     <string name="zen_upgrade_notification_content" msgid="1794994264692424562">"Tik om te kyk wat geblokkeer word."</string>
     <string name="notification_app_name_system" msgid="4205032194610042794">"Stelsel"</string>
     <string name="notification_app_name_settings" msgid="7751445616365753381">"Instellings"</string>
+    <!-- no translation found for car_loading_profile (3545132581795684027) -->
+    <skip />
 </resources>
