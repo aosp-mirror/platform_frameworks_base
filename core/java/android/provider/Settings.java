@@ -11581,6 +11581,12 @@ public final class Settings {
         public static final String GPU_DEBUG_APP = "gpu_debug_app";
 
         /**
+         * App should try to use ANGLE
+         * @hide
+         */
+        public static final String ANGLE_ENABLED_APP = "angle_enabled_app";
+
+        /**
          * Ordered GPU debug layer list
          * i.e. <layer1>:<layer2>:...:<layerN>
          * @hide
