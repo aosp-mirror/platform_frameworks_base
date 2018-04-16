@@ -26,7 +26,6 @@
 #include <binder/IPCThreadState.h>
 #include <broadcastradio-utils-1x/Utils.h>
 #include <core_jni_helpers.h>
-#include <media/AudioSystem.h>
 #include <nativehelper/JNIHelp.h>
 #include <utils/Log.h>
 
@@ -69,8 +68,6 @@ static struct {
         jfieldID tunerCallback;
     } Tuner;
 } gjni;
-
-static const char* const kAudioDeviceName = "Radio tuner source";
 
 class HalDeathRecipient : public hidl_death_recipient {
     wp<V1_1::ITunerCallback> mTunerCallback;
@@ -154,20 +151,6 @@ sp<V1_1::IBroadcastRadio> TunerContext::getHalModule11() const {
     return V1_1::IBroadcastRadio::castFrom(halModule).withDefault(nullptr);
 }
 
-// TODO(b/62713378): implement support for multiple tuners open at the same time
-static void notifyAudioService(TunerContext& ctx, bool connected) {
-    if (!ctx.mWithAudio) return;
-    if (ctx.mIsAudioConnected == connected) return;
-    ctx.mIsAudioConnected = connected;
-
-    ALOGD("Notifying AudioService about new state: %d", connected);
-    auto token = IPCThreadState::self()->clearCallingIdentity();
-    AudioSystem::setDeviceConnectionState(AUDIO_DEVICE_IN_FM_TUNER,
-            connected ? AUDIO_POLICY_DEVICE_STATE_AVAILABLE : AUDIO_POLICY_DEVICE_STATE_UNAVAILABLE,
-            nullptr, kAudioDeviceName);
-    IPCThreadState::self()->restoreCallingIdentity(token);
-}
-
 void assignHalInterfaces(JNIEnv *env, JavaRef<jobject> const &jTuner,
         sp<V1_0::IBroadcastRadio> halModule, sp<V1_0::ITuner> halTuner) {
     ALOGV("%s(%p)", __func__, halTuner.get());
@@ -193,8 +176,6 @@ void assignHalInterfaces(JNIEnv *env, JavaRef<jobject> const &jTuner,
 
     ctx.mHalDeathRecipient = new HalDeathRecipient(getNativeCallback(env, jTuner));
     halTuner->linkToDeath(ctx.mHalDeathRecipient, 0);
-
-    notifyAudioService(ctx, true);
 }
 
 static sp<V1_0::ITuner> getHalTuner(const TunerContext& ctx) {
@@ -236,8 +217,6 @@ static void nativeClose(JNIEnv *env, jobject obj, jlong nativeContext) {
 
     ALOGI("Closing tuner %p", ctx.mHalTuner.get());
 
-    notifyAudioService(ctx, false);
-
     ctx.mHalTuner->unlinkToDeath(ctx.mHalDeathRecipient);
     ctx.mHalDeathRecipient = nullptr;
 
@@ -278,14 +257,6 @@ static jobject nativeGetConfiguration(JNIEnv *env, jobject obj, jlong nativeCont
     }
 
     return convert::BandConfigFromHal(env, halConfig, region).release();
-}
-
-static void nativeSetMuted(JNIEnv *env, jobject obj, jlong nativeContext, bool mute) {
-    ALOGV("%s(%d)", __func__, mute);
-    lock_guard<mutex> lk(gContextMutex);
-    auto& ctx = getNativeContext(nativeContext);
-
-    notifyAudioService(ctx, !mute);
 }
 
 static void nativeStep(JNIEnv *env, jobject obj, jlong nativeContext,
@@ -467,7 +438,6 @@ static const JNINativeMethod gTunerMethods[] = {
             (void*)nativeSetConfiguration },
     { "nativeGetConfiguration", "(JI)Landroid/hardware/radio/RadioManager$BandConfig;",
             (void*)nativeGetConfiguration },
-    { "nativeSetMuted", "(JZ)V", (void*)nativeSetMuted },
     { "nativeStep", "(JZZ)V", (void*)nativeStep },
     { "nativeScan", "(JZZ)V", (void*)nativeScan },
     { "nativeTune", "(JLandroid/hardware/radio/ProgramSelector;)V", (void*)nativeTune },
