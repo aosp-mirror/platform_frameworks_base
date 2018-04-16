@@ -16,16 +16,11 @@
 
 package com.android.systemui.statusbar.phone;
 
-import static com.google.common.truth.Truth.assertThat;
-
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyFloat;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.reset;
-import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.verifyZeroInteractions;
@@ -33,7 +28,6 @@ import static org.mockito.Mockito.when;
 
 import android.graphics.Color;
 import android.support.test.filters.SmallTest;
-import android.test.UiThreadTest;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.view.ViewGroup;
@@ -73,6 +67,8 @@ public class KeyguardBouncerTest extends SysuiTestCase {
     private KeyguardHostView mKeyguardHostView;
     @Mock
     private ViewTreeObserver mViewTreeObserver;
+    @Mock
+    private KeyguardBouncer.BouncerExpansionCallback mExpansionCallback;
 
     private KeyguardBouncer mBouncer;
 
@@ -84,7 +80,8 @@ public class KeyguardBouncerTest extends SysuiTestCase {
         when(mKeyguardHostView.getViewTreeObserver()).thenReturn(mViewTreeObserver);
         when(mKeyguardHostView.getHeight()).thenReturn(500);
         mBouncer = new KeyguardBouncer(getContext(), mViewMediatorCallback,
-                mLockPatternUtils, container, mDismissCallbackRegistry, mFalsingManager) {
+                mLockPatternUtils, container, mDismissCallbackRegistry, mFalsingManager,
+                mExpansionCallback) {
             @Override
             protected void inflateView() {
                 super.inflateView();
@@ -166,23 +163,26 @@ public class KeyguardBouncerTest extends SysuiTestCase {
     }
 
     @Test
-    public void testOnFullyShown_notifiesFalsingManager() {
+    public void testSetExpansion_notifiesFalsingManager() {
         mBouncer.ensureView();
-        mBouncer.onFullyShown();
-        verify(mFalsingManager).onBouncerShown();
-    }
+        mBouncer.setExpansion(0.5f);
 
-    @Test
-    public void testOnFullyShown_notifiesKeyguardView() {
-        mBouncer.ensureView();
-        mBouncer.onFullyShown();
-        verify(mKeyguardHostView).onResume();
-    }
-
-    @Test
-    public void testOnFullyHidden_notifiesFalsingManager() {
-        mBouncer.onFullyHidden();
+        mBouncer.setExpansion(1);
         verify(mFalsingManager).onBouncerHidden();
+        verify(mExpansionCallback).onFullyHidden();
+
+        mBouncer.setExpansion(0);
+        verify(mFalsingManager).onBouncerShown();
+        verify(mExpansionCallback).onFullyShown();
+    }
+
+    @Test
+    public void testSetExpansion_notifiesKeyguardView() {
+        mBouncer.ensureView();
+        mBouncer.setExpansion(0.1f);
+
+        mBouncer.setExpansion(0);
+        verify(mKeyguardHostView).onResume();
     }
 
     @Test
@@ -204,6 +204,14 @@ public class KeyguardBouncerTest extends SysuiTestCase {
         mBouncer.show(false);
         mBouncer.hide(false);
         verify(mDismissCallbackRegistry).notifyDismissCancelled();
+    }
+
+    @Test
+    public void testHide_notShowingAnymore() {
+        mBouncer.ensureView();
+        mBouncer.show(false /* resetSecuritySelection */);
+        mBouncer.hide(false /* destroyViews */);
+        Assert.assertFalse("Not showing", mBouncer.isShowing());
     }
 
     @Test

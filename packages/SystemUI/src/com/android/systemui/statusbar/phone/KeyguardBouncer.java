@@ -45,6 +45,8 @@ import com.android.systemui.DejankUtils;
 import com.android.systemui.classifier.FalsingManager;
 import com.android.systemui.keyguard.DismissCallbackRegistry;
 
+import java.io.PrintWriter;
+
 /**
  * A class which manages the bouncer on the lockscreen.
  */
@@ -60,6 +62,7 @@ public class KeyguardBouncer {
     private final FalsingManager mFalsingManager;
     private final DismissCallbackRegistry mDismissCallbackRegistry;
     private final Handler mHandler;
+    private final BouncerExpansionCallback mExpansionCallback;
     private final KeyguardUpdateMonitorCallback mUpdateMonitorCallback =
             new KeyguardUpdateMonitorCallback() {
                 @Override
@@ -79,7 +82,8 @@ public class KeyguardBouncer {
 
     public KeyguardBouncer(Context context, ViewMediatorCallback callback,
             LockPatternUtils lockPatternUtils, ViewGroup container,
-            DismissCallbackRegistry dismissCallbackRegistry, FalsingManager falsingManager) {
+            DismissCallbackRegistry dismissCallbackRegistry, FalsingManager falsingManager,
+            BouncerExpansionCallback expansionCallback) {
         mContext = context;
         mCallback = callback;
         mLockPatternUtils = lockPatternUtils;
@@ -87,6 +91,7 @@ public class KeyguardBouncer {
         KeyguardUpdateMonitor.getInstance(mContext).registerCallback(mUpdateMonitorCallback);
         mFalsingManager = falsingManager;
         mDismissCallbackRegistry = dismissCallbackRegistry;
+        mExpansionCallback = expansionCallback;
         mHandler = new Handler();
     }
 
@@ -157,7 +162,7 @@ public class KeyguardBouncer {
      * the translation is performed manually by the user, otherwise FalsingManager
      * will never be notified and its internal state will be out of sync.
      */
-    public void onFullyShown() {
+    private void onFullyShown() {
         mFalsingManager.onBouncerShown();
         if (mKeyguardView == null) {
             Log.wtf(TAG, "onFullyShown when view was null");
@@ -167,11 +172,9 @@ public class KeyguardBouncer {
     }
 
     /**
-     * This method must be called at the end of the bouncer animation when
-     * the translation is performed manually by the user, otherwise FalsingManager
-     * will never be notified and its internal state will be out of sync.
+     * @see #onFullyShown()
      */
-    public void onFullyHidden() {
+    private void onFullyHidden() {
         if (!mShowingSoon) {
             cancelShowRunnable();
             if (mRoot != null) {
@@ -326,11 +329,20 @@ public class KeyguardBouncer {
      * @see StatusBarKeyguardViewManager#onPanelExpansionChanged
      */
     public void setExpansion(float fraction) {
+        float oldExpansion = mExpansion;
         mExpansion = fraction;
         if (mKeyguardView != null && !mIsAnimatingAway) {
             float alpha = MathUtils.map(ALPHA_EXPANSION_THRESHOLD, 1, 1, 0, fraction);
             mKeyguardView.setAlpha(MathUtils.constrain(alpha, 0f, 1f));
             mKeyguardView.setTranslationY(fraction * mKeyguardView.getHeight());
+        }
+
+        if (fraction == 0 && oldExpansion != 0) {
+            onFullyShown();
+            mExpansionCallback.onFullyShown();
+        } else if (fraction == 1 && oldExpansion != 0) {
+            onFullyHidden();
+            mExpansionCallback.onFullyHidden();
         }
     }
 
@@ -436,5 +448,21 @@ public class KeyguardBouncer {
     public void notifyKeyguardAuthenticated(boolean strongAuth) {
         ensureView();
         mKeyguardView.finish(strongAuth, KeyguardUpdateMonitor.getCurrentUser());
+    }
+
+    public void dump(PrintWriter pw) {
+        pw.println("KeyguardBouncer");
+        pw.println("  isShowing(): " + isShowing());
+        pw.println("  mStatusBarHeight: " + mStatusBarHeight);
+        pw.println("  mExpansion: " + mExpansion);
+        pw.println("  mKeyguardView; " + mKeyguardView);
+        pw.println("  mShowingSoon: " + mKeyguardView);
+        pw.println("  mBouncerPromptReason: " + mBouncerPromptReason);
+        pw.println("  mIsAnimatingAway: " + mIsAnimatingAway);
+    }
+
+    public interface BouncerExpansionCallback {
+        void onFullyShown();
+        void onFullyHidden();
     }
 }
