@@ -48,7 +48,7 @@
     <string name="battery_saver_start_action" msgid="8187820911065797519">"Увімкнути режим економії заряду акумулятора"</string>
     <string name="status_bar_settings_settings_button" msgid="3023889916699270224">"Налаштування"</string>
     <string name="status_bar_settings_wifi_button" msgid="1733928151698311923">"Wi-Fi"</string>
-    <string name="status_bar_settings_auto_rotation" msgid="3790482541357798421">"Повертати екран автоматично"</string>
+    <string name="status_bar_settings_auto_rotation" msgid="3790482541357798421">"Автообертання екрана"</string>
     <string name="status_bar_settings_mute_label" msgid="554682549917429396">"ІГНОР."</string>
     <string name="status_bar_settings_auto_brightness_label" msgid="511453614962324674">"АВТОМ."</string>
     <string name="status_bar_settings_notifications" msgid="397146176280905137">"Сповіщення"</string>

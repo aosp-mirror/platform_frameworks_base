@@ -535,7 +535,7 @@
     <string name="stream_accessibility" msgid="301136219144385106">"Հատուկ գործառույթներ"</string>
     <string name="ring_toggle_title" msgid="3281244519428819576">"Զանգեր"</string>
     <string name="volume_ringer_status_normal" msgid="4273142424125855384">"Սովորական"</string>
-    <string name="volume_ringer_status_vibrate" msgid="1825615171021346557">"Թրթռազանգ"</string>
+    <string name="volume_ringer_status_vibrate" msgid="1825615171021346557">"Թրթռոց"</string>
     <string name="volume_ringer_status_silent" msgid="6896394161022916369">"Անձայն"</string>
     <string name="qs_status_phone_vibrate" msgid="204362991135761679">"Հեռախոսում միացված է թրթռոցը"</string>
     <string name="qs_status_phone_muted" msgid="5437668875879171548">"Հեռախոսի ձայնն անջատած է"</string>

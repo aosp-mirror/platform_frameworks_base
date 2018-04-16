@@ -161,10 +161,8 @@
     <string name="accessibility_no_sim" msgid="8274017118472455155">"ဆင်းကဒ်မရှိပါ။"</string>
     <string name="accessibility_cell_data" msgid="5326139158682385073">"မိုဘိုင်းဒေတာ"</string>
     <string name="accessibility_cell_data_on" msgid="5927098403452994422">"မိုဘိုင်းဒေတာကို ဖွင့်ထားပါသည်"</string>
-    <!-- no translation found for cell_data_off_content_description (4356113230238585072) -->
-    <skip />
-    <!-- no translation found for cell_data_off (1051264981229902873) -->
-    <skip />
+    <string name="cell_data_off_content_description" msgid="4356113230238585072">"မိုဘိုင်းဒေတာ ပိတ်ထားသည်"</string>
+    <string name="cell_data_off" msgid="1051264981229902873">"ပိတ်ရန်"</string>
     <string name="accessibility_bluetooth_tether" msgid="4102784498140271969">"ဘလူးတုသ်သုံး၍ ချိတ်ဆက်ခြင်း"</string>
     <string name="accessibility_airplane_mode" msgid="834748999790763092">"လေယာဥ်ပျံပေါ်အသုံးပြုသောစနစ်။"</string>
     <string name="accessibility_vpn_on" msgid="5993385083262856059">"VPN ကို ဖွင့်ထားသည်။"</string>
@@ -363,8 +361,7 @@
     <string name="recents_stack_action_button_label" msgid="6593727103310426253">"အားလုံး ဖယ်ရှားပါ"</string>
     <string name="recents_drag_hint_message" msgid="2649739267073203985">"မျက်နှာပြင် ခွဲခြမ်းပြသခြင်းကို အသုံးပြုရန် ဤနေရာသို့ ပွတ်၍ဆွဲထည့်ပါ"</string>
     <string name="recents_swipe_up_onboarding" msgid="3824607135920170001">"အက်ပ်များကို ဖွင့်ရန် အပေါ်သို့ ပွတ်ဆွဲပါ"</string>
-    <!-- no translation found for recents_quick_scrub_onboarding (2778062804333285789) -->
-    <skip />
+    <string name="recents_quick_scrub_onboarding" msgid="2778062804333285789">"အက်ပ်များကို ပြောင်းရန် ညာဘက်သို့ ဖိဆွဲပါ"</string>
     <string name="recents_multistack_add_stack_dialog_split_horizontal" msgid="8848514474543427332">"ရေပြင်ညီ ပိုင်းမည်"</string>
     <string name="recents_multistack_add_stack_dialog_split_vertical" msgid="9075292233696180813">"ဒေါင်လိုက်ပိုင်းမည်"</string>
     <string name="recents_multistack_add_stack_dialog_split_custom" msgid="4177837597513701943">"စိတ်ကြိုက် ပိုင်းမည်"</string>

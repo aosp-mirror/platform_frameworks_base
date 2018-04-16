@@ -161,10 +161,8 @@
     <string name="accessibility_no_sim" msgid="8274017118472455155">"Inget SIM-kort."</string>
     <string name="accessibility_cell_data" msgid="5326139158682385073">"Mobildata"</string>
     <string name="accessibility_cell_data_on" msgid="5927098403452994422">"Mobildata har aktiverats"</string>
-    <!-- no translation found for cell_data_off_content_description (4356113230238585072) -->
-    <skip />
-    <!-- no translation found for cell_data_off (1051264981229902873) -->
-    <skip />
+    <string name="cell_data_off_content_description" msgid="4356113230238585072">"Mobildata har inaktiverats"</string>
+    <string name="cell_data_off" msgid="1051264981229902873">"Av"</string>
     <string name="accessibility_bluetooth_tether" msgid="4102784498140271969">"Internetdelning via Bluetooth"</string>
     <string name="accessibility_airplane_mode" msgid="834748999790763092">"Flygplansläge"</string>
     <string name="accessibility_vpn_on" msgid="5993385083262856059">"VPN har aktiverats."</string>
@@ -363,8 +361,7 @@
     <string name="recents_stack_action_button_label" msgid="6593727103310426253">"Rensa alla"</string>
     <string name="recents_drag_hint_message" msgid="2649739267073203985">"Dra hit för att dela upp skärmen"</string>
     <string name="recents_swipe_up_onboarding" msgid="3824607135920170001">"Byt appar genom att svepa uppåt"</string>
-    <!-- no translation found for recents_quick_scrub_onboarding (2778062804333285789) -->
-    <skip />
+    <string name="recents_quick_scrub_onboarding" msgid="2778062804333285789">"Tryck och dra åt höger för att snabbt byta mellan appar"</string>
     <string name="recents_multistack_add_stack_dialog_split_horizontal" msgid="8848514474543427332">"Dela horisontellt"</string>
     <string name="recents_multistack_add_stack_dialog_split_vertical" msgid="9075292233696180813">"Dela vertikalt"</string>
     <string name="recents_multistack_add_stack_dialog_split_custom" msgid="4177837597513701943">"Dela anpassad"</string>
