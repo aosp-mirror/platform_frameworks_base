@@ -190,7 +190,7 @@
     <string name="tethering_settings_not_available" msgid="6765770438438291012">"Այս օգտատերը չի կարող փոխել մոդեմի ռեժիմի կարգավորումները"</string>
     <string name="apn_settings_not_available" msgid="7873729032165324000">"Մատչման կետի անվան կարգավորումները հասանելի չեն այս օգտատիրոջը"</string>
     <string name="enable_adb" msgid="7982306934419797485">"USB վրիպազերծում"</string>
-    <string name="enable_adb_summary" msgid="4881186971746056635">"Կարգաբերել ռեժիմը, երբ USB-ն միացված է"</string>
+    <string name="enable_adb_summary" msgid="4881186971746056635">"Միացնել վրիպազերծման ռեժիմը, երբ USB-ն միացված է"</string>
     <string name="clear_adb_keys" msgid="4038889221503122743">"Չեղարկել USB վրիպազերծման լիազորումները"</string>
     <string name="bugreport_in_power" msgid="7923901846375587241">"Սխալի հաղորդման դյուրանցում"</string>
     <string name="bugreport_in_power_summary" msgid="1778455732762984579">"Գործարկման ցանկում ցույց տալ կոճակը՝ վրիպակների հաղորդման համար"</string>
@@ -206,7 +206,7 @@
     <string name="mock_location_app_not_set" msgid="809543285495344223">"Տեղադրությունը կեղծող հավելված տեղակայված չէ"</string>
     <string name="mock_location_app_set" msgid="8966420655295102685">"Տեղադրությունը կեղծող հավելված՝ <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="debug_networking_category" msgid="7044075693643009662">"Ցանց"</string>
-    <string name="wifi_display_certification" msgid="8611569543791307533">"Անլար էկրանի վկայագրում"</string>
+    <string name="wifi_display_certification" msgid="8611569543791307533">"Անլար էկրանների հավաստագրում"</string>
     <string name="wifi_verbose_logging" msgid="4203729756047242344">"Միացնել Wi‑Fi մանրամասն գրանցամատյանները"</string>
     <string name="wifi_connected_mac_randomization" msgid="3168165236877957767">"MAC հասցեների պատահական ընտրություն Wi-Fi-ին միանալիս"</string>
     <string name="mobile_data_always_on" msgid="8774857027458200434">"Բջջային ինտերնետը միշտ ակտիվ է"</string>
@@ -238,7 +238,7 @@
     <string name="wifi_connected_mac_randomization_summary" msgid="1743059848752201485">"Պատահականորեն ընտրել MAC հասցեն Wi-Fi ցանցերին միանալիս"</string>
     <string name="wifi_metered_label" msgid="4514924227256839725">"Վճարովի թրաֆիկ"</string>
     <string name="wifi_unmetered_label" msgid="6124098729457992931">"Անսահմանափակ թրաֆիկ"</string>
-    <string name="select_logd_size_title" msgid="7433137108348553508">"Տեղեկամատյանի պահնակի չափերը"</string>
+    <string name="select_logd_size_title" msgid="7433137108348553508">"Մատյանի բուֆերի չափը չափերը"</string>
     <string name="select_logd_size_dialog_title" msgid="1206769310236476760">"Ընտրեք տեղեկամատյանի չափը մեկ պահնակի համար"</string>
     <string name="dev_logpersist_clear_warning_title" msgid="684806692440237967">"Ջնջե՞լ մատյանի մշտական հիշողությունը:"</string>
     <string name="dev_logpersist_clear_warning_message" msgid="2256582531342994562">"Մշտական տվյալների գրանցման մատյանի միջոցով վերահսկողությունը դադարեցնելու դեպքում մենք պարտավոր ենք ջնջել մատյանի տվյալները, որոնք պահվում են ձեր սարքում:"</string>
@@ -257,7 +257,7 @@
     <string name="dev_settings_warning_title" msgid="7244607768088540165">"Ընդունե՞լ ծրագրավորման կարգավորումներ:"</string>
     <string name="dev_settings_warning_message" msgid="2298337781139097964">"Այս կարգավորումները միայն ծրագրավորման նպատակների համար են նախատեսված: Դրանք կարող են խանգարել ձեր սարքի կամ ծրագրի աշխատանքին:"</string>
     <string name="verify_apps_over_usb_title" msgid="4177086489869041953">"Ստուգել հավելվածները USB-ի նկատմամբ"</string>
-    <string name="verify_apps_over_usb_summary" msgid="9164096969924529200">"Ստուգեք տեղադրված հավելվածը ADB/ADT-ի միջոցով կասկածելի աշխատանքի պատճառով:"</string>
+    <string name="verify_apps_over_usb_summary" msgid="9164096969924529200">"Ստուգել հավելվածների անվտանգությունը ADB/ADT-ի միջոցով տեղադրված լինելու դեպքում։"</string>
     <string name="bluetooth_show_devices_without_names_summary" msgid="2351196058115755520">"Bluetooth սարքերը կցուցադրվեն առանց անունների (միայն MAC հասցեները)"</string>
     <string name="bluetooth_disable_absolute_volume_summary" msgid="6031284410786545957">"Կասեցնում է Bluetooth-ի ձայնի բացարձակ ուժգնության գործառույթը՝ հեռավոր սարքերի հետ ձայնի ուժգնությանը վերաբերող խնդիրներ ունենալու դեպքում (օրինակ՝ երբ ձայնի ուժգնությունն անընդունելի է կամ դրա կառավարումը հնարավոր չէ):"</string>
     <string name="enable_terminal_title" msgid="95572094356054120">"Տեղային տերմինալ"</string>
@@ -266,12 +266,12 @@
     <string name="hdcp_checking_dialog_title" msgid="5141305530923283">"HDCP-ի ստուգման կարգը"</string>
     <string name="debug_debugging_category" msgid="6781250159513471316">"Վրիպազերծում"</string>
     <string name="debug_app" msgid="8349591734751384446">"Ընտրել վրիպազերծման հավելվածը"</string>
-    <string name="debug_app_not_set" msgid="718752499586403499">"Վրիպազերծման ծրագիրը կարգավորված չէ"</string>
+    <string name="debug_app_not_set" msgid="718752499586403499">"Վրիպազերծման հավելվածը կարգավորված չէ"</string>
     <string name="debug_app_set" msgid="2063077997870280017">"Վրիպազերծող հավելվածը` <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="select_application" msgid="5156029161289091703">"Ընտրել հավելվածը"</string>
     <string name="no_application" msgid="2813387563129153880">"Ոչինչ"</string>
     <string name="wait_for_debugger" msgid="1202370874528893091">"Սպասել վրիպազերծիչին"</string>
-    <string name="wait_for_debugger_summary" msgid="1766918303462746804">"Վրիպազերծված ծրագրիը սպասում է վրիպազերծիչի կցմանը մինչ կատարումը"</string>
+    <string name="wait_for_debugger_summary" msgid="1766918303462746804">"Հավելվածը սպասում է վրիպազերծիչի կցման"</string>
     <string name="debug_input_category" msgid="1811069939601180246">"Մուտքագրում"</string>
     <string name="debug_drawing_category" msgid="6755716469267367852">"Պատկերում"</string>
     <string name="debug_hw_drawing_category" msgid="6220174216912308658">"Սարքաշարի արագացված նյութավորում"</string>
@@ -290,12 +290,12 @@
     <string name="show_hw_layers_updates" msgid="5645728765605699821">"Ցույց տալ սարքաշարի ծածկույթի թարմացումները"</string>
     <string name="show_hw_layers_updates_summary" msgid="5296917233236661465">"Թող սարքաշարի ծածկույթները կանաչ գույնով առկայծեն, երբ  թարմացվեն"</string>
     <string name="debug_hw_overdraw" msgid="2968692419951565417">"Վրիպազերծել GPU գերազանցումները"</string>
-    <string name="disable_overlays" msgid="2074488440505934665">"Կասեցնել HW վերադրումները"</string>
+    <string name="disable_overlays" msgid="2074488440505934665">"Կասեցնել HW վրադրումները"</string>
     <string name="disable_overlays_summary" msgid="3578941133710758592">"Միշտ օգտագործել GPU-ն` էկրանի կազմման համար"</string>
     <string name="simulate_color_space" msgid="6745847141353345872">"Նմանակել գունատարածքը"</string>
     <string name="enable_opengl_traces_title" msgid="6790444011053219871">"Ակտիվացնել OpenGL հետքերը"</string>
-    <string name="usb_audio_disable_routing" msgid="8114498436003102671">"Անջատել USB աուդիո երթուղայնացումը"</string>
-    <string name="usb_audio_disable_routing_summary" msgid="980282760277312264">"Անջատել ավտոմատ երթուղայնացումը դեպի USB աուդիո սարքեր"</string>
+    <string name="usb_audio_disable_routing" msgid="8114498436003102671">"Անջատել USB աուդիո երթուղումը"</string>
+    <string name="usb_audio_disable_routing_summary" msgid="980282760277312264">"Անջատել ավտոմատ երթուղումը դեպի USB աուդիո սարքեր"</string>
     <string name="debug_layout" msgid="5981361776594526155">"Ցույց տալ տարրերի չափսերը"</string>
     <string name="debug_layout_summary" msgid="2001775315258637682">"Ցույց տալ կտրվածքի սահմանները, լուսանցքները և այլն"</string>
     <string name="force_rtl_layout_all_locales" msgid="2259906643093138978">"Փոխել RTL-ի դասավորության ուղղությունը"</string>
@@ -303,8 +303,8 @@
     <string name="force_hw_ui" msgid="6426383462520888732">"Ստիպել GPU-ին մատուցել"</string>
     <string name="force_hw_ui_summary" msgid="5535991166074861515">"Ստիպողաբար GPU-ի օգտագործում 2-րդ պատկերի համար"</string>
     <string name="force_msaa" msgid="7920323238677284387">"Ստիպել  4x MSAA"</string>
-    <string name="force_msaa_summary" msgid="9123553203895817537">"Միացնել 4x MSAA-ը  OpenGL ES 2.0 ծրագրերում"</string>
-    <string name="show_non_rect_clip" msgid="505954950474595172">"Կարգաբերել ոչ-ուղղանկյուն կտրվածքի գործողությունները"</string>
+    <string name="force_msaa_summary" msgid="9123553203895817537">"Միացնել 4x MSAA-ը  OpenGL ES 2.0 հավելվածներում"</string>
+    <string name="show_non_rect_clip" msgid="505954950474595172">"Վրիպազերծել ոչ ուղղանկյուն կտրումների գործողությունները"</string>
     <string name="track_frame_time" msgid="6146354853663863443">"GPU տվյալներ"</string>
     <string name="enable_gpu_debug_layers" msgid="3848838293793255097">"Միացնել GPU վրիպազերծման շերտերը"</string>
     <string name="enable_gpu_debug_layers_summary" msgid="8009136940671194940">"Թույլատրել GPU վրիպազերծման շերտերի բեռնումը վրիպազերծման հավելվածների համար"</string>
@@ -313,16 +313,16 @@
     <string name="animator_duration_scale_title" msgid="3406722410819934083">"Շարժանկարի տևողության սանդղակ"</string>
     <string name="overlay_display_devices_title" msgid="5364176287998398539">"Կրկնաստեղծել երկրորդական էկրան"</string>
     <string name="debug_applications_category" msgid="4206913653849771549">"Հավելվածներ"</string>
-    <string name="immediately_destroy_activities" msgid="1579659389568133959">"Պետք չէ պահել գործողությունները"</string>
-    <string name="immediately_destroy_activities_summary" msgid="3592221124808773368">"Ոչնչացնել ցանացած գործունեություն օգտատիրոջ հեռացումից հետո"</string>
-    <string name="app_process_limit_title" msgid="4280600650253107163">"Հետնաշերտի գործընթացի սահմանաչափ"</string>
+    <string name="immediately_destroy_activities" msgid="1579659389568133959">"Չպահել գործողությունները"</string>
+    <string name="immediately_destroy_activities_summary" msgid="3592221124808773368">"Օգտատիրոջ դուրս գալուց հետո հեռացնել բոլոր գործողությունները"</string>
+    <string name="app_process_limit_title" msgid="4280600650253107163">"Ֆոնային գործընթացների սահմանափակում"</string>
     <string name="show_all_anrs" msgid="4924885492787069007">"ANR-ները ֆոնային ռեժիմում"</string>
     <string name="show_all_anrs_summary" msgid="6636514318275139826">"Ցուցադրել «Հավելվածը չի արձագանքում» պատուհանը ֆոնային հավելվածների համար"</string>
     <string name="show_notification_channel_warnings" msgid="1399948193466922683">"Ցուցադրել ծանուցումների ալիքի զգուշացումները"</string>
     <string name="show_notification_channel_warnings_summary" msgid="5536803251863694895">"Էկրանին ցուցադրվում է զգուշացում, երբ որևէ հավելված փակցնում է ծանուցում առանց վավեր ալիքի"</string>
-    <string name="force_allow_on_external" msgid="3215759785081916381">"Միշտ թույլատրել ծրագրեր արտաքին պահեստում"</string>
+    <string name="force_allow_on_external" msgid="3215759785081916381">"Թույլատրել պահումն արտաքին կրիչներում"</string>
     <string name="force_allow_on_external_summary" msgid="3640752408258034689">"Թույլ է տալիս ցանկացած հավելված պահել արտաքին սարքում՝ մանիֆեստի արժեքներից անկախ"</string>
-    <string name="force_resizable_activities" msgid="8615764378147824985">"Ստիպել, որ ակտիվությունների չափերը լինեն փոփոխելի"</string>
+    <string name="force_resizable_activities" msgid="8615764378147824985">"Չափերի փոփոխում բազմապատուհան ռեժիմում"</string>
     <string name="force_resizable_activities_summary" msgid="6667493494706124459">"Բոլոր ակտիվությունների չափերը բազմապատուհան ռեժիմի համար դարձնել փոփոխելի՝ մանիֆեստի արժեքներից անկախ:"</string>
     <string name="enable_freeform_support" msgid="1461893351278940416">"Ակտիվացնել կամայական ձևի պատուհանները"</string>
     <string name="enable_freeform_support_summary" msgid="8247310463288834487">"Միացնել ազատ ձևի փորձնական պատուհանների աջակցումը:"</string>

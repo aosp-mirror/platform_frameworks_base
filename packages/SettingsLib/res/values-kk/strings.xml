@@ -129,7 +129,7 @@
     <string name="process_kernel_label" msgid="3916858646836739323">"Android операциялық жүйесі"</string>
     <string name="data_usage_uninstalled_apps" msgid="614263770923231598">"Алынған қолданбалар"</string>
     <string name="data_usage_uninstalled_apps_users" msgid="7986294489899813194">"Алынған қолданбалар және пайдаланушылар"</string>
-    <string name="tether_settings_title_usb" msgid="6688416425801386511">"USB модем режимі"</string>
+    <string name="tether_settings_title_usb" msgid="6688416425801386511">"USB тетеринг"</string>
     <string name="tether_settings_title_wifi" msgid="3277144155960302049">"Алынбалы хот-спот"</string>
     <string name="tether_settings_title_bluetooth" msgid="355855408317564420">"Bluetooth модем"</string>
     <string name="tether_settings_title_usb_bluetooth" msgid="5355828977109785001">"Тетеринг"</string>
@@ -140,8 +140,8 @@
     <string name="running_process_item_user_label" msgid="3129887865552025943">"Пайдаланушы: <xliff:g id="USER_NAME">%1$s</xliff:g>"</string>
     <string name="launch_defaults_some" msgid="313159469856372621">"Кейбір әдепкі параметрлер орнатылған"</string>
     <string name="launch_defaults_none" msgid="4241129108140034876">"Әдепкі параметрлер орнатылмаған"</string>
-    <string name="tts_settings" msgid="8186971894801348327">"Мәтіннен-сөйлеуге параметрлері"</string>
-    <string name="tts_settings_title" msgid="1237820681016639683">"Мәтінді тілге айналдыру"</string>
+    <string name="tts_settings" msgid="8186971894801348327">"Мәтінді дыбыстау параметрлері"</string>
+    <string name="tts_settings_title" msgid="1237820681016639683">"Мәтінді дыбыстау"</string>
     <string name="tts_default_rate_title" msgid="6030550998379310088">"Сөйлеу жылдамдығы"</string>
     <string name="tts_default_rate_summary" msgid="4061815292287182801">"Мәтіннің оқылу жылдамдығы"</string>
     <string name="tts_default_pitch_title" msgid="6135942113172488671">"Дауыс жиілігі"</string>
@@ -164,7 +164,7 @@
     <string name="tts_status_checking" msgid="5339150797940483592">"Тексерілуде…"</string>
     <string name="tts_engine_settings_title" msgid="3499112142425680334">"<xliff:g id="TTS_ENGINE_NAME">%s</xliff:g> параметрлері"</string>
     <string name="tts_engine_settings_button" msgid="1030512042040722285">"Қозғалтқыш параметрлерін қосу"</string>
-    <string name="tts_engine_preference_section_title" msgid="448294500990971413">"Қалаулы қозғалтқыш"</string>
+    <string name="tts_engine_preference_section_title" msgid="448294500990971413">"Таңдалған жүйе"</string>
     <string name="tts_general_section_title" msgid="4402572014604490502">"Жалпы"</string>
     <string name="tts_reset_speech_pitch_title" msgid="5789394019544785915">"Дауыс тембрін бастапқы мәніне қайтару"</string>
     <string name="tts_reset_speech_pitch_summary" msgid="8700539616245004418">"Мәтінді айту тембрін әдепкі мәніне қайтару."</string>
@@ -257,12 +257,12 @@
     <string name="dev_settings_warning_title" msgid="7244607768088540165">"Жетілдіру параметрлеріне рұқсат берілсін бе?"</string>
     <string name="dev_settings_warning_message" msgid="2298337781139097964">"Бұл параметрлер жетілдіру мақсатында ғана қолданылады. Олар құрылғыңыз бен қолданбаларыңыздың бұзылуына немесе әдеттен тыс әрекеттерге себеп болуы мүмкін."</string>
     <string name="verify_apps_over_usb_title" msgid="4177086489869041953">"USB арқылы орнатылған қолданбаларды растау"</string>
-    <string name="verify_apps_over_usb_summary" msgid="9164096969924529200">"ADB/ADT арқылы орнатылған қолданбалардың залалды болмауын тексеру."</string>
+    <string name="verify_apps_over_usb_summary" msgid="9164096969924529200">"ADB/ADT арқылы орнатылған қолданбалардың қауіпсіздігін тексеру."</string>
     <string name="bluetooth_show_devices_without_names_summary" msgid="2351196058115755520">"Атаусыз Bluetooth құрылғылары (тек MAC мекенжайымен) көрсетіледі"</string>
     <string name="bluetooth_disable_absolute_volume_summary" msgid="6031284410786545957">"Қолайсыз қатты дыбыс деңгейі немесе басқарудың болмауы сияқты қашықтағы құрылғыларда дыбыс деңгейімен мәселелер жағдайында Bluetooth абсолютті дыбыс деңгейі функциясын өшіреді."</string>
     <string name="enable_terminal_title" msgid="95572094356054120">"Жергілікті терминал"</string>
     <string name="enable_terminal_summary" msgid="67667852659359206">"Жергілікті шелл-код қол жетімділігін ұсынатын терминалды қолданбаны қосу"</string>
-    <string name="hdcp_checking_title" msgid="8605478913544273282">"HDCP (жоғары кең жолақты сандық мазмұнды қорғау) тексеру"</string>
+    <string name="hdcp_checking_title" msgid="8605478913544273282">"HDCP тексеру"</string>
     <string name="hdcp_checking_dialog_title" msgid="5141305530923283">"HDCP (кең жолақты сандық мазмұн қорғау) тексеру мүмкіндігін орнату"</string>
     <string name="debug_debugging_category" msgid="6781250159513471316">"Жөндеу"</string>
     <string name="debug_app" msgid="8349591734751384446">"Жөндеу қолданбасын таңдау"</string>
@@ -286,9 +286,9 @@
     <string name="show_screen_updates" msgid="5470814345876056420">"Беткейлік жаңартуларды көрсету"</string>
     <string name="show_screen_updates_summary" msgid="2569622766672785529">"Жаңартылғанда бүкіл терезе беткейінің жыпылықтауы"</string>
     <string name="show_hw_screen_updates" msgid="5036904558145941590">"Графикалық процессор көрінісінің жаңартуларын көрсету"</string>
-    <string name="show_hw_screen_updates_summary" msgid="1115593565980196197">"Графикалық процессор сызғанда терезе ішіндегі көріністердің жыпылықтауы"</string>
-    <string name="show_hw_layers_updates" msgid="5645728765605699821">"Компьютерлік жабдықтама қабаттарының жаңартулары"</string>
-    <string name="show_hw_layers_updates_summary" msgid="5296917233236661465">"Жаңартылғанда компьютерлік жабдықтама қабаттарының жасыл шамы жануы"</string>
+    <string name="show_hw_screen_updates_summary" msgid="1115593565980196197">"Графикалық процессор сызғанда, терезе ішіндегі көріністердің жыпылықтауы"</string>
+    <string name="show_hw_layers_updates" msgid="5645728765605699821">"Аппараттық қабат жаңартуларын көрсету"</string>
+    <string name="show_hw_layers_updates_summary" msgid="5296917233236661465">"Жаңартылғанда, аппараттық қабаттарды жасылмен жыпылықтату"</string>
     <string name="debug_hw_overdraw" msgid="2968692419951565417">"Үстінен бастырылғанды жөндеу"</string>
     <string name="disable_overlays" msgid="2074488440505934665">"Жабдықпен үстінен бастыруды өшіру"</string>
     <string name="disable_overlays_summary" msgid="3578941133710758592">"Экранды жасақтау үшін әрқашан графикалық процессор қолдану қажет"</string>
@@ -310,8 +310,8 @@
     <string name="enable_gpu_debug_layers_summary" msgid="8009136940671194940">"GPU түзету қабаттарының жүктелуіне рұқсат ету"</string>
     <string name="window_animation_scale_title" msgid="6162587588166114700">"Терезе анимациясының өлшемі"</string>
     <string name="transition_animation_scale_title" msgid="387527540523595875">"Ауысу анимациясының өлшемі"</string>
-    <string name="animator_duration_scale_title" msgid="3406722410819934083">"Аниматор ұзақтығының межесі"</string>
-    <string name="overlay_display_devices_title" msgid="5364176287998398539">"Қосымша дисплейлерге еліктеу"</string>
+    <string name="animator_duration_scale_title" msgid="3406722410819934083">"Аниматор ұзақтығы"</string>
+    <string name="overlay_display_devices_title" msgid="5364176287998398539">"Қосымша дисплей симуляциясы"</string>
     <string name="debug_applications_category" msgid="4206913653849771549">"Қолданбалар"</string>
     <string name="immediately_destroy_activities" msgid="1579659389568133959">"Әрекеттерді сақтамау"</string>
     <string name="immediately_destroy_activities_summary" msgid="3592221124808773368">"Әр әрекетті пайдаланушы аяқтай салысымен жою"</string>
@@ -320,14 +320,14 @@
     <string name="show_all_anrs_summary" msgid="6636514318275139826">"Фондық қолданбалар үшін \"Қолданба жауап бермейді\" терезесін шығару"</string>
     <string name="show_notification_channel_warnings" msgid="1399948193466922683">"Хабарландыру арнасының ескертулерін көрсету"</string>
     <string name="show_notification_channel_warnings_summary" msgid="5536803251863694895">"Қолданба жарамсыз арна арқылы хабарландыру жариялағанда, экрандық ескертуді көрсетеді"</string>
-    <string name="force_allow_on_external" msgid="3215759785081916381">"Сыртқыда қолданбаларға мәжбүрлеп рұқсат ету"</string>
+    <string name="force_allow_on_external" msgid="3215759785081916381">"Сыртқы жадта қолданбаларға рұқсат ету"</string>
     <string name="force_allow_on_external_summary" msgid="3640752408258034689">"Манифест мәндеріне қарамастан кез келген қолданбаны сыртқы жадқа жазуға жарамды етеді"</string>
-    <string name="force_resizable_activities" msgid="8615764378147824985">"Әрекеттерді өлшемін өзгертуге болатын етуге мәжбүрлеу"</string>
+    <string name="force_resizable_activities" msgid="8615764378147824985">"Әрекеттердің өлшемін өзгертуге рұқсат ету"</string>
     <string name="force_resizable_activities_summary" msgid="6667493494706124459">"Манифест мәндеріне қарамастан бірнеше терезе режимінде барлық әрекеттердің өлшемін өзгертуге рұқсат беру."</string>
     <string name="enable_freeform_support" msgid="1461893351278940416">"Еркін пішіндегі терезелерді қосу"</string>
     <string name="enable_freeform_support_summary" msgid="8247310463288834487">"Еркін пішінді терезелерді құру эксперименттік функиясын қосу."</string>
-    <string name="local_backup_password_title" msgid="3860471654439418822">"Компьютер үстелінің сақтық көшірмесі"</string>
-    <string name="local_backup_password_summary_none" msgid="6951095485537767956">"Жұмыс үстелінің сақтық көшірмелері қазір қорғалмаған"</string>
+    <string name="local_backup_password_title" msgid="3860471654439418822">"Компьютердегі сақтық көшірме құпия сөзі"</string>
+    <string name="local_backup_password_summary_none" msgid="6951095485537767956">"Компьютердегі толық сақтық көшірмелер қазір қорғалмаған"</string>
     <string name="local_backup_password_summary_change" msgid="5376206246809190364">"Үстелдік компьютердің толық сақтық көшірмелерінің кілтсөзін өзгерту немесе жою үшін түртіңіз"</string>
     <string name="local_backup_password_toast_success" msgid="582016086228434290">"Жаңа сақтық кілтсөзі тағайындалды"</string>
     <string name="local_backup_password_toast_confirmation_mismatch" msgid="7805892532752708288">"Жаңа кілтсөз және растау сәйкес емес"</string>

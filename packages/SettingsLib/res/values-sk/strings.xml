@@ -197,20 +197,20 @@
     <string name="keep_screen_on" msgid="1146389631208760344">"Nevypínať obrazovku"</string>
     <string name="keep_screen_on_summary" msgid="2173114350754293009">"Obrazovka sa pri nabíjaní neprepne do režimu spánku"</string>
     <string name="bt_hci_snoop_log" msgid="3340699311158865670">"Povoliť denník Bluetooth HCI"</string>
-    <string name="bt_hci_snoop_log_summary" msgid="366083475849911315">"Zachytiť všetky pakety Bluetooth HCI do súboru (po zmene tohto nastavenia prepnúť Bluetooth)"</string>
+    <string name="bt_hci_snoop_log_summary" msgid="366083475849911315">"Zachytávať všetky pakety Bluetooth HCI do súboru (po zmene tohto nastavenia prepnúť Bluetooth)"</string>
     <string name="oem_unlock_enable" msgid="6040763321967327691">"Odblokovať OEM"</string>
     <string name="oem_unlock_enable_summary" msgid="4720281828891618376">"Povoliť odblokovanie ponuky bootloader"</string>
     <string name="confirm_enable_oem_unlock_title" msgid="4802157344812385674">"Povoliť odblokovanie OEM?"</string>
     <string name="confirm_enable_oem_unlock_text" msgid="5517144575601647022">"UPOZORNENIE: Dokiaľ bude toto nastavenie zapnuté, funkcie ochrany zariadenia nebudú na tomto zariadení fungovať."</string>
-    <string name="mock_location_app" msgid="7966220972812881854">"Vybrať aplikáciu so simulovanou polohou"</string>
-    <string name="mock_location_app_not_set" msgid="809543285495344223">"Nemáte žiadnu aplikáciu so simulovanou polohou"</string>
-    <string name="mock_location_app_set" msgid="8966420655295102685">"Aplikácia so simulovanou polohou: <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
+    <string name="mock_location_app" msgid="7966220972812881854">"Vybrať aplikáciu na simuláciu polohy"</string>
+    <string name="mock_location_app_not_set" msgid="809543285495344223">"Žiadna aplikácia na simuláciu polohy"</string>
+    <string name="mock_location_app_set" msgid="8966420655295102685">"Aplikácia na simuláciu polohy: <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="debug_networking_category" msgid="7044075693643009662">"Siete"</string>
     <string name="wifi_display_certification" msgid="8611569543791307533">"Certifikácia bezdrôtového zobrazenia"</string>
     <string name="wifi_verbose_logging" msgid="4203729756047242344">"Podrobné denníky Wi‑Fi"</string>
     <string name="wifi_connected_mac_randomization" msgid="3168165236877957767">"Randomizácia pripojených adries MAC"</string>
     <string name="mobile_data_always_on" msgid="8774857027458200434">"Mobilné dáta ponechať vždy aktívne"</string>
-    <string name="tethering_hardware_offload" msgid="7470077827090325814">"Hardvérovú akcelerácia pre tethering"</string>
+    <string name="tethering_hardware_offload" msgid="7470077827090325814">"Hardvérová akcelerácia tetheringu"</string>
     <string name="bluetooth_show_devices_without_names" msgid="4708446092962060176">"Zobrazovať zariadenia Bluetooth bez názvov"</string>
     <string name="bluetooth_disable_absolute_volume" msgid="2660673801947898809">"Zakázať absolútnu hlasitosť"</string>
     <string name="bluetooth_select_avrcp_version_string" msgid="3750059931120293633">"Verzia rozhrania Bluetooth AVRCP"</string>
@@ -250,7 +250,7 @@
     <string name="allow_mock_location_summary" msgid="317615105156345626">"Povoliť simulované polohy"</string>
     <string name="debug_view_attributes" msgid="6485448367803310384">"Kontrola atribútov zobrazenia"</string>
     <string name="mobile_data_always_on_summary" msgid="8149773901431697910">"Vždy ponechávať mobilné dáta aktívne, dokonca aj pri aktívnej sieti Wi‑Fi (na rýchle prepínanie sietí)"</string>
-    <string name="tethering_hardware_offload_summary" msgid="7726082075333346982">"Používať hardvérovú akceleráciu pre tethering (ak je k dispozícii)"</string>
+    <string name="tethering_hardware_offload_summary" msgid="7726082075333346982">"Ak je k dispozícii hardvérová akcelerácia tetheringu, používať ju"</string>
     <string name="adb_warning_title" msgid="6234463310896563253">"Povoliť ladenie cez USB?"</string>
     <string name="adb_warning_message" msgid="7316799925425402244">"Ladenie cez USB je určené iba na účely vývoja. Možno ho použiť na kopírovanie dát medzi počítačom a zariadením, inštaláciu aplikácií do zariadenia bez upozornenia a čítanie dát denníka."</string>
     <string name="adb_keys_warning_message" msgid="5659849457135841625">"Chcete všetkým v minulosti autorizovaným počítačom odvolať prístup k ladeniu cez USB?"</string>
@@ -283,30 +283,30 @@
     <string name="pointer_location_summary" msgid="840819275172753713">"Zobraziť prekryvnú vrstvu s aktuálnymi údajmi o klepnutiach"</string>
     <string name="show_touches" msgid="2642976305235070316">"Zobrazovať klepnutia"</string>
     <string name="show_touches_summary" msgid="6101183132903926324">"Vizuálne znázorňovať klepnutia"</string>
-    <string name="show_screen_updates" msgid="5470814345876056420">"Zobraziť obnovenia obsahu"</string>
+    <string name="show_screen_updates" msgid="5470814345876056420">"Ukazovať obnovenia obsahu"</string>
     <string name="show_screen_updates_summary" msgid="2569622766672785529">"Rozblikať obsah okna pri aktualizácii"</string>
-    <string name="show_hw_screen_updates" msgid="5036904558145941590">"Zobraziť obnovenia s GPU"</string>
-    <string name="show_hw_screen_updates_summary" msgid="1115593565980196197">"Rozblikať zobrazenia v oknách vykresľované GPU"</string>
-    <string name="show_hw_layers_updates" msgid="5645728765605699821">"Obnovenie hardvér. vrstiev"</string>
+    <string name="show_hw_screen_updates" msgid="5036904558145941590">"Ukazovať obnovenia grafickým procesorom"</string>
+    <string name="show_hw_screen_updates_summary" msgid="1115593565980196197">"Rozblikať zobrazenia v oknách vykresľované grafickým procesorom"</string>
+    <string name="show_hw_layers_updates" msgid="5645728765605699821">"Ukazovať obnovenia hardvérových vrstiev"</string>
     <string name="show_hw_layers_updates_summary" msgid="5296917233236661465">"Rozblikať zelene hardvérové vrstvy pri obnovení"</string>
-    <string name="debug_hw_overdraw" msgid="2968692419951565417">"Ladenie prekresľovania GPU"</string>
+    <string name="debug_hw_overdraw" msgid="2968692419951565417">"Ladiť prekresľovanie grafickým procesorom"</string>
     <string name="disable_overlays" msgid="2074488440505934665">"Zakázať hardvérové prekrytia"</string>
-    <string name="disable_overlays_summary" msgid="3578941133710758592">"Vždy používať GPU na skladanie obrazovky"</string>
+    <string name="disable_overlays_summary" msgid="3578941133710758592">"Vždy skladať obrazovku grafickým procesorom"</string>
     <string name="simulate_color_space" msgid="6745847141353345872">"Simulácia far. priestoru"</string>
     <string name="enable_opengl_traces_title" msgid="6790444011053219871">"Trasovanie OpenGL"</string>
     <string name="usb_audio_disable_routing" msgid="8114498436003102671">"Vyp. smer. zvuku do USB"</string>
     <string name="usb_audio_disable_routing_summary" msgid="980282760277312264">"Vypnúť automatické smerovanie do audio periférií USB"</string>
-    <string name="debug_layout" msgid="5981361776594526155">"Zobraziť ohraničenia"</string>
+    <string name="debug_layout" msgid="5981361776594526155">"Zobrazovať ohraničenia"</string>
     <string name="debug_layout_summary" msgid="2001775315258637682">"Zobraziť vo výstrižku ohraničenie, okraje a pod."</string>
     <string name="force_rtl_layout_all_locales" msgid="2259906643093138978">"Rozloženia sprava doľava"</string>
     <string name="force_rtl_layout_all_locales_summary" msgid="9192797796616132534">"Vynútiť pre všetky jazyky rozloženie obrazovky sprava doľava"</string>
-    <string name="force_hw_ui" msgid="6426383462520888732">"Vykresľovat pomocou GPU"</string>
-    <string name="force_hw_ui_summary" msgid="5535991166074861515">"Používať GPU na dvojrozmerné vykresľovanie"</string>
+    <string name="force_hw_ui" msgid="6426383462520888732">"Vykresľovať grafickým procesorom"</string>
+    <string name="force_hw_ui_summary" msgid="5535991166074861515">"Vynútiť použitie grafického procesora na dvojrozmerné vykresľovanie"</string>
     <string name="force_msaa" msgid="7920323238677284387">"Vynútiť 4x MSAA"</string>
     <string name="force_msaa_summary" msgid="9123553203895817537">"Povoliť 4x MSAA v aplikáciách OpenGL ES 2.0"</string>
     <string name="show_non_rect_clip" msgid="505954950474595172">"Ladenie operácií s neobdĺžnikovými výstrižkami"</string>
-    <string name="track_frame_time" msgid="6146354853663863443">"Profil vykresľovania GPU"</string>
-    <string name="enable_gpu_debug_layers" msgid="3848838293793255097">"Povoliť vrstvy ladenia GPU"</string>
+    <string name="track_frame_time" msgid="6146354853663863443">"Profil vykresľovania grafickým procesorom"</string>
+    <string name="enable_gpu_debug_layers" msgid="3848838293793255097">"Povoliť vrstvy ladenia grafického procesora"</string>
     <string name="enable_gpu_debug_layers_summary" msgid="8009136940671194940">"Povoliť načítanie vrstiev ladenia grafického procesora na ladenie aplikácií"</string>
     <string name="window_animation_scale_title" msgid="6162587588166114700">"Mierka animácie okna"</string>
     <string name="transition_animation_scale_title" msgid="387527540523595875">"Mierka animácie premeny"</string>
@@ -347,7 +347,7 @@
     <string name="inactive_app_active_summary" msgid="4174921824958516106">"Aktívne. Prepnite klepnutím."</string>
     <string name="standby_bucket_summary" msgid="6567835350910684727">"Stav pohotovostného režimu aplikácie: <xliff:g id="BUCKET"> %s</xliff:g>"</string>
     <string name="runningservices_settings_title" msgid="8097287939865165213">"Spustené služby"</string>
-    <string name="runningservices_settings_summary" msgid="854608995821032748">"Zobrazenie a ovládanie aktuálne spustených služieb"</string>
+    <string name="runningservices_settings_summary" msgid="854608995821032748">"Zobrazovať a riadiť aktuálne spustené služby"</string>
     <string name="select_webview_provider_title" msgid="4628592979751918907">"Implementácia WebView"</string>
     <string name="select_webview_provider_dialog_title" msgid="4370551378720004872">"Nastaviť implementáciu WebView"</string>
     <string name="select_webview_provider_toast_text" msgid="5466970498308266359">"Táto voľba už nie je platná. Skúste to znova."</string>

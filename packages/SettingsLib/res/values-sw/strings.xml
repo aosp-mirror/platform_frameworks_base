@@ -309,13 +309,13 @@
     <string name="enable_gpu_debug_layers" msgid="3848838293793255097">"Ruhusu safu za utatuzi wa GPU"</string>
     <string name="enable_gpu_debug_layers_summary" msgid="8009136940671194940">"Ruhusu upakiaji wa safu za utatuzi wa GPU za programu za utatuzi"</string>
     <string name="window_animation_scale_title" msgid="6162587588166114700">"Uhuishaji kwenye dirisha"</string>
-    <string name="transition_animation_scale_title" msgid="387527540523595875">"Mageuzi ya kipimo cha huiani"</string>
+    <string name="transition_animation_scale_title" msgid="387527540523595875">"Mageuzi ya kipimo cha uhuishaji"</string>
     <string name="animator_duration_scale_title" msgid="3406722410819934083">"Mizani ya muda wa uhuishaji"</string>
-    <string name="overlay_display_devices_title" msgid="5364176287998398539">"Iga maonyesho ya upili"</string>
+    <string name="overlay_display_devices_title" msgid="5364176287998398539">"Iga maonyesho ya mbadala"</string>
     <string name="debug_applications_category" msgid="4206913653849771549">"Programu"</string>
     <string name="immediately_destroy_activities" msgid="1579659389568133959">"Usihifadhi shughuli"</string>
     <string name="immediately_destroy_activities_summary" msgid="3592221124808773368">"Haribu kila shughuli pindi tu mtumiaji anapoondoka"</string>
-    <string name="app_process_limit_title" msgid="4280600650253107163">"Kiwango cha mchakato wa mandari nyuma"</string>
+    <string name="app_process_limit_title" msgid="4280600650253107163">"Kikomo cha mchakato wa mandhari nyuma"</string>
     <string name="show_all_anrs" msgid="4924885492787069007">"Onyesha historia ya ANR"</string>
     <string name="show_all_anrs_summary" msgid="6636514318275139826">"Onyesha kidirisha cha Programu Kutorejesha Majibu kwa programu zinazotumika chinichini"</string>
     <string name="show_notification_channel_warnings" msgid="1399948193466922683">"Onyesha arifa za maonyo ya kituo"</string>
@@ -347,7 +347,7 @@
     <string name="inactive_app_active_summary" msgid="4174921824958516106">"Inatumika. Gusa ili ugeuze."</string>
     <string name="standby_bucket_summary" msgid="6567835350910684727">"Hali ya kisitisha programu:<xliff:g id="BUCKET"> %s</xliff:g>"</string>
     <string name="runningservices_settings_title" msgid="8097287939865165213">"Huduma zinazoendeshwa"</string>
-    <string name="runningservices_settings_summary" msgid="854608995821032748">"Onyesha na dhibiti huduma zinazoendeshwa kwa sasa"</string>
+    <string name="runningservices_settings_summary" msgid="854608995821032748">"Onyesha na udhibiti huduma zinazoendeshwa kwa sasa"</string>
     <string name="select_webview_provider_title" msgid="4628592979751918907">"Utekelezaji wa WebView"</string>
     <string name="select_webview_provider_dialog_title" msgid="4370551378720004872">"Weka utekelezaji wa WebView"</string>
     <string name="select_webview_provider_toast_text" msgid="5466970498308266359">"Chaguo hili halipo tena. Jaribu tena."</string>
@@ -441,7 +441,7 @@
     <string name="okay" msgid="1997666393121016642">"Sawa"</string>
     <string name="zen_mode_enable_dialog_turn_on" msgid="8287824809739581837">"Washa"</string>
     <string name="zen_mode_settings_turn_on_dialog_title" msgid="2297134204747331078">"Washa kipengele cha Usinisumbue"</string>
-    <string name="zen_mode_settings_summary_off" msgid="6119891445378113334">"Kamwe"</string>
+    <string name="zen_mode_settings_summary_off" msgid="6119891445378113334">"Kamwe usiwashe"</string>
     <string name="zen_interruption_level_priority" msgid="2078370238113347720">"Kipaumbele tu"</string>
     <string name="zen_mode_and_condition" msgid="4927230238450354412">"<xliff:g id="ZEN_MODE">%1$s</xliff:g>. <xliff:g id="EXIT_CONDITION">%2$s</xliff:g>"</string>
     <string name="zen_alarm_warning_indef" msgid="3007988140196673193">"Hutasikia kengele inayofuata ya saa <xliff:g id="WHEN">%1$s</xliff:g> isipokuwa uzime mipangilio hii kabla ya wakati huo"</string>
