@@ -404,7 +404,10 @@ Landroid/appwidget/AppWidgetManager;->bindAppWidgetId(ILandroid/content/Componen
 Landroid/appwidget/AppWidgetManager;->bindAppWidgetId(ILandroid/content/ComponentName;)V
 Landroid/appwidget/AppWidgetManager;->mService:Lcom/android/internal/appwidget/IAppWidgetService;
 Landroid/appwidget/AppWidgetProviderInfo;->providerInfo:Landroid/content/pm/ActivityInfo;
+Landroid/bluetooth/BluetoothA2dp;->ACTION_ACTIVE_DEVICE_CHANGED:Ljava/lang/String;
 Landroid/bluetooth/BluetoothA2dp;->connect(Landroid/bluetooth/BluetoothDevice;)Z
+Landroid/bluetooth/BluetoothA2dp;->getActiveDevice()Landroid/bluetooth/BluetoothDevice;
+Landroid/bluetooth/BluetoothA2dp;->setActiveDevice(Landroid/bluetooth/BluetoothDevice;)Z
 Landroid/bluetooth/BluetoothAdapter;->disable(Z)Z
 Landroid/bluetooth/BluetoothAdapter;->factoryReset()Z
 Landroid/bluetooth/BluetoothAdapter;->getDiscoverableTimeout()I
