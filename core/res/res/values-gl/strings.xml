@@ -1024,7 +1024,7 @@
     <string name="view_calendar" msgid="979609872939597838">"Ver"</string>
     <string name="view_calendar_desc" msgid="5828320291870344584">"Consulta a hora seleccionada no calendario"</string>
     <string name="add_calendar_event" msgid="1953664627192056206">"Programar"</string>
-    <string name="add_calendar_event_desc" msgid="4326891793260687388">"Programa un evento para unha data seleccionada"</string>
+    <string name="add_calendar_event_desc" msgid="4326891793260687388">"Programa un evento para a data seleccionada"</string>
     <string name="view_flight" msgid="7691640491425680214">"Realizar seguimento"</string>
     <string name="view_flight_desc" msgid="3876322502674253506">"Fai un seguimento do voo seleccionado"</string>
     <string name="low_internal_storage_view_title" msgid="5576272496365684834">"Estase esgotando o espazo de almacenamento"</string>
@@ -1879,4 +1879,6 @@
     <string name="zen_upgrade_notification_content" msgid="1794994264692424562">"Toca para comprobar o contido bloqueado."</string>
     <string name="notification_app_name_system" msgid="4205032194610042794">"Sistema"</string>
     <string name="notification_app_name_settings" msgid="7751445616365753381">"Configuración"</string>
+    <!-- no translation found for car_loading_profile (3545132581795684027) -->
+    <skip />
 </resources>

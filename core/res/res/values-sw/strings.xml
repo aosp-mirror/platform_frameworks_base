@@ -1876,4 +1876,6 @@
     <string name="zen_upgrade_notification_content" msgid="1794994264692424562">"Gusa ili uangalie kipengee ambacho kimezuiwa."</string>
     <string name="notification_app_name_system" msgid="4205032194610042794">"Mfumo"</string>
     <string name="notification_app_name_settings" msgid="7751445616365753381">"Mipangilio"</string>
+    <!-- no translation found for car_loading_profile (3545132581795684027) -->
+    <skip />
 </resources>

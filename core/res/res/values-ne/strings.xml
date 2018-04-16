@@ -1696,8 +1696,7 @@
     <string name="package_installed_device_owner" msgid="6875717669960212648">"तपाईंका प्रशासकले स्थापना गर्नुभएको"</string>
     <string name="package_updated_device_owner" msgid="1847154566357862089">"तपाईंका प्रशासकले अद्यावधिक गर्नुभएको"</string>
     <string name="package_deleted_device_owner" msgid="2307122077550236438">"तपाईंका प्रशासकले मेट्नुभएको"</string>
-    <!-- no translation found for battery_saver_description (769989536172631582) -->
-    <skip />
+    <string name="battery_saver_description" msgid="769989536172631582">"तपाईंको ब्याट्रीको आयु बढाउनाका लागि ब्याट्री सेभरले यन्त्रका केही सुविधाहरू निष्क्रिय पार्छ र अनुप्रयोगहरूलाई प्रतिबन्धित गर्छ।"</string>
     <string name="data_saver_description" msgid="6015391409098303235">"डेटाको प्रयोगलाई कम गर्नमा मद्दतका लागि डेटा सर्भरले केही अनुप्रयोगहरूलाई पृष्ठभूमिमा डेटा पठाउन वा प्राप्त गर्नबाट रोक्दछ। तपाईँले हाल प्रयोग गरिरहनुभएको अनु्प्रयोगले डेटामाथि पहुँच राख्न सक्छ, तर त्यसले यो काम थोरै पटक गर्न सक्छ। उदाहरणका लागि यसको मतलब यो हुन सक्छ: तपाईँले छविहरूलाई ट्याप नगरेसम्म ती प्रदर्शन हुँदैनन्।"</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"डेटा सेभरलाई सक्रिय गर्ने हो?"</string>
     <string name="data_saver_enable_button" msgid="7147735965247211818">"सक्रिय गर्नुहोस्"</string>
@@ -1879,12 +1878,12 @@
     <string name="volume_dialog_ringer_guidance_silent" msgid="2128975224280276122">"कल तथा सूचनाहरूलाई म्युट गरिने छ"</string>
     <string name="notification_channel_system_changes" msgid="5072715579030948646">"प्रणालीसम्बन्धी परिवर्तनहरू"</string>
     <string name="notification_channel_do_not_disturb" msgid="6766940333105743037">"बाधा नपुऱ्याउनुहोस्"</string>
-    <!-- no translation found for zen_upgrade_notification_visd_title (3288313883409759733) -->
-    <skip />
-    <!-- no translation found for zen_upgrade_notification_visd_content (5533674060311631165) -->
-    <skip />
+    <string name="zen_upgrade_notification_visd_title" msgid="3288313883409759733">"नयाँ: बाधा नपुर्‍याउनुहोस् नामक मोडले सूचनाहरू लुकाइरहेको छ"</string>
+    <string name="zen_upgrade_notification_visd_content" msgid="5533674060311631165">"थप जान्न र परिवर्तन गर्न ट्याप गर्नुहोस्।"</string>
     <string name="zen_upgrade_notification_title" msgid="3799603322910377294">"बाधा नपुर्‍याउनुहोस् मोड परिवर्तन भएको छ"</string>
     <string name="zen_upgrade_notification_content" msgid="1794994264692424562">"रोक लगाइएका कुराहरू जाँच गर्न ट्याप गर्नुहोस्‌।"</string>
     <string name="notification_app_name_system" msgid="4205032194610042794">"प्रणाली"</string>
     <string name="notification_app_name_settings" msgid="7751445616365753381">"सेटिङहरू"</string>
+    <!-- no translation found for car_loading_profile (3545132581795684027) -->
+    <skip />
 </resources>

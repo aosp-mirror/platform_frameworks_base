@@ -1691,8 +1691,7 @@
     <string name="package_installed_device_owner" msgid="6875717669960212648">"আপনার প্রশাসক ইনস্টল করেছেন"</string>
     <string name="package_updated_device_owner" msgid="1847154566357862089">"আপনার প্রশাসক আপডেট করেছেন"</string>
     <string name="package_deleted_device_owner" msgid="2307122077550236438">"আপনার প্রশাসক মুছে দিয়েছেন"</string>
-    <!-- no translation found for battery_saver_description (769989536172631582) -->
-    <skip />
+    <string name="battery_saver_description" msgid="769989536172631582">"আপনার ডিভাইসের চার্জ যাতে তাড়াতাড়ি শেষ না হয়ে যায় তার জন্য ব্যাটারি সেভার ডিভাইসের কিছু বৈশিষ্ট্যকে বন্ধ করে দেয় এবং অ্যাপের কাজকর্মকে সীমাবদ্ধ করে।"</string>
     <string name="data_saver_description" msgid="6015391409098303235">"ডেটার ব্যবহার কমাতে সহায়তা করার জন্য, ডেটা সেভার পটভূমিতে কিছু অ্যাপ্লিকেশনকে ডেটা পাঠাতে বা গ্রহণ করতে বাধা দেয়৷ আপনি বর্তমানে এমন একটি অ্যাপ্লিকেশন ব্যবহার করছেন যেটি ডেটা অ্যাক্সেস করতে পারে, তবে সেটি কমই করে৷ এর ফলে যা হতে পারে, উদাহরণস্বরূপ, আপনি ছবিগুলিতে আলতো চাপ না দেওয়া পর্যন্ত সেগুলি প্রদর্শিত হবে না৷"</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"ডেটা সেভার চালু করবেন?"</string>
     <string name="data_saver_enable_button" msgid="7147735965247211818">"চালু করুন"</string>
@@ -1874,12 +1873,12 @@
     <string name="volume_dialog_ringer_guidance_silent" msgid="2128975224280276122">"কল এবং বিজ্ঞপ্তিগুলি মিউট করা হবে"</string>
     <string name="notification_channel_system_changes" msgid="5072715579030948646">"সিস্টেমে হয়ে থাকা পরিবর্তন"</string>
     <string name="notification_channel_do_not_disturb" msgid="6766940333105743037">"বিরক্ত করবেন না"</string>
-    <!-- no translation found for zen_upgrade_notification_visd_title (3288313883409759733) -->
-    <skip />
-    <!-- no translation found for zen_upgrade_notification_visd_content (5533674060311631165) -->
-    <skip />
+    <string name="zen_upgrade_notification_visd_title" msgid="3288313883409759733">"নতুন: \'বিরক্ত করবেন না\' মোড চালু আছে, তাই বিজ্ঞপ্তি লুকিয়ে ফেলা হচ্ছে"</string>
+    <string name="zen_upgrade_notification_visd_content" msgid="5533674060311631165">"আরও জানতে এবং পরিবর্তন করতে ট্যাপ করুন।"</string>
     <string name="zen_upgrade_notification_title" msgid="3799603322910377294">"\'বিরক্ত করবেন না\' মোডের সেটিং বদলে গেছে"</string>
     <string name="zen_upgrade_notification_content" msgid="1794994264692424562">"কী কী ব্লক করা আছে তা দেখতে ট্যাপ করুন।"</string>
     <string name="notification_app_name_system" msgid="4205032194610042794">"সিস্টেম"</string>
     <string name="notification_app_name_settings" msgid="7751445616365753381">"সেটিংস"</string>
+    <!-- no translation found for car_loading_profile (3545132581795684027) -->
+    <skip />
 </resources>
