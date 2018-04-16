@@ -89,24 +89,7 @@ public class RecoverySession implements AutoCloseable {
             @NonNull byte[] vaultChallenge,
             @NonNull List<KeyChainProtectionParams> secrets)
             throws CertificateException, InternalRecoveryServiceException {
-        try {
-            byte[] recoveryClaim =
-                    mRecoveryController.getBinder().startRecoverySession(
-                            mSessionId,
-                            verifierPublicKey,
-                            vaultParams,
-                            vaultChallenge,
-                            secrets);
-            return recoveryClaim;
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        } catch (ServiceSpecificException e) {
-            if (e.errorCode == RecoveryController.ERROR_BAD_CERTIFICATE_FORMAT
-                    || e.errorCode == RecoveryController.ERROR_INVALID_CERTIFICATE) {
-                throw new CertificateException("Invalid certificate for recovery session", e);
-            }
-            throw mRecoveryController.wrapUnexpectedServiceSpecificException(e);
-        }
+        throw new UnsupportedOperationException();
     }
 
     /**
@@ -121,28 +104,7 @@ public class RecoverySession implements AutoCloseable {
             @NonNull byte[] vaultChallenge,
             @NonNull List<KeyChainProtectionParams> secrets)
             throws CertificateException, InternalRecoveryServiceException {
-        // Wrap the CertPath in a Parcelable so it can be passed via Binder calls.
-        RecoveryCertPath recoveryCertPath =
-                RecoveryCertPath.createRecoveryCertPath(verifierCertPath);
-        try {
-            byte[] recoveryClaim =
-                    mRecoveryController.getBinder().startRecoverySessionWithCertPath(
-                            mSessionId,
-                            /*rootCertificateAlias=*/ "",  // Use the default root cert
-                            recoveryCertPath,
-                            vaultParams,
-                            vaultChallenge,
-                            secrets);
-            return recoveryClaim;
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        } catch (ServiceSpecificException e) {
-            if (e.errorCode == RecoveryController.ERROR_BAD_CERTIFICATE_FORMAT
-                    || e.errorCode == RecoveryController.ERROR_INVALID_CERTIFICATE) {
-                throw new CertificateException("Invalid certificate for recovery session", e);
-            }
-            throw mRecoveryController.wrapUnexpectedServiceSpecificException(e);
-        }
+        throw new UnsupportedOperationException();
     }
 
     /**
@@ -210,20 +172,7 @@ public class RecoverySession implements AutoCloseable {
             @NonNull List<WrappedApplicationKey> applicationKeys)
             throws SessionExpiredException, DecryptionFailedException,
             InternalRecoveryServiceException {
-        try {
-            return (Map<String, byte[]>) mRecoveryController.getBinder().recoverKeys(
-                    mSessionId, recoveryKeyBlob, applicationKeys);
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        } catch (ServiceSpecificException e) {
-            if (e.errorCode == RecoveryController.ERROR_DECRYPTION_FAILED) {
-                throw new DecryptionFailedException(e.getMessage());
-            }
-            if (e.errorCode == RecoveryController.ERROR_SESSION_EXPIRED) {
-                throw new SessionExpiredException(e.getMessage());
-            }
-            throw mRecoveryController.wrapUnexpectedServiceSpecificException(e);
-        }
+        throw new UnsupportedOperationException();
     }
 
     /**

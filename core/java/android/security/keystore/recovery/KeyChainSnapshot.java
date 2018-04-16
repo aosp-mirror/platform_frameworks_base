@@ -71,7 +71,6 @@ public final class KeyChainSnapshot implements Parcelable {
     private int mMaxAttempts = DEFAULT_MAX_ATTEMPTS;
     private long mCounterId = DEFAULT_COUNTER_ID;
     private byte[] mServerParams;
-    private byte[] mPublicKey;  // The raw public key bytes used
     private RecoveryCertPath mCertPath;  // The cert path including necessary intermediate certs
     private List<KeyChainProtectionParams> mKeyChainProtectionParams;
     private List<WrappedApplicationKey> mEntryRecoveryData;
@@ -123,7 +122,7 @@ public final class KeyChainSnapshot implements Parcelable {
      */
     @Deprecated
     public @NonNull byte[] getTrustedHardwarePublicKey() {
-        return mPublicKey;
+        throw new UnsupportedOperationException();
     }
 
     /**
@@ -228,12 +227,11 @@ public final class KeyChainSnapshot implements Parcelable {
          *
          * @param publicKey The public key
          * @return This builder.
-         * @deprecated Use {@link #setTrustedHardwareCertPath} instead.
+         * @removed Use {@link #setTrustedHardwareCertPath} instead.
          */
         @Deprecated
         public Builder setTrustedHardwarePublicKey(byte[] publicKey) {
-            mInstance.mPublicKey = publicKey;
-            return this;
+            throw new UnsupportedOperationException();
         }
 
         /**
@@ -313,7 +311,6 @@ public final class KeyChainSnapshot implements Parcelable {
         out.writeInt(mMaxAttempts);
         out.writeLong(mCounterId);
         out.writeByteArray(mServerParams);
-        out.writeByteArray(mPublicKey);
         out.writeTypedObject(mCertPath, /* no flags */ 0);
     }
 
@@ -328,7 +325,6 @@ public final class KeyChainSnapshot implements Parcelable {
         mMaxAttempts = in.readInt();
         mCounterId = in.readLong();
         mServerParams = in.createByteArray();
-        mPublicKey = in.createByteArray();
         mCertPath = in.readTypedObject(RecoveryCertPath.CREATOR);
     }
 
