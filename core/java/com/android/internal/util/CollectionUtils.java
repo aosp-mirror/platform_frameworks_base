@@ -29,6 +29,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.stream.Stream;
 
 /**
@@ -82,6 +83,17 @@ public class CollectionUtils {
             }
         }
         return emptyIfNull(result);
+    }
+
+    /** Add all elements matching {@code predicate} in {@code source} to {@code dest}. */
+    public static <T> void addIf(@Nullable List<T> source, @NonNull Collection<? super T> dest,
+            @Nullable Predicate<? super T> predicate) {
+        for (int i = 0; i < size(source); i++) {
+            final T item = source.get(i);
+            if (predicate.test(item)) {
+                dest.add(item);
+            }
+        }
     }
 
     /**
