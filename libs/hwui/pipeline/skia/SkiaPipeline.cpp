@@ -53,6 +53,7 @@ TaskManager* SkiaPipeline::getTaskManager() {
 }
 
 void SkiaPipeline::onDestroyHardwareResources() {
+    unpinImages();
     mRenderThread.cacheManager().trimStaleResources();
 }
 

@@ -166,10 +166,7 @@ void CacheManager::trimStaleResources() {
         return;
     }
     mGrContext->flush();
-    // Here we purge all the unlocked scratch resources (leaving those resources w/ persistent data)
-    // and then purge those w/ persistent data based on age.
-    mGrContext->purgeUnlockedResources(true);
-    mGrContext->purgeResourcesNotUsedInMs(std::chrono::seconds(10));
+    mGrContext->purgeResourcesNotUsedInMs(std::chrono::seconds(30));
 }
 
 sp<skiapipeline::VectorDrawableAtlas> CacheManager::acquireVectorDrawableAtlas() {
