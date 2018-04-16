@@ -4884,7 +4884,7 @@ public class StatusBar extends SystemUI implements DemoMode,
 
         @Override
         public void setAodDimmingScrim(float scrimOpacity) {
-            ScrimState.AOD.setAodFrontScrimAlpha(scrimOpacity);
+            mScrimController.setAodFrontScrimAlpha(scrimOpacity);
         }
 
         public void dispatchDoubleTap(float viewX, float viewY) {
