@@ -877,8 +877,12 @@ static jobject nativeGetHdrCapabilities(JNIEnv* env, jclass clazz, jobject token
     SurfaceComposerClient::getHdrCapabilities(token, &capabilities);
 
     const auto& types = capabilities.getSupportedHdrTypes();
+    std::vector<int32_t> intTypes;
+    for (auto type : types) {
+        intTypes.push_back(static_cast<int32_t>(type));
+    }
     auto typesArray = env->NewIntArray(types.size());
-    env->SetIntArrayRegion(typesArray, 0, types.size(), types.data());
+    env->SetIntArrayRegion(typesArray, 0, intTypes.size(), intTypes.data());
 
     return env->NewObject(gHdrCapabilitiesClassInfo.clazz, gHdrCapabilitiesClassInfo.ctor,
             typesArray, capabilities.getDesiredMaxLuminance(),
