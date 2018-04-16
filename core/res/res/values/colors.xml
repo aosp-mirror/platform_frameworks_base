@@ -178,7 +178,7 @@
     <color name="profile_badge_3">#ff22f033</color><!-- Green -->
 
     <!-- Default instant app badge color -->
-    <color name="instant_app_badge">#FFFFFFFF</color><!-- White -->
+    <color name="instant_app_badge">#ff757575</color><!-- Grey -->
 
     <!-- Multi-sim sim colors -->
     <color name="Teal_700">#ff00796b</color>
