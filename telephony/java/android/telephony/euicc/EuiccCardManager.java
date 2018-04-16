@@ -623,7 +623,7 @@ public class EuiccCardManager {
     }
 
     /**
-     * Lists all notifications of the given {@code notificationEvents}.
+     * Lists all notifications of the given {@code events}.
      *
      * @param cardId The Id of the eUICC.
      * @param events bits of the event types ({@link EuiccNotification.Event}) to list.
