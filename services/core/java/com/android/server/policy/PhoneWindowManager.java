@@ -4809,6 +4809,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         // For layout, the status bar is always at the top with our fixed height.
         displayFrames.mStable.top = displayFrames.mUnrestricted.top
                 + mStatusBarHeightForRotation[displayFrames.mRotation];
+        // Make sure the status bar covers the entire cutout height
+        displayFrames.mStable.top = Math.max(displayFrames.mStable.top,
+                displayFrames.mDisplayCutoutSafe.top);
 
         // Tell the bar controller where the collapsed status bar content is
         mTmpRect.set(mStatusBar.getContentFrameLw());
