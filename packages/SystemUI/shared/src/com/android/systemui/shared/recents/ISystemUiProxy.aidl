@@ -41,7 +41,12 @@ interface ISystemUiProxy {
     void setInteractionState(int flags) = 4;
 
     /**
-    * Notifies SystemUI that split screen has been invoked.
-    */
+     * Notifies SystemUI that split screen has been invoked.
+     */
     void onSplitScreenInvoked() = 5;
+
+    /**
+     * Notifies SystemUI that Overview is shown.
+     */
+    void onOverviewShown(boolean fromHome) = 6;
 }

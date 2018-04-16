@@ -180,8 +180,6 @@ public class NavigationBarFragment extends Fragment implements Callbacks {
 
         @Override
         public void onQuickStepStarted() {
-            mNavigationBarView.onQuickStepStarted();
-
             // Use navbar dragging as a signal to hide the rotate button
             setRotateSuggestionButtonState(false);
         }
