@@ -145,4 +145,8 @@
     <color name="datepicker_default_view_animator_color_material_light">#fff2f2f2</color>
     <color name="datepicker_default_view_animator_color_material_dark">#ff303030</color>
 
+    <!-- Autofill colors -->
+    <color name="autofill_background_material_dark">@color/material_blue_grey_900</color>
+    <color name="autofill_background_material_light">@color/material_grey_50</color>
+
 </resources>

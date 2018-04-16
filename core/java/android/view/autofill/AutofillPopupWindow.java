@@ -19,6 +19,7 @@ package android.view.autofill;
 import static android.view.autofill.Helper.sVerbose;
 
 import android.annotation.NonNull;
+import android.graphics.Point;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.os.IBinder;
@@ -79,11 +80,6 @@ public class AutofillPopupWindow extends PopupWindow {
     public AutofillPopupWindow(@NonNull IAutofillWindowPresenter presenter) {
         mWindowPresenter = new WindowPresenter(presenter);
 
-        // We want to show the window as system controlled one so it covers app windows, but it has
-        // to be an application type (so it's contained inside the application area).
-        // Hence, we set it to the application type with the highest z-order, which currently
-        // is TYPE_APPLICATION_ABOVE_SUB_PANEL.
-        setWindowLayoutType(WindowManager.LayoutParams.TYPE_APPLICATION_ABOVE_SUB_PANEL);
         setTouchModal(false);
         setOutsideTouchable(true);
         setInputMethodMode(INPUT_METHOD_NOT_NEEDED);
@@ -110,7 +106,16 @@ public class AutofillPopupWindow extends PopupWindow {
      */
     public void update(View anchor, int offsetX, int offsetY, int width, int height,
             Rect virtualBounds) {
-        mFullScreen = width == LayoutParams.MATCH_PARENT && height == LayoutParams.MATCH_PARENT;
+        mFullScreen = width == LayoutParams.MATCH_PARENT;
+        // For no fullscreen autofill window, we want to show the window as system controlled one
+        // so it covers app windows, but it has to be an application type (so it's contained inside
+        // the application area). Hence, we set it to the application type with the highest z-order,
+        // which currently is TYPE_APPLICATION_ABOVE_SUB_PANEL.
+        // For fullscreen mode, autofill window is at the bottom of screen, it should not be
+        // clipped by app activity window. Fullscreen autofill window does not need to follow app
+        // anchor view position.
+        setWindowLayoutType(mFullScreen ? WindowManager.LayoutParams.TYPE_SYSTEM_DIALOG
+                : WindowManager.LayoutParams.TYPE_APPLICATION_ABOVE_SUB_PANEL);
         // If we are showing the popup for a virtual view we use a fake view which
         // delegates to the anchor but present itself with the same bounds as the
         // virtual view. This ensures that the location logic in popup works
@@ -119,6 +124,15 @@ public class AutofillPopupWindow extends PopupWindow {
         if (mFullScreen) {
             offsetX = 0;
             offsetY = 0;
+            // If it is not fullscreen height, put window at bottom. Computes absolute position.
+            // Note that we cannot easily change default gravity from Gravity.TOP to
+            // Gravity.BOTTOM because PopupWindow base class does not expose computeGravity().
+            final Point outPoint = new Point();
+            anchor.getContext().getDisplay().getSize(outPoint);
+            width = outPoint.x;
+            if (height != LayoutParams.MATCH_PARENT) {
+                offsetY = outPoint.y - height;
+            }
             actualAnchor = anchor;
         } else if (virtualBounds != null) {
             final int[] mLocationOnScreen = new int[] {virtualBounds.left, virtualBounds.top};
@@ -202,6 +216,16 @@ public class AutofillPopupWindow extends PopupWindow {
             actualAnchor = anchor;
         }
 
+        if (!mFullScreen) {
+            // No fullscreen window animation is controlled by PopupWindow.
+            setAnimationStyle(-1);
+        } else if (height == LayoutParams.MATCH_PARENT) {
+            // Complete fullscreen autofill window has no animation.
+            setAnimationStyle(0);
+        } else {
+            // Slide half screen height autofill window from bottom.
+            setAnimationStyle(com.android.internal.R.style.AutofillHalfScreenAnimation);
+        }
         if (!isShowing()) {
             setWidth(width);
             setHeight(height);
@@ -223,7 +247,12 @@ public class AutofillPopupWindow extends PopupWindow {
     protected boolean findDropDownPosition(View anchor, LayoutParams outParams,
             int xOffset, int yOffset, int width, int height, int gravity, boolean allowScroll) {
         if (mFullScreen) {
-            // Do not patch LayoutParams if force full screen
+            // In fullscreen mode, don't need consider the anchor view.
+            outParams.x = xOffset;
+            outParams.y = yOffset;
+            outParams.width = width;
+            outParams.height = height;
+            outParams.gravity = gravity;
             return false;
         }
         return super.findDropDownPosition(anchor, outParams, xOffset, yOffset,
@@ -312,11 +341,6 @@ public class AutofillPopupWindow extends PopupWindow {
 
     @Override
     public Transition getExitTransition() {
-        throw new IllegalStateException("You can't call this!");
-    }
-
-    @Override
-    public void setAnimationStyle(int animationStyle) {
         throw new IllegalStateException("You can't call this!");
     }
 

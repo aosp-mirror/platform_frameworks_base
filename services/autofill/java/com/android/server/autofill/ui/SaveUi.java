@@ -42,6 +42,7 @@ import android.text.Html;
 import android.util.ArraySet;
 import android.util.Pair;
 import android.util.Slog;
+import android.view.ContextThemeWrapper;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -69,6 +70,9 @@ import java.util.ArrayList;
 final class SaveUi {
 
     private static final String TAG = "AutofillSaveUi";
+
+    private static final int THEME_ID =
+            com.android.internal.R.style.Theme_DeviceDefault_Autofill_Save;
 
     public interface OnSaveListener {
         void onSave();
@@ -144,6 +148,7 @@ final class SaveUi {
         mServicePackageName = servicePackageName;
         mPackageName = packageName;
 
+        context = new ContextThemeWrapper(context, THEME_ID);
         final LayoutInflater inflater = LayoutInflater.from(context);
         final View view = inflater.inflate(R.layout.autofill_save, null);
 
@@ -222,7 +227,7 @@ final class SaveUi {
         final View yesButton = view.findViewById(R.id.autofill_save_yes);
         yesButton.setOnClickListener((v) -> mListener.onSave());
 
-        mDialog = new Dialog(context, R.style.Theme_DeviceDefault_Light_Panel);
+        mDialog = new Dialog(context, THEME_ID);
         mDialog.setContentView(view);
 
         // Dialog can be dismissed when touched outside, but the negative listener should not be
@@ -309,6 +314,7 @@ final class SaveUi {
 
         try {
             // Create the remote view peer.
+            template.setApplyTheme(THEME_ID);
             final View customSubtitleView = template.apply(context, null, handler);
 
             // And apply batch updates (if any).
