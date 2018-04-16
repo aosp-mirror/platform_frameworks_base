@@ -1334,7 +1334,6 @@ public final class ViewRootImpl implements ViewParent,
                 if (renderer != null) {
                     renderer.destroyHardwareResources(mView);
                 }
-                mSurface.release();
             }
 
             for (int i = 0; i < mWindowStoppedCallbacks.size(); i++) {
