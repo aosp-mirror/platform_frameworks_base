@@ -2413,11 +2413,16 @@ public class AccessibilityNodeInfo implements Parcelable {
 
     /**
      * Returns whether node represents a heading.
+     * <p><strong>Note:</strong> Returns {@code true} if either {@link #setHeading(boolean)}
+     * marks this node as a heading or if the node has a {@link CollectionItemInfo} that marks
+     * it as such, to accomodate apps that use the now-deprecated API.</p>
      *
      * @return {@code true} if the node is a heading, {@code false} otherwise.
      */
     public boolean isHeading() {
-        return getBooleanProperty(BOOLEAN_PROPERTY_IS_HEADING);
+        if (getBooleanProperty(BOOLEAN_PROPERTY_IS_HEADING)) return true;
+        CollectionItemInfo itemInfo = getCollectionItemInfo();
+        return ((itemInfo != null) && itemInfo.mHeading);
     }
 
     /**
