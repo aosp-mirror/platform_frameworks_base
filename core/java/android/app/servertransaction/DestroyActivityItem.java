@@ -37,7 +37,7 @@ public class DestroyActivityItem extends ActivityLifecycleItem {
             PendingTransactionActions pendingActions) {
         Trace.traceBegin(TRACE_TAG_ACTIVITY_MANAGER, "activityDestroy");
         client.handleDestroyActivity(token, mFinished, mConfigChanges,
-                false /* getNonConfigInstance */, getDescription());
+                false /* getNonConfigInstance */, "DestroyActivityItem");
         Trace.traceEnd(TRACE_TAG_ACTIVITY_MANAGER);
     }
 
@@ -77,14 +77,12 @@ public class DestroyActivityItem extends ActivityLifecycleItem {
     /** Write to Parcel. */
     @Override
     public void writeToParcel(Parcel dest, int flags) {
-        super.writeToParcel(dest, flags);
         dest.writeBoolean(mFinished);
         dest.writeInt(mConfigChanges);
     }
 
     /** Read from Parcel. */
     private DestroyActivityItem(Parcel in) {
-        super(in);
         mFinished = in.readBoolean();
         mConfigChanges = in.readInt();
     }
