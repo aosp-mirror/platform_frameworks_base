@@ -21,30 +21,37 @@ import static android.provider.Settings.Global.SHOW_TEMPERATURE_WARNING;
 
 import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertTrue;
+
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.content.Context;
+import android.content.Intent;
 import android.os.BatteryManager;
 import android.os.HardwarePropertiesManager;
+import android.os.PowerManager;
 import android.provider.Settings;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper.RunWithLooper;
 import android.testing.TestableResources;
 import android.test.suitebuilder.annotation.SmallTest;
 
+import com.android.settingslib.utils.ThreadUtils;
 import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.power.PowerUI.WarningsUI;
 import com.android.systemui.statusbar.phone.StatusBar;
 
 import java.time.Duration;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 
 @RunWith(AndroidTestingRunner.class)
 @RunWithLooper
@@ -63,15 +70,18 @@ public class PowerUITest extends SysuiTestCase {
     private WarningsUI mMockWarnings;
     private PowerUI mPowerUI;
     private EnhancedEstimates mEnhancedEstimates;
+    @Mock private PowerManager mPowerManager;
 
     @Before
     public void setup() {
+        MockitoAnnotations.initMocks(this);
         mMockWarnings = mDependency.injectMockDependency(WarningsUI.class);
         mEnhancedEstimates = mDependency.injectMockDependency(EnhancedEstimates.class);
         mHardProps = mock(HardwarePropertiesManager.class);
 
         mContext.putComponent(StatusBar.class, mock(StatusBar.class));
         mContext.addMockSystemService(Context.HARDWARE_PROPERTIES_SERVICE, mHardProps);
+        mContext.addMockSystemService(Context.POWER_SERVICE, mPowerManager);
 
         createPowerUi();
     }
@@ -405,6 +415,38 @@ public class PowerUITest extends SysuiTestCase {
                 mPowerUI.shouldDismissLowBatteryWarning(UNPLUGGED, BELOW_WARNING_BUCKET,
                         ABOVE_WARNING_BUCKET, ABOVE_HYBRID_THRESHOLD, POWER_SAVER_OFF);
         assertTrue(shouldDismiss);
+    }
+
+    @Test
+    public void testShouldDismissLowBatteryWarning_powerSaverModeEnabled()
+            throws InterruptedException {
+        when(mPowerManager.isPowerSaveMode()).thenReturn(true);
+
+        mPowerUI.start();
+        mPowerUI.mReceiver.onReceive(mContext,
+                new Intent(PowerManager.ACTION_POWER_SAVE_MODE_CHANGED));
+
+        CountDownLatch latch = new CountDownLatch(1);
+        ThreadUtils.postOnBackgroundThread(() -> latch.countDown());
+        latch.await(5, TimeUnit.SECONDS);
+
+        verify(mMockWarnings).dismissLowBatteryWarning();
+    }
+
+    @Test
+    public void testShouldNotDismissLowBatteryWarning_powerSaverModeDisabled()
+            throws InterruptedException {
+        when(mPowerManager.isPowerSaveMode()).thenReturn(false);
+
+        mPowerUI.start();
+        mPowerUI.mReceiver.onReceive(mContext,
+                new Intent(PowerManager.ACTION_POWER_SAVE_MODE_CHANGED));
+
+        CountDownLatch latch = new CountDownLatch(1);
+        ThreadUtils.postOnBackgroundThread(() -> latch.countDown());
+        latch.await(5, TimeUnit.SECONDS);
+
+        verify(mMockWarnings, never()).dismissLowBatteryWarning();
     }
 
     private void setCurrentTemp(float temp) {
