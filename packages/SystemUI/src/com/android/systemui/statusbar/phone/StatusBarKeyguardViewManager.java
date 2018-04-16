@@ -42,7 +42,9 @@ import com.android.systemui.SystemUIFactory;
 import com.android.systemui.keyguard.DismissCallbackRegistry;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.RemoteInputController;
+import com.android.systemui.statusbar.phone.KeyguardBouncer.BouncerExpansionCallback;
 
+import java.io.PrintWriter;
 import java.util.ArrayList;
 
 /**
@@ -71,6 +73,17 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
 
     protected final Context mContext;
     private final StatusBarWindowManager mStatusBarWindowManager;
+    private final BouncerExpansionCallback mExpansionCallback = new BouncerExpansionCallback() {
+        @Override
+        public void onFullyShown() {
+            updateStates();
+        }
+
+        @Override
+        public void onFullyHidden() {
+            updateStates();
+        }
+    };
 
     protected LockPatternUtils mLockPatternUtils;
     protected ViewMediatorCallback mViewMediatorCallback;
@@ -133,7 +146,8 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
         mContainer = container;
         mFingerprintUnlockController = fingerprintUnlockController;
         mBouncer = SystemUIFactory.getInstance().createKeyguardBouncer(mContext,
-                mViewMediatorCallback, mLockPatternUtils, container, dismissCallbackRegistry);
+                mViewMediatorCallback, mLockPatternUtils, container, dismissCallbackRegistry,
+                mExpansionCallback);
         mContainer.addOnLayoutChangeListener(this::onContainerLayout);
         mNotificationPanelView = notificationPanelView;
         notificationPanelView.setExpansionListener(this::onPanelExpansionChanged);
@@ -160,8 +174,6 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
             if (expansion != 1 && tracking && !mBouncer.isShowing()
                     && !mBouncer.isAnimatingAway()) {
                 mBouncer.show(false /* resetSecuritySelection */, false /* animated */);
-            } else if (expansion == 0 || expansion == 1) {
-                updateStates();
             }
         }
     }
@@ -588,11 +600,6 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
         if (bouncerShowing != mLastBouncerShowing || mFirstUpdate) {
             mStatusBarWindowManager.setBouncerShowing(bouncerShowing);
             mStatusBar.setBouncerShowing(bouncerShowing);
-            if (bouncerShowing) {
-                mBouncer.onFullyShown();
-            } else {
-                mBouncer.onFullyHidden();
-            }
         }
 
         KeyguardUpdateMonitor updateMonitor = KeyguardUpdateMonitor.getInstance(mContext);
@@ -707,6 +714,22 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
 
     public boolean willDismissWithAction() {
         return mBouncer.willDismissWithAction();
+    }
+
+    public void dump(PrintWriter pw) {
+        pw.println("StatusBarKeyguardViewManager:");
+        pw.println("  mShowing: " + mShowing);
+        pw.println("  mOccluded: " + mOccluded);
+        pw.println("  mRemoteInputActive: " + mRemoteInputActive);
+        pw.println("  mDozing: " + mDozing);
+        pw.println("  mGoingToSleepVisibleNotOccluded: " + mGoingToSleepVisibleNotOccluded);
+        pw.println("  mAfterKeyguardGoneAction: " + mAfterKeyguardGoneAction);
+        pw.println("  mAfterKeyguardGoneRunnables: " + mAfterKeyguardGoneRunnables);
+        pw.println("  mPendingWakeupAction: " + mPendingWakeupAction);
+
+        if (mBouncer != null) {
+            mBouncer.dump(pw);
+        }
     }
 
     private static class DismissWithActionRequest {
