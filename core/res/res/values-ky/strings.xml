@@ -1772,7 +1772,7 @@
     <string name="importance_from_person" msgid="9160133597262938296">"Булар сиз үчүн маанилүү адамдар."</string>
     <string name="user_creation_account_exists" msgid="1942606193570143289">"<xliff:g id="APP">%1$s</xliff:g> колдонмосу <xliff:g id="ACCOUNT">%2$s</xliff:g> аккаунту менен жаңы колдонуучу түзө берсинби?"</string>
     <string name="user_creation_adding" msgid="4482658054622099197">"<xliff:g id="APP">%1$s</xliff:g> колдонмосуна <xliff:g id="ACCOUNT">%2$s</xliff:g> аккаунту үчүн жаңы колдонуучу түзгөнгө уруксат бересизби (мындай аккаунту бар колдонуучу мурунтан эле бар)?"</string>
-    <string name="language_selection_title" msgid="2680677278159281088">"Тил кошуңуз"</string>
+    <string name="language_selection_title" msgid="2680677278159281088">"Тил кошуу"</string>
     <string name="country_selection_title" msgid="2954859441620215513">"Чөлкөмдүк жөндөөлөр"</string>
     <string name="search_language_hint" msgid="7042102592055108574">"Тилди киргизиңиз"</string>
     <string name="language_picker_section_suggested" msgid="8414489646861640885">"Сунушталган"</string>
@@ -1880,4 +1880,6 @@
     <string name="zen_upgrade_notification_content" msgid="1794994264692424562">"Бөгөттөлгөн нерселерди көрүү үчүн таптаңыз."</string>
     <string name="notification_app_name_system" msgid="4205032194610042794">"Тутум"</string>
     <string name="notification_app_name_settings" msgid="7751445616365753381">"Жөндөөлөр"</string>
+    <!-- no translation found for car_loading_profile (3545132581795684027) -->
+    <skip />
 </resources>

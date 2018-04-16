@@ -1422,7 +1422,7 @@
     <string name="keyboardview_keycode_delete" msgid="3337914833206635744">"Löschen"</string>
     <string name="keyboardview_keycode_done" msgid="1992571118466679775">"Fertig"</string>
     <string name="keyboardview_keycode_mode_change" msgid="4547387741906537519">"Modusänderung"</string>
-    <string name="keyboardview_keycode_shift" msgid="2270748814315147690">"Shift"</string>
+    <string name="keyboardview_keycode_shift" msgid="2270748814315147690">"Umschalttaste"</string>
     <string name="keyboardview_keycode_enter" msgid="2985864015076059467">"Eingabetaste"</string>
     <string name="activitychooserview_choose_application" msgid="2125168057199941199">"App auswählen"</string>
     <string name="activitychooserview_choose_application_error" msgid="8624618365481126668">"<xliff:g id="APPLICATION_NAME">%s</xliff:g> konnte nicht gestartet werden."</string>
@@ -1878,4 +1878,6 @@
     <string name="zen_upgrade_notification_content" msgid="1794994264692424562">"Tippe, um zu überprüfen, welche Inhalte blockiert werden."</string>
     <string name="notification_app_name_system" msgid="4205032194610042794">"System"</string>
     <string name="notification_app_name_settings" msgid="7751445616365753381">"Einstellungen"</string>
+    <!-- no translation found for car_loading_profile (3545132581795684027) -->
+    <skip />
 </resources>

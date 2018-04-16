@@ -220,7 +220,7 @@
     <string name="global_action_bug_report" msgid="7934010578922304799">"Алдаа мэдээлэх"</string>
     <string name="global_action_logout" msgid="935179188218826050">"Гаргах харилцан үйлдэл"</string>
     <string name="global_action_screenshot" msgid="8329831278085426283">"Дэлгэцийн зураг дарах"</string>
-    <string name="bugreport_title" msgid="2667494803742548533">"Согог репорт авах"</string>
+    <string name="bugreport_title" msgid="2667494803742548533">"Алдааны тайлан авах"</string>
     <string name="bugreport_message" msgid="398447048750350456">"Энэ таны төхөөрөмжийн одоогийн статусын талаарх мэдээллийг цуглуулах ба имэйл мессеж болгон илгээнэ. Алдааны мэдэгдлээс эхэлж илгээхэд бэлэн болоход хэсэг хугацаа зарцуулагдана тэвчээртэй байна уу."</string>
     <string name="bugreport_option_interactive_title" msgid="8635056131768862479">"Интерактив тайлан"</string>
     <string name="bugreport_option_interactive_summary" msgid="229299488536107968">"Үүнийг ихэнх тохиолдолд ашиглана уу. Энэ нь танд тайлангийн явцыг хянах, асуудлын талаар дэлгэрэнгүй мэдээлэл оруулах болон дэлгэцийн агшин авахыг зөвшөөрнө. Мөн тайлагнахад урт хугацаа шаарддаг таны бага ашигладаг зарим хэсгийг алгасах болно."</string>
@@ -1691,8 +1691,8 @@
     <string name="package_updated_device_owner" msgid="1847154566357862089">"Таны админ шинэчилсэн"</string>
     <string name="package_deleted_device_owner" msgid="2307122077550236438">"Таны админ устгасан"</string>
     <string name="battery_saver_description" msgid="769989536172631582">"Батарейны ажиллах хугацааг ихэсгэхийн тулд Батарей хэмнэгч төхөөрөмжийн зарим онцлогийг унтрааж аппуудыг хязгаарладаг."</string>
-    <string name="data_saver_description" msgid="6015391409098303235">"Дата ашиглалтыг багасгахын тулд дата хэмнэгч нь зарим апп-г өгөгдлийг дэвсгэрт илгээх болон авахаас сэргийлдэг. Таны одоогийн ашиглаж буй апп нь өгөгдөлд хандах боломжтой хэдий ч цөөн үйлдэл хийнэ. Жишээлбэл зураг харахын тулд та товших шаардлагатай болно."</string>
-    <string name="data_saver_enable_title" msgid="4674073932722787417">"Өгөгдөл хамгаалагчийг асаах уу?"</string>
+    <string name="data_saver_description" msgid="6015391409098303235">"Дата ашиглалтыг багасгахын тулд дата хэмнэгч нь зарим апп-г өгөгдлийг дэвсгэрт илгээх болон авахаас сэргийлдэг. Таны одоогийн ашиглаж буй апп нь өгөгдөлд хандах боломжтой хэдий ч тогтмол хандахгүй. Жишээлбэл зургийг товших хүртэл харагдахгүй."</string>
+    <string name="data_saver_enable_title" msgid="4674073932722787417">"Дата хэмнэгчийг асаах уу?"</string>
     <string name="data_saver_enable_button" msgid="7147735965247211818">"Асаах"</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="4367877408072000848">
       <item quantity="other"> %1$d минутын турш ( <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g> хүртэл)</item>
@@ -1878,4 +1878,6 @@
     <string name="zen_upgrade_notification_content" msgid="1794994264692424562">"Блоклосон зүйлийг шалгахын тулд товшино уу."</string>
     <string name="notification_app_name_system" msgid="4205032194610042794">"Систем"</string>
     <string name="notification_app_name_settings" msgid="7751445616365753381">"Тохиргоо"</string>
+    <!-- no translation found for car_loading_profile (3545132581795684027) -->
+    <skip />
 </resources>

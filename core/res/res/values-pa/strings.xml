@@ -1691,8 +1691,7 @@
     <string name="package_installed_device_owner" msgid="6875717669960212648">"ਤੁਹਾਡੇ ਪ੍ਰਸ਼ਾਸਕ ਵੱਲੋਂ ਸਥਾਪਤ ਕੀਤਾ ਗਿਆ"</string>
     <string name="package_updated_device_owner" msgid="1847154566357862089">"ਤੁਹਾਡੇ ਪ੍ਰਸ਼ਾਸਕ ਵੱਲੋਂ ਅੱਪਡੇਟ ਕੀਤਾ ਗਿਆ"</string>
     <string name="package_deleted_device_owner" msgid="2307122077550236438">"ਤੁਹਾਡੇ ਪ੍ਰਸ਼ਾਸਕ ਵੱਲੋਂ ਮਿਟਾਇਆ ਗਿਆ"</string>
-    <!-- no translation found for battery_saver_description (769989536172631582) -->
-    <skip />
+    <string name="battery_saver_description" msgid="769989536172631582">"ਬੈਟਰੀ ਲਾਈਫ਼ ਵਧਾਉਣ ਲਈ, ਬੈਟਰੀ ਸੇਵਰ ਕੁਝ ਡੀਵਾਈਸ ਵਿਸ਼ੇਸ਼ਤਾਵਾਂ ਨੂੰ ਬੰਦ ਕਰਦਾ ਹੈ ਅਤੇ ਐਪਾਂ \'ਤੇ ਪਾਬੰਦੀ ਲਗਾਉਂਦਾ ਹੈ।"</string>
     <string name="data_saver_description" msgid="6015391409098303235">"ਡਾਟਾ ਵਰਤੋਂ ਘਟਾਉਣ ਵਿੱਚ ਮਦਦ ਲਈ, ਡਾਟਾ ਸੇਵਰ ਕੁਝ ਐਪਾਂ ਨੂੰ ਬੈਕਗ੍ਰਾਊਂਡ ਵਿੱਚ ਡਾਟਾ ਭੇਜਣ ਜਾਂ ਪ੍ਰਾਪਤ ਕਰਨ ਤੋਂ ਰੋਕਦਾ ਹੈ। ਤੁਹਾਡੇ ਵੱਲੋਂ ਵਰਤਮਾਨ ਤੌਰ \'ਤੇ ਵਰਤੀ ਜਾ ਰਹੀ ਐਪ ਡਾਟਾ \'ਤੇ ਪਹੁੰਚ ਕਰ ਸਕਦੀ ਹੈ, ਪਰ ਉਹ ਇੰਝ ਕਦੇ-ਕਦਾਈਂ ਕਰ ਸਕਦੀ ਹੈ। ਉਦਾਹਰਨ ਲਈ, ਇਸ ਦਾ ਮਤਲਬ ਇਹ ਹੋ ਸਕਦਾ ਹੈ ਕਿ ਚਿੱਤਰ ਤਦ ਤੱਕ ਨਹੀਂ ਪ੍ਰਦਰਸ਼ਿਤ ਕੀਤੇ ਜਾਂਦੇ, ਜਦੋਂ ਤੱਕ ਤੁਸੀਂ ਉਹਨਾਂ \'ਤੇ ਟੈਪ ਨਹੀਂ ਕਰਦੇ।"</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"ਕੀ ਡਾਟਾ ਸੇਵਰ ਚਾਲੂ ਕਰਨਾ ਹੈ?"</string>
     <string name="data_saver_enable_button" msgid="7147735965247211818">"ਚਾਲੂ ਕਰੋ"</string>
@@ -1874,12 +1873,12 @@
     <string name="volume_dialog_ringer_guidance_silent" msgid="2128975224280276122">"ਕਾਲਾਂ ਅਤੇ ਸੂਚਨਾਵਾਂ ਨੂੰ ਮਿਊਟ ਕੀਤਾ ਜਾਵੇਗਾ"</string>
     <string name="notification_channel_system_changes" msgid="5072715579030948646">"ਸਿਸਟਮ ਬਦਲਾਅ"</string>
     <string name="notification_channel_do_not_disturb" msgid="6766940333105743037">"ਪਰੇਸ਼ਾਨ ਨਾ ਕਰੋ"</string>
-    <!-- no translation found for zen_upgrade_notification_visd_title (3288313883409759733) -->
-    <skip />
-    <!-- no translation found for zen_upgrade_notification_visd_content (5533674060311631165) -->
-    <skip />
+    <string name="zen_upgrade_notification_visd_title" msgid="3288313883409759733">"ਨਵਾਂ: \'ਪਰੇਸ਼ਾਨ ਨਾ ਕਰੋ\' ਮੋਡ ਸੂਚਨਾਵਾਂ ਨੂੰ ਲੁਕਾ ਰਿਹਾ ਹੈ"</string>
+    <string name="zen_upgrade_notification_visd_content" msgid="5533674060311631165">"ਹੋਰ ਜਾਣਨ ਲਈ ਅਤੇ ਬਦਲਾਅ ਕਰਨ ਲਈ ਟੈਪ ਕਰੋ।"</string>
     <string name="zen_upgrade_notification_title" msgid="3799603322910377294">"\'ਪਰੇਸ਼ਾਨ ਨਾ ਕਰੋ\' ਵਿਕਲਪ ਬਦਲ ਗਿਆ ਹੈ"</string>
     <string name="zen_upgrade_notification_content" msgid="1794994264692424562">"ਟੈਪ ਕਰਕੇ ਦੋਖੋ ਕਿ ਕਿਹੜੀਆਂ ਚੀਜ਼ਾਂ ਬਲਾਕ ਕੀਤੀਆਂ ਗਈਆਂ ਹਨ।"</string>
     <string name="notification_app_name_system" msgid="4205032194610042794">"ਸਿਸਟਮ"</string>
     <string name="notification_app_name_settings" msgid="7751445616365753381">"ਸੈਟਿੰਗਾਂ"</string>
+    <!-- no translation found for car_loading_profile (3545132581795684027) -->
+    <skip />
 </resources>

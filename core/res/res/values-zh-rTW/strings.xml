@@ -1878,4 +1878,6 @@
     <string name="zen_upgrade_notification_content" msgid="1794994264692424562">"輕觸即可查看遭封鎖的項目。"</string>
     <string name="notification_app_name_system" msgid="4205032194610042794">"系統"</string>
     <string name="notification_app_name_settings" msgid="7751445616365753381">"設定"</string>
+    <!-- no translation found for car_loading_profile (3545132581795684027) -->
+    <skip />
 </resources>

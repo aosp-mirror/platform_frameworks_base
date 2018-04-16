@@ -1777,12 +1777,9 @@
     <string name="language_picker_section_all" msgid="3097279199511617537">"Alla språk"</string>
     <string name="region_picker_section_all" msgid="8966316787153001779">"Alla regioner"</string>
     <string name="locale_search_menu" msgid="2560710726687249178">"Söka"</string>
-    <!-- no translation found for app_suspended_title (1919029799438164552) -->
-    <skip />
-    <!-- no translation found for app_suspended_default_message (7875306315686531621) -->
-    <skip />
-    <!-- no translation found for app_suspended_more_details (1131804827776778187) -->
-    <skip />
+    <string name="app_suspended_title" msgid="1919029799438164552">"Det gick inte att öppna appen"</string>
+    <string name="app_suspended_default_message" msgid="7875306315686531621">"Appen <xliff:g id="APP_NAME_0">%1$s</xliff:g> är inte tillgänglig just nu. Detta hanteras av <xliff:g id="APP_NAME_1">%2$s</xliff:g>."</string>
+    <string name="app_suspended_more_details" msgid="1131804827776778187">"Läs mer"</string>
     <string name="work_mode_off_title" msgid="1118691887588435530">"Vill du aktivera jobbprofilen?"</string>
     <string name="work_mode_off_message" msgid="5130856710614337649">"Jobbappar, aviseringar, data och andra funktioner i jobbprofilen aktiveras"</string>
     <string name="work_mode_turn_on" msgid="2062544985670564875">"Aktivera"</string>
@@ -1878,4 +1875,6 @@
     <string name="zen_upgrade_notification_content" msgid="1794994264692424562">"Tryck om du vill se vad som blockeras."</string>
     <string name="notification_app_name_system" msgid="4205032194610042794">"System"</string>
     <string name="notification_app_name_settings" msgid="7751445616365753381">"Inställningar"</string>
+    <!-- no translation found for car_loading_profile (3545132581795684027) -->
+    <skip />
 </resources>

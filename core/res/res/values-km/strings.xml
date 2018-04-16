@@ -1880,4 +1880,6 @@
     <string name="zen_upgrade_notification_content" msgid="1794994264692424562">"សូមចុច​ដើម្បី​មើល​ថា​​បានទប់ស្កាត់អ្វីខ្លះ។"</string>
     <string name="notification_app_name_system" msgid="4205032194610042794">"ប្រព័ន្ធ"</string>
     <string name="notification_app_name_settings" msgid="7751445616365753381">"ការកំណត់"</string>
+    <!-- no translation found for car_loading_profile (3545132581795684027) -->
+    <skip />
 </resources>

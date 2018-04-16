@@ -452,7 +452,7 @@
     <string name="permlab_accessNetworkState" msgid="4951027964348974773">"नेटवर्क कनेक्शन पहा"</string>
     <string name="permdesc_accessNetworkState" msgid="8318964424675960975">"कोणती नेटवर्क अस्तित्वात आहेत आणि कनेक्ट केलेली आहेत यासारख्या नेटवर्क कनेक्शनविषयीची माहिती पाहण्यासाठी अॅप ला अनुमती देते."</string>
     <string name="permlab_createNetworkSockets" msgid="7934516631384168107">"पूर्ण नेटवर्क प्रवेश आहे"</string>
-    <string name="permdesc_createNetworkSockets" msgid="3403062187779724185">"नेटवर्क सॉकेट तयार करण्यासाठी आणि सानुकूल नेटवर्क प्रोटोकॉल वापरण्यासाठी अॅप ला अनुमती देते. ब्राउझर आणि अन्य अॅप्लिकेशन म्हणजे इंटरनेटवर डेटा पाठवण्याचा मार्ग, म्हणजे इंटरनेटवर डेटा पाठविण्यासाठी परवानगीची आवश्यकता नसते."</string>
+    <string name="permdesc_createNetworkSockets" msgid="3403062187779724185">"नेटवर्क सॉकेट तयार करण्यासाठी आणि कस्टम नेटवर्क प्रोटोकॉल वापरण्यासाठी अॅप ला अनुमती देते. ब्राउझर आणि अन्य अॅप्लिकेशन म्हणजे इंटरनेटवर डेटा पाठवण्याचा मार्ग, म्हणजे इंटरनेटवर डेटा पाठविण्यासाठी परवानगीची आवश्यकता नसते."</string>
     <string name="permlab_changeNetworkState" msgid="958884291454327309">"नेटवर्क कनेक्टिव्हिटी बदला"</string>
     <string name="permdesc_changeNetworkState" msgid="6789123912476416214">"नेटवर्क कनेक्टिव्हिटीची स्थिती बदलण्यासाठी अॅप ला अनुमती देते."</string>
     <string name="permlab_changeTetherState" msgid="5952584964373017960">"टिथर केलेली कनेक्टिव्हिटी बदला"</string>
@@ -611,30 +611,30 @@
     <item msgid="1735177144948329370">"निवास फॅक्स"</item>
     <item msgid="603878674477207394">"पेजर"</item>
     <item msgid="1650824275177931637">"अन्य"</item>
-    <item msgid="9192514806975898961">"सानुकूल"</item>
+    <item msgid="9192514806975898961">"कस्टम"</item>
   </string-array>
   <string-array name="emailAddressTypes">
     <item msgid="8073994352956129127">"घर"</item>
     <item msgid="7084237356602625604">"कार्य"</item>
     <item msgid="1112044410659011023">"अन्य"</item>
-    <item msgid="2374913952870110618">"सानुकूल"</item>
+    <item msgid="2374913952870110618">"कस्टम"</item>
   </string-array>
   <string-array name="postalAddressTypes">
     <item msgid="6880257626740047286">"घर"</item>
     <item msgid="5629153956045109251">"कार्य"</item>
     <item msgid="4966604264500343469">"अन्य"</item>
-    <item msgid="4932682847595299369">"सानुकूल"</item>
+    <item msgid="4932682847595299369">"कस्टम"</item>
   </string-array>
   <string-array name="imAddressTypes">
     <item msgid="1738585194601476694">"घर"</item>
     <item msgid="1359644565647383708">"कार्य"</item>
     <item msgid="7868549401053615677">"अन्य"</item>
-    <item msgid="3145118944639869809">"सानुकूल"</item>
+    <item msgid="3145118944639869809">"कस्टम"</item>
   </string-array>
   <string-array name="organizationTypes">
     <item msgid="7546335612189115615">"कार्य"</item>
     <item msgid="4378074129049520373">"अन्य"</item>
-    <item msgid="3455047468583965104">"सानुकूल"</item>
+    <item msgid="3455047468583965104">"कस्टम"</item>
   </string-array>
   <string-array name="imProtocols">
     <item msgid="8595261363518459565">"AIM"</item>
@@ -646,7 +646,7 @@
     <item msgid="2506857312718630823">"ICQ"</item>
     <item msgid="1648797903785279353">"Jabber"</item>
   </string-array>
-    <string name="phoneTypeCustom" msgid="1644738059053355820">"सानुकूल"</string>
+    <string name="phoneTypeCustom" msgid="1644738059053355820">"कस्टम"</string>
     <string name="phoneTypeHome" msgid="2570923463033985887">"घर"</string>
     <string name="phoneTypeMobile" msgid="6501463557754751037">"मोबाईल"</string>
     <string name="phoneTypeWork" msgid="8863939667059911633">"कार्य"</string>
@@ -667,24 +667,24 @@
     <string name="phoneTypeWorkPager" msgid="649938731231157056">"कार्य पेजर"</string>
     <string name="phoneTypeAssistant" msgid="5596772636128562884">"साहाय्यक"</string>
     <string name="phoneTypeMms" msgid="7254492275502768992">"MMS"</string>
-    <string name="eventTypeCustom" msgid="7837586198458073404">"सानुकूल"</string>
+    <string name="eventTypeCustom" msgid="7837586198458073404">"कस्टम"</string>
     <string name="eventTypeBirthday" msgid="2813379844211390740">"वाढदिवस"</string>
     <string name="eventTypeAnniversary" msgid="3876779744518284000">"वर्षदिन"</string>
     <string name="eventTypeOther" msgid="7388178939010143077">"अन्य"</string>
-    <string name="emailTypeCustom" msgid="8525960257804213846">"सानुकूल"</string>
+    <string name="emailTypeCustom" msgid="8525960257804213846">"कस्टम"</string>
     <string name="emailTypeHome" msgid="449227236140433919">"घर"</string>
     <string name="emailTypeWork" msgid="3548058059601149973">"कार्य"</string>
     <string name="emailTypeOther" msgid="2923008695272639549">"अन्य"</string>
     <string name="emailTypeMobile" msgid="119919005321166205">"मोबाईल"</string>
-    <string name="postalTypeCustom" msgid="8903206903060479902">"सानुकूल"</string>
+    <string name="postalTypeCustom" msgid="8903206903060479902">"कस्टम"</string>
     <string name="postalTypeHome" msgid="8165756977184483097">"घर"</string>
     <string name="postalTypeWork" msgid="5268172772387694495">"कार्य"</string>
     <string name="postalTypeOther" msgid="2726111966623584341">"अन्य"</string>
-    <string name="imTypeCustom" msgid="2074028755527826046">"सानुकूल"</string>
+    <string name="imTypeCustom" msgid="2074028755527826046">"कस्टम"</string>
     <string name="imTypeHome" msgid="6241181032954263892">"घर"</string>
     <string name="imTypeWork" msgid="1371489290242433090">"कार्य"</string>
     <string name="imTypeOther" msgid="5377007495735915478">"अन्य"</string>
-    <string name="imProtocolCustom" msgid="6919453836618749992">"सानुकूल"</string>
+    <string name="imProtocolCustom" msgid="6919453836618749992">"कस्टम"</string>
     <string name="imProtocolAim" msgid="7050360612368383417">"AIM"</string>
     <string name="imProtocolMsn" msgid="144556545420769442">"Windows Live"</string>
     <string name="imProtocolYahoo" msgid="8271439408469021273">"Yahoo"</string>
@@ -696,8 +696,8 @@
     <string name="imProtocolNetMeeting" msgid="8287625655986827971">"NetMeeting"</string>
     <string name="orgTypeWork" msgid="29268870505363872">"कार्य"</string>
     <string name="orgTypeOther" msgid="3951781131570124082">"अन्य"</string>
-    <string name="orgTypeCustom" msgid="225523415372088322">"सानुकूल"</string>
-    <string name="relationTypeCustom" msgid="3542403679827297300">"सानुकूल"</string>
+    <string name="orgTypeCustom" msgid="225523415372088322">"कस्टम"</string>
+    <string name="relationTypeCustom" msgid="3542403679827297300">"कस्टम"</string>
     <string name="relationTypeAssistant" msgid="6274334825195379076">"साहाय्यक"</string>
     <string name="relationTypeBrother" msgid="8757913506784067713">"भाऊ"</string>
     <string name="relationTypeChild" msgid="1890746277276881626">"मूल"</string>
@@ -712,7 +712,7 @@
     <string name="relationTypeRelative" msgid="1799819930085610271">"नातेवाईक"</string>
     <string name="relationTypeSister" msgid="1735983554479076481">"बहिण"</string>
     <string name="relationTypeSpouse" msgid="394136939428698117">"पती/पत्नी"</string>
-    <string name="sipAddressTypeCustom" msgid="2473580593111590945">"सानुकूल"</string>
+    <string name="sipAddressTypeCustom" msgid="2473580593111590945">"कस्टम"</string>
     <string name="sipAddressTypeHome" msgid="6093598181069359295">"घर"</string>
     <string name="sipAddressTypeWork" msgid="6920725730797099047">"कार्य"</string>
     <string name="sipAddressTypeOther" msgid="4408436162950119849">"अन्य"</string>
@@ -1691,8 +1691,7 @@
     <string name="package_installed_device_owner" msgid="6875717669960212648">"आपल्या प्रशासकाने इंस्टॉल केले"</string>
     <string name="package_updated_device_owner" msgid="1847154566357862089">"आपल्या प्रशासकाने अपडेट केले"</string>
     <string name="package_deleted_device_owner" msgid="2307122077550236438">"आपल्या प्रशासकाने हटवले"</string>
-    <!-- no translation found for battery_saver_description (769989536172631582) -->
-    <skip />
+    <string name="battery_saver_description" msgid="769989536172631582">"बॅटरी लाइफ वाढवण्‍यासाठी, बॅटरी सेव्‍हर काही वैशिष्‍ट्ये बंद करते आणि अॅप्‍स प्रतिबंधित करते."</string>
     <string name="data_saver_description" msgid="6015391409098303235">"डेटा वापर कमी करण्यात मदत करण्यासाठी, डेटा सर्व्हर काही अॅप्सना पार्श्वभूमीमध्ये डेटा पाठविण्यास किंवा प्राप्त करण्यास प्रतिबंधित करतो. तुम्ही सध्या वापरत असलेला अॅप डेटामध्ये प्रवेश करू शकतो परंतु तसे तो खूप कमी वेळा करू शकतो. याचा अर्थ, उदाहरणार्थ, तुम्ही इमेज टॅप करेपर्यंत त्या प्रदर्शित करणार नाहीत असा असू शकतो."</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"डेटा बचतकर्ता चालू करायचा?"</string>
     <string name="data_saver_enable_button" msgid="7147735965247211818">"चालू करा"</string>
@@ -1739,7 +1738,7 @@
     <string name="zen_mode_default_weeknights_name" msgid="3081318299464998143">"आठवड्याची शेवटची रात्र"</string>
     <string name="zen_mode_default_weekends_name" msgid="2786495801019345244">"आठवड्याच्या शेवटी"</string>
     <string name="zen_mode_default_events_name" msgid="8158334939013085363">"इव्‍हेंट"</string>
-    <string name="zen_mode_default_every_night_name" msgid="3012363838882944175">"झोपलेले आहे"</string>
+    <string name="zen_mode_default_every_night_name" msgid="3012363838882944175">"निष्क्रिय आहे"</string>
     <string name="muted_by" msgid="6147073845094180001">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g> द्वारे नि:शब्द केले"</string>
     <string name="system_error_wipe_data" msgid="6608165524785354962">"आपल्‍या डिव्‍हाइसमध्‍ये अंतर्गत समस्‍या आहे आणि आपला फॅक्‍टरी डेटा रीसेट होईपर्यंत ती अस्‍थिर असू शकते."</string>
     <string name="system_error_manufacturer" msgid="8086872414744210668">"आपल्‍या डिव्‍हाइसमध्‍ये अंतर्गत समस्‍या आहे. तपशीलांसाठी आपल्‍या निर्मात्याशी संपर्क साधा."</string>
@@ -1874,12 +1873,12 @@
     <string name="volume_dialog_ringer_guidance_silent" msgid="2128975224280276122">"कॉल आणि सूचना म्युट केल्या जातील"</string>
     <string name="notification_channel_system_changes" msgid="5072715579030948646">"सिस्टम बदल"</string>
     <string name="notification_channel_do_not_disturb" msgid="6766940333105743037">"व्यत्यय आणू नका"</string>
-    <!-- no translation found for zen_upgrade_notification_visd_title (3288313883409759733) -->
-    <skip />
-    <!-- no translation found for zen_upgrade_notification_visd_content (5533674060311631165) -->
-    <skip />
+    <string name="zen_upgrade_notification_visd_title" msgid="3288313883409759733">"व्यत्यय आणू नका सूचना लपवत आहे"</string>
+    <string name="zen_upgrade_notification_visd_content" msgid="5533674060311631165">"अधिक जाणून घेण्‍यासाठी आणि बदलण्‍यासाठी टॅप करा."</string>
     <string name="zen_upgrade_notification_title" msgid="3799603322910377294">"व्यत्यय आणू नका बदलले आहे"</string>
     <string name="zen_upgrade_notification_content" msgid="1794994264692424562">"काय ब्लॉक केले आहे हे तपासण्यासाठी टॅप करा."</string>
     <string name="notification_app_name_system" msgid="4205032194610042794">"सिस्टम"</string>
     <string name="notification_app_name_settings" msgid="7751445616365753381">"सेटिंग्ज"</string>
+    <!-- no translation found for car_loading_profile (3545132581795684027) -->
+    <skip />
 </resources>
