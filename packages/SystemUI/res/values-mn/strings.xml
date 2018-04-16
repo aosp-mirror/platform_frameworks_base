@@ -242,8 +242,8 @@
     <string name="accessibility_quick_settings_work_mode_on" msgid="7650588553988014341">"Ажлын горимыг асаасан."</string>
     <string name="accessibility_quick_settings_work_mode_changed_off" msgid="5605534876107300711">"Ажлын горимыг унтраасан."</string>
     <string name="accessibility_quick_settings_work_mode_changed_on" msgid="249840330756998612">"Ажлын горимыг асаасан."</string>
-    <string name="accessibility_quick_settings_data_saver_changed_off" msgid="650231949881093289">"Өгөгдөл хамгаалагчийг унтраасан."</string>
-    <string name="accessibility_quick_settings_data_saver_changed_on" msgid="4218725402373934151">"Өгөгдөл хамгаалагчийг асаасан."</string>
+    <string name="accessibility_quick_settings_data_saver_changed_off" msgid="650231949881093289">"Дата хэмнэгчийг унтраасан."</string>
+    <string name="accessibility_quick_settings_data_saver_changed_on" msgid="4218725402373934151">"Дата хэмнэгчийг асаасан."</string>
     <string name="accessibility_brightness" msgid="8003681285547803095">"Дэлгэцийн гэрэлтэлт"</string>
     <string name="accessibility_ambient_display_charging" msgid="9084521679384069087">"Цэнэглэж байна"</string>
     <string name="data_usage_disabled_dialog_3g_title" msgid="5281770593459841889">"2G-3G дата-г түр зогсоосон байна"</string>
@@ -328,7 +328,7 @@
     <string name="quick_settings_tethering_label" msgid="7153452060448575549">"Модем болгох"</string>
     <string name="quick_settings_hotspot_label" msgid="6046917934974004879">"Сүлжээний цэг"</string>
     <string name="quick_settings_hotspot_secondary_label_transient" msgid="8010579363691405477">"Асааж байна…"</string>
-    <string name="quick_settings_hotspot_secondary_label_data_saver_enabled" msgid="5672131949987422420">"Өгөгдөл хамгаалагчийг асаасан"</string>
+    <string name="quick_settings_hotspot_secondary_label_data_saver_enabled" msgid="5672131949987422420">"Дата хэмнэгчийг асаасан"</string>
     <plurals name="quick_settings_hotspot_secondary_label_num_devices" formatted="false" msgid="2324635800672199428">
       <item quantity="other">%d төхөөрөмж</item>
       <item quantity="one">%d төхөөрөмж</item>
@@ -424,7 +424,7 @@
     <string name="user_logout_notification_text" msgid="3350262809611876284">"Одоогийн хэрэглэгчийг гаргах"</string>
     <string name="user_logout_notification_action" msgid="1195428991423425062">"ХЭРЭГЛЭГЧЭЭС ГАРАХ"</string>
     <string name="user_add_user_title" msgid="4553596395824132638">"Шинэ хэрэглэгч нэмэх үү?"</string>
-    <string name="user_add_user_message_short" msgid="2161624834066214559">"Та шинэ хэрэглэгч нэмбэл, тухайн хүн өөрийн профайлыг тохируулах шаардлагатай.\n\nАль ч хэрэглэгч бүх хэрэглэгчийн апп-уудыг шинэчлэх боломжтой."</string>
+    <string name="user_add_user_message_short" msgid="2161624834066214559">"Та шинэ хэрэглэгч нэмбэл тухайн хүн өөрийн профайлыг тохируулах шаардлагатай.\n\nАль ч хэрэглэгч бүх хэрэглэгчийн апп-уудыг шинэчлэх боломжтой."</string>
     <string name="user_remove_user_title" msgid="4681256956076895559">"Хэрэглэгчийг устгах уу?"</string>
     <string name="user_remove_user_message" msgid="1453218013959498039">"Энэ хэрэглэгчийн бүх апп болон мэдээлэл устах болно."</string>
     <string name="user_remove_user_remove" msgid="7479275741742178297">"Арилгах"</string>
@@ -697,9 +697,9 @@
     <string name="accessibility_long_click_tile" msgid="6687350750091842525">"Тохиргоог нээх"</string>
     <string name="accessibility_status_bar_headphones" msgid="9156307120060559989">"Чихэвч холбогдсон"</string>
     <string name="accessibility_status_bar_headset" msgid="8666419213072449202">"Чихэвч холбогдсон"</string>
-    <string name="data_saver" msgid="5037565123367048522">"Өгөгдөл хамгаалагч"</string>
-    <string name="accessibility_data_saver_on" msgid="8454111686783887148">"Өгөгдөл хамгаалагчийг асаасан байна"</string>
-    <string name="accessibility_data_saver_off" msgid="8841582529453005337">"Өгөгдөл хамгаалагчийг унтраасан байна"</string>
+    <string name="data_saver" msgid="5037565123367048522">"Дата хэмнэгч"</string>
+    <string name="accessibility_data_saver_on" msgid="8454111686783887148">"Дата хэмнэгчийг асаасан байна"</string>
+    <string name="accessibility_data_saver_off" msgid="8841582529453005337">"Дата хэмнэгчийг унтраасан байна"</string>
     <string name="switch_bar_on" msgid="1142437840752794229">"Идэвхтэй"</string>
     <string name="switch_bar_off" msgid="8803270596930432874">"Идэвхгүй"</string>
     <string name="nav_bar" msgid="1993221402773877607">"Навигацийн самбар"</string>
@@ -771,7 +771,7 @@
     <string name="forced_resizable_secondary_display" msgid="4230857851756391925">"Апп хоёрдогч дэлгэцэд ажиллахгүй."</string>
     <string name="activity_launch_on_secondary_display_failed_text" msgid="7793821742158306742">"Аппыг хоёрдогч дэлгэцэд эхлүүлэх боломжгүй."</string>
     <string name="accessibility_quick_settings_settings" msgid="6132460890024942157">"Тохиргоог нээнэ үү."</string>
-    <string name="accessibility_quick_settings_expand" msgid="2375165227880477530">"Хурдан тохиргоог нээнэ үү."</string>
+    <string name="accessibility_quick_settings_expand" msgid="2375165227880477530">"Шуурхай тохиргоог нээнэ үү."</string>
     <string name="accessibility_quick_settings_collapse" msgid="1792625797142648105">"Хурдан тохиргоог хаана уу."</string>
     <string name="accessibility_quick_settings_alarm_set" msgid="1863000242431528676">"Сэрүүлэг тавьсан."</string>
     <string name="accessibility_quick_settings_user" msgid="1567445362870421770">"<xliff:g id="ID_1">%s</xliff:g>-р нэвтэрсэн"</string>

@@ -387,7 +387,7 @@
     <string name="keyguard_more_overflow_text" msgid="9195222469041601365">"+<xliff:g id="NUMBER_OF_NOTIFICATIONS">%d</xliff:g>"</string>
     <string name="speed_bump_explanation" msgid="1288875699658819755">"Minder dringende kennisgewings hieronder"</string>
     <string name="notification_tap_again" msgid="7590196980943943842">"Tik weer om oop te maak"</string>
-    <string name="keyguard_unlock" msgid="8043466894212841998">"Sleep op om te ontsluit"</string>
+    <string name="keyguard_unlock" msgid="8043466894212841998">"Swiep op om te ontsluit"</string>
     <string name="do_disclosure_generic" msgid="5615898451805157556">"Jou organisasie bestuur hierdie toestel"</string>
     <string name="do_disclosure_with_name" msgid="5640615509915445501">"Hierdie toestel word deur <xliff:g id="ORGANIZATION_NAME">%s</xliff:g> bestuur"</string>
     <string name="phone_hint" msgid="4872890986869209950">"Swiep vanaf ikoon vir foon"</string>
@@ -787,7 +787,7 @@
     <string name="pip_phone_minimize" msgid="1079119422589131792">"Minimeer"</string>
     <string name="pip_phone_close" msgid="8416647892889710330">"Maak toe"</string>
     <string name="pip_phone_settings" msgid="8080777499521528521">"Instellings"</string>
-    <string name="pip_phone_dismiss_hint" msgid="6351678169095923899">"Sleep af om toe te maak"</string>
+    <string name="pip_phone_dismiss_hint" msgid="6351678169095923899">"Swiep af om toe te maak"</string>
     <string name="pip_menu_title" msgid="4707292089961887657">"Kieslys"</string>
     <string name="pip_notification_title" msgid="3204024940158161322">"<xliff:g id="NAME">%s</xliff:g> is in beeld-in-beeld"</string>
     <string name="pip_notification_message" msgid="5619512781514343311">"As jy nie wil hê dat <xliff:g id="NAME">%s</xliff:g> hierdie kenmerk moet gebruik nie, tik om instellings oop te maak en skakel dit af."</string>
