@@ -6107,7 +6107,7 @@ public abstract class PackageManager {
      * case of packages that are signed by multiple certificates, for which signing certificate
      * rotation is not supported.  This method is analogous to using {@code getPackageInfo} with
      * {@code GET_SIGNING_CERTIFICATES} and then searching through the resulting {@code
-     * signingCertificateHistory} field to see if the desired certificate is present.
+     * signingInfo} field to see if the desired certificate is present.
      *
      * @param packageName package whose signing certificates to check
      * @param certificate signing certificate for which to search
@@ -6131,7 +6131,7 @@ public abstract class PackageManager {
      * rotation is not supported. This method is analogous to using {@code getPackagesForUid}
      * followed by {@code getPackageInfo} with {@code GET_SIGNING_CERTIFICATES}, selecting the
      * {@code PackageInfo} of the newest-signed bpackage , and finally searching through the
-     * resulting {@code signingCertificateHistory} field to see if the desired certificate is there.
+     * resulting {@code signingInfo} field to see if the desired certificate is there.
      *
      * @param uid uid whose signing certificates to check
      * @param certificate signing certificate for which to search
