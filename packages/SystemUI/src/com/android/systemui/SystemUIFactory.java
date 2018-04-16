@@ -97,10 +97,11 @@ public class SystemUIFactory {
     }
 
     public KeyguardBouncer createKeyguardBouncer(Context context, ViewMediatorCallback callback,
-            LockPatternUtils lockPatternUtils,
-            ViewGroup container, DismissCallbackRegistry dismissCallbackRegistry) {
+            LockPatternUtils lockPatternUtils,  ViewGroup container,
+            DismissCallbackRegistry dismissCallbackRegistry,
+            KeyguardBouncer.BouncerExpansionCallback expansionCallback) {
         return new KeyguardBouncer(context, callback, lockPatternUtils, container,
-                dismissCallbackRegistry, FalsingManager.getInstance(context));
+                dismissCallbackRegistry, FalsingManager.getInstance(context), expansionCallback);
     }
 
     public ScrimController createScrimController(ScrimView scrimBehind, ScrimView scrimInFront,
