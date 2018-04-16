@@ -36,6 +36,7 @@ import android.provider.Settings;
 import android.service.vr.IVrManager;
 import android.service.vr.IVrStateCallbacks;
 import android.util.Log;
+import android.util.MathUtils;
 import android.widget.ImageView;
 
 import com.android.internal.logging.MetricsLogger;
@@ -49,7 +50,14 @@ public class BrightnessController implements ToggleSlider.Listener {
     private static final String TAG = "StatusBar.BrightnessController";
     private static final boolean SHOW_AUTOMATIC_ICON = false;
 
+    private static final int SLIDER_MAX = 1023;
     private static final int SLIDER_ANIMATION_DURATION = 3000;
+
+    // Hybrid Log Gamma constant values
+    private static final float R = 0.5f;
+    private static final float A = 0.17883277f;
+    private static final float B = 0.28466892f;
+    private static final float C = 0.55991073f;
 
     private static final int MSG_UPDATE_ICON = 0;
     private static final int MSG_UPDATE_SLIDER = 1;
@@ -60,8 +68,10 @@ public class BrightnessController implements ToggleSlider.Listener {
 
     private final int mMinimumBacklight;
     private final int mMaximumBacklight;
+    private final int mDefaultBacklight;
     private final int mMinimumBacklightForVr;
     private final int mMaximumBacklightForVr;
+    private final int mDefaultBacklightForVr;
 
     private final Context mContext;
     private final ImageView mIcon;
@@ -203,21 +213,18 @@ public class BrightnessController implements ToggleSlider.Listener {
     private final Runnable mUpdateSliderRunnable = new Runnable() {
         @Override
         public void run() {
-            if (mIsVrModeEnabled) {
-                int value = Settings.System.getIntForUser(mContext.getContentResolver(),
-                        Settings.System.SCREEN_BRIGHTNESS_FOR_VR, mMaximumBacklight,
+            final int val;
+            final boolean inVrMode = mIsVrModeEnabled;
+            if (inVrMode) {
+                val = Settings.System.getIntForUser(mContext.getContentResolver(),
+                        Settings.System.SCREEN_BRIGHTNESS_FOR_VR, mDefaultBacklightForVr,
                         UserHandle.USER_CURRENT);
-                mHandler.obtainMessage(MSG_UPDATE_SLIDER,
-                        mMaximumBacklightForVr - mMinimumBacklightForVr,
-                        value - mMinimumBacklightForVr).sendToTarget();
             } else {
-                int value;
-                value = Settings.System.getIntForUser(mContext.getContentResolver(),
-                        Settings.System.SCREEN_BRIGHTNESS, mMaximumBacklight,
+                val = Settings.System.getIntForUser(mContext.getContentResolver(),
+                        Settings.System.SCREEN_BRIGHTNESS, mDefaultBacklight,
                         UserHandle.USER_CURRENT);
-                mHandler.obtainMessage(MSG_UPDATE_SLIDER, mMaximumBacklight - mMinimumBacklight,
-                        value - mMinimumBacklight).sendToTarget();
             }
+            mHandler.obtainMessage(MSG_UPDATE_SLIDER, val, inVrMode ? 1 : 0).sendToTarget();
         }
     };
 
@@ -239,8 +246,7 @@ public class BrightnessController implements ToggleSlider.Listener {
                         updateIcon(msg.arg1 != 0);
                         break;
                     case MSG_UPDATE_SLIDER:
-                        mControl.setMax(msg.arg1);
-                        animateSliderTo(msg.arg2);
+                        updateSlider(msg.arg1, msg.arg2 != 0);
                         break;
                     case MSG_SET_CHECKED:
                         mControl.setChecked(msg.arg1 != 0);
@@ -267,6 +273,7 @@ public class BrightnessController implements ToggleSlider.Listener {
         mContext = context;
         mIcon = icon;
         mControl = control;
+        mControl.setMax(SLIDER_MAX);
         mBackgroundHandler = new Handler((Looper) Dependency.get(Dependency.BG_LOOPER));
         mUserTracker = new CurrentUserTracker(mContext) {
             @Override
@@ -277,11 +284,13 @@ public class BrightnessController implements ToggleSlider.Listener {
         };
         mBrightnessObserver = new BrightnessObserver(mHandler);
 
-        PowerManager pm = (PowerManager)context.getSystemService(Context.POWER_SERVICE);
+        PowerManager pm = context.getSystemService(PowerManager.class);
         mMinimumBacklight = pm.getMinimumScreenBrightnessSetting();
         mMaximumBacklight = pm.getMaximumScreenBrightnessSetting();
+        mDefaultBacklight = pm.getDefaultScreenBrightnessSetting();
         mMinimumBacklightForVr = pm.getMinimumScreenBrightnessForVrSetting();
         mMaximumBacklightForVr = pm.getMaximumScreenBrightnessForVrSetting();
+        mDefaultBacklightForVr = pm.getDefaultScreenBrightnessForVrSetting();
 
         mAutomaticAvailable = context.getResources().getBoolean(
                 com.android.internal.R.bool.config_automatic_brightness_available);
@@ -350,38 +359,39 @@ public class BrightnessController implements ToggleSlider.Listener {
             mSliderAnimator.cancel();
         }
 
+        final int min;
+        final int max;
+        final int metric;
+        final String setting;
+
         if (mIsVrModeEnabled) {
-            final int val = value + mMinimumBacklightForVr;
-            if (stopTracking) {
-                MetricsLogger.action(mContext, MetricsEvent.ACTION_BRIGHTNESS_FOR_VR, val);
-            }
-            setBrightness(val);
-            if (!tracking) {
-                AsyncTask.execute(new Runnable() {
-                        public void run() {
-                            Settings.System.putIntForUser(mContext.getContentResolver(),
-                                    Settings.System.SCREEN_BRIGHTNESS_FOR_VR, val,
-                                    UserHandle.USER_CURRENT);
-                        }
-                    });
-            }
+            metric = MetricsEvent.ACTION_BRIGHTNESS_FOR_VR;
+            min = mMinimumBacklightForVr;
+            max = mMaximumBacklightForVr;
+            setting = Settings.System.SCREEN_BRIGHTNESS_FOR_VR;
         } else {
-            final int val = value + mMinimumBacklight;
-            if (stopTracking) {
-                final int metric = mAutomatic ?
-                        MetricsEvent.ACTION_BRIGHTNESS_AUTO : MetricsEvent.ACTION_BRIGHTNESS;
-                MetricsLogger.action(mContext, metric, val);
-            }
-            setBrightness(val);
-            if (!tracking) {
-                AsyncTask.execute(new Runnable() {
-                        public void run() {
-                            Settings.System.putIntForUser(mContext.getContentResolver(),
-                                    Settings.System.SCREEN_BRIGHTNESS, val,
-                                    UserHandle.USER_CURRENT);
-                        }
-                    });
-            }
+            metric = mAutomatic
+                    ? MetricsEvent.ACTION_BRIGHTNESS_AUTO
+                    : MetricsEvent.ACTION_BRIGHTNESS;
+            min = mMinimumBacklight;
+            max = mMaximumBacklight;
+            setting = Settings.System.SCREEN_BRIGHTNESS;
+        }
+
+        final int val = convertGammaToLinear(value, min, max);
+
+        if (stopTracking) {
+            MetricsLogger.action(mContext, metric, val);
+        }
+
+        setBrightness(val);
+        if (!tracking) {
+            AsyncTask.execute(new Runnable() {
+                    public void run() {
+                        Settings.System.putIntForUser(mContext.getContentResolver(),
+                                setting, val, UserHandle.USER_CURRENT);
+                    }
+                });
         }
 
         for (BrightnessStateChangeCallback cb : mChangeCallbacks) {
@@ -430,6 +440,28 @@ public class BrightnessController implements ToggleSlider.Listener {
         }
     }
 
+    private void updateSlider(int val, boolean inVrMode) {
+        final int min;
+        final int max;
+        if (inVrMode) {
+            min = mMinimumBacklightForVr;
+            max = mMaximumBacklightForVr;
+        } else {
+            min = mMinimumBacklight;
+            max = mMaximumBacklight;
+        }
+        if (val == convertGammaToLinear(mControl.getValue(), min, max)) {
+            // If we have more resolution on the slider than we do in the actual setting, then
+            // multiple slider positions will map to the same setting value. Thus, if we see a
+            // setting value here that maps to the current slider position, we don't bother to
+            // calculate the new slider position since it may differ and look like a brightness
+            // change to the user even though it isn't one.
+            return;
+        }
+        final int sliderVal = convertLinearToGamma(val, min, max);
+        animateSliderTo(sliderVal);
+    }
+
     private void animateSliderTo(int target) {
         if (!mControlValueInitialized) {
             // Don't animate the first value since it's default state isn't meaningful to users.
@@ -447,5 +479,78 @@ public class BrightnessController implements ToggleSlider.Listener {
         });
         mSliderAnimator.setDuration(SLIDER_ANIMATION_DURATION);
         mSliderAnimator.start();
+    }
+
+    /**
+     * A function for converting from the linear space that the setting works in to the
+     * gamma space that the slider works in.
+     *
+     * The gamma space effectively provides us a way to make linear changes to the slider that
+     * result in linear changes in perception. If we made changes to the slider in the linear space
+     * then we'd see an approximately logarithmic change in perception (c.f. Fechner's Law).
+     *
+     * Internally, this implements the Hybrid Log Gamma opto-electronic transfer function, which is
+     * a slight improvement to the typical gamma transfer function for displays whose max
+     * brightness exceeds the 120 nit reference point, but doesn't set a specific reference
+     * brightness like the PQ function does.
+     *
+     * Note that this transfer function is only valid if the display's backlight value is a linear
+     * control. If it's calibrated to be something non-linear, then a different transfer function
+     * should be used.
+     *
+     * @param val The brightness setting value.
+     * @param min The minimum acceptable value for the setting.
+     * @param max The maximum acceptable value for the setting.
+     *
+     * @return The corresponding slider value
+     */
+    private static final int convertLinearToGamma(int val, int min, int max) {
+        // For some reason, HLG normalizes to the range [0, 12] rather than [0, 1]
+        final float normalizedVal = MathUtils.norm(min, max, val) * 12;
+        final float ret;
+        if (normalizedVal <= 1f) {
+            ret = MathUtils.sqrt(normalizedVal) * R;
+        } else {
+            ret = A * MathUtils.log(normalizedVal - B) + C;
+        }
+
+        return Math.round(MathUtils.lerp(0, SLIDER_MAX, ret));
+    }
+
+    /**
+     * A function for converting from the gamma space that the slider works in to the
+     * linear space that the setting works in.
+     *
+     * The gamma space effectively provides us a way to make linear changes to the slider that
+     * result in linear changes in perception. If we made changes to the slider in the linear space
+     * then we'd see an approximately logarithmic change in perception (c.f. Fechner's Law).
+     *
+     * Internally, this implements the Hybrid Log Gamma electro-optical transfer function, which is
+     * a slight improvement to the typical gamma transfer function for displays whose max
+     * brightness exceeds the 120 nit reference point, but doesn't set a specific reference
+     * brightness like the PQ function does.
+     *
+     * Note that this transfer function is only valid if the display's backlight value is a linear
+     * control. If it's calibrated to be something non-linear, then a different transfer function
+     * should be used.
+     *
+     * @param val The slider value.
+     * @param min The minimum acceptable value for the setting.
+     * @param max The maximum acceptable value for the setting.
+     *
+     * @return The corresponding setting value.
+     */
+    private static final int convertGammaToLinear(int val, int min, int max) {
+        final float normalizedVal = MathUtils.norm(0, SLIDER_MAX, val);
+        final float ret;
+        if (normalizedVal <= R) {
+            ret = MathUtils.sq(normalizedVal/R);
+        } else {
+            ret = MathUtils.exp((normalizedVal - C) / A) + B;
+        }
+
+        // HLG is normalized to the range [0, 12], so we need to re-normalize to the range [0, 1]
+        // in order to derive the correct setting value.
+        return Math.round(MathUtils.lerp(min, max, ret / 12));
     }
 }
