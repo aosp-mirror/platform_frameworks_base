@@ -35,10 +35,10 @@
     <string name="keyboard_layout_slovenian" msgid="1735933028924982368">"словенский"</string>
     <string name="keyboard_layout_turkish" msgid="7736163250907964898">"турецкий"</string>
     <string name="keyboard_layout_ukrainian" msgid="8176637744389480417">"украинский"</string>
-    <string name="keyboard_layout_arabic" msgid="5671970465174968712">"Арабский"</string>
-    <string name="keyboard_layout_greek" msgid="7289253560162386040">"Греческий"</string>
-    <string name="keyboard_layout_hebrew" msgid="7241473985890173812">"Иврит"</string>
-    <string name="keyboard_layout_lithuanian" msgid="6943110873053106534">"Литовский"</string>
-    <string name="keyboard_layout_spanish_latin" msgid="5690539836069535697">"Испанский (Латинская Америка)"</string>
+    <string name="keyboard_layout_arabic" msgid="5671970465174968712">"арабский"</string>
+    <string name="keyboard_layout_greek" msgid="7289253560162386040">"греческий"</string>
+    <string name="keyboard_layout_hebrew" msgid="7241473985890173812">"иврит"</string>
+    <string name="keyboard_layout_lithuanian" msgid="6943110873053106534">"литовский"</string>
+    <string name="keyboard_layout_spanish_latin" msgid="5690539836069535697">"испанский (Латинская Америка)"</string>
     <string name="keyboard_layout_latvian" msgid="4405417142306250595">"латышский"</string>
 </resources>
