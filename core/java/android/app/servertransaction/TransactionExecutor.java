@@ -34,8 +34,6 @@ import android.util.Slog;
 
 import com.android.internal.annotations.VisibleForTesting;
 
-import java.io.PrintWriter;
-import java.io.StringWriter;
 import java.util.List;
 
 /**
@@ -135,20 +133,7 @@ public class TransactionExecutor {
         final IBinder token = transaction.getActivityToken();
         final ActivityClientRecord r = mTransactionHandler.getActivityClient(token);
 
-        // TODO(b/71506345): Remove once root cause is found.
         if (r == null) {
-            final StringWriter stringWriter = new StringWriter();
-            final PrintWriter pw = new PrintWriter(stringWriter);
-            final String prefix = "  ";
-
-            pw.println("Lifecycle transaction does not have valid ActivityClientRecord.");
-            pw.println("Transaction:");
-            transaction.dump(pw, prefix);
-            pw.println("Executor:");
-            dump(pw, prefix);
-
-            Slog.w(TAG, stringWriter.toString());
-
             // Ignore requests for non-existent client records for now.
             return;
         }
@@ -223,10 +208,5 @@ public class TransactionExecutor {
 
     private static void log(String message) {
         if (DEBUG_RESOLVER) Slog.d(TAG, message);
-    }
-
-    private void dump(PrintWriter pw, String prefix) {
-        pw.println(prefix + "mTransactionHandler:");
-        mTransactionHandler.dump(pw, prefix + "  ");
     }
 }
