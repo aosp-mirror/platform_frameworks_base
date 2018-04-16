@@ -1,5 +1,5 @@
 /*
- * Copyright 2016, The Android Open Source Project
+ * Copyright 2018, The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,15 +28,22 @@
 
 // JNI function acting as simply call-through to native APF interpreter.
 static jint com_android_server_ApfTest_apfSimulate(
-        JNIEnv* env, jclass, jbyteArray program, jbyteArray packet, jint filter_age) {
-    return accept_packet(
-            (uint8_t*)env->GetByteArrayElements(program, NULL),
-            env->GetArrayLength(program),
-            (uint8_t*)env->GetByteArrayElements(packet, NULL),
-            env->GetArrayLength(packet),
-            nullptr,
-            0,
-            filter_age);
+        JNIEnv* env, jclass, jbyteArray program, jbyteArray packet,
+        jbyteArray data, jint filter_age) {
+    uint8_t* program_raw = (uint8_t*)env->GetByteArrayElements(program, nullptr);
+    uint8_t* packet_raw = (uint8_t*)env->GetByteArrayElements(packet, nullptr);
+    uint8_t* data_raw = (uint8_t*)(data ? env->GetByteArrayElements(data, nullptr) : nullptr);
+    uint32_t program_len = env->GetArrayLength(program);
+    uint32_t packet_len = env->GetArrayLength(packet);
+    uint32_t data_len = data ? env->GetArrayLength(data) : 0;
+    jint result = accept_packet(program_raw, program_len, packet_raw,
+                                packet_len, data_raw, data_len, filter_age);
+    if (data) {
+        env->ReleaseByteArrayElements(data, (jbyte*)data_raw, 0 /* copy back */);
+    }
+    env->ReleaseByteArrayElements(packet, (jbyte*)packet_raw, JNI_ABORT);
+    env->ReleaseByteArrayElements(program, (jbyte*)program_raw, JNI_ABORT);
+    return result;
 }
 
 class ScopedPcap {
@@ -170,7 +177,7 @@ extern "C" jint JNI_OnLoad(JavaVM* vm, void*) {
     }
 
     static JNINativeMethod gMethods[] = {
-            { "apfSimulate", "([B[BI)I",
+            { "apfSimulate", "([B[B[BI)I",
                     (void*)com_android_server_ApfTest_apfSimulate },
             { "compileToBpf", "(Ljava/lang/String;)Ljava/lang/String;",
                     (void*)com_android_server_ApfTest_compileToBpf },
