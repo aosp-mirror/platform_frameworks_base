@@ -160,7 +160,7 @@ public class ApfTest {
             throw new Exception(
                     "program: " + HexDump.toHexString(program) +
                     "\ndata memory: " + HexDump.toHexString(data) +
-                    "\nexpected: " + HexDump.toHexString(expected_data));
+                    "\nexpected:    " + HexDump.toHexString(expected_data));
         }
     }
 
@@ -625,18 +625,19 @@ public class ApfTest {
     @Test
     public void testApfDataWrite() throws IllegalInstructionException, Exception {
         byte[] packet = new byte[MIN_PKT_SIZE];
-        byte[] data = {0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16};
+        byte[] data = {0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15};
         byte[] expected_data = data.clone();
 
         // No memory access instructions: should leave the data segment untouched.
         ApfGenerator gen = new ApfGenerator(3);
         assertDataMemoryContents(PASS, gen.generate(), packet, data, expected_data);
 
-        // Expect value 0x87654321 to be stored starting from address 3 + 2, in big-endian order.
+        // Expect value 0x87654321 to be stored starting from address -11 from the end of the
+        // data buffer, in big-endian order.
         gen = new ApfGenerator(3);
         gen.addLoadImmediate(Register.R0, 0x87654321);
-        gen.addLoadImmediate(Register.R1, 2);
-        gen.addStoreData(Register.R0, 3);
+        gen.addLoadImmediate(Register.R1, -5);
+        gen.addStoreData(Register.R0, -6);  // -5 + -6 = -11 (offset +5 with data_len=16)
         expected_data[5] = (byte)0x87;
         expected_data[6] = (byte)0x65;
         expected_data[7] = (byte)0x43;
@@ -646,16 +647,16 @@ public class ApfTest {
 
     @Test
     public void testApfDataRead() throws IllegalInstructionException, Exception {
-        // Program that DROPs if address 11 (7 + 3) contains 0x87654321.
+        // Program that DROPs if address 10 (-6) contains 0x87654321.
         ApfGenerator gen = new ApfGenerator(3);
-        gen.addLoadImmediate(Register.R1, 3);
-        gen.addLoadData(Register.R0, 7);
+        gen.addLoadImmediate(Register.R1, 10);
+        gen.addLoadData(Register.R0, -16);  // 10 + -16 = -6 (offset +10 with data_len=16)
         gen.addJumpIfR0Equals(0x87654321, gen.DROP_LABEL);
         byte[] program = gen.generate();
         byte[] packet = new byte[MIN_PKT_SIZE];
 
         // Content is incorrect (last byte does not match) -> PASS
-        byte[] data = new byte[32];
+        byte[] data = new byte[16];
         data[10] = (byte)0x87;
         data[11] = (byte)0x65;
         data[12] = (byte)0x43;
@@ -672,10 +673,10 @@ public class ApfTest {
     @Test
     public void testApfDataReadModifyWrite() throws IllegalInstructionException, Exception {
         ApfGenerator gen = new ApfGenerator(3);
-        gen.addLoadImmediate(Register.R1, 3);
-        gen.addLoadData(Register.R0, 7);  // Load from address 7 + 3 = 10
+        gen.addLoadImmediate(Register.R1, -22);
+        gen.addLoadData(Register.R0, 0);  // Load from address 32 -22 + 0 = 10
         gen.addAdd(0x78453412);  // 87654321 + 78453412 = FFAA7733
-        gen.addStoreData(Register.R0, 11);  // Write back to address 11 + 3 = 14
+        gen.addStoreData(Register.R0, 4);  // Write back to address 32 -22 + 4 = 14
 
         byte[] packet = new byte[MIN_PKT_SIZE];
         byte[] data = new byte[32];
@@ -718,10 +719,17 @@ public class ApfTest {
         gen.addJump(gen.DROP_LABEL);
         assertDataMemoryContents(DROP, gen.generate(), packet, data, expected_data);
 
-        // ...but underflowing isn't allowed.
+        // ...and underflowing simply wraps around to the end of the buffer...
         gen = new ApfGenerator(3);
         gen.addLoadImmediate(Register.R0, 20);
         gen.addLoadData(Register.R1, -30);
+        gen.addJump(gen.DROP_LABEL);
+        assertDataMemoryContents(DROP, gen.generate(), packet, data, expected_data);
+
+        // ...but doesn't allow accesses before the start of the buffer
+        gen = new ApfGenerator(3);
+        gen.addLoadImmediate(Register.R0, 20);
+        gen.addLoadData(Register.R1, -1000);
         gen.addJump(gen.DROP_LABEL);  // Not reached.
         assertDataMemoryContents(PASS, gen.generate(), packet, data, expected_data);
     }
