@@ -75,6 +75,8 @@ public:
 
     void informPullAlarmFired(const int64_t timestampNs);
 
+    int64_t getLastReportTimeNs(const ConfigKey& key);
+
 private:
     // For testing only.
     inline sp<AlarmMonitor> getAnomalyAlarmMonitor() const {
