@@ -58,7 +58,9 @@ public class ApfGenerator {
         JLT(18),   // Compare less than and branch, e.g. "jlt R0,5,label"
         JSET(19),  // Compare any bits set and branch, e.g. "jset R0,5,label"
         JNEBS(20), // Compare not equal byte sequence, e.g. "jnebs R0,5,label,0x1122334455"
-        EXT(21);   // Followed by immediate indicating ExtendedOpcodes.
+        EXT(21),   // Followed by immediate indicating ExtendedOpcodes.
+        LDDW(22),  // Load 4 bytes from data memory address (register + immediate): "lddw R0, [5]R1"
+        STDW(23);  // Store 4 bytes to data memory address (register + immediate): "stdw R0, [5]R1"
 
         final int value;
 
@@ -355,19 +357,38 @@ public class ApfGenerator {
      */
     public static final int LAST_PREFILLED_MEMORY_SLOT = FILTER_AGE_MEMORY_SLOT;
 
+    // This version number syncs up with APF_VERSION in hardware/google/apf/apf_interpreter.h
+    private static final int MIN_APF_VERSION = 2;
+
     private final ArrayList<Instruction> mInstructions = new ArrayList<Instruction>();
     private final HashMap<String, Instruction> mLabels = new HashMap<String, Instruction>();
     private final Instruction mDropLabel = new Instruction(Opcodes.LABEL);
     private final Instruction mPassLabel = new Instruction(Opcodes.LABEL);
+    private final int mVersion;
     private boolean mGenerated;
 
     /**
-     * Set version of APF instruction set to generate instructions for. Returns {@code true}
-     * if generating for this version is supported, {@code false} otherwise.
+     * Creates an ApfGenerator instance which is able to emit instructions for the specified
+     * {@code version} of the APF interpreter. Throws {@code IllegalInstructionException} if
+     * the requested version is unsupported.
      */
-    public boolean setApfVersion(int version) {
-        // This version number syncs up with APF_VERSION in hardware/google/apf/apf_interpreter.h
-        return version >= 2;
+    ApfGenerator(int version) throws IllegalInstructionException {
+        mVersion = version;
+        requireApfVersion(MIN_APF_VERSION);
+    }
+
+    /**
+     * Returns true if the specified {@code version} is supported by the ApfGenerator, otherwise
+     * false.
+     */
+    public static boolean supportsVersion(int version) {
+        return version >= MIN_APF_VERSION;
+    }
+
+    private void requireApfVersion(int minimumVersion) throws IllegalInstructionException {
+        if (mVersion < minimumVersion) {
+            throw new IllegalInstructionException("Requires APF >= " + minimumVersion);
+        }
     }
 
     private void addInstruction(Instruction instruction) {
@@ -814,6 +835,36 @@ public class ApfGenerator {
     public ApfGenerator addMove(Register register) {
         Instruction instruction = new Instruction(Opcodes.EXT, register);
         instruction.setUnsignedImm(ExtendedOpcodes.MOVE.value);
+        addInstruction(instruction);
+        return this;
+    }
+
+    /**
+     * Add an instruction to the end of the program to load 32 bits from the data memory into
+     * {@code register}. The source address is computed by adding @{code offset} to the other
+     * register.
+     * Requires APF v3 or greater.
+     */
+    public ApfGenerator addLoadData(Register destinationRegister, int offset)
+            throws IllegalInstructionException {
+        requireApfVersion(3);
+        Instruction instruction = new Instruction(Opcodes.LDDW, destinationRegister);
+        instruction.setUnsignedImm(offset);
+        addInstruction(instruction);
+        return this;
+    }
+
+    /**
+     * Add an instruction to the end of the program to store 32 bits from {@code register} into the
+     * data memory. The destination address is computed by adding @{code offset} to the other
+     * register.
+     * Requires APF v3 or greater.
+     */
+    public ApfGenerator addStoreData(Register sourceRegister, int offset)
+            throws IllegalInstructionException {
+        requireApfVersion(3);
+        Instruction instruction = new Instruction(Opcodes.STDW, sourceRegister);
+        instruction.setUnsignedImm(offset);
         addInstruction(instruction);
         return this;
     }
