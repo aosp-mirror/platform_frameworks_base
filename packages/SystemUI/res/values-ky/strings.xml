@@ -29,9 +29,9 @@
       <item quantity="other">%d экран Көз жүгүртүүдө</item>
       <item quantity="one">1 экран Көз жүгүртүүдө</item>
     </plurals>
-    <string name="status_bar_no_notifications_title" msgid="4755261167193833213">"Эскертмелер жок"</string>
+    <string name="status_bar_no_notifications_title" msgid="4755261167193833213">"Билдирме жок"</string>
     <string name="status_bar_ongoing_events_title" msgid="1682504513316879202">"Учурдагы"</string>
-    <string name="status_bar_latest_events_title" msgid="6594767438577593172">"Эскертмелер"</string>
+    <string name="status_bar_latest_events_title" msgid="6594767438577593172">"Билдирмелер"</string>
     <string name="battery_low_title" msgid="6456385927409742437">"Батареянын кубаты аз"</string>
     <string name="battery_low_percent_format" msgid="2900940511201380775">"<xliff:g id="PERCENTAGE">%s</xliff:g> калды"</string>
     <string name="battery_low_percent_format_hybrid" msgid="6838677459286775617">"<xliff:g id="PERCENTAGE">%s</xliff:g> калды, колдонушуңузга караганда болжол менен дагы <xliff:g id="TIME">%s</xliff:g> бар"</string>
@@ -49,7 +49,7 @@
     <string name="status_bar_settings_auto_rotation" msgid="3790482541357798421">"Экрандын авто-айлануусу"</string>
     <string name="status_bar_settings_mute_label" msgid="554682549917429396">"ҮНСҮЗ"</string>
     <string name="status_bar_settings_auto_brightness_label" msgid="511453614962324674">"АВТО"</string>
-    <string name="status_bar_settings_notifications" msgid="397146176280905137">"Эскертмелер"</string>
+    <string name="status_bar_settings_notifications" msgid="397146176280905137">"Билдирмелер"</string>
     <string name="bluetooth_tethered" msgid="7094101612161133267">"Bluetooth жалгашты"</string>
     <string name="status_bar_input_method_settings_configure_input_methods" msgid="3504292471512317827">"Киргизүү ыкмасын тууралоо"</string>
     <string name="status_bar_use_physical_keyboard" msgid="7551903084416057810">"Аппараттык тергич"</string>
@@ -148,20 +148,23 @@
     <string name="data_connection_gprs" msgid="7652872568358508452">"GPRS"</string>
     <string name="data_connection_hspa" msgid="1499615426569473562">"HSPA"</string>
     <string name="data_connection_3g" msgid="503045449315378373">"3G"</string>
-    <string name="data_connection_3_5g" msgid="5218328297191657602">"3.5G"</string>
-    <string name="data_connection_3_5g_plus" msgid="7570783890290275297">"3.5G+"</string>
+    <string name="data_connection_3_5g" msgid="3164370985817123144">"H"</string>
+    <string name="data_connection_3_5g_plus" msgid="4464630787664529264">"H+"</string>
     <string name="data_connection_4g" msgid="9139963475267449144">"4G"</string>
     <string name="data_connection_4g_plus" msgid="1148687201877800700">"4G+"</string>
     <string name="data_connection_lte" msgid="2694876797724028614">"LTE"</string>
     <string name="data_connection_lte_plus" msgid="3423013208570937424">"LTE+"</string>
-    <string name="data_connection_cdma" msgid="4677985502159869585">"CDMA"</string>
+    <string name="data_connection_cdma" msgid="8176597308239086780">"1X"</string>
     <string name="data_connection_roaming" msgid="6037232010953697354">"Роуминг"</string>
     <string name="data_connection_edge" msgid="871835227939216682">"EDGE"</string>
     <string name="accessibility_data_connection_wifi" msgid="2324496756590645221">"Wi-Fi"</string>
     <string name="accessibility_no_sim" msgid="8274017118472455155">"SIM карта жок."</string>
     <string name="accessibility_cell_data" msgid="5326139158682385073">"Мобилдик Интернет"</string>
     <string name="accessibility_cell_data_on" msgid="5927098403452994422">"Мобилдик Интернет күйгүзүлгөн"</string>
-    <string name="cell_data_off" msgid="5287705247512911922">"Мобилдик Интернет өчүрүлгөн"</string>
+    <!-- no translation found for cell_data_off_content_description (4356113230238585072) -->
+    <skip />
+    <!-- no translation found for cell_data_off (1051264981229902873) -->
+    <skip />
     <string name="accessibility_bluetooth_tether" msgid="4102784498140271969">"Bluetooth аркылуу интернет бөлүшүү."</string>
     <string name="accessibility_airplane_mode" msgid="834748999790763092">"Учак тартиби."</string>
     <string name="accessibility_vpn_on" msgid="5993385083262856059">"VPN күйүк."</string>
@@ -171,7 +174,7 @@
     <string name="accessibility_battery_level" msgid="7451474187113371965">"Батарея <xliff:g id="NUMBER">%d</xliff:g> пайыз."</string>
     <string name="accessibility_battery_level_charging" msgid="1147587904439319646">"Батарея кубатталууда, <xliff:g id="BATTERY_PERCENTAGE">%d</xliff:g> пайыз."</string>
     <string name="accessibility_settings_button" msgid="799583911231893380">"Система тууралоолору."</string>
-    <string name="accessibility_notifications_button" msgid="4498000369779421892">"Эскертмелер."</string>
+    <string name="accessibility_notifications_button" msgid="4498000369779421892">"Билдирмелер"</string>
     <string name="accessibility_overflow_action" msgid="5681882033274783311">"Бардык эскертмелерди көрүү"</string>
     <string name="accessibility_remove_notification" msgid="3603099514902182350">"Эскертмелерди тазалоо."</string>
     <string name="accessibility_gps_enabled" msgid="3511469499240123019">"GPS жандырылган."</string>
@@ -189,7 +192,7 @@
     <string name="accessibility_recents_item_open_app_info" msgid="5107479759905883540">"<xliff:g id="APP">%s</xliff:g> колдонмосу жөнүндө маалыматты ачыңыз."</string>
     <string name="accessibility_recents_item_launched" msgid="7616039892382525203">"<xliff:g id="APP">%s</xliff:g> иштеп баштоодо."</string>
     <string name="accessibility_notification_dismissed" msgid="854211387186306927">"Эскертме жок кылынды."</string>
-    <string name="accessibility_desc_notification_shade" msgid="4690274844447504208">"Эскертмелер көшөгөсү."</string>
+    <string name="accessibility_desc_notification_shade" msgid="4690274844447504208">"Билдирмелер тактасы."</string>
     <string name="accessibility_desc_quick_settings" msgid="6186378411582437046">"Тез тууралоолор."</string>
     <string name="accessibility_desc_lock_screen" msgid="5625143713611759164">"Кулпуланган экран."</string>
     <string name="accessibility_desc_settings" msgid="3417884241751434521">"Жөндөөлөр"</string>
@@ -332,7 +335,7 @@
       <item quantity="other">%d түзмөк</item>
       <item quantity="one">%d түзмөк</item>
     </plurals>
-    <string name="quick_settings_notifications_label" msgid="4818156442169154523">"Эскертмелер"</string>
+    <string name="quick_settings_notifications_label" msgid="4818156442169154523">"Билдирмелер"</string>
     <string name="quick_settings_flashlight_label" msgid="2133093497691661546">"Кол чырак"</string>
     <string name="quick_settings_cellular_detail_title" msgid="3661194685666477347">"Мобилдик Интернет"</string>
     <string name="quick_settings_cellular_detail_data_usage" msgid="1964260360259312002">"Дайындардын өткөрүлүшү"</string>
@@ -359,6 +362,9 @@
     <string name="recents_launch_disabled_message" msgid="1624523193008871793">"<xliff:g id="APP">%s</xliff:g> коопсуз режиминде өчүрүлдү."</string>
     <string name="recents_stack_action_button_label" msgid="6593727103310426253">"Баарын тазалоо"</string>
     <string name="recents_drag_hint_message" msgid="2649739267073203985">"Экранды бөлүү үчүн бул жерге сүйрөңүз"</string>
+    <string name="recents_swipe_up_onboarding" msgid="3824607135920170001">"Колдонмолорду которуштуруу үчүн өйдө сүрүңүз"</string>
+    <!-- no translation found for recents_quick_scrub_onboarding (2778062804333285789) -->
+    <skip />
     <string name="recents_multistack_add_stack_dialog_split_horizontal" msgid="8848514474543427332">"Туурасынан бөлүү"</string>
     <string name="recents_multistack_add_stack_dialog_split_vertical" msgid="9075292233696180813">"Тигинен бөлүү"</string>
     <string name="recents_multistack_add_stack_dialog_split_custom" msgid="4177837597513701943">"Ыңгайлаштырылган бөлүү"</string>
@@ -433,7 +439,7 @@
     <string name="manage_notifications_text" msgid="8035284146227267681">"Эскертмелерди башкаруу"</string>
     <string name="dnd_suppressing_shade_text" msgid="5179021215370153526">"\"Тынчымды алба\" режими эскертмелерди жашырууда"</string>
     <string name="media_projection_action_text" msgid="8470872969457985954">"Азыр баштоо"</string>
-    <string name="empty_shade_text" msgid="708135716272867002">"Эскертмелер жок"</string>
+    <string name="empty_shade_text" msgid="708135716272867002">"Билдирме жок"</string>
     <string name="profile_owned_footer" msgid="8021888108553696069">"Профилди көзөмөлдөсө болот"</string>
     <string name="vpn_footer" msgid="2388611096129106812">"Тармак көзөмөлдөнүшү мүмкүн"</string>
     <string name="branded_vpn_footer" msgid="2168111859226496230">"Тармак көзөмөлдөнүшү мүмкүн"</string>
@@ -531,18 +537,15 @@
     <string name="volume_ringer_status_normal" msgid="4273142424125855384">"Шыңгыратуу"</string>
     <string name="volume_ringer_status_vibrate" msgid="1825615171021346557">"Дирилдөө"</string>
     <string name="volume_ringer_status_silent" msgid="6896394161022916369">"Үнсүз"</string>
-    <!-- no translation found for qs_status_phone_vibrate (204362991135761679) -->
-    <skip />
-    <!-- no translation found for qs_status_phone_muted (5437668875879171548) -->
-    <skip />
+    <string name="qs_status_phone_vibrate" msgid="204362991135761679">"Телефон дирилдөө режиминде"</string>
+    <string name="qs_status_phone_muted" msgid="5437668875879171548">"Телефондун үнү өчүрүлдү"</string>
     <string name="volume_stream_content_description_unmute" msgid="4436631538779230857">"%1$s. Үнүн чыгаруу үчүн таптап коюңуз."</string>
     <string name="volume_stream_content_description_vibrate" msgid="1187944970457807498">"%1$s. Дирилдөөгө коюу үчүн таптап коюңуз. Атайын мүмкүнчүлүктөр кызматынын үнүн өчүрүп койсо болот."</string>
     <string name="volume_stream_content_description_mute" msgid="3625049841390467354">"%1$s. Үнүн өчүрүү үчүн таптап коюңуз. Атайын мүмкүнчүлүктөр кызматынын үнүн өчүрүп койсо болот."</string>
     <string name="volume_stream_content_description_vibrate_a11y" msgid="6427727603978431301">"%1$s. Дирилдөөгө коюу үчүн басыңыз."</string>
     <string name="volume_stream_content_description_mute_a11y" msgid="8995013018414535494">"%1$s. Үнүн өчүрүү үчүн басыңыз."</string>
     <string name="volume_dialog_title" msgid="7272969888820035876">"%s үндү башкаруу элементтери"</string>
-    <!-- no translation found for volume_dialog_ringer_guidance_ring (3360373718388509040) -->
-    <skip />
+    <string name="volume_dialog_ringer_guidance_ring" msgid="3360373718388509040">"Чалуулар менен эскертмелердин үнү чыгарылат (<xliff:g id="VOLUME_LEVEL">%1$s</xliff:g>)"</string>
     <string name="output_title" msgid="5355078100792942802">"Медиа түзмөк"</string>
     <string name="output_calls_title" msgid="8717692905017206161">"Телефон чалуу"</string>
     <string name="output_none_found" msgid="5544982839808921091">"Түзмөктөр табылган жок"</string>
@@ -588,15 +591,15 @@
     <string name="enable_bluetooth_title" msgid="5027037706500635269">"Bluetooth күйгүзүлсүнбү?"</string>
     <string name="enable_bluetooth_message" msgid="9106595990708985385">"Баскычтобуңузду планшетиңизге туташтыруу үчүн, адегенде Bluetooth\'ту күйгүзүшүңүз керек."</string>
     <string name="enable_bluetooth_confirmation_ok" msgid="6258074250948309715">"Күйгүзүү"</string>
-    <string name="show_silently" msgid="6841966539811264192">"Эскертмелер үнсүз көрсөтүлсүн"</string>
+    <string name="show_silently" msgid="6841966539811264192">"Үнсүз көрүнөт"</string>
     <string name="block" msgid="2734508760962682611">"Бардык эскертмелерди бөгөттөө"</string>
     <string name="do_not_silence" msgid="6878060322594892441">"Үнү менен көрсөтүлсүн"</string>
     <string name="do_not_silence_block" msgid="4070647971382232311">"Үнү менен көрсөтүлүп бөгөттөлбөсүн"</string>
     <string name="tuner_full_importance_settings" msgid="3207312268609236827">"Эскертмелерди башкаруу каражаттары"</string>
     <string name="tuner_full_importance_settings_on" msgid="7545060756610299966">"Күйүк"</string>
     <string name="tuner_full_importance_settings_off" msgid="8208165412614935229">"Өчүк"</string>
-    <string name="power_notification_controls_description" msgid="4372459941671353358">"Бул функциянын жардамы менен ар бир колдонмо үчүн эскертменин маанилүүлүк деңгээлин 0дон 5ке чейин койсоңуз болот. \n\n"<b>"5-деңгээл"</b>" \n- Эскертмелер тизмесинин башында көрсөтүлсүн \n- Эскертмелер толук экранда көрсөтүлсүн \n- Калкып чыгуучу эскертмелерге уруксат берилсин \n\n"<b>"4-деңгээл"</b>" \n- Эскертмелер толук экранда көрсөтүлбөсүн \n- Калкып чыгуучу эскертмелерге уруксат берилсин \n\n"<b>"3-деңгээл"</b>" \n- Эскертмелер толук экранда көрсөтүлбөсүн \n- Калкып чыгуучу эскертмелерге тыюу салынсын \n\n"<b>"2-деңгээл"</b>" \n- Эскертмелер толук экранда көрсөтүлбөсүн \n- Калкып чыгуучу эскертмелерге тыюу салынсын \n- Эч качан добуш чыгып же дирилдебесин \n\n"<b>"1-деңгээл"</b>" \n- Эскертмелер толук экранда көрсөтүлбөсүн \n- Калкып чыгуучу эскертмелерге тыюу салынсын \n- Эч качан добуш чыгып же дирилдебесин \n- Кулпуланган экрандан жана абал тилкесинен жашырылсын \n- Эскертмелер тизмесинин аягында көрсөтүлсүн \n\n"<b>"0-деңгээл"</b>" \n- Колдонмодон алынган бардык эскертмелер бөгөттөлсүн"</string>
-    <string name="notification_header_default_channel" msgid="7506845022070889909">"Эскертмелер"</string>
+    <string name="power_notification_controls_description" msgid="4372459941671353358">"Бул функциянын жардамы менен ар бир колдонмо үчүн билдирменин маанилүүлүгүн 0дон 5ке чейин бааласаңыз болот. \n\n"<b>"5-деңгээл"</b>" \n- Билдирмелер тизмесинин өйдө жагында көрсөтүлөт \n- Билдирмелер толук экранда көрсөтүлөт \n- Калкып чыгуучу билдирмелерге уруксат берилет \n\n"<b>"4-деңгээл"</b>" \n- Билдирмелер толук экранда көрсөтүлбөйт \n- Калкып чыгуучу билдирмелерге уруксат берилет \n\n"<b>"3-деңгээл"</b>" \n- Билдирмелер толук экранда көрсөтүлбөйт \n- Калкып чыгуучу билдирмелерге тыюу салынат \n\n"<b>"2-деңгээл"</b>" \n- Билдирмелер толук экранда көрсөтүлбөйт \n- Калкып чыгуучу билдирмелерге тыюу салынат \n- Эч качан үн чыкпайт же дирилдебейт \n\n"<b>"1-деңгээл"</b>" \n- Билдирмелер толук экранда көрсөтүлбөйт \n- Калкып чыгуучу билдирмелерге тыюу салынат \n- Эч качан үн чыкпайт же дирилдебейт \n- Кулпуланган экрандан жана абал тилкесинен жашырылат \n- Билдирмелер тизмесинин ылдый жагында көрсөтүлөт \n\n"<b>"0-деңгээл"</b>" \n- Колдонмодон алынган бардык билдирмелер бөгөттөлөт"</string>
+    <string name="notification_header_default_channel" msgid="7506845022070889909">"Билдирмелер"</string>
     <string name="notification_channel_disabled" msgid="344536703863700565">"Мындан ары бул эскертмелер сизге көрсөтүлбөйт"</string>
     <string name="notification_channel_minimized" msgid="1664411570378910931">"Бул эскертмелер кичирейтилет"</string>
     <string name="inline_blocking_helper" msgid="3055064577771478591">"Адатта мындай эскертмелерди өткөрүп жибересиз. \nАлар көрсөтүлө берсинби?"</string>
@@ -674,8 +677,8 @@
     <string name="keyboard_shortcut_group_system_home" msgid="3054369431319891965">"Башкы бет"</string>
     <string name="keyboard_shortcut_group_system_recents" msgid="3154851905021926744">"Акыркылар"</string>
     <string name="keyboard_shortcut_group_system_back" msgid="2207004531216446378">"Артка"</string>
-    <string name="keyboard_shortcut_group_system_notifications" msgid="8366964080041773224">"Эскертмелер"</string>
-    <string name="keyboard_shortcut_group_system_shortcuts_helper" msgid="4892255911160332762">"Баскычтоптун кыска жолдору"</string>
+    <string name="keyboard_shortcut_group_system_notifications" msgid="8366964080041773224">"Билдирмелер"</string>
+    <string name="keyboard_shortcut_group_system_shortcuts_helper" msgid="4892255911160332762">"Ыкчам баскычтар"</string>
     <string name="keyboard_shortcut_group_system_switch_input" msgid="2334164096341310324">"Киргизүү ыкмасын которуштуруу"</string>
     <string name="keyboard_shortcut_group_applications" msgid="9129465955073449206">"Колдонмолор"</string>
     <string name="keyboard_shortcut_group_applications_assist" msgid="9095441910537146013">"Көмөкчү"</string>
@@ -693,8 +696,7 @@
     <string name="battery" msgid="7498329822413202973">"Батарея"</string>
     <string name="clock" msgid="7416090374234785905">"Саат"</string>
     <string name="headset" msgid="4534219457597457353">"Гарнитура"</string>
-    <!-- no translation found for accessibility_long_click_tile (6687350750091842525) -->
-    <skip />
+    <string name="accessibility_long_click_tile" msgid="6687350750091842525">"Жөндөөлөрдү ачуу"</string>
     <string name="accessibility_status_bar_headphones" msgid="9156307120060559989">"Гарнитуралар туташкан"</string>
     <string name="accessibility_status_bar_headset" msgid="8666419213072449202">"Гарнитура туташты"</string>
     <string name="data_saver" msgid="5037565123367048522">"Дайындарды үнөмдөгүч"</string>
