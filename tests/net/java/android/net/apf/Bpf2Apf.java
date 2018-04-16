@@ -307,7 +307,7 @@ public class Bpf2Apf {
      * program and return it.
      */
     public static byte[] convert(String bpf) throws IllegalInstructionException {
-        ApfGenerator gen = new ApfGenerator();
+        ApfGenerator gen = new ApfGenerator(3);
         for (String line : bpf.split("\\n")) convertLine(line, gen);
         return gen.generate();
     }
@@ -320,7 +320,7 @@ public class Bpf2Apf {
         BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
         String line = null;
         StringBuilder responseData = new StringBuilder();
-        ApfGenerator gen = new ApfGenerator();
+        ApfGenerator gen = new ApfGenerator(3);
         while ((line = in.readLine()) != null) convertLine(line, gen);
         System.out.write(gen.generate());
     }
