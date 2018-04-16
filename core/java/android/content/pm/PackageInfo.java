@@ -250,7 +250,7 @@ public class PackageInfo implements Parcelable {
      * reported signing certificate, so that an application will appear to
      * callers as though no rotation occurred.
      *
-     * @deprecated use {@code signingCertificateHistory} instead
+     * @deprecated use {@code signingInfo} instead
      */
     @Deprecated
     public Signature[] signatures;
