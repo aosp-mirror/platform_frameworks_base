@@ -74,10 +74,8 @@
     <string name="screenshot_saving_title" msgid="8242282144535555697">"ସ୍କ୍ରୀନଶଟ୍‍ ସେଭ୍‍ କରାଯାଉଛି…"</string>
     <string name="screenshot_saved_title" msgid="5637073968117370753">"ସ୍କ୍ରୀନଶଟ୍ ସେଭ୍ ହୋଇଛି"</string>
     <string name="screenshot_saved_text" msgid="7574667448002050363">"ସ୍କ୍ରୀନଶଟ୍‍ ଦେଖିବା ପାଇଁ ଟାପ୍‍ କରନ୍ତୁ"</string>
-    <!-- no translation found for screenshot_failed_title (7612509838919089748) -->
-    <skip />
-    <!-- no translation found for screenshot_failed_to_save_unknown_text (3637758096565605541) -->
-    <skip />
+    <string name="screenshot_failed_title" msgid="7612509838919089748">"ସ୍କ୍ରୀନ୍‍ଶଟ୍ ସେଭ୍ କରିହେବ ନାହିଁ"</string>
+    <string name="screenshot_failed_to_save_unknown_text" msgid="3637758096565605541">"ପୁଣିଥରେ ସ୍କ୍ରୀନ୍‌ଶଟ୍ ନେବାକୁ ଚେଷ୍ଟା କରନ୍ତୁ"</string>
     <string name="screenshot_failed_to_save_text" msgid="3041612585107107310">"ସୀମିତ ଷ୍ଟୋରେଜ୍‍ ସ୍ପେସ୍‍ ହେତୁ ସ୍କ୍ରୀନଶଟ୍‍ ସେଭ୍‍ ହୋଇପାରିବ ନାହିଁ"</string>
     <string name="screenshot_failed_to_capture_text" msgid="173674476457581486">"ଆପ୍‍ କିମ୍ବା ସଂସ୍ଥା ଦ୍ୱାରା ସ୍କ୍ରୀନଶଟ୍‍ ନେବାକୁ ଅନୁମତି ଦିଆଯାଇ ନାହିଁ"</string>
     <string name="usb_preference_title" msgid="6551050377388882787">"USB ଫାଇଲ୍‌ ଟ୍ରାନ୍ସଫର୍‌ର ବିକଳ୍ପ"</string>
@@ -150,20 +148,26 @@
     <string name="data_connection_gprs" msgid="7652872568358508452">"GPRS"</string>
     <string name="data_connection_hspa" msgid="1499615426569473562">"HSPA"</string>
     <string name="data_connection_3g" msgid="503045449315378373">"3G"</string>
-    <string name="data_connection_3_5g" msgid="5218328297191657602">"3.5G"</string>
-    <string name="data_connection_3_5g_plus" msgid="7570783890290275297">"4G+"</string>
+    <!-- no translation found for data_connection_3_5g (3164370985817123144) -->
+    <skip />
+    <!-- no translation found for data_connection_3_5g_plus (4464630787664529264) -->
+    <skip />
     <string name="data_connection_4g" msgid="9139963475267449144">"4G"</string>
     <string name="data_connection_4g_plus" msgid="1148687201877800700">"4G+"</string>
     <string name="data_connection_lte" msgid="2694876797724028614">"LTE"</string>
     <string name="data_connection_lte_plus" msgid="3423013208570937424">"LTE+"</string>
-    <string name="data_connection_cdma" msgid="4677985502159869585">"CDMA"</string>
+    <!-- no translation found for data_connection_cdma (8176597308239086780) -->
+    <skip />
     <string name="data_connection_roaming" msgid="6037232010953697354">"ରୋମିଙ୍ଗ"</string>
     <string name="data_connection_edge" msgid="871835227939216682">"EDGE"</string>
     <string name="accessibility_data_connection_wifi" msgid="2324496756590645221">"ୱାଇ-ଫାଇ"</string>
     <string name="accessibility_no_sim" msgid="8274017118472455155">"କୌଣସି SIM ନାହିଁ।"</string>
     <string name="accessibility_cell_data" msgid="5326139158682385073">"ମୋବାଇଲ୍‌ ଡାଟା"</string>
     <string name="accessibility_cell_data_on" msgid="5927098403452994422">"ମୋବାଇଲ୍‌ ଡାଟା ଅନ୍‍"</string>
-    <string name="cell_data_off" msgid="5287705247512911922">"ମୋବାଇଲ୍‌ ଡାଟା ଅଫ୍ ଅଛି"</string>
+    <!-- no translation found for cell_data_off_content_description (4356113230238585072) -->
+    <skip />
+    <!-- no translation found for cell_data_off (1051264981229902873) -->
+    <skip />
     <string name="accessibility_bluetooth_tether" msgid="4102784498140271969">"ବ୍ଲୁ-ଟୁଥ୍‍ ଟିଥରିଙ୍ଗ"</string>
     <string name="accessibility_airplane_mode" msgid="834748999790763092">"ଏରୋପ୍ଲେନ୍‍ ମୋଡ୍‌।"</string>
     <string name="accessibility_vpn_on" msgid="5993385083262856059">"VPN ଅନ୍‍।"</string>
@@ -348,8 +352,7 @@
     <string name="quick_settings_night_secondary_label_on_at_sunset" msgid="8483259341596943314">"ସୂର୍ଯ୍ୟାସ୍ତ ବେଳେ ଅନ୍ ହେବ"</string>
     <string name="quick_settings_night_secondary_label_until_sunrise" msgid="4453017157391574402">"ସୂର୍ଯ୍ୟୋଦୟ ପର୍ଯ୍ୟନ୍ତ"</string>
     <string name="quick_settings_night_secondary_label_on_at" msgid="6256314040368487637">"<xliff:g id="TIME">%s</xliff:g>ରେ ଅନ୍ ହେବ"</string>
-    <!-- no translation found for quick_settings_secondary_label_until (2749196569462600150) -->
-    <skip />
+    <string name="quick_settings_secondary_label_until" msgid="2749196569462600150">"<xliff:g id="TIME">%s</xliff:g> ପର୍ଯ୍ୟନ୍ତ"</string>
     <string name="quick_settings_nfc_label" msgid="9012153754816969325">"NFC"</string>
     <string name="quick_settings_nfc_off" msgid="6883274004315134333">"NFC ଅକ୍ଷମ କରାଯାଇଛି"</string>
     <string name="quick_settings_nfc_on" msgid="6680317193676884311">"NFC ସକ୍ଷମ କରାଯାଇଛି"</string>
@@ -362,6 +365,10 @@
     <string name="recents_launch_disabled_message" msgid="1624523193008871793">"<xliff:g id="APP">%s</xliff:g> ସୁରକ୍ଷିତ-ମୋଡ୍‌ରେ ଅକ୍ଷମ ଅଟେ।"</string>
     <string name="recents_stack_action_button_label" msgid="6593727103310426253">"ସବୁ ଖାଲି କରନ୍ତୁ"</string>
     <string name="recents_drag_hint_message" msgid="2649739267073203985">"ସ୍ପ୍ଲିଟ୍‍ ସ୍କ୍ରୀନ୍‍ ବ୍ୟବହାର କରିବା ପାଇଁ ଏଠାକୁ ଡ୍ରାଗ୍‌ କରନ୍ତୁ"</string>
+    <!-- no translation found for recents_swipe_up_onboarding (3824607135920170001) -->
+    <skip />
+    <!-- no translation found for recents_quick_scrub_onboarding (2778062804333285789) -->
+    <skip />
     <string name="recents_multistack_add_stack_dialog_split_horizontal" msgid="8848514474543427332">"ଭୂସମାନ୍ତର ଭାବରେ ଭାଗ କରନ୍ତୁ"</string>
     <string name="recents_multistack_add_stack_dialog_split_vertical" msgid="9075292233696180813">"ଭୂଲମ୍ବ ଭାବରେ ଭାଗ କରନ୍ତୁ"</string>
     <string name="recents_multistack_add_stack_dialog_split_custom" msgid="4177837597513701943">"କଷ୍ଟମ୍‍ କରି ଭାଗ କରନ୍ତୁ"</string>
@@ -433,8 +440,7 @@
     <string name="media_projection_dialog_text" msgid="3071431025448218928">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> ଆପଣଙ୍କ ସ୍କ୍ରୀନ୍‌ରେ ପ୍ରଦର୍ଶିତ ହେଉଥିବା ସମସ୍ତ ବସ୍ତୁକୁ କ୍ୟାପଚର୍ କରିବା ଆରମ୍ଭ ହୋଇଯିବ।"</string>
     <string name="media_projection_remember_text" msgid="3103510882172746752">"ପୁଣି ଦେଖାନ୍ତୁ ନାହିଁ"</string>
     <string name="clear_all_notifications_text" msgid="814192889771462828">"ସମସ୍ତ ଖାଲି କରନ୍ତୁ"</string>
-    <!-- no translation found for manage_notifications_text (8035284146227267681) -->
-    <skip />
+    <string name="manage_notifications_text" msgid="8035284146227267681">"ବିଜ୍ଞପ୍ତି ପରିଚାଳନା କରନ୍ତୁ"</string>
     <string name="dnd_suppressing_shade_text" msgid="5179021215370153526">"\"ବିରକ୍ତ କରନ୍ତୁ ନାହିଁ\" ମୋଡ୍‌ ଅନ୍‌ ଥିବାଯୋଗୁଁ ବିଜ୍ଞପ୍ତି ଲୁଚାଇ ଦିଆଯାଉଛି"</string>
     <string name="media_projection_action_text" msgid="8470872969457985954">"ବର୍ତ୍ତମାନ ଆରମ୍ଭ କରନ୍ତୁ"</string>
     <string name="empty_shade_text" msgid="708135716272867002">"କୌଣସି ବିଜ୍ଞପ୍ତି ନାହିଁ"</string>
@@ -535,18 +541,15 @@
     <string name="volume_ringer_status_normal" msgid="4273142424125855384">"ରିଙ୍ଗ"</string>
     <string name="volume_ringer_status_vibrate" msgid="1825615171021346557">"ଭାଇବ୍ରେଟ୍‌"</string>
     <string name="volume_ringer_status_silent" msgid="6896394161022916369">"ମ୍ୟୁଟ୍"</string>
-    <!-- no translation found for qs_status_phone_vibrate (204362991135761679) -->
-    <skip />
-    <!-- no translation found for qs_status_phone_muted (5437668875879171548) -->
-    <skip />
+    <string name="qs_status_phone_vibrate" msgid="204362991135761679">"ଫୋନ୍ ଭାଇବ୍ରେଟ୍‌ରେ ଅଛି"</string>
+    <string name="qs_status_phone_muted" msgid="5437668875879171548">"ଫୋନ୍‌ ମ୍ୟୁଟ୍‌ରେ ଅଛି"</string>
     <string name="volume_stream_content_description_unmute" msgid="4436631538779230857">"%1$s। ଅନମ୍ୟୁଟ୍‍ କରିବା ପାଇଁ ଟାପ୍‍ କରନ୍ତୁ।"</string>
     <string name="volume_stream_content_description_vibrate" msgid="1187944970457807498">"%1$s। ଭାଇବ୍ରେଟ୍‍ ସେଟ୍‍ କରିବାକୁ ଟାପ୍‍ କରନ୍ତୁ। ଆକ୍ସେସିବିଲିଟୀ ସର୍ଭିସ୍‌ ମ୍ୟୁଟ୍‍ କରାଯାଇପାରେ।"</string>
     <string name="volume_stream_content_description_mute" msgid="3625049841390467354">"%1$s। ମ୍ୟୁଟ୍‍ କରିବାକୁ ଟାପ୍‍ କରନ୍ତୁ। ଆକ୍ସେସିବିଲିଟୀ ସର୍ଭିସ୍‌ ମ୍ୟୁଟ୍‍ କରାଯାଇପାରେ।"</string>
     <string name="volume_stream_content_description_vibrate_a11y" msgid="6427727603978431301">"%1$s। ଭାଇବ୍ରେଟରେ ସେଟ୍‍ କରିବାକୁ ଟାପ୍‍ କରନ୍ତୁ।"</string>
     <string name="volume_stream_content_description_mute_a11y" msgid="8995013018414535494">"%1$s। ମ୍ୟୁଟ୍‍ କରିବାକୁ ଟାପ୍‍ କରନ୍ତୁ।"</string>
     <string name="volume_dialog_title" msgid="7272969888820035876">"%s ଭଲ୍ୟୁମ୍ ନିୟନ୍ତ୍ରଣ"</string>
-    <!-- no translation found for volume_dialog_ringer_guidance_ring (3360373718388509040) -->
-    <skip />
+    <string name="volume_dialog_ringer_guidance_ring" msgid="3360373718388509040">"କଲ୍ ଓ ବିଜ୍ଞପ୍ତି ପାଇଁ (<xliff:g id="VOLUME_LEVEL">%1$s</xliff:g>)ରେ ରିଙ୍ଗ ହେବ"</string>
     <string name="output_title" msgid="5355078100792942802">"ମିଡିଆ ଆଉଟପୁଟ୍‍"</string>
     <string name="output_calls_title" msgid="8717692905017206161">"ଫୋନ୍‍ କଲ୍‍ ଆଉଟପୁଟ୍‍"</string>
     <string name="output_none_found" msgid="5544982839808921091">"କୌଣସି ଡିଭାଇସ୍ ମିଳିଲା ନାହିଁ"</string>
@@ -633,8 +636,7 @@
     <string name="notification_menu_accessibility" msgid="2046162834248888553">"<xliff:g id="APP_NAME">%1$s</xliff:g> <xliff:g id="MENU_DESCRIPTION">%2$s</xliff:g>"</string>
     <string name="notification_menu_gear_description" msgid="2204480013726775108">"ବିଜ୍ଞପ୍ତି ନିୟନ୍ତ୍ରଣ"</string>
     <string name="notification_menu_snooze_description" msgid="3653669438131034525">"ବିଜ୍ଞପ୍ତି ସ୍ନୁଜ୍‍ ବିକଳ୍ପ"</string>
-    <!-- no translation found for notification_menu_snooze_action (1112254519029621372) -->
-    <skip />
+    <string name="notification_menu_snooze_action" msgid="1112254519029621372">"ସ୍ନୁଜ୍"</string>
     <string name="snooze_undo" msgid="6074877317002985129">"ପୂର୍ବାବସ୍ଥାକୁ ଫେରାଇ ଆଣନ୍ତୁ"</string>
     <string name="snoozed_for_time" msgid="2390718332980204462">"<xliff:g id="TIME_AMOUNT">%1$s</xliff:g> ପାଇଁ ସ୍ନୁଜ୍‍ କରାଗଲା"</string>
     <plurals name="snoozeHourOptions" formatted="false" msgid="2124335842674413030">
@@ -698,8 +700,7 @@
     <string name="battery" msgid="7498329822413202973">"ବ୍ୟାଟେରୀ"</string>
     <string name="clock" msgid="7416090374234785905">"ଘଣ୍ଟା"</string>
     <string name="headset" msgid="4534219457597457353">"ହେଡସେଟ୍‍"</string>
-    <!-- no translation found for accessibility_long_click_tile (6687350750091842525) -->
-    <skip />
+    <string name="accessibility_long_click_tile" msgid="6687350750091842525">"ସେଟିଙ୍ଗ ଖୋଲନ୍ତୁ"</string>
     <string name="accessibility_status_bar_headphones" msgid="9156307120060559989">"ହେଡଫୋନ୍‍ ସଂଯୁକ୍ତ"</string>
     <string name="accessibility_status_bar_headset" msgid="8666419213072449202">"ହେଡସେଟ୍‍ ସଂଯୁକ୍ତ"</string>
     <string name="data_saver" msgid="5037565123367048522">"ଡାଟା ସେଭର୍‍"</string>
