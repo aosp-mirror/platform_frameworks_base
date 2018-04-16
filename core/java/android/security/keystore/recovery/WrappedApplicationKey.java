@@ -80,7 +80,7 @@ public final class WrappedApplicationKey implements Parcelable {
          */
         @Deprecated
         public Builder setAccount(@NonNull byte[] account) {
-            return this;
+            throw new UnsupportedOperationException();
         }
 
         /**
@@ -139,7 +139,7 @@ public final class WrappedApplicationKey implements Parcelable {
      */
     @Deprecated
     public @NonNull byte[] getAccount() {
-        return new byte[0];
+        throw new UnsupportedOperationException();
     }
 
     public static final Parcelable.Creator<WrappedApplicationKey> CREATOR =

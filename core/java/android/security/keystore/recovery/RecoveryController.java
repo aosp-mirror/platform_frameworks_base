@@ -309,17 +309,7 @@ public class RecoveryController {
     public void initRecoveryService(
             @NonNull String rootCertificateAlias, @NonNull byte[] signedPublicKeyList)
             throws CertificateException, InternalRecoveryServiceException {
-        try {
-            mBinder.initRecoveryService(rootCertificateAlias, signedPublicKeyList);
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        } catch (ServiceSpecificException e) {
-            if (e.errorCode == ERROR_BAD_CERTIFICATE_FORMAT
-                    || e.errorCode == ERROR_INVALID_CERTIFICATE) {
-                throw new CertificateException("Invalid certificate for recovery service", e);
-            }
-            throw wrapUnexpectedServiceSpecificException(e);
-        }
+        throw new UnsupportedOperationException();
     }
 
     /**
@@ -379,7 +369,7 @@ public class RecoveryController {
     @Deprecated
     @RequiresPermission(android.Manifest.permission.RECOVER_KEYSTORE)
     public @Nullable KeyChainSnapshot getRecoveryData() throws InternalRecoveryServiceException {
-        return getKeyChainSnapshot();
+        throw new UnsupportedOperationException();
     }
 
     /**
@@ -457,7 +447,7 @@ public class RecoveryController {
     @RequiresPermission(android.Manifest.permission.RECOVER_KEYSTORE)
     public List<String> getAliases(@Nullable String packageName)
             throws InternalRecoveryServiceException {
-        return getAliases();
+        throw new UnsupportedOperationException();
     }
 
     /**
@@ -484,7 +474,7 @@ public class RecoveryController {
     public void setRecoveryStatus(
             @NonNull String packageName, String alias, int status)
             throws NameNotFoundException, InternalRecoveryServiceException {
-        setRecoveryStatus(alias, status);
+        throw new UnsupportedOperationException();
     }
 
     /**
@@ -518,7 +508,7 @@ public class RecoveryController {
     @RequiresPermission(android.Manifest.permission.RECOVER_KEYSTORE)
     public int getRecoveryStatus(String packageName, String alias)
             throws InternalRecoveryServiceException {
-        return getRecoveryStatus(alias);
+        throw new UnsupportedOperationException();
     }
 
     /**
@@ -623,7 +613,7 @@ public class RecoveryController {
     @RequiresPermission(android.Manifest.permission.RECOVER_KEYSTORE)
     public Key generateKey(@NonNull String alias, byte[] account)
             throws InternalRecoveryServiceException, LockScreenRequiredException {
-        return generateKey(alias);
+        throw new UnsupportedOperationException();
     }
 
     /**
