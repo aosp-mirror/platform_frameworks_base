@@ -38,10 +38,10 @@ public class QSContainerImpl extends FrameLayout {
     private final Point mSizePoint = new Point();
 
     private int mHeightOverride = -1;
-    protected View mQSPanel;
+    private QSPanel mQSPanel;
     private View mQSDetail;
-    protected View mHeader;
-    protected float mQsExpansion;
+    private View mHeader;
+    private float mQsExpansion;
     private QSCustomizer mQSCustomizer;
     private View mQSFooter;
 
@@ -188,7 +188,7 @@ public class QSContainerImpl extends FrameLayout {
         setMargins(mQSDetail);
         setMargins(mBackground);
         setMargins(mQSFooter);
-        setMargins(mQSPanel);
+        mQSPanel.setMargins(mSideMargins);
         setMargins(mHeader);
     }
 
