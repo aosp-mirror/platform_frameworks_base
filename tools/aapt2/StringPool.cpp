@@ -172,9 +172,10 @@ StringPool::Ref StringPool::MakeRef(const StringPiece& str, const Context& conte
 StringPool::Ref StringPool::MakeRefImpl(const StringPiece& str, const Context& context,
                                         bool unique) {
   if (unique) {
-    auto iter = indexed_strings_.find(str);
-    if (iter != std::end(indexed_strings_)) {
-      return Ref(iter->second);
+    for (auto& indexed_str : indexed_strings_) {
+      if (str == indexed_str.first && context.priority == indexed_str.second->context.priority) {
+        return Ref(indexed_str.second);
+      }
     }
   }
 
