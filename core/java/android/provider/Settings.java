@@ -3673,17 +3673,6 @@ public final class Settings {
         public static final Validator TTY_MODE_VALIDATOR = new InclusiveIntegerRangeValidator(0, 3);
 
         /**
-         * User-selected RTT mode. When on, outgoing and incoming calls will be answered as RTT
-         * calls when supported by the device and carrier. Boolean value.
-         * 0 = OFF
-         * 1 = ON
-         */
-        public static final String RTT_CALLING_MODE = "rtt_calling_mode";
-
-        /** @hide */
-        public static final Validator RTT_CALLING_MODE_VALIDATOR = sBooleanValidator;
-
-        /**
          * Whether the sounds effects (key clicks, lid open ...) are enabled. The value is
          * boolean (1 or 0).
          */
@@ -4003,7 +3992,6 @@ public final class Settings {
             DTMF_TONE_WHEN_DIALING,
             DTMF_TONE_TYPE_WHEN_DIALING,
             HEARING_AID,
-            RTT_CALLING_MODE,
             TTY_MODE,
             MASTER_MONO,
             SOUND_EFFECTS_ENABLED,
@@ -4187,7 +4175,6 @@ public final class Settings {
             VALIDATORS.put(DTMF_TONE_TYPE_WHEN_DIALING, DTMF_TONE_TYPE_WHEN_DIALING_VALIDATOR);
             VALIDATORS.put(HEARING_AID, HEARING_AID_VALIDATOR);
             VALIDATORS.put(TTY_MODE, TTY_MODE_VALIDATOR);
-            VALIDATORS.put(RTT_CALLING_MODE, RTT_CALLING_MODE_VALIDATOR);
             VALIDATORS.put(NOTIFICATION_LIGHT_PULSE, NOTIFICATION_LIGHT_PULSE_VALIDATOR);
             VALIDATORS.put(POINTER_LOCATION, POINTER_LOCATION_VALIDATOR);
             VALIDATORS.put(SHOW_TOUCHES, SHOW_TOUCHES_VALIDATOR);
@@ -6262,6 +6249,15 @@ public final class Settings {
         public static final String TTY_MODE_ENABLED = "tty_mode_enabled";
 
         /**
+         * User-selected RTT mode. When on, outgoing and incoming calls will be answered as RTT
+         * calls when supported by the device and carrier. Boolean value.
+         * 0 = OFF
+         * 1 = ON
+         */
+        public static final String RTT_CALLING_MODE = "rtt_calling_mode";
+
+        /**
+        /**
          * Controls whether settings backup is enabled.
          * Type: int ( 0 = disabled, 1 = enabled )
          * @hide
@@ -7218,6 +7214,7 @@ public final class Settings {
             PREFERRED_TTY_MODE,
             ENHANCED_VOICE_PRIVACY_ENABLED,
             TTY_MODE_ENABLED,
+            RTT_CALLING_MODE,
             INCALL_POWER_BUTTON_BEHAVIOR,
             NIGHT_DISPLAY_CUSTOM_START_TIME,
             NIGHT_DISPLAY_CUSTOM_END_TIME,
