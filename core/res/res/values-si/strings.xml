@@ -1692,8 +1692,7 @@
     <string name="package_installed_device_owner" msgid="6875717669960212648">"ඔබගේ පරිපාලක මඟින් ස්ථාපනය කර ඇත"</string>
     <string name="package_updated_device_owner" msgid="1847154566357862089">"ඔබගේ පරිපාලක මඟින් යාවත්කාලීන කර ඇත"</string>
     <string name="package_deleted_device_owner" msgid="2307122077550236438">"ඔබගේ පරිපාලක මඟින් මකා දමා ඇත"</string>
-    <!-- no translation found for battery_saver_description (769989536172631582) -->
-    <skip />
+    <string name="battery_saver_description" msgid="769989536172631582">"ඔබගේ බැටරි ආයු කාලය දිගු කිරීමට, බැටරි සුරැකුම සමහර උපාංග විශේෂාංග ක්‍රියාවිරහිත කර යෙදුම් සීමා කරයි."</string>
     <string name="data_saver_description" msgid="6015391409098303235">"දත්ත භාවිතය අඩු කිරීමට උදවු වීමට, දත්ත සුරැකුම සමහර යෙදුම් පසුබිමින් දත්ත යැවීම සහ ලබා ගැනීම වළක්වයි. ඔබ දැනට භාවිත කරන යෙදුමකට දත්ත වෙත පිවිසීමට හැකිය, නමුත් එසේ කරන්නේ කලාතුරකින් විය හැකිය. මෙයින් අදහස් වන්නේ, උදාහරණයක් ලෙස, එම රූප ඔබ ඒවාට තට්ටු කරන තෙක් සංදර්ශනය නොවන බවය."</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"දත්ත සුරැකුම ක්‍රියාත්මක කරන්නද?"</string>
     <string name="data_saver_enable_button" msgid="7147735965247211818">"ක්‍රියාත්මක කරන්න"</string>
@@ -1780,9 +1779,12 @@
     <string name="language_picker_section_all" msgid="3097279199511617537">"සියලු භාෂා"</string>
     <string name="region_picker_section_all" msgid="8966316787153001779">"සියලු ප්‍රදේශ"</string>
     <string name="locale_search_menu" msgid="2560710726687249178">"සෙවීම"</string>
-    <string name="app_suspended_title" msgid="5360409799785895488">"ක්‍රියාව ඉඩ නොදේ"</string>
-    <string name="app_suspended_default_message" msgid="5876776530189983288">"අයදුම්පත <xliff:g id="APP_NAME">%1$s</xliff:g> දැනට අබල කර ඇත."</string>
-    <string name="app_suspended_more_details" msgid="2901244470963918402">"වැඩි විස්තර"</string>
+    <!-- no translation found for app_suspended_title (1919029799438164552) -->
+    <skip />
+    <!-- no translation found for app_suspended_default_message (7875306315686531621) -->
+    <skip />
+    <!-- no translation found for app_suspended_more_details (1131804827776778187) -->
+    <skip />
     <string name="work_mode_off_title" msgid="1118691887588435530">"කාර්යාල පැතිකඩ ක්‍රියාත්මක කරන්නද?"</string>
     <string name="work_mode_off_message" msgid="5130856710614337649">"ඔබගේ වැඩ යෙදුම්, දැනුම්දීම්, දත්ත සහ වෙනත් කාර්යාල පැතිකඩ විශේෂාංග ක්‍රියාත්මක කරනු ඇත"</string>
     <string name="work_mode_turn_on" msgid="2062544985670564875">"ක්‍රියාත්මක කරන්න"</string>
@@ -1872,12 +1874,12 @@
     <string name="volume_dialog_ringer_guidance_silent" msgid="2128975224280276122">"ඇමතුම් සහ දැනුම්දීම් නිහඬ වනු ඇත"</string>
     <string name="notification_channel_system_changes" msgid="5072715579030948646">"පද්ධති වෙනස් කිරීම්"</string>
     <string name="notification_channel_do_not_disturb" msgid="6766940333105743037">"බාධා නොකරන්න"</string>
-    <!-- no translation found for zen_upgrade_notification_visd_title (3288313883409759733) -->
-    <skip />
-    <!-- no translation found for zen_upgrade_notification_visd_content (5533674060311631165) -->
-    <skip />
+    <string name="zen_upgrade_notification_visd_title" msgid="3288313883409759733">"නව: බාධා නොකරන්න දැනුම්දීම් සඟවමින්"</string>
+    <string name="zen_upgrade_notification_visd_content" msgid="5533674060311631165">"තව දැන ගැනීමට සහ වෙනස් කිරීමට තට්ටු කරන්න."</string>
     <string name="zen_upgrade_notification_title" msgid="3799603322910377294">"බාධා නොකරන්න වෙනස් කර ඇත"</string>
     <string name="zen_upgrade_notification_content" msgid="1794994264692424562">"අවහිර කර ඇති දේ පරීක්ෂා කිරීමට තට්ටු කරන්න."</string>
     <string name="notification_app_name_system" msgid="4205032194610042794">"පද්ධතිය"</string>
     <string name="notification_app_name_settings" msgid="7751445616365753381">"සැකසීම්"</string>
+    <!-- no translation found for car_loading_profile (3545132581795684027) -->
+    <skip />
 </resources>

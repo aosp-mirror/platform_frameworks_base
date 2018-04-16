@@ -522,7 +522,7 @@ public class ApfFilter {
                     ICMP6_4_BYTE_LIFETIME_OFFSET, ICMP6_4_BYTE_LIFETIME_LEN);
         }
 
-        // Note that this parses RA and may throw IllegalArgumentException (from
+        // Note that this parses RA and may throw InvalidRaException (from
         // Buffer.position(int) or due to an invalid-length option) or IndexOutOfBoundsException
         // (from ByteBuffer.get(int) ) if parsing encounters something non-compliant with
         // specifications.
@@ -986,9 +986,8 @@ public class ApfFilter {
      */
     @GuardedBy("this")
     private ApfGenerator beginProgramLocked() throws IllegalInstructionException {
-        ApfGenerator gen = new ApfGenerator();
-        // This is guaranteed to return true because of the check in maybeCreate.
-        gen.setApfVersion(mApfCapabilities.apfVersionSupported);
+        // This is guaranteed to succeed because of the check in maybeCreate.
+        ApfGenerator gen = new ApfGenerator(mApfCapabilities.apfVersionSupported);
 
         // Here's a basic summary of what the initial program does:
         //
@@ -1216,7 +1215,7 @@ public class ApfFilter {
         //   1. the program generator will need its offsets adjusted.
         //   2. the packet filter attached to our packet socket will need its offset adjusted.
         if (apfCapabilities.apfPacketFormat != ARPHRD_ETHER) return null;
-        if (!new ApfGenerator().setApfVersion(apfCapabilities.apfVersionSupported)) {
+        if (!ApfGenerator.supportsVersion(apfCapabilities.apfVersionSupported)) {
             Log.e(TAG, "Unsupported APF version: " + apfCapabilities.apfVersionSupported);
             return null;
         }

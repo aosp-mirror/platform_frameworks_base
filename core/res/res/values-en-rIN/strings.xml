@@ -1777,9 +1777,9 @@
     <string name="language_picker_section_all" msgid="3097279199511617537">"All languages"</string>
     <string name="region_picker_section_all" msgid="8966316787153001779">"All regions"</string>
     <string name="locale_search_menu" msgid="2560710726687249178">"Search"</string>
-    <string name="app_suspended_title" msgid="5360409799785895488">"Action not allowed"</string>
-    <string name="app_suspended_default_message" msgid="5876776530189983288">"The application <xliff:g id="APP_NAME">%1$s</xliff:g> is currently disabled."</string>
-    <string name="app_suspended_more_details" msgid="2901244470963918402">"More details"</string>
+    <string name="app_suspended_title" msgid="1919029799438164552">"Can’t open app"</string>
+    <string name="app_suspended_default_message" msgid="7875306315686531621">"The app <xliff:g id="APP_NAME_0">%1$s</xliff:g> isn’t available at the moment. This is managed by <xliff:g id="APP_NAME_1">%2$s</xliff:g>."</string>
+    <string name="app_suspended_more_details" msgid="1131804827776778187">"Learn more"</string>
     <string name="work_mode_off_title" msgid="1118691887588435530">"Turn on work profile?"</string>
     <string name="work_mode_off_message" msgid="5130856710614337649">"Your work apps, notifications, data and other work profile features will be turned on"</string>
     <string name="work_mode_turn_on" msgid="2062544985670564875">"Turn on"</string>
@@ -1833,7 +1833,7 @@
     <string name="autofill_save_title_with_2types" msgid="5214035651838265325">"Save <xliff:g id="TYPE_0">%1$s</xliff:g> and <xliff:g id="TYPE_1">%2$s</xliff:g> to &lt;b&gt;<xliff:g id="LABEL">%3$s</xliff:g>&lt;/b&gt;?"</string>
     <string name="autofill_save_title_with_3types" msgid="6943161834231458441">"Save <xliff:g id="TYPE_0">%1$s</xliff:g>, <xliff:g id="TYPE_1">%2$s</xliff:g>, and <xliff:g id="TYPE_2">%3$s</xliff:g> to &lt;b&gt;<xliff:g id="LABEL">%4$s</xliff:g>&lt;/b&gt;?"</string>
     <string name="autofill_save_yes" msgid="6398026094049005921">"Save"</string>
-    <string name="autofill_save_no" msgid="2625132258725581787">"No thanks"</string>
+    <string name="autofill_save_no" msgid="2625132258725581787">"No, thanks"</string>
     <string name="autofill_save_type_password" msgid="5288448918465971568">"password"</string>
     <string name="autofill_save_type_address" msgid="4936707762193009542">"address"</string>
     <string name="autofill_save_type_credit_card" msgid="7127694776265563071">"credit card"</string>
@@ -1875,4 +1875,5 @@
     <string name="zen_upgrade_notification_content" msgid="1794994264692424562">"Tap to check what\'s blocked."</string>
     <string name="notification_app_name_system" msgid="4205032194610042794">"System"</string>
     <string name="notification_app_name_settings" msgid="7751445616365753381">"Settings"</string>
+    <string name="car_loading_profile" msgid="3545132581795684027">"Loading"</string>
 </resources>

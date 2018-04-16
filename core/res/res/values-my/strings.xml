@@ -304,7 +304,7 @@
     <string name="capability_title_canRequestFilterKeyEvents" msgid="2103440391902412174">"ရိုက်သောစာများကို စောင့်ကြည့်ရန်"</string>
     <string name="capability_desc_canRequestFilterKeyEvents" msgid="7463135292204152818">"ကိုယ်ရေးအချက်အလက်များဖြစ်သော ခရက်ဒစ်ကဒ်နံပါတ်နှင့် စကားဝှက်များ ပါဝင်သည်။"</string>
     <string name="capability_title_canControlMagnification" msgid="3593493281059424855">"မျက်နှာပြင် ချဲ့ခြင်းကို ထိန်းချုပ်ရန်"</string>
-    <string name="capability_desc_canControlMagnification" msgid="4791858203568383773">"မျက်နှာပြင် ဇူးမ်အရွယ်နှင့် နေရာချထားခြင်းကို ထိန်းချုပ်ပါ။"</string>
+    <string name="capability_desc_canControlMagnification" msgid="4791858203568383773">"မျက်နှာပြင် ဇူးမ်အရွယ်နှင့် နေရာချထားခြင်းကို ထိန်းချုပ်ပါသည်။"</string>
     <string name="capability_title_canPerformGestures" msgid="7418984730362576862">"လက်ဟန်များ အသုံးပြုပါ"</string>
     <string name="capability_desc_canPerformGestures" msgid="8296373021636981249">"တို့ခြင်း၊ ပွတ်ဆွဲခြင်း၊ နှင့် အခြား လက်ဟန်များကို အသုံးပြုနိုင်ပါသည်။"</string>
     <string name="capability_title_canCaptureFingerprintGestures" msgid="6309568287512278670">"လက်ဗွေရာများ"</string>
@@ -601,7 +601,7 @@
     <string name="policydesc_encryptedStorage" msgid="2637732115325316992">"အပလီကေးရှင်းမှ သိမ်းဆည်းထားသော အရာများအား လျို့ဝှက် အသွင်းပြောင်းရန် လိုအပ်ခြင်း"</string>
     <string name="policylab_disableCamera" msgid="6395301023152297826">"ကင်မရာအား ပိတ်ခြင်း"</string>
     <string name="policydesc_disableCamera" msgid="2306349042834754597">"စက်မှ ကင်မရာအားလုံး အသုံးပြုမှုအား ကန့်သတ်ရန်"</string>
-    <string name="policylab_disableKeyguardFeatures" msgid="8552277871075367771">"ဖန်သားပြင်သော့ခတ်နိုင်သည့်အင်္ဂါရပ် အချို့အား ပိတ်ထားပါ"</string>
+    <string name="policylab_disableKeyguardFeatures" msgid="8552277871075367771">"ဖန်သားပြင် လော့ခ်ချသည့် ဝန်ဆောင်မှုအချို့ ပိတ်ခြင်း"</string>
     <string name="policydesc_disableKeyguardFeatures" msgid="2044755691354158439">"ဖန်သားပြင်သော့ခတ်နိုင်သည့်အင်္ဂါရပ် အချို့ အသုံးပြုမှုအား ကာကွယ်ပါ။"</string>
   <string-array name="phoneTypes">
     <item msgid="8901098336658710359">"အိမ်"</item>
@@ -1737,7 +1737,7 @@
     <string name="zen_mode_downtime_feature_name" msgid="2626974636779860146">"ကျချိန်"</string>
     <string name="zen_mode_default_weeknights_name" msgid="3081318299464998143">"ကြားရက်ည"</string>
     <string name="zen_mode_default_weekends_name" msgid="2786495801019345244">"စနေ၊ တနင်္ဂနွေ"</string>
-    <string name="zen_mode_default_events_name" msgid="8158334939013085363">"ဖြစ်ရပ်"</string>
+    <string name="zen_mode_default_events_name" msgid="8158334939013085363">"အစီအစဉ်"</string>
     <string name="zen_mode_default_every_night_name" msgid="3012363838882944175">"အိပ်နေချိန်"</string>
     <string name="muted_by" msgid="6147073845094180001">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g> အသံပိတ်သည်"</string>
     <string name="system_error_wipe_data" msgid="6608165524785354962">"သင့်ကိရိယာအတွင်းပိုင်းတွင် ပြဿနာရှိနေပြီး၊ မူလစက်ရုံထုတ်အခြေအနေအဖြစ် ပြန်လည်ရယူနိုင်သည်အထိ အခြေအနေမတည်ငြိမ်နိုင်ပါ။"</string>
@@ -1778,9 +1778,9 @@
     <string name="language_picker_section_all" msgid="3097279199511617537">"ဘာသာစကားများအားလုံး"</string>
     <string name="region_picker_section_all" msgid="8966316787153001779">"ဒေသအားလုံး"</string>
     <string name="locale_search_menu" msgid="2560710726687249178">"ရှာဖွေရန်"</string>
-    <string name="app_suspended_title" msgid="5360409799785895488">"လုပ်ဆောင်ချက်ကို ခွင့်မပြုပါ"</string>
-    <string name="app_suspended_default_message" msgid="5876776530189983288">"<xliff:g id="APP_NAME">%1$s</xliff:g> အပလီကေးရှင်းကို လက်ရှိ ပိတ်ထားပါသည်။"</string>
-    <string name="app_suspended_more_details" msgid="2901244470963918402">"နောက်ထပ် အသေးစိတ်များ"</string>
+    <string name="app_suspended_title" msgid="1919029799438164552">"အက်ပ်ကို ဖွင့်၍မရပါ"</string>
+    <string name="app_suspended_default_message" msgid="7875306315686531621">"<xliff:g id="APP_NAME_0">%1$s</xliff:g> အက်ပ်ကို လောလောဆယ် မရနိုင်ပါ။ ၎င်းကို <xliff:g id="APP_NAME_1">%2$s</xliff:g> က စီမံထားပါသည်။"</string>
+    <string name="app_suspended_more_details" msgid="1131804827776778187">"ပိုမိုလေ့လာရန်"</string>
     <string name="work_mode_off_title" msgid="1118691887588435530">"အလုပ်ပရိုဖိုင် ဖွင့်လိုသလား။"</string>
     <string name="work_mode_off_message" msgid="5130856710614337649">"သင်၏ အလုပ်အက်ပ်၊ အကြောင်းကြားချက်၊ ဒေတာနှင့် အခြားအလုပ်ပရိုဖိုင် ဝန်ဆောင်မှုများကို ဖွင့်လိုက်ပါမည်"</string>
     <string name="work_mode_turn_on" msgid="2062544985670564875">"ဖွင့်ပါ"</string>
@@ -1876,4 +1876,6 @@
     <string name="zen_upgrade_notification_content" msgid="1794994264692424562">"ပိတ်ထားသည့်အရာများကို ကြည့်ရန် တို့ပါ။"</string>
     <string name="notification_app_name_system" msgid="4205032194610042794">"စနစ်"</string>
     <string name="notification_app_name_settings" msgid="7751445616365753381">"ဆက်တင်များ"</string>
+    <!-- no translation found for car_loading_profile (3545132581795684027) -->
+    <skip />
 </resources>

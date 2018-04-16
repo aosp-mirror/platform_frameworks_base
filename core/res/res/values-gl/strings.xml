@@ -1014,7 +1014,7 @@
     <string name="dial" msgid="1253998302767701559">"Chamar"</string>
     <string name="dial_desc" msgid="6573723404985517250">"Chama ao número de teléfono seleccionado"</string>
     <string name="map" msgid="5441053548030107189">"Mapa"</string>
-    <string name="map_desc" msgid="1836995341943772348">"Localizar o enderezo seleccionado"</string>
+    <string name="map_desc" msgid="1836995341943772348">"Localiza o enderezo seleccionado"</string>
     <string name="browse" msgid="1245903488306147205">"Abrir"</string>
     <string name="browse_desc" msgid="8220976549618935044">"Abre o URL seleccionado"</string>
     <string name="sms" msgid="4560537514610063430">"Mensaxe"</string>
@@ -1024,7 +1024,7 @@
     <string name="view_calendar" msgid="979609872939597838">"Ver"</string>
     <string name="view_calendar_desc" msgid="5828320291870344584">"Consulta a hora seleccionada no calendario"</string>
     <string name="add_calendar_event" msgid="1953664627192056206">"Programar"</string>
-    <string name="add_calendar_event_desc" msgid="4326891793260687388">"Programa un evento para unha data seleccionada"</string>
+    <string name="add_calendar_event_desc" msgid="4326891793260687388">"Programa un evento para a data seleccionada"</string>
     <string name="view_flight" msgid="7691640491425680214">"Realizar seguimento"</string>
     <string name="view_flight_desc" msgid="3876322502674253506">"Fai un seguimento do voo seleccionado"</string>
     <string name="low_internal_storage_view_title" msgid="5576272496365684834">"Estase esgotando o espazo de almacenamento"</string>
@@ -1691,8 +1691,7 @@
     <string name="package_installed_device_owner" msgid="6875717669960212648">"Instalado polo teu administrador"</string>
     <string name="package_updated_device_owner" msgid="1847154566357862089">"Actualizado polo teu administrador"</string>
     <string name="package_deleted_device_owner" msgid="2307122077550236438">"Eliminado polo teu administrador"</string>
-    <!-- no translation found for battery_saver_description (769989536172631582) -->
-    <skip />
+    <string name="battery_saver_description" msgid="769989536172631582">"Para ampliar a duración da batería, a función Aforro de batería desactiva algunhas funcións do dispositivo e restrinxe aplicacións."</string>
     <string name="data_saver_description" msgid="6015391409098303235">"Para contribuír a reducir o uso de datos, o Economizador de datos impide que algunhas aplicacións envíen ou reciban datos en segundo plano. Cando esteas utilizando unha aplicación, esta poderá acceder aos datos, pero é posible que o faga con menos frecuencia. Por exemplo, é posible que as imaxes non se mostren ata que as toques."</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"Queres activar o economizador de datos?"</string>
     <string name="data_saver_enable_button" msgid="7147735965247211818">"Activar"</string>
@@ -1779,9 +1778,12 @@
     <string name="language_picker_section_all" msgid="3097279199511617537">"Todos os idiomas"</string>
     <string name="region_picker_section_all" msgid="8966316787153001779">"Todas as rexións"</string>
     <string name="locale_search_menu" msgid="2560710726687249178">"Buscar"</string>
-    <string name="app_suspended_title" msgid="5360409799785895488">"Acción non permitida"</string>
-    <string name="app_suspended_default_message" msgid="5876776530189983288">"A aplicación <xliff:g id="APP_NAME">%1$s</xliff:g> está desactivada."</string>
-    <string name="app_suspended_more_details" msgid="2901244470963918402">"Máis detalles"</string>
+    <!-- no translation found for app_suspended_title (1919029799438164552) -->
+    <skip />
+    <!-- no translation found for app_suspended_default_message (7875306315686531621) -->
+    <skip />
+    <!-- no translation found for app_suspended_more_details (1131804827776778187) -->
+    <skip />
     <string name="work_mode_off_title" msgid="1118691887588435530">"Activar o perfil de traballo?"</string>
     <string name="work_mode_off_message" msgid="5130856710614337649">"Activaranse as túas aplicacións de traballo, as notificacións, os datos e outras funcións do perfil de traballo"</string>
     <string name="work_mode_turn_on" msgid="2062544985670564875">"Activar"</string>
@@ -1871,12 +1873,12 @@
     <string name="volume_dialog_ringer_guidance_silent" msgid="2128975224280276122">"As chamadas e as notificacións estarán silenciadas"</string>
     <string name="notification_channel_system_changes" msgid="5072715579030948646">"Cambios no sistema"</string>
     <string name="notification_channel_do_not_disturb" msgid="6766940333105743037">"Non molestar"</string>
-    <!-- no translation found for zen_upgrade_notification_visd_title (3288313883409759733) -->
-    <skip />
-    <!-- no translation found for zen_upgrade_notification_visd_content (5533674060311631165) -->
-    <skip />
+    <string name="zen_upgrade_notification_visd_title" msgid="3288313883409759733">"Novidade! O modo Non molestar oculta as notificacións"</string>
+    <string name="zen_upgrade_notification_visd_content" msgid="5533674060311631165">"Toca para obter máis información e facer cambios."</string>
     <string name="zen_upgrade_notification_title" msgid="3799603322910377294">"O modo Non molestar cambiou"</string>
     <string name="zen_upgrade_notification_content" msgid="1794994264692424562">"Toca para comprobar o contido bloqueado."</string>
     <string name="notification_app_name_system" msgid="4205032194610042794">"Sistema"</string>
     <string name="notification_app_name_settings" msgid="7751445616365753381">"Configuración"</string>
+    <!-- no translation found for car_loading_profile (3545132581795684027) -->
+    <skip />
 </resources>

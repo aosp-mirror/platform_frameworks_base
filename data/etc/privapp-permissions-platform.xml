@@ -65,6 +65,8 @@ applications that come with the platform
     </privapp-permissions>
 
     <privapp-permissions package="com.android.emergency">
+        <!-- Required to place emergency calls from emergency info screen. -->
+        <permission name="android.permission.CALL_PRIVILEGED"/>
         <permission name="android.permission.MANAGE_USERS"/>
     </privapp-permissions>
 

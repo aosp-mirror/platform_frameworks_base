@@ -1057,7 +1057,7 @@
     <string name="whichSendToApplication" msgid="8272422260066642057">"ផ្ញើដោយប្រើ"</string>
     <string name="whichSendToApplicationNamed" msgid="7768387871529295325">"ផ្ញើដោយប្រើ %1$s"</string>
     <string name="whichSendToApplicationLabel" msgid="8878962419005813500">"ផ្ញើ"</string>
-    <string name="whichHomeApplication" msgid="4307587691506919691">"ជ្រើស​កម្មវិធី​ដើម"</string>
+    <string name="whichHomeApplication" msgid="4307587691506919691">"ជ្រើសរើស​កម្មវិធីអេក្រង់​ដើម"</string>
     <string name="whichHomeApplicationNamed" msgid="4493438593214760979">"ប្រើ %1$s ជា​ដើម"</string>
     <string name="whichHomeApplicationLabel" msgid="809529747002918649">"ថតរូប"</string>
     <string name="whichImageCaptureApplication" msgid="3680261417470652882">"ថតរូបជាមួយ"</string>
@@ -1399,7 +1399,7 @@
     <string name="sync_undo_deletes" msgid="2941317360600338602">"មិន​ធ្វើ​ការ​លុប​វិញ"</string>
     <string name="sync_do_nothing" msgid="3743764740430821845">"មិន​ធ្វើអ្វី​ទេ​ឥឡូវ"</string>
     <string name="choose_account_label" msgid="5655203089746423927">"ជ្រើស​គណនី"</string>
-    <string name="add_account_label" msgid="2935267344849993553">"បន្ថែម​គណនី​ថ្មី​​"</string>
+    <string name="add_account_label" msgid="2935267344849993553">"បញ្ចូល​គណនី​"</string>
     <string name="add_account_button_label" msgid="3611982894853435874">"បន្ថែម​គណនី"</string>
     <string name="number_picker_increment_button" msgid="2412072272832284313">"បង្កើន"</string>
     <string name="number_picker_decrement_button" msgid="476050778386779067">"បន្ថយ"</string>
@@ -1692,8 +1692,7 @@
     <string name="package_installed_device_owner" msgid="6875717669960212648">"​ដំឡើង​ដោយ​អ្នកគ្រប់គ្រង​របស់​អ្នក"</string>
     <string name="package_updated_device_owner" msgid="1847154566357862089">"ធ្វើ​បច្ចុប្បន្នភាព​ដោយ​អ្នកគ្រប់គ្រង​របស់​អ្នក"</string>
     <string name="package_deleted_device_owner" msgid="2307122077550236438">"លុប​ដោយ​អ្នកគ្រប់គ្រង​របស់​អ្នក"</string>
-    <!-- no translation found for battery_saver_description (769989536172631582) -->
-    <skip />
+    <string name="battery_saver_description" msgid="769989536172631582">"ដើម្បី​បង្កើន​ថាមពល​ថ្មរបស់​អ្នក​ កម្មវិធីសន្សំ​ថ្ម​បិទ​មុខងារ​មួយ​ចំនួនរបស់​ឧបករណ៍​ និង​ដាក់​កំហិតលើ​​កម្មវិធីផ្សេងៗ។"</string>
     <string name="data_saver_description" msgid="6015391409098303235">"ដើម្បីជួយកាត់បន្ថយការប្រើប្រាស់ទិន្នន័យ កម្មវិធីសន្សំសំចៃទិន្នន័យរារាំងកម្មវិធីមួយចំនួនមិនឲ្យបញ្ជូន ឬទទួលទិន្នន័យនៅផ្ទៃខាងក្រោយទេ។ កម្មវិធីដែលអ្នកកំពុងប្រើនាពេលបច្ចុប្បន្នអាចចូលប្រើប្រាស់​ទិន្នន័យបាន ប៉ុន្តែអាចនឹងមិនញឹកញាប់ដូចមុនទេ។ ឧទាហរណ៍ រូបភាពមិនបង្ហាញទេ លុះត្រាតែអ្នកប៉ះរូបភាពទាំងនោះ។"</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"បើកកម្មវិធីសន្សំសំចៃទិន្នន័យឬ?"</string>
     <string name="data_saver_enable_button" msgid="7147735965247211818">"បើក"</string>
@@ -1780,9 +1779,12 @@
     <string name="language_picker_section_all" msgid="3097279199511617537">"ភាសាទាំងអស់"</string>
     <string name="region_picker_section_all" msgid="8966316787153001779">"តំបន់ទាំងអស់"</string>
     <string name="locale_search_menu" msgid="2560710726687249178">"ស្វែងរក"</string>
-    <string name="app_suspended_title" msgid="5360409799785895488">"សកម្មភាពមិនត្រូវបានអនុញ្ញាត"</string>
-    <string name="app_suspended_default_message" msgid="5876776530189983288">"បច្ចុប្បន្ន កម្មវិធី <xliff:g id="APP_NAME">%1$s</xliff:g> ត្រូវបាន​បិទ។"</string>
-    <string name="app_suspended_more_details" msgid="2901244470963918402">"ព័ត៌មានលម្អិតបន្ថែម"</string>
+    <!-- no translation found for app_suspended_title (1919029799438164552) -->
+    <skip />
+    <!-- no translation found for app_suspended_default_message (7875306315686531621) -->
+    <skip />
+    <!-- no translation found for app_suspended_more_details (1131804827776778187) -->
+    <skip />
     <string name="work_mode_off_title" msgid="1118691887588435530">"បើក​កម្រង​ព័ត៌មាន​ការ​ងារ?"</string>
     <string name="work_mode_off_message" msgid="5130856710614337649">"កម្មវិធី​ការងារ ការ​ជូនដំណឹង ទិន្នន័យ និង​មុខងារ​កម្រង​ព័ត៌មាន​ការងារ​ផ្សេង​ទៀត​របស់អ្នក​នឹង​ត្រូវ​បាន​បើក"</string>
     <string name="work_mode_turn_on" msgid="2062544985670564875">"បើក"</string>
@@ -1872,12 +1874,12 @@
     <string name="volume_dialog_ringer_guidance_silent" msgid="2128975224280276122">"ការហៅ​ទូរសព្ទ និងការជូន​ដំណឹងនឹង​បិទសំឡេង"</string>
     <string name="notification_channel_system_changes" msgid="5072715579030948646">"ការផ្លាស់ប្ដូរ​ប្រព័ន្ធ"</string>
     <string name="notification_channel_do_not_disturb" msgid="6766940333105743037">"កុំ​រំខាន"</string>
-    <!-- no translation found for zen_upgrade_notification_visd_title (3288313883409759733) -->
-    <skip />
-    <!-- no translation found for zen_upgrade_notification_visd_content (5533674060311631165) -->
-    <skip />
+    <string name="zen_upgrade_notification_visd_title" msgid="3288313883409759733">"ថ្មី៖ មុខងារ​កុំរំខាន​កំពុងលាក់​ការជូនដំណឹង"</string>
+    <string name="zen_upgrade_notification_visd_content" msgid="5533674060311631165">"ចុចដើម្បីស្វែងយល់បន្ថែម និងផ្លាស់ប្ដូរ។"</string>
     <string name="zen_upgrade_notification_title" msgid="3799603322910377294">"មុខងារ​កុំ​រំខាន​ត្រូវ​បាន​ប្ដូរ"</string>
     <string name="zen_upgrade_notification_content" msgid="1794994264692424562">"សូមចុច​ដើម្បី​មើល​ថា​​បានទប់ស្កាត់អ្វីខ្លះ។"</string>
     <string name="notification_app_name_system" msgid="4205032194610042794">"ប្រព័ន្ធ"</string>
     <string name="notification_app_name_settings" msgid="7751445616365753381">"ការកំណត់"</string>
+    <!-- no translation found for car_loading_profile (3545132581795684027) -->
+    <skip />
 </resources>

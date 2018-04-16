@@ -1691,8 +1691,7 @@
     <string name="package_installed_device_owner" msgid="6875717669960212648">"Instaluar nga administratori"</string>
     <string name="package_updated_device_owner" msgid="1847154566357862089">"Përditësuar nga administratori"</string>
     <string name="package_deleted_device_owner" msgid="2307122077550236438">"Fshirë nga administratori"</string>
-    <!-- no translation found for battery_saver_description (769989536172631582) -->
-    <skip />
+    <string name="battery_saver_description" msgid="769989536172631582">"Për të zgjatur jetëgjatësinë e baterisë sate, Kursyesi i baterisë çaktivizon disa funksione të pajisjes dhe kufizon aplikacionet."</string>
     <string name="data_saver_description" msgid="6015391409098303235">"Për të ndihmuar në reduktimin e përdorimit të të dhënave, \"Kursyesi i të dhënave\" pengon që disa aplikacione të dërgojnë apo të marrin të dhëna në sfond. Një aplikacion që po përdor aktualisht mund të ketë qasje te të dhënat, por këtë mund ta bëjë më rrallë. Kjo mund të nënkuptojë, për shembull, se imazhet nuk shfaqen kur troket mbi to."</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"Të aktivizohet \"Kursyesi i të dhënave\"?"</string>
     <string name="data_saver_enable_button" msgid="7147735965247211818">"Aktivizo"</string>
@@ -1779,9 +1778,12 @@
     <string name="language_picker_section_all" msgid="3097279199511617537">"Të gjitha gjuhët"</string>
     <string name="region_picker_section_all" msgid="8966316787153001779">"Të gjitha rajonet"</string>
     <string name="locale_search_menu" msgid="2560710726687249178">"Kërko"</string>
-    <string name="app_suspended_title" msgid="5360409799785895488">"Veprimi nuk lejohet"</string>
-    <string name="app_suspended_default_message" msgid="5876776530189983288">"Aplikacioni <xliff:g id="APP_NAME">%1$s</xliff:g> është aktualisht i çaktivizuar."</string>
-    <string name="app_suspended_more_details" msgid="2901244470963918402">"Më shumë detaje"</string>
+    <!-- no translation found for app_suspended_title (1919029799438164552) -->
+    <skip />
+    <!-- no translation found for app_suspended_default_message (7875306315686531621) -->
+    <skip />
+    <!-- no translation found for app_suspended_more_details (1131804827776778187) -->
+    <skip />
     <string name="work_mode_off_title" msgid="1118691887588435530">"Të aktivizohet profili i punës?"</string>
     <string name="work_mode_off_message" msgid="5130856710614337649">"Aplikacionet e punës, njoftimet, të dhënat e tua dhe funksionet e tjera të profilit të punës do të aktivizohen"</string>
     <string name="work_mode_turn_on" msgid="2062544985670564875">"Aktivizo"</string>
@@ -1871,12 +1873,12 @@
     <string name="volume_dialog_ringer_guidance_silent" msgid="2128975224280276122">"Do të hiqet zëri për telefonatat dhe njoftimet"</string>
     <string name="notification_channel_system_changes" msgid="5072715579030948646">"Ndryshimet e sistemit"</string>
     <string name="notification_channel_do_not_disturb" msgid="6766940333105743037">"Mos shqetëso"</string>
-    <!-- no translation found for zen_upgrade_notification_visd_title (3288313883409759733) -->
-    <skip />
-    <!-- no translation found for zen_upgrade_notification_visd_content (5533674060311631165) -->
-    <skip />
+    <string name="zen_upgrade_notification_visd_title" msgid="3288313883409759733">"E re: Modaliteti \"Mos shqetëso\" po fsheh njoftimet"</string>
+    <string name="zen_upgrade_notification_visd_content" msgid="5533674060311631165">"Trokit për të mësuar më shumë dhe për të ndryshuar."</string>
     <string name="zen_upgrade_notification_title" msgid="3799603322910377294">"\"Mos shqetëso\" ka ndryshuar"</string>
     <string name="zen_upgrade_notification_content" msgid="1794994264692424562">"Trokit për të shënuar atë që është bllokuar"</string>
     <string name="notification_app_name_system" msgid="4205032194610042794">"Sistemi"</string>
     <string name="notification_app_name_settings" msgid="7751445616365753381">"Cilësimet"</string>
+    <!-- no translation found for car_loading_profile (3545132581795684027) -->
+    <skip />
 </resources>

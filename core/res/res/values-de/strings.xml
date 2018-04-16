@@ -727,7 +727,7 @@
     <string name="keyguard_password_wrong_pin_code" msgid="2422225591006134936">"Falscher PIN-Code"</string>
     <string name="keyguard_label_text" msgid="861796461028298424">"Drücke zum Entsperren die Menütaste und dann auf \"0\"."</string>
     <string name="emergency_call_dialog_number_for_display" msgid="696192103195090970">"Notrufnummer"</string>
-    <string name="lockscreen_carrier_default" msgid="6169005837238288522">"Kein Dienst"</string>
+    <string name="lockscreen_carrier_default" msgid="6169005837238288522">"Dienst nicht verfügbar"</string>
     <string name="lockscreen_screen_locked" msgid="7288443074806832904">"Display gesperrt"</string>
     <string name="lockscreen_instructions_when_pattern_enabled" msgid="46154051614126049">"Drücke die Menütaste, um das Telefon zu entsperren oder einen Notruf zu tätigen."</string>
     <string name="lockscreen_instructions_when_pattern_disabled" msgid="686260028797158364">"Zum Entsperren die Menütaste drücken"</string>
@@ -1389,7 +1389,7 @@
     <string name="gpsNotifTicker" msgid="5622683912616496172">"Standortabfrage von <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="gpsNotifTitle" msgid="5446858717157416839">"Standortabfrage"</string>
     <string name="gpsNotifMessage" msgid="1374718023224000702">"Angefordert von <xliff:g id="NAME">%1$s</xliff:g> (<xliff:g id="SERVICE">%2$s</xliff:g>)"</string>
-    <string name="gpsVerifYes" msgid="2346566072867213563">"Ja"</string>
+    <string name="gpsVerifYes" msgid="2346566072867213563">"\"Ja\""</string>
     <string name="gpsVerifNo" msgid="1146564937346454865">"Nein"</string>
     <string name="sync_too_many_deletes" msgid="5296321850662746890">"Löschbegrenzung überschritten"</string>
     <string name="sync_too_many_deletes_desc" msgid="496551671008694245">"Es sind <xliff:g id="NUMBER_OF_DELETED_ITEMS">%1$d</xliff:g> gelöschte Elemente für <xliff:g id="TYPE_OF_SYNC">%2$s</xliff:g>, Konto <xliff:g id="ACCOUNT_NAME">%3$s</xliff:g>, vorhanden. Wie möchtest du fortfahren?"</string>
@@ -1422,7 +1422,7 @@
     <string name="keyboardview_keycode_delete" msgid="3337914833206635744">"Löschen"</string>
     <string name="keyboardview_keycode_done" msgid="1992571118466679775">"Fertig"</string>
     <string name="keyboardview_keycode_mode_change" msgid="4547387741906537519">"Modusänderung"</string>
-    <string name="keyboardview_keycode_shift" msgid="2270748814315147690">"Shift"</string>
+    <string name="keyboardview_keycode_shift" msgid="2270748814315147690">"Umschalttaste"</string>
     <string name="keyboardview_keycode_enter" msgid="2985864015076059467">"Eingabetaste"</string>
     <string name="activitychooserview_choose_application" msgid="2125168057199941199">"App auswählen"</string>
     <string name="activitychooserview_choose_application_error" msgid="8624618365481126668">"<xliff:g id="APPLICATION_NAME">%s</xliff:g> konnte nicht gestartet werden."</string>
@@ -1690,8 +1690,7 @@
     <string name="package_installed_device_owner" msgid="6875717669960212648">"Von deinem Administrator installiert"</string>
     <string name="package_updated_device_owner" msgid="1847154566357862089">"Von deinem Administrator aktualisiert"</string>
     <string name="package_deleted_device_owner" msgid="2307122077550236438">"Von deinem Administrator gelöscht"</string>
-    <!-- no translation found for battery_saver_description (769989536172631582) -->
-    <skip />
+    <string name="battery_saver_description" msgid="769989536172631582">"Zur Verlängerung der Akkulaufzeit werden im Energiesparmodus einige Gerätefunktionen deaktiviert und Apps eingeschränkt."</string>
     <string name="data_saver_description" msgid="6015391409098303235">"Mit dem Datensparmodus wird die Datennutzung verringert, indem verhindert wird, dass im Hintergrund Daten von Apps gesendet oder empfangen werden. Datenzugriffe sind mit einer aktiven App zwar möglich, erfolgen aber seltener. Als Folge davon könnten Bilder beispielsweise erst dann sichtbar werden, wenn sie angetippt werden."</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"Datensparmodus aktivieren?"</string>
     <string name="data_saver_enable_button" msgid="7147735965247211818">"Aktivieren"</string>
@@ -1778,9 +1777,12 @@
     <string name="language_picker_section_all" msgid="3097279199511617537">"Alle Sprachen"</string>
     <string name="region_picker_section_all" msgid="8966316787153001779">"Alle Regionen"</string>
     <string name="locale_search_menu" msgid="2560710726687249178">"Suche"</string>
-    <string name="app_suspended_title" msgid="5360409799785895488">"Aktion nicht zulässig"</string>
-    <string name="app_suspended_default_message" msgid="5876776530189983288">"Die App \"<xliff:g id="APP_NAME">%1$s</xliff:g>\" ist derzeit deaktiviert."</string>
-    <string name="app_suspended_more_details" msgid="2901244470963918402">"Weitere Details"</string>
+    <!-- no translation found for app_suspended_title (1919029799438164552) -->
+    <skip />
+    <!-- no translation found for app_suspended_default_message (7875306315686531621) -->
+    <skip />
+    <!-- no translation found for app_suspended_more_details (1131804827776778187) -->
+    <skip />
     <string name="work_mode_off_title" msgid="1118691887588435530">"Arbeitsprofil aktivieren?"</string>
     <string name="work_mode_off_message" msgid="5130856710614337649">"Deine geschäftlichen Apps, Benachrichtigungen, Daten und andere Funktionen des Arbeitsprofils werden aktiviert"</string>
     <string name="work_mode_turn_on" msgid="2062544985670564875">"Aktivieren"</string>
@@ -1870,12 +1872,12 @@
     <string name="volume_dialog_ringer_guidance_silent" msgid="2128975224280276122">"Anrufe und Benachrichtigungen stummgeschaltet"</string>
     <string name="notification_channel_system_changes" msgid="5072715579030948646">"Systemänderungen"</string>
     <string name="notification_channel_do_not_disturb" msgid="6766940333105743037">"Bitte nicht stören"</string>
-    <!-- no translation found for zen_upgrade_notification_visd_title (3288313883409759733) -->
-    <skip />
-    <!-- no translation found for zen_upgrade_notification_visd_content (5533674060311631165) -->
-    <skip />
+    <string name="zen_upgrade_notification_visd_title" msgid="3288313883409759733">"Neu: Durch \"Bitte nicht stören\" werden Benachrichtigungen nicht mehr angezeigt"</string>
+    <string name="zen_upgrade_notification_visd_content" msgid="5533674060311631165">"Für weitere Informationen und zum Ändern tippen."</string>
     <string name="zen_upgrade_notification_title" msgid="3799603322910377294">"\"Bitte nicht stören\" wurde geändert"</string>
     <string name="zen_upgrade_notification_content" msgid="1794994264692424562">"Tippe, um zu überprüfen, welche Inhalte blockiert werden."</string>
     <string name="notification_app_name_system" msgid="4205032194610042794">"System"</string>
     <string name="notification_app_name_settings" msgid="7751445616365753381">"Einstellungen"</string>
+    <!-- no translation found for car_loading_profile (3545132581795684027) -->
+    <skip />
 </resources>
