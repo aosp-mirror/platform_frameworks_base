@@ -8987,6 +8987,12 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
 
         @Override
+        public int noteOp(String op, int uid, String packageName) {
+            return mActivityManagerService.mAppOpsService
+                    .noteOperation(AppOpsManager.strOpToOp(op), uid, packageName);
+        }
+
+        @Override
         public String[] getPackagesForUid(int uid) {
             return mActivityManagerService.mContext.getPackageManager()
                     .getPackagesForUid(uid);

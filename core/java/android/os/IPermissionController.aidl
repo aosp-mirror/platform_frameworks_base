@@ -20,6 +20,7 @@ package android.os;
 /** @hide */
 interface IPermissionController {
     boolean checkPermission(String permission, int pid, int uid);
+    int noteOp(String op, int uid, String packageName);
     String[] getPackagesForUid(int uid);
     boolean isRuntimePermission(String permission);
     int getPackageUid(String packageName, int flags);

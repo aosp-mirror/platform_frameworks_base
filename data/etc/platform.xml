@@ -175,6 +175,7 @@
     <assign-permission name="android.permission.DUMP" uid="statsd" />
     <assign-permission name="android.permission.PACKAGE_USAGE_STATS" uid="statsd" />
     <assign-permission name="android.permission.STATSCOMPANION" uid="statsd" />
+    <assign-permission name="android.permission.UPDATE_APP_OPS_STATS" uid="statsd" />
 
     <!-- This is a list of all the libraries available for application
          code to link against. -->
