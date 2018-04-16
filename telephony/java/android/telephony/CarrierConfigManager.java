@@ -1919,6 +1919,15 @@ public class CarrierConfigManager {
     public static final String KEY_WCDMA_DEFAULT_SIGNAL_STRENGTH_MEASUREMENT_STRING =
             "wcdma_default_signal_strength_measurement_string";
 
+    /**
+     * When a partial sms / mms message stay in raw table for too long without being completed,
+     * we expire them and delete them from the raw table. This carrier config defines the
+     * expiration time.
+     * @hide
+     */
+    public static final String KEY_UNDELIVERED_SMS_MESSAGE_EXPIRATION_TIME =
+            "undelivered_sms_message_expiration_time";
+
     /** The default value for every variable. */
     private final static PersistableBundle sDefaults;
 
