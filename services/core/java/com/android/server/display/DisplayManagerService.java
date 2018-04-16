@@ -1904,7 +1904,7 @@ public final class DisplayManagerService extends SystemService {
 
             final int callingUid = Binder.getCallingUid();
             AppOpsManager appOpsManager = mContext.getSystemService(AppOpsManager.class);
-            final int mode = appOpsManager.noteOp(AppOpsManager.OP_GET_USAGE_STATS,
+            final int mode = appOpsManager.checkOp(AppOpsManager.OP_GET_USAGE_STATS,
                     callingUid, callingPackage);
             final boolean hasUsageStats;
             if (mode == AppOpsManager.MODE_DEFAULT) {
