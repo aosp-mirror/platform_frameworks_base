@@ -578,6 +578,17 @@ public class QSPanel extends LinearLayout implements Tunable, Callback, Brightne
         mFooter.showDeviceMonitoringDialog();
     }
 
+    public void setMargins(int sideMargins) {
+        for (int i = 0; i < getChildCount(); i++) {
+            View view = getChildAt(i);
+            if (view != mTileLayout) {
+                LayoutParams lp = (LayoutParams) view.getLayoutParams();
+                lp.leftMargin = sideMargins;
+                lp.rightMargin = sideMargins;
+            }
+        }
+    }
+
     private class H extends Handler {
         private static final int SHOW_DETAIL = 1;
         private static final int SET_TILE_VISIBILITY = 2;
