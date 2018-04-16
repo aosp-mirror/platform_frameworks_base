@@ -185,6 +185,8 @@ public class ScheduleConditionProvider extends SystemConditionProviderService {
     @GuardedBy("mSubscriptions")
     Condition evaluateSubscriptionLocked(Uri conditionId, ScheduleCalendar cal,
             long now, long nextUserAlarmTime) {
+        if (DEBUG) Slog.d(TAG, String.format("evaluateSubscriptionLocked cal=%s, now=%s, "
+                        + "nextUserAlarmTime=%s", cal, ts(now), ts(nextUserAlarmTime)));
         Condition condition;
         if (cal == null) {
             condition = createCondition(conditionId, Condition.STATE_ERROR, "!invalidId");
