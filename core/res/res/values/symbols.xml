@@ -334,6 +334,7 @@
   <java-symbol type="bool" name="config_windowShowCircularMask" />
   <java-symbol type="bool" name="config_windowEnableCircularEmulatorDisplayOverlay" />
   <java-symbol type="bool" name="config_wifi_framework_enable_associated_network_selection" />
+  <java-symbol type="bool" name="config_wifi_framework_use_single_radio_chain_scan_results_network_selection" />
   <java-symbol type="bool" name="config_wifi_only_link_same_credential_configurations" />
   <java-symbol type="bool" name="config_wifi_framework_enable_voice_call_sar_tx_power_limit" />
   <java-symbol type="bool" name="config_wifi_enable_disconnection_debounce" />
