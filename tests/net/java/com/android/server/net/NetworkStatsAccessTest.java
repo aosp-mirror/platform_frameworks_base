@@ -176,7 +176,7 @@ public class NetworkStatsAccessTest {
     }
 
     private void setHasAppOpsPermission(int appOpsMode, boolean hasPermission) {
-        when(mAppOps.noteOp(AppOpsManager.OP_GET_USAGE_STATS, TEST_UID, TEST_PKG))
+        when(mAppOps.checkOp(AppOpsManager.OP_GET_USAGE_STATS, TEST_UID, TEST_PKG))
                 .thenReturn(appOpsMode);
         when(mContext.checkCallingPermission(Manifest.permission.PACKAGE_USAGE_STATS)).thenReturn(
                 hasPermission ? PackageManager.PERMISSION_GRANTED
