@@ -42,7 +42,7 @@
     <string name="page_description_template" msgid="6831239682256197161">"Strana <xliff:g id="CURRENT_PAGE">%1$d</xliff:g> od <xliff:g id="PAGE_COUNT">%2$d</xliff:g>"</string>
     <string name="summary_template" msgid="8899734908625669193">"Rezime, primjeraka <xliff:g id="COPIES">%1$s</xliff:g>, veličina papira <xliff:g id="PAPER_SIZE">%2$s</xliff:g>"</string>
     <string name="expand_handle" msgid="7282974448109280522">"Regulator za proširivanje"</string>
-    <string name="collapse_handle" msgid="6886637989442507451">"Regulator za skupljanje"</string>
+    <string name="collapse_handle" msgid="6886637989442507451">"Regulator za sužavanje"</string>
     <string name="print_button" msgid="645164566271246268">"Štampaj"</string>
     <string name="savetopdf_button" msgid="2976186791686924743">"Sačuvaj u PDF"</string>
     <string name="print_options_expanded" msgid="6944679157471691859">"Opcije za štampanje su proširene"</string>
