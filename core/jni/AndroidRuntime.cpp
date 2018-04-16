@@ -817,12 +817,6 @@ int AndroidRuntime::startVm(JavaVM** pJavaVM, JNIEnv** pEnv, bool zygote)
         addOption("-Ximage-compiler-option");
         addOption("--image-classes=/system/etc/preloaded-classes");
 
-        // If there is a compiled-classes file, push it.
-        if (hasFile("/system/etc/compiled-classes")) {
-            addOption("-Ximage-compiler-option");
-            addOption("--compiled-classes=/system/etc/compiled-classes");
-        }
-
         // If there is a dirty-image-objects file, push it.
         if (hasFile("/system/etc/dirty-image-objects")) {
             addOption("-Ximage-compiler-option");
