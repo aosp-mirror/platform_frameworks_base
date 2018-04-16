@@ -93,7 +93,7 @@ public class TileLayout extends ViewGroup implements QSTileLayout {
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         final int numTiles = mRecords.size();
-        final int width = MeasureSpec.getSize(widthMeasureSpec);
+        final int width = MeasureSpec.getSize(widthMeasureSpec) - mPaddingLeft - mPaddingRight;
         final int numRows = (numTiles + mColumns - 1) / mColumns;
         mCellWidth = (width - mSidePadding * 2 - (mCellMarginHorizontal * mColumns)) / mColumns;
 
@@ -159,6 +159,6 @@ public class TileLayout extends ViewGroup implements QSTileLayout {
     }
 
     private int getColumnStart(int column) {
-        return column * (mCellWidth + mCellMarginHorizontal) + mCellMarginHorizontal;
+        return column * (mCellWidth + mCellMarginHorizontal) + mCellMarginHorizontal + mPaddingLeft;
     }
 }
