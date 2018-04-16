@@ -3355,7 +3355,7 @@ public abstract class PackageManager {
             @ComponentInfoFlags int flags) throws NameNotFoundException;
 
     /**
-     * Return a List of all packages that are installed on the device.
+     * Return a List of all packages that are installed for the current user.
      *
      * @param flags Additional option flags to modify the data returned.
      * @return A List of PackageInfo objects, one for each installed package,
@@ -3742,8 +3742,8 @@ public abstract class PackageManager {
             throws NameNotFoundException;
 
     /**
-     * Return a List of all application packages that are installed on the
-     * device. If flag GET_UNINSTALLED_PACKAGES has been set, a list of all
+     * Return a List of all application packages that are installed for the
+     * current user. If flag GET_UNINSTALLED_PACKAGES has been set, a list of all
      * applications including those deleted with {@code DONT_DELETE_DATA}
      * (partially installed apps with data directory) will be returned.
      *
