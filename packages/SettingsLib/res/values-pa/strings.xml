@@ -194,7 +194,7 @@
     <string name="clear_adb_keys" msgid="4038889221503122743">"USB ਡੀਬਗਿੰਗ ਅਧਿਕਾਰ ਰੱਦ ਕਰੋ"</string>
     <string name="bugreport_in_power" msgid="7923901846375587241">"ਬੱਗ ਰਿਪੋਰਟ ਸ਼ਾਰਟਕੱਟ"</string>
     <string name="bugreport_in_power_summary" msgid="1778455732762984579">"ਇੱਕ ਬੱਗ ਰਿਪੋਰਟ ਲੈਣ ਲਈ ਪਾਵਰ ਮੀਨੂ ਵਿੱਚ ਇੱਕ ਬਟਨ ਦਿਖਾਓ"</string>
-    <string name="keep_screen_on" msgid="1146389631208760344">"ਸਕਿਰਿਆ ਰੱਖੋ"</string>
+    <string name="keep_screen_on" msgid="1146389631208760344">"ਸੁਚੇਤ ਰਹੋ"</string>
     <string name="keep_screen_on_summary" msgid="2173114350754293009">"ਸਕ੍ਰੀਨ ਚਾਰਜਿੰਗ ਦੇ ਸਮੇਂ ਕਦੇ ਵੀ ਸਲੀਪ ਨਹੀਂ ਹੋਵੇਗੀ"</string>
     <string name="bt_hci_snoop_log" msgid="3340699311158865670">"ਬਲੂਟੁੱਥ HCI ਸਨੂਪ ਲੌਗ ਨੂੰ ਚਾਲੂ ਕਰੋ"</string>
     <string name="bt_hci_snoop_log_summary" msgid="366083475849911315">"ਇੱਕ ਫ਼ਾਈਲ ਵਿੱਚ ਸਾਰੇ ਬਲੂਟੁੱਥ HCI ਪੈਕੇਟਾਂ ਨੂੰ ਕੈਪਚਰ ਕਰੋ (ਇਹ ਸੈਟਿੰਗ ਬਦਲਣ ਤੋਂ ਬਾਅਦ ਬਲੂਟੁੱਥ ਟੌਗਲ ਕਰੋ)"</string>
@@ -212,18 +212,18 @@
     <string name="mobile_data_always_on" msgid="8774857027458200434">"ਮੋਬਾਈਲ ਡਾਟਾ ਹਮੇਸ਼ਾਂ ਕਿਰਿਆਸ਼ੀਲ"</string>
     <string name="tethering_hardware_offload" msgid="7470077827090325814">"ਟੈਦਰਿੰਗ ਹਾਰਡਵੇਅਰ ਐਕਸੈੱਲਰੇਸ਼ਨ"</string>
     <string name="bluetooth_show_devices_without_names" msgid="4708446092962060176">"ਅਨਾਮ ਬਲੂਟੁੱਥ ਡੀਵਾਈਸਾਂ ਦਿਖਾਓ"</string>
-    <string name="bluetooth_disable_absolute_volume" msgid="2660673801947898809">"ਪੂਰਨ ਵੌਲਿਊਮ ਨੂੰ ਅਯੋਗ ਬਣਾਓ"</string>
+    <string name="bluetooth_disable_absolute_volume" msgid="2660673801947898809">"ਪੂਰਨ ਅਵਾਜ਼ ਨੂੰ ਚਾਲੂ ਕਰੋ"</string>
     <string name="bluetooth_select_avrcp_version_string" msgid="3750059931120293633">"ਬਲੂਟੁੱਥ AVRCP ਵਰਜਨ"</string>
     <string name="bluetooth_select_avrcp_version_dialog_title" msgid="7277329668298705702">"ਬਲੂਟੁੱਥ AVRCP ਵਰਜਨ ਚੁਣੋ"</string>
-    <string name="bluetooth_select_a2dp_codec_type" msgid="90597356942154882">"ਬਲੂਟੁੱਥ ਔਡੀਓ ਕੋਡੇਕ"</string>
+    <string name="bluetooth_select_a2dp_codec_type" msgid="90597356942154882">"ਬਲੂਟੁੱਥ ਆਡੀਓ ਕੋਡੇਕ"</string>
     <string name="bluetooth_select_a2dp_codec_type_dialog_title" msgid="8436224899475822557">"ਬਲੂਟੁੱਥ ਆਡੀਓ ਕੋਡੇਕ\nਚੋਣ ਨੂੰ ਟ੍ਰਿਗਰ ਕਰੋ"</string>
-    <string name="bluetooth_select_a2dp_codec_sample_rate" msgid="4788245703824623062">"ਬਲੂਟੁੱਥ  ਆਡੀਓ  ਨਮੂਨਾ ਦਰ"</string>
+    <string name="bluetooth_select_a2dp_codec_sample_rate" msgid="4788245703824623062">"ਬਲੂਟੁੱਥ ਆਡੀਓ ਸੈਂਪਲ ਰੇਟ"</string>
     <string name="bluetooth_select_a2dp_codec_sample_rate_dialog_title" msgid="8010380028880963535">"ਬਲੂਟੁੱਥ ਆਡੀਓ ਕੋਡੇਕ\nਚੋਣ ਨੂੰ ਟ੍ਰਿਗਰ ਕਰੋ: ਸੈਂਪਲ ਰੇਟ"</string>
-    <string name="bluetooth_select_a2dp_codec_bits_per_sample" msgid="2099645202720164141">"ਪ੍ਰਤੀ ਨਮੂਨਾ ਬਲੂਟੁੱਥ  ਆਡੀਓ  ਬਿਟਾਂ"</string>
+    <string name="bluetooth_select_a2dp_codec_bits_per_sample" msgid="2099645202720164141">"ਪ੍ਰਤੀ ਸੈਂਪਲ ਬਲੂਟੁੱਥ ਆਡੀਓ ਬਿਟਾਂ"</string>
     <string name="bluetooth_select_a2dp_codec_bits_per_sample_dialog_title" msgid="8063859754619484760">"ਬਲੂਟੁੱਥ ਆਡੀਓ ਕੋਡੇਕ\nਚੋਣ ਨੂੰ ਟ੍ਰਿਗਰ ਕਰੋ: ਪ੍ਰਤੀ ਸੈਂਪਲ ਬਿਟਾਂ"</string>
-    <string name="bluetooth_select_a2dp_codec_channel_mode" msgid="884855779449390540">"ਬਲੂਟੁੱਥ  ਆਡੀਓ  ਚੈਨਲ ਮੋਡ"</string>
+    <string name="bluetooth_select_a2dp_codec_channel_mode" msgid="884855779449390540">"ਬਲੂਟੁੱਥ ਆਡੀਓ ਚੈਨਲ ਮੋਡ"</string>
     <string name="bluetooth_select_a2dp_codec_channel_mode_dialog_title" msgid="7234956835280563341">"ਬਲੂਟੁੱਥ ਆਡੀਓ ਕੋਡੇਕ\nਚੋਣ ਨੂੰ ਟ੍ਰਿਗਰ ਕਰੋ: ਚੈਨਲ ਮੋਡ"</string>
-    <string name="bluetooth_select_a2dp_codec_ldac_playback_quality" msgid="3619694372407843405">"ਬਲੂਟੁੱਥ ਔਡੀਓ LDAC ਕੋਡੇਕ: ਪਲੇਬੈਕ ਗੁਣਵੱਤਾ"</string>
+    <string name="bluetooth_select_a2dp_codec_ldac_playback_quality" msgid="3619694372407843405">"ਬਲੂਟੁੱਥ ਆਡੀਓ LDAC ਕੋਡੇਕ: ਪਲੇਬੈਕ ਕੁਆਲਿਟੀ"</string>
     <string name="bluetooth_select_a2dp_codec_ldac_playback_quality_dialog_title" msgid="7595776220458732825">"ਬਲੂਟੁੱਥ ਆਡੀਓ LDAC ਕੋਡੇਕ\nਚੋਣ ਨੂੰ ਟ੍ਰਿਗਰ ਕਰੋ: ਪਲੇਬੈਕ ਕੁਆਲਿਟੀ"</string>
     <string name="bluetooth_select_a2dp_codec_streaming_label" msgid="5347862512596240506">"ਸਟ੍ਰੀਮਿੰਗ: <xliff:g id="STREAMING_PARAMETER">%1$s</xliff:g>"</string>
     <string name="select_private_dns_configuration_title" msgid="3700456559305263922">"ਨਿੱਜੀ DNS"</string>
@@ -259,7 +259,7 @@
     <string name="verify_apps_over_usb_title" msgid="4177086489869041953">"USB ਤੇ ਐਪਾਂ ਦੀ ਜਾਂਚ ਕਰੋ"</string>
     <string name="verify_apps_over_usb_summary" msgid="9164096969924529200">"ਹਾਨੀਕਾਰਕ ਵਿਵਹਾਰ ਲਈ ADB/ADT ਰਾਹੀਂ ਸਥਾਪਤ ਕੀਤੀਆਂ ਐਪਾਂ ਦੀ ਜਾਂਚ ਕਰੋ।"</string>
     <string name="bluetooth_show_devices_without_names_summary" msgid="2351196058115755520">"ਅਨਾਮ ਬਲੂਟੁੱਥ ਡੀਵਾਈਸਾਂ ਦਿਖਾਈਆਂ ਜਾਣਗੀਆਂ (ਸਿਰਫ਼ MAC ਪਤੇ)"</string>
-    <string name="bluetooth_disable_absolute_volume_summary" msgid="6031284410786545957">"ਰਿਮੋਟ ਡੀਵਾਈਸਾਂ ਨਾਲ ਵੌਲਿਊਮ ਸਮੱਸਿਆਵਾਂ ਜਿਵੇਂ ਕਿ ਨਾ ਪਸੰਦ ਕੀਤੀ ਜਾਣ ਵਾਲੀ ਉੱਚੀ ਵੌਲਿਊਮ ਜਾਂ ਕੰਟਰੋਲ ਦੀ ਕਮੀ ਵਰਗੀ ਹਾਲਤ ਵਿੱਚ ਬਲੂਟੁੱਥ ਪੂਰਨ ਵੌਲਿਊਮ ਵਿਸ਼ੇਸ਼ਤਾ ਨੂੰ ਅਯੋਗ ਬਣਾਉਂਦਾ ਹੈ।"</string>
+    <string name="bluetooth_disable_absolute_volume_summary" msgid="6031284410786545957">"ਰਿਮੋਟ ਡੀਵਾਈਸਾਂ ਨਾਲ ਅਵਾਜ਼ੀ ਸਮੱਸਿਆਵਾਂ ਜਿਵੇਂ ਕਿ ਨਾ ਪਸੰਦ ਕੀਤੀ ਜਾਣ ਵਾਲੀ ਉੱਚੀ ਅਵਾਜ਼ ਜਾਂ ਕੰਟਰੋਲ ਦੀ ਕਮੀ ਵਰਗੀ ਹਾਲਤ ਵਿੱਚ ਬਲੂਟੁੱਥ ਪੂਰਨ ਅਵਾਜ਼ਮ ਵਿਸ਼ੇਸ਼ਤਾ ਨੂੰ ਬੰਦ ਕਰਦਾ ਹੈ।"</string>
     <string name="enable_terminal_title" msgid="95572094356054120">"ਸਥਾਨਕ ਟਰਮੀਨਲ"</string>
     <string name="enable_terminal_summary" msgid="67667852659359206">"ਟਰਮੀਨਲ ਐਪ ਨੂੰ ਚਾਲੂ ਕਰੋ ਜੋ ਸਥਾਨਕ ਸ਼ੈਲ ਪਹੁੰਚ ਪੇਸ਼ਕਸ਼ ਕਰਦਾ ਹੈ"</string>
     <string name="hdcp_checking_title" msgid="8605478913544273282">"HDCP ਜਾਂਚ"</string>
@@ -272,30 +272,30 @@
     <string name="no_application" msgid="2813387563129153880">"ਕੁਝ ਨਹੀਂ"</string>
     <string name="wait_for_debugger" msgid="1202370874528893091">"ਡੀਬੱਗਰ ਦੀ ਉਡੀਕ ਕਰੋ"</string>
     <string name="wait_for_debugger_summary" msgid="1766918303462746804">"ਡੀਬੱਗ ਕੀਤੇ ਐਪਲੀਕੇਸ਼ਨ ਐਗਜੀਕਿਊਟ ਕਰਨ ਤੋਂ ਪਹਿਲਾਂ ਅਟੈਚ ਕਰਨ ਲਈ ਡੀਬੱਗਰ ਦੀ ਉਡੀਕ ਕਰਦੇ ਹਨ"</string>
-    <string name="debug_input_category" msgid="1811069939601180246">"ਇਨਪੁਟ"</string>
+    <string name="debug_input_category" msgid="1811069939601180246">"ਇਨਪੁੱਟ"</string>
     <string name="debug_drawing_category" msgid="6755716469267367852">"ਡਰਾਇੰਗ"</string>
     <string name="debug_hw_drawing_category" msgid="6220174216912308658">"ਹਾਰਡਵੇਅਰ ਐਕਸੇਲਰੇਟਿਡ ਰੈਂਡਰਿੰਗ"</string>
     <string name="media_category" msgid="4388305075496848353">"ਮੀਡੀਆ"</string>
-    <string name="debug_monitoring_category" msgid="7640508148375798343">"ਨਿਰੀਖਣ ਕਰ ਰਿਹਾ ਹੈ"</string>
+    <string name="debug_monitoring_category" msgid="7640508148375798343">"ਨਿਰੀਖਣ ਕਰਨਾ"</string>
     <string name="strict_mode" msgid="1938795874357830695">"ਸਟ੍ਰਿਕਟ ਮੋਡ ਸਮਰਥਿਤ"</string>
-    <string name="strict_mode_summary" msgid="142834318897332338">"ਜਦੋਂ ਐਪਸ ਮੇਨ ਥ੍ਰੈਡ ਤੇ ਲੰਮੇ ਓਪਰੇਸ਼ਨ ਕਰਨ ਤਾਂ ਸਕ੍ਰੀਨ ਫਲੈਸ਼ ਕਰੋ"</string>
-    <string name="pointer_location" msgid="6084434787496938001">"ਪੌਇੰਟਰ ਟਿਕਾਣਾ"</string>
-    <string name="pointer_location_summary" msgid="840819275172753713">"ਸਕ੍ਰੀਨ ਓਵਰਲੇ ਮੌਜੂਦਾ ਟਚ  ਡਾਟਾ  ਦਿਖਾ ਰਿਹਾ ਹੈ"</string>
-    <string name="show_touches" msgid="2642976305235070316">"ਟੈਪਾਂ  ਦਿਖਾਓ"</string>
-    <string name="show_touches_summary" msgid="6101183132903926324">"ਟੈਪਾਂ ਲਈ ਨਜ਼ਰ ਸਬੰਧੀ ਪ੍ਰਤੀਕਰਮ  ਦਿਖਾਓ"</string>
-    <string name="show_screen_updates" msgid="5470814345876056420">"ਸਰਫਸ ਅਪਡੇਟਾਂ ਦਿਖਾਓ"</string>
-    <string name="show_screen_updates_summary" msgid="2569622766672785529">"ਵਿੰਡੋ ਦੇ ਸਮੁੱਚੇ ਤਲਾਂ ਦੇ ਅੱਪਡੇਟ ਹੋਣ \'ਤੇ ਉਨ੍ਹਾਂ ਨੂੰ ਰੌਸ਼ਨ ਕਰੋ"</string>
-    <string name="show_hw_screen_updates" msgid="5036904558145941590">"GPU ਦ੍ਰਿਸ਼ ਅੱਪਡੇਟਾਂ ਦਿਖਾਓ"</string>
+    <string name="strict_mode_summary" msgid="142834318897332338">"ਐਪਾਂ ਵੱਲੋਂ ਮੁੱਖ ਥ੍ਰੈੱਡ \'ਤੇ ਲੰਬੀਆਂ ਕਾਰਵਾਈਆਂ ਕਰਨ \'ਤੇ ਸਕ੍ਰੀਨ ਫਲੈਸ਼ ਕਰੋ"</string>
+    <string name="pointer_location" msgid="6084434787496938001">"ਪੁਆਇੰਟਰ ਟਿਕਾਣਾ"</string>
+    <string name="pointer_location_summary" msgid="840819275172753713">"ਸਕ੍ਰੀਨ ਓਵਰਲੇ ਮੌਜੂਦਾ ਸਪੱਰਸ਼ ਡਾਟਾ ਦਿਖਾ ਰਿਹਾ ਹੈ"</string>
+    <string name="show_touches" msgid="2642976305235070316">"ਟੈਪਾਂ ਦਿਖਾਓ"</string>
+    <string name="show_touches_summary" msgid="6101183132903926324">"ਟੈਪਾਂ ਲਈ ਨਜ਼ਰ ਸੰਬੰਧੀ ਪ੍ਰਤੀਕਰਮ ਦਿਖਾਓ"</string>
+    <string name="show_screen_updates" msgid="5470814345876056420">"ਸਰਫ਼ੇਸ ਅੱਪਡੇਟ ਦਿਖਾਓ"</string>
+    <string name="show_screen_updates_summary" msgid="2569622766672785529">"ਸਮੁੱਚੀ ਵਿੰਡੋ ਸਰਫ਼ੇਸਾਂ ਫਲੈਸ਼ ਕਰੋ ਜਦੋਂ ਉਹ ਅੱਪਡੇਟ ਹੁੰਦੀਆਂ ਹਨ"</string>
+    <string name="show_hw_screen_updates" msgid="5036904558145941590">"GPU ਦ੍ਰਿਸ਼ ਅੱਪਡੇਟ ਦਿਖਾਓ"</string>
     <string name="show_hw_screen_updates_summary" msgid="1115593565980196197">"ਜਦੋਂ GPU ਨਾਲ ਡ੍ਰਾ ਕੀਤਾ ਜਾਏ ਤਾਂ ਵਿੰਡੋਜ਼ ਦੇ ਅੰਦਰ ਦ੍ਰਿਸ਼ ਫਲੈਸ਼ ਕਰੋ"</string>
-    <string name="show_hw_layers_updates" msgid="5645728765605699821">"ਹਾਰਡਵੇਅਰ ਲੇਅਰਾਂ ਦੇ ਅੱਪਡੇਟਾਂ ਦਿਖਾਓ"</string>
+    <string name="show_hw_layers_updates" msgid="5645728765605699821">"ਹਾਰਡਵੇਅਰ ਲੇਅਰਾਂ ਦੇ ਅੱਪਡੇਟ ਦਿਖਾਓ"</string>
     <string name="show_hw_layers_updates_summary" msgid="5296917233236661465">"ਹਾਰਡਵੇਅਰ ਲੇਅਰਾਂ ਅੱਪਡੇਟ ਹੋਣ \'ਤੇ ਉਨ੍ਹਾਂ ਨੂੰ ਹਰਾ ਕਰੋ"</string>
     <string name="debug_hw_overdraw" msgid="2968692419951565417">"GPU ਓਵਰਡ੍ਰਾ ਡੀਬੱਗ ਕਰੋ"</string>
-    <string name="disable_overlays" msgid="2074488440505934665">"HW ਓਵਰਲੇਜ ਨੂੰ ਅਸਮਰੱਥ ਬਣਾਓ"</string>
+    <string name="disable_overlays" msgid="2074488440505934665">"HW ਓਵਰਲੇ ਨੂੰ ਬੰਦ ਕਰੋ"</string>
     <string name="disable_overlays_summary" msgid="3578941133710758592">"ਸਕ੍ਰੀਨ ਕੰਪੋਜਿਟਿੰਗ ਲਈ ਹਮੇਸ਼ਾਂ GPU ਵਰਤੋ"</string>
     <string name="simulate_color_space" msgid="6745847141353345872">"ਰੰਗ ਸਪੇਸ ਦੀ ਨਕਲ ਕਰੋ"</string>
     <string name="enable_opengl_traces_title" msgid="6790444011053219871">"OpenGL ਟ੍ਰੇਸਿਜ ਨੂੰ ਚਾਲੂ ਕਰੋ"</string>
-    <string name="usb_audio_disable_routing" msgid="8114498436003102671">"USB  ਆਡੀਓ  ਰੂਟਿੰਗ ਨੂੰ ਅਸਮਰੱਥ ਬਣਾਓ"</string>
-    <string name="usb_audio_disable_routing_summary" msgid="980282760277312264">"USB  ਆਡੀਓ  ਪੈਰੀਫਰਲ ਲਈ ਆਟੋਮੈਟਿਕ ਰੂਟਿੰਗ ਅਸਮਰੱਥ ਬਣਾਓ"</string>
+    <string name="usb_audio_disable_routing" msgid="8114498436003102671">"USB ਆਡੀਓ ਰੂਟਿੰਗ ਨੂੰ ਬੰਦ ਕਰੋ"</string>
+    <string name="usb_audio_disable_routing_summary" msgid="980282760277312264">"USB ਆਡੀਓ ਪੈਰੀਫੈਰਲ ਲਈ ਸਵੈਚਲਿਤ ਰੂਟਿੰਗ ਬੰਦ ਕਰੋ"</string>
     <string name="debug_layout" msgid="5981361776594526155">"ਲੇਆਉਟ ਬਾਊਂਡਸ ਦਿਖਾਓ"</string>
     <string name="debug_layout_summary" msgid="2001775315258637682">"ਕਲਿਪ ਬਾਊਂਡਸ, ਮਾਰਜਿਨ ਆਦਿ ਦਿਖਾਓ"</string>
     <string name="force_rtl_layout_all_locales" msgid="2259906643093138978">"RTL ਲੇਆਉਟ ਦਿਸ਼ਾ ਤੇ ਜ਼ੋਰ ਪਾਓ"</string>
@@ -314,17 +314,17 @@
     <string name="overlay_display_devices_title" msgid="5364176287998398539">"ਸੈਕੰਡਰੀ ਡਿਸਪਲੇ ਦੀ ਨਕਲ ਕਰੋ"</string>
     <string name="debug_applications_category" msgid="4206913653849771549">"ਐਪਾਂ"</string>
     <string name="immediately_destroy_activities" msgid="1579659389568133959">"ਗਤੀਵਿਧੀਆਂ ਨਾ ਰੱਖੋ"</string>
-    <string name="immediately_destroy_activities_summary" msgid="3592221124808773368">"ਹਰੇਕ ਗਤੀਵਿਧੀ ਨੂੰ ਨਸ਼ਟ ਕਰੋ ਜਿਵੇਂ ਹੀ ਉਪਭੋਗਤਾ ਇਸਨੂੰ ਛੱਡ ਦੇਵੇ"</string>
-    <string name="app_process_limit_title" msgid="4280600650253107163">"ਪਿਛੋਕੜ ਪ੍ਰਕਿਰਿਆ ਸੀਮਾ"</string>
+    <string name="immediately_destroy_activities_summary" msgid="3592221124808773368">"ਹਰੇਕ ਸਰਗਰਮੀ ਨਸ਼ਟ ਕਰੋ, ਜਿਵੇਂ ਹੀ ਵਰਤੋਂਕਾਰ ਇਸਨੂੰ ਛੱਡੇ"</string>
+    <string name="app_process_limit_title" msgid="4280600650253107163">"ਬੈਕਗ੍ਰਾਊਂਡ ਪ੍ਰਕਿਰਿਆ ਸੀਮਾ"</string>
     <string name="show_all_anrs" msgid="4924885492787069007">"ਬੈਕਗ੍ਰਾਊਂਡ ANRs ਦਿਖਾਓ"</string>
-    <string name="show_all_anrs_summary" msgid="6636514318275139826">"ਬੈਕਗ੍ਰਾਊਂਡ ਐਪਾਂ ਲਈ \'ਐਪ ਪ੍ਰਤਿਕਿਰਿਆ ਨਹੀਂ ਦੇ ਰਹੀ ਹੈ\' ਡਾਇਲੌਗ ਦਿਖਾਓ"</string>
+    <string name="show_all_anrs_summary" msgid="6636514318275139826">"ਬੈਕਗ੍ਰਾਊਂਡ ਐਪਾਂ ਲਈ \'ਐਪ ਪ੍ਰਤਿਕਿਰਿਆ ਨਹੀਂ ਦੇ ਰਹੀ ਹੈ\' ਵਿੰਡੋ ਦਿਖਾਓ"</string>
     <string name="show_notification_channel_warnings" msgid="1399948193466922683">"ਸੂਚਨਾ ਚੈਨਲ ਚਿਤਾਵਨੀਆਂ ਦਿਖਾਓ"</string>
     <string name="show_notification_channel_warnings_summary" msgid="5536803251863694895">"ਐਪ ਵੱਲੋਂ ਵੈਧ ਚੈਨਲ ਤੋਂ ਬਿਨਾਂ ਸੂਚਨਾ ਪੋਸਟ ਕਰਨ \'ਤੇ ਸਕ੍ਰੀਨ \'ਤੇ ਚਿਤਾਵਨੀ ਦਿਖਾਉਂਦੀ ਹੈ"</string>
-    <string name="force_allow_on_external" msgid="3215759785081916381">"ਐਪਸ ਨੂੰ ਬਾਹਰਲੇ ਤੇ ਜ਼ਬਰਦਸਤੀ ਆਗਿਆ ਦਿਓ"</string>
+    <string name="force_allow_on_external" msgid="3215759785081916381">"ਐਪਾਂ ਨੂੰ ਜ਼ਬਰਦਸਤੀ ਬਾਹਰੀ ਸਟੋਰੇਜ \'ਤੇ ਆਗਿਆ ਦਿਓ"</string>
     <string name="force_allow_on_external_summary" msgid="3640752408258034689">"ਮੈਨੀਫੈਸਟ ਮੁੱਲਾਂ ਦੀ ਪਰਵਾਹ ਕੀਤੇ ਬਿਨਾਂ, ਕਿਸੇ ਵੀ ਐਪ ਨੂੰ ਬਾਹਰੀ ਸਟੋਰੇਜ \'ਤੇ ਲਿਖਣ ਦੇ ਯੋਗ ਬਣਾਉਂਦੀ ਹੈ"</string>
     <string name="force_resizable_activities" msgid="8615764378147824985">"ਮੁੜ-ਆਕਾਰ ਬਦਲਣ ਲਈ ਸਰਗਰਮੀਆਂ \'ਤੇ ਜ਼ੋਰ ਦਿਓ"</string>
     <string name="force_resizable_activities_summary" msgid="6667493494706124459">"ਮੈਨੀਫ਼ੈਸਟ ਮੁੱਲਾਂ ਦੀ ਪਰਵਾਹ ਕੀਤੇ ਬਿਨਾਂ, ਮਲਟੀ-ਵਿੰਡੋ ਲਈ ਸਾਰੀਆਂ ਸਰਗਰਮੀਆਂ ਨੂੰ ਆਕਾਰ ਬਦਲਣਯੋਗ ਬਣਾਓ।"</string>
-    <string name="enable_freeform_support" msgid="1461893351278940416">"freeform windows ਨੂੰ ਚਾਲੂ ਕਰੋ"</string>
+    <string name="enable_freeform_support" msgid="1461893351278940416">"ਫ੍ਰੀਫਾਰਮ ਵਿੰਡੋਜ਼ ਨੂੰ ਚਾਲੂ ਕਰੋ"</string>
     <string name="enable_freeform_support_summary" msgid="8247310463288834487">"ਪ੍ਰਯੋਗਮਈ ਫ੍ਰੀਫਾਰਮ ਵਿੰਡੋਜ਼ ਲਈ ਸਮਰਥਨ ਨੂੰ ਚਾਲੂ ਕਰੋ।"</string>
     <string name="local_backup_password_title" msgid="3860471654439418822">"ਡੈਸਕਟਾਪ ਬੈਕਅੱਪ ਪਾਸਵਰਡ"</string>
     <string name="local_backup_password_summary_none" msgid="6951095485537767956">"ਡੈਸਕਟਾਪ ਪੂਰੇ ਬੈਕਅੱਪ ਇਸ ਵੇਲੇ ਸੁਰੱਖਿਅਤ ਨਹੀਂ ਹਨ"</string>
@@ -359,12 +359,12 @@
     <string name="button_convert_fbe" msgid="5152671181309826405">"ਮਿਟਾਓ ਅਤੇ ਰੁਪਾਂਤਰਣ ਕਰੋ..."</string>
     <string name="picture_color_mode" msgid="4560755008730283695">"ਤਸਵੀਰ ਰੰਗ ਮੋਡ"</string>
     <string name="picture_color_mode_desc" msgid="1141891467675548590">"sRGB ਵਰਤੋਂ ਕਰੋ"</string>
-    <string name="daltonizer_mode_disabled" msgid="7482661936053801862">"ਅਯੋਗ ਬਣਾਇਆ"</string>
+    <string name="daltonizer_mode_disabled" msgid="7482661936053801862">"ਬੰਦ ਹੈ"</string>
     <string name="daltonizer_mode_monochromacy" msgid="8485709880666106721">"Monochromacy"</string>
     <string name="daltonizer_mode_deuteranomaly" msgid="5475532989673586329">"Deuteranomaly (ਲਾਲ-ਹਰਾ)"</string>
     <string name="daltonizer_mode_protanomaly" msgid="8424148009038666065">"Protanomaly (ਲਾਲ-ਹਰਾ)"</string>
     <string name="daltonizer_mode_tritanomaly" msgid="481725854987912389">"Tritanomaly (ਨੀਲਾ-ਪੀਲਾ)"</string>
-    <string name="accessibility_display_daltonizer_preference_title" msgid="5800761362678707872">"ਰੰਗ ਸੰਸ਼ੋਧਨ"</string>
+    <string name="accessibility_display_daltonizer_preference_title" msgid="5800761362678707872">"ਰੰਗ ਸੁਧਾਈ"</string>
     <string name="accessibility_display_daltonizer_preference_subtitle" msgid="3484969015295282911">"ਇਹ ਵਿਸ਼ੇਸ਼ਤਾ ਪ੍ਰਯੋਗਾਤਮਿਕ ਹੈ ਅਤੇ ਪ੍ਰਦਰਸ਼ਨ ਤੇ ਅਸਰ ਪਾ ਸਕਦੀ ਹੈ।"</string>
     <string name="daltonizer_type_overridden" msgid="3116947244410245916">"<xliff:g id="TITLE">%1$s</xliff:g> ਦੁਆਰਾ ਓਵਰਰਾਈਡ ਕੀਤਾ"</string>
     <string name="power_remaining_duration_only" msgid="845431008899029842">"ਲਗਭਗ <xliff:g id="TIME">%1$s</xliff:g> ਬਾਕੀ"</string>

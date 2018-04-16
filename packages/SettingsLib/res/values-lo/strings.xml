@@ -137,7 +137,7 @@
     <string name="managed_user_title" msgid="8109605045406748842">"ແອັບເຮັດວຽກທັງໝົດ"</string>
     <string name="user_guest" msgid="8475274842845401871">"ແຂກ"</string>
     <string name="unknown" msgid="1592123443519355854">"ບໍ່ຮູ້ຈັກ"</string>
-    <string name="running_process_item_user_label" msgid="3129887865552025943">"ຜູ່ໃຊ້: <xliff:g id="USER_NAME">%1$s</xliff:g>"</string>
+    <string name="running_process_item_user_label" msgid="3129887865552025943">"ຜູ້ໃຊ້: <xliff:g id="USER_NAME">%1$s</xliff:g>"</string>
     <string name="launch_defaults_some" msgid="313159469856372621">"ຕັ້ງ​ບາງ​ຄ່າ​ເລີ່ມ​ຕົ້ນ​ແລ້ວ"</string>
     <string name="launch_defaults_none" msgid="4241129108140034876">"ບໍ່ໄດ້ຕັ້ງຄ່າເລີ່ມຕົ້ນເທື່ອ"</string>
     <string name="tts_settings" msgid="8186971894801348327">"ການຕັ້ງຄ່າການປ່ຽນຂໍ້ຄວາມເປັນສຽງເວົ້າ"</string>
@@ -221,9 +221,9 @@
     <string name="bluetooth_select_a2dp_codec_sample_rate_dialog_title" msgid="8010380028880963535">"ເປີດໃຊ້ Bluetooth Audio Codec\nການເລືອກ: Sample Rate"</string>
     <string name="bluetooth_select_a2dp_codec_bits_per_sample" msgid="2099645202720164141">"Bluetooth Audio Bits Per Sample"</string>
     <string name="bluetooth_select_a2dp_codec_bits_per_sample_dialog_title" msgid="8063859754619484760">"ເປີດໃຊ້ Bluetooth Audio Codec\nການເລືອກ: Bits Per Sample"</string>
-    <string name="bluetooth_select_a2dp_codec_channel_mode" msgid="884855779449390540">"Bluetooth Audio Channel Mode"</string>
+    <string name="bluetooth_select_a2dp_codec_channel_mode" msgid="884855779449390540">"ໂໝດຊ່ອງສຽງ Bluetooth"</string>
     <string name="bluetooth_select_a2dp_codec_channel_mode_dialog_title" msgid="7234956835280563341">"ເປີດໃຊ້ Bluetooth Audio Codec\nການເລືອກ: ໂໝດຊ່ອງ"</string>
-    <string name="bluetooth_select_a2dp_codec_ldac_playback_quality" msgid="3619694372407843405">"Bluetooth Audio LDAC Codec: Playback Quality"</string>
+    <string name="bluetooth_select_a2dp_codec_ldac_playback_quality" msgid="3619694372407843405">"Bluetooth Audio LDAC Codec: ຄຸນນະພາບການຫຼິ້ນ"</string>
     <string name="bluetooth_select_a2dp_codec_ldac_playback_quality_dialog_title" msgid="7595776220458732825">"ເປີດໃຊ້ Bluetooth Audio LDAC Codec\nການເລືອກ: ຄຸນນະພາບການຫຼິ້ນ"</string>
     <string name="bluetooth_select_a2dp_codec_streaming_label" msgid="5347862512596240506">"Streaming: <xliff:g id="STREAMING_PARAMETER">%1$s</xliff:g>"</string>
     <string name="select_private_dns_configuration_title" msgid="3700456559305263922">"DNS ສ່ວນຕົວ"</string>
@@ -309,12 +309,12 @@
     <string name="enable_gpu_debug_layers" msgid="3848838293793255097">"ເປີດໃຊ້ຊັ້ນຂໍ້ມູນດີບັກ GPU"</string>
     <string name="enable_gpu_debug_layers_summary" msgid="8009136940671194940">"ອະນຸຍາດການໂຫລດຊັ້ນຂໍ້ມູນດີບັກ GPU ສຳລັບແອັບດີບັກ"</string>
     <string name="window_animation_scale_title" msgid="6162587588166114700">"ຂະໜາດອະນິເມຊັນ"</string>
-    <string name="transition_animation_scale_title" msgid="387527540523595875">"ຂະໜາດສະລັບອະນິເມຊັນ"</string>
+    <string name="transition_animation_scale_title" msgid="387527540523595875">"ຂະໜາດອະນິເມຊັນ"</string>
     <string name="animator_duration_scale_title" msgid="3406722410819934083">"ໄລຍະເວລາອະນິເມຊັນ"</string>
     <string name="overlay_display_devices_title" msgid="5364176287998398539">"ຈຳລອງຈໍສະແດງຜົນທີ່ສອງ"</string>
     <string name="debug_applications_category" msgid="4206913653849771549">"ແອັບຯ"</string>
     <string name="immediately_destroy_activities" msgid="1579659389568133959">"ບໍ່ຕ້ອງຮັກສາການເຮັດວຽກ"</string>
-    <string name="immediately_destroy_activities_summary" msgid="3592221124808773368">"ລຶບທຸກການເຄື່ອນໄຫວທັນທີທີ່ຜູ່ໃຊ້ອອກຈາກມັນ"</string>
+    <string name="immediately_destroy_activities_summary" msgid="3592221124808773368">"ລຶບທຸກການເຄື່ອນໄຫວທັນທີທີ່ຜູ້ໃຊ້ອອກຈາກມັນ"</string>
     <string name="app_process_limit_title" msgid="4280600650253107163">"ການຈຳກັດໂປຣເຊສໃນພື້ນຫຼັງ"</string>
     <string name="show_all_anrs" msgid="4924885492787069007">"ສະແດງ ANR ພື້ນຫຼັງ"</string>
     <string name="show_all_anrs_summary" msgid="6636514318275139826">"ສະແດງກ່ອງຂໍ້ຄວາມບໍ່ຕອບສະໜອງແອັບສຳລັບແອັບພື້ນຫຼັງ"</string>
