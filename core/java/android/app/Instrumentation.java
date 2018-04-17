@@ -1182,6 +1182,10 @@ public class Instrumentation {
             IllegalAccessException {
         Activity activity = (Activity)clazz.newInstance();
         ActivityThread aThread = null;
+        // Activity.attach expects a non-null Application Object.
+        if (application == null) {
+            application = new Application();
+        }
         activity.attach(context, aThread, this, token, 0 /* ident */, application, intent,
                 info, title, parent, id,
                 (Activity.NonConfigurationInstances)lastNonConfigurationInstance,
