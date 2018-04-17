@@ -51,7 +51,6 @@ minikin::Layout MinikinUtils::doLayout(const Paint* paint, minikin::Bidi bidiFla
                                        const Typeface* typeface, const uint16_t* buf, size_t start,
                                        size_t count, size_t bufSize, minikin::MeasuredText* mt) {
     minikin::MinikinPaint minikinPaint = prepareMinikinPaint(paint, typeface);
-    minikin::Layout layout;
 
     const minikin::U16StringPiece textBuf(buf, bufSize);
     const minikin::Range range(start, start + count);
@@ -60,11 +59,10 @@ minikin::Layout MinikinUtils::doLayout(const Paint* paint, minikin::Bidi bidiFla
     const minikin::EndHyphenEdit endHyphen = minikin::endHyphenEdit(hyphenEdit);
 
     if (mt == nullptr) {
-        layout.doLayout(textBuf,range, bidiFlags, minikinPaint, startHyphen, endHyphen);
+        return minikin::Layout(textBuf,range, bidiFlags, minikinPaint, startHyphen, endHyphen);
     } else {
-        mt->buildLayout(textBuf, range, minikinPaint, bidiFlags, startHyphen, endHyphen, &layout);
+        return mt->buildLayout(textBuf, range, minikinPaint, bidiFlags, startHyphen, endHyphen);
     }
-    return layout;
 }
 
 float MinikinUtils::measureText(const Paint* paint, minikin::Bidi bidiFlags,
