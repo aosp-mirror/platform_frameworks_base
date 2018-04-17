@@ -232,8 +232,7 @@ public class KeyguardClockPositionAlgorithm {
         if (mCurrentlySecure) {
             alphaKeyguard = 1;
         } else {
-            alphaKeyguard = Math.max(0, Math.min(1, (y - mMinTopMargin)
-                    / Math.max(1f, getExpandedClockPosition() - mMinTopMargin)));
+            alphaKeyguard = Math.max(0, y / Math.max(1f, getExpandedClockPosition()));
             alphaKeyguard = Interpolators.ACCELERATE.getInterpolation(alphaKeyguard);
         }
         return MathUtils.lerp(alphaKeyguard, 1f, mDarkAmount);
