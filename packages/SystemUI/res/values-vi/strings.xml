@@ -161,10 +161,8 @@
     <string name="accessibility_no_sim" msgid="8274017118472455155">"Không có SIM nào."</string>
     <string name="accessibility_cell_data" msgid="5326139158682385073">"Dữ liệu di động"</string>
     <string name="accessibility_cell_data_on" msgid="5927098403452994422">"Dữ liệu di động đang bật"</string>
-    <!-- no translation found for cell_data_off_content_description (4356113230238585072) -->
-    <skip />
-    <!-- no translation found for cell_data_off (1051264981229902873) -->
-    <skip />
+    <string name="cell_data_off_content_description" msgid="4356113230238585072">"Đã tắt dữ liệu di động"</string>
+    <string name="cell_data_off" msgid="1051264981229902873">"Tắt"</string>
     <string name="accessibility_bluetooth_tether" msgid="4102784498140271969">"Chia sẻ kết nối Internet qua Bluetooth"</string>
     <string name="accessibility_airplane_mode" msgid="834748999790763092">"Chế độ trên máy bay."</string>
     <string name="accessibility_vpn_on" msgid="5993385083262856059">"VPN đang bật."</string>
@@ -363,8 +361,7 @@
     <string name="recents_stack_action_button_label" msgid="6593727103310426253">"Xóa tất cả"</string>
     <string name="recents_drag_hint_message" msgid="2649739267073203985">"Kéo vào đây để sử dụng chế độ chia đôi màn hình"</string>
     <string name="recents_swipe_up_onboarding" msgid="3824607135920170001">"Vuốt lên để chuyển đổi ứng dụng"</string>
-    <!-- no translation found for recents_quick_scrub_onboarding (2778062804333285789) -->
-    <skip />
+    <string name="recents_quick_scrub_onboarding" msgid="2778062804333285789">"Kéo sang phải để chuyển đổi nhanh giữa các ứng dụng"</string>
     <string name="recents_multistack_add_stack_dialog_split_horizontal" msgid="8848514474543427332">"Phân tách ngang"</string>
     <string name="recents_multistack_add_stack_dialog_split_vertical" msgid="9075292233696180813">"Phân tách dọc"</string>
     <string name="recents_multistack_add_stack_dialog_split_custom" msgid="4177837597513701943">"Tùy chỉnh phân tách"</string>
@@ -559,7 +556,7 @@
     <string name="quick_settings" msgid="10042998191725428">"Cài đặt nhanh"</string>
     <string name="status_bar" msgid="4877645476959324760">"Thanh trạng thái"</string>
     <string name="overview" msgid="4018602013895926956">"Tổng quan"</string>
-    <string name="demo_mode" msgid="2532177350215638026">"Chế độ trình diễn giao diện người dùng hệ thống"</string>
+    <string name="demo_mode" msgid="2532177350215638026">"Chế độ thử nghiệm giao diện người dùng hệ thống"</string>
     <string name="enable_demo_mode" msgid="4844205668718636518">"Bật chế độ trình diễn"</string>
     <string name="show_demo_mode" msgid="2018336697782464029">"Hiển thị chế độ trình diễn"</string>
     <string name="status_bar_ethernet" msgid="5044290963549500128">"Ethernet"</string>

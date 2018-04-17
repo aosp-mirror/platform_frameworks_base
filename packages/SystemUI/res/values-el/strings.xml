@@ -161,10 +161,8 @@
     <string name="accessibility_no_sim" msgid="8274017118472455155">"Δεν υπάρχει SIM."</string>
     <string name="accessibility_cell_data" msgid="5326139158682385073">"Δεδομένα κινητής τηλεφωνίας"</string>
     <string name="accessibility_cell_data_on" msgid="5927098403452994422">"Τα δεδομένα κινητής τηλεφωνίας ενεργοποιήθηκαν"</string>
-    <!-- no translation found for cell_data_off_content_description (4356113230238585072) -->
-    <skip />
-    <!-- no translation found for cell_data_off (1051264981229902873) -->
-    <skip />
+    <string name="cell_data_off_content_description" msgid="4356113230238585072">"Τα δεδομένα κινητής τηλεφωνίας απενεργοποιήθηκαν"</string>
+    <string name="cell_data_off" msgid="1051264981229902873">"Ανενεργά"</string>
     <string name="accessibility_bluetooth_tether" msgid="4102784498140271969">"Πρόσδεση Bluetooth"</string>
     <string name="accessibility_airplane_mode" msgid="834748999790763092">"Λειτουργία πτήσης."</string>
     <string name="accessibility_vpn_on" msgid="5993385083262856059">"VPN ενεργό."</string>
@@ -363,8 +361,7 @@
     <string name="recents_stack_action_button_label" msgid="6593727103310426253">"Διαγραφή όλων"</string>
     <string name="recents_drag_hint_message" msgid="2649739267073203985">"Σύρετε εδώ για να χρησιμοποιήσετε τον διαχωρισμό οθόνης"</string>
     <string name="recents_swipe_up_onboarding" msgid="3824607135920170001">"Σύρετε προς τα επάνω για εναλλαγή των εφαρμογών"</string>
-    <!-- no translation found for recents_quick_scrub_onboarding (2778062804333285789) -->
-    <skip />
+    <string name="recents_quick_scrub_onboarding" msgid="2778062804333285789">"Σύρετε προς τα δεξιά για γρήγορη εναλλαγή εφαρμογών"</string>
     <string name="recents_multistack_add_stack_dialog_split_horizontal" msgid="8848514474543427332">"Οριζόντιος διαχωρισμός"</string>
     <string name="recents_multistack_add_stack_dialog_split_vertical" msgid="9075292233696180813">"Κάθετος διαχωρισμός"</string>
     <string name="recents_multistack_add_stack_dialog_split_custom" msgid="4177837597513701943">"Προσαρμοσμένος διαχωρισμός"</string>

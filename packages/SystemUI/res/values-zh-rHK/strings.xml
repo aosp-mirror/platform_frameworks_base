@@ -161,10 +161,8 @@
     <string name="accessibility_no_sim" msgid="8274017118472455155">"無 SIM 卡。"</string>
     <string name="accessibility_cell_data" msgid="5326139158682385073">"流動數據"</string>
     <string name="accessibility_cell_data_on" msgid="5927098403452994422">"開咗流動數據"</string>
-    <!-- no translation found for cell_data_off_content_description (4356113230238585072) -->
-    <skip />
-    <!-- no translation found for cell_data_off (1051264981229902873) -->
-    <skip />
+    <string name="cell_data_off_content_description" msgid="4356113230238585072">"流動數據已關閉"</string>
+    <string name="cell_data_off" msgid="1051264981229902873">"關閉"</string>
     <string name="accessibility_bluetooth_tether" msgid="4102784498140271969">"藍牙網絡共享。"</string>
     <string name="accessibility_airplane_mode" msgid="834748999790763092">"飛航模式。"</string>
     <string name="accessibility_vpn_on" msgid="5993385083262856059">"開咗 VPN。"</string>
@@ -365,8 +363,7 @@
     <string name="recents_stack_action_button_label" msgid="6593727103310426253">"全部清除"</string>
     <string name="recents_drag_hint_message" msgid="2649739267073203985">"在這裡拖曳即可分割螢幕"</string>
     <string name="recents_swipe_up_onboarding" msgid="3824607135920170001">"向上快速滑動即可切換應用程式"</string>
-    <!-- no translation found for recents_quick_scrub_onboarding (2778062804333285789) -->
-    <skip />
+    <string name="recents_quick_scrub_onboarding" msgid="2778062804333285789">"向右拖曳即可快速切換應用程式"</string>
     <string name="recents_multistack_add_stack_dialog_split_horizontal" msgid="8848514474543427332">"水平分割"</string>
     <string name="recents_multistack_add_stack_dialog_split_vertical" msgid="9075292233696180813">"垂直分割"</string>
     <string name="recents_multistack_add_stack_dialog_split_custom" msgid="4177837597513701943">"自訂分割"</string>
@@ -677,13 +674,13 @@
     <string name="keyboard_key_numpad_template" msgid="8729216555174634026">"數字鍵盤 <xliff:g id="NAME">%1$s</xliff:g>"</string>
     <string name="keyboard_shortcut_group_system" msgid="6472647649616541064">"系統"</string>
     <string name="keyboard_shortcut_group_system_home" msgid="3054369431319891965">"主畫面"</string>
-    <string name="keyboard_shortcut_group_system_recents" msgid="3154851905021926744">"最近的活動"</string>
+    <string name="keyboard_shortcut_group_system_recents" msgid="3154851905021926744">"最近"</string>
     <string name="keyboard_shortcut_group_system_back" msgid="2207004531216446378">"返回"</string>
     <string name="keyboard_shortcut_group_system_notifications" msgid="8366964080041773224">"通知"</string>
     <string name="keyboard_shortcut_group_system_shortcuts_helper" msgid="4892255911160332762">"鍵盤快速鍵"</string>
     <string name="keyboard_shortcut_group_system_switch_input" msgid="2334164096341310324">"切換輸入法"</string>
     <string name="keyboard_shortcut_group_applications" msgid="9129465955073449206">"應用程式"</string>
-    <string name="keyboard_shortcut_group_applications_assist" msgid="9095441910537146013">"輔助"</string>
+    <string name="keyboard_shortcut_group_applications_assist" msgid="9095441910537146013">"小幫手"</string>
     <string name="keyboard_shortcut_group_applications_browser" msgid="6465985474000766533">"瀏覽器"</string>
     <string name="keyboard_shortcut_group_applications_contacts" msgid="2064197111278436375">"通訊錄"</string>
     <string name="keyboard_shortcut_group_applications_email" msgid="6257036897441939004">"電郵"</string>

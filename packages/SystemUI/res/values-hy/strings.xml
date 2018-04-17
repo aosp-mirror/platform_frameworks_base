@@ -161,10 +161,8 @@
     <string name="accessibility_no_sim" msgid="8274017118472455155">"SIM չկա:"</string>
     <string name="accessibility_cell_data" msgid="5326139158682385073">"Բջջային ինտերնետ"</string>
     <string name="accessibility_cell_data_on" msgid="5927098403452994422">"Բջջային տվյալները միացված են"</string>
-    <!-- no translation found for cell_data_off_content_description (4356113230238585072) -->
-    <skip />
-    <!-- no translation found for cell_data_off (1051264981229902873) -->
-    <skip />
+    <string name="cell_data_off_content_description" msgid="4356113230238585072">"Բջջային ինտերնետն անջատված է"</string>
+    <string name="cell_data_off" msgid="1051264981229902873">"Անջատված է"</string>
     <string name="accessibility_bluetooth_tether" msgid="4102784498140271969">"Bluetooth մոդեմ"</string>
     <string name="accessibility_airplane_mode" msgid="834748999790763092">"Ինքնաթիռի ռեժիմ"</string>
     <string name="accessibility_vpn_on" msgid="5993385083262856059">"Միացնել VPN-ը։"</string>
@@ -363,8 +361,7 @@
     <string name="recents_stack_action_button_label" msgid="6593727103310426253">"Մաքրել բոլորը"</string>
     <string name="recents_drag_hint_message" msgid="2649739267073203985">"Քաշեք այստեղ՝ էկրանի տրոհումն օգտագործելու համար"</string>
     <string name="recents_swipe_up_onboarding" msgid="3824607135920170001">"Սահեցրեք վերև՝ մյուս հավելվածին անցնելու համար"</string>
-    <!-- no translation found for recents_quick_scrub_onboarding (2778062804333285789) -->
-    <skip />
+    <string name="recents_quick_scrub_onboarding" msgid="2778062804333285789">"Քաշեք աջ՝ մյուս հավելվածներին անցնելու համար"</string>
     <string name="recents_multistack_add_stack_dialog_split_horizontal" msgid="8848514474543427332">"Հորիզոնական տրոհում"</string>
     <string name="recents_multistack_add_stack_dialog_split_vertical" msgid="9075292233696180813">"Ուղղահայաց տրոհում"</string>
     <string name="recents_multistack_add_stack_dialog_split_custom" msgid="4177837597513701943">"Հատուկ տրոհում"</string>
