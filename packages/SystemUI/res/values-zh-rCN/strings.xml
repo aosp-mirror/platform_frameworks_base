@@ -161,10 +161,8 @@
     <string name="accessibility_no_sim" msgid="8274017118472455155">"无 SIM 卡。"</string>
     <string name="accessibility_cell_data" msgid="5326139158682385073">"移动数据"</string>
     <string name="accessibility_cell_data_on" msgid="5927098403452994422">"移动数据已开启"</string>
-    <!-- no translation found for cell_data_off_content_description (4356113230238585072) -->
-    <skip />
-    <!-- no translation found for cell_data_off (1051264981229902873) -->
-    <skip />
+    <string name="cell_data_off_content_description" msgid="4356113230238585072">"移动数据网络已关闭"</string>
+    <string name="cell_data_off" msgid="1051264981229902873">"已关闭"</string>
     <string name="accessibility_bluetooth_tether" msgid="4102784498140271969">"蓝牙网络共享。"</string>
     <string name="accessibility_airplane_mode" msgid="834748999790763092">"飞行模式。"</string>
     <string name="accessibility_vpn_on" msgid="5993385083262856059">"VPN 已开启。"</string>
@@ -363,8 +361,7 @@
     <string name="recents_stack_action_button_label" msgid="6593727103310426253">"全部清除"</string>
     <string name="recents_drag_hint_message" msgid="2649739267073203985">"拖动到此处即可使用分屏功能"</string>
     <string name="recents_swipe_up_onboarding" msgid="3824607135920170001">"向上滑动可切换应用"</string>
-    <!-- no translation found for recents_quick_scrub_onboarding (2778062804333285789) -->
-    <skip />
+    <string name="recents_quick_scrub_onboarding" msgid="2778062804333285789">"向右拖动可快速切换应用"</string>
     <string name="recents_multistack_add_stack_dialog_split_horizontal" msgid="8848514474543427332">"水平分割"</string>
     <string name="recents_multistack_add_stack_dialog_split_vertical" msgid="9075292233696180813">"垂直分割"</string>
     <string name="recents_multistack_add_stack_dialog_split_custom" msgid="4177837597513701943">"自定义分割"</string>

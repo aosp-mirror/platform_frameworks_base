@@ -52,7 +52,7 @@
     <string name="status_bar_settings_notifications" msgid="397146176280905137">"Хабарлар"</string>
     <string name="bluetooth_tethered" msgid="7094101612161133267">"Bluetooth қосылды"</string>
     <string name="status_bar_input_method_settings_configure_input_methods" msgid="3504292471512317827">"Енгізу әдістерін орнату"</string>
-    <string name="status_bar_use_physical_keyboard" msgid="7551903084416057810">"Қатты пернетақта"</string>
+    <string name="status_bar_use_physical_keyboard" msgid="7551903084416057810">"Физикалық пернетақта"</string>
     <string name="usb_device_permission_prompt" msgid="1825685909587559679">"<xliff:g id="APPLICATION">%1$s</xliff:g> қолданбасына <xliff:g id="USB_DEVICE">%2$s</xliff:g> құрылғысына кіруге рұқсат берілсін бе?"</string>
     <string name="usb_accessory_permission_prompt" msgid="2465531696941369047">"<xliff:g id="APPLICATION">%1$s</xliff:g> қолданбасына <xliff:g id="USB_ACCESSORY">%2$s</xliff:g> жабдығына кіруге рұқсат берілсін бе?"</string>
     <string name="usb_device_confirm_prompt" msgid="7440562274256843905">"<xliff:g id="USB_DEVICE">%2$s</xliff:g> жабдығын басқару үшін <xliff:g id="APPLICATION">%1$s</xliff:g> ашылсын ба?"</string>
@@ -161,10 +161,8 @@
     <string name="accessibility_no_sim" msgid="8274017118472455155">"SIM жоқ."</string>
     <string name="accessibility_cell_data" msgid="5326139158682385073">"Мобильдік дерекқор"</string>
     <string name="accessibility_cell_data_on" msgid="5927098403452994422">"Мобильдік деректер қосулы"</string>
-    <!-- no translation found for cell_data_off_content_description (4356113230238585072) -->
-    <skip />
-    <!-- no translation found for cell_data_off (1051264981229902873) -->
-    <skip />
+    <string name="cell_data_off_content_description" msgid="4356113230238585072">"Мобильдік деректер өшірулі"</string>
+    <string name="cell_data_off" msgid="1051264981229902873">"Өшірулі"</string>
     <string name="accessibility_bluetooth_tether" msgid="4102784498140271969">"Bluetooth тетеринг."</string>
     <string name="accessibility_airplane_mode" msgid="834748999790763092">"Ұшақ режимі."</string>
     <string name="accessibility_vpn_on" msgid="5993385083262856059">"VPN қосулы."</string>
@@ -363,8 +361,7 @@
     <string name="recents_stack_action_button_label" msgid="6593727103310426253">"Барлығын тазалау"</string>
     <string name="recents_drag_hint_message" msgid="2649739267073203985">"Бөлінген экранды пайдалану үшін осында сүйреңіз"</string>
     <string name="recents_swipe_up_onboarding" msgid="3824607135920170001">"Қолданбалар арасында ауысу үшін жоғары сырғытыңыз"</string>
-    <!-- no translation found for recents_quick_scrub_onboarding (2778062804333285789) -->
-    <skip />
+    <string name="recents_quick_scrub_onboarding" msgid="2778062804333285789">"Қолданбаларды жылдам ауыстырып қосу үшін оңға қарай сүйреңіз"</string>
     <string name="recents_multistack_add_stack_dialog_split_horizontal" msgid="8848514474543427332">"Бөлінген көлденең"</string>
     <string name="recents_multistack_add_stack_dialog_split_vertical" msgid="9075292233696180813">"Бөлінген тік"</string>
     <string name="recents_multistack_add_stack_dialog_split_custom" msgid="4177837597513701943">"Бөлінген теңшелетін"</string>

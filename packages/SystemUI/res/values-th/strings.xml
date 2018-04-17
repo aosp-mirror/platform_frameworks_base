@@ -161,10 +161,8 @@
     <string name="accessibility_no_sim" msgid="8274017118472455155">"ไม่มีซิมการ์ด"</string>
     <string name="accessibility_cell_data" msgid="5326139158682385073">"อินเทอร์เน็ตมือถือ"</string>
     <string name="accessibility_cell_data_on" msgid="5927098403452994422">"อินเทอร์เน็ตมือถือเปิดอยู่"</string>
-    <!-- no translation found for cell_data_off_content_description (4356113230238585072) -->
-    <skip />
-    <!-- no translation found for cell_data_off (1051264981229902873) -->
-    <skip />
+    <string name="cell_data_off_content_description" msgid="4356113230238585072">"เน็ตมือถือปิดอยู่"</string>
+    <string name="cell_data_off" msgid="1051264981229902873">"ปิด"</string>
     <string name="accessibility_bluetooth_tether" msgid="4102784498140271969">"การปล่อยสัญญาณบลูทูธ"</string>
     <string name="accessibility_airplane_mode" msgid="834748999790763092">"โหมดใช้งานบนเครื่องบิน"</string>
     <string name="accessibility_vpn_on" msgid="5993385083262856059">"VPN เปิดอยู่"</string>
@@ -363,8 +361,7 @@
     <string name="recents_stack_action_button_label" msgid="6593727103310426253">"ล้างทั้งหมด"</string>
     <string name="recents_drag_hint_message" msgid="2649739267073203985">"ลากมาที่นี่เพื่อใช้การแยกหน้าจอ"</string>
     <string name="recents_swipe_up_onboarding" msgid="3824607135920170001">"เลื่อนขึ้นเพื่อสลับแอป"</string>
-    <!-- no translation found for recents_quick_scrub_onboarding (2778062804333285789) -->
-    <skip />
+    <string name="recents_quick_scrub_onboarding" msgid="2778062804333285789">"ลากไปทางขวาเพื่อสลับแอปอย่างรวดเร็ว"</string>
     <string name="recents_multistack_add_stack_dialog_split_horizontal" msgid="8848514474543427332">"แยกในแนวนอน"</string>
     <string name="recents_multistack_add_stack_dialog_split_vertical" msgid="9075292233696180813">"แยกในแนวตั้ง"</string>
     <string name="recents_multistack_add_stack_dialog_split_custom" msgid="4177837597513701943">"แยกแบบกำหนดเอง"</string>

@@ -161,10 +161,8 @@
     <string name="accessibility_no_sim" msgid="8274017118472455155">"SIM карта жок."</string>
     <string name="accessibility_cell_data" msgid="5326139158682385073">"Мобилдик Интернет"</string>
     <string name="accessibility_cell_data_on" msgid="5927098403452994422">"Мобилдик Интернет күйгүзүлгөн"</string>
-    <!-- no translation found for cell_data_off_content_description (4356113230238585072) -->
-    <skip />
-    <!-- no translation found for cell_data_off (1051264981229902873) -->
-    <skip />
+    <string name="cell_data_off_content_description" msgid="4356113230238585072">"Мобилдик Интернет өчүрүлгөн"</string>
+    <string name="cell_data_off" msgid="1051264981229902873">"Өчүк"</string>
     <string name="accessibility_bluetooth_tether" msgid="4102784498140271969">"Bluetooth аркылуу интернет бөлүшүү."</string>
     <string name="accessibility_airplane_mode" msgid="834748999790763092">"Учак тартиби."</string>
     <string name="accessibility_vpn_on" msgid="5993385083262856059">"VPN күйүк."</string>
@@ -244,8 +242,8 @@
     <string name="accessibility_quick_settings_work_mode_on" msgid="7650588553988014341">"Иштөө режими күйүк."</string>
     <string name="accessibility_quick_settings_work_mode_changed_off" msgid="5605534876107300711">"Иштөө режими өчүрүлдү."</string>
     <string name="accessibility_quick_settings_work_mode_changed_on" msgid="249840330756998612">"Иштөө режими күйгүзүлдү."</string>
-    <string name="accessibility_quick_settings_data_saver_changed_off" msgid="650231949881093289">"Дайындарды үнөмдөгүч өчүрүлдү."</string>
-    <string name="accessibility_quick_settings_data_saver_changed_on" msgid="4218725402373934151">"Дайындарды үнөмдөгүч күйгүзүлдү."</string>
+    <string name="accessibility_quick_settings_data_saver_changed_off" msgid="650231949881093289">"Трафикти үнөмдөө режими өчүрүлдү."</string>
+    <string name="accessibility_quick_settings_data_saver_changed_on" msgid="4218725402373934151">"Трафикти үнөмдөө режими күйгүзүлдү."</string>
     <string name="accessibility_brightness" msgid="8003681285547803095">"Жарыктыгын көрсөтүү"</string>
     <string name="accessibility_ambient_display_charging" msgid="9084521679384069087">"Кубатталууда"</string>
     <string name="data_usage_disabled_dialog_3g_title" msgid="5281770593459841889">"2G-3G дайындары тындырылды."</string>
@@ -345,7 +343,7 @@
     <string name="quick_settings_cellular_detail_data_limit" msgid="56011158504994128">"<xliff:g id="DATA_LIMIT">%s</xliff:g> чектөө"</string>
     <string name="quick_settings_cellular_detail_data_warning" msgid="2440098045692399009">"<xliff:g id="DATA_LIMIT">%s</xliff:g> эскертүү"</string>
     <string name="quick_settings_work_mode_label" msgid="7608026833638817218">"Жумуш профили"</string>
-    <string name="quick_settings_night_display_label" msgid="3577098011487644395">"Түнкү жарык"</string>
+    <string name="quick_settings_night_display_label" msgid="3577098011487644395">"Түнкү режим"</string>
     <string name="quick_settings_night_secondary_label_on_at_sunset" msgid="8483259341596943314">"Күн батканда күйөт"</string>
     <string name="quick_settings_night_secondary_label_until_sunrise" msgid="4453017157391574402">"Күн чыкканга чейин"</string>
     <string name="quick_settings_night_secondary_label_on_at" msgid="6256314040368487637">"Саат <xliff:g id="TIME">%s</xliff:g> күйөт"</string>
@@ -363,8 +361,7 @@
     <string name="recents_stack_action_button_label" msgid="6593727103310426253">"Баарын тазалоо"</string>
     <string name="recents_drag_hint_message" msgid="2649739267073203985">"Экранды бөлүү үчүн бул жерге сүйрөңүз"</string>
     <string name="recents_swipe_up_onboarding" msgid="3824607135920170001">"Колдонмолорду которуштуруу үчүн өйдө сүрүңүз"</string>
-    <!-- no translation found for recents_quick_scrub_onboarding (2778062804333285789) -->
-    <skip />
+    <string name="recents_quick_scrub_onboarding" msgid="2778062804333285789">"Колдонмолорду тез которуштуруу үчүн оңго сүйрөңүз"</string>
     <string name="recents_multistack_add_stack_dialog_split_horizontal" msgid="8848514474543427332">"Туурасынан бөлүү"</string>
     <string name="recents_multistack_add_stack_dialog_split_vertical" msgid="9075292233696180813">"Тигинен бөлүү"</string>
     <string name="recents_multistack_add_stack_dialog_split_custom" msgid="4177837597513701943">"Ыңгайлаштырылган бөлүү"</string>
@@ -555,7 +552,7 @@
     <string name="output_service_bt_wifi" msgid="4486837869988770896">"Bluetooth жана Wi-Fi"</string>
     <string name="system_ui_tuner" msgid="708224127392452018">"System UI Tuner"</string>
     <string name="show_battery_percentage" msgid="5444136600512968798">"Батарянын кубатнын деңгээли пайыз менен көрсөтлсүн"</string>
-    <string name="show_battery_percentage_summary" msgid="3215025775576786037">"Түзмөк кубаттанбай турганда, батареянын деңгээли статус тилкесинде көрүнүп турат"</string>
+    <string name="show_battery_percentage_summary" msgid="3215025775576786037">"Түзмөк кубатталбай турганда, батареянын деңгээли статус тилкесинде көрүнүп турат"</string>
     <string name="quick_settings" msgid="10042998191725428">"Ыкчам жөндөөлөр"</string>
     <string name="status_bar" msgid="4877645476959324760">"Абал тилкеси"</string>
     <string name="overview" msgid="4018602013895926956">"Көз жүгүртүү"</string>
@@ -699,9 +696,9 @@
     <string name="accessibility_long_click_tile" msgid="6687350750091842525">"Жөндөөлөрдү ачуу"</string>
     <string name="accessibility_status_bar_headphones" msgid="9156307120060559989">"Гарнитуралар туташкан"</string>
     <string name="accessibility_status_bar_headset" msgid="8666419213072449202">"Гарнитура туташты"</string>
-    <string name="data_saver" msgid="5037565123367048522">"Дайындарды үнөмдөгүч"</string>
-    <string name="accessibility_data_saver_on" msgid="8454111686783887148">"Дайындарды үнөмдөгүч күйүк"</string>
-    <string name="accessibility_data_saver_off" msgid="8841582529453005337">"Дайындарды үнөмдөгүч өчүрүлгөн"</string>
+    <string name="data_saver" msgid="5037565123367048522">"Трафикти үнөмдөө"</string>
+    <string name="accessibility_data_saver_on" msgid="8454111686783887148">"Трафикти үнөмдөө режими күйүк"</string>
+    <string name="accessibility_data_saver_off" msgid="8841582529453005337">"Трафикти үнөмдөө режими өчүрүлгөн"</string>
     <string name="switch_bar_on" msgid="1142437840752794229">"Күйүк"</string>
     <string name="switch_bar_off" msgid="8803270596930432874">"Өчүк"</string>
     <string name="nav_bar" msgid="1993221402773877607">"Чабыттоо тилкеси"</string>
@@ -849,7 +846,7 @@
     <string name="slice_permission_allow" msgid="2340244901366722709">"Уруксат берүү"</string>
     <string name="slice_permission_deny" msgid="7683681514008048807">"Жок"</string>
     <string name="auto_saver_title" msgid="1217959994732964228">"Батареяны үнөмдөгүчтүн тартибин жөндөө үчүн басыңыз"</string>
-    <string name="auto_saver_text" msgid="6324376061044218113">"Батареянын деңгээли <xliff:g id="PERCENTAGE">%d</xliff:g>%% жеткенде, автоматтык түрдө күйгүзүлсүн"</string>
+    <string name="auto_saver_text" msgid="6324376061044218113">"Батареянын деңгээли <xliff:g id="PERCENTAGE">%d</xliff:g>%% жеткенде, автоматтык түрдө күйсүн"</string>
     <string name="no_auto_saver_action" msgid="8086002101711328500">"Жок, рахмат"</string>
     <string name="auto_saver_enabled_title" msgid="6726474226058316862">"Батареяны үнөмдөгүчтүн тартиби күйгүзүлдү"</string>
     <string name="auto_saver_enabled_text" msgid="874711029884777579">"Батареянын деңгээли <xliff:g id="PERCENTAGE">%d</xliff:g>%% төмөндөгөндө, Батареяны үнөмдөгүч режими автоматтык түрдө күйөт."</string>
