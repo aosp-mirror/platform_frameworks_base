@@ -121,6 +121,11 @@ message StatsLogReport {
 
   // Fields 2 and 3 are reserved.
 
+  message SkippedBuckets {
+      optional int64 start_elapsed_nanos = 1;
+      optional int64 end_elapsed_nanos = 2;
+  }
+
   message EventMetricDataWrapper {
     repeated EventMetricData data = 1;
   }
@@ -132,10 +137,12 @@ message StatsLogReport {
   }
   message ValueMetricDataWrapper {
     repeated ValueMetricData data = 1;
+    repeated SkippedBuckets skipped = 2;
   }
 
   message GaugeMetricDataWrapper {
     repeated GaugeMetricData data = 1;
+    repeated SkippedBuckets skipped = 2;
   }
 
   oneof data {
