@@ -458,11 +458,11 @@ final class SystemServiceRegistry {
             }});
 
         registerService(Context.STATS_MANAGER, StatsManager.class,
-                new StaticServiceFetcher<StatsManager>() {
-                    @Override
-                    public StatsManager createService() throws ServiceNotFoundException {
-                        return new StatsManager();
-                    }});
+                new CachedServiceFetcher<StatsManager>() {
+            @Override
+            public StatsManager createService(ContextImpl ctx) {
+                return new StatsManager(ctx.getOuterContext());
+            }});
 
         registerService(Context.STATUS_BAR_SERVICE, StatusBarManager.class,
                 new CachedServiceFetcher<StatusBarManager>() {

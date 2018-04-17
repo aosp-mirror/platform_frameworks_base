@@ -80,14 +80,14 @@ interface IStatsManager {
      *
      * Requires Manifest.permission.DUMP.
      */
-    byte[] getData(in long key);
+    byte[] getData(in long key, in String packageName);
 
     /**
      * Fetches metadata across statsd. Returns byte array representing wire-encoded proto.
      *
      * Requires Manifest.permission.DUMP.
      */
-    byte[] getMetadata();
+    byte[] getMetadata(in String packageName);
 
     /**
      * Sets a configuration with the specified config key and subscribes to updates for this
@@ -97,7 +97,7 @@ interface IStatsManager {
      *
      * Requires Manifest.permission.DUMP.
      */
-    void addConfiguration(in long configKey, in byte[] config);
+    void addConfiguration(in long configKey, in byte[] config, in String packageName);
 
     /**
      * Registers the given pending intent for this config key. This intent is invoked when the
@@ -106,14 +106,14 @@ interface IStatsManager {
      *
      * Requires Manifest.permission.DUMP.
      */
-    void setDataFetchOperation(long configKey, in IBinder intentSender);
+    void setDataFetchOperation(long configKey, in IBinder intentSender, in String packageName);
 
     /**
      * Removes the data fetch operation for the specified configuration.
      *
      * Requires Manifest.permission.DUMP.
      */
-    void removeDataFetchOperation(long configKey);
+    void removeDataFetchOperation(long configKey, in String packageName);
 
     /**
      * Removes the configuration with the matching config key. No-op if this config key does not
@@ -121,7 +121,7 @@ interface IStatsManager {
      *
      * Requires Manifest.permission.DUMP.
      */
-    void removeConfiguration(in long configKey);
+    void removeConfiguration(in long configKey, in String packageName);
 
     /**
      * Set the IIntentSender (i.e. PendingIntent) to be used when broadcasting subscriber
@@ -141,7 +141,8 @@ interface IStatsManager {
      *
      * Requires Manifest.permission.DUMP.
      */
-    void setBroadcastSubscriber(long configKey, long subscriberId, in IBinder intentSender);
+    void setBroadcastSubscriber(long configKey, long subscriberId, in IBinder intentSender,
+                                in String packageName);
 
     /**
      * Undoes setBroadcastSubscriber() for the (configKey, subscriberId) pair.
@@ -150,5 +151,5 @@ interface IStatsManager {
      *
      * Requires Manifest.permission.DUMP.
      */
-    void unsetBroadcastSubscriber(long configKey, long subscriberId);
+    void unsetBroadcastSubscriber(long configKey, long subscriberId, in String packageName);
 }

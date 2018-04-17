@@ -15,10 +15,13 @@
  */
 package android.app;
 
-import android.Manifest;
+import static android.Manifest.permission.DUMP;
+import static android.Manifest.permission.PACKAGE_USAGE_STATS;
+
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
+import android.content.Context;
 import android.os.IBinder;
 import android.os.IStatsManager;
 import android.os.RemoteException;
@@ -33,9 +36,12 @@ import android.util.Slog;
  */
 @SystemApi
 public final class StatsManager {
-    IStatsManager mService;
     private static final String TAG = "StatsManager";
     private static final boolean DEBUG = false;
+
+    private final Context mContext;
+
+    private IStatsManager mService;
 
     /**
      * Long extra of uid that added the relevant stats config.
@@ -79,7 +85,8 @@ public final class StatsManager {
      *
      * @hide
      */
-    public StatsManager() {
+    public StatsManager(Context context) {
+        mContext = context;
     }
 
     /**
@@ -92,15 +99,18 @@ public final class StatsManager {
      * @throws StatsUnavailableException if unsuccessful due to failing to connect to stats service
      * @throws IllegalArgumentException if config is not a wire-encoded StatsdConfig proto
      */
-    @RequiresPermission(Manifest.permission.DUMP)
+    @RequiresPermission(allOf = { DUMP, PACKAGE_USAGE_STATS })
     public void addConfig(long configKey, byte[] config) throws StatsUnavailableException {
         synchronized (this) {
             try {
                 IStatsManager service = getIStatsManagerLocked();
-                service.addConfiguration(configKey, config); // can throw IllegalArgumentException
+                // can throw IllegalArgumentException
+                service.addConfiguration(configKey, config, mContext.getOpPackageName());
             } catch (RemoteException e) {
                 Slog.e(TAG, "Failed to connect to statsd when adding configuration");
                 throw new StatsUnavailableException("could not connect", e);
+            } catch (SecurityException e) {
+                throw new StatsUnavailableException(e.getMessage(), e);
             }
         }
     }
@@ -108,7 +118,7 @@ public final class StatsManager {
     /**
      * TODO: Temporary for backwards compatibility. Remove.
      */
-    @RequiresPermission(Manifest.permission.DUMP)
+    @RequiresPermission(allOf = { DUMP, PACKAGE_USAGE_STATS })
     public boolean addConfiguration(long configKey, byte[] config) {
         try {
             addConfig(configKey, config);
@@ -124,15 +134,17 @@ public final class StatsManager {
      * @param configKey Configuration key to remove.
      * @throws StatsUnavailableException if unsuccessful due to failing to connect to stats service
      */
-    @RequiresPermission(Manifest.permission.DUMP)
+    @RequiresPermission(allOf = { DUMP, PACKAGE_USAGE_STATS })
     public void removeConfig(long configKey) throws StatsUnavailableException {
         synchronized (this) {
             try {
                 IStatsManager service = getIStatsManagerLocked();
-                service.removeConfiguration(configKey);
+                service.removeConfiguration(configKey, mContext.getOpPackageName());
             } catch (RemoteException e) {
                 Slog.e(TAG, "Failed to connect to statsd when removing configuration");
                 throw new StatsUnavailableException("could not connect", e);
+            } catch (SecurityException e) {
+                throw new StatsUnavailableException(e.getMessage(), e);
             }
         }
     }
@@ -140,7 +152,7 @@ public final class StatsManager {
     /**
      * TODO: Temporary for backwards compatibility. Remove.
      */
-    @RequiresPermission(Manifest.permission.DUMP)
+    @RequiresPermission(allOf = { DUMP, PACKAGE_USAGE_STATS })
     public boolean removeConfiguration(long configKey) {
         try {
             removeConfig(configKey);
@@ -179,7 +191,7 @@ public final class StatsManager {
      * @param subscriberId  ID of the subscriber, as used in the config.
      * @throws StatsUnavailableException if unsuccessful due to failing to connect to stats service
      */
-    @RequiresPermission(Manifest.permission.DUMP)
+    @RequiresPermission(allOf = { DUMP, PACKAGE_USAGE_STATS })
     public void setBroadcastSubscriber(
             PendingIntent pendingIntent, long configKey, long subscriberId)
             throws StatsUnavailableException {
@@ -189,13 +201,17 @@ public final class StatsManager {
                 if (pendingIntent != null) {
                     // Extracts IIntentSender from the PendingIntent and turns it into an IBinder.
                     IBinder intentSender = pendingIntent.getTarget().asBinder();
-                    service.setBroadcastSubscriber(configKey, subscriberId, intentSender);
+                    service.setBroadcastSubscriber(configKey, subscriberId, intentSender,
+                            mContext.getOpPackageName());
                 } else {
-                    service.unsetBroadcastSubscriber(configKey, subscriberId);
+                    service.unsetBroadcastSubscriber(configKey, subscriberId,
+                            mContext.getOpPackageName());
                 }
             } catch (RemoteException e) {
                 Slog.e(TAG, "Failed to connect to statsd when adding broadcast subscriber", e);
                 throw new StatsUnavailableException("could not connect", e);
+            } catch (SecurityException e) {
+                throw new StatsUnavailableException(e.getMessage(), e);
             }
         }
     }
@@ -203,7 +219,7 @@ public final class StatsManager {
     /**
      * TODO: Temporary for backwards compatibility. Remove.
      */
-    @RequiresPermission(Manifest.permission.DUMP)
+    @RequiresPermission(allOf = { DUMP, PACKAGE_USAGE_STATS })
     public boolean setBroadcastSubscriber(
             long configKey, long subscriberId, PendingIntent pendingIntent) {
         try {
@@ -228,23 +244,26 @@ public final class StatsManager {
      * @param configKey     The integer naming the config to which this operation is attached.
      * @throws StatsUnavailableException if unsuccessful due to failing to connect to stats service
      */
-    @RequiresPermission(Manifest.permission.DUMP)
+    @RequiresPermission(allOf = { DUMP, PACKAGE_USAGE_STATS })
     public void setFetchReportsOperation(PendingIntent pendingIntent, long configKey)
             throws StatsUnavailableException {
         synchronized (this) {
             try {
                 IStatsManager service = getIStatsManagerLocked();
                 if (pendingIntent == null) {
-                    service.removeDataFetchOperation(configKey);
+                    service.removeDataFetchOperation(configKey, mContext.getOpPackageName());
                 } else {
                     // Extracts IIntentSender from the PendingIntent and turns it into an IBinder.
                     IBinder intentSender = pendingIntent.getTarget().asBinder();
-                    service.setDataFetchOperation(configKey, intentSender);
+                    service.setDataFetchOperation(configKey, intentSender,
+                            mContext.getOpPackageName());
                 }
 
             } catch (RemoteException e) {
                 Slog.e(TAG, "Failed to connect to statsd when registering data listener.");
                 throw new StatsUnavailableException("could not connect", e);
+            } catch (SecurityException e) {
+                throw new StatsUnavailableException(e.getMessage(), e);
             }
         }
     }
@@ -252,7 +271,7 @@ public final class StatsManager {
     /**
      * TODO: Temporary for backwards compatibility. Remove.
      */
-    @RequiresPermission(Manifest.permission.DUMP)
+    @RequiresPermission(allOf = { DUMP, PACKAGE_USAGE_STATS })
     public boolean setDataFetchOperation(long configKey, PendingIntent pendingIntent) {
         try {
             setFetchReportsOperation(pendingIntent, configKey);
@@ -270,15 +289,17 @@ public final class StatsManager {
      * @return Serialized ConfigMetricsReportList proto.
      * @throws StatsUnavailableException if unsuccessful due to failing to connect to stats service
      */
-    @RequiresPermission(Manifest.permission.DUMP)
+    @RequiresPermission(allOf = { DUMP, PACKAGE_USAGE_STATS })
     public byte[] getReports(long configKey) throws StatsUnavailableException {
         synchronized (this) {
             try {
                 IStatsManager service = getIStatsManagerLocked();
-                return service.getData(configKey);
+                return service.getData(configKey, mContext.getOpPackageName());
             } catch (RemoteException e) {
                 Slog.e(TAG, "Failed to connect to statsd when getting data");
                 throw new StatsUnavailableException("could not connect", e);
+            } catch (SecurityException e) {
+                throw new StatsUnavailableException(e.getMessage(), e);
             }
         }
     }
@@ -286,7 +307,7 @@ public final class StatsManager {
     /**
      * TODO: Temporary for backwards compatibility. Remove.
      */
-    @RequiresPermission(Manifest.permission.DUMP)
+    @RequiresPermission(allOf = { DUMP, PACKAGE_USAGE_STATS })
     public @Nullable byte[] getData(long configKey) {
         try {
             return getReports(configKey);
@@ -303,15 +324,17 @@ public final class StatsManager {
      * @return Serialized StatsdStatsReport proto.
      * @throws StatsUnavailableException if unsuccessful due to failing to connect to stats service
      */
-    @RequiresPermission(Manifest.permission.DUMP)
+    @RequiresPermission(allOf = { DUMP, PACKAGE_USAGE_STATS })
     public byte[] getStatsMetadata() throws StatsUnavailableException {
         synchronized (this) {
             try {
                 IStatsManager service = getIStatsManagerLocked();
-                return service.getMetadata();
+                return service.getMetadata(mContext.getOpPackageName());
             } catch (RemoteException e) {
                 Slog.e(TAG, "Failed to connect to statsd when getting metadata");
                 throw new StatsUnavailableException("could not connect", e);
+            } catch (SecurityException e) {
+                throw new StatsUnavailableException(e.getMessage(), e);
             }
         }
     }
@@ -323,7 +346,7 @@ public final class StatsManager {
      *
      * @return Serialized StatsdStatsReport proto. Returns null on failure (eg, if statsd crashed).
      */
-    @RequiresPermission(Manifest.permission.DUMP)
+    @RequiresPermission(allOf = { DUMP, PACKAGE_USAGE_STATS })
     public @Nullable byte[] getMetadata() {
         try {
             return getStatsMetadata();
