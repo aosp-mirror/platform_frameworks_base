@@ -43,6 +43,7 @@ import static android.net.NetworkTemplate.buildTemplateMobileWildcard;
 import static android.net.NetworkTemplate.buildTemplateWifiWildcard;
 import static android.net.TrafficStats.KB_IN_BYTES;
 import static android.net.TrafficStats.MB_IN_BYTES;
+import static android.os.Trace.TRACE_TAG_NETWORK;
 import static android.provider.Settings.Global.NETSTATS_AUGMENT_ENABLED;
 import static android.provider.Settings.Global.NETSTATS_DEV_BUCKET_DURATION;
 import static android.provider.Settings.Global.NETSTATS_DEV_DELETE_AGE;
@@ -109,6 +110,7 @@ import android.os.Messenger;
 import android.os.PowerManager;
 import android.os.RemoteException;
 import android.os.SystemClock;
+import android.os.Trace;
 import android.os.UserHandle;
 import android.provider.Settings;
 import android.provider.Settings.Global;
@@ -1189,27 +1191,43 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
     private void recordSnapshotLocked(long currentTime) throws RemoteException {
         // snapshot and record current counters; read UID stats first to
         // avoid over counting dev stats.
+        Trace.traceBegin(TRACE_TAG_NETWORK, "snapshotUid");
         final NetworkStats uidSnapshot = getNetworkStatsUidDetail(INTERFACES_ALL);
+        Trace.traceEnd(TRACE_TAG_NETWORK);
+        Trace.traceBegin(TRACE_TAG_NETWORK, "snapshotXt");
         final NetworkStats xtSnapshot = getNetworkStatsXt();
+        Trace.traceEnd(TRACE_TAG_NETWORK);
+        Trace.traceBegin(TRACE_TAG_NETWORK, "snapshotDev");
         final NetworkStats devSnapshot = mNetworkManager.getNetworkStatsSummaryDev();
+        Trace.traceEnd(TRACE_TAG_NETWORK);
 
         // Tethering snapshot for dev and xt stats. Counts per-interface data from tethering stats
         // providers that isn't already counted by dev and XT stats.
+        Trace.traceBegin(TRACE_TAG_NETWORK, "snapshotTether");
         final NetworkStats tetherSnapshot = getNetworkStatsTethering(STATS_PER_IFACE);
+        Trace.traceEnd(TRACE_TAG_NETWORK);
         xtSnapshot.combineAllValues(tetherSnapshot);
         devSnapshot.combineAllValues(tetherSnapshot);
 
         // For xt/dev, we pass a null VPN array because usage is aggregated by UID, so VPN traffic
         // can't be reattributed to responsible apps.
+        Trace.traceBegin(TRACE_TAG_NETWORK, "recordDev");
         mDevRecorder.recordSnapshotLocked(
                 devSnapshot, mActiveIfaces, null /* vpnArray */, currentTime);
+        Trace.traceEnd(TRACE_TAG_NETWORK);
+        Trace.traceBegin(TRACE_TAG_NETWORK, "recordXt");
         mXtRecorder.recordSnapshotLocked(
                 xtSnapshot, mActiveIfaces, null /* vpnArray */, currentTime);
+        Trace.traceEnd(TRACE_TAG_NETWORK);
 
         // For per-UID stats, pass the VPN info so VPN traffic is reattributed to responsible apps.
         VpnInfo[] vpnArray = mConnManager.getAllVpnInfo();
+        Trace.traceBegin(TRACE_TAG_NETWORK, "recordUid");
         mUidRecorder.recordSnapshotLocked(uidSnapshot, mActiveUidIfaces, vpnArray, currentTime);
+        Trace.traceEnd(TRACE_TAG_NETWORK);
+        Trace.traceBegin(TRACE_TAG_NETWORK, "recordUidTag");
         mUidTagRecorder.recordSnapshotLocked(uidSnapshot, mActiveUidIfaces, vpnArray, currentTime);
+        Trace.traceEnd(TRACE_TAG_NETWORK);
 
         // We need to make copies of member fields that are sent to the observer to avoid
         // a race condition between the service handler thread and the observer's
@@ -1254,8 +1272,7 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
     private void performPollLocked(int flags) {
         if (!mSystemReady) return;
         if (LOGV) Slog.v(TAG, "performPollLocked(flags=0x" + Integer.toHexString(flags) + ")");
-
-        final long startRealtime = SystemClock.elapsedRealtime();
+        Trace.traceBegin(TRACE_TAG_NETWORK, "performPollLocked");
 
         final boolean persistNetwork = (flags & FLAG_PERSIST_NETWORK) != 0;
         final boolean persistUid = (flags & FLAG_PERSIST_UID) != 0;
@@ -1275,6 +1292,7 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
         }
 
         // persist any pending data depending on requested flags
+        Trace.traceBegin(TRACE_TAG_NETWORK, "[persisting]");
         if (persistForce) {
             mDevRecorder.forcePersistLocked(currentTime);
             mXtRecorder.forcePersistLocked(currentTime);
@@ -1290,11 +1308,7 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
                 mUidTagRecorder.maybePersistLocked(currentTime);
             }
         }
-
-        if (LOGV) {
-            final long duration = SystemClock.elapsedRealtime() - startRealtime;
-            Slog.v(TAG, "performPollLocked() took " + duration + "ms");
-        }
+        Trace.traceEnd(TRACE_TAG_NETWORK);
 
         if (mSettings.getSampleEnabled()) {
             // sample stats after each full poll
@@ -1306,6 +1320,8 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
         updatedIntent.setFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY);
         mContext.sendBroadcastAsUser(updatedIntent, UserHandle.ALL,
                 READ_NETWORK_USAGE_HISTORY);
+
+        Trace.traceEnd(TRACE_TAG_NETWORK);
     }
 
     /**
@@ -1388,12 +1404,22 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
     private class NetworkStatsManagerInternalImpl extends NetworkStatsManagerInternal {
         @Override
         public long getNetworkTotalBytes(NetworkTemplate template, long start, long end) {
-            return NetworkStatsService.this.getNetworkTotalBytes(template, start, end);
+            Trace.traceBegin(TRACE_TAG_NETWORK, "getNetworkTotalBytes");
+            try {
+                return NetworkStatsService.this.getNetworkTotalBytes(template, start, end);
+            } finally {
+                Trace.traceEnd(TRACE_TAG_NETWORK);
+            }
         }
 
         @Override
         public NetworkStats getNetworkUidBytes(NetworkTemplate template, long start, long end) {
-            return NetworkStatsService.this.getNetworkUidBytes(template, start, end);
+            Trace.traceBegin(TRACE_TAG_NETWORK, "getNetworkUidBytes");
+            try {
+                return NetworkStatsService.this.getNetworkUidBytes(template, start, end);
+            } finally {
+                Trace.traceEnd(TRACE_TAG_NETWORK);
+            }
         }
 
         @Override
