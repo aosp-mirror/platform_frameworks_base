@@ -1980,6 +1980,9 @@ public class SyncManager {
     }
 
     static String formatTime(long time) {
+        if (time == 0) {
+            return "N/A";
+        }
         Time tobj = new Time();
         tobj.set(time);
         return tobj.format("%Y-%m-%d %H:%M:%S");
@@ -2334,12 +2337,27 @@ public class SyncManager {
             pw.print("]");
             pw.println();
 
+            pw.println("    Per source last syncs:");
+            for (int j = 0; j < SyncStorageEngine.SOURCES.length; j++) {
+                pw.print("      ");
+                pw.print(String.format("%8s", SyncStorageEngine.SOURCES[j]));
+                pw.print("  Success: ");
+                pw.print(formatTime(event.second.perSourceLastSuccessTimes[j]));
+
+                pw.print("  Failure: ");
+                pw.println(formatTime(event.second.perSourceLastFailureTimes[j]));
+            }
+
+            pw.println("    Last syncs:");
             for (int j = 0; j < event.second.getEventCount(); j++) {
-                pw.print("    ");
+                pw.print("      ");
                 pw.print(formatTime(event.second.getEventTime(j)));
                 pw.print(' ');
                 pw.print(event.second.getEvent(j));
                 pw.println();
+            }
+            if (event.second.getEventCount() == 0) {
+                pw.println("      N/A");
             }
         }
     }

@@ -28,9 +28,14 @@ import java.util.GregorianCalendar;
 public class SyncStatusInfo implements Parcelable {
     private static final String TAG = "Sync";
 
-    static final int VERSION = 5;
+    static final int VERSION = 6;
 
     private static final int MAX_EVENT_COUNT = 10;
+
+    /**
+     * Number of sync sources. KEEP THIS AND SyncStorageEngine.SOURCES IN SYNC.
+     */
+    private static final int SOURCE_COUNT = 6;
 
     public final int authorityId;
 
@@ -120,7 +125,10 @@ public class SyncStatusInfo implements Parcelable {
     public long initialFailureTime;
     public boolean pending;
     public boolean initialize;
-    
+
+    public final long[] perSourceLastSuccessTimes = new long[SOURCE_COUNT];
+    public final long[] perSourceLastFailureTimes = new long[SOURCE_COUNT];
+
   // Warning: It is up to the external caller to ensure there are
   // no race conditions when accessing this list
   private ArrayList<Long> periodicSyncTimes;
@@ -191,6 +199,10 @@ public class SyncStatusInfo implements Parcelable {
 
         todayStats.writeToParcel(parcel);
         yesterdayStats.writeToParcel(parcel);
+
+        // Version 6.
+        parcel.writeLongArray(perSourceLastSuccessTimes);
+        parcel.writeLongArray(perSourceLastFailureTimes);
     }
 
     public SyncStatusInfo(Parcel parcel) {
@@ -260,6 +272,10 @@ public class SyncStatusInfo implements Parcelable {
             todayStats.readFromParcel(parcel);
             yesterdayStats.readFromParcel(parcel);
         }
+        if (version >= 6) {
+            parcel.readLongArray(perSourceLastSuccessTimes);
+            parcel.readLongArray(perSourceLastFailureTimes);
+        }
     }
 
     public SyncStatusInfo(SyncStatusInfo other) {
@@ -284,6 +300,13 @@ public class SyncStatusInfo implements Parcelable {
         }
         mLastEventTimes.addAll(other.mLastEventTimes);
         mLastEvents.addAll(other.mLastEvents);
+
+        copy(perSourceLastSuccessTimes, other.perSourceLastSuccessTimes);
+        copy(perSourceLastFailureTimes, other.perSourceLastFailureTimes);
+    }
+
+    private static void copy(long[] to, long[] from) {
+        System.arraycopy(from, 0, to, 0, to.length);
     }
 
     public void setPeriodicSyncTime(int index, long when) {
@@ -332,6 +355,34 @@ public class SyncStatusInfo implements Parcelable {
         return mLastEvents.get(i);
     }
 
+    /** Call this when a sync has succeeded. */
+    public void setLastSuccess(int source, long lastSyncTime) {
+        lastSuccessTime = lastSyncTime;
+        lastSuccessSource = source;
+        lastFailureTime = 0;
+        lastFailureSource = -1;
+        lastFailureMesg = null;
+        initialFailureTime = 0;
+
+        if (0 <= source && source < perSourceLastSuccessTimes.length) {
+            perSourceLastSuccessTimes[source] = lastSyncTime;
+        }
+    }
+
+    /** Call this when a sync has failed. */
+    public void setLastFailure(int source, long lastSyncTime, String failureMessage) {
+        lastFailureTime = lastSyncTime;
+        lastFailureSource = source;
+        lastFailureMesg = failureMessage;
+        if (initialFailureTime == 0) {
+            initialFailureTime = lastSyncTime;
+        }
+
+        if (0 <= source && source < perSourceLastFailureTimes.length) {
+            perSourceLastFailureTimes[source] = lastSyncTime;
+        }
+    }
+
     public static final Creator<SyncStatusInfo> CREATOR = new Creator<SyncStatusInfo>() {
         public SyncStatusInfo createFromParcel(Parcel in) {
             return new SyncStatusInfo(in);
@@ -356,7 +407,7 @@ public class SyncStatusInfo implements Parcelable {
     }
 
     /**
-     * If the last reset was not not today, move today's stats to yesterday's and clear today's.
+     * If the last reset was not today, move today's stats to yesterday's and clear today's.
      */
     public void maybeResetTodayStats(boolean clockValid, boolean force) {
         final long now = System.currentTimeMillis();
