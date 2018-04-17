@@ -35,4 +35,5 @@
     <integer name="quick_settings_num_columns">4</integer>
     <bool name="quick_settings_wide">true</bool>
     <dimen name="qs_detail_margin_top">0dp</dimen>
+    <dimen name="qs_paged_tile_layout_padding_bottom">0dp</dimen>
 </resources>

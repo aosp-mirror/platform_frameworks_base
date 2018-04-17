@@ -45,7 +45,7 @@ public class PageIndicator extends ViewGroup {
     }
 
     public void setNumPages(int numPages) {
-        setVisibility(numPages > 1 ? View.VISIBLE : View.INVISIBLE);
+        setVisibility(numPages > 1 ? View.VISIBLE : View.GONE);
         if (mAnimating) {
             Log.w(TAG, "setNumPages during animation");
         }
