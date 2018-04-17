@@ -71,7 +71,7 @@ import android.view.ViewPropertyAnimator;
 import android.view.Window;
 import android.view.WindowManager;
 import android.view.accessibility.AccessibilityEvent;
-import android.view.accessibility.AccessibilityManager.AccessibilityStateChangeListener;
+import android.view.accessibility.AccessibilityManager.AccessibilityServicesStateChangeListener;
 import android.view.animation.DecelerateInterpolator;
 import android.widget.ImageButton;
 import android.widget.ImageView;
@@ -1182,12 +1182,12 @@ public class VolumeDialogImpl implements VolumeDialog {
                 }
             });
             mDialogView.setAccessibilityDelegate(this);
-            mAccessibilityMgr.addAccessibilityStateChangeListener(mListener);
+            mAccessibilityMgr.addCallback(mListener);
             updateFeedbackEnabled();
         }
 
         public void destroy() {
-            mAccessibilityMgr.removeAccessibilityStateChangeListener(mListener);
+            mAccessibilityMgr.removeCallback(mListener);
         }
 
         @Override
@@ -1213,7 +1213,7 @@ public class VolumeDialogImpl implements VolumeDialog {
             return false;
         }
 
-        private final AccessibilityStateChangeListener mListener =
+        private final AccessibilityServicesStateChangeListener mListener =
                 enabled -> updateFeedbackEnabled();
     }
 
