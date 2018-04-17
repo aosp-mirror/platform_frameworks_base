@@ -16,14 +16,16 @@
 
 package com.android.printservice.recommendation.plugin.mdnsFilter;
 
-import android.annotation.NonNull;
-import android.annotation.Nullable;
 import android.content.Context;
 import android.content.res.XmlResourceParser;
 import android.util.ArrayMap;
-import com.android.internal.annotations.Immutable;
-import com.android.internal.util.Preconditions;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.core.util.Preconditions;
+
 import com.android.printservice.recommendation.R;
+
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 
@@ -37,7 +39,6 @@ import java.util.List;
  * Vendor configuration as read from {@link R.xml#vendorconfigs vendorconfigs.xml}. Configuration
  * can be read via {@link #getConfig(Context, String)}.
  */
-@Immutable
 public class VendorConfig {
     /** Lock for {@link #sConfigs} */
     private static final Object sLock = new Object();

@@ -16,11 +16,12 @@
 
 package com.android.printservice.recommendation.util;
 
-import android.annotation.NonNull;
 import android.net.nsd.NsdManager;
 import android.net.nsd.NsdServiceInfo;
 import android.util.ArrayMap;
 import android.util.Log;
+
+import androidx.annotation.NonNull;
 
 import java.util.ArrayList;
 
