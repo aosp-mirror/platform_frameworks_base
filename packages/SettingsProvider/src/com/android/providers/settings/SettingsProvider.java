@@ -226,6 +226,7 @@ public class SettingsProvider extends ContentProvider {
     private static final Set<String> CRITICAL_SECURE_SETTINGS = new ArraySet<>();
     static {
         CRITICAL_SECURE_SETTINGS.add(Settings.Secure.USER_SETUP_COMPLETE);
+        CRITICAL_SECURE_SETTINGS.add(Settings.Secure.TV_USER_SETUP_COMPLETE);
     }
 
     // Per user secure settings that moved to the for all users global settings.
@@ -3739,6 +3740,18 @@ public class SettingsProvider extends ContentProvider {
 
                 if (currentVersion == 144) {
                     // Version 145: Removed
+                    // Repurpose for AndroidTV devices coming from N
+                    final SettingsState secureSettings = getSecureSettingsLocked(userId);
+                    String defaultTvSetupSetting = (getContext().getResources().getString(
+                            R.string.def_tv_user_setup_complete));
+                    String currentUserSetupSetting = secureSettings.getSettingLocked(
+                            Settings.Secure.USER_SETUP_COMPLETE).getValue();
+                    if (defaultTvSetupSetting != null && !defaultTvSetupSetting.isEmpty() &&
+                            currentUserSetupSetting == "1") {
+                        secureSettings.insertSettingLocked(
+                                Settings.Secure.TV_USER_SETUP_COMPLETE, "1",
+                                null, true, SettingsState.SYSTEM_PACKAGE_NAME);
+                    }
                     currentVersion = 145;
                 }
 
