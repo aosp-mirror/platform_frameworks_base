@@ -435,9 +435,10 @@ public class SoundTriggerTestService extends Service {
             if (!file.getName().endsWith(".properties")) {
                 continue;
             }
-            try {
+
+            try (FileInputStream in = new FileInputStream(file)) {
                 Properties properties = new Properties();
-                properties.load(new FileInputStream(file));
+                properties.load(in);
                 createModelInfo(properties);
                 loadedModel = true;
             } catch (Exception e) {

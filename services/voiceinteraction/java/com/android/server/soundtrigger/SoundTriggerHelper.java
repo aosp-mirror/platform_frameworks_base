@@ -828,7 +828,12 @@ public class SoundTriggerHelper implements SoundTrigger.StatusListener {
     // internalClearGlobalStateLocked() cleans up the telephony and power save listeners.
     private void internalClearGlobalStateLocked() {
         // Unregister from call state changes.
-        mTelephonyManager.listen(mPhoneStateListener, PhoneStateListener.LISTEN_NONE);
+        long token = Binder.clearCallingIdentity();
+        try {
+            mTelephonyManager.listen(mPhoneStateListener, PhoneStateListener.LISTEN_NONE);
+        } finally {
+            Binder.restoreCallingIdentity(token);
+        }
 
         // Unregister from power save mode changes.
         if (mPowerSaveModeListener != null) {
