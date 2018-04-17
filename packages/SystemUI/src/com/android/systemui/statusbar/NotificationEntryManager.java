@@ -300,12 +300,12 @@ public class NotificationEntryManager implements Dumpable, NotificationInflater.
         updateNotifications();
     }
 
-    private boolean shouldSuppressFullScreenIntent(StatusBarNotification sbn) {
+    private boolean shouldSuppressFullScreenIntent(NotificationData.Entry entry) {
         if (mPresenter.isDeviceInVrMode()) {
             return true;
         }
 
-        return mNotificationData.shouldSuppressFullScreenIntent(sbn);
+        return mNotificationData.shouldSuppressFullScreenIntent(entry);
     }
 
     private void inflateViews(NotificationData.Entry entry, ViewGroup parent) {
@@ -692,7 +692,7 @@ public class NotificationEntryManager implements Dumpable, NotificationInflater.
         NotificationData.Entry shadeEntry = createNotificationViews(notification);
         boolean isHeadsUped = shouldPeek(shadeEntry);
         if (!isHeadsUped && notification.getNotification().fullScreenIntent != null) {
-            if (shouldSuppressFullScreenIntent(notification)) {
+            if (shouldSuppressFullScreenIntent(shadeEntry)) {
                 if (DEBUG) {
                     Log.d(TAG, "No Fullscreen intent: suppressed by DND: " + key);
                 }
@@ -848,7 +848,7 @@ public class NotificationEntryManager implements Dumpable, NotificationInflater.
             return false;
         }
 
-        if (mNotificationData.shouldFilterOut(sbn)) {
+        if (mNotificationData.shouldFilterOut(entry)) {
             if (DEBUG) Log.d(TAG, "No peeking: filtered notification: " + sbn.getKey());
             return false;
         }
@@ -862,13 +862,13 @@ public class NotificationEntryManager implements Dumpable, NotificationInflater.
             return false;
         }
 
-        if (!mPresenter.isDozing() && mNotificationData.shouldSuppressPeek(sbn)) {
+        if (!mPresenter.isDozing() && mNotificationData.shouldSuppressPeek(entry)) {
             if (DEBUG) Log.d(TAG, "No peeking: suppressed by DND: " + sbn.getKey());
             return false;
         }
 
         // Peeking triggers an ambient display pulse, so disable peek is ambient is active
-        if (mPresenter.isDozing() && mNotificationData.shouldSuppressAmbient(sbn)) {
+        if (mPresenter.isDozing() && mNotificationData.shouldSuppressAmbient(entry)) {
             if (DEBUG) Log.d(TAG, "No peeking: suppressed by DND: " + sbn.getKey());
             return false;
         }
