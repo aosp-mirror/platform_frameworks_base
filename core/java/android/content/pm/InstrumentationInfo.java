@@ -101,6 +101,12 @@ public class InstrumentationInfo extends PackageItemInfo implements Parcelable {
     /** {@hide} */
     public String credentialProtectedDataDir;
 
+    /** {@hide} */
+    public String primaryCpuAbi;
+
+    /** {@hide} */
+    public String secondaryCpuAbi;
+
     /** {@hide} Full path to the directory containing primary ABI native libraries. */
     public String nativeLibraryDir;
 
@@ -131,6 +137,8 @@ public class InstrumentationInfo extends PackageItemInfo implements Parcelable {
         dataDir = orig.dataDir;
         deviceProtectedDataDir = orig.deviceProtectedDataDir;
         credentialProtectedDataDir = orig.credentialProtectedDataDir;
+        primaryCpuAbi = orig.primaryCpuAbi;
+        secondaryCpuAbi = orig.secondaryCpuAbi;
         nativeLibraryDir = orig.nativeLibraryDir;
         secondaryNativeLibraryDir = orig.secondaryNativeLibraryDir;
         handleProfiling = orig.handleProfiling;
@@ -160,6 +168,8 @@ public class InstrumentationInfo extends PackageItemInfo implements Parcelable {
         dest.writeString(dataDir);
         dest.writeString(deviceProtectedDataDir);
         dest.writeString(credentialProtectedDataDir);
+        dest.writeString(primaryCpuAbi);
+        dest.writeString(secondaryCpuAbi);
         dest.writeString(nativeLibraryDir);
         dest.writeString(secondaryNativeLibraryDir);
         dest.writeInt((handleProfiling == false) ? 0 : 1);
@@ -190,6 +200,8 @@ public class InstrumentationInfo extends PackageItemInfo implements Parcelable {
         dataDir = source.readString();
         deviceProtectedDataDir = source.readString();
         credentialProtectedDataDir = source.readString();
+        primaryCpuAbi = source.readString();
+        secondaryCpuAbi = source.readString();
         nativeLibraryDir = source.readString();
         secondaryNativeLibraryDir = source.readString();
         handleProfiling = source.readInt() != 0;
@@ -208,6 +220,8 @@ public class InstrumentationInfo extends PackageItemInfo implements Parcelable {
         ai.dataDir = dataDir;
         ai.deviceProtectedDataDir = deviceProtectedDataDir;
         ai.credentialProtectedDataDir = credentialProtectedDataDir;
+        ai.primaryCpuAbi = primaryCpuAbi;
+        ai.secondaryCpuAbi = secondaryCpuAbi;
         ai.nativeLibraryDir = nativeLibraryDir;
         ai.secondaryNativeLibraryDir = secondaryNativeLibraryDir;
     }
