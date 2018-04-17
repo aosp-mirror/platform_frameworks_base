@@ -92,6 +92,7 @@ public:
 
     virtual void onDumpReport(const int64_t dumpTimeNs,
                               const bool include_current_partial_bucket,
+                              std::set<string> *str_set,
                               android::util::ProtoOutputStream* protoOutput);
 
     // Computes the total byte size of all metrics managed by a single config source.

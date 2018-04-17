@@ -65,6 +65,7 @@ const int FIELD_ID_CURRENT_REPORT_ELAPSED_NANOS = 4;
 const int FIELD_ID_LAST_REPORT_WALL_CLOCK_NANOS = 5;
 const int FIELD_ID_CURRENT_REPORT_WALL_CLOCK_NANOS = 6;
 const int FIELD_ID_DUMP_REPORT_REASON = 8;
+const int FIELD_ID_STRINGS = 9;
 
 #define NS_PER_HOUR 3600 * NS_PER_SEC
 
@@ -293,6 +294,7 @@ void StatsLogProcessor::dumpStates(FILE* out, bool verbose) {
  */
 void StatsLogProcessor::onDumpReport(const ConfigKey& key, const int64_t dumpTimeStampNs,
                                      const bool include_current_partial_bucket,
+                                     const bool include_string,
                                      const DumpReportReason dumpReportReason,
                                      vector<uint8_t>* outData) {
     std::lock_guard<std::mutex> lock(mMetricsMutex);
@@ -320,7 +322,7 @@ void StatsLogProcessor::onDumpReport(const ConfigKey& key, const int64_t dumpTim
         uint64_t reportsToken =
                 proto.start(FIELD_TYPE_MESSAGE | FIELD_COUNT_REPEATED | FIELD_ID_REPORTS);
         onConfigMetricsReportLocked(key, dumpTimeStampNs, include_current_partial_bucket,
-                                    dumpReportReason, &proto);
+                                    include_string, dumpReportReason, &proto);
         proto.end(reportsToken);
         // End of ConfigMetricsReport (reports).
     } else {
@@ -349,6 +351,7 @@ void StatsLogProcessor::onDumpReport(const ConfigKey& key, const int64_t dumpTim
 void StatsLogProcessor::onConfigMetricsReportLocked(const ConfigKey& key,
                                                     const int64_t dumpTimeStampNs,
                                                     const bool include_current_partial_bucket,
+                                                    const bool include_string,
                                                     const DumpReportReason dumpReportReason,
                                                     ProtoOutputStream* proto) {
     // We already checked whether key exists in mMetricsManagers in
@@ -360,13 +363,16 @@ void StatsLogProcessor::onConfigMetricsReportLocked(const ConfigKey& key,
     int64_t lastReportTimeNs = it->second->getLastReportTimeNs();
     int64_t lastReportWallClockNs = it->second->getLastReportWallClockNs();
 
+    std::set<string> str_set;
+
     // First, fill in ConfigMetricsReport using current data on memory, which
     // starts from filling in StatsLogReport's.
-    it->second->onDumpReport(dumpTimeStampNs, include_current_partial_bucket, proto);
+    it->second->onDumpReport(dumpTimeStampNs, include_current_partial_bucket,
+                             &str_set, proto);
 
     // Fill in UidMap.
     uint64_t uidMapToken = proto->start(FIELD_TYPE_MESSAGE | FIELD_ID_UID_MAP);
-    mUidMap->appendUidMap(dumpTimeStampNs, key, proto);
+    mUidMap->appendUidMap(dumpTimeStampNs, key, &str_set, proto);
     proto->end(uidMapToken);
 
     // Fill in the timestamps.
@@ -380,6 +386,12 @@ void StatsLogProcessor::onConfigMetricsReportLocked(const ConfigKey& key,
                 (long long)getWallClockNs());
     // Dump report reason
     proto->write(FIELD_TYPE_INT32 | FIELD_ID_DUMP_REPORT_REASON, dumpReportReason);
+
+    if (include_string) {
+        for (const auto& str : str_set) {
+            proto->write(FIELD_TYPE_STRING | FIELD_COUNT_REPEATED | FIELD_ID_STRINGS, str);
+        }
+    }
 }
 
 void StatsLogProcessor::resetConfigsLocked(const int64_t timestampNs,
@@ -465,7 +477,8 @@ void StatsLogProcessor::WriteDataToDiskLocked(const ConfigKey& key,
                                               const DumpReportReason dumpReportReason) {
     ProtoOutputStream proto;
     onConfigMetricsReportLocked(key, getElapsedRealtimeNs(),
-                                true /* include_current_partial_bucket*/, dumpReportReason, &proto);
+                                true /* include_current_partial_bucket*/,
+                                false /* include strings */, dumpReportReason, &proto);
     string file_name = StringPrintf("%s/%ld_%d_%lld", STATS_DATA_DIR,
          (long)getWallClockSec(), key.GetUid(), (long long)key.GetId());
     android::base::unique_fd fd(open(file_name.c_str(),

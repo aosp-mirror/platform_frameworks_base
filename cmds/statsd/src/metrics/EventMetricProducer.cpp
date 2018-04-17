@@ -102,6 +102,7 @@ std::unique_ptr<std::vector<uint8_t>> serializeProtoLocked(ProtoOutputStream& pr
 
 void EventMetricProducer::onDumpReportLocked(const int64_t dumpTimeNs,
                                              const bool include_current_partial_bucket,
+                                             std::set<string> *str_set,
                                              ProtoOutputStream* protoOutput) {
     if (mProto->size() <= 0) {
         return;

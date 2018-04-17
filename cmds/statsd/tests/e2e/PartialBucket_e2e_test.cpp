@@ -46,7 +46,7 @@ ConfigMetricsReport GetReports(sp<StatsLogProcessor> processor, int64_t timestam
     IPCThreadState* ipc = IPCThreadState::self();
     ConfigKey configKey(ipc->getCallingUid(), kConfigKey);
     processor->onDumpReport(configKey, timestamp, include_current /* include_current_bucket*/,
-                            ADB_DUMP, &output);
+                            true/* include strings*/, ADB_DUMP, &output);
     ConfigMetricsReportList reports;
     reports.ParseFromArray(output.data(), output.size());
     EXPECT_EQ(1, reports.reports_size());
@@ -153,7 +153,12 @@ TEST(PartialBucketE2eTest, TestCountMetricSplitOnUpgrade) {
     service.mProcessor->OnLogEvent(CreateAppCrashEvent(100, start + 3).get());
 
     ConfigMetricsReport report = GetReports(service.mProcessor, start + 4);
+    backfillStartEndTimestamp(&report);
     EXPECT_EQ(1, report.metrics_size());
+    EXPECT_TRUE(report.metrics(0).count_metrics().data(0).bucket_info(0).
+                    has_start_bucket_elapsed_nanos());
+    EXPECT_TRUE(report.metrics(0).count_metrics().data(0).bucket_info(0).
+                    has_end_bucket_elapsed_nanos());
     EXPECT_EQ(1, report.metrics(0).count_metrics().data(0).bucket_info(0).count());
 }
 
@@ -171,7 +176,12 @@ TEST(PartialBucketE2eTest, TestCountMetricSplitOnRemoval) {
     service.mProcessor->OnLogEvent(CreateAppCrashEvent(100, start + 3).get());
 
     ConfigMetricsReport report = GetReports(service.mProcessor, start + 4);
+    backfillStartEndTimestamp(&report);
     EXPECT_EQ(1, report.metrics_size());
+    EXPECT_TRUE(report.metrics(0).count_metrics().data(0).bucket_info(0).
+                    has_start_bucket_elapsed_nanos());
+    EXPECT_TRUE(report.metrics(0).count_metrics().data(0).bucket_info(0).
+                    has_end_bucket_elapsed_nanos());
     EXPECT_EQ(1, report.metrics(0).count_metrics().data(0).bucket_info(0).count());
 }
 
@@ -206,10 +216,13 @@ TEST(PartialBucketE2eTest, TestValueMetricWithMinPartialBucket) {
 
     ConfigMetricsReport report =
             GetReports(service.mProcessor, 5 * 60 * NS_PER_SEC + start + 100 * NS_PER_SEC, true);
+    backfillStartEndTimestamp(&report);
     EXPECT_EQ(1, report.metrics_size());
     EXPECT_EQ(1, report.metrics(0).value_metrics().skipped_size());
+    EXPECT_TRUE(report.metrics(0).value_metrics().skipped(0).has_start_bucket_elapsed_nanos());
     // Can't test the start time since it will be based on the actual time when the pulling occurs.
-    EXPECT_EQ(endSkipped, report.metrics(0).value_metrics().skipped(0).end_elapsed_nanos());
+    EXPECT_EQ(MillisToNano(NanoToMillis(endSkipped)),
+              report.metrics(0).value_metrics().skipped(0).end_bucket_elapsed_nanos());
 }
 
 TEST(PartialBucketE2eTest, TestGaugeMetricWithoutMinPartialBucket) {
@@ -243,10 +256,13 @@ TEST(PartialBucketE2eTest, TestGaugeMetricWithMinPartialBucket) {
 
     ConfigMetricsReport report =
             GetReports(service.mProcessor, 5 * 60 * NS_PER_SEC + start + 100 * NS_PER_SEC, true);
+    backfillStartEndTimestamp(&report);
     EXPECT_EQ(1, report.metrics_size());
     EXPECT_EQ(1, report.metrics(0).gauge_metrics().skipped_size());
     // Can't test the start time since it will be based on the actual time when the pulling occurs.
-    EXPECT_EQ(endSkipped, report.metrics(0).gauge_metrics().skipped(0).end_elapsed_nanos());
+    EXPECT_TRUE(report.metrics(0).gauge_metrics().skipped(0).has_start_bucket_elapsed_nanos());
+    EXPECT_EQ(MillisToNano(NanoToMillis(endSkipped)),
+              report.metrics(0).gauge_metrics().skipped(0).end_bucket_elapsed_nanos());
 }
 
 #else

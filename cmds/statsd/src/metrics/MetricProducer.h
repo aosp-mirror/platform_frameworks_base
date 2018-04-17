@@ -52,6 +52,7 @@ public:
           mWizard(wizard),
           mConditionTrackerIndex(conditionIndex),
           mContainANYPositionInDimensionsInWhat(false),
+          mSliceByPositionALL(false),
           mSameConditionDimensionsInTracker(false),
           mHasLinksToAllConditionDimensionsInTracker(false) {
     }
@@ -114,9 +115,10 @@ public:
     // This method clears all the past buckets.
     void onDumpReport(const int64_t dumpTimeNs,
                       const bool include_current_partial_bucket,
+                      std::set<string> *str_set,
                       android::util::ProtoOutputStream* protoOutput) {
         std::lock_guard<std::mutex> lock(mMutex);
-        return onDumpReportLocked(dumpTimeNs, include_current_partial_bucket, protoOutput);
+        return onDumpReportLocked(dumpTimeNs, include_current_partial_bucket, str_set, protoOutput);
     }
 
     void dumpStates(FILE* out, bool verbose) const {
@@ -176,6 +178,7 @@ protected:
                                                   const int64_t eventTime) = 0;
     virtual void onDumpReportLocked(const int64_t dumpTimeNs,
                                     const bool include_current_partial_bucket,
+                                    std::set<string> *str_set,
                                     android::util::ProtoOutputStream* protoOutput) = 0;
     virtual size_t byteSizeLocked() const = 0;
     virtual void dumpStatesLocked(FILE* out, bool verbose) const = 0;
@@ -212,6 +215,10 @@ protected:
         return mTimeBaseNs + (mCurrentBucketNum + 1) * mBucketSizeNs;
     }
 
+    int64_t getBucketNumFromEndTimeNs(const int64_t endNs) {
+        return (endNs - mTimeBaseNs) / mBucketSizeNs - 1;
+    }
+
     virtual void dropDataLocked(const int64_t dropTimeNs) = 0;
 
     const int64_t mMetricId;
@@ -244,6 +251,7 @@ protected:
     vector<Matcher> mDimensionsInCondition;  // The dimensions_in_condition defined in statsd_config
 
     bool mContainANYPositionInDimensionsInWhat;
+    bool mSliceByPositionALL;
 
     // True iff the condition dimensions equal to the sliced dimensions in the simple condition
     // tracker. This field is always false for combinational condition trackers.

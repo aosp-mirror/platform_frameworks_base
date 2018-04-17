@@ -36,6 +36,7 @@ using android::util::FIELD_COUNT_REPEATED;
 using android::util::FIELD_TYPE_INT32;
 using android::util::FIELD_TYPE_INT64;
 using android::util::FIELD_TYPE_MESSAGE;
+using android::util::FIELD_TYPE_STRING;
 using android::util::ProtoOutputStream;
 
 using std::make_unique;
@@ -192,14 +193,16 @@ void MetricsManager::dropData(const int64_t dropTimeNs) {
 
 void MetricsManager::onDumpReport(const int64_t dumpTimeStampNs,
                                   const bool include_current_partial_bucket,
+                                  std::set<string> *str_set,
                                   ProtoOutputStream* protoOutput) {
     VLOG("=========================Metric Reports Start==========================");
     // one StatsLogReport per MetricProduer
     for (const auto& producer : mAllMetricProducers) {
         if (mNoReportMetricIds.find(producer->getMetricId()) == mNoReportMetricIds.end()) {
-            uint64_t token =
-                    protoOutput->start(FIELD_TYPE_MESSAGE | FIELD_COUNT_REPEATED | FIELD_ID_METRICS);
-            producer->onDumpReport(dumpTimeStampNs, include_current_partial_bucket, protoOutput);
+            uint64_t token = protoOutput->start(
+                    FIELD_TYPE_MESSAGE | FIELD_COUNT_REPEATED | FIELD_ID_METRICS);
+            producer->onDumpReport(dumpTimeStampNs, include_current_partial_bucket, str_set,
+                                   protoOutput);
             protoOutput->end(token);
         }
     }
@@ -211,6 +214,7 @@ void MetricsManager::onDumpReport(const int64_t dumpTimeStampNs,
         protoOutput->write(FIELD_TYPE_INT32 | FIELD_ID_ANNOTATIONS_INT32, annotation.second);
         protoOutput->end(token);
     }
+
     mLastReportTimeNs = dumpTimeStampNs;
     mLastReportWallClockNs = getWallClockNs();
     VLOG("=========================Metric Reports End==========================");

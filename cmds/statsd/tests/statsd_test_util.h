@@ -19,11 +19,15 @@
 #include "frameworks/base/cmds/statsd/src/statsd_config.pb.h"
 #include "src/StatsLogProcessor.h"
 #include "src/logd/LogEvent.h"
+#include "src/hash.h"
+#include "src/stats_log_util.h"
 #include "statslog.h"
 
 namespace android {
 namespace os {
 namespace statsd {
+
+using google::protobuf::RepeatedPtrField;
 
 // Create AtomMatcher proto to simply match a specific atom type.
 AtomMatcher CreateSimpleAtomMatcher(const string& name, int atomId);
@@ -201,6 +205,53 @@ struct DimensionsPair {
 bool LessThan(const DimensionsValue& s1, const DimensionsValue& s2);
 bool LessThan(const DimensionsPair& s1, const DimensionsPair& s2);
 
+
+void backfillStartEndTimestamp(ConfigMetricsReport *config_report);
+void backfillStartEndTimestamp(ConfigMetricsReportList *config_report_list);
+
+void backfillStringInReport(ConfigMetricsReportList *config_report_list);
+void backfillStringInDimension(const std::map<uint64_t, string>& str_map,
+                               DimensionsValue* dimension);
+
+template <typename T>
+void backfillStringInDimension(const std::map<uint64_t, string>& str_map,
+                               T* metrics) {
+    for (int i = 0; i < metrics->data_size(); ++i) {
+        auto data = metrics->mutable_data(i);
+        if (data->has_dimensions_in_what()) {
+            backfillStringInDimension(str_map, data->mutable_dimensions_in_what());
+        }
+        if (data->has_dimensions_in_condition()) {
+            backfillStringInDimension(str_map, data->mutable_dimensions_in_condition());
+        }
+    }
+}
+
+void backfillDimensionPath(ConfigMetricsReportList* config_report_list);
+
+bool backfillDimensionPath(const DimensionsValue& path,
+                           const google::protobuf::RepeatedPtrField<DimensionsValue>& leafValues,
+                           DimensionsValue* dimension);
+
+template <typename T>
+void backfillDimensionPath(const DimensionsValue& whatPath,
+                           const DimensionsValue& conditionPath,
+                           T* metricData) {
+    for (int i = 0; i < metricData->data_size(); ++i) {
+        auto data = metricData->mutable_data(i);
+        if (data->dimension_leaf_values_in_what_size() > 0) {
+            backfillDimensionPath(whatPath, data->dimension_leaf_values_in_what(),
+                                  data->mutable_dimensions_in_what());
+            data->clear_dimension_leaf_values_in_what();
+        }
+        if (data->dimension_leaf_values_in_condition_size() > 0) {
+            backfillDimensionPath(conditionPath, data->dimension_leaf_values_in_condition(),
+                                  data->mutable_dimensions_in_condition());
+            data->clear_dimension_leaf_values_in_condition();
+        }
+    }
+}
+
 struct DimensionCompare {
     bool operator()(const DimensionsPair& s1, const DimensionsPair& s2) const {
         return LessThan(s1, s2);
@@ -221,6 +272,51 @@ void sortMetricDataByDimensionsValue(const T& metricData, T* sortedMetricData) {
     }
 }
 
+template <typename T>
+void backfillStartEndTimestampForFullBucket(
+    const int64_t timeBaseNs, const int64_t bucketSizeNs, T* bucket) {
+    bucket->set_start_bucket_elapsed_nanos(timeBaseNs + bucketSizeNs * bucket->bucket_num());
+    bucket->set_end_bucket_elapsed_nanos(
+        timeBaseNs + bucketSizeNs * bucket->bucket_num() + bucketSizeNs);
+    bucket->clear_bucket_num();
+}
+
+template <typename T>
+void backfillStartEndTimestampForPartialBucket(const int64_t timeBaseNs, T* bucket) {
+    if (bucket->has_start_bucket_elapsed_millis()) {
+        bucket->set_start_bucket_elapsed_nanos(
+            MillisToNano(bucket->start_bucket_elapsed_millis()));
+        bucket->clear_start_bucket_elapsed_millis();
+    }
+    if (bucket->has_end_bucket_elapsed_millis()) {
+        bucket->set_end_bucket_elapsed_nanos(
+            MillisToNano(bucket->end_bucket_elapsed_millis()));
+        bucket->clear_end_bucket_elapsed_millis();
+    }
+}
+
+template <typename T>
+void backfillStartEndTimestampForMetrics(const int64_t timeBaseNs, const int64_t bucketSizeNs,
+                                         T* metrics) {
+    for (int i = 0; i < metrics->data_size(); ++i) {
+        auto data = metrics->mutable_data(i);
+        for (int j = 0; j < data->bucket_info_size(); ++j) {
+            auto bucket = data->mutable_bucket_info(j);
+            if (bucket->has_bucket_num()) {
+                backfillStartEndTimestampForFullBucket(timeBaseNs, bucketSizeNs, bucket);
+            } else {
+                backfillStartEndTimestampForPartialBucket(timeBaseNs, bucket);
+            }
+        }
+    }
+}
+
+template <typename T>
+void backfillStartEndTimestampForSkippedBuckets(const int64_t timeBaseNs, T* metrics) {
+    for (int i = 0; i < metrics->skipped_size(); ++i) {
+        backfillStartEndTimestampForPartialBucket(timeBaseNs, metrics->mutable_skipped(i));
+    }
+}
 }  // namespace statsd
 }  // namespace os
 }  // namespace android

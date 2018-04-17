@@ -48,19 +48,26 @@ namespace statsd {
 // for StatsLogReport
 const int FIELD_ID_ID = 1;
 const int FIELD_ID_VALUE_METRICS = 7;
+const int FIELD_ID_TIME_BASE = 9;
+const int FIELD_ID_BUCKET_SIZE = 10;
+const int FIELD_ID_DIMENSION_PATH_IN_WHAT = 11;
+const int FIELD_ID_DIMENSION_PATH_IN_CONDITION = 12;
 // for ValueMetricDataWrapper
 const int FIELD_ID_DATA = 1;
 const int FIELD_ID_SKIPPED = 2;
-const int FIELD_ID_SKIPPED_START = 1;
-const int FIELD_ID_SKIPPED_END = 2;
+const int FIELD_ID_SKIPPED_START_MILLIS = 3;
+const int FIELD_ID_SKIPPED_END_MILLIS = 4;
 // for ValueMetricData
 const int FIELD_ID_DIMENSION_IN_WHAT = 1;
 const int FIELD_ID_DIMENSION_IN_CONDITION = 2;
 const int FIELD_ID_BUCKET_INFO = 3;
+const int FIELD_ID_DIMENSION_LEAF_IN_WHAT = 4;
+const int FIELD_ID_DIMENSION_LEAF_IN_CONDITION = 5;
 // for ValueBucketInfo
-const int FIELD_ID_START_BUCKET_NANOS = 1;
-const int FIELD_ID_END_BUCKET_NANOS = 2;
 const int FIELD_ID_VALUE = 3;
+const int FIELD_ID_BUCKET_NUM = 4;
+const int FIELD_ID_START_BUCKET_ELAPSED_MILLIS = 5;
+const int FIELD_ID_END_BUCKET_ELAPSED_MILLIS = 6;
 
 // ValueMetric has a minimum bucket size of 10min so that we don't pull too frequently
 ValueMetricProducer::ValueMetricProducer(const ConfigKey& key, const ValueMetric& metric,
@@ -113,6 +120,8 @@ ValueMetricProducer::ValueMetricProducer(const ConfigKey& key, const ValueMetric
         mField = mValueField.child(0).field();
     }
     mConditionSliced = (metric.links().size() > 0) || (mDimensionsInCondition.size() > 0);
+    mSliceByPositionALL = HasPositionALL(metric.dimensions_in_what()) ||
+            HasPositionALL(metric.dimensions_in_condition());
 
     // Kicks off the puller immediately.
     flushIfNeededLocked(startTimestampNs);
@@ -153,6 +162,7 @@ void ValueMetricProducer::dropDataLocked(const int64_t dropTimeNs) {
 
 void ValueMetricProducer::onDumpReportLocked(const int64_t dumpTimeNs,
                                              const bool include_current_partial_bucket,
+                                             std::set<string> *str_set,
                                              ProtoOutputStream* protoOutput) {
     VLOG("metric %lld dump report now...", (long long)mMetricId);
     if (include_current_partial_bucket) {
@@ -164,13 +174,33 @@ void ValueMetricProducer::onDumpReportLocked(const int64_t dumpTimeNs,
         return;
     }
     protoOutput->write(FIELD_TYPE_INT64 | FIELD_ID_ID, (long long)mMetricId);
+    protoOutput->write(FIELD_TYPE_INT64 | FIELD_ID_TIME_BASE, (long long)mTimeBaseNs);
+    protoOutput->write(FIELD_TYPE_INT64 | FIELD_ID_BUCKET_SIZE, (long long)mBucketSizeNs);
+    // Fills the dimension path if not slicing by ALL.
+    if (!mSliceByPositionALL) {
+        if (!mDimensionsInWhat.empty()) {
+            uint64_t dimenPathToken = protoOutput->start(
+                    FIELD_TYPE_MESSAGE | FIELD_ID_DIMENSION_PATH_IN_WHAT);
+            writeDimensionPathToProto(mDimensionsInWhat, protoOutput);
+            protoOutput->end(dimenPathToken);
+        }
+        if (!mDimensionsInCondition.empty()) {
+            uint64_t dimenPathToken = protoOutput->start(
+                    FIELD_TYPE_MESSAGE | FIELD_ID_DIMENSION_PATH_IN_CONDITION);
+            writeDimensionPathToProto(mDimensionsInCondition, protoOutput);
+            protoOutput->end(dimenPathToken);
+        }
+    }
+
     uint64_t protoToken = protoOutput->start(FIELD_TYPE_MESSAGE | FIELD_ID_VALUE_METRICS);
 
     for (const auto& pair : mSkippedBuckets) {
         uint64_t wrapperToken =
                 protoOutput->start(FIELD_TYPE_MESSAGE | FIELD_COUNT_REPEATED | FIELD_ID_SKIPPED);
-        protoOutput->write(FIELD_TYPE_INT64 | FIELD_ID_SKIPPED_START, (long long)pair.first);
-        protoOutput->write(FIELD_TYPE_INT64 | FIELD_ID_SKIPPED_END, (long long)pair.second);
+        protoOutput->write(FIELD_TYPE_INT64 | FIELD_ID_SKIPPED_START_MILLIS,
+                           (long long)(NanoToMillis(pair.first)));
+        protoOutput->write(FIELD_TYPE_INT64 | FIELD_ID_SKIPPED_END_MILLIS,
+                           (long long)(NanoToMillis(pair.second)));
         protoOutput->end(wrapperToken);
     }
     mSkippedBuckets.clear();
@@ -182,25 +212,43 @@ void ValueMetricProducer::onDumpReportLocked(const int64_t dumpTimeNs,
                 protoOutput->start(FIELD_TYPE_MESSAGE | FIELD_COUNT_REPEATED | FIELD_ID_DATA);
 
         // First fill dimension.
-        uint64_t dimensionToken = protoOutput->start(
-            FIELD_TYPE_MESSAGE | FIELD_ID_DIMENSION_IN_WHAT);
-        writeDimensionToProto(dimensionKey.getDimensionKeyInWhat(), protoOutput);
-        protoOutput->end(dimensionToken);
-        if (dimensionKey.hasDimensionKeyInCondition()) {
-            uint64_t dimensionInConditionToken = protoOutput->start(
-                    FIELD_TYPE_MESSAGE | FIELD_ID_DIMENSION_IN_CONDITION);
-            writeDimensionToProto(dimensionKey.getDimensionKeyInCondition(), protoOutput);
-            protoOutput->end(dimensionInConditionToken);
+        if (mSliceByPositionALL) {
+            uint64_t dimensionToken = protoOutput->start(
+                    FIELD_TYPE_MESSAGE | FIELD_ID_DIMENSION_IN_WHAT);
+            writeDimensionToProto(dimensionKey.getDimensionKeyInWhat(), str_set, protoOutput);
+            protoOutput->end(dimensionToken);
+            if (dimensionKey.hasDimensionKeyInCondition()) {
+                uint64_t dimensionInConditionToken = protoOutput->start(
+                        FIELD_TYPE_MESSAGE | FIELD_ID_DIMENSION_IN_CONDITION);
+                writeDimensionToProto(dimensionKey.getDimensionKeyInCondition(),
+                                      str_set, protoOutput);
+                protoOutput->end(dimensionInConditionToken);
+            }
+        } else {
+            writeDimensionLeafNodesToProto(dimensionKey.getDimensionKeyInWhat(),
+                                           FIELD_ID_DIMENSION_LEAF_IN_WHAT, str_set, protoOutput);
+            if (dimensionKey.hasDimensionKeyInCondition()) {
+                writeDimensionLeafNodesToProto(dimensionKey.getDimensionKeyInCondition(),
+                                               FIELD_ID_DIMENSION_LEAF_IN_CONDITION,
+                                               str_set, protoOutput);
+            }
         }
 
         // Then fill bucket_info (ValueBucketInfo).
         for (const auto& bucket : pair.second) {
             uint64_t bucketInfoToken = protoOutput->start(
                     FIELD_TYPE_MESSAGE | FIELD_COUNT_REPEATED | FIELD_ID_BUCKET_INFO);
-            protoOutput->write(FIELD_TYPE_INT64 | FIELD_ID_START_BUCKET_NANOS,
-                               (long long)bucket.mBucketStartNs);
-            protoOutput->write(FIELD_TYPE_INT64 | FIELD_ID_END_BUCKET_NANOS,
-                               (long long)bucket.mBucketEndNs);
+
+            if (bucket.mBucketEndNs - bucket.mBucketStartNs != mBucketSizeNs) {
+                protoOutput->write(FIELD_TYPE_INT64 | FIELD_ID_START_BUCKET_ELAPSED_MILLIS,
+                                   (long long)NanoToMillis(bucket.mBucketStartNs));
+                protoOutput->write(FIELD_TYPE_INT64 | FIELD_ID_END_BUCKET_ELAPSED_MILLIS,
+                                   (long long)NanoToMillis(bucket.mBucketEndNs));
+            } else {
+                protoOutput->write(FIELD_TYPE_INT64 | FIELD_ID_BUCKET_NUM,
+                                   (long long)(getBucketNumFromEndTimeNs(bucket.mBucketEndNs)));
+            }
+
             protoOutput->write(FIELD_TYPE_INT64 | FIELD_ID_VALUE, (long long)bucket.mValue);
             protoOutput->end(bucketInfoToken);
             VLOG("\t bucket [%lld - %lld] count: %lld", (long long)bucket.mBucketStartNs,
