@@ -59,7 +59,6 @@ public class SystemNotificationChannels {
                 VIRTUAL_KEYBOARD,
                 context.getString(R.string.notification_channel_virtual_keyboard),
                 NotificationManager.IMPORTANCE_LOW);
-        keyboard.setBypassDnd(true);
         keyboard.setBlockableSystem(true);
         channelsList.add(keyboard);
 
@@ -76,7 +75,6 @@ public class SystemNotificationChannels {
                 SECURITY,
                 context.getString(R.string.notification_channel_security),
                 NotificationManager.IMPORTANCE_LOW);
-        security.setBypassDnd(true);
         channelsList.add(security);
 
         final NotificationChannel car = new NotificationChannel(
@@ -84,7 +82,6 @@ public class SystemNotificationChannels {
                 context.getString(R.string.notification_channel_car_mode),
                 NotificationManager.IMPORTANCE_LOW);
         car.setBlockableSystem(true);
-        car.setBypassDnd(true);
         channelsList.add(car);
 
         channelsList.add(newAccountChannel(context));
@@ -93,7 +90,6 @@ public class SystemNotificationChannels {
                 DEVELOPER,
                 context.getString(R.string.notification_channel_developer),
                 NotificationManager.IMPORTANCE_LOW);
-        developer.setBypassDnd(true);
         developer.setBlockableSystem(true);
         channelsList.add(developer);
 
@@ -101,21 +97,18 @@ public class SystemNotificationChannels {
                 UPDATES,
                 context.getString(R.string.notification_channel_updates),
                 NotificationManager.IMPORTANCE_LOW);
-        updates.setBypassDnd(true);
         channelsList.add(updates);
 
         final NotificationChannel network = new NotificationChannel(
                 NETWORK_STATUS,
                 context.getString(R.string.notification_channel_network_status),
                 NotificationManager.IMPORTANCE_LOW);
-        network.setBypassDnd(true);
         channelsList.add(network);
 
         final NotificationChannel networkAlertsChannel = new NotificationChannel(
                 NETWORK_ALERTS,
                 context.getString(R.string.notification_channel_network_alerts),
                 NotificationManager.IMPORTANCE_HIGH);
-        networkAlertsChannel.setBypassDnd(true);
         networkAlertsChannel.setBlockableSystem(true);
         channelsList.add(networkAlertsChannel);
 
@@ -124,42 +117,36 @@ public class SystemNotificationChannels {
                 context.getString(R.string.notification_channel_network_available),
                 NotificationManager.IMPORTANCE_LOW);
         networkAvailable.setBlockableSystem(true);
-        networkAvailable.setBypassDnd(true);
         channelsList.add(networkAvailable);
 
         final NotificationChannel vpn = new NotificationChannel(
                 VPN,
                 context.getString(R.string.notification_channel_vpn),
                 NotificationManager.IMPORTANCE_LOW);
-        vpn.setBypassDnd(true);
         channelsList.add(vpn);
 
         final NotificationChannel deviceAdmin = new NotificationChannel(
                 DEVICE_ADMIN,
                 context.getString(R.string.notification_channel_device_admin),
                 NotificationManager.IMPORTANCE_LOW);
-        deviceAdmin.setBypassDnd(true);
         channelsList.add(deviceAdmin);
 
         final NotificationChannel alertsChannel = new NotificationChannel(
                 ALERTS,
                 context.getString(R.string.notification_channel_alerts),
                 NotificationManager.IMPORTANCE_DEFAULT);
-        alertsChannel.setBypassDnd(true);
         channelsList.add(alertsChannel);
 
         final NotificationChannel retail = new NotificationChannel(
                 RETAIL_MODE,
                 context.getString(R.string.notification_channel_retail_mode),
                 NotificationManager.IMPORTANCE_LOW);
-        retail.setBypassDnd(true);
         channelsList.add(retail);
 
         final NotificationChannel usb = new NotificationChannel(
                 USB,
                 context.getString(R.string.notification_channel_usb),
                 NotificationManager.IMPORTANCE_MIN);
-        usb.setBypassDnd(true);
         channelsList.add(usb);
 
         NotificationChannel foregroundChannel = new NotificationChannel(
@@ -167,7 +154,6 @@ public class SystemNotificationChannels {
                 context.getString(R.string.notification_channel_foreground_service),
                 NotificationManager.IMPORTANCE_LOW);
         foregroundChannel.setBlockableSystem(true);
-        foregroundChannel.setBypassDnd(true);
         channelsList.add(foregroundChannel);
 
         NotificationChannel heavyWeightChannel = new NotificationChannel(
@@ -179,19 +165,16 @@ public class SystemNotificationChannels {
                 .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
                 .setUsage(AudioAttributes.USAGE_NOTIFICATION_EVENT)
                 .build());
-        heavyWeightChannel.setBypassDnd(true);
         channelsList.add(heavyWeightChannel);
 
         NotificationChannel systemChanges = new NotificationChannel(SYSTEM_CHANGES,
                 context.getString(R.string.notification_channel_system_changes),
                 NotificationManager.IMPORTANCE_LOW);
-        systemChanges.setBypassDnd(true);
         channelsList.add(systemChanges);
 
         NotificationChannel dndChanges = new NotificationChannel(DO_NOT_DISTURB,
                 context.getString(R.string.notification_channel_do_not_disturb),
                 NotificationManager.IMPORTANCE_LOW);
-        dndChanges.setBypassDnd(true);
         channelsList.add(dndChanges);
 
         nm.createNotificationChannels(channelsList);
@@ -208,12 +191,10 @@ public class SystemNotificationChannels {
     }
 
     private static NotificationChannel newAccountChannel(Context context) {
-        final NotificationChannel acct = new NotificationChannel(
+        return new NotificationChannel(
                 ACCOUNT,
                 context.getString(R.string.notification_channel_account),
                 NotificationManager.IMPORTANCE_LOW);
-        acct.setBypassDnd(true);
-        return acct;
     }
 
     private SystemNotificationChannels() {}
