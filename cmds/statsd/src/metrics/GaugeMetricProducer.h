@@ -136,6 +136,11 @@ private:
     // this slice (ie, for partial buckets, we use the last partial bucket in this full bucket).
     std::shared_ptr<DimToValMap> mCurrentSlicedBucketForAnomaly;
 
+    // Pairs of (elapsed start, elapsed end) denoting buckets that were skipped.
+    std::list<std::pair<int64_t, int64_t>> mSkippedBuckets;
+
+    const int64_t mMinBucketSizeNs;
+
     // Translate Atom based bucket to single numeric value bucket for anomaly and updates the map
     // for each slice with the latest value.
     void updateCurrentSlicedBucketForAnomaly();

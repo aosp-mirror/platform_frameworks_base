@@ -148,6 +148,11 @@ private:
     // TODO: Add a lock to mPastBuckets.
     std::unordered_map<MetricDimensionKey, std::vector<ValueBucket>> mPastBuckets;
 
+    // Pairs of (elapsed start, elapsed end) denoting buckets that were skipped.
+    std::list<std::pair<int64_t, int64_t>> mSkippedBuckets;
+
+    const int64_t mMinBucketSizeNs;
+
     // Util function to check whether the specified dimension hits the guardrail.
     bool hitGuardRailLocked(const MetricDimensionKey& newKey);
 
