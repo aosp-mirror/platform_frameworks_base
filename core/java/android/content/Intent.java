@@ -3660,6 +3660,10 @@ public class Intent implements Parcelable, Cloneable {
      * <p class="note">This is a protected intent that can only be sent by the system.
      * @hide
      * @removed
+     * @deprecated Use {@link android.provider.Telephony.ServiceStateTable} and the helper
+     * functions {@code ServiceStateTable.getUriForSubscriptionIdAndField} and
+     * {@code ServiceStateTable.getUriForSubscriptionId} to subscribe to changes to the ServiceState
+     * for a given subscription id and field with a ContentObserver or using JobScheduler.
      */
     @Deprecated
     @SystemApi
@@ -3675,6 +3679,7 @@ public class Intent implements Parcelable, Cloneable {
      * @see android.telephony.ServiceState#STATE_POWER_OFF
      * @hide
      * @removed
+     * @deprecated Use {@link android.provider.Telephony.ServiceStateTable#VOICE_REG_STATE}.
      */
     @Deprecated
     @SystemApi
@@ -3688,6 +3693,7 @@ public class Intent implements Parcelable, Cloneable {
      * @see android.telephony.ServiceState#STATE_POWER_OFF
      * @hide
      * @removed
+     * @deprecated Use {@link android.provider.Telephony.ServiceStateTable#DATA_REG_STATE}.
      */
     @Deprecated
     @SystemApi
@@ -3698,6 +3704,7 @@ public class Intent implements Parcelable, Cloneable {
      * type.
      * @hide
      * @removed
+     * @deprecated Use {@link android.provider.Telephony.ServiceStateTable#VOICE_ROAMING_TYPE}.
      */
     @Deprecated
     @SystemApi
@@ -3708,6 +3715,7 @@ public class Intent implements Parcelable, Cloneable {
      * type.
      * @hide
      * @removed
+     * @deprecated Use {@link android.provider.Telephony.ServiceStateTable#DATA_ROAMING_TYPE}.
      */
     @Deprecated
     @SystemApi
@@ -3719,6 +3727,8 @@ public class Intent implements Parcelable, Cloneable {
      * {@code null} if the operator name is not known or unregistered.
      * @hide
      * @removed
+     * @deprecated Use
+     * {@link android.provider.Telephony.ServiceStateTable#VOICE_OPERATOR_ALPHA_LONG}.
      */
     @Deprecated
     @SystemApi
@@ -3730,6 +3740,8 @@ public class Intent implements Parcelable, Cloneable {
      * {@code null} if the operator name is not known or unregistered.
      * @hide
      * @removed
+     * @deprecated Use
+     * {@link android.provider.Telephony.ServiceStateTable#VOICE_OPERATOR_ALPHA_SHORT}.
      */
     @Deprecated
     @SystemApi
@@ -3741,6 +3753,7 @@ public class Intent implements Parcelable, Cloneable {
      * network.
      * @hide
      * @removed
+     * @deprecated Use {@link android.provider.Telephony.ServiceStateTable#VOICE_OPERATOR_NUMERIC}.
      */
     @Deprecated
     @SystemApi
@@ -3752,6 +3765,8 @@ public class Intent implements Parcelable, Cloneable {
      * {@code null} if the operator name is not known or unregistered.
      * @hide
      * @removed
+     * @deprecated Use
+     * {@link android.provider.Telephony.ServiceStateTable#DATA_OPERATOR_ALPHA_LONG}.
      */
     @Deprecated
     @SystemApi
@@ -3763,6 +3778,8 @@ public class Intent implements Parcelable, Cloneable {
      * {@code null} if the operator name is not known or unregistered.
      * @hide
      * @removed
+     * @deprecated Use
+     * {@link android.provider.Telephony.ServiceStateTable#DATA_OPERATOR_ALPHA_SHORT}.
      */
     @Deprecated
     @SystemApi
@@ -3774,6 +3791,7 @@ public class Intent implements Parcelable, Cloneable {
      * data operator.
      * @hide
      * @removed
+     * @deprecated Use {@link android.provider.Telephony.ServiceStateTable#DATA_OPERATOR_NUMERIC}.
      */
     @Deprecated
     @SystemApi
@@ -3785,6 +3803,8 @@ public class Intent implements Parcelable, Cloneable {
      * Will be {@code true} if manual mode, {@code false} if automatic mode.
      * @hide
      * @removed
+     * @deprecated Use
+     * {@link android.provider.Telephony.ServiceStateTable#IS_MANUAL_NETWORK_SELECTION}.
      */
     @Deprecated
     @SystemApi
@@ -3795,6 +3815,8 @@ public class Intent implements Parcelable, Cloneable {
      * radio technology.
      * @hide
      * @removed
+     * @deprecated Use
+     * {@link android.provider.Telephony.ServiceStateTable#RIL_VOICE_RADIO_TECHNOLOGY}.
      */
     @Deprecated
     @SystemApi
@@ -3805,6 +3827,8 @@ public class Intent implements Parcelable, Cloneable {
      * radio technology.
      * @hide
      * @removed
+     * @deprecated Use
+     * {@link android.provider.Telephony.ServiceStateTable#RIL_DATA_RADIO_TECHNOLOGY}.
      */
     @Deprecated
     @SystemApi
@@ -3816,6 +3840,7 @@ public class Intent implements Parcelable, Cloneable {
      * Will be {@code true} if support, {@code false} otherwise.
      * @hide
      * @removed
+     * @deprecated Use {@link android.provider.Telephony.ServiceStateTable#CSS_INDICATOR}.
      */
     @Deprecated
     @SystemApi
@@ -3826,6 +3851,7 @@ public class Intent implements Parcelable, Cloneable {
      * id. {@code Integer.MAX_VALUE} if unknown.
      * @hide
      * @removed
+     * @deprecated Use {@link android.provider.Telephony.ServiceStateTable#NETWORK_ID}.
      */
     @Deprecated
     @SystemApi
@@ -3836,6 +3862,7 @@ public class Intent implements Parcelable, Cloneable {
      * {@code Integer.MAX_VALUE} if unknown.
      * @hide
      * @removed
+     * @deprecated Use {@link android.provider.Telephony.ServiceStateTable#SYSTEM_ID}.
      */
     @Deprecated
     @SystemApi
@@ -3846,6 +3873,7 @@ public class Intent implements Parcelable, Cloneable {
      * indicator if registered on a CDMA or EVDO system or {@code -1} if not.
      * @hide
      * @removed
+     * @deprecated Use {@link android.provider.Telephony.ServiceStateTable#CDMA_ROAMING_INDICATOR}.
      */
     @Deprecated
     @SystemApi
@@ -3856,6 +3884,8 @@ public class Intent implements Parcelable, Cloneable {
      * indicator from the PRL if registered on a CDMA or EVDO system {@code -1} if not.
      * @hide
      * @removed
+     * @deprecated Use
+     * {@link android.provider.Telephony.ServiceStateTable#CDMA_DEFAULT_ROAMING_INDICATOR}.
      */
     @Deprecated
     @SystemApi
@@ -3867,6 +3897,7 @@ public class Intent implements Parcelable, Cloneable {
      * {@code true} if in emergency only mode, {@code false} otherwise.
      * @hide
      * @removed
+     * @deprecated Use {@link android.provider.Telephony.ServiceStateTable#IS_EMERGENCY_ONLY}.
      */
     @Deprecated
     @SystemApi
@@ -3878,6 +3909,8 @@ public class Intent implements Parcelable, Cloneable {
      * {@code true} if registration indicates roaming, {@code false} otherwise
      * @hide
      * @removed
+     * @deprecated Use
+     * {@link android.provider.Telephony.ServiceStateTable#IS_DATA_ROAMING_FROM_REGISTRATION}.
      */
     @Deprecated
     @SystemApi
@@ -3890,6 +3923,8 @@ public class Intent implements Parcelable, Cloneable {
      * {@code true} if carrier aggregation is in use, {@code false} otherwise.
      * @hide
      * @removed
+     * @deprecated Use
+     * {@link android.provider.Telephony.ServiceStateTable#IS_USING_CARRIER_AGGREGATION}.
      */
     @Deprecated
     @SystemApi
