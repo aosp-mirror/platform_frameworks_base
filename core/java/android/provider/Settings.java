@@ -8768,6 +8768,17 @@ public final class Settings {
         public static final String EUICC_PROVISIONED = "euicc_provisioned";
 
         /**
+         * List of ISO country codes in which eUICC UI is shown. Country codes should be separated
+         * by comma.
+         *
+         * <p>Used to hide eUICC UI from users who are currently in countries no carriers support
+         * eUICC.
+         * @hide
+         */
+        //TODO(b/77914569) Changes this to System Api.
+        public static final String EUICC_SUPPORTED_COUNTRIES = "euicc_supported_countries";
+
+        /**
          * Whether any activity can be resized. When this is true, any
          * activity, regardless of manifest values, can be resized for multi-window.
          * (0 = false, 1 = true)
