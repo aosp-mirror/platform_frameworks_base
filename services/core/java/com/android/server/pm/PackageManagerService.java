@@ -11503,6 +11503,8 @@ public class PackageManagerService extends IPackageManager.Stub
                 a.info.dataDir = pkg.applicationInfo.dataDir;
                 a.info.deviceProtectedDataDir = pkg.applicationInfo.deviceProtectedDataDir;
                 a.info.credentialProtectedDataDir = pkg.applicationInfo.credentialProtectedDataDir;
+                a.info.primaryCpuAbi = pkg.applicationInfo.primaryCpuAbi;
+                a.info.secondaryCpuAbi = pkg.applicationInfo.secondaryCpuAbi;
                 a.info.nativeLibraryDir = pkg.applicationInfo.nativeLibraryDir;
                 a.info.secondaryNativeLibraryDir = pkg.applicationInfo.secondaryNativeLibraryDir;
                 mInstrumentation.put(a.getComponentName(), a);
