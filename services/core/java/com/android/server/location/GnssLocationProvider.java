@@ -387,6 +387,7 @@ public class GnssLocationProvider implements LocationProviderInterface, InjectNt
     private long mLastFixTime;
 
     private int mPositionMode;
+    private GnssPositionMode mLastPositionMode;
 
     // Current request from underlying location clients.
     private ProviderRequest mProviderRequest = null;
@@ -1341,7 +1342,7 @@ public class GnssLocationProvider implements LocationProviderInterface, InjectNt
             // apply request to GPS engine
             if (mStarted && hasCapability(GPS_CAPABILITY_SCHEDULING)) {
                 // change period and/or lowPowerMode
-                if (!native_set_position_mode(mPositionMode, GPS_POSITION_RECURRENCE_PERIODIC,
+                if (!setPositionMode(mPositionMode, GPS_POSITION_RECURRENCE_PERIODIC,
                         mFixInterval, 0, 0, mLowPowerMode)) {
                     Log.e(TAG, "set_position_mode failed in updateRequirements");
                 }
@@ -1364,6 +1365,24 @@ public class GnssLocationProvider implements LocationProviderInterface, InjectNt
             mAlarmManager.cancel(mWakeupIntent);
             mAlarmManager.cancel(mTimeoutIntent);
         }
+    }
+
+    private boolean setPositionMode(int mode, int recurrence, int minInterval,
+            int preferredAccuracy, int preferredTime, boolean lowPowerMode) {
+        GnssPositionMode positionMode = new GnssPositionMode(mode, recurrence, minInterval,
+                preferredAccuracy, preferredTime, lowPowerMode);
+        if (mLastPositionMode != null && mLastPositionMode.equals(positionMode)) {
+            return true;
+        }
+
+        boolean result = native_set_position_mode(mode, recurrence, minInterval,
+                preferredAccuracy, preferredTime, lowPowerMode);
+        if (result) {
+            mLastPositionMode = positionMode;
+        } else {
+            mLastPositionMode = null;
+        }
+        return result;
     }
 
     private void updateClientUids(WorkSource source) {
@@ -1525,7 +1544,7 @@ public class GnssLocationProvider implements LocationProviderInterface, InjectNt
 
             int interval = (hasCapability(GPS_CAPABILITY_SCHEDULING) ? mFixInterval : 1000);
             mLowPowerMode = (boolean) mProviderRequest.lowPowerMode;
-            if (!native_set_position_mode(mPositionMode, GPS_POSITION_RECURRENCE_PERIODIC,
+            if (!setPositionMode(mPositionMode, GPS_POSITION_RECURRENCE_PERIODIC,
                     interval, 0, 0, mLowPowerMode)) {
                 mStarted = false;
                 Log.e(TAG, "set_position_mode failed in startNavigating()");
