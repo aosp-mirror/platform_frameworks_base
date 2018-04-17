@@ -18,9 +18,9 @@ package com.android.settingslib.deviceinfo;
 
 import android.content.Context;
 import android.os.Build;
-import android.support.annotation.VisibleForTesting;
-import android.support.v7.preference.Preference;
-import android.support.v7.preference.PreferenceScreen;
+import androidx.annotation.VisibleForTesting;
+import androidx.preference.Preference;
+import androidx.preference.PreferenceScreen;
 import android.text.TextUtils;
 
 import com.android.settingslib.core.AbstractPreferenceController;

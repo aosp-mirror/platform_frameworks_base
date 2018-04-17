@@ -40,8 +40,8 @@ import static org.mockito.Mockito.verify;
 
 import android.content.Context;
 import android.os.SystemProperties;
-import android.support.v7.preference.ListPreference;
-import android.support.v7.preference.PreferenceScreen;
+import androidx.preference.ListPreference;
+import androidx.preference.PreferenceScreen;
 
 import com.android.settingslib.R;
 import com.android.settingslib.SettingsLibRobolectricTestRunner;
