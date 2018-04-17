@@ -334,4 +334,40 @@ public class CachedBluetoothDeviceTest {
         mCachedDevice.onProfileStateChanged(mHfpProfile, BluetoothProfile.STATE_DISCONNECTED);
         assertThat(mCachedDevice.setActive()).isFalse();
     }
+
+    @Test
+    public void testIsA2dpDevice_isA2dpDevice() {
+        when(mProfileManager.getA2dpProfile()).thenReturn(mA2dpProfile);
+        when(mA2dpProfile.getConnectionStatus(mDevice)).
+                thenReturn(BluetoothProfile.STATE_CONNECTED);
+
+        assertThat(mCachedDevice.isA2dpDevice()).isTrue();
+    }
+
+    @Test
+    public void testIsA2dpDevice_isNotA2dpDevice() {
+        when(mProfileManager.getA2dpProfile()).thenReturn(mA2dpProfile);
+        when(mA2dpProfile.getConnectionStatus(mDevice)).
+                thenReturn(BluetoothProfile.STATE_DISCONNECTING);
+
+        assertThat(mCachedDevice.isA2dpDevice()).isFalse();
+    }
+
+    @Test
+    public void testIsHfpDevice_isHfpDevice() {
+        when(mProfileManager.getHeadsetProfile()).thenReturn(mHfpProfile);
+        when(mHfpProfile.getConnectionStatus(mDevice)).
+                thenReturn(BluetoothProfile.STATE_CONNECTED);
+
+        assertThat(mCachedDevice.isHfpDevice()).isTrue();
+    }
+
+    @Test
+    public void testIsHfpDevice_isNotHfpDevice() {
+        when(mProfileManager.getHeadsetProfile()).thenReturn(mHfpProfile);
+        when(mHfpProfile.getConnectionStatus(mDevice)).
+                thenReturn(BluetoothProfile.STATE_DISCONNECTING);
+
+        assertThat(mCachedDevice.isHfpDevice()).isFalse();
+    }
 }

@@ -354,6 +354,22 @@ public class LocalBluetoothProfileManager {
                     oldState == BluetoothProfile.STATE_CONNECTING) {
                 Log.i(TAG, "Failed to connect " + mProfile + " device");
             }
+
+            if (getHearingAidProfile() != null &&
+                mProfile instanceof HearingAidProfile &&
+                (newState == BluetoothProfile.STATE_CONNECTED)) {
+                // Check if the HiSyncID has being initialized
+                if (cachedDevice.getHiSyncId() == BluetoothHearingAid.HI_SYNC_ID_INVALID) {
+
+                    long newHiSyncId = getHearingAidProfile().getHiSyncId(cachedDevice.getDevice());
+
+                    if (newHiSyncId != BluetoothHearingAid.HI_SYNC_ID_INVALID) {
+                        cachedDevice.setHiSyncId(newHiSyncId);
+                        mDeviceManager.onHiSyncIdChanged(newHiSyncId);
+                    }
+                }
+            }
+
             cachedDevice.onProfileStateChanged(mProfile, newState);
             cachedDevice.refresh();
         }

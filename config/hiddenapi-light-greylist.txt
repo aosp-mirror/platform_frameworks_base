@@ -404,7 +404,10 @@ Landroid/appwidget/AppWidgetManager;->bindAppWidgetId(ILandroid/content/Componen
 Landroid/appwidget/AppWidgetManager;->bindAppWidgetId(ILandroid/content/ComponentName;)V
 Landroid/appwidget/AppWidgetManager;->mService:Lcom/android/internal/appwidget/IAppWidgetService;
 Landroid/appwidget/AppWidgetProviderInfo;->providerInfo:Landroid/content/pm/ActivityInfo;
+Landroid/bluetooth/BluetoothA2dp;->ACTION_ACTIVE_DEVICE_CHANGED:Ljava/lang/String;
 Landroid/bluetooth/BluetoothA2dp;->connect(Landroid/bluetooth/BluetoothDevice;)Z
+Landroid/bluetooth/BluetoothA2dp;->getActiveDevice()Landroid/bluetooth/BluetoothDevice;
+Landroid/bluetooth/BluetoothA2dp;->setActiveDevice(Landroid/bluetooth/BluetoothDevice;)Z
 Landroid/bluetooth/BluetoothAdapter;->disable(Z)Z
 Landroid/bluetooth/BluetoothAdapter;->factoryReset()Z
 Landroid/bluetooth/BluetoothAdapter;->getDiscoverableTimeout()I
@@ -993,12 +996,13 @@ Landroid/location/IGeofenceProvider$Stub;-><init>()V
 Landroid/location/ILocationManager$Stub;->asInterface(Landroid/os/IBinder;)Landroid/location/ILocationManager;
 Landroid/location/ILocationManager$Stub$Proxy;-><init>(Landroid/os/IBinder;)V
 Landroid/location/LocationManager;->mService:Landroid/location/ILocationManager;
+Landroid/media/AudioAttributes$Builder;->addTag(Ljava/lang/String;)Landroid/media/AudioAttributes$Builder;
 Landroid/media/AudioAttributes;->mContentType:I
 Landroid/media/AudioAttributes;->mFlags:I
 Landroid/media/AudioAttributes;->mFormattedTags:Ljava/lang/String;
 Landroid/media/AudioAttributes;->mSource:I
 Landroid/media/AudioAttributes;->mUsage:I
-Landroid/media/AudioAttributes$Builder;->addTag(Ljava/lang/String;)Landroid/media/AudioAttributes$Builder;
+Landroid/media/AudioAttributes;->toLegacyStreamType(Landroid/media/AudioAttributes;)I
 Landroid/media/AudioDevicePortConfig;-><init>(Landroid/media/AudioDevicePort;IIILandroid/media/AudioGainConfig;)V
 Landroid/media/AudioDevicePort;-><init>(Landroid/media/AudioHandle;Ljava/lang/String;[I[I[I[I[Landroid/media/AudioGain;ILjava/lang/String;)V
 Landroid/media/AudioFormat;-><init>(IIII)V
@@ -1087,6 +1091,7 @@ Landroid/media/IAudioService;->getStreamVolume(I)I
 Landroid/media/IAudioService;->setStreamVolume(IIILjava/lang/String;)V
 Landroid/media/IAudioService$Stub;->asInterface(Landroid/os/IBinder;)Landroid/media/IAudioService;
 Landroid/media/IAudioService$Stub$Proxy;-><init>(Landroid/os/IBinder;)V
+Landroid/media/Image;-><init>()V
 Landroid/media/IMediaScannerService;->scanFile(Ljava/lang/String;Ljava/lang/String;)V
 Landroid/media/IMediaScannerService$Stub;->asInterface(Landroid/os/IBinder;)Landroid/media/IMediaScannerService;
 Landroid/media/IRemoteDisplayCallback;->onStateChanged(Landroid/media/RemoteDisplayState;)V
@@ -1203,6 +1208,7 @@ Landroid/net/ConnectivityManager;->TYPE_MOBILE_IMS:I
 Landroid/net/ConnectivityManager;->TYPE_NONE:I
 Landroid/net/ConnectivityManager;->TYPE_PROXY:I
 Landroid/net/ConnectivityManager;->TYPE_WIFI_P2P:I
+Landroid/net/http/SslError;->mCertificate:Landroid/net/http/SslCertificate;
 Landroid/net/IConnectivityManager$Stub;->asInterface(Landroid/os/IBinder;)Landroid/net/IConnectivityManager;
 Landroid/net/IConnectivityManager$Stub$Proxy;->getActiveLinkProperties()Landroid/net/LinkProperties;
 Landroid/net/IConnectivityManager$Stub$Proxy;->getActiveNetworkInfo()Landroid/net/NetworkInfo;
@@ -1537,6 +1543,7 @@ Landroid/os/storage/StorageVolume;->getMaxFileSize()J
 Landroid/os/storage/StorageVolume;->getPathFile()Ljava/io/File;
 Landroid/os/storage/StorageVolume;->getPath()Ljava/lang/String;
 Landroid/os/storage/StorageVolume;->getUserLabel()Ljava/lang/String;
+Landroid/os/storage/StorageVolume;->mPath:Ljava/io/File;
 Landroid/os/storage/VolumeInfo;->getDisk()Landroid/os/storage/DiskInfo;
 Landroid/os/storage/VolumeInfo;->getFsUuid()Ljava/lang/String;
 Landroid/os/storage/VolumeInfo;->getPath()Ljava/io/File;
@@ -1706,6 +1713,7 @@ Landroid/provider/Settings$System;->MASTER_MONO:Ljava/lang/String;
 Landroid/provider/Settings$System;->putStringForUser(Landroid/content/ContentResolver;Ljava/lang/String;Ljava/lang/String;I)Z
 Landroid/provider/Settings$System;->SCREEN_AUTO_BRIGHTNESS_ADJ:Ljava/lang/String;
 Landroid/provider/Settings$System;->sNameValueCache:Landroid/provider/Settings$NameValueCache;
+Landroid/provider/Settings$System;->VOLUME_SETTINGS:[Ljava/lang/String;
 Landroid/provider/Telephony$Sms;->addMessageToUri(ILandroid/content/ContentResolver;Landroid/net/Uri;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Long;ZZJ)Landroid/net/Uri;
 Landroid/provider/Telephony$Sms;->addMessageToUri(ILandroid/content/ContentResolver;Landroid/net/Uri;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Long;ZZ)Landroid/net/Uri;
 Landroid/provider/Telephony$Sms;->addMessageToUri(Landroid/content/ContentResolver;Landroid/net/Uri;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Long;ZZJ)Landroid/net/Uri;
@@ -2138,6 +2146,9 @@ Landroid/text/TextPaint;->setUnderlineText(IF)V
 Landroid/text/TextUtils$TruncateAt;->END_SMALL:Landroid/text/TextUtils$TruncateAt;
 Landroid/transition/ChangeBounds;->BOTTOM_RIGHT_ONLY_PROPERTY:Landroid/util/Property;
 Landroid/transition/ChangeBounds;->POSITION_PROPERTY:Landroid/util/Property;
+Landroid/transition/Scene;->mEnterAction:Ljava/lang/Runnable;
+Landroid/transition/Scene;->mExitAction:Ljava/lang/Runnable;
+Landroid/transition/Scene;->setCurrentScene(Landroid/view/View;Landroid/transition/Scene;)V
 Landroid/transition/TransitionManager;->sRunningTransitions:Ljava/lang/ThreadLocal;
 Landroid/util/ArrayMap;->append(Ljava/lang/Object;Ljava/lang/Object;)V
 Landroid/util/ArrayMap;->mBaseCacheSize:I
@@ -2156,6 +2167,7 @@ Landroid/util/NtpTrustedTime;->getCachedNtpTime()J
 Landroid/util/NtpTrustedTime;->getCachedNtpTimeReference()J
 Landroid/util/NtpTrustedTime;->getInstance(Landroid/content/Context;)Landroid/util/NtpTrustedTime;
 Landroid/util/NtpTrustedTime;->hasCache()Z
+Landroid/util/PathParser;->createPathFromPathData(Ljava/lang/String;)Landroid/graphics/Path;
 Landroid/util/Pools$SimplePool;->mPool:[Ljava/lang/Object;
 Landroid/util/Pools$SynchronizedPool;->acquire()Ljava/lang/Object;
 Landroid/util/Pools$SynchronizedPool;-><init>(I)V
@@ -2737,6 +2749,7 @@ Landroid/widget/ProgressBar;->mIndeterminate:Z
 Landroid/widget/ProgressBar;->mMaxHeight:I
 Landroid/widget/ProgressBar;->mMinHeight:I
 Landroid/widget/ProgressBar;->mOnlyIndeterminate:Z
+Landroid/widget/ProgressBar;->setProgressInternal(IZZ)Z
 Landroid/widget/RelativeLayout$LayoutParams;->mBottom:I
 Landroid/widget/RelativeLayout$LayoutParams;->mLeft:I
 Landroid/widget/RelativeLayout$LayoutParams;->mRight:I
@@ -2803,6 +2816,7 @@ Landroid/widget/TextView;->mTextPaint:Landroid/text/TextPaint;
 Landroid/widget/TextView;->setText(Ljava/lang/CharSequence;Landroid/widget/TextView$BufferType;ZI)V
 Landroid/widget/Toast;->getService()Landroid/app/INotificationManager;
 Landroid/widget/Toast;->getWindowParams()Landroid/view/WindowManager$LayoutParams;
+Landroid/widget/Toast;->mDuration:I
 Landroid/widget/Toast;->mTN:Landroid/widget/Toast$TN;
 Landroid/widget/Toast;->sService:Landroid/app/INotificationManager;
 Landroid/widget/Toast$TN;->mNextView:Landroid/view/View;
@@ -3083,6 +3097,7 @@ Lcom/android/internal/R$styleable;->EdgeEffect:[I
 Lcom/android/internal/R$styleable;->GridView:[I
 Lcom/android/internal/R$styleable;->IconMenuView:[I
 Lcom/android/internal/R$styleable;->ImageView:[I
+Lcom/android/internal/R$styleable;->ImageView_scaleType:I
 Lcom/android/internal/R$styleable;->ImageView_src:I
 Lcom/android/internal/R$styleable;->ListPreference_entries:I
 Lcom/android/internal/R$styleable;->ListPreference:[I

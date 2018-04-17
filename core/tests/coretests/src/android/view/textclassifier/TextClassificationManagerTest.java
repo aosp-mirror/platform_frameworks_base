@@ -232,16 +232,16 @@ public class TextClassificationManagerTest {
     @Test
     public void testGenerateLinks_exclude() {
         if (isTextClassifierDisabled()) return;
-        String text = "The number is +12122537077. See you tonight!";
+        String text = "You want apple@banana.com. See you tonight!";
         List<String> hints = Collections.EMPTY_LIST;
         List<String> included = Collections.EMPTY_LIST;
-        List<String> excluded = Arrays.asList(TextClassifier.TYPE_PHONE);
+        List<String> excluded = Arrays.asList(TextClassifier.TYPE_EMAIL);
         TextLinks.Request request = new TextLinks.Request.Builder(text)
                 .setEntityConfig(TextClassifier.EntityConfig.create(hints, included, excluded))
                 .setDefaultLocales(LOCALES)
                 .build();
         assertThat(mClassifier.generateLinks(request),
-                not(isTextLinksContaining(text, "+12122537077", TextClassifier.TYPE_PHONE)));
+                not(isTextLinksContaining(text, "apple@banana.com", TextClassifier.TYPE_EMAIL)));
     }
 
     @Test
@@ -261,16 +261,16 @@ public class TextClassificationManagerTest {
     @Test
     public void testGenerateLinks_exclude_override() {
         if (isTextClassifierDisabled()) return;
-        String text = "The number is +12122537077. See you tonight!";
+        String text = "You want apple@banana.com. See you tonight!";
         List<String> hints = Collections.EMPTY_LIST;
-        List<String> included = Arrays.asList(TextClassifier.TYPE_PHONE);
-        List<String> excluded = Arrays.asList(TextClassifier.TYPE_PHONE);
+        List<String> included = Arrays.asList(TextClassifier.TYPE_EMAIL);
+        List<String> excluded = Arrays.asList(TextClassifier.TYPE_EMAIL);
         TextLinks.Request request = new TextLinks.Request.Builder(text)
                 .setEntityConfig(TextClassifier.EntityConfig.create(hints, included, excluded))
                 .setDefaultLocales(LOCALES)
                 .build();
         assertThat(mClassifier.generateLinks(request),
-                not(isTextLinksContaining(text, "+12122537077", TextClassifier.TYPE_PHONE)));
+                not(isTextLinksContaining(text, "apple@banana.com", TextClassifier.TYPE_EMAIL)));
     }
 
     @Test

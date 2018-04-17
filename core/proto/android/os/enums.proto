@@ -60,7 +60,7 @@ enum BatteryStatusEnum {
 // They are primarily used by android/os/HardwarePropertiesManager.java.
 // Any change to the types in the thermal hal should be made here as well.
 enum TemperatureTypeEnum {
-    TEMPERATURE_TYPE_UKNOWN = -1;
+    TEMPERATURE_TYPE_UNKNOWN = -1;
     TEMPERATURE_TYPE_CPU = 0;
     TEMPERATURE_TYPE_GPU = 1;
     TEMPERATURE_TYPE_BATTERY = 2;

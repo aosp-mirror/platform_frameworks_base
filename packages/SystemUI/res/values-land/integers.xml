@@ -15,10 +15,8 @@
   ~ limitations under the License
   -->
 <resources>
-    <integer name="fingerprint_dialog_text_gravity">8388611</integer> <!-- gravity start -->
-
-    <!-- Action footer width used for layout_width to indicate WRAP_CONTENT (along with a weight of
-         0) as we can allow the carrier text to stretch as far as needed in the QS footer. -->
-    <integer name="qs_footer_actions_width">-2</integer>
-    <integer name="qs_footer_actions_weight">0</integer>
+    <!-- Action footer width is set to 0 to allow it to stretch (through a weight of 1) and center
+         the page indicator in between the footer and the carrier text.-->
+    <integer name="qs_footer_actions_width">0</integer>
+    <integer name="qs_footer_actions_weight">1</integer>
 </resources>

@@ -8,6 +8,7 @@ import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
 
+import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothHeadset;
 import android.bluetooth.BluetoothProfile;
 import android.content.Context;
@@ -31,7 +32,10 @@ public class HeadsetProfileTest {
     private LocalBluetoothProfileManager mProfileManager;
     @Mock
     private BluetoothHeadset mService;
-    
+    @Mock
+    private CachedBluetoothDevice mCachedBluetoothDevice;
+    @Mock
+    private BluetoothDevice mBluetoothDevice;
     private BluetoothProfile.ServiceListener mServiceListener;
     private HeadsetProfile mProfile;
 
@@ -44,6 +48,7 @@ public class HeadsetProfileTest {
             mServiceListener = (BluetoothProfile.ServiceListener) invocation.getArguments()[1];
             return null;
         }).when(mAdapter).getProfileProxy(any(Context.class), any(), eq(BluetoothProfile.HEADSET));
+        when(mCachedBluetoothDevice.getDevice()).thenReturn(mBluetoothDevice);
 
         mProfile = new HeadsetProfile(context, mAdapter, mDeviceManager, mProfileManager);
         mServiceListener.onServiceConnected(BluetoothProfile.HEADSET, mService);
@@ -56,5 +61,18 @@ public class HeadsetProfileTest {
 
         when(mService.isAudioOn()).thenReturn(false);
         assertThat(mProfile.isAudioOn()).isFalse();
+    }
+
+    @Test
+    public void testHeadsetProfile_shouldReturnAudioState() {
+        when(mService.getAudioState(mBluetoothDevice)).
+                thenReturn(BluetoothHeadset.STATE_AUDIO_DISCONNECTED);
+        assertThat(mProfile.getAudioState(mBluetoothDevice)).
+                isEqualTo(BluetoothHeadset.STATE_AUDIO_DISCONNECTED);
+
+        when(mService.getAudioState(mBluetoothDevice)).
+                thenReturn(BluetoothHeadset.STATE_AUDIO_CONNECTED);
+        assertThat(mProfile.getAudioState(mBluetoothDevice)).
+                isEqualTo(BluetoothHeadset.STATE_AUDIO_CONNECTED);
     }
 }

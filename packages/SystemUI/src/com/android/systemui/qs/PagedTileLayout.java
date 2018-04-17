@@ -46,6 +46,7 @@ public class PagedTileLayout extends ViewPager implements QSTileLayout {
     private final ArrayList<TilePage> mPages = new ArrayList<>();
 
     private PageIndicator mPageIndicator;
+    private float mPageIndicatorPosition;
 
     private int mNumPages;
     private PageListener mPageListener;
@@ -145,6 +146,8 @@ public class PagedTileLayout extends ViewPager implements QSTileLayout {
 
     public void setPageIndicator(PageIndicator indicator) {
         mPageIndicator = indicator;
+        mPageIndicator.setNumPages(mNumPages);
+        mPageIndicator.setLocation(mPageIndicatorPosition);
     }
 
     @Override
@@ -212,7 +215,6 @@ public class PagedTileLayout extends ViewPager implements QSTileLayout {
             }
             if (DEBUG) Log.d(TAG, "Size: " + mNumPages);
             mPageIndicator.setNumPages(mNumPages);
-            mPageIndicator.setVisibility(mNumPages > 1 ? View.VISIBLE : View.GONE);
             setAdapter(mAdapter);
             mAdapter.notifyDataSetChanged();
             setCurrentItem(0, false);
@@ -221,6 +223,12 @@ public class PagedTileLayout extends ViewPager implements QSTileLayout {
 
     @Override
     public boolean updateResources() {
+        // Update bottom padding, useful for removing extra space once the panel page indicator is
+        // hidden.
+        setPadding(0, 0, 0,
+                getContext().getResources().getDimensionPixelSize(
+                        R.dimen.qs_paged_tile_layout_padding_bottom));
+
         boolean changed = false;
         for (int i = 0; i < mPages.size(); i++) {
             changed |= mPages.get(i).updateResources();
@@ -326,7 +334,8 @@ public class PagedTileLayout extends ViewPager implements QSTileLayout {
                 public void onPageScrolled(int position, float positionOffset,
                         int positionOffsetPixels) {
                     if (mPageIndicator == null) return;
-                    mPageIndicator.setLocation(position + positionOffset);
+                    mPageIndicatorPosition = position + positionOffset;
+                    mPageIndicator.setLocation(mPageIndicatorPosition);
                     if (mPageListener != null) {
                         mPageListener.onPageChanged(positionOffsetPixels == 0 &&
                                 (isLayoutRtl() ? position == mPages.size() - 1 : position == 0));

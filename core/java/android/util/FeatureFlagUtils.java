@@ -41,7 +41,7 @@ public class FeatureFlagUtils {
         DEFAULT_FLAGS.put("settings_about_phone_v2", "true");
         DEFAULT_FLAGS.put("settings_bluetooth_while_driving", "false");
         DEFAULT_FLAGS.put("settings_data_usage_v2", "true");
-        DEFAULT_FLAGS.put("settings_audio_switcher", "false");
+        DEFAULT_FLAGS.put("settings_audio_switcher", "true");
     }
 
     /**

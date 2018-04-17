@@ -80,8 +80,6 @@ class Tuner extends ITuner.Stub {
             @NonNull RadioManager.BandConfig config);
     private native RadioManager.BandConfig nativeGetConfiguration(long nativeContext, int region);
 
-    private native void nativeSetMuted(long nativeContext, boolean mute);
-
     private native void nativeStep(long nativeContext, boolean directionDown, boolean skipSubChannel);
     private native void nativeScan(long nativeContext, boolean directionDown, boolean skipSubChannel);
     private native void nativeTune(long nativeContext, @NonNull ProgramSelector selector);
@@ -155,8 +153,7 @@ class Tuner extends ITuner.Stub {
             checkNotClosedLocked();
             if (mIsMuted == mute) return;
             mIsMuted = mute;
-
-            nativeSetMuted(mNativeContext, mute);
+            Slog.w(TAG, "Mute via RadioService is not implemented - please handle it via app");
         }
     }
 

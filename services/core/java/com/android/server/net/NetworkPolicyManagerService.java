@@ -71,6 +71,7 @@ import static android.net.NetworkTemplate.MATCH_MOBILE;
 import static android.net.NetworkTemplate.MATCH_WIFI;
 import static android.net.NetworkTemplate.buildTemplateMobileAll;
 import static android.net.TrafficStats.MB_IN_BYTES;
+import static android.os.Trace.TRACE_TAG_NETWORK;
 import static android.provider.Settings.Global.NETPOLICY_OVERRIDE_ENABLED;
 import static android.provider.Settings.Global.NETPOLICY_QUOTA_ENABLED;
 import static android.provider.Settings.Global.NETPOLICY_QUOTA_FRAC_JOBS;
@@ -1100,6 +1101,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
      */
     void updateNotificationsNL() {
         if (LOGV) Slog.v(TAG, "updateNotificationsNL()");
+        Trace.traceBegin(TRACE_TAG_NETWORK, "updateNotificationsNL");
 
         // keep track of previously active notifications
         final ArraySet<NotificationId> beforeNotifs = new ArraySet<NotificationId>(mActiveNotifs);
@@ -1191,6 +1193,8 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                 cancelNotification(notificationId);
             }
         }
+
+        Trace.traceEnd(TRACE_TAG_NETWORK);
     }
 
     /**
@@ -1604,6 +1608,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
      */
     void updateNetworkEnabledNL() {
         if (LOGV) Slog.v(TAG, "updateNetworkEnabledNL()");
+        Trace.traceBegin(TRACE_TAG_NETWORK, "updateNetworkEnabledNL");
 
         // TODO: reset any policy-disabled networks when any policy is removed
         // completely, which is currently rare case.
@@ -1633,6 +1638,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         }
 
         mStatLogger.logDurationStat(Stats.UPDATE_NETWORK_ENABLED, startTime);
+        Trace.traceEnd(TRACE_TAG_NETWORK);
     }
 
     /**
@@ -1693,6 +1699,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
      */
     void updateNetworkRulesNL() {
         if (LOGV) Slog.v(TAG, "updateNetworkRulesNL()");
+        Trace.traceBegin(TRACE_TAG_NETWORK, "updateNetworkRulesNL");
 
         final NetworkState[] states;
         try {
@@ -1866,6 +1873,8 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         mHandler.obtainMessage(MSG_METERED_IFACES_CHANGED, meteredIfaces).sendToTarget();
 
         mHandler.obtainMessage(MSG_ADVISE_PERSIST_THRESHOLD, lowestRule).sendToTarget();
+
+        Trace.traceEnd(TRACE_TAG_NETWORK);
     }
 
     /**

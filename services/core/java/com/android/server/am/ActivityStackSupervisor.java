@@ -1466,11 +1466,9 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
                 // Set desired final state.
                 final ActivityLifecycleItem lifecycleItem;
                 if (andResume) {
-                    lifecycleItem = ResumeActivityItem.obtain(mService.isNextTransitionForward())
-                            .setDescription(r.getLifecycleDescription("realStartActivityLocked"));
+                    lifecycleItem = ResumeActivityItem.obtain(mService.isNextTransitionForward());
                 } else {
-                    lifecycleItem = PauseActivityItem.obtain()
-                            .setDescription(r.getLifecycleDescription("realStartActivityLocked"));
+                    lifecycleItem = PauseActivityItem.obtain();
                 }
                 clientTransaction.setLifecycleStateRequest(lifecycleItem);
 
@@ -4666,7 +4664,8 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
             userId = task.userId;
             return mService.getActivityStartController().startActivityInPackage(
                     task.mCallingUid, callingPid, callingUid, callingPackage, intent, null, null,
-                    null, 0, 0, options, userId, task, "startActivityFromRecents");
+                    null, 0, 0, options, userId, task, "startActivityFromRecents",
+                    false /* validateIncomingUser */);
         } finally {
             if (windowingMode == WINDOWING_MODE_SPLIT_SCREEN_PRIMARY && task != null) {
                 // If we are launching the task in the docked stack, put it into resizing mode so

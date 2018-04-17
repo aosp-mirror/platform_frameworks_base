@@ -3355,7 +3355,7 @@ public abstract class PackageManager {
             @ComponentInfoFlags int flags) throws NameNotFoundException;
 
     /**
-     * Return a List of all packages that are installed on the device.
+     * Return a List of all packages that are installed for the current user.
      *
      * @param flags Additional option flags to modify the data returned.
      * @return A List of PackageInfo objects, one for each installed package,
@@ -3742,8 +3742,8 @@ public abstract class PackageManager {
             throws NameNotFoundException;
 
     /**
-     * Return a List of all application packages that are installed on the
-     * device. If flag GET_UNINSTALLED_PACKAGES has been set, a list of all
+     * Return a List of all application packages that are installed for the
+     * current user. If flag GET_UNINSTALLED_PACKAGES has been set, a list of all
      * applications including those deleted with {@code DONT_DELETE_DATA}
      * (partially installed apps with data directory) will be returned.
      *
@@ -6107,7 +6107,7 @@ public abstract class PackageManager {
      * case of packages that are signed by multiple certificates, for which signing certificate
      * rotation is not supported.  This method is analogous to using {@code getPackageInfo} with
      * {@code GET_SIGNING_CERTIFICATES} and then searching through the resulting {@code
-     * signingCertificateHistory} field to see if the desired certificate is present.
+     * signingInfo} field to see if the desired certificate is present.
      *
      * @param packageName package whose signing certificates to check
      * @param certificate signing certificate for which to search
@@ -6131,7 +6131,7 @@ public abstract class PackageManager {
      * rotation is not supported. This method is analogous to using {@code getPackagesForUid}
      * followed by {@code getPackageInfo} with {@code GET_SIGNING_CERTIFICATES}, selecting the
      * {@code PackageInfo} of the newest-signed bpackage , and finally searching through the
-     * resulting {@code signingCertificateHistory} field to see if the desired certificate is there.
+     * resulting {@code signingInfo} field to see if the desired certificate is there.
      *
      * @param uid uid whose signing certificates to check
      * @param certificate signing certificate for which to search

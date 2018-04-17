@@ -148,7 +148,7 @@ public class UiccSlotInfo implements Parcelable {
         UiccSlotInfo that = (UiccSlotInfo) obj;
         return (mIsActive == that.mIsActive)
                 && (mIsEuicc == that.mIsEuicc)
-                && (mCardId == that.mCardId)
+                && (Objects.equals(mCardId, that.mCardId))
                 && (mCardStateInfo == that.mCardStateInfo)
                 && (mLogicalSlotIdx == that.mLogicalSlotIdx)
                 && (mIsExtendedApduSupported == that.mIsExtendedApduSupported);

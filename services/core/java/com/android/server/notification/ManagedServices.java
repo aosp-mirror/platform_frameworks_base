@@ -467,8 +467,12 @@ abstract public class ManagedServices {
                 mApproved.getOrDefault(userId, new ArrayMap<>());
         for (int i = 0; i < allowedByType.size(); i++) {
             final ArraySet<String> allowed = allowedByType.valueAt(i);
-            allowedComponents.addAll(allowed.stream().map(ComponentName::unflattenFromString)
-                    .filter(out -> out != null).collect(Collectors.toList()));
+            for (int j = 0; j < allowed.size(); j++) {
+                ComponentName cn = ComponentName.unflattenFromString(allowed.valueAt(j));
+                if (cn != null) {
+                    allowedComponents.add(cn);
+                }
+            }
         }
         return allowedComponents;
     }
@@ -479,10 +483,12 @@ abstract public class ManagedServices {
                 mApproved.getOrDefault(userId, new ArrayMap<>());
         for (int i = 0; i < allowedByType.size(); i++) {
             final ArraySet<String> allowed = allowedByType.valueAt(i);
-            allowedPackages.addAll(
-                    allowed.stream().map(this::getPackageName).
-                            filter(value -> !TextUtils.isEmpty(value))
-                            .collect(Collectors.toList()));
+            for (int j = 0; j < allowed.size(); j++) {
+                String pkgName = getPackageName(allowed.valueAt(j));
+                if (!TextUtils.isEmpty(pkgName)) {
+                    allowedPackages.add(pkgName);
+                }
+            }
         }
         return allowedPackages;
     }

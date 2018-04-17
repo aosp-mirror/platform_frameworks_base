@@ -312,12 +312,14 @@ class InstantAppRegistry {
                 return;
             }
 
-            // For backwards compatibility we accept match based on first signature only in the case
-            // of multiply-signed packagse
+            // For backwards compatibility we accept match based on any signature, since we may have
+            // recorded only the first for multiply-signed packages
             final String[] signaturesSha256Digests =
                     PackageUtils.computeSignaturesSha256Digests(pkg.mSigningDetails.signatures);
-            if (signaturesSha256Digests[0].equals(currentCookieSha256)) {
-                return;
+            for (String s : signaturesSha256Digests) {
+                if (s.equals(currentCookieSha256)) {
+                    return;
+                }
             }
 
             // Sorry, you are out of luck - different signatures - nuke data

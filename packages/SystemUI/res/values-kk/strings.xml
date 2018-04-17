@@ -148,20 +148,23 @@
     <string name="data_connection_gprs" msgid="7652872568358508452">"GPRS"</string>
     <string name="data_connection_hspa" msgid="1499615426569473562">"HSPA"</string>
     <string name="data_connection_3g" msgid="503045449315378373">"3G"</string>
-    <string name="data_connection_3_5g" msgid="5218328297191657602">"3,5Г"</string>
-    <string name="data_connection_3_5g_plus" msgid="7570783890290275297">"3.5G+"</string>
+    <string name="data_connection_3_5g" msgid="3164370985817123144">"H"</string>
+    <string name="data_connection_3_5g_plus" msgid="4464630787664529264">"H+"</string>
     <string name="data_connection_4g" msgid="9139963475267449144">"4G"</string>
     <string name="data_connection_4g_plus" msgid="1148687201877800700">"4G+"</string>
     <string name="data_connection_lte" msgid="2694876797724028614">"LTE"</string>
     <string name="data_connection_lte_plus" msgid="3423013208570937424">"LTE+"</string>
-    <string name="data_connection_cdma" msgid="4677985502159869585">"CDMA"</string>
+    <string name="data_connection_cdma" msgid="8176597308239086780">"1X"</string>
     <string name="data_connection_roaming" msgid="6037232010953697354">"Роуминг"</string>
     <string name="data_connection_edge" msgid="871835227939216682">"EDGE"</string>
     <string name="accessibility_data_connection_wifi" msgid="2324496756590645221">"Wi-Fi"</string>
     <string name="accessibility_no_sim" msgid="8274017118472455155">"SIM жоқ."</string>
     <string name="accessibility_cell_data" msgid="5326139158682385073">"Мобильдік дерекқор"</string>
     <string name="accessibility_cell_data_on" msgid="5927098403452994422">"Мобильдік деректер қосулы"</string>
-    <string name="cell_data_off" msgid="5287705247512911922">"Мобильдік деректер өшірулі"</string>
+    <!-- no translation found for cell_data_off_content_description (4356113230238585072) -->
+    <skip />
+    <!-- no translation found for cell_data_off (1051264981229902873) -->
+    <skip />
     <string name="accessibility_bluetooth_tether" msgid="4102784498140271969">"Bluetooth тетеринг."</string>
     <string name="accessibility_airplane_mode" msgid="834748999790763092">"Ұшақ режимі."</string>
     <string name="accessibility_vpn_on" msgid="5993385083262856059">"VPN қосулы."</string>
@@ -318,7 +321,7 @@
     <string name="quick_settings_brightness_dialog_title" msgid="8599674057673605368">"Жарықтығы"</string>
     <string name="quick_settings_brightness_dialog_auto_brightness_label" msgid="5064982743784071218">"Авто"</string>
     <string name="quick_settings_inversion_label" msgid="8790919884718619648">"Түстерді инверсиялау"</string>
-    <string name="quick_settings_color_space_label" msgid="853443689745584770">"Түсті жөндеу режимі"</string>
+    <string name="quick_settings_color_space_label" msgid="853443689745584770">"Түсті түзету режимі"</string>
     <string name="quick_settings_more_settings" msgid="326112621462813682">"Қосымша параметрлер"</string>
     <string name="quick_settings_done" msgid="3402999958839153376">"Дайын"</string>
     <string name="quick_settings_connected" msgid="1722253542984847487">"Қосылды"</string>
@@ -359,6 +362,9 @@
     <string name="recents_launch_disabled_message" msgid="1624523193008871793">"<xliff:g id="APP">%s</xliff:g> қауіпсіз режимде өшіріледі."</string>
     <string name="recents_stack_action_button_label" msgid="6593727103310426253">"Барлығын тазалау"</string>
     <string name="recents_drag_hint_message" msgid="2649739267073203985">"Бөлінген экранды пайдалану үшін осында сүйреңіз"</string>
+    <string name="recents_swipe_up_onboarding" msgid="3824607135920170001">"Қолданбалар арасында ауысу үшін жоғары сырғытыңыз"</string>
+    <!-- no translation found for recents_quick_scrub_onboarding (2778062804333285789) -->
+    <skip />
     <string name="recents_multistack_add_stack_dialog_split_horizontal" msgid="8848514474543427332">"Бөлінген көлденең"</string>
     <string name="recents_multistack_add_stack_dialog_split_vertical" msgid="9075292233696180813">"Бөлінген тік"</string>
     <string name="recents_multistack_add_stack_dialog_split_custom" msgid="4177837597513701943">"Бөлінген теңшелетін"</string>
@@ -455,7 +461,7 @@
     <string name="monitoring_title_device_owned" msgid="1652495295941959815">"Құрылғыны басқару"</string>
     <string name="monitoring_title_profile_owned" msgid="6790109874733501487">"Профильді бақылау"</string>
     <string name="monitoring_title" msgid="169206259253048106">"Желіні бақылау"</string>
-    <string name="monitoring_subtitle_vpn" msgid="876537538087857300">"VPN (Виртуалды жеке желі)"</string>
+    <string name="monitoring_subtitle_vpn" msgid="876537538087857300">"VPN"</string>
     <string name="monitoring_subtitle_network_logging" msgid="3341264304793193386">"Желі журналын жүргізу"</string>
     <string name="monitoring_subtitle_ca_certificate" msgid="3874151893894355988">"CA сертификаттары"</string>
     <string name="disable_vpn" msgid="4435534311510272506">"VPN функциясын өшіру"</string>
@@ -531,18 +537,15 @@
     <string name="volume_ringer_status_normal" msgid="4273142424125855384">"Шылдырлау"</string>
     <string name="volume_ringer_status_vibrate" msgid="1825615171021346557">"Діріл"</string>
     <string name="volume_ringer_status_silent" msgid="6896394161022916369">"Дыбысын өшіру"</string>
-    <!-- no translation found for qs_status_phone_vibrate (204362991135761679) -->
-    <skip />
-    <!-- no translation found for qs_status_phone_muted (5437668875879171548) -->
-    <skip />
+    <string name="qs_status_phone_vibrate" msgid="204362991135761679">"Телефон дірілі қосулы"</string>
+    <string name="qs_status_phone_muted" msgid="5437668875879171548">"Телефон дыбысы өшірулі"</string>
     <string name="volume_stream_content_description_unmute" msgid="4436631538779230857">"%1$s. Дыбысын қосу үшін түртіңіз."</string>
     <string name="volume_stream_content_description_vibrate" msgid="1187944970457807498">"%1$s. Діріл режимін орнату үшін түртіңіз. Арнайы мүмкіндік қызметтерінің дыбысы өшуі мүмкін."</string>
     <string name="volume_stream_content_description_mute" msgid="3625049841390467354">"%1$s. Дыбысын өшіру үшін түртіңіз. Арнайы мүмкіндік қызметтерінің дыбысы өшуі мүмкін."</string>
     <string name="volume_stream_content_description_vibrate_a11y" msgid="6427727603978431301">"%1$s. Діріл режимін орнату үшін түртіңіз."</string>
     <string name="volume_stream_content_description_mute_a11y" msgid="8995013018414535494">"%1$s. Дыбысын өшіру үшін түртіңіз."</string>
     <string name="volume_dialog_title" msgid="7272969888820035876">"Дыбысты басқару элементтері: %s"</string>
-    <!-- no translation found for volume_dialog_ringer_guidance_ring (3360373718388509040) -->
-    <skip />
+    <string name="volume_dialog_ringer_guidance_ring" msgid="3360373718388509040">"Қоңыраулар мен хабарландырулар дыбысы қосулы (<xliff:g id="VOLUME_LEVEL">%1$s</xliff:g>)"</string>
     <string name="output_title" msgid="5355078100792942802">"Meдиа шығысы"</string>
     <string name="output_calls_title" msgid="8717692905017206161">"Телефон қоңырау шығысы"</string>
     <string name="output_none_found" msgid="5544982839808921091">"Ешқандай құрылғы табылмады"</string>
@@ -618,7 +621,7 @@
       <item quantity="one"><xliff:g id="PERFORMING_ACTIVITY_0">%1$s</xliff:g> пайдалануда</item>
     </plurals>
     <string name="notification_appops_settings" msgid="1028328314935908050">"Параметрлер"</string>
-    <string name="notification_appops_ok" msgid="602562195588819631">"ОК"</string>
+    <string name="notification_appops_ok" msgid="602562195588819631">"Жарайды"</string>
     <string name="notification_channel_controls_opened_accessibility" msgid="6553950422055908113">"<xliff:g id="APP_NAME">%1$s</xliff:g> хабарландыруларын басқару элементтері ашылды"</string>
     <string name="notification_channel_controls_closed_accessibility" msgid="7521619812603693144">"<xliff:g id="APP_NAME">%1$s</xliff:g> хабарландыруларын басқару элементтері жабылды"</string>
     <string name="notification_channel_switch_accessibility" msgid="3420796005601900717">"Осы арнадан келетін хабарландыруларға рұқсат беру"</string>
@@ -693,8 +696,7 @@
     <string name="battery" msgid="7498329822413202973">"Батарея"</string>
     <string name="clock" msgid="7416090374234785905">"Сағат"</string>
     <string name="headset" msgid="4534219457597457353">"Құлақаспап жинағы"</string>
-    <!-- no translation found for accessibility_long_click_tile (6687350750091842525) -->
-    <skip />
+    <string name="accessibility_long_click_tile" msgid="6687350750091842525">"Параметрлерді ашу"</string>
     <string name="accessibility_status_bar_headphones" msgid="9156307120060559989">"Құлақаспап қосылды"</string>
     <string name="accessibility_status_bar_headset" msgid="8666419213072449202">"Құлақаспап жинағы қосылды"</string>
     <string name="data_saver" msgid="5037565123367048522">"Трафикті үнемдеу"</string>

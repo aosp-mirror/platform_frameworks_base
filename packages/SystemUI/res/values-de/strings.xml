@@ -75,7 +75,7 @@
     <string name="screenshot_saved_title" msgid="5637073968117370753">"Screenshot gespeichert"</string>
     <string name="screenshot_saved_text" msgid="7574667448002050363">"Tippe, um deinen Screenshot anzusehen"</string>
     <string name="screenshot_failed_title" msgid="7612509838919089748">"Screenshot konnte nicht gespeichert werden"</string>
-    <string name="screenshot_failed_to_save_unknown_text" msgid="3637758096565605541">"Erstelle einen weiteren Screenshot"</string>
+    <string name="screenshot_failed_to_save_unknown_text" msgid="3637758096565605541">"Versuche noch einmal, den Screenshot zu erstellen"</string>
     <string name="screenshot_failed_to_save_text" msgid="3041612585107107310">"Speichern des Screenshots aufgrund von zu wenig Speicher nicht möglich"</string>
     <string name="screenshot_failed_to_capture_text" msgid="173674476457581486">"Die App oder deine Organisation lässt das Erstellen von Screenshots nicht zu"</string>
     <string name="usb_preference_title" msgid="6551050377388882787">"USB-Dateiübertragungsoptionen"</string>
@@ -148,20 +148,23 @@
     <string name="data_connection_gprs" msgid="7652872568358508452">"GPRS"</string>
     <string name="data_connection_hspa" msgid="1499615426569473562">"HSPA"</string>
     <string name="data_connection_3g" msgid="503045449315378373">"3G"</string>
-    <string name="data_connection_3_5g" msgid="5218328297191657602">"3.5G"</string>
-    <string name="data_connection_3_5g_plus" msgid="7570783890290275297">"3.5G+"</string>
+    <string name="data_connection_3_5g" msgid="3164370985817123144">"H"</string>
+    <string name="data_connection_3_5g_plus" msgid="4464630787664529264">"H+"</string>
     <string name="data_connection_4g" msgid="9139963475267449144">"4G"</string>
     <string name="data_connection_4g_plus" msgid="1148687201877800700">"4G+"</string>
     <string name="data_connection_lte" msgid="2694876797724028614">"LTE"</string>
     <string name="data_connection_lte_plus" msgid="3423013208570937424">"LTE+"</string>
-    <string name="data_connection_cdma" msgid="4677985502159869585">"CDMA"</string>
+    <string name="data_connection_cdma" msgid="8176597308239086780">"1X"</string>
     <string name="data_connection_roaming" msgid="6037232010953697354">"Roaming"</string>
     <string name="data_connection_edge" msgid="871835227939216682">"EDGE"</string>
     <string name="accessibility_data_connection_wifi" msgid="2324496756590645221">"WLAN"</string>
     <string name="accessibility_no_sim" msgid="8274017118472455155">"Keine SIM-Karte"</string>
     <string name="accessibility_cell_data" msgid="5326139158682385073">"Mobile Daten"</string>
     <string name="accessibility_cell_data_on" msgid="5927098403452994422">"Mobile Datennutzung aktiviert"</string>
-    <string name="cell_data_off" msgid="5287705247512911922">"Mobile Daten sind deaktiviert"</string>
+    <!-- no translation found for cell_data_off_content_description (4356113230238585072) -->
+    <skip />
+    <!-- no translation found for cell_data_off (1051264981229902873) -->
+    <skip />
     <string name="accessibility_bluetooth_tether" msgid="4102784498140271969">"Bluetooth-Tethering"</string>
     <string name="accessibility_airplane_mode" msgid="834748999790763092">"Flugmodus"</string>
     <string name="accessibility_vpn_on" msgid="5993385083262856059">"VPN an."</string>
@@ -363,6 +366,9 @@
     <string name="recents_launch_disabled_message" msgid="1624523193008871793">"<xliff:g id="APP">%s</xliff:g> ist im abgesicherten Modus deaktiviert."</string>
     <string name="recents_stack_action_button_label" msgid="6593727103310426253">"Alle schließen"</string>
     <string name="recents_drag_hint_message" msgid="2649739267073203985">"Hierher ziehen, um den Bildschirm zu teilen"</string>
+    <string name="recents_swipe_up_onboarding" msgid="3824607135920170001">"Nach oben wischen, um Apps zu wechseln"</string>
+    <!-- no translation found for recents_quick_scrub_onboarding (2778062804333285789) -->
+    <skip />
     <string name="recents_multistack_add_stack_dialog_split_horizontal" msgid="8848514474543427332">"Geteilte Schaltfläche – horizontal"</string>
     <string name="recents_multistack_add_stack_dialog_split_vertical" msgid="9075292233696180813">"Geteilte Schaltfläche – vertikal"</string>
     <string name="recents_multistack_add_stack_dialog_split_custom" msgid="4177837597513701943">"Geteilte Schaltfläche – benutzerdefiniert"</string>
@@ -415,7 +421,7 @@
     <string name="guest_exit_guest_dialog_remove" msgid="7402231963862520531">"Entfernen"</string>
     <string name="guest_wipe_session_title" msgid="6419439912885956132">"Willkommen zurück im Gastmodus"</string>
     <string name="guest_wipe_session_message" msgid="8476238178270112811">"Möchtest du deine Sitzung fortsetzen?"</string>
-    <string name="guest_wipe_session_wipe" msgid="5065558566939858884">"Von vorn"</string>
+    <string name="guest_wipe_session_wipe" msgid="5065558566939858884">"Neu starten"</string>
     <string name="guest_wipe_session_dontwipe" msgid="1401113462524894716">"Ja, weiter"</string>
     <string name="guest_notification_title" msgid="1585278533840603063">"Gastnutzer"</string>
     <string name="guest_notification_text" msgid="335747957734796689">"Zum Löschen von Apps und Daten Gastnutzer entfernen"</string>
@@ -535,18 +541,15 @@
     <string name="volume_ringer_status_normal" msgid="4273142424125855384">"Klingeln lassen"</string>
     <string name="volume_ringer_status_vibrate" msgid="1825615171021346557">"Vibrieren"</string>
     <string name="volume_ringer_status_silent" msgid="6896394161022916369">"Stummschalten"</string>
-    <!-- no translation found for qs_status_phone_vibrate (204362991135761679) -->
-    <skip />
-    <!-- no translation found for qs_status_phone_muted (5437668875879171548) -->
-    <skip />
+    <string name="qs_status_phone_vibrate" msgid="204362991135761679">"Vibrationsmodus aktiviert"</string>
+    <string name="qs_status_phone_muted" msgid="5437668875879171548">"Smartphone stummgeschaltet"</string>
     <string name="volume_stream_content_description_unmute" msgid="4436631538779230857">"%1$s. Zum Aufheben der Stummschaltung tippen."</string>
     <string name="volume_stream_content_description_vibrate" msgid="1187944970457807498">"%1$s. Tippen, um Vibrieren festzulegen. Bedienungshilfen werden unter Umständen stummgeschaltet."</string>
     <string name="volume_stream_content_description_mute" msgid="3625049841390467354">"%1$s. Zum Stummschalten tippen. Bedienungshilfen werden unter Umständen stummgeschaltet."</string>
     <string name="volume_stream_content_description_vibrate_a11y" msgid="6427727603978431301">"%1$s. Zum Aktivieren der Vibration tippen."</string>
     <string name="volume_stream_content_description_mute_a11y" msgid="8995013018414535494">"%1$s. Zum Stummschalten tippen."</string>
     <string name="volume_dialog_title" msgid="7272969888820035876">"Lautstärkeregler von %s"</string>
-    <!-- no translation found for volume_dialog_ringer_guidance_ring (3360373718388509040) -->
-    <skip />
+    <string name="volume_dialog_ringer_guidance_ring" msgid="3360373718388509040">"Gerät klingelt bei Anrufen und Benachrichtigungen (<xliff:g id="VOLUME_LEVEL">%1$s</xliff:g>)"</string>
     <string name="output_title" msgid="5355078100792942802">"Medienausgabe"</string>
     <string name="output_calls_title" msgid="8717692905017206161">"Telefonanrufausgabe"</string>
     <string name="output_none_found" msgid="5544982839808921091">"Keine Geräte gefunden"</string>
@@ -697,8 +700,7 @@
     <string name="battery" msgid="7498329822413202973">"Akku"</string>
     <string name="clock" msgid="7416090374234785905">"Uhr"</string>
     <string name="headset" msgid="4534219457597457353">"Headset"</string>
-    <!-- no translation found for accessibility_long_click_tile (6687350750091842525) -->
-    <skip />
+    <string name="accessibility_long_click_tile" msgid="6687350750091842525">"Einstellungen öffnen"</string>
     <string name="accessibility_status_bar_headphones" msgid="9156307120060559989">"Mit Kopfhörer verbunden"</string>
     <string name="accessibility_status_bar_headset" msgid="8666419213072449202">"Mit Headset verbunden"</string>
     <string name="data_saver" msgid="5037565123367048522">"Datenverbrauch reduzieren"</string>

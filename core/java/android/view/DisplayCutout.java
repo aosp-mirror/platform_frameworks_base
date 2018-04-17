@@ -16,6 +16,8 @@
 
 package android.view;
 
+import static android.util.DisplayMetrics.DENSITY_DEFAULT;
+import static android.util.DisplayMetrics.DENSITY_DEVICE_STABLE;
 import static android.view.DisplayCutoutProto.BOUNDS;
 import static android.view.DisplayCutoutProto.INSETS;
 
@@ -358,7 +360,7 @@ public final class DisplayCutout {
      */
     public static DisplayCutout fromResources(Resources res, int displayWidth, int displayHeight) {
         return fromSpec(res.getString(R.string.config_mainBuiltInDisplayCutout),
-                displayWidth, displayHeight, res.getDisplayMetrics().density);
+                displayWidth, displayHeight, DENSITY_DEVICE_STABLE / (float) DENSITY_DEFAULT);
     }
 
     /**
@@ -368,7 +370,7 @@ public final class DisplayCutout {
      */
     public static Path pathFromResources(Resources res, int displayWidth, int displayHeight) {
         return pathAndDisplayCutoutFromSpec(res.getString(R.string.config_mainBuiltInDisplayCutout),
-                displayWidth, displayHeight, res.getDisplayMetrics().density).first;
+                displayWidth, displayHeight, DENSITY_DEVICE_STABLE / (float) DENSITY_DEFAULT).first;
     }
 
     /**

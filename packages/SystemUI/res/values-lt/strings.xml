@@ -150,20 +150,23 @@
     <string name="data_connection_gprs" msgid="7652872568358508452">"GPRS"</string>
     <string name="data_connection_hspa" msgid="1499615426569473562">"HSPA"</string>
     <string name="data_connection_3g" msgid="503045449315378373">"3G"</string>
-    <string name="data_connection_3_5g" msgid="5218328297191657602">"3.5G"</string>
-    <string name="data_connection_3_5g_plus" msgid="7570783890290275297">"3.5G+"</string>
+    <string name="data_connection_3_5g" msgid="3164370985817123144">"H"</string>
+    <string name="data_connection_3_5g_plus" msgid="4464630787664529264">"H+"</string>
     <string name="data_connection_4g" msgid="9139963475267449144">"4G"</string>
     <string name="data_connection_4g_plus" msgid="1148687201877800700">"4G+"</string>
     <string name="data_connection_lte" msgid="2694876797724028614">"LTE"</string>
     <string name="data_connection_lte_plus" msgid="3423013208570937424">"LTE+"</string>
-    <string name="data_connection_cdma" msgid="4677985502159869585">"CDMA"</string>
+    <string name="data_connection_cdma" msgid="8176597308239086780">"1X"</string>
     <string name="data_connection_roaming" msgid="6037232010953697354">"Tarptinklinis ryšys"</string>
     <string name="data_connection_edge" msgid="871835227939216682">"EDGE"</string>
     <string name="accessibility_data_connection_wifi" msgid="2324496756590645221">"Wi-Fi"</string>
     <string name="accessibility_no_sim" msgid="8274017118472455155">"Nėra SIM kortelės."</string>
     <string name="accessibility_cell_data" msgid="5326139158682385073">"Mobiliojo ryšio duomenys"</string>
     <string name="accessibility_cell_data_on" msgid="5927098403452994422">"Mobiliojo ryšio duomenys įjungti"</string>
-    <string name="cell_data_off" msgid="5287705247512911922">"Mobiliojo ryšio duomenys išjungti"</string>
+    <!-- no translation found for cell_data_off_content_description (4356113230238585072) -->
+    <skip />
+    <!-- no translation found for cell_data_off (1051264981229902873) -->
+    <skip />
     <string name="accessibility_bluetooth_tether" msgid="4102784498140271969">"„Bluetooth“ įrenginio kaip modemo naudojimas."</string>
     <string name="accessibility_airplane_mode" msgid="834748999790763092">"Lėktuvo režimas."</string>
     <string name="accessibility_vpn_on" msgid="5993385083262856059">"VPN įjungtas."</string>
@@ -365,6 +368,9 @@
     <string name="recents_launch_disabled_message" msgid="1624523193008871793">"Programa „<xliff:g id="APP">%s</xliff:g>“ išjungta saugos režimu."</string>
     <string name="recents_stack_action_button_label" msgid="6593727103310426253">"Išvalyti viską"</string>
     <string name="recents_drag_hint_message" msgid="2649739267073203985">"Vilkite čia, kad naudotumėte skaidytą ekraną"</string>
+    <string name="recents_swipe_up_onboarding" msgid="3824607135920170001">"Perbraukite aukštyn, kad perjungtumėte programas"</string>
+    <!-- no translation found for recents_quick_scrub_onboarding (2778062804333285789) -->
+    <skip />
     <string name="recents_multistack_add_stack_dialog_split_horizontal" msgid="8848514474543427332">"Horizontalus skaidymas"</string>
     <string name="recents_multistack_add_stack_dialog_split_vertical" msgid="9075292233696180813">"Vertikalus skaidymas"</string>
     <string name="recents_multistack_add_stack_dialog_split_custom" msgid="4177837597513701943">"Tinkintas skaidymas"</string>
@@ -537,18 +543,15 @@
     <string name="volume_ringer_status_normal" msgid="4273142424125855384">"Skambinti"</string>
     <string name="volume_ringer_status_vibrate" msgid="1825615171021346557">"Vibruoti"</string>
     <string name="volume_ringer_status_silent" msgid="6896394161022916369">"Nutildyti"</string>
-    <!-- no translation found for qs_status_phone_vibrate (204362991135761679) -->
-    <skip />
-    <!-- no translation found for qs_status_phone_muted (5437668875879171548) -->
-    <skip />
+    <string name="qs_status_phone_vibrate" msgid="204362991135761679">"Įjungtas telefono vibravimas"</string>
+    <string name="qs_status_phone_muted" msgid="5437668875879171548">"Telefonas nutildytas"</string>
     <string name="volume_stream_content_description_unmute" msgid="4436631538779230857">"%1$s. Palieskite, kad įjungtumėte garsą."</string>
     <string name="volume_stream_content_description_vibrate" msgid="1187944970457807498">"%1$s. Palieskite, kad nustatytumėte vibravimą. Gali būti nutildytos pritaikymo neįgaliesiems paslaugos."</string>
     <string name="volume_stream_content_description_mute" msgid="3625049841390467354">"%1$s. Palieskite, kad nutildytumėte. Gali būti nutildytos pritaikymo neįgaliesiems paslaugos."</string>
     <string name="volume_stream_content_description_vibrate_a11y" msgid="6427727603978431301">"%1$s. Palieskite, kad nustatytumėte vibravimą."</string>
     <string name="volume_stream_content_description_mute_a11y" msgid="8995013018414535494">"%1$s. Palieskite, kad nutildytumėte."</string>
     <string name="volume_dialog_title" msgid="7272969888820035876">"Garsumo valdikliai: %s"</string>
-    <!-- no translation found for volume_dialog_ringer_guidance_ring (3360373718388509040) -->
-    <skip />
+    <string name="volume_dialog_ringer_guidance_ring" msgid="3360373718388509040">"Skambučiai ir pranešimai skambės (<xliff:g id="VOLUME_LEVEL">%1$s</xliff:g>)"</string>
     <string name="output_title" msgid="5355078100792942802">"Medijos išvestis"</string>
     <string name="output_calls_title" msgid="8717692905017206161">"Telefono skambučių išvestis"</string>
     <string name="output_none_found" msgid="5544982839808921091">"Įrenginių nerasta"</string>
@@ -656,7 +659,7 @@
     </plurals>
     <string name="battery_panel_title" msgid="7944156115535366613">"Akum. energ. vartoj."</string>
     <string name="battery_detail_charging_summary" msgid="1279095653533044008">"Akumuliatoriaus tausojimo priemonė nepasiekiama įkraunant"</string>
-    <string name="battery_detail_switch_title" msgid="6285872470260795421">"Akumuliatoriaus tausojimo priemonė"</string>
+    <string name="battery_detail_switch_title" msgid="6285872470260795421">"Akumuliat. taus. pr."</string>
     <string name="battery_detail_switch_summary" msgid="9049111149407626804">"Sumažinamas našumas ir foninių duomenų naudojimas"</string>
     <string name="keyboard_key_button_template" msgid="6230056639734377300">"Mygtukas <xliff:g id="NAME">%1$s</xliff:g>"</string>
     <string name="keyboard_key_home" msgid="2243500072071305073">"Pagrindinis"</string>
@@ -707,11 +710,10 @@
     <string name="battery" msgid="7498329822413202973">"Akumuliatorius"</string>
     <string name="clock" msgid="7416090374234785905">"Laikrodis"</string>
     <string name="headset" msgid="4534219457597457353">"Ausinės"</string>
-    <!-- no translation found for accessibility_long_click_tile (6687350750091842525) -->
-    <skip />
+    <string name="accessibility_long_click_tile" msgid="6687350750091842525">"Atidaryti nustatymus"</string>
     <string name="accessibility_status_bar_headphones" msgid="9156307120060559989">"Ausinės prijungtos"</string>
     <string name="accessibility_status_bar_headset" msgid="8666419213072449202">"Ausinės prijungtos"</string>
-    <string name="data_saver" msgid="5037565123367048522">"Duomenų taupymo priemonė"</string>
+    <string name="data_saver" msgid="5037565123367048522">"Duomenų taupymo pr."</string>
     <string name="accessibility_data_saver_on" msgid="8454111686783887148">"Duomenų taupymo priemonė įjungta"</string>
     <string name="accessibility_data_saver_off" msgid="8841582529453005337">"Duomenų taupymo priemonė išjungta"</string>
     <string name="switch_bar_on" msgid="1142437840752794229">"Įjungta"</string>
