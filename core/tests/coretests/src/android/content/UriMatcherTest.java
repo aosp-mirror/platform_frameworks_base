@@ -14,13 +14,16 @@
  * limitations under the License.
  */
 
-package android.net;
+package android.content;
 
-import android.content.UriMatcher;
 import android.net.Uri;
 import android.test.suitebuilder.annotation.SmallTest;
 
 import junit.framework.TestCase;
+
+import java.lang.reflect.Field;
+import java.util.ArrayList;
+
 
 public class UriMatcherTest extends TestCase {
 
@@ -101,6 +104,59 @@ public class UriMatcherTest extends TestCase {
         matcher.addURI("filter-recent", null, FILTERRECENT);
         matcher.addURI("auth", "/another/path/segment", ANOTHER_PATH_SEGMENT);
         checkAll(matcher);
+    }
+
+    /**
+     * Tests that different {@link UriMatcher}s for {@code "#"} use the same
+     * instance of the String {@code "#"}.
+     */
+    @SmallTest
+    public void testTextCreatesNoDuplicateStrings() throws Exception {
+        // Change the visibility of fields so that they can be tested without
+        // making it non-private.
+        Field textField = UriMatcher.class.getDeclaredField("mText");
+        textField.setAccessible(true);
+
+        UriMatcher matcher = new UriMatcher(ROOT);
+        matcher.addURI("authority", "people/#", PEOPLE_ID);
+        matcher.addURI("authority", "calls/#", CALLS_ID);
+
+        UriMatcher authorityChild = getOnlyChild(matcher);
+        ArrayList<UriMatcher> mChildren = getChildren(authorityChild);
+        UriMatcher peopleChild = mChildren.get(0);
+        UriMatcher callsChild = mChildren.get(1);
+        assertEquals("people", textField.get(peopleChild));
+        assertEquals("calls", textField.get(callsChild));
+        UriMatcher peopleSharp = getOnlyChild(peopleChild);
+        UriMatcher callsSharp = getOnlyChild(callsChild);
+        assertTrue("There should be only one instance of String `#` but `"
+                + textField.get(peopleSharp) + "` is not `"
+                + textField.get(callsSharp) + "`",
+                textField.get(peopleSharp) == textField.get(callsSharp));
+    }
+
+    /**
+     * Returns {@link UriMatcher#mChildren}.
+     */
+    private ArrayList<UriMatcher> getChildren(UriMatcher matcher)
+            throws IllegalAccessException, NoSuchFieldException {
+        // Change the visibility of fields so that they can be tested without
+        // making it non-private.
+        Field childrenField = UriMatcher.class.getDeclaredField("mChildren");
+        childrenField.setAccessible(true);
+        return (ArrayList<UriMatcher>) childrenField.get(matcher);
+
+    }
+
+    /**
+     * Returns the only element of {@link UriMatcher#mChildren}.
+     */
+    private UriMatcher getOnlyChild(UriMatcher matcher)
+            throws IllegalAccessException, NoSuchFieldException {
+        ArrayList<UriMatcher> children = getChildren(matcher);
+        assertEquals("There should be one child for " + matcher,
+                1, children.size());
+        return children.get(0);
     }
 
     private void checkAll(UriMatcher matcher) {
