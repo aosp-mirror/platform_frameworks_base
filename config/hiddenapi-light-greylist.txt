@@ -136,6 +136,7 @@ Landroid/app/ActivityThread$ServiceArgsData;->args:Landroid/content/Intent;
 Landroid/app/ActivityThread$ServiceArgsData;->token:Landroid/os/IBinder;
 Landroid/app/ActivityThread;->sPackageManager:Landroid/content/pm/IPackageManager;
 Landroid/app/ActivityThread;->startActivityNow(Landroid/app/Activity;Ljava/lang/String;Landroid/content/Intent;Landroid/content/pm/ActivityInfo;Landroid/os/IBinder;Landroid/os/Bundle;Landroid/app/Activity$NonConfigurationInstances;)Landroid/app/Activity;
+Landroid/app/admin/DevicePolicyManager;->getMandatoryBackupTransport()Landroid/content/ComponentName;
 Landroid/app/admin/DevicePolicyManager;->getProfileOwnerAsUser(I)Landroid/content/ComponentName;
 Landroid/app/admin/DevicePolicyManager;->getTrustAgentConfiguration(Landroid/content/ComponentName;Landroid/content/ComponentName;I)Ljava/util/List;
 Landroid/app/admin/DevicePolicyManager;->packageHasActiveAdmins(Ljava/lang/String;I)Z
