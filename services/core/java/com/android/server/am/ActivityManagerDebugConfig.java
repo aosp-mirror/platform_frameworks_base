@@ -94,6 +94,7 @@ class ActivityManagerDebugConfig {
     static final boolean DEBUG_USAGE_STATS = DEBUG_ALL || false;
     static final boolean DEBUG_PERMISSIONS_REVIEW = DEBUG_ALL || false;
     static final boolean DEBUG_WHITELISTS = DEBUG_ALL || false;
+    static final boolean DEBUG_METRICS = DEBUG_ALL || false;
 
     static final String POSTFIX_ADD_REMOVE = (APPEND_CATEGORY_NAME) ? "_AddRemove" : "";
     static final String POSTFIX_APP = (APPEND_CATEGORY_NAME) ? "_App" : "";
