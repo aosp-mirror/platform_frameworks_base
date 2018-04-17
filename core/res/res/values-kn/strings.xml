@@ -1879,6 +1879,5 @@
     <string name="zen_upgrade_notification_content" msgid="1794994264692424562">"ಏನನ್ನು ನಿರ್ಬಂಧಿಸಲಾಗಿದೆ ಎಂಬುದನ್ನು ಪರೀಕ್ಷಿಸಲು ಟ್ಯಾಪ್ ಮಾಡಿ."</string>
     <string name="notification_app_name_system" msgid="4205032194610042794">"ಸಿಸ್ಟಂ"</string>
     <string name="notification_app_name_settings" msgid="7751445616365753381">"ಸೆಟ್ಟಿಂಗ್‌ಗಳು"</string>
-    <!-- no translation found for car_loading_profile (3545132581795684027) -->
-    <skip />
+    <string name="car_loading_profile" msgid="3545132581795684027">"ಲೋಡ್ ಆಗುತ್ತಿದೆ"</string>
 </resources>

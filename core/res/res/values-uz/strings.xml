@@ -1072,7 +1072,7 @@
     <string name="aerr_application_repeated" msgid="3146328699537439573">"<xliff:g id="APPLICATION">%1$s</xliff:g> yana ishdan chiqdi"</string>
     <string name="aerr_process_repeated" msgid="6235302956890402259">"<xliff:g id="PROCESS">%1$s</xliff:g> yana ishdan chiqdi"</string>
     <string name="aerr_restart" msgid="7581308074153624475">"Ilovani qayta ochish"</string>
-    <string name="aerr_report" msgid="5371800241488400617">"Fikr-mulohaza yuborish"</string>
+    <string name="aerr_report" msgid="5371800241488400617">"Fikr-mulohaza"</string>
     <string name="aerr_close" msgid="2991640326563991340">"Yopish"</string>
     <string name="aerr_mute" msgid="1974781923723235953">"Qurilma o‘chib yonguncha e’tiborsiz qoldirish"</string>
     <string name="aerr_wait" msgid="3199956902437040261">"Kutish"</string>
@@ -1876,6 +1876,5 @@
     <string name="zen_upgrade_notification_content" msgid="1794994264692424562">"Nimalar bloklanganini tekshirish uchun bosing"</string>
     <string name="notification_app_name_system" msgid="4205032194610042794">"Tizim"</string>
     <string name="notification_app_name_settings" msgid="7751445616365753381">"Sozlamalar"</string>
-    <!-- no translation found for car_loading_profile (3545132581795684027) -->
-    <skip />
+    <string name="car_loading_profile" msgid="3545132581795684027">"Yuklanmoqda"</string>
 </resources>

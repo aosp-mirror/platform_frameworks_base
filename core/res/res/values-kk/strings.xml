@@ -297,17 +297,17 @@
     <string name="permgrouplab_sensors" msgid="416037179223226722">"Дене датчиктері"</string>
     <string name="permgroupdesc_sensors" msgid="7147968539346634043">"ағза күйінің көрсеткіштері туралы сенсор деректеріне қатынасу"</string>
     <string name="permgrouprequest_sensors" msgid="6349806962814556786">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; қолданбасына негізгі физиологиялық көрсеткіштерді көрсететін сенсорлық деректерді пайдалануға рұқсат берілсін бе?"</string>
-    <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"Терезе мазмұнын оқып отыру."</string>
+    <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"Терезе мазмұнын оқып отыру"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"Ашық тұрған терезе мазмұнын тексеру."</string>
-    <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"Түртілген элементтерді дыбыстау функциясын қосу"</string>
+    <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"Explore by Touch функциясын қосу"</string>
     <string name="capability_desc_canRequestTouchExploration" msgid="7543249041581408313">"Түртілген элементтер дауыстап айтылады және экранды қимылдар арқылы зерттеуге болады."</string>
     <string name="capability_title_canRequestFilterKeyEvents" msgid="2103440391902412174">"Терілген мәтінді тексеру"</string>
-    <string name="capability_desc_canRequestFilterKeyEvents" msgid="7463135292204152818">"Кредит карта нөмірі және кілтсөздер сияқты жеке деректерді қоса."</string>
+    <string name="capability_desc_canRequestFilterKeyEvents" msgid="7463135292204152818">"Несиелік карта нөмірі және құпия сөздер сияқты жеке деректі қоса."</string>
     <string name="capability_title_canControlMagnification" msgid="3593493281059424855">"Дисплей ұлғайтуды басқару"</string>
     <string name="capability_desc_canControlMagnification" msgid="4791858203568383773">"Дисплейдің масштабтау деңгейін және орналастыруды басқару."</string>
     <string name="capability_title_canPerformGestures" msgid="7418984730362576862">"Қимылдарды орындау"</string>
     <string name="capability_desc_canPerformGestures" msgid="8296373021636981249">"Түртуге, сырғытуға, қысуға және басқа қимылдарды орындауға болады."</string>
-    <string name="capability_title_canCaptureFingerprintGestures" msgid="6309568287512278670">"Саусақ ізі датчигіндегі қимылдар"</string>
+    <string name="capability_title_canCaptureFingerprintGestures" msgid="6309568287512278670">"Саусақ ізі сканеріндегі қимылдар"</string>
     <string name="capability_desc_canCaptureFingerprintGestures" msgid="4386487962402228670">"Құрылғының саусақ ізі сенсорында орындалған қимылдарды сақтайды."</string>
     <string name="permlab_statusBar" msgid="7417192629601890791">"күйін көрсету тақтасын өшіру немесе өзгерту"</string>
     <string name="permdesc_statusBar" msgid="8434669549504290975">"Қолданбаға күй жолағын өшіруге немесе жүйелік белгішелерді қосуға және жоюға рұқсат береді."</string>
@@ -889,9 +889,9 @@
     <string name="searchview_description_clear" msgid="1330281990951833033">"Сұрақты өшіру"</string>
     <string name="searchview_description_submit" msgid="2688450133297983542">"Сұрақ жіберу"</string>
     <string name="searchview_description_voice" msgid="2453203695674994440">"Дауыс арқылы іздеу"</string>
-    <string name="enable_explore_by_touch_warning_title" msgid="7460694070309730149">"Сенсор арқылы шолу функциясы қосылсын ба?"</string>
-    <string name="enable_explore_by_touch_warning_message" product="tablet" msgid="8655887539089910577">"<xliff:g id="ACCESSIBILITY_SERVICE_NAME">%1$s</xliff:g> Сенсор арқылы шолу функциясын іске қосуды қалайды. Сенсор арқылы шолу функциясы қосылғанда саусақ астындағы нысан сипаттарын естуге немесе көруге болады немесе планшетпен қатынасу қимылдарын орындауға болады."</string>
-    <string name="enable_explore_by_touch_warning_message" product="default" msgid="2708199672852373195">"<xliff:g id="ACCESSIBILITY_SERVICE_NAME">%1$s</xliff:g> Сенсор арқылы шолу функциясын іске қосуды қалайды. Сенсор арқылы шолу функциясы қосылғанда саусақ астындағы нысан сипаттарын естуге немесе көруге болады немесе телефонмен қатынасу қимылдарын орындауға болады."</string>
+    <string name="enable_explore_by_touch_warning_title" msgid="7460694070309730149">"Explore by Touch функциясы қосылсын ба?"</string>
+    <string name="enable_explore_by_touch_warning_message" product="tablet" msgid="8655887539089910577">"<xliff:g id="ACCESSIBILITY_SERVICE_NAME">%1$s</xliff:g> қызметі Explore by Touch мүмкіндігін қосқысы келеді. Explore by Touch мүмкіндігі қосылған кезде, саусағыңыздың астындағы нәрсенің сипаттамаларын естисіз не көресіз немесе планшетпен өзара байланысу үшін қимылдайсыз."</string>
+    <string name="enable_explore_by_touch_warning_message" product="default" msgid="2708199672852373195">"<xliff:g id="ACCESSIBILITY_SERVICE_NAME">%1$s</xliff:g> қызметі Explore by Touch мүмкіндігін қосқысы келеді. Explore by Touch мүмкіндігі қосылған кезде, саусағыңыздың астындағы нәрсенің сипаттамаларын естисіз не көресіз немесе телефонмен өзара байланысу үшін қимылдайсыз."</string>
     <string name="oneMonthDurationPast" msgid="7396384508953779925">"1 ай бұрын"</string>
     <string name="beforeOneMonthDurationPast" msgid="909134546836499826">"Осыған дейін 1 ай бұрын"</string>
     <plurals name="last_num_days" formatted="false" msgid="5104533550723932025">
@@ -1554,7 +1554,7 @@
     <string name="disable_accessibility_shortcut" msgid="627625354248453445">"Төте жолды өшіру"</string>
     <string name="leave_accessibility_shortcut_on" msgid="7653111894438512680">"Төте жолды пайдалану"</string>
     <string name="color_inversion_feature_name" msgid="4231186527799958644">"Түстер инверсиясы"</string>
-    <string name="color_correction_feature_name" msgid="6779391426096954933">"Түс жөндеу"</string>
+    <string name="color_correction_feature_name" msgid="6779391426096954933">"Түсті түзету"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="7771852911861522636">"Арнайы мүмкіндіктер таңбашасы <xliff:g id="SERVICE_NAME">%1$s</xliff:g> қызметін қосты"</string>
     <string name="accessibility_shortcut_disabling_service" msgid="2747243438223109821">"Арнайы мүмкіндіктер таңбашасы <xliff:g id="SERVICE_NAME">%1$s</xliff:g> қызметін өшірді"</string>
     <string name="accessibility_button_prompt_text" msgid="4234556536456854251">"\"Арнайы мүмкіндіктер\" түймесін түрткенде пайдаланатын мүмкіндікті таңдаңыз:"</string>
@@ -1692,7 +1692,7 @@
     <string name="package_updated_device_owner" msgid="1847154566357862089">"Әкімші жаңартқан"</string>
     <string name="package_deleted_device_owner" msgid="2307122077550236438">"Әкімші жойған"</string>
     <string name="battery_saver_description" msgid="769989536172631582">"Батарея жұмысының ұзақтығын арттыру үшін Battery Saver функциясы кейбір құрылғы мүмкіндіктерін өшіреді және қолданбаларды шектейді."</string>
-    <string name="data_saver_description" msgid="6015391409098303235">"Деректердің пайдаланылуын азайту үшін Трафикті үнемдеу функциясы кейбір қолданбаларға деректерді фондық режимде жіберуге немесе қабылдауға жол бермейді. Қазір қолданылып жатқан қолданба деректерді пайдалануы мүмкін, бірақ жиі емес. Мысалы, кескіндер оларды түрткенге дейін көрсетілмейді."</string>
+    <string name="data_saver_description" msgid="6015391409098303235">"Деректердің пайдаланылуын азайту үшін Data Saver функциясы кейбір қолданбаларға деректерді фондық режимде жіберуге немесе қабылдауға жол бермейді. Қазір қолданылып жатқан қолданба деректерді пайдаланады, бірақ шектеулі шамада (мысалы, кескіндер оларды түрткенге дейін көрсетілмейді)."</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"Data Saver функциясын қосу керек пе?"</string>
     <string name="data_saver_enable_button" msgid="7147735965247211818">"Қосу"</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="4367877408072000848">
@@ -1778,12 +1778,9 @@
     <string name="language_picker_section_all" msgid="3097279199511617537">"Барлық тілдер"</string>
     <string name="region_picker_section_all" msgid="8966316787153001779">"Барлық аймақтар"</string>
     <string name="locale_search_menu" msgid="2560710726687249178">"Іздеу"</string>
-    <!-- no translation found for app_suspended_title (1919029799438164552) -->
-    <skip />
-    <!-- no translation found for app_suspended_default_message (7875306315686531621) -->
-    <skip />
-    <!-- no translation found for app_suspended_more_details (1131804827776778187) -->
-    <skip />
+    <string name="app_suspended_title" msgid="1919029799438164552">"Қолданбаны ашу мүмкін емес"</string>
+    <string name="app_suspended_default_message" msgid="7875306315686531621">"<xliff:g id="APP_NAME_0">%1$s</xliff:g> қолданбасы дәл қазір қолжетімді емес. Оны <xliff:g id="APP_NAME_1">%2$s</xliff:g> қолданбасы басқарады."</string>
+    <string name="app_suspended_more_details" msgid="1131804827776778187">"Толығырақ"</string>
     <string name="work_mode_off_title" msgid="1118691887588435530">"Жұмыс профилі қосылсын ба?"</string>
     <string name="work_mode_off_message" msgid="5130856710614337649">"Жұмыс қолданбалары, хабарландырулар, деректер және басқа да жұмыс профильдерінің мүмкіндіктері қосылады"</string>
     <string name="work_mode_turn_on" msgid="2062544985670564875">"Қосу"</string>
@@ -1879,6 +1876,5 @@
     <string name="zen_upgrade_notification_content" msgid="1794994264692424562">"Түймені түртіп, неге тыйым салынатынын көріңіз."</string>
     <string name="notification_app_name_system" msgid="4205032194610042794">"Жүйе"</string>
     <string name="notification_app_name_settings" msgid="7751445616365753381">"Параметрлер"</string>
-    <!-- no translation found for car_loading_profile (3545132581795684027) -->
-    <skip />
+    <string name="car_loading_profile" msgid="3545132581795684027">"Жүктелуде"</string>
 </resources>

@@ -298,13 +298,13 @@
     <string name="permgroupdesc_sensors" msgid="7147968539346634043">"accéder aux données des capteurs relatives à vos signes vitaux"</string>
     <string name="permgrouprequest_sensors" msgid="6349806962814556786">"Permettre à &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; d\'accéder aux données des capteurs relatives à vos signes vitaux ?"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"Récupérer le contenu d\'une fenêtre"</string>
-    <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"Inspecter le contenu d\'une fenêtre avec laquelle vous interagissez"</string>
+    <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"Inspecte le contenu d\'une fenêtre avec laquelle vous interagissez."</string>
     <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"Activer la fonctionnalité Explorer au toucher"</string>
     <string name="capability_desc_canRequestTouchExploration" msgid="7543249041581408313">"Les éléments sélectionnés sont énoncés à voix haute. Vous pouvez explorer l\'écran à l\'aide de gestes."</string>
     <string name="capability_title_canRequestFilterKeyEvents" msgid="2103440391902412174">"Observer le texte que vous saisissez"</string>
     <string name="capability_desc_canRequestFilterKeyEvents" msgid="7463135292204152818">"Inclut des données personnelles telles que les numéros de cartes de paiement et les mots de passe."</string>
     <string name="capability_title_canControlMagnification" msgid="3593493281059424855">"Contrôler l\'agrandissement de l\'écran"</string>
-    <string name="capability_desc_canControlMagnification" msgid="4791858203568383773">"Contrôler le niveau de zoom et le positionnement de l\'écran"</string>
+    <string name="capability_desc_canControlMagnification" msgid="4791858203568383773">"Contrôle le niveau de zoom et le positionnement de l\'écran."</string>
     <string name="capability_title_canPerformGestures" msgid="7418984730362576862">"Effectuer des gestes"</string>
     <string name="capability_desc_canPerformGestures" msgid="8296373021636981249">"Permet d\'appuyer sur l\'écran, de le balayer, de le pincer et d\'effectuer d\'autres gestes."</string>
     <string name="capability_title_canCaptureFingerprintGestures" msgid="6309568287512278670">"Gestes avec l\'empreinte digitale"</string>
@@ -1777,12 +1777,9 @@
     <string name="language_picker_section_all" msgid="3097279199511617537">"Toutes les langues"</string>
     <string name="region_picker_section_all" msgid="8966316787153001779">"Toutes les régions"</string>
     <string name="locale_search_menu" msgid="2560710726687249178">"Rechercher"</string>
-    <!-- no translation found for app_suspended_title (1919029799438164552) -->
-    <skip />
-    <!-- no translation found for app_suspended_default_message (7875306315686531621) -->
-    <skip />
-    <!-- no translation found for app_suspended_more_details (1131804827776778187) -->
-    <skip />
+    <string name="app_suspended_title" msgid="1919029799438164552">"Impossible d\'ouvrir l\'appli"</string>
+    <string name="app_suspended_default_message" msgid="7875306315686531621">"L\'application <xliff:g id="APP_NAME_0">%1$s</xliff:g> n\'est pas disponible pour le moment. Cette suspension est gérée par l\'application <xliff:g id="APP_NAME_1">%2$s</xliff:g>."</string>
+    <string name="app_suspended_more_details" msgid="1131804827776778187">"En savoir plus"</string>
     <string name="work_mode_off_title" msgid="1118691887588435530">"Activer profil professionnel ?"</string>
     <string name="work_mode_off_message" msgid="5130856710614337649">"Vos applications professionnelles, notifications, données et d\'autres fonctionnalités de votre profil professionnel seront activées"</string>
     <string name="work_mode_turn_on" msgid="2062544985670564875">"Activer"</string>

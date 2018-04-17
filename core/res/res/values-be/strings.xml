@@ -306,7 +306,7 @@
     <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"Атрымліваць змесціва вакна"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"Аналізаваць змесціва актыўнага вакна."</string>
     <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"Уключаць Азнаямленне дотыкам"</string>
-    <string name="capability_desc_canRequestTouchExploration" msgid="7543249041581408313">"Элементы, да якіх дакрануліся, будуць агучаны, а экранам можна даследаваць пры дапамозе жэстаў."</string>
+    <string name="capability_desc_canRequestTouchExploration" msgid="7543249041581408313">"Агучваць элементы пры націсканні і дазволіць кіраванне прыладай з дапамогай жэстаў."</string>
     <string name="capability_title_canRequestFilterKeyEvents" msgid="2103440391902412174">"Праглядаць тэкст, які вы набіраеце"</string>
     <string name="capability_desc_canRequestFilterKeyEvents" msgid="7463135292204152818">"У тым ліку асабістыя даныя, такія як нумары крэдытных карт і паролі."</string>
     <string name="capability_title_canControlMagnification" msgid="3593493281059424855">"Кіраваць павелічэннем дысплэя"</string>
@@ -1845,12 +1845,9 @@
     <string name="language_picker_section_all" msgid="3097279199511617537">"Усе мовы"</string>
     <string name="region_picker_section_all" msgid="8966316787153001779">"Усе рэгіёны"</string>
     <string name="locale_search_menu" msgid="2560710726687249178">"Шукаць"</string>
-    <!-- no translation found for app_suspended_title (1919029799438164552) -->
-    <skip />
-    <!-- no translation found for app_suspended_default_message (7875306315686531621) -->
-    <skip />
-    <!-- no translation found for app_suspended_more_details (1131804827776778187) -->
-    <skip />
+    <string name="app_suspended_title" msgid="1919029799438164552">"Не ўдалося запусціць праграму"</string>
+    <string name="app_suspended_default_message" msgid="7875306315686531621">"Праграма \"<xliff:g id="APP_NAME_0">%1$s</xliff:g>\" цяпер недаступная. Яна кіруецца праграмай \"<xliff:g id="APP_NAME_1">%2$s</xliff:g>\"."</string>
+    <string name="app_suspended_more_details" msgid="1131804827776778187">"Даведацца больш"</string>
     <string name="work_mode_off_title" msgid="1118691887588435530">"Уключыць працоўны профіль?"</string>
     <string name="work_mode_off_message" msgid="5130856710614337649">"Будуць уключаны вашы рабочыя праграмы, апавяшчэнні, даныя і іншыя функцыі працоўнага профілю"</string>
     <string name="work_mode_turn_on" msgid="2062544985670564875">"Уключыць"</string>

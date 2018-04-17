@@ -298,12 +298,12 @@
     <string name="permgroupdesc_sensors" msgid="7147968539346634043">"உங்கள் உடல் இயக்கம் பற்றி உணர்விகள் கூறும் தகவலைப் பார்க்கலாம்"</string>
     <string name="permgrouprequest_sensors" msgid="6349806962814556786">"உங்கள் உடலியக்கக் குறிகள் பற்றிய சென்சார் தரவை அணுகுவதற்கு &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; பயன்பாட்டை அனுமதிக்கவா?"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"சாளர உள்ளடக்கத்தைப் பெறும்"</string>
-    <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"நீங்கள் பணியாற்றி கொண்டிருக்கும் சாளரத்தின் உள்ளடக்கத்தைப் பார்க்கலாம்."</string>
+    <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"நீங்கள் பணியாற்றிக் கொண்டிருக்கும் சாளரத்தின் உள்ளடக்கத்தைப் பார்க்கலாம்."</string>
     <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"தொடுவதன் மூலம் அறிவதை இயக்கும்"</string>
-    <string name="capability_desc_canRequestTouchExploration" msgid="7543249041581408313">"தட்டிய உருப்படிகள் சத்தமாகப் படிக்கப்படும், சைகைகளைப் பயன்படுத்தி திரையில் உலாவலாம்."</string>
+    <string name="capability_desc_canRequestTouchExploration" msgid="7543249041581408313">"தட்டிய உள்ளடக்கம் சத்தமாகப் படிக்கப்படும், சைகைகளைப் பயன்படுத்தி திரையில் உலாவலாம்."</string>
     <string name="capability_title_canRequestFilterKeyEvents" msgid="2103440391902412174">"நீங்கள் தட்டச்சு செய்யும் உரையைக் கவனிக்கும்"</string>
     <string name="capability_desc_canRequestFilterKeyEvents" msgid="7463135292204152818">"கிரெடிட் கார்டு எண்கள் மற்றும் கடவுச்சொற்கள் போன்ற தனிப்பட்ட தகவலும் உள்ளடங்கும்."</string>
-    <string name="capability_title_canControlMagnification" msgid="3593493281059424855">"திரையின் உருப்பெருக்கத்தைக் கட்டுப்படுத்துதல்"</string>
+    <string name="capability_title_canControlMagnification" msgid="3593493281059424855">"திரை பெரிதாவதைக் கட்டுப்படுத்தும்"</string>
     <string name="capability_desc_canControlMagnification" msgid="4791858203568383773">"திரையின் ஜூம் அளவையும் நிலையையும் கட்டுப்படுத்தலாம்."</string>
     <string name="capability_title_canPerformGestures" msgid="7418984730362576862">"சைகைகளைச் செயல்படுத்துதல்"</string>
     <string name="capability_desc_canPerformGestures" msgid="8296373021636981249">"தட்டலாம், ஸ்வைப் செய்யலாம், பின்ச் செய்யலாம் மற்றும் பிற சைகைகளைச் செயல்படுத்தலாம்."</string>
