@@ -81,36 +81,44 @@ public:
     /**
      * Binder call for clients to request data for this configuration key.
      */
-    virtual Status getData(int64_t key, vector<uint8_t>* output) override;
+    virtual Status getData(int64_t key,
+                           const String16& packageName,
+                           vector<uint8_t>* output) override;
 
 
     /**
      * Binder call for clients to get metadata across all configs in statsd.
      */
-    virtual Status getMetadata(vector<uint8_t>* output) override;
+    virtual Status getMetadata(const String16& packageName,
+                               vector<uint8_t>* output) override;
 
 
     /**
      * Binder call to let clients send a configuration and indicate they're interested when they
      * should requestData for this configuration.
      */
-    virtual Status addConfiguration(int64_t key, const vector<uint8_t>& config) override;
+    virtual Status addConfiguration(int64_t key,
+                                    const vector<uint8_t>& config,
+                                    const String16& packageName) override;
 
     /**
      * Binder call to let clients register the data fetch operation for a configuration.
      */
     virtual Status setDataFetchOperation(int64_t key,
-                                         const sp<android::IBinder>& intentSender) override;
+                                         const sp<android::IBinder>& intentSender,
+                                         const String16& packageName) override;
 
     /**
      * Binder call to remove the data fetch operation for the specified config key.
      */
-    virtual Status removeDataFetchOperation(int64_t key) override;
+    virtual Status removeDataFetchOperation(int64_t key,
+                                            const String16& packageName) override;
 
     /**
      * Binder call to allow clients to remove the specified configuration.
      */
-    virtual Status removeConfiguration(int64_t key) override;
+    virtual Status removeConfiguration(int64_t key,
+                                       const String16& packageName) override;
 
     /**
      * Binder call to associate the given config's subscriberId with the given intentSender.
@@ -118,12 +126,15 @@ public:
      */
     virtual Status setBroadcastSubscriber(int64_t configId,
                                           int64_t subscriberId,
-                                          const sp<android::IBinder>& intentSender) override;
+                                          const sp<android::IBinder>& intentSender,
+                                          const String16& packageName) override;
 
     /**
      * Binder call to unassociate the given config's subscriberId with any intentSender.
      */
-    virtual Status unsetBroadcastSubscriber(int64_t configId, int64_t subscriberId) override;
+    virtual Status unsetBroadcastSubscriber(int64_t configId,
+                                            int64_t subscriberId,
+                                            const String16& packageName) override;
 
     /** Inform statsCompanion that statsd is ready. */
     virtual void sayHiToStatsCompanion();
