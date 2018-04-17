@@ -16,7 +16,7 @@
 
 package com.android.systemui.statusbar.notification;
 
-import android.support.v4.util.ArraySet;
+import androidx.collection.ArraySet;
 import android.view.View;
 
 import com.android.systemui.statusbar.ExpandableNotificationRow;

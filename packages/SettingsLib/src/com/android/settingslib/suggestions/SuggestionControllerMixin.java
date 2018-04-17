@@ -17,13 +17,13 @@
 package com.android.settingslib.suggestions;
 
 import android.app.LoaderManager;
-import android.arch.lifecycle.OnLifecycleEvent;
+import androidx.lifecycle.OnLifecycleEvent;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Loader;
 import android.os.Bundle;
 import android.service.settings.suggestions.Suggestion;
-import android.support.annotation.Nullable;
+import androidx.annotation.Nullable;
 import android.util.Log;
 
 import com.android.settingslib.core.lifecycle.Lifecycle;
@@ -34,7 +34,7 @@ import java.util.List;
  * Manages IPC communication to SettingsIntelligence for suggestion related services.
  */
 public class SuggestionControllerMixin implements SuggestionController.ServiceConnectionListener,
-        android.arch.lifecycle.LifecycleObserver, LoaderManager.LoaderCallbacks<List<Suggestion>> {
+        androidx.lifecycle.LifecycleObserver, LoaderManager.LoaderCallbacks<List<Suggestion>> {
 
     public interface SuggestionControllerHost {
         /**

@@ -14,15 +14,15 @@
 #
 
 LOCAL_STATIC_JAVA_LIBRARIES += \
-    android-support-annotations \
-    android-arch-lifecycle-common
+    androidx.annotation_annotation \
+    androidx.lifecycle_lifecycle-common
 
 LOCAL_STATIC_ANDROID_LIBRARIES += \
-    android-support-v4 \
-    android-arch-lifecycle-runtime \
-    android-support-v7-recyclerview \
-    android-support-v7-preference \
-    android-support-v7-appcompat \
-    android-support-v14-preference \
+    androidx.legacy_legacy-support-v4 \
+    androidx.lifecycle_lifecycle-runtime \
+    androidx.recyclerview_recyclerview \
+    androidx.preference_preference \
+    androidx.appcompat_appcompat \
+    androidx.legacy_legacy-preference-v14 \
     SettingsLib
 
