@@ -244,6 +244,9 @@ status_t StatsService::onTransact(uint32_t code, const Parcel& data, Parcel* rep
  * Write debugging data about statsd.
  */
 status_t StatsService::dump(int fd, const Vector<String16>& args) {
+    if (!checkCallingPermission(String16(kPermissionDump))) {
+        return PERMISSION_DENIED;
+    }
     FILE* out = fdopen(fd, "w");
     if (out == NULL) {
         return NO_MEMORY;  // the fd is already open
