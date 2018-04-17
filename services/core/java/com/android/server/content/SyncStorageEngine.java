@@ -108,11 +108,12 @@ public class SyncStorageEngine {
     /** Enum value for a sync stop event. */
     public static final int EVENT_STOP = 1;
 
-    /** Enum value for a server-initiated sync. */
-    public static final int SOURCE_SERVER = 0;
+    /** Enum value for a sync with other sources. */
+    public static final int SOURCE_OTHER = 0;
 
     /** Enum value for a local-initiated sync. */
     public static final int SOURCE_LOCAL = 1;
+
     /** Enum value for a poll-based sync (e.g., upon connection to network) */
     public static final int SOURCE_POLL = 2;
 
@@ -122,16 +123,18 @@ public class SyncStorageEngine {
     /** Enum value for a periodic sync. */
     public static final int SOURCE_PERIODIC = 4;
 
+    /** Enum a sync with a "feed" extra */
+    public static final int SOURCE_FEED = 5;
+
     public static final long NOT_IN_BACKOFF_MODE = -1;
 
-    // TODO: i18n -- grab these out of resources.
     /** String names for the sync source types. */
-    public static final String[] SOURCES = { "SERVER",
+    public static final String[] SOURCES = { "OTHER",
             "LOCAL",
             "POLL",
             "USER",
             "PERIODIC",
-            "SERVICE"};
+            "FEED"};
 
     // The MESG column will contain one of these or one of the Error types.
     public static final String MESG_SUCCESS = "success";
@@ -152,6 +155,8 @@ public class SyncStorageEngine {
 
     private static HashMap<String, String> sAuthorityRenames;
     private static PeriodicSyncAddedListener mPeriodicSyncAddedListener;
+
+    private volatile boolean mIsClockValid;
 
     static {
         sAuthorityRenames = new HashMap<String, String>();
@@ -1174,23 +1179,36 @@ public class SyncStorageEngine {
 
             SyncStatusInfo status = getOrCreateSyncStatusLocked(item.authorityId);
 
-            status.numSyncs++;
-            status.totalElapsedTime += elapsedTime;
+            status.maybeResetTodayStats(isClockValid(), /*force=*/ false);
+
+            status.totalStats.numSyncs++;
+            status.todayStats.numSyncs++;
+            status.totalStats.totalElapsedTime += elapsedTime;
+            status.todayStats.totalElapsedTime += elapsedTime;
             switch (item.source) {
                 case SOURCE_LOCAL:
-                    status.numSourceLocal++;
+                    status.totalStats.numSourceLocal++;
+                    status.todayStats.numSourceLocal++;
                     break;
                 case SOURCE_POLL:
-                    status.numSourcePoll++;
+                    status.totalStats.numSourcePoll++;
+                    status.todayStats.numSourcePoll++;
                     break;
                 case SOURCE_USER:
-                    status.numSourceUser++;
+                    status.totalStats.numSourceUser++;
+                    status.todayStats.numSourceUser++;
                     break;
-                case SOURCE_SERVER:
-                    status.numSourceServer++;
+                case SOURCE_OTHER:
+                    status.totalStats.numSourceOther++;
+                    status.todayStats.numSourceOther++;
                     break;
                 case SOURCE_PERIODIC:
-                    status.numSourcePeriodic++;
+                    status.totalStats.numSourcePeriodic++;
+                    status.todayStats.numSourcePeriodic++;
+                    break;
+                case SOURCE_FEED:
+                    status.totalStats.numSourceFeed++;
+                    status.todayStats.numSourceFeed++;
                     break;
             }
 
@@ -1225,6 +1243,9 @@ public class SyncStorageEngine {
                 if (status.lastFailureTime == 0) {
                     writeStatusNow = true;
                 }
+                status.totalStats.numFailures++;
+                status.todayStats.numFailures++;
+
                 status.lastFailureTime = lastSyncTime;
                 status.lastFailureSource = item.source;
                 status.lastFailureMesg = resultMessage;
@@ -1233,6 +1254,11 @@ public class SyncStorageEngine {
                 }
                 ds.failureCount++;
                 ds.failureTime += elapsedTime;
+            } else {
+                // Cancel
+                status.totalStats.numCancels++;
+                status.todayStats.numCancels++;
+                writeStatusNow = true;
             }
             final StringBuilder event = new StringBuilder();
             event.append("" + resultMessage + " Source=" + SyncStorageEngine.SOURCES[item.source]
@@ -1969,9 +1995,8 @@ public class SyncStorageEngine {
     }
 
     /**
-     * Load sync engine state from the old syncmanager database, and then
-     * erase it.  Note that we don't deal with pending operations, active
-     * sync, or history.
+     * TODO Remove it. It's super old code that was used to migrate the information from a sqlite
+     * database that we used a long time ago, and is no longer relevant.
      */
     private void readAndDeleteLegacyAccountInfoLocked() {
         // Look for old database to initialize from.
@@ -2049,13 +2074,13 @@ public class SyncStorageEngine {
                         st = new SyncStatusInfo(authority.ident);
                         mSyncStatus.put(authority.ident, st);
                     }
-                    st.totalElapsedTime = getLongColumn(c, "totalElapsedTime");
-                    st.numSyncs = getIntColumn(c, "numSyncs");
-                    st.numSourceLocal = getIntColumn(c, "numSourceLocal");
-                    st.numSourcePoll = getIntColumn(c, "numSourcePoll");
-                    st.numSourceServer = getIntColumn(c, "numSourceServer");
-                    st.numSourceUser = getIntColumn(c, "numSourceUser");
-                    st.numSourcePeriodic = 0;
+                    st.totalStats.totalElapsedTime = getLongColumn(c, "totalElapsedTime");
+                    st.totalStats.numSyncs = getIntColumn(c, "numSyncs");
+                    st.totalStats.numSourceLocal = getIntColumn(c, "numSourceLocal");
+                    st.totalStats.numSourcePoll = getIntColumn(c, "numSourcePoll");
+                    st.totalStats.numSourceOther = getIntColumn(c, "numSourceServer");
+                    st.totalStats.numSourceUser = getIntColumn(c, "numSourceUser");
+                    st.totalStats.numSourcePeriodic = 0;
                     st.lastSuccessSource = getIntColumn(c, "lastSuccessSource");
                     st.lastSuccessTime = getLongColumn(c, "lastSuccessTime");
                     st.lastFailureSource = getIntColumn(c, "lastFailureSource");
@@ -2295,5 +2320,30 @@ public class SyncStorageEngine {
      */
     public void queueBackup() {
         BackupManager.dataChanged("android");
+    }
+
+    public void setClockValid() {
+        if (!mIsClockValid) {
+            mIsClockValid = true;
+            Slog.w(TAG, "Clock is valid now.");
+        }
+    }
+
+    public boolean isClockValid() {
+        return mIsClockValid;
+    }
+
+    public void resetTodayStats(boolean force) {
+        if (force) {
+            Log.w(TAG, "Force resetting today stats.");
+        }
+        synchronized (mAuthorities) {
+            final int N = mSyncStatus.size();
+            for (int i = 0; i < N; i++) {
+                SyncStatusInfo cur = mSyncStatus.valueAt(i);
+                cur.maybeResetTodayStats(isClockValid(), force);
+            }
+            writeStatusLocked();
+        }
     }
 }
