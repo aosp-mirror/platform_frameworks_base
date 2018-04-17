@@ -136,6 +136,8 @@ CopyResult SkiaOpenGLReadback::copyImageInto(EGLImageKHR eglImage, const Matrix4
     // make sure that we have deleted the texture (in the SkImage) before we
     // destroy the EGLImage that it was created from
     image.reset();
+    glFinish();
+
     return copyResult;
 }
 

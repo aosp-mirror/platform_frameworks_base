@@ -114,11 +114,7 @@ void RenderNode::prepareTree(TreeInfo& info) {
     LOG_ALWAYS_FATAL_IF(!info.damageAccumulator, "DamageAccumulator missing");
     MarkAndSweepRemoved observer(&info);
 
-    // The OpenGL renderer reserves the stencil buffer for overdraw debugging.  Functors
-    // will need to be drawn in a layer.
-    bool functorsNeedLayer = Properties::debugOverdraw && !Properties::isSkiaEnabled();
-
-    prepareTreeImpl(observer, info, functorsNeedLayer);
+    prepareTreeImpl(observer, info, false);
 }
 
 void RenderNode::addAnimator(const sp<BaseRenderNodeAnimator>& animator) {

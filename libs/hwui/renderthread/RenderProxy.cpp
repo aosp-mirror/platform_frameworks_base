@@ -334,7 +334,7 @@ sk_sp<Bitmap> RenderProxy::allocateHardwareBitmap(SkBitmap& bitmap) {
 
 int RenderProxy::copyGraphicBufferInto(GraphicBuffer* buffer, SkBitmap* bitmap) {
     RenderThread& thread = RenderThread::getInstance();
-    if (Properties::isSkiaEnabled() && gettid() == thread.getTid()) {
+    if (gettid() == thread.getTid()) {
         // TODO: fix everything that hits this. We should never be triggering a readback ourselves.
         return (int)thread.readback().copyGraphicBufferInto(buffer, bitmap);
     } else {

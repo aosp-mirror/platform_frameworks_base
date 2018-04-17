@@ -62,13 +62,7 @@ SkiaCanvas::SkiaCanvas(const SkBitmap& bitmap) {
     mCanvasOwned =
             std::unique_ptr<SkCanvas>(new SkCanvas(bitmap, SkCanvas::ColorBehavior::kLegacy));
     if (cs.get() == nullptr || cs->isSRGB()) {
-        if (!uirenderer::Properties::isSkiaEnabled()) {
-            mCanvasWrapper =
-                    SkCreateColorSpaceXformCanvas(mCanvasOwned.get(), SkColorSpace::MakeSRGB());
-            mCanvas = mCanvasWrapper.get();
-        } else {
-            mCanvas = mCanvasOwned.get();
-        }
+        mCanvas = mCanvasOwned.get();
     } else {
         /** The wrapper is needed if we are drawing into a non-sRGB destination, since
          *  we need to transform all colors (not just bitmaps via filters) into the
@@ -101,8 +95,6 @@ void SkiaCanvas::setBitmap(const SkBitmap& bitmap) {
     std::unique_ptr<SkCanvas> newCanvasWrapper;
     if (cs.get() != nullptr && !cs->isSRGB()) {
         newCanvasWrapper = SkCreateColorSpaceXformCanvas(newCanvas.get(), std::move(cs));
-    } else if (!uirenderer::Properties::isSkiaEnabled()) {
-        newCanvasWrapper = SkCreateColorSpaceXformCanvas(newCanvas.get(), SkColorSpace::MakeSRGB());
     }
 
     // deletes the previously owned canvas (if any)
