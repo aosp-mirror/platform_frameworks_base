@@ -1965,14 +1965,12 @@ public class NotificationPanelView extends PanelView implements
 
     @Override
     public void onClick(View v) {
-        if (v.getId() == R.id.expand_indicator) {
-            onQsExpansionStarted();
-            if (mQsExpanded) {
-                flingSettings(0 /* vel */, false /* expand */, null, true /* isClick */);
-            } else if (mQsExpansionEnabled) {
-                mLockscreenGestureLogger.write(MetricsEvent.ACTION_SHADE_QS_TAP, 0, 0);
-                flingSettings(0 /* vel */, true /* expand */, null, true /* isClick */);
-            }
+        onQsExpansionStarted();
+        if (mQsExpanded) {
+            flingSettings(0 /* vel */, false /* expand */, null, true /* isClick */);
+        } else if (mQsExpansionEnabled) {
+            mLockscreenGestureLogger.write(MetricsEvent.ACTION_SHADE_QS_TAP, 0, 0);
+            flingSettings(0 /* vel */, true /* expand */, null, true /* isClick */);
         }
     }
 
