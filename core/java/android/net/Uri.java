@@ -720,6 +720,10 @@ public abstract class Uri implements Parcelable, Comparable<Uri> {
                 LOOP: while (end < length) {
                     switch (uriString.charAt(end)) {
                         case '/': // Start of path
+                        case '\\':// Start of path
+                          // Per http://url.spec.whatwg.org/#host-state, the \ character
+                          // is treated as if it were a / character when encountered in a
+                          // host
                         case '?': // Start of query
                         case '#': // Start of fragment
                             break LOOP;
@@ -758,6 +762,10 @@ public abstract class Uri implements Parcelable, Comparable<Uri> {
                         case '#': // Start of fragment
                             return ""; // Empty path.
                         case '/': // Start of path!
+                        case '\\':// Start of path!
+                          // Per http://url.spec.whatwg.org/#host-state, the \ character
+                          // is treated as if it were a / character when encountered in a
+                          // host
                             break LOOP;
                     }
                     pathStart++;
