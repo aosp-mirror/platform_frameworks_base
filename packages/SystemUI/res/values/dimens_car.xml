@@ -16,9 +16,6 @@
 */
 -->
 <resources>
-    <dimen name="car_margin">148dp</dimen>
-    <dimen name="car_margin_standard">112dp</dimen>
-
     <!-- TODO replace with car support lib sizes when available -->
     <dimen name="car_fullscreen_user_pod_icon_text_size">64sp</dimen>
     <dimen name="car_fullscreen_user_pod_width">243dp</dimen>
@@ -30,14 +27,6 @@
     <dimen name="car_navigation_bar_width">760dp</dimen>
     <dimen name="car_left_navigation_bar_width">96dp</dimen>
     <dimen name="car_right_navigation_bar_width">96dp</dimen>
-
-    <dimen name="car_page_indicator_dot_diameter">12dp</dimen>
-    <dimen name="car_page_indicator_margin_bottom">24dp</dimen>
-
-    <dimen name="car_start_driving_corner_radius">16dp</dimen>
-    <dimen name="car_start_driving_padding_side">30dp</dimen>
-    <dimen name="car_start_driving_height">80dp</dimen>
-    <dimen name="car_start_driving_text_size">@dimen/car_body2_size</dimen>
 
     <dimen name="car_qs_footer_height">112dp</dimen>
     <dimen name="car_qs_footer_padding_bottom">16dp</dimen>
