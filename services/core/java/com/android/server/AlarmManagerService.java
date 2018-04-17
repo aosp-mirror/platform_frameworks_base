@@ -141,6 +141,13 @@ class AlarmManagerService extends SystemService {
     static final int ALARM_EVENT = 1;
     static final String TIMEZONE_PROPERTY = "persist.sys.timezone";
 
+    // Indices into the APP_STANDBY_MIN_DELAYS and KEYS_APP_STANDBY_DELAY arrays
+    static final int ACTIVE_INDEX = 0;
+    static final int WORKING_INDEX = 1;
+    static final int FREQUENT_INDEX = 2;
+    static final int RARE_INDEX = 3;
+    static final int NEVER_INDEX = 4;
+
     private final Intent mBackgroundIntent
             = new Intent().addFlags(Intent.FLAG_FROM_BACKGROUND);
     static final IncreasingTimeOrder sIncreasingTimeOrder = new IncreasingTimeOrder();
@@ -381,9 +388,10 @@ class AlarmManagerService extends SystemService {
                         DEFAULT_ALLOW_WHILE_IDLE_WHITELIST_DURATION);
                 LISTENER_TIMEOUT = mParser.getLong(KEY_LISTENER_TIMEOUT,
                         DEFAULT_LISTENER_TIMEOUT);
-                APP_STANDBY_MIN_DELAYS[0] = mParser.getDurationMillis(KEYS_APP_STANDBY_DELAY[0],
-                        DEFAULT_APP_STANDBY_DELAYS[0]);
-                for (int i = 1; i < KEYS_APP_STANDBY_DELAY.length; i++) {
+                APP_STANDBY_MIN_DELAYS[ACTIVE_INDEX] = mParser.getDurationMillis(
+                        KEYS_APP_STANDBY_DELAY[ACTIVE_INDEX],
+                        DEFAULT_APP_STANDBY_DELAYS[ACTIVE_INDEX]);
+                for (int i = WORKING_INDEX; i < KEYS_APP_STANDBY_DELAY.length; i++) {
                     APP_STANDBY_MIN_DELAYS[i] = mParser.getDurationMillis(KEYS_APP_STANDBY_DELAY[i],
                             Math.max(APP_STANDBY_MIN_DELAYS[i-1], DEFAULT_APP_STANDBY_DELAYS[i]));
                 }
@@ -1526,22 +1534,24 @@ class AlarmManagerService extends SystemService {
         setImplLocked(a, false, doValidate);
     }
 
+    /**
+     * Return the minimum time that should elapse before an app in the specified bucket
+     * can receive alarms again
+     */
     private long getMinDelayForBucketLocked(int bucket) {
-        // Return the minimum time that should elapse before an app in the specified bucket
-        // can receive alarms again
-        if (bucket == UsageStatsManager.STANDBY_BUCKET_NEVER) {
-            return mConstants.APP_STANDBY_MIN_DELAYS[4];
-        }
-        else if (bucket >= UsageStatsManager.STANDBY_BUCKET_RARE) {
-            return mConstants.APP_STANDBY_MIN_DELAYS[3];
-        }
-        else if (bucket >= UsageStatsManager.STANDBY_BUCKET_FREQUENT) {
-            return mConstants.APP_STANDBY_MIN_DELAYS[2];
-        }
-        else if (bucket >= UsageStatsManager.STANDBY_BUCKET_WORKING_SET) {
-            return mConstants.APP_STANDBY_MIN_DELAYS[1];
-        }
-        else return mConstants.APP_STANDBY_MIN_DELAYS[0];
+        // UsageStats bucket values are treated as floors of their behavioral range.
+        // In other words, a bucket value between WORKING and ACTIVE is treated as
+        // WORKING, not as ACTIVE.  The ACTIVE and NEVER bucket apply only at specific
+        // values.
+        final int index;
+
+        if (bucket == UsageStatsManager.STANDBY_BUCKET_NEVER) index = NEVER_INDEX;
+        else if (bucket > UsageStatsManager.STANDBY_BUCKET_FREQUENT) index = RARE_INDEX;
+        else if (bucket > UsageStatsManager.STANDBY_BUCKET_WORKING_SET) index = FREQUENT_INDEX;
+        else if (bucket > UsageStatsManager.STANDBY_BUCKET_ACTIVE) index = WORKING_INDEX;
+        else index = ACTIVE_INDEX;
+
+        return mConstants.APP_STANDBY_MIN_DELAYS[index];
     }
 
     /**
