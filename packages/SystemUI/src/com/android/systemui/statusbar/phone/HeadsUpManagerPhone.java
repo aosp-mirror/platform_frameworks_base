@@ -24,7 +24,7 @@ import android.content.res.Resources;
 import android.graphics.Rect;
 import android.graphics.Region;
 import android.graphics.Region.Op;
-import android.support.v4.util.ArraySet;
+import androidx.collection.ArraySet;
 import android.util.Log;
 import android.util.Pools;
 import android.view.DisplayCutout;
