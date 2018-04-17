@@ -70,6 +70,7 @@ interface ITelephonyRegistry {
     void notifyVoLteServiceStateChanged(in VoLteServiceState lteState);
     void notifySimActivationStateChangedForPhoneId(in int phoneId, in int subId,
             int activationState, int activationType);
+    void notifyOemHookRawEventForSubscriber(in int subId, in byte[] rawData);
     void notifySubscriptionInfoChanged();
     void notifyCarrierNetworkChange(in boolean active);
     void notifyUserMobileDataStateChangedForPhoneId(in int phoneId, in int subId, in boolean state);
