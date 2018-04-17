@@ -37,7 +37,6 @@ import static android.content.pm.PackageManager.FEATURE_TELEVISION;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 import static android.os.IServiceManager.DUMP_FLAG_PRIORITY_CRITICAL;
 import static android.os.IServiceManager.DUMP_FLAG_PRIORITY_NORMAL;
-import static android.os.UserHandle.USER_ALL;
 import static android.os.UserHandle.USER_NULL;
 import static android.os.UserHandle.USER_SYSTEM;
 import static android.service.notification.NotificationListenerService
@@ -228,7 +227,6 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map.Entry;
@@ -315,7 +313,6 @@ public class NotificationManagerService extends SystemService {
     private ICompanionDeviceManager mCompanionManager;
     private AccessibilityManager mAccessibilityManager;
     private IDeviceIdleController mDeviceIdleController;
-    private IBinder mPermissionOwner;
 
     final IBinder mForegroundToken = new Binder();
     private WorkerHandler mHandler;
@@ -1378,12 +1375,6 @@ public class NotificationManagerService extends SystemService {
         mDeviceIdleController = IDeviceIdleController.Stub.asInterface(
                 ServiceManager.getService(Context.DEVICE_IDLE_CONTROLLER));
         mDpm = dpm;
-
-        try {
-            mPermissionOwner = mAm.newUriPermissionOwner("notification");
-        } catch (RemoteException e) {
-            Slog.w(TAG, "AM dead", e);
-        }
 
         mHandler = new WorkerHandler(looper);
         mRankingThread.start();
@@ -3967,7 +3958,7 @@ public class NotificationManagerService extends SystemService {
             sbn.getNotification().flags =
                     (r.mOriginalFlags & ~Notification.FLAG_FOREGROUND_SERVICE);
             mRankingHelper.sort(mNotificationList);
-            mListeners.notifyPostedLocked(r, sbn /* oldSbn */);
+            mListeners.notifyPostedLocked(r, r);
         }
     };
 
@@ -4433,8 +4424,6 @@ public class NotificationManagerService extends SystemService {
                         // Make sure we don't lose the foreground service state.
                         notification.flags |=
                                 old.getNotification().flags & Notification.FLAG_FOREGROUND_SERVICE;
-                        // revoke uri permissions for changed uris
-                        revokeUriPermissions(r, old);
                         r.isUpdate = true;
                         r.setInterruptive(isVisuallyInterruptive(old, r));
                     }
@@ -4453,7 +4442,7 @@ public class NotificationManagerService extends SystemService {
 
                     if (notification.getSmallIcon() != null) {
                         StatusBarNotification oldSbn = (old != null) ? old.sbn : null;
-                        mListeners.notifyPostedLocked(r, oldSbn);
+                        mListeners.notifyPostedLocked(r, old);
                         if (oldSbn == null || !Objects.equals(oldSbn.getGroup(), n.getGroup())) {
                             mHandler.post(new Runnable() {
                                 @Override
@@ -5306,9 +5295,6 @@ public class NotificationManagerService extends SystemService {
             r.recordDismissalSurface(NotificationStats.DISMISSAL_OTHER);
         }
 
-        // Revoke permissions
-        revokeUriPermissions(null, r);
-
         // tell the app
         if (sendDelete) {
             if (r.getNotification().deleteIntent != null) {
@@ -5406,25 +5392,111 @@ public class NotificationManagerService extends SystemService {
                 r.getLifespanMs(now), r.getFreshnessMs(now), r.getExposureMs(now), listenerName);
     }
 
-    void revokeUriPermissions(NotificationRecord newRecord, NotificationRecord oldRecord) {
-        Set<Uri> oldUris = oldRecord.getNotificationUris();
-        Set<Uri> newUris = newRecord == null ? new HashSet<>() : newRecord.getNotificationUris();
-        oldUris.removeAll(newUris);
+    @VisibleForTesting
+    void updateUriPermissions(@Nullable NotificationRecord newRecord,
+            @Nullable NotificationRecord oldRecord, String targetPkg, int targetUserId) {
+        final String key = (newRecord != null) ? newRecord.getKey() : oldRecord.getKey();
+        if (DBG) Slog.d(TAG, key + ": updating permissions");
 
-        long ident = Binder.clearCallingIdentity();
-        try {
-            for (Uri uri : oldUris) {
-                if (uri != null) {
-                    int notiUserId = oldRecord.getUserId();
-                    int sourceUserId = notiUserId == USER_ALL ? USER_SYSTEM
-                            : ContentProvider.getUserIdFromUri(uri, notiUserId);
-                    uri = ContentProvider.getUriWithoutUserId(uri);
-                    mAm.revokeUriPermissionFromOwner(mPermissionOwner,
-                            uri, Intent.FLAG_GRANT_READ_URI_PERMISSION, sourceUserId);
+        final ArraySet<Uri> newUris = (newRecord != null) ? newRecord.getGrantableUris() : null;
+        final ArraySet<Uri> oldUris = (oldRecord != null) ? oldRecord.getGrantableUris() : null;
+
+        // Shortcut when no Uris involved
+        if (newUris == null && oldUris == null) {
+            return;
+        }
+
+        // Inherit any existing owner
+        IBinder permissionOwner = null;
+        if (newRecord != null && permissionOwner == null) {
+            permissionOwner = newRecord.permissionOwner;
+        }
+        if (oldRecord != null && permissionOwner == null) {
+            permissionOwner = oldRecord.permissionOwner;
+        }
+
+        // If we have Uris to grant, but no owner yet, go create one
+        if (newUris != null && permissionOwner == null) {
+            try {
+                if (DBG) Slog.d(TAG, key + ": creating owner");
+                permissionOwner = mAm.newUriPermissionOwner("NOTIF:" + key);
+            } catch (RemoteException ignored) {
+                // Ignored because we're in same process
+            }
+        }
+
+        // If we have no Uris to grant, but an existing owner, go destroy it
+        if (newUris == null && permissionOwner != null) {
+            final long ident = Binder.clearCallingIdentity();
+            try {
+                if (DBG) Slog.d(TAG, key + ": destroying owner");
+                mAm.revokeUriPermissionFromOwner(permissionOwner, null, ~0,
+                        UserHandle.getUserId(oldRecord.getUid()));
+                permissionOwner = null;
+            } catch (RemoteException ignored) {
+                // Ignored because we're in same process
+            } finally {
+                Binder.restoreCallingIdentity(ident);
+            }
+        }
+
+        // Grant access to new Uris
+        if (newUris != null && permissionOwner != null) {
+            for (int i = 0; i < newUris.size(); i++) {
+                final Uri uri = newUris.valueAt(i);
+                if (oldUris == null || !oldUris.contains(uri)) {
+                    if (DBG) Slog.d(TAG, key + ": granting " + uri);
+                    grantUriPermission(permissionOwner, uri, newRecord.getUid(), targetPkg,
+                            targetUserId);
                 }
             }
-        } catch (RemoteException e) {
-            Log.e(TAG, "Count not revoke uri permissions", e);
+        }
+
+        // Revoke access to old Uris
+        if (oldUris != null && permissionOwner != null) {
+            for (int i = 0; i < oldUris.size(); i++) {
+                final Uri uri = oldUris.valueAt(i);
+                if (newUris == null || !newUris.contains(uri)) {
+                    if (DBG) Slog.d(TAG, key + ": revoking " + uri);
+                    revokeUriPermission(permissionOwner, uri, oldRecord.getUid());
+                }
+            }
+        }
+
+        if (newRecord != null) {
+            newRecord.permissionOwner = permissionOwner;
+        }
+    }
+
+    private void grantUriPermission(IBinder owner, Uri uri, int sourceUid, String targetPkg,
+            int targetUserId) {
+        if (uri == null || !ContentResolver.SCHEME_CONTENT.equals(uri.getScheme())) return;
+
+        final long ident = Binder.clearCallingIdentity();
+        try {
+            mAm.grantUriPermissionFromOwner(owner, sourceUid, targetPkg,
+                    ContentProvider.getUriWithoutUserId(uri),
+                    Intent.FLAG_GRANT_READ_URI_PERMISSION,
+                    ContentProvider.getUserIdFromUri(uri, UserHandle.getUserId(sourceUid)),
+                    targetUserId);
+        } catch (RemoteException ignored) {
+            // Ignored because we're in same process
+        } finally {
+            Binder.restoreCallingIdentity(ident);
+        }
+    }
+
+    private void revokeUriPermission(IBinder owner, Uri uri, int sourceUid) {
+        if (uri == null || !ContentResolver.SCHEME_CONTENT.equals(uri.getScheme())) return;
+
+        final long ident = Binder.clearCallingIdentity();
+        try {
+            mAm.revokeUriPermissionFromOwner(owner,
+                    ContentProvider.getUriWithoutUserId(uri),
+                    Intent.FLAG_GRANT_READ_URI_PERMISSION,
+                    ContentProvider.getUserIdFromUri(uri, UserHandle.getUserId(sourceUid)));
+        } catch (RemoteException ignored) {
+            // Ignored because we're in same process
         } finally {
             Binder.restoreCallingIdentity(ident);
         }
@@ -6317,8 +6389,8 @@ public class NotificationManagerService extends SystemService {
          * but isn't anymore.
          */
         @GuardedBy("mNotificationLock")
-        public void notifyPostedLocked(NotificationRecord r, StatusBarNotification oldSbn) {
-            notifyPostedLocked(r, oldSbn, true);
+        public void notifyPostedLocked(NotificationRecord r, NotificationRecord old) {
+            notifyPostedLocked(r, old, true);
         }
 
         /**
@@ -6326,13 +6398,12 @@ public class NotificationManagerService extends SystemService {
          *                           targetting <= O_MR1
          */
         @GuardedBy("mNotificationLock")
-        private void notifyPostedLocked(NotificationRecord r, StatusBarNotification oldSbn,
+        private void notifyPostedLocked(NotificationRecord r, NotificationRecord old,
                 boolean notifyAllListeners) {
             // Lazily initialized snapshots of the notification.
             StatusBarNotification sbn = r.sbn;
+            StatusBarNotification oldSbn = (old != null) ? old.sbn : null;
             TrimCache trimCache = new TrimCache(sbn);
-
-            Set<Uri> uris = r.getNotificationUris();
 
             for (final ManagedServiceInfo info : getServices()) {
                 boolean sbnVisible = isVisibleToListener(sbn, info);
@@ -6371,38 +6442,18 @@ public class NotificationManagerService extends SystemService {
                     continue;
                 }
 
-                grantUriPermissions(uris, sbn.getUserId(), info.component.getPackageName(),
-                        info.userid);
+                // Grant access before listener is notified
+                final int targetUserId = (info.userid == UserHandle.USER_ALL)
+                        ? UserHandle.USER_SYSTEM : info.userid;
+                updateUriPermissions(r, old, info.component.getPackageName(), targetUserId);
 
-                final StatusBarNotification sbnToPost =  trimCache.ForListener(info);
+                final StatusBarNotification sbnToPost = trimCache.ForListener(info);
                 mHandler.post(new Runnable() {
                     @Override
                     public void run() {
                         notifyPosted(info, sbnToPost, update);
                     }
                 });
-            }
-        }
-
-        private void grantUriPermissions(Set<Uri> uris, int notiUserId, String listenerPkg,
-                int listenerUserId) {
-            long ident = Binder.clearCallingIdentity();
-            try {
-                for (Uri uri : uris) {
-                    if (uri != null) {
-                        int sourceUserId = notiUserId == USER_ALL ? USER_SYSTEM
-                                : ContentProvider.getUserIdFromUri(uri, notiUserId);
-                        uri = ContentProvider.getUriWithoutUserId(uri);
-                        mAm.grantUriPermissionFromOwner(mPermissionOwner, Process.myUid(),
-                                listenerPkg,
-                                uri, Intent.FLAG_GRANT_READ_URI_PERMISSION, sourceUserId,
-                                listenerUserId == USER_ALL ? USER_SYSTEM : listenerUserId);
-                    }
-                }
-            } catch (RemoteException e) {
-                Log.e(TAG, "Count not grant uri permission to " + listenerPkg, e);
-            } finally {
-                Binder.restoreCallingIdentity(ident);
             }
         }
 
@@ -6413,6 +6464,7 @@ public class NotificationManagerService extends SystemService {
         public void notifyRemovedLocked(NotificationRecord r, int reason,
                 NotificationStats notificationStats) {
             final StatusBarNotification sbn = r.sbn;
+
             // make a copy in case changes are made to the underlying Notification object
             // NOTE: this copy is lightweight: it doesn't include heavyweight parts of the
             // notification
@@ -6447,6 +6499,11 @@ public class NotificationManagerService extends SystemService {
                     }
                 });
             }
+
+            // Revoke access after all listeners have been updated
+            mHandler.post(() -> {
+                updateUriPermissions(null, r, null, UserHandle.USER_SYSTEM);
+            });
         }
 
         /**
@@ -6548,7 +6605,7 @@ public class NotificationManagerService extends SystemService {
             int numChangedNotifications = changedNotifications.size();
             for (int i = 0; i < numChangedNotifications; i++) {
                 NotificationRecord rec = changedNotifications.get(i);
-                mListeners.notifyPostedLocked(rec, rec.sbn, false);
+                mListeners.notifyPostedLocked(rec, rec, false);
             }
         }
 
