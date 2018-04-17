@@ -1845,12 +1845,9 @@
     <string name="language_picker_section_all" msgid="3097279199511617537">"Visos kalbos"</string>
     <string name="region_picker_section_all" msgid="8966316787153001779">"Visi regionai"</string>
     <string name="locale_search_menu" msgid="2560710726687249178">"Paieška"</string>
-    <!-- no translation found for app_suspended_title (1919029799438164552) -->
-    <skip />
-    <!-- no translation found for app_suspended_default_message (7875306315686531621) -->
-    <skip />
-    <!-- no translation found for app_suspended_more_details (1131804827776778187) -->
-    <skip />
+    <string name="app_suspended_title" msgid="1919029799438164552">"Nepavyko atidaryti programos"</string>
+    <string name="app_suspended_default_message" msgid="7875306315686531621">"Programa „<xliff:g id="APP_NAME_0">%1$s</xliff:g>“ šiuo metu nepasiekiama. Tai tvarko „<xliff:g id="APP_NAME_1">%2$s</xliff:g>“."</string>
+    <string name="app_suspended_more_details" msgid="1131804827776778187">"Sužinoti daugiau"</string>
     <string name="work_mode_off_title" msgid="1118691887588435530">"Įjungti darbo profilį?"</string>
     <string name="work_mode_off_message" msgid="5130856710614337649">"Darbo programos, pranešimai, duomenys ir kitos darbo profilio funkcijos bus išjungtos"</string>
     <string name="work_mode_turn_on" msgid="2062544985670564875">"Įjungti"</string>

@@ -305,7 +305,7 @@
     <string name="capability_desc_canRequestFilterKeyEvents" msgid="7463135292204152818">"ক্রেডিট কার্ডের নম্বর ও পাসওয়ার্ডগুলির মতো ব্যক্তিগত তথ্য অন্তর্ভুক্ত করে৷"</string>
     <string name="capability_title_canControlMagnification" msgid="3593493281059424855">"প্রদর্শনের বৃহত্তরীকরণ ব্যবস্থা নিয়ন্ত্রণ করুন"</string>
     <string name="capability_desc_canControlMagnification" msgid="4791858203568383773">"প্রদর্শনের জুমের স্তর এবং অবস্থান নির্ধারন নিয়ন্ত্রণ করুন৷"</string>
-    <string name="capability_title_canPerformGestures" msgid="7418984730362576862">"অঙ্গভঙ্গির কাজগুলি সম্পাদন করুন"</string>
+    <string name="capability_title_canPerformGestures" msgid="7418984730362576862">"অঙ্গভঙ্গির কাজগুলি সম্পাদন"</string>
     <string name="capability_desc_canPerformGestures" msgid="8296373021636981249">"আলতো চাপ দেওয়া, সোয়াইপ, পিঞ্চ করা এবং অন্যান্য ইঙ্গিতের কাজগুলি সম্পাদন করতে পারবেন৷"</string>
     <string name="capability_title_canCaptureFingerprintGestures" msgid="6309568287512278670">"ফিঙ্গারপ্রিন্ট সেন্সরের উপর করা অঙ্গভঙ্গিগুলি"</string>
     <string name="capability_desc_canCaptureFingerprintGestures" msgid="4386487962402228670">"ডিভাইসের আঙ্গুলের ছাপের সেন্সরের উপরে ইঙ্গিত করলে বুঝতে পারে।"</string>
@@ -583,7 +583,7 @@
     <string name="policydesc_watchLogin_secondaryUser" product="default" msgid="2185480427217127147">"স্ক্রীন আনলক করার সময় ভুলভাবে লেখা পাসওয়ার্ড প্রবেশের সংখ্যা মনিটার করে, এবং ফোন লক করে এবং অনেক বার পাসওয়ার্ড ভুল ভাবে লেখা হলে ব্যবহারকারীর ডেটা মুছে ফেলে৷"</string>
     <string name="policylab_resetPassword" msgid="4934707632423915395">"স্ক্রিন লক পরিবর্তন করুন"</string>
     <string name="policydesc_resetPassword" msgid="1278323891710619128">"স্ক্রিন লক পরিবর্তন করুন৷"</string>
-    <string name="policylab_forceLock" msgid="2274085384704248431">"স্ক্রীণটি লক করে"</string>
+    <string name="policylab_forceLock" msgid="2274085384704248431">"স্ক্রিনটি লক করে"</string>
     <string name="policydesc_forceLock" msgid="1141797588403827138">"স্ক্রীন কখন কিভাবে লক হবে তা নিয়ন্ত্রণ করে৷"</string>
     <string name="policylab_wipeData" msgid="3910545446758639713">"সমস্ত ডেটা মুছে দেয়"</string>
     <string name="policydesc_wipeData" product="tablet" msgid="4306184096067756876">"ফ্যাক্টরি ডেটা আবার সেট কার্য সম্পাদনার দ্বারা কোনো রকম সতর্কতা ছাড়াই ট্যাবলেটের ডেটা মোছে৷"</string>
@@ -1672,7 +1672,7 @@
     </plurals>
     <string name="restr_pin_try_later" msgid="973144472490532377">"পরে আবার চেষ্টা করুন"</string>
     <string name="immersive_cling_title" msgid="8394201622932303336">"পূর্ণ স্ক্রিনে দেখা হচ্ছে"</string>
-    <string name="immersive_cling_description" msgid="3482371193207536040">"প্রস্থান করতে উপর থেকে নীচের দিকে সোয়াইপ করুন"</string>
+    <string name="immersive_cling_description" msgid="3482371193207536040">"প্রস্থান করতে উপর থেকে নিচের দিকে সোয়াইপ করুন"</string>
     <string name="immersive_cling_positive" msgid="5016839404568297683">"বুঝেছি"</string>
     <string name="done_label" msgid="2093726099505892398">"সম্পন্ন হয়েছে"</string>
     <string name="hour_picker_description" msgid="6698199186859736512">"বৃত্তাকার ঘণ্টা নির্বাচকের স্লাইডার"</string>

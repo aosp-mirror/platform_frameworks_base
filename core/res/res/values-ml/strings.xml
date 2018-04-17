@@ -427,9 +427,9 @@
     <string name="permdesc_acceptHandovers" msgid="4570660484220539698">"മറ്റൊരു ആപ്പിൽ ആരംഭിച്ച കോൾ തുടരാൻ ആപ്പിനെ അനുവദിക്കുന്നു."</string>
     <string name="permlab_readPhoneNumbers" msgid="6108163940932852440">"ഫോൺ നമ്പറുകൾ റീഡുചെയ്യൽ"</string>
     <string name="permdesc_readPhoneNumbers" msgid="8559488833662272354">"ഉപകരണത്തിന്റെ ഫോൺ നമ്പറുകൾ ആക്‌സസ് ചെയ്യാൻ ആപ്പിനെ അനുവദിക്കുന്നു."</string>
-    <string name="permlab_wakeLock" product="tablet" msgid="1531731435011495015">"സുഷുപ്‌തിയിലാകുന്നതിൽ നിന്ന് ടാബ്‌ലെറ്റിനെ തടയുക"</string>
+    <string name="permlab_wakeLock" product="tablet" msgid="1531731435011495015">"ഉറങ്ങുന്നതിൽ നിന്ന് ടാബ്‌ലെറ്റിനെ തടയുക"</string>
     <string name="permlab_wakeLock" product="tv" msgid="2601193288949154131">"ടിവിയെ നിർജ്ജീവമാകുന്നതിൽ നിന്ന് തടയുക"</string>
-    <string name="permlab_wakeLock" product="default" msgid="573480187941496130">"സുഷുപ്‌തിയിലാകുന്നതിൽ നിന്ന് ഫോണിനെ തടയുക"</string>
+    <string name="permlab_wakeLock" product="default" msgid="573480187941496130">"ഉറങ്ങുന്നതിൽ നിന്ന് ഫോണിനെ തടയുക"</string>
     <string name="permdesc_wakeLock" product="tablet" msgid="7311319824400447868">"ടാബ്‌ലെറ്റ് സുഷുപ്തിയിലാകുന്നതിൽ നിന്നും തടയുന്നതിന് അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു."</string>
     <string name="permdesc_wakeLock" product="tv" msgid="3208534859208996974">"ടിവി നിർജ്ജീവമാകുന്നത് തടയുന്നതിന് അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു."</string>
     <string name="permdesc_wakeLock" product="default" msgid="8559100677372928754">"ഫോൺ സുഷുപ്തിയിലാകുന്നതിൽ നിന്നും തടയുന്നതിന് അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു."</string>
@@ -601,7 +601,7 @@
     <string name="policydesc_encryptedStorage" msgid="2637732115325316992">"സംഭരിച്ച അപ്ലിക്കേഷൻ ഡാറ്റ എൻക്രിപ്റ്റുചെയ്യേണ്ടതുണ്ട്."</string>
     <string name="policylab_disableCamera" msgid="6395301023152297826">"ക്യാമറകൾ പ്രവർത്തനരഹിതമാക്കുക"</string>
     <string name="policydesc_disableCamera" msgid="2306349042834754597">"എല്ലാ ഉപകരണ ക്യാമറകളുടേയും ഉപയോഗം തടയുക."</string>
-    <string name="policylab_disableKeyguardFeatures" msgid="8552277871075367771">"ലോക്ക് ഫീച്ചർ അപ്രാപ്തമാക്കൂ"</string>
+    <string name="policylab_disableKeyguardFeatures" msgid="8552277871075367771">"ലോക്ക് ഫീച്ചർ പ്രവർത്തന രഹിതമാക്കുക"</string>
     <string name="policydesc_disableKeyguardFeatures" msgid="2044755691354158439">"ചില സ്‌ക്രീൻ ലോക്ക് ഫീച്ചറുകളുടെ ഉപയോഗം തടയുക."</string>
   <string-array name="phoneTypes">
     <item msgid="8901098336658710359">"വീട്ടിലെ ഫോൺ"</item>

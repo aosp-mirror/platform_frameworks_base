@@ -305,9 +305,9 @@
     <string name="capability_desc_canRequestFilterKeyEvents" msgid="7463135292204152818">"Inclou dades personals com ara números de targetes de crèdit i contrasenyes."</string>
     <string name="capability_title_canControlMagnification" msgid="3593493281059424855">"Controlar l\'ampliació de la pantalla"</string>
     <string name="capability_desc_canControlMagnification" msgid="4791858203568383773">"Controla el nivell i la posició del zoom de la pantalla."</string>
-    <string name="capability_title_canPerformGestures" msgid="7418984730362576862">"Utilitza gestos"</string>
+    <string name="capability_title_canPerformGestures" msgid="7418984730362576862">"Fer gestos"</string>
     <string name="capability_desc_canPerformGestures" msgid="8296373021636981249">"Permet tocar, lliscar, pinçar i fer altres gestos."</string>
-    <string name="capability_title_canCaptureFingerprintGestures" msgid="6309568287512278670">"Gestos al sensor d\'empremtes digitals"</string>
+    <string name="capability_title_canCaptureFingerprintGestures" msgid="6309568287512278670">"Gestos d\'empremtes digitals"</string>
     <string name="capability_desc_canCaptureFingerprintGestures" msgid="4386487962402228670">"Captura gestos realitzats en el sensor d\'empremtes digitals del dispositiu."</string>
     <string name="permlab_statusBar" msgid="7417192629601890791">"desactivar o modificar la barra d\'estat"</string>
     <string name="permdesc_statusBar" msgid="8434669549504290975">"Permet que l\'aplicació desactivi la barra d\'estat o afegeixi i elimini icones del sistema."</string>
@@ -1777,12 +1777,9 @@
     <string name="language_picker_section_all" msgid="3097279199511617537">"Tots els idiomes"</string>
     <string name="region_picker_section_all" msgid="8966316787153001779">"Totes les regions"</string>
     <string name="locale_search_menu" msgid="2560710726687249178">"Cerca"</string>
-    <!-- no translation found for app_suspended_title (1919029799438164552) -->
-    <skip />
-    <!-- no translation found for app_suspended_default_message (7875306315686531621) -->
-    <skip />
-    <!-- no translation found for app_suspended_more_details (1131804827776778187) -->
-    <skip />
+    <string name="app_suspended_title" msgid="1919029799438164552">"No es pot obrir l\'aplicació"</string>
+    <string name="app_suspended_default_message" msgid="7875306315686531621">"L\'aplicació <xliff:g id="APP_NAME_0">%1$s</xliff:g> no està disponible en aquests moments. Aquesta opció es gestiona a <xliff:g id="APP_NAME_1">%2$s</xliff:g>."</string>
+    <string name="app_suspended_more_details" msgid="1131804827776778187">"Més informació"</string>
     <string name="work_mode_off_title" msgid="1118691887588435530">"Activar el perfil professional?"</string>
     <string name="work_mode_off_message" msgid="5130856710614337649">"S\'activaran les teves aplicacions per a la feina, les notificacions, les dades i altres funcions del perfil professional"</string>
     <string name="work_mode_turn_on" msgid="2062544985670564875">"Activa"</string>
@@ -1878,6 +1875,5 @@
     <string name="zen_upgrade_notification_content" msgid="1794994264692424562">"Toca per consultar què s\'ha bloquejat."</string>
     <string name="notification_app_name_system" msgid="4205032194610042794">"Sistema"</string>
     <string name="notification_app_name_settings" msgid="7751445616365753381">"Configuració"</string>
-    <!-- no translation found for car_loading_profile (3545132581795684027) -->
-    <skip />
+    <string name="car_loading_profile" msgid="3545132581795684027">"S\'està carregant"</string>
 </resources>

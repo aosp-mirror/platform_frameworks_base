@@ -1377,7 +1377,7 @@
     <string name="vpn_text" msgid="1610714069627824309">"Додирните да бисте управљали мрежом."</string>
     <string name="vpn_text_long" msgid="4907843483284977618">"Повезано са сесијом <xliff:g id="SESSION">%s</xliff:g>. Додирните да бисте управљали мрежом."</string>
     <string name="vpn_lockdown_connecting" msgid="6443438964440960745">"Повезивање стално укљученог VPN-а..."</string>
-    <string name="vpn_lockdown_connected" msgid="8202679674819213931">"Стално укључени VPN је повезан"</string>
+    <string name="vpn_lockdown_connected" msgid="8202679674819213931">"Стално укључен VPN је повезан"</string>
     <string name="vpn_lockdown_disconnected" msgid="735805531187559719">"Веза са увек укљученим VPN-ом је прекинута"</string>
     <string name="vpn_lockdown_error" msgid="3133844445659711681">"Повезивање на стално укључени VPN није успело"</string>
     <string name="vpn_lockdown_config" msgid="8151951501116759194">"Промените подешавања VPN-а"</string>
@@ -1811,12 +1811,9 @@
     <string name="language_picker_section_all" msgid="3097279199511617537">"Сви језици"</string>
     <string name="region_picker_section_all" msgid="8966316787153001779">"Сви региони"</string>
     <string name="locale_search_menu" msgid="2560710726687249178">"Претражи"</string>
-    <!-- no translation found for app_suspended_title (1919029799438164552) -->
-    <skip />
-    <!-- no translation found for app_suspended_default_message (7875306315686531621) -->
-    <skip />
-    <!-- no translation found for app_suspended_more_details (1131804827776778187) -->
-    <skip />
+    <string name="app_suspended_title" msgid="1919029799438164552">"Отварање апликације није успело"</string>
+    <string name="app_suspended_default_message" msgid="7875306315686531621">"Апликација <xliff:g id="APP_NAME_0">%1$s</xliff:g> тренутно није доступна. <xliff:g id="APP_NAME_1">%2$s</xliff:g> управља доступношћу."</string>
+    <string name="app_suspended_more_details" msgid="1131804827776778187">"Сазнајте више"</string>
     <string name="work_mode_off_title" msgid="1118691887588435530">"Да укључимо профил за Work?"</string>
     <string name="work_mode_off_message" msgid="5130856710614337649">"Укључиће се пословне апликације, обавештења, подаци и друге функције профила за Work"</string>
     <string name="work_mode_turn_on" msgid="2062544985670564875">"Укључи"</string>

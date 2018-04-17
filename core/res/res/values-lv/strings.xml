@@ -1811,12 +1811,9 @@
     <string name="language_picker_section_all" msgid="3097279199511617537">"Visas valodas"</string>
     <string name="region_picker_section_all" msgid="8966316787153001779">"Visi reģioni"</string>
     <string name="locale_search_menu" msgid="2560710726687249178">"Meklēt"</string>
-    <!-- no translation found for app_suspended_title (1919029799438164552) -->
-    <skip />
-    <!-- no translation found for app_suspended_default_message (7875306315686531621) -->
-    <skip />
-    <!-- no translation found for app_suspended_more_details (1131804827776778187) -->
-    <skip />
+    <string name="app_suspended_title" msgid="1919029799438164552">"Neatverama lietotne"</string>
+    <string name="app_suspended_default_message" msgid="7875306315686531621">"Lietotne <xliff:g id="APP_NAME_0">%1$s</xliff:g> pašlaik nav pieejama. Šo darbību pārvalda <xliff:g id="APP_NAME_1">%2$s</xliff:g>."</string>
+    <string name="app_suspended_more_details" msgid="1131804827776778187">"Uzzināt vairāk"</string>
     <string name="work_mode_off_title" msgid="1118691887588435530">"Vai ieslēgt darba profilu?"</string>
     <string name="work_mode_off_message" msgid="5130856710614337649">"Tiks ieslēgtas jūsu darba lietotnes, paziņojumi, dati un citas darba profila funkcijas."</string>
     <string name="work_mode_turn_on" msgid="2062544985670564875">"Ieslēgt"</string>

@@ -297,12 +297,12 @@
     <string name="permgrouplab_sensors" msgid="416037179223226722">"शरीर संवेदक"</string>
     <string name="permgroupdesc_sensors" msgid="7147968539346634043">"अपने महत्वपूर्ण संकेतों के बारे में सेंसर डेटा को ऐक्सेस करें"</string>
     <string name="permgrouprequest_sensors" msgid="6349806962814556786">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; को अपने स्वास्थ्य से जुड़ी ज़रूरी जानकारी इस्तेमाल करने की अनुमति देना चाहते हैं?"</string>
-    <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"विंडो सामग्री प्राप्त करें"</string>
-    <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"उस विंडो की सामग्री का निरीक्षण करें जिससे आप सहभागिता कर रहे हैं."</string>
-    <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"छूकर, उससे जुड़ी जानकारी सुनने की सुविधा चालू करें"</string>
-    <string name="capability_desc_canRequestTouchExploration" msgid="7543249041581408313">"टैप किए गए आइटम ज़ोर से बोले जाएंगे और स्क्रीन को जेस्चर के ज़रिए एक्सप्लोर किया जा सकता है."</string>
-    <string name="capability_title_canRequestFilterKeyEvents" msgid="2103440391902412174">"आपके द्वारा लिखे हुए लेख को ध्यान से देखें"</string>
-    <string name="capability_desc_canRequestFilterKeyEvents" msgid="7463135292204152818">"क्रेडिट कार्ड नंबर और पासवर्ड जैसा व्यक्तिगत डेटा शामिल होता है."</string>
+    <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"विंडो की सामग्री वापस पाएं"</string>
+    <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"उस विंडो की सामग्री की जाँच करें, जिसका आप इस्तेमाल कर रहे हैं."</string>
+    <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"छूकर, किसी चीज़ से जुड़ी जानकारी सुनने की सुविधा चालू करें"</string>
+    <string name="capability_desc_canRequestTouchExploration" msgid="7543249041581408313">"जिन चीज़ों पर आप टैप करेंगे उन्हें ज़ोर से बोला जाएगा और स्क्रीन को जेस्चर के ज़रिए एक्सप्लोर किया जा सकेगा."</string>
+    <string name="capability_title_canRequestFilterKeyEvents" msgid="2103440391902412174">"अपने लिखे हुए लेख पर गौर करें"</string>
+    <string name="capability_desc_canRequestFilterKeyEvents" msgid="7463135292204152818">"क्रेडिट कार्ड नंबर और पासवर्ड जैसा निजी डेटा शामिल होता है."</string>
     <string name="capability_title_canControlMagnification" msgid="3593493281059424855">"डिसप्ले को बड़ा-छोटा करने की सुविधा को नियंत्रित करें"</string>
     <string name="capability_desc_canControlMagnification" msgid="4791858203568383773">"डिसप्ले के ज़ूम का स्‍तर और पोज़िशनिंग नियंत्रित करें."</string>
     <string name="capability_title_canPerformGestures" msgid="7418984730362576862">"जेस्चर करें"</string>
@@ -508,7 +508,7 @@
     <string name="fingerprint_error_unable_to_process" msgid="6107816084103552441">"पुन: प्रयास करें."</string>
     <string name="fingerprint_error_no_fingerprints" msgid="7654382120628334248">"कोई फ़िंगरप्रिंट रजिस्टर नहीं किया गया है."</string>
     <string name="fingerprint_error_hw_not_present" msgid="5729436878065119329">"इस डिवाइस में फ़िंगरप्रिंट सेंसर नहीं है"</string>
-    <string name="fingerprint_name_template" msgid="5870957565512716938">"उंगली <xliff:g id="FINGERID">%d</xliff:g>"</string>
+    <string name="fingerprint_name_template" msgid="5870957565512716938">"पहला फ़िगरप्रिंट <xliff:g id="FINGERID">%d</xliff:g>"</string>
   <string-array name="fingerprint_error_vendor">
   </string-array>
     <string name="fingerprint_icon_content_description" msgid="2340202869968465936">"फ़िंगरप्रिंट आइकॉन"</string>
@@ -601,7 +601,7 @@
     <string name="policydesc_encryptedStorage" msgid="2637732115325316992">"संग्रहित ऐप्स डेटा को एन्क्रिप्ट किया जाना आवश्‍यक है."</string>
     <string name="policylab_disableCamera" msgid="6395301023152297826">"कैमरों को अक्षम करें"</string>
     <string name="policydesc_disableCamera" msgid="2306349042834754597">"सभी डिवाइस कैमरों का उपयोग रोकें."</string>
-    <string name="policylab_disableKeyguardFeatures" msgid="8552277871075367771">"कुछ स्‍क्रीन लॉक सुविधाओं को अक्षम करें"</string>
+    <string name="policylab_disableKeyguardFeatures" msgid="8552277871075367771">"स्‍क्रीन लॉक की कुछ सुविधाएं बंद करें"</string>
     <string name="policydesc_disableKeyguardFeatures" msgid="2044755691354158439">"कुछ स्‍क्रीन लाॅक सुविधाओं का उपयोग रोकें."</string>
   <string-array name="phoneTypes">
     <item msgid="8901098336658710359">"घर"</item>
@@ -882,9 +882,9 @@
     <string name="menu_space_shortcut_label" msgid="2410328639272162537">"space"</string>
     <string name="menu_enter_shortcut_label" msgid="2743362785111309668">"enter"</string>
     <string name="menu_delete_shortcut_label" msgid="3658178007202748164">"मिटाएं"</string>
-    <string name="search_go" msgid="8298016669822141719">"सर्च करें"</string>
-    <string name="search_hint" msgid="1733947260773056054">"सर्च करें…"</string>
-    <string name="searchview_description_search" msgid="6749826639098512120">"सर्च करें"</string>
+    <string name="search_go" msgid="8298016669822141719">"खोजें"</string>
+    <string name="search_hint" msgid="1733947260773056054">"खोजें…"</string>
+    <string name="searchview_description_search" msgid="6749826639098512120">"खोजें"</string>
     <string name="searchview_description_query" msgid="5911778593125355124">"सर्च क्वेरी"</string>
     <string name="searchview_description_clear" msgid="1330281990951833033">"क्‍वेरी साफ़ करें"</string>
     <string name="searchview_description_submit" msgid="2688450133297983542">"क्वेरी सबमिट करें"</string>
@@ -1324,7 +1324,7 @@
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="1311810005957319690">"ज़ूम नियंत्रण के लिए दो बार टैप करें"</string>
     <string name="gadget_host_error_inflating" msgid="4882004314906466162">"विजेट नहीं जोड़ा जा सका."</string>
     <string name="ime_action_go" msgid="8320845651737369027">"जाएं"</string>
-    <string name="ime_action_search" msgid="658110271822807811">"सर्च करें"</string>
+    <string name="ime_action_search" msgid="658110271822807811">"खोजें"</string>
     <string name="ime_action_send" msgid="2316166556349314424">"भेजें"</string>
     <string name="ime_action_next" msgid="3138843904009813834">"आगे"</string>
     <string name="ime_action_done" msgid="8971516117910934605">"हो गया"</string>
@@ -1496,7 +1496,7 @@
     <string name="media_route_controller_disconnect" msgid="8966120286374158649">"डिसकनेक्ट करें"</string>
     <string name="media_route_status_scanning" msgid="7279908761758293783">"स्‍कैन कर रहा है..."</string>
     <string name="media_route_status_connecting" msgid="6422571716007825440">"कनेक्ट हो रहा है..."</string>
-    <string name="media_route_status_available" msgid="6983258067194649391">"उपलब्ध"</string>
+    <string name="media_route_status_available" msgid="6983258067194649391">"मौजूद"</string>
     <string name="media_route_status_not_available" msgid="6739899962681886401">"उपलब्‍ध नहीं"</string>
     <string name="media_route_status_in_use" msgid="4533786031090198063">"उपयोग में"</string>
     <string name="display_manager_built_in_display_name" msgid="2583134294292563941">"अंतर्निहित स्क्रीन"</string>
@@ -1691,7 +1691,7 @@
     <string name="package_updated_device_owner" msgid="1847154566357862089">"आपके व्यवस्थापक ने अपडेट किया है"</string>
     <string name="package_deleted_device_owner" msgid="2307122077550236438">"आपके व्यवस्थापक ने हटा दिया है"</string>
     <string name="battery_saver_description" msgid="769989536172631582">"अापके डिवाइस की बैटरी लाइफ़ बढ़ाने के लिए बैटरी सेवर, डिवाइस की कुछ सुविधाओं को बंद कर देता है और ऐप्लिकेशन को बैटरी इस्तेमाल करने से रोकता है."</string>
-    <string name="data_saver_description" msgid="6015391409098303235">"डेटा खर्च, कम करने के लिए डेटा सेवर कुछ ऐप को बैकग्राउंड में डेटा भेजने या पाने से रोकता है. आप फ़िलहाल जिस एेप का इस्तेमाल कर रहे हैं वह डेटा तक पहुंच सकता है, लेकिन ऐसा कभी-कभी ही हो पाएगा. उदाहरण के लिए, इसे समझिये कि तस्वीर तब तक दिखाई नहीं देंगी जब तक कि आप उन्हें टैप नहीं करते."</string>
+    <string name="data_saver_description" msgid="6015391409098303235">"डेटा खर्च, कम करने के लिए डेटा सेवर कुछ ऐप्लिकेशन को बैकग्राउंड में डेटा भेजने या डेटा पाने से रोकता है. आप फ़िलहाल जिस एेप्लिकेशन का इस्तेमाल कर रहे हैं वह डेटा तक पहुंच सकता है लेकिन ऐसा कभी-कभी ही हो पाएगा. उदाहरण के लिए, इमेज तब तक दिखाई नहीं देंगी जब तक कि आप उन्हें टैप नहीं करते."</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"डेटा बचाने की सेटिंग चालू करें?"</string>
     <string name="data_saver_enable_button" msgid="7147735965247211818">"चालू करें"</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="4367877408072000848">
@@ -1765,7 +1765,7 @@
       <item quantity="one"><xliff:g id="COUNT_1">%1$d</xliff:g> चयनित</item>
       <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> चयनित</item>
     </plurals>
-    <string name="default_notification_channel_label" msgid="5929663562028088222">"अवर्गीकृत"</string>
+    <string name="default_notification_channel_label" msgid="5929663562028088222">"बिना किसी श्रेणी के"</string>
     <string name="importance_from_user" msgid="7318955817386549931">"आपने इन सूचनाओं की अहमियत सेट की है."</string>
     <string name="importance_from_person" msgid="9160133597262938296">"यह मौजूद व्यक्तियों के कारण महत्वपूर्ण है."</string>
     <string name="user_creation_account_exists" msgid="1942606193570143289">"<xliff:g id="APP">%1$s</xliff:g> को <xliff:g id="ACCOUNT">%2$s</xliff:g> के ज़रिये एक नया उपयोगकर्ता बनाने दें?"</string>
@@ -1773,10 +1773,10 @@
     <string name="language_selection_title" msgid="2680677278159281088">"भाषा जोड़ें"</string>
     <string name="country_selection_title" msgid="2954859441620215513">"क्षेत्र प्राथमिकता"</string>
     <string name="search_language_hint" msgid="7042102592055108574">"भाषा का नाम लिखें"</string>
-    <string name="language_picker_section_suggested" msgid="8414489646861640885">"सुझाए गए"</string>
+    <string name="language_picker_section_suggested" msgid="8414489646861640885">"दिए गए सुझाव"</string>
     <string name="language_picker_section_all" msgid="3097279199511617537">"सभी भाषाएं"</string>
     <string name="region_picker_section_all" msgid="8966316787153001779">"सभी क्षेत्र"</string>
-    <string name="locale_search_menu" msgid="2560710726687249178">"सर्च करें"</string>
+    <string name="locale_search_menu" msgid="2560710726687249178">"खोजें"</string>
     <!-- no translation found for app_suspended_title (1919029799438164552) -->
     <skip />
     <!-- no translation found for app_suspended_default_message (7875306315686531621) -->
