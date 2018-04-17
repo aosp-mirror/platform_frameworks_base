@@ -25,6 +25,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import android.app.IActivityManager;
+import android.app.KeyguardManager;
 import android.app.NotificationManager;
 import android.app.admin.DevicePolicyManager;
 import android.app.admin.DevicePolicyManagerInternal;
@@ -102,7 +103,8 @@ public class BaseLockSettingsServiceTests extends AndroidTestCase {
         LocalServices.addService(DevicePolicyManagerInternal.class, mDevicePolicyManagerInternal);
 
         mContext = new MockLockSettingsContext(getContext(), mUserManager, mNotificationManager,
-                mDevicePolicyManager, mock(StorageManager.class), mock(TrustManager.class));
+                mDevicePolicyManager, mock(StorageManager.class), mock(TrustManager.class),
+                mock(KeyguardManager.class));
         mStorage = new LockSettingsStorageTestable(mContext,
                 new File(getContext().getFilesDir(), "locksettings"));
         File storageDir = mStorage.mStorageDir;
