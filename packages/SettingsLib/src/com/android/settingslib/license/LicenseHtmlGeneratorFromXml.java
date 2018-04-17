@@ -16,7 +16,7 @@
 
 package com.android.settingslib.license;
 
-import android.support.annotation.VisibleForTesting;
+import androidx.annotation.VisibleForTesting;
 import android.text.TextUtils;
 import android.util.Log;
 import android.util.Xml;

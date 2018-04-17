@@ -16,7 +16,7 @@ package com.android.systemui.tuner;
 
 import android.content.Context;
 import android.graphics.drawable.Drawable;
-import android.support.v7.preference.CheckBoxPreference;
+import androidx.preference.CheckBoxPreference;
 import android.util.TypedValue;
 
 import com.android.systemui.statusbar.ScalingDrawableWrapper;
