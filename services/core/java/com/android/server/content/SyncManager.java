@@ -48,6 +48,7 @@ import android.content.SyncAdaptersCache;
 import android.content.SyncInfo;
 import android.content.SyncResult;
 import android.content.SyncStatusInfo;
+import android.content.SyncStatusInfo.Stats;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
@@ -95,6 +96,7 @@ import com.android.internal.notification.SystemNotificationChannels;
 import com.android.internal.os.BackgroundThread;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.IndentingPrintWriter;
+import com.android.internal.util.function.QuadConsumer;
 import com.android.server.DeviceIdleController;
 import com.android.server.LocalServices;
 import com.android.server.SystemService;
@@ -122,6 +124,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Random;
 import java.util.Set;
+import java.util.function.Function;
 import java.util.function.Predicate;
 
 /**
@@ -242,7 +245,7 @@ public class SyncManager {
     /** Track whether the device has already been provisioned. */
     private volatile boolean mProvisioned;
 
-    protected SyncAdaptersCache mSyncAdapters;
+    protected final SyncAdaptersCache mSyncAdapters;
 
     private final Random mRand;
 
@@ -420,6 +423,17 @@ public class SyncManager {
 
                     mLogger.log(getJobStats());
                     mLogger.log("Shutting down.");
+                }
+            };
+
+    private final BroadcastReceiver mOtherIntentsReceiver =
+            new BroadcastReceiver() {
+                @Override
+                public void onReceive(Context context, Intent intent) {
+                    if (Intent.ACTION_TIME_CHANGED.equals(intent.getAction())) {
+                        mSyncStorageEngine.setClockValid();
+                        return;
+                    }
                 }
             };
 
@@ -630,6 +644,9 @@ public class SyncManager {
         intentFilter.addAction(Intent.ACTION_USER_STOPPED);
         mContext.registerReceiverAsUser(
                 mUserIntentReceiver, UserHandle.ALL, intentFilter, null, null);
+
+        intentFilter = new IntentFilter(Intent.ACTION_TIME_CHANGED);
+        context.registerReceiver(mOtherIntentsReceiver, intentFilter);
 
         if (!factoryTest) {
             mNotificationMgr = (NotificationManager)
@@ -947,9 +964,13 @@ public class SyncManager {
         } else if (requestedAuthority == null) {
             source = SyncStorageEngine.SOURCE_POLL;
         } else {
-            // This isn't strictly server, since arbitrary callers can (and do) request
-            // a non-forced two-way sync on a specific url.
-            source = SyncStorageEngine.SOURCE_SERVER;
+            if (extras.containsKey("feed")) {
+                source = SyncStorageEngine.SOURCE_FEED;
+            } else{
+                // This isn't strictly server, since arbitrary callers can (and do) request
+                // a non-forced two-way sync on a specific url.
+                source = SyncStorageEngine.SOURCE_OTHER;
+            }
         }
 
         for (AccountAndUser account : accounts) {
@@ -2134,6 +2155,7 @@ public class SyncManager {
         pw.print("Memory low: "); pw.println(mStorageIsLow);
         pw.print("Device idle: "); pw.println(mDeviceIsIdle);
         pw.print("Reported active: "); pw.println(mReportedSyncActive);
+        pw.print("Clock valid: "); pw.println(mSyncStorageEngine.isClockValid());
 
         final AccountAndUser[] accounts = AccountManagerService.getSingleton().getAllAccounts();
 
@@ -2181,26 +2203,35 @@ public class SyncManager {
 
         final ArrayList<Pair<EndPoint, SyncStatusInfo>> statuses = new ArrayList<>();
 
+        mSyncStorageEngine.resetTodayStats(/* force=*/ false);
+
         for (AccountAndUser account : accounts) {
             pw.printf("Account %s u%d %s\n",
                     account.account.name, account.userId, account.account.type);
 
             pw.println("=======================================================================");
-            final PrintTable table = new PrintTable(13);
+            final PrintTable table = new PrintTable(16);
             table.set(0, 0,
                     "Authority", // 0
                     "Syncable",  // 1
                     "Enabled",   // 2
-                    "Delay",     // 3
-                    "Loc",       // 4
-                    "Poll",      // 5
-                    "Per",       // 6
-                    "Serv",      // 7
-                    "User",      // 8
-                    "Tot",       // 9
-                    "Time",      // 10
-                    "Last Sync", // 11
-                    "Backoff"    // 12
+
+                    "Stats",     // 3 "Total", "Today" or "Yesterday".
+
+                    "Loc",       // 4 # of syncs with local sources. (including failures/cancels. )
+                    "Poll",      // 5 "poll" syncs.
+                    "Per",       // 6 Periodic syncs.
+                    "Feed",      // 7 Syncs with a "feed" extra. (subscribedfeeds?)
+                    "User",      // 8 User-initiated
+                    "Othr",      // 9 Other sources.
+
+                    "Tot",       // 10 Total syncs (including failures / cancels)
+                    "Fail",      // 11 (Failure)
+                    "Can",       // 12 (Cancel)
+
+                    "Time",      // 13 Total time
+                    "Last Sync", // 14
+                    "Backoff"    // 15
             );
 
             final List<RegisteredServicesCache.ServiceInfo<SyncAdapterType>> sorted =
@@ -2234,37 +2265,50 @@ public class SyncManager {
                 }
                 table.set(row, 0, authority, settings.syncable, settings.enabled);
 
-                sb.setLength(0);
-                table.set(row, 4,
-                        status.numSourceLocal,
-                        status.numSourcePoll,
-                        status.numSourcePeriodic,
-                        status.numSourceServer,
-                        status.numSourceUser,
-                        status.numSyncs,
-                        formatDurationHMS(sb, status.totalElapsedTime));
+                QuadConsumer<String, Stats, Function<Integer, String>, Integer> c =
+                        (label, stats, filter, r) -> {
+                    sb.setLength(0);
+                    table.set(r, 3,
+                            label,
+                            filter.apply(stats.numSourceLocal),
+                            filter.apply(stats.numSourcePoll),
+                            filter.apply(stats.numSourcePeriodic),
+                            filter.apply(stats.numSourceFeed),
+                            filter.apply(stats.numSourceUser),
+                            filter.apply(stats.numSourceOther),
+                            filter.apply(stats.numSyncs),
+                            filter.apply(stats.numFailures),
+                            filter.apply(stats.numCancels),
+                            formatDurationHMS(sb, stats.totalElapsedTime));
+                };
+                c.accept("Total", status.totalStats, (i) -> Integer.toString(i), row);
+                c.accept("Today", status.todayStats, this::zeroToEmpty, row + 1);
+                c.accept("Yestr", status.yesterdayStats, this::zeroToEmpty, row + 2);
+
+                final int LAST_SYNC = 14;
+                final int BACKOFF = LAST_SYNC + 1;
 
                 int row1 = row;
                 if (settings.delayUntil > now) {
-                    table.set(row1++, 12, "D: " + (settings.delayUntil - now) / 1000);
+                    table.set(row1++, BACKOFF, "D: " + (settings.delayUntil - now) / 1000);
                     if (settings.backoffTime > now) {
-                        table.set(row1++, 12, "B: " + (settings.backoffTime - now) / 1000);
-                        table.set(row1++, 12, settings.backoffDelay / 1000);
+                        table.set(row1++, BACKOFF, "B: " + (settings.backoffTime - now) / 1000);
+                        table.set(row1++, BACKOFF, settings.backoffDelay / 1000);
                     }
                 }
 
                 row1 = row;
                 if (status.lastSuccessTime != 0) {
-                    table.set(row1++, 11, SyncStorageEngine.SOURCES[status.lastSuccessSource]
+                    table.set(row1++, LAST_SYNC, SyncStorageEngine.SOURCES[status.lastSuccessSource]
                             + " " + "SUCCESS");
-                    table.set(row1++, 11, formatTime(status.lastSuccessTime));
+                    table.set(row1++, LAST_SYNC, formatTime(status.lastSuccessTime));
                 }
                 if (status.lastFailureTime != 0) {
-                    table.set(row1++, 11, SyncStorageEngine.SOURCES[status.lastFailureSource]
+                    table.set(row1++, LAST_SYNC, SyncStorageEngine.SOURCES[status.lastFailureSource]
                             + " " + "FAILURE");
-                    table.set(row1++, 11, formatTime(status.lastFailureTime));
+                    table.set(row1++, LAST_SYNC, formatTime(status.lastFailureTime));
                     //noinspection UnusedAssignment
-                    table.set(row1++, 11, status.lastFailureMesg);
+                    table.set(row1++, LAST_SYNC, status.lastFailureMesg);
                 }
             }
             table.writeTo(pw);
@@ -2274,6 +2318,7 @@ public class SyncManager {
 
         pw.println();
         pw.println("Per Adapter History");
+        pw.println("(SERVER is now split up to FEED and OTHER)");
 
         for (int i = 0; i < statuses.size(); i++) {
             final Pair<EndPoint, SyncStatusInfo> event = statuses.get(i);
@@ -2297,6 +2342,10 @@ public class SyncManager {
                 pw.println();
             }
         }
+    }
+
+    private String zeroToEmpty(int value) {
+        return (value != 0) ? Integer.toString(value) : "";
     }
 
     private void dumpTimeSec(PrintWriter pw, long time) {
@@ -2459,6 +2508,7 @@ public class SyncManager {
 
             pw.println();
             pw.println("Recent Sync History");
+            pw.println("(SERVER is now split up to FEED and OTHER)");
             final String format = "  %-" + maxAccount + "s  %-" + maxAuthority + "s %s\n";
             final Map<String, Long> lastTimeMap = Maps.newHashMap();
             final PackageManager pm = mContext.getPackageManager();
@@ -2525,6 +2575,7 @@ public class SyncManager {
             }
             pw.println();
             pw.println("Recent Sync History Extras");
+            pw.println("(SERVER is now split up to FEED and OTHER)");
             for (int i = 0; i < N; i++) {
                 final SyncStorageEngine.SyncHistoryItem item = items.get(i);
                 final Bundle extras = item.extras;
@@ -3103,6 +3154,10 @@ public class SyncManager {
         private void startSyncH(SyncOperation op) {
             final boolean isLoggable = Log.isLoggable(TAG, Log.VERBOSE);
             if (isLoggable) Slog.v(TAG, op.toString());
+
+            // At this point, we know the device has been connected to the server, so
+            // assume the clock is correct.
+            mSyncStorageEngine.setClockValid();
 
             mSyncJobService.markSyncStarted(op.jobId);
 
@@ -4014,5 +4069,9 @@ public class SyncManager {
     private void wtfWithLog(String message) {
         Slog.wtf(TAG, message);
         mLogger.log("WTF: ", message);
+    }
+
+    public void resetTodayStats() {
+        mSyncStorageEngine.resetTodayStats(/*force=*/ true);
     }
 }
