@@ -14,6 +14,7 @@
 
 #include <gtest/gtest.h>
 
+#include <binder/IPCThreadState.h>
 #include "src/StatsLogProcessor.h"
 #include "src/StatsService.h"
 #include "src/stats_log_util.h"
@@ -39,9 +40,13 @@ void SendConfig(StatsService& service, const StatsdConfig& config) {
     service.addConfiguration(kConfigKey, configAsVec, String16(kAndroid.c_str()));
 }
 
-ConfigMetricsReport GetReports(StatsService& service) {
+ConfigMetricsReport GetReports(sp<StatsLogProcessor> processor, int64_t timestamp,
+                               bool include_current = false) {
     vector<uint8_t> output;
-    service.getData(kConfigKey, String16(kAndroid.c_str()), &output);
+    IPCThreadState* ipc = IPCThreadState::self();
+    ConfigKey configKey(ipc->getCallingUid(), kConfigKey);
+    processor->onDumpReport(configKey, timestamp, include_current /* include_current_bucket*/,
+                            &output);
     ConfigMetricsReportList reports;
     reports.ParseFromArray(output.data(), output.size());
     EXPECT_EQ(1, reports.reports_size());
@@ -61,6 +66,47 @@ StatsdConfig MakeConfig() {
     return config;
 }
 
+StatsdConfig MakeValueMetricConfig(int64_t minTime) {
+    StatsdConfig config;
+    config.add_allowed_log_source("AID_ROOT");  // LogEvent defaults to UID of root.
+
+    auto temperatureAtomMatcher = CreateTemperatureAtomMatcher();
+    *config.add_atom_matcher() = temperatureAtomMatcher;
+    *config.add_atom_matcher() = CreateScreenTurnedOnAtomMatcher();
+    *config.add_atom_matcher() = CreateScreenTurnedOffAtomMatcher();
+
+    auto valueMetric = config.add_value_metric();
+    valueMetric->set_id(123456);
+    valueMetric->set_what(temperatureAtomMatcher.id());
+    *valueMetric->mutable_value_field() =
+            CreateDimensions(android::util::TEMPERATURE, {3 /* temperature degree field */});
+    *valueMetric->mutable_dimensions_in_what() =
+            CreateDimensions(android::util::TEMPERATURE, {2 /* sensor name field */});
+    valueMetric->set_bucket(FIVE_MINUTES);
+    valueMetric->set_min_bucket_size_nanos(minTime);
+    return config;
+}
+
+StatsdConfig MakeGaugeMetricConfig(int64_t minTime) {
+    StatsdConfig config;
+    config.add_allowed_log_source("AID_ROOT");  // LogEvent defaults to UID of root.
+
+    auto temperatureAtomMatcher = CreateTemperatureAtomMatcher();
+    *config.add_atom_matcher() = temperatureAtomMatcher;
+    *config.add_atom_matcher() = CreateScreenTurnedOnAtomMatcher();
+    *config.add_atom_matcher() = CreateScreenTurnedOffAtomMatcher();
+
+    auto gaugeMetric = config.add_gauge_metric();
+    gaugeMetric->set_id(123456);
+    gaugeMetric->set_what(temperatureAtomMatcher.id());
+    gaugeMetric->mutable_gauge_fields_filter()->set_include_all(true);
+    *gaugeMetric->mutable_dimensions_in_what() =
+            CreateDimensions(android::util::TEMPERATURE, {2 /* sensor name field */});
+    gaugeMetric->set_bucket(FIVE_MINUTES);
+    gaugeMetric->set_min_bucket_size_nanos(minTime);
+    return config;
+}
+
 TEST(PartialBucketE2eTest, TestCountMetricWithoutSplit) {
     StatsService service(nullptr);
     SendConfig(service, MakeConfig());
@@ -70,7 +116,7 @@ TEST(PartialBucketE2eTest, TestCountMetricWithoutSplit) {
     service.mProcessor->OnLogEvent(CreateAppCrashEvent(100, start + 1).get());
     service.mProcessor->OnLogEvent(CreateAppCrashEvent(100, start + 2).get());
 
-    ConfigMetricsReport report = GetReports(service);
+    ConfigMetricsReport report = GetReports(service.mProcessor, start + 3);
     // Expect no metrics since the bucket has not finished yet.
     EXPECT_EQ(0, report.metrics_size());
 }
@@ -89,7 +135,7 @@ TEST(PartialBucketE2eTest, TestCountMetricNoSplitOnNewApp) {
     // Goes into the second bucket.
     service.mProcessor->OnLogEvent(CreateAppCrashEvent(100, start + 3).get());
 
-    ConfigMetricsReport report = GetReports(service);
+    ConfigMetricsReport report = GetReports(service.mProcessor, start + 4);
     EXPECT_EQ(0, report.metrics_size());
 }
 
@@ -106,7 +152,7 @@ TEST(PartialBucketE2eTest, TestCountMetricSplitOnUpgrade) {
     // Goes into the second bucket.
     service.mProcessor->OnLogEvent(CreateAppCrashEvent(100, start + 3).get());
 
-    ConfigMetricsReport report = GetReports(service);
+    ConfigMetricsReport report = GetReports(service.mProcessor, start + 4);
     EXPECT_EQ(1, report.metrics_size());
     EXPECT_EQ(1, report.metrics(0).count_metrics().data(0).bucket_info(0).count());
 }
@@ -124,9 +170,83 @@ TEST(PartialBucketE2eTest, TestCountMetricSplitOnRemoval) {
     // Goes into the second bucket.
     service.mProcessor->OnLogEvent(CreateAppCrashEvent(100, start + 3).get());
 
-    ConfigMetricsReport report = GetReports(service);
+    ConfigMetricsReport report = GetReports(service.mProcessor, start + 4);
     EXPECT_EQ(1, report.metrics_size());
     EXPECT_EQ(1, report.metrics(0).count_metrics().data(0).bucket_info(0).count());
+}
+
+TEST(PartialBucketE2eTest, TestValueMetricWithoutMinPartialBucket) {
+    StatsService service(nullptr);
+    // Partial buckets don't occur when app is first installed.
+    service.mUidMap->updateApp(1, String16(kApp1.c_str()), 1, 1);
+    SendConfig(service, MakeValueMetricConfig(0));
+    const long start = getElapsedRealtimeNs();  // This is the start-time the metrics producers are
+                                                // initialized with.
+
+    service.mProcessor->informPullAlarmFired(5 * 60 * NS_PER_SEC + start);
+    service.mUidMap->updateApp(5 * 60 * NS_PER_SEC + start + 2, String16(kApp1.c_str()), 1, 2);
+
+    ConfigMetricsReport report =
+            GetReports(service.mProcessor, 5 * 60 * NS_PER_SEC + start + 100, true);
+    EXPECT_EQ(1, report.metrics_size());
+    EXPECT_EQ(0, report.metrics(0).value_metrics().skipped_size());
+}
+
+TEST(PartialBucketE2eTest, TestValueMetricWithMinPartialBucket) {
+    StatsService service(nullptr);
+    // Partial buckets don't occur when app is first installed.
+    service.mUidMap->updateApp(1, String16(kApp1.c_str()), 1, 1);
+    SendConfig(service, MakeValueMetricConfig(60 * NS_PER_SEC /* One minute */));
+    const long start = getElapsedRealtimeNs();  // This is the start-time the metrics producers are
+                                                // initialized with.
+
+    const int64_t endSkipped = 5 * 60 * NS_PER_SEC + start + 2;
+    service.mProcessor->informPullAlarmFired(5 * 60 * NS_PER_SEC + start);
+    service.mUidMap->updateApp(endSkipped, String16(kApp1.c_str()), 1, 2);
+
+    ConfigMetricsReport report =
+            GetReports(service.mProcessor, 5 * 60 * NS_PER_SEC + start + 100 * NS_PER_SEC, true);
+    EXPECT_EQ(1, report.metrics_size());
+    EXPECT_EQ(1, report.metrics(0).value_metrics().skipped_size());
+    // Can't test the start time since it will be based on the actual time when the pulling occurs.
+    EXPECT_EQ(endSkipped, report.metrics(0).value_metrics().skipped(0).end_elapsed_nanos());
+}
+
+TEST(PartialBucketE2eTest, TestGaugeMetricWithoutMinPartialBucket) {
+    StatsService service(nullptr);
+    // Partial buckets don't occur when app is first installed.
+    service.mUidMap->updateApp(1, String16(kApp1.c_str()), 1, 1);
+    SendConfig(service, MakeGaugeMetricConfig(0));
+    const long start = getElapsedRealtimeNs();  // This is the start-time the metrics producers are
+                                                // initialized with.
+
+    service.mProcessor->informPullAlarmFired(5 * 60 * NS_PER_SEC + start);
+    service.mUidMap->updateApp(5 * 60 * NS_PER_SEC + start + 2, String16(kApp1.c_str()), 1, 2);
+
+    ConfigMetricsReport report =
+            GetReports(service.mProcessor, 5 * 60 * NS_PER_SEC + start + 100, true);
+    EXPECT_EQ(1, report.metrics_size());
+    EXPECT_EQ(0, report.metrics(0).gauge_metrics().skipped_size());
+}
+
+TEST(PartialBucketE2eTest, TestGaugeMetricWithMinPartialBucket) {
+    StatsService service(nullptr);
+    // Partial buckets don't occur when app is first installed.
+    service.mUidMap->updateApp(1, String16(kApp1.c_str()), 1, 1);
+    SendConfig(service, MakeGaugeMetricConfig(60 * NS_PER_SEC /* One minute */));
+    const long start = getElapsedRealtimeNs();  // This is the start-time the metrics producers are
+                                                // initialized with.
+
+    const int64_t endSkipped = 5 * 60 * NS_PER_SEC + start + 2;
+    service.mProcessor->informPullAlarmFired(5 * 60 * NS_PER_SEC + start);
+    service.mUidMap->updateApp(endSkipped, String16(kApp1.c_str()), 1, 2);
+
+    ConfigMetricsReport report =
+            GetReports(service.mProcessor, 5 * 60 * NS_PER_SEC + start + 100 * NS_PER_SEC, true);
+    EXPECT_EQ(1, report.metrics_size());
+    EXPECT_EQ(1, report.metrics(0).gauge_metrics().skipped_size());
+    // Can't test the start time since it will be based on the actual time when the pulling occurs.
+    EXPECT_EQ(endSkipped, report.metrics(0).gauge_metrics().skipped(0).end_elapsed_nanos());
 }
 
 #else
