@@ -27,6 +27,7 @@ namespace statsd {
 
 #ifdef __ANDROID__
 
+const string kAndroid = "android";
 const string kApp1 = "app1.sharing.1";
 const int kConfigKey = 789130123;  // Randomly chosen to avoid collisions with existing configs.
 
@@ -35,12 +36,12 @@ void SendConfig(StatsService& service, const StatsdConfig& config) {
     config.SerializeToString(&str);
     std::vector<uint8_t> configAsVec(str.begin(), str.end());
     bool success;
-    service.addConfiguration(kConfigKey, configAsVec);
+    service.addConfiguration(kConfigKey, configAsVec, String16(kAndroid.c_str()));
 }
 
 ConfigMetricsReport GetReports(StatsService& service) {
     vector<uint8_t> output;
-    service.getData(kConfigKey, &output);
+    service.getData(kConfigKey, String16(kAndroid.c_str()), &output);
     ConfigMetricsReportList reports;
     reports.ParseFromArray(output.data(), output.size());
     EXPECT_EQ(1, reports.reports_size());
