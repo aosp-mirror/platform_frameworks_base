@@ -1500,7 +1500,6 @@ Landroid/os/PowerManager;->getMaximumScreenBrightnessSetting()I
 Landroid/os/PowerManager;->getMinimumScreenBrightnessSetting()I
 Landroid/os/PowerManager;->isLightDeviceIdleMode()Z
 Landroid/os/PowerManager;->mService:Landroid/os/IPowerManager;
-Landroid/os/PowerManager;->nap(J)V
 Landroid/os/PowerManager;->userActivity(JZ)V
 Landroid/os/PowerManager;->validateWakeLockParameters(ILjava/lang/String;)V
 Landroid/os/PowerManager;->wakeUp(JLjava/lang/String;)V
