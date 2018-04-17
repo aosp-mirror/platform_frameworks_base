@@ -69,6 +69,7 @@
         android:layout_toStartOf="@id/system_icons_container"
         android:gravity="center_vertical"
         android:ellipsize="marquee"
+        android:textDirection="locale"
         android:textAppearance="?android:attr/textAppearanceSmall"
         android:textColor="?attr/wallpaperTextColorSecondary"
         android:singleLine="true" />
