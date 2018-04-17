@@ -576,18 +576,18 @@
         <item>0</item>  <item>334</item>
     </array>
     <array name="batterymeter_plus_points">
-        <item>3</item><item>0</item>
         <item>5</item><item>0</item>
-        <item>5</item><item>3</item>
-        <item>8</item><item>3</item>
-        <item>8</item><item>5</item>
-        <item>5</item><item>5</item>
-        <item>5</item><item>8</item>
-        <item>3</item><item>8</item>
-        <item>3</item><item>5</item>
+        <item>11</item><item>0</item>
+        <item>11</item><item>5</item>
+        <item>16</item><item>5</item>
+        <item>16</item><item>11</item>
+        <item>11</item><item>11</item>
+        <item>11</item><item>16</item>
+        <item>5</item><item>16</item>
+        <item>5</item><item>11</item>
+        <item>0</item><item>11</item>
         <item>0</item><item>5</item>
-        <item>0</item><item>3</item>
-        <item>3</item><item>3</item>
+        <item>5</item><item>5</item>
     </array>
 
 </resources>
