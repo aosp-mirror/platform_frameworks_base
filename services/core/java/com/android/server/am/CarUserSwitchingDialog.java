@@ -20,17 +20,16 @@ import android.content.Context;
 import android.content.pm.UserInfo;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
-import android.graphics.Canvas;
+import android.graphics.BitmapFactory;
 import android.graphics.Color;
-import android.graphics.Paint;
-import android.graphics.Paint.Align;
 import android.graphics.drawable.ColorDrawable;
-import android.graphics.drawable.GradientDrawable;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
 import com.android.internal.R;
+import com.android.server.pm.UserManagerService;
+import java.io.FileDescriptor;
 
 /**
  * Dialog to show when a user switch it about to happen for the car. The intent is to snapshot the
@@ -60,54 +59,13 @@ final class CarUserSwitchingDialog extends UserSwitchingDialog {
         View view = LayoutInflater.from(getContext()).inflate(R.layout.car_user_switching_dialog,
             null);
 
+        FileDescriptor fileDescriptor = UserManagerService.getInstance()
+                .getUserIcon(mNewUser.id).getFileDescriptor();
+        Bitmap bitmap = BitmapFactory.decodeFileDescriptor(fileDescriptor);
         ((ImageView) view.findViewById(R.id.user_loading_avatar))
-            .setImageBitmap(getDefaultUserIcon(mNewUser));
+            .setImageBitmap(bitmap);
         ((TextView) view.findViewById(R.id.user_loading))
             .setText(res.getString(R.string.car_loading_profile));
         setView(view);
-    }
-
-    /**
-     * Returns the default user icon.  This icon is a circle with a letter in it.  The letter is
-     * the first character in the username.
-     *
-     * @param userInfo the profile of the user for which the icon should be created
-     */
-    private Bitmap getDefaultUserIcon(UserInfo userInfo) {
-        Resources res = mContext.getResources();
-        int mPodImageAvatarWidth = res.getDimensionPixelSize(
-            R.dimen.car_fullscreen_user_pod_image_avatar_width);
-        int mPodImageAvatarHeight = res.getDimensionPixelSize(
-            R.dimen.car_fullscreen_user_pod_image_avatar_height);
-        CharSequence displayText = userInfo.name.subSequence(0, 1);
-        Bitmap out = Bitmap.createBitmap(mPodImageAvatarWidth, mPodImageAvatarHeight,
-            Bitmap.Config.ARGB_8888);
-        Canvas canvas = new Canvas(out);
-
-        // Draw the circle background.
-        GradientDrawable shape = new GradientDrawable();
-        shape.setShape(GradientDrawable.RADIAL_GRADIENT);
-        shape.setGradientRadius(1.0f);
-        shape.setColor(mContext.getColor(R.color.car_user_switcher_user_image_bgcolor));
-        shape.setBounds(0, 0, mPodImageAvatarWidth, mPodImageAvatarHeight);
-        shape.draw(canvas);
-
-        // Draw the letter in the center.
-        Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG);
-        paint.setColor(mContext.getColor(R.color.car_user_switcher_user_image_fgcolor));
-        paint.setTextAlign(Align.CENTER);
-        paint.setTextSize(res.getDimensionPixelSize(
-            R.dimen.car_fullscreen_user_pod_icon_text_size));
-
-        Paint.FontMetricsInt metrics = paint.getFontMetricsInt();
-        // The Y coordinate is measured by taking half the height of the pod, but that would
-        // draw the character putting the bottom of the font in the middle of the pod.  To
-        // correct this, half the difference between the top and bottom distance metrics of the
-        // font gives the offset of the font.  Bottom is a positive value, top is negative, so
-        // the different is actually a sum.  The "half" operation is then factored out.
-        canvas.drawText(displayText.toString(), mPodImageAvatarWidth / 2,
-            (mPodImageAvatarHeight - (metrics.bottom + metrics.top)) / 2, paint);
-
-        return out;
     }
 }
