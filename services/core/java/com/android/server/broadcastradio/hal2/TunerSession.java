@@ -25,7 +25,6 @@ import android.hardware.radio.ITuner;
 import android.hardware.radio.ProgramList;
 import android.hardware.radio.ProgramSelector;
 import android.hardware.radio.RadioManager;
-import android.media.AudioSystem;
 import android.os.RemoteException;
 import android.util.MutableBoolean;
 import android.util.MutableInt;
@@ -45,7 +44,6 @@ class TunerSession extends ITuner.Stub {
     private final ITunerSession mHwSession;
     private final TunerCallback mCallback;
     private boolean mIsClosed = false;
-    private boolean mIsAudioConnected = false;
     private boolean mIsMuted = false;
 
     // necessary only for older APIs compatibility
@@ -56,7 +54,6 @@ class TunerSession extends ITuner.Stub {
         mModule = Objects.requireNonNull(module);
         mHwSession = Objects.requireNonNull(hwSession);
         mCallback = Objects.requireNonNull(callback);
-        notifyAudioServiceLocked(true);
     }
 
     @Override
@@ -64,7 +61,6 @@ class TunerSession extends ITuner.Stub {
         synchronized (mLock) {
             if (mIsClosed) return;
             mIsClosed = true;
-            notifyAudioServiceLocked(false);
         }
     }
 
@@ -76,22 +72,6 @@ class TunerSession extends ITuner.Stub {
     private void checkNotClosedLocked() {
         if (mIsClosed) {
             throw new IllegalStateException("Tuner is closed, no further operations are allowed");
-        }
-    }
-
-    private void notifyAudioServiceLocked(boolean connected) {
-        if (mIsAudioConnected == connected) return;
-
-        Slog.d(TAG, "Notifying AudioService about new state: " + connected);
-        int ret = AudioSystem.setDeviceConnectionState(AudioSystem.DEVICE_IN_FM_TUNER,
-            connected ? AudioSystem.DEVICE_STATE_AVAILABLE : AudioSystem.DEVICE_STATE_UNAVAILABLE,
-            null, kAudioDeviceName);
-
-        if (ret == AudioSystem.AUDIO_STATUS_OK) {
-            mIsAudioConnected = connected;
-        } else {
-            Slog.e(TAG, "Failed to notify AudioService about new state: "
-                    + connected + ", response was: " + ret);
         }
     }
 
@@ -119,7 +99,7 @@ class TunerSession extends ITuner.Stub {
             checkNotClosedLocked();
             if (mIsMuted == mute) return;
             mIsMuted = mute;
-            notifyAudioServiceLocked(!mute);
+            Slog.w(TAG, "Mute via RadioService is not implemented - please handle it via app");
         }
     }
 
