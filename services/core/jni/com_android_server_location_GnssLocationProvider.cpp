@@ -1745,12 +1745,12 @@ static void android_location_GnssLocationProvider_update_network_state(JNIEnv* e
     }
 }
 
-static jboolean android_location_GnssLocationProvider_is_geofence_supported(
+static jboolean android_location_GnssGeofenceProvider_is_geofence_supported(
         JNIEnv* /* env */, jobject /* obj */) {
     return (gnssGeofencingIface != nullptr) ? JNI_TRUE : JNI_FALSE;
 }
 
-static jboolean android_location_GnssLocationProvider_add_geofence(JNIEnv* /* env */,
+static jboolean android_location_GnssGeofenceProvider_add_geofence(JNIEnv* /* env */,
         jobject /* obj */, jint geofenceId, jdouble latitude, jdouble longitude, jdouble radius,
         jint last_transition, jint monitor_transition, jint notification_responsiveness,
         jint unknown_timer) {
@@ -1766,7 +1766,7 @@ static jboolean android_location_GnssLocationProvider_add_geofence(JNIEnv* /* en
     return JNI_FALSE;
 }
 
-static jboolean android_location_GnssLocationProvider_remove_geofence(JNIEnv* /* env */,
+static jboolean android_location_GnssGeofenceProvider_remove_geofence(JNIEnv* /* env */,
         jobject /* obj */, jint geofenceId) {
     if (gnssGeofencingIface != nullptr) {
         auto result = gnssGeofencingIface->removeGeofence(geofenceId);
@@ -1777,7 +1777,7 @@ static jboolean android_location_GnssLocationProvider_remove_geofence(JNIEnv* /*
     return JNI_FALSE;
 }
 
-static jboolean android_location_GnssLocationProvider_pause_geofence(JNIEnv* /* env */,
+static jboolean android_location_GnssGeofenceProvider_pause_geofence(JNIEnv* /* env */,
         jobject /* obj */, jint geofenceId) {
     if (gnssGeofencingIface != nullptr) {
         auto result = gnssGeofencingIface->pauseGeofence(geofenceId);
@@ -1788,7 +1788,7 @@ static jboolean android_location_GnssLocationProvider_pause_geofence(JNIEnv* /* 
     return JNI_FALSE;
 }
 
-static jboolean android_location_GnssLocationProvider_resume_geofence(JNIEnv* /* env */,
+static jboolean android_location_GnssGeofenceProvider_resume_geofence(JNIEnv* /* env */,
         jobject /* obj */, jint geofenceId, jint monitor_transition) {
     if (gnssGeofencingIface != nullptr) {
         auto result = gnssGeofencingIface->resumeGeofence(geofenceId, monitor_transition);
@@ -2178,20 +2178,6 @@ static const JNINativeMethod sMethods[] = {
     {"native_update_network_state",
             "(ZIZZLjava/lang/String;Ljava/lang/String;)V",
             reinterpret_cast<void *>(android_location_GnssLocationProvider_update_network_state)},
-    {"native_is_geofence_supported",
-            "()Z",
-            reinterpret_cast<void *>(android_location_GnssLocationProvider_is_geofence_supported)},
-    {"native_add_geofence",
-            "(IDDDIIII)Z",
-            reinterpret_cast<void *>(android_location_GnssLocationProvider_add_geofence)},
-    {"native_remove_geofence",
-            "(I)Z",
-            reinterpret_cast<void *>(android_location_GnssLocationProvider_remove_geofence)},
-    {"native_pause_geofence", "(I)Z", reinterpret_cast<void *>(
-            android_location_GnssLocationProvider_pause_geofence)},
-    {"native_resume_geofence",
-            "(II)Z",
-            reinterpret_cast<void *>(android_location_GnssLocationProvider_resume_geofence)},
     {"native_is_measurement_supported",
             "()Z",
             reinterpret_cast<void *>(
@@ -2265,12 +2251,35 @@ static const JNINativeMethod sMethodsBatching[] = {
             reinterpret_cast<void *>(android_location_GnssBatchingProvider_cleanup_batching)},
 };
 
+static const JNINativeMethod sGeofenceMethods[] = {
+     /* name, signature, funcPtr */
+    {"native_is_geofence_supported",
+            "()Z",
+            reinterpret_cast<void *>(android_location_GnssGeofenceProvider_is_geofence_supported)},
+    {"native_add_geofence",
+            "(IDDDIIII)Z",
+            reinterpret_cast<void *>(android_location_GnssGeofenceProvider_add_geofence)},
+    {"native_remove_geofence",
+            "(I)Z",
+            reinterpret_cast<void *>(android_location_GnssGeofenceProvider_remove_geofence)},
+    {"native_pause_geofence", "(I)Z", reinterpret_cast<void *>(
+            android_location_GnssGeofenceProvider_pause_geofence)},
+    {"native_resume_geofence",
+            "(II)Z",
+            reinterpret_cast<void *>(android_location_GnssGeofenceProvider_resume_geofence)},
+};
+
 int register_android_server_location_GnssLocationProvider(JNIEnv* env) {
     jniRegisterNativeMethods(
             env,
             "com/android/server/location/GnssBatchingProvider",
             sMethodsBatching,
             NELEM(sMethodsBatching));
+    jniRegisterNativeMethods(
+            env,
+            "com/android/server/location/GnssGeofenceProvider",
+            sGeofenceMethods,
+            NELEM(sGeofenceMethods));
     return jniRegisterNativeMethods(
             env,
             "com/android/server/location/GnssLocationProvider",
