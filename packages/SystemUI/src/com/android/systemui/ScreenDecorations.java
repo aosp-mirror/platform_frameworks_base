@@ -421,7 +421,7 @@ public class ScreenDecorations extends SystemUI implements Tunable {
             int dw = flipped ? lh : lw;
             int dh = flipped ? lw : lh;
 
-            mBoundingPath.set(DisplayCutout.pathFromResources(getResources(), lw, lh));
+            mBoundingPath.set(DisplayCutout.pathFromResources(getResources(), dw, dh));
             Matrix m = new Matrix();
             transformPhysicalToLogicalCoordinates(mInfo.rotation, dw, dh, m);
             mBoundingPath.transform(m);

@@ -678,9 +678,9 @@
     <string name="keyboard_shortcut_group_system_recents" msgid="3154851905021926744">"ఇటీవలివి"</string>
     <string name="keyboard_shortcut_group_system_back" msgid="2207004531216446378">"వెనుకకు"</string>
     <string name="keyboard_shortcut_group_system_notifications" msgid="8366964080041773224">"నోటిఫికేషన్‌లు"</string>
-    <string name="keyboard_shortcut_group_system_shortcuts_helper" msgid="4892255911160332762">"కీబోర్డ్ సత్వరమార్గాలు"</string>
+    <string name="keyboard_shortcut_group_system_shortcuts_helper" msgid="4892255911160332762">"కీబోర్డ్ షార్ట్‌కట్‌లు"</string>
     <string name="keyboard_shortcut_group_system_switch_input" msgid="2334164096341310324">"ఇన్‌పుట్ పద్ధతిని మార్చండి"</string>
-    <string name="keyboard_shortcut_group_applications" msgid="9129465955073449206">"అనువర్తనాలు"</string>
+    <string name="keyboard_shortcut_group_applications" msgid="9129465955073449206">"అప్లికేషన్‌లు"</string>
     <string name="keyboard_shortcut_group_applications_assist" msgid="9095441910537146013">"సహాయకం"</string>
     <string name="keyboard_shortcut_group_applications_browser" msgid="6465985474000766533">"బ్రౌజర్"</string>
     <string name="keyboard_shortcut_group_applications_contacts" msgid="2064197111278436375">"పరిచయాలు"</string>

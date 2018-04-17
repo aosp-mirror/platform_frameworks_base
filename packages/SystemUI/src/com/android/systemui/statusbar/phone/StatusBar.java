@@ -2763,6 +2763,10 @@ public class StatusBar extends SystemUI implements DemoMode,
             mScrimController.dump(fd, pw, args);
         }
 
+        if (mStatusBarKeyguardViewManager != null) {
+            mStatusBarKeyguardViewManager.dump(pw);
+        }
+
         if (DUMPTRUCK) {
             synchronized (mEntryManager.getNotificationData()) {
                 mEntryManager.getNotificationData().dump(pw, "  ");

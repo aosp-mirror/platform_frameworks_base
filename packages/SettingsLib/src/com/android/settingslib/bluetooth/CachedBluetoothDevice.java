@@ -18,6 +18,7 @@ package com.android.settingslib.bluetooth;
 
 import android.bluetooth.BluetoothClass;
 import android.bluetooth.BluetoothDevice;
+import android.bluetooth.BluetoothHearingAid;
 import android.bluetooth.BluetoothProfile;
 import android.bluetooth.BluetoothUuid;
 import android.content.Context;
@@ -53,6 +54,7 @@ public class CachedBluetoothDevice implements Comparable<CachedBluetoothDevice> 
     private final BluetoothDevice mDevice;
     //TODO: consider remove, BluetoothDevice.getName() is already cached
     private String mName;
+    private long mHiSyncId;
     // Need this since there is no method for getting RSSI
     private short mRssi;
     //TODO: consider remove, BluetoothDevice.getBluetoothClass() is already cached
@@ -93,6 +95,17 @@ public class CachedBluetoothDevice implements Comparable<CachedBluetoothDevice> 
      * error even if they all fail. This tracks that state.
      */
     private boolean mIsConnectingErrorPossible;
+
+    public long getHiSyncId() {
+        return mHiSyncId;
+    }
+
+    public void setHiSyncId(long id) {
+        if (Utils.D) {
+            Log.d(TAG, "setHiSyncId: mDevice " + mDevice + ", id " + id);
+        }
+        mHiSyncId = id;
+    }
 
     /**
      * Last time a bt profile auto-connect was attempted.
@@ -175,6 +188,7 @@ public class CachedBluetoothDevice implements Comparable<CachedBluetoothDevice> 
         mDevice = device;
         mProfileConnectionState = new HashMap<LocalBluetoothProfile, Integer>();
         fillData();
+        mHiSyncId = BluetoothHearingAid.HI_SYNC_ID_INVALID;
     }
 
     public void disconnect() {
@@ -336,7 +350,7 @@ public class CachedBluetoothDevice implements Comparable<CachedBluetoothDevice> 
                     }
                 } else if (Utils.V) {
                     Log.v(TAG, "Framework rejected command immediately:REMOVE_BOND " +
-                            describe(null));
+                        describe(null));
                 }
             }
         }
@@ -1064,5 +1078,21 @@ public class CachedBluetoothDevice implements Comparable<CachedBluetoothDevice> 
 
         return getBondState() == BluetoothDevice.BOND_BONDING ?
                 mContext.getString(R.string.bluetooth_pairing) : null;
+    }
+
+    /**
+     * @return {@code true} if {@code cachedBluetoothDevice} is a2dp device
+     */
+    public boolean isA2dpDevice() {
+        return mProfileManager.getA2dpProfile().getConnectionStatus(mDevice) ==
+                BluetoothProfile.STATE_CONNECTED;
+    }
+
+    /**
+     * @return {@code true} if {@code cachedBluetoothDevice} is HFP device
+     */
+    public boolean isHfpDevice() {
+        return mProfileManager.getHeadsetProfile().getConnectionStatus(mDevice) ==
+                BluetoothProfile.STATE_CONNECTED;
     }
 }

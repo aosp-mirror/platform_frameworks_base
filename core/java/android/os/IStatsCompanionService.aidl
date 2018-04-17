@@ -66,7 +66,7 @@ interface IStatsCompanionService {
     StatsLogEventWrapper[] pullData(int pullCode);
 
     /** Send a broadcast to the specified PendingIntent's as IBinder that it should getData now. */
-    oneway void sendDataBroadcast(in IBinder intentSender);
+    oneway void sendDataBroadcast(in IBinder intentSender, long lastReportTimeNs);
 
     /**
      * Requests StatsCompanionService to send a broadcast using the given intentSender

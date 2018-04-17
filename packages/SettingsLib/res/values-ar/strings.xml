@@ -164,7 +164,7 @@
     <string name="tts_status_checking" msgid="5339150797940483592">"جارٍ التحقق…"</string>
     <string name="tts_engine_settings_title" msgid="3499112142425680334">"إعدادات <xliff:g id="TTS_ENGINE_NAME">%s</xliff:g>"</string>
     <string name="tts_engine_settings_button" msgid="1030512042040722285">"تشغيل إعدادات المحرك"</string>
-    <string name="tts_engine_preference_section_title" msgid="448294500990971413">"المحرك المفضل"</string>
+    <string name="tts_engine_preference_section_title" msgid="448294500990971413">"المحرّك المفضّل"</string>
     <string name="tts_general_section_title" msgid="4402572014604490502">"عامة"</string>
     <string name="tts_reset_speech_pitch_title" msgid="5789394019544785915">"إعادة ضبط طبقة صوت الكلام"</string>
     <string name="tts_reset_speech_pitch_summary" msgid="8700539616245004418">"إعادة ضبط طبقة الصوت التي يتم نطق النص بها على الإعداد الافتراضي."</string>
@@ -196,7 +196,7 @@
     <string name="bugreport_in_power_summary" msgid="1778455732762984579">"عرض زر في قائمة خيارات التشغيل لإعداد تقرير بالأخطاء"</string>
     <string name="keep_screen_on" msgid="1146389631208760344">"البقاء في الوضع النشط"</string>
     <string name="keep_screen_on_summary" msgid="2173114350754293009">"لا يتم مطلقًا دخول الشاشة في وضع السكون أثناء الشحن"</string>
-    <string name="bt_hci_snoop_log" msgid="3340699311158865670">"تمكين سجل تطفل بواجهة وحدة تحكم المضيف عبر بلوتوث"</string>
+    <string name="bt_hci_snoop_log" msgid="3340699311158865670">"تفعيل سجلّ تطفّل بواجهة وحدة تحكّم المضيف عبر بلوتوث"</string>
     <string name="bt_hci_snoop_log_summary" msgid="366083475849911315">"‏التقاط جميع حزم واجهة وحدة تحكم المضيف (HCI) في أحد الملفات عبر البلوتوث (تبديل البلوتوث بعد تغيير هذا الإعداد)"</string>
     <string name="oem_unlock_enable" msgid="6040763321967327691">"إلغاء قفل المصنّع الأصلي للجهاز"</string>
     <string name="oem_unlock_enable_summary" msgid="4720281828891618376">"‏السماح بإلغاء قفل برنامج bootloader"</string>
@@ -212,7 +212,7 @@
     <string name="mobile_data_always_on" msgid="8774857027458200434">"بيانات الجوّال نشطة دائمًا"</string>
     <string name="tethering_hardware_offload" msgid="7470077827090325814">"تسريع الأجهزة للتوصيل"</string>
     <string name="bluetooth_show_devices_without_names" msgid="4708446092962060176">"عرض أجهزة البلوتوث بدون أسماء"</string>
-    <string name="bluetooth_disable_absolute_volume" msgid="2660673801947898809">"تعطيل مستوى الصوت المطلق"</string>
+    <string name="bluetooth_disable_absolute_volume" msgid="2660673801947898809">"إيقاف مستوى الصوت المطلق"</string>
     <string name="bluetooth_select_avrcp_version_string" msgid="3750059931120293633">"‏إصدار Bluetooth AVRCP"</string>
     <string name="bluetooth_select_avrcp_version_dialog_title" msgid="7277329668298705702">"‏اختيار إصدار Bluetooth AVRCP"</string>
     <string name="bluetooth_select_a2dp_codec_type" msgid="90597356942154882">"ترميز صوت بلوتوث"</string>
@@ -248,7 +248,7 @@
     <string name="select_usb_configuration_dialog_title" msgid="6385564442851599963">"‏حدد تهيئة USB"</string>
     <string name="allow_mock_location" msgid="2787962564578664888">"السماح بمواقع وهمية"</string>
     <string name="allow_mock_location_summary" msgid="317615105156345626">"السماح بمواقع وهمية"</string>
-    <string name="debug_view_attributes" msgid="6485448367803310384">"تمكين فحص سمة العرض"</string>
+    <string name="debug_view_attributes" msgid="6485448367803310384">"تفعيل فحص سمة العرض"</string>
     <string name="mobile_data_always_on_summary" msgid="8149773901431697910">"‏اجعل بيانات الجوّال نشطة دائمًا، حتى عندما يكون اتصال Wi‑Fi نشطًا (لتبديل الشبكة بسرعة)."</string>
     <string name="tethering_hardware_offload_summary" msgid="7726082075333346982">"استخدام إعداد تسريع الأجهزة للتوصيل إن كان متاحًا"</string>
     <string name="adb_warning_title" msgid="6234463310896563253">"‏هل تريد السماح بتصحيح أخطاء USB؟"</string>
@@ -259,7 +259,7 @@
     <string name="verify_apps_over_usb_title" msgid="4177086489869041953">"‏التحقق من التطبيقات عبر USB"</string>
     <string name="verify_apps_over_usb_summary" msgid="9164096969924529200">"‏التحقق من التطبيقات المثبتة عبر ADB/ADT لكشف السلوك الضار"</string>
     <string name="bluetooth_show_devices_without_names_summary" msgid="2351196058115755520">"‏سيتم عرض أجهزة البلوتوث بدون أسماء (عناوين MAC فقط)"</string>
-    <string name="bluetooth_disable_absolute_volume_summary" msgid="6031284410786545957">"لتعطيل ميزة مستوى الصوت المطلق للبلوتوث في حالة حدوث مشكلات متعلقة بمستوى الصوت مع الأجهزة البعيدة مثل مستوى صوت عالٍ بشكل غير مقبول أو نقص إمكانية التحكم في الصوت."</string>
+    <string name="bluetooth_disable_absolute_volume_summary" msgid="6031284410786545957">"لإيقاف ميزة مستوى الصوت المطلق للبلوتوث في حال حدوث مشاكل متعلقة بمستوى الصوت في الأجهزة البعيدة، مثل مستوى صوت عالٍ بشكل غير مقبول أو عدم إمكانية التحكّم في الصوت"</string>
     <string name="enable_terminal_title" msgid="95572094356054120">"تطبيق طرفي محلي"</string>
     <string name="enable_terminal_summary" msgid="67667852659359206">"تمكين تطبيق طرفي يوفر إمكانية الدخول إلى واجهة النظام المحلية"</string>
     <string name="hdcp_checking_title" msgid="8605478913544273282">"‏التحقق من HDCP"</string>
@@ -277,7 +277,7 @@
     <string name="debug_hw_drawing_category" msgid="6220174216912308658">"عرض تسارع الأجهزة"</string>
     <string name="media_category" msgid="4388305075496848353">"الوسائط"</string>
     <string name="debug_monitoring_category" msgid="7640508148375798343">"المراقبة"</string>
-    <string name="strict_mode" msgid="1938795874357830695">"تم تمكين الوضع المتشدد"</string>
+    <string name="strict_mode" msgid="1938795874357830695">"تفعيل الوضع المتشدد"</string>
     <string name="strict_mode_summary" msgid="142834318897332338">"وميض الشاشة عند إجراء التطبيقات عمليات طويلة في سلسلة المحادثات الرئيسية"</string>
     <string name="pointer_location" msgid="6084434787496938001">"موقع المؤشر"</string>
     <string name="pointer_location_summary" msgid="840819275172753713">"عرض تراكب الشاشة لبيانات اللمس الحالية"</string>
@@ -290,12 +290,12 @@
     <string name="show_hw_layers_updates" msgid="5645728765605699821">"عرض تحديثات طبقات الأجهزة"</string>
     <string name="show_hw_layers_updates_summary" msgid="5296917233236661465">"تشغيل وميض بالأخضر لطبقات الأجهزة عند تحديثها"</string>
     <string name="debug_hw_overdraw" msgid="2968692419951565417">"تصحيح تجاوز حد وحدة معالجة الرسومات"</string>
-    <string name="disable_overlays" msgid="2074488440505934665">"تعطيل تراكبات الأجهزة"</string>
+    <string name="disable_overlays" msgid="2074488440505934665">"إيقاف تراكبات الأجهزة"</string>
     <string name="disable_overlays_summary" msgid="3578941133710758592">"استخدام وحدة معالجة الرسومات دائمًا لتركيب الشاشة"</string>
     <string name="simulate_color_space" msgid="6745847141353345872">"محاكاة مسافة اللون"</string>
     <string name="enable_opengl_traces_title" msgid="6790444011053219871">"‏تمكين عمليات تتبع OpenGL"</string>
-    <string name="usb_audio_disable_routing" msgid="8114498436003102671">"‏تعطيل توجيه الصوت عبر USB"</string>
-    <string name="usb_audio_disable_routing_summary" msgid="980282760277312264">"‏تعطيل التوجيه التلقائي إلى أجهزة الصوت الطرفية عبر USB"</string>
+    <string name="usb_audio_disable_routing" msgid="8114498436003102671">"‏إيقاف توجيه الصوت عبر USB"</string>
+    <string name="usb_audio_disable_routing_summary" msgid="980282760277312264">"‏إيقاف التوجيه التلقائي إلى أجهزة الصوت الطرفية عبر USB"</string>
     <string name="debug_layout" msgid="5981361776594526155">"عرض حدود المخطط"</string>
     <string name="debug_layout_summary" msgid="2001775315258637682">"عرض حدود وهوامش المقطع وما إلى ذلك."</string>
     <string name="force_rtl_layout_all_locales" msgid="2259906643093138978">"فرض اتجاه التنسيق ليكون من اليمين إلى اليسار"</string>

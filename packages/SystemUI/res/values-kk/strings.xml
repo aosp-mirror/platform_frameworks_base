@@ -321,7 +321,7 @@
     <string name="quick_settings_brightness_dialog_title" msgid="8599674057673605368">"Жарықтығы"</string>
     <string name="quick_settings_brightness_dialog_auto_brightness_label" msgid="5064982743784071218">"Авто"</string>
     <string name="quick_settings_inversion_label" msgid="8790919884718619648">"Түстерді инверсиялау"</string>
-    <string name="quick_settings_color_space_label" msgid="853443689745584770">"Түсті жөндеу режимі"</string>
+    <string name="quick_settings_color_space_label" msgid="853443689745584770">"Түсті түзету режимі"</string>
     <string name="quick_settings_more_settings" msgid="326112621462813682">"Қосымша параметрлер"</string>
     <string name="quick_settings_done" msgid="3402999958839153376">"Дайын"</string>
     <string name="quick_settings_connected" msgid="1722253542984847487">"Қосылды"</string>
@@ -461,7 +461,7 @@
     <string name="monitoring_title_device_owned" msgid="1652495295941959815">"Құрылғыны басқару"</string>
     <string name="monitoring_title_profile_owned" msgid="6790109874733501487">"Профильді бақылау"</string>
     <string name="monitoring_title" msgid="169206259253048106">"Желіні бақылау"</string>
-    <string name="monitoring_subtitle_vpn" msgid="876537538087857300">"VPN (Виртуалды жеке желі)"</string>
+    <string name="monitoring_subtitle_vpn" msgid="876537538087857300">"VPN"</string>
     <string name="monitoring_subtitle_network_logging" msgid="3341264304793193386">"Желі журналын жүргізу"</string>
     <string name="monitoring_subtitle_ca_certificate" msgid="3874151893894355988">"CA сертификаттары"</string>
     <string name="disable_vpn" msgid="4435534311510272506">"VPN функциясын өшіру"</string>
@@ -621,7 +621,7 @@
       <item quantity="one"><xliff:g id="PERFORMING_ACTIVITY_0">%1$s</xliff:g> пайдалануда</item>
     </plurals>
     <string name="notification_appops_settings" msgid="1028328314935908050">"Параметрлер"</string>
-    <string name="notification_appops_ok" msgid="602562195588819631">"ОК"</string>
+    <string name="notification_appops_ok" msgid="602562195588819631">"Жарайды"</string>
     <string name="notification_channel_controls_opened_accessibility" msgid="6553950422055908113">"<xliff:g id="APP_NAME">%1$s</xliff:g> хабарландыруларын басқару элементтері ашылды"</string>
     <string name="notification_channel_controls_closed_accessibility" msgid="7521619812603693144">"<xliff:g id="APP_NAME">%1$s</xliff:g> хабарландыруларын басқару элементтері жабылды"</string>
     <string name="notification_channel_switch_accessibility" msgid="3420796005601900717">"Осы арнадан келетін хабарландыруларға рұқсат беру"</string>

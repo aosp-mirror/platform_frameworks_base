@@ -148,16 +148,13 @@
     <string name="data_connection_gprs" msgid="7652872568358508452">"GPRS"</string>
     <string name="data_connection_hspa" msgid="1499615426569473562">"HSPA"</string>
     <string name="data_connection_3g" msgid="503045449315378373">"3G"</string>
-    <!-- no translation found for data_connection_3_5g (3164370985817123144) -->
-    <skip />
-    <!-- no translation found for data_connection_3_5g_plus (4464630787664529264) -->
-    <skip />
+    <string name="data_connection_3_5g" msgid="3164370985817123144">"H"</string>
+    <string name="data_connection_3_5g_plus" msgid="4464630787664529264">"H+"</string>
     <string name="data_connection_4g" msgid="9139963475267449144">"4G"</string>
     <string name="data_connection_4g_plus" msgid="1148687201877800700">"4G+"</string>
     <string name="data_connection_lte" msgid="2694876797724028614">"LTE"</string>
     <string name="data_connection_lte_plus" msgid="3423013208570937424">"LTE+"</string>
-    <!-- no translation found for data_connection_cdma (8176597308239086780) -->
-    <skip />
+    <string name="data_connection_cdma" msgid="8176597308239086780">"1X"</string>
     <string name="data_connection_roaming" msgid="6037232010953697354">"रोमिंग"</string>
     <string name="data_connection_edge" msgid="871835227939216682">"EDGE"</string>
     <string name="accessibility_data_connection_wifi" msgid="2324496756590645221">"वाई-फ़ाई"</string>
@@ -412,7 +409,7 @@
     <string name="accessibility_multi_user_switch_quick_contact" msgid="3020367729287990475">"प्रोफ़ाइल दिखाएं"</string>
     <string name="user_add_user" msgid="5110251524486079492">"उपयोगकर्ता जोड़ें"</string>
     <string name="user_new_user_name" msgid="426540612051178753">"नया उपयोगकर्ता"</string>
-    <string name="guest_nickname" msgid="8059989128963789678">"अतिथि"</string>
+    <string name="guest_nickname" msgid="8059989128963789678">"मेहमान"</string>
     <string name="guest_new_guest" msgid="600537543078847803">"अतिथि जोड़ें"</string>
     <string name="guest_exit_guest" msgid="7187359342030096885">"अतिथि को निकालें"</string>
     <string name="guest_exit_guest_dialog_title" msgid="8480693520521766688">"अतिथि को निकालें?"</string>

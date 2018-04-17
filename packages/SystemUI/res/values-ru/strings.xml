@@ -143,7 +143,7 @@
     <string name="accessibility_two_bars" msgid="6437363648385206679">"два деления"</string>
     <string name="accessibility_three_bars" msgid="2648241415119396648">"три деления"</string>
     <string name="accessibility_signal_full" msgid="9122922886519676839">"надежный сигнал"</string>
-    <string name="accessibility_desc_on" msgid="2385254693624345265">"Вкл."</string>
+    <string name="accessibility_desc_on" msgid="2385254693624345265">"Включено"</string>
     <string name="accessibility_desc_off" msgid="6475508157786853157">"Отключено"</string>
     <string name="accessibility_desc_connected" msgid="8366256693719499665">"Подключено"</string>
     <string name="accessibility_desc_connecting" msgid="3812924520316280149">"Соединение."</string>

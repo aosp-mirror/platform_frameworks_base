@@ -36,7 +36,7 @@
     <string name="wifi_no_internet" msgid="4663834955626848401">"Интернетке туташпай турат"</string>
     <string name="saved_network" msgid="4352716707126620811">"<xliff:g id="NAME">%1$s</xliff:g> тарабынан сакталды"</string>
     <string name="connected_via_network_scorer" msgid="5713793306870815341">"%1$s аркылуу автоматтык түрдө туташты"</string>
-    <string name="connected_via_network_scorer_default" msgid="7867260222020343104">"Тармактардын рейтингинин автору аркылуу автоматтык түрдө туташты"</string>
+    <string name="connected_via_network_scorer_default" msgid="7867260222020343104">"Тармактар рейтингинин автору аркылуу автоматтык түрдө туташты"</string>
     <string name="connected_via_passpoint" msgid="2826205693803088747">"%1$s аркылуу жеткиликтүү"</string>
     <string name="available_via_passpoint" msgid="1617440946846329613">"%1$s аркылуу жеткиликтүү"</string>
     <string name="wifi_connected_no_internet" msgid="8202906332837777829">"Туташып турат, Интернет жок"</string>
@@ -190,10 +190,10 @@
     <string name="tethering_settings_not_available" msgid="6765770438438291012">"Бул колдонуучу тетеринг жөндөөлөрүн колдоно албайт"</string>
     <string name="apn_settings_not_available" msgid="7873729032165324000">"Бул колдонуучу мүмкүндүк алуу түйүнүнүн аталышынын жөндөөлөрүн колдоно албайт"</string>
     <string name="enable_adb" msgid="7982306934419797485">"USB аркылуу мүчүлүштүктөрдү оңдоо"</string>
-    <string name="enable_adb_summary" msgid="4881186971746056635">"USB туташтырылган учурдагы мүчүлүштүктөрдү оңдоо режими"</string>
-    <string name="clear_adb_keys" msgid="4038889221503122743">"USB аркылуу жөндөө уруксатын кайтарып алуу"</string>
-    <string name="bugreport_in_power" msgid="7923901846375587241">"Мүчүлүштүктөр жөнүндө кабардын кыска жолу"</string>
-    <string name="bugreport_in_power_summary" msgid="1778455732762984579">"Мүчүлүштүктөр жөнүндө кабар алуу үчүн, жандыруу менюсунда баскыч көрсөтүлсүн"</string>
+    <string name="enable_adb_summary" msgid="4881186971746056635">"USB компьютерге сайылганда мүчүлүштүктөрдү оңдоо режими иштейт"</string>
+    <string name="clear_adb_keys" msgid="4038889221503122743">"USB аркылуу мүчүлүштүктөрдү оңдоо уруксатын артка кайтаруу"</string>
+    <string name="bugreport_in_power" msgid="7923901846375587241">"Ката жөнүндө кабарлоо"</string>
+    <string name="bugreport_in_power_summary" msgid="1778455732762984579">"Менюда ката жөнүндө кабарлоо баскычы көрүнүп турат"</string>
     <string name="keep_screen_on" msgid="1146389631208760344">"Ойгоо туруу"</string>
     <string name="keep_screen_on_summary" msgid="2173114350754293009">"Түзмөк кубатталып жатканда экран өчпөйт"</string>
     <string name="bt_hci_snoop_log" msgid="3340699311158865670">"Bluetooth HCI журналын иштетүү"</string>
@@ -202,15 +202,15 @@
     <string name="oem_unlock_enable_summary" msgid="4720281828891618376">"Кайра жүктөгүчтү бөгөттөн чыгарууга уруксат берүү"</string>
     <string name="confirm_enable_oem_unlock_title" msgid="4802157344812385674">"OEM бөгөттөн чыгарууга уруксатпы?"</string>
     <string name="confirm_enable_oem_unlock_text" msgid="5517144575601647022">"ЭСКЕРТҮҮ: Бул жөндөө күйгүзүлүп турганда түзмөктү коргоо өзгөчөлүктөрү иштебейт."</string>
-    <string name="mock_location_app" msgid="7966220972812881854">"Жалган жайгашкан жерлер үчүн колдонмо тандоо"</string>
-    <string name="mock_location_app_not_set" msgid="809543285495344223">"Жалган жайгашкан жерлер үчүн колдонмо коюлган жок"</string>
-    <string name="mock_location_app_set" msgid="8966420655295102685">"Жалган жайгашкан жерлер үчүн колдонмо: <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
-    <string name="debug_networking_category" msgid="7044075693643009662">"Тармактык байланыштарды кеңейтүү"</string>
-    <string name="wifi_display_certification" msgid="8611569543791307533">"Зымсыз дисплейди аныктоо"</string>
-    <string name="wifi_verbose_logging" msgid="4203729756047242344">"Wi‑Fi дайын-даректүү протоколун иштетүү"</string>
-    <string name="wifi_connected_mac_randomization" msgid="3168165236877957767">"Кокустан тандалган MAC дарегине туташты"</string>
-    <string name="mobile_data_always_on" msgid="8774857027458200434">"Мобилдик Интернет иштей берсин"</string>
-    <string name="tethering_hardware_offload" msgid="7470077827090325814">"Тетерингдин иштешин тездетүү"</string>
+    <string name="mock_location_app" msgid="7966220972812881854">"Жалган жайгашкан жерлерди көрсөткөн колдонмону тандоо"</string>
+    <string name="mock_location_app_not_set" msgid="809543285495344223">"Жалган жайгашкан жерлерди көрсөткөн колдонмо жок"</string>
+    <string name="mock_location_app_set" msgid="8966420655295102685">"Жалган жайгашкан жерлерди көрсөткөн колдонмо: <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
+    <string name="debug_networking_category" msgid="7044075693643009662">"Тармактар"</string>
+    <string name="wifi_display_certification" msgid="8611569543791307533">"Зымсыз мониторлорду тастыктамалоо"</string>
+    <string name="wifi_verbose_logging" msgid="4203729756047242344">"Wi‑Fi дайын-даректүү журналы"</string>
+    <string name="wifi_connected_mac_randomization" msgid="3168165236877957767">"Wi-Fi аркылуу туташканда башаламан MAC даректерди түзүү"</string>
+    <string name="mobile_data_always_on" msgid="8774857027458200434">"Мобилдик Интернет иштей берет"</string>
+    <string name="tethering_hardware_offload" msgid="7470077827090325814">"Модем режиминде аппараттын иштешин тездетүү"</string>
     <string name="bluetooth_show_devices_without_names" msgid="4708446092962060176">"Аталышсыз Bluetooth түзмөктөрү көрсөтүлсүн"</string>
     <string name="bluetooth_disable_absolute_volume" msgid="2660673801947898809">"Үндүн абсолюттук деңгээли өчүрүлсүн"</string>
     <string name="bluetooth_select_avrcp_version_string" msgid="3750059931120293633">"Bluetooth AVRCP версиясы"</string>
@@ -227,15 +227,15 @@
     <string name="bluetooth_select_a2dp_codec_ldac_playback_quality_dialog_title" msgid="7595776220458732825">"Bluetooth Audio кодегин иштетүү\nТандоо: Ойнотуу сапаты"</string>
     <string name="bluetooth_select_a2dp_codec_streaming_label" msgid="5347862512596240506">"Трансляция: <xliff:g id="STREAMING_PARAMETER">%1$s</xliff:g>"</string>
     <string name="select_private_dns_configuration_title" msgid="3700456559305263922">"Купуя DNS"</string>
-    <string name="select_private_dns_configuration_dialog_title" msgid="9221994415765826811">"Купуя DNS режимин тандаңыз"</string>
+    <string name="select_private_dns_configuration_dialog_title" msgid="9221994415765826811">"Жеке DNS режимин тандаңыз"</string>
     <string name="private_dns_mode_off" msgid="8236575187318721684">"Өчүк"</string>
     <string name="private_dns_mode_opportunistic" msgid="8314986739896927399">"Автоматтык режим"</string>
     <string name="private_dns_mode_provider" msgid="8354935160639360804">"Купуя DNS түйүндүн аталышы"</string>
     <string name="private_dns_mode_provider_hostname_hint" msgid="2487492386970928143">"DNS түйүндүн аталышын киргизиңиз"</string>
     <string name="private_dns_mode_provider_failure" msgid="231837290365031223">"Туташпай койду"</string>
-    <string name="wifi_display_certification_summary" msgid="1155182309166746973">"Зымсыз дисплейди сертификатто мүмкүнчүлүктөрүн көргөзүү"</string>
-    <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"Wi-Fi Кармагычта Wi‑Fi протокол деңгээлин жогорулатуу жана ар бир SSID RSSI үчүн көрсөтүү."</string>
-    <string name="wifi_connected_mac_randomization_summary" msgid="1743059848752201485">"Wi‑Fi тармагына туташууда кокустан тандаган MAC дарегин колдонуу"</string>
+    <string name="wifi_display_certification_summary" msgid="1155182309166746973">"Зымсыз мониторлорду тастыктамалоо параметрлери көрүнүп турат"</string>
+    <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"Wi-Fi тандалганда ар бир SSID үчүн RSSI көрүнүп турат"</string>
+    <string name="wifi_connected_mac_randomization_summary" msgid="1743059848752201485">"Wi‑Fi тармактарын туташканда MAC даректери башаламан түзүлүп турат"</string>
     <string name="wifi_metered_label" msgid="4514924227256839725">"Трафик ченелет"</string>
     <string name="wifi_unmetered_label" msgid="6124098729457992931">"Чектелбеген тармак"</string>
     <string name="select_logd_size_title" msgid="7433137108348553508">"Журнал буферинин өлчөмү"</string>
@@ -249,8 +249,8 @@
     <string name="allow_mock_location" msgid="2787962564578664888">"Жасалма жайгашкан жерди көрсөтүүгө уруксат берилсин"</string>
     <string name="allow_mock_location_summary" msgid="317615105156345626">"Жасалма жайгашкан жерди көрсөтүүгө уруксат берилсин"</string>
     <string name="debug_view_attributes" msgid="6485448367803310384">"Аттрибуттарды текшерүүнү иштетүү"</string>
-    <string name="mobile_data_always_on_summary" msgid="8149773901431697910">"Wi-Fi иштеп турганда да дайындар мобилдик тармак аркылуу өткөрүлө берсин (тармактар ортосунда тезирээк которулуу үчүн)."</string>
-    <string name="tethering_hardware_offload_summary" msgid="7726082075333346982">"Эгер мүмкүн болсо, тетерингдин иштеши тездетилсин"</string>
+    <string name="mobile_data_always_on_summary" msgid="8149773901431697910">"Wi-Fi иштеп турганда да дайындар мобилдик тармак аркылуу өткөрүлө берет (бир тармактан экинчисине тезирээк которулуу үчүн)."</string>
+    <string name="tethering_hardware_offload_summary" msgid="7726082075333346982">"Мүмкүнчүлүккө жараша, модем режиминде аппарат тезирээк иштей баштайт"</string>
     <string name="adb_warning_title" msgid="6234463310896563253">"USB аркылуу жөндөөгө уруксат берилсинби?"</string>
     <string name="adb_warning_message" msgid="7316799925425402244">"USB-жөндөө - өндүрүү максатында гана  түзүлгөн. Аны компүтериңиз менен түзмөгүңүздүн ортосунда берилиштерди алмашуу, түзмөгүңүзгө колдонмолорду эскертүүсүз орнотуу жана лог берилиштерин окуу үчүн колдонсоңуз болот."</string>
     <string name="adb_keys_warning_message" msgid="5659849457135841625">"Сиз мурун USB жөндөөлөрүнө уруксат берген бардык компүтерлердин жеткиси жокко чыгарылсынбы?"</string>
@@ -264,7 +264,7 @@
     <string name="enable_terminal_summary" msgid="67667852659359206">"Жергиликтүү буйрук кабыгын сунуштаган терминалга уруксат берүү"</string>
     <string name="hdcp_checking_title" msgid="8605478913544273282">"HDCP текшерүү"</string>
     <string name="hdcp_checking_dialog_title" msgid="5141305530923283">"HDCP текшерүү тартиби"</string>
-    <string name="debug_debugging_category" msgid="6781250159513471316">"Жөндөө"</string>
+    <string name="debug_debugging_category" msgid="6781250159513471316">"Мүчүлүштүктөрдү оңдоо"</string>
     <string name="debug_app" msgid="8349591734751384446">"Мүчүлүштүктөрдү оңдоочу колдонмону тандоо"</string>
     <string name="debug_app_not_set" msgid="718752499586403499">"Бир дагы колдонмо орнотула элек."</string>
     <string name="debug_app_set" msgid="2063077997870280017">"Жөндөөчү колдонмо: <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
@@ -273,18 +273,18 @@
     <string name="wait_for_debugger" msgid="1202370874528893091">"Мүчүлүштүктөрдү оңдогуч күтүлүүдө"</string>
     <string name="wait_for_debugger_summary" msgid="1766918303462746804">"Колдонмо мүчүлүштүктөрдү оңдогучтун иштешин күтөт"</string>
     <string name="debug_input_category" msgid="1811069939601180246">"Киргизүү"</string>
-    <string name="debug_drawing_category" msgid="6755716469267367852">"Тартуу"</string>
+    <string name="debug_drawing_category" msgid="6755716469267367852">"Чиймелөө"</string>
     <string name="debug_hw_drawing_category" msgid="6220174216912308658">"Визуалдаштырууну аппарат менен ылдамдатуу"</string>
     <string name="media_category" msgid="4388305075496848353">"Медиа"</string>
     <string name="debug_monitoring_category" msgid="7640508148375798343">"Мониторинг"</string>
     <string name="strict_mode" msgid="1938795874357830695">"Катаал режим иштетилди"</string>
     <string name="strict_mode_summary" msgid="142834318897332338">"Узак операцияларда экран күйүп-өчүп турат"</string>
     <string name="pointer_location" msgid="6084434787496938001">"Көрсөткүчтүн жайгшкн жери"</string>
-    <string name="pointer_location_summary" msgid="840819275172753713">"Учурдагы басылган дайндрд көрсөтүүчү экран катмары"</string>
-    <string name="show_touches" msgid="2642976305235070316">"Таптоолорду көрсөтүү"</string>
-    <string name="show_touches_summary" msgid="6101183132903926324">"Экранда тапталган жерлерди көрсөтүү"</string>
+    <string name="pointer_location_summary" msgid="840819275172753713">"Басылган жерлер жана жаңсоолор экранда көрүнүп турат"</string>
+    <string name="show_touches" msgid="2642976305235070316">"Басылган жерлерди көрсөтүү"</string>
+    <string name="show_touches_summary" msgid="6101183132903926324">"Экранда басылган жерлер көрүнүп турат"</string>
     <string name="show_screen_updates" msgid="5470814345876056420">"Экран жаңыруусун көрсөтүү"</string>
-    <string name="show_screen_updates_summary" msgid="2569622766672785529">"Экран жаңырганда аны бүт бойдон жарык кылуу"</string>
+    <string name="show_screen_updates_summary" msgid="2569622766672785529">"Экран жаңырганда анын үстү жарык болот"</string>
     <string name="show_hw_screen_updates" msgid="5036904558145941590">"Экран жаңыртуусун көрсөтүү"</string>
     <string name="show_hw_screen_updates_summary" msgid="1115593565980196197">"GPU менен тартканда экрандын аймактары жарык болот"</string>
     <string name="show_hw_layers_updates" msgid="5645728765605699821">"Аппараттык жаңыртууларды көрсөтүү"</string>
@@ -297,9 +297,9 @@
     <string name="usb_audio_disable_routing" msgid="8114498436003102671">"Аудиону өткөрүүнү өчүрүү (USB)"</string>
     <string name="usb_audio_disable_routing_summary" msgid="980282760277312264">"Тышкы USB аудио жабдыктарына авто өткөрүү өчрлт"</string>
     <string name="debug_layout" msgid="5981361776594526155">"Элементтрдн чектрин көрст"</string>
-    <string name="debug_layout_summary" msgid="2001775315258637682">"Клиптин чектерин, талааларын ж.б. көргөзүү"</string>
-    <string name="force_rtl_layout_all_locales" msgid="2259906643093138978">"Солдон оңго багытына мажбурлоо"</string>
-    <string name="force_rtl_layout_all_locales_summary" msgid="9192797796616132534">"Экрандын жайгашуу багытын бардык тилдер үчүн Оңдон-солго кылуу"</string>
+    <string name="debug_layout_summary" msgid="2001775315258637682">"Кесилген нерсенин чектери жана жээктери көрүнөт"</string>
+    <string name="force_rtl_layout_all_locales" msgid="2259906643093138978">"Интерфейсти чагылдыруу"</string>
+    <string name="force_rtl_layout_all_locales_summary" msgid="9192797796616132534">"Интерфейстин элементтери бардык тилдерде оңдон солго карай жайгаштырылат"</string>
     <string name="force_hw_ui" msgid="6426383462520888732">"GPU тездетүү"</string>
     <string name="force_hw_ui_summary" msgid="5535991166074861515">"Эки өлчөмдүү (2d) сүрөт үчүн ар дайым GPU колдонулат"</string>
     <string name="force_msaa" msgid="7920323238677284387">"4x MSAA иштетүү"</string>

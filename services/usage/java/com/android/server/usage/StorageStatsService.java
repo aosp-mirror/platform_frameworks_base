@@ -17,6 +17,7 @@
 package com.android.server.usage;
 
 import static com.android.internal.util.ArrayUtils.defeatNullable;
+import static com.android.server.pm.PackageManagerService.PLATFORM_PACKAGE_NAME;
 
 import android.app.AppOpsManager;
 import android.app.usage.ExternalStorageStats;
@@ -30,7 +31,6 @@ import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.PackageStats;
 import android.content.pm.UserInfo;
-import android.net.TrafficStats;
 import android.net.Uri;
 import android.os.Binder;
 import android.os.Environment;
@@ -138,7 +138,7 @@ public class StorageStatsService extends IStorageStatsManager.Stub {
     }
 
     private void enforcePermission(int callingUid, String callingPackage) {
-        final int mode = mAppOps.checkOp(AppOpsManager.OP_GET_USAGE_STATS,
+        final int mode = mAppOps.noteOp(AppOpsManager.OP_GET_USAGE_STATS,
                 callingUid, callingPackage);
         switch (mode) {
             case AppOpsManager.MODE_ALLOWED:
@@ -207,8 +207,8 @@ public class StorageStatsService extends IStorageStatsManager.Stub {
             // Free space is usable bytes plus any cached data that we're
             // willing to automatically clear. To avoid user confusion, this
             // logic should be kept in sync with getAllocatableBytes().
-            if (isQuotaSupported(volumeUuid, callingPackage)) {
-                final long cacheTotal = getCacheBytes(volumeUuid, callingPackage);
+            if (isQuotaSupported(volumeUuid, PLATFORM_PACKAGE_NAME)) {
+                final long cacheTotal = getCacheBytes(volumeUuid, PLATFORM_PACKAGE_NAME);
                 final long cacheReserved = mStorage.getStorageCacheBytes(path, 0);
                 final long cacheClearable = Math.max(0, cacheTotal - cacheReserved);
 

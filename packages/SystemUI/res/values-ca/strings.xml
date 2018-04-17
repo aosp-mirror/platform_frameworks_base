@@ -143,7 +143,7 @@
     <string name="accessibility_signal_full" msgid="9122922886519676839">"Senyal complet."</string>
     <string name="accessibility_desc_on" msgid="2385254693624345265">"Activat."</string>
     <string name="accessibility_desc_off" msgid="6475508157786853157">"Desactivat."</string>
-    <string name="accessibility_desc_connected" msgid="8366256693719499665">"Connectat."</string>
+    <string name="accessibility_desc_connected" msgid="8366256693719499665">"Connectat"</string>
     <string name="accessibility_desc_connecting" msgid="3812924520316280149">"S’està connectant."</string>
     <string name="data_connection_gprs" msgid="7652872568358508452">"GPRS"</string>
     <string name="data_connection_hspa" msgid="1499615426569473562">"HSPA"</string>

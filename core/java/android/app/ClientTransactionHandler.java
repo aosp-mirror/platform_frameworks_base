@@ -27,7 +27,6 @@ import android.util.MergedConfiguration;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.content.ReferrerIntent;
 
-import java.io.PrintWriter;
 import java.util.List;
 
 /**
@@ -192,11 +191,4 @@ public abstract class ClientTransactionHandler {
      *                       Used to check if we should report relaunch to WM.
      * */
     public abstract void reportRelaunch(IBinder token, PendingTransactionActions pendingActions);
-
-    /**
-     * Debugging output.
-     * @param pw {@link PrintWriter} to write logs to.
-     * @param prefix Prefix to prepend to output.
-     */
-    public abstract void dump(PrintWriter pw, String prefix);
 }

@@ -518,7 +518,6 @@ public class VolumeDialogImpl implements VolumeDialog {
         mHandler.removeMessages(H.SHOW);
         mHandler.removeMessages(H.DISMISS);
         rescheduleTimeoutH();
-        if (mShowing) return;
         mShowing = true;
 
         initSettingsH();
@@ -546,7 +545,6 @@ public class VolumeDialogImpl implements VolumeDialog {
     protected void dismissH(int reason) {
         mHandler.removeMessages(H.DISMISS);
         mHandler.removeMessages(H.SHOW);
-        if (!mShowing) return;
         mDialogView.animate().cancel();
         mShowing = false;
 

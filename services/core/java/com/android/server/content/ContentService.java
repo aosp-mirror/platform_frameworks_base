@@ -51,6 +51,8 @@ import android.os.IBinder;
 import android.os.Parcel;
 import android.os.Process;
 import android.os.RemoteException;
+import android.os.ResultReceiver;
+import android.os.ShellCallback;
 import android.os.UserHandle;
 import android.text.TextUtils;
 import android.util.ArrayMap;
@@ -1576,5 +1578,33 @@ public final class ContentService extends IContentService.Stub {
                 }
             }
         }
+    }
+
+    private void enforceShell(String method) {
+        final int callingUid = Binder.getCallingUid();
+        if (callingUid != Process.SHELL_UID && callingUid != Process.ROOT_UID) {
+            throw new SecurityException("Non-shell user attempted to call " + method);
+        }
+    }
+
+    @Override
+    public void resetTodayStats() {
+        enforceShell("resetTodayStats");
+
+        if (mSyncManager != null) {
+            final long token = Binder.clearCallingIdentity();
+            try {
+                mSyncManager.resetTodayStats();
+            } finally {
+                Binder.restoreCallingIdentity(token);
+            }
+        }
+    }
+
+    @Override
+    public void onShellCommand(FileDescriptor in, FileDescriptor out,
+            FileDescriptor err, String[] args, ShellCallback callback,
+            ResultReceiver resultReceiver) {
+        (new ContentShellCommand(this)).exec(this, in, out, err, args, callback, resultReceiver);
     }
 }

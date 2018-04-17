@@ -85,14 +85,12 @@ public class StopActivityItem extends ActivityLifecycleItem {
     /** Write to Parcel. */
     @Override
     public void writeToParcel(Parcel dest, int flags) {
-        super.writeToParcel(dest, flags);
         dest.writeBoolean(mShowWindow);
         dest.writeInt(mConfigChanges);
     }
 
     /** Read from Parcel. */
     private StopActivityItem(Parcel in) {
-        super(in);
         mShowWindow = in.readBoolean();
         mConfigChanges = in.readInt();
     }

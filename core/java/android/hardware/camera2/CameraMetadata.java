@@ -864,7 +864,7 @@ public abstract class CameraMetadata<TKey> {
 
     /**
      * <p>The camera device is a monochrome camera that doesn't contain a color filter array,
-     * and the pixel values on U and Y planes are all 128.</p>
+     * and the pixel values on U and V planes are all 128.</p>
      * @see CameraCharacteristics#REQUEST_AVAILABLE_CAPABILITIES
      */
     public static final int REQUEST_AVAILABLE_CAPABILITIES_MONOCHROME = 12;

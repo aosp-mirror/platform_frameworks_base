@@ -164,9 +164,9 @@ public class KeyChainSnapshotSerializerTest {
     }
 
     @Test
-    public void serialize_doesNotThrowForNullPublicKey() throws Exception {
+    public void serialize_doesNotThrowForTestSnapshot() throws Exception {
         KeyChainSnapshotSerializer.serialize(
-                createTestKeyChainSnapshotNoPublicKey(), new ByteArrayOutputStream());
+                createTestKeyChainSnapshot(), new ByteArrayOutputStream());
     }
 
     private static List<WrappedApplicationKey> roundTripKeys() throws Exception {
@@ -186,19 +186,6 @@ public class KeyChainSnapshotSerializerTest {
     }
 
     private static KeyChainSnapshot createTestKeyChainSnapshot() throws Exception {
-        return new KeyChainSnapshot.Builder()
-                .setCounterId(COUNTER_ID)
-                .setSnapshotVersion(SNAPSHOT_VERSION)
-                .setServerParams(SERVER_PARAMS)
-                .setMaxAttempts(MAX_ATTEMPTS)
-                .setEncryptedRecoveryKeyBlob(KEY_BLOB)
-                .setKeyChainProtectionParams(createKeyChainProtectionParamsList())
-                .setWrappedApplicationKeys(createKeys())
-                .setTrustedHardwareCertPath(CERT_PATH)
-                .build();
-    }
-
-    private static KeyChainSnapshot createTestKeyChainSnapshotNoPublicKey() throws Exception {
         return new KeyChainSnapshot.Builder()
                 .setCounterId(COUNTER_ID)
                 .setSnapshotVersion(SNAPSHOT_VERSION)

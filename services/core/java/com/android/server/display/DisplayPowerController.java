@@ -760,8 +760,14 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
             brightness = mScreenBrightnessForVr;
         }
 
+        boolean setBrightnessToOverride = false;
         if (brightness < 0 && mPowerRequest.screenBrightnessOverride > 0) {
             brightness = mPowerRequest.screenBrightnessOverride;
+            // If there's a screen brightness override, we want to reset the brightness to it
+            // whenever the user changes it, to communicate that these changes aren't taking
+            // effect. However, for a nicer user experience, we don't do it here, but rather after
+            // the temporary brightness has been taken into account.
+            setBrightnessToOverride = true;
         }
 
         final boolean autoBrightnessEnabledInDoze =
@@ -782,6 +788,12 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
         if (mTemporaryScreenBrightness > 0) {
             brightness = mTemporaryScreenBrightness;
             brightnessIsTemporary = true;
+        }
+
+        // Reset the brightness to the screen brightness override to communicate to the user that
+        // her changes aren't taking effect.
+        if (setBrightnessToOverride && !brightnessIsTemporary) {
+            putScreenBrightnessSetting(brightness);
         }
 
         final boolean autoBrightnessAdjustmentChanged = updateAutoBrightnessAdjustment();
@@ -866,7 +878,6 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
         if (brightness < 0) {
             brightness = clampScreenBrightness(mCurrentScreenBrightnessSetting);
         }
-
 
         // Apply dimming by at least some minimum amount when user activity
         // timeout is about to expire.

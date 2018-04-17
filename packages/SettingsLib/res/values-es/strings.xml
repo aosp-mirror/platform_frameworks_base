@@ -140,7 +140,7 @@
     <string name="running_process_item_user_label" msgid="3129887865552025943">"Usuario: <xliff:g id="USER_NAME">%1$s</xliff:g>"</string>
     <string name="launch_defaults_some" msgid="313159469856372621">"Se han establecido algunos valores predeterminados"</string>
     <string name="launch_defaults_none" msgid="4241129108140034876">"No se han establecido valores predeterminados"</string>
-    <string name="tts_settings" msgid="8186971894801348327">"Configuración síntesis voz"</string>
+    <string name="tts_settings" msgid="8186971894801348327">"Ajustes de síntesis de voz"</string>
     <string name="tts_settings_title" msgid="1237820681016639683">"Síntesis de voz"</string>
     <string name="tts_default_rate_title" msgid="6030550998379310088">"Velocidad de la voz"</string>
     <string name="tts_default_rate_summary" msgid="4061815292287182801">"Velocidad a la que se lee el texto"</string>

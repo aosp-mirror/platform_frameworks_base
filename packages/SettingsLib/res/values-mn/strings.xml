@@ -192,8 +192,8 @@
     <string name="enable_adb" msgid="7982306934419797485">"USB дебаг"</string>
     <string name="enable_adb_summary" msgid="4881186971746056635">"USB холбодсон үеийн согог засах горим"</string>
     <string name="clear_adb_keys" msgid="4038889221503122743">"USB дебагын зөвшөөрлийг хураах"</string>
-    <string name="bugreport_in_power" msgid="7923901846375587241">"Согог мэдээлэх товчлол"</string>
-    <string name="bugreport_in_power_summary" msgid="1778455732762984579">"Цэсэнд согогийн репорт авахад зориулсан товчийг харуулах"</string>
+    <string name="bugreport_in_power" msgid="7923901846375587241">"Алдаа мэдээлэх товчлол"</string>
+    <string name="bugreport_in_power_summary" msgid="1778455732762984579">"Цэсэнд алдааны мэдэгдэл авахад зориулсан товчийг харуулах"</string>
     <string name="keep_screen_on" msgid="1146389631208760344">"Идэвхтэй байлгах"</string>
     <string name="keep_screen_on_summary" msgid="2173114350754293009">"Цэнэглэж байх үед дэлгэц хэзээ ч амрахгүй"</string>
     <string name="bt_hci_snoop_log" msgid="3340699311158865670">"Bluetooth HCI снүүп логыг идэвхжүүлэх"</string>
@@ -264,14 +264,14 @@
     <string name="enable_terminal_summary" msgid="67667852659359206">"Локал суурьт хандалт хийх боломж олгодог терминалын апп-г идэвхжүүлэх"</string>
     <string name="hdcp_checking_title" msgid="8605478913544273282">"HDCP шалгах"</string>
     <string name="hdcp_checking_dialog_title" msgid="5141305530923283">"HDCP шалгах авирыг тохируулах"</string>
-    <string name="debug_debugging_category" msgid="6781250159513471316">"Согог хайх"</string>
-    <string name="debug_app" msgid="8349591734751384446">"Согог засах апп сонгоно уу"</string>
+    <string name="debug_debugging_category" msgid="6781250159513471316">"Дебаг"</string>
+    <string name="debug_app" msgid="8349591734751384446">"Дебаг хийх апп сонгоно уу"</string>
     <string name="debug_app_not_set" msgid="718752499586403499">"Дебаг аппликейшн тохируулаагүй"</string>
     <string name="debug_app_set" msgid="2063077997870280017">"Согог засах аппликейшн: <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="select_application" msgid="5156029161289091703">"Аппликейшн сонгох"</string>
     <string name="no_application" msgid="2813387563129153880">"Юуг ч биш"</string>
-    <string name="wait_for_debugger" msgid="1202370874528893091">"Согог засагчийг хүлээх"</string>
-    <string name="wait_for_debugger_summary" msgid="1766918303462746804">"Согог засагдсан аппликейшн ажиллахын өмнө согог засагчийг хавсаргагдахыг хүлээнэ"</string>
+    <string name="wait_for_debugger" msgid="1202370874528893091">"Дебаг-г хүлээх"</string>
+    <string name="wait_for_debugger_summary" msgid="1766918303462746804">"Дебаг хийгдсэн апп гүйцэтгэхийнхээ өмнө дебаг хийхийг хавсаргахыг хүлээнэ"</string>
     <string name="debug_input_category" msgid="1811069939601180246">"Оруулах"</string>
     <string name="debug_drawing_category" msgid="6755716469267367852">"Зураг"</string>
     <string name="debug_hw_drawing_category" msgid="6220174216912308658">"Техник хангамжийн хурдатгалтай үзүүлэлт"</string>
@@ -311,7 +311,7 @@
     <string name="window_animation_scale_title" msgid="6162587588166114700">"Цонхны дүрс амилуулалтын далайц"</string>
     <string name="transition_animation_scale_title" msgid="387527540523595875">"Шилжилтийн дүрс амилуулалтын далайц"</string>
     <string name="animator_duration_scale_title" msgid="3406722410819934083">"Дүрс амилуулалт үргэлжлэх далайц"</string>
-    <string name="overlay_display_devices_title" msgid="5364176287998398539">"Хоёрдох дэлгэцийн симуляци хийх"</string>
+    <string name="overlay_display_devices_title" msgid="5364176287998398539">"Хоёр дахь дэлгэцийн симуляци хийх"</string>
     <string name="debug_applications_category" msgid="4206913653849771549">"Апп"</string>
     <string name="immediately_destroy_activities" msgid="1579659389568133959">"Үйлдлүүдийг хадгалахгүй"</string>
     <string name="immediately_destroy_activities_summary" msgid="3592221124808773368">"Үйлдэл бүрийг хэрэглэгч орхимогц нь устгах"</string>

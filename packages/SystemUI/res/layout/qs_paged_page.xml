@@ -20,5 +20,7 @@
     android:id="@+id/tile_page"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    android:paddingLeft="@dimen/notification_side_paddings"
+    android:paddingRight="@dimen/notification_side_paddings"
     android:clipChildren="false"
     android:clipToPadding="false" />
