@@ -1278,6 +1278,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
 
         if (mContentInsetsChanged
                 || mVisibleInsetsChanged
+                || mStableInsetsChanged
                 || winAnimator.mSurfaceResized
                 || mOutsetsChanged
                 || mFrameSizeChanged
