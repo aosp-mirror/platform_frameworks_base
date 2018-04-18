@@ -4267,6 +4267,7 @@ package android.provider {
   public static final class Settings.Global extends android.provider.Settings.NameValueTable {
     method public static boolean putString(android.content.ContentResolver, java.lang.String, java.lang.String, java.lang.String, boolean);
     method public static void resetToDefaults(android.content.ContentResolver, java.lang.String);
+    field public static final java.lang.String APP_STANDBY_ENABLED = "app_standby_enabled";
     field public static final java.lang.String AUTOFILL_COMPAT_MODE_ALLOWED_PACKAGES = "autofill_compat_mode_allowed_packages";
     field public static final java.lang.String CARRIER_APP_NAMES = "carrier_app_names";
     field public static final java.lang.String CARRIER_APP_WHITELIST = "carrier_app_whitelist";

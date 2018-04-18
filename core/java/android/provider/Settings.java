@@ -10809,6 +10809,7 @@ public final class Settings {
          * Default: 1
          * @hide
          */
+        @SystemApi
         public static final String APP_STANDBY_ENABLED = "app_standby_enabled";
 
         /**
