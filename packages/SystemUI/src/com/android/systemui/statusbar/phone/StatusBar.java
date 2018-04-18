@@ -784,6 +784,12 @@ public class StatusBar extends SystemUI implements DemoMode,
         // into fragments, but the rest here, it leaves some awkward lifecycle and whatnot.
         mNotificationPanel = mStatusBarWindow.findViewById(R.id.notification_panel);
         mStackScroller = mStatusBarWindow.findViewById(R.id.notification_stack_scroller);
+        mZenController.addCallback(new ZenModeController.Callback() {
+            @Override
+            public void onZenChanged(int zen) {
+                updateEmptyShadeView();
+            }
+        });
         mActivityLaunchAnimator = new ActivityLaunchAnimator(mStatusBarWindow,
                 this,
                 mNotificationPanel,
