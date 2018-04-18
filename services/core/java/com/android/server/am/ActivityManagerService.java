@@ -23389,8 +23389,14 @@ public class ActivityManagerService extends IActivityManager.Stub
                                 int newAdj;
                                 if ((cr.flags&(Context.BIND_ABOVE_CLIENT
                                         |Context.BIND_IMPORTANT)) != 0) {
-                                    newAdj = clientAdj >= ProcessList.PERSISTENT_SERVICE_ADJ
-                                            ? clientAdj : ProcessList.PERSISTENT_SERVICE_ADJ;
+                                    if (clientAdj >= ProcessList.PERSISTENT_SERVICE_ADJ) {
+                                        newAdj = clientAdj;
+                                    } else {
+                                        // make this service persistent
+                                        newAdj = ProcessList.PERSISTENT_SERVICE_ADJ;
+                                        schedGroup = ProcessList.SCHED_GROUP_DEFAULT;
+                                        procState = ActivityManager.PROCESS_STATE_PERSISTENT;
+                                    }
                                 } else if ((cr.flags&Context.BIND_NOT_VISIBLE) != 0
                                         && clientAdj < ProcessList.PERCEPTIBLE_APP_ADJ
                                         && adj > ProcessList.PERCEPTIBLE_APP_ADJ) {
