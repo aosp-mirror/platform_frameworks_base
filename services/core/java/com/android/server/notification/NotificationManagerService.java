@@ -693,7 +693,7 @@ public class NotificationManagerService extends SystemService {
         }
 
         @Override
-        public void onNotificationClick(int callingUid, int callingPid, String key) {
+        public void onNotificationClick(int callingUid, int callingPid, String key, NotificationVisibility nv) {
             exitIdle();
             synchronized (mNotificationLock) {
                 NotificationRecord r = mNotificationsByKey.get(key);
@@ -704,22 +704,26 @@ public class NotificationManagerService extends SystemService {
                 final long now = System.currentTimeMillis();
                 MetricsLogger.action(r.getLogMaker(now)
                         .setCategory(MetricsEvent.NOTIFICATION_ITEM)
-                        .setType(MetricsEvent.TYPE_ACTION));
+                        .setType(MetricsEvent.TYPE_ACTION)
+                        .addTaggedData(MetricsEvent.NOTIFICATION_SHADE_INDEX, nv.rank)
+                        .addTaggedData(MetricsEvent.NOTIFICATION_SHADE_COUNT, nv.count));
                 EventLogTags.writeNotificationClicked(key,
-                        r.getLifespanMs(now), r.getFreshnessMs(now), r.getExposureMs(now));
+                        r.getLifespanMs(now), r.getFreshnessMs(now), r.getExposureMs(now),
+                        nv.rank, nv.count);
 
                 StatusBarNotification sbn = r.sbn;
                 cancelNotification(callingUid, callingPid, sbn.getPackageName(), sbn.getTag(),
                         sbn.getId(), Notification.FLAG_AUTO_CANCEL,
                         Notification.FLAG_FOREGROUND_SERVICE, false, r.getUserId(),
-                        REASON_CLICK, null);
+                        REASON_CLICK, nv.rank, nv.count, null);
+                nv.recycle();
                 reportUserInteraction(r);
             }
         }
 
         @Override
         public void onNotificationActionClick(int callingUid, int callingPid, String key,
-                int actionIndex) {
+                int actionIndex, NotificationVisibility nv) {
             exitIdle();
             synchronized (mNotificationLock) {
                 NotificationRecord r = mNotificationsByKey.get(key);
@@ -731,9 +735,13 @@ public class NotificationManagerService extends SystemService {
                 MetricsLogger.action(r.getLogMaker(now)
                         .setCategory(MetricsEvent.NOTIFICATION_ITEM_ACTION)
                         .setType(MetricsEvent.TYPE_ACTION)
-                        .setSubtype(actionIndex));
+                        .setSubtype(actionIndex)
+                        .addTaggedData(MetricsEvent.NOTIFICATION_SHADE_INDEX, nv.rank)
+                        .addTaggedData(MetricsEvent.NOTIFICATION_SHADE_COUNT, nv.count));
                 EventLogTags.writeNotificationActionClicked(key, actionIndex,
-                        r.getLifespanMs(now), r.getFreshnessMs(now), r.getExposureMs(now));
+                        r.getLifespanMs(now), r.getFreshnessMs(now), r.getExposureMs(now),
+                        nv.rank, nv.count);
+                nv.recycle();
                 reportUserInteraction(r);
             }
         }
@@ -741,7 +749,8 @@ public class NotificationManagerService extends SystemService {
         @Override
         public void onNotificationClear(int callingUid, int callingPid,
                 String pkg, String tag, int id, int userId, String key,
-                @NotificationStats.DismissalSurface int dismissalSurface) {
+                @NotificationStats.DismissalSurface int dismissalSurface,
+                NotificationVisibility nv) {
             synchronized (mNotificationLock) {
                 NotificationRecord r = mNotificationsByKey.get(key);
                 if (r != null) {
@@ -750,7 +759,8 @@ public class NotificationManagerService extends SystemService {
             }
             cancelNotification(callingUid, callingPid, pkg, tag, id, 0,
                     Notification.FLAG_ONGOING_EVENT | Notification.FLAG_FOREGROUND_SERVICE,
-                    true, userId, REASON_CANCEL, null);
+                    true, userId, REASON_CANCEL, nv.rank, nv.count,null);
+            nv.recycle();
         }
 
         @Override
@@ -810,7 +820,7 @@ public class NotificationManagerService extends SystemService {
                             mMetricsLogger.write(logMaker);
                         }
                     }
-                    r.setVisibility(true, nv.rank);
+                    r.setVisibility(true, nv.rank, nv.count);
                     nv.recycle();
                 }
                 // Note that we might receive this event after notifications
@@ -820,7 +830,7 @@ public class NotificationManagerService extends SystemService {
                 for (NotificationVisibility nv : noLongerVisibleKeys) {
                     NotificationRecord r = mNotificationsByKey.get(nv.key);
                     if (r == null) continue;
-                    r.setVisibility(false, nv.rank);
+                    r.setVisibility(false, nv.rank, nv.count);
                     nv.recycle();
                 }
             }
@@ -5289,6 +5299,12 @@ public class NotificationManagerService extends SystemService {
     @GuardedBy("mNotificationLock")
     private void cancelNotificationLocked(NotificationRecord r, boolean sendDelete, int reason,
             boolean wasPosted, String listenerName) {
+        cancelNotificationLocked(r, sendDelete, reason, -1, -1, wasPosted, listenerName);
+    }
+
+    @GuardedBy("mNotificationLock")
+    private void cancelNotificationLocked(NotificationRecord r, boolean sendDelete, int reason,
+            int rank, int count, boolean wasPosted, String listenerName) {
         final String canceledKey = r.getKey();
 
         // Record caller.
@@ -5390,12 +5406,18 @@ public class NotificationManagerService extends SystemService {
         mArchive.record(r.sbn);
 
         final long now = System.currentTimeMillis();
-        MetricsLogger.action(r.getLogMaker(now)
+        final LogMaker logMaker = r.getLogMaker(now)
                 .setCategory(MetricsEvent.NOTIFICATION_ITEM)
                 .setType(MetricsEvent.TYPE_DISMISS)
-                .setSubtype(reason));
+                .setSubtype(reason);
+        if (rank != -1 && count != -1) {
+            logMaker.addTaggedData(MetricsEvent.NOTIFICATION_SHADE_INDEX, rank)
+                    .addTaggedData(MetricsEvent.NOTIFICATION_SHADE_COUNT, count);
+        }
+        MetricsLogger.action(logMaker);
         EventLogTags.writeNotificationCanceled(canceledKey, reason,
-                r.getLifespanMs(now), r.getFreshnessMs(now), r.getExposureMs(now), listenerName);
+                r.getLifespanMs(now), r.getFreshnessMs(now), r.getExposureMs(now),
+                rank, count, listenerName);
     }
 
     void revokeUriPermissions(NotificationRecord newRecord, NotificationRecord oldRecord) {
@@ -5430,6 +5452,18 @@ public class NotificationManagerService extends SystemService {
             final String pkg, final String tag, final int id,
             final int mustHaveFlags, final int mustNotHaveFlags, final boolean sendDelete,
             final int userId, final int reason, final ManagedServiceInfo listener) {
+        cancelNotification(callingUid, callingPid, pkg, tag, id, mustHaveFlags, mustNotHaveFlags,
+                sendDelete, userId, reason, -1 /* rank */, -1 /* count */, listener);
+    }
+
+    /**
+     * Cancels a notification ONLY if it has all of the {@code mustHaveFlags}
+     * and none of the {@code mustNotHaveFlags}.
+     */
+    void cancelNotification(final int callingUid, final int callingPid,
+            final String pkg, final String tag, final int id,
+            final int mustHaveFlags, final int mustNotHaveFlags, final boolean sendDelete,
+            final int userId, final int reason, int rank, int count, final ManagedServiceInfo listener) {
 
         // In enqueueNotificationInternal notifications are added by scheduling the
         // work on the worker handler. Hence, we also schedule the cancel on this
@@ -5463,7 +5497,7 @@ public class NotificationManagerService extends SystemService {
 
                         // Cancel the notification.
                         boolean wasPosted = removeFromNotificationListsLocked(r);
-                        cancelNotificationLocked(r, sendDelete, reason, wasPosted, listenerName);
+                        cancelNotificationLocked(r, sendDelete, reason, rank, count, wasPosted, listenerName);
                         cancelGroupChildrenLocked(r, callingUid, callingPid, listenerName,
                                 sendDelete, null);
                         updateLightsLocked();

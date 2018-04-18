@@ -107,7 +107,7 @@ public class NotificationLogger {
                 NotificationData.Entry entry = activeNotifications.get(i);
                 String key = entry.notification.getKey();
                 boolean isVisible = mListContainer.isInVisibleLocation(entry.row);
-                NotificationVisibility visObj = NotificationVisibility.obtain(key, i, isVisible);
+                NotificationVisibility visObj = NotificationVisibility.obtain(key, i, N, isVisible);
                 boolean previouslyVisible = mCurrentlyVisibleNotifications.contains(visObj);
                 if (isVisible) {
                     // Build new set of visible notifications.

@@ -778,14 +778,15 @@ public final class NotificationRecord {
     /**
      * Set the visibility of the notification.
      */
-    public void setVisibility(boolean visible, int rank) {
+    public void setVisibility(boolean visible, int rank, int count) {
         final long now = System.currentTimeMillis();
         mVisibleSinceMs = visible ? now : mVisibleSinceMs;
         stats.onVisibilityChanged(visible);
         MetricsLogger.action(getLogMaker(now)
                 .setCategory(MetricsEvent.NOTIFICATION_ITEM)
                 .setType(visible ? MetricsEvent.TYPE_OPEN : MetricsEvent.TYPE_CLOSE)
-                .addTaggedData(MetricsEvent.NOTIFICATION_SHADE_INDEX, rank));
+                .addTaggedData(MetricsEvent.NOTIFICATION_SHADE_INDEX, rank)
+                .addTaggedData(MetricsEvent.NOTIFICATION_SHADE_COUNT, count));
         if (visible) {
             setSeen();
             MetricsLogger.histogram(mContext, "note_freshness", getFreshnessMs(now));
