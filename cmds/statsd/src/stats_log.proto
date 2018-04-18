@@ -197,6 +197,17 @@ message ConfigMetricsReport {
 
   optional int64 current_report_wall_clock_nanos = 6;
 
+  enum DumpReportReason {
+      DEVICE_SHUTDOWN = 1;
+      CONFIG_UPDATED = 2;
+      CONFIG_REMOVED = 3;
+      GET_DATA_CALLED = 4;
+      ADB_DUMP = 5;
+      CONFIG_RESET = 6;
+      STATSCOMPANION_DIED = 7;
+  }
+  optional DumpReportReason dump_report_reason = 8;
+
   message Annotation {
       optional int64 field_int64 = 1;
       optional int32 field_int32 = 2;
@@ -212,6 +223,8 @@ message ConfigMetricsReportList {
   optional ConfigKey config_key = 1;
 
   repeated ConfigMetricsReport reports = 2;
+
+  reserved 10;
 }
 
 message StatsdStatsReport {
