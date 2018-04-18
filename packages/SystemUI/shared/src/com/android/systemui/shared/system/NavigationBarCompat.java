@@ -35,7 +35,7 @@ public class NavigationBarCompat {
      */
     public static final int QUICK_STEP_DRAG_SLOP_PX = convertDpToPixel(10);
     public static final int QUICK_SCRUB_DRAG_SLOP_PX = convertDpToPixel(20);
-    public static final int QUICK_STEP_TOUCH_SLOP_PX = convertDpToPixel(40);
+    public static final int QUICK_STEP_TOUCH_SLOP_PX = convertDpToPixel(24);
     public static final int QUICK_SCRUB_TOUCH_SLOP_PX = convertDpToPixel(35);
 
     @Retention(RetentionPolicy.SOURCE)
