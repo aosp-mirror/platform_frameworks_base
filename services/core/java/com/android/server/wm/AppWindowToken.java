@@ -1662,7 +1662,9 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
     }
 
     SurfaceControl getAppAnimationLayer() {
-        return getAppAnimationLayer(needsZBoost());
+        return getAppAnimationLayer(isActivityTypeHome() ? ANIMATION_LAYER_HOME
+                : needsZBoost() ? ANIMATION_LAYER_BOOSTED
+                : ANIMATION_LAYER_STANDARD);
     }
 
     @Override
