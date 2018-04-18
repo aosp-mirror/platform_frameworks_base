@@ -1583,6 +1583,8 @@ Landroid/os/ServiceManager;->sCache:Ljava/util/HashMap;
 Landroid/os/ServiceManager;->sServiceManager:Landroid/os/IServiceManager;
 Landroid/os/SharedMemory;->getFd()I
 Landroid/os/storage/DiskInfo;->getDescription()Ljava/lang/String;
+Landroid/os/storage/DiskInfo;->isSd()Z
+Landroid/os/storage/DiskInfo;->isUsb()Z
 Landroid/os/storage/IStorageManager$Stub;->asInterface(Landroid/os/IBinder;)Landroid/os/storage/IStorageManager;
 Landroid/os/storage/IStorageManager$Stub$Proxy;-><init>(Landroid/os/IBinder;)V
 Landroid/os/storage/StorageManager;->findVolumeByUuid(Ljava/lang/String;)Landroid/os/storage/VolumeInfo;
@@ -1603,13 +1605,17 @@ Landroid/os/storage/StorageVolume;->getPathFile()Ljava/io/File;
 Landroid/os/storage/StorageVolume;->getPath()Ljava/lang/String;
 Landroid/os/storage/StorageVolume;->getUserLabel()Ljava/lang/String;
 Landroid/os/storage/StorageVolume;->mPath:Ljava/io/File;
+Landroid/os/storage/VolumeInfo;->buildStorageVolume(Landroid/content/Context;IZ)Landroid/os/storage/StorageVolume;
 Landroid/os/storage/VolumeInfo;->getDisk()Landroid/os/storage/DiskInfo;
+Landroid/os/storage/VolumeInfo;->getEnvironmentForState(I)Ljava/lang/String;
 Landroid/os/storage/VolumeInfo;->getFsUuid()Ljava/lang/String;
 Landroid/os/storage/VolumeInfo;->getPath()Ljava/io/File;
 Landroid/os/storage/VolumeInfo;->getState()I
 Landroid/os/storage/VolumeInfo;->getType()I
 Landroid/os/storage/VolumeInfo;->isPrimary()Z
 Landroid/os/storage/VolumeInfo;->isVisible()Z
+Landroid/os/storage/VolumeInfo;->TYPE_EMULATED:I
+Landroid/os/storage/VolumeInfo;->TYPE_PUBLIC:I
 Landroid/os/StrictMode;->conditionallyCheckInstanceCounts()V
 Landroid/os/StrictMode;->disableDeathOnFileUriExposure()V
 Landroid/os/StrictMode;->enterCriticalSpan(Ljava/lang/String;)Landroid/os/StrictMode$Span;
