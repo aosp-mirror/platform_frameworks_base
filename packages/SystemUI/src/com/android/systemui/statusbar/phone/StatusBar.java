@@ -4682,7 +4682,8 @@ public class StatusBar extends SystemUI implements DemoMode,
             // tapping on a notification, editing QS or being dismissed by
             // FLAG_DISMISS_KEYGUARD_ACTIVITY.
             ScrimState state = mIsOccluded || mNotificationPanel.needsScrimming()
-                    || mStatusBarKeyguardViewManager.willDismissWithAction() ?
+                    || mStatusBarKeyguardViewManager.willDismissWithAction()
+                    || mStatusBarKeyguardViewManager.isFullscreenBouncer() ?
                     ScrimState.BOUNCER_SCRIMMED : ScrimState.BOUNCER;
             mScrimController.transitionTo(state);
         } else if (mLaunchCameraOnScreenTurningOn || isInLaunchTransition()) {
