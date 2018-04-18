@@ -89,7 +89,6 @@ import com.android.systemui.fragments.FragmentHostManager.FragmentListener;
 import com.android.systemui.recents.Recents;
 import com.android.systemui.recents.misc.SysUiTaskStackChangeListener;
 import com.android.systemui.shared.system.ActivityManagerWrapper;
-import com.android.systemui.shared.system.WindowManagerWrapper;
 import com.android.systemui.stackdivider.Divider;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.CommandQueue.Callbacks;
@@ -174,8 +173,6 @@ public class NavigationBarFragment extends Fragment implements Callbacks {
         public void onConnectionChanged(boolean isConnected) {
             mNavigationBarView.updateStates();
             updateScreenPinningGestures();
-            WindowManagerWrapper.getInstance()
-                    .setNavBarVirtualKeyHapticFeedbackEnabled(!isConnected);
         }
 
         @Override
