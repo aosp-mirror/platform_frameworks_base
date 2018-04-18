@@ -66,7 +66,7 @@ public class SliceManager {
      * @hide
      */
     public static final String ACTION_REQUEST_SLICE_PERMISSION =
-            "android.intent.action.REQUEST_SLICE_PERMISSION";
+            "com.android.intent.action.REQUEST_SLICE_PERMISSION";
 
     /**
      * Category used to resolve intents that can be rendered as slices.
