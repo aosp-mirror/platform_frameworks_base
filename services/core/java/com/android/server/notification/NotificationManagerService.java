@@ -4763,7 +4763,9 @@ public class NotificationManagerService extends SystemService {
 
         // Suppressed because another notification in its group handles alerting
         if (record.sbn.isGroup()) {
-            return notification.suppressAlertingDueToGrouping();
+            if (notification.suppressAlertingDueToGrouping()) {
+                return true;
+            }
         }
 
         // Suppressed for being too recently noisy
