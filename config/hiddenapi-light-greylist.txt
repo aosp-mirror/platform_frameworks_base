@@ -372,6 +372,9 @@ Landroid/app/Service;->setForeground(Z)V
 Landroid/app/SharedPreferencesImpl;-><init>(Ljava/io/File;I)V
 Landroid/app/SharedPreferencesImpl;->mFile:Ljava/io/File;
 Landroid/app/SharedPreferencesImpl;->startReloadIfChangedUnexpectedly()V
+Landroid/app/slice/SliceItem;->getTimestamp()J
+Landroid/app/slice/SliceManager;->bindSlice(Landroid/net/Uri;Ljava/util/List;)Landroid/app/slice/Slice;
+Landroid/app/slice/SliceManager;->pinSlice(Landroid/net/Uri;Ljava/util/List;)V
 Landroid/app/StatusBarManager;->collapsePanels()V
 Landroid/app/StatusBarManager;->disable(I)V
 Landroid/app/StatusBarManager;->expandNotificationsPanel()V
