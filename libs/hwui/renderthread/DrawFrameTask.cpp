@@ -103,8 +103,9 @@ void DrawFrameTask::run() {
 
     // Even if we aren't drawing this vsync pulse the next frame number will still be accurate
     if (CC_UNLIKELY(callback)) {
-        context->enqueueFrameWork(
-                [ callback, frameNr = context->getFrameNumber() ]() { callback(frameNr); });
+        context->enqueueFrameWork([callback, frameNr = context->getFrameNumber()]() {
+            callback(frameNr);
+        });
     }
 
     if (CC_LIKELY(canDrawThisFrame)) {

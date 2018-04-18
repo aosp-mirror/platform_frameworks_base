@@ -36,7 +36,6 @@ bool Properties::showDirtyRegions = false;
 bool Properties::skipEmptyFrames = true;
 bool Properties::useBufferAge = true;
 bool Properties::enablePartialUpdates = true;
-bool Properties::usePresentTime = true;
 
 DebugLevel Properties::debugLevel = kDebugDisabled;
 OverdrawColorSet Properties::overdrawColorSet = OverdrawColorSet::Default;
@@ -136,7 +135,6 @@ bool Properties::load() {
     skipEmptyFrames = property_get_bool(PROPERTY_SKIP_EMPTY_DAMAGE, true);
     useBufferAge = property_get_bool(PROPERTY_USE_BUFFER_AGE, true);
     enablePartialUpdates = property_get_bool(PROPERTY_ENABLE_PARTIAL_UPDATES, true);
-    usePresentTime = property_get_bool(PROPERTY_USE_PRESENT_TIME, true);
 
     filterOutTestOverhead = property_get_bool(PROPERTY_FILTER_TEST_OVERHEAD, false);
 
