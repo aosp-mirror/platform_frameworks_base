@@ -1210,11 +1210,16 @@ public class Instrumentation {
             Intent intent)
             throws InstantiationException, IllegalAccessException,
             ClassNotFoundException {
-        String pkg = intent.getComponent().getPackageName();
+        String pkg = intent != null && intent.getComponent() != null
+                ? intent.getComponent().getPackageName() : null;
         return getFactory(pkg).instantiateActivity(cl, className, intent);
     }
 
     private AppComponentFactory getFactory(String pkg) {
+        if (pkg == null) {
+            Log.e(TAG, "No pkg specified, disabling AppComponentFactory");
+            return AppComponentFactory.DEFAULT;
+        }
         if (mThread == null) {
             Log.e(TAG, "Uninitialized ActivityThread, likely app-created Instrumentation,"
                     + " disabling AppComponentFactory", new Throwable());
