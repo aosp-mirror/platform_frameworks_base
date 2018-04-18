@@ -411,7 +411,7 @@ public class VolumeDialogImpl implements VolumeDialog {
 
     public void initSettingsH() {
         mSettingsView.setVisibility(
-                mDeviceProvisionedController.isDeviceProvisioned() ? VISIBLE : GONE);
+                mDeviceProvisionedController.isCurrentUserSetup() ? VISIBLE : GONE);
         mSettingsIcon.setOnClickListener(v -> {
             Events.writeEvent(mContext, Events.EVENT_SETTINGS_CLICK);
             Intent intent = new Intent(Settings.ACTION_SOUND_SETTINGS);
