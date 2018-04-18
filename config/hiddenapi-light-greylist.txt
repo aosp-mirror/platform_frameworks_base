@@ -319,6 +319,7 @@ Landroid/app/LoadedApk;->mClassLoader:Ljava/lang/ClassLoader;
 Landroid/app/LoadedApk;->mDataDirFile:Ljava/io/File;
 Landroid/app/LoadedApk;->mDataDir:Ljava/lang/String;
 Landroid/app/LoadedApk;->mDisplayAdjustments:Landroid/view/DisplayAdjustments;
+Landroid/app/LoadedApk;->mLibDir:Ljava/lang/String;
 Landroid/app/LoadedApk;->mPackageName:Ljava/lang/String;
 Landroid/app/LoadedApk;->mReceivers:Landroid/util/ArrayMap;
 Landroid/app/LoadedApk;->mResDir:Ljava/lang/String;
