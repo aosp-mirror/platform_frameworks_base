@@ -933,4 +933,32 @@ TEST_F(ResourceParserTest, DuplicateOverlayableIsError) {
   EXPECT_FALSE(TestParse(input));
 }
 
+TEST_F(ResourceParserTest, ParseIdItem) {
+  std::string input = R"(
+    <item name="foo" type="id">@id/bar</item>
+    <item name="bar" type="id"/>
+    <item name="baz" type="id"></item>)";
+  ASSERT_TRUE(TestParse(input));
+
+  ASSERT_THAT(test::GetValue<Reference>(&table_, "id/foo"), NotNull());
+  ASSERT_THAT(test::GetValue<Id>(&table_, "id/bar"), NotNull());
+  ASSERT_THAT(test::GetValue<Id>(&table_, "id/baz"), NotNull());
+
+  // Reject attribute references
+  input = R"(<item name="foo2" type="id">?attr/bar"</item>)";
+  ASSERT_FALSE(TestParse(input));
+
+  // Reject non-references
+  input = R"(<item name="foo3" type="id">0x7f010001</item>)";
+  ASSERT_FALSE(TestParse(input));
+  input = R"(<item name="foo4" type="id">@drawable/my_image</item>)";
+  ASSERT_FALSE(TestParse(input));
+  input = R"(<item name="foo5" type="id"><string name="biz"></string></item>)";
+  ASSERT_FALSE(TestParse(input));
+
+  // Ids that reference other resource ids cannot be public
+  input = R"(<public name="foo6" type="id">@id/bar6</item>)";
+  ASSERT_FALSE(TestParse(input));
+}
+
 }  // namespace aapt
