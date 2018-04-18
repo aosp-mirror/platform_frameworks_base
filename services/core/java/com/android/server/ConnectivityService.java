@@ -930,6 +930,15 @@ public class ConnectivityService extends IConnectivityManager.Stub
                 deps);
     }
 
+    private static NetworkCapabilities createDefaultNetworkCapabilitiesForUid(int uid) {
+        final NetworkCapabilities netCap = new NetworkCapabilities();
+        netCap.addCapability(NET_CAPABILITY_INTERNET);
+        netCap.addCapability(NET_CAPABILITY_NOT_RESTRICTED);
+        netCap.removeCapability(NET_CAPABILITY_NOT_VPN);
+        netCap.setSingleUid(uid);
+        return netCap;
+    }
+
     private NetworkRequest createDefaultInternetRequestForTransport(
             int transportType, NetworkRequest.Type type) {
         NetworkCapabilities netCap = new NetworkCapabilities();
@@ -1182,12 +1191,20 @@ public class ConnectivityService extends IConnectivityManager.Stub
         int vpnNetId = NETID_UNSET;
         synchronized (mVpns) {
             final Vpn vpn = mVpns.get(user);
+            // TODO : now that capabilities contain the UID, the appliesToUid test should
+            // be removed as the satisfying test below should be enough.
             if (vpn != null && vpn.appliesToUid(uid)) vpnNetId = vpn.getNetId();
         }
         NetworkAgentInfo nai;
         if (vpnNetId != NETID_UNSET) {
             nai = getNetworkAgentInfoForNetId(vpnNetId);
-            if (nai != null) return nai.network;
+            if (nai != null) {
+                final NetworkCapabilities requiredCaps =
+                    createDefaultNetworkCapabilitiesForUid(uid);
+                if (requiredCaps.satisfiedByNetworkCapabilities(nai.networkCapabilities)) {
+                    return nai.network;
+                }
+            }
         }
         nai = getDefaultNetwork();
         if (nai != null
@@ -1402,8 +1419,10 @@ public class ConnectivityService extends IConnectivityManager.Stub
     private NetworkCapabilities networkCapabilitiesRestrictedForCallerPermissions(
             NetworkCapabilities nc, int callerPid, int callerUid) {
         final NetworkCapabilities newNc = new NetworkCapabilities(nc);
-        if (!checkSettingsPermission(callerPid, callerUid)) newNc.setUids(null);
-        if (!checkSettingsPermission(callerPid, callerUid)) newNc.setSSID(null);
+        if (!checkSettingsPermission(callerPid, callerUid)) {
+            newNc.setUids(null);
+            newNc.setSSID(null);
+        }
         return newNc;
     }
 
@@ -4305,8 +4324,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
         // the default network request. This allows callers to keep track of
         // the system default network.
         if (type == NetworkRequest.Type.TRACK_DEFAULT) {
-            networkCapabilities = new NetworkCapabilities(mDefaultRequest.networkCapabilities);
-            networkCapabilities.removeCapability(NET_CAPABILITY_NOT_VPN);
+            networkCapabilities = createDefaultNetworkCapabilitiesForUid(Binder.getCallingUid());
             enforceAccessPermission();
         } else {
             networkCapabilities = new NetworkCapabilities(networkCapabilities);
@@ -4563,7 +4581,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
 
     // Note: if mDefaultRequest is changed, NetworkMonitor needs to be updated.
     private final NetworkRequest mDefaultRequest;
-
+ 
     // Request used to optionally keep mobile data active even when higher
     // priority networks like Wi-Fi are active.
     private final NetworkRequest mDefaultMobileDataRequest;

@@ -4173,4 +4173,53 @@ public class ConnectivityServiceTest {
         mCm.unregisterNetworkCallback(vpnNetworkCallback);
         mCm.unregisterNetworkCallback(defaultCallback);
     }
+
+    @Test
+    public void testVpnWithAndWithoutInternet() {
+        final int uid = Process.myUid();
+
+        final TestNetworkCallback defaultCallback = new TestNetworkCallback();
+        mCm.registerDefaultNetworkCallback(defaultCallback);
+        defaultCallback.assertNoCallback();
+
+        mWiFiNetworkAgent = new MockNetworkAgent(TRANSPORT_WIFI);
+        mWiFiNetworkAgent.connect(true);
+
+        defaultCallback.expectAvailableThenValidatedCallbacks(mWiFiNetworkAgent);
+        assertEquals(defaultCallback.getLastAvailableNetwork(), mCm.getActiveNetwork());
+
+        MockNetworkAgent vpnNetworkAgent = new MockNetworkAgent(TRANSPORT_VPN);
+        final ArraySet<UidRange> ranges = new ArraySet<>();
+        ranges.add(new UidRange(uid, uid));
+        when(mMockVpn.getNetId()).thenReturn(vpnNetworkAgent.getNetwork().netId);
+        vpnNetworkAgent.setUids(ranges);
+        vpnNetworkAgent.connect(true /* validated */, false /* hasInternet */);
+
+        defaultCallback.assertNoCallback();
+        assertEquals(defaultCallback.getLastAvailableNetwork(), mCm.getActiveNetwork());
+
+        vpnNetworkAgent.disconnect();
+        defaultCallback.assertNoCallback();
+
+        vpnNetworkAgent = new MockNetworkAgent(TRANSPORT_VPN);
+        when(mMockVpn.getNetId()).thenReturn(vpnNetworkAgent.getNetwork().netId);
+        vpnNetworkAgent.setUids(ranges);
+        vpnNetworkAgent.connect(true /* validated */, true /* hasInternet */);
+        defaultCallback.expectAvailableThenValidatedCallbacks(vpnNetworkAgent);
+        assertEquals(defaultCallback.getLastAvailableNetwork(), mCm.getActiveNetwork());
+
+        vpnNetworkAgent.disconnect();
+        defaultCallback.expectCallback(CallbackState.LOST, vpnNetworkAgent);
+        defaultCallback.expectAvailableCallbacksValidated(mWiFiNetworkAgent);
+
+        vpnNetworkAgent = new MockNetworkAgent(TRANSPORT_VPN);
+        when(mMockVpn.getNetId()).thenReturn(vpnNetworkAgent.getNetwork().netId);
+        ranges.clear();
+        vpnNetworkAgent.setUids(ranges);
+
+        vpnNetworkAgent.connect(false /* validated */, true /* hasInternet */);
+        defaultCallback.assertNoCallback();
+
+        mCm.unregisterNetworkCallback(defaultCallback);
+    }
 }
