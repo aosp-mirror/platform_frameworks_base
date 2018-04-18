@@ -35,6 +35,7 @@ import com.android.settingslib.bluetooth.CachedBluetoothDevice;
 import com.android.settingslib.bluetooth.CachedBluetoothDeviceManager;
 import com.android.settingslib.bluetooth.LocalBluetoothAdapter;
 import com.android.settingslib.bluetooth.LocalBluetoothManager;
+import com.android.settingslib.bluetooth.LocalBluetoothProfileManager;
 import com.android.systemui.SysuiTestCase;
 
 import org.junit.Before;
@@ -68,6 +69,8 @@ public class BluetoothControllerImplTest extends SysuiTestCase {
         mMockAdapter = mock(LocalBluetoothAdapter.class);
         when(mMockBluetoothManager.getBluetoothAdapter()).thenReturn(mMockAdapter);
         when(mMockBluetoothManager.getEventManager()).thenReturn(mock(BluetoothEventManager.class));
+        when(mMockBluetoothManager.getProfileManager())
+                .thenReturn(mock(LocalBluetoothProfileManager.class));
 
         mBluetoothControllerImpl = new BluetoothControllerImpl(mContext,
                 mTestableLooper.getLooper());
