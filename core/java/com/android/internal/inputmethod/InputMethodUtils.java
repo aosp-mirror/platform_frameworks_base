@@ -578,7 +578,7 @@ public class InputMethodUtils {
      * Returns the language component of a given locale string.
      * TODO: Use {@link Locale#toLanguageTag()} and {@link Locale#forLanguageTag(String)}
      */
-    public static String getLanguageFromLocaleString(String locale) {
+    private static String getLanguageFromLocaleString(String locale) {
         final int idx = locale.indexOf('_');
         if (idx < 0) {
             return locale;

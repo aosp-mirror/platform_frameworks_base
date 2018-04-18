@@ -19,6 +19,7 @@ package com.android.settingslib.inputmethod;
 import android.support.test.InstrumentationRegistry;
 import android.support.test.filters.SmallTest;
 import android.support.test.runner.AndroidJUnit4;
+import android.text.TextUtils;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -98,11 +99,14 @@ public class InputMethodSubtypePreferenceTest {
             final String subtypeLocaleString,
             final Locale systemLocale) {
         final String key = subtypeName + "-" + subtypeLocaleString + "-" + systemLocale;
+        final String subtypeLanguageTag = subtypeLocaleString.replace('_', '-');
+        final Locale subtypeLocale = TextUtils.isEmpty(subtypeLanguageTag)
+                ? null : Locale.forLanguageTag(subtypeLanguageTag);
         return new InputMethodSubtypePreference(
                 InstrumentationRegistry.getTargetContext(),
                 key,
                 subtypeName,
-                subtypeLocaleString,
+                subtypeLocale,
                 systemLocale);
     }
 }
