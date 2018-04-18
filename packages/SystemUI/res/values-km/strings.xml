@@ -161,10 +161,8 @@
     <string name="accessibility_no_sim" msgid="8274017118472455155">"គ្មាន​ស៊ីម​កាត។"</string>
     <string name="accessibility_cell_data" msgid="5326139158682385073">"ទិន្នន័យ​ទូរសព្ទចល័ត"</string>
     <string name="accessibility_cell_data_on" msgid="5927098403452994422">"ទិន្នន័យទូរសព្ទចល័តបានបើក"</string>
-    <!-- no translation found for cell_data_off_content_description (4356113230238585072) -->
-    <skip />
-    <!-- no translation found for cell_data_off (1051264981229902873) -->
-    <skip />
+    <string name="cell_data_off_content_description" msgid="4356113230238585072">"ទិន្នន័យ​ទូរសព្ទចល័ត​បានបិទ"</string>
+    <string name="cell_data_off" msgid="1051264981229902873">"បិទ"</string>
     <string name="accessibility_bluetooth_tether" msgid="4102784498140271969">"ការ​ភ្ជាប់​ប៊្លូធូស។"</string>
     <string name="accessibility_airplane_mode" msgid="834748999790763092">"របៀប​​ពេលជិះ​យន្តហោះ"</string>
     <string name="accessibility_vpn_on" msgid="5993385083262856059">"បើក VPN ។"</string>
@@ -363,8 +361,7 @@
     <string name="recents_stack_action_button_label" msgid="6593727103310426253">"សម្អាតទាំងអស់"</string>
     <string name="recents_drag_hint_message" msgid="2649739267073203985">"អូសនៅទីនេះដើម្បីប្រើអេក្រង់បំបែក"</string>
     <string name="recents_swipe_up_onboarding" msgid="3824607135920170001">"អូស​ឡើង​លើ​ដើម្បី​ប្តូរ​កម្មវិធី"</string>
-    <!-- no translation found for recents_quick_scrub_onboarding (2778062804333285789) -->
-    <skip />
+    <string name="recents_quick_scrub_onboarding" msgid="2778062804333285789">"អូសទៅស្ដាំដើម្បីប្ដូរកម្មវិធីបានរហ័ស"</string>
     <string name="recents_multistack_add_stack_dialog_split_horizontal" msgid="8848514474543427332">"បំបែកផ្តេក"</string>
     <string name="recents_multistack_add_stack_dialog_split_vertical" msgid="9075292233696180813">"បំបែកបញ្ឈរ"</string>
     <string name="recents_multistack_add_stack_dialog_split_custom" msgid="4177837597513701943">"បំបែកផ្ទាល់ខ្លួន"</string>

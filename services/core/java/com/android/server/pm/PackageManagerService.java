@@ -2499,6 +2499,10 @@ public class PackageManagerService extends IPackageManager.Stub
 
             SELinuxMMAC.readInstallPolicy();
 
+            Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "loadFallbacks");
+            FallbackCategoryProvider.loadFallbacks();
+            Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
+
             Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "read user settings");
             mFirstBoot = !mSettings.readLPw(sUserManager.getUsers(false));
             Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
@@ -3237,10 +3241,6 @@ public class PackageManagerService extends IPackageManager.Stub
         // tidy.
         Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "GC");
         Runtime.getRuntime().gc();
-        Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
-
-        Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "loadFallbacks");
-        FallbackCategoryProvider.loadFallbacks();
         Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
 
         // The initial scanning above does many calls into installd while
@@ -11488,6 +11488,8 @@ public class PackageManagerService extends IPackageManager.Stub
                 a.info.dataDir = pkg.applicationInfo.dataDir;
                 a.info.deviceProtectedDataDir = pkg.applicationInfo.deviceProtectedDataDir;
                 a.info.credentialProtectedDataDir = pkg.applicationInfo.credentialProtectedDataDir;
+                a.info.primaryCpuAbi = pkg.applicationInfo.primaryCpuAbi;
+                a.info.secondaryCpuAbi = pkg.applicationInfo.secondaryCpuAbi;
                 a.info.nativeLibraryDir = pkg.applicationInfo.nativeLibraryDir;
                 a.info.secondaryNativeLibraryDir = pkg.applicationInfo.secondaryNativeLibraryDir;
                 mInstrumentation.put(a.getComponentName(), a);

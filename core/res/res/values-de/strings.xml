@@ -1777,12 +1777,9 @@
     <string name="language_picker_section_all" msgid="3097279199511617537">"Alle Sprachen"</string>
     <string name="region_picker_section_all" msgid="8966316787153001779">"Alle Regionen"</string>
     <string name="locale_search_menu" msgid="2560710726687249178">"Suche"</string>
-    <!-- no translation found for app_suspended_title (1919029799438164552) -->
-    <skip />
-    <!-- no translation found for app_suspended_default_message (7875306315686531621) -->
-    <skip />
-    <!-- no translation found for app_suspended_more_details (1131804827776778187) -->
-    <skip />
+    <string name="app_suspended_title" msgid="1919029799438164552">"App kann nicht geöffnet werden"</string>
+    <string name="app_suspended_default_message" msgid="7875306315686531621">"Die App <xliff:g id="APP_NAME_0">%1$s</xliff:g> ist zurzeit nicht verfügbar. Die Verwaltung erfolgt über <xliff:g id="APP_NAME_1">%2$s</xliff:g>."</string>
+    <string name="app_suspended_more_details" msgid="1131804827776778187">"Weitere Informationen"</string>
     <string name="work_mode_off_title" msgid="1118691887588435530">"Arbeitsprofil aktivieren?"</string>
     <string name="work_mode_off_message" msgid="5130856710614337649">"Deine geschäftlichen Apps, Benachrichtigungen, Daten und andere Funktionen des Arbeitsprofils werden aktiviert"</string>
     <string name="work_mode_turn_on" msgid="2062544985670564875">"Aktivieren"</string>
@@ -1878,6 +1875,5 @@
     <string name="zen_upgrade_notification_content" msgid="1794994264692424562">"Tippe, um zu überprüfen, welche Inhalte blockiert werden."</string>
     <string name="notification_app_name_system" msgid="4205032194610042794">"System"</string>
     <string name="notification_app_name_settings" msgid="7751445616365753381">"Einstellungen"</string>
-    <!-- no translation found for car_loading_profile (3545132581795684027) -->
-    <skip />
+    <string name="car_loading_profile" msgid="3545132581795684027">"Wird geladen"</string>
 </resources>

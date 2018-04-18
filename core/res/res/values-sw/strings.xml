@@ -295,16 +295,16 @@
     <string name="permgrouplab_sensors" msgid="416037179223226722">"Vihisi vya Mwili"</string>
     <string name="permgroupdesc_sensors" msgid="7147968539346634043">"fikia data ya kitambuzi kuhusu alama zako muhimu"</string>
     <string name="permgrouprequest_sensors" msgid="6349806962814556786">"Ungependa kuiruhusu &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ifikie data ya vitambuzi kuhusu viashiria muhimu vya mwili wako?"</string>
-    <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"Kurejesha maudhui ya dirisha"</string>
+    <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"Kufikia maudhui ya dirisha"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"Kuchunguza maudhui ya dirisha unalotumia."</string>
     <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"Kuwasha \'Chunguza kwa Kugusa\'"</string>
-    <string name="capability_desc_canRequestTouchExploration" msgid="7543249041581408313">"Ukigonga vipengee, vitatamka maneno kwa sauti na unaweza kukagua skrini kwa kutumia ishara."</string>
-    <string name="capability_title_canRequestFilterKeyEvents" msgid="2103440391902412174">"Kuangalia maandishi unayoyacharaza"</string>
-    <string name="capability_desc_canRequestFilterKeyEvents" msgid="7463135292204152818">"Inajumuisha data binafsi kama vile nambari za kadi ya mkopo na manenosiri."</string>
-    <string name="capability_title_canControlMagnification" msgid="3593493281059424855">"Kudhibiti ukuzaji wa onyesho"</string>
-    <string name="capability_desc_canControlMagnification" msgid="4791858203568383773">"Kudhibiti kiwango cha kukuza na nafasi cha onyesho."</string>
+    <string name="capability_desc_canRequestTouchExploration" msgid="7543249041581408313">"Vipengee utakavyogusa vitatamkwa kwa sauti na unaweza kukagua skrini kwa kutumia ishara."</string>
+    <string name="capability_title_canRequestFilterKeyEvents" msgid="2103440391902412174">"Kutambua maandishi unayocharaza"</string>
+    <string name="capability_desc_canRequestFilterKeyEvents" msgid="7463135292204152818">"Inajumuisha data binafsi kama vile nambari za kadi za mikopo na manenosiri."</string>
+    <string name="capability_title_canControlMagnification" msgid="3593493281059424855">"Kudhibiti ukuzaji kwenye skrini"</string>
+    <string name="capability_desc_canControlMagnification" msgid="4791858203568383773">"Kudhibiti kiwango cha kukuza na nafasi kwenye skrini."</string>
     <string name="capability_title_canPerformGestures" msgid="7418984730362576862">"Tekeleza ishara"</string>
-    <string name="capability_desc_canPerformGestures" msgid="8296373021636981249">"Unaweza kugonga, kutelezesha kidole, kubana na kutekeleza ishara zingine."</string>
+    <string name="capability_desc_canPerformGestures" msgid="8296373021636981249">"Unaweza kugusa, kutelezesha kidole, kubana na kutekeleza ishara zingine."</string>
     <string name="capability_title_canCaptureFingerprintGestures" msgid="6309568287512278670">"Ishara za alama ya kidole"</string>
     <string name="capability_desc_canCaptureFingerprintGestures" msgid="4386487962402228670">"Inaweza kurekodi ishara zinazotekelezwa kwenye kitambua alama ya kidole."</string>
     <string name="permlab_statusBar" msgid="7417192629601890791">"zima au rekebisha mwambaa hali"</string>
@@ -599,7 +599,7 @@
     <string name="policydesc_encryptedStorage" msgid="2637732115325316992">"Inahitaji kwamba data iliyohifadhiwa ya programu iwe na msimbo fiche."</string>
     <string name="policylab_disableCamera" msgid="6395301023152297826">"Kuzima kamera"</string>
     <string name="policydesc_disableCamera" msgid="2306349042834754597">"Kuzuia matumizi yote ya kamera za kifaa."</string>
-    <string name="policylab_disableKeyguardFeatures" msgid="8552277871075367771">"Zima matumizi ya baadhi ya vipengele vya kufunga skrini"</string>
+    <string name="policylab_disableKeyguardFeatures" msgid="8552277871075367771">"Kuzima baadhi ya vipengele vya kufunga skrini"</string>
     <string name="policydesc_disableKeyguardFeatures" msgid="2044755691354158439">"Zuia matumizi ya baadhi ya vipengele vya kufunga skrini."</string>
   <string-array name="phoneTypes">
     <item msgid="8901098336658710359">"Nyumbani"</item>
@@ -1034,7 +1034,7 @@
     <string name="cancel" msgid="6442560571259935130">"Ghairi"</string>
     <string name="yes" msgid="5362982303337969312">"Sawa"</string>
     <string name="no" msgid="5141531044935541497">"Ghairi"</string>
-    <string name="dialog_alert_title" msgid="2049658708609043103">"Zingatia"</string>
+    <string name="dialog_alert_title" msgid="2049658708609043103">"Kumbuka"</string>
     <string name="loading" msgid="7933681260296021180">"Inapakia…"</string>
     <string name="capital_on" msgid="1544682755514494298">"Washa"</string>
     <string name="capital_off" msgid="6815870386972805832">"ZIMA"</string>
@@ -1550,7 +1550,7 @@
     <string name="accessibility_shortcut_toogle_warning" msgid="7256507885737444807">"Unapowasha kipengele cha njia ya mkato, hatua ya kubonyeza vitufe vyote viwili vya sauti kwa dakika 3 itafungua kipengele cha zana za walio na matatizo ya kuona au kusikia.\n\n Kipengele kilichopo cha zana za walio na matatizo ya kuona au kusikia:\n <xliff:g id="SERVICE_NAME">%1$s</xliff:g>\n\n Unaweza kubadilisha kipengele hiki katika Mipangilio &gt; Zana za walio na matatizo ya kuona au kusikia."</string>
     <string name="disable_accessibility_shortcut" msgid="627625354248453445">"Zima kipengele cha Njia ya Mkato"</string>
     <string name="leave_accessibility_shortcut_on" msgid="7653111894438512680">"Tumia Njia ya Mkato"</string>
-    <string name="color_inversion_feature_name" msgid="4231186527799958644">"Ugeuzaji wa Rangi"</string>
+    <string name="color_inversion_feature_name" msgid="4231186527799958644">"Ugeuzaji rangi"</string>
     <string name="color_correction_feature_name" msgid="6779391426096954933">"Usahihishaji wa rangi"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="7771852911861522636">"Njia ya mkato ya zana za walio na matatizo ya kuona au kusikia imewasha <xliff:g id="SERVICE_NAME">%1$s</xliff:g>"</string>
     <string name="accessibility_shortcut_disabling_service" msgid="2747243438223109821">"Njia ya mkato ya zana za walio na matatizo ya kuona au kusikia imezima <xliff:g id="SERVICE_NAME">%1$s</xliff:g>"</string>
@@ -1763,7 +1763,7 @@
       <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> vimechaguliwa</item>
       <item quantity="one"><xliff:g id="COUNT_0">%1$d</xliff:g> kimechaguliwa</item>
     </plurals>
-    <string name="default_notification_channel_label" msgid="5929663562028088222">"Haijawekwa katika kategoria"</string>
+    <string name="default_notification_channel_label" msgid="5929663562028088222">"Ambazo aina haijabainishwa"</string>
     <string name="importance_from_user" msgid="7318955817386549931">"Uliweka mipangilio ya umuhimu wa arifa hizi."</string>
     <string name="importance_from_person" msgid="9160133597262938296">"Hii ni muhimu kwa sababu ya watu waliohusika."</string>
     <string name="user_creation_account_exists" msgid="1942606193570143289">"Ungependa kuruhusu <xliff:g id="APP">%1$s</xliff:g> iunde Mtumiaji mpya ikitumia <xliff:g id="ACCOUNT">%2$s</xliff:g>?"</string>
@@ -1775,12 +1775,9 @@
     <string name="language_picker_section_all" msgid="3097279199511617537">"Lugha zote"</string>
     <string name="region_picker_section_all" msgid="8966316787153001779">"Maeneo yote"</string>
     <string name="locale_search_menu" msgid="2560710726687249178">"Tafuta"</string>
-    <!-- no translation found for app_suspended_title (1919029799438164552) -->
-    <skip />
-    <!-- no translation found for app_suspended_default_message (7875306315686531621) -->
-    <skip />
-    <!-- no translation found for app_suspended_more_details (1131804827776778187) -->
-    <skip />
+    <string name="app_suspended_title" msgid="1919029799438164552">"Huwezi kufungua programu"</string>
+    <string name="app_suspended_default_message" msgid="7875306315686531621">"Programu ya <xliff:g id="APP_NAME_0">%1$s</xliff:g> haipatikani wakati huu. Inasimamiwa na <xliff:g id="APP_NAME_1">%2$s</xliff:g>."</string>
+    <string name="app_suspended_more_details" msgid="1131804827776778187">"Pata maelezo zaidi"</string>
     <string name="work_mode_off_title" msgid="1118691887588435530">"Ungependa kuwasha wasifu wa kazini?"</string>
     <string name="work_mode_off_message" msgid="5130856710614337649">"Hatua hii itawasha data, arifa, programu za kazini, arifa na vipengele vingine vya wasifu wa kazini"</string>
     <string name="work_mode_turn_on" msgid="2062544985670564875">"Washa"</string>
@@ -1876,6 +1873,5 @@
     <string name="zen_upgrade_notification_content" msgid="1794994264692424562">"Gusa ili uangalie kipengee ambacho kimezuiwa."</string>
     <string name="notification_app_name_system" msgid="4205032194610042794">"Mfumo"</string>
     <string name="notification_app_name_settings" msgid="7751445616365753381">"Mipangilio"</string>
-    <!-- no translation found for car_loading_profile (3545132581795684027) -->
-    <skip />
+    <string name="car_loading_profile" msgid="3545132581795684027">"Inapakia"</string>
 </resources>

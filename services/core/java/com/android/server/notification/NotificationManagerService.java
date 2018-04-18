@@ -782,18 +782,8 @@ public class NotificationManagerService extends SystemService {
         @Override
         public void onNotificationError(int callingUid, int callingPid, String pkg, String tag, int id,
                 int uid, int initialPid, String message, int userId) {
-            Slog.d(TAG, "onNotification error pkg=" + pkg + " tag=" + tag + " id=" + id
-                    + "; will crashApplication(uid=" + uid + ", pid=" + initialPid + ")");
             cancelNotification(callingUid, callingPid, pkg, tag, id, 0, 0, false, userId,
                     REASON_ERROR, null);
-            long ident = Binder.clearCallingIdentity();
-            try {
-                ActivityManager.getService().crashApplication(uid, initialPid, pkg, -1,
-                        "Bad notification posted from package " + pkg
-                        + ": " + message);
-            } catch (RemoteException e) {
-            }
-            Binder.restoreCallingIdentity(ident);
         }
 
         @Override
@@ -4773,7 +4763,9 @@ public class NotificationManagerService extends SystemService {
 
         // Suppressed because another notification in its group handles alerting
         if (record.sbn.isGroup()) {
-            return notification.suppressAlertingDueToGrouping();
+            if (notification.suppressAlertingDueToGrouping()) {
+                return true;
+            }
         }
 
         // Suppressed for being too recently noisy

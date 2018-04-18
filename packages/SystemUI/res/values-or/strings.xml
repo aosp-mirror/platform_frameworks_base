@@ -574,7 +574,7 @@
     <string name="broadcast_tile" msgid="3894036511763289383">"ଟାଇଲ୍‍ ବ୍ରଡ୍‌କାଷ୍ଟ କରନ୍ତୁ"</string>
     <string name="zen_alarm_warning_indef" msgid="3482966345578319605">"ଆପଣ <xliff:g id="WHEN">%1$s</xliff:g> ପୂର୍ବରୁ ଏହା ଅଫ୍‍ ନକଲେ ନିଜର ପରବର୍ତ୍ତୀ ଆଲାର୍ମ ଶୁଣିପାରିବେ ନାହିଁ"</string>
     <string name="zen_alarm_warning" msgid="444533119582244293">"<xliff:g id="WHEN">%1$s</xliff:g>ବେଳେ ଆପଣ ନିଜର ପରବର୍ତ୍ତୀ ଆଲାର୍ମ ଶୁଣିପାରିବେ ନାହିଁ"</string>
-    <string name="alarm_template" msgid="3980063409350522735">"<xliff:g id="WHEN">%1$s</xliff:g>ରେ"</string>
+    <string name="alarm_template" msgid="3980063409350522735">"<xliff:g id="WHEN">%1$s</xliff:g> ହେଲେ"</string>
     <string name="alarm_template_far" msgid="4242179982586714810">"<xliff:g id="WHEN">%1$s</xliff:g> ବେଳେ"</string>
     <string name="accessibility_quick_settings_detail" msgid="2579369091672902101">"ଦ୍ରୁତ ସେଟିଙ୍ଗ, <xliff:g id="TITLE">%s</xliff:g>।"</string>
     <string name="accessibility_status_bar_hotspot" msgid="4099381329956402865">"ହଟସ୍ପଟ୍‌"</string>

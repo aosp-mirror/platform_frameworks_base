@@ -166,6 +166,8 @@ void UidMap::updateApp(const int64_t& timestamp, const String16& app_16, const i
         } else {
             // Only notify the listeners if this is an app upgrade. If this app is being installed
             // for the first time, then we don't notify the listeners.
+            // It's also OK to split again if we're forming a partial bucket after re-installing an
+            // app after deletion.
             getListenerListCopyLocked(&broadcastList);
         }
         mChanges.emplace_back(false, timestamp, appName, uid, versionCode, prevVersion);

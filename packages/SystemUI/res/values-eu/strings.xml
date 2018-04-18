@@ -161,10 +161,8 @@
     <string name="accessibility_no_sim" msgid="8274017118472455155">"Ez dago SIM txartelik."</string>
     <string name="accessibility_cell_data" msgid="5326139158682385073">"Datu-konexioa"</string>
     <string name="accessibility_cell_data_on" msgid="5927098403452994422">"Datu-konexioa aktibatuta"</string>
-    <!-- no translation found for cell_data_off_content_description (4356113230238585072) -->
-    <skip />
-    <!-- no translation found for cell_data_off (1051264981229902873) -->
-    <skip />
+    <string name="cell_data_off_content_description" msgid="4356113230238585072">"Desaktibatuta dago datu-konexioa"</string>
+    <string name="cell_data_off" msgid="1051264981229902873">"Desaktibatuta"</string>
     <string name="accessibility_bluetooth_tether" msgid="4102784498140271969">"Konexioa partekatzea (Bluetooth)"</string>
     <string name="accessibility_airplane_mode" msgid="834748999790763092">"Hegaldi-modua"</string>
     <string name="accessibility_vpn_on" msgid="5993385083262856059">"VPN eginbidea aktibatuta."</string>
@@ -365,8 +363,7 @@
     <string name="recents_stack_action_button_label" msgid="6593727103310426253">"Garbitu guztiak"</string>
     <string name="recents_drag_hint_message" msgid="2649739267073203985">"Arrastatu hau pantaila zatitzeko"</string>
     <string name="recents_swipe_up_onboarding" msgid="3824607135920170001">"Egin gora aplikazioa aldatzeko"</string>
-    <!-- no translation found for recents_quick_scrub_onboarding (2778062804333285789) -->
-    <skip />
+    <string name="recents_quick_scrub_onboarding" msgid="2778062804333285789">"Arrastatu eskuinera aplikazioa azkar aldatzeko"</string>
     <string name="recents_multistack_add_stack_dialog_split_horizontal" msgid="8848514474543427332">"Zatitze horizontala"</string>
     <string name="recents_multistack_add_stack_dialog_split_vertical" msgid="9075292233696180813">"Zatitze bertikala"</string>
     <string name="recents_multistack_add_stack_dialog_split_custom" msgid="4177837597513701943">"Zatitze pertsonalizatua"</string>
@@ -389,7 +386,7 @@
     <string name="keyguard_more_overflow_text" msgid="9195222469041601365">"+<xliff:g id="NUMBER_OF_NOTIFICATIONS">%d</xliff:g>"</string>
     <string name="speed_bump_explanation" msgid="1288875699658819755">"Horren premiazkoak ez diren jakinarazpenak daude behean"</string>
     <string name="notification_tap_again" msgid="7590196980943943842">"Irekitzeko, ukitu berriro"</string>
-    <string name="keyguard_unlock" msgid="8043466894212841998">"Desblokeatzeko, pasatu hatza gorantz"</string>
+    <string name="keyguard_unlock" msgid="8043466894212841998">"Desblokeatzeko, pasatu hatza gora"</string>
     <string name="do_disclosure_generic" msgid="5615898451805157556">"Zure erakundeak kudeatzen du gailua"</string>
     <string name="do_disclosure_with_name" msgid="5640615509915445501">"<xliff:g id="ORGANIZATION_NAME">%s</xliff:g> erakundeak kudeatzen du gailu hau"</string>
     <string name="phone_hint" msgid="4872890986869209950">"Pasatu hatza ikonotik, telefonoa irekitzeko"</string>

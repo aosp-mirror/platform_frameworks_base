@@ -1777,12 +1777,9 @@
     <string name="language_picker_section_all" msgid="3097279199511617537">"すべての言語"</string>
     <string name="region_picker_section_all" msgid="8966316787153001779">"すべての地域"</string>
     <string name="locale_search_menu" msgid="2560710726687249178">"検索"</string>
-    <!-- no translation found for app_suspended_title (1919029799438164552) -->
-    <skip />
-    <!-- no translation found for app_suspended_default_message (7875306315686531621) -->
-    <skip />
-    <!-- no translation found for app_suspended_more_details (1131804827776778187) -->
-    <skip />
+    <string name="app_suspended_title" msgid="1919029799438164552">"アプリを開くことはできません"</string>
+    <string name="app_suspended_default_message" msgid="7875306315686531621">"アプリ <xliff:g id="APP_NAME_0">%1$s</xliff:g> は現在ご利用いただけません。このアプリは [<xliff:g id="APP_NAME_1">%2$s</xliff:g>] で管理されています。"</string>
+    <string name="app_suspended_more_details" msgid="1131804827776778187">"詳細"</string>
     <string name="work_mode_off_title" msgid="1118691887588435530">"仕事用プロファイルの有効化"</string>
     <string name="work_mode_off_message" msgid="5130856710614337649">"仕事用のアプリ、通知、データなど、仕事用プロファイルの機能が ON になります"</string>
     <string name="work_mode_turn_on" msgid="2062544985670564875">"ON にする"</string>

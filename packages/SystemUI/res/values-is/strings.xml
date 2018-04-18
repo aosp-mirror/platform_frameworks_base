@@ -161,10 +161,8 @@
     <string name="accessibility_no_sim" msgid="8274017118472455155">"Ekkert SIM-kort."</string>
     <string name="accessibility_cell_data" msgid="5326139158682385073">"Farsímagögn"</string>
     <string name="accessibility_cell_data_on" msgid="5927098403452994422">"Kveikt á farsímagögnum"</string>
-    <!-- no translation found for cell_data_off_content_description (4356113230238585072) -->
-    <skip />
-    <!-- no translation found for cell_data_off (1051264981229902873) -->
-    <skip />
+    <string name="cell_data_off_content_description" msgid="4356113230238585072">"Slökkt á farsímagögnum"</string>
+    <string name="cell_data_off" msgid="1051264981229902873">"Slökkt"</string>
     <string name="accessibility_bluetooth_tether" msgid="4102784498140271969">"Tjóðrun með Bluetooth."</string>
     <string name="accessibility_airplane_mode" msgid="834748999790763092">"Flugstilling"</string>
     <string name="accessibility_vpn_on" msgid="5993385083262856059">"Kveikt á VPN."</string>
@@ -363,8 +361,7 @@
     <string name="recents_stack_action_button_label" msgid="6593727103310426253">"Hreinsa allt"</string>
     <string name="recents_drag_hint_message" msgid="2649739267073203985">"Dragðu hingað til að skipta skjánum"</string>
     <string name="recents_swipe_up_onboarding" msgid="3824607135920170001">"Strjúktu upp til að skipta á milli forrita"</string>
-    <!-- no translation found for recents_quick_scrub_onboarding (2778062804333285789) -->
-    <skip />
+    <string name="recents_quick_scrub_onboarding" msgid="2778062804333285789">"Dragðu til hægri til að skipta hratt á milli forrita"</string>
     <string name="recents_multistack_add_stack_dialog_split_horizontal" msgid="8848514474543427332">"Lárétt skipting"</string>
     <string name="recents_multistack_add_stack_dialog_split_vertical" msgid="9075292233696180813">"Lóðrétt skipting"</string>
     <string name="recents_multistack_add_stack_dialog_split_custom" msgid="4177837597513701943">"Sérsniðin skipting"</string>

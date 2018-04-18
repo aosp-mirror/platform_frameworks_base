@@ -175,4 +175,18 @@ public class PowerUtilTest {
         // Add percentage to string when provided
         assertThat(info2).isEqualTo("More than 2 days remaining (10%)");
     }
+
+    @Test
+    public void testRoundToNearestThreshold_roundsCorrectly() {
+        // test some pretty normal values
+        assertThat(PowerUtil.roundTimeToNearestThreshold(1200, 1000)).isEqualTo(1000);
+        assertThat(PowerUtil.roundTimeToNearestThreshold(800, 1000)).isEqualTo(1000);
+        assertThat(PowerUtil.roundTimeToNearestThreshold(1000, 1000)).isEqualTo(1000);
+
+        // test the weird stuff
+        assertThat(PowerUtil.roundTimeToNearestThreshold(80, -200)).isEqualTo(0);
+        assertThat(PowerUtil.roundTimeToNearestThreshold(-150, 100)).isEqualTo(200);
+        assertThat(PowerUtil.roundTimeToNearestThreshold(-120, 100)).isEqualTo(100);
+        assertThat(PowerUtil.roundTimeToNearestThreshold(-200, -75)).isEqualTo(225);
+    }
 }

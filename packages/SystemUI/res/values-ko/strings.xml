@@ -161,10 +161,8 @@
     <string name="accessibility_no_sim" msgid="8274017118472455155">"SIM이 없습니다."</string>
     <string name="accessibility_cell_data" msgid="5326139158682385073">"모바일 데이터"</string>
     <string name="accessibility_cell_data_on" msgid="5927098403452994422">"모바일 데이터 사용"</string>
-    <!-- no translation found for cell_data_off_content_description (4356113230238585072) -->
-    <skip />
-    <!-- no translation found for cell_data_off (1051264981229902873) -->
-    <skip />
+    <string name="cell_data_off_content_description" msgid="4356113230238585072">"모바일 데이터 사용 중지"</string>
+    <string name="cell_data_off" msgid="1051264981229902873">"사용 안함"</string>
     <string name="accessibility_bluetooth_tether" msgid="4102784498140271969">"블루투스 테더링입니다."</string>
     <string name="accessibility_airplane_mode" msgid="834748999790763092">"비행기 모드입니다."</string>
     <string name="accessibility_vpn_on" msgid="5993385083262856059">"VPN 켜짐"</string>
@@ -365,8 +363,7 @@
     <string name="recents_stack_action_button_label" msgid="6593727103310426253">"모두 지우기"</string>
     <string name="recents_drag_hint_message" msgid="2649739267073203985">"여기를 드래그하여 분할 화면 사용하기"</string>
     <string name="recents_swipe_up_onboarding" msgid="3824607135920170001">"위로 스와이프하여 앱 전환"</string>
-    <!-- no translation found for recents_quick_scrub_onboarding (2778062804333285789) -->
-    <skip />
+    <string name="recents_quick_scrub_onboarding" msgid="2778062804333285789">"앱을 빠르게 전환하려면 오른쪽으로 드래그"</string>
     <string name="recents_multistack_add_stack_dialog_split_horizontal" msgid="8848514474543427332">"수평 분할"</string>
     <string name="recents_multistack_add_stack_dialog_split_vertical" msgid="9075292233696180813">"수직 분할"</string>
     <string name="recents_multistack_add_stack_dialog_split_custom" msgid="4177837597513701943">"맞춤 분할"</string>
