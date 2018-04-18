@@ -93,7 +93,7 @@ public class NotificationLoggerTest extends SysuiTestCase {
         waitForUiOffloadThread();
 
         NotificationVisibility[] newlyVisibleKeys = {
-                NotificationVisibility.obtain(mEntry.key, 0, true)
+                NotificationVisibility.obtain(mEntry.key, 0, 1, true)
         };
         NotificationVisibility[] noLongerVisibleKeys = {};
         verify(mBarService).onNotificationVisibilityChanged(newlyVisibleKeys, noLongerVisibleKeys);
