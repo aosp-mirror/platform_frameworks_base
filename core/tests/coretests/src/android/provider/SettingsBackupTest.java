@@ -241,6 +241,7 @@ public class SettingsBackupTest {
                     Settings.Global.GLOBAL_HTTP_PROXY_HOST,
                     Settings.Global.GLOBAL_HTTP_PROXY_PAC,
                     Settings.Global.GLOBAL_HTTP_PROXY_PORT,
+                    Settings.Global.GNSS_HAL_LOCATION_REQUEST_DURATION_MILLIS,
                     Settings.Global.GNSS_SATELLITE_BLACKLIST,
                     Settings.Global.GPRS_REGISTER_CHECK_PERIOD_MS,
                     Settings.Global.HDMI_CONTROL_AUTO_DEVICE_OFF_ENABLED,

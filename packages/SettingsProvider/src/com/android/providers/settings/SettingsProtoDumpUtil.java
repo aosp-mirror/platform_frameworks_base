@@ -745,6 +745,9 @@ class SettingsProtoDumpUtil {
         dumpSetting(s, p,
                 Settings.Global.GNSS_SATELLITE_BLACKLIST,
                 GlobalSettingsProto.Location.GNSS_SATELLITE_BLACKLIST);
+        dumpSetting(s, p,
+                Settings.Global.GNSS_HAL_LOCATION_REQUEST_DURATION_MILLIS,
+                GlobalSettingsProto.Location.GNSS_HAL_LOCATION_REQUEST_DURATION_MILLIS);
         p.end(locationToken);
 
         final long lpmToken = p.start(GlobalSettingsProto.LOW_POWER_MODE);
