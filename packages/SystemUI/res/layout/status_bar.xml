@@ -28,6 +28,7 @@
     android:orientation="vertical"
     android:focusable="false"
     android:descendantFocusability="afterDescendants"
+    android:accessibilityPaneTitle="@string/status_bar"
     >
 
     <ImageView
