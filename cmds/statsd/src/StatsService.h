@@ -66,7 +66,7 @@ public:
                                     const vector<String16>& app);
     virtual Status informOnePackage(const String16& app, int32_t uid, int64_t version);
     virtual Status informOnePackageRemoved(const String16& app, int32_t uid);
-    virtual Status writeDataToDisk();
+    virtual Status informDeviceShutdown(bool isShutdown);
 
     /**
      * Called right before we start processing events.

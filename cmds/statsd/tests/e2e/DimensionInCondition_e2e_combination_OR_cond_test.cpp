@@ -130,7 +130,8 @@ TEST(DimensionInConditionE2eTest, TestCreateCountMetric_NoLink_OR_CombinationCon
 
     ConfigMetricsReportList reports;
     vector<uint8_t> buffer;
-    processor->onDumpReport(cfgKey, bucketStartTimeNs + 2 * bucketSizeNs + 1, false, &buffer);
+    processor->onDumpReport(cfgKey, bucketStartTimeNs + 2 * bucketSizeNs + 1, false, ADB_DUMP,
+                            &buffer);
     EXPECT_TRUE(buffer.size() > 0);
     EXPECT_TRUE(reports.ParseFromArray(&buffer[0], buffer.size()));
 
@@ -342,7 +343,8 @@ TEST(DimensionInConditionE2eTest, TestCreateCountMetric_Link_OR_CombinationCondi
 
     ConfigMetricsReportList reports;
     vector<uint8_t> buffer;
-    processor->onDumpReport(cfgKey, bucketStartTimeNs + 2 * bucketSizeNs + 1, false, &buffer);
+    processor->onDumpReport(cfgKey, bucketStartTimeNs + 2 * bucketSizeNs + 1, false, ADB_DUMP,
+                            &buffer);
     EXPECT_TRUE(buffer.size() > 0);
     EXPECT_TRUE(reports.ParseFromArray(&buffer[0], buffer.size()));
 
@@ -522,7 +524,8 @@ TEST(DimensionInConditionE2eTest, TestDurationMetric_NoLink_OR_CombinationCondit
 
         ConfigMetricsReportList reports;
         vector<uint8_t> buffer;
-        processor->onDumpReport(cfgKey, bucketStartTimeNs + 2 * bucketSizeNs + 1, false, &buffer);
+        processor->onDumpReport(cfgKey, bucketStartTimeNs + 2 * bucketSizeNs + 1, false, ADB_DUMP,
+                                &buffer);
         EXPECT_TRUE(buffer.size() > 0);
         EXPECT_TRUE(reports.ParseFromArray(&buffer[0], buffer.size()));
 
@@ -720,7 +723,8 @@ TEST(DimensionInConditionE2eTest, TestDurationMetric_Link_OR_CombinationConditio
 
         ConfigMetricsReportList reports;
         vector<uint8_t> buffer;
-        processor->onDumpReport(cfgKey, bucketStartTimeNs + 2 * bucketSizeNs + 1, false, &buffer);
+        processor->onDumpReport(cfgKey, bucketStartTimeNs + 2 * bucketSizeNs + 1, false, ADB_DUMP,
+                                &buffer);
         EXPECT_TRUE(buffer.size() > 0);
         EXPECT_TRUE(reports.ParseFromArray(&buffer[0], buffer.size()));
 
