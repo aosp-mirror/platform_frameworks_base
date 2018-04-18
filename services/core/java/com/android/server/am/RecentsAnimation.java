@@ -17,6 +17,8 @@
 package com.android.server.am;
 
 import static android.app.ActivityManager.START_TASK_TO_FRONT;
+import static android.app.AppOpsManager.OP_ASSIST_STRUCTURE;
+import static android.app.AppOpsManager.OP_NONE;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_HOME;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_RECENTS;
 import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
@@ -30,7 +32,10 @@ import static com.android.server.wm.RecentsAnimationController.REORDER_MOVE_TO_O
 import static com.android.server.wm.RecentsAnimationController.REORDER_MOVE_TO_TOP;
 
 import android.app.ActivityOptions;
+import android.app.AppOpsManager;
+import android.app.IAssistDataReceiver;
 import android.content.ComponentName;
+import android.content.Context;
 import android.content.Intent;
 import android.os.RemoteException;
 import android.os.Trace;
@@ -58,6 +63,7 @@ class RecentsAnimation implements RecentsAnimationCallbacks {
     private final int mCallingPid;
 
     private int mTargetActivityType;
+    private AssistDataRequester mAssistDataRequester;
 
     // The stack to restore the target stack behind when the animation is finished
     private ActivityStack mRestoreTargetBehindStack;
@@ -75,8 +81,10 @@ class RecentsAnimation implements RecentsAnimationCallbacks {
     }
 
     void startRecentsActivity(Intent intent, IRecentsAnimationRunner recentsAnimationRunner,
-            ComponentName recentsComponent, int recentsUid) {
-        if (DEBUG) Slog.d(TAG, "startRecentsActivity(): intent=" + intent);
+            ComponentName recentsComponent, int recentsUid,
+            IAssistDataReceiver assistDataReceiver) {
+        if (DEBUG) Slog.d(TAG, "startRecentsActivity(): intent=" + intent
+                + " assistDataReceiver=" + assistDataReceiver);
         Trace.traceBegin(TRACE_TAG_ACTIVITY_MANAGER, "RecentsAnimation#startRecentsActivity");
 
         if (!mWindowManager.canStartRecentsAnimation()) {
@@ -120,6 +128,20 @@ class RecentsAnimation implements RecentsAnimationCallbacks {
 
         mWindowManager.deferSurfaceLayout();
         try {
+            // Kick off the assist data request in the background before showing the target activity
+            if (assistDataReceiver != null) {
+                final AppOpsManager appOpsManager = (AppOpsManager)
+                        mService.mContext.getSystemService(Context.APP_OPS_SERVICE);
+                final AssistDataReceiverProxy proxy = new AssistDataReceiverProxy(
+                        assistDataReceiver, recentsComponent.getPackageName());
+                mAssistDataRequester = new AssistDataRequester(mService.mContext, mService,
+                        mWindowManager, appOpsManager, proxy, this, OP_ASSIST_STRUCTURE, OP_NONE);
+                mAssistDataRequester.requestAssistData(mStackSupervisor.getTopVisibleActivities(),
+                        true /* fetchData */, false /* fetchScreenshots */,
+                        true /* allowFetchData */, false /* allowFetchScreenshots */,
+                        recentsUid, recentsComponent.getPackageName());
+            }
+
             final ActivityDisplay display;
             if (hasExistingActivity) {
                 // Move the recents activity into place for the animation if it is not top most
@@ -184,6 +206,13 @@ class RecentsAnimation implements RecentsAnimationCallbacks {
             if (DEBUG) Slog.d(TAG, "onAnimationFinished(): controller="
                         + mWindowManager.getRecentsAnimationController()
                         + " reorderMode=" + reorderMode);
+
+            // Cancel the associated assistant data request
+            if (mAssistDataRequester != null) {
+                mAssistDataRequester.cancel();
+                mAssistDataRequester = null;
+            }
+
             if (mWindowManager.getRecentsAnimationController() == null) return;
 
             // Just to be sure end the launch hint in case the target activity was never launched.
