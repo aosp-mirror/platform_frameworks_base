@@ -185,7 +185,7 @@ public class UserGridRecyclerView extends PagedListView implements
                         .getUserIcon(userRecord.mInfo));
             } else {
                 holder.mUserAvatarImageView.setImageDrawable(mContext
-                        .getDrawable(R.drawable.ic_add_circle_qs));
+                        .getDrawable(R.drawable.car_add_circle_round));
             }
             holder.mUserNameTextView.setText(userRecord.mInfo.name);
             holder.mView.setOnClickListener(v -> {
