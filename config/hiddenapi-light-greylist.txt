@@ -257,6 +257,7 @@ Landroid/app/IActivityManager;->broadcastIntent(Landroid/app/IApplicationThread;
 Landroid/app/IActivityManager;->finishActivity(Landroid/os/IBinder;ILandroid/content/Intent;I)Z
 Landroid/app/IActivityManager;->finishReceiver(Landroid/os/IBinder;ILjava/lang/String;Landroid/os/Bundle;ZI)V
 Landroid/app/IActivityManager;->forceStopPackage(Ljava/lang/String;I)V
+Landroid/app/IActivityManager;->getConfiguration()Landroid/content/res/Configuration;
 Landroid/app/IActivityManager;->getIntentSender(ILjava/lang/String;Landroid/os/IBinder;Ljava/lang/String;I[Landroid/content/Intent;[Ljava/lang/String;ILandroid/os/Bundle;I)Landroid/content/IIntentSender;
 Landroid/app/IActivityManager;->getLaunchedFromPackage(Landroid/os/IBinder;)Ljava/lang/String;
 Landroid/app/IActivityManager;->getProviderMimeType(Landroid/net/Uri;I)Ljava/lang/String;
