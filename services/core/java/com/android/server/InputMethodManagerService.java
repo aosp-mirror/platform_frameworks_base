@@ -1880,8 +1880,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
 
             // If the screen is on, inform the new client it is active
             if (mIsInteractive) {
-                executeOrSendMessage(cs.client, mCaller.obtainMessageIO(
-                        MSG_SET_ACTIVE, mIsInteractive ? 1 : 0, cs));
+                executeOrSendMessage(cs.client, mCaller.obtainMessageIO(MSG_SET_ACTIVE, 1, cs));
             }
         }
 
