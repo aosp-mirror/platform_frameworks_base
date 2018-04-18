@@ -12684,6 +12684,18 @@ public final class Settings {
          * @hide
          */
         public static final String GNSS_SATELLITE_BLACKLIST = "gnss_satellite_blacklist";
+
+        /**
+         * Duration of updates in millisecond for GNSS location request from HAL to framework.
+         *
+         * If zero, the GNSS location request feature is disabled.
+         *
+         * The value is a non-negative long.
+         *
+         * @hide
+         */
+        public static final String GNSS_HAL_LOCATION_REQUEST_DURATION_MILLIS =
+                "gnss_hal_location_request_duration_millis";
     }
 
     /**
