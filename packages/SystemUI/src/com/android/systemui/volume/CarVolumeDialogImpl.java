@@ -16,27 +16,21 @@
 
 package com.android.systemui.volume;
 
-import android.animation.ObjectAnimator;
-import android.annotation.SuppressLint;
+import android.annotation.Nullable;
 import android.app.Dialog;
 import android.app.KeyguardManager;
 import android.content.Context;
 import android.content.DialogInterface;
-import android.content.res.ColorStateList;
-import android.content.res.Resources;
 import android.graphics.Color;
-import android.graphics.PixelFormat;
 import android.graphics.drawable.ColorDrawable;
+import android.graphics.PixelFormat;
 import android.media.AudioManager;
 import android.media.AudioSystem;
 import android.os.Debug;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
-import android.os.SystemClock;
-import android.provider.Settings.Global;
 import android.util.Log;
-import android.util.Slog;
 import android.util.SparseBooleanArray;
 import android.view.ContextThemeWrapper;
 import android.view.Gravity;
@@ -45,16 +39,21 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
-import android.view.animation.DecelerateInterpolator;
-import android.widget.ImageButton;
 import android.widget.SeekBar;
 import android.widget.SeekBar.OnSeekBarChangeListener;
 
+import androidx.car.widget.ListItem;
+import androidx.car.widget.ListItemAdapter;
+import androidx.car.widget.ListItemAdapter.BackgroundStyle;
+import androidx.car.widget.ListItemProvider.ListProvider;
+import androidx.car.widget.PagedListView;
+import androidx.car.widget.SeekbarListItem;
+
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
-import com.android.settingslib.Utils;
 import com.android.systemui.Dependency;
 import com.android.systemui.R;
 import com.android.systemui.plugins.VolumeDialog;
@@ -73,42 +72,61 @@ public class CarVolumeDialogImpl implements VolumeDialog {
     private static final String TAG = Util.logTag(CarVolumeDialogImpl.class);
 
     private static final long USER_ATTEMPT_GRACE_PERIOD = 1000;
-    private static final int UPDATE_ANIMATION_DURATION = 80;
 
     private final Context mContext;
     private final H mHandler = new H();
     private final VolumeDialogController mController;
+    private final AudioManager mAudioManager;
 
     private Window mWindow;
     private CustomDialog mDialog;
     private ViewGroup mDialogView;
-    private ViewGroup mDialogRowsView;
+    private PagedListView mListView;
+    private ListItemAdapter mPagedListAdapter;
+    private final List<ListItem> mVolumeLineItems = new ArrayList<>();
     private final List<VolumeRow> mRows = new ArrayList<>();
     private ConfigurableTexts mConfigurableTexts;
     private final SparseBooleanArray mDynamic = new SparseBooleanArray();
     private final KeyguardManager mKeyguard;
     private final Object mSafetyWarningLock = new Object();
-    private final ColorStateList mActiveSliderTint;
-    private final ColorStateList mInactiveSliderTint;
 
     private boolean mShowing;
 
-    private int mActiveStream;
-    private int mPrevActiveStream;
     private boolean mAutomute = VolumePrefs.DEFAULT_ENABLE_AUTOMUTE;
     private boolean mSilentMode = VolumePrefs.DEFAULT_ENABLE_SILENT_MODE;
     private State mState;
     private SafetyWarningDialog mSafetyWarning;
     private boolean mHovering = false;
-    private boolean mExpanded = false;
-    private View mExpandBtn;
+    private boolean mExpanded;
+
+    private final View.OnClickListener mSupplementalIconListener = v -> {
+        mExpanded = !mExpanded;
+        if (mExpanded) {
+            for (VolumeRow row : mRows) {
+                // Adding the items which are not coming from default stream.
+                if (!row.defaultStream) {
+                    addSeekbarListItem(row, null);
+                }
+            }
+        } else {
+            // Only keeping the default stream if it is not expended.
+            Iterator itr = mVolumeLineItems.iterator();
+            while (itr.hasNext()) {
+                SeekbarListItem item = (SeekbarListItem) itr.next();
+                VolumeRow row = findRow(item);
+                if (!row.defaultStream) {
+                    itr.remove();
+                }
+            }
+        }
+        mPagedListAdapter.notifyDataSetChanged();
+    };
 
     public CarVolumeDialogImpl(Context context) {
         mContext = new ContextThemeWrapper(context, com.android.systemui.R.style.qs_theme);
         mController = Dependency.get(VolumeDialogController.class);
         mKeyguard = (KeyguardManager) mContext.getSystemService(Context.KEYGUARD_SERVICE);
-        mActiveSliderTint = ColorStateList.valueOf(Utils.getColorAccent(mContext));
-        mInactiveSliderTint = loadColorStateList(R.color.volume_slider_inactive);
+        mAudioManager = (AudioManager) mContext.getSystemService(Context.AUDIO_SERVICE);
     }
 
     public void init(int windowType, Callback callback) {
@@ -125,11 +143,14 @@ public class CarVolumeDialogImpl implements VolumeDialog {
     }
 
     private void initDialog() {
+        mRows.clear();
+        mVolumeLineItems.clear();
         mDialog = new CustomDialog(mContext);
 
         mConfigurableTexts = new ConfigurableTexts(mContext);
         mHovering = false;
         mShowing = false;
+        mExpanded = false;
         mWindow = mDialog.getWindow();
         mWindow.requestFeature(Window.FEATURE_NO_TITLE);
         mWindow.setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
@@ -163,12 +184,7 @@ public class CarVolumeDialogImpl implements VolumeDialog {
                 .setInterpolator(new SystemUIInterpolators.LogDecelerateInterpolator())
                 .start();
         });
-        mExpandBtn = mDialog.findViewById(R.id.expand);
-        mExpandBtn.setOnClickListener(v -> {
-            mExpanded = !mExpanded;
-            updateRowsH(getActiveRow());
-        });
-        mDialogView = mDialog.findViewById(R.id.volume_dialog);
+        mDialogView = (ViewGroup) mDialog.findViewById(R.id.volume_dialog);
         mDialogView.setOnHoverListener((v, event) -> {
             int action = event.getActionMasked();
             mHovering = (action == MotionEvent.ACTION_HOVER_ENTER)
@@ -176,25 +192,20 @@ public class CarVolumeDialogImpl implements VolumeDialog {
             rescheduleTimeoutH();
             return true;
         });
+        mListView = (PagedListView) mWindow.findViewById(R.id.volume_list);
 
-        mDialogRowsView = mDialog.findViewById(R.id.car_volume_dialog_rows);
+        // TODO: apply tint to the supplement icon.
+        addSeekbarListItem(addVolumeRow(AudioManager.STREAM_MUSIC, R.drawable.ic_volume_media,
+            R.drawable.car_ic_arrow_drop_up, true, true), mSupplementalIconListener);
+        addVolumeRow(AudioManager.STREAM_RING, R.drawable.ic_volume_ringer, 0,
+            true, false);
+        addVolumeRow(AudioManager.STREAM_ALARM, R.drawable.ic_volume_alarm, 0,
+            true, false);
 
-        if (mRows.isEmpty()) {
-            addRow(AudioManager.STREAM_MUSIC,
-                R.drawable.ic_volume_media, R.drawable.ic_volume_media_mute, true, true);
-            addRow(AudioManager.STREAM_RING,
-                R.drawable.ic_volume_ringer, R.drawable.ic_volume_ringer_mute, true, false);
-            addRow(AudioManager.STREAM_ALARM,
-                R.drawable.ic_volume_alarm, R.drawable.ic_volume_alarm_mute, true, false);
-        } else {
-            addExistingRows();
-        }
-
-        updateRowsH(getActiveRow());
-    }
-
-    private ColorStateList loadColorStateList(int colorResId) {
-        return ColorStateList.valueOf(mContext.getColor(colorResId));
+        mPagedListAdapter = new ListItemAdapter(mContext, new ListProvider(mVolumeLineItems),
+            BackgroundStyle.PANEL);
+        mListView.setAdapter(mPagedListAdapter);
+        mListView.setMaxPages(PagedListView.UNLIMITED_PAGES);
     }
 
     public void setStreamImportant(int stream, boolean important) {
@@ -202,65 +213,52 @@ public class CarVolumeDialogImpl implements VolumeDialog {
     }
 
     public void setAutomute(boolean automute) {
-        if (mAutomute == automute) return;
+        if (mAutomute == automute) {
+            return;
+        }
         mAutomute = automute;
         mHandler.sendEmptyMessage(H.RECHECK_ALL);
     }
 
     public void setSilentMode(boolean silentMode) {
-        if (mSilentMode == silentMode) return;
+        if (mSilentMode == silentMode) {
+            return;
+        }
         mSilentMode = silentMode;
         mHandler.sendEmptyMessage(H.RECHECK_ALL);
     }
 
-    private void addRow(int stream, int iconRes, int iconMuteRes, boolean important,
-        boolean defaultStream) {
-        addRow(stream, iconRes, iconMuteRes, important, defaultStream, false);
+    private VolumeRow addVolumeRow(int stream, int primaryActionIcon, int supplementalIcon,
+        boolean important, boolean defaultStream) {
+        VolumeRow volumeRow = new VolumeRow();
+        volumeRow.stream = stream;
+        volumeRow.primaryActionIcon = primaryActionIcon;
+        volumeRow.supplementalIcon = supplementalIcon;
+        volumeRow.important = important;
+        volumeRow.defaultStream = defaultStream;
+        volumeRow.listItem = null;
+        mRows.add(volumeRow);
+        return volumeRow;
     }
 
-    private void addRow(int stream, int iconRes, int iconMuteRes, boolean important,
-        boolean defaultStream, boolean dynamic) {
-        if (D.BUG) Slog.d(TAG, "Adding row for stream " + stream);
-        VolumeRow row = new VolumeRow();
-        initRow(row, stream, iconRes, iconMuteRes, important, defaultStream);
-        mDialogRowsView.addView(row.view);
-        mRows.add(row);
-    }
-
-    private void addExistingRows() {
-        int N = mRows.size();
-        for (int i = 0; i < N; i++) {
-            final VolumeRow row = mRows.get(i);
-            initRow(row, row.stream, row.iconRes, row.iconMuteRes, row.important,
-                row.defaultStream);
-            mDialogRowsView.addView(row.view);
-            updateVolumeRowH(row);
+    private SeekbarListItem addSeekbarListItem(
+        VolumeRow volumeRow, @Nullable View.OnClickListener supplementalIconOnClickListener) {
+        int volumeMax = mAudioManager.getStreamMaxVolume(volumeRow.stream);
+        int currentVolume = mAudioManager.getStreamVolume(volumeRow.stream);
+        SeekbarListItem listItem =
+            new SeekbarListItem(mContext, volumeMax, currentVolume,
+                new VolumeSeekBarChangeListener(volumeRow), null);
+        listItem.setPrimaryActionIcon(volumeRow.primaryActionIcon);
+        if (volumeRow.supplementalIcon != 0) {
+            listItem.setSupplementalIcon(volumeRow.supplementalIcon, true, supplementalIconOnClickListener);
+        } else {
+            listItem.setSupplementalEmptyIcon(true);
         }
-    }
 
-    private VolumeRow getActiveRow() {
-        for (VolumeRow row : mRows) {
-            if (row.stream == mActiveStream) {
-                return row;
-            }
-        }
-        return mRows.get(0);
-    }
+        mVolumeLineItems.add(listItem);
+        volumeRow.listItem = listItem;
 
-    private VolumeRow findRow(int stream) {
-        for (VolumeRow row : mRows) {
-            if (row.stream == stream) return row;
-        }
-        return null;
-    }
-
-    public void dump(PrintWriter writer) {
-        writer.println(VolumeDialogImpl.class.getSimpleName() + " state:");
-        writer.print("  mShowing: "); writer.println(mShowing);
-        writer.print("  mActiveStream: "); writer.println(mActiveStream);
-        writer.print("  mDynamic: "); writer.println(mDynamic);
-        writer.print("  mAutomute: "); writer.println(mAutomute);
-        writer.print("  mSilentMode: "); writer.println(mSilentMode);
+        return listItem;
     }
 
     private static int getImpliedLevel(SeekBar seekBar, int progress) {
@@ -269,25 +267,6 @@ public class CarVolumeDialogImpl implements VolumeDialog {
         final int level = progress == 0 ? 0
             : progress == m ? (m / 100) : (1 + (int)((progress / (float) m) * n));
         return level;
-    }
-
-    @SuppressLint("InflateParams")
-    private void initRow(final VolumeRow row, final int stream, int iconRes, int iconMuteRes,
-        boolean important, boolean defaultStream) {
-        row.stream = stream;
-        row.iconRes = iconRes;
-        row.iconMuteRes = iconMuteRes;
-        row.important = important;
-        row.defaultStream = defaultStream;
-        row.view = mDialog.getLayoutInflater().inflate(R.layout.car_volume_dialog_row, null);
-        row.view.setId(row.stream);
-        row.view.setTag(row);
-        row.slider =  row.view.findViewById(R.id.volume_row_slider);
-        row.slider.setOnSeekBarChangeListener(new VolumeSeekBarChangeListener(row));
-        row.anim = null;
-
-        row.icon = row.view.findViewById(R.id.volume_row_icon);
-        row.icon.setImageResource(iconRes);
     }
 
     public void show(int reason) {
@@ -356,243 +335,87 @@ public class CarVolumeDialogImpl implements VolumeDialog {
         }
     }
 
-    private boolean shouldBeVisibleH(VolumeRow row) {
-        if (mExpanded) {
-            return true;
-        }
-        return row.defaultStream;
-    }
-
-    private void updateRowsH(final VolumeRow activeRow) {
-        if (D.BUG) Log.d(TAG, "updateRowsH");
-        if (!mShowing) {
-            trimObsoleteH();
-        }
-        // apply changes to all rows
-        for (final VolumeRow row : mRows) {
-            final boolean isActive = row == activeRow;
-            final boolean shouldBeVisible = shouldBeVisibleH(row);
-            Util.setVisOrGone(row.view, shouldBeVisible);
-            if (row.view.isShown()) {
-                updateVolumeRowSliderTintH(row, isActive);
-            }
-        }
-    }
-
     private void trimObsoleteH() {
-        if (D.BUG) Log.d(TAG, "trimObsoleteH");
+        int initialVolumeItemSize = mVolumeLineItems.size();
         for (int i = mRows.size() - 1; i >= 0; i--) {
             final VolumeRow row = mRows.get(i);
             if (row.ss == null || !row.ss.dynamic) continue;
             if (!mDynamic.get(row.stream)) {
                 mRows.remove(i);
-                mDialogRowsView.removeView(row.view);
+                mVolumeLineItems.remove(row.listItem);
             }
+        }
+
+        if (mVolumeLineItems.size() != initialVolumeItemSize) {
+            mPagedListAdapter.notifyDataSetChanged();
         }
     }
 
-    protected void onStateChangedH(State state) {
+    private void onStateChangedH(State state) {
         mState = state;
         mDynamic.clear();
         // add any new dynamic rows
         for (int i = 0; i < state.states.size(); i++) {
             final int stream = state.states.keyAt(i);
             final StreamState ss = state.states.valueAt(i);
-            if (!ss.dynamic) continue;
+            if (!ss.dynamic) {
+                continue;
+            }
             mDynamic.put(stream, true);
             if (findRow(stream) == null) {
-                addRow(stream, R.drawable.ic_volume_remote, R.drawable.ic_volume_remote_mute, true,
-                    false, true);
+                VolumeRow row = addVolumeRow(stream, R.drawable.ic_volume_remote,
+                    0, true,false);
+                if (mExpanded) {
+                    addSeekbarListItem(row, null);
+                }
             }
         }
 
-        if (mActiveStream != state.activeStream) {
-            mPrevActiveStream = mActiveStream;
-            mActiveStream = state.activeStream;
-            updateRowsH(getActiveRow());
-            rescheduleTimeoutH();
-        }
         for (VolumeRow row : mRows) {
             updateVolumeRowH(row);
         }
-
     }
 
     private void updateVolumeRowH(VolumeRow row) {
         if (D.BUG) Log.d(TAG, "updateVolumeRowH s=" + row.stream);
-        if (mState == null) return;
-        final StreamState ss = mState.states.get(row.stream);
-        if (ss == null) return;
-        row.ss = ss;
-        if (ss.level > 0) {
-            row.lastAudibleLevel = ss.level;
+        if (mState == null) {
+            return;
         }
+        final StreamState ss = mState.states.get(row.stream);
+        if (ss == null) {
+            return;
+        }
+        row.ss = ss;
         if (ss.level == row.requestedLevel) {
             row.requestedLevel = -1;
         }
-        final boolean isRingStream = row.stream == AudioManager.STREAM_RING;
-        final boolean isSystemStream = row.stream == AudioManager.STREAM_SYSTEM;
-        final boolean isAlarmStream = row.stream == AudioManager.STREAM_ALARM;
-        final boolean isMusicStream = row.stream == AudioManager.STREAM_MUSIC;
-        final boolean isRingVibrate = isRingStream
-            && mState.ringerModeInternal == AudioManager.RINGER_MODE_VIBRATE;
-        final boolean isRingSilent = isRingStream
-            && mState.ringerModeInternal == AudioManager.RINGER_MODE_SILENT;
-        final boolean isZenPriorityOnly = mState.zenMode == Global.ZEN_MODE_IMPORTANT_INTERRUPTIONS;
-        final boolean isZenAlarms = mState.zenMode == Global.ZEN_MODE_ALARMS;
-        final boolean isZenNone = mState.zenMode == Global.ZEN_MODE_NO_INTERRUPTIONS;
-        final boolean zenMuted = isZenAlarms ? (isRingStream || isSystemStream)
-            : isZenNone ? (isRingStream || isSystemStream || isAlarmStream || isMusicStream)
-                : isZenPriorityOnly ? ((isAlarmStream && mState.disallowAlarms) ||
-                    (isMusicStream && mState.disallowMedia) ||
-                    (isRingStream && mState.disallowRinger) ||
-                    (isSystemStream && mState.disallowSystem))
-                    : false;
-
-        // update slider max
-        final int max = ss.levelMax * 100;
-        if (max != row.slider.getMax()) {
-            row.slider.setMax(max);
-        }
-
-        // update icon
-        final boolean iconEnabled = (mAutomute || ss.muteSupported) && !zenMuted;
-        row.icon.setEnabled(iconEnabled);
-        row.icon.setAlpha(iconEnabled ? 1 : 0.5f);
-        final int iconRes =
-            isRingVibrate ? R.drawable.ic_volume_ringer_vibrate
-                : isRingSilent || zenMuted ? row.iconMuteRes
-                    : ss.routedToBluetooth ?
-                        (ss.muted ? R.drawable.ic_volume_media_bt_mute
-                            : R.drawable.ic_volume_media_bt)
-                        : mAutomute && ss.level == 0 ? row.iconMuteRes
-                            : (ss.muted ? row.iconMuteRes : row.iconRes);
-        row.icon.setImageResource(iconRes);
-        row.iconState =
-            iconRes == R.drawable.ic_volume_ringer_vibrate ? Events.ICON_STATE_VIBRATE
-                : (iconRes == R.drawable.ic_volume_media_bt_mute || iconRes == row.iconMuteRes)
-                    ? Events.ICON_STATE_MUTE
-                    : (iconRes == R.drawable.ic_volume_media_bt || iconRes == row.iconRes)
-                        ? Events.ICON_STATE_UNMUTE
-                        : Events.ICON_STATE_UNKNOWN;
-        if (iconEnabled) {
-            if (isRingStream) {
-                if (isRingVibrate) {
-                    row.icon.setContentDescription(mContext.getString(
-                        R.string.volume_stream_content_description_unmute,
-                        getStreamLabelH(ss)));
-                } else {
-                    if (mController.hasVibrator()) {
-                        row.icon.setContentDescription(mContext.getString(
-                            R.string.volume_stream_content_description_vibrate,
-                            getStreamLabelH(ss)));
-                    } else {
-                        row.icon.setContentDescription(mContext.getString(
-                            R.string.volume_stream_content_description_mute,
-                            getStreamLabelH(ss)));
-                    }
-                }
-            } else {
-                if (ss.muted || mAutomute && ss.level == 0) {
-                    row.icon.setContentDescription(mContext.getString(
-                        R.string.volume_stream_content_description_unmute,
-                        getStreamLabelH(ss)));
-                } else {
-                    row.icon.setContentDescription(mContext.getString(
-                        R.string.volume_stream_content_description_mute,
-                        getStreamLabelH(ss)));
-                }
-            }
-        } else {
-            row.icon.setContentDescription(getStreamLabelH(ss));
-        }
-
-        // ensure tracking is disabled if zenMuted
-        if (zenMuted) {
-            row.tracking = false;
-        }
-
-        // update slider
-        final boolean enableSlider = !zenMuted;
-        final int vlevel = row.ss.muted && (!isRingStream && !zenMuted) ? 0
-            : row.ss.level;
-        updateVolumeRowSliderH(row, enableSlider, vlevel);
+        // TODO: update Seekbar progress and change the mute icon if necessary.
     }
 
-    private String getStreamLabelH(StreamState ss) {
-        if (ss.remoteLabel != null) {
-            return ss.remoteLabel;
-        }
-        try {
-            return mContext.getResources().getString(ss.name);
-        } catch (Resources.NotFoundException e) {
-            Slog.e(TAG, "Can't find translation for stream " + ss);
-            return "";
-        }
-    }
-
-    private void updateVolumeRowSliderTintH(VolumeRow row, boolean isActive) {
-        if (isActive) {
-            row.slider.requestFocus();
-        }
-        final ColorStateList tint = isActive && row.slider.isEnabled() ? mActiveSliderTint
-            : mInactiveSliderTint;
-        if (tint == row.cachedSliderTint) return;
-        row.cachedSliderTint = tint;
-        row.slider.setProgressTintList(tint);
-        row.slider.setThumbTintList(tint);
-    }
-
-    private void updateVolumeRowSliderH(VolumeRow row, boolean enable, int vlevel) {
-        row.slider.setEnabled(enable);
-        updateVolumeRowSliderTintH(row, row.stream == mActiveStream);
-        if (row.tracking) {
-            return;  // don't update if user is sliding
-        }
-        final int progress = row.slider.getProgress();
-        final int level = getImpliedLevel(row.slider, progress);
-        final boolean rowVisible = row.view.getVisibility() == View.VISIBLE;
-        final boolean inGracePeriod = (SystemClock.uptimeMillis() - row.userAttempt)
-            < USER_ATTEMPT_GRACE_PERIOD;
-        mHandler.removeMessages(H.RECHECK, row);
-        if (mShowing && rowVisible && inGracePeriod) {
-            if (D.BUG) Log.d(TAG, "inGracePeriod");
-            mHandler.sendMessageAtTime(mHandler.obtainMessage(H.RECHECK, row),
-                row.userAttempt + USER_ATTEMPT_GRACE_PERIOD);
-            return;  // don't update if visible and in grace period
-        }
-        if (vlevel == level) {
-            if (mShowing && rowVisible) {
-                return;  // don't clamp if visible
+    private VolumeRow findRow(int stream) {
+        for (VolumeRow row : mRows) {
+            if (row.stream == stream) {
+                return row;
             }
         }
-        final int newProgress = vlevel * 100;
-        if (progress != newProgress) {
-            if (mShowing && rowVisible) {
-                // animate!
-                if (row.anim != null && row.anim.isRunning()
-                    && row.animTargetProgress == newProgress) {
-                    return;  // already animating to the target progress
-                }
-                // start/update animation
-                if (row.anim == null) {
-                    row.anim = ObjectAnimator.ofInt(row.slider, "progress", progress, newProgress);
-                    row.anim.setInterpolator(new DecelerateInterpolator());
-                } else {
-                    row.anim.cancel();
-                    row.anim.setIntValues(progress, newProgress);
-                }
-                row.animTargetProgress = newProgress;
-                row.anim.setDuration(UPDATE_ANIMATION_DURATION);
-                row.anim.start();
-            } else {
-                // update slider directly to clamped value
-                if (row.anim != null) {
-                    row.anim.cancel();
-                }
-                row.slider.setProgress(newProgress, true);
+        return null;
+    }
+
+    private VolumeRow findRow(SeekbarListItem targetItem) {
+        for (VolumeRow row : mRows) {
+            if (row.listItem == targetItem) {
+                return row;
             }
         }
+        return null;
+    }
+
+    public void dump(PrintWriter writer) {
+        writer.println(VolumeDialogImpl.class.getSimpleName() + " state:");
+        writer.print("  mShowing: "); writer.println(mShowing);
+        writer.print("  mDynamic: "); writer.println(mDynamic);
+        writer.print("  mAutomute: "); writer.println(mAutomute);
+        writer.print("  mSilentMode: "); writer.println(mSilentMode);
     }
 
     private void recheckH(VolumeRow row) {
@@ -641,7 +464,7 @@ public class CarVolumeDialogImpl implements VolumeDialog {
     }
 
     private final VolumeDialogController.Callbacks mControllerCallbackH
-        = new VolumeDialogController.Callbacks() {
+            = new VolumeDialogController.Callbacks() {
         @Override
         public void onShowRequested(int reason) {
             showH(reason);
@@ -763,18 +586,24 @@ public class CarVolumeDialogImpl implements VolumeDialog {
     private final class VolumeSeekBarChangeListener implements OnSeekBarChangeListener {
         private final VolumeRow mRow;
 
-        private VolumeSeekBarChangeListener(VolumeRow row) {
-            mRow = row;
+        private VolumeSeekBarChangeListener(VolumeRow volumeRow) {
+            mRow = volumeRow;
         }
 
         @Override
         public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-            if (mRow.ss == null) return;
-            if (D.BUG) Log.d(TAG, AudioSystem.streamToString(mRow.stream)
-                + " onProgressChanged " + progress + " fromUser=" + fromUser);
-            if (!fromUser) return;
+            if (mRow.ss == null) {
+                return;
+            }
+            if (D.BUG) {
+                Log.d(TAG, AudioSystem.streamToString(mRow.stream)
+                    + " onProgressChanged " + progress + " fromUser=" + fromUser);
+            }
+            if (!fromUser) {
+                return;
+            }
             if (mRow.ss.levelMin > 0) {
-                final int minProgress = mRow.ss.levelMin * 100;
+                final int minProgress = mRow.ss.levelMin;
                 if (progress < minProgress) {
                     seekBar.setProgress(minProgress);
                     progress = minProgress;
@@ -782,7 +611,6 @@ public class CarVolumeDialogImpl implements VolumeDialog {
             }
             final int userLevel = getImpliedLevel(seekBar, progress);
             if (mRow.ss.level != userLevel || mRow.ss.muted && userLevel > 0) {
-                mRow.userAttempt = SystemClock.uptimeMillis();
                 if (mRow.requestedLevel != userLevel) {
                     mController.setStreamVolume(mRow.stream, userLevel);
                     mRow.requestedLevel = userLevel;
@@ -794,16 +622,17 @@ public class CarVolumeDialogImpl implements VolumeDialog {
 
         @Override
         public void onStartTrackingTouch(SeekBar seekBar) {
-            if (D.BUG) Log.d(TAG, "onStartTrackingTouch"+ " " + mRow.stream);
+            if (D.BUG) {
+                Log.d(TAG, "onStartTrackingTouch"+ " " + mRow.stream);
+            }
             mController.setActiveStream(mRow.stream);
-            mRow.tracking = true;
         }
 
         @Override
         public void onStopTrackingTouch(SeekBar seekBar) {
-            if (D.BUG) Log.d(TAG, "onStopTrackingTouch"+ " " + mRow.stream);
-            mRow.tracking = false;
-            mRow.userAttempt = SystemClock.uptimeMillis();
+            if (D.BUG) {
+                Log.d(TAG, "onStopTrackingTouch"+ " " + mRow.stream);
+            }
             final int userLevel = getImpliedLevel(seekBar, seekBar.getProgress());
             Events.writeEvent(mContext, Events.EVENT_TOUCH_LEVEL_DONE, mRow.stream, userLevel);
             if (mRow.ss.level != userLevel) {
@@ -814,22 +643,13 @@ public class CarVolumeDialogImpl implements VolumeDialog {
     }
 
     private static class VolumeRow {
-        private View view;
-        private ImageButton icon;
-        private SeekBar slider;
         private int stream;
         private StreamState ss;
-        private long userAttempt;  // last user-driven slider change
-        private boolean tracking;  // tracking slider touch
-        private int requestedLevel = -1;  // pending user-requested level via progress changed
-        private int iconRes;
-        private int iconMuteRes;
         private boolean important;
         private boolean defaultStream;
-        private ColorStateList cachedSliderTint;
-        private int iconState;  // from Events
-        private ObjectAnimator anim;  // slider progress animation for non-touch-related updates
-        private int animTargetProgress;
-        private int lastAudibleLevel = 1;
+        private int primaryActionIcon;
+        private int supplementalIcon;
+        private SeekbarListItem listItem;
+        private int requestedLevel = -1;  // pending user-requested level via progress changed
     }
 }
