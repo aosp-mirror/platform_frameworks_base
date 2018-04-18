@@ -527,9 +527,6 @@ import android.view.autofill.AutofillValue;
  * <pre> &lt;autofill-service xmlns:android="http://schemas.android.com/apk/res/android"&gt;
  *     &lt;compatibility-package android:name="foo.bar.baz" android:maxLongVersionCode="1000000000"/&gt;
  * &lt;/autofill-service&gt;</pre>
- *
- * <p>When using compatibility mode, the {@link SaveInfo.Builder#setFlags(int) SaveInfo flags}
- * automatically include {@link SaveInfo#FLAG_SAVE_ON_ALL_VIEWS_INVISIBLE}.
  */
 public abstract class AutofillService extends Service {
     private static final String TAG = "AutofillService";
