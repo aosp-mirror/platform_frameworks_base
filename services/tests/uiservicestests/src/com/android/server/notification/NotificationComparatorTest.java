@@ -138,12 +138,14 @@ public class NotificationComparatorTest extends UiServiceTestCase {
         mRecordInlineReply.setUserImportance(NotificationManager.IMPORTANCE_HIGH);
         mRecordInlineReply.setPackagePriority(Notification.PRIORITY_MAX);
 
-        Notification n5 = new Notification.Builder(mContext, TEST_CHANNEL_ID)
-                .setCategory(Notification.CATEGORY_MESSAGE).build();
-        mRecordSms = new NotificationRecord(mContext, new StatusBarNotification(smsPkg,
-                smsPkg, 1, "sms", smsUid, smsUid, n5, new UserHandle(userId),
-                "", 1299), getDefaultChannel());
-        mRecordSms.setUserImportance(NotificationManager.IMPORTANCE_DEFAULT);
+        if (smsPkg != null) {
+            Notification n5 = new Notification.Builder(mContext, TEST_CHANNEL_ID)
+                    .setCategory(Notification.CATEGORY_MESSAGE).build();
+            mRecordSms = new NotificationRecord(mContext, new StatusBarNotification(smsPkg,
+                    smsPkg, 1, "sms", smsUid, smsUid, n5, new UserHandle(userId),
+                    "", 1299), getDefaultChannel());
+            mRecordSms.setUserImportance(NotificationManager.IMPORTANCE_DEFAULT);
+        }
 
         Notification n6 = new Notification.Builder(mContext, TEST_CHANNEL_ID).build();
         mRecordStarredContact = new NotificationRecord(mContext, new StatusBarNotification(pkg2,
@@ -230,7 +232,9 @@ public class NotificationComparatorTest extends UiServiceTestCase {
         expected.add(mRecordColorized);
         expected.add(mRecordHighCall);
         expected.add(mRecordInlineReply);
-        expected.add(mRecordSms);
+        if (mRecordSms != null) {
+            expected.add(mRecordSms);
+        }
         expected.add(mRecordStarredContact);
         expected.add(mRecordContact);
         expected.add(mRecordEmail);
@@ -253,7 +257,9 @@ public class NotificationComparatorTest extends UiServiceTestCase {
     public void testMessaging() throws Exception {
         NotificationComparator comp = new NotificationComparator(mContext);
         assertTrue(comp.isImportantMessaging(mRecordInlineReply));
-        assertTrue(comp.isImportantMessaging(mRecordSms));
+        if (mRecordSms != null) {
+            assertTrue(comp.isImportantMessaging(mRecordSms));
+        }
         assertFalse(comp.isImportantMessaging(mRecordEmail));
         assertFalse(comp.isImportantMessaging(mRecordCheater));
     }
