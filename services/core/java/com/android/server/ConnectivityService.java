@@ -238,8 +238,9 @@ public class ConnectivityService extends IConnectivityManager.Stub
 
     private KeyStore mKeyStore;
 
+    @VisibleForTesting
     @GuardedBy("mVpns")
-    private final SparseArray<Vpn> mVpns = new SparseArray<Vpn>();
+    protected final SparseArray<Vpn> mVpns = new SparseArray<Vpn>();
 
     // TODO: investigate if mLockdownEnabled can be removed and replaced everywhere by
     // a direct call to LockdownVpnTracker.isEnabled().
