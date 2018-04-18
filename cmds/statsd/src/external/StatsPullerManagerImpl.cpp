@@ -20,8 +20,8 @@
 #include <android/os/IStatsCompanionService.h>
 #include <cutils/log.h>
 #include <math.h>
+#include <stdint.h>
 #include <algorithm>
-#include <climits>
 #include "../StatsService.h"
 #include "../logd/LogEvent.h"
 #include "../stats_log_util.h"
@@ -45,6 +45,9 @@ using std::list;
 namespace android {
 namespace os {
 namespace statsd {
+
+// Values smaller than this may require to update the alarm.
+const int64_t NO_ALARM_UPDATE = INT64_MAX;
 
 const std::map<int, PullAtomInfo> StatsPullerManagerImpl::kAllPullAtomInfo = {
         // wifi_bytes_transfer
@@ -170,7 +173,7 @@ const std::map<int, PullAtomInfo> StatsPullerManagerImpl::kAllPullAtomInfo = {
         // temperature
         {android::util::TEMPERATURE, {{}, {}, 1, new ResourceThermalManagerPuller()}}};
 
-StatsPullerManagerImpl::StatsPullerManagerImpl() : mNextPullTimeNs(LONG_MAX) {
+StatsPullerManagerImpl::StatsPullerManagerImpl() : mNextPullTimeNs(NO_ALARM_UPDATE) {
 }
 
 bool StatsPullerManagerImpl::Pull(const int tagId, const int64_t timeNs,
@@ -197,7 +200,7 @@ bool StatsPullerManagerImpl::PullerForMatcherExists(int tagId) const {
 }
 
 void StatsPullerManagerImpl::updateAlarmLocked() {
-    if (mNextPullTimeNs == LONG_MAX) {
+    if (mNextPullTimeNs == NO_ALARM_UPDATE) {
         VLOG("No need to set alarms. Skipping");
         return;
     }
@@ -278,7 +281,7 @@ void StatsPullerManagerImpl::UnRegisterReceiver(int tagId, wp<PullDataReceiver> 
 void StatsPullerManagerImpl::OnAlarmFired(const int64_t currentTimeNs) {
     AutoMutex _l(mLock);
 
-    int64_t minNextPullTimeNs = LONG_MAX;
+    int64_t minNextPullTimeNs = NO_ALARM_UPDATE;
 
     vector<pair<int, vector<ReceiverInfo*>>> needToPull =
             vector<pair<int, vector<ReceiverInfo*>>>();
@@ -322,6 +325,8 @@ void StatsPullerManagerImpl::OnAlarmFired(const int64_t currentTimeNs) {
         }
     }
 
+    VLOG("mNextPullTimeNs: %lld updated to %lld", (long long)mNextPullTimeNs,
+         (long long)minNextPullTimeNs);
     mNextPullTimeNs = minNextPullTimeNs;
     updateAlarmLocked();
 }
