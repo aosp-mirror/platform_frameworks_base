@@ -17,6 +17,7 @@
 package com.android.server.wm;
 
 import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
+import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_PRIMARY;
 import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
 import static android.content.pm.ActivityInfo.CONFIG_ORIENTATION;
 import static android.content.pm.ActivityInfo.CONFIG_SCREEN_SIZE;
@@ -31,9 +32,12 @@ import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_STARTING;
 import static android.view.WindowManager.LayoutParams.TYPE_BASE_APPLICATION;
 
+import static android.view.WindowManager.TRANSIT_DOCK_TASK_FROM_RECENTS;
+import static android.view.WindowManager.TRANSIT_WALLPAPER_OPEN;
 import static com.android.server.policy.WindowManagerPolicy.FINISH_LAYOUT_REDO_ANIM;
 import static com.android.server.policy.WindowManagerPolicy.FINISH_LAYOUT_REDO_WALLPAPER;
 import static android.view.WindowManager.TRANSIT_UNSET;
+import static com.android.server.wm.AppTransition.isKeyguardGoingAwayTransit;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_ADD_REMOVE;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_ANIM;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_APP_TRANSITIONS;
@@ -1680,12 +1684,24 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
         }
     }
 
+    private boolean shouldAnimate(int transit) {
+        final boolean isSplitScreenPrimary =
+                getWindowingMode() == WINDOWING_MODE_SPLIT_SCREEN_PRIMARY;
+        final boolean allowSplitScreenPrimaryAnimation = transit != TRANSIT_WALLPAPER_OPEN;
+
+        // We animate always if it's not split screen primary, and only some special cases in split
+        // screen primary because it causes issues with stack clipping when we run an un-minimize
+        // animation at the same time.
+        return !isSplitScreenPrimary || allowSplitScreenPrimaryAnimation;
+    }
+
     boolean applyAnimationLocked(WindowManager.LayoutParams lp, int transit, boolean enter,
             boolean isVoiceInteraction) {
 
-        if (mService.mDisableTransitionAnimation) {
+        if (mService.mDisableTransitionAnimation || !shouldAnimate(transit)) {
             if (DEBUG_APP_TRANSITIONS || DEBUG_ANIM) {
-                Slog.v(TAG_WM, "applyAnimation: transition animation is disabled. atoken=" + this);
+                Slog.v(TAG_WM, "applyAnimation: transition animation is disabled or skipped."
+                        + " atoken=" + this);
             }
             cancelAnimation();
             return false;
