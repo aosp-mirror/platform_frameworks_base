@@ -205,6 +205,16 @@ public class PhoneStateListener {
     public static final int LISTEN_VOLTE_STATE                              = 0x00004000;
 
     /**
+     * Listen for OEM hook raw event
+     *
+     * @see #onOemHookRawEvent
+     * @hide
+     * @deprecated OEM needs a vendor-extension hal and their apps should use that instead
+     */
+    @Deprecated
+    public static final int LISTEN_OEM_HOOK_RAW_EVENT                       = 0x00008000;
+
+    /**
      * Listen for carrier network changes indicated by a carrier app.
      *
      * @see #onCarrierNetworkRequest
@@ -367,6 +377,9 @@ public class PhoneStateListener {
                         break;
                     case LISTEN_USER_MOBILE_DATA_STATE:
                         PhoneStateListener.this.onUserMobileDataStateChanged((boolean)msg.obj);
+                        break;
+                    case LISTEN_OEM_HOOK_RAW_EVENT:
+                        PhoneStateListener.this.onOemHookRawEvent((byte[])msg.obj);
                         break;
                     case LISTEN_CARRIER_NETWORK_CHANGE:
                         PhoneStateListener.this.onCarrierNetworkChange((boolean)msg.obj);
@@ -588,6 +601,16 @@ public class PhoneStateListener {
     }
 
     /**
+     * Callback invoked when OEM hook raw event is received. Requires
+     * the READ_PRIVILEGED_PHONE_STATE permission.
+     * @param rawData is the byte array of the OEM hook raw data.
+     * @hide
+     */
+    public void onOemHookRawEvent(byte[] rawData) {
+        // default implementation empty
+    }
+
+    /**
      * Callback invoked when telephony has received notice from a carrier
      * app that a network action that could result in connectivity loss
      * has been requested by an app using
@@ -701,6 +724,10 @@ public class PhoneStateListener {
 
         public void onUserMobileDataStateChanged(boolean enabled) {
             send(LISTEN_USER_MOBILE_DATA_STATE, 0, 0, enabled);
+        }
+
+        public void onOemHookRawEvent(byte[] rawData) {
+            send(LISTEN_OEM_HOOK_RAW_EVENT, 0, 0, rawData);
         }
 
         public void onCarrierNetworkChange(boolean active) {
