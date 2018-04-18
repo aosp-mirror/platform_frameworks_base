@@ -23596,6 +23596,16 @@ Slog.v(TAG, ":: stepped forward, applying functor at tag " + parser.getName());
                     SigningDetails.CertCapabilities.INSTALLED_DATA);
         }
 
+        @Override
+        public boolean hasSignatureCapability(int serverUid, int clientUid,
+                @SigningDetails.CertCapabilities int capability) {
+            SigningDetails serverSigningDetails = getSigningDetails(serverUid);
+            SigningDetails clientSigningDetails = getSigningDetails(clientUid);
+            return serverSigningDetails.checkCapability(clientSigningDetails, capability)
+                    || clientSigningDetails.hasAncestorOrSelf(serverSigningDetails);
+
+        }
+
         private SigningDetails getSigningDetails(@NonNull String packageName) {
             synchronized (mPackages) {
                 PackageParser.Package p = mPackages.get(packageName);
@@ -23603,6 +23613,21 @@ Slog.v(TAG, ":: stepped forward, applying functor at tag " + parser.getName());
                     return null;
                 }
                 return p.mSigningDetails;
+            }
+        }
+
+        private SigningDetails getSigningDetails(int uid) {
+            synchronized (mPackages) {
+                final Object obj = mSettings.getUserIdLPr(uid);
+                if (obj != null) {
+                    if (obj instanceof SharedUserSetting) {
+                        return ((SharedUserSetting) obj).signatures.mSigningDetails;
+                    } else if (obj instanceof PackageSetting) {
+                        final PackageSetting ps = (PackageSetting) obj;
+                        return ps.signatures.mSigningDetails;
+                    }
+                }
+                return SigningDetails.UNKNOWN;
             }
         }
 
