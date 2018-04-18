@@ -3574,6 +3574,7 @@ Ljava/util/PriorityQueue;->modCount:I
 Ljava/util/PriorityQueue;->size:I
 Ljava/util/Random;->seedUniquifier()J
 Ljava/util/regex/Matcher;->appendPos:I
+Ljava/util/UUID;->mostSigBits:J
 Ljava/util/Vector;->elementData(I)Ljava/lang/Object;
 Ljava/util/zip/Deflater;->buf:[B
 Ljava/util/zip/Deflater;->finished:Z
