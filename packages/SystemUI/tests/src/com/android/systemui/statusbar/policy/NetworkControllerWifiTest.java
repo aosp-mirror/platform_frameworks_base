@@ -136,10 +136,9 @@ public class NetworkControllerWifiTest extends NetworkControllerBaseTest {
     }
 
     protected void setWifiEnabled(boolean enabled) {
-        Intent i = new Intent(WifiManager.WIFI_STATE_CHANGED_ACTION);
-        i.putExtra(WifiManager.EXTRA_WIFI_STATE,
+        when(mMockWm.getWifiState()).thenReturn(
                 enabled ? WifiManager.WIFI_STATE_ENABLED : WifiManager.WIFI_STATE_DISABLED);
-        mNetworkController.onReceive(mContext, i);
+        mNetworkController.onReceive(mContext, new Intent(WifiManager.WIFI_STATE_CHANGED_ACTION));
     }
 
     protected void setWifiState(boolean connected, String ssid) {
