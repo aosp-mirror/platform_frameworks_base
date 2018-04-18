@@ -3161,6 +3161,8 @@ public class ActivityManagerService extends IActivityManager.Stub
 
         // bind background thread to little cores
         // this is expected to fail inside of framework tests because apps can't touch cpusets directly
+        // make sure we've already adjusted system_server's internal view of itself first
+        updateOomAdjLocked();
         try {
             Process.setThreadGroupAndCpuset(BackgroundThread.get().getThreadId(),
                     Process.THREAD_GROUP_BG_NONINTERACTIVE);
