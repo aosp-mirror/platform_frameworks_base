@@ -2335,7 +2335,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         final NotificationRecord r = generateNotificationRecord(mTestNotificationChannel);
         mService.addNotification(r);
 
-        NotificationVisibility nv = NotificationVisibility.obtain(r.getKey(), 1, true);
+        final NotificationVisibility nv = NotificationVisibility.obtain(r.getKey(), 1, 2, true);
         mService.mNotificationDelegate.onNotificationVisibilityChanged(
                 new NotificationVisibility[] {nv}, new NotificationVisibility[]{});
         assertTrue(mService.getNotificationRecord(r.getKey()).getStats().hasSeen());
@@ -2349,8 +2349,9 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         final NotificationRecord r = generateNotificationRecord(mTestNotificationChannel);
         mService.addNotification(r);
 
+        final NotificationVisibility nv = NotificationVisibility.obtain(r.getKey(), 0, 1, true);
         mService.mNotificationDelegate.onNotificationClear(mUid, 0, PKG, r.sbn.getTag(),
-                r.sbn.getId(), r.getUserId(), r.getKey(), NotificationStats.DISMISSAL_AOD);
+                r.sbn.getId(), r.getUserId(), r.getKey(), NotificationStats.DISMISSAL_AOD, nv);
         waitForIdle();
 
         assertEquals(NotificationStats.DISMISSAL_AOD, r.getStats().getDismissalSurface());
