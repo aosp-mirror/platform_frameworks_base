@@ -3450,6 +3450,7 @@ Ljava/lang/Short;->value:S
 Ljava/lang/String;-><init>(II[C)V
 Ljava/lang/System;->arraycopy([II[III)V
 Ljava/lang/System;-><init>()V
+Ljava/lang/Thread;->contextClassLoader:Ljava/lang/ClassLoader;
 Ljava/lang/Thread;->daemon:Z
 Ljava/lang/Thread;->dispatchUncaughtException(Ljava/lang/Throwable;)V
 Ljava/lang/ThreadGroup;->add(Ljava/lang/Thread;)V
