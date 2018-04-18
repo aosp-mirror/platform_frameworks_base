@@ -24,6 +24,7 @@ import static org.mockito.hamcrest.MockitoHamcrest.argThat;
 
 import android.content.Context;
 import android.content.Intent;
+import android.os.UserHandle;
 import android.support.test.filters.LargeTest;
 
 import org.hamcrest.BaseMatcher;
@@ -59,8 +60,9 @@ public class RulesUpdaterContractTest {
 
         RulesUpdaterContract.sendBroadcast(mockContext, packageName, tokenBytes);
 
-        verify(mockContext).sendBroadcast(
+        verify(mockContext).sendBroadcastAsUser(
                 filterEquals(expectedIntent),
+                eq(UserHandle.SYSTEM),
                 eq(RulesUpdaterContract.UPDATE_TIME_ZONE_RULES_PERMISSION));
     }
 
