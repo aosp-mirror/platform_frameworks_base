@@ -3706,12 +3706,16 @@ public class ActivityManagerService extends IActivityManager.Stub
         int lrui = mLruProcesses.lastIndexOf(app);
         if (lrui >= 0) {
             if (!app.killed) {
-                Slog.wtfStack(TAG, "Removing process that hasn't been killed: " + app);
-                if (app.pid > 0) {
-                    killProcessQuiet(app.pid);
-                    killProcessGroup(app.uid, app.pid);
+                if (app.persistent) {
+                    Slog.w(TAG, "Removing persistent process that hasn't been killed: " + app);
                 } else {
-                    app.pendingStart = false;
+                    Slog.wtfStack(TAG, "Removing process that hasn't been killed: " + app);
+                    if (app.pid > 0) {
+                        killProcessQuiet(app.pid);
+                        killProcessGroup(app.uid, app.pid);
+                    } else {
+                        app.pendingStart = false;
+                    }
                 }
             }
             if (lrui <= mLruProcessActivityStart) {
