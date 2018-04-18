@@ -1426,6 +1426,31 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
         }
     }
 
+    public void notifyOemHookRawEventForSubscriber(int subId, byte[] rawData) {
+        if (!checkNotifyPermission("notifyOemHookRawEventForSubscriber")) {
+            return;
+        }
+
+        synchronized (mRecords) {
+            for (Record r : mRecords) {
+                if (VDBG) {
+                    log("notifyOemHookRawEventForSubscriber:  r=" + r + " subId=" + subId);
+                }
+                if ((r.matchPhoneStateListenerEvent(
+                        PhoneStateListener.LISTEN_OEM_HOOK_RAW_EVENT)) &&
+                        ((r.subId == subId) ||
+                        (r.subId == SubscriptionManager.DEFAULT_SUBSCRIPTION_ID))) {
+                    try {
+                        r.callback.onOemHookRawEvent(rawData);
+                    } catch (RemoteException ex) {
+                        mRemoveList.add(r.binder);
+                    }
+                }
+            }
+            handleRemoveListLocked();
+        }
+    }
+
     @Override
     public void dump(FileDescriptor fd, PrintWriter writer, String[] args) {
         final IndentingPrintWriter pw = new IndentingPrintWriter(writer, "  ");
@@ -1691,6 +1716,11 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
         if ((events & PRECISE_PHONE_STATE_PERMISSION_MASK) != 0) {
             mContext.enforceCallingOrSelfPermission(
                     android.Manifest.permission.READ_PRECISE_PHONE_STATE, null);
+        }
+
+        if ((events & PhoneStateListener.LISTEN_OEM_HOOK_RAW_EVENT) != 0) {
+            mContext.enforceCallingOrSelfPermission(
+                    android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE, null);
         }
 
         return true;
