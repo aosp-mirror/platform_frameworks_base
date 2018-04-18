@@ -946,6 +946,7 @@ public class RemoteViews implements Parcelable, Filter {
                     }
                 };
             }
+            target.setTagInternal(R.id.pending_intent_tag, pendingIntent);
             target.setOnClickListener(listener);
         }
 

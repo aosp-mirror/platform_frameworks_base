@@ -16,16 +16,21 @@
 
 package com.android.systemui.statusbar.notification;
 
+import android.app.PendingIntent;
 import android.content.Context;
 import android.graphics.Color;
 import android.graphics.Rect;
 import android.service.notification.StatusBarNotification;
+import android.util.ArraySet;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
+import com.android.internal.R;
 import com.android.internal.widget.NotificationActionListLayout;
+import com.android.systemui.Dependency;
+import com.android.systemui.UiOffloadThread;
 import com.android.systemui.statusbar.CrossFadeHelper;
 import com.android.systemui.statusbar.ExpandableNotificationRow;
 import com.android.systemui.statusbar.TransformableView;
@@ -49,6 +54,8 @@ public class NotificationTemplateViewWrapper extends NotificationHeaderViewWrapp
     private int mContentHeight;
     private int mMinHeightHint;
     private NotificationActionListLayout mActions;
+    private ArraySet<PendingIntent> mCancelledPendingIntents = new ArraySet<>();
+    private UiOffloadThread mUiOffloadThread;
 
     protected NotificationTemplateViewWrapper(Context ctx, View view,
             ExpandableNotificationRow row) {
@@ -137,6 +144,63 @@ public class NotificationTemplateViewWrapper extends NotificationHeaderViewWrapp
         mActionsContainer = mView.findViewById(com.android.internal.R.id.actions_container);
         mActions = mView.findViewById(com.android.internal.R.id.actions);
         mReplyAction = mView.findViewById(com.android.internal.R.id.reply_icon_action);
+        updatePendingIntentCancellations();
+    }
+
+    private void updatePendingIntentCancellations() {
+        if (mActions != null) {
+            int numActions = mActions.getChildCount();
+            for (int i = 0; i < numActions; i++) {
+                View action = mActions.getChildAt(i);
+                performOnPendingIntentCancellation(action, () -> {
+                    action.setEnabled(false);
+                    // The visual appearance doesn't look disabled enough yet, let's add the
+                    // alpha as well. Selectors unfortunately don't seem to work here.
+                    action.setAlpha(0.5f);
+                });
+            }
+        }
+        if (mReplyAction != null) {
+            performOnPendingIntentCancellation(mReplyAction, () -> {
+                mReplyAction.setEnabled(false);
+                // The visual appearance doesn't look disabled enough yet, let's add the
+                // alpha as well. Selectors unfortunately don't seem to work here.
+                mReplyAction.setAlpha(0.5f);
+            });
+        }
+    }
+
+    private void performOnPendingIntentCancellation(View view, Runnable cancellationRunnable) {
+        PendingIntent pendingIntent = (PendingIntent) view.getTag(
+                com.android.internal.R.id.pending_intent_tag);
+        if (pendingIntent == null) {
+            return;
+        }
+        if (mCancelledPendingIntents.contains(pendingIntent)) {
+            cancellationRunnable.run();
+        } else {
+            PendingIntent.CancelListener listener = (PendingIntent intent) -> {
+                mView.post(() -> {
+                    mCancelledPendingIntents.add(pendingIntent);
+                    cancellationRunnable.run();
+                });
+            };
+            if (mUiOffloadThread == null) {
+                mUiOffloadThread = Dependency.get(UiOffloadThread.class);
+            }
+            mUiOffloadThread.submit(() -> pendingIntent.registerCancelListener(listener));
+            view.addOnAttachStateChangeListener(new View.OnAttachStateChangeListener() {
+                @Override
+                public void onViewAttachedToWindow(View v) {
+                    mUiOffloadThread.submit(() -> pendingIntent.registerCancelListener(listener));
+                }
+
+                @Override
+                public void onViewDetachedFromWindow(View v) {
+                    mUiOffloadThread.submit(() -> pendingIntent.unregisterCancelListener(listener));
+                }
+            });
+        }
     }
 
     @Override

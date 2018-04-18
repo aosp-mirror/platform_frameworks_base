@@ -2615,6 +2615,7 @@
   <java-symbol type="id" name="actions_container" />
   <java-symbol type="id" name="smart_reply_container" />
   <java-symbol type="id" name="remote_input_tag" />
+  <java-symbol type="id" name="pending_intent_tag" />
 
   <java-symbol type="attr" name="seekBarDialogPreferenceStyle" />
   <java-symbol type="string" name="ext_media_status_removed" />
