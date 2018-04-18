@@ -1185,6 +1185,7 @@ Landroid/media/MediaRecorder;->setParameter(Ljava/lang/String;)V
 Landroid/media/MediaRouter$RouteInfo;->getStatusCode()I
 Landroid/media/MediaRouter$RouteInfo;->STATUS_CONNECTING:I
 Landroid/media/MediaRouter;->selectRouteInt(ILandroid/media/MediaRouter$RouteInfo;Z)V
+Landroid/media/MediaScanner;->isNoMediaPath(Ljava/lang/String;)Z
 Landroid/media/MediaScanner;->mClient:Landroid/media/MediaScanner$MyMediaScannerClient;
 Landroid/media/MediaScanner;->scanSingleFile(Ljava/lang/String;Ljava/lang/String;)Landroid/net/Uri;
 Landroid/media/Metadata;->getBoolean(I)Z
