@@ -1586,7 +1586,7 @@
     </plurals>
 
     <string name="notification_appops_settings">Settings</string>
-    <string name="notification_appops_ok">Ok</string>
+    <string name="notification_appops_ok">OK</string>
 
     <!-- Notification: Control panel: Accessibility description for expanded inline controls view, used
         to control settings about notifications related to the current notification.  -->
