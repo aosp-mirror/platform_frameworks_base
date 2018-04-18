@@ -95,6 +95,7 @@ import static android.os.Process.SIGNAL_USR1;
 import static android.os.Process.SYSTEM_UID;
 import static android.os.Process.THREAD_GROUP_BG_NONINTERACTIVE;
 import static android.os.Process.THREAD_GROUP_DEFAULT;
+import static android.os.Process.THREAD_GROUP_RESTRICTED;
 import static android.os.Process.THREAD_GROUP_TOP_APP;
 import static android.os.Process.THREAD_PRIORITY_BACKGROUND;
 import static android.os.Process.THREAD_PRIORITY_FOREGROUND;
@@ -13067,6 +13068,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                 mHandler.obtainMessage(DISPATCH_SCREEN_AWAKE_MSG, isAwake ? 1 : 0, 0)
                         .sendToTarget();
             }
+            updateOomAdjLocked();
         }
     }
 
@@ -18056,6 +18058,9 @@ public class ActivityManagerService extends IActivityManager.Stub
                 case ProcessList.SCHED_GROUP_TOP_APP:
                     schedGroup = 'T';
                     break;
+                case ProcessList.SCHED_GROUP_RESTRICTED:
+                    schedGroup = 'R';
+                    break;
                 default:
                     schedGroup = '?';
                     break;
@@ -22881,8 +22886,8 @@ public class ActivityManagerService extends IActivityManager.Stub
                 app.curSchedGroup = ProcessList.SCHED_GROUP_TOP_APP;
                 app.adjType = "pers-top-activity";
             } else if (app.hasTopUi) {
+                // sched group/proc state adjustment is below
                 app.systemNoUi = false;
-                app.curSchedGroup = ProcessList.SCHED_GROUP_TOP_APP;
                 app.adjType = "pers-top-ui";
             } else if (activitiesSize > 0) {
                 for (int j = 0; j < activitiesSize; j++) {
@@ -22893,7 +22898,15 @@ public class ActivityManagerService extends IActivityManager.Stub
                 }
             }
             if (!app.systemNoUi) {
-                app.curProcState = ActivityManager.PROCESS_STATE_PERSISTENT_UI;
+              if (mWakefulness == PowerManagerInternal.WAKEFULNESS_AWAKE) {
+                  // screen on, promote UI
+                  app.curProcState = ActivityManager.PROCESS_STATE_PERSISTENT_UI;
+                  app.curSchedGroup = ProcessList.SCHED_GROUP_TOP_APP;
+              } else {
+                  // screen off, restrict UI scheduling
+                  app.curProcState = ActivityManager.PROCESS_STATE_BOUND_FOREGROUND_SERVICE;
+                  app.curSchedGroup = ProcessList.SCHED_GROUP_RESTRICTED;
+              }
             }
             return (app.curAdj=app.maxAdj);
         }
@@ -23751,6 +23764,15 @@ public class ActivityManagerService extends IActivityManager.Stub
             }
         }
 
+        // Put bound foreground services in a special sched group for additional
+        // restrictions on screen off
+        if (procState >= ActivityManager.PROCESS_STATE_BOUND_FOREGROUND_SERVICE &&
+            mWakefulness != PowerManagerInternal.WAKEFULNESS_AWAKE) {
+            if (schedGroup > ProcessList.SCHED_GROUP_RESTRICTED) {
+                schedGroup = ProcessList.SCHED_GROUP_RESTRICTED;
+            }
+        }
+
         // Do final modification to adj.  Everything we do between here and applying
         // the final setAdj must be done in this function, because we will also use
         // it when computing the final cached adj later.  Note that we don't need to
@@ -24172,6 +24194,9 @@ public class ActivityManagerService extends IActivityManager.Stub
                     case ProcessList.SCHED_GROUP_TOP_APP:
                     case ProcessList.SCHED_GROUP_TOP_APP_BOUND:
                         processGroup = THREAD_GROUP_TOP_APP;
+                        break;
+                    case ProcessList.SCHED_GROUP_RESTRICTED:
+                        processGroup = THREAD_GROUP_RESTRICTED;
                         break;
                     default:
                         processGroup = THREAD_GROUP_DEFAULT;
