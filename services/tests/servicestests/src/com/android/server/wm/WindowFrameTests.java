@@ -441,6 +441,28 @@ public class WindowFrameTests extends WindowTestsBase {
         assertEquals(w.mDisplayCutout.getDisplayCutout().getSafeInsetRight(), 0);
     }
 
+    @Test
+    public void testDisplayCutout_tempInsetBounds() {
+        // Regular fullscreen task and window
+        TaskWithBounds task = new TaskWithBounds(new Rect(0, -500, 1000, 1500));
+        task.mFullscreenForTest = false;
+        task.mInsetBounds.set(0, 0, 1000, 2000);
+        WindowState w = createWindow(task, FILL_PARENT, FILL_PARENT);
+        w.mAttrs.gravity = Gravity.LEFT | Gravity.TOP;
+
+        final Rect pf = new Rect(0, -500, 1000, 1500);
+        // Create a display cutout of size 50x50, aligned top-center
+        final WmDisplayCutout cutout = WmDisplayCutout.computeSafeInsets(
+                fromBoundingRect(500, 0, 550, 50), pf.width(), pf.height());
+
+        w.computeFrameLw(pf, pf, pf, pf, pf, pf, pf, pf, cutout, false);
+
+        assertEquals(w.mDisplayCutout.getDisplayCutout().getSafeInsetTop(), 50);
+        assertEquals(w.mDisplayCutout.getDisplayCutout().getSafeInsetBottom(), 0);
+        assertEquals(w.mDisplayCutout.getDisplayCutout().getSafeInsetLeft(), 0);
+        assertEquals(w.mDisplayCutout.getDisplayCutout().getSafeInsetRight(), 0);
+    }
+
     private WindowStateWithTask createWindow(Task task, int width, int height) {
         final WindowManager.LayoutParams attrs = new WindowManager.LayoutParams(TYPE_APPLICATION);
         attrs.width = width;
