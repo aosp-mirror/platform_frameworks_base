@@ -16,12 +16,16 @@
 
 package android.content.pm.dex;
 
+import static android.Manifest.permission.PACKAGE_USAGE_STATS;
+import static android.Manifest.permission.READ_RUNTIME_PROFILES;
+
 import android.annotation.CallbackExecutor;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
+import android.content.Context;
 import android.os.Environment;
 import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
@@ -62,13 +66,14 @@ public class ArtManager {
     @Retention(RetentionPolicy.SOURCE)
     public @interface ProfileType {}
 
-
-    private IArtManager mArtManager;
+    private final Context mContext;
+    private final IArtManager mArtManager;
 
     /**
      * @hide
      */
-    public ArtManager(@NonNull IArtManager manager) {
+    public ArtManager(@NonNull Context context, @NonNull IArtManager manager) {
+        mContext = context;
         mArtManager = manager;
     }
 
@@ -99,7 +104,7 @@ public class ArtManager {
      * @param callback the callback which should be used for the result
      * @param executor the executor which should be used to post the result
      */
-    @RequiresPermission(android.Manifest.permission.READ_RUNTIME_PROFILES)
+    @RequiresPermission(allOf = { READ_RUNTIME_PROFILES, PACKAGE_USAGE_STATS })
     public void snapshotRuntimeProfile(@ProfileType int profileType, @Nullable String packageName,
             @Nullable String codePath, @NonNull @CallbackExecutor Executor executor,
             @NonNull SnapshotRuntimeProfileCallback callback) {
@@ -108,9 +113,10 @@ public class ArtManager {
         SnapshotRuntimeProfileCallbackDelegate delegate =
                 new SnapshotRuntimeProfileCallbackDelegate(callback, executor);
         try {
-            mArtManager.snapshotRuntimeProfile(profileType, packageName, codePath, delegate);
+            mArtManager.snapshotRuntimeProfile(profileType, packageName, codePath, delegate,
+                    mContext.getOpPackageName());
         } catch (RemoteException e) {
-            e.rethrowAsRuntimeException();
+            throw e.rethrowAsRuntimeException();
         }
     }
 
@@ -122,14 +128,13 @@ public class ArtManager {
      * @param profileType can be either {@link ArtManager#PROFILE_APPS}
      *                    or {@link ArtManager#PROFILE_BOOT_IMAGE}
      */
-    @RequiresPermission(android.Manifest.permission.READ_RUNTIME_PROFILES)
+    @RequiresPermission(allOf = { READ_RUNTIME_PROFILES, PACKAGE_USAGE_STATS })
     public boolean isRuntimeProfilingEnabled(@ProfileType int profileType) {
         try {
-            return mArtManager.isRuntimeProfilingEnabled(profileType);
+            return mArtManager.isRuntimeProfilingEnabled(profileType, mContext.getOpPackageName());
         } catch (RemoteException e) {
-            e.rethrowAsRuntimeException();
+            throw e.rethrowAsRuntimeException();
         }
-        return false;
     }
 
     /**
