@@ -3,6 +3,8 @@ include $(CLEAR_VARS)
 
 LOCAL_MODULE_TAGS := optional
 
+LOCAL_RESOURCE_DIR := $(LOCAL_PATH)/res
+
 LOCAL_SRC_FILES := $(call all-java-files-under, src) \
     src/com/android/providers/settings/EventLogTags.logtags
 

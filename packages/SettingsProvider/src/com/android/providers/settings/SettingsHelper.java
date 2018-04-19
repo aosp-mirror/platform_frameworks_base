@@ -17,7 +17,6 @@
 package com.android.providers.settings;
 
 import android.os.Process;
-import com.android.internal.R;
 import com.android.internal.app.LocalePicker;
 import com.android.internal.annotations.VisibleForTesting;
 
@@ -30,13 +29,11 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.Configuration;
-import android.hardware.display.DisplayManager;
 import android.icu.util.ULocale;
 import android.location.LocationManager;
 import android.media.AudioManager;
 import android.media.RingtoneManager;
 import android.net.Uri;
-import android.os.IPowerManager;
 import android.os.LocaleList;
 import android.os.RemoteException;
 import android.os.ServiceManager;
@@ -46,16 +43,16 @@ import android.provider.Settings;
 import android.telephony.TelephonyManager;
 import android.text.TextUtils;
 import android.util.ArraySet;
-import android.util.Slog;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Locale;
 
 public class SettingsHelper {
     private static final String TAG = "SettingsHelper";
     private static final String SILENT_RINGTONE = "_silent";
+    private static final float FLOAT_TOLERANCE = 0.01f;
+
     private Context mContext;
     private AudioManager mAudioManager;
     private TelephonyManager mTelephonyManager;
@@ -259,9 +256,14 @@ public class SettingsHelper {
             case Settings.Secure.TOUCH_EXPLORATION_GRANTED_ACCESSIBILITY_SERVICES:
             case Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES:
             case Settings.Secure.ACCESSIBILITY_DISPLAY_DALTONIZER:
-            case Settings.Secure.ACCESSIBILITY_DISPLAY_MAGNIFICATION_SCALE:
                 return !TextUtils.isEmpty(Settings.Secure.getString(
                         mContext.getContentResolver(), name));
+            case Settings.Secure.ACCESSIBILITY_DISPLAY_MAGNIFICATION_SCALE:
+                float defaultScale = mContext.getResources().getFraction(
+                        R.fraction.def_accessibility_display_magnification_scale, 1, 1);
+                float currentScale = Settings.Secure.getFloat(
+                        mContext.getContentResolver(), name, defaultScale);
+                return Math.abs(currentScale - defaultScale) >= FLOAT_TOLERANCE;
             case Settings.System.FONT_SCALE:
                 return Settings.System.getFloat(mContext.getContentResolver(), name, 1.0f) != 1.0f;
             default:
