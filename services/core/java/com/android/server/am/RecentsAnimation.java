@@ -101,9 +101,7 @@ class RecentsAnimation implements RecentsAnimationCallbacks {
                         : ACTIVITY_TYPE_HOME;
         final ActivityStack targetStack = mDefaultDisplay.getStack(WINDOWING_MODE_UNDEFINED,
                 mTargetActivityType);
-        ActivityRecord targetActivity = targetStack != null
-                ? targetStack.getTopActivity()
-                : null;
+        ActivityRecord targetActivity = getTargetActivity(targetStack, intent.getComponent());
         final boolean hasExistingActivity = targetActivity != null;
         if (hasExistingActivity) {
             final ActivityDisplay display = targetActivity.getDisplay();
@@ -149,6 +147,14 @@ class RecentsAnimation implements RecentsAnimationCallbacks {
                 display.moveStackBehindBottomMostVisibleStack(targetStack);
                 if (DEBUG) Slog.d(TAG, "Moved stack=" + targetStack + " behind stack="
                             + display.getStackAbove(targetStack));
+
+                // If there are multiple tasks in the target stack (ie. the home stack, with 3p
+                // and default launchers coexisting), then move the task to the top as a part of
+                // moving the stack to the front
+                if (targetStack.topTask() != targetActivity.getTask()) {
+                    targetStack.addTask(targetActivity.getTask(), true /* toTop */,
+                            "startRecentsActivity");
+                }
             } else {
                 // No recents activity
                 ActivityOptions options = ActivityOptions.makeBasic();
@@ -321,5 +327,23 @@ class RecentsAnimation implements RecentsAnimationCallbacks {
             return s;
         }
         return null;
+    }
+
+    /**
+     * @return the top activity in the {@param targetStack} matching the {@param component}, or just
+     * the top activity of the top task if no task matches the component.
+     */
+    private ActivityRecord getTargetActivity(ActivityStack targetStack, ComponentName component) {
+        if (targetStack == null) {
+            return null;
+        }
+
+        for (int i = targetStack.getChildCount() - 1; i >= 0; i--) {
+            final TaskRecord task = (TaskRecord) targetStack.getChildAt(i);
+            if (task.getBaseIntent().getComponent().equals(component)) {
+                return task.getTopActivity();
+            }
+        }
+        return targetStack.getTopActivity();
     }
 }
