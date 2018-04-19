@@ -87,6 +87,7 @@ interface INotificationManager
     boolean onlyHasDefaultChannel(String pkg, int uid);
     ParceledListSlice getRecentNotifyingAppsForUser(int userId);
     int getBlockedAppCount(int userId);
+    boolean areChannelsBypassingDnd();
 
     // TODO: Remove this when callers have been migrated to the equivalent
     // INotificationListener method.
