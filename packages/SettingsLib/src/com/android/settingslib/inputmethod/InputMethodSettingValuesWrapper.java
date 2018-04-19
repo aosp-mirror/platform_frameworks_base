@@ -16,17 +16,15 @@
 
 package com.android.settingslib.inputmethod;
 
-import android.app.ActivityManager;
+import android.annotation.UiThread;
+import android.content.ContentResolver;
 import android.content.Context;
-import android.os.RemoteException;
 import android.util.Log;
-import android.util.Slog;
 import android.view.inputmethod.InputMethodInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.view.inputmethod.InputMethodSubtype;
 
 import com.android.internal.inputmethod.InputMethodUtils;
-import com.android.internal.inputmethod.InputMethodUtils.InputMethodSettings;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -35,18 +33,19 @@ import java.util.List;
 import java.util.Locale;
 
 /**
- * This class is a wrapper for InputMethodSettings. You need to refresh internal states
- * manually on some events when "InputMethodInfo"s and "InputMethodSubtype"s can be
- * changed.
+ * This class is a wrapper for {@link InputMethodManager} and
+ * {@link android.provider.Settings.Secure#ENABLED_INPUT_METHODS}. You need to refresh internal
+ * states manually on some events when "InputMethodInfo"s and "InputMethodSubtype"s can be changed.
+ *
+ * <p>TODO: Consolidate this with {@link InputMethodAndSubtypeUtil}.</p>
  */
-// TODO: Consolidate this with {@link InputMethodAndSubtypeUtil}.
+@UiThread
 public class InputMethodSettingValuesWrapper {
     private static final String TAG = InputMethodSettingValuesWrapper.class.getSimpleName();
 
     private static volatile InputMethodSettingValuesWrapper sInstance;
     private final ArrayList<InputMethodInfo> mMethodList = new ArrayList<>();
-    private final HashMap<String, InputMethodInfo> mMethodMap = new HashMap<>();
-    private final InputMethodSettings mSettings;
+    private final ContentResolver mContentResolver;
     private final InputMethodManager mImm;
     private final HashSet<InputMethodInfo> mAsciiCapableEnabledImis = new HashSet<>();
 
@@ -61,67 +60,44 @@ public class InputMethodSettingValuesWrapper {
         return sInstance;
     }
 
-    private static int getDefaultCurrentUserId() {
-        try {
-            return ActivityManager.getService().getCurrentUser().id;
-        } catch (RemoteException e) {
-            Slog.w(TAG, "Couldn't get current user ID; guessing it's 0", e);
-        }
-        return 0;
-    }
-
     // Ensure singleton
     private InputMethodSettingValuesWrapper(Context context) {
-        mSettings = new InputMethodSettings(context.getResources(), context.getContentResolver(),
-                mMethodMap, mMethodList, getDefaultCurrentUserId(), false /* copyOnWrite */);
-        mImm = (InputMethodManager) context.getSystemService(Context.INPUT_METHOD_SERVICE);
+        mContentResolver = context.getContentResolver();
+        mImm = context.getSystemService(InputMethodManager.class);
         refreshAllInputMethodAndSubtypes();
     }
 
     public void refreshAllInputMethodAndSubtypes() {
-        synchronized (mMethodMap) {
-            mMethodList.clear();
-            mMethodMap.clear();
-            final List<InputMethodInfo> imms = mImm.getInputMethodList();
-            mMethodList.addAll(imms);
-            for (InputMethodInfo imi : imms) {
-                mMethodMap.put(imi.getId(), imi);
-            }
-            updateAsciiCapableEnabledImis();
-        }
+        mMethodList.clear();
+        mMethodList.addAll(mImm.getInputMethodList());
+        updateAsciiCapableEnabledImis();
     }
 
     // TODO: Add a cts to ensure at least one AsciiCapableSubtypeEnabledImis exist
     private void updateAsciiCapableEnabledImis() {
-        synchronized (mMethodMap) {
-            mAsciiCapableEnabledImis.clear();
-            final List<InputMethodInfo> enabledImis = mSettings.getEnabledInputMethodListLocked();
-            for (final InputMethodInfo imi : enabledImis) {
-                final int subtypeCount = imi.getSubtypeCount();
-                for (int i = 0; i < subtypeCount; ++i) {
-                    final InputMethodSubtype subtype = imi.getSubtypeAt(i);
-                    if (InputMethodUtils.SUBTYPE_MODE_KEYBOARD.equalsIgnoreCase(subtype.getMode())
-                            && subtype.isAsciiCapable()) {
-                        mAsciiCapableEnabledImis.add(imi);
-                        break;
-                    }
+        mAsciiCapableEnabledImis.clear();
+        final List<InputMethodInfo> enabledImis = getEnabledInputMethodList();
+        for (final InputMethodInfo imi : enabledImis) {
+            final int subtypeCount = imi.getSubtypeCount();
+            for (int i = 0; i < subtypeCount; ++i) {
+                final InputMethodSubtype subtype = imi.getSubtypeAt(i);
+                if (InputMethodUtils.SUBTYPE_MODE_KEYBOARD.equalsIgnoreCase(subtype.getMode())
+                        && subtype.isAsciiCapable()) {
+                    mAsciiCapableEnabledImis.add(imi);
+                    break;
                 }
             }
         }
     }
 
     public List<InputMethodInfo> getInputMethodList() {
-        synchronized (mMethodMap) {
-            return mMethodList;
-        }
+        return new ArrayList<>(mMethodList);
     }
 
     public boolean isAlwaysCheckedIme(InputMethodInfo imi, Context context) {
         final boolean isEnabled = isEnabledImi(imi);
-        synchronized (mMethodMap) {
-            if (mSettings.getEnabledInputMethodListLocked().size() <= 1 && isEnabled) {
-                return true;
-            }
+        if (getEnabledInputMethodList().size() <= 1 && isEnabled) {
+            return true;
         }
 
         final int enabledValidSystemNonAuxAsciiCapableImeCount =
@@ -131,15 +107,11 @@ public class InputMethodSettingValuesWrapper {
                 && !(enabledValidSystemNonAuxAsciiCapableImeCount == 1 && !isEnabled)
                 && imi.isSystem()
                 && isValidSystemNonAuxAsciiCapableIme(imi, context);
-
     }
 
     private int getEnabledValidSystemNonAuxAsciiCapableImeCount(Context context) {
         int count = 0;
-        final List<InputMethodInfo> enabledImis;
-        synchronized (mMethodMap) {
-            enabledImis = mSettings.getEnabledInputMethodListLocked();
-        }
+        final List<InputMethodInfo> enabledImis = getEnabledInputMethodList();
         for (final InputMethodInfo imi : enabledImis) {
             if (isValidSystemNonAuxAsciiCapableIme(imi, context)) {
                 ++count;
@@ -152,10 +124,7 @@ public class InputMethodSettingValuesWrapper {
     }
 
     public boolean isEnabledImi(InputMethodInfo imi) {
-        final List<InputMethodInfo> enabledImis;
-        synchronized (mMethodMap) {
-            enabledImis = mSettings.getEnabledInputMethodListLocked();
-        }
+        final List<InputMethodInfo> enabledImis = getEnabledInputMethodList();
         for (final InputMethodInfo tempImi : enabledImis) {
             if (tempImi.getId().equals(imi.getId())) {
                 return true;
@@ -181,5 +150,24 @@ public class InputMethodSettingValuesWrapper {
                     InputMethodUtils.SUBTYPE_MODE_KEYBOARD);
         }
         return mAsciiCapableEnabledImis.contains(imi);
+    }
+
+    /**
+     * Returns the list of the enabled {@link InputMethodInfo} determined by
+     * {@link android.provider.Settings.Secure#ENABLED_INPUT_METHODS} rather than just returning
+     * {@link InputMethodManager#getEnabledInputMethodList()}.
+     *
+     * @return the list of the enabled {@link InputMethodInfo}
+     */
+    private ArrayList<InputMethodInfo> getEnabledInputMethodList() {
+        final HashMap<String, HashSet<String>> enabledInputMethodsAndSubtypes =
+                InputMethodAndSubtypeUtil.getEnabledInputMethodsAndSubtypeList(mContentResolver);
+        final ArrayList<InputMethodInfo> result = new ArrayList<>();
+        for (InputMethodInfo imi : mMethodList) {
+            if (enabledInputMethodsAndSubtypes.keySet().contains(imi.getId())) {
+                result.add(imi);
+            }
+        }
+        return result;
     }
 }
