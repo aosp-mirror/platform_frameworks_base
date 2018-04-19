@@ -121,7 +121,7 @@ public abstract class ClientTransactionHandler {
             Configuration overrideConfig, int displayId);
 
     /** Deliver result from another activity. */
-    public abstract void handleSendResult(IBinder token, List<ResultInfo> results);
+    public abstract void handleSendResult(IBinder token, List<ResultInfo> results, String reason);
 
     /** Deliver multi-window mode change notification. */
     public abstract void handleMultiWindowModeChanged(IBinder token, boolean isInMultiWindowMode,
