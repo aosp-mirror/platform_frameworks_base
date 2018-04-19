@@ -57,11 +57,33 @@ public final class BluetoothCodecStatus implements Parcelable {
         if (o instanceof BluetoothCodecStatus) {
             BluetoothCodecStatus other = (BluetoothCodecStatus) o;
             return (Objects.equals(other.mCodecConfig, mCodecConfig)
-                    && Objects.equals(other.mCodecsLocalCapabilities, mCodecsLocalCapabilities)
-                    && Objects.equals(other.mCodecsSelectableCapabilities,
+                    && sameCapabilities(other.mCodecsLocalCapabilities, mCodecsLocalCapabilities)
+                    && sameCapabilities(other.mCodecsSelectableCapabilities,
                     mCodecsSelectableCapabilities));
         }
         return false;
+    }
+
+    /**
+     * Checks whether two arrays of capabilities contain same capabilities.
+     * The order of the capabilities in each array is ignored.
+     *
+     * @param c1 the first array of capabilities to compare
+     * @param c2 the second array of capabilities to compare
+     * @return true if both arrays contain same capabilities
+     */
+    private static boolean sameCapabilities(BluetoothCodecConfig[] c1,
+                                            BluetoothCodecConfig[] c2) {
+        if (c1 == null) {
+            return (c2 == null);
+        }
+        if (c2 == null) {
+            return false;
+        }
+        if (c1.length != c2.length) {
+            return false;
+        }
+        return Arrays.asList(c1).containsAll(Arrays.asList(c2));
     }
 
     @Override
