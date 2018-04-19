@@ -77,7 +77,7 @@ import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.SystemClock;
 import android.os.UserHandle;
-import android.provider.Settings;
+import android.provider.Settings.Global;
 import android.telephony.TelephonyManager;
 import android.util.ArraySet;
 import android.util.KeyValueListParser;
@@ -1397,8 +1397,10 @@ public class AppStandbyController {
         boolean isAppIdleEnabled() {
             final boolean buildFlag = mContext.getResources().getBoolean(
                     com.android.internal.R.bool.config_enableAutoPowerModes);
-            final boolean runtimeFlag = Settings.Global.getInt(mContext.getContentResolver(),
-                    Settings.Global.APP_STANDBY_ENABLED, 1) == 1;
+            final boolean runtimeFlag = Global.getInt(mContext.getContentResolver(),
+                    Global.APP_STANDBY_ENABLED, 1) == 1
+                    && Global.getInt(mContext.getContentResolver(),
+                    Global.ADAPTIVE_BATTERY_MANAGEMENT_ENABLED, 1) == 1;
             return buildFlag && runtimeFlag;
         }
 
@@ -1447,8 +1449,8 @@ public class AppStandbyController {
         }
 
         String getAppIdleSettings() {
-            return Settings.Global.getString(mContext.getContentResolver(),
-                    Settings.Global.APP_IDLE_CONSTANTS);
+            return Global.getString(mContext.getContentResolver(),
+                    Global.APP_IDLE_CONSTANTS);
         }
     }
 
@@ -1557,7 +1559,7 @@ public class AppStandbyController {
     };
 
     /**
-     * Observe settings changes for {@link Settings.Global#APP_IDLE_CONSTANTS}.
+     * Observe settings changes for {@link Global#APP_IDLE_CONSTANTS}.
      */
     private class SettingsObserver extends ContentObserver {
         /**
@@ -1596,10 +1598,11 @@ public class AppStandbyController {
         }
 
         void registerObserver() {
-            mContext.getContentResolver().registerContentObserver(Settings.Global.getUriFor(
-                    Settings.Global.APP_IDLE_CONSTANTS), false, this);
-            mContext.getContentResolver().registerContentObserver(Settings.Global.getUriFor(
-                    Settings.Global.APP_STANDBY_ENABLED), false, this);
+            final ContentResolver cr = mContext.getContentResolver();
+            cr.registerContentObserver(Global.getUriFor(Global.APP_IDLE_CONSTANTS), false, this);
+            cr.registerContentObserver(Global.getUriFor(Global.APP_STANDBY_ENABLED), false, this);
+            cr.registerContentObserver(Global.getUriFor(Global.ADAPTIVE_BATTERY_MANAGEMENT_ENABLED),
+                    false, this);
         }
 
         @Override
@@ -1611,11 +1614,14 @@ public class AppStandbyController {
         void updateSettings() {
             if (DEBUG) {
                 Slog.d(TAG,
-                        "appidle=" + Settings.Global.getString(mContext.getContentResolver(),
-                                Settings.Global.APP_STANDBY_ENABLED));
-                Slog.d(TAG, "appidleconstants=" + Settings.Global.getString(
+                        "appidle=" + Global.getString(mContext.getContentResolver(),
+                                Global.APP_STANDBY_ENABLED));
+                Slog.d(TAG,
+                        "adaptivebat=" + Global.getString(mContext.getContentResolver(),
+                                Global.ADAPTIVE_BATTERY_MANAGEMENT_ENABLED));
+                Slog.d(TAG, "appidleconstants=" + Global.getString(
                         mContext.getContentResolver(),
-                        Settings.Global.APP_IDLE_CONSTANTS));
+                        Global.APP_IDLE_CONSTANTS));
             }
             // Check if app_idle_enabled has changed
             setAppIdleEnabled(mInjector.isAppIdleEnabled());
