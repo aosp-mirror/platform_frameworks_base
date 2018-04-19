@@ -382,9 +382,9 @@
 
     <!-- Instructions telling the user remaining times when enter SIM PIN view.  -->
     <plurals name="kg_password_default_pin_message">
-        <item quantity="one">Enter SIM PIN, you have <xliff:g id="number">%d</xliff:g> remaining
+        <item quantity="one">Enter SIM PIN. You have <xliff:g id="number">%d</xliff:g> remaining
 attempt before you must contact your carrier to unlock your device.</item>
-        <item quantity="other">Enter SIM PIN, you have <xliff:g id="number">%d</xliff:g> remaining
+        <item quantity="other">Enter SIM PIN. You have <xliff:g id="number">%d</xliff:g> remaining
 attempts.</item>
     </plurals>
 
