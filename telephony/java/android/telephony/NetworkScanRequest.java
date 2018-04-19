@@ -20,11 +20,10 @@ import android.annotation.IntDef;
 import android.os.Parcel;
 import android.os.Parcelable;
 
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
-
+import java.util.ArrayList;
+import java.util.Arrays;
 /**
  * Defines a request to peform a network scan.
  *
@@ -152,7 +151,7 @@ public final class NetworkScanRequest implements Parcelable {
         this.mMaxSearchTime = maxSearchTime;
         this.mIncrementalResults = incrementalResults;
         this.mIncrementalResultsPeriodicity = incrementalResultsPeriodicity;
-        if (mMccMncs != null) {
+        if (mccMncs != null) {
             this.mMccMncs = (ArrayList<String>) mccMncs.clone();
         } else {
             this.mMccMncs = new ArrayList<>();
