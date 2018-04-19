@@ -877,7 +877,9 @@ Landroid/graphics/GraphicBuffer;-><init>(IIIIJ)V
 Landroid/graphics/GraphicBuffer;->mNativeObject:J
 Landroid/graphics/ImageDecoder;->postProcessAndRelease(Landroid/graphics/Canvas;)I
 Landroid/graphics/Insets;->left:I
+Landroid/graphics/Insets;->top:I
 Landroid/graphics/Insets;->right:I
+Landroid/graphics/Insets;->bottom:I
 Landroid/graphics/LinearGradient;->mColors:[I
 Landroid/graphics/Matrix;->native_instance:J
 Landroid/graphics/Movie;-><init>(J)V
