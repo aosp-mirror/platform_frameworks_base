@@ -15,10 +15,6 @@
  */
 package com.android.server.notification;
 
-import static android.app.Notification.EXTRA_AUDIO_CONTENTS_URI;
-import static android.app.Notification.EXTRA_BACKGROUND_IMAGE_URI;
-import static android.app.Notification.EXTRA_HISTORIC_MESSAGES;
-import static android.app.Notification.EXTRA_MESSAGES;
 import static android.app.NotificationChannel.USER_LOCKED_IMPORTANCE;
 import static android.app.NotificationManager.IMPORTANCE_DEFAULT;
 import static android.app.NotificationManager.IMPORTANCE_HIGH;
@@ -32,10 +28,8 @@ import static android.service.notification.NotificationListenerService.Ranking
 
 import android.annotation.Nullable;
 import android.app.ActivityManager;
-import android.app.ActivityManagerInternal;
 import android.app.IActivityManager;
 import android.app.Notification;
-import android.app.Notification.MessagingStyle;
 import android.app.NotificationChannel;
 import android.content.ContentProvider;
 import android.content.ContentResolver;
@@ -55,7 +49,6 @@ import android.os.Binder;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.IBinder;
-import android.os.Parcelable;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.provider.Settings;
@@ -75,7 +68,6 @@ import android.widget.RemoteViews;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
-import com.android.internal.util.ArrayUtils;
 import com.android.server.EventLogTags;
 import com.android.server.LocalServices;
 
@@ -1029,36 +1021,14 @@ public final class NotificationRecord {
      */
     private void calculateGrantableUris() {
         final Notification notification = getNotification();
+        notification.visitUris((uri) -> {
+            visitGrantableUri(uri);
+        });
 
-        noteGrantableUri(notification.sound);
         if (notification.getChannelId() != null) {
             NotificationChannel channel = getChannel();
             if (channel != null) {
-                noteGrantableUri(channel.getSound());
-            }
-        }
-
-        final Bundle extras = notification.extras;
-        if (extras != null) {
-            noteGrantableUri(extras.getParcelable(EXTRA_AUDIO_CONTENTS_URI));
-            noteGrantableUri(extras.getParcelable(EXTRA_BACKGROUND_IMAGE_URI));
-        }
-
-        if (MessagingStyle.class.equals(notification.getNotificationStyle()) && extras != null) {
-            final Parcelable[] messages = extras.getParcelableArray(EXTRA_MESSAGES);
-            if (!ArrayUtils.isEmpty(messages)) {
-                for (MessagingStyle.Message message : MessagingStyle.Message
-                        .getMessagesFromBundleArray(messages)) {
-                    noteGrantableUri(message.getDataUri());
-                }
-            }
-
-            final Parcelable[] historic = extras.getParcelableArray(EXTRA_HISTORIC_MESSAGES);
-            if (!ArrayUtils.isEmpty(historic)) {
-                for (MessagingStyle.Message message : MessagingStyle.Message
-                        .getMessagesFromBundleArray(historic)) {
-                    noteGrantableUri(message.getDataUri());
-                }
+                visitGrantableUri(channel.getSound());
             }
         }
     }
@@ -1071,7 +1041,7 @@ public final class NotificationRecord {
      * {@link #mGrantableUris}. Otherwise, this will either log or throw
      * {@link SecurityException} depending on target SDK of enqueuing app.
      */
-    private void noteGrantableUri(Uri uri) {
+    private void visitGrantableUri(Uri uri) {
         if (uri == null || !ContentResolver.SCHEME_CONTENT.equals(uri.getScheme())) return;
 
         // We can't grant Uri permissions from system
