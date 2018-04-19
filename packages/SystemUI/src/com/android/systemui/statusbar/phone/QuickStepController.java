@@ -215,16 +215,16 @@ public class QuickStepController implements GestureHelper {
                 int pos, touchDown, offset, trackSize;
 
                 if (mIsVertical) {
-                    exceededScrubTouchSlop = yDiff > QUICK_STEP_TOUCH_SLOP_PX && yDiff > xDiff;
-                    exceededSwipeUpTouchSlop = xDiff > QUICK_STEP_DRAG_SLOP_PX && xDiff > yDiff;
+                    exceededScrubTouchSlop = yDiff > QUICK_SCRUB_TOUCH_SLOP_PX && yDiff > xDiff;
+                    exceededSwipeUpTouchSlop = xDiff > QUICK_STEP_TOUCH_SLOP_PX && xDiff > yDiff;
                     exceededScrubDragSlop = yDiff > QUICK_SCRUB_DRAG_SLOP_PX && yDiff > xDiff;
                     pos = y;
                     touchDown = mTouchDownY;
                     offset = pos - mTrackRect.top;
                     trackSize = mTrackRect.height();
                 } else {
-                    exceededScrubTouchSlop = xDiff > QUICK_STEP_TOUCH_SLOP_PX && xDiff > yDiff;
-                    exceededSwipeUpTouchSlop = yDiff > QUICK_SCRUB_TOUCH_SLOP_PX && yDiff > xDiff;
+                    exceededScrubTouchSlop = xDiff > QUICK_SCRUB_TOUCH_SLOP_PX && xDiff > yDiff;
+                    exceededSwipeUpTouchSlop = yDiff > QUICK_STEP_TOUCH_SLOP_PX && yDiff > xDiff;
                     exceededScrubDragSlop = xDiff > QUICK_SCRUB_DRAG_SLOP_PX && xDiff > yDiff;
                     pos = x;
                     touchDown = mTouchDownX;
