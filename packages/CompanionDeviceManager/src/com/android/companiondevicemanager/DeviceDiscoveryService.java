@@ -65,9 +65,7 @@ import android.widget.TextView;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.CollectionUtils;
 import com.android.internal.util.Preconditions;
-import com.android.internal.util.function.pooled.PooledLambda;
 
-import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -219,7 +217,7 @@ public class DeviceDiscoveryService extends Service {
         stopScan();
         mDevicesFound.clear();
         mSelectedDevice = null;
-        mDevicesAdapter.notifyDataSetChanged();
+        notifyDataSetChanged();
     }
 
     @Override
@@ -265,7 +263,12 @@ public class DeviceDiscoveryService extends Service {
             onReadyToShowUI();
         }
         mDevicesFound.add(device);
-        mDevicesAdapter.notifyDataSetChanged();
+        notifyDataSetChanged();
+    }
+
+    private void notifyDataSetChanged() {
+        Handler.getMain().sendMessage(obtainMessage(
+                DevicesAdapter::notifyDataSetChanged, mDevicesAdapter));
     }
 
     //TODO also, on timeout -> call onFailure
@@ -283,7 +286,7 @@ public class DeviceDiscoveryService extends Service {
 
     private void onDeviceLost(@Nullable DeviceFilterPair device) {
         mDevicesFound.remove(device);
-        mDevicesAdapter.notifyDataSetChanged();
+        notifyDataSetChanged();
         if (DEBUG) Log.i(LOG_TAG, "Lost device " + device.getDisplayName());
     }
 
