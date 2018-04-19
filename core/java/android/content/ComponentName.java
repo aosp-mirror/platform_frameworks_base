@@ -396,4 +396,14 @@ public final class ComponentName implements Parcelable, Cloneable, Comparable<Co
         mPackage = pkg;
         mClass = in.readString();
     }
+
+    /**
+     * Interface for classes associated with a component name.
+     * @hide
+     */
+    @FunctionalInterface
+    public interface WithComponentName {
+        /** Return the associated component name. */
+        ComponentName getComponentName();
+    }
 }
