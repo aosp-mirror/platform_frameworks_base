@@ -3949,6 +3949,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         if (mSwitchingDialog != null) {
             mSwitchingDialog.dismiss();
             mSwitchingDialog = null;
+            mSwitchingDialogTitleView = null;
         }
 
         updateSystemUiLocked(mCurToken, mImeWindowVis, mBackDisposition);
