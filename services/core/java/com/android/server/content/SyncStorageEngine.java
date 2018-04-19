@@ -128,8 +128,13 @@ public class SyncStorageEngine {
 
     public static final long NOT_IN_BACKOFF_MODE = -1;
 
-    /** String names for the sync source types. */
-    public static final String[] SOURCES = { "OTHER",
+    /**
+     * String names for the sync source types.
+     *
+     * KEEP THIS AND {@link SyncStatusInfo#SOURCE_COUNT} IN SYNC.
+     */
+    public static final String[] SOURCES = {
+            "OTHER",
             "LOCAL",
             "POLL",
             "USER",
@@ -1231,12 +1236,7 @@ public class SyncStorageEngine {
                 if (status.lastSuccessTime == 0 || status.lastFailureTime != 0) {
                     writeStatusNow = true;
                 }
-                status.lastSuccessTime = lastSyncTime;
-                status.lastSuccessSource = item.source;
-                status.lastFailureTime = 0;
-                status.lastFailureSource = -1;
-                status.lastFailureMesg = null;
-                status.initialFailureTime = 0;
+                status.setLastSuccess(item.source, lastSyncTime);
                 ds.successCount++;
                 ds.successTime += elapsedTime;
             } else if (!MESG_CANCELED.equals(resultMessage)) {
@@ -1246,12 +1246,8 @@ public class SyncStorageEngine {
                 status.totalStats.numFailures++;
                 status.todayStats.numFailures++;
 
-                status.lastFailureTime = lastSyncTime;
-                status.lastFailureSource = item.source;
-                status.lastFailureMesg = resultMessage;
-                if (status.initialFailureTime == 0) {
-                    status.initialFailureTime = lastSyncTime;
-                }
+                status.setLastFailure(item.source, lastSyncTime, resultMessage);
+
                 ds.failureCount++;
                 ds.failureTime += elapsedTime;
             } else {
