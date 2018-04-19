@@ -674,7 +674,7 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
     final SparseArray<WallpaperData> mLockWallpaperMap = new SparseArray<WallpaperData>();
 
     final SparseArray<Boolean> mUserRestorecon = new SparseArray<Boolean>();
-    int mCurrentUserId;
+    int mCurrentUserId = UserHandle.USER_NULL;
     boolean mInAmbientMode;
 
     static class WallpaperData {
@@ -1166,7 +1166,11 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
         mIPackageManager = AppGlobals.getPackageManager();
         mAppOpsManager = (AppOpsManager) mContext.getSystemService(Context.APP_OPS_SERVICE);
         mMonitor = new MyPackageMonitor();
-        mMonitor.register(context, null, UserHandle.ALL, true);
+        mColorsChangedListeners = new SparseArray<>();
+    }
+
+    void initialize() {
+        mMonitor.register(mContext, null, UserHandle.ALL, true);
         getWallpaperDir(UserHandle.USER_SYSTEM).mkdirs();
 
         // Initialize state from the persistent store, then guarantee that the
@@ -1174,8 +1178,6 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
         // it from defaults if necessary.
         loadSettingsLocked(UserHandle.USER_SYSTEM, false);
         getWallpaperSafeLocked(UserHandle.USER_SYSTEM, FLAG_SYSTEM);
-
-        mColorsChangedListeners = new SparseArray<>();
     }
 
     private static File getWallpaperDir(int userId) {
@@ -1193,6 +1195,8 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
 
     void systemReady() {
         if (DEBUG) Slog.v(TAG, "systemReady");
+        initialize();
+
         WallpaperData wallpaper = mWallpaperMap.get(UserHandle.USER_SYSTEM);
         // If we think we're going to be using the system image wallpaper imagery, make
         // sure we have something to render
@@ -1344,6 +1348,9 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
         final WallpaperData systemWallpaper;
         final WallpaperData lockWallpaper;
         synchronized (mLock) {
+            if (mCurrentUserId == userId) {
+                return;
+            }
             mCurrentUserId = userId;
             systemWallpaper = getWallpaperSafeLocked(userId, FLAG_SYSTEM);
             final WallpaperData tmpLockWallpaper = mLockWallpaperMap.get(userId);

@@ -452,6 +452,7 @@ message GlobalSettingsProto {
         // Secure#LOCATION_MODE_OFF} temporarily for all users.
         optional SettingProto global_kill_switch = 5 [ (android.privacy).dest = DEST_AUTOMATIC ];
         optional SettingProto gnss_satellite_blacklist = 6 [ (android.privacy).dest = DEST_AUTOMATIC ];
+        optional SettingProto gnss_hal_location_request_duration_millis = 7 [ (android.privacy).dest = DEST_AUTOMATIC ];
     }
     optional Location location = 69;
 

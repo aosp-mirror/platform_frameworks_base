@@ -73,6 +73,7 @@ import android.app.admin.DevicePolicyManagerInternal;
 import android.app.usage.UsageStatsManagerInternal;
 import android.companion.ICompanionDeviceManager;
 import android.content.ComponentName;
+import android.content.ContentUris;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ApplicationInfo;
@@ -80,6 +81,7 @@ import android.content.pm.IPackageManager;
 import android.content.pm.PackageManager;
 import android.content.pm.ParceledListSlice;
 import android.graphics.Color;
+import android.media.AudioAttributes;
 import android.media.AudioManager;
 import android.net.Uri;
 import android.os.Binder;
@@ -88,6 +90,7 @@ import android.os.Bundle;
 import android.os.IBinder;
 import android.os.Process;
 import android.os.UserHandle;
+import android.provider.MediaStore;
 import android.provider.Settings.Secure;
 import android.service.notification.Adjustment;
 import android.service.notification.NotificationListenerService;
@@ -622,8 +625,6 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
                 mBinderService.getActiveNotifications(PKG);
         assertEquals(0, notifs.length);
         assertEquals(0, mService.getNotificationRecordCount());
-        verify(mAm, atLeastOnce()).revokeUriPermissionFromOwner(
-                any(), any(), anyInt(), anyInt());
     }
 
     @Test
@@ -642,7 +643,6 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         ArgumentCaptor<NotificationStats> captor = ArgumentCaptor.forClass(NotificationStats.class);
         verify(mListeners, times(1)).notifyRemovedLocked(any(), anyInt(), captor.capture());
         assertEquals(NotificationStats.DISMISSAL_OTHER, captor.getValue().getDismissalSurface());
-        verify(mAm, atLeastOnce()).revokeUriPermissionFromOwner(any(), any(), anyInt(), anyInt());
     }
 
     @Test
@@ -657,7 +657,6 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
                 mBinderService.getActiveNotifications(sbn.getPackageName());
         assertEquals(0, notifs.length);
         assertEquals(0, mService.getNotificationRecordCount());
-        verify(mAm, atLeastOnce()).revokeUriPermissionFromOwner(any(), any(), anyInt(), anyInt());
     }
 
     @Test
@@ -671,7 +670,6 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
                 mBinderService.getActiveNotifications(sbn.getPackageName());
         assertEquals(0, notifs.length);
         assertEquals(0, mService.getNotificationRecordCount());
-        verify(mAm, atLeastOnce()).revokeUriPermissionFromOwner(any(), any(), anyInt(), anyInt());
     }
 
     @Test
@@ -693,7 +691,6 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         ArgumentCaptor<NotificationStats> captor = ArgumentCaptor.forClass(NotificationStats.class);
         verify(mListeners, times(1)).notifyRemovedLocked(any(), anyInt(), captor.capture());
         assertEquals(NotificationStats.DISMISSAL_OTHER, captor.getValue().getDismissalSurface());
-        verify(mAm, atLeastOnce()).revokeUriPermissionFromOwner(any(), any(), anyInt(), anyInt());
     }
 
     @Test
@@ -712,7 +709,6 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         mBinderService.cancelAllNotifications(PKG, parent.sbn.getUserId());
         waitForIdle();
         assertEquals(0, mService.getNotificationRecordCount());
-        verify(mAm, atLeastOnce()).revokeUriPermissionFromOwner(any(), any(), anyInt(), anyInt());
     }
 
     @Test
@@ -726,7 +722,6 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         waitForIdle();
 
         assertEquals(0, mService.getNotificationRecordCount());
-        verify(mAm, atLeastOnce()).revokeUriPermissionFromOwner(any(), any(), anyInt(), anyInt());
     }
 
     @Test
@@ -2245,7 +2240,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
 
     @Test
     public void testBumpFGImportance_noChannelChangePreOApp() throws Exception {
-        String preOPkg = "preO";
+        String preOPkg = PKG_N_MR1;
         int preOUid = 145;
         final ApplicationInfo legacy = new ApplicationInfo();
         legacy.targetSdkVersion = Build.VERSION_CODES.N_MR1;
@@ -2335,7 +2330,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         final NotificationRecord r = generateNotificationRecord(mTestNotificationChannel);
         mService.addNotification(r);
 
-        NotificationVisibility nv = NotificationVisibility.obtain(r.getKey(), 1, true);
+        final NotificationVisibility nv = NotificationVisibility.obtain(r.getKey(), 1, 2, true);
         mService.mNotificationDelegate.onNotificationVisibilityChanged(
                 new NotificationVisibility[] {nv}, new NotificationVisibility[]{});
         assertTrue(mService.getNotificationRecord(r.getKey()).getStats().hasSeen());
@@ -2349,8 +2344,9 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         final NotificationRecord r = generateNotificationRecord(mTestNotificationChannel);
         mService.addNotification(r);
 
+        final NotificationVisibility nv = NotificationVisibility.obtain(r.getKey(), 0, 1, true);
         mService.mNotificationDelegate.onNotificationClear(mUid, 0, PKG, r.sbn.getTag(),
-                r.sbn.getId(), r.getUserId(), r.getKey(), NotificationStats.DISMISSAL_AOD);
+                r.sbn.getId(), r.getUserId(), r.getKey(), NotificationStats.DISMISSAL_AOD, nv);
         waitForIdle();
 
         assertEquals(NotificationStats.DISMISSAL_AOD, r.getStats().getDismissalSurface());
@@ -2489,62 +2485,62 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     }
 
     @Test
-    public void revokeUriPermissions_update() throws Exception {
+    public void updateUriPermissions_update() throws Exception {
         NotificationChannel c = new NotificationChannel(
                 TEST_CHANNEL_ID, TEST_CHANNEL_ID, NotificationManager.IMPORTANCE_DEFAULT);
         c.setSound(null, Notification.AUDIO_ATTRIBUTES_DEFAULT);
         Message message1 = new Message("", 0, "");
-        message1.setData("", Uri.fromParts("old", "", "old stuff"));
+        message1.setData("",
+                ContentUris.withAppendedId(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, 1));
         Message message2 = new Message("", 1, "");
-        message2.setData("", Uri.fromParts("new", "", "new stuff"));
+        message2.setData("",
+                ContentUris.withAppendedId(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, 2));
 
-        Notification.Builder nb = new Notification.Builder(mContext, c.getId())
+        Notification.Builder nbA = new Notification.Builder(mContext, c.getId())
                 .setContentTitle("foo")
                 .setSmallIcon(android.R.drawable.sym_def_app_icon)
                 .setStyle(new Notification.MessagingStyle("")
                         .addMessage(message1)
                         .addMessage(message2));
-        StatusBarNotification oldSbn = new StatusBarNotification(PKG, PKG, 0, "tag", mUid, 0,
-                nb.build(), new UserHandle(mUid), null, 0);
-        NotificationRecord oldRecord =
-                new NotificationRecord(mContext, oldSbn, c);
+        NotificationRecord recordA = new NotificationRecord(mContext, new StatusBarNotification(
+                PKG, PKG, 0, "tag", mUid, 0, nbA.build(), new UserHandle(mUid), null, 0), c);
 
-        Notification.Builder nb1 = new Notification.Builder(mContext, c.getId())
+        // First post means we grant access to both
+        reset(mAm);
+        when(mAm.newUriPermissionOwner(any())).thenReturn(new Binder());
+        mService.updateUriPermissions(recordA, null, mContext.getPackageName(),
+                UserHandle.USER_SYSTEM);
+        verify(mAm, times(1)).grantUriPermissionFromOwner(any(), anyInt(), any(),
+                eq(message1.getDataUri()), anyInt(), anyInt(), anyInt());
+        verify(mAm, times(1)).grantUriPermissionFromOwner(any(), anyInt(), any(),
+                eq(message2.getDataUri()), anyInt(), anyInt(), anyInt());
+
+        Notification.Builder nbB = new Notification.Builder(mContext, c.getId())
                 .setContentTitle("foo")
                 .setSmallIcon(android.R.drawable.sym_def_app_icon)
                 .setStyle(new Notification.MessagingStyle("").addMessage(message2));
-        StatusBarNotification newSbn = new StatusBarNotification(PKG, PKG, 0, "tag", mUid, 0,
-                nb1.build(), new UserHandle(mUid), null, 0);
-        NotificationRecord newRecord =
-                new NotificationRecord(mContext, newSbn, c);
+        NotificationRecord recordB = new NotificationRecord(mContext, new StatusBarNotification(PKG,
+                PKG, 0, "tag", mUid, 0, nbB.build(), new UserHandle(mUid), null, 0), c);
 
-        mService.revokeUriPermissions(newRecord, oldRecord);
-
+        // Update means we drop access to first
+        reset(mAm);
+        mService.updateUriPermissions(recordB, recordA, mContext.getPackageName(),
+                UserHandle.USER_SYSTEM);
         verify(mAm, times(1)).revokeUriPermissionFromOwner(any(), eq(message1.getDataUri()),
                 anyInt(), anyInt());
-    }
 
-    @Test
-    public void revokeUriPermissions_cancel() throws Exception {
-        NotificationChannel c = new NotificationChannel(
-                TEST_CHANNEL_ID, TEST_CHANNEL_ID, NotificationManager.IMPORTANCE_DEFAULT);
-        c.setSound(null, Notification.AUDIO_ATTRIBUTES_DEFAULT);
-        Message message1 = new Message("", 0, "");
-        message1.setData("", Uri.fromParts("old", "", "old stuff"));
+        // Update back means we grant access to first again
+        reset(mAm);
+        mService.updateUriPermissions(recordA, recordB, mContext.getPackageName(),
+                UserHandle.USER_SYSTEM);
+        verify(mAm, times(1)).grantUriPermissionFromOwner(any(), anyInt(), any(),
+                eq(message1.getDataUri()), anyInt(), anyInt(), anyInt());
 
-        Notification.Builder nb = new Notification.Builder(mContext, c.getId())
-                .setContentTitle("foo")
-                .setSmallIcon(android.R.drawable.sym_def_app_icon)
-                .setStyle(new Notification.MessagingStyle("")
-                        .addMessage(message1));
-        StatusBarNotification oldSbn = new StatusBarNotification(PKG, PKG, 0, "tag", mUid, 0,
-                nb.build(), new UserHandle(mUid), null, 0);
-        NotificationRecord oldRecord =
-                new NotificationRecord(mContext, oldSbn, c);
-
-        mService.revokeUriPermissions(null, oldRecord);
-
-        verify(mAm, times(1)).revokeUriPermissionFromOwner(any(), eq(message1.getDataUri()),
+        // And update to empty means we drop everything
+        reset(mAm);
+        mService.updateUriPermissions(null, recordB, mContext.getPackageName(),
+                UserHandle.USER_SYSTEM);
+        verify(mAm, times(1)).revokeUriPermissionFromOwner(any(), eq(null),
                 anyInt(), anyInt());
     }
 

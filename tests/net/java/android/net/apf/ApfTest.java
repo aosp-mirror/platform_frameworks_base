@@ -30,7 +30,6 @@ import static org.mockito.Mockito.verify;
 import android.content.Context;
 import android.net.LinkAddress;
 import android.net.LinkProperties;
-import android.net.NetworkUtils;
 import android.net.apf.ApfFilter.ApfConfiguration;
 import android.net.apf.ApfGenerator.IllegalInstructionException;
 import android.net.apf.ApfGenerator.Register;
@@ -42,22 +41,13 @@ import android.os.ConditionVariable;
 import android.os.Parcelable;
 import android.os.SystemClock;
 import android.support.test.InstrumentationRegistry;
-import android.support.test.runner.AndroidJUnit4;
 import android.support.test.filters.SmallTest;
+import android.support.test.runner.AndroidJUnit4;
 import android.system.ErrnoException;
 import android.system.Os;
 import android.text.format.DateUtils;
-
 import com.android.frameworks.tests.net.R;
 import com.android.internal.util.HexDump;
-
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.ArgumentCaptor;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
-
 import java.io.File;
 import java.io.FileDescriptor;
 import java.io.FileOutputStream;
@@ -68,9 +58,14 @@ import java.net.InetAddress;
 import java.nio.ByteBuffer;
 import java.util.List;
 import java.util.Random;
-
 import libcore.io.IoUtils;
 import libcore.io.Streams;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 
 /**
  * Tests for APF program generator and interpreter.
@@ -82,6 +77,7 @@ import libcore.io.Streams;
 @SmallTest
 public class ApfTest {
     private static final int TIMEOUT_MS = 500;
+    private final static int MIN_APF_VERSION = 2;
 
     @Mock IpConnectivityLog mLog;
     @Mock Context mContext;
@@ -131,11 +127,11 @@ public class ApfTest {
     }
 
     private void assertVerdict(int expected, byte[] program, byte[] packet, int filterAge) {
-        assertReturnCodesEqual(expected, apfSimulate(program, packet, filterAge));
+        assertReturnCodesEqual(expected, apfSimulate(program, packet, null, filterAge));
     }
 
     private void assertVerdict(int expected, byte[] program, byte[] packet) {
-        assertReturnCodesEqual(expected, apfSimulate(program, packet, 0));
+        assertReturnCodesEqual(expected, apfSimulate(program, packet, null, 0));
     }
 
     private void assertPass(byte[] program, byte[] packet, int filterAge) {
@@ -154,9 +150,24 @@ public class ApfTest {
         assertVerdict(DROP, program, packet);
     }
 
+  private void assertDataMemoryContents(
+          int expected, byte[] program, byte[] packet, byte[] data, byte[] expected_data)
+      throws IllegalInstructionException, Exception {
+        assertReturnCodesEqual(expected, apfSimulate(program, packet, data, 0 /* filterAge */));
+
+        // assertArrayEquals() would only print one byte, making debugging difficult.
+        if (!java.util.Arrays.equals(expected_data, data)) {
+            throw new Exception(
+                    "program: " + HexDump.toHexString(program) +
+                    "\ndata memory: " + HexDump.toHexString(data) +
+                    "\nexpected: " + HexDump.toHexString(expected_data));
+        }
+    }
+
     private void assertVerdict(int expected, ApfGenerator gen, byte[] packet, int filterAge)
             throws IllegalInstructionException {
-        assertReturnCodesEqual(expected, apfSimulate(gen.generate(), packet, filterAge));
+        assertReturnCodesEqual(expected, apfSimulate(gen.generate(), packet, null,
+              filterAge));
     }
 
     private void assertPass(ApfGenerator gen, byte[] packet, int filterAge)
@@ -189,11 +200,11 @@ public class ApfTest {
         // Empty program should pass because having the program counter reach the
         // location immediately after the program indicates the packet should be
         // passed to the AP.
-        ApfGenerator gen = new ApfGenerator();
+        ApfGenerator gen = new ApfGenerator(MIN_APF_VERSION);
         assertPass(gen);
 
         // Test jumping to pass label.
-        gen = new ApfGenerator();
+        gen = new ApfGenerator(MIN_APF_VERSION);
         gen.addJump(gen.PASS_LABEL);
         byte[] program = gen.generate();
         assertEquals(1, program.length);
@@ -201,7 +212,7 @@ public class ApfTest {
         assertPass(program, new byte[MIN_PKT_SIZE], 0);
 
         // Test jumping to drop label.
-        gen = new ApfGenerator();
+        gen = new ApfGenerator(MIN_APF_VERSION);
         gen.addJump(gen.DROP_LABEL);
         program = gen.generate();
         assertEquals(2, program.length);
@@ -210,121 +221,121 @@ public class ApfTest {
         assertDrop(program, new byte[15], 15);
 
         // Test jumping if equal to 0.
-        gen = new ApfGenerator();
+        gen = new ApfGenerator(MIN_APF_VERSION);
         gen.addJumpIfR0Equals(0, gen.DROP_LABEL);
         assertDrop(gen);
 
         // Test jumping if not equal to 0.
-        gen = new ApfGenerator();
+        gen = new ApfGenerator(MIN_APF_VERSION);
         gen.addJumpIfR0NotEquals(0, gen.DROP_LABEL);
         assertPass(gen);
-        gen = new ApfGenerator();
+        gen = new ApfGenerator(MIN_APF_VERSION);
         gen.addLoadImmediate(Register.R0, 1);
         gen.addJumpIfR0NotEquals(0, gen.DROP_LABEL);
         assertDrop(gen);
 
         // Test jumping if registers equal.
-        gen = new ApfGenerator();
+        gen = new ApfGenerator(MIN_APF_VERSION);
         gen.addJumpIfR0EqualsR1(gen.DROP_LABEL);
         assertDrop(gen);
 
         // Test jumping if registers not equal.
-        gen = new ApfGenerator();
+        gen = new ApfGenerator(MIN_APF_VERSION);
         gen.addJumpIfR0NotEqualsR1(gen.DROP_LABEL);
         assertPass(gen);
-        gen = new ApfGenerator();
+        gen = new ApfGenerator(MIN_APF_VERSION);
         gen.addLoadImmediate(Register.R0, 1);
         gen.addJumpIfR0NotEqualsR1(gen.DROP_LABEL);
         assertDrop(gen);
 
         // Test load immediate.
-        gen = new ApfGenerator();
+        gen = new ApfGenerator(MIN_APF_VERSION);
         gen.addLoadImmediate(Register.R0, 1234567890);
         gen.addJumpIfR0Equals(1234567890, gen.DROP_LABEL);
         assertDrop(gen);
 
         // Test add.
-        gen = new ApfGenerator();
+        gen = new ApfGenerator(MIN_APF_VERSION);
         gen.addAdd(1234567890);
         gen.addJumpIfR0Equals(1234567890, gen.DROP_LABEL);
         assertDrop(gen);
 
         // Test subtract.
-        gen = new ApfGenerator();
+        gen = new ApfGenerator(MIN_APF_VERSION);
         gen.addAdd(-1234567890);
         gen.addJumpIfR0Equals(-1234567890, gen.DROP_LABEL);
         assertDrop(gen);
 
         // Test or.
-        gen = new ApfGenerator();
+        gen = new ApfGenerator(MIN_APF_VERSION);
         gen.addOr(1234567890);
         gen.addJumpIfR0Equals(1234567890, gen.DROP_LABEL);
         assertDrop(gen);
 
         // Test and.
-        gen = new ApfGenerator();
+        gen = new ApfGenerator(MIN_APF_VERSION);
         gen.addLoadImmediate(Register.R0, 1234567890);
         gen.addAnd(123456789);
         gen.addJumpIfR0Equals(1234567890 & 123456789, gen.DROP_LABEL);
         assertDrop(gen);
 
         // Test left shift.
-        gen = new ApfGenerator();
+        gen = new ApfGenerator(MIN_APF_VERSION);
         gen.addLoadImmediate(Register.R0, 1234567890);
         gen.addLeftShift(1);
         gen.addJumpIfR0Equals(1234567890 << 1, gen.DROP_LABEL);
         assertDrop(gen);
 
         // Test right shift.
-        gen = new ApfGenerator();
+        gen = new ApfGenerator(MIN_APF_VERSION);
         gen.addLoadImmediate(Register.R0, 1234567890);
         gen.addRightShift(1);
         gen.addJumpIfR0Equals(1234567890 >> 1, gen.DROP_LABEL);
         assertDrop(gen);
 
         // Test multiply.
-        gen = new ApfGenerator();
+        gen = new ApfGenerator(MIN_APF_VERSION);
         gen.addLoadImmediate(Register.R0, 1234567890);
         gen.addMul(2);
         gen.addJumpIfR0Equals(1234567890 * 2, gen.DROP_LABEL);
         assertDrop(gen);
 
         // Test divide.
-        gen = new ApfGenerator();
+        gen = new ApfGenerator(MIN_APF_VERSION);
         gen.addLoadImmediate(Register.R0, 1234567890);
         gen.addDiv(2);
         gen.addJumpIfR0Equals(1234567890 / 2, gen.DROP_LABEL);
         assertDrop(gen);
 
         // Test divide by zero.
-        gen = new ApfGenerator();
+        gen = new ApfGenerator(MIN_APF_VERSION);
         gen.addDiv(0);
         gen.addJump(gen.DROP_LABEL);
         assertPass(gen);
 
         // Test add.
-        gen = new ApfGenerator();
+        gen = new ApfGenerator(MIN_APF_VERSION);
         gen.addLoadImmediate(Register.R1, 1234567890);
         gen.addAddR1();
         gen.addJumpIfR0Equals(1234567890, gen.DROP_LABEL);
         assertDrop(gen);
 
         // Test subtract.
-        gen = new ApfGenerator();
+        gen = new ApfGenerator(MIN_APF_VERSION);
         gen.addLoadImmediate(Register.R1, -1234567890);
         gen.addAddR1();
         gen.addJumpIfR0Equals(-1234567890, gen.DROP_LABEL);
         assertDrop(gen);
 
         // Test or.
-        gen = new ApfGenerator();
+        gen = new ApfGenerator(MIN_APF_VERSION);
         gen.addLoadImmediate(Register.R1, 1234567890);
         gen.addOrR1();
         gen.addJumpIfR0Equals(1234567890, gen.DROP_LABEL);
         assertDrop(gen);
 
         // Test and.
-        gen = new ApfGenerator();
+        gen = new ApfGenerator(MIN_APF_VERSION);
         gen.addLoadImmediate(Register.R0, 1234567890);
         gen.addLoadImmediate(Register.R1, 123456789);
         gen.addAndR1();
@@ -332,7 +343,7 @@ public class ApfTest {
         assertDrop(gen);
 
         // Test left shift.
-        gen = new ApfGenerator();
+        gen = new ApfGenerator(MIN_APF_VERSION);
         gen.addLoadImmediate(Register.R0, 1234567890);
         gen.addLoadImmediate(Register.R1, 1);
         gen.addLeftShiftR1();
@@ -340,7 +351,7 @@ public class ApfTest {
         assertDrop(gen);
 
         // Test right shift.
-        gen = new ApfGenerator();
+        gen = new ApfGenerator(MIN_APF_VERSION);
         gen.addLoadImmediate(Register.R0, 1234567890);
         gen.addLoadImmediate(Register.R1, -1);
         gen.addLeftShiftR1();
@@ -348,7 +359,7 @@ public class ApfTest {
         assertDrop(gen);
 
         // Test multiply.
-        gen = new ApfGenerator();
+        gen = new ApfGenerator(MIN_APF_VERSION);
         gen.addLoadImmediate(Register.R0, 1234567890);
         gen.addLoadImmediate(Register.R1, 2);
         gen.addMulR1();
@@ -356,7 +367,7 @@ public class ApfTest {
         assertDrop(gen);
 
         // Test divide.
-        gen = new ApfGenerator();
+        gen = new ApfGenerator(MIN_APF_VERSION);
         gen.addLoadImmediate(Register.R0, 1234567890);
         gen.addLoadImmediate(Register.R1, 2);
         gen.addDivR1();
@@ -364,136 +375,136 @@ public class ApfTest {
         assertDrop(gen);
 
         // Test divide by zero.
-        gen = new ApfGenerator();
+        gen = new ApfGenerator(MIN_APF_VERSION);
         gen.addDivR1();
         gen.addJump(gen.DROP_LABEL);
         assertPass(gen);
 
         // Test byte load.
-        gen = new ApfGenerator();
+        gen = new ApfGenerator(MIN_APF_VERSION);
         gen.addLoad8(Register.R0, 1);
         gen.addJumpIfR0Equals(45, gen.DROP_LABEL);
         assertDrop(gen, new byte[]{123,45,0,0,0,0,0,0,0,0,0,0,0,0,0}, 0);
 
         // Test out of bounds load.
-        gen = new ApfGenerator();
+        gen = new ApfGenerator(MIN_APF_VERSION);
         gen.addLoad8(Register.R0, 16);
         gen.addJumpIfR0Equals(0, gen.DROP_LABEL);
         assertPass(gen, new byte[]{123,45,0,0,0,0,0,0,0,0,0,0,0,0,0}, 0);
 
         // Test half-word load.
-        gen = new ApfGenerator();
+        gen = new ApfGenerator(MIN_APF_VERSION);
         gen.addLoad16(Register.R0, 1);
         gen.addJumpIfR0Equals((45 << 8) | 67, gen.DROP_LABEL);
         assertDrop(gen, new byte[]{123,45,67,0,0,0,0,0,0,0,0,0,0,0,0}, 0);
 
         // Test word load.
-        gen = new ApfGenerator();
+        gen = new ApfGenerator(MIN_APF_VERSION);
         gen.addLoad32(Register.R0, 1);
         gen.addJumpIfR0Equals((45 << 24) | (67 << 16) | (89 << 8) | 12, gen.DROP_LABEL);
         assertDrop(gen, new byte[]{123,45,67,89,12,0,0,0,0,0,0,0,0,0,0}, 0);
 
         // Test byte indexed load.
-        gen = new ApfGenerator();
+        gen = new ApfGenerator(MIN_APF_VERSION);
         gen.addLoadImmediate(Register.R1, 1);
         gen.addLoad8Indexed(Register.R0, 0);
         gen.addJumpIfR0Equals(45, gen.DROP_LABEL);
         assertDrop(gen, new byte[]{123,45,0,0,0,0,0,0,0,0,0,0,0,0,0}, 0);
 
         // Test out of bounds indexed load.
-        gen = new ApfGenerator();
+        gen = new ApfGenerator(MIN_APF_VERSION);
         gen.addLoadImmediate(Register.R1, 8);
         gen.addLoad8Indexed(Register.R0, 8);
         gen.addJumpIfR0Equals(0, gen.DROP_LABEL);
         assertPass(gen, new byte[]{123,45,0,0,0,0,0,0,0,0,0,0,0,0,0}, 0);
 
         // Test half-word indexed load.
-        gen = new ApfGenerator();
+        gen = new ApfGenerator(MIN_APF_VERSION);
         gen.addLoadImmediate(Register.R1, 1);
         gen.addLoad16Indexed(Register.R0, 0);
         gen.addJumpIfR0Equals((45 << 8) | 67, gen.DROP_LABEL);
         assertDrop(gen, new byte[]{123,45,67,0,0,0,0,0,0,0,0,0,0,0,0}, 0);
 
         // Test word indexed load.
-        gen = new ApfGenerator();
+        gen = new ApfGenerator(MIN_APF_VERSION);
         gen.addLoadImmediate(Register.R1, 1);
         gen.addLoad32Indexed(Register.R0, 0);
         gen.addJumpIfR0Equals((45 << 24) | (67 << 16) | (89 << 8) | 12, gen.DROP_LABEL);
         assertDrop(gen, new byte[]{123,45,67,89,12,0,0,0,0,0,0,0,0,0,0}, 0);
 
         // Test jumping if greater than.
-        gen = new ApfGenerator();
+        gen = new ApfGenerator(MIN_APF_VERSION);
         gen.addJumpIfR0GreaterThan(0, gen.DROP_LABEL);
         assertPass(gen);
-        gen = new ApfGenerator();
+        gen = new ApfGenerator(MIN_APF_VERSION);
         gen.addLoadImmediate(Register.R0, 1);
         gen.addJumpIfR0GreaterThan(0, gen.DROP_LABEL);
         assertDrop(gen);
 
         // Test jumping if less than.
-        gen = new ApfGenerator();
+        gen = new ApfGenerator(MIN_APF_VERSION);
         gen.addJumpIfR0LessThan(0, gen.DROP_LABEL);
         assertPass(gen);
-        gen = new ApfGenerator();
+        gen = new ApfGenerator(MIN_APF_VERSION);
         gen.addJumpIfR0LessThan(1, gen.DROP_LABEL);
         assertDrop(gen);
 
         // Test jumping if any bits set.
-        gen = new ApfGenerator();
+        gen = new ApfGenerator(MIN_APF_VERSION);
         gen.addJumpIfR0AnyBitsSet(3, gen.DROP_LABEL);
         assertPass(gen);
-        gen = new ApfGenerator();
+        gen = new ApfGenerator(MIN_APF_VERSION);
         gen.addLoadImmediate(Register.R0, 1);
         gen.addJumpIfR0AnyBitsSet(3, gen.DROP_LABEL);
         assertDrop(gen);
-        gen = new ApfGenerator();
+        gen = new ApfGenerator(MIN_APF_VERSION);
         gen.addLoadImmediate(Register.R0, 3);
         gen.addJumpIfR0AnyBitsSet(3, gen.DROP_LABEL);
         assertDrop(gen);
 
         // Test jumping if register greater than.
-        gen = new ApfGenerator();
+        gen = new ApfGenerator(MIN_APF_VERSION);
         gen.addJumpIfR0GreaterThanR1(gen.DROP_LABEL);
         assertPass(gen);
-        gen = new ApfGenerator();
+        gen = new ApfGenerator(MIN_APF_VERSION);
         gen.addLoadImmediate(Register.R0, 2);
         gen.addLoadImmediate(Register.R1, 1);
         gen.addJumpIfR0GreaterThanR1(gen.DROP_LABEL);
         assertDrop(gen);
 
         // Test jumping if register less than.
-        gen = new ApfGenerator();
+        gen = new ApfGenerator(MIN_APF_VERSION);
         gen.addJumpIfR0LessThanR1(gen.DROP_LABEL);
         assertPass(gen);
-        gen = new ApfGenerator();
+        gen = new ApfGenerator(MIN_APF_VERSION);
         gen.addLoadImmediate(Register.R1, 1);
         gen.addJumpIfR0LessThanR1(gen.DROP_LABEL);
         assertDrop(gen);
 
         // Test jumping if any bits set in register.
-        gen = new ApfGenerator();
+        gen = new ApfGenerator(MIN_APF_VERSION);
         gen.addLoadImmediate(Register.R1, 3);
         gen.addJumpIfR0AnyBitsSetR1(gen.DROP_LABEL);
         assertPass(gen);
-        gen = new ApfGenerator();
+        gen = new ApfGenerator(MIN_APF_VERSION);
         gen.addLoadImmediate(Register.R1, 3);
         gen.addLoadImmediate(Register.R0, 1);
         gen.addJumpIfR0AnyBitsSetR1(gen.DROP_LABEL);
         assertDrop(gen);
-        gen = new ApfGenerator();
+        gen = new ApfGenerator(MIN_APF_VERSION);
         gen.addLoadImmediate(Register.R1, 3);
         gen.addLoadImmediate(Register.R0, 3);
         gen.addJumpIfR0AnyBitsSetR1(gen.DROP_LABEL);
         assertDrop(gen);
 
         // Test load from memory.
-        gen = new ApfGenerator();
+        gen = new ApfGenerator(MIN_APF_VERSION);
         gen.addLoadFromMemory(Register.R0, 0);
         gen.addJumpIfR0Equals(0, gen.DROP_LABEL);
         assertDrop(gen);
 
         // Test store to memory.
-        gen = new ApfGenerator();
+        gen = new ApfGenerator(MIN_APF_VERSION);
         gen.addLoadImmediate(Register.R1, 1234567890);
         gen.addStoreToMemory(Register.R1, 12);
         gen.addLoadFromMemory(Register.R0, 12);
@@ -501,63 +512,63 @@ public class ApfTest {
         assertDrop(gen);
 
         // Test filter age pre-filled memory.
-        gen = new ApfGenerator();
+        gen = new ApfGenerator(MIN_APF_VERSION);
         gen.addLoadFromMemory(Register.R0, gen.FILTER_AGE_MEMORY_SLOT);
         gen.addJumpIfR0Equals(1234567890, gen.DROP_LABEL);
         assertDrop(gen, new byte[MIN_PKT_SIZE], 1234567890);
 
         // Test packet size pre-filled memory.
-        gen = new ApfGenerator();
+        gen = new ApfGenerator(MIN_APF_VERSION);
         gen.addLoadFromMemory(Register.R0, gen.PACKET_SIZE_MEMORY_SLOT);
         gen.addJumpIfR0Equals(MIN_PKT_SIZE, gen.DROP_LABEL);
         assertDrop(gen);
 
         // Test IPv4 header size pre-filled memory.
-        gen = new ApfGenerator();
+        gen = new ApfGenerator(MIN_APF_VERSION);
         gen.addLoadFromMemory(Register.R0, gen.IPV4_HEADER_SIZE_MEMORY_SLOT);
         gen.addJumpIfR0Equals(20, gen.DROP_LABEL);
         assertDrop(gen, new byte[]{0,0,0,0,0,0,0,0,0,0,0,0,0,0,0x45}, 0);
 
         // Test not.
-        gen = new ApfGenerator();
+        gen = new ApfGenerator(MIN_APF_VERSION);
         gen.addLoadImmediate(Register.R0, 1234567890);
         gen.addNot(Register.R0);
         gen.addJumpIfR0Equals(~1234567890, gen.DROP_LABEL);
         assertDrop(gen);
 
         // Test negate.
-        gen = new ApfGenerator();
+        gen = new ApfGenerator(MIN_APF_VERSION);
         gen.addLoadImmediate(Register.R0, 1234567890);
         gen.addNeg(Register.R0);
         gen.addJumpIfR0Equals(-1234567890, gen.DROP_LABEL);
         assertDrop(gen);
 
         // Test move.
-        gen = new ApfGenerator();
+        gen = new ApfGenerator(MIN_APF_VERSION);
         gen.addLoadImmediate(Register.R1, 1234567890);
         gen.addMove(Register.R0);
         gen.addJumpIfR0Equals(1234567890, gen.DROP_LABEL);
         assertDrop(gen);
-        gen = new ApfGenerator();
+        gen = new ApfGenerator(MIN_APF_VERSION);
         gen.addLoadImmediate(Register.R0, 1234567890);
         gen.addMove(Register.R1);
         gen.addJumpIfR0Equals(1234567890, gen.DROP_LABEL);
         assertDrop(gen);
 
         // Test swap.
-        gen = new ApfGenerator();
+        gen = new ApfGenerator(MIN_APF_VERSION);
         gen.addLoadImmediate(Register.R1, 1234567890);
         gen.addSwap();
         gen.addJumpIfR0Equals(1234567890, gen.DROP_LABEL);
         assertDrop(gen);
-        gen = new ApfGenerator();
+        gen = new ApfGenerator(MIN_APF_VERSION);
         gen.addLoadImmediate(Register.R0, 1234567890);
         gen.addSwap();
         gen.addJumpIfR0Equals(0, gen.DROP_LABEL);
         assertDrop(gen);
 
         // Test jump if bytes not equal.
-        gen = new ApfGenerator();
+        gen = new ApfGenerator(MIN_APF_VERSION);
         gen.addLoadImmediate(Register.R0, 1);
         gen.addJumpIfBytesNotEqual(Register.R0, new byte[]{123}, gen.DROP_LABEL);
         program = gen.generate();
@@ -569,23 +580,150 @@ public class ApfTest {
         assertEquals(1, program[4]);
         assertEquals(123, program[5]);
         assertDrop(program, new byte[MIN_PKT_SIZE], 0);
-        gen = new ApfGenerator();
+        gen = new ApfGenerator(MIN_APF_VERSION);
         gen.addLoadImmediate(Register.R0, 1);
         gen.addJumpIfBytesNotEqual(Register.R0, new byte[]{123}, gen.DROP_LABEL);
         byte[] packet123 = {0,123,0,0,0,0,0,0,0,0,0,0,0,0,0};
         assertPass(gen, packet123, 0);
-        gen = new ApfGenerator();
+        gen = new ApfGenerator(MIN_APF_VERSION);
         gen.addJumpIfBytesNotEqual(Register.R0, new byte[]{123}, gen.DROP_LABEL);
         assertDrop(gen, packet123, 0);
-        gen = new ApfGenerator();
+        gen = new ApfGenerator(MIN_APF_VERSION);
         gen.addLoadImmediate(Register.R0, 1);
         gen.addJumpIfBytesNotEqual(Register.R0, new byte[]{1,2,30,4,5}, gen.DROP_LABEL);
         byte[] packet12345 = {0,1,2,3,4,5,0,0,0,0,0,0,0,0,0};
         assertDrop(gen, packet12345, 0);
-        gen = new ApfGenerator();
+        gen = new ApfGenerator(MIN_APF_VERSION);
         gen.addLoadImmediate(Register.R0, 1);
         gen.addJumpIfBytesNotEqual(Register.R0, new byte[]{1,2,3,4,5}, gen.DROP_LABEL);
         assertPass(gen, packet12345, 0);
+    }
+
+    @Test(expected = ApfGenerator.IllegalInstructionException.class)
+    public void testApfGeneratorWantsV2OrGreater() throws Exception {
+        // The minimum supported APF version is 2.
+        new ApfGenerator(1);
+    }
+
+    @Test
+    public void testApfDataOpcodesWantApfV3() throws IllegalInstructionException, Exception {
+        ApfGenerator gen = new ApfGenerator(MIN_APF_VERSION);
+        try {
+            gen.addStoreData(Register.R0, 0);
+            fail();
+        } catch (IllegalInstructionException expected) {
+            /* pass */
+        }
+        try {
+            gen.addLoadData(Register.R0, 0);
+            fail();
+        } catch (IllegalInstructionException expected) {
+            /* pass */
+        }
+    }
+
+    @Test
+    public void testApfDataWrite() throws IllegalInstructionException, Exception {
+        byte[] packet = new byte[MIN_PKT_SIZE];
+        byte[] data = {0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16};
+        byte[] expected_data = data.clone();
+
+        // No memory access instructions: should leave the data segment untouched.
+        ApfGenerator gen = new ApfGenerator(3);
+        assertDataMemoryContents(PASS, gen.generate(), packet, data, expected_data);
+
+        // Expect value 0x87654321 to be stored starting from address 3 + 2, in big-endian order.
+        gen = new ApfGenerator(3);
+        gen.addLoadImmediate(Register.R0, 0x87654321);
+        gen.addLoadImmediate(Register.R1, 2);
+        gen.addStoreData(Register.R0, 3);
+        expected_data[5] = (byte)0x87;
+        expected_data[6] = (byte)0x65;
+        expected_data[7] = (byte)0x43;
+        expected_data[8] = (byte)0x21;
+        assertDataMemoryContents(PASS, gen.generate(), packet, data, expected_data);
+    }
+
+    @Test
+    public void testApfDataRead() throws IllegalInstructionException, Exception {
+        // Program that DROPs if address 11 (7 + 3) contains 0x87654321.
+        ApfGenerator gen = new ApfGenerator(3);
+        gen.addLoadImmediate(Register.R1, 3);
+        gen.addLoadData(Register.R0, 7);
+        gen.addJumpIfR0Equals(0x87654321, gen.DROP_LABEL);
+        byte[] program = gen.generate();
+        byte[] packet = new byte[MIN_PKT_SIZE];
+
+        // Content is incorrect (last byte does not match) -> PASS
+        byte[] data = new byte[32];
+        data[10] = (byte)0x87;
+        data[11] = (byte)0x65;
+        data[12] = (byte)0x43;
+        data[13] = (byte)0x00;  // != 0x21
+        byte[] expected_data = data.clone();
+        assertDataMemoryContents(PASS, program, packet, data, expected_data);
+
+        // Fix the last byte -> conditional jump taken -> DROP
+        data[13] = (byte)0x21;
+        expected_data = data;
+        assertDataMemoryContents(DROP, program, packet, data, expected_data);
+    }
+
+    @Test
+    public void testApfDataReadModifyWrite() throws IllegalInstructionException, Exception {
+        ApfGenerator gen = new ApfGenerator(3);
+        gen.addLoadImmediate(Register.R1, 3);
+        gen.addLoadData(Register.R0, 7);  // Load from address 7 + 3 = 10
+        gen.addAdd(0x78453412);  // 87654321 + 78453412 = FFAA7733
+        gen.addStoreData(Register.R0, 11);  // Write back to address 11 + 3 = 14
+
+        byte[] packet = new byte[MIN_PKT_SIZE];
+        byte[] data = new byte[32];
+        data[10] = (byte)0x87;
+        data[11] = (byte)0x65;
+        data[12] = (byte)0x43;
+        data[13] = (byte)0x21;
+        byte[] expected_data = data.clone();
+        expected_data[14] = (byte)0xFF;
+        expected_data[15] = (byte)0xAA;
+        expected_data[16] = (byte)0x77;
+        expected_data[17] = (byte)0x33;
+        assertDataMemoryContents(PASS, gen.generate(), packet, data, expected_data);
+    }
+
+    @Test
+    public void testApfDataBoundChecking() throws IllegalInstructionException, Exception {
+        byte[] packet = new byte[MIN_PKT_SIZE];
+        byte[] data = new byte[32];
+        byte[] expected_data = data;
+
+        // Program that DROPs unconditionally. This is our the baseline.
+        ApfGenerator gen = new ApfGenerator(3);
+        gen.addLoadImmediate(Register.R0, 3);
+        gen.addLoadData(Register.R1, 7);
+        gen.addJump(gen.DROP_LABEL);
+        assertDataMemoryContents(DROP, gen.generate(), packet, data, expected_data);
+
+        // Same program as before, but this time we're trying to load past the end of the data.
+        gen = new ApfGenerator(3);
+        gen.addLoadImmediate(Register.R0, 20);
+        gen.addLoadData(Register.R1, 15);  // 20 + 15 > 32
+        gen.addJump(gen.DROP_LABEL);  // Not reached.
+        assertDataMemoryContents(PASS, gen.generate(), packet, data, expected_data);
+
+        // Subtracting an immediate should work...
+        gen = new ApfGenerator(3);
+        gen.addLoadImmediate(Register.R0, 20);
+        gen.addLoadData(Register.R1, -4);
+        gen.addJump(gen.DROP_LABEL);
+        assertDataMemoryContents(DROP, gen.generate(), packet, data, expected_data);
+
+        // ...but underflowing isn't allowed.
+        gen = new ApfGenerator(3);
+        gen.addLoadImmediate(Register.R0, 20);
+        gen.addLoadData(Register.R1, -30);
+        gen.addJump(gen.DROP_LABEL);  // Not reached.
+        assertDataMemoryContents(PASS, gen.generate(), packet, data, expected_data);
     }
 
     /**
@@ -1422,10 +1560,11 @@ public class ApfTest {
     }
 
     /**
-     * Call the APF interpreter the run {@code program} on {@code packet} pretending the
-     * filter was installed {@code filter_age} seconds ago.
+     * Call the APF interpreter to run {@code program} on {@code packet} with persistent memory
+     * segment {@data} pretending the filter was installed {@code filter_age} seconds ago.
      */
-    private native static int apfSimulate(byte[] program, byte[] packet, int filter_age);
+    private native static int apfSimulate(byte[] program, byte[] packet, byte[] data,
+        int filter_age);
 
     /**
      * Compile a tcpdump human-readable filter (e.g. "icmp" or "tcp port 54") into a BPF

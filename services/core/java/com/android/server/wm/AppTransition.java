@@ -20,6 +20,7 @@ import static android.view.WindowManager.LayoutParams;
 import static android.view.WindowManager.TRANSIT_ACTIVITY_CLOSE;
 import static android.view.WindowManager.TRANSIT_ACTIVITY_OPEN;
 import static android.view.WindowManager.TRANSIT_ACTIVITY_RELAUNCH;
+import static android.view.WindowManager.TRANSIT_CRASHING_ACTIVITY_CLOSE;
 import static android.view.WindowManager.TRANSIT_DOCK_TASK_FROM_RECENTS;
 import static android.view.WindowManager.TRANSIT_FLAG_KEYGUARD_GOING_AWAY_NO_ANIMATION;
 import static android.view.WindowManager.TRANSIT_FLAG_KEYGUARD_GOING_AWAY_TO_SHADE;
@@ -81,6 +82,7 @@ import android.app.ActivityManager;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.res.Configuration;
+import android.content.res.ResourceId;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
@@ -554,16 +556,16 @@ public class AppTransition implements Dump {
     }
 
     Animation loadAnimationAttr(LayoutParams lp, int animAttr) {
-        int anim = 0;
+        int anim = ResourceId.ID_NULL;
         Context context = mContext;
-        if (animAttr >= 0) {
+        if (ResourceId.isValid(animAttr)) {
             AttributeCache.Entry ent = getCachedAnimations(lp);
             if (ent != null) {
                 context = ent.context;
                 anim = ent.array.getResourceId(animAttr, 0);
             }
         }
-        if (anim != 0) {
+        if (ResourceId.isValid(anim)) {
             return AnimationUtils.loadAnimation(context, anim);
         }
         return null;
@@ -571,7 +573,7 @@ public class AppTransition implements Dump {
 
     Animation loadAnimationRes(LayoutParams lp, int resId) {
         Context context = mContext;
-        if (resId >= 0) {
+        if (ResourceId.isValid(resId)) {
             AttributeCache.Entry ent = getCachedAnimations(lp);
             if (ent != null) {
                 context = ent.context;
@@ -582,16 +584,16 @@ public class AppTransition implements Dump {
     }
 
     private Animation loadAnimationRes(String packageName, int resId) {
-        int anim = 0;
+        int anim = ResourceId.ID_NULL;
         Context context = mContext;
-        if (resId >= 0) {
+        if (ResourceId.isValid(resId)) {
             AttributeCache.Entry ent = getCachedAnimations(packageName, resId);
             if (ent != null) {
                 context = ent.context;
                 anim = resId;
             }
         }
-        if (anim != 0) {
+        if (ResourceId.isValid(anim)) {
             return AnimationUtils.loadAnimation(context, anim);
         }
         return null;
@@ -1569,6 +1571,8 @@ public class AppTransition implements Dump {
             a = null;
         } else if (transit == TRANSIT_KEYGUARD_UNOCCLUDE && !enter) {
             a = loadAnimationRes(lp, com.android.internal.R.anim.wallpaper_open_exit);
+        } else if (transit == TRANSIT_CRASHING_ACTIVITY_CLOSE) {
+            a = null;
         } else if (isVoiceInteraction && (transit == TRANSIT_ACTIVITY_OPEN
                 || transit == TRANSIT_TASK_OPEN
                 || transit == TRANSIT_TASK_TO_FRONT)) {
@@ -2157,8 +2161,10 @@ public class AppTransition implements Dump {
             setAppTransition(transit, flags);
         }
         // We never want to change from a Keyguard transit to a non-Keyguard transit, as our logic
-        // relies on the fact that we always execute a Keyguard transition after preparing one.
-        else if (!alwaysKeepCurrent && !isKeyguardTransit(transit)) {
+        // relies on the fact that we always execute a Keyguard transition after preparing one. We
+        // also don't want to change away from a crashing transition.
+        else if (!alwaysKeepCurrent && !isKeyguardTransit(transit)
+                && transit != TRANSIT_CRASHING_ACTIVITY_CLOSE) {
             if (transit == TRANSIT_TASK_OPEN && isTransitionEqual(TRANSIT_TASK_CLOSE)) {
                 // Opening a new task always supersedes a close for the anim.
                 setAppTransition(transit, flags);

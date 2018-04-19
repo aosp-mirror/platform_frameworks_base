@@ -58,6 +58,8 @@ import android.content.pm.IPackageManager;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
+import android.content.pm.PackageManagerInternal;
+import android.content.pm.PackageParser;
 import android.content.pm.RegisteredServicesCache;
 import android.content.pm.RegisteredServicesCacheListener;
 import android.content.pm.ResolveInfo;
@@ -4737,9 +4739,11 @@ public class AccountManagerService
                 }
                 ActivityInfo targetActivityInfo = resolveInfo.activityInfo;
                 int targetUid = targetActivityInfo.applicationInfo.uid;
+                PackageManagerInternal pmi = LocalServices.getService(PackageManagerInternal.class);
                 if (!isExportedSystemActivity(targetActivityInfo)
-                        && (PackageManager.SIGNATURE_MATCH != pm.checkSignatures(authUid,
-                                targetUid))) {
+                        && !pmi.hasSignatureCapability(
+                                targetUid, authUid,
+                                PackageParser.SigningDetails.CertCapabilities.AUTH)) {
                     String pkgName = targetActivityInfo.packageName;
                     String activityName = targetActivityInfo.name;
                     String tmpl = "KEY_INTENT resolved to an Activity (%s) in a package (%s) that "
@@ -5476,15 +5480,17 @@ public class AccountManagerService
         } finally {
             Binder.restoreCallingIdentity(identityToken);
         }
-        // Check for signature match with Authenticator.
+        // Check for signature match with Authenticator.LocalServices.getService(PackageManagerInternal.class);
+        PackageManagerInternal pmi = LocalServices.getService(PackageManagerInternal.class);
         for (RegisteredServicesCache.ServiceInfo<AuthenticatorDescription> serviceInfo
                 : serviceInfos) {
             if (accountType.equals(serviceInfo.type.type)) {
                 if (serviceInfo.uid == callingUid) {
                     return SIGNATURE_CHECK_UID_MATCH;
                 }
-                final int sigChk = mPackageManager.checkSignatures(serviceInfo.uid, callingUid);
-                if (sigChk == PackageManager.SIGNATURE_MATCH) {
+                if (pmi.hasSignatureCapability(
+                        serviceInfo.uid, callingUid,
+                        PackageParser.SigningDetails.CertCapabilities.AUTH)) {
                     return SIGNATURE_CHECK_MATCH;
                 }
             }
@@ -5520,10 +5526,13 @@ public class AccountManagerService
         } finally {
             Binder.restoreCallingIdentity(identityToken);
         }
+
+        PackageManagerInternal pmi = LocalServices.getService(PackageManagerInternal.class);
         for (RegisteredServicesCache.ServiceInfo<AuthenticatorDescription> serviceInfo :
                 serviceInfos) {
-            if (isOtherwisePermitted || (mPackageManager.checkSignatures(serviceInfo.uid,
-                    callingUid) == PackageManager.SIGNATURE_MATCH)) {
+            if (isOtherwisePermitted || pmi.hasSignatureCapability(
+                    serviceInfo.uid, callingUid,
+                    PackageParser.SigningDetails.CertCapabilities.AUTH)) {
                 managedAccountTypes.add(serviceInfo.type.type);
             }
         }

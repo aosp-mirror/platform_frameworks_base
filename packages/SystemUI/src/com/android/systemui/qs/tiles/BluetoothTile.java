@@ -28,6 +28,7 @@ import android.content.Intent;
 import android.graphics.drawable.Drawable;
 import android.provider.Settings;
 import android.service.quicksettings.Tile;
+import android.text.TextUtils;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Switch;
@@ -131,32 +132,32 @@ public class BluetoothTile extends QSTileImpl<BooleanState> {
         }
         state.slash.isSlashed = !enabled;
         state.label = mContext.getString(R.string.quick_settings_bluetooth_label);
+        state.secondaryLabel = TextUtils.emptyIfNull(
+                getSecondaryLabel(enabled, connected, state.isTransient));
         if (enabled) {
             if (connected) {
                 state.icon = new BluetoothConnectedTileIcon();
-                state.contentDescription = mContext.getString(
-                        R.string.accessibility_bluetooth_name, state.label);
-
                 state.label = mController.getLastDeviceName();
+                state.contentDescription =
+                        mContext.getString(R.string.accessibility_bluetooth_name, state.label)
+                                + ", " + state.secondaryLabel;
             } else if (state.isTransient) {
                 state.icon = ResourceIcon.get(R.drawable.ic_bluetooth_transient_animation);
-                state.contentDescription = mContext.getString(
-                        R.string.accessibility_quick_settings_bluetooth_connecting);
+                state.contentDescription = state.secondaryLabel;
             } else {
                 state.icon = ResourceIcon.get(R.drawable.ic_qs_bluetooth_on);
                 state.contentDescription = mContext.getString(
-                        R.string.accessibility_quick_settings_bluetooth_on) + ","
+                        R.string.accessibility_quick_settings_bluetooth) + ","
                         + mContext.getString(R.string.accessibility_not_connected);
             }
             state.state = Tile.STATE_ACTIVE;
         } else {
             state.icon = ResourceIcon.get(R.drawable.ic_qs_bluetooth_on);
             state.contentDescription = mContext.getString(
-                    R.string.accessibility_quick_settings_bluetooth_off);
+                    R.string.accessibility_quick_settings_bluetooth);
             state.state = Tile.STATE_INACTIVE;
         }
 
-        state.secondaryLabel = getSecondaryLabel(enabled, connected, state.isTransient);
         state.dualLabelContentDescription = mContext.getResources().getString(
                 R.string.accessibility_quick_settings_open_settings, getTileLabel());
         state.expandedAccessibilityClassName = Switch.class.getName();

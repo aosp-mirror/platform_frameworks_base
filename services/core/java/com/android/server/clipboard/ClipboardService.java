@@ -25,6 +25,7 @@ import android.app.KeyguardManager;
 import android.content.ClipData;
 import android.content.ClipDescription;
 import android.content.ContentProvider;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.IClipboard;
 import android.content.IOnPrimaryClipChangedListener;
@@ -490,17 +491,18 @@ public class ClipboardService extends SystemService {
         }
     }
 
-    private final void checkUriOwnerLocked(Uri uri, int uid) {
-        if (!"content".equals(uri.getScheme())) {
-            return;
-        }
-        long ident = Binder.clearCallingIdentity();
+    private final void checkUriOwnerLocked(Uri uri, int sourceUid) {
+        if (uri == null || !ContentResolver.SCHEME_CONTENT.equals(uri.getScheme())) return;
+
+        final long ident = Binder.clearCallingIdentity();
         try {
-            // This will throw SecurityException for us.
-            mAm.checkGrantUriPermission(uid, null, ContentProvider.getUriWithoutUserId(uri),
+            // This will throw SecurityException if caller can't grant
+            mAm.checkGrantUriPermission(sourceUid, null,
+                    ContentProvider.getUriWithoutUserId(uri),
                     Intent.FLAG_GRANT_READ_URI_PERMISSION,
-                    ContentProvider.getUserIdFromUri(uri, UserHandle.getUserId(uid)));
-        } catch (RemoteException e) {
+                    ContentProvider.getUserIdFromUri(uri, UserHandle.getUserId(sourceUid)));
+        } catch (RemoteException ignored) {
+            // Ignored because we're in same process
         } finally {
             Binder.restoreCallingIdentity(ident);
         }
@@ -523,27 +525,32 @@ public class ClipboardService extends SystemService {
         }
     }
 
-    private final void grantUriLocked(Uri uri, int primaryClipUid, String pkg, int userId) {
-        long ident = Binder.clearCallingIdentity();
+    private final void grantUriLocked(Uri uri, int sourceUid, String targetPkg,
+            int targetUserId) {
+        if (uri == null || !ContentResolver.SCHEME_CONTENT.equals(uri.getScheme())) return;
+
+        final long ident = Binder.clearCallingIdentity();
         try {
-            int sourceUserId = ContentProvider.getUserIdFromUri(uri, userId);
-            uri = ContentProvider.getUriWithoutUserId(uri);
-            mAm.grantUriPermissionFromOwner(mPermissionOwner, primaryClipUid, pkg,
-                    uri, Intent.FLAG_GRANT_READ_URI_PERMISSION, sourceUserId, userId);
-        } catch (RemoteException e) {
+            mAm.grantUriPermissionFromOwner(mPermissionOwner, sourceUid, targetPkg,
+                    ContentProvider.getUriWithoutUserId(uri),
+                    Intent.FLAG_GRANT_READ_URI_PERMISSION,
+                    ContentProvider.getUserIdFromUri(uri, UserHandle.getUserId(sourceUid)),
+                    targetUserId);
+        } catch (RemoteException ignored) {
+            // Ignored because we're in same process
         } finally {
             Binder.restoreCallingIdentity(ident);
         }
     }
 
-    private final void grantItemLocked(ClipData.Item item, int primaryClipUid, String pkg,
-            int userId) {
+    private final void grantItemLocked(ClipData.Item item, int sourceUid, String targetPkg,
+            int targetUserId) {
         if (item.getUri() != null) {
-            grantUriLocked(item.getUri(), primaryClipUid, pkg, userId);
+            grantUriLocked(item.getUri(), sourceUid, targetPkg, targetUserId);
         }
         Intent intent = item.getIntent();
         if (intent != null && intent.getData() != null) {
-            grantUriLocked(intent.getData(), primaryClipUid, pkg, userId);
+            grantUriLocked(intent.getData(), sourceUid, targetPkg, targetUserId);
         }
     }
 
@@ -576,28 +583,29 @@ public class ClipboardService extends SystemService {
         }
     }
 
-    private final void revokeUriLocked(Uri uri) {
-        int userId = ContentProvider.getUserIdFromUri(uri,
-                UserHandle.getUserId(Binder.getCallingUid()));
-        long ident = Binder.clearCallingIdentity();
+    private final void revokeUriLocked(Uri uri, int sourceUid) {
+        if (uri == null || !ContentResolver.SCHEME_CONTENT.equals(uri.getScheme())) return;
+
+        final long ident = Binder.clearCallingIdentity();
         try {
-            uri = ContentProvider.getUriWithoutUserId(uri);
-            mAm.revokeUriPermissionFromOwner(mPermissionOwner, uri,
-                    Intent.FLAG_GRANT_READ_URI_PERMISSION | Intent.FLAG_GRANT_WRITE_URI_PERMISSION,
-                    userId);
-        } catch (RemoteException e) {
+            mAm.revokeUriPermissionFromOwner(mPermissionOwner,
+                    ContentProvider.getUriWithoutUserId(uri),
+                    Intent.FLAG_GRANT_READ_URI_PERMISSION,
+                    ContentProvider.getUserIdFromUri(uri, UserHandle.getUserId(sourceUid)));
+        } catch (RemoteException ignored) {
+            // Ignored because we're in same process
         } finally {
             Binder.restoreCallingIdentity(ident);
         }
     }
 
-    private final void revokeItemLocked(ClipData.Item item) {
+    private final void revokeItemLocked(ClipData.Item item, int sourceUid) {
         if (item.getUri() != null) {
-            revokeUriLocked(item.getUri());
+            revokeUriLocked(item.getUri(), sourceUid);
         }
         Intent intent = item.getIntent();
         if (intent != null && intent.getData() != null) {
-            revokeUriLocked(intent.getData());
+            revokeUriLocked(intent.getData(), sourceUid);
         }
     }
 
@@ -607,7 +615,7 @@ public class ClipboardService extends SystemService {
         }
         final int N = clipboard.primaryClip.getItemCount();
         for (int i=0; i<N; i++) {
-            revokeItemLocked(clipboard.primaryClip.getItemAt(i));
+            revokeItemLocked(clipboard.primaryClip.getItemAt(i), clipboard.primaryClipUid);
         }
     }
 

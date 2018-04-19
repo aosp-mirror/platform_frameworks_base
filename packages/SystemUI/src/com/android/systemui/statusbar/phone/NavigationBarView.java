@@ -67,6 +67,7 @@ import com.android.systemui.plugins.statusbar.phone.NavGesture.GestureHelper;
 import com.android.systemui.recents.RecentsOnboarding;
 import com.android.systemui.shared.system.ActivityManagerWrapper;
 import com.android.systemui.shared.system.NavigationBarCompat;
+import com.android.systemui.shared.system.WindowManagerWrapper;
 import com.android.systemui.stackdivider.Divider;
 import com.android.systemui.statusbar.policy.DeadZone;
 import com.android.systemui.statusbar.policy.KeyButtonDrawable;
@@ -284,12 +285,6 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
     public void setOnVerticalChangedListener(OnVerticalChangedListener onVerticalChangedListener) {
         mOnVerticalChangedListener = onVerticalChangedListener;
         notifyVerticalChangedListener(mVertical);
-    }
-
-    public void onQuickStepStarted() {
-        if (mRecentsOnboarding != null) {
-            mRecentsOnboarding.onQuickStepStarted();
-        }
     }
 
     @Override
@@ -682,6 +677,8 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
         reloadNavIcons();
         updateNavButtonIcons();
         setUpSwipeUpOnboarding(isQuickStepSwipeUpEnabled());
+        WindowManagerWrapper.getInstance().setNavBarVirtualKeyHapticFeedbackEnabled(
+                !mOverviewProxyService.shouldShowSwipeUpUI());
     }
 
     private void updateSlippery() {

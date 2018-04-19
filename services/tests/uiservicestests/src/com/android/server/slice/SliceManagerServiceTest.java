@@ -71,7 +71,6 @@ public class SliceManagerServiceTest extends UiServiceTestCase {
 
     @Before
     public void setup() {
-        LocalServices.addService(PackageManagerInternal.class, mock(PackageManagerInternal.class));
         LocalServices.addService(UsageStatsManagerInternal.class,
                 mock(UsageStatsManagerInternal.class));
         mContext.addMockSystemService(AppOpsManager.class, mock(AppOpsManager.class));
@@ -85,7 +84,6 @@ public class SliceManagerServiceTest extends UiServiceTestCase {
 
     @After
     public void teardown() {
-        LocalServices.removeServiceForTest(PackageManagerInternal.class);
         LocalServices.removeServiceForTest(UsageStatsManagerInternal.class);
     }
 

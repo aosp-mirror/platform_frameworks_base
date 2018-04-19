@@ -15,23 +15,35 @@
  */
 package com.android.server.notification;
 
+import static android.app.Notification.EXTRA_AUDIO_CONTENTS_URI;
+import static android.app.Notification.EXTRA_BACKGROUND_IMAGE_URI;
+import static android.app.Notification.EXTRA_HISTORIC_MESSAGES;
+import static android.app.Notification.EXTRA_MESSAGES;
 import static android.app.NotificationChannel.USER_LOCKED_IMPORTANCE;
-import static android.app.NotificationManager.IMPORTANCE_MIN;
-import static android.app.NotificationManager.IMPORTANCE_UNSPECIFIED;
 import static android.app.NotificationManager.IMPORTANCE_DEFAULT;
 import static android.app.NotificationManager.IMPORTANCE_HIGH;
 import static android.app.NotificationManager.IMPORTANCE_LOW;
+import static android.app.NotificationManager.IMPORTANCE_MIN;
+import static android.app.NotificationManager.IMPORTANCE_UNSPECIFIED;
 import static android.service.notification.NotificationListenerService.Ranking
         .USER_SENTIMENT_NEUTRAL;
 import static android.service.notification.NotificationListenerService.Ranking
         .USER_SENTIMENT_POSITIVE;
 
+import android.annotation.Nullable;
+import android.app.ActivityManager;
+import android.app.ActivityManagerInternal;
+import android.app.IActivityManager;
 import android.app.Notification;
+import android.app.Notification.MessagingStyle;
 import android.app.NotificationChannel;
+import android.content.ContentProvider;
+import android.content.ContentResolver;
 import android.content.Context;
-import android.content.pm.ApplicationInfo;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
+import android.content.pm.PackageManagerInternal;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.drawable.Icon;
@@ -39,9 +51,12 @@ import android.media.AudioAttributes;
 import android.media.AudioSystem;
 import android.metrics.LogMaker;
 import android.net.Uri;
+import android.os.Binder;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.IBinder;
 import android.os.Parcelable;
+import android.os.RemoteException;
 import android.os.UserHandle;
 import android.provider.Settings;
 import android.service.notification.Adjustment;
@@ -53,7 +68,6 @@ import android.service.notification.StatusBarNotification;
 import android.text.TextUtils;
 import android.util.ArraySet;
 import android.util.Log;
-import android.util.Slog;
 import android.util.TimeUtils;
 import android.util.proto.ProtoOutputStream;
 import android.widget.RemoteViews;
@@ -61,7 +75,9 @@ import android.widget.RemoteViews;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
+import com.android.internal.util.ArrayUtils;
 import com.android.server.EventLogTags;
+import com.android.server.LocalServices;
 
 import java.io.PrintWriter;
 import java.lang.reflect.Array;
@@ -69,7 +85,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
-import java.util.Set;
 
 /**
  * Holds data about notifications that should not be shared with the
@@ -88,11 +103,13 @@ public final class NotificationRecord {
     static final boolean DBG = Log.isLoggable(TAG, Log.DEBUG);
     private static final int MAX_LOGTAG_LENGTH = 35;
     final StatusBarNotification sbn;
+    final int mTargetSdkVersion;
     final int mOriginalFlags;
     private final Context mContext;
 
     NotificationUsageStats.SingleNotificationStats stats;
     boolean isCanceled;
+    IBinder permissionOwner;
 
     // These members are used by NotificationSignalExtractors
     // to communicate with the ranking module.
@@ -156,10 +173,13 @@ public final class NotificationRecord {
      * conjunction with user sentiment calculation.
      */
     private boolean mIsAppImportanceLocked;
+    private ArraySet<Uri> mGrantableUris;
 
     public NotificationRecord(Context context, StatusBarNotification sbn,
             NotificationChannel channel) {
         this.sbn = sbn;
+        mTargetSdkVersion = LocalServices.getService(PackageManagerInternal.class)
+                .getPackageTargetSdkVersion(sbn.getPackageName());
         mOriginalFlags = sbn.getNotification().flags;
         mRankingTimeMs = calculateRankingTimeMs(0L);
         mCreationTimeMs = sbn.getPostTime();
@@ -176,20 +196,14 @@ public final class NotificationRecord {
         mAdjustments = new ArrayList<>();
         mStats = new NotificationStats();
         calculateUserSentiment();
+        calculateGrantableUris();
     }
 
     private boolean isPreChannelsNotification() {
-        try {
-            if (NotificationChannel.DEFAULT_CHANNEL_ID.equals(getChannel().getId())) {
-                  final ApplicationInfo applicationInfo =
-                        mContext.getPackageManager().getApplicationInfoAsUser(sbn.getPackageName(),
-                                0, UserHandle.getUserId(sbn.getUid()));
-                if (applicationInfo.targetSdkVersion < Build.VERSION_CODES.O) {
-                    return true;
-                }
+        if (NotificationChannel.DEFAULT_CHANNEL_ID.equals(getChannel().getId())) {
+            if (mTargetSdkVersion < Build.VERSION_CODES.O) {
+                return true;
             }
-        } catch (NameNotFoundException e) {
-            Slog.e(TAG, "Can't find package", e);
         }
         return false;
     }
@@ -377,6 +391,7 @@ public final class NotificationRecord {
     public String getKey() { return sbn.getKey(); }
     /** @deprecated Use {@link #getUser()} instead. */
     public int getUserId() { return sbn.getUserId(); }
+    public int getUid() { return sbn.getUid(); }
 
     void dump(ProtoOutputStream proto, long fieldId, boolean redact, int state) {
         final long token = proto.start(fieldId);
@@ -778,14 +793,15 @@ public final class NotificationRecord {
     /**
      * Set the visibility of the notification.
      */
-    public void setVisibility(boolean visible, int rank) {
+    public void setVisibility(boolean visible, int rank, int count) {
         final long now = System.currentTimeMillis();
         mVisibleSinceMs = visible ? now : mVisibleSinceMs;
         stats.onVisibilityChanged(visible);
         MetricsLogger.action(getLogMaker(now)
                 .setCategory(MetricsEvent.NOTIFICATION_ITEM)
                 .setType(visible ? MetricsEvent.TYPE_OPEN : MetricsEvent.TYPE_CLOSE)
-                .addTaggedData(MetricsEvent.NOTIFICATION_SHADE_INDEX, rank));
+                .addTaggedData(MetricsEvent.NOTIFICATION_SHADE_INDEX, rank)
+                .addTaggedData(MetricsEvent.NOTIFICATION_SHADE_COUNT, count));
         if (visible) {
             setSeen();
             MetricsLogger.histogram(mContext, "note_freshness", getFreshnessMs(now));
@@ -998,40 +1014,94 @@ public final class NotificationRecord {
         mHasSeenSmartReplies = hasSeenSmartReplies;
     }
 
-    public Set<Uri> getNotificationUris() {
-        Notification notification = getNotification();
-        Set<Uri> uris = new ArraySet<>();
+    /**
+     * @return all {@link Uri} that should have permission granted to whoever
+     *         will be rendering it. This list has already been vetted to only
+     *         include {@link Uri} that the enqueuing app can grant.
+     */
+    public @Nullable ArraySet<Uri> getGrantableUris() {
+        return mGrantableUris;
+    }
 
-        if (notification.sound != null) {
-            uris.add(notification.sound);
-        }
+    /**
+     * Collect all {@link Uri} that should have permission granted to whoever
+     * will be rendering it.
+     */
+    private void calculateGrantableUris() {
+        final Notification notification = getNotification();
+
+        noteGrantableUri(notification.sound);
         if (notification.getChannelId() != null) {
             NotificationChannel channel = getChannel();
-            if (channel != null && channel.getSound() != null) {
-                uris.add(channel.getSound());
-            }
-        }
-        if (notification.extras.containsKey(Notification.EXTRA_AUDIO_CONTENTS_URI)) {
-            uris.add(notification.extras.getParcelable(Notification.EXTRA_AUDIO_CONTENTS_URI));
-        }
-        if (notification.extras.containsKey(Notification.EXTRA_BACKGROUND_IMAGE_URI)) {
-            uris.add(notification.extras.getParcelable(Notification.EXTRA_BACKGROUND_IMAGE_URI));
-        }
-        if (Notification.MessagingStyle.class.equals(notification.getNotificationStyle())) {
-            Parcelable[] newMessages =
-                    notification.extras.getParcelableArray(Notification.EXTRA_MESSAGES);
-            List<Notification.MessagingStyle.Message> messages
-                    = Notification.MessagingStyle.Message.getMessagesFromBundleArray(newMessages);
-            Parcelable[] histMessages =
-                    notification.extras.getParcelableArray(Notification.EXTRA_HISTORIC_MESSAGES);
-            messages.addAll(
-                    Notification.MessagingStyle.Message.getMessagesFromBundleArray(histMessages));
-            for (Notification.MessagingStyle.Message message : messages) {
-                uris.add(message.getDataUri());
+            if (channel != null) {
+                noteGrantableUri(channel.getSound());
             }
         }
 
-        return uris;
+        final Bundle extras = notification.extras;
+        if (extras != null) {
+            noteGrantableUri(extras.getParcelable(EXTRA_AUDIO_CONTENTS_URI));
+            noteGrantableUri(extras.getParcelable(EXTRA_BACKGROUND_IMAGE_URI));
+        }
+
+        if (MessagingStyle.class.equals(notification.getNotificationStyle()) && extras != null) {
+            final Parcelable[] messages = extras.getParcelableArray(EXTRA_MESSAGES);
+            if (!ArrayUtils.isEmpty(messages)) {
+                for (MessagingStyle.Message message : MessagingStyle.Message
+                        .getMessagesFromBundleArray(messages)) {
+                    noteGrantableUri(message.getDataUri());
+                }
+            }
+
+            final Parcelable[] historic = extras.getParcelableArray(EXTRA_HISTORIC_MESSAGES);
+            if (!ArrayUtils.isEmpty(historic)) {
+                for (MessagingStyle.Message message : MessagingStyle.Message
+                        .getMessagesFromBundleArray(historic)) {
+                    noteGrantableUri(message.getDataUri());
+                }
+            }
+        }
+    }
+
+    /**
+     * Note the presence of a {@link Uri} that should have permission granted to
+     * whoever will be rendering it.
+     * <p>
+     * If the enqueuing app has the ability to grant access, it will be added to
+     * {@link #mGrantableUris}. Otherwise, this will either log or throw
+     * {@link SecurityException} depending on target SDK of enqueuing app.
+     */
+    private void noteGrantableUri(Uri uri) {
+        if (uri == null || !ContentResolver.SCHEME_CONTENT.equals(uri.getScheme())) return;
+
+        // We can't grant Uri permissions from system
+        final int sourceUid = sbn.getUid();
+        if (sourceUid == android.os.Process.SYSTEM_UID) return;
+
+        final IActivityManager am = ActivityManager.getService();
+        final long ident = Binder.clearCallingIdentity();
+        try {
+            // This will throw SecurityException if caller can't grant
+            am.checkGrantUriPermission(sourceUid, null,
+                    ContentProvider.getUriWithoutUserId(uri),
+                    Intent.FLAG_GRANT_READ_URI_PERMISSION,
+                    ContentProvider.getUserIdFromUri(uri, UserHandle.getUserId(sourceUid)));
+
+            if (mGrantableUris == null) {
+                mGrantableUris = new ArraySet<>();
+            }
+            mGrantableUris.add(uri);
+        } catch (RemoteException ignored) {
+            // Ignored because we're in same process
+        } catch (SecurityException e) {
+            if (mTargetSdkVersion >= Build.VERSION_CODES.P) {
+                throw e;
+            } else {
+                Log.w(TAG, "Ignoring " + uri + " from " + sourceUid + ": " + e.getMessage());
+            }
+        } finally {
+            Binder.restoreCallingIdentity(ident);
+        }
     }
 
     public LogMaker getLogMaker(long now) {

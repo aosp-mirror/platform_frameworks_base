@@ -411,7 +411,7 @@ public class VolumeDialogImpl implements VolumeDialog {
 
     public void initSettingsH() {
         mSettingsView.setVisibility(
-                mDeviceProvisionedController.isDeviceProvisioned() ? VISIBLE : GONE);
+                mDeviceProvisionedController.isCurrentUserSetup() ? VISIBLE : GONE);
         mSettingsIcon.setOnClickListener(v -> {
             Events.writeEvent(mContext, Events.EVENT_SETTINGS_CLICK);
             Intent intent = new Intent(Settings.ACTION_SOUND_SETTINGS);
@@ -764,6 +764,11 @@ public class VolumeDialogImpl implements VolumeDialog {
         final int max = ss.levelMax * 100;
         if (max != row.slider.getMax()) {
             row.slider.setMax(max);
+        }
+        // update A11y slider min
+        final int min = ss.levelMin * 100;
+        if (isA11yStream && min != row.slider.getMin()) {
+            row.slider.setMin(min);
         }
 
         // update header text

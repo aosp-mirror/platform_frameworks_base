@@ -20,6 +20,7 @@ import static android.app.ActivityManagerInternal.APP_TRANSITION_SNAPSHOT;
 import static android.app.ActivityManagerInternal.APP_TRANSITION_SPLASH_SCREEN;
 import static android.app.ActivityManagerInternal.APP_TRANSITION_WINDOWS_DRAWN;
 
+import static android.view.WindowManager.TRANSIT_CRASHING_ACTIVITY_CLOSE;
 import static android.view.WindowManager.TRANSIT_DOCK_TASK_FROM_RECENTS;
 import static android.view.WindowManager.TRANSIT_TRANSLUCENT_ACTIVITY_CLOSE;
 import static android.view.WindowManager.TRANSIT_TRANSLUCENT_ACTIVITY_OPEN;
@@ -368,6 +369,10 @@ class WindowSurfacePlacer {
      */
     private void overrideWithRemoteAnimationIfSet(AppWindowToken animLpToken, int transit,
             ArraySet<Integer> activityTypes) {
+        if (transit == TRANSIT_CRASHING_ACTIVITY_CLOSE) {
+            // The crash transition has higher priority than any involved remote animations.
+            return;
+        }
         if (animLpToken == null) {
             return;
         }
@@ -625,13 +630,12 @@ class WindowSurfacePlacer {
 
     private int maybeUpdateTransitToWallpaper(int transit, boolean openingAppHasWallpaper,
             boolean closingAppHasWallpaper) {
-        // Given no app transition pass it through instead of a wallpaper transition
-        if (transit == TRANSIT_NONE) {
-            return TRANSIT_NONE;
-        }
+        // Given no app transition pass it through instead of a wallpaper transition.
+        // Never convert the crashing transition.
         // Never update the transition for the wallpaper if we are just docking from recents
-        if (transit == TRANSIT_DOCK_TASK_FROM_RECENTS) {
-            return TRANSIT_DOCK_TASK_FROM_RECENTS;
+        if (transit == TRANSIT_NONE || transit == TRANSIT_CRASHING_ACTIVITY_CLOSE
+                || transit == TRANSIT_DOCK_TASK_FROM_RECENTS) {
+            return transit;
         }
 
         // if wallpaper is animating in or out set oldWallpaper to null else to wallpaper
