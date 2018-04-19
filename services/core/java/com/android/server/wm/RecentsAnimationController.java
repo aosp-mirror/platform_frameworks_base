@@ -369,7 +369,7 @@ public class RecentsAnimationController implements DeathRecipient {
     }
 
     void cancelAnimation(@ReorderMode int reorderMode, String reason) {
-        if (DEBUG_RECENTS_ANIMATIONS) Slog.d(TAG, "cancelAnimation()");
+        if (DEBUG_RECENTS_ANIMATIONS) Slog.d(TAG, "cancelAnimation(): reason=" + reason);
         synchronized (mService.getWindowManagerLock()) {
             if (mCanceled) {
                 // We've already canceled the animation

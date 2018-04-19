@@ -26629,6 +26629,11 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
 
         @Override
+        public void cancelRecentsAnimation(boolean restoreHomeStackPosition) {
+            ActivityManagerService.this.cancelRecentsAnimation(restoreHomeStackPosition);
+        }
+
+        @Override
         public boolean isUidActive(int uid) {
             synchronized (ActivityManagerService.this) {
                 final UidRecord uidRec = mActiveUids.get(uid);
