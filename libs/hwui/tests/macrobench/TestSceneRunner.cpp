@@ -153,12 +153,6 @@ void run(const TestScene::Info& info, const TestScene::Options& opts,
     proxy->resetProfileInfo();
     proxy->fence();
 
-    if (opts.renderAhead) {
-        // Need to let the queue drain to see render-ahead in action.
-        usleep(33000);
-    }
-    proxy->setRenderAheadDepth(opts.renderAhead);
-
     ModifiedMovingAverage<double> avgMs(opts.reportFrametimeWeight);
 
     nsecs_t start = systemTime(CLOCK_MONOTONIC);

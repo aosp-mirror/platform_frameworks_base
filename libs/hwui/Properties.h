@@ -151,12 +151,6 @@ enum DebugLevel {
  */
 #define PROPERTY_ENABLE_PARTIAL_UPDATES "debug.hwui.use_partial_updates"
 
-/**
- * Setting this to "false" will disable the use of the EGL_ANDROID_presentation_time extension
- * and prevents more precise control over swap behavior & timings.
- */
-#define PROPERTY_USE_PRESENT_TIME "debug.hwui.use_present_time"
-
 #define PROPERTY_FILTER_TEST_OVERHEAD "debug.hwui.filter_test_overhead"
 
 /**
@@ -226,7 +220,6 @@ public:
     static bool skipEmptyFrames;
     static bool useBufferAge;
     static bool enablePartialUpdates;
-    static bool usePresentTime;
 
     // TODO: Move somewhere else?
     static constexpr float textGamma = 1.45f;
