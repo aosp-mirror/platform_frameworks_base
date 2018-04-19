@@ -34,6 +34,7 @@ import android.util.Slog;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.util.IndentingPrintWriter;
 import com.android.server.pm.Installer.InstallerException;
+import com.android.server.pm.dex.DexManager;
 import com.android.server.pm.dex.DexoptOptions;
 import com.android.server.pm.dex.DexoptUtils;
 import com.android.server.pm.dex.PackageDexUsage;
@@ -495,10 +496,9 @@ public class PackageDexOptimizer {
             boolean isUsedByOtherApps) {
         int flags = info.flags;
         boolean vmSafeMode = (flags & ApplicationInfo.FLAG_VM_SAFE_MODE) != 0;
-        // When pm.dexopt.priv-apps-oob is true, we only verify privileged apps.
-        if (info.isPrivilegedApp() &&
-            SystemProperties.getBoolean("pm.dexopt.priv-apps-oob", false)) {
-          return "verify";
+        // When a priv app is configured to run out of box, only verify it.
+        if (info.isPrivilegedApp() && DexManager.isPackageSelectedToRunOob(info.packageName)) {
+            return "verify";
         }
         if (vmSafeMode) {
             return getSafeModeCompilerFilter(targetCompilerFilter);
