@@ -2398,6 +2398,11 @@ public class NotificationManagerService extends SystemService {
         }
 
         @Override
+        public boolean areChannelsBypassingDnd() {
+            return mRankingHelper.areChannelsBypassingDnd();
+        }
+
+        @Override
         public void clearData(String packageName, int uid, boolean fromApp) throws RemoteException {
             checkCallerIsSystem();
 
@@ -3279,7 +3284,6 @@ public class NotificationManagerService extends SystemService {
                 policy = new Policy(policy.priorityCategories,
                         policy.priorityCallSenders, policy.priorityMessageSenders,
                         newVisualEffects);
-
                 ZenLog.traceSetNotificationPolicy(pkg, applicationInfo.targetSdkVersion, policy);
                 mZenModeHelper.setNotificationPolicy(policy);
             } catch (RemoteException e) {
