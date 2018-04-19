@@ -1854,7 +1854,7 @@ static jboolean android_location_GnssMeasurementsProvider_stop_measurement_colle
     return boolToJbool(result.isOk());
 }
 
-static jboolean android_location_GnssLocationProvider_is_navigation_message_supported(
+static jboolean android_location_GnssNavigationMessageProvider_is_navigation_message_supported(
         JNIEnv* env,
         jclass clazz) {
     if (gnssNavigationMessageIface != nullptr) {
@@ -1863,7 +1863,7 @@ static jboolean android_location_GnssLocationProvider_is_navigation_message_supp
     return JNI_FALSE;
 }
 
-static jboolean android_location_GnssLocationProvider_start_navigation_message_collection(
+static jboolean android_location_GnssNavigationMessageProvider_start_navigation_message_collection(
         JNIEnv* env,
         jobject obj) {
     if (gnssNavigationMessageIface == nullptr) {
@@ -1884,7 +1884,7 @@ static jboolean android_location_GnssLocationProvider_start_navigation_message_c
     return JNI_TRUE;
 }
 
-static jboolean android_location_GnssLocationProvider_stop_navigation_message_collection(
+static jboolean android_location_GnssNavigationMessageProvider_stop_navigation_message_collection(
         JNIEnv* env,
         jobject obj) {
     if (gnssNavigationMessageIface == nullptr) {
@@ -2178,18 +2178,6 @@ static const JNINativeMethod sMethods[] = {
     {"native_update_network_state",
             "(ZIZZLjava/lang/String;Ljava/lang/String;)V",
             reinterpret_cast<void *>(android_location_GnssLocationProvider_update_network_state)},
-    {"native_is_navigation_message_supported",
-            "()Z",
-            reinterpret_cast<void *>(
-                    android_location_GnssLocationProvider_is_navigation_message_supported)},
-    {"native_start_navigation_message_collection",
-            "()Z",
-            reinterpret_cast<void *>(
-                    android_location_GnssLocationProvider_start_navigation_message_collection)},
-    {"native_stop_navigation_message_collection",
-            "()Z",
-            reinterpret_cast<void *>(
-                    android_location_GnssLocationProvider_stop_navigation_message_collection)},
     {"native_set_supl_es",
             "(I)Z",
             reinterpret_cast<void *>(android_location_GnssLocationProvider_set_supl_es)},
@@ -2273,6 +2261,22 @@ static const JNINativeMethod sMeasurementMethods[] = {
                     android_location_GnssMeasurementsProvider_stop_measurement_collection)},
 };
 
+static const JNINativeMethod sNavigationMessageMethods[] = {
+     /* name, signature, funcPtr */
+    {"native_is_navigation_message_supported",
+            "()Z",
+            reinterpret_cast<void *>(
+                    android_location_GnssNavigationMessageProvider_is_navigation_message_supported)},
+    {"native_start_navigation_message_collection",
+            "()Z",
+            reinterpret_cast<void *>(
+                    android_location_GnssNavigationMessageProvider_start_navigation_message_collection)},
+    {"native_stop_navigation_message_collection",
+            "()Z",
+            reinterpret_cast<void *>(
+                    android_location_GnssNavigationMessageProvider_stop_navigation_message_collection)},
+};
+
 int register_android_server_location_GnssLocationProvider(JNIEnv* env) {
     jniRegisterNativeMethods(
             env,
@@ -2289,6 +2293,11 @@ int register_android_server_location_GnssLocationProvider(JNIEnv* env) {
             "com/android/server/location/GnssMeasurementsProvider",
             sMeasurementMethods,
             NELEM(sMeasurementMethods));
+    jniRegisterNativeMethods(
+            env,
+            "com/android/server/location/GnssNavigationMessageProvider",
+            sNavigationMessageMethods,
+            NELEM(sNavigationMessageMethods));
     return jniRegisterNativeMethods(
             env,
             "com/android/server/location/GnssLocationProvider",
