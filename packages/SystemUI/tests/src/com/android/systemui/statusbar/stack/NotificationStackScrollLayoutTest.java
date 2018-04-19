@@ -141,6 +141,19 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
     }
 
     @Test
+    public void updateEmptyView_noNotificationsToDndSuppressing() {
+        mStackScroller.setEmptyShadeView(mEmptyShadeView);
+        when(mEmptyShadeView.willBeGone()).thenReturn(true);
+        when(mBar.areNotificationsHidden()).thenReturn(false);
+        mStackScroller.updateEmptyShadeView(true);
+        verify(mEmptyShadeView).setText(R.string.empty_shade_text);
+
+        when(mBar.areNotificationsHidden()).thenReturn(true);
+        mStackScroller.updateEmptyShadeView(true);
+        verify(mEmptyShadeView).setText(R.string.dnd_suppressing_shade_text);
+    }
+
+    @Test
     @UiThreadTest
     public void testSetExpandedHeight_blockingHelperManagerReceivedCallbacks() {
         mStackScroller.setExpandedHeight(0f);
