@@ -701,10 +701,14 @@ public final class BluetoothGattServer implements BluetoothProfile {
      * <p>If the local device has already exposed services when this function
      * is called, a service update notification will be sent to all clients.
      *
+     * <p>The {@link BluetoothGattServerCallback#onServiceAdded} callback will indicate
+     * whether this service has been added successfully. Do not add another service
+     * before this callback.
+     *
      * <p>Requires {@link android.Manifest.permission#BLUETOOTH} permission.
      *
      * @param service Service to be added to the list of services provided by this device.
-     * @return true, if the service has been added successfully
+     * @return true, if the request to add service has been initiated
      */
     public boolean addService(BluetoothGattService service) {
         if (DBG) Log.d(TAG, "addService() - service: " + service.getUuid());
