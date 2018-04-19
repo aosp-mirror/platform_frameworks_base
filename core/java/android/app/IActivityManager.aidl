@@ -575,6 +575,11 @@ interface IActivityManager {
     void resizeDockedStack(in Rect dockedBounds, in Rect tempDockedTaskBounds,
             in Rect tempDockedTaskInsetBounds,
             in Rect tempOtherTaskBounds, in Rect tempOtherTaskInsetBounds);
+    /**
+     * Sets whether we are currently in an interactive split screen resize operation where we
+     * are changing the docked stack size.
+     */
+    void setSplitScreenResizing(boolean resizing);
     int setVrMode(in IBinder token, boolean enabled, in ComponentName packageName);
     // Gets the URI permissions granted to an arbitrary package (or all packages if null)
     // NOTE: this is different from getPersistedUriPermissions(), which returns the URIs the package

@@ -17,6 +17,7 @@
 package android.graphics;
 
 import android.annotation.CheckResult;
+import android.annotation.Nullable;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -97,6 +98,16 @@ public final class Rect implements Parcelable {
             right = r.right;
             bottom = r.bottom;
         }
+    }
+
+    /**
+     * Returns a copy of {@code r} if {@code r} is not {@code null}, or {@code null} otherwise.
+     *
+     * @hide
+     */
+    @Nullable
+    public static Rect copyOrNull(@Nullable Rect r) {
+        return r == null ? null : new Rect(r);
     }
 
     @Override
