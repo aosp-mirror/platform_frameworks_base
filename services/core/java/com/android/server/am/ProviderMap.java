@@ -17,22 +17,28 @@
 package com.android.server.am;
 
 import android.content.ComponentName;
+import android.content.ComponentName.WithComponentName;
 import android.os.Binder;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.util.Slog;
 import android.util.SparseArray;
 import com.android.internal.os.TransferPipe;
+import com.android.internal.util.CollectionUtils;
+import com.android.internal.util.DumpUtils;
 
 import java.io.FileDescriptor;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Predicate;
 
 /**
  * Keeps track of content providers by authority (name) and class. It separates the mapping by
@@ -325,7 +331,9 @@ public final class ProviderMap {
 
     private ArrayList<ContentProviderRecord> getProvidersForName(String name) {
         ArrayList<ContentProviderRecord> allProviders = new ArrayList<ContentProviderRecord>();
-        ArrayList<ContentProviderRecord> providers = new ArrayList<ContentProviderRecord>();
+        final ArrayList<ContentProviderRecord> ret = new ArrayList<>();
+
+        final Predicate<ContentProviderRecord> filter = DumpUtils.filterRecord(name);
 
         synchronized (mAm) {
             allProviders.addAll(mSingletonByClass.values());
@@ -333,39 +341,11 @@ public final class ProviderMap {
                 allProviders.addAll(mProvidersByClassPerUser.valueAt(i).values());
             }
 
-            if ("all".equals(name)) {
-                providers.addAll(allProviders);
-            } else {
-                ComponentName componentName = name != null
-                        ? ComponentName.unflattenFromString(name) : null;
-                int objectId = 0;
-                if (componentName == null) {
-                    // Not a '/' separated full component name; maybe an object ID?
-                    try {
-                        objectId = Integer.parseInt(name, 16);
-                        name = null;
-                        componentName = null;
-                    } catch (RuntimeException e) {
-                    }
-                }
-
-                for (int i=0; i<allProviders.size(); i++) {
-                    ContentProviderRecord r1 = allProviders.get(i);
-                    if (componentName != null) {
-                        if (r1.name.equals(componentName)) {
-                            providers.add(r1);
-                        }
-                    } else if (name != null) {
-                        if (r1.name.flattenToString().contains(name)) {
-                            providers.add(r1);
-                        }
-                    } else if (System.identityHashCode(r1) == objectId) {
-                        providers.add(r1);
-                    }
-                }
-            }
+            CollectionUtils.addIf(allProviders, ret, filter);
         }
-        return providers;
+        // Sort by component name.
+        ret.sort(Comparator.comparing(WithComponentName::getComponentName));
+        return ret;
     }
 
     protected boolean dumpProvider(FileDescriptor fd, PrintWriter pw, String name, String[] args,

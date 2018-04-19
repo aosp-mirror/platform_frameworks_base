@@ -16,18 +16,25 @@
 
 package com.android.internal.util;
 
+import android.annotation.Nullable;
 import android.app.AppOpsManager;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.os.Binder;
 import android.os.Handler;
+import android.text.TextUtils;
 import android.util.Slog;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.util.Objects;
+import java.util.function.Predicate;
 
 /**
  * Helper functions for dumping the state of system services.
+ * Test:
+ atest /android/pi-dev/frameworks/base/core/tests/coretests/src/com/android/internal/util/DumpUtilsTest.java
  */
 public final class DumpUtils {
     private static final String TAG = "DumpUtils";
@@ -153,4 +160,99 @@ public final class DumpUtils {
             PrintWriter pw) {
         return checkDumpPermission(context, tag, pw) && checkUsageStatsPermission(context, tag, pw);
     }
+
+    /**
+     * Return whether a package name is considered to be part of the platform.
+     * @hide
+     */
+    public static boolean isPlatformPackage(@Nullable String packageName) {
+        return (packageName != null)
+                && (packageName.equals("android")
+                    || packageName.startsWith("android.")
+                    || packageName.startsWith("com.android."));
+    }
+
+    /**
+     * Return whether a package name is considered to be part of the platform.
+     * @hide
+     */
+    public static boolean isPlatformPackage(@Nullable ComponentName cname) {
+        return (cname != null) && isPlatformPackage(cname.getPackageName());
+    }
+
+    /**
+     * Return whether a package name is considered to be part of the platform.
+     * @hide
+     */
+    public static boolean isPlatformPackage(@Nullable ComponentName.WithComponentName wcn) {
+        return (wcn != null) && isPlatformPackage(wcn.getComponentName());
+    }
+
+    /**
+     * Return whether a package name is NOT considered to be part of the platform.
+     * @hide
+     */
+    public static boolean isNonPlatformPackage(@Nullable String packageName) {
+        return (packageName != null) && !isPlatformPackage(packageName);
+    }
+
+    /**
+     * Return whether a package name is NOT considered to be part of the platform.
+     * @hide
+     */
+    public static boolean isNonPlatformPackage(@Nullable ComponentName cname) {
+        return (cname != null) && isNonPlatformPackage(cname.getPackageName());
+    }
+
+    /**
+     * Return whether a package name is NOT considered to be part of the platform.
+     * @hide
+     */
+    public static boolean isNonPlatformPackage(@Nullable ComponentName.WithComponentName wcn) {
+        return (wcn != null) && !isPlatformPackage(wcn.getComponentName());
+    }
+
+    /**
+     * Used for dumping providers and services. Return a predicate for a given filter string.
+     * @hide
+     */
+    public static <TRec extends ComponentName.WithComponentName> Predicate<TRec> filterRecord(
+            @Nullable String filterString) {
+
+        if (TextUtils.isEmpty(filterString)) {
+            return rec -> false;
+        }
+
+        // Dump all?
+        if ("all".equals(filterString)) {
+            return Objects::nonNull;
+        }
+
+        // Dump all platform?
+        if ("all-platform".equals(filterString)) {
+            return DumpUtils::isPlatformPackage;
+        }
+
+        // Dump all non-platform?
+        if ("all-non-platform".equals(filterString)) {
+            return DumpUtils::isNonPlatformPackage;
+        }
+
+        // Is the filter a component name? If so, do an exact match.
+        final ComponentName filterCname = ComponentName.unflattenFromString(filterString);
+        if (filterCname != null) {
+            // Do exact component name check.
+            return rec -> (rec != null) && filterCname.equals(rec.getComponentName());
+        }
+
+        // Otherwise, do a partial match against the component name.
+        // Also if the filter is a hex-decimal string, do the object ID match too.
+        final int id = ParseUtils.parseIntWithBase(filterString, 16, -1);
+        return rec -> {
+            final ComponentName cn = rec.getComponentName();
+            return ((id != -1) && (System.identityHashCode(rec) == id))
+                    || cn.flattenToString().toLowerCase().contains(filterString.toLowerCase());
+        };
+    }
 }
+
