@@ -178,6 +178,16 @@ message MetricsEvent {
     TEXT_SELECTION_INVOCATION_LINK = 2;
   }
 
+  // Access method for hidden API events. Type of data tagged with
+  // FIELD_HIDDEN_API_ACCESS_METHOD.
+  // This must be kept in sync with enum AccessMethod in art/runtime/hidden_api.h
+  enum HiddenApiAccessMethod {
+    ACCESS_METHOD_NONE = 0; // never logged, included for completeness
+    ACCESS_METHOD_REFLECTION = 1;
+    ACCESS_METHOD_JNI = 2;
+    ACCESS_METHOD_LINKING = 3; // never logged, included for completeness
+  }
+
   // Known visual elements: views or controls.
   enum View {
     // Unknown view
@@ -5663,6 +5673,25 @@ message MetricsEvent {
     // CATEGORY: SETTINGS
     // OS: P
     BLUETOOTH_FRAGMENT = 1390;
+
+    // Enclosing category for group of FIELD_HIDDEN_API_FOO events, logged when
+    // an app uses a hidden API.
+    ACTION_HIDDEN_API_ACCESSED = 1391;
+
+    // Tagged data for ACTION_HIDDEN_API_ACCESSED. The metod of the hidden API
+    // access; see enum HiddenApiAccessMethod
+    // OS: P
+    FIELD_HIDDEN_API_ACCESS_METHOD = 1392;
+
+    // Tagged data for ACTION_HIDDEN_API_ACCESSED. Indicates that access was
+    // denied to the API.
+    // OS: P
+    FIELD_HIDDEN_API_ACCESS_DENIED = 1393;
+
+    // Tagged data for ACTION_HIDDEN_API_ACCESSED. The signature of the hidden
+    // API that was accessed.
+    // OS: P
+    FIELD_HIDDEN_API_SIGNATURE = 1394;
 
     // This value should never appear in log outputs - it is reserved for
     // internal platform metrics use.
