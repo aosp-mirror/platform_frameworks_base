@@ -407,6 +407,7 @@ public class QuickStepController implements GestureHelper {
             } catch (RemoteException e) {
                 Log.e(TAG, "Failed to send start of quick scrub.", e);
             }
+            mOverviewEventSender.notifyQuickScrubStarted();
         }
     }
 

@@ -19,6 +19,12 @@ package com.android.systemui.recents;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_UNDEFINED;
 
+import static com.android.systemui.Prefs.Key.HAS_SEEN_RECENTS_QUICK_SCRUB_ONBOARDING;
+import static com.android.systemui.Prefs.Key.HAS_SEEN_RECENTS_SWIPE_UP_ONBOARDING;
+import static com.android.systemui.Prefs.Key.OVERVIEW_OPENED_COUNT;
+import static com.android.systemui.Prefs.Key.OVERVIEW_OPENED_FROM_HOME_COUNT;
+
+import android.annotation.StringRes;
 import android.annotation.TargetApi;
 import android.app.ActivityManager;
 import android.content.Context;
@@ -31,8 +37,6 @@ import android.graphics.drawable.ShapeDrawable;
 import android.os.Build;
 import android.os.SystemProperties;
 import android.os.UserManager;
-import android.text.TextUtils;
-import android.util.Log;
 import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -65,10 +69,16 @@ public class RecentsOnboarding {
     private static final boolean ONBOARDING_ENABLED = false;
     private static final long SHOW_DELAY_MS = 500;
     private static final long SHOW_HIDE_DURATION_MS = 300;
-    // Don't show the onboarding until the user has launched this number of apps.
-    private static final int SHOW_ON_APP_LAUNCH = 2;
-    // After explicitly dismissing, show again after launching this number of apps.
-    private static final int SHOW_ON_APP_LAUNCH_AFTER_DISMISS = 5;
+    // Show swipe-up tips after opening overview from home this number of times.
+    private static final int SWIPE_UP_SHOW_ON_OVERVIEW_OPENED_FROM_HOME_COUNT = 3;
+    // Show quick scrub tips after opening overview this number of times.
+    private static final int QUICK_SCRUB_SHOW_ON_OVERVIEW_OPENED_COUNT = 10;
+    // After explicitly dismissing, show again after launching this number of apps for swipe-up
+    // tips.
+    private static final int SWIPE_UP_SHOW_ON_APP_LAUNCH_AFTER_DISMISS = 5;
+    // After explicitly dismissing, show again after launching this number of apps for QuickScrub
+    // tips.
+    private static final int QUICK_SCRUB_SHOW_ON_APP_LAUNCH_AFTER_DISMISS = 10;
 
     private final Context mContext;
     private final WindowManager mWindowManager;
@@ -82,11 +92,14 @@ public class RecentsOnboarding {
     private final int mOnboardingToastArrowRadius;
     private int mNavBarHeight;
 
+    private boolean mOverviewProxyListenerRegistered;
     private boolean mTaskListenerRegistered;
     private boolean mLayoutAttachedToWindow;
     private int mLastTaskId;
-    private boolean mHasDismissed;
-    private int mNumAppsLaunchedSinceDismiss;
+    private boolean mHasDismissedSwipeUpTip;
+    private boolean mHasDismissedQuickScrubTip;
+    private int mNumAppsLaunchedSinceSwipeUpTipDismiss;
+    private int mNumAppsLaunchedSinceQuickScrubTipDismiss;
 
     private final SysUiTaskStackChangeListener mTaskListener = new SysUiTaskStackChangeListener() {
         @Override
@@ -107,18 +120,40 @@ public class RecentsOnboarding {
             int activityType = info.configuration.windowConfiguration.getActivityType();
             if (activityType == ACTIVITY_TYPE_STANDARD) {
                 mLastTaskId = info.id;
-                int numAppsLaunched = mHasDismissed ? mNumAppsLaunchedSinceDismiss
-                        : Prefs.getInt(mContext, Prefs.Key.NUM_APPS_LAUNCHED, 0);
-                int showOnAppLaunch = mHasDismissed ? SHOW_ON_APP_LAUNCH_AFTER_DISMISS
-                        : SHOW_ON_APP_LAUNCH;
-                numAppsLaunched++;
-                if (numAppsLaunched >= showOnAppLaunch) {
-                    show();
+
+                boolean alreadySeenSwipeUpOnboarding = hasSeenSwipeUpOnboarding();
+                boolean alreadySeenQuickScrubsOnboarding = hasSeenQuickScrubOnboarding();
+                if (alreadySeenSwipeUpOnboarding && alreadySeenQuickScrubsOnboarding) {
+                    onDisconnectedFromLauncher();
+                    return;
+                }
+
+                if (!alreadySeenSwipeUpOnboarding) {
+                    if (getOpenedOverviewFromHomeCount()
+                            >= SWIPE_UP_SHOW_ON_OVERVIEW_OPENED_FROM_HOME_COUNT) {
+                        if (mHasDismissedSwipeUpTip) {
+                            mNumAppsLaunchedSinceSwipeUpTipDismiss++;
+                            if (mNumAppsLaunchedSinceSwipeUpTipDismiss
+                                    == SWIPE_UP_SHOW_ON_APP_LAUNCH_AFTER_DISMISS) {
+                                mNumAppsLaunchedSinceSwipeUpTipDismiss = 0;
+                                show(R.string.recents_swipe_up_onboarding);
+                            }
+                        } else {
+                            show(R.string.recents_swipe_up_onboarding);
+                        }
+                    }
                 } else {
-                    if (mHasDismissed) {
-                        mNumAppsLaunchedSinceDismiss = numAppsLaunched;
-                    } else {
-                        Prefs.putInt(mContext, Prefs.Key.NUM_APPS_LAUNCHED, numAppsLaunched);
+                    if (getOpenedOverviewCount() >= QUICK_SCRUB_SHOW_ON_OVERVIEW_OPENED_COUNT) {
+                        if (mHasDismissedQuickScrubTip) {
+                            mNumAppsLaunchedSinceQuickScrubTipDismiss++;
+                            if (mNumAppsLaunchedSinceQuickScrubTipDismiss
+                                    == QUICK_SCRUB_SHOW_ON_APP_LAUNCH_AFTER_DISMISS) {
+                                mNumAppsLaunchedSinceQuickScrubTipDismiss = 0;
+                                show(R.string.recents_quick_scrub_onboarding);
+                            }
+                        } else {
+                            show(R.string.recents_quick_scrub_onboarding);
+                        }
                     }
                 }
             } else {
@@ -127,13 +162,36 @@ public class RecentsOnboarding {
         }
     };
 
+    private OverviewProxyService.OverviewProxyListener mOverviewProxyListener =
+            new OverviewProxyService.OverviewProxyListener() {
+                @Override
+                public void onOverviewShown(boolean fromHome) {
+                    boolean alreadySeenRecentsOnboarding = hasSeenSwipeUpOnboarding();
+                    if (!alreadySeenRecentsOnboarding && !fromHome) {
+                        setHasSeenSwipeUpOnboarding(true);
+                    }
+                    if (fromHome) {
+                        setOpenedOverviewFromHomeCount(getOpenedOverviewFromHomeCount() + 1);
+                    }
+                    setOpenedOverviewCount(getOpenedOverviewCount() + 1);
+                }
+
+                @Override
+                public void onQuickScrubStarted() {
+                    boolean alreadySeenQuickScrubsOnboarding = hasSeenQuickScrubOnboarding();
+                    if (!alreadySeenQuickScrubsOnboarding) {
+                        setHasSeenQuickScrubOnboarding(true);
+                    }
+                }
+            };
+
     private final View.OnAttachStateChangeListener mOnAttachStateChangeListener
             = new View.OnAttachStateChangeListener() {
         @Override
         public void onViewAttachedToWindow(View view) {
             if (view == mLayout) {
                 mLayoutAttachedToWindow = true;
-                mHasDismissed = false;
+                mHasDismissedSwipeUpTip = false;
             }
         }
 
@@ -167,8 +225,19 @@ public class RecentsOnboarding {
         mLayout.addOnAttachStateChangeListener(mOnAttachStateChangeListener);
         mDismissView.setOnClickListener(v -> {
             hide(true);
-            mHasDismissed = true;
-            mNumAppsLaunchedSinceDismiss = 0;
+            if (v.getTag().equals(R.string.recents_swipe_up_onboarding)) {
+                mHasDismissedSwipeUpTip = true;
+                mNumAppsLaunchedSinceSwipeUpTipDismiss = 0;
+            } else {
+                if (mHasDismissedQuickScrubTip) {
+                    // If user dismisses the quick scrub tip twice, we consider user has seen it
+                    // and do not show it again.
+                    setHasSeenQuickScrubOnboarding(true);
+                } else {
+                    mHasDismissedQuickScrubTip = true;
+                }
+                mNumAppsLaunchedSinceQuickScrubTipDismiss = 0;
+            }
         });
 
         ViewGroup.LayoutParams arrowLp = mArrowView.getLayoutParams();
@@ -181,8 +250,10 @@ public class RecentsOnboarding {
         mArrowView.setBackground(arrowDrawable);
 
         if (RESET_PREFS_FOR_DEBUG) {
-            Prefs.putBoolean(mContext, Prefs.Key.HAS_SEEN_RECENTS_ONBOARDING, false);
-            Prefs.putInt(mContext, Prefs.Key.NUM_APPS_LAUNCHED, 0);
+            setHasSeenSwipeUpOnboarding(false);
+            setHasSeenQuickScrubOnboarding(false);
+            setOpenedOverviewCount(0);
+            setOpenedOverviewFromHomeCount(0);
         }
     }
 
@@ -190,30 +261,35 @@ public class RecentsOnboarding {
         if (!ONBOARDING_ENABLED) {
             return;
         }
-        boolean alreadySeenRecentsOnboarding = Prefs.getBoolean(mContext,
-                Prefs.Key.HAS_SEEN_RECENTS_ONBOARDING, false);
-        if (!mTaskListenerRegistered && !alreadySeenRecentsOnboarding) {
+
+        if (hasSeenSwipeUpOnboarding() && hasSeenQuickScrubOnboarding()) {
+            return;
+        }
+
+        if (!mOverviewProxyListenerRegistered) {
+            mOverviewProxyService.addCallback(mOverviewProxyListener);
+            mOverviewProxyListenerRegistered = true;
+        }
+        if (!mTaskListenerRegistered) {
             ActivityManagerWrapper.getInstance().registerTaskStackListener(mTaskListener);
             mTaskListenerRegistered = true;
         }
     }
 
-    public void onQuickStepStarted() {
-        boolean alreadySeenRecentsOnboarding = Prefs.getBoolean(mContext,
-                Prefs.Key.HAS_SEEN_RECENTS_ONBOARDING, false);
-        if (!alreadySeenRecentsOnboarding) {
-            Prefs.putBoolean(mContext, Prefs.Key.HAS_SEEN_RECENTS_ONBOARDING, true);
-            onDisconnectedFromLauncher();
-        }
-    }
-
     public void onDisconnectedFromLauncher() {
+        if (mOverviewProxyListenerRegistered) {
+            mOverviewProxyService.removeCallback(mOverviewProxyListener);
+            mOverviewProxyListenerRegistered = false;
+        }
         if (mTaskListenerRegistered) {
             ActivityManagerWrapper.getInstance().unregisterTaskStackListener(mTaskListener);
             mTaskListenerRegistered = false;
         }
-        mHasDismissed = false;
-        mNumAppsLaunchedSinceDismiss = 0;
+
+        mHasDismissedSwipeUpTip = false;
+        mHasDismissedQuickScrubTip = false;
+        mNumAppsLaunchedSinceSwipeUpTipDismiss = 0;
+        mNumAppsLaunchedSinceQuickScrubTipDismiss = 0;
         hide(false);
     }
 
@@ -223,11 +299,12 @@ public class RecentsOnboarding {
         }
     }
 
-    public void show() {
+    public void show(@StringRes int stringRes) {
         if (!shouldShow()) {
             return;
         }
-        mTextView.setText(R.string.recents_swipe_up_onboarding);
+        mDismissView.setTag(stringRes);
+        mTextView.setText(stringRes);
         // Only show in portrait.
         int orientation = mContext.getResources().getConfiguration().orientation;
         if (!mLayoutAttachedToWindow && orientation == Configuration.ORIENTATION_PORTRAIT) {
@@ -259,7 +336,7 @@ public class RecentsOnboarding {
     private boolean shouldShow() {
         return SystemProperties.getBoolean("persist.quickstep.onboarding.enabled",
                 !(mContext.getSystemService(UserManager.class)).isDemoUser() &&
-                !ActivityManager.isRunningInTestHarness());
+                        !ActivityManager.isRunningInTestHarness());
     }
 
     public void hide(boolean animate) {
@@ -298,5 +375,44 @@ public class RecentsOnboarding {
         lp.setTitle("RecentsOnboarding");
         lp.gravity = Gravity.BOTTOM;
         return lp;
+    }
+
+    private boolean hasSeenSwipeUpOnboarding() {
+        return Prefs.getBoolean(mContext, HAS_SEEN_RECENTS_SWIPE_UP_ONBOARDING, false);
+    }
+
+    private void setHasSeenSwipeUpOnboarding(boolean hasSeenSwipeUpOnboarding) {
+        Prefs.putBoolean(mContext, HAS_SEEN_RECENTS_SWIPE_UP_ONBOARDING, hasSeenSwipeUpOnboarding);
+        if (hasSeenSwipeUpOnboarding && hasSeenQuickScrubOnboarding()) {
+            onDisconnectedFromLauncher();
+        }
+    }
+
+    private boolean hasSeenQuickScrubOnboarding() {
+        return Prefs.getBoolean(mContext, HAS_SEEN_RECENTS_QUICK_SCRUB_ONBOARDING, false);
+    }
+
+    private void setHasSeenQuickScrubOnboarding(boolean hasSeenQuickScrubOnboarding) {
+        Prefs.putBoolean(mContext, HAS_SEEN_RECENTS_QUICK_SCRUB_ONBOARDING,
+                hasSeenQuickScrubOnboarding);
+        if (hasSeenQuickScrubOnboarding && hasSeenSwipeUpOnboarding()) {
+            onDisconnectedFromLauncher();
+        }
+    }
+
+    private int getOpenedOverviewFromHomeCount() {
+        return Prefs.getInt(mContext, OVERVIEW_OPENED_FROM_HOME_COUNT, 0);
+    }
+
+    private void setOpenedOverviewFromHomeCount(int openedOverviewFromHomeCount) {
+        Prefs.putInt(mContext, OVERVIEW_OPENED_FROM_HOME_COUNT, openedOverviewFromHomeCount);
+    }
+
+    private int getOpenedOverviewCount() {
+        return Prefs.getInt(mContext, OVERVIEW_OPENED_COUNT, 0);
+    }
+
+    private void setOpenedOverviewCount(int openedOverviewCount) {
+        Prefs.putInt(mContext, OVERVIEW_OPENED_COUNT, openedOverviewCount);
     }
 }
