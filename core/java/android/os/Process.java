@@ -422,6 +422,13 @@ public class Process {
      **/
     public static final int THREAD_GROUP_RT_APP = 6;
 
+    /**
+     * Thread group for bound foreground services that should
+     * have additional CPU restrictions during screen off
+     * @hide
+     **/
+    public static final int THREAD_GROUP_RESTRICTED = 7;
+
     public static final int SIGNAL_QUIT = 3;
     public static final int SIGNAL_KILL = 9;
     public static final int SIGNAL_USR1 = 10;
