@@ -615,6 +615,8 @@
     <dimen name="notification_media_image_max_width">280dp</dimen>
     <!-- The size of the right icon -->
     <dimen name="notification_right_icon_size">38dp</dimen>
+    <!-- The alpha of a disabled notification button -->
+    <item type="dimen" format="float" name="notification_action_disabled_alpha">0.5</item>
 
     <!-- The maximum height of any image in a remote view. This is applied to all images in custom remoteviews. -->
     <dimen name="notification_custom_view_max_image_height_low_ram">208dp</dimen>

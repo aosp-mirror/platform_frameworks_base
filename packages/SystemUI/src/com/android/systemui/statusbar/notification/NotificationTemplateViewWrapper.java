@@ -18,16 +18,20 @@ package com.android.systemui.statusbar.notification;
 
 import android.app.PendingIntent;
 import android.content.Context;
+import android.content.res.ColorStateList;
 import android.graphics.Color;
+import android.graphics.PorterDuffColorFilter;
 import android.graphics.Rect;
+import android.graphics.drawable.Drawable;
 import android.service.notification.StatusBarNotification;
 import android.util.ArraySet;
 import android.view.View;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
-import com.android.internal.R;
+import com.android.internal.util.NotificationColorUtil;
 import com.android.internal.widget.NotificationActionListLayout;
 import com.android.systemui.Dependency;
 import com.android.systemui.UiOffloadThread;
@@ -48,7 +52,7 @@ public class NotificationTemplateViewWrapper extends NotificationHeaderViewWrapp
     private TextView mTitle;
     private TextView mText;
     protected View mActionsContainer;
-    private View mReplyAction;
+    private ImageView mReplyAction;
     private Rect mTmpRect = new Rect();
 
     private int mContentHeight;
@@ -151,23 +155,58 @@ public class NotificationTemplateViewWrapper extends NotificationHeaderViewWrapp
         if (mActions != null) {
             int numActions = mActions.getChildCount();
             for (int i = 0; i < numActions; i++) {
-                View action = mActions.getChildAt(i);
+                Button action = (Button) mActions.getChildAt(i);
                 performOnPendingIntentCancellation(action, () -> {
-                    action.setEnabled(false);
-                    // The visual appearance doesn't look disabled enough yet, let's add the
-                    // alpha as well. Selectors unfortunately don't seem to work here.
-                    action.setAlpha(0.5f);
+                    if (action.isEnabled()) {
+                        action.setEnabled(false);
+                        // The visual appearance doesn't look disabled enough yet, let's add the
+                        // alpha as well. Since Alpha doesn't play nicely right now with the
+                        // transformation, we rather blend it manually with the background color.
+                        ColorStateList textColors = action.getTextColors();
+                        int[] colors = textColors.getColors();
+                        int[] newColors = new int[colors.length];
+                        float disabledAlpha = mView.getResources().getFloat(
+                                com.android.internal.R.dimen.notification_action_disabled_alpha);
+                        for (int j = 0; j < colors.length; j++) {
+                            int color = colors[j];
+                            color = blendColorWithBackground(color, disabledAlpha);
+                            newColors[j] = color;
+                        }
+                        ColorStateList newColorStateList = new ColorStateList(
+                                textColors.getStates(), newColors);
+                        action.setTextColor(newColorStateList);
+                    }
                 });
             }
         }
         if (mReplyAction != null) {
             performOnPendingIntentCancellation(mReplyAction, () -> {
-                mReplyAction.setEnabled(false);
-                // The visual appearance doesn't look disabled enough yet, let's add the
-                // alpha as well. Selectors unfortunately don't seem to work here.
-                mReplyAction.setAlpha(0.5f);
+                if (mReplyAction != null && mReplyAction.isEnabled()) {
+                    mReplyAction.setEnabled(false);
+                    // The visual appearance doesn't look disabled enough yet, let's add the
+                    // alpha as well. Since Alpha doesn't play nicely right now with the
+                    // transformation, we rather blend it manually with the background color.
+                    Drawable drawable = mReplyAction.getDrawable().mutate();
+                    PorterDuffColorFilter colorFilter =
+                            (PorterDuffColorFilter) drawable.getColorFilter();
+                    float disabledAlpha = mView.getResources().getFloat(
+                            com.android.internal.R.dimen.notification_action_disabled_alpha);
+                    if (colorFilter != null) {
+                        int color = colorFilter.getColor();
+                        color = blendColorWithBackground(color, disabledAlpha);
+                        drawable.mutate().setColorFilter(color, colorFilter.getMode());
+                    } else {
+                        mReplyAction.setAlpha(disabledAlpha);
+                    }
+                }
             });
         }
+    }
+
+    private int blendColorWithBackground(int color, float alpha) {
+        // alpha doesn't go well for color filters, so let's blend it manually
+        return NotificationColorUtil.compositeColors(Color.argb((int) (alpha * 255),
+                Color.red(color), Color.green(color), Color.blue(color)), resolveBackgroundColor());
     }
 
     private void performOnPendingIntentCancellation(View view, Runnable cancellationRunnable) {
