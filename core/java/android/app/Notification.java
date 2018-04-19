@@ -3142,10 +3142,14 @@ public class Notification implements Parcelable
         private int mCachedContrastColor = COLOR_INVALID;
         private int mCachedContrastColorIsFor = COLOR_INVALID;
         /**
-         * Caches a ambient version of {@link #mCachedContrastColorIsFor}.
+         * Caches a ambient version of {@link #mCachedAmbientColorIsFor}.
          */
         private int mCachedAmbientColor = COLOR_INVALID;
         private int mCachedAmbientColorIsFor = COLOR_INVALID;
+        /**
+         * A neutral color color that can be used for icons.
+         */
+        private int mNeutralColor = COLOR_INVALID;
 
         /**
          * Caches an instance of StandardTemplateParams. Note that this may have been used before,
@@ -4581,7 +4585,7 @@ public class Notification implements Parcelable
                 contentView.setViewVisibility(R.id.reply_icon_action, View.VISIBLE);
                 contentView.setDrawableTint(R.id.reply_icon_action,
                         false /* targetBackground */,
-                        getPrimaryTextColor(),
+                        getNeutralColor(),
                         PorterDuff.Mode.SRC_ATOP);
                 contentView.setOnClickPendingIntent(R.id.reply_icon_action, action.actionIntent);
                 contentView.setRemoteInputs(R.id.reply_icon_action, action.mRemoteInputs);
@@ -4625,8 +4629,7 @@ public class Notification implements Parcelable
         }
 
         private void bindActivePermissions(RemoteViews contentView, boolean ambient) {
-            int color = ambient ? resolveAmbientColor()
-                    : isColorized() ? getPrimaryTextColor() : resolveContrastColor();
+            int color = ambient ? resolveAmbientColor() : getNeutralColor();
             contentView.setDrawableTint(R.id.camera, false, color, PorterDuff.Mode.SRC_ATOP);
             contentView.setDrawableTint(R.id.mic, false, color, PorterDuff.Mode.SRC_ATOP);
             contentView.setDrawableTint(R.id.overlay, false, color, PorterDuff.Mode.SRC_ATOP);
@@ -5339,6 +5342,20 @@ public class Notification implements Parcelable
             return mCachedContrastColor = color;
         }
 
+        int resolveNeutralColor() {
+            if (mNeutralColor != COLOR_INVALID) {
+                return mNeutralColor;
+            }
+            int background = mContext.getColor(
+                    com.android.internal.R.color.notification_material_background_color);
+            mNeutralColor = NotificationColorUtil.resolveDefaultColor(mContext, background);
+            if (Color.alpha(mNeutralColor) < 255) {
+                // alpha doesn't go well for color filters, so let's blend it manually
+                mNeutralColor = NotificationColorUtil.compositeColors(mNeutralColor, background);
+            }
+            return mNeutralColor;
+        }
+
         int resolveAmbientColor() {
             if (mCachedAmbientColorIsFor == mN.color && mCachedAmbientColorIsFor != COLOR_INVALID) {
                 return mCachedAmbientColor;
@@ -5567,6 +5584,17 @@ public class Notification implements Parcelable
                 return mBackgroundColor != COLOR_INVALID ? mBackgroundColor : mN.color;
             } else {
                 return COLOR_DEFAULT;
+            }
+        }
+
+        /**
+         * Gets a neutral color that can be used for icons or similar that should not stand out.
+         */
+        private int getNeutralColor() {
+            if (isColorized()) {
+                return getSecondaryTextColor();
+            } else {
+                return resolveNeutralColor();
             }
         }
 
