@@ -17,12 +17,12 @@
 package com.android.server;
 
 import android.app.ActivityManager;
+import android.app.AppOpsManager;
 import android.content.BroadcastReceiver;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.pm.PackageManager;
 import android.database.ContentObserver;
 import android.net.Uri;
 import android.os.Binder;
@@ -41,12 +41,12 @@ import android.text.format.Time;
 import android.util.ArrayMap;
 import android.util.Slog;
 
-import libcore.io.IoUtils;
-
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.os.IDropBoxManagerService;
 import com.android.internal.util.DumpUtils;
 import com.android.internal.util.ObjectUtils;
+
+import libcore.io.IoUtils;
 
 import java.io.BufferedOutputStream;
 import java.io.File;
@@ -58,7 +58,6 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.util.ArrayList;
-import java.util.Objects;
 import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.zip.GZIPOutputStream;
@@ -145,8 +144,8 @@ public final class DropBoxManagerService extends SystemService {
         }
 
         @Override
-        public DropBoxManager.Entry getNextEntry(String tag, long millis) {
-            return DropBoxManagerService.this.getNextEntry(tag, millis);
+        public DropBoxManager.Entry getNextEntry(String tag, long millis, String callingPackage) {
+            return DropBoxManagerService.this.getNextEntry(tag, millis, callingPackage);
         }
 
         @Override
@@ -327,10 +326,29 @@ public final class DropBoxManagerService extends SystemService {
         }
     }
 
-    public synchronized DropBoxManager.Entry getNextEntry(String tag, long millis) {
-        if (getContext().checkCallingOrSelfPermission(android.Manifest.permission.READ_LOGS)
-                != PackageManager.PERMISSION_GRANTED) {
-            throw new SecurityException("READ_LOGS permission required");
+    private boolean checkPermission(int callingUid, String callingPackage) {
+        // Callers always need this permission
+        getContext().enforceCallingOrSelfPermission(
+                android.Manifest.permission.READ_LOGS, TAG);
+
+        // Callers also need the ability to read usage statistics
+        switch (getContext().getSystemService(AppOpsManager.class)
+                .noteOp(AppOpsManager.OP_GET_USAGE_STATS, callingUid, callingPackage)) {
+            case AppOpsManager.MODE_ALLOWED:
+                return true;
+            case AppOpsManager.MODE_DEFAULT:
+                getContext().enforceCallingOrSelfPermission(
+                        android.Manifest.permission.PACKAGE_USAGE_STATS, TAG);
+                return true;
+            default:
+                return false;
+        }
+    }
+
+    public synchronized DropBoxManager.Entry getNextEntry(String tag, long millis,
+            String callingPackage) {
+        if (!checkPermission(Binder.getCallingUid(), callingPackage)) {
+            return null;
         }
 
         try {

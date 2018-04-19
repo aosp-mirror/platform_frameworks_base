@@ -16,9 +16,14 @@
 
 package android.os;
 
+import static android.Manifest.permission.PACKAGE_USAGE_STATS;
+import static android.Manifest.permission.READ_LOGS;
+
+import android.annotation.Nullable;
+import android.annotation.RequiresPermission;
 import android.annotation.SdkConstant;
-import android.annotation.SystemService;
 import android.annotation.SdkConstant.SdkConstantType;
+import android.annotation.SystemService;
 import android.content.Context;
 import android.util.Log;
 
@@ -351,16 +356,23 @@ public class DropBoxManager {
 
     /**
      * Gets the next entry from the drop box <em>after</em> the specified time.
-     * Requires <code>android.permission.READ_LOGS</code>.  You must always call
-     * {@link Entry#close()} on the return value!
+     * You must always call {@link Entry#close()} on the return value!
      *
      * @param tag of entry to look for, null for all tags
      * @param msec time of the last entry seen
      * @return the next entry, or null if there are no more entries
      */
-    public Entry getNextEntry(String tag, long msec) {
+    @RequiresPermission(allOf = { READ_LOGS, PACKAGE_USAGE_STATS })
+    public @Nullable Entry getNextEntry(String tag, long msec) {
         try {
-            return mService.getNextEntry(tag, msec);
+            return mService.getNextEntry(tag, msec, mContext.getOpPackageName());
+        } catch (SecurityException e) {
+            if (mContext.getApplicationInfo().targetSdkVersion >= Build.VERSION_CODES.P) {
+                throw e;
+            } else {
+                Log.w(TAG, e.getMessage());
+                return null;
+            }
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
