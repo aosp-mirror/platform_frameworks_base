@@ -564,7 +564,7 @@ class Task extends WindowContainer<AppWindowToken> {
     public SurfaceControl getAnimationLeashParent() {
         // Reparent to the animation layer so that we aren't clipped by the non-minimized
         // stack bounds, currently we only animate the task for the recents animation
-        return getAppAnimationLayer(false /* boosted */);
+        return getAppAnimationLayer(ANIMATION_LAYER_STANDARD);
     }
 
     boolean isTaskAnimating() {
