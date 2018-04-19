@@ -2280,6 +2280,7 @@ Landroid/view/Choreographer;->mLock:Ljava/lang/Object;
 Landroid/view/Choreographer;->scheduleVsyncLocked()V
 Landroid/view/Choreographer;->USE_VSYNC:Z
 Landroid/view/ContextThemeWrapper;->getThemeResId()I
+Landroid/view/ContextThemeWrapper;->mInflater:Landroid/view/LayoutInflater;
 Landroid/view/ContextThemeWrapper;->mResources:Landroid/content/res/Resources;
 Landroid/view/ContextThemeWrapper;->mTheme:Landroid/content/res/Resources$Theme;
 Landroid/view/ContextThemeWrapper;->mThemeResource:I
