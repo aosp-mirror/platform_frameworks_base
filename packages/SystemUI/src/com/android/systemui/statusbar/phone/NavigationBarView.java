@@ -287,12 +287,6 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
         notifyVerticalChangedListener(mVertical);
     }
 
-    public void onQuickStepStarted() {
-        if (mRecentsOnboarding != null) {
-            mRecentsOnboarding.onQuickStepStarted();
-        }
-    }
-
     @Override
     public boolean onInterceptTouchEvent(MotionEvent event) {
         if (mDeadZone.onTouchEvent(event)) {
