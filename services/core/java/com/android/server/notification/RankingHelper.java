@@ -1225,12 +1225,16 @@ public class RankingHelper implements RankingConfig {
                         if (r.showBadge != DEFAULT_SHOW_BADGE) {
                             record.put("showBadge", Boolean.valueOf(r.showBadge));
                         }
+                        JSONArray channels = new JSONArray();
                         for (NotificationChannel channel : r.channels.values()) {
-                            record.put("channel", channel.toJson());
+                            channels.put(channel.toJson());
                         }
+                        record.put("channels", channels);
+                        JSONArray groups = new JSONArray();
                         for (NotificationChannelGroup group : r.groups.values()) {
-                            record.put("group", group.toJson());
+                            groups.put(group.toJson());
                         }
+                        record.put("groups", groups);
                     } catch (JSONException e) {
                         // pass
                     }
