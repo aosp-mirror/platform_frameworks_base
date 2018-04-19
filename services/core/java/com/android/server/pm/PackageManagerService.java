@@ -23614,7 +23614,8 @@ Slog.v(TAG, ":: stepped forward, applying functor at tag " + parser.getName());
 
         private SigningDetails getSigningDetails(int uid) {
             synchronized (mPackages) {
-                final Object obj = mSettings.getUserIdLPr(uid);
+                final int appId = UserHandle.getAppId(uid);
+                final Object obj = mSettings.getUserIdLPr(appId);
                 if (obj != null) {
                     if (obj instanceof SharedUserSetting) {
                         return ((SharedUserSetting) obj).signatures.mSigningDetails;
