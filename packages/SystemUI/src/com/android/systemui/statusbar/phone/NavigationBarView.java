@@ -772,13 +772,13 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
         if (setIcon) getRotateSuggestionButton().setImageDrawable(mRotateSuggestionIcon);
     }
 
-    public void setRotateButtonVisibility(final boolean visible) {
+    public int setRotateButtonVisibility(final boolean visible) {
         // Never show if a11y is visible
         final boolean adjVisible = visible && !mShowAccessibilityButton;
         final int vis = adjVisible ? View.VISIBLE : View.INVISIBLE;
 
         // No need to do anything if the request matches the current state
-        if (vis == getRotateSuggestionButton().getVisibility()) return;
+        if (vis == getRotateSuggestionButton().getVisibility()) return vis;
 
         getRotateSuggestionButton().setVisibility(vis);
         mShowRotateButton = visible;
@@ -795,6 +795,9 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
 
         // Hide/restore other button visibility, if necessary
         updateNavButtonIcons();
+
+        // Return applied visibility
+        return vis;
     }
 
     public boolean isRotateButtonVisible() { return mShowRotateButton; }

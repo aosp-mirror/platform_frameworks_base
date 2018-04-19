@@ -546,7 +546,12 @@ public class NavigationBarFragment extends Fragment implements Callbacks {
 
             // Set visibility, may fail if a11y service is active.
             // If invisible, call will stop animation.
-            mNavigationBarView.setRotateButtonVisibility(true);
+            int appliedVisibility = mNavigationBarView.setRotateButtonVisibility(true);
+            if (appliedVisibility == View.VISIBLE) {
+                // If the button will actually become visible and the navbar is about to hide,
+                // tell the statusbar to keep it around for longer
+                mStatusBar.touchAutoHide();
+            }
 
         } else { // Hide
 
