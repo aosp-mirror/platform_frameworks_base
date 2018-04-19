@@ -2289,9 +2289,8 @@ public class Intent implements Parcelable, Cloneable {
     /**
      * Activity Action: Started to show more details about why an application was suspended.
      *
-     * <p>Whenever the system detects an activity launch for a suspended app, it shows a dialog to
-     * the user to inform them of the state and present them an affordance to start this activity
-     * action to show more details about the reason for suspension.
+     * <p>Whenever the system detects an activity launch for a suspended app, this action can
+     * be used to show more details about the reason for suspension.
      *
      * <p>Apps holding {@link android.Manifest.permission#SUSPEND_APPS} must declare an activity
      * handling this intent and protect it with
