@@ -412,7 +412,7 @@ public final class TextClassifierImpl implements TextClassifier {
         boolean isPrimaryAction = true;
         for (LabeledIntent labeledIntent : IntentFactory.create(
                 mContext, referenceTime, highestScoringResult, classifiedText)) {
-            RemoteAction action = labeledIntent.asRemoteAction(mContext);
+            final RemoteAction action = labeledIntent.asRemoteAction(mContext);
             if (isPrimaryAction) {
                 // For O backwards compatibility, the first RemoteAction is also written to the
                 // legacy API fields.
@@ -421,7 +421,7 @@ public final class TextClassifierImpl implements TextClassifier {
                 builder.setIntent(labeledIntent.getIntent());
                 builder.setOnClickListener(TextClassification.createIntentOnClickListener(
                         TextClassification.createPendingIntent(mContext,
-                                labeledIntent.getIntent())));
+                                labeledIntent.getIntent(), labeledIntent.getRequestCode())));
                 isPrimaryAction = false;
             }
             builder.addAction(action);
@@ -559,14 +559,30 @@ public final class TextClassifierImpl implements TextClassifier {
      * Helper class to store the information from which RemoteActions are built.
      */
     private static final class LabeledIntent {
-        private String mTitle;
-        private String mDescription;
-        private Intent mIntent;
 
-        LabeledIntent(String title, String description, Intent intent) {
+        static final int DEFAULT_REQUEST_CODE = 0;
+
+        private final String mTitle;
+        private final String mDescription;
+        private final Intent mIntent;
+        private final int mRequestCode;
+
+        /**
+         * Initializes a LabeledIntent.
+         *
+         * <p>NOTE: {@code reqestCode} is required to not be {@link #DEFAULT_REQUEST_CODE}
+         * if distinguishing info (e.g. the classified text) is represented in intent extras only.
+         * In such circumstances, the request code should represent the distinguishing info
+         * (e.g. by generating a hashcode) so that the generated PendingIntent is (somewhat)
+         * unique. To be correct, the PendingIntent should be definitely unique but we try a
+         * best effort approach that avoids spamming the system with PendingIntents.
+         */
+        // TODO: Fix the issue mentioned above so the behaviour is correct.
+        LabeledIntent(String title, String description, Intent intent, int requestCode) {
             mTitle = title;
             mDescription = description;
             mIntent = intent;
+            mRequestCode = requestCode;
         }
 
         String getTitle() {
@@ -579,6 +595,10 @@ public final class TextClassifierImpl implements TextClassifier {
 
         Intent getIntent() {
             return mIntent;
+        }
+
+        int getRequestCode() {
+            return mRequestCode;
         }
 
         RemoteAction asRemoteAction(Context context) {
@@ -602,8 +622,8 @@ public final class TextClassifierImpl implements TextClassifier {
                 icon = Icon.createWithResource("android",
                         com.android.internal.R.drawable.ic_more_items);
             }
-            RemoteAction action = new RemoteAction(icon, mTitle, mDescription,
-                    TextClassification.createPendingIntent(context, mIntent));
+            final RemoteAction action = new RemoteAction(icon, mTitle, mDescription,
+                    TextClassification.createPendingIntent(context, mIntent, mRequestCode));
             action.setShouldShowIcon(shouldShowIcon);
             return action;
         }
@@ -659,13 +679,15 @@ public final class TextClassifierImpl implements TextClassifier {
                             context.getString(com.android.internal.R.string.email),
                             context.getString(com.android.internal.R.string.email_desc),
                             new Intent(Intent.ACTION_SENDTO)
-                                    .setData(Uri.parse(String.format("mailto:%s", text)))),
+                                    .setData(Uri.parse(String.format("mailto:%s", text))),
+                            LabeledIntent.DEFAULT_REQUEST_CODE),
                     new LabeledIntent(
                             context.getString(com.android.internal.R.string.add_contact),
                             context.getString(com.android.internal.R.string.add_contact_desc),
                             new Intent(Intent.ACTION_INSERT_OR_EDIT)
                                     .setType(ContactsContract.Contacts.CONTENT_ITEM_TYPE)
-                                    .putExtra(ContactsContract.Intents.Insert.EMAIL, text)));
+                                    .putExtra(ContactsContract.Intents.Insert.EMAIL, text),
+                            text.hashCode()));
         }
 
         @NonNull
@@ -679,20 +701,23 @@ public final class TextClassifierImpl implements TextClassifier {
                         context.getString(com.android.internal.R.string.dial),
                         context.getString(com.android.internal.R.string.dial_desc),
                         new Intent(Intent.ACTION_DIAL).setData(
-                                Uri.parse(String.format("tel:%s", text)))));
+                                Uri.parse(String.format("tel:%s", text))),
+                        LabeledIntent.DEFAULT_REQUEST_CODE));
             }
             actions.add(new LabeledIntent(
                     context.getString(com.android.internal.R.string.add_contact),
                     context.getString(com.android.internal.R.string.add_contact_desc),
                     new Intent(Intent.ACTION_INSERT_OR_EDIT)
                             .setType(ContactsContract.Contacts.CONTENT_ITEM_TYPE)
-                            .putExtra(ContactsContract.Intents.Insert.PHONE, text)));
+                            .putExtra(ContactsContract.Intents.Insert.PHONE, text),
+                    text.hashCode()));
             if (!userRestrictions.getBoolean(UserManager.DISALLOW_SMS, false)) {
                 actions.add(new LabeledIntent(
                         context.getString(com.android.internal.R.string.sms),
                         context.getString(com.android.internal.R.string.sms_desc),
                         new Intent(Intent.ACTION_SENDTO)
-                                .setData(Uri.parse(String.format("smsto:%s", text)))));
+                                .setData(Uri.parse(String.format("smsto:%s", text))),
+                        LabeledIntent.DEFAULT_REQUEST_CODE));
             }
             return actions;
         }
@@ -706,7 +731,8 @@ public final class TextClassifierImpl implements TextClassifier {
                         context.getString(com.android.internal.R.string.map),
                         context.getString(com.android.internal.R.string.map_desc),
                         new Intent(Intent.ACTION_VIEW)
-                                .setData(Uri.parse(String.format("geo:0,0?q=%s", encText)))));
+                                .setData(Uri.parse(String.format("geo:0,0?q=%s", encText))),
+                        LabeledIntent.DEFAULT_REQUEST_CODE));
             } catch (UnsupportedEncodingException e) {
                 Log.e(LOG_TAG, "Could not encode address", e);
             }
@@ -728,7 +754,8 @@ public final class TextClassifierImpl implements TextClassifier {
                     context.getString(com.android.internal.R.string.browse),
                     context.getString(com.android.internal.R.string.browse_desc),
                     new Intent(Intent.ACTION_VIEW, Uri.parse(text))
-                            .putExtra(Browser.EXTRA_APPLICATION_ID, context.getPackageName())));
+                            .putExtra(Browser.EXTRA_APPLICATION_ID, context.getPackageName()),
+                    LabeledIntent.DEFAULT_REQUEST_CODE));
         }
 
         @NonNull
@@ -754,7 +781,8 @@ public final class TextClassifierImpl implements TextClassifier {
                     context.getString(com.android.internal.R.string.view_flight),
                     context.getString(com.android.internal.R.string.view_flight_desc),
                     new Intent(Intent.ACTION_WEB_SEARCH)
-                            .putExtra(SearchManager.QUERY, text)));
+                            .putExtra(SearchManager.QUERY, text),
+                    text.hashCode()));
         }
 
         @NonNull
@@ -765,7 +793,8 @@ public final class TextClassifierImpl implements TextClassifier {
             return new LabeledIntent(
                     context.getString(com.android.internal.R.string.view_calendar),
                     context.getString(com.android.internal.R.string.view_calendar_desc),
-                    new Intent(Intent.ACTION_VIEW).setData(builder.build()));
+                    new Intent(Intent.ACTION_VIEW).setData(builder.build()),
+                    LabeledIntent.DEFAULT_REQUEST_CODE);
         }
 
         @NonNull
@@ -781,7 +810,8 @@ public final class TextClassifierImpl implements TextClassifier {
                             .putExtra(CalendarContract.EXTRA_EVENT_BEGIN_TIME,
                                     parsedTime.toEpochMilli())
                             .putExtra(CalendarContract.EXTRA_EVENT_END_TIME,
-                                    parsedTime.toEpochMilli() + DEFAULT_EVENT_DURATION));
+                                    parsedTime.toEpochMilli() + DEFAULT_EVENT_DURATION),
+                    parsedTime.hashCode());
         }
     }
 }
