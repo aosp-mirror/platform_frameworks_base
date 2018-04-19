@@ -78,4 +78,8 @@
         <item type="string" name="test2" />
         <item type="array" name="integerArray1" />
     </overlayable>
+
+    <item name="high_ref" type="id">@id/middle_ref</item>
+    <item name="middle_ref" type="id">@id/low_ref</item>
+    <item name="low_ref" type="id"/>
 </resources>
