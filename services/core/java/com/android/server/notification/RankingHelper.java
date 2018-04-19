@@ -17,13 +17,6 @@ package com.android.server.notification;
 
 import static android.app.NotificationManager.IMPORTANCE_NONE;
 
-import com.android.internal.R;
-import com.android.internal.annotations.VisibleForTesting;
-import com.android.internal.logging.MetricsLogger;
-import com.android.internal.logging.nano.MetricsProto;
-import com.android.internal.util.Preconditions;
-import com.android.internal.util.XmlUtils;
-
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.app.Notification;
@@ -52,6 +45,13 @@ import android.util.Slog;
 import android.util.SparseBooleanArray;
 import android.util.proto.ProtoOutputStream;
 
+import com.android.internal.R;
+import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.logging.MetricsLogger;
+import com.android.internal.logging.nano.MetricsProto;
+import com.android.internal.util.Preconditions;
+import com.android.internal.util.XmlUtils;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -65,11 +65,11 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class RankingHelper implements RankingConfig {
     private static final String TAG = "RankingHelper";
@@ -127,12 +127,15 @@ public class RankingHelper implements RankingConfig {
     private String mPermissionControllerPackageName;
     private String mServicesSystemSharedLibPackageName;
     private String mSharedSystemSharedLibPackageName;
+    private boolean mAreChannelsBypassingDnd;
+    private ZenModeHelper mZenModeHelper;
 
     public RankingHelper(Context context, PackageManager pm, RankingHandler rankingHandler,
             ZenModeHelper zenHelper, NotificationUsageStats usageStats, String[] extractorNames) {
         mContext = context;
         mRankingHandler = rankingHandler;
         mPm = pm;
+        mZenModeHelper= zenHelper;
 
         mPreliminaryComparator = new NotificationComparator(mContext);
 
@@ -159,6 +162,7 @@ public class RankingHelper implements RankingConfig {
         }
 
         getSignatures();
+        updateChannelsBypassingDnd();
     }
 
     @SuppressWarnings("unchecked")
@@ -648,7 +652,12 @@ public class RankingHelper implements RankingConfig {
             // system apps and dnd access apps can bypass dnd if the user hasn't changed any
             // fields on the channel yet
             if (existing.getUserLockedFields() == 0 && (isSystemApp || hasDndAccess)) {
-                existing.setBypassDnd(channel.canBypassDnd());
+                boolean bypassDnd = channel.canBypassDnd();
+                existing.setBypassDnd(bypassDnd);
+
+                if (bypassDnd != mAreChannelsBypassingDnd) {
+                    updateChannelsBypassingDnd();
+                }
             }
 
             updateConfig();
@@ -675,6 +684,9 @@ public class RankingHelper implements RankingConfig {
         }
 
         r.channels.put(channel.getId(), channel);
+        if (channel.canBypassDnd() != mAreChannelsBypassingDnd) {
+            updateChannelsBypassingDnd();
+        }
         MetricsLogger.action(getChannelLog(channel, pkg).setType(
                 MetricsProto.MetricsEvent.TYPE_OPEN));
     }
@@ -781,6 +793,10 @@ public class RankingHelper implements RankingConfig {
             // only log if there are real changes
             MetricsLogger.action(getChannelLog(updatedChannel, pkg));
         }
+
+        if (updatedChannel.canBypassDnd() != mAreChannelsBypassingDnd) {
+            updateChannelsBypassingDnd();
+        }
         updateConfig();
     }
 
@@ -814,6 +830,10 @@ public class RankingHelper implements RankingConfig {
             LogMaker lm = getChannelLog(channel, pkg);
             lm.setType(MetricsProto.MetricsEvent.TYPE_CLOSE);
             MetricsLogger.action(lm);
+
+            if (mAreChannelsBypassingDnd && channel.canBypassDnd()) {
+                updateChannelsBypassingDnd();
+            }
         }
     }
 
@@ -1024,6 +1044,45 @@ public class RankingHelper implements RankingConfig {
             }
         }
         return count;
+    }
+
+    public void updateChannelsBypassingDnd() {
+        synchronized (mRecords) {
+            final int numRecords = mRecords.size();
+            for (int recordIndex = 0; recordIndex < numRecords; recordIndex++) {
+                final Record r = mRecords.valueAt(recordIndex);
+                final int numChannels = r.channels.size();
+
+                for (int channelIndex = 0; channelIndex < numChannels; channelIndex++) {
+                    NotificationChannel channel = r.channels.valueAt(channelIndex);
+                    if (!channel.isDeleted() && channel.canBypassDnd()) {
+                        if (!mAreChannelsBypassingDnd) {
+                            mAreChannelsBypassingDnd = true;
+                            updateZenPolicy(true);
+                        }
+                        return;
+                    }
+                }
+            }
+        }
+
+        if (mAreChannelsBypassingDnd) {
+            mAreChannelsBypassingDnd = false;
+            updateZenPolicy(false);
+        }
+    }
+
+    public void updateZenPolicy(boolean areChannelsBypassingDnd) {
+        NotificationManager.Policy policy = mZenModeHelper.getNotificationPolicy();
+        mZenModeHelper.setNotificationPolicy(new NotificationManager.Policy(
+                policy.priorityCategories, policy.priorityCallSenders,
+                policy.priorityMessageSenders, policy.suppressedVisualEffects,
+                (areChannelsBypassingDnd ? NotificationManager.Policy.STATE_CHANNELS_BYPASSING_DND
+                        : 0)));
+    }
+
+    public boolean areChannelsBypassingDnd() {
+        return mAreChannelsBypassingDnd;
     }
 
     /**
