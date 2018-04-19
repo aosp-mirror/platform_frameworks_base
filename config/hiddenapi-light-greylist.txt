@@ -2864,8 +2864,10 @@ Landroid/widget/Switch;->mThumbDrawable:Landroid/graphics/drawable/Drawable;
 Landroid/widget/Switch;->mTrackDrawable:Landroid/graphics/drawable/Drawable;
 Landroid/widget/TabHost$IntentContentStrategy;->getContentView()Landroid/view/View;
 Landroid/widget/TabHost$IntentContentStrategy;->tabClosed()V
+Landroid/widget/TabHost$TabSpec;->mIndicatorStrategy:Landroid/widget/TabHost$IndicatorStrategy;
 Landroid/widget/TabHost;->mTabSpecs:Ljava/util/List;
 Landroid/widget/TabHost$TabSpec;->mContentStrategy:Landroid/widget/TabHost$ContentStrategy;
+Landroid/widget/TabWidget;->mDrawBottomStrips:Z
 Landroid/widget/TabWidget;->mSelectedTab:I
 Landroid/widget/TabWidget;->setTabSelectionListener(Landroid/widget/TabWidget$OnTabSelectionChanged;)V
 Landroid/widget/TextView;->assumeLayout()V
