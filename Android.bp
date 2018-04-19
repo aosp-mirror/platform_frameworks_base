@@ -944,34 +944,34 @@ framework_docs_args = "-android -manifest $(location core/res/AndroidManifest.xm
      "-hidePackage com.android.okhttp " +
      "-hidePackage com.android.org.conscrypt " +
      "-hidePackage com.android.server " +
-     "-since $(location api/1.xml) 1 " +
-     "-since $(location api/2.xml) 2 " +
-     "-since $(location api/3.xml) 3 " +
-     "-since $(location api/4.xml) 4 " +
-     "-since $(location api/5.xml) 5 " +
-     "-since $(location api/6.xml) 6 " +
-     "-since $(location api/7.xml) 7 " +
-     "-since $(location api/8.xml) 8 " +
-     "-since $(location api/9.xml) 9 " +
-     "-since $(location api/10.xml) 10 " +
-     "-since $(location api/11.xml) 11 " +
-     "-since $(location api/12.xml) 12 " +
-     "-since $(location api/13.xml) 13 " +
-     "-since $(location api/14.txt) 14 " +
-     "-since $(location api/15.txt) 15 " +
-     "-since $(location api/16.txt) 16 " +
-     "-since $(location api/17.txt) 17 " +
-     "-since $(location api/18.txt) 18 " +
-     "-since $(location api/19.txt) 19 " +
-     "-since $(location api/20.txt) 20 " +
-     "-since $(location api/21.txt) 21 " +
-     "-since $(location api/22.txt) 22 " +
-     "-since $(location api/23.txt) 23 " +
-     "-since $(location api/24.txt) 24 " +
-     "-since $(location api/25.txt) 25 " +
-     "-since $(location api/26.txt) 26 " +
-     "-since $(location api/27.txt) 27 " +
-     "-since $(location api/current.txt) P " +
+     "-since $(location 1/public/api/android.xml) 1 " +
+     "-since $(location 2/public/api/android.xml) 2 " +
+     "-since $(location 3/public/api/android.xml) 3 " +
+     "-since $(location 4/public/api/android.xml) 4 " +
+     "-since $(location 5/public/api/android.xml) 5 " +
+     "-since $(location 6/public/api/android.xml) 6 " +
+     "-since $(location 7/public/api/android.xml) 7 " +
+     "-since $(location 8/public/api/android.xml) 8 " +
+     "-since $(location 9/public/api/android.xml) 9 " +
+     "-since $(location 10/public/api/android.xml) 10 " +
+     "-since $(location 11/public/api/android.xml) 11 " +
+     "-since $(location 12/public/api/android.xml) 12 " +
+     "-since $(location 13/public/api/android.xml) 13 " +
+     "-since $(location 14/public/api/android.txt) 14 " +
+     "-since $(location 15/public/api/android.txt) 15 " +
+     "-since $(location 16/public/api/android.txt) 16 " +
+     "-since $(location 17/public/api/android.txt) 17 " +
+     "-since $(location 18/public/api/android.txt) 18 " +
+     "-since $(location 19/public/api/android.txt) 19 " +
+     "-since $(location 20/public/api/android.txt) 20 " +
+     "-since $(location 21/public/api/android.txt) 21 " +
+     "-since $(location 22/public/api/android.txt) 22 " +
+     "-since $(location 23/public/api/android.txt) 23 " +
+     "-since $(location 24/public/api/android.txt) 24 " +
+     "-since $(location 25/public/api/android.txt) 25 " +
+     "-since $(location 26/public/api/android.txt) 26 " +
+     "-since $(location 27/public/api/android.txt) 27 " +
+     "-since $(location 28/public/api/android.txt) 28 " +
      "-werror -lerror -hide 111 -hide 113 -hide 125 -hide 126 -hide 127 -hide 128 " +
      "-overview $(location core/java/overview.html) " +
      // Federate Support Library references against local API file.
