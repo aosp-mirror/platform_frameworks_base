@@ -20,7 +20,6 @@
 #include "SkiaPipeline.h"
 
 #include <SkPathOps.h>
-#include <SkRRectsGaussianEdgeMaskFilter.h>
 #include <SkShadowUtils.h>
 
 namespace android {
