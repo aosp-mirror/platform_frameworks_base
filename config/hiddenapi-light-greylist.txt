@@ -374,6 +374,8 @@ Landroid/app/Service;->setForeground(Z)V
 Landroid/app/SharedPreferencesImpl;-><init>(Ljava/io/File;I)V
 Landroid/app/SharedPreferencesImpl;->mFile:Ljava/io/File;
 Landroid/app/SharedPreferencesImpl;->startReloadIfChangedUnexpectedly()V
+Landroid/app/slice/Slice$Builder;-><init>(Landroid/net/Uri;)V
+Landroid/app/slice/Slice$Builder;->setSpec(Landroid/app/slice/SliceSpec;)Landroid/app/slice/Slice$Builder;
 Landroid/app/slice/SliceItem;->getTimestamp()J
 Landroid/app/slice/SliceManager;->bindSlice(Landroid/net/Uri;Ljava/util/List;)Landroid/app/slice/Slice;
 Landroid/app/slice/SliceManager;->pinSlice(Landroid/net/Uri;Ljava/util/List;)V
