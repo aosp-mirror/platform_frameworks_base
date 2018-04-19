@@ -271,7 +271,8 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
 
                 // Sanitize structure before it's sent to service.
                 final ComponentName componentNameFromApp = structure.getActivityComponent();
-                if (!mComponentName.equals(componentNameFromApp)) {
+                if (componentNameFromApp == null || !mComponentName.getPackageName()
+                        .equals(componentNameFromApp.getPackageName())) {
                     Slog.w(TAG, "Activity " + mComponentName + " forged different component on "
                             + "AssistStructure: " + componentNameFromApp);
                     structure.setActivityComponent(mComponentName);
