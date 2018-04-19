@@ -111,6 +111,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.function.BiConsumer;
 
 /**
@@ -4039,14 +4040,21 @@ public class NotificationStackScrollLayout extends ViewGroup
     public void updateEmptyShadeView(boolean visible) {
         int oldVisibility = mEmptyShadeView.willBeGone() ? GONE : mEmptyShadeView.getVisibility();
         int newVisibility = visible ? VISIBLE : GONE;
-        if (oldVisibility != newVisibility) {
+
+        boolean changedVisibility = oldVisibility != newVisibility;
+        if (changedVisibility || newVisibility != GONE) {
             if (newVisibility != GONE) {
+                int oldText = mEmptyShadeView.getTextResource();
+                int newText;
                 if (mStatusBar.areNotificationsHidden()) {
-                    mEmptyShadeView.setText(R.string.dnd_suppressing_shade_text);
+                    newText = R.string.dnd_suppressing_shade_text;
                 } else {
-                    mEmptyShadeView.setText(R.string.empty_shade_text);
+                    newText = R.string.empty_shade_text;
                 }
-                showFooterView(mEmptyShadeView);
+                if (changedVisibility || !Objects.equals(oldText, newText)) {
+                    mEmptyShadeView.setText(newText);
+                    showFooterView(mEmptyShadeView);
+                }
             } else {
                 hideFooterView(mEmptyShadeView, true);
             }
