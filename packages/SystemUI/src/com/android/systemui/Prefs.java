@@ -50,8 +50,10 @@ public final class Prefs {
             Key.QS_NIGHTDISPLAY_ADDED,
             Key.QS_LONG_PRESS_TOOLTIP_SHOWN_COUNT,
             Key.SEEN_MULTI_USER,
-            Key.NUM_APPS_LAUNCHED,
-            Key.HAS_SEEN_RECENTS_ONBOARDING,
+            Key.HAS_SEEN_RECENTS_SWIPE_UP_ONBOARDING,
+            Key.HAS_SEEN_RECENTS_QUICK_SCRUB_ONBOARDING,
+            Key.OVERVIEW_OPENED_COUNT,
+            Key.OVERVIEW_OPENED_FROM_HOME_COUNT,
             Key.SEEN_RINGER_GUIDANCE_COUNT,
             Key.QS_HAS_TURNED_OFF_MOBILE_DATA,
             Key.TOUCHED_RINGER_TOGGLE,
@@ -88,8 +90,10 @@ public final class Prefs {
          */
         String QS_LONG_PRESS_TOOLTIP_SHOWN_COUNT = "QsLongPressTooltipShownCount";
         String SEEN_MULTI_USER = "HasSeenMultiUser";
-        String NUM_APPS_LAUNCHED = "NumAppsLaunched";
-        String HAS_SEEN_RECENTS_ONBOARDING = "HasSeenRecentsOnboarding";
+        String OVERVIEW_OPENED_COUNT = "OverviewOpenedCount";
+        String OVERVIEW_OPENED_FROM_HOME_COUNT = "OverviewOpenedFromHomeCount";
+        String HAS_SEEN_RECENTS_SWIPE_UP_ONBOARDING = "HasSeenRecentsSwipeUpOnboarding";
+        String HAS_SEEN_RECENTS_QUICK_SCRUB_ONBOARDING = "HasSeenRecentsQuickScrubOnboarding";
         String SEEN_RINGER_GUIDANCE_COUNT = "RingerGuidanceCount";
         String QS_TILE_SPECS_REVEALED = "QsTileSpecsRevealed";
         String QS_HAS_TURNED_OFF_MOBILE_DATA = "QsHasTurnedOffMobileData";
