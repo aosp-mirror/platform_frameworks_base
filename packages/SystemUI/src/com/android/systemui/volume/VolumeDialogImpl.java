@@ -765,9 +765,9 @@ public class VolumeDialogImpl implements VolumeDialog {
         if (max != row.slider.getMax()) {
             row.slider.setMax(max);
         }
-        // update A11y slider min
+        // update slider min
         final int min = ss.levelMin * 100;
-        if (isA11yStream && min != row.slider.getMin()) {
+        if (min != row.slider.getMin()) {
             row.slider.setMin(min);
         }
 
