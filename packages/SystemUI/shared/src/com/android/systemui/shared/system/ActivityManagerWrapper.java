@@ -219,13 +219,6 @@ public class ActivityManagerWrapper {
             if (animationHandler != null) {
                 runner = new IRecentsAnimationRunner.Stub() {
                     public void onAnimationStart(IRecentsAnimationController controller,
-                            RemoteAnimationTarget[] apps) {
-                        final Rect stableInsets = new Rect();
-                        WindowManagerWrapper.getInstance().getStableInsets(stableInsets);
-                        onAnimationStart_New(controller, apps, stableInsets, null);
-                    }
-
-                    public void onAnimationStart_New(IRecentsAnimationController controller,
                             RemoteAnimationTarget[] apps, Rect homeContentInsets,
                             Rect minimizedHomeBounds) {
                         final RecentsAnimationControllerCompat controllerCompat =

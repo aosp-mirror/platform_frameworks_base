@@ -366,7 +366,7 @@ public class RecentsAnimationController implements DeathRecipient {
                     && mTargetAppToken.findMainWindow() != null
                             ? mTargetAppToken.findMainWindow().mContentInsets
                             : null;
-            mRunner.onAnimationStart_New(mController, appTargets, contentInsets,
+            mRunner.onAnimationStart(mController, appTargets, contentInsets,
                     minimizedHomeBounds);
             if (DEBUG_RECENTS_ANIMATIONS) {
                 Slog.d(TAG, "startAnimation(): Notify animation start:");
