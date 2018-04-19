@@ -150,15 +150,24 @@ public class ApfTest {
         assertVerdict(DROP, program, packet);
     }
 
-  private void assertDataMemoryContents(
-          int expected, byte[] program, byte[] packet, byte[] data, byte[] expected_data)
-      throws IllegalInstructionException, Exception {
+    private void assertProgramEquals(byte[] expected, byte[] program) throws AssertionError {
+        // assertArrayEquals() would only print one byte, making debugging difficult.
+        if (!java.util.Arrays.equals(expected, program)) {
+            throw new AssertionError(
+                    "\nexpected: " + HexDump.toHexString(expected) +
+                    "\nactual:   " + HexDump.toHexString(program));
+        }
+    }
+
+    private void assertDataMemoryContents(
+            int expected, byte[] program, byte[] packet, byte[] data, byte[] expected_data)
+            throws IllegalInstructionException, Exception {
         assertReturnCodesEqual(expected, apfSimulate(program, packet, data, 0 /* filterAge */));
 
         // assertArrayEquals() would only print one byte, making debugging difficult.
         if (!java.util.Arrays.equals(expected_data, data)) {
             throw new Exception(
-                    "program: " + HexDump.toHexString(program) +
+                    "\nprogram:     " + HexDump.toHexString(program) +
                     "\ndata memory: " + HexDump.toHexString(data) +
                     "\nexpected:    " + HexDump.toHexString(expected_data));
         }
@@ -620,6 +629,64 @@ public class ApfTest {
         } catch (IllegalInstructionException expected) {
             /* pass */
         }
+    }
+
+    /**
+     * Test that the generator emits immediates using the shortest possible encoding.
+     */
+    @Test
+    public void testImmediateEncoding() throws IllegalInstructionException {
+        final int LI_OPCODE = 13 << 3;
+        ApfGenerator gen;
+
+        // 0-byte immediate: li R0, 0
+        gen = new ApfGenerator(3);
+        gen.addLoadImmediate(Register.R0, 0);
+        assertProgramEquals(new byte[]{LI_OPCODE | (0 << 1)}, gen.generate());
+
+        // 1-byte immediate: li R0, 42
+        gen = new ApfGenerator(3);
+        gen.addLoadImmediate(Register.R0, 42);
+        assertProgramEquals(new byte[]{LI_OPCODE | (1 << 1), 42}, gen.generate());
+
+        // 2-byte immediate: li R1, 0x1234
+        gen = new ApfGenerator(3);
+        gen.addLoadImmediate(Register.R1, 0x1234);
+        assertProgramEquals(new byte[]{LI_OPCODE | (2 << 1) | 1 , 0x12, 0x34}, gen.generate());
+
+        // 4-byte immediate: li R0, 0x12345678
+        gen = new ApfGenerator(3);
+        gen.addLoadImmediate(Register.R0, 0x12345678);
+        assertProgramEquals(
+                new byte[]{LI_OPCODE | (3 << 1), 0x12, 0x34, 0x56, 0x78},
+                gen.generate());
+    }
+
+    /**
+     * Test that the generator emits negative immediates using the shortest possible encoding.
+     */
+    @Test
+    public void testNegativeImmediateEncoding() throws IllegalInstructionException {
+        final int LI_OPCODE = 13 << 3;
+        ApfGenerator gen;
+
+        // 1-byte negative immediate: li R0, -42
+        gen = new ApfGenerator(3);
+        gen.addLoadImmediate(Register.R0, -42);
+        assertProgramEquals(new byte[]{LI_OPCODE | (1 << 1), -42}, gen.generate());
+
+        // 2-byte negative immediate: li R1, -0x1234
+        gen = new ApfGenerator(3);
+        gen.addLoadImmediate(Register.R1, -0x1122);
+        assertProgramEquals(new byte[]{LI_OPCODE | (2 << 1) | 1, (byte)0xEE, (byte)0xDE},
+                gen.generate());
+
+        // 4-byte negative immediate: li R0, -0x11223344
+        gen = new ApfGenerator(3);
+        gen.addLoadImmediate(Register.R0, -0x11223344);
+        assertProgramEquals(
+                new byte[]{LI_OPCODE | (3 << 1), (byte)0xEE, (byte)0xDD, (byte)0xCC, (byte)0xBC},
+                gen.generate());
     }
 
     @Test
