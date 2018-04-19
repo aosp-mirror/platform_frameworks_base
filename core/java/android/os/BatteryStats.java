@@ -4447,8 +4447,7 @@ public abstract class BatteryStats implements Parcelable {
             pw.println(sb.toString());
         }
 
-        final long dischargeScreenOnCount =
-                dischargeCount - dischargeScreenOffCount - dischargeScreenDozeCount;
+        final long dischargeScreenOnCount = dischargeCount - dischargeScreenOffCount;
         if (dischargeScreenOnCount >= 0) {
             sb.setLength(0);
             sb.append(prefix);
