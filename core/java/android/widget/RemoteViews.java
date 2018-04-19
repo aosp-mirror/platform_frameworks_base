@@ -83,6 +83,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Stack;
 import java.util.concurrent.Executor;
+import java.util.function.Consumer;
 
 /**
  * A class that describes a view hierarchy that can be displayed in
@@ -444,6 +445,10 @@ public class RemoteViews implements Parcelable, Filter {
             return true;
         }
 
+        public void visitUris(@NonNull Consumer<Uri> visitor) {
+            // Nothing to visit by default
+        }
+
         int viewId;
     }
 
@@ -515,6 +520,27 @@ public class RemoteViews implements Parcelable, Filter {
         // Because pruning can remove the need for bitmaps, we reconstruct the bitmap cache
         mBitmapCache = new BitmapCache();
         setBitmapCache(mBitmapCache);
+    }
+
+    /**
+     * Note all {@link Uri} that are referenced internally, with the expectation
+     * that Uri permission grants will need to be issued to ensure the recipient
+     * of this object is able to render its contents.
+     *
+     * @hide
+     */
+    public void visitUris(@NonNull Consumer<Uri> visitor) {
+        if (mActions != null) {
+            for (int i = 0; i < mActions.size(); i++) {
+                mActions.get(i).visitUris(visitor);
+            }
+        }
+    }
+
+    private static void visitIconUri(Icon icon, @NonNull Consumer<Uri> visitor) {
+        if (icon != null && icon.getType() == Icon.TYPE_URI) {
+            visitor.accept(icon.getUri());
+        }
     }
 
     private static class RemoteViewsContextWrapper extends ContextWrapper {
@@ -1485,6 +1511,20 @@ public class RemoteViews implements Parcelable, Filter {
         public boolean prefersAsyncApply() {
             return this.type == URI || this.type == ICON;
         }
+
+        @Override
+        public void visitUris(@NonNull Consumer<Uri> visitor) {
+            switch (this.type) {
+                case URI:
+                    final Uri uri = (Uri) this.value;
+                    visitor.accept(uri);
+                    break;
+                case ICON:
+                    final Icon icon = (Icon) this.value;
+                    visitIconUri(icon, visitor);
+                    break;
+            }
+        }
     }
 
     /**
@@ -1847,6 +1887,16 @@ public class RemoteViews implements Parcelable, Filter {
         @Override
         public int getActionTag() {
             return TEXT_VIEW_DRAWABLE_ACTION_TAG;
+        }
+
+        @Override
+        public void visitUris(@NonNull Consumer<Uri> visitor) {
+            if (useIcons) {
+                visitIconUri(i1, visitor);
+                visitIconUri(i2, visitor);
+                visitIconUri(i3, visitor);
+                visitIconUri(i4, visitor);
+            }
         }
 
         boolean isRelative = false;

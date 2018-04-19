@@ -91,6 +91,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
+import java.util.function.Consumer;
 
 /**
  * A class that represents how a persistent notification is to be presented to
@@ -2302,6 +2303,45 @@ public class Notification implements Parcelable
 
         if (!heavy) {
             that.lightenPayload(); // will clean out extras
+        }
+    }
+
+    /**
+     * Note all {@link Uri} that are referenced internally, with the expectation
+     * that Uri permission grants will need to be issued to ensure the recipient
+     * of this object is able to render its contents.
+     *
+     * @hide
+     */
+    public void visitUris(@NonNull Consumer<Uri> visitor) {
+        visitor.accept(sound);
+
+        if (tickerView != null) tickerView.visitUris(visitor);
+        if (contentView != null) contentView.visitUris(visitor);
+        if (bigContentView != null) bigContentView.visitUris(visitor);
+        if (headsUpContentView != null) headsUpContentView.visitUris(visitor);
+
+        if (extras != null) {
+            visitor.accept(extras.getParcelable(EXTRA_AUDIO_CONTENTS_URI));
+            visitor.accept(extras.getParcelable(EXTRA_BACKGROUND_IMAGE_URI));
+        }
+
+        if (MessagingStyle.class.equals(getNotificationStyle()) && extras != null) {
+            final Parcelable[] messages = extras.getParcelableArray(EXTRA_MESSAGES);
+            if (!ArrayUtils.isEmpty(messages)) {
+                for (MessagingStyle.Message message : MessagingStyle.Message
+                        .getMessagesFromBundleArray(messages)) {
+                    visitor.accept(message.getDataUri());
+                }
+            }
+
+            final Parcelable[] historic = extras.getParcelableArray(EXTRA_HISTORIC_MESSAGES);
+            if (!ArrayUtils.isEmpty(historic)) {
+                for (MessagingStyle.Message message : MessagingStyle.Message
+                        .getMessagesFromBundleArray(historic)) {
+                    visitor.accept(message.getDataUri());
+                }
+            }
         }
     }
 
