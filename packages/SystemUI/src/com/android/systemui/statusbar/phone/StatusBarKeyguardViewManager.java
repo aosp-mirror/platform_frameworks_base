@@ -542,6 +542,10 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
         return mBouncer.isShowing();
     }
 
+    public boolean isFullscreenBouncer() {
+        return mBouncer.isFullscreenBouncer();
+    }
+
     private long getNavBarShowDelay() {
         if (mStatusBar.isKeyguardFadingAway()) {
             return mStatusBar.getKeyguardFadingAwayDelay();
