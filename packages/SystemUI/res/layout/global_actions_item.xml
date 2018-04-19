@@ -25,8 +25,8 @@
     android:minHeight="92dp"
     android:gravity="center"
     android:orientation="vertical"
-    android:paddingEnd="0dip"
-    android:paddingStart="0dip">
+    android:paddingEnd="4dip"
+    android:paddingStart="4dip">
 
     <ImageView
         android:id="@*android:id/icon"
