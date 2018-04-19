@@ -496,9 +496,9 @@ import android.view.autofill.AutofillValue;
  *
  * <p>Apps that use standard Android widgets support autofill out-of-the-box and need to do
  * very little to improve their user experience (annotating autofillable views and providing
- * autofill hints). However, some apps do their own rendering and the rendered content may
- * contain semantic structure that needs to be surfaced to the autofill framework. The platform
- * exposes APIs to achieve this, however it could take some time until these apps implement
+ * autofill hints). However, some apps (typically browsers) do their own rendering and the rendered
+ * content may contain semantic structure that needs to be surfaced to the autofill framework. The
+ * platform exposes APIs to achieve this, however it could take some time until these apps implement
  * autofill support.
  *
  * <p>To enable autofill for such apps the platform provides a compatibility mode in which the
@@ -521,12 +521,33 @@ import android.view.autofill.AutofillValue;
  *     &lt;meta-data android:name="android.autofill" android:resource="@xml/autofillservice" /&gt;
  * &lt;/service&gt;</pre>
  *
- * <P>In the XML file you can specify one or more packages for which to enable compatibility
+ * <p>In the XML file you can specify one or more packages for which to enable compatibility
  * mode. Below is a sample meta-data declaration:
  *
  * <pre> &lt;autofill-service xmlns:android="http://schemas.android.com/apk/res/android"&gt;
  *     &lt;compatibility-package android:name="foo.bar.baz" android:maxLongVersionCode="1000000000"/&gt;
  * &lt;/autofill-service&gt;</pre>
+ *
+ * <p>Notice that compatibility mode has limitations such as:
+ * <ul>
+ * <li>No manual autofill requests. Hence, the {@link FillRequest}
+ * {@link FillRequest#getFlags() flags} never have the {@link FillRequest#FLAG_MANUAL_REQUEST} flag.
+ * <li>The value of password fields are most likely masked&mdash;for example, {@code ****} instead
+ * of {@code 1234}. Hence, you must be careful when using these values to avoid updating the user
+ * data with invalid input. For example, when you parse the {@link FillRequest} and detect a
+ * password field, you could check if its
+ * {@link android.app.assist.AssistStructure.ViewNode#getInputType()
+ * input type} has password flags and if so, don't add it to the {@link SaveInfo} object.
+ * <li>The autofill context is not always {@link AutofillManager#commit() committed} when an HTML
+ * form is submitted. Hence, you must use other mechanisms to trigger save, such as setting the
+ * {@link SaveInfo#FLAG_SAVE_ON_ALL_VIEWS_INVISIBLE} flag on {@link SaveInfo.Builder#setFlags(int)}
+ * or using {@link SaveInfo.Builder#setTriggerId(AutofillId)}.
+ * <li>Browsers often provide their own autofill management system. When both the browser and
+ * the platform render an autofill dialog at the same time, the result can be confusing to the user.
+ * Such browsers typically offer an option for users to disable autofill, so your service should
+ * also allow users to disable compatiblity mode for specific apps. That way, it is up to the user
+ * to decide which autofill mechanism&mdash;the browser's or the platform's&mdash;should be used.
+ * </ul>
  */
 public abstract class AutofillService extends Service {
     private static final String TAG = "AutofillService";
