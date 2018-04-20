@@ -20,6 +20,7 @@ import static com.android.internal.util.Preconditions.checkNotNull;
 
 import android.annotation.Nullable;
 import android.annotation.SystemService;
+import android.annotation.TestApi;
 import android.app.usage.NetworkStats.Bucket;
 import android.content.Context;
 import android.net.ConnectivityManager;
@@ -111,7 +112,9 @@ public class NetworkStatsManager {
     /** @hide */
     public static final int FLAG_POLL_ON_OPEN = 1 << 0;
     /** @hide */
-    public static final int FLAG_AUGMENT_WITH_SUBSCRIPTION_PLAN = 1 << 1;
+    public static final int FLAG_POLL_FORCE = 1 << 1;
+    /** @hide */
+    public static final int FLAG_AUGMENT_WITH_SUBSCRIPTION_PLAN = 1 << 2;
 
     private int mFlags;
 
@@ -137,6 +140,16 @@ public class NetworkStatsManager {
             mFlags |= FLAG_POLL_ON_OPEN;
         } else {
             mFlags &= ~FLAG_POLL_ON_OPEN;
+        }
+    }
+
+    /** @hide */
+    @TestApi
+    public void setPollForce(boolean pollForce) {
+        if (pollForce) {
+            mFlags |= FLAG_POLL_FORCE;
+        } else {
+            mFlags &= ~FLAG_POLL_FORCE;
         }
     }
 
