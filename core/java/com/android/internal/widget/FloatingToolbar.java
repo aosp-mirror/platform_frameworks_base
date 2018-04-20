@@ -1176,6 +1176,9 @@ public final class FloatingToolbar {
                 final boolean showIcon = isFirstItem && menuItem.getItemId() == R.id.textAssist;
                 final View menuItemButton = createMenuItemButton(
                         mContext, menuItem, mIconTextSpacing, showIcon);
+                if (!showIcon && menuItemButton instanceof LinearLayout) {
+                    ((LinearLayout) menuItemButton).setGravity(Gravity.CENTER);
+                }
 
                 // Adding additional start padding for the first button to even out button spacing.
                 if (isFirstItem) {
@@ -1200,57 +1203,21 @@ public final class FloatingToolbar {
                 final int menuItemButtonWidth = Math.min(
                         menuItemButton.getMeasuredWidth(), toolbarWidth);
 
-                final boolean isNewGroup = !isFirstItem && lastGroupId != menuItem.getGroupId();
-                final int extraPadding = isNewGroup ? menuItemButton.getPaddingEnd() * 2 : 0;
-
                 // Check if we can fit an item while reserving space for the overflowButton.
                 final boolean canFitWithOverflow =
                         menuItemButtonWidth <=
-                                availableWidth - mOverflowButtonSize.getWidth() - extraPadding;
+                                availableWidth - mOverflowButtonSize.getWidth();
                 final boolean canFitNoOverflow =
-                        isLastItem && menuItemButtonWidth <= availableWidth - extraPadding;
+                        isLastItem && menuItemButtonWidth <= availableWidth;
                 if (canFitWithOverflow || canFitNoOverflow) {
-                    if (isNewGroup) {
-                        final View divider = createDivider(mContext);
-                        final int dividerWidth = divider.getLayoutParams().width;
-
-                        // Add extra padding to the end of the previous button.
-                        // Half of the extra padding (less borderWidth) goes to the previous button.
-                        final View previousButton = mMainPanel.getChildAt(
-                                mMainPanel.getChildCount() - 1);
-                        final int prevPaddingEnd = previousButton.getPaddingEnd()
-                                + extraPadding / 2 - dividerWidth;
-                        previousButton.setPaddingRelative(
-                                previousButton.getPaddingStart(),
-                                previousButton.getPaddingTop(),
-                                prevPaddingEnd,
-                                previousButton.getPaddingBottom());
-                        final ViewGroup.LayoutParams prevParams = previousButton.getLayoutParams();
-                        prevParams.width += extraPadding / 2 - dividerWidth;
-                        previousButton.setLayoutParams(prevParams);
-
-                        // Add extra padding to the start of this button.
-                        // Other half of the extra padding goes to this button.
-                        final int paddingStart = menuItemButton.getPaddingStart()
-                                + extraPadding / 2;
-                        menuItemButton.setPaddingRelative(
-                                paddingStart,
-                                menuItemButton.getPaddingTop(),
-                                menuItemButton.getPaddingEnd(),
-                                menuItemButton.getPaddingBottom());
-
-                        // Include a divider.
-                        mMainPanel.addView(divider);
-                    }
-
                     setButtonTagAndClickListener(menuItemButton, menuItem);
                     // Set tooltips for main panel items, but not overflow items (b/35726766).
                     menuItemButton.setTooltipText(menuItem.getTooltipText());
                     mMainPanel.addView(menuItemButton);
                     final ViewGroup.LayoutParams params = menuItemButton.getLayoutParams();
-                    params.width = menuItemButtonWidth + extraPadding / 2;
+                    params.width = menuItemButtonWidth;
                     menuItemButton.setLayoutParams(params);
-                    availableWidth -= menuItemButtonWidth + extraPadding;
+                    availableWidth -= menuItemButtonWidth;
                     remainingMenuItems.pop();
                 } else {
                     break;
@@ -1724,30 +1691,6 @@ public final class FloatingToolbar {
                 ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT));
         popupContentHolder.addView(content);
         return popupWindow;
-    }
-
-    private static View createDivider(Context context) {
-        // TODO: Inflate this instead.
-        View divider = new View(context);
-
-        int _1dp = (int) TypedValue.applyDimension(
-                TypedValue.COMPLEX_UNIT_DIP, 1, context.getResources().getDisplayMetrics());
-        LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
-                _1dp, ViewGroup.LayoutParams.MATCH_PARENT);
-        params.setMarginsRelative(0, _1dp * 10, 0, _1dp * 10);
-        divider.setLayoutParams(params);
-
-        TypedArray a = context.obtainStyledAttributes(
-                new TypedValue().data, new int[] { R.attr.floatingToolbarDividerColor });
-        divider.setBackgroundColor(a.getColor(0, 0));
-        a.recycle();
-
-        divider.setImportantForAccessibility(View.IMPORTANT_FOR_ACCESSIBILITY_NO);
-        divider.setEnabled(false);
-        divider.setFocusable(false);
-        divider.setContentDescription(null);
-
-        return divider;
     }
 
     /**
