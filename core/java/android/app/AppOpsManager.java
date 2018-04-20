@@ -577,9 +577,9 @@ public class AppOpsManager {
      * make them all controlled by the same single operation.
      */
     private static int[] sOpToSwitch = new int[] {
-            OP_COARSE_LOCATION,
-            OP_COARSE_LOCATION,
-            OP_COARSE_LOCATION,
+            OP_COARSE_LOCATION, // OP_COARSE_LOCATION
+            OP_COARSE_LOCATION, // OP_FINE_LOCATION
+            OP_COARSE_LOCATION, // OP_GPS
             OP_VIBRATE,
             OP_READ_CONTACTS,
             OP_WRITE_CONTACTS,
@@ -587,9 +587,9 @@ public class AppOpsManager {
             OP_WRITE_CALL_LOG,
             OP_READ_CALENDAR,
             OP_WRITE_CALENDAR,
-            OP_COARSE_LOCATION,
+            OP_COARSE_LOCATION, // OP_WIFI_SCAN (results can be used to locate user)
             OP_POST_NOTIFICATION,
-            OP_COARSE_LOCATION,
+            OP_COARSE_LOCATION, // OP_NEIGHBORING_CELLS
             OP_CALL_PHONE,
             OP_READ_SMS,
             OP_WRITE_SMS,
@@ -618,8 +618,8 @@ public class AppOpsManager {
             OP_AUDIO_NOTIFICATION_VOLUME,
             OP_AUDIO_BLUETOOTH_VOLUME,
             OP_WAKE_LOCK,
-            OP_COARSE_LOCATION,
-            OP_COARSE_LOCATION,
+            OP_COARSE_LOCATION,  // OP_MONITOR_LOCATION
+            OP_COARSE_LOCATION,  // OP_MONITOR_HIGH_POWER_LOCATION
             OP_GET_USAGE_STATS,
             OP_MUTE_MICROPHONE,
             OP_TOAST_WINDOW,
