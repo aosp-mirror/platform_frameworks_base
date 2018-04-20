@@ -5984,6 +5984,8 @@ public class AudioService extends IAudioService.Stub
                 mConnectedDevices.remove(deviceKey);
                 return true;
             }
+            Log.w(TAG, "handleDeviceConnection() failed, deviceKey=" + deviceKey + ", deviceSpec="
+                       + deviceSpec + ", connect=" + connect);
         }
         return false;
     }
