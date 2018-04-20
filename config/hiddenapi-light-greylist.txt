@@ -3451,6 +3451,7 @@ Ljava/lang/ref/FinalizerReference;->remove(Ljava/lang/ref/FinalizerReference;)V
 Ljava/lang/reflect/Executable;->artMethod:J
 Ljava/lang/reflect/Parameter;-><init>(Ljava/lang/String;ILjava/lang/reflect/Executable;I)V
 Ljava/lang/reflect/Proxy;->invoke(Ljava/lang/reflect/Proxy;Ljava/lang/reflect/Method;[Ljava/lang/Object;)Ljava/lang/Object;
+Ljava/lang/ref/Reference;->getReferent()Ljava/lang/Object;
 Ljava/lang/ref/ReferenceQueue;->add(Ljava/lang/ref/Reference;)V
 Ljava/lang/ref/Reference;->referent:Ljava/lang/Object;
 Ljava/lang/Runtime;->loadLibrary(Ljava/lang/String;Ljava/lang/ClassLoader;)V
@@ -3458,7 +3459,9 @@ Ljava/lang/Runtime;->load(Ljava/lang/String;Ljava/lang/ClassLoader;)V
 Ljava/lang/Runtime;->mLibPaths:[Ljava/lang/String;
 Ljava/lang/Runtime;->nativeLoad(Ljava/lang/String;Ljava/lang/ClassLoader;)Ljava/lang/String;
 Ljava/lang/Short;->value:S
+Ljava/lang/String;->getCharsNoCheck(II[CI)V
 Ljava/lang/String;-><init>(II[C)V
+Ljava/lang/System;->arraycopy([CI[CII)V
 Ljava/lang/System;->arraycopy([II[III)V
 Ljava/lang/System;-><init>()V
 Ljava/lang/Thread;->contextClassLoader:Ljava/lang/ClassLoader;
