@@ -6091,6 +6091,14 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 && (!isNavBarVirtKey || mNavBarVirtualKeyHapticFeedbackEnabled)
                 && event.getRepeatCount() == 0;
 
+        // Cancel any pending remote recents animations before handling the button itself. In the
+        // case where we are going home and the recents animation has already started, just cancel
+        // the recents animation, leaving the home stack in place for the pending start activity
+        if (isNavBarVirtKey && !down) {
+            boolean isHomeKey = keyCode == KeyEvent.KEYCODE_HOME;
+            mActivityManagerInternal.cancelRecentsAnimation(!isHomeKey);
+        }
+
         // Handle special keys.
         switch (keyCode) {
             case KeyEvent.KEYCODE_BACK: {
