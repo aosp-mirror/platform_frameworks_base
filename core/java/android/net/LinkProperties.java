@@ -50,6 +50,7 @@ public final class LinkProperties implements Parcelable {
     private String mIfaceName;
     private ArrayList<LinkAddress> mLinkAddresses = new ArrayList<LinkAddress>();
     private ArrayList<InetAddress> mDnses = new ArrayList<InetAddress>();
+    private ArrayList<InetAddress> mValidatedPrivateDnses = new ArrayList<InetAddress>();
     private boolean mUsePrivateDns;
     private String mPrivateDnsServerName;
     private String mDomains;
@@ -167,6 +168,9 @@ public final class LinkProperties implements Parcelable {
             mIfaceName = source.getInterfaceName();
             for (LinkAddress l : source.getLinkAddresses()) mLinkAddresses.add(l);
             for (InetAddress i : source.getDnsServers()) mDnses.add(i);
+            for (InetAddress i : source.getValidatedPrivateDnsServers()) {
+                mValidatedPrivateDnses.add(i);
+            }
             mUsePrivateDns = source.mUsePrivateDns;
             mPrivateDnsServerName = source.mPrivateDnsServerName;
             mDomains = source.getDomains();
@@ -374,7 +378,7 @@ public final class LinkProperties implements Parcelable {
      * Replaces the DNS servers in this {@code LinkProperties} with
      * the given {@link Collection} of {@link InetAddress} objects.
      *
-     * @param addresses The {@link Collection} of DNS servers to set in this object.
+     * @param dnsServers The {@link Collection} of DNS servers to set in this object.
      * @hide
      */
     public void setDnsServers(Collection<InetAddress> dnsServers) {
@@ -445,6 +449,65 @@ public final class LinkProperties implements Parcelable {
      */
     public @Nullable String getPrivateDnsServerName() {
         return mPrivateDnsServerName;
+    }
+
+    /**
+     * Adds the given {@link InetAddress} to the list of validated private DNS servers,
+     * if not present. This is distinct from the server name in that these are actually
+     * resolved addresses.
+     *
+     * @param dnsServer The {@link InetAddress} to add to the list of validated private DNS servers.
+     * @return true if the DNS server was added, false if it was already present.
+     * @hide
+     */
+    public boolean addValidatedPrivateDnsServer(InetAddress dnsServer) {
+        if (dnsServer != null && !mValidatedPrivateDnses.contains(dnsServer)) {
+            mValidatedPrivateDnses.add(dnsServer);
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * Removes the given {@link InetAddress} from the list of validated private DNS servers.
+     *
+     * @param dnsServer The {@link InetAddress} to remove from the list of validated private DNS
+     *        servers.
+     * @return true if the DNS server was removed, false if it did not exist.
+     * @hide
+     */
+    public boolean removeValidatedPrivateDnsServer(InetAddress dnsServer) {
+        if (dnsServer != null) {
+            return mValidatedPrivateDnses.remove(dnsServer);
+        }
+        return false;
+    }
+
+    /**
+     * Replaces the validated private DNS servers in this {@code LinkProperties} with
+     * the given {@link Collection} of {@link InetAddress} objects.
+     *
+     * @param dnsServers The {@link Collection} of validated private DNS servers to set in this
+     *        object.
+     * @hide
+     */
+    public void setValidatedPrivateDnsServers(Collection<InetAddress> dnsServers) {
+        mValidatedPrivateDnses.clear();
+        for (InetAddress dnsServer: dnsServers) {
+            addValidatedPrivateDnsServer(dnsServer);
+        }
+    }
+
+    /**
+     * Returns all the {@link InetAddress} for validated private DNS servers on this link.
+     * These are resolved from the private DNS server name.
+     *
+     * @return An umodifiable {@link List} of {@link InetAddress} for validated private
+     *         DNS servers on this link.
+     * @hide
+     */
+    public List<InetAddress> getValidatedPrivateDnsServers() {
+        return Collections.unmodifiableList(mValidatedPrivateDnses);
     }
 
     /**
@@ -715,6 +778,15 @@ public final class LinkProperties implements Parcelable {
             privateDnsServerName = "PrivateDnsServerName: " + mPrivateDnsServerName + " ";
         }
 
+        String validatedPrivateDns = "";
+        if (!mValidatedPrivateDnses.isEmpty()) {
+            validatedPrivateDns = "ValidatedPrivateDnsAddresses: [";
+            for (InetAddress addr : mValidatedPrivateDnses) {
+                validatedPrivateDns += addr.getHostAddress() + ",";
+            }
+            validatedPrivateDns += "] ";
+        }
+
         String domainName = "Domains: " + mDomains;
 
         String mtu = " MTU: " + mMtu;
@@ -959,7 +1031,7 @@ public final class LinkProperties implements Parcelable {
             if (mDomains.equals(targetDomains) == false) return false;
         }
         return (mDnses.size() == targetDnses.size()) ?
-                    mDnses.containsAll(targetDnses) : false;
+                mDnses.containsAll(targetDnses) : false;
     }
 
     /**
@@ -977,6 +1049,20 @@ public final class LinkProperties implements Parcelable {
     }
 
     /**
+     * Compares this {@code LinkProperties} validated private DNS addresses against
+     * the target
+     *
+     * @param target LinkProperties to compare.
+     * @return {@code true} if both are identical, {@code false} otherwise.
+     * @hide
+     */
+    public boolean isIdenticalValidatedPrivateDnses(LinkProperties target) {
+        Collection<InetAddress> targetDnses = target.getValidatedPrivateDnsServers();
+        return (mValidatedPrivateDnses.size() == targetDnses.size())
+                ? mValidatedPrivateDnses.containsAll(targetDnses) : false;
+    }
+
+    /**
      * Compares this {@code LinkProperties} Routes against the target
      *
      * @param target LinkProperties to compare.
@@ -986,7 +1072,7 @@ public final class LinkProperties implements Parcelable {
     public boolean isIdenticalRoutes(LinkProperties target) {
         Collection<RouteInfo> targetRoutes = target.getRoutes();
         return (mRoutes.size() == targetRoutes.size()) ?
-                    mRoutes.containsAll(targetRoutes) : false;
+                mRoutes.containsAll(targetRoutes) : false;
     }
 
     /**
@@ -998,7 +1084,7 @@ public final class LinkProperties implements Parcelable {
      */
     public boolean isIdenticalHttpProxy(LinkProperties target) {
         return getHttpProxy() == null ? target.getHttpProxy() == null :
-                    getHttpProxy().equals(target.getHttpProxy());
+                getHttpProxy().equals(target.getHttpProxy());
     }
 
     /**
@@ -1074,6 +1160,7 @@ public final class LinkProperties implements Parcelable {
                 && isIdenticalAddresses(target)
                 && isIdenticalDnses(target)
                 && isIdenticalPrivateDns(target)
+                && isIdenticalValidatedPrivateDnses(target)
                 && isIdenticalRoutes(target)
                 && isIdenticalHttpProxy(target)
                 && isIdenticalStackedLinks(target)
@@ -1118,6 +1205,19 @@ public final class LinkProperties implements Parcelable {
          * addedAddresses.
          */
         return new CompareResult<>(mDnses, target != null ? target.getDnsServers() : null);
+    }
+
+    /**
+     * Compares the validated private DNS addresses in this LinkProperties with another
+     * LinkProperties.
+     *
+     * @param target a LinkProperties with the new list of validated private dns addresses
+     * @return the differences between the DNS addresses.
+     * @hide
+     */
+    public CompareResult<InetAddress> compareValidatedPrivateDnses(LinkProperties target) {
+        return new CompareResult<>(mValidatedPrivateDnses,
+                target != null ? target.getValidatedPrivateDnsServers() : null);
     }
 
     /**
@@ -1168,6 +1268,7 @@ public final class LinkProperties implements Parcelable {
         return ((null == mIfaceName) ? 0 : mIfaceName.hashCode()
                 + mLinkAddresses.size() * 31
                 + mDnses.size() * 37
+                + mValidatedPrivateDnses.size() * 61
                 + ((null == mDomains) ? 0 : mDomains.hashCode())
                 + mRoutes.size() * 41
                 + ((null == mHttpProxy) ? 0 : mHttpProxy.hashCode())
@@ -1184,12 +1285,16 @@ public final class LinkProperties implements Parcelable {
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeString(getInterfaceName());
         dest.writeInt(mLinkAddresses.size());
-        for(LinkAddress linkAddress : mLinkAddresses) {
+        for (LinkAddress linkAddress : mLinkAddresses) {
             dest.writeParcelable(linkAddress, flags);
         }
 
         dest.writeInt(mDnses.size());
-        for(InetAddress d : mDnses) {
+        for (InetAddress d : mDnses) {
+            dest.writeByteArray(d.getAddress());
+        }
+        dest.writeInt(mValidatedPrivateDnses.size());
+        for (InetAddress d : mValidatedPrivateDnses) {
             dest.writeByteArray(d.getAddress());
         }
         dest.writeBoolean(mUsePrivateDns);
@@ -1198,7 +1303,7 @@ public final class LinkProperties implements Parcelable {
         dest.writeInt(mMtu);
         dest.writeString(mTcpBufferSizes);
         dest.writeInt(mRoutes.size());
-        for(RouteInfo route : mRoutes) {
+        for (RouteInfo route : mRoutes) {
             dest.writeParcelable(route, flags);
         }
 
@@ -1225,13 +1330,20 @@ public final class LinkProperties implements Parcelable {
                     netProp.setInterfaceName(iface);
                 }
                 int addressCount = in.readInt();
-                for (int i=0; i<addressCount; i++) {
-                    netProp.addLinkAddress((LinkAddress)in.readParcelable(null));
+                for (int i = 0; i < addressCount; i++) {
+                    netProp.addLinkAddress((LinkAddress) in.readParcelable(null));
                 }
                 addressCount = in.readInt();
-                for (int i=0; i<addressCount; i++) {
+                for (int i = 0; i < addressCount; i++) {
                     try {
                         netProp.addDnsServer(InetAddress.getByAddress(in.createByteArray()));
+                    } catch (UnknownHostException e) { }
+                }
+                addressCount = in.readInt();
+                for (int i = 0; i < addressCount; i++) {
+                    try {
+                        netProp.addValidatedPrivateDnsServer(
+                                InetAddress.getByAddress(in.createByteArray()));
                     } catch (UnknownHostException e) { }
                 }
                 netProp.setUsePrivateDns(in.readBoolean());
@@ -1240,11 +1352,11 @@ public final class LinkProperties implements Parcelable {
                 netProp.setMtu(in.readInt());
                 netProp.setTcpBufferSizes(in.readString());
                 addressCount = in.readInt();
-                for (int i=0; i<addressCount; i++) {
-                    netProp.addRoute((RouteInfo)in.readParcelable(null));
+                for (int i = 0; i < addressCount; i++) {
+                    netProp.addRoute((RouteInfo) in.readParcelable(null));
                 }
                 if (in.readByte() == 1) {
-                    netProp.setHttpProxy((ProxyInfo)in.readParcelable(null));
+                    netProp.setHttpProxy((ProxyInfo) in.readParcelable(null));
                 }
                 ArrayList<LinkProperties> stackedLinks = new ArrayList<LinkProperties>();
                 in.readList(stackedLinks, LinkProperties.class.getClassLoader());
@@ -1259,16 +1371,16 @@ public final class LinkProperties implements Parcelable {
             }
         };
 
-        /**
-         * Check the valid MTU range based on IPv4 or IPv6.
-         * @hide
-         */
-        public static boolean isValidMtu(int mtu, boolean ipv6) {
-            if (ipv6) {
-                if ((mtu >= MIN_MTU_V6 && mtu <= MAX_MTU)) return true;
-            } else {
-                if ((mtu >= MIN_MTU && mtu <= MAX_MTU)) return true;
-            }
-            return false;
+    /**
+     * Check the valid MTU range based on IPv4 or IPv6.
+     * @hide
+     */
+    public static boolean isValidMtu(int mtu, boolean ipv6) {
+        if (ipv6) {
+            if (mtu >= MIN_MTU_V6 && mtu <= MAX_MTU) return true;
+        } else {
+            if (mtu >= MIN_MTU && mtu <= MAX_MTU) return true;
         }
+        return false;
+    }
 }
