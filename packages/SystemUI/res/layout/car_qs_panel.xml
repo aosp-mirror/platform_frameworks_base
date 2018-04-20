@@ -29,6 +29,7 @@
 
     <RelativeLayout
         xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:app="http://schemas.android.com/apk/res-auto"
         android:id="@+id/user_switcher_container"
         android:layout_marginStart="@dimen/car_margin"
         android:layout_marginEnd="@dimen/car_margin"
@@ -36,23 +37,17 @@
         android:layout_width="match_parent"
         android:layout_height="@dimen/car_user_switcher_container_height">
 
-        <RelativeLayout
-            android:id="@+id/fullscreen_user_switcher_container_inner"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_marginEnd="@dimen/car_padding_4">
-
-            <com.android.systemui.statusbar.car.UserGridRecyclerView
-                android:id="@+id/user_grid"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:scrollbars="vertical"
-                android:verticalScrollbarPosition="left"
-                android:layout_centerHorizontal="true"
-                android:layout_centerVertical="true"
-                android:layout_alignParentRight="true"
-                android:scrollbarFadeDuration="0"/>
-        </RelativeLayout>
+        <com.android.systemui.statusbar.car.UserGridRecyclerView
+            android:id="@+id/user_grid"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerHorizontal="true"
+            android:layout_centerVertical="true"
+            android:layout_alignParentRight="true"
+            app:dayNightStyle="force_night"
+            app:showPagedListViewDivider="false"
+            app:gutter="both"
+            app:itemSpacing="@dimen/car_padding_4"/>
 
     </RelativeLayout>
 

@@ -73,6 +73,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 /**
@@ -338,7 +339,7 @@ abstract public class ManagedServices {
         loadAllowedComponentsFromSettings();
     }
 
-    public void readXml(XmlPullParser parser)
+    public void readXml(XmlPullParser parser, Predicate<String> allowedManagedServicePackages)
             throws XmlPullParserException, IOException {
         // upgrade xml
         int xmlVersion = XmlUtils.readIntAttribute(parser, ATT_VERSION, 0);
@@ -363,10 +364,14 @@ abstract public class ManagedServices {
                     final int userId = XmlUtils.readIntAttribute(parser, ATT_USER_ID, 0);
                     final boolean isPrimary =
                             XmlUtils.readBooleanAttribute(parser, ATT_IS_PRIMARY, true);
-                    if (mUm.getUserInfo(userId) != null) {
-                        addApprovedList(approved, userId, isPrimary);
+
+                    if (allowedManagedServicePackages == null ||
+                            allowedManagedServicePackages.test(getPackageName(approved))) {
+                        if (mUm.getUserInfo(userId) != null) {
+                            addApprovedList(approved, userId, isPrimary);
+                        }
+                        mUseXml = true;
                     }
-                    mUseXml = true;
                 }
             }
         }

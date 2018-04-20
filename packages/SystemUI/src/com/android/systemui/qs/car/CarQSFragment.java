@@ -75,7 +75,7 @@ public class CarQSFragment extends Fragment implements QS {
         mUserGridView = mUserSwitcherContainer.findViewById(R.id.user_grid);
         GridLayoutManager layoutManager = new GridLayoutManager(context,
                 context.getResources().getInteger(R.integer.user_fullscreen_switcher_num_col));
-        mUserGridView.setLayoutManager(layoutManager);
+        mUserGridView.getRecyclerView().setLayoutManager(layoutManager);
         mUserGridView.buildAdapter();
 
         mUserSwitchCallback = new UserSwitchCallback();

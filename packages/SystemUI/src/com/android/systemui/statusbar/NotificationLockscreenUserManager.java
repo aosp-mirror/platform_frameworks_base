@@ -38,6 +38,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.android.internal.statusbar.IStatusBarService;
+import com.android.internal.statusbar.NotificationVisibility;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.systemui.Dependency;
 import com.android.systemui.Dumpable;
@@ -129,8 +130,13 @@ public class NotificationLockscreenUserManager implements Dumpable {
                     }
                 }
                 if (notificationKey != null) {
+                    final int count =
+                            mEntryManager.getNotificationData().getActiveNotifications().size();
+                    final int rank = mEntryManager.getNotificationData().getRank(notificationKey);
+                    final NotificationVisibility nv = NotificationVisibility.obtain(notificationKey,
+                            rank, count, true);
                     try {
-                        mBarService.onNotificationClick(notificationKey);
+                        mBarService.onNotificationClick(notificationKey, nv);
                     } catch (RemoteException e) {
                         /* ignore */
                     }

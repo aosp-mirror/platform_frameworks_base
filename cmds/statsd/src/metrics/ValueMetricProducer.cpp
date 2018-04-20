@@ -50,6 +50,9 @@ const int FIELD_ID_ID = 1;
 const int FIELD_ID_VALUE_METRICS = 7;
 // for ValueMetricDataWrapper
 const int FIELD_ID_DATA = 1;
+const int FIELD_ID_SKIPPED = 2;
+const int FIELD_ID_SKIPPED_START = 1;
+const int FIELD_ID_SKIPPED_END = 2;
 // for ValueMetricData
 const int FIELD_ID_DIMENSION_IN_WHAT = 1;
 const int FIELD_ID_DIMENSION_IN_CONDITION = 2;
@@ -69,6 +72,7 @@ ValueMetricProducer::ValueMetricProducer(const ConfigKey& key, const ValueMetric
       mValueField(metric.value_field()),
       mStatsPullerManager(statsPullerManager),
       mPullTagId(pullTagId),
+      mMinBucketSizeNs(metric.min_bucket_size_nanos()),
       mDimensionSoftLimit(StatsdStats::kAtomDimensionKeySizeLimitMap.find(pullTagId) !=
                                           StatsdStats::kAtomDimensionKeySizeLimitMap.end()
                                   ? StatsdStats::kAtomDimensionKeySizeLimitMap.at(pullTagId).first
@@ -156,11 +160,20 @@ void ValueMetricProducer::onDumpReportLocked(const int64_t dumpTimeNs,
     } else {
         flushIfNeededLocked(dumpTimeNs);
     }
-    if (mPastBuckets.empty()) {
+    if (mPastBuckets.empty() && mSkippedBuckets.empty()) {
         return;
     }
     protoOutput->write(FIELD_TYPE_INT64 | FIELD_ID_ID, (long long)mMetricId);
     uint64_t protoToken = protoOutput->start(FIELD_TYPE_MESSAGE | FIELD_ID_VALUE_METRICS);
+
+    for (const auto& pair : mSkippedBuckets) {
+        uint64_t wrapperToken =
+                protoOutput->start(FIELD_TYPE_MESSAGE | FIELD_COUNT_REPEATED | FIELD_ID_SKIPPED);
+        protoOutput->write(FIELD_TYPE_INT64 | FIELD_ID_SKIPPED_START, (long long)pair.first);
+        protoOutput->write(FIELD_TYPE_INT64 | FIELD_ID_SKIPPED_END, (long long)pair.second);
+        protoOutput->end(wrapperToken);
+    }
+    mSkippedBuckets.clear();
 
     for (const auto& pair : mPastBuckets) {
         const MetricDimensionKey& dimensionKey = pair.first;
@@ -391,18 +404,23 @@ void ValueMetricProducer::flushCurrentBucketLocked(const int64_t& eventTimeNs) {
         info.mBucketEndNs = fullBucketEndTimeNs;
     }
 
-    int tainted = 0;
-    for (const auto& slice : mCurrentSlicedBucket) {
-        tainted += slice.second.tainted;
-        tainted += slice.second.startUpdated;
-        if (slice.second.hasValue) {
-            info.mValue = slice.second.sum;
-            // it will auto create new vector of ValuebucketInfo if the key is not found.
-            auto& bucketList = mPastBuckets[slice.first];
-            bucketList.push_back(info);
+    if (info.mBucketEndNs - mCurrentBucketStartTimeNs >= mMinBucketSizeNs) {
+        // The current bucket is large enough to keep.
+        int tainted = 0;
+        for (const auto& slice : mCurrentSlicedBucket) {
+            tainted += slice.second.tainted;
+            tainted += slice.second.startUpdated;
+            if (slice.second.hasValue) {
+                info.mValue = slice.second.sum;
+                // it will auto create new vector of ValuebucketInfo if the key is not found.
+                auto& bucketList = mPastBuckets[slice.first];
+                bucketList.push_back(info);
+            }
         }
+        VLOG("%d tainted pairs in the bucket", tainted);
+    } else {
+        mSkippedBuckets.emplace_back(info.mBucketStartNs, info.mBucketEndNs);
     }
-    VLOG("%d tainted pairs in the bucket", tainted);
 
     if (eventTimeNs > fullBucketEndTimeNs) {  // If full bucket, send to anomaly tracker.
         // Accumulate partial buckets with current value and then send to anomaly tracker.

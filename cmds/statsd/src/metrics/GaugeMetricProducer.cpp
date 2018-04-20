@@ -47,6 +47,9 @@ const int FIELD_ID_ID = 1;
 const int FIELD_ID_GAUGE_METRICS = 8;
 // for GaugeMetricDataWrapper
 const int FIELD_ID_DATA = 1;
+const int FIELD_ID_SKIPPED = 2;
+const int FIELD_ID_SKIPPED_START = 1;
+const int FIELD_ID_SKIPPED_END = 2;
 // for GaugeMetricData
 const int FIELD_ID_DIMENSION_IN_WHAT = 1;
 const int FIELD_ID_DIMENSION_IN_CONDITION = 2;
@@ -66,6 +69,7 @@ GaugeMetricProducer::GaugeMetricProducer(const ConfigKey& key, const GaugeMetric
     : MetricProducer(metric.id(), key, timeBaseNs, conditionIndex, wizard),
       mStatsPullerManager(statsPullerManager),
       mPullTagId(pullTagId),
+      mMinBucketSizeNs(metric.min_bucket_size_nanos()),
       mDimensionSoftLimit(StatsdStats::kAtomDimensionKeySizeLimitMap.find(pullTagId) !=
                                           StatsdStats::kAtomDimensionKeySizeLimitMap.end()
                                   ? StatsdStats::kAtomDimensionKeySizeLimitMap.at(pullTagId).first
@@ -173,6 +177,15 @@ void GaugeMetricProducer::onDumpReportLocked(const int64_t dumpTimeNs,
 
     protoOutput->write(FIELD_TYPE_INT64 | FIELD_ID_ID, (long long)mMetricId);
     uint64_t protoToken = protoOutput->start(FIELD_TYPE_MESSAGE | FIELD_ID_GAUGE_METRICS);
+
+    for (const auto& pair : mSkippedBuckets) {
+        uint64_t wrapperToken =
+                protoOutput->start(FIELD_TYPE_MESSAGE | FIELD_COUNT_REPEATED | FIELD_ID_SKIPPED);
+        protoOutput->write(FIELD_TYPE_INT64 | FIELD_ID_SKIPPED_START, (long long)pair.first);
+        protoOutput->write(FIELD_TYPE_INT64 | FIELD_ID_SKIPPED_END, (long long)pair.second);
+        protoOutput->end(wrapperToken);
+    }
+    mSkippedBuckets.clear();
 
     for (const auto& pair : mPastBuckets) {
         const MetricDimensionKey& dimensionKey = pair.first;
@@ -440,12 +453,16 @@ void GaugeMetricProducer::flushCurrentBucketLocked(const int64_t& eventTimeNs) {
         info.mBucketEndNs = fullBucketEndTimeNs;
     }
 
-    for (const auto& slice : *mCurrentSlicedBucket) {
-        info.mGaugeAtoms = slice.second;
-        auto& bucketList = mPastBuckets[slice.first];
-        bucketList.push_back(info);
-        VLOG("Gauge gauge metric %lld, dump key value: %s", (long long)mMetricId,
-             slice.first.toString().c_str());
+    if (info.mBucketEndNs - mCurrentBucketStartTimeNs >= mMinBucketSizeNs) {
+        for (const auto& slice : *mCurrentSlicedBucket) {
+            info.mGaugeAtoms = slice.second;
+            auto& bucketList = mPastBuckets[slice.first];
+            bucketList.push_back(info);
+            VLOG("Gauge gauge metric %lld, dump key value: %s", (long long)mMetricId,
+                 slice.first.toString().c_str());
+        }
+    } else {
+        mSkippedBuckets.emplace_back(info.mBucketStartNs, info.mBucketEndNs);
     }
 
     // If we have anomaly trackers, we need to update the partial bucket values.

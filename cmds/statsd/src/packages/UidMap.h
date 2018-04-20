@@ -59,11 +59,11 @@ struct ChangeRecord {
     const int64_t timestampNs;
     const string package;
     const int32_t uid;
-    const int32_t version;
-    const int32_t prevVersion;
+    const int64_t version;
+    const int64_t prevVersion;
 
     ChangeRecord(const bool isDeletion, const int64_t timestampNs, const string& package,
-                 const int32_t uid, const int32_t version, const int32_t prevVersion)
+                 const int32_t uid, const int64_t version, const int64_t prevVersion)
         : deletion(isDeletion),
           timestampNs(timestampNs),
           package(package),

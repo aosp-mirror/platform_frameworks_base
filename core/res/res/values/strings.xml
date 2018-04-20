@@ -4609,7 +4609,7 @@
     <string name="zen_mode_default_every_night_name">Sleeping</string>
 
     <!-- Indication that the current volume and other effects (vibration) are being suppressed by a third party, such as a notification listener. [CHAR LIMIT=30] -->
-    <string name="muted_by">Muted by <xliff:g id="third_party">%1$s</xliff:g></string>
+    <string name="muted_by"><xliff:g id="third_party">%1$s</xliff:g> is muting some sounds</string>
 
     <!-- Error message shown when there is a system error which can be solved by user performing factory reset. [CHAR LIMIT=NONE] -->
     <string name="system_error_wipe_data">There\'s an internal problem with your device, and it may be unstable until you factory data reset.</string>

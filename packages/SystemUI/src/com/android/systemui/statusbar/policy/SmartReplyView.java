@@ -17,6 +17,8 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.accessibility.AccessibilityNodeInfo;
+import android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction;
 import android.widget.Button;
 
 import com.android.internal.annotations.VisibleForTesting;
@@ -179,6 +181,15 @@ public class SmartReplyView extends ViewGroup {
             mKeyguardDismissUtil.dismissKeyguardThenExecute(
                     action, null /* cancelAction */, false /* afterKeyguardGone */);
         });
+
+        b.setAccessibilityDelegate(new AccessibilityDelegate() {
+            public void onInitializeAccessibilityNodeInfo(View host, AccessibilityNodeInfo info) {
+                super.onInitializeAccessibilityNodeInfo(host, info);
+                String label = getResources().getString(R.string.accessibility_send_smart_reply);
+                info.addAction(new AccessibilityAction(AccessibilityNodeInfo.ACTION_CLICK, label));
+            }
+        });
+
         return b;
     }
 

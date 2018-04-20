@@ -42,7 +42,7 @@ public class InputMethodSubtypePreference extends SwitchWithNoTextPreference {
         this(context,
                 imi.getId() + subtype.hashCode(),
                 InputMethodAndSubtypeUtil.getSubtypeLocaleNameAsSentence(subtype, context, imi),
-                subtype.getLocale(),
+                subtype.getLocaleObject(),
                 context.getResources().getConfiguration().locale);
     }
 
@@ -51,20 +51,19 @@ public class InputMethodSubtypePreference extends SwitchWithNoTextPreference {
             final Context context,
             final String prefKey,
             final CharSequence title,
-            final String subtypeLocaleString,
+            final Locale subtypeLocale,
             final Locale systemLocale) {
         super(context);
         setPersistent(false);
         setKey(prefKey);
         setTitle(title);
-        if (TextUtils.isEmpty(subtypeLocaleString)) {
+        if (subtypeLocale == null) {
             mIsSystemLocale = false;
             mIsSystemLanguage = false;
         } else {
-            mIsSystemLocale = subtypeLocaleString.equals(systemLocale.toString());
+            mIsSystemLocale = subtypeLocale.equals(systemLocale);
             mIsSystemLanguage = mIsSystemLocale
-                    || InputMethodUtils.getLanguageFromLocaleString(subtypeLocaleString)
-                            .equals(systemLocale.getLanguage());
+                    || TextUtils.equals(subtypeLocale.getLanguage(), systemLocale.getLanguage());
         }
     }
 

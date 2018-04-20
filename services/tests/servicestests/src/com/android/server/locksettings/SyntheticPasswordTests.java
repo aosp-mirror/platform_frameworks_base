@@ -217,6 +217,38 @@ public class SyntheticPasswordTests extends BaseLockSettingsServiceTests {
         verify(mAuthSecretService, never()).primaryUserCredential(any(ArrayList.class));
     }
 
+    public void testNoSyntheticPasswordOrCredentialDoesNotPassAuthSecret() throws RemoteException {
+        // Setting null doesn't create a synthetic password
+        initializeCredentialUnderSP(null, PRIMARY_USER_ID);
+
+        reset(mAuthSecretService);
+        mService.onUnlockUser(PRIMARY_USER_ID);
+        mService.mHandler.runWithScissors(() -> {}, 0 /*now*/); // Flush runnables on handler
+        verify(mAuthSecretService, never()).primaryUserCredential(any(ArrayList.class));
+    }
+
+    public void testSyntheticPasswordAndCredentialDoesNotPassAuthSecret() throws RemoteException {
+        final String PASSWORD = "passwordForASyntheticPassword";
+        initializeCredentialUnderSP(PASSWORD, PRIMARY_USER_ID);
+
+        reset(mAuthSecretService);
+        mService.onUnlockUser(PRIMARY_USER_ID);
+        mService.mHandler.runWithScissors(() -> {}, 0 /*now*/); // Flush runnables on handler
+        verify(mAuthSecretService, never()).primaryUserCredential(any(ArrayList.class));
+    }
+
+    public void testSyntheticPasswordButNoCredentialPassesAuthSecret() throws RemoteException {
+        final String PASSWORD = "getASyntheticPassword";
+        initializeCredentialUnderSP(PASSWORD, PRIMARY_USER_ID);
+        mService.setLockCredential(null, LockPatternUtils.CREDENTIAL_TYPE_NONE, PASSWORD,
+                PASSWORD_QUALITY_UNSPECIFIED, PRIMARY_USER_ID);
+
+        reset(mAuthSecretService);
+        mService.onUnlockUser(PRIMARY_USER_ID);
+        mService.mHandler.runWithScissors(() -> {}, 0 /*now*/); // Flush runnables on handler
+        verify(mAuthSecretService).primaryUserCredential(any(ArrayList.class));
+    }
+
     public void testManagedProfileUnifiedChallengeMigration() throws RemoteException {
         final String UnifiedPassword = "testManagedProfileUnifiedChallengeMigration-pwd";
         disableSyntheticPassword();

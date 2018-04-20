@@ -29,10 +29,7 @@
 namespace android {
 
 Canvas* Canvas::create_recording_canvas(int width, int height, uirenderer::RenderNode* renderNode) {
-    if (uirenderer::Properties::isSkiaEnabled()) {
-        return new uirenderer::skiapipeline::SkiaRecordingCanvas(renderNode, width, height);
-    }
-    return new uirenderer::RecordingCanvas(width, height);
+    return new uirenderer::skiapipeline::SkiaRecordingCanvas(renderNode, width, height);
 }
 
 static inline void drawStroke(SkScalar left, SkScalar right, SkScalar top, SkScalar thickness,

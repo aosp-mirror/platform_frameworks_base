@@ -332,6 +332,18 @@ public class PhoneStatusBarView extends PanelBar {
         if (cornerCutoutMargins != null) {
             lp.leftMargin = Math.max(lp.leftMargin, cornerCutoutMargins.first);
             lp.rightMargin = Math.max(lp.rightMargin, cornerCutoutMargins.second);
+
+            // If we're already inset enough (e.g. on the status bar side), we can have 0 margin
+            WindowInsets insets = getRootWindowInsets();
+            int leftInset = insets.getSystemWindowInsetLeft();
+            int rightInset = insets.getSystemWindowInsetRight();
+            if (lp.leftMargin <= leftInset) {
+                lp.leftMargin = 0;
+            }
+            if (lp.rightMargin <= rightInset) {
+                lp.rightMargin = 0;
+            }
+
         }
     }
 

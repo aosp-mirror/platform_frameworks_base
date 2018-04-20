@@ -20,8 +20,8 @@ import static com.android.systemui.statusbar.notification.NotificationUtils.inte
 
 import android.content.res.Resources;
 import android.util.MathUtils;
-import com.android.keyguard.KeyguardStatusView;
 
+import com.android.keyguard.KeyguardStatusView;
 import com.android.systemui.Interpolators;
 import com.android.systemui.R;
 
@@ -45,12 +45,6 @@ public class KeyguardClockPositionAlgorithm {
      * Margin between the bottom of the clock and the notification shade.
      */
     private int mClockNotificationsMargin;
-
-    /**
-     * Current height of {@link NotificationPanelView}, considering how much the
-     * user collapsed it.
-     */
-    private float mExpandedHeight;
 
     /**
      * Height of the parent view - display size in px.
@@ -84,9 +78,9 @@ public class KeyguardClockPositionAlgorithm {
     private int mContainerTopPadding;
 
     /**
-     * @see NotificationPanelView#getMaxPanelHeight()
+     * @see NotificationPanelView#getExpandedFraction()
      */
-    private float mMaxPanelHeight;
+    private float mPanelExpansion;
 
     /**
      * Burn-in prevention x translation.
@@ -140,13 +134,13 @@ public class KeyguardClockPositionAlgorithm {
     }
 
     public void setup(int minTopMargin, int maxShadeBottom, int notificationStackHeight,
-            float expandedHeight, float maxPanelHeight, int parentHeight, int keyguardStatusHeight,
-            float dark, boolean secure, boolean pulsing, int bouncerTop) {
+            float panelExpansion, int parentHeight,
+            int keyguardStatusHeight, float dark, boolean secure, boolean pulsing,
+            int bouncerTop) {
         mMinTopMargin = minTopMargin + mContainerTopPadding;
         mMaxShadeBottom = maxShadeBottom;
         mNotificationStackHeight = notificationStackHeight;
-        mExpandedHeight = expandedHeight;
-        mMaxPanelHeight = maxPanelHeight;
+        mPanelExpansion = panelExpansion;
         mHeight = parentHeight;
         mKeyguardStatusHeight = keyguardStatusHeight;
         mDarkAmount = dark;
@@ -171,16 +165,12 @@ public class KeyguardClockPositionAlgorithm {
         return mHeight / 2 - mKeyguardStatusHeight - mClockNotificationsMargin;
     }
 
-    public int getExpandedClockBottom() {
-        return getExpandedClockPosition() + mKeyguardStatusHeight;
-    }
-
     /**
      * Vertically align the clock and the shade in the available space considering only
      * a percentage of the clock height defined by {@code CLOCK_HEIGHT_WEIGHT}.
      * @return Clock Y in pixels.
      */
-    private int getExpandedClockPosition() {
+    public int getExpandedClockPosition() {
         final int availableHeight = mMaxShadeBottom - mMinTopMargin;
         final int containerCenter = mMinTopMargin + availableHeight / 2;
 
@@ -212,8 +202,7 @@ public class KeyguardClockPositionAlgorithm {
                 mMinTopMargin : -mKeyguardStatusHeight;
 
         // Move clock up while collapsing the shade
-        float shadeExpansion = mExpandedHeight / mMaxPanelHeight;
-        shadeExpansion = Interpolators.FAST_OUT_LINEAR_IN.getInterpolation(shadeExpansion);
+        float shadeExpansion = Interpolators.FAST_OUT_LINEAR_IN.getInterpolation(mPanelExpansion);
         final float clockY = MathUtils.lerp(clockYTarget, clockYRegular, shadeExpansion);
 
         return (int) MathUtils.lerp(clockY, clockYDark, mDarkAmount);

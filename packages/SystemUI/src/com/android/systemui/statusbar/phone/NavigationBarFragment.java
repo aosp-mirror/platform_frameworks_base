@@ -89,7 +89,6 @@ import com.android.systemui.fragments.FragmentHostManager.FragmentListener;
 import com.android.systemui.recents.Recents;
 import com.android.systemui.recents.misc.SysUiTaskStackChangeListener;
 import com.android.systemui.shared.system.ActivityManagerWrapper;
-import com.android.systemui.shared.system.WindowManagerWrapper;
 import com.android.systemui.stackdivider.Divider;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.CommandQueue.Callbacks;
@@ -174,14 +173,10 @@ public class NavigationBarFragment extends Fragment implements Callbacks {
         public void onConnectionChanged(boolean isConnected) {
             mNavigationBarView.updateStates();
             updateScreenPinningGestures();
-            WindowManagerWrapper.getInstance()
-                    .setNavBarVirtualKeyHapticFeedbackEnabled(!isConnected);
         }
 
         @Override
         public void onQuickStepStarted() {
-            mNavigationBarView.onQuickStepStarted();
-
             // Use navbar dragging as a signal to hide the rotate button
             setRotateSuggestionButtonState(false);
         }
@@ -549,7 +544,12 @@ public class NavigationBarFragment extends Fragment implements Callbacks {
 
             // Set visibility, may fail if a11y service is active.
             // If invisible, call will stop animation.
-            mNavigationBarView.setRotateButtonVisibility(true);
+            int appliedVisibility = mNavigationBarView.setRotateButtonVisibility(true);
+            if (appliedVisibility == View.VISIBLE) {
+                // If the button will actually become visible and the navbar is about to hide,
+                // tell the statusbar to keep it around for longer
+                mStatusBar.touchAutoHide();
+            }
 
         } else { // Hide
 

@@ -16,11 +16,12 @@
 
 package com.android.printservice.recommendation.plugin.hp;
 
-import android.annotation.NonNull;
 import android.content.Context;
 import android.net.nsd.NsdManager;
 import android.net.nsd.NsdServiceInfo;
 import android.text.TextUtils;
+
+import androidx.annotation.NonNull;
 
 import com.android.printservice.recommendation.PrintServicePlugin;
 

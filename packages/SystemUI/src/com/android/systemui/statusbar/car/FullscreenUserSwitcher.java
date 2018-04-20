@@ -23,7 +23,6 @@ import android.view.View;
 import android.view.ViewStub;
 
 import android.support.v7.widget.GridLayoutManager;
-import android.support.v7.widget.RecyclerView;
 
 import com.android.settingslib.users.UserManagerHelper;
 import com.android.systemui.R;
@@ -49,7 +48,7 @@ public class FullscreenUserSwitcher {
         mUserGridView = mContainer.findViewById(R.id.user_grid);
         GridLayoutManager layoutManager = new GridLayoutManager(context,
                 context.getResources().getInteger(R.integer.user_fullscreen_switcher_num_col));
-        mUserGridView.setLayoutManager(layoutManager);
+        mUserGridView.getRecyclerView().setLayoutManager(layoutManager);
         mUserGridView.buildAdapter();
         mUserGridView.setUserSelectionListener(this::onUserSelected);
 

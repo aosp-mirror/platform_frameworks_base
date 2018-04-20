@@ -1111,45 +1111,47 @@ public final class SystemServer {
             }
             traceEnd();
 
-            if (context.getPackageManager().hasSystemFeature(
-                        PackageManager.FEATURE_WIFI)) {
-                // Wifi Service must be started first for wifi-related services.
-                traceBeginAndSlog("StartWifi");
-                mSystemServiceManager.startService(WIFI_SERVICE_CLASS);
-                traceEnd();
-                traceBeginAndSlog("StartWifiScanning");
-                mSystemServiceManager.startService(
-                    "com.android.server.wifi.scanner.WifiScanningService");
-                traceEnd();
-            }
+            if (!mOnlyCore) {
+                if (context.getPackageManager().hasSystemFeature(
+                            PackageManager.FEATURE_WIFI)) {
+                    // Wifi Service must be started first for wifi-related services.
+                    traceBeginAndSlog("StartWifi");
+                    mSystemServiceManager.startService(WIFI_SERVICE_CLASS);
+                    traceEnd();
+                    traceBeginAndSlog("StartWifiScanning");
+                    mSystemServiceManager.startService(
+                        "com.android.server.wifi.scanner.WifiScanningService");
+                    traceEnd();
+                }
 
-            if (context.getPackageManager().hasSystemFeature(
-                PackageManager.FEATURE_WIFI_RTT)) {
-                traceBeginAndSlog("StartRttService");
-                mSystemServiceManager.startService(
-                    "com.android.server.wifi.rtt.RttService");
-                traceEnd();
-            }
+                if (context.getPackageManager().hasSystemFeature(
+                    PackageManager.FEATURE_WIFI_RTT)) {
+                    traceBeginAndSlog("StartRttService");
+                    mSystemServiceManager.startService(
+                        "com.android.server.wifi.rtt.RttService");
+                    traceEnd();
+                }
 
-            if (context.getPackageManager().hasSystemFeature(
-                PackageManager.FEATURE_WIFI_AWARE)) {
-                traceBeginAndSlog("StartWifiAware");
-                mSystemServiceManager.startService(WIFI_AWARE_SERVICE_CLASS);
-                traceEnd();
-            }
+                if (context.getPackageManager().hasSystemFeature(
+                    PackageManager.FEATURE_WIFI_AWARE)) {
+                    traceBeginAndSlog("StartWifiAware");
+                    mSystemServiceManager.startService(WIFI_AWARE_SERVICE_CLASS);
+                    traceEnd();
+                }
 
-            if (context.getPackageManager().hasSystemFeature(
-                PackageManager.FEATURE_WIFI_DIRECT)) {
-                traceBeginAndSlog("StartWifiP2P");
-                mSystemServiceManager.startService(WIFI_P2P_SERVICE_CLASS);
-                traceEnd();
-            }
+                if (context.getPackageManager().hasSystemFeature(
+                    PackageManager.FEATURE_WIFI_DIRECT)) {
+                    traceBeginAndSlog("StartWifiP2P");
+                    mSystemServiceManager.startService(WIFI_P2P_SERVICE_CLASS);
+                    traceEnd();
+                }
 
-            if (context.getPackageManager().hasSystemFeature(
-                PackageManager.FEATURE_LOWPAN)) {
-                traceBeginAndSlog("StartLowpan");
-                mSystemServiceManager.startService(LOWPAN_SERVICE_CLASS);
-                traceEnd();
+                if (context.getPackageManager().hasSystemFeature(
+                    PackageManager.FEATURE_LOWPAN)) {
+                    traceBeginAndSlog("StartLowpan");
+                    mSystemServiceManager.startService(LOWPAN_SERVICE_CLASS);
+                    traceEnd();
+                }
             }
 
             if (mPackageManager.hasSystemFeature(PackageManager.FEATURE_ETHERNET) ||

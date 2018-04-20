@@ -4063,7 +4063,8 @@ public class Editor {
                 item.setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS);
                 mAssistClickHandlers.put(item, TextClassification.createIntentOnClickListener(
                         TextClassification.createPendingIntent(mTextView.getContext(),
-                                textClassification.getIntent())));
+                                textClassification.getIntent(),
+                                createAssistMenuItemPendingIntentRequestCode())));
             }
             final int count = textClassification.getActions().size();
             for (int i = 1; i < count; i++) {
@@ -4121,7 +4122,9 @@ public class Editor {
                 final Intent intent = assistMenuItem.getIntent();
                 if (intent != null) {
                     onClickListener = TextClassification.createIntentOnClickListener(
-                            TextClassification.createPendingIntent(mTextView.getContext(), intent));
+                            TextClassification.createPendingIntent(
+                                    mTextView.getContext(), intent,
+                                    createAssistMenuItemPendingIntentRequestCode()));
                 }
             }
             if (onClickListener != null) {
@@ -4130,6 +4133,14 @@ public class Editor {
             }
             // We tried our best.
             return true;
+        }
+
+        private int createAssistMenuItemPendingIntentRequestCode() {
+            return mTextView.hasSelection()
+                    ? mTextView.getText().subSequence(
+                            mTextView.getSelectionStart(), mTextView.getSelectionEnd())
+                            .hashCode()
+                    : 0;
         }
 
         private boolean shouldEnableAssistMenuItems() {

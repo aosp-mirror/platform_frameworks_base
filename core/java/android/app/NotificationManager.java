@@ -399,7 +399,8 @@ public class NotificationManager {
 
         ActivityManager am = (ActivityManager) mContext.getSystemService(Context.ACTIVITY_SERVICE);
         boolean isLowRam = am.isLowRamDevice();
-        final Notification copy = Builder.maybeCloneStrippedForDelivery(notification, isLowRam);
+        final Notification copy = Builder.maybeCloneStrippedForDelivery(notification, isLowRam,
+                mContext);
         try {
             service.enqueueNotificationWithTag(pkg, mContext.getOpPackageName(), tag, id,
                     copy, user.getIdentifier());
@@ -1167,6 +1168,23 @@ public class NotificationManager {
         public final int suppressedVisualEffects;
 
         /**
+         * @hide
+         */
+        public static final int STATE_CHANNELS_BYPASSING_DND = 1 << 0;
+
+        /**
+         * @hide
+         */
+        public static final int STATE_UNSET = -1;
+
+        /**
+         * Notification state information that is necessary to determine Do Not Disturb behavior.
+         * Bitmask of STATE_* constants.
+         * @hide
+         */
+        public final int state;
+
+        /**
          * Constructs a policy for Do Not Disturb priority mode behavior.
          *
          * <p>
@@ -1181,7 +1199,7 @@ public class NotificationManager {
          */
         public Policy(int priorityCategories, int priorityCallSenders, int priorityMessageSenders) {
             this(priorityCategories, priorityCallSenders, priorityMessageSenders,
-                    SUPPRESSED_EFFECTS_UNSET);
+                    SUPPRESSED_EFFECTS_UNSET, STATE_UNSET);
         }
 
         /**
@@ -1219,11 +1237,23 @@ public class NotificationManager {
             this.priorityCallSenders = priorityCallSenders;
             this.priorityMessageSenders = priorityMessageSenders;
             this.suppressedVisualEffects = suppressedVisualEffects;
+            this.state = STATE_UNSET;
+        }
+
+        /** @hide */
+        public Policy(int priorityCategories, int priorityCallSenders, int priorityMessageSenders,
+                int suppressedVisualEffects, int state) {
+            this.priorityCategories = priorityCategories;
+            this.priorityCallSenders = priorityCallSenders;
+            this.priorityMessageSenders = priorityMessageSenders;
+            this.suppressedVisualEffects = suppressedVisualEffects;
+            this.state = state;
         }
 
         /** @hide */
         public Policy(Parcel source) {
-            this(source.readInt(), source.readInt(), source.readInt(), source.readInt());
+            this(source.readInt(), source.readInt(), source.readInt(), source.readInt(),
+                    source.readInt());
         }
 
         @Override
@@ -1232,6 +1262,7 @@ public class NotificationManager {
             dest.writeInt(priorityCallSenders);
             dest.writeInt(priorityMessageSenders);
             dest.writeInt(suppressedVisualEffects);
+            dest.writeInt(state);
         }
 
         @Override
@@ -1264,6 +1295,8 @@ public class NotificationManager {
                     + ",priorityMessageSenders=" + prioritySendersToString(priorityMessageSenders)
                     + ",suppressedVisualEffects="
                     + suppressedEffectsToString(suppressedVisualEffects)
+                    + ",areChannelsBypassingDnd=" + (((state & STATE_CHANNELS_BYPASSING_DND) != 0)
+                        ? "true" : "false")
                     + "]";
         }
 

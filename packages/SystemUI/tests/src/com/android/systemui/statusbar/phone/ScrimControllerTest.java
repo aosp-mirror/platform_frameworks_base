@@ -157,6 +157,38 @@ public class ScrimControllerTest extends SysuiTestCase {
     }
 
     @Test
+    public void transitionToAod_withFrontAlphaUpdates() {
+        // Assert that setting the AOD front scrim alpha doesn't take effect in a non-AOD state.
+        mScrimController.transitionTo(ScrimState.KEYGUARD);
+        mScrimController.setAodFrontScrimAlpha(0.5f);
+        mScrimController.finishAnimationsImmediately();
+        // Front scrim should be transparent
+        // Back scrim should be visible without tint
+        assertScrimVisibility(VISIBILITY_FULLY_TRANSPARENT, VISIBILITY_SEMI_TRANSPARENT);
+
+        // ... but that it does take effect once we enter the AOD state.
+        mScrimController.transitionTo(ScrimState.AOD);
+        mScrimController.finishAnimationsImmediately();
+        // Front scrim should be semi-transparent
+        // Back scrim should be visible
+        assertScrimVisibility(VISIBILITY_SEMI_TRANSPARENT, VISIBILITY_FULLY_OPAQUE);
+
+        // ... and that if we set it while we're in AOD, it does take immediate effect.
+        mScrimController.setAodFrontScrimAlpha(1f);
+        assertScrimVisibility(VISIBILITY_FULLY_OPAQUE, VISIBILITY_FULLY_OPAQUE);
+
+        // ... and make sure we recall the previous front scrim alpha even if we transition away
+        // for a bit.
+        mScrimController.transitionTo(ScrimState.UNLOCKED);
+        mScrimController.transitionTo(ScrimState.AOD);
+        mScrimController.finishAnimationsImmediately();
+        assertScrimVisibility(VISIBILITY_FULLY_OPAQUE, VISIBILITY_FULLY_OPAQUE);
+
+        // Reset value since enums are static.
+        mScrimController.setAodFrontScrimAlpha(0f);
+    }
+
+    @Test
     public void transitionToPulsing() {
         // Pre-condition
         // Need to go to AoD first because PULSING doesn't change

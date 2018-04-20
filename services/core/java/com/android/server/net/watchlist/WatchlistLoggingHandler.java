@@ -75,6 +75,7 @@ class WatchlistLoggingHandler extends Handler {
     private final WatchlistReportDbHelper mDbHelper;
     private final WatchlistConfig mConfig;
     private final WatchlistSettings mSettings;
+    private int mPrimaryUserId = -1;
     // A cache for uid and apk digest mapping.
     // As uid won't be reused until reboot, it's safe to assume uid is unique per signature and app.
     // TODO: Use more efficient data structure.
@@ -97,6 +98,7 @@ class WatchlistLoggingHandler extends Handler {
         mConfig = WatchlistConfig.getInstance();
         mSettings = WatchlistSettings.getInstance();
         mDropBoxManager = mContext.getSystemService(DropBoxManager.class);
+        mPrimaryUserId = getPrimaryUserId();
     }
 
     @Override
@@ -128,6 +130,19 @@ class WatchlistLoggingHandler extends Handler {
                 break;
             }
         }
+    }
+
+    /**
+     * Get primary user id.
+     * @return Primary user id. -1 if primary user not found.
+     */
+    private int getPrimaryUserId() {
+        final UserInfo primaryUserInfo = ((UserManager) mContext.getSystemService(
+                Context.USER_SERVICE)).getPrimaryUser();
+        if (primaryUserInfo != null) {
+            return primaryUserInfo.id;
+        }
+        return -1;
     }
 
     /**
@@ -181,6 +196,18 @@ class WatchlistLoggingHandler extends Handler {
             int uid, long timestamp) {
         if (DEBUG) {
             Slog.i(TAG, "handleNetworkEvent with host: " + hostname + ", uid: " + uid);
+        }
+        // Update primary user id if necessary
+        if (mPrimaryUserId == -1) {
+            mPrimaryUserId = getPrimaryUserId();
+        }
+
+        // Only process primary user data
+        if (UserHandle.getUserId(uid) != mPrimaryUserId) {
+            if (DEBUG) {
+                Slog.i(TAG, "Do not log non-system user records");
+            }
+            return;
         }
         final String cncDomain = searchAllSubDomainsInWatchlist(hostname);
         if (cncDomain != null) {
@@ -272,28 +299,15 @@ class WatchlistLoggingHandler extends Handler {
     @VisibleForTesting
     List<String> getAllDigestsForReport(WatchlistReportDbHelper.AggregatedResult record) {
         // Step 1: Get all installed application digests.
-        final List<UserInfo> users = ((UserManager) mContext.getSystemService(
-                Context.USER_SERVICE)).getUsers();
-        final int totalUsers = users.size();
         final List<ApplicationInfo> apps = mContext.getPackageManager().getInstalledApplications(
-                PackageManager.MATCH_ANY_USER | PackageManager.MATCH_ALL);
+                PackageManager.MATCH_ALL);
         final HashSet<String> result = new HashSet<>(apps.size() + record.appDigestCNCList.size());
         final int size = apps.size();
         for (int i = 0; i < size; i++) {
-            final int appUid = apps.get(i).uid;
-            boolean added = false;
-            // As the uid returned by getInstalledApplications() is for primary user only, it
-            // may exist in secondary users but not primary user, so we need to loop and see if
-            // that user has the app enabled.
-            for (int j = 0; j < totalUsers && !added; j++) {
-                int uid = UserHandle.getUid(users.get(j).id, appUid);
-                byte[] digest = getDigestFromUid(uid);
-                if (digest != null) {
-                    result.add(HexDump.toHexString(digest));
-                    added = true;
-                }
-            }
-            if (!added) {
+            byte[] digest = getDigestFromUid(apps.get(i).uid);
+            if (digest != null) {
+                result.add(HexDump.toHexString(digest));
+            } else {
                 Slog.e(TAG, "Cannot get digest from uid: " + apps.get(i).uid
                         + ",pkg: " + apps.get(i).packageName);
             }

@@ -286,12 +286,6 @@ void RenderProxy::removeFrameMetricsObserver(FrameMetricsObserver* observerPtr) 
     });
 }
 
-void RenderProxy::setRenderAheadDepth(int renderAhead) {
-    mRenderThread.queue().post([ context = mContext, renderAhead ]() {
-        context->setRenderAheadDepth(renderAhead);
-    });
-}
-
 int RenderProxy::copySurfaceInto(sp<Surface>& surface, int left, int top, int right, int bottom,
                                  SkBitmap* bitmap) {
     auto& thread = RenderThread::getInstance();
@@ -334,7 +328,7 @@ sk_sp<Bitmap> RenderProxy::allocateHardwareBitmap(SkBitmap& bitmap) {
 
 int RenderProxy::copyGraphicBufferInto(GraphicBuffer* buffer, SkBitmap* bitmap) {
     RenderThread& thread = RenderThread::getInstance();
-    if (Properties::isSkiaEnabled() && gettid() == thread.getTid()) {
+    if (gettid() == thread.getTid()) {
         // TODO: fix everything that hits this. We should never be triggering a readback ourselves.
         return (int)thread.readback().copyGraphicBufferInto(buffer, bitmap);
     } else {

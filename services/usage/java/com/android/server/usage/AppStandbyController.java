@@ -63,6 +63,10 @@ import android.content.pm.PackageManagerInternal;
 import android.content.pm.ParceledListSlice;
 import android.database.ContentObserver;
 import android.hardware.display.DisplayManager;
+import android.net.ConnectivityManager;
+import android.net.Network;
+import android.net.NetworkInfo;
+import android.net.NetworkRequest;
 import android.net.NetworkScoreManager;
 import android.os.BatteryManager;
 import android.os.BatteryStats;
@@ -191,6 +195,7 @@ public class AppStandbyController {
 
     long mCheckIdleIntervalMillis;
     long mAppIdleParoleIntervalMillis;
+    long mAppIdleParoleWindowMillis;
     long mAppIdleParoleDurationMillis;
     long[] mAppStandbyScreenThresholds = SCREEN_TIME_THRESHOLDS;
     long[] mAppStandbyElapsedThresholds = ELAPSED_TIME_THRESHOLDS;
@@ -227,6 +232,7 @@ public class AppStandbyController {
     // TODO: Provide a mechanism to set an external bucketing service
 
     private AppWidgetManager mAppWidgetManager;
+    private ConnectivityManager mConnectivityManager;
     private PowerManager mPowerManager;
     private PackageManager mPackageManager;
     Injector mInjector;
@@ -326,6 +332,7 @@ public class AppStandbyController {
             settingsObserver.updateSettings();
 
             mAppWidgetManager = mContext.getSystemService(AppWidgetManager.class);
+            mConnectivityManager = mContext.getSystemService(ConnectivityManager.class);
             mPowerManager = mContext.getSystemService(PowerManager.class);
 
             mInjector.registerDisplayListener(mDisplayListener, mHandler);
@@ -414,7 +421,7 @@ public class AppStandbyController {
                     postParoleEndTimeout();
                 } else {
                     mLastAppIdleParoledTime = now;
-                    postNextParoleTimeout(now);
+                    postNextParoleTimeout(now, false);
                 }
                 postParoleStateChanged();
             }
@@ -428,13 +435,18 @@ public class AppStandbyController {
         }
     }
 
-    private void postNextParoleTimeout(long now) {
+    private void postNextParoleTimeout(long now, boolean forced) {
         if (DEBUG) Slog.d(TAG, "Posting MSG_CHECK_PAROLE_TIMEOUT");
         mHandler.removeMessages(MSG_CHECK_PAROLE_TIMEOUT);
         // Compute when the next parole needs to happen. We check more frequently than necessary
         // since the message handler delays are based on elapsedRealTime and not wallclock time.
         // The comparison is done in wallclock time.
         long timeLeft = (mLastAppIdleParoledTime + mAppIdleParoleIntervalMillis) - now;
+        if (forced) {
+            // Set next timeout for the end of the parole window
+            // If parole is not set by the end of the window it will be forced
+            timeLeft += mAppIdleParoleWindowMillis;
+        }
         if (timeLeft < 0) {
             timeLeft = 0;
         }
@@ -653,23 +665,49 @@ public class AppStandbyController {
         return THRESHOLD_BUCKETS[bucketIndex];
     }
 
-    /** Check if it's been a while since last parole and let idle apps do some work */
+    /**
+     * Check if it's been a while since last parole and let idle apps do some work.
+     * If network is not available, delay parole until it is available up until the end of the
+     * parole window. Force the parole to be set if end of the parole window is reached.
+     */
     void checkParoleTimeout() {
         boolean setParoled = false;
+        boolean waitForNetwork = false;
+        NetworkInfo activeNetwork = mConnectivityManager.getActiveNetworkInfo();
+        boolean networkActive = activeNetwork != null &&
+                activeNetwork.isConnected();
+
         synchronized (mAppIdleLock) {
             final long now = mInjector.currentTimeMillis();
             if (!mAppIdleTempParoled) {
                 final long timeSinceLastParole = now - mLastAppIdleParoledTime;
                 if (timeSinceLastParole > mAppIdleParoleIntervalMillis) {
                     if (DEBUG) Slog.d(TAG, "Crossed default parole interval");
-                    setParoled = true;
+                    if (networkActive) {
+                        // If network is active set parole
+                        setParoled = true;
+                    } else {
+                        if (timeSinceLastParole
+                                > mAppIdleParoleIntervalMillis + mAppIdleParoleWindowMillis) {
+                            if (DEBUG) Slog.d(TAG, "Crossed end of parole window, force parole");
+                            setParoled = true;
+                        } else {
+                            if (DEBUG) Slog.d(TAG, "Network unavailable, delaying parole");
+                            waitForNetwork = true;
+                            postNextParoleTimeout(now, true);
+                        }
+                    }
                 } else {
                     if (DEBUG) Slog.d(TAG, "Not long enough to go to parole");
-                    postNextParoleTimeout(now);
+                    postNextParoleTimeout(now, false);
                 }
             }
         }
+        if (waitForNetwork) {
+            mConnectivityManager.registerNetworkCallback(mNetworkRequest, mNetworkCallback);
+        }
         if (setParoled) {
+            // Set parole if network is available
             setAppIdleParoled(true);
         }
     }
@@ -1321,6 +1359,10 @@ public class AppStandbyController {
         TimeUtils.formatDuration(mAppIdleParoleIntervalMillis, pw);
         pw.println();
 
+        pw.print("  mAppIdleParoleWindowMillis=");
+        TimeUtils.formatDuration(mAppIdleParoleWindowMillis, pw);
+        pw.println();
+
         pw.print("  mAppIdleParoleDurationMillis=");
         TimeUtils.formatDuration(mAppIdleParoleDurationMillis, pw);
         pw.println();
@@ -1537,6 +1579,17 @@ public class AppStandbyController {
         }
     }
 
+    private final NetworkRequest mNetworkRequest = new NetworkRequest.Builder().build();
+
+    private final ConnectivityManager.NetworkCallback mNetworkCallback
+            = new ConnectivityManager.NetworkCallback() {
+        @Override
+        public void onAvailable(Network network) {
+            mConnectivityManager.unregisterNetworkCallback(this);
+            checkParoleTimeout();
+        }
+    };
+
     private final DisplayManager.DisplayListener mDisplayListener
             = new DisplayManager.DisplayListener() {
 
@@ -1569,6 +1622,7 @@ public class AppStandbyController {
         private static final String KEY_IDLE_DURATION = "idle_duration2";
         private static final String KEY_WALLCLOCK_THRESHOLD = "wallclock_threshold";
         private static final String KEY_PAROLE_INTERVAL = "parole_interval";
+        private static final String KEY_PAROLE_WINDOW = "parole_window";
         private static final String KEY_PAROLE_DURATION = "parole_duration";
         private static final String KEY_SCREEN_TIME_THRESHOLDS = "screen_thresholds";
         private static final String KEY_ELAPSED_TIME_THRESHOLDS = "elapsed_thresholds";
@@ -1634,6 +1688,10 @@ public class AppStandbyController {
                 // Default: 24 hours between paroles
                 mAppIdleParoleIntervalMillis = mParser.getDurationMillis(KEY_PAROLE_INTERVAL,
                         COMPRESS_TIME ? ONE_MINUTE * 10 : 24 * 60 * ONE_MINUTE);
+
+                // Default: 2 hours to wait on network
+                mAppIdleParoleWindowMillis = mParser.getDurationMillis(KEY_PAROLE_WINDOW,
+                        COMPRESS_TIME ? ONE_MINUTE * 2 : 2 * 60 * ONE_MINUTE);
 
                 mAppIdleParoleDurationMillis = mParser.getDurationMillis(KEY_PAROLE_DURATION,
                         COMPRESS_TIME ? ONE_MINUTE : 10 * ONE_MINUTE); // 10 minutes

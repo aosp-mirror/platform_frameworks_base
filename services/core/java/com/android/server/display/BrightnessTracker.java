@@ -282,13 +282,14 @@ public class BrightnessTracker {
         }
         Message m = mBgHandler.obtainMessage(MSG_BRIGHTNESS_CHANGED,
                 userInitiated ? 1 : 0, 0 /*unused*/, new BrightnessChangeValues(brightness,
-                        powerBrightnessFactor, isUserSetBrightness, isDefaultBrightnessConfig));
+                        powerBrightnessFactor, isUserSetBrightness, isDefaultBrightnessConfig,
+                        mInjector.currentTimeMillis()));
         m.sendToTarget();
     }
 
     private void handleBrightnessChanged(float brightness, boolean userInitiated,
             float powerBrightnessFactor, boolean isUserSetBrightness,
-            boolean isDefaultBrightnessConfig) {
+            boolean isDefaultBrightnessConfig, long timestamp) {
         BrightnessChangeEvent.Builder builder;
 
         synchronized (mDataCollectionLock) {
@@ -309,7 +310,7 @@ public class BrightnessTracker {
 
             builder = new BrightnessChangeEvent.Builder();
             builder.setBrightness(brightness);
-            builder.setTimeStamp(mInjector.currentTimeMillis());
+            builder.setTimeStamp(timestamp);
             builder.setPowerBrightnessFactor(powerBrightnessFactor);
             builder.setUserBrightnessPoint(isUserSetBrightness);
             builder.setIsDefaultBrightnessConfig(isDefaultBrightnessConfig);
@@ -813,7 +814,7 @@ public class BrightnessTracker {
                     boolean userInitiatedChange = (msg.arg1 == 1);
                     handleBrightnessChanged(values.brightness, userInitiatedChange,
                             values.powerBrightnessFactor, values.isUserSetBrightness,
-                            values.isDefaultBrightnessConfig);
+                            values.isDefaultBrightnessConfig, values.timestamp);
                     break;
                 case MSG_START_SENSOR_LISTENER:
                     startSensorListener();
@@ -830,13 +831,16 @@ public class BrightnessTracker {
         final float powerBrightnessFactor;
         final boolean isUserSetBrightness;
         final boolean isDefaultBrightnessConfig;
+        final long timestamp;
 
         BrightnessChangeValues(float brightness, float powerBrightnessFactor,
-                boolean isUserSetBrightness, boolean isDefaultBrightnessConfig) {
+                boolean isUserSetBrightness, boolean isDefaultBrightnessConfig,
+                long timestamp) {
             this.brightness = brightness;
             this.powerBrightnessFactor = powerBrightnessFactor;
             this.isUserSetBrightness = isUserSetBrightness;
             this.isDefaultBrightnessConfig = isDefaultBrightnessConfig;
+            this.timestamp = timestamp;
         }
     }
 

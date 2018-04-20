@@ -864,10 +864,19 @@ public class WindowManagerService extends IWindowManager.Stub
             } else {
                 atoken.updateReportedVisibilityLocked();
                 if (atoken.mEnteringAnimation) {
-                    atoken.mEnteringAnimation = false;
-                    try {
-                        mActivityManager.notifyEnterAnimationComplete(atoken.token);
-                    } catch (RemoteException e) {
+                    if (getRecentsAnimationController() != null
+                            && getRecentsAnimationController().isTargetApp(atoken)) {
+                        // Currently running a recents animation, this will get called early because
+                        // we show the recents animation target activity immediately when the
+                        // animation starts. In this case, we should defer sending the finished
+                        // callback until the animation successfully finishes
+                        return;
+                    } else {
+                        atoken.mEnteringAnimation = false;
+                        try {
+                            mActivityManager.notifyEnterAnimationComplete(atoken.token);
+                        } catch (RemoteException e) {
+                        }
                     }
                 }
             }

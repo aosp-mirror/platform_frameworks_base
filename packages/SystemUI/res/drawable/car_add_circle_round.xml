@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item>
+        <shape android:shape="oval">
+            <solid
+                android:color="@color/car_dark_blue_grey_600"/>
+            <size
+                android:width="@dimen/car_fullscreen_user_pod_image_avatar_width"
+                android:height="@dimen/car_fullscreen_user_pod_image_avatar_height"/>
+        </shape>
+    </item>
+    <item
+        android:drawable="@drawable/car_ic_add_white"
+        android:gravity="center"/>
+</layer-list>

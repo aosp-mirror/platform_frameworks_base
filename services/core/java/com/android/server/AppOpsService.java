@@ -191,15 +191,35 @@ public class AppOpsService extends IAppOpsService.Stub {
 
     public final class ModeCallback implements DeathRecipient {
         final IAppOpsCallback mCallback;
-        final int mUid;
+        final int mWatchingUid;
+        final int mCallingUid;
+        final int mCallingPid;
 
-        public ModeCallback(IAppOpsCallback callback, int uid) {
+        public ModeCallback(IAppOpsCallback callback, int watchingUid, int callingUid,
+                int callingPid) {
             mCallback = callback;
-            mUid = uid;
+            mWatchingUid = watchingUid;
+            mCallingUid = callingUid;
+            mCallingPid = callingPid;
             try {
                 mCallback.asBinder().linkToDeath(this, 0);
             } catch (RemoteException e) {
             }
+        }
+
+        @Override
+        public String toString() {
+            StringBuilder sb = new StringBuilder(128);
+            sb.append("ModeCallback{");
+            sb.append(Integer.toHexString(System.identityHashCode(this)));
+            sb.append(" watchinguid=");
+            UserHandle.formatUid(sb, mWatchingUid);
+            sb.append(" from uid=");
+            UserHandle.formatUid(sb, mCallingUid);
+            sb.append(" pid=");
+            sb.append(mCallingPid);
+            sb.append('}');
+            return sb.toString();
         }
 
         public void unlinkToDeath() {
@@ -214,15 +234,35 @@ public class AppOpsService extends IAppOpsService.Stub {
 
     public final class ActiveCallback implements DeathRecipient {
         final IAppOpsActiveCallback mCallback;
-        final int mUid;
+        final int mWatchingUid;
+        final int mCallingUid;
+        final int mCallingPid;
 
-        public ActiveCallback(IAppOpsActiveCallback callback, int uid) {
+        public ActiveCallback(IAppOpsActiveCallback callback, int watchingUid, int callingUid,
+                int callingPid) {
             mCallback = callback;
-            mUid = uid;
+            mWatchingUid = watchingUid;
+            mCallingUid = callingUid;
+            mCallingPid = callingPid;
             try {
                 mCallback.asBinder().linkToDeath(this, 0);
             } catch (RemoteException e) {
             }
+        }
+
+        @Override
+        public String toString() {
+            StringBuilder sb = new StringBuilder(128);
+            sb.append("ActiveCallback{");
+            sb.append(Integer.toHexString(System.identityHashCode(this)));
+            sb.append(" watchinguid=");
+            UserHandle.formatUid(sb, mWatchingUid);
+            sb.append(" from uid=");
+            UserHandle.formatUid(sb, mCallingUid);
+            sb.append(" pid=");
+            sb.append(mCallingPid);
+            sb.append('}');
+            return sb.toString();
         }
 
         public void destroy() {
@@ -769,7 +809,7 @@ public class AppOpsService extends IAppOpsService.Stub {
 
     private void notifyOpChanged(ModeCallback callback, int code,
             int uid, String packageName) {
-        if (uid != UID_ANY && callback.mUid >= 0 && callback.mUid != uid) {
+        if (uid != UID_ANY && callback.mWatchingUid >= 0 && callback.mWatchingUid != uid) {
             return;
         }
         // There are components watching for mode changes such as window manager
@@ -941,9 +981,11 @@ public class AppOpsService extends IAppOpsService.Stub {
     @Override
     public void startWatchingMode(int op, String packageName, IAppOpsCallback callback) {
         int watchedUid = -1;
+        final int callingUid = Binder.getCallingUid();
+        final int callingPid = Binder.getCallingPid();
         if (mContext.checkCallingOrSelfPermission(Manifest.permission.WATCH_APPOPS)
                 != PackageManager.PERMISSION_GRANTED) {
-            watchedUid = Binder.getCallingUid();
+            watchedUid = callingUid;
         }
         Preconditions.checkArgumentInRange(op, AppOpsManager.OP_NONE,
                 AppOpsManager._NUM_OP - 1, "Invalid op code: " + op);
@@ -954,7 +996,7 @@ public class AppOpsService extends IAppOpsService.Stub {
             op = (op != AppOpsManager.OP_NONE) ? AppOpsManager.opToSwitch(op) : op;
             ModeCallback cb = mModeWatchers.get(callback.asBinder());
             if (cb == null) {
-                cb = new ModeCallback(callback, watchedUid);
+                cb = new ModeCallback(callback, watchedUid, callingUid, callingPid);
                 mModeWatchers.put(callback.asBinder(), cb);
             }
             if (op != AppOpsManager.OP_NONE) {
@@ -1222,9 +1264,11 @@ public class AppOpsService extends IAppOpsService.Stub {
     @Override
     public void startWatchingActive(int[] ops, IAppOpsActiveCallback callback) {
         int watchedUid = -1;
+        final int callingUid = Binder.getCallingUid();
+        final int callingPid = Binder.getCallingPid();
         if (mContext.checkCallingOrSelfPermission(Manifest.permission.WATCH_APPOPS)
                 != PackageManager.PERMISSION_GRANTED) {
-            watchedUid = Binder.getCallingUid();
+            watchedUid = callingUid;
         }
         if (ops != null) {
             Preconditions.checkArrayElementsInRange(ops, 0,
@@ -1239,7 +1283,8 @@ public class AppOpsService extends IAppOpsService.Stub {
                 callbacks = new SparseArray<>();
                 mActiveWatchers.put(callback.asBinder(), callbacks);
             }
-            final ActiveCallback activeCallback = new ActiveCallback(callback, watchedUid);
+            final ActiveCallback activeCallback = new ActiveCallback(callback, watchedUid,
+                    callingUid, callingPid);
             for (int op : ops) {
                 callbacks.put(op, activeCallback);
             }
@@ -1384,7 +1429,7 @@ public class AppOpsService extends IAppOpsService.Stub {
             final SparseArray<ActiveCallback> callbacks = mActiveWatchers.valueAt(i);
             ActiveCallback callback = callbacks.get(code);
             if (callback != null) {
-                if (callback.mUid >= 0 && callback.mUid != uid) {
+                if (callback.mWatchingUid >= 0 && callback.mWatchingUid != uid) {
                     continue;
                 }
                 if (dispatchedCallbacks == null) {
@@ -2477,8 +2522,9 @@ public class AppOpsService extends IAppOpsService.Stub {
                 needSep = true;
                 pw.println("  All op mode watchers:");
                 for (int i=0; i<mModeWatchers.size(); i++) {
-                    pw.print("    "); pw.print(mModeWatchers.keyAt(i));
-                    pw.print(" -> "); pw.println(mModeWatchers.valueAt(i));
+                    pw.print("    ");
+                    pw.print(Integer.toHexString(System.identityHashCode(mModeWatchers.keyAt(i))));
+                    pw.print(": "); pw.println(mModeWatchers.valueAt(i));
                 }
             }
             if (mActiveWatchers.size() > 0) {
@@ -2489,8 +2535,11 @@ public class AppOpsService extends IAppOpsService.Stub {
                     if (activeWatchers.size() <= 0) {
                         continue;
                     }
-                    pw.print("    "); pw.print(mActiveWatchers.keyAt(i));
-                    pw.print(" -> [");
+                    pw.print("    ");
+                    pw.print(Integer.toHexString(System.identityHashCode(
+                            mActiveWatchers.keyAt(i))));
+                    pw.println(" ->");
+                    pw.print("        [");
                     final int opCount = activeWatchers.size();
                     for (i = 0; i < opCount; i++) {
                         pw.print(AppOpsManager.opToName(activeWatchers.keyAt(i)));
@@ -2498,7 +2547,9 @@ public class AppOpsService extends IAppOpsService.Stub {
                             pw.print(',');
                         }
                     }
-                    pw.print("]" ); pw.println(activeWatchers.valueAt(0));
+                    pw.println("]");
+                    pw.print("        ");
+                    pw.println(activeWatchers.valueAt(0));
                 }
             }
             if (mClients.size() > 0) {

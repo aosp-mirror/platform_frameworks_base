@@ -5706,6 +5706,9 @@ public class PackageParser {
 
             /** allow pkg to update to one signed by this certificate */
             int ROLLBACK = 8;
+
+            /** allow pkg to continue to have auth access gated by this cert */
+            int AUTH = 16;
         }
 
         /**

@@ -62,6 +62,10 @@ public class EmptyShadeView extends StackScrollerDecorView {
         mEmptyText.setText(mText);
     }
 
+    public int getTextResource() {
+        return mText;
+    }
+
     @Override
     protected void onFinishInflate() {
         super.onFinishInflate();

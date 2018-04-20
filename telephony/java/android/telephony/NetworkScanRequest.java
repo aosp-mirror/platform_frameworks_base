@@ -152,7 +152,7 @@ public final class NetworkScanRequest implements Parcelable {
         this.mMaxSearchTime = maxSearchTime;
         this.mIncrementalResults = incrementalResults;
         this.mIncrementalResultsPeriodicity = incrementalResultsPeriodicity;
-        if (mMccMncs != null) {
+        if (mccMncs != null) {
             this.mMccMncs = (ArrayList<String>) mccMncs.clone();
         } else {
             this.mMccMncs = new ArrayList<>();

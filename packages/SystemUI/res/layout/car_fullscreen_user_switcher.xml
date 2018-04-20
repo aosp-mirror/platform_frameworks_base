@@ -15,6 +15,7 @@
      limitations under the License.
 -->
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:app="http://schemas.android.com/apk/res-auto"
         android:fitsSystemWindows="true"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -31,34 +32,19 @@
             android:theme="@android:style/Theme"
             android:layout_alignParentTop="true"/>
 
-        <RelativeLayout
-            android:id="@+id/fullscreen_user_switcher_container"
-            android:layout_width="match_parent"
+        <!-- TODO: add app:verticallyCenterListContent="true" when car support lib is updated -->
+        <com.android.systemui.statusbar.car.UserGridRecyclerView
+            android:id="@+id/user_grid"
+            android:layout_width="wrap_content"
             android:layout_height="match_parent"
-            android:layout_marginStart="@dimen/car_margin"
-            android:layout_marginEnd="@dimen/car_margin">
-
-            <RelativeLayout
-                android:id="@+id/fullscreen_user_switcher_container_inner"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:layout_marginEnd="@dimen/car_padding_4">
-
-                <com.android.systemui.statusbar.car.UserGridRecyclerView
-                    android:id="@+id/user_grid"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_below="@+id/header"
-                    android:scrollbars="vertical"
-                    android:scrollbarFadeDuration="0"
-                    android:verticalScrollbarPosition="left"
-                    android:layout_centerHorizontal="true"
-                    android:layout_centerVertical="true"
-                    android:layout_alignParentRight="true"/>
-
-            </RelativeLayout>
-
-        </RelativeLayout>
+            android:layout_below="@+id/header"
+            android:layout_centerHorizontal="true"
+            android:layout_centerVertical="true"
+            android:layout_alignParentRight="true"
+            app:dayNightStyle="force_night"
+            app:showPagedListViewDivider="false"
+            app:gutter="both"
+            app:itemSpacing="@dimen/car_padding_5"/>
 
     </RelativeLayout>
 </FrameLayout>

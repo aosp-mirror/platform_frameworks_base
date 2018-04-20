@@ -39,6 +39,7 @@ import android.widget.TextView;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.statusbar.IStatusBarService;
+import com.android.internal.statusbar.NotificationVisibility;
 import com.android.systemui.Dependency;
 import com.android.systemui.Dumpable;
 import com.android.systemui.statusbar.policy.RemoteInputView;
@@ -132,8 +133,11 @@ public class NotificationRemoteInputManager implements Dumpable {
                 ViewGroup actionGroup = (ViewGroup) parent;
                 index = actionGroup.indexOfChild(view);
             }
+            final int count = mEntryManager.getNotificationData().getActiveNotifications().size();
+            final int rank = mEntryManager.getNotificationData().getRank(key);
+            final NotificationVisibility nv = NotificationVisibility.obtain(key, rank, count, true);
             try {
-                mBarService.onNotificationActionClick(key, index);
+                mBarService.onNotificationActionClick(key, index, nv);
             } catch (RemoteException e) {
                 // Ignore
             }

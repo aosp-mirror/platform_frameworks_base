@@ -118,6 +118,19 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
             }
         }
 
+        public void onOverviewShown(boolean fromHome) {
+            long token = Binder.clearCallingIdentity();
+            try {
+                mHandler.post(() -> {
+                    for (int i = mConnectionCallbacks.size() - 1; i >= 0; --i) {
+                        mConnectionCallbacks.get(i).onOverviewShown(fromHome);
+                    }
+                });
+            } finally {
+                Binder.restoreCallingIdentity(token);
+            }
+        }
+
         public void setInteractionState(@InteractionType int flags) {
             long token = Binder.clearCallingIdentity();
             try {
@@ -306,6 +319,12 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
         }
     }
 
+    public void notifyQuickScrubStarted() {
+        for (int i = mConnectionCallbacks.size() - 1; i >= 0; --i) {
+            mConnectionCallbacks.get(i).onQuickScrubStarted();
+        }
+    }
+
     private void updateEnabledState() {
         mIsEnabled = mContext.getPackageManager().resolveServiceAsUser(mQuickStepIntent,
                 MATCH_DIRECT_BOOT_UNAWARE,
@@ -325,5 +344,7 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
         default void onConnectionChanged(boolean isConnected) {}
         default void onQuickStepStarted() {}
         default void onInteractionFlagsChanged(@InteractionType int flags) {}
+        default void onOverviewShown(boolean fromHome) {}
+        default void onQuickScrubStarted() {}
     }
 }

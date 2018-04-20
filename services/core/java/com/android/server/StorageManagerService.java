@@ -2667,9 +2667,17 @@ class StorageManagerService extends IStorageManager.Stub
     public void mkdirs(String callingPkg, String appPath) {
         final int userId = UserHandle.getUserId(Binder.getCallingUid());
         final UserEnvironment userEnv = new UserEnvironment(userId);
+        final String propertyName = "sys.user." + userId + ".ce_available";
 
         // Ignore requests to create directories while storage is locked
-        if (!isUserKeyUnlocked(userId)) return;
+        if (!isUserKeyUnlocked(userId)) {
+            throw new IllegalStateException("Failed to prepare " + appPath);
+        }
+
+        // Ignore requests to create directories if CE storage is not available
+        if (!SystemProperties.getBoolean(propertyName, false)) {
+            throw new IllegalStateException("Failed to prepare " + appPath);
+        }
 
         // Validate that reported package name belongs to caller
         final AppOpsManager appOps = (AppOpsManager) mContext.getSystemService(

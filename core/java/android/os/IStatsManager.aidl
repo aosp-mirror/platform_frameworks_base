@@ -54,9 +54,9 @@ interface IStatsManager {
     void informAlarmForSubscriberTriggeringFired();
 
     /**
-     * Tells statsd to store data to disk.
+     * Tells statsd that the device is about to shutdown.
      */
-    void writeDataToDisk();
+    void informDeviceShutdown(boolean isShutdown);
 
     /**
      * Inform statsd what the version and package are for each uid. Note that each array should

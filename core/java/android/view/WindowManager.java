@@ -248,6 +248,12 @@ public interface WindowManager extends ViewManager {
     int TRANSIT_TRANSLUCENT_ACTIVITY_CLOSE = 25;
 
     /**
+     * A crashing activity is being closed.
+     * @hide
+     */
+    int TRANSIT_CRASHING_ACTIVITY_CLOSE = 26;
+
+    /**
      * @hide
      */
     @IntDef(prefix = { "TRANSIT_" }, value = {

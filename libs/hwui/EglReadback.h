@@ -18,16 +18,15 @@
 
 #include "Readback.h"
 
+#include "Matrix.h"
+
 #include <EGL/egl.h>
 #include <EGL/eglext.h>
 
 namespace android {
 namespace uirenderer {
 
-class Matrix4;
-class GlLayer;
-
-class OpenGLReadback : public Readback {
+class EglReadback : public Readback {
 public:
     virtual CopyResult copySurfaceInto(Surface& surface, const Rect& srcRect,
                                        SkBitmap* bitmap) override;
@@ -35,8 +34,8 @@ public:
                                              SkBitmap* bitmap) override;
 
 protected:
-    explicit OpenGLReadback(renderthread::RenderThread& thread) : Readback(thread) {}
-    virtual ~OpenGLReadback() {}
+    explicit EglReadback(renderthread::RenderThread& thread) : Readback(thread) {}
+    virtual ~EglReadback() {}
 
     virtual CopyResult copyImageInto(EGLImageKHR eglImage, const Matrix4& imgTransform,
                                      int imgWidth, int imgHeight, const Rect& srcRect,
@@ -45,22 +44,6 @@ protected:
 private:
     CopyResult copyGraphicBufferInto(GraphicBuffer* graphicBuffer, Matrix4& texTransform,
                                      const Rect& srcRect, SkBitmap* bitmap);
-};
-
-class OpenGLReadbackImpl : public OpenGLReadback {
-public:
-    OpenGLReadbackImpl(renderthread::RenderThread& thread) : OpenGLReadback(thread) {}
-
-    /**
-     * Copies the layer's contents into the provided bitmap.
-     */
-    static bool copyLayerInto(renderthread::RenderThread& renderThread, GlLayer& layer,
-                              SkBitmap* bitmap);
-
-protected:
-    virtual CopyResult copyImageInto(EGLImageKHR eglImage, const Matrix4& imgTransform,
-                                     int imgWidth, int imgHeight, const Rect& srcRect,
-                                     SkBitmap* bitmap) override;
 };
 
 }  // namespace uirenderer

@@ -112,10 +112,13 @@ void mergeIsolatedUidsToHostUid(vector<shared_ptr<LogEvent>>& data, const sp<Uid
         VLOG("Unknown pull atom id %d", tagId);
         return;
     }
-    if (android::util::AtomsInfo::kAtomsWithUidField.find(tagId) ==
-        android::util::AtomsInfo::kAtomsWithUidField.end()) {
+    int uidField;
+    auto it = android::util::AtomsInfo::kAtomsWithUidField.find(tagId);
+    if (it == android::util::AtomsInfo::kAtomsWithUidField.end()) {
         VLOG("No uid to merge for atom %d", tagId);
         return;
+    } else {
+        uidField = it->second;  // uidField is the field number in proto,
     }
     const vector<int>& additiveFields =
             StatsPullerManagerImpl::kAllPullAtomInfo.find(tagId)->second.additiveFields;
@@ -129,11 +132,13 @@ void mergeIsolatedUidsToHostUid(vector<shared_ptr<LogEvent>>& data, const sp<Uid
     for (size_t i = 0; i < data.size(); i++) {
         vector<FieldValue>* valueList = data[i]->getMutableValues();
 
-        int err = 0;
-        int uid = data[i]->GetInt(1, &err);
-        if (err != 0) {
-            VLOG("Bad uid field for %s", data[i]->ToString().c_str());
-            return;
+        int uid;
+        if (uidField > 0 && (int)data[i]->getValues().size() >= uidField &&
+            (data[i]->getValues())[uidField - 1].mValue.getType() == INT) {
+            uid = (*data[i]->getMutableValues())[uidField - 1].mValue.int_value;
+        } else {
+            ALOGE("Malformed log, uid not found. %s", data[i]->ToString().c_str());
+            continue;
         }
 
         const int hostUid = uidMap->getHostUidOrSelf(uid);

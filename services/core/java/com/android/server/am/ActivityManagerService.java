@@ -95,6 +95,7 @@ import static android.os.Process.SIGNAL_USR1;
 import static android.os.Process.SYSTEM_UID;
 import static android.os.Process.THREAD_GROUP_BG_NONINTERACTIVE;
 import static android.os.Process.THREAD_GROUP_DEFAULT;
+import static android.os.Process.THREAD_GROUP_RESTRICTED;
 import static android.os.Process.THREAD_GROUP_TOP_APP;
 import static android.os.Process.THREAD_PRIORITY_BACKGROUND;
 import static android.os.Process.THREAD_PRIORITY_FOREGROUND;
@@ -2945,7 +2946,11 @@ public class ActivityManagerService extends IActivityManager.Stub
                             ? Collections.emptyList()
                             : Arrays.asList(exemptions.split(","));
                 }
-                zygoteProcess.setApiBlacklistExemptions(mExemptions);
+                if (!zygoteProcess.setApiBlacklistExemptions(mExemptions)) {
+                  Slog.e(TAG, "Failed to set API blacklist exemptions!");
+                  // leave mExemptionsStr as is, so we don't try to send the same list again.
+                  mExemptions = Collections.emptyList();
+                }
             }
             int logSampleRate = Settings.Global.getInt(mContext.getContentResolver(),
                     Settings.Global.HIDDEN_API_ACCESS_LOG_SAMPLING_RATE, -1);
@@ -3161,6 +3166,8 @@ public class ActivityManagerService extends IActivityManager.Stub
 
         // bind background thread to little cores
         // this is expected to fail inside of framework tests because apps can't touch cpusets directly
+        // make sure we've already adjusted system_server's internal view of itself first
+        updateOomAdjLocked();
         try {
             Process.setThreadGroupAndCpuset(BackgroundThread.get().getThreadId(),
                     Process.THREAD_GROUP_BG_NONINTERACTIVE);
@@ -3706,12 +3713,16 @@ public class ActivityManagerService extends IActivityManager.Stub
         int lrui = mLruProcesses.lastIndexOf(app);
         if (lrui >= 0) {
             if (!app.killed) {
-                Slog.wtfStack(TAG, "Removing process that hasn't been killed: " + app);
-                if (app.pid > 0) {
-                    killProcessQuiet(app.pid);
-                    killProcessGroup(app.uid, app.pid);
+                if (app.persistent) {
+                    Slog.w(TAG, "Removing persistent process that hasn't been killed: " + app);
                 } else {
-                    app.pendingStart = false;
+                    Slog.wtfStack(TAG, "Removing process that hasn't been killed: " + app);
+                    if (app.pid > 0) {
+                        killProcessQuiet(app.pid);
+                        killProcessGroup(app.uid, app.pid);
+                    } else {
+                        app.pendingStart = false;
+                    }
                 }
             }
             if (lrui <= mLruProcessActivityStart) {
@@ -5276,22 +5287,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                 final RecentsAnimation anim = new RecentsAnimation(this, mStackSupervisor,
                         mActivityStartController, mWindowManager, mUserController, callingPid);
                 anim.startRecentsActivity(intent, recentsAnimationRunner, recentsComponent,
-                        recentsUid);
-            }
-
-            // If provided, kick off the request for the assist data in the background. Do not hold
-            // the AM lock as this will just proxy directly to the assist data receiver provided.
-            if (assistDataReceiver != null) {
-                final AppOpsManager appOpsManager = (AppOpsManager)
-                        mContext.getSystemService(Context.APP_OPS_SERVICE);
-                final AssistDataReceiverProxy proxy = new AssistDataReceiverProxy(
-                        assistDataReceiver, recentsPackage);
-                final AssistDataRequester requester = new AssistDataRequester(mContext, this,
-                        mWindowManager, appOpsManager, proxy, this, OP_ASSIST_STRUCTURE, OP_NONE);
-                requester.requestAssistData(topVisibleActivities,
-                        true /* fetchData */, false /* fetchScreenshots */,
-                        true /* allowFetchData */, false /* allowFetchScreenshots */,
-                        recentsUid, recentsPackage);
+                        recentsUid, assistDataReceiver);
             }
         } finally {
             Binder.restoreCallingIdentity(origId);
@@ -13076,6 +13072,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                 mHandler.obtainMessage(DISPATCH_SCREEN_AWAKE_MSG, isAwake ? 1 : 0, 0)
                         .sendToTarget();
             }
+            updateOomAdjLocked();
         }
     }
 
@@ -18065,6 +18062,9 @@ public class ActivityManagerService extends IActivityManager.Stub
                 case ProcessList.SCHED_GROUP_TOP_APP:
                     schedGroup = 'T';
                     break;
+                case ProcessList.SCHED_GROUP_RESTRICTED:
+                    schedGroup = 'R';
+                    break;
                 default:
                     schedGroup = '?';
                     break;
@@ -22890,8 +22890,8 @@ public class ActivityManagerService extends IActivityManager.Stub
                 app.curSchedGroup = ProcessList.SCHED_GROUP_TOP_APP;
                 app.adjType = "pers-top-activity";
             } else if (app.hasTopUi) {
+                // sched group/proc state adjustment is below
                 app.systemNoUi = false;
-                app.curSchedGroup = ProcessList.SCHED_GROUP_TOP_APP;
                 app.adjType = "pers-top-ui";
             } else if (activitiesSize > 0) {
                 for (int j = 0; j < activitiesSize; j++) {
@@ -22902,7 +22902,15 @@ public class ActivityManagerService extends IActivityManager.Stub
                 }
             }
             if (!app.systemNoUi) {
-                app.curProcState = ActivityManager.PROCESS_STATE_PERSISTENT_UI;
+              if (mWakefulness == PowerManagerInternal.WAKEFULNESS_AWAKE) {
+                  // screen on, promote UI
+                  app.curProcState = ActivityManager.PROCESS_STATE_PERSISTENT_UI;
+                  app.curSchedGroup = ProcessList.SCHED_GROUP_TOP_APP;
+              } else {
+                  // screen off, restrict UI scheduling
+                  app.curProcState = ActivityManager.PROCESS_STATE_BOUND_FOREGROUND_SERVICE;
+                  app.curSchedGroup = ProcessList.SCHED_GROUP_RESTRICTED;
+              }
             }
             return (app.curAdj=app.maxAdj);
         }
@@ -23385,8 +23393,14 @@ public class ActivityManagerService extends IActivityManager.Stub
                                 int newAdj;
                                 if ((cr.flags&(Context.BIND_ABOVE_CLIENT
                                         |Context.BIND_IMPORTANT)) != 0) {
-                                    newAdj = clientAdj >= ProcessList.PERSISTENT_SERVICE_ADJ
-                                            ? clientAdj : ProcessList.PERSISTENT_SERVICE_ADJ;
+                                    if (clientAdj >= ProcessList.PERSISTENT_SERVICE_ADJ) {
+                                        newAdj = clientAdj;
+                                    } else {
+                                        // make this service persistent
+                                        newAdj = ProcessList.PERSISTENT_SERVICE_ADJ;
+                                        schedGroup = ProcessList.SCHED_GROUP_DEFAULT;
+                                        procState = ActivityManager.PROCESS_STATE_PERSISTENT;
+                                    }
                                 } else if ((cr.flags&Context.BIND_NOT_VISIBLE) != 0
                                         && clientAdj < ProcessList.PERCEPTIBLE_APP_ADJ
                                         && adj > ProcessList.PERCEPTIBLE_APP_ADJ) {
@@ -23751,6 +23765,15 @@ public class ActivityManagerService extends IActivityManager.Stub
             adj = app.maxAdj;
             if (app.maxAdj <= ProcessList.PERCEPTIBLE_APP_ADJ) {
                 schedGroup = ProcessList.SCHED_GROUP_DEFAULT;
+            }
+        }
+
+        // Put bound foreground services in a special sched group for additional
+        // restrictions on screen off
+        if (procState >= ActivityManager.PROCESS_STATE_BOUND_FOREGROUND_SERVICE &&
+            mWakefulness != PowerManagerInternal.WAKEFULNESS_AWAKE) {
+            if (schedGroup > ProcessList.SCHED_GROUP_RESTRICTED) {
+                schedGroup = ProcessList.SCHED_GROUP_RESTRICTED;
             }
         }
 
@@ -24175,6 +24198,9 @@ public class ActivityManagerService extends IActivityManager.Stub
                     case ProcessList.SCHED_GROUP_TOP_APP:
                     case ProcessList.SCHED_GROUP_TOP_APP_BOUND:
                         processGroup = THREAD_GROUP_TOP_APP;
+                        break;
+                    case ProcessList.SCHED_GROUP_RESTRICTED:
+                        processGroup = THREAD_GROUP_RESTRICTED;
                         break;
                     default:
                         processGroup = THREAD_GROUP_DEFAULT;
@@ -26478,6 +26504,11 @@ public class ActivityManagerService extends IActivityManager.Stub
         @Override
         public boolean isRecentsComponentHomeActivity(int userId) {
             return getRecentTasks().isRecentsComponentHomeActivity(userId);
+        }
+
+        @Override
+        public void cancelRecentsAnimation(boolean restoreHomeStackPosition) {
+            ActivityManagerService.this.cancelRecentsAnimation(restoreHomeStackPosition);
         }
 
         @Override

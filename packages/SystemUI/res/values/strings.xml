@@ -240,6 +240,8 @@
     <string name="accessibility_waiting_for_fingerprint">Waiting for fingerprint</string>
     <!-- Accessibility action of the unlock button when fingerpint is on (not shown on the screen). [CHAR LIMIT=NONE] -->
     <string name="accessibility_unlock_without_fingerprint">Unlock without using your fingerprint</string>
+    <!-- Click action label for accessibility for the smart reply buttons (not shown on-screen).". [CHAR LIMIT=NONE] -->
+    <string name="accessibility_send_smart_reply">Send</string>
     <!-- Click action label for accessibility for the unlock button. [CHAR LIMIT=NONE] -->
     <string name="unlock_label">unlock</string>
     <!-- Click action label for accessibility for the phone button. [CHAR LIMIT=NONE] -->
@@ -513,16 +515,12 @@
     <string name="accessibility_quick_settings_airplane_changed_off">Airplane mode turned off.</string>
     <!-- Announcement made when the airplane mode changes to on (not shown on the screen). [CHAR LIMIT=NONE] -->
     <string name="accessibility_quick_settings_airplane_changed_on">Airplane mode turned on.</string>
-    <!-- Content description of the do not disturb tile in quick settings when on in the default priority mode (not shown on the screen). [CHAR LIMIT=NONE] -->
-    <string name="accessibility_quick_settings_dnd_priority_on">Do not disturb on.</string>
     <!-- Content description of the do not disturb tile in quick settings when on in none (not shown on the screen). [CHAR LIMIT=NONE] -->
-    <string name="accessibility_quick_settings_dnd_none_on">Do not disturb on, total silence.</string>
+    <string name="accessibility_quick_settings_dnd_none_on">total silence</string>
     <!-- Content description of the do not disturb tile in quick settings when on in alarms only (not shown on the screen). [CHAR LIMIT=NONE] -->
-    <string name="accessibility_quick_settings_dnd_alarms_on">Do not disturb on, alarms only.</string>
+    <string name="accessibility_quick_settings_dnd_alarms_on">alarms only</string>
      <!-- Content description of the do not disturb tile in quick settings (not shown on the screen). [CHAR LIMIT=NONE] -->
     <string name="accessibility_quick_settings_dnd">Do not disturb.</string>
-     <!-- Content description of the do not disturb tile in quick settings when off (not shown on the screen). [CHAR LIMIT=NONE] -->
-    <string name="accessibility_quick_settings_dnd_off">Do not disturb off.</string>
     <!-- Announcement made when do not disturb changes to off (not shown on the screen). [CHAR LIMIT=NONE] -->
     <string name="accessibility_quick_settings_dnd_changed_off">Do not disturb turned off.</string>
     <!-- Announcement made when do not disturb changes to on (not shown on the screen). [CHAR LIMIT=NONE] -->
@@ -1584,7 +1582,7 @@
     </plurals>
 
     <string name="notification_appops_settings">Settings</string>
-    <string name="notification_appops_ok">Ok</string>
+    <string name="notification_appops_ok">OK</string>
 
     <!-- Notification: Control panel: Accessibility description for expanded inline controls view, used
         to control settings about notifications related to the current notification.  -->

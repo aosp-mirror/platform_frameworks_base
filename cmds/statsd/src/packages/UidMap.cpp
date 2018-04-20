@@ -166,6 +166,8 @@ void UidMap::updateApp(const int64_t& timestamp, const String16& app_16, const i
         } else {
             // Only notify the listeners if this is an app upgrade. If this app is being installed
             // for the first time, then we don't notify the listeners.
+            // It's also OK to split again if we're forming a partial bucket after re-installing an
+            // app after deletion.
             getListenerListCopyLocked(&broadcastList);
         }
         mChanges.emplace_back(false, timestamp, appName, uid, versionCode, prevVersion);
@@ -219,7 +221,7 @@ void UidMap::removeApp(const int64_t& timestamp, const String16& app_16, const i
     {
         lock_guard<mutex> lock(mMutex);
 
-        int32_t prevVersion = 0;
+        int64_t prevVersion = 0;
         auto key = std::make_pair(uid, app);
         auto it = mMap.find(key);
         if (it != mMap.end() && !it->second.deleted) {
@@ -322,8 +324,9 @@ void UidMap::appendUidMap(const int64_t& timestamp, const ConfigKey& key,
                          (long long)record.timestampNs);
             proto->write(FIELD_TYPE_STRING | FIELD_ID_CHANGE_PACKAGE, record.package);
             proto->write(FIELD_TYPE_INT32 | FIELD_ID_CHANGE_UID, (int)record.uid);
-            proto->write(FIELD_TYPE_INT32 | FIELD_ID_CHANGE_NEW_VERSION, (int)record.version);
-            proto->write(FIELD_TYPE_INT32 | FIELD_ID_CHANGE_PREV_VERSION, (int)record.prevVersion);
+            proto->write(FIELD_TYPE_INT64 | FIELD_ID_CHANGE_NEW_VERSION, (long long)record.version);
+            proto->write(FIELD_TYPE_INT64 | FIELD_ID_CHANGE_PREV_VERSION,
+                         (long long)record.prevVersion);
             proto->end(changesToken);
         }
     }
@@ -336,8 +339,8 @@ void UidMap::appendUidMap(const int64_t& timestamp, const ConfigKey& key,
         uint64_t token = proto->start(FIELD_TYPE_MESSAGE | FIELD_COUNT_REPEATED |
                                       FIELD_ID_SNAPSHOT_PACKAGE_INFO);
         proto->write(FIELD_TYPE_STRING | FIELD_ID_SNAPSHOT_PACKAGE_NAME, kv.first.second);
-        proto->write(FIELD_TYPE_INT32 | FIELD_ID_SNAPSHOT_PACKAGE_VERSION,
-                     (int)kv.second.versionCode);
+        proto->write(FIELD_TYPE_INT64 | FIELD_ID_SNAPSHOT_PACKAGE_VERSION,
+                     (long long)kv.second.versionCode);
         proto->write(FIELD_TYPE_INT32 | FIELD_ID_SNAPSHOT_PACKAGE_UID, kv.first.first);
         proto->write(FIELD_TYPE_BOOL | FIELD_ID_SNAPSHOT_PACKAGE_DELETED, kv.second.deleted);
         proto->end(token);

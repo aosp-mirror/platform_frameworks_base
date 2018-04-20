@@ -156,8 +156,7 @@ public class NotificationIconAreaController implements DarkReceiver {
         }
 
         // showAmbient == show in shade but not shelf
-        if (!showAmbient && mEntryManager.getNotificationData().shouldSuppressStatusBar(
-                entry.notification)) {
+        if (!showAmbient && mEntryManager.getNotificationData().shouldSuppressStatusBar(entry)) {
             return false;
         }
 

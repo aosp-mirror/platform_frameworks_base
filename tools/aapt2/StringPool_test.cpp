@@ -61,6 +61,17 @@ TEST(StringPoolTest, DoNotInsertNewDuplicateString) {
   EXPECT_THAT(pool.size(), Eq(1u));
 }
 
+TEST(StringPoolTest, DoNotDedupeSameStringDifferentPriority) {
+  StringPool pool;
+
+  StringPool::Ref ref_a = pool.MakeRef("wut", StringPool::Context(0x81010001));
+  StringPool::Ref ref_b = pool.MakeRef("wut", StringPool::Context(0x81010002));
+
+  EXPECT_THAT(*ref_a, Eq("wut"));
+  EXPECT_THAT(*ref_b, Eq("wut"));
+  EXPECT_THAT(pool.size(), Eq(2u));
+}
+
 TEST(StringPoolTest, MaintainInsertionOrderIndex) {
   StringPool pool;
 

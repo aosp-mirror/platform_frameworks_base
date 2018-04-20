@@ -105,6 +105,13 @@ public class QSFragment extends Fragment implements QS, CommandQueue.Callbacks {
             mQSCustomizer.setEditLocation(x, y);
             mQSCustomizer.restoreInstanceState(savedInstanceState);
         }
+        SysUiServiceProvider.getComponent(getContext(), CommandQueue.class).addCallbacks(this);
+    }
+
+    @Override
+    public void onDestroyView() {
+        SysUiServiceProvider.getComponent(getContext(), CommandQueue.class).removeCallbacks(this);
+        super.onDestroyView();
     }
 
     @Override
@@ -203,15 +210,13 @@ public class QSFragment extends Fragment implements QS, CommandQueue.Callbacks {
                 : View.INVISIBLE);
         mHeader.setExpanded((mKeyguardShowing && !mHeaderAnimating)
                 || (mQsExpanded && !mStackScrollerOverscrolling));
-        mFooter.setVisibility((mQsExpanded || !mKeyguardShowing || mHeaderAnimating)
+        mFooter.setVisibility(
+                !mQsDisabled && (mQsExpanded || !mKeyguardShowing || mHeaderAnimating)
                 ? View.VISIBLE
                 : View.INVISIBLE);
-        if (mQsDisabled) {
-            mFooter.setVisibility(View.GONE);
-        }
         mFooter.setExpanded((mKeyguardShowing && !mHeaderAnimating)
                 || (mQsExpanded && !mStackScrollerOverscrolling));
-        mQSPanel.setVisibility(expandVisually ? View.VISIBLE : View.INVISIBLE);
+        mQSPanel.setVisibility(!mQsDisabled && expandVisually ? View.VISIBLE : View.INVISIBLE);
     }
 
     public QSPanel getQsPanel() {
@@ -235,11 +240,6 @@ public class QSFragment extends Fragment implements QS, CommandQueue.Callbacks {
     @Override
     public void setHeaderClickable(boolean clickable) {
         if (DEBUG) Log.d(TAG, "setHeaderClickable " + clickable);
-
-        View expandView = mFooter.getExpandView();
-        if (expandView != null) {
-            expandView.setClickable(clickable);
-        }
     }
 
     @Override
@@ -278,12 +278,6 @@ public class QSFragment extends Fragment implements QS, CommandQueue.Callbacks {
         mHeader.setListening(listening);
         mFooter.setListening(listening);
         mQSPanel.setListening(mListening && mQsExpanded);
-        if (listening) {
-            SysUiServiceProvider.getComponent(getContext(), CommandQueue.class).addCallbacks(this);
-        } else {
-            SysUiServiceProvider.getComponent(getContext(), CommandQueue.class)
-                    .removeCallbacks(this);
-        }
     }
 
     @Override
@@ -370,11 +364,7 @@ public class QSFragment extends Fragment implements QS, CommandQueue.Callbacks {
 
     @Override
     public void setExpandClickListener(OnClickListener onClickListener) {
-        View expandView = mFooter.getExpandView();
-
-        if (expandView != null) {
-            expandView.setOnClickListener(onClickListener);
-        }
+        mFooter.setExpandClickListener(onClickListener);
     }
 
     @Override

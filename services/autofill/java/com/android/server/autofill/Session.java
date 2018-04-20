@@ -271,7 +271,8 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
 
                 // Sanitize structure before it's sent to service.
                 final ComponentName componentNameFromApp = structure.getActivityComponent();
-                if (!mComponentName.equals(componentNameFromApp)) {
+                if (componentNameFromApp == null || !mComponentName.getPackageName()
+                        .equals(componentNameFromApp.getPackageName())) {
                     Slog.w(TAG, "Activity " + mComponentName + " forged different component on "
                             + "AssistStructure: " + componentNameFromApp);
                     structure.setActivityComponent(mComponentName);
@@ -2150,11 +2151,8 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
             if (saveTriggerId != null) {
                 writeLog(MetricsEvent.AUTOFILL_EXPLICIT_SAVE_TRIGGER_DEFINITION);
             }
-            int flags = saveInfo.getFlags();
-            if (mCompatMode) {
-                flags |= SaveInfo.FLAG_SAVE_ON_ALL_VIEWS_INVISIBLE;
-            }
-            mSaveOnAllViewsInvisible = (flags & SaveInfo.FLAG_SAVE_ON_ALL_VIEWS_INVISIBLE) != 0;
+            mSaveOnAllViewsInvisible =
+                    (saveInfo.getFlags() & SaveInfo.FLAG_SAVE_ON_ALL_VIEWS_INVISIBLE) != 0;
 
             // We only need to track views if we want to save once they become invisible.
             if (mSaveOnAllViewsInvisible) {

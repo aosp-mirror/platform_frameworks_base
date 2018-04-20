@@ -20,25 +20,30 @@ import android.util.FloatProperty;
 import android.util.Property;
 import android.view.View;
 
-import com.android.systemui.statusbar.stack.AnimationProperties;
+import com.android.systemui.R;
 
 import java.util.function.BiConsumer;
-import java.util.function.Consumer;
 import java.util.function.Function;
 
 /**
  * An animatable property of a view. Used with {@link PropertyAnimator}
  */
-public interface AnimatableProperty {
-    int getAnimationStartTag();
+public abstract class AnimatableProperty {
 
-    int getAnimationEndTag();
+    public static final AnimatableProperty X = AnimatableProperty.from(View.X,
+            R.id.x_animator_tag, R.id.x_animator_tag_start_value, R.id.x_animator_tag_end_value);
+    public static final AnimatableProperty Y = AnimatableProperty.from(View.Y,
+            R.id.y_animator_tag, R.id.y_animator_tag_start_value, R.id.y_animator_tag_end_value);
 
-    int getAnimatorTag();
+    public abstract int getAnimationStartTag();
 
-    Property getProperty();
+    public abstract int getAnimationEndTag();
 
-    static <T extends View> AnimatableProperty from(String name, BiConsumer<T, Float> setter,
+    public abstract int getAnimatorTag();
+
+    public abstract Property getProperty();
+
+    public static <T extends View> AnimatableProperty from(String name, BiConsumer<T, Float> setter,
             Function<T, Float> getter, int animatorTag, int startValueTag, int endValueTag) {
         Property<T, Float> property = new FloatProperty<T>(name) {
 
@@ -52,6 +57,31 @@ public interface AnimatableProperty {
                 setter.accept(object, value);
             }
         };
+        return new AnimatableProperty() {
+            @Override
+            public int getAnimationStartTag() {
+                return startValueTag;
+            }
+
+            @Override
+            public int getAnimationEndTag() {
+                return endValueTag;
+            }
+
+            @Override
+            public int getAnimatorTag() {
+                return animatorTag;
+            }
+
+            @Override
+            public Property getProperty() {
+                return property;
+            }
+        };
+    }
+
+    public static <T extends View> AnimatableProperty from(Property<T, Float> property,
+            int animatorTag, int startValueTag, int endValueTag) {
         return new AnimatableProperty() {
             @Override
             public int getAnimationStartTag() {

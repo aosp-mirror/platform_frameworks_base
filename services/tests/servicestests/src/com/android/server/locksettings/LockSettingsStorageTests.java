@@ -20,6 +20,7 @@ import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import android.app.KeyguardManager;
 import android.app.NotificationManager;
 import android.app.admin.DevicePolicyManager;
 import android.app.trust.TrustManager;
@@ -79,7 +80,7 @@ public class LockSettingsStorageTests extends AndroidTestCase {
 
         MockLockSettingsContext context = new MockLockSettingsContext(getContext(), mockUserManager,
                 mock(NotificationManager.class), mock(DevicePolicyManager.class),
-                mock(StorageManager.class), mock(TrustManager.class));
+                mock(StorageManager.class), mock(TrustManager.class), mock(KeyguardManager.class));
         mStorage = new LockSettingsStorageTestable(context,
                 new File(getContext().getFilesDir(), "locksettings"));
         mStorage.setDatabaseOnCreateCallback(new LockSettingsStorage.Callback() {

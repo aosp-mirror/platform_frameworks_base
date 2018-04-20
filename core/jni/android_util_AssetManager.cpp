@@ -837,7 +837,7 @@ static jint NativeGetResourceArray(JNIEnv* env, jclass /*clazz*/, jlong ptr, jin
     ResTable_config selected_config;
     selected_config.density = 0;
     uint32_t flags = bag->type_spec_flags;
-    uint32_t ref;
+    uint32_t ref = 0;
     ApkAssetsCookie cookie =
         assetmanager->ResolveReference(entry.cookie, &value, &selected_config, &flags, &ref);
     if (cookie == kInvalidCookie) {

@@ -17,7 +17,6 @@
 package com.android.systemui.qs;
 
 import static android.app.StatusBarManager.DISABLE2_QUICK_SETTINGS;
-import static android.content.res.Configuration.ORIENTATION_LANDSCAPE;
 
 import android.content.Context;
 import android.content.Intent;
@@ -27,6 +26,7 @@ import android.content.res.Configuration;
 import android.graphics.PorterDuff.Mode;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.RippleDrawable;
+import android.os.Bundle;
 import android.os.UserManager;
 import android.support.annotation.Nullable;
 import android.support.annotation.VisibleForTesting;
@@ -34,6 +34,7 @@ import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.accessibility.AccessibilityNodeInfo;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -96,6 +97,7 @@ public class QSFooterImpl extends FrameLayout implements QSFooter,
     private ImageView mMobileRoaming;
     private final int mColorForeground;
     private final CellSignalState mInfo = new CellSignalState();
+    private OnClickListener mExpandClickListener;
 
     public QSFooterImpl(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -140,6 +142,7 @@ public class QSFooterImpl extends FrameLayout implements QSFooter,
         mActivityStarter = Dependency.get(ActivityStarter.class);
         addOnLayoutChangeListener((v, left, top, right, bottom, oldLeft, oldTop, oldRight,
                 oldBottom) -> updateAnimator(right - left));
+        setImportantForAccessibility(IMPORTANT_FOR_ACCESSIBILITY_YES);
     }
 
     private void updateAnimator(int width) {
@@ -205,6 +208,11 @@ public class QSFooterImpl extends FrameLayout implements QSFooter,
     }
 
     @Override
+    public void setExpandClickListener(OnClickListener onClickListener) {
+        mExpandClickListener = onClickListener;
+    }
+
+    @Override
     public void setExpanded(boolean expanded) {
         if (mExpanded == expanded) return;
         mExpanded = expanded;
@@ -238,8 +246,20 @@ public class QSFooterImpl extends FrameLayout implements QSFooter,
     }
 
     @Override
-    public View getExpandView() {
-        return findViewById(R.id.expand_indicator);
+    public boolean performAccessibilityAction(int action, Bundle arguments) {
+        if (action == AccessibilityNodeInfo.ACTION_EXPAND) {
+            if (mExpandClickListener != null) {
+                mExpandClickListener.onClick(null);
+                return true;
+            }
+        }
+        return super.performAccessibilityAction(action, arguments);
+    }
+
+    @Override
+    public void onInitializeAccessibilityNodeInfo(AccessibilityNodeInfo info) {
+        super.onInitializeAccessibilityNodeInfo(info);
+        info.addAction(AccessibilityNodeInfo.AccessibilityAction.ACTION_EXPAND);
     }
 
     @Override

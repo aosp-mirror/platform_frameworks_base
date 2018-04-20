@@ -16,15 +16,15 @@
 
 #pragma once
 
-#include "OpenGLReadback.h"
+#include "EglReadback.h"
 
 namespace android {
 namespace uirenderer {
 namespace skiapipeline {
 
-class SkiaOpenGLReadback : public OpenGLReadback {
+class SkiaOpenGLReadback : public EglReadback {
 public:
-    SkiaOpenGLReadback(renderthread::RenderThread& thread) : OpenGLReadback(thread) {}
+    SkiaOpenGLReadback(renderthread::RenderThread& thread) : EglReadback(thread) {}
 
 protected:
     virtual CopyResult copyImageInto(EGLImageKHR eglImage, const Matrix4& imgTransform,

@@ -236,6 +236,8 @@ message GaugeMetric {
     ALL_CONDITION_CHANGES = 2;
   }
   optional SamplingType sampling_type = 9 [default = RANDOM_ONE_SAMPLE] ;
+
+  optional int64 min_bucket_size_nanos = 10;
 }
 
 message ValueMetric {
@@ -259,6 +261,8 @@ message ValueMetric {
     SUM = 1;
   }
   optional AggregationType aggregation_type = 8 [default = SUM];
+
+  optional int64 min_bucket_size_nanos = 10;
 }
 
 message Alert {

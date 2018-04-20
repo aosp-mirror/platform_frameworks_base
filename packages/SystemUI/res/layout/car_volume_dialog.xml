@@ -15,55 +15,24 @@
 -->
 <FrameLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/volume_dialog"
+    android:clipChildren="false"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_marginStart="@dimen/car_margin"
     android:layout_marginEnd="@dimen/car_margin"
-    android:background="@drawable/car_rounded_bg_bottom"
-    android:theme="@style/qs_theme"
-    android:clipChildren="false" >
-    <LinearLayout
-        android:id="@+id/volume_dialog"
+    android:theme="@style/qs_theme" >
+    <androidx.car.widget.PagedListView
+        android:id="@+id/volume_list"
+        android:background="@drawable/car_rounded_bg_bottom"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_gravity="center_horizontal|top"
-        android:orientation="vertical"
-        android:clipChildren="false" >
-
-        <LinearLayout
-            android:id="@+id/main"
-            android:layout_width="match_parent"
-            android:minWidth="@dimen/volume_dialog_panel_width"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:clipChildren="false"
-            android:clipToPadding="false"
-            android:elevation="@dimen/volume_dialog_elevation" >
-            <LinearLayout
-                android:id="@+id/car_volume_dialog_rows"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:gravity="center"
-                android:orientation="vertical" >
-                <!-- volume rows added and removed here! :-) -->
-            </LinearLayout>
-        </LinearLayout>
-    </LinearLayout>
-    <FrameLayout
-        android:layout_width="wrap_content"
-        android:layout_height="@dimen/car_single_line_list_item_height"
-        android:gravity="center"
-        android:layout_marginEnd="@dimen/car_keyline_1"
-        android:layout_gravity="end">
-        <com.android.keyguard.AlphaOptimizedImageButton
-            android:id="@+id/expand"
-            android:layout_gravity="center"
-            android:layout_width="@dimen/car_primary_icon_size"
-            android:layout_height="@dimen/car_primary_icon_size"
-            android:src="@drawable/car_ic_arrow_drop_up"
-            android:background="?android:attr/selectableItemBackground"
-            android:tint="@color/car_tint"
-            android:scaleType="fitCenter"
-        />
-    </FrameLayout>
+        android:minWidth="@dimen/volume_dialog_panel_width"
+        android:theme="?attr/dialogListTheme"
+        app:dividerStartMargin="@dimen/car_keyline_1"
+        app:dividerEndMargin="@dimen/car_keyline_1"
+        app:gutter="none"
+        app:showPagedListViewDivider="true"
+        app:scrollBarEnabled="false" />
 </FrameLayout>

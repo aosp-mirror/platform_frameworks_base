@@ -424,7 +424,7 @@ public class LocationManagerService extends ILocationManager.Stub {
                             Log.d(TAG, "request from uid " + uid + " is now "
                                     + (foreground ? "foreground" : "background)"));
                         }
-                        record.mIsForegroundUid = foreground;
+                        record.updateForeground(foreground);
 
                         if (!isThrottlingExemptLocked(record.mReceiver.mIdentity)) {
                             affectedProviders.add(provider);
@@ -1905,7 +1905,17 @@ public class LocationManagerService extends ILocationManager.Stub {
 
             // Update statistics for historical location requests by package/provider
             mRequestStatistics.startRequesting(
-                    mReceiver.mIdentity.mPackageName, provider, request.getInterval());
+                    mReceiver.mIdentity.mPackageName, provider, request.getInterval(),
+                    mIsForegroundUid);
+        }
+
+        /**
+         * Method to be called when record changes foreground/background
+         */
+        void updateForeground(boolean isForeground){
+            mIsForegroundUid = isForeground;
+            mRequestStatistics.updateForeground(
+                    mReceiver.mIdentity.mPackageName, mProvider, isForeground);
         }
 
         /**

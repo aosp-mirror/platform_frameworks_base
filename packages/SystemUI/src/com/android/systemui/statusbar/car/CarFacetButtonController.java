@@ -75,7 +75,8 @@ public class CarFacetButtonController {
         int displayId = getDisplayId();
         for (ActivityManager.StackInfo stackInfo :stackInfoList) {
             // if the display id is known and does not match the stack we skip
-            if (displayId != -1 && displayId != stackInfo.displayId) {
+            if (displayId != -1 && displayId != stackInfo.displayId ||
+                    stackInfo.topActivity == null) {
                 continue;
             }
 

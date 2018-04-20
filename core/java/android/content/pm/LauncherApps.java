@@ -229,7 +229,7 @@ public class LauncherApps {
          * <p>A suspending app with the permission {@code android.permission.SUSPEND_APPS} can
          * optionally provide a {@link Bundle} of extra information that it deems helpful for the
          * launcher to handle the suspended state of these packages. The contents of this
-         * {@link Bundle} supposed to be a contract between the suspending app and the launcher.
+         * {@link Bundle} are supposed to be a contract between the suspending app and the launcher.
          *
          * @param packageNames The names of the packages that have just been suspended.
          * @param user the user for which the given packages were suspended.

@@ -66,7 +66,7 @@ public:
                                     const vector<String16>& app);
     virtual Status informOnePackage(const String16& app, int32_t uid, int64_t version);
     virtual Status informOnePackageRemoved(const String16& app, int32_t uid);
-    virtual Status writeDataToDisk();
+    virtual Status informDeviceShutdown(bool isShutdown);
 
     /**
      * Called right before we start processing events.
@@ -272,6 +272,10 @@ private:
     FRIEND_TEST(PartialBucketE2eTest, TestCountMetricSplitOnUpgrade);
     FRIEND_TEST(PartialBucketE2eTest, TestCountMetricSplitOnRemoval);
     FRIEND_TEST(PartialBucketE2eTest, TestCountMetricWithoutSplit);
+    FRIEND_TEST(PartialBucketE2eTest, TestValueMetricWithoutMinPartialBucket);
+    FRIEND_TEST(PartialBucketE2eTest, TestValueMetricWithMinPartialBucket);
+    FRIEND_TEST(PartialBucketE2eTest, TestGaugeMetricWithoutMinPartialBucket);
+    FRIEND_TEST(PartialBucketE2eTest, TestGaugeMetricWithMinPartialBucket);
 };
 
 }  // namespace statsd

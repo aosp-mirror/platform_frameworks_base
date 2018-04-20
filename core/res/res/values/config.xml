@@ -37,9 +37,6 @@
         <item><xliff:g id="id">@string/status_bar_nfc</xliff:g></item>
         <item><xliff:g id="id">@string/status_bar_tty</xliff:g></item>
         <item><xliff:g id="id">@string/status_bar_speakerphone</xliff:g></item>
-        <item><xliff:g id="id">@string/status_bar_zen</xliff:g></item>
-        <item><xliff:g id="id">@string/status_bar_mute</xliff:g></item>
-        <item><xliff:g id="id">@string/status_bar_volume</xliff:g></item>
         <item><xliff:g id="id">@string/status_bar_cdma_eri</xliff:g></item>
         <item><xliff:g id="id">@string/status_bar_data_connection</xliff:g></item>
         <item><xliff:g id="id">@string/status_bar_phone_evdo_signal</xliff:g></item>
@@ -49,10 +46,13 @@
         <item><xliff:g id="id">@string/status_bar_managed_profile</xliff:g></item>
         <item><xliff:g id="id">@string/status_bar_cast</xliff:g></item>
         <item><xliff:g id="id">@string/status_bar_vpn</xliff:g></item>
+        <item><xliff:g id="id">@string/status_bar_mute</xliff:g></item>
+        <item><xliff:g id="id">@string/status_bar_volume</xliff:g></item>
         <item><xliff:g id="id">@string/status_bar_location</xliff:g></item>
-        <item><xliff:g id="id">@string/status_bar_hotspot</xliff:g></item>
+        <item><xliff:g id="id">@string/status_bar_zen</xliff:g></item>
         <item><xliff:g id="id">@string/status_bar_ethernet</xliff:g></item>
         <item><xliff:g id="id">@string/status_bar_wifi</xliff:g></item>
+        <item><xliff:g id="id">@string/status_bar_hotspot</xliff:g></item>
         <item><xliff:g id="id">@string/status_bar_mobile</xliff:g></item>
         <item><xliff:g id="id">@string/status_bar_airplane</xliff:g></item>
         <item><xliff:g id="id">@string/status_bar_battery</xliff:g></item>
@@ -3174,6 +3174,9 @@
 
     <!-- An array of packages for which notifications cannot be blocked. -->
     <string-array translatable="false" name="config_nonBlockableNotificationPackages" />
+
+    <!-- An array of packages which can listen for notifications on low ram devices. -->
+    <string-array translatable="false" name="config_allowedManagedServicesOnLowRamDevices" />
 
     <!-- The default value for transition animation scale found in developer settings.
          1.0 corresponds to 1x animator scale, 0 means that there will be no transition

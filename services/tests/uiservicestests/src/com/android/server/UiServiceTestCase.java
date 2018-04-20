@@ -13,15 +13,25 @@
  */
 package com.android.server;
 
-import android.content.Context;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.when;
+
+import android.content.pm.PackageManagerInternal;
+import android.os.Build;
 import android.support.test.InstrumentationRegistry;
 import android.testing.TestableContext;
 
 import org.junit.Before;
 import org.junit.Rule;
-
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 
 public class UiServiceTestCase {
+    @Mock protected PackageManagerInternal mPmi;
+
+    protected static final String PKG_N_MR1 = "com.example.n_mr1";
+    protected static final String PKG_O = "com.example.o";
+
     @Rule
     public final TestableContext mContext =
             new TestableContext(InstrumentationRegistry.getContext(), null);
@@ -32,7 +42,24 @@ public class UiServiceTestCase {
 
     @Before
     public void setup() {
+        MockitoAnnotations.initMocks(this);
+
         // Share classloader to allow package access.
         System.setProperty("dexmaker.share_classloader", "true");
+
+        // Assume some default packages
+        LocalServices.removeServiceForTest(PackageManagerInternal.class);
+        LocalServices.addService(PackageManagerInternal.class, mPmi);
+        when(mPmi.getPackageTargetSdkVersion(anyString()))
+                .thenAnswer((iom) -> {
+                    switch ((String) iom.getArgument(0)) {
+                        case PKG_N_MR1:
+                            return Build.VERSION_CODES.N_MR1;
+                        case PKG_O:
+                            return Build.VERSION_CODES.O;
+                        default:
+                            return Build.VERSION_CODES.CUR_DEVELOPMENT;
+                    }
+                });
     }
 }

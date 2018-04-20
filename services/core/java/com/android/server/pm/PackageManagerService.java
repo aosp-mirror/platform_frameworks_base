@@ -2462,7 +2462,7 @@ public class PackageManagerService extends IPackageManager.Stub
                 installer, mInstallLock);
         mDexManager = new DexManager(this, mPackageDexOptimizer, installer, mInstallLock,
                 dexManagerListener);
-        mArtManagerService = new ArtManagerService(this, installer, mInstallLock);
+        mArtManagerService = new ArtManagerService(mContext, this, installer, mInstallLock);
         mMoveCallbacks = new MoveCallbacks(FgThread.get().getLooper());
 
         mOnPermissionChangeListeners = new OnPermissionChangeListeners(
@@ -2498,6 +2498,10 @@ public class PackageManagerService extends IPackageManager.Stub
             }
 
             SELinuxMMAC.readInstallPolicy();
+
+            Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "loadFallbacks");
+            FallbackCategoryProvider.loadFallbacks();
+            Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
 
             Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "read user settings");
             mFirstBoot = !mSettings.readLPw(sUserManager.getUsers(false));
@@ -3241,10 +3245,6 @@ public class PackageManagerService extends IPackageManager.Stub
         // tidy.
         Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "GC");
         Runtime.getRuntime().gc();
-        Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
-
-        Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "loadFallbacks");
-        FallbackCategoryProvider.loadFallbacks();
         Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
 
         // The initial scanning above does many calls into installd while
@@ -11503,6 +11503,8 @@ public class PackageManagerService extends IPackageManager.Stub
                 a.info.dataDir = pkg.applicationInfo.dataDir;
                 a.info.deviceProtectedDataDir = pkg.applicationInfo.deviceProtectedDataDir;
                 a.info.credentialProtectedDataDir = pkg.applicationInfo.credentialProtectedDataDir;
+                a.info.primaryCpuAbi = pkg.applicationInfo.primaryCpuAbi;
+                a.info.secondaryCpuAbi = pkg.applicationInfo.secondaryCpuAbi;
                 a.info.nativeLibraryDir = pkg.applicationInfo.nativeLibraryDir;
                 a.info.secondaryNativeLibraryDir = pkg.applicationInfo.secondaryNativeLibraryDir;
                 mInstrumentation.put(a.getComponentName(), a);
@@ -23594,6 +23596,16 @@ Slog.v(TAG, ":: stepped forward, applying functor at tag " + parser.getName());
                     SigningDetails.CertCapabilities.INSTALLED_DATA);
         }
 
+        @Override
+        public boolean hasSignatureCapability(int serverUid, int clientUid,
+                @SigningDetails.CertCapabilities int capability) {
+            SigningDetails serverSigningDetails = getSigningDetails(serverUid);
+            SigningDetails clientSigningDetails = getSigningDetails(clientUid);
+            return serverSigningDetails.checkCapability(clientSigningDetails, capability)
+                    || clientSigningDetails.hasAncestorOrSelf(serverSigningDetails);
+
+        }
+
         private SigningDetails getSigningDetails(@NonNull String packageName) {
             synchronized (mPackages) {
                 PackageParser.Package p = mPackages.get(packageName);
@@ -23601,6 +23613,22 @@ Slog.v(TAG, ":: stepped forward, applying functor at tag " + parser.getName());
                     return null;
                 }
                 return p.mSigningDetails;
+            }
+        }
+
+        private SigningDetails getSigningDetails(int uid) {
+            synchronized (mPackages) {
+                final int appId = UserHandle.getAppId(uid);
+                final Object obj = mSettings.getUserIdLPr(appId);
+                if (obj != null) {
+                    if (obj instanceof SharedUserSetting) {
+                        return ((SharedUserSetting) obj).signatures.mSigningDetails;
+                    } else if (obj instanceof PackageSetting) {
+                        final PackageSetting ps = (PackageSetting) obj;
+                        return ps.signatures.mSigningDetails;
+                    }
+                }
+                return SigningDetails.UNKNOWN;
             }
         }
 

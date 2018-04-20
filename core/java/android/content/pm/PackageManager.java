@@ -68,6 +68,7 @@ import java.io.File;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.List;
+import java.util.Locale;
 
 /**
  * Class for retrieving various kinds of information related to the application
@@ -5533,15 +5534,23 @@ public abstract class PackageManager {
      *
      * <p>It doesn't remove the data or the actual package file. The application's notifications
      * will be hidden, any of its started activities will be stopped and it will not be able to
-     * show toasts or dialogs or ring the device. When the user tries to launch a suspended app, a
-     * system dialog with the given {@code dialogMessage} will be shown instead.</p>
+     * show toasts or system alert windows or ring the device.
+     *
+     * <p>When the user tries to launch a suspended app, a system dialog with the given
+     * {@code dialogMessage} will be shown instead. Since the message is supplied to the system as
+     * a {@link String}, the caller needs to take care of localization as needed.
+     * The dialog message can optionally contain a placeholder for the name of the suspended app.
+     * The system uses {@link String#format(Locale, String, Object...) String.format} to insert the
+     * app name into the message, so an example format string could be {@code "The app %1$s is
+     * currently suspended"}. This makes it easier for callers to provide a single message which
+     * works for all the packages being suspended in a single call.
      *
      * <p>The package must already be installed. If the package is uninstalled while suspended
      * the package will no longer be suspended. </p>
      *
      * <p>Optionally, the suspending app can provide extra information in the form of
      * {@link PersistableBundle} objects to be shared with the apps being suspended and the
-     * launcher to support customization that they might need to handle the suspended state. </p>
+     * launcher to support customization that they might need to handle the suspended state.
      *
      * <p>The caller must hold {@link Manifest.permission#SUSPEND_APPS} or
      * {@link Manifest.permission#MANAGE_USERS} to use this api.</p>
@@ -5558,8 +5567,8 @@ public abstract class PackageManager {
      * @param dialogMessage The message to be displayed to the user, when they try to launch a
      *                      suspended app.
      *
-     * @return an array of package names for which the suspended status is not set as requested in
-     * this method.
+     * @return an array of package names for which the suspended status could not be set as
+     * requested in this method.
      *
      * @hide
      */

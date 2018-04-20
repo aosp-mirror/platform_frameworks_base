@@ -1278,6 +1278,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
 
         if (mContentInsetsChanged
                 || mVisibleInsetsChanged
+                || mStableInsetsChanged
                 || winAnimator.mSurfaceResized
                 || mOutsetsChanged
                 || mFrameSizeChanged
@@ -1701,12 +1702,17 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             return changed;
         }
 
-        if (visible != isVisibleNow()) {
-            if (!runningAppAnimation) {
+        final boolean isVisibleNow = isVisibleNow();
+        if (visible != isVisibleNow) {
+            // Run exit animation if:
+            // 1. App visibility and WS visibility are different
+            // 2. App is not running an animation
+            // 3. WS is currently visible
+            if (!runningAppAnimation && isVisibleNow) {
                 final AccessibilityController accessibilityController =
                         mService.mAccessibilityController;
-                final int winTransit = visible ? TRANSIT_ENTER : TRANSIT_EXIT;
-                mWinAnimator.applyAnimationLocked(winTransit, visible);
+                final int winTransit = TRANSIT_EXIT;
+                mWinAnimator.applyAnimationLocked(winTransit, false /* isEntrance */);
                 //TODO (multidisplay): Magnification is supported only for the default
                 if (accessibilityController != null && getDisplayId() == DEFAULT_DISPLAY) {
                     accessibilityController.onWindowTransitionLocked(this, winTransit);

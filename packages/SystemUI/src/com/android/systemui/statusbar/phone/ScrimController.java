@@ -449,6 +449,18 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, OnCo
         mScrimBehind.setDrawable(drawable);
     }
 
+    /**
+     * Sets the front alpha while in AOD.
+     */
+    public void setAodFrontScrimAlpha(float alpha) {
+        if (mState == ScrimState.AOD && mCurrentInFrontAlpha != alpha) {
+            mCurrentInFrontAlpha = alpha;
+            scheduleUpdate();
+        }
+
+        mState.AOD.setAodFrontScrimAlpha(alpha);
+    }
+
     protected void scheduleUpdate() {
         if (mUpdatePending) return;
 

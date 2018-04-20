@@ -96,6 +96,7 @@ public class Watchdog extends Thread {
         "android.hardware.camera.provider@2.4::ICameraProvider",
         "android.hardware.graphics.composer@2.1::IComposer",
         "android.hardware.media.omx@1.0::IOmx",
+        "android.hardware.media.omx@1.0::IOmxStore",
         "android.hardware.sensors@1.0::ISensors",
         "android.hardware.vr@1.0::IVr"
     );

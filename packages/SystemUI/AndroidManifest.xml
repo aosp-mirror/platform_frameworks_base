@@ -455,7 +455,7 @@
             android:finishOnCloseSystemDialogs="true"
             android:excludeFromRecents="true">
             <intent-filter>
-                <action android:name="android.intent.action.REQUEST_SLICE_PERMISSION" />
+                <action android:name="com.android.intent.action.REQUEST_SLICE_PERMISSION" />
             </intent-filter>
         </activity>
 

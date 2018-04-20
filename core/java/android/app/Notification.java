@@ -91,6 +91,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
+import java.util.function.Consumer;
 
 /**
  * A class that represents how a persistent notification is to be presented to
@@ -2302,6 +2303,45 @@ public class Notification implements Parcelable
 
         if (!heavy) {
             that.lightenPayload(); // will clean out extras
+        }
+    }
+
+    /**
+     * Note all {@link Uri} that are referenced internally, with the expectation
+     * that Uri permission grants will need to be issued to ensure the recipient
+     * of this object is able to render its contents.
+     *
+     * @hide
+     */
+    public void visitUris(@NonNull Consumer<Uri> visitor) {
+        visitor.accept(sound);
+
+        if (tickerView != null) tickerView.visitUris(visitor);
+        if (contentView != null) contentView.visitUris(visitor);
+        if (bigContentView != null) bigContentView.visitUris(visitor);
+        if (headsUpContentView != null) headsUpContentView.visitUris(visitor);
+
+        if (extras != null) {
+            visitor.accept(extras.getParcelable(EXTRA_AUDIO_CONTENTS_URI));
+            visitor.accept(extras.getParcelable(EXTRA_BACKGROUND_IMAGE_URI));
+        }
+
+        if (MessagingStyle.class.equals(getNotificationStyle()) && extras != null) {
+            final Parcelable[] messages = extras.getParcelableArray(EXTRA_MESSAGES);
+            if (!ArrayUtils.isEmpty(messages)) {
+                for (MessagingStyle.Message message : MessagingStyle.Message
+                        .getMessagesFromBundleArray(messages)) {
+                    visitor.accept(message.getDataUri());
+                }
+            }
+
+            final Parcelable[] historic = extras.getParcelableArray(EXTRA_HISTORIC_MESSAGES);
+            if (!ArrayUtils.isEmpty(historic)) {
+                for (MessagingStyle.Message message : MessagingStyle.Message
+                        .getMessagesFromBundleArray(historic)) {
+                    visitor.accept(message.getDataUri());
+                }
+            }
         }
     }
 
@@ -4574,13 +4614,14 @@ public class Notification implements Parcelable
                 bindHeaderChronometerAndTime(contentView);
                 bindProfileBadge(contentView);
             }
-            bindActivePermissions(contentView);
+            bindActivePermissions(contentView, ambient);
             bindExpandButton(contentView);
             mN.mUsesStandardHeader = true;
         }
 
-        private void bindActivePermissions(RemoteViews contentView) {
-            int color = isColorized() ? getPrimaryTextColor() : getSecondaryTextColor();
+        private void bindActivePermissions(RemoteViews contentView, boolean ambient) {
+            int color = ambient ? resolveAmbientColor()
+                    : isColorized() ? getPrimaryTextColor() : resolveContrastColor();
             contentView.setDrawableTint(R.id.camera, false, color, PorterDuff.Mode.SRC_ATOP);
             contentView.setDrawableTint(R.id.mic, false, color, PorterDuff.Mode.SRC_ATOP);
             contentView.setDrawableTint(R.id.overlay, false, color, PorterDuff.Mode.SRC_ATOP);
@@ -5427,7 +5468,8 @@ public class Notification implements Parcelable
          *
          * @hide
          */
-        public static Notification maybeCloneStrippedForDelivery(Notification n, boolean isLowRam) {
+        public static Notification maybeCloneStrippedForDelivery(Notification n, boolean isLowRam,
+                Context context) {
             String templateClass = n.extras.getString(EXTRA_TEMPLATE);
 
             // Only strip views for known Styles because we won't know how to
@@ -5469,9 +5511,13 @@ public class Notification implements Parcelable
                 clone.extras.remove(EXTRA_REBUILD_HEADS_UP_CONTENT_VIEW_ACTION_COUNT);
             }
             if (isLowRam) {
-                clone.extras.remove(Notification.TvExtender.EXTRA_TV_EXTENDER);
-                clone.extras.remove(WearableExtender.EXTRA_WEARABLE_EXTENSIONS);
-                clone.extras.remove(CarExtender.EXTRA_CAR_EXTENDER);
+                String[] allowedServices = context.getResources().getStringArray(
+                        R.array.config_allowedManagedServicesOnLowRamDevices);
+                if (allowedServices.length == 0) {
+                    clone.extras.remove(Notification.TvExtender.EXTRA_TV_EXTENDER);
+                    clone.extras.remove(WearableExtender.EXTRA_WEARABLE_EXTENSIONS);
+                    clone.extras.remove(CarExtender.EXTRA_CAR_EXTENDER);
+                }
             }
             return clone;
         }

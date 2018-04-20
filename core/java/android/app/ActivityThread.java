@@ -5442,7 +5442,8 @@ public final class ActivityThread extends ClientTransactionHandler {
      * runtime's instruction set is.
      */
     private String getInstrumentationLibrary(ApplicationInfo appInfo, InstrumentationInfo insInfo) {
-        if (appInfo.primaryCpuAbi != null && appInfo.secondaryCpuAbi != null) {
+        if (appInfo.primaryCpuAbi != null && appInfo.secondaryCpuAbi != null
+                && appInfo.secondaryCpuAbi.equals(insInfo.secondaryCpuAbi)) {
             // Get the instruction set supported by the secondary ABI. In the presence
             // of a native bridge this might be different than the one secondary ABI used.
             String secondaryIsa =
@@ -5669,6 +5670,16 @@ public final class ActivityThread extends ClientTransactionHandler {
             } catch (PackageManager.NameNotFoundException e) {
                 throw new RuntimeException(
                         "Unable to find instrumentation info for: " + data.instrumentationName);
+            }
+
+            // Warn of potential ABI mismatches.
+            if (!Objects.equals(data.appInfo.primaryCpuAbi, ii.primaryCpuAbi)
+                    || !Objects.equals(data.appInfo.secondaryCpuAbi, ii.secondaryCpuAbi)) {
+                Slog.w(TAG, "Package uses different ABI(s) than its instrumentation: "
+                        + "package[" + data.appInfo.packageName + "]: "
+                        + data.appInfo.primaryCpuAbi + ", " + data.appInfo.secondaryCpuAbi
+                        + " instrumentation[" + ii.packageName + "]: "
+                        + ii.primaryCpuAbi + ", " + ii.secondaryCpuAbi);
             }
 
             mInstrumentationPackageName = ii.packageName;

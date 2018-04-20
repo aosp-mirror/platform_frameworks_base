@@ -60,6 +60,13 @@ std::unique_ptr<xml::XmlResource> GenerateSplitManifest(const AppInfo& app_info,
 Maybe<AppInfo> ExtractAppInfoFromBinaryManifest(const xml::XmlResource& xml_res,
                                                 IDiagnostics* diag);
 
+// Returns a copy of 'name' which conforms to the regex '[a-zA-Z]+[a-zA-Z0-9_]*' by
+// replacing nonconforming characters with underscores.
+//
+// See frameworks/base/core/java/android/content/pm/PackageParser.java which
+// checks this at runtime.
+std::string MakePackageSafeName(const std::string &name);
+
 }  // namespace aapt
 
 #endif /* AAPT_SPLIT_UTIL_H */

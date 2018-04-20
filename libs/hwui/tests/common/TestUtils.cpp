@@ -24,7 +24,6 @@
 #include <pipeline/skia/SkiaOpenGLPipeline.h>
 #include <pipeline/skia/SkiaVulkanPipeline.h>
 #include <renderthread/EglManager.h>
-#include <renderthread/OpenGLPipeline.h>
 #include <renderthread/VulkanManager.h>
 #include <utils/Unicode.h>
 

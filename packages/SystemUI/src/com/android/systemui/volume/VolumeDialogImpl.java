@@ -71,7 +71,7 @@ import android.view.ViewPropertyAnimator;
 import android.view.Window;
 import android.view.WindowManager;
 import android.view.accessibility.AccessibilityEvent;
-import android.view.accessibility.AccessibilityManager.AccessibilityStateChangeListener;
+import android.view.accessibility.AccessibilityManager.AccessibilityServicesStateChangeListener;
 import android.view.animation.DecelerateInterpolator;
 import android.widget.ImageButton;
 import android.widget.ImageView;
@@ -411,7 +411,7 @@ public class VolumeDialogImpl implements VolumeDialog {
 
     public void initSettingsH() {
         mSettingsView.setVisibility(
-                mDeviceProvisionedController.isDeviceProvisioned() ? VISIBLE : GONE);
+                mDeviceProvisionedController.isCurrentUserSetup() ? VISIBLE : GONE);
         mSettingsIcon.setOnClickListener(v -> {
             Events.writeEvent(mContext, Events.EVENT_SETTINGS_CLICK);
             Intent intent = new Intent(Settings.ACTION_SOUND_SETTINGS);
@@ -764,6 +764,11 @@ public class VolumeDialogImpl implements VolumeDialog {
         final int max = ss.levelMax * 100;
         if (max != row.slider.getMax()) {
             row.slider.setMax(max);
+        }
+        // update slider min
+        final int min = ss.levelMin * 100;
+        if (min != row.slider.getMin()) {
+            row.slider.setMin(min);
         }
 
         // update header text
@@ -1182,12 +1187,12 @@ public class VolumeDialogImpl implements VolumeDialog {
                 }
             });
             mDialogView.setAccessibilityDelegate(this);
-            mAccessibilityMgr.addAccessibilityStateChangeListener(mListener);
+            mAccessibilityMgr.addCallback(mListener);
             updateFeedbackEnabled();
         }
 
         public void destroy() {
-            mAccessibilityMgr.removeAccessibilityStateChangeListener(mListener);
+            mAccessibilityMgr.removeCallback(mListener);
         }
 
         @Override
@@ -1213,7 +1218,7 @@ public class VolumeDialogImpl implements VolumeDialog {
             return false;
         }
 
-        private final AccessibilityStateChangeListener mListener =
+        private final AccessibilityServicesStateChangeListener mListener =
                 enabled -> updateFeedbackEnabled();
     }
 

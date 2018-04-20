@@ -83,7 +83,7 @@
     <string name="def_charging_started_sound" translatable="false">/system/media/audio/ui/ChargingStarted.ogg</string>
 
     <!-- sound trigger detection service default values -->
-    <integer name="def_max_sound_trigger_detection_service_ops_per_day" translatable="false">200</integer>
+    <integer name="def_max_sound_trigger_detection_service_ops_per_day" translatable="false">1000</integer>
     <integer name="def_sound_trigger_detection_service_op_timeout" translatable="false">15000</integer>
 
     <bool name="def_lockscreen_disabled">false</bool>

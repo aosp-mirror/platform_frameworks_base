@@ -210,7 +210,7 @@ public class NotificationDataTest extends SysuiTestCase {
         bundle.putStringArray(Notification.EXTRA_FOREGROUND_APPS, new String[] {"something"});
         sbn.getNotification().extras = bundle;
 
-        assertTrue(mNotificationData.shouldFilterOut(mRow.getEntry().notification));
+        assertTrue(mNotificationData.shouldFilterOut(mRow.getEntry()));
     }
 
     @Test
@@ -223,17 +223,17 @@ public class NotificationDataTest extends SysuiTestCase {
         when(mFsc.isSystemAlertWarningNeeded(anyInt(), anyString())).thenReturn(true);
         when(mFsc.isSystemAlertNotification(any())).thenReturn(true);
 
-        assertFalse(mNotificationData.shouldFilterOut(mRow.getEntry().notification));
+        assertFalse(mNotificationData.shouldFilterOut(mRow.getEntry()));
 
         when(mFsc.isSystemAlertWarningNeeded(anyInt(), anyString())).thenReturn(true);
         when(mFsc.isSystemAlertNotification(any())).thenReturn(false);
 
-        assertFalse(mNotificationData.shouldFilterOut(mRow.getEntry().notification));
+        assertFalse(mNotificationData.shouldFilterOut(mRow.getEntry()));
 
         when(mFsc.isSystemAlertWarningNeeded(anyInt(), anyString())).thenReturn(false);
         when(mFsc.isSystemAlertNotification(any())).thenReturn(false);
 
-        assertFalse(mNotificationData.shouldFilterOut(mRow.getEntry().notification));
+        assertFalse(mNotificationData.shouldFilterOut(mRow.getEntry()));
     }
 
     @Test
@@ -241,7 +241,7 @@ public class NotificationDataTest extends SysuiTestCase {
         when(mFsc.isSystemAlertWarningNeeded(anyInt(), anyString())).thenReturn(true);
 
         // missing extra
-        assertFalse(mNotificationData.shouldFilterOut(mRow.getEntry().notification));
+        assertFalse(mNotificationData.shouldFilterOut(mRow.getEntry()));
 
         StatusBarNotification sbn = mRow.getEntry().notification;
         Bundle bundle = new Bundle();
@@ -249,7 +249,7 @@ public class NotificationDataTest extends SysuiTestCase {
         sbn.getNotification().extras = bundle;
 
         // extra missing values
-        assertFalse(mNotificationData.shouldFilterOut(mRow.getEntry().notification));
+        assertFalse(mNotificationData.shouldFilterOut(mRow.getEntry()));
     }
 
     @Test
@@ -262,11 +262,13 @@ public class NotificationDataTest extends SysuiTestCase {
         // test should filter out hidden notifications:
         // hidden
         when(mMockStatusBarNotification.getKey()).thenReturn(TEST_HIDDEN_NOTIFICATION_KEY);
-        assertTrue(mNotificationData.shouldFilterOut(mMockStatusBarNotification));
+        NotificationData.Entry entry = new NotificationData.Entry(mMockStatusBarNotification);
+        assertTrue(mNotificationData.shouldFilterOut(entry));
 
         // not hidden
         when(mMockStatusBarNotification.getKey()).thenReturn("not hidden");
-        assertFalse(mNotificationData.shouldFilterOut(mMockStatusBarNotification));
+        entry = new NotificationData.Entry(mMockStatusBarNotification);
+        assertFalse(mNotificationData.shouldFilterOut(entry));
     }
 
     @Test
@@ -276,9 +278,10 @@ public class NotificationDataTest extends SysuiTestCase {
                 TEST_EXEMPT_DND_VISUAL_SUPPRESSION_KEY);
         Notification n = mMockStatusBarNotification.getNotification();
         n.flags = Notification.FLAG_FOREGROUND_SERVICE;
+        NotificationData.Entry entry = new NotificationData.Entry(mMockStatusBarNotification);
 
-        assertTrue(mNotificationData.isExemptFromDndVisualSuppression(mMockStatusBarNotification));
-        assertFalse(mNotificationData.shouldSuppressAmbient(mMockStatusBarNotification));
+        assertTrue(mNotificationData.isExemptFromDndVisualSuppression(entry));
+        assertFalse(mNotificationData.shouldSuppressAmbient(entry));
     }
 
     @Test
@@ -291,9 +294,22 @@ public class NotificationDataTest extends SysuiTestCase {
         nb.setStyle(new Notification.MediaStyle().setMediaSession(mock(MediaSession.Token.class)));
         n = nb.build();
         when(mMockStatusBarNotification.getNotification()).thenReturn(n);
+        NotificationData.Entry entry = new NotificationData.Entry(mMockStatusBarNotification);
 
-        assertTrue(mNotificationData.isExemptFromDndVisualSuppression(mMockStatusBarNotification));
-        assertFalse(mNotificationData.shouldSuppressAmbient(mMockStatusBarNotification));
+        assertTrue(mNotificationData.isExemptFromDndVisualSuppression(entry));
+        assertFalse(mNotificationData.shouldSuppressAmbient(entry));
+    }
+
+    @Test
+    public void testIsExemptFromDndVisualSuppression_system() {
+        initStatusBarNotification(false);
+        when(mMockStatusBarNotification.getKey()).thenReturn(
+                TEST_EXEMPT_DND_VISUAL_SUPPRESSION_KEY);
+        NotificationData.Entry entry = new NotificationData.Entry(mMockStatusBarNotification);
+        entry.mIsSystemNotification = true;
+
+        assertTrue(mNotificationData.isExemptFromDndVisualSuppression(entry));
+        assertFalse(mNotificationData.shouldSuppressAmbient(entry));
     }
 
     private void initStatusBarNotification(boolean allowDuringSetup) {

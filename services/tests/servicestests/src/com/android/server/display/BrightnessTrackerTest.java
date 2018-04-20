@@ -22,6 +22,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import android.app.ActivityManager;
 import android.content.BroadcastReceiver;
@@ -63,6 +64,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
 @SmallTest
@@ -447,7 +449,7 @@ public class BrightnessTrackerTest {
         final long secondSensorTime = mInjector.currentTimeMillis();
         mInjector.incrementTime(TimeUnit.SECONDS.toMillis(3));
         notifyBrightnessChanged(mTracker, brightness, true /*userInitiated*/,
-                0.5f /*powerPolicyDim(*/, true /*hasUserBrightnessPoints*/,
+                0.5f /*powerBrightnessFactor*/, true /*hasUserBrightnessPoints*/,
                 false /*isDefaultBrightnessConfig*/);
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         mTracker.writeEventsLocked(baos);
@@ -584,6 +586,48 @@ public class BrightnessTrackerTest {
         slice = mTracker.getAmbientBrightnessStats(0);
         assertNotNull(slice);
         assertTrue(slice.getList().isEmpty());
+    }
+
+    @Test
+    public void testBackgroundHandlerDelay() {
+        final int brightness = 20;
+
+        // Setup tracker.
+        startTracker(mTracker);
+        mInjector.mSensorListener.onSensorChanged(createSensorEvent(1.0f));
+        mInjector.incrementTime(TimeUnit.SECONDS.toMillis(2));
+
+        // Block handler from running.
+        final CountDownLatch latch = new CountDownLatch(1);
+        mInjector.mHandler.post(
+                () -> {
+                    try {
+                        latch.await();
+                    } catch (InterruptedException e) {
+                        fail(e.getMessage());
+                    }
+                });
+
+        // Send an event.
+        long eventTime = mInjector.currentTimeMillis();
+        mTracker.notifyBrightnessChanged(brightness, true /*userInitiated*/,
+                1.0f /*powerBrightnessFactor*/, false /*isUserSetBrightness*/,
+                false /*isDefaultBrightnessConfig*/);
+
+        // Time passes before handler can run.
+        mInjector.incrementTime(TimeUnit.SECONDS.toMillis(2));
+
+        // Let the handler run.
+        latch.countDown();
+        mInjector.waitForHandler();
+
+        List<BrightnessChangeEvent> events = mTracker.getEvents(0, true).getList();
+        mTracker.stop();
+
+        // Check event was recorded with time it was sent rather than handler ran.
+        assertEquals(1, events.size());
+        BrightnessChangeEvent event = events.get(0);
+        assertEquals(eventTime, event.timeStamp);
     }
 
     private InputStream getInputStream(String data) {

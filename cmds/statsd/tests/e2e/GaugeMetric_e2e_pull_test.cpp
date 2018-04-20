@@ -122,7 +122,8 @@ TEST(GaugeMetricE2eTest, TestRandomSamplePulledEvents) {
 
     ConfigMetricsReportList reports;
     vector<uint8_t> buffer;
-    processor->onDumpReport(cfgKey, configAddedTimeNs + 7 * bucketSizeNs + 10, false, &buffer);
+    processor->onDumpReport(cfgKey, configAddedTimeNs + 7 * bucketSizeNs + 10, false, ADB_DUMP,
+                            &buffer);
     EXPECT_TRUE(buffer.size() > 0);
     EXPECT_TRUE(reports.ParseFromArray(&buffer[0], buffer.size()));
     EXPECT_EQ(1, reports.reports_size());
@@ -240,7 +241,8 @@ TEST(GaugeMetricE2eTest, TestAllConditionChangesSamplePulledEvents) {
 
     ConfigMetricsReportList reports;
     vector<uint8_t> buffer;
-    processor->onDumpReport(cfgKey, configAddedTimeNs + 8 * bucketSizeNs + 10, false, &buffer);
+    processor->onDumpReport(cfgKey, configAddedTimeNs + 8 * bucketSizeNs + 10, false, ADB_DUMP,
+                            &buffer);
     EXPECT_TRUE(buffer.size() > 0);
     EXPECT_TRUE(reports.ParseFromArray(&buffer[0], buffer.size()));
     EXPECT_EQ(1, reports.reports_size());
@@ -340,7 +342,8 @@ TEST(GaugeMetricE2eTest, TestRandomSamplePulledEvent_LateAlarm) {
 
     ConfigMetricsReportList reports;
     vector<uint8_t> buffer;
-    processor->onDumpReport(cfgKey, configAddedTimeNs + 7 * bucketSizeNs + 10, false, &buffer);
+    processor->onDumpReport(cfgKey, configAddedTimeNs + 7 * bucketSizeNs + 10, false, ADB_DUMP,
+                            &buffer);
     EXPECT_TRUE(buffer.size() > 0);
     EXPECT_TRUE(reports.ParseFromArray(&buffer[0], buffer.size()));
     EXPECT_EQ(1, reports.reports_size());

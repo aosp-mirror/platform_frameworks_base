@@ -105,7 +105,7 @@ public class InputMethodAndSubtypeUtil {
     }
 
     // Needs to modify InputMethodManageService if you want to change the format of saved string.
-    private static HashMap<String, HashSet<String>> getEnabledInputMethodsAndSubtypeList(
+    static HashMap<String, HashSet<String>> getEnabledInputMethodsAndSubtypeList(
             ContentResolver resolver) {
         final String enabledInputMethodsStr = Settings.Secure.getString(
                 resolver, Settings.Secure.ENABLED_INPUT_METHODS);

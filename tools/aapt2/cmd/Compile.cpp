@@ -30,6 +30,7 @@
 #include "Flags.h"
 #include "ResourceParser.h"
 #include "ResourceTable.h"
+#include "cmd/Util.h"
 #include "compile/IdAssigner.h"
 #include "compile/InlineXmlFormatParser.h"
 #include "compile/Png.h"
@@ -328,6 +329,12 @@ static bool CompileTable(IAaptContext* context, const CompileOptions& options,
                 // nested under their parent and use its visibility.
                 r_txt_printer.Print("default int styleable ");
                 r_txt_printer.Print(entry->name);
+                // If the package name is present, also include it in the mangled name (e.g.
+                // "android")
+                if (!attr.name.value().package.empty()) {
+                  r_txt_printer.Print("_");
+                  r_txt_printer.Print(MakePackageSafeName(attr.name.value().package));
+                }
                 r_txt_printer.Print("_");
                 r_txt_printer.Println(attr.name.value().entry);
               }

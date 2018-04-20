@@ -3532,6 +3532,8 @@ public class UserManagerService extends IUserManager.Stub {
             switch(cmd) {
                 case "list":
                     return runList(pw);
+                default:
+                    return shell.handleDefaultCommands(cmd);
             }
         } catch (RemoteException e) {
             pw.println("Remote exception: " + e);

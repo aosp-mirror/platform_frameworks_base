@@ -50,9 +50,7 @@ CacheManager::CacheManager(const DisplayInfo& display) : mMaxSurfaceArea(display
     mVectorDrawableAtlas = new skiapipeline::VectorDrawableAtlas(
             mMaxSurfaceArea / 2,
             skiapipeline::VectorDrawableAtlas::StorageMode::disallowSharedSurface);
-    if (Properties::isSkiaEnabled()) {
-        skiapipeline::ShaderCache::get().initShaderDiskCache();
-    }
+    skiapipeline::ShaderCache::get().initShaderDiskCache();
 }
 
 void CacheManager::reset(sk_sp<GrContext> context) {

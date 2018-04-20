@@ -1000,27 +1000,27 @@ public class StatusBarManagerService extends IStatusBarService.Stub {
     }
 
     @Override
-    public void onNotificationClick(String key) {
+    public void onNotificationClick(String key, NotificationVisibility nv) {
         enforceStatusBarService();
         final int callingUid = Binder.getCallingUid();
         final int callingPid = Binder.getCallingPid();
         long identity = Binder.clearCallingIdentity();
         try {
-            mNotificationDelegate.onNotificationClick(callingUid, callingPid, key);
+            mNotificationDelegate.onNotificationClick(callingUid, callingPid, key, nv);
         } finally {
             Binder.restoreCallingIdentity(identity);
         }
     }
 
     @Override
-    public void onNotificationActionClick(String key, int actionIndex) {
+    public void onNotificationActionClick(String key, int actionIndex, NotificationVisibility nv) {
         enforceStatusBarService();
         final int callingUid = Binder.getCallingUid();
         final int callingPid = Binder.getCallingPid();
         long identity = Binder.clearCallingIdentity();
         try {
             mNotificationDelegate.onNotificationActionClick(callingUid, callingPid, key,
-                    actionIndex);
+                    actionIndex, nv);
         } finally {
             Binder.restoreCallingIdentity(identity);
         }
@@ -1044,14 +1044,14 @@ public class StatusBarManagerService extends IStatusBarService.Stub {
 
     @Override
     public void onNotificationClear(String pkg, String tag, int id, int userId, String key,
-            @NotificationStats.DismissalSurface int dismissalSurface) {
+            @NotificationStats.DismissalSurface int dismissalSurface, NotificationVisibility nv) {
         enforceStatusBarService();
         final int callingUid = Binder.getCallingUid();
         final int callingPid = Binder.getCallingPid();
         long identity = Binder.clearCallingIdentity();
         try {
-            mNotificationDelegate.onNotificationClear(
-                    callingUid, callingPid, pkg, tag, id, userId, key, dismissalSurface);
+            mNotificationDelegate.onNotificationClear(callingUid, callingPid, pkg, tag, id, userId,
+                    key, dismissalSurface, nv);
         } finally {
             Binder.restoreCallingIdentity(identity);
         }
