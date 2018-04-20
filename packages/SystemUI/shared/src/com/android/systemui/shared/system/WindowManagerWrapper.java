@@ -60,6 +60,16 @@ public class WindowManagerWrapper {
 
     public static final int ACTIVITY_TYPE_STANDARD = WindowConfiguration.ACTIVITY_TYPE_STANDARD;
 
+    public static final int WINDOWING_MODE_UNDEFINED = WindowConfiguration.WINDOWING_MODE_UNDEFINED;
+    public static final int WINDOWING_MODE_FULLSCREEN =
+            WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
+    public static final int WINDOWING_MODE_PINNED = WindowConfiguration.WINDOWING_MODE_PINNED;
+    public static final int WINDOWING_MODE_SPLIT_SCREEN_PRIMARY =
+            WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_PRIMARY;
+    public static final int WINDOWING_MODE_SPLIT_SCREEN_SECONDARY =
+            WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_SECONDARY;
+    public static final int WINDOWING_MODE_FREEFORM = WindowConfiguration.WINDOWING_MODE_FREEFORM;
+
     private static final WindowManagerWrapper sInstance = new WindowManagerWrapper();
 
     public static WindowManagerWrapper getInstance() {
