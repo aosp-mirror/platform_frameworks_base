@@ -3413,7 +3413,11 @@ Ljava/io/FileDescriptor;->descriptor:I
 Ljava/io/FileDescriptor;->getInt$()I
 Ljava/io/FileDescriptor;->isSocket$()Z
 Ljava/io/FileDescriptor;->setInt$(I)V
+Ljava/io/File;->filePath:Ljava/nio/file/Path;
 Ljava/io/File;->fs:Ljava/io/FileSystem;
+Ljava/io/File;->path:Ljava/lang/String;
+Ljava/io/File;->prefixLength:I
+Ljava/io/File;->status:Ljava/io/File$PathStatus;
 Ljava/io/FileInputStream;->fd:Ljava/io/FileDescriptor;
 Ljava/io/FileOutputStream;->fd:Ljava/io/FileDescriptor;
 Ljava/io/ObjectStreamClass;->getConstructorId(Ljava/lang/Class;)J
