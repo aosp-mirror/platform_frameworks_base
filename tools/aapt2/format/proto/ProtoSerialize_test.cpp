@@ -271,6 +271,7 @@ TEST(ProtoSerializeTest, SerializeAndDeserializePrimitives) {
           .AddValue("android:integer/hex_int_abcd", ResourceUtils::TryParseInt("0xABCD"))
           .AddValue("android:dimen/dimen_1.39mm", ResourceUtils::TryParseFloat("1.39mm"))
           .AddValue("android:fraction/fraction_27", ResourceUtils::TryParseFloat("27%"))
+          .AddValue("android:dimen/neg_2.3in", ResourceUtils::TryParseFloat("-2.3in"))
           .AddValue("android:integer/null", ResourceUtils::MakeEmpty())
           .Build();
 
@@ -352,6 +353,12 @@ TEST(ProtoSerializeTest, SerializeAndDeserializePrimitives) {
   ASSERT_THAT(bp, NotNull());
   EXPECT_THAT(bp->value.dataType, Eq(android::Res_value::TYPE_FRACTION));
   EXPECT_THAT(bp->value.data, Eq(ResourceUtils::TryParseFloat("27%")->value.data));
+
+  bp = test::GetValueForConfigAndProduct<BinaryPrimitive>(&new_table, "android:dimen/neg_2.3in",
+                                                          ConfigDescription::DefaultConfig(), "");
+  ASSERT_THAT(bp, NotNull());
+  EXPECT_THAT(bp->value.dataType, Eq(android::Res_value::TYPE_DIMENSION));
+  EXPECT_THAT(bp->value.data, Eq(ResourceUtils::TryParseFloat("-2.3in")->value.data));
 
   bp = test::GetValueForConfigAndProduct<BinaryPrimitive>(&new_table, "android:integer/null",
                                                           ConfigDescription::DefaultConfig(), "");
