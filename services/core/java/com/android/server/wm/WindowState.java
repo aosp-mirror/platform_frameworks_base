@@ -1088,16 +1088,14 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
                             :  Math.max(mFrame.bottom - mStableFrame.bottom, 0));
         }
 
+        mDisplayCutout = displayCutout.calculateRelativeTo(mFrame);
+
         // Offset the actual frame by the amount layout frame is off.
         mFrame.offset(-layoutXDiff, -layoutYDiff);
         mCompatFrame.offset(-layoutXDiff, -layoutYDiff);
         mContentFrame.offset(-layoutXDiff, -layoutYDiff);
         mVisibleFrame.offset(-layoutXDiff, -layoutYDiff);
         mStableFrame.offset(-layoutXDiff, -layoutYDiff);
-
-        // TODO(roosa): Figure out what frame exactly this needs to be calculated with.
-        mDisplayCutout = displayCutout.calculateRelativeTo(mFrame);
-
 
         mCompatFrame.set(mFrame);
         if (mEnforceSizeCompat) {
