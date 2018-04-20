@@ -16,6 +16,7 @@
 
 package com.android.systemui.statusbar;
 
+import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.content.Context;
 import android.util.AttributeSet;
@@ -35,6 +36,7 @@ public abstract class StackScrollerDecorView extends ExpandableView {
     private boolean mIsVisible;
     private boolean mIsSecondaryVisible;
     private boolean mAnimating;
+    private boolean mSecondaryAnimating;
     private int mDuration = 260;
 
     public StackScrollerDecorView(Context context, AttributeSet attrs) {
@@ -61,13 +63,26 @@ public abstract class StackScrollerDecorView extends ExpandableView {
     }
 
     public void performVisibilityAnimation(boolean nowVisible) {
-        animateText(mContent, nowVisible, null /* onFinishedRunnable */);
-        mIsVisible = nowVisible;
+        performVisibilityAnimation(nowVisible, null /* onFinishedRunnable */);
     }
 
     public void performVisibilityAnimation(boolean nowVisible, Runnable onFinishedRunnable) {
-        animateText(mContent, nowVisible, onFinishedRunnable);
-        mIsVisible = nowVisible;
+        boolean oldVisible = isVisible();
+        animateText(mContent, nowVisible, oldVisible, new AnimatorListenerAdapter() {
+                @Override
+                public void onAnimationStart(Animator animation) {
+                    mAnimating = true;
+                }
+
+                @Override
+                public void onAnimationEnd(Animator animation) {
+                    mAnimating = false;
+                    mIsVisible = nowVisible;
+                    if (onFinishedRunnable != null) {
+                        onFinishedRunnable.run();
+                    }
+                }
+            });
     }
 
     public void performSecondaryVisibilityAnimation(boolean nowVisible) {
@@ -76,16 +91,43 @@ public abstract class StackScrollerDecorView extends ExpandableView {
 
     public void performSecondaryVisibilityAnimation(boolean nowVisible,
             Runnable onFinishedRunnable) {
-        animateText(mSecondaryView, nowVisible, onFinishedRunnable);
-        mIsSecondaryVisible = nowVisible;
+        boolean oldVisible = isSecondaryVisible();
+        animateText(mSecondaryView, nowVisible, oldVisible, new AnimatorListenerAdapter() {
+                @Override
+                public void onAnimationStart(Animator animation) {
+                    mSecondaryAnimating = true;
+                }
+
+                @Override
+                public void onAnimationEnd(Animator animation) {
+                    mSecondaryAnimating = false;
+                    mIsSecondaryVisible = nowVisible;
+                    if (onFinishedRunnable != null) {
+                        onFinishedRunnable.run();
+                    }
+                }
+            });
     }
 
+    /**
+     * Check whether the secondary view is visible or not.<p/>
+     *
+     * @see #isVisible()
+     */
     public boolean isSecondaryVisible() {
-        return mSecondaryView != null && (mIsSecondaryVisible || mAnimating);
+        return mSecondaryView != null && (mIsSecondaryVisible ^ mSecondaryAnimating);
     }
 
+    /**
+     * Check whether the whole view is visible or not.<p/>
+     * The view is considered visible if it matches one of following:
+     * <ul>
+     *   <li> It's visible and there is no ongoing animation. </li>
+     *   <li> It's not visible but is animating, thus being eventually visible. </li>
+     * </ul>
+     */
     public boolean isVisible() {
-        return mIsVisible || mAnimating;
+        return mIsVisible ^ mAnimating;
     }
 
     void setDuration(int duration) {
@@ -95,15 +137,18 @@ public abstract class StackScrollerDecorView extends ExpandableView {
     /**
      * Animate the text to a new visibility.
      *
-     * @param nowVisible should it now be visible
-     * @param onFinishedRunnable A runnable which should be run when the animation is
-     *        finished.
+     * @param view Target view, maybe content view or dissmiss view
+     * @param nowVisible Should it now be visible
+     * @param oldVisible Is it visible currently
+     * @param listener A listener that doing flag settings or other actions
      */
-    private void animateText(View view, boolean nowVisible, final Runnable onFinishedRunnable) {
+    private void animateText(View view, boolean nowVisible, boolean oldVisible,
+        AnimatorListenerAdapter listener) {
         if (view == null) {
             return;
         }
-        if (nowVisible != mIsVisible) {
+
+        if (nowVisible != oldVisible) {
             // Animate text
             float endValue = nowVisible ? 1.0f : 0.0f;
             Interpolator interpolator;
@@ -112,24 +157,11 @@ public abstract class StackScrollerDecorView extends ExpandableView {
             } else {
                 interpolator = Interpolators.ALPHA_OUT;
             }
-            mAnimating = true;
             view.animate()
                     .alpha(endValue)
                     .setInterpolator(interpolator)
                     .setDuration(mDuration)
-                    .withEndAction(new Runnable() {
-                        @Override
-                        public void run() {
-                            mAnimating = false;
-                            if (onFinishedRunnable != null) {
-                                onFinishedRunnable.run();
-                            }
-                        }
-                    });
-        } else {
-            if (onFinishedRunnable != null) {
-                onFinishedRunnable.run();
-            }
+                    .setListener(listener);
         }
     }
 
