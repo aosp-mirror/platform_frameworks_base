@@ -25,7 +25,7 @@ import android.graphics.drawable.Drawable;
 import android.os.Process;
 import android.os.UserHandle;
 import android.os.UserManager;
-import android.support.annotation.VisibleForTesting;
+import androidx.annotation.VisibleForTesting;
 import android.util.IconDrawableFactory;
 import android.util.Log;
 import java.util.ArrayList;

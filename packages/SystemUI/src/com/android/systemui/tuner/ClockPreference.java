@@ -14,7 +14,7 @@
 package com.android.systemui.tuner;
 
 import android.content.Context;
-import android.support.v7.preference.DropDownPreference;
+import androidx.preference.DropDownPreference;
 import android.text.TextUtils;
 import android.util.ArraySet;
 import android.util.AttributeSet;

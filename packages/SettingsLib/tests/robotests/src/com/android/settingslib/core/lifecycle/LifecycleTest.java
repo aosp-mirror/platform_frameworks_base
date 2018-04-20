@@ -15,10 +15,10 @@
  */
 package com.android.settingslib.core.lifecycle;
 
-import static android.arch.lifecycle.Lifecycle.Event.ON_START;
+import static androidx.lifecycle.Lifecycle.Event.ON_START;
 import static com.google.common.truth.Truth.assertThat;
 
-import android.arch.lifecycle.LifecycleOwner;
+import androidx.lifecycle.LifecycleOwner;
 import android.content.Context;
 import android.view.Menu;
 import android.view.MenuInflater;

@@ -37,20 +37,20 @@ LOCAL_SRC_FILES := \
 LOCAL_STATIC_ANDROID_LIBRARIES := \
     SystemUIPluginLib \
     SystemUISharedLib \
-    android-support-car \
-    android-support-v4 \
-    android-support-v7-recyclerview \
-    android-support-v7-preference \
-    android-support-v7-appcompat \
-    android-support-v7-mediarouter \
-    android-support-v7-palette \
-    android-support-v14-preference \
-    android-support-v17-leanback \
-    android-slices-core \
-    android-slices-view \
-    android-slices-builders \
-    android-arch-core-runtime \
-    android-arch-lifecycle-extensions \
+    androidx.car_car \
+    androidx.legacy_legacy-support-v4 \
+    androidx.recyclerview_recyclerview \
+    androidx.preference_preference \
+    androidx.appcompat_appcompat \
+    androidx.mediarouter_mediarouter \
+    androidx.palette_palette \
+    androidx.legacy_legacy-preference-v14 \
+    androidx.leanback_leanback \
+    androidx.slice_slice-core \
+    androidx.slice_slice-view \
+    androidx.slice_slice-builders \
+    androidx.arch.core_core-runtime \
+    androidx.lifecycle_lifecycle-extensions \
 
 LOCAL_STATIC_JAVA_LIBRARIES := \
     SystemUI-tags \

@@ -221,7 +221,7 @@
         android:theme="@style/Theme.SystemUI"
         android:defaultToDeviceProtectedStorage="true"
         android:directBootAware="true"
-        android:appComponentFactory="android.support.v4.app.CoreComponentFactory">
+        android:appComponentFactory="androidx.core.app.CoreComponentFactory">
         <!-- Keep theme in sync with SystemUIApplication.onCreate().
              Setting the theme on the application does not affect views inflated by services.
              The application theme is set again from onCreate to take effect for those views. -->
@@ -585,7 +585,7 @@
         </receiver>
 
         <provider
-            android:name="android.support.v4.content.FileProvider"
+            android:name="androidx.core.content.FileProvider"
             android:authorities="com.android.systemui.fileprovider"
             android:exported="false"
             android:grantUriPermissions="true">

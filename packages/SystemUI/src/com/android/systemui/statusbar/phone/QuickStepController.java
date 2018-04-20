@@ -38,7 +38,7 @@ import android.view.ViewConfiguration;
 import android.view.WindowManagerGlobal;
 import android.view.animation.DecelerateInterpolator;
 import android.view.animation.Interpolator;
-import android.support.annotation.DimenRes;
+import androidx.annotation.DimenRes;
 import com.android.systemui.Dependency;
 import com.android.systemui.OverviewProxyService;
 import com.android.systemui.R;

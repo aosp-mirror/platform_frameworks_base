@@ -21,7 +21,7 @@ import android.os.IDeviceIdleController;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.UserHandle;
-import android.support.annotation.VisibleForTesting;
+import androidx.annotation.VisibleForTesting;
 import android.util.ArraySet;
 import android.util.Log;
 
