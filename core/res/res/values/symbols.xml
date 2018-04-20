@@ -3371,4 +3371,5 @@
   <java-symbol type="id" name="user_loading_avatar" />
   <java-symbol type="id" name="user_loading" />
 
+  <java-symbol type="string" name="battery_saver_description_with_learn_more" />
 </resources>
