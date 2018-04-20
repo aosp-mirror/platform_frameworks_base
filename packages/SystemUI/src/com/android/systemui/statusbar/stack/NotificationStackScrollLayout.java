@@ -164,6 +164,7 @@ public class NotificationStackScrollLayout extends ViewGroup
 
     private Paint mDebugPaint;
     private int mContentHeight;
+    private int mIntrinsicContentHeight;
     private int mCollapsedSize;
     private int mPaddingBetweenElements;
     private int mIncreasedPaddingBetweenElements;
@@ -538,15 +539,16 @@ public class NotificationStackScrollLayout extends ViewGroup
                 canvas.drawRect(darkLeft, darkTop, darkRight, darkBottom, mBackgroundPaint);
             }
         } else {
-            float animProgress = Interpolators.FAST_OUT_SLOW_IN
-                    .getInterpolation(1f - mDarkAmount);
-            float sidePaddingsProgress = Interpolators.FAST_OUT_SLOW_IN
-                    .getInterpolation((1f - mDarkAmount) * 2);
+            float inverseDark = 1 - mDarkAmount;
+            float yProgress = Interpolators.FAST_OUT_SLOW_IN.getInterpolation(inverseDark);
+            float xProgress = Interpolators.FAST_OUT_SLOW_IN
+                    .getInterpolation(inverseDark * 2f);
+
             mBackgroundAnimationRect.set(
-                    (int) MathUtils.lerp(darkLeft, lockScreenLeft, sidePaddingsProgress),
-                    (int) MathUtils.lerp(darkTop, lockScreenTop, animProgress),
-                    (int) MathUtils.lerp(darkRight, lockScreenRight, sidePaddingsProgress),
-                    (int) MathUtils.lerp(darkBottom, lockScreenBottom, animProgress));
+                    (int) MathUtils.lerp(darkLeft, lockScreenLeft, xProgress),
+                    (int) MathUtils.lerp(darkTop, lockScreenTop, yProgress),
+                    (int) MathUtils.lerp(darkRight, lockScreenRight, xProgress),
+                    (int) MathUtils.lerp(darkBottom, lockScreenBottom, yProgress));
             if (!mAmbientState.isDark() || mFirstVisibleBackgroundChild != null) {
                 canvas.drawRoundRect(mBackgroundAnimationRect.left, mBackgroundAnimationRect.top,
                         mBackgroundAnimationRect.right, mBackgroundAnimationRect.bottom,
@@ -628,8 +630,12 @@ public class NotificationStackScrollLayout extends ViewGroup
     }
 
     private void notifyHeightChangeListener(ExpandableView view) {
+        notifyHeightChangeListener(view, false /* needsAnimation */);
+    }
+
+    private void notifyHeightChangeListener(ExpandableView view, boolean needsAnimation) {
         if (mOnHeightChangedListener != null) {
-            mOnHeightChangedListener.onHeightChanged(view, false /* needsAnimation */);
+            mOnHeightChangedListener.onHeightChanged(view, needsAnimation);
         }
     }
 
@@ -850,7 +856,7 @@ public class NotificationStackScrollLayout extends ViewGroup
                 mNeedsAnimation =  true;
             }
             requestChildrenUpdate();
-            notifyHeightChangeListener(null);
+            notifyHeightChangeListener(null, animate);
         }
     }
 
@@ -913,6 +919,13 @@ public class NotificationStackScrollLayout extends ViewGroup
     private void setRequestedClipBounds(Rect clipRect) {
         mRequestedClipBounds = clipRect;
         updateClipping();
+    }
+
+    /**
+     * Return the height of the content ignoring the footer.
+     */
+    public int getIntrinsicContentHeight() {
+        return mIntrinsicContentHeight;
     }
 
     public void updateClipping() {
@@ -2130,8 +2143,9 @@ public class NotificationStackScrollLayout extends ViewGroup
 
         for (int i = 0; i < getChildCount(); i++) {
             ExpandableView expandableView = (ExpandableView) getChildAt(i);
+            boolean footerViewOnLockScreen = expandableView == mFooterView && onKeyguard();
             if (expandableView.getVisibility() != View.GONE
-                    && !expandableView.hasNoContentHeight()) {
+                    && !expandableView.hasNoContentHeight() && !footerViewOnLockScreen) {
                 boolean limitReached = maxDisplayedNotifications != -1
                         && numShownItems >= maxDisplayedNotifications;
                 boolean notificationOnAmbientThatIsNotPulsing = mAmbientState.isFullyDark()
@@ -2179,6 +2193,7 @@ public class NotificationStackScrollLayout extends ViewGroup
                 }
             }
         }
+        mIntrinsicContentHeight = height;
         mContentHeight = height + mTopPadding + mBottomMargin;
         updateScrollability();
         clampScrollPosition();
@@ -3656,7 +3671,7 @@ public class NotificationStackScrollLayout extends ViewGroup
         updateContentHeight();
         updateScrollPositionOnExpandInBottom(view);
         clampScrollPosition();
-        notifyHeightChangeListener(view);
+        notifyHeightChangeListener(view, needsAnimation);
         ExpandableNotificationRow row = view instanceof ExpandableNotificationRow
                 ? (ExpandableNotificationRow) view
                 : null;
@@ -3970,6 +3985,7 @@ public class NotificationStackScrollLayout extends ViewGroup
                 mShelf.fadeInTranslating();
             }
         }
+        updateAlgorithmHeightAndPadding();
         updateBackgroundDimming();
         updateAntiBurnInTranslation();
         requestChildrenUpdate();

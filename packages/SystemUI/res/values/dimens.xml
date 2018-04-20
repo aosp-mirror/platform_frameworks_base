@@ -138,7 +138,7 @@
 
     <!-- Vertical translation of the shelf during animation that happens after the
     notification panel collapses -->
-    <dimen name="shelf_appear_translation">9dp</dimen>
+    <dimen name="shelf_appear_translation">42dp</dimen>
 
     <!-- The amount the content shifts upwards when transforming into the icon -->
     <dimen name="notification_icon_transform_content_shift">32dp</dimen>
@@ -496,9 +496,6 @@
     <!-- Distance the user needs to drag vertically such that a swipe is accepted to unlock the
          device. -->
     <dimen name="unlock_move_distance">75dp</dimen>
-
-    <!-- Distance after which the scrim starts fading in when dragging down the quick settings -->
-    <dimen name="notification_scrim_wait_distance">100dp</dimen>
 
     <!-- Move distance for the unlock hint animation on the lockscreen -->
     <dimen name="hint_move_distance">75dp</dimen>
