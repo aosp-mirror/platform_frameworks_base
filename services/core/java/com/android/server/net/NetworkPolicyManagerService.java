@@ -189,6 +189,7 @@ import android.provider.Settings.Global;
 import android.telephony.CarrierConfigManager;
 import android.telephony.SubscriptionInfo;
 import android.telephony.SubscriptionManager;
+import android.telephony.SubscriptionManager.OnSubscriptionsChangedListener;
 import android.telephony.SubscriptionPlan;
 import android.telephony.TelephonyManager;
 import android.text.TextUtils;
@@ -198,6 +199,7 @@ import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.AtomicFile;
 import android.util.DataUnit;
+import android.util.IntArray;
 import android.util.Log;
 import android.util.Pair;
 import android.util.Range;
@@ -228,6 +230,7 @@ import com.android.server.ServiceThread;
 import com.android.server.SystemConfig;
 
 import libcore.io.IoUtils;
+import libcore.util.EmptyArray;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlSerializer;
@@ -249,6 +252,7 @@ import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.List;
 import java.util.Objects;
@@ -415,7 +419,6 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
     final Object mNetworkPoliciesSecondLock = new Object();
 
     @GuardedBy("allLocks") volatile boolean mSystemReady;
-    volatile boolean mSystemReallyReady;
 
     @GuardedBy("mUidRulesFirstLock") volatile boolean mRestrictBackground;
     @GuardedBy("mUidRulesFirstLock") volatile boolean mRestrictPower;
@@ -510,7 +513,6 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
     /** Map from network ID to last observed meteredness state */
     @GuardedBy("mNetworkPoliciesSecondLock")
     private final SparseBooleanArray mNetworkMetered = new SparseBooleanArray();
-
     /** Map from network ID to last observed roaming state */
     @GuardedBy("mNetworkPoliciesSecondLock")
     private final SparseBooleanArray mNetworkRoaming = new SparseBooleanArray();
@@ -518,6 +520,13 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
     /** Map from netId to subId as of last update */
     @GuardedBy("mNetworkPoliciesSecondLock")
     private final SparseIntArray mNetIdToSubId = new SparseIntArray();
+
+    /** Map from subId to subscriberId as of last update */
+    @GuardedBy("mNetworkPoliciesSecondLock")
+    private final SparseArray<String> mSubIdToSubscriberId = new SparseArray<>();
+    /** Set of all merged subscriberId as of last update */
+    @GuardedBy("mNetworkPoliciesSecondLock")
+    private String[] mMergedSubscriberIds = EmptyArray.STRING;
 
     /**
      * Indicates the uids restricted by admin from accessing metered data. It's a mapping from
@@ -843,6 +852,16 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                     new NetworkRequest.Builder().build(), mNetworkCallback);
 
             mUsageStats.addAppIdleStateChangeListener(new AppIdleStateChangeListener());
+
+            // Listen for subscriber changes
+            mContext.getSystemService(SubscriptionManager.class).addOnSubscriptionsChangedListener(
+                    new OnSubscriptionsChangedListener(mHandler.getLooper()) {
+                        @Override
+                        public void onSubscriptionsChanged() {
+                            updateNetworksInternal();
+                        }
+                    });
+
             // tell systemReady() that the service has been initialized
             initCompleteSignal.countDown();
         } finally {
@@ -868,7 +887,6 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
             Thread.currentThread().interrupt();
             throw new IllegalStateException("Service " + TAG + " init interrupted", e);
         }
-        mSystemReallyReady = true;
     }
 
     final private IUidObserver mUidObserver = new IUidObserver.Stub() {
@@ -1114,7 +1132,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         final long now = mClock.millis();
         for (int i = mNetworkPolicy.size()-1; i >= 0; i--) {
             final NetworkPolicy policy = mNetworkPolicy.valueAt(i);
-            final int subId = findRelevantSubId(policy.template);
+            final int subId = findRelevantSubIdNL(policy.template);
 
             // ignore policies that aren't relevant to user
             if (subId == INVALID_SUBSCRIPTION_ID) continue;
@@ -1245,14 +1263,11 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
      * @return relevant subId, or {@link #INVALID_SUBSCRIPTION_ID} when no
      *         matching subId found.
      */
-    private int findRelevantSubId(NetworkTemplate template) {
-        final TelephonyManager tele = mContext.getSystemService(TelephonyManager.class);
-        final SubscriptionManager sub = mContext.getSystemService(SubscriptionManager.class);
-
+    private int findRelevantSubIdNL(NetworkTemplate template) {
         // Mobile template is relevant when any active subscriber matches
-        final int[] subIds = ArrayUtils.defeatNullable(sub.getActiveSubscriptionIdList());
-        for (int subId : subIds) {
-            final String subscriberId = tele.getSubscriberId(subId);
+        for (int i = 0; i < mSubIdToSubscriberId.size(); i++) {
+            final int subId = mSubIdToSubscriberId.keyAt(i);
+            final String subscriberId = mSubIdToSubscriberId.valueAt(i);
             final NetworkIdentity probeIdent = new NetworkIdentity(TYPE_MOBILE,
                     TelephonyManager.NETWORK_TYPE_UNKNOWN, subscriberId, null, false, true,
                     true);
@@ -1407,23 +1422,29 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         public void onReceive(Context context, Intent intent) {
             // on background handler thread, and verified CONNECTIVITY_INTERNAL
             // permission above.
-
-            if (!mSystemReallyReady) return;
-            synchronized (mUidRulesFirstLock) {
-                synchronized (mNetworkPoliciesSecondLock) {
-                    ensureActiveMobilePolicyAL();
-                    normalizePoliciesNL();
-                    updateNetworkEnabledNL();
-                    updateNetworkRulesNL();
-                    updateNotificationsNL();
-                }
-            }
+            updateNetworksInternal();
         }
     };
 
+    private void updateNetworksInternal() {
+        // Get all of our cross-process communication with telephony out of
+        // the way before we acquire internal locks.
+        updateSubscriptions();
+
+        synchronized (mUidRulesFirstLock) {
+            synchronized (mNetworkPoliciesSecondLock) {
+                ensureActiveMobilePolicyAL();
+                normalizePoliciesNL();
+                updateNetworkEnabledNL();
+                updateNetworkRulesNL();
+                updateNotificationsNL();
+            }
+        }
+    }
+
     @VisibleForTesting
     public void updateNetworks() throws InterruptedException {
-        mConnReceiver.onReceive(null, null);
+        updateNetworksInternal();
         final CountDownLatch latch = new CountDownLatch(1);
         mHandler.post(() -> {
             latch.countDown();
@@ -1438,14 +1459,11 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
      * @param subId that has its associated NetworkPolicy updated if necessary
      * @return if any policies were updated
      */
-    private boolean maybeUpdateMobilePolicyCycleAL(int subId) {
+    private boolean maybeUpdateMobilePolicyCycleAL(int subId, String subscriberId) {
         if (LOGV) Slog.v(TAG, "maybeUpdateMobilePolicyCycleAL()");
 
-        boolean policyUpdated = false;
-        final String subscriberId = mContext.getSystemService(TelephonyManager.class)
-                .getSubscriberId(subId);
-
         // find and update the mobile NetworkPolicy for this subscriber id
+        boolean policyUpdated = false;
         final NetworkIdentity probeIdent = new NetworkIdentity(TYPE_MOBILE,
                 TelephonyManager.NETWORK_TYPE_UNKNOWN, subscriberId, null, false, true, true);
         for (int i = mNetworkPolicy.size() - 1; i >= 0; i--) {
@@ -1568,15 +1586,21 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                 return;
             }
             final int subId = intent.getIntExtra(PhoneConstants.SUBSCRIPTION_KEY, -1);
-            final TelephonyManager tele = mContext.getSystemService(TelephonyManager.class);
-            final String subscriberId = tele.getSubscriberId(subId);
+
+            // Get all of our cross-process communication with telephony out of
+            // the way before we acquire internal locks.
+            updateSubscriptions();
 
             synchronized (mUidRulesFirstLock) {
                 synchronized (mNetworkPoliciesSecondLock) {
-                    final boolean added = ensureActiveMobilePolicyAL(subId, subscriberId);
-                    if (added) return;
-                    final boolean updated = maybeUpdateMobilePolicyCycleAL(subId);
-                    if (!updated) return;
+                    final String subscriberId = mSubIdToSubscriberId.get(subId, null);
+                    if (subscriberId != null) {
+                        ensureActiveMobilePolicyAL(subId, subscriberId);
+                        maybeUpdateMobilePolicyCycleAL(subId, subscriberId);
+                    } else {
+                        Slog.wtf(TAG, "Missing subscriberId for subId " + subId);
+                    }
+
                     // update network and notification rules, as the data cycle changed and it's
                     // possible that we should be triggering warnings/limits now
                     handleNetworkPoliciesUpdateAL(true);
@@ -1659,19 +1683,28 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         if (template.getMatchRule() == MATCH_MOBILE) {
             // If mobile data usage hits the limit or if the user resumes the data, we need to
             // notify telephony.
-            final SubscriptionManager sm = mContext.getSystemService(SubscriptionManager.class);
-            final TelephonyManager tm = mContext.getSystemService(TelephonyManager.class);
 
-            final int[] subIds = ArrayUtils.defeatNullable(sm.getActiveSubscriptionIdList());
-            for (int subId : subIds) {
-                final String subscriberId = tm.getSubscriberId(subId);
-                final NetworkIdentity probeIdent = new NetworkIdentity(TYPE_MOBILE,
-                        TelephonyManager.NETWORK_TYPE_UNKNOWN, subscriberId, null, false, true,
-                        true);
-                // Template is matched when subscriber id matches.
-                if (template.matches(probeIdent)) {
-                    tm.setPolicyDataEnabled(enabled, subId);
+            final IntArray matchingSubIds = new IntArray();
+            synchronized (mNetworkPoliciesSecondLock) {
+                for (int i = 0; i < mSubIdToSubscriberId.size(); i++) {
+                    final int subId = mSubIdToSubscriberId.keyAt(i);
+                    final String subscriberId = mSubIdToSubscriberId.valueAt(i);
+
+                    final NetworkIdentity probeIdent = new NetworkIdentity(TYPE_MOBILE,
+                            TelephonyManager.NETWORK_TYPE_UNKNOWN, subscriberId, null, false, true,
+                            true);
+                    // Template is matched when subscriber id matches.
+                    if (template.matches(probeIdent)) {
+                        matchingSubIds.add(subId);
+                    }
                 }
+            }
+
+            // Only talk with telephony outside of locks
+            final TelephonyManager tm = mContext.getSystemService(TelephonyManager.class);
+            for (int i = 0; i < matchingSubIds.size(); i++) {
+                final int subId = matchingSubIds.get(i);
+                tm.setPolicyDataEnabled(enabled, subId);
             }
         }
     }
@@ -1690,6 +1723,46 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                 ifaces.add(stackedIface);
             }
         }
+    }
+
+    /**
+     * Examine all currently active subscriptions from
+     * {@link SubscriptionManager#getActiveSubscriptionIdList()} and update
+     * internal data structures.
+     * <p>
+     * Callers <em>must not</em> hold any locks when this method called.
+     */
+    void updateSubscriptions() {
+        if (LOGV) Slog.v(TAG, "updateSubscriptions()");
+        Trace.traceBegin(TRACE_TAG_NETWORK, "updateSubscriptions");
+
+        final TelephonyManager tm = mContext.getSystemService(TelephonyManager.class);
+        final SubscriptionManager sm = mContext.getSystemService(SubscriptionManager.class);
+
+        final int[] subIds = ArrayUtils.defeatNullable(sm.getActiveSubscriptionIdList());
+        final String[] mergedSubscriberIds = ArrayUtils.defeatNullable(tm.getMergedSubscriberIds());
+
+        final SparseArray<String> subIdToSubscriberId = new SparseArray<>(subIds.length);
+        for (int subId : subIds) {
+            final String subscriberId = tm.getSubscriberId(subId);
+            if (!TextUtils.isEmpty(subscriberId)) {
+                subIdToSubscriberId.put(subId, subscriberId);
+            } else {
+                Slog.wtf(TAG, "Missing subscriberId for subId " + subId);
+            }
+        }
+
+        synchronized (mNetworkPoliciesSecondLock) {
+            mSubIdToSubscriberId.clear();
+            for (int i = 0; i < subIdToSubscriberId.size(); i++) {
+                mSubIdToSubscriberId.put(subIdToSubscriberId.keyAt(i),
+                        subIdToSubscriberId.valueAt(i));
+            }
+
+            mMergedSubscriberIds = mergedSubscriberIds;
+        }
+
+        Trace.traceEnd(TRACE_TAG_NETWORK);
     }
 
     /**
@@ -1885,12 +1958,10 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         if (LOGV) Slog.v(TAG, "ensureActiveMobilePolicyAL()");
         if (mSuppressDefaultPolicy) return;
 
-        final TelephonyManager tele = mContext.getSystemService(TelephonyManager.class);
-        final SubscriptionManager sub = mContext.getSystemService(SubscriptionManager.class);
+        for (int i = 0; i < mSubIdToSubscriberId.size(); i++) {
+            final int subId = mSubIdToSubscriberId.keyAt(i);
+            final String subscriberId = mSubIdToSubscriberId.valueAt(i);
 
-        final int[] subIds = ArrayUtils.defeatNullable(sub.getActiveSubscriptionIdList());
-        for (int subId : subIds) {
-            final String subscriberId = tele.getSubscriberId(subId);
             ensureActiveMobilePolicyAL(subId, subscriberId);
         }
     }
@@ -2633,14 +2704,11 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
     }
 
     private void normalizePoliciesNL(NetworkPolicy[] policies) {
-        final TelephonyManager tele = mContext.getSystemService(TelephonyManager.class);
-        final String[] merged = tele.getMergedSubscriberIds();
-
         mNetworkPolicy.clear();
         for (NetworkPolicy policy : policies) {
             // When two normalized templates conflict, prefer the most
             // restrictive policy
-            policy.template = NetworkTemplate.normalize(policy.template, merged);
+            policy.template = NetworkTemplate.normalize(policy.template, mMergedSubscriberIds);
             final NetworkPolicy existing = mNetworkPolicy.get(policy.template);
             if (existing == null || existing.compareTo(policy) > 0) {
                 if (existing != null) {
@@ -3092,10 +3160,14 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                     mSubscriptionPlans.put(subId, plans);
                     mSubscriptionPlansOwner.put(subId, callingPackage);
 
-                    final String subscriberId = mContext.getSystemService(TelephonyManager.class)
-                            .getSubscriberId(subId);
-                    ensureActiveMobilePolicyAL(subId, subscriberId);
-                    maybeUpdateMobilePolicyCycleAL(subId);
+                    final String subscriberId = mSubIdToSubscriberId.get(subId, null);
+                    if (subscriberId != null) {
+                        ensureActiveMobilePolicyAL(subId, subscriberId);
+                        maybeUpdateMobilePolicyCycleAL(subId, subscriberId);
+                    } else {
+                        Slog.wtf(TAG, "Missing subscriberId for subId " + subId);
+                    }
+
                     handleNetworkPoliciesUpdateAL(true);
                 }
             }
@@ -3211,6 +3283,21 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                     fout.decreaseIndent();
                 }
                 fout.decreaseIndent();
+
+                fout.println();
+                fout.println("Active subscriptions:");
+                fout.increaseIndent();
+                for (int i = 0; i < mSubIdToSubscriberId.size(); i++) {
+                    final int subId = mSubIdToSubscriberId.keyAt(i);
+                    final String subscriberId = mSubIdToSubscriberId.valueAt(i);
+
+                    fout.println(subId + "=" + NetworkIdentity.scrubSubscriberId(subscriberId));
+                }
+                fout.decreaseIndent();
+
+                fout.println();
+                fout.println("Merged subscriptions: "
+                        + Arrays.toString(NetworkIdentity.scrubSubscriberId(mMergedSubscriberIds)));
 
                 fout.println();
                 fout.println("Policy for UIDs:");
@@ -4805,6 +4892,14 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         public SubscriptionPlan getSubscriptionPlan(Network network) {
             synchronized (mNetworkPoliciesSecondLock) {
                 final int subId = getSubIdLocked(network);
+                return getPrimarySubscriptionPlanLocked(subId);
+            }
+        }
+
+        @Override
+        public SubscriptionPlan getSubscriptionPlan(NetworkTemplate template) {
+            synchronized (mNetworkPoliciesSecondLock) {
+                final int subId = findRelevantSubIdNL(template);
                 return getPrimarySubscriptionPlanLocked(subId);
             }
         }
