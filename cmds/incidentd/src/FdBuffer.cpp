@@ -71,7 +71,8 @@ status_t FdBuffer::read(int fd, int64_t timeout) {
                 VLOG("return event has error %s", strerror(errno));
                 return errno != 0 ? -errno : UNKNOWN_ERROR;
             } else {
-                ssize_t amt = ::read(fd, mBuffer.writeBuffer(), mBuffer.currentToWrite());
+                ssize_t amt = TEMP_FAILURE_RETRY(
+                        ::read(fd, mBuffer.writeBuffer(), mBuffer.currentToWrite()));
                 if (amt < 0) {
                     if (errno == EAGAIN || errno == EWOULDBLOCK) {
                         continue;
@@ -182,9 +183,9 @@ status_t FdBuffer::readProcessedDataInStream(int fd, unique_fd toFd, unique_fd f
         if (cirSize != BUFFER_SIZE && pfds[0].fd != -1) {
             ssize_t amt;
             if (rpos >= wpos) {
-                amt = ::read(fd, cirBuf + rpos, BUFFER_SIZE - rpos);
+                amt = TEMP_FAILURE_RETRY(::read(fd, cirBuf + rpos, BUFFER_SIZE - rpos));
             } else {
-                amt = ::read(fd, cirBuf + rpos, wpos - rpos);
+                amt = TEMP_FAILURE_RETRY(::read(fd, cirBuf + rpos, wpos - rpos));
             }
             if (amt < 0) {
                 if (!(errno == EAGAIN || errno == EWOULDBLOCK)) {
@@ -204,9 +205,9 @@ status_t FdBuffer::readProcessedDataInStream(int fd, unique_fd toFd, unique_fd f
         if (cirSize > 0 && pfds[1].fd != -1) {
             ssize_t amt;
             if (rpos > wpos) {
-                amt = ::write(toFd.get(), cirBuf + wpos, rpos - wpos);
+                amt = TEMP_FAILURE_RETRY(::write(toFd.get(), cirBuf + wpos, rpos - wpos));
             } else {
-                amt = ::write(toFd.get(), cirBuf + wpos, BUFFER_SIZE - wpos);
+                amt = TEMP_FAILURE_RETRY(::write(toFd.get(), cirBuf + wpos, BUFFER_SIZE - wpos));
             }
             if (amt < 0) {
                 if (!(errno == EAGAIN || errno == EWOULDBLOCK)) {
@@ -235,7 +236,8 @@ status_t FdBuffer::readProcessedDataInStream(int fd, unique_fd toFd, unique_fd f
         }
 
         // read from parsing process
-        ssize_t amt = ::read(fromFd.get(), mBuffer.writeBuffer(), mBuffer.currentToWrite());
+        ssize_t amt = TEMP_FAILURE_RETRY(
+                ::read(fromFd.get(), mBuffer.writeBuffer(), mBuffer.currentToWrite()));
         if (amt < 0) {
             if (!(errno == EAGAIN || errno == EWOULDBLOCK)) {
                 VLOG("Fail to read fromFd %d: %s", fromFd.get(), strerror(errno));
