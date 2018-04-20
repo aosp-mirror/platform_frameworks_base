@@ -57,6 +57,12 @@
         <service
             android:name="com.android.systemui.qs.external.TileLifecycleManagerTests$FakeTileService"
             android:process=":killable" />
+
+        <receiver android:name="com.android.systemui.SliceBroadcastRelayHandlerTest$Receiver">
+            <intent-filter>
+                <action android:name="com.android.systemui.action.TEST_ACTION" />
+            </intent-filter>
+        </receiver>
     </application>
 
     <instrumentation android:name="android.testing.TestableInstrumentation"
