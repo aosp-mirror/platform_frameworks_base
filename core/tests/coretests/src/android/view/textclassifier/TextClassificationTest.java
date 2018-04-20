@@ -17,6 +17,7 @@
 package android.view.textclassifier;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 
 import android.app.PendingIntent;
@@ -26,6 +27,7 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
 import android.graphics.drawable.Icon;
 import android.os.LocaleList;
 import android.os.Parcel;
@@ -99,12 +101,6 @@ public class TextClassificationTest {
         assertEquals(id, result.getId());
         assertEquals(2, result.getActions().size());
 
-        // Legacy API.
-        assertNull(result.getIcon());
-        assertNull(result.getLabel());
-        assertNull(result.getIntent());
-        assertNull(result.getOnClickListener());
-
         // Primary action.
         final RemoteAction primaryAction = result.getActions().get(0);
         assertEquals(primaryLabel, primaryAction.getTitle());
@@ -128,23 +124,35 @@ public class TextClassificationTest {
     @Test
     public void testParcelLegacy() {
         final Context context = InstrumentationRegistry.getInstrumentation().getContext();
-        final String text = "text";
 
-        final Icon icon = generateTestIcon(384, 192, Color.BLUE);
+        final int legacyIconWidth = 192;
+        final int legacyIconHeight = 96;
+        final int legacyIconColor = Color.BLUE;
+        final Drawable legacyIcon = generateTestIcon(
+                legacyIconWidth, legacyIconHeight, legacyIconColor)
+                .loadDrawable(context);
+        final String legacyLabel = "legacyLabel";
+        final Intent legacyIntent = new Intent("ACTION_LEGACY");
+        final View.OnClickListener legacyOnClick = null;
+
+        final int width = 384;
+        final int height = 192;
+        final int iconColor = Color.RED;
         final String label = "label";
-        final Intent intent = new Intent("intent");
-        final View.OnClickListener onClickListener = v -> { };
+        final PendingIntent pendingIntent = PendingIntent.getActivity(
+                context, 0, new Intent("ACTION_0"), 0);
+        final RemoteAction remoteAction = new RemoteAction(
+                generateTestIcon(width, height, iconColor),
+                label,
+                "description",
+                pendingIntent);
 
-        final String id = "id";
         final TextClassification reference = new TextClassification.Builder()
-                .setText(text)
-                .setIcon(icon.loadDrawable(context))
-                .setLabel(label)
-                .setIntent(intent)
-                .setOnClickListener(onClickListener)
-                .setEntityType(TextClassifier.TYPE_ADDRESS, 0.3f)
-                .setEntityType(TextClassifier.TYPE_PHONE, 0.7f)
-                .setId(id)
+                .setIcon(legacyIcon)
+                .setLabel(legacyLabel)
+                .setIntent(legacyIntent)
+                .setOnClickListener(legacyOnClick)
+                .addAction(remoteAction)
                 .build();
 
         // Parcel and unparcel
@@ -153,13 +161,14 @@ public class TextClassificationTest {
         parcel.setDataPosition(0);
         final TextClassification result = TextClassification.CREATOR.createFromParcel(parcel);
 
+        // Legacy fields excluding legacyIntent are replaced by first remoteAction.
+        assertNull(result.getIntent());
         final Bitmap resultIcon = ((BitmapDrawable) result.getIcon()).getBitmap();
-        assertEquals(icon.getBitmap().getPixel(0, 0), resultIcon.getPixel(0, 0));
-        assertEquals(192, resultIcon.getWidth());
-        assertEquals(96, resultIcon.getHeight());
+        assertEquals(iconColor, resultIcon.getPixel(0, 0));
+        assertEquals(width, resultIcon.getWidth());
+        assertEquals(height, resultIcon.getHeight());
         assertEquals(label, result.getLabel());
-        assertEquals(intent.getAction(), result.getIntent().getAction());
-        assertNull(result.getOnClickListener());
+        assertNotNull(result.getOnClickListener());
     }
 
     @Test
