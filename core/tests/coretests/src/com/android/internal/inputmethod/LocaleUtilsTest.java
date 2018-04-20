@@ -19,6 +19,7 @@ package com.android.internal.inputmethod;
 import static org.junit.Assert.assertEquals;
 
 import android.os.LocaleList;
+import android.platform.test.annotations.Presubmit;
 import android.support.test.filters.SmallTest;
 import android.support.test.runner.AndroidJUnit4;
 
@@ -29,6 +30,7 @@ import java.util.ArrayList;
 import java.util.Locale;
 
 @SmallTest
+@Presubmit
 @RunWith(AndroidJUnit4.class)
 public class LocaleUtilsTest {
 
