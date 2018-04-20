@@ -342,12 +342,6 @@ interface IWindowManager
     int getDockedStackSide();
 
     /**
-     * Sets whether we are currently in a drag resize operation where we are changing the docked
-     * stack size.
-     */
-    void setDockedStackResizing(boolean resizing);
-
-    /**
      * Sets the region the user can touch the divider. This region will be excluded from the region
      * which is used to cause a focus switch when dispatching touch.
      */
