@@ -69,6 +69,14 @@ public class RecentsAnimationControllerCompat {
         }
     }
 
+    public void hideCurrentInputMethod() {
+        try {
+            mAnimationController.hideCurrentInputMethod();
+        } catch (RemoteException e) {
+            Log.e(TAG, "Failed to set hide input method", e);
+        }
+    }
+
     public void finish(boolean toHome) {
         try {
             mAnimationController.finish(toHome);
