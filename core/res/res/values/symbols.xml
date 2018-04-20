@@ -1623,6 +1623,8 @@
   <java-symbol type="anim" name="task_open_enter_cross_profile_apps" />
   <java-symbol type="anim" name="activity_translucent_open_enter" />
   <java-symbol type="anim" name="activity_translucent_close_exit" />
+  <java-symbol type="anim" name="activity_open_enter" />
+  <java-symbol type="anim" name="activity_close_exit" />
 
   <java-symbol type="array" name="config_autoRotationTiltTolerance" />
   <java-symbol type="array" name="config_keyboardTapVibePattern" />

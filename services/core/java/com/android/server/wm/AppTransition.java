@@ -554,7 +554,7 @@ public class AppTransition implements Dump {
         return null;
     }
 
-    Animation loadAnimationAttr(LayoutParams lp, int animAttr) {
+    Animation loadAnimationAttr(LayoutParams lp, int animAttr, int transit) {
         int anim = 0;
         Context context = mContext;
         if (animAttr >= 0) {
@@ -564,6 +564,7 @@ public class AppTransition implements Dump {
                 anim = ent.array.getResourceId(animAttr, 0);
             }
         }
+        anim = updateToTranslucentAnimIfNeeded(anim, transit);
         if (anim != 0) {
             return AnimationUtils.loadAnimation(context, anim);
         }
@@ -596,6 +597,16 @@ public class AppTransition implements Dump {
             return AnimationUtils.loadAnimation(context, anim);
         }
         return null;
+    }
+
+    private int updateToTranslucentAnimIfNeeded(int anim, int transit) {
+        if (transit == TRANSIT_TRANSLUCENT_ACTIVITY_OPEN && anim == R.anim.activity_open_enter) {
+            return R.anim.activity_translucent_open_enter;
+        }
+        if (transit == TRANSIT_TRANSLUCENT_ACTIVITY_CLOSE && anim == R.anim.activity_close_exit) {
+            return R.anim.activity_translucent_close_exit;
+        }
+        return anim;
     }
 
     /**
@@ -1664,29 +1675,17 @@ public class AppTransition implements Dump {
                     "applyAnimation NEXT_TRANSIT_TYPE_OPEN_CROSS_PROFILE_APPS:"
                             + " anim=" + a + " transit=" + appTransitionToString(transit)
                             + " isEntrance=true" + " Callers=" + Debug.getCallers(3));
-        } else if (transit == TRANSIT_TRANSLUCENT_ACTIVITY_OPEN && enter) {
-            a = loadAnimationRes("android",
-                    com.android.internal.R.anim.activity_translucent_open_enter);
-            Slog.v(TAG,
-                    "applyAnimation TRANSIT_TRANSLUCENT_ACTIVITY_OPEN:"
-                            + " anim=" + a + " transit=" + appTransitionToString(transit)
-                            + " isEntrance=true" + " Callers=" + Debug.getCallers(3));
-        } else if (transit == TRANSIT_TRANSLUCENT_ACTIVITY_CLOSE && !enter) {
-            a = loadAnimationRes("android",
-                    com.android.internal.R.anim.activity_translucent_close_exit);
-            Slog.v(TAG,
-                    "applyAnimation TRANSIT_TRANSLUCENT_ACTIVITY_CLOSE:"
-                            + " anim=" + a + " transit=" + appTransitionToString(transit)
-                            + " isEntrance=false" + " Callers=" + Debug.getCallers(3));
         } else {
             int animAttr = 0;
             switch (transit) {
                 case TRANSIT_ACTIVITY_OPEN:
+                case TRANSIT_TRANSLUCENT_ACTIVITY_OPEN:
                     animAttr = enter
                             ? WindowAnimation_activityOpenEnterAnimation
                             : WindowAnimation_activityOpenExitAnimation;
                     break;
                 case TRANSIT_ACTIVITY_CLOSE:
+                case TRANSIT_TRANSLUCENT_ACTIVITY_CLOSE:
                     animAttr = enter
                             ? WindowAnimation_activityCloseEnterAnimation
                             : WindowAnimation_activityCloseExitAnimation;
@@ -1737,7 +1736,7 @@ public class AppTransition implements Dump {
                             ? WindowAnimation_launchTaskBehindSourceAnimation
                             : WindowAnimation_launchTaskBehindTargetAnimation;
             }
-            a = animAttr != 0 ? loadAnimationAttr(lp, animAttr) : null;
+            a = animAttr != 0 ? loadAnimationAttr(lp, animAttr, transit) : null;
             if (DEBUG_APP_TRANSITIONS || DEBUG_ANIM) Slog.v(TAG,
                     "applyAnimation:"
                     + " anim=" + a

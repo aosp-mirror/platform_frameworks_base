@@ -23,6 +23,7 @@ import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_IS_ROUNDED_CO
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_STARTING;
 import static android.view.WindowManager.LayoutParams.TYPE_INPUT_METHOD;
 import static android.view.WindowManager.LayoutParams.TYPE_WALLPAPER;
+import static android.view.WindowManager.TRANSIT_NONE;
 import static com.android.server.policy.WindowManagerPolicy.FINISH_LAYOUT_REDO_ANIM;
 import static com.android.server.policy.WindowManagerPolicy.FINISH_LAYOUT_REDO_WALLPAPER;
 import static com.android.server.wm.DragResizeMode.DRAG_RESIZE_MODE_FREEFORM;
@@ -1360,7 +1361,7 @@ class WindowStateAnimator {
                         break;
                 }
                 if (attr >= 0) {
-                    a = mService.mAppTransition.loadAnimationAttr(mWin.mAttrs, attr);
+                    a = mService.mAppTransition.loadAnimationAttr(mWin.mAttrs, attr, TRANSIT_NONE);
                 }
             }
             if (DEBUG_ANIM) Slog.v(TAG,
