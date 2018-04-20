@@ -31,23 +31,18 @@
         xmlns:android="http://schemas.android.com/apk/res/android"
         xmlns:app="http://schemas.android.com/apk/res-auto"
         android:id="@+id/user_switcher_container"
-        android:layout_marginStart="@dimen/car_margin"
-        android:layout_marginEnd="@dimen/car_margin"
         android:clipChildren="false"
         android:layout_width="match_parent"
         android:layout_height="@dimen/car_user_switcher_container_height">
 
         <com.android.systemui.statusbar.car.UserGridRecyclerView
             android:id="@+id/user_grid"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_centerHorizontal="true"
-            android:layout_centerVertical="true"
-            android:layout_alignParentRight="true"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
             app:dayNightStyle="force_night"
             app:showPagedListViewDivider="false"
             app:gutter="both"
-            app:itemSpacing="@dimen/car_padding_4"/>
+            app:itemSpacing="@dimen/car_user_switcher_vertical_spacing_between_users"/>
 
     </RelativeLayout>
 

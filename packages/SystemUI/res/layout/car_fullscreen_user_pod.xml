@@ -16,30 +16,31 @@
 -->
 
 
-<RelativeLayout
+<LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:clipChildren="false"
     android:alpha="0"
     android:layout_height="wrap_content"
     android:layout_width="match_parent"
-    android:gravity="fill_horizontal">
+    android:orientation="vertical"
+    android:gravity="center"
+    >
 
     <ImageView android:id="@+id/user_avatar"
-        android:layout_centerHorizontal="true"
-        android:layout_width="@dimen/car_fullscreen_user_pod_image_avatar_width"
-        android:layout_height="@dimen/car_fullscreen_user_pod_image_avatar_height"
+        android:layout_width="@dimen/car_user_switcher_image_avatar_size"
+        android:layout_height="@dimen/car_user_switcher_image_avatar_size"
         android:background="@drawable/car_button_ripple_background_inverse"
+        android:gravity="center"
         />
 
     <TextView android:id="@+id/user_name"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="@dimen/car_padding_4"
-        android:textSize="@dimen/car_body1_size"
-        android:textColor="@color/car_body1_light"
+        android:layout_marginTop="@dimen/car_user_switcher_vertical_spacing_between_name_and_avatar"
+        android:textSize="@dimen/car_user_switcher_name_text_size"
+        android:textColor="@color/car_user_switcher_name_text_color"
         android:ellipsize="end"
         android:singleLine="true"
-        android:gravity="center"
-        android:layout_below="@id/user_avatar"/>
+        android:gravity="center"/>
 
-</RelativeLayout>
+</LinearLayout>
