@@ -102,7 +102,7 @@
     <string name="bluetooth_pairing_accept" msgid="6163520056536604875">"配對"</string>
     <string name="bluetooth_pairing_accept_all_caps" msgid="6061699265220789149">"配對"</string>
     <string name="bluetooth_pairing_decline" msgid="4185420413578948140">"取消"</string>
-    <string name="bluetooth_pairing_will_share_phonebook" msgid="4982239145676394429">"配對完成後，所配對的裝置即可在連線後存取你的聯絡人和通話紀錄。"</string>
+    <string name="bluetooth_pairing_will_share_phonebook" msgid="4982239145676394429">"配對完成後，所配對的裝置即可在連線後存取你的聯絡人和通話記錄。"</string>
     <string name="bluetooth_pairing_error_message" msgid="3748157733635947087">"無法與 <xliff:g id="DEVICE_NAME">%1$s</xliff:g> 配對。"</string>
     <string name="bluetooth_pairing_pin_error_message" msgid="8337234855188925274">"無法與 <xliff:g id="DEVICE_NAME">%1$s</xliff:g> 配對，因為 PIN 碼或密碼金鑰不正確。"</string>
     <string name="bluetooth_pairing_device_down_error_message" msgid="7870998403045801381">"無法與 <xliff:g id="DEVICE_NAME">%1$s</xliff:g> 通訊。"</string>
@@ -196,7 +196,7 @@
     <string name="bugreport_in_power_summary" msgid="1778455732762984579">"在電源選單中顯示取得錯誤報告的按鈕"</string>
     <string name="keep_screen_on" msgid="1146389631208760344">"螢幕不休眠"</string>
     <string name="keep_screen_on_summary" msgid="2173114350754293009">"充電時螢幕不會進入休眠"</string>
-    <string name="bt_hci_snoop_log" msgid="3340699311158865670">"啟用藍牙 HCI 窺探紀錄"</string>
+    <string name="bt_hci_snoop_log" msgid="3340699311158865670">"啟用藍牙 HCI 窺探記錄"</string>
     <string name="bt_hci_snoop_log_summary" msgid="366083475849911315">"擷取單一檔案內的所有藍牙 HCI 封包 (變更這項設定後必須切換藍牙)"</string>
     <string name="oem_unlock_enable" msgid="6040763321967327691">"OEM 解鎖"</string>
     <string name="oem_unlock_enable_summary" msgid="4720281828891618376">"允許解除鎖定開機載入器"</string>
@@ -207,7 +207,7 @@
     <string name="mock_location_app_set" msgid="8966420655295102685">"模擬位置應用程式：<xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="debug_networking_category" msgid="7044075693643009662">"網路連線"</string>
     <string name="wifi_display_certification" msgid="8611569543791307533">"無線螢幕分享認證"</string>
-    <string name="wifi_verbose_logging" msgid="4203729756047242344">"啟用 Wi‑Fi 詳細紀錄設定"</string>
+    <string name="wifi_verbose_logging" msgid="4203729756047242344">"啟用 Wi‑Fi 詳細記錄設定"</string>
     <string name="wifi_connected_mac_randomization" msgid="3168165236877957767">"已連線的 MAC 隨機化處理"</string>
     <string name="mobile_data_always_on" msgid="8774857027458200434">"行動數據連線一律保持啟用狀態"</string>
     <string name="tethering_hardware_offload" msgid="7470077827090325814">"數據連線硬體加速"</string>
@@ -234,16 +234,16 @@
     <string name="private_dns_mode_provider_hostname_hint" msgid="2487492386970928143">"輸入 DNS 供應商的主機名稱"</string>
     <string name="private_dns_mode_provider_failure" msgid="231837290365031223">"無法連線"</string>
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"顯示無線螢幕分享認證的選項"</string>
-    <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"讓 Wi‑Fi 記錄功能升級，在 Wi‑Fi 選擇器中依每個 SSID RSSI 顯示 Wi‑Fi 詳細紀錄"</string>
+    <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"讓 Wi‑Fi 記錄功能升級，在 Wi‑Fi 選擇器中依每個 SSID RSSI 顯示 Wi‑Fi 詳細記錄"</string>
     <string name="wifi_connected_mac_randomization_summary" msgid="1743059848752201485">"連線至 Wi‑Fi 網路時隨機化 MAC 位址"</string>
     <string name="wifi_metered_label" msgid="4514924227256839725">"計量付費"</string>
     <string name="wifi_unmetered_label" msgid="6124098729457992931">"非計量付費"</string>
-    <string name="select_logd_size_title" msgid="7433137108348553508">"紀錄器緩衝區空間"</string>
-    <string name="select_logd_size_dialog_title" msgid="1206769310236476760">"選取每個紀錄緩衝區的紀錄器空間"</string>
+    <string name="select_logd_size_title" msgid="7433137108348553508">"記錄器緩衝區空間"</string>
+    <string name="select_logd_size_dialog_title" msgid="1206769310236476760">"選取每個記錄緩衝區的記錄器空間"</string>
     <string name="dev_logpersist_clear_warning_title" msgid="684806692440237967">"要清除永久儲存的記錄器資料嗎？"</string>
     <string name="dev_logpersist_clear_warning_message" msgid="2256582531342994562">"如果你選擇不再透過永久記錄器進行監控，系統就必須清除裝置中的記錄器資料。"</string>
     <string name="select_logpersist_title" msgid="7530031344550073166">"在裝置上永久儲存記錄器資料"</string>
-    <string name="select_logpersist_dialog_title" msgid="4003400579973269060">"選取要在裝置上永久儲存的紀錄緩衝區"</string>
+    <string name="select_logpersist_dialog_title" msgid="4003400579973269060">"選取要在裝置上永久儲存的記錄緩衝區"</string>
     <string name="select_usb_configuration_title" msgid="2649938511506971843">"選取 USB 設定"</string>
     <string name="select_usb_configuration_dialog_title" msgid="6385564442851599963">"選取 USB 設定"</string>
     <string name="allow_mock_location" msgid="2787962564578664888">"允許模擬位置"</string>

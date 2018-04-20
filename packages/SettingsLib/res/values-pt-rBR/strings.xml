@@ -283,7 +283,7 @@
     <string name="pointer_location_summary" msgid="840819275172753713">"Exibir dados de toque"</string>
     <string name="show_touches" msgid="2642976305235070316">"Mostrar toques"</string>
     <string name="show_touches_summary" msgid="6101183132903926324">"Mostrar feedback visual para toques"</string>
-    <string name="show_screen_updates" msgid="5470814345876056420">"Mostrar atualiz. de sup."</string>
+    <string name="show_screen_updates" msgid="5470814345876056420">"Mostrar atual. superfície"</string>
     <string name="show_screen_updates_summary" msgid="2569622766672785529">"Piscar superfícies de toda a janela ao atualizar"</string>
     <string name="show_hw_screen_updates" msgid="5036904558145941590">"Mostrar atualiz. da GPU"</string>
     <string name="show_hw_screen_updates_summary" msgid="1115593565980196197">"Piscar visualizações em janelas ao desenhar c/ GPU"</string>

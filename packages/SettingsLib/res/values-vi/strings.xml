@@ -209,7 +209,7 @@
     <string name="wifi_display_certification" msgid="8611569543791307533">"Chứng nhận hiển thị không dây"</string>
     <string name="wifi_verbose_logging" msgid="4203729756047242344">"Bật ghi nhật ký chi tiết Wi‑Fi"</string>
     <string name="wifi_connected_mac_randomization" msgid="3168165236877957767">"Lựa chọn ngẫu nhiên địa chỉ MAC khi kết nối"</string>
-    <string name="mobile_data_always_on" msgid="8774857027458200434">"Dữ liệu di động luôn hiện hoạt"</string>
+    <string name="mobile_data_always_on" msgid="8774857027458200434">"Dữ liệu di động luôn hoạt động"</string>
     <string name="tethering_hardware_offload" msgid="7470077827090325814">"Tăng tốc phần cứng cho chia sẻ kết nối"</string>
     <string name="bluetooth_show_devices_without_names" msgid="4708446092962060176">"Hiển thị các thiết bị Bluetooth không có tên"</string>
     <string name="bluetooth_disable_absolute_volume" msgid="2660673801947898809">"Vô hiệu hóa âm lượng tuyệt đối"</string>
@@ -283,7 +283,7 @@
     <string name="pointer_location_summary" msgid="840819275172753713">"Lớp phủ màn hình hiển thị dữ liệu chạm hiện tại"</string>
     <string name="show_touches" msgid="2642976305235070316">"Hiển thị số lần nhấn"</string>
     <string name="show_touches_summary" msgid="6101183132903926324">"Hiển thị phản hồi trực quan cho các lần nhấn"</string>
-    <string name="show_screen_updates" msgid="5470814345876056420">"Hiển thị cập nhật bề mặt"</string>
+    <string name="show_screen_updates" msgid="5470814345876056420">"Hiển thị bản cập nhật giao diện"</string>
     <string name="show_screen_updates_summary" msgid="2569622766672785529">"Chuyển nhanh toàn bộ các giao diện cửa sổ khi các giao diện này cập nhật"</string>
     <string name="show_hw_screen_updates" msgid="5036904558145941590">"Hiện cập nhật giao diện GPU"</string>
     <string name="show_hw_screen_updates_summary" msgid="1115593565980196197">"Chuyển nhanh chế độ xem trong cửa sổ khi được vẽ bằng GPU"</string>
@@ -298,8 +298,8 @@
     <string name="usb_audio_disable_routing_summary" msgid="980282760277312264">"Tắt định tuyến tự động tới thiết bị âm thanh ngoại vi USB"</string>
     <string name="debug_layout" msgid="5981361776594526155">"Hiển thị ranh giới bố cục"</string>
     <string name="debug_layout_summary" msgid="2001775315258637682">"Hiển thị viền đoạn video, lề, v.v.."</string>
-    <string name="force_rtl_layout_all_locales" msgid="2259906643093138978">"Buộc hướng bố cục RTL"</string>
-    <string name="force_rtl_layout_all_locales_summary" msgid="9192797796616132534">"Buộc hướng bố cục màn hình RTL cho tất cả ngôn ngữ"</string>
+    <string name="force_rtl_layout_all_locales" msgid="2259906643093138978">"Buộc hướng bố cục phải sang trái"</string>
+    <string name="force_rtl_layout_all_locales_summary" msgid="9192797796616132534">"Buộc hướng bố cục màn hình phải sang trái cho tất cả ngôn ngữ"</string>
     <string name="force_hw_ui" msgid="6426383462520888732">"Bắt buộc kết xuất GPU"</string>
     <string name="force_hw_ui_summary" msgid="5535991166074861515">"Bắt buộc sử dụng GPU cho bản vẽ 2d"</string>
     <string name="force_msaa" msgid="7920323238677284387">"Bắt buộc 4x MSAA"</string>

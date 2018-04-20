@@ -138,7 +138,7 @@
     <string name="user_guest" msgid="8475274842845401871">"אורח"</string>
     <string name="unknown" msgid="1592123443519355854">"לא ידוע"</string>
     <string name="running_process_item_user_label" msgid="3129887865552025943">"משתמש: <xliff:g id="USER_NAME">%1$s</xliff:g>"</string>
-    <string name="launch_defaults_some" msgid="313159469856372621">"הוגדרו כמה ברירת מחדל"</string>
+    <string name="launch_defaults_some" msgid="313159469856372621">"הוגדרו כמה ברירות מחדל"</string>
     <string name="launch_defaults_none" msgid="4241129108140034876">"לא הוגדרו ברירות מחדל"</string>
     <string name="tts_settings" msgid="8186971894801348327">"הגדרות טקסט לדיבור"</string>
     <string name="tts_settings_title" msgid="1237820681016639683">"פלט טקסט לדיבור"</string>
