@@ -841,30 +841,30 @@ public class ApfGenerator {
 
     /**
      * Add an instruction to the end of the program to load 32 bits from the data memory into
-     * {@code register}. The source address is computed by adding @{code offset} to the other
-     * register.
+     * {@code register}. The source address is computed by adding the signed immediate
+     * @{code offset} to the other register.
      * Requires APF v3 or greater.
      */
     public ApfGenerator addLoadData(Register destinationRegister, int offset)
             throws IllegalInstructionException {
         requireApfVersion(3);
         Instruction instruction = new Instruction(Opcodes.LDDW, destinationRegister);
-        instruction.setUnsignedImm(offset);
+        instruction.setSignedImm(offset);
         addInstruction(instruction);
         return this;
     }
 
     /**
      * Add an instruction to the end of the program to store 32 bits from {@code register} into the
-     * data memory. The destination address is computed by adding @{code offset} to the other
-     * register.
+     * data memory. The destination address is computed by adding the signed immediate
+     * @{code offset} to the other register.
      * Requires APF v3 or greater.
      */
     public ApfGenerator addStoreData(Register sourceRegister, int offset)
             throws IllegalInstructionException {
         requireApfVersion(3);
         Instruction instruction = new Instruction(Opcodes.STDW, sourceRegister);
-        instruction.setUnsignedImm(offset);
+        instruction.setSignedImm(offset);
         addInstruction(instruction);
         return this;
     }
