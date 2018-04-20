@@ -759,6 +759,7 @@ public class Activity extends ContextThemeWrapper
     private static final int LOG_AM_ON_STOP_CALLED = 30049;
     private static final int LOG_AM_ON_RESTART_CALLED = 30058;
     private static final int LOG_AM_ON_DESTROY_CALLED = 30060;
+    private static final int LOG_AM_ON_ACTIVITY_RESULT_CALLED = 30062;
 
     private static class ManagedDialog {
         Dialog mDialog;
@@ -7438,8 +7439,8 @@ public class Activity extends ContextThemeWrapper
         }
     }
 
-    void dispatchActivityResult(String who, int requestCode,
-        int resultCode, Intent data) {
+    void dispatchActivityResult(String who, int requestCode, int resultCode, Intent data,
+            String reason) {
         if (false) Log.v(
             TAG, "Dispatching result: who=" + who + ", reqCode=" + requestCode
             + ", resCode=" + resultCode + ", data=" + data);
@@ -7475,6 +7476,7 @@ public class Activity extends ContextThemeWrapper
                 frag.onActivityResult(requestCode, resultCode, data);
             }
         }
+        writeEventLog(LOG_AM_ON_ACTIVITY_RESULT_CALLED, reason);
     }
 
     /**
