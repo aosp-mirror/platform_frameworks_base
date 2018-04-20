@@ -441,6 +441,12 @@ public final class BluetoothAdapter {
      */
     public static final int IO_CAPABILITY_UNKNOWN = 255;
 
+    /** @hide */
+    @IntDef({IO_CAPABILITY_OUT, IO_CAPABILITY_IO, IO_CAPABILITY_IN, IO_CAPABILITY_NONE,
+            IO_CAPABILITY_KBDISP})
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface IoCapability {}
+
     /**
      * Broadcast Action: The local Bluetooth adapter has started the remote
      * device discovery process.
@@ -1286,6 +1292,7 @@ public final class BluetoothAdapter {
      * @hide
      */
     @RequiresPermission(Manifest.permission.BLUETOOTH_ADMIN)
+    @IoCapability
     public int getIoCapability() {
         if (getState() != STATE_ON) return BluetoothAdapter.IO_CAPABILITY_UNKNOWN;
         try {
@@ -1313,7 +1320,7 @@ public final class BluetoothAdapter {
      * @hide
      */
     @RequiresPermission(Manifest.permission.BLUETOOTH_PRIVILEGED)
-    public boolean setIoCapability(int capability) {
+    public boolean setIoCapability(@IoCapability int capability) {
         if (getState() != STATE_ON) return false;
         try {
             mServiceLock.readLock().lock();
@@ -1336,6 +1343,7 @@ public final class BluetoothAdapter {
      * @hide
      */
     @RequiresPermission(Manifest.permission.BLUETOOTH_ADMIN)
+    @IoCapability
     public int getLeIoCapability() {
         if (getState() != STATE_ON) return BluetoothAdapter.IO_CAPABILITY_UNKNOWN;
         try {
@@ -1363,7 +1371,7 @@ public final class BluetoothAdapter {
      * @hide
      */
     @RequiresPermission(Manifest.permission.BLUETOOTH_PRIVILEGED)
-    public boolean setLeIoCapability(int capability) {
+    public boolean setLeIoCapability(@IoCapability int capability) {
         if (getState() != STATE_ON) return false;
         try {
             mServiceLock.readLock().lock();
