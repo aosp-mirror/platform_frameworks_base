@@ -27,6 +27,7 @@ import android.net.LinkProperties;
 import android.net.LinkProperties.CompareResult;
 import android.net.LinkProperties.ProvisioningChange;
 import android.net.RouteInfo;
+import android.os.Parcel;
 import android.support.test.filters.SmallTest;
 import android.support.test.runner.AndroidJUnit4;
 import android.system.OsConstants;
@@ -81,6 +82,9 @@ public class LinkPropertiesTest {
 
         assertTrue(source.isIdenticalPrivateDns(target));
         assertTrue(target.isIdenticalPrivateDns(source));
+
+        assertTrue(source.isIdenticalValidatedPrivateDnses(target));
+        assertTrue(target.isIdenticalValidatedPrivateDnses(source));
 
         assertTrue(source.isIdenticalRoutes(target));
         assertTrue(target.isIdenticalRoutes(source));
@@ -783,5 +787,36 @@ public class LinkPropertiesTest {
         CompareResult<T> result = new CompareResult<>(oldItems, newItems);
         assertEquals(new ArraySet<>(expectAdded), new ArraySet<>(result.added));
         assertEquals(new ArraySet<>(expectRemoved), (new ArraySet<>(result.removed)));
+    }
+
+    @Test
+    public void testLinkPropertiesParcelable() {
+        LinkProperties source = new LinkProperties();
+        source.setInterfaceName(NAME);
+        // set 2 link addresses
+        source.addLinkAddress(LINKADDRV4);
+        source.addLinkAddress(LINKADDRV6);
+        // set 2 dnses
+        source.addDnsServer(DNS1);
+        source.addDnsServer(DNS2);
+        // set 2 gateways
+        source.addRoute(new RouteInfo(GATEWAY1));
+        source.addRoute(new RouteInfo(GATEWAY2));
+        // set 2 validated private dnses
+        source.addValidatedPrivateDnsServer(DNS6);
+        source.addValidatedPrivateDnsServer(GATEWAY61);
+
+        source.setMtu(MTU);
+
+        Parcel p = Parcel.obtain();
+        source.writeToParcel(p, /* flags */ 0);
+        p.setDataPosition(0);
+        final byte[] marshalled = p.marshall();
+        p = Parcel.obtain();
+        p.unmarshall(marshalled, 0, marshalled.length);
+        p.setDataPosition(0);
+        LinkProperties dest = LinkProperties.CREATOR.createFromParcel(p);
+
+        assertEquals(source, dest);
     }
 }
