@@ -16,8 +16,9 @@
 
 package com.android.server.pm.dex;
 
-import android.Manifest;
 import android.annotation.UserIdInt;
+import android.app.AppOpsManager;
+import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.IPackageManager;
 import android.content.pm.PackageInfo;
@@ -38,7 +39,9 @@ import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.system.Os;
 import android.util.ArrayMap;
+import android.util.Log;
 import android.util.Slog;
+
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.os.BackgroundThread;
 import com.android.internal.util.ArrayUtils;
@@ -47,13 +50,16 @@ import com.android.server.LocalServices;
 import com.android.server.pm.Installer;
 import com.android.server.pm.Installer.InstallerException;
 import com.android.server.pm.PackageManagerServiceCompilerMapping;
+
 import dalvik.system.DexFile;
 import dalvik.system.VMRuntime;
-import java.io.File;
-import java.io.FileNotFoundException;
+
 import libcore.io.IoUtils;
 import libcore.util.NonNull;
 import libcore.util.Nullable;
+
+import java.io.File;
+import java.io.FileNotFoundException;
 
 /**
  * A system service that provides access to runtime and compiler artifacts.
@@ -69,9 +75,7 @@ import libcore.util.Nullable;
  */
 public class ArtManagerService extends android.content.pm.dex.IArtManager.Stub {
     private static final String TAG = "ArtManagerService";
-
-    private static boolean DEBUG = false;
-    private static boolean DEBUG_IGNORE_PERMISSIONS = false;
+    private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
 
     // Package name used to create the profile directory layout when
     // taking a snapshot of the boot image profile.
@@ -79,6 +83,7 @@ public class ArtManagerService extends android.content.pm.dex.IArtManager.Stub {
     // Profile name used for the boot image profile.
     private static final String BOOT_IMAGE_PROFILE_NAME = "android.prof";
 
+    private final Context mContext;
     private final IPackageManager mPackageManager;
     private final Object mInstallLock;
     @GuardedBy("mInstallLock")
@@ -90,7 +95,9 @@ public class ArtManagerService extends android.content.pm.dex.IArtManager.Stub {
         verifyTronLoggingConstants();
     }
 
-    public ArtManagerService(IPackageManager pm, Installer installer, Object installLock) {
+    public ArtManagerService(Context context, IPackageManager pm, Installer installer,
+            Object installLock) {
+        mContext = context;
         mPackageManager = pm;
         mInstaller = installer;
         mInstallLock = installLock;
@@ -99,9 +106,37 @@ public class ArtManagerService extends android.content.pm.dex.IArtManager.Stub {
         LocalServices.addService(ArtManagerInternal.class, new ArtManagerInternalImpl());
     }
 
+    private boolean checkPermission(int callingUid, String callingPackage) {
+        // Callers always need this permission
+        mContext.enforceCallingOrSelfPermission(
+                android.Manifest.permission.READ_RUNTIME_PROFILES, TAG);
+
+        // Callers also need the ability to read usage statistics
+        switch (mContext.getSystemService(AppOpsManager.class)
+                .noteOp(AppOpsManager.OP_GET_USAGE_STATS, callingUid, callingPackage)) {
+            case AppOpsManager.MODE_ALLOWED:
+                return true;
+            case AppOpsManager.MODE_DEFAULT:
+                mContext.enforceCallingOrSelfPermission(
+                        android.Manifest.permission.PACKAGE_USAGE_STATS, TAG);
+                return true;
+            default:
+                return false;
+        }
+    }
+
     @Override
     public void snapshotRuntimeProfile(@ProfileType int profileType, @Nullable String packageName,
-            @Nullable String codePath, @NonNull ISnapshotRuntimeProfileCallback callback) {
+            @Nullable String codePath, @NonNull ISnapshotRuntimeProfileCallback callback,
+            String callingPackage) {
+        if (!checkPermission(Binder.getCallingUid(), callingPackage)) {
+            try {
+                callback.onError(ArtManager.SNAPSHOT_FAILED_INTERNAL_ERROR);
+            } catch (RemoteException ignored) {
+            }
+            return;
+        }
+
         // Sanity checks on the arguments.
         Preconditions.checkNotNull(callback);
 
@@ -111,9 +146,8 @@ public class ArtManagerService extends android.content.pm.dex.IArtManager.Stub {
             Preconditions.checkStringNotEmpty(packageName);
         }
 
-        // Verify that the caller has the right permissions and that the runtime profiling is
-        // enabled. The call to isRuntimePermissions will checkReadRuntimeProfilePermission.
-        if (!isRuntimeProfilingEnabled(profileType)) {
+        // Verify that runtime profiling is enabled.
+        if (!isRuntimeProfilingEnabled(profileType, callingPackage)) {
             throw new IllegalStateException("Runtime profiling is not enabled for " + profileType);
         }
 
@@ -231,9 +265,10 @@ public class ArtManagerService extends android.content.pm.dex.IArtManager.Stub {
     }
 
     @Override
-    public boolean isRuntimeProfilingEnabled(@ProfileType int profileType) {
-        // Verify that the caller has the right permissions.
-        checkReadRuntimeProfilePermission();
+    public boolean isRuntimeProfilingEnabled(@ProfileType int profileType, String callingPackage) {
+        if (!checkPermission(Binder.getCallingUid(), callingPackage)) {
+            return false;
+        }
 
         switch (profileType) {
             case ArtManager.PROFILE_APPS :
@@ -303,27 +338,6 @@ public class ArtManagerService extends android.content.pm.dex.IArtManager.Stub {
                 IoUtils.closeQuietly(fd);
             }
         });
-    }
-
-    /**
-     * Verify that the binder calling uid has {@code android.permission.READ_RUNTIME_PROFILE}.
-     * If not, it throws a {@link SecurityException}.
-     */
-    private void checkReadRuntimeProfilePermission() {
-        if (DEBUG_IGNORE_PERMISSIONS) {
-            return;
-        }
-        try {
-            int result = mPackageManager.checkUidPermission(
-                    Manifest.permission.READ_RUNTIME_PROFILES, Binder.getCallingUid());
-            if (result != PackageManager.PERMISSION_GRANTED) {
-                throw new SecurityException("You need "
-                        + Manifest.permission.READ_RUNTIME_PROFILES
-                        + " permission to snapshot profiles.");
-            }
-        } catch (RemoteException e) {
-            // Should not happen.
-        }
     }
 
     /**

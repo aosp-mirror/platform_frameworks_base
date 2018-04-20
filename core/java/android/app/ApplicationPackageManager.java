@@ -2831,7 +2831,7 @@ public class ApplicationPackageManager extends PackageManager {
         synchronized (mLock) {
             if (mArtManager == null) {
                 try {
-                    mArtManager = new ArtManager(mPM.getArtManager());
+                    mArtManager = new ArtManager(mContext, mPM.getArtManager());
                 } catch (RemoteException e) {
                     throw e.rethrowFromSystemServer();
                 }
