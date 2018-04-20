@@ -92,6 +92,8 @@ final class ApkSigningBlockUtils {
             throw new SecurityException("No digests provided");
         }
 
+        boolean neverVerified = true;
+
         Map<Integer, byte[]> expected1MbChunkDigests = new ArrayMap<>();
         if (expectedDigests.containsKey(CONTENT_DIGEST_CHUNKED_SHA256)) {
             expected1MbChunkDigests.put(CONTENT_DIGEST_CHUNKED_SHA256,
@@ -101,18 +103,23 @@ final class ApkSigningBlockUtils {
             expected1MbChunkDigests.put(CONTENT_DIGEST_CHUNKED_SHA512,
                     expectedDigests.get(CONTENT_DIGEST_CHUNKED_SHA512));
         }
+        if (!expected1MbChunkDigests.isEmpty()) {
+            try {
+                verifyIntegrityFor1MbChunkBasedAlgorithm(expected1MbChunkDigests, apk.getFD(),
+                        signatureInfo);
+                neverVerified = false;
+            } catch (IOException e) {
+                throw new SecurityException("Cannot get FD", e);
+            }
+        }
 
         if (expectedDigests.containsKey(CONTENT_DIGEST_VERITY_CHUNKED_SHA256)) {
             verifyIntegrityForVerityBasedAlgorithm(
                     expectedDigests.get(CONTENT_DIGEST_VERITY_CHUNKED_SHA256), apk, signatureInfo);
-        } else if (!expected1MbChunkDigests.isEmpty()) {
-            try {
-                verifyIntegrityFor1MbChunkBasedAlgorithm(expected1MbChunkDigests, apk.getFD(),
-                        signatureInfo);
-            } catch (IOException e) {
-                throw new SecurityException("Cannot get FD", e);
-            }
-        } else {
+            neverVerified = false;
+        }
+
+        if (neverVerified) {
             throw new SecurityException("No known digest exists for integrity check");
         }
     }
