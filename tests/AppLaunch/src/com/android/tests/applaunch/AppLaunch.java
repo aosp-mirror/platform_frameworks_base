@@ -98,7 +98,7 @@ public class AppLaunch extends InstrumentationTestCase {
     private static final String LAUNCH_FILE = "applaunch.txt";
     private static final String TRACE_SUB_DIRECTORY = "atrace_logs";
     private static final String DEFAULT_TRACE_CATEGORIES =
-            "sched,freq,gfx,view,dalvik,webview,input,wm,disk,am,wm";
+            "sched,freq,gfx,view,dalvik,webview,input,wm,disk,am,wm,binder_driver,hal";
     private static final String DEFAULT_TRACE_BUFFER_SIZE = "20000";
     private static final String DEFAULT_TRACE_DUMP_INTERVAL = "10";
     private static final String TRIAL_LAUNCH = "TRIAL_LAUNCH";
@@ -310,7 +310,8 @@ public class AppLaunch extends InstrumentationTestCase {
                     try {
                         atraceLogger.atraceStart(traceCategoriesSet, traceBufferSize,
                                 traceDumpInterval, rootTraceSubDir,
-                                String.format("%s-%s", launch.getApp(), launch.getLaunchReason()));
+                                String.format("%s-%s-%s", launch.getApp(),
+                                        launch.getCompilerFilter(), launch.getLaunchReason()));
                         startApp(launch.getApp(), launch.getLaunchReason());
                         sleep(POST_LAUNCH_IDLE_TIMEOUT);
                     } finally {
