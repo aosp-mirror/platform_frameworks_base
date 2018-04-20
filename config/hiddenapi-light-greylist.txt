@@ -2515,6 +2515,7 @@ Landroid/view/View;->isVisibleToUser(Landroid/graphics/Rect;)Z
 Landroid/view/View;->isVisibleToUser()Z
 Landroid/view/View$ListenerInfo;-><init>()V
 Landroid/view/View$ListenerInfo;->mOnClickListener:Landroid/view/View$OnClickListener;
+Landroid/view/View$ListenerInfo;->mOnDragListener:Landroid/view/View$OnDragListener;
 Landroid/view/View$ListenerInfo;->mOnFocusChangeListener:Landroid/view/View$OnFocusChangeListener;
 Landroid/view/View$ListenerInfo;->mOnLongClickListener:Landroid/view/View$OnLongClickListener;
 Landroid/view/View$ListenerInfo;->mOnTouchListener:Landroid/view/View$OnTouchListener;
