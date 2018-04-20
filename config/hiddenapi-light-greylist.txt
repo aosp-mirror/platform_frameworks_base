@@ -967,6 +967,8 @@ Landroid/hardware/Camera;->openLegacy(II)Landroid/hardware/Camera;
 Landroid/hardware/Camera;->postEventFromNative(Ljava/lang/Object;IIILjava/lang/Object;)V
 Landroid/hardware/display/WifiDisplayStatus;->mActiveDisplay:Landroid/hardware/display/WifiDisplay;
 Landroid/hardware/display/WifiDisplayStatus;->mDisplays:[Landroid/hardware/display/WifiDisplay;
+Landroid/hardware/fingerprint/Fingerprint;->getFingerId()I
+Landroid/hardware/fingerprint/Fingerprint;->getName()Ljava/lang/CharSequence;
 Landroid/hardware/fingerprint/IFingerprintService$Stub$Proxy;-><init>(Landroid/os/IBinder;)V
 Landroid/hardware/HardwareBuffer;-><init>(J)V
 Landroid/hardware/HardwareBuffer;->mNativeObject:J
@@ -2262,6 +2264,7 @@ Landroid/view/accessibility/AccessibilityManager;->sInstance:Landroid/view/acces
 Landroid/view/accessibility/AccessibilityManager;->sInstanceSync:Ljava/lang/Object;
 Landroid/view/accessibility/AccessibilityNodeInfo;->isSealed()Z
 Landroid/view/accessibility/AccessibilityNodeInfo;->mChildNodeIds:Landroid/util/LongArray;
+Landroid/view/accessibility/AccessibilityNodeInfo;->mSealed:Z
 Landroid/view/accessibility/AccessibilityNodeInfo;->refresh(Landroid/os/Bundle;Z)Z
 Landroid/view/accessibility/AccessibilityNodeInfo;->setSealed(Z)V
 Landroid/view/accessibility/AccessibilityRecord;->getSourceNodeId()J
