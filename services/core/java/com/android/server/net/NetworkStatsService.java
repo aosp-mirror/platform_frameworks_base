@@ -543,7 +543,8 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
         final int usedFlags = isRateLimitedForPoll(callingUid)
                 ? flags & (~NetworkStatsManager.FLAG_POLL_ON_OPEN)
                 : flags;
-        if ((usedFlags & NetworkStatsManager.FLAG_POLL_ON_OPEN) != 0) {
+        if ((usedFlags & (NetworkStatsManager.FLAG_POLL_ON_OPEN
+                | NetworkStatsManager.FLAG_POLL_FORCE)) != 0) {
             final long ident = Binder.clearCallingIdentity();
             try {
                 performPoll(FLAG_PERSIST_ALL);

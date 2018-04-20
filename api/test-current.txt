@@ -204,6 +204,10 @@ package android.app.backup {
 
 package android.app.usage {
 
+  public class NetworkStatsManager {
+    method public void setPollForce(boolean);
+  }
+
   public class StorageStatsManager {
     method public boolean isQuotaSupported(java.util.UUID);
     method public boolean isReservedSupported(java.util.UUID);
