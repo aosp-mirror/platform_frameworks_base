@@ -1222,7 +1222,7 @@ public class ExifInterface {
             TAG_F_NUMBER, TAG_DIGITAL_ZOOM_RATIO, TAG_EXPOSURE_TIME, TAG_SUBJECT_DISTANCE,
             TAG_GPS_TIMESTAMP));
     // Mappings from tag number to IFD type for pointer tags.
-    private static final HashMap sExifPointerTagMap = new HashMap();
+    private static final HashMap<Integer, Integer> sExifPointerTagMap = new HashMap();
 
     // See JPEG File Interchange Format Version 1.02.
     // The following values are defined for handling JPEG streams. In this implementation, we are
@@ -1299,6 +1299,7 @@ public class ExifInterface {
     private final boolean mIsInputStream;
     private int mMimeType;
     private final HashMap[] mAttributes = new HashMap[EXIF_TAGS.length];
+    private Set<Integer> mAttributesOffsets = new HashSet<>(EXIF_TAGS.length);
     private ByteOrder mExifByteOrder = ByteOrder.BIG_ENDIAN;
     private boolean mHasThumbnail;
     // The following values used for indicating a thumbnail position.
@@ -2957,8 +2958,9 @@ public class ExifInterface {
         }
         // See TIFF 6.0 Section 2: TIFF Structure, Figure 1.
         short numberOfDirectoryEntry = dataInputStream.readShort();
-        if (dataInputStream.mPosition + 12 * numberOfDirectoryEntry > dataInputStream.mLength) {
-            // Return if the size of entries is too big.
+        if (dataInputStream.mPosition + 12 * numberOfDirectoryEntry > dataInputStream.mLength
+                || numberOfDirectoryEntry <= 0) {
+            // Return if the size of entries is either too big or negative.
             return;
         }
 
@@ -3049,7 +3051,7 @@ public class ExifInterface {
             }
 
             // Recursively parse IFD when a IFD pointer tag appears.
-            Object nextIfdType = sExifPointerTagMap.get(tagNumber);
+            Integer nextIfdType = sExifPointerTagMap.get(tagNumber);
             if (DEBUG) {
                 Log.d(TAG, "nextIfdType: " + nextIfdType + " byteCount: " + byteCount);
             }
@@ -3083,9 +3085,20 @@ public class ExifInterface {
                 if (DEBUG) {
                     Log.d(TAG, String.format("Offset: %d, tagName: %s", offset, tag.name));
                 }
+
+                // Check if the next IFD offset
+                // 1. Exists within the boundaries of the input stream
+                // 2. Does not point to a previously read IFD.
                 if (offset > 0L && offset < dataInputStream.mLength) {
-                    dataInputStream.seek(offset);
-                    readImageFileDirectory(dataInputStream, (int) nextIfdType);
+                    if (!mAttributesOffsets.contains((int) offset)) {
+                        // Save offset of current IFD to prevent reading an IFD that is already read
+                        mAttributesOffsets.add(dataInputStream.mPosition);
+                        dataInputStream.seek(offset);
+                        readImageFileDirectory(dataInputStream, nextIfdType);
+                    } else {
+                        Log.w(TAG, "Skip jump into the IFD since it has already been read: "
+                                + "IfdType " + nextIfdType + " (at " + offset + ")");
+                    }
                 } else {
                     Log.w(TAG, "Skip jump into the IFD since its offset is invalid: " + offset);
                 }
@@ -3127,16 +3140,27 @@ public class ExifInterface {
             if (DEBUG) {
                 Log.d(TAG, String.format("nextIfdOffset: %d", nextIfdOffset));
             }
-            // The next IFD offset needs to be bigger than 8
-            // since the first IFD offset is at least 8.
-            if (nextIfdOffset > 8 && nextIfdOffset < dataInputStream.mLength) {
-                dataInputStream.seek(nextIfdOffset);
-                if (mAttributes[IFD_TYPE_THUMBNAIL].isEmpty()) {
+            // Check if the next IFD offset
+            // 1. Exists within the boundaries of the input stream
+            // 2. Does not point to a previously read IFD.
+            if (nextIfdOffset > 0L && nextIfdOffset < dataInputStream.mLength) {
+                if (!mAttributesOffsets.contains(nextIfdOffset)) {
+                    // Save offset of current IFD to prevent reading an IFD that is already read.
+                    mAttributesOffsets.add(dataInputStream.mPosition);
+                    dataInputStream.seek(nextIfdOffset);
                     // Do not overwrite thumbnail IFD data if it alreay exists.
-                    readImageFileDirectory(dataInputStream, IFD_TYPE_THUMBNAIL);
-                } else if (mAttributes[IFD_TYPE_PREVIEW].isEmpty()) {
-                    readImageFileDirectory(dataInputStream, IFD_TYPE_PREVIEW);
+                    if (mAttributes[IFD_TYPE_THUMBNAIL].isEmpty()) {
+                        readImageFileDirectory(dataInputStream, IFD_TYPE_THUMBNAIL);
+                    } else if (mAttributes[IFD_TYPE_PREVIEW].isEmpty()) {
+                        readImageFileDirectory(dataInputStream, IFD_TYPE_PREVIEW);
+                    }
+                } else {
+                    Log.w(TAG, "Stop reading file since re-reading an IFD may cause an "
+                            + "infinite loop: " + nextIfdOffset);
                 }
+            } else {
+                Log.w(TAG, "Stop reading file since a wrong offset may cause an infinite loop: "
+                        + nextIfdOffset);
             }
         }
     }
