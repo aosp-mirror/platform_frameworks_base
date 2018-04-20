@@ -81,9 +81,8 @@ public class RecentsAnimationController implements DeathRecipient {
     private final RecentsAnimationCallbacks mCallbacks;
     private final ArrayList<TaskAnimationAdapter> mPendingAnimations = new ArrayList<>();
     private final int mDisplayId;
-    private final Runnable mFailsafeRunnable = () -> {
-        cancelAnimation(REORDER_MOVE_TO_ORIGINAL_POSITION, "failSafeRunnable");
-    };
+    private final Runnable mFailsafeRunnable = () ->
+            cancelAnimation(REORDER_MOVE_TO_ORIGINAL_POSITION, "failSafeRunnable");
 
     // The recents component app token that is shown behind the visibile tasks
     private AppWindowToken mTargetAppToken;
@@ -110,7 +109,7 @@ public class RecentsAnimationController implements DeathRecipient {
     private boolean mLinkedToDeathOfRunner;
 
     public interface RecentsAnimationCallbacks {
-        void onAnimationFinished(@ReorderMode int reorderMode);
+        void onAnimationFinished(@ReorderMode int reorderMode, boolean runSychronously);
     }
 
     private final IRecentsAnimationController mController =
@@ -162,7 +161,8 @@ public class RecentsAnimationController implements DeathRecipient {
                 // prior to calling the callback
                 mCallbacks.onAnimationFinished(moveHomeToTop
                         ? REORDER_MOVE_TO_TOP
-                        : REORDER_MOVE_TO_ORIGINAL_POSITION);
+                        : REORDER_MOVE_TO_ORIGINAL_POSITION,
+                        true /* runSynchronously */);
             } finally {
                 Binder.restoreCallingIdentity(token);
             }
@@ -369,7 +369,17 @@ public class RecentsAnimationController implements DeathRecipient {
     }
 
     void cancelAnimation(@ReorderMode int reorderMode, String reason) {
-        if (DEBUG_RECENTS_ANIMATIONS) Slog.d(TAG, "cancelAnimation(): reason=" + reason);
+        cancelAnimation(reorderMode, false /* runSynchronously */, reason);
+    }
+
+    void cancelAnimationSynchronously(@ReorderMode int reorderMode, String reason) {
+        cancelAnimation(reorderMode, true /* runSynchronously */, reason);
+    }
+
+    private void cancelAnimation(@ReorderMode int reorderMode, boolean runSynchronously,
+            String reason) {
+        if (DEBUG_RECENTS_ANIMATIONS) Slog.d(TAG, "cancelAnimation(): reason=" + reason
+                + " runSynchronously=" + runSynchronously);
         synchronized (mService.getWindowManagerLock()) {
             if (mCanceled) {
                 // We've already canceled the animation
@@ -385,8 +395,7 @@ public class RecentsAnimationController implements DeathRecipient {
         }
 
         // Clean up and return to the previous app
-        // Don't hold the WM lock here as it calls back to AM/RecentsAnimation
-        mCallbacks.onAnimationFinished(reorderMode);
+        mCallbacks.onAnimationFinished(reorderMode, runSynchronously);
     }
 
     void cleanupAnimation(@ReorderMode int reorderMode) {
