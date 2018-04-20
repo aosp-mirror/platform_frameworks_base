@@ -377,6 +377,11 @@ public abstract class ActivityManagerInternal {
     public abstract boolean isRecentsComponentHomeActivity(int userId);
 
     /**
+     * Cancels any currently running recents animation.
+     */
+    public abstract void cancelRecentsAnimation(boolean restoreHomeStackPosition);
+
+    /**
      * Whether an UID is active or idle.
      */
     public abstract boolean isUidActive(int uid);
