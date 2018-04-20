@@ -17,6 +17,7 @@
 package com.android.server.net;
 
 import android.net.Network;
+import android.net.NetworkTemplate;
 import android.telephony.SubscriptionPlan;
 
 import java.util.Set;
@@ -57,6 +58,11 @@ public abstract class NetworkPolicyManagerInternal {
      * Return the active {@link SubscriptionPlan} for the given network.
      */
     public abstract SubscriptionPlan getSubscriptionPlan(Network network);
+
+    /**
+     * Return the active {@link SubscriptionPlan} for the given template.
+     */
+    public abstract SubscriptionPlan getSubscriptionPlan(NetworkTemplate template);
 
     public static final int QUOTA_TYPE_JOBS = 1;
     public static final int QUOTA_TYPE_MULTIPATH = 2;
