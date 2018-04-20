@@ -503,6 +503,22 @@ public final class TextLinks implements Parcelable {
      */
     public static class TextLinkSpan extends ClickableSpan {
 
+        /**
+         * How the clickspan is triggered.
+         * @hide
+         */
+        @Retention(RetentionPolicy.SOURCE)
+        @IntDef({INVOCATION_METHOD_UNSPECIFIED, INVOCATION_METHOD_TOUCH,
+                INVOCATION_METHOD_KEYBOARD})
+        public @interface InvocationMethod {}
+
+        /** @hide */
+        public static final int INVOCATION_METHOD_UNSPECIFIED = -1;
+        /** @hide */
+        public static final int INVOCATION_METHOD_TOUCH = 0;
+        /** @hide */
+        public static final int INVOCATION_METHOD_KEYBOARD = 1;
+
         private final TextLink mTextLink;
 
         public TextLinkSpan(@NonNull TextLink textLink) {
@@ -511,16 +527,24 @@ public final class TextLinks implements Parcelable {
 
         @Override
         public void onClick(View widget) {
+            onClick(widget, INVOCATION_METHOD_UNSPECIFIED);
+        }
+
+        /** @hide */
+        public final void onClick(View widget, @InvocationMethod int invocationMethod) {
             if (widget instanceof TextView) {
                 final TextView textView = (TextView) widget;
                 final Context context = textView.getContext();
                 if (TextClassificationManager.getSettings(context).isSmartLinkifyEnabled()) {
-                    if (textView.requestFocus()) {
-                        textView.requestActionMode(this);
-                    } else {
-                        // If textView can not take focus, then simply handle the click as it will
-                        // be difficult to get rid of the floating action mode.
-                        textView.handleClick(this);
+                    switch (invocationMethod) {
+                        case INVOCATION_METHOD_TOUCH:
+                            textView.requestActionMode(this);
+                            break;
+                        case INVOCATION_METHOD_KEYBOARD:// fall though
+                        case INVOCATION_METHOD_UNSPECIFIED:  // fall through
+                        default:
+                            textView.handleClick(this);
+                            break;
                     }
                 } else {
                     if (mTextLink.mUrlSpan != null) {
