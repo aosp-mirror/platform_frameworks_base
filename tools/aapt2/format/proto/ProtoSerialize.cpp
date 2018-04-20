@@ -452,10 +452,10 @@ class ValueSerializer : public ConstValueVisitor {
         pb_prim->set_float_value(*(float*)&val.data);
       } break;
       case android::Res_value::TYPE_DIMENSION: {
-        pb_prim->set_dimension_value(*(float*)&val.data);
+        pb_prim->set_dimension_value(val.data);
       } break;
       case android::Res_value::TYPE_FRACTION: {
-        pb_prim->set_fraction_value(*(float*)&val.data);
+        pb_prim->set_fraction_value(val.data);
       } break;
       case android::Res_value::TYPE_INT_DEC: {
         pb_prim->set_int_decimal_value(static_cast<int32_t>(val.data));
