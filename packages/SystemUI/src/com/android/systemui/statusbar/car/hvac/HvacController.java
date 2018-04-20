@@ -28,8 +28,10 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.util.Log;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
@@ -46,7 +48,7 @@ public class HvacController {
     private Handler mHandler;
     private Car mCar;
     private CarHvacManager mHvacManager;
-    private HashMap<HvacKey, TemperatureView> mTempComponents = new HashMap<>();
+    private HashMap<HvacKey, List<TemperatureView>> mTempComponents = new HashMap<>();
 
     public HvacController(Context context) {
         mContext = context;
@@ -114,18 +116,24 @@ public class HvacController {
      * @param temperatureView
      */
     public void addHvacTextView(TemperatureView temperatureView) {
-        mTempComponents.put(
-                new HvacKey(temperatureView.getPropertyId(), temperatureView.getAreaId()),
-                temperatureView);
+
+        HvacKey hvacKey = new HvacKey(temperatureView.getPropertyId(), temperatureView.getAreaId());
+        if (!mTempComponents.containsKey(hvacKey)) {
+            mTempComponents.put(hvacKey, new ArrayList<>());
+        }
+        mTempComponents.get(hvacKey).add(temperatureView);
         initComponent(temperatureView);
     }
 
     private void initComponents() {
-        Iterator<Map.Entry<HvacKey, TemperatureView>> iterator =
+        Iterator<Map.Entry<HvacKey, List<TemperatureView>>> iterator =
                 mTempComponents.entrySet().iterator();
         while (iterator.hasNext()) {
-            Map.Entry<HvacKey, TemperatureView> next = iterator.next();
-            initComponent(next.getValue());
+            Map.Entry<HvacKey, List<TemperatureView>> next = iterator.next();
+            List<TemperatureView> temperatureViews = next.getValue();
+            for (TemperatureView view : temperatureViews) {
+                initComponent(view);
+            }
         }
     }
 
@@ -155,11 +163,13 @@ public class HvacController {
             try {
                 int areaId = val.getAreaId();
                 int propertyId = val.getPropertyId();
-                TemperatureView temperatureView = mTempComponents.get(
+                List<TemperatureView> temperatureViews = mTempComponents.get(
                         new HvacKey(propertyId, areaId));
-                if (temperatureView != null) {
+                if (temperatureViews != null && !temperatureViews.isEmpty()) {
                     float value = (float) val.getValue();
-                    temperatureView.setTemp(value);
+                    for (TemperatureView tempView : temperatureViews) {
+                        tempView.setTemp(value);
+                    }
                 } // else the data is not of interest
             } catch (Exception e) {
                 // catch all so we don't take down the sysui if a new data type is
