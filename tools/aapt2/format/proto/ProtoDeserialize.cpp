@@ -780,13 +780,11 @@ std::unique_ptr<Item> DeserializeItemFromPb(const pb::Item& pb_item,
         } break;
         case pb::Primitive::kDimensionValue: {
           val.dataType = android::Res_value::TYPE_DIMENSION;
-          float dimen_val = pb_prim.dimension_value();
-          val.data = *(uint32_t*)&dimen_val;
+          val.data  = pb_prim.dimension_value();
         } break;
         case pb::Primitive::kFractionValue: {
           val.dataType = android::Res_value::TYPE_FRACTION;
-          float fraction_val = pb_prim.fraction_value();
-          val.data = *(uint32_t*)&fraction_val;
+          val.data  = pb_prim.fraction_value();
         } break;
         case pb::Primitive::kIntDecimalValue: {
           val.dataType = android::Res_value::TYPE_INT_DEC;
@@ -815,6 +813,16 @@ std::unique_ptr<Item> DeserializeItemFromPb(const pb::Item& pb_item,
         case pb::Primitive::kColorRgb4Value: {
           val.dataType = android::Res_value::TYPE_INT_COLOR_RGB4;
           val.data = pb_prim.color_rgb4_value();
+        } break;
+        case pb::Primitive::kDimensionValueDeprecated: {  // DEPRECATED
+          val.dataType = android::Res_value::TYPE_DIMENSION;
+          float dimen_val = pb_prim.dimension_value_deprecated();
+          val.data = *(uint32_t*)&dimen_val;
+        } break;
+        case pb::Primitive::kFractionValueDeprecated: {  // DEPRECATED
+          val.dataType = android::Res_value::TYPE_FRACTION;
+          float fraction_val = pb_prim.fraction_value_deprecated();
+          val.data = *(uint32_t*)&fraction_val;
         } break;
         default: {
           LOG(FATAL) << "Unexpected Primitive type: "
