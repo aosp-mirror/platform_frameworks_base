@@ -269,13 +269,6 @@ public class KeyButtonView extends ImageView implements ButtonInterface {
                 }
                 if (mCode != 0) {
                     if (doIt) {
-                        // If there was a pending remote recents animation, then we need to
-                        // cancel the animation now before we handle the button itself. In the case
-                        // where we are going home and the recents animation has already started,
-                        // just cancel the recents animation, leaving the home stack in place
-                        boolean isHomeKey = mCode == KEYCODE_HOME;
-                        ActivityManagerWrapper.getInstance().cancelRecentsAnimation(!isHomeKey);
-
                         sendEvent(KeyEvent.ACTION_UP, 0);
                         sendAccessibilityEvent(AccessibilityEvent.TYPE_VIEW_CLICKED);
                     } else {
