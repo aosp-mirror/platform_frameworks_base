@@ -6921,6 +6921,7 @@ public class Intent implements Parcelable, Cloneable {
                 "<INTENT> specifications include these flags and arguments:",
                 "    [-a <ACTION>] [-d <DATA_URI>] [-t <MIME_TYPE>]",
                 "    [-c <CATEGORY> [-c <CATEGORY>] ...]",
+                "    [-n <COMPONENT_NAME>]",
                 "    [-e|--es <EXTRA_KEY> <EXTRA_STRING_VALUE> ...]",
                 "    [--esn <EXTRA_KEY> ...]",
                 "    [--ez <EXTRA_KEY> <EXTRA_BOOLEAN_VALUE> ...]",
