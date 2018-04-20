@@ -20,7 +20,9 @@ import android.content.Context;
 import android.content.pm.UserInfo;
 import android.content.res.ColorStateList;
 import android.content.res.Resources;
+import android.graphics.Bitmap;
 import android.os.AsyncTask;
+import android.os.UserHandle;
 import android.support.v7.widget.RecyclerView;
 import android.util.AttributeSet;
 import android.view.LayoutInflater;
@@ -31,6 +33,7 @@ import android.widget.TextView;
 
 import androidx.car.widget.PagedListView;
 
+import com.android.internal.util.UserIcons;
 import com.android.settingslib.users.UserManagerHelper;
 import com.android.systemui.R;
 
@@ -180,13 +183,7 @@ public class UserGridRecyclerView extends PagedListView implements
         @Override
         public void onBindViewHolder(UserAdapterViewHolder holder, int position) {
             UserRecord userRecord = mUsers.get(position);
-            if (!userRecord.mIsAddUser) {
-                holder.mUserAvatarImageView.setImageBitmap(mUserManagerHelper
-                        .getUserIcon(userRecord.mInfo));
-            } else {
-                holder.mUserAvatarImageView.setImageDrawable(mContext
-                        .getDrawable(R.drawable.car_add_circle_round));
-            }
+            holder.mUserAvatarImageView.setImageBitmap(getUserRecordIcon(userRecord));
             holder.mUserNameTextView.setText(userRecord.mInfo.name);
             holder.mView.setOnClickListener(v -> {
                 if (userRecord == null) {
@@ -217,6 +214,20 @@ public class UserGridRecyclerView extends PagedListView implements
                 mUserManagerHelper.switchToUser(userRecord.mInfo);
             });
 
+        }
+
+        private Bitmap getUserRecordIcon(UserRecord userRecord) {
+            if (userRecord.mIsStartGuestSession) {
+                return UserIcons.convertToBitmap(UserIcons.getDefaultUserIcon(
+                                mContext.getResources(), UserHandle.USER_NULL, false));
+            }
+
+            if (userRecord.mIsAddUser) {
+                return UserIcons.convertToBitmap(mContext
+                        .getDrawable(R.drawable.car_add_circle_round));
+            }
+
+            return mUserManagerHelper.getUserIcon(userRecord.mInfo);
         }
 
         private class AddNewUserTask extends AsyncTask<String, Void, UserInfo> {
