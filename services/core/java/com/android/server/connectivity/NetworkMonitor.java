@@ -822,9 +822,9 @@ public class NetworkMonitor extends StateMachine {
         private void resolveStrictModeHostname() {
             try {
                 // Do a blocking DNS resolution using the network-assigned nameservers.
-                mPrivateDnsConfig = new PrivateDnsConfig(
-                        mPrivateDnsProviderHostname,
-                        mNetwork.getAllByName(mPrivateDnsProviderHostname));
+                final InetAddress[] ips = ResolvUtil.blockingResolveAllLocally(
+                        mNetwork, mPrivateDnsProviderHostname);
+                mPrivateDnsConfig = new PrivateDnsConfig(mPrivateDnsProviderHostname, ips);
             } catch (UnknownHostException uhe) {
                 mPrivateDnsConfig = null;
             }
