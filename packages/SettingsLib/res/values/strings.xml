@@ -902,16 +902,18 @@
     <!-- Summary shown for color space correction preference when its value is overridden by another preference [CHAR LIMIT=35] -->
     <string name="daltonizer_type_overridden">Overridden by <xliff:g id="title" example="Simulate color space">%1$s</xliff:g></string>
 
+    <!-- [CHAR_LIMIT=NONE] Label for battery on main page of settings -->
+    <string name="power_remaining_settings_home_page"><xliff:g id="percentage" example="10%">%1$s</xliff:g> - <xliff:g id="time_string" example="1 hour left based on your usage">%2$s</xliff:g></string>
     <!-- [CHAR_LIMIT=40] Label for estimated remaining duration of battery discharging -->
-    <string name="power_remaining_duration_only">About <xliff:g id="time">%1$s</xliff:g> left</string>
+    <string name="power_remaining_duration_only">About <xliff:g id="time_remaining">%1$s</xliff:g> left</string>
     <!-- [CHAR_LIMIT=40] Label for battery level chart when discharging with duration -->
-    <string name="power_discharging_duration">About <xliff:g id="time">%1$s</xliff:g> left (<xliff:g id="level">%2$s</xliff:g>)</string>
+    <string name="power_discharging_duration">About <xliff:g id="time_remaining">%1$s</xliff:g> left (<xliff:g id="level">%2$s</xliff:g>)</string>
     <!-- [CHAR_LIMIT=60] Label for estimated remaining duration of battery discharging -->
-    <string name="power_remaining_duration_only_enhanced">About <xliff:g id="time">%1$s</xliff:g> left based on your usage</string>
+    <string name="power_remaining_duration_only_enhanced">About <xliff:g id="time_remaining">%1$s</xliff:g> left based on your usage</string>
     <!-- [CHAR_LIMIT=60] Label for battery level chart when discharging with duration and using enhanced estimate -->
-    <string name="power_discharging_duration_enhanced">About <xliff:g id="time">%1$s</xliff:g> left based on your usage (<xliff:g id="level">%2$s</xliff:g>)</string>
+    <string name="power_discharging_duration_enhanced">About <xliff:g id="time_remaining">%1$s</xliff:g> left based on your usage (<xliff:g id="level">%2$s</xliff:g>)</string>
     <!-- [CHAR_LIMIT=40] Short label for estimated remaining duration of battery charging/discharging -->
-    <string name="power_remaining_duration_only_short"><xliff:g id="time">%1$s</xliff:g> left</string>
+    <string name="power_remaining_duration_only_short"><xliff:g id="time_remaining">%1$s</xliff:g> left</string>
 
     <!-- [CHAR_LIMIT=100] Label for enhanced estimated time that phone will run out of battery -->
     <string name="power_discharge_by_enhanced">Should last until about <xliff:g id="time">%1$s</xliff:g> based on your usage (<xliff:g id="level">%2$s</xliff:g>)</string>
