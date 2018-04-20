@@ -2405,6 +2405,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         @Override
         public void binderDied() {
             try {
+                boolean resetSplitScreenResizing = false;
                 synchronized(mService.mWindowMap) {
                     final WindowState win = mService.windowForClientLocked(mSession, mClient, false);
                     Slog.i(TAG, "WIN DEATH: " + win);
@@ -2424,11 +2425,21 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
                             if (stack != null) {
                                 stack.resetDockedStackToMiddle();
                             }
-                            mService.setDockedStackResizing(false);
+                            resetSplitScreenResizing = true;
                         }
                     } else if (mHasSurface) {
                         Slog.e(TAG, "!!! LEAK !!! Window removed but surface still valid.");
                         WindowState.this.removeIfPossible();
+                    }
+                }
+                if (resetSplitScreenResizing) {
+                    try {
+                        // Note: this calls into ActivityManager, so we must *not* hold the window
+                        // manager lock while calling this.
+                        mService.mActivityManager.setSplitScreenResizing(false);
+                    } catch (RemoteException e) {
+                        // Local call, shouldn't return RemoteException.
+                        throw e.rethrowAsRuntimeException();
                     }
                 }
             } catch (IllegalArgumentException ex) {

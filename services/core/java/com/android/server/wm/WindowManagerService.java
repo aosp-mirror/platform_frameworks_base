@@ -6864,7 +6864,6 @@ public class WindowManagerService extends IWindowManager.Stub
         }
     }
 
-    @Override
     public void setDockedStackResizing(boolean resizing) {
         synchronized (mWindowMap) {
             getDefaultDisplayContentLocked().getDockedDividerController().setResizing(resizing);
