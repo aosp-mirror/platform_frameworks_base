@@ -321,14 +321,6 @@ package android.net {
   public static abstract class NetworkBadging.Badging implements java.lang.annotation.Annotation {
   }
 
-  public class NetworkRequest implements android.os.Parcelable {
-    method public boolean hasUnwantedCapability(int);
-  }
-
-  public static class NetworkRequest.Builder {
-    method public android.net.NetworkRequest.Builder addUnwantedCapability(int);
-  }
-
   public class SSLCertificateSocketFactory extends javax.net.ssl.SSLSocketFactory {
     method public static deprecated org.apache.http.conn.ssl.SSLSocketFactory getHttpSocketFactory(int, android.net.SSLSessionCache);
   }
