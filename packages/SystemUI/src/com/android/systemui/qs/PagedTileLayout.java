@@ -56,6 +56,7 @@ public class PagedTileLayout extends ViewPager implements QSTileLayout {
 
     private AnimatorSet mBounceAnimatorSet;
     private int mAnimatingToPage = -1;
+    private float mLastExpansion;
 
     public PagedTileLayout(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -172,8 +173,19 @@ public class PagedTileLayout extends ViewPager implements QSTileLayout {
 
     @Override
     public void setExpansion(float expansion) {
-        for (TileRecord tr : mTiles) {
-            tr.tileView.setExpansion(expansion);
+        mLastExpansion = expansion;
+        updateSelected();
+    }
+
+    private void updateSelected() {
+        // Start the marquee when fully expanded and stop when fully collapsed. Leave as is for
+        // other expansion ratios since there is no way way to pause the marquee.
+        if (mLastExpansion > 0f && mLastExpansion < 1f) {
+            return;
+        }
+        boolean selected = mLastExpansion == 1f;
+        for (int i = 0; i < mPages.size(); i++) {
+            mPages.get(i).setSelected(i == getCurrentItem() ? selected : false);
         }
     }
 
@@ -323,6 +335,7 @@ public class PagedTileLayout extends ViewPager implements QSTileLayout {
             new ViewPager.SimpleOnPageChangeListener() {
                 @Override
                 public void onPageSelected(int position) {
+                    updateSelected();
                     if (mPageIndicator == null) return;
                     if (mPageListener != null) {
                         mPageListener.onPageChanged(isLayoutRtl() ? position == mPages.size() - 1

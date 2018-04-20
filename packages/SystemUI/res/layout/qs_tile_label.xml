@@ -76,7 +76,7 @@
         android:layout_below="@id/label_group"
         android:clickable="false"
         android:ellipsize="marquee"
-        android:maxLines="1"
+        android:singleLine="true"
         android:padding="0dp"
         android:visibility="gone"
         android:gravity="center"
