@@ -2232,7 +2232,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
                         }
                         if (service != null) {
                             mFingerprintGestureDispatcher = new FingerprintGestureDispatcher(
-                                    service, mLock);
+                                    service, mContext.getResources(), mLock);
                             break;
                         }
                     }

@@ -2404,6 +2404,7 @@
 
   <!-- Fingerprint config -->
   <java-symbol type="integer" name="config_fingerprintMaxTemplatesPerUser"/>
+  <java-symbol type="bool" name="config_fingerprintSupportsGestures"/>
 
   <!-- From various Material changes -->
   <java-symbol type="attr" name="titleTextAppearance" />
