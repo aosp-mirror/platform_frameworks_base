@@ -72,7 +72,7 @@ sp<DeferredLayerUpdater> TestUtils::createTextureLayerUpdater(
     layerUpdater->setTransform(&transform);
 
     // updateLayer so it's ready to draw
-    layerUpdater->updateLayer(true, Matrix4::identity().data);
+    layerUpdater->updateLayer(true, Matrix4::identity().data, HAL_DATASPACE_UNKNOWN);
     if (layerUpdater->backingLayer()->getApi() == Layer::Api::OpenGL) {
         static_cast<GlLayer*>(layerUpdater->backingLayer())
                 ->setRenderTarget(GL_TEXTURE_EXTERNAL_OES);
