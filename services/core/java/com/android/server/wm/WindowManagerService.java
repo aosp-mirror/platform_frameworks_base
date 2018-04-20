@@ -2677,15 +2677,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
     @Override
     public void endProlongedAnimations() {
-        synchronized (mWindowMap) {
-            for (final WindowState win : mWindowMap.values()) {
-                final AppWindowToken appToken = win.mAppToken;
-                if (appToken != null) {
-                    appToken.endDelayingAnimationStart();
-                }
-            }
-            mAppTransition.notifyProlongedAnimationsEnded();
-        }
+        // TODO: Remove once clients are updated.
     }
 
     @Override
