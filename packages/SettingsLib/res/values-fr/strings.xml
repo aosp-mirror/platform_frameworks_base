@@ -259,7 +259,7 @@
     <string name="verify_apps_over_usb_title" msgid="4177086489869041953">"Vérifier les applis via USB"</string>
     <string name="verify_apps_over_usb_summary" msgid="9164096969924529200">"Vérifiez que les applications installées par ADB/ADT ne présentent pas de comportement dangereux."</string>
     <string name="bluetooth_show_devices_without_names_summary" msgid="2351196058115755520">"Les appareils Bluetooth seront affichés sans nom (adresse MAC uniquement)"</string>
-    <string name="bluetooth_disable_absolute_volume_summary" msgid="6031284410786545957">"Désactive la fonctionnalité de volume absolu du Bluetooth en cas de problème de volume sur les appareils à distance, par exemple si le volume est trop élevé ou s\'il ne peut pas être contrôlé."</string>
+    <string name="bluetooth_disable_absolute_volume_summary" msgid="6031284410786545957">"Désactive la fonctionnalité de volume absolu du Bluetooth en cas de problème de volume sur les appareils à distance, par exemple si le volume est trop élevé ou s\'il ne peut pas être contrôlé"</string>
     <string name="enable_terminal_title" msgid="95572094356054120">"Terminal local"</string>
     <string name="enable_terminal_summary" msgid="67667852659359206">"Activer l\'application Terminal permettant l\'accès au shell local"</string>
     <string name="hdcp_checking_title" msgid="8605478913544273282">"Vérification HDCP"</string>
@@ -319,11 +319,11 @@
     <string name="show_notification_channel_warnings" msgid="1399948193466922683">"Voir avertissements liés aux canaux notification"</string>
     <string name="show_notification_channel_warnings_summary" msgid="5536803251863694895">"Affiche avertissement lorsqu\'une application publie notification sans canal valide"</string>
     <string name="force_allow_on_external" msgid="3215759785081916381">"Forcer disponibilité stockage externe pour applis"</string>
-    <string name="force_allow_on_external_summary" msgid="3640752408258034689">"Rend possible l\'enregistrement de toute application sur un espace de stockage externe, indépendamment des valeurs du fichier manifeste."</string>
+    <string name="force_allow_on_external_summary" msgid="3640752408258034689">"Rend possible l\'enregistrement de toute application sur un espace de stockage externe, indépendamment des valeurs du fichier manifeste"</string>
     <string name="force_resizable_activities" msgid="8615764378147824985">"Forcer possibilité de redimensionner les activités"</string>
-    <string name="force_resizable_activities_summary" msgid="6667493494706124459">"Permettre de redimensionner toutes les activités pour le mode multifenêtre, indépendamment des valeurs du fichier manifeste."</string>
+    <string name="force_resizable_activities_summary" msgid="6667493494706124459">"Permettre de redimensionner toutes les activités pour le mode multifenêtre, indépendamment des valeurs du fichier manifeste"</string>
     <string name="enable_freeform_support" msgid="1461893351278940416">"Activer les fenêtres de forme libre"</string>
-    <string name="enable_freeform_support_summary" msgid="8247310463288834487">"Activer la compatibilité avec les fenêtres de forme libre expérimentales."</string>
+    <string name="enable_freeform_support_summary" msgid="8247310463288834487">"Activer la compatibilité avec les fenêtres de forme libre expérimentales"</string>
     <string name="local_backup_password_title" msgid="3860471654439418822">"Mot de passe sauvegarde PC"</string>
     <string name="local_backup_password_summary_none" msgid="6951095485537767956">"Les sauvegardes complètes sur PC ne sont pas protégées actuellement."</string>
     <string name="local_backup_password_summary_change" msgid="5376206246809190364">"Appuyez pour modifier ou supprimer le mot de passe de sauvegarde complète sur PC."</string>

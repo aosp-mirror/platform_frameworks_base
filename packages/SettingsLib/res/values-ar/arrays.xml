@@ -22,7 +22,7 @@
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
   <string-array name="wifi_status">
     <item msgid="1922181315419294640"></item>
-    <item msgid="8934131797783724664">"جارٍ الفحص..."</item>
+    <item msgid="8934131797783724664">"البحث عن الشبكات..."</item>
     <item msgid="8513729475867537913">"جارٍ الاتصال…"</item>
     <item msgid="515055375277271756">"جارٍ المصادقة…"</item>
     <item msgid="1943354004029184381">"‏جارٍ الحصول على عنوان IP…"</item>
@@ -36,7 +36,7 @@
   </string-array>
   <string-array name="wifi_status_with_ssid">
     <item msgid="7714855332363650812"></item>
-    <item msgid="8878186979715711006">"جارٍ الفحص..."</item>
+    <item msgid="8878186979715711006">"البحث عن الشبكات..."</item>
     <item msgid="355508996603873860">"جارٍ الاتصال بجهاز <xliff:g id="NETWORK_NAME">%1$s</xliff:g>…"</item>
     <item msgid="554971459996405634">"جارٍ المصادقة مع <xliff:g id="NETWORK_NAME">%1$s</xliff:g>…"</item>
     <item msgid="7928343808033020343">"‏جارٍ الحصول على عنوان IP من <xliff:g id="NETWORK_NAME">%1$s</xliff:g>…"</item>
@@ -71,7 +71,7 @@
     <item msgid="3422726142222090896">"avrcp16"</item>
   </string-array>
   <string-array name="bluetooth_a2dp_codec_titles">
-    <item msgid="7065842274271279580">"استخدام اختيار النظام (افتراضي)"</item>
+    <item msgid="7065842274271279580">"استخدام اختيار النظام (تلقائي)"</item>
     <item msgid="7539690996561263909">"SBC"</item>
     <item msgid="686685526567131661">"AAC"</item>
     <item msgid="5254942598247222737">"صوت <xliff:g id="QUALCOMM">Qualcomm®</xliff:g> <xliff:g id="APTX">aptX™</xliff:g>"</item>
@@ -81,7 +81,7 @@
     <item msgid="3304843301758635896">"تعطيل برامج الترميز الاختيارية"</item>
   </string-array>
   <string-array name="bluetooth_a2dp_codec_summaries">
-    <item msgid="5062108632402595000">"استخدام اختيار النظام (افتراضي)"</item>
+    <item msgid="5062108632402595000">"استخدام اختيار النظام (تلقائي)"</item>
     <item msgid="6898329690939802290">"SBC"</item>
     <item msgid="6839647709301342559">"AAC"</item>
     <item msgid="7848030269621918608">"صوت <xliff:g id="QUALCOMM">Qualcomm®</xliff:g> <xliff:g id="APTX">aptX™</xliff:g>"</item>
@@ -91,38 +91,38 @@
     <item msgid="741805482892725657">"تعطيل برامج الترميز الاختيارية"</item>
   </string-array>
   <string-array name="bluetooth_a2dp_codec_sample_rate_titles">
-    <item msgid="3093023430402746802">"استخدام اختيار النظام (افتراضي)"</item>
+    <item msgid="3093023430402746802">"استخدام اختيار النظام (تلقائي)"</item>
     <item msgid="8895532488906185219">"44.1 كيلو هرتز"</item>
     <item msgid="2909915718994807056">"48.0 كيلو هرتز"</item>
     <item msgid="3347287377354164611">"88.2 كيلو هرتز"</item>
     <item msgid="1234212100239985373">"96.0 كيلو هرتز"</item>
   </string-array>
   <string-array name="bluetooth_a2dp_codec_sample_rate_summaries">
-    <item msgid="3214516120190965356">"استخدام اختيار النظام (افتراضي)"</item>
+    <item msgid="3214516120190965356">"استخدام اختيار النظام (تلقائي)"</item>
     <item msgid="4482862757811638365">"44.1 كيلو هرتز"</item>
     <item msgid="354495328188724404">"48.0 كيلو هرتز"</item>
     <item msgid="7329816882213695083">"88.2 كيلو هرتز"</item>
     <item msgid="6967397666254430476">"96.0 كيلو هرتز"</item>
   </string-array>
   <string-array name="bluetooth_a2dp_codec_bits_per_sample_titles">
-    <item msgid="2684127272582591429">"استخدام اختيار النظام (افتراضي)"</item>
+    <item msgid="2684127272582591429">"استخدام اختيار النظام (تلقائي)"</item>
     <item msgid="5618929009984956469">"16 بت لكل عيّنة"</item>
     <item msgid="3412640499234627248">"24 بت لكل عيّنة"</item>
     <item msgid="121583001492929387">"32 بت لكل عيّنة"</item>
   </string-array>
   <string-array name="bluetooth_a2dp_codec_bits_per_sample_summaries">
-    <item msgid="1081159789834584363">"استخدام اختيار النظام (افتراضي)"</item>
+    <item msgid="1081159789834584363">"استخدام اختيار النظام (تلقائي)"</item>
     <item msgid="4726688794884191540">"16 بت لكل عيّنة"</item>
     <item msgid="305344756485516870">"24 بت لكل عيّنة"</item>
     <item msgid="244568657919675099">"32 بت لكل عيّنة"</item>
   </string-array>
   <string-array name="bluetooth_a2dp_codec_channel_mode_titles">
-    <item msgid="5226878858503393706">"استخدام اختيار النظام (افتراضي)"</item>
+    <item msgid="5226878858503393706">"استخدام اختيار النظام (تلقائي)"</item>
     <item msgid="4106832974775067314">"أحادي"</item>
     <item msgid="5571632958424639155">"استريو"</item>
   </string-array>
   <string-array name="bluetooth_a2dp_codec_channel_mode_summaries">
-    <item msgid="4118561796005528173">"استخدام اختيار النظام (افتراضي)"</item>
+    <item msgid="4118561796005528173">"استخدام اختيار النظام (التلقائي)"</item>
     <item msgid="8900559293912978337">"أحادي"</item>
     <item msgid="8883739882299884241">"استريو"</item>
   </string-array>
@@ -200,7 +200,7 @@
     <item msgid="1069584980746680398">"‏حجم الرسوم المتحركة 10x"</item>
   </string-array>
   <string-array name="overlay_display_devices_entries">
-    <item msgid="1606809880904982133">"لا شيء"</item>
+    <item msgid="1606809880904982133">"بدون"</item>
     <item msgid="9033194758688161545">"480 بكسل"</item>
     <item msgid="1025306206556583600">"480 بكسل (العرض آمن)"</item>
     <item msgid="1853913333042744661">"720 بكسل"</item>
@@ -214,7 +214,7 @@
     <item msgid="1311305077526792901">"720 بكسل، 1080 بكسل (شاشة مزدوجة)"</item>
   </string-array>
   <string-array name="enable_opengl_traces_entries">
-    <item msgid="3191973083884253830">"لا شيء"</item>
+    <item msgid="3191973083884253830">"بدون"</item>
     <item msgid="9089630089455370183">"Logcat"</item>
     <item msgid="5397807424362304288">"‏Systrace (رسومات)"</item>
     <item msgid="1340692776955662664">"‏تكدس الاستدعاءات في دالة glGetError"</item>

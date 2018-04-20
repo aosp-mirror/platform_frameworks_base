@@ -34,7 +34,7 @@
     <string name="wifi_not_in_range" msgid="1136191511238508967">"Niet binnen bereik"</string>
     <string name="wifi_no_internet_no_reconnect" msgid="5724903347310541706">"Er wordt niet automatisch verbinding gemaakt"</string>
     <string name="wifi_no_internet" msgid="4663834955626848401">"Geen internettoegang"</string>
-    <string name="saved_network" msgid="4352716707126620811">"Opgeslagen door <xliff:g id="NAME">%1$s</xliff:g>"</string>
+    <string name="saved_network" msgid="4352716707126620811">"Opgeslagen door \'<xliff:g id="NAME">%1$s</xliff:g>\'"</string>
     <string name="connected_via_network_scorer" msgid="5713793306870815341">"Automatisch verbonden via %1$s"</string>
     <string name="connected_via_network_scorer_default" msgid="7867260222020343104">"Automatisch verbonden via provider van netwerkbeoordelingen"</string>
     <string name="connected_via_passpoint" msgid="2826205693803088747">"Verbonden via %1$s"</string>
@@ -249,7 +249,7 @@
     <string name="allow_mock_location" msgid="2787962564578664888">"Neplocaties toestaan"</string>
     <string name="allow_mock_location_summary" msgid="317615105156345626">"Neplocaties toestaan"</string>
     <string name="debug_view_attributes" msgid="6485448367803310384">"Inspectie van weergavekenmerk inschakelen"</string>
-    <string name="mobile_data_always_on_summary" msgid="8149773901431697910">"mobiele data altijd actief houden, ook als wifi actief is (voor sneller schakelen tussen netwerken)."</string>
+    <string name="mobile_data_always_on_summary" msgid="8149773901431697910">"Mobiele data altijd actief houden, ook als wifi actief is (voor sneller schakelen tussen netwerken)."</string>
     <string name="tethering_hardware_offload_summary" msgid="7726082075333346982">"Hardwareversnelling voor tethering gebruiken indien beschikbaar"</string>
     <string name="adb_warning_title" msgid="6234463310896563253">"USB-foutopsporing toestaan?"</string>
     <string name="adb_warning_message" msgid="7316799925425402244">"USB-foutopsporing is alleen bedoeld voor ontwikkeldoeleinden. Het kan worden gebruikt om gegevens te kopiëren tussen je computer en je apparaat, apps zonder melding op je apparaat te installeren en loggegevens te lezen."</string>
@@ -315,7 +315,7 @@
     <string name="immediately_destroy_activities_summary" msgid="3592221124808773368">"Activiteit wissen zodra de gebruiker deze verlaat"</string>
     <string name="app_process_limit_title" msgid="4280600650253107163">"Achtergrondproceslimiet"</string>
     <string name="show_all_anrs" msgid="4924885492787069007">"ANR\'s op de achtergrond"</string>
-    <string name="show_all_anrs_summary" msgid="6636514318275139826">"Dialoogvenster \'App reageert niet\' weergeven voor apps op de achtergrond"</string>
+    <string name="show_all_anrs_summary" msgid="6636514318275139826">"Dialoogvenster \'App reageert niet\' weergeven voor achtergrond-apps"</string>
     <string name="show_notification_channel_warnings" msgid="1399948193466922683">"Kanaalwaarschuwingen voor meldingen weergeven"</string>
     <string name="show_notification_channel_warnings_summary" msgid="5536803251863694895">"Geeft een waarschuwing op het scherm weer wanneer een app een melding post zonder geldig kanaal"</string>
     <string name="force_allow_on_external" msgid="3215759785081916381">"Toestaan van apps op externe opslag afdwingen"</string>

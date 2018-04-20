@@ -182,8 +182,8 @@
     <string name="choose_profile" msgid="6921016979430278661">"Izaberite profil"</string>
     <string name="category_personal" msgid="1299663247844969448">"Lično"</string>
     <string name="category_work" msgid="8699184680584175622">"Posao"</string>
-    <string name="development_settings_title" msgid="215179176067683667">"Opcije za programera"</string>
-    <string name="development_settings_enable" msgid="542530994778109538">"Omogući opcije za programera"</string>
+    <string name="development_settings_title" msgid="215179176067683667">"Opcije za programere"</string>
+    <string name="development_settings_enable" msgid="542530994778109538">"Omogući opcije za programere"</string>
     <string name="development_settings_summary" msgid="1815795401632854041">"Podešavanje opcija za programiranje aplikacije"</string>
     <string name="development_settings_not_available" msgid="4308569041701535607">"Opcije za programere nisu dostupne za ovog korisnika"</string>
     <string name="vpn_settings_not_available" msgid="956841430176985598">"Podešavanja VPN-a nisu dostupna za ovog korisnika"</string>
@@ -290,12 +290,12 @@
     <string name="show_hw_layers_updates" msgid="5645728765605699821">"Prikaži ažuriranja hardverskih slojeva"</string>
     <string name="show_hw_layers_updates_summary" msgid="5296917233236661465">"Hardverski slojevi trepere zeleno kada se ažuriraju"</string>
     <string name="debug_hw_overdraw" msgid="2968692419951565417">"Otkloni greške GPU preklapanja"</string>
-    <string name="disable_overlays" msgid="2074488440505934665">"Onemog. HW post. elemente"</string>
+    <string name="disable_overlays" msgid="2074488440505934665">"Onemogući HW postavljene elemente"</string>
     <string name="disable_overlays_summary" msgid="3578941133710758592">"Uvek koristi GPU za komponovanje ekrana"</string>
     <string name="simulate_color_space" msgid="6745847141353345872">"Simuliraj prostor boje"</string>
     <string name="enable_opengl_traces_title" msgid="6790444011053219871">"Omogući OpenGL tragove"</string>
     <string name="usb_audio_disable_routing" msgid="8114498436003102671">"Onemogući USB preusm. zvuka"</string>
-    <string name="usb_audio_disable_routing_summary" msgid="980282760277312264">"Onemogući automat. preusmer. na USB audio periferne uređaje"</string>
+    <string name="usb_audio_disable_routing_summary" msgid="980282760277312264">"Onemogući aut. preusm. na USB audio periferne uređaje"</string>
     <string name="debug_layout" msgid="5981361776594526155">"Prikaži granice rasporeda"</string>
     <string name="debug_layout_summary" msgid="2001775315258637682">"Prikaži granice klipa, margine itd."</string>
     <string name="force_rtl_layout_all_locales" msgid="2259906643093138978">"Nametni smer rasporeda zdesna nalevo"</string>
@@ -305,7 +305,7 @@
     <string name="show_non_rect_clip" msgid="505954950474595172">"Otkloni greške u vezi sa radnjama za isecanje oblasti koje nisu pravougaonog oblika"</string>
     <string name="track_frame_time" msgid="6094365083096851167">"Prik. prof. pomoću HWUI-a"</string>
     <string name="enable_gpu_debug_layers" msgid="3848838293793255097">"Omogući slojeve za otklanjanje grešaka GPU-a"</string>
-    <string name="enable_gpu_debug_layers_summary" msgid="8009136940671194940">"Omogući učitavanje sloj. za otk. greš. GPU-a u apl. za otk. greš."</string>
+    <string name="enable_gpu_debug_layers_summary" msgid="8009136940671194940">"Omogući učitavanje otk. greš. GPU-a u apl. za otk. greš."</string>
     <string name="window_animation_scale_title" msgid="6162587588166114700">"Razmera animacije prozora"</string>
     <string name="transition_animation_scale_title" msgid="387527540523595875">"Razmera animacije prelaza"</string>
     <string name="animator_duration_scale_title" msgid="3406722410819934083">"Animatorova razmera trajanja"</string>
@@ -314,7 +314,7 @@
     <string name="immediately_destroy_activities" msgid="1579659389568133959">"Ne čuvaj aktivnosti"</string>
     <string name="immediately_destroy_activities_summary" msgid="3592221124808773368">"Uništi svaku aktivnost čim je korisnik napusti"</string>
     <string name="app_process_limit_title" msgid="4280600650253107163">"Ograničenje pozadinskih procesa"</string>
-    <string name="show_all_anrs" msgid="4924885492787069007">"Prikaži ANR-ove u pozad."</string>
+    <string name="show_all_anrs" msgid="4924885492787069007">"Prikaži ANR-ove u pozadini"</string>
     <string name="show_all_anrs_summary" msgid="6636514318275139826">"Prikaži dijalog Aplikacija ne reaguje za aplikacije u pozadini"</string>
     <string name="show_notification_channel_warnings" msgid="1399948193466922683">"Prikazuj upozorenja zbog kanala za obaveštenja"</string>
     <string name="show_notification_channel_warnings_summary" msgid="5536803251863694895">"Prikazuje upozorenje na ekranu kada aplikacija postavi obaveštenje bez važećeg kanala"</string>

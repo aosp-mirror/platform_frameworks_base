@@ -81,7 +81,7 @@
     <item msgid="3304843301758635896">"বিকল্প ক\'ডেকসমূহ অসক্ষম কৰক"</item>
   </string-array>
   <string-array name="bluetooth_a2dp_codec_summaries">
-    <item msgid="5062108632402595000">"ছিষ্টেমৰ বাছনি ব্যৱহাৰ কৰক (ডিফল্ট)"</item>
+    <item msgid="5062108632402595000">"ছিষ্টেমৰ বাছনি ব্যৱহাৰ কৰক (ডিফ\'ল্ট)"</item>
     <item msgid="6898329690939802290">"এছবিচি"</item>
     <item msgid="6839647709301342559">"এএচি"</item>
     <item msgid="7848030269621918608">"<xliff:g id="QUALCOMM">Qualcomm®</xliff:g> <xliff:g id="APTX">aptX™</xliff:g> অডিঅ’"</item>

@@ -361,7 +361,7 @@
     <string name="daltonizer_mode_monochromacy" msgid="8485709880666106721">"全色盲"</string>
     <string name="daltonizer_mode_deuteranomaly" msgid="5475532989673586329">"绿色弱视（红绿不分）"</string>
     <string name="daltonizer_mode_protanomaly" msgid="8424148009038666065">"红色弱视（红绿不分）"</string>
-    <string name="daltonizer_mode_tritanomaly" msgid="481725854987912389">"蓝色弱视（蓝黄色）"</string>
+    <string name="daltonizer_mode_tritanomaly" msgid="481725854987912389">"蓝色弱视（蓝黄不分）"</string>
     <string name="accessibility_display_daltonizer_preference_title" msgid="5800761362678707872">"色彩校正"</string>
     <string name="accessibility_display_daltonizer_preference_subtitle" msgid="3484969015295282911">"这是实验性功能，性能可能不稳定。"</string>
     <string name="daltonizer_type_overridden" msgid="3116947244410245916">"已被“<xliff:g id="TITLE">%1$s</xliff:g>”覆盖"</string>
@@ -370,10 +370,10 @@
     <string name="power_remaining_duration_only_enhanced" msgid="5992456722677973678">"根据您的使用情况，大约还可使用 <xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="power_discharging_duration_enhanced" msgid="5726302316642148671">"根据您的使用情况，剩余时间大约还有 <xliff:g id="TIME">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
     <string name="power_remaining_duration_only_short" msgid="5329694252258605547">"还可用 <xliff:g id="TIME">%1$s</xliff:g>"</string>
-    <string name="power_discharge_by_enhanced" msgid="2095821536747992464">"根据您的使用情况，目前电量为 <xliff:g id="LEVEL">%2$s</xliff:g>，估计还能使用大约 <xliff:g id="TIME">%1$s</xliff:g>"</string>
-    <string name="power_discharge_by_only_enhanced" msgid="2175151772952365149">"根据您的使用情况，电量估计还能使用大约 <xliff:g id="TIME">%1$s</xliff:g>"</string>
-    <string name="power_discharge_by" msgid="6453537733650125582">"目前电量为 <xliff:g id="LEVEL">%2$s</xliff:g>，估计还能使用大约 <xliff:g id="TIME">%1$s</xliff:g>"</string>
-    <string name="power_discharge_by_only" msgid="107616694963545745">"估计还能使用大约 <xliff:g id="TIME">%1$s</xliff:g>"</string>
+    <string name="power_discharge_by_enhanced" msgid="2095821536747992464">"根据您的使用情况，估计大约还能用到<xliff:g id="TIME">%1$s</xliff:g>（目前电量为 <xliff:g id="LEVEL">%2$s</xliff:g>）"</string>
+    <string name="power_discharge_by_only_enhanced" msgid="2175151772952365149">"根据您的使用情况，估计大约还能用到<xliff:g id="TIME">%1$s</xliff:g>"</string>
+    <string name="power_discharge_by" msgid="6453537733650125582">"目前电量为 <xliff:g id="LEVEL">%2$s</xliff:g>，估计大约还能用到<xliff:g id="TIME">%1$s</xliff:g>"</string>
+    <string name="power_discharge_by_only" msgid="107616694963545745">"估计大约还能用到<xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="power_remaining_less_than_duration_only" msgid="5996752448813295329">"剩余电池续航时间不到 <xliff:g id="THRESHOLD">%1$s</xliff:g>"</string>
     <string name="power_remaining_less_than_duration" msgid="5751885147712659423">"电量剩余使用时间不到 <xliff:g id="THRESHOLD">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
     <string name="power_remaining_more_than_subtext" msgid="3176771815132876675">"电量剩余使用时间超过 <xliff:g id="TIME_REMAINING">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>

@@ -26,7 +26,7 @@
     <string name="wifi_disabled_generic" msgid="4259794910584943386">"Onemogućeno"</string>
     <string name="wifi_disabled_network_failure" msgid="2364951338436007124">"Greška u konfiguraciji IP-a"</string>
     <string name="wifi_disabled_by_recommendation_provider" msgid="5168315140978066096">"Niste povezani zbog slabog kvaliteta mreže"</string>
-    <string name="wifi_disabled_wifi_failure" msgid="3081668066612876581">"Greška pri povezivanju na Wi-Fi"</string>
+    <string name="wifi_disabled_wifi_failure" msgid="3081668066612876581">"Greška pri povezivanju na WiFi"</string>
     <string name="wifi_disabled_password_failure" msgid="8659805351763133575">"Problem pri provjeri vjerodostojnosti."</string>
     <string name="wifi_cant_connect" msgid="5410016875644565884">"Nije se moguće povezati"</string>
     <string name="wifi_cant_connect_to_ap" msgid="1222553274052685331">"Nije se moguće povezati na aplikaciju \'<xliff:g id="AP_NAME">%1$s</xliff:g>\'"</string>
@@ -118,12 +118,12 @@
     <string name="bluetooth_hearingaid_right_pairing_message" msgid="1550373802309160891">"Uparivanje desnog slušnog aparata…"</string>
     <string name="bluetooth_hearingaid_left_battery_level" msgid="8797811465352097562">"Lijevi - <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> baterije"</string>
     <string name="bluetooth_hearingaid_right_battery_level" msgid="7309476148173459677">"Desni - <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> baterije"</string>
-    <string name="accessibility_wifi_off" msgid="1166761729660614716">"Wi-Fi isključen."</string>
-    <string name="accessibility_no_wifi" msgid="8834610636137374508">"Wi-Fi nije povezan."</string>
-    <string name="accessibility_wifi_one_bar" msgid="4869376278894301820">"Wi-Fi jedna crtica."</string>
-    <string name="accessibility_wifi_two_bars" msgid="3569851234710034416">"Wi-Fi dvije crtice."</string>
-    <string name="accessibility_wifi_three_bars" msgid="8134185644861380311">"Wi-Fi tri crtice."</string>
-    <string name="accessibility_wifi_signal_full" msgid="7061045677694702">"Wi-Fi puni signal."</string>
+    <string name="accessibility_wifi_off" msgid="1166761729660614716">"WiFi isključen."</string>
+    <string name="accessibility_no_wifi" msgid="8834610636137374508">"WiFi nije povezan."</string>
+    <string name="accessibility_wifi_one_bar" msgid="4869376278894301820">"WiFi jedna crtica."</string>
+    <string name="accessibility_wifi_two_bars" msgid="3569851234710034416">"WiFi dvije crtice."</string>
+    <string name="accessibility_wifi_three_bars" msgid="8134185644861380311">"WiFi tri crtice."</string>
+    <string name="accessibility_wifi_signal_full" msgid="7061045677694702">"WiFi puni signal."</string>
     <string name="accessibility_wifi_security_type_none" msgid="1223747559986205423">"Otvorena mreža"</string>
     <string name="accessibility_wifi_security_type_secured" msgid="862921720418885331">"Sigurna mreža"</string>
     <string name="process_kernel_label" msgid="3916858646836739323">"Android OS"</string>
@@ -207,7 +207,7 @@
     <string name="mock_location_app_set" msgid="8966420655295102685">"Aplikacija za lažne lokacije: <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="debug_networking_category" msgid="7044075693643009662">"Umrežavanje"</string>
     <string name="wifi_display_certification" msgid="8611569543791307533">"Certifikacija bežičnog prikaza"</string>
-    <string name="wifi_verbose_logging" msgid="4203729756047242344">"Omogućiti Wi-Fi Verbose zapisivanje"</string>
+    <string name="wifi_verbose_logging" msgid="4203729756047242344">"Omogućiti WiFi Verbose zapisivanje"</string>
     <string name="wifi_connected_mac_randomization" msgid="3168165236877957767">"Nasumični odabir MAC adrese pri povezivanju"</string>
     <string name="mobile_data_always_on" msgid="8774857027458200434">"Mobilna mreža za prijenos podataka je uvijek aktivna"</string>
     <string name="tethering_hardware_offload" msgid="7470077827090325814">"Hardversko ubrzavanje dijeljenja veze"</string>
@@ -230,12 +230,12 @@
     <string name="select_private_dns_configuration_dialog_title" msgid="9221994415765826811">"Odaberite način rada privatnog DNS-a"</string>
     <string name="private_dns_mode_off" msgid="8236575187318721684">"Isključeno"</string>
     <string name="private_dns_mode_opportunistic" msgid="8314986739896927399">"Automatski"</string>
-    <string name="private_dns_mode_provider" msgid="8354935160639360804">"Naziv host računara privatnog DNS-a"</string>
-    <string name="private_dns_mode_provider_hostname_hint" msgid="2487492386970928143">"Unesite naziv host računara pružaoca DNS-a"</string>
+    <string name="private_dns_mode_provider" msgid="8354935160639360804">"Naziv hosta pružaoca usluge privatnog DNS-a"</string>
+    <string name="private_dns_mode_provider_hostname_hint" msgid="2487492386970928143">"Unesite naziv hosta pružaoca usluge DNS-a"</string>
     <string name="private_dns_mode_provider_failure" msgid="231837290365031223">"Povezivanje nije uspjelo"</string>
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"Pokaži opcije za certifikaciju Bežičnog prikaza"</string>
-    <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"Povećajte nivo Wi-Fi zapisivanja, pokazati po SSID RSSI Wi-Fi Picker"</string>
-    <string name="wifi_connected_mac_randomization_summary" msgid="1743059848752201485">"Nasumično odaberi MAC adresu prilikom povezivanja na Wi-Fi mreže"</string>
+    <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"Povećajte nivo WiFi zapisivanja, pokazati po SSID RSSI WiFi Picker"</string>
+    <string name="wifi_connected_mac_randomization_summary" msgid="1743059848752201485">"Nasumično odaberi MAC adresu prilikom povezivanja na WiFi mreže"</string>
     <string name="wifi_metered_label" msgid="4514924227256839725">"S naplatom"</string>
     <string name="wifi_unmetered_label" msgid="6124098729457992931">"Mreža bez ograničenja prometa"</string>
     <string name="select_logd_size_title" msgid="7433137108348553508">"Veličine bafera za zapisnik"</string>
@@ -249,7 +249,7 @@
     <string name="allow_mock_location" msgid="2787962564578664888">"Dozvoli lažne lokacije"</string>
     <string name="allow_mock_location_summary" msgid="317615105156345626">"Dozvoli lažne lokacije"</string>
     <string name="debug_view_attributes" msgid="6485448367803310384">"Omogući pregled atributa prikaza"</string>
-    <string name="mobile_data_always_on_summary" msgid="8149773901431697910">"Uvijek drži prijenos podataka na mobilnoj mreži aktivnim, čak i kada je Wi-Fi je aktivan (za brzo prebacivanje između mreža)."</string>
+    <string name="mobile_data_always_on_summary" msgid="8149773901431697910">"Uvijek drži prijenos podataka na mobilnoj mreži aktivnim, čak i kada je WiFi je aktivan (za brzo prebacivanje između mreža)."</string>
     <string name="tethering_hardware_offload_summary" msgid="7726082075333346982">"Koristi hardversko ubrzavanje dijeljenja veze, ako je dostupno"</string>
     <string name="adb_warning_title" msgid="6234463310896563253">"Omogućiti otklanjanje grešaka putem uređaja spojenog na USB?"</string>
     <string name="adb_warning_message" msgid="7316799925425402244">"Otklanjanje grešaka putem uređaja spojenog na USB je namijenjeno samo u svrhe razvoja aplikacija. Koristite ga za kopiranje podataka između računara i uređaja, instaliranje aplikacija na uređaj bez obavještenja te čitanje podataka iz zapisnika."</string>
