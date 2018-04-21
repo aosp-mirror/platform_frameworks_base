@@ -123,4 +123,12 @@ public class WindowManagerWrapper {
             Log.w(TAG, "Failed to set shelf height");
         }
     }
+
+    public void setRecentsVisibility(boolean visible) {
+        try {
+            WindowManagerGlobal.getWindowManagerService().setRecentsVisibility(visible);
+        } catch (RemoteException e) {
+            Log.w(TAG, "Failed to set recents visibility");
+        }
+    }
 }
