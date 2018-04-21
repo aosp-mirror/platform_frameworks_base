@@ -140,10 +140,7 @@
       <item quantity="other">L\'appareil n\'a pas été déverrouillé depuis <xliff:g id="NUMBER_1">%d</xliff:g> heures. Confirmez le mot de passe.</item>
     </plurals>
     <string name="fingerprint_not_recognized" msgid="348813995267914625">"Non reconnu"</string>
-    <plurals name="kg_password_default_pin_message" formatted="false" msgid="6203676909479972943">
-      <item quantity="one">Saisissez le code PIN de la carte SIM. <xliff:g id="NUMBER_1">%d</xliff:g> tentative restante.</item>
-      <item quantity="other">Saisissez le code PIN de la carte SIM. <xliff:g id="NUMBER_1">%d</xliff:g> tentatives restantes.</item>
-    </plurals>
+    <!-- no translation found for kg_password_default_pin_message (3739658416797652781) -->
     <plurals name="kg_password_default_puk_message" formatted="false" msgid="8744416410184198352">
       <item quantity="one">La carte SIM est maintenant désactivée. Saisissez le code PUK pour continuer. Il vous reste <xliff:g id="_NUMBER_1">%d</xliff:g> tentative avant que votre carte SIM ne devienne définitivement inutilisable. Pour de plus amples informations, veuillez contacter votre opérateur.</item>
       <item quantity="other">La carte SIM est maintenant désactivée. Saisissez le code PUK pour continuer. Il vous reste <xliff:g id="_NUMBER_1">%d</xliff:g> tentatives avant que votre carte SIM ne devienne définitivement inutilisable. Pour de plus amples informations, veuillez contacter votre opérateur.</item>

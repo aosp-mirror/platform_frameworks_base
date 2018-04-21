@@ -97,6 +97,8 @@
     <string name="accessibility_unlock_button" msgid="128158454631118828">"Odblokuj"</string>
     <string name="accessibility_waiting_for_fingerprint" msgid="4808860050517462885">"Czekam na odcisk palca"</string>
     <string name="accessibility_unlock_without_fingerprint" msgid="7541705575183694446">"Odblokuj bez używania odcisku palca"</string>
+    <!-- no translation found for accessibility_send_smart_reply (7766727839703044493) -->
+    <skip />
     <string name="unlock_label" msgid="8779712358041029439">"odblokuj"</string>
     <string name="phone_label" msgid="2320074140205331708">"otwórz telefon"</string>
     <string name="voice_assist_label" msgid="3956854378310019854">"otwórz pomoc głosową"</string>
@@ -163,10 +165,8 @@
     <string name="accessibility_no_sim" msgid="8274017118472455155">"Brak karty SIM."</string>
     <string name="accessibility_cell_data" msgid="5326139158682385073">"Mobilna transmisja danych"</string>
     <string name="accessibility_cell_data_on" msgid="5927098403452994422">"Mobilna transmisja danych włączona"</string>
-    <!-- no translation found for cell_data_off_content_description (4356113230238585072) -->
-    <skip />
-    <!-- no translation found for cell_data_off (1051264981229902873) -->
-    <skip />
+    <string name="cell_data_off_content_description" msgid="4356113230238585072">"Wyłączona"</string>
+    <string name="cell_data_off" msgid="1051264981229902873">"Wył."</string>
     <string name="accessibility_bluetooth_tether" msgid="4102784498140271969">"Thethering przez Bluetooth."</string>
     <string name="accessibility_airplane_mode" msgid="834748999790763092">"Tryb samolotowy."</string>
     <string name="accessibility_vpn_on" msgid="5993385083262856059">"Sieć VPN włączona."</string>
@@ -210,11 +210,11 @@
     <string name="accessibility_quick_settings_airplane_on" msgid="6406141469157599296">"Tryb samolotowy jest włączony."</string>
     <string name="accessibility_quick_settings_airplane_changed_off" msgid="66846307818850664">"Tryb samolotowy został wyłączony."</string>
     <string name="accessibility_quick_settings_airplane_changed_on" msgid="8983005603505087728">"Tryb samolotowy został włączony."</string>
-    <string name="accessibility_quick_settings_dnd_priority_on" msgid="5836205286254617194">"Tryb Nie przeszkadzać jest włączony."</string>
-    <string name="accessibility_quick_settings_dnd_none_on" msgid="6882582132662613537">"Nie przeszkadzać (włączone, całkowita cisza)."</string>
-    <string name="accessibility_quick_settings_dnd_alarms_on" msgid="9152834845587554157">"Nie przeszkadzać (włączone, tylko alarmy)."</string>
+    <!-- no translation found for accessibility_quick_settings_dnd_none_on (2960643943620637020) -->
+    <skip />
+    <!-- no translation found for accessibility_quick_settings_dnd_alarms_on (3357131899365865386) -->
+    <skip />
     <string name="accessibility_quick_settings_dnd" msgid="6607873236717185815">"Nie przeszkadzać."</string>
-    <string name="accessibility_quick_settings_dnd_off" msgid="2371832603753738581">"Nie przeszkadzać (wyłączone)."</string>
     <string name="accessibility_quick_settings_dnd_changed_off" msgid="898107593453022935">"Nieprzeszkadzanie wyłączone."</string>
     <string name="accessibility_quick_settings_dnd_changed_on" msgid="4483780856613561039">"Nieprzeszkadzanie włączone."</string>
     <string name="accessibility_quick_settings_bluetooth" msgid="6341675755803320038">"Bluetooth."</string>
@@ -347,7 +347,7 @@
     <string name="quick_settings_cellular_detail_data_usage" msgid="1964260360259312002">"Użycie danych"</string>
     <string name="quick_settings_cellular_detail_remaining_data" msgid="722715415543541249">"Pozostały limit"</string>
     <string name="quick_settings_cellular_detail_over_limit" msgid="967669665390990427">"Przekroczono limit"</string>
-    <string name="quick_settings_cellular_detail_data_used" msgid="1476810587475761478">"Wykorzystano <xliff:g id="DATA_USED">%s</xliff:g>"</string>
+    <string name="quick_settings_cellular_detail_data_used" msgid="1476810587475761478">"Wykorzystano: <xliff:g id="DATA_USED">%s</xliff:g>"</string>
     <string name="quick_settings_cellular_detail_data_limit" msgid="56011158504994128">"Limit <xliff:g id="DATA_LIMIT">%s</xliff:g>"</string>
     <string name="quick_settings_cellular_detail_data_warning" msgid="2440098045692399009">"Ostrzeżenie: <xliff:g id="DATA_LIMIT">%s</xliff:g>"</string>
     <string name="quick_settings_work_mode_label" msgid="7608026833638817218">"Profil do pracy"</string>
@@ -369,8 +369,7 @@
     <string name="recents_stack_action_button_label" msgid="6593727103310426253">"Wyczyść wszystko"</string>
     <string name="recents_drag_hint_message" msgid="2649739267073203985">"Przeciągnij tutaj, by podzielić ekran"</string>
     <string name="recents_swipe_up_onboarding" msgid="3824607135920170001">"Przesuń w górę, by przełączyć aplikacje"</string>
-    <!-- no translation found for recents_quick_scrub_onboarding (2778062804333285789) -->
-    <skip />
+    <string name="recents_quick_scrub_onboarding" msgid="2778062804333285789">"Szybko przeciągnij w prawo, by przełączyć aplikacje"</string>
     <string name="recents_multistack_add_stack_dialog_split_horizontal" msgid="8848514474543427332">"Podziel poziomo"</string>
     <string name="recents_multistack_add_stack_dialog_split_vertical" msgid="9075292233696180813">"Podziel pionowo"</string>
     <string name="recents_multistack_add_stack_dialog_split_custom" msgid="4177837597513701943">"Podziel niestandardowo"</string>
@@ -631,7 +630,8 @@
       <item quantity="one">korzysta z: <xliff:g id="PERFORMING_ACTIVITY_0">%1$s</xliff:g></item>
     </plurals>
     <string name="notification_appops_settings" msgid="1028328314935908050">"Ustawienia"</string>
-    <string name="notification_appops_ok" msgid="602562195588819631">"OK"</string>
+    <!-- no translation found for notification_appops_ok (1156966426011011434) -->
+    <skip />
     <string name="notification_channel_controls_opened_accessibility" msgid="6553950422055908113">"Sterowanie powiadomieniami aplikacji <xliff:g id="APP_NAME">%1$s</xliff:g> otwarte"</string>
     <string name="notification_channel_controls_closed_accessibility" msgid="7521619812603693144">"Sterowanie powiadomieniami aplikacji <xliff:g id="APP_NAME">%1$s</xliff:g> zamknięte"</string>
     <string name="notification_channel_switch_accessibility" msgid="3420796005601900717">"Zezwól na powiadomienia z tego kanału"</string>

@@ -95,6 +95,8 @@
     <string name="accessibility_unlock_button" msgid="128158454631118828">"解除鎖定"</string>
     <string name="accessibility_waiting_for_fingerprint" msgid="4808860050517462885">"正在等候指紋"</string>
     <string name="accessibility_unlock_without_fingerprint" msgid="7541705575183694446">"不使用指紋進行解鎖"</string>
+    <!-- no translation found for accessibility_send_smart_reply (7766727839703044493) -->
+    <skip />
     <string name="unlock_label" msgid="8779712358041029439">"解除鎖定"</string>
     <string name="phone_label" msgid="2320074140205331708">"開啟電話"</string>
     <string name="voice_assist_label" msgid="3956854378310019854">"開啟語音小幫手"</string>
@@ -161,10 +163,8 @@
     <string name="accessibility_no_sim" msgid="8274017118472455155">"沒有 SIM 卡。"</string>
     <string name="accessibility_cell_data" msgid="5326139158682385073">"行動數據"</string>
     <string name="accessibility_cell_data_on" msgid="5927098403452994422">"行動數據已開啟"</string>
-    <!-- no translation found for cell_data_off_content_description (4356113230238585072) -->
-    <skip />
-    <!-- no translation found for cell_data_off (1051264981229902873) -->
-    <skip />
+    <string name="cell_data_off_content_description" msgid="4356113230238585072">"行動數據已關閉"</string>
+    <string name="cell_data_off" msgid="1051264981229902873">"關閉"</string>
     <string name="accessibility_bluetooth_tether" msgid="4102784498140271969">"藍牙網路共用"</string>
     <string name="accessibility_airplane_mode" msgid="834748999790763092">"飛行模式。"</string>
     <string name="accessibility_vpn_on" msgid="5993385083262856059">"VPN 已開啟。"</string>
@@ -208,11 +208,11 @@
     <string name="accessibility_quick_settings_airplane_on" msgid="6406141469157599296">"飛航模式已開啟。"</string>
     <string name="accessibility_quick_settings_airplane_changed_off" msgid="66846307818850664">"飛航模式已關閉。"</string>
     <string name="accessibility_quick_settings_airplane_changed_on" msgid="8983005603505087728">"飛航模式已開啟。"</string>
-    <string name="accessibility_quick_settings_dnd_priority_on" msgid="5836205286254617194">"「零打擾」模式已開啟。"</string>
-    <string name="accessibility_quick_settings_dnd_none_on" msgid="6882582132662613537">"「零打擾」設定為開啟，完全靜音。"</string>
-    <string name="accessibility_quick_settings_dnd_alarms_on" msgid="9152834845587554157">"「零打擾」設定為開啟，只會顯示鬧鐘。"</string>
+    <!-- no translation found for accessibility_quick_settings_dnd_none_on (2960643943620637020) -->
+    <skip />
+    <!-- no translation found for accessibility_quick_settings_dnd_alarms_on (3357131899365865386) -->
+    <skip />
     <string name="accessibility_quick_settings_dnd" msgid="6607873236717185815">"零打擾。"</string>
-    <string name="accessibility_quick_settings_dnd_off" msgid="2371832603753738581">"「零打擾」設定為關閉。"</string>
     <string name="accessibility_quick_settings_dnd_changed_off" msgid="898107593453022935">"已停用「零打擾」設定。"</string>
     <string name="accessibility_quick_settings_dnd_changed_on" msgid="4483780856613561039">"已啟用「零打擾」設定。"</string>
     <string name="accessibility_quick_settings_bluetooth" msgid="6341675755803320038">"藍牙。"</string>
@@ -363,8 +363,7 @@
     <string name="recents_stack_action_button_label" msgid="6593727103310426253">"全部清除"</string>
     <string name="recents_drag_hint_message" msgid="2649739267073203985">"拖曳到這裡即可使用分割畫面"</string>
     <string name="recents_swipe_up_onboarding" msgid="3824607135920170001">"向上滑動即可切換應用程式"</string>
-    <!-- no translation found for recents_quick_scrub_onboarding (2778062804333285789) -->
-    <skip />
+    <string name="recents_quick_scrub_onboarding" msgid="2778062804333285789">"向右拖曳以快速切換應用程式"</string>
     <string name="recents_multistack_add_stack_dialog_split_horizontal" msgid="8848514474543427332">"水平分割"</string>
     <string name="recents_multistack_add_stack_dialog_split_vertical" msgid="9075292233696180813">"垂直分割"</string>
     <string name="recents_multistack_add_stack_dialog_split_custom" msgid="4177837597513701943">"自訂分割"</string>
@@ -462,7 +461,7 @@
     <string name="monitoring_title_profile_owned" msgid="6790109874733501487">"設定檔監控"</string>
     <string name="monitoring_title" msgid="169206259253048106">"網路監控"</string>
     <string name="monitoring_subtitle_vpn" msgid="876537538087857300">"VPN"</string>
-    <string name="monitoring_subtitle_network_logging" msgid="3341264304793193386">"網路紀錄"</string>
+    <string name="monitoring_subtitle_network_logging" msgid="3341264304793193386">"網路記錄"</string>
     <string name="monitoring_subtitle_ca_certificate" msgid="3874151893894355988">"CA 憑證"</string>
     <string name="disable_vpn" msgid="4435534311510272506">"停用 VPN"</string>
     <string name="disconnect_vpn" msgid="1324915059568548655">"中斷 VPN 連線"</string>
@@ -472,7 +471,7 @@
     <string name="monitoring_description_management_ca_certificate" msgid="5202023784131001751">"貴機構已為這個裝置安裝憑證授權單位憑證。你的安全網路流量可能會受到監控或修改。"</string>
     <string name="monitoring_description_managed_profile_ca_certificate" msgid="4683248196789897964">"貴機構已為你的 Work 設定檔安裝憑證授權單位憑證。你的安全網路流量可能會受到監控或修改。"</string>
     <string name="monitoring_description_ca_certificate" msgid="7886985418413598352">"這個裝置已安裝憑證授權單位憑證。你的安全網路流量可能會受到監控或修改。"</string>
-    <string name="monitoring_description_management_network_logging" msgid="7184005419733060736">"你的管理員已啟用網路紀錄功能，可監控你裝置的流量。"</string>
+    <string name="monitoring_description_management_network_logging" msgid="7184005419733060736">"你的管理員已啟用網路記錄功能，可監控你裝置的流量。"</string>
     <string name="monitoring_description_named_vpn" msgid="7403457334088909254">"由於你已連結至「<xliff:g id="VPN_APP">%1$s</xliff:g>」，因此你的網路活動 (包括收發電子郵件、使用應用程式及瀏覽網站) 可能會受到這個應用程式監控。"</string>
     <string name="monitoring_description_two_named_vpns" msgid="4198511413729213802">"由於你已連結至「<xliff:g id="VPN_APP_0">%1$s</xliff:g>」和「<xliff:g id="VPN_APP_1">%2$s</xliff:g>」，因此你的網路活動 (包括收發電子郵件、使用應用程式及瀏覽網站) 可能會受到這兩個應用程式監控。"</string>
     <string name="monitoring_description_managed_profile_named_vpn" msgid="1427905889862420559">"由於你的 Work 設定檔已連結至「<xliff:g id="VPN_APP">%1$s</xliff:g>」，因此你的網路活動 (包括收發電子郵件、使用應用程式及瀏覽網站) 可能會受到這個應用程式監控。"</string>
@@ -487,7 +486,7 @@
     <string name="monitoring_description_vpn_settings" msgid="6434859242636063861">"開啟 VPN 設定"</string>
     <string name="monitoring_description_ca_cert_settings_separator" msgid="4987350385906393626">" "</string>
     <string name="monitoring_description_ca_cert_settings" msgid="5489969458872997092">"開啟信任的憑證"</string>
-    <string name="monitoring_description_network_logging" msgid="7223505523384076027">"你的管理員已啟用網路紀錄功能，可監控你裝置的流量。\n\n如需詳細資訊，請與你的管理員聯絡。"</string>
+    <string name="monitoring_description_network_logging" msgid="7223505523384076027">"你的管理員已啟用網路記錄功能，可監控你裝置的流量。\n\n如需詳細資訊，請與你的管理員聯絡。"</string>
     <string name="monitoring_description_vpn" msgid="4445150119515393526">"你已授權一個應用程式設定 VPN 連線。\n\n這個應用程式可以監控你的裝置和網路活動，包括收發電子郵件、使用應用程式和瀏覽網站。"</string>
     <string name="monitoring_description_vpn_profile_owned" msgid="2958019119161161530">"你的 Work 設定檔是由下列機構管理：<xliff:g id="ORGANIZATION">%1$s</xliff:g>。\n\n你的管理員可以監控你的網路活動，包括收發電子郵件、使用應用程式及瀏覽網站。\n\n如需詳細資訊，請與你的管理員聯絡。\n\n此外，由於你已連線至 VPN，因此你的網路活動也會受到 VPN 監控。"</string>
     <string name="legacy_vpn_name" msgid="6604123105765737830">"VPN"</string>
@@ -621,7 +620,8 @@
       <item quantity="one">使用<xliff:g id="PERFORMING_ACTIVITY_0">%1$s</xliff:g></item>
     </plurals>
     <string name="notification_appops_settings" msgid="1028328314935908050">"設定"</string>
-    <string name="notification_appops_ok" msgid="602562195588819631">"確定"</string>
+    <!-- no translation found for notification_appops_ok (1156966426011011434) -->
+    <skip />
     <string name="notification_channel_controls_opened_accessibility" msgid="6553950422055908113">"「<xliff:g id="APP_NAME">%1$s</xliff:g>」的通知控制項已開啟"</string>
     <string name="notification_channel_controls_closed_accessibility" msgid="7521619812603693144">"「<xliff:g id="APP_NAME">%1$s</xliff:g>」的通知控制項已關閉"</string>
     <string name="notification_channel_switch_accessibility" msgid="3420796005601900717">"允許來自這個頻道的通知"</string>

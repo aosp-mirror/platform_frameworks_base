@@ -140,10 +140,7 @@
       <item quantity="one">Hujafungua kifaa kwa saa <xliff:g id="NUMBER_0">%d</xliff:g>. Thibitisha nenosiri.</item>
     </plurals>
     <string name="fingerprint_not_recognized" msgid="348813995267914625">"Haikutambua alama ya kidole"</string>
-    <plurals name="kg_password_default_pin_message" formatted="false" msgid="6203676909479972943">
-      <item quantity="other">Weka PIN ya SIM, umesalia na majaribio <xliff:g id="NUMBER_1">%d</xliff:g>.</item>
-      <item quantity="one">PIN ya SIM uliyoweka si sahihi. Umesalia na jaribio <xliff:g id="NUMBER_0">%d</xliff:g> kabla ya kulazimika kuwasiliana na mtoa huduma wako ili afungue kifaa chako.</item>
-    </plurals>
+    <!-- no translation found for kg_password_default_pin_message (3739658416797652781) -->
     <plurals name="kg_password_default_puk_message" formatted="false" msgid="8744416410184198352">
       <item quantity="other">Sasa SIM imefungwa. Weka msimbo wa PUK ili uendelee. Umesalia na majaribio <xliff:g id="_NUMBER_1">%d</xliff:g> kabla ya SIM kuacha kufanya kazi kabisa. Wasiliana na mtoa huduma kwa maelezo.</item>
       <item quantity="one">Sasa SIM imefungwa. Weka msimbo wa PUK ili uendelee. Umesalia na jaribio <xliff:g id="_NUMBER_0">%d</xliff:g> kabla ya SIM kuacha kufanya kazi kabisa. Wasiliana na mtoa huduma kwa maelezo.</item>

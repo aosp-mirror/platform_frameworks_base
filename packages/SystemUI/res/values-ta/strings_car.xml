@@ -19,8 +19,7 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="notification_channel_tv_pip" msgid="134047986446577723">"Pantalla en pantalla"</string>
-    <string name="pip_notification_unknown_title" msgid="6289156118095849438">"(Sin título de programa)"</string>
-    <string name="pip_close" msgid="3480680679023423574">"Cerrar PIP"</string>
-    <string name="pip_fullscreen" msgid="8604643018538487816">"Pantalla completa"</string>
+    <string name="car_guest" msgid="3738772168718508650">"விருந்தினர்"</string>
+    <string name="car_add_user" msgid="5245196248349230898">"பயனரைச் சேர்க்கவும்"</string>
+    <string name="car_new_user" msgid="8142927244990323906">"புதிய பயனர்"</string>
 </resources>

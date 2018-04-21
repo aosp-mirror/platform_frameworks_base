@@ -97,6 +97,8 @@
     <string name="accessibility_unlock_button" msgid="128158454631118828">"Разблокировать."</string>
     <string name="accessibility_waiting_for_fingerprint" msgid="4808860050517462885">"Отсканируйте отпечаток пальца"</string>
     <string name="accessibility_unlock_without_fingerprint" msgid="7541705575183694446">"Разблокировать без отпечатка пальца"</string>
+    <!-- no translation found for accessibility_send_smart_reply (7766727839703044493) -->
+    <skip />
     <string name="unlock_label" msgid="8779712358041029439">"Разблокировать."</string>
     <string name="phone_label" msgid="2320074140205331708">"Открыть телефон."</string>
     <string name="voice_assist_label" msgid="3956854378310019854">"включить аудиоподсказки"</string>
@@ -163,10 +165,8 @@
     <string name="accessibility_no_sim" msgid="8274017118472455155">"SIM-карта отсутствует."</string>
     <string name="accessibility_cell_data" msgid="5326139158682385073">"Мобильный Интернет"</string>
     <string name="accessibility_cell_data_on" msgid="5927098403452994422">"Мобильный Интернет включен"</string>
-    <!-- no translation found for cell_data_off_content_description (4356113230238585072) -->
-    <skip />
-    <!-- no translation found for cell_data_off (1051264981229902873) -->
-    <skip />
+    <string name="cell_data_off_content_description" msgid="4356113230238585072">"Мобильный Интернет отключен"</string>
+    <string name="cell_data_off" msgid="1051264981229902873">"Отключен"</string>
     <string name="accessibility_bluetooth_tether" msgid="4102784498140271969">"Bluetooth-модем"</string>
     <string name="accessibility_airplane_mode" msgid="834748999790763092">"Режим полета."</string>
     <string name="accessibility_vpn_on" msgid="5993385083262856059">"Режим VPN включен."</string>
@@ -212,11 +212,11 @@
     <string name="accessibility_quick_settings_airplane_on" msgid="6406141469157599296">"Режим полета включен."</string>
     <string name="accessibility_quick_settings_airplane_changed_off" msgid="66846307818850664">"Режим полета отключен."</string>
     <string name="accessibility_quick_settings_airplane_changed_on" msgid="8983005603505087728">"Режим полета включен."</string>
-    <string name="accessibility_quick_settings_dnd_priority_on" msgid="5836205286254617194">"Режим \"Не беспокоить\" включен"</string>
-    <string name="accessibility_quick_settings_dnd_none_on" msgid="6882582132662613537">"Не беспокоить, полная тишина."</string>
-    <string name="accessibility_quick_settings_dnd_alarms_on" msgid="9152834845587554157">"Не беспокоить – только будильник."</string>
+    <!-- no translation found for accessibility_quick_settings_dnd_none_on (2960643943620637020) -->
+    <skip />
+    <!-- no translation found for accessibility_quick_settings_dnd_alarms_on (3357131899365865386) -->
+    <skip />
     <string name="accessibility_quick_settings_dnd" msgid="6607873236717185815">"Не беспокоить."</string>
-    <string name="accessibility_quick_settings_dnd_off" msgid="2371832603753738581">"Режим \"Не беспокоить\" выключен."</string>
     <string name="accessibility_quick_settings_dnd_changed_off" msgid="898107593453022935">"Режим \"Не беспокоить\" выключен."</string>
     <string name="accessibility_quick_settings_dnd_changed_on" msgid="4483780856613561039">"Режим \"Не беспокоить\" включен."</string>
     <string name="accessibility_quick_settings_bluetooth" msgid="6341675755803320038">"Bluetooth."</string>
@@ -354,7 +354,7 @@
     <string name="quick_settings_cellular_detail_data_warning" msgid="2440098045692399009">"Предупреждение: <xliff:g id="DATA_LIMIT">%s</xliff:g>"</string>
     <string name="quick_settings_work_mode_label" msgid="7608026833638817218">"Рабочий профиль"</string>
     <string name="quick_settings_night_display_label" msgid="3577098011487644395">"Ночной режим"</string>
-    <string name="quick_settings_night_secondary_label_on_at_sunset" msgid="8483259341596943314">"Включить на закате"</string>
+    <string name="quick_settings_night_secondary_label_on_at_sunset" msgid="8483259341596943314">"Вкл. на закате"</string>
     <string name="quick_settings_night_secondary_label_until_sunrise" msgid="4453017157391574402">"До рассвета"</string>
     <string name="quick_settings_night_secondary_label_on_at" msgid="6256314040368487637">"Включить в <xliff:g id="TIME">%s</xliff:g>"</string>
     <string name="quick_settings_secondary_label_until" msgid="2749196569462600150">"До <xliff:g id="TIME">%s</xliff:g>"</string>
@@ -371,8 +371,7 @@
     <string name="recents_stack_action_button_label" msgid="6593727103310426253">"Очистить все"</string>
     <string name="recents_drag_hint_message" msgid="2649739267073203985">"Перетащите сюда, чтобы разделить экран"</string>
     <string name="recents_swipe_up_onboarding" msgid="3824607135920170001">"Чтобы переключиться между приложениями, проведите по экрану вверх."</string>
-    <!-- no translation found for recents_quick_scrub_onboarding (2778062804333285789) -->
-    <skip />
+    <string name="recents_quick_scrub_onboarding" msgid="2778062804333285789">"Перетащите вправо, чтобы быстро переключиться между приложениями"</string>
     <string name="recents_multistack_add_stack_dialog_split_horizontal" msgid="8848514474543427332">"Разделить по горизонтали"</string>
     <string name="recents_multistack_add_stack_dialog_split_vertical" msgid="9075292233696180813">"Разделить по вертикали"</string>
     <string name="recents_multistack_add_stack_dialog_split_custom" msgid="4177837597513701943">"Разделить по-другому"</string>
@@ -608,7 +607,7 @@
     <string name="tuner_full_importance_settings_off" msgid="8208165412614935229">"Отключено"</string>
     <string name="power_notification_controls_description" msgid="4372459941671353358">"С помощью этой функции вы можете устанавливать уровень важности уведомлений от 0 до 5 для каждого приложения.\n\n"<b>"Уровень 5"</b>\n"‒ Помещать уведомления в начало списка.\n‒ Показывать полноэкранные уведомления.\n‒ Показывать всплывающие уведомления.\nУровень 4\n"<b></b>\n"‒ Не показывать полноэкранные уведомления.\n‒ Показывать всплывающие уведомления.\nУровень 3\n"<b></b>\n"‒ Не показывать полноэкранные уведомления.\n‒ Не показывать всплывающие уведомления.\nУровень 2\n"<b></b>\n"‒ Не показывать полноэкранные уведомления.\n‒ Не показывать всплывающие уведомления.\n‒ Не использовать звук и вибрацию.\nУровень 1\n"<b></b>\n"‒ Не показывать полноэкранные уведомления.\n‒ Не показывать всплывающие уведомления.\n‒ Не использовать звук и вибрацию.\n‒ Не показывать на экране блокировки и в строке состояния.\n‒ Помещать уведомления в конец списка.\nУровень 0\n"<b></b>\n"‒ Блокировать все уведомления приложения."</string>
     <string name="notification_header_default_channel" msgid="7506845022070889909">"Уведомления"</string>
-    <string name="notification_channel_disabled" msgid="344536703863700565">"Вы больше не будете получать эти уведомления."</string>
+    <string name="notification_channel_disabled" msgid="344536703863700565">"Эти уведомления отключены."</string>
     <string name="notification_channel_minimized" msgid="1664411570378910931">"Эти уведомления будут свернуты."</string>
     <string name="inline_blocking_helper" msgid="3055064577771478591">"Обычно вы скрываете эти уведомления.\nПоказывать их?"</string>
     <string name="inline_keep_showing" msgid="8945102997083836858">"Показывать эти уведомления?"</string>
@@ -633,7 +632,8 @@
       <item quantity="other">использует <xliff:g id="PERFORMING_ACTIVITY_1">%1$s</xliff:g> и <xliff:g id="PERFORMING_ACTIVITY_2">%2$s</xliff:g></item>
     </plurals>
     <string name="notification_appops_settings" msgid="1028328314935908050">"Настройки"</string>
-    <string name="notification_appops_ok" msgid="602562195588819631">"ОК"</string>
+    <!-- no translation found for notification_appops_ok (1156966426011011434) -->
+    <skip />
     <string name="notification_channel_controls_opened_accessibility" msgid="6553950422055908113">"Настройки уведомлений для приложения <xliff:g id="APP_NAME">%1$s</xliff:g> открыты"</string>
     <string name="notification_channel_controls_closed_accessibility" msgid="7521619812603693144">"Настройки уведомлений для приложения <xliff:g id="APP_NAME">%1$s</xliff:g> закрыты"</string>
     <string name="notification_channel_switch_accessibility" msgid="3420796005601900717">"Показывать уведомления с этого канала"</string>

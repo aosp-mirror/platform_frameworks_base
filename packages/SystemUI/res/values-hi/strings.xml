@@ -46,7 +46,7 @@
     <string name="battery_saver_start_action" msgid="8187820911065797519">"बैटरी सेवर चालू करें"</string>
     <string name="status_bar_settings_settings_button" msgid="3023889916699270224">"सेटिंग"</string>
     <string name="status_bar_settings_wifi_button" msgid="1733928151698311923">"वाई-फ़ाई"</string>
-    <string name="status_bar_settings_auto_rotation" msgid="3790482541357798421">"स्‍क्रीन अपने आप घुमाएं"</string>
+    <string name="status_bar_settings_auto_rotation" msgid="3790482541357798421">"स्‍क्रीन अपने आप घुमाना"</string>
     <string name="status_bar_settings_mute_label" msgid="554682549917429396">"म्यूट करें"</string>
     <string name="status_bar_settings_auto_brightness_label" msgid="511453614962324674">"स्वत:"</string>
     <string name="status_bar_settings_notifications" msgid="397146176280905137">"सूचनाएं"</string>
@@ -88,13 +88,15 @@
     <string name="accessibility_accessibility_button" msgid="7601252764577607915">"सुलभता"</string>
     <string name="accessibility_rotate_button" msgid="7402949513740253006">"स्क्रीन घुमाएं"</string>
     <string name="accessibility_recent" msgid="5208608566793607626">"खास जानकारी"</string>
-    <string name="accessibility_search_light" msgid="1103867596330271848">"सर्च करें"</string>
+    <string name="accessibility_search_light" msgid="1103867596330271848">"खोजें"</string>
     <string name="accessibility_camera_button" msgid="8064671582820358152">"कैमरा"</string>
     <string name="accessibility_phone_button" msgid="6738112589538563574">"फ़ोन"</string>
     <string name="accessibility_voice_assist_button" msgid="487611083884852965">"आवाज़ से डिवाइस का इस्तेमाल"</string>
     <string name="accessibility_unlock_button" msgid="128158454631118828">"अनलॉक करें"</string>
     <string name="accessibility_waiting_for_fingerprint" msgid="4808860050517462885">"फ़िंगरप्रिंट का इंतज़ार हो रहा है"</string>
     <string name="accessibility_unlock_without_fingerprint" msgid="7541705575183694446">"अपने फ़िंगरप्रिंट का इस्तेमाल किए बिना अनलॉक करें"</string>
+    <!-- no translation found for accessibility_send_smart_reply (7766727839703044493) -->
+    <skip />
     <string name="unlock_label" msgid="8779712358041029439">"अनलॉक करें"</string>
     <string name="phone_label" msgid="2320074140205331708">"फ़ोन खोलें"</string>
     <string name="voice_assist_label" msgid="3956854378310019854">"आवाज़ से डिवाइस को इस्तेमाल करें"</string>
@@ -147,12 +149,12 @@
     <string name="accessibility_desc_connecting" msgid="3812924520316280149">"कनेक्ट हो रहा है."</string>
     <string name="data_connection_gprs" msgid="7652872568358508452">"GPRS"</string>
     <string name="data_connection_hspa" msgid="1499615426569473562">"HSPA"</string>
-    <string name="data_connection_3g" msgid="503045449315378373">"3G"</string>
+    <string name="data_connection_3g" msgid="503045449315378373">"3जी"</string>
     <string name="data_connection_3_5g" msgid="3164370985817123144">"H"</string>
     <string name="data_connection_3_5g_plus" msgid="4464630787664529264">"H+"</string>
     <string name="data_connection_4g" msgid="9139963475267449144">"4G"</string>
     <string name="data_connection_4g_plus" msgid="1148687201877800700">"4G+"</string>
-    <string name="data_connection_lte" msgid="2694876797724028614">"LTE"</string>
+    <string name="data_connection_lte" msgid="2694876797724028614">"एलटीई"</string>
     <string name="data_connection_lte_plus" msgid="3423013208570937424">"LTE+"</string>
     <string name="data_connection_cdma" msgid="8176597308239086780">"1X"</string>
     <string name="data_connection_roaming" msgid="6037232010953697354">"रोमिंग"</string>
@@ -161,11 +163,9 @@
     <string name="accessibility_no_sim" msgid="8274017118472455155">"कोई सिम नहीं."</string>
     <string name="accessibility_cell_data" msgid="5326139158682385073">"मोबाइल डेटा"</string>
     <string name="accessibility_cell_data_on" msgid="5927098403452994422">"मोबाइल डेटा चालू है"</string>
-    <!-- no translation found for cell_data_off_content_description (4356113230238585072) -->
-    <skip />
-    <!-- no translation found for cell_data_off (1051264981229902873) -->
-    <skip />
-    <string name="accessibility_bluetooth_tether" msgid="4102784498140271969">"ब्लूटूथ से इंटरनेट पर शेयर करें."</string>
+    <string name="cell_data_off_content_description" msgid="4356113230238585072">"मोबाइल डेटा बंद है"</string>
+    <string name="cell_data_off" msgid="1051264981229902873">"बंद है"</string>
+    <string name="accessibility_bluetooth_tether" msgid="4102784498140271969">"ब्लूटूथ से टेदरिंग."</string>
     <string name="accessibility_airplane_mode" msgid="834748999790763092">"हवाई जहाज मोड."</string>
     <string name="accessibility_vpn_on" msgid="5993385083262856059">"VPN चालू."</string>
     <string name="accessibility_no_sims" msgid="3957997018324995781">"कोई सिम कार्ड नहीं है."</string>
@@ -208,11 +208,11 @@
     <string name="accessibility_quick_settings_airplane_on" msgid="6406141469157599296">"हवाई जहाज़ मोड चालू है."</string>
     <string name="accessibility_quick_settings_airplane_changed_off" msgid="66846307818850664">"हवाई जहाज़ मोड को बंद किया गया."</string>
     <string name="accessibility_quick_settings_airplane_changed_on" msgid="8983005603505087728">"हवाई जहाज़ मोड को चालू किया गया."</string>
-    <string name="accessibility_quick_settings_dnd_priority_on" msgid="5836205286254617194">"परेशान न करें मोड चालू है."</string>
-    <string name="accessibility_quick_settings_dnd_none_on" msgid="6882582132662613537">"परेशान ना करें चालू है, पूरी तरह शांत."</string>
-    <string name="accessibility_quick_settings_dnd_alarms_on" msgid="9152834845587554157">"परेशान ना करें चालू, सिर्फ़ अलार्म."</string>
+    <!-- no translation found for accessibility_quick_settings_dnd_none_on (2960643943620637020) -->
+    <skip />
+    <!-- no translation found for accessibility_quick_settings_dnd_alarms_on (3357131899365865386) -->
+    <skip />
     <string name="accessibility_quick_settings_dnd" msgid="6607873236717185815">"परेशान ना करें."</string>
-    <string name="accessibility_quick_settings_dnd_off" msgid="2371832603753738581">"परेशान ना करें बंद."</string>
     <string name="accessibility_quick_settings_dnd_changed_off" msgid="898107593453022935">"परेशान ना करें बंद किया गया."</string>
     <string name="accessibility_quick_settings_dnd_changed_on" msgid="4483780856613561039">"परेशान ना करें चालू किया गया."</string>
     <string name="accessibility_quick_settings_bluetooth" msgid="6341675755803320038">"ब्लूटूथ."</string>
@@ -363,8 +363,7 @@
     <string name="recents_stack_action_button_label" msgid="6593727103310426253">"Clear all"</string>
     <string name="recents_drag_hint_message" msgid="2649739267073203985">"स्क्रीन के दो हिस्से में बंट जाने, स्पिल्ट स्क्रीन, का इस्तेमाल करने के लिए यहां खींचें और छोडें"</string>
     <string name="recents_swipe_up_onboarding" msgid="3824607135920170001">"ऐप्लिकेशन बदलने के लिए ऊपर स्वाइप करें"</string>
-    <!-- no translation found for recents_quick_scrub_onboarding (2778062804333285789) -->
-    <skip />
+    <string name="recents_quick_scrub_onboarding" msgid="2778062804333285789">"ऐप्लिकेशन को झटपट स्विच करने के लिए उसे दाईं ओर खींचें और छोड़ें"</string>
     <string name="recents_multistack_add_stack_dialog_split_horizontal" msgid="8848514474543427332">"क्षैतिज रूप से विभाजित करें"</string>
     <string name="recents_multistack_add_stack_dialog_split_vertical" msgid="9075292233696180813">"लम्बवत रूप से विभाजित करें"</string>
     <string name="recents_multistack_add_stack_dialog_split_custom" msgid="4177837597513701943">"अपने मुताबिक बांटें"</string>
@@ -376,7 +375,7 @@
     <string name="expanded_header_battery_charging_with_time" msgid="457559884275395376">"पूर्ण होने में <xliff:g id="CHARGING_TIME">%s</xliff:g> शेष"</string>
     <string name="expanded_header_battery_not_charging" msgid="4798147152367049732">"चार्ज नहीं हो रही है"</string>
     <string name="ssl_ca_cert_warning" msgid="9005954106902053641">"नेटवर्क को\nमॉनीटर किया जा सकता है"</string>
-    <string name="description_target_search" msgid="3091587249776033139">"सर्च करें"</string>
+    <string name="description_target_search" msgid="3091587249776033139">"खोजें"</string>
     <string name="description_direction_up" msgid="7169032478259485180">"<xliff:g id="TARGET_DESCRIPTION">%s</xliff:g> के लिए ऊपर स्‍लाइड करें."</string>
     <string name="description_direction_left" msgid="7207478719805562165">"<xliff:g id="TARGET_DESCRIPTION">%s</xliff:g> के लिए बाएं स्‍लाइड करें."</string>
     <string name="zen_priority_introduction" msgid="1149025108714420281">"आपको अलार्म, रिमाइंडर, इवेंट और चुनिंदा कॉल करने वालों के अलावा किसी और तरह से (आवाज़ करके और थरथरा कर ) परेशान नहीं किया जाएगा. आप फिर भी संगीत, वीडियो और गेम सहित अपना चुना हुआ सब कुछ सुन सकते हैं."</string>
@@ -435,7 +434,7 @@
     <string name="battery_saver_notification_action_text" msgid="132118784269455533">"बैटरी सेवर बंद करें"</string>
     <string name="media_projection_dialog_text" msgid="3071431025448218928">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> आपके स्क्रीन पर दिखाई देने वाली हर सामग्री को कैप्चर करना शुरू कर देगी."</string>
     <string name="media_projection_remember_text" msgid="3103510882172746752">"फिर से न दिखाएं"</string>
-    <string name="clear_all_notifications_text" msgid="814192889771462828">"सभी साफ़ करें"</string>
+    <string name="clear_all_notifications_text" msgid="814192889771462828">"सभी को हटाएं"</string>
     <string name="manage_notifications_text" msgid="8035284146227267681">"सूचनाएं प्रबंधित करें"</string>
     <string name="dnd_suppressing_shade_text" msgid="5179021215370153526">"परेशान न करें सुविधा चालू होने की वजह से सूचनाएं नहीं दिखाई जा रही हैं"</string>
     <string name="media_projection_action_text" msgid="8470872969457985954">"अब शुरू करें"</string>
@@ -621,7 +620,8 @@
       <item quantity="other"> <xliff:g id="PERFORMING_ACTIVITY_1">%1$s</xliff:g> और <xliff:g id="PERFORMING_ACTIVITY_2">%2$s</xliff:g> का इस्तेमाल कर रहा है</item>
     </plurals>
     <string name="notification_appops_settings" msgid="1028328314935908050">"सेटिंग"</string>
-    <string name="notification_appops_ok" msgid="602562195588819631">"ठीक है"</string>
+    <!-- no translation found for notification_appops_ok (1156966426011011434) -->
+    <skip />
     <string name="notification_channel_controls_opened_accessibility" msgid="6553950422055908113">"<xliff:g id="APP_NAME">%1$s</xliff:g> के लिए सूचना नियंत्रण चालू हैं"</string>
     <string name="notification_channel_controls_closed_accessibility" msgid="7521619812603693144">"<xliff:g id="APP_NAME">%1$s</xliff:g> के लिए सूचना नियंत्रण बंद हैं"</string>
     <string name="notification_channel_switch_accessibility" msgid="3420796005601900717">"इस चैनल से सूचना की पाने की मंज़ूरी दें"</string>
@@ -773,7 +773,7 @@
     <string name="forced_resizable_secondary_display" msgid="4230857851756391925">"हो सकता है कि ऐप प्राइमरी (मुख्य) डिस्प्ले के अलावा बाकी दूसरे डिस्प्ले पर काम न करे."</string>
     <string name="activity_launch_on_secondary_display_failed_text" msgid="7793821742158306742">"प्राइमरी (मुख्य) डिस्प्ले के अलावा बाकी दूसरे डिस्प्ले पर ऐप लॉन्च नहीं किया जा सकता."</string>
     <string name="accessibility_quick_settings_settings" msgid="6132460890024942157">"सेटिंग खोलें."</string>
-    <string name="accessibility_quick_settings_expand" msgid="2375165227880477530">"त्वरित सेटिंग खोलें."</string>
+    <string name="accessibility_quick_settings_expand" msgid="2375165227880477530">"क्विक सेटिंग खोलें."</string>
     <string name="accessibility_quick_settings_collapse" msgid="1792625797142648105">"त्वरित सेटिंग बंद करें."</string>
     <string name="accessibility_quick_settings_alarm_set" msgid="1863000242431528676">"अलार्म सेट."</string>
     <string name="accessibility_quick_settings_user" msgid="1567445362870421770">"<xliff:g id="ID_1">%s</xliff:g> के रूप में प्रवेश किया हुआ है"</string>

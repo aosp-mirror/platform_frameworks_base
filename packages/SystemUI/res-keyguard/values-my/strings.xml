@@ -140,10 +140,7 @@
       <item quantity="one">စက်ပစ္စည်းကို <xliff:g id="NUMBER_0">%d</xliff:g> နာရီကြာ လော့ခ်ဖွင့်ခဲ့ခြင်း မရှိပါ။ စကားဝှက်အား အတည်ပြုပါ။</item>
     </plurals>
     <string name="fingerprint_not_recognized" msgid="348813995267914625">"မသိပါ"</string>
-    <plurals name="kg_password_default_pin_message" formatted="false" msgid="6203676909479972943">
-      <item quantity="other">ဆင်းမ်ကဒ် ပင်နံပါတ် ထည့်သွင်းပါ၊  သင့်တွင် <xliff:g id="NUMBER_1">%d</xliff:g> ကြိမ် စမ်းသပ်ခွင့် ကျန်ပါသေးသည်။</item>
-      <item quantity="one">ဆင်းမ်ကဒ် ပင်နံပါတ် ထည့်သွင်းပါ၊ သင့်စက်ကို လော့ခ်ဖွင့်ပေးရန်အတွက် ဝန်ဆောင်မှုပေးသူသို့ မဆက်သွယ်မီ <xliff:g id="NUMBER_0">%d</xliff:g> ကြိမ် စမ်းသပ်ခွင့် ကျန်ပါသေးသည်။</item>
-    </plurals>
+    <!-- no translation found for kg_password_default_pin_message (3739658416797652781) -->
     <plurals name="kg_password_default_puk_message" formatted="false" msgid="8744416410184198352">
       <item quantity="other">ဆင်းမ်ကဒ်သည် ယခု ပိတ်သွားပါပြီ။ ရှေ့ဆက်ရန် PUK ကုဒ်ကို ထည့်ပါ။ ဆင်းမ်ကဒ် အပြီးပိတ်မသွားမီ သင့်တွင် <xliff:g id="_NUMBER_1">%d</xliff:g> ကြိမ် စမ်းသပ်ခွင့် ကျန်ပါသေးသည်။ အသေးစိတ်အချက်များအတွက် ဝန်ဆောင်မှုပေးသူကို ဆက်သွယ်ပါ။</item>
       <item quantity="one">ဆင်းမ်ကဒ်သည် ယခု ပိတ်သွားပါပြီ။ ရှေ့ဆက်ရန် PUK ကုဒ်ကို ထည့်ပါ။ ဆင်းမ်ကဒ် အပြီးပိတ်မသွားမီ သင့်တွင် <xliff:g id="_NUMBER_0">%d</xliff:g> ကြိမ် စမ်းသပ်ခွင့် ကျန်ပါသေးသည်။ အသေးစိတ်အချက်များအတွက် ဝန်ဆောင်မှုပေးသူကို ဆက်သွယ်ပါ။</item>

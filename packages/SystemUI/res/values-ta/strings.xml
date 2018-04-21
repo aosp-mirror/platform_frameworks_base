@@ -22,7 +22,7 @@
     <string name="app_label" msgid="7164937344850004466">"சாதனத்தின் UI"</string>
     <string name="status_bar_clear_all_button" msgid="7774721344716731603">"அழி"</string>
     <string name="status_bar_recent_remove_item_title" msgid="6026395868129852968">"பட்டியலில் இருந்து அகற்று"</string>
-    <string name="status_bar_recent_inspect_item_title" msgid="7793624864528818569">"ஆப்ஸ் தகவல்"</string>
+    <string name="status_bar_recent_inspect_item_title" msgid="7793624864528818569">"பயன்பாட்டுத் தகவல்"</string>
     <string name="status_bar_no_recent_apps" msgid="7374907845131203189">"சமீபத்திய திரைகள் இங்கு தோன்றும்"</string>
     <string name="status_bar_accessibility_dismiss_recents" msgid="4576076075226540105">"சமீபத்திய பயன்பாடுகளை நிராகரி"</string>
     <plurals name="status_bar_accessibility_recent_apps" formatted="false" msgid="9138535907802238759">
@@ -95,6 +95,8 @@
     <string name="accessibility_unlock_button" msgid="128158454631118828">"திற"</string>
     <string name="accessibility_waiting_for_fingerprint" msgid="4808860050517462885">"கைரேகைக்காகக் காத்திருக்கிறது"</string>
     <string name="accessibility_unlock_without_fingerprint" msgid="7541705575183694446">"உங்கள் கைரேகையைப் பயன்படுத்தாமல் திறக்கவும்"</string>
+    <!-- no translation found for accessibility_send_smart_reply (7766727839703044493) -->
+    <skip />
     <string name="unlock_label" msgid="8779712358041029439">"திற"</string>
     <string name="phone_label" msgid="2320074140205331708">"ஃபோனைத் திற"</string>
     <string name="voice_assist_label" msgid="3956854378310019854">"குரல் உதவியைத் திற"</string>
@@ -141,8 +143,8 @@
     <string name="accessibility_two_bars" msgid="6437363648385206679">"இரண்டு கோடுகள்."</string>
     <string name="accessibility_three_bars" msgid="2648241415119396648">"மூன்று கோடுகள்."</string>
     <string name="accessibility_signal_full" msgid="9122922886519676839">"சிக்னல் முழுமையாக உள்ளது."</string>
-    <string name="accessibility_desc_on" msgid="2385254693624345265">"இயக்கப்பட்டுள்ளது."</string>
-    <string name="accessibility_desc_off" msgid="6475508157786853157">"முடக்கப்பட்டுள்ளது."</string>
+    <string name="accessibility_desc_on" msgid="2385254693624345265">"ஆன்."</string>
+    <string name="accessibility_desc_off" msgid="6475508157786853157">"ஆஃப்."</string>
     <string name="accessibility_desc_connected" msgid="8366256693719499665">"இணைக்கப்பட்டது."</string>
     <string name="accessibility_desc_connecting" msgid="3812924520316280149">"இணைக்கிறது."</string>
     <string name="data_connection_gprs" msgid="7652872568358508452">"GPRS"</string>
@@ -161,10 +163,8 @@
     <string name="accessibility_no_sim" msgid="8274017118472455155">"சிம் இல்லை."</string>
     <string name="accessibility_cell_data" msgid="5326139158682385073">"மொபைல் டேட்டா"</string>
     <string name="accessibility_cell_data_on" msgid="5927098403452994422">"மொபைல் டேட்டா இயக்கப்பட்டது"</string>
-    <!-- no translation found for cell_data_off_content_description (4356113230238585072) -->
-    <skip />
-    <!-- no translation found for cell_data_off (1051264981229902873) -->
-    <skip />
+    <string name="cell_data_off_content_description" msgid="4356113230238585072">"மொபைல் டேட்டா ஆஃப் செய்யப்பட்டது"</string>
+    <string name="cell_data_off" msgid="1051264981229902873">"ஆஃப்"</string>
     <string name="accessibility_bluetooth_tether" msgid="4102784498140271969">"புளூடூத் டெதெரிங்."</string>
     <string name="accessibility_airplane_mode" msgid="834748999790763092">"விமானப் பயன்முறை."</string>
     <string name="accessibility_vpn_on" msgid="5993385083262856059">"VPN இயக்கத்தில் உள்ளது."</string>
@@ -208,11 +208,11 @@
     <string name="accessibility_quick_settings_airplane_on" msgid="6406141469157599296">"விமானப் பயன்முறை இயக்கத்தில்."</string>
     <string name="accessibility_quick_settings_airplane_changed_off" msgid="66846307818850664">"விமானப் பயன்முறை முடக்கப்பட்டது."</string>
     <string name="accessibility_quick_settings_airplane_changed_on" msgid="8983005603505087728">"விமானப் பயன்முறை இயக்கப்பட்டது."</string>
-    <string name="accessibility_quick_settings_dnd_priority_on" msgid="5836205286254617194">"\'தொந்தரவு செய்ய வேண்டாம்\' பயன்முறை ஆனில் உள்ளது."</string>
-    <string name="accessibility_quick_settings_dnd_none_on" msgid="6882582132662613537">"தொந்தரவு செய்ய வேண்டாம் என்பது இயக்கப்பட்டது, அறிவிப்புகள் வேண்டாம்."</string>
-    <string name="accessibility_quick_settings_dnd_alarms_on" msgid="9152834845587554157">"தொந்தரவு செய்ய வேண்டாம் என்பது இயக்கப்பட்டது, அலாரங்கள் மட்டும்."</string>
+    <!-- no translation found for accessibility_quick_settings_dnd_none_on (2960643943620637020) -->
+    <skip />
+    <!-- no translation found for accessibility_quick_settings_dnd_alarms_on (3357131899365865386) -->
+    <skip />
     <string name="accessibility_quick_settings_dnd" msgid="6607873236717185815">"தொந்தரவு செய்யாதே."</string>
-    <string name="accessibility_quick_settings_dnd_off" msgid="2371832603753738581">"தொந்தரவு செய்ய வேண்டாம் என்பது முடக்கப்பட்டது."</string>
     <string name="accessibility_quick_settings_dnd_changed_off" msgid="898107593453022935">"தொந்தரவு செய்ய வேண்டாம் என்பது முடக்கப்பட்டது."</string>
     <string name="accessibility_quick_settings_dnd_changed_on" msgid="4483780856613561039">"தொந்தரவு செய்ய வேண்டாம் என்பது இயக்கப்பட்டது."</string>
     <string name="accessibility_quick_settings_bluetooth" msgid="6341675755803320038">"புளூடூத்."</string>
@@ -252,7 +252,7 @@
     <string name="data_usage_disabled_dialog_4g_title" msgid="1601769736881078016">"4G டேட்டா இடைநிறுத்தப்பட்டது"</string>
     <string name="data_usage_disabled_dialog_mobile_title" msgid="6801382439018099779">"மொபைல் டேட்டா இடைநிறுத்தப்பட்டுள்ளது"</string>
     <string name="data_usage_disabled_dialog_title" msgid="3932437232199671967">"தரவு இடைநிறுத்தப்பட்டது"</string>
-    <string name="data_usage_disabled_dialog" msgid="4919541636934603816">"நீங்கள் அமைத்த டேட்டா வரம்பை அடைந்துவிட்டீர்கள். இப்போது மொபைல் டேட்டாவைப் பயன்படுத்தவில்லை.\n\nமீண்டும் மொபைல் டேட்டாவைப் பயன்படுத்தத் தொடங்கினால், டேட்டா பயன்பாட்டிற்குக் கட்டணம் விதிக்கப்படலாம்."</string>
+    <string name="data_usage_disabled_dialog" msgid="4919541636934603816">"நீங்கள் அமைத்த டேட்டா வரம்பை அடைந்துவிட்டீர்கள். இப்போது மொபைல் டேட்டாவைப் பயன்படுத்தவில்லை.\n\nமீண்டும் மொபைல் டேட்டாவைப் பயன்படுத்தத் தொடங்கினால், டேட்டா உபயோகத்திற்குக் கட்டணம் விதிக்கப்படலாம்."</string>
     <string name="data_usage_disabled_dialog_enable" msgid="1412395410306390593">"மீண்டும் தொடங்கு"</string>
     <string name="gps_notification_searching_text" msgid="8574247005642736060">"GPS ஐத் தேடுகிறது"</string>
     <string name="gps_notification_found_text" msgid="4619274244146446464">"GPS அமைத்த இருப்பிடம்"</string>
@@ -338,7 +338,7 @@
     <string name="quick_settings_notifications_label" msgid="4818156442169154523">"அறிவிப்புகள்"</string>
     <string name="quick_settings_flashlight_label" msgid="2133093497691661546">"டார்ச் லைட்"</string>
     <string name="quick_settings_cellular_detail_title" msgid="3661194685666477347">"மொபைல் டேட்டா"</string>
-    <string name="quick_settings_cellular_detail_data_usage" msgid="1964260360259312002">"டேட்டா பயன்பாடு"</string>
+    <string name="quick_settings_cellular_detail_data_usage" msgid="1964260360259312002">"டேட்டா உபயோகம்"</string>
     <string name="quick_settings_cellular_detail_remaining_data" msgid="722715415543541249">"மீதமுள்ள தரவு"</string>
     <string name="quick_settings_cellular_detail_over_limit" msgid="967669665390990427">"வரம்பைக் கடந்தது"</string>
     <string name="quick_settings_cellular_detail_data_used" msgid="1476810587475761478">"பயன்படுத்தியது - <xliff:g id="DATA_USED">%s</xliff:g>"</string>
@@ -363,8 +363,7 @@
     <string name="recents_stack_action_button_label" msgid="6593727103310426253">"அனைத்தையும் அழி"</string>
     <string name="recents_drag_hint_message" msgid="2649739267073203985">"திரைப் பிரிப்பைப் பயன்படுத்த, இங்கே இழுக்கவும்"</string>
     <string name="recents_swipe_up_onboarding" msgid="3824607135920170001">"ஆப்ஸிற்கு இடையே மாற்றுவதற்கு, மேல்நோக்கி ஸ்வைப் செய்க"</string>
-    <!-- no translation found for recents_quick_scrub_onboarding (2778062804333285789) -->
-    <skip />
+    <string name="recents_quick_scrub_onboarding" msgid="2778062804333285789">"ஆப்ஸை வேகமாக மாற்ற, வலப்புறம் இழுக்கவும்"</string>
     <string name="recents_multistack_add_stack_dialog_split_horizontal" msgid="8848514474543427332">"கிடைமட்டமாகப் பிரி"</string>
     <string name="recents_multistack_add_stack_dialog_split_vertical" msgid="9075292233696180813">"செங்குத்தாகப் பிரி"</string>
     <string name="recents_multistack_add_stack_dialog_split_custom" msgid="4177837597513701943">"தனிவிருப்பத்தில் பிரி"</string>
@@ -598,7 +597,7 @@
     <string name="tuner_full_importance_settings" msgid="3207312268609236827">"ஆற்றல்மிக்க அறிவிப்புக் கட்டுப்பாடுகள்"</string>
     <string name="tuner_full_importance_settings_on" msgid="7545060756610299966">"ஆன்"</string>
     <string name="tuner_full_importance_settings_off" msgid="8208165412614935229">"ஆஃப்"</string>
-    <string name="power_notification_controls_description" msgid="4372459941671353358">"ஆற்றல்மிக்க அறிவிப்புக் கட்டுப்பாடுகள் மூலம், பயன்பாட்டின் அறிவிப்புகளுக்கு முக்கியத்துவ நிலையை (0-5) அமைக்கலாம். \n\n"<b>"நிலை 5"</b>" \n- அறிவிப்புப் பட்டியலின் மேலே காட்டும் \n- முழுத் திரைக் குறுக்கீட்டை அனுமதிக்கும் \n- எப்போதும் நடப்புத் திரையின் மேல் பகுதியில் அறிவிப்புகளைக் காட்டும் \n\n"<b>"நிலை 4"</b>" \n- முழுத் திரைக் குறுக்கீட்டைத் தடுக்கும் \n- எப்போதும் நடப்புத் திரையின் மேல் பகுதியில் அறிவிப்புகளைக் காட்டும் \n\n"<b>"நிலை 3"</b>" \n- முழுத் திரைக் குறுக்கீட்டைத் தடுக்கும் \n- ஒருபோதும் நடப்புத் திரையின் மேல் பகுதியில் அறிவிப்புகளைக் காட்டாது \n\n"<b>"நிலை 2"</b>" \n- முழுத் திரைக் குறுக்கீட்டைத் தடுக்கும் \n- ஒருபோதும் நடப்புத் திரையின் மேல் பகுதியில் அறிவிப்புகளைக் காட்டாது \n- ஒருபோதும் ஒலி எழுப்பாது, அதிர்வுறாது \n\n"<b>"நிலை 1"</b>" \n- முழுத் திரைக் குறுக்கீட்டைத் தடுக்கும் \n- ஒருபோதும் நடப்புத் திரையின் மேல் பகுதியில் அறிவிப்புகளைக் காட்டாது \n- ஒருபோதும் ஒலி எழுப்பாது அல்லது அதிர்வுறாது \n- பூட்டுத்திரை மற்றும் நிலைப்பட்டியிலிருந்து மறைக்கும் \n- அறிவிப்புகள் பட்டியலின் கீழே காட்டும் \n\n"<b>"நிலை 0"</b>" \n- பயன்பாட்டின் எல்லா அறிவிப்புகளையும் தடுக்கும்"</string>
+    <string name="power_notification_controls_description" msgid="4372459941671353358">"ஆற்றல்மிக்க அறிவிப்புக் கட்டுப்பாடுகள் மூலம், பயன்பாட்டின் அறிவிப்புகளுக்கு முக்கியத்துவ நிலையை (0-5) அமைக்கலாம். \n\n"<b>"நிலை 5"</b>" \n- அறிவிப்புப் பட்டியலின் மேலே காட்டும் \n- முழுத் திரைக் குறுக்கீட்டை அனுமதிக்கும் \n- எப்போதும் நடப்புத் திரையின் மேல் பகுதியில் அறிவிப்புகளைக் காட்டும் \n\n"<b>"நிலை 4"</b>" \n- முழுத் திரைக் குறுக்கீட்டைத் தடுக்கும் \n- எப்போதும் நடப்புத் திரையின் மேல் பகுதியில் அறிவிப்புகளைக் காட்டும் \n\n"<b>"நிலை 3"</b>" \n- முழுத் திரைக் குறுக்கீட்டைத் தடுக்கும் \n- ஒருபோதும் நடப்புத் திரையின் மேல் பகுதியில் அறிவிப்புகளைக் காட்டாது \n\n"<b>"நிலை 2"</b>" \n- முழுத் திரைக் குறுக்கீட்டைத் தடுக்கும் \n- ஒருபோதும் நடப்புத் திரையின் மேல் பகுதியில் அறிவிப்புகளைக் காட்டாது \n- ஒருபோதும் ஒலி எழுப்பாது, அதிர்வுறாது \n\n"<b>"நிலை 1"</b>" \n- முழுத் திரைக் குறுக்கீட்டைத் தடுக்கும் \n- ஒருபோதும் நடப்புத் திரையின் மேல் பகுதியில் அறிவிப்புகளைக் காட்டாது \n- ஒருபோதும் ஒலி எழுப்பாது அல்லது அதிர்வுறாது \n- லாக் ஸ்கிரீன் மற்றும் நிலைப்பட்டியிலிருந்து மறைக்கும் \n- அறிவிப்புகள் பட்டியலின் கீழே காட்டும் \n\n"<b>"நிலை 0"</b>" \n- பயன்பாட்டின் எல்லா அறிவிப்புகளையும் தடுக்கும்"</string>
     <string name="notification_header_default_channel" msgid="7506845022070889909">"அறிவிப்புகள்"</string>
     <string name="notification_channel_disabled" msgid="344536703863700565">"இந்த அறிவிப்புகளை இனி பார்க்கமாட்டீர்கள்"</string>
     <string name="notification_channel_minimized" msgid="1664411570378910931">"இந்த அறிவிப்புகள் சிறிதாக்கப்படும்"</string>
@@ -621,7 +620,8 @@
       <item quantity="one"><xliff:g id="PERFORMING_ACTIVITY_0">%1$s</xliff:g>ஐப் பயன்படுத்துகிறது</item>
     </plurals>
     <string name="notification_appops_settings" msgid="1028328314935908050">"அமைப்புகள்"</string>
-    <string name="notification_appops_ok" msgid="602562195588819631">"சரி"</string>
+    <!-- no translation found for notification_appops_ok (1156966426011011434) -->
+    <skip />
     <string name="notification_channel_controls_opened_accessibility" msgid="6553950422055908113">"<xliff:g id="APP_NAME">%1$s</xliff:g>க்கான அறிவிப்புக் கட்டுப்பாடுகள் திறக்கப்பட்டன"</string>
     <string name="notification_channel_controls_closed_accessibility" msgid="7521619812603693144">"<xliff:g id="APP_NAME">%1$s</xliff:g>க்கான அறிவிப்புக் கட்டுப்பாடுகள் மூடப்பட்டன"</string>
     <string name="notification_channel_switch_accessibility" msgid="3420796005601900717">"இந்தச் சேனலிலிருந்து அறிவிப்புகளைப் பெறுவதை அனுமதிக்கும்"</string>
@@ -821,9 +821,9 @@
     <string name="notification_channel_general" msgid="4525309436693914482">"பொதுச் செய்திகள்"</string>
     <string name="notification_channel_storage" msgid="3077205683020695313">"சேமிப்பிடம்"</string>
     <string name="notification_channel_hints" msgid="7323870212489152689">"குறிப்புகள்"</string>
-    <string name="instant_apps" msgid="6647570248119804907">"இன்ஸ்டண்ட் பயன்பாடுகள்"</string>
+    <string name="instant_apps" msgid="6647570248119804907">"இன்ஸ்டண்ட் ஆப்ஸ்"</string>
     <string name="instant_apps_message" msgid="8116608994995104836">"இன்ஸ்டண்ட் பயன்பாடுகளுக்கு நிறுவல் தேவையில்லை."</string>
-    <string name="app_info" msgid="6856026610594615344">"ஆப்ஸ் தகவல்"</string>
+    <string name="app_info" msgid="6856026610594615344">"பயன்பாட்டுத் தகவல்"</string>
     <string name="go_to_web" msgid="2650669128861626071">"உலாவிக்குச் செல்"</string>
     <string name="mobile_data" msgid="7094582042819250762">"மொபைல் டேட்டா"</string>
     <string name="mobile_data_text_format" msgid="3526214522670876454">"<xliff:g id="ID_1">%s</xliff:g> — <xliff:g id="ID_2">%s</xliff:g>"</string>
@@ -837,7 +837,7 @@
     <string name="qs_dnd_keep" msgid="1825009164681928736">"வைத்திரு"</string>
     <string name="qs_dnd_replace" msgid="8019520786644276623">"மாற்று"</string>
     <string name="running_foreground_services_title" msgid="381024150898615683">"பின்னணியில் இயங்கும் பயன்பாடுகள்"</string>
-    <string name="running_foreground_services_msg" msgid="6326247670075574355">"பேட்டரி மற்றும் தரவு உபயோக விவரங்களைக் காண, தட்டவும்"</string>
+    <string name="running_foreground_services_msg" msgid="6326247670075574355">"பேட்டரி மற்றும் டேட்டா உபயோக விவரங்களைக் காண, தட்டவும்"</string>
     <string name="mobile_data_disable_title" msgid="1068272097382942231">"மொபைல் டேட்டாவை ஆஃப் செய்யவா?"</string>
     <string name="mobile_data_disable_message" msgid="4756541658791493506">"<xliff:g id="CARRIER">%s</xliff:g> மொபைல் நிறுவனத்தின் மூலம் டேட்டா அல்லது இணையத்தை உங்களால் பயன்படுத்த முடியாது. வைஃபை வழியாக மட்டுமே இணையத்தைப் பயன்படுத்த முடியும்."</string>
     <string name="mobile_data_disable_message_default_carrier" msgid="6078110473451946831">"உங்கள் மொபைல் நிறுவனம்"</string>

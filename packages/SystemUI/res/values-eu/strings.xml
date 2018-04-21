@@ -95,6 +95,8 @@
     <string name="accessibility_unlock_button" msgid="128158454631118828">"Desblokeatu"</string>
     <string name="accessibility_waiting_for_fingerprint" msgid="4808860050517462885">"Hatz-markaren zain"</string>
     <string name="accessibility_unlock_without_fingerprint" msgid="7541705575183694446">"Desblokeatu hatz-markaren bidez"</string>
+    <!-- no translation found for accessibility_send_smart_reply (7766727839703044493) -->
+    <skip />
     <string name="unlock_label" msgid="8779712358041029439">"desblokeatu"</string>
     <string name="phone_label" msgid="2320074140205331708">"ireki telefonoan"</string>
     <string name="voice_assist_label" msgid="3956854378310019854">"ireki ahots-laguntza"</string>
@@ -161,10 +163,8 @@
     <string name="accessibility_no_sim" msgid="8274017118472455155">"Ez dago SIM txartelik."</string>
     <string name="accessibility_cell_data" msgid="5326139158682385073">"Datu-konexioa"</string>
     <string name="accessibility_cell_data_on" msgid="5927098403452994422">"Datu-konexioa aktibatuta"</string>
-    <!-- no translation found for cell_data_off_content_description (4356113230238585072) -->
-    <skip />
-    <!-- no translation found for cell_data_off (1051264981229902873) -->
-    <skip />
+    <string name="cell_data_off_content_description" msgid="4356113230238585072">"Desaktibatuta dago datu-konexioa"</string>
+    <string name="cell_data_off" msgid="1051264981229902873">"Desaktibatuta"</string>
     <string name="accessibility_bluetooth_tether" msgid="4102784498140271969">"Konexioa partekatzea (Bluetooth)"</string>
     <string name="accessibility_airplane_mode" msgid="834748999790763092">"Hegaldi-modua"</string>
     <string name="accessibility_vpn_on" msgid="5993385083262856059">"VPN eginbidea aktibatuta."</string>
@@ -210,11 +210,11 @@
     <string name="accessibility_quick_settings_airplane_on" msgid="6406141469157599296">"Hegaldi modua aktibatuta dago."</string>
     <string name="accessibility_quick_settings_airplane_changed_off" msgid="66846307818850664">"Hegaldi modua desaktibatu egin da."</string>
     <string name="accessibility_quick_settings_airplane_changed_on" msgid="8983005603505087728">"Hegaldi modua aktibatu egin da."</string>
-    <string name="accessibility_quick_settings_dnd_priority_on" msgid="5836205286254617194">"Aktibatuta dago \"Ez molestatu\"."</string>
-    <string name="accessibility_quick_settings_dnd_none_on" msgid="6882582132662613537">"\"Ez molestatu\" aukera aktibatuta dago, isiltasun osoa."</string>
-    <string name="accessibility_quick_settings_dnd_alarms_on" msgid="9152834845587554157">"\"Ez molestatu\" aukera aktibatuta dago, alarmak soilik."</string>
+    <!-- no translation found for accessibility_quick_settings_dnd_none_on (2960643943620637020) -->
+    <skip />
+    <!-- no translation found for accessibility_quick_settings_dnd_alarms_on (3357131899365865386) -->
+    <skip />
     <string name="accessibility_quick_settings_dnd" msgid="6607873236717185815">"Ez molestatu."</string>
-    <string name="accessibility_quick_settings_dnd_off" msgid="2371832603753738581">"\"Ez molestatu\" aukera desaktibatuta dago."</string>
     <string name="accessibility_quick_settings_dnd_changed_off" msgid="898107593453022935">"\"Ez molestatu\" aukera desaktibatuta dago."</string>
     <string name="accessibility_quick_settings_dnd_changed_on" msgid="4483780856613561039">"\"Ez molestatu\" aukera aktibatuta dago."</string>
     <string name="accessibility_quick_settings_bluetooth" msgid="6341675755803320038">"Bluetooth."</string>
@@ -315,7 +315,7 @@
     <string name="quick_settings_wifi_on_label" msgid="7607810331387031235">"Aktibatuta dago Wi-Fi konexioa"</string>
     <string name="quick_settings_wifi_detail_empty_text" msgid="269990350383909226">"Ez dago Wi-Fi sarerik erabilgarri"</string>
     <string name="quick_settings_wifi_secondary_label_transient" msgid="7748206246119760554">"Aktibatzen…"</string>
-    <string name="quick_settings_cast_title" msgid="7709016546426454729">"Cast"</string>
+    <string name="quick_settings_cast_title" msgid="7709016546426454729">"Igorri"</string>
     <string name="quick_settings_casting" msgid="6601710681033353316">"Igortzen"</string>
     <string name="quick_settings_cast_device_default_name" msgid="5367253104742382945">"Izenik gabeko gailua"</string>
     <string name="quick_settings_cast_device_default_description" msgid="2484573682378634413">"Igortzeko prest"</string>
@@ -365,8 +365,7 @@
     <string name="recents_stack_action_button_label" msgid="6593727103310426253">"Garbitu guztiak"</string>
     <string name="recents_drag_hint_message" msgid="2649739267073203985">"Arrastatu hau pantaila zatitzeko"</string>
     <string name="recents_swipe_up_onboarding" msgid="3824607135920170001">"Egin gora aplikazioa aldatzeko"</string>
-    <!-- no translation found for recents_quick_scrub_onboarding (2778062804333285789) -->
-    <skip />
+    <string name="recents_quick_scrub_onboarding" msgid="2778062804333285789">"Arrastatu eskuinera aplikazioa azkar aldatzeko"</string>
     <string name="recents_multistack_add_stack_dialog_split_horizontal" msgid="8848514474543427332">"Zatitze horizontala"</string>
     <string name="recents_multistack_add_stack_dialog_split_vertical" msgid="9075292233696180813">"Zatitze bertikala"</string>
     <string name="recents_multistack_add_stack_dialog_split_custom" msgid="4177837597513701943">"Zatitze pertsonalizatua"</string>
@@ -389,7 +388,7 @@
     <string name="keyguard_more_overflow_text" msgid="9195222469041601365">"+<xliff:g id="NUMBER_OF_NOTIFICATIONS">%d</xliff:g>"</string>
     <string name="speed_bump_explanation" msgid="1288875699658819755">"Horren premiazkoak ez diren jakinarazpenak daude behean"</string>
     <string name="notification_tap_again" msgid="7590196980943943842">"Irekitzeko, ukitu berriro"</string>
-    <string name="keyguard_unlock" msgid="8043466894212841998">"Desblokeatzeko, pasatu hatza gorantz"</string>
+    <string name="keyguard_unlock" msgid="8043466894212841998">"Desblokeatzeko, pasatu hatza gora"</string>
     <string name="do_disclosure_generic" msgid="5615898451805157556">"Zure erakundeak kudeatzen du gailua"</string>
     <string name="do_disclosure_with_name" msgid="5640615509915445501">"<xliff:g id="ORGANIZATION_NAME">%s</xliff:g> erakundeak kudeatzen du gailu hau"</string>
     <string name="phone_hint" msgid="4872890986869209950">"Pasatu hatza ikonotik, telefonoa irekitzeko"</string>
@@ -623,7 +622,8 @@
       <item quantity="one"><xliff:g id="PERFORMING_ACTIVITY_0">%1$s</xliff:g> erabiltzen</item>
     </plurals>
     <string name="notification_appops_settings" msgid="1028328314935908050">"Ezarpenak"</string>
-    <string name="notification_appops_ok" msgid="602562195588819631">"Ados"</string>
+    <!-- no translation found for notification_appops_ok (1156966426011011434) -->
+    <skip />
     <string name="notification_channel_controls_opened_accessibility" msgid="6553950422055908113">"Ireki dira <xliff:g id="APP_NAME">%1$s</xliff:g> aplikazioaren jakinarazpenak kontrolatzeko aukerak"</string>
     <string name="notification_channel_controls_closed_accessibility" msgid="7521619812603693144">"Itxi dira <xliff:g id="APP_NAME">%1$s</xliff:g> aplikazioaren jakinarazpenak kontrolatzeko aukerak"</string>
     <string name="notification_channel_switch_accessibility" msgid="3420796005601900717">"Onartu kanal honen jakinarazpenak"</string>

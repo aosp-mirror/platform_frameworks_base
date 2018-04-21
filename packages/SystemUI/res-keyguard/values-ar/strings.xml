@@ -164,14 +164,7 @@
       <item quantity="one">لم يتم إلغاء تأمين الجهاز لمدة <xliff:g id="NUMBER_0">%d</xliff:g> ساعة. تأكيد كلمة المرور.</item>
     </plurals>
     <string name="fingerprint_not_recognized" msgid="348813995267914625">"لم يتم التعرف عليها"</string>
-    <plurals name="kg_password_default_pin_message" formatted="false" msgid="6203676909479972943">
-      <item quantity="zero">‏أدخل رقم التعريف الشخصي لشريحة SIM، وتتبقى لديك <xliff:g id="NUMBER_1">%d</xliff:g> محاولات.</item>
-      <item quantity="two">‏أدخل رقم التعريف الشخصي لشريحة SIM، وتتبقى لديك محاولتان (<xliff:g id="NUMBER_1">%d</xliff:g>).</item>
-      <item quantity="few">‏أدخل رقم التعريف الشخصي لشريحة SIM، وتتبقى لديك <xliff:g id="NUMBER_1">%d</xliff:g> محاولات.</item>
-      <item quantity="many">‏أدخل رقم التعريف الشخصي لشريحة SIM، وتتبقى لديك <xliff:g id="NUMBER_1">%d</xliff:g> محاولة.</item>
-      <item quantity="other">‏أدخل رقم التعريف الشخصي لشريحة SIM، وتتبقى لديك <xliff:g id="NUMBER_1">%d</xliff:g> محاولة.</item>
-      <item quantity="one">‏أدخل رقم التعريف الشخصي لشريحة SIM، وتتبقى لديك محاولة واحدة (<xliff:g id="NUMBER_0">%d</xliff:g>) يجب أن تتصل بعدها بمشغّل شبكة الجوّال لإلغاء قفل الجهاز.</item>
-    </plurals>
+    <!-- no translation found for kg_password_default_pin_message (3739658416797652781) -->
     <plurals name="kg_password_default_puk_message" formatted="false" msgid="8744416410184198352">
       <item quantity="zero">‏تم إيقاف شريحة SIM الآن. أدخل رمز PUK للمتابعة، وتتبقى لديك <xliff:g id="_NUMBER_1">%d</xliff:g> محاولة قبل أن تصبح شريحة SIM غير صالحة للاستخدام نهائيًا. ويمكنك الاتصال بمشغل شبكة الجوّال لمعرفة التفاصيل.</item>
       <item quantity="two">‏تم إيقاف شريحة SIM الآن. أدخل رمز PUK للمتابعة، وتتبقى لديك محاولتان (<xliff:g id="_NUMBER_1">%d</xliff:g>) قبل أن تصبح شريحة SIM غير صالحة للاستخدام نهائيًا. ويمكنك الاتصال بمشغل شبكة الجوّال لمعرفة التفاصيل.</item>

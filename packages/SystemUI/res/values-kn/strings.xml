@@ -95,6 +95,8 @@
     <string name="accessibility_unlock_button" msgid="128158454631118828">"ಅನ್‌ಲಾಕ್"</string>
     <string name="accessibility_waiting_for_fingerprint" msgid="4808860050517462885">"ಫಿಂಗರ್ ಪ್ರಿಂಟ್ ನಿರೀಕ್ಷಿಸಲಾಗುತ್ತಿದೆ"</string>
     <string name="accessibility_unlock_without_fingerprint" msgid="7541705575183694446">"ನಿಮ್ಮ ಬೆರಳಚ್ಚು ಬಳಸದೆಯೇ ಅನ್‌ಲಾಕ್ ಮಾಡಿ"</string>
+    <!-- no translation found for accessibility_send_smart_reply (7766727839703044493) -->
+    <skip />
     <string name="unlock_label" msgid="8779712358041029439">"ಅನ್‌ಲಾಕ್ ಮಾಡು"</string>
     <string name="phone_label" msgid="2320074140205331708">"ಫೋನ್ ತೆರೆಯಿರಿ"</string>
     <string name="voice_assist_label" msgid="3956854378310019854">"ಧ್ವನಿ ಸಹಾಯಕವನ್ನು ತೆರೆ"</string>
@@ -161,10 +163,8 @@
     <string name="accessibility_no_sim" msgid="8274017118472455155">"ಯಾವುದೇ ಸಿಮ್‌ ಇಲ್ಲ."</string>
     <string name="accessibility_cell_data" msgid="5326139158682385073">"ಮೊಬೈಲ್ ಡೇಟಾ"</string>
     <string name="accessibility_cell_data_on" msgid="5927098403452994422">"ಮೊಬೈಲ್ ಡೇಟಾ ಆನ್"</string>
-    <!-- no translation found for cell_data_off_content_description (4356113230238585072) -->
-    <skip />
-    <!-- no translation found for cell_data_off (1051264981229902873) -->
-    <skip />
+    <string name="cell_data_off_content_description" msgid="4356113230238585072">"ಮೊಬೈಲ್ ಡೇಟಾ ಆಫ್"</string>
+    <string name="cell_data_off" msgid="1051264981229902873">"ಆಫ್"</string>
     <string name="accessibility_bluetooth_tether" msgid="4102784498140271969">"ಬ್ಲೂಟೂತ್‌‌ ಟೆಥರಿಂಗ್."</string>
     <string name="accessibility_airplane_mode" msgid="834748999790763092">"ಏರೋಪ್ಲೇನ್‌ ಮೋಡ್‌"</string>
     <string name="accessibility_vpn_on" msgid="5993385083262856059">"ನಲ್ಲಿ VPN"</string>
@@ -208,11 +208,11 @@
     <string name="accessibility_quick_settings_airplane_on" msgid="6406141469157599296">"ಏರ್‌ಪ್ಲೇನ್ ಮೋಡ್ ಆನ್ ಮಾಡಲಾಗಿದೆ."</string>
     <string name="accessibility_quick_settings_airplane_changed_off" msgid="66846307818850664">"ಏರ್‌ಪ್ಲೇನ್ ಮೋಡ್ ಅನ್ನು ಆಫ್ ಮಾಡಲಾಗಿದೆ."</string>
     <string name="accessibility_quick_settings_airplane_changed_on" msgid="8983005603505087728">"ಏರ್‌ಪ್ಲೇನ್ ಮೋಡ್ ಅನ್ನು ಆನ್ ಮಾಡಲಾಗಿದೆ."</string>
-    <string name="accessibility_quick_settings_dnd_priority_on" msgid="5836205286254617194">"ಅಡಚಣೆ ಮಾಡಬೇಡಿ ಆನ್ ಆಗಿದೆ"</string>
-    <string name="accessibility_quick_settings_dnd_none_on" msgid="6882582132662613537">"ಅಡಚಣೆ ಮಾಡಬೇಡಿ ಆನ್ ಆಗಿದೆ, ಒಟ್ಟು ನಿಶ್ಯಬ್ಧ."</string>
-    <string name="accessibility_quick_settings_dnd_alarms_on" msgid="9152834845587554157">"ಅಲಾರಮ್‌‌ಗಳಿಗೆ ಮಾತ್ರ ಅಡಚಣೆ ಮಾಡಬೇಡಿ."</string>
+    <!-- no translation found for accessibility_quick_settings_dnd_none_on (2960643943620637020) -->
+    <skip />
+    <!-- no translation found for accessibility_quick_settings_dnd_alarms_on (3357131899365865386) -->
+    <skip />
     <string name="accessibility_quick_settings_dnd" msgid="6607873236717185815">"ಅಡಚಣೆ ಮಾಡಬೇಡಿ."</string>
-    <string name="accessibility_quick_settings_dnd_off" msgid="2371832603753738581">"ಅಡಚಣೆ ಮಾಡಬೇಡಿ ಆಫ್ ಆಗಿದೆ."</string>
     <string name="accessibility_quick_settings_dnd_changed_off" msgid="898107593453022935">"ತೊಂದರೆ ಮಾಡಬೇಡಿ ಆಫ್ ಮಾಡಲಾಗಿದೆ."</string>
     <string name="accessibility_quick_settings_dnd_changed_on" msgid="4483780856613561039">"ಅಡಚಣೆ ಮಾಡಬೇಡಿ ಆನ್ ಮಾಡಲಾಗಿದೆ."</string>
     <string name="accessibility_quick_settings_bluetooth" msgid="6341675755803320038">"ಬ್ಲೂಟೂತ್."</string>
@@ -363,8 +363,7 @@
     <string name="recents_stack_action_button_label" msgid="6593727103310426253">"ಎಲ್ಲವನ್ನೂ ತೆರವುಗೊಳಿಸಿ"</string>
     <string name="recents_drag_hint_message" msgid="2649739267073203985">"ವಿಭಜಿತ ಪರದೆಯನ್ನು ಬಳಸಲು ಇಲ್ಲಿ ಡ್ರ್ಯಾಗ್‌ ಮಾಡಿ"</string>
     <string name="recents_swipe_up_onboarding" msgid="3824607135920170001">"ಅಪ್ಲಿಕೇಶನ್‌ಗಳನ್ನು ಬದಲಾಯಿಸಲು ಸ್ವೈಪ್ ಮಾಡಿ"</string>
-    <!-- no translation found for recents_quick_scrub_onboarding (2778062804333285789) -->
-    <skip />
+    <string name="recents_quick_scrub_onboarding" msgid="2778062804333285789">"ಅಪ್ಲಿಕೇಶನ್‌ಗಳನ್ನು ಬದಲಿಸಲು ತ್ವರಿತವಾಗಿ ಬಲಕ್ಕೆ ಡ್ರ್ಯಾಗ್ ಮಾಡಿ"</string>
     <string name="recents_multistack_add_stack_dialog_split_horizontal" msgid="8848514474543427332">"ಅಡ್ಡಲಾಗಿ ವಿಭಜಿಸಿದ"</string>
     <string name="recents_multistack_add_stack_dialog_split_vertical" msgid="9075292233696180813">"ಲಂಬವಾಗಿ ವಿಭಜಿಸಿದ"</string>
     <string name="recents_multistack_add_stack_dialog_split_custom" msgid="4177837597513701943">"ಕಸ್ಟಮ್ ವಿಭಜಿಸಿದ"</string>
@@ -621,7 +620,8 @@
       <item quantity="other"><xliff:g id="PERFORMING_ACTIVITY_1">%1$s</xliff:g> ಮತ್ತು <xliff:g id="PERFORMING_ACTIVITY_2">%2$s</xliff:g> ಅನ್ನು ಬಳಸಿಕೊಂಡು</item>
     </plurals>
     <string name="notification_appops_settings" msgid="1028328314935908050">"ಸೆಟ್ಟಿಂಗ್‌ಗಳು"</string>
-    <string name="notification_appops_ok" msgid="602562195588819631">"ಸರಿ"</string>
+    <!-- no translation found for notification_appops_ok (1156966426011011434) -->
+    <skip />
     <string name="notification_channel_controls_opened_accessibility" msgid="6553950422055908113">"<xliff:g id="APP_NAME">%1$s</xliff:g> ನ ಅಧಿಸೂಚನೆ ನಿಯಂತ್ರಣಗಳನ್ನು ತೆರೆಯಲಾಗಿದೆ"</string>
     <string name="notification_channel_controls_closed_accessibility" msgid="7521619812603693144">"<xliff:g id="APP_NAME">%1$s</xliff:g> ನ ಅಧಿಸೂಚನೆ ನಿಯಂತ್ರಣಗಳನ್ನು ಮುಚ್ಚಲಾಗಿದೆ"</string>
     <string name="notification_channel_switch_accessibility" msgid="3420796005601900717">"ಈ ಚಾನಲ್‌ನ ಅಧಿಸೂಚನೆಗಳಿಗೆ ಅನುಮತಿ ನೀಡಿ"</string>

@@ -52,7 +52,7 @@
     <string name="status_bar_settings_notifications" msgid="397146176280905137">"Хабарлар"</string>
     <string name="bluetooth_tethered" msgid="7094101612161133267">"Bluetooth қосылды"</string>
     <string name="status_bar_input_method_settings_configure_input_methods" msgid="3504292471512317827">"Енгізу әдістерін орнату"</string>
-    <string name="status_bar_use_physical_keyboard" msgid="7551903084416057810">"Қатты пернетақта"</string>
+    <string name="status_bar_use_physical_keyboard" msgid="7551903084416057810">"Физикалық пернетақта"</string>
     <string name="usb_device_permission_prompt" msgid="1825685909587559679">"<xliff:g id="APPLICATION">%1$s</xliff:g> қолданбасына <xliff:g id="USB_DEVICE">%2$s</xliff:g> құрылғысына кіруге рұқсат берілсін бе?"</string>
     <string name="usb_accessory_permission_prompt" msgid="2465531696941369047">"<xliff:g id="APPLICATION">%1$s</xliff:g> қолданбасына <xliff:g id="USB_ACCESSORY">%2$s</xliff:g> жабдығына кіруге рұқсат берілсін бе?"</string>
     <string name="usb_device_confirm_prompt" msgid="7440562274256843905">"<xliff:g id="USB_DEVICE">%2$s</xliff:g> жабдығын басқару үшін <xliff:g id="APPLICATION">%1$s</xliff:g> ашылсын ба?"</string>
@@ -95,6 +95,8 @@
     <string name="accessibility_unlock_button" msgid="128158454631118828">"Бекітпесін ашу"</string>
     <string name="accessibility_waiting_for_fingerprint" msgid="4808860050517462885">"Саусақ ізі күтілуде"</string>
     <string name="accessibility_unlock_without_fingerprint" msgid="7541705575183694446">"Саусақ ізін пайдаланбай құлыпты ашу"</string>
+    <!-- no translation found for accessibility_send_smart_reply (7766727839703044493) -->
+    <skip />
     <string name="unlock_label" msgid="8779712358041029439">"бекітпесін ашу"</string>
     <string name="phone_label" msgid="2320074140205331708">"телефонды ашу"</string>
     <string name="voice_assist_label" msgid="3956854378310019854">"ашық дауыс көмекшісі"</string>
@@ -161,10 +163,8 @@
     <string name="accessibility_no_sim" msgid="8274017118472455155">"SIM жоқ."</string>
     <string name="accessibility_cell_data" msgid="5326139158682385073">"Мобильдік дерекқор"</string>
     <string name="accessibility_cell_data_on" msgid="5927098403452994422">"Мобильдік деректер қосулы"</string>
-    <!-- no translation found for cell_data_off_content_description (4356113230238585072) -->
-    <skip />
-    <!-- no translation found for cell_data_off (1051264981229902873) -->
-    <skip />
+    <string name="cell_data_off_content_description" msgid="4356113230238585072">"Мобильдік деректер өшірулі"</string>
+    <string name="cell_data_off" msgid="1051264981229902873">"Өшірулі"</string>
     <string name="accessibility_bluetooth_tether" msgid="4102784498140271969">"Bluetooth тетеринг."</string>
     <string name="accessibility_airplane_mode" msgid="834748999790763092">"Ұшақ режимі."</string>
     <string name="accessibility_vpn_on" msgid="5993385083262856059">"VPN қосулы."</string>
@@ -208,11 +208,11 @@
     <string name="accessibility_quick_settings_airplane_on" msgid="6406141469157599296">"Ұшақ режимі қосулы."</string>
     <string name="accessibility_quick_settings_airplane_changed_off" msgid="66846307818850664">"Ұшақ режимі өшірілді."</string>
     <string name="accessibility_quick_settings_airplane_changed_on" msgid="8983005603505087728">"Ұшақ режимі қосылды."</string>
-    <string name="accessibility_quick_settings_dnd_priority_on" msgid="5836205286254617194">"\"Мазаламау\" режимі қосулы."</string>
-    <string name="accessibility_quick_settings_dnd_none_on" msgid="6882582132662613537">"Мазаламау режимі қосулы, толық тыныштық."</string>
-    <string name="accessibility_quick_settings_dnd_alarms_on" msgid="9152834845587554157">"Кедергі жасамаңыз, тек дабылдар."</string>
+    <!-- no translation found for accessibility_quick_settings_dnd_none_on (2960643943620637020) -->
+    <skip />
+    <!-- no translation found for accessibility_quick_settings_dnd_alarms_on (3357131899365865386) -->
+    <skip />
     <string name="accessibility_quick_settings_dnd" msgid="6607873236717185815">"Мазаламау."</string>
-    <string name="accessibility_quick_settings_dnd_off" msgid="2371832603753738581">"Мазаламау режимі өшірулі"</string>
     <string name="accessibility_quick_settings_dnd_changed_off" msgid="898107593453022935">"Мазаламау режимі өшірілді."</string>
     <string name="accessibility_quick_settings_dnd_changed_on" msgid="4483780856613561039">"Мазаламау режимі қосылды."</string>
     <string name="accessibility_quick_settings_bluetooth" msgid="6341675755803320038">"Bluetooth."</string>
@@ -328,7 +328,7 @@
     <string name="quick_settings_connected_battery_level" msgid="4136051440381328892">"Қосылды, батарея деңгейі: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
     <string name="quick_settings_connecting" msgid="47623027419264404">"Қосылуда…"</string>
     <string name="quick_settings_tethering_label" msgid="7153452060448575549">"Тетеринг"</string>
-    <string name="quick_settings_hotspot_label" msgid="6046917934974004879">"Хот-спот"</string>
+    <string name="quick_settings_hotspot_label" msgid="6046917934974004879">"Хотспот"</string>
     <string name="quick_settings_hotspot_secondary_label_transient" msgid="8010579363691405477">"Қосылуда…"</string>
     <string name="quick_settings_hotspot_secondary_label_data_saver_enabled" msgid="5672131949987422420">"Data Saver қосулы"</string>
     <plurals name="quick_settings_hotspot_secondary_label_num_devices" formatted="false" msgid="2324635800672199428">
@@ -338,7 +338,7 @@
     <string name="quick_settings_notifications_label" msgid="4818156442169154523">"Хабарландырулар"</string>
     <string name="quick_settings_flashlight_label" msgid="2133093497691661546">"Қалта шам"</string>
     <string name="quick_settings_cellular_detail_title" msgid="3661194685666477347">"Мобильдік деректер"</string>
-    <string name="quick_settings_cellular_detail_data_usage" msgid="1964260360259312002">"Деректерді пайдалану"</string>
+    <string name="quick_settings_cellular_detail_data_usage" msgid="1964260360259312002">"Дерек шығыны"</string>
     <string name="quick_settings_cellular_detail_remaining_data" msgid="722715415543541249">"Қалған деректер"</string>
     <string name="quick_settings_cellular_detail_over_limit" msgid="967669665390990427">"Шектен асу"</string>
     <string name="quick_settings_cellular_detail_data_used" msgid="1476810587475761478">"<xliff:g id="DATA_USED">%s</xliff:g> пайдаланылған"</string>
@@ -363,8 +363,7 @@
     <string name="recents_stack_action_button_label" msgid="6593727103310426253">"Барлығын тазалау"</string>
     <string name="recents_drag_hint_message" msgid="2649739267073203985">"Бөлінген экранды пайдалану үшін осында сүйреңіз"</string>
     <string name="recents_swipe_up_onboarding" msgid="3824607135920170001">"Қолданбалар арасында ауысу үшін жоғары сырғытыңыз"</string>
-    <!-- no translation found for recents_quick_scrub_onboarding (2778062804333285789) -->
-    <skip />
+    <string name="recents_quick_scrub_onboarding" msgid="2778062804333285789">"Қолданбаларды жылдам ауыстырып қосу үшін оңға қарай сүйреңіз"</string>
     <string name="recents_multistack_add_stack_dialog_split_horizontal" msgid="8848514474543427332">"Бөлінген көлденең"</string>
     <string name="recents_multistack_add_stack_dialog_split_vertical" msgid="9075292233696180813">"Бөлінген тік"</string>
     <string name="recents_multistack_add_stack_dialog_split_custom" msgid="4177837597513701943">"Бөлінген теңшелетін"</string>
@@ -573,7 +572,7 @@
     <string name="alarm_template" msgid="3980063409350522735">"<xliff:g id="WHEN">%1$s</xliff:g>"</string>
     <string name="alarm_template_far" msgid="4242179982586714810">"<xliff:g id="WHEN">%1$s</xliff:g>"</string>
     <string name="accessibility_quick_settings_detail" msgid="2579369091672902101">"Жылдам параметрлер, <xliff:g id="TITLE">%s</xliff:g>."</string>
-    <string name="accessibility_status_bar_hotspot" msgid="4099381329956402865">"Хот-спот"</string>
+    <string name="accessibility_status_bar_hotspot" msgid="4099381329956402865">"Хотспот"</string>
     <string name="accessibility_managed_profile" msgid="6613641363112584120">"Жұмыс профилі"</string>
     <string name="tuner_warning_title" msgid="7094689930793031682">"Кейбіреулерге қызық, бірақ барлығына емес"</string>
     <string name="tuner_warning" msgid="8730648121973575701">"Жүйелік пайдаланушылық интерфейс тюнері Android пайдаланушылық интерфейсін реттеудің қосымша жолдарын береді. Бұл эксперименттік мүмкіндіктер болашақ шығарылымдарда өзгеруі, бұзылуы немесе жоғалуы мүмкін. Сақтықпен жалғастырыңыз."</string>
@@ -621,7 +620,8 @@
       <item quantity="one"><xliff:g id="PERFORMING_ACTIVITY_0">%1$s</xliff:g> пайдалануда</item>
     </plurals>
     <string name="notification_appops_settings" msgid="1028328314935908050">"Параметрлер"</string>
-    <string name="notification_appops_ok" msgid="602562195588819631">"Жарайды"</string>
+    <!-- no translation found for notification_appops_ok (1156966426011011434) -->
+    <skip />
     <string name="notification_channel_controls_opened_accessibility" msgid="6553950422055908113">"<xliff:g id="APP_NAME">%1$s</xliff:g> хабарландыруларын басқару элементтері ашылды"</string>
     <string name="notification_channel_controls_closed_accessibility" msgid="7521619812603693144">"<xliff:g id="APP_NAME">%1$s</xliff:g> хабарландыруларын басқару элементтері жабылды"</string>
     <string name="notification_channel_switch_accessibility" msgid="3420796005601900717">"Осы арнадан келетін хабарландыруларға рұқсат беру"</string>
@@ -699,7 +699,7 @@
     <string name="accessibility_long_click_tile" msgid="6687350750091842525">"Параметрлерді ашу"</string>
     <string name="accessibility_status_bar_headphones" msgid="9156307120060559989">"Құлақаспап қосылды"</string>
     <string name="accessibility_status_bar_headset" msgid="8666419213072449202">"Құлақаспап жинағы қосылды"</string>
-    <string name="data_saver" msgid="5037565123367048522">"Трафикті үнемдеу"</string>
+    <string name="data_saver" msgid="5037565123367048522">"Data Saver"</string>
     <string name="accessibility_data_saver_on" msgid="8454111686783887148">"Дерек сақтағыш қосулы"</string>
     <string name="accessibility_data_saver_off" msgid="8841582529453005337">"Дерек сақтағышы өшірулі"</string>
     <string name="switch_bar_on" msgid="1142437840752794229">"Қосулы"</string>
@@ -731,7 +731,7 @@
     <string name="right_keycode" msgid="708447961000848163">"Оң жақ кілт коды"</string>
     <string name="left_icon" msgid="3096287125959387541">"Сол жақ белгіше"</string>
     <string name="right_icon" msgid="3952104823293824311">"Оң жақ белгіше"</string>
-    <string name="drag_to_add_tiles" msgid="230586591689084925">"Бөлшектер қосу үшін ұстап тұрып сүйреңіз"</string>
+    <string name="drag_to_add_tiles" msgid="230586591689084925">"Қажетті элементтерді сүйреп әкеліп қойыңыз"</string>
     <string name="drag_to_remove_tiles" msgid="3361212377437088062">"Керексіздерін осы жерге сүйреңіз"</string>
     <string name="drag_to_remove_disabled" msgid="2390968976638993382">"Кемінде 6 бөлшек қажет"</string>
     <string name="qs_edit" msgid="2232596095725105230">"Өңдеу"</string>

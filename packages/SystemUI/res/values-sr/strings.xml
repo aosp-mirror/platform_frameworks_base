@@ -96,6 +96,8 @@
     <string name="accessibility_unlock_button" msgid="128158454631118828">"Откључајте"</string>
     <string name="accessibility_waiting_for_fingerprint" msgid="4808860050517462885">"Чека се отисак прста"</string>
     <string name="accessibility_unlock_without_fingerprint" msgid="7541705575183694446">"Откључај без коришћења отиска прста"</string>
+    <!-- no translation found for accessibility_send_smart_reply (7766727839703044493) -->
+    <skip />
     <string name="unlock_label" msgid="8779712358041029439">"откључај"</string>
     <string name="phone_label" msgid="2320074140205331708">"отвори телефон"</string>
     <string name="voice_assist_label" msgid="3956854378310019854">"отвори гласовну помоћ"</string>
@@ -162,10 +164,8 @@
     <string name="accessibility_no_sim" msgid="8274017118472455155">"Нема SIM картице."</string>
     <string name="accessibility_cell_data" msgid="5326139158682385073">"Мобилни подаци"</string>
     <string name="accessibility_cell_data_on" msgid="5927098403452994422">"Мобилни подаци су укључени"</string>
-    <!-- no translation found for cell_data_off_content_description (4356113230238585072) -->
-    <skip />
-    <!-- no translation found for cell_data_off (1051264981229902873) -->
-    <skip />
+    <string name="cell_data_off_content_description" msgid="4356113230238585072">"Мобилни подаци су искључени"</string>
+    <string name="cell_data_off" msgid="1051264981229902873">"Искључено"</string>
     <string name="accessibility_bluetooth_tether" msgid="4102784498140271969">"Bluetooth привезивање."</string>
     <string name="accessibility_airplane_mode" msgid="834748999790763092">"Режим рада у авиону."</string>
     <string name="accessibility_vpn_on" msgid="5993385083262856059">"VPN је укључен."</string>
@@ -209,11 +209,11 @@
     <string name="accessibility_quick_settings_airplane_on" msgid="6406141469157599296">"Режим рада у авиону је укључен."</string>
     <string name="accessibility_quick_settings_airplane_changed_off" msgid="66846307818850664">"Режим рада у авиону је искључен."</string>
     <string name="accessibility_quick_settings_airplane_changed_on" msgid="8983005603505087728">"Режим рада у авиону је укључен."</string>
-    <string name="accessibility_quick_settings_dnd_priority_on" msgid="5836205286254617194">"Режим Не узнемиравај је укључен."</string>
-    <string name="accessibility_quick_settings_dnd_none_on" msgid="6882582132662613537">"Подешавање Не узнемиравај је укључено, потпуна тишина."</string>
-    <string name="accessibility_quick_settings_dnd_alarms_on" msgid="9152834845587554157">"Подешавање Не узнемиравај је укључено, само аларми."</string>
+    <!-- no translation found for accessibility_quick_settings_dnd_none_on (2960643943620637020) -->
+    <skip />
+    <!-- no translation found for accessibility_quick_settings_dnd_alarms_on (3357131899365865386) -->
+    <skip />
     <string name="accessibility_quick_settings_dnd" msgid="6607873236717185815">"Не узнемиравај."</string>
-    <string name="accessibility_quick_settings_dnd_off" msgid="2371832603753738581">"Подешавање Не узнемиравај је искључено."</string>
     <string name="accessibility_quick_settings_dnd_changed_off" msgid="898107593453022935">"Подешавање Не узнемиравај је искључено."</string>
     <string name="accessibility_quick_settings_dnd_changed_on" msgid="4483780856613561039">"Подешавање Не узнемиравај је укључено."</string>
     <string name="accessibility_quick_settings_bluetooth" msgid="6341675755803320038">"Bluetooth."</string>
@@ -366,8 +366,7 @@
     <string name="recents_stack_action_button_label" msgid="6593727103310426253">"Обриши све"</string>
     <string name="recents_drag_hint_message" msgid="2649739267073203985">"Превуците овде да бисте користили раздељени екран"</string>
     <string name="recents_swipe_up_onboarding" msgid="3824607135920170001">"Превуците нагоре да бисте мењали апликације"</string>
-    <!-- no translation found for recents_quick_scrub_onboarding (2778062804333285789) -->
-    <skip />
+    <string name="recents_quick_scrub_onboarding" msgid="2778062804333285789">"Превуците удесно да бисте брзо променили апликације"</string>
     <string name="recents_multistack_add_stack_dialog_split_horizontal" msgid="8848514474543427332">"Подели хоризонтално"</string>
     <string name="recents_multistack_add_stack_dialog_split_vertical" msgid="9075292233696180813">"Подели вертикално"</string>
     <string name="recents_multistack_add_stack_dialog_split_custom" msgid="4177837597513701943">"Прилагођено дељење"</string>
@@ -626,7 +625,8 @@
       <item quantity="other">користи <xliff:g id="PERFORMING_ACTIVITY_1">%1$s</xliff:g>  <xliff:g id="PERFORMING_ACTIVITY_2">%2$s</xliff:g></item>
     </plurals>
     <string name="notification_appops_settings" msgid="1028328314935908050">"Подешавања"</string>
-    <string name="notification_appops_ok" msgid="602562195588819631">"Потврди"</string>
+    <!-- no translation found for notification_appops_ok (1156966426011011434) -->
+    <skip />
     <string name="notification_channel_controls_opened_accessibility" msgid="6553950422055908113">"Контроле обавештења за отварање апликације <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="notification_channel_controls_closed_accessibility" msgid="7521619812603693144">"Контроле обавештења за затварање апликације <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="notification_channel_switch_accessibility" msgid="3420796005601900717">"Дозволи обавештења са овог канала"</string>

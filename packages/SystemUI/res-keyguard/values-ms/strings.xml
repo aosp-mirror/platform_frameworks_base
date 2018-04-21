@@ -140,10 +140,7 @@
       <item quantity="one">Peranti tidak dibuka kuncinya selama <xliff:g id="NUMBER_0">%d</xliff:g> jam. Sahkan kata laluan.</item>
     </plurals>
     <string name="fingerprint_not_recognized" msgid="348813995267914625">"Tidak dikenali"</string>
-    <plurals name="kg_password_default_pin_message" formatted="false" msgid="6203676909479972943">
-      <item quantity="other">Masukkan PIN SIM, tinggal <xliff:g id="NUMBER_1">%d</xliff:g> percubaan lagi.</item>
-      <item quantity="one">Masukkan PIN SIM, tinggal <xliff:g id="NUMBER_0">%d</xliff:g> percubaan lagi sebelum anda harus menghubungi pembawa anda untuk membuka kunci peranti.</item>
-    </plurals>
+    <!-- no translation found for kg_password_default_pin_message (3739658416797652781) -->
     <plurals name="kg_password_default_puk_message" formatted="false" msgid="8744416410184198352">
       <item quantity="other">Kini SIM dilumpuhkan. Masukkan kod PUK untuk meneruskan. Tinggal <xliff:g id="_NUMBER_1">%d</xliff:g> percubaan sebelum SIM tidak boleh digunakan secara kekal. Hubungi pembawa untuk mendapatkan butiran.</item>
       <item quantity="one">Kini SIM dilumpuhkan. Masukkan kod PUK untuk meneruskan. Tinggal <xliff:g id="_NUMBER_0">%d</xliff:g> percubaan sebelum SIM tidak boleh digunakan secara kekal. Hubungi pembawa untuk mendapatkan butiran.</item>
