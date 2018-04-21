@@ -1691,7 +1691,7 @@
     <string name="package_installed_device_owner" msgid="6875717669960212648">"మీ నిర్వాహకులు ఇన్‌స్టాల్ చేసారు"</string>
     <string name="package_updated_device_owner" msgid="1847154566357862089">"మీ నిర్వాహకులు నవీకరించారు"</string>
     <string name="package_deleted_device_owner" msgid="2307122077550236438">"మీ నిర్వాహకులు తొలగించారు"</string>
-    <string name="battery_saver_description" msgid="769989536172631582">"మీ బ్యాటరీ జీవితకాలాన్ని పెంచుకోవాలనుకుంటే, బ్యాటరీ సేవర్ కొన్ని పరికర ఫీచర్‌లను ఆఫ్ చేస్తుంది మరియు కొన్ని యాప్‌లను పరిమితం చేస్తుంది."</string>
+    <string name="battery_saver_description" msgid="769989536172631582">"మీ బ్యాటరీ జీవితకాలాన్ని పెంచడానికి, బ్యాటరీ సేవర్ కొన్ని పరికర ఫీచర్‌లను ఆఫ్ చేస్తుంది మరియు కొన్ని యాప్‌లను పరిమితం చేస్తుంది."</string>
     <string name="data_saver_description" msgid="6015391409098303235">"డేటా వినియోగాన్ని తగ్గించడంలో సహాయకరంగా ఉండటానికి, డేటా సేవర్ కొన్ని యాప్‌లను నేపథ్యంలో డేటాను పంపకుండా లేదా స్వీకరించకుండా నిరోధిస్తుంది. మీరు ప్రస్తుతం ఉపయోగిస్తున్న యాప్‌ డేటాను యాక్సెస్ చేయగలదు కానీ అలా అరుదుగా చేయవచ్చు. అంటే, ఉదాహరణకు, మీరు ఆ చిత్రాలను నొక్కే వరకు అవి ప్రదర్శించబడవు."</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"డేటా సేవర్‌ను ఆన్ చేయాలా?"</string>
     <string name="data_saver_enable_button" msgid="7147735965247211818">"ఆన్ చేయి"</string>
@@ -1729,7 +1729,7 @@
     </plurals>
     <string name="zen_mode_until" msgid="7336308492289875088">"<xliff:g id="FORMATTEDTIME">%1$s</xliff:g> వరకు"</string>
     <string name="zen_mode_alarm" msgid="9128205721301330797">"<xliff:g id="FORMATTEDTIME">%1$s</xliff:g> (తర్వాత అలారం) వరకు"</string>
-    <string name="zen_mode_forever" msgid="931849471004038757">"మీరు ఆఫ్‌చేసే వరకు"</string>
+    <string name="zen_mode_forever" msgid="931849471004038757">"మీరు ఆఫ్‌ చేసే వరకు"</string>
     <string name="zen_mode_forever_dnd" msgid="3792132696572189081">"మీరు అంతరాయం కలిగించవద్దు ఎంపిక ఆఫ్ చేసే వరకు"</string>
     <string name="zen_mode_rule_name_combination" msgid="191109939968076477">"<xliff:g id="FIRST">%1$s</xliff:g> / <xliff:g id="REST">%2$s</xliff:g>"</string>
     <string name="toolbar_collapse_description" msgid="2821479483960330739">"కుదించండి"</string>
@@ -1739,7 +1739,8 @@
     <string name="zen_mode_default_weekends_name" msgid="2786495801019345244">"వారాంతం"</string>
     <string name="zen_mode_default_events_name" msgid="8158334939013085363">"ఈవెంట్"</string>
     <string name="zen_mode_default_every_night_name" msgid="3012363838882944175">"నిద్రావస్థ"</string>
-    <string name="muted_by" msgid="6147073845094180001">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g> ద్వారా మ్యూట్ చేయబడింది"</string>
+    <!-- no translation found for muted_by (5942954724562097128) -->
+    <skip />
     <string name="system_error_wipe_data" msgid="6608165524785354962">"మీ పరికరంతో అంతర్గత సమస్య ఏర్పడింది మరియు మీరు ఫ్యాక్టరీ డేటా రీసెట్ చేసే వరకు అస్థిరంగా ఉంటుంది."</string>
     <string name="system_error_manufacturer" msgid="8086872414744210668">"మీ పరికరంతో అంతర్గత సమస్య ఏర్పడింది. వివరాల కోసం మీ తయారీదారుని సంప్రదించండి."</string>
     <string name="stk_cc_ussd_to_dial" msgid="5214333646366591205">"USSD అభ్యర్థన సాధారణ కాల్‌కు మార్చబడింది"</string>
@@ -1778,12 +1779,9 @@
     <string name="language_picker_section_all" msgid="3097279199511617537">"అన్ని భాషలు"</string>
     <string name="region_picker_section_all" msgid="8966316787153001779">"అన్ని ప్రాంతాలు"</string>
     <string name="locale_search_menu" msgid="2560710726687249178">"వెతుకు"</string>
-    <!-- no translation found for app_suspended_title (1919029799438164552) -->
-    <skip />
-    <!-- no translation found for app_suspended_default_message (7875306315686531621) -->
-    <skip />
-    <!-- no translation found for app_suspended_more_details (1131804827776778187) -->
-    <skip />
+    <string name="app_suspended_title" msgid="1919029799438164552">"యాప్‌ను తెరవడం సాధ్యపడ లేదు"</string>
+    <string name="app_suspended_default_message" msgid="7875306315686531621">"యాప్ <xliff:g id="APP_NAME_0">%1$s</xliff:g> ప్రస్తుతం అందుబాటులో లేదు. ఇది <xliff:g id="APP_NAME_1">%2$s</xliff:g> ద్వారా నిర్వహించబడుతుంది."</string>
+    <string name="app_suspended_more_details" msgid="1131804827776778187">"మరింత తెలుసుకోండి"</string>
     <string name="work_mode_off_title" msgid="1118691887588435530">"కార్యాలయ ప్రొఫైల్‌ని ఆన్ చేయాలా?"</string>
     <string name="work_mode_off_message" msgid="5130856710614337649">"మీ కార్యాలయ యాప్‌లు, నోటిఫికేషన్‌లు, డేటా మరియు ఇతర కార్యాలయ ప్రొఫైల్ ఫీచర్‌లు ఆన్ చేయబడతాయి"</string>
     <string name="work_mode_turn_on" msgid="2062544985670564875">"ఆన్ చేయి"</string>
@@ -1879,6 +1877,5 @@
     <string name="zen_upgrade_notification_content" msgid="1794994264692424562">"బ్లాక్ చేయబడిన దాన్ని తనిఖీ చేయడానికి నొక్కండి."</string>
     <string name="notification_app_name_system" msgid="4205032194610042794">"సిస్టమ్"</string>
     <string name="notification_app_name_settings" msgid="7751445616365753381">"సెట్టింగ్‌లు"</string>
-    <!-- no translation found for car_loading_profile (3545132581795684027) -->
-    <skip />
+    <string name="car_loading_profile" msgid="3545132581795684027">"లోడవుతోంది"</string>
 </resources>

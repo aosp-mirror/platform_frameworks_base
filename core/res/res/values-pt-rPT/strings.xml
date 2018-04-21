@@ -1140,7 +1140,7 @@
     <string name="volume_icon_description_notification" msgid="7044986546477282274">"Volume de notificações"</string>
     <string name="ringtone_default" msgid="3789758980357696936">"Toque predefinido"</string>
     <string name="ringtone_default_with_actual" msgid="1767304850491060581">"Predefinição (<xliff:g id="ACTUAL_RINGTONE">%1$s</xliff:g>)"</string>
-    <string name="ringtone_silent" msgid="7937634392408977062">"Nada"</string>
+    <string name="ringtone_silent" msgid="7937634392408977062">"Nenhum"</string>
     <string name="ringtone_picker_title" msgid="3515143939175119094">"Toques"</string>
     <string name="ringtone_picker_title_alarm" msgid="6473325356070549702">"Sons de alarme"</string>
     <string name="ringtone_picker_title_notification" msgid="4837740874822788802">"Sons de notificação"</string>
@@ -1738,7 +1738,8 @@
     <string name="zen_mode_default_weekends_name" msgid="2786495801019345244">"Fim de semana"</string>
     <string name="zen_mode_default_events_name" msgid="8158334939013085363">"Evento"</string>
     <string name="zen_mode_default_every_night_name" msgid="3012363838882944175">"A dormir"</string>
-    <string name="muted_by" msgid="6147073845094180001">"Som desativado por <xliff:g id="THIRD_PARTY">%1$s</xliff:g>"</string>
+    <!-- no translation found for muted_by (5942954724562097128) -->
+    <skip />
     <string name="system_error_wipe_data" msgid="6608165524785354962">"Existe um problema interno no seu dispositivo e pode ficar instável até efetuar uma reposição de dados de fábrica."</string>
     <string name="system_error_manufacturer" msgid="8086872414744210668">"Existe um problema interno no seu dispositivo. Contacte o fabricante para obter mais informações."</string>
     <string name="stk_cc_ussd_to_dial" msgid="5214333646366591205">"O pedido USSD foi alterado para uma chamada normal."</string>
@@ -1796,7 +1797,7 @@
     <string name="usb_mtp_launch_notification_description" msgid="8541876176425411358">"Tocar para ver ficheiros"</string>
     <string name="pin_target" msgid="3052256031352291362">"Fixar"</string>
     <string name="unpin_target" msgid="3556545602439143442">"Soltar"</string>
-    <string name="app_info" msgid="6856026610594615344">"Informações da aplicação"</string>
+    <string name="app_info" msgid="6856026610594615344">"Info. da aplicação"</string>
     <string name="negative_duration" msgid="5688706061127375131">"-<xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="demo_starting_message" msgid="5268556852031489931">"A iniciar a demonstração…"</string>
     <string name="demo_restarting_message" msgid="952118052531642451">"A repor o dispositivo…"</string>
