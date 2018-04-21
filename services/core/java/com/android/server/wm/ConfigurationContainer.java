@@ -130,9 +130,11 @@ public abstract class ConfigurationContainer<E extends ConfigurationContainer> {
         // Update merged override config of this container and all its children.
         onMergedOverrideConfigurationChanged();
 
+        // Use the updated override configuration to notify listeners.
+        mTmpConfig.setTo(mOverrideConfiguration);
         // Inform listeners of the change.
         for (int i = mChangeListeners.size() - 1; i >=0; --i) {
-            mChangeListeners.get(i).onOverrideConfigurationChanged(overrideConfiguration);
+            mChangeListeners.get(i).onOverrideConfigurationChanged(mTmpConfig);
         }
     }
 
