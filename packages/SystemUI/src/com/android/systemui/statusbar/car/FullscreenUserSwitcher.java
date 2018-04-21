@@ -69,7 +69,6 @@ public class FullscreenUserSwitcher {
 
     public void hide() {
         mShowing = false;
-        toggleSwitchInProgress(false);
         mParent.setVisibility(View.GONE);
     }
 
@@ -78,6 +77,7 @@ public class FullscreenUserSwitcher {
         // reboot, system fires ACTION_USER_SWITCHED change from -1 to 0 user. This is not an actual
         // user switch. We only want to trigger keyguard dismissal when foreground user changes.
         if (foregroundUserChanged()) {
+            toggleSwitchInProgress(false);
             updateCurrentForegroundUser();
             mParent.post(this::dismissKeyguard);
         }
@@ -107,33 +107,34 @@ public class FullscreenUserSwitcher {
 
     private void toggleSwitchInProgress(boolean inProgress) {
         if (inProgress) {
-            crossFade(mParent, mContainer);
+            fadeOut(mContainer);
         } else {
-            crossFade(mContainer, mParent);
+            fadeIn(mContainer);
         }
-
     }
 
-    private void crossFade(View incoming, View outgoing) {
-        incoming.animate()
-            .alpha(1.0f)
-            .setDuration(mShortAnimDuration)
-            .setListener(new AnimatorListenerAdapter() {
-                @Override
-                public void onAnimationStart(Animator animator) {
-                    incoming.setAlpha(0.0f);
-                    incoming.setVisibility(View.VISIBLE);
-                }
-            });
+    private void fadeOut(View view) {
+        view.animate()
+                .alpha(0.0f)
+                .setDuration(mShortAnimDuration)
+                .setListener(new AnimatorListenerAdapter() {
+                    @Override
+                    public void onAnimationEnd(Animator animation) {
+                        view.setVisibility(View.GONE);
+                    }
+                });
+    }
 
-        outgoing.animate()
-            .alpha(0.0f)
-            .setDuration(mShortAnimDuration)
-            .setListener(new AnimatorListenerAdapter() {
-                @Override
-                public void onAnimationEnd(Animator animation) {
-                    outgoing.setVisibility(View.GONE);
-                }
-            });
+    private void fadeIn(View view) {
+        view.animate()
+                .alpha(1.0f)
+                .setDuration(mShortAnimDuration)
+                .setListener(new AnimatorListenerAdapter() {
+                    @Override
+                    public void onAnimationStart(Animator animator) {
+                        view.setAlpha(0.0f);
+                        view.setVisibility(View.VISIBLE);
+                    }
+                });
     }
 }
