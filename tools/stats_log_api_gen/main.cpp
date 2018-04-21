@@ -104,7 +104,7 @@ static int write_stats_log_cpp(FILE *out, const Atoms &atoms,
     fprintf(out, "#include <mutex>\n");
     fprintf(out, "#include <chrono>\n");
     fprintf(out, "#include <thread>\n");
-    fprintf(out, "#include <log/log_event_list.h>\n");
+    fprintf(out, "#include <stats_event_list.h>\n");
     fprintf(out, "#include <log/log.h>\n");
     fprintf(out, "#include <statslog.h>\n");
     fprintf(out, "#include <utils/SystemClock.h>\n");
@@ -242,7 +242,7 @@ static int write_stats_log_cpp(FILE *out, const Atoms &atoms,
 
         fprintf(out, "{\n");
         argIndex = 1;
-        fprintf(out, "    android_log_event_list event(kStatsEventTag);\n");
+        fprintf(out, "    stats_event_list event(kStatsEventTag);\n");
         fprintf(out, "    event << android::elapsedRealtimeNano();\n\n");
         fprintf(out, "    event << code;\n\n");
         for (vector<java_type_t>::const_iterator arg = signature->begin();
@@ -375,7 +375,7 @@ static int write_stats_log_cpp(FILE *out, const Atoms &atoms,
 
         fprintf(out, "{\n");
         argIndex = 1;
-        fprintf(out, "    android_log_event_list event(kStatsEventTag);\n");
+        fprintf(out, "    stats_event_list event(kStatsEventTag);\n");
         fprintf(out, "    event << android::elapsedRealtimeNano();\n\n");
         fprintf(out, "    event << code;\n\n");
         for (vector<java_type_t>::const_iterator arg = signature->begin();
