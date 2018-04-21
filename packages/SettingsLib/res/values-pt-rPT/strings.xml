@@ -56,7 +56,7 @@
     <string name="bluetooth_disconnecting" msgid="8913264760027764974">"A desligar..."</string>
     <string name="bluetooth_connecting" msgid="8555009514614320497">"A ligar..."</string>
     <string name="bluetooth_connected" msgid="5427152882755735944">"Ligado<xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g>"</string>
-    <string name="bluetooth_pairing" msgid="1426882272690346242">"A emparelhar..."</string>
+    <string name="bluetooth_pairing" msgid="1426882272690346242">"A sincronizar..."</string>
     <string name="bluetooth_connected_no_headset" msgid="616068069034994802">"Ligado (sem telemóvel)<xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g>"</string>
     <string name="bluetooth_connected_no_a2dp" msgid="3736431800395923868">"Ligado (sem multimédia)<xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g>"</string>
     <string name="bluetooth_connected_no_map" msgid="3200033913678466453">"Ligado (sem acesso a mensagens)<xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g>"</string>
@@ -99,7 +99,7 @@
     <string name="bluetooth_opp_profile_summary_use_for" msgid="1255674547144769756">"Utilizar para transferência de ficheiros"</string>
     <string name="bluetooth_hid_profile_summary_use_for" msgid="232727040453645139">"Utilizar para entrada"</string>
     <string name="bluetooth_hearing_aid_profile_summary_use_for" msgid="908775281788309484">"Utilizar com o aparelho auditivo"</string>
-    <string name="bluetooth_pairing_accept" msgid="6163520056536604875">"Par"</string>
+    <string name="bluetooth_pairing_accept" msgid="6163520056536604875">"Sincr."</string>
     <string name="bluetooth_pairing_accept_all_caps" msgid="6061699265220789149">"SINCRONIZAR"</string>
     <string name="bluetooth_pairing_decline" msgid="4185420413578948140">"Cancelar"</string>
     <string name="bluetooth_pairing_will_share_phonebook" msgid="4982239145676394429">"A sincronização concede acesso aos seus contactos e ao histórico de chamadas quando tem uma ligação estabelecida."</string>
@@ -231,7 +231,7 @@
     <string name="private_dns_mode_off" msgid="8236575187318721684">"Desativado"</string>
     <string name="private_dns_mode_opportunistic" msgid="8314986739896927399">"Automático"</string>
     <string name="private_dns_mode_provider" msgid="8354935160639360804">"Nome de anfitrião do fornecedor DNS privado"</string>
-    <string name="private_dns_mode_provider_hostname_hint" msgid="2487492386970928143">"Introduza o nome de anfitrião do fornecedor DNS."</string>
+    <string name="private_dns_mode_provider_hostname_hint" msgid="2487492386970928143">"Introduza nome - anfitrião do fornecedor DNS"</string>
     <string name="private_dns_mode_provider_failure" msgid="231837290365031223">"Não foi possível estabelecer ligação"</string>
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"Mostrar opções da certificação de display sem fios"</string>
     <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"Aumentar o nível de reg. de Wi-Fi, mostrar por RSSI de SSID no Selec. de Wi-Fi"</string>

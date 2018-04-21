@@ -231,7 +231,7 @@
     <string name="private_dns_mode_off" msgid="8236575187318721684">"გამორთული"</string>
     <string name="private_dns_mode_opportunistic" msgid="8314986739896927399">"ავტომატური"</string>
     <string name="private_dns_mode_provider" msgid="8354935160639360804">"პირადი DNS პროვაიდერის სერვერის სახელი"</string>
-    <string name="private_dns_mode_provider_hostname_hint" msgid="2487492386970928143">"შეიყვანეთ DNS პროვაიდერის სერვერის სახელი"</string>
+    <string name="private_dns_mode_provider_hostname_hint" msgid="2487492386970928143">"შეიყვანეთ პროვაიდერის სერვერის სახელი"</string>
     <string name="private_dns_mode_provider_failure" msgid="231837290365031223">"დაკავშირება ვერ მოხერხდა"</string>
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"უსადენო ეკრანის სერტიფიცირების ვარიანტების ჩვენება"</string>
     <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"Wi‑Fi-ს აღრიცხვის დონის გაზრდა, Wi‑Fi ამომრჩეველში ყოველ SSID RSSI-ზე ჩვენება"</string>

@@ -236,7 +236,7 @@
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"വയർലെസ് ഡിസ്‌പ്ലേ സർട്ടിഫിക്കേഷനായി ഓപ്‌ഷനുകൾ ദൃശ്യമാക്കുക"</string>
     <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"വൈഫൈ പിക്കറിൽ ഓരോ SSID RSSI പ്രകാരം കാണിക്കാൻ വൈഫൈ ലോഗിംഗ് നില വർദ്ധിപ്പിക്കുക"</string>
     <string name="wifi_connected_mac_randomization_summary" msgid="1743059848752201485">"വൈഫൈ നെറ്റ്‌വർക്കുകളിലേക്ക് കണക്‌റ്റ് ചെയ്യുമ്പോൾ MAC വിലാസം ക്രമരഹിതമാക്കുക"</string>
-    <string name="wifi_metered_label" msgid="4514924227256839725">"മീറ്റർമാപകം"</string>
+    <string name="wifi_metered_label" msgid="4514924227256839725">"മീറ്റർചെയ്ത"</string>
     <string name="wifi_unmetered_label" msgid="6124098729457992931">"മീറ്റർമാപകമല്ലാത്തത്"</string>
     <string name="select_logd_size_title" msgid="7433137108348553508">"ലോഗർ ബഫർ വലുപ്പം"</string>
     <string name="select_logd_size_dialog_title" msgid="1206769310236476760">"ഓരോ ലോഗ് ബഫറിനും വലുപ്പം തിരഞ്ഞെടുക്കൂ"</string>
@@ -401,7 +401,7 @@
     <string name="disabled" msgid="9206776641295849915">"പ്രവർത്തനരഹിതമാക്കി"</string>
     <string name="external_source_trusted" msgid="2707996266575928037">"അനുവദനീയം"</string>
     <string name="external_source_untrusted" msgid="2677442511837596726">"അനുവദിച്ചിട്ടില്ല"</string>
-    <string name="install_other_apps" msgid="6986686991775883017">"അറിഞ്ഞുകൂടാത്ത ആപ്‌സ് ഇൻസ്റ്റാളുചെയ്യുക"</string>
+    <string name="install_other_apps" msgid="6986686991775883017">"അറിയാത്ത ആപ്‌സ് ഇൻസ്റ്റാൾ ചെയ്യുക"</string>
     <string name="home" msgid="3256884684164448244">"ക്രമീകരണ ഹോം"</string>
   <string-array name="battery_labels">
     <item msgid="8494684293649631252">"0%"</item>
