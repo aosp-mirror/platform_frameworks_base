@@ -1841,24 +1841,23 @@ public class TelephonyManager {
     }
 
     /**
-     * Returns the ISO country code equivalent of the current registered
-     * operator's MCC (Mobile Country Code).
+     * Returns the ISO country code equivalent of the MCC (Mobile Country Code) of the current
+     * registered operator, or nearby cell information if not registered.
+     * .
      * <p>
-     * Availability: Only when user is registered to a network. Result may be
-     * unreliable on CDMA networks (use {@link #getPhoneType()} to determine if
-     * on a CDMA network).
+     * Note: Result may be unreliable on CDMA networks (use {@link #getPhoneType()} to determine
+     * if on a CDMA network).
      */
     public String getNetworkCountryIso() {
         return getNetworkCountryIsoForPhone(getPhoneId());
     }
 
     /**
-     * Returns the ISO country code equivalent of the current registered
-     * operator's MCC (Mobile Country Code) of a subscription.
+     * Returns the ISO country code equivalent of the MCC (Mobile Country Code) of the current
+     * registered operator, or nearby cell information if not registered.
      * <p>
-     * Availability: Only when user is registered to a network. Result may be
-     * unreliable on CDMA networks (use {@link #getPhoneType()} to determine if
-     * on a CDMA network).
+     * Note: Result may be unreliable on CDMA networks (use {@link #getPhoneType()} to determine
+     * if on a CDMA network).
      *
      * @param subId for which Network CountryIso is returned
      * @hide
