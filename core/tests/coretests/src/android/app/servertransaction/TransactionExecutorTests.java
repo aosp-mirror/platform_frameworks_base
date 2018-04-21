@@ -40,7 +40,10 @@ import static org.mockito.Mockito.when;
 
 import android.app.ActivityThread.ActivityClientRecord;
 import android.app.ClientTransactionHandler;
+import android.app.servertransaction.ActivityLifecycleItem.LifecycleState;
 import android.os.IBinder;
+import android.os.Parcel;
+import android.os.Parcelable;
 import android.platform.test.annotations.Presubmit;
 import android.support.test.filters.SmallTest;
 import android.support.test.runner.AndroidJUnit4;
@@ -50,7 +53,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InOrder;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -231,12 +233,12 @@ public class TransactionExecutorTests {
 
     @Test
     public void testActivityResultRequiredStateResolution() {
-        ActivityResultItem activityResultItem = ActivityResultItem.obtain(new ArrayList<>());
+        PostExecItem postExecItem = new PostExecItem(ON_RESUME);
 
         IBinder token = mock(IBinder.class);
         ClientTransaction transaction = ClientTransaction.obtain(null /* client */,
                 token /* activityToken */);
-        transaction.addCallback(activityResultItem);
+        transaction.addCallback(postExecItem);
 
         // Verify resolution that should get to onPause
         mClientRecord.setState(ON_RESUME);
@@ -394,5 +396,55 @@ public class TransactionExecutorTests {
     private int[] pathExcludeLast(int finish) {
         return mExecutorHelper.getLifecyclePath(mClientRecord.getLifecycleState(), finish,
                 true /* excludeLastState */).toArray();
+    }
+
+    /** A transaction item that requires some specific post-execution state. */
+    private static class PostExecItem extends StubItem {
+
+        @LifecycleState
+        private int mPostExecutionState;
+
+        PostExecItem(@LifecycleState int state) {
+            mPostExecutionState = state;
+        }
+
+        @Override
+        public int getPostExecutionState() {
+            return mPostExecutionState;
+        }
+    }
+
+    /** Stub implementation of a transaction item that works as a base class for items in tests. */
+    private static class StubItem extends ClientTransactionItem  {
+
+        private StubItem() {
+        }
+
+        private StubItem(Parcel in) {
+        }
+
+        @Override
+        public void execute(ClientTransactionHandler client, IBinder token,
+                PendingTransactionActions pendingActions) {
+        }
+
+        @Override
+        public void recycle() {
+        }
+
+        @Override
+        public void writeToParcel(Parcel dest, int flags) {
+        }
+
+        public static final Parcelable.Creator<StubItem> CREATOR =
+                new Parcelable.Creator<StubItem>() {
+                    public StubItem createFromParcel(Parcel in) {
+                        return new StubItem(in);
+                    }
+
+                    public StubItem[] newArray(int size) {
+                        return new StubItem[size];
+                    }
+                };
     }
 }
