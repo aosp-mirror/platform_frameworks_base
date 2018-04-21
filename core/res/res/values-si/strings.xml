@@ -1740,7 +1740,8 @@
     <string name="zen_mode_default_weekends_name" msgid="2786495801019345244">"සති අන්තය"</string>
     <string name="zen_mode_default_events_name" msgid="8158334939013085363">"සිදුවීම"</string>
     <string name="zen_mode_default_every_night_name" msgid="3012363838882944175">"නිදා ගනිමින්"</string>
-    <string name="muted_by" msgid="6147073845094180001">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g> විසින් නිශ්ශබ්ද කරන ලදි"</string>
+    <!-- no translation found for muted_by (5942954724562097128) -->
+    <skip />
     <string name="system_error_wipe_data" msgid="6608165524785354962">"ඔබේ උපාංගය සමගින් ගැටලුවක් ඇති අතර, ඔබේ කර්මාන්තශාලා දත්ත යළි සකසන තෙක් එය අස්ථායි විය හැකිය."</string>
     <string name="system_error_manufacturer" msgid="8086872414744210668">"ඔබේ උපාංගය සමගින් අභ්‍යන්තර ගැටලුවක් ඇත. විස්තර සඳහා ඔබේ නිෂ්පාදක අමතන්න."</string>
     <string name="stk_cc_ussd_to_dial" msgid="5214333646366591205">"USSD ඉල්ලීම සාමාන්‍ය ඇමතුමට වෙනස් කරන ලදී"</string>
@@ -1779,12 +1780,9 @@
     <string name="language_picker_section_all" msgid="3097279199511617537">"සියලු භාෂා"</string>
     <string name="region_picker_section_all" msgid="8966316787153001779">"සියලු ප්‍රදේශ"</string>
     <string name="locale_search_menu" msgid="2560710726687249178">"සෙවීම"</string>
-    <!-- no translation found for app_suspended_title (1919029799438164552) -->
-    <skip />
-    <!-- no translation found for app_suspended_default_message (7875306315686531621) -->
-    <skip />
-    <!-- no translation found for app_suspended_more_details (1131804827776778187) -->
-    <skip />
+    <string name="app_suspended_title" msgid="1919029799438164552">"යෙදුම විවෘත කළ නොහැකිය"</string>
+    <string name="app_suspended_default_message" msgid="7875306315686531621">"<xliff:g id="APP_NAME_0">%1$s</xliff:g> යෙදුම මේ අවස්ථාවේදී ලබා ගත නොහැකිය. මෙය <xliff:g id="APP_NAME_1">%2$s</xliff:g> මගින් කළමනාකරණය කෙරේ."</string>
+    <string name="app_suspended_more_details" msgid="1131804827776778187">"තව දැන ගන්න"</string>
     <string name="work_mode_off_title" msgid="1118691887588435530">"කාර්යාල පැතිකඩ ක්‍රියාත්මක කරන්නද?"</string>
     <string name="work_mode_off_message" msgid="5130856710614337649">"ඔබගේ වැඩ යෙදුම්, දැනුම්දීම්, දත්ත සහ වෙනත් කාර්යාල පැතිකඩ විශේෂාංග ක්‍රියාත්මක කරනු ඇත"</string>
     <string name="work_mode_turn_on" msgid="2062544985670564875">"ක්‍රියාත්මක කරන්න"</string>
@@ -1880,6 +1878,5 @@
     <string name="zen_upgrade_notification_content" msgid="1794994264692424562">"අවහිර කර ඇති දේ පරීක්ෂා කිරීමට තට්ටු කරන්න."</string>
     <string name="notification_app_name_system" msgid="4205032194610042794">"පද්ධතිය"</string>
     <string name="notification_app_name_settings" msgid="7751445616365753381">"සැකසීම්"</string>
-    <!-- no translation found for car_loading_profile (3545132581795684027) -->
-    <skip />
+    <string name="car_loading_profile" msgid="3545132581795684027">"පූරණය කරමින්"</string>
 </resources>

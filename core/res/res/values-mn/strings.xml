@@ -220,7 +220,7 @@
     <string name="global_action_bug_report" msgid="7934010578922304799">"Алдаа мэдээлэх"</string>
     <string name="global_action_logout" msgid="935179188218826050">"Гаргах харилцан үйлдэл"</string>
     <string name="global_action_screenshot" msgid="8329831278085426283">"Дэлгэцийн зураг дарах"</string>
-    <string name="bugreport_title" msgid="2667494803742548533">"Согог репорт авах"</string>
+    <string name="bugreport_title" msgid="2667494803742548533">"Алдааны тайлан авах"</string>
     <string name="bugreport_message" msgid="398447048750350456">"Энэ таны төхөөрөмжийн одоогийн статусын талаарх мэдээллийг цуглуулах ба имэйл мессеж болгон илгээнэ. Алдааны мэдэгдлээс эхэлж илгээхэд бэлэн болоход хэсэг хугацаа зарцуулагдана тэвчээртэй байна уу."</string>
     <string name="bugreport_option_interactive_title" msgid="8635056131768862479">"Интерактив тайлан"</string>
     <string name="bugreport_option_interactive_summary" msgid="229299488536107968">"Үүнийг ихэнх тохиолдолд ашиглана уу. Энэ нь танд тайлангийн явцыг хянах, асуудлын талаар дэлгэрэнгүй мэдээлэл оруулах болон дэлгэцийн агшин авахыг зөвшөөрнө. Мөн тайлагнахад урт хугацаа шаарддаг таны бага ашигладаг зарим хэсгийг алгасах болно."</string>
@@ -1691,7 +1691,7 @@
     <string name="package_updated_device_owner" msgid="1847154566357862089">"Таны админ шинэчилсэн"</string>
     <string name="package_deleted_device_owner" msgid="2307122077550236438">"Таны админ устгасан"</string>
     <string name="battery_saver_description" msgid="769989536172631582">"Батарейны ажиллах хугацааг ихэсгэхийн тулд Батарей хэмнэгч төхөөрөмжийн зарим онцлогийг унтрааж аппуудыг хязгаарладаг."</string>
-    <string name="data_saver_description" msgid="6015391409098303235">"Дата ашиглалтыг багасгахын тулд дата хэмнэгч нь зарим апп-г өгөгдлийг дэвсгэрт илгээх болон авахаас сэргийлдэг. Таны одоогийн ашиглаж буй апп нь өгөгдөлд хандах боломжтой хэдий ч тогтмол хандахгүй. Жишээлбэл зургийг товших хүртэл харагдахгүй."</string>
+    <string name="data_saver_description" msgid="6015391409098303235">"Дата ашиглалтыг багасгахын тулд дата хэмнэгч нь зарим апп-н өгөгдлийг дэвсгэрт илгээх болон авахаас сэргийлдэг. Таны одоогийн ашиглаж буй апп нь өгөгдөлд хандах боломжтой хэдий ч тогтмол хандахгүй. Жишээлбэл зургийг товших хүртэл харагдахгүй."</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"Дата хэмнэгчийг асаах уу?"</string>
     <string name="data_saver_enable_button" msgid="7147735965247211818">"Асаах"</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="4367877408072000848">
@@ -1738,7 +1738,8 @@
     <string name="zen_mode_default_weekends_name" msgid="2786495801019345244">"Амралтын өдөр"</string>
     <string name="zen_mode_default_events_name" msgid="8158334939013085363">"Үйл явдал"</string>
     <string name="zen_mode_default_every_night_name" msgid="3012363838882944175">"Идэвхгүй"</string>
-    <string name="muted_by" msgid="6147073845094180001">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g>-с хаасан"</string>
+    <!-- no translation found for muted_by (5942954724562097128) -->
+    <skip />
     <string name="system_error_wipe_data" msgid="6608165524785354962">"Таны төхөөрөмжид дотоод алдаа байна.Та төхөөрөмжөө үйлдвэрээс гарсан төлөвт шилжүүлэх хүртэл таны төхөөрөмж чинь тогтворгүй байж болох юм."</string>
     <string name="system_error_manufacturer" msgid="8086872414744210668">"Таны төхөөрөмжид дотоод алдаа байна. Дэлгэрэнгүй мэдээлэл авахыг хүсвэл үйлдвэрлэгчтэйгээ холбоо барина уу."</string>
     <string name="stk_cc_ussd_to_dial" msgid="5214333646366591205">"USSD хүсэлтийг энгийн дуудлага болгон өөрчилсөн"</string>
@@ -1777,12 +1778,9 @@
     <string name="language_picker_section_all" msgid="3097279199511617537">"Бүх хэл"</string>
     <string name="region_picker_section_all" msgid="8966316787153001779">"Бүх бүс нутаг"</string>
     <string name="locale_search_menu" msgid="2560710726687249178">"Хайх"</string>
-    <!-- no translation found for app_suspended_title (1919029799438164552) -->
-    <skip />
-    <!-- no translation found for app_suspended_default_message (7875306315686531621) -->
-    <skip />
-    <!-- no translation found for app_suspended_more_details (1131804827776778187) -->
-    <skip />
+    <string name="app_suspended_title" msgid="1919029799438164552">"Аппыг нээх боломжгүй байна"</string>
+    <string name="app_suspended_default_message" msgid="7875306315686531621">"<xliff:g id="APP_NAME_0">%1$s</xliff:g> апп одоогоор боломжгүй байна. Үүнийг <xliff:g id="APP_NAME_1">%2$s</xliff:g> удирддаг."</string>
+    <string name="app_suspended_more_details" msgid="1131804827776778187">"Дэлгэрэнгүй үзэх"</string>
     <string name="work_mode_off_title" msgid="1118691887588435530">"Ажлын профайлыг асаах уу?"</string>
     <string name="work_mode_off_message" msgid="5130856710614337649">"Таны ажлын апп, мэдэгдэл, өгөгдөл болон бусад ажлын профайлын онцлогийг асаана"</string>
     <string name="work_mode_turn_on" msgid="2062544985670564875">"Асаах"</string>
@@ -1878,6 +1876,5 @@
     <string name="zen_upgrade_notification_content" msgid="1794994264692424562">"Блоклосон зүйлийг шалгахын тулд товшино уу."</string>
     <string name="notification_app_name_system" msgid="4205032194610042794">"Систем"</string>
     <string name="notification_app_name_settings" msgid="7751445616365753381">"Тохиргоо"</string>
-    <!-- no translation found for car_loading_profile (3545132581795684027) -->
-    <skip />
+    <string name="car_loading_profile" msgid="3545132581795684027">"Ачаалж байна"</string>
 </resources>

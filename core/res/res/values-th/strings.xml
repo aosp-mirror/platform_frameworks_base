@@ -300,7 +300,7 @@
     <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"เรียกข้อมูลเนื้อหาของหน้าต่าง"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"ตรวจสอบเนื้อหาของหน้าต่างที่คุณกำลังโต้ตอบอยู่"</string>
     <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"เปิด \"แตะเพื่อสำรวจ\""</string>
-    <string name="capability_desc_canRequestTouchExploration" msgid="7543249041581408313">"ระบบจะพูดออกเสียงรายการที่แตะและหน้าจอสามารถสำรวจได้ด้วยท่าทางสัมผัส"</string>
+    <string name="capability_desc_canRequestTouchExploration" msgid="7543249041581408313">"ระบบจะพูดออกเสียงรายการที่แตะ และสำรวจหน้าจอได้ด้วยท่าทางสัมผัส"</string>
     <string name="capability_title_canRequestFilterKeyEvents" msgid="2103440391902412174">"สังเกตข้อความที่คุณพิมพ์"</string>
     <string name="capability_desc_canRequestFilterKeyEvents" msgid="7463135292204152818">"รวมถึงข้อมูลส่วนบุคคล เช่น หมายเลขบัตรเครดิตและรหัสผ่าน"</string>
     <string name="capability_title_canControlMagnification" msgid="3593493281059424855">"ควบคุมการขยายการแสดงผล"</string>
@@ -1738,7 +1738,8 @@
     <string name="zen_mode_default_weekends_name" msgid="2786495801019345244">"สุดสัปดาห์"</string>
     <string name="zen_mode_default_events_name" msgid="8158334939013085363">"กิจกรรม"</string>
     <string name="zen_mode_default_every_night_name" msgid="3012363838882944175">"นอนหลับ"</string>
-    <string name="muted_by" msgid="6147073845094180001">"ปิดเสียงโดย <xliff:g id="THIRD_PARTY">%1$s</xliff:g>"</string>
+    <!-- no translation found for muted_by (5942954724562097128) -->
+    <skip />
     <string name="system_error_wipe_data" msgid="6608165524785354962">"อุปกรณ์ของคุณเกิดปัญหาภายในเครื่อง อุปกรณ์อาจทำงานไม่เสถียรจนกว่าคุณจะรีเซ็ตข้อมูลเป็นค่าเริ่มต้น"</string>
     <string name="system_error_manufacturer" msgid="8086872414744210668">"อุปกรณ์ของคุณเกิดปัญหาภายในเครื่อง โปรดติดต่อผู้ผลิตเพื่อขอรายละเอียดเพิ่มเติม"</string>
     <string name="stk_cc_ussd_to_dial" msgid="5214333646366591205">"คำขอ USSD เปลี่ยนเป็นการโทรปกติแล้ว"</string>
@@ -1777,12 +1778,9 @@
     <string name="language_picker_section_all" msgid="3097279199511617537">"ทุกภาษา"</string>
     <string name="region_picker_section_all" msgid="8966316787153001779">"ภูมิภาคทั้งหมด"</string>
     <string name="locale_search_menu" msgid="2560710726687249178">"ค้นหา"</string>
-    <!-- no translation found for app_suspended_title (1919029799438164552) -->
-    <skip />
-    <!-- no translation found for app_suspended_default_message (7875306315686531621) -->
-    <skip />
-    <!-- no translation found for app_suspended_more_details (1131804827776778187) -->
-    <skip />
+    <string name="app_suspended_title" msgid="1919029799438164552">"เปิดแอปไม่ได้"</string>
+    <string name="app_suspended_default_message" msgid="7875306315686531621">"เปิดแอป <xliff:g id="APP_NAME_0">%1$s</xliff:g> ไม่ได้ในขณะนี้ นโยบายนี้จัดการโดย <xliff:g id="APP_NAME_1">%2$s</xliff:g>"</string>
+    <string name="app_suspended_more_details" msgid="1131804827776778187">"ดูข้อมูลเพิ่มเติม"</string>
     <string name="work_mode_off_title" msgid="1118691887588435530">"เปิดโปรไฟล์งานไหม"</string>
     <string name="work_mode_off_message" msgid="5130856710614337649">"ระบบจะเปิดแอปงาน การแจ้งเตือน ข้อมูล และฟีเจอร์อื่นๆ ในโปรไฟล์งาน"</string>
     <string name="work_mode_turn_on" msgid="2062544985670564875">"เปิด"</string>
@@ -1878,6 +1876,5 @@
     <string name="zen_upgrade_notification_content" msgid="1794994264692424562">"แตะเพื่อดูรายการที่ถูกบล็อก"</string>
     <string name="notification_app_name_system" msgid="4205032194610042794">"ระบบ"</string>
     <string name="notification_app_name_settings" msgid="7751445616365753381">"การตั้งค่า"</string>
-    <!-- no translation found for car_loading_profile (3545132581795684027) -->
-    <skip />
+    <string name="car_loading_profile" msgid="3545132581795684027">"กำลังโหลด"</string>
 </resources>

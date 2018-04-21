@@ -220,7 +220,7 @@
     <string name="global_action_bug_report" msgid="7934010578922304799">"Báo cáo lỗi"</string>
     <string name="global_action_logout" msgid="935179188218826050">"Kết thúc phiên"</string>
     <string name="global_action_screenshot" msgid="8329831278085426283">"Ảnh chụp màn hình"</string>
-    <string name="bugreport_title" msgid="2667494803742548533">"Nhận báo cáo lỗi"</string>
+    <string name="bugreport_title" msgid="2667494803742548533">"Tạo báo cáo lỗi"</string>
     <string name="bugreport_message" msgid="398447048750350456">"Báo cáo này sẽ thu thập thông tin về tình trạng thiết bị hiện tại của bạn, để gửi dưới dạng thông báo qua email. Sẽ mất một chút thời gian kể từ khi bắt đầu báo cáo lỗi cho tới khi báo cáo sẵn sàng để gửi; xin vui lòng kiên nhẫn."</string>
     <string name="bugreport_option_interactive_title" msgid="8635056131768862479">"Báo cáo tương tác"</string>
     <string name="bugreport_option_interactive_summary" msgid="229299488536107968">"Sử dụng tùy chọn này trong hầu hết các trường hợp. Tùy chọn này cho phép bạn theo dõi tiến trình của báo cáo, nhập thêm thông tin chi tiết về sự cố cũng như chụp ảnh màn hình. Tùy chọn này có thể bỏ qua một số phần ít được sử dụng mà mất nhiều thời gian để báo cáo."</string>
@@ -301,7 +301,7 @@
     <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"Kiểm tra nội dung của cửa sổ bạn đang tương tác."</string>
     <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"Bật Khám phá bằng cách chạm"</string>
     <string name="capability_desc_canRequestTouchExploration" msgid="7543249041581408313">"Đọc to các mục được nhấn và cho phép khám phá màn hình bằng cử chỉ."</string>
-    <string name="capability_title_canRequestFilterKeyEvents" msgid="2103440391902412174">"Xem nội dung bạn nhập"</string>
+    <string name="capability_title_canRequestFilterKeyEvents" msgid="2103440391902412174">"Quan sát nội dung bạn nhập"</string>
     <string name="capability_desc_canRequestFilterKeyEvents" msgid="7463135292204152818">"Bao gồm dữ liệu cá nhân chẳng hạn như số thẻ tín dụng và mật khẩu."</string>
     <string name="capability_title_canControlMagnification" msgid="3593493281059424855">"Kiểm soát thu phóng màn hình"</string>
     <string name="capability_desc_canControlMagnification" msgid="4791858203568383773">"Kiểm soát vị trí và mức thu phóng của màn hình."</string>
@@ -601,7 +601,7 @@
     <string name="policydesc_encryptedStorage" msgid="2637732115325316992">"Yêu cầu dữ liệu ứng dụng được lưu trữ phải được mã hóa."</string>
     <string name="policylab_disableCamera" msgid="6395301023152297826">"Vô hiệu hóa máy ảnh"</string>
     <string name="policydesc_disableCamera" msgid="2306349042834754597">"Ngăn sử dụng tất cả máy ảnh của thiết bị."</string>
-    <string name="policylab_disableKeyguardFeatures" msgid="8552277871075367771">"Tắt một số t.năng khóa m.hình"</string>
+    <string name="policylab_disableKeyguardFeatures" msgid="8552277871075367771">"Tắt một số tính năng khóa màn hình"</string>
     <string name="policydesc_disableKeyguardFeatures" msgid="2044755691354158439">"Ngăn sử dụng một số tính năng khóa màn hình."</string>
   <string-array name="phoneTypes">
     <item msgid="8901098336658710359">"Nhà riêng"</item>
@@ -1260,7 +1260,7 @@
     <string name="share_remote_bugreport_action" msgid="6249476773913384948">"CHIA SẺ"</string>
     <string name="decline_remote_bugreport_action" msgid="6230987241608770062">"TỪ CHỐI"</string>
     <string name="select_input_method" msgid="8547250819326693584">"Thay đổi bàn phím"</string>
-    <string name="show_ime" msgid="2506087537466597099">"Tiếp tục sử dụng ứng dụng trên màn hình trong khi bàn phím thực đang hoạt động"</string>
+    <string name="show_ime" msgid="2506087537466597099">"Hiển thị bàn phím ảo trên màn hình trong khi bàn phím thực đang hoạt động"</string>
     <string name="hardware" msgid="194658061510127999">"Hiển thị bàn phím ảo"</string>
     <string name="select_keyboard_layout_notification_title" msgid="597189518763083494">"Định cấu hình bàn phím thực"</string>
     <string name="select_keyboard_layout_notification_message" msgid="8084622969903004900">"Nhấn để chọn ngôn ngữ và bố cục"</string>
@@ -1737,8 +1737,9 @@
     <string name="zen_mode_default_weeknights_name" msgid="3081318299464998143">"Đêm trong tuần"</string>
     <string name="zen_mode_default_weekends_name" msgid="2786495801019345244">"Cuối tuần"</string>
     <string name="zen_mode_default_events_name" msgid="8158334939013085363">"Sự kiện"</string>
-    <string name="zen_mode_default_every_night_name" msgid="3012363838882944175">"Khi đang ngủ"</string>
-    <string name="muted_by" msgid="6147073845094180001">"Do <xliff:g id="THIRD_PARTY">%1$s</xliff:g> tắt tiếng"</string>
+    <string name="zen_mode_default_every_night_name" msgid="3012363838882944175">"Ngủ"</string>
+    <!-- no translation found for muted_by (5942954724562097128) -->
+    <skip />
     <string name="system_error_wipe_data" msgid="6608165524785354962">"Đã xảy ra sự cố nội bộ với thiết bị của bạn và thiết bị có thể sẽ không ổn định cho tới khi bạn thiết lập lại dữ liệu ban đầu."</string>
     <string name="system_error_manufacturer" msgid="8086872414744210668">"Đã xảy ra sự cố nội bộ với thiết bị. Hãy liên hệ với nhà sản xuất của bạn để biết chi tiết."</string>
     <string name="stk_cc_ussd_to_dial" msgid="5214333646366591205">"Yêu cầu USSD đã thay đổi thành cuộc gọi thông thường"</string>
@@ -1777,12 +1778,9 @@
     <string name="language_picker_section_all" msgid="3097279199511617537">"Tất cả ngôn ngữ"</string>
     <string name="region_picker_section_all" msgid="8966316787153001779">"Tất cả khu vực"</string>
     <string name="locale_search_menu" msgid="2560710726687249178">"Tìm kiếm"</string>
-    <!-- no translation found for app_suspended_title (1919029799438164552) -->
-    <skip />
-    <!-- no translation found for app_suspended_default_message (7875306315686531621) -->
-    <skip />
-    <!-- no translation found for app_suspended_more_details (1131804827776778187) -->
-    <skip />
+    <string name="app_suspended_title" msgid="1919029799438164552">"Không thể mở ứng dụng"</string>
+    <string name="app_suspended_default_message" msgid="7875306315686531621">"Ứng dụng <xliff:g id="APP_NAME_0">%1$s</xliff:g> hiện không hoạt động. Chính sách tạm ngưng này do <xliff:g id="APP_NAME_1">%2$s</xliff:g> quản lý."</string>
+    <string name="app_suspended_more_details" msgid="1131804827776778187">"Tìm hiểu thêm"</string>
     <string name="work_mode_off_title" msgid="1118691887588435530">"Bạn muốn bật hồ sơ công việc?"</string>
     <string name="work_mode_off_message" msgid="5130856710614337649">"Ứng dụng công việc, thông báo, dữ liệu và các tính năng khác của hồ sơ công việc sẽ được bật"</string>
     <string name="work_mode_turn_on" msgid="2062544985670564875">"Bật"</string>
@@ -1878,6 +1876,5 @@
     <string name="zen_upgrade_notification_content" msgid="1794994264692424562">"Nhấn để xem những thông báo bị chặn."</string>
     <string name="notification_app_name_system" msgid="4205032194610042794">"Hệ thống"</string>
     <string name="notification_app_name_settings" msgid="7751445616365753381">"Cài đặt"</string>
-    <!-- no translation found for car_loading_profile (3545132581795684027) -->
-    <skip />
+    <string name="car_loading_profile" msgid="3545132581795684027">"Đang tải"</string>
 </resources>

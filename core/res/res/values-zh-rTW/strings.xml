@@ -381,12 +381,12 @@
     <string name="permdesc_writeContacts" product="tablet" msgid="897243932521953602">"允許應用程式讀取平板電腦上儲存的聯絡人資料，包括你與特定聯絡人通話、傳送電子郵件或使用其他通訊方式的互動頻率。這項權限可讓應用程式刪除聯絡人資料。"</string>
     <string name="permdesc_writeContacts" product="tv" msgid="5438230957000018959">"允許應用程式修改電視上儲存的聯絡人資料，包括你與特定聯絡人通話、傳送電子郵件或使用其他通訊方式的互動頻率。這項權限可讓應用程式刪除聯絡人資料。"</string>
     <string name="permdesc_writeContacts" product="default" msgid="589869224625163558">"允許應用程式讀取手機上儲存的聯絡人資料，包括你與特定聯絡人通話、傳送電子郵件或使用其他通訊方式的互動頻率。這項權限可讓應用程式刪除聯絡人資料。"</string>
-    <string name="permlab_readCallLog" msgid="3478133184624102739">"讀取通話紀錄"</string>
-    <string name="permdesc_readCallLog" msgid="3204122446463552146">"這個應用程式可讀取通話紀錄。"</string>
-    <string name="permlab_writeCallLog" msgid="8552045664743499354">"寫入通話紀錄"</string>
-    <string name="permdesc_writeCallLog" product="tablet" msgid="6661806062274119245">"允許應用程式修改平板電腦的通話紀錄，包括來電和已撥電話相關資料。請注意，惡意應用程式可能濫用此功能刪除或修改你的通話紀錄。"</string>
-    <string name="permdesc_writeCallLog" product="tv" msgid="4225034892248398019">"允許應用程式修改電視的通話紀錄，包括來電和已撥電話相關資料。惡意應用程式可能會藉此清除或修改你的通話紀錄。"</string>
-    <string name="permdesc_writeCallLog" product="default" msgid="683941736352787842">"允許應用程式修改手機的通話紀錄，包括來電和已撥電話相關資料。請注意，惡意應用程式可能濫用此功能刪除或修改你的通話紀錄。"</string>
+    <string name="permlab_readCallLog" msgid="3478133184624102739">"讀取通話記錄"</string>
+    <string name="permdesc_readCallLog" msgid="3204122446463552146">"這個應用程式可讀取通話記錄。"</string>
+    <string name="permlab_writeCallLog" msgid="8552045664743499354">"寫入通話記錄"</string>
+    <string name="permdesc_writeCallLog" product="tablet" msgid="6661806062274119245">"允許應用程式修改平板電腦的通話記錄，包括來電和已撥電話相關資料。請注意，惡意應用程式可能濫用此功能刪除或修改你的通話記錄。"</string>
+    <string name="permdesc_writeCallLog" product="tv" msgid="4225034892248398019">"允許應用程式修改電視的通話記錄，包括來電和已撥電話相關資料。惡意應用程式可能會藉此清除或修改你的通話記錄。"</string>
+    <string name="permdesc_writeCallLog" product="default" msgid="683941736352787842">"允許應用程式修改手機的通話記錄，包括來電和已撥電話相關資料。請注意，惡意應用程式可能濫用此功能刪除或修改你的通話記錄。"</string>
     <string name="permlab_bodySensors" msgid="4683341291818520277">"存取人體感應器 (例如心跳速率監測器)"</string>
     <string name="permdesc_bodySensors" product="default" msgid="4380015021754180431">"允許應用程式存取感測器所收集的資料 (這類感測器可監測你的體能狀態，例如你的心跳速率)。"</string>
     <string name="permlab_readCalendar" msgid="6716116972752441641">"讀取日曆活動和詳細資訊"</string>
@@ -517,7 +517,7 @@
     <string name="permlab_writeSyncSettings" msgid="5408694875793945314">"開啟及關閉同步功能"</string>
     <string name="permdesc_writeSyncSettings" msgid="8956262591306369868">"允許應用程式修改帳戶的同步處理設定，例如讓「使用者」應用程式與某個帳戶進行同步處理。"</string>
     <string name="permlab_readSyncStats" msgid="7396577451360202448">"讀取同步處理狀態"</string>
-    <string name="permdesc_readSyncStats" msgid="1510143761757606156">"允許應用程式讀取帳戶的同步處理統計資料，包括同步處理活動紀錄，以及同步處理的資料量。"</string>
+    <string name="permdesc_readSyncStats" msgid="1510143761757606156">"允許應用程式讀取帳戶的同步處理統計資料，包括同步處理活動記錄，以及同步處理的資料量。"</string>
     <string name="permlab_sdcardRead" product="nosdcard" msgid="367275095159405468">"讀取 USB 儲存裝置的內容"</string>
     <string name="permlab_sdcardRead" product="default" msgid="2188156462934977940">"讀取 SD 卡的內容"</string>
     <string name="permdesc_sdcardRead" product="nosdcard" msgid="3446988712598386079">"允許應用程式讀取 USB 儲存裝置的內容。"</string>
@@ -540,7 +540,7 @@
     <string name="permdesc_bind_connection_service" msgid="4008754499822478114">"允許應用程式與電話語音服務互動以撥接電話。"</string>
     <string name="permlab_control_incall_experience" msgid="9061024437607777619">"為使用者提供通話體驗"</string>
     <string name="permdesc_control_incall_experience" msgid="915159066039828124">"允許應用程式向使用者提供通話體驗。"</string>
-    <string name="permlab_readNetworkUsageHistory" msgid="7862593283611493232">"讀取網路用量紀錄"</string>
+    <string name="permlab_readNetworkUsageHistory" msgid="7862593283611493232">"讀取網路用量記錄"</string>
     <string name="permdesc_readNetworkUsageHistory" msgid="7689060749819126472">"允許應用程式讀取特定網路和應用程式的網路使用記錄。"</string>
     <string name="permlab_manageNetworkPolicy" msgid="2562053592339859990">"管理網路政策"</string>
     <string name="permdesc_manageNetworkPolicy" msgid="7537586771559370668">"允許應用程式管理網路政策並定義應用程式專用規則。"</string>
@@ -853,12 +853,12 @@
     <string name="autofill_parish" msgid="8202206105468820057">"教區"</string>
     <string name="autofill_area" msgid="3547409050889952423">"區"</string>
     <string name="autofill_emirate" msgid="2893880978835698818">"大公國"</string>
-    <string name="permlab_readHistoryBookmarks" msgid="3775265775405106983">"讀取你的網路書籤和紀錄"</string>
-    <string name="permdesc_readHistoryBookmarks" msgid="8462378226600439658">"允許應用程式讀取瀏覽器造訪過的所有網址紀錄，以及瀏覽器的所有書籤。注意：這項權限不適用於第三方瀏覽器或其他具備網頁瀏覽功能的應用程式。"</string>
-    <string name="permlab_writeHistoryBookmarks" msgid="3714785165273314490">"寫入網路書籤和紀錄"</string>
-    <string name="permdesc_writeHistoryBookmarks" product="tablet" msgid="6825527469145760922">"允許應用程式修改平板電腦上儲存的瀏覽紀錄或書籤。這項設定會讓應用程式具有清除或修改瀏覽資料的權限。注意：這項權限不適用於第三方瀏覽器或其他具備網頁瀏覽功能的應用程式。"</string>
-    <string name="permdesc_writeHistoryBookmarks" product="tv" msgid="7007393823197766548">"允許應用程式修改電視上儲存的瀏覽器紀錄或書籤。應用程式可能會藉由這項權限清除或修改瀏覽器資料。注意：第三方瀏覽器或其他具備網路瀏覽功能的應用程式不一定會強制使用這項權限。"</string>
-    <string name="permdesc_writeHistoryBookmarks" product="default" msgid="8497389531014185509">"允許應用程式修改手機上儲存的瀏覽紀錄或書籤。這項設定會讓應用程式具有清除或修改瀏覽資料的權限。注意：這項權限不適用於第三方瀏覽器或其他具備網頁瀏覽功能的應用程式。"</string>
+    <string name="permlab_readHistoryBookmarks" msgid="3775265775405106983">"讀取你的網路書籤和記錄"</string>
+    <string name="permdesc_readHistoryBookmarks" msgid="8462378226600439658">"允許應用程式讀取瀏覽器造訪過的所有網址記錄，以及瀏覽器的所有書籤。注意：這項權限不適用於第三方瀏覽器或其他具備網頁瀏覽功能的應用程式。"</string>
+    <string name="permlab_writeHistoryBookmarks" msgid="3714785165273314490">"寫入網路書籤和記錄"</string>
+    <string name="permdesc_writeHistoryBookmarks" product="tablet" msgid="6825527469145760922">"允許應用程式修改平板電腦上儲存的瀏覽記錄或書籤。這項設定會讓應用程式具有清除或修改瀏覽資料的權限。注意：這項權限不適用於第三方瀏覽器或其他具備網頁瀏覽功能的應用程式。"</string>
+    <string name="permdesc_writeHistoryBookmarks" product="tv" msgid="7007393823197766548">"允許應用程式修改電視上儲存的瀏覽器記錄或書籤。應用程式可能會藉由這項權限清除或修改瀏覽器資料。注意：第三方瀏覽器或其他具備網路瀏覽功能的應用程式不一定會強制使用這項權限。"</string>
+    <string name="permdesc_writeHistoryBookmarks" product="default" msgid="8497389531014185509">"允許應用程式修改手機上儲存的瀏覽記錄或書籤。這項設定會讓應用程式具有清除或修改瀏覽資料的權限。注意：這項權限不適用於第三方瀏覽器或其他具備網頁瀏覽功能的應用程式。"</string>
     <string name="permlab_setAlarm" msgid="1379294556362091814">"設定鬧鐘"</string>
     <string name="permdesc_setAlarm" msgid="316392039157473848">"允許應用程式在安裝的鬧鐘應用程式中設定鬧鐘，某些鬧鐘應用程式可能無法執行這項功能。"</string>
     <string name="permlab_addVoicemail" msgid="5525660026090959044">"新增語音留言"</string>
@@ -1738,7 +1738,8 @@
     <string name="zen_mode_default_weekends_name" msgid="2786495801019345244">"週末"</string>
     <string name="zen_mode_default_events_name" msgid="8158334939013085363">"活動"</string>
     <string name="zen_mode_default_every_night_name" msgid="3012363838882944175">"睡眠"</string>
-    <string name="muted_by" msgid="6147073845094180001">"由 <xliff:g id="THIRD_PARTY">%1$s</xliff:g> 設為靜音"</string>
+    <!-- no translation found for muted_by (5942954724562097128) -->
+    <skip />
     <string name="system_error_wipe_data" msgid="6608165524785354962">"你的裝置發生內部問題，必須將裝置恢復原廠設定才能解除不穩定狀態。"</string>
     <string name="system_error_manufacturer" msgid="8086872414744210668">"你的裝置發生內部問題，詳情請洽裝置製造商。"</string>
     <string name="stk_cc_ussd_to_dial" msgid="5214333646366591205">"USSD 要求已變更為一般通話"</string>
@@ -1777,12 +1778,9 @@
     <string name="language_picker_section_all" msgid="3097279199511617537">"所有語言"</string>
     <string name="region_picker_section_all" msgid="8966316787153001779">"所有地區"</string>
     <string name="locale_search_menu" msgid="2560710726687249178">"搜尋"</string>
-    <!-- no translation found for app_suspended_title (1919029799438164552) -->
-    <skip />
-    <!-- no translation found for app_suspended_default_message (7875306315686531621) -->
-    <skip />
-    <!-- no translation found for app_suspended_more_details (1131804827776778187) -->
-    <skip />
+    <string name="app_suspended_title" msgid="1919029799438164552">"無法開啟應用程式"</string>
+    <string name="app_suspended_default_message" msgid="7875306315686531621">"目前無法使用「<xliff:g id="APP_NAME_0">%1$s</xliff:g>」應用程式。這個應用程式是由「<xliff:g id="APP_NAME_1">%2$s</xliff:g>」所管理。"</string>
+    <string name="app_suspended_more_details" msgid="1131804827776778187">"瞭解詳情"</string>
     <string name="work_mode_off_title" msgid="1118691887588435530">"要開啟 Work 設定檔嗎？"</string>
     <string name="work_mode_off_message" msgid="5130856710614337649">"系統將開啟你的辦公應用程式、通知、資料和其他 Work 設定檔功能"</string>
     <string name="work_mode_turn_on" msgid="2062544985670564875">"開啟"</string>
@@ -1878,6 +1876,5 @@
     <string name="zen_upgrade_notification_content" msgid="1794994264692424562">"輕觸即可查看遭封鎖的項目。"</string>
     <string name="notification_app_name_system" msgid="4205032194610042794">"系統"</string>
     <string name="notification_app_name_settings" msgid="7751445616365753381">"設定"</string>
-    <!-- no translation found for car_loading_profile (3545132581795684027) -->
-    <skip />
+    <string name="car_loading_profile" msgid="3545132581795684027">"載入中"</string>
 </resources>

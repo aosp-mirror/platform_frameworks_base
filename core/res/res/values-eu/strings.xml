@@ -302,10 +302,10 @@
     <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"Aktibatu \"Arakatu ukituta\""</string>
     <string name="capability_desc_canRequestTouchExploration" msgid="7543249041581408313">"Sakatutako elementuak ozen irakurriko dira eta pantaila keinu bidez arakatu ahal izango da."</string>
     <string name="capability_title_canRequestFilterKeyEvents" msgid="2103440391902412174">"Behatu idazten duzun testua"</string>
-    <string name="capability_desc_canRequestFilterKeyEvents" msgid="7463135292204152818">"Ez da salbuespenik egiten datu pertsonalekin, hala nola, kreditu-txartelen zenbakiekin eta pasahitzekin."</string>
+    <string name="capability_desc_canRequestFilterKeyEvents" msgid="7463135292204152818">"Ez da salbuespenik egiten datu pertsonalekin, hala nola kreditu-txartelen zenbakiekin eta pasahitzekin."</string>
     <string name="capability_title_canControlMagnification" msgid="3593493281059424855">"Kontrolatu pantailaren zoom-maila"</string>
     <string name="capability_desc_canControlMagnification" msgid="4791858203568383773">"Kontrolatu pantailaren zoom-maila eta posizioa."</string>
-    <string name="capability_title_canPerformGestures" msgid="7418984730362576862">"Keinuak egin"</string>
+    <string name="capability_title_canPerformGestures" msgid="7418984730362576862">"Egin keinuak"</string>
     <string name="capability_desc_canPerformGestures" msgid="8296373021636981249">"Sakatu, lerratu, atximurkatu eta beste hainbat keinu egin ditzake."</string>
     <string name="capability_title_canCaptureFingerprintGestures" msgid="6309568287512278670">"Hatz-marken keinuak"</string>
     <string name="capability_desc_canCaptureFingerprintGestures" msgid="4386487962402228670">"Gailuaren hatz-marken sentsorean egindako keinuak antzeman ditzake."</string>
@@ -1348,7 +1348,7 @@
     <string name="wallpaper_binding_label" msgid="1240087844304687662">"Horma-papera"</string>
     <string name="chooser_wallpaper" msgid="7873476199295190279">"Aldatu horma-papera"</string>
     <string name="notification_listener_binding_label" msgid="2014162835481906429">"Jakinarazpenak hautemateko zerbitzua"</string>
-    <string name="vr_listener_binding_label" msgid="4316591939343607306">"EB hautemailea"</string>
+    <string name="vr_listener_binding_label" msgid="4316591939343607306">"Errealitate birtualeko hautemailea"</string>
     <string name="condition_provider_service_binding_label" msgid="1321343352906524564">"Baldintza-hornitzailea"</string>
     <string name="notification_ranker_binding_label" msgid="774540592299064747">"Jakinarazpenen sailkapen-zerbitzua"</string>
     <string name="vpn_title" msgid="19615213552042827">"VPN eginbidea aktibatuta"</string>
@@ -1692,7 +1692,7 @@
     <string name="package_updated_device_owner" msgid="1847154566357862089">"Administratzaileak eguneratu du"</string>
     <string name="package_deleted_device_owner" msgid="2307122077550236438">"Administratzaileak ezabatu du"</string>
     <string name="battery_saver_description" msgid="769989536172631582">"Bateriak gehiago iraun dezan, bateria-aurrezleak gailuaren eginbide batzuk desaktibatu eta aplikazioak mugatzen ditu."</string>
-    <string name="data_saver_description" msgid="6015391409098303235">"Datuen erabilera murrizteko, atzeko planoan datuak bidaltzea eta jasotzea galarazten die datu-aurrezleak aplikazio batzuei. Unean erabiltzen ari zaren aplikazioak atzi ditzake datuak, baina baliteke maiztasun txikiagoarekin atzitzea. Horrela, adibidez, baliteke irudiak ez erakustea haiek sakatu arte."</string>
+    <string name="data_saver_description" msgid="6015391409098303235">"Datuen erabilera murrizteko, atzeko planoan datuak bidaltzea eta jasotzea galarazten die datu-aurrezleak aplikazio batzuei. Unean erabiltzen ari zaren aplikazioak atzitu egin ahal izango datuak, baina baliteke maiztasun txikiagoarekin atzitzea. Horrela, adibidez, baliteke irudiak ez erakustea haiek sakatu arte."</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"Datu-aurrezlea aktibatu?"</string>
     <string name="data_saver_enable_button" msgid="7147735965247211818">"Aktibatu"</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="4367877408072000848">
@@ -1738,8 +1738,9 @@
     <string name="zen_mode_default_weeknights_name" msgid="3081318299464998143">"Lanegunetako gaua"</string>
     <string name="zen_mode_default_weekends_name" msgid="2786495801019345244">"Asteburua"</string>
     <string name="zen_mode_default_events_name" msgid="8158334939013085363">"Gertaera"</string>
-    <string name="zen_mode_default_every_night_name" msgid="3012363838882944175">"Lo egin bitartean"</string>
-    <string name="muted_by" msgid="6147073845094180001">"Audioa desaktibatu da (<xliff:g id="THIRD_PARTY">%1$s</xliff:g>)"</string>
+    <string name="zen_mode_default_every_night_name" msgid="3012363838882944175">"Lo egitean"</string>
+    <!-- no translation found for muted_by (5942954724562097128) -->
+    <skip />
     <string name="system_error_wipe_data" msgid="6608165524785354962">"Barneko arazo bat dago zure gailuan eta agian ezegonkor egongo da jatorrizko datuak berrezartzen dituzun arte."</string>
     <string name="system_error_manufacturer" msgid="8086872414744210668">"Barneko arazo bat dago zure gailuan. Xehetasunak jakiteko, jarri fabrikatzailearekin harremanetan."</string>
     <string name="stk_cc_ussd_to_dial" msgid="5214333646366591205">"USSD eskaera ohiko deira aldatu da"</string>
@@ -1778,12 +1779,9 @@
     <string name="language_picker_section_all" msgid="3097279199511617537">"Hizkuntza guztiak"</string>
     <string name="region_picker_section_all" msgid="8966316787153001779">"Lurralde guztiak"</string>
     <string name="locale_search_menu" msgid="2560710726687249178">"Bilaketa"</string>
-    <!-- no translation found for app_suspended_title (1919029799438164552) -->
-    <skip />
-    <!-- no translation found for app_suspended_default_message (7875306315686531621) -->
-    <skip />
-    <!-- no translation found for app_suspended_more_details (1131804827776778187) -->
-    <skip />
+    <string name="app_suspended_title" msgid="1919029799438164552">"Ezin da ireki aplikazioa"</string>
+    <string name="app_suspended_default_message" msgid="7875306315686531621">"Une honetan ez dago erabilgarri <xliff:g id="APP_NAME_0">%1$s</xliff:g>. <xliff:g id="APP_NAME_1">%2$s</xliff:g> aplikazioak kudeatzen du hori."</string>
+    <string name="app_suspended_more_details" msgid="1131804827776778187">"Lortu informazio gehiago"</string>
     <string name="work_mode_off_title" msgid="1118691887588435530">"Laneko profila aktibatu?"</string>
     <string name="work_mode_off_message" msgid="5130856710614337649">"Laneko aplikazioak, jakinarazpenak, datuak eta laneko profileko bestelako eginbideak aktibatuko dira"</string>
     <string name="work_mode_turn_on" msgid="2062544985670564875">"Aktibatu"</string>
@@ -1879,6 +1877,5 @@
     <string name="zen_upgrade_notification_content" msgid="1794994264692424562">"Sakatu zer dagoen blokeatuta ikusteko."</string>
     <string name="notification_app_name_system" msgid="4205032194610042794">"Sistema"</string>
     <string name="notification_app_name_settings" msgid="7751445616365753381">"Ezarpenak"</string>
-    <!-- no translation found for car_loading_profile (3545132581795684027) -->
-    <skip />
+    <string name="car_loading_profile" msgid="3545132581795684027">"Kargatzen"</string>
 </resources>

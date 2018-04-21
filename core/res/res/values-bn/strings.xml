@@ -305,7 +305,7 @@
     <string name="capability_desc_canRequestFilterKeyEvents" msgid="7463135292204152818">"ক্রেডিট কার্ডের নম্বর ও পাসওয়ার্ডগুলির মতো ব্যক্তিগত তথ্য অন্তর্ভুক্ত করে৷"</string>
     <string name="capability_title_canControlMagnification" msgid="3593493281059424855">"প্রদর্শনের বৃহত্তরীকরণ ব্যবস্থা নিয়ন্ত্রণ করুন"</string>
     <string name="capability_desc_canControlMagnification" msgid="4791858203568383773">"প্রদর্শনের জুমের স্তর এবং অবস্থান নির্ধারন নিয়ন্ত্রণ করুন৷"</string>
-    <string name="capability_title_canPerformGestures" msgid="7418984730362576862">"অঙ্গভঙ্গির কাজগুলি সম্পাদন করুন"</string>
+    <string name="capability_title_canPerformGestures" msgid="7418984730362576862">"অঙ্গভঙ্গির কাজগুলি সম্পাদন"</string>
     <string name="capability_desc_canPerformGestures" msgid="8296373021636981249">"আলতো চাপ দেওয়া, সোয়াইপ, পিঞ্চ করা এবং অন্যান্য ইঙ্গিতের কাজগুলি সম্পাদন করতে পারবেন৷"</string>
     <string name="capability_title_canCaptureFingerprintGestures" msgid="6309568287512278670">"ফিঙ্গারপ্রিন্ট সেন্সরের উপর করা অঙ্গভঙ্গিগুলি"</string>
     <string name="capability_desc_canCaptureFingerprintGestures" msgid="4386487962402228670">"ডিভাইসের আঙ্গুলের ছাপের সেন্সরের উপরে ইঙ্গিত করলে বুঝতে পারে।"</string>
@@ -583,7 +583,7 @@
     <string name="policydesc_watchLogin_secondaryUser" product="default" msgid="2185480427217127147">"স্ক্রীন আনলক করার সময় ভুলভাবে লেখা পাসওয়ার্ড প্রবেশের সংখ্যা মনিটার করে, এবং ফোন লক করে এবং অনেক বার পাসওয়ার্ড ভুল ভাবে লেখা হলে ব্যবহারকারীর ডেটা মুছে ফেলে৷"</string>
     <string name="policylab_resetPassword" msgid="4934707632423915395">"স্ক্রিন লক পরিবর্তন করুন"</string>
     <string name="policydesc_resetPassword" msgid="1278323891710619128">"স্ক্রিন লক পরিবর্তন করুন৷"</string>
-    <string name="policylab_forceLock" msgid="2274085384704248431">"স্ক্রীণটি লক করে"</string>
+    <string name="policylab_forceLock" msgid="2274085384704248431">"স্ক্রিনটি লক করে"</string>
     <string name="policydesc_forceLock" msgid="1141797588403827138">"স্ক্রীন কখন কিভাবে লক হবে তা নিয়ন্ত্রণ করে৷"</string>
     <string name="policylab_wipeData" msgid="3910545446758639713">"সমস্ত ডেটা মুছে দেয়"</string>
     <string name="policydesc_wipeData" product="tablet" msgid="4306184096067756876">"ফ্যাক্টরি ডেটা আবার সেট কার্য সম্পাদনার দ্বারা কোনো রকম সতর্কতা ছাড়াই ট্যাবলেটের ডেটা মোছে৷"</string>
@@ -1161,7 +1161,7 @@
     <string name="wifi_available_content_failed_to_connect" msgid="3377406637062802645">"সমস্ত নেটওয়ার্ক দেখতে ট্যাপ করুন"</string>
     <string name="wifi_available_action_connect" msgid="2635699628459488788">"সংযুক্ত করুন"</string>
     <string name="wifi_available_action_all_networks" msgid="4368435796357931006">"সব নেটওয়ার্ক"</string>
-    <string name="wifi_wakeup_onboarding_title" msgid="228772560195634292">"ওয়াই-ফাই নিজে থেকেই চালু হবে"</string>
+    <string name="wifi_wakeup_onboarding_title" msgid="228772560195634292">"ওয়াই-ফাই অটোমেটিক চালু হবে"</string>
     <string name="wifi_wakeup_onboarding_subtext" msgid="3989697580301186973">"যখন আপনি একটি উচ্চ মানের সংরক্ষিত নেটওয়ার্ক কাছাকাছি থাকেন"</string>
     <string name="wifi_wakeup_onboarding_action_disable" msgid="838648204200836028">"আবার চালু করবেন না"</string>
     <string name="wifi_wakeup_enabled_title" msgid="6534603733173085309">"ওয়াই-ফাই নিজে থেকে চালু করা হয়েছে"</string>
@@ -1672,7 +1672,7 @@
     </plurals>
     <string name="restr_pin_try_later" msgid="973144472490532377">"পরে আবার চেষ্টা করুন"</string>
     <string name="immersive_cling_title" msgid="8394201622932303336">"পূর্ণ স্ক্রিনে দেখা হচ্ছে"</string>
-    <string name="immersive_cling_description" msgid="3482371193207536040">"প্রস্থান করতে উপর থেকে নীচের দিকে সোয়াইপ করুন"</string>
+    <string name="immersive_cling_description" msgid="3482371193207536040">"প্রস্থান করতে উপর থেকে নিচের দিকে সোয়াইপ করুন"</string>
     <string name="immersive_cling_positive" msgid="5016839404568297683">"বুঝেছি"</string>
     <string name="done_label" msgid="2093726099505892398">"সম্পন্ন হয়েছে"</string>
     <string name="hour_picker_description" msgid="6698199186859736512">"বৃত্তাকার ঘণ্টা নির্বাচকের স্লাইডার"</string>
@@ -1739,7 +1739,8 @@
     <string name="zen_mode_default_weekends_name" msgid="2786495801019345244">"সপ্তাহান্ত"</string>
     <string name="zen_mode_default_events_name" msgid="8158334939013085363">"ইভেন্ট"</string>
     <string name="zen_mode_default_every_night_name" msgid="3012363838882944175">"ঘুমানোর সময়"</string>
-    <string name="muted_by" msgid="6147073845094180001">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g> দ্বারা নিঃশব্দ করা হয়েছে"</string>
+    <!-- no translation found for muted_by (5942954724562097128) -->
+    <skip />
     <string name="system_error_wipe_data" msgid="6608165524785354962">"আপনার ডিভাইসে একটি অভ্যন্তরীন সমস্যা হয়েছে, এবং আপনি যতক্ষণ না পর্যন্ত এটিকে ফ্যাক্টরি ডেটা রিসেট করছেন ততক্ষণ এটি ঠিকভাবে কাজ নাও করতে পারে৷"</string>
     <string name="system_error_manufacturer" msgid="8086872414744210668">"আপনার ডিভাইসে একটি অভ্যন্তরীন সমস্যা হয়েছে৷ বিস্তারিত জানার জন্য প্রস্তুতকারকের সাথে যোগাযোগ করুন৷"</string>
     <string name="stk_cc_ussd_to_dial" msgid="5214333646366591205">"USSD অনুরোধ সাধারণ কলে পরিবর্তন করা হয়েছে"</string>
@@ -1778,12 +1779,9 @@
     <string name="language_picker_section_all" msgid="3097279199511617537">"সকল ভাষা"</string>
     <string name="region_picker_section_all" msgid="8966316787153001779">"সমস্ত অঞ্চল"</string>
     <string name="locale_search_menu" msgid="2560710726687249178">"খুঁজুন"</string>
-    <!-- no translation found for app_suspended_title (1919029799438164552) -->
-    <skip />
-    <!-- no translation found for app_suspended_default_message (7875306315686531621) -->
-    <skip />
-    <!-- no translation found for app_suspended_more_details (1131804827776778187) -->
-    <skip />
+    <string name="app_suspended_title" msgid="1919029799438164552">"অ্যাপটি চালু করা যাচ্ছে না"</string>
+    <string name="app_suspended_default_message" msgid="7875306315686531621">"<xliff:g id="APP_NAME_0">%1$s</xliff:g> অ্যাপটি এই মুহূর্তে উপলভ্য নয়। <xliff:g id="APP_NAME_1">%2$s</xliff:g> থেকে এই অ্যাপটিকে পরিচালনা করা হয়।"</string>
+    <string name="app_suspended_more_details" msgid="1131804827776778187">"আরও জানুন"</string>
     <string name="work_mode_off_title" msgid="1118691887588435530">"কাজের প্রোফাইল চালু করবেন?"</string>
     <string name="work_mode_off_message" msgid="5130856710614337649">"আপনার কাজের অ্যাপ, বিজ্ঞপ্তি, ডেটা এবং কাজের প্রোফাইলের অন্যান্য বৈশিষ্ট্য চালু করা হবে"</string>
     <string name="work_mode_turn_on" msgid="2062544985670564875">"চালু করুন"</string>
@@ -1879,6 +1877,5 @@
     <string name="zen_upgrade_notification_content" msgid="1794994264692424562">"কী কী ব্লক করা আছে তা দেখতে ট্যাপ করুন।"</string>
     <string name="notification_app_name_system" msgid="4205032194610042794">"সিস্টেম"</string>
     <string name="notification_app_name_settings" msgid="7751445616365753381">"সেটিংস"</string>
-    <!-- no translation found for car_loading_profile (3545132581795684027) -->
-    <skip />
+    <string name="car_loading_profile" msgid="3545132581795684027">"লোড হচ্ছে"</string>
 </resources>

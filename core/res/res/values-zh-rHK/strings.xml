@@ -70,7 +70,7 @@
     <string name="ThreeWCMmi" msgid="9051047170321190368">"三方通話"</string>
     <string name="RuacMmi" msgid="7827887459138308886">"拒接不想接聽的騷擾電話"</string>
     <string name="CndMmi" msgid="3116446237081575808">"顯示發話號碼"</string>
-    <string name="DndMmi" msgid="1265478932418334331">"請勿打擾"</string>
+    <string name="DndMmi" msgid="1265478932418334331">"請勿騷擾"</string>
     <string name="CLIRDefaultOnNextCallOn" msgid="429415409145781923">"預設不顯示來電號碼，下一通電話也不顯示。"</string>
     <string name="CLIRDefaultOnNextCallOff" msgid="3092918006077864624">"預設不顯示來電號碼，但下一通電話則顯示。"</string>
     <string name="CLIRDefaultOffNextCallOn" msgid="6179425182856418465">"預設顯示來電號碼，但下一通電話不顯示。"</string>
@@ -240,7 +240,7 @@
     <string name="global_action_battery_saver_on_status" msgid="484059130698197787">"省電模式已關閉"</string>
     <string name="global_action_battery_saver_off_status" msgid="75550964969478405">"省電模式已開啟"</string>
     <string name="global_action_settings" msgid="1756531602592545966">"設定"</string>
-    <string name="global_action_assist" msgid="3892832961594295030">"協助"</string>
+    <string name="global_action_assist" msgid="3892832961594295030">"小幫手"</string>
     <string name="global_action_voice_assist" msgid="7751191495200504480">"語音助手"</string>
     <string name="global_action_lockdown" msgid="1099326950891078929">"鎖定"</string>
     <string name="status_bar_notification_info_overflow" msgid="5301981741705354993">"999+"</string>
@@ -273,7 +273,7 @@
     <string name="permgrouplab_contacts" msgid="3657758145679177612">"通訊錄"</string>
     <string name="permgroupdesc_contacts" msgid="6951499528303668046">"存取您的通訊錄"</string>
     <string name="permgrouprequest_contacts" msgid="6032805601881764300">"允許「<xliff:g id="APP_NAME">%1$s</xliff:g>」&lt;b&gt;&lt;/b&gt;存取您的聯絡人嗎？"</string>
-    <string name="permgrouplab_location" msgid="7275582855722310164">"位置"</string>
+    <string name="permgrouplab_location" msgid="7275582855722310164">"位置資訊"</string>
     <string name="permgroupdesc_location" msgid="1346617465127855033">"存取此裝置的位置"</string>
     <string name="permgrouprequest_location" msgid="3788275734953323491">"允許「<xliff:g id="APP_NAME">%1$s</xliff:g>」&lt;b&gt;&lt;/b&gt;存取此裝置的位置資訊嗎？"</string>
     <string name="permgrouplab_calendar" msgid="5863508437783683902">"日曆"</string>
@@ -306,7 +306,7 @@
     <string name="capability_title_canControlMagnification" msgid="3593493281059424855">"控制顯示屏的放大功能"</string>
     <string name="capability_desc_canControlMagnification" msgid="4791858203568383773">"控制顯示屏的縮放程度和位置。"</string>
     <string name="capability_title_canPerformGestures" msgid="7418984730362576862">"執行手勢"</string>
-    <string name="capability_desc_canPerformGestures" msgid="8296373021636981249">"可以輕按、快速滑動和兩指縮放，並執行其他手勢。"</string>
+    <string name="capability_desc_canPerformGestures" msgid="8296373021636981249">"可以輕按、滑動和兩指縮放，並執行其他手勢。"</string>
     <string name="capability_title_canCaptureFingerprintGestures" msgid="6309568287512278670">"指紋手勢"</string>
     <string name="capability_desc_canCaptureFingerprintGestures" msgid="4386487962402228670">"可以擷取在裝置指紋感應器上執行的手勢。"</string>
     <string name="permlab_statusBar" msgid="7417192629601890791">"停用或修改狀態列"</string>
@@ -1494,7 +1494,7 @@
     <string name="media_route_chooser_searching" msgid="4776236202610828706">"正在搜尋裝置…"</string>
     <string name="media_route_chooser_extended_settings" msgid="87015534236701604">"設定"</string>
     <string name="media_route_controller_disconnect" msgid="8966120286374158649">"停止連接"</string>
-    <string name="media_route_status_scanning" msgid="7279908761758293783">"正在掃描…"</string>
+    <string name="media_route_status_scanning" msgid="7279908761758293783">"正在掃瞄…"</string>
     <string name="media_route_status_connecting" msgid="6422571716007825440">"正在連線..."</string>
     <string name="media_route_status_available" msgid="6983258067194649391">"可用"</string>
     <string name="media_route_status_not_available" msgid="6739899962681886401">"無法使用"</string>
@@ -1671,7 +1671,7 @@
     </plurals>
     <string name="restr_pin_try_later" msgid="973144472490532377">"稍後再試"</string>
     <string name="immersive_cling_title" msgid="8394201622932303336">"開啟全螢幕"</string>
-    <string name="immersive_cling_description" msgid="3482371193207536040">"由頂部向下快速滑動即可退出。"</string>
+    <string name="immersive_cling_description" msgid="3482371193207536040">"由頂部向下滑動即可退出。"</string>
     <string name="immersive_cling_positive" msgid="5016839404568297683">"知道了"</string>
     <string name="done_label" msgid="2093726099505892398">"完成"</string>
     <string name="hour_picker_description" msgid="6698199186859736512">"小時環形滑桿"</string>
@@ -1738,7 +1738,8 @@
     <string name="zen_mode_default_weekends_name" msgid="2786495801019345244">"週末"</string>
     <string name="zen_mode_default_events_name" msgid="8158334939013085363">"活動"</string>
     <string name="zen_mode_default_every_night_name" msgid="3012363838882944175">"睡眠"</string>
-    <string name="muted_by" msgid="6147073845094180001">"靜音設定者：<xliff:g id="THIRD_PARTY">%1$s</xliff:g>"</string>
+    <!-- no translation found for muted_by (5942954724562097128) -->
+    <skip />
     <string name="system_error_wipe_data" msgid="6608165524785354962">"您裝置的系統發生問題，回復原廠設定後即可解決該問題。"</string>
     <string name="system_error_manufacturer" msgid="8086872414744210668">"您裝置的系統發生問題，請聯絡您的製造商瞭解詳情。"</string>
     <string name="stk_cc_ussd_to_dial" msgid="5214333646366591205">"USSD 要求已變更為一般通話"</string>
@@ -1777,12 +1778,9 @@
     <string name="language_picker_section_all" msgid="3097279199511617537">"所有語言"</string>
     <string name="region_picker_section_all" msgid="8966316787153001779">"所有國家/地區"</string>
     <string name="locale_search_menu" msgid="2560710726687249178">"搜尋"</string>
-    <!-- no translation found for app_suspended_title (1919029799438164552) -->
-    <skip />
-    <!-- no translation found for app_suspended_default_message (7875306315686531621) -->
-    <skip />
-    <!-- no translation found for app_suspended_more_details (1131804827776778187) -->
-    <skip />
+    <string name="app_suspended_title" msgid="1919029799438164552">"無法開啟應用程式"</string>
+    <string name="app_suspended_default_message" msgid="7875306315686531621">"目前無法使用 <xliff:g id="APP_NAME_0">%1$s</xliff:g> 應用程式。此應用程式是由「<xliff:g id="APP_NAME_1">%2$s</xliff:g>」管理。"</string>
+    <string name="app_suspended_more_details" msgid="1131804827776778187">"瞭解詳情"</string>
     <string name="work_mode_off_title" msgid="1118691887588435530">"要開啟工作設定檔嗎？"</string>
     <string name="work_mode_off_message" msgid="5130856710614337649">"系統將開啟您的工作應用程式、通知、資料和其他工作設定檔功能"</string>
     <string name="work_mode_turn_on" msgid="2062544985670564875">"開啟"</string>
@@ -1878,6 +1876,5 @@
     <string name="zen_upgrade_notification_content" msgid="1794994264692424562">"輕按即可查看封鎖內容。"</string>
     <string name="notification_app_name_system" msgid="4205032194610042794">"系統"</string>
     <string name="notification_app_name_settings" msgid="7751445616365753381">"設定"</string>
-    <!-- no translation found for car_loading_profile (3545132581795684027) -->
-    <skip />
+    <string name="car_loading_profile" msgid="3545132581795684027">"正在載入"</string>
 </resources>
