@@ -14,6 +14,7 @@
 
 service statsd /system/bin/statsd
     class main
+    socket statsdw dgram+passcred 0222 statsd statsd
     user statsd
     group statsd log
     writepid /dev/cpuset/system-background/tasks
