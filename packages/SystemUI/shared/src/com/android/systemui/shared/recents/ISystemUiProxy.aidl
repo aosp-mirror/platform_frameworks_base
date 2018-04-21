@@ -49,4 +49,9 @@ interface ISystemUiProxy {
      * Notifies SystemUI that Overview is shown.
      */
     void onOverviewShown(boolean fromHome) = 6;
+
+    /**
+     * Get the secondary split screen app's rectangle when not minimized.
+     */
+    Rect getNonMinimizedSplitScreenSecondaryBounds() = 7;
 }
