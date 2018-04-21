@@ -34,7 +34,7 @@
     <string name="wifi_not_in_range" msgid="1136191511238508967">"Fuera de alcance"</string>
     <string name="wifi_no_internet_no_reconnect" msgid="5724903347310541706">"No se conectará automáticamente"</string>
     <string name="wifi_no_internet" msgid="4663834955626848401">"No hay acceso a Internet"</string>
-    <string name="saved_network" msgid="4352716707126620811">"Guardadas por <xliff:g id="NAME">%1$s</xliff:g>"</string>
+    <string name="saved_network" msgid="4352716707126620811">"Guardada por <xliff:g id="NAME">%1$s</xliff:g>"</string>
     <string name="connected_via_network_scorer" msgid="5713793306870815341">"Conexión automática mediante %1$s"</string>
     <string name="connected_via_network_scorer_default" msgid="7867260222020343104">"Conectado automáticamente mediante proveedor de calificación de red"</string>
     <string name="connected_via_passpoint" msgid="2826205693803088747">"Conexión a través de %1$s"</string>
@@ -129,11 +129,11 @@
     <string name="process_kernel_label" msgid="3916858646836739323">"SO Android"</string>
     <string name="data_usage_uninstalled_apps" msgid="614263770923231598">"Aplicaciones eliminadas"</string>
     <string name="data_usage_uninstalled_apps_users" msgid="7986294489899813194">"Aplicaciones y usuarios eliminados"</string>
-    <string name="tether_settings_title_usb" msgid="6688416425801386511">"Anclaje a red USB"</string>
-    <string name="tether_settings_title_wifi" msgid="3277144155960302049">"Zona Wi-Fi portátil"</string>
-    <string name="tether_settings_title_bluetooth" msgid="355855408317564420">"Anclaje a red Bluetooth"</string>
-    <string name="tether_settings_title_usb_bluetooth" msgid="5355828977109785001">"Anclaje a red"</string>
-    <string name="tether_settings_title_all" msgid="8356136101061143841">"Anclaje a red y zona portátil"</string>
+    <string name="tether_settings_title_usb" msgid="6688416425801386511">"Conexión mediante USB"</string>
+    <string name="tether_settings_title_wifi" msgid="3277144155960302049">"Hotspot portátil"</string>
+    <string name="tether_settings_title_bluetooth" msgid="355855408317564420">"Conexión mediante Bluetooth"</string>
+    <string name="tether_settings_title_usb_bluetooth" msgid="5355828977109785001">"Compartir conexión"</string>
+    <string name="tether_settings_title_all" msgid="8356136101061143841">"Hotspots y dispositivos portátiles"</string>
     <string name="managed_user_title" msgid="8109605045406748842">"Todas las apps de trabajo"</string>
     <string name="user_guest" msgid="8475274842845401871">"Invitado"</string>
     <string name="unknown" msgid="1592123443519355854">"Desconocido"</string>
@@ -236,7 +236,7 @@
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"Mostrar opciones de certificación de pantalla inalámbrica"</string>
     <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"Aumentar nivel de registro Wi-Fi; mostrar por SSID RSSI en el selector de Wi-Fi"</string>
     <string name="wifi_connected_mac_randomization_summary" msgid="1743059848752201485">"Seleccionar la dirección MAC de forma aleatoria cuando se establezca conexión con redes Wi-Fi"</string>
-    <string name="wifi_metered_label" msgid="4514924227256839725">"Con tarifa plana"</string>
+    <string name="wifi_metered_label" msgid="4514924227256839725">"Con uso medido"</string>
     <string name="wifi_unmetered_label" msgid="6124098729457992931">"Sin tarifa plana"</string>
     <string name="select_logd_size_title" msgid="7433137108348553508">"Tamaños de búfer de Logger"</string>
     <string name="select_logd_size_dialog_title" msgid="1206769310236476760">"Selecciona el tamaño del Logger por búfer"</string>
@@ -299,15 +299,15 @@
     <string name="debug_layout" msgid="5981361776594526155">"Mostrar límites de diseño"</string>
     <string name="debug_layout_summary" msgid="2001775315258637682">"Mostrar límites de recortes, márgenes, etc."</string>
     <string name="force_rtl_layout_all_locales" msgid="2259906643093138978">"Forzar diseño der. a izq."</string>
-    <string name="force_rtl_layout_all_locales_summary" msgid="9192797796616132534">"Forzar diseño pantalla der.&gt;izq., cualquier idioma"</string>
+    <string name="force_rtl_layout_all_locales_summary" msgid="9192797796616132534">"Forzar diseño de pantalla de derecha a izquierda para todos los idiomas"</string>
     <string name="force_msaa" msgid="7920323238677284387">"Forzar MSAA 4x"</string>
     <string name="force_msaa_summary" msgid="9123553203895817537">"Activar MSAA 4x en aplicaciones OpenGL ES 2.0"</string>
     <string name="show_non_rect_clip" msgid="505954950474595172">"Depurar operaciones de recorte no rectangulares"</string>
     <string name="track_frame_time" msgid="6094365083096851167">"Perfil procesamiento HWUI"</string>
     <string name="enable_gpu_debug_layers" msgid="3848838293793255097">"Habilitar depuración GPU"</string>
     <string name="enable_gpu_debug_layers_summary" msgid="8009136940671194940">"Permitir capas de GPU para apps de depuración"</string>
-    <string name="window_animation_scale_title" msgid="6162587588166114700">"Ventana de escala de animación"</string>
-    <string name="transition_animation_scale_title" msgid="387527540523595875">"Transición de escala de animación"</string>
+    <string name="window_animation_scale_title" msgid="6162587588166114700">"Escala de animación de ventana"</string>
+    <string name="transition_animation_scale_title" msgid="387527540523595875">"Escala de animación de transición"</string>
     <string name="animator_duration_scale_title" msgid="3406722410819934083">"Escala de duración de animador"</string>
     <string name="overlay_display_devices_title" msgid="5364176287998398539">"Simular pantallas secundarias"</string>
     <string name="debug_applications_category" msgid="4206913653849771549">"Aplicaciones"</string>

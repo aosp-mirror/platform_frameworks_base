@@ -141,7 +141,7 @@
     <string name="launch_defaults_some" msgid="313159469856372621">"Bazı varsayılan tercihler ayarlandı"</string>
     <string name="launch_defaults_none" msgid="4241129108140034876">"Hiçbir varsayılan tercih ayarlanmadı"</string>
     <string name="tts_settings" msgid="8186971894801348327">"Metin-konuşma ayarları"</string>
-    <string name="tts_settings_title" msgid="1237820681016639683">"Metin-konuşma çıktısı"</string>
+    <string name="tts_settings_title" msgid="1237820681016639683">"Metin okuma çıkışı"</string>
     <string name="tts_default_rate_title" msgid="6030550998379310088">"Konuşma hızı"</string>
     <string name="tts_default_rate_summary" msgid="4061815292287182801">"Metnin konuşulduğu hız"</string>
     <string name="tts_default_pitch_title" msgid="6135942113172488671">"Perde"</string>
@@ -155,7 +155,7 @@
     <string name="tts_install_data_title" msgid="4264378440508149986">"Ses verilerini yükle"</string>
     <string name="tts_install_data_summary" msgid="5742135732511822589">"Konuşma sentezi için gereken ses verilerini yükle"</string>
     <string name="tts_engine_security_warning" msgid="8786238102020223650">"Bu konuşma sentezi motoru, şifreler ve kredi kartı numaraları gibi kişisel veriler de dahil konuşulan tüm metni toplayabilir. <xliff:g id="TTS_PLUGIN_ENGINE_NAME">%s</xliff:g> motorundan gelmektedir. Bu konuşma sentezi motorunun kullanımı etkinleştirilsin mi?"</string>
-    <string name="tts_engine_network_required" msgid="1190837151485314743">"Bu dil, metin-konuşma çıktısı için bir ağ bağlantısı gerektirir."</string>
+    <string name="tts_engine_network_required" msgid="1190837151485314743">"Bu dil, metin okuma çıkışı için bir ağ bağlantısı gerektirir."</string>
     <string name="tts_default_sample_string" msgid="4040835213373086322">"Bu bir konuşma sentezi örneğidir"</string>
     <string name="tts_status_title" msgid="7268566550242584413">"Varsayılan dil durumu"</string>
     <string name="tts_status_ok" msgid="1309762510278029765">"<xliff:g id="LOCALE">%1$s</xliff:g> tamamen destekleniyor"</string>
@@ -284,7 +284,7 @@
     <string name="show_touches" msgid="2642976305235070316">"Dokunmayı göster"</string>
     <string name="show_touches_summary" msgid="6101183132903926324">"Dokunmalarda görsel geri bildirim göster"</string>
     <string name="show_screen_updates" msgid="5470814345876056420">"Yüzey güncellemelerini göster"</string>
-    <string name="show_screen_updates_summary" msgid="2569622766672785529">"Güncelleme sırasında tüm pencere yüzeylerini çiz"</string>
+    <string name="show_screen_updates_summary" msgid="2569622766672785529">"Güncellenirken tüm pencere yüzeylerini yakıp söndür"</string>
     <string name="show_hw_screen_updates" msgid="4117270979975470789">"Görünüm güncellemelerini göster"</string>
     <string name="show_hw_screen_updates_summary" msgid="6506943466625875655">"Çizim yapılırken görünümleri pencerede çiz"</string>
     <string name="show_hw_layers_updates" msgid="5645728765605699821">"Donanım katmanı güncellemelerini göster"</string>

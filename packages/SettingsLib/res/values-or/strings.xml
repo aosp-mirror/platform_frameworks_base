@@ -370,14 +370,10 @@
     <string name="power_remaining_duration_only_enhanced" msgid="5992456722677973678">"ଆପଣଙ୍କ ବ୍ୟବହାରକୁ ଆଧାର କରି ପ୍ରାୟ <xliff:g id="TIME">%1$s</xliff:g> ଅବଶିଷ୍ଟ"</string>
     <string name="power_discharging_duration_enhanced" msgid="5726302316642148671">"ଆପଣଙ୍କ ବ୍ୟବହାରକୁ ଭିତ୍ତି କରି ପାଖାପାଖି <xliff:g id="TIME">%1$s</xliff:g> ବାକି ଅଛି(<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
     <string name="power_remaining_duration_only_short" msgid="5329694252258605547">"<xliff:g id="TIME">%1$s</xliff:g> ଅବଶିଷ୍ଟ"</string>
-    <!-- no translation found for power_discharge_by_enhanced (2095821536747992464) -->
-    <skip />
-    <!-- no translation found for power_discharge_by_only_enhanced (2175151772952365149) -->
-    <skip />
-    <!-- no translation found for power_discharge_by (6453537733650125582) -->
-    <skip />
-    <!-- no translation found for power_discharge_by_only (107616694963545745) -->
-    <skip />
+    <string name="power_discharge_by_enhanced" msgid="2095821536747992464">"ଆପଣଙ୍କର ବ୍ୟବହାରକୁ ଆଧାର କରି ବ୍ୟାଟେରୀ <xliff:g id="TIME">%1$s</xliff:g> ପର୍ଯ୍ୟନ୍ତ ଚାଲିବ (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
+    <string name="power_discharge_by_only_enhanced" msgid="2175151772952365149">"ଆପଣଙ୍କର ବ୍ୟବହାରକୁ ଆଧାର କରି ବ୍ୟାଟେରୀ <xliff:g id="TIME">%1$s</xliff:g> ପର୍ଯ୍ୟନ୍ତ ଚାଲିବ"</string>
+    <string name="power_discharge_by" msgid="6453537733650125582">"ବ୍ୟାଟେରୀ ପାଖାପାଖି <xliff:g id="TIME">%1$s</xliff:g> ଚାଲିବ (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
+    <string name="power_discharge_by_only" msgid="107616694963545745">"ବ୍ୟାଟେରୀ <xliff:g id="TIME">%1$s</xliff:g> ପର୍ଯ୍ୟନ୍ତ ଚାଲିବ"</string>
     <string name="power_remaining_less_than_duration_only" msgid="5996752448813295329">"<xliff:g id="THRESHOLD">%1$s</xliff:g>ରୁ କମ୍ ସମୟ ବଳକା ଅଛି"</string>
     <string name="power_remaining_less_than_duration" msgid="5751885147712659423">"<xliff:g id="THRESHOLD">%1$s</xliff:g> ରୁ କମ୍ ସମୟ ବଳକା ଅଛି (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
     <string name="power_remaining_more_than_subtext" msgid="3176771815132876675">"<xliff:g id="TIME_REMAINING">%1$s</xliff:g>ରୁ ଅଧିକ ସମୟ ବଳକା ଅଛି(<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
@@ -396,7 +392,7 @@
     <string name="battery_info_status_charging_lower" msgid="8689770213898117994">"ଚାର୍ଜ ହେଉଛି"</string>
     <string name="battery_info_status_discharging" msgid="310932812698268588">"ଚାର୍ଜ ହେଉନାହିଁ"</string>
     <string name="battery_info_status_not_charging" msgid="8523453668342598579">"ପ୍ଲଗ୍‌ରେ ଲାଗିଛି, ହେଲେ ଏବେ ଚାର୍ଜ କରିପାରିବ ନାହିଁ"</string>
-    <string name="battery_info_status_full" msgid="2824614753861462808">"ସମ୍ପୂର୍ଣ୍ଣ"</string>
+    <string name="battery_info_status_full" msgid="2824614753861462808">"ଚାର୍ଜ ଅଛି"</string>
     <string name="disabled_by_admin_summary_text" msgid="6750513964908334617">"ଆଡ୍‌ମିନ୍‌ ଦ୍ୱାରା ନିୟନ୍ତ୍ରିତ"</string>
     <string name="enabled_by_admin" msgid="5302986023578399263">"ଆଡମିନ୍‌ଙ୍କ ଦ୍ୱାରା ସକ୍ଷମ କରାଯାଇଛି"</string>
     <string name="disabled_by_admin" msgid="8505398946020816620">"ଆଡ୍‌ମିନ୍‌ ଦ୍ଵାରା ଅକ୍ଷମ କରାଯାଇଛି"</string>
@@ -432,8 +428,7 @@
     <string name="ims_reg_status_registered" msgid="933003316932739188">"ପଞ୍ଜିକୃତ"</string>
     <string name="ims_reg_status_not_registered" msgid="6529783773485229486">"ପଞ୍ଜିକୃତ ହୋଇନାହିଁ"</string>
     <string name="status_unavailable" msgid="7862009036663793314">"ଉପଲବ୍ଧ ନାହିଁ"</string>
-    <!-- no translation found for wifi_status_mac_randomized (5589328382467438245) -->
-    <skip />
+    <string name="wifi_status_mac_randomized" msgid="5589328382467438245">"MACର ଠିକଣା ରାଣ୍ଡମ୍ ଭାବେ ସେଟ୍ କରାଯାଇଛି"</string>
     <plurals name="wifi_tether_connected_summary" formatted="false" msgid="3871603864314407780">
       <item quantity="other">%1$dଟି ଡିଭାଇସ୍‌ ସଂଯୁକ୍ତ ହୋଇଛି</item>
       <item quantity="one">%1$dଟି ଡିଭାଇସ୍ ସଂଯୁକ୍ତ ହୋଇଛି</item>
@@ -453,6 +448,5 @@
     <string name="alarm_template_far" msgid="3779172822607461675">"<xliff:g id="WHEN">%1$s</xliff:g> ବେଳେ"</string>
     <string name="zen_mode_duration_settings_title" msgid="229547412251222757">"ଅବଧି"</string>
     <string name="zen_mode_duration_always_prompt_title" msgid="6478923750878945501">"ପ୍ରତ୍ୟେକ ଥର ପଚାରନ୍ତୁ"</string>
-    <!-- no translation found for time_unit_just_now (6363336622778342422) -->
-    <skip />
+    <string name="time_unit_just_now" msgid="6363336622778342422">"ଏହିକ୍ଷଣି"</string>
 </resources>

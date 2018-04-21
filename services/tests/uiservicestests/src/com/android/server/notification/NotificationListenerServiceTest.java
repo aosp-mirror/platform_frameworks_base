@@ -24,7 +24,13 @@ import static android.service.notification.NotificationListenerService.Ranking
         .USER_SENTIMENT_POSITIVE;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
+import android.app.INotificationManager;
 import android.app.NotificationChannel;
 import android.content.Intent;
 import android.os.Binder;
@@ -34,6 +40,7 @@ import android.service.notification.NotificationListenerService;
 import android.service.notification.NotificationListenerService.Ranking;
 import android.service.notification.NotificationRankingUpdate;
 import android.service.notification.SnoozeCriterion;
+import android.service.notification.StatusBarNotification;
 import android.support.test.runner.AndroidJUnit4;
 import android.test.suitebuilder.annotation.SmallTest;
 
@@ -50,6 +57,19 @@ import java.util.List;
 public class NotificationListenerServiceTest extends UiServiceTestCase {
 
     private String[] mKeys = new String[] { "key", "key1", "key2", "key3"};
+
+    @Test
+    public void testGetActiveNotifications_notNull() throws Exception {
+        TestListenerService service = new TestListenerService();
+        INotificationManager noMan = service.getNoMan();
+        when(noMan.getActiveNotificationsFromListener(any(), any(), anyInt())).thenReturn(null);
+
+        assertNotNull(service.getActiveNotifications());
+        assertNotNull(service.getActiveNotifications(NotificationListenerService.TRIM_FULL));
+        assertNotNull(service.getActiveNotifications(new String[0]));
+        assertNotNull(service.getActiveNotifications(
+                new String[0], NotificationListenerService.TRIM_LIGHT));
+    }
 
     @Test
     public void testRanking() throws Exception {
@@ -180,7 +200,12 @@ public class NotificationListenerServiceTest extends UiServiceTestCase {
         private final IBinder binder = new LocalBinder();
 
         public TestListenerService() {
+            mWrapper = mock(NotificationListenerWrapper.class);
+            mNoMan = mock(INotificationManager.class);
+        }
 
+        INotificationManager getNoMan() {
+            return mNoMan;
         }
 
         @Override

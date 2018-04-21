@@ -21,7 +21,7 @@ import android.annotation.Nullable;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.content.res.Resources;
-import android.support.v4.util.ArraySet;
+import androidx.collection.ArraySet;
 import android.util.Log;
 import android.util.Pools;
 import android.view.View;

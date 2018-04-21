@@ -17,7 +17,7 @@
 package com.android.systemui.statusbar.notification;
 
 import android.content.Context;
-import android.support.v4.view.AsyncLayoutInflater;
+import androidx.asynclayoutinflater.view.AsyncLayoutInflater;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;

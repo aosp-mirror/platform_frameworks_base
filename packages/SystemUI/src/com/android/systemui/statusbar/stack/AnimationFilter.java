@@ -16,7 +16,7 @@
 
 package com.android.systemui.statusbar.stack;
 
-import android.support.v4.util.ArraySet;
+import androidx.collection.ArraySet;
 import android.util.Property;
 import android.view.View;
 

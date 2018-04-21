@@ -14,10 +14,12 @@
  * limitations under the License.
  */
 
+#define DEBUG false  // STOPSHIP if true
 #include "Log.h"
 
 #include "StatsService.h"
 #include "logd/LogReader.h"
+#include "socket/StatsSocketListener.h"
 
 #include <binder/IInterface.h>
 #include <binder/IPCThreadState.h>
@@ -35,7 +37,9 @@
 using namespace android;
 using namespace android::os::statsd;
 
-// ================================================================================
+const bool kUseLogd = false;
+const bool kUseStatsdSocket = true;
+
 /**
  * Thread function data.
  */
@@ -48,11 +52,7 @@ struct log_reader_thread_data {
  */
 static void* log_reader_thread_func(void* cookie) {
     log_reader_thread_data* data = static_cast<log_reader_thread_data*>(cookie);
-
     sp<LogReader> reader = new LogReader(data->service);
-
-    // Tell StatsService that we're ready to go.
-    data->service->Startup();
 
     // Run the read loop. Never returns.
     reader->Run();
@@ -96,10 +96,7 @@ static status_t start_log_reader_thread(const sp<StatsService>& service) {
     return NO_ERROR;
 }
 
-// ================================================================================
 int main(int /*argc*/, char** /*argv*/) {
-    status_t err;
-
     // Set up the looper
     sp<Looper> looper(Looper::prepare(0 /* opts */));
 
@@ -118,10 +115,25 @@ int main(int /*argc*/, char** /*argv*/) {
     }
     service->sayHiToStatsCompanion();
 
-    // Start the log reader thread
-    err = start_log_reader_thread(service);
-    if (err != NO_ERROR) {
-        return 1;
+    service->Startup();
+
+    sp<StatsSocketListener> socketListener = new StatsSocketListener(service);
+
+    if (kUseLogd) {
+        ALOGI("using logd");
+        // Start the log reader thread
+        status_t err = start_log_reader_thread(service);
+        if (err != NO_ERROR) {
+            return 1;
+        }
+    }
+
+    if (kUseStatsdSocket) {
+        ALOGI("using statsd socket");
+        // Backlog and /proc/sys/net/unix/max_dgram_qlen set to large value
+        if (socketListener->startListener(600)) {
+            exit(1);
+        }
     }
 
     // Loop forever -- the reports run on this thread in a handler, and the

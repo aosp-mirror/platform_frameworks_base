@@ -30,7 +30,7 @@ import android.os.UserHandle;
 import android.service.quicksettings.IQSTileService;
 import android.service.quicksettings.Tile;
 import android.service.quicksettings.TileService;
-import android.support.annotation.VisibleForTesting;
+import androidx.annotation.VisibleForTesting;
 import android.util.Log;
 
 import com.android.systemui.qs.external.TileLifecycleManager.TileChangeListener;

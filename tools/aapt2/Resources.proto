@@ -306,6 +306,7 @@ message FileReference {
 }
 
 // A value that represents a primitive data type (float, int, boolean, etc.).
+// Refer to Res_value in ResourceTypes.h for info on types and formatting
 message Primitive {
   message NullType {
   }
@@ -315,8 +316,8 @@ message Primitive {
     NullType null_value = 1;
     EmptyType empty_value = 2;
     float float_value = 3;
-    float dimension_value = 4;
-    float fraction_value = 5;
+    uint32 dimension_value = 13;
+    uint32 fraction_value = 14;
     int32 int_decimal_value = 6;
     uint32 int_hexadecimal_value = 7;
     bool boolean_value = 8;
@@ -324,6 +325,8 @@ message Primitive {
     uint32 color_rgb8_value = 10;
     uint32 color_argb4_value = 11;
     uint32 color_rgb4_value = 12;
+    float dimension_value_deprecated = 4 [deprecated=true];
+    float fraction_value_deprecated = 5 [deprecated=true];
   }
 }
 

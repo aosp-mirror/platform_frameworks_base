@@ -25,11 +25,9 @@ import static android.os.storage.OnObbStateChangeListener.ERROR_PERMISSION_DENIE
 import static android.os.storage.OnObbStateChangeListener.MOUNTED;
 import static android.os.storage.OnObbStateChangeListener.UNMOUNTED;
 
-import static com.android.internal.util.XmlUtils.readBooleanAttribute;
 import static com.android.internal.util.XmlUtils.readIntAttribute;
 import static com.android.internal.util.XmlUtils.readLongAttribute;
 import static com.android.internal.util.XmlUtils.readStringAttribute;
-import static com.android.internal.util.XmlUtils.writeBooleanAttribute;
 import static com.android.internal.util.XmlUtils.writeIntAttribute;
 import static com.android.internal.util.XmlUtils.writeLongAttribute;
 import static com.android.internal.util.XmlUtils.writeStringAttribute;
@@ -249,7 +247,6 @@ class StorageManagerService extends IStorageManager.Stub
     private static final String TAG_VOLUMES = "volumes";
     private static final String ATTR_VERSION = "version";
     private static final String ATTR_PRIMARY_STORAGE_UUID = "primaryStorageUuid";
-    private static final String ATTR_FORCE_ADOPTABLE = "forceAdoptable";
     private static final String TAG_VOLUME = "volume";
     private static final String ATTR_TYPE = "type";
     private static final String ATTR_FS_UUID = "fsUuid";
@@ -287,8 +284,6 @@ class StorageManagerService extends IStorageManager.Stub
     private ArrayMap<String, VolumeRecord> mRecords = new ArrayMap<>();
     @GuardedBy("mLock")
     private String mPrimaryStorageUuid;
-    @GuardedBy("mLock")
-    private boolean mForceAdoptable;
 
     /** Map from disk ID to latches */
     @GuardedBy("mLock")
@@ -1011,9 +1006,14 @@ class StorageManagerService extends IStorageManager.Stub
         @Override
         public void onDiskCreated(String diskId, int flags) {
             synchronized (mLock) {
-                if (SystemProperties.getBoolean(StorageManager.PROP_FORCE_ADOPTABLE, false)
-                        || mForceAdoptable) {
-                    flags |= DiskInfo.FLAG_ADOPTABLE;
+                final String value = SystemProperties.get(StorageManager.PROP_ADOPTABLE);
+                switch (value) {
+                    case "force_on":
+                        flags |= DiskInfo.FLAG_ADOPTABLE;
+                        break;
+                    case "force_off":
+                        flags &= ~DiskInfo.FLAG_ADOPTABLE;
+                        break;
                 }
                 mDisks.put(diskId, new DiskInfo(diskId, flags));
             }
@@ -1530,7 +1530,6 @@ class StorageManagerService extends IStorageManager.Stub
     private void readSettingsLocked() {
         mRecords.clear();
         mPrimaryStorageUuid = getDefaultPrimaryStorageUuid();
-        mForceAdoptable = false;
 
         FileInputStream fis = null;
         try {
@@ -1552,7 +1551,6 @@ class StorageManagerService extends IStorageManager.Stub
                             mPrimaryStorageUuid = readStringAttribute(in,
                                     ATTR_PRIMARY_STORAGE_UUID);
                         }
-                        mForceAdoptable = readBooleanAttribute(in, ATTR_FORCE_ADOPTABLE, false);
 
                     } else if (TAG_VOLUME.equals(tag)) {
                         final VolumeRecord rec = readVolumeRecord(in);
@@ -1583,7 +1581,6 @@ class StorageManagerService extends IStorageManager.Stub
             out.startTag(null, TAG_VOLUMES);
             writeIntAttribute(out, ATTR_VERSION, VERSION_FIX_PRIMARY);
             writeStringAttribute(out, ATTR_PRIMARY_STORAGE_UUID, mPrimaryStorageUuid);
-            writeBooleanAttribute(out, ATTR_FORCE_ADOPTABLE, mForceAdoptable);
             final int size = mRecords.size();
             for (int i = 0; i < size; i++) {
                 final VolumeRecord rec = mRecords.valueAt(i);
@@ -1980,12 +1977,25 @@ class StorageManagerService extends IStorageManager.Stub
             }
         }
 
-        if ((mask & StorageManager.DEBUG_FORCE_ADOPTABLE) != 0) {
-            synchronized (mLock) {
-                mForceAdoptable = (flags & StorageManager.DEBUG_FORCE_ADOPTABLE) != 0;
+        if ((mask & (StorageManager.DEBUG_ADOPTABLE_FORCE_ON
+                | StorageManager.DEBUG_ADOPTABLE_FORCE_OFF)) != 0) {
+            final String value;
+            if ((flags & StorageManager.DEBUG_ADOPTABLE_FORCE_ON) != 0) {
+                value = "force_on";
+            } else if ((flags & StorageManager.DEBUG_ADOPTABLE_FORCE_OFF) != 0) {
+                value = "force_off";
+            } else {
+                value = "";
+            }
 
-                writeSettingsLocked();
+            final long token = Binder.clearCallingIdentity();
+            try {
+                SystemProperties.set(StorageManager.PROP_ADOPTABLE, value);
+
+                // Reset storage to kick new setting into place
                 mHandler.obtainMessage(H_RESET).sendToTarget();
+            } finally {
+                Binder.restoreCallingIdentity(token);
             }
         }
 
@@ -3564,8 +3574,6 @@ class StorageManagerService extends IStorageManager.Stub
                 pw.print(DataUnit.MEBIBYTES.toBytes(pair.second));
                 pw.println(" MiB)");
             }
-            pw.println("Force adoptable: " + mForceAdoptable);
-            pw.println();
             pw.println("Local unlocked users: " + Arrays.toString(mLocalUnlockedUsers));
             pw.println("System unlocked users: " + Arrays.toString(mSystemUnlockedUsers));
         }

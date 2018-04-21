@@ -43,6 +43,7 @@ import static android.app.WindowConfiguration.activityTypeToString;
 import static android.app.WindowConfiguration.windowingModeToString;
 import static android.content.pm.PackageManager.PERMISSION_DENIED;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
+import static android.graphics.Rect.copyOrNull;
 import static android.os.PowerManager.PARTIAL_WAKE_LOCK;
 import static android.os.Process.SYSTEM_UID;
 import static android.os.Trace.TRACE_TAG_ACTIVITY_MANAGER;
@@ -244,6 +245,20 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
     // Used to indicate that pausing an activity should occur immediately without waiting for
     // the activity callback indicating that it has completed pausing
     static final boolean PAUSE_IMMEDIATELY = true;
+
+    /** True if the docked stack is currently being resized. */
+    private boolean mDockedStackResizing;
+
+    /**
+     * True if there are pending docked bounds that need to be applied after
+     * {@link #mDockedStackResizing} is reset to false.
+     */
+    private boolean mHasPendingDockedBounds;
+    private Rect mPendingDockedBounds;
+    private Rect mPendingTempDockedTaskBounds;
+    private Rect mPendingTempDockedTaskInsetBounds;
+    private Rect mPendingTempOtherTaskBounds;
+    private Rect mPendingTempOtherTaskInsetBounds;
 
     /**
      * The modes which affect which tasks are returned when calling
@@ -2708,6 +2723,28 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
                 moveTasksToFullscreenStackInSurfaceTransaction(fromStack, toDisplayId, onTop));
     }
 
+    void setSplitScreenResizing(boolean resizing) {
+        if (resizing == mDockedStackResizing) {
+            return;
+        }
+
+        mDockedStackResizing = resizing;
+        mWindowManager.setDockedStackResizing(resizing);
+
+        if (!resizing && mHasPendingDockedBounds) {
+            resizeDockedStackLocked(mPendingDockedBounds, mPendingTempDockedTaskBounds,
+                    mPendingTempDockedTaskInsetBounds, mPendingTempOtherTaskBounds,
+                    mPendingTempOtherTaskInsetBounds, PRESERVE_WINDOWS);
+
+            mHasPendingDockedBounds = false;
+            mPendingDockedBounds = null;
+            mPendingTempDockedTaskBounds = null;
+            mPendingTempDockedTaskInsetBounds = null;
+            mPendingTempOtherTaskBounds = null;
+            mPendingTempOtherTaskInsetBounds = null;
+        }
+    }
+
     void resizeDockedStackLocked(Rect dockedBounds, Rect tempDockedTaskBounds,
             Rect tempDockedTaskInsetBounds, Rect tempOtherTaskBounds, Rect tempOtherTaskInsetBounds,
             boolean preserveWindows) {
@@ -2729,6 +2766,15 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
         if (stack == null) {
             Slog.w(TAG, "resizeDockedStackLocked: docked stack not found");
             return;
+        }
+
+        if (mDockedStackResizing) {
+            mHasPendingDockedBounds = true;
+            mPendingDockedBounds = copyOrNull(dockedBounds);
+            mPendingTempDockedTaskBounds = copyOrNull(tempDockedTaskBounds);
+            mPendingTempDockedTaskInsetBounds = copyOrNull(tempDockedTaskInsetBounds);
+            mPendingTempOtherTaskBounds = copyOrNull(tempOtherTaskBounds);
+            mPendingTempOtherTaskInsetBounds = copyOrNull(tempOtherTaskInsetBounds);
         }
 
         Trace.traceBegin(TRACE_TAG_ACTIVITY_MANAGER, "am.resizeDockedStack");
@@ -2763,6 +2809,11 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
                         continue;
                     }
                     if (!current.affectedBySplitScreenResize()) {
+                        continue;
+                    }
+                    if (mDockedStackResizing && !current.isTopActivityVisible()) {
+                        // Non-visible stacks get resized once we're done with the resize
+                        // interaction.
                         continue;
                     }
                     // Need to set windowing mode here before we try to get the dock bounds.

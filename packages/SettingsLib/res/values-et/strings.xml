@@ -227,7 +227,7 @@
     <string name="bluetooth_select_a2dp_codec_ldac_playback_quality_dialog_title" msgid="7595776220458732825">"Bluetoothi LDAC-helikodeki käivitamine\nValik: taasesituskvaliteet"</string>
     <string name="bluetooth_select_a2dp_codec_streaming_label" msgid="5347862512596240506">"Voogesitus: <xliff:g id="STREAMING_PARAMETER">%1$s</xliff:g>"</string>
     <string name="select_private_dns_configuration_title" msgid="3700456559305263922">"Privaatne DNS"</string>
-    <string name="select_private_dns_configuration_dialog_title" msgid="9221994415765826811">"Valige privaatse DNS-i režiim"</string>
+    <string name="select_private_dns_configuration_dialog_title" msgid="9221994415765826811">"Privaatse DNS-režiimi valimine"</string>
     <string name="private_dns_mode_off" msgid="8236575187318721684">"Väljas"</string>
     <string name="private_dns_mode_opportunistic" msgid="8314986739896927399">"Automaatne"</string>
     <string name="private_dns_mode_provider" msgid="8354935160639360804">"Privaatse DNS-i teenusepakkuja hostinimi"</string>
@@ -332,7 +332,7 @@
     <string name="local_backup_password_toast_validation_failure" msgid="5646377234895626531">"Varuparooli määramine ebaõnnestus"</string>
   <string-array name="color_mode_names">
     <item msgid="2425514299220523812">"Ere (vaikeseade)"</item>
-    <item msgid="8446070607501413455">"Loomulik"</item>
+    <item msgid="8446070607501413455">"Loomulikud"</item>
     <item msgid="6553408765810699025">"Tavaline"</item>
   </string-array>
   <string-array name="color_mode_descriptions">

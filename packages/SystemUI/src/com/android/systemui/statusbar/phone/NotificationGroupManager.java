@@ -17,7 +17,7 @@
 package com.android.systemui.statusbar.phone;
 
 import android.service.notification.StatusBarNotification;
-import android.support.annotation.Nullable;
+import androidx.annotation.Nullable;
 import android.util.Log;
 
 import com.android.systemui.statusbar.ExpandableNotificationRow;

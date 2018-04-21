@@ -359,9 +359,9 @@
     <string name="picture_color_mode_desc" msgid="1141891467675548590">"sRGBஐப் பயன்படுத்தும்"</string>
     <string name="daltonizer_mode_disabled" msgid="7482661936053801862">"முடக்கப்பட்டது"</string>
     <string name="daltonizer_mode_monochromacy" msgid="8485709880666106721">"மோனோகுரோமசி"</string>
-    <string name="daltonizer_mode_deuteranomaly" msgid="5475532989673586329">"நிறக்குருடு (சிவப்பு)"</string>
-    <string name="daltonizer_mode_protanomaly" msgid="8424148009038666065">"நிறக்குருடு (பச்சை)"</string>
-    <string name="daltonizer_mode_tritanomaly" msgid="481725854987912389">"நிறக்குருடு (நீலம்-மஞ்சள்)"</string>
+    <string name="daltonizer_mode_deuteranomaly" msgid="5475532989673586329">"நிறம் அடையாளங்காண முடியாமை (சிவப்பு-பச்சை)"</string>
+    <string name="daltonizer_mode_protanomaly" msgid="8424148009038666065">"நிறம் அடையாளங்காண முடியாமை (சிவப்பு-பச்சை)"</string>
+    <string name="daltonizer_mode_tritanomaly" msgid="481725854987912389">"நிறம் அடையாளங்காண முடியாமை (நீலம்-மஞ்சள்)"</string>
     <string name="accessibility_display_daltonizer_preference_title" msgid="5800761362678707872">"வண்ணத்திருத்தம்"</string>
     <string name="accessibility_display_daltonizer_preference_subtitle" msgid="3484969015295282911">"இது சோதனை முறையிலான அம்சம், இது செயல்திறனைப் பாதிக்கலாம்."</string>
     <string name="daltonizer_type_overridden" msgid="3116947244410245916">"<xliff:g id="TITLE">%1$s</xliff:g> மூலம் மேலெழுதப்பட்டது"</string>

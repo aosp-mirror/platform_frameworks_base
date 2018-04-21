@@ -23,10 +23,10 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import android.arch.lifecycle.LifecycleOwner;
-import android.support.v14.preference.PreferenceFragment;
-import android.support.v7.preference.PreferenceManager;
-import android.support.v7.preference.PreferenceScreen;
+import androidx.lifecycle.LifecycleOwner;
+import androidx.preference.PreferenceFragment;
+import androidx.preference.PreferenceManager;
+import androidx.preference.PreferenceScreen;
 
 import com.android.settingslib.SettingsLibRobolectricTestRunner;
 import com.android.settingslib.core.lifecycle.Lifecycle;

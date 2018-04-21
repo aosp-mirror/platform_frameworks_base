@@ -20,7 +20,7 @@ import android.content.Context;
 import android.content.pm.PackageManager;
 import android.os.UserHandle;
 import android.service.notification.StatusBarNotification;
-import android.support.annotation.VisibleForTesting;
+import androidx.annotation.VisibleForTesting;
 import android.util.Log;
 
 import com.android.systemui.Dependency;

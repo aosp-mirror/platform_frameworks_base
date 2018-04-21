@@ -17,7 +17,9 @@ package com.android.server;
 
 import static android.app.AppOpsManager.MODE_ALLOWED;
 import static android.app.AppOpsManager.MODE_ERRORED;
+import static android.app.AppOpsManager.OP_COARSE_LOCATION;
 import static android.app.AppOpsManager.OP_READ_SMS;
+import static android.app.AppOpsManager.OP_WIFI_SCAN;
 import static android.app.AppOpsManager.OP_WRITE_SMS;
 
 import static com.google.common.truth.Truth.assertThat;
@@ -101,6 +103,31 @@ public class AppOpsServiceTest {
         loggedOps = getLoggedOps();
         assertContainsOp(loggedOps, OP_READ_SMS, mTestStartMillis, -1, MODE_ALLOWED);
         assertContainsOp(loggedOps, OP_WRITE_SMS, -1, mTestStartMillis, MODE_ERRORED);
+    }
+
+    /**
+     * Tests the scenario where an operation's permission is controlled by another operation.
+     * For example the results of a WIFI_SCAN can be used to infer the location of a user, so the
+     * ACCESS_COARSE_LOCATION op is used to check whether WIFI_SCAN is allowed.
+     */
+    @Test
+    public void testNoteOperationAndGetOpsForPackage_controlledByDifferentOp() {
+        // This op controls WIFI_SCAN
+        mAppOpsService.setMode(OP_COARSE_LOCATION, mMyUid, mMyPackageName, MODE_ALLOWED);
+
+        assertThat(mAppOpsService.noteOperation(OP_WIFI_SCAN, mMyUid, mMyPackageName))
+                .isEqualTo(MODE_ALLOWED);
+
+        assertContainsOp(getLoggedOps(), OP_WIFI_SCAN, mTestStartMillis, -1,
+                MODE_ALLOWED /* default for WIFI_SCAN; this is not changed or used in this test */);
+
+        // Now set COARSE_LOCATION to ERRORED -> this will make WIFI_SCAN disabled as well.
+        mAppOpsService.setMode(OP_COARSE_LOCATION, mMyUid, mMyPackageName, MODE_ERRORED);
+        assertThat(mAppOpsService.noteOperation(OP_WIFI_SCAN, mMyUid, mMyPackageName))
+                .isEqualTo(MODE_ERRORED);
+
+        assertContainsOp(getLoggedOps(), OP_WIFI_SCAN, mTestStartMillis, mTestStartMillis,
+                MODE_ALLOWED /* default for WIFI_SCAN; this is not changed or used in this test */);
     }
 
     // Tests the dumping and restoring of the in-memory state to/from XML.
