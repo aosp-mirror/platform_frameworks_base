@@ -24,6 +24,8 @@ import android.os.Process;
 import android.os.RemoteException;
 import android.util.Log;
 
+import com.android.server.SystemServerInitThreadPool;
+
 /**
  * The implementation of the scheduling policy service interface.
  *
@@ -62,11 +64,18 @@ public class SchedulingPolicyService extends ISchedulingPolicyService.Stub {
         // (Note that if mediaserver thinks we're in boosted state before the crash,
         // the state could go out of sync temporarily until mediaserver enables/disable
         // boost next time, but this won't be a big issue.)
-        int[] nativePids = Process.getPidsForCommands(MEDIA_PROCESS_NAMES);
-        if (nativePids != null && nativePids.length == 1) {
-            mBoostedPid = nativePids[0];
-            disableCpusetBoost(nativePids[0]);
-        }
+        SystemServerInitThreadPool.get().submit(() -> {
+            synchronized (mDeathRecipient) {
+                // only do this if we haven't already got a request to boost.
+                if (mBoostedPid == -1) {
+                    int[] nativePids = Process.getPidsForCommands(MEDIA_PROCESS_NAMES);
+                    if (nativePids != null && nativePids.length == 1) {
+                        mBoostedPid = nativePids[0];
+                        disableCpusetBoost(nativePids[0]);
+                    }
+                }
+            }
+        }, TAG + ".<init>");
     }
 
     // TODO(b/35196900) We should pass the period in time units, rather
@@ -107,7 +116,9 @@ public class SchedulingPolicyService extends ISchedulingPolicyService.Stub {
 
     // Request to move media.codec process between SP_FOREGROUND and SP_TOP_APP.
     public int requestCpusetBoost(boolean enable, IBinder client) {
-        if (!isPermitted()) {
+        // Can only allow mediaserver to call this.
+        if (Binder.getCallingPid() != Process.myPid() &&
+                Binder.getCallingUid() != Process.MEDIA_UID) {
             return PackageManager.PERMISSION_DENIED;
         }
 
@@ -201,7 +212,6 @@ public class SchedulingPolicyService extends ISchedulingPolicyService.Stub {
 
         switch (Binder.getCallingUid()) {
         case Process.AUDIOSERVER_UID:  // fastcapture, fastmixer
-        case Process.MEDIA_UID:        // mediaserver
         case Process.CAMERASERVER_UID: // camera high frame rate recording
         case Process.BLUETOOTH_UID:    // Bluetooth audio playback
             return true;
