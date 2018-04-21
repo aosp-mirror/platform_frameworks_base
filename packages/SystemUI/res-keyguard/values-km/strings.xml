@@ -140,10 +140,7 @@
       <item quantity="one">ឧបករណ៍​បាន​ជាប់​សោ​អស់រយៈ​ពេល <xliff:g id="NUMBER_0">%d</xliff:g> ម៉ោង​ហើយ។ សូម​បញ្ជាក់​ពាក្យ​សម្ងាត់។</item>
     </plurals>
     <string name="fingerprint_not_recognized" msgid="348813995267914625">"មិនអាចសម្គាល់បានទេ"</string>
-    <plurals name="kg_password_default_pin_message" formatted="false" msgid="6203676909479972943">
-      <item quantity="other">បញ្ចូលកូដ PIN របស់ស៊ីម អ្នកនៅសល់ការព្យាយាម <xliff:g id="NUMBER_1">%d</xliff:g> ដងទៀត។</item>
-      <item quantity="one">បញ្ចូលកូដ PIN របស់ស៊ីម អ្នក​នៅសល់​ការព្យាយាម <xliff:g id="NUMBER_0">%d</xliff:g> ដង​ទៀត មុន​ពេល​ដែលអ្នក​ត្រូវទាក់ទង​ទៅ​ក្រុមហ៊ុន​សេវា​ទូរសព្ទ​របស់អ្នក​ដើម្បី​ដោះសោ​ឧបករណ៍​របស់អ្នក។</item>
-    </plurals>
+    <!-- no translation found for kg_password_default_pin_message (3739658416797652781) -->
     <plurals name="kg_password_default_puk_message" formatted="false" msgid="8744416410184198352">
       <item quantity="other">ឥឡូវនេះស៊ីមត្រូវបានបិទ។ សូមបញ្ចូលកូដ PUK ដើម្បីបន្ត។ អ្នកនៅសល់ការព្យាយាម <xliff:g id="_NUMBER_1">%d</xliff:g> ដងទៀត​មុនពេល​ស៊ីម​មិនអាច​ប្រើបាន​ជា​អចិន្ត្រៃយ៍។ ទាក់ទង​ទៅ​ក្រុមហ៊ុន​សេវា​ទូរសព្ទ​សម្រាប់ព័ត៌មានលម្អិត។</item>
       <item quantity="one">ឥឡូវនេះស៊ីមត្រូវបានបិទ។ សូមបញ្ចូលកូដ PUK ដើម្បីបន្ត។ អ្នកនៅសល់ការព្យាយាម <xliff:g id="_NUMBER_0">%d</xliff:g> ដងទៀតមុនពេលស៊ីមមិនអាចប្រើបានជាអចិន្ត្រៃយ៍។ ទាក់ទង​ទៅ​ក្រុមហ៊ុន​សេវា​ទូរសព្ទ​សម្រាប់​ព័ត៌មាន​លម្អិត។</item>

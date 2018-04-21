@@ -140,10 +140,7 @@
       <item quantity="one">Құрылғы құлпы <xliff:g id="NUMBER_0">%d</xliff:g> сағаттан бері ашылмаған. Құпия сөзді растаңыз.</item>
     </plurals>
     <string name="fingerprint_not_recognized" msgid="348813995267914625">"Анықталмады"</string>
-    <plurals name="kg_password_default_pin_message" formatted="false" msgid="6203676909479972943">
-      <item quantity="other">SIM PIN кодын енгізіңіз. <xliff:g id="NUMBER_1">%d</xliff:g> мүмкіндік қалды.</item>
-      <item quantity="one">SIM PIN кодын енгізіңіз. <xliff:g id="NUMBER_0">%d</xliff:g> мүмкіндік қалды, одан кейін оператордан SIM картасының құлпын ашуды сұрауға тура келеді.</item>
-    </plurals>
+    <!-- no translation found for kg_password_default_pin_message (3739658416797652781) -->
     <plurals name="kg_password_default_puk_message" formatted="false" msgid="8744416410184198352">
       <item quantity="other">SIM картасы өшірілді. Жалғастыру үшін PUK кодын енгізіңіз. <xliff:g id="_NUMBER_1">%d</xliff:g> мүмкіндік қалды, одан кейін SIM картасы біржола құлыпталады. Толығырақ мәліметті оператордан алыңыз.</item>
       <item quantity="one">SIM картасы өшірілді. Жалғастыру үшін PUK кодын енгізіңіз. <xliff:g id="_NUMBER_0">%d</xliff:g> мүмкіндік қалды, одан кейін SIM картасы біржола құлыпталады. Толығырақ мәліметті оператордан алыңыз.</item>

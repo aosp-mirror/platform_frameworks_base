@@ -146,11 +146,7 @@
       <item quantity="other">Нисте откључали уређај <xliff:g id="NUMBER_1">%d</xliff:g> сати. Потврдите лозинку.</item>
     </plurals>
     <string name="fingerprint_not_recognized" msgid="348813995267914625">"Није препознат"</string>
-    <plurals name="kg_password_default_pin_message" formatted="false" msgid="6203676909479972943">
-      <item quantity="one">Унесите PIN за SIM. Имате још <xliff:g id="NUMBER_1">%d</xliff:g> покушај.</item>
-      <item quantity="few">Унесите PIN за SIM. Имате још <xliff:g id="NUMBER_1">%d</xliff:g> покушаја.</item>
-      <item quantity="other">Унесите PIN за SIM. Имате још <xliff:g id="NUMBER_1">%d</xliff:g> покушаја.</item>
-    </plurals>
+    <!-- no translation found for kg_password_default_pin_message (3739658416797652781) -->
     <plurals name="kg_password_default_puk_message" formatted="false" msgid="8744416410184198352">
       <item quantity="one">SIM је сада онемогућен. Унесите PUK кôд да бисте наставили. Имате још <xliff:g id="_NUMBER_1">%d</xliff:g> покушај пре него што SIM постане трајно неупотребљив. Детаљне информације потражите од мобилног оператера.</item>
       <item quantity="few">SIM је сада онемогућен. Унесите PUK кôд да бисте наставили. Имате још <xliff:g id="_NUMBER_1">%d</xliff:g> покушаја пре него што SIM постане трајно неупотребљив. Детаљне информације потражите од мобилног оператера.</item>

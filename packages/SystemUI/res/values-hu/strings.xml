@@ -95,6 +95,8 @@
     <string name="accessibility_unlock_button" msgid="128158454631118828">"Feloldás"</string>
     <string name="accessibility_waiting_for_fingerprint" msgid="4808860050517462885">"Várakozás az ujjlenyomatra"</string>
     <string name="accessibility_unlock_without_fingerprint" msgid="7541705575183694446">"Feloldás ujjlenyomat nélkül"</string>
+    <!-- no translation found for accessibility_send_smart_reply (7766727839703044493) -->
+    <skip />
     <string name="unlock_label" msgid="8779712358041029439">"feloldás"</string>
     <string name="phone_label" msgid="2320074140205331708">"telefon megnyitása"</string>
     <string name="voice_assist_label" msgid="3956854378310019854">"hangsegéd megnyitása"</string>
@@ -161,10 +163,8 @@
     <string name="accessibility_no_sim" msgid="8274017118472455155">"Nincs SIM."</string>
     <string name="accessibility_cell_data" msgid="5326139158682385073">"Mobiladatok"</string>
     <string name="accessibility_cell_data_on" msgid="5927098403452994422">"Mobiladatok bekapcsolva"</string>
-    <!-- no translation found for cell_data_off_content_description (4356113230238585072) -->
-    <skip />
-    <!-- no translation found for cell_data_off (1051264981229902873) -->
-    <skip />
+    <string name="cell_data_off_content_description" msgid="4356113230238585072">"Mobiladatok kikapcsolva"</string>
+    <string name="cell_data_off" msgid="1051264981229902873">"Ki"</string>
     <string name="accessibility_bluetooth_tether" msgid="4102784498140271969">"Bluetooth megosztása."</string>
     <string name="accessibility_airplane_mode" msgid="834748999790763092">"Repülőgép üzemmód."</string>
     <string name="accessibility_vpn_on" msgid="5993385083262856059">"VPN bekapcsolva."</string>
@@ -208,11 +208,11 @@
     <string name="accessibility_quick_settings_airplane_on" msgid="6406141469157599296">"Repülős üzemmód bekapcsolva."</string>
     <string name="accessibility_quick_settings_airplane_changed_off" msgid="66846307818850664">"Repülős üzemmód kikapcsolva."</string>
     <string name="accessibility_quick_settings_airplane_changed_on" msgid="8983005603505087728">"Repülős üzemmód bekapcsolva."</string>
-    <string name="accessibility_quick_settings_dnd_priority_on" msgid="5836205286254617194">"Ne zavarjanak mód bekapcsolva."</string>
-    <string name="accessibility_quick_settings_dnd_none_on" msgid="6882582132662613537">"„Ne zavarjanak” mód bekapcsolva; teljes némítás."</string>
-    <string name="accessibility_quick_settings_dnd_alarms_on" msgid="9152834845587554157">"A „Ne zavarjanak” mód bekapcsolva. Csak ébresztések."</string>
+    <!-- no translation found for accessibility_quick_settings_dnd_none_on (2960643943620637020) -->
+    <skip />
+    <!-- no translation found for accessibility_quick_settings_dnd_alarms_on (3357131899365865386) -->
+    <skip />
     <string name="accessibility_quick_settings_dnd" msgid="6607873236717185815">"Ne zavarjanak"</string>
-    <string name="accessibility_quick_settings_dnd_off" msgid="2371832603753738581">"A „Ne zavarjanak” mód kikapcsolva."</string>
     <string name="accessibility_quick_settings_dnd_changed_off" msgid="898107593453022935">"A „Ne zavarjanak” mód kikapcsolva."</string>
     <string name="accessibility_quick_settings_dnd_changed_on" msgid="4483780856613561039">"A „Ne zavarjanak” mód bekapcsolva."</string>
     <string name="accessibility_quick_settings_bluetooth" msgid="6341675755803320038">"Bluetooth"</string>
@@ -363,8 +363,7 @@
     <string name="recents_stack_action_button_label" msgid="6593727103310426253">"Összes törlése"</string>
     <string name="recents_drag_hint_message" msgid="2649739267073203985">"Húzza ide az osztott képernyő használatához"</string>
     <string name="recents_swipe_up_onboarding" msgid="3824607135920170001">"Váltás az alkalmazások között felfelé csúsztatással"</string>
-    <!-- no translation found for recents_quick_scrub_onboarding (2778062804333285789) -->
-    <skip />
+    <string name="recents_quick_scrub_onboarding" msgid="2778062804333285789">"Húzza jobbra az ujját az alkalmazások közötti gyors váltáshoz"</string>
     <string name="recents_multistack_add_stack_dialog_split_horizontal" msgid="8848514474543427332">"Osztott vízszintes"</string>
     <string name="recents_multistack_add_stack_dialog_split_vertical" msgid="9075292233696180813">"Osztott függőleges"</string>
     <string name="recents_multistack_add_stack_dialog_split_custom" msgid="4177837597513701943">"Osztott egyéni"</string>
@@ -621,7 +620,8 @@
       <item quantity="one">a következőt használja: <xliff:g id="PERFORMING_ACTIVITY_0">%1$s</xliff:g></item>
     </plurals>
     <string name="notification_appops_settings" msgid="1028328314935908050">"Beállítások"</string>
-    <string name="notification_appops_ok" msgid="602562195588819631">"OK"</string>
+    <!-- no translation found for notification_appops_ok (1156966426011011434) -->
+    <skip />
     <string name="notification_channel_controls_opened_accessibility" msgid="6553950422055908113">"A(z) <xliff:g id="APP_NAME">%1$s</xliff:g> értesítésvezérlői megnyitva"</string>
     <string name="notification_channel_controls_closed_accessibility" msgid="7521619812603693144">"A(z) <xliff:g id="APP_NAME">%1$s</xliff:g> értesítésvezérlői kikapcsolva"</string>
     <string name="notification_channel_switch_accessibility" msgid="3420796005601900717">"Értesítések engedélyezése erről a csatornáról"</string>
