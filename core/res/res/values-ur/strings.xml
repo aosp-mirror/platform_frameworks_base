@@ -1739,7 +1739,8 @@
     <string name="zen_mode_default_weekends_name" msgid="2786495801019345244">"ویک اینڈ"</string>
     <string name="zen_mode_default_events_name" msgid="8158334939013085363">"ایونٹ"</string>
     <string name="zen_mode_default_every_night_name" msgid="3012363838882944175">"سونا"</string>
-    <string name="muted_by" msgid="6147073845094180001">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g> کے ذریعے خاموش کردہ"</string>
+    <!-- no translation found for muted_by (5942954724562097128) -->
+    <skip />
     <string name="system_error_wipe_data" msgid="6608165524785354962">"آپ کے آلہ میں ایک داخلی مسئلہ ہے اور جب تک آپ فیکٹری ڈیٹا کو دوبارہ ترتیب نہیں دے دیتے ہیں، ہوسکتا ہے کہ یہ غیر مستحکم رہے۔"</string>
     <string name="system_error_manufacturer" msgid="8086872414744210668">"آپ کے آلہ میں ایک داخلی مسئلہ ہے۔ تفصیلات کیلئے اپنے مینوفیکچرر سے رابطہ کریں۔"</string>
     <string name="stk_cc_ussd_to_dial" msgid="5214333646366591205">"‏USSD درخواست کو ریگولر کال میں تبدیل کر دیا گیا"</string>
@@ -1778,12 +1779,9 @@
     <string name="language_picker_section_all" msgid="3097279199511617537">"سبھی زبانیں"</string>
     <string name="region_picker_section_all" msgid="8966316787153001779">"تمام علاقے"</string>
     <string name="locale_search_menu" msgid="2560710726687249178">"تلاش"</string>
-    <!-- no translation found for app_suspended_title (1919029799438164552) -->
-    <skip />
-    <!-- no translation found for app_suspended_default_message (7875306315686531621) -->
-    <skip />
-    <!-- no translation found for app_suspended_more_details (1131804827776778187) -->
-    <skip />
+    <string name="app_suspended_title" msgid="1919029799438164552">"ایپ نہیں کھول سکتے"</string>
+    <string name="app_suspended_default_message" msgid="7875306315686531621">"ایپ <xliff:g id="APP_NAME_0">%1$s</xliff:g> اس وقت دستیاب نہیں ہے۔ یہ <xliff:g id="APP_NAME_1">%2$s</xliff:g> کے زیر انتظام ہے۔"</string>
+    <string name="app_suspended_more_details" msgid="1131804827776778187">"مزید جانیں"</string>
     <string name="work_mode_off_title" msgid="1118691887588435530">"دفتری پروفائل آن کریں؟"</string>
     <string name="work_mode_off_message" msgid="5130856710614337649">"آپ کی دفتری ایپس، اطلاعات، ڈیٹا اور دفتری پروفائل کی دیگر خصوصیات آن کر دی جائیں گی"</string>
     <string name="work_mode_turn_on" msgid="2062544985670564875">"آن کریں"</string>
@@ -1879,6 +1877,5 @@
     <string name="zen_upgrade_notification_content" msgid="1794994264692424562">"مسدود کی گئی چیزوں کو چیک کرنے کے لیے تھپتھپائیں۔"</string>
     <string name="notification_app_name_system" msgid="4205032194610042794">"سسٹم"</string>
     <string name="notification_app_name_settings" msgid="7751445616365753381">"ترتیبات"</string>
-    <!-- no translation found for car_loading_profile (3545132581795684027) -->
-    <skip />
+    <string name="car_loading_profile" msgid="3545132581795684027">"لوڈ ہو رہا ہے"</string>
 </resources>

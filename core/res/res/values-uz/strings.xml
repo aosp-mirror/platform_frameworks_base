@@ -163,10 +163,10 @@
     <string name="contentServiceSync" msgid="8353523060269335667">"Sinx."</string>
     <string name="contentServiceSyncNotificationTitle" msgid="7036196943673524858">"Sinxronlanmadi"</string>
     <string name="contentServiceTooManyDeletesNotificationDesc" msgid="4884451152168188763">"Juda ko‘p elementni (<xliff:g id="CONTENT_TYPE">%s</xliff:g>) o‘chirib tashlashga urindingiz."</string>
-    <string name="low_memory" product="tablet" msgid="6494019234102154896">"Planshet xotirasi to‘la. Joy bo‘shatish uchun ba’zi fayllarni o‘chiring."</string>
-    <string name="low_memory" product="watch" msgid="4415914910770005166">"Soat xotirasi to‘lgan. Joy bo‘shatish uchun ba’zi fayllarni o‘chiring."</string>
-    <string name="low_memory" product="tv" msgid="516619861191025923">"Televizor xotirasi to‘lgan. Joy bo‘shatish uchun ba’zi fayllarni o‘chiring."</string>
-    <string name="low_memory" product="default" msgid="3475999286680000541">"Telefon xotirasi to‘la. Joy bo‘shatish uchun ba’zi fayllarni o‘chiring."</string>
+    <string name="low_memory" product="tablet" msgid="6494019234102154896">"Planshet xotirasi to‘la. Joy ochish uchun ba’zi fayllarni o‘chiring."</string>
+    <string name="low_memory" product="watch" msgid="4415914910770005166">"Soat xotirasi to‘lgan. Joy ochish uchun ba’zi fayllarni o‘chiring."</string>
+    <string name="low_memory" product="tv" msgid="516619861191025923">"Televizor xotirasi to‘lgan. Joy ochish uchun ba’zi fayllarni o‘chiring."</string>
+    <string name="low_memory" product="default" msgid="3475999286680000541">"Telefon xotirasi to‘la. Joy ochish uchun ba’zi fayllarni o‘chiring."</string>
     <plurals name="ssl_ca_cert_warning" formatted="false" msgid="5106721205300213569">
       <item quantity="other">Sertifikat markazi sertifikatlari o‘rnatildi</item>
       <item quantity="one">Sertifikat markazi sertifikati o‘rnatildi</item>
@@ -237,7 +237,7 @@
     <string name="global_actions_airplane_mode_on_status" msgid="2719557982608919750">"Parvoz usuli yoqilgan"</string>
     <string name="global_actions_airplane_mode_off_status" msgid="5075070442854490296">"Parvoz rejimi o‘chirilgan"</string>
     <string name="global_action_toggle_battery_saver" msgid="708515500418994208">"Quvvat tejash rejimi"</string>
-    <string name="global_action_battery_saver_on_status" msgid="484059130698197787">"Quvvatni tejash rejimi O‘CHIQ"</string>
+    <string name="global_action_battery_saver_on_status" msgid="484059130698197787">"Quvvat tejash rejimi YOQILMAGAN"</string>
     <string name="global_action_battery_saver_off_status" msgid="75550964969478405">"Quvvat tejash rejimi YONIQ"</string>
     <string name="global_action_settings" msgid="1756531602592545966">"Sozlamalar"</string>
     <string name="global_action_assist" msgid="3892832961594295030">"Yordam"</string>
@@ -1692,7 +1692,7 @@
     <string name="package_updated_device_owner" msgid="1847154566357862089">"Administrator tomonidan yangilangan"</string>
     <string name="package_deleted_device_owner" msgid="2307122077550236438">"Administrator tomonidan o‘chirilgan"</string>
     <string name="battery_saver_description" msgid="769989536172631582">"Batareya quvvatini tejash maqsadida Quvvat tejash rejimida ayrim qurilma funksiyalari faolsizlantiriladi va ilovalar ishlashi cheklanadi."</string>
-    <string name="data_saver_description" msgid="6015391409098303235">"Trafik tejash rejimida ayrim ilovalar uchun orqa fondan internetdan foydalanish imkoniyati cheklanadi. Siz ishlatayotgan ilova zaruratga qarab internet-trafik sarflashi mumkin, biroq cheklangan miqdorda. Masalan, rasmlar ustiga bosmaguningizcha ular yuklanmaydi."</string>
+    <string name="data_saver_description" msgid="6015391409098303235">"Trafik tejash rejimida ayrim ilovalar uchun orqa fonda internetdan foydalanish imkoniyati cheklanadi. Siz ishlatayotgan ilova zaruratga qarab internet-trafik sarflashi mumkin, biroq cheklangan miqdorda. Masalan, rasmlar ustiga bosmaguningizcha ular yuklanmaydi."</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"Trafik tejash yoqilsinmi?"</string>
     <string name="data_saver_enable_button" msgid="7147735965247211818">"Yoqish"</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="4367877408072000848">
@@ -1739,7 +1739,8 @@
     <string name="zen_mode_default_weekends_name" msgid="2786495801019345244">"Dam olish kunlari"</string>
     <string name="zen_mode_default_events_name" msgid="8158334939013085363">"Tadbir"</string>
     <string name="zen_mode_default_every_night_name" msgid="3012363838882944175">"Uyquda"</string>
-    <string name="muted_by" msgid="6147073845094180001">"“<xliff:g id="THIRD_PARTY">%1$s</xliff:g>” tomonidan ovozsiz qilingan"</string>
+    <!-- no translation found for muted_by (5942954724562097128) -->
+    <skip />
     <string name="system_error_wipe_data" msgid="6608165524785354962">"Qurilmangiz bilan bog‘liq ichki muammo mavjud. U zavod sozlamalari tiklanmaguncha barqaror ishlamasligi mumkin."</string>
     <string name="system_error_manufacturer" msgid="8086872414744210668">"Qurilmangiz bilan bog‘liq ichki muammo mavjud. Tafsilotlar uchun qurilmangiz ishlab chiqaruvchisiga murojaat qiling."</string>
     <string name="stk_cc_ussd_to_dial" msgid="5214333646366591205">"USSD talabi odatiy chaqiruvga almashtirildi"</string>
@@ -1834,7 +1835,7 @@
     <string name="autofill_save_title_with_2types" msgid="5214035651838265325">"<xliff:g id="TYPE_0">%1$s</xliff:g> va <xliff:g id="TYPE_1">%2$s</xliff:g> &lt;b&gt;<xliff:g id="LABEL">%3$s</xliff:g>&lt;/b&gt; xizmatiga saqlansinmi?"</string>
     <string name="autofill_save_title_with_3types" msgid="6943161834231458441">"<xliff:g id="TYPE_0">%1$s</xliff:g>, <xliff:g id="TYPE_1">%2$s</xliff:g> va <xliff:g id="TYPE_2">%3$s</xliff:g> &lt;b&gt;<xliff:g id="LABEL">%4$s</xliff:g>&lt;/b&gt; xizmatiga saqlansinmi?"</string>
     <string name="autofill_save_yes" msgid="6398026094049005921">"Saqlash"</string>
-    <string name="autofill_save_no" msgid="2625132258725581787">"Yo‘q, kerak emas"</string>
+    <string name="autofill_save_no" msgid="2625132258725581787">"Kerak emas"</string>
     <string name="autofill_save_type_password" msgid="5288448918465971568">"parol"</string>
     <string name="autofill_save_type_address" msgid="4936707762193009542">"manzil"</string>
     <string name="autofill_save_type_credit_card" msgid="7127694776265563071">"kredit karta"</string>

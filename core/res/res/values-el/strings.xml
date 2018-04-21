@@ -1738,7 +1738,8 @@
     <string name="zen_mode_default_weekends_name" msgid="2786495801019345244">"Σαββατοκύριακο"</string>
     <string name="zen_mode_default_events_name" msgid="8158334939013085363">"Συμβάν"</string>
     <string name="zen_mode_default_every_night_name" msgid="3012363838882944175">"Ύπνος"</string>
-    <string name="muted_by" msgid="6147073845094180001">"Σίγαση από <xliff:g id="THIRD_PARTY">%1$s</xliff:g>"</string>
+    <!-- no translation found for muted_by (5942954724562097128) -->
+    <skip />
     <string name="system_error_wipe_data" msgid="6608165524785354962">"Υπάρχει ένα εσωτερικό πρόβλημα με τη συσκευή σας και ενδέχεται να είναι ασταθής μέχρι την επαναφορά των εργοστασιακών ρυθμίσεων."</string>
     <string name="system_error_manufacturer" msgid="8086872414744210668">"Υπάρχει ένα εσωτερικό πρόβλημα με τη συσκευή σας. Επικοινωνήστε με τον κατασκευαστή σας για λεπτομέρειες."</string>
     <string name="stk_cc_ussd_to_dial" msgid="5214333646366591205">"Το αίτημα USSD τροποποιήθηκε σε κανονική κλήση"</string>

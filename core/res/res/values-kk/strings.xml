@@ -246,7 +246,7 @@
     <string name="status_bar_notification_info_overflow" msgid="5301981741705354993">"999+"</string>
     <string name="notification_hidden_text" msgid="6351207030447943784">"Жаңа хабарландыру"</string>
     <string name="notification_channel_virtual_keyboard" msgid="6969925135507955575">"Виртуалды пернетақта"</string>
-    <string name="notification_channel_physical_keyboard" msgid="7297661826966861459">"Қатты пернетақта"</string>
+    <string name="notification_channel_physical_keyboard" msgid="7297661826966861459">"Физикалық пернетақта"</string>
     <string name="notification_channel_security" msgid="7345516133431326347">"Қауіпсіздік"</string>
     <string name="notification_channel_car_mode" msgid="3553380307619874564">"Көлік режимі"</string>
     <string name="notification_channel_account" msgid="7577959168463122027">"Есептік жазба күйі"</string>
@@ -901,7 +901,7 @@
     <string name="last_month" msgid="3959346739979055432">"Соңғы ай"</string>
     <string name="older" msgid="5211975022815554840">"Ескілеу"</string>
     <string name="preposition_for_date" msgid="9093949757757445117">"<xliff:g id="DATE">%s</xliff:g> күні"</string>
-    <string name="preposition_for_time" msgid="5506831244263083793">"<xliff:g id="TIME">%s</xliff:g> уақытында"</string>
+    <string name="preposition_for_time" msgid="5506831244263083793">"<xliff:g id="TIME">%s</xliff:g>"</string>
     <string name="preposition_for_year" msgid="5040395640711867177">"<xliff:g id="YEAR">%s</xliff:g> жылда"</string>
     <string name="day" msgid="8144195776058119424">"күн"</string>
     <string name="days" msgid="4774547661021344602">"күндер"</string>
@@ -1498,7 +1498,7 @@
     <string name="media_route_status_scanning" msgid="7279908761758293783">"Тексеруде..."</string>
     <string name="media_route_status_connecting" msgid="6422571716007825440">"Қосылуда..."</string>
     <string name="media_route_status_available" msgid="6983258067194649391">"Қол жетімді"</string>
-    <string name="media_route_status_not_available" msgid="6739899962681886401">"Қол жетімсіз"</string>
+    <string name="media_route_status_not_available" msgid="6739899962681886401">"Қолжетімсіз"</string>
     <string name="media_route_status_in_use" msgid="4533786031090198063">"Қолданыста"</string>
     <string name="display_manager_built_in_display_name" msgid="2583134294292563941">"Орнатылған экран"</string>
     <string name="display_manager_hdmi_display_name" msgid="1555264559227470109">"HDMI экраны"</string>
@@ -1692,7 +1692,7 @@
     <string name="package_updated_device_owner" msgid="1847154566357862089">"Әкімші жаңартқан"</string>
     <string name="package_deleted_device_owner" msgid="2307122077550236438">"Әкімші жойған"</string>
     <string name="battery_saver_description" msgid="769989536172631582">"Батарея жұмысының ұзақтығын арттыру үшін Battery Saver функциясы кейбір құрылғы мүмкіндіктерін өшіреді және қолданбаларды шектейді."</string>
-    <string name="data_saver_description" msgid="6015391409098303235">"Деректердің пайдаланылуын азайту үшін Data Saver функциясы кейбір қолданбаларға деректерді фондық режимде жіберуге немесе қабылдауға жол бермейді. Қазір қолданылып жатқан қолданба деректерді пайдаланады, бірақ шектеулі шамада (мысалы, кескіндер оларды түрткенге дейін көрсетілмейді)."</string>
+    <string name="data_saver_description" msgid="6015391409098303235">"Дерек шығынын азайту үшін Data Saver функциясы кейбір қолданбаларға деректерді фондық режимде жіберуге және алуға жол бермейді. Ашық тұрған қолданба деректерді пайдаланады, бірақ шектеулі шамада (мысалы, кескіндер оларды түрткенге дейін көрсетілмейді)."</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"Data Saver функциясын қосу керек пе?"</string>
     <string name="data_saver_enable_button" msgid="7147735965247211818">"Қосу"</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="4367877408072000848">
@@ -1737,9 +1737,10 @@
     <string name="zen_mode_downtime_feature_name" msgid="2626974636779860146">"Бос тұру уақыты"</string>
     <string name="zen_mode_default_weeknights_name" msgid="3081318299464998143">"Жұмыс күндері кешке"</string>
     <string name="zen_mode_default_weekends_name" msgid="2786495801019345244">"Демалыс күндері"</string>
-    <string name="zen_mode_default_events_name" msgid="8158334939013085363">"Оқиға"</string>
+    <string name="zen_mode_default_events_name" msgid="8158334939013085363">"Іс-шара"</string>
     <string name="zen_mode_default_every_night_name" msgid="3012363838882944175">"Ұйқы режимі"</string>
-    <string name="muted_by" msgid="6147073845094180001">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g> үнін өшірген"</string>
+    <!-- no translation found for muted_by (5942954724562097128) -->
+    <skip />
     <string name="system_error_wipe_data" msgid="6608165524785354962">"There\'s an internal problem with your device, and it may be unstable until you factory data reset."</string>
     <string name="system_error_manufacturer" msgid="8086872414744210668">"There\'s an internal problem with your device. Contact your manufacturer for details."</string>
     <string name="stk_cc_ussd_to_dial" msgid="5214333646366591205">"USSD сұрауы кәдімгі қоңырауға өзгертілді"</string>

@@ -832,7 +832,7 @@
     <string name="js_dialog_before_unload_positive_button" msgid="3112752010600484130">"Bu Səhifəni Tərk edin"</string>
     <string name="js_dialog_before_unload_negative_button" msgid="5614861293026099715">"Bu səhifədə qalın"</string>
     <string name="js_dialog_before_unload" msgid="3468816357095378590">"<xliff:g id="MESSAGE">%s</xliff:g>\n\nBu səhifədən kənara naviqasiya etmək istədiyinizə əminsiniz mi?"</string>
-    <string name="save_password_label" msgid="6860261758665825069">"Təsdiqlə"</string>
+    <string name="save_password_label" msgid="6860261758665825069">"Təsdiq edin"</string>
     <string name="double_tap_toast" msgid="4595046515400268881">"Məsləhət: Böyütmək və kiçiltmək üçün iki dəfə tıklayın."</string>
     <string name="autofill_this_form" msgid="4616758841157816676">"Avtodoldurma"</string>
     <string name="setup_autofill" msgid="7103495070180590814">"AvtoDoldurmanı ayarla"</string>
@@ -1738,7 +1738,8 @@
     <string name="zen_mode_default_weekends_name" msgid="2786495801019345244">"Həftə sonu"</string>
     <string name="zen_mode_default_events_name" msgid="8158334939013085363">"Tədbir"</string>
     <string name="zen_mode_default_every_night_name" msgid="3012363838882944175">"Yuxu"</string>
-    <string name="muted_by" msgid="6147073845094180001">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g> tərəfindən susdurulub"</string>
+    <!-- no translation found for muted_by (5942954724562097128) -->
+    <skip />
     <string name="system_error_wipe_data" msgid="6608165524785354962">"Cihazınızın daxili problemi var və istehsalçı sıfırlanması olmayana qədər qeyri-stabil ola bilər."</string>
     <string name="system_error_manufacturer" msgid="8086872414744210668">"Cihazınızın daxili problemi var. Əlavə məlumat üçün istehsalçı ilə əlaqə saxlayın."</string>
     <string name="stk_cc_ussd_to_dial" msgid="5214333646366591205">"USSD sorğusu adi zəngə dəyişdirildi"</string>

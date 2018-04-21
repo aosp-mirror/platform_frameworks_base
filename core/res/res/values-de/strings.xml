@@ -93,13 +93,13 @@
     <string name="notification_channel_mobile_data_status" msgid="4575131690860945836">"Status der mobilen Datennutzung"</string>
     <string name="notification_channel_sms" msgid="3441746047346135073">"SMS"</string>
     <string name="notification_channel_voice_mail" msgid="3954099424160511919">"Mailboxnachrichten"</string>
-    <string name="notification_channel_wfc" msgid="2130802501654254801">"Anrufe über WLAN"</string>
+    <string name="notification_channel_wfc" msgid="2130802501654254801">"WLAN-Telefonie"</string>
     <string name="notification_channel_sim" msgid="4052095493875188564">"Status der SIM-Karte"</string>
     <string name="peerTtyModeFull" msgid="6165351790010341421">"Peer hat TTY-Modus \"Vollständig\" angefordert."</string>
     <string name="peerTtyModeHco" msgid="5728602160669216784">"Peer hat TTY-Modus \"HCO\" angefordert."</string>
     <string name="peerTtyModeVco" msgid="1742404978686538049">"Peer hat TTY-Modus \"VC\" angefordert."</string>
     <string name="peerTtyModeOff" msgid="3280819717850602205">"Peer hat TTY-Modus \"Aus\" angefordert."</string>
-    <string name="serviceClassVoice" msgid="1258393812335258019">"Sprachnotiz"</string>
+    <string name="serviceClassVoice" msgid="1258393812335258019">"Stimme"</string>
     <string name="serviceClassData" msgid="872456782077937893">"Daten"</string>
     <string name="serviceClassFAX" msgid="5566624998840486475">"FAX"</string>
     <string name="serviceClassSMS" msgid="2015460373701527489">"SMS"</string>
@@ -123,14 +123,14 @@
     <string name="roamingTextSearching" msgid="8360141885972279963">"Suche nach Dienst"</string>
     <string name="wfcRegErrorTitle" msgid="3855061241207182194">"WLAN-Telefonie konnte nicht eingerichtet werden"</string>
   <string-array name="wfcOperatorErrorAlertMessages">
-    <item msgid="3910386316304772394">"Um über WLAN telefonieren und Nachrichten senden zu können, bitte zuerst deinen Mobilfunkanbieter, diesen Dienst einzurichten. Aktiviere die Option \"Anrufe über WLAN\" dann noch einmal über die Einstellungen. (Fehlercode: <xliff:g id="CODE">%1$s</xliff:g>)"</item>
+    <item msgid="3910386316304772394">"Um über WLAN telefonieren und Nachrichten senden zu können, bitte zuerst deinen Mobilfunkanbieter, diesen Dienst einzurichten. Anschließend kannst du die Option \"WLAN-Telefonie\" über die Einstellungen erneut aktivieren. (Fehlercode: <xliff:g id="CODE">%1$s</xliff:g>)"</item>
   </string-array>
   <string-array name="wfcOperatorErrorNotificationMessages">
     <item msgid="7372514042696663278">"Probleme beim Registrieren der WLAN-Telefonie bei deinem Mobilfunkanbieter: <xliff:g id="CODE">%1$s</xliff:g>"</item>
   </string-array>
   <string-array name="wfcSpnFormats">
     <item msgid="6830082633573257149">"%s"</item>
-    <item msgid="4397097370387921767">"%s Anrufe über WLAN"</item>
+    <item msgid="4397097370387921767">"%s WLAN-Telefonie"</item>
   </string-array>
     <string name="wifi_calling_off_summary" msgid="8720659586041656098">"Aus"</string>
     <string name="wfc_mode_wifi_preferred_summary" msgid="1994113411286935263">"WLAN bevorzugt"</string>
@@ -1738,7 +1738,8 @@
     <string name="zen_mode_default_weekends_name" msgid="2786495801019345244">"Wochenende"</string>
     <string name="zen_mode_default_events_name" msgid="8158334939013085363">"Termin"</string>
     <string name="zen_mode_default_every_night_name" msgid="3012363838882944175">"Beim Schlafen"</string>
-    <string name="muted_by" msgid="6147073845094180001">"Stummgeschaltet durch <xliff:g id="THIRD_PARTY">%1$s</xliff:g>"</string>
+    <!-- no translation found for muted_by (5942954724562097128) -->
+    <skip />
     <string name="system_error_wipe_data" msgid="6608165524785354962">"Es liegt ein internes Problem mit deinem Gerät vor. Möglicherweise verhält es sich instabil, bis du es auf die Werkseinstellungen zurücksetzt."</string>
     <string name="system_error_manufacturer" msgid="8086872414744210668">"Es liegt ein internes Problem mit deinem Gerät vor. Bitte wende dich diesbezüglich an den Hersteller."</string>
     <string name="stk_cc_ussd_to_dial" msgid="5214333646366591205">"USSD-Anfrage wurde in normalen Anruf geändert"</string>

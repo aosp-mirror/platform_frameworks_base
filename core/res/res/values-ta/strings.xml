@@ -132,7 +132,7 @@
     <item msgid="6830082633573257149">"%s"</item>
     <item msgid="4397097370387921767">"%s வைஃபை அழைப்பு"</item>
   </string-array>
-    <string name="wifi_calling_off_summary" msgid="8720659586041656098">"முடக்கப்பட்டுள்ளது"</string>
+    <string name="wifi_calling_off_summary" msgid="8720659586041656098">"ஆஃப்"</string>
     <string name="wfc_mode_wifi_preferred_summary" msgid="1994113411286935263">"வைஃபைக்கு முன்னுரிமை"</string>
     <string name="wfc_mode_cellular_preferred_summary" msgid="1988279625335345908">"மொபைல் தரவிற்கு முன்னுரிமை"</string>
     <string name="wfc_mode_wifi_only_summary" msgid="2379919155237869320">"வைஃபை மட்டும்"</string>
@@ -191,7 +191,7 @@
     <string name="turn_on_radio" msgid="3912793092339962371">"வயர்லெஸ்ஸை இயக்கு"</string>
     <string name="turn_off_radio" msgid="8198784949987062346">"வயர்லெஸ்ஸை முடக்கு"</string>
     <string name="screen_lock" msgid="799094655496098153">"திரைப் பூட்டு"</string>
-    <string name="power_off" msgid="4266614107412865048">"முடக்கு"</string>
+    <string name="power_off" msgid="4266614107412865048">"பவர் ஆஃப்"</string>
     <string name="silent_mode_silent" msgid="319298163018473078">"ரிங்கர் முடக்கப்பட்டது"</string>
     <string name="silent_mode_vibrate" msgid="7072043388581551395">"ரிங்கர் அதிர்வு"</string>
     <string name="silent_mode_ring" msgid="8592241816194074353">"ரிங்கர் இயக்கப்பட்டது"</string>
@@ -215,7 +215,7 @@
     <string name="global_actions" product="tv" msgid="7240386462508182976">"டிவி விருப்பங்கள்"</string>
     <string name="global_actions" product="default" msgid="2406416831541615258">"தொலைபேசி விருப்பங்கள்"</string>
     <string name="global_action_lock" msgid="2844945191792119712">"திரைப் பூட்டு"</string>
-    <string name="global_action_power_off" msgid="4471879440839879722">"முடக்கு"</string>
+    <string name="global_action_power_off" msgid="4471879440839879722">"பவர் ஆஃப்"</string>
     <string name="global_action_emergency" msgid="7112311161137421166">"அவசர அழைப்பு"</string>
     <string name="global_action_bug_report" msgid="7934010578922304799">"பிழை அறிக்கை"</string>
     <string name="global_action_logout" msgid="935179188218826050">"அமர்வை முடிக்கிறது"</string>
@@ -264,7 +264,7 @@
     <string name="notification_channel_foreground_service" msgid="3931987440602669158">"பேட்டரியைப் பயன்படுத்தும் பயன்பாடுகள்"</string>
     <string name="foreground_service_app_in_background" msgid="1060198778219731292">"<xliff:g id="APP_NAME">%1$s</xliff:g> பயன்பாடு பேட்டரியைப் பயன்படுத்துகிறது"</string>
     <string name="foreground_service_apps_in_background" msgid="7175032677643332242">"<xliff:g id="NUMBER">%1$d</xliff:g> பயன்பாடுகள் பேட்டரியைப் பயன்படுத்துகின்றன"</string>
-    <string name="foreground_service_tap_for_details" msgid="372046743534354644">"பேட்டரி மற்றும் தரவு உபயோக விவரங்களைக் காண, தட்டவும்"</string>
+    <string name="foreground_service_tap_for_details" msgid="372046743534354644">"பேட்டரி மற்றும் டேட்டா உபயோக விவரங்களைக் காண, தட்டவும்"</string>
     <string name="foreground_service_multiple_separator" msgid="4021901567939866542">"<xliff:g id="LEFT_SIDE">%1$s</xliff:g>, <xliff:g id="RIGHT_SIDE">%2$s</xliff:g>"</string>
     <string name="safeMode" msgid="2788228061547930246">"பாதுகாப்பு பயன்முறை"</string>
     <string name="android_system_label" msgid="6577375335728551336">"Android அமைப்பு"</string>
@@ -274,7 +274,7 @@
     <string name="permgroupdesc_contacts" msgid="6951499528303668046">"தொடர்புகளை அணுக வேண்டும்"</string>
     <string name="permgrouprequest_contacts" msgid="6032805601881764300">"தொடர்புகளை அணுகுவதற்கு &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; பயன்பாட்டை அனுமதிக்கவா?"</string>
     <string name="permgrouplab_location" msgid="7275582855722310164">"இருப்பிடம்"</string>
-    <string name="permgroupdesc_location" msgid="1346617465127855033">"இந்தச் சாதனத்தின் இருப்பிடத்தை அறிந்து கொள்ளலாம்"</string>
+    <string name="permgroupdesc_location" msgid="1346617465127855033">"இந்தச் சாதனத்தின் இருப்பிடத்தை அறிந்து கொள்ள"</string>
     <string name="permgrouprequest_location" msgid="3788275734953323491">"இந்தச் சாதனத்தின் இருப்பிடத்தை அணுகுவதற்கு &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; பயன்பாட்டை அனுமதிக்கவா?"</string>
     <string name="permgrouplab_calendar" msgid="5863508437783683902">"கேலெண்டர்"</string>
     <string name="permgroupdesc_calendar" msgid="3889615280211184106">"கேலெண்டரை அணுகலாம்"</string>
@@ -354,7 +354,7 @@
     <string name="permlab_runInBackground" msgid="7365290743781858803">"பின்னணியில் இயக்கு"</string>
     <string name="permdesc_runInBackground" msgid="7370142232209999824">"இந்தப் பயன்பாடு, பின்னணியில் இயங்கலாம். இதனால் பேட்டரி விரைவாகத் தீர்ந்துவிடக்கூடும்."</string>
     <string name="permlab_useDataInBackground" msgid="8694951340794341809">"பின்னணியில் தரவைப் பயன்படுத்து"</string>
-    <string name="permdesc_useDataInBackground" msgid="6049514223791806027">"இந்தப் பயன்பாடு, பின்னணியில் தரவைப் பயன்படுத்தலாம். இதனால் தரவுப் பயன்பாடு அதிகரிக்கக்கூடும்."</string>
+    <string name="permdesc_useDataInBackground" msgid="6049514223791806027">"இந்தப் பயன்பாடு, பின்னணியில் டேட்டாவை உபயோகிக்கலாம். இதனால் டேட்டா உபயோகம் அதிகரிக்கக்கூடும்."</string>
     <string name="permlab_persistentActivity" msgid="8841113627955563938">"பயன்பாட்டை எப்போதும் இயங்குமாறு செய்தல்"</string>
     <string name="permdesc_persistentActivity" product="tablet" msgid="8525189272329086137">"நினைவகத்தில் நிலையாக இருக்கும் தன்னுடைய பகுதிகளை உருவாக்கப் பயன்பாட்டை அனுமதிக்கிறது. இதனால பிற பயன்பாடுகளுக்குக் கிடைக்கும் நினைவகம் வரையறுக்கப்பட்டு, டேப்லெட்டின் வேகத்தைக் குறைக்கலாம்."</string>
     <string name="permdesc_persistentActivity" product="tv" msgid="5086862529499103587">"பயன்பாடு தனது உள்ளடக்கத்தை நினைவகத்தில் தொடர்ந்து வைத்திருக்க, அனுமதிக்கிறது. பிற பயன்பாடுகளுக்கென இருக்கும் நினைவகத்தை இது கட்டுப்படுத்தி, டிவியின் செயல்திறனைக் குறைக்கலாம்."</string>
@@ -1453,7 +1453,7 @@
     <string name="data_usage_limit_snoozed_body" msgid="1671222777207603301">"நீங்கள் அமைத்த வரம்பைவிட <xliff:g id="SIZE">%s</xliff:g> அதிகமாகப் பயன்படுத்தியுள்ளீர்கள்"</string>
     <string name="data_usage_restricted_title" msgid="5965157361036321914">"பின்புல வரம்பு வரையறுக்கப்பட்டது"</string>
     <string name="data_usage_restricted_body" msgid="469866376337242726">"வரம்பை அகற்ற, தட்டவும்."</string>
-    <string name="data_usage_rapid_title" msgid="1809795402975261331">"மிகுதியான மொபைல் டேட்டா பயன்பாடு"</string>
+    <string name="data_usage_rapid_title" msgid="1809795402975261331">"மிகுதியான மொபைல் டேட்டா உபயோகம்"</string>
     <string name="data_usage_rapid_body" msgid="6897825788682442715">"உங்கள் ஆப்ஸ், வழக்கத்தைவிட அதிகமான டேட்டாவைப் பயன்படுத்தியுள்ளன"</string>
     <string name="data_usage_rapid_app_body" msgid="5396680996784142544">"வழக்கத்தைவிட அதிகமான டேட்டாவை, <xliff:g id="APP">%s</xliff:g> பயன்படுத்தியுள்ளது"</string>
     <string name="ssl_certificate" msgid="6510040486049237639">"பாதுகாப்பு சான்றிதழ்"</string>
@@ -1691,8 +1691,8 @@
     <string name="package_installed_device_owner" msgid="6875717669960212648">"உங்கள் நிர்வாகி நிறுவியுள்ளார்"</string>
     <string name="package_updated_device_owner" msgid="1847154566357862089">"உங்கள் நிர்வாகி புதுப்பித்துள்ளார்"</string>
     <string name="package_deleted_device_owner" msgid="2307122077550236438">"உங்கள் நிர்வாகி நீக்கியுள்ளார்"</string>
-    <string name="battery_saver_description" msgid="769989536172631582">"பேட்டரி நிலையை நீட்டிக்க, பேட்டரி சேமிப்பான் அம்சமானது சில சாதன அம்சங்களை ஆஃப் செய்து, ஆப்ஸைக் கட்டுப்படுத்தும்."</string>
-    <string name="data_saver_description" msgid="6015391409098303235">"டேட்டா பயன்பாட்டைக் குறைப்பதற்கு உதவ, பின்புலத்தில் டேட்டாவை அனுப்புவது அல்லது பெறுவதிலிருந்து சில பயன்பாடுகளை டேட்டா சேமிப்பான் தடுக்கும். தற்போது பயன்படுத்தும் பயன்பாடானது எப்போதாவது டேட்டாவை அணுகலாம். எடுத்துக்காட்டாக, படங்களை நீங்கள் தட்டும் வரை அவை காட்டப்படாது."</string>
+    <string name="battery_saver_description" msgid="769989536172631582">"பேட்டரி இயங்கும் நேரத்தை அதிகரிக்க, பேட்டரி சேமிப்பான் அம்சமானது சில சாதன அம்சங்களை ஆஃப் செய்து, ஆப்ஸைக் கட்டுப்படுத்தும்."</string>
+    <string name="data_saver_description" msgid="6015391409098303235">"டேட்டா உபயோகத்தைக் குறைப்பதற்கு உதவ, பின்புலத்தில் டேட்டாவை அனுப்புவது அல்லது பெறுவதிலிருந்து சில பயன்பாடுகளை டேட்டா சேமிப்பான் தடுக்கும். தற்போது பயன்படுத்தும் பயன்பாடானது எப்போதாவது டேட்டாவை அணுகலாம். எடுத்துக்காட்டாக, படங்களை நீங்கள் தட்டும் வரை அவை காட்டப்படாது."</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"டேட்டா சேமிப்பானை இயக்கவா?"</string>
     <string name="data_saver_enable_button" msgid="7147735965247211818">"இயக்கு"</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="4367877408072000848">
@@ -1739,7 +1739,8 @@
     <string name="zen_mode_default_weekends_name" msgid="2786495801019345244">"வார இறுதி"</string>
     <string name="zen_mode_default_events_name" msgid="8158334939013085363">"நிகழ்வு"</string>
     <string name="zen_mode_default_every_night_name" msgid="3012363838882944175">"உறக்கத்தில்"</string>
-    <string name="muted_by" msgid="6147073845094180001">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g> ஒலியடக்கினார்"</string>
+    <!-- no translation found for muted_by (5942954724562097128) -->
+    <skip />
     <string name="system_error_wipe_data" msgid="6608165524785354962">"சாதனத்தில் அகச் சிக்கல் இருக்கிறது, அதனை ஆரம்பநிலைக்கு மீட்டமைக்கும் வரை நிலையற்று இயங்கலாம்."</string>
     <string name="system_error_manufacturer" msgid="8086872414744210668">"சாதனத்தில் அகச் சிக்கல் இருக்கிறது. விவரங்களுக்கு சாதன தயாரிப்பாளரைத் தொடர்புகொள்ளவும்."</string>
     <string name="stk_cc_ussd_to_dial" msgid="5214333646366591205">"USSD கோரிக்கை, வழக்கமான அழைப்பிற்கு மாற்றப்பட்டது"</string>
@@ -1778,12 +1779,9 @@
     <string name="language_picker_section_all" msgid="3097279199511617537">"எல்லா மொழிகளும்"</string>
     <string name="region_picker_section_all" msgid="8966316787153001779">"எல்லா மண்டலங்களும்"</string>
     <string name="locale_search_menu" msgid="2560710726687249178">"தேடு"</string>
-    <!-- no translation found for app_suspended_title (1919029799438164552) -->
-    <skip />
-    <!-- no translation found for app_suspended_default_message (7875306315686531621) -->
-    <skip />
-    <!-- no translation found for app_suspended_more_details (1131804827776778187) -->
-    <skip />
+    <string name="app_suspended_title" msgid="1919029799438164552">"பயன்பாட்டைத் திறக்க இயலாது"</string>
+    <string name="app_suspended_default_message" msgid="7875306315686531621">"இப்போது <xliff:g id="APP_NAME_0">%1$s</xliff:g> பயன்பாட்டை உபயோகிக்க முடியாது. இதை <xliff:g id="APP_NAME_1">%2$s</xliff:g> நிர்வகிக்கிறது."</string>
+    <string name="app_suspended_more_details" msgid="1131804827776778187">"மேலும் அறிக"</string>
     <string name="work_mode_off_title" msgid="1118691887588435530">"பணிச் சுயவிவரத்தை ஆன் செய்யவா?"</string>
     <string name="work_mode_off_message" msgid="5130856710614337649">"பணி ஆப்ஸ், அறிவிப்புகள், தரவு மற்றும் பிற பணிச் சுயவிவர அம்சங்கள் ஆன் செய்யப்படும்"</string>
     <string name="work_mode_turn_on" msgid="2062544985670564875">"இயக்கு"</string>
@@ -1800,7 +1798,7 @@
     <string name="usb_mtp_launch_notification_description" msgid="8541876176425411358">"கோப்புகளைப் பார்க்க, தட்டவும்"</string>
     <string name="pin_target" msgid="3052256031352291362">"பின் செய்"</string>
     <string name="unpin_target" msgid="3556545602439143442">"பின்னை அகற்று"</string>
-    <string name="app_info" msgid="6856026610594615344">"ஆப்ஸ் தகவல்"</string>
+    <string name="app_info" msgid="6856026610594615344">"பயன்பாட்டுத் தகவல்"</string>
     <string name="negative_duration" msgid="5688706061127375131">"−<xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="demo_starting_message" msgid="5268556852031489931">"டெமோவைத் தொடங்குகிறது…"</string>
     <string name="demo_restarting_message" msgid="952118052531642451">"சாதனத்தை மீட்டமைக்கிறது…"</string>
@@ -1879,6 +1877,5 @@
     <string name="zen_upgrade_notification_content" msgid="1794994264692424562">"எவற்றையெல்லாம் தடுக்கிறது என்பதைப் பார்க்க, தட்டவும்."</string>
     <string name="notification_app_name_system" msgid="4205032194610042794">"சிஸ்டம்"</string>
     <string name="notification_app_name_settings" msgid="7751445616365753381">"அமைப்புகள்"</string>
-    <!-- no translation found for car_loading_profile (3545132581795684027) -->
-    <skip />
+    <string name="car_loading_profile" msgid="3545132581795684027">"ஏற்றுகிறது"</string>
 </resources>
