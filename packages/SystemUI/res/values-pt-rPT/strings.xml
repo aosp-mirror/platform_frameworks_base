@@ -19,10 +19,10 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="app_label" msgid="7164937344850004466">"IU do sist."</string>
+    <string name="app_label" msgid="7164937344850004466">"IU do sistema"</string>
     <string name="status_bar_clear_all_button" msgid="7774721344716731603">"Limpar"</string>
     <string name="status_bar_recent_remove_item_title" msgid="6026395868129852968">"Remover da lista"</string>
-    <string name="status_bar_recent_inspect_item_title" msgid="7793624864528818569">"Informações da aplicação"</string>
+    <string name="status_bar_recent_inspect_item_title" msgid="7793624864528818569">"Info. da aplicação"</string>
     <string name="status_bar_no_recent_apps" msgid="7374907845131203189">"Os ecrãs recentes aparecem aqui"</string>
     <string name="status_bar_accessibility_dismiss_recents" msgid="4576076075226540105">"Ignorar aplicações recentes"</string>
     <plurals name="status_bar_accessibility_recent_apps" formatted="false" msgid="9138535907802238759">
@@ -95,6 +95,8 @@
     <string name="accessibility_unlock_button" msgid="128158454631118828">"Desbloquear"</string>
     <string name="accessibility_waiting_for_fingerprint" msgid="4808860050517462885">"A aguardar a impressão digital…"</string>
     <string name="accessibility_unlock_without_fingerprint" msgid="7541705575183694446">"Desbloquear sem utilizar a sua impressão digital"</string>
+    <!-- no translation found for accessibility_send_smart_reply (7766727839703044493) -->
+    <skip />
     <string name="unlock_label" msgid="8779712358041029439">"desbloquear"</string>
     <string name="phone_label" msgid="2320074140205331708">"abrir telemóvel"</string>
     <string name="voice_assist_label" msgid="3956854378310019854">"abrir assistente de voz"</string>
@@ -162,7 +164,7 @@
     <string name="accessibility_cell_data" msgid="5326139158682385073">"Dados móveis"</string>
     <string name="accessibility_cell_data_on" msgid="5927098403452994422">"Dados móveis ativados"</string>
     <string name="cell_data_off_content_description" msgid="4356113230238585072">"Dados móveis desativados"</string>
-    <string name="cell_data_off" msgid="1051264981229902873">"Desativados"</string>
+    <string name="cell_data_off" msgid="1051264981229902873">"Desativado"</string>
     <string name="accessibility_bluetooth_tether" msgid="4102784498140271969">"Ligação Bluetooth via telemóvel."</string>
     <string name="accessibility_airplane_mode" msgid="834748999790763092">"Modo de avião"</string>
     <string name="accessibility_vpn_on" msgid="5993385083262856059">"VPN ativada."</string>
@@ -206,11 +208,11 @@
     <string name="accessibility_quick_settings_airplane_on" msgid="6406141469157599296">"Modo de avião ligado."</string>
     <string name="accessibility_quick_settings_airplane_changed_off" msgid="66846307818850664">"Modo de avião desligado."</string>
     <string name="accessibility_quick_settings_airplane_changed_on" msgid="8983005603505087728">"Modo de avião ligado."</string>
-    <string name="accessibility_quick_settings_dnd_priority_on" msgid="5836205286254617194">"Não incomodar ativado."</string>
-    <string name="accessibility_quick_settings_dnd_none_on" msgid="6882582132662613537">"Não incomodar ativado, silêncio total."</string>
-    <string name="accessibility_quick_settings_dnd_alarms_on" msgid="9152834845587554157">"Não incomodar ligado, apenas alarmes."</string>
+    <!-- no translation found for accessibility_quick_settings_dnd_none_on (2960643943620637020) -->
+    <skip />
+    <!-- no translation found for accessibility_quick_settings_dnd_alarms_on (3357131899365865386) -->
+    <skip />
     <string name="accessibility_quick_settings_dnd" msgid="6607873236717185815">"Não incomodar."</string>
-    <string name="accessibility_quick_settings_dnd_off" msgid="2371832603753738581">"Não incomodar desligado."</string>
     <string name="accessibility_quick_settings_dnd_changed_off" msgid="898107593453022935">"Não incomodar desligado."</string>
     <string name="accessibility_quick_settings_dnd_changed_on" msgid="4483780856613561039">"Não incomodar ligado."</string>
     <string name="accessibility_quick_settings_bluetooth" msgid="6341675755803320038">"Bluetooth."</string>
@@ -339,13 +341,13 @@
     <string name="quick_settings_cellular_detail_data_usage" msgid="1964260360259312002">"Utilização de dados"</string>
     <string name="quick_settings_cellular_detail_remaining_data" msgid="722715415543541249">"Dados restantes"</string>
     <string name="quick_settings_cellular_detail_over_limit" msgid="967669665390990427">"Acima do limite"</string>
-    <string name="quick_settings_cellular_detail_data_used" msgid="1476810587475761478">"<xliff:g id="DATA_USED">%s</xliff:g> utilizado(s)"</string>
+    <string name="quick_settings_cellular_detail_data_used" msgid="1476810587475761478">"<xliff:g id="DATA_USED">%s</xliff:g> MB utiliz."</string>
     <string name="quick_settings_cellular_detail_data_limit" msgid="56011158504994128">"Limite de <xliff:g id="DATA_LIMIT">%s</xliff:g>"</string>
     <string name="quick_settings_cellular_detail_data_warning" msgid="2440098045692399009">"Aviso de <xliff:g id="DATA_LIMIT">%s</xliff:g>"</string>
     <string name="quick_settings_work_mode_label" msgid="7608026833638817218">"Perfil de trabalho"</string>
     <string name="quick_settings_night_display_label" msgid="3577098011487644395">"Luz noturna"</string>
     <string name="quick_settings_night_secondary_label_on_at_sunset" msgid="8483259341596943314">"Ativ. ao pôr-do-sol"</string>
-    <string name="quick_settings_night_secondary_label_until_sunrise" msgid="4453017157391574402">"Até ao nascer do sol"</string>
+    <string name="quick_settings_night_secondary_label_until_sunrise" msgid="4453017157391574402">"Até ao amanhecer"</string>
     <string name="quick_settings_night_secondary_label_on_at" msgid="6256314040368487637">"Ativada à(s) <xliff:g id="TIME">%s</xliff:g>"</string>
     <string name="quick_settings_secondary_label_until" msgid="2749196569462600150">"Até à(s) <xliff:g id="TIME">%s</xliff:g>"</string>
     <string name="quick_settings_nfc_label" msgid="9012153754816969325">"NFC"</string>
@@ -618,7 +620,8 @@
       <item quantity="one">a utilizar o(a) <xliff:g id="PERFORMING_ACTIVITY_0">%1$s</xliff:g></item>
     </plurals>
     <string name="notification_appops_settings" msgid="1028328314935908050">"Definições"</string>
-    <string name="notification_appops_ok" msgid="602562195588819631">"Ok"</string>
+    <!-- no translation found for notification_appops_ok (1156966426011011434) -->
+    <skip />
     <string name="notification_channel_controls_opened_accessibility" msgid="6553950422055908113">"Controlos de notificações da aplicação <xliff:g id="APP_NAME">%1$s</xliff:g> abertos"</string>
     <string name="notification_channel_controls_closed_accessibility" msgid="7521619812603693144">"Controlos de notificações da aplicação <xliff:g id="APP_NAME">%1$s</xliff:g> fechados"</string>
     <string name="notification_channel_switch_accessibility" msgid="3420796005601900717">"Permitir notificações deste canal"</string>
@@ -820,7 +823,7 @@
     <string name="notification_channel_hints" msgid="7323870212489152689">"Sugestões"</string>
     <string name="instant_apps" msgid="6647570248119804907">"Aplicações instantâneas"</string>
     <string name="instant_apps_message" msgid="8116608994995104836">"As Aplicações instantâneas não requerem instalação."</string>
-    <string name="app_info" msgid="6856026610594615344">"Informações da aplicação"</string>
+    <string name="app_info" msgid="6856026610594615344">"Info. da aplicação"</string>
     <string name="go_to_web" msgid="2650669128861626071">"Ir para o navegador"</string>
     <string name="mobile_data" msgid="7094582042819250762">"Dados móveis"</string>
     <string name="mobile_data_text_format" msgid="3526214522670876454">"<xliff:g id="ID_1">%s</xliff:g> – <xliff:g id="ID_2">%s</xliff:g>"</string>

@@ -95,6 +95,8 @@
     <string name="accessibility_unlock_button" msgid="128158454631118828">"解鎖"</string>
     <string name="accessibility_waiting_for_fingerprint" msgid="4808860050517462885">"正在等待指紋"</string>
     <string name="accessibility_unlock_without_fingerprint" msgid="7541705575183694446">"不使用指紋解鎖"</string>
+    <!-- no translation found for accessibility_send_smart_reply (7766727839703044493) -->
+    <skip />
     <string name="unlock_label" msgid="8779712358041029439">"解鎖"</string>
     <string name="phone_label" msgid="2320074140205331708">"開啟電話"</string>
     <string name="voice_assist_label" msgid="3956854378310019854">"開啟語音助手"</string>
@@ -208,11 +210,11 @@
     <string name="accessibility_quick_settings_airplane_on" msgid="6406141469157599296">"飛行模式已開啟。"</string>
     <string name="accessibility_quick_settings_airplane_changed_off" msgid="66846307818850664">"飛行模式已關閉。"</string>
     <string name="accessibility_quick_settings_airplane_changed_on" msgid="8983005603505087728">"飛行模式已開啟。"</string>
-    <string name="accessibility_quick_settings_dnd_priority_on" msgid="5836205286254617194">"「請勿騷擾」模式已開啟。"</string>
-    <string name="accessibility_quick_settings_dnd_none_on" msgid="6882582132662613537">"開啟「請勿騷擾」，完全靜音。"</string>
-    <string name="accessibility_quick_settings_dnd_alarms_on" msgid="9152834845587554157">"開啟「請勿騷擾」，只限鬧鐘。"</string>
+    <!-- no translation found for accessibility_quick_settings_dnd_none_on (2960643943620637020) -->
+    <skip />
+    <!-- no translation found for accessibility_quick_settings_dnd_alarms_on (3357131899365865386) -->
+    <skip />
     <string name="accessibility_quick_settings_dnd" msgid="6607873236717185815">"請勿騷擾。"</string>
-    <string name="accessibility_quick_settings_dnd_off" msgid="2371832603753738581">"「請勿騷擾」關閉"</string>
     <string name="accessibility_quick_settings_dnd_changed_off" msgid="898107593453022935">"已關閉「請勿騷擾」。"</string>
     <string name="accessibility_quick_settings_dnd_changed_on" msgid="4483780856613561039">"已開啟「請勿騷擾」。"</string>
     <string name="accessibility_quick_settings_bluetooth" msgid="6341675755803320038">"藍牙。"</string>
@@ -362,7 +364,7 @@
     <string name="recents_launch_disabled_message" msgid="1624523193008871793">"「<xliff:g id="APP">%s</xliff:g>」已在安全模式中停用。"</string>
     <string name="recents_stack_action_button_label" msgid="6593727103310426253">"全部清除"</string>
     <string name="recents_drag_hint_message" msgid="2649739267073203985">"在這裡拖曳即可分割螢幕"</string>
-    <string name="recents_swipe_up_onboarding" msgid="3824607135920170001">"向上快速滑動即可切換應用程式"</string>
+    <string name="recents_swipe_up_onboarding" msgid="3824607135920170001">"向上滑動即可切換應用程式"</string>
     <string name="recents_quick_scrub_onboarding" msgid="2778062804333285789">"向右拖曳即可快速切換應用程式"</string>
     <string name="recents_multistack_add_stack_dialog_split_horizontal" msgid="8848514474543427332">"水平分割"</string>
     <string name="recents_multistack_add_stack_dialog_split_vertical" msgid="9075292233696180813">"垂直分割"</string>
@@ -386,12 +388,12 @@
     <string name="keyguard_more_overflow_text" msgid="9195222469041601365">"還有 <xliff:g id="NUMBER_OF_NOTIFICATIONS">%d</xliff:g> 則通知"</string>
     <string name="speed_bump_explanation" msgid="1288875699658819755">"不太緊急的通知會在下方顯示"</string>
     <string name="notification_tap_again" msgid="7590196980943943842">"再次輕按即可開啟"</string>
-    <string name="keyguard_unlock" msgid="8043466894212841998">"向上快速滑動即可解鎖"</string>
+    <string name="keyguard_unlock" msgid="8043466894212841998">"向上滑動即可解鎖"</string>
     <string name="do_disclosure_generic" msgid="5615898451805157556">"此裝置由您的機構管理"</string>
     <string name="do_disclosure_with_name" msgid="5640615509915445501">"此裝置由<xliff:g id="ORGANIZATION_NAME">%s</xliff:g>管理"</string>
-    <string name="phone_hint" msgid="4872890986869209950">"從圖示快速滑動即可使用手機功能"</string>
-    <string name="voice_hint" msgid="8939888732119726665">"從圖示快速滑動即可使用語音助手"</string>
-    <string name="camera_hint" msgid="7939688436797157483">"從圖示快速滑動即可使用相機功能"</string>
+    <string name="phone_hint" msgid="4872890986869209950">"從圖示滑動即可使用手機功能"</string>
+    <string name="voice_hint" msgid="8939888732119726665">"從圖示滑動即可使用語音助手"</string>
+    <string name="camera_hint" msgid="7939688436797157483">"從圖示滑動即可使用相機功能"</string>
     <string name="interruption_level_none_with_warning" msgid="5114872171614161084">"完全靜音。這亦將使螢幕閱讀器靜音。"</string>
     <string name="interruption_level_none" msgid="6000083681244492992">"完全靜音"</string>
     <string name="interruption_level_priority" msgid="6426766465363855505">"只限優先"</string>
@@ -620,7 +622,8 @@
       <item quantity="one">使用<xliff:g id="PERFORMING_ACTIVITY_0">%1$s</xliff:g></item>
     </plurals>
     <string name="notification_appops_settings" msgid="1028328314935908050">"設定"</string>
-    <string name="notification_appops_ok" msgid="602562195588819631">"確定"</string>
+    <!-- no translation found for notification_appops_ok (1156966426011011434) -->
+    <skip />
     <string name="notification_channel_controls_opened_accessibility" msgid="6553950422055908113">"開咗「<xliff:g id="APP_NAME">%1$s</xliff:g>」嘅通知控制項"</string>
     <string name="notification_channel_controls_closed_accessibility" msgid="7521619812603693144">"閂咗「<xliff:g id="APP_NAME">%1$s</xliff:g>」嘅通知控制項"</string>
     <string name="notification_channel_switch_accessibility" msgid="3420796005601900717">"允許收到呢個頻道嘅通知"</string>

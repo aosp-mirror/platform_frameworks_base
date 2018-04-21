@@ -95,6 +95,8 @@
     <string name="accessibility_unlock_button" msgid="128158454631118828">"Отклучување"</string>
     <string name="accessibility_waiting_for_fingerprint" msgid="4808860050517462885">"Се чека отпечаток"</string>
     <string name="accessibility_unlock_without_fingerprint" msgid="7541705575183694446">"Отклучете без да го користите вашиот отпечаток"</string>
+    <!-- no translation found for accessibility_send_smart_reply (7766727839703044493) -->
+    <skip />
     <string name="unlock_label" msgid="8779712358041029439">"отклучи"</string>
     <string name="phone_label" msgid="2320074140205331708">"отвори телефон"</string>
     <string name="voice_assist_label" msgid="3956854378310019854">"отвори гласовна помош"</string>
@@ -206,11 +208,11 @@
     <string name="accessibility_quick_settings_airplane_on" msgid="6406141469157599296">"Авионскиот режим е вклучен."</string>
     <string name="accessibility_quick_settings_airplane_changed_off" msgid="66846307818850664">"Авионскиот режим е исклучен."</string>
     <string name="accessibility_quick_settings_airplane_changed_on" msgid="8983005603505087728">"Авионскиот режим е вклучен."</string>
-    <string name="accessibility_quick_settings_dnd_priority_on" msgid="5836205286254617194">"„Не вознемирувај“ е вклучено."</string>
-    <string name="accessibility_quick_settings_dnd_none_on" msgid="6882582132662613537">"„Не вознемирувај“ е вклучено, целосна тишина."</string>
-    <string name="accessibility_quick_settings_dnd_alarms_on" msgid="9152834845587554157">"„Не вознемирувај“ е вклучено, само аларми."</string>
+    <!-- no translation found for accessibility_quick_settings_dnd_none_on (2960643943620637020) -->
+    <skip />
+    <!-- no translation found for accessibility_quick_settings_dnd_alarms_on (3357131899365865386) -->
+    <skip />
     <string name="accessibility_quick_settings_dnd" msgid="6607873236717185815">"Не вознемирувај."</string>
-    <string name="accessibility_quick_settings_dnd_off" msgid="2371832603753738581">"„Не вознемирувај“ е исклучено."</string>
     <string name="accessibility_quick_settings_dnd_changed_off" msgid="898107593453022935">"„Не вознемирувај“ е исклучено."</string>
     <string name="accessibility_quick_settings_dnd_changed_on" msgid="4483780856613561039">"„Не вознемирувај“ е вклучено."</string>
     <string name="accessibility_quick_settings_bluetooth" msgid="6341675755803320038">"Bluetooth."</string>
@@ -618,7 +620,8 @@
       <item quantity="other">користат <xliff:g id="PERFORMING_ACTIVITY_1">%1$s</xliff:g> и <xliff:g id="PERFORMING_ACTIVITY_2">%2$s</xliff:g></item>
     </plurals>
     <string name="notification_appops_settings" msgid="1028328314935908050">"Поставки"</string>
-    <string name="notification_appops_ok" msgid="602562195588819631">"Во ред"</string>
+    <!-- no translation found for notification_appops_ok (1156966426011011434) -->
+    <skip />
     <string name="notification_channel_controls_opened_accessibility" msgid="6553950422055908113">"Контролите за известувањата за <xliff:g id="APP_NAME">%1$s</xliff:g> се отворија"</string>
     <string name="notification_channel_controls_closed_accessibility" msgid="7521619812603693144">"Контролите за известувањата за <xliff:g id="APP_NAME">%1$s</xliff:g> се затворија"</string>
     <string name="notification_channel_switch_accessibility" msgid="3420796005601900717">"Дозволете известувања од овој канал"</string>

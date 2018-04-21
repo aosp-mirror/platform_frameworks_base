@@ -152,12 +152,7 @@
       <item quantity="other">Устройство не разблокировалось в течение <xliff:g id="NUMBER_1">%d</xliff:g> часа. Введите пароль ещё раз.</item>
     </plurals>
     <string name="fingerprint_not_recognized" msgid="348813995267914625">"Не распознано"</string>
-    <plurals name="kg_password_default_pin_message" formatted="false" msgid="6203676909479972943">
-      <item quantity="one">Неверный PIN-код. Осталась <xliff:g id="NUMBER_1">%d</xliff:g> попытка.</item>
-      <item quantity="few">Неверный PIN-код. Осталось <xliff:g id="NUMBER_1">%d</xliff:g> попытки.</item>
-      <item quantity="many">Неверный PIN-код. Осталось <xliff:g id="NUMBER_1">%d</xliff:g> попыток.</item>
-      <item quantity="other">Неверный PIN-код. Осталось <xliff:g id="NUMBER_1">%d</xliff:g> попытки.</item>
-    </plurals>
+    <!-- no translation found for kg_password_default_pin_message (3739658416797652781) -->
     <plurals name="kg_password_default_puk_message" formatted="false" msgid="8744416410184198352">
       <item quantity="one">SIM-карта отключена. Чтобы продолжить, введите PUK-код. Осталась <xliff:g id="_NUMBER_1">%d</xliff:g> попытка. После этого SIM-карта будет заблокирована навсегда. За подробной информацией обратитесь к оператору связи.</item>
       <item quantity="few">SIM-карта отключена. Чтобы продолжить, введите PUK-код. Осталось <xliff:g id="_NUMBER_1">%d</xliff:g> попытки. После этого SIM-карта будет заблокирована навсегда. За подробной информацией обратитесь к оператору связи.</item>

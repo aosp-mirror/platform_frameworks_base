@@ -140,10 +140,7 @@
       <item quantity="other">Уредот не е отклучен веќе <xliff:g id="NUMBER_1">%d</xliff:g> часа. Потврдете ја лозинката.</item>
     </plurals>
     <string name="fingerprint_not_recognized" msgid="348813995267914625">"Непознат"</string>
-    <plurals name="kg_password_default_pin_message" formatted="false" msgid="6203676909479972943">
-      <item quantity="one">Внесете PIN-код за SIM-картичката. Ви преостанува уште <xliff:g id="NUMBER_1">%d</xliff:g> обид.</item>
-      <item quantity="other">Внесете PIN-код за SIM-картичката. Ви преостануваат уште <xliff:g id="NUMBER_1">%d</xliff:g> обиди.</item>
-    </plurals>
+    <!-- no translation found for kg_password_default_pin_message (3739658416797652781) -->
     <plurals name="kg_password_default_puk_message" formatted="false" msgid="8744416410184198352">
       <item quantity="one">SIM-картичката сега е оневозможена. Внесете PUK-код за да продолжите. Ви преостанува уште <xliff:g id="_NUMBER_1">%d</xliff:g> обид пред SIM-картичката да стане трајно неупотреблива. Контактирајте го операторот за детали.</item>
       <item quantity="other">SIM-картичката сега е оневозможена. Внесете PUK-код за да продолжите. Ви преостануваат уште <xliff:g id="_NUMBER_1">%d</xliff:g> обиди пред SIM-картичката да стане трајно неупотреблива. Контактирајте го операторот за детали.</item>

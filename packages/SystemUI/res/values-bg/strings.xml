@@ -95,6 +95,8 @@
     <string name="accessibility_unlock_button" msgid="128158454631118828">"Отключване"</string>
     <string name="accessibility_waiting_for_fingerprint" msgid="4808860050517462885">"Изчаква се отпечатък"</string>
     <string name="accessibility_unlock_without_fingerprint" msgid="7541705575183694446">"Отключете, без да използвате отпечатъка си"</string>
+    <!-- no translation found for accessibility_send_smart_reply (7766727839703044493) -->
+    <skip />
     <string name="unlock_label" msgid="8779712358041029439">"отключване"</string>
     <string name="phone_label" msgid="2320074140205331708">"отваряне на телефона"</string>
     <string name="voice_assist_label" msgid="3956854378310019854">"отваряне на гласовата помощ"</string>
@@ -206,11 +208,11 @@
     <string name="accessibility_quick_settings_airplane_on" msgid="6406141469157599296">"Самолетният режим е включен."</string>
     <string name="accessibility_quick_settings_airplane_changed_off" msgid="66846307818850664">"Самолетният режим се изключи."</string>
     <string name="accessibility_quick_settings_airplane_changed_on" msgid="8983005603505087728">"Самолетният режим се включи."</string>
-    <string name="accessibility_quick_settings_dnd_priority_on" msgid="5836205286254617194">"Режимът „Не безпокойте“ е включен."</string>
-    <string name="accessibility_quick_settings_dnd_none_on" msgid="6882582132662613537">"Настройката „Не безпокойте“ е включена в режим за пълна тишина."</string>
-    <string name="accessibility_quick_settings_dnd_alarms_on" msgid="9152834845587554157">"Настройката „Не безпокойте“ е включена в режим само с будилници."</string>
+    <!-- no translation found for accessibility_quick_settings_dnd_none_on (2960643943620637020) -->
+    <skip />
+    <!-- no translation found for accessibility_quick_settings_dnd_alarms_on (3357131899365865386) -->
+    <skip />
     <string name="accessibility_quick_settings_dnd" msgid="6607873236717185815">"Не безпокойте."</string>
-    <string name="accessibility_quick_settings_dnd_off" msgid="2371832603753738581">"Настройката „Не безпокойте“ е изключена."</string>
     <string name="accessibility_quick_settings_dnd_changed_off" msgid="898107593453022935">"Настройката „Не безпокойте“ е изключена."</string>
     <string name="accessibility_quick_settings_dnd_changed_on" msgid="4483780856613561039">"Настройката „Не безпокойте“ е включена."</string>
     <string name="accessibility_quick_settings_bluetooth" msgid="6341675755803320038">"Bluetooth."</string>
@@ -618,7 +620,8 @@
       <item quantity="one">използва <xliff:g id="PERFORMING_ACTIVITY_0">%1$s</xliff:g></item>
     </plurals>
     <string name="notification_appops_settings" msgid="1028328314935908050">"Настройки"</string>
-    <string name="notification_appops_ok" msgid="602562195588819631">"OK"</string>
+    <!-- no translation found for notification_appops_ok (1156966426011011434) -->
+    <skip />
     <string name="notification_channel_controls_opened_accessibility" msgid="6553950422055908113">"Контролите за известията за <xliff:g id="APP_NAME">%1$s</xliff:g> са оттворени"</string>
     <string name="notification_channel_controls_closed_accessibility" msgid="7521619812603693144">"Контролите за известията за <xliff:g id="APP_NAME">%1$s</xliff:g> са затворени"</string>
     <string name="notification_channel_switch_accessibility" msgid="3420796005601900717">"Разрешаване на известия от този канал"</string>

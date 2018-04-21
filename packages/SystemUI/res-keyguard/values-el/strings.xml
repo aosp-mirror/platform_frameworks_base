@@ -140,10 +140,7 @@
       <item quantity="one">Η συσκευή δεν έχει ξεκλειδωθεί εδώ και <xliff:g id="NUMBER_0">%d</xliff:g> ώρα. Επιβεβαιώστε τον κωδικό πρόσβασης.</item>
     </plurals>
     <string name="fingerprint_not_recognized" msgid="348813995267914625">"Δεν αναγνωρίστηκε"</string>
-    <plurals name="kg_password_default_pin_message" formatted="false" msgid="6203676909479972943">
-      <item quantity="other">Καταχωρίστε τον αριθμό PIN της κάρτας SIM. Απομένουν <xliff:g id="NUMBER_1">%d</xliff:g> ακόμη προσπάθειες.</item>
-      <item quantity="one">Εσφαλμένος αριθμός PIN κάρτας SIM. Απομένει άλλη <xliff:g id="NUMBER_0">%d</xliff:g> προσπάθεια. Στη συνέχεια, θα πρέπει να επικοινωνήσετε με τον πάροχο κινητής τηλεφωνίας, για να ξεκλειδώσετε τη συσκευή.</item>
-    </plurals>
+    <!-- no translation found for kg_password_default_pin_message (3739658416797652781) -->
     <plurals name="kg_password_default_puk_message" formatted="false" msgid="8744416410184198352">
       <item quantity="other">Η κάρτα SIM απενεργοποιήθηκε. Καταχωρίστε τον κωδικό PUK, για να συνεχίσετε. Απομένουν <xliff:g id="_NUMBER_1">%d</xliff:g> ακόμη προσπάθειες προτού να μην είναι πλέον δυνατή η χρήση της κάρτας SIM. Επικοινωνήστε με την εταιρεία κινητής τηλεφωνίας για λεπτομέρειες.</item>
       <item quantity="one">Η κάρτα SIM απενεργοποιήθηκε. Καταχωρίστε τον κωδικό PUK, για να συνεχίσετε. Απομένει <xliff:g id="_NUMBER_0">%d</xliff:g> ακόμη προσπάθεια προτού να μην είναι πλέον δυνατή η χρήση της κάρτας SIM. Επικοινωνήστε με την εταιρεία κινητής τηλεφωνίας για λεπτομέρειες.</item>

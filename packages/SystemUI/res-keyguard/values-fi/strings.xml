@@ -140,10 +140,7 @@
       <item quantity="one">Laitteen lukitusta ei ole avattu <xliff:g id="NUMBER_0">%d</xliff:g> tuntiin. Vahvista salasana.</item>
     </plurals>
     <string name="fingerprint_not_recognized" msgid="348813995267914625">"Ei tunnistettu"</string>
-    <plurals name="kg_password_default_pin_message" formatted="false" msgid="6203676909479972943">
-      <item quantity="other">Anna SIM-kortin PIN-koodi. Sinulla on <xliff:g id="NUMBER_1">%d</xliff:g> yritystä jäljellä.</item>
-      <item quantity="one">Anna SIM-kortin PIN-koodi. <xliff:g id="NUMBER_0">%d</xliff:g> yrityksen jälkeen laite lukittuu, ja vain operaattori voi avata sen.</item>
-    </plurals>
+    <!-- no translation found for kg_password_default_pin_message (3739658416797652781) -->
     <plurals name="kg_password_default_puk_message" formatted="false" msgid="8744416410184198352">
       <item quantity="other">SIM-kortti on nyt lukittu. Anna PUK-koodi, niin voit jatkaa. Sinulla on <xliff:g id="_NUMBER_1">%d</xliff:g> yritystä jäljellä, ennen kuin SIM-kortti poistuu pysyvästi käytöstä. Pyydä lisätietoja operaattoriltasi.</item>
       <item quantity="one">SIM-kortti on nyt lukittu. Anna PUK-koodi, niin voit jatkaa. Sinulla on <xliff:g id="_NUMBER_0">%d</xliff:g> yritys jäljellä, ennen kuin SIM-kortti poistuu pysyvästi käytöstä. Pyydä lisätietoja operaattoriltasi.</item>
