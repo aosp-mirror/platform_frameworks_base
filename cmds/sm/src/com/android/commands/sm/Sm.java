@@ -147,9 +147,21 @@ public final class Sm {
     }
 
     public void runSetForceAdoptable() throws RemoteException {
-        final boolean forceAdoptable = Boolean.parseBoolean(nextArg());
-        mSm.setDebugFlags(forceAdoptable ? StorageManager.DEBUG_FORCE_ADOPTABLE : 0,
-                StorageManager.DEBUG_FORCE_ADOPTABLE);
+        final int mask = StorageManager.DEBUG_ADOPTABLE_FORCE_ON
+                | StorageManager.DEBUG_ADOPTABLE_FORCE_OFF;
+        switch (nextArg()) {
+            case "on":
+            case "true":
+                mSm.setDebugFlags(StorageManager.DEBUG_ADOPTABLE_FORCE_ON, mask);
+                break;
+            case "off":
+                mSm.setDebugFlags(StorageManager.DEBUG_ADOPTABLE_FORCE_OFF, mask);
+                break;
+            case "default":
+            case "false":
+                mSm.setDebugFlags(0, mask);
+                break;
+        }
     }
 
     public void runSetSdcardfs() throws RemoteException {
@@ -289,7 +301,7 @@ public final class Sm {
         System.err.println("       sm list-volumes [public|private|emulated|all]");
         System.err.println("       sm has-adoptable");
         System.err.println("       sm get-primary-storage-uuid");
-        System.err.println("       sm set-force-adoptable [true|false]");
+        System.err.println("       sm set-force-adoptable [on|off|default]");
         System.err.println("       sm set-virtual-disk [true|false]");
         System.err.println("");
         System.err.println("       sm partition DISK [public|private|mixed] [ratio]");
