@@ -97,6 +97,8 @@
     <string name="accessibility_unlock_button" msgid="128158454631118828">"Odemknout"</string>
     <string name="accessibility_waiting_for_fingerprint" msgid="4808860050517462885">"Čeká se na použití otisku"</string>
     <string name="accessibility_unlock_without_fingerprint" msgid="7541705575183694446">"Odemknout bez otisku prstu"</string>
+    <!-- no translation found for accessibility_send_smart_reply (7766727839703044493) -->
+    <skip />
     <string name="unlock_label" msgid="8779712358041029439">"odemknout"</string>
     <string name="phone_label" msgid="2320074140205331708">"otevřít telefon"</string>
     <string name="voice_assist_label" msgid="3956854378310019854">"otevřít hlasovou asistenci"</string>
@@ -210,11 +212,11 @@
     <string name="accessibility_quick_settings_airplane_on" msgid="6406141469157599296">"Režim Letadlo je zapnutý."</string>
     <string name="accessibility_quick_settings_airplane_changed_off" msgid="66846307818850664">"Režim Letadlo je vypnutý."</string>
     <string name="accessibility_quick_settings_airplane_changed_on" msgid="8983005603505087728">"Režim Letadlo je zapnutý."</string>
-    <string name="accessibility_quick_settings_dnd_priority_on" msgid="5836205286254617194">"Režim Nerušit je zapnutý."</string>
-    <string name="accessibility_quick_settings_dnd_none_on" msgid="6882582132662613537">"Je zapnut režim Nerušit – úplné ticho."</string>
-    <string name="accessibility_quick_settings_dnd_alarms_on" msgid="9152834845587554157">"Nerušit, pouze budíky"</string>
+    <!-- no translation found for accessibility_quick_settings_dnd_none_on (2960643943620637020) -->
+    <skip />
+    <!-- no translation found for accessibility_quick_settings_dnd_alarms_on (3357131899365865386) -->
+    <skip />
     <string name="accessibility_quick_settings_dnd" msgid="6607873236717185815">"Nerušit."</string>
-    <string name="accessibility_quick_settings_dnd_off" msgid="2371832603753738581">"Stav Nerušit je vypnutý."</string>
     <string name="accessibility_quick_settings_dnd_changed_off" msgid="898107593453022935">"Stav Nerušit je vypnutý"</string>
     <string name="accessibility_quick_settings_dnd_changed_on" msgid="4483780856613561039">"Stav Nerušit je zapnutý."</string>
     <string name="accessibility_quick_settings_bluetooth" msgid="6341675755803320038">"Bluetooth."</string>
@@ -289,7 +291,7 @@
     <string name="quick_settings_bluetooth_detail_empty_text" msgid="4910015762433302860">"Nejsou dostupná žádná spárovaná zařízení"</string>
     <string name="quick_settings_bluetooth_secondary_label_battery_level" msgid="7106697106764717416">"Baterie: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%s</xliff:g>"</string>
     <string name="quick_settings_bluetooth_secondary_label_audio" msgid="5673845963301132071">"Zvuk"</string>
-    <string name="quick_settings_bluetooth_secondary_label_headset" msgid="1880572731276240588">"Náhlavní souprava"</string>
+    <string name="quick_settings_bluetooth_secondary_label_headset" msgid="1880572731276240588">"Sluchátka"</string>
     <string name="quick_settings_bluetooth_secondary_label_input" msgid="2173322305072945905">"Vstup"</string>
     <string name="quick_settings_bluetooth_secondary_label_transient" msgid="4551281899312150640">"Zapínání…"</string>
     <string name="quick_settings_brightness_label" msgid="6968372297018755815">"Jas"</string>
@@ -317,7 +319,7 @@
     <string name="quick_settings_wifi_on_label" msgid="7607810331387031235">"Wi-Fi je zapnutá"</string>
     <string name="quick_settings_wifi_detail_empty_text" msgid="269990350383909226">"Žádné sítě Wi-Fi nejsou k dispozici"</string>
     <string name="quick_settings_wifi_secondary_label_transient" msgid="7748206246119760554">"Zapínání…"</string>
-    <string name="quick_settings_cast_title" msgid="7709016546426454729">"Odeslat"</string>
+    <string name="quick_settings_cast_title" msgid="7709016546426454729">"Odesílání"</string>
     <string name="quick_settings_casting" msgid="6601710681033353316">"Odesílání"</string>
     <string name="quick_settings_cast_device_default_name" msgid="5367253104742382945">"Nepojmenované zařízení"</string>
     <string name="quick_settings_cast_device_default_description" msgid="2484573682378634413">"Připraveno k vysílání"</string>
@@ -630,7 +632,8 @@
       <item quantity="one">používá položku <xliff:g id="PERFORMING_ACTIVITY_0">%1$s</xliff:g></item>
     </plurals>
     <string name="notification_appops_settings" msgid="1028328314935908050">"Nastavení"</string>
-    <string name="notification_appops_ok" msgid="602562195588819631">"OK"</string>
+    <!-- no translation found for notification_appops_ok (1156966426011011434) -->
+    <skip />
     <string name="notification_channel_controls_opened_accessibility" msgid="6553950422055908113">"Ovládací prvky oznámení aplikace <xliff:g id="APP_NAME">%1$s</xliff:g> byly otevřeny"</string>
     <string name="notification_channel_controls_closed_accessibility" msgid="7521619812603693144">"Ovládací prvky oznámení aplikace <xliff:g id="APP_NAME">%1$s</xliff:g> byly zavřeny"</string>
     <string name="notification_channel_switch_accessibility" msgid="3420796005601900717">"Povolit oznámení z tohoto kanálu"</string>

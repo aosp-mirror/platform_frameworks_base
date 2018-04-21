@@ -95,6 +95,8 @@
     <string name="accessibility_unlock_button" msgid="128158454631118828">"Lås opp"</string>
     <string name="accessibility_waiting_for_fingerprint" msgid="4808860050517462885">"Venger på fingeravtrykk"</string>
     <string name="accessibility_unlock_without_fingerprint" msgid="7541705575183694446">"Lås opp uten å bruke fingeravtrykk"</string>
+    <!-- no translation found for accessibility_send_smart_reply (7766727839703044493) -->
+    <skip />
     <string name="unlock_label" msgid="8779712358041029439">"lås opp"</string>
     <string name="phone_label" msgid="2320074140205331708">"åpne telefonen"</string>
     <string name="voice_assist_label" msgid="3956854378310019854">"åpne talehjelp"</string>
@@ -206,11 +208,11 @@
     <string name="accessibility_quick_settings_airplane_on" msgid="6406141469157599296">"Flymodus er på."</string>
     <string name="accessibility_quick_settings_airplane_changed_off" msgid="66846307818850664">"Flymodus er slått av."</string>
     <string name="accessibility_quick_settings_airplane_changed_on" msgid="8983005603505087728">"Flymodus er slått på."</string>
-    <string name="accessibility_quick_settings_dnd_priority_on" msgid="5836205286254617194">"«Ikke forstyrr» er på."</string>
-    <string name="accessibility_quick_settings_dnd_none_on" msgid="6882582132662613537">"Ikke forstyrr er slått på, full stillhet."</string>
-    <string name="accessibility_quick_settings_dnd_alarms_on" msgid="9152834845587554157">"Ikke forstyrr er på – bare alarmer."</string>
+    <!-- no translation found for accessibility_quick_settings_dnd_none_on (2960643943620637020) -->
+    <skip />
+    <!-- no translation found for accessibility_quick_settings_dnd_alarms_on (3357131899365865386) -->
+    <skip />
     <string name="accessibility_quick_settings_dnd" msgid="6607873236717185815">"Ikke forstyrr."</string>
-    <string name="accessibility_quick_settings_dnd_off" msgid="2371832603753738581">"«Ikke forstyrr» er av."</string>
     <string name="accessibility_quick_settings_dnd_changed_off" msgid="898107593453022935">"«Ikke forstyrr» er slått av."</string>
     <string name="accessibility_quick_settings_dnd_changed_on" msgid="4483780856613561039">"«Ikke forstyrr» er slått på."</string>
     <string name="accessibility_quick_settings_bluetooth" msgid="6341675755803320038">"Bluetooth."</string>
@@ -618,7 +620,8 @@
       <item quantity="one">bruker <xliff:g id="PERFORMING_ACTIVITY_0">%1$s</xliff:g></item>
     </plurals>
     <string name="notification_appops_settings" msgid="1028328314935908050">"Innstillinger"</string>
-    <string name="notification_appops_ok" msgid="602562195588819631">"Ok"</string>
+    <!-- no translation found for notification_appops_ok (1156966426011011434) -->
+    <skip />
     <string name="notification_channel_controls_opened_accessibility" msgid="6553950422055908113">"Varselinnstillingene for <xliff:g id="APP_NAME">%1$s</xliff:g> er åpnet"</string>
     <string name="notification_channel_controls_closed_accessibility" msgid="7521619812603693144">"Varselinnstillingene for <xliff:g id="APP_NAME">%1$s</xliff:g> er lukket"</string>
     <string name="notification_channel_switch_accessibility" msgid="3420796005601900717">"Tillat varsler fra denne kanalen"</string>

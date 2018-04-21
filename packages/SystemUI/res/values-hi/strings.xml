@@ -95,6 +95,8 @@
     <string name="accessibility_unlock_button" msgid="128158454631118828">"अनलॉक करें"</string>
     <string name="accessibility_waiting_for_fingerprint" msgid="4808860050517462885">"फ़िंगरप्रिंट का इंतज़ार हो रहा है"</string>
     <string name="accessibility_unlock_without_fingerprint" msgid="7541705575183694446">"अपने फ़िंगरप्रिंट का इस्तेमाल किए बिना अनलॉक करें"</string>
+    <!-- no translation found for accessibility_send_smart_reply (7766727839703044493) -->
+    <skip />
     <string name="unlock_label" msgid="8779712358041029439">"अनलॉक करें"</string>
     <string name="phone_label" msgid="2320074140205331708">"फ़ोन खोलें"</string>
     <string name="voice_assist_label" msgid="3956854378310019854">"आवाज़ से डिवाइस को इस्तेमाल करें"</string>
@@ -161,10 +163,8 @@
     <string name="accessibility_no_sim" msgid="8274017118472455155">"कोई सिम नहीं."</string>
     <string name="accessibility_cell_data" msgid="5326139158682385073">"मोबाइल डेटा"</string>
     <string name="accessibility_cell_data_on" msgid="5927098403452994422">"मोबाइल डेटा चालू है"</string>
-    <!-- no translation found for cell_data_off_content_description (4356113230238585072) -->
-    <skip />
-    <!-- no translation found for cell_data_off (1051264981229902873) -->
-    <skip />
+    <string name="cell_data_off_content_description" msgid="4356113230238585072">"मोबाइल डेटा बंद है"</string>
+    <string name="cell_data_off" msgid="1051264981229902873">"बंद है"</string>
     <string name="accessibility_bluetooth_tether" msgid="4102784498140271969">"ब्लूटूथ से टेदरिंग."</string>
     <string name="accessibility_airplane_mode" msgid="834748999790763092">"हवाई जहाज मोड."</string>
     <string name="accessibility_vpn_on" msgid="5993385083262856059">"VPN चालू."</string>
@@ -208,11 +208,11 @@
     <string name="accessibility_quick_settings_airplane_on" msgid="6406141469157599296">"हवाई जहाज़ मोड चालू है."</string>
     <string name="accessibility_quick_settings_airplane_changed_off" msgid="66846307818850664">"हवाई जहाज़ मोड को बंद किया गया."</string>
     <string name="accessibility_quick_settings_airplane_changed_on" msgid="8983005603505087728">"हवाई जहाज़ मोड को चालू किया गया."</string>
-    <string name="accessibility_quick_settings_dnd_priority_on" msgid="5836205286254617194">"परेशान न करें मोड चालू है."</string>
-    <string name="accessibility_quick_settings_dnd_none_on" msgid="6882582132662613537">"परेशान ना करें चालू है, पूरी तरह शांत."</string>
-    <string name="accessibility_quick_settings_dnd_alarms_on" msgid="9152834845587554157">"परेशान ना करें चालू, सिर्फ़ अलार्म."</string>
+    <!-- no translation found for accessibility_quick_settings_dnd_none_on (2960643943620637020) -->
+    <skip />
+    <!-- no translation found for accessibility_quick_settings_dnd_alarms_on (3357131899365865386) -->
+    <skip />
     <string name="accessibility_quick_settings_dnd" msgid="6607873236717185815">"परेशान ना करें."</string>
-    <string name="accessibility_quick_settings_dnd_off" msgid="2371832603753738581">"परेशान ना करें बंद."</string>
     <string name="accessibility_quick_settings_dnd_changed_off" msgid="898107593453022935">"परेशान ना करें बंद किया गया."</string>
     <string name="accessibility_quick_settings_dnd_changed_on" msgid="4483780856613561039">"परेशान ना करें चालू किया गया."</string>
     <string name="accessibility_quick_settings_bluetooth" msgid="6341675755803320038">"ब्लूटूथ."</string>
@@ -363,8 +363,7 @@
     <string name="recents_stack_action_button_label" msgid="6593727103310426253">"Clear all"</string>
     <string name="recents_drag_hint_message" msgid="2649739267073203985">"स्क्रीन के दो हिस्से में बंट जाने, स्पिल्ट स्क्रीन, का इस्तेमाल करने के लिए यहां खींचें और छोडें"</string>
     <string name="recents_swipe_up_onboarding" msgid="3824607135920170001">"ऐप्लिकेशन बदलने के लिए ऊपर स्वाइप करें"</string>
-    <!-- no translation found for recents_quick_scrub_onboarding (2778062804333285789) -->
-    <skip />
+    <string name="recents_quick_scrub_onboarding" msgid="2778062804333285789">"ऐप्लिकेशन को झटपट स्विच करने के लिए उसे दाईं ओर खींचें और छोड़ें"</string>
     <string name="recents_multistack_add_stack_dialog_split_horizontal" msgid="8848514474543427332">"क्षैतिज रूप से विभाजित करें"</string>
     <string name="recents_multistack_add_stack_dialog_split_vertical" msgid="9075292233696180813">"लम्बवत रूप से विभाजित करें"</string>
     <string name="recents_multistack_add_stack_dialog_split_custom" msgid="4177837597513701943">"अपने मुताबिक बांटें"</string>
@@ -435,7 +434,7 @@
     <string name="battery_saver_notification_action_text" msgid="132118784269455533">"बैटरी सेवर बंद करें"</string>
     <string name="media_projection_dialog_text" msgid="3071431025448218928">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> आपके स्क्रीन पर दिखाई देने वाली हर सामग्री को कैप्चर करना शुरू कर देगी."</string>
     <string name="media_projection_remember_text" msgid="3103510882172746752">"फिर से न दिखाएं"</string>
-    <string name="clear_all_notifications_text" msgid="814192889771462828">"सभी साफ़ करें"</string>
+    <string name="clear_all_notifications_text" msgid="814192889771462828">"सभी को हटाएं"</string>
     <string name="manage_notifications_text" msgid="8035284146227267681">"सूचनाएं प्रबंधित करें"</string>
     <string name="dnd_suppressing_shade_text" msgid="5179021215370153526">"परेशान न करें सुविधा चालू होने की वजह से सूचनाएं नहीं दिखाई जा रही हैं"</string>
     <string name="media_projection_action_text" msgid="8470872969457985954">"अब शुरू करें"</string>
@@ -621,7 +620,8 @@
       <item quantity="other"> <xliff:g id="PERFORMING_ACTIVITY_1">%1$s</xliff:g> और <xliff:g id="PERFORMING_ACTIVITY_2">%2$s</xliff:g> का इस्तेमाल कर रहा है</item>
     </plurals>
     <string name="notification_appops_settings" msgid="1028328314935908050">"सेटिंग"</string>
-    <string name="notification_appops_ok" msgid="602562195588819631">"ठीक है"</string>
+    <!-- no translation found for notification_appops_ok (1156966426011011434) -->
+    <skip />
     <string name="notification_channel_controls_opened_accessibility" msgid="6553950422055908113">"<xliff:g id="APP_NAME">%1$s</xliff:g> के लिए सूचना नियंत्रण चालू हैं"</string>
     <string name="notification_channel_controls_closed_accessibility" msgid="7521619812603693144">"<xliff:g id="APP_NAME">%1$s</xliff:g> के लिए सूचना नियंत्रण बंद हैं"</string>
     <string name="notification_channel_switch_accessibility" msgid="3420796005601900717">"इस चैनल से सूचना की पाने की मंज़ूरी दें"</string>

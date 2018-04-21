@@ -95,6 +95,8 @@
     <string name="accessibility_unlock_button" msgid="128158454631118828">"Déverrouiller"</string>
     <string name="accessibility_waiting_for_fingerprint" msgid="4808860050517462885">"En attente de l\'empreinte digitale"</string>
     <string name="accessibility_unlock_without_fingerprint" msgid="7541705575183694446">"Déverrouiller le système sans utiliser votre empreinte digitale"</string>
+    <!-- no translation found for accessibility_send_smart_reply (7766727839703044493) -->
+    <skip />
     <string name="unlock_label" msgid="8779712358041029439">"déverrouiller"</string>
     <string name="phone_label" msgid="2320074140205331708">"Ouvrir le téléphone"</string>
     <string name="voice_assist_label" msgid="3956854378310019854">"ouvrir l\'assistance vocale"</string>
@@ -161,7 +163,7 @@
     <string name="accessibility_no_sim" msgid="8274017118472455155">"Aucune carte SIM"</string>
     <string name="accessibility_cell_data" msgid="5326139158682385073">"Données cellulaires"</string>
     <string name="accessibility_cell_data_on" msgid="5927098403452994422">"Données cellulaires activées"</string>
-    <string name="cell_data_off_content_description" msgid="4356113230238585072">"Données cellulaires désactivées"</string>
+    <string name="cell_data_off_content_description" msgid="4356113230238585072">"Désactivées"</string>
     <string name="cell_data_off" msgid="1051264981229902873">"Désactivé"</string>
     <string name="accessibility_bluetooth_tether" msgid="4102784498140271969">"Partage de connexion Bluetooth"</string>
     <string name="accessibility_airplane_mode" msgid="834748999790763092">"Mode Avion"</string>
@@ -208,11 +210,11 @@
     <string name="accessibility_quick_settings_airplane_on" msgid="6406141469157599296">"Mode Avion : activé"</string>
     <string name="accessibility_quick_settings_airplane_changed_off" msgid="66846307818850664">"Le mode Avion est désactivé."</string>
     <string name="accessibility_quick_settings_airplane_changed_on" msgid="8983005603505087728">"Le mode Avion est activé."</string>
-    <string name="accessibility_quick_settings_dnd_priority_on" msgid="5836205286254617194">"Le mode Ne pas déranger est activé."</string>
-    <string name="accessibility_quick_settings_dnd_none_on" msgid="6882582132662613537">"Mode « Ne pas déranger » activé, aucune interruption"</string>
-    <string name="accessibility_quick_settings_dnd_alarms_on" msgid="9152834845587554157">"Mode « Ne pas déranger » activé, alarmes uniquement."</string>
+    <!-- no translation found for accessibility_quick_settings_dnd_none_on (2960643943620637020) -->
+    <skip />
+    <!-- no translation found for accessibility_quick_settings_dnd_alarms_on (3357131899365865386) -->
+    <skip />
     <string name="accessibility_quick_settings_dnd" msgid="6607873236717185815">"Ne pas déranger."</string>
-    <string name="accessibility_quick_settings_dnd_off" msgid="2371832603753738581">"Mode « Ne pas déranger » désactivé."</string>
     <string name="accessibility_quick_settings_dnd_changed_off" msgid="898107593453022935">"Le mode « Ne pas déranger » a bien été désactivé."</string>
     <string name="accessibility_quick_settings_dnd_changed_on" msgid="4483780856613561039">"Le mode « Ne pas déranger » a bien été activé."</string>
     <string name="accessibility_quick_settings_bluetooth" msgid="6341675755803320038">"Bluetooth."</string>
@@ -346,7 +348,7 @@
     <string name="quick_settings_cellular_detail_data_warning" msgid="2440098045692399009">"Avertissement : <xliff:g id="DATA_LIMIT">%s</xliff:g>"</string>
     <string name="quick_settings_work_mode_label" msgid="7608026833638817218">"Profil professionnel"</string>
     <string name="quick_settings_night_display_label" msgid="3577098011487644395">"Éclairage nocturne"</string>
-    <string name="quick_settings_night_secondary_label_on_at_sunset" msgid="8483259341596943314">"Au coucher du soleil"</string>
+    <string name="quick_settings_night_secondary_label_on_at_sunset" msgid="8483259341596943314">"Activé la nuit"</string>
     <string name="quick_settings_night_secondary_label_until_sunrise" msgid="4453017157391574402">"Jusqu\'au lev. soleil"</string>
     <string name="quick_settings_night_secondary_label_on_at" msgid="6256314040368487637">"Actif à <xliff:g id="TIME">%s</xliff:g>"</string>
     <string name="quick_settings_secondary_label_until" msgid="2749196569462600150">"Jusqu\'à <xliff:g id="TIME">%s</xliff:g>"</string>
@@ -620,7 +622,8 @@
       <item quantity="other">utilise <xliff:g id="PERFORMING_ACTIVITY_1">%1$s</xliff:g> et <xliff:g id="PERFORMING_ACTIVITY_2">%2$s</xliff:g></item>
     </plurals>
     <string name="notification_appops_settings" msgid="1028328314935908050">"Paramètres"</string>
-    <string name="notification_appops_ok" msgid="602562195588819631">"OK"</string>
+    <!-- no translation found for notification_appops_ok (1156966426011011434) -->
+    <skip />
     <string name="notification_channel_controls_opened_accessibility" msgid="6553950422055908113">"Les paramètres des notifications pour <xliff:g id="APP_NAME">%1$s</xliff:g> sont ouverts"</string>
     <string name="notification_channel_controls_closed_accessibility" msgid="7521619812603693144">"Les paramètres des notifications pour <xliff:g id="APP_NAME">%1$s</xliff:g> sont fermés"</string>
     <string name="notification_channel_switch_accessibility" msgid="3420796005601900717">"Autoriser les notifications de cette chaîne"</string>

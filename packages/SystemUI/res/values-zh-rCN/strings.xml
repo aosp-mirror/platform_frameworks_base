@@ -95,6 +95,8 @@
     <string name="accessibility_unlock_button" msgid="128158454631118828">"解锁"</string>
     <string name="accessibility_waiting_for_fingerprint" msgid="4808860050517462885">"正在等待提供指纹"</string>
     <string name="accessibility_unlock_without_fingerprint" msgid="7541705575183694446">"不使用指纹解锁"</string>
+    <!-- no translation found for accessibility_send_smart_reply (7766727839703044493) -->
+    <skip />
     <string name="unlock_label" msgid="8779712358041029439">"解锁"</string>
     <string name="phone_label" msgid="2320074140205331708">"打开电话"</string>
     <string name="voice_assist_label" msgid="3956854378310019854">"打开语音助理"</string>
@@ -162,7 +164,7 @@
     <string name="accessibility_cell_data" msgid="5326139158682385073">"移动数据"</string>
     <string name="accessibility_cell_data_on" msgid="5927098403452994422">"移动数据已开启"</string>
     <string name="cell_data_off_content_description" msgid="4356113230238585072">"移动数据网络已关闭"</string>
-    <string name="cell_data_off" msgid="1051264981229902873">"已关闭"</string>
+    <string name="cell_data_off" msgid="1051264981229902873">"关闭"</string>
     <string name="accessibility_bluetooth_tether" msgid="4102784498140271969">"蓝牙网络共享。"</string>
     <string name="accessibility_airplane_mode" msgid="834748999790763092">"飞行模式。"</string>
     <string name="accessibility_vpn_on" msgid="5993385083262856059">"VPN 已开启。"</string>
@@ -206,11 +208,11 @@
     <string name="accessibility_quick_settings_airplane_on" msgid="6406141469157599296">"飞行模式开启。"</string>
     <string name="accessibility_quick_settings_airplane_changed_off" msgid="66846307818850664">"飞行模式已关闭。"</string>
     <string name="accessibility_quick_settings_airplane_changed_on" msgid="8983005603505087728">"飞行模式已开启。"</string>
-    <string name="accessibility_quick_settings_dnd_priority_on" msgid="5836205286254617194">"“勿扰”模式已开启。"</string>
-    <string name="accessibility_quick_settings_dnd_none_on" msgid="6882582132662613537">"勿扰模式已开启，阻止全部通知。"</string>
-    <string name="accessibility_quick_settings_dnd_alarms_on" msgid="9152834845587554157">"勿扰模式已开启，仅限闹钟。"</string>
+    <!-- no translation found for accessibility_quick_settings_dnd_none_on (2960643943620637020) -->
+    <skip />
+    <!-- no translation found for accessibility_quick_settings_dnd_alarms_on (3357131899365865386) -->
+    <skip />
     <string name="accessibility_quick_settings_dnd" msgid="6607873236717185815">"勿扰。"</string>
-    <string name="accessibility_quick_settings_dnd_off" msgid="2371832603753738581">"勿扰模式关闭。"</string>
     <string name="accessibility_quick_settings_dnd_changed_off" msgid="898107593453022935">"已关闭勿扰模式。"</string>
     <string name="accessibility_quick_settings_dnd_changed_on" msgid="4483780856613561039">"已开启勿扰模式。"</string>
     <string name="accessibility_quick_settings_bluetooth" msgid="6341675755803320038">"蓝牙。"</string>
@@ -618,7 +620,8 @@
       <item quantity="one">使用<xliff:g id="PERFORMING_ACTIVITY_0">%1$s</xliff:g></item>
     </plurals>
     <string name="notification_appops_settings" msgid="1028328314935908050">"设置"</string>
-    <string name="notification_appops_ok" msgid="602562195588819631">"确定"</string>
+    <!-- no translation found for notification_appops_ok (1156966426011011434) -->
+    <skip />
     <string name="notification_channel_controls_opened_accessibility" msgid="6553950422055908113">"<xliff:g id="APP_NAME">%1$s</xliff:g>的通知控件已打开"</string>
     <string name="notification_channel_controls_closed_accessibility" msgid="7521619812603693144">"<xliff:g id="APP_NAME">%1$s</xliff:g>的通知控件已关闭"</string>
     <string name="notification_channel_switch_accessibility" msgid="3420796005601900717">"允许接收来自此频道的通知"</string>
@@ -731,7 +734,7 @@
     <string name="drag_to_add_tiles" msgid="230586591689084925">"按住并拖动即可添加图块"</string>
     <string name="drag_to_remove_tiles" msgid="3361212377437088062">"拖动到此处即可移除"</string>
     <string name="drag_to_remove_disabled" msgid="2390968976638993382">"您至少需要 6 个图块"</string>
-    <string name="qs_edit" msgid="2232596095725105230">"修改"</string>
+    <string name="qs_edit" msgid="2232596095725105230">"编辑"</string>
     <string name="tuner_time" msgid="6572217313285536011">"时间"</string>
   <string-array name="clock_options">
     <item msgid="5965318737560463480">"显示小时、分钟和秒"</item>

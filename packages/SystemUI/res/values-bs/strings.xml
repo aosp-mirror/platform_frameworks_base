@@ -46,7 +46,7 @@
     <string name="battery_saver_confirmation_ok" msgid="7507968430447930257">"Uključi"</string>
     <string name="battery_saver_start_action" msgid="8187820911065797519">"Uključi Uštedu baterije"</string>
     <string name="status_bar_settings_settings_button" msgid="3023889916699270224">"Postavke"</string>
-    <string name="status_bar_settings_wifi_button" msgid="1733928151698311923">"Wi-Fi"</string>
+    <string name="status_bar_settings_wifi_button" msgid="1733928151698311923">"WiFi"</string>
     <string name="status_bar_settings_auto_rotation" msgid="3790482541357798421">"Automatsko rotiranje ekrana"</string>
     <string name="status_bar_settings_mute_label" msgid="554682549917429396">"BEZV."</string>
     <string name="status_bar_settings_auto_brightness_label" msgid="511453614962324674">"AUTO"</string>
@@ -89,13 +89,15 @@
     <string name="accessibility_accessibility_button" msgid="7601252764577607915">"Pristupačnost"</string>
     <string name="accessibility_rotate_button" msgid="7402949513740253006">"Rotiraj ekran"</string>
     <string name="accessibility_recent" msgid="5208608566793607626">"Pregled"</string>
-    <string name="accessibility_search_light" msgid="1103867596330271848">"Traži"</string>
+    <string name="accessibility_search_light" msgid="1103867596330271848">"Pretraživanje"</string>
     <string name="accessibility_camera_button" msgid="8064671582820358152">"Kamera"</string>
     <string name="accessibility_phone_button" msgid="6738112589538563574">"Telefon"</string>
     <string name="accessibility_voice_assist_button" msgid="487611083884852965">"Glasovna pomoć"</string>
     <string name="accessibility_unlock_button" msgid="128158454631118828">"Otključaj"</string>
     <string name="accessibility_waiting_for_fingerprint" msgid="4808860050517462885">"Čeka se otisak prsta"</string>
     <string name="accessibility_unlock_without_fingerprint" msgid="7541705575183694446">"Otključaj bez korištenja otiska prsta"</string>
+    <!-- no translation found for accessibility_send_smart_reply (7766727839703044493) -->
+    <skip />
     <string name="unlock_label" msgid="8779712358041029439">"otključaj"</string>
     <string name="phone_label" msgid="2320074140205331708">"otvori telefon"</string>
     <string name="voice_assist_label" msgid="3956854378310019854">"otvori glasovnu pomoć"</string>
@@ -158,7 +160,7 @@
     <string name="data_connection_cdma" msgid="8176597308239086780">"1X"</string>
     <string name="data_connection_roaming" msgid="6037232010953697354">"Roming"</string>
     <string name="data_connection_edge" msgid="871835227939216682">"EDGE"</string>
-    <string name="accessibility_data_connection_wifi" msgid="2324496756590645221">"Wi-Fi"</string>
+    <string name="accessibility_data_connection_wifi" msgid="2324496756590645221">"WiFi"</string>
     <string name="accessibility_no_sim" msgid="8274017118472455155">"Nema SIM kartice."</string>
     <string name="accessibility_cell_data" msgid="5326139158682385073">"Prijenos podataka na mobilnoj mreži"</string>
     <string name="accessibility_cell_data_on" msgid="5927098403452994422">"Prijenos podataka na mobilnoj mreži je uključen"</string>
@@ -207,11 +209,11 @@
     <string name="accessibility_quick_settings_airplane_on" msgid="6406141469157599296">"Uključen način rada u avionu."</string>
     <string name="accessibility_quick_settings_airplane_changed_off" msgid="66846307818850664">"Način rada u avionu je isključen."</string>
     <string name="accessibility_quick_settings_airplane_changed_on" msgid="8983005603505087728">"Način rada u avionu je uključen."</string>
-    <string name="accessibility_quick_settings_dnd_priority_on" msgid="5836205286254617194">"Način rada Ne ometaj je uključen"</string>
-    <string name="accessibility_quick_settings_dnd_none_on" msgid="6882582132662613537">"Način rada Ne ometaj je uključen, potpuna tišina."</string>
-    <string name="accessibility_quick_settings_dnd_alarms_on" msgid="9152834845587554157">"Način rada Ne ometaj je uključen, čut će se samo alarmi."</string>
+    <!-- no translation found for accessibility_quick_settings_dnd_none_on (2960643943620637020) -->
+    <skip />
+    <!-- no translation found for accessibility_quick_settings_dnd_alarms_on (3357131899365865386) -->
+    <skip />
     <string name="accessibility_quick_settings_dnd" msgid="6607873236717185815">"Ne ometaj."</string>
-    <string name="accessibility_quick_settings_dnd_off" msgid="2371832603753738581">"Način rada Ne ometaj je isključen."</string>
     <string name="accessibility_quick_settings_dnd_changed_off" msgid="898107593453022935">"Način rada Ne ometaj je isključen."</string>
     <string name="accessibility_quick_settings_dnd_changed_on" msgid="4483780856613561039">"Način rada Ne ometaj je uključen."</string>
     <string name="accessibility_quick_settings_bluetooth" msgid="6341675755803320038">"Bluetooth."</string>
@@ -306,12 +308,12 @@
     <string name="quick_settings_user_label" msgid="5238995632130897840">"Ja"</string>
     <string name="quick_settings_user_title" msgid="4467690427642392403">"Korisnik"</string>
     <string name="quick_settings_user_new_user" msgid="9030521362023479778">"Novi korisnik"</string>
-    <string name="quick_settings_wifi_label" msgid="9135344704899546041">"Wi-Fi"</string>
+    <string name="quick_settings_wifi_label" msgid="9135344704899546041">"WiFi"</string>
     <string name="quick_settings_wifi_not_connected" msgid="7171904845345573431">"Nije povezano"</string>
     <string name="quick_settings_wifi_no_network" msgid="2221993077220856376">"Nema mreže"</string>
-    <string name="quick_settings_wifi_off_label" msgid="7558778100843885864">"Wi-Fi isključen"</string>
-    <string name="quick_settings_wifi_on_label" msgid="7607810331387031235">"Wi-Fi uključen"</string>
-    <string name="quick_settings_wifi_detail_empty_text" msgid="269990350383909226">"Nema dostupnih Wi-Fi mreža"</string>
+    <string name="quick_settings_wifi_off_label" msgid="7558778100843885864">"WiFi isključen"</string>
+    <string name="quick_settings_wifi_on_label" msgid="7607810331387031235">"WiFi uključen"</string>
+    <string name="quick_settings_wifi_detail_empty_text" msgid="269990350383909226">"Nema dostupnih WiFi mreža"</string>
     <string name="quick_settings_wifi_secondary_label_transient" msgid="7748206246119760554">"Uključivanje…"</string>
     <string name="quick_settings_cast_title" msgid="7709016546426454729">"Emitiranje"</string>
     <string name="quick_settings_casting" msgid="6601710681033353316">"Prebacivanje"</string>
@@ -438,7 +440,7 @@
     <string name="clear_all_notifications_text" msgid="814192889771462828">"Očisti sve"</string>
     <string name="manage_notifications_text" msgid="8035284146227267681">"Upravljajte obavještenjima"</string>
     <string name="dnd_suppressing_shade_text" msgid="5179021215370153526">"Način rada Ne ometaj sakriva obavještenja"</string>
-    <string name="media_projection_action_text" msgid="8470872969457985954">"Pokreni odmah"</string>
+    <string name="media_projection_action_text" msgid="8470872969457985954">"Započni odmah"</string>
     <string name="empty_shade_text" msgid="708135716272867002">"Nema obavještenja"</string>
     <string name="profile_owned_footer" msgid="8021888108553696069">"Profil može biti nadziran"</string>
     <string name="vpn_footer" msgid="2388611096129106812">"Mreža može biti nadzirana"</string>
@@ -553,8 +555,8 @@
     <string name="output_none_found" msgid="5544982839808921091">"Nije pronađen nijedan uređaj"</string>
     <string name="output_none_found_service_off" msgid="8631969668659757069">"Nije pronađen nijedan uređaj. Pokušajte uključiti <xliff:g id="SERVICE">%1$s</xliff:g>"</string>
     <string name="output_service_bt" msgid="6224213415445509542">"Bluetooth"</string>
-    <string name="output_service_wifi" msgid="3749735218931825054">"Wi-Fi"</string>
-    <string name="output_service_bt_wifi" msgid="4486837869988770896">"Bluetooth i Wi-Fi"</string>
+    <string name="output_service_wifi" msgid="3749735218931825054">"WiFi"</string>
+    <string name="output_service_bt_wifi" msgid="4486837869988770896">"Bluetooth i WiFi"</string>
     <string name="system_ui_tuner" msgid="708224127392452018">"Podešavač za korisnički interfejs sistema"</string>
     <string name="show_battery_percentage" msgid="5444136600512968798">"Prikaži ugrađeni postotak baterije"</string>
     <string name="show_battery_percentage_summary" msgid="3215025775576786037">"Prikazuje postotak nivoa baterije unutar ikone na statusnoj traci kada se baterija ne puni"</string>
@@ -625,7 +627,8 @@
       <item quantity="other">koristi funkcije <xliff:g id="PERFORMING_ACTIVITY_1">%1$s</xliff:g> i <xliff:g id="PERFORMING_ACTIVITY_2">%2$s</xliff:g></item>
     </plurals>
     <string name="notification_appops_settings" msgid="1028328314935908050">"Postavke"</string>
-    <string name="notification_appops_ok" msgid="602562195588819631">"Uredu"</string>
+    <!-- no translation found for notification_appops_ok (1156966426011011434) -->
+    <skip />
     <string name="notification_channel_controls_opened_accessibility" msgid="6553950422055908113">"Otvorene su kontrole obavještenja za aplikaciju <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="notification_channel_controls_closed_accessibility" msgid="7521619812603693144">"Zatvorene su kontrole obavještenja za aplikaciju <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="notification_channel_switch_accessibility" msgid="3420796005601900717">"Dozvoli obavještenja s ovog kanala"</string>
@@ -813,7 +816,7 @@
     <string name="lockscreen_unlock_right" msgid="1529992940510318775">"Prečica desno također otključava"</string>
     <string name="lockscreen_none" msgid="4783896034844841821">"Ništa"</string>
     <string name="tuner_launch_app" msgid="1527264114781925348">"Pokrenite aplikaciju <xliff:g id="APP">%1$s</xliff:g>"</string>
-    <string name="tuner_other_apps" msgid="4726596850501162493">"Druge aplikacije"</string>
+    <string name="tuner_other_apps" msgid="4726596850501162493">"Ostale aplikacije"</string>
     <string name="tuner_circle" msgid="2340998864056901350">"Krug"</string>
     <string name="tuner_plus" msgid="6792960658533229675">"Plus"</string>
     <string name="tuner_minus" msgid="4806116839519226809">"Minus"</string>
@@ -831,9 +834,9 @@
     <string name="instant_apps_message" msgid="8116608994995104836">"Za instant aplikacije nije potrebna instalacija"</string>
     <string name="app_info" msgid="6856026610594615344">"Informacije o aplikaciji"</string>
     <string name="go_to_web" msgid="2650669128861626071">"Idi na preglednik"</string>
-    <string name="mobile_data" msgid="7094582042819250762">"Prijenos podataka na mobilnoj mreži"</string>
+    <string name="mobile_data" msgid="7094582042819250762">"Prijenos podataka"</string>
     <string name="mobile_data_text_format" msgid="3526214522670876454">"<xliff:g id="ID_1">%s</xliff:g> — <xliff:g id="ID_2">%s</xliff:g>"</string>
-    <string name="wifi_is_off" msgid="1838559392210456893">"Wi-Fi veza je isključena"</string>
+    <string name="wifi_is_off" msgid="1838559392210456893">"WiFi veza je isključena"</string>
     <string name="bt_is_off" msgid="2640685272289706392">"Bluetooth je isključen"</string>
     <string name="dnd_is_off" msgid="6167780215212497572">"Način rada Ne ometaj je isključen"</string>
     <string name="qs_dnd_prompt_auto_rule" msgid="862559028345233052">"Opciju Ne ometaju uključilo je automatsko pravilo (<xliff:g id="ID_1">%s</xliff:g>)."</string>
@@ -845,7 +848,7 @@
     <string name="running_foreground_services_title" msgid="381024150898615683">"Aplikacije koje rade u pozadini"</string>
     <string name="running_foreground_services_msg" msgid="6326247670075574355">"Dodirnite za detalje o potrošnji baterije i prijenosa podataka"</string>
     <string name="mobile_data_disable_title" msgid="1068272097382942231">"Isključiti prijenos podataka na mobilnoj mreži?"</string>
-    <string name="mobile_data_disable_message" msgid="4756541658791493506">"Nećete imati pristup podacima ili internetu preko mobilnog operatera <xliff:g id="CARRIER">%s</xliff:g>. Internet će biti dostupan samo preko Wi-Fi mreže."</string>
+    <string name="mobile_data_disable_message" msgid="4756541658791493506">"Nećete imati pristup podacima ili internetu preko mobilnog operatera <xliff:g id="CARRIER">%s</xliff:g>. Internet će biti dostupan samo preko WiFi mreže."</string>
     <string name="mobile_data_disable_message_default_carrier" msgid="6078110473451946831">"vaš operater"</string>
     <string name="touch_filtered_warning" msgid="8671693809204767551">"Postavke ne mogu potvrditi vaš odgovor jer aplikacija zaklanja zahtjev za odobrenje."</string>
     <string name="slice_permission_title" msgid="7465009437851044444">"Dozvoliti aplikaciji <xliff:g id="APP_0">%1$s</xliff:g> prikazivanje isječaka aplikacije <xliff:g id="APP_2">%2$s</xliff:g>?"</string>

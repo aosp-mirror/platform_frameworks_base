@@ -152,12 +152,7 @@
       <item quantity="one">Urządzenie nie zostało odblokowane od <xliff:g id="NUMBER_0">%d</xliff:g> godziny. Potwierdź hasło.</item>
     </plurals>
     <string name="fingerprint_not_recognized" msgid="348813995267914625">"Nie rozpoznano"</string>
-    <plurals name="kg_password_default_pin_message" formatted="false" msgid="6203676909479972943">
-      <item quantity="few">Wpisz kod PIN karty SIM. Masz jeszcze <xliff:g id="NUMBER_1">%d</xliff:g> próby.</item>
-      <item quantity="many">Wpisz kod PIN karty SIM. Masz jeszcze <xliff:g id="NUMBER_1">%d</xliff:g> prób.</item>
-      <item quantity="other">Wpisz kod PIN karty SIM. Masz jeszcze <xliff:g id="NUMBER_1">%d</xliff:g> próby.</item>
-      <item quantity="one">Wpisz kod PIN karty SIM. Masz jeszcze <xliff:g id="NUMBER_0">%d</xliff:g> próbę, zanim będzie trzeba skontaktować się z operatorem, by odblokować to urządzenie.</item>
-    </plurals>
+    <!-- no translation found for kg_password_default_pin_message (3739658416797652781) -->
     <plurals name="kg_password_default_puk_message" formatted="false" msgid="8744416410184198352">
       <item quantity="few">Karta SIM została wyłączona. Wpisz kod PUK, by przejść dalej. Masz jeszcze <xliff:g id="_NUMBER_1">%d</xliff:g> próby, zanim karta SIM zostanie trwale zablokowana. Aby uzyskać szczegółowe informacje, skontaktuj się z operatorem.</item>
       <item quantity="many">Karta SIM została wyłączona. Wpisz kod PUK, by przejść dalej. Masz jeszcze <xliff:g id="_NUMBER_1">%d</xliff:g> prób, zanim karta SIM zostanie trwale zablokowana. Aby uzyskać szczegółowe informacje, skontaktuj się z operatorem.</item>

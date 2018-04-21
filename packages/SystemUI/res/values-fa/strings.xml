@@ -95,6 +95,8 @@
     <string name="accessibility_unlock_button" msgid="128158454631118828">"باز کردن قفل"</string>
     <string name="accessibility_waiting_for_fingerprint" msgid="4808860050517462885">"در انتظار اثرانگشت"</string>
     <string name="accessibility_unlock_without_fingerprint" msgid="7541705575183694446">"باز کردن قفل بدون استفاده از اثر انگشت"</string>
+    <!-- no translation found for accessibility_send_smart_reply (7766727839703044493) -->
+    <skip />
     <string name="unlock_label" msgid="8779712358041029439">"بازکردن قفل"</string>
     <string name="phone_label" msgid="2320074140205331708">"باز کردن تلفن"</string>
     <string name="voice_assist_label" msgid="3956854378310019854">"«دستیار صوتی» را باز کنید"</string>
@@ -206,11 +208,11 @@
     <string name="accessibility_quick_settings_airplane_on" msgid="6406141469157599296">"حالت هواپیما روشن است."</string>
     <string name="accessibility_quick_settings_airplane_changed_off" msgid="66846307818850664">"حالت هواپیما خاموش شد."</string>
     <string name="accessibility_quick_settings_airplane_changed_on" msgid="8983005603505087728">"حالت هواپیما روشن شد."</string>
-    <string name="accessibility_quick_settings_dnd_priority_on" msgid="5836205286254617194">"«مزاحم نشوید» روشن است."</string>
-    <string name="accessibility_quick_settings_dnd_none_on" msgid="6882582132662613537">"حالت «مزاحم نشوید» روشن است، سکوت کامل."</string>
-    <string name="accessibility_quick_settings_dnd_alarms_on" msgid="9152834845587554157">"حالت «مزاحم نشوید» روشن است، فقط هشدارها."</string>
+    <!-- no translation found for accessibility_quick_settings_dnd_none_on (2960643943620637020) -->
+    <skip />
+    <!-- no translation found for accessibility_quick_settings_dnd_alarms_on (3357131899365865386) -->
+    <skip />
     <string name="accessibility_quick_settings_dnd" msgid="6607873236717185815">"مزاحم نشوید."</string>
-    <string name="accessibility_quick_settings_dnd_off" msgid="2371832603753738581">"«مزاحم نشوید» خاموش است."</string>
     <string name="accessibility_quick_settings_dnd_changed_off" msgid="898107593453022935">"«مزاحم نشوید» خاموش شد."</string>
     <string name="accessibility_quick_settings_dnd_changed_on" msgid="4483780856613561039">"«مزاحم نشوید» روشن شد."</string>
     <string name="accessibility_quick_settings_bluetooth" msgid="6341675755803320038">"بلوتوث."</string>
@@ -311,7 +313,7 @@
     <string name="quick_settings_wifi_on_label" msgid="7607810331387031235">"‏Wi-Fi روشن"</string>
     <string name="quick_settings_wifi_detail_empty_text" msgid="269990350383909226">"‏هیچ شبکه Wi-Fi موجود نیست"</string>
     <string name="quick_settings_wifi_secondary_label_transient" msgid="7748206246119760554">"روشن کردن…"</string>
-    <string name="quick_settings_cast_title" msgid="7709016546426454729">"فرستادن"</string>
+    <string name="quick_settings_cast_title" msgid="7709016546426454729">"ارسال محتوا"</string>
     <string name="quick_settings_casting" msgid="6601710681033353316">"در حال فرستادن"</string>
     <string name="quick_settings_cast_device_default_name" msgid="5367253104742382945">"دستگاه بدون نام"</string>
     <string name="quick_settings_cast_device_default_description" msgid="2484573682378634413">"آماده برای فرستادن"</string>
@@ -618,7 +620,8 @@
       <item quantity="other">با استفاده از <xliff:g id="PERFORMING_ACTIVITY_1">%1$s</xliff:g> و <xliff:g id="PERFORMING_ACTIVITY_2">%2$s</xliff:g></item>
     </plurals>
     <string name="notification_appops_settings" msgid="1028328314935908050">"تنظیمات"</string>
-    <string name="notification_appops_ok" msgid="602562195588819631">"تأیید"</string>
+    <!-- no translation found for notification_appops_ok (1156966426011011434) -->
+    <skip />
     <string name="notification_channel_controls_opened_accessibility" msgid="6553950422055908113">"کنترل‌های اعلان برای <xliff:g id="APP_NAME">%1$s</xliff:g> باز شد"</string>
     <string name="notification_channel_controls_closed_accessibility" msgid="7521619812603693144">"کنترل‌های اعلان برای <xliff:g id="APP_NAME">%1$s</xliff:g> بسته شد"</string>
     <string name="notification_channel_switch_accessibility" msgid="3420796005601900717">"مجاز کردن اعلان‌های این کانال"</string>
