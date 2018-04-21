@@ -5816,6 +5816,7 @@ public class WindowManagerService extends IWindowManager.Stub
         final int displayId = mFrozenDisplayId;
         mFrozenDisplayId = INVALID_DISPLAY;
         mDisplayFrozen = false;
+        mInputMonitor.thawInputDispatchingLw();
         mLastDisplayFreezeDuration = (int)(SystemClock.elapsedRealtime() - mDisplayFreezeTime);
         StringBuilder sb = new StringBuilder(128);
         sb.append("Screen frozen for ");
@@ -5861,8 +5862,6 @@ public class WindowManagerService extends IWindowManager.Stub
             }
             updateRotation = true;
         }
-
-        mInputMonitor.thawInputDispatchingLw();
 
         boolean configChanged;
 
