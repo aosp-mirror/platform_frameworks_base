@@ -71,7 +71,7 @@
     <item msgid="3422726142222090896">"avrcp16"</item>
   </string-array>
   <string-array name="bluetooth_a2dp_codec_titles">
-    <item msgid="7065842274271279580">"Sử dụng lựa chọn hệ thống (Mặc định)"</item>
+    <item msgid="7065842274271279580">"Sử dụng lựa chọn của hệ thống (Mặc định)"</item>
     <item msgid="7539690996561263909">"SBC"</item>
     <item msgid="686685526567131661">"AAC"</item>
     <item msgid="5254942598247222737">"Âm thanh <xliff:g id="QUALCOMM">Qualcomm®</xliff:g> <xliff:g id="APTX">aptX™</xliff:g>"</item>
@@ -81,7 +81,7 @@
     <item msgid="3304843301758635896">"Tắt codec tùy chọn"</item>
   </string-array>
   <string-array name="bluetooth_a2dp_codec_summaries">
-    <item msgid="5062108632402595000">"Sử dụng lựa chọn hệ thống (Mặc định)"</item>
+    <item msgid="5062108632402595000">"Sử dụng lựa chọn của hệ thống (Mặc định)"</item>
     <item msgid="6898329690939802290">"SBC"</item>
     <item msgid="6839647709301342559">"AAC"</item>
     <item msgid="7848030269621918608">"Âm thanh <xliff:g id="QUALCOMM">Qualcomm®</xliff:g> <xliff:g id="APTX">aptX™</xliff:g>"</item>
@@ -91,38 +91,38 @@
     <item msgid="741805482892725657">"Tắt codec tùy chọn"</item>
   </string-array>
   <string-array name="bluetooth_a2dp_codec_sample_rate_titles">
-    <item msgid="3093023430402746802">"Sử dụng lựa chọn hệ thống (Mặc định)"</item>
+    <item msgid="3093023430402746802">"Sử dụng lựa chọn của hệ thống (Mặc định)"</item>
     <item msgid="8895532488906185219">"44,1 kHz"</item>
     <item msgid="2909915718994807056">"48,0 kHz"</item>
     <item msgid="3347287377354164611">"88,2 kHz"</item>
     <item msgid="1234212100239985373">"96,0 kHz"</item>
   </string-array>
   <string-array name="bluetooth_a2dp_codec_sample_rate_summaries">
-    <item msgid="3214516120190965356">"Sử dụng lựa chọn hệ thống (Mặc định)"</item>
+    <item msgid="3214516120190965356">"Sử dụng lựa chọn của hệ thống (Mặc định)"</item>
     <item msgid="4482862757811638365">"44,1 kHz"</item>
     <item msgid="354495328188724404">"48,0 kHz"</item>
     <item msgid="7329816882213695083">"88,2 kHz"</item>
     <item msgid="6967397666254430476">"96,0 kHz"</item>
   </string-array>
   <string-array name="bluetooth_a2dp_codec_bits_per_sample_titles">
-    <item msgid="2684127272582591429">"Sử dụng lựa chọn hệ thống (Mặc định)"</item>
+    <item msgid="2684127272582591429">"Sử dụng lựa chọn của hệ thống (Mặc định)"</item>
     <item msgid="5618929009984956469">"16 bit/mẫu"</item>
     <item msgid="3412640499234627248">"24 bit/mẫu"</item>
     <item msgid="121583001492929387">"32 bit/mẫu"</item>
   </string-array>
   <string-array name="bluetooth_a2dp_codec_bits_per_sample_summaries">
-    <item msgid="1081159789834584363">"Sử dụng lựa chọn hệ thống (Mặc định)"</item>
+    <item msgid="1081159789834584363">"Sử dụng lựa chọn của hệ thống (Mặc định)"</item>
     <item msgid="4726688794884191540">"16 bit/mẫu"</item>
     <item msgid="305344756485516870">"24 bit/mẫu"</item>
     <item msgid="244568657919675099">"32 bit/mẫu"</item>
   </string-array>
   <string-array name="bluetooth_a2dp_codec_channel_mode_titles">
-    <item msgid="5226878858503393706">"Sử dụng lựa chọn hệ thống (Mặc định)"</item>
+    <item msgid="5226878858503393706">"Sử dụng lựa chọn của hệ thống (Mặc định)"</item>
     <item msgid="4106832974775067314">"Đơn âm"</item>
     <item msgid="5571632958424639155">"Âm thanh nổi"</item>
   </string-array>
   <string-array name="bluetooth_a2dp_codec_channel_mode_summaries">
-    <item msgid="4118561796005528173">"Sử dụng lựa chọn hệ thống (Mặc định)"</item>
+    <item msgid="4118561796005528173">"Sử dụng lựa chọn của hệ thống (Mặc định)"</item>
     <item msgid="8900559293912978337">"Đơn âm"</item>
     <item msgid="8883739882299884241">"Âm thanh nổi"</item>
   </string-array>
@@ -154,11 +154,11 @@
   </string-array>
   <string-array name="select_logd_size_summaries">
     <item msgid="6921048829791179331">"Tắt"</item>
-    <item msgid="2969458029344750262">"64K/lần tải nhật ký"</item>
-    <item msgid="1342285115665698168">"256K/lần tải nhật ký"</item>
-    <item msgid="1314234299552254621">"1M/lần tải nhật ký"</item>
-    <item msgid="3606047780792894151">"4M/lần tải nhật ký"</item>
-    <item msgid="5431354956856655120">"16M/lần tải nhật ký"</item>
+    <item msgid="2969458029344750262">"64K mỗi bộ đệm nhật ký"</item>
+    <item msgid="1342285115665698168">"256K mỗi bộ đệm nhật ký"</item>
+    <item msgid="1314234299552254621">"1M mỗi bộ đệm nhật ký"</item>
+    <item msgid="3606047780792894151">"4M mỗi bộ đệm nhật ký"</item>
+    <item msgid="5431354956856655120">"16M mỗi bộ đệm nhật ký"</item>
   </string-array>
   <string-array name="select_logpersist_titles">
     <item msgid="1744840221860799971">"Tắt"</item>

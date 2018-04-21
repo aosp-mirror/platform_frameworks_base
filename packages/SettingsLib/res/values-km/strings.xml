@@ -189,12 +189,12 @@
     <string name="vpn_settings_not_available" msgid="956841430176985598">"ការ​កំណត់ VPN មិន​អាច​ប្រើ​បាន​សម្រាប់​អ្នក​ប្រើ​នេះ"</string>
     <string name="tethering_settings_not_available" msgid="6765770438438291012">"កំណត់​ការ​ភ្ជាប់​មិន​អាច​ប្រើ​បាន​សម្រាប់​អ្នក​ប្រើ​​នេះ"</string>
     <string name="apn_settings_not_available" msgid="7873729032165324000">"ការ​កំណត់​ឈ្មោះ​ចូល​ដំណើរការ​មិន​អាច​ប្រើ​បាន​សម្រាប់​អ្នក​ប្រើ​​នេះ"</string>
-    <string name="enable_adb" msgid="7982306934419797485">"ការ​កែ​កំហុស​តាម​យូអេសប៊ី"</string>
-    <string name="enable_adb_summary" msgid="4881186971746056635">"របៀប​កែ​កំហុស ពេល​ភ្ជាប់​យូអេសប៊ី"</string>
-    <string name="clear_adb_keys" msgid="4038889221503122743">"ដក​សិទ្ធិ​កែ​កំហុស​យូអេសប៊ី"</string>
-    <string name="bugreport_in_power" msgid="7923901846375587241">"ផ្លូវការ​រាយការណ៍​កំហុស"</string>
+    <string name="enable_adb" msgid="7982306934419797485">"ការ​កែ​កំហុស​តាម USB"</string>
+    <string name="enable_adb_summary" msgid="4881186971746056635">"មុខងារកែ​កំហុសពេល​ភ្ជាប់​ USB"</string>
+    <string name="clear_adb_keys" msgid="4038889221503122743">"ដក​សិទ្ធិ​កែ​កំហុសតាម USB"</string>
+    <string name="bugreport_in_power" msgid="7923901846375587241">"ផ្លូវកាត់រាយការណ៍​កំហុស"</string>
     <string name="bugreport_in_power_summary" msgid="1778455732762984579">"បង្ហាញ​​ប៊ូតុង​ក្នុង​ម៉ឺនុយ​ប៊ូតុង​ថាមពល​​​សម្រាប់​ការ​ទទួល​យក​របាយការណ៍​កំហុស"</string>
-    <string name="keep_screen_on" msgid="1146389631208760344">"កុំ​បិទ​អេក្រង់"</string>
+    <string name="keep_screen_on" msgid="1146389631208760344">"ទុកឲ្យបើកចោល"</string>
     <string name="keep_screen_on_summary" msgid="2173114350754293009">"អេក្រង់​នឹង​មិន​ដេក​ពេល​បញ្ចូល​ថ្ម"</string>
     <string name="bt_hci_snoop_log" msgid="3340699311158865670">"បើក​កំណត់​ហេតុ HCI snoop ប៊្លូធូស"</string>
     <string name="bt_hci_snoop_log_summary" msgid="366083475849911315">"ចាប់​យក​កញ្ចប់ HCI ប៊្លូធូស​ទាំងអស់​នៅ​ក្នុង​ឯកសារ​ (បិទ/​បើក​ប៊្លូធូស ​បន្ទាប់ពី​ប្តូរ​ការកំណត់​នេះ)"</string>
@@ -202,12 +202,12 @@
     <string name="oem_unlock_enable_summary" msgid="4720281828891618376">"អនុញ្ញាតឲ្យដោះសោកម្មវិធីចាប់ផ្តើមប្រព័ន្ធ"</string>
     <string name="confirm_enable_oem_unlock_title" msgid="4802157344812385674">"អនុញ្ញាតការដោះសោ OEM?"</string>
     <string name="confirm_enable_oem_unlock_text" msgid="5517144575601647022">"ព្រមាន៖ លក្ខណៈពិសេសការពារឧបករណ៍នឹងមិនដំណើរការនៅលើឧបករណ៍នេះទេ ខណៈពេលដែលការកំណត់នេះត្រូវបានបើក។"</string>
-    <string name="mock_location_app" msgid="7966220972812881854">"ជ្រើរើសកម្មវិធីទីតាំងបញ្ឆោត"</string>
+    <string name="mock_location_app" msgid="7966220972812881854">"ជ្រើសរើសកម្មវិធីទីតាំងបញ្ឆោត"</string>
     <string name="mock_location_app_not_set" msgid="809543285495344223">"គ្មានកម្មវិធីទីតាំងបញ្ឆោតត្រូវបានកំណត់ទេ"</string>
     <string name="mock_location_app_set" msgid="8966420655295102685">"កម្មវិធីទីតាំងបញ្ឆោត៖ <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="debug_networking_category" msgid="7044075693643009662">"ការភ្ជាប់បណ្ដាញ"</string>
-    <string name="wifi_display_certification" msgid="8611569543791307533">"បង្ហាញ​ការ​កំណត់​រចនាសម្ព័ន្ធ​ឥត​ខ្សែ"</string>
-    <string name="wifi_verbose_logging" msgid="4203729756047242344">"បើក​កំណត់ហេតុ​រៀបរាប់​វ៉ាយហ្វាយ"</string>
+    <string name="wifi_display_certification" msgid="8611569543791307533">"សេចក្តីបញ្ជាក់ការបង្ហាញ​ឥត​ខ្សែ"</string>
+    <string name="wifi_verbose_logging" msgid="4203729756047242344">"បើក​កំណត់ហេតុ​រៀបរាប់​ Wi-Fi"</string>
     <string name="wifi_connected_mac_randomization" msgid="3168165236877957767">"ការជ្រើសរើស MAC ដោយចៃដន្យ នៅពេលបានភ្ជាប់"</string>
     <string name="mobile_data_always_on" msgid="8774857027458200434">"ទិន្នន័យទូរសព្ទចល័តដំណើរការជានិច្ច"</string>
     <string name="tethering_hardware_offload" msgid="7470077827090325814">"ការ​បង្កើនល្បឿន​ផ្នែករឹងសម្រាប់​ការភ្ជាប់"</string>
@@ -233,7 +233,7 @@
     <string name="private_dns_mode_provider" msgid="8354935160639360804">"ឈ្មោះម៉ាស៊ីនក្រុមហ៊ុនផ្ដល់សេវា DNS ឯកជន"</string>
     <string name="private_dns_mode_provider_hostname_hint" msgid="2487492386970928143">"បញ្ចូលឈ្មោះម៉ាស៊ីនរបស់ក្រុមហ៊ុនផ្ដល់សេវា DNS"</string>
     <string name="private_dns_mode_provider_failure" msgid="231837290365031223">"មិន​អាចភ្ជាប់​បានទេ"</string>
-    <string name="wifi_display_certification_summary" msgid="1155182309166746973">"បង្ហាញ​ជម្រើស​សម្រាប់​វិញ្ញាបនបត្រ​បង្ហាញ​ឥត​ខ្សែ"</string>
+    <string name="wifi_display_certification_summary" msgid="1155182309166746973">"បង្ហាញ​ជម្រើស​សម្រាប់​សេចក្តីបញ្ជាក់ការបង្ហាញ​ឥត​ខ្សែ"</string>
     <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"បង្កើនកម្រិតកំណត់ហេតុវ៉ាយហ្វាយបង្ហាញក្នុង SSID RSSI ក្នុងកម្មវិធីជ្រើស​វ៉ាយហ្វាយ"</string>
     <string name="wifi_connected_mac_randomization_summary" msgid="1743059848752201485">"ជ្រើសរើសអាសយដ្ឋាន MAC ដោយចៃដន្យ នៅពេល​ភ្ជាប់​បណ្តាញ Wi‑Fi"</string>
     <string name="wifi_metered_label" msgid="4514924227256839725">"មានការកំណត់"</string>
@@ -256,17 +256,17 @@
     <string name="adb_keys_warning_message" msgid="5659849457135841625">"ដក​សិទ្ធិ​ចូល​ការ​កែ​កំហុស​តាម​យូអេសប៊ី​ពី​គ្រប់​កុំព្យូទ័រ​ដែល​អ្នក​បាន​ផ្ដល់​សិទ្ធិ​ពី​មុន?"</string>
     <string name="dev_settings_warning_title" msgid="7244607768088540165">"អនុញ្ញាត​កំណត់​ការ​អភិវឌ្ឍ?"</string>
     <string name="dev_settings_warning_message" msgid="2298337781139097964">"ការ​កំណត់​ទាំង​នេះ​សម្រាប់​តែ​ការ​ប្រើ​ក្នុង​ការ​អភិវឌ្ឍ​ប៉ុណ្ណោះ។ ពួក​វា​អាច​ធ្វើ​ឲ្យ​ឧបករណ៍ និង​កម្មវិធី​របស់​អ្នក​ខូច ឬ​ដំណើរ​មិន​ត្រឹមត្រូវ។"</string>
-    <string name="verify_apps_over_usb_title" msgid="4177086489869041953">"ផ្ទៀងផ្ទាត់​កម្មវិធី​តាម​យូអេសប៊ី"</string>
+    <string name="verify_apps_over_usb_title" msgid="4177086489869041953">"ផ្ទៀងផ្ទាត់​កម្មវិធី​តាម USB"</string>
     <string name="verify_apps_over_usb_summary" msgid="9164096969924529200">"ពិនិត្យ​កម្មវិធី​បាន​ដំឡើង​តាម​រយៈ ADB/ADT សម្រាប់​ឥរិយាបថ​ដែល​គ្រោះ​ថ្នាក់។"</string>
     <string name="bluetooth_show_devices_without_names_summary" msgid="2351196058115755520">"​ឧបករណ៍​ប្ល៊ូធូសគ្មានឈ្មោះ​ (អាសយដ្ឋាន MAC តែប៉ុណ្ណោះ) នឹង​បង្ហាញ"</string>
-    <string name="bluetooth_disable_absolute_volume_summary" msgid="6031284410786545957">"បិទលក្ខណៈពិសេសកម្រិតសំឡេងលឺខ្លាំងពេលភ្ជាប់ប៊្លូធូសក្នុងករណីមានបញ្ហាជាមួយឧបករណ៍បញ្ជាពីចម្ងាយ ដូចជាកម្រិតសំឡេងលឺខ្លាំងដែលមិនអាចទទួលយកបាន ឬខ្វះការគ្រប់គ្រង។"</string>
+    <string name="bluetooth_disable_absolute_volume_summary" msgid="6031284410786545957">"បិទមុខងារកម្រិតសំឡេងឮខ្លាំងពេលភ្ជាប់ប៊្លូធូសក្នុងករណីមានបញ្ហាជាមួយឧបករណ៍បញ្ជាពីចម្ងាយ ដូចជាកម្រិតសំឡេងឮខ្លាំងដែលមិនអាចទទួលយកបាន ឬខ្វះការគ្រប់គ្រង។"</string>
     <string name="enable_terminal_title" msgid="95572094356054120">"ស្ថានីយ​មូលដ្ឋាន"</string>
     <string name="enable_terminal_summary" msgid="67667852659359206">"បើក​កម្មវិធី​ស្ថានីយ​ដែល​ផ្ដល់​ការ​ចូល​សែល​មូលដ្ឋាន"</string>
     <string name="hdcp_checking_title" msgid="8605478913544273282">"ពិនិត្យ HDCP"</string>
     <string name="hdcp_checking_dialog_title" msgid="5141305530923283">"កំណត់​ឥរិយាបថ​ពិនិត្យ HDCP"</string>
     <string name="debug_debugging_category" msgid="6781250159513471316">"កែ​កំហុស"</string>
     <string name="debug_app" msgid="8349591734751384446">"ជ្រើស​កម្ម​វិធី​កែ​កំហុស"</string>
-    <string name="debug_app_not_set" msgid="718752499586403499">"គ្មាន​កម្មវិធី​កំហុស​បាន​កំណត់"</string>
+    <string name="debug_app_not_set" msgid="718752499586403499">"គ្មាន​កម្មវិធី​កែកំហុស​បាន​កំណត់ទេ"</string>
     <string name="debug_app_set" msgid="2063077997870280017">"កម្មវិធី​កែ​កំហុស៖ <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="select_application" msgid="5156029161289091703">"ជ្រើស​កម្មវិធី"</string>
     <string name="no_application" msgid="2813387563129153880">"គ្មាន​អ្វីទេ"</string>
@@ -277,12 +277,12 @@
     <string name="debug_hw_drawing_category" msgid="6220174216912308658">"បង្ហាញ​ផ្នែក​រឹង​បាន​បង្កើន​ល្បឿន"</string>
     <string name="media_category" msgid="4388305075496848353">"មេឌៀ"</string>
     <string name="debug_monitoring_category" msgid="7640508148375798343">"តាមដាន"</string>
-    <string name="strict_mode" msgid="1938795874357830695">"បាន​បើក​របៀប​តឹងរឹង"</string>
+    <string name="strict_mode" msgid="1938795874357830695">"បាន​បើក​មុខងារតឹងរ៉ឹង"</string>
     <string name="strict_mode_summary" msgid="142834318897332338">"បញ្ចេញ​ពន្លឺ​អេក្រង់​ពេល​កម្មវិធី​ធ្វើ​ប្រតិបត្តិការ​យូរ​លើ​សែស្រឡាយ​​មេ"</string>
     <string name="pointer_location" msgid="6084434787496938001">"ទីតាំង​ទ្រនិច"</string>
     <string name="pointer_location_summary" msgid="840819275172753713">"អេក្រង់​ត្រួត​គ្នា​បង្ហាញ​ទិន្នន័យ​ប៉ះ​បច្ចុប្បន្ន"</string>
-    <string name="show_touches" msgid="2642976305235070316">"បង្ហាញការប៉ះ"</string>
-    <string name="show_touches_summary" msgid="6101183132903926324">"បង្ហាញមតិដែលអាចមើលឃើញសម្រាប់ការប៉ះ"</string>
+    <string name="show_touches" msgid="2642976305235070316">"បង្ហាញការចុច"</string>
+    <string name="show_touches_summary" msgid="6101183132903926324">"បង្ហាញមតិកែលម្អដែលអាចមើលឃើញចំពោះការចុច"</string>
     <string name="show_screen_updates" msgid="5470814345876056420">"បង្ហាញ​បច្ចុប្បន្នភាព​ផ្ទៃ"</string>
     <string name="show_screen_updates_summary" msgid="2569622766672785529">"ផ្ទៃ​បង្អួច​ទាំង​មូល​បញ្ចេញ​ពន្លឺ​ពេល​ពួកវា​ធ្វើ​បច្ចុប្បន្នភាព"</string>
     <string name="show_hw_screen_updates" msgid="4117270979975470789">"បង្ហាញ​ការធ្វើ​បច្ចុប្បន្នភាព​នៃការមើល"</string>
@@ -294,8 +294,8 @@
     <string name="disable_overlays_summary" msgid="3578941133710758592">"ប្រើ GPU ជា​និច្ច​សម្រាប់​​ផ្សំ​អេក្រង់"</string>
     <string name="simulate_color_space" msgid="6745847141353345872">"ក្លែង​ធ្វើ​ចន្លោះ​ពណ៌"</string>
     <string name="enable_opengl_traces_title" msgid="6790444011053219871">"បើក​ដាន​ OpenGL"</string>
-    <string name="usb_audio_disable_routing" msgid="8114498436003102671">"បិទការនាំផ្លូវអូឌីយ៉ូយូអេសប៊ី"</string>
-    <string name="usb_audio_disable_routing_summary" msgid="980282760277312264">"បិទការនាំផ្លូវស្វ័យប្រវត្តិទៅឧបករណ៍អូឌីយ៉ូ​យូអេសប៊ី"</string>
+    <string name="usb_audio_disable_routing" msgid="8114498436003102671">"បិទការនាំផ្លូវសំឡេងតាម USB"</string>
+    <string name="usb_audio_disable_routing_summary" msgid="980282760277312264">"បិទការនាំផ្លូវស្វ័យប្រវត្តិទៅឧបករណ៍សំឡេងតាម USB"</string>
     <string name="debug_layout" msgid="5981361776594526155">"បង្ហាញ​ព្រំដែន​ប្លង់"</string>
     <string name="debug_layout_summary" msgid="2001775315258637682">"បង្ហាញ​ការ​ភ្ជាប់​អត្ថបទ​សម្រង់ រឹម ។ល។"</string>
     <string name="force_rtl_layout_all_locales" msgid="2259906643093138978">"បង្ខំ​ទិស​ប្លង់ RTL"</string>
@@ -306,7 +306,7 @@
     <string name="track_frame_time" msgid="6094365083096851167">"ការបំប្លែង​កម្រងព័ត៌មាន HWUI"</string>
     <string name="enable_gpu_debug_layers" msgid="3848838293793255097">"បើក​ស្រទាប់​ជួសជុល GPU"</string>
     <string name="enable_gpu_debug_layers_summary" msgid="8009136940671194940">"អនុញ្ញាតឱ្យ​ផ្ទុក​ស្រទាប់​ជួស​ជុល GPU សម្រាប់​កម្មវិធី​ជួសជុល"</string>
-    <string name="window_animation_scale_title" msgid="6162587588166114700">"មាត្រដ្ឋាន​ចលនា​បង្អួច"</string>
+    <string name="window_animation_scale_title" msgid="6162587588166114700">"មាត្រដ្ឋាន​ចលនា​វិនដូ"</string>
     <string name="transition_animation_scale_title" msgid="387527540523595875">"មាត្រដ្ឋាន​ដំណើរ​ផ្លាស់ប្ដូរ​ចលនា"</string>
     <string name="animator_duration_scale_title" msgid="3406722410819934083">"មាត្រដ្ឋាន​រយៈពេល​នៃ​កម្មវិធី​ចលនា"</string>
     <string name="overlay_display_devices_title" msgid="5364176287998398539">"ក្លែង​ធ្វើ​ការ​បង្ហាញ​ទី​ពីរ"</string>
@@ -321,11 +321,11 @@
     <string name="force_allow_on_external" msgid="3215759785081916381">"បង្ខំឲ្យអនុញ្ញាតកម្មវិធីលើឧបករណ៍ផ្ទុកខាងក្រៅ"</string>
     <string name="force_allow_on_external_summary" msgid="3640752408258034689">"ធ្វើឲ្យកម្មវិធីទាំងឡាយមានសិទ្ធិសរសេរទៅកាន់ឧបករណ៍ផ្ទុកខាងក្រៅ ដោយមិនគិតពីតម្លៃជាក់លាក់"</string>
     <string name="force_resizable_activities" msgid="8615764378147824985">"បង្ខំឲ្យសកម្មភាពអាចប្តូរទំហំបាន"</string>
-    <string name="force_resizable_activities_summary" msgid="6667493494706124459">"កំណត់ឲ្យសកម្មភាពទាំងអស់អាចប្តូរទំហំបានសម្រាប់ពហុផ្ទាំងវិនដូ ដោយមិនគិតពីតម្លៃមេនីហ្វេស។"</string>
+    <string name="force_resizable_activities_summary" msgid="6667493494706124459">"កំណត់ឲ្យសកម្មភាពទាំងអស់អាចប្តូរទំហំបានសម្រាប់ពហុផ្ទាំងវិនដូ ដោយមិនគិតពីតម្លៃជាក់លាក់ឡើយ។"</string>
     <string name="enable_freeform_support" msgid="1461893351278940416">"បើកដំណើរការផ្ទាំងវិនដូទម្រង់សេរី"</string>
     <string name="enable_freeform_support_summary" msgid="8247310463288834487">"បើកដំណើរការគាំទ្រផ្ទាំងវិនដូទម្រង់សេរីសាកល្បង"</string>
-    <string name="local_backup_password_title" msgid="3860471654439418822">"ពាក្យ​សម្ងាត់​បម្រុង​ទុក​លើ​ផ្ទៃតុ"</string>
-    <string name="local_backup_password_summary_none" msgid="6951095485537767956">"ការ​បម្រុង​ទុក​ពេញលេញ​លើ​ផ្ទៃតុ​បច្ចុប្បន្ន​មិន​ត្រូវ​បាន​ការពារ​ទេ។"</string>
+    <string name="local_backup_password_title" msgid="3860471654439418822">"ពាក្យ​សម្ងាត់​បម្រុង​ទុក​អេក្រង់ដើម"</string>
+    <string name="local_backup_password_summary_none" msgid="6951095485537767956">"បច្ចុប្បន្ន ការ​បម្រុង​ទុក​ពេញលេញអេក្រង់ដើមមិន​ត្រូវ​បាន​ការពារ​ទេ"</string>
     <string name="local_backup_password_summary_change" msgid="5376206246809190364">"ប៉ះដើម្បីប្ដូរ ឬយកពាក្យសម្ងាត់ចេញសម្រាប់ការបម្រុងទុកពេញលេញលើកុំព្យូទ័រ"</string>
     <string name="local_backup_password_toast_success" msgid="582016086228434290">"កំណត់​ពាក្យ​សម្ងាត់​បម្រុង​ទុក​ថ្មី"</string>
     <string name="local_backup_password_toast_confirmation_mismatch" msgid="7805892532752708288">"ពាក្យ​សម្ងាត់​ថ្មី និង​ការ​បញ្ជាក់​​មិន​ដូច​គ្នា"</string>

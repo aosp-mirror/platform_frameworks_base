@@ -173,21 +173,21 @@
     <item msgid="8489661142527693381">"akiba ya kumbukumbu ya keneli pekee"</item>
   </string-array>
   <string-array name="window_animation_scale_entries">
-    <item msgid="8134156599370824081">"Haiwani imezimwa"</item>
-    <item msgid="6624864048416710414">"Skeli .5x ya haiwani"</item>
-    <item msgid="2219332261255416635">"Skeli 1x ya haiwani"</item>
-    <item msgid="3544428804137048509">"Skeli 1.5x ya haiwani"</item>
-    <item msgid="3110710404225974514">"Skeli 2x ya haiwani"</item>
-    <item msgid="4402738611528318731">"Skeli 5x ya haiwani"</item>
-    <item msgid="6189539267968330656">"Skeli 10x ya haiwani"</item>
+    <item msgid="8134156599370824081">"Uhuishaji umezimwa"</item>
+    <item msgid="6624864048416710414">"Skeli .5x ya uhuishaji"</item>
+    <item msgid="2219332261255416635">"Skeli 1x ya uhuishaji"</item>
+    <item msgid="3544428804137048509">"Skeli 1.5x ya uhuishaji"</item>
+    <item msgid="3110710404225974514">"Skeli 2x ya uhuishaji"</item>
+    <item msgid="4402738611528318731">"Skeli 5x ya uhuishaji"</item>
+    <item msgid="6189539267968330656">"Skeli 10x ya uhuishaji"</item>
   </string-array>
   <string-array name="transition_animation_scale_entries">
-    <item msgid="8464255836173039442">"Haiwani imezimwa"</item>
-    <item msgid="3375781541913316411">"Skeli .5x ya haiwani"</item>
-    <item msgid="1991041427801869945">"Skeli 1x ya haiwani"</item>
-    <item msgid="4012689927622382874">"Skeli 1.5x ya haiwani"</item>
-    <item msgid="3289156759925947169">"Skeli 2x ya haiwani"</item>
-    <item msgid="7705857441213621835">"Skeli 5x ya haiwani"</item>
+    <item msgid="8464255836173039442">"Uhuishaji umezimwa"</item>
+    <item msgid="3375781541913316411">"Skeli .5x ya uhuishaji"</item>
+    <item msgid="1991041427801869945">"Skeli 1x ya uhuishaji"</item>
+    <item msgid="4012689927622382874">"Skeli 1.5x ya uhuishaji"</item>
+    <item msgid="3289156759925947169">"Skeli 2x ya uhuishaji"</item>
+    <item msgid="7705857441213621835">"Skeli 5x ya uhuishaji"</item>
     <item msgid="6660750935954853365">"Skeli ya 10x ya uhuishaji"</item>
   </string-array>
   <string-array name="animator_duration_scale_entries">
@@ -236,7 +236,7 @@
   </string-array>
   <string-array name="app_process_limit_entries">
     <item msgid="3401625457385943795">"Kiwango cha wastani"</item>
-    <item msgid="4071574792028999443">"Hakuna mchakato wa mandari nyuma"</item>
+    <item msgid="4071574792028999443">"Hakuna michakato ya mandhari nyuma"</item>
     <item msgid="4810006996171705398">"Angalau mchakato 1"</item>
     <item msgid="8586370216857360863">"Angalau michakato 2"</item>
     <item msgid="836593137872605381">"Angalau michakato 3"</item>

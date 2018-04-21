@@ -129,8 +129,8 @@
     <string name="process_kernel_label" msgid="3916858646836739323">"Android OS"</string>
     <string name="data_usage_uninstalled_apps" msgid="614263770923231598">"আঁতৰোৱা এপ্‌সমূহ"</string>
     <string name="data_usage_uninstalled_apps_users" msgid="7986294489899813194">"আঁতৰোৱা এপ্‌ আৰু ব্যৱহাৰকাৰীসমূহ"</string>
-    <string name="tether_settings_title_usb" msgid="6688416425801386511">"USB টেডাৰিং"</string>
-    <string name="tether_settings_title_wifi" msgid="3277144155960302049">"প\'ৰ্টেবল হটস্পট"</string>
+    <string name="tether_settings_title_usb" msgid="6688416425801386511">"ইউএছবি টেডাৰিং"</string>
+    <string name="tether_settings_title_wifi" msgid="3277144155960302049">"প\'ৰ্টেবল হ\'টস্প\'ট"</string>
     <string name="tether_settings_title_bluetooth" msgid="355855408317564420">"ব্লুটুথ টেডাৰিং"</string>
     <string name="tether_settings_title_usb_bluetooth" msgid="5355828977109785001">"টেডাৰ কৰি থকা হৈছে"</string>
     <string name="tether_settings_title_all" msgid="8356136101061143841">"টেদৰিং আৰু প\'ৰ্টেবল হ\'টস্পট"</string>
@@ -167,7 +167,7 @@
     <string name="tts_engine_preference_section_title" msgid="448294500990971413">"অগ্ৰাধিকাৰপ্ৰাপ্ত ইঞ্জিন"</string>
     <string name="tts_general_section_title" msgid="4402572014604490502">"সাধাৰণ"</string>
     <string name="tts_reset_speech_pitch_title" msgid="5789394019544785915">"কথনভংগী তীব্ৰতা ৰিছেট কৰক"</string>
-    <string name="tts_reset_speech_pitch_summary" msgid="8700539616245004418">"পাঠ উচ্চাৰণৰ স্বৰ-তীব্ৰতা ৰিছেট কৰক যিটো ডিফল্ট হিচাপে ব্যৱহাৰ কৰা হ\'ব।"</string>
+    <string name="tts_reset_speech_pitch_summary" msgid="8700539616245004418">"পাঠ উচ্চাৰণৰ স্বৰ-তীব্ৰতা ৰিছেট কৰক যিটো ডিফ\'ল্ট হিচাপে ব্যৱহাৰ কৰা হ\'ব।"</string>
   <string-array name="tts_rate_entries">
     <item msgid="6695494874362656215">"অতি লেহেম"</item>
     <item msgid="4795095314303559268">"লেহেমীয়া"</item>
@@ -331,7 +331,7 @@
     <string name="local_backup_password_toast_confirmation_mismatch" msgid="7805892532752708288">"নতুন পাছৱৰ্ডটোৰ লগত নিশ্চিত কৰা পাছৱৰ্ডটো মিলা নাই"</string>
     <string name="local_backup_password_toast_validation_failure" msgid="5646377234895626531">"বেকআপ পাছৱৰ্ড নিৰ্ধাৰণ কৰিব পৰা নহ\'ল"</string>
   <string-array name="color_mode_names">
-    <item msgid="2425514299220523812">"জীৱন্ত (ডিফল্ট)"</item>
+    <item msgid="2425514299220523812">"জীৱন্ত (ডিফ\'ল্ট)"</item>
     <item msgid="8446070607501413455">"প্ৰাকৃতিক"</item>
     <item msgid="6553408765810699025">"মানক"</item>
   </string-array>

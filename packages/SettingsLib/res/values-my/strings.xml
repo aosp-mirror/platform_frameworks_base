@@ -126,7 +126,7 @@
     <string name="accessibility_wifi_signal_full" msgid="7061045677694702">"Wi-Fi  အပြည့်ရှိ"</string>
     <string name="accessibility_wifi_security_type_none" msgid="1223747559986205423">"အများသုံး ကွန်ရက်"</string>
     <string name="accessibility_wifi_security_type_secured" msgid="862921720418885331">"လုံခြုံသည့် ကွန်ရက်"</string>
-    <string name="process_kernel_label" msgid="3916858646836739323">"Android စနစ်"</string>
+    <string name="process_kernel_label" msgid="3916858646836739323">"Android OS"</string>
     <string name="data_usage_uninstalled_apps" msgid="614263770923231598">"ဖယ်ရှားထားသော အက်ပ်များ"</string>
     <string name="data_usage_uninstalled_apps_users" msgid="7986294489899813194">"ဖယ်ရှားထားသော အပလီကေးရှင်းနှင့် သုံးစွဲသူများ"</string>
     <string name="tether_settings_title_usb" msgid="6688416425801386511">"USB သုံး၍ချိတ်ဆက်ခြင်း"</string>
