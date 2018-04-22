@@ -268,6 +268,8 @@ import com.android.server.policy.PermissionPolicyInternal;
 import com.android.server.uri.UriGrantsManagerInternal;
 import com.android.server.vr.VrManagerInternal;
 
+import org.lineageos.internal.applications.LineageActivityManager;
+
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileDescriptor;
@@ -647,6 +649,9 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
 
     private int mDeviceOwnerUid = Process.INVALID_UID;
 
+    // Lineage sdk activity related helper
+    private LineageActivityManager mLineageActivityManager;
+
     private final class FontScaleSettingObserver extends ContentObserver {
         private final Uri mFontScaleUri = Settings.System.getUriFor(FONT_SCALE);
         private final Uri mHideErrorDialogsUri = Settings.Global.getUriFor(HIDE_ERROR_DIALOGS);
@@ -716,6 +721,10 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
 
     public void installSystemProviders() {
         mFontScaleSettingObserver = new FontScaleSettingObserver();
+
+        // LineageActivityManager depends on settings so we can initialize only
+        // after providers are available.
+        mLineageActivityManager = new LineageActivityManager(mContext);
     }
 
     public void retrieveSettings(ContentResolver resolver) {
@@ -7446,5 +7455,9 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                 mCompanionAppUidsMap.put(userId, result);
             }
         }
+    }
+
+    public boolean shouldForceLongScreen(String packageName) {
+        return mLineageActivityManager.shouldForceLongScreen(packageName);
     }
 }
