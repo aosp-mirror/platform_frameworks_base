@@ -95,6 +95,8 @@
     <string name="accessibility_unlock_button" msgid="128158454631118828">"Desbloqueja"</string>
     <string name="accessibility_waiting_for_fingerprint" msgid="4808860050517462885">"S\'està esperant l\'empremta digital"</string>
     <string name="accessibility_unlock_without_fingerprint" msgid="7541705575183694446">"Desbloqueja sense utilitzar l\'empremta digital"</string>
+    <!-- no translation found for accessibility_send_smart_reply (7766727839703044493) -->
+    <skip />
     <string name="unlock_label" msgid="8779712358041029439">"desbloqueja"</string>
     <string name="phone_label" msgid="2320074140205331708">"obre el telèfon"</string>
     <string name="voice_assist_label" msgid="3956854378310019854">"obre l\'assistència per veu"</string>
@@ -206,11 +208,11 @@
     <string name="accessibility_quick_settings_airplane_on" msgid="6406141469157599296">"El Mode d\'avió està activat."</string>
     <string name="accessibility_quick_settings_airplane_changed_off" msgid="66846307818850664">"S\'ha desactivat el Mode d\'avió."</string>
     <string name="accessibility_quick_settings_airplane_changed_on" msgid="8983005603505087728">"S\'ha activat el Mode d\'avió."</string>
-    <string name="accessibility_quick_settings_dnd_priority_on" msgid="5836205286254617194">"Mode No molestis activat."</string>
-    <string name="accessibility_quick_settings_dnd_none_on" msgid="6882582132662613537">"El mode No molestis està activat; silenci total."</string>
-    <string name="accessibility_quick_settings_dnd_alarms_on" msgid="9152834845587554157">"El mode No molestis està activat (només alarmes)."</string>
+    <!-- no translation found for accessibility_quick_settings_dnd_none_on (2960643943620637020) -->
+    <skip />
+    <!-- no translation found for accessibility_quick_settings_dnd_alarms_on (3357131899365865386) -->
+    <skip />
     <string name="accessibility_quick_settings_dnd" msgid="6607873236717185815">"Mode No molestis."</string>
-    <string name="accessibility_quick_settings_dnd_off" msgid="2371832603753738581">"El mode No molestis està desactivat."</string>
     <string name="accessibility_quick_settings_dnd_changed_off" msgid="898107593453022935">"S\'ha desactivat el mode No molestis."</string>
     <string name="accessibility_quick_settings_dnd_changed_on" msgid="4483780856613561039">"S\'ha activat el mode No molestis."</string>
     <string name="accessibility_quick_settings_bluetooth" msgid="6341675755803320038">"Bluetooth."</string>
@@ -339,7 +341,7 @@
     <string name="quick_settings_cellular_detail_data_usage" msgid="1964260360259312002">"Ús de dades"</string>
     <string name="quick_settings_cellular_detail_remaining_data" msgid="722715415543541249">"Dades restants"</string>
     <string name="quick_settings_cellular_detail_over_limit" msgid="967669665390990427">"Límit excedit"</string>
-    <string name="quick_settings_cellular_detail_data_used" msgid="1476810587475761478">"Utilitzats: <xliff:g id="DATA_USED">%s</xliff:g>"</string>
+    <string name="quick_settings_cellular_detail_data_used" msgid="1476810587475761478">"Dades utilitzades: <xliff:g id="DATA_USED">%s</xliff:g>"</string>
     <string name="quick_settings_cellular_detail_data_limit" msgid="56011158504994128">"Límit: <xliff:g id="DATA_LIMIT">%s</xliff:g>"</string>
     <string name="quick_settings_cellular_detail_data_warning" msgid="2440098045692399009">"Advertiment: <xliff:g id="DATA_LIMIT">%s</xliff:g>"</string>
     <string name="quick_settings_work_mode_label" msgid="7608026833638817218">"Perfil professional"</string>
@@ -618,7 +620,8 @@
       <item quantity="one">utilitzant <xliff:g id="PERFORMING_ACTIVITY_0">%1$s</xliff:g></item>
     </plurals>
     <string name="notification_appops_settings" msgid="1028328314935908050">"Configuració"</string>
-    <string name="notification_appops_ok" msgid="602562195588819631">"D\'acord"</string>
+    <!-- no translation found for notification_appops_ok (1156966426011011434) -->
+    <skip />
     <string name="notification_channel_controls_opened_accessibility" msgid="6553950422055908113">"S\'han obert els controls de notificació per a <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="notification_channel_controls_closed_accessibility" msgid="7521619812603693144">"S\'han tancat els controls de notificació per a <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="notification_channel_switch_accessibility" msgid="3420796005601900717">"Permet les notificacions d\'aquest canal"</string>
@@ -640,7 +643,7 @@
       <item quantity="other">%d minuts</item>
       <item quantity="one">%d minut</item>
     </plurals>
-    <string name="battery_panel_title" msgid="7944156115535366613">"Consum de la bateria"</string>
+    <string name="battery_panel_title" msgid="7944156115535366613">"Ús de la bateria"</string>
     <string name="battery_detail_charging_summary" msgid="1279095653533044008">"La funció Estalvi de bateria no està disponible durant la càrrega"</string>
     <string name="battery_detail_switch_title" msgid="6285872470260795421">"Estalvi de bateria"</string>
     <string name="battery_detail_switch_summary" msgid="9049111149407626804">"Redueix el rendiment i les dades en segon pla"</string>
@@ -697,8 +700,8 @@
     <string name="accessibility_status_bar_headphones" msgid="9156307120060559989">"Auriculars connectats"</string>
     <string name="accessibility_status_bar_headset" msgid="8666419213072449202">"Auriculars connectats"</string>
     <string name="data_saver" msgid="5037565123367048522">"Economitzador de dades"</string>
-    <string name="accessibility_data_saver_on" msgid="8454111686783887148">"L\'extensió Economitzador de dades està activada"</string>
-    <string name="accessibility_data_saver_off" msgid="8841582529453005337">"L\'extensió Economitzador de dades està desactivada"</string>
+    <string name="accessibility_data_saver_on" msgid="8454111686783887148">"L\'Economitzador de dades està activat"</string>
+    <string name="accessibility_data_saver_off" msgid="8841582529453005337">"Economitzador de dades desactivada"</string>
     <string name="switch_bar_on" msgid="1142437840752794229">"Activat"</string>
     <string name="switch_bar_off" msgid="8803270596930432874">"Desactivat"</string>
     <string name="nav_bar" msgid="1993221402773877607">"Barra de navegació"</string>
@@ -728,7 +731,7 @@
     <string name="right_keycode" msgid="708447961000848163">"Codi de tecla de la dreta"</string>
     <string name="left_icon" msgid="3096287125959387541">"Icona de l\'esquerra"</string>
     <string name="right_icon" msgid="3952104823293824311">"Icona de la dreta"</string>
-    <string name="drag_to_add_tiles" msgid="230586591689084925">"Mantén premut un mosaic i arrossega\'l per afegir-lo"</string>
+    <string name="drag_to_add_tiles" msgid="230586591689084925">"Mantén premut i arrossega per afegir funcions"</string>
     <string name="drag_to_remove_tiles" msgid="3361212377437088062">"Arrossega aquí per suprimir una funció"</string>
     <string name="drag_to_remove_disabled" msgid="2390968976638993382">"Necessites com a mínim 6 mosaics"</string>
     <string name="qs_edit" msgid="2232596095725105230">"Edita"</string>

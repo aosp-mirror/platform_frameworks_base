@@ -113,7 +113,9 @@ public class DozeUi implements DozeMachine.Part {
                     // The display buffers will be empty and need to be filled.
                     mHost.dozeTimeTick();
                     // The first frame may arrive when the display isn't ready yet.
-                    mHandler.postDelayed(mHost::dozeTimeTick, 100);
+                    mHandler.postDelayed(mWakeLock.wrap(mHost::dozeTimeTick), 100);
+                    // The the delayed frame may arrive when the display isn't ready yet either.
+                    mHandler.postDelayed(mWakeLock.wrap(mHost::dozeTimeTick), 1000);
                 }
                 scheduleTimeTick();
                 break;

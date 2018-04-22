@@ -3730,7 +3730,7 @@ public final class ActivityThread extends ClientTransactionHandler {
                 r.pendingIntents = null;
             }
             if (r.pendingResults != null) {
-                deliverResults(r, r.pendingResults);
+                deliverResults(r, r.pendingResults, reason);
                 r.pendingResults = null;
             }
             r.activity.performResume(r.startsNotResumed, reason);
@@ -4299,7 +4299,7 @@ public final class ActivityThread extends ClientTransactionHandler {
         WindowManagerGlobal.getInstance().reportNewConfiguration(mConfiguration);
     }
 
-    private void deliverResults(ActivityClientRecord r, List<ResultInfo> results) {
+    private void deliverResults(ActivityClientRecord r, List<ResultInfo> results, String reason) {
         final int N = results.size();
         for (int i=0; i<N; i++) {
             ResultInfo ri = results.get(i);
@@ -4311,7 +4311,7 @@ public final class ActivityThread extends ClientTransactionHandler {
                 if (DEBUG_RESULTS) Slog.v(TAG,
                         "Delivering result to activity " + r + " : " + ri);
                 r.activity.dispatchActivityResult(ri.mResultWho,
-                        ri.mRequestCode, ri.mResultCode, ri.mData);
+                        ri.mRequestCode, ri.mResultCode, ri.mData, reason);
             } catch (Exception e) {
                 if (!mInstrumentation.onException(r.activity, e)) {
                     throw new RuntimeException(
@@ -4324,7 +4324,7 @@ public final class ActivityThread extends ClientTransactionHandler {
     }
 
     @Override
-    public void handleSendResult(IBinder token, List<ResultInfo> results) {
+    public void handleSendResult(IBinder token, List<ResultInfo> results, String reason) {
         ActivityClientRecord r = mActivities.get(token);
         if (DEBUG_RESULTS) Slog.v(TAG, "Handling send result to " + r);
         if (r != null) {
@@ -4359,9 +4359,9 @@ public final class ActivityThread extends ClientTransactionHandler {
                 }
             }
             checkAndBlockForNetworkAccess();
-            deliverResults(r, results);
+            deliverResults(r, results, reason);
             if (resumed) {
-                r.activity.performResume(false, "handleSendResult");
+                r.activity.performResume(false, reason);
                 r.activity.mTemporaryPause = false;
             }
         }

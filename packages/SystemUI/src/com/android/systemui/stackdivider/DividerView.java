@@ -378,6 +378,23 @@ public class DividerView extends FrameLayout implements OnTouchListener,
         return mWindowManagerProxy;
     }
 
+    public Rect getNonMinimizedSplitScreenSecondaryBounds() {
+        calculateBoundsForPosition(mSnapTargetBeforeMinimized.position,
+                DockedDividerUtils.invertDockSide(mDockSide), mOtherTaskRect);
+        switch (mDockSide) {
+            case WindowManager.DOCKED_LEFT:
+                mOtherTaskRect.right -= mStableInsets.right;
+                break;
+            case WindowManager.DOCKED_RIGHT:
+                mOtherTaskRect.left -= mStableInsets.left;
+                break;
+            case WindowManager.DOCKED_TOP:
+                mOtherTaskRect.bottom -= mStableInsets.bottom;
+                break;
+        }
+        return mOtherTaskRect;
+    }
+
     public boolean startDragging(boolean animate, boolean touching) {
         cancelFlingAnimation();
         if (touching) {

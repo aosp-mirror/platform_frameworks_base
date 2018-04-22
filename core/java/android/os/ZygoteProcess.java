@@ -475,11 +475,14 @@ public class ZygoteProcess {
      * @param exemptions List of hidden API exemption prefixes. Any matching members are treated as
      *        whitelisted/public APIs (i.e. allowed, no logging of usage).
      */
-    public void setApiBlacklistExemptions(List<String> exemptions) {
+    public boolean setApiBlacklistExemptions(List<String> exemptions) {
         synchronized (mLock) {
             mApiBlacklistExemptions = exemptions;
-            maybeSetApiBlacklistExemptions(primaryZygoteState, true);
-            maybeSetApiBlacklistExemptions(secondaryZygoteState, true);
+            boolean ok = maybeSetApiBlacklistExemptions(primaryZygoteState, true);
+            if (ok) {
+                ok = maybeSetApiBlacklistExemptions(secondaryZygoteState, true);
+            }
+            return ok;
         }
     }
 
@@ -499,12 +502,13 @@ public class ZygoteProcess {
     }
 
     @GuardedBy("mLock")
-    private void maybeSetApiBlacklistExemptions(ZygoteState state, boolean sendIfEmpty) {
+    private boolean maybeSetApiBlacklistExemptions(ZygoteState state, boolean sendIfEmpty) {
         if (state == null || state.isClosed()) {
-            return;
+            Slog.e(LOG_TAG, "Can't set API blacklist exemptions: no zygote connection");
+            return false;
         }
         if (!sendIfEmpty && mApiBlacklistExemptions.isEmpty()) {
-            return;
+            return true;
         }
         try {
             state.writer.write(Integer.toString(mApiBlacklistExemptions.size() + 1));
@@ -520,8 +524,11 @@ public class ZygoteProcess {
             if (status != 0) {
                 Slog.e(LOG_TAG, "Failed to set API blacklist exemptions; status " + status);
             }
+            return true;
         } catch (IOException ioe) {
             Slog.e(LOG_TAG, "Failed to set API blacklist exemptions", ioe);
+            mApiBlacklistExemptions = Collections.emptyList();
+            return false;
         }
     }
 

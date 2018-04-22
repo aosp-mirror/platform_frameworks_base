@@ -1743,6 +1743,11 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
         return getDisplay().isTopStack(this);
     }
 
+    boolean isTopActivityVisible() {
+        final ActivityRecord topActivity = getTopActivity();
+        return topActivity != null && topActivity.visible;
+    }
+
     /**
      * Returns true if the stack should be visible.
      *

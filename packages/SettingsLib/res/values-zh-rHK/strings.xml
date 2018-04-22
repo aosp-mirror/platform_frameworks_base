@@ -20,7 +20,7 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="wifi_fail_to_scan" msgid="1265540342578081461">"無法掃描網絡"</string>
+    <string name="wifi_fail_to_scan" msgid="1265540342578081461">"無法掃瞄網絡"</string>
     <string name="wifi_security_none" msgid="7985461072596594400">"無"</string>
     <string name="wifi_remembered" msgid="4955746899347821096">"已儲存"</string>
     <string name="wifi_disabled_generic" msgid="4259794910584943386">"已停用"</string>
@@ -448,7 +448,7 @@
     <string name="zen_alarm_warning" msgid="6236690803924413088">"您不會聽到下一個<xliff:g id="WHEN">%1$s</xliff:g>的鬧鐘響鬧"</string>
     <string name="alarm_template" msgid="4996153414057676512">"時間：<xliff:g id="WHEN">%1$s</xliff:g>"</string>
     <string name="alarm_template_far" msgid="3779172822607461675">"時間：<xliff:g id="WHEN">%1$s</xliff:g>"</string>
-    <string name="zen_mode_duration_settings_title" msgid="229547412251222757">"長度"</string>
+    <string name="zen_mode_duration_settings_title" msgid="229547412251222757">"持續時間"</string>
     <string name="zen_mode_duration_always_prompt_title" msgid="6478923750878945501">"每次都詢問"</string>
     <string name="time_unit_just_now" msgid="6363336622778342422">"剛剛"</string>
 </resources>

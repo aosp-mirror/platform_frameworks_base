@@ -115,7 +115,7 @@ public class StorageManager {
     /** {@hide} */
     public static final String PROP_HAS_RESERVED = "vold.has_reserved";
     /** {@hide} */
-    public static final String PROP_FORCE_ADOPTABLE = "persist.fw.force_adoptable";
+    public static final String PROP_ADOPTABLE = "persist.sys.adoptable";
     /** {@hide} */
     public static final String PROP_EMULATE_FBE = "persist.sys.emulate_fbe";
     /** {@hide} */
@@ -197,15 +197,17 @@ public class StorageManager {
     public static final String EXTRA_REQUESTED_BYTES = "android.os.storage.extra.REQUESTED_BYTES";
 
     /** {@hide} */
-    public static final int DEBUG_FORCE_ADOPTABLE = 1 << 0;
+    public static final int DEBUG_ADOPTABLE_FORCE_ON = 1 << 0;
     /** {@hide} */
-    public static final int DEBUG_EMULATE_FBE = 1 << 1;
+    public static final int DEBUG_ADOPTABLE_FORCE_OFF = 1 << 1;
     /** {@hide} */
-    public static final int DEBUG_SDCARDFS_FORCE_ON = 1 << 2;
+    public static final int DEBUG_EMULATE_FBE = 1 << 2;
     /** {@hide} */
-    public static final int DEBUG_SDCARDFS_FORCE_OFF = 1 << 3;
+    public static final int DEBUG_SDCARDFS_FORCE_ON = 1 << 3;
     /** {@hide} */
-    public static final int DEBUG_VIRTUAL_DISK = 1 << 4;
+    public static final int DEBUG_SDCARDFS_FORCE_OFF = 1 << 4;
+    /** {@hide} */
+    public static final int DEBUG_VIRTUAL_DISK = 1 << 5;
 
     // NOTE: keep in sync with installd
     /** {@hide} */

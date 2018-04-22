@@ -784,6 +784,12 @@ public class StatusBar extends SystemUI implements DemoMode,
         // into fragments, but the rest here, it leaves some awkward lifecycle and whatnot.
         mNotificationPanel = mStatusBarWindow.findViewById(R.id.notification_panel);
         mStackScroller = mStatusBarWindow.findViewById(R.id.notification_stack_scroller);
+        mZenController.addCallback(new ZenModeController.Callback() {
+            @Override
+            public void onZenChanged(int zen) {
+                updateEmptyShadeView();
+            }
+        });
         mActivityLaunchAnimator = new ActivityLaunchAnimator(mStatusBarWindow,
                 this,
                 mNotificationPanel,
@@ -4683,7 +4689,8 @@ public class StatusBar extends SystemUI implements DemoMode,
             // tapping on a notification, editing QS or being dismissed by
             // FLAG_DISMISS_KEYGUARD_ACTIVITY.
             ScrimState state = mIsOccluded || mNotificationPanel.needsScrimming()
-                    || mStatusBarKeyguardViewManager.willDismissWithAction() ?
+                    || mStatusBarKeyguardViewManager.willDismissWithAction()
+                    || mStatusBarKeyguardViewManager.isFullscreenBouncer() ?
                     ScrimState.BOUNCER_SCRIMMED : ScrimState.BOUNCER;
             mScrimController.transitionTo(state);
         } else if (mLaunchCameraOnScreenTurningOn || isInLaunchTransition()) {

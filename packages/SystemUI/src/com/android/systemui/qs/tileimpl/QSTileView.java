@@ -107,15 +107,6 @@ public class QSTileView extends QSTileBaseView {
     }
 
     @Override
-    public void setExpansion(float expansion) {
-        // Start the marquee when fully expanded and stop when fully collapsed. Leave as is for
-        // other expansion ratios since there is no way way to pause the marquee.
-        boolean selected = expansion == 1f ? true : expansion == 0f ? false : mLabel.isSelected();
-        mLabel.setSelected(selected);
-        mSecondLine.setSelected(selected);
-    }
-
-    @Override
     protected void handleStateChanged(QSTile.State state) {
         super.handleStateChanged(state);
         if (!Objects.equals(mLabel.getText(), state.label) || mState != state.state) {

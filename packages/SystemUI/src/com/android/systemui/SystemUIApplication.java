@@ -69,8 +69,8 @@ public class SystemUIApplication extends Application implements SysUiServiceProv
         SystemUIFactory.createFromConfig(this);
 
         if (Process.myUserHandle().equals(UserHandle.SYSTEM)) {
-            IntentFilter filter = new IntentFilter(Intent.ACTION_BOOT_COMPLETED);
-            filter.setPriority(IntentFilter.SYSTEM_HIGH_PRIORITY);
+            IntentFilter bootCompletedFilter = new IntentFilter(Intent.ACTION_BOOT_COMPLETED);
+            bootCompletedFilter.setPriority(IntentFilter.SYSTEM_HIGH_PRIORITY);
             registerReceiver(new BroadcastReceiver() {
                 @Override
                 public void onReceive(Context context, Intent intent) {
@@ -86,11 +86,21 @@ public class SystemUIApplication extends Application implements SysUiServiceProv
                         }
                     }
 
-                    IntentFilter localeChangedFilter = new IntentFilter(
-                            Intent.ACTION_LOCALE_CHANGED);
-                    registerReceiver(mLocaleChangeReceiver, localeChangedFilter);
+
                 }
-            }, filter);
+            }, bootCompletedFilter);
+
+            IntentFilter localeChangedFilter = new IntentFilter(Intent.ACTION_LOCALE_CHANGED);
+            registerReceiver(new BroadcastReceiver() {
+                @Override
+                public void onReceive(Context context, Intent intent) {
+                    if (Intent.ACTION_LOCALE_CHANGED.equals(intent.getAction())) {
+                        if (!mBootCompleted) return;
+                        // Update names of SystemUi notification channels
+                        NotificationChannels.createAll(context);
+                    }
+                }
+            }, localeChangedFilter);
         } else {
             // We don't need to startServices for sub-process that is doing some tasks.
             // (screenshots, sweetsweetdesserts or tuner ..)
@@ -239,14 +249,4 @@ public class SystemUIApplication extends Application implements SysUiServiceProv
     public SystemUI[] getServices() {
         return mServices;
     }
-
-    private final BroadcastReceiver mLocaleChangeReceiver = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            if (Intent.ACTION_LOCALE_CHANGED.equals(intent.getAction())) {
-                // Update names of SystemUi notification channels
-                NotificationChannels.createAll(context);
-            }
-        }
-    };
 }

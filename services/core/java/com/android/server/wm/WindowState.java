@@ -1088,16 +1088,14 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
                             :  Math.max(mFrame.bottom - mStableFrame.bottom, 0));
         }
 
+        mDisplayCutout = displayCutout.calculateRelativeTo(mFrame);
+
         // Offset the actual frame by the amount layout frame is off.
         mFrame.offset(-layoutXDiff, -layoutYDiff);
         mCompatFrame.offset(-layoutXDiff, -layoutYDiff);
         mContentFrame.offset(-layoutXDiff, -layoutYDiff);
         mVisibleFrame.offset(-layoutXDiff, -layoutYDiff);
         mStableFrame.offset(-layoutXDiff, -layoutYDiff);
-
-        // TODO(roosa): Figure out what frame exactly this needs to be calculated with.
-        mDisplayCutout = displayCutout.calculateRelativeTo(mFrame);
-
 
         mCompatFrame.set(mFrame);
         if (mEnforceSizeCompat) {
@@ -2407,6 +2405,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         @Override
         public void binderDied() {
             try {
+                boolean resetSplitScreenResizing = false;
                 synchronized(mService.mWindowMap) {
                     final WindowState win = mService.windowForClientLocked(mSession, mClient, false);
                     Slog.i(TAG, "WIN DEATH: " + win);
@@ -2426,11 +2425,21 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
                             if (stack != null) {
                                 stack.resetDockedStackToMiddle();
                             }
-                            mService.setDockedStackResizing(false);
+                            resetSplitScreenResizing = true;
                         }
                     } else if (mHasSurface) {
                         Slog.e(TAG, "!!! LEAK !!! Window removed but surface still valid.");
                         WindowState.this.removeIfPossible();
+                    }
+                }
+                if (resetSplitScreenResizing) {
+                    try {
+                        // Note: this calls into ActivityManager, so we must *not* hold the window
+                        // manager lock while calling this.
+                        mService.mActivityManager.setSplitScreenResizing(false);
+                    } catch (RemoteException e) {
+                        // Local call, shouldn't return RemoteException.
+                        throw e.rethrowAsRuntimeException();
                     }
                 }
             } catch (IllegalArgumentException ex) {
@@ -4708,16 +4717,38 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         outPoint.offset(-mAttrs.surfaceInsets.left, -mAttrs.surfaceInsets.top);
     }
 
+    boolean needsRelativeLayeringToIme() {
+        // We only use the relative layering mode in split screen, as part of elevating the IME
+        // and windows above it's target above the docked divider.
+        if (!inSplitScreenWindowingMode()) {
+            return false;
+        }
+
+        if (isChildWindow()) {
+            // If we are a child of the input method target we need this promotion.
+            if (getParentWindow().isInputMethodTarget()) {
+                return true;
+            }
+        } else if (mAppToken != null) {
+            // Likewise if we share a token with the Input method target and are ordered
+            // above it but not necessarily a child (e.g. a Dialog) then we also need
+            // this promotion.
+            final WindowState imeTarget = mService.mInputMethodTarget;
+            boolean inTokenWithAndAboveImeTarget = imeTarget != null && imeTarget != this
+                    && imeTarget.mToken == mToken && imeTarget.compareTo(this) <= 0;
+            return inTokenWithAndAboveImeTarget;
+        }
+        return false;
+    }
+
     @Override
     void assignLayer(Transaction t, int layer) {
         // See comment in assignRelativeLayerForImeTargetChild
-        if (!isChildWindow()
-                || (!getParentWindow().isInputMethodTarget())
-                || !inSplitScreenWindowingMode()) {
-            super.assignLayer(t, layer);
+        if (needsRelativeLayeringToIme()) {
+            getDisplayContent().assignRelativeLayerForImeTargetChild(t, this);
             return;
         }
-        getDisplayContent().assignRelativeLayerForImeTargetChild(t, this);
+        super.assignLayer(t, layer);
     }
 
     @Override

@@ -95,6 +95,8 @@
     <string name="accessibility_unlock_button" msgid="128158454631118828">"ਅਣਲਾਕ ਕਰੋ"</string>
     <string name="accessibility_waiting_for_fingerprint" msgid="4808860050517462885">"ਫਿੰਗਰਪ੍ਰਿੰਟ ਦੀ ਉਡੀਕ ਹੋ ਰਹੀ ਹੈ"</string>
     <string name="accessibility_unlock_without_fingerprint" msgid="7541705575183694446">"ਆਪਣਾ ਫਿੰਗਰਪ੍ਰਿੰਟ ਵਰਤੇ ਬਿਨਾਂ ਅਣਲਾਕ ਕਰੋ"</string>
+    <!-- no translation found for accessibility_send_smart_reply (7766727839703044493) -->
+    <skip />
     <string name="unlock_label" msgid="8779712358041029439">"ਅਣਲਾਕ ਕਰੋ"</string>
     <string name="phone_label" msgid="2320074140205331708">"ਫ਼ੋਨ ਖੋਲ੍ਹੋ"</string>
     <string name="voice_assist_label" msgid="3956854378310019854">"ਅਵਾਜ਼ੀ ਸਹਾਇਕ ਖੋਲ੍ਹੋ"</string>
@@ -161,10 +163,8 @@
     <string name="accessibility_no_sim" msgid="8274017118472455155">"ਕੋਈ SIM ਨਹੀਂ।"</string>
     <string name="accessibility_cell_data" msgid="5326139158682385073">"ਮੋਬਾਈਲ ਡਾਟਾ"</string>
     <string name="accessibility_cell_data_on" msgid="5927098403452994422">"ਮੋਬਾਈਲ ਡਾਟਾ ਚਾਲੂ"</string>
-    <!-- no translation found for cell_data_off_content_description (4356113230238585072) -->
-    <skip />
-    <!-- no translation found for cell_data_off (1051264981229902873) -->
-    <skip />
+    <string name="cell_data_off_content_description" msgid="4356113230238585072">"ਮੋਬਾਈਲ ਡਾਟਾ ਬੰਦ"</string>
+    <string name="cell_data_off" msgid="1051264981229902873">"ਬੰਦ"</string>
     <string name="accessibility_bluetooth_tether" msgid="4102784498140271969">"ਬਲੂਟੁੱਥ ਟੈਦਰਿੰਗ।"</string>
     <string name="accessibility_airplane_mode" msgid="834748999790763092">"ਏਅਰਪਲੇਨ ਮੋਡ।"</string>
     <string name="accessibility_vpn_on" msgid="5993385083262856059">"VPN ਚਾਲੂ ਹੈ।"</string>
@@ -208,11 +208,11 @@
     <string name="accessibility_quick_settings_airplane_on" msgid="6406141469157599296">"ਏਅਰਪਲੇਨ ਮੋਡ ਚਾਲੂ।"</string>
     <string name="accessibility_quick_settings_airplane_changed_off" msgid="66846307818850664">"ਏਅਰਪਲੇਨ ਮੋਡ ਬੰਦ ਹੈ।"</string>
     <string name="accessibility_quick_settings_airplane_changed_on" msgid="8983005603505087728">"ਏਅਰਪਲੇਨ ਮੋਡ ਚਾਲੂ ਹੋਇਆ"</string>
-    <string name="accessibility_quick_settings_dnd_priority_on" msgid="5836205286254617194">"\'ਪਰੇਸ਼ਾਨ ਨਾ ਕਰੋ\' ਚਾਲੂ ਹੈ।"</string>
-    <string name="accessibility_quick_settings_dnd_none_on" msgid="6882582132662613537">"ਪਰੇਸ਼ਾਨ ਨਾ ਕਰੋ ਚਾਲੂ ਕਰੋ, ਪੂਰਾ ਸ਼ਾਂਤ।"</string>
-    <string name="accessibility_quick_settings_dnd_alarms_on" msgid="9152834845587554157">"ਪਰੇਸ਼ਾਨ ਨਾ ਕਰੋ ਚਾਲੂ, ਕੇਵਲ ਅਲਾਰਮ।"</string>
+    <!-- no translation found for accessibility_quick_settings_dnd_none_on (2960643943620637020) -->
+    <skip />
+    <!-- no translation found for accessibility_quick_settings_dnd_alarms_on (3357131899365865386) -->
+    <skip />
     <string name="accessibility_quick_settings_dnd" msgid="6607873236717185815">"ਪਰੇਸ਼ਾਨ ਨਾ ਕਰੋ।"</string>
-    <string name="accessibility_quick_settings_dnd_off" msgid="2371832603753738581">"ਪਰੇਸ਼ਾਨ ਨਾ ਕਰੋ ਬੰਦ।"</string>
     <string name="accessibility_quick_settings_dnd_changed_off" msgid="898107593453022935">"ਪਰੇਸ਼ਾਨ ਨਾ ਕਰੋ ਬੰਦ ਕੀਤਾ।"</string>
     <string name="accessibility_quick_settings_dnd_changed_on" msgid="4483780856613561039">"ਪਰੇਸ਼ਾਨ ਨਾ ਕਰੋ ਚਾਲੂ ਕੀਤਾ।"</string>
     <string name="accessibility_quick_settings_bluetooth" msgid="6341675755803320038">"ਬਲੂਟੁੱਥ।"</string>
@@ -363,8 +363,7 @@
     <string name="recents_stack_action_button_label" msgid="6593727103310426253">"ਸਭ ਕਲੀਅਰ ਕਰੋ"</string>
     <string name="recents_drag_hint_message" msgid="2649739267073203985">"ਸਪਲਿਟ ਸਕ੍ਰੀਨ ਦੀ ਵਰਤੋਂ ਕਰਨ ਲਈ ਇੱਥੇ ਘਸੀਟੋ"</string>
     <string name="recents_swipe_up_onboarding" msgid="3824607135920170001">"ਐਪਾਂ ਵਿਚਾਲੇ ਅਦਲਾ-ਬਦਲੀ ਕਰਨ ਲਈ ਉੱਪਰ ਵੱਲ ਸਵਾਈਪ ਕਰੋ"</string>
-    <!-- no translation found for recents_quick_scrub_onboarding (2778062804333285789) -->
-    <skip />
+    <string name="recents_quick_scrub_onboarding" msgid="2778062804333285789">"ਐਪਾਂ ਵਿਚਾਲੇ ਤੇਜ਼ੀ ਨਾਲ ਅਦਲਾ-ਬਦਲੀ ਕਰਨ ਲਈ ਸੱਜੇ ਪਾਸੇ ਵੱਲ ਘਸੀਟੋ"</string>
     <string name="recents_multistack_add_stack_dialog_split_horizontal" msgid="8848514474543427332">"ਹੌਰੀਜ਼ੌਂਟਲ ਸਪਲਿਟ"</string>
     <string name="recents_multistack_add_stack_dialog_split_vertical" msgid="9075292233696180813">"ਵਰਟੀਕਲ ਸਪਲਿਟ"</string>
     <string name="recents_multistack_add_stack_dialog_split_custom" msgid="4177837597513701943">"ਵਿਉਂਂਤੀ ਸਪਲਿਟ"</string>
@@ -621,7 +620,8 @@
       <item quantity="other"><xliff:g id="PERFORMING_ACTIVITY_1">%1$s</xliff:g> ਅਤੇ <xliff:g id="PERFORMING_ACTIVITY_2">%2$s</xliff:g> ਦੀ ਵਰਤੋਂ ਕਰ ਰਹੀ</item>
     </plurals>
     <string name="notification_appops_settings" msgid="1028328314935908050">"ਸੈਟਿੰਗਾਂ"</string>
-    <string name="notification_appops_ok" msgid="602562195588819631">"ਠੀਕ ਹੈ"</string>
+    <!-- no translation found for notification_appops_ok (1156966426011011434) -->
+    <skip />
     <string name="notification_channel_controls_opened_accessibility" msgid="6553950422055908113">"<xliff:g id="APP_NAME">%1$s</xliff:g> ਲਈ ਸੂਚਨਾ ਕੰਟਰੋਲਾਂ ਨੂੰ ਖੋਲ੍ਹਿਆ ਗਿਆ"</string>
     <string name="notification_channel_controls_closed_accessibility" msgid="7521619812603693144">"<xliff:g id="APP_NAME">%1$s</xliff:g> ਲਈ ਸੂਚਨਾ ਕੰਟਰੋਲਾਂ ਨੂੰ ਬੰਦ ਕੀਤਾ ਗਿਆ"</string>
     <string name="notification_channel_switch_accessibility" msgid="3420796005601900717">"ਇਸ ਚੈਨਲ ਤੋਂ ਸੂਚਨਾਵਾਂ ਨੂੰ ਇਜਾਜ਼ਤ ਦਿਓ"</string>

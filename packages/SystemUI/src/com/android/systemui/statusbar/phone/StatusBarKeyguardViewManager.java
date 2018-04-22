@@ -165,14 +165,15 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
         // • The user quickly taps on the display and we show "swipe up to unlock."
         // • Keyguard will be dismissed by an action. a.k.a: FLAG_DISMISS_KEYGUARD_ACTIVITY
         // • Full-screen user switcher is displayed.
-        if (mOccluded || mNotificationPanelView.isUnlockHintRunning()
-                || mBouncer.willDismissWithAction()
+        if (mNotificationPanelView.isUnlockHintRunning()) {
+            mBouncer.setExpansion(1);
+        } else if (mOccluded || mBouncer.willDismissWithAction()
                 || mStatusBar.isFullScreenUserSwitcherState()) {
             mBouncer.setExpansion(0);
-        } else if (mShowing && mStatusBar.isKeyguardCurrentlySecure() && !mDozing) {
+        } else if (mShowing && !mDozing) {
             mBouncer.setExpansion(expansion);
-            if (expansion != 1 && tracking && !mBouncer.isShowing()
-                    && !mBouncer.isAnimatingAway()) {
+            if (expansion != 1 && tracking && mStatusBar.isKeyguardCurrentlySecure()
+                    && !mBouncer.isShowing() && !mBouncer.isAnimatingAway()) {
                 mBouncer.show(false /* resetSecuritySelection */, false /* animated */);
             }
         }
@@ -540,6 +541,10 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
 
     public boolean isBouncerShowing() {
         return mBouncer.isShowing();
+    }
+
+    public boolean isFullscreenBouncer() {
+        return mBouncer.isFullscreenBouncer();
     }
 
     private long getNavBarShowDelay() {

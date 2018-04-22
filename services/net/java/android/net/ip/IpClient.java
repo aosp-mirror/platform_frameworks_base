@@ -16,6 +16,7 @@
 
 package android.net.ip;
 
+import com.android.internal.util.HexDump;
 import com.android.internal.util.MessageUtils;
 import com.android.internal.util.WakeupMessage;
 
@@ -142,6 +143,12 @@ public class IpClient extends StateMachine {
         // Install an APF program to filter incoming packets.
         public void installPacketFilter(byte[] filter) {}
 
+        // Asynchronously read back the APF program & data buffer from the wifi driver.
+        // Due to Wifi HAL limitations, the current implementation only supports dumping the entire
+        // buffer. In response to this request, the driver returns the data buffer asynchronously
+        // by sending an IpClient#EVENT_READ_PACKET_FILTER_COMPLETE message.
+        public void startReadPacketFilter() {}
+
         // If multicast filtering cannot be accomplished with APF, this function will be called to
         // actuate multicast filtering using another means.
         public void setFallbackMulticastFilter(boolean enabled) {}
@@ -246,6 +253,11 @@ public class IpClient extends StateMachine {
         public void installPacketFilter(byte[] filter) {
             mCallback.installPacketFilter(filter);
             log("installPacketFilter(byte[" + filter.length + "])");
+        }
+        @Override
+        public void startReadPacketFilter() {
+            mCallback.startReadPacketFilter();
+            log("startReadPacketFilter()");
         }
         @Override
         public void setFallbackMulticastFilter(boolean enabled) {
@@ -559,6 +571,7 @@ public class IpClient extends StateMachine {
     private static final int CMD_SET_MULTICAST_FILTER             = 9;
     private static final int EVENT_PROVISIONING_TIMEOUT           = 10;
     private static final int EVENT_DHCPACTION_TIMEOUT             = 11;
+    private static final int EVENT_READ_PACKET_FILTER_COMPLETE    = 12;
 
     private static final int MAX_LOG_RECORDS = 500;
     private static final int MAX_PACKET_RECORDS = 100;
@@ -611,6 +624,7 @@ public class IpClient extends StateMachine {
     private ApfFilter mApfFilter;
     private boolean mMulticastFiltering;
     private long mStartTimeMillis;
+    private byte[] mApfDataSnapshot;
 
     public static class Dependencies {
         public INetworkManagementService getNMS() {
@@ -823,6 +837,10 @@ public class IpClient extends StateMachine {
         sendMessage(EVENT_PRE_DHCP_ACTION_COMPLETE);
     }
 
+    public void readPacketFilterComplete(byte[] data) {
+        sendMessage(EVENT_READ_PACKET_FILTER_COMPLETE, data);
+    }
+
     /**
      * Set the TCP buffer sizes to use.
      *
@@ -863,6 +881,7 @@ public class IpClient extends StateMachine {
         final ProvisioningConfiguration provisioningConfig = mConfiguration;
         final ApfCapabilities apfCapabilities = (provisioningConfig != null)
                 ? provisioningConfig.mApfCapabilities : null;
+        final byte[] apfDataSnapshot = mApfDataSnapshot;
 
         IndentingPrintWriter pw = new IndentingPrintWriter(writer, "  ");
         pw.println(mTag + " APF dump:");
@@ -878,6 +897,14 @@ public class IpClient extends StateMachine {
             } else {
                 pw.println("ApfFilter not yet started, APF capabilities: " + apfCapabilities);
             }
+        }
+        pw.decreaseIndent();
+        pw.println(mTag + " latest APF data snapshot: ");
+        pw.increaseIndent();
+        if (apfDataSnapshot != null) {
+            pw.println(HexDump.dumpHexString(apfDataSnapshot));
+        } else {
+            pw.println("No last snapshot.");
         }
         pw.decreaseIndent();
 
@@ -1673,6 +1700,11 @@ public class IpClient extends StateMachine {
                     } else {
                         mCallback.setFallbackMulticastFilter(mMulticastFiltering);
                     }
+                    break;
+                }
+
+                case EVENT_READ_PACKET_FILTER_COMPLETE: {
+                    mApfDataSnapshot = (byte[]) msg.obj;
                     break;
                 }
 

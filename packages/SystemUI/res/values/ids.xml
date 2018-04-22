@@ -24,6 +24,8 @@
     <item type="id" name="scale_y_animator_tag"/>
     <item type="id" name="top_inset_animator_tag"/>
     <item type="id" name="height_animator_tag"/>
+    <item type="id" name="x_animator_tag"/>
+    <item type="id" name="y_animator_tag"/>
     <item type="id" name="shadow_alpha_animator_tag"/>
     <item type="id" name="translation_x_animator_end_value_tag"/>
     <item type="id" name="translation_y_animator_end_value_tag"/>
@@ -34,6 +36,8 @@
     <item type="id" name="top_inset_animator_end_value_tag"/>
     <item type="id" name="height_animator_end_value_tag"/>
     <item type="id" name="shadow_alpha_animator_end_value_tag"/>
+    <item type="id" name="x_animator_tag_end_value"/>
+    <item type="id" name="y_animator_tag_end_value"/>
     <item type="id" name="translation_x_animator_start_value_tag"/>
     <item type="id" name="translation_y_animator_start_value_tag"/>
     <item type="id" name="translation_z_animator_start_value_tag"/>
@@ -43,6 +47,8 @@
     <item type="id" name="top_inset_animator_start_value_tag"/>
     <item type="id" name="height_animator_start_value_tag"/>
     <item type="id" name="shadow_alpha_animator_start_value_tag"/>
+    <item type="id" name="x_animator_tag_start_value"/>
+    <item type="id" name="y_animator_tag_start_value"/>
     <item type="id" name="doze_saved_filter_tag"/>
     <item type="id" name="qs_icon_tag"/>
     <item type="id" name="qs_slash_tag"/>

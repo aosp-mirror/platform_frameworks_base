@@ -301,7 +301,7 @@
     <string name="permgroupdesc_phone" msgid="6234224354060641055">"uskutečňování a spravování telefonních hovorů"</string>
     <string name="permgrouprequest_phone" msgid="9166979577750581037">"Povolit aplikaci &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; uskutečňovat a spravovat telefonní hovory?"</string>
     <string name="permgrouplab_sensors" msgid="416037179223226722">"Tělesné senzory"</string>
-    <string name="permgroupdesc_sensors" msgid="7147968539346634043">"přístup k údajům snímačů vašich životních funkcí"</string>
+    <string name="permgroupdesc_sensors" msgid="7147968539346634043">"přístup k datům ze snímačů vašich životních funkcí"</string>
     <string name="permgrouprequest_sensors" msgid="6349806962814556786">"Povolit aplikaci &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; přístup k údajům ze snímačů vašich životních funkcí?"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"Načítat obsah oken"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"Může prozkoumávat obsah oken, se kterými pracujete."</string>
@@ -1804,7 +1804,8 @@
     <string name="zen_mode_default_weekends_name" msgid="2786495801019345244">"Víkend"</string>
     <string name="zen_mode_default_events_name" msgid="8158334939013085363">"Událost"</string>
     <string name="zen_mode_default_every_night_name" msgid="3012363838882944175">"Spánek"</string>
-    <string name="muted_by" msgid="6147073845094180001">"Ignorováno stranou <xliff:g id="THIRD_PARTY">%1$s</xliff:g>"</string>
+    <!-- no translation found for muted_by (5942954724562097128) -->
+    <skip />
     <string name="system_error_wipe_data" msgid="6608165524785354962">"V zařízení došlo k internímu problému. Dokud neprovedete obnovení továrních dat, může být nestabilní."</string>
     <string name="system_error_manufacturer" msgid="8086872414744210668">"V zařízení došlo k internímu problému. Další informace vám sdělí výrobce."</string>
     <string name="stk_cc_ussd_to_dial" msgid="5214333646366591205">"Požadavek USSD byl změněn na běžný hovor"</string>

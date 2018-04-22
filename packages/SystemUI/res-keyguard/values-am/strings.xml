@@ -140,10 +140,7 @@
       <item quantity="other">መሣሪያው ለ<xliff:g id="NUMBER_1">%d</xliff:g> ሰዓቶች አልተከፈተም ነበር። የይለፍ ቃል ያረጋግጡ።</item>
     </plurals>
     <string name="fingerprint_not_recognized" msgid="348813995267914625">"አልታወቀም"</string>
-    <plurals name="kg_password_default_pin_message" formatted="false" msgid="6203676909479972943">
-      <item quantity="one">የሲም ፒን ያስገቡ፣ <xliff:g id="NUMBER_1">%d</xliff:g> ሙከራዎች ይቀረዎታል።</item>
-      <item quantity="other">የሲም ፒን ያስገቡ፣ <xliff:g id="NUMBER_1">%d</xliff:g> ሙከራዎች ይቀረዎታል።</item>
-    </plurals>
+    <!-- no translation found for kg_password_default_pin_message (3739658416797652781) -->
     <plurals name="kg_password_default_puk_message" formatted="false" msgid="8744416410184198352">
       <item quantity="one">ሲም አሁን ተሰናክሏል። ለመቀጠል የPUK ኮድ ያስገቡ። ሲም እስከመጨረሻው መጠቀም የማይቻል ከመሆኑ በፊት <xliff:g id="_NUMBER_1">%d</xliff:g> ሙከራዎች ይቀረዎታል። ዝርዝሮችን ለማግኘት የአገልግሎት አቅራቢን ያነጋግሩ።</item>
       <item quantity="other">ሲም አሁን ተሰናክሏል። ለመቀጠል የPUK ኮድ ያስገቡ። ሲም እስከመጨረሻው መጠቀም የማይቻል ከመሆኑ በፊት <xliff:g id="_NUMBER_1">%d</xliff:g> ሙከራዎች ይቀረዎታል። ዝርዝሮችን ለማግኘት የአገልግሎት አቅራቢን ያነጋግሩ።</item>

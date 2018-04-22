@@ -2282,6 +2282,7 @@ Landroid/view/Choreographer;->mLock:Ljava/lang/Object;
 Landroid/view/Choreographer;->scheduleVsyncLocked()V
 Landroid/view/Choreographer;->USE_VSYNC:Z
 Landroid/view/ContextThemeWrapper;->getThemeResId()I
+Landroid/view/ContextThemeWrapper;->mInflater:Landroid/view/LayoutInflater;
 Landroid/view/ContextThemeWrapper;->mResources:Landroid/content/res/Resources;
 Landroid/view/ContextThemeWrapper;->mTheme:Landroid/content/res/Resources$Theme;
 Landroid/view/ContextThemeWrapper;->mThemeResource:I
@@ -2864,8 +2865,10 @@ Landroid/widget/Switch;->mThumbDrawable:Landroid/graphics/drawable/Drawable;
 Landroid/widget/Switch;->mTrackDrawable:Landroid/graphics/drawable/Drawable;
 Landroid/widget/TabHost$IntentContentStrategy;->getContentView()Landroid/view/View;
 Landroid/widget/TabHost$IntentContentStrategy;->tabClosed()V
+Landroid/widget/TabHost$TabSpec;->mIndicatorStrategy:Landroid/widget/TabHost$IndicatorStrategy;
 Landroid/widget/TabHost;->mTabSpecs:Ljava/util/List;
 Landroid/widget/TabHost$TabSpec;->mContentStrategy:Landroid/widget/TabHost$ContentStrategy;
+Landroid/widget/TabWidget;->mDrawBottomStrips:Z
 Landroid/widget/TabWidget;->mSelectedTab:I
 Landroid/widget/TabWidget;->setTabSelectionListener(Landroid/widget/TabWidget$OnTabSelectionChanged;)V
 Landroid/widget/TextView;->assumeLayout()V
@@ -3450,6 +3453,7 @@ Ljava/lang/ref/FinalizerReference;->remove(Ljava/lang/ref/FinalizerReference;)V
 Ljava/lang/reflect/Executable;->artMethod:J
 Ljava/lang/reflect/Parameter;-><init>(Ljava/lang/String;ILjava/lang/reflect/Executable;I)V
 Ljava/lang/reflect/Proxy;->invoke(Ljava/lang/reflect/Proxy;Ljava/lang/reflect/Method;[Ljava/lang/Object;)Ljava/lang/Object;
+Ljava/lang/ref/Reference;->getReferent()Ljava/lang/Object;
 Ljava/lang/ref/ReferenceQueue;->add(Ljava/lang/ref/Reference;)V
 Ljava/lang/ref/Reference;->referent:Ljava/lang/Object;
 Ljava/lang/Runtime;->loadLibrary(Ljava/lang/String;Ljava/lang/ClassLoader;)V
@@ -3457,7 +3461,9 @@ Ljava/lang/Runtime;->load(Ljava/lang/String;Ljava/lang/ClassLoader;)V
 Ljava/lang/Runtime;->mLibPaths:[Ljava/lang/String;
 Ljava/lang/Runtime;->nativeLoad(Ljava/lang/String;Ljava/lang/ClassLoader;)Ljava/lang/String;
 Ljava/lang/Short;->value:S
+Ljava/lang/String;->getCharsNoCheck(II[CI)V
 Ljava/lang/String;-><init>(II[C)V
+Ljava/lang/System;->arraycopy([CI[CII)V
 Ljava/lang/System;->arraycopy([II[III)V
 Ljava/lang/System;-><init>()V
 Ljava/lang/Thread;->contextClassLoader:Ljava/lang/ClassLoader;
@@ -3489,7 +3495,21 @@ Ljava/lang/Throwable;->suppressedExceptions:Ljava/util/List;
 Ljava/lang/Void;-><init>()V
 Ljava/net/Authenticator;->theAuthenticator:Ljava/net/Authenticator;
 Ljava/net/DatagramSocket;->impl:Ljava/net/DatagramSocketImpl;
+Ljava/net/HttpCookie;->assignors:Ljava/util/Map;
+Ljava/net/HttpCookie;->comment:Ljava/lang/String;
+Ljava/net/HttpCookie;->commentURL:Ljava/lang/String;
+Ljava/net/HttpCookie;->domain:Ljava/lang/String;
+Ljava/net/HttpCookie;->header:Ljava/lang/String;
 Ljava/net/HttpCookie;->httpOnly:Z
+Ljava/net/HttpCookie;->maxAge:J
+Ljava/net/HttpCookie;->name:Ljava/lang/String;
+Ljava/net/HttpCookie;->path:Ljava/lang/String;
+Ljava/net/HttpCookie;->portlist:Ljava/lang/String;
+Ljava/net/HttpCookie;->secure:Z
+Ljava/net/HttpCookie;->toDiscard:Z
+Ljava/net/HttpCookie;->tspecials:Ljava/lang/String;
+Ljava/net/HttpCookie;->value:Ljava/lang/String;
+Ljava/net/HttpCookie;->version:I
 Ljava/net/HttpCookie;->whenCreated:J
 Ljava/net/Inet4Address;-><init>()V
 Ljava/net/Inet6Address;->holder6:Ljava/net/Inet6Address$Inet6AddressHolder;
@@ -3580,6 +3600,7 @@ Ljava/util/PriorityQueue;->modCount:I
 Ljava/util/PriorityQueue;->size:I
 Ljava/util/Random;->seedUniquifier()J
 Ljava/util/regex/Matcher;->appendPos:I
+Ljava/util/UUID;->leastSigBits:J
 Ljava/util/UUID;->mostSigBits:J
 Ljava/util/Vector;->elementData(I)Ljava/lang/Object;
 Ljava/util/zip/Deflater;->buf:[B

@@ -601,7 +601,7 @@
     <string name="policydesc_encryptedStorage" msgid="2637732115325316992">"តម្រូវ​ឲ្យ​ដាក់​លេខ​កូដ​ទិន្នន័យ​កម្មវិធី​បាន​រក្សាទុក។"</string>
     <string name="policylab_disableCamera" msgid="6395301023152297826">"បិទ​ម៉ាស៊ីន​ថត"</string>
     <string name="policydesc_disableCamera" msgid="2306349042834754597">"ការពារ​ការ​ប្រើ​ម៉ាស៊ីន​ថត​ឧបករណ៍​ទាំងអស់។"</string>
-    <string name="policylab_disableKeyguardFeatures" msgid="8552277871075367771">"បិទលក្ខណៈពិសេសចាក់សោអេក្រង់មួយចំនួន"</string>
+    <string name="policylab_disableKeyguardFeatures" msgid="8552277871075367771">"បិទមុខងារចាក់សោអេក្រង់មួយចំនួន"</string>
     <string name="policydesc_disableKeyguardFeatures" msgid="2044755691354158439">"រារាំងការប្រើលក្ខណៈពិសេសនៃការចាក់សោអេក្រង់មួយចំនួន។"</string>
   <string-array name="phoneTypes">
     <item msgid="8901098336658710359">"ផ្ទះ"</item>
@@ -1740,7 +1740,8 @@
     <string name="zen_mode_default_weekends_name" msgid="2786495801019345244">"ចុងសប្ដាហ៍"</string>
     <string name="zen_mode_default_events_name" msgid="8158334939013085363">"ព្រឹត្តិការណ៍"</string>
     <string name="zen_mode_default_every_night_name" msgid="3012363838882944175">"កំពុងដេក"</string>
-    <string name="muted_by" msgid="6147073845094180001">"បាន​បិទ​សំឡេង​ដោយ <xliff:g id="THIRD_PARTY">%1$s</xliff:g>"</string>
+    <!-- no translation found for muted_by (5942954724562097128) -->
+    <skip />
     <string name="system_error_wipe_data" msgid="6608165524785354962">"មានបញ្ហាខាងក្នុងឧបករណ៍របស់អ្នក ហើយវាអ្នកមិនមានស្ថេរភាព រហូតទាល់តែអ្នកកំណត់ដូចដើមវិញទាំងស្រុង។"</string>
     <string name="system_error_manufacturer" msgid="8086872414744210668">"មានបញ្ហាខាងក្នុងឧបករណ៍របស់អ្នក ទំនាក់ទំនងក្រុមហ៊ុនផលិតឧបករណ៍របស់អ្នកសម្រាប់ព័ត៌មានបន្ថែម។"</string>
     <string name="stk_cc_ussd_to_dial" msgid="5214333646366591205">"សំណើ USSD ត្រូវបាន​ប្ដូរ​ទៅ​ការហៅ​ធម្មតា"</string>
@@ -1780,7 +1781,7 @@
     <string name="region_picker_section_all" msgid="8966316787153001779">"តំបន់ទាំងអស់"</string>
     <string name="locale_search_menu" msgid="2560710726687249178">"ស្វែងរក"</string>
     <string name="app_suspended_title" msgid="1919029799438164552">"មិន​អាច​បើកកម្មវិធី​បានទេ"</string>
-    <string name="app_suspended_default_message" msgid="7875306315686531621">"កម្មវិធី <xliff:g id="APP_NAME_0">%1$s</xliff:g> មិន​អាច​ប្រើ​បាន​ទេនៅពេលនេះ។ វា​ស្ថិត​ក្រោម​ការគ្រប់គ្រង <xliff:g id="APP_NAME_1">%2$s</xliff:g> ។"</string>
+    <string name="app_suspended_default_message" msgid="7875306315686531621">"កម្មវិធី <xliff:g id="APP_NAME_0">%1$s</xliff:g> មិន​អាច​ប្រើ​បាន​ទេនៅពេលនេះ។ វា​ស្ថិត​ក្រោម​ការគ្រប់គ្រងរបស់ <xliff:g id="APP_NAME_1">%2$s</xliff:g> ។"</string>
     <string name="app_suspended_more_details" msgid="1131804827776778187">"ស្វែងយល់បន្ថែម"</string>
     <string name="work_mode_off_title" msgid="1118691887588435530">"បើក​កម្រង​ព័ត៌មាន​ការ​ងារ?"</string>
     <string name="work_mode_off_message" msgid="5130856710614337649">"កម្មវិធី​ការងារ ការ​ជូនដំណឹង ទិន្នន័យ និង​មុខងារ​កម្រង​ព័ត៌មាន​ការងារ​ផ្សេង​ទៀត​របស់អ្នក​នឹង​ត្រូវ​បាន​បើក"</string>
@@ -1877,6 +1878,5 @@
     <string name="zen_upgrade_notification_content" msgid="1794994264692424562">"សូមចុច​ដើម្បី​មើល​ថា​​បានទប់ស្កាត់អ្វីខ្លះ។"</string>
     <string name="notification_app_name_system" msgid="4205032194610042794">"ប្រព័ន្ធ"</string>
     <string name="notification_app_name_settings" msgid="7751445616365753381">"ការកំណត់"</string>
-    <!-- no translation found for car_loading_profile (3545132581795684027) -->
-    <skip />
+    <string name="car_loading_profile" msgid="3545132581795684027">"កំពុងផ្ទុក"</string>
 </resources>

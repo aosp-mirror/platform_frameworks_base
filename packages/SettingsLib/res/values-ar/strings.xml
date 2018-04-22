@@ -21,7 +21,7 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="wifi_fail_to_scan" msgid="1265540342578081461">"لا يمكن فحص الشبكات"</string>
-    <string name="wifi_security_none" msgid="7985461072596594400">"لا شيء"</string>
+    <string name="wifi_security_none" msgid="7985461072596594400">"بدون"</string>
     <string name="wifi_remembered" msgid="4955746899347821096">"تم الحفظ"</string>
     <string name="wifi_disabled_generic" msgid="4259794910584943386">"معطلة"</string>
     <string name="wifi_disabled_network_failure" msgid="2364951338436007124">"‏تعذّرت تهيئة عنوان IP"</string>
@@ -138,7 +138,7 @@
     <string name="user_guest" msgid="8475274842845401871">"ضيف"</string>
     <string name="unknown" msgid="1592123443519355854">"غير معروف"</string>
     <string name="running_process_item_user_label" msgid="3129887865552025943">"المستخدم: <xliff:g id="USER_NAME">%1$s</xliff:g>"</string>
-    <string name="launch_defaults_some" msgid="313159469856372621">"تم تعيين بعض الإعدادات الافتراضية"</string>
+    <string name="launch_defaults_some" msgid="313159469856372621">"تم تعيين بعض الإعدادات التلقائية"</string>
     <string name="launch_defaults_none" msgid="4241129108140034876">"لم يتم تعيين إعدادات تلقائية"</string>
     <string name="tts_settings" msgid="8186971894801348327">"إعدادات تحويل النص إلى كلام"</string>
     <string name="tts_settings_title" msgid="1237820681016639683">"تحويل النص إلى كلام"</string>
@@ -157,7 +157,7 @@
     <string name="tts_engine_security_warning" msgid="8786238102020223650">"ربما يمكن لمحرك اصطناع الحديث جمع كل النص التي سيتم نطقه، بما في ذلك البيانات الشخصية مثل كلمات المرور وأرقام بطاقة الائتمان. يتم إحضار ذلك من المحرك <xliff:g id="TTS_PLUGIN_ENGINE_NAME">%s</xliff:g>. هل تريد تمكين استخدام محرك اصطناع الحديث هذا؟"</string>
     <string name="tts_engine_network_required" msgid="1190837151485314743">"تتطلب هذه اللغة اتصال شبكة سليمًا لتحويل النص إلى كلام."</string>
     <string name="tts_default_sample_string" msgid="4040835213373086322">"هذا مثال لتركيب الكلام"</string>
-    <string name="tts_status_title" msgid="7268566550242584413">"حالة اللغة الافتراضية"</string>
+    <string name="tts_status_title" msgid="7268566550242584413">"حالة اللغة التلقائية"</string>
     <string name="tts_status_ok" msgid="1309762510278029765">"<xliff:g id="LOCALE">%1$s</xliff:g> متوافقة تمامًا"</string>
     <string name="tts_status_requires_network" msgid="6042500821503226892">"<xliff:g id="LOCALE">%1$s</xliff:g> تتطلب اتصالاً بالشبكة"</string>
     <string name="tts_status_not_supported" msgid="4491154212762472495">"<xliff:g id="LOCALE">%1$s</xliff:g> غير متوافقة"</string>
@@ -167,7 +167,7 @@
     <string name="tts_engine_preference_section_title" msgid="448294500990971413">"المحرّك المفضّل"</string>
     <string name="tts_general_section_title" msgid="4402572014604490502">"عامة"</string>
     <string name="tts_reset_speech_pitch_title" msgid="5789394019544785915">"إعادة ضبط طبقة صوت الكلام"</string>
-    <string name="tts_reset_speech_pitch_summary" msgid="8700539616245004418">"إعادة ضبط طبقة الصوت التي يتم نطق النص بها على الإعداد الافتراضي."</string>
+    <string name="tts_reset_speech_pitch_summary" msgid="8700539616245004418">"إعادة ضبط طبقة الصوت التي يتم نطق النص بها على الإعداد التلقائي."</string>
   <string-array name="tts_rate_entries">
     <item msgid="6695494874362656215">"بطيء جدًا"</item>
     <item msgid="4795095314303559268">"بطيء"</item>
@@ -236,7 +236,7 @@
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"عرض خيارات شهادة عرض شاشة لاسلكي"</string>
     <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"‏زيادة مستوى تسجيل Wi-Fi، وعرض لكل SSID RSSI في منتقي Wi-Fi"</string>
     <string name="wifi_connected_mac_randomization_summary" msgid="1743059848752201485">"‏اختيار عشوائي لعنوان MAC عند الاتصال بشبكات Wi‑Fi"</string>
-    <string name="wifi_metered_label" msgid="4514924227256839725">"بقياس"</string>
+    <string name="wifi_metered_label" msgid="4514924227256839725">"مُقاسة"</string>
     <string name="wifi_unmetered_label" msgid="6124098729457992931">"بدون قياس"</string>
     <string name="select_logd_size_title" msgid="7433137108348553508">"أحجام ذاكرة التخزين المؤقت للتسجيل"</string>
     <string name="select_logd_size_dialog_title" msgid="1206769310236476760">"حدد أحجامًا أكبر لكل ذاكرة تخزين مؤقت للتسجيل"</string>
@@ -333,7 +333,7 @@
     <string name="local_backup_password_toast_confirmation_mismatch" msgid="7805892532752708288">"كلمة المرور الجديدة وتأكيدها لا يتطابقان"</string>
     <string name="local_backup_password_toast_validation_failure" msgid="5646377234895626531">"تعذّر تعيين كلمة مرور احتياطية"</string>
   <string-array name="color_mode_names">
-    <item msgid="2425514299220523812">"نابض بالحياة (افتراضي)"</item>
+    <item msgid="2425514299220523812">"نابض بالحياة (تلقائي)"</item>
     <item msgid="8446070607501413455">"طبيعي"</item>
     <item msgid="6553408765810699025">"قياسي"</item>
   </string-array>

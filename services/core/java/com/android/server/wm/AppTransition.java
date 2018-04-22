@@ -82,7 +82,6 @@ import android.app.ActivityManager;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.res.Configuration;
-import android.content.res.ResourceId;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
@@ -555,17 +554,18 @@ public class AppTransition implements Dump {
         return null;
     }
 
-    Animation loadAnimationAttr(LayoutParams lp, int animAttr) {
-        int anim = ResourceId.ID_NULL;
+    Animation loadAnimationAttr(LayoutParams lp, int animAttr, int transit) {
+        int anim = 0;
         Context context = mContext;
-        if (ResourceId.isValid(animAttr)) {
+        if (animAttr >= 0) {
             AttributeCache.Entry ent = getCachedAnimations(lp);
             if (ent != null) {
                 context = ent.context;
                 anim = ent.array.getResourceId(animAttr, 0);
             }
         }
-        if (ResourceId.isValid(anim)) {
+        anim = updateToTranslucentAnimIfNeeded(anim, transit);
+        if (anim != 0) {
             return AnimationUtils.loadAnimation(context, anim);
         }
         return null;
@@ -573,7 +573,7 @@ public class AppTransition implements Dump {
 
     Animation loadAnimationRes(LayoutParams lp, int resId) {
         Context context = mContext;
-        if (ResourceId.isValid(resId)) {
+        if (resId >= 0) {
             AttributeCache.Entry ent = getCachedAnimations(lp);
             if (ent != null) {
                 context = ent.context;
@@ -584,19 +584,29 @@ public class AppTransition implements Dump {
     }
 
     private Animation loadAnimationRes(String packageName, int resId) {
-        int anim = ResourceId.ID_NULL;
+        int anim = 0;
         Context context = mContext;
-        if (ResourceId.isValid(resId)) {
+        if (resId >= 0) {
             AttributeCache.Entry ent = getCachedAnimations(packageName, resId);
             if (ent != null) {
                 context = ent.context;
                 anim = resId;
             }
         }
-        if (ResourceId.isValid(anim)) {
+        if (anim != 0) {
             return AnimationUtils.loadAnimation(context, anim);
         }
         return null;
+    }
+
+    private int updateToTranslucentAnimIfNeeded(int anim, int transit) {
+        if (transit == TRANSIT_TRANSLUCENT_ACTIVITY_OPEN && anim == R.anim.activity_open_enter) {
+            return R.anim.activity_translucent_open_enter;
+        }
+        if (transit == TRANSIT_TRANSLUCENT_ACTIVITY_CLOSE && anim == R.anim.activity_close_exit) {
+            return R.anim.activity_translucent_close_exit;
+        }
+        return anim;
     }
 
     /**
@@ -1665,29 +1675,17 @@ public class AppTransition implements Dump {
                     "applyAnimation NEXT_TRANSIT_TYPE_OPEN_CROSS_PROFILE_APPS:"
                             + " anim=" + a + " transit=" + appTransitionToString(transit)
                             + " isEntrance=true" + " Callers=" + Debug.getCallers(3));
-        } else if (transit == TRANSIT_TRANSLUCENT_ACTIVITY_OPEN && enter) {
-            a = loadAnimationRes("android",
-                    com.android.internal.R.anim.activity_translucent_open_enter);
-            Slog.v(TAG,
-                    "applyAnimation TRANSIT_TRANSLUCENT_ACTIVITY_OPEN:"
-                            + " anim=" + a + " transit=" + appTransitionToString(transit)
-                            + " isEntrance=true" + " Callers=" + Debug.getCallers(3));
-        } else if (transit == TRANSIT_TRANSLUCENT_ACTIVITY_CLOSE && !enter) {
-            a = loadAnimationRes("android",
-                    com.android.internal.R.anim.activity_translucent_close_exit);
-            Slog.v(TAG,
-                    "applyAnimation TRANSIT_TRANSLUCENT_ACTIVITY_CLOSE:"
-                            + " anim=" + a + " transit=" + appTransitionToString(transit)
-                            + " isEntrance=false" + " Callers=" + Debug.getCallers(3));
         } else {
             int animAttr = 0;
             switch (transit) {
                 case TRANSIT_ACTIVITY_OPEN:
+                case TRANSIT_TRANSLUCENT_ACTIVITY_OPEN:
                     animAttr = enter
                             ? WindowAnimation_activityOpenEnterAnimation
                             : WindowAnimation_activityOpenExitAnimation;
                     break;
                 case TRANSIT_ACTIVITY_CLOSE:
+                case TRANSIT_TRANSLUCENT_ACTIVITY_CLOSE:
                     animAttr = enter
                             ? WindowAnimation_activityCloseEnterAnimation
                             : WindowAnimation_activityCloseExitAnimation;
@@ -1738,7 +1736,7 @@ public class AppTransition implements Dump {
                             ? WindowAnimation_launchTaskBehindSourceAnimation
                             : WindowAnimation_launchTaskBehindTargetAnimation;
             }
-            a = animAttr != 0 ? loadAnimationAttr(lp, animAttr) : null;
+            a = animAttr != 0 ? loadAnimationAttr(lp, animAttr, transit) : null;
             if (DEBUG_APP_TRANSITIONS || DEBUG_ANIM) Slog.v(TAG,
                     "applyAnimation:"
                     + " anim=" + a

@@ -192,8 +192,8 @@
     <string name="enable_adb" msgid="7982306934419797485">"USB жөндеу"</string>
     <string name="enable_adb_summary" msgid="4881186971746056635">"USB жалғанғандағы жөндеу режимі"</string>
     <string name="clear_adb_keys" msgid="4038889221503122743">"USB жөндеу рұқсаттарынан бас тарту"</string>
-    <string name="bugreport_in_power" msgid="7923901846375587241">"Қате туралы есеп пернелер тіркесімі"</string>
-    <string name="bugreport_in_power_summary" msgid="1778455732762984579">"Қате туралы есеп беруге арналған қуат мәзірінде түймені көрсету"</string>
+    <string name="bugreport_in_power" msgid="7923901846375587241">"Қате туралы хабарлау"</string>
+    <string name="bugreport_in_power_summary" msgid="1778455732762984579">"Қуат мәзірінде қате туралы хабарлауға арналған түймені көрсету"</string>
     <string name="keep_screen_on" msgid="1146389631208760344">"Ояу тұру"</string>
     <string name="keep_screen_on_summary" msgid="2173114350754293009">"Зарядтау кезінде экран ұйықтамайды"</string>
     <string name="bt_hci_snoop_log" msgid="3340699311158865670">"Bluetooth HCI snoop тіркелімін қосу"</string>
@@ -207,19 +207,19 @@
     <string name="mock_location_app_set" msgid="8966420655295102685">"Жалған орын қолданбасы: <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="debug_networking_category" msgid="7044075693643009662">"Желі орнату"</string>
     <string name="wifi_display_certification" msgid="8611569543791307533">"Сымсыз дисплей сертификаты"</string>
-    <string name="wifi_verbose_logging" msgid="4203729756047242344">"Wi‑Fi егжей-тегжейлі журналға тір. қосу"</string>
+    <string name="wifi_verbose_logging" msgid="4203729756047242344">"Wi‑Fi егжей-тегжейлі журналы"</string>
     <string name="wifi_connected_mac_randomization" msgid="3168165236877957767">"Қосылу кезінде MAC мекенжайларын еркін таңдау"</string>
     <string name="mobile_data_always_on" msgid="8774857027458200434">"Мобильдік деректер әрқашан қосулы"</string>
     <string name="tethering_hardware_offload" msgid="7470077827090325814">"Тетерингтің аппараттық жеделдетуі"</string>
-    <string name="bluetooth_show_devices_without_names" msgid="4708446092962060176">"Атаусыз Bluetooth құрылғыларын көрсету"</string>
+    <string name="bluetooth_show_devices_without_names" msgid="4708446092962060176">"Bluetooth құрылғыларын атаусыз көрсету"</string>
     <string name="bluetooth_disable_absolute_volume" msgid="2660673801947898809">"Абсолютті дыбыс деңгейін өшіру"</string>
     <string name="bluetooth_select_avrcp_version_string" msgid="3750059931120293633">"Bluetooth AVRCP нұсқасы"</string>
     <string name="bluetooth_select_avrcp_version_dialog_title" msgid="7277329668298705702">"Bluetooth AVRCP нұсқасын таңдау"</string>
     <string name="bluetooth_select_a2dp_codec_type" msgid="90597356942154882">"Bluetooth аудимазмұн кодегі"</string>
     <string name="bluetooth_select_a2dp_codec_type_dialog_title" msgid="8436224899475822557">"Bluetooth аудиокодегін іске қосу\nТаңдау"</string>
-    <string name="bluetooth_select_a2dp_codec_sample_rate" msgid="4788245703824623062">"Bluetooth аудиомазмұны бойынша үлгі жиілігі"</string>
+    <string name="bluetooth_select_a2dp_codec_sample_rate" msgid="4788245703824623062">"Bluetooth аудиомазмұны бойынша іріктеу жиілігі"</string>
     <string name="bluetooth_select_a2dp_codec_sample_rate_dialog_title" msgid="8010380028880963535">"Bluetooth аудиокодегін іске қосу\nТаңдау: іріктеу жылдамдығы"</string>
-    <string name="bluetooth_select_a2dp_codec_bits_per_sample" msgid="2099645202720164141">"Bluetooth аудиомазмұны бойынша әр үлгіге келетін биттер саны"</string>
+    <string name="bluetooth_select_a2dp_codec_bits_per_sample" msgid="2099645202720164141">"Bluetooth аудиомазмұны бойынша разрядтылық мөлшері"</string>
     <string name="bluetooth_select_a2dp_codec_bits_per_sample_dialog_title" msgid="8063859754619484760">"Bluetooth аудиокодегін іске қосу\nТаңдау: разрядтылық"</string>
     <string name="bluetooth_select_a2dp_codec_channel_mode" msgid="884855779449390540">"Bluetooth аудиомазмұны бойынша арна режимі"</string>
     <string name="bluetooth_select_a2dp_codec_channel_mode_dialog_title" msgid="7234956835280563341">"Bluetooth аудиокодегін іске қосу\nТаңдау: арна режимі"</string>
@@ -233,8 +233,8 @@
     <string name="private_dns_mode_provider" msgid="8354935160639360804">"Жеке DNS провайдерінің хост атауы"</string>
     <string name="private_dns_mode_provider_hostname_hint" msgid="2487492386970928143">"DNS провайдерінің хост атауын енгізіңіз"</string>
     <string name="private_dns_mode_provider_failure" msgid="231837290365031223">"Қосылмады"</string>
-    <string name="wifi_display_certification_summary" msgid="1155182309166746973">"Сымсыз дисплей растау опцияларын көрсету"</string>
-    <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"Wi‑Fi жур. тір. дең. арт., Wi‑Fi желісін таңдағышта әр SSID RSSI бойынша көрсету"</string>
+    <string name="wifi_display_certification_summary" msgid="1155182309166746973">"Сымсыз дисплей сертификаты опцияларын көрсету"</string>
+    <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"Wi‑Fi тіркеу деңгейін арттыру, Wi‑Fi таңдағанда әр SSID RSSI бойынша көрсету"</string>
     <string name="wifi_connected_mac_randomization_summary" msgid="1743059848752201485">"Wi‑Fi желісіне қосылу кезінде MAC мекенжайларын еркін таңдау"</string>
     <string name="wifi_metered_label" msgid="4514924227256839725">"Шектелген"</string>
     <string name="wifi_unmetered_label" msgid="6124098729457992931">"Шектелмеген"</string>
@@ -258,8 +258,8 @@
     <string name="dev_settings_warning_message" msgid="2298337781139097964">"Бұл параметрлер жетілдіру мақсатында ғана қолданылады. Олар құрылғыңыз бен қолданбаларыңыздың бұзылуына немесе әдеттен тыс әрекеттерге себеп болуы мүмкін."</string>
     <string name="verify_apps_over_usb_title" msgid="4177086489869041953">"USB арқылы орнатылған қолданбаларды растау"</string>
     <string name="verify_apps_over_usb_summary" msgid="9164096969924529200">"ADB/ADT арқылы орнатылған қолданбалардың қауіпсіздігін тексеру."</string>
-    <string name="bluetooth_show_devices_without_names_summary" msgid="2351196058115755520">"Атаусыз Bluetooth құрылғылары (тек MAC мекенжайымен) көрсетіледі"</string>
-    <string name="bluetooth_disable_absolute_volume_summary" msgid="6031284410786545957">"Қолайсыз қатты дыбыс деңгейі немесе басқарудың болмауы сияқты қашықтағы құрылғыларда дыбыс деңгейімен мәселелер жағдайында Bluetooth абсолютті дыбыс деңгейі функциясын өшіреді."</string>
+    <string name="bluetooth_show_devices_without_names_summary" msgid="2351196058115755520">"Bluetooth құрылғылары атаусыз (тек MAC мекенжайымен) көрсетіледі"</string>
+    <string name="bluetooth_disable_absolute_volume_summary" msgid="6031284410786545957">"Қолайсыз қатты дыбыс деңгейі немесе басқарудың болмауы сияқты қашықтағы құрылғыларда дыбыс деңгейіне қатысты мәселелер жағдайында Bluetooth абсолютті дыбыс деңгейі функциясын өшіреді."</string>
     <string name="enable_terminal_title" msgid="95572094356054120">"Жергілікті терминал"</string>
     <string name="enable_terminal_summary" msgid="67667852659359206">"Жергілікті шелл-код қол жетімділігін ұсынатын терминалды қолданбаны қосу"</string>
     <string name="hdcp_checking_title" msgid="8605478913544273282">"HDCP тексеру"</string>
@@ -281,24 +281,24 @@
     <string name="strict_mode_summary" msgid="142834318897332338">"Қолданбалар негізгі жолда ұзақ әрекеттерді орындағанда экранды жыпылықтату"</string>
     <string name="pointer_location" msgid="6084434787496938001">"Меңзер орны"</string>
     <string name="pointer_location_summary" msgid="840819275172753713">"Экран бетіне түртілген элемент дерегі көрсетіледі"</string>
-    <string name="show_touches" msgid="2642976305235070316">"Түртулерді көрсету"</string>
-    <string name="show_touches_summary" msgid="6101183132903926324">"Түртулер үшін көрнекі кері байланысты көрсету"</string>
-    <string name="show_screen_updates" msgid="5470814345876056420">"Беткейлік жаңартуларды көрсету"</string>
-    <string name="show_screen_updates_summary" msgid="2569622766672785529">"Жаңартылғанда бүкіл терезе беткейінің жыпылықтауы"</string>
+    <string name="show_touches" msgid="2642976305235070316">"Түрту қимылын көрсету"</string>
+    <string name="show_touches_summary" msgid="6101183132903926324">"Түрту қимылын экраннан көрсету"</string>
+    <string name="show_screen_updates" msgid="5470814345876056420">"Беттің жаңарғанын көрсету"</string>
+    <string name="show_screen_updates_summary" msgid="2569622766672785529">"Жаңарғанда, терезе беттерін жыпылықтату"</string>
     <string name="show_hw_screen_updates" msgid="5036904558145941590">"Графикалық процессор көрінісінің жаңартуларын көрсету"</string>
     <string name="show_hw_screen_updates_summary" msgid="1115593565980196197">"Графикалық процессор сызғанда, терезе ішіндегі көріністердің жыпылықтауы"</string>
     <string name="show_hw_layers_updates" msgid="5645728765605699821">"Аппараттық қабат жаңартуларын көрсету"</string>
     <string name="show_hw_layers_updates_summary" msgid="5296917233236661465">"Жаңартылғанда, аппараттық қабаттарды жасылмен жыпылықтату"</string>
     <string name="debug_hw_overdraw" msgid="2968692419951565417">"Үстінен бастырылғанды жөндеу"</string>
-    <string name="disable_overlays" msgid="2074488440505934665">"Жабдықпен үстінен бастыруды өшіру"</string>
-    <string name="disable_overlays_summary" msgid="3578941133710758592">"Экранды жасақтау үшін әрқашан графикалық процессор қолдану қажет"</string>
-    <string name="simulate_color_space" msgid="6745847141353345872">"Түстер аймағына еліктеу"</string>
+    <string name="disable_overlays" msgid="2074488440505934665">"Аппараттық қабаттасуды өшіру"</string>
+    <string name="disable_overlays_summary" msgid="3578941133710758592">"Экранды жасақтау үшін әрқашан GPU қолдану"</string>
+    <string name="simulate_color_space" msgid="6745847141353345872">"Түстер кеңістігінің симуляциясы"</string>
     <string name="enable_opengl_traces_title" msgid="6790444011053219871">"OpenGL трейстерін қосу"</string>
-    <string name="usb_audio_disable_routing" msgid="8114498436003102671">"USB аудио бағыттау. өшіру"</string>
-    <string name="usb_audio_disable_routing_summary" msgid="980282760277312264">"USB перифериялық аудио құр-на автоматты бағ. өшіру"</string>
-    <string name="debug_layout" msgid="5981361776594526155">"Жиектерін көрсету"</string>
+    <string name="usb_audio_disable_routing" msgid="8114498436003102671">"USB-мен аудио жіберуді өшіру"</string>
+    <string name="usb_audio_disable_routing_summary" msgid="980282760277312264">"Сыртқы USB аудио құрылғыларына автоматты жіберуді өшіру"</string>
+    <string name="debug_layout" msgid="5981361776594526155">"Жиектерді көрсету"</string>
     <string name="debug_layout_summary" msgid="2001775315258637682">"Қию шектерін, жиектерін, т.б көрсету."</string>
-    <string name="force_rtl_layout_all_locales" msgid="2259906643093138978">"Оңнан солға орналасу бағытына реттеу"</string>
+    <string name="force_rtl_layout_all_locales" msgid="2259906643093138978">"Оңнан солға орналастыру"</string>
     <string name="force_rtl_layout_all_locales_summary" msgid="9192797796616132534">"Экранның орналасу бағытын барлық тілдер үшін оңнан солға қарату"</string>
     <string name="force_hw_ui" msgid="6426383462520888732">"GPU рендерингін жылдамдату"</string>
     <string name="force_hw_ui_summary" msgid="5535991166074861515">"Графикалық процессорды 2d сызбаларына қолдану"</string>
@@ -306,8 +306,8 @@
     <string name="force_msaa_summary" msgid="9123553203895817537">"4x MSAA функциясын OpenGL ES 2.0 (ашық графикалық кітапхана) қолданбаларында іске қосу"</string>
     <string name="show_non_rect_clip" msgid="505954950474595172">"Тіктөртбұрышты емес кесу жұмыстарын жөндеу"</string>
     <string name="track_frame_time" msgid="6146354853663863443">"GPU жұмысын жазу"</string>
-    <string name="enable_gpu_debug_layers" msgid="3848838293793255097">"GPU түзету қабаттарын қосу"</string>
-    <string name="enable_gpu_debug_layers_summary" msgid="8009136940671194940">"GPU түзету қабаттарының жүктелуіне рұқсат ету"</string>
+    <string name="enable_gpu_debug_layers" msgid="3848838293793255097">"GPU жөндеу қабаттарын қосу"</string>
+    <string name="enable_gpu_debug_layers_summary" msgid="8009136940671194940">"GPU жқндеу қабаттарының жүктелуіне рұқсат ету"</string>
     <string name="window_animation_scale_title" msgid="6162587588166114700">"Терезе анимациясының өлшемі"</string>
     <string name="transition_animation_scale_title" msgid="387527540523595875">"Ауысу анимациясының өлшемі"</string>
     <string name="animator_duration_scale_title" msgid="3406722410819934083">"Аниматор ұзақтығы"</string>
@@ -387,7 +387,7 @@
     <string name="power_remaining_duration_shutdown_imminent" product="tablet" msgid="7466484148515796216">"Планшет көп ұзамай өшуі мүмкін (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
     <string name="power_remaining_duration_shutdown_imminent" product="device" msgid="603933521600231649">"Құрылғы көп ұзамай өшуі мүмкін (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
     <string name="power_charging" msgid="1779532561355864267">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="STATE">%2$s</xliff:g>"</string>
-    <string name="power_remaining_charging_duration_only" msgid="1421102457410268886">"Толық зарядқа <xliff:g id="TIME">%1$s</xliff:g> қалды"</string>
+    <string name="power_remaining_charging_duration_only" msgid="1421102457410268886">"Толық зарядталуына <xliff:g id="TIME">%1$s</xliff:g> қалды"</string>
     <string name="power_charging_duration" msgid="4676999980973411875">"<xliff:g id="LEVEL">%1$s</xliff:g> – толық зарядталғанға дейін <xliff:g id="TIME">%2$s</xliff:g>"</string>
     <string name="battery_info_status_unknown" msgid="196130600938058547">"Белгісіз"</string>
     <string name="battery_info_status_charging" msgid="1705179948350365604">"Зарядталуда"</string>
@@ -429,7 +429,7 @@
     <string name="ims_reg_title" msgid="7609782759207241443">"IMS тіркеу күйі"</string>
     <string name="ims_reg_status_registered" msgid="933003316932739188">"Тіркелген"</string>
     <string name="ims_reg_status_not_registered" msgid="6529783773485229486">"Тіркелмеген"</string>
-    <string name="status_unavailable" msgid="7862009036663793314">"Қол жетімсіз"</string>
+    <string name="status_unavailable" msgid="7862009036663793314">"Қолжетімсіз"</string>
     <string name="wifi_status_mac_randomized" msgid="5589328382467438245">"MAC еркін таңдауға қойылды"</string>
     <plurals name="wifi_tether_connected_summary" formatted="false" msgid="3871603864314407780">
       <item quantity="other">%1$d құрылғы қосылды</item>

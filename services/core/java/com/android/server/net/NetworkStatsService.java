@@ -116,7 +116,6 @@ import android.provider.Settings;
 import android.provider.Settings.Global;
 import android.service.NetworkInterfaceProto;
 import android.service.NetworkStatsServiceDumpProto;
-import android.telephony.SubscriptionManager;
 import android.telephony.SubscriptionPlan;
 import android.telephony.TelephonyManager;
 import android.text.format.DateUtils;
@@ -545,7 +544,8 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
         final int usedFlags = isRateLimitedForPoll(callingUid)
                 ? flags & (~NetworkStatsManager.FLAG_POLL_ON_OPEN)
                 : flags;
-        if ((usedFlags & NetworkStatsManager.FLAG_POLL_ON_OPEN) != 0) {
+        if ((usedFlags & (NetworkStatsManager.FLAG_POLL_ON_OPEN
+                | NetworkStatsManager.FLAG_POLL_FORCE)) != 0) {
             final long ident = Binder.clearCallingIdentity();
             try {
                 performPoll(FLAG_PERSIST_ALL);
@@ -679,22 +679,12 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
     private SubscriptionPlan resolveSubscriptionPlan(NetworkTemplate template, int flags) {
         SubscriptionPlan plan = null;
         if ((flags & NetworkStatsManager.FLAG_AUGMENT_WITH_SUBSCRIPTION_PLAN) != 0
-                && (template.getMatchRule() == NetworkTemplate.MATCH_MOBILE)
                 && mSettings.getAugmentEnabled()) {
             if (LOGD) Slog.d(TAG, "Resolving plan for " + template);
             final long token = Binder.clearCallingIdentity();
             try {
-                final SubscriptionManager sm = mContext.getSystemService(SubscriptionManager.class);
-                final TelephonyManager tm = mContext.getSystemService(TelephonyManager.class);
-                for (int subId : sm.getActiveSubscriptionIdList()) {
-                    if (template.matchesSubscriberId(tm.getSubscriberId(subId))) {
-                        if (LOGD) Slog.d(TAG, "Found active matching subId " + subId);
-                        final List<SubscriptionPlan> plans = sm.getSubscriptionPlans(subId);
-                        if (!plans.isEmpty()) {
-                            plan = plans.get(0);
-                        }
-                    }
-                }
+                plan = LocalServices.getService(NetworkPolicyManagerInternal.class)
+                        .getSubscriptionPlan(template);
             } finally {
                 Binder.restoreCallingIdentity(token);
             }

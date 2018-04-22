@@ -16,7 +16,6 @@
 
 package android.app.servertransaction;
 
-import static android.app.servertransaction.ActivityLifecycleItem.ON_RESUME;
 import static android.os.Trace.TRACE_TAG_ACTIVITY_MANAGER;
 
 import android.app.ClientTransactionHandler;
@@ -37,16 +36,17 @@ public class ActivityResultItem extends ClientTransactionItem {
 
     private List<ResultInfo> mResultInfoList;
 
+    /* TODO(b/78294732)
     @Override
     public int getPostExecutionState() {
         return ON_RESUME;
-    }
+    }*/
 
     @Override
     public void execute(ClientTransactionHandler client, IBinder token,
             PendingTransactionActions pendingActions) {
         Trace.traceBegin(TRACE_TAG_ACTIVITY_MANAGER, "activityDeliverResult");
-        client.handleSendResult(token, mResultInfoList);
+        client.handleSendResult(token, mResultInfoList, "ACTIVITY_RESULT");
         Trace.traceEnd(TRACE_TAG_ACTIVITY_MANAGER);
     }
 

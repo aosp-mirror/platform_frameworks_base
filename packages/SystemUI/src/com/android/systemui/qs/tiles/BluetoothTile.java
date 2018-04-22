@@ -51,6 +51,7 @@ import com.android.systemui.statusbar.policy.BluetoothController;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 
 /** Quick settings tile: Bluetooth **/
 public class BluetoothTile extends QSTileImpl<BooleanState> {
@@ -137,7 +138,9 @@ public class BluetoothTile extends QSTileImpl<BooleanState> {
         if (enabled) {
             if (connected) {
                 state.icon = new BluetoothConnectedTileIcon();
-                state.label = mController.getLastDeviceName();
+                if (!TextUtils.isEmpty(mController.getConnectedDeviceName())) {
+                    state.label = mController.getConnectedDeviceName();
+                }
                 state.contentDescription =
                         mContext.getString(R.string.accessibility_bluetooth_name, state.label)
                                 + ", " + state.secondaryLabel;
@@ -177,9 +180,18 @@ public class BluetoothTile extends QSTileImpl<BooleanState> {
         if (isTransient) {
             return mContext.getString(R.string.quick_settings_bluetooth_secondary_label_transient);
         }
-        final CachedBluetoothDevice lastDevice = mController.getLastDevice();
 
-        if (enabled && connected && lastDevice != null) {
+        List<CachedBluetoothDevice> connectedDevices = mController.getConnectedDevices();
+        if (enabled && connected && !connectedDevices.isEmpty()) {
+            if (connectedDevices.size() > 1) {
+                // TODO(b/76102598): add a new string for "X connected devices" after P
+                return mContext.getResources().getQuantityString(
+                        R.plurals.quick_settings_hotspot_secondary_label_num_devices,
+                        connectedDevices.size(),
+                        connectedDevices.size());
+            }
+
+            CachedBluetoothDevice lastDevice = connectedDevices.get(0);
             final int batteryLevel = lastDevice.getBatteryLevel();
 
             if (batteryLevel != BluetoothDevice.BATTERY_LEVEL_UNKNOWN) {

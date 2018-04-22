@@ -98,9 +98,16 @@ cc_library_shared {
     name: "libstatslog",
     generated_sources: ["statslog.cpp"],
     generated_headers: ["statslog.h"],
+    srcs: [
+        "stats_event_list.cpp",
+        "statsd_writer.cpp",
+    ],
     cflags: [
         "-Wall",
         "-Werror",
+        "-DLIBLOG_LOG_TAG=1006",
+        "-DWRITE_TO_STATSD=1",
+        "-DWRITE_TO_LOGD=0",
     ],
     export_generated_headers: ["statslog.h"],
     shared_libs: [

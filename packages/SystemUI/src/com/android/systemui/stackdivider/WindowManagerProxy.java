@@ -180,7 +180,7 @@ public class WindowManagerProxy {
             @Override
             public void run() {
                 try {
-                    WindowManagerGlobal.getWindowManagerService().setDockedStackResizing(resizing);
+                    ActivityManager.getService().setSplitScreenResizing(resizing);
                 } catch (RemoteException e) {
                     Log.w(TAG, "Error calling setDockedStackResizing: " + e);
                 }

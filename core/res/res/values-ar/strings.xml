@@ -75,10 +75,10 @@
     <string name="RuacMmi" msgid="7827887459138308886">"رفض المكالمات المزعجة غير المرغوب فيها"</string>
     <string name="CndMmi" msgid="3116446237081575808">"تسليم رقم الاتصال"</string>
     <string name="DndMmi" msgid="1265478932418334331">"عدم الإزعاج"</string>
-    <string name="CLIRDefaultOnNextCallOn" msgid="429415409145781923">"الإعداد الافتراضي لمعرف المتصل هو محظور  . الاتصال التالي: محظور"</string>
-    <string name="CLIRDefaultOnNextCallOff" msgid="3092918006077864624">"الإعداد الافتراضي لمعرف المتصل هو محظور  . الاتصال التالي: غير محظور"</string>
-    <string name="CLIRDefaultOffNextCallOn" msgid="6179425182856418465">"الإعداد الافتراضي لمعرف المتصل هو غير محظور  . الاتصال التالي: محظور"</string>
-    <string name="CLIRDefaultOffNextCallOff" msgid="2567998633124408552">"الإعداد الافتراضي لمعرف المتصل هو غير محظور  . الاتصال التالي: غير محظور"</string>
+    <string name="CLIRDefaultOnNextCallOn" msgid="429415409145781923">"الإعداد التلقائي لمعرف المتصل هو محظور  . الاتصال التالي: محظور"</string>
+    <string name="CLIRDefaultOnNextCallOff" msgid="3092918006077864624">"الإعداد التلقائي لمعرف المتصل هو محظور  . الاتصال التالي: غير محظور"</string>
+    <string name="CLIRDefaultOffNextCallOn" msgid="6179425182856418465">"الإعداد التلقائي لمعرف المتصل هو غير محظور  . الاتصال التالي: محظور"</string>
+    <string name="CLIRDefaultOffNextCallOff" msgid="2567998633124408552">"الإعداد التلقائي لمعرف المتصل هو غير محظور  . الاتصال التالي: غير محظور"</string>
     <string name="serviceNotProvisioned" msgid="8614830180508686666">"الخدمة غير متوفرة."</string>
     <string name="CLIRPermanent" msgid="3377371145926835671">"لا يمكنك تغيير إعداد معرّف المتصل."</string>
     <string name="RestrictedOnDataTitle" msgid="5221736429761078014">"لا تتوفّر خدمة بيانات جوّال."</string>
@@ -137,7 +137,7 @@
     <item msgid="4397097370387921767">"‏%s جارٍ الاتصال عبر Wi-Fi"</item>
   </string-array>
     <string name="wifi_calling_off_summary" msgid="8720659586041656098">"إيقاف"</string>
-    <string name="wfc_mode_wifi_preferred_summary" msgid="1994113411286935263">"‏شبكة Wi-Fi مُفضّلة"</string>
+    <string name="wfc_mode_wifi_preferred_summary" msgid="1994113411286935263">"‏شبكة Wi-Fi مفضّلة"</string>
     <string name="wfc_mode_cellular_preferred_summary" msgid="1988279625335345908">"مفضَّل للجوّال"</string>
     <string name="wfc_mode_wifi_only_summary" msgid="2379919155237869320">"‏Wi-Fi فقط"</string>
     <string name="cfTemplateNotForwarded" msgid="1683685883841272560">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: لم تتم إعادة التوجيه"</string>
@@ -1141,9 +1141,9 @@
     <string name="whichImageCaptureApplication" msgid="3680261417470652882">"التقاط صورة باستخدام"</string>
     <string name="whichImageCaptureApplicationNamed" msgid="8619384150737825003">"‏التقاط صورة باستخدام %1$s"</string>
     <string name="whichImageCaptureApplicationLabel" msgid="6390303445371527066">"التقاط صورة"</string>
-    <string name="alwaysUse" msgid="4583018368000610438">"الاستخدام بشكل افتراضي لهذا الإجراء."</string>
+    <string name="alwaysUse" msgid="4583018368000610438">"الاستخدام بشكل تلقائي لهذا الإجراء."</string>
     <string name="use_a_different_app" msgid="8134926230585710243">"استخدام تطبيق آخر"</string>
-    <string name="clearDefaultHintMsg" msgid="3252584689512077257">"‏يمكنك محو الإعدادات الافتراضية في إعدادات النظام &gt; التطبيقات &gt; ما تم تنزيله."</string>
+    <string name="clearDefaultHintMsg" msgid="3252584689512077257">"‏يمكنك محو الإعدادات التلقائية في إعدادات النظام &gt; التطبيقات &gt; ما تم تنزيله."</string>
     <string name="chooseActivity" msgid="7486876147751803333">"اختيار إجراء"</string>
     <string name="chooseUsbActivity" msgid="6894748416073583509">"‏اختيار أحد التطبيقات لجهاز USB"</string>
     <string name="noApplications" msgid="2991814273936504689">"ليست هناك تطبيقات يمكنها تنفيذ هذا الإجراء."</string>
@@ -1219,7 +1219,7 @@
     <string name="volume_icon_description_media" msgid="4217311719665194215">"مستوى صوت الوسائط"</string>
     <string name="volume_icon_description_notification" msgid="7044986546477282274">"مستوى صوت الإشعار"</string>
     <string name="ringtone_default" msgid="3789758980357696936">"نغمة الرنين التلقائية"</string>
-    <string name="ringtone_default_with_actual" msgid="1767304850491060581">"الافتراضية (<xliff:g id="ACTUAL_RINGTONE">%1$s</xliff:g>)"</string>
+    <string name="ringtone_default_with_actual" msgid="1767304850491060581">"التلقائية (<xliff:g id="ACTUAL_RINGTONE">%1$s</xliff:g>)"</string>
     <string name="ringtone_silent" msgid="7937634392408977062">"بلا نغمة رنين"</string>
     <string name="ringtone_picker_title" msgid="3515143939175119094">"نغمات الرنين"</string>
     <string name="ringtone_picker_title_alarm" msgid="6473325356070549702">"أصوات التنبيه"</string>
@@ -1586,7 +1586,7 @@
     <string name="media_route_chooser_searching" msgid="4776236202610828706">"جارٍ البحث عن الأجهزة…"</string>
     <string name="media_route_chooser_extended_settings" msgid="87015534236701604">"الإعدادات"</string>
     <string name="media_route_controller_disconnect" msgid="8966120286374158649">"قطع الاتصال"</string>
-    <string name="media_route_status_scanning" msgid="7279908761758293783">"جارٍ الفحص..."</string>
+    <string name="media_route_status_scanning" msgid="7279908761758293783">"البحث عن الشبكات..."</string>
     <string name="media_route_status_connecting" msgid="6422571716007825440">"جارٍ الاتصال..."</string>
     <string name="media_route_status_available" msgid="6983258067194649391">"متاح"</string>
     <string name="media_route_status_not_available" msgid="6739899962681886401">"غير متاح"</string>
@@ -1870,7 +1870,8 @@
     <string name="zen_mode_default_weekends_name" msgid="2786495801019345244">"نهاية الأسبوع"</string>
     <string name="zen_mode_default_events_name" msgid="8158334939013085363">"حدث"</string>
     <string name="zen_mode_default_every_night_name" msgid="3012363838882944175">"النوم"</string>
-    <string name="muted_by" msgid="6147073845094180001">"تم كتم الصوت بواسطة <xliff:g id="THIRD_PARTY">%1$s</xliff:g>"</string>
+    <!-- no translation found for muted_by (5942954724562097128) -->
+    <skip />
     <string name="system_error_wipe_data" msgid="6608165524785354962">"حدثت مشكلة داخلية في جهازك، وقد لا يستقر وضعه حتى إجراء إعادة الضبط بحسب بيانات المصنع."</string>
     <string name="system_error_manufacturer" msgid="8086872414744210668">"حدثت مشكلة داخلية في جهازك. يمكنك الاتصال بالمصنِّع للحصول على تفاصيل."</string>
     <string name="stk_cc_ussd_to_dial" msgid="5214333646366591205">"‏تم تغيير طلب USSD إلى مكالمة عادية."</string>

@@ -95,6 +95,8 @@
     <string name="accessibility_unlock_button" msgid="128158454631118828">"Sblocca"</string>
     <string name="accessibility_waiting_for_fingerprint" msgid="4808860050517462885">"In attesa dell\'impronta digitale"</string>
     <string name="accessibility_unlock_without_fingerprint" msgid="7541705575183694446">"Sblocca senza utilizzare l\'impronta digitale"</string>
+    <!-- no translation found for accessibility_send_smart_reply (7766727839703044493) -->
+    <skip />
     <string name="unlock_label" msgid="8779712358041029439">"sblocca"</string>
     <string name="phone_label" msgid="2320074140205331708">"apri telefono"</string>
     <string name="voice_assist_label" msgid="3956854378310019854">"apri Voice Assist"</string>
@@ -208,11 +210,11 @@
     <string name="accessibility_quick_settings_airplane_on" msgid="6406141469157599296">"Modalità aereo attiva."</string>
     <string name="accessibility_quick_settings_airplane_changed_off" msgid="66846307818850664">"Modalità aereo disattivata."</string>
     <string name="accessibility_quick_settings_airplane_changed_on" msgid="8983005603505087728">"Modalità aereo attivata."</string>
-    <string name="accessibility_quick_settings_dnd_priority_on" msgid="5836205286254617194">"Modalità Non disturbare attiva."</string>
-    <string name="accessibility_quick_settings_dnd_none_on" msgid="6882582132662613537">"Opzione \"Non disturbare\" attiva, silenzio totale."</string>
-    <string name="accessibility_quick_settings_dnd_alarms_on" msgid="9152834845587554157">"\"Non disturbare\" attivo, solo sveglie."</string>
+    <!-- no translation found for accessibility_quick_settings_dnd_none_on (2960643943620637020) -->
+    <skip />
+    <!-- no translation found for accessibility_quick_settings_dnd_alarms_on (3357131899365865386) -->
+    <skip />
     <string name="accessibility_quick_settings_dnd" msgid="6607873236717185815">"Non disturbare."</string>
-    <string name="accessibility_quick_settings_dnd_off" msgid="2371832603753738581">"\"Non disturbare\" non attivo."</string>
     <string name="accessibility_quick_settings_dnd_changed_off" msgid="898107593453022935">"\"Non disturbare\" non attivo."</string>
     <string name="accessibility_quick_settings_dnd_changed_on" msgid="4483780856613561039">"\"Non disturbare\" attivo."</string>
     <string name="accessibility_quick_settings_bluetooth" msgid="6341675755803320038">"Bluetooth."</string>
@@ -620,7 +622,8 @@
       <item quantity="one">usa la <xliff:g id="PERFORMING_ACTIVITY_0">%1$s</xliff:g></item>
     </plurals>
     <string name="notification_appops_settings" msgid="1028328314935908050">"Impostazioni"</string>
-    <string name="notification_appops_ok" msgid="602562195588819631">"OK"</string>
+    <!-- no translation found for notification_appops_ok (1156966426011011434) -->
+    <skip />
     <string name="notification_channel_controls_opened_accessibility" msgid="6553950422055908113">"Controlli di gestione delle notifiche per <xliff:g id="APP_NAME">%1$s</xliff:g> aperti"</string>
     <string name="notification_channel_controls_closed_accessibility" msgid="7521619812603693144">"Controlli di gestione delle notifiche per <xliff:g id="APP_NAME">%1$s</xliff:g> chiusi"</string>
     <string name="notification_channel_switch_accessibility" msgid="3420796005601900717">"Consenti le notifiche di questo canale"</string>
@@ -701,7 +704,7 @@
     <string name="data_saver" msgid="5037565123367048522">"Risparmio dati"</string>
     <string name="accessibility_data_saver_on" msgid="8454111686783887148">"Risparmio dati attivo"</string>
     <string name="accessibility_data_saver_off" msgid="8841582529453005337">"Risparmio dati disattivato"</string>
-    <string name="switch_bar_on" msgid="1142437840752794229">"Attiva"</string>
+    <string name="switch_bar_on" msgid="1142437840752794229">"On"</string>
     <string name="switch_bar_off" msgid="8803270596930432874">"Off"</string>
     <string name="nav_bar" msgid="1993221402773877607">"Barra di navigazione"</string>
     <string name="nav_bar_layout" msgid="3664072994198772020">"Layout"</string>

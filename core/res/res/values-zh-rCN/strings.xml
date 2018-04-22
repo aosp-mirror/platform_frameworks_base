@@ -134,7 +134,7 @@
   </string-array>
     <string name="wifi_calling_off_summary" msgid="8720659586041656098">"关闭"</string>
     <string name="wfc_mode_wifi_preferred_summary" msgid="1994113411286935263">"首选 WLAN"</string>
-    <string name="wfc_mode_cellular_preferred_summary" msgid="1988279625335345908">"移动数据网络优先"</string>
+    <string name="wfc_mode_cellular_preferred_summary" msgid="1988279625335345908">"首选移动数据网络"</string>
     <string name="wfc_mode_wifi_only_summary" msgid="2379919155237869320">"仅限 WLAN"</string>
     <string name="cfTemplateNotForwarded" msgid="1683685883841272560">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>：无法转接"</string>
     <string name="cfTemplateForwarded" msgid="1302922117498590521">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>：<xliff:g id="DIALING_NUMBER">{1}</xliff:g>"</string>
@@ -1445,7 +1445,7 @@
     <string name="data_usage_warning_title" msgid="6499834033204801605">"数据流量警告"</string>
     <string name="data_usage_warning_body" msgid="7340198905103751676">"您已使用 <xliff:g id="APP">%s</xliff:g> 的数据流量"</string>
     <string name="data_usage_mobile_limit_title" msgid="6561099244084267376">"已达到移动数据流量上限"</string>
-    <string name="data_usage_wifi_limit_title" msgid="5803363779034792676">"已达到WLAN流量上限"</string>
+    <string name="data_usage_wifi_limit_title" msgid="5803363779034792676">"已达到 WLAN 流量上限"</string>
     <string name="data_usage_limit_body" msgid="2908179506560812973">"已暂停使用数据网络连接，直到这个周期结束为止"</string>
     <string name="data_usage_mobile_limit_snoozed_title" msgid="3171402244827034372">"已超出移动数据流量上限"</string>
     <string name="data_usage_wifi_limit_snoozed_title" msgid="3547771791046344188">"已超出 WLAN 数据流量上限"</string>
@@ -1738,7 +1738,8 @@
     <string name="zen_mode_default_weekends_name" msgid="2786495801019345244">"周末"</string>
     <string name="zen_mode_default_events_name" msgid="8158334939013085363">"活动"</string>
     <string name="zen_mode_default_every_night_name" msgid="3012363838882944175">"睡眠"</string>
-    <string name="muted_by" msgid="6147073845094180001">"已被<xliff:g id="THIRD_PARTY">%1$s</xliff:g>设为静音"</string>
+    <!-- no translation found for muted_by (5942954724562097128) -->
+    <skip />
     <string name="system_error_wipe_data" msgid="6608165524785354962">"您的设备内部出现了问题。如果不将设备恢复出厂设置，设备运行可能会不稳定。"</string>
     <string name="system_error_manufacturer" msgid="8086872414744210668">"您的设备内部出现了问题。请联系您的设备制造商了解详情。"</string>
     <string name="stk_cc_ussd_to_dial" msgid="5214333646366591205">"USSD 请求已更改为普通通话"</string>
@@ -1814,7 +1815,7 @@
     <string name="device_storage_monitor_notification_channel" msgid="3295871267414816228">"设备存储空间"</string>
     <string name="adb_debugging_notification_channel_tv" msgid="5537766997350092316">"USB 调试"</string>
     <string name="time_picker_hour_label" msgid="2979075098868106450">"点"</string>
-    <string name="time_picker_minute_label" msgid="5168864173796598399">"分钟"</string>
+    <string name="time_picker_minute_label" msgid="5168864173796598399">"分"</string>
     <string name="time_picker_header_text" msgid="143536825321922567">"设置时间"</string>
     <string name="time_picker_input_error" msgid="7574999942502513765">"请输入有效的时间"</string>
     <string name="time_picker_prompt_label" msgid="7588093983899966783">"请输入时间"</string>

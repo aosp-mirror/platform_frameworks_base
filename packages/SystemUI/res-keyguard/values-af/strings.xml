@@ -140,10 +140,7 @@
       <item quantity="one">Toestel is <xliff:g id="NUMBER_0">%d</xliff:g> uur lank nie ontsluit nie. Bevestig wagwoord.</item>
     </plurals>
     <string name="fingerprint_not_recognized" msgid="348813995267914625">"Nie herken nie"</string>
-    <plurals name="kg_password_default_pin_message" formatted="false" msgid="6203676909479972943">
-      <item quantity="other">Voer SIM-PIN in; jy het <xliff:g id="NUMBER_1">%d</xliff:g> pogings oor.</item>
-      <item quantity="one">Verkeerde SIM-PIN. Jy het <xliff:g id="NUMBER_0">%d</xliff:g> poging oor voordat jy jou diensverskaffer moet kontak om jou toestel te ontsluit.</item>
-    </plurals>
+    <!-- no translation found for kg_password_default_pin_message (3739658416797652781) -->
     <plurals name="kg_password_default_puk_message" formatted="false" msgid="8744416410184198352">
       <item quantity="other">SIM is nou gedeaktiveer. Voer PUK-kode in om voort te gaan. Jy het <xliff:g id="_NUMBER_1">%d</xliff:g> pogings oor voordat die SIM permanent onbruikbaar word. Kontak die diensverskaffer vir besonderhede.</item>
       <item quantity="one">SIM is nou gedeaktiveer. Voer PUK-kode in om voort te gaan. Jy het <xliff:g id="_NUMBER_0">%d</xliff:g> poging oor voordat die SIM permanent onbruikbaar word. Kontak die diensverskaffer vir besonderhede.</item>

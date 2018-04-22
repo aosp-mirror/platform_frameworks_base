@@ -807,7 +807,8 @@ public abstract class NotificationListenerService extends Service {
      * @return An array of active notifications, sorted in natural order.
      */
     public StatusBarNotification[] getActiveNotifications() {
-        return getActiveNotifications(null, TRIM_FULL);
+        StatusBarNotification[] activeNotifications = getActiveNotifications(null, TRIM_FULL);
+        return activeNotifications != null ? activeNotifications : new StatusBarNotification[0];
     }
 
     /**
@@ -842,7 +843,8 @@ public abstract class NotificationListenerService extends Service {
      */
     @SystemApi
     public StatusBarNotification[] getActiveNotifications(int trim) {
-        return getActiveNotifications(null, trim);
+        StatusBarNotification[] activeNotifications = getActiveNotifications(null, trim);
+        return activeNotifications != null ? activeNotifications : new StatusBarNotification[0];
     }
 
     /**
@@ -858,7 +860,8 @@ public abstract class NotificationListenerService extends Service {
      * same order as the key list.
      */
     public StatusBarNotification[] getActiveNotifications(String[] keys) {
-        return getActiveNotifications(keys, TRIM_FULL);
+        StatusBarNotification[] activeNotifications = getActiveNotifications(keys, TRIM_FULL);
+        return activeNotifications != null ? activeNotifications : new StatusBarNotification[0];
     }
 
     /**
@@ -890,6 +893,9 @@ public abstract class NotificationListenerService extends Service {
 
     private StatusBarNotification[] cleanUpNotificationList(
             ParceledListSlice<StatusBarNotification> parceledList) {
+        if (parceledList == null || parceledList.getList() == null) {
+            return new StatusBarNotification[0];
+        }
         List<StatusBarNotification> list = parceledList.getList();
         ArrayList<StatusBarNotification> corruptNotifications = null;
         int N = list.size();

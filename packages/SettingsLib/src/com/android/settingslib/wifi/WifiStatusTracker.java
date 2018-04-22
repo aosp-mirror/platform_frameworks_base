@@ -103,10 +103,9 @@ public class WifiStatusTracker extends ConnectivityManager.NetworkCallback {
     public void handleBroadcast(Intent intent) {
         String action = intent.getAction();
         if (action.equals(WifiManager.WIFI_STATE_CHANGED_ACTION)) {
-            state = intent.getIntExtra(WifiManager.EXTRA_WIFI_STATE,
-                    WifiManager.WIFI_STATE_UNKNOWN);
-            enabled = state == WifiManager.WIFI_STATE_ENABLED;
+            updateWifiState();
         } else if (action.equals(WifiManager.NETWORK_STATE_CHANGED_ACTION)) {
+            updateWifiState();
             final NetworkInfo networkInfo =
                     intent.getParcelableExtra(WifiManager.EXTRA_NETWORK_INFO);
             connected = networkInfo != null && networkInfo.isConnected();
@@ -126,6 +125,11 @@ public class WifiStatusTracker extends ConnectivityManager.NetworkCallback {
             updateRssi(intent.getIntExtra(WifiManager.EXTRA_NEW_RSSI, -200));
             updateStatusLabel();
         }
+    }
+
+    private void updateWifiState() {
+        state = mWifiManager.getWifiState();
+        enabled = state == WifiManager.WIFI_STATE_ENABLED;
     }
 
     private void updateRssi(int newRssi) {

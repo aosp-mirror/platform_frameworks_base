@@ -2462,7 +2462,7 @@ public class PackageManagerService extends IPackageManager.Stub
                 installer, mInstallLock);
         mDexManager = new DexManager(this, mPackageDexOptimizer, installer, mInstallLock,
                 dexManagerListener);
-        mArtManagerService = new ArtManagerService(this, installer, mInstallLock);
+        mArtManagerService = new ArtManagerService(mContext, this, installer, mInstallLock);
         mMoveCallbacks = new MoveCallbacks(FgThread.get().getLooper());
 
         mOnPermissionChangeListeners = new OnPermissionChangeListeners(

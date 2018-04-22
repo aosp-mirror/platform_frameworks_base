@@ -811,6 +811,10 @@ public final class StrictMode {
 
             /**
              * Detect reflective usage of APIs that are not part of the public Android SDK.
+             *
+             * <p>Note that any non-SDK APIs that this processes accesses before this detection is
+             * enabled may not be detected. To ensure that all such API accesses are detected,
+             * you should apply this policy as early as possible after process creation.
              */
             public Builder detectNonSdkApiUsage() {
                 return enable(DETECT_VM_NON_SDK_API_USAGE);
@@ -1885,8 +1889,10 @@ public final class StrictMode {
 
             if ((sVmPolicy.mask & DETECT_VM_NON_SDK_API_USAGE) != 0) {
                 VMRuntime.setNonSdkApiUsageConsumer(sNonSdkApiUsageConsumer);
+                VMRuntime.setDedupeHiddenApiWarnings(false);
             } else {
                 VMRuntime.setNonSdkApiUsageConsumer(null);
+                VMRuntime.setDedupeHiddenApiWarnings(true);
             }
         }
     }

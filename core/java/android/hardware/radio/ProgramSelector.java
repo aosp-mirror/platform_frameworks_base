@@ -498,7 +498,7 @@ public final class ProgramSelector implements Parcelable {
     @Override
     public int hashCode() {
         // secondaryIds and vendorIds are ignored for equality/hashing
-        return Objects.hash(mProgramType, mPrimaryId);
+        return mPrimaryId.hashCode();
     }
 
     @Override
@@ -507,7 +507,8 @@ public final class ProgramSelector implements Parcelable {
         if (!(obj instanceof ProgramSelector)) return false;
         ProgramSelector other = (ProgramSelector) obj;
         // secondaryIds and vendorIds are ignored for equality/hashing
-        return other.getProgramType() == mProgramType && mPrimaryId.equals(other.getPrimaryId());
+        // programType can be inferred from primaryId, thus not checked
+        return mPrimaryId.equals(other.getPrimaryId());
     }
 
     private ProgramSelector(Parcel in) {
