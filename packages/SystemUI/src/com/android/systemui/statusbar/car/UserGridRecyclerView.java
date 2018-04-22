@@ -16,9 +16,14 @@
 
 package com.android.systemui.statusbar.car;
 
+import static android.content.DialogInterface.BUTTON_POSITIVE;
+
+import android.app.AlertDialog;
+import android.app.AlertDialog.Builder;
+import android.app.Dialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.pm.UserInfo;
-import android.content.res.ColorStateList;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.os.AsyncTask;
@@ -37,6 +42,7 @@ import com.android.internal.util.UserIcons;
 import com.android.settingslib.users.UserManagerHelper;
 import com.android.systemui.R;
 
+import com.android.systemui.statusbar.phone.SystemUIDialog;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -147,13 +153,17 @@ public class UserGridRecyclerView extends PagedListView implements
     /**
      * Adapter to populate the grid layout with the available user profiles
      */
-    public final class UserAdapter extends RecyclerView.Adapter<UserAdapter.UserAdapterViewHolder> {
+    public final class UserAdapter extends RecyclerView.Adapter<UserAdapter.UserAdapterViewHolder>
+            implements Dialog.OnClickListener {
 
         private final Context mContext;
         private List<UserRecord> mUsers;
         private final Resources mRes;
         private final String mGuestName;
         private final String mNewUserName;
+        private AlertDialog mDialog;
+        // View that holds the add user button.  Used to enable/disable the view
+        private View mAddUserView;
 
         public UserAdapter(Context context, List<UserRecord> users) {
             mRes = context.getResources();
@@ -190,9 +200,6 @@ public class UserGridRecyclerView extends PagedListView implements
                     return;
                 }
 
-                // Disable button so it cannot be clicked multiple times
-                holder.mView.setEnabled(false);
-
                 // Notify the listener which user was selected
                 if (mUserSelectionListener != null) {
                     mUserSelectionListener.onUserSelected(userRecord);
@@ -204,12 +211,28 @@ public class UserGridRecyclerView extends PagedListView implements
                     return;
                 }
 
-                // If the user wants to add a user, start task to add new user
+                // If the user wants to add a user, show dialog to confirm adding a user
                 if (userRecord.mIsAddUser) {
-                    new AddNewUserTask().execute(mNewUserName);
+                    // Disable button so it cannot be clicked multiple times
+                    mAddUserView = holder.mView;
+                    mAddUserView.setEnabled(false);
+
+                    String message = mRes.getString(R.string.user_add_user_message_setup)
+                        .concat(System.getProperty("line.separator"))
+                        .concat(System.getProperty("line.separator"))
+                        .concat(mRes.getString(R.string.user_add_user_message_update));
+
+                    mDialog = new Builder(mContext, R.style.Theme_Car_Dark_Dialog_Alert)
+                        .setTitle(R.string.user_add_user_title)
+                        .setMessage(message)
+                        .setNegativeButton(android.R.string.cancel, this)
+                        .setPositiveButton(android.R.string.ok, this)
+                        .create();
+                    // Sets window flags for the SysUI dialog
+                    SystemUIDialog.applyFlags(mDialog);
+                    mDialog.show();
                     return;
                 }
-
                 // If the user doesn't want to be a guest or add a user, switch to the user selected
                 mUserManagerHelper.switchToUser(userRecord.mInfo);
             });
@@ -219,15 +242,26 @@ public class UserGridRecyclerView extends PagedListView implements
         private Bitmap getUserRecordIcon(UserRecord userRecord) {
             if (userRecord.mIsStartGuestSession) {
                 return UserIcons.convertToBitmap(UserIcons.getDefaultUserIcon(
-                                mContext.getResources(), UserHandle.USER_NULL, false));
+                    mContext.getResources(), UserHandle.USER_NULL, false));
             }
 
             if (userRecord.mIsAddUser) {
                 return UserIcons.convertToBitmap(mContext
-                        .getDrawable(R.drawable.car_add_circle_round));
+                    .getDrawable(R.drawable.car_add_circle_round));
             }
 
             return mUserManagerHelper.getUserIcon(userRecord.mInfo);
+        }
+
+        @Override
+        public void onClick(DialogInterface dialog, int which) {
+            // Enable the add button
+            if (mAddUserView != null) {
+                mAddUserView.setEnabled(true);
+            }
+            if (which == BUTTON_POSITIVE) {
+                new AddNewUserTask().execute(mNewUserName);
+            }
         }
 
         private class AddNewUserTask extends AsyncTask<String, Void, UserInfo> {
