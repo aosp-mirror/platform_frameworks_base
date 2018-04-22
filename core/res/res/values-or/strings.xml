@@ -799,7 +799,7 @@
     <string name="keyguard_accessibility_unlock_area_collapsed" msgid="6366992066936076396">"ଅନଲକ୍‍ କ୍ଷେତ୍ର ଛୋଟ କରିଦିଆଯାଇଛି।"</string>
     <string name="keyguard_accessibility_widget" msgid="6527131039741808240">"<xliff:g id="WIDGET_INDEX">%1$s</xliff:g> ୱିଜେଟ୍‍।"</string>
     <string name="keyguard_accessibility_user_selector" msgid="1226798370913698896">"ୟୁଜର୍‌ ଚୟନକାରୀ"</string>
-    <string name="keyguard_accessibility_status" msgid="8008264603935930611">"ସ୍ଥିତି"</string>
+    <string name="keyguard_accessibility_status" msgid="8008264603935930611">"ଷ୍ଟାଟସ୍"</string>
     <string name="keyguard_accessibility_camera" msgid="8904231194181114603">"କ୍ୟାମେରା"</string>
     <string name="keygaurd_accessibility_media_controls" msgid="262209654292161806">"ମିଡିଆ ନିୟନ୍ତ୍ରଣ"</string>
     <string name="keyguard_accessibility_widget_reorder_start" msgid="8736853615588828197">"ୱିଜେଟ୍‍ ପୁନଃ ସଜାଇବା ଆରମ୍ଭ ହେଲା।"</string>
@@ -1739,7 +1739,8 @@
     <string name="zen_mode_default_weekends_name" msgid="2786495801019345244">"ସପ୍ତାହାନ୍ତ"</string>
     <string name="zen_mode_default_events_name" msgid="8158334939013085363">"ଇଭେଣ୍ଟ"</string>
     <string name="zen_mode_default_every_night_name" msgid="3012363838882944175">"ଶୋଇବା"</string>
-    <string name="muted_by" msgid="6147073845094180001">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g> ଦ୍ୱାରା ନିଶବ୍ଦ କରନ୍ତୁ"</string>
+    <!-- no translation found for muted_by (5942954724562097128) -->
+    <skip />
     <string name="system_error_wipe_data" msgid="6608165524785354962">"ଆପଣଙ୍କ ଡିଭାଇସ୍‍ରେ ଏକ ସମସ୍ୟା ରହିଛି ଏବଂ ଆପଣ ଫ୍ୟାକ୍ଟୋରୀ ଡାଟା ରିସେଟ୍‍ ନକରିବା ପର୍ଯ୍ୟନ୍ତ ଏହା ଅସ୍ଥିର ରହିପାରେ।"</string>
     <string name="system_error_manufacturer" msgid="8086872414744210668">"ଆପଣଙ୍କ ଡିଭାଇସ୍‍ରେ ଏକ ସମସ୍ୟା ରହିଛି। ବିବରଣୀ ପାଇଁ ଆପଣଙ୍କ ଉତ୍ପାଦକଙ୍କ ସହ ଯୋଗାଯୋଗ କରନ୍ତୁ।"</string>
     <string name="stk_cc_ussd_to_dial" msgid="5214333646366591205">"USSD ଅନୁରୋଧ, ସ୍ଵାଭାବିକ କଲ୍‌ରେ ପରିବର୍ତ୍ତନ ହେଲା"</string>
@@ -1778,12 +1779,9 @@
     <string name="language_picker_section_all" msgid="3097279199511617537">"ସମସ୍ତ ଭାଷା"</string>
     <string name="region_picker_section_all" msgid="8966316787153001779">"ସମସ୍ତ ଅଞ୍ଚଳ"</string>
     <string name="locale_search_menu" msgid="2560710726687249178">"ସର୍ଚ୍ଚ କରନ୍ତୁ"</string>
-    <!-- no translation found for app_suspended_title (1919029799438164552) -->
-    <skip />
-    <!-- no translation found for app_suspended_default_message (7875306315686531621) -->
-    <skip />
-    <!-- no translation found for app_suspended_more_details (1131804827776778187) -->
-    <skip />
+    <string name="app_suspended_title" msgid="1919029799438164552">"ଆପ୍ ଖୋଲିହେଉନାହିଁ"</string>
+    <string name="app_suspended_default_message" msgid="7875306315686531621">"ବର୍ତ୍ତମାନ <xliff:g id="APP_NAME_0">%1$s</xliff:g> ଆପ୍ ଉପଲବ୍ଧ ନାହିଁ। ଏହା <xliff:g id="APP_NAME_1">%2$s</xliff:g> ଦ୍ଵାରା ପରିଚାଳିତ କରାଯାଉଛି।"</string>
+    <string name="app_suspended_more_details" msgid="1131804827776778187">"ଅଧିକ ଜାଣନ୍ତୁ"</string>
     <string name="work_mode_off_title" msgid="1118691887588435530">"ୱର୍କ ପ୍ରୋଫାଇଲ୍‌କୁ ଚାଲୁ କରିବେ?"</string>
     <string name="work_mode_off_message" msgid="5130856710614337649">"ଆପଣଙ୍କର କାର୍ଯ୍ୟକାରୀ ଆପ୍‌, ବିଜ୍ଞପ୍ତି, ଡାଟା ଓ ଅନ୍ୟ ୱର୍କ ପ୍ରୋଫାଇଲ୍‌ଗୁଡ଼ିକ ଚାଲୁ ହୋଇଯିବ"</string>
     <string name="work_mode_turn_on" msgid="2062544985670564875">"ଅନ୍ କରନ୍ତୁ"</string>
@@ -1881,6 +1879,5 @@
     <string name="zen_upgrade_notification_content" msgid="1794994264692424562">"କ’ଣ ଅବରୋଧ ହୋଇଛି ଯାଞ୍ଚ କରିବା ପାଇଁ ଟାପ୍ କରନ୍ତୁ।"</string>
     <string name="notification_app_name_system" msgid="4205032194610042794">"ସିଷ୍ଟମ୍‌"</string>
     <string name="notification_app_name_settings" msgid="7751445616365753381">"ସେଟିଙ୍ଗ"</string>
-    <!-- no translation found for car_loading_profile (3545132581795684027) -->
-    <skip />
+    <string name="car_loading_profile" msgid="3545132581795684027">"ଲୋଡ୍ ହେଉଛି"</string>
 </resources>

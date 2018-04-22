@@ -667,7 +667,7 @@
     <string name="phoneTypeWorkPager" msgid="649938731231157056">"Work Pager"</string>
     <string name="phoneTypeAssistant" msgid="5596772636128562884">"Assistant"</string>
     <string name="phoneTypeMms" msgid="7254492275502768992">"MMS"</string>
-    <string name="eventTypeCustom" msgid="7837586198458073404">"Customised"</string>
+    <string name="eventTypeCustom" msgid="7837586198458073404">"Custom"</string>
     <string name="eventTypeBirthday" msgid="2813379844211390740">"Birthday"</string>
     <string name="eventTypeAnniversary" msgid="3876779744518284000">"Anniversary"</string>
     <string name="eventTypeOther" msgid="7388178939010143077">"Other"</string>
@@ -697,7 +697,7 @@
     <string name="orgTypeWork" msgid="29268870505363872">"Work"</string>
     <string name="orgTypeOther" msgid="3951781131570124082">"Other"</string>
     <string name="orgTypeCustom" msgid="225523415372088322">"Custom"</string>
-    <string name="relationTypeCustom" msgid="3542403679827297300">"Customised"</string>
+    <string name="relationTypeCustom" msgid="3542403679827297300">"Custom"</string>
     <string name="relationTypeAssistant" msgid="6274334825195379076">"Assistant"</string>
     <string name="relationTypeBrother" msgid="8757913506784067713">"Brother"</string>
     <string name="relationTypeChild" msgid="1890746277276881626">"Child"</string>
@@ -712,7 +712,7 @@
     <string name="relationTypeRelative" msgid="1799819930085610271">"Relative"</string>
     <string name="relationTypeSister" msgid="1735983554479076481">"Sister"</string>
     <string name="relationTypeSpouse" msgid="394136939428698117">"Spouse"</string>
-    <string name="sipAddressTypeCustom" msgid="2473580593111590945">"Customised"</string>
+    <string name="sipAddressTypeCustom" msgid="2473580593111590945">"Custom"</string>
     <string name="sipAddressTypeHome" msgid="6093598181069359295">"Home"</string>
     <string name="sipAddressTypeWork" msgid="6920725730797099047">"Work"</string>
     <string name="sipAddressTypeOther" msgid="4408436162950119849">"Other"</string>
@@ -1738,7 +1738,8 @@
     <string name="zen_mode_default_weekends_name" msgid="2786495801019345244">"Weekend"</string>
     <string name="zen_mode_default_events_name" msgid="8158334939013085363">"Event"</string>
     <string name="zen_mode_default_every_night_name" msgid="3012363838882944175">"Sleeping"</string>
-    <string name="muted_by" msgid="6147073845094180001">"Muted by <xliff:g id="THIRD_PARTY">%1$s</xliff:g>"</string>
+    <!-- no translation found for muted_by (5942954724562097128) -->
+    <skip />
     <string name="system_error_wipe_data" msgid="6608165524785354962">"There\'s an internal problem with your device, and it may be unstable until you factory data reset."</string>
     <string name="system_error_manufacturer" msgid="8086872414744210668">"There\'s an internal problem with your device. Contact your manufacturer for details."</string>
     <string name="stk_cc_ussd_to_dial" msgid="5214333646366591205">"USSD request changed to regular call"</string>

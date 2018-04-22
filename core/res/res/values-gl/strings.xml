@@ -1739,7 +1739,8 @@
     <string name="zen_mode_default_weekends_name" msgid="2786495801019345244">"Fin de semana"</string>
     <string name="zen_mode_default_events_name" msgid="8158334939013085363">"Evento"</string>
     <string name="zen_mode_default_every_night_name" msgid="3012363838882944175">"Durmindo"</string>
-    <string name="muted_by" msgid="6147073845094180001">"Silenciado por <xliff:g id="THIRD_PARTY">%1$s</xliff:g>"</string>
+    <!-- no translation found for muted_by (5942954724562097128) -->
+    <skip />
     <string name="system_error_wipe_data" msgid="6608165524785354962">"Produciuse un erro interno no teu dispositivo e quizais funcione de maneira inestable ata o restablecemento dos datos de fábrica."</string>
     <string name="system_error_manufacturer" msgid="8086872414744210668">"Produciuse un erro interno co teu dispositivo. Contacta co teu fabricante para obter máis información."</string>
     <string name="stk_cc_ussd_to_dial" msgid="5214333646366591205">"A solicitude USSD transformouse nunha chamada normal"</string>
@@ -1778,12 +1779,9 @@
     <string name="language_picker_section_all" msgid="3097279199511617537">"Todos os idiomas"</string>
     <string name="region_picker_section_all" msgid="8966316787153001779">"Todas as rexións"</string>
     <string name="locale_search_menu" msgid="2560710726687249178">"Buscar"</string>
-    <!-- no translation found for app_suspended_title (1919029799438164552) -->
-    <skip />
-    <!-- no translation found for app_suspended_default_message (7875306315686531621) -->
-    <skip />
-    <!-- no translation found for app_suspended_more_details (1131804827776778187) -->
-    <skip />
+    <string name="app_suspended_title" msgid="1919029799438164552">"Non se pode abrir a aplicación"</string>
+    <string name="app_suspended_default_message" msgid="7875306315686531621">"A aplicación <xliff:g id="APP_NAME_0">%1$s</xliff:g> non está dispoñible neste momento. Está política está xestionada por <xliff:g id="APP_NAME_1">%2$s</xliff:g>."</string>
+    <string name="app_suspended_more_details" msgid="1131804827776778187">"Máis información"</string>
     <string name="work_mode_off_title" msgid="1118691887588435530">"Activar o perfil de traballo?"</string>
     <string name="work_mode_off_message" msgid="5130856710614337649">"Activaranse as túas aplicacións de traballo, as notificacións, os datos e outras funcións do perfil de traballo"</string>
     <string name="work_mode_turn_on" msgid="2062544985670564875">"Activar"</string>
@@ -1879,6 +1877,5 @@
     <string name="zen_upgrade_notification_content" msgid="1794994264692424562">"Toca para comprobar o contido bloqueado."</string>
     <string name="notification_app_name_system" msgid="4205032194610042794">"Sistema"</string>
     <string name="notification_app_name_settings" msgid="7751445616365753381">"Configuración"</string>
-    <!-- no translation found for car_loading_profile (3545132581795684027) -->
-    <skip />
+    <string name="car_loading_profile" msgid="3545132581795684027">"Cargando"</string>
 </resources>

@@ -1366,7 +1366,7 @@
     <string name="car_mode_disable_notification_title" msgid="5704265646471239078">"Aplikasi mengemudi sedang berjalan"</string>
     <string name="car_mode_disable_notification_message" msgid="7647248420931129377">"Tap untuk keluar dari aplikasi mengemudi."</string>
     <string name="tethered_notification_title" msgid="3146694234398202601">"Tethering (Penambatan) atau hotspot aktif"</string>
-    <string name="tethered_notification_message" msgid="2113628520792055377">"Ketuk untuk menyiapkan."</string>
+    <string name="tethered_notification_message" msgid="2113628520792055377">"Tap untuk menyiapkan."</string>
     <string name="disable_tether_notification_title" msgid="7526977944111313195">"Tethering dinonaktifkan"</string>
     <string name="disable_tether_notification_message" msgid="2913366428516852495">"Hubungi admin untuk mengetahui detailnya"</string>
     <string name="back_button_label" msgid="2300470004503343439">"Kembali"</string>
@@ -1692,7 +1692,7 @@
     <string name="package_deleted_device_owner" msgid="2307122077550236438">"Dihapus oleh admin Anda"</string>
     <string name="battery_saver_description" msgid="769989536172631582">"Untuk memperpanjang masa pakai baterai Anda, fitur Penghemat Baterai mematikan sebagian fitur perangkat dan membatasi aplikasi."</string>
     <string name="data_saver_description" msgid="6015391409098303235">"Untuk membantu mengurangi penggunaan data, Penghemat Kuota Internet mencegah beberapa aplikasi mengirim atau menerima data di latar belakang. Aplikasi yang sedang digunakan dapat mengakses data, tetapi frekuensinya agak lebih jarang. Misalnya saja, gambar hanya akan ditampilkan setelah di-tap."</string>
-    <string name="data_saver_enable_title" msgid="4674073932722787417">"Aktifkan Penghemat Kuota Internet?"</string>
+    <string name="data_saver_enable_title" msgid="4674073932722787417">"Aktifkan Penghemat Kuota?"</string>
     <string name="data_saver_enable_button" msgid="7147735965247211818">"Aktifkan"</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="4367877408072000848">
       <item quantity="other">Selama %1$d menit (hingga <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
@@ -1738,7 +1738,8 @@
     <string name="zen_mode_default_weekends_name" msgid="2786495801019345244">"Akhir pekan"</string>
     <string name="zen_mode_default_events_name" msgid="8158334939013085363">"Acara"</string>
     <string name="zen_mode_default_every_night_name" msgid="3012363838882944175">"Tidur"</string>
-    <string name="muted_by" msgid="6147073845094180001">"Dinonaktifkan oleh <xliff:g id="THIRD_PARTY">%1$s</xliff:g>"</string>
+    <!-- no translation found for muted_by (5942954724562097128) -->
+    <skip />
     <string name="system_error_wipe_data" msgid="6608165524785354962">"Ada masalah dengan perangkat. Hal ini mungkin membuat perangkat jadi tidak stabil dan perlu dikembalikan ke setelan pabrik."</string>
     <string name="system_error_manufacturer" msgid="8086872414744210668">"Ada masalah dengan perangkat. Hubungi produsen perangkat untuk informasi selengkapnya."</string>
     <string name="stk_cc_ussd_to_dial" msgid="5214333646366591205">"Permintaan USSD diubah ke panggilan reguler"</string>
@@ -1777,12 +1778,9 @@
     <string name="language_picker_section_all" msgid="3097279199511617537">"Semua bahasa"</string>
     <string name="region_picker_section_all" msgid="8966316787153001779">"Semua wilayah"</string>
     <string name="locale_search_menu" msgid="2560710726687249178">"Telusuri"</string>
-    <!-- no translation found for app_suspended_title (1919029799438164552) -->
-    <skip />
-    <!-- no translation found for app_suspended_default_message (7875306315686531621) -->
-    <skip />
-    <!-- no translation found for app_suspended_more_details (1131804827776778187) -->
-    <skip />
+    <string name="app_suspended_title" msgid="1919029799438164552">"Aplikasi tidak dapat dibuka"</string>
+    <string name="app_suspended_default_message" msgid="7875306315686531621">"Aplikasi <xliff:g id="APP_NAME_0">%1$s</xliff:g> saat ini tidak tersedia. Aplikasi ini dikelola oleh <xliff:g id="APP_NAME_1">%2$s</xliff:g>."</string>
+    <string name="app_suspended_more_details" msgid="1131804827776778187">"Pelajari lebih lanjut"</string>
     <string name="work_mode_off_title" msgid="1118691887588435530">"Aktifkan profil kerja?"</string>
     <string name="work_mode_off_message" msgid="5130856710614337649">"Aplikasi kerja, notifikasi, data, dan fitur profil kerja lainnya akan diaktifkan"</string>
     <string name="work_mode_turn_on" msgid="2062544985670564875">"Aktifkan"</string>
@@ -1878,6 +1876,5 @@
     <string name="zen_upgrade_notification_content" msgid="1794994264692424562">"Tap untuk memeriksa item yang diblokir."</string>
     <string name="notification_app_name_system" msgid="4205032194610042794">"Sistem"</string>
     <string name="notification_app_name_settings" msgid="7751445616365753381">"Setelan"</string>
-    <!-- no translation found for car_loading_profile (3545132581795684027) -->
-    <skip />
+    <string name="car_loading_profile" msgid="3545132581795684027">"Memuat"</string>
 </resources>
