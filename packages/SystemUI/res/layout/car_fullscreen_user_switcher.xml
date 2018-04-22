@@ -19,32 +19,29 @@
         android:fitsSystemWindows="true"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="@color/car_card_dark"
+        android:background="@color/car_user_switcher_background_color"
         android:visibility="gone">
 
-    <RelativeLayout
+    <LinearLayout
         android:id="@+id/container"
-        android:background="@color/car_card_dark"
+        android:background="@color/car_user_switcher_background_color"
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+        android:orientation="vertical">
 
         <include layout="@layout/car_status_bar_header"
             android:theme="@android:style/Theme"
             android:layout_alignParentTop="true"/>
 
-        <!-- TODO: add app:verticallyCenterListContent="true" when car support lib is updated -->
         <com.android.systemui.statusbar.car.UserGridRecyclerView
             android:id="@+id/user_grid"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_below="@+id/header"
-            android:layout_centerHorizontal="true"
-            android:layout_centerVertical="true"
-            android:layout_alignParentRight="true"
+            app:verticallyCenterListContent="true"
             app:dayNightStyle="force_night"
             app:showPagedListViewDivider="false"
             app:gutter="both"
-            app:itemSpacing="@dimen/car_padding_5"/>
+            app:itemSpacing="@dimen/car_user_switcher_vertical_spacing_between_users"/>
 
-    </RelativeLayout>
+    </LinearLayout>
 </FrameLayout>

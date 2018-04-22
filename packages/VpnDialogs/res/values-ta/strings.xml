@@ -17,7 +17,7 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="prompt" msgid="3183836924226407828">"இணைப்புக் கோரிக்கை"</string>
-    <string name="warning" msgid="809658604548412033">"VPN இணைப்பை அமைக்க <xliff:g id="APP">%s</xliff:g> விழைகிறது அதன்மூலம் இது நெட்வொர்க் ட்ராஃபிக்கைக் கண்காணிக்கும் அனுமதியைப் பெறும். நம்பகமான மூலத்தை மட்டுமே ஏற்கவும். &lt;br /&gt; &lt;br /&gt; VPN இயக்கத்தில் உள்ளபோது திரையில் மேல் பகுதியில் &lt;img src=vpn_icon /&gt; தோன்றும்."</string>
+    <string name="warning" msgid="809658604548412033">"VPN இணைப்பை அமைக்க <xliff:g id="APP">%s</xliff:g> விழைகிறது. அதன்மூலம் இது நெட்வொர்க் டிராஃபிக்கைக் கண்காணிக்கும் அனுமதியைப் பெறும். நம்பகமான மூலத்தை மட்டுமே ஏற்கவும். &lt;br /&gt; &lt;br /&gt; VPN இயக்கத்தில் உள்ளபோது திரையில் மேல் பகுதியில் &lt;img src=vpn_icon /&gt; தோன்றும்."</string>
     <string name="legacy_title" msgid="192936250066580964">"VPN இணைக்கப்பட்டது"</string>
     <string name="session" msgid="6470628549473641030">"அமர்வு:"</string>
     <string name="duration" msgid="3584782459928719435">"காலஅளவு:"</string>

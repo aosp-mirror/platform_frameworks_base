@@ -140,10 +140,7 @@
       <item quantity="other">قفل دستگاه <xliff:g id="NUMBER_1">%d</xliff:g> ساعت باز نشده است. گذرواژه را تأیید کنید.</item>
     </plurals>
     <string name="fingerprint_not_recognized" msgid="348813995267914625">"شناسایی نشد"</string>
-    <plurals name="kg_password_default_pin_message" formatted="false" msgid="6203676909479972943">
-      <item quantity="one">پین سیم‌کارت را وارد کنید. <xliff:g id="NUMBER_1">%d</xliff:g> تلاش دیگری باقی مانده است.</item>
-      <item quantity="other">پین سیم‌کارت را وارد کنید. <xliff:g id="NUMBER_1">%d</xliff:g> تلاش دیگری باقی مانده است.</item>
-    </plurals>
+    <!-- no translation found for kg_password_default_pin_message (3739658416797652781) -->
     <plurals name="kg_password_default_puk_message" formatted="false" msgid="8744416410184198352">
       <item quantity="one">‏سیم‌کارت اکنون غیرفعال است. برای ادامه دادن کد PUK را وارد کنید. <xliff:g id="_NUMBER_1">%d</xliff:g> تلاش دیگر باقی مانده است و پس از آن سیم‌کارت برای همیشه غیرقابل‌استفاده می‌شود. برای اطلاع از جزئیات با شرکت مخابراتی تماس بگیرید.</item>
       <item quantity="other">‏سیم‌کارت اکنون غیرفعال است. برای ادامه دادن کد PUK را وارد کنید. <xliff:g id="_NUMBER_1">%d</xliff:g> تلاش دیگر باقی مانده است و پس از آن سیم‌کارت برای همیشه غیرقابل‌استفاده می‌شود. برای اطلاع از جزئیات با شرکت مخابراتی تماس بگیرید.</item>

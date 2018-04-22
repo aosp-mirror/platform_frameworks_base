@@ -16,12 +16,11 @@
 */
 -->
 <resources>
-    <!-- TODO replace with car support lib sizes when available -->
-    <dimen name="car_fullscreen_user_pod_icon_text_size">64sp</dimen>
-    <dimen name="car_fullscreen_user_pod_width">243dp</dimen>
-    <dimen name="car_fullscreen_user_pod_height">356dp</dimen>
-    <dimen name="car_fullscreen_user_pod_image_avatar_width">96dp</dimen>
-    <dimen name="car_fullscreen_user_pod_image_avatar_height">96dp</dimen>
+    <!-- dimensions for the car user switcher -->
+    <dimen name="car_user_switcher_name_text_size">@dimen/car_body1_size</dimen>
+    <dimen name="car_user_switcher_image_avatar_size">@dimen/car_large_avatar_size</dimen>
+    <dimen name="car_user_switcher_vertical_spacing_between_users">@dimen/car_padding_5</dimen>
+    <dimen name="car_user_switcher_vertical_spacing_between_name_and_avatar">@dimen/car_padding_4</dimen>
 
     <dimen name="car_navigation_button_width">64dp</dimen>
     <dimen name="car_navigation_bar_width">760dp</dimen>
@@ -43,5 +42,4 @@
     <!-- This must be the negative of car_user_switcher_container_height for the animation. -->
     <dimen name="car_user_switcher_container_anim_height">-420dp</dimen>
 
-    <dimen name="car_body2_size">26sp</dimen>
 </resources>

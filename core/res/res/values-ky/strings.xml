@@ -430,9 +430,9 @@
     <string name="permlab_wakeLock" product="tablet" msgid="1531731435011495015">"планшетти уктатпай сактоо"</string>
     <string name="permlab_wakeLock" product="tv" msgid="2601193288949154131">"сыналгыны көшүтпөө"</string>
     <string name="permlab_wakeLock" product="default" msgid="573480187941496130">"телефонду уктатпай сактоо"</string>
-    <string name="permdesc_wakeLock" product="tablet" msgid="7311319824400447868">"Колдонмого планшетти көшүтпөө мүмкүнчүлүгүн берет."</string>
-    <string name="permdesc_wakeLock" product="tv" msgid="3208534859208996974">"Колдонмого сыналгыны уктатпай ойгоо кармап туруу мүмкүнчүлүгүн берет."</string>
-    <string name="permdesc_wakeLock" product="default" msgid="8559100677372928754">"Колдонмого телефонду көшүтпөө мүмкүнчүлүгүн берет."</string>
+    <string name="permdesc_wakeLock" product="tablet" msgid="7311319824400447868">"Колдонмо планшетти көшүү режимине өткөрбөйт."</string>
+    <string name="permdesc_wakeLock" product="tv" msgid="3208534859208996974">"Колдонмо сыналгыны көшүү режимине өткөрбөйт."</string>
+    <string name="permdesc_wakeLock" product="default" msgid="8559100677372928754">"Колдонмо телефонду көшүү режимине өткөрбөйт."</string>
     <string name="permlab_transmitIr" msgid="7545858504238530105">"инфра кызыл менен иштөө"</string>
     <string name="permdesc_transmitIr" product="tablet" msgid="5358308854306529170">"Колдонмого планшеттин инфракызыл өткөргүчүн колдонуу мүмкүнчүлүгүн берет."</string>
     <string name="permdesc_transmitIr" product="tv" msgid="3926790828514867101">"Колдонмого сыналгынын инфракызыл өткөргүчүн пайдалануу мүмкүнчүлүгүн берет."</string>
@@ -581,11 +581,11 @@
     <string name="policydesc_watchLogin_secondaryUser" product="tablet" msgid="4280246270601044505">"Экрандын кулпусун ачуу учурунда туура эмес терилген сырсөздөрдү тескөө жана сырсөз өтө көп жолу туура эмес терилген болсо, планшетти кулпулап же бул колдонуучунун бардык дайындарын тазалап салуу."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="TV" msgid="3484832653564483250">"Экрандын кулпусун ачуу учурунда туура эмес терилген сырсөздөрдү тескөө жана сырсөз өтө көп жолу туура эмес терилген болсо, сыналгыны кулпулап же бул колдонуучунун бардык дайындарын тазалап салуу."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="default" msgid="2185480427217127147">"Экрандын кулпусун ачуу учурунда туура эмес терилген сырсөздөрдү тескөө жана сырсөз өтө көп жолу туура эмес терилген болсо, телефонду кулпулап же бул колдонуучунун бардык дайындарын тазалап салуу."</string>
-    <string name="policylab_resetPassword" msgid="4934707632423915395">"Экран кулпусун өзгөртөт"</string>
+    <string name="policylab_resetPassword" msgid="4934707632423915395">"Экран кулпусун өзгөртүү"</string>
     <string name="policydesc_resetPassword" msgid="1278323891710619128">"Экран кулпусун өзгөртүү."</string>
     <string name="policylab_forceLock" msgid="2274085384704248431">"Экранды кулпулоо"</string>
     <string name="policydesc_forceLock" msgid="1141797588403827138">"Экран качан жана кантип кулпулана турганын башкарат."</string>
-    <string name="policylab_wipeData" msgid="3910545446758639713">"Бардык дайындарды тазалайт"</string>
+    <string name="policylab_wipeData" msgid="3910545446758639713">"Бардык маалыматты өчүрүү"</string>
     <string name="policydesc_wipeData" product="tablet" msgid="4306184096067756876">"Алдын-ала эскертпестен, баштапкы абалга келтирүү функциясы менен планшеттеги бардык дайындарды өчүрөт."</string>
     <string name="policydesc_wipeData" product="tv" msgid="5816221315214527028">"Сыналгынын дайындарын баштапкы абалга кайтарып, алдын-ала эскертпестен өчүрүп салуу."</string>
     <string name="policydesc_wipeData" product="default" msgid="5096895604574188391">"Алдын-ала эскертпестен, баштапкы абалга келтирүү функциясы менен телефондогу бардык дайындарды өчүрөт."</string>
@@ -601,7 +601,7 @@
     <string name="policydesc_encryptedStorage" msgid="2637732115325316992">"Колдонмонун сакталган берилиштери шифрленишин талап кылуу."</string>
     <string name="policylab_disableCamera" msgid="6395301023152297826">"Камераларды өчүрүү"</string>
     <string name="policydesc_disableCamera" msgid="2306349042834754597">"Түзмөктүн бардык камераларын колдонууга тыюу салуу."</string>
-    <string name="policylab_disableKeyguardFeatures" msgid="8552277871075367771">"Экрн клпснн айрм функцялрн өчр"</string>
+    <string name="policylab_disableKeyguardFeatures" msgid="8552277871075367771">"Функцияларды өчүрүү"</string>
     <string name="policydesc_disableKeyguardFeatures" msgid="2044755691354158439">"Экранды кулпулоо функцияларынын айрымдарын колдонууга тыюу салуу"</string>
   <string-array name="phoneTypes">
     <item msgid="8901098336658710359">"Үй"</item>
@@ -1161,8 +1161,8 @@
     <string name="wifi_available_content_failed_to_connect" msgid="3377406637062802645">"Бардык тармактарды көрүү үчүн басыңыз"</string>
     <string name="wifi_available_action_connect" msgid="2635699628459488788">"Туташуу"</string>
     <string name="wifi_available_action_all_networks" msgid="4368435796357931006">"Бардык тармактар"</string>
-    <string name="wifi_wakeup_onboarding_title" msgid="228772560195634292">"Wi‑Fi автоматтык түрдө күйгүзүлөт"</string>
-    <string name="wifi_wakeup_onboarding_subtext" msgid="3989697580301186973">"Байланыш сигналы жакшы болгон тармактарга жакындаганда"</string>
+    <string name="wifi_wakeup_onboarding_title" msgid="228772560195634292">"Wi‑Fi автоматтык түрдө күйөт"</string>
+    <string name="wifi_wakeup_onboarding_subtext" msgid="3989697580301186973">"Байланыш сигналы күчтүү тармактарга жакындаганда"</string>
     <string name="wifi_wakeup_onboarding_action_disable" msgid="838648204200836028">"Өзү кайра күйбөйт"</string>
     <string name="wifi_wakeup_enabled_title" msgid="6534603733173085309">"Wi‑Fi автоматтык түрдө күйгүзүлдү"</string>
     <string name="wifi_wakeup_enabled_content" msgid="189330154407990583">"Сакталган тармактын жанындасыз: <xliff:g id="NETWORK_SSID">%1$s</xliff:g>"</string>
@@ -1347,7 +1347,7 @@
     <string name="sync_binding_label" msgid="3687969138375092423">"Шайкештирүү"</string>
     <string name="accessibility_binding_label" msgid="4148120742096474641">"Атайын мүмкүнчүлүктөр"</string>
     <string name="wallpaper_binding_label" msgid="1240087844304687662">"Тушкагаз"</string>
-    <string name="chooser_wallpaper" msgid="7873476199295190279">"Тушкагазды өзгөртүү"</string>
+    <string name="chooser_wallpaper" msgid="7873476199295190279">"Тушкагазды өзгөртүп алыңыз"</string>
     <string name="notification_listener_binding_label" msgid="2014162835481906429">"Эскертүү тыңшагычы"</string>
     <string name="vr_listener_binding_label" msgid="4316591939343607306">"VR режими"</string>
     <string name="condition_provider_service_binding_label" msgid="1321343352906524564">"Шарт түзүүчү"</string>
@@ -1356,8 +1356,8 @@
     <string name="vpn_title_long" msgid="6400714798049252294">"VPN <xliff:g id="APP">%s</xliff:g> аркылуу жандырылды"</string>
     <string name="vpn_text" msgid="1610714069627824309">"Тармактын параметрлерин өзгөртүү үчүн бул жерди басыңыз."</string>
     <string name="vpn_text_long" msgid="4907843483284977618">"<xliff:g id="SESSION">%s</xliff:g> сеансына туташуу ишке ашты. Желенин параметрлерин өзгөртүү үчүн бул жерди басыңыз."</string>
-    <string name="vpn_lockdown_connecting" msgid="6443438964440960745">"Дайым иштеген VPN туташууда…"</string>
-    <string name="vpn_lockdown_connected" msgid="8202679674819213931">"Дайым иштеген VPN туташтырылды"</string>
+    <string name="vpn_lockdown_connecting" msgid="6443438964440960745">"Туруктуу VPN туташууда…"</string>
+    <string name="vpn_lockdown_connected" msgid="8202679674819213931">"Туташты"</string>
     <string name="vpn_lockdown_disconnected" msgid="735805531187559719">"Ар дайым иштеген VPN\'ден ажыратуу"</string>
     <string name="vpn_lockdown_error" msgid="3133844445659711681">"Ар дайым күйүк VPN\'ге туташпай калды"</string>
     <string name="vpn_lockdown_config" msgid="8151951501116759194">"Тармакты же VPN жөндөөлөрүн өзгөртүү"</string>
@@ -1551,7 +1551,7 @@
     <string name="kg_reordering_delete_drop_target_text" msgid="7899202978204438708">"Алып салуу"</string>
     <string name="safe_media_volume_warning" product="default" msgid="2276318909314492312">"Сунушталган деңгээлден да катуулатып уккуңуз келеби?\n\nМузыканы узакка чейин катуу уксаңыз, угууңуз начарлап кетиши мүмкүн."</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="8404780875025725199">"Атайын мүмкүнчүлүктөр функциясынын кыска жолу колдонулсунбу?"</string>
-    <string name="accessibility_shortcut_toogle_warning" msgid="7256507885737444807">"Атайын мүмкүнчүлүктөр функциясын пайдалануу үчүн, анын кыска жолу күйгүзүлгөндө, үндү катуулатуу/акырындатуу баскычын үч секунддай кое бербей басып туруңуз.\n\n Учурдагы атайын мүмкүнчүлүктөрдүн жөндөөлөрү:\n <xliff:g id="SERVICE_NAME">%1$s</xliff:g>\n\nЖөндөөлөр &gt; Атайын мүмкүнчүлүктөр бөлүмүнөн өзгөртө аласыз."</string>
+    <string name="accessibility_shortcut_toogle_warning" msgid="7256507885737444807">"Атайын мүмкүнчүлүктөр функциясын пайдалануу үчүн, ал күйгүзүлгөндө, үндү катуулатып/акырындаткан эки баскычты тең үч секунддай кое бербей басып туруңуз.\n\n Учурдагы атайын мүмкүнчүлүктөрдүн жөндөөлөрү:\n <xliff:g id="SERVICE_NAME">%1$s</xliff:g>\n\nЖөндөөлөр &gt; Атайын мүмкүнчүлүктөр бөлүмүнөн өзгөртө аласыз."</string>
     <string name="disable_accessibility_shortcut" msgid="627625354248453445">"Кыска жолду өчүрүү"</string>
     <string name="leave_accessibility_shortcut_on" msgid="7653111894438512680">"Кыска жолду колдонуу"</string>
     <string name="color_inversion_feature_name" msgid="4231186527799958644">"Түстү инверсиялоо"</string>
@@ -1687,14 +1687,14 @@
     <string name="managed_profile_label_badge_2" msgid="5048136430082124036">"2-жумуш <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="managed_profile_label_badge_3" msgid="2808305070321719040">"3-жумуш <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"Бошотуудан мурун PIN суралсын"</string>
-    <string name="lock_to_app_unlock_pattern" msgid="4182192144797225137">"Бошотуудан мурун кулпуну ачкан үлгү суралсын"</string>
+    <string name="lock_to_app_unlock_pattern" msgid="4182192144797225137">"Бошотуудан мурун графикалык ачкыч суралсын"</string>
     <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"Бошотуудан мурун сырсөз суралсын"</string>
     <string name="package_installed_device_owner" msgid="6875717669960212648">"Администраторуңуз орнотуп койгон"</string>
     <string name="package_updated_device_owner" msgid="1847154566357862089">"Администраторуңуз жаңыртып койгон"</string>
     <string name="package_deleted_device_owner" msgid="2307122077550236438">"Администраторуңуз жок кылып салган"</string>
-    <string name="battery_saver_description" msgid="769989536172631582">"Батареянын кубатынын мөөнөтүн узартуу үчүн Батареяны үнөмдөгүч түзмөгүңүздүн айрым функцияларын өчүрүп, колдонмолорду чектейт."</string>
+    <string name="battery_saver_description" msgid="769989536172631582">"Батареянын кубатынын мөөнөтүн узартуу үчүн Батареяны үнөмдөгүч режиминде түзмөгүңүздүн айрым функциялары өчүп, колдонмолор чектелет."</string>
     <string name="data_saver_description" msgid="6015391409098303235">"Трафикти үнөмдөө режиминде айрым колдонмолор дайындарды фондо өткөрө алышпайт. Учурда сиз пайдаланып жаткан колдонмо дайындарды жөнөтүп/ала алат, бирок адаттагыдан азыраак өткөргөндүктөн, анын айрым функциялары талаптагыдай иштебей коюшу мүмкүн. Мисалы, сүрөттөр басылмайынча жүктөлбөйт."</string>
-    <string name="data_saver_enable_title" msgid="4674073932722787417">"Дайындарды үнөмдөгүч күйсүнбү?"</string>
+    <string name="data_saver_enable_title" msgid="4674073932722787417">"Трафикти үнөмдөө режимин иштетесизби?"</string>
     <string name="data_saver_enable_button" msgid="7147735965247211818">"Күйгүзүү"</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="4367877408072000848">
       <item quantity="other">%1$d мүнөткө (<xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g> чейин)</item>
@@ -1721,8 +1721,8 @@
       <item quantity="one">1 мүнөткө</item>
     </plurals>
     <plurals name="zen_mode_duration_hours" formatted="false" msgid="6571961796799076730">
-      <item quantity="other">%d саатка күйгүзүлдү</item>
-      <item quantity="one">1 саатка күйгүзүлдү</item>
+      <item quantity="other">%d саатка чейин</item>
+      <item quantity="one">1 саатка чейин</item>
     </plurals>
     <plurals name="zen_mode_duration_hours_short" formatted="false" msgid="6748277774662434217">
       <item quantity="other">%d саатка</item>
@@ -1740,7 +1740,8 @@
     <string name="zen_mode_default_weekends_name" msgid="2786495801019345244">"Дем алыш"</string>
     <string name="zen_mode_default_events_name" msgid="8158334939013085363">"Иш-чара"</string>
     <string name="zen_mode_default_every_night_name" msgid="3012363838882944175">"Уйку режими"</string>
-    <string name="muted_by" msgid="6147073845094180001">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g> тарабынан үнсүздөлдү"</string>
+    <!-- no translation found for muted_by (5942954724562097128) -->
+    <skip />
     <string name="system_error_wipe_data" msgid="6608165524785354962">"Түзмөгүңүздө ички көйгөй бар жана ал баштапкы абалга кайтарылмайынча туруктуу иштебей коюшу мүмкүн."</string>
     <string name="system_error_manufacturer" msgid="8086872414744210668">"Түзмөгүңүздө ички көйгөй бар. Анын чоо-жайын билүү үчүн өндүрүүчүңүзгө кайрылыңыз."</string>
     <string name="stk_cc_ussd_to_dial" msgid="5214333646366591205">"USSD сурамы демейки чалууга өзгөртүлдү"</string>
@@ -1779,12 +1780,9 @@
     <string name="language_picker_section_all" msgid="3097279199511617537">"Бардык тилдер"</string>
     <string name="region_picker_section_all" msgid="8966316787153001779">"Бардык аймактар"</string>
     <string name="locale_search_menu" msgid="2560710726687249178">"Издөө"</string>
-    <!-- no translation found for app_suspended_title (1919029799438164552) -->
-    <skip />
-    <!-- no translation found for app_suspended_default_message (7875306315686531621) -->
-    <skip />
-    <!-- no translation found for app_suspended_more_details (1131804827776778187) -->
-    <skip />
+    <string name="app_suspended_title" msgid="1919029799438164552">"Колдонмо ачылбайт"</string>
+    <string name="app_suspended_default_message" msgid="7875306315686531621">"<xliff:g id="APP_NAME_0">%1$s</xliff:g> колдонмосу учурда жеткиликсиз. Саясат <xliff:g id="APP_NAME_1">%2$s</xliff:g> колдонмосу тарабынан башкарылат."</string>
+    <string name="app_suspended_more_details" msgid="1131804827776778187">"Кеңири маалымат"</string>
     <string name="work_mode_off_title" msgid="1118691887588435530">"Жумуш профили күйгүзүлсүнбү?"</string>
     <string name="work_mode_off_message" msgid="5130856710614337649">"Жумуш колдонмолоруңуз, эскертмелериңиз, дайындарыңыз жана жумуш профилинин башка функциялары күйгүзүлөт."</string>
     <string name="work_mode_turn_on" msgid="2062544985670564875">"Күйгүзүү"</string>
@@ -1880,6 +1878,5 @@
     <string name="zen_upgrade_notification_content" msgid="1794994264692424562">"Бөгөттөлгөн нерселерди көрүү үчүн таптаңыз."</string>
     <string name="notification_app_name_system" msgid="4205032194610042794">"Тутум"</string>
     <string name="notification_app_name_settings" msgid="7751445616365753381">"Жөндөөлөр"</string>
-    <!-- no translation found for car_loading_profile (3545132581795684027) -->
-    <skip />
+    <string name="car_loading_profile" msgid="3545132581795684027">"Жүктөлүүдө"</string>
 </resources>

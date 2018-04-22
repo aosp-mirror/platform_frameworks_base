@@ -40,7 +40,7 @@
     <string name="keyguard_low_battery" msgid="9218432555787624490">"充電してください。"</string>
     <string name="keyguard_instructions_when_pattern_disabled" msgid="8566679946700751371">"メニューからロックを解除できます。"</string>
     <string name="keyguard_network_locked_message" msgid="6743537524631420759">"ネットワークがロックされました"</string>
-    <string name="keyguard_missing_sim_message_short" msgid="6327533369959764518">"SIM カードが挿入されていません"</string>
+    <string name="keyguard_missing_sim_message_short" msgid="6327533369959764518">"SIM カードなし"</string>
     <string name="keyguard_missing_sim_message" product="tablet" msgid="4550152848200783542">"タブレットに SIM カードが挿入されていません。"</string>
     <string name="keyguard_missing_sim_message" product="default" msgid="6585414237800161146">"スマートフォンに SIM カードが挿入されていません。"</string>
     <string name="keyguard_missing_sim_instructions" msgid="7350295932015220392">"SIM カードを挿入してください。"</string>
@@ -140,10 +140,7 @@
       <item quantity="one">端末のロックが <xliff:g id="NUMBER_0">%d</xliff:g> 時間、解除されていません。パスワードを確認してください。</item>
     </plurals>
     <string name="fingerprint_not_recognized" msgid="348813995267914625">"認識されませんでした"</string>
-    <plurals name="kg_password_default_pin_message" formatted="false" msgid="6203676909479972943">
-      <item quantity="other">SIM PIN を入力してください。入力できるのはあと <xliff:g id="NUMBER_1">%d</xliff:g> 回です。</item>
-      <item quantity="one">SIM PIN を入力してください。入力できるのはあと <xliff:g id="NUMBER_0">%d</xliff:g> 回です。この回数を超えた場合は、携帯通信会社にお問い合わせください。</item>
-    </plurals>
+    <!-- no translation found for kg_password_default_pin_message (3739658416797652781) -->
     <plurals name="kg_password_default_puk_message" formatted="false" msgid="8744416410184198352">
       <item quantity="other">SIM が無効になりました。続行するには PUK コードを入力してください。入力できるのはあと <xliff:g id="_NUMBER_1">%d</xliff:g> 回です。この回数を超えると SIM は完全に使用できなくなります。詳しくは携帯通信会社にお問い合わせください。</item>
       <item quantity="one">SIM が無効になりました。続行するには PUK コードを入力してください。入力できるのはあと <xliff:g id="_NUMBER_0">%d</xliff:g> 回です。この回数を超えると SIM は完全に使用できなくなります。詳しくは携帯通信会社にお問い合わせください。</item>

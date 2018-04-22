@@ -70,7 +70,7 @@
     <string name="ThreeWCMmi" msgid="9051047170321190368">"Llamada de tres direcciones"</string>
     <string name="RuacMmi" msgid="7827887459138308886">"Rechazo de llamadas molestas no deseadas"</string>
     <string name="CndMmi" msgid="3116446237081575808">"Entrega de número de llamada"</string>
-    <string name="DndMmi" msgid="1265478932418334331">"No molestar"</string>
+    <string name="DndMmi" msgid="1265478932418334331">"No interrumpir"</string>
     <string name="CLIRDefaultOnNextCallOn" msgid="429415409145781923">"El identificador de llamadas está predeterminado en restringido. Llamada siguiente: restringida"</string>
     <string name="CLIRDefaultOnNextCallOff" msgid="3092918006077864624">"El Identificador de llamadas está predeterminado en restringido. Llamada siguiente: no restringido"</string>
     <string name="CLIRDefaultOffNextCallOn" msgid="6179425182856418465">"El identificador de llamadas está predeterminado en no restringido. Llamada siguiente: restringida"</string>
@@ -570,8 +570,8 @@
     <string name="permdesc_bindCarrierMessagingService" msgid="2762882888502113944">"Permite al propietario vincularse a la interfaz de nivel superior del servicio de mensajería del proveedor. Las aplicaciones regulares no lo necesitan."</string>
     <string name="permlab_bindCarrierServices" msgid="3233108656245526783">"vincular con servicios de proveedores"</string>
     <string name="permdesc_bindCarrierServices" msgid="1391552602551084192">"Permite al propietario vincular con servicios de proveedores. Las aplicaciones normales no deberían necesitar este permiso."</string>
-    <string name="permlab_access_notification_policy" msgid="4247510821662059671">"Acceso a la función No molestar"</string>
-    <string name="permdesc_access_notification_policy" msgid="3296832375218749580">"Permite que la aplicación lea y modifique la configuración de la función No molestar."</string>
+    <string name="permlab_access_notification_policy" msgid="4247510821662059671">"Acceso a la función No interrumpir"</string>
+    <string name="permdesc_access_notification_policy" msgid="3296832375218749580">"Permite que la aplicación lea y modifique la configuración de la función No interrumpir."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Establecer reglas de contraseña"</string>
     <string name="policydesc_limitPassword" msgid="2502021457917874968">"Permite controlar la longitud y los caracteres permitidos en las contraseñas y los PIN para el bloqueo de pantalla."</string>
     <string name="policylab_watchLogin" msgid="5091404125971980158">"Supervisa los intentos para desbloquear la pantalla"</string>
@@ -1188,10 +1188,10 @@
     <string name="wifi_connect_alert_title" msgid="8455846016001810172">"¿Permitir la conexión?"</string>
     <string name="wifi_connect_alert_message" msgid="6451273376815958922">"La aplicación %1$s quiere conectarse a la red Wi-Fi %2$s."</string>
     <string name="wifi_connect_default_application" msgid="7143109390475484319">"Una aplicación"</string>
-    <string name="wifi_p2p_dialog_title" msgid="97611782659324517">"Wi-Fi Direct"</string>
-    <string name="wifi_p2p_turnon_message" msgid="2909250942299627244">"Iniciar Wi-Fi Direct. Se desactivará el funcionamiento de la zona o del cliente Wi-Fi."</string>
-    <string name="wifi_p2p_failed_message" msgid="3763669677935623084">"No se pudo iniciar Wi-Fi Direct."</string>
-    <string name="wifi_p2p_enabled_notification_title" msgid="2068321881673734886">"Se activó Wi-Fi Direct."</string>
+    <string name="wifi_p2p_dialog_title" msgid="97611782659324517">"Wi-Fi directo"</string>
+    <string name="wifi_p2p_turnon_message" msgid="2909250942299627244">"Iniciar Wi-Fi directo. Se desactivará el funcionamiento del hotspot o del cliente Wi-Fi."</string>
+    <string name="wifi_p2p_failed_message" msgid="3763669677935623084">"No se pudo iniciar Wi-Fi directo."</string>
+    <string name="wifi_p2p_enabled_notification_title" msgid="2068321881673734886">"Se activó Wi-Fi directo."</string>
     <string name="wifi_p2p_enabled_notification_message" msgid="8064677407830620023">"Presiona para ver la configuración"</string>
     <string name="accept" msgid="1645267259272829559">"Aceptar"</string>
     <string name="decline" msgid="2112225451706137894">"Rechazar"</string>
@@ -1691,7 +1691,7 @@
     <string name="package_updated_device_owner" msgid="1847154566357862089">"Tu administrador actualizó este paquete"</string>
     <string name="package_deleted_device_owner" msgid="2307122077550236438">"Tu administrador borró este paquete"</string>
     <string name="battery_saver_description" msgid="769989536172631582">"Para extender la duración de la batería, Ahorro de batería desactiva algunas funciones y restringe apps en el dispositivo."</string>
-    <string name="data_saver_description" msgid="6015391409098303235">"Para reducir el uso de datos, \"Reducir datos\" evita que algunas apps envíen y reciban datos en segundo plano. La app que estés usando podrá acceder a los datos, pero con menor frecuencia. De esta forma, por ejemplo, las imágenes no se mostrarán hasta que las presiones."</string>
+    <string name="data_saver_description" msgid="6015391409098303235">"Para reducir el uso de datos, Ahorro de datos evita que algunas apps envíen y reciban datos en segundo plano. La app que estés usando podrá acceder a los datos, pero con menor frecuencia. De esta forma, por ejemplo, las imágenes no se mostrarán hasta que las presiones."</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"¿Activar Ahorro de datos?"</string>
     <string name="data_saver_enable_button" msgid="7147735965247211818">"Activar"</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="4367877408072000848">
@@ -1729,16 +1729,17 @@
     <string name="zen_mode_until" msgid="7336308492289875088">"Hasta la(s) <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
     <string name="zen_mode_alarm" msgid="9128205721301330797">"Hasta la hora <xliff:g id="FORMATTEDTIME">%1$s</xliff:g> (próxima alarma)"</string>
     <string name="zen_mode_forever" msgid="931849471004038757">"Hasta que lo desactives"</string>
-    <string name="zen_mode_forever_dnd" msgid="3792132696572189081">"Hasta que desactives No molestar"</string>
+    <string name="zen_mode_forever_dnd" msgid="3792132696572189081">"Hasta que desactives No interrumpir"</string>
     <string name="zen_mode_rule_name_combination" msgid="191109939968076477">"<xliff:g id="FIRST">%1$s</xliff:g>/<xliff:g id="REST">%2$s</xliff:g>"</string>
     <string name="toolbar_collapse_description" msgid="2821479483960330739">"Contraer"</string>
-    <string name="zen_mode_feature_name" msgid="5254089399895895004">"No molestar"</string>
+    <string name="zen_mode_feature_name" msgid="5254089399895895004">"No interrumpir"</string>
     <string name="zen_mode_downtime_feature_name" msgid="2626974636779860146">"Tiempo de inactividad"</string>
     <string name="zen_mode_default_weeknights_name" msgid="3081318299464998143">"Noche, en la semana"</string>
     <string name="zen_mode_default_weekends_name" msgid="2786495801019345244">"Fin de semana"</string>
     <string name="zen_mode_default_events_name" msgid="8158334939013085363">"Evento"</string>
     <string name="zen_mode_default_every_night_name" msgid="3012363838882944175">"Dormir"</string>
-    <string name="muted_by" msgid="6147073845094180001">"Silenciados por <xliff:g id="THIRD_PARTY">%1$s</xliff:g>"</string>
+    <!-- no translation found for muted_by (5942954724562097128) -->
+    <skip />
     <string name="system_error_wipe_data" msgid="6608165524785354962">"Existe un problema interno con el dispositivo, de modo que el dispositivo puede estar inestable hasta que restablezcas la configuración de fábrica."</string>
     <string name="system_error_manufacturer" msgid="8086872414744210668">"Existe un problema interno con el dispositivo. Comunícate con el fabricante para obtener más información."</string>
     <string name="stk_cc_ussd_to_dial" msgid="5214333646366591205">"Se cambió la solicitud USSD por una llamada normal"</string>
@@ -1875,6 +1876,5 @@
     <string name="zen_upgrade_notification_content" msgid="1794994264692424562">"Presiona para consultar lo que está bloqueado."</string>
     <string name="notification_app_name_system" msgid="4205032194610042794">"Sistema"</string>
     <string name="notification_app_name_settings" msgid="7751445616365753381">"Configuración"</string>
-    <!-- no translation found for car_loading_profile (3545132581795684027) -->
-    <skip />
+    <string name="car_loading_profile" msgid="3545132581795684027">"Cargando"</string>
 </resources>

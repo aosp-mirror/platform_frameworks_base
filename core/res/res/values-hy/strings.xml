@@ -21,7 +21,7 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="byteShort" msgid="8340973892742019101">"Բ"</string>
-    <string name="kilobyteShort" msgid="7542884022844556968">"ԿԲ"</string>
+    <string name="kilobyteShort" msgid="7542884022844556968">"կԲ"</string>
     <string name="megabyteShort" msgid="6355851576770428922">"ՄԲ"</string>
     <string name="gigabyteShort" msgid="3259882455212193214">"ԳԲ"</string>
     <string name="terabyteShort" msgid="231613018159186962">"ՏԲ"</string>
@@ -220,7 +220,7 @@
     <string name="global_action_bug_report" msgid="7934010578922304799">"Վրիպակի զեկույց"</string>
     <string name="global_action_logout" msgid="935179188218826050">"Ավարտել աշխատաշրջանը"</string>
     <string name="global_action_screenshot" msgid="8329831278085426283">"Էկրանի պատկեր"</string>
-    <string name="bugreport_title" msgid="2667494803742548533">"Գրել սխալի զեկույց"</string>
+    <string name="bugreport_title" msgid="2667494803742548533">"Հաղորդել սխալի մասին"</string>
     <string name="bugreport_message" msgid="398447048750350456">"Սա տեղեկություններ կհավաքագրի ձեր սարքի առկա կարգավիճակի մասին և կուղարկի այն էլեկտրոնային նամակով: Որոշակի ժամանակ կպահանջվի վրիպակի մասին զեկուցելու պահից սկսած մինչ ուղարկելը: Խնդրում ենք փոքր-ինչ համբերատար լինել:"</string>
     <string name="bugreport_option_interactive_title" msgid="8635056131768862479">"Ինտերակտիվ զեկույց"</string>
     <string name="bugreport_option_interactive_summary" msgid="229299488536107968">"Հիմնականում օգտագործեք այս տարբերակը: Այն ձեզ թույլ է տալիս հետևել զեկույցի ստեղծման գործընթացին, խնդրի մասին լրացուցիչ տեղեկություններ մուտքագրել և էկրանի պատկերներ կորզել: Կարող է բաց թողնել քիչ օգտագործվող որոշ բաժինները, որոնց ստեղծումը երկար է տևում:"</string>
@@ -1266,7 +1266,7 @@
     <string name="select_keyboard_layout_notification_message" msgid="8084622969903004900">"Հպեք՝ լեզուն և դասավորությունն ընտրելու համար"</string>
     <string name="fast_scroll_alphabet" msgid="5433275485499039199">" ԱԲԳԴԵԶԷԸԹԺԻԼԽԾԿՀՁՂՃՄՅՆՇՈՉՊՋՌՍՎՏՐՑՈՒՓՔԵւՕՖ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="4030170524595123610">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
-    <string name="alert_windows_notification_channel_group_name" msgid="1463953341148606396">"Ցույց տալ այլ հավելվածների վրայից"</string>
+    <string name="alert_windows_notification_channel_group_name" msgid="1463953341148606396">"Ցուցադրում այլ հավելվածների վրայից"</string>
     <string name="alert_windows_notification_channel_name" msgid="3116610965549449803">"<xliff:g id="NAME">%s</xliff:g> հավելվածը ցուցադրվում է այլ հավելվածների վերևում"</string>
     <string name="alert_windows_notification_title" msgid="3697657294867638947">"<xliff:g id="NAME">%s</xliff:g> հավելվածը ցուցադրվում է այլ հավելվածների վերևում"</string>
     <string name="alert_windows_notification_message" msgid="8917232109522912560">"Եթե չեք ցանկանում, որ <xliff:g id="NAME">%s</xliff:g>-ն օգտագործի այս գործառույթը, հպեք՝ կարգավորումները բացելու և այն անջատելու համար։"</string>
@@ -1549,7 +1549,7 @@
     <string name="kg_reordering_delete_drop_target_text" msgid="7899202978204438708">"Հեռացնել"</string>
     <string name="safe_media_volume_warning" product="default" msgid="2276318909314492312">"Ձայնը բարձրացնե՞լ խորհուրդ տրվող մակարդակից ավել:\n\nԵրկարատև բարձրաձայն լսելը կարող է վնասել ձեր լսողությունը:"</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="8404780875025725199">"Օգտագործե՞լ Մատչելիության դյուրանցումը։"</string>
-    <string name="accessibility_shortcut_toogle_warning" msgid="7256507885737444807">"Մատչելիության գործառույթն օգտագործելու համար սեղմեք և 3 վայրկյան սեղմած պահեք ձայնի ուժգնության երկու կոճակները, երբ գործառույթը միացված է։\n\n Մատչելիության ակտիվ գործառույթը՝\n<xliff:g id="SERVICE_NAME">%1$s</xliff:g>\n\n Գործառույթը կարող եք փոփոխել՝ անցնելով Կարգավորումներ &gt; Հատուկ գործառույթներ։"</string>
+    <string name="accessibility_shortcut_toogle_warning" msgid="7256507885737444807">"Հատուկ գործառույթն օգտագործելու համար սեղմեք և 3 վայրկյան սեղմած պահեք ձայնի ուժգնության երկու կոճակները, երբ գործառույթը միացված է։\n\n Մատչելիության ակտիվ գործառույթը՝\n<xliff:g id="SERVICE_NAME">%1$s</xliff:g>\n\n Գործառույթը կարող եք փոփոխել՝ անցնելով Կարգավորումներ &gt; Հատուկ գործառույթներ։"</string>
     <string name="disable_accessibility_shortcut" msgid="627625354248453445">"Անջատել դյուրանցումը"</string>
     <string name="leave_accessibility_shortcut_on" msgid="7653111894438512680">"Օգտագործել դյուրանցումը"</string>
     <string name="color_inversion_feature_name" msgid="4231186527799958644">"Գունաշրջում"</string>
@@ -1684,9 +1684,9 @@
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"Աշխատանքային <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="managed_profile_label_badge_2" msgid="5048136430082124036">"2-րդ աշխատանք <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="managed_profile_label_badge_3" msgid="2808305070321719040">"3-րդ աշխատանք <xliff:g id="LABEL">%1$s</xliff:g>"</string>
-    <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"Ապաամրացնելուց առաջ հարցնել PIN-կոդը"</string>
-    <string name="lock_to_app_unlock_pattern" msgid="4182192144797225137">"Ապաամրացնելուց առաջ հարցնել ապակողպող նախշը"</string>
-    <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"Ապաամրացնելուց առաջ հարցնել գաղտնաբառը"</string>
+    <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"Հարցնել PIN-կոդը"</string>
+    <string name="lock_to_app_unlock_pattern" msgid="4182192144797225137">"Հարցնել ապակողպող նախշը"</string>
+    <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"Հարցնել գաղտնաբառը"</string>
     <string name="package_installed_device_owner" msgid="6875717669960212648">"Տեղադրվել է ձեր ադմինիստրատորի կողմից"</string>
     <string name="package_updated_device_owner" msgid="1847154566357862089">"Թարմացվել է ձեր ադմինիստրատորի կողմից"</string>
     <string name="package_deleted_device_owner" msgid="2307122077550236438">"Ջնջվել է ձեր ադմինիստրատորի կողմից"</string>
@@ -1738,7 +1738,8 @@
     <string name="zen_mode_default_weekends_name" msgid="2786495801019345244">"Շաբաթ-կիրակի"</string>
     <string name="zen_mode_default_events_name" msgid="8158334939013085363">"Միջոցառում"</string>
     <string name="zen_mode_default_every_night_name" msgid="3012363838882944175">"Քնելիս"</string>
-    <string name="muted_by" msgid="6147073845094180001">"Համրեցվել է <xliff:g id="THIRD_PARTY">%1$s</xliff:g>-ի կողմից"</string>
+    <!-- no translation found for muted_by (5942954724562097128) -->
+    <skip />
     <string name="system_error_wipe_data" msgid="6608165524785354962">"Սարքում ներքին խնդիր է առաջացել և այն կարող է կրկնվել, մինչև չվերականգնեք գործարանային կարգավորումները:"</string>
     <string name="system_error_manufacturer" msgid="8086872414744210668">"Սարքում ներքին խնդիր է առաջացել: Մանրամասների համար կապվեք արտադրողի հետ:"</string>
     <string name="stk_cc_ussd_to_dial" msgid="5214333646366591205">"USSD հարցումը փոխվել է սովորական զանգի"</string>
@@ -1777,12 +1778,9 @@
     <string name="language_picker_section_all" msgid="3097279199511617537">"Բոլոր լեզուները"</string>
     <string name="region_picker_section_all" msgid="8966316787153001779">"Բոլոր տարածաշրջանները"</string>
     <string name="locale_search_menu" msgid="2560710726687249178">"Որոնում"</string>
-    <!-- no translation found for app_suspended_title (1919029799438164552) -->
-    <skip />
-    <!-- no translation found for app_suspended_default_message (7875306315686531621) -->
-    <skip />
-    <!-- no translation found for app_suspended_more_details (1131804827776778187) -->
-    <skip />
+    <string name="app_suspended_title" msgid="1919029799438164552">"Հնարավոր չէ բացել հավելվածը"</string>
+    <string name="app_suspended_default_message" msgid="7875306315686531621">"«<xliff:g id="APP_NAME_0">%1$s</xliff:g>» հավելվածը հասանելի չէ։ Դրա աշխատանքը կառավարվում է «<xliff:g id="APP_NAME_1">%2$s</xliff:g>» հավելվածի կողմից։"</string>
+    <string name="app_suspended_more_details" msgid="1131804827776778187">"Մանրամասն"</string>
     <string name="work_mode_off_title" msgid="1118691887588435530">"Միացնե՞լ աշխատանքային պրոֆիլը"</string>
     <string name="work_mode_off_message" msgid="5130856710614337649">"Ձեր աշխատանքային հավելվածները, ծանուցումները, տվյալները և աշխատանքային պրոֆիլի մյուս գործառույթները կմիանան"</string>
     <string name="work_mode_turn_on" msgid="2062544985670564875">"Միացնել"</string>
@@ -1878,6 +1876,5 @@
     <string name="zen_upgrade_notification_content" msgid="1794994264692424562">"Հպեք՝ տեսնելու, թե ինչ է արգելափակվել:"</string>
     <string name="notification_app_name_system" msgid="4205032194610042794">"Համակարգ"</string>
     <string name="notification_app_name_settings" msgid="7751445616365753381">"Կարգավորումներ"</string>
-    <!-- no translation found for car_loading_profile (3545132581795684027) -->
-    <skip />
+    <string name="car_loading_profile" msgid="3545132581795684027">"Բեռնում"</string>
 </resources>

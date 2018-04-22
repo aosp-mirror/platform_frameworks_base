@@ -1377,7 +1377,7 @@
     <string name="vpn_text" msgid="1610714069627824309">"Dodirnite da biste upravljali mrežom."</string>
     <string name="vpn_text_long" msgid="4907843483284977618">"Povezano sa sesijom <xliff:g id="SESSION">%s</xliff:g>. Dodirnite da biste upravljali mrežom."</string>
     <string name="vpn_lockdown_connecting" msgid="6443438964440960745">"Povezivanje stalno uključenog VPN-a..."</string>
-    <string name="vpn_lockdown_connected" msgid="8202679674819213931">"Stalno uključeni VPN je povezan"</string>
+    <string name="vpn_lockdown_connected" msgid="8202679674819213931">"Stalno uključen VPN je povezan"</string>
     <string name="vpn_lockdown_disconnected" msgid="735805531187559719">"Veza sa uvek uključenim VPN-om je prekinuta"</string>
     <string name="vpn_lockdown_error" msgid="3133844445659711681">"Povezivanje na stalno uključeni VPN nije uspelo"</string>
     <string name="vpn_lockdown_config" msgid="8151951501116759194">"Promenite podešavanja VPN-a"</string>
@@ -1771,7 +1771,8 @@
     <string name="zen_mode_default_weekends_name" msgid="2786495801019345244">"Vikend"</string>
     <string name="zen_mode_default_events_name" msgid="8158334939013085363">"Događaj"</string>
     <string name="zen_mode_default_every_night_name" msgid="3012363838882944175">"Spavanje"</string>
-    <string name="muted_by" msgid="6147073845094180001">"Zvuk je isključio/la <xliff:g id="THIRD_PARTY">%1$s</xliff:g>"</string>
+    <!-- no translation found for muted_by (5942954724562097128) -->
+    <skip />
     <string name="system_error_wipe_data" msgid="6608165524785354962">"Došlo je do internog problema u vezi sa uređajem i možda će biti nestabilan dok ne obavite resetovanje na fabrička podešavanja."</string>
     <string name="system_error_manufacturer" msgid="8086872414744210668">"Došlo je do internog problema u vezi sa uređajem. Potražite detalje od proizvođača."</string>
     <string name="stk_cc_ussd_to_dial" msgid="5214333646366591205">"USSD zahtev je promenjen u običan poziv"</string>
@@ -1811,12 +1812,9 @@
     <string name="language_picker_section_all" msgid="3097279199511617537">"Svi jezici"</string>
     <string name="region_picker_section_all" msgid="8966316787153001779">"Svi regioni"</string>
     <string name="locale_search_menu" msgid="2560710726687249178">"Pretraži"</string>
-    <!-- no translation found for app_suspended_title (1919029799438164552) -->
-    <skip />
-    <!-- no translation found for app_suspended_default_message (7875306315686531621) -->
-    <skip />
-    <!-- no translation found for app_suspended_more_details (1131804827776778187) -->
-    <skip />
+    <string name="app_suspended_title" msgid="1919029799438164552">"Otvaranje aplikacije nije uspelo"</string>
+    <string name="app_suspended_default_message" msgid="7875306315686531621">"Aplikacija <xliff:g id="APP_NAME_0">%1$s</xliff:g> trenutno nije dostupna. <xliff:g id="APP_NAME_1">%2$s</xliff:g> upravlja dostupnošću."</string>
+    <string name="app_suspended_more_details" msgid="1131804827776778187">"Saznajte više"</string>
     <string name="work_mode_off_title" msgid="1118691887588435530">"Da uključimo profil za Work?"</string>
     <string name="work_mode_off_message" msgid="5130856710614337649">"Uključiće se poslovne aplikacije, obaveštenja, podaci i druge funkcije profila za Work"</string>
     <string name="work_mode_turn_on" msgid="2062544985670564875">"Uključi"</string>
@@ -1913,6 +1911,5 @@
     <string name="zen_upgrade_notification_content" msgid="1794994264692424562">"Dodirnite da biste proverili šta je blokirano."</string>
     <string name="notification_app_name_system" msgid="4205032194610042794">"Sistem"</string>
     <string name="notification_app_name_settings" msgid="7751445616365753381">"Podešavanja"</string>
-    <!-- no translation found for car_loading_profile (3545132581795684027) -->
-    <skip />
+    <string name="car_loading_profile" msgid="3545132581795684027">"Učitava se"</string>
 </resources>

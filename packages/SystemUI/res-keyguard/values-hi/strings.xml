@@ -140,10 +140,7 @@
       <item quantity="other">डिवाइस को <xliff:g id="NUMBER_1">%d</xliff:g> घंटों से अनलॉक नहीं किया गया है. पासवर्ड की पुष्टि करें.</item>
     </plurals>
     <string name="fingerprint_not_recognized" msgid="348813995267914625">"उंगली की पहचान नहीं हो सकी"</string>
-    <plurals name="kg_password_default_pin_message" formatted="false" msgid="6203676909479972943">
-      <item quantity="one">सिम का पिन डालें, आपके पास <xliff:g id="NUMBER_1">%d</xliff:g> मौके बचे हैं.</item>
-      <item quantity="other">सिम का पिन डालें, आपके पास <xliff:g id="NUMBER_1">%d</xliff:g> मौके बचे हैं.</item>
-    </plurals>
+    <!-- no translation found for kg_password_default_pin_message (3739658416797652781) -->
     <plurals name="kg_password_default_puk_message" formatted="false" msgid="8744416410184198352">
       <item quantity="one">सिम बंद कर दिया गया है. जारी रखने के लिए PUK कोड डालें. आपके पास <xliff:g id="_NUMBER_1">%d</xliff:g> मौके बचे हैं, उसके बाद, सिम हमेशा के लिए काम करना बंद कर देगा. जानकारी के लिए, मोबाइल और इंटरनेट सेवा देने वाली कंपनी से संपर्क करें.</item>
       <item quantity="other">सिम बंद कर दिया गया है. जारी रखने के लिए PUK कोड डालें. आपके पास <xliff:g id="_NUMBER_1">%d</xliff:g> मौके बचे हैं, उसके बाद, सिम हमेशा के लिए काम करना बंद कर देगा. जानकारी के लिए, मोबाइल और इंटरनेट सेवा देने वाली कंपनी से संपर्क करें.</item>

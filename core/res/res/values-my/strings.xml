@@ -1224,7 +1224,7 @@
     <string name="sim_done_button" msgid="827949989369963775">"ပြီးပါပြီ"</string>
     <string name="sim_added_title" msgid="3719670512889674693">"ဆင်းမ်ကဒ် ထည့်ပါသည်"</string>
     <string name="sim_added_message" msgid="6599945301141050216">"မိုးဘိုင်းကွန်ရက်ကို ဆက်သွယ်ရန် စက်ကို ပြန် စ ပါ"</string>
-    <string name="sim_restart_button" msgid="4722407842815232347">"အစက ပြန်စရန်"</string>
+    <string name="sim_restart_button" msgid="4722407842815232347">"ပြန်စရန်"</string>
     <string name="install_carrier_app_notification_title" msgid="9056007111024059888">"မိုဘိုင်းဝန်ဆောင်မှု စတင်ဖွင့်လှစ်ရန်"</string>
     <string name="install_carrier_app_notification_text" msgid="3346681446158696001">"သင့်ဆင်းမ်ကဒ်အသစ်ကို စတင်အသုံးပြုရန် ဝန်ဆောင်မှုပေးသူအက်ပ်ကို ဒေါင်းလုဒ်လုပ်ပါ"</string>
     <string name="install_carrier_app_notification_text_app_name" msgid="1196505084835248137">"သင်၏ ဆင်းမ်ကဒ်အသစ်ကို စဖွင့်အသုံးပြုနိုင်ရန် <xliff:g id="APP_NAME">%1$s</xliff:g> အက်ပ်ကို ဒေါင်းလုဒ်လုပ်ပါ"</string>
@@ -1692,7 +1692,7 @@
     <string name="package_updated_device_owner" msgid="1847154566357862089">"သင်၏ စီမံခန့်ခွဲသူက အပ်ဒိတ်လုပ်ထားသည်"</string>
     <string name="package_deleted_device_owner" msgid="2307122077550236438">"သင်၏ စီမံခန့်ခွဲသူက ဖျက်လိုက်ပါပြီ"</string>
     <string name="battery_saver_description" msgid="769989536172631582">"ဘက်ထရီသက်တမ်း တိုးလာစေရန် \'ဘက်ထရီအားထိန်း\' သည် အချို့သော စက်ပစ္စည်းဝန်ဆောင်မှုများကို ပိတ်ပြီး အက်ပ်များကို ကန့်သတ်ပေးပါသည်။"</string>
-    <string name="data_saver_description" msgid="6015391409098303235">"ဒေတာအသုံးလျှော့ချနိုင်ရန် အက်ပ်များကို နောက်ခံတွင် ဒေတာပို့ခြင်းနှင့် လက်ခံခြင်းမရှိစေရန် ဒေတာချွေတာမှုစနစ်က တားဆီးထားပါသည်။ ယခုအက်ပ်ဖြင့် ဒေတာအသုံးပြုနိုင်သော်လည်း အကြိမ်လျှော့၍သုံးရပါမည်။ ဥပမာ၊ သင် မတို့မချင်း ပုံများပေါ်လာမည် မဟုတ်ပါ။"</string>
+    <string name="data_saver_description" msgid="6015391409098303235">"ဒေတာအသုံးလျှော့ချနိုင်ရန်အတွက် အက်ပ်များကို နောက်ခံတွင် ဒေတာပို့ခြင်းနှင့် လက်ခံခြင်းမပြုရန် ဒေတာချွေတာမှုစနစ်က တားဆီးထားပါသည်။ ယခုအက်ပ်ဖြင့် ဒေတာအသုံးပြုနိုင်သော်လည်း အကြိမ်လျှော့၍သုံးရပါမည်။ ဥပမာ၊ သင်က မတို့မချင်း ပုံများပေါ်လာမည် မဟုတ်ပါ။"</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"ဒေတာအသုံးပြုမှု ချွေတာမှုစနစ်ကို ဖွင့်မလား။"</string>
     <string name="data_saver_enable_button" msgid="7147735965247211818">"ဖွင့်ပါ"</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="4367877408072000848">
@@ -1739,7 +1739,8 @@
     <string name="zen_mode_default_weekends_name" msgid="2786495801019345244">"စနေ၊ တနင်္ဂနွေ"</string>
     <string name="zen_mode_default_events_name" msgid="8158334939013085363">"အစီအစဉ်"</string>
     <string name="zen_mode_default_every_night_name" msgid="3012363838882944175">"အိပ်နေချိန်"</string>
-    <string name="muted_by" msgid="6147073845094180001">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g> အသံပိတ်သည်"</string>
+    <!-- no translation found for muted_by (5942954724562097128) -->
+    <skip />
     <string name="system_error_wipe_data" msgid="6608165524785354962">"သင့်ကိရိယာအတွင်းပိုင်းတွင် ပြဿနာရှိနေပြီး၊ မူလစက်ရုံထုတ်အခြေအနေအဖြစ် ပြန်လည်ရယူနိုင်သည်အထိ အခြေအနေမတည်ငြိမ်နိုင်ပါ။"</string>
     <string name="system_error_manufacturer" msgid="8086872414744210668">"သင့်ကိရိယာအတွင်းပိုင်းတွင် ပြဿနာရှိနေ၏။ အသေးစိတ်သိရန်အတွက် ပစ္စည်းထုတ်လုပ်သူအား ဆက်သွယ်ပါ။"</string>
     <string name="stk_cc_ussd_to_dial" msgid="5214333646366591205">"USSD တောင်းဆိုမှုကို ပုံမှန်ခေါ်ဆိုမှုသို့ ပြောင်းထားသည်"</string>
@@ -1876,6 +1877,5 @@
     <string name="zen_upgrade_notification_content" msgid="1794994264692424562">"ပိတ်ထားသည့်အရာများကို ကြည့်ရန် တို့ပါ။"</string>
     <string name="notification_app_name_system" msgid="4205032194610042794">"စနစ်"</string>
     <string name="notification_app_name_settings" msgid="7751445616365753381">"ဆက်တင်များ"</string>
-    <!-- no translation found for car_loading_profile (3545132581795684027) -->
-    <skip />
+    <string name="car_loading_profile" msgid="3545132581795684027">"တင်နေသည်"</string>
 </resources>

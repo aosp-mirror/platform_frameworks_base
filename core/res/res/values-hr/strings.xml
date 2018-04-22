@@ -604,7 +604,7 @@
     <string name="policydesc_encryptedStorage" msgid="2637732115325316992">"Zahtijevajte da pohranjeni podaci aplikacije budu šifrirani."</string>
     <string name="policylab_disableCamera" msgid="6395301023152297826">"Onemogući fotoaparate"</string>
     <string name="policydesc_disableCamera" msgid="2306349042834754597">"Spriječite upotrebu svih kamera uređaja."</string>
-    <string name="policylab_disableKeyguardFeatures" msgid="8552277871075367771">"Onemogući dio značajki zaklj. zaslona"</string>
+    <string name="policylab_disableKeyguardFeatures" msgid="8552277871075367771">"Onemogućavanje nekih značajki zaključavanja zaslona"</string>
     <string name="policydesc_disableKeyguardFeatures" msgid="2044755691354158439">"Sprječava upotrebu nekih značajki zaključavanja zaslona."</string>
   <string-array name="phoneTypes">
     <item msgid="8901098336658710359">"Privatni"</item>
@@ -1771,7 +1771,8 @@
     <string name="zen_mode_default_weekends_name" msgid="2786495801019345244">"Vikend"</string>
     <string name="zen_mode_default_events_name" msgid="8158334939013085363">"Događaj"</string>
     <string name="zen_mode_default_every_night_name" msgid="3012363838882944175">"Spavanje"</string>
-    <string name="muted_by" msgid="6147073845094180001">"Zvuk je isklj. treća strana <xliff:g id="THIRD_PARTY">%1$s</xliff:g>"</string>
+    <!-- no translation found for muted_by (5942954724562097128) -->
+    <skip />
     <string name="system_error_wipe_data" msgid="6608165524785354962">"Na vašem uređaju postoji interni problem i možda neće biti stabilan dok ga ne vratite na tvorničko stanje."</string>
     <string name="system_error_manufacturer" msgid="8086872414744210668">"Na vašem uređaju postoji interni problem. Obratite se proizvođaču za više pojedinosti."</string>
     <string name="stk_cc_ussd_to_dial" msgid="5214333646366591205">"USSD zahtjev promijenjen je u običan poziv"</string>
@@ -1910,6 +1911,5 @@
     <string name="zen_upgrade_notification_content" msgid="1794994264692424562">"Dodirnite da biste provjerili što je blokirano."</string>
     <string name="notification_app_name_system" msgid="4205032194610042794">"Sustav"</string>
     <string name="notification_app_name_settings" msgid="7751445616365753381">"Postavke"</string>
-    <!-- no translation found for car_loading_profile (3545132581795684027) -->
-    <skip />
+    <string name="car_loading_profile" msgid="3545132581795684027">"Učitavanje"</string>
 </resources>

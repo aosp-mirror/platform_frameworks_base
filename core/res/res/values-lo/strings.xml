@@ -299,7 +299,7 @@
     <string name="permgrouprequest_sensors" msgid="6349806962814556786">"ອະນຸຍາດ &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ໃຫ້ເຂົ້າເຖິງຂໍ້ມູນເຊັນເຊີກ່ຽວກັບສັນຍານຊີບຂອງທ່ານບໍ?"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"ດຶງຂໍ້ມູນເນື້ອຫາໃນໜ້າຈໍ"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"ກວດກາເນື້ອຫາຂອງໜ້າຈໍທີ່ທ່ານກຳລັງມີປະຕິສຳພັນນຳ."</string>
-    <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"ເປີດໃຊ້ \"ການສຳຫຼວດໂດຍສຳພັດ\""</string>
+    <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"ເປີດໃຊ້ \"ການສຳຫຼວດໂດຍສຳຜັດ\""</string>
     <string name="capability_desc_canRequestTouchExploration" msgid="7543249041581408313">"ລາຍການທີ່ແຕະຈະຖືກເວົ້າອອກມາ ແລະ ສາມາດສຳຫຼວດໜ້າຈໍໄດ້ດ້ວຍທ່າທາງໄດ້."</string>
     <string name="capability_title_canRequestFilterKeyEvents" msgid="2103440391902412174">"ຕິດຕາມ​ເບິ່ງ​ຂໍ້​ຄວາມ​ທີ່​ທ່ານ​ພິມ"</string>
     <string name="capability_desc_canRequestFilterKeyEvents" msgid="7463135292204152818">"ຮວມທັງຂໍ້ມູນສ່ວນໂຕເຊັ່ນ: ເລກບັດເຄຣດິດ ແລະລະຫັດຜ່ານ."</string>
@@ -1738,7 +1738,8 @@
     <string name="zen_mode_default_weekends_name" msgid="2786495801019345244">"ທ້າຍອາທິດ"</string>
     <string name="zen_mode_default_events_name" msgid="8158334939013085363">"ການນັດໝາຍ"</string>
     <string name="zen_mode_default_every_night_name" msgid="3012363838882944175">"ການນອນ"</string>
-    <string name="muted_by" msgid="6147073845094180001">"ຖືກ​ປິດ​ສຽງ​ໂດຍ <xliff:g id="THIRD_PARTY">%1$s</xliff:g>"</string>
+    <!-- no translation found for muted_by (5942954724562097128) -->
+    <skip />
     <string name="system_error_wipe_data" msgid="6608165524785354962">"ມີ​ບັນ​ຫາ​ພາຍ​ໃນ​ກັບ​ອຸ​ປະ​ກອນ​ຂອງ​ທ່ານ, ແລະ​ມັນ​ອາດ​ຈະ​ບໍ່​ສະ​ຖຽນ​ຈົນ​ກວ່າ​ທ່ານ​ຕັ້ງ​ເປັນ​ຂໍ້​ມູນ​ໂຮງ​ງານ​ຄືນ​ແລ້ວ."</string>
     <string name="system_error_manufacturer" msgid="8086872414744210668">"ມີ​ບັນ​ຫາ​ພາຍ​ໃນ​ກັບ​ອຸ​ປະ​ກອນ​ຂອງ​ທ່ານ. ຕິດ​ຕໍ່ຜູ້​ຜະ​ລິດ​ຂອງ​ທ່ານ​ສຳ​ລັບ​ລາຍ​ລະ​ອຽດ​ຕ່າງໆ."</string>
     <string name="stk_cc_ussd_to_dial" msgid="5214333646366591205">"ປ່ຽນການຮ້ອງຂໍ USSD ເປັນການໂທທຳມະດາແລ້ວ"</string>
@@ -1777,12 +1778,9 @@
     <string name="language_picker_section_all" msgid="3097279199511617537">"ທຸກພາ​ສາ​"</string>
     <string name="region_picker_section_all" msgid="8966316787153001779">"ທຸກຂົງເຂດ"</string>
     <string name="locale_search_menu" msgid="2560710726687249178">"ຄົ້ນຫາ"</string>
-    <!-- no translation found for app_suspended_title (1919029799438164552) -->
-    <skip />
-    <!-- no translation found for app_suspended_default_message (7875306315686531621) -->
-    <skip />
-    <!-- no translation found for app_suspended_more_details (1131804827776778187) -->
-    <skip />
+    <string name="app_suspended_title" msgid="1919029799438164552">"ບໍ່ສາມາດເປີດແອັບໄດ້"</string>
+    <string name="app_suspended_default_message" msgid="7875306315686531621">"ບໍ່ສາມາດໃຊ້ແອັບ <xliff:g id="APP_NAME_0">%1$s</xliff:g> ໄດ້ໃນຕອນນີ້. ນີ້ຖືກຈັດການໂດຍ <xliff:g id="APP_NAME_1">%2$s</xliff:g>."</string>
+    <string name="app_suspended_more_details" msgid="1131804827776778187">"ສຶກສາເພີ່ມເຕີມ"</string>
     <string name="work_mode_off_title" msgid="1118691887588435530">"ເປີດໃຊ້ໂປຣໄຟລ໌ບ່ອນເຮັດວຽກບໍ?"</string>
     <string name="work_mode_off_message" msgid="5130856710614337649">"ແອັບວຽກຂອງທ່ານ, ການແຈ້ງເຕືອນ, ຂໍ້ມູນ ແລະ ຄຸນສົມບັດໂປຣໄຟລ໌ວຽກຈະຖືກເປີດໃຊ້"</string>
     <string name="work_mode_turn_on" msgid="2062544985670564875">"ເປີດ​"</string>
@@ -1878,6 +1876,5 @@
     <string name="zen_upgrade_notification_content" msgid="1794994264692424562">"ແຕະເພື່ອກວດສອບວ່າມີຫຍັງຖືກບລັອກໄວ້ແດ່."</string>
     <string name="notification_app_name_system" msgid="4205032194610042794">"ລະບົບ"</string>
     <string name="notification_app_name_settings" msgid="7751445616365753381">"ການຕັ້ງຄ່າ"</string>
-    <!-- no translation found for car_loading_profile (3545132581795684027) -->
-    <skip />
+    <string name="car_loading_profile" msgid="3545132581795684027">"ກຳລັງໂຫລດ"</string>
 </resources>

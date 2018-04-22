@@ -297,14 +297,14 @@
     <string name="permgrouplab_sensors" msgid="416037179223226722">"Sensores corporais"</string>
     <string name="permgroupdesc_sensors" msgid="7147968539346634043">"acesse dados do sensor sobre seus sinais vitais"</string>
     <string name="permgrouprequest_sensors" msgid="6349806962814556786">"Permitir que &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; acesse os dados do sensor sobre seus sinais vitais?"</string>
-    <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"Recuperar cont. da janela"</string>
-    <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"Inspecionar o conteúdo da janela com a qual você está interagindo."</string>
+    <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"Acessar conteúdo de uma janela"</string>
+    <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"Inspeciona o conteúdo de uma janela com a qual você está interagindo."</string>
     <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"Ativar Explorar por toque"</string>
-    <string name="capability_desc_canRequestTouchExploration" msgid="7543249041581408313">"Itens tocados serão falados em voz alta, e a tela poderá ser explorada por meio de gestos."</string>
+    <string name="capability_desc_canRequestTouchExploration" msgid="7543249041581408313">"Ao serem tocados, os itens serão descritos em voz alta. A tela também poderá ser reconhecida por gestos."</string>
     <string name="capability_title_canRequestFilterKeyEvents" msgid="2103440391902412174">"Observar o texto digitado"</string>
     <string name="capability_desc_canRequestFilterKeyEvents" msgid="7463135292204152818">"Inclui dados pessoais, como números de cartão de crédito e senhas."</string>
     <string name="capability_title_canControlMagnification" msgid="3593493281059424855">"Controlar ampliação da tela"</string>
-    <string name="capability_desc_canControlMagnification" msgid="4791858203568383773">"Controlar o posicionamento e nível de zoom da tela."</string>
+    <string name="capability_desc_canControlMagnification" msgid="4791858203568383773">"Controla o posicionamento e o zoom da tela."</string>
     <string name="capability_title_canPerformGestures" msgid="7418984730362576862">"Fazer gestos"</string>
     <string name="capability_desc_canPerformGestures" msgid="8296373021636981249">"Toque, deslize, faça gestos de pinça e faça outros gestos."</string>
     <string name="capability_title_canCaptureFingerprintGestures" msgid="6309568287512278670">"Gestos de impressão digital"</string>
@@ -601,7 +601,7 @@
     <string name="policydesc_encryptedStorage" msgid="2637732115325316992">"Exija que os dados armazenados do app sejam criptografados."</string>
     <string name="policylab_disableCamera" msgid="6395301023152297826">"Desativar câmeras"</string>
     <string name="policydesc_disableCamera" msgid="2306349042834754597">"Impeça o uso de todas as câmeras do dispositivo."</string>
-    <string name="policylab_disableKeyguardFeatures" msgid="8552277871075367771">"Desat. recursos bloq. de tela"</string>
+    <string name="policylab_disableKeyguardFeatures" msgid="8552277871075367771">"Desativar recursos bloq. de tela"</string>
     <string name="policydesc_disableKeyguardFeatures" msgid="2044755691354158439">"Impede o uso de alguns recursos do bloqueio de tela."</string>
   <string-array name="phoneTypes">
     <item msgid="8901098336658710359">"Residencial"</item>
@@ -1691,7 +1691,7 @@
     <string name="package_updated_device_owner" msgid="1847154566357862089">"Atualizado pelo seu administrador"</string>
     <string name="package_deleted_device_owner" msgid="2307122077550236438">"Excluído pelo seu administrador"</string>
     <string name="battery_saver_description" msgid="769989536172631582">"A Economia de bateria desativa alguns recursos do dispositivo e restringe apps para aumentar a duração da bateria."</string>
-    <string name="data_saver_description" msgid="6015391409098303235">"Para ajudar a reduzir o uso de dados, a Economia de dados impede que alguns apps enviem ou recebam dados em segundo plano. Um app que você esteja usando no momento pode acessar dados, mas com menos frequência. Isso pode significar que as imagens não serão exibidas até que você toque nelas."</string>
+    <string name="data_saver_description" msgid="6015391409098303235">"Para ajudar a reduzir o uso de dados, a Economia de dados impede que alguns apps enviem ou recebam dados em segundo plano. Um app que você esteja usando no momento pode acessar dados, mas com menos frequência. Isso pode fazer com que imagens não sejam exibidas até que você toque nelas."</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"Ativar Economia de dados?"</string>
     <string name="data_saver_enable_button" msgid="7147735965247211818">"Ativar"</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="4367877408072000848">
@@ -1738,7 +1738,8 @@
     <string name="zen_mode_default_weekends_name" msgid="2786495801019345244">"Fim de semana"</string>
     <string name="zen_mode_default_events_name" msgid="8158334939013085363">"Evento"</string>
     <string name="zen_mode_default_every_night_name" msgid="3012363838882944175">"Dormindo"</string>
-    <string name="muted_by" msgid="6147073845094180001">"Som desativado por <xliff:g id="THIRD_PARTY">%1$s</xliff:g>"</string>
+    <!-- no translation found for muted_by (5942954724562097128) -->
+    <skip />
     <string name="system_error_wipe_data" msgid="6608165524785354962">"Há um problema interno com seu dispositivo. Ele pode ficar instável até que você faça a redefinição para configuração original."</string>
     <string name="system_error_manufacturer" msgid="8086872414744210668">"Há um problema interno com seu dispositivo. Entre em contato com o fabricante para saber mais detalhes."</string>
     <string name="stk_cc_ussd_to_dial" msgid="5214333646366591205">"Solicitação USSD alterada para chamada normal"</string>
@@ -1875,6 +1876,5 @@
     <string name="zen_upgrade_notification_content" msgid="1794994264692424562">"Toque para verificar o que está bloqueado."</string>
     <string name="notification_app_name_system" msgid="4205032194610042794">"Sistema"</string>
     <string name="notification_app_name_settings" msgid="7751445616365753381">"Configurações"</string>
-    <!-- no translation found for car_loading_profile (3545132581795684027) -->
-    <skip />
+    <string name="car_loading_profile" msgid="3545132581795684027">"Carregando"</string>
 </resources>
