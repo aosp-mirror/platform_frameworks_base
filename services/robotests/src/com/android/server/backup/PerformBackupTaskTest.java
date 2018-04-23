@@ -361,10 +361,43 @@ public class PerformBackupTaskTest {
 
         runTask(task);
 
-        // TODO: Should it not call mListener.onFinished()? PerformBackupTask:891 return?
-        // verify(mListener).onFinished(any());
+        verify(mListener).onFinished(any());
         verify(mObserver).onResult(eq(PACKAGE_1), eq(BackupManager.ERROR_AGENT_FAILURE));
         verify(agentMock.agentBinder).fail(any());
+        verify(mObserver).backupFinished(BackupManager.SUCCESS);
+    }
+
+    @Test
+    public void testRunTask_whenFirstAgentKeyProhibitedButLastPermitted() throws Exception {
+        TransportMock transportMock = setUpTransport(mTransport);
+        List<AgentMock> agentMocks = setUpAgents(PACKAGE_1, PACKAGE_2);
+        AgentMock agentMock1 = agentMocks.get(0);
+        AgentMock agentMock2 = agentMocks.get(1);
+        agentOnBackupDo(
+                agentMock1.agent,
+                (oldState, dataOutput, newState) -> {
+                    char prohibitedChar = 0xff00;
+                    writeData(dataOutput, prohibitedChar + "key", "foo".getBytes());
+                });
+        agentOnBackupDo(
+                agentMock2.agent,
+                (oldState, dataOutput, newState) -> {
+                    writeData(dataOutput, "key", "bar".getBytes());
+                });
+        PerformBackupTask task =
+                createPerformBackupTask(
+                        transportMock.transportClient,
+                        mTransport.transportDirName,
+                        PACKAGE_1,
+                        PACKAGE_2);
+
+        runTask(task);
+
+        verify(mListener).onFinished(any());
+        verify(mObserver).onResult(eq(PACKAGE_1), eq(BackupManager.ERROR_AGENT_FAILURE));
+        verify(agentMock1.agentBinder).fail(any());
+        verify(mObserver).onResult(eq(PACKAGE_2), eq(BackupManager.SUCCESS));
+        verify(mObserver).backupFinished(BackupManager.SUCCESS);
     }
 
     @Test
