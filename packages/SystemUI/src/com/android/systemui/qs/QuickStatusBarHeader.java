@@ -367,6 +367,7 @@ public class QuickStatusBarHeader extends RelativeLayout implements
 
     @Override
     public void onAttachedToWindow() {
+        super.onAttachedToWindow();
         Dependency.get(StatusBarIconController.class).addIconGroup(mIconManager);
         requestApplyInsets();
     }
