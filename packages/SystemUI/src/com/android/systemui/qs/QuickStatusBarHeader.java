@@ -98,7 +98,6 @@ public class QuickStatusBarHeader extends RelativeLayout implements
 
     private View mSystemIconsView;
     private View mQuickQsStatusIcons;
-    private View mDate;
     private View mHeaderTextContainerView;
     /** View containing the next alarm and ringer mode info. */
     private View mStatusContainer;
@@ -148,8 +147,6 @@ public class QuickStatusBarHeader extends RelativeLayout implements
         super.onFinishInflate();
 
         mHeaderQsPanel = findViewById(R.id.quick_qs_panel);
-        mDate = findViewById(R.id.date);
-        mDate.setOnClickListener(this);
         mSystemIconsView = findViewById(R.id.quick_status_bar_system_icons);
         mQuickQsStatusIcons = findViewById(R.id.quick_qs_status_icons);
         StatusIconContainer iconContainer = findViewById(R.id.statusIcons);
@@ -184,6 +181,7 @@ public class QuickStatusBarHeader extends RelativeLayout implements
         mBatteryMeterView.setForceShowPercent(true);
         mClockView = findViewById(R.id.clock);
         mDateView = findViewById(R.id.date);
+        mDateView.setOnClickListener(this);
     }
 
     private void updateStatusText() {
@@ -262,7 +260,6 @@ public class QuickStatusBarHeader extends RelativeLayout implements
                 newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE;
         mBatteryMeterView.useWallpaperTextColor(shouldUseWallpaperTextColor);
         mClockView.useWallpaperTextColor(shouldUseWallpaperTextColor);
-        mDateView.useWallpaperTextColor(shouldUseWallpaperTextColor);
     }
 
     @Override
@@ -416,7 +413,7 @@ public class QuickStatusBarHeader extends RelativeLayout implements
 
     @Override
     public void onClick(View v) {
-        if(v == mDate){
+        if(v == mDateView){
             Dependency.get(ActivityStarter.class).postStartActivityDismissingKeyguard(new Intent(
                     AlarmClock.ACTION_SHOW_ALARMS),0);
         }
