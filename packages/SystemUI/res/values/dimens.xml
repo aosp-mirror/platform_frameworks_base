@@ -899,8 +899,6 @@
     <dimen name="default_gear_space">18dp</dimen>
     <dimen name="cell_overlay_padding">18dp</dimen>
 
-    <dimen name="hwui_edge_margin">16dp</dimen>
-
     <dimen name="global_actions_panel_width">120dp</dimen>
 
     <dimen name="global_actions_top_padding">120dp</dimen>
@@ -916,7 +914,7 @@
     <dimen name="corner_size">8dp</dimen>
     <dimen name="top_padding">0dp</dimen>
     <dimen name="bottom_padding">48dp</dimen>
-    <dimen name="edge_margin">16dp</dimen>
+    <dimen name="edge_margin">8dp</dimen>
 
     <dimen name="rounded_corner_radius">0dp</dimen>
     <dimen name="rounded_corner_content_padding">0dp</dimen>
