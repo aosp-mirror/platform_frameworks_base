@@ -1171,7 +1171,7 @@ public class ZenModeHelper {
 
     private void showZenUpgradeNotification(int zen) {
         final boolean showNotification = mIsBootComplete
-                && zen == Global.ZEN_MODE_IMPORTANT_INTERRUPTIONS
+                && zen != Global.ZEN_MODE_OFF
                 && Settings.Global.getInt(mContext.getContentResolver(),
                 Settings.Global.SHOW_ZEN_UPGRADE_NOTIFICATION, 0) != 0;
 
@@ -1190,17 +1190,20 @@ public class ZenModeHelper {
                 mContext.getResources().getString(R.string.global_action_settings));
         int title = R.string.zen_upgrade_notification_title;
         int content = R.string.zen_upgrade_notification_content;
+        int drawable = R.drawable.ic_zen_24dp;
         if (NotificationManager.Policy.areAllVisualEffectsSuppressed(
                 getNotificationPolicy().suppressedVisualEffects)) {
             title = R.string.zen_upgrade_notification_visd_title;
             content = R.string.zen_upgrade_notification_visd_content;
+            drawable = R.drawable.ic_dnd_block_notifications;
         }
+
         Intent onboardingIntent = new Intent(Settings.ZEN_MODE_ONBOARDING);
         onboardingIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         return new Notification.Builder(mContext, SystemNotificationChannels.DO_NOT_DISTURB)
                 .setAutoCancel(true)
                 .setSmallIcon(R.drawable.ic_settings_24dp)
-                .setLargeIcon(Icon.createWithResource(mContext, R.drawable.ic_zen_24dp))
+                .setLargeIcon(Icon.createWithResource(mContext, drawable))
                 .setContentTitle(mContext.getResources().getString(title))
                 .setContentText(mContext.getResources().getString(content))
                 .setContentIntent(PendingIntent.getActivity(mContext, 0, onboardingIntent,
