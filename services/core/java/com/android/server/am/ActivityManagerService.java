@@ -14416,6 +14416,10 @@ public class ActivityManagerService extends IActivityManager.Stub
     }
 
     void setRunningRemoteAnimation(int pid, boolean runningRemoteAnimation) {
+        if (pid == Process.myPid()) {
+            Slog.wtf(TAG, "system can't run remote animation");
+            return;
+        }
         synchronized (ActivityManagerService.this) {
             final ProcessRecord pr;
             synchronized (mPidsSelfLocked) {
