@@ -42,17 +42,17 @@ public class ScreenPinningNotify {
     }
 
     /** Show "Screen pinned" toast. */
-    void showPinningStartToast() {
+    public void showPinningStartToast() {
         makeAllUserToastAndShow(R.string.screen_pinning_start);
     }
 
     /** Show "Screen unpinned" toast. */
-    void showPinningExitToast() {
+    public void showPinningExitToast() {
         makeAllUserToastAndShow(R.string.screen_pinning_exit);
     }
 
     /** Show a toast that describes the gesture the user should use to escape pinned mode. */
-    void showEscapeToast(boolean isRecentsButtonVisible) {
+    public void showEscapeToast(boolean isRecentsButtonVisible) {
         long showToastTime = SystemClock.elapsedRealtime();
         if ((showToastTime - mLastShowToastTime) < SHOW_TOAST_MINIMUM_INTERVAL) {
             Slog.i(TAG, "Ignore toast since it is requested in very short interval.");
