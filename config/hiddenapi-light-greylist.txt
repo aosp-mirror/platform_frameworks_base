@@ -248,6 +248,7 @@ Landroid/app/Dialog;->mDismissMessage:Landroid/os/Message;
 Landroid/app/Dialog;->mListenersHandler:Landroid/os/Handler;
 Landroid/app/Dialog;->mOwnerActivity:Landroid/app/Activity;
 Landroid/app/Dialog;->mShowMessage:Landroid/os/Message;
+Landroid/app/DownloadManager;->setAccessFilename(Z)V
 Landroid/app/DownloadManager$Request;->mUri:Landroid/net/Uri;
 Landroid/app/FragmentManagerImpl;->mAdded:Ljava/util/ArrayList;
 Landroid/app/FragmentManagerImpl;->noteStateNotSaved()V
@@ -484,6 +485,7 @@ Landroid/bluetooth/BluetoothGattCharacteristic;->mService:Landroid/bluetooth/Blu
 Landroid/bluetooth/BluetoothGattDescriptor;->mCharacteristic:Landroid/bluetooth/BluetoothGattCharacteristic;
 Landroid/bluetooth/BluetoothGattDescriptor;->mInstance:I
 Landroid/bluetooth/BluetoothGatt;->mAuthRetryState:I
+Landroid/bluetooth/BluetoothGatt;->mClientIf:I
 Landroid/bluetooth/BluetoothGatt;->refresh()Z
 Landroid/bluetooth/BluetoothHeadset;->ACTION_ACTIVE_DEVICE_CHANGED:Ljava/lang/String;
 Landroid/bluetooth/BluetoothHeadset;->close()V
