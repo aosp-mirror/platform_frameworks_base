@@ -203,7 +203,8 @@ class TaskRecord extends ConfigurationContainer implements TaskWindowContainerLi
     String rootAffinity;    // Initial base affinity, or null; does not change from initial root.
     final IVoiceInteractionSession voiceSession;    // Voice interaction session driving task
     final IVoiceInteractor voiceInteractor;         // Associated interactor to provide to app
-    Intent intent;          // The original intent that started the task.
+    Intent intent;          // The original intent that started the task. Note that this value can
+                            // be null.
     Intent affinityIntent;  // Intent of affinity-moved activity that started this task.
     int effectiveUid;       // The current effective uid of the identity of this task.
     ComponentName origActivity; // The non-alias activity component of the intent.
@@ -897,12 +898,12 @@ class TaskRecord extends ConfigurationContainer implements TaskWindowContainerLi
         // the real activity that will be launched not the alias, so we need to use an intent with
         // the component name pointing to the real activity not the alias in the activity record.
         intent.setComponent(r.realActivity);
-        return this.intent.filterEquals(intent);
+        return intent.filterEquals(this.intent);
     }
 
     boolean returnsToHomeStack() {
         final int returnHomeFlags = FLAG_ACTIVITY_NEW_TASK | FLAG_ACTIVITY_TASK_ON_HOME;
-        return (intent.getFlags() & returnHomeFlags) == returnHomeFlags;
+        return intent != null && (intent.getFlags() & returnHomeFlags) == returnHomeFlags;
     }
 
     void setPrevAffiliate(TaskRecord prevAffiliate) {
@@ -2165,9 +2166,11 @@ class TaskRecord extends ConfigurationContainer implements TaskWindowContainerLi
             out.endTag(null, TAG_AFFINITYINTENT);
         }
 
-        out.startTag(null, TAG_INTENT);
-        intent.saveToXml(out);
-        out.endTag(null, TAG_INTENT);
+        if (intent != null) {
+            out.startTag(null, TAG_INTENT);
+            intent.saveToXml(out);
+            out.endTag(null, TAG_INTENT);
+        }
 
         final ArrayList<ActivityRecord> activities = mActivities;
         final int numActivities = activities.size();
