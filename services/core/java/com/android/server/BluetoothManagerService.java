@@ -285,6 +285,9 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
                         try {
                             mBluetoothLock.readLock().lock();
                             if (mBluetooth != null) {
+                                addActiveLog(
+                                        BluetoothProtoEnums.ENABLE_DISABLE_REASON_AIRPLANE_MODE,
+                                        mContext.getPackageName(), false);
                                 mBluetooth.onBrEdrDown();
                                 mEnable = false;
                                 mEnableExternal = false;
@@ -677,6 +680,8 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
                 try {
                     mBluetoothLock.readLock().lock();
                     if (mBluetooth != null) {
+                        addActiveLog(BluetoothProtoEnums.ENABLE_DISABLE_REASON_APPLICATION_REQUEST,
+                                mContext.getPackageName(), false);
                         mBluetooth.onBrEdrDown();
                     }
                 } catch (RemoteException e) {
