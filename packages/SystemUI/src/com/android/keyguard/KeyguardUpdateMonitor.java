@@ -1850,7 +1850,6 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
         final TelephonyManager tele = TelephonyManager.from(mContext);
         ArrayList<Integer> changedSubscriptionIds = new ArrayList<>();
         HashSet<Integer> activeSubIds = new HashSet<>();
-        HashSet<Integer> activeSlotIds = new HashSet<>();
 
         for (SubscriptionInfo info : activeSubscriptionInfos) {
             int subId = info.getSubscriptionId();
@@ -1879,15 +1878,11 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
             }
 
             activeSubIds.add(subId);
-            activeSlotIds.add(slotId);
         }
 
         for (SimData data : mSimDatas.values()) {
-            if (!activeSubIds.contains(data.subId)
-                && !activeSlotIds.contains(data.slotId)
-                && data.simState != State.ABSENT) {
+            if (!activeSubIds.contains(data.subId) && data.simState != State.ABSENT) {
                 // for the inactive subscriptions, reset state to ABSENT
-                if (DEBUG_SIM_STATES) Log.d(TAG, "reset state to ABSENT for subId:" + data.subId);
                 data.simState = State.ABSENT;
                 changedSubscriptionIds.add(data.subId);
             }
