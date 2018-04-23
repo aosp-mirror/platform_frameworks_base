@@ -116,12 +116,8 @@ public class ImageFloatingTextView extends TextView {
     }
 
     @RemotableViewMethod
-    public void setImageEndMarginDimen(int imageEndMargin) {
-        if (imageEndMargin != 0) {
-            mImageEndMargin = getContext().getResources().getDimensionPixelSize(imageEndMargin);
-        } else {
-            mImageEndMargin = 0;
-        }
+    public void setImageEndMargin(int imageEndMargin) {
+        mImageEndMargin = imageEndMargin;
     }
 
     @Override

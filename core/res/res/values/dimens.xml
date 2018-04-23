@@ -165,11 +165,8 @@
     <!-- The margin on the end of the content view. -->
     <dimen name="notification_content_margin_end">16dp</dimen>
 
-    <!-- The margin on the end of the content view with a picture. -->
-    <dimen name="notification_content_picture_margin">52dp</dimen>
-
-    <!-- The margin on the end of the content view with a picture and a reply button -->
-    <dimen name="notification_content_picture_and_reply_margin">88dp</dimen>
+    <!-- The inset of the reply icon. -->
+    <dimen name="notification_reply_inset">8dp</dimen>
 
     <!-- The margin for text at the end of the image view for media notifications -->
     <dimen name="notification_media_image_margin_end">72dp</dimen>

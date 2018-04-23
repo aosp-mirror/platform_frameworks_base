@@ -375,7 +375,13 @@ public class MessagingGroup extends LinearLayout implements MessagingLinearLayou
             mImageContainer.removeAllViews();
         }
         mIsolatedMessage = isolatedMessage;
+        updateImageContainerVisibility();
         mMessages = group;
+    }
+
+    private void updateImageContainerVisibility() {
+        mImageContainer.setVisibility(mIsolatedMessage != null && mImagesAtEnd
+                ? View.VISIBLE : View.GONE);
     }
 
     /**
@@ -477,7 +483,7 @@ public class MessagingGroup extends LinearLayout implements MessagingLinearLayou
     public void setDisplayImagesAtEnd(boolean atEnd) {
         if (mImagesAtEnd != atEnd) {
             mImagesAtEnd = atEnd;
-            mImageContainer.setVisibility(atEnd ? View.VISIBLE : View.GONE);
+            updateImageContainerVisibility();
         }
     }
 

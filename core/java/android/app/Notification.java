@@ -4536,21 +4536,48 @@ public class Notification implements Parcelable
         private void bindLargeIconAndReply(RemoteViews contentView, StandardTemplateParams p,
                 TemplateBindResult result) {
             boolean largeIconShown = bindLargeIcon(contentView, p.hideLargeIcon || p.ambient);
-            boolean showReplyIcon = bindReplyIcon(contentView, p.hideReplyIcon || p.ambient);
+            boolean replyIconShown = bindReplyIcon(contentView, p.hideReplyIcon || p.ambient);
             contentView.setViewVisibility(R.id.right_icon_container,
-                    largeIconShown || showReplyIcon ? View.VISIBLE : View.GONE);
-            int marginEndDimen = 0;
-            if (largeIconShown && showReplyIcon) {
-                marginEndDimen = R.dimen.notification_content_picture_and_reply_margin;
-            } else if (largeIconShown || showReplyIcon) {
-                marginEndDimen = R.dimen.notification_content_picture_margin;
-            }
-            contentView.setViewLayoutMarginEndDimen(R.id.line1, marginEndDimen);
-            contentView.setViewLayoutMarginEndDimen(R.id.text, marginEndDimen);
-            contentView.setViewLayoutMarginEndDimen(R.id.progress, marginEndDimen);
+                    largeIconShown || replyIconShown ? View.VISIBLE : View.GONE);
+            int marginEnd = calculateMarginEnd(largeIconShown, replyIconShown);
+            contentView.setViewLayoutMarginEnd(R.id.line1, marginEnd);
+            contentView.setViewLayoutMarginEnd(R.id.text, marginEnd);
+            contentView.setViewLayoutMarginEnd(R.id.progress, marginEnd);
             if (result != null) {
-                result.setIconMarginEndDimen(marginEndDimen);
+                result.setIconMarginEnd(marginEnd);
             }
+        }
+
+        private int calculateMarginEnd(boolean largeIconShown, boolean replyIconShown) {
+            int marginEnd = 0;
+            int contentMargin = mContext.getResources().getDimensionPixelSize(
+                    R.dimen.notification_content_margin_end);
+            int iconSize = mContext.getResources().getDimensionPixelSize(
+                    R.dimen.notification_right_icon_size);
+            if (replyIconShown) {
+                // The size of the reply icon
+                marginEnd += iconSize;
+
+                int replyInset = mContext.getResources().getDimensionPixelSize(
+                        R.dimen.notification_reply_inset);
+                // We're subtracting the inset of the reply icon to make sure it's
+                // aligned nicely on the right, and remove it from the following padding
+                marginEnd -= replyInset * 2;
+            }
+            if (largeIconShown) {
+                // adding size of the right icon
+                marginEnd += iconSize;
+
+                if (replyIconShown) {
+                    // We also add some padding to the reply icon if it's around
+                    marginEnd += contentMargin;
+                }
+            }
+            if (replyIconShown || largeIconShown) {
+                // The padding to the content
+                marginEnd += contentMargin;
+            }
+            return marginEnd;
         }
 
         /**
@@ -6408,7 +6435,7 @@ public class Notification implements Parcelable
 
             TemplateBindResult result = new TemplateBindResult();
             RemoteViews contentView = getStandardView(mBuilder.getBigTextLayoutResource(), result);
-            contentView.setInt(R.id.big_text, "setImageEndMarginDimen", result.getIconMarginEndDimen());
+            contentView.setInt(R.id.big_text, "setImageEndMargin", result.getIconMarginEnd());
 
             mBuilder.getAllExtras().putCharSequence(EXTRA_TEXT, text);
 
@@ -6911,8 +6938,8 @@ public class Notification implements Parcelable
                     bindResult);
             addExtras(mBuilder.mN.extras);
             // also update the end margin if there is an image
-            contentView.setViewLayoutMarginEndDimen(R.id.notification_main_column,
-                    bindResult.getIconMarginEndDimen());
+            contentView.setViewLayoutMarginEnd(R.id.notification_messaging,
+                    bindResult.getIconMarginEnd());
             contentView.setInt(R.id.status_bar_latest_event_content, "setLayoutColor",
                     mBuilder.resolveContrastColor());
             contentView.setBoolean(R.id.status_bar_latest_event_content, "setDisplayImagesAtEnd",
@@ -7356,7 +7383,7 @@ public class Notification implements Parcelable
                     mBuilder.setTextViewColorSecondary(contentView, rowIds[i]);
                     contentView.setViewPadding(rowIds[i], 0, topPadding, 0, 0);
                     handleInboxImageMargin(contentView, rowIds[i], first,
-                            result.getIconMarginEndDimen());
+                            result.getIconMarginEnd());
                     if (first) {
                         onlyViewId = rowIds[i];
                     } else {
@@ -7389,17 +7416,17 @@ public class Notification implements Parcelable
         }
 
         private void handleInboxImageMargin(RemoteViews contentView, int id, boolean first,
-                int marginEndDimen) {
+                int marginEndValue) {
             int endMargin = 0;
             if (first) {
                 final int max = mBuilder.mN.extras.getInt(EXTRA_PROGRESS_MAX, 0);
                 final boolean ind = mBuilder.mN.extras.getBoolean(EXTRA_PROGRESS_INDETERMINATE);
                 boolean hasProgress = max != 0 || ind;
                 if (!hasProgress) {
-                    endMargin = marginEndDimen;
+                    endMargin = marginEndValue;
                 }
             }
-            contentView.setViewLayoutMarginEndDimen(id, endMargin);
+            contentView.setViewLayoutMarginEnd(id, endMargin);
         }
     }
 
@@ -7772,11 +7799,7 @@ public class Notification implements Parcelable
             // also update the end margin if there is an image
             Resources resources = mBuilder.mContext.getResources();
             int endMargin = resources.getDimensionPixelSize(
-                    R.dimen.notification_content_margin_end);
-            int marginEndDimen = result.getIconMarginEndDimen();
-            if (marginEndDimen != 0) {
-                endMargin += resources.getDimensionPixelSize(marginEndDimen);
-            }
+                    R.dimen.notification_content_margin_end) + result.getIconMarginEnd();
             remoteViews.setViewLayoutMarginEnd(R.id.notification_main_column, endMargin);
         }
 
@@ -9385,18 +9408,18 @@ public class Notification implements Parcelable
      * A result object where information about the template that was created is saved.
      */
     private static class TemplateBindResult {
-        int mIconMarginEndDimen;
+        int mIconMarginEnd;
 
         /**
-         * Get the margin end dimension that needs to be added to any fields that may overlap
+         * Get the margin end that needs to be added to any fields that may overlap
          * with the right actions.
          */
-        public int getIconMarginEndDimen() {
-            return mIconMarginEndDimen;
+        public int getIconMarginEnd() {
+            return mIconMarginEnd;
         }
 
-        public void setIconMarginEndDimen(int iconMarginEndDimen) {
-            this.mIconMarginEndDimen = iconMarginEndDimen;
+        public void setIconMarginEnd(int iconMarginEnd) {
+            this.mIconMarginEnd = iconMarginEnd;
         }
     }
 
