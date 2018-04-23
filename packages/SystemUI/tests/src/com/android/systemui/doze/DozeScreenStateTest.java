@@ -25,8 +25,10 @@ import static com.android.systemui.doze.DozeMachine.State.INITIALIZED;
 import static com.android.systemui.doze.DozeMachine.State.UNINITIALIZED;
 import static com.android.systemui.utils.os.FakeHandler.Mode.QUEUEING;
 
+import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.reset;
@@ -41,6 +43,7 @@ import android.view.Display;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.statusbar.phone.DozeParameters;
 import com.android.systemui.util.wakelock.WakeLock;
+import com.android.systemui.util.wakelock.WakeLockFake;
 import com.android.systemui.utils.os.FakeHandler;
 
 import org.junit.Before;
@@ -58,8 +61,7 @@ public class DozeScreenStateTest extends SysuiTestCase {
     FakeHandler mHandlerFake;
     @Mock
     DozeParameters mDozeParameters;
-    @Mock
-    WakeLock mWakeLock;
+    WakeLockFake mWakeLock;
 
     @Before
     public void setUp() throws Exception {
@@ -68,6 +70,7 @@ public class DozeScreenStateTest extends SysuiTestCase {
         when(mDozeParameters.getAlwaysOn()).thenReturn(true);
         mServiceFake = new DozeServiceFake();
         mHandlerFake = new FakeHandler(Looper.getMainLooper());
+        mWakeLock = new WakeLockFake();
         mScreen = new DozeScreenState(mServiceFake, mHandlerFake, mDozeParameters, mWakeLock);
     }
 
@@ -158,14 +161,29 @@ public class DozeScreenStateTest extends SysuiTestCase {
 
         mScreen.transitionTo(UNINITIALIZED, INITIALIZED);
         mHandlerFake.dispatchQueuedMessages();
-        reset(mWakeLock);
 
         mScreen.transitionTo(INITIALIZED, DOZE_AOD);
-        verify(mWakeLock).acquire();
-        verify(mWakeLock, never()).release();
+        assertThat(mWakeLock.isHeld(), is(true));
 
         mHandlerFake.dispatchQueuedMessages();
-        verify(mWakeLock).release();
+        assertThat(mWakeLock.isHeld(), is(false));
+    }
+
+    @Test
+    public void test_releasesWakeLock_abortingLowPowerDelayed() {
+        // Transition to low power mode will be delayed to let
+        // animations play at 60 fps.
+        when(mDozeParameters.shouldControlScreenOff()).thenReturn(true);
+        mHandlerFake.setMode(QUEUEING);
+
+        mScreen.transitionTo(UNINITIALIZED, INITIALIZED);
+        mHandlerFake.dispatchQueuedMessages();
+
+        mScreen.transitionTo(INITIALIZED, DOZE_AOD);
+        assertThat(mWakeLock.isHeld(), is(true));
+        mScreen.transitionTo(DOZE_AOD, FINISH);
+
+        assertThat(mWakeLock.isHeld(), is(false));
     }
 
 }
