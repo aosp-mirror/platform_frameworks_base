@@ -10783,6 +10783,7 @@ public final class Settings {
          * track_cpu_active_cluster_time (boolean)
          * read_binary_cpu_time          (boolean)
          * proc_state_cpu_times_read_delay_ms (long)
+         * external_stats_collection_rate_limit_ms (long)
          * </pre>
          *
          * <p>

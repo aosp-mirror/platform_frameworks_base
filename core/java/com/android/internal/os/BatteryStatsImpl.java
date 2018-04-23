@@ -13261,18 +13261,23 @@ public class BatteryStatsImpl extends BatteryStats {
                 = "kernel_uid_readers_throttle_time";
         public static final String KEY_UID_REMOVE_DELAY_MS
                 = "uid_remove_delay_ms";
+        public static final String KEY_EXTERNAL_STATS_COLLECTION_RATE_LIMIT_MS
+                = "external_stats_collection_rate_limit_ms";
 
         private static final boolean DEFAULT_TRACK_CPU_TIMES_BY_PROC_STATE = true;
         private static final boolean DEFAULT_TRACK_CPU_ACTIVE_CLUSTER_TIME = true;
         private static final long DEFAULT_PROC_STATE_CPU_TIMES_READ_DELAY_MS = 5_000;
         private static final long DEFAULT_KERNEL_UID_READERS_THROTTLE_TIME = 10_000;
         private static final long DEFAULT_UID_REMOVE_DELAY_MS = 5L * 60L * 1000L;
+        private static final long DEFAULT_EXTERNAL_STATS_COLLECTION_RATE_LIMIT_MS = 600_000;
 
         public boolean TRACK_CPU_TIMES_BY_PROC_STATE = DEFAULT_TRACK_CPU_TIMES_BY_PROC_STATE;
         public boolean TRACK_CPU_ACTIVE_CLUSTER_TIME = DEFAULT_TRACK_CPU_ACTIVE_CLUSTER_TIME;
         public long PROC_STATE_CPU_TIMES_READ_DELAY_MS = DEFAULT_PROC_STATE_CPU_TIMES_READ_DELAY_MS;
         public long KERNEL_UID_READERS_THROTTLE_TIME = DEFAULT_KERNEL_UID_READERS_THROTTLE_TIME;
         public long UID_REMOVE_DELAY_MS = DEFAULT_UID_REMOVE_DELAY_MS;
+        public long EXTERNAL_STATS_COLLECTION_RATE_LIMIT_MS
+                = DEFAULT_EXTERNAL_STATS_COLLECTION_RATE_LIMIT_MS;
 
         private ContentResolver mResolver;
         private final KeyValueListParser mParser = new KeyValueListParser(',');
@@ -13318,6 +13323,9 @@ public class BatteryStatsImpl extends BatteryStats {
                                 DEFAULT_KERNEL_UID_READERS_THROTTLE_TIME));
                 updateUidRemoveDelay(
                         mParser.getLong(KEY_UID_REMOVE_DELAY_MS, DEFAULT_UID_REMOVE_DELAY_MS));
+                EXTERNAL_STATS_COLLECTION_RATE_LIMIT_MS = mParser.getLong(
+                        KEY_EXTERNAL_STATS_COLLECTION_RATE_LIMIT_MS,
+                        DEFAULT_EXTERNAL_STATS_COLLECTION_RATE_LIMIT_MS);
             }
         }
 
@@ -13367,6 +13375,14 @@ public class BatteryStatsImpl extends BatteryStats {
             pw.println(PROC_STATE_CPU_TIMES_READ_DELAY_MS);
             pw.print(KEY_KERNEL_UID_READERS_THROTTLE_TIME); pw.print("=");
             pw.println(KERNEL_UID_READERS_THROTTLE_TIME);
+            pw.print(KEY_EXTERNAL_STATS_COLLECTION_RATE_LIMIT_MS); pw.print("=");
+            pw.println(EXTERNAL_STATS_COLLECTION_RATE_LIMIT_MS);
+        }
+    }
+
+    public long getExternalStatsCollectionRateLimitMs() {
+        synchronized (this) {
+            return mConstants.EXTERNAL_STATS_COLLECTION_RATE_LIMIT_MS;
         }
     }
 
