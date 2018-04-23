@@ -147,6 +147,7 @@ Landroid/app/admin/DevicePolicyManager;->throwIfParentInstance(Ljava/lang/String
 Landroid/app/admin/IDevicePolicyManager$Stub;->TRANSACTION_packageHasActiveAdmins:I
 Landroid/app/admin/IDevicePolicyManager$Stub;->TRANSACTION_removeActiveAdmin:I
 Landroid/app/admin/SecurityLog$SecurityEvent;-><init>([B)V
+Landroid/app/ActionBar;->setShowHideAnimationEnabled(Z)V
 Landroid/app/AlarmManager;->FLAG_ALLOW_WHILE_IDLE_UNRESTRICTED:I
 Landroid/app/AlarmManager;->FLAG_IDLE_UNTIL:I
 Landroid/app/AlarmManager;->FLAG_STANDALONE:I
@@ -251,6 +252,7 @@ Landroid/app/Dialog;->mShowMessage:Landroid/os/Message;
 Landroid/app/DownloadManager;->setAccessFilename(Z)V
 Landroid/app/DownloadManager$Request;->mUri:Landroid/net/Uri;
 Landroid/app/FragmentManagerImpl;->mAdded:Ljava/util/ArrayList;
+Landroid/app/FragmentManagerImpl;->mStateSaved:Z
 Landroid/app/FragmentManagerImpl;->noteStateNotSaved()V
 Landroid/app/Fragment;->mChildFragmentManager:Landroid/app/FragmentManagerImpl;
 Landroid/app/Fragment;->mWho:Ljava/lang/String;
@@ -684,6 +686,7 @@ Landroid/content/res/AssetFileDescriptor;->mStartOffset:J
 Landroid/content/res/AssetManager;->addAssetPathAsSharedLibrary(Ljava/lang/String;)I
 Landroid/content/res/AssetManager;->addAssetPath(Ljava/lang/String;)I
 Landroid/content/res/AssetManager;->applyStyle(JIILandroid/content/res/XmlBlock$Parser;[IJJ)V
+Landroid/content/res/AssetManager;->createTheme()J
 Landroid/content/res/AssetManager;->getAssignedPackageIdentifiers()Landroid/util/SparseArray;
 Landroid/content/res/AssetManager;->getResourceBagText(II)Ljava/lang/CharSequence;
 Landroid/content/res/AssetManager;->getResourceEntryName(I)Ljava/lang/String;
@@ -2300,6 +2303,7 @@ Landroid/view/Choreographer;->mLock:Ljava/lang/Object;
 Landroid/view/Choreographer;->scheduleVsyncLocked()V
 Landroid/view/Choreographer;->USE_VSYNC:Z
 Landroid/view/ContextThemeWrapper;->getThemeResId()I
+Landroid/view/ContextThemeWrapper;->initializeTheme()V
 Landroid/view/ContextThemeWrapper;->mInflater:Landroid/view/LayoutInflater;
 Landroid/view/ContextThemeWrapper;->mResources:Landroid/content/res/Resources;
 Landroid/view/ContextThemeWrapper;->mTheme:Landroid/content/res/Resources$Theme;
