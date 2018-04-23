@@ -89,7 +89,7 @@ public class HardwareUiLayout extends FrameLayout implements Tunable {
         mEdgeBleed = Settings.Secure.getInt(getContext().getContentResolver(),
                 EDGE_BLEED, 0) != 0;
         mRoundedDivider = Settings.Secure.getInt(getContext().getContentResolver(),
-                ROUNDED_DIVIDER, 1) != 0;
+                ROUNDED_DIVIDER, 0) != 0;
         updateEdgeMargin(mEdgeBleed ? 0 : getEdgePadding());
         mBackground = new HardwareBgDrawable(mRoundedDivider, !mEdgeBleed, getContext());
         if (mChild != null) {
