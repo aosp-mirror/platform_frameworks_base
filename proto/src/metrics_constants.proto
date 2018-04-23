@@ -5697,6 +5697,26 @@ message MetricsEvent {
     // internal platform metrics use.
     NOTIFICATION_SHADE_COUNT = 1395;
 
+    // ACTION: DND Settings > What to block
+    // OS: P
+    ACTION_ZEN_SOUND_ONLY = 1396;
+
+    // ACTION: DND Settings > Notifications
+    // OS: P
+    ACTION_ZEN_SOUND_AND_VIS_EFFECTS = 1397;
+
+    // ACTION: DND Settings > Notifications
+    // OS: P
+    ACTION_ZEN_SHOW_CUSTOM = 1398;
+
+    // ACTION: DND Settings > Notifications
+    // OS: P
+    ACTION_ZEN_CUSTOM = 1399;
+
+    // Screen: DND Settings > Notifications
+    // OS: P
+    SETTINGS_ZEN_NOTIFICATIONS = 1400;
+
     // ---- End P Constants, all P constants go above this line ----
     // Add new aosp constants above this line.
     // END OF AOSP CONSTANTS
