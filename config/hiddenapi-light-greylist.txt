@@ -801,7 +801,7 @@ Landroid/graphics/BitmapFactory;->nativeDecodeByteArray([BIILandroid/graphics/Bi
 Landroid/graphics/BitmapFactory;->nativeDecodeFileDescriptor(Ljava/io/FileDescriptor;Landroid/graphics/Rect;Landroid/graphics/BitmapFactory$Options;)Landroid/graphics/Bitmap;
 Landroid/graphics/BitmapFactory;->nativeDecodeStream(Ljava/io/InputStream;[BLandroid/graphics/Rect;Landroid/graphics/BitmapFactory$Options;)Landroid/graphics/Bitmap;
 Landroid/graphics/Bitmap;->getDefaultDensity()I
-Landroid/graphics/Bitmap;-><init>(JIIIZZ[BLandroid/graphics/NinePatch$InsetStruct;)V
+Landroid/graphics/Bitmap;-><init>(JIIIZ[BLandroid/graphics/NinePatch$InsetStruct;)V
 Landroid/graphics/Bitmap;->mNativePtr:J
 Landroid/graphics/Bitmap;->mNinePatchChunk:[B
 Landroid/graphics/Bitmap;->mNinePatchInsets:Landroid/graphics/NinePatch$InsetStruct;
