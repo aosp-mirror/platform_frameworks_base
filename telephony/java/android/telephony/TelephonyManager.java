@@ -7115,31 +7115,6 @@ public class TelephonyManager {
     }
 
     /**
-     * Set the ISO country code equivalent of the current registered
-     * operator's MCC (Mobile Country Code).
-     * @param iso the ISO country code equivalent of the current registered
-     * @hide
-     */
-    public void setNetworkCountryIso(String iso) {
-        int phoneId = getPhoneId();
-        setNetworkCountryIsoForPhone(phoneId, iso);
-    }
-
-    /**
-     * Set the ISO country code equivalent of the current registered
-     * operator's MCC (Mobile Country Code).
-     * @param phoneId which phone you want to set
-     * @param iso the ISO country code equivalent of the current registered
-     * @hide
-     */
-    public void setNetworkCountryIsoForPhone(int phoneId, String iso) {
-        if (SubscriptionManager.isValidPhoneId(phoneId)) {
-            setTelephonyProperty(phoneId,
-                    TelephonyProperties.PROPERTY_OPERATOR_ISO_COUNTRY, iso);
-        }
-    }
-
-    /**
      * Set the network type currently in use on the device for data transmission.
      *
      * If this object has been created with {@link #createForSubscriptionId}, applies to the
