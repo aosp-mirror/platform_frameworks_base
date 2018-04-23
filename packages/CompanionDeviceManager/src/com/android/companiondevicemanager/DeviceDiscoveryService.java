@@ -65,9 +65,7 @@ import android.widget.TextView;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.CollectionUtils;
 import com.android.internal.util.Preconditions;
-import com.android.internal.util.function.pooled.PooledLambda;
 
-import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -236,7 +234,9 @@ public class DeviceDiscoveryService extends Service {
 
         DeviceChooserActivity activity = mActivity;
         if (activity != null) {
-            activity.mDeviceListView.removeFooterView(activity.mLoadingIndicator);
+            if (activity.mDeviceListView != null) {
+                activity.mDeviceListView.removeFooterView(activity.mLoadingIndicator);
+            }
             mActivity = null;
         }
 
