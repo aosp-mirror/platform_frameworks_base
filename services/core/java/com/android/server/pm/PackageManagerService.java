@@ -17425,6 +17425,7 @@ public class PackageManagerService extends IPackageManager.Stub
         //   1) it is not forward locked.
         //   2) it is not on on an external ASEC container.
         //   3) it is not an instant app or if it is then dexopt is enabled via gservices.
+        //   4) it is not debuggable.
         //
         // Note that we do not dexopt instant apps by default. dexopt can take some time to
         // complete, so we skip this step during installation. Instead, we'll take extra time
@@ -17436,7 +17437,8 @@ public class PackageManagerService extends IPackageManager.Stub
                 && !forwardLocked
                 && !pkg.applicationInfo.isExternalAsec()
                 && (!instantApp || Global.getInt(mContext.getContentResolver(),
-                Global.INSTANT_APP_DEXOPT_ENABLED, 0) != 0);
+                Global.INSTANT_APP_DEXOPT_ENABLED, 0) != 0)
+                && ((pkg.applicationInfo.flags & ApplicationInfo.FLAG_DEBUGGABLE) == 0);
 
         if (performDexopt) {
             Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "dexopt");
