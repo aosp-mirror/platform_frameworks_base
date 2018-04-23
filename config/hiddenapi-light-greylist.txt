@@ -1577,6 +1577,7 @@ Landroid/os/Process;->isIsolated(I)Z
 Landroid/os/Process;->readProcFile(Ljava/lang/String;[I[Ljava/lang/String;[J[F)Z
 Landroid/os/Process;->readProcLines(Ljava/lang/String;[Ljava/lang/String;[J)V
 Landroid/os/Process;->setArgV0(Ljava/lang/String;)V
+Landroid/os/SELinux;->getFileContext(Ljava/lang/String;)Ljava/lang/String;
 Landroid/os/SELinux;->isSELinuxEnabled()Z
 Landroid/os/SELinux;->isSELinuxEnforced()Z
 Landroid/os/ServiceManager;->addService(Ljava/lang/String;Landroid/os/IBinder;)V
