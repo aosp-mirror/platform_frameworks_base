@@ -41,16 +41,20 @@ cc_library {
 cc_test {
     name: "libprotoutil_test",
 
-    srcs: [
-        "tests/EncodedBuffer_test.cpp",
-    ],
+    srcs: ["tests/*"],
 
     shared_libs: [
+        "libbase",
         "libcutils",
         "libprotoutil",
+        "libprotobuf-cpp-full",
     ],
 
     static_libs: [
         "libgmock",
     ],
+
+    proto: {
+        type: "full",
+    }
 }
