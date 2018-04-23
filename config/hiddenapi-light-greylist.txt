@@ -248,8 +248,8 @@ Landroid/app/Dialog;->mDismissMessage:Landroid/os/Message;
 Landroid/app/Dialog;->mListenersHandler:Landroid/os/Handler;
 Landroid/app/Dialog;->mOwnerActivity:Landroid/app/Activity;
 Landroid/app/Dialog;->mShowMessage:Landroid/os/Message;
-Landroid/app/DownloadManager;->setAccessFilename(Z)V
 Landroid/app/DownloadManager$Request;->mUri:Landroid/net/Uri;
+Landroid/app/DownloadManager;->setAccessFilename(Z)V
 Landroid/app/FragmentManagerImpl;->mAdded:Ljava/util/ArrayList;
 Landroid/app/FragmentManagerImpl;->noteStateNotSaved()V
 Landroid/app/Fragment;->mChildFragmentManager:Landroid/app/FragmentManagerImpl;
@@ -512,11 +512,13 @@ Landroid/bluetooth/BluetoothPan;->isValidDevice(Landroid/bluetooth/BluetoothDevi
 Landroid/bluetooth/BluetoothPan;->log(Ljava/lang/String;)V
 Landroid/bluetooth/BluetoothPan;->setBluetoothTethering(Z)V
 Landroid/bluetooth/BluetoothProfile;->PAN:I
+Landroid/bluetooth/BluetoothSocket;->mPfd:Landroid/os/ParcelFileDescriptor;
 Landroid/bluetooth/BluetoothUuid;->RESERVED_UUIDS:[Landroid/os/ParcelUuid;
 Landroid/bluetooth/IBluetooth;->getAddress()Ljava/lang/String;
 Landroid/bluetooth/IBluetoothManager$Stub$Proxy;-><init>(Landroid/os/IBinder;)V
 Landroid/bluetooth/IBluetooth$Stub;->asInterface(Landroid/os/IBinder;)Landroid/bluetooth/IBluetooth;
 Landroid/bluetooth/IBluetooth$Stub$Proxy;->getAddress()Ljava/lang/String;
+Landroid/bluetooth/IBluetooth$Stub$Proxy;->getConnectionState(Landroid/bluetooth/BluetoothDevice;)I
 Landroid/bluetooth/le/ScanRecord;->parseFromBytes([B)Landroid/bluetooth/le/ScanRecord;
 Landroid/content/AsyncTaskLoader;->mExecutor:Ljava/util/concurrent/Executor;
 Landroid/content/BroadcastReceiver$PendingResult;-><init>(ILjava/lang/String;Landroid/os/Bundle;IZZLandroid/os/IBinder;II)V
@@ -735,6 +737,7 @@ Landroid/content/res/Resources;->mResourcesImpl:Landroid/content/res/ResourcesIm
 Landroid/content/res/Resources;->mSystem:Landroid/content/res/Resources;
 Landroid/content/res/Resources;->mTmpValue:Landroid/util/TypedValue;
 Landroid/content/res/Resources;->mTypedArrayPool:Landroid/util/Pools$SynchronizedPool;
+Landroid/content/res/Resources;->selectDefaultTheme(II)I
 Landroid/content/res/Resources;->setCompatibilityInfo(Landroid/content/res/CompatibilityInfo;)V
 Landroid/content/res/Resources;->updateSystemConfiguration(Landroid/content/res/Configuration;Landroid/util/DisplayMetrics;Landroid/content/res/CompatibilityInfo;)V
 Landroid/content/res/StringBlock;-><init>(JZ)V
@@ -819,12 +822,14 @@ Landroid/graphics/drawable/BitmapDrawable;->mTargetDensity:I
 Landroid/graphics/drawable/BitmapDrawable;->setBitmap(Landroid/graphics/Bitmap;)V
 Landroid/graphics/drawable/ColorDrawable$ColorState;->mUseColor:I
 Landroid/graphics/drawable/DrawableContainer$DrawableContainerState;->mConstantPadding:Landroid/graphics/Rect;
+Landroid/graphics/drawable/DrawableContainer$DrawableContainerState;->mDrawables:[Landroid/graphics/drawable/Drawable;
 Landroid/graphics/drawable/DrawableContainer;->getOpticalInsets()Landroid/graphics/Insets;
 Landroid/graphics/drawable/DrawableContainer;->mDrawableContainerState:Landroid/graphics/drawable/DrawableContainer$DrawableContainerState;
 Landroid/graphics/drawable/Drawable;->getOpticalInsets()Landroid/graphics/Insets;
 Landroid/graphics/drawable/Drawable;->inflateWithAttributes(Landroid/content/res/Resources;Lorg/xmlpull/v1/XmlPullParser;Landroid/content/res/TypedArray;I)V
 Landroid/graphics/drawable/Drawable;->mCallback:Ljava/lang/ref/WeakReference;
 Landroid/graphics/drawable/Drawable;->parseTintMode(ILandroid/graphics/PorterDuff$Mode;)Landroid/graphics/PorterDuff$Mode;
+Landroid/graphics/drawable/GradientDrawable;->getOpticalInsets()Landroid/graphics/Insets;
 Landroid/graphics/drawable/GradientDrawable$GradientState;->mAngle:I
 Landroid/graphics/drawable/GradientDrawable$GradientState;->mGradientColors:[I
 Landroid/graphics/drawable/GradientDrawable$GradientState;->mGradient:I
@@ -868,6 +873,9 @@ Landroid/graphics/drawable/StateListDrawable;->getStateDrawableIndex([I)I
 Landroid/graphics/drawable/StateListDrawable;->getStateSet(I)[I
 Landroid/graphics/drawable/StateListDrawable;->mStateListState:Landroid/graphics/drawable/StateListDrawable$StateListState;
 Landroid/graphics/drawable/StateListDrawable;->updateStateFromTypedArray(Landroid/content/res/TypedArray;)V
+Landroid/graphics/drawable/VectorDrawable;->getTargetByName(Ljava/lang/String;)Ljava/lang/Object;
+Landroid/graphics/drawable/VectorDrawable;->setAllowCaching(Z)V
+Landroid/graphics/drawable/VectorDrawable$VGroup;->setRotation(F)V
 Landroid/graphics/FontFamily;->abortCreation()V
 Landroid/graphics/FontFamily;->addFontFromAssetManager(Landroid/content/res/AssetManager;Ljava/lang/String;IZIII[Landroid/graphics/fonts/FontVariationAxis;)Z
 Landroid/graphics/FontFamily;->addFontFromBuffer(Ljava/nio/ByteBuffer;I[Landroid/graphics/fonts/FontVariationAxis;II)Z
@@ -1288,6 +1296,10 @@ Landroid/net/ConnectivityManager;->TYPE_NONE:I
 Landroid/net/ConnectivityManager;->TYPE_PROXY:I
 Landroid/net/ConnectivityManager;->TYPE_WIFI_P2P:I
 Landroid/net/http/SslError;->mCertificate:Landroid/net/http/SslCertificate;
+Landroid/net/IConnectivityManager;->getActiveLinkProperties()Landroid/net/LinkProperties;
+Landroid/net/IConnectivityManager;->getActiveNetworkInfo()Landroid/net/NetworkInfo;
+Landroid/net/IConnectivityManager;->getAllNetworkInfo()[Landroid/net/NetworkInfo;
+Landroid/net/IConnectivityManager;->getTetheredIfaces()[Ljava/lang/String;
 Landroid/net/IConnectivityManager$Stub;->asInterface(Landroid/os/IBinder;)Landroid/net/IConnectivityManager;
 Landroid/net/IConnectivityManager$Stub$Proxy;->getActiveLinkProperties()Landroid/net/LinkProperties;
 Landroid/net/IConnectivityManager$Stub$Proxy;->getActiveNetworkInfo()Landroid/net/NetworkInfo;
@@ -1407,6 +1419,7 @@ Landroid/net/wifi/WifiEnterpriseConfig;->getCaCertificateAlias()Ljava/lang/Strin
 Landroid/net/wifi/WifiEnterpriseConfig;->getClientCertificateAlias()Ljava/lang/String;
 Landroid/net/wifi/WifiInfo;->DEFAULT_MAC_ADDRESS:Ljava/lang/String;
 Landroid/net/wifi/WifiInfo;->getMeteredHint()Z
+Landroid/net/wifi/WifiInfo;->getWifiSsid()Landroid/net/wifi/WifiSsid;
 Landroid/net/wifi/WifiInfo;->mMacAddress:Ljava/lang/String;
 Landroid/net/wifi/WifiInfo;->removeDoubleQuotes(Ljava/lang/String;)Ljava/lang/String;
 Landroid/net/wifi/WifiManager;->cancelLocalOnlyHotspotRequest()V
@@ -1415,11 +1428,12 @@ Landroid/net/wifi/WifiManager;->forget(ILandroid/net/wifi/WifiManager$ActionList
 Landroid/net/wifi/WifiManager;->isDualBandSupported()Z
 Landroid/net/wifi/WifiManager;->mService:Landroid/net/wifi/IWifiManager;
 Landroid/net/wifi/WifiManager;->save(Landroid/net/wifi/WifiConfiguration;Landroid/net/wifi/WifiManager$ActionListener;)V
+Landroid/net/wifi/WifiSsid;->getOctets()[B
 Landroid/net/wifi/WifiSsid;->NONE:Ljava/lang/String;
 Landroid/nfc/NfcAdapter;->getAdapterState()I
 Landroid/nfc/NfcAdapter;->getDefaultAdapter()Landroid/nfc/NfcAdapter;
-Landroid/nfc/NfcAdapter;->setNdefPushMessageCallback(Landroid/nfc/NfcAdapter$CreateNdefMessageCallback;Landroid/app/Activity;I)V
 Landroid/nfc/NfcAdapter;->getNfcAdapter(Landroid/content/Context;)Landroid/nfc/NfcAdapter;
+Landroid/nfc/NfcAdapter;->setNdefPushMessageCallback(Landroid/nfc/NfcAdapter$CreateNdefMessageCallback;Landroid/app/Activity;I)V
 Landroid/opengl/GLSurfaceView$EglHelper;->mEglContext:Ljavax/microedition/khronos/egl/EGLContext;
 Landroid/opengl/GLSurfaceView$GLThread;->mEglHelper:Landroid/opengl/GLSurfaceView$EglHelper;
 Landroid/opengl/GLSurfaceView;->mGLThread:Landroid/opengl/GLSurfaceView$GLThread;
@@ -1728,6 +1742,7 @@ Landroid/os/WorkSource;->mNum:I
 Landroid/os/WorkSource;->mUids:[I
 Landroid/os/WorkSource;->setReturningDiffs(Landroid/os/WorkSource;)[Landroid/os/WorkSource;
 Landroid/os/WorkSource;->size()I
+Landroid/permissionpresenterservice/RuntimePermissionPresenterService;->onRevokeRuntimePermission(Ljava/lang/String;Ljava/lang/String;)V
 Landroid/preference/DialogPreference;->mBuilder:Landroid/app/AlertDialog$Builder;
 Landroid/preference/DialogPreference;->mDialogIcon:Landroid/graphics/drawable/Drawable;
 Landroid/preference/DialogPreference;->mDialog:Landroid/app/Dialog;
@@ -2007,6 +2022,7 @@ Landroid/R$styleable;->Window_windowBackground:I
 Landroid/R$styleable;->Window_windowFrame:I
 Landroid/security/keystore/AndroidKeyStoreProvider;->getKeyStoreOperationHandle(Ljava/lang/Object;)J
 Landroid/security/KeyStore;->getInstance()Landroid/security/KeyStore;
+Landroid/security/keystore/recovery/RecoveryController;->initRecoveryService(Ljava/lang/String;[B)V
 Landroid/security/net/config/RootTrustManager;->checkServerTrusted([Ljava/security/cert/X509Certificate;Ljava/lang/String;Ljava/lang/String;)Ljava/util/List;
 Landroid/service/media/IMediaBrowserServiceCallbacks;->onConnectFailed()V
 Landroid/service/media/IMediaBrowserServiceCallbacks;->onConnect(Ljava/lang/String;Landroid/media/session/MediaSession$Token;Landroid/os/Bundle;)V
@@ -2460,6 +2476,7 @@ Landroid/view/textclassifier/TextClassificationManager;->getTextClassifier(I)Lan
 Landroid/view/textclassifier/TextClassifier;->classifyText(Ljava/lang/CharSequence;IILandroid/view/textclassifier/TextClassification$Options;)Landroid/view/textclassifier/TextClassification;
 Landroid/view/textclassifier/TextClassifier;->generateLinks(Ljava/lang/CharSequence;Landroid/view/textclassifier/TextLinks$Options;)Landroid/view/textclassifier/TextLinks;
 Landroid/view/textclassifier/TextClassifier;->suggestSelection(Ljava/lang/CharSequence;IILandroid/view/textclassifier/TextSelection$Options;)Landroid/view/textclassifier/TextSelection;
+Landroid/view/textclassifier/TextLinks$Options;-><init>()V
 Landroid/view/textservice/TextServicesManager;->isSpellCheckerEnabled()Z
 Landroid/view/TextureView;->destroyHardwareLayer()V
 Landroid/view/TextureView;->destroyHardwareResources()V
@@ -2897,6 +2914,7 @@ Landroid/widget/TextView;->createEditorIfNeeded()V
 Landroid/widget/TextView;->getHorizontallyScrolling()Z
 Landroid/widget/TextView;->getTextColor(Landroid/content/Context;Landroid/content/res/TypedArray;I)I
 Landroid/widget/TextView;->isSingleLine()Z
+Landroid/widget/TextView;->LINES:I
 Landroid/widget/TextView;->mCursorDrawableRes:I
 Landroid/widget/TextView;->mCurTextColor:I
 Landroid/widget/TextView;->mEditor:Landroid/widget/Editor;
@@ -3437,11 +3455,11 @@ Ljava/io/FileDescriptor;->isSocket$()Z
 Ljava/io/FileDescriptor;->setInt$(I)V
 Ljava/io/File;->filePath:Ljava/nio/file/Path;
 Ljava/io/File;->fs:Ljava/io/FileSystem;
+Ljava/io/FileInputStream;->fd:Ljava/io/FileDescriptor;
+Ljava/io/FileOutputStream;->fd:Ljava/io/FileDescriptor;
 Ljava/io/File;->path:Ljava/lang/String;
 Ljava/io/File;->prefixLength:I
 Ljava/io/File;->status:Ljava/io/File$PathStatus;
-Ljava/io/FileInputStream;->fd:Ljava/io/FileDescriptor;
-Ljava/io/FileOutputStream;->fd:Ljava/io/FileDescriptor;
 Ljava/io/ObjectStreamClass;->getConstructorId(Ljava/lang/Class;)J
 Ljava/io/ObjectStreamClass;->newInstance(Ljava/lang/Class;J)Ljava/lang/Object;
 Ljava/io/ObjectStreamClass;->newInstance()Ljava/lang/Object;
