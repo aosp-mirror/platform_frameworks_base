@@ -16,6 +16,9 @@
 
 package com.android.server.am;
 
+import static com.android.server.am.ActivityManagerDebugConfig.TAG_AM;
+import static com.android.server.am.ActivityManagerDebugConfig.TAG_WITH_CLASS_NAME;
+
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.Intent;
@@ -23,6 +26,7 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.SystemPropertiesProto;
+import android.util.Log;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.CheckBox;
@@ -31,6 +35,8 @@ import com.android.internal.R;
 import com.android.server.utils.AppInstallerUtil;
 
 public class DeprecatedTargetSdkVersionDialog {
+    private static final String TAG = TAG_WITH_CLASS_NAME ? "DeprecatedTargetSdkVersionDialog" : TAG_AM;
+
     private final AlertDialog mDialog;
     private final String mPackageName;
 
@@ -74,6 +80,7 @@ public class DeprecatedTargetSdkVersionDialog {
     }
 
     public void show() {
+        Log.w(TAG, "Showing SDK deprecation warning for package " + mPackageName);
         mDialog.show();
     }
 
