@@ -2102,18 +2102,24 @@ public class ActivityManager {
         private final GraphicBuffer mSnapshot;
         private final int mOrientation;
         private final Rect mContentInsets;
+        // Whether this snapshot is a down-sampled version of the full resolution, used mainly for
+        // low-ram devices
         private final boolean mReducedResolution;
+        // Whether or not the snapshot is a real snapshot or an app-theme generated snapshot due to
+        // the task having a secure window or having previews disabled
         private final boolean mIsRealSnapshot;
+        private final int mWindowingMode;
         private final float mScale;
 
         public TaskSnapshot(GraphicBuffer snapshot, int orientation, Rect contentInsets,
-                boolean reducedResolution, float scale, boolean isRealSnapshot) {
+                boolean reducedResolution, float scale, boolean isRealSnapshot, int windowingMode) {
             mSnapshot = snapshot;
             mOrientation = orientation;
             mContentInsets = new Rect(contentInsets);
             mReducedResolution = reducedResolution;
             mScale = scale;
             mIsRealSnapshot = isRealSnapshot;
+            mWindowingMode = windowingMode;
         }
 
         private TaskSnapshot(Parcel source) {
@@ -2123,6 +2129,7 @@ public class ActivityManager {
             mReducedResolution = source.readBoolean();
             mScale = source.readFloat();
             mIsRealSnapshot = source.readBoolean();
+            mWindowingMode = source.readInt();
         }
 
         /**
@@ -2163,6 +2170,13 @@ public class ActivityManager {
         }
 
         /**
+         * @return The windowing mode of the task when this snapshot was taken.
+         */
+        public int getWindowingMode() {
+            return mWindowingMode;
+        }
+
+        /**
          * @return The scale this snapshot was taken in.
          */
         public float getScale() {
@@ -2182,14 +2196,18 @@ public class ActivityManager {
             dest.writeBoolean(mReducedResolution);
             dest.writeFloat(mScale);
             dest.writeBoolean(mIsRealSnapshot);
+            dest.writeInt(mWindowingMode);
         }
 
         @Override
         public String toString() {
-            return "TaskSnapshot{mSnapshot=" + mSnapshot + " mOrientation=" + mOrientation
+            final int width = mSnapshot != null ? mSnapshot.getWidth() : 0;
+            final int height = mSnapshot != null ? mSnapshot.getHeight() : 0;
+            return "TaskSnapshot{mSnapshot=" + mSnapshot + " (" + width + "x" + height + ")"
+                    + " mOrientation=" + mOrientation
                     + " mContentInsets=" + mContentInsets.toShortString()
                     + " mReducedResolution=" + mReducedResolution + " mScale=" + mScale
-                    + " mIsRealSnapshot=" + mIsRealSnapshot;
+                    + " mIsRealSnapshot=" + mIsRealSnapshot + " mWindowingMode=" + mWindowingMode;
         }
 
         public static final Creator<TaskSnapshot> CREATOR = new Creator<TaskSnapshot>() {

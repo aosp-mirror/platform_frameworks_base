@@ -90,7 +90,7 @@ class TaskSnapshotLoader {
             return new TaskSnapshot(buffer, proto.orientation,
                     new Rect(proto.insetLeft, proto.insetTop, proto.insetRight, proto.insetBottom),
                     reducedResolution, reducedResolution ? REDUCED_SCALE : 1f,
-                    proto.isRealSnapshot);
+                    proto.isRealSnapshot, proto.windowingMode);
         } catch (IOException e) {
             Slog.w(TAG, "Unable to load task snapshot data for taskId=" + taskId);
             return null;
