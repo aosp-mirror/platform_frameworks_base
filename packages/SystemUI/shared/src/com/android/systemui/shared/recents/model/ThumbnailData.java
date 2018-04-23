@@ -17,6 +17,7 @@
 package com.android.systemui.shared.recents.model;
 
 import static android.content.res.Configuration.ORIENTATION_UNDEFINED;
+import static com.android.systemui.shared.system.WindowManagerWrapper.WINDOWING_MODE_UNDEFINED;
 
 import android.app.ActivityManager.TaskSnapshot;
 import android.graphics.Bitmap;
@@ -32,6 +33,7 @@ public class ThumbnailData {
     public Rect insets;
     public boolean reducedResolution;
     public boolean isRealSnapshot;
+    public int windowingMode;
     public float scale;
 
     public ThumbnailData() {
@@ -41,6 +43,7 @@ public class ThumbnailData {
         reducedResolution = false;
         scale = 1f;
         isRealSnapshot = true;
+        windowingMode = WINDOWING_MODE_UNDEFINED;
     }
 
     public ThumbnailData(TaskSnapshot snapshot) {
@@ -50,5 +53,6 @@ public class ThumbnailData {
         reducedResolution = snapshot.isReducedResolution();
         scale = snapshot.getScale();
         isRealSnapshot = snapshot.isRealSnapshot();
+        windowingMode = snapshot.getWindowingMode();
     }
 }

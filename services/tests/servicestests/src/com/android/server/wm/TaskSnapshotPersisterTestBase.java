@@ -16,6 +16,7 @@
 
 package com.android.server.wm;
 
+import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.content.res.Configuration.ORIENTATION_PORTRAIT;
 import static android.graphics.GraphicBuffer.USAGE_HW_TEXTURE;
 import static android.graphics.GraphicBuffer.USAGE_SW_READ_RARELY;
@@ -84,16 +85,16 @@ class TaskSnapshotPersisterTestBase extends WindowTestsBase {
     }
 
     TaskSnapshot createSnapshot(float scale) {
-        return createSnapshot(scale, true /* isRealSnapshot */);
+        return createSnapshot(scale, true /* isRealSnapshot */, WINDOWING_MODE_FULLSCREEN);
     }
 
-    TaskSnapshot createSnapshot(float scale, boolean isRealSnapshot) {
+    TaskSnapshot createSnapshot(float scale, boolean isRealSnapshot, int windowingMode) {
         final GraphicBuffer buffer = GraphicBuffer.create(100, 100, PixelFormat.RGBA_8888,
                 USAGE_HW_TEXTURE | USAGE_SW_READ_RARELY | USAGE_SW_READ_RARELY);
         Canvas c = buffer.lockCanvas();
         c.drawColor(Color.RED);
         buffer.unlockCanvasAndPost(c);
         return new TaskSnapshot(buffer, ORIENTATION_PORTRAIT, TEST_INSETS,
-                scale < 1f /* reducedResolution */, scale, isRealSnapshot);
+                scale < 1f /* reducedResolution */, scale, isRealSnapshot, windowingMode);
     }
 }
