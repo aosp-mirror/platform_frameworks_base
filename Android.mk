@@ -245,6 +245,18 @@ framework_docs_LOCAL_DROIDDOC_OPTIONS += \
 		-federate AndroidX https://developer.android.com \
 		-federationapi AndroidX prebuilts/sdk/current/androidx-api.txt
 
+# Get the highest numbered api txt for the given api level.
+# $(1): the api level (e.g. public, system)
+define highest_sdk_txt
+$(HISTORICAL_SDK_VERSIONS_ROOT)/$(lastword $(call numerically_sort, \
+    $(patsubst \
+        $(HISTORICAL_SDK_VERSIONS_ROOT)/%,\
+        %,\
+        $(wildcard $(HISTORICAL_SDK_VERSIONS_ROOT)/*/$(1)/api/android.txt)\
+    ) \
+))
+endef
+
 # ====  Public API diff ===========================
 include $(CLEAR_VARS)
 
@@ -260,13 +272,8 @@ LOCAL_ADDITIONAL_DEPENDENCIES := \
 
 LOCAL_MODULE := offline-sdk-referenceonly
 
-last_released_sdk_version := $(lastword $(call numerically_sort, \
-			$(filter-out current, \
-				$(patsubst $(SRC_API_DIR)/%.txt,%, $(wildcard $(SRC_API_DIR)/*.txt)) \
-			 )\
-		))
-
-LOCAL_APIDIFF_OLDAPI := $(LOCAL_PATH)/../../$(SRC_API_DIR)/$(last_released_sdk_version)
+# Basename, because apidiff adds .txt internally.
+LOCAL_APIDIFF_OLDAPI := $(basename $(call highest_sdk_txt,public))
 LOCAL_APIDIFF_NEWAPI := $(LOCAL_PATH)/../../$(basename $(INTERNAL_PLATFORM_API_FILE))
 
 include $(BUILD_APIDIFF)
@@ -290,13 +297,8 @@ LOCAL_ADDITIONAL_DEPENDENCIES := \
 
 LOCAL_MODULE := offline-system-sdk-referenceonly
 
-last_released_sdk_version := $(lastword $(call numerically_sort, \
-			$(filter-out current, \
-				$(patsubst $(SRC_SYSTEM_API_DIR)/%.txt,%, $(wildcard $(SRC_SYSTEM_API_DIR)/*.txt)) \
-			 )\
-		))
-
-LOCAL_APIDIFF_OLDAPI := $(LOCAL_PATH)/../../$(SRC_SYSTEM_API_DIR)/$(last_released_sdk_version)
+# Basename, because apidiff adds .txt internally.
+LOCAL_APIDIFF_OLDAPI := $(basename $(call highest_sdk_txt,system))
 LOCAL_APIDIFF_NEWAPI := $(LOCAL_PATH)/../../$(basename $(INTERNAL_PLATFORM_SYSTEM_API_FILE))
 
 include $(BUILD_APIDIFF)
