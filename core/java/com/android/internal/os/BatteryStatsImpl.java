@@ -196,6 +196,7 @@ public class BatteryStatsImpl extends BatteryStats {
     static final int MSG_REPORT_CPU_UPDATE_NEEDED = 1;
     static final int MSG_REPORT_POWER_CHANGE = 2;
     static final int MSG_REPORT_CHARGING = 3;
+    static final int MSG_REPORT_RESET_STATS = 4;
     static final long DELAY_UPDATE_WAKELOCKS = 5*1000;
 
     private final KernelWakelockReader mKernelWakelockReader = new KernelWakelockReader();
@@ -319,6 +320,7 @@ public class BatteryStatsImpl extends BatteryStats {
         public void batteryNeedsCpuUpdate();
         public void batteryPowerChanged(boolean onBattery);
         public void batterySendBroadcast(Intent intent);
+        public void batteryStatsReset();
     }
 
     public interface PlatformIdleStateCallback {
@@ -373,7 +375,11 @@ public class BatteryStatsImpl extends BatteryStats {
                         cb.batterySendBroadcast(intent);
                     }
                     break;
-            }
+                case MSG_REPORT_RESET_STATS:
+                    if (cb != null) {
+                        cb.batteryStatsReset();
+                    }
+                }
         }
     }
 
@@ -10939,6 +10945,7 @@ public class BatteryStatsImpl extends BatteryStats {
         initDischarge();
 
         clearHistoryLocked();
+        mHandler.sendEmptyMessage(MSG_REPORT_RESET_STATS);
     }
 
     private void initActiveHistoryEventsLocked(long elapsedRealtimeMs, long uptimeMs) {

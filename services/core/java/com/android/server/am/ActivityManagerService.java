@@ -433,6 +433,7 @@ import com.android.internal.util.Preconditions;
 import com.android.server.AlarmManagerInternal;
 import com.android.server.AppOpsService;
 import com.android.server.AttributeCache;
+import com.android.server.BinderCallsStatsService;
 import com.android.server.DeviceIdleController;
 import com.android.server.IntentResolver;
 import com.android.server.IoThread;
@@ -3410,6 +3411,11 @@ public class ActivityManagerService extends IActivityManager.Stub
                 mOnBattery = DEBUG_POWER ? true : onBattery;
             }
         }
+    }
+
+    @Override
+    public void batteryStatsReset() {
+        BinderCallsStatsService.reset();
     }
 
     @Override
