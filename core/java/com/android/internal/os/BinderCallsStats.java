@@ -18,6 +18,7 @@ package com.android.internal.os;
 
 import android.os.Binder;
 import android.os.SystemClock;
+import android.text.format.DateFormat;
 import android.util.ArrayMap;
 import android.util.SparseArray;
 
@@ -46,6 +47,7 @@ public class BinderCallsStats {
     private final SparseArray<UidEntry> mUidEntries = new SparseArray<>();
     private final Queue<CallSession> mCallSessionsPool = new ConcurrentLinkedQueue<>();
     private final Object mLock = new Object();
+    private long mStartTime = System.currentTimeMillis();
 
     private BinderCallsStats() {
     }
@@ -108,6 +110,8 @@ public class BinderCallsStats {
         Map<Integer, Long> uidCallCountMap = new HashMap<>();
         long totalCallsCount = 0;
         long totalCallsTime = 0;
+        pw.print("Start time: ");
+        pw.println(DateFormat.format("yyyy-MM-dd HH:mm:ss", mStartTime));
         int uidEntriesSize = mUidEntries.size();
         List<UidEntry> entries = new ArrayList<>();
         synchronized (mLock) {
@@ -126,8 +130,7 @@ public class BinderCallsStats {
             }
         }
         if (mDetailedTracking) {
-            pw.println("Binder call stats:");
-            pw.println("  Raw data (uid,call_desc,time):");
+            pw.println("Raw data (uid,call_desc,time):");
             entries.sort((o1, o2) -> {
                 if (o1.time < o2.time) {
                     return 1;
@@ -155,12 +158,12 @@ public class BinderCallsStats {
                 }
             }
             pw.println();
-            pw.println("  Per UID Summary(UID: time, % of total_time, calls_count):");
+            pw.println("Per UID Summary(UID: time, % of total_time, calls_count):");
             List<Map.Entry<Integer, Long>> uidTotals = new ArrayList<>(uidTimeMap.entrySet());
             uidTotals.sort((o1, o2) -> o2.getValue().compareTo(o1.getValue()));
             for (Map.Entry<Integer, Long> uidTotal : uidTotals) {
                 Long callCount = uidCallCountMap.get(uidTotal.getKey());
-                pw.println(String.format("    %7d: %11d %3.0f%% %8d",
+                pw.println(String.format("  %7d: %11d %3.0f%% %8d",
                         uidTotal.getKey(), uidTotal.getValue(),
                         100d * uidTotal.getValue() / totalCallsTime, callCount));
             }
@@ -170,7 +173,7 @@ public class BinderCallsStats {
                     totalCallsTime, totalCallsCount,
                     (double)totalCallsTime / totalCallsCount));
         } else {
-            pw.println("  Per UID Summary(UID: calls_count, % of total calls_count):");
+            pw.println("Per UID Summary(UID: calls_count, % of total calls_count):");
             List<Map.Entry<Integer, Long>> uidTotals = new ArrayList<>(uidTimeMap.entrySet());
             uidTotals.sort((o1, o2) -> o2.getValue().compareTo(o1.getValue()));
             for (Map.Entry<Integer, Long> uidTotal : uidTotals) {
@@ -201,6 +204,7 @@ public class BinderCallsStats {
     public void reset() {
         synchronized (mLock) {
             mUidEntries.clear();
+            mStartTime = System.currentTimeMillis();
         }
     }
 
