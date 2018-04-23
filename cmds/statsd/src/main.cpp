@@ -29,6 +29,8 @@
 #include <utils/Looper.h>
 #include <utils/StrongPointer.h>
 
+#include <memory>
+
 #include <stdio.h>
 #include <sys/stat.h>
 #include <sys/types.h>
@@ -72,7 +74,7 @@ static status_t start_log_reader_thread(const sp<StatsService>& service) {
     pthread_t thread;
 
     // Thread data.
-    log_reader_thread_data* data = new log_reader_thread_data();
+    std::unique_ptr<log_reader_thread_data> data = std::make_unique<log_reader_thread_data>();
     data->service = service;
 
     // Create the thread
@@ -86,11 +88,15 @@ static status_t start_log_reader_thread(const sp<StatsService>& service) {
         pthread_attr_destroy(&attr);
         return err;
     }
-    err = pthread_create(&thread, &attr, log_reader_thread_func, static_cast<void*>(data));
+    err = pthread_create(&thread, &attr, log_reader_thread_func,
+                         static_cast<void*>(data.get()));
     if (err != NO_ERROR) {
         pthread_attr_destroy(&attr);
         return err;
     }
+    // Release here rather than in pthread_create, since an error creating the
+    // thread leaves `data` ownerless.
+    data.release();
     pthread_attr_destroy(&attr);
 
     return NO_ERROR;
