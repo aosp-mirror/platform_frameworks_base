@@ -166,10 +166,10 @@
     <dimen name="notification_content_margin_end">16dp</dimen>
 
     <!-- The margin on the end of the content view with a picture. -->
-    <dimen name="notification_content_picture_margin">56dp</dimen>
+    <dimen name="notification_content_picture_margin">52dp</dimen>
 
     <!-- The margin on the end of the content view with a picture and a reply button -->
-    <dimen name="notification_content_picture_and_reply_margin">92dp</dimen>
+    <dimen name="notification_content_picture_and_reply_margin">88dp</dimen>
 
     <!-- The margin for text at the end of the image view for media notifications -->
     <dimen name="notification_media_image_margin_end">72dp</dimen>
@@ -614,7 +614,7 @@
     <!-- The maximum width of a image in a media notification. The images will be reduced to that width in case they are bigger.-->
     <dimen name="notification_media_image_max_width">280dp</dimen>
     <!-- The size of the right icon -->
-    <dimen name="notification_right_icon_size">38dp</dimen>
+    <dimen name="notification_right_icon_size">36dp</dimen>
     <!-- The alpha of a disabled notification button -->
     <item type="dimen" format="float" name="notification_action_disabled_alpha">0.5</item>
 
@@ -631,7 +631,7 @@
     <!-- The maximum width of a image in a media notification. The images will be reduced to that width in case they are bigger.-->
     <dimen name="notification_media_image_max_width_low_ram">100dp</dimen>
     <!-- The size of the right icon image when on low ram -->
-    <dimen name="notification_right_icon_size_low_ram">40dp</dimen>
+    <dimen name="notification_right_icon_size_low_ram">@dimen/notification_right_icon_size_low_ram</dimen>
 
     <dimen name="messaging_avatar_size">@dimen/notification_right_icon_size</dimen>
 
