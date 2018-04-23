@@ -20850,7 +20850,9 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         }
         // If this isn't laid out yet, focus assignment will be handled during the "deferment/
         // backtracking" of requestFocus during layout, so don't touch focus here.
-        if (!sCanFocusZeroSized && isLayoutValid()) {
+        if (!sCanFocusZeroSized && isLayoutValid()
+                // Don't touch focus if animating
+                && !(mParent instanceof ViewGroup && ((ViewGroup) mParent).isLayoutSuppressed())) {
             if (newWidth <= 0 || newHeight <= 0) {
                 if (hasFocus()) {
                     clearFocus();
