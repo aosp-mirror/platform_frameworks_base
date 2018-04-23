@@ -16,11 +16,11 @@
 
 package com.android.server.location;
 
-import android.annotation.Nullable;
 import android.app.AlarmManager;
 import android.app.AppOpsManager;
 import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -251,8 +251,6 @@ public class GnssLocationProvider implements LocationProviderInterface, InjectNt
     private static final int TCP_MIN_PORT = 0;
     private static final int TCP_MAX_PORT = 0xffff;
 
-    // 10 seconds.
-    private static final long LOCATION_TIME_FRESHNESS_THESHOLD_MILLIS = 10 * 1000;
     // 1 second, or 1 Hz frequency.
     private static final long LOCATION_UPDATE_MIN_TIME_INTERVAL_MILLIS = 1000;
     // 30 seconds.
@@ -1038,6 +1036,15 @@ public class GnssLocationProvider implements LocationProviderInterface, InjectNt
             }
             return;
         }
+        ContentResolver resolver = mContext.getContentResolver();
+        long durationMillis = Settings.Global.getLong(
+                resolver,
+                Settings.Global.GNSS_HAL_LOCATION_REQUEST_DURATION_MILLIS,
+                LOCATION_UPDATE_DURATION_MILLIS);
+        if (durationMillis == 0) {
+            Log.i(TAG, "GNSS HAL location request is disabled by Settings.");
+            return;
+        }
 
         LocationManager locationManager = (LocationManager) mContext.getSystemService(
                 Context.LOCATION_SERVICE);
@@ -1055,7 +1062,9 @@ public class GnssLocationProvider implements LocationProviderInterface, InjectNt
         }
 
         Log.i(TAG,
-                String.format("GNSS HAL Requesting location updates from %s provider.", provider));
+                String.format(
+                        "GNSS HAL Requesting location updates from %s provider for %d millis.",
+                        provider, durationMillis));
         locationManager.requestLocationUpdates(provider,
                 LOCATION_UPDATE_MIN_TIME_INTERVAL_MILLIS, /*minDistance=*/ 0,
                 locationListener, mHandler.getLooper());
@@ -1065,7 +1074,7 @@ public class GnssLocationProvider implements LocationProviderInterface, InjectNt
                 Log.i(TAG, String.format("Removing location updates from %s provider.", provider));
                 locationManager.removeUpdates(locationListener);
             }
-        }, LOCATION_UPDATE_DURATION_MILLIS);
+        }, durationMillis);
     }
 
     private void injectBestLocation(Location location) {
@@ -1092,21 +1101,6 @@ public class GnssLocationProvider implements LocationProviderInterface, InjectNt
                 altitudeMeters, speedMetersPerSec, bearingDegrees, horizontalAccuracyMeters,
                 verticalAccuracyMeters, speedAccuracyMetersPerSecond, bearingAccuracyDegrees,
                 timestamp);
-    }
-
-    /**
-     * Get the last fresh location.
-     *
-     * Return null if the last location is not available or not fresh.
-     */
-    private @Nullable
-    Location getLastFreshLocation(LocationManager locationManager, String provider) {
-        Location location = locationManager.getLastKnownLocation(provider);
-        if (location != null && System.currentTimeMillis() - location.getTime()
-                < LOCATION_TIME_FRESHNESS_THESHOLD_MILLIS) {
-            return location;
-        }
-        return null;
     }
 
     /** Returns true if the location request is too frequent. */
