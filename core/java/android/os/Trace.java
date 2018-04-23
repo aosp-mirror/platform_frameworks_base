@@ -91,6 +91,8 @@ public final class Trace {
     public static final long TRACE_TAG_ADB = 1L << 22;
     /** @hide */
     public static final long TRACE_TAG_AIDL = 1L << 24;
+    /** @hide */
+    public static final long TRACE_TAG_NNAPI = 1L << 25;
 
     private static final long TRACE_TAG_NOT_READY = 1L << 63;
     private static final int MAX_SECTION_NAME_LEN = 127;
