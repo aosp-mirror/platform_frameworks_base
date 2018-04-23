@@ -715,7 +715,13 @@ public final class Parcel {
         nativeWriteString(mNativePtr, val);
     }
 
-    /** @hide */
+    /**
+     * Write a boolean value into the parcel at the current dataPosition(),
+     * growing dataCapacity() if needed.
+     *
+     * <p>Note: This method currently delegates to writeInt with a value of 1 or 0
+     * for true or false, respectively, but may change in the future.
+     */
     public final void writeBoolean(boolean val) {
         writeInt(val ? 1 : 0);
     }
@@ -805,6 +811,9 @@ public final class Parcel {
     /**
      * Write a byte value into the parcel at the current dataPosition(),
      * growing dataCapacity() if needed.
+     *
+     * <p>Note: This method currently delegates to writeInt but may change in
+     * the future.
      */
     public final void writeByte(byte val) {
         writeInt(val);
@@ -2007,7 +2016,9 @@ public final class Parcel {
         return nativeReadString(mNativePtr);
     }
 
-    /** @hide */
+    /**
+     * Read a boolean value from the parcel at the current dataPosition().
+     */
     public final boolean readBoolean() {
         return readInt() != 0;
     }
