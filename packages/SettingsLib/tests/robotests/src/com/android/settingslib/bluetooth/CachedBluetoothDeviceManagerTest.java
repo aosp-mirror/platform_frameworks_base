@@ -486,11 +486,14 @@ public class CachedBluetoothDeviceManagerTest {
         doAnswer((invocation) -> mHearingAidProfile).when(mLocalProfileManager)
             .getHearingAidProfile();
         doAnswer((invocation) -> HISYNCID1).when(mHearingAidProfile).getHiSyncId(mDevice1);
+        doAnswer((invocation) -> HISYNCID1).when(mHearingAidProfile).getHiSyncId(mDevice2);
         mCachedDeviceManager.mCachedDevices.add(mCachedDevice1);
+        mCachedDeviceManager.mCachedDevices.add(mCachedDevice2);
         mCachedDeviceManager.updateHearingAidsDevices(mLocalProfileManager);
 
-        // Assert that the mCachedDevice1 has an updated HiSyncId.
+        // Assert that the mCachedDevice1 and mCachedDevice2 have an updated HiSyncId.
         assertThat(mCachedDevice1.getHiSyncId()).isEqualTo(HISYNCID1);
+        assertThat(mCachedDevice2.getHiSyncId()).isEqualTo(HISYNCID1);
     }
 
     /**
