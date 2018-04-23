@@ -140,7 +140,7 @@ void TestUtils::TestTask::run() {
     if (Properties::getRenderPipelineType() == RenderPipelineType::SkiaVulkan) {
         renderThread.vulkanManager().initialize();
     } else {
-        renderThread.eglManager().initialize();
+        renderThread.requireGlContext();
     }
 
     rtCallback(renderThread);
@@ -149,7 +149,7 @@ void TestUtils::TestTask::run() {
         renderThread.vulkanManager().destroy();
     } else {
         renderThread.renderState().flush(Caches::FlushMode::Full);
-        renderThread.eglManager().destroy();
+        renderThread.destroyGlContext();
     }
 }
 

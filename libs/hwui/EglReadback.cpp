@@ -58,7 +58,7 @@ CopyResult EglReadback::copySurfaceInto(Surface& surface, const Rect& srcRect,
 CopyResult EglReadback::copyGraphicBufferInto(GraphicBuffer* graphicBuffer,
                                                  Matrix4& texTransform, const Rect& srcRect,
                                                  SkBitmap* bitmap) {
-    mRenderThread.eglManager().initialize();
+    mRenderThread.requireGlContext();
     // TODO: Can't use Image helper since it forces GL_TEXTURE_2D usage via
     // GL_OES_EGL_image, which doesn't work since we need samplerExternalOES
     // to be able to properly sample from the buffer.

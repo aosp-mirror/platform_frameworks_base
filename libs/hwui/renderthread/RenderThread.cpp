@@ -30,6 +30,13 @@
 #include "utils/FatVector.h"
 #include "utils/TimeUtils.h"
 
+#ifdef HWUI_GLES_WRAP_ENABLED
+#include "debug/GlesDriver.h"
+#endif
+
+#include <GrContextOptions.h>
+#include <gl/GrGLInterface.h>
+
 #include <gui/DisplayEventReceiver.h>
 #include <sys/resource.h>
 #include <utils/Condition.h>
@@ -163,10 +170,43 @@ void RenderThread::initThreadLocals() {
     nsecs_t frameIntervalNanos = static_cast<nsecs_t>(1000000000 / mDisplayInfo.fps);
     mTimeLord.setFrameInterval(frameIntervalNanos);
     initializeDisplayEventReceiver();
-    mEglManager = new EglManager(*this);
+    mEglManager = new EglManager();
     mRenderState = new RenderState(*this);
     mVkManager = new VulkanManager(*this);
     mCacheManager = new CacheManager(mDisplayInfo);
+}
+
+void RenderThread::requireGlContext() {
+    if (mEglManager->hasEglContext()) {
+        return;
+    }
+    mEglManager->initialize();
+    renderState().onGLContextCreated();
+
+    if (Properties::getRenderPipelineType() == RenderPipelineType::SkiaGL) {
+#ifdef HWUI_GLES_WRAP_ENABLED
+        debug::GlesDriver* driver = debug::GlesDriver::get();
+        sk_sp<const GrGLInterface> glInterface(driver->getSkiaInterface());
+#else
+        sk_sp<const GrGLInterface> glInterface(GrGLCreateNativeInterface());
+#endif
+        LOG_ALWAYS_FATAL_IF(!glInterface.get());
+
+        GrContextOptions options;
+        options.fDisableDistanceFieldPaths = true;
+        cacheManager().configureContext(&options);
+        sk_sp<GrContext> grContext(GrContext::MakeGL(std::move(glInterface), options));
+        LOG_ALWAYS_FATAL_IF(!grContext.get());
+        setGrContext(grContext);
+    }
+}
+
+void RenderThread::destroyGlContext() {
+    if (mEglManager->hasEglContext()) {
+        setGrContext(nullptr);
+        renderState().onGLContextDestroyed();
+        mEglManager->destroy();
+    }
 }
 
 void RenderThread::dumpGraphicsMemory(int fd) {

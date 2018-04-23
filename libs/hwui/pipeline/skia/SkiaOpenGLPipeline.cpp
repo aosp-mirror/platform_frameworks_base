@@ -166,7 +166,7 @@ static Layer* createLayer(RenderState& renderState, uint32_t layerWidth, uint32_
 }
 
 DeferredLayerUpdater* SkiaOpenGLPipeline::createTextureLayer() {
-    mEglManager.initialize();
+    mRenderThread.requireGlContext();
     return new DeferredLayerUpdater(mRenderThread.renderState(), createLayer, Layer::Api::OpenGL);
 }
 
@@ -184,6 +184,7 @@ bool SkiaOpenGLPipeline::setSurface(Surface* surface, SwapBehavior swapBehavior,
     }
 
     if (surface) {
+        mRenderThread.requireGlContext();
         const bool wideColorGamut = colorMode == ColorMode::WideColorGamut;
         mEglSurface = mEglManager.createSurface(surface, wideColorGamut);
     }
@@ -274,7 +275,7 @@ private:
 
 sk_sp<Bitmap> SkiaOpenGLPipeline::allocateHardwareBitmap(renderthread::RenderThread& renderThread,
                                                          SkBitmap& skBitmap) {
-    renderThread.eglManager().initialize();
+    renderThread.requireGlContext();
 
     sk_sp<GrContext> grContext = sk_ref_sp(renderThread.getGrContext());
     const SkImageInfo& info = skBitmap.info();
