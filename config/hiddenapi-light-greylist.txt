@@ -1092,6 +1092,7 @@ Landroid/media/AudioManager;->getService()Landroid/media/IAudioService;
 Landroid/media/AudioManager;-><init>(Landroid/content/Context;)V
 Landroid/media/AudioManager;->mAudioFocusIdListenerMap:Ljava/util/concurrent/ConcurrentHashMap;
 Landroid/media/AudioManager;->setMasterMute(ZI)V
+Landroid/media/AudioManager;->setRingerModeInternal(I)V
 Landroid/media/AudioManager;->startBluetoothScoVirtualCall()V
 Landroid/media/AudioManager;->STREAM_BLUETOOTH_SCO:I
 Landroid/media/AudioManager;->STREAM_SYSTEM_ENFORCED:I
@@ -1401,8 +1402,10 @@ Landroid/net/wifi/WifiManager;->isDualBandSupported()Z
 Landroid/net/wifi/WifiManager;->mService:Landroid/net/wifi/IWifiManager;
 Landroid/net/wifi/WifiManager;->save(Landroid/net/wifi/WifiConfiguration;Landroid/net/wifi/WifiManager$ActionListener;)V
 Landroid/net/wifi/WifiSsid;->NONE:Ljava/lang/String;
+Landroid/nfc/NfcAdapter;->getAdapterState()I
 Landroid/nfc/NfcAdapter;->getDefaultAdapter()Landroid/nfc/NfcAdapter;
 Landroid/nfc/NfcAdapter;->setNdefPushMessageCallback(Landroid/nfc/NfcAdapter$CreateNdefMessageCallback;Landroid/app/Activity;I)V
+Landroid/nfc/NfcAdapter;->getNfcAdapter(Landroid/content/Context;)Landroid/nfc/NfcAdapter;
 Landroid/opengl/GLSurfaceView$EglHelper;->mEglContext:Ljavax/microedition/khronos/egl/EGLContext;
 Landroid/opengl/GLSurfaceView$GLThread;->mEglHelper:Landroid/opengl/GLSurfaceView$EglHelper;
 Landroid/opengl/GLSurfaceView;->mGLThread:Landroid/opengl/GLSurfaceView$GLThread;
@@ -1774,6 +1777,7 @@ Landroid/provider/Settings$Secure;->ENABLED_NOTIFICATION_LISTENERS:Ljava/lang/St
 Landroid/provider/Settings$Secure;->INCALL_POWER_BUTTON_BEHAVIOR:Ljava/lang/String;
 Landroid/provider/Settings$Secure;->LONG_PRESS_TIMEOUT:Ljava/lang/String;
 Landroid/provider/Settings$Secure;->PACKAGE_VERIFIER_USER_CONSENT:Ljava/lang/String;
+Landroid/provider/Settings$Secure;->putIntForUser(Landroid/content/ContentResolver;Ljava/lang/String;II)Z
 Landroid/provider/Settings$Secure;->sNameValueCache:Landroid/provider/Settings$NameValueCache;
 Landroid/provider/Settings$System;->AIRPLANE_MODE_TOGGLEABLE_RADIOS:Ljava/lang/String;
 Landroid/provider/Settings$System;->getStringForUser(Landroid/content/ContentResolver;Ljava/lang/String;I)Ljava/lang/String;
@@ -3251,6 +3255,7 @@ Lcom/android/internal/telephony/ITelephony;->getDataState()I
 Lcom/android/internal/telephony/ITelephony;->isIdle(Ljava/lang/String;)Z
 Lcom/android/internal/telephony/ITelephonyRegistry;->notifyCallState(ILjava/lang/String;)V
 Lcom/android/internal/telephony/ITelephonyRegistry$Stub;->asInterface(Landroid/os/IBinder;)Lcom/android/internal/telephony/ITelephonyRegistry;
+Lcom/android/internal/telephony/ITelephony;->setRadio(Z)Z
 Lcom/android/internal/telephony/ITelephony;->silenceRinger()V
 Lcom/android/internal/telephony/ITelephony$Stub;->asInterface(Landroid/os/IBinder;)Lcom/android/internal/telephony/ITelephony;
 Lcom/android/internal/telephony/ITelephony$Stub$Proxy;->endCall()Z
