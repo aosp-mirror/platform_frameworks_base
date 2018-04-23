@@ -1261,6 +1261,11 @@ static void android_media_MediaCodec_setInputSurface(
     sp<PersistentSurface> persistentSurface =
         android_media_MediaCodec_getPersistentInputSurface(env, object);
 
+    if (persistentSurface == NULL) {
+        throwExceptionAsNecessary(
+                env, BAD_VALUE, ACTION_CODE_FATAL, "input surface not valid");
+        return;
+    }
     status_t err = codec->setInputSurface(persistentSurface);
     if (err != NO_ERROR) {
         throwExceptionAsNecessary(env, err);
