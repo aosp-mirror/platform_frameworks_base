@@ -21,6 +21,7 @@ import android.app.slice.SliceProvider;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnClickListener;
 import android.content.DialogInterface.OnDismissListener;
+import android.content.pm.PackageItemInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.net.Uri;
@@ -51,10 +52,14 @@ public class SlicePermissionActivity extends Activity implements OnClickListener
 
         try {
             PackageManager pm = getPackageManager();
-            CharSequence app1 = BidiFormatter.getInstance().unicodeWrap(
-                    pm.getApplicationInfo(mCallingPkg, 0).loadSafeLabel(pm).toString());
-            CharSequence app2 = BidiFormatter.getInstance().unicodeWrap(
-                    pm.getApplicationInfo(mProviderPkg, 0).loadSafeLabel(pm).toString());
+            CharSequence app1 = BidiFormatter.getInstance().unicodeWrap(pm.getApplicationInfo(
+                    mCallingPkg, 0).loadSafeLabel(pm, PackageItemInfo.DEFAULT_MAX_LABEL_SIZE_PX,
+                    PackageItemInfo.SAFE_LABEL_FLAG_TRIM
+                            | PackageItemInfo.SAFE_LABEL_FLAG_FIRST_LINE).toString());
+            CharSequence app2 = BidiFormatter.getInstance().unicodeWrap(pm.getApplicationInfo(
+                    mProviderPkg, 0).loadSafeLabel(pm, PackageItemInfo.DEFAULT_MAX_LABEL_SIZE_PX,
+                    PackageItemInfo.SAFE_LABEL_FLAG_TRIM
+                            | PackageItemInfo.SAFE_LABEL_FLAG_FIRST_LINE).toString());
             AlertDialog dialog = new AlertDialog.Builder(this)
                     .setTitle(getString(R.string.slice_permission_title, app1, app2))
                     .setView(R.layout.slice_permission_request)

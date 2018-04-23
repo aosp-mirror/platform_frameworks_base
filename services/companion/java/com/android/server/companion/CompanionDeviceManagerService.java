@@ -23,7 +23,6 @@ import static com.android.internal.util.Preconditions.checkNotNull;
 import static com.android.internal.util.Preconditions.checkState;
 import static com.android.internal.util.function.pooled.PooledLambda.obtainRunnable;
 
-import android.Manifest;
 import android.annotation.CheckResult;
 import android.annotation.Nullable;
 import android.app.PendingIntent;
@@ -39,6 +38,7 @@ import android.content.Intent;
 import android.content.ServiceConnection;
 import android.content.pm.FeatureInfo;
 import android.content.pm.PackageInfo;
+import android.content.pm.PackageItemInfo;
 import android.content.pm.PackageManager;
 import android.net.NetworkPolicyManager;
 import android.os.Binder;
@@ -289,7 +289,10 @@ public class CompanionDeviceManagerService extends SystemService implements Bind
             String packageTitle = BidiFormatter.getInstance().unicodeWrap(
                     getPackageInfo(callingPackage, userId)
                             .applicationInfo
-                            .loadSafeLabel(getContext().getPackageManager())
+                            .loadSafeLabel(getContext().getPackageManager(),
+                                    PackageItemInfo.DEFAULT_MAX_LABEL_SIZE_PX,
+                                    PackageItemInfo.SAFE_LABEL_FLAG_TRIM
+                                            | PackageItemInfo.SAFE_LABEL_FLAG_FIRST_LINE)
                             .toString());
             long identity = Binder.clearCallingIdentity();
             try {

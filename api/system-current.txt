@@ -1062,7 +1062,11 @@ package android.content.pm {
   }
 
   public class PackageItemInfo {
-    method public java.lang.CharSequence loadSafeLabel(android.content.pm.PackageManager);
+    method public deprecated java.lang.CharSequence loadSafeLabel(android.content.pm.PackageManager);
+    method public java.lang.CharSequence loadSafeLabel(android.content.pm.PackageManager, float, int);
+    field public static final int SAFE_LABEL_FLAG_FIRST_LINE = 4; // 0x4
+    field public static final int SAFE_LABEL_FLAG_SINGLE_LINE = 2; // 0x2
+    field public static final int SAFE_LABEL_FLAG_TRIM = 1; // 0x1
   }
 
   public abstract class PackageManager {

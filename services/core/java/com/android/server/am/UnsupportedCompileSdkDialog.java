@@ -20,6 +20,7 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageItemInfo;
 import android.content.pm.PackageManager;
 import android.view.Window;
 import android.view.WindowManager;
@@ -37,7 +38,10 @@ public class UnsupportedCompileSdkDialog {
         mPackageName = appInfo.packageName;
 
         final PackageManager pm = context.getPackageManager();
-        final CharSequence label = appInfo.loadSafeLabel(pm);
+        final CharSequence label = appInfo.loadSafeLabel(pm,
+                PackageItemInfo.DEFAULT_MAX_LABEL_SIZE_PX,
+                PackageItemInfo.SAFE_LABEL_FLAG_FIRST_LINE
+                        | PackageItemInfo.SAFE_LABEL_FLAG_TRIM);
         final CharSequence message = context.getString(R.string.unsupported_compile_sdk_message,
                 label);
 
