@@ -267,6 +267,32 @@ public class ManagedServicesTest extends UiServiceTestCase {
     }
 
     @Test
+    public void testReadXml_appendsListOfApprovedComponents() throws Exception {
+        for (int approvalLevel : new int[] {APPROVAL_BY_COMPONENT, APPROVAL_BY_PACKAGE}) {
+            ManagedServices service = new TestManagedServices(getContext(), mLock, mUserProfiles,
+                    mIpm, approvalLevel);
+
+            String preApprovedPackage = "some.random.package";
+            String preApprovedComponent = "some.random.package/C1";
+
+            List<String> packages = new ArrayList<>();
+            packages.add(preApprovedPackage);
+            addExpectedServices(service, packages, 0);
+
+            service.setPackageOrComponentEnabled(preApprovedComponent, 0, true, true);
+
+            loadXml(service);
+
+            verifyExpectedApprovedEntries(service);
+
+            String verifyValue  = (approvalLevel == APPROVAL_BY_COMPONENT)
+                    ? preApprovedComponent
+                    : preApprovedPackage;
+            assertTrue(service.isPackageOrComponentAllowed(verifyValue, 0));
+        }
+    }
+
+    @Test
     public void testWriteXml_trimsMissingServices() throws Exception {
         for (int approvalLevel : new int[] {APPROVAL_BY_COMPONENT, APPROVAL_BY_PACKAGE}) {
             ManagedServices service = new TestManagedServices(getContext(), mLock, mUserProfiles,
