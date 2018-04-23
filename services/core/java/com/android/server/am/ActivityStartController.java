@@ -331,7 +331,8 @@ public class ActivityStartController {
                                 "FLAG_CANT_SAVE_STATE not supported here");
                     }
 
-                    final SafeActivityOptions checkedOptions = i == intents.length - 1
+                    final boolean top = i == intents.length - 1;
+                    final SafeActivityOptions checkedOptions = top
                             ? options
                             : null;
                     final int res = obtainStarter(intent, reason)
@@ -348,6 +349,10 @@ public class ActivityStartController {
                             .setActivityOptions(checkedOptions)
                             .setComponentSpecified(componentSpecified)
                             .setOutActivity(outActivity)
+
+                            // Top activity decides on animation being run, so we allow only for the
+                            // top one as otherwise an activity below might consume it.
+                            .setAllowPendingRemoteAnimationRegistryLookup(top /* allowLookup*/)
                             .execute();
 
                     if (res < 0) {
