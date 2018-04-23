@@ -27,8 +27,10 @@ import com.android.internal.annotations.VisibleForTesting;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.Objects;
 
 /**
@@ -191,6 +193,7 @@ public class CachedBluetoothDeviceManager {
             log("updateHearingAidsDevices: getHearingAidProfile() is null");
             return;
         }
+        final Set<Long> syncIdChangedSet = new HashSet<Long>();
         for (CachedBluetoothDevice cachedDevice : mCachedDevices) {
             if (cachedDevice.getHiSyncId() != BluetoothHearingAid.HI_SYNC_ID_INVALID) {
                 continue;
@@ -200,8 +203,11 @@ public class CachedBluetoothDeviceManager {
 
             if (newHiSyncId != BluetoothHearingAid.HI_SYNC_ID_INVALID) {
                 cachedDevice.setHiSyncId(newHiSyncId);
-                onHiSyncIdChanged(newHiSyncId);
+                syncIdChangedSet.add(newHiSyncId);
             }
+        }
+        for (Long syncId : syncIdChangedSet) {
+            onHiSyncIdChanged(syncId);
         }
     }
 
