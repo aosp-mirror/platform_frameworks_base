@@ -3958,8 +3958,6 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         DevicePolicyData policy = getUserData(credentialOwner);
         PasswordMetrics metrics = getUserPasswordMetricsLocked(credentialOwner);
         if (metrics == null) {
-            Slog.wtf(LOG_TAG, "Should have had a valid password metrics for updating checkpoint " +
-                    "validity.");
             metrics = new PasswordMetrics();
         }
         policy.mPasswordValidAtLastCheckpoint =
@@ -4508,7 +4506,8 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         }
 
         if (metrics == null) {
-            Slog.wtf(LOG_TAG, "FBE device, should have been unlocked and had valid metrics.");
+            // This could happen if the user never had a password set, for example, so
+            // setActivePasswordState has never been called for it.
             metrics = new PasswordMetrics();
         }
         return isPasswordSufficientForUserWithoutCheckpointLocked(metrics, userHandle, parent);
