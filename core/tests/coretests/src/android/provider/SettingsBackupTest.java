@@ -471,6 +471,7 @@ public class SettingsBackupTest {
                     Settings.Global.WIFI_FREQUENCY_BAND,
                     Settings.Global.WIFI_IDLE_MS,
                     Settings.Global.WIFI_IS_UNUSABLE_EVENT_METRICS_ENABLED,
+                    Settings.Global.WIFI_LINK_SPEED_METRICS_ENABLED,
                     Settings.Global.WIFI_MAX_DHCP_RETRY_COUNT,
                     Settings.Global.WIFI_MOBILE_DATA_TRANSITION_WAKELOCK_TIMEOUT_MS,
                     Settings.Global.WIFI_NETWORK_SHOW_RSSI,
