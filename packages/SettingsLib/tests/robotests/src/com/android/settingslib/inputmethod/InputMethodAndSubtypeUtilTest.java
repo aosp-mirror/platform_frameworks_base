@@ -138,7 +138,7 @@ public class InputMethodAndSubtypeUtilTest {
         // We do not expect what order will be used to concatenate items in
         // InputMethodAndSubtypeUtil.buildInputMethodsAndSubtypesString() hence accept all possible
         // permutations here.
-        assertThat(result).matches("(ime0;subtype0;subtype1)|(ime0;subtype1;subtype0)");
+        assertThat(result).matches("ime0;subtype0;subtype1|ime0;subtype1;subtype0");
     }
 
     @Test
@@ -151,7 +151,7 @@ public class InputMethodAndSubtypeUtilTest {
         // We do not expect what order will be used to concatenate items in
         // InputMethodAndSubtypeUtil.buildInputMethodsAndSubtypesString() hence accept all possible
         // permutations here.
-        assertThat(result).matches("(ime0:ime1)|(ime1:ime0)");
+        assertThat(result).matches("ime0:ime1|ime1:ime0");
     }
 
     @Test
@@ -164,8 +164,8 @@ public class InputMethodAndSubtypeUtilTest {
         // We do not expect what order will be used to concatenate items in
         // InputMethodAndSubtypeUtil.buildInputMethodsAndSubtypesString() hence accept all possible
         // permutations here.
-        assertThat(result).matches("(ime0;subtype0;subtype1:ime1)|(ime0;subtype1;subtype0:ime1)"
-                + "|(ime1:ime0;subtype0;subtype1)|(ime1:ime0;subtype1;subtype0)");
+        assertThat(result).matches("ime0;subtype0;subtype1:ime1|ime0;subtype1;subtype0:ime1"
+                + "|ime1:ime0;subtype0;subtype1|ime1:ime0;subtype1;subtype0");
     }
 
     @Test
@@ -178,13 +178,13 @@ public class InputMethodAndSubtypeUtilTest {
         // We do not expect what order will be used to concatenate items in
         // InputMethodAndSubtypeUtil.buildInputMethodsAndSubtypesString() hence accept all possible
         // permutations here.
-        assertThat(result).matches("|(ime0;subtype0;subtype1:ime1;subtype2;subtype3)|"
-                + "|(ime0;subtype1;subtype0:ime1;subtype2;subtype3)|"
-                + "|(ime0;subtype0;subtype1:ime1;subtype3;subtype2)|"
-                + "|(ime0;subtype1;subtype0:ime1;subtype3;subtype2)|"
-                + "|(ime1;subtype2;subtype3:ime0;subtype0;subtype1)|"
-                + "|(ime2;subtype3;subtype2:ime0;subtype0;subtype1)|"
-                + "|(ime3;subtype2;subtype3:ime0;subtype1;subtype0)|"
-                + "|(ime4;subtype3;subtype2:ime0;subtype1;subtype0)");
+        assertThat(result).matches("ime0;subtype0;subtype1:ime1;subtype2;subtype3"
+                + "|ime0;subtype1;subtype0:ime1;subtype2;subtype3"
+                + "|ime0;subtype0;subtype1:ime1;subtype3;subtype2"
+                + "|ime0;subtype1;subtype0:ime1;subtype3;subtype2"
+                + "|ime1;subtype2;subtype3:ime0;subtype0;subtype1"
+                + "|ime2;subtype3;subtype2:ime0;subtype0;subtype1"
+                + "|ime3;subtype2;subtype3:ime0;subtype1;subtype0"
+                + "|ime4;subtype3;subtype2:ime0;subtype1;subtype0");
     }
 }
