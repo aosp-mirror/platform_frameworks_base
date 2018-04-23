@@ -909,6 +909,8 @@ Landroid/hardware/camera2/CameraCharacteristics;->CONTROL_MAX_REGIONS:Landroid/h
 Landroid/hardware/camera2/CameraCharacteristics;->DEPTH_AVAILABLE_DEPTH_MIN_FRAME_DURATIONS:Landroid/hardware/camera2/CameraCharacteristics$Key;
 Landroid/hardware/camera2/CameraCharacteristics;->DEPTH_AVAILABLE_DEPTH_STALL_DURATIONS:Landroid/hardware/camera2/CameraCharacteristics$Key;
 Landroid/hardware/camera2/CameraCharacteristics;->DEPTH_AVAILABLE_DEPTH_STREAM_CONFIGURATIONS:Landroid/hardware/camera2/CameraCharacteristics$Key;
+Landroid/hardware/camera2/CameraCharacteristics$Key;->getNativeKey()Landroid/hardware/camera2/impl/CameraMetadataNative$Key;
+Landroid/hardware/camera2/CameraCharacteristics$Key;-><init>(Ljava/lang/String;Landroid/hardware/camera2/utils/TypeReference;)V
 Landroid/hardware/camera2/CameraCharacteristics$Key;-><init>(Ljava/lang/String;Ljava/lang/Class;J)V
 Landroid/hardware/camera2/CameraCharacteristics$Key;-><init>(Ljava/lang/String;Ljava/lang/Class;)V
 Landroid/hardware/camera2/CameraCharacteristics;->LED_AVAILABLE_LEDS:Landroid/hardware/camera2/CameraCharacteristics$Key;
@@ -933,6 +935,8 @@ Landroid/hardware/camera2/CameraCharacteristics;->SCALER_AVAILABLE_STREAM_CONFIG
 Landroid/hardware/camera2/CaptureRequest;->JPEG_GPS_COORDINATES:Landroid/hardware/camera2/CaptureRequest$Key;
 Landroid/hardware/camera2/CaptureRequest;->JPEG_GPS_PROCESSING_METHOD:Landroid/hardware/camera2/CaptureRequest$Key;
 Landroid/hardware/camera2/CaptureRequest;->JPEG_GPS_TIMESTAMP:Landroid/hardware/camera2/CaptureRequest$Key;
+Landroid/hardware/camera2/CaptureRequest$Key;->getNativeKey()Landroid/hardware/camera2/impl/CameraMetadataNative$Key;
+Landroid/hardware/camera2/CaptureRequest$Key;-><init>(Ljava/lang/String;Landroid/hardware/camera2/utils/TypeReference;)V
 Landroid/hardware/camera2/CaptureRequest$Key;-><init>(Ljava/lang/String;Ljava/lang/Class;J)V
 Landroid/hardware/camera2/CaptureRequest;->LED_TRANSMIT:Landroid/hardware/camera2/CaptureRequest$Key;
 Landroid/hardware/camera2/CaptureRequest;->REQUEST_ID:Landroid/hardware/camera2/CaptureRequest$Key;
@@ -942,6 +946,8 @@ Landroid/hardware/camera2/CaptureRequest;->TONEMAP_CURVE_RED:Landroid/hardware/c
 Landroid/hardware/camera2/CaptureResult;->JPEG_GPS_COORDINATES:Landroid/hardware/camera2/CaptureResult$Key;
 Landroid/hardware/camera2/CaptureResult;->JPEG_GPS_PROCESSING_METHOD:Landroid/hardware/camera2/CaptureResult$Key;
 Landroid/hardware/camera2/CaptureResult;->JPEG_GPS_TIMESTAMP:Landroid/hardware/camera2/CaptureResult$Key;
+Landroid/hardware/camera2/CaptureResult$Key;->getNativeKey()Landroid/hardware/camera2/impl/CameraMetadataNative$Key;
+Landroid/hardware/camera2/CaptureResult$Key;-><init>(Ljava/lang/String;Landroid/hardware/camera2/utils/TypeReference;)V
 Landroid/hardware/camera2/CaptureResult$Key;-><init>(Ljava/lang/String;Ljava/lang/Class;J)V
 Landroid/hardware/camera2/CaptureResult$Key;-><init>(Ljava/lang/String;Ljava/lang/Class;)V
 Landroid/hardware/camera2/CaptureResult;->LED_TRANSMIT:Landroid/hardware/camera2/CaptureResult$Key;
@@ -962,7 +968,9 @@ Landroid/hardware/camera2/CaptureResult;->SYNC_FRAME_NUMBER:Landroid/hardware/ca
 Landroid/hardware/camera2/CaptureResult;->TONEMAP_CURVE_BLUE:Landroid/hardware/camera2/CaptureResult$Key;
 Landroid/hardware/camera2/CaptureResult;->TONEMAP_CURVE_GREEN:Landroid/hardware/camera2/CaptureResult$Key;
 Landroid/hardware/camera2/CaptureResult;->TONEMAP_CURVE_RED:Landroid/hardware/camera2/CaptureResult$Key;
+Landroid/hardware/camera2/impl/CameraMetadataNative$Key;->getTag()I
 Landroid/hardware/camera2/impl/CameraMetadataNative;->mMetadataPtr:J
+Landroid/hardware/camera2/utils/TypeReference;->createSpecializedTypeReference(Ljava/lang/reflect/Type;)Landroid/hardware/camera2/utils/TypeReference;
 Landroid/hardware/Camera;->addCallbackBuffer([BI)V
 Landroid/hardware/Camera;->mNativeContext:J
 Landroid/hardware/Camera;->openLegacy(II)Landroid/hardware/Camera;
@@ -2875,9 +2883,9 @@ Landroid/widget/Switch;->mThumbDrawable:Landroid/graphics/drawable/Drawable;
 Landroid/widget/Switch;->mTrackDrawable:Landroid/graphics/drawable/Drawable;
 Landroid/widget/TabHost$IntentContentStrategy;->getContentView()Landroid/view/View;
 Landroid/widget/TabHost$IntentContentStrategy;->tabClosed()V
-Landroid/widget/TabHost$TabSpec;->mIndicatorStrategy:Landroid/widget/TabHost$IndicatorStrategy;
 Landroid/widget/TabHost;->mTabSpecs:Ljava/util/List;
 Landroid/widget/TabHost$TabSpec;->mContentStrategy:Landroid/widget/TabHost$ContentStrategy;
+Landroid/widget/TabHost$TabSpec;->mIndicatorStrategy:Landroid/widget/TabHost$IndicatorStrategy;
 Landroid/widget/TabWidget;->mDrawBottomStrips:Z
 Landroid/widget/TabWidget;->mSelectedTab:I
 Landroid/widget/TabWidget;->setTabSelectionListener(Landroid/widget/TabWidget$OnTabSelectionChanged;)V
