@@ -168,37 +168,25 @@ framework_docs_LOCAL_DROIDDOC_OPTIONS := \
     -hidePackage com.android.internal.util \
     -hidePackage com.android.okhttp \
     -hidePackage com.android.org.conscrypt \
-    -hidePackage com.android.server \
-    -since $(SRC_API_DIR)/1.xml 1 \
-    -since $(SRC_API_DIR)/2.xml 2 \
-    -since $(SRC_API_DIR)/3.xml 3 \
-    -since $(SRC_API_DIR)/4.xml 4 \
-    -since $(SRC_API_DIR)/5.xml 5 \
-    -since $(SRC_API_DIR)/6.xml 6 \
-    -since $(SRC_API_DIR)/7.xml 7 \
-    -since $(SRC_API_DIR)/8.xml 8 \
-    -since $(SRC_API_DIR)/9.xml 9 \
-    -since $(SRC_API_DIR)/10.xml 10 \
-    -since $(SRC_API_DIR)/11.xml 11 \
-    -since $(SRC_API_DIR)/12.xml 12 \
-    -since $(SRC_API_DIR)/13.xml 13 \
-    -since $(SRC_API_DIR)/14.txt 14 \
-    -since $(SRC_API_DIR)/15.txt 15 \
-    -since $(SRC_API_DIR)/16.txt 16 \
-    -since $(SRC_API_DIR)/17.txt 17 \
-    -since $(SRC_API_DIR)/18.txt 18 \
-    -since $(SRC_API_DIR)/19.txt 19 \
-    -since $(SRC_API_DIR)/20.txt 20 \
-    -since $(SRC_API_DIR)/21.txt 21 \
-    -since $(SRC_API_DIR)/22.txt 22 \
-    -since $(SRC_API_DIR)/23.txt 23 \
-    -since $(SRC_API_DIR)/24.txt 24 \
-    -since $(SRC_API_DIR)/25.txt 25 \
-    -since $(SRC_API_DIR)/26.txt 26 \
-    -since $(SRC_API_DIR)/27.txt 27 \
-    -since $(SRC_API_DIR)/28.txt 28 \
+    -hidePackage com.android.server
+
+# Convert an sdk level to a "since" argument.
+since-arg = -since $(wildcard $(HISTORICAL_SDK_VERSIONS_ROOT)/$(1)/public/api/android.*) $(1)
+
+finalized_sdks := $(patsubst $(HISTORICAL_SDK_VERSIONS_ROOT)/%/public/api/android.xml,%,\
+    $(wildcard $(HISTORICAL_SDK_VERSIONS_ROOT)/*/public/api/android.xml))
+finalized_sdks += $(patsubst $(HISTORICAL_SDK_VERSIONS_ROOT)/%/public/api/android.txt,%,\
+    $(wildcard $(HISTORICAL_SDK_VERSIONS_ROOT)/*/public/api/android.txt))
+finalized_sdks := $(call numerically_sort,$(finalized_sdks))
+
+framework_docs_LOCAL_DROIDDOC_OPTIONS += $(foreach sdk,$(finalized_sdks),$(call since-arg,$(sdk)))
+ifneq ($(PLATFORM_VERSION_CODENAME),REL)
+  framework_docs_LOCAL_DROIDDOC_OPTIONS += \
+      -since ./frameworks/base/api/current.txt $(PLATFORM_VERSION_CODENAME)
+endif
+framework_docs_LOCAL_DROIDDOC_OPTIONS += \
     -werror -lerror -hide 111 -hide 113 -hide 125 -hide 126 -hide 127 -hide 128 \
-    -overview $(LOCAL_PATH)/core/java/overview.html \
+    -overview $(LOCAL_PATH)/core/java/overview.html
 
 framework_docs_LOCAL_API_CHECK_ADDITIONAL_JAVA_DIR:= \
 	$(call intermediates-dir-for,JAVA_LIBRARIES,framework,,COMMON)
