@@ -307,6 +307,15 @@ public abstract class DrawableWrapper extends Drawable implements Drawable.Callb
     }
 
     @Override
+    public ColorFilter getColorFilter() {
+        final Drawable drawable = getDrawable();
+        if (drawable != null) {
+            return drawable.getColorFilter();
+        }
+        return super.getColorFilter();
+    }
+
+    @Override
     public void setTintList(@Nullable ColorStateList tint) {
         if (mDrawable != null) {
             mDrawable.setTintList(tint);
