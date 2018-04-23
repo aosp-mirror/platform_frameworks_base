@@ -1541,7 +1541,9 @@ public final class BatteryStatsService extends IBatteryStats.Stub
         }
         long ident = Binder.clearCallingIdentity();
         try {
-            syncStats("get-health-stats-for-uids", BatteryExternalStatsWorker.UPDATE_ALL);
+            if (shouldCollectExternalStats()) {
+                syncStats("get-health-stats-for-uids", BatteryExternalStatsWorker.UPDATE_ALL);
+            }
             synchronized (mStats) {
                 return getHealthStatsForUidLocked(requestUid);
             }
@@ -1565,7 +1567,9 @@ public final class BatteryStatsService extends IBatteryStats.Stub
         long ident = Binder.clearCallingIdentity();
         int i=-1;
         try {
-            syncStats("get-health-stats-for-uids", BatteryExternalStatsWorker.UPDATE_ALL);
+            if (shouldCollectExternalStats()) {
+                syncStats("get-health-stats-for-uids", BatteryExternalStatsWorker.UPDATE_ALL);
+            }
             synchronized (mStats) {
                 final int N = requestUids.length;
                 final HealthStatsParceler[] results = new HealthStatsParceler[N];
@@ -1581,6 +1585,11 @@ public final class BatteryStatsService extends IBatteryStats.Stub
         } finally {
             Binder.restoreCallingIdentity(ident);
         }
+    }
+
+    private boolean shouldCollectExternalStats() {
+        return (SystemClock.elapsedRealtime() - mWorker.getLastCollectionTimeStamp())
+                > mStats.getExternalStatsCollectionRateLimitMs();
     }
 
     /**
