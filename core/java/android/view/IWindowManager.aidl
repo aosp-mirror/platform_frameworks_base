@@ -128,7 +128,10 @@ interface IWindowManager
     void overridePendingAppTransitionRemote(in RemoteAnimationAdapter remoteAnimationAdapter);
     void executeAppTransition();
 
-    /** Used by system ui to report that recents has shown itself. */
+    /**
+      * Used by system ui to report that recents has shown itself.
+      * @deprecated to be removed once prebuilts are updated
+      */
     void endProlongedAnimations();
 
     // Re-evaluate the current orientation from the caller's state.
