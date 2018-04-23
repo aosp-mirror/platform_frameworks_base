@@ -245,7 +245,6 @@ public class AppTransition implements Dump {
 
     private int mLastClipRevealMaxTranslation;
     private boolean mLastHadClipReveal;
-    private boolean mProlongedAnimationsEnded;
 
     private final boolean mGridLayoutRecentsEnabled;
     private final boolean mLowRamRecentsEnabled;
@@ -423,25 +422,10 @@ public class AppTransition implements Dump {
         mService.getDefaultDisplayContentLocked().getDockedDividerController()
                 .notifyAppTransitionStarting(openingApps, transit);
 
-        // Prolong the start for the transition when docking a task from recents, unless recents
-        // ended it already then we don't need to wait.
-        if (transit == TRANSIT_DOCK_TASK_FROM_RECENTS && !mProlongedAnimationsEnded) {
-            for (int i = openingApps.size() - 1; i >= 0; i--) {
-                final AppWindowToken app = openingApps.valueAt(i);
-                app.startDelayingAnimationStart();
-            }
-        }
         if (mRemoteAnimationController != null) {
             mRemoteAnimationController.goodToGo();
         }
         return redoLayout;
-    }
-
-    /**
-     * Let the transitions manager know that the somebody wanted to end the prolonged animations.
-     */
-    void notifyProlongedAnimationsEnded() {
-        mProlongedAnimationsEnded = true;
     }
 
     void clear() {
@@ -452,7 +436,6 @@ public class AppTransition implements Dump {
         mNextAppTransitionAnimationsSpecsFuture = null;
         mDefaultNextAppTransitionAnimationSpec = null;
         mAnimationFinishedCallback = null;
-        mProlongedAnimationsEnded = false;
     }
 
     void freeze() {
