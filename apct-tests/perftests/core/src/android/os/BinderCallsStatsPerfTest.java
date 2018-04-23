@@ -69,7 +69,6 @@ public class BinderCallsStatsPerfTest {
         final BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         Binder b = new Binder();
         mBinderCallsStats = new BinderCallsStats(false);
-        assertNull(mBinderCallsStats.callStarted(b, 0));
         while (state.keepRunning()) {
             BinderCallsStats.CallSession s = mBinderCallsStats.callStarted(b, 0);
             mBinderCallsStats.callEnded(s);
