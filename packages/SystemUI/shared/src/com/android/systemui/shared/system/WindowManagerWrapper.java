@@ -104,14 +104,6 @@ public class WindowManagerWrapper {
         }
     }
 
-    public void endProlongedAnimations() {
-        try {
-            WindowManagerGlobal.getWindowManagerService().endProlongedAnimations();
-        } catch (RemoteException e) {
-            Log.w(TAG, "Failed to end prolonged animations: ", e);
-        }
-    }
-
     /**
      * Enable or disable haptic feedback on the navigation bar buttons.
      */
