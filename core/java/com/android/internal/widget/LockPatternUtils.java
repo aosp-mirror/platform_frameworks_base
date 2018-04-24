@@ -66,8 +66,10 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
+import java.util.StringJoiner;
 /**
  * Utilities for the lock pattern and its settings.
  */
@@ -165,6 +167,7 @@ public class LockPatternUtils {
 
     public static final String SYNTHETIC_PASSWORD_HANDLE_KEY = "sp-handle";
     public static final String SYNTHETIC_PASSWORD_ENABLED_KEY = "enable-sp";
+    private static final String HISTORY_DELIMITER = ",";
 
     private final Context mContext;
     private final ContentResolver mContentResolver;
@@ -507,31 +510,50 @@ public class LockPatternUtils {
     }
 
     /**
+     * Returns the password history hash factor, needed to check new password against password
+     * history with {@link #checkPasswordHistory(String, byte[], int)}
+     */
+    public byte[] getPasswordHistoryHashFactor(String currentPassword, int userId) {
+        try {
+            return getLockSettings().getHashFactor(currentPassword, userId);
+        } catch (RemoteException e) {
+            Log.e(TAG, "failed to get hash factor", e);
+            return null;
+        }
+    }
+
+    /**
      * Check to see if a password matches any of the passwords stored in the
      * password history.
      *
-     * @param password The password to check.
+     * @param passwordToCheck The password to check.
+     * @param hashFactor Hash factor of the current user returned from
+     *        {@link ILockSettings#getHashFactor}
      * @return Whether the password matches any in the history.
      */
-    public boolean checkPasswordHistory(String password, int userId) {
-        String passwordHashString = new String(
-                passwordToHash(password, userId), StandardCharsets.UTF_8);
-        String passwordHistory = getString(PASSWORD_HISTORY_KEY, userId);
-        if (passwordHistory == null) {
+    public boolean checkPasswordHistory(String passwordToCheck, byte[] hashFactor, int userId) {
+        if (TextUtils.isEmpty(passwordToCheck)) {
+            Log.e(TAG, "checkPasswordHistory: empty password");
             return false;
         }
-        // Password History may be too long...
-        int passwordHashLength = passwordHashString.length();
+        String passwordHistory = getString(PASSWORD_HISTORY_KEY, userId);
+        if (TextUtils.isEmpty(passwordHistory)) {
+            return false;
+        }
         int passwordHistoryLength = getRequestedPasswordHistoryLength(userId);
         if(passwordHistoryLength == 0) {
             return false;
         }
-        int neededPasswordHistoryLength = passwordHashLength * passwordHistoryLength
-                + passwordHistoryLength - 1;
-        if (passwordHistory.length() > neededPasswordHistoryLength) {
-            passwordHistory = passwordHistory.substring(0, neededPasswordHistoryLength);
+        String legacyHash = legacyPasswordToHash(passwordToCheck, userId);
+        String passwordHash = passwordToHistoryHash(passwordToCheck, hashFactor, userId);
+        String[] history = passwordHistory.split(HISTORY_DELIMITER);
+        // Password History may be too long...
+        for (int i = 0; i < Math.min(passwordHistoryLength, history.length); i++) {
+            if (history[i].equals(legacyHash) || history[i].equals(passwordHash)) {
+                return true;
+            }
         }
-        return passwordHistory.contains(passwordHashString);
+        return false;
     }
 
     /**
@@ -830,6 +852,7 @@ public class LockPatternUtils {
         updateEncryptionPasswordIfNeeded(password,
                 PasswordMetrics.computeForPassword(password).quality, userHandle);
         updatePasswordHistory(password, userHandle);
+        onAfterChangingPassword(userHandle);
     }
 
     /**
@@ -852,8 +875,15 @@ public class LockPatternUtils {
         }
     }
 
+    /**
+     * Store the hash of the *current* password in the password history list, if device policy
+     * enforces password history requirement.
+     */
     private void updatePasswordHistory(String password, int userHandle) {
-
+        if (TextUtils.isEmpty(password)) {
+            Log.e(TAG, "checkPasswordHistory: empty password");
+            return;
+        }
         // Add the password to the password history. We assume all
         // password hashes have the same length for simplicity of implementation.
         String passwordHistory = getString(PASSWORD_HISTORY_KEY, userHandle);
@@ -864,16 +894,25 @@ public class LockPatternUtils {
         if (passwordHistoryLength == 0) {
             passwordHistory = "";
         } else {
-            byte[] hash = passwordToHash(password, userHandle);
-            passwordHistory = new String(hash, StandardCharsets.UTF_8) + "," + passwordHistory;
-            // Cut it to contain passwordHistoryLength hashes
-            // and passwordHistoryLength -1 commas.
-            passwordHistory = passwordHistory.substring(0, Math.min(hash.length
-                    * passwordHistoryLength + passwordHistoryLength - 1, passwordHistory
-                    .length()));
+            final byte[] hashFactor = getPasswordHistoryHashFactor(password, userHandle);
+            String hash = passwordToHistoryHash(password, hashFactor, userHandle);
+            if (hash == null) {
+                Log.e(TAG, "Compute new style password hash failed, fallback to legacy style");
+                hash = legacyPasswordToHash(password, userHandle);
+            }
+            if (TextUtils.isEmpty(passwordHistory)) {
+                passwordHistory = hash;
+            } else {
+                String[] history = passwordHistory.split(HISTORY_DELIMITER);
+                StringJoiner joiner = new StringJoiner(HISTORY_DELIMITER);
+                joiner.add(hash);
+                for (int i = 0; i < passwordHistoryLength - 1 && i < history.length; i++) {
+                    joiner.add(history[i]);
+                }
+                passwordHistory = joiner.toString();
+            }
         }
         setString(PASSWORD_HISTORY_KEY, passwordHistory, userHandle);
-        onAfterChangingPassword(userHandle);
     }
 
     /**
@@ -1098,7 +1137,7 @@ public class LockPatternUtils {
         return Long.toHexString(salt);
     }
 
-    /*
+    /**
      * Generate a hash for the given password. To avoid brute force attacks, we use a salted hash.
      * Not the most secure, but it is at least a second level of protection. First level is that
      * the file is in a location only readable by the system process.
@@ -1107,7 +1146,7 @@ public class LockPatternUtils {
      *
      * @return the hash of the pattern in a byte array.
      */
-    public byte[] passwordToHash(String password, int userId) {
+    public String legacyPasswordToHash(String password, int userId) {
         if (password == null) {
             return null;
         }
@@ -1122,7 +1161,24 @@ public class LockPatternUtils {
             System.arraycopy(md5, 0, combined, sha1.length, md5.length);
 
             final char[] hexEncoded = HexEncoding.encode(combined);
-            return new String(hexEncoded).getBytes(StandardCharsets.UTF_8);
+            return new String(hexEncoded);
+        } catch (NoSuchAlgorithmException e) {
+            throw new AssertionError("Missing digest algorithm: ", e);
+        }
+    }
+
+    /**
+     * Hash the password for password history check purpose.
+     */
+    private String passwordToHistoryHash(String passwordToHash, byte[] hashFactor, int userId) {
+        if (TextUtils.isEmpty(passwordToHash) || hashFactor == null) {
+            return null;
+        }
+        try {
+            MessageDigest sha256 = MessageDigest.getInstance("SHA-256");
+            sha256.update(hashFactor);
+            sha256.update((passwordToHash + getSalt(userId)).getBytes());
+            return new String(HexEncoding.encode(sha256.digest()));
         } catch (NoSuchAlgorithmException e) {
             throw new AssertionError("Missing digest algorithm: ", e);
         }
@@ -1571,6 +1627,7 @@ public class LockPatternUtils {
 
             updateEncryptionPasswordIfNeeded(credential, quality, userId);
             updatePasswordHistory(credential, userId);
+            onAfterChangingPassword(userId);
         } else {
             if (!TextUtils.isEmpty(credential)) {
                 throw new IllegalArgumentException("password must be emtpy for NONE type");
