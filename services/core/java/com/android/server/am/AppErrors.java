@@ -476,7 +476,8 @@ class AppErrors {
                     } catch (IllegalArgumentException e) {
                         // Hmm, that didn't work, app might have crashed before creating a
                         // recents entry. Let's see if we have a safe-to-restart intent.
-                        final Set<String> cats = task.intent.getCategories();
+                        final Set<String> cats = task.intent != null
+                                ? task.intent.getCategories() : null;
                         if (cats != null && cats.contains(Intent.CATEGORY_LAUNCHER)) {
                             mService.getActivityStartController().startActivityInPackage(
                                     task.mCallingUid, callingPid, callingUid, task.mCallingPackage,
