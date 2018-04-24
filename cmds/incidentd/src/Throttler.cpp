@@ -18,6 +18,7 @@
 
 #include "Throttler.h"
 
+#include <inttypes.h>
 #include <utils/SystemClock.h>
 
 namespace android {
@@ -42,15 +43,15 @@ bool Throttler::shouldThrottle() {
 }
 
 void Throttler::addReportSize(size_t reportByteSize) {
-    VLOG("The current request took %d bytes to dropbox", (int)reportByteSize);
+    VLOG("The current request took %zu bytes to dropbox", reportByteSize);
     mAccumulatedSize += reportByteSize;
 }
 
 void Throttler::dump(FILE* out) {
-    fprintf(out, "mSizeLimit=%d\n", (int)mSizeLimit);
-    fprintf(out, "mAccumulatedSize=%d\n", (int)mAccumulatedSize);
-    fprintf(out, "mRefractoryPeriodMs=%d\n", (int)mRefractoryPeriodMs);
-    fprintf(out, "mLastRefractoryMs=%d\n", (int)mLastRefractoryMs);
+    fprintf(out, "mSizeLimit=%zu\n", mSizeLimit);
+    fprintf(out, "mAccumulatedSize=%zu\n", mAccumulatedSize);
+    fprintf(out, "mRefractoryPeriodMs=%" PRIi64 "\n", mRefractoryPeriodMs);
+    fprintf(out, "mLastRefractoryMs=%" PRIi64 "\n", mLastRefractoryMs);
 }
 
 }  // namespace incidentd

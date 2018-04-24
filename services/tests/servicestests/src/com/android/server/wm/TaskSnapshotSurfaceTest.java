@@ -16,6 +16,7 @@
 
 package com.android.server.wm;
 
+import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.content.res.Configuration.ORIENTATION_PORTRAIT;
 import static android.view.WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS;
 import static org.junit.Assert.assertEquals;
@@ -60,7 +61,8 @@ public class TaskSnapshotSurfaceTest extends WindowTestsBase {
         final GraphicBuffer buffer = GraphicBuffer.create(width, height, PixelFormat.RGBA_8888,
                 GraphicBuffer.USAGE_SW_READ_NEVER | GraphicBuffer.USAGE_SW_WRITE_NEVER);
         final TaskSnapshot snapshot = new TaskSnapshot(buffer,
-                ORIENTATION_PORTRAIT, contentInsets, false, 1.0f, true /* isRealSnapshot */);
+                ORIENTATION_PORTRAIT, contentInsets, false, 1.0f, true /* isRealSnapshot */,
+                WINDOWING_MODE_FULLSCREEN);
         mSurface = new TaskSnapshotSurface(sWm, new Window(), new Surface(), snapshot, "Test",
                 Color.WHITE, Color.RED, Color.BLUE, sysuiVis, windowFlags, 0, taskBounds,
                 ORIENTATION_PORTRAIT);

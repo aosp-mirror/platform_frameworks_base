@@ -17,6 +17,9 @@
 
 package com.android.server.am;
 
+import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
+import static android.content.Intent.FLAG_ACTIVITY_TASK_ON_HOME;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
@@ -62,7 +65,7 @@ import java.util.Comparator;
  * Tests for exercising {@link TaskRecord}.
  *
  * Build/Install/Run:
- *  bit FrameworksServicesTests:com.android.server.am.TaskRecordTests
+ *  atest FrameworksServicesTests:com.android.server.am.TaskRecordTests
  */
 @MediumTest
 @Presubmit
@@ -111,6 +114,18 @@ public class TaskRecordTests extends ActivityTestsBase {
         TaskRecord.create(null, 0, null, null, null, null);
 
         assertTrue(factory.mCreated);
+    }
+
+    @Test
+    public void testReturnsToHomeStack() throws Exception {
+        final TaskRecord task = createTaskRecord(1);
+        assertFalse(task.returnsToHomeStack());
+        task.intent = null;
+        assertFalse(task.returnsToHomeStack());
+        task.intent = new Intent();
+        assertFalse(task.returnsToHomeStack());
+        task.intent.addFlags(FLAG_ACTIVITY_NEW_TASK | FLAG_ACTIVITY_TASK_ON_HOME);
+        assertTrue(task.returnsToHomeStack());
     }
 
     private File serializeToFile(TaskRecord r) throws IOException, XmlPullParserException {

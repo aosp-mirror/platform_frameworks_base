@@ -86,8 +86,8 @@ status_t PrivacyBuffer::stripField(const Privacy* parentPolicy, const PrivacySpe
         // iterator will point to head of next field
         size_t currentAt = mData.rp()->pos();
         writeFieldOrSkip(fieldTag, skip);
-        VLOG("[Depth %2d]Field %d %ss %d bytes", depth, fieldId, skip ? "skip" : "write",
-             (int)(get_varint_size(fieldTag) + mData.rp()->pos() - currentAt));
+        VLOG("[Depth %2d]Field %d %ss %zu bytes", depth, fieldId, skip ? "skip" : "write",
+             get_varint_size(fieldTag) + mData.rp()->pos() - currentAt);
         return NO_ERROR;
     }
     // current field is message type and its sub-fields have extra privacy policies

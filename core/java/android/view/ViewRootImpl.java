@@ -3269,7 +3269,8 @@ public final class ViewRootImpl implements ViewParent,
                 // eglTerminate() for instance.
                 if (mAttachInfo.mThreadedRenderer != null &&
                         !mAttachInfo.mThreadedRenderer.isEnabled() &&
-                        mAttachInfo.mThreadedRenderer.isRequested()) {
+                        mAttachInfo.mThreadedRenderer.isRequested() &&
+                        mSurface.isValid()) {
 
                     try {
                         mAttachInfo.mThreadedRenderer.initializeIfNeeded(

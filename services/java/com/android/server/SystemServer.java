@@ -221,7 +221,7 @@ public final class SystemServer {
     private static final String TIME_ZONE_RULES_MANAGER_SERVICE_CLASS =
             "com.android.server.timezone.RulesManagerService$Lifecycle";
     private static final String IOT_SERVICE_CLASS =
-            "com.google.android.things.services.IoTSystemService";
+            "com.android.things.server.IoTSystemService";
     private static final String SLICE_MANAGER_SERVICE_CLASS =
             "com.android.server.slice.SliceManagerService$Lifecycle";
     private static final String CAR_SERVICE_HELPER_SERVICE_CLASS =

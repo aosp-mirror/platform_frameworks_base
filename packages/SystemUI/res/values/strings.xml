@@ -59,7 +59,7 @@
     <string name="status_bar_latest_events_title">Notifications</string>
 
     <!-- When the battery is low, this is displayed to the user in a dialog.  The title of the low battery alert.  [CHAR LIMIT=NONE]-->
-    <string name="battery_low_title">Battery is low</string>
+    <string name="battery_low_title">Battery may run out soon</string>
 
     <!-- A message that appears when the battery level is getting low in a dialog.  This is
         appended to the subtitle of the low battery alert.  "percentage" is the percentage of battery

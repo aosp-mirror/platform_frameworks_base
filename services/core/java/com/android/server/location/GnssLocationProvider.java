@@ -418,6 +418,7 @@ public class GnssLocationProvider implements LocationProviderInterface, InjectNt
     private final LocationChangeListener mNetworkLocationListener = new NetworkLocationListener();
     private final LocationChangeListener mFusedLocationListener = new FusedLocationListener();
     private final NtpTimeHelper mNtpTimeHelper;
+    private final GnssBatchingProvider mGnssBatchingProvider;
 
     // Handler for processing events
     private Handler mHandler;
@@ -885,6 +886,7 @@ public class GnssLocationProvider implements LocationProviderInterface, InjectNt
         mGnssSatelliteBlacklistHelper = new GnssSatelliteBlacklistHelper(mContext,
                 looper, this);
         mHandler.post(mGnssSatelliteBlacklistHelper::updateSatelliteBlacklist);
+        mGnssBatchingProvider = new GnssBatchingProvider();
     }
 
     /**
@@ -1059,6 +1061,12 @@ public class GnssLocationProvider implements LocationProviderInterface, InjectNt
             // For Device-Based Hybrid (E911)
             provider = LocationManager.FUSED_PROVIDER;
             locationListener = mFusedLocationListener;
+        }
+
+        if (!locationManager.isProviderEnabled(provider)) {
+            Log.w(TAG, "Unable to request location since " + provider
+                    + " provider does not exist or is not enabled.");
+            return;
         }
 
         Log.i(TAG,
@@ -1267,7 +1275,7 @@ public class GnssLocationProvider implements LocationProviderInterface, InjectNt
 
             mGnssMeasurementsProvider.onGpsEnabledChanged();
             mGnssNavigationMessageProvider.onGpsEnabledChanged();
-            enableBatching();
+            mGnssBatchingProvider.enable();
         } else {
             synchronized (mLock) {
                 mEnabled = false;
@@ -1299,7 +1307,7 @@ public class GnssLocationProvider implements LocationProviderInterface, InjectNt
         mAlarmManager.cancel(mWakeupIntent);
         mAlarmManager.cancel(mTimeoutIntent);
 
-        disableBatching();
+        mGnssBatchingProvider.disable();
         // do this before releasing wakelock
         native_cleanup();
 
@@ -2001,58 +2009,11 @@ public class GnssLocationProvider implements LocationProviderInterface, InjectNt
         };
     }
 
-    public interface GnssBatchingProvider {
-        /**
-         * Returns the GNSS batching size
-         */
-        int getSize();
-
-        /**
-         * Starts the hardware batching operation
-         */
-        boolean start(long periodNanos, boolean wakeOnFifoFull);
-
-        /**
-         * Forces a flush of existing locations from the hardware batching
-         */
-        void flush();
-
-        /**
-         * Stops the batching operation
-         */
-        boolean stop();
-    }
-
     /**
      * @hide
      */
     public GnssBatchingProvider getGnssBatchingProvider() {
-        return new GnssBatchingProvider() {
-            @Override
-            public int getSize() {
-                return native_get_batch_size();
-            }
-
-            @Override
-            public boolean start(long periodNanos, boolean wakeOnFifoFull) {
-                if (periodNanos <= 0) {
-                    Log.e(TAG, "Invalid periodNanos " + periodNanos +
-                            "in batching request, not started");
-                    return false;
-                }
-                return native_start_batch(periodNanos, wakeOnFifoFull);
-            }
-
-            @Override
-            public void flush() {
-                native_flush_batch();
-            }
-
-            @Override
-            public boolean stop() {
-                return native_stop_batch();
-            }
-        };
+        return mGnssBatchingProvider;
     }
 
     public interface GnssMetricsProvider {
@@ -2072,23 +2033,6 @@ public class GnssLocationProvider implements LocationProviderInterface, InjectNt
                 return mGnssMetrics.dumpGnssMetricsAsProtoString();
             }
         };
-    }
-
-    /**
-     * Initialize Batching if enabled
-     */
-    private void enableBatching() {
-        if (!native_init_batching()) {
-            Log.e(TAG, "Failed to initialize GNSS batching");
-        }
-    }
-
-    /**
-     * Disable batching
-     */
-    private void disableBatching() {
-        native_stop_batch();
-        native_cleanup_batching();
     }
 
     /**
@@ -2912,19 +2856,5 @@ public class GnssLocationProvider implements LocationProviderInterface, InjectNt
     private static native boolean native_set_emergency_supl_pdn(int emergencySuplPdn);
 
     private static native boolean native_set_satellite_blacklist(int[] constellations, int[] svIds);
-
-    // GNSS Batching
-    private static native int native_get_batch_size();
-
-    private static native boolean native_start_batch(long periodNanos, boolean wakeOnFifoFull);
-
-    private static native void native_flush_batch();
-
-    private static native boolean native_stop_batch();
-
-    private static native boolean native_init_batching();
-
-    private static native void native_cleanup_batching();
-
 }
 

@@ -176,7 +176,7 @@ TEST_F(ReporterTest, RunReportToGivenDirectory) {
 
     ASSERT_EQ(Reporter::REPORT_FINISHED, reporter->runReport(&size));
     vector<string> results = InspectFiles();
-    ASSERT_EQ((int)results.size(), 1);
+    ASSERT_EQ(results.size(), 1UL);
     EXPECT_EQ(results[0],
               "\n\x2"
               "\b\f\n\x6"

@@ -17,6 +17,8 @@
 package com.android.server.wm;
 
 import android.support.test.filters.FlakyTest;
+import android.view.SurfaceControl;
+import android.view.SurfaceSession;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -43,6 +45,9 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.anyFloat;
+import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
@@ -105,6 +110,21 @@ public class WindowContainerTests extends WindowTestsBase {
         assertTrue(layerNeg2.mOnParentSetCalled);
         assertTrue(secondLayerNeg1.mOnParentSetCalled);
         assertTrue(layer0.mOnParentSetCalled);
+    }
+
+    @Test
+    public void testAddChildSetsSurfacePosition() throws Exception {
+        MockSurfaceBuildingContainer top = new MockSurfaceBuildingContainer();
+
+        final SurfaceControl.Transaction transaction = mock(SurfaceControl.Transaction.class);
+        sWm.mTransactionFactory = () -> transaction;
+
+        WindowContainer child = new WindowContainer(sWm);
+        child.setBounds(1, 1, 10, 10);
+
+        verify(transaction, never()).setPosition(any(), anyFloat(), anyFloat());
+        top.addChild(child, 0);
+        verify(transaction, times(1)).setPosition(any(), eq(1.f), eq(1.f));
     }
 
     @Test
@@ -823,6 +843,30 @@ public class WindowContainerTests extends WindowTestsBase {
 
         TestWindowContainer build() {
             return new TestWindowContainer(mLayer, mIsAnimating, mIsVisible, mOrientation);
+        }
+    }
+
+    private class MockSurfaceBuildingContainer extends WindowContainer<WindowContainer> {
+        final SurfaceSession mSession = new SurfaceSession();
+
+        MockSurfaceBuildingContainer() {
+            super(sWm);
+        }
+
+        class MockSurfaceBuilder extends SurfaceControl.Builder {
+            MockSurfaceBuilder(SurfaceSession ss) {
+                super(ss);
+            }
+
+            @Override
+            public SurfaceControl build() {
+                return mock(SurfaceControl.class);
+            }
+        }
+
+        @Override
+        SurfaceControl.Builder makeChildSurface(WindowContainer child) {
+            return new MockSurfaceBuilder(mSession);
         }
     }
 }

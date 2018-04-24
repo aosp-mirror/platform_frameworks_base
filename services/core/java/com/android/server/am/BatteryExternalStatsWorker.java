@@ -117,6 +117,13 @@ class BatteryExternalStatsWorker implements BatteryStatsImpl.ExternalStatsSync {
     private WifiActivityEnergyInfo mLastInfo =
             new WifiActivityEnergyInfo(0, 0, 0, new long[]{0}, 0, 0, 0, 0);
 
+    /**
+     * Timestamp at which all external stats were last collected in
+     * {@link SystemClock#elapsedRealtime()} time base.
+     */
+    @GuardedBy("this")
+    private long mLastCollectionTimeStamp;
+
     BatteryExternalStatsWorker(Context context, BatteryStatsImpl stats) {
         mContext = context;
         mStats = stats;
@@ -259,6 +266,12 @@ class BatteryExternalStatsWorker implements BatteryStatsImpl.ExternalStatsSync {
         return mCurrentFuture;
     }
 
+    long getLastCollectionTimeStamp() {
+        synchronized (this) {
+            return mLastCollectionTimeStamp;
+        }
+    }
+
     private final Runnable mSyncTask = new Runnable() {
         @Override
         public void run() {
@@ -311,6 +324,10 @@ class BatteryExternalStatsWorker implements BatteryStatsImpl.ExternalStatsSync {
                 }
             } catch (Exception e) {
                 Slog.wtf(TAG, "Error updating external stats: ", e);
+            }
+
+            synchronized (BatteryExternalStatsWorker.this) {
+                mLastCollectionTimeStamp = SystemClock.elapsedRealtime();
             }
         }
     };

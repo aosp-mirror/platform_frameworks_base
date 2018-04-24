@@ -116,6 +116,7 @@ public class AlwaysOnDisplayPolicy {
     private SettingsObserver mSettingsObserver;
 
     public AlwaysOnDisplayPolicy(Context context) {
+        context = context.getApplicationContext();
         mContext = context;
         mParser = new KeyValueListParser(',');
         mSettingsObserver = new SettingsObserver(context.getMainThreadHandler());

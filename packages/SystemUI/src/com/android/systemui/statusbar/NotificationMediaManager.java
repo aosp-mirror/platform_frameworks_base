@@ -172,26 +172,27 @@ public class NotificationMediaManager implements Dumpable {
                 }
             }
 
-            if (mediaNotification != null) {
-                mMediaNotificationKey = mediaNotification.notification.getKey();
-                if (DEBUG_MEDIA) {
-                    Log.v(TAG, "DEBUG_MEDIA: Found new media notification: key="
-                            + mMediaNotificationKey + " controller=" + mMediaController);
-                }
-            }
-
             if (controller != null && !sameSessions(mMediaController, controller)) {
                 // We have a new media session
-                clearCurrentMediaNotification();
+                clearCurrentMediaNotificationSession();
                 mMediaController = controller;
                 mMediaController.registerCallback(mMediaListener);
                 mMediaMetadata = mMediaController.getMetadata();
                 if (DEBUG_MEDIA) {
-                    Log.v(TAG, "DEBUG_MEDIA: insert listener, receive metadata: "
-                            + mMediaMetadata);
+                    Log.v(TAG, "DEBUG_MEDIA: insert listener, found new controller: "
+                            + mMediaController + ", receive metadata: " + mMediaMetadata);
                 }
 
                 metaDataChanged = true;
+            }
+
+            if (mediaNotification != null
+                    && !mediaNotification.notification.getKey().equals(mMediaNotificationKey)) {
+                mMediaNotificationKey = mediaNotification.notification.getKey();
+                if (DEBUG_MEDIA) {
+                    Log.v(TAG, "DEBUG_MEDIA: Found new media notification: key="
+                            + mMediaNotificationKey);
+                }
             }
         }
 
@@ -203,15 +204,7 @@ public class NotificationMediaManager implements Dumpable {
 
     public void clearCurrentMediaNotification() {
         mMediaNotificationKey = null;
-        mMediaMetadata = null;
-        if (mMediaController != null) {
-            if (DEBUG_MEDIA) {
-                Log.v(TAG, "DEBUG_MEDIA: Disconnecting from old controller: "
-                        + mMediaController.getPackageName());
-            }
-            mMediaController.unregisterCallback(mMediaListener);
-        }
-        mMediaController = null;
+        clearCurrentMediaNotificationSession();
     }
 
     @Override
@@ -264,5 +257,17 @@ public class NotificationMediaManager implements Dumpable {
         return entry.getExpandedContentView() != null &&
                 entry.getExpandedContentView()
                         .findViewById(com.android.internal.R.id.media_actions) != null;
+    }
+
+    private void clearCurrentMediaNotificationSession() {
+        mMediaMetadata = null;
+        if (mMediaController != null) {
+            if (DEBUG_MEDIA) {
+                Log.v(TAG, "DEBUG_MEDIA: Disconnecting from old controller: "
+                        + mMediaController.getPackageName());
+            }
+            mMediaController.unregisterCallback(mMediaListener);
+        }
+        mMediaController = null;
     }
 }

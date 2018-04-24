@@ -173,7 +173,7 @@
     <style name="TextAppearance.StatusBar.Expanded.Date">
         <item name="android:textSize">@dimen/qs_time_expanded_size</item>
         <item name="android:textStyle">normal</item>
-        <item name="android:textColor">#ffffffff</item>
+        <item name="android:textColor">?android:attr/textColorPrimary</item>
         <item name="android:fontFamily">sans-serif</item>
     </style>
 

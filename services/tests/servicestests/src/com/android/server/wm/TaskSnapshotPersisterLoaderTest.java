@@ -16,6 +16,8 @@
 
 package com.android.server.wm;
 
+import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
+import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
@@ -164,8 +166,10 @@ public class TaskSnapshotPersisterLoaderTest extends TaskSnapshotPersisterTestBa
 
     @Test
     public void testIsRealSnapshotPersistAndLoadSnapshot() {
-        TaskSnapshot a = createSnapshot(1f /* scale */, true /* isRealSnapshot */);
-        TaskSnapshot b = createSnapshot(1f /* scale */, false /* isRealSnapshot */);
+        TaskSnapshot a = createSnapshot(1f /* scale */, true /* isRealSnapshot */,
+                WINDOWING_MODE_FULLSCREEN);
+        TaskSnapshot b = createSnapshot(1f /* scale */, false /* isRealSnapshot */,
+                WINDOWING_MODE_FULLSCREEN);
         assertTrue(a.isRealSnapshot());
         assertFalse(b.isRealSnapshot());
         mPersister.persistSnapshot(1, mTestUserId, a);
@@ -177,6 +181,25 @@ public class TaskSnapshotPersisterLoaderTest extends TaskSnapshotPersisterTestBa
         assertNotNull(snapshotB);
         assertTrue(snapshotA.isRealSnapshot());
         assertFalse(snapshotB.isRealSnapshot());
+    }
+
+    @Test
+    public void testWindowingModePersistAndLoadSnapshot() {
+        TaskSnapshot a = createSnapshot(1f /* scale */, true /* isRealSnapshot */,
+                WINDOWING_MODE_FULLSCREEN);
+        TaskSnapshot b = createSnapshot(1f /* scale */, true /* isRealSnapshot */,
+                WINDOWING_MODE_PINNED);
+        assertTrue(a.getWindowingMode() == WINDOWING_MODE_FULLSCREEN);
+        assertTrue(b.getWindowingMode() == WINDOWING_MODE_PINNED);
+        mPersister.persistSnapshot(1, mTestUserId, a);
+        mPersister.persistSnapshot(2, mTestUserId, b);
+        mPersister.waitForQueueEmpty();
+        final TaskSnapshot snapshotA = mLoader.loadTask(1, mTestUserId, false /* reduced */);
+        final TaskSnapshot snapshotB = mLoader.loadTask(2, mTestUserId, false /* reduced */);
+        assertNotNull(snapshotA);
+        assertNotNull(snapshotB);
+        assertTrue(snapshotA.getWindowingMode() == WINDOWING_MODE_FULLSCREEN);
+        assertTrue(snapshotB.getWindowingMode() == WINDOWING_MODE_PINNED);
     }
 
     @Test

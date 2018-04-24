@@ -17,7 +17,7 @@
         android:layout_gravity="top|right"
         android:gravity="center"
         android:orientation="vertical"
-        android:padding="16dp"
+        android:padding="12dp"
         android:translationZ="9dp" />
 
 </com.android.systemui.HardwareUiLayout>

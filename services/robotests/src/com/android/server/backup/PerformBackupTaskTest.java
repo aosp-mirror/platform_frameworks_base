@@ -17,16 +17,16 @@
 package com.android.server.backup;
 
 import static com.android.server.backup.testing.BackupManagerServiceTestUtils.createBackupWakeLock;
-import static com.android.server.backup.testing.BackupManagerServiceTestUtils
-        .setUpBackupManagerServiceBasics;
-import static com.android.server.backup.testing.BackupManagerServiceTestUtils
-        .startBackupThreadAndGetLooper;
+import static com.android.server.backup.testing.BackupManagerServiceTestUtils.setUpBackupManagerServiceBasics;
+import static com.android.server.backup.testing.BackupManagerServiceTestUtils.startBackupThreadAndGetLooper;
 import static com.android.server.backup.testing.TestUtils.uncheck;
 import static com.android.server.backup.testing.TransportData.backupTransport;
-
 import static com.google.common.truth.Truth.assertThat;
-
+import static java.util.Collections.emptyList;
+import static java.util.stream.Collectors.toCollection;
+import static java.util.stream.Collectors.toList;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.argThat;
@@ -41,10 +41,6 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.robolectric.Shadows.shadowOf;
 
-import static java.util.Collections.emptyList;
-import static java.util.stream.Collectors.toCollection;
-import static java.util.stream.Collectors.toList;
-
 import android.app.Application;
 import android.app.IBackupAgent;
 import android.app.backup.BackupAgent;
@@ -58,6 +54,7 @@ import android.app.backup.IBackupObserver;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
+import android.os.DeadObjectException;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
@@ -66,7 +63,6 @@ import android.os.PowerManager;
 import android.os.RemoteException;
 import android.platform.test.annotations.Presubmit;
 import android.util.Pair;
-
 import com.android.internal.backup.IBackupTransport;
 import com.android.server.backup.internal.BackupHandler;
 import com.android.server.backup.internal.BackupRequest;
@@ -81,9 +77,14 @@ import com.android.server.testing.SystemLoaderClasses;
 import com.android.server.testing.SystemLoaderPackages;
 import com.android.server.testing.shadows.ShadowBackupDataInput;
 import com.android.server.testing.shadows.ShadowBackupDataOutput;
-
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Stream;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentMatcher;
@@ -97,20 +98,15 @@ import org.robolectric.shadows.ShadowLooper;
 import org.robolectric.shadows.ShadowPackageManager;
 import org.robolectric.shadows.ShadowQueuedWork;
 
-import java.io.File;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.stream.Stream;
-
 @RunWith(FrameworkRobolectricTestRunner.class)
 @Config(
-    manifest = Config.NONE,
-    sdk = 26,
-    shadows = {ShadowBackupDataInput.class, ShadowBackupDataOutput.class, ShadowQueuedWork.class}
-)
+        manifest = Config.NONE,
+        sdk = 26,
+        shadows = {
+            ShadowBackupDataInput.class,
+            ShadowBackupDataOutput.class,
+            ShadowQueuedWork.class
+        })
 @SystemLoaderPackages({"com.android.server.backup", "android.app.backup"})
 @SystemLoaderClasses({IBackupTransport.class, IBackupAgent.class, PackageInfo.class})
 @Presubmit
@@ -382,8 +378,7 @@ public class PerformBackupTaskTest {
         runTask(task);
 
         verify(mListener).onFinished(any());
-        // TODO: Should it be 2 times? (PBT.beginBackup() and PBT.finalizeBackup())
-        verify(mObserver, times(2)).backupFinished(eq(BackupManager.ERROR_TRANSPORT_ABORTED));
+        verify(mObserver).backupFinished(eq(BackupManager.ERROR_TRANSPORT_ABORTED));
     }
 
     @Test
@@ -538,6 +533,57 @@ public class PerformBackupTaskTest {
         verify(mObserver).backupFinished(BackupManager.SUCCESS);
     }
 
+    @Test
+    public void testRunTask_whenQueueEmpty() throws Exception {
+        TransportMock transportMock = setUpTransport(mTransport);
+        PerformBackupTask task =
+                createPerformBackupTask(
+                        transportMock.transportClient, mTransport.transportDirName, true);
+
+        runTask(task);
+
+        verify(mObserver).backupFinished(eq(BackupManager.SUCCESS));
+    }
+
+    @Test
+    public void testRunTask_whenIncrementalAndTransportUnavailableDuringPmBackup()
+            throws Exception {
+        TransportMock transportMock = setUpTransport(mTransport);
+        IBackupTransport transportBinder = transportMock.transport;
+        setUpAgent(PACKAGE_1);
+        when(transportBinder.getBackupQuota(
+                        eq(BackupManagerService.PACKAGE_MANAGER_SENTINEL), anyBoolean()))
+                .thenThrow(DeadObjectException.class);
+        PerformBackupTask task =
+                createPerformBackupTask(
+                        transportMock.transportClient,
+                        mTransport.transportDirName,
+                        false,
+                        PACKAGE_1);
+
+        runTask(task);
+
+        verify(mListener).onFinished(any());
+        verify(mObserver).backupFinished(eq(BackupManager.ERROR_TRANSPORT_ABORTED));
+    }
+
+    @Test
+    public void testRunTask_whenIncrementalAndAgentFails() throws Exception {
+        TransportMock transportMock = setUpTransport(mTransport);
+        createFakePmAgent();
+        PerformBackupTask task =
+                createPerformBackupTask(
+                        transportMock.transportClient,
+                        mTransport.transportDirName,
+                        false,
+                        PACKAGE_1);
+
+        runTask(task);
+
+        verify(mListener).onFinished(any());
+        verify(mObserver).backupFinished(eq(BackupManager.ERROR_TRANSPORT_ABORTED));
+    }
+
     private void runTask(PerformBackupTask task) {
         Message message = mBackupHandler.obtainMessage(BackupHandler.MSG_BACKUP_RESTORE_STEP, task);
         mBackupHandler.sendMessage(message);
@@ -637,6 +683,19 @@ public class PerformBackupTaskTest {
         return pmAgent;
     }
 
+    /**
+     * Returns an implementation of PackageManagerBackupAgent that throws RuntimeException in {@link
+     * BackupAgent#onBackup(ParcelFileDescriptor, BackupDataOutput, ParcelFileDescriptor)}
+     */
+    private PackageManagerBackupAgent createFakePmAgent() {
+        PackageManagerBackupAgent fakePmAgent =
+                new FakePackageManagerBackupAgent(mApplication.getPackageManager());
+        fakePmAgent.attach(mApplication);
+        fakePmAgent.onCreate();
+        when(mBackupManagerService.makeMetadataAgent()).thenReturn(fakePmAgent);
+        return fakePmAgent;
+    }
+
     /** Matches {@link PackageInfo} whose package name is {@code packageName}. */
     private static ArgumentMatcher<PackageInfo> packageInfo(String packageName) {
         // We have to test for packageInfo nulity because of Mockito's own stubbing with argThat().
@@ -711,6 +770,20 @@ public class PerformBackupTaskTest {
                     mBackupHandler.obtainMessage(
                             BackupHandler.MSG_OP_COMPLETE, Pair.create(mTask, result));
             mBackupHandler.sendMessage(message);
+        }
+    }
+
+    private static class FakePackageManagerBackupAgent extends PackageManagerBackupAgent {
+        public FakePackageManagerBackupAgent(PackageManager packageMgr) {
+            super(packageMgr);
+        }
+
+        @Override
+        public void onBackup(
+                ParcelFileDescriptor oldState,
+                BackupDataOutput data,
+                ParcelFileDescriptor newState) {
+            throw new RuntimeException();
         }
     }
 }

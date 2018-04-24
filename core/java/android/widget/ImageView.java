@@ -109,9 +109,10 @@ public class ImageView extends View {
     private ColorFilter mColorFilter = null;
     private boolean mHasColorFilter = false;
     private Xfermode mXfermode;
+    private boolean mHasXfermode = false;
     private int mAlpha = 255;
+    private boolean mHasAlpha = false;
     private final int mViewAlphaScale = 256;
-    private boolean mColorMod = false;
 
     private Drawable mDrawable = null;
     private BitmapDrawable mRecycleableBitmapDrawable = null;
@@ -1007,7 +1008,9 @@ public class ImageView extends View {
             mDrawableWidth = d.getIntrinsicWidth();
             mDrawableHeight = d.getIntrinsicHeight();
             applyImageTint();
-            applyColorMod();
+            applyColorFilter();
+            applyAlpha();
+            applyXfermode();
 
             configureBounds();
         } else {
@@ -1462,8 +1465,8 @@ public class ImageView extends View {
     public final void setXfermode(Xfermode mode) {
         if (mXfermode != mode) {
             mXfermode = mode;
-            mColorMod = true;
-            applyColorMod();
+            mHasXfermode = true;
+            applyXfermode();
             invalidate();
         }
     }
@@ -1490,8 +1493,7 @@ public class ImageView extends View {
         if (mColorFilter != cf) {
             mColorFilter = cf;
             mHasColorFilter = true;
-            mColorMod = true;
-            applyColorMod();
+            applyColorFilter();
             invalidate();
         }
     }
@@ -1535,22 +1537,29 @@ public class ImageView extends View {
         alpha &= 0xFF;          // keep it legal
         if (mAlpha != alpha) {
             mAlpha = alpha;
-            mColorMod = true;
-            applyColorMod();
+            mHasAlpha = true;
+            applyAlpha();
             invalidate();
         }
     }
 
-    private void applyColorMod() {
-        // Only mutate and apply when modifications have occurred. This should
-        // not reset the mColorMod flag, since these filters need to be
-        // re-applied if the Drawable is changed.
-        if (mDrawable != null && mColorMod) {
+    private void applyXfermode() {
+        if (mDrawable != null && mHasXfermode) {
             mDrawable = mDrawable.mutate();
-            if (mHasColorFilter) {
-                mDrawable.setColorFilter(mColorFilter);
-            }
             mDrawable.setXfermode(mXfermode);
+        }
+    }
+
+    private void applyColorFilter() {
+        if (mDrawable != null && mHasColorFilter) {
+            mDrawable = mDrawable.mutate();
+            mDrawable.setColorFilter(mColorFilter);
+        }
+    }
+
+    private void applyAlpha() {
+        if (mDrawable != null && mHasAlpha) {
+            mDrawable = mDrawable.mutate();
             mDrawable.setAlpha(mAlpha * mViewAlphaScale >> 8);
         }
     }

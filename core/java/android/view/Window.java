@@ -1657,7 +1657,7 @@ public abstract class Window {
      *
      * @return Returns the top-level window decor view.
      */
-    public abstract View getDecorView();
+    public abstract @NonNull View getDecorView();
 
     /**
      * Retrieve the current decor view, but only if it has already been created;

@@ -16,6 +16,7 @@
 
 package com.android.server.power;
 
+import android.annotation.Nullable;
 import android.annotation.UserIdInt;
 import android.app.ActivityManagerInternal;
 import android.app.AppOpsManager;
@@ -97,7 +98,7 @@ final class Notifier {
     private final ActivityManagerInternal mActivityManagerInternal;
     private final InputManagerInternal mInputManagerInternal;
     private final InputMethodManagerInternal mInputMethodManagerInternal;
-    private final StatusBarManagerInternal mStatusBarManagerInternal;
+    @Nullable private final StatusBarManagerInternal mStatusBarManagerInternal;
     private final TrustManager mTrustManager;
 
     private final NotifierHandler mHandler;
@@ -738,7 +739,9 @@ final class Notifier {
 
     private void showWirelessChargingStarted(int batteryLevel) {
         playChargingStartedSound();
-        mStatusBarManagerInternal.showChargingAnimation(batteryLevel);
+        if (mStatusBarManagerInternal != null) {
+            mStatusBarManagerInternal.showChargingAnimation(batteryLevel);
+        }
         mSuspendBlocker.release();
     }
 

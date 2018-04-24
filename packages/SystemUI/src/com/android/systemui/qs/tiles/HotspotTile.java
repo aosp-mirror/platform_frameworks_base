@@ -98,7 +98,8 @@ public class HotspotTile extends QSTileImpl<AirplaneBooleanState> {
     @Override
     protected void handleClick() {
         final boolean isEnabled = mState.value;
-        if (!isEnabled && mAirplaneMode.getValue() != 0) {
+        if (!isEnabled &&
+                (mAirplaneMode.getValue() != 0 || mDataSaverController.isDataSaverEnabled())) {
             return;
         }
         // Immediately enter transient enabling state when turning hotspot on.

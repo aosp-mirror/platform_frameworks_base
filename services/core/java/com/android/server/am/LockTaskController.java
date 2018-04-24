@@ -555,11 +555,12 @@ public class LockTaskController {
             return;
         }
 
-        if (mLockTaskModeTasks.isEmpty()) {
+        final Intent taskIntent = task.intent;
+        if (mLockTaskModeTasks.isEmpty() && taskIntent != null) {
             mSupervisor.mRecentTasks.onLockTaskModeStateChanged(lockTaskModeState, task.userId);
             // Start lock task on the handler thread
             mHandler.post(() -> performStartLockTask(
-                    task.intent.getComponent().getPackageName(),
+                    taskIntent.getComponent().getPackageName(),
                     task.userId,
                     lockTaskModeState));
         }

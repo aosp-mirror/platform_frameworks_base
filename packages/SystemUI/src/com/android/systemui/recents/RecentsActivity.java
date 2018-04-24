@@ -835,9 +835,6 @@ public class RecentsActivity extends Activity implements ViewTreeObserver.OnPreD
     @Override
     public boolean onPreDraw() {
         mRecentsView.getViewTreeObserver().removeOnPreDrawListener(this);
-        // We post to make sure that this information is delivered after this traversals is
-        // finished.
-        mRecentsView.post(() -> WindowManagerWrapper.getInstance().endProlongedAnimations());
         return true;
     }
 

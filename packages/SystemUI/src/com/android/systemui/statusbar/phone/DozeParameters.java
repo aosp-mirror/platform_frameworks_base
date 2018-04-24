@@ -59,9 +59,9 @@ public class DozeParameters implements TunerService.Tunable {
 
     @VisibleForTesting
     protected DozeParameters(Context context) {
-        mContext = context;
+        mContext = context.getApplicationContext();
         mAmbientDisplayConfiguration = new AmbientDisplayConfiguration(mContext);
-        mAlwaysOnPolicy = new AlwaysOnDisplayPolicy(context);
+        mAlwaysOnPolicy = new AlwaysOnDisplayPolicy(mContext);
 
         mControlScreenOffAnimation = !getDisplayNeedsBlanking();
         mPowerManager = mContext.getSystemService(PowerManager.class);
@@ -241,6 +241,10 @@ public class DozeParameters implements TunerService.Tunable {
     @Override
     public void onTuningChanged(String key, String newValue) {
         mDozeAlwaysOn = mAmbientDisplayConfiguration.alwaysOnEnabled(UserHandle.USER_CURRENT);
+    }
+
+    public AlwaysOnDisplayPolicy getPolicy() {
+        return mAlwaysOnPolicy;
     }
 
     /**
