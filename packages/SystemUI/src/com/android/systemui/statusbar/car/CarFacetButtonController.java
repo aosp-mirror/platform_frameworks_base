@@ -7,6 +7,7 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.view.Display;
+import android.view.View;
 
 import java.util.HashMap;
 import java.util.List;
@@ -73,36 +74,43 @@ public class CarFacetButtonController {
      */
     public void taskChanged(List<ActivityManager.StackInfo> stackInfoList) {
         int displayId = getDisplayId();
+        ActivityManager.StackInfo validStackInfo = null;
         for (ActivityManager.StackInfo stackInfo :stackInfoList) {
-            // if the display id is known and does not match the stack we skip
-            if (displayId != -1 && displayId != stackInfo.displayId ||
-                    stackInfo.topActivity == null) {
-                continue;
-            }
-
-            if (mSelectedFacetButton != null) {
-                mSelectedFacetButton.setSelected(false);
-            }
-
-            String packageName = stackInfo.topActivity.getPackageName();
-            CarFacetButton facetButton = findFacetButtongByComponentName(stackInfo.topActivity);
-            if (facetButton == null) {
-                facetButton = mButtonsByPackage.get(packageName);
-            }
-
-            if (facetButton == null) {
-                String category = getPackageCategory(packageName);
-                if (category != null) {
-                    facetButton = mButtonsByCategory.get(category);
-                }
-            }
-
-            if (facetButton != null) {
-                facetButton.setSelected(true);
-                mSelectedFacetButton = facetButton;
-                return;
+            // If the display id is unknown or it matches the stack, it's valid for use
+            if ((displayId == -1 || displayId == stackInfo.displayId) &&
+                    stackInfo.topActivity != null) {
+                validStackInfo = stackInfo;
+                break;
             }
         }
+
+        if (validStackInfo == null) {
+            // No stack was found that was on the same display as the facet buttons thus return
+            return;
+        }
+
+        if (mSelectedFacetButton != null) {
+            mSelectedFacetButton.setSelected(false);
+        }
+
+        String packageName = validStackInfo.topActivity.getPackageName();
+        CarFacetButton facetButton = findFacetButtongByComponentName(validStackInfo.topActivity);
+        if (facetButton == null) {
+            facetButton = mButtonsByPackage.get(packageName);
+        }
+
+        if (facetButton == null) {
+            String category = getPackageCategory(packageName);
+            if (category != null) {
+                facetButton = mButtonsByCategory.get(category);
+            }
+        }
+
+        if (facetButton != null && facetButton.getVisibility() == View.VISIBLE) {
+            facetButton.setSelected(true);
+            mSelectedFacetButton = facetButton;
+        }
+
     }
 
     private int getDisplayId() {
