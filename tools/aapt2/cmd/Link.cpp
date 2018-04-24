@@ -137,6 +137,9 @@ struct LinkOptions {
   // In order to work around this limitation, we allow the use of traditionally reserved
   // resource IDs [those between 0x02 and 0x7E].
   bool allow_reserved_package_id = false;
+
+  // Whether we should fail on definitions of a resource with conflicting visibility.
+  bool strict_visibility = false;
 };
 
 class LinkContext : public IAaptContext {
@@ -1713,6 +1716,7 @@ class LinkCommand {
 
     TableMergerOptions table_merger_options;
     table_merger_options.auto_add_overlay = options_.auto_add_overlay;
+    table_merger_options.strict_visibility = options_.strict_visibility;
     table_merger_ = util::make_unique<TableMerger>(context_, &final_table_, table_merger_options);
 
     if (context_->IsVerbose()) {
@@ -2209,7 +2213,10 @@ int Link(const std::vector<StringPiece>& args, IDiagnostics* diagnostics) {
           .OptionalSwitch("--debug-mode",
                           "Inserts android:debuggable=\"true\" in to the application node of the\n"
                           "manifest, making the application debuggable even on production devices.",
-                          &options.manifest_fixer_options.debug_mode);
+                          &options.manifest_fixer_options.debug_mode)
+          .OptionalSwitch("--strict-visibility",
+                          "Do not allow overlays with different visibility levels.",
+                          &options.strict_visibility);
 
   if (!flags.Parse("aapt2 link", args, &std::cerr)) {
     return 1;

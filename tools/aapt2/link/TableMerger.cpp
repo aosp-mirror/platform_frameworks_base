@@ -102,7 +102,17 @@ static bool MergeType(IAaptContext* context, const Source& src, ResourceTableTyp
 }
 
 static bool MergeEntry(IAaptContext* context, const Source& src, bool overlay,
-                       ResourceEntry* dst_entry, ResourceEntry* src_entry) {
+                       ResourceEntry* dst_entry, ResourceEntry* src_entry,
+                       bool strict_visibility) {
+  if (strict_visibility
+      && dst_entry->visibility.level != Visibility::Level::kUndefined
+      && src_entry->visibility.level != dst_entry->visibility.level) {
+      context->GetDiagnostics()->Error(
+          DiagMessage(src) << "cannot merge resource '" << dst_entry->name << "' with conflicting visibilities: "
+                           << "public and private");
+    return false;
+  }
+
   // Copy over the strongest visibility.
   if (src_entry->visibility.level > dst_entry->visibility.level) {
     // Only copy the ID if the source is public, or else the ID is meaningless.
@@ -234,7 +244,7 @@ bool TableMerger::DoMerge(const Source& src, ResourceTable* src_table,
         continue;
       }
 
-      if (!MergeEntry(context_, src, overlay, dst_entry, src_entry.get())) {
+      if (!MergeEntry(context_, src, overlay, dst_entry, src_entry.get(), options_.strict_visibility)) {
         error = true;
         continue;
       }

@@ -241,6 +241,37 @@ TEST_F(TableMergerTest, FailToOverrideConflictingEntryIdsWithOverlay) {
   ASSERT_FALSE(merger.Merge({}, overlay.get(), true /*overlay*/));
 }
 
+TEST_F(TableMergerTest, FailConflictingVisibility) {
+  std::unique_ptr<ResourceTable> base =
+      test::ResourceTableBuilder()
+          .SetPackageId("", 0x7f)
+          .SetSymbolState("bool/foo", ResourceId(0x7f, 0x01, 0x0001), Visibility::Level::kPublic)
+          .Build();
+  std::unique_ptr<ResourceTable> overlay =
+      test::ResourceTableBuilder()
+          .SetPackageId("", 0x7f)
+          .SetSymbolState("bool/foo", ResourceId(0x7f, 0x01, 0x0001), Visibility::Level::kPrivate)
+          .Build();
+
+  // It should fail if the "--strict-visibility" flag is set.
+  ResourceTable final_table;
+  TableMergerOptions options;
+  options.auto_add_overlay = false;
+  options.strict_visibility = true;
+  TableMerger merger(context_.get(), &final_table, options);
+
+  ASSERT_TRUE(merger.Merge({}, base.get(), false /*overlay*/));
+  ASSERT_FALSE(merger.Merge({}, overlay.get(), true /*overlay*/));
+
+  // But it should still pass if the flag is not set.
+  ResourceTable final_table2;
+  options.strict_visibility = false;
+  TableMerger merger2(context_.get(), &final_table2, options);
+
+  ASSERT_TRUE(merger2.Merge({}, base.get(), false /*overlay*/));
+  ASSERT_TRUE(merger2.Merge({}, overlay.get(), true /*overlay*/));
+}
+
 TEST_F(TableMergerTest, MergeAddResourceFromOverlay) {
   std::unique_ptr<ResourceTable> table_a =
       test::ResourceTableBuilder().SetPackageId("", 0x7f).Build();
