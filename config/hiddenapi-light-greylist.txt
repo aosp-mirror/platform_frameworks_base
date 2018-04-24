@@ -718,6 +718,8 @@ Landroid/content/res/CompatibilityInfo;->DEFAULT_COMPATIBILITY_INFO:Landroid/con
 Landroid/content/res/DrawableCache;->getInstance(JLandroid/content/res/Resources;Landroid/content/res/Resources$Theme;)Landroid/graphics/drawable/Drawable;
 Landroid/content/res/DrawableCache;-><init>()V
 Landroid/content/res/ObbInfo;->salt:[B
+Landroid/content/res/Resources;->mClassLoader:Ljava/lang/ClassLoader;
+Landroid/content/res/Resources;->mDrawableInflater:Landroid/graphics/drawable/DrawableInflater;
 Landroid/content/res/Resources;->getCompatibilityInfo()Landroid/content/res/CompatibilityInfo;
 Landroid/content/res/ResourcesImpl;->getAssets()Landroid/content/res/AssetManager;
 Landroid/content/res/ResourcesImpl;->mAccessLock:Ljava/lang/Object;
@@ -832,6 +834,7 @@ Landroid/graphics/drawable/Drawable;->getOpticalInsets()Landroid/graphics/Insets
 Landroid/graphics/drawable/Drawable;->inflateWithAttributes(Landroid/content/res/Resources;Lorg/xmlpull/v1/XmlPullParser;Landroid/content/res/TypedArray;I)V
 Landroid/graphics/drawable/Drawable;->mCallback:Ljava/lang/ref/WeakReference;
 Landroid/graphics/drawable/Drawable;->parseTintMode(ILandroid/graphics/PorterDuff$Mode;)Landroid/graphics/PorterDuff$Mode;
+Landroid/graphics/drawable/DrawableInflater;->mClassLoader:Ljava/lang/ClassLoader;
 Landroid/graphics/drawable/GradientDrawable;->getOpticalInsets()Landroid/graphics/Insets;
 Landroid/graphics/drawable/GradientDrawable$GradientState;->mAngle:I
 Landroid/graphics/drawable/GradientDrawable$GradientState;->mGradientColors:[I
