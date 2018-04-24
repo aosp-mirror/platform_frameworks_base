@@ -269,7 +269,6 @@ public class PerformBackupTask implements BackupRestoreTask {
         if (mOriginalQueue.isEmpty() && mPendingFullBackups.isEmpty()) {
             Slog.w(TAG, "Backup begun with an empty queue - nothing to do.");
             backupManagerService.addBackupTrace("queue empty at begin");
-            BackupObserverUtils.sendBackupFinished(mObserver, BackupManager.SUCCESS);
             executeNextState(BackupState.FINAL);
             return;
         }
@@ -349,8 +348,6 @@ public class PerformBackupTask implements BackupRestoreTask {
                 // restage everything and try again later.
                 backupManagerService.resetBackupState(mStateDir);  // Just to make sure.
                 // In case of any other error, it's backup transport error.
-                BackupObserverUtils.sendBackupFinished(mObserver,
-                        BackupManager.ERROR_TRANSPORT_ABORTED);
                 executeNextState(BackupState.FINAL);
             }
         }
@@ -384,18 +381,8 @@ public class PerformBackupTask implements BackupRestoreTask {
                 // if things went wrong at this point, we need to
                 // restage everything and try again later.
                 backupManagerService.resetBackupState(mStateDir);  // Just to make sure.
-                BackupObserverUtils.sendBackupFinished(mObserver,
-                        invokeAgentToObserverError(mStatus));
                 executeNextState(BackupState.FINAL);
             }
-        }
-    }
-
-    private int invokeAgentToObserverError(int error) {
-        if (error == BackupTransport.AGENT_ERROR) {
-            return BackupManager.ERROR_AGENT_FAILURE;
-        } else {
-            return BackupManager.ERROR_TRANSPORT_ABORTED;
         }
     }
 
