@@ -9985,8 +9985,12 @@ public class PackageManagerService extends IPackageManager.Stub
         }
 
         // Scan as privileged apps that share a user with a priv-app.
-        if (((scanFlags & SCAN_AS_PRIVILEGED) == 0) && !pkg.isPrivileged()
-                && (pkg.mSharedUserId != null)) {
+        final boolean skipVendorPrivilegeScan = ((scanFlags & SCAN_AS_VENDOR) != 0)
+                && SystemProperties.getInt("ro.vndk.version", 28) < 28;
+        if (((scanFlags & SCAN_AS_PRIVILEGED) == 0)
+                && !pkg.isPrivileged()
+                && (pkg.mSharedUserId != null)
+                && !skipVendorPrivilegeScan) {
             SharedUserSetting sharedUserSetting = null;
             try {
                 sharedUserSetting = mSettings.getSharedUserLPw(pkg.mSharedUserId, 0, 0, false);
