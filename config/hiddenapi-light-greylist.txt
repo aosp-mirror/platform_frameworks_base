@@ -205,6 +205,7 @@ Landroid/app/AppOpsManager;->OP_WIFI_SCAN:I
 Landroid/app/AppOpsManager;->OP_WRITE_CONTACTS:I
 Landroid/app/AppOpsManager;->OP_WRITE_SMS:I
 Landroid/app/AppOpsManager;->permissionToOpCode(Ljava/lang/String;)I
+Landroid/app/AppOpsManager;->sOpPerms:[Ljava/lang/String;
 Landroid/app/AppOpsManager;->strOpToOp(Ljava/lang/String;)I
 Landroid/app/backup/BackupDataInput$EntityHeader;->dataSize:I
 Landroid/app/backup/BackupDataInput$EntityHeader;->key:Ljava/lang/String;
@@ -249,6 +250,7 @@ Landroid/app/Dialog;->mDismissMessage:Landroid/os/Message;
 Landroid/app/Dialog;->mListenersHandler:Landroid/os/Handler;
 Landroid/app/Dialog;->mOwnerActivity:Landroid/app/Activity;
 Landroid/app/Dialog;->mShowMessage:Landroid/os/Message;
+Landroid/app/DialogFragment;->showAllowingStateLoss(Landroid/app/FragmentManager;Ljava/lang/String;)V
 Landroid/app/DownloadManager$Request;->mUri:Landroid/net/Uri;
 Landroid/app/DownloadManager;->setAccessFilename(Z)V
 Landroid/app/Fragment;->mChildFragmentManager:Landroid/app/FragmentManagerImpl;
@@ -363,6 +365,7 @@ Landroid/app/QueuedWork;->sFinishers:Ljava/util/LinkedList;
 Landroid/app/ResourcesManager;->appendLibAssetForMainAssetPath(Ljava/lang/String;Ljava/lang/String;)V
 Landroid/app/ResourcesManager;->getInstance()Landroid/app/ResourcesManager;
 Landroid/app/ResourcesManager;->mActivityResourceReferences:Ljava/util/WeakHashMap;
+Landroid/app/ResourcesManager;->mResConfiguration:Landroid/content/res/Configuration;
 Landroid/app/ResourcesManager;->mResourceImpls:Landroid/util/ArrayMap;
 Landroid/app/ResourcesManager;->mResourceReferences:Ljava/util/ArrayList;
 Landroid/app/Service;->attach(Landroid/content/Context;Landroid/app/ActivityThread;Ljava/lang/String;Landroid/os/IBinder;Landroid/app/Application;Ljava/lang/Object;)V
@@ -614,6 +617,7 @@ Landroid/content/pm/IPackageMoveObserver$Stub;-><init>()V
 Landroid/content/pm/IPackageMoveObserver$Stub;->asInterface(Landroid/os/IBinder;)Landroid/content/pm/IPackageMoveObserver;
 Landroid/content/pm/IPackageStatsObserver$Stub;-><init>()V
 Landroid/content/pm/IShortcutService$Stub$Proxy;-><init>(Landroid/os/IBinder;)V
+Landroid/content/pm/IShortcutService$Stub;->asInterface(Landroid/os/IBinder;)Landroid/content/pm/IShortcutService;
 Landroid/content/pm/LauncherActivityInfo;->mActivityInfo:Landroid/content/pm/ActivityInfo;
 Landroid/content/pm/LauncherApps;->mPm:Landroid/content/pm/PackageManager;
 Landroid/content/pm/LauncherApps;->startShortcut(Ljava/lang/String;Ljava/lang/String;Landroid/graphics/Rect;Landroid/os/Bundle;I)V
@@ -1031,6 +1035,7 @@ Landroid/hardware/soundtrigger/SoundTrigger$RecognitionConfig;->captureRequested
 Landroid/hardware/soundtrigger/SoundTrigger$RecognitionConfig;->data:[B
 Landroid/hardware/soundtrigger/SoundTrigger$RecognitionConfig;->keyphrases:[Landroid/hardware/soundtrigger/SoundTrigger$KeyphraseRecognitionExtra;
 Landroid/hardware/soundtrigger/SoundTrigger$RecognitionEvent;-><init>(IIZIIIZLandroid/media/AudioFormat;[B)V
+Landroid/hardware/soundtrigger/SoundTrigger$RecognitionEvent;->data:[B
 Landroid/hardware/soundtrigger/SoundTrigger$SoundModel;->data:[B
 Landroid/hardware/soundtrigger/SoundTrigger$SoundModel;->uuid:Ljava/util/UUID;
 Landroid/hardware/soundtrigger/SoundTrigger$SoundModel;->vendorUuid:Ljava/util/UUID;
@@ -1605,6 +1610,7 @@ Landroid/os/PowerManager;->userActivity(JZ)V
 Landroid/os/PowerManager;->validateWakeLockParameters(ILjava/lang/String;)V
 Landroid/os/PowerManager;->wakeUp(J)V
 Landroid/os/PowerManager;->wakeUp(JLjava/lang/String;)V
+Landroid/os/Process;->getFreeMemory()J
 Landroid/os/Process;->getParentPid(I)I
 Landroid/os/Process;->getPids(Ljava/lang/String;[I)[I
 Landroid/os/Process;->getTotalMemory()J
@@ -2266,6 +2272,7 @@ Landroid/util/ArrayMap;->append(Ljava/lang/Object;Ljava/lang/Object;)V
 Landroid/util/ArrayMap;->mBaseCacheSize:I
 Landroid/util/ArrayMap;->mTwiceBaseCacheSize:I
 Landroid/util/ArraySet;-><init>(Ljava/util/Collection;)V
+Landroid/util/DisplayMetrics;->DENSITY_DEVICE:I
 Landroid/util/DisplayMetrics;->noncompatHeightPixels:I
 Landroid/util/DisplayMetrics;->noncompatWidthPixels:I
 Landroid/util/EventLog$Event;-><init>([B)V
@@ -2645,10 +2652,12 @@ Landroid/view/Window;->mCallback:Landroid/view/Window$Callback;
 Landroid/view/Window;->mContext:Landroid/content/Context;
 Landroid/view/Window;->mHardwareAccelerated:Z
 Landroid/view/Window;->mWindowStyle:Landroid/content/res/TypedArray;
+Landroid/view/Window;->setNeedsMenuKey(I)V
 Landroid/view/WindowAnimationFrameStats;->init(J[J)V
 Landroid/view/WindowContentFrameStats;->init(J[J[J[J)V
 Landroid/view/WindowManager$LayoutParams;->hideTimeoutMilliseconds:J
 Landroid/view/WindowManager$LayoutParams;->needsMenuKey:I
+Landroid/view/WindowManager$LayoutParams;->NEEDS_MENU_SET_FALSE:I
 Landroid/view/WindowManager$LayoutParams;->NEEDS_MENU_SET_TRUE:I
 Landroid/view/WindowManager$LayoutParams;->userActivityTimeout:J
 Landroid/view/WindowManagerGlobal;->getInstance()Landroid/view/WindowManagerGlobal;
@@ -2706,7 +2715,9 @@ Landroid/webkit/WebView;->restorePicture(Landroid/os/Bundle;Ljava/io/File;)Z
 Landroid/webkit/WebView;->savePicture(Landroid/os/Bundle;Ljava/io/File;)Z
 Landroid/webkit/WebView;->sEnforceThreadChecking:Z
 Landroid/webkit/WebViewClient;->onUnhandledInputEvent(Landroid/webkit/WebView;Landroid/view/InputEvent;)V
+Landroid/webkit/WebViewDelegate;-><init>()V
 Landroid/webkit/WebViewFactory;->getProvider()Landroid/webkit/WebViewFactoryProvider;
+Landroid/webkit/WebViewFactory;->getUpdateService()Landroid/webkit/IWebViewUpdateService;
 Landroid/webkit/WebViewFactory;->getWebViewContextAndSetProvider()Landroid/content/Context;
 Landroid/webkit/WebViewFactory;->sPackageInfo:Landroid/content/pm/PackageInfo;
 Landroid/webkit/WebViewFactory;->sProviderInstance:Landroid/webkit/WebViewFactoryProvider;
@@ -2773,6 +2784,7 @@ Landroid/widget/CursorAdapter;->mRowIDColumn:I
 Landroid/widget/DatePicker;->mDelegate:Landroid/widget/DatePicker$DatePickerDelegate;
 Landroid/widget/EdgeEffect;->mPaint:Landroid/graphics/Paint;
 Landroid/widget/Editor;->invalidateTextDisplayList()V
+Landroid/widget/Editor;->mSelectHandleLeft:Landroid/graphics/drawable/Drawable;
 Landroid/widget/Editor;->mShowCursor:J
 Landroid/widget/Editor;->mShowSoftInputOnFocus:Z
 Landroid/widget/ExpandableListView;->mChildDivider:Landroid/graphics/drawable/Drawable;
@@ -2935,6 +2947,7 @@ Landroid/widget/TextView;->mMarquee:Landroid/widget/TextView$Marquee;
 Landroid/widget/TextView;->mMaximum:I
 Landroid/widget/TextView;->mMaxMode:I
 Landroid/widget/TextView;->mSingleLine:Z
+Landroid/widget/TextView;->mText:Ljava/lang/CharSequence;
 Landroid/widget/TextView;->mTextPaint:Landroid/text/TextPaint;
 Landroid/widget/TextView;->setText(Ljava/lang/CharSequence;Landroid/widget/TextView$BufferType;ZI)V
 Landroid/widget/Toast$TN;->mNextView:Landroid/view/View;
@@ -3441,9 +3454,11 @@ Ldalvik/system/DexPathList;->nativeLibraryPathElements:[Ldalvik/system/DexPathLi
 Ldalvik/system/DexPathList;->splitPaths(Ljava/lang/String;Z)Ljava/util/List;
 Ldalvik/system/DexPathList;->systemNativeLibraryDirectories:Ljava/util/List;
 Ldalvik/system/VMDebug;->dumpReferenceTables()V
+Ldalvik/system/VMDebug;->isDebuggerConnected()Z
 Ldalvik/system/VMRuntime;->addressOf(Ljava/lang/Object;)J
 Ldalvik/system/VMRuntime;->clearGrowthLimit()V
 Ldalvik/system/VMRuntime;->getCurrentInstructionSet()Ljava/lang/String;
+Ldalvik/system/VMRuntime;->getExternalBytesAllocated()J
 Ldalvik/system/VMRuntime;->getInstructionSet(Ljava/lang/String;)Ljava/lang/String;
 Ldalvik/system/VMRuntime;->getRuntime()Ldalvik/system/VMRuntime;
 Ldalvik/system/VMRuntime;->is64Bit()Z
