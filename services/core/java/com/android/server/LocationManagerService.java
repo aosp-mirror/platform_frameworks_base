@@ -86,6 +86,7 @@ import com.android.server.location.ActivityRecognitionProxy;
 import com.android.server.location.GeocoderProxy;
 import com.android.server.location.GeofenceManager;
 import com.android.server.location.GeofenceProxy;
+import com.android.server.location.GnssBatchingProvider;
 import com.android.server.location.GnssLocationProvider;
 import com.android.server.location.GnssMeasurementsProvider;
 import com.android.server.location.GnssNavigationMessageProvider;
@@ -244,7 +245,7 @@ public class LocationManagerService extends ILocationManager.Stub {
 
     private GnssLocationProvider.GnssMetricsProvider mGnssMetricsProvider;
 
-    private GnssLocationProvider.GnssBatchingProvider mGnssBatchingProvider;
+    private GnssBatchingProvider mGnssBatchingProvider;
     private IBatchedLocationCallback mGnssBatchingCallback;
     private LinkedCallback mGnssBatchingDeathCallback;
     private boolean mGnssBatchingInProgress = false;
@@ -1176,7 +1177,7 @@ public class LocationManagerService extends ILocationManager.Stub {
                 "Location Hardware permission not granted to access hardware batching");
 
         if (hasGnssPermissions(packageName) && mGnssBatchingProvider != null) {
-            return mGnssBatchingProvider.getSize();
+            return mGnssBatchingProvider.getBatchSize();
         } else {
             return 0;
         }
