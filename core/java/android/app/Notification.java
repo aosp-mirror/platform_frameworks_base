@@ -3154,10 +3154,14 @@ public class Notification implements Parcelable
         private int mCachedContrastColor = COLOR_INVALID;
         private int mCachedContrastColorIsFor = COLOR_INVALID;
         /**
-         * Caches a ambient version of {@link #mCachedContrastColorIsFor}.
+         * Caches a ambient version of {@link #mCachedAmbientColorIsFor}.
          */
         private int mCachedAmbientColor = COLOR_INVALID;
         private int mCachedAmbientColorIsFor = COLOR_INVALID;
+        /**
+         * A neutral color color that can be used for icons.
+         */
+        private int mNeutralColor = COLOR_INVALID;
 
         /**
          * Caches an instance of StandardTemplateParams. Note that this may have been used before,
@@ -4299,7 +4303,6 @@ public class Notification implements Parcelable
 
         private void resetStandardTemplate(RemoteViews contentView) {
             resetNotificationHeader(contentView);
-            resetContentMargins(contentView);
             contentView.setViewVisibility(R.id.right_icon, View.GONE);
             contentView.setViewVisibility(R.id.title, View.GONE);
             contentView.setTextViewText(R.id.title, null);
@@ -4331,24 +4334,23 @@ public class Notification implements Parcelable
             mN.mUsesStandardHeader = false;
         }
 
-        private void resetContentMargins(RemoteViews contentView) {
-            contentView.setViewLayoutMarginEndDimen(R.id.line1, 0);
-            contentView.setViewLayoutMarginEndDimen(R.id.text, 0);
-        }
-
-        private RemoteViews applyStandardTemplate(int resId) {
-            return applyStandardTemplate(resId, mParams.reset().fillTextsFrom(this));
+        private RemoteViews applyStandardTemplate(int resId, TemplateBindResult result) {
+            return applyStandardTemplate(resId, mParams.reset().fillTextsFrom(this),
+                    result);
         }
 
         /**
          * @param hasProgress whether the progress bar should be shown and set
+         * @param result
          */
-        private RemoteViews applyStandardTemplate(int resId, boolean hasProgress) {
+        private RemoteViews applyStandardTemplate(int resId, boolean hasProgress,
+                TemplateBindResult result) {
             return applyStandardTemplate(resId, mParams.reset().hasProgress(hasProgress)
-                    .fillTextsFrom(this));
+                    .fillTextsFrom(this), result);
         }
 
-        private RemoteViews applyStandardTemplate(int resId, StandardTemplateParams p) {
+        private RemoteViews applyStandardTemplate(int resId, StandardTemplateParams p,
+                TemplateBindResult result) {
             RemoteViews contentView = new BuilderRemoteViews(mContext.getApplicationInfo(), resId);
 
             resetStandardTemplate(contentView);
@@ -4356,7 +4358,7 @@ public class Notification implements Parcelable
             final Bundle ex = mN.extras;
             updateBackgroundColor(contentView);
             bindNotificationHeader(contentView, p.ambient, p.headerTextSecondary);
-            bindLargeIcon(contentView, p.hideLargeIcon || p.ambient, p.alwaysShowReply);
+            bindLargeIconAndReply(contentView, p, result);
             boolean showProgress = handleProgressBar(p.hasProgress, contentView, ex);
             if (p.title != null) {
                 contentView.setViewVisibility(R.id.title, View.VISIBLE);
@@ -4552,8 +4554,58 @@ public class Notification implements Parcelable
             }
         }
 
-        private void bindLargeIcon(RemoteViews contentView, boolean hideLargeIcon,
-                boolean alwaysShowReply) {
+        private void bindLargeIconAndReply(RemoteViews contentView, StandardTemplateParams p,
+                TemplateBindResult result) {
+            boolean largeIconShown = bindLargeIcon(contentView, p.hideLargeIcon || p.ambient);
+            boolean replyIconShown = bindReplyIcon(contentView, p.hideReplyIcon || p.ambient);
+            contentView.setViewVisibility(R.id.right_icon_container,
+                    largeIconShown || replyIconShown ? View.VISIBLE : View.GONE);
+            int marginEnd = calculateMarginEnd(largeIconShown, replyIconShown);
+            contentView.setViewLayoutMarginEnd(R.id.line1, marginEnd);
+            contentView.setViewLayoutMarginEnd(R.id.text, marginEnd);
+            contentView.setViewLayoutMarginEnd(R.id.progress, marginEnd);
+            if (result != null) {
+                result.setIconMarginEnd(marginEnd);
+            }
+        }
+
+        private int calculateMarginEnd(boolean largeIconShown, boolean replyIconShown) {
+            int marginEnd = 0;
+            int contentMargin = mContext.getResources().getDimensionPixelSize(
+                    R.dimen.notification_content_margin_end);
+            int iconSize = mContext.getResources().getDimensionPixelSize(
+                    R.dimen.notification_right_icon_size);
+            if (replyIconShown) {
+                // The size of the reply icon
+                marginEnd += iconSize;
+
+                int replyInset = mContext.getResources().getDimensionPixelSize(
+                        R.dimen.notification_reply_inset);
+                // We're subtracting the inset of the reply icon to make sure it's
+                // aligned nicely on the right, and remove it from the following padding
+                marginEnd -= replyInset * 2;
+            }
+            if (largeIconShown) {
+                // adding size of the right icon
+                marginEnd += iconSize;
+
+                if (replyIconShown) {
+                    // We also add some padding to the reply icon if it's around
+                    marginEnd += contentMargin;
+                }
+            }
+            if (replyIconShown || largeIconShown) {
+                // The padding to the content
+                marginEnd += contentMargin;
+            }
+            return marginEnd;
+        }
+
+        /**
+         * Bind the large icon.
+         * @return if the largeIcon is visible
+         */
+        private boolean bindLargeIcon(RemoteViews contentView, boolean hideLargeIcon) {
             if (mN.mLargeIcon == null && mN.largeIcon != null) {
                 mN.mLargeIcon = Icon.createWithBitmap(mN.largeIcon);
             }
@@ -4562,51 +4614,35 @@ public class Notification implements Parcelable
                 contentView.setViewVisibility(R.id.right_icon, View.VISIBLE);
                 contentView.setImageViewIcon(R.id.right_icon, mN.mLargeIcon);
                 processLargeLegacyIcon(mN.mLargeIcon, contentView);
-                int endMargin = R.dimen.notification_content_picture_margin;
-                contentView.setViewLayoutMarginEndDimen(R.id.line1, endMargin);
-                contentView.setViewLayoutMarginEndDimen(R.id.text, endMargin);
-                contentView.setViewLayoutMarginEndDimen(R.id.progress, endMargin);
             }
-            // Bind the reply action
-            Action action = findReplyAction();
+            return showLargeIcon;
+        }
 
-            boolean actionVisible = action != null && (showLargeIcon || alwaysShowReply);
-            int replyId = showLargeIcon ? R.id.reply_icon_action : R.id.right_icon;
+        /**
+         * Bind the reply icon.
+         * @return if the reply icon is visible
+         */
+        private boolean bindReplyIcon(RemoteViews contentView, boolean hideReplyIcon) {
+            boolean actionVisible = !hideReplyIcon;
+            Action action = null;
             if (actionVisible) {
-                // We're only showing the icon as big if we're hiding the large icon
-                int contrastColor = resolveContrastColor();
-                int iconColor;
-                if (showLargeIcon) {
-                    contentView.setDrawableTint(R.id.reply_icon_action,
-                            true /* targetBackground */,
-                            contrastColor, PorterDuff.Mode.SRC_ATOP);
-                    contentView.setOnClickPendingIntent(R.id.right_icon,
-                            action.actionIntent);
-                    contentView.setRemoteInputs(R.id.right_icon, action.mRemoteInputs);
-                    iconColor = NotificationColorUtil.isColorLight(contrastColor)
-                            ? Color.BLACK : Color.WHITE;
-                } else {
-                    contentView.setImageViewResource(R.id.right_icon,
-                            R.drawable.ic_reply_notification_large);
-                    contentView.setViewVisibility(R.id.right_icon, View.VISIBLE);
-                    iconColor = contrastColor;
-                }
-                contentView.setDrawableTint(replyId,
-                        false /* targetBackground */,
-                        iconColor,
-                        PorterDuff.Mode.SRC_ATOP);
-                contentView.setOnClickPendingIntent(replyId,
-                        action.actionIntent);
-                contentView.setRemoteInputs(replyId, action.mRemoteInputs);
-            } else {
-                contentView.setRemoteInputs(R.id.right_icon, null);
+                action = findReplyAction();
+                actionVisible = action != null;
             }
-            contentView.setViewVisibility(R.id.reply_icon_action, actionVisible && showLargeIcon
-                    ? View.VISIBLE
-                    : View.GONE);
-            contentView.setViewVisibility(R.id.right_icon_container, actionVisible || showLargeIcon
-                    ? View.VISIBLE
-                    : View.GONE);
+            if (actionVisible) {
+                contentView.setViewVisibility(R.id.reply_icon_action, View.VISIBLE);
+                contentView.setDrawableTint(R.id.reply_icon_action,
+                        false /* targetBackground */,
+                        getNeutralColor(),
+                        PorterDuff.Mode.SRC_ATOP);
+                contentView.setOnClickPendingIntent(R.id.reply_icon_action, action.actionIntent);
+                contentView.setRemoteInputs(R.id.reply_icon_action, action.mRemoteInputs);
+            } else {
+                contentView.setRemoteInputs(R.id.reply_icon_action, null);
+            }
+            contentView.setViewVisibility(R.id.reply_icon_action,
+                    actionVisible ? View.VISIBLE : View.GONE);
+            return actionVisible;
         }
 
         private Action findReplyAction() {
@@ -4641,8 +4677,7 @@ public class Notification implements Parcelable
         }
 
         private void bindActivePermissions(RemoteViews contentView, boolean ambient) {
-            int color = ambient ? resolveAmbientColor()
-                    : isColorized() ? getPrimaryTextColor() : resolveContrastColor();
+            int color = ambient ? resolveAmbientColor() : getNeutralColor();
             contentView.setDrawableTint(R.id.camera, false, color, PorterDuff.Mode.SRC_ATOP);
             contentView.setDrawableTint(R.id.mic, false, color, PorterDuff.Mode.SRC_ATOP);
             contentView.setDrawableTint(R.id.overlay, false, color, PorterDuff.Mode.SRC_ATOP);
@@ -4793,13 +4828,15 @@ public class Notification implements Parcelable
                     R.dimen.notification_content_margin);
         }
 
-        private RemoteViews applyStandardTemplateWithActions(int layoutId) {
-            return applyStandardTemplateWithActions(layoutId, mParams.reset().fillTextsFrom(this));
+        private RemoteViews applyStandardTemplateWithActions(int layoutId,
+                TemplateBindResult result) {
+            return applyStandardTemplateWithActions(layoutId, mParams.reset().fillTextsFrom(this),
+                    result);
         }
 
         private RemoteViews applyStandardTemplateWithActions(int layoutId,
-            StandardTemplateParams p) {
-            RemoteViews big = applyStandardTemplate(layoutId, p);
+                StandardTemplateParams p, TemplateBindResult result) {
+            RemoteViews big = applyStandardTemplate(layoutId, p, result);
 
             resetStandardTemplateWithActions(big);
 
@@ -4915,7 +4952,7 @@ public class Notification implements Parcelable
                     return styleView;
                 }
             }
-            return applyStandardTemplate(getBaseLayoutResource());
+            return applyStandardTemplate(getBaseLayoutResource(), null /* result */);
         }
 
         private boolean useExistingRemoteView() {
@@ -4934,7 +4971,8 @@ public class Notification implements Parcelable
                 result = mStyle.makeBigContentView();
                 hideLine1Text(result);
             } else if (mActions.size() != 0) {
-                result = applyStandardTemplateWithActions(getBigBaseLayoutResource());
+                result = applyStandardTemplateWithActions(getBigBaseLayoutResource(),
+                        null /* result */);
             }
             makeHeaderExpanded(result);
             return result;
@@ -4971,7 +5009,8 @@ public class Notification implements Parcelable
         public RemoteViews makeAmbientNotification() {
             RemoteViews ambient = applyStandardTemplateWithActions(
                     R.layout.notification_template_material_ambient,
-                    mParams.reset().ambient(true).fillTextsFrom(this).hasProgress(false));
+                    mParams.reset().ambient(true).fillTextsFrom(this).hasProgress(false),
+                    null /* result */);
             return ambient;
         }
 
@@ -5014,7 +5053,7 @@ public class Notification implements Parcelable
                 return null;
             }
 
-            return applyStandardTemplateWithActions(getBigBaseLayoutResource());
+            return applyStandardTemplateWithActions(getBigBaseLayoutResource(), null /* result */);
         }
 
         /**
@@ -5362,6 +5401,20 @@ public class Notification implements Parcelable
             return mCachedContrastColor = color;
         }
 
+        int resolveNeutralColor() {
+            if (mNeutralColor != COLOR_INVALID) {
+                return mNeutralColor;
+            }
+            int background = mContext.getColor(
+                    com.android.internal.R.color.notification_material_background_color);
+            mNeutralColor = NotificationColorUtil.resolveDefaultColor(mContext, background);
+            if (Color.alpha(mNeutralColor) < 255) {
+                // alpha doesn't go well for color filters, so let's blend it manually
+                mNeutralColor = NotificationColorUtil.compositeColors(mNeutralColor, background);
+            }
+            return mNeutralColor;
+        }
+
         int resolveAmbientColor() {
             if (mCachedAmbientColorIsFor == mN.color && mCachedAmbientColorIsFor != COLOR_INVALID) {
                 return mCachedAmbientColor;
@@ -5595,6 +5648,17 @@ public class Notification implements Parcelable
                 return mBackgroundColor != COLOR_INVALID ? mBackgroundColor : mN.color;
             } else {
                 return COLOR_DEFAULT;
+            }
+        }
+
+        /**
+         * Gets a neutral color that can be used for icons or similar that should not stand out.
+         */
+        private int getNeutralColor() {
+            if (isColorized()) {
+                return getSecondaryTextColor();
+            } else {
+                return resolveNeutralColor();
             }
         }
 
@@ -5900,6 +5964,18 @@ public class Notification implements Parcelable
         }
 
         protected RemoteViews getStandardView(int layoutId) {
+            return getStandardView(layoutId, null);
+        }
+
+        /**
+         * Get the standard view for this style.
+         *
+         * @param layoutId The layout id to use
+         * @param result The result where template bind information is saved.
+         * @return A remoteView for this style.
+         * @hide
+         */
+        protected RemoteViews getStandardView(int layoutId, TemplateBindResult result) {
             checkBuilder();
 
             // Nasty.
@@ -5909,7 +5985,7 @@ public class Notification implements Parcelable
                 mBuilder.setContentTitle(mBigContentTitle);
             }
 
-            RemoteViews contentView = mBuilder.applyStandardTemplateWithActions(layoutId);
+            RemoteViews contentView = mBuilder.applyStandardTemplateWithActions(layoutId, result);
 
             mBuilder.getAllExtras().putCharSequence(EXTRA_TITLE, oldBuilderContentTitle);
 
@@ -6206,7 +6282,8 @@ public class Notification implements Parcelable
                 mBuilder.mN.largeIcon = null;
             }
 
-            RemoteViews contentView = getStandardView(mBuilder.getBigPictureLayoutResource());
+            RemoteViews contentView = getStandardView(mBuilder.getBigPictureLayoutResource(),
+                    null /* result */);
             if (mSummaryTextSet) {
                 contentView.setTextViewText(R.id.text, mBuilder.processTextSpans(
                         mBuilder.processLegacyText(mSummaryText)));
@@ -6393,7 +6470,9 @@ public class Notification implements Parcelable
             CharSequence text = mBuilder.getAllExtras().getCharSequence(EXTRA_TEXT);
             mBuilder.getAllExtras().putCharSequence(EXTRA_TEXT, null);
 
-            RemoteViews contentView = getStandardView(mBuilder.getBigTextLayoutResource());
+            TemplateBindResult result = new TemplateBindResult();
+            RemoteViews contentView = getStandardView(mBuilder.getBigTextLayoutResource(), result);
+            contentView.setInt(R.id.big_text, "setImageEndMargin", result.getIconMarginEnd());
 
             mBuilder.getAllExtras().putCharSequence(EXTRA_TEXT, text);
 
@@ -6776,7 +6855,7 @@ public class Notification implements Parcelable
             mBuilder.mOriginalActions = mBuilder.mActions;
             mBuilder.mActions = new ArrayList<>();
             RemoteViews remoteViews = makeMessagingView(true /* displayImagesAtEnd */,
-                    true /* showReplyIcon */);
+                    false /* hideLargeIcon */);
             mBuilder.mActions = mBuilder.mOriginalActions;
             mBuilder.mOriginalActions = null;
             return remoteViews;
@@ -6863,7 +6942,7 @@ public class Notification implements Parcelable
          */
         @Override
         public RemoteViews makeBigContentView() {
-            return makeMessagingView(false /* displayImagesAtEnd */, false /* showReplyIcon */);
+            return makeMessagingView(false /* displayImagesAtEnd */, true /* hideLargeIcon */);
         }
 
         /**
@@ -6871,11 +6950,11 @@ public class Notification implements Parcelable
          *
          * @param displayImagesAtEnd should images be displayed at the end of the content instead
          *                           of inline.
-         * @param showReplyIcon Should the reply affordance be shown at the end of the notification
+         * @param hideRightIcons Should the reply affordance be shown at the end of the notification
          * @return the created remoteView.
          */
         @NonNull
-        private RemoteViews makeMessagingView(boolean displayImagesAtEnd, boolean showReplyIcon) {
+        private RemoteViews makeMessagingView(boolean displayImagesAtEnd, boolean hideRightIcons) {
             CharSequence conversationTitle = !TextUtils.isEmpty(super.mBigContentTitle)
                     ? super.mBigContentTitle
                     : mConversationTitle;
@@ -6886,20 +6965,18 @@ public class Notification implements Parcelable
                 nameReplacement = conversationTitle;
                 conversationTitle = null;
             }
-            boolean hideLargeIcon = !showReplyIcon || isOneToOne;
+            TemplateBindResult bindResult = new TemplateBindResult();
             RemoteViews contentView = mBuilder.applyStandardTemplateWithActions(
                     mBuilder.getMessagingLayoutResource(),
                     mBuilder.mParams.reset().hasProgress(false).title(conversationTitle).text(null)
-                            .hideLargeIcon(hideLargeIcon)
-                            .headerTextSecondary(conversationTitle)
-                            .alwaysShowReply(showReplyIcon));
+                            .hideLargeIcon(hideRightIcons || isOneToOne)
+                            .hideReplyIcon(hideRightIcons)
+                            .headerTextSecondary(conversationTitle),
+                    bindResult);
             addExtras(mBuilder.mN.extras);
             // also update the end margin if there is an image
-            int endMargin = R.dimen.notification_content_margin_end;
-            if (showReplyIcon) {
-                endMargin = R.dimen.notification_content_plus_picture_margin_end;
-            }
-            contentView.setViewLayoutMarginEndDimen(R.id.notification_main_column, endMargin);
+            contentView.setViewLayoutMarginEnd(R.id.notification_messaging,
+                    bindResult.getIconMarginEnd());
             contentView.setInt(R.id.status_bar_latest_event_content, "setLayoutColor",
                     mBuilder.resolveContrastColor());
             contentView.setBoolean(R.id.status_bar_latest_event_content, "setDisplayImagesAtEnd",
@@ -6971,7 +7048,7 @@ public class Notification implements Parcelable
         @Override
         public RemoteViews makeHeadsUpContentView(boolean increasedHeight) {
             RemoteViews remoteViews = makeMessagingView(true /* displayImagesAtEnd */,
-                    false /* showReplyIcon */);
+                    true /* hideLargeIcon */);
             remoteViews.setInt(R.id.notification_messaging, "setMaxDisplayedLines", 1);
             return remoteViews;
         }
@@ -7354,7 +7431,8 @@ public class Notification implements Parcelable
             CharSequence oldBuilderContentText = mBuilder.mN.extras.getCharSequence(EXTRA_TEXT);
             mBuilder.getAllExtras().putCharSequence(EXTRA_TEXT, null);
 
-            RemoteViews contentView = getStandardView(mBuilder.getInboxLayoutResource());
+            TemplateBindResult result = new TemplateBindResult();
+            RemoteViews contentView = getStandardView(mBuilder.getInboxLayoutResource(), result);
 
             mBuilder.getAllExtras().putCharSequence(EXTRA_TEXT, oldBuilderContentText);
 
@@ -7383,7 +7461,8 @@ public class Notification implements Parcelable
                             mBuilder.processTextSpans(mBuilder.processLegacyText(str)));
                     mBuilder.setTextViewColorSecondary(contentView, rowIds[i]);
                     contentView.setViewPadding(rowIds[i], 0, topPadding, 0, 0);
-                    handleInboxImageMargin(contentView, rowIds[i], first);
+                    handleInboxImageMargin(contentView, rowIds[i], first,
+                            result.getIconMarginEnd());
                     if (first) {
                         onlyViewId = rowIds[i];
                     } else {
@@ -7415,17 +7494,18 @@ public class Notification implements Parcelable
             return !Objects.equals(getLines(), newS.getLines());
         }
 
-        private void handleInboxImageMargin(RemoteViews contentView, int id, boolean first) {
+        private void handleInboxImageMargin(RemoteViews contentView, int id, boolean first,
+                int marginEndValue) {
             int endMargin = 0;
             if (first) {
                 final int max = mBuilder.mN.extras.getInt(EXTRA_PROGRESS_MAX, 0);
                 final boolean ind = mBuilder.mN.extras.getBoolean(EXTRA_PROGRESS_INDETERMINATE);
                 boolean hasProgress = max != 0 || ind;
-                if (mBuilder.mN.hasLargeIcon() && !hasProgress) {
-                    endMargin = R.dimen.notification_content_picture_margin;
+                if (!hasProgress) {
+                    endMargin = marginEndValue;
                 }
             }
-            contentView.setViewLayoutMarginEndDimen(id, endMargin);
+            contentView.setViewLayoutMarginEnd(id, endMargin);
         }
     }
 
@@ -7614,7 +7694,8 @@ public class Notification implements Parcelable
 
         private RemoteViews makeMediaContentView() {
             RemoteViews view = mBuilder.applyStandardTemplate(
-                    R.layout.notification_template_material_media, false /* hasProgress */);
+                    R.layout.notification_template_material_media, false, /* hasProgress */
+                    null /* result */);
 
             final int numActions = mBuilder.mActions.size();
             final int N = mActionsToShowInCompact == null
@@ -7638,7 +7719,7 @@ public class Notification implements Parcelable
             // handle the content margin
             int endMargin = R.dimen.notification_content_margin_end;
             if (mBuilder.mN.hasLargeIcon()) {
-                endMargin = R.dimen.notification_content_plus_picture_margin_end;
+                endMargin = R.dimen.notification_media_image_margin_end;
             }
             view.setViewLayoutMarginEndDimen(R.id.notification_main_column, endMargin);
             return view;
@@ -7659,8 +7740,7 @@ public class Notification implements Parcelable
                 return null;
             }
             RemoteViews big = mBuilder.applyStandardTemplate(
-                    R.layout.notification_template_material_big_media,
-                    false);
+                    R.layout.notification_template_material_big_media, false, null /* result */);
 
             if (actionCount > 0) {
                 big.removeAllViews(com.android.internal.R.id.media_actions);
@@ -7756,16 +7836,18 @@ public class Notification implements Parcelable
             if (mBuilder.mActions.size() == 0) {
                return makeStandardTemplateWithCustomContent(headsUpContentView);
             }
+            TemplateBindResult result = new TemplateBindResult();
             RemoteViews remoteViews = mBuilder.applyStandardTemplateWithActions(
-                        mBuilder.getBigBaseLayoutResource());
-            buildIntoRemoteViewContent(remoteViews, headsUpContentView);
+                        mBuilder.getBigBaseLayoutResource(), result);
+            buildIntoRemoteViewContent(remoteViews, headsUpContentView, result);
             return remoteViews;
         }
 
         private RemoteViews makeStandardTemplateWithCustomContent(RemoteViews customContent) {
+            TemplateBindResult result = new TemplateBindResult();
             RemoteViews remoteViews = mBuilder.applyStandardTemplate(
-                    mBuilder.getBaseLayoutResource());
-            buildIntoRemoteViewContent(remoteViews, customContent);
+                    mBuilder.getBaseLayoutResource(), result);
+            buildIntoRemoteViewContent(remoteViews, customContent, result);
             return remoteViews;
         }
 
@@ -7776,14 +7858,15 @@ public class Notification implements Parcelable
             if (mBuilder.mActions.size() == 0) {
                 return makeStandardTemplateWithCustomContent(bigContentView);
             }
+            TemplateBindResult result = new TemplateBindResult();
             RemoteViews remoteViews = mBuilder.applyStandardTemplateWithActions(
-                    mBuilder.getBigBaseLayoutResource());
-            buildIntoRemoteViewContent(remoteViews, bigContentView);
+                    mBuilder.getBigBaseLayoutResource(), result);
+            buildIntoRemoteViewContent(remoteViews, bigContentView, result);
             return remoteViews;
         }
 
         private void buildIntoRemoteViewContent(RemoteViews remoteViews,
-                RemoteViews customContent) {
+                RemoteViews customContent, TemplateBindResult result) {
             if (customContent != null) {
                 // Need to clone customContent before adding, because otherwise it can no longer be
                 // parceled independently of remoteViews.
@@ -7793,11 +7876,10 @@ public class Notification implements Parcelable
                 remoteViews.setReapplyDisallowed();
             }
             // also update the end margin if there is an image
-            int endMargin = R.dimen.notification_content_margin_end;
-            if (mBuilder.mN.hasLargeIcon()) {
-                endMargin = R.dimen.notification_content_plus_picture_margin_end;
-            }
-            remoteViews.setViewLayoutMarginEndDimen(R.id.notification_main_column, endMargin);
+            Resources resources = mBuilder.mContext.getResources();
+            int endMargin = resources.getDimensionPixelSize(
+                    R.dimen.notification_content_margin_end) + result.getIconMarginEnd();
+            remoteViews.setViewLayoutMarginEnd(R.id.notification_main_column, endMargin);
         }
 
         /**
@@ -9401,6 +9483,25 @@ public class Notification implements Parcelable
         }
     }
 
+    /**
+     * A result object where information about the template that was created is saved.
+     */
+    private static class TemplateBindResult {
+        int mIconMarginEnd;
+
+        /**
+         * Get the margin end that needs to be added to any fields that may overlap
+         * with the right actions.
+         */
+        public int getIconMarginEnd() {
+            return mIconMarginEnd;
+        }
+
+        public void setIconMarginEnd(int iconMarginEnd) {
+            this.mIconMarginEnd = iconMarginEnd;
+        }
+    }
+
     private static class StandardTemplateParams {
         boolean hasProgress = true;
         boolean ambient = false;
@@ -9408,7 +9509,7 @@ public class Notification implements Parcelable
         CharSequence text;
         CharSequence headerTextSecondary;
         boolean hideLargeIcon;
-        public boolean alwaysShowReply;
+        boolean hideReplyIcon;
 
         final StandardTemplateParams reset() {
             hasProgress = true;
@@ -9439,13 +9540,13 @@ public class Notification implements Parcelable
             return this;
         }
 
-        final StandardTemplateParams alwaysShowReply(boolean alwaysShowReply) {
-            this.alwaysShowReply = alwaysShowReply;
+        final StandardTemplateParams hideLargeIcon(boolean hideLargeIcon) {
+            this.hideLargeIcon = hideLargeIcon;
             return this;
         }
 
-        final StandardTemplateParams hideLargeIcon(boolean hideLargeIcon) {
-            this.hideLargeIcon = hideLargeIcon;
+        final StandardTemplateParams hideReplyIcon(boolean hideReplyIcon) {
+            this.hideReplyIcon = hideReplyIcon;
             return this;
         }
 

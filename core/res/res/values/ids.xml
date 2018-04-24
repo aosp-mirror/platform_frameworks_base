@@ -128,6 +128,7 @@
   <item type="id" name="accessibilityActionContextClick" />
 
   <item type="id" name="remote_input_tag" />
+  <item type="id" name="pending_intent_tag" />
 
   <item type="id" name="cross_task_transition" />
 

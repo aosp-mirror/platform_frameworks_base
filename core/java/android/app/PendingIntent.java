@@ -33,7 +33,10 @@ import android.os.Parcelable;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.util.AndroidException;
+import android.util.ArraySet;
 import android.util.proto.ProtoOutputStream;
+
+import com.android.internal.os.IResultReceiver;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -93,7 +96,9 @@ import java.lang.annotation.RetentionPolicy;
  */
 public final class PendingIntent implements Parcelable {
     private final IIntentSender mTarget;
+    private IResultReceiver mCancelReceiver;
     private IBinder mWhitelistToken;
+    private ArraySet<CancelListener> mCancelListeners;
 
     /** @hide */
     @IntDef(flag = true,
@@ -964,6 +969,74 @@ public final class PendingIntent implements Parcelable {
     }
 
     /**
+     * Register a listener to when this pendingIntent is cancelled. There are no guarantees on which
+     * thread a listener will be called and it's up to the caller to synchronize. This may
+     * trigger a synchronous binder call so should therefore usually be called on a background
+     * thread.
+     *
+     * @hide
+     */
+    public void registerCancelListener(CancelListener cancelListener) {
+        synchronized (this) {
+            if (mCancelReceiver == null) {
+                mCancelReceiver = new IResultReceiver.Stub() {
+                    @Override
+                    public void send(int resultCode, Bundle resultData) throws RemoteException {
+                        notifyCancelListeners();
+                    }
+                };
+            }
+            if (mCancelListeners == null) {
+                mCancelListeners = new ArraySet<>();
+            }
+            boolean wasEmpty = mCancelListeners.isEmpty();
+            mCancelListeners.add(cancelListener);
+            if (wasEmpty) {
+                try {
+                    ActivityManager.getService().registerIntentSenderCancelListener(mTarget,
+                            mCancelReceiver);
+                } catch (RemoteException e) {
+                    throw e.rethrowFromSystemServer();
+                }
+            }
+        }
+    }
+
+    private void notifyCancelListeners() {
+        ArraySet<CancelListener> cancelListeners;
+        synchronized (this) {
+            cancelListeners = new ArraySet<>(mCancelListeners);
+        }
+        int size = cancelListeners.size();
+        for (int i = 0; i < size; i++) {
+            cancelListeners.valueAt(i).onCancelled(this);
+        }
+    }
+
+    /**
+     * Un-register a listener to when this pendingIntent is cancelled.
+     *
+     * @hide
+     */
+    public void unregisterCancelListener(CancelListener cancelListener) {
+        synchronized (this) {
+            if (mCancelListeners == null) {
+                return;
+            }
+            boolean wasEmpty = mCancelListeners.isEmpty();
+            mCancelListeners.remove(cancelListener);
+            if (mCancelListeners.isEmpty() && !wasEmpty) {
+                try {
+                    ActivityManager.getService().unregisterIntentSenderCancelListener(mTarget,
+                            mCancelReceiver);
+                } catch (RemoteException e) {
+                    throw e.rethrowFromSystemServer();
+                }
+            }
+        }
+    }
+
+    /**
      * Return the user handle of the application that created this
      * PendingIntent, that is the user under which you will actually be
      * sending the Intent.  The returned UserHandle is supplied by the system, so
@@ -1183,5 +1256,19 @@ public final class PendingIntent implements Parcelable {
     /** @hide */
     public IBinder getWhitelistToken() {
         return mWhitelistToken;
+    }
+
+    /**
+     * A listener to when a pending intent is cancelled
+     *
+     * @hide
+     */
+    public interface CancelListener {
+        /**
+         * Called when a Pending Intent is cancelled.
+         *
+         * @param intent The intent that was cancelled.
+         */
+        void onCancelled(PendingIntent intent);
     }
 }
