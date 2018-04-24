@@ -502,9 +502,6 @@ public class KeyguardViewMediator extends SystemUI {
                     break;
                 default:
                     if (DEBUG_SIM_STATES) Log.v(TAG, "Unspecific state: " + simState);
-                    synchronized (KeyguardViewMediator.this) {
-                        onSimAbsentLocked();
-                    }
                     break;
             }
         }
