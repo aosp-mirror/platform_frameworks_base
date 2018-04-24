@@ -22948,6 +22948,7 @@ public class ActivityManagerService extends IActivityManager.Stub
 
     private void noteUidProcessState(final int uid, final int state) {
         mBatteryStatsService.noteUidProcessState(uid, state);
+        mAppOpsService.updateUidProcState(uid, state);
         if (mTrackingAssociations) {
             for (int i1=0, N1=mAssociations.size(); i1<N1; i1++) {
                 ArrayMap<ComponentName, SparseArray<ArrayMap<String, Association>>> targetComponents
