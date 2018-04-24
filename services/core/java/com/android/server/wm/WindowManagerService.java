@@ -2204,7 +2204,7 @@ public class WindowManagerService extends IWindowManager.Stub
             if (mInputMethodWindow == win) {
                 setInputMethodWindowLocked(null);
             }
-            boolean stopped = win.mAppToken != null ? win.mAppToken.mAppStopped : false;
+            boolean stopped = win.mAppToken != null ? win.mAppToken.mAppStopped : true;
             // We set mDestroying=true so AppWindowToken#notifyAppStopped in-to destroy surfaces
             // will later actually destroy the surface if we do not do so here. Normally we leave
             // this to the exit animation.
@@ -2677,15 +2677,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
     @Override
     public void endProlongedAnimations() {
-        synchronized (mWindowMap) {
-            for (final WindowState win : mWindowMap.values()) {
-                final AppWindowToken appToken = win.mAppToken;
-                if (appToken != null) {
-                    appToken.endDelayingAnimationStart();
-                }
-            }
-            mAppTransition.notifyProlongedAnimationsEnded();
-        }
+        // TODO: Remove once clients are updated.
     }
 
     @Override
@@ -5816,6 +5808,7 @@ public class WindowManagerService extends IWindowManager.Stub
         final int displayId = mFrozenDisplayId;
         mFrozenDisplayId = INVALID_DISPLAY;
         mDisplayFrozen = false;
+        mInputMonitor.thawInputDispatchingLw();
         mLastDisplayFreezeDuration = (int)(SystemClock.elapsedRealtime() - mDisplayFreezeTime);
         StringBuilder sb = new StringBuilder(128);
         sb.append("Screen frozen for ");
@@ -5861,8 +5854,6 @@ public class WindowManagerService extends IWindowManager.Stub
             }
             updateRotation = true;
         }
-
-        mInputMonitor.thawInputDispatchingLw();
 
         boolean configChanged;
 
@@ -5952,12 +5943,8 @@ public class WindowManagerService extends IWindowManager.Stub
 
     @Override
     public void setRecentsVisibility(boolean visible) {
-        if (mContext.checkCallingOrSelfPermission(android.Manifest.permission.STATUS_BAR)
-                != PackageManager.PERMISSION_GRANTED) {
-            throw new SecurityException("Caller does not hold permission "
-                    + android.Manifest.permission.STATUS_BAR);
-        }
-
+        mAmInternal.enforceCallerIsRecentsOrHasPermission(android.Manifest.permission.STATUS_BAR,
+                "setRecentsVisibility()");
         synchronized (mWindowMap) {
             mPolicy.setRecentsVisibilityLw(visible);
         }

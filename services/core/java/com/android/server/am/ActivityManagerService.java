@@ -433,6 +433,7 @@ import com.android.internal.util.Preconditions;
 import com.android.server.AlarmManagerInternal;
 import com.android.server.AppOpsService;
 import com.android.server.AttributeCache;
+import com.android.server.BinderCallsStatsService;
 import com.android.server.DeviceIdleController;
 import com.android.server.IntentResolver;
 import com.android.server.IoThread;
@@ -3410,6 +3411,11 @@ public class ActivityManagerService extends IActivityManager.Stub
                 mOnBattery = DEBUG_POWER ? true : onBattery;
             }
         }
+    }
+
+    @Override
+    public void batteryStatsReset() {
+        BinderCallsStatsService.reset();
     }
 
     @Override
@@ -14542,6 +14548,10 @@ public class ActivityManagerService extends IActivityManager.Stub
     }
 
     void setRunningRemoteAnimation(int pid, boolean runningRemoteAnimation) {
+        if (pid == Process.myPid()) {
+            Slog.wtf(TAG, "system can't run remote animation");
+            return;
+        }
         synchronized (ActivityManagerService.this) {
             final ProcessRecord pr;
             synchronized (mPidsSelfLocked) {
@@ -21961,54 +21971,6 @@ public class ActivityManagerService extends IActivityManager.Stub
     // INSTRUMENTATION
     // =========================================================
 
-    private static String[] HIDDENAPI_EXEMPT_PACKAGES = {
-        "com.android.bluetooth.tests",
-        "com.android.managedprovisioning.tests",
-        "com.android.frameworks.coretests",
-        "com.android.frameworks.coretests.binderproxycountingtestapp",
-        "com.android.frameworks.coretests.binderproxycountingtestservice",
-        "com.android.frameworks.tests.net",
-        "com.android.frameworks.tests.uiservices",
-        "com.android.coretests.apps.bstatstestapp",
-        "com.android.servicestests.apps.conntestapp",
-        "com.android.frameworks.servicestests",
-        "com.android.frameworks.utiltests",
-        "com.android.mtp.tests",
-        "android.mtp",
-        "com.android.documentsui.tests",
-        "com.android.shell.tests",
-        "com.android.systemui.tests",
-        "com.android.testables",
-        "android.net.wifi.test",
-        "com.android.server.wifi.test",
-        "com.android.frameworks.telephonytests",
-        "com.android.providers.contacts.tests",
-        "com.android.providers.contacts.tests2",
-        "com.android.settings.tests.unit",
-        "com.android.server.telecom.tests",
-        "com.android.vcard.tests",
-        "com.android.providers.blockednumber.tests",
-        "android.settings.functional",
-        "com.android.notification.functional",
-        "com.android.frameworks.dexloggertest",
-        "com.android.server.usb",
-        "com.android.providers.downloads.tests",
-        "com.android.emergency.tests.unit",
-        "com.android.providers.calendar.tests",
-        "com.android.settingslib",
-        "com.android.rs.test",
-        "com.android.printspooler.outofprocess.tests",
-        "com.android.cellbroadcastreceiver.tests.unit",
-        "com.android.providers.telephony.tests",
-        "com.android.carrierconfig.tests",
-        "com.android.phone.tests",
-        "com.android.service.ims.presence.tests",
-        "com.android.providers.setting.test",
-        "com.android.frameworks.locationtests",
-        "com.android.frameworks.coretests.privacy",
-        "com.android.settings.ui",
-    };
-
     public boolean startInstrumentation(ComponentName className,
             String profileFile, int flags, Bundle arguments,
             IInstrumentationWatcher watcher, IUiAutomationConnection uiAutomationConnection,
@@ -22080,6 +22042,13 @@ public class ActivityManagerService extends IActivityManager.Stub
             activeInstr.mUiAutomationConnection = uiAutomationConnection;
             activeInstr.mResultClass = className;
 
+            boolean disableHiddenApiChecks =
+                    (flags & INSTRUMENTATION_FLAG_DISABLE_HIDDEN_API_CHECKS) != 0;
+            if (disableHiddenApiChecks) {
+                enforceCallingPermission(android.Manifest.permission.DISABLE_HIDDEN_API_CHECKS,
+                        "disable hidden API checks");
+            }
+
             final long origId = Binder.clearCallingIdentity();
             // Instrumentation can kill and relaunch even persistent processes
             forceStopPackageLocked(ii.targetPackage, -1, true, false, true, true, false, userId,
@@ -22088,15 +22057,6 @@ public class ActivityManagerService extends IActivityManager.Stub
             if (mUsageStatsService != null) {
                 mUsageStatsService.reportEvent(ii.targetPackage, userId,
                         UsageEvents.Event.SYSTEM_INTERACTION);
-            }
-            boolean disableHiddenApiChecks =
-                    (flags & INSTRUMENTATION_FLAG_DISABLE_HIDDEN_API_CHECKS) != 0;
-
-            // TODO: Temporary whitelist of packages which need to be exempt from hidden API
-            //       checks. Remove this as soon as the testing infrastructure allows to set
-            //       the flag in AndroidTest.xml.
-            if (Arrays.asList(HIDDENAPI_EXEMPT_PACKAGES).contains(ai.packageName)) {
-                disableHiddenApiChecks = true;
             }
 
             ProcessRecord app = addAppLocked(ai, defProcess, false, disableHiddenApiChecks,

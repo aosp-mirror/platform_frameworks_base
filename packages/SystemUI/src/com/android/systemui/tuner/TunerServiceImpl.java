@@ -16,21 +16,14 @@
 package com.android.systemui.tuner;
 
 import android.app.ActivityManager;
-import android.content.BroadcastReceiver;
-import android.content.ComponentName;
 import android.content.ContentResolver;
 import android.content.Context;
-import android.content.DialogInterface;
-import android.content.DialogInterface.OnClickListener;
 import android.content.Intent;
-import android.content.pm.PackageManager;
-import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.UserInfo;
 import android.database.ContentObserver;
 import android.net.Uri;
 import android.os.Handler;
 import android.os.Looper;
-import android.os.UserHandle;
 import android.os.UserManager;
 import android.provider.Settings;
 import android.provider.Settings.Secure;
@@ -38,15 +31,12 @@ import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 
+import com.android.internal.util.ArrayUtils;
 import com.android.systemui.DemoMode;
 import com.android.systemui.Dependency;
-import com.android.systemui.R;
-import com.android.systemui.SysUiServiceProvider;
-import com.android.systemui.SystemUI;
-import com.android.systemui.SystemUIApplication;
+import com.android.systemui.qs.QSTileHost;
 import com.android.systemui.settings.CurrentUserTracker;
 import com.android.systemui.statusbar.phone.StatusBarIconController;
-import com.android.systemui.statusbar.phone.SystemUIDialog;
 import com.android.systemui.util.leak.LeakDetector;
 
 import java.util.HashMap;
@@ -58,7 +48,13 @@ public class TunerServiceImpl extends TunerService {
 
     private static final String TUNER_VERSION = "sysui_tuner_version";
 
-    private static final int CURRENT_TUNER_VERSION = 2;
+    private static final int CURRENT_TUNER_VERSION = 4;
+
+    // Things that use the tunable infrastructure but are now real user settings and
+    // shouldn't be reset with tuner settings.
+    private static final String[] RESET_BLACKLIST = new String[] {
+            QSTileHost.TILES_SETTING,
+    };
 
     private final Observer mObserver = new Observer();
     // Map of Uris we listen on to their settings keys.
@@ -118,6 +114,11 @@ public class TunerServiceImpl extends TunerService {
         }
         if (oldVersion < 2) {
             setTunerEnabled(mContext, false);
+        }
+        // 3 Removed because of a revert.
+        if (oldVersion < 4) {
+            // Delay this so that we can wait for everything to be registered first.
+            new Handler(Dependency.get(Dependency.BG_LOOPER)).postDelayed(() -> clearAll(), 5000);
         }
         setValue(TUNER_VERSION, newVersion);
     }
@@ -226,6 +227,9 @@ public class TunerServiceImpl extends TunerService {
         mContext.sendBroadcast(intent);
 
         for (String key : mTunableLookup.keySet()) {
+            if (ArrayUtils.contains(RESET_BLACKLIST, key)) {
+                continue;
+            }
             Settings.Secure.putString(mContentResolver, key, null);
         }
     }

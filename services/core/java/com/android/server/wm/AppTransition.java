@@ -82,6 +82,7 @@ import android.app.ActivityManager;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.res.Configuration;
+import android.content.res.ResourceId;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
@@ -245,7 +246,6 @@ public class AppTransition implements Dump {
 
     private int mLastClipRevealMaxTranslation;
     private boolean mLastHadClipReveal;
-    private boolean mProlongedAnimationsEnded;
 
     private final boolean mGridLayoutRecentsEnabled;
     private final boolean mLowRamRecentsEnabled;
@@ -423,25 +423,10 @@ public class AppTransition implements Dump {
         mService.getDefaultDisplayContentLocked().getDockedDividerController()
                 .notifyAppTransitionStarting(openingApps, transit);
 
-        // Prolong the start for the transition when docking a task from recents, unless recents
-        // ended it already then we don't need to wait.
-        if (transit == TRANSIT_DOCK_TASK_FROM_RECENTS && !mProlongedAnimationsEnded) {
-            for (int i = openingApps.size() - 1; i >= 0; i--) {
-                final AppWindowToken app = openingApps.valueAt(i);
-                app.startDelayingAnimationStart();
-            }
-        }
         if (mRemoteAnimationController != null) {
             mRemoteAnimationController.goodToGo();
         }
         return redoLayout;
-    }
-
-    /**
-     * Let the transitions manager know that the somebody wanted to end the prolonged animations.
-     */
-    void notifyProlongedAnimationsEnded() {
-        mProlongedAnimationsEnded = true;
     }
 
     void clear() {
@@ -452,7 +437,6 @@ public class AppTransition implements Dump {
         mNextAppTransitionAnimationsSpecsFuture = null;
         mDefaultNextAppTransitionAnimationSpec = null;
         mAnimationFinishedCallback = null;
-        mProlongedAnimationsEnded = false;
     }
 
     void freeze() {
@@ -555,25 +539,25 @@ public class AppTransition implements Dump {
     }
 
     Animation loadAnimationAttr(LayoutParams lp, int animAttr, int transit) {
-        int anim = 0;
+        int resId = ResourceId.ID_NULL;
         Context context = mContext;
         if (animAttr >= 0) {
             AttributeCache.Entry ent = getCachedAnimations(lp);
             if (ent != null) {
                 context = ent.context;
-                anim = ent.array.getResourceId(animAttr, 0);
+                resId = ent.array.getResourceId(animAttr, 0);
             }
         }
-        anim = updateToTranslucentAnimIfNeeded(anim, transit);
-        if (anim != 0) {
-            return AnimationUtils.loadAnimation(context, anim);
+        resId = updateToTranslucentAnimIfNeeded(resId, transit);
+        if (ResourceId.isValid(resId)) {
+            return AnimationUtils.loadAnimation(context, resId);
         }
         return null;
     }
 
     Animation loadAnimationRes(LayoutParams lp, int resId) {
         Context context = mContext;
-        if (resId >= 0) {
+        if (ResourceId.isValid(resId)) {
             AttributeCache.Entry ent = getCachedAnimations(lp);
             if (ent != null) {
                 context = ent.context;
@@ -584,17 +568,11 @@ public class AppTransition implements Dump {
     }
 
     private Animation loadAnimationRes(String packageName, int resId) {
-        int anim = 0;
-        Context context = mContext;
-        if (resId >= 0) {
+        if (ResourceId.isValid(resId)) {
             AttributeCache.Entry ent = getCachedAnimations(packageName, resId);
             if (ent != null) {
-                context = ent.context;
-                anim = resId;
+                return AnimationUtils.loadAnimation(ent.context, resId);
             }
-        }
-        if (anim != 0) {
-            return AnimationUtils.loadAnimation(context, anim);
         }
         return null;
     }

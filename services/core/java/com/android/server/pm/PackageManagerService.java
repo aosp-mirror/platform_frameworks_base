@@ -13625,24 +13625,14 @@ public class PackageManagerService extends IPackageManager.Stub
             // install reason correctly.
             return installReason;
         }
-
-        final IDevicePolicyManager dpm = IDevicePolicyManager.Stub.asInterface(
-            ServiceManager.getService(Context.DEVICE_POLICY_SERVICE));
-        if (dpm != null) {
-            ComponentName owner = null;
-            try {
-                owner = dpm.getDeviceOwnerComponent(true /* callingUserOnly */);
-                if (owner == null) {
-                    owner = dpm.getProfileOwner(UserHandle.getUserId(installerUid));
-                }
-            } catch (RemoteException e) {
-            }
-            if (owner != null && owner.getPackageName().equals(installerPackageName)) {
-                // If the install is being performed by a device or profile owner, the install
-                // reason should be enterprise policy.
-                return PackageManager.INSTALL_REASON_POLICY;
-            }
+        final String ownerPackage = mProtectedPackages.getDeviceOwnerOrProfileOwnerPackage(
+                UserHandle.getUserId(installerUid));
+        if (ownerPackage != null && ownerPackage.equals(installerPackageName)) {
+            // If the install is being performed by a device or profile owner, the install
+            // reason should be enterprise policy.
+            return PackageManager.INSTALL_REASON_POLICY;
         }
+
 
         if (installReason == PackageManager.INSTALL_REASON_POLICY) {
             // If the install is being performed by a regular app (i.e. neither system app nor
@@ -14040,7 +14030,11 @@ public class PackageManagerService extends IPackageManager.Stub
             throw new IllegalArgumentException("CallingPackage " + callingPackage + " does not"
                     + " belong to calling app id " + UserHandle.getAppId(callingUid));
         }
-
+        if (!PLATFORM_PACKAGE_NAME.equals(callingPackage)
+                && mProtectedPackages.getDeviceOwnerOrProfileOwnerPackage(userId) != null) {
+            throw new UnsupportedOperationException("Cannot suspend/unsuspend packages. User "
+                    + userId + " has an active DO or PO");
+        }
         if (ArrayUtils.isEmpty(packageNames)) {
             return packageNames;
         }
@@ -17425,6 +17419,7 @@ public class PackageManagerService extends IPackageManager.Stub
         //   1) it is not forward locked.
         //   2) it is not on on an external ASEC container.
         //   3) it is not an instant app or if it is then dexopt is enabled via gservices.
+        //   4) it is not debuggable.
         //
         // Note that we do not dexopt instant apps by default. dexopt can take some time to
         // complete, so we skip this step during installation. Instead, we'll take extra time
@@ -17436,7 +17431,8 @@ public class PackageManagerService extends IPackageManager.Stub
                 && !forwardLocked
                 && !pkg.applicationInfo.isExternalAsec()
                 && (!instantApp || Global.getInt(mContext.getContentResolver(),
-                Global.INSTANT_APP_DEXOPT_ENABLED, 0) != 0);
+                Global.INSTANT_APP_DEXOPT_ENABLED, 0) != 0)
+                && ((pkg.applicationInfo.flags & ApplicationInfo.FLAG_DEBUGGABLE) == 0);
 
         if (performDexopt) {
             Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "dexopt");

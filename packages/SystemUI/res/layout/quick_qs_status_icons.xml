@@ -15,14 +15,27 @@
 -->
 <LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:systemui="http://schemas.android.com/apk/res-auto"
     android:id="@+id/quick_qs_status_icons"
     android:layout_width="match_parent"
     android:layout_height="20dp"
     android:layout_marginTop="8dp"
     android:layout_marginBottom="14dp"
+    android:layout_marginStart="8dp"
     android:layout_marginEnd="@dimen/notification_side_paddings"
     android:layout_below="@id/quick_status_bar_system_icons"
     android:paddingEnd="@dimen/status_bar_padding_end" >
+
+    <com.android.systemui.statusbar.policy.DateView
+        android:id="@+id/date"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="start"
+        android:gravity="center_vertical"
+        android:singleLine="true"
+        android:textAppearance="@style/TextAppearance.StatusBar.Expanded.Date"
+        android:textSize="@dimen/qs_time_collapsed_size"
+        systemui:datePattern="@string/abbrev_wday_month_day_no_year_alarm" />
 
     <com.android.systemui.statusbar.phone.StatusIconContainer
         android:id="@+id/statusIcons"

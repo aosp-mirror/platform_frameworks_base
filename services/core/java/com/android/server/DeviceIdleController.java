@@ -327,13 +327,16 @@ public class DeviceIdleController extends SystemService
 
     private final int[] mEventCmds = new int[EVENT_BUFFER_SIZE];
     private final long[] mEventTimes = new long[EVENT_BUFFER_SIZE];
+    private final String[] mEventReasons = new String[EVENT_BUFFER_SIZE];
 
-    private void addEvent(int cmd) {
+    private void addEvent(int cmd, String reason) {
         if (mEventCmds[0] != cmd) {
             System.arraycopy(mEventCmds, 0, mEventCmds, 1, EVENT_BUFFER_SIZE - 1);
             System.arraycopy(mEventTimes, 0, mEventTimes, 1, EVENT_BUFFER_SIZE - 1);
+            System.arraycopy(mEventReasons, 0, mEventReasons, 1, EVENT_BUFFER_SIZE - 1);
             mEventCmds[0] = cmd;
             mEventTimes[0] = SystemClock.elapsedRealtime();
+            mEventReasons[0] = reason;
         }
     }
 
@@ -2061,7 +2064,7 @@ public class DeviceIdleController extends SystemService
             mMaintenanceStartTime = 0;
             resetIdleManagementLocked();
             resetLightIdleManagementLocked();
-            addEvent(EVENT_NORMAL);
+            addEvent(EVENT_NORMAL, activeReason);
         }
     }
 
@@ -2158,7 +2161,7 @@ public class DeviceIdleController extends SystemService
                 if (DEBUG) Slog.d(TAG, "Moved to LIGHT_STATE_IDLE.");
                 mLightState = LIGHT_STATE_IDLE;
                 EventLogTags.writeDeviceIdleLight(mLightState, reason);
-                addEvent(EVENT_LIGHT_IDLE);
+                addEvent(EVENT_LIGHT_IDLE, null);
                 mGoingIdleWakeLock.acquire();
                 mHandler.sendEmptyMessage(MSG_REPORT_IDLE_ON_LIGHT);
                 break;
@@ -2179,7 +2182,7 @@ public class DeviceIdleController extends SystemService
                             "Moved from LIGHT_STATE_IDLE to LIGHT_STATE_IDLE_MAINTENANCE.");
                     mLightState = LIGHT_STATE_IDLE_MAINTENANCE;
                     EventLogTags.writeDeviceIdleLight(mLightState, reason);
-                    addEvent(EVENT_LIGHT_MAINTENANCE);
+                    addEvent(EVENT_LIGHT_MAINTENANCE, null);
                     mHandler.sendEmptyMessage(MSG_REPORT_IDLE_OFF);
                 } else {
                     // We'd like to do maintenance, but currently don't have network
@@ -2284,7 +2287,7 @@ public class DeviceIdleController extends SystemService
                     cancelLightAlarmLocked();
                 }
                 EventLogTags.writeDeviceIdle(mState, reason);
-                addEvent(EVENT_DEEP_IDLE);
+                addEvent(EVENT_DEEP_IDLE, null);
                 mGoingIdleWakeLock.acquire();
                 mHandler.sendEmptyMessage(MSG_REPORT_IDLE_ON);
                 break;
@@ -2303,7 +2306,7 @@ public class DeviceIdleController extends SystemService
                 }
                 mState = STATE_IDLE_MAINTENANCE;
                 EventLogTags.writeDeviceIdle(mState, reason);
-                addEvent(EVENT_DEEP_MAINTENANCE);
+                addEvent(EVENT_DEEP_MAINTENANCE, null);
                 mHandler.sendEmptyMessage(MSG_REPORT_IDLE_OFF);
                 break;
         }
@@ -2414,7 +2417,7 @@ public class DeviceIdleController extends SystemService
             mCurIdleBudget = 0;
             mMaintenanceStartTime = 0;
             EventLogTags.writeDeviceIdle(mState, type);
-            addEvent(EVENT_NORMAL);
+            addEvent(EVENT_NORMAL, type);
             becomeInactive = true;
         }
         if (mLightState == LIGHT_STATE_OVERRIDE) {
@@ -3273,8 +3276,14 @@ public class DeviceIdleController extends SystemService
                     pw.print("    ");
                     pw.print(label);
                     pw.print(": ");
-                    TimeUtils.formatDuration(mEventTimes[i], now, pw);;
+                    TimeUtils.formatDuration(mEventTimes[i], now, pw);
+                    if (mEventReasons[i] != null) {
+                        pw.print(" (");
+                        pw.print(mEventReasons[i]);
+                        pw.print(")");
+                    }
                     pw.println();
+
                 }
             }
 

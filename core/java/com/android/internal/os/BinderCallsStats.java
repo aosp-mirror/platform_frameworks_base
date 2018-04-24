@@ -18,9 +18,11 @@ package com.android.internal.os;
 
 import android.os.Binder;
 import android.os.SystemClock;
+import android.text.format.DateFormat;
 import android.util.ArrayMap;
 import android.util.SparseArray;
 
+import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.Preconditions;
 
@@ -40,23 +42,22 @@ public class BinderCallsStats {
     private static final int CALL_SESSIONS_POOL_SIZE = 100;
     private static final BinderCallsStats sInstance = new BinderCallsStats();
 
-    private volatile boolean mTrackingEnabled = false;
+    private volatile boolean mDetailedTracking = false;
+    @GuardedBy("mLock")
     private final SparseArray<UidEntry> mUidEntries = new SparseArray<>();
     private final Queue<CallSession> mCallSessionsPool = new ConcurrentLinkedQueue<>();
+    private final Object mLock = new Object();
+    private long mStartTime = System.currentTimeMillis();
 
     private BinderCallsStats() {
     }
 
     @VisibleForTesting
-    public BinderCallsStats(boolean trackingEnabled) {
-        mTrackingEnabled = trackingEnabled;
+    public BinderCallsStats(boolean detailedTracking) {
+        mDetailedTracking = detailedTracking;
     }
 
     public CallSession callStarted(Binder binder, int code) {
-        if (!mTrackingEnabled) {
-            return null;
-        }
-
         return callStarted(binder.getClass().getName(), code);
     }
 
@@ -73,32 +74,31 @@ public class BinderCallsStats {
     }
 
     public void callEnded(CallSession s) {
-        if (!mTrackingEnabled) {
-            return;
-        }
         Preconditions.checkNotNull(s);
-        final long cpuTimeNow = getThreadTimeMicro();
-        final long duration = cpuTimeNow - s.mStarted;
+        long duration = mDetailedTracking ? getThreadTimeMicro() - s.mStarted : 1;
         s.mCallingUId = Binder.getCallingUid();
 
-        synchronized (mUidEntries) {
+        synchronized (mLock) {
             UidEntry uidEntry = mUidEntries.get(s.mCallingUId);
             if (uidEntry == null) {
                 uidEntry = new UidEntry(s.mCallingUId);
                 mUidEntries.put(s.mCallingUId, uidEntry);
             }
 
-            // Find CallDesc entry and update its total time
-            CallStat callStat = uidEntry.mCallStats.get(s.mCallStat);
-            // Only create CallStat if it's a new entry, otherwise update existing instance
-            if (callStat == null) {
-                callStat = new CallStat(s.mCallStat.className, s.mCallStat.msg);
-                uidEntry.mCallStats.put(callStat, callStat);
+            if (mDetailedTracking) {
+                // Find CallDesc entry and update its total time
+                CallStat callStat = uidEntry.mCallStats.get(s.mCallStat);
+                // Only create CallStat if it's a new entry, otherwise update existing instance
+                if (callStat == null) {
+                    callStat = new CallStat(s.mCallStat.className, s.mCallStat.msg);
+                    uidEntry.mCallStats.put(callStat, callStat);
+                }
+                callStat.callCount++;
+                callStat.time += duration;
             }
+
             uidEntry.time += duration;
             uidEntry.callCount++;
-            callStat.callCount++;
-            callStat.time += duration;
         }
         if (mCallSessionsPool.size() < CALL_SESSIONS_POOL_SIZE) {
             mCallSessionsPool.add(s);
@@ -110,9 +110,11 @@ public class BinderCallsStats {
         Map<Integer, Long> uidCallCountMap = new HashMap<>();
         long totalCallsCount = 0;
         long totalCallsTime = 0;
+        pw.print("Start time: ");
+        pw.println(DateFormat.format("yyyy-MM-dd HH:mm:ss", mStartTime));
         int uidEntriesSize = mUidEntries.size();
         List<UidEntry> entries = new ArrayList<>();
-        synchronized (mUidEntries) {
+        synchronized (mLock) {
             for (int i = 0; i < uidEntriesSize; i++) {
                 UidEntry e = mUidEntries.valueAt(i);
                 entries.add(e);
@@ -127,20 +129,9 @@ public class BinderCallsStats {
                 totalCallsCount += e.callCount;
             }
         }
-        pw.println("Binder call stats:");
-        pw.println("  Raw data (uid,call_desc,time):");
-        entries.sort((o1, o2) -> {
-            if (o1.time < o2.time) {
-                return 1;
-            } else if (o1.time > o2.time) {
-                return -1;
-            }
-            return 0;
-        });
-        StringBuilder sb = new StringBuilder();
-        for (UidEntry uidEntry : entries) {
-            List<CallStat> callStats = new ArrayList<>(uidEntry.mCallStats.keySet());
-            callStats.sort((o1, o2) -> {
+        if (mDetailedTracking) {
+            pw.println("Raw data (uid,call_desc,time):");
+            entries.sort((o1, o2) -> {
                 if (o1.time < o2.time) {
                     return 1;
                 } else if (o1.time > o2.time) {
@@ -148,44 +139,73 @@ public class BinderCallsStats {
                 }
                 return 0;
             });
-            for (CallStat e : callStats) {
-                sb.setLength(0);
-                sb.append("    ")
-                        .append(uidEntry.uid).append(",").append(e).append(',').append(e.time);
-                pw.println(sb);
+            StringBuilder sb = new StringBuilder();
+            for (UidEntry uidEntry : entries) {
+                List<CallStat> callStats = new ArrayList<>(uidEntry.mCallStats.keySet());
+                callStats.sort((o1, o2) -> {
+                    if (o1.time < o2.time) {
+                        return 1;
+                    } else if (o1.time > o2.time) {
+                        return -1;
+                    }
+                    return 0;
+                });
+                for (CallStat e : callStats) {
+                    sb.setLength(0);
+                    sb.append("    ")
+                            .append(uidEntry.uid).append(",").append(e).append(',').append(e.time);
+                    pw.println(sb);
+                }
+            }
+            pw.println();
+            pw.println("Per UID Summary(UID: time, % of total_time, calls_count):");
+            List<Map.Entry<Integer, Long>> uidTotals = new ArrayList<>(uidTimeMap.entrySet());
+            uidTotals.sort((o1, o2) -> o2.getValue().compareTo(o1.getValue()));
+            for (Map.Entry<Integer, Long> uidTotal : uidTotals) {
+                Long callCount = uidCallCountMap.get(uidTotal.getKey());
+                pw.println(String.format("  %7d: %11d %3.0f%% %8d",
+                        uidTotal.getKey(), uidTotal.getValue(),
+                        100d * uidTotal.getValue() / totalCallsTime, callCount));
+            }
+            pw.println();
+            pw.println(String.format("  Summary: total_time=%d, "
+                            + "calls_count=%d, avg_call_time=%.0f",
+                    totalCallsTime, totalCallsCount,
+                    (double)totalCallsTime / totalCallsCount));
+        } else {
+            pw.println("Per UID Summary(UID: calls_count, % of total calls_count):");
+            List<Map.Entry<Integer, Long>> uidTotals = new ArrayList<>(uidTimeMap.entrySet());
+            uidTotals.sort((o1, o2) -> o2.getValue().compareTo(o1.getValue()));
+            for (Map.Entry<Integer, Long> uidTotal : uidTotals) {
+                Long callCount = uidCallCountMap.get(uidTotal.getKey());
+                pw.println(String.format("    %7d: %8d %3.0f%%",
+                        uidTotal.getKey(), callCount, 100d * uidTotal.getValue() / totalCallsTime));
             }
         }
-        pw.println();
-        pw.println("  Per UID Summary(UID: time, total_time_percentage, calls_count):");
-        List<Map.Entry<Integer, Long>> uidTotals = new ArrayList<>(uidTimeMap.entrySet());
-        uidTotals.sort((o1, o2) -> o2.getValue().compareTo(o1.getValue()));
-        for (Map.Entry<Integer, Long> uidTotal : uidTotals) {
-            Long callCount = uidCallCountMap.get(uidTotal.getKey());
-            pw.println(String.format("    %5d: %11d %3.0f%% %8d",
-                    uidTotal.getKey(), uidTotal.getValue(),
-                    100d * uidTotal.getValue() / totalCallsTime, callCount));
-        }
-        pw.println();
-        pw.println(String.format("  Summary: total_time=%d, "
-                        + "calls_count=%d, avg_call_time=%.0f",
-                totalCallsTime, totalCallsCount,
-                (double)totalCallsTime / totalCallsCount));
     }
 
-    private static long getThreadTimeMicro() {
-        return SystemClock.currentThreadTimeMicro();
+    private long getThreadTimeMicro() {
+        // currentThreadTimeMicro is expensive, so we measure cpu time only if detailed tracking is
+        // enabled
+        return mDetailedTracking ? SystemClock.currentThreadTimeMicro() : 0;
     }
 
     public static BinderCallsStats getInstance() {
         return sInstance;
     }
 
-    public void setTrackingEnabled(boolean enabled) {
-        mTrackingEnabled = enabled;
+    public void setDetailedTracking(boolean enabled) {
+        if (enabled != mDetailedTracking) {
+            reset();
+            mDetailedTracking = enabled;
+        }
     }
 
-    public boolean isTrackingEnabled() {
-        return mTrackingEnabled;
+    public void reset() {
+        synchronized (mLock) {
+            mUidEntries.clear();
+            mStartTime = System.currentTimeMillis();
+        }
     }
 
     private static class CallStat {
@@ -210,7 +230,7 @@ public class BinderCallsStats {
 
             CallStat callStat = (CallStat) o;
 
-            return msg == callStat.msg && (className == callStat.className);
+            return msg == callStat.msg && (className.equals(callStat.className));
         }
 
         @Override

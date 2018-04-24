@@ -132,6 +132,7 @@ public class ActivityTestsBase {
         private int mUid;
         private boolean mCreateTask;
         private ActivityStack mStack;
+        private int mActivityFlags;
 
         ActivityBuilder(ActivityManagerService service) {
             mService = service;
@@ -149,6 +150,11 @@ public class ActivityTestsBase {
 
         ActivityBuilder setTask(TaskRecord task) {
             mTaskRecord = task;
+            return this;
+        }
+
+        ActivityBuilder setActivityFlags(int flags) {
+            mActivityFlags = flags;
             return this;
         }
 
@@ -186,6 +192,8 @@ public class ActivityTestsBase {
             aInfo.applicationInfo = new ApplicationInfo();
             aInfo.applicationInfo.packageName = mComponent.getPackageName();
             aInfo.applicationInfo.uid = mUid;
+            aInfo.flags |= mActivityFlags;
+
             final ActivityRecord activity = new ActivityRecord(mService, null /* caller */,
                     0 /* launchedFromPid */, 0, null, intent, null,
                     aInfo /*aInfo*/, new Configuration(), null /* resultTo */, null /* resultWho */,

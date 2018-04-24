@@ -123,6 +123,7 @@ public class RadioTunerTest {
     private void resetCallback() {
         verify(mCallback, atLeast(0)).onMetadataChanged(any());
         verify(mCallback, atLeast(0)).onProgramInfoChanged(any());
+        verify(mCallback, atLeast(0)).onProgramListChanged();
         verifyNoMoreInteractions(mCallback);
         Mockito.reset(mCallback);
     }
