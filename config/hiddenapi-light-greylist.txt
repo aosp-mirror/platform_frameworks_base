@@ -880,6 +880,7 @@ Landroid/graphics/drawable/StateListDrawable;->getStateSet(I)[I
 Landroid/graphics/drawable/StateListDrawable;->mStateListState:Landroid/graphics/drawable/StateListDrawable$StateListState;
 Landroid/graphics/drawable/StateListDrawable;->updateStateFromTypedArray(Landroid/content/res/TypedArray;)V
 Landroid/graphics/drawable/VectorDrawable;->getTargetByName(Ljava/lang/String;)Ljava/lang/Object;
+Landroid/graphics/drawable/VectorDrawable;->mTintFilter:Landroid/graphics/PorterDuffColorFilter;
 Landroid/graphics/drawable/VectorDrawable;->setAllowCaching(Z)V
 Landroid/graphics/drawable/VectorDrawable$VGroup;->setRotation(F)V
 Landroid/graphics/FontFamily;->abortCreation()V
@@ -904,6 +905,7 @@ Landroid/graphics/NinePatch$InsetStruct;-><init>(IIIIIIIIFIF)V
 Landroid/graphics/NinePatch;->mBitmap:Landroid/graphics/Bitmap;
 Landroid/graphics/Picture;->mNativePicture:J
 Landroid/graphics/PixelXorXfermode;-><init>(I)V
+Landroid/graphics/PorterDuffColorFilter;->getColor()I
 Landroid/graphics/PorterDuffColorFilter;->setColor(I)V
 Landroid/graphics/PorterDuffColorFilter;->setMode(Landroid/graphics/PorterDuff$Mode;)V
 Landroid/graphics/Rect;->scale(F)V
@@ -2714,6 +2716,7 @@ Landroid/widget/AbsListView$FlingRunnable;->start(I)V
 Landroid/widget/AbsListView;->invokeOnItemScrollListener()V
 Landroid/widget/AbsListView;->isVerticalScrollBarHidden()Z
 Landroid/widget/AbsListView;->mAdapter:Landroid/widget/ListAdapter;
+Landroid/widget/AbsListView;->mDataSetObserver:Landroid/widget/AbsListView$AdapterDataSetObserver;
 Landroid/widget/AbsListView;->mEdgeGlowBottom:Landroid/widget/EdgeEffect;
 Landroid/widget/AbsListView;->mEdgeGlowTop:Landroid/widget/EdgeEffect;
 Landroid/widget/AbsListView;->mFastScroll:Landroid/widget/FastScroller;
@@ -2821,6 +2824,8 @@ Landroid/widget/ListView;->fillUp(II)Landroid/view/View;
 Landroid/widget/ListView;->findViewTraversal(I)Landroid/view/View;
 Landroid/widget/ListView;->findViewWithTagTraversal(Ljava/lang/Object;)Landroid/view/View;
 Landroid/widget/ListView;->mAreAllItemsSelectable:Z
+Landroid/widget/ListView;->mFooterViewInfos:Ljava/util/ArrayList;
+Landroid/widget/ListView;->mHeaderViewInfos:Ljava/util/ArrayList;
 Landroid/widget/ListView;->setSelectionInt(I)V
 Landroid/widget/MediaController;->mAnchor:Landroid/view/View;
 Landroid/widget/MediaController;->mDecor:Landroid/view/View;
