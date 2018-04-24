@@ -481,6 +481,24 @@ native_init_failure:
 }
 
 // ----------------------------------------------------------------------------
+static jboolean
+android_media_AudioTrack_is_direct_output_supported(JNIEnv *env, jobject thiz,
+                                             jint encoding, jint sampleRate,
+                                             jint channelMask, jint channelIndexMask,
+                                             jint contentType, jint usage, jint flags) {
+    audio_config_base_t config = {};
+    audio_attributes_t attributes = {};
+    config.format = static_cast<audio_format_t>(audioFormatToNative(encoding));
+    config.sample_rate = static_cast<uint32_t>(sampleRate);
+    config.channel_mask = nativeChannelMaskFromJavaChannelMasks(channelMask, channelIndexMask);
+    attributes.content_type = static_cast<audio_content_type_t>(contentType);
+    attributes.usage = static_cast<audio_usage_t>(usage);
+    attributes.flags = static_cast<audio_flags_mask_t>(flags);
+    // ignore source and tags attributes as they don't affect querying whether output is supported
+    return AudioTrack::isDirectOutputSupported(config, attributes);
+}
+
+// ----------------------------------------------------------------------------
 static void
 android_media_AudioTrack_start(JNIEnv *env, jobject thiz)
 {
@@ -1298,6 +1316,9 @@ static jint android_media_AudioTrack_get_port_id(JNIEnv *env,  jobject thiz) {
 // ----------------------------------------------------------------------------
 static const JNINativeMethod gMethods[] = {
     // name,              signature,     funcPtr
+    {"native_is_direct_output_supported",
+                             "(IIIIIII)Z",
+                                         (void *)android_media_AudioTrack_is_direct_output_supported},
     {"native_start",         "()V",      (void *)android_media_AudioTrack_start},
     {"native_stop",          "()V",      (void *)android_media_AudioTrack_stop},
     {"native_pause",         "()V",      (void *)android_media_AudioTrack_pause},

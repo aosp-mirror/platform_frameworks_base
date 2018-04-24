@@ -995,6 +995,35 @@ public class AudioTrack extends PlayerBase
         }
     }
 
+    /**
+     * Returns whether direct playback of an audio format with the provided attributes is
+     * currently supported on the system.
+     * <p>Direct playback means that the audio stream is not resampled or downmixed
+     * by the framework. Checking for direct support can help the app select the representation
+     * of audio content that most closely matches the capabilities of the device and peripherials
+     * (e.g. A/V receiver) connected to it. Note that the provided stream can still be re-encoded
+     * or mixed with other streams, if needed.
+     * <p>Also note that this query only provides information about the support of an audio format.
+     * It does not indicate whether the resources necessary for the playback are available
+     * at that instant.
+     * @param format a non-null {@link AudioFormat} instance describing the format of
+     *   the audio data.
+     * @param attributes a non-null {@link AudioAttributes} instance.
+     * @return true if the given audio format can be played directly.
+     */
+    public static boolean isDirectPlaybackSupported(@NonNull AudioFormat format,
+            @NonNull AudioAttributes attributes) {
+        if (format == null) {
+            throw new IllegalArgumentException("Illegal null AudioFormat argument");
+        }
+        if (attributes == null) {
+            throw new IllegalArgumentException("Illegal null AudioAttributes argument");
+        }
+        return native_is_direct_output_supported(format.getEncoding(), format.getSampleRate(),
+                format.getChannelMask(), format.getChannelIndexMask(),
+                attributes.getContentType(), attributes.getUsage(), attributes.getFlags());
+    }
+
     // mask of all the positional channels supported, however the allowed combinations
     // are further restricted by the matching left/right rule and
     // AudioSystem.OUT_CHANNEL_COUNT_MAX
@@ -3327,6 +3356,9 @@ public class AudioTrack extends PlayerBase
     //---------------------------------------------------------
     // Native methods called from the Java side
     //--------------------
+
+    private static native boolean native_is_direct_output_supported(int encoding, int sampleRate,
+            int channelMask, int channelIndexMask, int contentType, int usage, int flags);
 
     // post-condition: mStreamType is overwritten with a value
     //     that reflects the audio attributes (e.g. an AudioAttributes object with a usage of
