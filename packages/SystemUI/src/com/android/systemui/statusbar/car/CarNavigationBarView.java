@@ -36,10 +36,11 @@ import com.android.systemui.statusbar.phone.StatusBarIconController;
  * in a linear layout.
  */
 class CarNavigationBarView extends LinearLayout {
-    private LinearLayout mNavButtons;
+    private View mNavButtons;
     private AlphaOptimizedImageButton mNotificationsButton;
     private CarStatusBar mCarStatusBar;
     private Context mContext;
+    private View mLockScreenButtons;
 
     public CarNavigationBarView(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -49,6 +50,7 @@ class CarNavigationBarView extends LinearLayout {
     @Override
     public void onFinishInflate() {
         mNavButtons = findViewById(R.id.nav_buttons);
+        mLockScreenButtons = findViewById(R.id.lock_screen_nav_buttons);
 
         mNotificationsButton = findViewById(R.id.notifications);
         if (mNotificationsButton != null) {
@@ -73,5 +75,29 @@ class CarNavigationBarView extends LinearLayout {
 
     protected void onNotificationsClick(View v) {
         mCarStatusBar.togglePanel();
+    }
+
+    /**
+     * If there are buttons declared in the layout they will be shown and the normal
+     * Nav buttons will be hidden.
+     */
+    public void showKeyguardButtons() {
+        if (mLockScreenButtons == null) {
+            return;
+        }
+        mLockScreenButtons.setVisibility(View.VISIBLE);
+        mNavButtons.setVisibility(View.GONE);
+    }
+
+    /**
+     * If there are buttons declared in the layout they will be hidden and the normal
+     * Nav buttons will be shown.
+     */
+    public void hideKeyguardButtons() {
+        if (mLockScreenButtons == null) {
+            return;
+        }
+        mNavButtons.setVisibility(View.VISIBLE);
+        mLockScreenButtons.setVisibility(View.GONE);
     }
 }
