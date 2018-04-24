@@ -157,7 +157,7 @@
                  android:defaultToDeviceProtectedStorage="true"
                  android:directBootAware="true">
         <provider
-            android:name="android.support.v4.content.FileProvider"
+            android:name="androidx.core.content.FileProvider"
             android:authorities="com.android.shell"
             android:grantUriPermissions="true"
             android:exported="false">
