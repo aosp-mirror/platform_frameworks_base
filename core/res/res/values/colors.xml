@@ -137,6 +137,7 @@
     <color name="notification_primary_text_color_light">@color/primary_text_default_material_light</color>
     <color name="notification_primary_text_color_dark">@color/primary_text_default_material_dark</color>
     <color name="notification_secondary_text_color_light">@color/primary_text_default_material_light</color>
+    <item name="notification_secondary_text_disabled_alpha" format="float" type="dimen">0.30</item>
     <color name="notification_secondary_text_color_dark">@color/primary_text_default_material_dark</color>
     <color name="notification_default_color_dark">@color/primary_text_default_material_light</color>
     <color name="notification_default_color_light">#a3202124</color>

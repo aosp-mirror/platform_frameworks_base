@@ -972,6 +972,18 @@ public class Notification implements Parcelable
     public static final String EXTRA_REMOTE_INPUT_HISTORY = "android.remoteInputHistory";
 
     /**
+     * {@link #extras} key: boolean as supplied to
+     * {@link Builder#setShowRemoteInputSpinner(boolean)}.
+     *
+     * If set to true, then the view displaying the remote input history from
+     * {@link Builder#setRemoteInputHistory(CharSequence[])} will have a progress spinner.
+     *
+     * @see Builder#setShowRemoteInputSpinner(boolean)
+     * @hide
+     */
+    public static final String EXTRA_SHOW_REMOTE_INPUT_SPINNER = "android.remoteInputSpinner";
+
+    /**
      * {@link #extras} key: this is a small piece of additional text as supplied to
      * {@link Builder#setContentInfo(CharSequence)}.
      */
@@ -3537,6 +3549,15 @@ public class Notification implements Parcelable
         }
 
         /**
+         * Sets whether remote history entries view should have a spinner.
+         * @hide
+         */
+        public Builder setShowRemoteInputSpinner(boolean showSpinner) {
+            mN.extras.putBoolean(EXTRA_SHOW_REMOTE_INPUT_SPINNER, showSpinner);
+            return this;
+        }
+
+        /**
          * Sets the number of items this notification represents. May be displayed as a badge count
          * for Launchers that support badging.
          */
@@ -4760,6 +4781,8 @@ public class Notification implements Parcelable
 
             big.setViewVisibility(R.id.notification_material_reply_container, View.GONE);
             big.setTextViewText(R.id.notification_material_reply_text_1, null);
+            big.setViewVisibility(R.id.notification_material_reply_text_1_container, View.GONE);
+            big.setViewVisibility(R.id.notification_material_reply_progress, View.GONE);
 
             big.setViewVisibility(R.id.notification_material_reply_text_2, View.GONE);
             big.setTextViewText(R.id.notification_material_reply_text_2, null);
@@ -4810,10 +4833,19 @@ public class Notification implements Parcelable
             CharSequence[] replyText = mN.extras.getCharSequenceArray(EXTRA_REMOTE_INPUT_HISTORY);
             if (!p.ambient && validRemoteInput && replyText != null
                     && replyText.length > 0 && !TextUtils.isEmpty(replyText[0])) {
+                boolean showSpinner = mN.extras.getBoolean(EXTRA_SHOW_REMOTE_INPUT_SPINNER);
                 big.setViewVisibility(R.id.notification_material_reply_container, View.VISIBLE);
+                big.setViewVisibility(R.id.notification_material_reply_text_1_container,
+                        View.VISIBLE);
                 big.setTextViewText(R.id.notification_material_reply_text_1,
                         processTextSpans(replyText[0]));
                 setTextViewColorSecondary(big, R.id.notification_material_reply_text_1);
+                big.setViewVisibility(R.id.notification_material_reply_progress,
+                        showSpinner ? View.VISIBLE : View.GONE);
+                big.setProgressIndeterminateTintList(
+                        R.id.notification_material_reply_progress,
+                        ColorStateList.valueOf(
+                                isColorized() ? getPrimaryTextColor() : resolveContrastColor()));
 
                 if (replyText.length > 1 && !TextUtils.isEmpty(replyText[1])) {
                     big.setViewVisibility(R.id.notification_material_reply_text_2, View.VISIBLE);
@@ -6958,11 +6990,16 @@ public class Notification implements Parcelable
             static final String KEY_DATA_MIME_TYPE = "type";
             static final String KEY_DATA_URI= "uri";
             static final String KEY_EXTRAS_BUNDLE = "extras";
+            static final String KEY_REMOTE_INPUT_HISTORY = "remote_input_history";
 
             private final CharSequence mText;
             private final long mTimestamp;
             @Nullable
             private final Person mSender;
+            /** True if this message was generated from the extra
+             *  {@link Notification#EXTRA_REMOTE_INPUT_HISTORY}
+             */
+            private final boolean mRemoteInputHistory;
 
             private Bundle mExtras = new Bundle();
             private String mDataMimeType;
@@ -7001,9 +7038,33 @@ public class Notification implements Parcelable
              * </p>
              */
             public Message(@NonNull CharSequence text, long timestamp, @Nullable Person sender) {
+                this(text, timestamp, sender, false /* remoteHistory */);
+            }
+
+            /**
+             * Constructor
+             * @param text A {@link CharSequence} to be displayed as the message content
+             * @param timestamp Time at which the message arrived
+             * @param sender The {@link Person} who sent the message.
+             * Should be <code>null</code> for messages by the current user, in which case
+             * the platform will insert the user set in {@code MessagingStyle(Person)}.
+             * @param remoteInputHistory True if the messages was generated from the extra
+             * {@link Notification#EXTRA_REMOTE_INPUT_HISTORY}.
+             * <p>
+             * The person provided should contain an Icon, set with
+             * {@link Person.Builder#setIcon(Icon)} and also have a name provided
+             * with {@link Person.Builder#setName(CharSequence)}. If multiple users have the same
+             * name, consider providing a key with {@link Person.Builder#setKey(String)} in order
+             * to differentiate between the different users.
+             * </p>
+             * @hide
+             */
+            public Message(@NonNull CharSequence text, long timestamp, @Nullable Person sender,
+                    boolean remoteInputHistory) {
                 mText = text;
                 mTimestamp = timestamp;
                 mSender = sender;
+                mRemoteInputHistory = remoteInputHistory;
             }
 
             /**
@@ -7093,6 +7154,15 @@ public class Notification implements Parcelable
                 return mDataUri;
             }
 
+            /**
+             * @return True if the message was generated from
+             * {@link Notification#EXTRA_REMOTE_INPUT_HISTORY}.
+             * @hide
+             */
+            public boolean isRemoteInputHistory() {
+                return mRemoteInputHistory;
+            }
+
             private Bundle toBundle() {
                 Bundle bundle = new Bundle();
                 if (mText != null) {
@@ -7112,6 +7182,9 @@ public class Notification implements Parcelable
                 }
                 if (mExtras != null) {
                     bundle.putBundle(KEY_EXTRAS_BUNDLE, mExtras);
+                }
+                if (mRemoteInputHistory) {
+                    bundle.putBoolean(KEY_REMOTE_INPUT_HISTORY, mRemoteInputHistory);
                 }
                 return bundle;
             }
@@ -7164,7 +7237,8 @@ public class Notification implements Parcelable
                         }
                         Message message = new Message(bundle.getCharSequence(KEY_TEXT),
                                 bundle.getLong(KEY_TIMESTAMP),
-                                senderPerson);
+                                senderPerson,
+                                bundle.getBoolean(KEY_REMOTE_INPUT_HISTORY, false));
                         if (bundle.containsKey(KEY_DATA_MIME_TYPE) &&
                                 bundle.containsKey(KEY_DATA_URI)) {
                             message.setData(bundle.getString(KEY_DATA_MIME_TYPE),
