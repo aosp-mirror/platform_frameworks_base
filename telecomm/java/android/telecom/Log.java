@@ -46,6 +46,11 @@ public class Log {
     private static final int EVENTS_TO_CACHE = 10;
     private static final int EVENTS_TO_CACHE_DEBUG = 20;
 
+    /**
+     * When generating a bug report, include the last X dialable digits when logging phone numbers.
+     */
+    private static final int NUM_DIALABLE_DIGITS_TO_LOG = Build.IS_USER ? 0 : 2;
+
     // Generic tag for all Telecom logging
     @VisibleForTesting
     public static String TAG = "TelecomFramework";
@@ -384,9 +389,15 @@ public class Log {
 
             String textToObfuscate = uri.getSchemeSpecificPart();
             if (PhoneAccount.SCHEME_TEL.equals(scheme)) {
+                int numDigitsToObfuscate = getDialableCount(textToObfuscate)
+                        - NUM_DIALABLE_DIGITS_TO_LOG;
                 for (int i = 0; i < textToObfuscate.length(); i++) {
                     char c = textToObfuscate.charAt(i);
-                    sb.append(PhoneNumberUtils.isDialable(c) ? "*" : c);
+                    boolean isDialable = PhoneNumberUtils.isDialable(c);
+                    if (isDialable) {
+                        numDigitsToObfuscate--;
+                    }
+                    sb.append(isDialable && numDigitsToObfuscate >= 0 ? "*" : c);
                 }
             } else if (PhoneAccount.SCHEME_SIP.equals(scheme)) {
                 for (int i = 0; i < textToObfuscate.length(); i++) {
@@ -402,6 +413,21 @@ public class Log {
         }
 
         return sb.toString();
+    }
+
+    /**
+     * Determines the number of dialable characters in a string.
+     * @param toCount The string to count dialable characters in.
+     * @return The count of dialable characters.
+     */
+    private static int getDialableCount(String toCount) {
+        int numDialable = 0;
+        for (char c : toCount.toCharArray()) {
+            if (PhoneNumberUtils.isDialable(c)) {
+                numDialable++;
+            }
+        }
+        return numDialable;
     }
 
     /**
