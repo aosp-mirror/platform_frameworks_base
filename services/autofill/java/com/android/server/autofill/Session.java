@@ -98,7 +98,6 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -2482,13 +2481,14 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
             }
         }
         pw.print(prefix); pw.print("mCurrentViewId: "); pw.println(mCurrentViewId);
-        pw.print(prefix); pw.print("mViewStates size: "); pw.println(mViewStates.size());
         pw.print(prefix); pw.print("mDestroyed: "); pw.println(mDestroyed);
         pw.print(prefix); pw.print("mIsSaving: "); pw.println(mIsSaving);
         pw.print(prefix); pw.print("mPendingSaveUi: "); pw.println(mPendingSaveUi);
-        for (Map.Entry<AutofillId, ViewState> entry : mViewStates.entrySet()) {
-            pw.print(prefix); pw.print("State for id "); pw.println(entry.getKey());
-            entry.getValue().dump(prefix2, pw);
+        final int numberViews = mViewStates.size();
+        pw.print(prefix); pw.print("mViewStates size: "); pw.println(mViewStates.size());
+        for (int i = 0; i < numberViews; i++) {
+            pw.print(prefix); pw.print("ViewState at #"); pw.println(i);
+            mViewStates.valueAt(i).dump(prefix2, pw);
         }
 
         pw.print(prefix); pw.print("mContexts: " );
@@ -2499,7 +2499,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
 
                 pw.print(prefix2); pw.print(context);
                 if (sVerbose) {
-                    pw.println(context.getStructure() + " (look at logcat)");
+                    pw.println("AssistStructure dumped at logcat)");
 
                     // TODO: add method on AssistStructure to dump on pw
                     context.getStructure().dump(false);
