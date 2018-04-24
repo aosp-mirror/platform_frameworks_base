@@ -946,6 +946,7 @@ public class RemoteViews implements Parcelable, Filter {
                     }
                 };
             }
+            target.setTagInternal(R.id.pending_intent_tag, pendingIntent);
             target.setOnClickListener(listener);
         }
 
@@ -1999,6 +2000,7 @@ public class RemoteViews implements Parcelable, Filter {
         /** Set width */
         public static final int LAYOUT_WIDTH = 2;
         public static final int LAYOUT_MARGIN_BOTTOM_DIMEN = 3;
+        public static final int LAYOUT_MARGIN_END = 4;
 
         final int mProperty;
         final int mValue;
@@ -2036,11 +2038,14 @@ public class RemoteViews implements Parcelable, Filter {
             if (layoutParams == null) {
                 return;
             }
+            int value = mValue;
             switch (mProperty) {
                 case LAYOUT_MARGIN_END_DIMEN:
+                    value = resolveDimenPixelOffset(target, mValue);
+                    // fall-through
+                case LAYOUT_MARGIN_END:
                     if (layoutParams instanceof ViewGroup.MarginLayoutParams) {
-                        int resolved = resolveDimenPixelOffset(target, mValue);
-                        ((ViewGroup.MarginLayoutParams) layoutParams).setMarginEnd(resolved);
+                        ((ViewGroup.MarginLayoutParams) layoutParams).setMarginEnd(value);
                         target.setLayoutParams(layoutParams);
                     }
                     break;
@@ -2977,6 +2982,20 @@ public class RemoteViews implements Parcelable, Filter {
     public void setViewLayoutMarginEndDimen(int viewId, @DimenRes int endMarginDimen) {
         addAction(new LayoutParamAction(viewId, LayoutParamAction.LAYOUT_MARGIN_END_DIMEN,
                 endMarginDimen));
+    }
+
+    /**
+     * Equivalent to calling {@link android.view.ViewGroup.MarginLayoutParams#setMarginEnd(int)}.
+     * Only works if the {@link View#getLayoutParams()} supports margins.
+     * Hidden for now since we don't want to support this for all different layout margins yet.
+     *
+     * @param viewId The id of the view to change
+     * @param endMargin a value in pixels for the end margin.
+     * @hide
+     */
+    public void setViewLayoutMarginEnd(int viewId, @DimenRes int endMargin) {
+        addAction(new LayoutParamAction(viewId, LayoutParamAction.LAYOUT_MARGIN_END,
+                endMargin));
     }
 
     /**
