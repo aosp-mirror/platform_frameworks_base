@@ -2050,7 +2050,7 @@ static jboolean android_location_GnssLocationProvider_set_satellite_blacklist(
 }
 
 
-static jint android_location_GnssLocationProvider_get_batch_size(JNIEnv*, jclass) {
+static jint android_location_GnssBatchingProvider_get_batch_size(JNIEnv*, jclass) {
     if (gnssBatchingIface == nullptr) {
         return 0; // batching not supported, size = 0
     }
@@ -2062,7 +2062,7 @@ static jint android_location_GnssLocationProvider_get_batch_size(JNIEnv*, jclass
     }
 }
 
-static jboolean android_location_GnssLocationProvider_init_batching(JNIEnv*, jclass) {
+static jboolean android_location_GnssBatchingProvider_init_batching(JNIEnv*, jclass) {
     if (gnssBatchingIface == nullptr) {
         return JNI_FALSE; // batching not supported
     }
@@ -2071,14 +2071,14 @@ static jboolean android_location_GnssLocationProvider_init_batching(JNIEnv*, jcl
     return static_cast<jboolean>(gnssBatchingIface->init(gnssBatchingCbIface));
 }
 
-static void android_location_GnssLocationProvider_cleanup_batching(JNIEnv*, jclass) {
+static void android_location_GnssBatchingProvider_cleanup_batching(JNIEnv*, jclass) {
     if (gnssBatchingIface == nullptr) {
         return; // batching not supported
     }
     gnssBatchingIface->cleanup();
 }
 
-static jboolean android_location_GnssLocationProvider_start_batch(JNIEnv*, jclass,
+static jboolean android_location_GnssBatchingProvider_start_batch(JNIEnv*, jclass,
         jlong periodNanos, jboolean wakeOnFifoFull) {
     if (gnssBatchingIface == nullptr) {
         return JNI_FALSE; // batching not supported
@@ -2095,7 +2095,7 @@ static jboolean android_location_GnssLocationProvider_start_batch(JNIEnv*, jclas
     return static_cast<jboolean>(gnssBatchingIface->start(options));
 }
 
-static void android_location_GnssLocationProvider_flush_batch(JNIEnv*, jclass) {
+static void android_location_GnssBatchingProvider_flush_batch(JNIEnv*, jclass) {
     if (gnssBatchingIface == nullptr) {
         return; // batching not supported
     }
@@ -2103,7 +2103,7 @@ static void android_location_GnssLocationProvider_flush_batch(JNIEnv*, jclass) {
     gnssBatchingIface->flush();
 }
 
-static jboolean android_location_GnssLocationProvider_stop_batch(JNIEnv*, jclass) {
+static jboolean android_location_GnssBatchingProvider_stop_batch(JNIEnv*, jclass) {
     if (gnssBatchingIface == nullptr) {
         return JNI_FALSE; // batching not supported
     }
@@ -2241,30 +2241,36 @@ static const JNINativeMethod sMethods[] = {
     {"native_set_satellite_blacklist",
             "([I[I)Z",
             reinterpret_cast<void *>(android_location_GnssLocationProvider_set_satellite_blacklist)},
+};
+
+static const JNINativeMethod sMethodsBatching[] = {
+     /* name, signature, funcPtr */
     {"native_get_batch_size",
             "()I",
-            reinterpret_cast<void *>(android_location_GnssLocationProvider_get_batch_size)},
-    {"native_init_batching",
-            "()Z",
-            reinterpret_cast<void *>(android_location_GnssLocationProvider_init_batching)},
+            reinterpret_cast<void *>(android_location_GnssBatchingProvider_get_batch_size)},
     {"native_start_batch",
             "(JZ)Z",
-            reinterpret_cast<void *>(android_location_GnssLocationProvider_start_batch)},
+            reinterpret_cast<void *>(android_location_GnssBatchingProvider_start_batch)},
     {"native_flush_batch",
             "()V",
-            reinterpret_cast<void *>(android_location_GnssLocationProvider_flush_batch)},
+            reinterpret_cast<void *>(android_location_GnssBatchingProvider_flush_batch)},
     {"native_stop_batch",
             "()Z",
-            reinterpret_cast<void *>(android_location_GnssLocationProvider_stop_batch)},
+            reinterpret_cast<void *>(android_location_GnssBatchingProvider_stop_batch)},
     {"native_init_batching",
             "()Z",
-            reinterpret_cast<void *>(android_location_GnssLocationProvider_init_batching)},
+            reinterpret_cast<void *>(android_location_GnssBatchingProvider_init_batching)},
     {"native_cleanup_batching",
             "()V",
-            reinterpret_cast<void *>(android_location_GnssLocationProvider_cleanup_batching)},
+            reinterpret_cast<void *>(android_location_GnssBatchingProvider_cleanup_batching)},
 };
 
 int register_android_server_location_GnssLocationProvider(JNIEnv* env) {
+    jniRegisterNativeMethods(
+            env,
+            "com/android/server/location/GnssBatchingProvider",
+            sMethodsBatching,
+            NELEM(sMethodsBatching));
     return jniRegisterNativeMethods(
             env,
             "com/android/server/location/GnssLocationProvider",
