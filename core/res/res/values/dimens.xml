@@ -635,6 +635,8 @@
 
     <dimen name="messaging_avatar_size">@dimen/notification_right_icon_size</dimen>
 
+    <dimen name="messaging_group_sending_progress_size">24dp</dimen>
+
     <!-- Max width/height of the autofill data set picker as a fraction of the screen width/height -->
     <dimen name="autofill_dataset_picker_max_width">90%</dimen>
     <dimen name="autofill_dataset_picker_max_height">90%</dimen>

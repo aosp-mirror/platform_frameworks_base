@@ -20,7 +20,6 @@ import android.app.AlarmManager;
 import android.content.Context;
 import android.util.ArrayMap;
 import android.util.Log;
-import android.view.View;
 import android.view.ViewGroup;
 
 import com.android.internal.logging.MetricsLogger;
@@ -43,12 +42,11 @@ import com.android.systemui.statusbar.NotificationMediaManager;
 import com.android.systemui.statusbar.NotificationRemoteInputManager;
 import com.android.systemui.statusbar.NotificationViewHierarchyManager;
 import com.android.systemui.statusbar.ScrimView;
-import com.android.systemui.statusbar.SmartReplyLogger;
+import com.android.systemui.statusbar.SmartReplyController;
 import com.android.systemui.statusbar.notification.VisualStabilityManager;
 import com.android.systemui.statusbar.phone.DozeParameters;
 import com.android.systemui.statusbar.phone.KeyguardBouncer;
 import com.android.systemui.statusbar.phone.KeyguardDismissUtil;
-import com.android.systemui.statusbar.phone.LightBarController;
 import com.android.systemui.statusbar.phone.LockIcon;
 import com.android.systemui.statusbar.phone.LockscreenWallpaper;
 import com.android.systemui.statusbar.phone.NotificationGroupManager;
@@ -58,7 +56,6 @@ import com.android.systemui.statusbar.phone.ScrimState;
 import com.android.systemui.statusbar.phone.StatusBar;
 import com.android.systemui.statusbar.phone.StatusBarIconController;
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
-import com.android.systemui.statusbar.policy.DeviceProvisionedController;
 import com.android.systemui.statusbar.policy.SmartReplyConstants;
 
 import java.util.function.Consumer;
@@ -150,6 +147,6 @@ public class SystemUIFactory {
                 () -> new NotificationViewHierarchyManager(context));
         providers.put(NotificationEntryManager.class, () -> new NotificationEntryManager(context));
         providers.put(KeyguardDismissUtil.class, KeyguardDismissUtil::new);
-        providers.put(SmartReplyLogger.class, () -> new SmartReplyLogger(context));
+        providers.put(SmartReplyController.class, () -> new SmartReplyController());
     }
 }

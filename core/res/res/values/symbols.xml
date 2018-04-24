@@ -2668,8 +2668,10 @@
 
   <java-symbol type="id" name="notification_material_reply_container" />
   <java-symbol type="id" name="notification_material_reply_text_1" />
+  <java-symbol type="id" name="notification_material_reply_text_1_container" />
   <java-symbol type="id" name="notification_material_reply_text_2" />
   <java-symbol type="id" name="notification_material_reply_text_3" />
+  <java-symbol type="id" name="notification_material_reply_progress" />
 
   <java-symbol type="string" name="notification_hidden_text" />
   <java-symbol type="id" name="app_name_text" />
@@ -2999,6 +3001,7 @@
   <java-symbol type="color" name="notification_secondary_text_color_dark" />
   <java-symbol type="color" name="notification_default_color_light" />
   <java-symbol type="color" name="notification_default_color_dark" />
+  <java-symbol type="dimen" name="notification_secondary_text_disabled_alpha" />
 
   <java-symbol type="string" name="app_category_game" />
   <java-symbol type="string" name="app_category_audio" />
@@ -3254,11 +3257,14 @@
   <java-symbol type="id" name="clip_children_tag" />
   <java-symbol type="drawable" name="ic_reply_notification_large" />
   <java-symbol type="dimen" name="messaging_avatar_size" />
+  <java-symbol type="dimen" name="messaging_group_sending_progress_size" />
   <java-symbol type="dimen" name="messaging_image_rounding" />
   <java-symbol type="dimen" name="messaging_image_min_size" />
   <java-symbol type="dimen" name="messaging_image_max_height" />
   <java-symbol type="dimen" name="messaging_image_extra_spacing" />
   <java-symbol type="id" name="messaging_group_icon_container" />
+  <java-symbol type="id" name="messaging_group_sending_progress" />
+  <java-symbol type="id" name="messaging_group_sending_progress_container" />
 
   <java-symbol type="integer" name="config_stableDeviceDisplayWidth" />
   <java-symbol type="integer" name="config_stableDeviceDisplayHeight" />

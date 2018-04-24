@@ -26,7 +26,7 @@ import com.android.keyguard.KeyguardHostView.OnDismissAction;
 import com.android.systemui.Dependency;
 import com.android.systemui.R;
 import com.android.systemui.statusbar.NotificationData;
-import com.android.systemui.statusbar.SmartReplyLogger;
+import com.android.systemui.statusbar.SmartReplyController;
 import com.android.systemui.statusbar.notification.NotificationUtils;
 import com.android.systemui.statusbar.phone.KeyguardDismissUtil;
 
@@ -72,6 +72,8 @@ public class SmartReplyView extends ViewGroup {
     private final BreakIterator mBreakIterator;
 
     private PriorityQueue<Button> mCandidateButtonQueueForSqueezing;
+
+    private View mSmartReplyContainer;
 
     public SmartReplyView(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -133,7 +135,9 @@ public class SmartReplyView extends ViewGroup {
     }
 
     public void setRepliesFromRemoteInput(RemoteInput remoteInput, PendingIntent pendingIntent,
-            SmartReplyLogger smartReplyLogger, NotificationData.Entry entry) {
+            SmartReplyController smartReplyController, NotificationData.Entry entry,
+            View smartReplyContainer) {
+        mSmartReplyContainer = smartReplyContainer;
         removeAllViews();
         if (remoteInput != null && pendingIntent != null) {
             CharSequence[] choices = remoteInput.getChoices();
@@ -141,7 +145,7 @@ public class SmartReplyView extends ViewGroup {
                 for (int i = 0; i < choices.length; ++i) {
                     Button replyButton = inflateReplyButton(
                             getContext(), this, i, choices[i], remoteInput, pendingIntent,
-                            smartReplyLogger, entry);
+                            smartReplyController, entry);
                     addView(replyButton);
                 }
             }
@@ -157,7 +161,7 @@ public class SmartReplyView extends ViewGroup {
     @VisibleForTesting
     Button inflateReplyButton(Context context, ViewGroup root, int replyIndex,
             CharSequence choice, RemoteInput remoteInput, PendingIntent pendingIntent,
-            SmartReplyLogger smartReplyLogger, NotificationData.Entry entry) {
+            SmartReplyController smartReplyController, NotificationData.Entry entry) {
         Button b = (Button) LayoutInflater.from(context).inflate(
                 R.layout.smart_reply_button, root, false);
         b.setText(choice);
@@ -173,7 +177,8 @@ public class SmartReplyView extends ViewGroup {
             } catch (PendingIntent.CanceledException e) {
                 Log.w(TAG, "Unable to send smart reply", e);
             }
-            smartReplyLogger.smartReplySent(entry, replyIndex);
+            smartReplyController.smartReplySent(entry, replyIndex, b.getText());
+            mSmartReplyContainer.setVisibility(View.GONE);
             return false; // do not defer
         };
 
