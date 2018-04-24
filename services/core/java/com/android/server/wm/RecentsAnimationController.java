@@ -47,7 +47,9 @@ import android.view.IRecentsAnimationRunner;
 import android.view.RemoteAnimationTarget;
 import android.view.SurfaceControl;
 import android.view.SurfaceControl.Transaction;
+import android.view.inputmethod.InputMethodManagerInternal;
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.server.LocalServices;
 import com.android.server.wm.SurfaceAnimator.OnAnimationFinishedCallback;
 import com.android.server.wm.utils.InsetUtils;
 import com.google.android.collect.Sets;
@@ -215,6 +217,20 @@ public class RecentsAnimationController implements DeathRecipient {
 
                     mSplitScreenMinimized = minimized;
                     mService.checkSplitScreenMinimizedChanged(true /* animate */);
+                }
+            } finally {
+                Binder.restoreCallingIdentity(token);
+            }
+        }
+
+        @Override
+        public void hideCurrentInputMethod() {
+            final long token = Binder.clearCallingIdentity();
+            try {
+                final InputMethodManagerInternal inputMethodManagerInternal =
+                        LocalServices.getService(InputMethodManagerInternal.class);
+                if (inputMethodManagerInternal != null) {
+                    inputMethodManagerInternal.hideCurrentInputMethod();
                 }
             } finally {
                 Binder.restoreCallingIdentity(token);
