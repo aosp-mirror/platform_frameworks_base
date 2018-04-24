@@ -149,7 +149,9 @@ public class MessagingLayout extends FrameLayout {
         }
         addRemoteInputHistoryToMessages(newMessages,
                 extras.getCharSequenceArray(Notification.EXTRA_REMOTE_INPUT_HISTORY));
-        bind(newMessages, newHistoricMessages);
+        boolean showSpinner =
+                extras.getBoolean(Notification.EXTRA_SHOW_REMOTE_INPUT_SPINNER, false);
+        bind(newMessages, newHistoricMessages, showSpinner);
     }
 
     private void addRemoteInputHistoryToMessages(
@@ -161,17 +163,18 @@ public class MessagingLayout extends FrameLayout {
         for (int i = remoteInputHistory.length - 1; i >= 0; i--) {
             CharSequence message = remoteInputHistory[i];
             newMessages.add(new Notification.MessagingStyle.Message(
-                    message, 0, (Person) null));
+                    message, 0, (Person) null, true /* remoteHistory */));
         }
     }
 
     private void bind(List<Notification.MessagingStyle.Message> newMessages,
-            List<Notification.MessagingStyle.Message> newHistoricMessages) {
+            List<Notification.MessagingStyle.Message> newHistoricMessages,
+            boolean showSpinner) {
 
         List<MessagingMessage> historicMessages = createMessages(newHistoricMessages,
                 true /* isHistoric */);
         List<MessagingMessage> messages = createMessages(newMessages, false /* isHistoric */);
-        addMessagesToGroups(historicMessages, messages);
+        addMessagesToGroups(historicMessages, messages, showSpinner);
 
         // Let's remove the remaining messages
         mMessages.forEach(REMOVE_MESSAGE);
@@ -308,7 +311,7 @@ public class MessagingLayout extends FrameLayout {
     }
 
     private void addMessagesToGroups(List<MessagingMessage> historicMessages,
-            List<MessagingMessage> messages) {
+            List<MessagingMessage> messages, boolean showSpinner) {
         // Let's first find our groups!
         List<List<MessagingMessage>> groups = new ArrayList<>();
         List<Person> senders = new ArrayList<>();
@@ -317,11 +320,11 @@ public class MessagingLayout extends FrameLayout {
         findGroups(historicMessages, messages, groups, senders);
 
         // Let's now create the views and reorder them accordingly
-        createGroupViews(groups, senders);
+        createGroupViews(groups, senders, showSpinner);
     }
 
     private void createGroupViews(List<List<MessagingMessage>> groups,
-            List<Person> senders) {
+            List<Person> senders, boolean showSpinner) {
         mGroups.clear();
         for (int groupIndex = 0; groupIndex < groups.size(); groupIndex++) {
             List<MessagingMessage> group = groups.get(groupIndex);
@@ -346,6 +349,7 @@ public class MessagingLayout extends FrameLayout {
                 nameOverride = mNameReplacement;
             }
             newGroup.setSender(sender, nameOverride);
+            newGroup.setSending(groupIndex == (groups.size() - 1) && showSpinner);
             mGroups.add(newGroup);
 
             if (mMessagingLinearLayout.indexOfChild(newGroup) != groupIndex) {

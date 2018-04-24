@@ -15,24 +15,32 @@
  */
 package com.android.systemui.statusbar;
 
-import android.content.Context;
 import android.os.RemoteException;
-import android.os.ServiceManager;
+import android.service.notification.StatusBarNotification;
+
 import com.android.internal.statusbar.IStatusBarService;
+import com.android.systemui.Dependency;
+
 
 /**
- * Handles reporting when smart replies are added to a notification
+ * Handles when smart replies are added to a notification
  * and clicked upon.
  */
-public class SmartReplyLogger {
-    protected IStatusBarService mBarService;
+public class SmartReplyController {
+    private IStatusBarService mBarService;
+    private NotificationEntryManager mNotificationEntryManager;
 
-    public SmartReplyLogger(Context context) {
-        mBarService = IStatusBarService.Stub.asInterface(
-                ServiceManager.getService(Context.STATUS_BAR_SERVICE));
+    public SmartReplyController() {
+        mBarService = Dependency.get(IStatusBarService.class);
+        mNotificationEntryManager = Dependency.get(NotificationEntryManager.class);
     }
 
-    public void smartReplySent(NotificationData.Entry entry, int replyIndex) {
+    public void smartReplySent(NotificationData.Entry entry, int replyIndex, CharSequence reply) {
+        StatusBarNotification newSbn =
+                mNotificationEntryManager.rebuildNotificationWithRemoteInput(entry, reply,
+                        true /* showSpinner */);
+        mNotificationEntryManager.updateNotification(newSbn, null /* ranking */);
+
         try {
             mBarService.onNotificationSmartReplySent(entry.notification.getKey(),
                     replyIndex);
