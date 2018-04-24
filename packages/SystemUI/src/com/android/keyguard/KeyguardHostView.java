@@ -180,7 +180,7 @@ public class KeyguardHostView extends FrameLayout implements SecurityCallback {
     }
 
     public void showErrorMessage(CharSequence message) {
-        showMessage(message, Utils.getColorError(mContext));
+        showMessage(message, Utils.getColorErrorDefaultColor(mContext));
     }
 
     /**

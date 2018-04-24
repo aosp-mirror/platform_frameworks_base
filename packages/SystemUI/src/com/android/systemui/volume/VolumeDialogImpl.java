@@ -150,7 +150,7 @@ public class VolumeDialogImpl implements VolumeDialog {
         mController = Dependency.get(VolumeDialogController.class);
         mKeyguard = (KeyguardManager) mContext.getSystemService(Context.KEYGUARD_SERVICE);
         mAccessibilityMgr = Dependency.get(AccessibilityManagerWrapper.class);
-        mActiveTint = ColorStateList.valueOf(Utils.getColorAccent(mContext));
+        mActiveTint = Utils.getColorAccent(mContext);
         mInactiveTint = loadColorStateList(R.color.volume_slider_inactive);
         mDeviceProvisionedController = Dependency.get(DeviceProvisionedController.class);
         mVibrator = (Vibrator) context.getSystemService(Context.VIBRATOR_SERVICE);
