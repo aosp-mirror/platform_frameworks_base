@@ -73,6 +73,9 @@ import static com.android.internal.widget.LockPatternUtils.StrongAuthTracker
 import static com.android.server.devicepolicy.TransferOwnershipMetadataManager.ADMIN_TYPE_DEVICE_OWNER;
 import static com.android.server.devicepolicy.TransferOwnershipMetadataManager.ADMIN_TYPE_PROFILE_OWNER;
 
+
+import static com.android.server.pm.PackageManagerService.PLATFORM_PACKAGE_NAME;
+
 import static org.xmlpull.v1.XmlPullParser.END_DOCUMENT;
 import static org.xmlpull.v1.XmlPullParser.END_TAG;
 import static org.xmlpull.v1.XmlPullParser.TEXT;
@@ -9193,8 +9196,8 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
             long id = mInjector.binderClearCallingIdentity();
             try {
-                return mIPackageManager.setPackagesSuspendedAsUser(
-                        packageNames, suspended, null, null, null, "android", callingUserId);
+                return mIPackageManager.setPackagesSuspendedAsUser(packageNames, suspended,
+                        null, null, null, PLATFORM_PACKAGE_NAME, callingUserId);
             } catch (RemoteException re) {
                 // Shouldn't happen.
                 Slog.e(LOG_TAG, "Failed talking to the package manager", re);
