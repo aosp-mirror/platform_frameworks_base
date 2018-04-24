@@ -21,6 +21,7 @@ import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
 import static android.view.ViewGroup.LayoutParams.WRAP_CONTENT;
 import static android.view.WindowManager.LayoutParams.*;
 
+import android.annotation.NonNull;
 import android.app.ActivityManager;
 import android.app.SearchManager;
 import android.os.UserHandle;
@@ -2066,7 +2067,7 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
     }
 
     @Override
-    public final View getDecorView() {
+    public final @NonNull View getDecorView() {
         if (mDecor == null || mForceDecorInstall) {
             installDecor();
         }
