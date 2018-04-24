@@ -219,6 +219,8 @@ public final class AutofillManagerService extends SystemService {
                     final String activePackageName = getActiveAutofillServicePackageName();
                     if (packageName.equals(activePackageName)) {
                         removeCachedServiceLocked(getChangingUserId());
+                    } else {
+                        handlePackageUpdateLocked(packageName);
                     }
                 }
             }
@@ -250,6 +252,8 @@ public final class AutofillManagerService extends SystemService {
                                 return true;
                             }
                             removeCachedServiceLocked(getChangingUserId());
+                        } else {
+                          handlePackageUpdateLocked(pkg);
                         }
                     }
                 }
@@ -273,6 +277,14 @@ public final class AutofillManagerService extends SystemService {
                     return null;
                 }
                 return serviceComponent.getPackageName();
+            }
+
+            @GuardedBy("mLock")
+            private void handlePackageUpdateLocked(String packageName) {
+                final int size = mServicesCache.size();
+                for (int i = 0; i < size; i++) {
+                    mServicesCache.valueAt(i).handlePackageUpdateLocked(packageName);
+                }
             }
         };
 
