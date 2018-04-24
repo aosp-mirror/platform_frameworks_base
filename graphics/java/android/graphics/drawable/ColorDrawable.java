@@ -21,12 +21,18 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.TestApi;
 import android.content.pm.ActivityInfo.Config;
-import android.graphics.*;
-import android.graphics.PorterDuff.Mode;
 import android.content.res.ColorStateList;
 import android.content.res.Resources;
 import android.content.res.Resources.Theme;
 import android.content.res.TypedArray;
+import android.graphics.Canvas;
+import android.graphics.ColorFilter;
+import android.graphics.Outline;
+import android.graphics.Paint;
+import android.graphics.PixelFormat;
+import android.graphics.PorterDuff.Mode;
+import android.graphics.PorterDuffColorFilter;
+import android.graphics.Xfermode;
 import android.util.AttributeSet;
 import android.view.ViewDebug;
 
@@ -178,6 +184,17 @@ public class ColorDrawable extends Drawable {
     @Override
     public void setColorFilter(ColorFilter colorFilter) {
         mPaint.setColorFilter(colorFilter);
+    }
+
+    /**
+     * Returns the color filter applied to this color configured by
+     * {@link #setColorFilter(ColorFilter)}
+     *
+     * @see android.graphics.drawable.Drawable#getColorFilter()
+     */
+    @Override
+    public @Nullable ColorFilter getColorFilter() {
+        return mPaint.getColorFilter();
     }
 
     @Override
