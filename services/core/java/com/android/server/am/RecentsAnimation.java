@@ -179,8 +179,9 @@ class RecentsAnimation implements RecentsAnimationCallbacks {
             targetActivity.mLaunchTaskBehind = true;
 
             // Fetch all the surface controls and pass them to the client to get the animation
-            // started
-            mWindowManager.cancelRecentsAnimation(REORDER_MOVE_TO_ORIGINAL_POSITION,
+            // started. Cancel any existing recents animation running synchronously (do not hold the
+            // WM lock)
+            mWindowManager.cancelRecentsAnimationSynchronously(REORDER_MOVE_TO_ORIGINAL_POSITION,
                     "startRecentsActivity");
             mWindowManager.initializeRecentsAnimation(mTargetActivityType, recentsAnimationRunner,
                     this, display.mDisplayId, mStackSupervisor.mRecentTasks.getRecentTaskIds());
@@ -200,12 +201,11 @@ class RecentsAnimation implements RecentsAnimationCallbacks {
         }
     }
 
-    @Override
-    public void onAnimationFinished(@RecentsAnimationController.ReorderMode int reorderMode) {
+    private void finishAnimation(@RecentsAnimationController.ReorderMode int reorderMode) {
         synchronized (mService) {
             if (DEBUG) Slog.d(TAG, "onAnimationFinished(): controller="
-                        + mWindowManager.getRecentsAnimationController()
-                        + " reorderMode=" + reorderMode);
+                    + mWindowManager.getRecentsAnimationController()
+                    + " reorderMode=" + reorderMode);
 
             // Cancel the associated assistant data request
             if (mAssistDataRequester != null) {
@@ -295,6 +295,16 @@ class RecentsAnimation implements RecentsAnimationCallbacks {
                     Trace.traceEnd(TRACE_TAG_ACTIVITY_MANAGER);
                 }
             });
+        }
+    }
+
+    @Override
+    public void onAnimationFinished(@RecentsAnimationController.ReorderMode int reorderMode,
+            boolean runSychronously) {
+        if (runSychronously) {
+            finishAnimation(reorderMode);
+        } else {
+            mService.mHandler.post(() -> finishAnimation(reorderMode));
         }
     }
 
