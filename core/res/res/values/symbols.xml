@@ -2615,6 +2615,7 @@
   <java-symbol type="id" name="actions_container" />
   <java-symbol type="id" name="smart_reply_container" />
   <java-symbol type="id" name="remote_input_tag" />
+  <java-symbol type="id" name="pending_intent_tag" />
 
   <java-symbol type="attr" name="seekBarDialogPreferenceStyle" />
   <java-symbol type="string" name="ext_media_status_removed" />
@@ -2691,7 +2692,7 @@
   <java-symbol type="dimen" name="notification_header_shrink_min_width" />
   <java-symbol type="dimen" name="notification_content_margin_start" />
   <java-symbol type="dimen" name="notification_content_margin_end" />
-  <java-symbol type="dimen" name="notification_content_picture_margin" />
+  <java-symbol type="dimen" name="notification_reply_inset" />
   <java-symbol type="dimen" name="notification_content_margin_top" />
   <java-symbol type="dimen" name="notification_content_margin" />
   <java-symbol type="dimen" name="notification_header_background_height" />
@@ -2875,8 +2876,9 @@
 
   <java-symbol type="bool" name="config_supportPreRebootSecurityLogs" />
 
-  <java-symbol type="dimen" name="notification_content_plus_picture_margin_end" />
+  <java-symbol type="dimen" name="notification_media_image_margin_end" />
   <java-symbol type="id" name="notification_action_list_margin_target" />
+  <java-symbol type="dimen" name="notification_action_disabled_alpha" />
 
   <!-- Pinner Service -->
   <java-symbol type="array" name="config_defaultPinnerServiceFiles" />
@@ -3255,7 +3257,6 @@
   <java-symbol type="id" name="clip_children_set_tag" />
   <java-symbol type="id" name="clip_to_padding_tag" />
   <java-symbol type="id" name="clip_children_tag" />
-  <java-symbol type="drawable" name="ic_reply_notification_large" />
   <java-symbol type="dimen" name="messaging_avatar_size" />
   <java-symbol type="dimen" name="messaging_group_sending_progress_size" />
   <java-symbol type="dimen" name="messaging_image_rounding" />

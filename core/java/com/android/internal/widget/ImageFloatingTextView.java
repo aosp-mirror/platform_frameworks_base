@@ -47,6 +47,7 @@ public class ImageFloatingTextView extends TextView {
     private boolean mFirstMeasure = true;
     private int mLayoutMaxLines = -1;
     private boolean mBlockLayouts;
+    private int mImageEndMargin;
 
     public ImageFloatingTextView(Context context) {
         this(context, null);
@@ -98,13 +99,11 @@ public class ImageFloatingTextView extends TextView {
         }
 
         // we set the endmargin on the requested number of lines.
-        int endMargin = getContext().getResources().getDimensionPixelSize(
-                R.dimen.notification_content_picture_margin);
         int[] margins = null;
         if (mIndentLines > 0) {
             margins = new int[mIndentLines + 1];
             for (int i = 0; i < mIndentLines; i++) {
-                margins[i] = endMargin;
+                margins[i] = mImageEndMargin;
             }
         }
         if (mResolvedDirection == LAYOUT_DIRECTION_RTL) {
@@ -114,6 +113,11 @@ public class ImageFloatingTextView extends TextView {
         }
 
         return builder.build();
+    }
+
+    @RemotableViewMethod
+    public void setImageEndMargin(int imageEndMargin) {
+        mImageEndMargin = imageEndMargin;
     }
 
     @Override
