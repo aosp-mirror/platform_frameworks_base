@@ -550,7 +550,7 @@ class RecentTasks {
                 continue;
             }
 
-            ComponentName cn = tr.intent.getComponent();
+            ComponentName cn = tr.intent != null ? tr.intent.getComponent() : null;
             final boolean sameComponent = cn != null && cn.getPackageName().equals(packageName)
                     && (filterByClasses == null || filterByClasses.contains(cn.getClassName()));
             if (sameComponent) {
