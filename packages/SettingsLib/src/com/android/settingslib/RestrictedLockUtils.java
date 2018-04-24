@@ -46,6 +46,7 @@ import android.widget.TextView;
 import com.android.internal.widget.LockPatternUtils;
 
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Utility class to host methods usable in adding a restricted padlock icon and showing admin
@@ -90,29 +91,29 @@ public class RestrictedLockUtils {
             // Restriction is not enforced.
             return null;
         } else if (enforcingUsers.size() > 1) {
-            return EnforcedAdmin.MULTIPLE_ENFORCED_ADMIN;
+            return EnforcedAdmin.createDefaultEnforcedAdminWithRestriction(userRestriction);
         }
 
         final int restrictionSource = enforcingUsers.get(0).getUserRestrictionSource();
         final int adminUserId = enforcingUsers.get(0).getUserHandle().getIdentifier();
-
         if (restrictionSource == UserManager.RESTRICTION_SOURCE_PROFILE_OWNER) {
             // Check if it is a profile owner of the user under consideration.
             if (adminUserId == userId) {
-                return getProfileOwner(context, adminUserId);
+                return getProfileOwner(context, userRestriction, adminUserId);
             } else {
                 // Check if it is a profile owner of a managed profile of the current user.
                 // Otherwise it is in a separate user and we return a default EnforcedAdmin.
                 final UserInfo parentUser = um.getProfileParent(adminUserId);
                 return (parentUser != null && parentUser.id == userId)
-                        ? getProfileOwner(context, adminUserId)
-                        : EnforcedAdmin.MULTIPLE_ENFORCED_ADMIN;
+                        ? getProfileOwner(context, userRestriction, adminUserId)
+                        : EnforcedAdmin.createDefaultEnforcedAdminWithRestriction(userRestriction);
             }
         } else if (restrictionSource == UserManager.RESTRICTION_SOURCE_DEVICE_OWNER) {
             // When the restriction is enforced by device owner, return the device owner admin only
             // if the admin is for the {@param userId} otherwise return a default EnforcedAdmin.
             return adminUserId == userId
-                    ? getDeviceOwner(context) : EnforcedAdmin.MULTIPLE_ENFORCED_ADMIN;
+                    ? getDeviceOwner(context, userRestriction)
+                    : EnforcedAdmin.createDefaultEnforcedAdminWithRestriction(userRestriction);
         }
 
         // If the restriction is enforced by system then return null.
@@ -406,7 +407,6 @@ public class RestrictedLockUtils {
      * or {@code null} if no quality requirements are set. If the requirements are set by
      * multiple device admins, then the admin component will be set to {@code null} and userId to
      * {@link UserHandle#USER_NULL}.
-     *
      */
     public static EnforcedAdmin checkIfPasswordQualityIsSet(Context context, int userId) {
         final LockSettingCheck check =
@@ -518,6 +518,11 @@ public class RestrictedLockUtils {
     }
 
     public static EnforcedAdmin getProfileOrDeviceOwner(Context context, int userId) {
+        return getProfileOrDeviceOwner(context, null, userId);
+    }
+
+    public static EnforcedAdmin getProfileOrDeviceOwner(
+            Context context, String enforcedRestriction, int userId) {
         if (userId == UserHandle.USER_NULL) {
             return null;
         }
@@ -528,18 +533,22 @@ public class RestrictedLockUtils {
         }
         ComponentName adminComponent = dpm.getProfileOwnerAsUser(userId);
         if (adminComponent != null) {
-            return new EnforcedAdmin(adminComponent, userId);
+            return new EnforcedAdmin(adminComponent, enforcedRestriction, userId);
         }
         if (dpm.getDeviceOwnerUserId() == userId) {
             adminComponent = dpm.getDeviceOwnerComponentOnAnyUser();
             if (adminComponent != null) {
-                return new EnforcedAdmin(adminComponent, userId);
+                return new EnforcedAdmin(adminComponent, enforcedRestriction, userId);
             }
         }
         return null;
     }
 
     public static EnforcedAdmin getDeviceOwner(Context context) {
+        return getDeviceOwner(context, null);
+    }
+
+    private static EnforcedAdmin getDeviceOwner(Context context, String enforcedRestriction) {
         final DevicePolicyManager dpm = (DevicePolicyManager) context.getSystemService(
                 Context.DEVICE_POLICY_SERVICE);
         if (dpm == null) {
@@ -547,12 +556,18 @@ public class RestrictedLockUtils {
         }
         ComponentName adminComponent = dpm.getDeviceOwnerComponentOnAnyUser();
         if (adminComponent != null) {
-            return new EnforcedAdmin(adminComponent, dpm.getDeviceOwnerUserId());
+            return new EnforcedAdmin(
+                    adminComponent, enforcedRestriction, dpm.getDeviceOwnerUserId());
         }
         return null;
     }
 
     private static EnforcedAdmin getProfileOwner(Context context, int userId) {
+        return getProfileOwner(context, null, userId);
+    }
+
+    private static EnforcedAdmin getProfileOwner(
+            Context context, String enforcedRestriction, int userId) {
         if (userId == UserHandle.USER_NULL) {
             return null;
         }
@@ -563,7 +578,7 @@ public class RestrictedLockUtils {
         }
         ComponentName adminComponent = dpm.getProfileOwnerAsUser(userId);
         if (adminComponent != null) {
-            return new EnforcedAdmin(adminComponent, userId);
+            return new EnforcedAdmin(adminComponent, enforcedRestriction, userId);
         }
         return null;
     }
@@ -626,6 +641,7 @@ public class RestrictedLockUtils {
                 && isCurrentUserOrProfile(context, admin.userId)) {
             targetUserId = admin.userId;
         }
+        intent.putExtra(DevicePolicyManager.EXTRA_RESTRICTION, admin.enforcedRestriction);
         context.startActivityAsUser(intent, new UserHandle(targetUserId));
     }
 
@@ -700,14 +716,34 @@ public class RestrictedLockUtils {
     }
 
     public static class EnforcedAdmin {
+        @Nullable
         public ComponentName component = null;
+        /**
+         * The restriction enforced by admin. It could be any user restriction or policy like
+         * {@link DevicePolicyManager#POLICY_DISABLE_CAMERA}.
+         */
+        @Nullable
+        public String enforcedRestriction = null;
         public int userId = UserHandle.USER_NULL;
 
         // We use this to represent the case where a policy is enforced by multiple admins.
         public final static EnforcedAdmin MULTIPLE_ENFORCED_ADMIN = new EnforcedAdmin();
 
+        public static EnforcedAdmin createDefaultEnforcedAdminWithRestriction(
+                String enforcedRestriction) {
+            EnforcedAdmin enforcedAdmin = new EnforcedAdmin();
+            enforcedAdmin.enforcedRestriction = enforcedRestriction;
+            return enforcedAdmin;
+        }
+
         public EnforcedAdmin(ComponentName component, int userId) {
             this.component = component;
+            this.userId = userId;
+        }
+
+        public EnforcedAdmin(ComponentName component, String enforcedRestriction, int userId) {
+            this.component = component;
+            this.enforcedRestriction = enforcedRestriction;
             this.userId = userId;
         }
 
@@ -716,37 +752,35 @@ public class RestrictedLockUtils {
                 throw new IllegalArgumentException();
             }
             this.component = other.component;
+            this.enforcedRestriction = other.enforcedRestriction;
             this.userId = other.userId;
         }
 
-        public EnforcedAdmin() {}
+        public EnforcedAdmin() {
+        }
 
         @Override
-        public boolean equals(Object object) {
-            if (object == this) return true;
-            if (!(object instanceof EnforcedAdmin)) return false;
-            EnforcedAdmin other = (EnforcedAdmin) object;
-            if (userId != other.userId) {
-                return false;
-            }
-            if ((component == null && other.component == null) ||
-                    (component != null && component.equals(other.component))) {
-                return true;
-            }
-            return false;
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            EnforcedAdmin that = (EnforcedAdmin) o;
+            return userId == that.userId &&
+                    Objects.equals(component, that.component) &&
+                    Objects.equals(enforcedRestriction, that.enforcedRestriction);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(component, enforcedRestriction, userId);
         }
 
         @Override
         public String toString() {
-            return "EnforcedAdmin{component=" + component + ",userId=" + userId + "}";
-        }
-
-        public void copyTo(EnforcedAdmin other) {
-            if (other == null) {
-                throw new IllegalArgumentException();
-            }
-            other.component = component;
-            other.userId = userId;
+            return "EnforcedAdmin{" +
+                    "component=" + component +
+                    ", enforcedRestriction='" + enforcedRestriction +
+                    ", userId=" + userId +
+                    '}';
         }
     }
 
