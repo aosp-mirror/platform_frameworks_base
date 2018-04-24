@@ -1722,6 +1722,9 @@ public class TaskStack extends WindowContainer<Task> implements
             return true;
         }
         final Task homeTask = homeStack.getTopChild();
+        if (homeTask == null) {
+            return true;
+        }
         final AppWindowToken homeApp = homeTask.getTopVisibleAppToken();
         if (!homeTask.isVisible() || homeApp == null) {
             return true;
