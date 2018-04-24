@@ -123,6 +123,7 @@ public class SyntheticPasswordManager {
     private static final byte[] PERSONALIZATION_FBE_KEY = "fbe-key".getBytes();
     private static final byte[] PERSONALIZATION_AUTHSECRET_KEY = "authsecret-hal".getBytes();
     private static final byte[] PERSONALIZATION_SP_SPLIT = "sp-split".getBytes();
+    private static final byte[] PERSONALIZATION_PASSWORD_HASH = "pw-hash".getBytes();
     private static final byte[] PERSONALIZATION_E0 = "e0-encryption".getBytes();
     private static final byte[] PERSONALISATION_WEAVER_PASSWORD = "weaver-pwd".getBytes();
     private static final byte[] PERSONALISATION_WEAVER_KEY = "weaver-key".getBytes();
@@ -162,6 +163,11 @@ public class SyntheticPasswordManager {
 
         public byte[] deriveVendorAuthSecret() {
             return SyntheticPasswordCrypto.personalisedHash(PERSONALIZATION_AUTHSECRET_KEY,
+                    syntheticPassword.getBytes());
+        }
+
+        public byte[] derivePasswordHashFactor() {
+            return SyntheticPasswordCrypto.personalisedHash(PERSONALIZATION_PASSWORD_HASH,
                     syntheticPassword.getBytes());
         }
 
