@@ -1063,6 +1063,12 @@ public class GnssLocationProvider implements LocationProviderInterface, InjectNt
             locationListener = mFusedLocationListener;
         }
 
+        if (!locationManager.isProviderEnabled(provider)) {
+            Log.w(TAG, "Unable to request location since " + provider
+                    + " provider does not exist or is not enabled.");
+            return;
+        }
+
         Log.i(TAG,
                 String.format(
                         "GNSS HAL Requesting location updates from %s provider for %d millis.",
