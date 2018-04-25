@@ -137,7 +137,8 @@
         <item name="android:layout_marginTop">4dp</item>
     </style>
 
-    <style name="hybrid_notification_text">
+    <style name="hybrid_notification_text"
+           parent="@*android:style/Widget.Material.Notification.Text">
         <item name="android:paddingEnd">4dp</item>
     </style>
 
@@ -358,10 +359,6 @@
 
     <style name="TextAppearance.Material.Notification.HeaderTitle"
         parent="@*android:style/TextAppearance.Material.Notification.Info">
-    </style>
-
-    <style name="TextAppearance.Material.Notification.HybridNotificationDivider"
-        parent="@*android:style/TextAppearance.Material.Notification">
     </style>
 
     <style name="SearchPanelCircle">
