@@ -67,7 +67,6 @@ public class InputMethodUtils {
     private static final String NOT_A_SUBTYPE_ID_STR = String.valueOf(NOT_A_SUBTYPE_ID);
     private static final String TAG_ENABLED_WHEN_DEFAULT_IS_NOT_ASCII_CAPABLE =
             "EnabledWhenDefaultIsNotAsciiCapable";
-    private static final String TAG_ASCII_CAPABLE = "AsciiCapable";
 
     // The string for enabled input method is saved as follows:
     // example: ("ime0;subtype0;subtype1;subtype2:ime1:ime2;subtype0")
@@ -539,7 +538,7 @@ public class InputMethodUtils {
             final int numApplicationSubtypes = applicableSubtypes.size();
             for (int i = 0; i < numApplicationSubtypes; ++i) {
                 final InputMethodSubtype subtype = applicableSubtypes.get(i);
-                if (subtype.containsExtraValueKey(TAG_ASCII_CAPABLE)) {
+                if (subtype.isAsciiCapable()) {
                     hasAsciiCapableKeyboard = true;
                     break;
                 }
