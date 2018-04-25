@@ -110,6 +110,10 @@ public class StatusBarIconHolder {
     }
 
     public void setVisible(boolean visible) {
+        if (isVisible() == visible) {
+            return;
+        }
+
         switch (mType) {
             case TYPE_ICON:
                 mIcon.visible = visible;

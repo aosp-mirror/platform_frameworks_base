@@ -64,6 +64,7 @@ public class StatusBarWifiView extends FrameLayout implements DarkReceiver,
     private WifiIconState mState;
     private String mSlot;
     private float mDarkIntensity = 0;
+    private int mVisibleState = -1;
 
     private ContextThemeWrapper mDarkContext;
     private ContextThemeWrapper mLightContext;
@@ -73,6 +74,7 @@ public class StatusBarWifiView extends FrameLayout implements DarkReceiver,
         StatusBarWifiView v = (StatusBarWifiView) inflater.inflate(R.layout.status_bar_wifi_group, null);
         v.setSlot(slot);
         v.init();
+        v.setVisibleState(STATE_ICON);
         return v;
     }
 
@@ -123,6 +125,11 @@ public class StatusBarWifiView extends FrameLayout implements DarkReceiver,
 
     @Override
     public void setVisibleState(int state) {
+        if (state == mVisibleState) {
+            return;
+        }
+        mVisibleState = state;
+
         switch (state) {
             case STATE_ICON:
                 mWifiGroup.setVisibility(View.VISIBLE);
@@ -137,12 +144,6 @@ public class StatusBarWifiView extends FrameLayout implements DarkReceiver,
                 setVisibility(View.GONE);
                 break;
         }
-    }
-
-    @Override
-    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-        super.onMeasure(widthMeasureSpec, heightMeasureSpec);
-        int width = MeasureSpec.getSize(widthMeasureSpec);
     }
 
     private void init() {
@@ -180,12 +181,12 @@ public class StatusBarWifiView extends FrameLayout implements DarkReceiver,
         }
 
         if (mState == null) {
-            mState = state;
+            mState = state.copy();
             initViewState();
         }
 
         if (!mState.equals(state)) {
-            updateState(state);
+            updateState(state.copy());
         }
     }
 
