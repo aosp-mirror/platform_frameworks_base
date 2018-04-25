@@ -1510,6 +1510,10 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         return (stack != null && stack.isVisible()) ? stack : null;
     }
 
+    boolean hasSplitScreenPrimaryStack() {
+        return getSplitScreenPrimaryStack() != null;
+    }
+
     /**
      * Like {@link #getSplitScreenPrimaryStack}, but also returns the stack if it's currently
      * not visible.
@@ -1613,6 +1617,18 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         mService.mWindowsChanged = true;
     }
 
+    /**
+     * In split-screen mode we process the IME containers above the docked divider
+     * rather than directly above their target.
+     */
+    private boolean skipTraverseChild(WindowContainer child) {
+        if (child == mImeWindowsContainers && mService.mInputMethodTarget != null
+                && !hasSplitScreenPrimaryStack()) {
+            return true;
+        }
+        return false;
+    }
+
     @Override
     boolean forAllWindows(ToBooleanFunction<WindowState> callback, boolean traverseTopToBottom) {
         // Special handling so we can process IME windows with #forAllImeWindows above their IME
@@ -1620,11 +1636,10 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         if (traverseTopToBottom) {
             for (int i = mChildren.size() - 1; i >= 0; --i) {
                 final DisplayChildWindowContainer child = mChildren.get(i);
-                if (child == mImeWindowsContainers && mService.mInputMethodTarget != null) {
-                    // In this case the Ime windows will be processed above their target so we skip
-                    // here.
+                if (skipTraverseChild(child)) {
                     continue;
                 }
+
                 if (child.forAllWindows(callback, traverseTopToBottom)) {
                     return true;
                 }
@@ -1633,11 +1648,10 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
             final int count = mChildren.size();
             for (int i = 0; i < count; i++) {
                 final DisplayChildWindowContainer child = mChildren.get(i);
-                if (child == mImeWindowsContainers && mService.mInputMethodTarget != null) {
-                    // In this case the Ime windows will be processed above their target so we skip
-                    // here.
+                if (skipTraverseChild(child)) {
                     continue;
                 }
+
                 if (child.forAllWindows(callback, traverseTopToBottom)) {
                     return true;
                 }

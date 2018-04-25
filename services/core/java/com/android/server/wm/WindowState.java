@@ -3997,32 +3997,33 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         return false;
     }
 
+    private boolean applyImeWindowsIfNeeded(ToBooleanFunction<WindowState> callback,
+            boolean traverseTopToBottom) {
+        // If this window is the current IME target, so we need to process the IME windows
+        // directly above it. The exception is if we are in split screen
+        // in which case we process the IME at the DisplayContent level to
+        // ensure it is above the docked divider.
+        if (isInputMethodTarget() && !inSplitScreenWindowingMode()) {
+            if (getDisplayContent().forAllImeWindows(callback, traverseTopToBottom)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     private boolean applyInOrderWithImeWindows(ToBooleanFunction<WindowState> callback,
             boolean traverseTopToBottom) {
         if (traverseTopToBottom) {
-            if (isInputMethodTarget()) {
-                // This window is the current IME target, so we need to process the IME windows
-                // directly above it.
-                if (getDisplayContent().forAllImeWindows(callback, traverseTopToBottom)) {
-                    return true;
-                }
-            }
-            if (callback.apply(this)) {
+            if (applyImeWindowsIfNeeded(callback, traverseTopToBottom)
+                    || callback.apply(this)) {
                 return true;
             }
         } else {
-            if (callback.apply(this)) {
+            if (callback.apply(this)
+                    || applyImeWindowsIfNeeded(callback, traverseTopToBottom)) {
                 return true;
             }
-            if (isInputMethodTarget()) {
-                // This window is the current IME target, so we need to process the IME windows
-                // directly above it.
-                if (getDisplayContent().forAllImeWindows(callback, traverseTopToBottom)) {
-                    return true;
-                }
-            }
         }
-
         return false;
     }
 
