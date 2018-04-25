@@ -590,6 +590,8 @@ Landroid/content/pm/ApplicationInfo;->secondaryCpuAbi:Ljava/lang/String;
 Landroid/content/pm/ApplicationInfo;->secondaryNativeLibraryDir:Ljava/lang/String;
 Landroid/content/pm/ApplicationInfo;->versionCode:I
 Landroid/content/pm/ComponentInfo;->getComponentName()Landroid/content/ComponentName;
+Landroid/content/pm/IPackageDataObserver$Stub$Proxy;-><init>(Landroid/os/IBinder;)V
+Landroid/content/pm/IPackageDataObserver$Stub$Proxy;->mRemote:Landroid/os/IBinder;
 Landroid/content/pm/IPackageDataObserver$Stub;->asInterface(Landroid/os/IBinder;)Landroid/content/pm/IPackageDataObserver;
 Landroid/content/pm/IPackageManager$Stub$Proxy;->getInstalledPackages(II)Landroid/content/pm/ParceledListSlice;
 Landroid/content/pm/IPackageManager$Stub$Proxy;->getPackageInfo(Ljava/lang/String;II)Landroid/content/pm/PackageInfo;
@@ -612,6 +614,8 @@ Landroid/content/pm/IPackageManager;->setInstallerPackageName(Ljava/lang/String;
 Landroid/content/pm/IPackageManager;->setLastChosenActivity(Landroid/content/Intent;Ljava/lang/String;ILandroid/content/IntentFilter;ILandroid/content/ComponentName;)V
 Landroid/content/pm/IPackageMoveObserver$Stub;-><init>()V
 Landroid/content/pm/IPackageMoveObserver$Stub;->asInterface(Landroid/os/IBinder;)Landroid/content/pm/IPackageMoveObserver;
+Landroid/content/pm/IPackageStatsObserver$Stub$Proxy;-><init>(Landroid/os/IBinder;)V
+Landroid/content/pm/IPackageStatsObserver$Stub$Proxy;->mRemote:Landroid/os/IBinder;
 Landroid/content/pm/IPackageStatsObserver$Stub;-><init>()V
 Landroid/content/pm/IShortcutService$Stub$Proxy;-><init>(Landroid/os/IBinder;)V
 Landroid/content/pm/LauncherActivityInfo;->mActivityInfo:Landroid/content/pm/ActivityInfo;
@@ -2762,6 +2766,7 @@ Landroid/widget/AutoCompleteTextView;->mPopup:Landroid/widget/ListPopupWindow;
 Landroid/widget/AutoCompleteTextView;->setDropDownAlwaysVisible(Z)V
 Landroid/widget/AutoCompleteTextView;->setForceIgnoreOutsideTouch(Z)V
 Landroid/widget/BaseAdapter;->mDataSetObservable:Landroid/database/DataSetObservable;
+Landroid/widget/CompoundButton;->mBroadcasting:Z
 Landroid/widget/CompoundButton;->mButtonDrawable:Landroid/graphics/drawable/Drawable;
 Landroid/widget/CompoundButton;->mOnCheckedChangeListener:Landroid/widget/CompoundButton$OnCheckedChangeListener;
 Landroid/widget/CursorAdapter;->mChangeObserver:Landroid/widget/CursorAdapter$ChangeObserver;
@@ -3291,6 +3296,7 @@ Lcom/android/internal/telephony/ISms$Stub;->asInterface(Landroid/os/IBinder;)Lco
 Lcom/android/internal/telephony/ISub$Stub$Proxy;-><init>(Landroid/os/IBinder;)V
 Lcom/android/internal/telephony/ITelephony$Stub$Proxy;-><init>(Landroid/os/IBinder;)V
 Lcom/android/internal/telephony/ITelephony$Stub$Proxy;->endCall()Z
+Lcom/android/internal/telephony/ITelephony$Stub$Proxy;->mRemote:Landroid/os/IBinder;
 Lcom/android/internal/telephony/ITelephony$Stub;->asInterface(Landroid/os/IBinder;)Lcom/android/internal/telephony/ITelephony;
 Lcom/android/internal/telephony/ITelephony$Stub;->TRANSACTION_call:I
 Lcom/android/internal/telephony/ITelephony$Stub;->TRANSACTION_endCall:I
@@ -3508,6 +3514,7 @@ Ljava/lang/ref/Reference;->getReferent()Ljava/lang/Object;
 Ljava/lang/ref/Reference;->referent:Ljava/lang/Object;
 Ljava/lang/ref/ReferenceQueue;->add(Ljava/lang/ref/Reference;)V
 Ljava/lang/reflect/Executable;->artMethod:J
+Ljava/lang/reflect/Field;->accessFlags:I
 Ljava/lang/reflect/Parameter;-><init>(Ljava/lang/String;ILjava/lang/reflect/Executable;I)V
 Ljava/lang/reflect/Proxy;->invoke(Ljava/lang/reflect/Proxy;Ljava/lang/reflect/Method;[Ljava/lang/Object;)Ljava/lang/Object;
 Ljava/lang/Runtime;->load(Ljava/lang/String;Ljava/lang/ClassLoader;)V
