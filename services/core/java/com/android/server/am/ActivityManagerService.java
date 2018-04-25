@@ -26625,8 +26625,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         @Override
         public boolean isUidActive(int uid) {
             synchronized (ActivityManagerService.this) {
-                final UidRecord uidRec = mActiveUids.get(uid);
-                return (uidRec != null) && !uidRec.idle;
+                return isUidActiveLocked(uid);
             }
         }
 
