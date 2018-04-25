@@ -16,6 +16,7 @@
 
 package android.view;
 
+import android.annotation.TestApi;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.text.method.MetaKeyKeyListener;
@@ -2857,6 +2858,7 @@ public class KeyEvent extends InputEvent implements Parcelable {
      * @return The symbolic name of the specified action.
      * @hide
      */
+    @TestApi
     public static String actionToString(int action) {
         switch (action) {
             case ACTION_DOWN:
