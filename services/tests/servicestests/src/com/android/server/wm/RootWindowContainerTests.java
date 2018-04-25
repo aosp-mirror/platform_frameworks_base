@@ -24,27 +24,29 @@ import static org.junit.Assert.assertTrue;
 public class RootWindowContainerTests extends WindowTestsBase {
     @Test
     public void testSetDisplayOverrideConfigurationIfNeeded() throws Exception {
-        // Add first stack we expect to be updated with configuration change.
-        final TaskStack stack = createTaskStackOnDisplay(mDisplayContent);
-        stack.getOverrideConfiguration().windowConfiguration.setBounds(new Rect(0, 0, 5, 5));
+        synchronized (sWm.mWindowMap) {
+            // Add first stack we expect to be updated with configuration change.
+            final TaskStack stack = createTaskStackOnDisplay(mDisplayContent);
+            stack.getOverrideConfiguration().windowConfiguration.setBounds(new Rect(0, 0, 5, 5));
 
-        // Add second task that will be set for deferred removal that should not be returned
-        // with the configuration change.
-        final TaskStack deferredDeletedStack = createTaskStackOnDisplay(mDisplayContent);
-        deferredDeletedStack.getOverrideConfiguration().windowConfiguration.setBounds(
-                new Rect(0, 0, 5, 5));
-        deferredDeletedStack.mDeferRemoval = true;
+            // Add second task that will be set for deferred removal that should not be returned
+            // with the configuration change.
+            final TaskStack deferredDeletedStack = createTaskStackOnDisplay(mDisplayContent);
+            deferredDeletedStack.getOverrideConfiguration().windowConfiguration.setBounds(
+                    new Rect(0, 0, 5, 5));
+            deferredDeletedStack.mDeferRemoval = true;
 
-        final Configuration override = new Configuration(
-                mDisplayContent.getOverrideConfiguration());
-        override.windowConfiguration.setBounds(new Rect(0, 0, 10, 10));
+            final Configuration override = new Configuration(
+                    mDisplayContent.getOverrideConfiguration());
+            override.windowConfiguration.setBounds(new Rect(0, 0, 10, 10));
 
-        // Set display override.
-        final int[] results = sWm.mRoot.setDisplayOverrideConfigurationIfNeeded(override,
-                        mDisplayContent.getDisplayId());
+            // Set display override.
+            final int[] results = sWm.mRoot.setDisplayOverrideConfigurationIfNeeded(override,
+                    mDisplayContent.getDisplayId());
 
-        // Ensure only first stack is returned.
-        assertTrue(results.length == 1);
-        assertTrue(results[0] == stack.mStackId);
+            // Ensure only first stack is returned.
+            assertTrue(results.length == 1);
+            assertTrue(results[0] == stack.mStackId);
+        }
     }
 }
