@@ -1259,6 +1259,10 @@ package android.view {
     method public void enable();
   }
 
+  public class KeyEvent extends android.view.InputEvent implements android.os.Parcelable {
+    method public static java.lang.String actionToString(int);
+  }
+
   public final class KeyboardShortcutGroup implements android.os.Parcelable {
     ctor public KeyboardShortcutGroup(java.lang.CharSequence, java.util.List<android.view.KeyboardShortcutInfo>, boolean);
     ctor public KeyboardShortcutGroup(java.lang.CharSequence, boolean);
