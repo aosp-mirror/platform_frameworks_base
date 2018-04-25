@@ -17,6 +17,7 @@
 
 #include <inttypes.h>
 
+#include <android-base/file.h>
 #include <android/util/protobuf.h>
 #include <android/util/ProtoOutputStream.h>
 #include <cutils/log.h>
@@ -467,19 +468,6 @@ ProtoOutputStream::size()
     return mBuffer.size();
 }
 
-static bool write_all(int fd, uint8_t const* buf, size_t size)
-{
-    while (size > 0) {
-        ssize_t amt = ::write(fd, buf, size);
-        if (amt < 0) {
-            return false;
-        }
-        size -= amt;
-        buf += amt;
-    }
-    return true;
-}
-
 bool
 ProtoOutputStream::flush(int fd)
 {
@@ -488,7 +476,7 @@ ProtoOutputStream::flush(int fd)
 
     EncodedBuffer::iterator it = mBuffer.begin();
     while (it.readBuffer() != NULL) {
-        if (!write_all(fd, it.readBuffer(), it.currentToRead())) return false;
+        if (!android::base::WriteFully(fd, it.readBuffer(), it.currentToRead())) return false;
         it.rp()->move(it.currentToRead());
     }
     return true;

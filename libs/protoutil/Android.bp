@@ -33,6 +33,7 @@ cc_library {
     export_include_dirs: ["include"],
 
     shared_libs: [
+        "libbase",
         "libcutils",
         "liblog",
     ],
