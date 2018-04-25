@@ -692,13 +692,13 @@ public class NinePatchDrawable extends Drawable {
                 mPadding = new Rect();
             }
             mPadding.left = Drawable.scaleFromDensity(
-                    sourcePadding.left, sourceDensity, targetDensity, false);
+                    sourcePadding.left, sourceDensity, targetDensity, true);
             mPadding.top = Drawable.scaleFromDensity(
-                    sourcePadding.top, sourceDensity, targetDensity, false);
+                    sourcePadding.top, sourceDensity, targetDensity, true);
             mPadding.right = Drawable.scaleFromDensity(
-                    sourcePadding.right, sourceDensity, targetDensity, false);
+                    sourcePadding.right, sourceDensity, targetDensity, true);
             mPadding.bottom = Drawable.scaleFromDensity(
-                    sourcePadding.bottom, sourceDensity, targetDensity, false);
+                    sourcePadding.bottom, sourceDensity, targetDensity, true);
         } else {
             mPadding = null;
         }

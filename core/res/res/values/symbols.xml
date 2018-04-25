@@ -334,6 +334,7 @@
   <java-symbol type="bool" name="config_windowShowCircularMask" />
   <java-symbol type="bool" name="config_windowEnableCircularEmulatorDisplayOverlay" />
   <java-symbol type="bool" name="config_wifi_framework_enable_associated_network_selection" />
+  <java-symbol type="bool" name="config_wifi_framework_use_single_radio_chain_scan_results_network_selection" />
   <java-symbol type="bool" name="config_wifi_only_link_same_credential_configurations" />
   <java-symbol type="bool" name="config_wifi_framework_enable_voice_call_sar_tx_power_limit" />
   <java-symbol type="bool" name="config_wifi_enable_disconnection_debounce" />
@@ -2615,6 +2616,7 @@
   <java-symbol type="id" name="actions_container" />
   <java-symbol type="id" name="smart_reply_container" />
   <java-symbol type="id" name="remote_input_tag" />
+  <java-symbol type="id" name="pending_intent_tag" />
 
   <java-symbol type="attr" name="seekBarDialogPreferenceStyle" />
   <java-symbol type="string" name="ext_media_status_removed" />
@@ -2668,8 +2670,10 @@
 
   <java-symbol type="id" name="notification_material_reply_container" />
   <java-symbol type="id" name="notification_material_reply_text_1" />
+  <java-symbol type="id" name="notification_material_reply_text_1_container" />
   <java-symbol type="id" name="notification_material_reply_text_2" />
   <java-symbol type="id" name="notification_material_reply_text_3" />
+  <java-symbol type="id" name="notification_material_reply_progress" />
 
   <java-symbol type="string" name="notification_hidden_text" />
   <java-symbol type="id" name="app_name_text" />
@@ -2689,7 +2693,7 @@
   <java-symbol type="dimen" name="notification_header_shrink_min_width" />
   <java-symbol type="dimen" name="notification_content_margin_start" />
   <java-symbol type="dimen" name="notification_content_margin_end" />
-  <java-symbol type="dimen" name="notification_content_picture_margin" />
+  <java-symbol type="dimen" name="notification_reply_inset" />
   <java-symbol type="dimen" name="notification_content_margin_top" />
   <java-symbol type="dimen" name="notification_content_margin" />
   <java-symbol type="dimen" name="notification_header_background_height" />
@@ -2873,8 +2877,9 @@
 
   <java-symbol type="bool" name="config_supportPreRebootSecurityLogs" />
 
-  <java-symbol type="dimen" name="notification_content_plus_picture_margin_end" />
+  <java-symbol type="dimen" name="notification_media_image_margin_end" />
   <java-symbol type="id" name="notification_action_list_margin_target" />
+  <java-symbol type="dimen" name="notification_action_disabled_alpha" />
 
   <!-- Pinner Service -->
   <java-symbol type="array" name="config_defaultPinnerServiceFiles" />
@@ -2999,6 +3004,7 @@
   <java-symbol type="color" name="notification_secondary_text_color_dark" />
   <java-symbol type="color" name="notification_default_color_light" />
   <java-symbol type="color" name="notification_default_color_dark" />
+  <java-symbol type="dimen" name="notification_secondary_text_disabled_alpha" />
 
   <java-symbol type="string" name="app_category_game" />
   <java-symbol type="string" name="app_category_audio" />
@@ -3252,13 +3258,15 @@
   <java-symbol type="id" name="clip_children_set_tag" />
   <java-symbol type="id" name="clip_to_padding_tag" />
   <java-symbol type="id" name="clip_children_tag" />
-  <java-symbol type="drawable" name="ic_reply_notification_large" />
   <java-symbol type="dimen" name="messaging_avatar_size" />
+  <java-symbol type="dimen" name="messaging_group_sending_progress_size" />
   <java-symbol type="dimen" name="messaging_image_rounding" />
   <java-symbol type="dimen" name="messaging_image_min_size" />
   <java-symbol type="dimen" name="messaging_image_max_height" />
   <java-symbol type="dimen" name="messaging_image_extra_spacing" />
   <java-symbol type="id" name="messaging_group_icon_container" />
+  <java-symbol type="id" name="messaging_group_sending_progress" />
+  <java-symbol type="id" name="messaging_group_sending_progress_container" />
 
   <java-symbol type="integer" name="config_stableDeviceDisplayWidth" />
   <java-symbol type="integer" name="config_stableDeviceDisplayHeight" />

@@ -367,4 +367,44 @@ public class NotificationEntryManagerTest extends SysuiTestCase {
         mEntryManager.tagForeground(mEntry.notification);
         Assert.assertEquals(0, mEntry.mActiveAppOps.size());
     }
+
+    @Test
+    public void testRebuildWithRemoteInput_noExistingInputNoSpinner() {
+        StatusBarNotification newSbn =
+                mEntryManager.rebuildNotificationWithRemoteInput(mEntry, "A Reply", false);
+        CharSequence[] messages = newSbn.getNotification().extras
+                .getCharSequenceArray(Notification.EXTRA_REMOTE_INPUT_HISTORY);
+        Assert.assertEquals(1, messages.length);
+        Assert.assertEquals("A Reply", messages[0]);
+        Assert.assertFalse(newSbn.getNotification().extras
+                .getBoolean(Notification.EXTRA_SHOW_REMOTE_INPUT_SPINNER, false));
+    }
+
+    @Test
+    public void testRebuildWithRemoteInput_noExistingInputWithSpinner() {
+        StatusBarNotification newSbn =
+                mEntryManager.rebuildNotificationWithRemoteInput(mEntry, "A Reply", true);
+        CharSequence[] messages = newSbn.getNotification().extras
+                .getCharSequenceArray(Notification.EXTRA_REMOTE_INPUT_HISTORY);
+        Assert.assertEquals(1, messages.length);
+        Assert.assertEquals("A Reply", messages[0]);
+        Assert.assertTrue(newSbn.getNotification().extras
+                .getBoolean(Notification.EXTRA_SHOW_REMOTE_INPUT_SPINNER, false));
+    }
+
+    @Test
+    public void testRebuildWithRemoteInput_withExistingInput() {
+        // Setup a notification entry with 1 remote input.
+        StatusBarNotification newSbn =
+                mEntryManager.rebuildNotificationWithRemoteInput(mEntry, "A Reply", false);
+        NotificationData.Entry entry = new NotificationData.Entry(newSbn);
+
+        // Try rebuilding to add another reply.
+        newSbn = mEntryManager.rebuildNotificationWithRemoteInput(entry, "Reply 2", true);
+        CharSequence[] messages = newSbn.getNotification().extras
+                .getCharSequenceArray(Notification.EXTRA_REMOTE_INPUT_HISTORY);
+        Assert.assertEquals(2, messages.length);
+        Assert.assertEquals("Reply 2", messages[0]);
+        Assert.assertEquals("A Reply", messages[1]);
+    }
 }

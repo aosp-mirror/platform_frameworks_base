@@ -419,6 +419,7 @@ public class GnssLocationProvider implements LocationProviderInterface, InjectNt
     private final LocationChangeListener mFusedLocationListener = new FusedLocationListener();
     private final NtpTimeHelper mNtpTimeHelper;
     private final GnssBatchingProvider mGnssBatchingProvider;
+    private final GnssGeofenceProvider mGnssGeofenceProvider;
 
     // Handler for processing events
     private Handler mHandler;
@@ -493,7 +494,7 @@ public class GnssLocationProvider implements LocationProviderInterface, InjectNt
     }
 
     public IGpsGeofenceHardware getGpsGeofenceProxy() {
-        return mGpsGeofenceBinder;
+        return mGnssGeofenceProvider;
     }
 
     public GnssMeasurementsProvider getGnssMeasurementsProvider() {
@@ -887,6 +888,7 @@ public class GnssLocationProvider implements LocationProviderInterface, InjectNt
                 looper, this);
         mHandler.post(mGnssSatelliteBlacklistHelper::updateSatelliteBlacklist);
         mGnssBatchingProvider = new GnssBatchingProvider();
+        mGnssGeofenceProvider = new GnssGeofenceProvider(looper);
     }
 
     /**
@@ -1061,6 +1063,12 @@ public class GnssLocationProvider implements LocationProviderInterface, InjectNt
             // For Device-Based Hybrid (E911)
             provider = LocationManager.FUSED_PROVIDER;
             locationListener = mFusedLocationListener;
+        }
+
+        if (!locationManager.isProviderEnabled(provider)) {
+            Log.w(TAG, "Unable to request location since " + provider
+                    + " provider does not exist or is not enabled.");
+            return;
         }
 
         Log.i(TAG,
@@ -1494,31 +1502,6 @@ public class GnssLocationProvider implements LocationProviderInterface, InjectNt
             Binder.restoreCallingIdentity(identity);
         }
     }
-
-    private IGpsGeofenceHardware mGpsGeofenceBinder = new IGpsGeofenceHardware.Stub() {
-        public boolean isHardwareGeofenceSupported() {
-            return native_is_geofence_supported();
-        }
-
-        public boolean addCircularHardwareGeofence(int geofenceId, double latitude,
-                double longitude, double radius, int lastTransition, int monitorTransitions,
-                int notificationResponsiveness, int unknownTimer) {
-            return native_add_geofence(geofenceId, latitude, longitude, radius,
-                    lastTransition, monitorTransitions, notificationResponsiveness, unknownTimer);
-        }
-
-        public boolean removeHardwareGeofence(int geofenceId) {
-            return native_remove_geofence(geofenceId);
-        }
-
-        public boolean pauseHardwareGeofence(int geofenceId) {
-            return native_pause_geofence(geofenceId);
-        }
-
-        public boolean resumeHardwareGeofence(int geofenceId, int monitorTransition) {
-            return native_resume_geofence(geofenceId, monitorTransition);
-        }
-    };
 
     private boolean deleteAidingData(Bundle extras) {
         int flags;
@@ -2806,19 +2789,6 @@ public class GnssLocationProvider implements LocationProviderInterface, InjectNt
 
     private native void native_update_network_state(boolean connected, int type,
             boolean roaming, boolean available, String extraInfo, String defaultAPN);
-
-    // Hardware Geofence support.
-    private static native boolean native_is_geofence_supported();
-
-    private static native boolean native_add_geofence(int geofenceId, double latitude,
-            double longitude, double radius, int lastTransition, int monitorTransitions,
-            int notificationResponsivenes, int unknownTimer);
-
-    private static native boolean native_remove_geofence(int geofenceId);
-
-    private static native boolean native_resume_geofence(int geofenceId, int transitions);
-
-    private static native boolean native_pause_geofence(int geofenceId);
 
     // Gps Hal measurements support.
     private static native boolean native_is_measurement_supported();

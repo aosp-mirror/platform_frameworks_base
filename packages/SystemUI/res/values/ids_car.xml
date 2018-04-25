@@ -1,5 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
 <!--
-  ~ Copyright (C) 2017 The Android Open Source Project
+  ~ Copyright (C) 2018 The Android Open Source Project
   ~
   ~ Licensed under the Apache License, Version 2.0 (the "License");
   ~ you may not use this file except in compliance with the License.
@@ -14,11 +15,8 @@
   ~ limitations under the License
   -->
 
-<shape xmlns:android="http://schemas.android.com/apk/res/android"
-    android:shape="oval">
-    <solid
-        android:color="#ff757575"/>
-    <size
-        android:width="16dp"
-        android:height="16dp"/>
-</shape>
+<resources>
+    <!-- Values used for finding elements on the system ui nav bars -->
+    <item type="id" name="lock_screen_nav_buttons"/>
+    <item type="id" name="nav_buttons"/>
+</resources>

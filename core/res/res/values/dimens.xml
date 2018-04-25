@@ -162,19 +162,14 @@
     <!-- The margin on the start of the content view -->
     <dimen name="notification_content_margin_start">16dp</dimen>
 
-    <!-- The margin on the end of the content view
-        Keep in sync with notification_content_plus_picture_margin! -->
+    <!-- The margin on the end of the content view. -->
     <dimen name="notification_content_margin_end">16dp</dimen>
 
-    <!-- The margin on the end of the content view with a picture.
-        Keep in sync with notification_content_plus_picture_margin! -->
-    <dimen name="notification_content_picture_margin">56dp</dimen>
+    <!-- The inset of the reply icon. -->
+    <dimen name="notification_reply_inset">8dp</dimen>
 
-    <!-- The margin on the end of the content view with a picture, plus the standard
-        content end margin.
-        Keep equal to (notification_content_picture_margin + notification_content_margin_end)!
-    -->
-    <dimen name="notification_content_plus_picture_margin_end">72dp</dimen>
+    <!-- The margin for text at the end of the image view for media notifications -->
+    <dimen name="notification_media_image_margin_end">72dp</dimen>
 
     <!-- The additional margin on the sides of the ambient view. -->
     <dimen name="notification_extra_margin_ambient">16dp</dimen>
@@ -616,7 +611,9 @@
     <!-- The maximum width of a image in a media notification. The images will be reduced to that width in case they are bigger.-->
     <dimen name="notification_media_image_max_width">280dp</dimen>
     <!-- The size of the right icon -->
-    <dimen name="notification_right_icon_size">38dp</dimen>
+    <dimen name="notification_right_icon_size">36dp</dimen>
+    <!-- The alpha of a disabled notification button -->
+    <item type="dimen" format="float" name="notification_action_disabled_alpha">0.5</item>
 
     <!-- The maximum height of any image in a remote view. This is applied to all images in custom remoteviews. -->
     <dimen name="notification_custom_view_max_image_height_low_ram">208dp</dimen>
@@ -631,9 +628,11 @@
     <!-- The maximum width of a image in a media notification. The images will be reduced to that width in case they are bigger.-->
     <dimen name="notification_media_image_max_width_low_ram">100dp</dimen>
     <!-- The size of the right icon image when on low ram -->
-    <dimen name="notification_right_icon_size_low_ram">40dp</dimen>
+    <dimen name="notification_right_icon_size_low_ram">@dimen/notification_right_icon_size_low_ram</dimen>
 
     <dimen name="messaging_avatar_size">@dimen/notification_right_icon_size</dimen>
+
+    <dimen name="messaging_group_sending_progress_size">24dp</dimen>
 
     <!-- Max width/height of the autofill data set picker as a fraction of the screen width/height -->
     <dimen name="autofill_dataset_picker_max_width">90%</dimen>

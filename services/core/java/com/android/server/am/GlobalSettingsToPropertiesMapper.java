@@ -19,6 +19,7 @@ package com.android.server.am;
 import android.content.ContentResolver;
 import android.database.ContentObserver;
 import android.net.Uri;
+import android.os.Build;
 import android.os.SystemProperties;
 import android.provider.Settings;
 import android.text.TextUtils;
@@ -98,7 +99,14 @@ class GlobalSettingsToPropertiesMapper {
         try {
             systemPropertiesSet(key, value);
         } catch (Exception e) {
-            Slog.e(TAG, "Unable to set property " + key + " value '" + value + "'", e);
+            // Failure to set a property can be caused by SELinux denial. This usually indicates
+            // that the property wasn't whitelisted in sepolicy.
+            // No need to report it on all user devices, only on debug builds.
+            if (Build.IS_DEBUGGABLE) {
+                Slog.wtf(TAG, "Unable to set property " + key + " value '" + value + "'", e);
+            } else {
+                Slog.e(TAG, "Unable to set property " + key + " value '" + value + "'", e);
+            }
         }
     }
 
