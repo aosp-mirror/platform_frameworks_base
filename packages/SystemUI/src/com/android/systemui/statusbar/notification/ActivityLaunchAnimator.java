@@ -123,81 +123,100 @@ public class ActivityLaunchAnimator {
                 IRemoteAnimationFinishedCallback iRemoteAnimationFinishedCallback)
                     throws RemoteException {
             mSourceNotification.post(() -> {
-                for (RemoteAnimationTarget app : remoteAnimationTargets) {
-                    if (app.mode == RemoteAnimationTarget.MODE_OPENING) {
-                        setExpandAnimationRunning(true);
-                        mInstantCollapsePanel = app.position.y == 0
-                                && app.sourceContainerBounds.height()
-                                        >= mNotificationPanel.getHeight();
-                        if (!mInstantCollapsePanel) {
-                            mNotificationPanel.collapseWithDuration(ANIMATION_DURATION);
+                RemoteAnimationTarget primary = getPrimaryRemoteAnimationTarget(
+                        remoteAnimationTargets);
+                if (primary == null) {
+                    setAnimationPending(false);
+                    invokeCallback(iRemoteAnimationFinishedCallback);
+                    return;
+                }
+
+                setExpandAnimationRunning(true);
+                mInstantCollapsePanel = primary.position.y == 0
+                        && primary.sourceContainerBounds.height()
+                                >= mNotificationPanel.getHeight();
+                if (!mInstantCollapsePanel) {
+                    mNotificationPanel.collapseWithDuration(ANIMATION_DURATION);
+                }
+                ValueAnimator anim = ValueAnimator.ofFloat(0, 1);
+                mParams.startPosition = mSourceNotification.getLocationOnScreen();
+                mParams.startTranslationZ = mSourceNotification.getTranslationZ();
+                mParams.startClipTopAmount = mSourceNotification.getClipTopAmount();
+                if (mSourceNotification.isChildInGroup()) {
+                    int parentClip = mSourceNotification
+                            .getNotificationParent().getClipTopAmount();
+                    mParams.parentStartClipTopAmount = parentClip;
+                    // We need to calculate how much the child is clipped by the parent
+                    // because children always have 0 clipTopAmount
+                    if (parentClip != 0) {
+                        float childClip = parentClip
+                                - mSourceNotification.getTranslationY();
+                        if (childClip > 0.0f) {
+                            mParams.startClipTopAmount = (int) Math.ceil(childClip);
                         }
-                        ValueAnimator anim = ValueAnimator.ofFloat(0, 1);
-                        mParams.startPosition = mSourceNotification.getLocationOnScreen();
-                        mParams.startTranslationZ = mSourceNotification.getTranslationZ();
-                        mParams.startClipTopAmount = mSourceNotification.getClipTopAmount();
-                        if (mSourceNotification.isChildInGroup()) {
-                            int parentClip = mSourceNotification
-                                    .getNotificationParent().getClipTopAmount();
-                            mParams.parentStartClipTopAmount = parentClip;
-                            // We need to calculate how much the child is clipped by the parent
-                            // because children always have 0 clipTopAmount
-                            if (parentClip != 0) {
-                                float childClip = parentClip
-                                        - mSourceNotification.getTranslationY();
-                                if (childClip > 0.0f) {
-                                    mParams.startClipTopAmount = (int) Math.ceil(childClip);
-                                }
-                            }
-                        }
-                        int targetWidth = app.sourceContainerBounds.width();
-                        int notificationHeight = mSourceNotification.getActualHeight()
-                                - mSourceNotification.getClipBottomAmount();
-                        int notificationWidth = mSourceNotification.getWidth();
-                        anim.setDuration(ANIMATION_DURATION);
-                        anim.setInterpolator(Interpolators.LINEAR);
-                        anim.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
-                            @Override
-                            public void onAnimationUpdate(ValueAnimator animation) {
-                                mParams.linearProgress = animation.getAnimatedFraction();
-                                float progress
-                                        = Interpolators.FAST_OUT_SLOW_IN.getInterpolation(
-                                                mParams.linearProgress);
-                                int newWidth = (int) MathUtils.lerp(notificationWidth,
-                                        targetWidth, progress);
-                                mParams.left = (int) ((targetWidth - newWidth) / 2.0f);
-                                mParams.right = mParams.left + newWidth;
-                                mParams.top = (int) MathUtils.lerp(mParams.startPosition[1],
-                                        app.position.y, progress);
-                                mParams.bottom = (int) MathUtils.lerp(mParams.startPosition[1]
-                                                + notificationHeight,
-                                        app.position.y + app.sourceContainerBounds.bottom,
-                                        progress);
-                                applyParamsToWindow(app);
-                                applyParamsToNotification(mParams);
-                                applyParamsToNotificationList(mParams);
-                            }
-                        });
-                        anim.addListener(new AnimatorListenerAdapter() {
-                            @Override
-                            public void onAnimationEnd(Animator animation) {
-                                setExpandAnimationRunning(false);
-                                if (mInstantCollapsePanel) {
-                                    mStatusBar.collapsePanel(false /* animate */);
-                                }
-                                try {
-                                    iRemoteAnimationFinishedCallback.onAnimationFinished();
-                                } catch (RemoteException e) {
-                                    e.printStackTrace();
-                                }
-                            }
-                        });
-                        anim.start();
-                        break;
                     }
                 }
+                int targetWidth = primary.sourceContainerBounds.width();
+                int notificationHeight = mSourceNotification.getActualHeight()
+                        - mSourceNotification.getClipBottomAmount();
+                int notificationWidth = mSourceNotification.getWidth();
+                anim.setDuration(ANIMATION_DURATION);
+                anim.setInterpolator(Interpolators.LINEAR);
+                anim.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
+                    @Override
+                    public void onAnimationUpdate(ValueAnimator animation) {
+                        mParams.linearProgress = animation.getAnimatedFraction();
+                        float progress
+                                = Interpolators.FAST_OUT_SLOW_IN.getInterpolation(
+                                        mParams.linearProgress);
+                        int newWidth = (int) MathUtils.lerp(notificationWidth,
+                                targetWidth, progress);
+                        mParams.left = (int) ((targetWidth - newWidth) / 2.0f);
+                        mParams.right = mParams.left + newWidth;
+                        mParams.top = (int) MathUtils.lerp(mParams.startPosition[1],
+                                primary.position.y, progress);
+                        mParams.bottom = (int) MathUtils.lerp(mParams.startPosition[1]
+                                        + notificationHeight,
+                                primary.position.y + primary.sourceContainerBounds.bottom,
+                                progress);
+                        applyParamsToWindow(primary);
+                        applyParamsToNotification(mParams);
+                        applyParamsToNotificationList(mParams);
+                    }
+                });
+                anim.addListener(new AnimatorListenerAdapter() {
+                    @Override
+                    public void onAnimationEnd(Animator animation) {
+                        setExpandAnimationRunning(false);
+                        if (mInstantCollapsePanel) {
+                            mStatusBar.collapsePanel(false /* animate */);
+                        }
+                        invokeCallback(iRemoteAnimationFinishedCallback);
+                    }
+                });
+                anim.start();
                 setAnimationPending(false);
             });
+        }
+
+        private void invokeCallback(IRemoteAnimationFinishedCallback callback) {
+            try {
+                callback.onAnimationFinished();
+            } catch (RemoteException e) {
+                e.printStackTrace();
+            }
+        }
+
+        private RemoteAnimationTarget getPrimaryRemoteAnimationTarget(
+                RemoteAnimationTarget[] remoteAnimationTargets) {
+            RemoteAnimationTarget primary = null;
+            for (RemoteAnimationTarget app : remoteAnimationTargets) {
+                if (app.mode == RemoteAnimationTarget.MODE_OPENING) {
+                    primary = app;
+                    break;
+                }
+            }
+            return primary;
         }
 
         private void setExpandAnimationRunning(boolean running) {
