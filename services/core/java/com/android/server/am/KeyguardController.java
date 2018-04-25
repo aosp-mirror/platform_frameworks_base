@@ -121,6 +121,8 @@ class KeyguardController {
     void setKeyguardShown(boolean keyguardShowing, boolean aodShowing,
             int secondaryDisplayShowing) {
         boolean showingChanged = keyguardShowing != mKeyguardShowing || aodShowing != mAodShowing;
+        // If keyguard is going away, but SystemUI aborted the transition, need to reset state.
+        showingChanged |= mKeyguardGoingAway && keyguardShowing;
         if (!showingChanged && secondaryDisplayShowing == mSecondaryDisplayShowing) {
             return;
         }
