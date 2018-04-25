@@ -17,6 +17,7 @@
 package com.android.systemui.shared.recents.model;
 
 import android.app.ActivityManager;
+import android.app.ActivityTaskManager;
 import android.content.ComponentCallbacks2;
 import android.content.ComponentName;
 import android.content.Context;
@@ -98,7 +99,7 @@ public class RecentsTaskLoader {
         mSvelteLevel = svelteLevel;
 
         // Initialize the proxy, cache and loaders
-        int numRecentTasks = ActivityManager.getMaxRecentTasksStatic();
+        int numRecentTasks = ActivityTaskManager.getMaxRecentTasksStatic();
         mHighResThumbnailLoader = new HighResThumbnailLoader(ActivityManagerWrapper.getInstance(),
                 Looper.getMainLooper(), ActivityManager.isLowRamDeviceStatic());
         mLoadQueue = new TaskResourceLoadQueue();
@@ -221,14 +222,14 @@ public class RecentsTaskLoader {
                 // We are leaving recents, so trim the data a bit
                 mIconCache.trimToSize(Math.max(1, mMaxIconCacheSize / 2));
                 mActivityInfoCache.trimToSize(Math.max(1,
-                        ActivityManager.getMaxRecentTasksStatic() / 2));
+                        ActivityTaskManager.getMaxRecentTasksStatic() / 2));
                 break;
             case ComponentCallbacks2.TRIM_MEMORY_RUNNING_LOW:
             case ComponentCallbacks2.TRIM_MEMORY_MODERATE:
                 // We are going to be low on memory
                 mIconCache.trimToSize(Math.max(1, mMaxIconCacheSize / 4));
                 mActivityInfoCache.trimToSize(Math.max(1,
-                        ActivityManager.getMaxRecentTasksStatic() / 4));
+                        ActivityTaskManager.getMaxRecentTasksStatic() / 4));
                 break;
             case ComponentCallbacks2.TRIM_MEMORY_RUNNING_CRITICAL:
             case ComponentCallbacks2.TRIM_MEMORY_COMPLETE:

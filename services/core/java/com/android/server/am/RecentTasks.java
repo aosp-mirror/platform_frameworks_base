@@ -41,6 +41,7 @@ import static com.android.server.am.ActivityStackSupervisor.REMOVE_FROM_RECENTS;
 import static com.android.server.am.TaskRecord.INVALID_TASK_ID;
 
 import android.app.ActivityManager;
+import android.app.ActivityTaskManager;
 import android.app.AppGlobals;
 import android.content.ComponentName;
 import android.content.Intent;
@@ -184,7 +185,7 @@ class RecentTasks {
         mService = service;
         mUserController = userController;
         mTaskPersister = taskPersister;
-        mGlobalMaxNumTasks = ActivityManager.getMaxRecentTasksStatic();
+        mGlobalMaxNumTasks = ActivityTaskManager.getMaxRecentTasksStatic();
         mHasVisibleRecentTasks = true;
     }
 
@@ -194,7 +195,7 @@ class RecentTasks {
         mService = service;
         mUserController = service.mUserController;
         mTaskPersister = new TaskPersister(systemDir, stackSupervisor, service, this);
-        mGlobalMaxNumTasks = ActivityManager.getMaxRecentTasksStatic();
+        mGlobalMaxNumTasks = ActivityTaskManager.getMaxRecentTasksStatic();
         mHasVisibleRecentTasks = res.getBoolean(com.android.internal.R.bool.config_hasRecents);
         loadParametersFromResources(res);
     }

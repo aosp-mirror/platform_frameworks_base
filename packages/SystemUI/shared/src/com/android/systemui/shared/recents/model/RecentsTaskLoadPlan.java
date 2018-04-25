@@ -19,6 +19,7 @@ package com.android.systemui.shared.recents.model;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
 
 import android.app.ActivityManager;
+import android.app.ActivityTaskManager;
 import android.app.KeyguardManager;
 import android.content.ComponentName;
 import android.content.Context;
@@ -92,7 +93,7 @@ public class RecentsTaskLoadPlan {
         ArrayList<Task> allTasks = new ArrayList<>();
         if (mRawTasks == null) {
             mRawTasks = ActivityManagerWrapper.getInstance().getRecentTasks(
-                    ActivityManager.getMaxRecentTasksStatic(), currentUserId);
+                    ActivityTaskManager.getMaxRecentTasksStatic(), currentUserId);
 
             // Since the raw tasks are given in most-recent to least-recent order, we need to reverse it
             Collections.reverse(mRawTasks);

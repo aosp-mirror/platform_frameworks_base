@@ -134,7 +134,7 @@ public class ActivityStarterTests extends ActivityTestsBase {
         assertTrue(task2.getStack() instanceof PinnedActivityStack);
         mStarter.updateBounds(task2, bounds);
 
-        verify(mService, times(1)).resizeStack(eq(task2.getStack().mStackId),
+        verify(mService.mActivityTaskManager, times(1)).resizeStack(eq(task2.getStack().mStackId),
                 eq(bounds), anyBoolean(), anyBoolean(), anyBoolean(), anyInt());
 
         // In the case of no animation, the stack and task bounds should be set immediately.

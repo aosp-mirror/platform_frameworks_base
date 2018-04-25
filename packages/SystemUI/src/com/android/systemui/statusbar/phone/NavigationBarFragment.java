@@ -35,6 +35,7 @@ import android.annotation.IdRes;
 import android.annotation.Nullable;
 import android.app.ActivityManager;
 import android.app.ActivityManagerNative;
+import android.app.ActivityTaskManager;
 import android.app.Fragment;
 import android.app.IActivityManager;
 import android.app.StatusBarManager;
@@ -933,7 +934,7 @@ public class NavigationBarFragment extends Fragment implements Callbacks {
     }
 
     private boolean onLongPressRecents() {
-        if (mRecents == null || !ActivityManager.supportsMultiWindow(getContext())
+        if (mRecents == null || !ActivityTaskManager.supportsMultiWindow(getContext())
                 || !mDivider.getView().getSnapAlgorithm().isSplitScreenFeasible()
                 || Recents.getConfiguration().isLowRamDevice
                 // If we are connected to the overview service, then disable the recents button

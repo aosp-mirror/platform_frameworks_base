@@ -24,7 +24,7 @@ import static android.Manifest.permission.START_TASKS_FROM_RECENTS;
 import static android.app.ActivityManager.LOCK_TASK_MODE_LOCKED;
 import static android.app.ActivityManager.START_DELIVERED_TO_TOP;
 import static android.app.ActivityManager.START_TASK_TO_FRONT;
-import static android.app.ActivityManager.StackId.INVALID_STACK_ID;
+import static android.app.ActivityTaskManager.INVALID_STACK_ID;
 import static android.app.ITaskStackListener.FORCED_RESIZEABLE_REASON_SECONDARY_DISPLAY;
 import static android.app.ITaskStackListener.FORCED_RESIZEABLE_REASON_SPLIT_SCREEN;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_ASSISTANT;
@@ -305,7 +305,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
     /** The number of distinct task ids that can be assigned to the tasks of a single user */
     private static final int MAX_TASK_IDS_PER_USER = UserHandle.PER_USER_RANGE;
 
-    final ActivityManagerService mService;
+    ActivityManagerService mService;
 
     /** The historial list of recent tasks including inactive tasks */
     RecentTasks mRecentTasks;
@@ -319,6 +319,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
     /** Short cut */
     WindowManagerService mWindowManager;
     DisplayManager mDisplayManager;
+    ActivityTaskManagerService mAtm;
 
     private LaunchParamsController mLaunchParamsController;
 
@@ -610,6 +611,11 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
         mHandler = new ActivityStackSupervisorHandler(looper);
     }
 
+    @VisibleForTesting
+    void setService(ActivityManagerService service) {
+        mService = service;
+    }
+
     public void initialize() {
         if (mInitialized) {
             return;
@@ -660,27 +666,29 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
         mLaunchingActivity.setReferenceCounted(false);
     }
 
+    void setActivityTaskManager(ActivityTaskManagerService atm) {
+        mAtm = atm;
+    }
+
     void setWindowManager(WindowManagerService wm) {
-        synchronized (mService) {
-            mWindowManager = wm;
-            getKeyguardController().setWindowManager(wm);
+        mWindowManager = wm;
+        getKeyguardController().setWindowManager(wm);
 
-            mDisplayManager =
-                    (DisplayManager)mService.mContext.getSystemService(Context.DISPLAY_SERVICE);
-            mDisplayManager.registerDisplayListener(this, null);
-            mDisplayManagerInternal = LocalServices.getService(DisplayManagerInternal.class);
+        mDisplayManager =
+                (DisplayManager) mService.mContext.getSystemService(Context.DISPLAY_SERVICE);
+        mDisplayManager.registerDisplayListener(this, null);
+        mDisplayManagerInternal = LocalServices.getService(DisplayManagerInternal.class);
 
-            Display[] displays = mDisplayManager.getDisplays();
-            for (int displayNdx = displays.length - 1; displayNdx >= 0; --displayNdx) {
-                final Display display = displays[displayNdx];
-                ActivityDisplay activityDisplay = new ActivityDisplay(this, display);
-                mActivityDisplays.put(display.getDisplayId(), activityDisplay);
-                calculateDefaultMinimalSizeOfResizeableTasks(activityDisplay);
-            }
-
-            mHomeStack = mFocusedStack = mLastFocusedStack = getDefaultDisplay().getOrCreateStack(
-                    WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_HOME, ON_TOP);
+        Display[] displays = mDisplayManager.getDisplays();
+        for (int displayNdx = displays.length - 1; displayNdx >= 0; --displayNdx) {
+            final Display display = displays[displayNdx];
+            ActivityDisplay activityDisplay = new ActivityDisplay(this, display);
+            mActivityDisplays.put(display.getDisplayId(), activityDisplay);
+            calculateDefaultMinimalSizeOfResizeableTasks(activityDisplay);
         }
+
+        mHomeStack = mFocusedStack = mLastFocusedStack = getDefaultDisplay().getOrCreateStack(
+                WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_HOME, ON_TOP);
     }
 
     ActivityStack getFocusedStack() {
@@ -4496,7 +4504,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
             }
             // The task might have landed on a display different from requested.
             // TODO(multi-display): Find proper stack for the task on the default display.
-            mService.setTaskWindowingMode(task.taskId,
+            mAtm.setTaskWindowingMode(task.taskId,
                     WINDOWING_MODE_FULLSCREEN_OR_SPLIT_SCREEN_SECONDARY, true /* toTop */);
             if (preferredDisplayId != actualDisplayId) {
                 // Display a warning toast that we tried to put a non-resizeable task on a secondary

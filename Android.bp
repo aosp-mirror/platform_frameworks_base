@@ -58,6 +58,7 @@ java_library {
         "core/java/android/app/IActivityController.aidl",
         "core/java/android/app/IActivityManager.aidl",
         "core/java/android/app/IActivityPendingResult.aidl",
+        "core/java/android/app/IActivityTaskManager.aidl",
         "core/java/android/app/IAlarmCompleteListener.aidl",
         "core/java/android/app/IAlarmListener.aidl",
         "core/java/android/app/IAlarmManager.aidl",

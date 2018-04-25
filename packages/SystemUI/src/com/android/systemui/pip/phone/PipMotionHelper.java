@@ -31,6 +31,7 @@ import android.animation.ValueAnimator;
 import android.animation.ValueAnimator.AnimatorUpdateListener;
 import android.app.ActivityManager.StackInfo;
 import android.app.IActivityManager;
+import android.app.IActivityTaskManager;
 import android.content.Context;
 import android.graphics.Point;
 import android.graphics.PointF;
@@ -81,6 +82,7 @@ public class PipMotionHelper implements Handler.Callback {
 
     private Context mContext;
     private IActivityManager mActivityManager;
+    private IActivityTaskManager mActivityTaskManager;
     private Handler mHandler;
 
     private PipMenuActivityController mMenuController;
@@ -94,11 +96,12 @@ public class PipMotionHelper implements Handler.Callback {
     private ValueAnimator mBoundsAnimator = null;
 
     public PipMotionHelper(Context context, IActivityManager activityManager,
-            PipMenuActivityController menuController, PipSnapAlgorithm snapAlgorithm,
-            FlingAnimationUtils flingAnimationUtils) {
+            IActivityTaskManager activityTaskManager, PipMenuActivityController menuController,
+            PipSnapAlgorithm snapAlgorithm, FlingAnimationUtils flingAnimationUtils) {
         mContext = context;
         mHandler = new Handler(ForegroundThread.get().getLooper(), this);
         mActivityManager = activityManager;
+        mActivityTaskManager = activityTaskManager;
         mMenuController = menuController;
         mSnapAlgorithm = snapAlgorithm;
         mFlingAnimationUtils = flingAnimationUtils;
@@ -177,7 +180,8 @@ public class PipMotionHelper implements Handler.Callback {
         mMenuController.hideMenuWithoutResize();
         mHandler.post(() -> {
             try {
-                mActivityManager.removeStacksInWindowingModes(new int[]{ WINDOWING_MODE_PINNED });
+                mActivityTaskManager.removeStacksInWindowingModes(
+                        new int[]{ WINDOWING_MODE_PINNED });
             } catch (RemoteException e) {
                 Log.e(TAG, "Failed to remove PiP", e);
             }
@@ -533,7 +537,7 @@ public class PipMotionHelper implements Handler.Callback {
                         return true;
                     }
 
-                    mActivityManager.resizeStack(stackInfo.stackId, toBounds,
+                    mActivityTaskManager.resizeStack(stackInfo.stackId, toBounds,
                             false /* allowResizeInDockedMode */, true /* preserveWindows */,
                             true /* animate */, duration);
                     mBounds.set(toBounds);

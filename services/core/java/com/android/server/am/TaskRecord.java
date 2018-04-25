@@ -16,9 +16,9 @@
 
 package com.android.server.am;
 
-import static android.app.ActivityManager.RESIZE_MODE_FORCED;
-import static android.app.ActivityManager.RESIZE_MODE_SYSTEM;
-import static android.app.ActivityManager.StackId.INVALID_STACK_ID;
+import static android.app.ActivityTaskManager.RESIZE_MODE_FORCED;
+import static android.app.ActivityTaskManager.RESIZE_MODE_SYSTEM;
+import static android.app.ActivityTaskManager.INVALID_STACK_ID;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_UNDEFINED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
@@ -85,6 +85,7 @@ import android.app.ActivityManager;
 import android.app.ActivityManager.TaskDescription;
 import android.app.ActivityManager.TaskSnapshot;
 import android.app.ActivityOptions;
+import android.app.ActivityTaskManager;
 import android.app.AppGlobals;
 import android.app.IActivityManager;
 import android.content.ComponentName;
@@ -364,7 +365,7 @@ class TaskRecord extends ConfigurationContainer implements TaskWindowContainerLi
         isPersistable = true;
         // Clamp to [1, max].
         maxRecents = Math.min(Math.max(info.maxRecents, 1),
-                ActivityManager.getMaxAppRecentsLimitStatic());
+                ActivityTaskManager.getMaxAppRecentsLimitStatic());
 
         lastTaskDescription = _taskDescription;
         touchActiveTime();
@@ -1233,7 +1234,7 @@ class TaskRecord extends ConfigurationContainer implements TaskWindowContainerLi
             mCallingPackage = r.launchedFromPackage;
             // Clamp to [1, max].
             maxRecents = Math.min(Math.max(r.info.maxRecents, 1),
-                    ActivityManager.getMaxAppRecentsLimitStatic());
+                    ActivityTaskManager.getMaxAppRecentsLimitStatic());
         } else {
             // Otherwise make all added activities match this one.
             r.setActivityType(getActivityType());

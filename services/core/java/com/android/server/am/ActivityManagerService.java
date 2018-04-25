@@ -29,9 +29,8 @@ import static android.Manifest.permission.REMOVE_TASKS;
 import static android.Manifest.permission.START_TASKS_FROM_RECENTS;
 import static android.Manifest.permission.STOP_APP_SWITCHES;
 import static android.app.ActivityManager.LOCK_TASK_MODE_NONE;
-import static android.app.ActivityManager.RESIZE_MODE_PRESERVE_WINDOW;
-import static android.app.ActivityManager.SPLIT_SCREEN_CREATE_MODE_TOP_OR_LEFT;
-import static android.app.ActivityManager.StackId.INVALID_STACK_ID;
+import static android.app.ActivityTaskManager.RESIZE_MODE_PRESERVE_WINDOW;
+import static android.app.ActivityTaskManager.INVALID_STACK_ID;
 import static android.app.ActivityManagerInternal.ASSIST_KEY_CONTENT;
 import static android.app.ActivityManagerInternal.ASSIST_KEY_DATA;
 import static android.app.ActivityManagerInternal.ASSIST_KEY_RECEIVER_EXTRAS;
@@ -44,7 +43,6 @@ import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN_OR_SPLIT_SCREEN_SECONDARY;
 import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
-import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_PRIMARY;
 import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_SECONDARY;
 import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
 import static android.content.Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS;
@@ -227,6 +225,7 @@ import android.app.ActivityManagerInternal.ScreenObserver;
 import android.app.ActivityManagerInternal.SleepToken;
 import android.app.ActivityManagerProto;
 import android.app.ActivityOptions;
+import android.app.ActivityTaskManager;
 import android.app.ActivityThread;
 import android.app.AlertDialog;
 import android.app.AppGlobals;
@@ -1859,6 +1858,7 @@ public class ActivityManagerService extends IActivityManager.Stub
     int mBootPhase;
 
     WindowManagerService mWindowManager;
+    ActivityTaskManagerService mActivityTaskManager;
     final ActivityThread mSystemThread;
 
     private final class AppDeathRecipient implements IBinder.DeathRecipient {
@@ -2776,6 +2776,14 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
     }
 
+    public void setActivityTaskManager(ActivityTaskManagerService atm) {
+        synchronized (this) {
+            mActivityTaskManager = atm;
+            mStackSupervisor.setActivityTaskManager(atm);
+            mActivityTaskManager.setActivityManagerService(this);
+        }
+    }
+
     public void setUsageStatsManager(UsageStatsManagerInternal usageStatsManager) {
         mUsageStatsService = usageStatsManager;
     }
@@ -3679,7 +3687,8 @@ public class ActivityManagerService extends IActivityManager.Stub
                     + " to main stack for VR");
             final ActivityStack stack = mStackSupervisor.getDefaultDisplay().getOrCreateStack(
                     WINDOWING_MODE_FULLSCREEN, r.getActivityType(), true /* toTop */);
-            moveTaskToStack(r.getTask().taskId, stack.mStackId, true /* toTop */);
+            mActivityTaskManager.moveTaskToStack(r.getTask().taskId, stack.mStackId,
+                    true /* toTop */);
         }
         mHandler.sendMessage(
                 mHandler.obtainMessage(VR_MODE_CHANGE_MSG, 0, 0, r));
@@ -10531,28 +10540,17 @@ public class ActivityManagerService extends IActivityManager.Stub
 
     @Override
     public List<RunningTaskInfo> getTasks(int maxNum) {
-       return getFilteredTasks(maxNum, ACTIVITY_TYPE_UNDEFINED, WINDOWING_MODE_UNDEFINED);
+       return mActivityTaskManager.getTasks(maxNum);
     }
 
     @Override
     public List<RunningTaskInfo> getFilteredTasks(int maxNum, @ActivityType int ignoreActivityType,
             @WindowingMode int ignoreWindowingMode) {
-        final int callingUid = Binder.getCallingUid();
-        ArrayList<RunningTaskInfo> list = new ArrayList<>();
-
-        synchronized(this) {
-            if (DEBUG_ALL) Slog.v(TAG, "getTasks: max=" + maxNum);
-
-            final boolean allowed = isGetTasksAllowed("getTasks", Binder.getCallingPid(),
-                    callingUid);
-            mStackSupervisor.getRunningTasks(maxNum, list, ignoreActivityType,
-                    ignoreWindowingMode, callingUid, allowed);
-        }
-
-        return list;
+        return mActivityTaskManager.getFilteredTasks(
+                maxNum, ignoreActivityType, ignoreWindowingMode);
     }
 
-    private boolean isGetTasksAllowed(String caller, int callingPid, int callingUid) {
+    boolean isGetTasksAllowed(String caller, int callingPid, int callingUid) {
         if (mRecentTasks.isCallerRecents(callingUid)) {
             // Always allow the recents component to get tasks
             return true;
@@ -10892,38 +10890,6 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
     }
 
-    /**
-     * Removes stacks in the input windowing modes from the system if they are of activity type
-     * ACTIVITY_TYPE_STANDARD or ACTIVITY_TYPE_UNDEFINED
-     */
-    @Override
-    public void removeStacksInWindowingModes(int[] windowingModes) {
-        enforceCallerIsRecentsOrHasPermission(MANAGE_ACTIVITY_STACKS,
-                "removeStacksInWindowingModes()");
-        synchronized (this) {
-            final long ident = Binder.clearCallingIdentity();
-            try {
-                mStackSupervisor.removeStacksInWindowingModes(windowingModes);
-            } finally {
-                Binder.restoreCallingIdentity(ident);
-            }
-        }
-    }
-
-    @Override
-    public void removeStacksWithActivityTypes(int[] activityTypes) {
-        enforceCallerIsRecentsOrHasPermission(MANAGE_ACTIVITY_STACKS,
-                "removeStacksWithActivityTypes()");
-        synchronized (this) {
-            final long ident = Binder.clearCallingIdentity();
-            try {
-                mStackSupervisor.removeStacksWithActivityTypes(activityTypes);
-            } finally {
-                Binder.restoreCallingIdentity(ident);
-            }
-        }
-    }
-
     @Override
     public void moveStackToDisplay(int stackId, int displayId) {
         enforceCallingPermission(INTERNAL_SYSTEM_WINDOW, "moveStackToDisplay()");
@@ -11117,128 +11083,8 @@ public class ActivityManagerService extends IActivityManager.Stub
     }
 
     @Override
-    public void setTaskWindowingMode(int taskId, int windowingMode, boolean toTop) {
-        if (windowingMode == WINDOWING_MODE_SPLIT_SCREEN_PRIMARY) {
-            setTaskWindowingModeSplitScreenPrimary(taskId, SPLIT_SCREEN_CREATE_MODE_TOP_OR_LEFT,
-                    toTop, ANIMATE, null /* initialBounds */, true /* showRecents */);
-            return;
-        }
-        enforceCallerIsRecentsOrHasPermission(MANAGE_ACTIVITY_STACKS, "setTaskWindowingMode()");
-        synchronized (this) {
-            final long ident = Binder.clearCallingIdentity();
-            try {
-                final TaskRecord task = mStackSupervisor.anyTaskForIdLocked(taskId);
-                if (task == null) {
-                    Slog.w(TAG, "setTaskWindowingMode: No task for id=" + taskId);
-                    return;
-                }
-
-                if (DEBUG_STACK) Slog.d(TAG_STACK, "setTaskWindowingMode: moving task=" + taskId
-                        + " to windowingMode=" + windowingMode + " toTop=" + toTop);
-
-                if (!task.isActivityTypeStandardOrUndefined()) {
-                    throw new IllegalArgumentException("setTaskWindowingMode: Attempt to move"
-                            + " non-standard task " + taskId + " to windowing mode="
-                            + windowingMode);
-                }
-
-                final ActivityStack stack = task.getStack();
-                if (toTop) {
-                    stack.moveToFront("setTaskWindowingMode", task);
-                }
-                stack.setWindowingMode(windowingMode);
-            } finally {
-                Binder.restoreCallingIdentity(ident);
-            }
-        }
-    }
-
-    /**
-     * Moves the specified task to the primary-split-screen stack.
-     *
-     * @param taskId Id of task to move.
-     * @param createMode The mode the primary split screen stack should be created in if it doesn't
-     *                   exist already. See
-     *                   {@link android.app.ActivityManager#SPLIT_SCREEN_CREATE_MODE_TOP_OR_LEFT}
-     *                   and
-     *                   {@link android.app.ActivityManager#SPLIT_SCREEN_CREATE_MODE_BOTTOM_OR_RIGHT}
-     * @param toTop If the task and stack should be moved to the top.
-     * @param animate Whether we should play an animation for the moving the task.
-     * @param initialBounds If the primary stack gets created, it will use these bounds for the
-     *                      stack. Pass {@code null} to use default bounds.
-     * @param showRecents If the recents activity should be shown on the other side of the task
-     *                    going into split-screen mode.
-     */
-    @Override
-    public boolean setTaskWindowingModeSplitScreenPrimary(int taskId, int createMode, boolean toTop,
-            boolean animate, Rect initialBounds, boolean showRecents) {
-        enforceCallerIsRecentsOrHasPermission(MANAGE_ACTIVITY_STACKS,
-                "setTaskWindowingModeSplitScreenPrimary()");
-        synchronized (this) {
-            long ident = Binder.clearCallingIdentity();
-            try {
-                final TaskRecord task = mStackSupervisor.anyTaskForIdLocked(taskId);
-                if (task == null) {
-                    Slog.w(TAG, "setTaskWindowingModeSplitScreenPrimary: No task for id=" + taskId);
-                    return false;
-                }
-                if (DEBUG_STACK) Slog.d(TAG_STACK,
-                        "setTaskWindowingModeSplitScreenPrimary: moving task=" + taskId
-                        + " to createMode=" + createMode + " toTop=" + toTop);
-                if (!task.isActivityTypeStandardOrUndefined()) {
-                    throw new IllegalArgumentException("setTaskWindowingMode: Attempt to move"
-                            + " non-standard task " + taskId + " to split-screen windowing mode");
-                }
-
-                mWindowManager.setDockedStackCreateState(createMode, initialBounds);
-                final int windowingMode = task.getWindowingMode();
-                final ActivityStack stack = task.getStack();
-                if (toTop) {
-                    stack.moveToFront("setTaskWindowingModeSplitScreenPrimary", task);
-                }
-                stack.setWindowingMode(WINDOWING_MODE_SPLIT_SCREEN_PRIMARY, animate, showRecents,
-                        false /* enteringSplitScreenMode */, false /* deferEnsuringVisibility */);
-                return windowingMode != task.getWindowingMode();
-            } finally {
-                Binder.restoreCallingIdentity(ident);
-            }
-        }
-    }
-
-    @Override
     public void moveTaskToStack(int taskId, int stackId, boolean toTop) {
-        enforceCallerIsRecentsOrHasPermission(MANAGE_ACTIVITY_STACKS, "moveTaskToStack()");
-        synchronized (this) {
-            long ident = Binder.clearCallingIdentity();
-            try {
-                final TaskRecord task = mStackSupervisor.anyTaskForIdLocked(taskId);
-                if (task == null) {
-                    Slog.w(TAG, "moveTaskToStack: No task for id=" + taskId);
-                    return;
-                }
-
-                if (DEBUG_STACK) Slog.d(TAG_STACK, "moveTaskToStack: moving task=" + taskId
-                        + " to stackId=" + stackId + " toTop=" + toTop);
-
-                final ActivityStack stack = mStackSupervisor.getStack(stackId);
-                if (stack == null) {
-                    throw new IllegalStateException(
-                            "moveTaskToStack: No stack for stackId=" + stackId);
-                }
-                if (!stack.isActivityTypeStandardOrUndefined()) {
-                    throw new IllegalArgumentException("moveTaskToStack: Attempt to move task "
-                            + taskId + " to stack " + stackId);
-                }
-                if (stack.inSplitScreenPrimaryWindowingMode()) {
-                    mWindowManager.setDockedStackCreateState(
-                            SPLIT_SCREEN_CREATE_MODE_TOP_OR_LEFT, null /* initialBounds */);
-                }
-                task.reparent(stack, toTop, REPARENT_KEEP_STACK_AT_FRONT, ANIMATE, !DEFER_RESUME,
-                        "moveTaskToStack");
-            } finally {
-                Binder.restoreCallingIdentity(ident);
-            }
-        }
+        mActivityTaskManager.moveTaskToStack(taskId, stackId, toTop);
     }
 
     /**
@@ -11345,36 +11191,8 @@ public class ActivityManagerService extends IActivityManager.Stub
     @Override
     public void resizeStack(int stackId, Rect destBounds, boolean allowResizeInDockedMode,
             boolean preserveWindows, boolean animate, int animationDuration) {
-        enforceCallerIsRecentsOrHasPermission(MANAGE_ACTIVITY_STACKS, "resizeStack()");
-        long ident = Binder.clearCallingIdentity();
-        try {
-            synchronized (this) {
-                if (animate) {
-                    final PinnedActivityStack stack = mStackSupervisor.getStack(stackId);
-                    if (stack == null) {
-                        Slog.w(TAG, "resizeStack: stackId " + stackId + " not found.");
-                        return;
-                    }
-                    if (stack.getWindowingMode() != WINDOWING_MODE_PINNED) {
-                        throw new IllegalArgumentException("Stack: " + stackId
-                                + " doesn't support animated resize.");
-                    }
-                    stack.animateResizePinnedStack(null /* sourceHintBounds */, destBounds,
-                            animationDuration, false /* fromFullscreen */);
-                } else {
-                    final ActivityStack stack = mStackSupervisor.getStack(stackId);
-                    if (stack == null) {
-                        Slog.w(TAG, "resizeStack: stackId " + stackId + " not found.");
-                        return;
-                    }
-                    mStackSupervisor.resizeStackLocked(stack, destBounds, null /* tempTaskBounds */,
-                            null /* tempTaskInsetBounds */, preserveWindows,
-                            allowResizeInDockedMode, !DEFER_RESUME);
-                }
-            }
-        } finally {
-            Binder.restoreCallingIdentity(ident);
-        }
+        mActivityTaskManager.resizeStack(stackId, destBounds, allowResizeInDockedMode,
+                preserveWindows, animate, animationDuration);
     }
 
     @Override
@@ -14922,11 +14740,11 @@ public class ActivityManagerService extends IActivityManager.Stub
                         || Settings.Global.getInt(
                                 resolver, DEVELOPMENT_ENABLE_FREEFORM_WINDOWS_SUPPORT, 0) != 0;
 
-        final boolean supportsMultiWindow = ActivityManager.supportsMultiWindow(mContext);
+        final boolean supportsMultiWindow = ActivityTaskManager.supportsMultiWindow(mContext);
         final boolean supportsPictureInPicture = supportsMultiWindow &&
                 mContext.getPackageManager().hasSystemFeature(FEATURE_PICTURE_IN_PICTURE);
         final boolean supportsSplitScreenMultiWindow =
-                ActivityManager.supportsSplitScreenMultiWindow(mContext);
+                ActivityTaskManager.supportsSplitScreenMultiWindow(mContext);
         final boolean supportsMultiDisplay = mContext.getPackageManager()
                 .hasSystemFeature(FEATURE_ACTIVITIES_ON_SECONDARY_DISPLAYS);
         final String debugApp = Settings.Global.getString(resolver, DEBUG_APP);

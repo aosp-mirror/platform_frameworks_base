@@ -23,7 +23,6 @@ import static android.app.ActivityManager.START_VOICE_NOT_ACTIVE_SESSION;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_ASSISTANT;
 
 import android.app.ActivityManager;
-import android.app.ActivityManager.StackId;
 import android.app.ActivityManagerInternal;
 import android.app.ActivityOptions;
 import android.app.IActivityManager;

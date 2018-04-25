@@ -17,6 +17,7 @@
 package com.android.systemui.recents.views;
 
 import android.app.ActivityManager;
+import android.app.ActivityTaskManager;
 import android.content.Context;
 import android.graphics.Point;
 import android.os.Bundle;
@@ -58,7 +59,7 @@ public class TaskViewAccessibilityDelegate extends View.AccessibilityDelegate {
     @Override
     public void onInitializeAccessibilityNodeInfo(View host, AccessibilityNodeInfo info) {
         super.onInitializeAccessibilityNodeInfo(host, info);
-        if (ActivityManager.supportsSplitScreenMultiWindow(mTaskView.getContext())
+        if (ActivityTaskManager.supportsSplitScreenMultiWindow(mTaskView.getContext())
                 && !Recents.getSystemServices().hasDockedTask()) {
             DockState[] dockStates = Recents.getConfiguration()
                     .getDockStatesForCurrentOrientation();

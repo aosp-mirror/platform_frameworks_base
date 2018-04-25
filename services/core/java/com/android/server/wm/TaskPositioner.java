@@ -16,8 +16,8 @@
 
 package com.android.server.wm;
 
-import static android.app.ActivityManager.RESIZE_MODE_USER;
-import static android.app.ActivityManager.RESIZE_MODE_USER_FORCED;
+import static android.app.ActivityTaskManager.RESIZE_MODE_USER;
+import static android.app.ActivityTaskManager.RESIZE_MODE_USER_FORCED;
 import static android.os.Trace.TRACE_TAG_WINDOW_MANAGER;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_ORIENTATION;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_TASK_POSITIONING;

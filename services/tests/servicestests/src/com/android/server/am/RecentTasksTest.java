@@ -16,7 +16,7 @@
 
 package com.android.server.am;
 
-import static android.app.ActivityManager.SPLIT_SCREEN_CREATE_MODE_TOP_OR_LEFT;
+import static android.app.ActivityTaskManager.SPLIT_SCREEN_CREATE_MODE_TOP_OR_LEFT;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_HOME;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_UNDEFINED;
@@ -40,11 +40,9 @@ import static org.mockito.Mockito.spy;
 
 import static java.lang.Integer.MAX_VALUE;
 
-import android.annotation.TestApi;
-import android.app.ActivityManager;
 import android.app.ActivityManager.RecentTaskInfo;
 import android.app.ActivityManager.RunningTaskInfo;
-import android.app.WindowConfiguration;
+import android.app.ActivityTaskManager;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.pm.PackageManager;
@@ -700,16 +698,19 @@ public class RecentTasksTest extends ActivityTestsBase {
     private void testRecentTasksApis(boolean expectCallable) {
         assertSecurityException(expectCallable, () -> mService.removeStack(INVALID_STACK_ID));
         assertSecurityException(expectCallable,
-                () -> mService.removeStacksInWindowingModes(new int[] {WINDOWING_MODE_UNDEFINED}));
+                () -> mService.mActivityTaskManager.removeStacksInWindowingModes(
+                        new int[] {WINDOWING_MODE_UNDEFINED}));
         assertSecurityException(expectCallable,
-                () -> mService.removeStacksWithActivityTypes(new int[] {ACTIVITY_TYPE_UNDEFINED}));
+                () -> mService.mActivityTaskManager.removeStacksWithActivityTypes(
+                        new int[] {ACTIVITY_TYPE_UNDEFINED}));
         assertSecurityException(expectCallable, () -> mService.removeTask(0));
         assertSecurityException(expectCallable,
-                () -> mService.setTaskWindowingMode(0, WINDOWING_MODE_UNDEFINED, true));
+                () -> mService.mActivityTaskManager.setTaskWindowingMode(
+                        0, WINDOWING_MODE_UNDEFINED, true));
         assertSecurityException(expectCallable,
                 () -> mService.moveTaskToStack(0, INVALID_STACK_ID, true));
         assertSecurityException(expectCallable,
-                () -> mService.setTaskWindowingModeSplitScreenPrimary(0,
+                () -> mService.mActivityTaskManager.setTaskWindowingModeSplitScreenPrimary(0,
                         SPLIT_SCREEN_CREATE_MODE_TOP_OR_LEFT, true, true, new Rect(), true));
         assertSecurityException(expectCallable, () -> mService.dismissSplitScreenMode(true));
         assertSecurityException(expectCallable, () -> mService.dismissPip(true, 0));
@@ -794,7 +795,7 @@ public class RecentTasksTest extends ActivityTestsBase {
                 .setFlags(FLAG_ACTIVITY_NEW_DOCUMENT | flags)
                 .build();
         task.affinity = null;
-        task.maxRecents = ActivityManager.getMaxAppRecentsLimitStatic();
+        task.maxRecents = ActivityTaskManager.getMaxAppRecentsLimitStatic();
         return task;
     }
 

@@ -19,7 +19,9 @@ package com.android.systemui.pip.tv;
 import android.app.ActivityManager;
 import android.app.ActivityManager.RunningTaskInfo;
 import android.app.ActivityManager.StackInfo;
+import android.app.ActivityTaskManager;
 import android.app.IActivityManager;
+import android.app.IActivityTaskManager;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
@@ -53,7 +55,7 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
 
-import static android.app.ActivityManager.StackId.INVALID_STACK_ID;
+import static android.app.ActivityTaskManager.INVALID_STACK_ID;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_UNDEFINED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
 import static android.view.Display.DEFAULT_DISPLAY;
@@ -108,6 +110,7 @@ public class PipManager implements BasePipManager {
 
     private Context mContext;
     private IActivityManager mActivityManager;
+    private IActivityTaskManager mActivityTaskManager;
     private IWindowManager mWindowManager;
     private MediaSessionManager mMediaSessionManager;
     private int mState = STATE_NO_PIP;
@@ -238,6 +241,7 @@ public class PipManager implements BasePipManager {
         mContext = context;
 
         mActivityManager = ActivityManager.getService();
+        mActivityTaskManager = ActivityTaskManager.getService();
         mWindowManager = WindowManagerGlobal.getWindowManagerService();
         ActivityManagerWrapper.getInstance().registerTaskStackListener(mTaskStackListener);
         IntentFilter intentFilter = new IntentFilter();
@@ -433,7 +437,7 @@ public class PipManager implements BasePipManager {
         }
         try {
             int animationDurationMs = -1;
-            mActivityManager.resizeStack(mPinnedStackId, mCurrentPipBounds,
+            mActivityTaskManager.resizeStack(mPinnedStackId, mCurrentPipBounds,
                     true, true, true, animationDurationMs);
         } catch (RemoteException e) {
             Log.e(TAG, "resizeStack failed", e);
