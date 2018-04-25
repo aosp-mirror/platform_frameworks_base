@@ -359,6 +359,26 @@ public abstract class VibrationEffect implements Parcelable {
             return new OneShot(mDuration, newAmplitude);
         }
 
+        /**
+         * Resolve default values into integer amplitude numbers.
+         *
+         * @param defaultAmplitude the default amplitude to apply, must be between 0 and
+         *         MAX_AMPLITUDE
+         * @return A {@link OneShot} effect with same physical meaning but explicitly set amplitude
+         *
+         * @hide
+         */
+        public OneShot resolve(int defaultAmplitude) {
+            if (defaultAmplitude > MAX_AMPLITUDE || defaultAmplitude < 0) {
+                throw new IllegalArgumentException(
+                        "Amplitude is negative or greater than MAX_AMPLITUDE");
+            }
+            if (mAmplitude == DEFAULT_AMPLITUDE) {
+                return new OneShot(mDuration, defaultAmplitude);
+            }
+            return this;
+        }
+
         @Override
         public void validate() {
             if (mAmplitude < -1 || mAmplitude == 0 || mAmplitude > 255) {
@@ -485,6 +505,30 @@ public abstract class VibrationEffect implements Parcelable {
                 scaledAmplitudes[i] = scale(scaledAmplitudes[i], gamma, maxAmplitude);
             }
             return new Waveform(mTimings, scaledAmplitudes, mRepeat);
+        }
+
+        /**
+         * Resolve default values into integer amplitude numbers.
+         *
+         * @param defaultAmplitude the default amplitude to apply, must be between 0 and
+         *         MAX_AMPLITUDE
+         * @return A {@link Waveform} effect with same physical meaning but explicitly set
+         *         amplitude
+         *
+         * @hide
+         */
+        public Waveform resolve(int defaultAmplitude) {
+            if (defaultAmplitude > MAX_AMPLITUDE || defaultAmplitude < 0) {
+                throw new IllegalArgumentException(
+                        "Amplitude is negative or greater than MAX_AMPLITUDE");
+            }
+            int[] resolvedAmplitudes = Arrays.copyOf(mAmplitudes, mAmplitudes.length);
+            for (int i = 0; i < resolvedAmplitudes.length; i++) {
+                if (resolvedAmplitudes[i] == DEFAULT_AMPLITUDE) {
+                    resolvedAmplitudes[i] = defaultAmplitude;
+                }
+            }
+            return new Waveform(mTimings, resolvedAmplitudes, mRepeat);
         }
 
         @Override

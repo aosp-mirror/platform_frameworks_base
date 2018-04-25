@@ -50,6 +50,8 @@ public class VibrationEffectTest {
 
     private static final VibrationEffect TEST_ONE_SHOT =
             VibrationEffect.createOneShot(TEST_TIMING, TEST_AMPLITUDE);
+    private static final VibrationEffect DEFAULT_ONE_SHOT =
+            VibrationEffect.createOneShot(TEST_TIMING, VibrationEffect.DEFAULT_AMPLITUDE);
     private static final VibrationEffect TEST_WAVEFORM =
             VibrationEffect.createWaveform(TEST_TIMINGS, TEST_AMPLITUDES, -1);
 
@@ -104,6 +106,22 @@ public class VibrationEffectTest {
     }
 
     @Test
+    public void testResolveOneShot() {
+        VibrationEffect.OneShot initial = (VibrationEffect.OneShot) DEFAULT_ONE_SHOT;
+        VibrationEffect.OneShot resolved = initial.resolve(239);
+        assertEquals(239, resolved.getAmplitude());
+    }
+
+    @Test
+    public void testResolveOneShotFailsWhenMaxAmplitudeAboveThreshold() {
+        try {
+            ((VibrationEffect.OneShot) TEST_ONE_SHOT).resolve(1000);
+            fail("Max amplitude above threshold, should throw IllegalArgumentException");
+        } catch (IllegalArgumentException expected) {
+        }
+    }
+
+    @Test
     public void testScaleWaveform() {
         VibrationEffect.Waveform scaled =
                 ((VibrationEffect.Waveform) TEST_WAVEFORM).scale(1.1f, 200);
@@ -115,6 +133,24 @@ public class VibrationEffectTest {
     public void testScaleWaveformFailsWhenMaxAmplitudeAboveThreshold() {
         try {
             ((VibrationEffect.Waveform) TEST_WAVEFORM).scale(1.1f, 1000);
+            fail("Max amplitude above threshold, should throw IllegalArgumentException");
+        } catch (IllegalArgumentException expected) {
+        }
+    }
+
+    @Test
+    public void testResolveWaveform() {
+        VibrationEffect.Waveform resolved =
+                ((VibrationEffect.Waveform) TEST_WAVEFORM).resolve(239);
+        assertEquals(255, resolved.getAmplitudes()[0]);
+        assertEquals(0, resolved.getAmplitudes()[1]);
+        assertEquals(239, resolved.getAmplitudes()[2]);
+    }
+
+    @Test
+    public void testResolveWaveformFailsWhenMaxAmplitudeAboveThreshold() {
+        try {
+            ((VibrationEffect.Waveform) TEST_WAVEFORM).resolve(1000);
             fail("Max amplitude above threshold, should throw IllegalArgumentException");
         } catch (IllegalArgumentException expected) {
         }
