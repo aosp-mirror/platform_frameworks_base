@@ -16,6 +16,7 @@
 
 package android.net.wifi;
 
+import android.Manifest;
 import android.annotation.RequiresPermission;
 import android.annotation.SuppressLint;
 import android.annotation.SystemApi;
@@ -721,6 +722,17 @@ public class WifiScanner {
     }
 
     /**
+     * Enable/Disable wifi scanning.
+     *
+     * {@hide}
+     */
+    @RequiresPermission(Manifest.permission.NETWORK_STACK)
+    public void setScanningEnabled(boolean enable) {
+        validateChannel();
+        mAsyncChannel.sendMessage(enable ? CMD_ENABLE : CMD_DISABLE);
+    }
+
+    /**
      * Register a listener that will receive results from all single scans
      * Either the onSuccess/onFailure will be called once when the listener is registered. After
      * (assuming onSuccess was called) all subsequent single scan results will be delivered to the
@@ -1164,6 +1176,10 @@ public class WifiScanner {
     public static final int CMD_DEREGISTER_SCAN_LISTENER    = BASE + 28;
     /** @hide */
     public static final int CMD_GET_SINGLE_SCAN_RESULTS     = BASE + 29;
+    /** @hide */
+    public static final int CMD_ENABLE                      = BASE + 30;
+    /** @hide */
+    public static final int CMD_DISABLE                     = BASE + 31;
 
     private Context mContext;
     private IWifiScanner mService;
