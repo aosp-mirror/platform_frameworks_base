@@ -68,6 +68,7 @@ import android.telephony.SubscriptionManager;
 import android.telephony.SubscriptionManager.OnSubscriptionsChangedListener;
 import android.telephony.TelephonyManager;
 import android.util.Log;
+import android.util.Slog;
 import android.util.SparseBooleanArray;
 import android.util.SparseIntArray;
 
@@ -87,7 +88,6 @@ import java.io.PrintWriter;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map.Entry;
 
@@ -400,9 +400,16 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
         // Hack level over 9000: Because the subscription id is not yet valid when we see the
         // first update in handleSimStateChange, we need to force refresh all all SIM states
         // so the subscription id for them is consistent.
-        List<Integer> changedSubscriptionIds = refreshSimState(subscriptionInfos);
-        for (int i = 0; i < changedSubscriptionIds.size(); i++) {
-            SimData data = mSimDatas.get(changedSubscriptionIds.get(i));
+        ArrayList<SubscriptionInfo> changedSubscriptions = new ArrayList<>();
+        for (int i = 0; i < subscriptionInfos.size(); i++) {
+            SubscriptionInfo info = subscriptionInfos.get(i);
+            boolean changed = refreshSimState(info.getSubscriptionId(), info.getSimSlotIndex());
+            if (changed) {
+                changedSubscriptions.add(info);
+            }
+        }
+        for (int i = 0; i < changedSubscriptions.size(); i++) {
+            SimData data = mSimDatas.get(changedSubscriptions.get(i).getSubscriptionId());
             for (int j = 0; j < mCallbacks.size(); j++) {
                 KeyguardUpdateMonitorCallback cb = mCallbacks.get(j).get();
                 if (cb != null) {
@@ -1839,56 +1846,34 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
     };
 
     /**
-     * @return A list of changed subscriptions, maybe empty but never null
+     * @return true if and only if the state has changed for the specified {@code slotId}
      */
-    private List<Integer> refreshSimState(final List<SubscriptionInfo> activeSubscriptionInfos) {
+    private boolean refreshSimState(int subId, int slotId) {
 
         // This is awful. It exists because there are two APIs for getting the SIM status
         // that don't return the complete set of values and have different types. In Keyguard we
         // need IccCardConstants, but TelephonyManager would only give us
         // TelephonyManager.SIM_STATE*, so we retrieve it manually.
         final TelephonyManager tele = TelephonyManager.from(mContext);
-        ArrayList<Integer> changedSubscriptionIds = new ArrayList<>();
-        HashSet<Integer> activeSubIds = new HashSet<>();
-
-        for (SubscriptionInfo info : activeSubscriptionInfos) {
-            int subId = info.getSubscriptionId();
-            int slotId = info.getSimSlotIndex();
-            int simState =  tele.getSimState(slotId);
-            State state;
-            try {
-                state = State.intToState(simState);
-            } catch(IllegalArgumentException ex) {
-                Log.w(TAG, "Unknown sim state: " + simState);
-                state = State.UNKNOWN;
-            }
-
-            SimData data = mSimDatas.get(subId);
-            final boolean changed;
-            if (data == null) {
-                data = new SimData(state, slotId, subId);
-                mSimDatas.put(subId, data);
-                changed = true;               // no data yet; force update
-            } else {
-                changed = data.simState != state;
-                data.simState = state;
-            }
-            if (changed) {
-                changedSubscriptionIds.add(subId);
-            }
-
-            activeSubIds.add(subId);
+        int simState =  tele.getSimState(slotId);
+        State state;
+        try {
+            state = State.intToState(simState);
+        } catch(IllegalArgumentException ex) {
+            Log.w(TAG, "Unknown sim state: " + simState);
+            state = State.UNKNOWN;
         }
-
-        for (SimData data : mSimDatas.values()) {
-            if (!activeSubIds.contains(data.subId) && data.simState != State.ABSENT) {
-                // for the inactive subscriptions, reset state to ABSENT
-                data.simState = State.ABSENT;
-                changedSubscriptionIds.add(data.subId);
-            }
+        SimData data = mSimDatas.get(subId);
+        final boolean changed;
+        if (data == null) {
+            data = new SimData(state, slotId, subId);
+            mSimDatas.put(subId, data);
+            changed = true; // no data yet; force update
+        } else {
+            changed = data.simState != state;
+            data.simState = state;
         }
-
-        return changedSubscriptionIds;
+        return changed;
     }
 
     public static boolean isSimPinSecure(IccCardConstants.State state) {
