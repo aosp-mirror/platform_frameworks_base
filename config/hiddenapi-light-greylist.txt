@@ -402,6 +402,7 @@ Landroid/app/QueuedWork;->sFinishers:Ljava/util/LinkedList;
 Landroid/app/ResourcesManager;->appendLibAssetForMainAssetPath(Ljava/lang/String;Ljava/lang/String;)V
 Landroid/app/ResourcesManager;->getInstance()Landroid/app/ResourcesManager;
 Landroid/app/ResourcesManager;->mActivityResourceReferences:Ljava/util/WeakHashMap;
+Landroid/app/ResourcesManager;->mResConfiguration:Landroid/content/res/Configuration;
 Landroid/app/ResourcesManager;->mResourceImpls:Landroid/util/ArrayMap;
 Landroid/app/ResourcesManager;->mResourceReferences:Ljava/util/ArrayList;
 Landroid/app/Service;->attach(Landroid/content/Context;Landroid/app/ActivityThread;Ljava/lang/String;Landroid/os/IBinder;Landroid/app/Application;Ljava/lang/Object;)V
@@ -697,6 +698,7 @@ Landroid/content/pm/PackageManager;->freeStorage(Ljava/lang/String;JLandroid/con
 Landroid/content/pm/PackageManager;->freeStorageAndNotify(JLandroid/content/pm/IPackageDataObserver;)V
 Landroid/content/pm/PackageManager;->freeStorageAndNotify(Ljava/lang/String;JLandroid/content/pm/IPackageDataObserver;)V
 Landroid/content/pm/PackageManager;->getApplicationInfoAsUser(Ljava/lang/String;II)Landroid/content/pm/ApplicationInfo;
+Landroid/content/pm/PackageManager;->getHomeActivities(Ljava/util/List;)Landroid/content/ComponentName;
 Landroid/content/pm/PackageManager;->getPackageCandidateVolumes(Landroid/content/pm/ApplicationInfo;)Ljava/util/List;
 Landroid/content/pm/PackageManager;->getPackageInfoAsUser(Ljava/lang/String;II)Landroid/content/pm/PackageInfo;
 Landroid/content/pm/PackageManager;->getPackageSizeInfo(Ljava/lang/String;Landroid/content/pm/IPackageStatsObserver;)V
@@ -1566,6 +1568,7 @@ Landroid/os/BatteryStats$Uid$Proc$ExcessivePower;->usedTime:J
 Landroid/os/BatteryStats$Uid$Proc;->countExcessivePowers()I
 Landroid/os/BatteryStats$Uid$Proc;->getExcessivePower(I)Landroid/os/BatteryStats$Uid$Proc$ExcessivePower;
 Landroid/os/BatteryStats$Uid$Proc;->getForegroundTime(I)J
+Landroid/os/BatteryStats$Uid$Proc;->getStarts(I)I
 Landroid/os/BatteryStats$Uid$Proc;->getSystemTime(I)J
 Landroid/os/BatteryStats$Uid$Proc;->getUserTime(I)J
 Landroid/os/BatteryStats$Uid$Sensor;->getHandle()I
@@ -1713,7 +1716,9 @@ Landroid/os/Process;->isIsolated(I)Z
 Landroid/os/Process;->readProcFile(Ljava/lang/String;[I[Ljava/lang/String;[J[F)Z
 Landroid/os/Process;->readProcLines(Ljava/lang/String;[Ljava/lang/String;[J)V
 Landroid/os/Process;->setArgV0(Ljava/lang/String;)V
+Landroid/os/SELinux;->checkSELinuxAccess(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)Z
 Landroid/os/SELinux;->getFileContext(Ljava/lang/String;)Ljava/lang/String;
+Landroid/os/SELinux;->getPidContext(I)Ljava/lang/String;
 Landroid/os/SELinux;->isSELinuxEnabled()Z
 Landroid/os/SELinux;->isSELinuxEnforced()Z
 Landroid/os/ServiceManager;-><init>()V
@@ -2139,6 +2144,8 @@ Landroid/service/media/IMediaBrowserServiceCallbacks;->onLoadChildren(Ljava/lang
 Landroid/service/media/IMediaBrowserServiceCallbacks;->onLoadChildrenWithOptions(Ljava/lang/String;Landroid/content/pm/ParceledListSlice;Landroid/os/Bundle;)V
 Landroid/service/media/MediaBrowserService$Result;->mFlags:I
 Landroid/service/media/MediaBrowserService;->KEY_MEDIA_ITEM:Ljava/lang/String;
+Landroid/service/notification/NotificationListenerService;->isBound()Z
+Landroid/service/notification/NotificationListenerService;->mHandler:Landroid/os/Handler;
 Landroid/service/notification/NotificationListenerService;->registerAsSystemService(Landroid/content/Context;Landroid/content/ComponentName;I)V
 Landroid/service/notification/NotificationListenerService;->unregisterAsSystemService()V
 Landroid/service/notification/StatusBarNotification;->getUid()I
@@ -2807,6 +2814,7 @@ Landroid/webkit/WebView;->savePicture(Landroid/os/Bundle;Ljava/io/File;)Z
 Landroid/webkit/WebView;->sEnforceThreadChecking:Z
 Landroid/webkit/WebViewClient;->onUnhandledInputEvent(Landroid/webkit/WebView;Landroid/view/InputEvent;)V
 Landroid/webkit/WebViewFactory;->getProvider()Landroid/webkit/WebViewFactoryProvider;
+Landroid/webkit/WebViewFactory;->getUpdateService()Landroid/webkit/IWebViewUpdateService;
 Landroid/webkit/WebViewFactory;->getWebViewContextAndSetProvider()Landroid/content/Context;
 Landroid/webkit/WebViewFactory;->sPackageInfo:Landroid/content/pm/PackageInfo;
 Landroid/webkit/WebViewFactory;->sProviderInstance:Landroid/webkit/WebViewFactoryProvider;
