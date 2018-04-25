@@ -86,7 +86,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
  * <p>
  * Once the app has a sessionId, it can construct a MediaCrypto object from the UUID and
  * sessionId.  The MediaCrypto object is registered with the MediaCodec in the
- * {@link MediaCodec.#configure} method to enable the codec to decrypt content.
+ * {@link MediaCodec#configure} method to enable the codec to decrypt content.
  * <p>
  * When the app has constructed {@link android.media.MediaExtractor},
  * {@link android.media.MediaCodec} and {@link android.media.MediaCrypto} objects,
