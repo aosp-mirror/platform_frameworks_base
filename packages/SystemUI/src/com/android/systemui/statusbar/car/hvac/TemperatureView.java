@@ -16,67 +16,25 @@
 
 package com.android.systemui.statusbar.car.hvac;
 
-import android.content.Context;
-import android.content.res.TypedArray;
-import android.util.AttributeSet;
-import android.widget.TextView;
-
-import com.android.systemui.Dependency;
-import com.android.systemui.R;
-
 /**
- * Simple text display of HVAC properties, It is designed to show temperature and is configured in
- * the XML.
- * XML properties:
- * hvacPropertyId - Example: CarHvacManager.ID_ZONED_TEMP_SETPOINT (16385)
- * hvacAreaId - Example: VehicleSeat.SEAT_ROW_1_LEFT (1)
- * hvacTempFormat - Example: "%.1f\u00B0" (1 decimal and the degree symbol)
- *
- * Note: It registers itself with {@link HvacController}
+ * Interface for Views that display temperature HVAC properties
  */
-public class TemperatureView extends TextView {
-
-    private final int mAreaId;
-    private final int mPropertyId;
-    private final String mTempFormat;
-
-    public TemperatureView(Context context, AttributeSet attrs) {
-        super(context, attrs);
-        TypedArray typedArray = context.obtainStyledAttributes(attrs, R.styleable.TemperatureView);
-        mAreaId = typedArray.getInt(R.styleable.TemperatureView_hvacAreaId,-1);
-        mPropertyId = typedArray.getInt(R.styleable.TemperatureView_hvacPropertyId, -1);
-        String format = typedArray.getString(R.styleable.TemperatureView_hvacTempFormat);
-        mTempFormat = (format == null) ? "%.1f\u00B0" : format;
-
-        // register with controller
-        HvacController hvacController = Dependency.get(HvacController.class);
-        hvacController.addHvacTextView(this);
-    }
-
+public interface TemperatureView {
     /**
      * Formats the float for display
+     *
      * @param temp - The current temp or NaN
      */
-    public void setTemp(float temp) {
-        if (Float.isNaN(temp)) {
-            setText("--");
-            return;
-        }
-        setText(String.format(mTempFormat, temp));
-    }
+    void setTemp(float temp);
+
 
     /**
      * @return propertiyId  Example: CarHvacManager.ID_ZONED_TEMP_SETPOINT (16385)
      */
-    public int getPropertyId() {
-        return mPropertyId;
-    }
+    int getPropertyId();
 
     /**
      * @return hvac AreaId - Example: VehicleSeat.SEAT_ROW_1_LEFT (1)
      */
-    public int getAreaId() {
-        return mAreaId;
-    }
+    int getAreaId();
 }
-
