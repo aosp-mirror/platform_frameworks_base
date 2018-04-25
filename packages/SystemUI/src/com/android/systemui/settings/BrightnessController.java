@@ -16,6 +16,10 @@
 
 package com.android.systemui.settings;
 
+import static com.android.settingslib.display.BrightnessUtils.GAMMA_SPACE_MAX;
+import static com.android.settingslib.display.BrightnessUtils.convertGammaToLinear;
+import static com.android.settingslib.display.BrightnessUtils.convertLinearToGamma;
+
 import android.animation.ValueAnimator;
 import android.content.ContentResolver;
 import android.content.Context;
@@ -24,7 +28,6 @@ import android.hardware.display.DisplayManager;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Handler;
-import android.os.IPowerManager;
 import android.os.Looper;
 import android.os.Message;
 import android.os.PowerManager;
@@ -36,7 +39,6 @@ import android.provider.Settings;
 import android.service.vr.IVrManager;
 import android.service.vr.IVrStateCallbacks;
 import android.util.Log;
-import android.util.MathUtils;
 import android.widget.ImageView;
 
 import com.android.internal.logging.MetricsLogger;
@@ -50,14 +52,7 @@ public class BrightnessController implements ToggleSlider.Listener {
     private static final String TAG = "StatusBar.BrightnessController";
     private static final boolean SHOW_AUTOMATIC_ICON = false;
 
-    private static final int SLIDER_MAX = 1023;
     private static final int SLIDER_ANIMATION_DURATION = 3000;
-
-    // Hybrid Log Gamma constant values
-    private static final float R = 0.5f;
-    private static final float A = 0.17883277f;
-    private static final float B = 0.28466892f;
-    private static final float C = 0.55991073f;
 
     private static final int MSG_UPDATE_ICON = 0;
     private static final int MSG_UPDATE_SLIDER = 1;
@@ -273,7 +268,7 @@ public class BrightnessController implements ToggleSlider.Listener {
         mContext = context;
         mIcon = icon;
         mControl = control;
-        mControl.setMax(SLIDER_MAX);
+        mControl.setMax(GAMMA_SPACE_MAX);
         mBackgroundHandler = new Handler((Looper) Dependency.get(Dependency.BG_LOOPER));
         mUserTracker = new CurrentUserTracker(mContext) {
             @Override
@@ -481,76 +476,4 @@ public class BrightnessController implements ToggleSlider.Listener {
         mSliderAnimator.start();
     }
 
-    /**
-     * A function for converting from the linear space that the setting works in to the
-     * gamma space that the slider works in.
-     *
-     * The gamma space effectively provides us a way to make linear changes to the slider that
-     * result in linear changes in perception. If we made changes to the slider in the linear space
-     * then we'd see an approximately logarithmic change in perception (c.f. Fechner's Law).
-     *
-     * Internally, this implements the Hybrid Log Gamma opto-electronic transfer function, which is
-     * a slight improvement to the typical gamma transfer function for displays whose max
-     * brightness exceeds the 120 nit reference point, but doesn't set a specific reference
-     * brightness like the PQ function does.
-     *
-     * Note that this transfer function is only valid if the display's backlight value is a linear
-     * control. If it's calibrated to be something non-linear, then a different transfer function
-     * should be used.
-     *
-     * @param val The brightness setting value.
-     * @param min The minimum acceptable value for the setting.
-     * @param max The maximum acceptable value for the setting.
-     *
-     * @return The corresponding slider value
-     */
-    private static final int convertLinearToGamma(int val, int min, int max) {
-        // For some reason, HLG normalizes to the range [0, 12] rather than [0, 1]
-        final float normalizedVal = MathUtils.norm(min, max, val) * 12;
-        final float ret;
-        if (normalizedVal <= 1f) {
-            ret = MathUtils.sqrt(normalizedVal) * R;
-        } else {
-            ret = A * MathUtils.log(normalizedVal - B) + C;
-        }
-
-        return Math.round(MathUtils.lerp(0, SLIDER_MAX, ret));
-    }
-
-    /**
-     * A function for converting from the gamma space that the slider works in to the
-     * linear space that the setting works in.
-     *
-     * The gamma space effectively provides us a way to make linear changes to the slider that
-     * result in linear changes in perception. If we made changes to the slider in the linear space
-     * then we'd see an approximately logarithmic change in perception (c.f. Fechner's Law).
-     *
-     * Internally, this implements the Hybrid Log Gamma electro-optical transfer function, which is
-     * a slight improvement to the typical gamma transfer function for displays whose max
-     * brightness exceeds the 120 nit reference point, but doesn't set a specific reference
-     * brightness like the PQ function does.
-     *
-     * Note that this transfer function is only valid if the display's backlight value is a linear
-     * control. If it's calibrated to be something non-linear, then a different transfer function
-     * should be used.
-     *
-     * @param val The slider value.
-     * @param min The minimum acceptable value for the setting.
-     * @param max The maximum acceptable value for the setting.
-     *
-     * @return The corresponding setting value.
-     */
-    private static final int convertGammaToLinear(int val, int min, int max) {
-        final float normalizedVal = MathUtils.norm(0, SLIDER_MAX, val);
-        final float ret;
-        if (normalizedVal <= R) {
-            ret = MathUtils.sq(normalizedVal/R);
-        } else {
-            ret = MathUtils.exp((normalizedVal - C) / A) + B;
-        }
-
-        // HLG is normalized to the range [0, 12], so we need to re-normalize to the range [0, 1]
-        // in order to derive the correct setting value.
-        return Math.round(MathUtils.lerp(min, max, ret / 12));
-    }
 }
