@@ -1857,6 +1857,8 @@ public class KeyguardViewMediator extends SystemUI {
         synchronized (KeyguardViewMediator.this) {
 
             if (!mHiding) {
+                // Tell ActivityManager that we canceled the keyguardExitAnimation.
+                setShowingLocked(mShowing, mAodShowing, mSecondaryDisplayShowing, true /* force */);
                 return;
             }
             mHiding = false;
