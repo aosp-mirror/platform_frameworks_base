@@ -29,8 +29,11 @@ import static android.os.BatteryManager.EXTRA_MAX_CHARGING_VOLTAGE;
 import static android.os.BatteryManager.EXTRA_PLUGGED;
 import static android.os.BatteryManager.EXTRA_STATUS;
 
+import android.annotation.AnyThread;
+import android.annotation.MainThread;
 import android.app.ActivityManager;
 import android.app.AlarmManager;
+import android.app.Instrumentation;
 import android.app.PendingIntent;
 import android.app.UserSwitchObserver;
 import android.app.admin.DevicePolicyManager;
@@ -44,7 +47,6 @@ import android.content.pm.IPackageManager;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.database.ContentObserver;
-import android.graphics.Bitmap;
 import android.hardware.fingerprint.FingerprintManager;
 import android.hardware.fingerprint.FingerprintManager.AuthenticationCallback;
 import android.hardware.fingerprint.FingerprintManager.AuthenticationResult;
@@ -76,6 +78,7 @@ import com.android.internal.telephony.IccCardConstants;
 import com.android.internal.telephony.IccCardConstants.State;
 import com.android.internal.telephony.PhoneConstants;
 import com.android.internal.telephony.TelephonyIntents;
+import com.android.internal.util.Preconditions;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.systemui.recents.misc.SysUiTaskStackChangeListener;
 import com.android.systemui.shared.system.ActivityManagerWrapper;
@@ -355,6 +358,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
 
     private static int sCurrentUser;
     private Runnable mUpdateFingerprintListeningState = this::updateFingerprintListeningState;
+    private static boolean sDisableHandlerCheckForTesting;
 
     public synchronized static void setCurrentUser(int currentUser) {
         sCurrentUser = currentUser;
@@ -366,6 +370,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
 
     @Override
     public void onTrustChanged(boolean enabled, int userId, int flags) {
+        checkIsHandlerThread();
         mUserHasTrust.put(userId, enabled);
         for (int i = 0; i < mCallbacks.size(); i++) {
             KeyguardUpdateMonitorCallback cb = mCallbacks.get(i).get();
@@ -383,7 +388,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
         dispatchErrorMessage(message);
     }
 
-    protected void handleSimSubscriptionInfoChanged() {
+    private void handleSimSubscriptionInfoChanged() {
         if (DEBUG_SIM_STATES) {
             Log.v(TAG, "onSubscriptionInfoChanged()");
             List<SubscriptionInfo> sil = mSubscriptionManager.getActiveSubscriptionInfoList();
@@ -444,6 +449,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
 
     @Override
     public void onTrustManagedChanged(boolean managed, int userId) {
+        checkIsHandlerThread();
         mUserTrustIsManaged.put(userId, managed);
 
         for (int i = 0; i < mCallbacks.size(); i++) {
@@ -631,6 +637,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
     }
 
     private void notifyFingerprintRunningStateChanged() {
+        checkIsHandlerThread();
         for (int i = 0; i < mCallbacks.size(); i++) {
             KeyguardUpdateMonitorCallback cb = mCallbacks.get(i).get();
             if (cb != null) {
@@ -639,6 +646,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
         }
     }
     private void handleFaceUnlockStateChanged(boolean running, int userId) {
+        checkIsHandlerThread();
         mUserFaceUnlockRunning.put(userId, running);
         for (int i = 0; i < mCallbacks.size(); i++) {
             KeyguardUpdateMonitorCallback cb = mCallbacks.get(i).get();
@@ -698,6 +706,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
     }
 
     private void notifyStrongAuthStateChanged(int userId) {
+        checkIsHandlerThread();
         for (int i = 0; i < mCallbacks.size(); i++) {
             KeyguardUpdateMonitorCallback cb = mCallbacks.get(i).get();
             if (cb != null) {
@@ -1118,20 +1127,6 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
         updateFingerprintListeningState();
     }
 
-    /**
-     * IMPORTANT: Must be called from UI thread.
-     */
-    public void dispatchSetBackground(Bitmap bmp) {
-        if (DEBUG) Log.d(TAG, "dispatchSetBackground");
-        final int count = mCallbacks.size();
-        for (int i = 0; i < count; i++) {
-            KeyguardUpdateMonitorCallback cb = mCallbacks.get(i).get();
-            if (cb != null) {
-                cb.onSetBackground(bmp);
-            }
-        }
-    }
-
     private void handleUserInfoChanged(int userId) {
         for (int i = 0; i < mCallbacks.size(); i++) {
             KeyguardUpdateMonitorCallback cb = mCallbacks.get(i).get();
@@ -1343,6 +1338,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
      * @param hasLockscreenWallpaper Whether Keyguard has a lockscreen wallpaper.
      */
     public void setHasLockscreenWallpaper(boolean hasLockscreenWallpaper) {
+        checkIsHandlerThread();
         if (hasLockscreenWallpaper != mHasLockscreenWallpaper) {
             mHasLockscreenWallpaper = hasLockscreenWallpaper;
             for (int i = mCallbacks.size() - 1; i >= 0; i--) {
@@ -1364,7 +1360,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
     /**
      * Handle {@link #MSG_DPM_STATE_CHANGED}
      */
-    protected void handleDevicePolicyManagerStateChanged() {
+    private void handleDevicePolicyManagerStateChanged() {
         updateFingerprintListeningState();
         for (int i = mCallbacks.size() - 1; i >= 0; i--) {
             KeyguardUpdateMonitorCallback cb = mCallbacks.get(i).get();
@@ -1377,7 +1373,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
     /**
      * Handle {@link #MSG_USER_SWITCHING}
      */
-    protected void handleUserSwitching(int userId, IRemoteCallback reply) {
+    private void handleUserSwitching(int userId, IRemoteCallback reply) {
         for (int i = 0; i < mCallbacks.size(); i++) {
             KeyguardUpdateMonitorCallback cb = mCallbacks.get(i).get();
             if (cb != null) {
@@ -1393,7 +1389,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
     /**
      * Handle {@link #MSG_USER_SWITCH_COMPLETE}
      */
-    protected void handleUserSwitchComplete(int userId) {
+    private void handleUserSwitchComplete(int userId) {
         for (int i = 0; i < mCallbacks.size(); i++) {
             KeyguardUpdateMonitorCallback cb = mCallbacks.get(i).get();
             if (cb != null) {
@@ -1415,7 +1411,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
     /**
      * Handle {@link #MSG_BOOT_COMPLETED}
      */
-    protected void handleBootCompleted() {
+    private void handleBootCompleted() {
         if (mBootCompleted) return;
         mBootCompleted = true;
         for (int i = 0; i < mCallbacks.size(); i++) {
@@ -1437,7 +1433,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
     /**
      * Handle {@link #MSG_DEVICE_PROVISIONED}
      */
-    protected void handleDeviceProvisioned() {
+    private void handleDeviceProvisioned() {
         for (int i = 0; i < mCallbacks.size(); i++) {
             KeyguardUpdateMonitorCallback cb = mCallbacks.get(i).get();
             if (cb != null) {
@@ -1454,7 +1450,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
     /**
      * Handle {@link #MSG_PHONE_STATE_CHANGED}
      */
-    protected void handlePhoneStateChanged(String newState) {
+    private void handlePhoneStateChanged(String newState) {
         if (DEBUG) Log.d(TAG, "handlePhoneStateChanged(" + newState + ")");
         if (TelephonyManager.EXTRA_STATE_IDLE.equals(newState)) {
             mPhoneState = TelephonyManager.CALL_STATE_IDLE;
@@ -1474,7 +1470,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
     /**
      * Handle {@link #MSG_RINGER_MODE_CHANGED}
      */
-    protected void handleRingerModeChange(int mode) {
+    private void handleRingerModeChange(int mode) {
         if (DEBUG) Log.d(TAG, "handleRingerModeChange(" + mode + ")");
         mRingMode = mode;
         for (int i = 0; i < mCallbacks.size(); i++) {
@@ -1519,8 +1515,8 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
      * Handle {@link #MSG_SIM_STATE_CHANGE}
      */
     @VisibleForTesting
-    protected void handleSimStateChange(int subId, int slotId, State state) {
-
+    void handleSimStateChange(int subId, int slotId, State state) {
+        checkIsHandlerThread();
         if (DEBUG_SIM_STATES) {
             Log.d(TAG, "handleSimStateChange(subId=" + subId + ", slotId="
                     + slotId + ", state=" + state +")");
@@ -1583,6 +1579,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
      * <p>Needs to be called from the main thread.
      */
     public void onKeyguardVisibilityChanged(boolean showing) {
+        checkIsHandlerThread();
         if (DEBUG) Log.d(TAG, "onKeyguardVisibilityChanged(" + showing + ")");
         mKeyguardIsVisible = showing;
         for (int i = 0; i < mCallbacks.size(); i++) {
@@ -1673,6 +1670,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
      * @param callback The callback to remove
      */
     public void removeCallback(KeyguardUpdateMonitorCallback callback) {
+        checkIsHandlerThread();
         if (DEBUG) Log.v(TAG, "*** unregister callback for " + callback);
         for (int i = mCallbacks.size() - 1; i >= 0; i--) {
             if (mCallbacks.get(i).get() == callback) {
@@ -1687,6 +1685,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
      * @param callback The callback to register
      */
     public void registerCallback(KeyguardUpdateMonitorCallback callback) {
+        checkIsHandlerThread();
         if (DEBUG) Log.v(TAG, "*** register callback for " + callback);
         // Prevent adding duplicate callbacks
         for (int i = 0; i < mCallbacks.size(); i++) {
@@ -1705,6 +1704,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
         return mSwitchingUser;
     }
 
+    @AnyThread
     public void setSwitchingUser(boolean switching) {
         mSwitchingUser = switching;
         // Since this comes in on a binder thread, we need to post if first
@@ -1748,6 +1748,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
      * NOTE: Because handleSimStateChange() invokes callbacks immediately without going
      * through mHandler, this *must* be called from the UI thread.
      */
+    @MainThread
     public void reportSimUnlocked(int subId) {
         if (DEBUG_SIM_STATES) Log.v(TAG, "reportSimUnlocked(subId=" + subId + ")");
         int slotId = SubscriptionManager.getSlotIndex(subId);
@@ -1766,6 +1767,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
         if (!bypassHandler) {
             mHandler.obtainMessage(MSG_REPORT_EMERGENCY_CALL_ACTION).sendToTarget();
         } else {
+            checkIsHandlerThread();
             handleReportEmergencyCallAction();
         }
     }
@@ -1995,6 +1997,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
     }
 
     private void updateLogoutEnabled() {
+        checkIsHandlerThread();
         boolean logoutEnabled = mDevicePolicyManager.isLogoutEnabled();
         if (mLogoutEnabled != logoutEnabled) {
             mLogoutEnabled = logoutEnabled;
@@ -2005,6 +2008,36 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
                 }
             }
         }
+    }
+
+    private void checkIsHandlerThread() {
+        if (sDisableHandlerCheckForTesting) {
+            return;
+        }
+        if (!mHandler.getLooper().isCurrentThread()) {
+            Log.wtf(TAG, "must call on mHandler's thread "
+                    + mHandler.getLooper().getThread() + ", not " + Thread.currentThread());
+        }
+    }
+
+    /**
+     * Turn off the handler check for testing.
+     *
+     * This is necessary because currently tests are not too careful about which thread they call
+     * into this class on.
+     *
+     * Note that this must be called before scheduling any work involving KeyguardUpdateMonitor
+     * instances.
+     *
+     * TODO: fix the tests and remove this.
+     */
+    @VisibleForTesting
+    public static void disableHandlerCheckForTesting(Instrumentation instrumentation) {
+        Preconditions.checkNotNull(instrumentation, "Must only call this method in tests!");
+        // Don't need synchronization here *if* the callers follow the contract and call this only
+        // before scheduling work for KeyguardUpdateMonitor on other threads, because the scheduling
+        // of that work forces a happens-before relationship.
+        sDisableHandlerCheckForTesting = true;
     }
 
     public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {

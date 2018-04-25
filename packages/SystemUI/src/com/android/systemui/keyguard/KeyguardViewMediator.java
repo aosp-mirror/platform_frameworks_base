@@ -165,6 +165,7 @@ public class KeyguardViewMediator extends SystemUI {
     private static final int NOTIFY_SCREEN_TURNED_ON = 15;
     private static final int NOTIFY_SCREEN_TURNED_OFF = 16;
     private static final int NOTIFY_STARTED_GOING_TO_SLEEP = 17;
+    private static final int SYSTEM_READY = 18;
 
     /**
      * The default amount of time we stay awake (used for all key input)
@@ -778,6 +779,10 @@ public class KeyguardViewMediator extends SystemUI {
      * Let us know that the system is ready after startup.
      */
     public void onSystemReady() {
+        mHandler.obtainMessage(SYSTEM_READY).sendToTarget();
+    }
+
+    private void handleSystemReady() {
         synchronized (this) {
             if (DEBUG) Log.d(TAG, "onSystemReady");
             mSystemReady = true;
@@ -1605,6 +1610,9 @@ public class KeyguardViewMediator extends SystemUI {
                     Trace.beginSection("KeyguardViewMediator#handleMessage KEYGUARD_DONE_PENDING_TIMEOUT");
                     Log.w(TAG, "Timeout while waiting for activity drawn!");
                     Trace.endSection();
+                    break;
+                case SYSTEM_READY:
+                    handleSystemReady();
                     break;
             }
         }
