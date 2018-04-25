@@ -87,7 +87,6 @@ public class InputMethodUtilsTest {
     private static final String SUBTYPE_MODE_HANDWRITING = "handwriting";
     private static final String SUBTYPE_MODE_ANY = null;
     private static final String EXTRA_VALUE_PAIR_SEPARATOR = ",";
-    private static final String EXTRA_VALUE_ASCII_CAPABLE = "AsciiCapable";
     private static final String EXTRA_VALUE_ENABLED_WHEN_DEFAULT_IS_NOT_ASCII_CAPABLE =
             "EnabledWhenDefaultIsNotAsciiCapable";
 
@@ -908,13 +907,6 @@ public class InputMethodUtilsTest {
         if (isEnabledWhenDefaultIsNotAsciiCapable) {
             subtypeExtraValue.append(EXTRA_VALUE_PAIR_SEPARATOR);
             subtypeExtraValue.append(EXTRA_VALUE_ENABLED_WHEN_DEFAULT_IS_NOT_ASCII_CAPABLE);
-        }
-
-        // TODO: Remove following code. InputMethodSubtype#isAsciiCapable() has been publicly
-        // available since API level 19 (KitKat). We no longer need to rely on extra value.
-        if (isAsciiCapable) {
-            subtypeExtraValue.append(EXTRA_VALUE_PAIR_SEPARATOR);
-            subtypeExtraValue.append(EXTRA_VALUE_ASCII_CAPABLE);
         }
 
         return new InputMethodSubtypeBuilder()
