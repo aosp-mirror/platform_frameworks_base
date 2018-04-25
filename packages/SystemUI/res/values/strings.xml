@@ -2223,4 +2223,6 @@
     <!-- An action on the dialog that tells that scheduled (i.e. automatic) battery saver: user acknowledges and closes the dialog.  [CHAR LIMIT=NONE]-->
     <string name="auto_saver_okay_action">Got it</string>
 
+    <!-- URl of the webpage that explains battery saver. -->
+    <string name="help_uri_battery_saver_learn_more_link_target" translatable="false"></string>
 </resources>

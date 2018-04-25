@@ -4514,7 +4514,10 @@
     <!-- Notification shown when device owner silently deletes a package [CHAR LIMIT=NONE] -->
     <string name="package_deleted_device_owner">Deleted by your admin</string>
 
-    <!-- [CHAR_LIMIT=NONE] Battery saver: Feature description -->
+    <!-- [CHAR_LIMIT=NONE] Battery saver: Feature description, with a "learn more" link. -->
+    <string name="battery_saver_description_with_learn_more">To extend your battery life, Battery Saver turns off some device features and restricts apps. <annotation id="url">Learn More</annotation></string>
+
+    <!-- [CHAR_LIMIT=NONE] Battery saver: Feature description, without a "learn more" link. -->
     <string name="battery_saver_description">To extend your battery life, Battery Saver turns off some device features and restricts apps.</string>
 
     <!-- [CHAR_LIMIT=NONE] Data saver: Feature description -->
