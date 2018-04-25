@@ -1877,7 +1877,7 @@ public class TelephonyManager {
 
     /**
      * Returns the ISO country code equivalent of the MCC (Mobile Country Code) of the current
-     * registered operator, or nearby cell information if not registered.
+     * registered operator or the cell nearby, if available.
      * .
      * <p>
      * Note: Result may be unreliable on CDMA networks (use {@link #getPhoneType()} to determine
@@ -1889,7 +1889,7 @@ public class TelephonyManager {
 
     /**
      * Returns the ISO country code equivalent of the MCC (Mobile Country Code) of the current
-     * registered operator, or nearby cell information if not registered.
+     * registered operator or the cell nearby, if available.
      * <p>
      * Note: Result may be unreliable on CDMA networks (use {@link #getPhoneType()} to determine
      * if on a CDMA network).
