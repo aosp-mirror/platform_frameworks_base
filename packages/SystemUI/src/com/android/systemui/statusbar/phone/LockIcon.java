@@ -55,6 +55,7 @@ public class LockIcon extends KeyguardAffordanceView implements OnUserInfoChange
     private final UnlockMethodCache mUnlockMethodCache;
     private AccessibilityController mAccessibilityController;
     private boolean mHasFingerPrintIcon;
+    private boolean mHasFaceUnlockIcon;
     private int mDensity;
 
     private final Runnable mDrawOffTimeout = () -> update(true /* forceUpdate */);
@@ -130,6 +131,7 @@ public class LockIcon extends KeyguardAffordanceView implements OnUserInfoChange
         }
         int state = getState();
         boolean anyFingerprintIcon = state == STATE_FINGERPRINT || state == STATE_FINGERPRINT_ERROR;
+        mHasFaceUnlockIcon = state == STATE_FACE_UNLOCK;
         boolean useAdditionalPadding = anyFingerprintIcon;
         boolean trustHidden = anyFingerprintIcon;
         if (state != mLastState || mDeviceInteractive != mLastDeviceInteractive
@@ -179,6 +181,11 @@ public class LockIcon extends KeyguardAffordanceView implements OnUserInfoChange
             setRestingAlpha(
                     anyFingerprintIcon ? 1f : KeyguardAffordanceHelper.SWIPE_RESTING_ALPHA_AMOUNT);
             setImageDrawable(icon, false);
+            if (mHasFaceUnlockIcon) {
+                announceForAccessibility(getContext().getString(
+                    R.string.accessibility_scanning_face));
+            }
+
             mHasFingerPrintIcon = anyFingerprintIcon;
             if (animation != null && isAnim) {
                 animation.forceAnimationOnUI();
@@ -228,6 +235,11 @@ public class LockIcon extends KeyguardAffordanceView implements OnUserInfoChange
             info.addAction(unlock);
             info.setHintText(getContext().getString(
                     R.string.accessibility_waiting_for_fingerprint));
+        } else if (mHasFaceUnlockIcon){
+            //Avoid 'button' to be spoken for scanning face
+            info.setClassName(LockIcon.class.getName());
+            info.setContentDescription(getContext().getString(
+                R.string.accessibility_scanning_face));
         }
     }
 

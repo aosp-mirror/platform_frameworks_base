@@ -240,6 +240,8 @@
     <string name="accessibility_waiting_for_fingerprint">Waiting for fingerprint</string>
     <!-- Accessibility action of the unlock button when fingerpint is on (not shown on the screen). [CHAR LIMIT=NONE] -->
     <string name="accessibility_unlock_without_fingerprint">Unlock without using your fingerprint</string>
+    <!-- Content description of the Trusted Face icon for accessibility. [CHAR LIMIT=NONE] -->
+    <string name="accessibility_scanning_face">Scanning face</string>
     <!-- Click action label for accessibility for the smart reply buttons (not shown on-screen).". [CHAR LIMIT=NONE] -->
     <string name="accessibility_send_smart_reply">Send</string>
     <!-- Click action label for accessibility for the unlock button. [CHAR LIMIT=NONE] -->
