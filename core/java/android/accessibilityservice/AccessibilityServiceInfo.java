@@ -302,7 +302,16 @@ public class AccessibilityServiceInfo implements Parcelable {
 
     /**
      * This flag requests that all fingerprint gestures be sent to the accessibility service.
-     * It is handled in {@link FingerprintGestureController}
+     * <p>
+     * Services that want to set this flag have to declare the capability
+     * to retrieve window content in their meta-data by setting the attribute
+     * {@link android.R.attr#canRequestFingerprintGestures} to
+     * true, otherwise this flag will be ignored. For how to declare the meta-data
+     * of a service refer to {@value AccessibilityService#SERVICE_META_DATA}.
+     * </p>
+     *
+     * @see android.R.styleable#AccessibilityService_canRequestFingerprintGestures
+     * @see AccessibilityService#getFingerprintGestureController()
      */
     public static final int FLAG_REQUEST_FINGERPRINT_GESTURES = 0x00000200;
 
