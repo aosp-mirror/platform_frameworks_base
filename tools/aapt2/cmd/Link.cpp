@@ -129,6 +129,12 @@ struct LinkOptions {
   // Stable ID options.
   std::unordered_map<ResourceName, ResourceId> stable_id_map;
   Maybe<std::string> resource_id_map_path;
+
+  // When 'true', allow reserved package IDs to be used for applications. Pre-O, the platform
+  // treats negative resource IDs [those with a package ID of 0x80 or higher] as invalid.
+  // In order to work around this limitation, we allow the use of traditionally reserved
+  // resource IDs [those between 0x02 and 0x7E].
+  bool allow_reserved_package_id = false;
 };
 
 class LinkContext : public IAaptContext {
@@ -895,9 +901,7 @@ class LinkCommand {
     // Capture the shared libraries so that the final resource table can be properly flattened
     // with support for shared libraries.
     for (auto& entry : asset_source->GetAssignedPackageIds()) {
-      if (entry.first > kFrameworkPackageId && entry.first < kAppPackageId) {
-        final_table_.included_packages_[entry.first] = entry.second;
-      } else if (entry.first == kAppPackageId) {
+      if (entry.first == kAppPackageId) {
         // Capture the included base feature package.
         included_feature_base_ = entry.second;
       } else if (entry.first == kFrameworkPackageId) {
@@ -911,6 +915,8 @@ class LinkCommand {
           // android:versionCode from the framework AndroidManifest.xml.
           ExtractCompileSdkVersions(asset_source->GetAssetManager());
         }
+      } else if (asset_source->IsPackageDynamic(entry.first)) {
+        final_table_.included_packages_[entry.first] = entry.second;
       }
     }
 
@@ -1595,7 +1601,15 @@ class LinkCommand {
     // If required, the package name is modifed before flattening, and then modified back
     // to its original name.
     ResourceTablePackage* package_to_rewrite = nullptr;
-    if (context_->GetPackageId() > kAppPackageId &&
+    // Pre-O, the platform treats negative resource IDs [those with a package ID of 0x80
+    // or higher] as invalid. In order to work around this limitation, we allow the use
+    // of traditionally reserved resource IDs [those between 0x02 and 0x7E]. Allow the
+    // definition of what a valid "split" package ID is to account for this.
+    const bool isSplitPackage = (options_.allow_reserved_package_id &&
+          context_->GetPackageId() != kAppPackageId &&
+          context_->GetPackageId() != kFrameworkPackageId)
+        || (!options_.allow_reserved_package_id && context_->GetPackageId() > kAppPackageId);
+    if (isSplitPackage &&
         included_feature_base_ == make_value(context_->GetCompilationPackage())) {
       // The base APK is included, and this is a feature split. If the base package is
       // the same as this package, then we are building an old style Android Instant Apps feature
@@ -2139,6 +2153,10 @@ int Link(const std::vector<StringPiece>& args, IDiagnostics* diagnostics) {
                         "Generates a text file containing the resource symbols of the R class in\n"
                         "the specified folder.",
                         &options.generate_text_symbols_path)
+          .OptionalSwitch("--allow-reserved-package-id",
+                          "Allows the use of a reserved package ID. This should on be used for\n"
+                          "packages with a pre-O min-sdk\n",
+                          &options.allow_reserved_package_id)
           .OptionalSwitch("--auto-add-overlay",
                           "Allows the addition of new resources in overlays without\n"
                           "<add-resource> tags.",
@@ -2238,7 +2256,9 @@ int Link(const std::vector<StringPiece>& args, IDiagnostics* diagnostics) {
     }
 
     const uint32_t package_id_int = maybe_package_id_int.value();
-    if (package_id_int < kAppPackageId || package_id_int > std::numeric_limits<uint8_t>::max()) {
+    if (package_id_int > std::numeric_limits<uint8_t>::max()
+        || package_id_int == kFrameworkPackageId
+        || (!options.allow_reserved_package_id && package_id_int < kAppPackageId)) {
       context.GetDiagnostics()->Error(
           DiagMessage() << StringPrintf(
               "invalid package ID 0x%02x. Must be in the range 0x7f-0xff.", package_id_int));
