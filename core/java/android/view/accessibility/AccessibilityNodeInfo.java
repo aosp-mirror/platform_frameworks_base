@@ -3442,6 +3442,7 @@ public class AccessibilityNodeInfo implements Parcelable {
         mPackageName = other.mPackageName;
         mClassName = other.mClassName;
         mText = other.mText;
+        mOriginalText = other.mOriginalText;
         mHintText = other.mHintText;
         mError = other.mError;
         mContentDescription = other.mContentDescription;
