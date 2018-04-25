@@ -16,6 +16,8 @@
 
 package com.android.internal.policy;
 
+import android.annotation.Nullable;
+import android.annotation.TestApi;
 import android.app.WindowConfiguration;
 import android.graphics.Outline;
 import android.graphics.drawable.InsetDrawable;
@@ -41,7 +43,6 @@ import java.util.List;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.ObjectAnimator;
-import android.app.ActivityManager;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.content.res.Resources;
@@ -55,7 +56,6 @@ import android.graphics.Region;
 import android.graphics.Shader;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
-import android.os.RemoteException;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.util.TypedValue;
@@ -281,9 +281,14 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
         initResizingPaints();
     }
 
-    void setBackgroundFallback(int resId) {
-        mBackgroundFallback.setDrawable(resId != 0 ? getContext().getDrawable(resId) : null);
+    void setBackgroundFallback(@Nullable Drawable fallbackDrawable) {
+        mBackgroundFallback.setDrawable(fallbackDrawable);
         setWillNotDraw(getBackground() == null && !mBackgroundFallback.hasFallback());
+    }
+
+    @TestApi
+    public @Nullable Drawable getBackgroundFallback() {
+        return mBackgroundFallback.getDrawable();
     }
 
     @Override
@@ -946,7 +951,7 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
                         mWindow.isTranslucent() || mWindow.isShowingWallpaper());
             } else {
                 mResizingBackgroundDrawable = getResizingBackgroundDrawable(
-                        getContext(), 0, mWindow.mBackgroundFallbackResource,
+                        mWindow.mBackgroundDrawable, mWindow.mBackgroundFallbackDrawable,
                         mWindow.isTranslucent() || mWindow.isShowingWallpaper());
             }
             if (mResizingBackgroundDrawable != null) {
@@ -1901,9 +1906,9 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
 
     private void loadBackgroundDrawablesIfNeeded() {
         if (mResizingBackgroundDrawable == null) {
-            mResizingBackgroundDrawable = getResizingBackgroundDrawable(getContext(),
-                    mWindow.mBackgroundResource, mWindow.mBackgroundFallbackResource,
-                    mWindow.isTranslucent() || mWindow.isShowingWallpaper());
+            mResizingBackgroundDrawable = getResizingBackgroundDrawable(mWindow.mBackgroundDrawable,
+                    mWindow.mBackgroundFallbackDrawable, mWindow.isTranslucent()
+                    || mWindow.isShowingWallpaper());
             if (mResizingBackgroundDrawable == null) {
                 // We shouldn't really get here as the background fallback should be always
                 // available since it is defaulted by the system.
@@ -2011,20 +2016,14 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
      * Returns the color used to fill areas the app has not rendered content to yet when the
      * user is resizing the window of an activity in multi-window mode.
      */
-    public static Drawable getResizingBackgroundDrawable(Context context, int backgroundRes,
-            int backgroundFallbackRes, boolean windowTranslucent) {
-        if (backgroundRes != 0) {
-            final Drawable drawable = context.getDrawable(backgroundRes);
-            if (drawable != null) {
-                return enforceNonTranslucentBackground(drawable, windowTranslucent);
-            }
+    public static Drawable getResizingBackgroundDrawable(@Nullable Drawable backgroundDrawable,
+            @Nullable Drawable fallbackDrawable, boolean windowTranslucent) {
+        if (backgroundDrawable != null) {
+            return enforceNonTranslucentBackground(backgroundDrawable, windowTranslucent);
         }
 
-        if (backgroundFallbackRes != 0) {
-            final Drawable fallbackDrawable = context.getDrawable(backgroundFallbackRes);
-            if (fallbackDrawable != null) {
-                return enforceNonTranslucentBackground(fallbackDrawable, windowTranslucent);
-            }
+        if (fallbackDrawable != null) {
+            return enforceNonTranslucentBackground(fallbackDrawable, windowTranslucent);
         }
         return new ColorDrawable(Color.BLACK);
     }

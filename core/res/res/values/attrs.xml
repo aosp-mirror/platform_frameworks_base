@@ -339,13 +339,13 @@
                   then in code manually set your window's background to
                   null so it will not be drawn.
              </ul> -->
-        <attr name="windowBackground" format="reference" />
+        <attr name="windowBackground" format="reference|color" />
         <!-- Drawable to draw selectively within the inset areas when the windowBackground
              has been set to null. This protects against seeing visual garbage in the
              surface when the app has not drawn any content into this area. One example is
              when the user is resizing a window of an activity that has
              {@link android.R.attr#resizeableActivity} set for multi-window mode. -->
-        <attr name="windowBackgroundFallback" format="reference" />
+        <attr name="windowBackgroundFallback" format="reference|color" />
         <!-- Drawable to use as a frame around the window. -->
         <attr name="windowFrame" format="reference" />
         <!-- Flag indicating whether there should be no title on this window. -->
