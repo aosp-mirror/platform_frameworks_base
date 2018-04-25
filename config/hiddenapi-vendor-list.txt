@@ -36,7 +36,6 @@ Landroid/app/IActivityManager;->startActivity(Landroid/app/IApplicationThread;Lj
 Landroid/app/IActivityManager;->startActivityAsUser(Landroid/app/IApplicationThread;Ljava/lang/String;Landroid/content/Intent;Ljava/lang/String;Landroid/os/IBinder;Ljava/lang/String;IILandroid/app/ProfilerInfo;Landroid/os/Bundle;I)I
 Landroid/app/IActivityManager;->startActivityFromRecents(ILandroid/os/Bundle;)I
 Landroid/app/IActivityManager;->startRecentsActivity(Landroid/content/Intent;Landroid/app/IAssistDataReceiver;Landroid/view/IRecentsAnimationRunner;)V
-Landroid/app/IAlarmManager$Stub;->asInterface(Landroid/os/IBinder;)Landroid/app/IAlarmManager;
 Landroid/app/IAlarmManager;->setTime(J)Z
 Landroid/app/IAssistDataReceiver$Stub;-><init>()V
 Landroid/app/IAssistDataReceiver;->onHandleAssistData(Landroid/os/Bundle;)V
@@ -92,7 +91,6 @@ Landroid/content/Intent;->getExtra(Ljava/lang/String;)Ljava/lang/Object;
 Landroid/content/Intent;->getIBinderExtra(Ljava/lang/String;)Landroid/os/IBinder;
 Landroid/content/Intent;->resolveSystemService(Landroid/content/pm/PackageManager;I)Landroid/content/ComponentName;
 Landroid/content/pm/IPackageDataObserver$Stub;-><init>()V
-Landroid/content/pm/IPackageDataObserver;->onRemoveCompleted(Ljava/lang/String;Z)V
 Landroid/content/pm/IPackageDeleteObserver$Stub;-><init>()V
 Landroid/content/pm/IPackageDeleteObserver;->packageDeleted(Ljava/lang/String;I)V
 Landroid/content/pm/IPackageManager;->getActivityInfo(Landroid/content/ComponentName;II)Landroid/content/pm/ActivityInfo;
@@ -168,7 +166,6 @@ Landroid/net/DhcpResults;->vendorInfo:Ljava/lang/String;
 Landroid/net/IConnectivityManager;->getAllNetworkState()[Landroid/net/NetworkState;
 Landroid/net/INetd$Stub;->asInterface(Landroid/os/IBinder;)Landroid/net/INetd;
 Landroid/net/INetd;->interfaceAddAddress(Ljava/lang/String;Ljava/lang/String;I)V
-Landroid/net/INetworkPolicyManager$Stub;->asInterface(Landroid/os/IBinder;)Landroid/net/INetworkPolicyManager;
 Landroid/net/INetworkPolicyManager;->getNetworkQuotaInfo(Landroid/net/NetworkState;)Landroid/net/NetworkQuotaInfo;
 Landroid/net/INetworkStatsService$Stub;->asInterface(Landroid/os/IBinder;)Landroid/net/INetworkStatsService;
 Landroid/net/INetworkStatsService;->openSession()Landroid/net/INetworkStatsSession;
@@ -768,7 +765,6 @@ Lcom/android/internal/os/BatteryStatsImpl;->getPhoneSignalScanningTime(JI)J
 Lcom/android/internal/os/BatteryStatsImpl;->getPhoneSignalStrengthTime(IJI)J
 Lcom/android/internal/os/BatteryStatsImpl;->getScreenBrightnessTime(IJI)J
 Lcom/android/internal/os/BatteryStatsImpl;->getWifiOnTime(JI)J
-Lcom/android/internal/os/SomeArgs;->arg1:Ljava/lang/Object;
 Lcom/android/internal/os/SomeArgs;->arg2:Ljava/lang/Object;
 Lcom/android/internal/os/SomeArgs;->arg3:Ljava/lang/Object;
 Lcom/android/internal/os/SomeArgs;->obtain()Lcom/android/internal/os/SomeArgs;
