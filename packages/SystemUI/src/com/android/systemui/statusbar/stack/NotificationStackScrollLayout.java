@@ -81,6 +81,7 @@ import com.android.systemui.plugins.statusbar.NotificationMenuRowPlugin;
 import com.android.systemui.plugins.statusbar.NotificationMenuRowPlugin.MenuItem;
 import com.android.systemui.plugins.statusbar.NotificationSwipeActionHelper;
 import com.android.systemui.statusbar.ActivatableNotificationView;
+import com.android.systemui.statusbar.DndSuppressingNotificationsView;
 import com.android.systemui.statusbar.EmptyShadeView;
 import com.android.systemui.statusbar.ExpandableNotificationRow;
 import com.android.systemui.statusbar.ExpandableView;
@@ -236,6 +237,7 @@ public class NotificationStackScrollLayout extends ViewGroup
     protected boolean mScrollingEnabled;
     protected FooterView mFooterView;
     protected EmptyShadeView mEmptyShadeView;
+    protected DndSuppressingNotificationsView mDndView;
     private boolean mDismissAllInProgress;
     private boolean mFadeNotificationsOnDismiss;
 
@@ -1006,7 +1008,8 @@ public class NotificationStackScrollLayout extends ViewGroup
     private float getAppearEndPosition() {
         int appearPosition;
         int notGoneChildCount = getNotGoneChildCount();
-        if (mEmptyShadeView.getVisibility() == GONE && notGoneChildCount != 0) {
+        if ((mEmptyShadeView.getVisibility() == GONE && mDndView.getVisibility() == GONE)
+                && notGoneChildCount != 0) {
             if (isHeadsUpTransition()
                     || (mHeadsUpManager.hasPinnedHeadsUp() && !mAmbientState.isDark())) {
                 appearPosition = getTopHeadsUpPinnedHeight();
@@ -1016,6 +1019,8 @@ public class NotificationStackScrollLayout extends ViewGroup
                     appearPosition += mShelf.getIntrinsicHeight();
                 }
             }
+        } else if (mEmptyShadeView.getVisibility() == GONE) {
+            appearPosition = mDndView.getHeight();
         } else {
             appearPosition = mEmptyShadeView.getHeight();
         }
@@ -2608,19 +2613,6 @@ public class NotificationStackScrollLayout extends ViewGroup
         return mShelf.getVisibility() == GONE ? 0 : mShelf.getIntrinsicHeight();
     }
 
-    public int getFirstChildIntrinsicHeight() {
-        final ExpandableView firstChild = getFirstChildNotGone();
-        int firstChildMinHeight = firstChild != null
-                ? firstChild.getIntrinsicHeight()
-                : mEmptyShadeView != null
-                        ? mEmptyShadeView.getIntrinsicHeight()
-                        : mCollapsedSize;
-        if (mOwnScrollY > 0) {
-            firstChildMinHeight = Math.max(firstChildMinHeight - mOwnScrollY, mCollapsedSize);
-        }
-        return firstChildMinHeight;
-    }
-
     public float getTopPaddingOverflow() {
         return mTopPaddingOverflow;
     }
@@ -3918,6 +3910,7 @@ public class NotificationStackScrollLayout extends ViewGroup
         final int textColor = Utils.getColorAttr(context, R.attr.wallpaperTextColor);
         mFooterView.setTextColor(textColor);
         mEmptyShadeView.setTextColor(textColor);
+        mDndView.setColor(textColor);
     }
 
     public void goToFullShade(long delay) {
@@ -3925,6 +3918,7 @@ public class NotificationStackScrollLayout extends ViewGroup
             mFooterView.setInvisible();
         }
         mEmptyShadeView.setInvisible();
+        mDndView.setInvisible();
         mGoToFullShadeNeedsAnimation = true;
         mGoToFullShadeDelay = delay;
         mNeedsAnimation = true;
@@ -4076,21 +4070,35 @@ public class NotificationStackScrollLayout extends ViewGroup
         int newVisibility = visible ? VISIBLE : GONE;
 
         boolean changedVisibility = oldVisibility != newVisibility;
-        if (changedVisibility || newVisibility != GONE) {
+        if (changedVisibility) {
             if (newVisibility != GONE) {
-                int oldText = mEmptyShadeView.getTextResource();
-                int newText;
-                if (mStatusBar.areNotificationsHidden()) {
-                    newText = R.string.dnd_suppressing_shade_text;
-                } else {
-                    newText = R.string.empty_shade_text;
-                }
-                if (changedVisibility || !Objects.equals(oldText, newText)) {
-                    mEmptyShadeView.setText(newText);
-                    showFooterView(mEmptyShadeView);
-                }
+                showFooterView(mEmptyShadeView);
             } else {
                 hideFooterView(mEmptyShadeView, true);
+            }
+        }
+    }
+
+    public void setDndView(DndSuppressingNotificationsView dndView) {
+        int index = -1;
+        if (mDndView != null) {
+            index = indexOfChild(mDndView);
+            removeView(mDndView);
+        }
+        mDndView = dndView;
+        addView(mDndView, index);
+    }
+
+    public void updateDndView(boolean visible) {
+        int oldVisibility = mDndView.willBeGone() ? GONE : mDndView.getVisibility();
+        int newVisibility = visible ? VISIBLE : GONE;
+
+        boolean changedVisibility = oldVisibility != newVisibility;
+        if (changedVisibility) {
+            if (newVisibility != GONE) {
+                showFooterView(mDndView);
+            } else {
+                hideFooterView(mDndView, true);
             }
         }
     }
@@ -4119,10 +4127,16 @@ public class NotificationStackScrollLayout extends ViewGroup
         } else {
             footerView.setInvisible();
         }
-        footerView.setVisibility(VISIBLE);
-        footerView.setWillBeGone(false);
-        updateContentHeight();
-        notifyHeightChangeListener(footerView);
+        Runnable onShowFinishRunnable = new Runnable() {
+            @Override
+            public void run() {
+                footerView.setVisibility(VISIBLE);
+                footerView.setWillBeGone(false);
+                updateContentHeight();
+                notifyHeightChangeListener(footerView);
+            }
+        };
+        footerView.performVisibilityAnimation(true, onShowFinishRunnable);
     }
 
     private void hideFooterView(StackScrollerDecorView footerView, boolean isButtonVisible) {
