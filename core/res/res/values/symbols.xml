@@ -663,6 +663,7 @@
   <java-symbol type="string" name="autofill_state_re" />
   <java-symbol type="string" name="autofill_this_form" />
   <java-symbol type="string" name="autofill_username_re" />
+  <java-symbol type="string" name="autofill_window_title" />
   <java-symbol type="string" name="autofill_zip_4_re" />
   <java-symbol type="string" name="autofill_zip_code" />
   <java-symbol type="string" name="autofill_zip_code_re" />
@@ -3055,13 +3056,13 @@
   <java-symbol type="layout" name="autofill_dataset_picker"/>
   <java-symbol type="layout" name="autofill_dataset_picker_fullscreen"/>
   <java-symbol type="layout" name="autofill_dataset_picker_header_footer"/>
-  <java-symbol type="layout" name="autofill_dataset_picker_header_footer_fullscreen"/>
   <java-symbol type="id" name="autofill" />
-  <java-symbol type="id" name="autofill_dataset_container"/>
   <java-symbol type="id" name="autofill_dataset_footer"/>
   <java-symbol type="id" name="autofill_dataset_header"/>
+  <java-symbol type="id" name="autofill_dataset_icon" />
   <java-symbol type="id" name="autofill_dataset_list"/>
   <java-symbol type="id" name="autofill_dataset_picker"/>
+  <java-symbol type="id" name="autofill_dataset_title" />
   <java-symbol type="id" name="autofill_save_custom_subtitle" />
   <java-symbol type="id" name="autofill_save_icon" />
   <java-symbol type="id" name="autofill_save_no" />
@@ -3086,12 +3087,16 @@
   <java-symbol type="string" name="autofill_save_type_email_address" />
   <java-symbol type="drawable" name="autofill_dataset_picker_background" />
   <java-symbol type="style" name="AutofillDatasetPicker" />
+  <java-symbol type="style" name="AutofillHalfScreenAnimation" />
   <java-symbol type="style" name="AutofillSaveAnimation" />
   <java-symbol type="dimen" name="autofill_dataset_picker_max_width"/>
   <java-symbol type="dimen" name="autofill_dataset_picker_max_height"/>
   <java-symbol type="dimen" name="autofill_save_custom_subtitle_max_height"/>
   <java-symbol type="dimen" name="autofill_save_icon_max_size"/>
   <java-symbol type="integer" name="autofill_max_visible_datasets" />
+
+  <java-symbol type="style" name="Theme.DeviceDefault.Autofill" />
+  <java-symbol type="style" name="Theme.DeviceDefault.Autofill.Save" />
 
   <java-symbol type="dimen" name="notification_big_picture_max_height"/>
   <java-symbol type="dimen" name="notification_big_picture_max_width"/>
