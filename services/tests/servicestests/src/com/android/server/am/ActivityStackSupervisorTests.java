@@ -332,13 +332,12 @@ public class ActivityStackSupervisorTests extends ActivityTestsBase {
     }
 
     /**
-     * Verifies the correct activity is returned when querying the top running activity with an
-     * empty focused stack.
+     * Verifies the correct activity is returned when querying the top running activity.
      */
     @Test
-    public void testNonFocusedTopRunningActivity() throws Exception {
+    public void testTopRunningActivity() throws Exception {
         // Create stack to hold focus
-        final ActivityStack focusedStack = mService.mStackSupervisor.getDefaultDisplay()
+        final ActivityStack emptyStack = mService.mStackSupervisor.getDefaultDisplay()
                 .createStack(WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD, true /* onTop */);
 
         final KeyguardController keyguard = mSupervisor.getKeyguardController();
@@ -347,7 +346,7 @@ public class ActivityStackSupervisorTests extends ActivityTestsBase {
         final ActivityRecord activity = new ActivityBuilder(mService).setCreateTask(true)
                 .setStack(stack).build();
 
-        mSupervisor.mFocusedStack = focusedStack;
+        mSupervisor.mFocusedStack = emptyStack;
 
         doAnswer((InvocationOnMock invocationOnMock) -> {
             final SparseIntArray displayIds = invocationOnMock.<SparseIntArray>getArgument(0);
@@ -366,6 +365,12 @@ public class ActivityStackSupervisorTests extends ActivityTestsBase {
         assertEquals(null, mService.mStackSupervisor.topRunningActivityLocked(
                 true /* considerKeyguardState */));
 
+        // Change focus to stack with activity.
+        mSupervisor.mFocusedStack = stack;
+        assertEquals(activity, mService.mStackSupervisor.topRunningActivityLocked());
+        assertEquals(null, mService.mStackSupervisor.topRunningActivityLocked(
+                true /* considerKeyguardState */));
+
         // Add activity that should be shown on the keyguard.
         final ActivityRecord showWhenLockedActivity = new ActivityBuilder(mService)
                 .setCreateTask(true)
@@ -374,6 +379,13 @@ public class ActivityStackSupervisorTests extends ActivityTestsBase {
                 .build();
 
         // Ensure the show when locked activity is returned.
+        assertEquals(showWhenLockedActivity, mService.mStackSupervisor.topRunningActivityLocked());
+        assertEquals(showWhenLockedActivity, mService.mStackSupervisor.topRunningActivityLocked(
+                true /* considerKeyguardState */));
+
+        // Change focus back to empty stack
+        mSupervisor.mFocusedStack = emptyStack;
+        // Ensure the show when locked activity is returned when not the focused stack
         assertEquals(showWhenLockedActivity, mService.mStackSupervisor.topRunningActivityLocked());
         assertEquals(showWhenLockedActivity, mService.mStackSupervisor.topRunningActivityLocked(
                 true /* considerKeyguardState */));
