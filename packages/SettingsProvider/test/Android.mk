@@ -14,6 +14,10 @@ LOCAL_STATIC_JAVA_LIBRARIES := android-support-test
 
 LOCAL_JAVA_LIBRARIES := android.test.base
 
+LOCAL_RESOURCE_DIR := frameworks/base/packages/SettingsProvider/res
+
+LOCAL_AAPT_FLAGS += --auto-add-overlay --extra-packages com.android.providers.settings
+
 LOCAL_PACKAGE_NAME := SettingsProviderTest
 LOCAL_PRIVATE_PLATFORM_APIS := true
 
