@@ -27,12 +27,10 @@ import android.util.Slog;
 public class TimeSparseArray<E> extends LongSparseArray<E> {
     private static final String TAG = TimeSparseArray.class.getSimpleName();
 
+    private boolean mWtfReported;
+
     public TimeSparseArray() {
         super();
-    }
-
-    public TimeSparseArray(int initialCapacity) {
-        super(initialCapacity);
     }
 
     /**
@@ -75,22 +73,16 @@ public class TimeSparseArray<E> extends LongSparseArray<E> {
     /**
      * {@inheritDoc}
      *
-     * Overridden to ensure no collisions. The key (time in milliseconds) is incremented till an
-     * empty place is found.
+     * <p> As this container is being used only to keep {@link android.util.AtomicFile files},
+     * there should not be any collisions. Reporting a {@link Slog#wtf(String, String)} in case that
+     * happens, as that will lead to one whole file being dropped.
      */
     @Override
     public void put(long key, E value) {
-        final long origKey = key;
-        int keyIndex = indexOfKey(key);
-        if (keyIndex >= 0) {
-            final long sz = size();
-            while (keyIndex < sz && keyAt(keyIndex) == key) {
-                key++;
-                keyIndex++;
-            }
-            if (key >= origKey + 100) {
-                Slog.w(TAG, "Value " + value + " supposed to be inserted at " + origKey
-                        + " displaced to " + key);
+        if (indexOfKey(key) >= 0) {
+            if (!mWtfReported) {
+                Slog.wtf(TAG, "Overwriting value " + get(key) + " by " + value);
+                mWtfReported = true;
             }
         }
         super.put(key, value);
