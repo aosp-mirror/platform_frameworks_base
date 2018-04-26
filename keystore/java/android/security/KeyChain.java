@@ -371,9 +371,9 @@ public final class KeyChain {
      *     a private key; used only to call startActivity(); must not
      *     be null.
      * @param response Callback to invoke when the request completes;
-     *     must not be null
+     *     must not be null.
      * @param keyTypes The acceptable types of asymmetric keys such as
-     *     "RSA" or "DSA", or a null array.
+     *     "RSA" or "DSA", or null.
      * @param issuers The acceptable certificate issuers for the
      *     certificate matching the private key, or null.
      * @param host The host name of the server requesting the
@@ -385,7 +385,8 @@ public final class KeyChain {
      */
     public static void choosePrivateKeyAlias(@NonNull Activity activity,
             @NonNull KeyChainAliasCallback response,
-            @KeyProperties.KeyAlgorithmEnum String[] keyTypes, Principal[] issuers,
+            @Nullable @KeyProperties.KeyAlgorithmEnum String[] keyTypes,
+            @Nullable Principal[] issuers,
             @Nullable String host, int port, @Nullable String alias) {
         Uri uri = null;
         if (host != null) {
@@ -421,9 +422,9 @@ public final class KeyChain {
      *     a private key; used only to call startActivity(); must not
      *     be null.
      * @param response Callback to invoke when the request completes;
-     *     must not be null
+     *     must not be null.
      * @param keyTypes The acceptable types of asymmetric keys such as
-     *     "EC" or "RSA", or a null array.
+     *     "EC" or "RSA", or null.
      * @param issuers The acceptable certificate issuers for the
      *     certificate matching the private key, or null.
      * @param uri The full URI the server is requesting the certificate
@@ -433,7 +434,8 @@ public final class KeyChain {
      */
     public static void choosePrivateKeyAlias(@NonNull Activity activity,
             @NonNull KeyChainAliasCallback response,
-            @KeyProperties.KeyAlgorithmEnum String[] keyTypes, Principal[] issuers,
+            @Nullable @KeyProperties.KeyAlgorithmEnum String[] keyTypes,
+            @Nullable Principal[] issuers,
             @Nullable Uri uri, @Nullable String alias) {
         /*
          * TODO currently keyTypes, issuers are unused. They are meant
