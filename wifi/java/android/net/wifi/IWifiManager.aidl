@@ -85,7 +85,7 @@ interface IWifiManager
 
     boolean disableNetwork(int netId, String packageName);
 
-    boolean startScan(String packageName);
+    void startScan(String packageName);
 
     List<ScanResult> getScanResults(String callingPackage);
 
