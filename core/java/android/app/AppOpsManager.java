@@ -1571,7 +1571,7 @@ public class AppOpsManager {
             long time = 0;
             for (int i = 0; i < _NUM_UID_STATE; i++) {
                 if (mRejectTimes[i] > time) {
-                    time = mTimes[i];
+                    time = mRejectTimes[i];
                 }
             }
             return time;
