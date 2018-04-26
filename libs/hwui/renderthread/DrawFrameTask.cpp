@@ -95,6 +95,7 @@ void DrawFrameTask::run() {
     // Grab a copy of everything we need
     CanvasContext* context = mContext;
     std::function<void(int64_t)> callback = std::move(mFrameCallback);
+    mFrameCallback = nullptr;
 
     // From this point on anything in "this" is *UNSAFE TO ACCESS*
     if (canUnblockUiThread) {
