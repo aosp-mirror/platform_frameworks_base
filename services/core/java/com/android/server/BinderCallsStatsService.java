@@ -56,7 +56,10 @@ public class BinderCallsStatsService extends Binder {
     protected void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
         if (args != null) {
             for (final String arg : args) {
-                if ("--reset".equals(arg)) {
+                if ("-a".equals(arg)) {
+                    // We currently dump all information by default
+                    continue;
+                } else if ("--reset".equals(arg)) {
                     reset();
                     pw.println("binder_calls_stats reset.");
                     return;
@@ -78,7 +81,6 @@ public class BinderCallsStatsService extends Binder {
                     return;
                 } else {
                     pw.println("Unknown option: " + arg);
-                    return;
                 }
             }
         }
