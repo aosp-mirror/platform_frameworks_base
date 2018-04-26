@@ -818,37 +818,7 @@ public class GnssLocationProvider implements LocationProviderInterface, InjectNt
             }
         };
 
-        mGnssMeasurementsProvider = new GnssMeasurementsProvider(mHandler) {
-            @Override
-            public boolean isAvailableInPlatform() {
-                return native_is_measurement_supported();
-            }
-
-            @Override
-            protected int registerWithService() {
-                int devOptions = Settings.Secure.getInt(mContext.getContentResolver(),
-                        Settings.Global.DEVELOPMENT_SETTINGS_ENABLED , 0);
-                int fullTrackingToggled = Settings.Global.getInt(mContext.getContentResolver(),
-                        Settings.Global.ENABLE_GNSS_RAW_MEAS_FULL_TRACKING , 0);
-                boolean result = false;
-                if (devOptions == 1 /* Developer Mode enabled */
-                        && fullTrackingToggled == 1 /* Raw Measurements Full Tracking enabled */) {
-                    result =  native_start_measurement_collection(true /* enableFullTracking */);
-                } else {
-                    result =  native_start_measurement_collection(false /* enableFullTracking */);
-                }
-                if (result) {
-                    return RemoteListenerHelper.RESULT_SUCCESS;
-                } else {
-                    return RemoteListenerHelper.RESULT_INTERNAL_ERROR;
-                }
-            }
-
-            @Override
-            protected void unregisterFromService() {
-                native_stop_measurement_collection();
-            }
-
+        mGnssMeasurementsProvider = new GnssMeasurementsProvider(mContext, mHandler) {
             @Override
             protected boolean isGpsEnabled() {
                 return isEnabled();
@@ -1032,7 +1002,7 @@ public class GnssLocationProvider implements LocationProviderInterface, InjectNt
                 Log.e(TAG, "Invalid status to release SUPL connection: " + agpsDataConnStatus);
         }
     }
-    
+
     private void handleRequestLocation(boolean independentFromGnss) {
         if (isRequestLocationRateLimited()) {
             if (DEBUG) {
@@ -2789,13 +2759,6 @@ public class GnssLocationProvider implements LocationProviderInterface, InjectNt
 
     private native void native_update_network_state(boolean connected, int type,
             boolean roaming, boolean available, String extraInfo, String defaultAPN);
-
-    // Gps Hal measurements support.
-    private static native boolean native_is_measurement_supported();
-
-    private native boolean native_start_measurement_collection(boolean enableFullTracking);
-
-    private native boolean native_stop_measurement_collection();
 
     // Gps Navigation message support.
     private static native boolean native_is_navigation_message_supported();
