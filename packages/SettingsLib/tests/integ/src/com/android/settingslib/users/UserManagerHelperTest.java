@@ -247,13 +247,13 @@ public class UserManagerHelperTest {
     }
 
     @Test
-    public void switchToGuest() {
-        mHelper.switchToGuest("Test Guest");
+    public void startNewGuestSession() {
+        mHelper.startNewGuestSession("Test Guest");
         verify(mUserManager).createGuest(mContext, "Test Guest");
 
         UserInfo guestInfo = new UserInfo(21, "Test Guest", UserInfo.FLAG_GUEST);
         when(mUserManager.createGuest(mContext, "Test Guest")).thenReturn(guestInfo);
-        mHelper.switchToGuest("Test Guest");
+        mHelper.startNewGuestSession("Test Guest");
         verify(mActivityManager).switchUser(21);
     }
 

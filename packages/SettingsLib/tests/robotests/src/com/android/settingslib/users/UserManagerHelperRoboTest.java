@@ -185,12 +185,7 @@ public class UserManagerHelperRoboTest {
         mHelper.switchToUser(createUserInfoForId(20));
         assertThat(ShadowActivityManager.getShadow().getSwitchUserCalled()).isFalse();
 
-        // Switching to Guest calls createGuest.
-        UserInfo guestInfo = new UserInfo(21, "Test Guest", UserInfo.FLAG_GUEST);
-        mHelper.switchToUser(guestInfo);
-        verify(mUserManager).createGuest(mContext, "Test Guest");
-
-        // Switching to non-current, non-guest user, simply calls switchUser.
+        // Switching to non-foreground user, simply calls switchUser.
         UserInfo userToSwitchTo = new UserInfo(22, "Test User", 0);
         mHelper.switchToUser(userToSwitchTo);
         assertThat(ShadowActivityManager.getShadow().getSwitchUserCalled()).isTrue();
