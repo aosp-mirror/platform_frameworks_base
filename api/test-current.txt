@@ -917,6 +917,7 @@ package android.telephony {
 
   public class TelephonyManager {
     method public int getCarrierIdListVersion();
+    method public void refreshUiccProfile();
     method public void setCarrierTestOverride(java.lang.String, java.lang.String, java.lang.String, java.lang.String, java.lang.String, java.lang.String, java.lang.String);
     field public static final int UNKNOWN_CARRIER_ID_LIST_VERSION = -1; // 0xffffffff
   }
