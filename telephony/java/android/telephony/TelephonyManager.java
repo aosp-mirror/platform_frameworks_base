@@ -2786,6 +2786,22 @@ public class TelephonyManager {
     }
 
     /**
+     * Test method to reload the UICC profile.
+     *
+     * @hide
+     */
+    @TestApi
+    @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE)
+    public void refreshUiccProfile() {
+        try {
+            ITelephony telephony = getITelephony();
+            telephony.refreshUiccProfile(mSubId);
+        } catch (RemoteException ex) {
+            Rlog.w(TAG, "RemoteException", ex);
+        }
+    }
+
+    /**
      * Map logicalSlot to physicalSlot, and activate the physicalSlot if it is inactive. For
      * example, passing the physicalSlots array [1, 0] means mapping the first item 1, which is
      * physical slot index 1, to the logical slot 0; and mapping the second item 0, which is
