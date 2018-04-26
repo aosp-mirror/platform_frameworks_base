@@ -88,7 +88,7 @@ public class StatusBarIconControllerImpl extends StatusBarIconList implements Tu
         List<Slot> allSlots = getSlots();
         for (int i = 0; i < allSlots.size(); i++) {
             Slot slot = allSlots.get(i);
-            List<StatusBarIconHolder> holders = slot.getHolderList();
+            List<StatusBarIconHolder> holders = slot.getHolderListInViewOrder();
             boolean blocked = mIconBlacklist.contains(slot.getName());
 
             for (StatusBarIconHolder holder : holders) {
@@ -121,7 +121,7 @@ public class StatusBarIconControllerImpl extends StatusBarIconList implements Tu
         // Remove all the icons.
         for (int i = currentSlots.size() - 1; i >= 0; i--) {
             Slot s = currentSlots.get(i);
-            slotsToReAdd.put(s, s.getHolderList());
+            slotsToReAdd.put(s, s.getHolderListInViewOrder());
             removeAllIconsForSlot(s.getName());
         }
 
@@ -281,7 +281,7 @@ public class StatusBarIconControllerImpl extends StatusBarIconList implements Tu
         mIconLogger.onIconHidden(slotName);
 
         int slotIndex = getSlotIndex(slotName);
-        List<StatusBarIconHolder> iconsToRemove = slot.getHolderList();
+        List<StatusBarIconHolder> iconsToRemove = slot.getHolderListInViewOrder();
         for (StatusBarIconHolder holder : iconsToRemove) {
             int viewIndex = getViewIndex(slotIndex, holder.getTag());
             slot.removeForTag(holder.getTag());
