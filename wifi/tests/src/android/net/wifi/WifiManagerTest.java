@@ -1070,16 +1070,4 @@ i     * Verify that a call to cancel WPS immediately returns a failure.
             fail("setWifiApConfiguration should rethrow Exceptions from WifiService");
         } catch (SecurityException e) { }
     }
-
-    /**
-     * Check the call to startScan calls WifiService.
-     */
-    @Test
-    public void testStartScan() throws Exception {
-        when(mWifiService.startScan(TEST_PACKAGE_NAME)).thenReturn(true);
-        assertTrue(mWifiManager.startScan());
-
-        when(mWifiService.startScan(TEST_PACKAGE_NAME)).thenReturn(false);
-        assertFalse(mWifiManager.startScan());
-    }
 }
