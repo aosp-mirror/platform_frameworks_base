@@ -107,7 +107,6 @@ public class IpSecService extends IIpSecService.Stub {
 
     static final int FREE_PORT_MIN = 1024; // ports 1-1023 are reserved
     static final int PORT_MAX = 0xFFFF; // ports are an unsigned 16-bit integer
-    static final String TUNNEL_INTERFACE_PREFIX = "ipsec";
 
     /* Binder context for this service */
     private final Context mContext;
@@ -1270,7 +1269,7 @@ public class IpSecService extends IIpSecService.Stub {
         final int resourceId = mNextResourceId++;
         final int ikey = reserveNetId();
         final int okey = reserveNetId();
-        String intfName = String.format("%s%d", TUNNEL_INTERFACE_PREFIX, resourceId);
+        String intfName = String.format("%s%d", INetd.IPSEC_INTERFACE_PREFIX, resourceId);
 
         try {
             // Calls to netd:
