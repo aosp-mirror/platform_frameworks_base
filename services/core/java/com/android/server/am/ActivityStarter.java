@@ -791,7 +791,7 @@ class ActivityStarter {
                 callingUid = realCallingUid;
                 callingPid = realCallingPid;
 
-                rInfo = mSupervisor.resolveIntent(intent, resolvedType, userId);
+                rInfo = mSupervisor.resolveIntent(intent, resolvedType, userId, 0, realCallingUid);
                 aInfo = mSupervisor.resolveActivity(intent, rInfo, startFlags,
                         null /*profilerInfo*/);
 
@@ -952,6 +952,9 @@ class ActivityStarter {
         mSupervisor.getActivityMetricsLogger().notifyActivityLaunching();
         boolean componentSpecified = intent.getComponent() != null;
 
+        final int realCallingPid = Binder.getCallingPid();
+        final int realCallingUid = Binder.getCallingUid();
+
         // Save a copy in case ephemeral needs it
         final Intent ephemeralIntent = new Intent(intent);
         // Don't modify the client's object!
@@ -969,7 +972,8 @@ class ActivityStarter {
             componentSpecified = false;
         }
 
-        ResolveInfo rInfo = mSupervisor.resolveIntent(intent, resolvedType, userId);
+        ResolveInfo rInfo = mSupervisor.resolveIntent(intent, resolvedType, userId,
+                0 /* matchFlags */, realCallingUid);
         if (rInfo == null) {
             UserInfo userInfo = mSupervisor.getUserInfo(userId);
             if (userInfo != null && userInfo.isManagedProfile()) {
@@ -991,7 +995,7 @@ class ActivityStarter {
                     rInfo = mSupervisor.resolveIntent(intent, resolvedType, userId,
                             PackageManager.MATCH_DIRECT_BOOT_AWARE
                                     | PackageManager.MATCH_DIRECT_BOOT_UNAWARE,
-                            Binder.getCallingUid());
+                            realCallingUid);
                 }
             }
         }
@@ -999,8 +1003,6 @@ class ActivityStarter {
         ActivityInfo aInfo = mSupervisor.resolveActivity(intent, rInfo, startFlags, profilerInfo);
 
         synchronized (mService) {
-            final int realCallingPid = Binder.getCallingPid();
-            final int realCallingUid = Binder.getCallingUid();
             int callingPid;
             if (callingUid >= 0) {
                 callingPid = -1;
@@ -1073,7 +1075,8 @@ class ActivityStarter {
                         callingUid = Binder.getCallingUid();
                         callingPid = Binder.getCallingPid();
                         componentSpecified = true;
-                        rInfo = mSupervisor.resolveIntent(intent, null /*resolvedType*/, userId);
+                        rInfo = mSupervisor.resolveIntent(intent, null /*resolvedType*/, userId,
+                                0 /* matchFlags */, realCallingUid);
                         aInfo = rInfo != null ? rInfo.activityInfo : null;
                         if (aInfo != null) {
                             aInfo = mService.getActivityInfoForUser(aInfo, userId);

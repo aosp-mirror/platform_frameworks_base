@@ -548,7 +548,8 @@ public class LauncherApps {
             Log.i(TAG, "StartMainActivity " + component + " " + user.getIdentifier());
         }
         try {
-            mService.startActivityAsUser(mContext.getPackageName(),
+            mService.startActivityAsUser(mContext.getIApplicationThread(),
+                    mContext.getPackageName(),
                     component, sourceBounds, opts, user);
         } catch (RemoteException re) {
             throw re.rethrowFromSystemServer();
@@ -568,7 +569,8 @@ public class LauncherApps {
             Rect sourceBounds, Bundle opts) {
         logErrorForInvalidProfileAccess(user);
         try {
-            mService.showAppDetailsAsUser(mContext.getPackageName(),
+            mService.showAppDetailsAsUser(mContext.getIApplicationThread(),
+                    mContext.getPackageName(),
                     component, sourceBounds, opts, user);
         } catch (RemoteException re) {
             throw re.rethrowFromSystemServer();

@@ -1315,10 +1315,6 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
         return aInfo;
     }
 
-    ResolveInfo resolveIntent(Intent intent, String resolvedType, int userId) {
-        return resolveIntent(intent, resolvedType, userId, 0, Binder.getCallingUid());
-    }
-
     ResolveInfo resolveIntent(Intent intent, String resolvedType, int userId, int flags,
             int filterCallingUid) {
         synchronized (mService) {
@@ -1330,9 +1326,19 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
                             || (intent.getFlags() & Intent.FLAG_ACTIVITY_MATCH_EXTERNAL) != 0) {
                     modifiedFlags |= PackageManager.MATCH_INSTANT;
                 }
-                return mService.getPackageManagerInternalLocked().resolveIntent(
-                        intent, resolvedType, modifiedFlags, userId, true, filterCallingUid);
 
+                // In order to allow cross-profile lookup, we clear the calling identity here.
+                // Note the binder identity won't affect the result, but filterCallingUid will.
+
+                // Cross-user/profile call check are done at the entry points
+                // (e.g. AMS.startActivityAsUser).
+                final long token = Binder.clearCallingIdentity();
+                try {
+                    return mService.getPackageManagerInternalLocked().resolveIntent(
+                            intent, resolvedType, modifiedFlags, userId, true, filterCallingUid);
+                } finally {
+                    Binder.restoreCallingIdentity(token);
+                }
             } finally {
                 Trace.traceEnd(TRACE_TAG_ACTIVITY_MANAGER);
             }
