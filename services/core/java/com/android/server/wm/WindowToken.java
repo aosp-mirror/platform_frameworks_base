@@ -17,7 +17,7 @@
 package com.android.server.wm;
 
 import static android.view.WindowManager.LayoutParams.FLAG_SHOW_WALLPAPER;
-
+import static android.view.WindowManager.LayoutParams.TYPE_NAVIGATION_BAR;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_ADD_REMOVE;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_FOCUS;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_WINDOW_MOVEMENT;
@@ -335,5 +335,17 @@ class WindowToken extends WindowContainer<WindowState> {
 
     boolean okToAnimate() {
         return mDisplayContent != null && mDisplayContent.okToAnimate();
+    }
+
+    /**
+     * Return whether windows from this token can layer above the
+     * system bars, or in other words extend outside of the "Decor Frame"
+     */
+    boolean canLayerAboveSystemBars() {
+        int layer = mService.mPolicy.getWindowLayerFromTypeLw(windowType,
+                mOwnerCanManageAppTokens);
+        int navLayer = mService.mPolicy.getWindowLayerFromTypeLw(TYPE_NAVIGATION_BAR,
+                mOwnerCanManageAppTokens);
+        return mOwnerCanManageAppTokens && (layer > navLayer);
     }
 }

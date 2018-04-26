@@ -4270,6 +4270,24 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         }
     }
 
+    private boolean skipDecorCrop() {
+        // The decor frame is used to specify the region not covered by the system
+        // decorations (nav bar, status bar). In case this is empty, for example with
+        // FLAG_TRANSLUCENT_NAVIGATION, we don't need to do any cropping.
+        if (mDecorFrame.isEmpty()) {
+            return true;
+        }
+
+        // But if we have a frame, and are an application window, then we must be cropped.
+        if (mAppToken != null) {
+            return false;
+        }
+
+        // For non application windows, we may be allowed to extend over the decor bars
+        // depending on our type and permissions assosciated with our token.
+        return mToken.canLayerAboveSystemBars();
+    }
+
     /**
      * Calculate the window crop according to system decor policy. In general this is
      * the system decor rect (see #calculateSystemDecorRect), but we also have some
@@ -4287,7 +4305,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             policyCrop.intersect(-mCompatFrame.left, -mCompatFrame.top,
                     displayInfo.logicalWidth - mCompatFrame.left,
                     displayInfo.logicalHeight - mCompatFrame.top);
-        } else if (mDecorFrame.isEmpty()) {
+        } else if (skipDecorCrop()) {
             // Windows without policy decor aren't cropped.
             policyCrop.set(0, 0, mCompatFrame.width(), mCompatFrame.height());
         } else {
