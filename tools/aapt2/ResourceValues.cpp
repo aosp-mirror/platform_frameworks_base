@@ -117,8 +117,7 @@ bool Reference::Equals(const Value* value) const {
 
 bool Reference::Flatten(android::Res_value* out_value) const {
   const ResourceId resid = id.value_or_default(ResourceId(0));
-  const bool dynamic = resid.is_valid_dynamic() && resid.package_id() != kFrameworkPackageId &&
-                       resid.package_id() < kAppPackageId;
+  const bool dynamic = resid.is_valid_dynamic() && is_dynamic;
 
   if (reference_type == Reference::Type::kResource) {
     if (dynamic) {
