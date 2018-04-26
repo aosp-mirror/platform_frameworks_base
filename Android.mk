@@ -448,6 +448,7 @@ LOCAL_DROIDDOC_OPTIONS:=\
 		-showAnnotation android.annotation.SystemApi \
 		-showAnnotation android.annotation.TestApi \
 		-privateDexApi $(INTERNAL_PLATFORM_PRIVATE_DEX_API_FILE) \
+		-removedDexApi $(INTERNAL_PLATFORM_REMOVED_DEX_API_FILE) \
 		-nodocs
 
 LOCAL_DROIDDOC_CUSTOM_TEMPLATE_DIR:=external/doclava/res/assets/templates-sdk
@@ -456,7 +457,8 @@ LOCAL_UNINSTALLABLE_MODULE := true
 
 include $(BUILD_DROIDDOC)
 
-$(full_target): .KATI_IMPLICIT_OUTPUTS := $(INTERNAL_PLATFORM_PRIVATE_DEX_API_FILE)
+$(full_target): .KATI_IMPLICIT_OUTPUTS := $(INTERNAL_PLATFORM_PRIVATE_DEX_API_FILE) \
+                                          $(INTERNAL_PLATFORM_REMOVED_DEX_API_FILE)
 
 # ====  check javadoc comments but don't generate docs ========
 include $(CLEAR_VARS)
