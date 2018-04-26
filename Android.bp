@@ -924,6 +924,7 @@ droiddoc {
     private_api_filename: "private.txt",
     private_dex_api_filename: "private-dex.txt",
     removed_api_filename: "removed.txt",
+    removed_dex_api_filename: "removed-dex.txt",
     args: framework_docs_args + " -referenceonly -nodocs",
 }
 
