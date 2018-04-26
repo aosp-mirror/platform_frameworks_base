@@ -1799,7 +1799,7 @@ static jboolean android_location_GnssGeofenceProvider_resume_geofence(JNIEnv* /*
     return JNI_FALSE;
 }
 
-static jboolean android_location_GnssLocationProvider_is_measurement_supported(
+static jboolean android_location_GnssMeasurementsProvider_is_measurement_supported(
     JNIEnv* env, jclass clazz) {
     if (gnssMeasurementIface != nullptr) {
         return JNI_TRUE;
@@ -1808,7 +1808,7 @@ static jboolean android_location_GnssLocationProvider_is_measurement_supported(
     return JNI_FALSE;
 }
 
-static jboolean android_location_GnssLocationProvider_start_measurement_collection(
+static jboolean android_location_GnssMeasurementsProvider_start_measurement_collection(
         JNIEnv* /* env */,
         jobject /* obj */,
         jboolean enableFullTracking) {
@@ -1842,7 +1842,7 @@ static jboolean android_location_GnssLocationProvider_start_measurement_collecti
     return JNI_TRUE;
 }
 
-static jboolean android_location_GnssLocationProvider_stop_measurement_collection(
+static jboolean android_location_GnssMeasurementsProvider_stop_measurement_collection(
         JNIEnv* env,
         jobject obj) {
     if (gnssMeasurementIface == nullptr) {
@@ -2178,18 +2178,6 @@ static const JNINativeMethod sMethods[] = {
     {"native_update_network_state",
             "(ZIZZLjava/lang/String;Ljava/lang/String;)V",
             reinterpret_cast<void *>(android_location_GnssLocationProvider_update_network_state)},
-    {"native_is_measurement_supported",
-            "()Z",
-            reinterpret_cast<void *>(
-                    android_location_GnssLocationProvider_is_measurement_supported)},
-    {"native_start_measurement_collection",
-             "(Z)Z",
-            reinterpret_cast<void *>(
-                    android_location_GnssLocationProvider_start_measurement_collection)},
-    {"native_stop_measurement_collection",
-            "()Z",
-            reinterpret_cast<void *>(
-                    android_location_GnssLocationProvider_stop_measurement_collection)},
     {"native_is_navigation_message_supported",
             "()Z",
             reinterpret_cast<void *>(
@@ -2269,6 +2257,22 @@ static const JNINativeMethod sGeofenceMethods[] = {
             reinterpret_cast<void *>(android_location_GnssGeofenceProvider_resume_geofence)},
 };
 
+static const JNINativeMethod sMeasurementMethods[] = {
+     /* name, signature, funcPtr */
+    {"native_is_measurement_supported",
+            "()Z",
+            reinterpret_cast<void *>(
+                    android_location_GnssMeasurementsProvider_is_measurement_supported)},
+    {"native_start_measurement_collection",
+             "(Z)Z",
+            reinterpret_cast<void *>(
+                    android_location_GnssMeasurementsProvider_start_measurement_collection)},
+    {"native_stop_measurement_collection",
+            "()Z",
+            reinterpret_cast<void *>(
+                    android_location_GnssMeasurementsProvider_stop_measurement_collection)},
+};
+
 int register_android_server_location_GnssLocationProvider(JNIEnv* env) {
     jniRegisterNativeMethods(
             env,
@@ -2280,6 +2284,11 @@ int register_android_server_location_GnssLocationProvider(JNIEnv* env) {
             "com/android/server/location/GnssGeofenceProvider",
             sGeofenceMethods,
             NELEM(sGeofenceMethods));
+    jniRegisterNativeMethods(
+            env,
+            "com/android/server/location/GnssMeasurementsProvider",
+            sMeasurementMethods,
+            NELEM(sMeasurementMethods));
     return jniRegisterNativeMethods(
             env,
             "com/android/server/location/GnssLocationProvider",
