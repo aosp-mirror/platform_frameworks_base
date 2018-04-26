@@ -1039,6 +1039,7 @@ droiddoc {
     ],
     api_filename: "public_api.txt",
     removed_api_filename: "removed.txt",
+    removed_dex_api_filename: "removed-dex.txt",
     args: framework_docs_args + " -referenceonly -nodocs",
 }
 
