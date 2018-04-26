@@ -21,6 +21,7 @@ import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
 import android.annotation.ColorInt;
 import android.annotation.DimenRes;
 import android.annotation.NonNull;
+import android.annotation.StyleRes;
 import android.app.ActivityOptions;
 import android.app.ActivityThread;
 import android.app.Application;
@@ -56,6 +57,7 @@ import android.os.UserHandle;
 import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.Log;
+import android.view.ContextThemeWrapper;
 import android.view.LayoutInflater;
 import android.view.LayoutInflater.Filter;
 import android.view.RemotableViewMethod;
@@ -180,6 +182,12 @@ public class RemoteViews implements Parcelable, Filter {
      * RemoteViews.
      */
     private boolean mIsRoot = true;
+
+    /**
+     * Optional theme resource id applied in inflateView(). When 0, Theme.DeviceDefault will be
+     * used.
+     */
+    private int mApplyThemeResId;
 
     /**
      * Whether reapply is disallowed on this remoteview. This maybe be true if some actions modify
@@ -3267,6 +3275,14 @@ public class RemoteViews implements Parcelable, Filter {
     }
 
     /**
+     * Set the theme used in apply() and applyASync().
+     * @hide
+     */
+    public void setApplyTheme(@StyleRes int themeResId) {
+        mApplyThemeResId = themeResId;
+    }
+
+    /**
      * Inflates the view hierarchy represented by this object and applies
      * all of the actions.
      *
@@ -3301,6 +3317,10 @@ public class RemoteViews implements Parcelable, Filter {
         final Context contextForResources = getContextForResources(context);
         Context inflationContext = new RemoteViewsContextWrapper(context, contextForResources);
 
+        // If mApplyThemeResId is not given, Theme.DeviceDefault will be used.
+        if (mApplyThemeResId != 0) {
+            inflationContext = new ContextThemeWrapper(inflationContext, mApplyThemeResId);
+        }
         LayoutInflater inflater = (LayoutInflater)
                 context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 

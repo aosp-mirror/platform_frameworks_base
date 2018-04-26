@@ -82,6 +82,9 @@ public final class BatchUpdates implements Parcelable {
          * {@link #transformChild(int, Transformation) transformations} are applied to the children
          * views.
          *
+         * <p>Theme does not work with RemoteViews layout. Avoid hardcoded text color
+         * or background color: Autofill on different platforms may have different themes.
+         *
          * @param updates a {@link RemoteViews} with the updated actions to be applied in the
          * underlying presentation template.
          *

@@ -163,11 +163,14 @@ public final class AutoFillUI {
      * @param filterText text of the view to be filled
      * @param servicePackageName package name of the autofill service filling the activity
      * @param packageName package name of the activity that is filled
+     * @param serviceLabel label of autofill service
+     * @param serviceIcon icon of autofill service
      * @param callback Identifier for the caller
      */
     public void showFillUi(@NonNull AutofillId focusedId, @NonNull FillResponse response,
             @Nullable String filterText, @Nullable String servicePackageName,
-            @NonNull String packageName, @NonNull AutoFillUiCallback callback) {
+            @NonNull String packageName, @NonNull CharSequence serviceLabel,
+            @NonNull Drawable serviceIcon, @NonNull AutoFillUiCallback callback) {
         if (sDebug) {
             final int size = filterText == null ? 0 : filterText.length();
             Slog.d(TAG, "showFillUi(): id=" + focusedId + ", filter=" + size + " chars");
@@ -185,7 +188,7 @@ public final class AutoFillUI {
             }
             hideAllUiThread(callback);
             mFillUi = new FillUi(mContext, response, focusedId,
-                    filterText, mOverlayControl, new FillUi.Callback() {
+                    filterText, mOverlayControl, serviceLabel, serviceIcon, new FillUi.Callback() {
                 @Override
                 public void onResponsePicked(FillResponse response) {
                     log.setType(MetricsEvent.TYPE_DETAIL);
