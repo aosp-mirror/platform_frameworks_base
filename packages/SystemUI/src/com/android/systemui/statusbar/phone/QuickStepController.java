@@ -34,7 +34,6 @@ import android.util.Log;
 import android.util.Slog;
 import android.view.MotionEvent;
 import android.view.View;
-import android.view.ViewConfiguration;
 import android.view.WindowManagerGlobal;
 import android.view.animation.DecelerateInterpolator;
 import android.view.animation.Interpolator;
@@ -45,16 +44,13 @@ import com.android.systemui.R;
 import com.android.systemui.plugins.statusbar.phone.NavGesture.GestureHelper;
 import com.android.systemui.shared.recents.IOverviewProxy;
 import com.android.systemui.shared.recents.utilities.Utilities;
+import com.android.systemui.shared.system.NavigationBarCompat;
 
 import static android.view.WindowManagerPolicyConstants.NAV_BAR_LEFT;
 import static android.view.WindowManagerPolicyConstants.NAV_BAR_BOTTOM;
 import static com.android.systemui.OverviewProxyService.DEBUG_OVERVIEW_PROXY;
 import static com.android.systemui.OverviewProxyService.TAG_OPS;
 import static com.android.systemui.shared.system.NavigationBarCompat.HIT_TARGET_HOME;
-import static com.android.systemui.shared.system.NavigationBarCompat.QUICK_SCRUB_DRAG_SLOP_PX;
-import static com.android.systemui.shared.system.NavigationBarCompat.QUICK_SCRUB_TOUCH_SLOP_PX;
-import static com.android.systemui.shared.system.NavigationBarCompat.QUICK_STEP_DRAG_SLOP_PX;
-import static com.android.systemui.shared.system.NavigationBarCompat.QUICK_STEP_TOUCH_SLOP_PX;
 
 /**
  * Class to detect gestures on the navigation bar and implement quick scrub.
@@ -215,17 +211,23 @@ public class QuickStepController implements GestureHelper {
                 int pos, touchDown, offset, trackSize;
 
                 if (mIsVertical) {
-                    exceededScrubTouchSlop = yDiff > QUICK_SCRUB_TOUCH_SLOP_PX && yDiff > xDiff;
-                    exceededSwipeUpTouchSlop = xDiff > QUICK_STEP_TOUCH_SLOP_PX && xDiff > yDiff;
-                    exceededScrubDragSlop = yDiff > QUICK_SCRUB_DRAG_SLOP_PX && yDiff > xDiff;
+                    exceededScrubTouchSlop =
+                            yDiff > NavigationBarCompat.getQuickScrubTouchSlopPx() && yDiff > xDiff;
+                    exceededSwipeUpTouchSlop =
+                            xDiff > NavigationBarCompat.getQuickStepTouchSlopPx() && xDiff > yDiff;
+                    exceededScrubDragSlop =
+                            yDiff > NavigationBarCompat.getQuickScrubDragSlopPx() && yDiff > xDiff;
                     pos = y;
                     touchDown = mTouchDownY;
                     offset = pos - mTrackRect.top;
                     trackSize = mTrackRect.height();
                 } else {
-                    exceededScrubTouchSlop = xDiff > QUICK_SCRUB_TOUCH_SLOP_PX && xDiff > yDiff;
-                    exceededSwipeUpTouchSlop = yDiff > QUICK_STEP_TOUCH_SLOP_PX && yDiff > xDiff;
-                    exceededScrubDragSlop = xDiff > QUICK_SCRUB_DRAG_SLOP_PX && xDiff > yDiff;
+                    exceededScrubTouchSlop =
+                            xDiff > NavigationBarCompat.getQuickScrubTouchSlopPx() && xDiff > yDiff;
+                    exceededSwipeUpTouchSlop =
+                            yDiff > NavigationBarCompat.getQuickStepTouchSlopPx() && yDiff > xDiff;
+                    exceededScrubDragSlop =
+                            xDiff > NavigationBarCompat.getQuickScrubDragSlopPx() && xDiff > yDiff;
                     pos = x;
                     touchDown = mTouchDownX;
                     offset = pos - mTrackRect.left;
