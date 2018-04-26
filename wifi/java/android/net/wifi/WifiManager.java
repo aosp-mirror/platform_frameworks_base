@@ -1635,8 +1635,7 @@ public class WifiManager {
     public boolean startScan(WorkSource workSource) {
         try {
             String packageName = mContext.getOpPackageName();
-            mService.startScan(packageName);
-            return true;
+            return mService.startScan(packageName);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
