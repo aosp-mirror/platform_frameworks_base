@@ -26,6 +26,7 @@ import android.net.NetworkCapabilities;
 import android.net.wifi.WifiInfo;
 import android.os.UserHandle;
 import android.telephony.TelephonyManager;
+import android.text.TextUtils;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.util.SparseIntArray;
@@ -131,16 +132,17 @@ public class NetworkNotificationManager {
         final String tag = tagFor(id);
         final int eventId = notifyType.eventId;
         final int transportType;
-        final String extraInfo;
+        final String name;
         if (nai != null) {
             transportType = getFirstTransportType(nai);
-            extraInfo = nai.networkInfo.getExtraInfo();
+            final String extraInfo = nai.networkInfo.getExtraInfo();
+            name = TextUtils.isEmpty(extraInfo) ? nai.networkCapabilities.getSSID() : extraInfo;
             // Only notify for Internet-capable networks.
             if (!nai.networkCapabilities.hasCapability(NET_CAPABILITY_INTERNET)) return;
         } else {
             // Legacy notifications.
             transportType = TRANSPORT_CELLULAR;
-            extraInfo = null;
+            name = null;
         }
 
         // Clear any previous notification with lower priority, otherwise return. http://b/63676954.
@@ -157,9 +159,8 @@ public class NetworkNotificationManager {
 
         if (DBG) {
             Slog.d(TAG, String.format(
-                    "showNotification tag=%s event=%s transport=%s extraInfo=%s highPrioriy=%s",
-                    tag, nameOf(eventId), getTransportName(transportType), extraInfo,
-                    highPriority));
+                    "showNotification tag=%s event=%s transport=%s name=%s highPriority=%s",
+                    tag, nameOf(eventId), getTransportName(transportType), name, highPriority));
         }
 
         Resources r = Resources.getSystem();
@@ -188,7 +189,7 @@ public class NetworkNotificationManager {
                     break;
                 default:
                     title = r.getString(R.string.network_available_sign_in, 0);
-                    details = r.getString(R.string.network_available_sign_in_detailed, extraInfo);
+                    details = r.getString(R.string.network_available_sign_in_detailed, name);
                     break;
             }
         } else if (notifyType == NotificationType.NETWORK_SWITCH) {
