@@ -229,6 +229,7 @@ Landroid/app/AppOpsManager;->OP_WIFI_SCAN:I
 Landroid/app/AppOpsManager;->OP_WRITE_CONTACTS:I
 Landroid/app/AppOpsManager;->OP_WRITE_SMS:I
 Landroid/app/AppOpsManager;->permissionToOpCode(Ljava/lang/String;)I
+Landroid/app/AppOpsManager;->setRestriction(III[Ljava/lang/String;)V
 Landroid/app/AppOpsManager;->sOpPerms:[Ljava/lang/String;
 Landroid/app/AppOpsManager;->strOpToOp(Ljava/lang/String;)I
 Landroid/app/backup/BackupDataInput$EntityHeader;->dataSize:I
@@ -420,6 +421,7 @@ Landroid/app/NotificationManager;->sService:Landroid/app/INotificationManager;
 Landroid/app/PendingIntent;->getActivityAsUser(Landroid/content/Context;ILandroid/content/Intent;ILandroid/os/Bundle;Landroid/os/UserHandle;)Landroid/app/PendingIntent;
 Landroid/app/PendingIntent;->getIntent()Landroid/content/Intent;
 Landroid/app/PendingIntent;->isActivity()Z
+Landroid/app/PictureInPictureParams;->getAspectRatio()F
 Landroid/app/Presentation;->createPresentationContext(Landroid/content/Context;Landroid/view/Display;I)Landroid/content/Context;
 Landroid/app/ProgressDialog;->mProgressNumber:Landroid/widget/TextView;
 Landroid/app/QueuedWork;->addFinisher(Ljava/lang/Runnable;)V
@@ -695,6 +697,7 @@ Landroid/content/pm/IPackageDataObserver$Stub$Proxy;-><init>(Landroid/os/IBinder
 Landroid/content/pm/IPackageDataObserver$Stub$Proxy;->mRemote:Landroid/os/IBinder;
 Landroid/content/pm/IPackageDataObserver$Stub;->asInterface(Landroid/os/IBinder;)Landroid/content/pm/IPackageDataObserver;
 Landroid/content/pm/IPackageDataObserver;->onRemoveCompleted(Ljava/lang/String;Z)V
+Landroid/content/pm/IPackageDeleteObserver$Stub;->asInterface(Landroid/os/IBinder;)Landroid/content/pm/IPackageDeleteObserver;
 Landroid/content/pm/IPackageDeleteObserver2$Stub$Proxy;-><init>(Landroid/os/IBinder;)V
 Landroid/content/pm/IPackageDeleteObserver2$Stub$Proxy;->mRemote:Landroid/os/IBinder;
 Landroid/content/pm/IPackageDeleteObserver2;->onPackageDeleted(Ljava/lang/String;ILjava/lang/String;)V
@@ -738,6 +741,7 @@ Landroid/content/pm/IPackageMoveObserver$Stub;->asInterface(Landroid/os/IBinder;
 Landroid/content/pm/IPackageStatsObserver$Stub$Proxy;-><init>(Landroid/os/IBinder;)V
 Landroid/content/pm/IPackageStatsObserver$Stub$Proxy;->mRemote:Landroid/os/IBinder;
 Landroid/content/pm/IPackageStatsObserver$Stub;-><init>()V
+Landroid/content/pm/IPackageStatsObserver$Stub;->asInterface(Landroid/os/IBinder;)Landroid/content/pm/IPackageStatsObserver;
 Landroid/content/pm/IShortcutService$Stub$Proxy;-><init>(Landroid/os/IBinder;)V
 Landroid/content/pm/IShortcutService$Stub;->asInterface(Landroid/os/IBinder;)Landroid/content/pm/IShortcutService;
 Landroid/content/pm/LauncherActivityInfo;->mActivityInfo:Landroid/content/pm/ActivityInfo;
@@ -796,6 +800,7 @@ Landroid/content/pm/PackageParser$Package;->applicationInfo:Landroid/content/pm/
 Landroid/content/pm/PackageParser$Package;->configPreferences:Ljava/util/ArrayList;
 Landroid/content/pm/PackageParser$Package;->instrumentation:Ljava/util/ArrayList;
 Landroid/content/pm/PackageParser$Package;->mAppMetaData:Landroid/os/Bundle;
+Landroid/content/pm/PackageParser$Package;->mKeySetMapping:Landroid/util/ArrayMap;
 Landroid/content/pm/PackageParser$Package;->mPreferredOrder:I
 Landroid/content/pm/PackageParser$Package;->mSharedUserId:Ljava/lang/String;
 Landroid/content/pm/PackageParser$Package;->mSharedUserLabel:I
@@ -891,6 +896,7 @@ Landroid/content/res/Resources;->selectDefaultTheme(II)I
 Landroid/content/res/Resources;->setCompatibilityInfo(Landroid/content/res/CompatibilityInfo;)V
 Landroid/content/res/Resources;->updateSystemConfiguration(Landroid/content/res/Configuration;Landroid/util/DisplayMetrics;Landroid/content/res/CompatibilityInfo;)V
 Landroid/content/res/ResourcesImpl;->getAssets()Landroid/content/res/AssetManager;
+Landroid/content/res/ResourcesImpl;->getValue(ILandroid/util/TypedValue;Z)V
 Landroid/content/res/ResourcesImpl;->mAccessLock:Ljava/lang/Object;
 Landroid/content/res/ResourcesImpl;->mAnimatorCache:Landroid/content/res/ConfigurationBoundResourceCache;
 Landroid/content/res/ResourcesImpl;->mAssets:Landroid/content/res/AssetManager;
@@ -1262,6 +1268,7 @@ Landroid/icu/text/SpoofChecker$ScriptSet;->isFull()Z
 Landroid/icu/text/SpoofChecker$ScriptSet;->setAll()V
 Landroid/icu/text/TimeZoneNames$DefaultTimeZoneNames$FactoryImpl;-><init>()V
 Landroid/icu/text/Transliterator;->createFromRules(Ljava/lang/String;Ljava/lang/String;I)Landroid/icu/text/Transliterator;
+Landroid/icu/text/Transliterator;->getInstance(Ljava/lang/String;)Landroid/icu/text/Transliterator;
 Landroid/icu/text/Transliterator;->transliterate(Ljava/lang/String;)Ljava/lang/String;
 Landroid/icu/text/UFormat;->getLocale(Landroid/icu/util/ULocale$Type;)Landroid/icu/util/ULocale;
 Landroid/icu/util/Calendar;->getLocale(Landroid/icu/util/ULocale$Type;)Landroid/icu/util/ULocale;
@@ -2093,6 +2100,7 @@ Landroid/R$styleable;->CheckedTextView:[I
 Landroid/R$styleable;->CheckedTextView_checkMark:I
 Landroid/R$styleable;->CompoundButton:[I
 Landroid/R$styleable;->CompoundButton_button:I
+Landroid/R$styleable;->DrawableStates:[I
 Landroid/R$styleable;->ImageView:[I
 Landroid/R$styleable;->ImageView_adjustViewBounds:I
 Landroid/R$styleable;->ImageView_baselineAlignBottom:I
@@ -2355,6 +2363,7 @@ Landroid/telephony/CellSignalStrengthLte;->mRsrp:I
 Landroid/telephony/CellSignalStrengthLte;->mRsrq:I
 Landroid/telephony/CellSignalStrengthLte;->mRssnr:I
 Landroid/telephony/CellSignalStrengthLte;->mSignalStrength:I
+Landroid/telephony/CellSignalStrengthLte;->mTimingAdvance:I
 Landroid/telephony/CellSignalStrengthWcdma;->mBitErrorRate:I
 Landroid/telephony/CellSignalStrengthWcdma;->mSignalStrength:I
 Landroid/telephony/PhoneNumberUtils;->isLocalEmergencyNumber(Landroid/content/Context;ILjava/lang/String;)Z
@@ -2364,6 +2373,7 @@ Landroid/telephony/SignalStrength;-><init>()V
 Landroid/telephony/SignalStrength;->getAsuLevel()I
 Landroid/telephony/SignalStrength;->getCdmaLevel()I
 Landroid/telephony/SignalStrength;->getDbm()I
+Landroid/telephony/SignalStrength;->getGsmDbm()I
 Landroid/telephony/SignalStrength;->getLteDbm()I
 Landroid/telephony/SignalStrength;->getLteRsrp()I
 Landroid/telephony/SignalStrength;->getLteRsrq()I
@@ -2428,6 +2438,7 @@ Landroid/telephony/TelephonyManager;->getSubscriberInfo()Lcom/android/internal/t
 Landroid/telephony/TelephonyManager;->hasIccCard(I)Z
 Landroid/telephony/TelephonyManager;->isMultiSimEnabled()Z
 Landroid/telephony/TelephonyManager;->isNetworkRoaming(I)Z
+Landroid/telephony/TelephonyManager;->isVideoTelephonyAvailable()Z
 Landroid/telephony/TelephonyManager;->isVolteAvailable()Z
 Landroid/telephony/TelephonyManager;->isWifiCallingAvailable()Z
 Landroid/telephony/TelephonyManager;->mSubscriptionManager:Landroid/telephony/SubscriptionManager;
@@ -2606,6 +2617,7 @@ Landroid/view/inputmethod/InputMethodInfo;->mSubtypes:Landroid/view/inputmethod/
 Landroid/view/inputmethod/InputMethodManager;->finishInputLocked()V
 Landroid/view/inputmethod/InputMethodManager;->focusIn(Landroid/view/View;)V
 Landroid/view/inputmethod/InputMethodManager;->focusOut(Landroid/view/View;)V
+Landroid/view/inputmethod/InputMethodManager;->getClient()Lcom/android/internal/view/IInputMethodClient;
 Landroid/view/inputmethod/InputMethodManager;->getInputMethodWindowVisibleHeight()I
 Landroid/view/inputmethod/InputMethodManager;->getInstance()Landroid/view/inputmethod/InputMethodManager;
 Landroid/view/inputmethod/InputMethodManager;->mCurId:Ljava/lang/String;
@@ -2782,6 +2794,7 @@ Landroid/view/View;->getWindowDisplayFrame(Landroid/graphics/Rect;)V
 Landroid/view/View;->includeForAccessibility()Z
 Landroid/view/View;->initializeScrollbars(Landroid/content/res/TypedArray;)V
 Landroid/view/View;->internalSetPadding(IIII)V
+Landroid/view/View;->invalidateParentIfNeeded()V
 Landroid/view/View;->isPaddingResolved()Z
 Landroid/view/View;->isRootNamespace()Z
 Landroid/view/View;->isVisibleToUser()Z
@@ -3066,6 +3079,7 @@ Landroid/widget/ImageView;->mAlpha:I
 Landroid/widget/ImageView;->mDrawMatrix:Landroid/graphics/Matrix;
 Landroid/widget/ImageView;->mMaxHeight:I
 Landroid/widget/ImageView;->mMaxWidth:I
+Landroid/widget/ImageView;->mRecycleableBitmapDrawable:Landroid/graphics/drawable/BitmapDrawable;
 Landroid/widget/ImageView;->mResource:I
 Landroid/widget/ImageView;->mUri:Landroid/net/Uri;
 Landroid/widget/ImageView;->updateDrawable(Landroid/graphics/drawable/Drawable;)V
@@ -3570,11 +3584,13 @@ Lcom/android/internal/telephony/ITelephony;->dial(Ljava/lang/String;)V
 Lcom/android/internal/telephony/ITelephony;->disableDataConnectivity()Z
 Lcom/android/internal/telephony/ITelephony;->enableDataConnectivity()Z
 Lcom/android/internal/telephony/ITelephony;->endCall()Z
+Lcom/android/internal/telephony/ITelephony;->endCallForSubscriber(I)Z
 Lcom/android/internal/telephony/ITelephony;->getCallState()I
 Lcom/android/internal/telephony/ITelephony;->getDataState()I
 Lcom/android/internal/telephony/ITelephony;->isIdle(Ljava/lang/String;)Z
 Lcom/android/internal/telephony/ITelephony;->setRadio(Z)Z
 Lcom/android/internal/telephony/ITelephony;->silenceRinger()V
+Lcom/android/internal/telephony/ITelephonyRegistry$Stub$Proxy;-><init>(Landroid/os/IBinder;)V
 Lcom/android/internal/telephony/ITelephonyRegistry$Stub;->asInterface(Landroid/os/IBinder;)Lcom/android/internal/telephony/ITelephonyRegistry;
 Lcom/android/internal/telephony/ITelephonyRegistry;->notifyCallState(ILjava/lang/String;)V
 Lcom/android/internal/telephony/SmsHeader$ConcatRef;->msgCount:I
@@ -3711,6 +3727,7 @@ Ldalvik/system/VMDebug;->dumpReferenceTables()V
 Ldalvik/system/VMDebug;->isDebuggerConnected()Z
 Ldalvik/system/VMRuntime;->addressOf(Ljava/lang/Object;)J
 Ldalvik/system/VMRuntime;->clearGrowthLimit()V
+Ldalvik/system/VMRuntime;->gcSoftReferences()V
 Ldalvik/system/VMRuntime;->getCurrentInstructionSet()Ljava/lang/String;
 Ldalvik/system/VMRuntime;->getExternalBytesAllocated()J
 Ldalvik/system/VMRuntime;->getInstructionSet(Ljava/lang/String;)Ljava/lang/String;
