@@ -227,6 +227,10 @@ std::map<size_t, std::string> AssetManagerSymbolSource::GetAssignedPackageIds() 
   return package_map;
 }
 
+bool AssetManagerSymbolSource::IsPackageDynamic(uint32_t packageId) const {
+  return assets_.getResources(false).isPackageDynamic(packageId);
+}
+
 static std::unique_ptr<SymbolTable::Symbol> LookupAttributeInTable(
     const android::ResTable& table, ResourceId id) {
   // Try as a bag.
@@ -330,6 +334,7 @@ std::unique_ptr<SymbolTable::Symbol> AssetManagerSymbolSource::FindByName(
   } else {
     s = util::make_unique<SymbolTable::Symbol>();
     s->id = res_id;
+    s->is_dynamic = table.isResourceDynamic(res_id.id);
   }
 
   if (s) {
@@ -354,7 +359,6 @@ std::unique_ptr<SymbolTable::Symbol> AssetManagerSymbolSource::FindById(
     // Exit early and avoid the error logs from AssetManager.
     return {};
   }
-
   const android::ResTable& table = assets_.getResources(false);
   Maybe<ResourceName> maybe_name = GetResourceName(table, id);
   if (!maybe_name) {
@@ -370,6 +374,7 @@ std::unique_ptr<SymbolTable::Symbol> AssetManagerSymbolSource::FindById(
   } else {
     s = util::make_unique<SymbolTable::Symbol>();
     s->id = id;
+    s->is_dynamic = table.isResourceDynamic(id.id);
   }
 
   if (s) {

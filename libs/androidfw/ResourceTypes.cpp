@@ -3504,13 +3504,14 @@ struct ResTable::PackageGroup
 {
     PackageGroup(
             ResTable* _owner, const String16& _name, uint32_t _id,
-            bool appAsLib, bool _isSystemAsset)
+            bool appAsLib, bool _isSystemAsset, bool _isDynamic)
         : owner(_owner)
         , name(_name)
         , id(_id)
         , largestTypeId(0)
         , dynamicRefTable(static_cast<uint8_t>(_id), appAsLib)
         , isSystemAsset(_isSystemAsset)
+        , isDynamic(_isDynamic)
     { }
 
     ~PackageGroup() {
@@ -3614,6 +3615,7 @@ struct ResTable::PackageGroup
     // If the package group comes from a system asset. Used in
     // determining non-system locales.
     const bool                      isSystemAsset;
+    const bool isDynamic;
 };
 
 ResTable::Theme::Theme(const ResTable& table)
@@ -3982,6 +3984,11 @@ inline ssize_t ResTable::getResourcePackageIndex(uint32_t resID) const
     return ((ssize_t)mPackageMap[Res_GETPACKAGE(resID)+1])-1;
 }
 
+inline ssize_t ResTable::getResourcePackageIndexFromPackage(uint8_t packageID) const
+{
+    return ((ssize_t)mPackageMap[packageID])-1;
+}
+
 status_t ResTable::add(const void* data, size_t size, const int32_t cookie, bool copyData) {
     return addInternal(data, size, NULL, 0, false, cookie, copyData);
 }
@@ -4037,7 +4044,7 @@ status_t ResTable::add(ResTable* src, bool isSystemAsset)
     for (size_t i=0; i < src->mPackageGroups.size(); i++) {
         PackageGroup* srcPg = src->mPackageGroups[i];
         PackageGroup* pg = new PackageGroup(this, srcPg->name, srcPg->id,
-                false /* appAsLib */, isSystemAsset || srcPg->isSystemAsset);
+                false /* appAsLib */, isSystemAsset || srcPg->isSystemAsset, srcPg->isDynamic);
         for (size_t j=0; j<srcPg->packages.size(); j++) {
             pg->packages.add(srcPg->packages[j]);
         }
@@ -6277,6 +6284,68 @@ bool ResTable::getResourceFlags(uint32_t resID, uint32_t* outFlags) const {
     return true;
 }
 
+bool ResTable::isPackageDynamic(uint8_t packageID) const {
+  if (mError != NO_ERROR) {
+      return false;
+  }
+  if (packageID == 0) {
+      ALOGW("Invalid package number 0x%08x", packageID);
+      return false;
+  }
+
+  const ssize_t p = getResourcePackageIndexFromPackage(packageID);
+
+  if (p < 0) {
+      ALOGW("Unknown package number 0x%08x", packageID);
+      return false;
+  }
+
+  const PackageGroup* const grp = mPackageGroups[p];
+  if (grp == NULL) {
+      ALOGW("Bad identifier for package number 0x%08x", packageID);
+      return false;
+  }
+
+  return grp->isDynamic;
+}
+
+bool ResTable::isResourceDynamic(uint32_t resID) const {
+    if (mError != NO_ERROR) {
+        return false;
+    }
+
+    const ssize_t p = getResourcePackageIndex(resID);
+    const int t = Res_GETTYPE(resID);
+    const int e = Res_GETENTRY(resID);
+
+    if (p < 0) {
+        if (Res_GETPACKAGE(resID)+1 == 0) {
+            ALOGW("No package identifier for resource number 0x%08x", resID);
+        } else {
+            ALOGW("No known package for resource number 0x%08x", resID);
+        }
+        return false;
+    }
+    if (t < 0) {
+        ALOGW("No type identifier for resource number 0x%08x", resID);
+        return false;
+    }
+
+    const PackageGroup* const grp = mPackageGroups[p];
+    if (grp == NULL) {
+        ALOGW("Bad identifier for resource number 0x%08x", resID);
+        return false;
+    }
+
+    Entry entry;
+    status_t err = getEntry(grp, t, e, NULL, &entry);
+    if (err != NO_ERROR) {
+        return false;
+    }
+
+    return grp->isDynamic;
+}
+
 static bool keyCompare(const ResTable_sparseTypeEntry& entry , uint16_t entryIdx) {
   return dtohs(entry.idx) < entryIdx;
 }
@@ -6520,12 +6589,14 @@ status_t ResTable::parsePackage(const ResTable_package* const pkg,
         id = targetPackageId;
     }
 
+    bool isDynamic = false;
     if (id >= 256) {
         LOG_ALWAYS_FATAL("Package id out of range");
         return NO_ERROR;
     } else if (id == 0 || (id == 0x7f && appAsLib) || isSystemAsset) {
         // This is a library or a system asset, so assign an ID
         id = mNextPackageId++;
+        isDynamic = true;
     }
 
     PackageGroup* group = NULL;
@@ -6553,10 +6624,9 @@ status_t ResTable::parsePackage(const ResTable_package* const pkg,
     size_t idx = mPackageMap[id];
     if (idx == 0) {
         idx = mPackageGroups.size() + 1;
-
         char16_t tmpName[sizeof(pkg->name)/sizeof(pkg->name[0])];
         strcpy16_dtoh(tmpName, pkg->name, sizeof(pkg->name)/sizeof(pkg->name[0]));
-        group = new PackageGroup(this, String16(tmpName), id, appAsLib, isSystemAsset);
+        group = new PackageGroup(this, String16(tmpName), id, appAsLib, isSystemAsset, isDynamic);
         if (group == NULL) {
             delete package;
             return (mError=NO_MEMORY);
