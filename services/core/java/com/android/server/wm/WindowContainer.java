@@ -922,6 +922,10 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
      * @return Whether this WindowContainer should be magnified by the accessibility magnifier.
      */
     boolean shouldMagnify() {
+        if (mSurfaceControl == null) {
+            return false;
+        }
+
         for (int i = 0; i < mChildren.size(); i++) {
             if (!mChildren.get(i).shouldMagnify()) {
                 return false;
