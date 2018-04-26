@@ -18,13 +18,15 @@
     xmlns:systemui="http://schemas.android.com/apk/res-auto"
     android:id="@+id/quick_qs_status_icons"
     android:layout_width="match_parent"
-    android:layout_height="20dp"
+    android:layout_height="wrap_content"
     android:layout_marginTop="8dp"
     android:layout_marginBottom="14dp"
-    android:layout_marginStart="8dp"
-    android:layout_marginEnd="@dimen/notification_side_paddings"
+    android:layout_marginStart="@dimen/status_bar_padding_start"
+    android:layout_marginEnd="@dimen/status_bar_padding_end"
     android:layout_below="@id/quick_status_bar_system_icons"
-    android:paddingEnd="@dimen/status_bar_padding_end" >
+    android:clipChildren="false"
+    android:clipToPadding="false"
+    android:minHeight="20dp" >
 
     <com.android.systemui.statusbar.policy.DateView
         android:id="@+id/date"
