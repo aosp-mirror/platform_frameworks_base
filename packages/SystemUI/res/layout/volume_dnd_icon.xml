@@ -15,16 +15,16 @@
 -->
 <FrameLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="14dp"
-    android:layout_height="14dp"
-    android:layout_marginTop="6dp"
-    android:layout_marginRight="6dp"
-    android:layout_gravity="right|top">
+    android:id="@+id/dnd_icon"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
 
     <ImageView
-        android:id="@+id/dnd_icon"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_width="14dp"
+        android:layout_height="14dp"
+        android:layout_marginTop="6dp"
+        android:layout_marginRight="6dp"
+        android:layout_gravity="right|top"
         android:src="@drawable/ic_dnd"
         android:tint="?android:attr/textColorTertiary"/>
 </FrameLayout>
