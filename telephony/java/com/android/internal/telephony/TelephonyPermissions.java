@@ -15,6 +15,9 @@
  */
 package com.android.internal.telephony;
 
+import static android.content.pm.PackageManager.PERMISSION_GRANTED;
+
+import android.Manifest;
 import android.app.AppOpsManager;
 import android.content.Context;
 import android.content.pm.PackageManager;
@@ -75,7 +78,7 @@ public final class TelephonyPermissions {
     /**
      * Check whether the app with the given pid/uid can read phone state.
      *
-    * <p>This method behaves in one of the following ways:
+     * <p>This method behaves in one of the following ways:
      * <ul>
      *   <li>return true: if the caller has the READ_PRIVILEGED_PHONE_STATE permission, the
      *       READ_PHONE_STATE runtime permission, or carrier privileges on the given subId.
@@ -128,6 +131,40 @@ public final class TelephonyPermissions {
         // revoked.
         AppOpsManager appOps = (AppOpsManager) context.getSystemService(Context.APP_OPS_SERVICE);
         return appOps.noteOp(AppOpsManager.OP_READ_PHONE_STATE, uid, callingPackage) ==
+                AppOpsManager.MODE_ALLOWED;
+    }
+
+    /**
+     * Check whether the app with the given pid/uid can read the call log.
+     * @return {@code true} if the specified app has the read call log permission and AppOpp granted
+     *      to it, {@code false} otherwise.
+     */
+    public static boolean checkReadCallLog(
+            Context context, int subId, int pid, int uid, String callingPackage) {
+        return checkReadCallLog(
+                context, TELEPHONY_SUPPLIER, subId, pid, uid, callingPackage);
+    }
+
+    @VisibleForTesting
+    public static boolean checkReadCallLog(
+            Context context, Supplier<ITelephony> telephonySupplier, int subId, int pid, int uid,
+            String callingPackage) {
+
+        if (context.checkPermission(Manifest.permission.READ_CALL_LOG, pid, uid)
+                != PERMISSION_GRANTED) {
+            // If we don't have the runtime permission, but do have carrier privileges, that
+            // suffices for being able to see the call phone numbers.
+            if (SubscriptionManager.isValidSubscriptionId(subId)) {
+                enforceCarrierPrivilege(telephonySupplier, subId, uid, "readCallLog");
+                return true;
+            }
+            return false;
+        }
+
+        // We have READ_CALL_LOG permission, so return true as long as the AppOps bit hasn't been
+        // revoked.
+        AppOpsManager appOps = (AppOpsManager) context.getSystemService(Context.APP_OPS_SERVICE);
+        return appOps.noteOp(AppOpsManager.OP_READ_CALL_LOG, uid, callingPackage) ==
                 AppOpsManager.MODE_ALLOWED;
     }
 
@@ -204,7 +241,7 @@ public final class TelephonyPermissions {
     public static void enforceCallingOrSelfModifyPermissionOrCarrierPrivilege(
             Context context, int subId, String message) {
         if (context.checkCallingOrSelfPermission(android.Manifest.permission.MODIFY_PHONE_STATE) ==
-                PackageManager.PERMISSION_GRANTED) {
+                PERMISSION_GRANTED) {
             return;
         }
 

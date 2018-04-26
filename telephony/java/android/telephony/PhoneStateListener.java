@@ -443,7 +443,7 @@ public class PhoneStateListener {
      * Callback invoked when device call state changes.
      * @param state call state
      * @param phoneNumber call phone number. If application does not have
-     * {@link android.Manifest.permission#READ_PHONE_STATE READ_PHONE_STATE} permission or carrier
+     * {@link android.Manifest.permission#READ_CALL_LOG READ_CALL_LOG} permission or carrier
      * privileges (see {@link TelephonyManager#hasCarrierPrivileges}), an empty string will be
      * passed as an argument.
      *
