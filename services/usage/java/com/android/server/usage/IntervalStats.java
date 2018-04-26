@@ -16,6 +16,7 @@
 package com.android.server.usage;
 
 import android.app.usage.ConfigurationStats;
+import android.app.usage.EventList;
 import android.app.usage.EventStats;
 import android.app.usage.TimeSparseArray;
 import android.app.usage.UsageEvents;
@@ -37,7 +38,7 @@ class IntervalStats {
     public final ArrayMap<String, UsageStats> packageStats = new ArrayMap<>();
     public final ArrayMap<Configuration, ConfigurationStats> configurations = new ArrayMap<>();
     public Configuration activeConfiguration;
-    public TimeSparseArray<UsageEvents.Event> events;
+    public EventList events;
 
     // A string cache. This is important as when we're parsing XML files, we don't want to
     // keep hundreds of strings that have the same contents. We will read the string
