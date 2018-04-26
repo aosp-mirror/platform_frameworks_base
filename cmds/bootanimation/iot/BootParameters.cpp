@@ -20,8 +20,6 @@
 
 #include <fcntl.h>
 
-#include <string>
-
 #include <android-base/file.h>
 #include <base/json/json_parser.h>
 #include <base/json/json_reader.h>
@@ -98,7 +96,11 @@ void BootParameters::loadParameters() {
         return;
     }
 
-    std::unique_ptr<Value> json = JSONReader::Read(contents);
+    loadParameters(contents);
+}
+
+void BootParameters::loadParameters(const std::string& raw_json) {
+    std::unique_ptr<Value> json = JSONReader::Read(raw_json);
     if (json.get() == nullptr) {
         return;
     }
