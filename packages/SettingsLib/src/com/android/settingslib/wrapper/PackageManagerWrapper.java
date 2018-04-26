@@ -35,6 +35,8 @@ import java.util.List;
  * and the PackageManager. This class only provides access to the minimum number of functions from
  * the PackageManager needed for DeletionHelper to work.
  */
+@Deprecated
+// Please replace with android.content.pm.PackageManager
 public class PackageManagerWrapper {
 
     private final PackageManager mPm;
