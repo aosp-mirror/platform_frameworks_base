@@ -22,12 +22,11 @@ import org.xmlpull.v1.XmlPullParserException;
 import org.xmlpull.v1.XmlSerializer;
 
 import android.app.usage.ConfigurationStats;
-import android.app.usage.TimeSparseArray;
+import android.app.usage.EventList;
 import android.app.usage.UsageEvents;
 import android.app.usage.UsageStats;
 import android.content.res.Configuration;
 import android.util.ArrayMap;
-import android.util.Pair;
 
 import java.io.IOException;
 import java.net.ProtocolException;
@@ -193,9 +192,9 @@ final class UsageStatsXmlV1 {
         }
 
         if (statsOut.events == null) {
-            statsOut.events = new TimeSparseArray<>();
+            statsOut.events = new EventList();
         }
-        statsOut.events.put(event.mTimeStamp, event);
+        statsOut.events.insert(event);
     }
 
     private static void writeUsageStats(XmlSerializer xml, final IntervalStats stats,
@@ -411,7 +410,7 @@ final class UsageStatsXmlV1 {
         xml.startTag(null, EVENT_LOG_TAG);
         final int eventCount = stats.events != null ? stats.events.size() : 0;
         for (int i = 0; i < eventCount; i++) {
-            writeEvent(xml, stats, stats.events.valueAt(i));
+            writeEvent(xml, stats, stats.events.get(i));
         }
         xml.endTag(null, EVENT_LOG_TAG);
     }
