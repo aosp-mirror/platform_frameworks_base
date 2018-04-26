@@ -64,3 +64,48 @@ java_library_static {
     // Pin java_version until jarjar is certified to support later versions. http://b/72703434
     java_version: "1.8",
 }
+
+droiddoc {
+    name: "android-test-runner-api-stubs-gen-docs",
+    srcs: [
+        "src/**/*.java",
+    ],
+    libs: [
+        "core-oj",
+        "core-libart",
+        "framework",
+        "android.test.base",
+        "android.test.mock",
+    ],
+    custom_template: "droiddoc-templates-sdk",
+    installable: false,
+    args: "-stubpackages android.test:" +
+          "android.test.suitebuilder:" +
+          "junit.runner:" +
+          "junit.textui -stubsourceonly -nodocs",
+    api_tag_name: "ANDROID_TEST_RUNNER",
+    api_filename: "android-test-runner-current.txt",
+    removed_api_filename: "android-test-runner-removed.txt",
+}
+
+// Build the android.test.runner.stubs library
+// =========================================
+java_library_static {
+    name: "android.test.runner.stubs",
+    srcs: [
+        ":android-test-runner-api-stubs-gen-docs",
+    ],
+    libs: [
+        "android.test.base.stubs",
+        "android.test.mock.stubs",
+    ],
+    product_variables: {
+        pdk: {
+            enabled: false,
+        },
+        unbundled_build: {
+            enabled: false,
+        },
+    },
+    sdk_version: "current",
+}
