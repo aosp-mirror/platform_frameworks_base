@@ -241,7 +241,7 @@ public class SEService {
      * @return String containing the OpenMobile API version (e.g. "3.0").
      */
     public @NonNull String getVersion() {
-        return "3.2";
+        return "3.3";
     }
 
     @NonNull ISecureElementListener getListener() {
