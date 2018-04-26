@@ -16,6 +16,7 @@
 
 package android.telephony;
 
+import android.annotation.NonNull;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -578,7 +579,8 @@ public class PhoneStateListener {
      * @param configs List of the current {@link PhysicalChannelConfig}s
      * @hide
      */
-    public void onPhysicalChannelConfigurationChanged(List<PhysicalChannelConfig> configs) {
+    public void onPhysicalChannelConfigurationChanged(
+            @NonNull List<PhysicalChannelConfig> configs) {
         // default implementation empty
     }
 
