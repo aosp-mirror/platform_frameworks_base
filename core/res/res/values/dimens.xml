@@ -629,7 +629,7 @@
     <!-- The maximum width of a image in a media notification. The images will be reduced to that width in case they are bigger.-->
     <dimen name="notification_media_image_max_width_low_ram">100dp</dimen>
     <!-- The size of the right icon image when on low ram -->
-    <dimen name="notification_right_icon_size_low_ram">@dimen/notification_right_icon_size_low_ram</dimen>
+    <dimen name="notification_right_icon_size_low_ram">38dp</dimen>
 
     <dimen name="messaging_avatar_size">@dimen/notification_right_icon_size</dimen>
 
