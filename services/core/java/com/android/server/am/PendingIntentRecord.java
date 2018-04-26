@@ -219,6 +219,9 @@ final class PendingIntentRecord extends IIntentSender.Stub {
     }
 
     public void unregisterCancelListenerLocked(IResultReceiver receiver) {
+        if (mCancelCallbacks == null) {
+            return; // Already unregistered or detached.
+        }
         mCancelCallbacks.unregister(receiver);
         if (mCancelCallbacks.getRegisteredCallbackCount() <= 0) {
             mCancelCallbacks = null;
