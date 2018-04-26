@@ -110,6 +110,27 @@ public class AppOpsManager {
     public static final int MODE_DEFAULT = 3;
 
     /**
+     * Special mode that means "allow only when app is in foreground."  This is <b>not</b>
+     * returned from {@link #checkOp}, {@link #noteOp}, {@link #startOp}; rather, when this
+     * mode is set, these functions will return {@link #MODE_ALLOWED} when the app being
+     * checked is currently in the foreground, otherwise {@link #MODE_IGNORED}.
+     * @hide
+     */
+    public static final int MODE_FOREGROUND = 4;
+
+
+    /**
+     * @hide
+     */
+    public static final String[] MODE_NAMES = new String[] {
+            "allow",        // MODE_ALLOWED
+            "ignore",       // MODE_IGNORED
+            "deny",         // MODE_ERRORED
+            "default",      // MODE_DEFAULT
+            "foreground",   // MODE_FOREGROUND
+    };
+
+    /**
      * Metrics about an op when its uid is persistent.
      * @hide
      */
@@ -619,83 +640,83 @@ public class AppOpsManager {
      * make them all controlled by the same single operation.
      */
     private static int[] sOpToSwitch = new int[] {
-            OP_COARSE_LOCATION,
-            OP_COARSE_LOCATION,
-            OP_COARSE_LOCATION,
-            OP_VIBRATE,
-            OP_READ_CONTACTS,
-            OP_WRITE_CONTACTS,
-            OP_READ_CALL_LOG,
-            OP_WRITE_CALL_LOG,
-            OP_READ_CALENDAR,
-            OP_WRITE_CALENDAR,
-            OP_COARSE_LOCATION,
-            OP_POST_NOTIFICATION,
-            OP_COARSE_LOCATION,
-            OP_CALL_PHONE,
-            OP_READ_SMS,
-            OP_WRITE_SMS,
-            OP_RECEIVE_SMS,
-            OP_RECEIVE_SMS,
-            OP_RECEIVE_MMS,
-            OP_RECEIVE_WAP_PUSH,
-            OP_SEND_SMS,
-            OP_READ_SMS,
-            OP_WRITE_SMS,
-            OP_WRITE_SETTINGS,
-            OP_SYSTEM_ALERT_WINDOW,
-            OP_ACCESS_NOTIFICATIONS,
-            OP_CAMERA,
-            OP_RECORD_AUDIO,
-            OP_PLAY_AUDIO,
-            OP_READ_CLIPBOARD,
-            OP_WRITE_CLIPBOARD,
-            OP_TAKE_MEDIA_BUTTONS,
-            OP_TAKE_AUDIO_FOCUS,
-            OP_AUDIO_MASTER_VOLUME,
-            OP_AUDIO_VOICE_VOLUME,
-            OP_AUDIO_RING_VOLUME,
-            OP_AUDIO_MEDIA_VOLUME,
-            OP_AUDIO_ALARM_VOLUME,
-            OP_AUDIO_NOTIFICATION_VOLUME,
-            OP_AUDIO_BLUETOOTH_VOLUME,
-            OP_WAKE_LOCK,
-            OP_COARSE_LOCATION,
-            OP_COARSE_LOCATION,
-            OP_GET_USAGE_STATS,
-            OP_MUTE_MICROPHONE,
-            OP_TOAST_WINDOW,
-            OP_PROJECT_MEDIA,
-            OP_ACTIVATE_VPN,
-            OP_WRITE_WALLPAPER,
-            OP_ASSIST_STRUCTURE,
-            OP_ASSIST_SCREENSHOT,
-            OP_READ_PHONE_STATE,
-            OP_ADD_VOICEMAIL,
-            OP_USE_SIP,
-            OP_PROCESS_OUTGOING_CALLS,
-            OP_USE_FINGERPRINT,
-            OP_BODY_SENSORS,
-            OP_READ_CELL_BROADCASTS,
-            OP_MOCK_LOCATION,
-            OP_READ_EXTERNAL_STORAGE,
-            OP_WRITE_EXTERNAL_STORAGE,
-            OP_TURN_SCREEN_ON,
-            OP_GET_ACCOUNTS,
-            OP_RUN_IN_BACKGROUND,
-            OP_AUDIO_ACCESSIBILITY_VOLUME,
-            OP_READ_PHONE_NUMBERS,
-            OP_REQUEST_INSTALL_PACKAGES,
-            OP_PICTURE_IN_PICTURE,
-            OP_INSTANT_APP_START_FOREGROUND,
-            OP_ANSWER_PHONE_CALLS,
-            OP_RUN_ANY_IN_BACKGROUND,
-            OP_CHANGE_WIFI_STATE,
-            OP_REQUEST_DELETE_PACKAGES,
-            OP_BIND_ACCESSIBILITY_SERVICE,
-            OP_ACCEPT_HANDOVER,
-            OP_MANAGE_IPSEC_TUNNELS,
-            OP_START_FOREGROUND,
+            OP_COARSE_LOCATION,                 // COARSE_LOCATION
+            OP_COARSE_LOCATION,                 // FINE_LOCATION
+            OP_COARSE_LOCATION,                 // GPS
+            OP_VIBRATE,                         // VIBRATE
+            OP_READ_CONTACTS,                   // READ_CONTACTS
+            OP_WRITE_CONTACTS,                  // WRITE_CONTACTS
+            OP_READ_CALL_LOG,                   // READ_CALL_LOG
+            OP_WRITE_CALL_LOG,                  // WRITE_CALL_LOG
+            OP_READ_CALENDAR,                   // READ_CALENDAR
+            OP_WRITE_CALENDAR,                  // WRITE_CALENDAR
+            OP_COARSE_LOCATION,                 // WIFI_SCAN
+            OP_POST_NOTIFICATION,               // POST_NOTIFICATION
+            OP_COARSE_LOCATION,                 // NEIGHBORING_CELLS
+            OP_CALL_PHONE,                      // CALL_PHONE
+            OP_READ_SMS,                        // READ_SMS
+            OP_WRITE_SMS,                       // WRITE_SMS
+            OP_RECEIVE_SMS,                     // RECEIVE_SMS
+            OP_RECEIVE_SMS,                     // RECEIVE_EMERGECY_SMS
+            OP_RECEIVE_MMS,                     // RECEIVE_MMS
+            OP_RECEIVE_WAP_PUSH,                // RECEIVE_WAP_PUSH
+            OP_SEND_SMS,                        // SEND_SMS
+            OP_READ_SMS,                        // READ_ICC_SMS
+            OP_WRITE_SMS,                       // WRITE_ICC_SMS
+            OP_WRITE_SETTINGS,                  // WRITE_SETTINGS
+            OP_SYSTEM_ALERT_WINDOW,             // SYSTEM_ALERT_WINDOW
+            OP_ACCESS_NOTIFICATIONS,            // ACCESS_NOTIFICATIONS
+            OP_CAMERA,                          // CAMERA
+            OP_RECORD_AUDIO,                    // RECORD_AUDIO
+            OP_PLAY_AUDIO,                      // PLAY_AUDIO
+            OP_READ_CLIPBOARD,                  // READ_CLIPBOARD
+            OP_WRITE_CLIPBOARD,                 // WRITE_CLIPBOARD
+            OP_TAKE_MEDIA_BUTTONS,              // TAKE_MEDIA_BUTTONS
+            OP_TAKE_AUDIO_FOCUS,                // TAKE_AUDIO_FOCUS
+            OP_AUDIO_MASTER_VOLUME,             // AUDIO_MASTER_VOLUME
+            OP_AUDIO_VOICE_VOLUME,              // AUDIO_VOICE_VOLUME
+            OP_AUDIO_RING_VOLUME,               // AUDIO_RING_VOLUME
+            OP_AUDIO_MEDIA_VOLUME,              // AUDIO_MEDIA_VOLUME
+            OP_AUDIO_ALARM_VOLUME,              // AUDIO_ALARM_VOLUME
+            OP_AUDIO_NOTIFICATION_VOLUME,       // AUDIO_NOTIFICATION_VOLUME
+            OP_AUDIO_BLUETOOTH_VOLUME,          // AUDIO_BLUETOOTH_VOLUME
+            OP_WAKE_LOCK,                       // WAKE_LOCK
+            OP_COARSE_LOCATION,                 // MONITOR_LOCATION
+            OP_COARSE_LOCATION,                 // MONITOR_HIGH_POWER_LOCATION
+            OP_GET_USAGE_STATS,                 // GET_USAGE_STATS
+            OP_MUTE_MICROPHONE,                 // MUTE_MICROPHONE
+            OP_TOAST_WINDOW,                    // TOAST_WINDOW
+            OP_PROJECT_MEDIA,                   // PROJECT_MEDIA
+            OP_ACTIVATE_VPN,                    // ACTIVATE_VPN
+            OP_WRITE_WALLPAPER,                 // WRITE_WALLPAPER
+            OP_ASSIST_STRUCTURE,                // ASSIST_STRUCTURE
+            OP_ASSIST_SCREENSHOT,               // ASSIST_SCREENSHOT
+            OP_READ_PHONE_STATE,                // READ_PHONE_STATE
+            OP_ADD_VOICEMAIL,                   // ADD_VOICEMAIL
+            OP_USE_SIP,                         // USE_SIP
+            OP_PROCESS_OUTGOING_CALLS,          // PROCESS_OUTGOING_CALLS
+            OP_USE_FINGERPRINT,                 // USE_FINGERPRINT
+            OP_BODY_SENSORS,                    // BODY_SENSORS
+            OP_READ_CELL_BROADCASTS,            // READ_CELL_BROADCASTS
+            OP_MOCK_LOCATION,                   // MOCK_LOCATION
+            OP_READ_EXTERNAL_STORAGE,           // READ_EXTERNAL_STORAGE
+            OP_WRITE_EXTERNAL_STORAGE,          // WRITE_EXTERNAL_STORAGE
+            OP_TURN_SCREEN_ON,                  // TURN_SCREEN_ON
+            OP_GET_ACCOUNTS,                    // GET_ACCOUNTS
+            OP_RUN_IN_BACKGROUND,               // RUN_IN_BACKGROUND
+            OP_AUDIO_ACCESSIBILITY_VOLUME,      // AUDIO_ACCESSIBILITY_VOLUME
+            OP_READ_PHONE_NUMBERS,              // READ_PHONE_NUMBERS
+            OP_REQUEST_INSTALL_PACKAGES,        // REQUEST_INSTALL_PACKAGES
+            OP_PICTURE_IN_PICTURE,              // ENTER_PICTURE_IN_PICTURE_ON_HIDE
+            OP_INSTANT_APP_START_FOREGROUND,    // INSTANT_APP_START_FOREGROUND
+            OP_ANSWER_PHONE_CALLS,              // ANSWER_PHONE_CALLS
+            OP_RUN_ANY_IN_BACKGROUND,           // OP_RUN_ANY_IN_BACKGROUND
+            OP_CHANGE_WIFI_STATE,               // OP_CHANGE_WIFI_STATE
+            OP_REQUEST_DELETE_PACKAGES,         // OP_REQUEST_DELETE_PACKAGES
+            OP_BIND_ACCESSIBILITY_SERVICE,      // OP_BIND_ACCESSIBILITY_SERVICE
+            OP_ACCEPT_HANDOVER,                 // ACCEPT_HANDOVER
+            OP_MANAGE_IPSEC_TUNNELS,            // MANAGE_IPSEC_HANDOVERS
+            OP_START_FOREGROUND,                // START_FOREGROUND
     };
 
     /**
@@ -1420,19 +1441,11 @@ public class AppOpsManager {
      * Retrieve the human readable mode.
      * @hide
      */
-    public static String modeToString(int mode) {
-        switch (mode) {
-            case MODE_ALLOWED:
-                return "allow";
-            case MODE_IGNORED:
-                return "ignore";
-            case MODE_ERRORED:
-                return "deny";
-            case MODE_DEFAULT:
-                return "default";
-            default:
-                return "mode=" + mode;
+    public static String modeToName(int mode) {
+        if (mode >= 0 && mode < MODE_NAMES.length) {
+            return MODE_NAMES[mode];
         }
+        return "mode=" + mode;
     }
 
     /**
@@ -1554,30 +1567,42 @@ public class AppOpsManager {
         }
 
         public long getTime() {
-            long time = 0;
-            for (int i = 0; i < _NUM_UID_STATE; i++) {
-                if (mTimes[i] > time) {
-                    time = mTimes[i];
-                }
-            }
-            return time;
+            return maxTime(mTimes, 0, _NUM_UID_STATE);
         }
 
-        public long getTimeFor(int uidState) {
+        public long getLastAccessTime() {
+            return maxTime(mTimes, 0, _NUM_UID_STATE);
+        }
+
+        public long getLastAccessForegroundTime() {
+            return maxTime(mTimes, UID_STATE_PERSISTENT, UID_STATE_FOREGROUND_SERVICE + 1);
+        }
+
+        public long getLastAccessBackgroundTime() {
+            return maxTime(mTimes, UID_STATE_FOREGROUND_SERVICE + 1, _NUM_UID_STATE);
+        }
+
+        public long getLastTimeFor(int uidState) {
             return mTimes[uidState];
         }
 
         public long getRejectTime() {
-            long time = 0;
-            for (int i = 0; i < _NUM_UID_STATE; i++) {
-                if (mRejectTimes[i] > time) {
-                    time = mRejectTimes[i];
-                }
-            }
-            return time;
+            return maxTime(mRejectTimes, 0, _NUM_UID_STATE);
         }
 
-        public long getRejectTimeFor(int uidState) {
+        public long getLastRejectTime() {
+            return maxTime(mRejectTimes, 0, _NUM_UID_STATE);
+        }
+
+        public long getLastRejectForegroundTime() {
+            return maxTime(mRejectTimes, UID_STATE_PERSISTENT, UID_STATE_FOREGROUND_SERVICE + 1);
+        }
+
+        public long getLastRejectBackgroundTime() {
+            return maxTime(mRejectTimes, UID_STATE_FOREGROUND_SERVICE + 1, _NUM_UID_STATE);
+        }
+
+        public long getLastRejectTimeFor(int uidState) {
             return mRejectTimes[uidState];
         }
 
@@ -1680,6 +1705,7 @@ public class AppOpsManager {
      * @param ops The set of operations you are interested in, or null if you want all of them.
      * @hide
      */
+    @RequiresPermission(android.Manifest.permission.GET_APP_OPS_STATS)
     public List<AppOpsManager.PackageOps> getPackagesForOps(int[] ops) {
         try {
             return mService.getPackagesForOps(ops);
@@ -1696,6 +1722,7 @@ public class AppOpsManager {
      * @param ops The set of operations you are interested in, or null if you want all of them.
      * @hide
      */
+    @RequiresPermission(android.Manifest.permission.GET_APP_OPS_STATS)
     public List<AppOpsManager.PackageOps> getOpsForPackage(int uid, String packageName, int[] ops) {
         try {
             return mService.getOpsForPackage(uid, packageName, ops);
@@ -2009,6 +2036,17 @@ public class AppOpsManager {
      * used for a quick check to see if an operation has been disabled for the application,
      * as an early reject of some work.  This does not modify the time stamp or other data
      * about the operation.
+     *
+     * <p>Important things this will not do (which you need to ultimate use
+     * {@link #noteOp(String, int, String)} or {@link #startOp(String, int, String)} to cover):</p>
+     * <ul>
+     *     <li>Verifying the uid and package are consistent, so callers can't spoof
+     *     their identity.</li>
+     *     <li>Taking into account the current foreground/background state of the
+     *     app; apps whose mode varies by this state will always be reported
+     *     as {@link #MODE_ALLOWED}.</li>
+     * </ul>
+     *
      * @param op The operation to check.  One of the OPSTR_* constants.
      * @param uid The user id of the application attempting to perform the operation.
      * @param packageName The name of the application attempting to perform the operation.
@@ -2128,6 +2166,17 @@ public class AppOpsManager {
      * used for a quick check to see if an operation has been disabled for the application,
      * as an early reject of some work.  This does not modify the time stamp or other data
      * about the operation.
+     *
+     * <p>Important things this will not do (which you need to ultimate use
+     * {@link #noteOp(int, int, String)} or {@link #startOp(int, int, String)} to cover):</p>
+     * <ul>
+     *     <li>Verifying the uid and package are consistent, so callers can't spoof
+     *     their identity.</li>
+     *     <li>Taking into account the current foreground/background state of the
+     *     app; apps whose mode varies by this state will always be reported
+     *     as {@link #MODE_ALLOWED}.</li>
+     * </ul>
+     *
      * @param op The operation to check.  One of the OP_* constants.
      * @param uid The user id of the application attempting to perform the operation.
      * @param packageName The name of the application attempting to perform the operation.
@@ -2444,5 +2493,18 @@ public class AppOpsManager {
     @TestApi
     public static String[] getOpStrs() {
         return Arrays.copyOf(sOpToString, sOpToString.length);
+    }
+
+    /**
+     * @hide
+     */
+    public static long maxTime(long[] times, int start, int end) {
+        long time = 0;
+        for (int i = start; i < end; i++) {
+            if (times[i] > time) {
+                time = times[i];
+            }
+        }
+        return time;
     }
 }
