@@ -2079,7 +2079,8 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
         }
 
         getUiForShowing().showFillUi(filledId, response, filterText,
-                mService.getServicePackageName(), mComponentName.getPackageName(), this);
+                mService.getServicePackageName(), mComponentName.getPackageName(),
+                mService.getServiceLabel(), mService.getServiceIcon(), this);
 
         synchronized (mLock) {
             if (mUiShownTime == 0) {

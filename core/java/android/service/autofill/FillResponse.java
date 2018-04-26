@@ -241,6 +241,9 @@ public final class FillResponse implements Parcelable {
          * immutable by using {@link android.app.PendingIntent#FLAG_IMMUTABLE} as the
          * platform needs to fill in the authentication arguments.
          *
+         * <p>Theme does not work with RemoteViews layout. Avoid hardcoded text color
+         * or background color: Autofill on different platforms may have different themes.
+         *
          * @param authentication Intent to an activity with your authentication flow.
          * @param presentation The presentation to visualize the response.
          * @param ids id of Views that when focused will display the authentication UI.
@@ -449,6 +452,9 @@ public final class FillResponse implements Parcelable {
          * authentication (as the header could have been set directly in the main presentation in
          * these cases).
          *
+         * <p>Theme does not work with RemoteViews layout. Avoid hardcoded text color
+         * or background color: Autofill on different platforms may have different themes.
+         *
          * @param header a presentation to represent the header. This presentation is not clickable
          * &mdash;calling
          * {@link RemoteViews#setOnClickPendingIntent(int, android.app.PendingIntent)} on it would
@@ -476,6 +482,9 @@ public final class FillResponse implements Parcelable {
          * method should only be used on {@link FillResponse FillResponses} that do not require
          * authentication (as the footer could have been set directly in the main presentation in
          * these cases).
+         *
+         * <p>Theme does not work with RemoteViews layout. Avoid hardcoded text color
+         * or background color: Autofill on different platforms may have different themes.
          *
          * @param footer a presentation to represent the footer. This presentation is not clickable
          * &mdash;calling

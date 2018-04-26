@@ -14,35 +14,73 @@
      limitations under the License.
 -->
 
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/autofill_dataset_picker"
-    style="@style/AutofillDatasetPicker"
-    android:layout_width="fill_parent"
-    android:layout_height="fill_parent">
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="horizontal"
+    android:background="?android:attr/windowBackground"
+    android:paddingStart="40dp"
+    android:paddingEnd="40dp"
+    android:paddingTop="40dp"
+    android:paddingBottom="40dp">
 
-    <TextView
-        android:layout_width="wrap_content"
+    <LinearLayout
+        android:orientation="vertical"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:text="@string/autofill_window_title"
-        android:layout_above="@+id/autofill_dataset_container"
-        android:layout_alignStart="@+id/autofill_dataset_container"
-        android:textSize="16sp"/>
+        android:layout_weight="1"
+        android:layout_marginEnd="32dp">
+
+        <LinearLayout
+            android:orientation="horizontal"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="6dp"
+            >
+            <ImageView
+                android:id="@+id/autofill_dataset_icon"
+                android:scaleType="fitStart"
+                android:layout_marginEnd="10dp"
+                android:layout_gravity="center_vertical"
+                android:layout_width="48dp"
+                android:layout_height="48dp"/>
+            <TextView
+                android:id="@+id/autofill_dataset_title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical"
+                android:textSize="24sp" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/autofill_dataset_header"
+            android:visibility="gone"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"/>
+
+    </LinearLayout>
 
     <!-- autofill_container is the common parent for inserting authentication item or
-         autofill_dataset_list-->
-    <FrameLayout
-        android:id="@+id/autofill_dataset_container"
-        android:layout_width="wrap_content"
+         autofill_dataset_list, autofill_dataset_foolter-->
+    <LinearLayout
+        android:layout_width="304dp"
         android:layout_height="wrap_content"
-        android:layout_centerInParent="true">
+        android:id="@+id/autofill_dataset_picker"
+        android:orientation="vertical">
         <ListView
             android:id="@+id/autofill_dataset_list"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:clickable="true"
             android:divider="@null"
             android:drawSelectorOnTop="true"
             android:visibility="gone"/>
-    </FrameLayout>
+        <LinearLayout
+            android:id="@+id/autofill_dataset_footer"
+            android:visibility="gone"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"/>
+    </LinearLayout>
 
-</RelativeLayout>
+</LinearLayout>
