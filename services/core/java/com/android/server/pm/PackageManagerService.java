@@ -4223,6 +4223,11 @@ public class PackageManagerService extends IPackageManager.Stub
                     || appId == Process.ROOT_UID) {
                 return false;
             }
+            // Installer gets to see all static libs.
+            if (PackageManager.PERMISSION_GRANTED
+                    == checkUidPermission(Manifest.permission.INSTALL_PACKAGES, uid)) {
+                return false;
+            }
         }
 
         // No package means no static lib as it is always on internal storage
