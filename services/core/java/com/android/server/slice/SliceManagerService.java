@@ -155,11 +155,10 @@ public class SliceManagerService extends ISliceManager.Stub {
         enforceAccess(pkg, uri);
         int user = Binder.getCallingUserHandle().getIdentifier();
         uri = maybeAddUserId(uri, user);
-        getOrCreatePinnedSlice(uri, pkg).pin(pkg, specs, token);
+        String slicePkg = getProviderPkg(uri, user);
+        getOrCreatePinnedSlice(uri, slicePkg).pin(pkg, specs, token);
 
-        Uri finalUri = uri;
         mHandler.post(() -> {
-            String slicePkg = getProviderPkg(finalUri, user);
             if (slicePkg != null && !Objects.equals(pkg, slicePkg)) {
                 mAppUsageStats.reportEvent(slicePkg, user,
                         isAssistant(pkg, user) || isDefaultHomeApp(pkg, user)
