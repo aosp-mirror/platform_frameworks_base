@@ -35,7 +35,6 @@ public class ImsConfig {
     private static final String TAG = "ImsConfig";
     private boolean DBG = true;
     private final IImsConfig miConfig;
-    private Context mContext;
 
     /**
      * Broadcast action: the feature enable status was changed
@@ -541,14 +540,12 @@ public class ImsConfig {
         public static final int WIFI_PREFERRED = 2;
     }
 
-    public ImsConfig(IImsConfig iconfig, Context context) {
-        if (DBG) Rlog.d(TAG, "ImsConfig created");
+    public ImsConfig(IImsConfig iconfig) {
         miConfig = iconfig;
-        mContext = context;
     }
 
     /**
-     * @deprecated see {@link #getInt(int)} instead.
+     * @deprecated see {@link #getConfigInt(int)} instead.
      */
     public int getProvisionedValue(int item) throws ImsException {
         return getConfigInt(item);
