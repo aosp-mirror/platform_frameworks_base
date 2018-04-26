@@ -227,9 +227,6 @@ public class NetworkStatsServiceTest {
 
     @After
     public void tearDown() throws Exception {
-        // Registered by NetworkStatsService's constructor.
-        LocalServices.removeServiceForTest(NetworkStatsManagerInternal.class);
-
         IoUtils.deleteContents(mStatsDir);
 
         mServiceContext = null;
