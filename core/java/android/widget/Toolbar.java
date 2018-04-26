@@ -1008,6 +1008,98 @@ public class Toolbar extends ViewGroup {
     }
 
     /**
+     * Retrieve the currently configured content description for the collapse button view.
+     * This will be used to describe the collapse action to users through mechanisms such
+     * as screen readers or tooltips.
+     *
+     * @return The collapse button's content description
+     *
+     * @attr ref android.R.styleable#Toolbar_collapseContentDescription
+     */
+    @Nullable
+    public CharSequence getCollapseContentDescription() {
+        return mCollapseButtonView != null ? mCollapseButtonView.getContentDescription() : null;
+    }
+
+    /**
+     * Set a content description for the collapse button if one is present. The content description
+     * will be read via screen readers or other accessibility systems to explain the action of the
+     * collapse button.
+     *
+     * @param resId Resource ID of a content description string to set, or 0 to
+     *              clear the description
+     *
+     * @attr ref android.R.styleable#Toolbar_collapseContentDescription
+     */
+    public void setCollapseContentDescription(@StringRes int resId) {
+        setCollapseContentDescription(resId != 0 ? getContext().getText(resId) : null);
+    }
+
+    /**
+     * Set a content description for the collapse button if one is present. The content description
+     * will be read via screen readers or other accessibility systems to explain the action of the
+     * navigation button.
+     *
+     * @param description Content description to set, or <code>null</code> to
+     *                    clear the content description
+     *
+     * @attr ref android.R.styleable#Toolbar_collapseContentDescription
+     */
+    public void setCollapseContentDescription(@Nullable CharSequence description) {
+        if (!TextUtils.isEmpty(description)) {
+            ensureCollapseButtonView();
+        }
+        if (mCollapseButtonView != null) {
+            mCollapseButtonView.setContentDescription(description);
+        }
+    }
+
+    /**
+     * Return the current drawable used as the collapse icon.
+     *
+     * @return The collapse icon drawable
+     *
+     * @attr ref android.R.styleable#Toolbar_collapseIcon
+     */
+    @Nullable
+    public Drawable getCollapseIcon() {
+        return mCollapseButtonView != null ? mCollapseButtonView.getDrawable() : null;
+    }
+
+    /**
+     * Set the icon to use for the toolbar's collapse button.
+     *
+     * <p>The collapse button appears at the start of the toolbar when an action view is present
+     * .</p>
+     *
+     * @param resId Resource ID of a drawable to set
+     *
+     * @attr ref android.R.styleable#Toolbar_collapseIcon
+     */
+    public void setCollapseIcon(@DrawableRes int resId) {
+        setCollapseIcon(getContext().getDrawable(resId));
+    }
+
+    /**
+     * Set the icon to use for the toolbar's collapse button.
+     *
+     * <p>The collapse button appears at the start of the toolbar when an action view is present
+     * .</p>
+     *
+     * @param icon Drawable to set, may be null to use the default icon
+     *
+     * @attr ref android.R.styleable#Toolbar_collapseIcon
+     */
+    public void setCollapseIcon(@Nullable Drawable icon) {
+        if (icon != null) {
+            ensureCollapseButtonView();
+            mCollapseButtonView.setImageDrawable(icon);
+        } else if (mCollapseButtonView != null) {
+            mCollapseButtonView.setImageDrawable(mCollapseIcon);
+        }
+    }
+
+    /**
      * Return the Menu shown in the toolbar.
      *
      * <p>Applications that wish to populate the toolbar's menu can do so from here. To use
