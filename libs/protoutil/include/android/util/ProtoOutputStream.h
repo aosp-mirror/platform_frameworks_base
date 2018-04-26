@@ -17,9 +17,10 @@
 #ifndef ANDROID_UTIL_PROTOOUTPUT_STREAM_H
 #define ANDROID_UTIL_PROTOOUTPUT_STREAM_H
 
-#include <android/util/EncodedBuffer.h>
-
+#include <cstdint>
 #include <string>
+
+#include <android/util/EncodedBuffer.h>
 
 namespace android {
 namespace util {
@@ -143,16 +144,16 @@ private:
 
     inline void writeDoubleImpl(uint32_t id, double val);
     inline void writeFloatImpl(uint32_t id, float val);
-    inline void writeInt64Impl(uint32_t id, long long val);
-    inline void writeInt32Impl(uint32_t id, int val);
+    inline void writeInt64Impl(uint32_t id, int64_t val);
+    inline void writeInt32Impl(uint32_t id, int32_t val);
     inline void writeUint64Impl(uint32_t id, uint64_t val);
     inline void writeUint32Impl(uint32_t id, uint32_t val);
     inline void writeFixed64Impl(uint32_t id, uint64_t val);
     inline void writeFixed32Impl(uint32_t id, uint32_t val);
-    inline void writeSFixed64Impl(uint32_t id, long long val);
-    inline void writeSFixed32Impl(uint32_t id, int val);
-    inline void writeZigzagInt64Impl(uint32_t id, long long val);
-    inline void writeZigzagInt32Impl(uint32_t id, int val);
+    inline void writeSFixed64Impl(uint32_t id, int64_t val);
+    inline void writeSFixed32Impl(uint32_t id, int32_t val);
+    inline void writeZigzagInt64Impl(uint32_t id, int64_t val);
+    inline void writeZigzagInt32Impl(uint32_t id, int32_t val);
     inline void writeEnumImpl(uint32_t id, int val);
     inline void writeBoolImpl(uint32_t id, bool val);
     inline void writeUtf8StringImpl(uint32_t id, const char* val, size_t size);
@@ -161,6 +162,9 @@ private:
     bool compact();
     size_t editEncodedSize(size_t rawSize);
     bool compactSize(size_t rawSize);
+
+    template<typename T>
+    bool internalWrite(uint64_t fieldId, T val, const char* typeName);
 };
 
 }
