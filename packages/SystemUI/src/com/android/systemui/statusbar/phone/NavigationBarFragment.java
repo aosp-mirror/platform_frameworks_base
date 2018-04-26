@@ -521,7 +521,7 @@ public class NavigationBarFragment extends Fragment implements Callbacks {
 
         // Clear any pending suggestion flag as it has either been nullified or is being shown
         mPendingRotationSuggestion = false;
-        getView().removeCallbacks(mCancelPendingRotationProposal);
+        if (getView() != null) getView().removeCallbacks(mCancelPendingRotationProposal);
 
         // Handle the visibility change and animation
         if (visible) { // Appear and change (cannot force)
@@ -1141,6 +1141,7 @@ public class NavigationBarFragment extends Fragment implements Callbacks {
         private final Runnable mRipple = new Runnable() {
             @Override
             public void run() { // Cause the ripple to fire via false presses
+                if (!mRoot.isAttachedToWindow()) return;
                 mRoot.setPressed(true);
                 mRoot.setPressed(false);
             }
