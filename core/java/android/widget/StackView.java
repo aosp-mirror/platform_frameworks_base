@@ -28,7 +28,6 @@ import android.graphics.PorterDuff;
 import android.graphics.PorterDuffXfermode;
 import android.graphics.Rect;
 import android.graphics.RectF;
-import android.graphics.Region;
 import android.graphics.TableMaskFilter;
 import android.os.Bundle;
 import android.util.AttributeSet;
@@ -550,8 +549,8 @@ public class StackView extends AdapterViewAnimator {
 
         // We only expand the clip bounds if necessary.
         if (expandClipRegion) {
-            canvas.save(Canvas.CLIP_SAVE_FLAG);
-            canvas.clipRect(stackInvalidateRect, Region.Op.UNION);
+            canvas.save();
+            canvas.clipRectUnion(stackInvalidateRect);
             super.dispatchDraw(canvas);
             canvas.restore();
         } else {

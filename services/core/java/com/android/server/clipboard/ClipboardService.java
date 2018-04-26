@@ -621,7 +621,7 @@ public class ClipboardService extends SystemService {
 
     private boolean clipboardAccessAllowed(int op, String callingPackage, int callingUid) {
         // Check the AppOp.
-        if (mAppOps.checkOp(op, callingUid, callingPackage) != AppOpsManager.MODE_ALLOWED) {
+        if (mAppOps.noteOp(op, callingUid, callingPackage) != AppOpsManager.MODE_ALLOWED) {
             return false;
         }
         try {

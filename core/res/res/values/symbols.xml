@@ -2407,6 +2407,7 @@
 
   <!-- Fingerprint config -->
   <java-symbol type="integer" name="config_fingerprintMaxTemplatesPerUser"/>
+  <java-symbol type="bool" name="config_fingerprintSupportsGestures"/>
 
   <!-- From various Material changes -->
   <java-symbol type="attr" name="titleTextAppearance" />
@@ -2575,6 +2576,7 @@
   <java-symbol type="dimen" name="floating_toolbar_maximum_overflow_height" />
   <java-symbol type="dimen" name="floating_toolbar_horizontal_margin" />
   <java-symbol type="dimen" name="floating_toolbar_vertical_margin" />
+  <java-symbol type="dimen" name="floating_toolbar_icon_text_spacing" />
   <java-symbol type="dimen" name="content_rect_bottom_clip_allowance" />
   <java-symbol type="drawable" name="ft_avd_tooverflow" />
   <java-symbol type="drawable" name="ft_avd_toarrow" />
@@ -3369,4 +3371,5 @@
   <java-symbol type="id" name="user_loading_avatar" />
   <java-symbol type="id" name="user_loading" />
 
+  <java-symbol type="string" name="battery_saver_description_with_learn_more" />
 </resources>

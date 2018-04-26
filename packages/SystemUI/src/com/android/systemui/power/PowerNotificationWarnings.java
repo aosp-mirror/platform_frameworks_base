@@ -19,17 +19,29 @@ package com.android.systemui.power;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
+import android.content.ActivityNotFoundException;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.media.AudioAttributes;
+import android.net.Uri;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.PowerManager;
 import android.os.UserHandle;
 import android.support.annotation.VisibleForTesting;
+import android.text.Annotation;
+import android.text.Layout;
+import android.text.SpannableString;
+import android.text.SpannableStringBuilder;
+import android.text.TextPaint;
+import android.text.TextUtils;
+import android.text.method.LinkMovementMethod;
+import android.text.style.URLSpan;
+import android.util.Log;
 import android.util.Slog;
+import android.view.View;
 
 import com.android.internal.messages.nano.SystemMessageProto.SystemMessage;
 import com.android.settingslib.Utils;
@@ -42,6 +54,8 @@ import com.android.systemui.util.NotificationChannels;
 
 import java.io.PrintWriter;
 import java.text.NumberFormat;
+import java.util.Locale;
+import java.util.Objects;
 
 public class PowerNotificationWarnings implements PowerUI.WarningsUI {
     private static final String TAG = PowerUI.TAG + ".Notification";
@@ -86,6 +100,8 @@ public class PowerNotificationWarnings implements PowerUI.WarningsUI {
 
     private static final String SETTINGS_ACTION_OPEN_BATTERY_SAVER_SETTING =
             "android.settings.BATTERY_SAVER_SETTINGS";
+
+    private static final String BATTERY_SAVER_DESCRIPTION_URL_KEY = "url";
 
     private static final AudioAttributes AUDIO_ATTRIBUTES = new AudioAttributes.Builder()
             .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
@@ -461,7 +477,16 @@ public class PowerNotificationWarnings implements PowerUI.WarningsUI {
         if (mSaverConfirmation != null) return;
         final SystemUIDialog d = new SystemUIDialog(mContext);
         d.setTitle(R.string.battery_saver_confirmation_title);
-        d.setMessage(com.android.internal.R.string.battery_saver_description);
+        d.setMessage(getBatterySaverDescription());
+
+        // Sad hack for http://b/78261259 and http://b/78298335. Otherwise "Battery" may be split
+        // into "Bat-tery".
+        if (isEnglishLocale()) {
+            d.setMessageHyphenationFrequency(Layout.HYPHENATION_FREQUENCY_NONE);
+        }
+        // We need to set LinkMovementMethod to make the link clickable.
+        d.setMessageMovementMethod(LinkMovementMethod.getInstance());
+
         d.setNegativeButton(android.R.string.cancel, null);
         d.setPositiveButton(R.string.battery_saver_confirmation_ok,
                 (dialog, which) -> setSaverMode(true, false));
@@ -469,6 +494,79 @@ public class PowerNotificationWarnings implements PowerUI.WarningsUI {
         d.setOnDismissListener((dialog) -> mSaverConfirmation = null);
         d.show();
         mSaverConfirmation = d;
+    }
+
+    private boolean isEnglishLocale() {
+        return Objects.equals(Locale.getDefault().getLanguage(),
+                Locale.ENGLISH.getLanguage());
+    }
+
+    /**
+     * Generates the message for the "want to start battery saver?" dialog with a "learn more" link.
+     */
+    private CharSequence getBatterySaverDescription() {
+        final String learnMoreUrl = mContext.getText(
+                R.string.help_uri_battery_saver_learn_more_link_target).toString();
+
+        // If there's no link, use the string with no "learn more".
+        if (TextUtils.isEmpty(learnMoreUrl)) {
+            return mContext.getText(
+                    com.android.internal.R.string.battery_saver_description);
+        }
+
+        // If we have a link, use the string with the "learn more" link.
+        final CharSequence rawText = mContext.getText(
+                com.android.internal.R.string.battery_saver_description_with_learn_more);
+        final SpannableString message = new SpannableString(rawText);
+        final SpannableStringBuilder builder = new SpannableStringBuilder(message);
+
+        // Look for the "learn more" part of the string, and set a URL span on it.
+        // We use a customized URLSpan to add FLAG_RECEIVER_FOREGROUND to the intent, and
+        // also to close the dialog.
+        for (Annotation annotation : message.getSpans(0, message.length(), Annotation.class)) {
+            final String key = annotation.getValue();
+
+            if (!BATTERY_SAVER_DESCRIPTION_URL_KEY.equals(key)) {
+                continue;
+            }
+            final int start = message.getSpanStart(annotation);
+            final int end = message.getSpanEnd(annotation);
+
+            // Replace the "learn more" with a custom URL span, with
+            // - No underline.
+            // - When clicked, close the dialog and the notification shade.
+            final URLSpan urlSpan = new URLSpan(learnMoreUrl) {
+                @Override
+                public void updateDrawState(TextPaint ds) {
+                    super.updateDrawState(ds);
+                    ds.setUnderlineText(false);
+                }
+
+                @Override
+                public void onClick(View widget) {
+                    // Close the parent dialog.
+                    if (mSaverConfirmation != null) {
+                        mSaverConfirmation.dismiss();
+                    }
+                    // Also close the notification shade, if it's open.
+                    mContext.sendBroadcast(
+                            new Intent(Intent.ACTION_CLOSE_SYSTEM_DIALOGS)
+                            .setFlags(Intent.FLAG_RECEIVER_FOREGROUND));
+
+                    final Uri uri = Uri.parse(getURL());
+                    Context context = widget.getContext();
+                    Intent intent = new Intent(Intent.ACTION_VIEW, uri)
+                            .setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                    try {
+                        context.startActivity(intent);
+                    } catch (ActivityNotFoundException e) {
+                        Log.w(TAG, "Activity was not found for intent, " + intent.toString());
+                    }
+                }
+            };
+            builder.setSpan(urlSpan, start, end, message.getSpanFlags(urlSpan));
+        }
+        return builder;
     }
 
     private void showAutoSaverEnabledConfirmation() {

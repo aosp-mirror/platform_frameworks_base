@@ -388,6 +388,12 @@ public class StatusBarSignalPolicy implements NetworkControllerImpl.SignalCallba
                             typeContentDescription);
         }
 
+        public MobileIconState copy() {
+            MobileIconState copy = new MobileIconState(this.subId);
+            copyTo(copy);
+            return copy;
+        }
+
         public void copyTo(MobileIconState other) {
             super.copyTo(other);
             other.subId = subId;
