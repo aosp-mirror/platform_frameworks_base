@@ -31,4 +31,12 @@
     <style name="LayoutInDisplayCutoutModeNever">
         <item name="android:windowLayoutInDisplayCutoutMode">never</item>
     </style>
+    <style name="WindowBackgroundColorLiteral">
+        <item name="android:windowBackground">#00FF00</item>
+    </style>
+    <style name="WindowBackgroundFallbackColorLiteral">
+        <item name="android:windowBackground">@null</item>
+        <item name="android:colorBackground">@null</item>
+        <item name="android:windowBackgroundFallback">#0000FF</item>
+    </style>
 </resources>

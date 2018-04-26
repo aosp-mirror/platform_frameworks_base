@@ -24,6 +24,9 @@ import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
 
 import android.content.Context;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
+import android.graphics.drawable.Drawable;
 import android.platform.test.annotations.Presubmit;
 import android.support.test.InstrumentationRegistry;
 import android.support.test.filters.SmallTest;
@@ -87,6 +90,32 @@ public final class PhoneWindowTest {
 
         assertThat(mPhoneWindow.getAttributes().layoutInDisplayCutoutMode,
                 is(LAYOUT_IN_DISPLAY_CUTOUT_MODE_NEVER));
+    }
+
+    @Test
+    public void testWindowBackground_colorLiteral() {
+        createPhoneWindowWithTheme(R.style.WindowBackgroundColorLiteral);
+        installDecor();
+
+        Drawable backgroundDrawable = mPhoneWindow.getDecorView().getBackground();
+        assertThat(backgroundDrawable instanceof ColorDrawable, is(true));
+
+        ColorDrawable colorDrawable = (ColorDrawable) backgroundDrawable;
+        assertThat(colorDrawable.getColor(), is(Color.GREEN));
+    }
+
+    @Test
+    public void testWindowBackgroundFallback_colorLiteral() {
+        createPhoneWindowWithTheme(R.style.WindowBackgroundFallbackColorLiteral);
+        installDecor();
+
+        DecorView decorView = (DecorView) mPhoneWindow.getDecorView();
+        Drawable fallbackDrawable = decorView.getBackgroundFallback();
+
+        assertThat(fallbackDrawable instanceof ColorDrawable, is(true));
+
+        ColorDrawable colorDrawable = (ColorDrawable) fallbackDrawable;
+        assertThat(colorDrawable.getColor(), is(Color.BLUE));
     }
 
     private void createPhoneWindowWithTheme(int theme) {
