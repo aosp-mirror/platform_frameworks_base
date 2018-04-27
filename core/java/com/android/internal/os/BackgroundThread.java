@@ -18,12 +18,15 @@ package com.android.internal.os;
 
 import android.os.Handler;
 import android.os.HandlerThread;
+import android.os.Looper;
 import android.os.Trace;
 
 /**
  * Shared singleton background thread for each process.
  */
 public final class BackgroundThread extends HandlerThread {
+    private static final long SLOW_DISPATCH_THRESHOLD_MS = 10_000;
+    private static final long SLOW_DELIVERY_THRESHOLD_MS = 30_000;
     private static BackgroundThread sInstance;
     private static Handler sHandler;
 
@@ -35,7 +38,10 @@ public final class BackgroundThread extends HandlerThread {
         if (sInstance == null) {
             sInstance = new BackgroundThread();
             sInstance.start();
-            sInstance.getLooper().setTraceTag(Trace.TRACE_TAG_SYSTEM_SERVER);
+            final Looper looper = sInstance.getLooper();
+            looper.setTraceTag(Trace.TRACE_TAG_SYSTEM_SERVER);
+            looper.setSlowLogThresholdMs(
+                    SLOW_DISPATCH_THRESHOLD_MS, SLOW_DELIVERY_THRESHOLD_MS);
             sHandler = new Handler(sInstance.getLooper());
         }
     }
