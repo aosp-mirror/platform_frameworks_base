@@ -984,6 +984,7 @@ public class AppTransition implements Dump {
                 (height - thumbnailSize) / 2,
                 (width + thumbnailSize) / 2,
                 (height + thumbnailSize) / 2);
+        drawable.setTint(mContext.getColor(android.R.color.white));
         drawable.draw(canvas);
         picture.endRecording();
 
