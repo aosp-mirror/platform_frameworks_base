@@ -30,6 +30,7 @@ import com.android.internal.hardware.AmbientDisplayConfiguration;
 import com.android.systemui.Dependency;
 import com.android.systemui.R;
 import com.android.systemui.doze.AlwaysOnDisplayPolicy;
+import com.android.systemui.doze.DozeScreenState;
 import com.android.systemui.tuner.TunerService;
 
 import java.io.PrintWriter;
@@ -153,7 +154,8 @@ public class DozeParameters implements TunerService.Tunable {
      * @return duration in millis.
      */
     public long getWallpaperAodDuration() {
-        return mAlwaysOnPolicy.wallpaperVisibilityDuration;
+        return shouldControlScreenOff() ? DozeScreenState.ENTER_DOZE_HIDE_WALLPAPER_DELAY
+                : mAlwaysOnPolicy.wallpaperVisibilityDuration;
     }
 
     /**
