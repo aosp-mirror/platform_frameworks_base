@@ -49,12 +49,11 @@ import com.android.systemui.OverviewProxyService;
 import com.android.systemui.R;
 import com.android.systemui.plugins.statusbar.phone.NavBarButtonProvider.ButtonInterface;
 import com.android.systemui.shared.system.ActivityManagerWrapper;
+import com.android.systemui.shared.system.NavigationBarCompat;
 
 import static android.view.KeyEvent.KEYCODE_HOME;
 import static android.view.accessibility.AccessibilityNodeInfo.ACTION_CLICK;
 import static android.view.accessibility.AccessibilityNodeInfo.ACTION_LONG_CLICK;
-import static com.android.systemui.shared.system.NavigationBarCompat.QUICK_SCRUB_TOUCH_SLOP_PX;
-import static com.android.systemui.shared.system.NavigationBarCompat.QUICK_STEP_TOUCH_SLOP_PX;
 
 public class KeyButtonView extends ImageView implements ButtonInterface {
     private static final String TAG = KeyButtonView.class.getSimpleName();
@@ -234,10 +233,12 @@ public class KeyButtonView extends ImageView implements ButtonInterface {
                 x = (int)ev.getRawX();
                 y = (int)ev.getRawY();
 
-                boolean exceededTouchSlopX = Math.abs(x - mTouchDownX) >
-                        (mIsVertical ? QUICK_SCRUB_TOUCH_SLOP_PX : QUICK_STEP_TOUCH_SLOP_PX);
-                boolean exceededTouchSlopY = Math.abs(y - mTouchDownY) >
-                        (mIsVertical ? QUICK_STEP_TOUCH_SLOP_PX : QUICK_SCRUB_TOUCH_SLOP_PX);
+                boolean exceededTouchSlopX = Math.abs(x - mTouchDownX) > (mIsVertical
+                        ? NavigationBarCompat.getQuickScrubTouchSlopPx()
+                        : NavigationBarCompat.getQuickStepTouchSlopPx());
+                boolean exceededTouchSlopY = Math.abs(y - mTouchDownY) > (mIsVertical
+                        ? NavigationBarCompat.getQuickStepTouchSlopPx()
+                        : NavigationBarCompat.getQuickScrubTouchSlopPx());
                 if (exceededTouchSlopX || exceededTouchSlopY) {
                     // When quick step is enabled, prevent animating the ripple triggered by
                     // setPressed and decide to run it on touch up
