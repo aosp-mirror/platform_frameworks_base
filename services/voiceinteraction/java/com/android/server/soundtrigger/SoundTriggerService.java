@@ -32,7 +32,6 @@ import static com.android.internal.util.function.pooled.PooledLambda.obtainMessa
 import android.Manifest;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.app.PendingIntent;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -49,7 +48,6 @@ import android.hardware.soundtrigger.SoundTrigger.SoundModel;
 import android.media.soundtrigger.ISoundTriggerDetectionService;
 import android.media.soundtrigger.ISoundTriggerDetectionServiceClient;
 import android.media.soundtrigger.SoundTriggerDetectionService;
-import android.media.soundtrigger.SoundTriggerManager;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.Handler;
@@ -67,7 +65,6 @@ import android.util.Slog;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.app.ISoundTriggerService;
-import com.android.internal.util.DumpUtils;
 import com.android.internal.util.Preconditions;
 import com.android.server.SystemService;
 
@@ -100,7 +97,6 @@ public class SoundTriggerService extends SystemService {
     private final TreeMap<UUID, SoundModel> mLoadedModels;
     private Object mCallbacksLock;
     private final TreeMap<UUID, IRecognitionStatusCallback> mCallbacks;
-    private PowerManager.WakeLock mWakelock;
 
     /** Number of ops run by the {@link RemoteSoundTriggerDetectionService} per package name */
     @GuardedBy("mLock")
@@ -296,27 +292,16 @@ public class SoundTriggerService extends SystemService {
             Preconditions.checkNotNull(detectionService);
             Preconditions.checkNotNull(config);
 
-            return startRecognitionForInt(soundModelId,
-                new RemoteSoundTriggerDetectionService(soundModelId.getUuid(),
-                    params, detectionService, Binder.getCallingUserHandle(), config), config);
-
-        }
-
-        @Override
-        public int startRecognitionForIntent(ParcelUuid soundModelId, PendingIntent callbackIntent,
-                SoundTrigger.RecognitionConfig config) {
-            return startRecognitionForInt(soundModelId,
-                new LocalSoundTriggerRecognitionStatusIntentCallback(soundModelId.getUuid(),
-                    callbackIntent, config), config);
-        }
-
-        private int startRecognitionForInt(ParcelUuid soundModelId,
-            IRecognitionStatusCallback callback, SoundTrigger.RecognitionConfig config) {
             enforceCallingPermission(Manifest.permission.MANAGE_SOUND_TRIGGER);
+
             if (!isInitialized()) return STATUS_ERROR;
             if (DEBUG) {
                 Slog.i(TAG, "startRecognition(): id = " + soundModelId);
             }
+
+            IRecognitionStatusCallback callback =
+                    new RemoteSoundTriggerDetectionService(soundModelId.getUuid(), params,
+                            detectionService, Binder.getCallingUserHandle(), config);
 
             synchronized (mLock) {
                 SoundModel soundModel = mLoadedModels.get(soundModelId.getUuid());
@@ -334,12 +319,6 @@ public class SoundTriggerService extends SystemService {
                 }
                 int ret;
                 switch (soundModel.type) {
-                    case SoundModel.TYPE_KEYPHRASE: {
-                        KeyphraseSoundModel keyphraseSoundModel = (KeyphraseSoundModel) soundModel;
-                        ret = mSoundTriggerHelper.startKeyphraseRecognition(
-                            keyphraseSoundModel.keyphrases[0].id, keyphraseSoundModel, callback,
-                            config);
-                    } break;
                     case SoundModel.TYPE_GENERIC_SOUND:
                         ret = mSoundTriggerHelper.startGenericRecognition(soundModel.uuid,
                             (GenericSoundModel) soundModel, callback, config);
@@ -361,7 +340,7 @@ public class SoundTriggerService extends SystemService {
         }
 
         @Override
-        public int stopRecognitionForIntent(ParcelUuid soundModelId) {
+        public int stopRecognitionForService(ParcelUuid soundModelId) {
             enforceCallingPermission(Manifest.permission.MANAGE_SOUND_TRIGGER);
             if (!isInitialized()) return STATUS_ERROR;
             if (DEBUG) {
@@ -384,10 +363,6 @@ public class SoundTriggerService extends SystemService {
                 }
                 int ret;
                 switch (soundModel.type) {
-                    case SoundModel.TYPE_KEYPHRASE:
-                        ret = mSoundTriggerHelper.stopKeyphraseRecognition(
-                                ((KeyphraseSoundModel)soundModel).keyphrases[0].id, callback);
-                        break;
                     case SoundModel.TYPE_GENERIC_SOUND:
                         ret = mSoundTriggerHelper.stopGenericRecognition(soundModel.uuid, callback);
                         break;
@@ -454,138 +429,6 @@ public class SoundTriggerService extends SystemService {
                 }
             }
             return mSoundTriggerHelper.isRecognitionRequested(parcelUuid.getUuid());
-        }
-    }
-
-    private final class LocalSoundTriggerRecognitionStatusIntentCallback
-            extends IRecognitionStatusCallback.Stub {
-        private UUID mUuid;
-        private PendingIntent mCallbackIntent;
-        private RecognitionConfig mRecognitionConfig;
-
-        public LocalSoundTriggerRecognitionStatusIntentCallback(UUID modelUuid,
-                PendingIntent callbackIntent,
-                RecognitionConfig config) {
-            mUuid = modelUuid;
-            mCallbackIntent = callbackIntent;
-            mRecognitionConfig = config;
-        }
-
-        @Override
-        public boolean pingBinder() {
-            return mCallbackIntent != null;
-        }
-
-        @Override
-        public void onKeyphraseDetected(SoundTrigger.KeyphraseRecognitionEvent event) {
-            if (mCallbackIntent == null) {
-                return;
-            }
-            grabWakeLock();
-
-            Slog.w(TAG, "Keyphrase sound trigger event: " + event);
-            Intent extras = new Intent();
-            extras.putExtra(SoundTriggerManager.EXTRA_MESSAGE_TYPE,
-                    SoundTriggerManager.FLAG_MESSAGE_TYPE_RECOGNITION_EVENT);
-            extras.putExtra(SoundTriggerManager.EXTRA_RECOGNITION_EVENT, event);
-            try {
-                mCallbackIntent.send(mContext, 0, extras, mCallbackCompletedHandler, null);
-                if (!mRecognitionConfig.allowMultipleTriggers) {
-                    removeCallback(/*releaseWakeLock=*/false);
-                }
-            } catch (PendingIntent.CanceledException e) {
-                removeCallback(/*releaseWakeLock=*/true);
-            }
-        }
-
-        @Override
-        public void onGenericSoundTriggerDetected(SoundTrigger.GenericRecognitionEvent event) {
-            if (mCallbackIntent == null) {
-                return;
-            }
-            grabWakeLock();
-
-            Slog.w(TAG, "Generic sound trigger event: " + event);
-            Intent extras = new Intent();
-            extras.putExtra(SoundTriggerManager.EXTRA_MESSAGE_TYPE,
-                    SoundTriggerManager.FLAG_MESSAGE_TYPE_RECOGNITION_EVENT);
-            extras.putExtra(SoundTriggerManager.EXTRA_RECOGNITION_EVENT, event);
-            try {
-                mCallbackIntent.send(mContext, 0, extras, mCallbackCompletedHandler, null);
-                if (!mRecognitionConfig.allowMultipleTriggers) {
-                    removeCallback(/*releaseWakeLock=*/false);
-                }
-            } catch (PendingIntent.CanceledException e) {
-                removeCallback(/*releaseWakeLock=*/true);
-            }
-        }
-
-        @Override
-        public void onError(int status) {
-            if (mCallbackIntent == null) {
-                return;
-            }
-            grabWakeLock();
-
-            Slog.i(TAG, "onError: " + status);
-            Intent extras = new Intent();
-            extras.putExtra(SoundTriggerManager.EXTRA_MESSAGE_TYPE,
-                    SoundTriggerManager.FLAG_MESSAGE_TYPE_RECOGNITION_ERROR);
-            extras.putExtra(SoundTriggerManager.EXTRA_STATUS, status);
-            try {
-                mCallbackIntent.send(mContext, 0, extras, mCallbackCompletedHandler, null);
-                // Remove the callback, but wait for the intent to finish before we let go of the
-                // wake lock
-                removeCallback(/*releaseWakeLock=*/false);
-            } catch (PendingIntent.CanceledException e) {
-                removeCallback(/*releaseWakeLock=*/true);
-            }
-        }
-
-        @Override
-        public void onRecognitionPaused() {
-            if (mCallbackIntent == null) {
-                return;
-            }
-            grabWakeLock();
-
-            Slog.i(TAG, "onRecognitionPaused");
-            Intent extras = new Intent();
-            extras.putExtra(SoundTriggerManager.EXTRA_MESSAGE_TYPE,
-                    SoundTriggerManager.FLAG_MESSAGE_TYPE_RECOGNITION_PAUSED);
-            try {
-                mCallbackIntent.send(mContext, 0, extras, mCallbackCompletedHandler, null);
-            } catch (PendingIntent.CanceledException e) {
-                removeCallback(/*releaseWakeLock=*/true);
-            }
-        }
-
-        @Override
-        public void onRecognitionResumed() {
-            if (mCallbackIntent == null) {
-                return;
-            }
-            grabWakeLock();
-
-            Slog.i(TAG, "onRecognitionResumed");
-            Intent extras = new Intent();
-            extras.putExtra(SoundTriggerManager.EXTRA_MESSAGE_TYPE,
-                    SoundTriggerManager.FLAG_MESSAGE_TYPE_RECOGNITION_RESUMED);
-            try {
-                mCallbackIntent.send(mContext, 0, extras, mCallbackCompletedHandler, null);
-            } catch (PendingIntent.CanceledException e) {
-                removeCallback(/*releaseWakeLock=*/true);
-            }
-        }
-
-        private void removeCallback(boolean releaseWakeLock) {
-            mCallbackIntent = null;
-            synchronized (mCallbacksLock) {
-                mCallbacks.remove(mUuid);
-                if (releaseWakeLock) {
-                    mWakelock.release();
-                }
-            }
         }
     }
 
@@ -1059,27 +902,6 @@ public class SoundTriggerService extends SystemService {
             }
         }
     }
-
-    private void grabWakeLock() {
-        synchronized (mCallbacksLock) {
-            if (mWakelock == null) {
-                PowerManager pm = ((PowerManager) mContext.getSystemService(Context.POWER_SERVICE));
-                mWakelock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, TAG);
-            }
-            mWakelock.acquire();
-        }
-    }
-
-    private PendingIntent.OnFinished mCallbackCompletedHandler = new PendingIntent.OnFinished() {
-        @Override
-        public void onSendFinished(PendingIntent pendingIntent, Intent intent, int resultCode,
-                String resultData, Bundle resultExtras) {
-            // We're only ever invoked when the callback is done, so release the lock.
-            synchronized (mCallbacksLock) {
-                mWakelock.release();
-            }
-        }
-    };
 
     public final class LocalSoundTriggerService extends SoundTriggerInternal {
         private final Context mContext;

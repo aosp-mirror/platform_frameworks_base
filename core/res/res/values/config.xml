@@ -647,6 +647,9 @@
     <!-- Boolean indicating associated network selection is allowed -->
     <bool translatable="false" name="config_wifi_framework_enable_associated_network_selection">true</bool>
 
+    <!-- Boolean indicating whether single radio chain scan results are to be used for network selection -->
+    <bool translatable="false" name="config_wifi_framework_use_single_radio_chain_scan_results_network_selection">false</bool>
+
     <!-- Boolean indicating that wifi only link configuratios that have exact same credentials (i.e PSK) -->
     <bool translatable="false" name="config_wifi_only_link_same_credential_configurations">true</bool>
 
@@ -2849,6 +2852,9 @@
 
     <!-- For performance and storage reasons, limit the number of fingerprints per user -->
     <integer name="config_fingerprintMaxTemplatesPerUser">5</integer>
+
+    <!-- Specify if the fingerprint hardware support gestures-->
+    <bool name="config_fingerprintSupportsGestures">false</bool>
 
     <!-- This config is used to force VoiceInteractionService to start on certain low ram devices.
          It declares the package name of VoiceInteractionService that should be started. -->

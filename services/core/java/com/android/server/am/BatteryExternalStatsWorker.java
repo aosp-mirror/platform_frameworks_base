@@ -103,6 +103,9 @@ class BatteryExternalStatsWorker implements BatteryStatsImpl.ExternalStatsSync {
     @GuardedBy("this")
     private Future<?> mWakelockChangesUpdate;
 
+    @GuardedBy("this")
+    private Future<?> mBatteryLevelSync;
+
     private final Object mWorkerLock = new Object();
 
     @GuardedBy("mWorkerLock")
@@ -197,33 +200,73 @@ class BatteryExternalStatsWorker implements BatteryStatsImpl.ExternalStatsSync {
 
     @Override
     public Future<?> scheduleCpuSyncDueToWakelockChange(long delayMillis) {
-        if (mExecutorService.isShutdown()) {
-            return CompletableFuture.failedFuture(new IllegalStateException("worker shutdown"));
+        synchronized (BatteryExternalStatsWorker.this) {
+            mWakelockChangesUpdate = scheduleDelayedSyncLocked(mWakelockChangesUpdate,
+                    () -> {
+                        scheduleSync("wakelock-change", UPDATE_CPU);
+                        scheduleRunnable(() -> mStats.postBatteryNeedsCpuUpdateMsg());
+                    },
+                    delayMillis);
+            return mWakelockChangesUpdate;
         }
-
-        if (mWakelockChangesUpdate != null) {
-            // If there's already a scheduled task, leave it as is if we're trying to re-schedule
-            // it again with a delay, otherwise cancel and re-schedule it.
-            if (delayMillis == 0) {
-                mWakelockChangesUpdate.cancel(false);
-            } else {
-                return mWakelockChangesUpdate;
-            }
-        }
-
-        mWakelockChangesUpdate = mExecutorService.schedule(() -> {
-            scheduleSync("wakelock-change", UPDATE_CPU);
-            scheduleRunnable(() -> mStats.postBatteryNeedsCpuUpdateMsg());
-            mWakelockChangesUpdate = null;
-        }, delayMillis, TimeUnit.MILLISECONDS);
-        return mWakelockChangesUpdate;
     }
 
     @Override
     public void cancelCpuSyncDueToWakelockChange() {
-        if (mWakelockChangesUpdate != null) {
-            mWakelockChangesUpdate.cancel(false);
+        synchronized (BatteryExternalStatsWorker.this) {
+            if (mWakelockChangesUpdate != null) {
+                mWakelockChangesUpdate.cancel(false);
+                mWakelockChangesUpdate = null;
+            }
         }
+    }
+
+    @Override
+    public Future<?> scheduleSyncDueToBatteryLevelChange(long delayMillis) {
+        synchronized (BatteryExternalStatsWorker.this) {
+            mBatteryLevelSync = scheduleDelayedSyncLocked(mBatteryLevelSync,
+                    () -> scheduleSync("battery-level", UPDATE_ALL),
+                    delayMillis);
+            return mBatteryLevelSync;
+        }
+    }
+
+    @GuardedBy("this")
+    private void cancelSyncDueToBatteryLevelChangeLocked() {
+        if (mBatteryLevelSync != null) {
+            mBatteryLevelSync.cancel(false);
+            mBatteryLevelSync = null;
+        }
+    }
+
+    /**
+     * Schedule a sync {@param syncRunnable} with a delay. If there's already a scheduled sync, a
+     * new sync won't be scheduled unless it is being scheduled to run immediately (delayMillis=0).
+     *
+     * @param lastScheduledSync the task which was earlier scheduled to run
+     * @param syncRunnable the task that needs to be scheduled to run
+     * @param delayMillis time after which {@param syncRunnable} needs to be scheduled
+     * @return scheduled {@link Future} which can be used to check if task is completed or to
+     *         cancel it if needed
+     */
+    @GuardedBy("this")
+    private Future<?> scheduleDelayedSyncLocked(Future<?> lastScheduledSync, Runnable syncRunnable,
+            long delayMillis) {
+        if (mExecutorService.isShutdown()) {
+            return CompletableFuture.failedFuture(new IllegalStateException("worker shutdown"));
+        }
+
+        if (lastScheduledSync != null) {
+            // If there's already a scheduled task, leave it as is if we're trying to
+            // re-schedule it again with a delay, otherwise cancel and re-schedule it.
+            if (delayMillis == 0) {
+                lastScheduledSync.cancel(false);
+            } else {
+                return lastScheduledSync;
+            }
+        }
+
+        return mExecutorService.schedule(syncRunnable, delayMillis, TimeUnit.MILLISECONDS);
     }
 
     public synchronized Future<?> scheduleWrite() {
@@ -294,6 +337,12 @@ class BatteryExternalStatsWorker implements BatteryStatsImpl.ExternalStatsSync {
                 mUidsToRemove.clear();
                 mCurrentFuture = null;
                 mUseLatestStates = true;
+                if ((updateFlags & UPDATE_ALL) != 0) {
+                    cancelSyncDueToBatteryLevelChangeLocked();
+                }
+                if ((updateFlags & UPDATE_CPU) != 0) {
+                    cancelCpuSyncDueToWakelockChange();
+                }
             }
 
             try {

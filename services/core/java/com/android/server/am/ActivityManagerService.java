@@ -5306,7 +5306,8 @@ public class ActivityManagerService extends IActivityManager.Stub
         final long origId = Binder.clearCallingIdentity();
         try {
             synchronized (this) {
-                mWindowManager.cancelRecentsAnimation(restoreHomeStackPosition
+                // Cancel the recents animation synchronously (do not hold the WM lock)
+                mWindowManager.cancelRecentsAnimationSynchronously(restoreHomeStackPosition
                         ? REORDER_MOVE_TO_ORIGINAL_POSITION
                         : REORDER_KEEP_IN_PLACE, "cancelRecentsAnimation");
             }
@@ -8356,8 +8357,19 @@ public class ActivityManagerService extends IActivityManager.Stub
         if (!(sender instanceof PendingIntentRecord)) {
             return;
         }
+        boolean isCancelled;
         synchronized(this) {
-            ((PendingIntentRecord)sender).registerCancelListenerLocked(receiver);
+            PendingIntentRecord pendingIntent = (PendingIntentRecord) sender;
+            isCancelled = pendingIntent.canceled;
+            if (!isCancelled) {
+                pendingIntent.registerCancelListenerLocked(receiver);
+            }
+        }
+        if (isCancelled) {
+            try {
+                receiver.send(Activity.RESULT_CANCELED, null);
+            } catch (RemoteException e) {
+            }
         }
     }
 
@@ -22791,6 +22803,7 @@ public class ActivityManagerService extends IActivityManager.Stub
 
     private void noteUidProcessState(final int uid, final int state) {
         mBatteryStatsService.noteUidProcessState(uid, state);
+        mAppOpsService.updateUidProcState(uid, state);
         if (mTrackingAssociations) {
             for (int i1=0, N1=mAssociations.size(); i1<N1; i1++) {
                 ArrayMap<ComponentName, SparseArray<ArrayMap<String, Association>>> targetComponents
@@ -26487,8 +26500,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         @Override
         public boolean isUidActive(int uid) {
             synchronized (ActivityManagerService.this) {
-                final UidRecord uidRec = mActiveUids.get(uid);
-                return (uidRec != null) && !uidRec.idle;
+                return isUidActiveLocked(uid);
             }
         }
 

@@ -586,20 +586,7 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
         boolean navBarVisible = isNavBarVisible();
         boolean lastNavBarVisible = getLastNavBarVisible();
         if (navBarVisible != lastNavBarVisible || mFirstUpdate) {
-            if (mStatusBar.getNavigationBarView() != null) {
-                if (navBarVisible) {
-                    long delay = getNavBarShowDelay();
-                    if (delay == 0) {
-                        mMakeNavigationBarVisibleRunnable.run();
-                    } else {
-                        mContainer.postOnAnimationDelayed(mMakeNavigationBarVisibleRunnable,
-                                delay);
-                    }
-                } else {
-                    mContainer.removeCallbacks(mMakeNavigationBarVisibleRunnable);
-                    mStatusBar.getNavigationBarView().getRootView().setVisibility(View.GONE);
-                }
-            }
+            updateNavigationBarVisibility(navBarVisible);
         }
 
         if (bouncerShowing != mLastBouncerShowing || mFirstUpdate) {
@@ -624,6 +611,23 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
         mLastDozing = mDozing;
         mLastFpMode = mFingerprintUnlockController.getMode();
         mStatusBar.onKeyguardViewManagerStatesUpdated();
+    }
+
+    protected void updateNavigationBarVisibility(boolean navBarVisible) {
+        if (mStatusBar.getNavigationBarView() != null) {
+            if (navBarVisible) {
+                long delay = getNavBarShowDelay();
+                if (delay == 0) {
+                    mMakeNavigationBarVisibleRunnable.run();
+                } else {
+                    mContainer.postOnAnimationDelayed(mMakeNavigationBarVisibleRunnable,
+                            delay);
+                }
+            } else {
+                mContainer.removeCallbacks(mMakeNavigationBarVisibleRunnable);
+                mStatusBar.getNavigationBarView().getRootView().setVisibility(View.GONE);
+            }
+        }
     }
 
     /**

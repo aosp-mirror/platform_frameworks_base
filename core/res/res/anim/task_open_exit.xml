@@ -32,7 +32,7 @@
 
     <translate
         android:fromXDelta="0"
-        android:toXDelta="105%"
+        android:toXDelta="-105%"
         android:fillEnabled="true"
         android:fillBefore="true"
         android:fillAfter="true"

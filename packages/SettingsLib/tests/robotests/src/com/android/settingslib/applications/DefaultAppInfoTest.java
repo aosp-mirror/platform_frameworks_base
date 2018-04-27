@@ -33,7 +33,6 @@ import android.content.pm.PackageManager;
 import android.graphics.drawable.Drawable;
 
 import com.android.settingslib.SettingsLibRobolectricTestRunner;
-import com.android.settingslib.wrapper.PackageManagerWrapper;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -41,7 +40,6 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.robolectric.RuntimeEnvironment;
-import org.robolectric.annotation.Config;
 
 @RunWith(SettingsLibRobolectricTestRunner.class)
 public class DefaultAppInfoTest {
@@ -52,8 +50,6 @@ public class DefaultAppInfoTest {
     private ComponentName mComponentName;
     @Mock
     private PackageManager mPackageManager;
-    @Mock
-    private PackageManagerWrapper mPackageManagerWrapper;
     @Mock
     private ApplicationInfo mApplicationInfo;
     @Mock
@@ -67,8 +63,7 @@ public class DefaultAppInfoTest {
         MockitoAnnotations.initMocks(this);
         mContext = spy(RuntimeEnvironment.application);
         doReturn(mPackageManager).when(mContext).getPackageManager();
-        when(mPackageManagerWrapper.getPackageManager()).thenReturn(mPackageManager);
-        when(mPackageManagerWrapper.getApplicationInfoAsUser(anyString(), anyInt(),
+        when(mPackageManager.getApplicationInfoAsUser(anyString(), anyInt(),
                 anyInt())).thenReturn(mApplicationInfo);
         when(mPackageManager.loadUnbadgedItemIcon(mPackageItemInfo, mApplicationInfo)).thenReturn(
                 mIcon);
@@ -77,7 +72,7 @@ public class DefaultAppInfoTest {
     @Test
     public void initInfoWithActivityInfo_shouldLoadInfo() {
         mPackageItemInfo.packageName = "test";
-        mInfo = new DefaultAppInfo(mContext, mPackageManagerWrapper, mPackageItemInfo);
+        mInfo = new DefaultAppInfo(mContext, mPackageManager, mPackageItemInfo);
         mInfo.loadLabel();
         Drawable icon = mInfo.loadIcon();
 
@@ -90,7 +85,7 @@ public class DefaultAppInfoTest {
     public void initInfoWithComponent_shouldLoadInfo() {
         when(mComponentName.getPackageName()).thenReturn("com.android.settings");
 
-        mInfo = new DefaultAppInfo(mContext, mPackageManagerWrapper, 0 /* uid */, mComponentName);
+        mInfo = new DefaultAppInfo(mContext, mPackageManager, 0 /* uid */, mComponentName);
         mInfo.getKey();
 
         verify(mComponentName).flattenToString();

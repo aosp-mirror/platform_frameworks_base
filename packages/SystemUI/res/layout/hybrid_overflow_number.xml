@@ -16,10 +16,10 @@
   -->
 <TextView
     xmlns:android="http://schemas.android.com/apk/res/android"
+    style="@*android:style/Widget.Material.Notification.Text"
     android:id="@+id/notification_text"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
-    android:textAppearance="@*android:style/TextAppearance.Material.Notification"
     android:paddingEnd="@dimen/group_overflow_number_padding"
     android:gravity="end"
     android:singleLine="true"

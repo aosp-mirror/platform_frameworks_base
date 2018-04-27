@@ -502,9 +502,6 @@ public class KeyguardViewMediator extends SystemUI {
                     break;
                 default:
                     if (DEBUG_SIM_STATES) Log.v(TAG, "Unspecific state: " + simState);
-                    synchronized (KeyguardViewMediator.this) {
-                        onSimAbsentLocked();
-                    }
                     break;
             }
         }
@@ -1857,6 +1854,8 @@ public class KeyguardViewMediator extends SystemUI {
         synchronized (KeyguardViewMediator.this) {
 
             if (!mHiding) {
+                // Tell ActivityManager that we canceled the keyguardExitAnimation.
+                setShowingLocked(mShowing, mAodShowing, mSecondaryDisplayShowing, true /* force */);
                 return;
             }
             mHiding = false;

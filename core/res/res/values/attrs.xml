@@ -339,13 +339,13 @@
                   then in code manually set your window's background to
                   null so it will not be drawn.
              </ul> -->
-        <attr name="windowBackground" format="reference" />
+        <attr name="windowBackground" format="reference|color" />
         <!-- Drawable to draw selectively within the inset areas when the windowBackground
              has been set to null. This protects against seeing visual garbage in the
              surface when the app has not drawn any content into this area. One example is
              when the user is resizing a window of an activity that has
              {@link android.R.attr#resizeableActivity} set for multi-window mode. -->
-        <attr name="windowBackgroundFallback" format="reference" />
+        <attr name="windowBackgroundFallback" format="reference|color" />
         <!-- Drawable to use as a frame around the window. -->
         <attr name="windowFrame" format="reference" />
         <!-- Flag indicating whether there should be no title on this window. -->
@@ -3419,10 +3419,16 @@
              constructor or 0. Arrays.hashCode(new Object[] {locale, mode, extraValue,
              isAuxiliary, overridesImplicitlyEnabledSubtype}) will be used instead. -->
         <attr name="subtypeId" format="integer"/>
-        <!-- Set to true if this subtype is ASCII capable. If the subtype is ASCII
+        <!-- Set to {@code true} if this subtype is ASCII capable. If the subtype is ASCII
              capable, it should guarantee that the user can input ASCII characters with
              this subtype. This is important because many password fields only allow
-             ASCII-characters. -->
+             ASCII-characters.
+
+             <p>Note: In order to avoid some known system issues on
+             {@link android.os.Build.VERSION_CODES#P} and prior OSes, you may want to include
+             {@code "AsciiCapable"} in
+             {@link android.R.styleable#InputMethod_Subtype_imeSubtypeExtraValue} when you specify
+             {@code true} to this attribute.-->
         <attr name="isAsciiCapable" format="boolean" />
         <!-- The BCP-47 Language Tag of the subtype.  This replaces
         {@link android.R.styleable#InputMethod_Subtype_imeSubtypeLocale}.  -->

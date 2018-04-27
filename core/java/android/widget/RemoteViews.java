@@ -21,6 +21,7 @@ import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
 import android.annotation.ColorInt;
 import android.annotation.DimenRes;
 import android.annotation.NonNull;
+import android.annotation.StyleRes;
 import android.app.ActivityOptions;
 import android.app.ActivityThread;
 import android.app.Application;
@@ -56,6 +57,7 @@ import android.os.UserHandle;
 import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.Log;
+import android.view.ContextThemeWrapper;
 import android.view.LayoutInflater;
 import android.view.LayoutInflater.Filter;
 import android.view.RemotableViewMethod;
@@ -180,6 +182,12 @@ public class RemoteViews implements Parcelable, Filter {
      * RemoteViews.
      */
     private boolean mIsRoot = true;
+
+    /**
+     * Optional theme resource id applied in inflateView(). When 0, Theme.DeviceDefault will be
+     * used.
+     */
+    private int mApplyThemeResId;
 
     /**
      * Whether reapply is disallowed on this remoteview. This maybe be true if some actions modify
@@ -946,6 +954,7 @@ public class RemoteViews implements Parcelable, Filter {
                     }
                 };
             }
+            target.setTagInternal(R.id.pending_intent_tag, pendingIntent);
             target.setOnClickListener(listener);
         }
 
@@ -1999,6 +2008,7 @@ public class RemoteViews implements Parcelable, Filter {
         /** Set width */
         public static final int LAYOUT_WIDTH = 2;
         public static final int LAYOUT_MARGIN_BOTTOM_DIMEN = 3;
+        public static final int LAYOUT_MARGIN_END = 4;
 
         final int mProperty;
         final int mValue;
@@ -2036,11 +2046,14 @@ public class RemoteViews implements Parcelable, Filter {
             if (layoutParams == null) {
                 return;
             }
+            int value = mValue;
             switch (mProperty) {
                 case LAYOUT_MARGIN_END_DIMEN:
+                    value = resolveDimenPixelOffset(target, mValue);
+                    // fall-through
+                case LAYOUT_MARGIN_END:
                     if (layoutParams instanceof ViewGroup.MarginLayoutParams) {
-                        int resolved = resolveDimenPixelOffset(target, mValue);
-                        ((ViewGroup.MarginLayoutParams) layoutParams).setMarginEnd(resolved);
+                        ((ViewGroup.MarginLayoutParams) layoutParams).setMarginEnd(value);
                         target.setLayoutParams(layoutParams);
                     }
                     break;
@@ -2980,6 +2993,20 @@ public class RemoteViews implements Parcelable, Filter {
     }
 
     /**
+     * Equivalent to calling {@link android.view.ViewGroup.MarginLayoutParams#setMarginEnd(int)}.
+     * Only works if the {@link View#getLayoutParams()} supports margins.
+     * Hidden for now since we don't want to support this for all different layout margins yet.
+     *
+     * @param viewId The id of the view to change
+     * @param endMargin a value in pixels for the end margin.
+     * @hide
+     */
+    public void setViewLayoutMarginEnd(int viewId, @DimenRes int endMargin) {
+        addAction(new LayoutParamAction(viewId, LayoutParamAction.LAYOUT_MARGIN_END,
+                endMargin));
+    }
+
+    /**
      * Equivalent to setting {@link android.view.ViewGroup.MarginLayoutParams#bottomMargin}.
      *
      * @param bottomMarginDimen a dimen resource to read the margin from or 0 to clear the margin.
@@ -3248,6 +3275,14 @@ public class RemoteViews implements Parcelable, Filter {
     }
 
     /**
+     * Set the theme used in apply() and applyASync().
+     * @hide
+     */
+    public void setApplyTheme(@StyleRes int themeResId) {
+        mApplyThemeResId = themeResId;
+    }
+
+    /**
      * Inflates the view hierarchy represented by this object and applies
      * all of the actions.
      *
@@ -3282,6 +3317,10 @@ public class RemoteViews implements Parcelable, Filter {
         final Context contextForResources = getContextForResources(context);
         Context inflationContext = new RemoteViewsContextWrapper(context, contextForResources);
 
+        // If mApplyThemeResId is not given, Theme.DeviceDefault will be used.
+        if (mApplyThemeResId != 0) {
+            inflationContext = new ContextThemeWrapper(inflationContext, mApplyThemeResId);
+        }
         LayoutInflater inflater = (LayoutInflater)
                 context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 

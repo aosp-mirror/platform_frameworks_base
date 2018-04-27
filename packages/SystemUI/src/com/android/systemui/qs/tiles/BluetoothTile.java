@@ -124,8 +124,9 @@ public class BluetoothTile extends QSTileImpl<BooleanState> {
         final boolean transientEnabling = arg == ARG_SHOW_TRANSIENT_ENABLING;
         final boolean enabled = transientEnabling || mController.isBluetoothEnabled();
         final boolean connected = mController.isBluetoothConnected();
-        state.isTransient = transientEnabling || mController.isBluetoothConnecting()
-                || mController.getBluetoothState() == BluetoothAdapter.STATE_TURNING_ON;
+        final boolean connecting = mController.isBluetoothConnecting();
+        state.isTransient = transientEnabling || connecting ||
+                mController.getBluetoothState() == BluetoothAdapter.STATE_TURNING_ON;
         state.dualTarget = true;
         state.value = enabled;
         if (state.slash == null) {
@@ -134,7 +135,7 @@ public class BluetoothTile extends QSTileImpl<BooleanState> {
         state.slash.isSlashed = !enabled;
         state.label = mContext.getString(R.string.quick_settings_bluetooth_label);
         state.secondaryLabel = TextUtils.emptyIfNull(
-                getSecondaryLabel(enabled, connected, state.isTransient));
+                getSecondaryLabel(enabled, connecting, connected, state.isTransient));
         if (enabled) {
             if (connected) {
                 state.icon = new BluetoothConnectedTileIcon();
@@ -170,13 +171,17 @@ public class BluetoothTile extends QSTileImpl<BooleanState> {
      * Returns the secondary label to use for the given bluetooth connection in the form of the
      * battery level or bluetooth profile name. If the bluetooth is disabled, there's no connected
      * devices, or we can't map the bluetooth class to a profile, this instead returns {@code null}.
-     *
      * @param enabled whether bluetooth is enabled
+     * @param connecting whether bluetooth is connecting to a device
      * @param connected whether there's a device connected via bluetooth
      * @param isTransient whether bluetooth is currently in a transient state turning on
      */
     @Nullable
-    private String getSecondaryLabel(boolean enabled, boolean connected, boolean isTransient) {
+    private String getSecondaryLabel(boolean enabled, boolean connecting, boolean connected,
+            boolean isTransient) {
+        if (connecting) {
+            return mContext.getString(R.string.quick_settings_connecting);
+        }
         if (isTransient) {
             return mContext.getString(R.string.quick_settings_bluetooth_secondary_label_transient);
         }

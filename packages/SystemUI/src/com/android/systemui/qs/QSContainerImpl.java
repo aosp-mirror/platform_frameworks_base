@@ -40,7 +40,7 @@ public class QSContainerImpl extends FrameLayout {
     private int mHeightOverride = -1;
     private QSPanel mQSPanel;
     private View mQSDetail;
-    private View mHeader;
+    private QuickStatusBarHeader mHeader;
     private float mQsExpansion;
     private QSCustomizer mQSCustomizer;
     private View mQSFooter;
@@ -178,7 +178,7 @@ public class QSContainerImpl extends FrameLayout {
         setMargins(mBackground);
         setMargins(mQSFooter);
         mQSPanel.setMargins(mSideMargins);
-        setMargins(mHeader);
+        mHeader.setMargins(mSideMargins);
     }
 
     private void setMargins(View view) {

@@ -2732,17 +2732,15 @@ public class WindowManagerService extends IWindowManager.Stub
 
     /**
      * Cancels any running recents animation. The caller should NOT hold the WM lock while calling
-     * this method, as it can call back into AM, and locking will be done in the animation
-     * controller itself.
+     * this method, as it will call back into AM and may cause a deadlock. Any locking will be done
+     * in the animation controller itself.
      */
-    public void cancelRecentsAnimation(@RecentsAnimationController.ReorderMode int reorderMode,
-            String reason) {
-        // Note: Do not hold the WM lock, this will lock appropriately in the call which also
-        // calls through to AM/RecentsAnimation.onAnimationFinished()
+    public void cancelRecentsAnimationSynchronously(
+            @RecentsAnimationController.ReorderMode int reorderMode, String reason) {
         if (mRecentsAnimationController != null) {
             // This call will call through to cleanupAnimation() below after the animation is
             // canceled
-            mRecentsAnimationController.cancelAnimation(reorderMode, reason);
+            mRecentsAnimationController.cancelAnimationSynchronously(reorderMode, reason);
         }
     }
 

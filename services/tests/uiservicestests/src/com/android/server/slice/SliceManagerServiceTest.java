@@ -93,7 +93,7 @@ public class SliceManagerServiceTest extends UiServiceTestCase {
 
         mService.pinSlice("pkg", TEST_URI, EMPTY_SPECS, mToken);
         mService.pinSlice("pkg", TEST_URI, EMPTY_SPECS, mToken);
-        verify(mService, times(1)).createPinnedSlice(eq(TEST_URI), eq("pkg"));
+        verify(mService, times(1)).createPinnedSlice(eq(TEST_URI), anyString());
     }
 
     @Test

@@ -48,7 +48,37 @@ import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 /**
- * A class that represents a local system update policy set by the device owner.
+ * Determines when over-the-air system updates are installed on a device. Only a device policy
+ * controller (DPC) running in device owner mode can set an update policy for the device—by calling
+ * the {@code DevicePolicyManager} method
+ * {@link DevicePolicyManager#setSystemUpdatePolicy setSystemUpdatePolicy()}. An update
+ * policy affects the pending system update (if there is one) and any future updates for the device.
+ *
+ * <p>If a policy is set on a device, the system doesn't notify the user about updates.</p>
+ * <h3>Example</h3>
+ *
+ * <p>The example below shows how a DPC might set a maintenance window for system updates:</p>
+ * <pre><code>
+ * private final MAINTENANCE_WINDOW_START = 1380; // 11pm
+ * private final MAINTENANCE_WINDOW_END = 120; // 2am
+ *
+ * // ...
+ *
+ * // Create the system update policy
+ * SystemUpdatePolicy policy = SystemUpdatePolicy.createWindowedInstallPolicy(
+ *     MAINTENANCE_WINDOW_START, MAINTENANCE_WINDOW_END);
+ *
+ * // Get a DevicePolicyManager instance to set the policy on the device
+ * DevicePolicyManager dpm =
+ *     (DevicePolicyManager) context.getSystemService(Context.DEVICE_POLICY_SERVICE);
+ * ComponentName adminComponent = getComponentName(context);
+ * dpm.setSystemUpdatePolicy(adminComponent, policy);
+ * </code></pre>
+ *
+ * <h3>Developer guide</h3>
+ * To learn more about managing system updates, read
+ * <a href="{@docRoot}/work/dpc/security.html#control_remote_software_updates">Control remote
+ * software updates</a>.
  *
  * @see DevicePolicyManager#setSystemUpdatePolicy
  * @see DevicePolicyManager#getSystemUpdatePolicy
@@ -71,44 +101,37 @@ public final class SystemUpdatePolicy implements Parcelable {
     private static final int TYPE_UNKNOWN = -1;
 
     /**
-     * Install system update automatically as soon as one is available.
+     * Installs system updates (without user interaction) as soon as they become available. Setting
+     * this policy type immediately installs any pending updates that might be postponed or waiting
+     * for a maintenance window.
      */
     public static final int TYPE_INSTALL_AUTOMATIC = 1;
 
     /**
-     * Install system update automatically within a daily maintenance window. An update can be
-     * delayed for a maximum of 30 days, after which the policy will no longer be effective and the
-     * system will revert back to its normal behavior as if no policy were set.
+     * Installs system updates (without user interaction) during a daily maintenance window. Set the
+     * start and end of the daily maintenance window, as minutes of the day, when creating a new
+     * {@code TYPE_INSTALL_WINDOWED} policy. See
+     * {@link #createWindowedInstallPolicy createWindowedInstallPolicy()}.
      *
-     * <p>After this policy expires, resetting it to any policy other than
-     * {@link #TYPE_INSTALL_AUTOMATIC} will produce no effect, as the 30-day maximum delay has
-     * already been used up.
-     * The {@link #TYPE_INSTALL_AUTOMATIC} policy will still take effect to install the delayed
-     * system update immediately.
-     *
-     * <p>Re-applying this policy or changing it to {@link #TYPE_POSTPONE} within the 30-day period
-     * will <i>not</i> extend policy expiration.
-     * However, the expiration will be recalculated when a new system update is made available.
+     * <p>No connectivity, not enough disk space, or a low battery are typical reasons Android might
+     * not install a system update in the daily maintenance window. After 30 days trying to install
+     * an update in the maintenance window (regardless of policy changes in this period), the system
+     * prompts the device user to install the update.
      */
     public static final int TYPE_INSTALL_WINDOWED = 2;
 
     /**
-     * Incoming system updates (except for security updates) will be blocked for a maximum of 30
-     * days, after which the policy will no longer be effective and the system will revert back to
-     * its normal behavior as if no policy were set.
+     * Postpones the installation of system updates for 30 days. After the 30-day period has ended,
+     * the system prompts the device user to install the update.
      *
-     * <p><b>Note:</b> security updates (e.g. monthly security patches) may <i>not</i> be affected
-     * by this policy, depending on the policy set by the device manufacturer and carrier.
+     * <p>The system limits each update to one 30-day postponement. The period begins when the
+     * system first postpones the update and setting new {@code TYPE_POSTPONE} policies won’t extend
+     * the period. If, after 30 days the update isn’t installed (through policy changes), the system
+     * prompts the user to install the update.
      *
-     * <p>After this policy expires, resetting it to any policy other than
-     * {@link #TYPE_INSTALL_AUTOMATIC} will produce no effect, as the 30-day maximum delay has
-     * already been used up.
-     * The {@link #TYPE_INSTALL_AUTOMATIC} policy will still take effect to install the delayed
-     * system update immediately.
-     *
-     * <p>Re-applying this policy or changing it to {@link #TYPE_INSTALL_WINDOWED} within the 30-day
-     * period will <i>not</i> extend policy expiration.
-     * However, the expiration will be recalculated when a new system update is made available.
+     * <p><strong>Note</strong>: Device manufacturers or carriers might choose to exempt important
+     * security updates from a postponement policy. Exempted updates notify the device user when
+     * they become available.
      */
     public static final int TYPE_POSTPONE = 3;
 
@@ -303,16 +326,20 @@ public final class SystemUpdatePolicy implements Parcelable {
      * Create a policy object and set it to: new system update will only be installed automatically
      * when the system clock is inside a daily maintenance window. If the start and end times are
      * the same, the window is considered to include the <i>whole 24 hours</i>. That is, updates can
-     * install at any time. If the given window in invalid, an {@link IllegalArgumentException}
-     * will be thrown. If start time is later than end time, the window is considered spanning
+     * install at any time. If start time is later than end time, the window is considered spanning
      * midnight (i.e. the end time denotes a time on the next day). The maintenance window will last
-     * for 30 days, after which the system will revert back to its normal behavior as if no policy
-     * were set.
+     * for 30 days for any given update, after which the window will no longer be effective and
+     * the pending update will be made available for manual installation as if no system update
+     * policy were set on the device. See {@link #TYPE_INSTALL_WINDOWED} for the details of this
+     * policy's behavior.
      *
      * @param startTime the start of the maintenance window, measured as the number of minutes from
      *            midnight in the device's local time. Must be in the range of [0, 1440).
      * @param endTime the end of the maintenance window, measured as the number of minutes from
      *            midnight in the device's local time. Must be in the range of [0, 1440).
+     * @throws IllegalArgumentException If the {@code startTime} or {@code endTime} isn't in the
+     *            accepted range.
+     * @return The configured policy.
      * @see #TYPE_INSTALL_WINDOWED
      */
     public static SystemUpdatePolicy createWindowedInstallPolicy(int startTime, int endTime) {
@@ -329,8 +356,7 @@ public final class SystemUpdatePolicy implements Parcelable {
 
     /**
      * Create a policy object and set it to block installation for a maximum period of 30 days.
-     * After expiration the system will revert back to its normal behavior as if no policy were
-     * set.
+     * To learn more about this policy's behavior, see {@link #TYPE_POSTPONE}.
      *
      * <p><b>Note: </b> security updates (e.g. monthly security patches) will <i>not</i> be affected
      * by this policy.
@@ -344,10 +370,9 @@ public final class SystemUpdatePolicy implements Parcelable {
     }
 
     /**
-     * Returns the type of system update policy.
+     * Returns the type of system update policy, or -1 if no policy has been set.
      *
-     * @return an integer, either one of {@link #TYPE_INSTALL_AUTOMATIC},
-     * {@link #TYPE_INSTALL_WINDOWED} and {@link #TYPE_POSTPONE}, or -1 if no policy has been set.
+     @return The policy type or -1 if the type isn't set.
      */
     @SystemUpdatePolicyType
     public int getPolicyType() {
@@ -423,24 +448,16 @@ public final class SystemUpdatePolicy implements Parcelable {
      * be blocked and cannot be installed. When the device is outside the freeze periods, the normal
      * policy behavior will apply.
      * <p>
-     * Each freeze period is defined by a starting and finishing date (both inclusive). Since the
-     * freeze period repeats annually, both of these dates are simply represented by integers
-     * counting the number of days since year start, similar to {@link LocalDate#getDayOfYear()}. We
-     * do not consider leap year when handling freeze period so the valid range of the integer is
-     * always [1,365] (see last section for more details on leap year). If the finishing date is
-     * smaller than the starting date, the freeze period is considered to be spanning across
-     * year-end.
-     * <p>
      * Each individual freeze period is allowed to be at most 90 days long, and adjacent freeze
      * periods need to be at least 60 days apart. Also, the list of freeze periods should not
      * contain duplicates or overlap with each other. If any of these conditions is not met, a
      * {@link ValidationFailedException} will be thrown.
      * <p>
-     * Handling of leap year: we do not consider leap year when handling freeze period, in
-     * particular,
+     * Handling of leap year: we ignore leap years in freeze period calculations, in particular,
      * <ul>
-     * <li>When a freeze period is defined by the day of year, February 29th does not count as one
-     * day, so day 59 is February 28th while day 60 is March 1st.</li>
+     * <li>When a freeze period is defined, February 29th is disregarded so even though a freeze
+     * period can be specified to start or end on February 29th, it will be treated as if the period
+     * started or ended on February 28th.</li>
      * <li>When applying freeze period behavior to the device, a system clock of February 29th is
      * treated as if it were February 28th</li>
      * <li>When calculating the number of days of a freeze period or separation between two freeze

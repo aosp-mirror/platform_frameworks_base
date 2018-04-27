@@ -498,7 +498,7 @@ public class TextUtils {
 
     /** {@hide} */
     public static int length(@Nullable String s) {
-        return isEmpty(s) ? 0 : s.length();
+        return s != null ? s.length() : 0;
     }
 
     /**

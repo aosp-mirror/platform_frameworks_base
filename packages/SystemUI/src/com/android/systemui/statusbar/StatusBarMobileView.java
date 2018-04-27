@@ -100,13 +100,13 @@ public class StatusBarMobileView extends AlphaOptimizedLinearLayout implements D
         }
 
         if (mState == null) {
-            mState = state;
+            mState = state.copy();
             initViewState();
             return;
         }
 
         if (!mState.equals(state)) {
-            updateState(state);
+            updateState(state.copy());
         }
     }
 

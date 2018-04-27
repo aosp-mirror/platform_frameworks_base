@@ -53,7 +53,6 @@ import android.os.Looper;
 import android.os.Message;
 import android.os.SystemClock;
 import android.os.VibrationEffect;
-import android.os.Vibrator;
 import android.provider.Settings;
 import android.provider.Settings.Global;
 import android.text.InputFilter;
@@ -73,8 +72,8 @@ import android.view.WindowManager;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityManager.AccessibilityServicesStateChangeListener;
 import android.view.animation.DecelerateInterpolator;
+import android.widget.FrameLayout;
 import android.widget.ImageButton;
-import android.widget.ImageView;
 import android.widget.SeekBar;
 import android.widget.SeekBar.OnSeekBarChangeListener;
 import android.widget.TextView;
@@ -122,7 +121,7 @@ public class VolumeDialogImpl implements VolumeDialog {
     private ImageButton mRingerIcon;
     private View mSettingsView;
     private ImageButton mSettingsIcon;
-    private ImageView mZenIcon;
+    private FrameLayout mZenIcon;
     private final List<VolumeRow> mRows = new ArrayList<>();
     private ConfigurableTexts mConfigurableTexts;
     private final SparseBooleanArray mDynamic = new SparseBooleanArray();
@@ -132,7 +131,6 @@ public class VolumeDialogImpl implements VolumeDialog {
     private final Accessibility mAccessibility = new Accessibility();
     private final ColorStateList mActiveTint;
     private final ColorStateList mInactiveTint;
-    private final Vibrator mVibrator;
 
     private boolean mShowing;
     private boolean mShowA11yStream;
@@ -153,7 +151,6 @@ public class VolumeDialogImpl implements VolumeDialog {
         mActiveTint = ColorStateList.valueOf(Utils.getColorAccent(mContext));
         mInactiveTint = loadColorStateList(R.color.volume_slider_inactive);
         mDeviceProvisionedController = Dependency.get(DeviceProvisionedController.class);
-        mVibrator = (Vibrator) context.getSystemService(Context.VIBRATOR_SERVICE);
     }
 
     public void init(int windowType, Callback callback) {
@@ -673,7 +670,28 @@ public class VolumeDialogImpl implements VolumeDialog {
      * @param enable whether to enable volume row views and hide dnd icon
      */
     private void enableVolumeRowViewsH(VolumeRow row, boolean enable) {
-        row.dndIcon.setVisibility(enable ? GONE : VISIBLE);
+        boolean showDndIcon = !enable;
+        row.dndIcon.setVisibility(showDndIcon ? VISIBLE : GONE);
+
+        if (showDndIcon && getNumVisibleRows() == 1) {
+            row.dndIcon.setLayoutParams(new FrameLayout.LayoutParams(
+                    mContext.getResources().getDimensionPixelSize(
+                            R.dimen.volume_dialog_panel_width),
+                    FrameLayout.LayoutParams.WRAP_CONTENT));
+        } else if (row.view.getVisibility() == VISIBLE) {
+            row.dndIcon.setLayoutParams(new FrameLayout.LayoutParams(
+                    FrameLayout.LayoutParams.MATCH_PARENT, FrameLayout.LayoutParams.WRAP_CONTENT));
+        }
+    }
+
+    private int getNumVisibleRows() {
+        int count = 0;
+        for (int i = 0; i < mRows.size(); i++) {
+            if (mRows.get(i).view.getVisibility() == VISIBLE) {
+                count++;
+            }
+        }
+        return count;
     }
 
     /**
@@ -1241,6 +1259,6 @@ public class VolumeDialogImpl implements VolumeDialog {
         private ObjectAnimator anim;  // slider progress animation for non-touch-related updates
         private int animTargetProgress;
         private int lastAudibleLevel = 1;
-        private ImageView dndIcon;
+        private FrameLayout dndIcon;
     }
 }

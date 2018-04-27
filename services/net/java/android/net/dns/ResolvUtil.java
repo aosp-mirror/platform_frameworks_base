@@ -62,4 +62,13 @@ public class ResolvUtil {
         final long netidForResolv = NETID_USE_LOCAL_NAMESERVERS | (long) network.netId;
         return new Network((int) netidForResolv);
     }
+
+    public static Network makeNetworkWithPrivateDnsBypass(Network network) {
+        return new Network(network) {
+            @Override
+            public InetAddress[] getAllByName(String host) throws UnknownHostException {
+                return blockingResolveAllLocally(network, host);
+            }
+        };
+    }
 }

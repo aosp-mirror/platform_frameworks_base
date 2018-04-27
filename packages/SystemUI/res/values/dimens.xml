@@ -326,7 +326,7 @@
     <dimen name="pull_span_min">25dp</dimen>
 
     <dimen name="qs_tile_height">106dp</dimen>
-    <dimen name="qs_tile_layout_margin_side">9dp</dimen>
+    <dimen name="qs_tile_layout_margin_side">6dp</dimen>
     <dimen name="qs_tile_margin_horizontal">18dp</dimen>
     <dimen name="qs_tile_margin_vertical">24dp</dimen>
     <dimen name="qs_tile_margin_top_bottom">12dp</dimen>
@@ -917,6 +917,8 @@
     <dimen name="edge_margin">8dp</dimen>
 
     <dimen name="rounded_corner_radius">0dp</dimen>
+    <dimen name="rounded_corner_radius_top">0dp</dimen>
+    <dimen name="rounded_corner_radius_bottom">0dp</dimen>
     <dimen name="rounded_corner_content_padding">0dp</dimen>
     <dimen name="nav_content_padding">0dp</dimen>
     <dimen name="nav_quick_scrub_track_edge_padding">42dp</dimen>

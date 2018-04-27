@@ -692,6 +692,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent> {
                     wallpaperDestroyed = true;
                 }
                 win.destroySurfaceUnchecked();
+                win.mWinAnimator.destroyPreservedSurfaceLocked();
             } while (i > 0);
             mService.mDestroySurface.clear();
         }

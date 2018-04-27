@@ -290,6 +290,11 @@ void Bitmap::getSkBitmap(SkBitmap* outBitmap) {
                                                      info().colorType(), info().alphaType(),
                                                      nullptr));
         uirenderer::renderthread::RenderProxy::copyGraphicBufferInto(graphicBuffer(), outBitmap);
+        if (mInfo.colorSpace()) {
+            sk_sp<SkPixelRef> pixelRef = sk_ref_sp(outBitmap->pixelRef());
+            outBitmap->setInfo(mInfo);
+            outBitmap->setPixelRef(std::move(pixelRef), 0, 0);
+        }
         return;
     }
     outBitmap->setInfo(mInfo, rowBytes());

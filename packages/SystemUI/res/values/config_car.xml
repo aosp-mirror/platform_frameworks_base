@@ -27,4 +27,5 @@
     <bool name="config_enableLeftNavigationBar">false</bool>
     <bool name="config_enableRightNavigationBar">false</bool>
     <bool name="config_enableBottomNavigationBar">true</bool>
+    <bool name="config_hideNavWhenKeyguardBouncerShown">true</bool>
 </resources>

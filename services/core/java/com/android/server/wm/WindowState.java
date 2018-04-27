@@ -3865,9 +3865,13 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         windowInfo.title = mAttrs.accessibilityTitle;
         // Panel windows have no public way to set the a11y title directly. Use the
         // regular title as a fallback.
-        if (TextUtils.isEmpty(windowInfo.title)
-                && (mAttrs.type >= WindowManager.LayoutParams.FIRST_SUB_WINDOW)
-                && (mAttrs.type <= WindowManager.LayoutParams.LAST_SUB_WINDOW)) {
+        final boolean isPanelWindow = (mAttrs.type >= WindowManager.LayoutParams.FIRST_SUB_WINDOW)
+                && (mAttrs.type <= WindowManager.LayoutParams.LAST_SUB_WINDOW);
+        // Accessibility overlays should have titles that work for accessibility, and can't set
+        // the a11y title themselves.
+        final boolean isAccessibilityOverlay =
+                windowInfo.type == WindowManager.LayoutParams.TYPE_ACCESSIBILITY_OVERLAY;
+        if (TextUtils.isEmpty(windowInfo.title) && (isPanelWindow || isAccessibilityOverlay)) {
             windowInfo.title = mAttrs.getTitle();
         }
         windowInfo.accessibilityIdOfAnchor = mAttrs.accessibilityIdOfAnchor;
@@ -4270,6 +4274,24 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         }
     }
 
+    private boolean skipDecorCrop() {
+        // The decor frame is used to specify the region not covered by the system
+        // decorations (nav bar, status bar). In case this is empty, for example with
+        // FLAG_TRANSLUCENT_NAVIGATION, we don't need to do any cropping.
+        if (mDecorFrame.isEmpty()) {
+            return true;
+        }
+
+        // But if we have a frame, and are an application window, then we must be cropped.
+        if (mAppToken != null) {
+            return false;
+        }
+
+        // For non application windows, we may be allowed to extend over the decor bars
+        // depending on our type and permissions assosciated with our token.
+        return mToken.canLayerAboveSystemBars();
+    }
+
     /**
      * Calculate the window crop according to system decor policy. In general this is
      * the system decor rect (see #calculateSystemDecorRect), but we also have some
@@ -4287,7 +4309,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             policyCrop.intersect(-mCompatFrame.left, -mCompatFrame.top,
                     displayInfo.logicalWidth - mCompatFrame.left,
                     displayInfo.logicalHeight - mCompatFrame.top);
-        } else if (mDecorFrame.isEmpty()) {
+        } else if (skipDecorCrop()) {
             // Windows without policy decor aren't cropped.
             policyCrop.set(0, 0, mCompatFrame.width(), mCompatFrame.height());
         } else {

@@ -33,10 +33,21 @@ public class NavigationBarCompat {
      * touch slop is when the respected operation will occur when exceeded. Touch slop must be
      * larger than the drag slop.
      */
-    public static final int QUICK_STEP_DRAG_SLOP_PX = convertDpToPixel(10);
-    public static final int QUICK_SCRUB_DRAG_SLOP_PX = convertDpToPixel(20);
-    public static final int QUICK_STEP_TOUCH_SLOP_PX = convertDpToPixel(24);
-    public static final int QUICK_SCRUB_TOUCH_SLOP_PX = convertDpToPixel(35);
+    public static int getQuickStepDragSlopPx() {
+        return convertDpToPixel(10);
+    }
+
+    public static int getQuickScrubDragSlopPx() {
+        return convertDpToPixel(20);
+    }
+
+    public static int getQuickStepTouchSlopPx() {
+        return convertDpToPixel(24);
+    }
+
+    public static int getQuickScrubTouchSlopPx() {
+        return convertDpToPixel(35);
+    }
 
     @Retention(RetentionPolicy.SOURCE)
     @IntDef({HIT_TARGET_NONE, HIT_TARGET_BACK, HIT_TARGET_HOME, HIT_TARGET_OVERVIEW})

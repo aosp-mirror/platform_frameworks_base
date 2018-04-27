@@ -41,6 +41,7 @@
             android:id="@+id/group_message_container"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/notification_text_margin_top"
             android:spacing="2dp"
             android:layout_weight="1"/>
     </com.android.internal.widget.RemeasuringLinearLayout>
@@ -50,4 +51,19 @@
         android:layout_height="@dimen/messaging_avatar_size"
         android:layout_marginStart="12dp"
         android:visibility="gone"/>
+    <FrameLayout
+        android:id="@+id/messaging_group_sending_progress_container"
+        android:layout_width="@dimen/messaging_group_sending_progress_size"
+        android:layout_height="@dimen/messaging_avatar_size"
+        android:layout_marginStart="12dp"
+        android:layout_gravity="top"
+        android:visibility="gone">
+        <ProgressBar
+            android:id="@+id/messaging_group_sending_progress"
+            android:layout_height="@dimen/messaging_group_sending_progress_size"
+            android:layout_width="@dimen/messaging_group_sending_progress_size"
+            android:layout_gravity="center"
+            android:indeterminate="true"
+            style="?android:attr/progressBarStyleSmall" />
+    </FrameLayout>
 </com.android.internal.widget.MessagingGroup>

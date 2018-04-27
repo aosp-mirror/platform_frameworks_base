@@ -348,6 +348,7 @@ bool ReferenceLinker::LinkReference(const CallSite& callsite, Reference* referen
     // against libraries without assigned IDs.
     // Ex: Linking against own resources when building a static library.
     reference->id = s->id;
+    reference->is_dynamic = s->is_dynamic;
     return true;
   }
 

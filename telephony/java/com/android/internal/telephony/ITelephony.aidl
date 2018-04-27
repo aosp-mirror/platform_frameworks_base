@@ -1514,4 +1514,10 @@ interface ITelephony {
      * A test API to return installed carrier id list version.
      */
     int getCarrierIdListVersion(int subId);
+
+    /**
+     * A test API to reload the UICC profile.
+     * @hide
+     */
+    void refreshUiccProfile(int subId);
 }

@@ -218,10 +218,8 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
 
     private ProgressBar mHorizontalProgressBar;
 
-    int mBackgroundResource = 0;
-    int mBackgroundFallbackResource = 0;
-
-    private Drawable mBackgroundDrawable;
+    Drawable mBackgroundDrawable = null;
+    Drawable mBackgroundFallbackDrawable = null;
 
     private boolean mLoadElevation = true;
     private float mElevation;
@@ -1471,14 +1469,14 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
 
     @Override
     public final void setBackgroundDrawable(Drawable drawable) {
-        if (drawable != mBackgroundDrawable || mBackgroundResource != 0) {
-            mBackgroundResource = 0;
+        if (drawable != mBackgroundDrawable) {
             mBackgroundDrawable = drawable;
             if (mDecor != null) {
                 mDecor.setWindowBackground(drawable);
-            }
-            if (mBackgroundFallbackResource != 0) {
-                mDecor.setBackgroundFallback(drawable != null ? 0 : mBackgroundFallbackResource);
+                if (mBackgroundFallbackDrawable != null) {
+                    mDecor.setBackgroundFallback(drawable != null ? null :
+                            mBackgroundFallbackDrawable);
+                }
             }
         }
     }
@@ -2511,19 +2509,18 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
         // the values are inherited from our container.
         if (getContainer() == null) {
             if (mBackgroundDrawable == null) {
-                if (mBackgroundResource == 0) {
-                    mBackgroundResource = a.getResourceId(
-                            R.styleable.Window_windowBackground, 0);
-                }
+
                 if (mFrameResource == 0) {
                     mFrameResource = a.getResourceId(R.styleable.Window_windowFrame, 0);
                 }
-                mBackgroundFallbackResource = a.getResourceId(
-                        R.styleable.Window_windowBackgroundFallback, 0);
-                if (false) {
-                    System.out.println("Background: "
-                            + Integer.toHexString(mBackgroundResource) + " Frame: "
-                            + Integer.toHexString(mFrameResource));
+
+                if (a.hasValue(R.styleable.Window_windowBackground)) {
+                    mBackgroundDrawable = a.getDrawable(R.styleable.Window_windowBackground);
+                }
+
+                if (a.hasValue(R.styleable.Window_windowBackgroundFallback)) {
+                    mBackgroundFallbackDrawable =
+                            a.getDrawable(R.styleable.Window_windowBackgroundFallback);
                 }
             }
             if (mLoadElevation) {
@@ -2618,13 +2615,7 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
         // Remaining setup -- of background and title -- that only applies
         // to top-level windows.
         if (getContainer() == null) {
-            final Drawable background;
-            if (mBackgroundResource != 0) {
-                background = getContext().getDrawable(mBackgroundResource);
-            } else {
-                background = mBackgroundDrawable;
-            }
-            mDecor.setWindowBackground(background);
+            mDecor.setWindowBackground(mBackgroundDrawable);
 
             final Drawable frame;
             if (mFrameResource != 0) {
@@ -2734,8 +2725,8 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
                 }
             }
 
-            if (mDecor.getBackground() == null && mBackgroundFallbackResource != 0) {
-                mDecor.setBackgroundFallback(mBackgroundFallbackResource);
+            if (mDecor.getBackground() == null && mBackgroundFallbackDrawable != null) {
+                mDecor.setBackgroundFallback(mBackgroundFallbackDrawable);
             }
 
             // Only inflate or create a new TransitionManager if the caller hasn't

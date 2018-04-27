@@ -68,6 +68,7 @@ class SymbolTable {
     Maybe<ResourceId> id;
     std::shared_ptr<Attribute> attribute;
     bool is_public = false;
+    bool is_dynamic = false;
   };
 
   SymbolTable(NameMangler* mangler);
@@ -205,6 +206,7 @@ class AssetManagerSymbolSource : public ISymbolSource {
 
   bool AddAssetPath(const android::StringPiece& path);
   std::map<size_t, std::string> GetAssignedPackageIds() const;
+  bool IsPackageDynamic(uint32_t packageId) const;
 
   std::unique_ptr<SymbolTable::Symbol> FindByName(
       const ResourceName& name) override;

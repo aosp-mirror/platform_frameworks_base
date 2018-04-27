@@ -10784,6 +10784,7 @@ public final class Settings {
          * read_binary_cpu_time          (boolean)
          * proc_state_cpu_times_read_delay_ms (long)
          * external_stats_collection_rate_limit_ms (long)
+         * battery_level_collection_delay_ms (long)
          * </pre>
          *
          * <p>
@@ -10804,14 +10805,27 @@ public final class Settings {
         public static final String SYNC_MANAGER_CONSTANTS = "sync_manager_constants";
 
         /**
-         * Whether or not App Standby feature is enabled. This controls throttling of apps
-         * based on usage patterns and predictions.
+         * Whether or not App Standby feature is enabled by system. This controls throttling of apps
+         * based on usage patterns and predictions. Platform will turn on this feature if both this
+         * flag and {@link #ADAPTIVE_BATTERY_MANAGEMENT_ENABLED} is on.
          * Type: int (0 for false, 1 for true)
          * Default: 1
          * @hide
+         * @see #ADAPTIVE_BATTERY_MANAGEMENT_ENABLED
          */
         @SystemApi
         public static final String APP_STANDBY_ENABLED = "app_standby_enabled";
+
+        /**
+         * Whether or not adaptive battery feature is enabled by user. Platform will turn on this
+         * feature if both this flag and {@link #APP_STANDBY_ENABLED} is on.
+         * Type: int (0 for false, 1 for true)
+         * Default: 1
+         * @hide
+         * @see #APP_STANDBY_ENABLED
+         */
+        public static final String ADAPTIVE_BATTERY_MANAGEMENT_ENABLED =
+                "adaptive_battery_management_enabled";
 
         /**
          * Whether or not app auto restriction is enabled. When it is enabled, settings app will

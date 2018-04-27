@@ -109,6 +109,48 @@ public class AppOpsManager {
      */
     public static final int MODE_DEFAULT = 3;
 
+    /**
+     * Metrics about an op when its uid is persistent.
+     * @hide
+     */
+    public static final int UID_STATE_PERSISTENT = 0;
+
+    /**
+     * Metrics about an op when its uid is at the top.
+     * @hide
+     */
+    public static final int UID_STATE_TOP = 1;
+
+    /**
+     * Metrics about an op when its uid is running a foreground service.
+     * @hide
+     */
+    public static final int UID_STATE_FOREGROUND_SERVICE = 2;
+
+    /**
+     * Metrics about an op when its uid is in the foreground for any other reasons.
+     * @hide
+     */
+    public static final int UID_STATE_FOREGROUND = 3;
+
+    /**
+     * Metrics about an op when its uid is in the background for any reason.
+     * @hide
+     */
+    public static final int UID_STATE_BACKGROUND = 4;
+
+    /**
+     * Metrics about an op when its uid is cached.
+     * @hide
+     */
+    public static final int UID_STATE_CACHED = 5;
+
+    /**
+     * Number of uid states we track.
+     * @hide
+     */
+    public static final int _NUM_UID_STATE = 6;
+
     // when adding one of these:
     //  - increment _NUM_OP
     //  - define an OPSTR_* constant (marked as @SystemApi)
@@ -1471,8 +1513,8 @@ public class AppOpsManager {
     public static class OpEntry implements Parcelable {
         private final int mOp;
         private final int mMode;
-        private final long mTime;
-        private final long mRejectTime;
+        private final long[] mTimes;
+        private final long[] mRejectTimes;
         private final int mDuration;
         private final int mProxyUid;
         private final String mProxyPackageName;
@@ -1481,8 +1523,23 @@ public class AppOpsManager {
                 int proxyUid, String proxyPackage) {
             mOp = op;
             mMode = mode;
-            mTime = time;
-            mRejectTime = rejectTime;
+            mTimes = new long[_NUM_UID_STATE];
+            mRejectTimes = new long[_NUM_UID_STATE];
+            mTimes[0] = time;
+            mRejectTimes[0] = rejectTime;
+            mDuration = duration;
+            mProxyUid = proxyUid;
+            mProxyPackageName = proxyPackage;
+        }
+
+        public OpEntry(int op, int mode, long[] times, long[] rejectTimes, int duration,
+                int proxyUid, String proxyPackage) {
+            mOp = op;
+            mMode = mode;
+            mTimes = new long[_NUM_UID_STATE];
+            mRejectTimes = new long[_NUM_UID_STATE];
+            System.arraycopy(times, 0, mTimes, 0, _NUM_UID_STATE);
+            System.arraycopy(rejectTimes, 0, mRejectTimes, 0, _NUM_UID_STATE);
             mDuration = duration;
             mProxyUid = proxyUid;
             mProxyPackageName = proxyPackage;
@@ -1497,11 +1554,31 @@ public class AppOpsManager {
         }
 
         public long getTime() {
-            return mTime;
+            long time = 0;
+            for (int i = 0; i < _NUM_UID_STATE; i++) {
+                if (mTimes[i] > time) {
+                    time = mTimes[i];
+                }
+            }
+            return time;
+        }
+
+        public long getTimeFor(int uidState) {
+            return mTimes[uidState];
         }
 
         public long getRejectTime() {
-            return mRejectTime;
+            long time = 0;
+            for (int i = 0; i < _NUM_UID_STATE; i++) {
+                if (mRejectTimes[i] > time) {
+                    time = mRejectTimes[i];
+                }
+            }
+            return time;
+        }
+
+        public long getRejectTimeFor(int uidState) {
+            return mRejectTimes[uidState];
         }
 
         public boolean isRunning() {
@@ -1509,7 +1586,7 @@ public class AppOpsManager {
         }
 
         public int getDuration() {
-            return mDuration == -1 ? (int)(System.currentTimeMillis()-mTime) : mDuration;
+            return mDuration;
         }
 
         public int getProxyUid() {
@@ -1529,8 +1606,8 @@ public class AppOpsManager {
         public void writeToParcel(Parcel dest, int flags) {
             dest.writeInt(mOp);
             dest.writeInt(mMode);
-            dest.writeLong(mTime);
-            dest.writeLong(mRejectTime);
+            dest.writeLongArray(mTimes);
+            dest.writeLongArray(mRejectTimes);
             dest.writeInt(mDuration);
             dest.writeInt(mProxyUid);
             dest.writeString(mProxyPackageName);
@@ -1539,8 +1616,8 @@ public class AppOpsManager {
         OpEntry(Parcel source) {
             mOp = source.readInt();
             mMode = source.readInt();
-            mTime = source.readLong();
-            mRejectTime = source.readLong();
+            mTimes = source.createLongArray();
+            mRejectTimes = source.createLongArray();
             mDuration = source.readInt();
             mProxyUid = source.readInt();
             mProxyPackageName = source.readString();

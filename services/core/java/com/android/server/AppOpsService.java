@@ -39,6 +39,7 @@ import android.os.ResultReceiver;
 import android.os.ServiceManager;
 import android.os.ShellCallback;
 import android.os.ShellCommand;
+import android.os.SystemClock;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.os.storage.StorageManagerInternal;
@@ -77,13 +78,23 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.nio.charset.StandardCharsets;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+
+import static android.app.AppOpsManager.UID_STATE_BACKGROUND;
+import static android.app.AppOpsManager.UID_STATE_CACHED;
+import static android.app.AppOpsManager.UID_STATE_FOREGROUND;
+import static android.app.AppOpsManager.UID_STATE_FOREGROUND_SERVICE;
+import static android.app.AppOpsManager._NUM_UID_STATE;
+import static android.app.AppOpsManager.UID_STATE_PERSISTENT;
+import static android.app.AppOpsManager.UID_STATE_TOP;
 
 public class AppOpsService extends IAppOpsService.Stub {
     static final String TAG = "AppOps";
@@ -99,6 +110,64 @@ public class AppOpsService extends IAppOpsService.Stub {
 
     // Constant meaning that any UID should be matched when dispatching callbacks
     private static final int UID_ANY = -2;
+
+    // Map from process states to the uid states we track.
+    private static final int[] PROCESS_STATE_TO_UID_STATE = new int[] {
+        UID_STATE_PERSISTENT,           // ActivityManager.PROCESS_STATE_PERSISTENT
+        UID_STATE_PERSISTENT,           // ActivityManager.PROCESS_STATE_PERSISTENT_UI
+        UID_STATE_TOP,                  // ActivityManager.PROCESS_STATE_TOP
+        UID_STATE_FOREGROUND_SERVICE,   // ActivityManager.PROCESS_STATE_FOREGROUND_SERVICE
+        UID_STATE_FOREGROUND,           // ActivityManager.PROCESS_STATE_BOUND_FOREGROUND_SERVICE
+        UID_STATE_FOREGROUND,           // ActivityManager.PROCESS_STATE_IMPORTANT_FOREGROUND
+        UID_STATE_BACKGROUND,           // ActivityManager.PROCESS_STATE_IMPORTANT_BACKGROUND
+        UID_STATE_BACKGROUND,           // ActivityManager.PROCESS_STATE_TRANSIENT_BACKGROUND
+        UID_STATE_BACKGROUND,           // ActivityManager.PROCESS_STATE_BACKUP
+        UID_STATE_BACKGROUND,           // ActivityManager.PROCESS_STATE_SERVICE
+        UID_STATE_BACKGROUND,           // ActivityManager.PROCESS_STATE_RECEIVER
+        UID_STATE_CACHED,               // ActivityManager.PROCESS_STATE_TOP_SLEEPING
+        UID_STATE_CACHED,               // ActivityManager.PROCESS_STATE_HEAVY_WEIGHT
+        UID_STATE_CACHED,               // ActivityManager.PROCESS_STATE_HOME
+        UID_STATE_CACHED,               // ActivityManager.PROCESS_STATE_LAST_ACTIVITY
+        UID_STATE_CACHED,               // ActivityManager.PROCESS_STATE_CACHED_ACTIVITY
+        UID_STATE_CACHED,               // ActivityManager.PROCESS_STATE_CACHED_ACTIVITY_CLIENT
+        UID_STATE_CACHED,               // ActivityManager.PROCESS_STATE_CACHED_RECENT
+        UID_STATE_CACHED,               // ActivityManager.PROCESS_STATE_CACHED_EMPTY
+        UID_STATE_CACHED,               // ActivityManager.PROCESS_STATE_NONEXISTENT
+    };
+
+    static final String[] UID_STATE_NAMES = new String[] {
+            "pers ",    // UID_STATE_PERSISTENT
+            "top  ",    // UID_STATE_TOP
+            "fgsvc",    // UID_STATE_FOREGROUND_SERVICE
+            "fg   ",    // UID_STATE_FOREGROUND
+            "bg   ",    // UID_STATE_BACKGROUND
+            "cch  ",    // UID_STATE_CACHED
+    };
+
+    static final String[] UID_STATE_TIME_ATTRS = new String[] {
+            "tp",       // UID_STATE_PERSISTENT
+            "tt",       // UID_STATE_TOP
+            "tfs",      // UID_STATE_FOREGROUND_SERVICE
+            "tf",       // UID_STATE_FOREGROUND
+            "tb",       // UID_STATE_BACKGROUND
+            "tc",       // UID_STATE_CACHED
+    };
+
+    static final String[] UID_STATE_REJECT_ATTRS = new String[] {
+            "rp",       // UID_STATE_PERSISTENT
+            "rt",       // UID_STATE_TOP
+            "rfs",      // UID_STATE_FOREGROUND_SERVICE
+            "rf",       // UID_STATE_FOREGROUND
+            "rb",       // UID_STATE_BACKGROUND
+            "rc",       // UID_STATE_CACHED
+    };
+
+    static final String[] MODE_NAMES = new String[] {
+            "allow",        // MODE_ALLOWED
+            "ignore",       // MODE_IGNORED
+            "deny",         // MODE_ERRORED
+            "default",      // MODE_DEFAULT
+    };
 
     Context mContext;
     final AtomicFile mFile;
@@ -133,6 +202,8 @@ public class AppOpsService extends IAppOpsService.Stub {
     @VisibleForTesting
     static final class UidState {
         public final int uid;
+        public int state = UID_STATE_CACHED;
+        public int startNesting;
         public ArrayMap<String, Ops> pkgOps;
         public SparseIntArray opModes;
 
@@ -151,35 +222,50 @@ public class AppOpsService extends IAppOpsService.Stub {
         }
     }
 
-    public final static class Ops extends SparseArray<Op> {
-        public final String packageName;
-        public final UidState uidState;
-        public final boolean isPrivileged;
+    final static class Ops extends SparseArray<Op> {
+        final String packageName;
+        final UidState uidState;
+        final boolean isPrivileged;
 
-        public Ops(String _packageName, UidState _uidState, boolean _isPrivileged) {
+        Ops(String _packageName, UidState _uidState, boolean _isPrivileged) {
             packageName = _packageName;
             uidState = _uidState;
             isPrivileged = _isPrivileged;
         }
     }
 
-    public final static class Op {
-        public final int uid;
-        public final String packageName;
-        public int proxyUid = -1;
-        public String proxyPackageName;
-        public final int op;
-        public int mode;
-        public int duration;
-        public long time;
-        public long rejectTime;
-        public int nesting;
+    final static class Op {
+        final UidState uidState;
+        final int uid;
+        final String packageName;
+        final int op;
+        int proxyUid = -1;
+        String proxyPackageName;
+        int mode;
+        int duration;
+        long time[] = new long[_NUM_UID_STATE];
+        long rejectTime[] = new long[_NUM_UID_STATE];
+        int startNesting;
+        long startRealtime;
 
-        public Op(int _uid, String _packageName, int _op) {
-            uid = _uid;
+        Op(UidState _uidState, String _packageName, int _op) {
+            uidState = _uidState;
+            uid = _uidState.uid;
             packageName = _packageName;
             op = _op;
             mode = AppOpsManager.opToDefaultMode(op);
+        }
+
+        boolean hasAnyTime() {
+            for (int i = 0; i < AppOpsManager._NUM_UID_STATE; i++) {
+                if (time[i] != 0) {
+                    return true;
+                }
+                if (rejectTime[i] != 0) {
+                    return true;
+                }
+            }
+            return false;
         }
     }
 
@@ -189,13 +275,13 @@ public class AppOpsService extends IAppOpsService.Stub {
     final ArrayMap<IBinder, SparseArray<ActiveCallback>> mActiveWatchers = new ArrayMap<>();
     final SparseArray<SparseArray<Restriction>> mAudioRestrictions = new SparseArray<>();
 
-    public final class ModeCallback implements DeathRecipient {
+    final class ModeCallback implements DeathRecipient {
         final IAppOpsCallback mCallback;
         final int mWatchingUid;
         final int mCallingUid;
         final int mCallingPid;
 
-        public ModeCallback(IAppOpsCallback callback, int watchingUid, int callingUid,
+        ModeCallback(IAppOpsCallback callback, int watchingUid, int callingUid,
                 int callingPid) {
             mCallback = callback;
             mWatchingUid = watchingUid;
@@ -222,7 +308,7 @@ public class AppOpsService extends IAppOpsService.Stub {
             return sb.toString();
         }
 
-        public void unlinkToDeath() {
+        void unlinkToDeath() {
             mCallback.asBinder().unlinkToDeath(this, 0);
         }
 
@@ -232,13 +318,13 @@ public class AppOpsService extends IAppOpsService.Stub {
         }
     }
 
-    public final class ActiveCallback implements DeathRecipient {
+    final class ActiveCallback implements DeathRecipient {
         final IAppOpsActiveCallback mCallback;
         final int mWatchingUid;
         final int mCallingUid;
         final int mCallingPid;
 
-        public ActiveCallback(IAppOpsActiveCallback callback, int watchingUid, int callingUid,
+        ActiveCallback(IAppOpsActiveCallback callback, int watchingUid, int callingUid,
                 int callingPid) {
             mCallback = callback;
             mWatchingUid = watchingUid;
@@ -265,7 +351,7 @@ public class AppOpsService extends IAppOpsService.Stub {
             return sb.toString();
         }
 
-        public void destroy() {
+        void destroy() {
             mCallback.asBinder().unlinkToDeath(this, 0);
         }
 
@@ -277,12 +363,12 @@ public class AppOpsService extends IAppOpsService.Stub {
 
     final ArrayMap<IBinder, ClientState> mClients = new ArrayMap<>();
 
-    public final class ClientState extends Binder implements DeathRecipient {
+    final class ClientState extends Binder implements DeathRecipient {
         final ArrayList<Op> mStartedOps = new ArrayList<>();
         final IBinder mAppToken;
         final int mPid;
 
-        public ClientState(IBinder appToken) {
+        ClientState(IBinder appToken) {
             mAppToken = appToken;
             mPid = Binder.getCallingPid();
             // Watch only for remote processes dying
@@ -453,7 +539,7 @@ public class AppOpsService extends IAppOpsService.Stub {
                     if (uid == op.uid && packageName.equals(op.packageName)) {
                         finishOperationLocked(op, /*finishNested*/ true);
                         client.mStartedOps.remove(j);
-                        if (op.nesting <= 0) {
+                        if (op.startNesting <= 0) {
                             scheduleOpActiveChangedIfNeededLocked(op.op,
                                     uid, packageName, false);
                         }
@@ -485,6 +571,31 @@ public class AppOpsService extends IAppOpsService.Stub {
         }
     }
 
+    public void updateUidProcState(int uid, int procState) {
+        synchronized (this) {
+            final UidState uidState = getUidStateLocked(uid, true);
+            final int newState = PROCESS_STATE_TO_UID_STATE[procState];
+            if (uidState != null && uidState.state != newState) {
+                if (uidState.startNesting != 0) {
+                    // There is some actively running operation...  need to find it
+                    // and appropriately update its state.
+                    final long now = System.currentTimeMillis();
+                    for (int i = uidState.pkgOps.size() - 1; i >= 0; i--) {
+                        final Ops ops = uidState.pkgOps.valueAt(i);
+                        for (int j = ops.size() - 1; j >= 0; j--) {
+                            final Op op = ops.valueAt(j);
+                            if (op.startNesting > 0) {
+                                op.time[uidState.state] = now;
+                                op.time[newState] = now;
+                            }
+                        }
+                    }
+                }
+                uidState.state = newState;
+            }
+        }
+    }
+
     public void shutdown() {
         Slog.w(TAG, "Writing app ops before shutdown...");
         boolean doWrite = false;
@@ -501,12 +612,16 @@ public class AppOpsService extends IAppOpsService.Stub {
 
     private ArrayList<AppOpsManager.OpEntry> collectOps(Ops pkgOps, int[] ops) {
         ArrayList<AppOpsManager.OpEntry> resOps = null;
+        final long elapsedNow = SystemClock.elapsedRealtime();
         if (ops == null) {
-            resOps = new ArrayList<AppOpsManager.OpEntry>();
+            resOps = new ArrayList<>();
             for (int j=0; j<pkgOps.size(); j++) {
                 Op curOp = pkgOps.valueAt(j);
+                long duration = curOp.duration == -1
+                        ? (elapsedNow - curOp.startRealtime)
+                        : curOp.duration;
                 resOps.add(new AppOpsManager.OpEntry(curOp.op, curOp.mode, curOp.time,
-                        curOp.rejectTime, curOp.duration, curOp.proxyUid,
+                        curOp.rejectTime, (int) duration, curOp.proxyUid,
                         curOp.proxyPackageName));
             }
         } else {
@@ -514,10 +629,13 @@ public class AppOpsService extends IAppOpsService.Stub {
                 Op curOp = pkgOps.get(ops[j]);
                 if (curOp != null) {
                     if (resOps == null) {
-                        resOps = new ArrayList<AppOpsManager.OpEntry>();
+                        resOps = new ArrayList<>();
                     }
+                    long duration = curOp.duration == -1
+                            ? (elapsedNow - curOp.startRealtime)
+                            : curOp.duration;
                     resOps.add(new AppOpsManager.OpEntry(curOp.op, curOp.mode, curOp.time,
-                            curOp.rejectTime, curOp.duration, curOp.proxyUid,
+                            curOp.rejectTime, (int) duration, curOp.proxyUid,
                             curOp.proxyPackageName));
                 }
             }
@@ -628,7 +746,7 @@ public class AppOpsService extends IAppOpsService.Stub {
     }
 
     private void pruneOp(Op op, int uid, String packageName) {
-        if (op.time == 0 && op.rejectTime == 0) {
+        if (!op.hasAnyTime()) {
             Ops ops = getOpsRawLocked(uid, packageName, false /* edit */,
                     false /* uidMismatchExpected */);
             if (ops != null) {
@@ -946,7 +1064,7 @@ public class AppOpsService extends IAppOpsService.Stub {
                                     mOpModeWatchers.get(curOp.op));
                             callbacks = addCallbacks(callbacks, curOp.op, curOp.uid, packageName,
                                     mPackageModeWatchers.get(packageName));
-                            if (curOp.time == 0 && curOp.rejectTime == 0) {
+                            if (!curOp.hasAnyTime()) {
                                 pkgOps.removeAt(j);
                             }
                         }
@@ -1212,24 +1330,25 @@ public class AppOpsService extends IAppOpsService.Stub {
     private int noteOperationUnchecked(int code, int uid, String packageName,
             int proxyUid, String proxyPackageName) {
         synchronized (this) {
-            Ops ops = getOpsRawLocked(uid, packageName, true /* edit */,
+            final Ops ops = getOpsRawLocked(uid, packageName, true /* edit */,
                     false /* uidMismatchExpected */);
             if (ops == null) {
                 if (DEBUG) Slog.d(TAG, "noteOperation: no op for code " + code + " uid " + uid
                         + " package " + packageName);
                 return AppOpsManager.MODE_ERRORED;
             }
-            Op op = getOpLocked(ops, code, true);
+            final Op op = getOpLocked(ops, code, true);
             if (isOpRestrictedLocked(uid, code, packageName)) {
                 return AppOpsManager.MODE_IGNORED;
             }
+            final UidState uidState = ops.uidState;
             if (op.duration == -1) {
                 Slog.w(TAG, "Noting op not finished: uid " + uid + " pkg " + packageName
-                        + " code " + code + " time=" + op.time + " duration=" + op.duration);
+                        + " code " + code + " time=" + op.time[uidState.state]
+                        + " duration=" + op.duration);
             }
             op.duration = 0;
             final int switchCode = AppOpsManager.opToSwitch(code);
-            UidState uidState = ops.uidState;
             // If there is a non-default per UID policy (we set UID op mode only if
             // non-default) it takes over, otherwise use the per package policy.
             if (uidState.opModes != null && uidState.opModes.indexOfKey(switchCode) >= 0) {
@@ -1238,7 +1357,7 @@ public class AppOpsService extends IAppOpsService.Stub {
                     if (DEBUG) Slog.d(TAG, "noteOperation: reject #" + op.mode + " for code "
                             + switchCode + " (" + code + ") uid " + uid + " package "
                             + packageName);
-                    op.rejectTime = System.currentTimeMillis();
+                    op.rejectTime[uidState.state] = System.currentTimeMillis();
                     return uidMode;
                 }
             } else {
@@ -1247,14 +1366,14 @@ public class AppOpsService extends IAppOpsService.Stub {
                     if (DEBUG) Slog.d(TAG, "noteOperation: reject #" + op.mode + " for code "
                             + switchCode + " (" + code + ") uid " + uid + " package "
                             + packageName);
-                    op.rejectTime = System.currentTimeMillis();
+                    op.rejectTime[uidState.state] = System.currentTimeMillis();
                     return switchOp.mode;
                 }
             }
             if (DEBUG) Slog.d(TAG, "noteOperation: allowing code " + code + " uid " + uid
                     + " package " + packageName);
-            op.time = System.currentTimeMillis();
-            op.rejectTime = 0;
+            op.time[uidState.state] = System.currentTimeMillis();
+            op.rejectTime[uidState.state] = 0;
             op.proxyUid = proxyUid;
             op.proxyPackageName = proxyPackageName;
             return AppOpsManager.MODE_ALLOWED;
@@ -1323,19 +1442,19 @@ public class AppOpsService extends IAppOpsService.Stub {
         }
         ClientState client = (ClientState)token;
         synchronized (this) {
-            Ops ops = getOpsRawLocked(uid, resolvedPackageName, true /* edit */,
+            final Ops ops = getOpsRawLocked(uid, resolvedPackageName, true /* edit */,
                     false /* uidMismatchExpected */);
             if (ops == null) {
                 if (DEBUG) Slog.d(TAG, "startOperation: no op for code " + code + " uid " + uid
                         + " package " + resolvedPackageName);
                 return AppOpsManager.MODE_ERRORED;
             }
-            Op op = getOpLocked(ops, code, true);
+            final Op op = getOpLocked(ops, code, true);
             if (isOpRestrictedLocked(uid, code, resolvedPackageName)) {
                 return AppOpsManager.MODE_IGNORED;
             }
             final int switchCode = AppOpsManager.opToSwitch(code);
-            UidState uidState = ops.uidState;
+            final UidState uidState = ops.uidState;
             // If there is a non-default per UID policy (we set UID op mode only if
             // non-default) it takes over, otherwise use the per package policy.
             if (uidState.opModes != null && uidState.opModes.indexOfKey(switchCode) >= 0) {
@@ -1345,7 +1464,7 @@ public class AppOpsService extends IAppOpsService.Stub {
                     if (DEBUG) Slog.d(TAG, "noteOperation: reject #" + op.mode + " for code "
                             + switchCode + " (" + code + ") uid " + uid + " package "
                             + resolvedPackageName);
-                    op.rejectTime = System.currentTimeMillis();
+                    op.rejectTime[uidState.state] = System.currentTimeMillis();
                     return uidMode;
                 }
             } else {
@@ -1355,19 +1474,21 @@ public class AppOpsService extends IAppOpsService.Stub {
                     if (DEBUG) Slog.d(TAG, "startOperation: reject #" + op.mode + " for code "
                             + switchCode + " (" + code + ") uid " + uid + " package "
                             + resolvedPackageName);
-                    op.rejectTime = System.currentTimeMillis();
+                    op.rejectTime[uidState.state] = System.currentTimeMillis();
                     return switchOp.mode;
                 }
             }
             if (DEBUG) Slog.d(TAG, "startOperation: allowing code " + code + " uid " + uid
                     + " package " + resolvedPackageName);
-            if (op.nesting == 0) {
-                op.time = System.currentTimeMillis();
-                op.rejectTime = 0;
+            if (op.startNesting == 0) {
+                op.startRealtime = SystemClock.elapsedRealtime();
+                op.time[uidState.state] = System.currentTimeMillis();
+                op.rejectTime[uidState.state] = 0;
                 op.duration = -1;
                 scheduleOpActiveChangedIfNeededLocked(code, uid, packageName, true);
             }
-            op.nesting++;
+            op.startNesting++;
+            uidState.startNesting++;
             if (client.mStartedOps != null) {
                 client.mStartedOps.add(op);
             }
@@ -1415,7 +1536,7 @@ public class AppOpsService extends IAppOpsService.Stub {
                 return;
             }
             finishOperationLocked(op, /*finishNested*/ false);
-            if (op.nesting <= 0) {
+            if (op.startNesting <= 0) {
                 scheduleOpActiveChangedIfNeededLocked(code, uid, packageName, false);
             }
         }
@@ -1476,18 +1597,22 @@ public class AppOpsService extends IAppOpsService.Stub {
     }
 
     void finishOperationLocked(Op op, boolean finishNested) {
-        if (op.nesting <= 1 || finishNested) {
-            if (op.nesting == 1 || finishNested) {
-                op.duration = (int)(System.currentTimeMillis() - op.time);
-                op.time += op.duration;
+        if (op.startNesting <= 1 || finishNested) {
+            if (op.startNesting == 1 || finishNested) {
+                op.duration = (int)(SystemClock.elapsedRealtime() - op.startRealtime);
+                op.time[op.uidState.state] = System.currentTimeMillis();
             } else {
                 Slog.w(TAG, "Finishing op nesting under-run: uid " + op.uid + " pkg "
                         + op.packageName + " code " + op.op + " time=" + op.time
-                        + " duration=" + op.duration + " nesting=" + op.nesting);
+                        + " duration=" + op.duration + " nesting=" + op.startNesting);
             }
-            op.nesting = 0;
+            if (op.startNesting >= 1) {
+                op.uidState.startNesting -= op.startNesting;
+            }
+            op.startNesting = 0;
         } else {
-            op.nesting--;
+            op.startNesting--;
+            op.uidState.startNesting--;
         }
     }
 
@@ -1617,7 +1742,7 @@ public class AppOpsService extends IAppOpsService.Stub {
             if (!edit) {
                 return null;
             }
-            op = new Op(ops.uidState.uid, ops.packageName, code);
+            op = new Op(ops.uidState, ops.packageName, code);
             ops.put(code, op);
         }
         if (edit) {
@@ -1750,7 +1875,7 @@ public class AppOpsService extends IAppOpsService.Stub {
                 if (ops != null) {
                     final Op op = ops.get(AppOpsManager.OP_RUN_IN_BACKGROUND);
                     if (op != null && op.mode != AppOpsManager.opToDefaultMode(op.op)) {
-                        final Op copy = new Op(op.uid, op.packageName,
+                        final Op copy = new Op(op.uidState, op.packageName,
                                 AppOpsManager.OP_RUN_ANY_IN_BACKGROUND);
                         copy.mode = op.mode;
                         ops.put(AppOpsManager.OP_RUN_ANY_IN_BACKGROUND, copy);
@@ -1860,35 +1985,84 @@ public class AppOpsService extends IAppOpsService.Stub {
 
             String tagName = parser.getName();
             if (tagName.equals("op")) {
-                Op op = new Op(uid, pkgName, Integer.parseInt(parser.getAttributeValue(null, "n")));
-                String mode = parser.getAttributeValue(null, "m");
-                if (mode != null) {
-                    op.mode = Integer.parseInt(mode);
-                }
-                String time = parser.getAttributeValue(null, "t");
-                if (time != null) {
-                    op.time = Long.parseLong(time);
-                }
-                time = parser.getAttributeValue(null, "r");
-                if (time != null) {
-                    op.rejectTime = Long.parseLong(time);
-                }
-                String dur = parser.getAttributeValue(null, "d");
-                if (dur != null) {
-                    op.duration = Integer.parseInt(dur);
-                }
-                String proxyUid = parser.getAttributeValue(null, "pu");
-                if (proxyUid != null) {
-                    op.proxyUid = Integer.parseInt(proxyUid);
-                }
-                String proxyPackageName = parser.getAttributeValue(null, "pp");
-                if (proxyPackageName != null) {
-                    op.proxyPackageName = proxyPackageName;
-                }
-
                 UidState uidState = getUidStateLocked(uid, true);
                 if (uidState.pkgOps == null) {
                     uidState.pkgOps = new ArrayMap<>();
+                }
+
+                Op op = new Op(uidState, pkgName,
+                        Integer.parseInt(parser.getAttributeValue(null, "n")));
+
+                for (int i = parser.getAttributeCount()-1; i >= 0; i--) {
+                    final String name = parser.getAttributeName(i);
+                    final String value = parser.getAttributeValue(i);
+                    switch (name) {
+                        case "m":
+                            op.mode = Integer.parseInt(value);
+                            break;
+                        case "d":
+                            op.duration = Integer.parseInt(value);
+                            break;
+                        case "pu":
+                            op.proxyUid = Integer.parseInt(value);
+                            break;
+                        case "pp":
+                            op.proxyPackageName = value;
+                            break;
+                        case "tp":
+                            op.time[AppOpsManager.UID_STATE_PERSISTENT] = Long.parseLong(value);
+                            break;
+                        case "tt":
+                            op.time[AppOpsManager.UID_STATE_TOP] = Long.parseLong(value);
+                            break;
+                        case "tfs":
+                            op.time[AppOpsManager.UID_STATE_FOREGROUND_SERVICE]
+                                    = Long.parseLong(value);
+                            break;
+                        case "tf":
+                            op.time[AppOpsManager.UID_STATE_FOREGROUND] = Long.parseLong(value);
+                            break;
+                        case "tb":
+                            op.time[AppOpsManager.UID_STATE_BACKGROUND] = Long.parseLong(value);
+                            break;
+                        case "tc":
+                            op.time[AppOpsManager.UID_STATE_CACHED] = Long.parseLong(value);
+                            break;
+                        case "rp":
+                            op.rejectTime[AppOpsManager.UID_STATE_PERSISTENT]
+                                    = Long.parseLong(value);
+                            break;
+                        case "rt":
+                            op.rejectTime[AppOpsManager.UID_STATE_TOP] = Long.parseLong(value);
+                            break;
+                        case "rfs":
+                            op.rejectTime[AppOpsManager.UID_STATE_FOREGROUND_SERVICE]
+                                    = Long.parseLong(value);
+                            break;
+                        case "rf":
+                            op.rejectTime[AppOpsManager.UID_STATE_FOREGROUND]
+                                    = Long.parseLong(value);
+                            break;
+                        case "rb":
+                            op.rejectTime[AppOpsManager.UID_STATE_BACKGROUND]
+                                    = Long.parseLong(value);
+                            break;
+                        case "rc":
+                            op.rejectTime[AppOpsManager.UID_STATE_CACHED]
+                                    = Long.parseLong(value);
+                            break;
+                        case "t":
+                            // Backwards compat.
+                            op.time[AppOpsManager.UID_STATE_TOP] = Long.parseLong(value);
+                            break;
+                        case "r":
+                            // Backwards compat.
+                            op.rejectTime[AppOpsManager.UID_STATE_TOP] = Long.parseLong(value);
+                            break;
+                        default:
+                            Slog.w(TAG, "Unknown attribute in 'op' tag: " + name);
+                            break;
+                    }
                 }
 
                 Ops ops = uidState.pkgOps.get(pkgName);
@@ -1977,13 +2151,17 @@ public class AppOpsService extends IAppOpsService.Stub {
                             if (op.getMode() != AppOpsManager.opToDefaultMode(op.getOp())) {
                                 out.attribute(null, "m", Integer.toString(op.getMode()));
                             }
-                            long time = op.getTime();
-                            if (time != 0) {
-                                out.attribute(null, "t", Long.toString(time));
-                            }
-                            time = op.getRejectTime();
-                            if (time != 0) {
-                                out.attribute(null, "r", Long.toString(time));
+                            for (int k = 0; k < _NUM_UID_STATE; k++) {
+                                final long time = op.getTimeFor(k);
+                                if (time != 0) {
+                                    out.attribute(null, UID_STATE_TIME_ATTRS[k],
+                                            Long.toString(time));
+                                }
+                                final long rejectTime = op.getRejectTimeFor(k);
+                                if (rejectTime != 0) {
+                                    out.attribute(null, UID_STATE_REJECT_ATTRS[k],
+                                            Long.toString(rejectTime));
+                                }
                             }
                             int dur = op.getDuration();
                             if (dur != 0) {
@@ -2069,15 +2247,10 @@ public class AppOpsService extends IAppOpsService.Stub {
         }
 
         int strModeToMode(String modeStr, PrintWriter err) {
-            switch (modeStr) {
-                case "allow":
-                    return AppOpsManager.MODE_ALLOWED;
-                case "deny":
-                    return AppOpsManager.MODE_ERRORED;
-                case "ignore":
-                    return AppOpsManager.MODE_IGNORED;
-                case "default":
-                    return AppOpsManager.MODE_DEFAULT;
+            for (int i = MODE_NAMES.length - 1; i >= 0; i--) {
+                if (MODE_NAMES[i].equals(modeStr)) {
+                    return i;
+                }
             }
             try {
                 return Integer.parseInt(modeStr);
@@ -2466,6 +2639,34 @@ public class AppOpsService extends IAppOpsService.Stub {
         pw.println("  none");
     }
 
+    private void dumpTimesLocked(PrintWriter pw, String firstPrefix, String prefix, long[] times,
+            long now, SimpleDateFormat sdf, Date date) {
+        boolean hasTime = false;
+        for (int i = 0; i < _NUM_UID_STATE; i++) {
+            if (times[i] != 0) {
+                hasTime = true;
+                break;
+            }
+        }
+        if (!hasTime) {
+            return;
+        }
+        boolean first = true;
+        for (int i = 0; i < _NUM_UID_STATE; i++) {
+            if (times[i] != 0) {
+                pw.print(first ? firstPrefix : prefix);
+                first = false;
+                pw.print(UID_STATE_NAMES[i]);
+                pw.print(" = ");
+                date.setTime(times[i]);
+                pw.print(sdf.format(date));
+                pw.print(" (");
+                TimeUtils.formatDuration(times[i]-now, pw);
+                pw.println(")");
+            }
+        }
+    }
+
     @Override
     protected void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
         if (!DumpUtils.checkDumpAndUsageStatsPermission(mContext, TAG, pw)) return;
@@ -2491,6 +2692,9 @@ public class AppOpsService extends IAppOpsService.Stub {
         synchronized (this) {
             pw.println("Current AppOps Service state:");
             final long now = System.currentTimeMillis();
+            final long nowElapsed = SystemClock.elapsedRealtime();
+            final SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
+            final Date date = new Date();
             boolean needSep = false;
             if (mOpModeWatchers.size() > 0) {
                 needSep = true;
@@ -2585,7 +2789,7 @@ public class AppOpsService extends IAppOpsService.Stub {
                         pw.print("    "); pw.print(op);
                         pw.print(" usage="); pw.print(AudioAttributes.usageToString(usage));
                         Restriction r = restrictions.valueAt(i);
-                        pw.print(": mode="); pw.println(r.mode);
+                        pw.print(": mode="); pw.println(MODE_NAMES[r.mode]);
                         if (!r.exceptionPackages.isEmpty()) {
                             pw.println("      Exceptions:");
                             for (int j=0; j<r.exceptionPackages.size(); j++) {
@@ -2602,6 +2806,12 @@ public class AppOpsService extends IAppOpsService.Stub {
                 UidState uidState = mUidStates.valueAt(i);
 
                 pw.print("  Uid "); UserHandle.formatUid(pw, uidState.uid); pw.println(":");
+                pw.print("    state=");
+                pw.println(UID_STATE_NAMES[uidState.state]);
+                if (uidState.startNesting != 0) {
+                    pw.print("    startNesting=");
+                    pw.println(uidState.startNesting);
+                }
                 needSep = true;
 
                 SparseIntArray opModes = uidState.opModes;
@@ -2611,7 +2821,7 @@ public class AppOpsService extends IAppOpsService.Stub {
                         final int code = opModes.keyAt(j);
                         final int mode = opModes.valueAt(j);
                         pw.print("      "); pw.print(AppOpsManager.opToName(code));
-                        pw.print(": mode="); pw.println(mode);
+                        pw.print(": mode="); pw.println(MODE_NAMES[mode]);
                     }
                 }
 
@@ -2625,21 +2835,26 @@ public class AppOpsService extends IAppOpsService.Stub {
                     for (int j=0; j<ops.size(); j++) {
                         Op op = ops.valueAt(j);
                         pw.print("      "); pw.print(AppOpsManager.opToName(op.op));
-                        pw.print(": mode="); pw.print(op.mode);
-                        if (op.time != 0) {
-                            pw.print("; time="); TimeUtils.formatDuration(now-op.time, pw);
-                            pw.print(" ago");
-                        }
-                        if (op.rejectTime != 0) {
-                            pw.print("; rejectTime="); TimeUtils.formatDuration(now-op.rejectTime, pw);
-                            pw.print(" ago");
-                        }
+                        pw.print(" ("); pw.print(MODE_NAMES[op.mode]); pw.println("): ");
+                        dumpTimesLocked(pw,
+                                "          Access: ",
+                                "                  ", op.time, now, sdf, date);
+                        dumpTimesLocked(pw,
+                                "          Reject: ",
+                                "                  ", op.rejectTime, now, sdf, date);
                         if (op.duration == -1) {
-                            pw.print(" (running)");
+                            pw.print("          Running start at: ");
+                            TimeUtils.formatDuration(nowElapsed-op.startRealtime, pw);
+                            pw.println();
                         } else if (op.duration != 0) {
-                            pw.print("; duration="); TimeUtils.formatDuration(op.duration, pw);
+                            pw.print("          duration=");
+                            TimeUtils.formatDuration(op.duration, pw);
+                            pw.println();
                         }
-                        pw.println();
+                        if (op.startNesting != 0) {
+                            pw.print("          startNesting=");
+                            pw.println(op.startNesting);
+                        }
                     }
                 }
             }

@@ -20,8 +20,4 @@
      <item type="dimen" format="float" name="ambient_shadow_alpha">0.15</item>
      <item type="dimen" format="float" name="spot_shadow_alpha">0.3</item>
 
-     <!-- Max width/height of the autofill data set picker as a fraction of the screen width/height -->
-     <dimen name="autofill_dataset_picker_max_width">60%</dimen>
-     <dimen name="autofill_dataset_picker_max_height">70%</dimen>
-
 </resources>

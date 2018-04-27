@@ -90,7 +90,10 @@ public final class TimeController extends StateController {
                 return;
             } else if (job.hasTimingDelayConstraint() && evaluateTimingDelayConstraint(job,
                     nowElapsedMillis)) {
-                return;
+                if (!job.hasDeadlineConstraint()) {
+                    // If it doesn't have a deadline, we'll never have to touch it again.
+                    return;
+                }
             }
 
             boolean isInsert = false;

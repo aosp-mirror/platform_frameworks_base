@@ -354,20 +354,15 @@ public final class UserManagerHelper {
             return;
         }
 
-        if (userInfo.isGuest()) {
-            switchToGuest(userInfo.name);
-            return;
-        }
-
         switchToUserId(userInfo.id);
     }
 
     /**
-     * Creates a guest session and switches into the guest session.
+     * Creates a new guest session and switches into the guest session.
      *
      * @param guestName Username for the guest user.
      */
-    public void switchToGuest(String guestName) {
+    public void startNewGuestSession(String guestName) {
         UserInfo guest = mUserManager.createGuest(mContext, guestName);
         if (guest == null) {
             // Couldn't create user, most likely because there are too many, but we haven't
@@ -375,6 +370,7 @@ public final class UserManagerHelper {
             Log.w(TAG, "can't create user.");
             return;
         }
+        assignDefaultIcon(guest);
         switchToUserId(guest.id);
     }
 
@@ -417,6 +413,27 @@ public final class UserManagerHelper {
         mUserManager.setUserName(user.id, name);
     }
 
+    /**
+     * Gets a bitmap representing the user's default avatar.
+     *
+     * @param userInfo User whose avatar should be returned.
+     * @return Default user icon
+     */
+    public Bitmap getUserDefaultIcon(UserInfo userInfo) {
+        return UserIcons.convertToBitmap(
+                UserIcons.getDefaultUserIcon(mContext.getResources(), userInfo.id, false));
+    }
+
+    /**
+     * Gets a bitmap representing the default icon for a Guest user.
+     *
+     * @return Degault guest icon
+     */
+    public Bitmap getGuestDefaultIcon() {
+        return UserIcons.convertToBitmap(UserIcons.getDefaultUserIcon(
+                mContext.getResources(), UserHandle.USER_NULL, false));
+    }
+
     private void registerReceiver() {
         IntentFilter filter = new IntentFilter();
         filter.addAction(Intent.ACTION_USER_REMOVED);
@@ -435,8 +452,7 @@ public final class UserManagerHelper {
      * @return Bitmap that has been assigned to the user.
      */
     private Bitmap assignDefaultIcon(UserInfo userInfo) {
-        Bitmap bitmap = UserIcons.convertToBitmap(
-                UserIcons.getDefaultUserIcon(mContext.getResources(), userInfo.id, false));
+        Bitmap bitmap = userInfo.isGuest() ? getGuestDefaultIcon() : getUserDefaultIcon(userInfo);
         mUserManager.setUserIcon(userInfo.id, bitmap);
         return bitmap;
     }

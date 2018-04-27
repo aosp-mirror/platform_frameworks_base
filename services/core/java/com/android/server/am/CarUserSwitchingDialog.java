@@ -23,6 +23,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
+import android.os.UserManager;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.ImageView;
@@ -59,11 +60,14 @@ final class CarUserSwitchingDialog extends UserSwitchingDialog {
         View view = LayoutInflater.from(getContext()).inflate(R.layout.car_user_switching_dialog,
             null);
 
-        FileDescriptor fileDescriptor = UserManagerService.getInstance()
-                .getUserIcon(mNewUser.id).getFileDescriptor();
-        Bitmap bitmap = BitmapFactory.decodeFileDescriptor(fileDescriptor);
-        ((ImageView) view.findViewById(R.id.user_loading_avatar))
-            .setImageBitmap(bitmap);
+        UserManager userManager =
+                (UserManager) getContext().getSystemService(Context.USER_SERVICE);
+        Bitmap bitmap = userManager.getUserIcon(mNewUser.id);
+        if (bitmap != null) {
+            ((ImageView) view.findViewById(R.id.user_loading_avatar))
+                    .setImageBitmap(bitmap);
+        }
+
         ((TextView) view.findViewById(R.id.user_loading))
             .setText(res.getString(R.string.car_loading_profile));
         setView(view);

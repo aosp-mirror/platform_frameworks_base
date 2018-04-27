@@ -351,7 +351,7 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
             mCallForwarding[i] =  false;
             mCellLocation[i] = new Bundle();
             mCellInfo.add(i, null);
-            mPhysicalChannelConfigs.add(i, null);
+            mPhysicalChannelConfigs.add(i, new ArrayList<PhysicalChannelConfig>());
         }
 
         // Note that location can be null for non-phone builds like

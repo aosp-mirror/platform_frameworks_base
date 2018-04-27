@@ -71,10 +71,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Objects;
 import java.util.Set;
 import java.util.function.Predicate;
-import java.util.stream.Collectors;
 
 /**
  * Manages the lifecycle of application-provided services bound by system server.
@@ -406,15 +404,20 @@ abstract public class ManagedServices {
             approvedByType = new ArrayMap<>();
             mApproved.put(userId, approvedByType);
         }
+
+        ArraySet<String> approvedList = approvedByType.get(isPrimary);
+        if (approvedList == null) {
+            approvedList = new ArraySet<>();
+            approvedByType.put(isPrimary, approvedList);
+        }
+
         String[] approvedArray = approved.split(ENABLED_SERVICES_SEPARATOR);
-        final ArraySet<String> approvedList = new ArraySet<>();
         for (String pkgOrComponent : approvedArray) {
             String approvedItem = getApprovedValue(pkgOrComponent);
             if (approvedItem != null) {
                 approvedList.add(approvedItem);
             }
         }
-        approvedByType.put(isPrimary, approvedList);
     }
 
     protected boolean isComponentEnabledForPackage(String pkg) {

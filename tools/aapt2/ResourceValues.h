@@ -157,6 +157,7 @@ struct Reference : public BaseItem<Reference> {
   Maybe<ResourceId> id;
   Reference::Type reference_type;
   bool private_reference = false;
+  bool is_dynamic = false;
 
   Reference();
   explicit Reference(const ResourceNameRef& n, Type type = Type::kResource);

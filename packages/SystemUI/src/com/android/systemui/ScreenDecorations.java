@@ -78,6 +78,8 @@ public class ScreenDecorations extends SystemUI implements Tunable {
             SystemProperties.getBoolean("debug.screenshot_rounded_corners", false);
 
     private int mRoundedDefault;
+    private int mRoundedDefaultTop;
+    private int mRoundedDefaultBottom;
     private View mOverlay;
     private View mBottomOverlay;
     private float mDensity;
@@ -89,9 +91,14 @@ public class ScreenDecorations extends SystemUI implements Tunable {
         mWindowManager = mContext.getSystemService(WindowManager.class);
         mRoundedDefault = mContext.getResources().getDimensionPixelSize(
                 R.dimen.rounded_corner_radius);
-        if (mRoundedDefault != 0 || shouldDrawCutout()) {
+        mRoundedDefaultTop = mContext.getResources().getDimensionPixelSize(
+                R.dimen.rounded_corner_radius_top);
+        mRoundedDefaultBottom = mContext.getResources().getDimensionPixelSize(
+                R.dimen.rounded_corner_radius_bottom);
+        if (hasRoundedCorners() || shouldDrawCutout()) {
             setupDecorations();
         }
+
         int padding = mContext.getResources().getDimensionPixelSize(
                 R.dimen.rounded_corner_content_padding);
         if (padding != 0) {
@@ -208,9 +215,13 @@ public class ScreenDecorations extends SystemUI implements Tunable {
     private void updateWindowVisibility(View overlay) {
         boolean visibleForCutout = shouldDrawCutout()
                 && overlay.findViewById(R.id.display_cutout).getVisibility() == View.VISIBLE;
-        boolean visibleForRoundedCorners = mRoundedDefault > 0;
+        boolean visibleForRoundedCorners = hasRoundedCorners();
         overlay.setVisibility(visibleForCutout || visibleForRoundedCorners
                 ? View.VISIBLE : View.GONE);
+    }
+
+    private boolean hasRoundedCorners() {
+        return mRoundedDefault > 0 || mRoundedDefaultBottom > 0 || mRoundedDefaultTop > 0;
     }
 
     private boolean shouldDrawCutout() {
@@ -284,14 +295,26 @@ public class ScreenDecorations extends SystemUI implements Tunable {
         if (mOverlay == null) return;
         if (SIZE.equals(key)) {
             int size = mRoundedDefault;
-            try {
-                size = (int) (Integer.parseInt(newValue) * mDensity);
-            } catch (Exception e) {
+            int sizeTop = mRoundedDefaultTop;
+            int sizeBottom = mRoundedDefaultBottom;
+            if (newValue != null) {
+                try {
+                    size = (int) (Integer.parseInt(newValue) * mDensity);
+                } catch (Exception e) {
+                }
             }
-            setSize(mOverlay.findViewById(R.id.left), size);
-            setSize(mOverlay.findViewById(R.id.right), size);
-            setSize(mBottomOverlay.findViewById(R.id.left), size);
-            setSize(mBottomOverlay.findViewById(R.id.right), size);
+
+            if (sizeTop == 0) {
+                sizeTop = size;
+            }
+            if (sizeBottom == 0) {
+                sizeBottom = size;
+            }
+
+            setSize(mOverlay.findViewById(R.id.left), sizeTop);
+            setSize(mOverlay.findViewById(R.id.right), sizeTop);
+            setSize(mBottomOverlay.findViewById(R.id.left), sizeBottom);
+            setSize(mBottomOverlay.findViewById(R.id.right), sizeBottom);
         }
     }
 

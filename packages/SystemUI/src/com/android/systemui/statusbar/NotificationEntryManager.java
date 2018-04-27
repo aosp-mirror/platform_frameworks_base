@@ -474,37 +474,12 @@ public class NotificationEntryManager implements Dumpable, NotificationInflater.
         if (FORCE_REMOTE_INPUT_HISTORY
                 && shouldKeepForRemoteInput(entry)
                 && entry.row != null && !entry.row.isDismissed()) {
-            StatusBarNotification sbn = entry.notification;
-
-            Notification.Builder b = Notification.Builder
-                    .recoverBuilder(mContext, sbn.getNotification().clone());
-            CharSequence[] oldHistory = sbn.getNotification().extras
-                    .getCharSequenceArray(Notification.EXTRA_REMOTE_INPUT_HISTORY);
-            CharSequence[] newHistory;
-            if (oldHistory == null) {
-                newHistory = new CharSequence[1];
-            } else {
-                newHistory = new CharSequence[oldHistory.length + 1];
-                System.arraycopy(oldHistory, 0, newHistory, 1, oldHistory.length);
-            }
             CharSequence remoteInputText = entry.remoteInputText;
             if (TextUtils.isEmpty(remoteInputText)) {
                 remoteInputText = entry.remoteInputTextWhenReset;
             }
-            newHistory[0] = String.valueOf(remoteInputText);
-            b.setRemoteInputHistory(newHistory);
-
-            Notification newNotification = b.build();
-
-            // Undo any compatibility view inflation
-            newNotification.contentView = sbn.getNotification().contentView;
-            newNotification.bigContentView = sbn.getNotification().bigContentView;
-            newNotification.headsUpContentView = sbn.getNotification().headsUpContentView;
-
-            StatusBarNotification newSbn = new StatusBarNotification(sbn.getPackageName(),
-                    sbn.getOpPkg(),
-                    sbn.getId(), sbn.getTag(), sbn.getUid(), sbn.getInitialPid(),
-                    newNotification, sbn.getUser(), sbn.getOverrideGroupKey(), sbn.getPostTime());
+            StatusBarNotification newSbn = rebuildNotificationWithRemoteInput(entry,
+                    remoteInputText, false /* showSpinner */);
             boolean updated = false;
             entry.onRemoteInputInserted();
             try {
@@ -552,6 +527,39 @@ public class NotificationEntryManager implements Dumpable, NotificationInflater.
         StatusBarNotification old = removeNotificationViews(key, ranking);
 
         mCallback.onNotificationRemoved(key, old);
+    }
+
+    public StatusBarNotification rebuildNotificationWithRemoteInput(NotificationData.Entry entry,
+            CharSequence remoteInputText, boolean showSpinner) {
+        StatusBarNotification sbn = entry.notification;
+
+        Notification.Builder b = Notification.Builder
+                .recoverBuilder(mContext, sbn.getNotification().clone());
+        CharSequence[] oldHistory = sbn.getNotification().extras
+                .getCharSequenceArray(Notification.EXTRA_REMOTE_INPUT_HISTORY);
+        CharSequence[] newHistory;
+        if (oldHistory == null) {
+            newHistory = new CharSequence[1];
+        } else {
+            newHistory = new CharSequence[oldHistory.length + 1];
+            System.arraycopy(oldHistory, 0, newHistory, 1, oldHistory.length);
+        }
+        newHistory[0] = String.valueOf(remoteInputText);
+        b.setRemoteInputHistory(newHistory);
+        b.setShowRemoteInputSpinner(showSpinner);
+
+        Notification newNotification = b.build();
+
+        // Undo any compatibility view inflation
+        newNotification.contentView = sbn.getNotification().contentView;
+        newNotification.bigContentView = sbn.getNotification().bigContentView;
+        newNotification.headsUpContentView = sbn.getNotification().headsUpContentView;
+
+        StatusBarNotification newSbn = new StatusBarNotification(sbn.getPackageName(),
+                sbn.getOpPkg(),
+                sbn.getId(), sbn.getTag(), sbn.getUid(), sbn.getInitialPid(),
+                newNotification, sbn.getUser(), sbn.getOverrideGroupKey(), sbn.getPostTime());
+        return newSbn;
     }
 
     private boolean shouldKeepForRemoteInput(NotificationData.Entry entry) {

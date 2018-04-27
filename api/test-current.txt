@@ -962,16 +962,10 @@ package android.telephony {
 
   public class TelephonyManager {
     method public int getCarrierIdListVersion();
+    method public void refreshUiccProfile();
     method public void setCarrierTestOverride(java.lang.String, java.lang.String, java.lang.String, java.lang.String, java.lang.String, java.lang.String, java.lang.String);
     field public static final int UNKNOWN_CARRIER_ID_LIST_VERSION = -1; // 0xffffffff
   }
-
-  public class TelephonyManager {
-    method public int getCarrierIdListVersion();
-    method public void setCarrierTestOverride(java.lang.String, java.lang.String, java.lang.String, java.lang.String, java.lang.String, java.lang.String, java.lang.String);
-    field public static final int UNKNOWN_CARRIER_ID_LIST_VERSION = -1; // 0xffffffff
-  }
-
 }
 
 package android.telephony.mbms {
@@ -1257,6 +1251,10 @@ package android.view {
   public final class InputDevice implements android.os.Parcelable {
     method public void disable();
     method public void enable();
+  }
+
+  public class KeyEvent extends android.view.InputEvent implements android.os.Parcelable {
+    method public static java.lang.String actionToString(int);
   }
 
   public final class KeyboardShortcutGroup implements android.os.Parcelable {

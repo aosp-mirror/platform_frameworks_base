@@ -16,6 +16,7 @@ package com.android.systemui.statusbar.policy;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertFalse;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -161,5 +162,39 @@ public class BluetoothControllerImplTest extends SysuiTestCase {
         } finally {
             mainLooper.destroy();
         }
+    }
+
+    @Test
+    public void testOnServiceConnected_updatesConnectionState() {
+        when(mMockAdapter.getConnectionState()).thenReturn(BluetoothAdapter.STATE_CONNECTING);
+
+        mBluetoothControllerImpl.onServiceConnected();
+
+        assertTrue(mBluetoothControllerImpl.isBluetoothConnecting());
+        assertFalse(mBluetoothControllerImpl.isBluetoothConnected());
+    }
+
+    @Test
+    public void testOnBluetoothStateChange_updatesBluetoothState() {
+        mBluetoothControllerImpl.onBluetoothStateChanged(BluetoothAdapter.STATE_OFF);
+
+        assertEquals(BluetoothAdapter.STATE_OFF, mBluetoothControllerImpl.getBluetoothState());
+
+        mBluetoothControllerImpl.onBluetoothStateChanged(BluetoothAdapter.STATE_ON);
+
+        assertEquals(BluetoothAdapter.STATE_ON, mBluetoothControllerImpl.getBluetoothState());
+    }
+
+    @Test
+    public void testOnBluetoothStateChange_updatesConnectionState() {
+        when(mMockAdapter.getConnectionState()).thenReturn(
+                BluetoothAdapter.STATE_CONNECTING,
+                BluetoothAdapter.STATE_DISCONNECTED);
+
+        mBluetoothControllerImpl.onServiceConnected();
+        mBluetoothControllerImpl.onBluetoothStateChanged(BluetoothAdapter.STATE_OFF);
+
+        assertFalse(mBluetoothControllerImpl.isBluetoothConnecting());
+        assertFalse(mBluetoothControllerImpl.isBluetoothConnected());
     }
 }

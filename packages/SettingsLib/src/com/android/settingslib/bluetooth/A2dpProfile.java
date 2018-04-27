@@ -20,7 +20,6 @@ import android.bluetooth.BluetoothA2dp;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothClass;
 import android.bluetooth.BluetoothCodecConfig;
-import android.bluetooth.BluetoothCodecStatus;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothProfile;
 import android.bluetooth.BluetoothUuid;
@@ -28,9 +27,7 @@ import android.content.Context;
 import android.os.ParcelUuid;
 import android.util.Log;
 
-import com.android.internal.annotations.VisibleForTesting;
 import com.android.settingslib.R;
-import com.android.settingslib.wrapper.BluetoothA2dpWrapper;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -43,7 +40,6 @@ public class A2dpProfile implements LocalBluetoothProfile {
     private Context mContext;
 
     private BluetoothA2dp mService;
-    private BluetoothA2dpWrapper mServiceWrapper;
     private boolean mIsProfileReady;
 
     private final LocalBluetoothAdapter mLocalAdapter;
@@ -67,7 +63,6 @@ public class A2dpProfile implements LocalBluetoothProfile {
         public void onServiceConnected(int profile, BluetoothProfile proxy) {
             if (V) Log.d(TAG,"Bluetooth service connected");
             mService = (BluetoothA2dp) proxy;
-            mServiceWrapper = new BluetoothA2dpWrapper(mService);
             // We just bound to the service, so refresh the UI for any connected A2DP devices.
             List<BluetoothDevice> deviceList = mService.getConnectedDevices();
             while (!deviceList.isEmpty()) {
@@ -103,11 +98,6 @@ public class A2dpProfile implements LocalBluetoothProfile {
         mProfileManager = profileManager;
         mLocalAdapter.getProfileProxy(context, new A2dpServiceListener(),
                 BluetoothProfile.A2DP);
-    }
-
-    @VisibleForTesting
-    void setBluetoothA2dpWrapper(BluetoothA2dpWrapper wrapper) {
-        mServiceWrapper = wrapper;
     }
 
     public boolean isConnectable() {
@@ -203,12 +193,12 @@ public class A2dpProfile implements LocalBluetoothProfile {
     }
 
     public boolean supportsHighQualityAudio(BluetoothDevice device) {
-        int support = mServiceWrapper.supportsOptionalCodecs(device);
+        int support = mService.supportsOptionalCodecs(device);
         return support == BluetoothA2dp.OPTIONAL_CODECS_SUPPORTED;
     }
 
     public boolean isHighQualityAudioEnabled(BluetoothDevice device) {
-        int enabled = mServiceWrapper.getOptionalCodecsEnabled(device);
+        int enabled = mService.getOptionalCodecsEnabled(device);
         if (enabled != BluetoothA2dp.OPTIONAL_CODECS_PREF_UNKNOWN) {
             return enabled == BluetoothA2dp.OPTIONAL_CODECS_PREF_ENABLED;
         } else if (getConnectionStatus(device) != BluetoothProfile.STATE_CONNECTED &&
@@ -219,8 +209,8 @@ public class A2dpProfile implements LocalBluetoothProfile {
             return true;
         }
         BluetoothCodecConfig codecConfig = null;
-        if (mServiceWrapper.getCodecStatus(device) != null) {
-            codecConfig = mServiceWrapper.getCodecStatus(device).getCodecConfig();
+        if (mService.getCodecStatus(device) != null) {
+            codecConfig = mService.getCodecStatus(device).getCodecConfig();
         }
         if (codecConfig != null)  {
             return !codecConfig.isMandatoryCodec();
@@ -233,7 +223,7 @@ public class A2dpProfile implements LocalBluetoothProfile {
         int prefValue = enabled
                 ? BluetoothA2dp.OPTIONAL_CODECS_PREF_ENABLED
                 : BluetoothA2dp.OPTIONAL_CODECS_PREF_DISABLED;
-        mServiceWrapper.setOptionalCodecsEnabled(device, prefValue);
+        mService.setOptionalCodecsEnabled(device, prefValue);
         if (getConnectionStatus(device) != BluetoothProfile.STATE_CONNECTED) {
             return;
         }
@@ -253,8 +243,8 @@ public class A2dpProfile implements LocalBluetoothProfile {
         // We want to get the highest priority codec, since that's the one that will be used with
         // this device, and see if it is high-quality (ie non-mandatory).
         BluetoothCodecConfig[] selectable = null;
-        if (mServiceWrapper.getCodecStatus(device) != null) {
-            selectable = mServiceWrapper.getCodecStatus(device).getCodecsSelectableCapabilities();
+        if (mService.getCodecStatus(device) != null) {
+            selectable = mService.getCodecStatus(device).getCodecsSelectableCapabilities();
             // To get the highest priority, we sort in reverse.
             Arrays.sort(selectable,
                     (a, b) -> {

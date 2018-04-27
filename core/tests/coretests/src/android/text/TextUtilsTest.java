@@ -777,4 +777,12 @@ public class TextUtilsTest {
     public void testTrimToSizeThrowsExceptionForZeroSize() {
         TextUtils.trimToSize("abc", 0);
     }
+
+    @Test
+    public void length() {
+        assertEquals(0, TextUtils.length(null));
+        assertEquals(0, TextUtils.length(""));
+        assertEquals(2, TextUtils.length("  "));
+        assertEquals(6, TextUtils.length("Hello!"));
+    }
 }

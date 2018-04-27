@@ -82,6 +82,9 @@ public interface MessagingMessage extends MessagingLinearLayout.MessagingChild {
         if (!Objects.equals(message.getDataUri(), ownMessage.getDataUri())) {
             return false;
         }
+        if (message.isRemoteInputHistory() != ownMessage.isRemoteInputHistory()) {
+            return false;
+        }
         return true;
     }
 

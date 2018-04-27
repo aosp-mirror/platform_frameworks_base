@@ -829,6 +829,17 @@ public class Canvas extends BaseCanvas {
     }
 
     /**
+     * DON'T USE THIS METHOD.  It exists only to support a particular legacy behavior in
+     * the view system and will be removed as soon as that code is refactored to no longer
+     * depend on this behavior.
+     * @hide
+     */
+    public boolean clipRectUnion(@NonNull Rect rect) {
+        return nClipRect(mNativeCanvasWrapper, rect.left, rect.top, rect.right, rect.bottom,
+                Region.Op.UNION.nativeInt);
+    }
+
+    /**
      * Intersect the current clip with the specified rectangle, which is
      * expressed in local coordinates.
      *
