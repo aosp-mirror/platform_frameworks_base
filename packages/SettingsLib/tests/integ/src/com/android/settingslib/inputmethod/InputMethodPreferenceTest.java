@@ -125,6 +125,7 @@ public class InputMethodPreferenceTest {
         final InputMethodSubtype systemLocaleSubtype =
                 new InputMethodSubtype.InputMethodSubtypeBuilder()
                         .setIsAsciiCapable(true)
+                        .setSubtypeMode("keyboard")
                         .setSubtypeLocale(systemLocale.getLanguage())
                         .build();
 
