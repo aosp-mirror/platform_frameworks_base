@@ -342,11 +342,31 @@ public final class Magnifier {
 
         // Clamp window coordinates inside the parent surface, to avoid displaying
         // the magnifier out of screen or overlapping with system insets.
-        final Rect insets = mView.getRootWindowInsets().getSystemWindowInsets();
-        final int windowCoordsX = Math.max(insets.left,
-                Math.min(surfaceWidth - mWindowWidth - insets.right, mWindowCoords.x));
-        final int windowCoordsY = Math.max(insets.top,
-                Math.min(surfaceHeight - mWindowHeight - insets.bottom, mWindowCoords.y));
+        Rect windowBounds = null;
+        if (mView.getViewRootImpl() != null) {
+            // TODO: deduplicate against the first part of #getValidParentSurfaceForMagnifier()
+            // TODO: deduplicate against the first part of the current method
+            final ViewRootImpl viewRootImpl = mView.getViewRootImpl();
+            final Surface parentSurface = viewRootImpl.mSurface;
+            final Rect surfaceInsets = viewRootImpl.mWindowAttributes.surfaceInsets;
+            final int parentWidth =
+                    viewRootImpl.getWidth() + surfaceInsets.left + surfaceInsets.right;
+            final int parentHeight =
+                    viewRootImpl.getHeight() + surfaceInsets.top + surfaceInsets.bottom;
+            if (parentSurface != null && parentSurface.isValid()) {
+                final Rect systemInsets = mView.getRootWindowInsets().getSystemWindowInsets();
+                windowBounds = new Rect(systemInsets.left, systemInsets.top,
+                         parentWidth - systemInsets.right, parentHeight - systemInsets.bottom);
+            }
+        }
+        if (windowBounds == null && mView instanceof SurfaceView) {
+            windowBounds = ((SurfaceView) mView).getHolder().getSurfaceFrame();
+        }
+
+        final int windowCoordsX = Math.max(windowBounds.left,
+                Math.min(windowBounds.right - mWindowWidth, mWindowCoords.x));
+        final int windowCoordsY = Math.max(windowBounds.top,
+                Math.min(windowBounds.bottom - mWindowHeight, mWindowCoords.y));
 
         // Perform the pixel copy.
         mPixelCopyRequestRect.set(clampedStartXInSurface,
