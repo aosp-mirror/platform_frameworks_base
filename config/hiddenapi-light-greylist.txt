@@ -1063,10 +1063,6 @@ Landroid/graphics/drawable/NinePatchDrawable;->mNinePatchState:Landroid/graphics
 Landroid/graphics/drawable/RippleDrawable$RippleState;->mColor:Landroid/content/res/ColorStateList;
 Landroid/graphics/drawable/RippleDrawable;->mState:Landroid/graphics/drawable/RippleDrawable$RippleState;
 Landroid/graphics/drawable/StateListDrawable;->extractStateSet(Landroid/util/AttributeSet;)[I
-Landroid/graphics/drawable/StateListDrawable;->getStateCount()I
-Landroid/graphics/drawable/StateListDrawable;->getStateDrawable(I)Landroid/graphics/drawable/Drawable;
-Landroid/graphics/drawable/StateListDrawable;->getStateDrawableIndex([I)I
-Landroid/graphics/drawable/StateListDrawable;->getStateSet(I)[I
 Landroid/graphics/drawable/StateListDrawable;->mStateListState:Landroid/graphics/drawable/StateListDrawable$StateListState;
 Landroid/graphics/drawable/StateListDrawable;->updateStateFromTypedArray(Landroid/content/res/TypedArray;)V
 Landroid/graphics/drawable/VectorDrawable$VGroup;->setRotation(F)V
@@ -1085,10 +1081,10 @@ Landroid/graphics/GraphicBuffer;->createFromExisting(IIIIJ)Landroid/graphics/Gra
 Landroid/graphics/GraphicBuffer;->CREATOR:Landroid/os/Parcelable$Creator;
 Landroid/graphics/GraphicBuffer;->mNativeObject:J
 Landroid/graphics/ImageDecoder;->postProcessAndRelease(Landroid/graphics/Canvas;)I
-Landroid/graphics/Insets;->left:I
-Landroid/graphics/Insets;->top:I
-Landroid/graphics/Insets;->right:I
 Landroid/graphics/Insets;->bottom:I
+Landroid/graphics/Insets;->left:I
+Landroid/graphics/Insets;->right:I
+Landroid/graphics/Insets;->top:I
 Landroid/graphics/LinearGradient;->mColors:[I
 Landroid/graphics/Matrix;->native_instance:J
 Landroid/graphics/Movie;-><init>(J)V
