@@ -12740,6 +12740,25 @@ public final class Settings {
         public static final String SHOW_ZEN_UPGRADE_NOTIFICATION = "show_zen_upgrade_notification";
 
         /**
+         * If nonzero, will show the zen update settings suggestion.
+         * @hide
+         */
+        public static final String SHOW_ZEN_SETTINGS_SUGGESTION = "show_zen_settings_suggestion";
+
+        /**
+         * If nonzero, zen has not been updated to reflect new changes.
+         * @hide
+         */
+        public static final String ZEN_SETTINGS_UPDATED = "zen_settings_updated";
+
+        /**
+         * If nonzero, zen setting suggestion has beem viewed by user
+         * @hide
+         */
+        public static final String ZEN_SETTINGS_SUGGESTION_VIEWED =
+                "zen_settings_suggestion_viewed";
+
+        /**
          * Backup and restore agent timeout parameters.
          * These parameters are represented by a comma-delimited key-value list.
          *
