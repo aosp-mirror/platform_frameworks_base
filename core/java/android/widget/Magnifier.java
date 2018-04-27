@@ -161,6 +161,15 @@ public final class Magnifier {
         // to the magnified view. This will not take into account overlapping views.
         final Rect viewVisibleRegion = new Rect();
         mView.getGlobalVisibleRect(viewVisibleRegion);
+        if (mView.getViewRootImpl() != null) {
+            // Clamping coordinates relative to the surface, not to the window.
+            final Rect surfaceInsets = mView.getViewRootImpl().mWindowAttributes.surfaceInsets;
+            viewVisibleRegion.offset(surfaceInsets.left, surfaceInsets.top);
+        }
+        if (mView instanceof SurfaceView) {
+            // If we copy content from a SurfaceView, clamp coordinates relative to it.
+            viewVisibleRegion.offset(-mViewCoordinatesInSurface[0], -mViewCoordinatesInSurface[1]);
+        }
         final int startX = Math.max(viewVisibleRegion.left, Math.min(
                 mCenterZoomCoords.x - mBitmapWidth / 2,
                 viewVisibleRegion.right - mBitmapWidth));
@@ -235,13 +244,17 @@ public final class Magnifier {
 
     /**
      * @hide
+     *
+     * @return The top left coordinates of the magnifier, relative to the parent window.
      */
     @Nullable
     public Point getWindowCoords() {
         if (mWindow == null) {
             return null;
         }
-        return new Point(mWindow.mLastDrawContentPositionX, mWindow.mLastDrawContentPositionY);
+        final Rect surfaceInsets = mView.getViewRootImpl().mWindowAttributes.surfaceInsets;
+        return new Point(mWindow.mLastDrawContentPositionX - surfaceInsets.left,
+                mWindow.mLastDrawContentPositionY - surfaceInsets.top);
     }
 
     @Nullable
@@ -308,8 +321,9 @@ public final class Magnifier {
         } else if (mView.getViewRootImpl() != null) {
             final ViewRootImpl viewRootImpl = mView.getViewRootImpl();
             surface = viewRootImpl.mSurface;
-            surfaceWidth = viewRootImpl.getWidth();
-            surfaceHeight = viewRootImpl.getHeight();
+            final Rect surfaceInsets = viewRootImpl.mWindowAttributes.surfaceInsets;
+            surfaceWidth = viewRootImpl.getWidth() + surfaceInsets.left + surfaceInsets.right;
+            surfaceHeight = viewRootImpl.getHeight() + surfaceInsets.top + surfaceInsets.bottom;
         } else {
             surface = null;
             surfaceWidth = NONEXISTENT_PREVIOUS_CONFIG_VALUE;
