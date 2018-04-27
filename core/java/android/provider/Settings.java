@@ -10784,6 +10784,7 @@ public final class Settings {
          * read_binary_cpu_time          (boolean)
          * proc_state_cpu_times_read_delay_ms (long)
          * external_stats_collection_rate_limit_ms (long)
+         * battery_level_collection_delay_ms (long)
          * </pre>
          *
          * <p>
