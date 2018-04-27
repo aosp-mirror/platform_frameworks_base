@@ -561,6 +561,11 @@ public class RemoteInputView extends LinearLayout implements View.OnClickListene
         @Override
         public InputConnection onCreateInputConnection(EditorInfo outAttrs) {
             final InputConnection inputConnection = super.onCreateInputConnection(outAttrs);
+            //if pinned, set imeOption to keep the behavior like in portrait.
+            if (mRemoteInputView != null && mRemoteInputView.mEntry.row.isPinned()) {
+                outAttrs.imeOptions |= EditorInfo.IME_FLAG_NO_EXTRACT_UI
+                        | EditorInfo.IME_FLAG_NO_FULLSCREEN;
+            }
 
             if (mShowImeOnInputConnection && inputConnection != null) {
                 final InputMethodManager imm = InputMethodManager.getInstance();
