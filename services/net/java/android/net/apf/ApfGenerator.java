@@ -378,8 +378,7 @@ public class ApfGenerator {
     }
 
     /**
-     * Returns true if the specified {@code version} is supported by the ApfGenerator, otherwise
-     * false.
+     * Returns true if the ApfGenerator supports the specified {@code version}, otherwise false.
      */
     public static boolean supportsVersion(int version) {
         return version >= MIN_APF_VERSION;
@@ -753,7 +752,7 @@ public class ApfGenerator {
 
     /**
      * Add an instruction to the end of the program to jump to {@code target} if the bytes of the
-     * packet at, an offset specified by {@code register}, match {@code bytes}.
+     * packet at an offset specified by {@code register} match {@code bytes}.
      */
     public ApfGenerator addJumpIfBytesNotEqual(Register register, byte[] bytes, String target)
             throws IllegalInstructionException {
