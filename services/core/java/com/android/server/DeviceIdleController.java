@@ -2411,19 +2411,26 @@ public class DeviceIdleController extends SystemService
         // after moving out of the inactive state, so no need to worry about that.
         boolean becomeInactive = false;
         if (mState != STATE_ACTIVE) {
-            scheduleReportActiveLocked(type, Process.myUid());
+            // Motion shouldn't affect light state, if it's already in doze-light or maintenance
+            boolean lightIdle = mLightState == LIGHT_STATE_IDLE
+                    || mLightState == LIGHT_STATE_WAITING_FOR_NETWORK
+                    || mLightState == LIGHT_STATE_IDLE_MAINTENANCE;
+            if (!lightIdle) {
+                // Only switch to active state if we're not in either idle state
+                scheduleReportActiveLocked(type, Process.myUid());
+                addEvent(EVENT_NORMAL, type);
+            }
             mState = STATE_ACTIVE;
             mInactiveTimeout = timeout;
             mCurIdleBudget = 0;
             mMaintenanceStartTime = 0;
             EventLogTags.writeDeviceIdle(mState, type);
-            addEvent(EVENT_NORMAL, type);
             becomeInactive = true;
         }
         if (mLightState == LIGHT_STATE_OVERRIDE) {
             // We went out of light idle mode because we had started deep idle mode...  let's
             // now go back and reset things so we resume light idling if appropriate.
-            mLightState = STATE_ACTIVE;
+            mLightState = LIGHT_STATE_ACTIVE;
             EventLogTags.writeDeviceIdleLight(mLightState, type);
             becomeInactive = true;
         }
@@ -2811,6 +2818,8 @@ public class DeviceIdleController extends SystemService
         pw.println("    If no DURATION is specified, 10 seconds is used");
         pw.println("    If [-r] option is used, then the package is removed from temp whitelist "
                 + "and any [-d] is ignored");
+        pw.println("  motion");
+        pw.println("    Simulate a motion event to bring the device out of deep doze");
     }
 
     class Shell extends ShellCommand {
@@ -3207,11 +3216,26 @@ public class DeviceIdleController extends SystemService
                 }
             } else {
                 synchronized (this) {
-                    for (int j=0; j<mPowerSaveWhitelistApps.size(); j++) {
+                    for (int j = 0; j < mPowerSaveWhitelistApps.size(); j++) {
                         pw.print(mPowerSaveWhitelistApps.keyAt(j));
                         pw.print(",");
                         pw.println(mPowerSaveWhitelistApps.valueAt(j));
                     }
+                }
+            }
+        } else if ("motion".equals(cmd)) {
+            getContext().enforceCallingOrSelfPermission(android.Manifest.permission.DEVICE_POWER,
+                    null);
+            synchronized (this) {
+                long token = Binder.clearCallingIdentity();
+                try {
+                    motionLocked();
+                    pw.print("Light state: ");
+                    pw.print(lightStateToString(mLightState));
+                    pw.print(", deep state: ");
+                    pw.println(stateToString(mState));
+                } finally {
+                    Binder.restoreCallingIdentity(token);
                 }
             }
         } else {
