@@ -234,6 +234,7 @@ public class BluetoothControllerImpl implements BluetoothController, BluetoothCa
         mEnabled = bluetoothState == BluetoothAdapter.STATE_ON
                 || bluetoothState == BluetoothAdapter.STATE_TURNING_ON;
         mState = bluetoothState;
+        updateConnected();
         mHandler.sendEmptyMessage(H.MSG_STATE_CHANGED);
     }
 
