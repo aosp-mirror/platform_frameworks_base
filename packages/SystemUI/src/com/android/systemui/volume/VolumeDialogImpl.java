@@ -724,8 +724,11 @@ public class VolumeDialogImpl implements VolumeDialog {
             updateVolumeRowH(row);
         }
         updateRingerH();
-        mWindow.setTitle(mContext.getString(R.string.volume_dialog_title,
-                getStreamLabelH(getActiveRow().ss)));
+        mWindow.setTitle(composeWindowTitle());
+    }
+
+    CharSequence composeWindowTitle() {
+        return mContext.getString(R.string.volume_dialog_title, getStreamLabelH(getActiveRow().ss));
     }
 
     private void updateVolumeRowH(VolumeRow row) {
@@ -1193,6 +1196,13 @@ public class VolumeDialogImpl implements VolumeDialog {
 
         public void destroy() {
             mAccessibilityMgr.removeCallback(mListener);
+        }
+
+        @Override
+        public boolean dispatchPopulateAccessibilityEvent(View host, AccessibilityEvent event) {
+            // Activities populate their title here. Follow that example.
+            event.getText().add(composeWindowTitle());
+            return true;
         }
 
         @Override
