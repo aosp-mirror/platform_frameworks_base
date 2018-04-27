@@ -613,6 +613,16 @@ public class PhoneStateListener {
     }
 
     /**
+     * Callback invoked when OEM hook raw event is received. Requires
+     * the READ_PRIVILEGED_PHONE_STATE permission.
+     * @param rawData is the byte array of the OEM hook raw data.
+     * @hide
+     */
+    public void onOemHookRawEvent(byte[] rawData) {
+        // default implementation empty
+    }
+
+    /**
      * Callback invoked when telephony has received notice from a carrier
      * app that a network action that could result in connectivity loss
      * has been requested by an app using
