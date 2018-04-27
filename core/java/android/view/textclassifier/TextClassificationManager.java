@@ -191,10 +191,11 @@ public final class TextClassificationManager {
         synchronized (mLock) {
             if (mLocalTextClassifier == null) {
                 if (mSettings.isLocalTextClassifierEnabled()) {
-                    mLocalTextClassifier = new TextClassifierImpl(mContext, mSettings);
+                    mLocalTextClassifier =
+                            new TextClassifierImpl(mContext, mSettings, TextClassifier.NO_OP);
                 } else {
                     Log.d(LOG_TAG, "Local TextClassifier disabled");
-                    mLocalTextClassifier = TextClassifierImpl.NO_OP;
+                    mLocalTextClassifier = TextClassifier.NO_OP;
                 }
             }
             return mLocalTextClassifier;
