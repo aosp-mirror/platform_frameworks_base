@@ -49,4 +49,14 @@ public class ApfCapabilities {
         return String.format("%s{version: %d, maxSize: %d, format: %d}", getClass().getSimpleName(),
                 apfVersionSupported, maximumApfProgramSize, apfPacketFormat);
     }
+
+    /**
+     * Returns true if the APF interpreter advertises support for the data buffer access opcodes
+     * LDDW and STDW.
+     *
+     * Full LDDW and STDW support is present from APFv4 on.
+     */
+    public boolean hasDataAccess() {
+        return apfVersionSupported >= 4;
+    }
 }
