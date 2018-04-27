@@ -190,6 +190,11 @@ public class MockBatteryStatsImpl extends BatteryStatsImpl {
         @Override
         public void cancelCpuSyncDueToWakelockChange() {
         }
+
+        @Override
+        public Future<?> scheduleSyncDueToBatteryLevelChange(long delayMillis) {
+            return null;
+        }
     }
 }
 
