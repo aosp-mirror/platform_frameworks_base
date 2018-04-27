@@ -190,3 +190,39 @@ TEST(ProtoOutputStreamTest, InvalidTypes) {
     EXPECT_FALSE(proto.write(FIELD_TYPE_BOOL | PrimitiveProto::kValBoolFieldNumber, 18.73f));
     EXPECT_EQ(proto.size(), 0);
 }
+
+TEST(ProtoOutputStreamTest, NoEndCalled) {
+    ProtoOutputStream proto;
+    proto.start(FIELD_TYPE_MESSAGE | ComplexProto::kLogsFieldNumber);
+    proto.write(FIELD_TYPE_INT32 | ComplexProto::Log::kIdFieldNumber, 53);
+    // no proto.end called
+    EXPECT_NE(proto.bytesWritten(), 0);
+    EXPECT_EQ(proto.size(), 0);
+    EXPECT_EQ(proto.data().size(), 0);
+    EXPECT_FALSE(proto.flush(STDOUT_FILENO));
+}
+
+
+TEST(ProtoOutputStreamTest, TwoEndCalled) {
+    ProtoOutputStream proto;
+    uint64_t token = proto.start(FIELD_TYPE_MESSAGE | ComplexProto::kLogsFieldNumber);
+    proto.write(FIELD_TYPE_INT32 | ComplexProto::Log::kIdFieldNumber, 53);
+    proto.end(token);
+    proto.end(token);
+    EXPECT_NE(proto.bytesWritten(), 0);
+    EXPECT_EQ(proto.size(), 0);
+    EXPECT_EQ(proto.data().size(), 0);
+    EXPECT_FALSE(proto.flush(STDOUT_FILENO));
+}
+
+TEST(ProtoOutputStreamTest, NoStartCalled) {
+    ProtoOutputStream proto;
+    uint64_t wrongToken = UINT64_C(324536345);
+    // no proto.start called
+    proto.write(FIELD_TYPE_INT32 | ComplexProto::Log::kIdFieldNumber, 53);
+    proto.end(wrongToken);
+    EXPECT_NE(proto.bytesWritten(), 0);
+    EXPECT_EQ(proto.size(), 0);
+    EXPECT_EQ(proto.data().size(), 0);
+    EXPECT_FALSE(proto.flush(STDOUT_FILENO));
+}
