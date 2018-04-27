@@ -82,7 +82,7 @@ public final class ColorDisplayController {
     public static final int AUTO_MODE_TWILIGHT = 2;
 
     @Retention(RetentionPolicy.SOURCE)
-    @IntDef({ COLOR_MODE_NATURAL, COLOR_MODE_BOOSTED, COLOR_MODE_SATURATED })
+    @IntDef({ COLOR_MODE_NATURAL, COLOR_MODE_BOOSTED, COLOR_MODE_SATURATED, COLOR_MODE_AUTOMATIC })
     public @interface ColorMode {}
 
     /**
@@ -103,12 +103,12 @@ public final class ColorDisplayController {
      * @see #setColorMode(int)
      */
     public static final int COLOR_MODE_SATURATED = 2;
-
     /**
-     * See com.android.server.display.DisplayTransformManager.
+     * Color mode with automatic colors.
+     *
+     * @see #setColorMode(int)
      */
-    private static final String PERSISTENT_PROPERTY_SATURATION = "persist.sys.sf.color_saturation";
-    private static final String PERSISTENT_PROPERTY_NATIVE_MODE = "persist.sys.sf.native_mode";
+    public static final int COLOR_MODE_AUTOMATIC = 3;
 
     private final Context mContext;
     private final int mUserId;
@@ -362,6 +362,41 @@ public final class ColorDisplayController {
     }
 
     /**
+     * Get the current color mode from system properties, or return -1.
+     *
+     * See com.android.server.display.DisplayTransformManager.
+     */
+    private @ColorMode int getCurrentColorModeFromSystemProperties() {
+        int displayColorSetting = SystemProperties.getInt("persist.sys.sf.native_mode", 0);
+        if (displayColorSetting == 0) {
+            return "1.0".equals(SystemProperties.get("persist.sys.sf.color_saturation"))
+                ? COLOR_MODE_NATURAL : COLOR_MODE_BOOSTED;
+        } else if (displayColorSetting == 1) {
+            return COLOR_MODE_SATURATED;
+        } else if (displayColorSetting == 2) {
+            return COLOR_MODE_AUTOMATIC;
+        } else {
+            return -1;
+        }
+    }
+
+    private boolean isColorModeAvailable(@ColorMode int colorMode) {
+        // SATURATED is always allowed
+        if (colorMode == COLOR_MODE_SATURATED) {
+            return true;
+        }
+
+        final int[] availableColorModes = mContext.getResources().getIntArray(
+                R.array.config_availableColorModes);
+        for (int mode : availableColorModes) {
+            if (mode == colorMode) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
      * Get the current color mode.
      */
     public int getColorMode() {
@@ -369,17 +404,27 @@ public final class ColorDisplayController {
             return COLOR_MODE_SATURATED;
         }
 
-        final int colorMode = System.getIntForUser(mContext.getContentResolver(),
+        int colorMode = System.getIntForUser(mContext.getContentResolver(),
             System.DISPLAY_COLOR_MODE, -1, mUserId);
-        if (colorMode < COLOR_MODE_NATURAL || colorMode > COLOR_MODE_SATURATED) {
+        if (colorMode == -1) {
             // There still might be a legacy system property controlling color mode that we need to
             // respect.
-            if ("1".equals(SystemProperties.get(PERSISTENT_PROPERTY_NATIVE_MODE))) {
-                return COLOR_MODE_SATURATED;
-            }
-            return "1.0".equals(SystemProperties.get(PERSISTENT_PROPERTY_SATURATION))
-                    ? COLOR_MODE_NATURAL : COLOR_MODE_BOOSTED;
+            colorMode = getCurrentColorModeFromSystemProperties();
         }
+
+        // This happens when a color mode is no longer available (e.g., after system update or B&R)
+        // or the device does not support any color mode.
+        if (!isColorModeAvailable(colorMode)) {
+            if (colorMode == COLOR_MODE_BOOSTED && isColorModeAvailable(COLOR_MODE_NATURAL)) {
+                colorMode = COLOR_MODE_NATURAL;
+            } else if (colorMode == COLOR_MODE_SATURATED
+                && isColorModeAvailable(COLOR_MODE_AUTOMATIC)) {
+                colorMode = COLOR_MODE_AUTOMATIC;
+            } else {
+                colorMode = COLOR_MODE_SATURATED;
+            }
+        }
+
         return colorMode;
     }
 
@@ -389,7 +434,7 @@ public final class ColorDisplayController {
      * @param colorMode the color mode
      */
     public void setColorMode(@ColorMode int colorMode) {
-        if (colorMode < COLOR_MODE_NATURAL || colorMode > COLOR_MODE_SATURATED) {
+        if (!isColorModeAvailable(colorMode)) {
             throw new IllegalArgumentException("Invalid colorMode: " + colorMode);
         }
         System.putIntForUser(mContext.getContentResolver(), System.DISPLAY_COLOR_MODE, colorMode,
