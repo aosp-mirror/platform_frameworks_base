@@ -48,6 +48,7 @@ public class InputMethodAndSubtypeUtil {
     private static final boolean DEBUG = false;
     private static final String TAG = "InputMethdAndSubtypeUtl";
 
+    private static final String SUBTYPE_MODE_KEYBOARD = "keyboard";
     private static final char INPUT_METHOD_SEPARATER = ':';
     private static final char INPUT_METHOD_SUBTYPE_SEPARATER = ';';
     private static final int NOT_A_SUBTYPE_ID = -1;
@@ -177,7 +178,7 @@ public class InputMethodAndSubtypeUtil {
             final boolean isCurrentInputMethod = imiId.equals(currentInputMethodId);
             final boolean systemIme = imi.isSystem();
             if ((!hasHardKeyboard && InputMethodSettingValuesWrapper.getInstance(
-                    context.getActivity()).isAlwaysCheckedIme(imi, context.getActivity()))
+                    context.getActivity()).isAlwaysCheckedIme(imi))
                     || isImeChecked) {
                 if (!enabledIMEsAndSubtypesMap.containsKey(imiId)) {
                     // imiId has just been enabled
@@ -415,5 +416,20 @@ public class InputMethodAndSubtypeUtil {
             return Locale.getDefault();
         }
         return configurationLocale;
+    }
+
+    public static boolean isValidSystemNonAuxAsciiCapableIme(InputMethodInfo imi) {
+        if (imi.isAuxiliaryIme() || !imi.isSystem()) {
+            return false;
+        }
+        final int subtypeCount = imi.getSubtypeCount();
+        for (int i = 0; i < subtypeCount; ++i) {
+            final InputMethodSubtype subtype = imi.getSubtypeAt(i);
+            if (SUBTYPE_MODE_KEYBOARD.equalsIgnoreCase(subtype.getMode())
+                    && subtype.isAsciiCapable()) {
+                return true;
+            }
+        }
+        return false;
     }
 }

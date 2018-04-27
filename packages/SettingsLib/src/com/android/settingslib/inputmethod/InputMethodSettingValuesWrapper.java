@@ -22,15 +22,11 @@ import android.content.Context;
 import android.util.Log;
 import android.view.inputmethod.InputMethodInfo;
 import android.view.inputmethod.InputMethodManager;
-import android.view.inputmethod.InputMethodSubtype;
-
-import com.android.internal.inputmethod.InputMethodUtils;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Locale;
 
 /**
  * This class is a wrapper for {@link InputMethodManager} and
@@ -47,7 +43,6 @@ public class InputMethodSettingValuesWrapper {
     private final ArrayList<InputMethodInfo> mMethodList = new ArrayList<>();
     private final ContentResolver mContentResolver;
     private final InputMethodManager mImm;
-    private final HashSet<InputMethodInfo> mAsciiCapableEnabledImis = new HashSet<>();
 
     public static InputMethodSettingValuesWrapper getInstance(Context context) {
         if (sInstance == null) {
@@ -70,50 +65,32 @@ public class InputMethodSettingValuesWrapper {
     public void refreshAllInputMethodAndSubtypes() {
         mMethodList.clear();
         mMethodList.addAll(mImm.getInputMethodList());
-        updateAsciiCapableEnabledImis();
-    }
-
-    // TODO: Add a cts to ensure at least one AsciiCapableSubtypeEnabledImis exist
-    private void updateAsciiCapableEnabledImis() {
-        mAsciiCapableEnabledImis.clear();
-        final List<InputMethodInfo> enabledImis = getEnabledInputMethodList();
-        for (final InputMethodInfo imi : enabledImis) {
-            final int subtypeCount = imi.getSubtypeCount();
-            for (int i = 0; i < subtypeCount; ++i) {
-                final InputMethodSubtype subtype = imi.getSubtypeAt(i);
-                if (InputMethodUtils.SUBTYPE_MODE_KEYBOARD.equalsIgnoreCase(subtype.getMode())
-                        && subtype.isAsciiCapable()) {
-                    mAsciiCapableEnabledImis.add(imi);
-                    break;
-                }
-            }
-        }
     }
 
     public List<InputMethodInfo> getInputMethodList() {
         return new ArrayList<>(mMethodList);
     }
 
-    public boolean isAlwaysCheckedIme(InputMethodInfo imi, Context context) {
+    public boolean isAlwaysCheckedIme(InputMethodInfo imi) {
         final boolean isEnabled = isEnabledImi(imi);
         if (getEnabledInputMethodList().size() <= 1 && isEnabled) {
             return true;
         }
 
         final int enabledValidSystemNonAuxAsciiCapableImeCount =
-                getEnabledValidSystemNonAuxAsciiCapableImeCount(context);
+                getEnabledValidSystemNonAuxAsciiCapableImeCount();
 
         return enabledValidSystemNonAuxAsciiCapableImeCount <= 1
                 && !(enabledValidSystemNonAuxAsciiCapableImeCount == 1 && !isEnabled)
                 && imi.isSystem()
-                && isValidSystemNonAuxAsciiCapableIme(imi, context);
+                && InputMethodAndSubtypeUtil.isValidSystemNonAuxAsciiCapableIme(imi);
     }
 
-    private int getEnabledValidSystemNonAuxAsciiCapableImeCount(Context context) {
+    private int getEnabledValidSystemNonAuxAsciiCapableImeCount() {
         int count = 0;
         final List<InputMethodInfo> enabledImis = getEnabledInputMethodList();
         for (final InputMethodInfo imi : enabledImis) {
-            if (isValidSystemNonAuxAsciiCapableIme(imi, context)) {
+            if (InputMethodAndSubtypeUtil.isValidSystemNonAuxAsciiCapableIme(imi)) {
                 ++count;
             }
         }
@@ -131,25 +108,6 @@ public class InputMethodSettingValuesWrapper {
             }
         }
         return false;
-    }
-
-    public boolean isValidSystemNonAuxAsciiCapableIme(InputMethodInfo imi, Context context) {
-        if (imi.isAuxiliaryIme()) {
-            return false;
-        }
-        final Locale systemLocale = context.getResources().getConfiguration().locale;
-        if (InputMethodUtils.isSystemImeThatHasSubtypeOf(imi, context,
-                    true /* checkDefaultAttribute */, systemLocale, false /* checkCountry */,
-                    InputMethodUtils.SUBTYPE_MODE_ANY)) {
-            return true;
-        }
-        if (mAsciiCapableEnabledImis.isEmpty()) {
-            Log.w(TAG, "ascii capable subtype enabled imi not found. Fall back to English"
-                    + " Keyboard subtype.");
-            return InputMethodUtils.containsSubtypeOf(imi, Locale.ENGLISH, false /* checkCountry */,
-                    InputMethodUtils.SUBTYPE_MODE_KEYBOARD);
-        }
-        return mAsciiCapableEnabledImis.contains(imi);
     }
 
     /**

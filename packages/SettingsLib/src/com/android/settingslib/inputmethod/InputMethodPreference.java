@@ -124,7 +124,7 @@ public class InputMethodPreference extends RestrictedSwitchPreference implements
         }
         mInputMethodSettingValues = InputMethodSettingValuesWrapper.getInstance(context);
         mHasPriorityInSorting = imi.isSystem()
-                && mInputMethodSettingValues.isValidSystemNonAuxAsciiCapableIme(imi, context);
+                && InputMethodAndSubtypeUtil.isValidSystemNonAuxAsciiCapableIme(imi);
         setOnPreferenceClickListener(this);
         setOnPreferenceChangeListener(this);
     }
@@ -197,8 +197,7 @@ public class InputMethodPreference extends RestrictedSwitchPreference implements
     }
 
     public void updatePreferenceViews() {
-        final boolean isAlwaysChecked = mInputMethodSettingValues.isAlwaysCheckedIme(
-                mImi, getContext());
+        final boolean isAlwaysChecked = mInputMethodSettingValues.isAlwaysCheckedIme(mImi);
         // When this preference has a switch and an input method should be always enabled,
         // this preference should be disabled to prevent accidentally disabling an input method.
         // This preference should also be disabled in case the admin does not allow this input

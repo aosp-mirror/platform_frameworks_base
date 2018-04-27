@@ -22,6 +22,14 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.RobolectricTestRunner;
 
+import android.content.pm.ApplicationInfo;
+import android.content.pm.ResolveInfo;
+import android.content.pm.ServiceInfo;
+import android.view.inputmethod.InputMethodInfo;
+import android.view.inputmethod.InputMethodSubtype;
+import android.view.inputmethod.InputMethodSubtype.InputMethodSubtypeBuilder;
+
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 
@@ -186,5 +194,76 @@ public class InputMethodAndSubtypeUtilTest {
                 + "|ime2;subtype3;subtype2:ime0;subtype0;subtype1"
                 + "|ime3;subtype2;subtype3:ime0;subtype1;subtype0"
                 + "|ime4;subtype3;subtype2:ime0;subtype1;subtype0");
+    }
+
+    @Test
+    public void isValidSystemNonAuxAsciiCapableIme() {
+        // System IME w/ no subtype
+        assertThat(InputMethodAndSubtypeUtil.isValidSystemNonAuxAsciiCapableIme(
+                createDummyIme(true, false)))
+                .isFalse();
+
+        // System IME w/ non-Aux and non-ASCII-capable "keyboard" subtype
+        assertThat(InputMethodAndSubtypeUtil.isValidSystemNonAuxAsciiCapableIme(
+                createDummyIme(true, false, createDummySubtype("keyboard", false, false))))
+                .isFalse();
+
+        // System IME w/ non-Aux and ASCII-capable "keyboard" subtype
+        assertThat(InputMethodAndSubtypeUtil.isValidSystemNonAuxAsciiCapableIme(
+                createDummyIme(true, false, createDummySubtype("keyboard", false, true))))
+                .isTrue();
+
+        // System IME w/ Aux and ASCII-capable "keyboard" subtype
+        assertThat(InputMethodAndSubtypeUtil.isValidSystemNonAuxAsciiCapableIme(
+                createDummyIme(true, true, createDummySubtype("keyboard", true, true))))
+                .isFalse();
+
+        // System IME w/ non-Aux and ASCII-capable "voice" subtype
+        assertThat(InputMethodAndSubtypeUtil.isValidSystemNonAuxAsciiCapableIme(
+                createDummyIme(true, false, createDummySubtype("voice", false, true))))
+                .isFalse();
+
+        // System IME w/ non-Aux and non-ASCII-capable subtype + Non-Aux and ASCII-capable subtype
+        assertThat(InputMethodAndSubtypeUtil.isValidSystemNonAuxAsciiCapableIme(
+                createDummyIme(true, false,
+                        createDummySubtype("keyboard", false, true),
+                        createDummySubtype("keyboard", false, false))))
+                .isTrue();
+
+        // Non-system IME w/ non-Aux and ASCII-capable "keyboard" subtype
+        assertThat(InputMethodAndSubtypeUtil.isValidSystemNonAuxAsciiCapableIme(
+                createDummyIme(false, false, createDummySubtype("keyboard", false, true))))
+                .isFalse();
+   }
+
+    private static InputMethodInfo createDummyIme(boolean isSystem, boolean isAuxIme,
+            InputMethodSubtype... subtypes) {
+        final ResolveInfo ri = new ResolveInfo();
+        final ServiceInfo si = new ServiceInfo();
+        final ApplicationInfo ai = new ApplicationInfo();
+        ai.packageName = "com.example.android.dummyime";
+        ai.enabled = true;
+        ai.flags |= (isSystem ? ApplicationInfo.FLAG_SYSTEM : 0);
+        si.applicationInfo = ai;
+        si.enabled = true;
+        si.packageName = "com.example.android.dummyime";
+        si.name = "Dummy IME";
+        si.exported = true;
+        si.nonLocalizedLabel = "Dummy IME";
+        ri.serviceInfo = si;
+        return new InputMethodInfo(ri, isAuxIme, "",  Arrays.asList(subtypes), 1, false);
+    }
+
+    private static InputMethodSubtype createDummySubtype(
+            String mode, boolean isAuxiliary, boolean isAsciiCapable) {
+        return new InputMethodSubtypeBuilder()
+                .setSubtypeNameResId(0)
+                .setSubtypeIconResId(0)
+                .setSubtypeLocale("en_US")
+                .setLanguageTag("en-US")
+                .setSubtypeMode(mode)
+                .setIsAuxiliary(isAuxiliary)
+                .setIsAsciiCapable(isAsciiCapable)
+                .build();
     }
 }

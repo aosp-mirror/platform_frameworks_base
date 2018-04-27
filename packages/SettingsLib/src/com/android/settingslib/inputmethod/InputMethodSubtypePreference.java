@@ -23,7 +23,6 @@ import android.view.inputmethod.InputMethodInfo;
 import android.view.inputmethod.InputMethodSubtype;
 
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.internal.inputmethod.InputMethodUtils;
 
 import java.text.Collator;
 import java.util.Locale;
