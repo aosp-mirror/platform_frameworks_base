@@ -134,6 +134,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Consumer;
 
 @SmallTest
 @RunWith(AndroidTestingRunner.class)
@@ -2546,6 +2547,27 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
                 UserHandle.USER_SYSTEM);
         verify(mAm, times(1)).revokeUriPermissionFromOwner(any(), eq(null),
                 anyInt(), anyInt());
+    }
+
+    @Test
+    public void testVisitUris() throws Exception {
+        final Uri audioContents = Uri.parse("content://com.example/audio");
+        final Uri backgroundImage = Uri.parse("content://com.example/background");
+
+        Bundle extras = new Bundle();
+        extras.putParcelable(Notification.EXTRA_AUDIO_CONTENTS_URI, audioContents);
+        extras.putString(Notification.EXTRA_BACKGROUND_IMAGE_URI, backgroundImage.toString());
+
+        Notification n = new Notification.Builder(mContext, "a")
+                .setContentTitle("notification with uris")
+                .setSmallIcon(android.R.drawable.sym_def_app_icon)
+                .addExtras(extras)
+                .build();
+
+        Consumer<Uri> visitor = (Consumer<Uri>) spy(Consumer.class);
+        n.visitUris(visitor);
+        verify(visitor, times(1)).accept(eq(audioContents));
+        verify(visitor, times(1)).accept(eq(backgroundImage));
     }
 
     @Test
