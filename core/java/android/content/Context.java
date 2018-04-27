@@ -729,6 +729,7 @@ public abstract class Context {
      * cases where system components are loaded into other app processes, in which
      * case this will be the name of the primary package in that process (so that app
      * ops uid verification will work with the name). */
+    @TestApi
     public abstract String getOpPackageName();
 
     /** Return the full application info for this context's package. */

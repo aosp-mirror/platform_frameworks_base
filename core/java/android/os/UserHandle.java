@@ -145,6 +145,7 @@ public final class UserHandle implements Parcelable {
      * "it's system", because of isolated UIDs. Use {@link #isCore} for that.
      * @hide
      */
+    @TestApi
     public static boolean isApp(int uid) {
         if (uid > 0) {
             final int appId = getAppId(uid);
