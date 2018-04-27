@@ -132,17 +132,31 @@ TEST(ProtoOutputStreamTest, Reusability) {
     EXPECT_TRUE(proto.write(FIELD_TYPE_INT32 | ComplexProto::kIntsFieldNumber, 15));
     EXPECT_EQ(proto.bytesWritten(), 4);
     EXPECT_EQ(proto.size(), 4);
+    // Can't write to proto after compact
+    EXPECT_FALSE(proto.write(FIELD_TYPE_INT32 | ComplexProto::kIntsFieldNumber, 94));
+
+    ComplexProto beforeClear;
+    ASSERT_TRUE(beforeClear.ParseFromString(flushToString(&proto)));
+    EXPECT_EQ(beforeClear.ints_size(), 2);
+    EXPECT_EQ(beforeClear.ints(0), 32);
+    EXPECT_EQ(beforeClear.ints(1), 15);
+
     proto.clear();
     EXPECT_EQ(proto.bytesWritten(), 0);
-    EXPECT_EQ(proto.size(), 0);
+    EXPECT_TRUE(proto.write(FIELD_TYPE_INT32 | ComplexProto::kIntsFieldNumber, 1076));
+
+    ComplexProto afterClear;
+    ASSERT_TRUE(afterClear.ParseFromString(flushToString(&proto)));
+    EXPECT_EQ(afterClear.ints_size(), 1);
+    EXPECT_EQ(afterClear.ints(0), 1076);
 }
 
 TEST(ProtoOutputStreamTest, AdvancedEncoding) {
     ProtoOutputStream proto;
-    proto.writeRawVarint(ComplexProto::kIntsFieldNumber << FIELD_ID_SHIFT);
+    proto.writeRawVarint((ComplexProto::kIntsFieldNumber << FIELD_ID_SHIFT) + WIRE_TYPE_VARINT);
     proto.writeRawVarint(UINT64_C(-123809234));
     proto.writeLengthDelimitedHeader(ComplexProto::kLogsFieldNumber, 8);
-    proto.writeRawByte((ComplexProto::Log::kDataFieldNumber << FIELD_ID_SHIFT) + 2);
+    proto.writeRawByte((ComplexProto::Log::kDataFieldNumber << FIELD_ID_SHIFT) + WIRE_TYPE_LENGTH_DELIMITED);
     proto.writeRawByte(6);
     proto.writeRawByte('b');
     proto.writeRawByte('a');
@@ -167,4 +181,12 @@ TEST(ProtoOutputStreamTest, AdvancedEncoding) {
     EXPECT_EQ(log2.id(), 14);
     EXPECT_FALSE(log2.has_name());
     EXPECT_FALSE(log2.has_data());
+}
+
+TEST(ProtoOutputStreamTest, InvalidTypes) {
+    ProtoOutputStream proto;
+    EXPECT_FALSE(proto.write(FIELD_TYPE_UNKNOWN | PrimitiveProto::kValInt32FieldNumber, 790));
+    EXPECT_FALSE(proto.write(FIELD_TYPE_ENUM | PrimitiveProto::kValEnumFieldNumber, 234.34));
+    EXPECT_FALSE(proto.write(FIELD_TYPE_BOOL | PrimitiveProto::kValBoolFieldNumber, 18.73f));
+    EXPECT_EQ(proto.size(), 0);
 }
