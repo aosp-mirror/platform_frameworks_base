@@ -18,6 +18,7 @@
 #define _BOOTANIMATION_BOOT_PARAMETERS_H_
 
 #include <list>
+#include <string>
 #include <vector>
 
 #include <base/json/json_value_converter.h>
@@ -43,6 +44,8 @@ public:
     // Returns the additional boot parameters that were set on reboot.
     const std::vector<ABootActionParameter>& getParameters() const { return mParameters; }
 
+    // Exposed for testing. Updates the parameters with new JSON values.
+    void loadParameters(const std::string& raw_json);
 private:
     // Raw boot saved_parameters loaded from .json.
     struct SavedBootParameters {
