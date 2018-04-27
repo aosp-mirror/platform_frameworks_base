@@ -724,6 +724,14 @@
         &lt;b><xliff:g id="app_name" example="Gmail">%1$s</xliff:g>&lt;/b> to take pictures and record video?</string>
 
     <!-- Title of a category of application permissions, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permgrouplab_calllog">Call logs</string>
+    <!-- Description of a category of application permissions, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permgroupdesc_calllog">read and write phone call log</string>
+    <!-- Message shown to the user when the apps requests permission from this group -->
+    <string name="permgrouprequest_calllog">Allow
+        &lt;b><xliff:g id="app_name" example="Gmail">%1$s</xliff:g>&lt;/b> to access your phone call logs?</string>
+
+    <!-- Title of a category of application permissions, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permgrouplab_phone">Phone</string>
     <!-- Description of a category of application permissions, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permgroupdesc_phone">make and manage phone calls</string>
