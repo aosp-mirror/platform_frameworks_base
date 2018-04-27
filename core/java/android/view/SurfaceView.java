@@ -700,15 +700,9 @@ public class SurfaceView extends View implements ViewRootImpl.WindowStoppedCallb
                     mIsCreating = false;
                     if (mSurfaceControl != null && !mSurfaceCreated) {
                         mSurface.release();
-                        // If we are not in the stopped state, then the destruction of the Surface
-                        // represents a visual change we need to display, and we should go ahead
-                        // and destroy the SurfaceControl. However if we are in the stopped state,
-                        // we can just leave the Surface around so it can be a part of animations,
-                        // and we let the life-time be tied to the parent surface.
-                        if (!mWindowStopped) {
-                            mSurfaceControl.destroy();
-                            mSurfaceControl = null;
-                        }
+
+                        mSurfaceControl.destroy();
+                        mSurfaceControl = null;
                     }
                 }
             } catch (Exception ex) {
