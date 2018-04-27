@@ -111,13 +111,11 @@ public class CaptivePortalLoginActivity extends Activity {
         mWebView.setWebViewClient(mWebViewClient);
         mWebView.setWebChromeClient(new MyWebChromeClient());
 
-        mNetwork = getNetworkForCaptivePortal();
-        if (mNetwork == null) {
+        final Network network = getNetworkForCaptivePortal();
+        if (network == null) {
             requestNetworkForCaptivePortal();
         } else {
-            mCm.bindProcessToNetwork(mNetwork);
-            mCm.setProcessDefaultNetworkForHostResolution(
-                    ResolvUtil.getNetworkWithUseLocalNameserversFlag(mNetwork));
+            setNetwork(network);
             // Start initial page load so WebView finishes loading proxy settings.
             // Actual load of mUrl is initiated by MyWebViewClient.
             mWebView.loadData("", "text/html", null);
@@ -157,6 +155,15 @@ public class CaptivePortalLoginActivity extends Activity {
         mWebView.destroy();
         releaseNetworkRequest();
         super.onDestroy();
+    }
+
+    private void setNetwork(Network network) {
+        if (network != null) {
+            mCm.bindProcessToNetwork(network);
+            mCm.setProcessDefaultNetworkForHostResolution(
+                    ResolvUtil.getNetworkWithUseLocalNameserversFlag(network));
+        }
+        mNetwork = network;
     }
 
     // Find WebView's proxy BroadcastReceiver and prompt it to read proxy system properties.
@@ -235,6 +242,7 @@ public class CaptivePortalLoginActivity extends Activity {
     private void testForCaptivePortal() {
         mTestingThread = new Thread(new Runnable() {
             public void run() {
+                final Network network = ResolvUtil.makeNetworkWithPrivateDnsBypass(mNetwork);
                 // Give time for captive portal to open.
                 try {
                     Thread.sleep(1000);
@@ -245,7 +253,7 @@ public class CaptivePortalLoginActivity extends Activity {
                 int httpResponseCode = 500;
                 int oldTag = TrafficStats.getAndSetThreadStatsTag(TrafficStats.TAG_SYSTEM_PROBE);
                 try {
-                    urlConnection = (HttpURLConnection) mNetwork.openConnection(
+                    urlConnection = (HttpURLConnection) network.openConnection(
                             new URL(mCm.getCaptivePortalServerUrl()));
                     urlConnection.setInstanceFollowRedirects(false);
                     urlConnection.setConnectTimeout(SOCKET_TIMEOUT_MS);
@@ -292,8 +300,7 @@ public class CaptivePortalLoginActivity extends Activity {
             @Override
             public void onAvailable(Network network) {
                 if (DBG) logd("Network available: " + network);
-                mCm.bindProcessToNetwork(network);
-                mNetwork = network;
+                setNetwork(network);
                 runOnUiThreadIfNotFinishing(() -> {
                     if (mReload) {
                         mWebView.reload();
