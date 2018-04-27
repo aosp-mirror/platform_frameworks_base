@@ -16,6 +16,10 @@
 
 package android.service.notification;
 
+import static android.app.NotificationManager.Policy.SUPPRESSED_EFFECT_FULL_SCREEN_INTENT;
+import static android.app.NotificationManager.Policy.SUPPRESSED_EFFECT_LIGHTS;
+import static android.app.NotificationManager.Policy.SUPPRESSED_EFFECT_PEEK;
+
 import android.app.ActivityManager;
 import android.app.AlarmManager;
 import android.app.NotificationManager;
@@ -68,6 +72,7 @@ public class ZenModeConfig implements Parcelable {
     public static final int SOURCE_STAR = 2;
     public static final int MAX_SOURCE = SOURCE_STAR;
     private static final int DEFAULT_SOURCE = SOURCE_CONTACT;
+    private static final int DEFAULT_CALLS_SOURCE = SOURCE_STAR;
 
     public static final String EVENTS_DEFAULT_RULE_ID = "EVENTS_DEFAULT_RULE";
     public static final String EVERY_NIGHT_DEFAULT_RULE_ID = "EVERY_NIGHT_DEFAULT_RULE";
@@ -93,13 +98,10 @@ public class ZenModeConfig implements Parcelable {
     private static final boolean DEFAULT_ALLOW_REMINDERS = false;
     private static final boolean DEFAULT_ALLOW_EVENTS = false;
     private static final boolean DEFAULT_ALLOW_REPEAT_CALLERS = false;
-    private static final boolean DEFAULT_ALLOW_SCREEN_OFF = false;
-    private static final boolean DEFAULT_ALLOW_SCREEN_ON = false;
     private static final boolean DEFAULT_CHANNELS_BYPASSING_DND = false;
-    private static final int DEFAULT_SUPPRESSED_VISUAL_EFFECTS =
-            Policy.getAllSuppressedVisualEffects();
+    private static final int DEFAULT_SUPPRESSED_VISUAL_EFFECTS = 0;
 
-    public static final int XML_VERSION = 7;
+    public static final int XML_VERSION = 8;
     public static final String ZEN_TAG = "zen";
     private static final String ZEN_ATT_VERSION = "version";
     private static final String ZEN_ATT_USER = "user";
@@ -151,12 +153,10 @@ public class ZenModeConfig implements Parcelable {
     public boolean allowMessages = DEFAULT_ALLOW_MESSAGES;
     public boolean allowReminders = DEFAULT_ALLOW_REMINDERS;
     public boolean allowEvents = DEFAULT_ALLOW_EVENTS;
-    public int allowCallsFrom = DEFAULT_SOURCE;
+    public int allowCallsFrom = DEFAULT_CALLS_SOURCE;
     public int allowMessagesFrom = DEFAULT_SOURCE;
     public int user = UserHandle.USER_SYSTEM;
     public int suppressedVisualEffects = DEFAULT_SUPPRESSED_VISUAL_EFFECTS;
-    public boolean allowWhenScreenOff = DEFAULT_ALLOW_SCREEN_OFF;
-    public boolean allowWhenScreenOn = DEFAULT_ALLOW_SCREEN_ON;
     public boolean areChannelsBypassingDnd = DEFAULT_CHANNELS_BYPASSING_DND;
     public int version;
 
@@ -185,8 +185,6 @@ public class ZenModeConfig implements Parcelable {
                 automaticRules.put(ids[i], rules[i]);
             }
         }
-        allowWhenScreenOff = source.readInt() == 1;
-        allowWhenScreenOn = source.readInt() == 1;
         allowAlarms = source.readInt() == 1;
         allowMedia = source.readInt() == 1;
         allowSystem = source.readInt() == 1;
@@ -219,8 +217,6 @@ public class ZenModeConfig implements Parcelable {
         } else {
             dest.writeInt(0);
         }
-        dest.writeInt(allowWhenScreenOff ? 1 : 0);
-        dest.writeInt(allowWhenScreenOn ? 1 : 0);
         dest.writeInt(allowAlarms ? 1 : 0);
         dest.writeInt(allowMedia ? 1 : 0);
         dest.writeInt(allowSystem ? 1 : 0);
@@ -242,8 +238,6 @@ public class ZenModeConfig implements Parcelable {
                 .append(",allowMessages=").append(allowMessages)
                 .append(",allowCallsFrom=").append(sourceToString(allowCallsFrom))
                 .append(",allowMessagesFrom=").append(sourceToString(allowMessagesFrom))
-                .append(",allowWhenScreenOff=").append(allowWhenScreenOff)
-                .append(",allowWhenScreenOn=").append(allowWhenScreenOn)
                 .append(",suppressedVisualEffects=").append(suppressedVisualEffects)
                 .append(",areChannelsBypassingDnd=").append(areChannelsBypassingDnd)
                 .append(",automaticRules=").append(automaticRules)
@@ -288,12 +282,6 @@ public class ZenModeConfig implements Parcelable {
         }
         if (allowMessagesFrom != to.allowMessagesFrom) {
             d.addLine("allowMessagesFrom", allowMessagesFrom, to.allowMessagesFrom);
-        }
-        if (allowWhenScreenOff != to.allowWhenScreenOff) {
-            d.addLine("allowWhenScreenOff", allowWhenScreenOff, to.allowWhenScreenOff);
-        }
-        if (allowWhenScreenOn != to.allowWhenScreenOn) {
-            d.addLine("allowWhenScreenOn", allowWhenScreenOn, to.allowWhenScreenOn);
         }
         if (suppressedVisualEffects != to.suppressedVisualEffects) {
             d.addLine("suppressedVisualEffects", suppressedVisualEffects,
@@ -404,8 +392,6 @@ public class ZenModeConfig implements Parcelable {
                 && other.allowMessagesFrom == allowMessagesFrom
                 && other.allowReminders == allowReminders
                 && other.allowEvents == allowEvents
-                && other.allowWhenScreenOff == allowWhenScreenOff
-                && other.allowWhenScreenOn == allowWhenScreenOn
                 && other.user == user
                 && Objects.equals(other.automaticRules, automaticRules)
                 && Objects.equals(other.manualRule, manualRule)
@@ -418,7 +404,7 @@ public class ZenModeConfig implements Parcelable {
         return Objects.hash(allowAlarms, allowMedia, allowSystem, allowCalls,
                 allowRepeatCallers, allowMessages,
                 allowCallsFrom, allowMessagesFrom, allowReminders, allowEvents,
-                allowWhenScreenOff, allowWhenScreenOn, user, automaticRules, manualRule,
+                user, automaticRules, manualRule,
                 suppressedVisualEffects, areChannelsBypassingDnd);
     }
 
@@ -472,6 +458,7 @@ public class ZenModeConfig implements Parcelable {
         final ZenModeConfig rt = new ZenModeConfig();
         rt.version = safeInt(parser, ZEN_ATT_VERSION, XML_VERSION);
         rt.user = safeInt(parser, ZEN_ATT_USER, rt.user);
+        boolean readSuppressedEffects = false;
         while ((type = parser.next()) != XmlPullParser.END_DOCUMENT) {
             tag = parser.getName();
             if (type == XmlPullParser.END_TAG && ZEN_TAG.equals(tag)) {
@@ -502,17 +489,33 @@ public class ZenModeConfig implements Parcelable {
                         rt.allowCallsFrom = DEFAULT_SOURCE;
                         rt.allowMessagesFrom = DEFAULT_SOURCE;
                     }
-                    // continue to read even though we now have suppressedVisualEffects, in case
-                    // we need to revert to users' previous settings
-                    rt.allowWhenScreenOff =
-                            safeBoolean(parser, ALLOW_ATT_SCREEN_OFF, DEFAULT_ALLOW_SCREEN_OFF);
-                    rt.allowWhenScreenOn =
-                            safeBoolean(parser, ALLOW_ATT_SCREEN_ON, DEFAULT_ALLOW_SCREEN_ON);
                     rt.allowAlarms = safeBoolean(parser, ALLOW_ATT_ALARMS, DEFAULT_ALLOW_ALARMS);
                     rt.allowMedia = safeBoolean(parser, ALLOW_ATT_MEDIA,
                             DEFAULT_ALLOW_MEDIA);
                     rt.allowSystem = safeBoolean(parser, ALLOW_ATT_SYSTEM, DEFAULT_ALLOW_SYSTEM);
-                } else if (DISALLOW_TAG.equals(tag)) {
+
+                    // migrate old suppressed visual effects fields, if they still exist in the xml
+                    Boolean allowWhenScreenOff = unsafeBoolean(parser, ALLOW_ATT_SCREEN_OFF);
+                    if (allowWhenScreenOff != null) {
+                        readSuppressedEffects = true;
+                        if (allowWhenScreenOff) {
+                            rt.suppressedVisualEffects |= SUPPRESSED_EFFECT_LIGHTS
+                                    | SUPPRESSED_EFFECT_FULL_SCREEN_INTENT;
+                        }
+                    }
+                    Boolean allowWhenScreenOn = unsafeBoolean(parser, ALLOW_ATT_SCREEN_ON);
+                    if (allowWhenScreenOn != null) {
+                        readSuppressedEffects = true;
+                        if (allowWhenScreenOn) {
+                            rt.suppressedVisualEffects |= SUPPRESSED_EFFECT_PEEK;
+                        }
+                    }
+                    if (readSuppressedEffects) {
+                        Slog.d(TAG, "Migrated visual effects to " + rt.suppressedVisualEffects);
+                    }
+                } else if (DISALLOW_TAG.equals(tag) && !readSuppressedEffects) {
+                    // only read from suppressed visual effects field if we haven't just migrated
+                    // the values from allowOn/allowOff, lest we wipe out those settings
                     rt.suppressedVisualEffects = safeInt(parser, DISALLOW_ATT_VISUAL_EFFECTS,
                             DEFAULT_SUPPRESSED_VISUAL_EFFECTS);
                 } else if (MANUAL_TAG.equals(tag)) {
@@ -552,8 +555,6 @@ public class ZenModeConfig implements Parcelable {
         out.attribute(null, ALLOW_ATT_EVENTS, Boolean.toString(allowEvents));
         out.attribute(null, ALLOW_ATT_CALLS_FROM, Integer.toString(allowCallsFrom));
         out.attribute(null, ALLOW_ATT_MESSAGES_FROM, Integer.toString(allowMessagesFrom));
-        out.attribute(null, ALLOW_ATT_SCREEN_OFF, Boolean.toString(allowWhenScreenOff));
-        out.attribute(null, ALLOW_ATT_SCREEN_ON, Boolean.toString(allowWhenScreenOn));
         out.attribute(null, ALLOW_ATT_ALARMS, Boolean.toString(allowAlarms));
         out.attribute(null, ALLOW_ATT_MEDIA, Boolean.toString(allowMedia));
         out.attribute(null, ALLOW_ATT_SYSTEM, Boolean.toString(allowSystem));
@@ -671,6 +672,12 @@ public class ZenModeConfig implements Parcelable {
 
     private static boolean isValidSource(int source) {
         return source >= SOURCE_ANYONE && source <= MAX_SOURCE;
+    }
+
+    private static Boolean unsafeBoolean(XmlPullParser parser, String att) {
+        final String val = parser.getAttributeValue(null, att);
+        if (TextUtils.isEmpty(val)) return null;
+        return Boolean.parseBoolean(val);
     }
 
     private static boolean safeBoolean(XmlPullParser parser, String att, boolean defValue) {

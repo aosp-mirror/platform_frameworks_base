@@ -173,18 +173,6 @@ public class ZenModeHelper {
         }
     }
 
-    public boolean shouldSuppressWhenScreenOff() {
-        synchronized (mConfig) {
-            return !mConfig.allowWhenScreenOff;
-        }
-    }
-
-    public boolean shouldSuppressWhenScreenOn() {
-        synchronized (mConfig) {
-            return !mConfig.allowWhenScreenOn;
-        }
-    }
-
     public void addCallback(Callback callback) {
         mCallbacks.add(callback);
     }
@@ -592,14 +580,12 @@ public class ZenModeHelper {
             return;
         }
         pw.printf("allow(alarms=%b,media=%b,system=%b,calls=%b,callsFrom=%s,repeatCallers=%b,"
-                + "messages=%b,messagesFrom=%s,"
-                + "events=%b,reminders=%b,whenScreenOff=%b,whenScreenOn=%b)\n",
+                + "messages=%b,messagesFrom=%s,events=%b,reminders=%b)\n",
                 config.allowAlarms, config.allowMedia, config.allowSystem,
                 config.allowCalls, ZenModeConfig.sourceToString(config.allowCallsFrom),
                 config.allowRepeatCallers, config.allowMessages,
                 ZenModeConfig.sourceToString(config.allowMessagesFrom),
-                config.allowEvents, config.allowReminders, config.allowWhenScreenOff,
-                config.allowWhenScreenOn);
+                config.allowEvents, config.allowReminders);
         pw.printf(" disallow(visualEffects=%s)\n", config.suppressedVisualEffects);
         pw.print(prefix); pw.print("  manualRule="); pw.println(config.manualRule);
         if (config.automaticRules.isEmpty()) return;
