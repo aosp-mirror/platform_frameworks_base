@@ -55,7 +55,8 @@ public final class SystemTextClassifier implements TextClassifier {
         mManagerService = ITextClassifierService.Stub.asInterface(
                 ServiceManager.getServiceOrThrow(Context.TEXT_CLASSIFICATION_SERVICE));
         mSettings = Preconditions.checkNotNull(settings);
-        mFallback = new TextClassifierImpl(context, settings);
+        mFallback = context.getSystemService(TextClassificationManager.class)
+                .getTextClassifier(TextClassifier.LOCAL);
         mPackageName = Preconditions.checkNotNull(context.getPackageName());
     }
 
