@@ -1110,11 +1110,11 @@ public class Notification implements Parcelable
     public static final String EXTRA_ALLOW_DURING_SETUP = "android.allowDuringSetup";
 
     /**
-     * {@link #extras} key: A
-     * {@link android.content.ContentUris content URI} pointing to an image that can be displayed
-     * in the background when the notification is selected. Used on television platforms.
-     * The URI must point to an image stream suitable for passing into
-     * {@link android.graphics.BitmapFactory#decodeStream(java.io.InputStream)
+     * {@link #extras} key:
+     * flat {@link String} representation of a {@link android.content.ContentUris content URI}
+     * pointing to an image that can be displayed in the background when the notification is
+     * selected. Used on television platforms. The URI must point to an image stream suitable for
+     * passing into {@link android.graphics.BitmapFactory#decodeStream(java.io.InputStream)
      * BitmapFactory.decodeStream}; all other content types will be ignored.
      */
     public static final String EXTRA_BACKGROUND_IMAGE_URI = "android.backgroundImageUri";
@@ -2335,7 +2335,9 @@ public class Notification implements Parcelable
 
         if (extras != null) {
             visitor.accept(extras.getParcelable(EXTRA_AUDIO_CONTENTS_URI));
-            visitor.accept(extras.getParcelable(EXTRA_BACKGROUND_IMAGE_URI));
+            if (extras.containsKey(EXTRA_BACKGROUND_IMAGE_URI)) {
+                visitor.accept(Uri.parse(extras.getString(EXTRA_BACKGROUND_IMAGE_URI)));
+            }
         }
 
         if (MessagingStyle.class.equals(getNotificationStyle()) && extras != null) {
