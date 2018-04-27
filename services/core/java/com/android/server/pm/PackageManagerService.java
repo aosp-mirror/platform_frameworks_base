@@ -10198,10 +10198,20 @@ public class PackageManagerService extends IPackageManager.Stub
                 // The signature has changed, but this package is in the system
                 // image...  let's recover!
                 pkgSetting.signatures.mSigningDetails = pkg.mSigningDetails;
-                // If the system app is part of a shared user we allow that shared user to change
-                // signatures as well in part as part of an OTA.
+                // However...  if this package is part of a shared user, but it
+                // doesn't match the signature of the shared user, let's fail.
+                // What this means is that you can't change the signatures
+                // associated with an overall shared user, which doesn't seem all
+                // that unreasonable.
                 if (signatureCheckPs.sharedUser != null) {
-                    signatureCheckPs.sharedUser.signatures.mSigningDetails = pkg.mSigningDetails;
+                    if (compareSignatures(
+                            signatureCheckPs.sharedUser.signatures.mSigningDetails.signatures,
+                            pkg.mSigningDetails.signatures) != PackageManager.SIGNATURE_MATCH) {
+                        throw new PackageManagerException(
+                                INSTALL_PARSE_FAILED_INCONSISTENT_CERTIFICATES,
+                                "Signature mismatch for shared user: "
+                                        + pkgSetting.sharedUser);
+                    }
                 }
                 // File a report about this.
                 String msg = "System package " + pkg.packageName
