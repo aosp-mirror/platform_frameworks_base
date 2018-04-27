@@ -401,12 +401,13 @@ public class BoundsAnimationController {
                 + " replacing=" + replacing);
 
         if (replacing) {
-            if (existing.isAnimatingTo(to)) {
+            if (existing.isAnimatingTo(to) && (!moveToFullscreen || existing.mMoveToFullscreen)
+                    && (!moveFromFullscreen || existing.mMoveFromFullscreen)) {
                 // Just let the current animation complete if it has the same destination as the
-                // one we are trying to start.
-                if (DEBUG) Slog.d(TAG, "animateBounds: same destination as existing=" + existing
-                        + " ignoring...");
-
+                // one we are trying to start, and, if moveTo/FromFullscreen was requested, already
+                // has that flag set.
+                if (DEBUG) Slog.d(TAG, "animateBounds: same destination and moveTo/From flags as "
+                        + "existing=" + existing + ", ignoring...");
                 return existing;
             }
 
@@ -432,6 +433,13 @@ public class BoundsAnimationController {
                             + " existing deferred state");
                     schedulePipModeChangedState = SCHEDULE_PIP_MODE_CHANGED_ON_END;
                 }
+            }
+
+            // We need to keep the previous moveTo/FromFullscreen flag, unless the new animation
+            // specifies a direction.
+            if (!moveFromFullscreen && !moveToFullscreen) {
+                moveToFullscreen = existing.mMoveToFullscreen;
+                moveFromFullscreen = existing.mMoveFromFullscreen;
             }
 
             // Since we are replacing, we skip both animation start and end callbacks
