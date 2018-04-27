@@ -11271,7 +11271,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                     stack.moveToFront("setTaskWindowingModeSplitScreenPrimary", task);
                 }
                 stack.setWindowingMode(WINDOWING_MODE_SPLIT_SCREEN_PRIMARY, animate, showRecents,
-                        false /* enteringSplitScreenMode */);
+                        false /* enteringSplitScreenMode */, false /* deferEnsuringVisibility */);
                 return windowingMode != task.getWindowingMode();
             } finally {
                 Binder.restoreCallingIdentity(ident);
