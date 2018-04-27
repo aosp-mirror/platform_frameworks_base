@@ -545,7 +545,7 @@ public class BoundsAnimationControllerTests extends WindowTestsBase {
                 .restart(BOUNDS_SMALLER_FLOATING,
                         false /* expectStartedAndPipModeChangedCallback */)
                 .end()
-                .expectEnded(SCHEDULE_PIP_MODE_CHANGED, !MOVE_TO_FULLSCREEN);
+                .expectEnded(SCHEDULE_PIP_MODE_CHANGED, MOVE_TO_FULLSCREEN);
     }
 
     /** !F->!F w/ CANCEL **/
