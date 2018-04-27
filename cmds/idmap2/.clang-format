@@ -1,0 +1,7 @@
+BasedOnStyle: Google
+ColumnLimit: 100
+AllowShortBlocksOnASingleLine: false
+AllowShortFunctionsOnASingleLine: false
+CommentPragmas: NOLINT:.*
+DerivePointerAlignment: false
+PointerAlignment: Left
