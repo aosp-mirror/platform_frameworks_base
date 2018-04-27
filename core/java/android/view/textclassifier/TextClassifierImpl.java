@@ -21,6 +21,7 @@ import static java.time.temporal.ChronoUnit.MILLIS;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.WorkerThread;
+import android.app.PendingIntent;
 import android.app.RemoteAction;
 import android.app.SearchManager;
 import android.content.ComponentName;
@@ -98,11 +99,16 @@ public final class TextClassifierImpl implements TextClassifier {
 
     private final TextClassificationConstants mSettings;
 
-    public TextClassifierImpl(Context context, TextClassificationConstants settings) {
+    public TextClassifierImpl(
+            Context context, TextClassificationConstants settings, TextClassifier fallback) {
         mContext = Preconditions.checkNotNull(context);
-        mFallback = TextClassifier.NO_OP;
+        mFallback = Preconditions.checkNotNull(fallback);
         mSettings = Preconditions.checkNotNull(settings);
         mGenerateLinksLogger = new GenerateLinksLogger(mSettings.getGenerateLinksLogSampleRate());
+    }
+
+    public TextClassifierImpl(Context context, TextClassificationConstants settings) {
+        this(context, settings, TextClassifier.NO_OP);
     }
 
     /** @inheritDoc */
@@ -413,6 +419,9 @@ public final class TextClassifierImpl implements TextClassifier {
         for (LabeledIntent labeledIntent : IntentFactory.create(
                 mContext, referenceTime, highestScoringResult, classifiedText)) {
             final RemoteAction action = labeledIntent.asRemoteAction(mContext);
+            if (action == null) {
+                continue;
+            }
             if (isPrimaryAction) {
                 // For O backwards compatibility, the first RemoteAction is also written to the
                 // legacy API fields.
@@ -601,6 +610,7 @@ public final class TextClassifierImpl implements TextClassifier {
             return mRequestCode;
         }
 
+        @Nullable
         RemoteAction asRemoteAction(Context context) {
             final PackageManager pm = context.getPackageManager();
             final ResolveInfo resolveInfo = pm.resolveActivity(mIntent, 0);
@@ -622,8 +632,12 @@ public final class TextClassifierImpl implements TextClassifier {
                 icon = Icon.createWithResource("android",
                         com.android.internal.R.drawable.ic_more_items);
             }
-            final RemoteAction action = new RemoteAction(icon, mTitle, mDescription,
-                    TextClassification.createPendingIntent(context, mIntent, mRequestCode));
+            final PendingIntent pendingIntent =
+                    TextClassification.createPendingIntent(context, mIntent, mRequestCode);
+            if (pendingIntent == null) {
+                return null;
+            }
+            final RemoteAction action = new RemoteAction(icon, mTitle, mDescription, pendingIntent);
             action.setShouldShowIcon(shouldShowIcon);
             return action;
         }
