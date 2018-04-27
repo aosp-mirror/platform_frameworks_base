@@ -619,6 +619,15 @@ public class FingerprintService extends SystemService implements IHwBinder.Death
 
     void startRemove(IBinder token, int fingerId, int groupId, int userId,
             IFingerprintServiceReceiver receiver, boolean restricted, boolean internal) {
+        if (token == null) {
+            Slog.w(TAG, "startRemove: token is null");
+            return;
+        }
+        if (receiver == null) {
+            Slog.w(TAG, "startRemove: receiver is null");
+            return;
+        }
+
         IBiometricsFingerprint daemon = getFingerprintDaemon();
         if (daemon == null) {
             Slog.w(TAG, "startRemove: no fingerprint HAL!");
