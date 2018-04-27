@@ -407,13 +407,14 @@ public class NotificationShelf extends ActivatableNotificationView implements
         boolean needsContinuousClipping = ViewState.isAnimatingY(icon) && !mAmbientState.isDark();
         boolean isContinuousClipping = icon.getTag(TAG_CONTINUOUS_CLIPPING) != null;
         if (needsContinuousClipping && !isContinuousClipping) {
+            final ViewTreeObserver observer = icon.getViewTreeObserver();
             ViewTreeObserver.OnPreDrawListener predrawListener =
                     new ViewTreeObserver.OnPreDrawListener() {
                         @Override
                         public boolean onPreDraw() {
                             boolean animatingY = ViewState.isAnimatingY(icon);
-                            if (!animatingY || !icon.isAttachedToWindow()) {
-                                icon.getViewTreeObserver().removeOnPreDrawListener(this);
+                            if (!animatingY) {
+                                observer.removeOnPreDrawListener(this);
                                 icon.setTag(TAG_CONTINUOUS_CLIPPING, null);
                                 return true;
                             }
@@ -421,7 +422,20 @@ public class NotificationShelf extends ActivatableNotificationView implements
                             return true;
                         }
                     };
-            icon.getViewTreeObserver().addOnPreDrawListener(predrawListener);
+            observer.addOnPreDrawListener(predrawListener);
+            icon.addOnAttachStateChangeListener(new OnAttachStateChangeListener() {
+                @Override
+                public void onViewAttachedToWindow(View v) {
+                }
+
+                @Override
+                public void onViewDetachedFromWindow(View v) {
+                    if (v == icon) {
+                        observer.removeOnPreDrawListener(predrawListener);
+                        icon.setTag(TAG_CONTINUOUS_CLIPPING, null);
+                    }
+                }
+            });
             icon.setTag(TAG_CONTINUOUS_CLIPPING, predrawListener);
         }
     }
