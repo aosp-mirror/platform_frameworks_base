@@ -22,6 +22,7 @@ import android.support.test.runner.AndroidJUnit4;
 import android.test.suitebuilder.annotation.SmallTest;
 
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.doze.DozeScreenState;
 import com.android.systemui.statusbar.phone.DozeParameters.IntInOutMatcher;
 
 import org.junit.Assert;
@@ -216,6 +217,15 @@ public class DozeParametersTest extends SysuiTestCase {
         reset(mockedPowerManager);
         dozeParameters.setControlScreenOffAnimation(true);
         verify(dozeParameters.getPowerManager()).setDozeAfterScreenOff(eq(false));
+    }
+
+    @Test
+    public void test_getWallpaperAodDuration_when_shouldControlScreenOff() {
+        TestableDozeParameters dozeParameters = new TestableDozeParameters(getContext());
+        dozeParameters.setControlScreenOffAnimation(true);
+        Assert.assertEquals("wallpaper hides faster when controlling screen off",
+                dozeParameters.getWallpaperAodDuration(),
+                DozeScreenState.ENTER_DOZE_HIDE_WALLPAPER_DELAY);
     }
 
     private class TestableDozeParameters extends DozeParameters {
