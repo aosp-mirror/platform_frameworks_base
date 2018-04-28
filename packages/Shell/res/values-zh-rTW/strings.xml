@@ -28,7 +28,7 @@
     <string name="bugreport_finished_pending_screenshot_text" product="tv" msgid="2343263822812016950">"選取即可分享不包含螢幕擷取畫面的錯誤報告；你也可以等候螢幕畫面擷取完畢"</string>
     <string name="bugreport_finished_pending_screenshot_text" product="watch" msgid="1474435374470177193">"輕觸即可分享無螢幕擷圖的錯誤報告；你也可以等候螢幕畫面擷取完畢"</string>
     <string name="bugreport_finished_pending_screenshot_text" product="default" msgid="1474435374470177193">"輕觸即可分享無螢幕擷圖的錯誤報告；你也可以等候螢幕畫面擷取完畢"</string>
-    <string name="bugreport_confirm" msgid="5917407234515812495">"錯誤報告的資料來自系統的各種紀錄檔，當中可能包含敏感資料 (例如應用程式使用情形和位置資料)。請務必只與你信任的使用者和應用程式分享錯誤報告。"</string>
+    <string name="bugreport_confirm" msgid="5917407234515812495">"錯誤報告的資料來自系統的各種記錄檔，當中可能包含敏感資料 (例如應用程式使用情形和位置資料)。請務必只與你信任的使用者和應用程式分享錯誤報告。"</string>
     <string name="bugreport_confirm_dont_repeat" msgid="6179945398364357318">"不要再顯示"</string>
     <string name="bugreport_storage_title" msgid="5332488144740527109">"錯誤報告"</string>
     <string name="bugreport_unreadable_text" msgid="586517851044535486">"無法讀取錯誤報告檔案"</string>
