@@ -26,7 +26,7 @@ import android.provider.Settings;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.UserIcons;
 import com.android.settingslib.drawable.UserIconDrawable;
-import com.android.settingslib.wrapper.LocationManagerWrapper;
+
 import java.text.NumberFormat;
 
 public class Utils {
@@ -68,8 +68,7 @@ public class Utils {
                 intent, UserHandle.of(userId), android.Manifest.permission.WRITE_SECURE_SETTINGS);
         LocationManager locationManager =
                 (LocationManager) context.getSystemService(Context.LOCATION_SERVICE);
-        LocationManagerWrapper wrapper = new LocationManagerWrapper(locationManager);
-        wrapper.setLocationEnabledForUser(enabled, UserHandle.of(userId));
+        locationManager.setLocationEnabledForUser(enabled, UserHandle.of(userId));
     }
 
     public static boolean updateLocationMode(Context context, int oldMode, int newMode, int userId,

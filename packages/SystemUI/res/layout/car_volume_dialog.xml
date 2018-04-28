@@ -13,26 +13,19 @@
      See the License for the specific language governing permissions and
      limitations under the License.
 -->
-<FrameLayout
+<androidx.car.widget.PagedListView
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:id="@+id/volume_dialog"
-    android:clipChildren="false"
+    android:background="@drawable/car_card_rounded_background"
+    android:id="@+id/volume_list"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_marginStart="@dimen/car_margin"
     android:layout_marginEnd="@dimen/car_margin"
-    android:theme="@style/qs_theme" >
-    <androidx.car.widget.PagedListView
-        android:id="@+id/volume_list"
-        android:background="@drawable/car_rounded_bg_bottom"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:minWidth="@dimen/volume_dialog_panel_width"
-        android:theme="?attr/dialogListTheme"
-        app:dividerStartMargin="@dimen/car_keyline_1"
-        app:dividerEndMargin="@dimen/car_keyline_1"
-        app:gutter="none"
-        app:showPagedListViewDivider="true"
-        app:scrollBarEnabled="false" />
-</FrameLayout>
+    android:minWidth="@dimen/volume_dialog_panel_width"
+    android:theme="@style/Theme.Car.NoActionBar"
+    app:dividerStartMargin="@dimen/car_keyline_1"
+    app:dividerEndMargin="@dimen/car_keyline_1"
+    app:gutter="none"
+    app:showPagedListViewDivider="true"
+    app:scrollBarEnabled="false" />

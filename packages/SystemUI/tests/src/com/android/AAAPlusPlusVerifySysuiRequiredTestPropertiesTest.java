@@ -14,7 +14,10 @@
 
 package com.android;
 
+import static org.hamcrest.Matchers.empty;
+import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertThat;
 
 import android.support.test.filters.LargeTest;
 import android.support.test.filters.MediumTest;
@@ -31,11 +34,11 @@ import com.android.systemui.SysuiTestCase;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.junit.internal.builders.AllDefaultPossibilitiesBuilder;
 
 import java.io.IOException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
@@ -72,9 +75,9 @@ public class AAAPlusPlusVerifySysuiRequiredTestPropertiesTest extends SysuiTestC
 
     @Test
     public void testAllClassInheritance() throws Throwable {
-        boolean anyClassWrong = false;
+        ArrayList<String> fails = new ArrayList<>();
         for (String className : getClassNamesFromClassPath()) {
-            Class<?> cls = Class.forName(className, false, this.getClass().getClassLoader());		
+            Class<?> cls = Class.forName(className, false, this.getClass().getClassLoader());
             if (!isTestClass(cls)) continue;
 
             boolean hasParent = false;
@@ -86,17 +89,15 @@ public class AAAPlusPlusVerifySysuiRequiredTestPropertiesTest extends SysuiTestC
             }
             boolean hasSize = hasSize(cls);
             if (!hasSize) {
-                anyClassWrong = true;
-                Log.e(TAG, cls.getName() + " does not have size annotation, such as @SmallTest");
+                fails.add(cls.getName() + " does not have size annotation, such as @SmallTest");
             }
             if (!hasParent) {
-                anyClassWrong = true;
-                Log.e(TAG, cls.getName() + " does not extend any of " + getClsStr());
+                fails.add(cls.getName() + " does not extend any of " + getClsStr());
             }
         }
 
-        assertFalse("All sysui test classes must have size and extend one of " + getClsStr(),
-                anyClassWrong);
+        assertThat("All sysui test classes must have size and extend one of " + getClsStr(),
+                fails, is(empty()));
     }
 
     private boolean hasSize(Class<?> cls) {

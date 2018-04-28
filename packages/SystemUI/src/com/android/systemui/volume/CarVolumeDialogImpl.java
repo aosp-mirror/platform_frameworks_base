@@ -16,6 +16,9 @@
 
 package com.android.systemui.volume;
 
+import android.animation.Animator;
+import android.animation.AnimatorInflater;
+import android.animation.AnimatorSet;
 import android.annotation.Nullable;
 import android.app.Dialog;
 import android.app.KeyguardManager;
@@ -24,6 +27,7 @@ import android.content.DialogInterface;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.PixelFormat;
+import android.graphics.drawable.Drawable;
 import android.media.AudioManager;
 import android.media.AudioSystem;
 import android.os.Debug;
@@ -80,7 +84,6 @@ public class CarVolumeDialogImpl implements VolumeDialog {
 
     private Window mWindow;
     private CustomDialog mDialog;
-    private ViewGroup mDialogView;
     private PagedListView mListView;
     private ListItemAdapter mPagedListAdapter;
     private final List<ListItem> mVolumeLineItems = new ArrayList<>();
@@ -98,29 +101,6 @@ public class CarVolumeDialogImpl implements VolumeDialog {
     private SafetyWarningDialog mSafetyWarning;
     private boolean mHovering = false;
     private boolean mExpanded;
-
-    private final View.OnClickListener mSupplementalIconListener = v -> {
-        mExpanded = !mExpanded;
-        if (mExpanded) {
-            for (VolumeRow row : mRows) {
-                // Adding the items which are not coming from default stream.
-                if (!row.defaultStream) {
-                    addSeekbarListItem(row, null);
-                }
-            }
-        } else {
-            // Only keeping the default stream if it is not expended.
-            Iterator itr = mVolumeLineItems.iterator();
-            while (itr.hasNext()) {
-                SeekbarListItem item = (SeekbarListItem) itr.next();
-                VolumeRow row = findRow(item);
-                if (!row.defaultStream) {
-                    itr.remove();
-                }
-            }
-        }
-        mPagedListAdapter.notifyDataSetChanged();
-    };
 
     public CarVolumeDialogImpl(Context context) {
         mContext = new ContextThemeWrapper(context, com.android.systemui.R.style.qs_theme);
@@ -175,31 +155,31 @@ public class CarVolumeDialogImpl implements VolumeDialog {
         mDialog.setCanceledOnTouchOutside(true);
         mDialog.setContentView(R.layout.car_volume_dialog);
         mDialog.setOnShowListener(dialog -> {
-            mDialogView.setTranslationY(-mDialogView.getHeight());
-            mDialogView.setAlpha(0);
-            mDialogView.animate()
+            mListView.setTranslationY(-mListView.getHeight());
+            mListView.setAlpha(0);
+            mListView.animate()
                 .alpha(1)
                 .translationY(0)
                 .setDuration(300)
                 .setInterpolator(new SystemUIInterpolators.LogDecelerateInterpolator())
                 .start();
         });
-        mDialogView = (ViewGroup) mDialog.findViewById(R.id.volume_dialog);
-        mDialogView.setOnHoverListener((v, event) -> {
+        mListView = (PagedListView) mWindow.findViewById(R.id.volume_list);
+        mListView.setOnHoverListener((v, event) -> {
             int action = event.getActionMasked();
             mHovering = (action == MotionEvent.ACTION_HOVER_ENTER)
                 || (action == MotionEvent.ACTION_HOVER_MOVE);
             rescheduleTimeoutH();
             return true;
         });
-        mListView = (PagedListView) mWindow.findViewById(R.id.volume_list);
 
-        // TODO: apply tint to the supplement icon.
-        addSeekbarListItem(addVolumeRow(AudioManager.STREAM_MUSIC, R.drawable.ic_volume_media,
-            R.drawable.car_ic_arrow_drop_up, true, true), mSupplementalIconListener);
-        addVolumeRow(AudioManager.STREAM_RING, R.drawable.ic_volume_ringer, 0,
+        addSeekbarListItem(addVolumeRow(AudioManager.STREAM_MUSIC, R.drawable.car_ic_music,
+            R.drawable.car_ic_keyboard_arrow_down, true, true),
+            new ExpandIconListener());
+        // We map AudioManager.STREAM_RING to a navigation icon for demo.
+        addVolumeRow(AudioManager.STREAM_RING, R.drawable.car_ic_navigation, 0,
             true, false);
-        addVolumeRow(AudioManager.STREAM_ALARM, R.drawable.ic_volume_alarm, 0,
+        addVolumeRow(AudioManager.STREAM_NOTIFICATION, R.drawable.car_ic_notification_2, 0,
             true, false);
 
         mPagedListAdapter = new ListItemAdapter(mContext, new ListProvider(mVolumeLineItems),
@@ -248,9 +228,13 @@ public class CarVolumeDialogImpl implements VolumeDialog {
         SeekbarListItem listItem =
             new SeekbarListItem(mContext, volumeMax, currentVolume,
                 new VolumeSeekBarChangeListener(volumeRow), null);
-        listItem.setPrimaryActionIcon(volumeRow.primaryActionIcon);
+        Drawable primaryIcon = mContext.getResources().getDrawable(volumeRow.primaryActionIcon);
+        listItem.setPrimaryActionIcon(primaryIcon);
         if (volumeRow.supplementalIcon != 0) {
-            listItem.setSupplementalIcon(volumeRow.supplementalIcon, true, supplementalIconOnClickListener);
+            Drawable supplementalIcon = mContext.getResources()
+                .getDrawable(volumeRow.supplementalIcon);
+            listItem.setSupplementalIcon(supplementalIcon, true,
+                supplementalIconOnClickListener);
         } else {
             listItem.setSupplementalEmptyIcon(true);
         }
@@ -309,14 +293,14 @@ public class CarVolumeDialogImpl implements VolumeDialog {
         mHandler.removeMessages(H.DISMISS);
         mHandler.removeMessages(H.SHOW);
         if (!mShowing) return;
-        mDialogView.animate().cancel();
+        mListView.animate().cancel();
         mShowing = false;
 
-        mDialogView.setTranslationY(0);
-        mDialogView.setAlpha(1);
-        mDialogView.animate()
+        mListView.setTranslationY(0);
+        mListView.setAlpha(1);
+        mListView.animate()
             .alpha(0)
-            .translationY(-mDialogView.getHeight())
+            .translationY(-mListView.getHeight())
             .setDuration(250)
             .setInterpolator(new SystemUIInterpolators.LogAccelerateInterpolator())
             .withEndAction(() -> mHandler.postDelayed(() -> {
@@ -487,7 +471,7 @@ public class CarVolumeDialogImpl implements VolumeDialog {
 
         @Override
         public void onLayoutDirectionChanged(int layoutDirection) {
-            mDialogView.setLayoutDirection(layoutDirection);
+            mListView.setLayoutDirection(layoutDirection);
         }
 
         @Override
@@ -639,6 +623,45 @@ public class CarVolumeDialogImpl implements VolumeDialog {
                 mHandler.sendMessageDelayed(mHandler.obtainMessage(H.RECHECK, mRow),
                     USER_ATTEMPT_GRACE_PERIOD);
             }
+        }
+    }
+
+    private final class ExpandIconListener implements View.OnClickListener {
+        @Override
+        public void onClick(final View v) {
+            mExpanded = !mExpanded;
+            Animator inAnimator;
+            if (mExpanded) {
+                for (VolumeRow row : mRows) {
+                    // Adding the items which are not coming from default stream.
+                    if (!row.defaultStream) {
+                        addSeekbarListItem(row, null);
+                    }
+                }
+                inAnimator = AnimatorInflater.loadAnimator(
+                    mContext, R.anim.car_arrow_fade_in_rotate_up);
+            } else {
+                // Only keeping the default stream if it is not expended.
+                Iterator itr = mVolumeLineItems.iterator();
+                while (itr.hasNext()) {
+                    SeekbarListItem item = (SeekbarListItem) itr.next();
+                    VolumeRow row = findRow(item);
+                    if (!row.defaultStream) {
+                        itr.remove();
+                    }
+                }
+                inAnimator = AnimatorInflater.loadAnimator(
+                    mContext, R.anim.car_arrow_fade_in_rotate_down);
+            }
+
+            Animator outAnimator = AnimatorInflater.loadAnimator(
+                mContext, R.anim.car_arrow_fade_out);
+            inAnimator.setStartDelay(100);
+            AnimatorSet animators = new AnimatorSet();
+            animators.playTogether(outAnimator, inAnimator);
+            animators.setTarget(v);
+            animators.start();
+            mPagedListAdapter.notifyDataSetChanged();
         }
     }
 

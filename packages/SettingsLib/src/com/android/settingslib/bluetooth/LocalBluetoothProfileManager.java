@@ -40,6 +40,7 @@ import com.android.internal.R;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 
@@ -158,9 +159,13 @@ public class LocalBluetoothProfileManager {
         addProfile(mPbapProfile, PbapServerProfile.NAME,
              BluetoothPbap.ACTION_CONNECTION_STATE_CHANGED);
 
-        mHearingAidProfile = new HearingAidProfile(mContext, mLocalAdapter, mDeviceManager, this);
-        addProfile(mHearingAidProfile, HearingAidProfile.NAME,
-                   BluetoothHearingAid.ACTION_CONNECTION_STATE_CHANGED);
+        List<Integer> supportedList = mLocalAdapter.getSupportedProfiles();
+        if (supportedList.contains(BluetoothProfile.HEARING_AID)) {
+            mHearingAidProfile = new HearingAidProfile(mContext, mLocalAdapter, mDeviceManager,
+                                                       this);
+            addProfile(mHearingAidProfile, HearingAidProfile.NAME,
+                       BluetoothHearingAid.ACTION_CONNECTION_STATE_CHANGED);
+        }
         if (DEBUG) Log.d(TAG, "LocalBluetoothProfileManager construction complete");
     }
 

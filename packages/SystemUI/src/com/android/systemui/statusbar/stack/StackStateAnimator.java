@@ -60,6 +60,7 @@ public class StackStateAnimator {
     public static final int ANIMATION_DELAY_HEADS_UP_CLICKED= 120;
 
     private final int mGoToFullShadeAppearingTranslation;
+    private final int mPulsingAppearingTranslation;
     private final ExpandableViewState mTmpState = new ExpandableViewState();
     private final AnimationProperties mAnimationProperties;
     public NotificationStackScrollLayout mHostLayout;
@@ -90,6 +91,9 @@ public class StackStateAnimator {
         mGoToFullShadeAppearingTranslation =
                 hostLayout.getContext().getResources().getDimensionPixelSize(
                         R.dimen.go_to_full_shade_appearing_translation);
+        mPulsingAppearingTranslation =
+                hostLayout.getContext().getResources().getDimensionPixelSize(
+                        R.dimen.pulsing_notification_appear_translation);
         mAnimationProperties = new AnimationProperties() {
             @Override
             public AnimationFilter getAnimationFilter() {
@@ -426,6 +430,18 @@ public class StackStateAnimator {
                     .AnimationEvent.ANIMATION_TYPE_GROUP_EXPANSION_CHANGED) {
                 ExpandableNotificationRow row = (ExpandableNotificationRow) event.changingView;
                 row.prepareExpansionChanged(finalState);
+            } else if (event.animationType == NotificationStackScrollLayout
+                    .AnimationEvent.ANIMATION_TYPE_PULSE_APPEAR) {
+                ExpandableViewState viewState = finalState.getViewStateForView(changingView);
+                mTmpState.copyFrom(viewState);
+                mTmpState.yTranslation += mPulsingAppearingTranslation;
+                mTmpState.alpha = 0;
+                mTmpState.applyToView(changingView);
+            } else if (event.animationType == NotificationStackScrollLayout
+                    .AnimationEvent.ANIMATION_TYPE_PULSE_DISAPPEAR) {
+                ExpandableViewState viewState = finalState.getViewStateForView(changingView);
+                viewState.yTranslation += mPulsingAppearingTranslation;
+                viewState.alpha = 0;
             } else if (event.animationType == NotificationStackScrollLayout
                     .AnimationEvent.ANIMATION_TYPE_HEADS_UP_APPEAR) {
                 // This item is added, initialize it's properties.

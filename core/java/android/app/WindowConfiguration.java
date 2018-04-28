@@ -495,7 +495,15 @@ public class WindowConfiguration implements Parcelable, Comparable<WindowConfigu
      * @hide
      */
     public boolean tasksAreFloating() {
-        return mWindowingMode == WINDOWING_MODE_FREEFORM || mWindowingMode == WINDOWING_MODE_PINNED;
+        return isFloating(mWindowingMode);
+    }
+
+    /**
+     * Returns true if the windowingMode represents a floating window.
+     * @hide
+     */
+    public static boolean isFloating(int windowingMode) {
+        return windowingMode == WINDOWING_MODE_FREEFORM || windowingMode == WINDOWING_MODE_PINNED;
     }
 
     /**

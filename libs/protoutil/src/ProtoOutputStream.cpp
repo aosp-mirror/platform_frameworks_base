@@ -244,12 +244,14 @@ ProtoOutputStream::end(uint64_t token)
 {
     if (token != mExpectedObjectToken) {
         ALOGE("Unexpected token: 0x%" PRIx64 ", should be 0x%" PRIx64, token, mExpectedObjectToken);
+        mDepth = UINT32_C(-1); // make depth invalid
         return;
     }
 
     uint32_t depth = getDepthFromToken(token);
     if (depth != (mDepth & 0x01ff)) {
         ALOGE("Unexpected depth: %" PRIu32 ", should be %" PRIu32, depth, mDepth);
+        mDepth = UINT32_C(-1); // make depth invalid
         return;
     }
     mDepth--;
@@ -282,7 +284,7 @@ bool
 ProtoOutputStream::compact() {
     if (mCompact) return true;
     if (mDepth != 0) {
-        ALOGE("Can't compact when depth(%" PRIu32 ") is not zero. Missing calls to end.", mDepth);
+        ALOGE("Can't compact when depth(%" PRIu32 ") is not zero. Missing or extra calls to end.", mDepth);
         return false;
     }
     // record the size of the original buffer.
@@ -425,7 +427,7 @@ ProtoOutputStream::size()
 {
     if (!compact()) {
         ALOGE("compact failed, the ProtoOutputStream data is corrupted!");
-        // TODO: handle this error
+        return 0;
     }
     return mBuffer.size();
 }
@@ -449,7 +451,7 @@ ProtoOutputStream::data()
 {
     if (!compact()) {
         ALOGE("compact failed, the ProtoOutputStream data is corrupted!");
-        // TODO: handle this error
+        mBuffer.clear();
     }
     return mBuffer.begin();
 }

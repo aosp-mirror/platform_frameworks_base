@@ -105,7 +105,7 @@ public:
     /**
      * Starts a sub-message write session.
      * Returns a token of this write session.
-     * Must call end(token) when finish write this sub-message.
+     * Must call end(token) exactly once when finish write this sub-message.
      */
     uint64_t start(uint64_t fieldId);
     void end(uint64_t token);

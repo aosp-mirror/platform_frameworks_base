@@ -898,6 +898,10 @@ public class ColorDisplayServiceTest {
 
     @Test
     public void accessibility_colorInversion_transformActivated() {
+        if (!mContext.getResources().getConfiguration().isScreenWideColorGamut()) {
+            return;
+        }
+
         setAccessibilityColorInversion(true);
         setColorMode(ColorDisplayController.COLOR_MODE_NATURAL);
 
@@ -909,6 +913,10 @@ public class ColorDisplayServiceTest {
 
     @Test
     public void accessibility_colorCorrection_transformActivated() {
+        if (!mContext.getResources().getConfiguration().isScreenWideColorGamut()) {
+            return;
+        }
+
         setAccessibilityColorCorrection(true);
         setColorMode(ColorDisplayController.COLOR_MODE_NATURAL);
 
@@ -920,6 +928,10 @@ public class ColorDisplayServiceTest {
 
     @Test
     public void accessibility_all_transformActivated() {
+        if (!mContext.getResources().getConfiguration().isScreenWideColorGamut()) {
+            return;
+        }
+
         setAccessibilityColorCorrection(true);
         setAccessibilityColorInversion(true);
         setColorMode(ColorDisplayController.COLOR_MODE_NATURAL);
@@ -932,6 +944,10 @@ public class ColorDisplayServiceTest {
 
     @Test
     public void accessibility_none_transformActivated() {
+        if (!mContext.getResources().getConfiguration().isScreenWideColorGamut()) {
+            return;
+        }
+
         setAccessibilityColorCorrection(false);
         setAccessibilityColorInversion(false);
         setColorMode(ColorDisplayController.COLOR_MODE_NATURAL);

@@ -29,7 +29,6 @@ import android.os.UserHandle;
 import android.util.IconDrawableFactory;
 
 import com.android.settingslib.widget.CandidateInfo;
-import com.android.settingslib.wrapper.PackageManagerWrapper;
 
 /**
  * Data model representing an app in DefaultAppPicker UI.

@@ -34,6 +34,7 @@ import static com.android.server.wm.WindowContainer.POSITION_TOP;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.anyBoolean;
 import static org.mockito.Mockito.anyFloat;
+import static org.mockito.Mockito.anyInt;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -72,7 +73,7 @@ public class WindowTestUtils {
             config.windowConfiguration.setBounds(bounds);
             return null;
         }).when(controller).adjustConfigurationForBounds(any(), any(), any(), any(),
-                anyBoolean(), anyBoolean(), anyFloat(), any(), any());
+                anyBoolean(), anyBoolean(), anyFloat(), any(), any(), anyInt());
 
         return controller;
     }
