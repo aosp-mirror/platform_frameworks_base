@@ -5667,8 +5667,6 @@ public class AudioService extends IAudioService.Stub
         // enable A2DP before notifying A2DP connection to avoid unnecessary processing in
         // audio policy manager
         VolumeStreamState streamState = mStreamStates[AudioSystem.STREAM_MUSIC];
-        sendMsg(mAudioHandler, MSG_SET_DEVICE_VOLUME, SENDMSG_QUEUE,
-                AudioSystem.DEVICE_OUT_BLUETOOTH_A2DP, 0, streamState, 0);
         setBluetoothA2dpOnInt(true, eventSource);
         AudioSystem.setDeviceConnectionState(AudioSystem.DEVICE_OUT_BLUETOOTH_A2DP,
                 AudioSystem.DEVICE_STATE_AVAILABLE, address, name);
@@ -5936,12 +5934,6 @@ public class AudioService extends IAudioService.Stub
         // address is not used for now, but may be used when multiple a2dp devices are supported
         synchronized (mA2dpAvrcpLock) {
             mAvrcpAbsVolSupported = support;
-            sendMsg(mAudioHandler, MSG_SET_DEVICE_VOLUME, SENDMSG_QUEUE,
-                    AudioSystem.DEVICE_OUT_BLUETOOTH_A2DP, 0,
-                    mStreamStates[AudioSystem.STREAM_MUSIC], 0);
-            sendMsg(mAudioHandler, MSG_SET_DEVICE_VOLUME, SENDMSG_QUEUE,
-                    AudioSystem.DEVICE_OUT_BLUETOOTH_A2DP, 0,
-                    mStreamStates[AudioSystem.STREAM_RING], 0);
         }
     }
 
