@@ -47,9 +47,9 @@
     <string name="mismatchPin" msgid="609379054496863419">"您输入的PIN码不一致。"</string>
     <string name="invalidPin" msgid="3850018445187475377">"输入一个4至8位数的PIN码。"</string>
     <string name="invalidPuk" msgid="8761456210898036513">"请输入至少8位数字的PUK码。"</string>
-    <string name="needPuk" msgid="919668385956251611">"已对SIM卡进行PUK码锁定。请输入PUK码将其解锁。"</string>
+    <string name="needPuk" msgid="919668385956251611">"您的 SIM 卡已用 PUK 码锁定。请输入 PUK 码将其解锁。"</string>
     <string name="needPuk2" msgid="4526033371987193070">"输入PUK2码以解锁SIM卡。"</string>
-    <string name="enablePin" msgid="209412020907207950">"失败，请开启SIM/RUIM卡锁定设置。"</string>
+    <string name="enablePin" msgid="209412020907207950">"失败，请开启 SIM/RUIM 卡锁定设置。"</string>
     <plurals name="pinpuk_attempts" formatted="false" msgid="1251012001539225582">
       <item quantity="other">您还可尝试 <xliff:g id="NUMBER_1">%d</xliff:g> 次。如果仍不正确，SIM 卡将被锁定。</item>
       <item quantity="one">您还可尝试 <xliff:g id="NUMBER_0">%d</xliff:g> 次。如果仍不正确，SIM 卡将被锁定。</item>
@@ -240,7 +240,7 @@
     <string name="global_action_battery_saver_on_status" msgid="484059130698197787">"省电模式已关闭"</string>
     <string name="global_action_battery_saver_off_status" msgid="75550964969478405">"省电模式已开启"</string>
     <string name="global_action_settings" msgid="1756531602592545966">"设置"</string>
-    <string name="global_action_assist" msgid="3892832961594295030">"助理"</string>
+    <string name="global_action_assist" msgid="3892832961594295030">"助手应用"</string>
     <string name="global_action_voice_assist" msgid="7751191495200504480">"语音助理"</string>
     <string name="global_action_lockdown" msgid="1099326950891078929">"锁定"</string>
     <string name="status_bar_notification_info_overflow" msgid="5301981741705354993">"999+"</string>
@@ -756,9 +756,9 @@
     <string name="lockscreen_transport_ffw_description" msgid="42987149870928985">"快进"</string>
     <string name="emergency_calls_only" msgid="6733978304386365407">"只能拨打紧急呼救电话"</string>
     <string name="lockscreen_network_locked_message" msgid="143389224986028501">"网络已锁定"</string>
-    <string name="lockscreen_sim_puk_locked_message" msgid="7441797339976230">"SIM卡已用PUK码锁定。"</string>
+    <string name="lockscreen_sim_puk_locked_message" msgid="7441797339976230">"SIM 卡已用 PUK 码锁定。"</string>
     <string name="lockscreen_sim_puk_locked_instructions" msgid="8127916255245181063">"请参阅《用户指南》或与客服人员联系。"</string>
-    <string name="lockscreen_sim_locked_message" msgid="8066660129206001039">"SIM卡已被锁定。"</string>
+    <string name="lockscreen_sim_locked_message" msgid="8066660129206001039">"SIM 卡已被锁定。"</string>
     <string name="lockscreen_sim_unlock_progress_dialog_message" msgid="595323214052881264">"正在解锁SIM卡..."</string>
     <string name="lockscreen_too_many_failed_attempts_dialog_message" msgid="6481623830344107222">"您已连续 <xliff:g id="NUMBER_0">%1$d</xliff:g> 次画错解锁图案。\n\n请在 <xliff:g id="NUMBER_1">%2$d</xliff:g> 秒后重试。"</string>
     <string name="lockscreen_too_many_failed_password_attempts_dialog_message" msgid="2725973286239344555">"您已连续 <xliff:g id="NUMBER_0">%1$d</xliff:g> 次输错密码。\n\n请在 <xliff:g id="NUMBER_1">%2$d</xliff:g> 秒后重试。"</string>
@@ -836,7 +836,8 @@
     <string name="double_tap_toast" msgid="4595046515400268881">"提示：点按两次可放大或缩小。"</string>
     <string name="autofill_this_form" msgid="4616758841157816676">"自动填充"</string>
     <string name="setup_autofill" msgid="7103495070180590814">"设置自动填充"</string>
-    <string name="autofill_window_title" msgid="921006636895825007">"自动填充"</string>
+    <!-- no translation found for autofill_window_title (4107745526909284887) -->
+    <skip />
     <string name="autofill_address_name_separator" msgid="6350145154779706772">" "</string>
     <string name="autofill_address_summary_name_format" msgid="3268041054899214945">"$1$2$3"</string>
     <string name="autofill_address_summary_separator" msgid="7483307893170324129">"， "</string>
@@ -1513,7 +1514,7 @@
       <item quantity="one">请在 1 秒后重试。</item>
     </plurals>
     <string name="kg_pattern_instructions" msgid="398978611683075868">"绘制您的图案"</string>
-    <string name="kg_sim_pin_instructions" msgid="2319508550934557331">"输入SIM卡PIN码"</string>
+    <string name="kg_sim_pin_instructions" msgid="2319508550934557331">"输入 SIM 卡 PIN 码"</string>
     <string name="kg_pin_instructions" msgid="2377242233495111557">"输入PIN码"</string>
     <string name="kg_password_instructions" msgid="5753646556186936819">"输入密码"</string>
     <string name="kg_puk_enter_puk_hint" msgid="453227143861735537">"SIM卡已被停用，需要输入PUK码才能继续使用。有关详情，请联系您的运营商。"</string>
@@ -1690,6 +1691,7 @@
     <string name="package_installed_device_owner" msgid="6875717669960212648">"已由您的管理员安装"</string>
     <string name="package_updated_device_owner" msgid="1847154566357862089">"已由您的管理员更新"</string>
     <string name="package_deleted_device_owner" msgid="2307122077550236438">"已由您的管理员删除"</string>
+    <string name="battery_saver_description_with_learn_more" msgid="6323937147992667707">"为了延长电池续航时间，省电模式会关闭部分设备功能并限制应用。"<annotation id="url">"了解详情"</annotation></string>
     <string name="battery_saver_description" msgid="769989536172631582">"为了延长电池续航时间，省电模式会关闭部分设备功能并限制应用。"</string>
     <string name="data_saver_description" msgid="6015391409098303235">"为了减少流量消耗，流量节省程序会阻止某些应用在后台收发数据。您当前使用的应用可以收发数据，但频率可能会降低。举例而言，这可能意味着图片只有在您点按之后才会显示。"</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"要开启流量节省程序吗？"</string>
@@ -1738,8 +1740,7 @@
     <string name="zen_mode_default_weekends_name" msgid="2786495801019345244">"周末"</string>
     <string name="zen_mode_default_events_name" msgid="8158334939013085363">"活动"</string>
     <string name="zen_mode_default_every_night_name" msgid="3012363838882944175">"睡眠"</string>
-    <!-- no translation found for muted_by (5942954724562097128) -->
-    <skip />
+    <string name="muted_by" msgid="5942954724562097128">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g>正在将某些音效设为静音"</string>
     <string name="system_error_wipe_data" msgid="6608165524785354962">"您的设备内部出现了问题。如果不将设备恢复出厂设置，设备运行可能会不稳定。"</string>
     <string name="system_error_manufacturer" msgid="8086872414744210668">"您的设备内部出现了问题。请联系您的设备制造商了解详情。"</string>
     <string name="stk_cc_ussd_to_dial" msgid="5214333646366591205">"USSD 请求已更改为普通通话"</string>

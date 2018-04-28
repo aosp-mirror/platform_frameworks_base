@@ -30,7 +30,7 @@
     <string name="untitled" msgid="4638956954852782576">"&lt;제목 없음&gt;"</string>
     <string name="emptyPhoneNumber" msgid="7694063042079676517">"(전화번호 없음)"</string>
     <string name="unknownName" msgid="6867811765370350269">"알 수 없음"</string>
-    <string name="defaultVoiceMailAlphaTag" msgid="2660020990097733077">"음성메일"</string>
+    <string name="defaultVoiceMailAlphaTag" msgid="2660020990097733077">"음성사서함"</string>
     <string name="defaultMsisdnAlphaTag" msgid="2850889754919584674">"MSISDN1"</string>
     <string name="mmiError" msgid="5154499457739052907">"연결에 문제가 있거나 MMI 코드가 잘못되었습니다."</string>
     <string name="mmiFdnError" msgid="5224398216385316471">"발신 허용 번호에서만 수행할 수 있는 작업입니다."</string>
@@ -836,7 +836,8 @@
     <string name="double_tap_toast" msgid="4595046515400268881">"도움말: 확대/축소하려면 두 번 탭합니다."</string>
     <string name="autofill_this_form" msgid="4616758841157816676">"자동완성"</string>
     <string name="setup_autofill" msgid="7103495070180590814">"자동완성 설정..."</string>
-    <string name="autofill_window_title" msgid="921006636895825007">"자동 완성"</string>
+    <!-- no translation found for autofill_window_title (4107745526909284887) -->
+    <skip />
     <string name="autofill_address_name_separator" msgid="6350145154779706772">" "</string>
     <string name="autofill_address_summary_name_format" msgid="3268041054899214945">"$3$2$1"</string>
     <string name="autofill_address_summary_separator" msgid="7483307893170324129">", "</string>
@@ -1690,6 +1691,7 @@
     <string name="package_installed_device_owner" msgid="6875717669960212648">"관리자에 의해 설치되었습니다."</string>
     <string name="package_updated_device_owner" msgid="1847154566357862089">"관리자에 의해 업데이트되었습니다."</string>
     <string name="package_deleted_device_owner" msgid="2307122077550236438">"관리자에 의해 삭제되었습니다."</string>
+    <string name="battery_saver_description_with_learn_more" msgid="6323937147992667707">"배터리 세이버를 사용하면 배터리 수명을 늘리기 위해 기기의 일부 기능이 사용 중지되며 앱이 제한됩니다. "<annotation id="url">"자세히 알아보기"</annotation></string>
     <string name="battery_saver_description" msgid="769989536172631582">"배터리 세이버를 사용하면 배터리 수명을 늘리기 위해 기기의 일부 기능이 사용 중지되며 앱이 제한됩니다."</string>
     <string name="data_saver_description" msgid="6015391409098303235">"데이터 사용량을 줄이기 위해 데이터 절약 모드는 일부 앱이 백그라운드에서 데이터를 전송하거나 수신하지 못하도록 합니다. 현재 사용 중인 앱에서 데이터에 액세스할 수 있지만 빈도가 줄어듭니다. 예를 들면, 이미지를 탭하기 전에는 이미지가 표시되지 않습니다."</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"데이터 절약 모드를 사용할까요?"</string>
@@ -1738,8 +1740,7 @@
     <string name="zen_mode_default_weekends_name" msgid="2786495801019345244">"주말"</string>
     <string name="zen_mode_default_events_name" msgid="8158334939013085363">"일정"</string>
     <string name="zen_mode_default_every_night_name" msgid="3012363838882944175">"수면 중"</string>
-    <!-- no translation found for muted_by (5942954724562097128) -->
-    <skip />
+    <string name="muted_by" msgid="5942954724562097128">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g>(이)가 일부 소리를 음소거함"</string>
     <string name="system_error_wipe_data" msgid="6608165524785354962">"사용 중인 기기 내부에 문제가 발생했습니다. 초기화할 때까지 불안정할 수 있습니다."</string>
     <string name="system_error_manufacturer" msgid="8086872414744210668">"사용 중인 기기 내부에 문제가 발생했습니다. 자세한 내용은 제조업체에 문의하세요."</string>
     <string name="stk_cc_ussd_to_dial" msgid="5214333646366591205">"USSD 요청이 일반 통화로 변경됨"</string>

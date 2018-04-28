@@ -836,7 +836,8 @@
     <string name="double_tap_toast" msgid="4595046515400268881">"Dica: toque duas vezes para aumentar e diminuir o zoom."</string>
     <string name="autofill_this_form" msgid="4616758841157816676">"Preench. aut."</string>
     <string name="setup_autofill" msgid="7103495070180590814">"Conf. preench. aut."</string>
-    <string name="autofill_window_title" msgid="921006636895825007">"Preenchimento automático"</string>
+    <!-- no translation found for autofill_window_title (4107745526909284887) -->
+    <skip />
     <string name="autofill_address_name_separator" msgid="6350145154779706772">" "</string>
     <string name="autofill_address_summary_name_format" msgid="3268041054899214945">"$1$2$3"</string>
     <string name="autofill_address_summary_separator" msgid="7483307893170324129">", "</string>
@@ -1690,6 +1691,7 @@
     <string name="package_installed_device_owner" msgid="6875717669960212648">"Instalado pelo seu administrador"</string>
     <string name="package_updated_device_owner" msgid="1847154566357862089">"Atualizado pelo seu administrador"</string>
     <string name="package_deleted_device_owner" msgid="2307122077550236438">"Excluído pelo seu administrador"</string>
+    <string name="battery_saver_description_with_learn_more" msgid="6323937147992667707">"A Economia de bateria desativa alguns recursos do dispositivo e restringe apps para aumentar a duração da carga. "<annotation id="url">"Saiba mais"</annotation></string>
     <string name="battery_saver_description" msgid="769989536172631582">"A Economia de bateria desativa alguns recursos do dispositivo e restringe apps para aumentar a duração da bateria."</string>
     <string name="data_saver_description" msgid="6015391409098303235">"Para ajudar a reduzir o uso de dados, a Economia de dados impede que alguns apps enviem ou recebam dados em segundo plano. Um app que você esteja usando no momento pode acessar dados, mas com menos frequência. Isso pode fazer com que imagens não sejam exibidas até que você toque nelas."</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"Ativar Economia de dados?"</string>
@@ -1738,8 +1740,7 @@
     <string name="zen_mode_default_weekends_name" msgid="2786495801019345244">"Fim de semana"</string>
     <string name="zen_mode_default_events_name" msgid="8158334939013085363">"Evento"</string>
     <string name="zen_mode_default_every_night_name" msgid="3012363838882944175">"Dormindo"</string>
-    <!-- no translation found for muted_by (5942954724562097128) -->
-    <skip />
+    <string name="muted_by" msgid="5942954724562097128">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g> está silenciando alguns sons"</string>
     <string name="system_error_wipe_data" msgid="6608165524785354962">"Há um problema interno com seu dispositivo. Ele pode ficar instável até que você faça a redefinição para configuração original."</string>
     <string name="system_error_manufacturer" msgid="8086872414744210668">"Há um problema interno com seu dispositivo. Entre em contato com o fabricante para saber mais detalhes."</string>
     <string name="stk_cc_ussd_to_dial" msgid="5214333646366591205">"Solicitação USSD alterada para chamada normal"</string>
