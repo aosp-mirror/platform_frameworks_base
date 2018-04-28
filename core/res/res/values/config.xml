@@ -1826,12 +1826,16 @@
     <string name="db_default_sync_mode" translatable="false">FULL</string>
 
     <!-- The database synchronization mode when using Write-Ahead Logging.
-         FULL is safest and preserves durability at the cost of extra fsyncs.
-         NORMAL sacrifices durability in WAL mode because syncs are only performed before
-         and after checkpoint operations.  If checkpoints are infrequent and power loss
-         occurs, then committed transactions could be lost and applications might break.
+         From https://www.sqlite.org/pragma.html#pragma_synchronous:
+         WAL mode is safe from corruption with synchronous=NORMAL, and probably DELETE mode is safe
+         too on modern filesystems. WAL mode is always consistent with synchronous=NORMAL, but WAL
+         mode does lose durability. A transaction committed in WAL mode with
+         synchronous=NORMAL might roll back following a power loss or system crash.
+         Transactions are durable across application crashes regardless of the synchronous setting
+         or journal mode. The synchronous=NORMAL setting is a good choice for most applications
+         running in WAL mode.
          Choices are: FULL, NORMAL, OFF. -->
-    <string name="db_wal_sync_mode" translatable="false">FULL</string>
+    <string name="db_wal_sync_mode" translatable="false">NORMAL</string>
 
     <!-- The Write-Ahead Log auto-checkpoint interval in database pages (typically 1 to 4KB).
          The log is checkpointed automatically whenever it exceeds this many pages.
