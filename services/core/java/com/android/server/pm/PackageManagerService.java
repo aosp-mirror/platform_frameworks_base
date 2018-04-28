@@ -88,11 +88,11 @@ import static android.os.storage.StorageManager.FLAG_STORAGE_CE;
 import static android.os.storage.StorageManager.FLAG_STORAGE_DE;
 import static android.system.OsConstants.O_CREAT;
 import static android.system.OsConstants.O_RDWR;
+
 import static com.android.internal.app.IntentForwarderActivity.FORWARD_INTENT_TO_MANAGED_PROFILE;
 import static com.android.internal.app.IntentForwarderActivity.FORWARD_INTENT_TO_PARENT;
 import static com.android.internal.content.NativeLibraryHelper.LIB64_DIR_NAME;
 import static com.android.internal.content.NativeLibraryHelper.LIB_DIR_NAME;
-import static com.android.internal.util.ArrayUtils.appendElement;
 import static com.android.internal.util.ArrayUtils.appendInt;
 import static com.android.server.pm.InstructionSets.getAppDexInstructionSets;
 import static com.android.server.pm.InstructionSets.getDexCodeInstructionSet;
@@ -275,7 +275,6 @@ import com.android.internal.R;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.app.IMediaContainerService;
 import com.android.internal.app.ResolverActivity;
-import com.android.internal.app.SuspendedAppActivity;
 import com.android.internal.content.NativeLibraryHelper;
 import com.android.internal.content.PackageHelper;
 import com.android.internal.logging.MetricsLogger;
@@ -411,7 +410,7 @@ public class PackageManagerService extends IPackageManager.Stub
     static final boolean DEBUG_DOMAIN_VERIFICATION = false;
     private static final boolean DEBUG_BACKUP = false;
     public static final boolean DEBUG_INSTALL = false;
-    public static final boolean DEBUG_REMOVE = true;
+    public static final boolean DEBUG_REMOVE = false;
     private static final boolean DEBUG_BROADCASTS = false;
     private static final boolean DEBUG_SHOW_INFO = false;
     private static final boolean DEBUG_PACKAGE_INFO = false;
@@ -14031,13 +14030,10 @@ public class PackageManagerService extends IPackageManager.Stub
                             + Manifest.permission.MANAGE_USERS);
         }
         final int callingUid = Binder.getCallingUid();
-        mPermissionManager.enforceCrossUserPermission(callingUid, userId,
-                true /* requireFullPermission */, true /* checkShell */,
-                "setPackagesSuspended for user " + userId);
-        if (callingUid != Process.ROOT_UID &&
-                !UserHandle.isSameApp(getPackageUid(callingPackage, 0, userId), callingUid)) {
-            throw new IllegalArgumentException("CallingPackage " + callingPackage + " does not"
-                    + " belong to calling app id " + UserHandle.getAppId(callingUid));
+        if (callingUid != Process.ROOT_UID && callingUid != Process.SYSTEM_UID
+                && getPackageUid(callingPackage, 0, userId) != callingUid) {
+            throw new SecurityException("Calling package " + callingPackage + " in user "
+                    + userId + " does not belong to calling uid " + callingUid);
         }
         if (!PLATFORM_PACKAGE_NAME.equals(callingPackage)
                 && mProtectedPackages.getDeviceOwnerOrProfileOwnerPackage(userId) != null) {
@@ -14164,9 +14160,19 @@ public class PackageManagerService extends IPackageManager.Stub
         }
     }
 
-    void onSuspendingPackageRemoved(String packageName, int removedForUser) {
-        final int[] userIds = (removedForUser == UserHandle.USER_ALL) ? sUserManager.getUserIds()
-                : new int[] {removedForUser};
+    /**
+     * Immediately unsuspends any packages suspended by the given package. To be called
+     * when such a package's data is cleared or it is removed from the device.
+     *
+     * <p><b>Should not be used on a frequent code path</b> as it flushes state to disk
+     * synchronously
+     *
+     * @param packageName The package holding {@link Manifest.permission#SUSPEND_APPS} permission
+     * @param affectedUser The user for which the changes are taking place.
+     */
+    void unsuspendForSuspendingPackage(String packageName, int affectedUser) {
+        final int[] userIds = (affectedUser == UserHandle.USER_ALL) ? sUserManager.getUserIds()
+                : new int[] {affectedUser};
         for (int userId : userIds) {
             List<String> affectedPackages = new ArrayList<>();
             synchronized (mPackages) {
@@ -14183,6 +14189,8 @@ public class PackageManagerService extends IPackageManager.Stub
                         new String[affectedPackages.size()]);
                 sendMyPackageSuspendedOrUnsuspended(packageArray, false, null, userId);
                 sendPackagesSuspendedForUser(packageArray, userId, false, null);
+                // Write package restrictions immediately to avoid an inconsistent state.
+                mSettings.writePackageRestrictionsLPr(userId);
             }
         }
     }
@@ -18758,7 +18766,7 @@ public class PackageManagerService extends IPackageManager.Stub
 
         final int userId = user == null ? UserHandle.USER_ALL : user.getIdentifier();
         if (ps.getPermissionsState().hasPermission(Manifest.permission.SUSPEND_APPS, userId)) {
-            onSuspendingPackageRemoved(packageName, userId);
+            unsuspendForSuspendingPackage(packageName, userId);
         }
 
 
@@ -18899,10 +18907,10 @@ public class PackageManagerService extends IPackageManager.Stub
                     true /*notLaunched*/,
                     false /*hidden*/,
                     false /*suspended*/,
-                    null, /*suspendingPackage*/
-                    null, /*dialogMessage*/
-                    null, /*suspendedAppExtras*/
-                    null, /*suspendedLauncherExtras*/
+                    null /*suspendingPackage*/,
+                    null /*dialogMessage*/,
+                    null /*suspendedAppExtras*/,
+                    null /*suspendedLauncherExtras*/,
                     false /*instantApp*/,
                     false /*virtualPreload*/,
                     null /*lastDisableAppCaller*/,
@@ -19088,6 +19096,10 @@ public class PackageManagerService extends IPackageManager.Stub
                                 .getService(DeviceStorageMonitorInternal.class);
                         if (dsm != null) {
                             dsm.checkMemory();
+                        }
+                        if (checkPermission(Manifest.permission.SUSPEND_APPS, packageName, userId)
+                                == PERMISSION_GRANTED) {
+                            unsuspendForSuspendingPackage(packageName, userId);
                         }
                     }
                 } else {
