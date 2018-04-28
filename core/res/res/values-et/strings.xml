@@ -836,7 +836,8 @@
     <string name="double_tap_toast" msgid="4595046515400268881">"Vihje: suurendamiseks ja vähendamiseks puudutage kaks korda."</string>
     <string name="autofill_this_form" msgid="4616758841157816676">"Automaatne täitmine"</string>
     <string name="setup_autofill" msgid="7103495070180590814">"Automaatse täitmise seadistamine"</string>
-    <string name="autofill_window_title" msgid="921006636895825007">"Automaattäide"</string>
+    <!-- no translation found for autofill_window_title (4107745526909284887) -->
+    <skip />
     <string name="autofill_address_name_separator" msgid="6350145154779706772">" "</string>
     <string name="autofill_address_summary_name_format" msgid="3268041054899214945">"$1$2$3"</string>
     <string name="autofill_address_summary_separator" msgid="7483307893170324129">", "</string>
@@ -1690,6 +1691,7 @@
     <string name="package_installed_device_owner" msgid="6875717669960212648">"Administraator on selle installinud"</string>
     <string name="package_updated_device_owner" msgid="1847154566357862089">"Administraator on seda värskendanud"</string>
     <string name="package_deleted_device_owner" msgid="2307122077550236438">"Administraator on selle kustutanud"</string>
+    <string name="battery_saver_description_with_learn_more" msgid="6323937147992667707">"Akusäästja lülitab mõned seadme funktsioonid välja ja piirab rakenduste kasutust, et aku tööiga pikendada. "<annotation id="url">"Lisateave"</annotation></string>
     <string name="battery_saver_description" msgid="769989536172631582">"Akusäästja lülitab mõned seadme funktsioonid välja ja piirab rakenduste kasutust, et aku tööiga pikendada."</string>
     <string name="data_saver_description" msgid="6015391409098303235">"Andmekasutuse vähendamiseks keelab andmeside mahu säästja mõne rakenduse puhul andmete taustal saatmise ja vastuvõtmise. Rakendus, mida praegu kasutate, pääseb andmesidele juurde, kuid võib seda teha väiksema sagedusega. Seetõttu võidakse näiteks kujutised kuvada alles siis, kui neid puudutate."</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"Lül. andmemahu säästja sisse?"</string>
@@ -1738,8 +1740,7 @@
     <string name="zen_mode_default_weekends_name" msgid="2786495801019345244">"Nädalavahetus"</string>
     <string name="zen_mode_default_events_name" msgid="8158334939013085363">"Sündmus"</string>
     <string name="zen_mode_default_every_night_name" msgid="3012363838882944175">"Magamine"</string>
-    <!-- no translation found for muted_by (5942954724562097128) -->
-    <skip />
+    <string name="muted_by" msgid="5942954724562097128">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g> vaigistab teatud helid"</string>
     <string name="system_error_wipe_data" msgid="6608165524785354962">"Seadmes ilmnes sisemine probleem ja seade võib olla ebastabiilne seni, kuni lähtestate seadme tehase andmetele."</string>
     <string name="system_error_manufacturer" msgid="8086872414744210668">"Seadmes ilmnes sisemine probleem. Üksikasjaliku teabe saamiseks võtke ühendust tootjaga."</string>
     <string name="stk_cc_ussd_to_dial" msgid="5214333646366591205">"USSD-taotlus muudeti tavaliseks kõneks"</string>

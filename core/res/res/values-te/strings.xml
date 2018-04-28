@@ -836,7 +836,8 @@
     <string name="double_tap_toast" msgid="4595046515400268881">"చిట్కా: దగ్గరకు మరియు దూరానికి జూమ్ చేయడానికి రెండు సార్లు నొక్కండి."</string>
     <string name="autofill_this_form" msgid="4616758841157816676">"స్వీయ పూరింపు"</string>
     <string name="setup_autofill" msgid="7103495070180590814">"స్వీయ పూరణను సెటప్ చేయండి"</string>
-    <string name="autofill_window_title" msgid="921006636895825007">"స్వీయ పూరింపు"</string>
+    <!-- no translation found for autofill_window_title (4107745526909284887) -->
+    <skip />
     <string name="autofill_address_name_separator" msgid="6350145154779706772">" "</string>
     <string name="autofill_address_summary_name_format" msgid="3268041054899214945">"$1$2$3"</string>
     <string name="autofill_address_summary_separator" msgid="7483307893170324129">", "</string>
@@ -1691,6 +1692,8 @@
     <string name="package_installed_device_owner" msgid="6875717669960212648">"మీ నిర్వాహకులు ఇన్‌స్టాల్ చేసారు"</string>
     <string name="package_updated_device_owner" msgid="1847154566357862089">"మీ నిర్వాహకులు నవీకరించారు"</string>
     <string name="package_deleted_device_owner" msgid="2307122077550236438">"మీ నిర్వాహకులు తొలగించారు"</string>
+    <!-- no translation found for battery_saver_description_with_learn_more (6323937147992667707) -->
+    <skip />
     <string name="battery_saver_description" msgid="769989536172631582">"మీ బ్యాటరీ జీవితకాలాన్ని పెంచడానికి, బ్యాటరీ సేవర్ కొన్ని పరికర ఫీచర్‌లను ఆఫ్ చేస్తుంది మరియు కొన్ని యాప్‌లను పరిమితం చేస్తుంది."</string>
     <string name="data_saver_description" msgid="6015391409098303235">"డేటా వినియోగాన్ని తగ్గించడంలో సహాయకరంగా ఉండటానికి, డేటా సేవర్ కొన్ని యాప్‌లను నేపథ్యంలో డేటాను పంపకుండా లేదా స్వీకరించకుండా నిరోధిస్తుంది. మీరు ప్రస్తుతం ఉపయోగిస్తున్న యాప్‌ డేటాను యాక్సెస్ చేయగలదు కానీ అలా అరుదుగా చేయవచ్చు. అంటే, ఉదాహరణకు, మీరు ఆ చిత్రాలను నొక్కే వరకు అవి ప్రదర్శించబడవు."</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"డేటా సేవర్‌ను ఆన్ చేయాలా?"</string>
@@ -1739,8 +1742,7 @@
     <string name="zen_mode_default_weekends_name" msgid="2786495801019345244">"వారాంతం"</string>
     <string name="zen_mode_default_events_name" msgid="8158334939013085363">"ఈవెంట్"</string>
     <string name="zen_mode_default_every_night_name" msgid="3012363838882944175">"నిద్రావస్థ"</string>
-    <!-- no translation found for muted_by (5942954724562097128) -->
-    <skip />
+    <string name="muted_by" msgid="5942954724562097128">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g> కొన్ని ధ్వనులను మ్యూట్ చేస్తోంది"</string>
     <string name="system_error_wipe_data" msgid="6608165524785354962">"మీ పరికరంతో అంతర్గత సమస్య ఏర్పడింది మరియు మీరు ఫ్యాక్టరీ డేటా రీసెట్ చేసే వరకు అస్థిరంగా ఉంటుంది."</string>
     <string name="system_error_manufacturer" msgid="8086872414744210668">"మీ పరికరంతో అంతర్గత సమస్య ఏర్పడింది. వివరాల కోసం మీ తయారీదారుని సంప్రదించండి."</string>
     <string name="stk_cc_ussd_to_dial" msgid="5214333646366591205">"USSD అభ్యర్థన సాధారణ కాల్‌కు మార్చబడింది"</string>

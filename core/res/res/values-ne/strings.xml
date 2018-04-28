@@ -836,7 +836,8 @@
     <string name="double_tap_toast" msgid="4595046515400268881">"जुक्ति: जुमलाई ठूलो र सानो पार्न दुई पटक हान्नुहोस्।"</string>
     <string name="autofill_this_form" msgid="4616758841157816676">"स्वतः भर्ने"</string>
     <string name="setup_autofill" msgid="7103495070180590814">"अटोफिल सेटअप गर्नुहोस्"</string>
-    <string name="autofill_window_title" msgid="921006636895825007">"स्वतः भरण"</string>
+    <!-- no translation found for autofill_window_title (4107745526909284887) -->
+    <skip />
     <string name="autofill_address_name_separator" msgid="6350145154779706772">" "</string>
     <string name="autofill_address_summary_name_format" msgid="3268041054899214945">"$१$२$३"</string>
     <string name="autofill_address_summary_separator" msgid="7483307893170324129">", "</string>
@@ -1696,6 +1697,8 @@
     <string name="package_installed_device_owner" msgid="6875717669960212648">"तपाईंका प्रशासकले स्थापना गर्नुभएको"</string>
     <string name="package_updated_device_owner" msgid="1847154566357862089">"तपाईंका प्रशासकले अद्यावधिक गर्नुभएको"</string>
     <string name="package_deleted_device_owner" msgid="2307122077550236438">"तपाईंका प्रशासकले मेट्नुभएको"</string>
+    <!-- no translation found for battery_saver_description_with_learn_more (6323937147992667707) -->
+    <skip />
     <string name="battery_saver_description" msgid="769989536172631582">"तपाईंको ब्याट्रीको आयु बढाउनाका लागि ब्याट्री सेभरले यन्त्रका केही सुविधाहरू निष्क्रिय पार्छ र अनुप्रयोगहरूलाई प्रतिबन्धित गर्छ।"</string>
     <string name="data_saver_description" msgid="6015391409098303235">"डेटाको प्रयोगलाई कम गर्नमा मद्दतका लागि डेटा सर्भरले केही अनुप्रयोगहरूलाई पृष्ठभूमिमा डेटा पठाउन वा प्राप्त गर्नबाट रोक्दछ। तपाईँले हाल प्रयोग गरिरहनुभएको अनु्प्रयोगले डेटामाथि पहुँच राख्न सक्छ, तर त्यसले यो काम थोरै पटक गर्न सक्छ। उदाहरणका लागि यसको मतलब यो हुन सक्छ: तपाईँले छविहरूलाई ट्याप नगरेसम्म ती प्रदर्शन हुँदैनन्।"</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"डेटा सेभरलाई सक्रिय गर्ने हो?"</string>
@@ -1744,8 +1747,7 @@
     <string name="zen_mode_default_weekends_name" msgid="2786495801019345244">"शनिबार"</string>
     <string name="zen_mode_default_events_name" msgid="8158334939013085363">"घटना"</string>
     <string name="zen_mode_default_every_night_name" msgid="3012363838882944175">"शयन अवस्था"</string>
-    <!-- no translation found for muted_by (5942954724562097128) -->
-    <skip />
+    <string name="muted_by" msgid="5942954724562097128">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g> ले केही ध्वनिहरू म्युट गर्दै छ"</string>
     <string name="system_error_wipe_data" msgid="6608165524785354962">"तपाईंको यन्त्रसँग आन्तरिक समस्या छ, र तपाईंले फ्याक्ट्री डाटा रिसेट नगर्दासम्म यो अस्थिर रहन्छ।"</string>
     <string name="system_error_manufacturer" msgid="8086872414744210668">"तपाईंको यन्त्रसँग आन्तरिक समस्या छ। विवरणहरूको लागि आफ्नो निर्मातासँग सम्पर्क गर्नुहोस्।"</string>
     <string name="stk_cc_ussd_to_dial" msgid="5214333646366591205">"USSD अनुरोधलाई नियमित कलमा परिवर्तन गरियो"</string>

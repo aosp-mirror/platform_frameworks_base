@@ -70,7 +70,7 @@
     <string name="ThreeWCMmi" msgid="9051047170321190368">"Upigaji simu kwa njia tatu"</string>
     <string name="RuacMmi" msgid="7827887459138308886">"Ukataaji wa simu zinazokera zisizohitajika"</string>
     <string name="CndMmi" msgid="3116446237081575808">"Kuonyeshwa kwa nambari inayopiga"</string>
-    <string name="DndMmi" msgid="1265478932418334331">"Usisumbue"</string>
+    <string name="DndMmi" msgid="1265478932418334331">"Usinisumbue"</string>
     <string name="CLIRDefaultOnNextCallOn" msgid="429415409145781923">"Chaguo-msingi za ID ya mpigaji simu za kutozuia. Simu ifuatayo: Imezuiliwa"</string>
     <string name="CLIRDefaultOnNextCallOff" msgid="3092918006077864624">"Chaguo-msingi za kitambulisho cha mpigaji simu huwa kuzuiwa. Simu ifuatayo: Haijazuiliwa"</string>
     <string name="CLIRDefaultOffNextCallOn" msgid="6179425182856418465">"Chaguo-msingi za ID ya mpigaji simu za kutozuia. Simu ifuatayo:Imezuiliwa"</string>
@@ -834,7 +834,8 @@
     <string name="double_tap_toast" msgid="4595046515400268881">"Kidokezo: Gusa mara mbili ili kukuza ndani na nje."</string>
     <string name="autofill_this_form" msgid="4616758841157816676">"Kujaza kiotomatiki"</string>
     <string name="setup_autofill" msgid="7103495070180590814">"Weka uwezo wa kujaza kiotomatiki"</string>
-    <string name="autofill_window_title" msgid="921006636895825007">"Kujaza Kiotomatiki"</string>
+    <!-- no translation found for autofill_window_title (4107745526909284887) -->
+    <skip />
     <string name="autofill_address_name_separator" msgid="6350145154779706772">" "</string>
     <string name="autofill_address_summary_name_format" msgid="3268041054899214945">"$1$2$3"</string>
     <string name="autofill_address_summary_separator" msgid="7483307893170324129">", "</string>
@@ -1221,7 +1222,7 @@
     <string name="sim_done_button" msgid="827949989369963775">"Nimemaliza"</string>
     <string name="sim_added_title" msgid="3719670512889674693">"SIM kadi imeongezwa"</string>
     <string name="sim_added_message" msgid="6599945301141050216">"Anzisha upya kifaa chako ili kufikia mtandao wa simu."</string>
-    <string name="sim_restart_button" msgid="4722407842815232347">"Anza upya"</string>
+    <string name="sim_restart_button" msgid="4722407842815232347">"Washa upya"</string>
     <string name="install_carrier_app_notification_title" msgid="9056007111024059888">"Washa huduma ya simu za mkononi"</string>
     <string name="install_carrier_app_notification_text" msgid="3346681446158696001">"Pakua programu ya mtoa huduma ili uwashe SIM yako mpya"</string>
     <string name="install_carrier_app_notification_text_app_name" msgid="1196505084835248137">"Pakua programu ya <xliff:g id="APP_NAME">%1$s</xliff:g> ili utumie SIM yako mpya"</string>
@@ -1688,6 +1689,7 @@
     <string name="package_installed_device_owner" msgid="6875717669960212648">"Imesakinishwa na msimamizi wako"</string>
     <string name="package_updated_device_owner" msgid="1847154566357862089">"Imesasishwa na msimamizi wako"</string>
     <string name="package_deleted_device_owner" msgid="2307122077550236438">"Imefutwa na msimamizi wako"</string>
+    <string name="battery_saver_description_with_learn_more" msgid="6323937147992667707">"Ili kuongeza muda wa matumizi ya betri, Kiokoa Betri huzima baadhi ya vipengele na kudhibiti programu. "<annotation id="url">"Pata Maelezo Zaidi"</annotation></string>
     <string name="battery_saver_description" msgid="769989536172631582">"Ili kuongeza muda wa matumizi ya betri, Kiokoa Betri huzima baadhi ya vipengele na kudhibiti programu."</string>
     <string name="data_saver_description" msgid="6015391409098303235">"Ili kusaidia kupunguza matumizi ya data, Kiokoa Data huzuia baadhi ya programu kupokea na kutuma data chini chini. Programu ambayo unatumia sasa inaweza kufikia data, lakini si kila wakati. Kwa mfano, haitaonyesha picha hadi utakapozifungua."</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"Ungependa Kuwasha Kiokoa Data?"</string>
@@ -1736,8 +1738,7 @@
     <string name="zen_mode_default_weekends_name" msgid="2786495801019345244">"Wikendi"</string>
     <string name="zen_mode_default_events_name" msgid="8158334939013085363">"Tukio"</string>
     <string name="zen_mode_default_every_night_name" msgid="3012363838882944175">"Kulala"</string>
-    <!-- no translation found for muted_by (5942954724562097128) -->
-    <skip />
+    <string name="muted_by" msgid="5942954724562097128">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g> inazima baadhi ya sauti"</string>
     <string name="system_error_wipe_data" msgid="6608165524785354962">"Kuna hitilafu ya ndani ya kifaa chako, na huenda kisiwe thabiti mpaka urejeshe mipangilio ya kiwandani."</string>
     <string name="system_error_manufacturer" msgid="8086872414744210668">"Kuna hitilafu ya ndani ya kifaa chako. Wasiliana na mtengenezaji wa kifaa chako kwa maelezo."</string>
     <string name="stk_cc_ussd_to_dial" msgid="5214333646366591205">"Imebadilisha ombi la USSD kuwa simu ya kawaida"</string>
@@ -1867,7 +1868,7 @@
     <string name="volume_dialog_ringer_guidance_vibrate" msgid="8902050240801159042">"Itatetema arifa ikitumwa au simu ikipigwa"</string>
     <string name="volume_dialog_ringer_guidance_silent" msgid="2128975224280276122">"Haitatoa mlio arifa ikitumwa au simu ikipigwa"</string>
     <string name="notification_channel_system_changes" msgid="5072715579030948646">"Mabadiliko kwenye mfumo"</string>
-    <string name="notification_channel_do_not_disturb" msgid="6766940333105743037">"Usisumbue"</string>
+    <string name="notification_channel_do_not_disturb" msgid="6766940333105743037">"Usinisumbue"</string>
     <string name="zen_upgrade_notification_visd_title" msgid="3288313883409759733">"Mpya: Kipengele cha Usinisumbue kinaficha arifa"</string>
     <string name="zen_upgrade_notification_visd_content" msgid="5533674060311631165">"Gusa ili upate maelezo zaidi na ubadilishe."</string>
     <string name="zen_upgrade_notification_title" msgid="3799603322910377294">"Kipengele cha Usinisumbue kimebadilishwa"</string>

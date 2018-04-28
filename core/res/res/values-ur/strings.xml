@@ -836,7 +836,8 @@
     <string name="double_tap_toast" msgid="4595046515400268881">"تجویز: زوم ان اور آؤٹ کیلئے دو بار تھپتھپائیں۔"</string>
     <string name="autofill_this_form" msgid="4616758841157816676">"آٹوفل"</string>
     <string name="setup_autofill" msgid="7103495070180590814">"آٹوفل مقرر کریں"</string>
-    <string name="autofill_window_title" msgid="921006636895825007">"آٹو فل"</string>
+    <!-- no translation found for autofill_window_title (4107745526909284887) -->
+    <skip />
     <string name="autofill_address_name_separator" msgid="6350145154779706772">" "</string>
     <string name="autofill_address_summary_name_format" msgid="3268041054899214945">"$1$2$3"</string>
     <string name="autofill_address_summary_separator" msgid="7483307893170324129">"، "</string>
@@ -1691,6 +1692,8 @@
     <string name="package_installed_device_owner" msgid="6875717669960212648">"آپ کے منتظم کے ذریعے انسٹال کیا گیا"</string>
     <string name="package_updated_device_owner" msgid="1847154566357862089">"آپ کے منتظم کے ذریعے اپ ڈیٹ کیا گیا"</string>
     <string name="package_deleted_device_owner" msgid="2307122077550236438">"آپ کے منتظم کے ذریعے حذف کیا گیا"</string>
+    <!-- no translation found for battery_saver_description_with_learn_more (6323937147992667707) -->
+    <skip />
     <string name="battery_saver_description" msgid="769989536172631582">"آپ کی بیٹری لائف کو بڑھانے کیلئے، بیٹری سیور آلہ کی کچھ خصوصیات کو آف اور ایپس کو محدود کرتا ہے۔"</string>
     <string name="data_saver_description" msgid="6015391409098303235">"ڈیٹا کے استعمال کو کم کرنے میں مدد کیلئے، ڈیٹا سیور پس منظر میں کچھ ایپس کو ڈیٹا بھیجنے یا موصول کرنے سے روکتا ہے۔ آپ جو ایپ فی الحال استعمال کر رہے ہیں وہ ڈیٹا پر رسائی کر سکتی ہے مگر ہو سکتا ہے ایسا زیادہ نہ ہو۔ اس کا مطلب مثال کے طور پر یہ ہو سکتا ہے کہ تصاویر تھپتھپانے تک ظاہر نہ ہوں۔"</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"ڈیٹا سیور آن کریں؟"</string>
@@ -1739,8 +1742,7 @@
     <string name="zen_mode_default_weekends_name" msgid="2786495801019345244">"ویک اینڈ"</string>
     <string name="zen_mode_default_events_name" msgid="8158334939013085363">"ایونٹ"</string>
     <string name="zen_mode_default_every_night_name" msgid="3012363838882944175">"سونا"</string>
-    <!-- no translation found for muted_by (5942954724562097128) -->
-    <skip />
+    <string name="muted_by" msgid="5942954724562097128">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g> کچھ آوازوں کو خاموش کر رہا ہے"</string>
     <string name="system_error_wipe_data" msgid="6608165524785354962">"آپ کے آلہ میں ایک داخلی مسئلہ ہے اور جب تک آپ فیکٹری ڈیٹا کو دوبارہ ترتیب نہیں دے دیتے ہیں، ہوسکتا ہے کہ یہ غیر مستحکم رہے۔"</string>
     <string name="system_error_manufacturer" msgid="8086872414744210668">"آپ کے آلہ میں ایک داخلی مسئلہ ہے۔ تفصیلات کیلئے اپنے مینوفیکچرر سے رابطہ کریں۔"</string>
     <string name="stk_cc_ussd_to_dial" msgid="5214333646366591205">"‏USSD درخواست کو ریگولر کال میں تبدیل کر دیا گیا"</string>

@@ -836,7 +836,8 @@
     <string name="double_tap_toast" msgid="4595046515400268881">"ជំនួយ៖ ប៉ះ​ពីរ​ដង ដើម្បី​ពង្រីក និង​បង្រួម។"</string>
     <string name="autofill_this_form" msgid="4616758841157816676">"បំពេញ​ស្វ័យ​ប្រវត្តិ"</string>
     <string name="setup_autofill" msgid="7103495070180590814">"រៀបចំ​ការ​បំពេញ​ស្វ័យ​ប្រវត្តិ"</string>
-    <string name="autofill_window_title" msgid="921006636895825007">"បំពេញ​ដោយ​ស្វ័យប្រវត្តិ"</string>
+    <!-- no translation found for autofill_window_title (4107745526909284887) -->
+    <skip />
     <string name="autofill_address_name_separator" msgid="6350145154779706772">" "</string>
     <string name="autofill_address_summary_name_format" msgid="3268041054899214945">"$1$2$3"</string>
     <string name="autofill_address_summary_separator" msgid="7483307893170324129">", "</string>
@@ -1252,9 +1253,9 @@
     <string name="usb_power_notification_message" msgid="4647527153291917218">"កំពុងសាកថ្ម​ឧបករណ៍​ដែលបានភ្ជាប់។ សូមចុចសម្រាប់​ជម្រើសបន្ថែម។"</string>
     <string name="usb_unsupported_audio_accessory_title" msgid="3529881374464628084">"បាន​រកឃើញ​គ្រឿង​បរិក្ខារ​សំឡេង​អាណាឡូក"</string>
     <string name="usb_unsupported_audio_accessory_message" msgid="6309553946441565215">"ឧបករណ៍​ដែលភ្ជាប់​មក​ជាមួយ​មិនត្រូវគ្នា​ជាមួយ​ទូរសព្ទ​នេះទេ។ ចុច​ដើម្បី​ស្វែងយល់​បន្ថែម។"</string>
-    <string name="adb_active_notification_title" msgid="6729044778949189918">"បាន​ភ្ជាប់​ការ​កែ​កំហុស​ USB"</string>
-    <string name="adb_active_notification_message" msgid="7463062450474107752">"សូមចុច​ដើម្បី​បិទ​ការជួសជុល ​USB"</string>
-    <string name="adb_active_notification_message" product="tv" msgid="8470296818270110396">"ជ្រើស​ ដើម្បី​បិទ​ការ​កែ​កំហុស​យូអេសប៊ី។"</string>
+    <string name="adb_active_notification_title" msgid="6729044778949189918">"បាន​ភ្ជាប់​ការ​កែ​កំហុសតាម​ USB"</string>
+    <string name="adb_active_notification_message" msgid="7463062450474107752">"ចុច​ដើម្បី​បិទ​ការកែកំហុសតាម ​USB"</string>
+    <string name="adb_active_notification_message" product="tv" msgid="8470296818270110396">"ជ្រើស​រើស ដើម្បី​បិទ​ការ​កែ​កំហុសតាម USB ។"</string>
     <string name="taking_remote_bugreport_notification_title" msgid="6742483073875060934">"កំពុងទទួលយករបាយការណ៍កំហុស…"</string>
     <string name="share_remote_bugreport_notification_title" msgid="4987095013583691873">"ចែករំលែករបាយការណ៍កំហុសឬ?"</string>
     <string name="sharing_remote_bugreport_notification_title" msgid="7572089031496651372">"កំពុងចែករំលែករបាយកំហុស…"</string>
@@ -1692,6 +1693,7 @@
     <string name="package_installed_device_owner" msgid="6875717669960212648">"​ដំឡើង​ដោយ​អ្នកគ្រប់គ្រង​របស់​អ្នក"</string>
     <string name="package_updated_device_owner" msgid="1847154566357862089">"ធ្វើ​បច្ចុប្បន្នភាព​ដោយ​អ្នកគ្រប់គ្រង​របស់​អ្នក"</string>
     <string name="package_deleted_device_owner" msgid="2307122077550236438">"លុប​ដោយ​អ្នកគ្រប់គ្រង​របស់​អ្នក"</string>
+    <string name="battery_saver_description_with_learn_more" msgid="6323937147992667707">"ដើម្បី​បង្កើន​ថាមពល​ថ្មរបស់​អ្នក​ កម្មវិធីសន្សំ​ថ្ម​បិទ​មុខងារ​មួយ​ចំនួនរបស់​ឧបករណ៍​ និង​ដាក់​កំហិតលើ​កម្មវិធីផ្សេងៗ។ "<annotation id="url">"ស្វែងយល់​បន្ថែម"</annotation></string>
     <string name="battery_saver_description" msgid="769989536172631582">"ដើម្បី​បង្កើន​ថាមពល​ថ្មរបស់​អ្នក​ កម្មវិធីសន្សំ​ថ្ម​បិទ​មុខងារ​មួយ​ចំនួនរបស់​ឧបករណ៍​ និង​ដាក់​កំហិតលើ​​កម្មវិធីផ្សេងៗ។"</string>
     <string name="data_saver_description" msgid="6015391409098303235">"ដើម្បីជួយកាត់បន្ថយការប្រើប្រាស់ទិន្នន័យ កម្មវិធីសន្សំសំចៃទិន្នន័យរារាំងកម្មវិធីមួយចំនួនមិនឲ្យបញ្ជូន ឬទទួលទិន្នន័យនៅផ្ទៃខាងក្រោយទេ។ កម្មវិធីដែលអ្នកកំពុងប្រើនាពេលបច្ចុប្បន្នអាចចូលប្រើប្រាស់​ទិន្នន័យបាន ប៉ុន្តែអាចនឹងមិនញឹកញាប់ដូចមុនទេ។ ឧទាហរណ៍ រូបភាពមិនបង្ហាញទេ លុះត្រាតែអ្នកប៉ះរូបភាពទាំងនោះ។"</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"បើកកម្មវិធីសន្សំសំចៃទិន្នន័យឬ?"</string>
@@ -1740,8 +1742,7 @@
     <string name="zen_mode_default_weekends_name" msgid="2786495801019345244">"ចុងសប្ដាហ៍"</string>
     <string name="zen_mode_default_events_name" msgid="8158334939013085363">"ព្រឹត្តិការណ៍"</string>
     <string name="zen_mode_default_every_night_name" msgid="3012363838882944175">"កំពុងដេក"</string>
-    <!-- no translation found for muted_by (5942954724562097128) -->
-    <skip />
+    <string name="muted_by" msgid="5942954724562097128">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g> កំពុង​បិទសំឡេង​មួយចំនួន"</string>
     <string name="system_error_wipe_data" msgid="6608165524785354962">"មានបញ្ហាខាងក្នុងឧបករណ៍របស់អ្នក ហើយវាអ្នកមិនមានស្ថេរភាព រហូតទាល់តែអ្នកកំណត់ដូចដើមវិញទាំងស្រុង។"</string>
     <string name="system_error_manufacturer" msgid="8086872414744210668">"មានបញ្ហាខាងក្នុងឧបករណ៍របស់អ្នក ទំនាក់ទំនងក្រុមហ៊ុនផលិតឧបករណ៍របស់អ្នកសម្រាប់ព័ត៌មានបន្ថែម។"</string>
     <string name="stk_cc_ussd_to_dial" msgid="5214333646366591205">"សំណើ USSD ត្រូវបាន​ប្ដូរ​ទៅ​ការហៅ​ធម្មតា"</string>
@@ -1787,7 +1788,7 @@
     <string name="work_mode_off_message" msgid="5130856710614337649">"កម្មវិធី​ការងារ ការ​ជូនដំណឹង ទិន្នន័យ និង​មុខងារ​កម្រង​ព័ត៌មាន​ការងារ​ផ្សេង​ទៀត​របស់អ្នក​នឹង​ត្រូវ​បាន​បើក"</string>
     <string name="work_mode_turn_on" msgid="2062544985670564875">"បើក"</string>
     <string name="deprecated_target_sdk_message" msgid="1449696506742572767">"កម្មវិធី​នេះ​ត្រូវបាន​បង្កើត​ឡើង​សម្រាប់​កំណែ​ប្រព័ន្ធ​ប្រតិបត្តិការ Android ចាស់ ហើយ​វាអាច​ដំណើរការ​ខុសប្រក្រតី។ សូម​សាកល្បង​ពិនិត្យមើល​កំណែ​ថ្មី ឬ​ទាក់ទង​ទៅអ្នក​អភិវឌ្ឍន៍។"</string>
-    <string name="deprecated_target_sdk_app_store" msgid="5032340500368495077">"ពិនិត្យមើល​កំណែ​ថ្មី"</string>
+    <string name="deprecated_target_sdk_app_store" msgid="5032340500368495077">"រក​មើល​កំណែ​ថ្មី"</string>
     <string name="new_sms_notification_title" msgid="8442817549127555977">"អ្នកមានសារថ្មី"</string>
     <string name="new_sms_notification_content" msgid="7002938807812083463">"បើកកម្មវិធីសារ SMS ដើម្បីមើល"</string>
     <string name="user_encrypted_title" msgid="9054897468831672082">"លទ្ធភាពប្រើមុខងារមួយចំនួនអាចត្រូវបាកម្រិត"</string>
@@ -1815,7 +1816,7 @@
     <string name="app_category_maps" msgid="5878491404538024367">"ផែនទី និង​ការ​រុករក"</string>
     <string name="app_category_productivity" msgid="3742083261781538852">"ផលិត​ភាព"</string>
     <string name="device_storage_monitor_notification_channel" msgid="3295871267414816228">"ទំហំផ្ទុកឧបករណ៍"</string>
-    <string name="adb_debugging_notification_channel_tv" msgid="5537766997350092316">"ការ​កែកំហុស USB"</string>
+    <string name="adb_debugging_notification_channel_tv" msgid="5537766997350092316">"ការ​កែកំហុសតាម USB"</string>
     <string name="time_picker_hour_label" msgid="2979075098868106450">"ម៉ោង"</string>
     <string name="time_picker_minute_label" msgid="5168864173796598399">"នាទី"</string>
     <string name="time_picker_header_text" msgid="143536825321922567">"កំណត់​ម៉ោង"</string>

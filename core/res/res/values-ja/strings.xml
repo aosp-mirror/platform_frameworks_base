@@ -836,7 +836,8 @@
     <string name="double_tap_toast" msgid="4595046515400268881">"ヒント: ダブルタップで拡大/縮小できます。"</string>
     <string name="autofill_this_form" msgid="4616758841157816676">"自動入力"</string>
     <string name="setup_autofill" msgid="7103495070180590814">"自動入力を設定"</string>
-    <string name="autofill_window_title" msgid="921006636895825007">"自動入力"</string>
+    <!-- no translation found for autofill_window_title (4107745526909284887) -->
+    <skip />
     <string name="autofill_address_name_separator" msgid="6350145154779706772">" "</string>
     <string name="autofill_address_summary_name_format" msgid="3268041054899214945">"$3$2$1"</string>
     <string name="autofill_address_summary_separator" msgid="7483307893170324129">"、 "</string>
@@ -1690,6 +1691,7 @@
     <string name="package_installed_device_owner" msgid="6875717669960212648">"管理者によりインストールされています"</string>
     <string name="package_updated_device_owner" msgid="1847154566357862089">"管理者により更新されています"</string>
     <string name="package_deleted_device_owner" msgid="2307122077550236438">"管理者により削除されています"</string>
+    <string name="battery_saver_description_with_learn_more" msgid="6323937147992667707">"電池寿命を延ばすため、バッテリー セーバーは端末の一部の機能を OFF にし、アプリを制限します。"<annotation id="url">"詳細"</annotation></string>
     <string name="battery_saver_description" msgid="769989536172631582">"電池寿命を延ばすため、バッテリー セーバーは端末の一部の機能を OFF にし、アプリを制限します。"</string>
     <string name="data_saver_description" msgid="6015391409098303235">"データセーバーは、一部のアプリによるバックグラウンドでのデータ送受信を停止することでデータ使用量を抑制します。使用中のアプリからデータにアクセスすることはできますが、その頻度は低くなる場合があります。この影響として、たとえば画像はタップしないと表示されないようになります。"</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"データセーバーを ON にしますか？"</string>
@@ -1728,7 +1730,7 @@
     </plurals>
     <string name="zen_mode_until" msgid="7336308492289875088">"<xliff:g id="FORMATTEDTIME">%1$s</xliff:g>まで"</string>
     <string name="zen_mode_alarm" msgid="9128205721301330797">"<xliff:g id="FORMATTEDTIME">%1$s</xliff:g>（次のアラーム）まで"</string>
-    <string name="zen_mode_forever" msgid="931849471004038757">"ユーザーが OFF にするまで"</string>
+    <string name="zen_mode_forever" msgid="931849471004038757">"自分が OFF にするまで"</string>
     <string name="zen_mode_forever_dnd" msgid="3792132696572189081">"マナーモードを OFF にするまで"</string>
     <string name="zen_mode_rule_name_combination" msgid="191109939968076477">"<xliff:g id="FIRST">%1$s</xliff:g>/<xliff:g id="REST">%2$s</xliff:g>"</string>
     <string name="toolbar_collapse_description" msgid="2821479483960330739">"折りたたむ"</string>
@@ -1738,8 +1740,7 @@
     <string name="zen_mode_default_weekends_name" msgid="2786495801019345244">"週末"</string>
     <string name="zen_mode_default_events_name" msgid="8158334939013085363">"予定"</string>
     <string name="zen_mode_default_every_night_name" msgid="3012363838882944175">"睡眠中"</string>
-    <!-- no translation found for muted_by (5942954724562097128) -->
-    <skip />
+    <string name="muted_by" msgid="5942954724562097128">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g> により一部の音はミュートに設定"</string>
     <string name="system_error_wipe_data" msgid="6608165524785354962">"端末で内部的な問題が発生しました。データが初期化されるまで不安定になる可能性があります。"</string>
     <string name="system_error_manufacturer" msgid="8086872414744210668">"端末で内部的な問題が発生しました。詳しくはメーカーにお問い合わせください。"</string>
     <string name="stk_cc_ussd_to_dial" msgid="5214333646366591205">"USSD リクエストは通常の通話に変更されました"</string>

@@ -282,7 +282,7 @@
     <string name="permgrouplab_sms" msgid="228308803364967808">"簡訊"</string>
     <string name="permgroupdesc_sms" msgid="4656988620100940350">"傳送及查看簡訊"</string>
     <string name="permgrouprequest_sms" msgid="7168124215838204719">"要允許「<xliff:g id="APP_NAME">%1$s</xliff:g>」傳送及查看簡訊嗎？"</string>
-    <string name="permgrouplab_storage" msgid="1971118770546336966">"儲存"</string>
+    <string name="permgrouplab_storage" msgid="1971118770546336966">"儲存空間"</string>
     <string name="permgroupdesc_storage" msgid="637758554581589203">"存取裝置中的相片、媒體和檔案"</string>
     <string name="permgrouprequest_storage" msgid="7885942926944299560">"要允許「<xliff:g id="APP_NAME">%1$s</xliff:g>」存取裝置中的相片、媒體和檔案嗎？"</string>
     <string name="permgrouplab_microphone" msgid="171539900250043464">"麥克風"</string>
@@ -581,8 +581,8 @@
     <string name="policydesc_watchLogin_secondaryUser" product="tablet" msgid="4280246270601044505">"監控螢幕解鎖密碼輸入錯誤的次數；如果輸入錯誤的次數超過上限，系統會將平板電腦鎖定，或將這個使用者的資料全部清除。"</string>
     <string name="policydesc_watchLogin_secondaryUser" product="TV" msgid="3484832653564483250">"監控螢幕解鎖密碼輸入錯誤的次數；如果輸入錯誤的次數超過上限，系統會將電視鎖定，或將這個使用者的資料全部清除。"</string>
     <string name="policydesc_watchLogin_secondaryUser" product="default" msgid="2185480427217127147">"監控螢幕解鎖密碼輸入錯誤的次數；如果輸入錯誤的次數超過上限，系統會將手機鎖定，或將這個使用者的資料全部清除。"</string>
-    <string name="policylab_resetPassword" msgid="4934707632423915395">"變更螢幕鎖定密碼"</string>
-    <string name="policydesc_resetPassword" msgid="1278323891710619128">"變更螢幕鎖定密碼。"</string>
+    <string name="policylab_resetPassword" msgid="4934707632423915395">"變更鎖定螢幕方式"</string>
+    <string name="policydesc_resetPassword" msgid="1278323891710619128">"變更鎖定螢幕方式。"</string>
     <string name="policylab_forceLock" msgid="2274085384704248431">"鎖定螢幕"</string>
     <string name="policydesc_forceLock" msgid="1141797588403827138">"控制鎖定螢幕的方式和時間。"</string>
     <string name="policylab_wipeData" msgid="3910545446758639713">"清除所有資料"</string>
@@ -836,7 +836,8 @@
     <string name="double_tap_toast" msgid="4595046515400268881">"提示：輕觸兩下即可縮放。"</string>
     <string name="autofill_this_form" msgid="4616758841157816676">"自動填入功能"</string>
     <string name="setup_autofill" msgid="7103495070180590814">"設定自動填入功能"</string>
-    <string name="autofill_window_title" msgid="921006636895825007">"自動填入"</string>
+    <!-- no translation found for autofill_window_title (4107745526909284887) -->
+    <skip />
     <string name="autofill_address_name_separator" msgid="6350145154779706772">" //*** Empty segment here as a separator ***//"</string>
     <string name="autofill_address_summary_name_format" msgid="3268041054899214945">"$1$2$3"</string>
     <string name="autofill_address_summary_separator" msgid="7483307893170324129">"， "</string>
@@ -1690,6 +1691,7 @@
     <string name="package_installed_device_owner" msgid="6875717669960212648">"已由你的管理員安裝"</string>
     <string name="package_updated_device_owner" msgid="1847154566357862089">"已由你的管理員更新"</string>
     <string name="package_deleted_device_owner" msgid="2307122077550236438">"已由你的管理員刪除"</string>
+    <string name="battery_saver_description_with_learn_more" msgid="6323937147992667707">"為了延長電池續航力，節約耗電量模式會關閉部分裝置功能並限制應用程式。"<annotation id="url">"瞭解詳情"</annotation></string>
     <string name="battery_saver_description" msgid="769989536172631582">"為了延長電池續航力，節約耗電量模式會關閉部分裝置功能，並限制應用程式。"</string>
     <string name="data_saver_description" msgid="6015391409098303235">"「數據節省模式」可防止部分應用程式在背景收發資料，以節省數據用量。你目前使用的某個應用程式可以存取資料，但存取頻率可能不如平時高。舉例來說，圖片可能不會自動顯示，而必須由你輕觸後才會顯示。"</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"要開啟數據節省模式嗎？"</string>
@@ -1738,8 +1740,7 @@
     <string name="zen_mode_default_weekends_name" msgid="2786495801019345244">"週末"</string>
     <string name="zen_mode_default_events_name" msgid="8158334939013085363">"活動"</string>
     <string name="zen_mode_default_every_night_name" msgid="3012363838882944175">"睡眠"</string>
-    <!-- no translation found for muted_by (5942954724562097128) -->
-    <skip />
+    <string name="muted_by" msgid="5942954724562097128">"「<xliff:g id="THIRD_PARTY">%1$s</xliff:g>」正在關閉部分音效"</string>
     <string name="system_error_wipe_data" msgid="6608165524785354962">"你的裝置發生內部問題，必須將裝置恢復原廠設定才能解除不穩定狀態。"</string>
     <string name="system_error_manufacturer" msgid="8086872414744210668">"你的裝置發生內部問題，詳情請洽裝置製造商。"</string>
     <string name="stk_cc_ussd_to_dial" msgid="5214333646366591205">"USSD 要求已變更為一般通話"</string>
@@ -1779,7 +1780,7 @@
     <string name="region_picker_section_all" msgid="8966316787153001779">"所有地區"</string>
     <string name="locale_search_menu" msgid="2560710726687249178">"搜尋"</string>
     <string name="app_suspended_title" msgid="1919029799438164552">"無法開啟應用程式"</string>
-    <string name="app_suspended_default_message" msgid="7875306315686531621">"目前無法使用「<xliff:g id="APP_NAME_0">%1$s</xliff:g>」應用程式。這個應用程式是由「<xliff:g id="APP_NAME_1">%2$s</xliff:g>」所管理。"</string>
+    <string name="app_suspended_default_message" msgid="7875306315686531621">"目前無法使用「<xliff:g id="APP_NAME_0">%1$s</xliff:g>」應用程式。這項設定是由「<xliff:g id="APP_NAME_1">%2$s</xliff:g>」應用程式管理。"</string>
     <string name="app_suspended_more_details" msgid="1131804827776778187">"瞭解詳情"</string>
     <string name="work_mode_off_title" msgid="1118691887588435530">"要開啟 Work 設定檔嗎？"</string>
     <string name="work_mode_off_message" msgid="5130856710614337649">"系統將開啟你的辦公應用程式、通知、資料和其他 Work 設定檔功能"</string>
@@ -1815,7 +1816,7 @@
     <string name="device_storage_monitor_notification_channel" msgid="3295871267414816228">"裝置儲存空間"</string>
     <string name="adb_debugging_notification_channel_tv" msgid="5537766997350092316">"USB 偵錯"</string>
     <string name="time_picker_hour_label" msgid="2979075098868106450">"點"</string>
-    <string name="time_picker_minute_label" msgid="5168864173796598399">"分鐘"</string>
+    <string name="time_picker_minute_label" msgid="5168864173796598399">"分"</string>
     <string name="time_picker_header_text" msgid="143536825321922567">"設定時間"</string>
     <string name="time_picker_input_error" msgid="7574999942502513765">"請輸入有效的時間"</string>
     <string name="time_picker_prompt_label" msgid="7588093983899966783">"輸入時間"</string>
