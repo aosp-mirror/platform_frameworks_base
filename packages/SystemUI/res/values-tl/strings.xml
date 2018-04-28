@@ -32,7 +32,7 @@
     <string name="status_bar_no_notifications_title" msgid="4755261167193833213">"Walang mga notification"</string>
     <string name="status_bar_ongoing_events_title" msgid="1682504513316879202">"Nagpapatuloy"</string>
     <string name="status_bar_latest_events_title" msgid="6594767438577593172">"Mga Notification"</string>
-    <string name="battery_low_title" msgid="6456385927409742437">"Mahina na ang baterya"</string>
+    <string name="battery_low_title" msgid="9187898087363540349">"Malapit nang maubos ang baterya"</string>
     <string name="battery_low_percent_format" msgid="2900940511201380775">"<xliff:g id="PERCENTAGE">%s</xliff:g> na lang ang natitira"</string>
     <string name="battery_low_percent_format_hybrid" msgid="6838677459286775617">"<xliff:g id="PERCENTAGE">%s</xliff:g> na lang ang natitira, humigit-kumulang <xliff:g id="TIME">%s</xliff:g> ang natitira batay sa iyong paggamit"</string>
     <string name="battery_low_percent_format_hybrid_short" msgid="9025795469949145586">"<xliff:g id="PERCENTAGE">%s</xliff:g> na lang ang natitira, humigit-kumulang <xliff:g id="TIME">%s</xliff:g> ang natitira"</string>
@@ -95,8 +95,7 @@
     <string name="accessibility_unlock_button" msgid="128158454631118828">"I-unlock"</string>
     <string name="accessibility_waiting_for_fingerprint" msgid="4808860050517462885">"Naghihintay ng fingerprint"</string>
     <string name="accessibility_unlock_without_fingerprint" msgid="7541705575183694446">"I-unlock nang hindi ginagamit ang iyong fingerprint"</string>
-    <!-- no translation found for accessibility_send_smart_reply (7766727839703044493) -->
-    <skip />
+    <string name="accessibility_send_smart_reply" msgid="7766727839703044493">"Ipadala"</string>
     <string name="unlock_label" msgid="8779712358041029439">"i-unlock"</string>
     <string name="phone_label" msgid="2320074140205331708">"buksan ang telepono"</string>
     <string name="voice_assist_label" msgid="3956854378310019854">"buksan ang voice assist"</string>
@@ -208,10 +207,8 @@
     <string name="accessibility_quick_settings_airplane_on" msgid="6406141469157599296">"Naka-on ang Airplane mode."</string>
     <string name="accessibility_quick_settings_airplane_changed_off" msgid="66846307818850664">"Na-off ang Airplane mode."</string>
     <string name="accessibility_quick_settings_airplane_changed_on" msgid="8983005603505087728">"Na-on ang Airplane mode."</string>
-    <!-- no translation found for accessibility_quick_settings_dnd_none_on (2960643943620637020) -->
-    <skip />
-    <!-- no translation found for accessibility_quick_settings_dnd_alarms_on (3357131899365865386) -->
-    <skip />
+    <string name="accessibility_quick_settings_dnd_none_on" msgid="2960643943620637020">"ganap na katahimikan"</string>
+    <string name="accessibility_quick_settings_dnd_alarms_on" msgid="3357131899365865386">"mga alarm lang"</string>
     <string name="accessibility_quick_settings_dnd" msgid="6607873236717185815">"Huwag istorbohin."</string>
     <string name="accessibility_quick_settings_dnd_changed_off" msgid="898107593453022935">"Na-off na ang huwag istorbohin"</string>
     <string name="accessibility_quick_settings_dnd_changed_on" msgid="4483780856613561039">"Na-on na ang huwag istorbohin."</string>
@@ -353,7 +350,7 @@
     <string name="quick_settings_nfc_label" msgid="9012153754816969325">"NFC"</string>
     <string name="quick_settings_nfc_off" msgid="6883274004315134333">"Naka-disable ang NFC"</string>
     <string name="quick_settings_nfc_on" msgid="6680317193676884311">"Naka-enable ang NFC"</string>
-    <string name="recents_empty_message" msgid="808480104164008572">"Walang mga kamakailang item"</string>
+    <string name="recents_empty_message" msgid="808480104164008572">"Walang kamakailang item"</string>
     <string name="recents_empty_message_dismissed_all" msgid="2791312568666558651">"Na-clear mo ang lahat"</string>
     <string name="recents_app_info_button_label" msgid="2890317189376000030">"Impormasyon ng Application"</string>
     <string name="recents_lock_to_app_button_label" msgid="6942899049072506044">"pagpi-pin sa screen"</string>
@@ -620,8 +617,7 @@
       <item quantity="other">ginagamit ang <xliff:g id="PERFORMING_ACTIVITY_1">%1$s</xliff:g> at <xliff:g id="PERFORMING_ACTIVITY_2">%2$s</xliff:g></item>
     </plurals>
     <string name="notification_appops_settings" msgid="1028328314935908050">"Mga Setting"</string>
-    <!-- no translation found for notification_appops_ok (1156966426011011434) -->
-    <skip />
+    <string name="notification_appops_ok" msgid="1156966426011011434">"OK"</string>
     <string name="notification_channel_controls_opened_accessibility" msgid="6553950422055908113">"Binuksan ang mga kontrol sa notification para sa <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="notification_channel_controls_closed_accessibility" msgid="7521619812603693144">"Isinara ang mga kontrol sa notification para sa <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="notification_channel_switch_accessibility" msgid="3420796005601900717">"Payagan ang mga notification mula sa channel na ito"</string>

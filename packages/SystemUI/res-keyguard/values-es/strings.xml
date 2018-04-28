@@ -140,7 +140,10 @@
       <item quantity="one">El dispositivo no se ha desbloqueado durante <xliff:g id="NUMBER_0">%d</xliff:g> hora. Confirma la contraseña.</item>
     </plurals>
     <string name="fingerprint_not_recognized" msgid="348813995267914625">"No reconocido"</string>
-    <!-- no translation found for kg_password_default_pin_message (3739658416797652781) -->
+    <plurals name="kg_password_default_pin_message" formatted="false" msgid="3739658416797652781">
+      <item quantity="other">Introduce el PIN de la tarjeta SIM. Te quedan <xliff:g id="NUMBER_1">%d</xliff:g> intentos.</item>
+      <item quantity="one">Introduce el PIN de la tarjeta SIM. Te queda <xliff:g id="NUMBER_0">%d</xliff:g> intento para tener que ponerte en contacto con tu operador para desbloquear el dispositivo.</item>
+    </plurals>
     <plurals name="kg_password_default_puk_message" formatted="false" msgid="8744416410184198352">
       <item quantity="other">La tarjeta SIM está inhabilitada. Introduce el código PUK para continuar. Te quedan <xliff:g id="_NUMBER_1">%d</xliff:g> intentos para que la tarjeta SIM quede inservible de forma permanente. Ponte en contacto con tu operador para obtener más información.</item>
       <item quantity="one">La tarjeta SIM está inhabilitada. Introduce el código PUK para continuar. Te queda <xliff:g id="_NUMBER_0">%d</xliff:g> intento para que la tarjeta SIM quede inservible de forma permanente. Ponte en contacto con tu operador para obtener más información.</item>

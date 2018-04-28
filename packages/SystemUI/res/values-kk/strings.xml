@@ -32,7 +32,7 @@
     <string name="status_bar_no_notifications_title" msgid="4755261167193833213">"Хабарлар жоқ"</string>
     <string name="status_bar_ongoing_events_title" msgid="1682504513316879202">"Ағымдағы"</string>
     <string name="status_bar_latest_events_title" msgid="6594767438577593172">"Хабарлар"</string>
-    <string name="battery_low_title" msgid="6456385927409742437">"Батарея заряды төмен"</string>
+    <string name="battery_low_title" msgid="9187898087363540349">"Батерея заряды жақын арада бітуі мүмкін"</string>
     <string name="battery_low_percent_format" msgid="2900940511201380775">"<xliff:g id="PERCENTAGE">%s</xliff:g> қалды"</string>
     <string name="battery_low_percent_format_hybrid" msgid="6838677459286775617">"Пайдалану барысына байланысты <xliff:g id="PERCENTAGE">%s</xliff:g> заряд, шамамен <xliff:g id="TIME">%s</xliff:g> қалды"</string>
     <string name="battery_low_percent_format_hybrid_short" msgid="9025795469949145586">"<xliff:g id="PERCENTAGE">%s</xliff:g> заряд, шамамен <xliff:g id="TIME">%s</xliff:g> қалды"</string>
@@ -95,8 +95,7 @@
     <string name="accessibility_unlock_button" msgid="128158454631118828">"Бекітпесін ашу"</string>
     <string name="accessibility_waiting_for_fingerprint" msgid="4808860050517462885">"Саусақ ізі күтілуде"</string>
     <string name="accessibility_unlock_without_fingerprint" msgid="7541705575183694446">"Саусақ ізін пайдаланбай құлыпты ашу"</string>
-    <!-- no translation found for accessibility_send_smart_reply (7766727839703044493) -->
-    <skip />
+    <string name="accessibility_send_smart_reply" msgid="7766727839703044493">"Жіберу"</string>
     <string name="unlock_label" msgid="8779712358041029439">"бекітпесін ашу"</string>
     <string name="phone_label" msgid="2320074140205331708">"телефонды ашу"</string>
     <string name="voice_assist_label" msgid="3956854378310019854">"ашық дауыс көмекшісі"</string>
@@ -208,10 +207,8 @@
     <string name="accessibility_quick_settings_airplane_on" msgid="6406141469157599296">"Ұшақ режимі қосулы."</string>
     <string name="accessibility_quick_settings_airplane_changed_off" msgid="66846307818850664">"Ұшақ режимі өшірілді."</string>
     <string name="accessibility_quick_settings_airplane_changed_on" msgid="8983005603505087728">"Ұшақ режимі қосылды."</string>
-    <!-- no translation found for accessibility_quick_settings_dnd_none_on (2960643943620637020) -->
-    <skip />
-    <!-- no translation found for accessibility_quick_settings_dnd_alarms_on (3357131899365865386) -->
-    <skip />
+    <string name="accessibility_quick_settings_dnd_none_on" msgid="2960643943620637020">"үнсіз"</string>
+    <string name="accessibility_quick_settings_dnd_alarms_on" msgid="3357131899365865386">"тек дабылдар"</string>
     <string name="accessibility_quick_settings_dnd" msgid="6607873236717185815">"Мазаламау."</string>
     <string name="accessibility_quick_settings_dnd_changed_off" msgid="898107593453022935">"Мазаламау режимі өшірілді."</string>
     <string name="accessibility_quick_settings_dnd_changed_on" msgid="4483780856613561039">"Мазаламау режимі қосылды."</string>
@@ -296,7 +293,7 @@
     <string name="quick_settings_rotation_locked_portrait_label" msgid="5102691921442135053">"Портрет"</string>
     <string name="quick_settings_rotation_locked_landscape_label" msgid="8553157770061178719">"Пейзаж"</string>
     <string name="quick_settings_ime_label" msgid="7073463064369468429">"Енгізу әдісі"</string>
-    <string name="quick_settings_location_label" msgid="5011327048748762257">"Орын"</string>
+    <string name="quick_settings_location_label" msgid="5011327048748762257">"Орналасу"</string>
     <string name="quick_settings_location_off_label" msgid="7464544086507331459">"Орын өшірулі"</string>
     <string name="quick_settings_media_device_label" msgid="1302906836372603762">"Meдиа құрылғысы"</string>
     <string name="quick_settings_rssi_label" msgid="7725671335550695589">"RSSI (алынған сигнал қуатының көрсеткіші)"</string>
@@ -620,8 +617,7 @@
       <item quantity="one"><xliff:g id="PERFORMING_ACTIVITY_0">%1$s</xliff:g> пайдалануда</item>
     </plurals>
     <string name="notification_appops_settings" msgid="1028328314935908050">"Параметрлер"</string>
-    <!-- no translation found for notification_appops_ok (1156966426011011434) -->
-    <skip />
+    <string name="notification_appops_ok" msgid="1156966426011011434">"Жарайды"</string>
     <string name="notification_channel_controls_opened_accessibility" msgid="6553950422055908113">"<xliff:g id="APP_NAME">%1$s</xliff:g> хабарландыруларын басқару элементтері ашылды"</string>
     <string name="notification_channel_controls_closed_accessibility" msgid="7521619812603693144">"<xliff:g id="APP_NAME">%1$s</xliff:g> хабарландыруларын басқару элементтері жабылды"</string>
     <string name="notification_channel_switch_accessibility" msgid="3420796005601900717">"Осы арнадан келетін хабарландыруларға рұқсат беру"</string>
@@ -674,7 +670,7 @@
     <string name="keyboard_key_num_lock" msgid="5052537581246772117">"Num Lock"</string>
     <string name="keyboard_key_numpad_template" msgid="8729216555174634026">"Сандық пернетақта <xliff:g id="NAME">%1$s</xliff:g>"</string>
     <string name="keyboard_shortcut_group_system" msgid="6472647649616541064">"Жүйе"</string>
-    <string name="keyboard_shortcut_group_system_home" msgid="3054369431319891965">"Негізгі бет"</string>
+    <string name="keyboard_shortcut_group_system_home" msgid="3054369431319891965">"Негізгі экран"</string>
     <string name="keyboard_shortcut_group_system_recents" msgid="3154851905021926744">"Жақындағылар"</string>
     <string name="keyboard_shortcut_group_system_back" msgid="2207004531216446378">"Артқа"</string>
     <string name="keyboard_shortcut_group_system_notifications" msgid="8366964080041773224">"Хабарландырулар"</string>

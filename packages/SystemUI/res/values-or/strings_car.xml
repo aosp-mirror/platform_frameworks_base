@@ -22,4 +22,6 @@
     <string name="car_guest" msgid="3738772168718508650">"ଅତିଥି"</string>
     <string name="car_add_user" msgid="5245196248349230898">"ୟୁଜର୍‍ଙ୍କୁ ଯୋଡ଼ନ୍ତୁ"</string>
     <string name="car_new_user" msgid="8142927244990323906">"ନୂଆ ୟୁଜର୍‍"</string>
+    <string name="user_add_user_message_setup" msgid="1791011504259527329">"ଯେତେବେଳେ ଆପଣ ଜଣେ ନୂଆ ୟୁଜର୍‍ଙ୍କୁ ଯୋଡ଼ିବେ, ସେହି ବ୍ୟକ୍ତିଙ୍କୁ ନିଜ ପାଇଁ ସ୍ପେସ୍‍ ସେଟ‍ଅପ୍ କରିବାକୁ ପଡ଼ିବ।"</string>
+    <string name="user_add_user_message_update" msgid="3383320289232716179">"ଯେକୌଣସି ୟୁଜର୍ ଅନ୍ୟ ସମସ୍ତ ୟୁଜରଙ୍କ ପାଇଁ ଆପ୍‍କୁ ଅପଡେଟ୍ କରିପାରିବେ।"</string>
 </resources>

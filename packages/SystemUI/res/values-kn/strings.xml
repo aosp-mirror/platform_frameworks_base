@@ -32,7 +32,7 @@
     <string name="status_bar_no_notifications_title" msgid="4755261167193833213">"ಯಾವುದೇ ಅಧಿಸೂಚನೆಗಳಿಲ್ಲ"</string>
     <string name="status_bar_ongoing_events_title" msgid="1682504513316879202">"ಚಾಲ್ತಿಯಲ್ಲಿರುವ"</string>
     <string name="status_bar_latest_events_title" msgid="6594767438577593172">"ಅಧಿಸೂಚನೆಗಳು"</string>
-    <string name="battery_low_title" msgid="6456385927409742437">"ಬ್ಯಾಟರಿ ಕಡಿಮೆ ಇದೆ"</string>
+    <string name="battery_low_title" msgid="9187898087363540349">"ಬ್ಯಾಟರಿ ಸದ್ಯದಲ್ಲೇ ಮುಕ್ತಾಯವಾಗಬಹುದು"</string>
     <string name="battery_low_percent_format" msgid="2900940511201380775">"<xliff:g id="PERCENTAGE">%s</xliff:g> ಉಳಿದಿದೆ"</string>
     <string name="battery_low_percent_format_hybrid" msgid="6838677459286775617">"<xliff:g id="PERCENTAGE">%s</xliff:g> ಬಾಕಿ ಉಳಿದಿದೆ, ನಿಮ್ಮ ಬಳಕೆಯ ಆಧಾರದ ಮೇಲೆ <xliff:g id="TIME">%s</xliff:g> ಉಳಿದಿದೆ"</string>
     <string name="battery_low_percent_format_hybrid_short" msgid="9025795469949145586">"<xliff:g id="PERCENTAGE">%s</xliff:g> ಬಾಕಿ ಉಳಿದಿದೆ, <xliff:g id="TIME">%s</xliff:g> ಉಳಿದಿದೆ"</string>
@@ -95,8 +95,7 @@
     <string name="accessibility_unlock_button" msgid="128158454631118828">"ಅನ್‌ಲಾಕ್"</string>
     <string name="accessibility_waiting_for_fingerprint" msgid="4808860050517462885">"ಫಿಂಗರ್ ಪ್ರಿಂಟ್ ನಿರೀಕ್ಷಿಸಲಾಗುತ್ತಿದೆ"</string>
     <string name="accessibility_unlock_without_fingerprint" msgid="7541705575183694446">"ನಿಮ್ಮ ಬೆರಳಚ್ಚು ಬಳಸದೆಯೇ ಅನ್‌ಲಾಕ್ ಮಾಡಿ"</string>
-    <!-- no translation found for accessibility_send_smart_reply (7766727839703044493) -->
-    <skip />
+    <string name="accessibility_send_smart_reply" msgid="7766727839703044493">"ಕಳುಹಿಸಿ"</string>
     <string name="unlock_label" msgid="8779712358041029439">"ಅನ್‌ಲಾಕ್ ಮಾಡು"</string>
     <string name="phone_label" msgid="2320074140205331708">"ಫೋನ್ ತೆರೆಯಿರಿ"</string>
     <string name="voice_assist_label" msgid="3956854378310019854">"ಧ್ವನಿ ಸಹಾಯಕವನ್ನು ತೆರೆ"</string>
@@ -208,10 +207,8 @@
     <string name="accessibility_quick_settings_airplane_on" msgid="6406141469157599296">"ಏರ್‌ಪ್ಲೇನ್ ಮೋಡ್ ಆನ್ ಮಾಡಲಾಗಿದೆ."</string>
     <string name="accessibility_quick_settings_airplane_changed_off" msgid="66846307818850664">"ಏರ್‌ಪ್ಲೇನ್ ಮೋಡ್ ಅನ್ನು ಆಫ್ ಮಾಡಲಾಗಿದೆ."</string>
     <string name="accessibility_quick_settings_airplane_changed_on" msgid="8983005603505087728">"ಏರ್‌ಪ್ಲೇನ್ ಮೋಡ್ ಅನ್ನು ಆನ್ ಮಾಡಲಾಗಿದೆ."</string>
-    <!-- no translation found for accessibility_quick_settings_dnd_none_on (2960643943620637020) -->
-    <skip />
-    <!-- no translation found for accessibility_quick_settings_dnd_alarms_on (3357131899365865386) -->
-    <skip />
+    <string name="accessibility_quick_settings_dnd_none_on" msgid="2960643943620637020">"ಸಂಪೂರ್ಣ ನಿಶ್ಯಬ್ಧ"</string>
+    <string name="accessibility_quick_settings_dnd_alarms_on" msgid="3357131899365865386">"ಅಲಾರಮ್‌ಗಳು ಮಾತ್ರ"</string>
     <string name="accessibility_quick_settings_dnd" msgid="6607873236717185815">"ಅಡಚಣೆ ಮಾಡಬೇಡಿ."</string>
     <string name="accessibility_quick_settings_dnd_changed_off" msgid="898107593453022935">"ತೊಂದರೆ ಮಾಡಬೇಡಿ ಆಫ್ ಮಾಡಲಾಗಿದೆ."</string>
     <string name="accessibility_quick_settings_dnd_changed_on" msgid="4483780856613561039">"ಅಡಚಣೆ ಮಾಡಬೇಡಿ ಆನ್ ಮಾಡಲಾಗಿದೆ."</string>
@@ -620,8 +617,7 @@
       <item quantity="other"><xliff:g id="PERFORMING_ACTIVITY_1">%1$s</xliff:g> ಮತ್ತು <xliff:g id="PERFORMING_ACTIVITY_2">%2$s</xliff:g> ಅನ್ನು ಬಳಸಿಕೊಂಡು</item>
     </plurals>
     <string name="notification_appops_settings" msgid="1028328314935908050">"ಸೆಟ್ಟಿಂಗ್‌ಗಳು"</string>
-    <!-- no translation found for notification_appops_ok (1156966426011011434) -->
-    <skip />
+    <string name="notification_appops_ok" msgid="1156966426011011434">"ಸರಿ"</string>
     <string name="notification_channel_controls_opened_accessibility" msgid="6553950422055908113">"<xliff:g id="APP_NAME">%1$s</xliff:g> ನ ಅಧಿಸೂಚನೆ ನಿಯಂತ್ರಣಗಳನ್ನು ತೆರೆಯಲಾಗಿದೆ"</string>
     <string name="notification_channel_controls_closed_accessibility" msgid="7521619812603693144">"<xliff:g id="APP_NAME">%1$s</xliff:g> ನ ಅಧಿಸೂಚನೆ ನಿಯಂತ್ರಣಗಳನ್ನು ಮುಚ್ಚಲಾಗಿದೆ"</string>
     <string name="notification_channel_switch_accessibility" msgid="3420796005601900717">"ಈ ಚಾನಲ್‌ನ ಅಧಿಸೂಚನೆಗಳಿಗೆ ಅನುಮತಿ ನೀಡಿ"</string>

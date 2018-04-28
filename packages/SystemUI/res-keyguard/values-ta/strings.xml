@@ -140,7 +140,10 @@
       <item quantity="one"><xliff:g id="NUMBER_0">%d</xliff:g> மணிநேரமாகச் சாதனம் திறக்கப்படவில்லை. கடவுச்சொல்லை உறுதிப்படுத்தவும்.</item>
     </plurals>
     <string name="fingerprint_not_recognized" msgid="348813995267914625">"அடையாளங்காண முடியவில்லை"</string>
-    <!-- no translation found for kg_password_default_pin_message (3739658416797652781) -->
+    <plurals name="kg_password_default_pin_message" formatted="false" msgid="3739658416797652781">
+      <item quantity="other">சிம் பின்னை உள்ளிடவும். மேலும், <xliff:g id="NUMBER_1">%d</xliff:g> வாய்ப்புகள் மீதமுள்ளன.</item>
+      <item quantity="one">சிம் பின்னை உள்ளிடவும். மீதமுள்ள <xliff:g id="NUMBER_0">%d</xliff:g> வாய்ப்பில் தவறுதலான பின் உள்ளிடப்பட்டால், உங்கள் தொலைத்தொடர்பு நிறுவனத்தைத் தொடர்பு கொண்டு மட்டுமே சாதனத்தைத் திறக்க முடியும்.</item>
+    </plurals>
     <plurals name="kg_password_default_puk_message" formatted="false" msgid="8744416410184198352">
       <item quantity="other">சிம் தற்போது முடக்கப்பட்டுள்ளது. தொடர்வதற்கு, PUK குறியீட்டை உள்ளிடவும். நீங்கள் <xliff:g id="_NUMBER_1">%d</xliff:g> முறை மட்டுமே முயற்சிக்க முடியும். அதன்பிறகு சிம் நிரந்தரமாக முடக்கப்படும். விவரங்களுக்கு, மொபைல் நிறுவனத்தைத் தொடர்புகொள்ளவும்.</item>
       <item quantity="one">சிம் தற்போது முடக்கப்பட்டுள்ளது. தொடர்வதற்கு, PUK குறியீட்டை உள்ளிடவும். நீங்கள் <xliff:g id="_NUMBER_0">%d</xliff:g> முறை மட்டுமே முயற்சிக்க முடியும். அதன்பிறகு சிம் நிரந்தரமாக முடக்கப்படும். விவரங்களுக்கு, மொபைல் நிறுவனத்தைத் தொடர்புகொள்ளவும்.</item>

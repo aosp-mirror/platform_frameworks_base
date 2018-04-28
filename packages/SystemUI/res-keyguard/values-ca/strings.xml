@@ -140,7 +140,10 @@
       <item quantity="one">Fa <xliff:g id="NUMBER_0">%d</xliff:g> hora que no es desbloqueja el dispositiu. Confirma la contrasenya.</item>
     </plurals>
     <string name="fingerprint_not_recognized" msgid="348813995267914625">"No s\'ha reconegut"</string>
-    <!-- no translation found for kg_password_default_pin_message (3739658416797652781) -->
+    <plurals name="kg_password_default_pin_message" formatted="false" msgid="3739658416797652781">
+      <item quantity="other">Introdueix el PIN de la SIM. Et queden <xliff:g id="NUMBER_1">%d</xliff:g> intents.</item>
+      <item quantity="one">Introdueix el PIN de la SIM. Et queda <xliff:g id="NUMBER_0">%d</xliff:g> intent; si no l\'encertes, contacta amb l\'operador de telefonia mòbil per desbloquejar el dispositiu.</item>
+    </plurals>
     <plurals name="kg_password_default_puk_message" formatted="false" msgid="8744416410184198352">
       <item quantity="other">La targeta SIM s\'ha desactivat. Introdueix el codi PUK per continuar. Et queden <xliff:g id="_NUMBER_1">%d</xliff:g> intents; si no l\'encertes, la SIM no es podrà tornar a fer servir. Contacta amb l\'operador de telefonia mòbil per obtenir-ne més informació.</item>
       <item quantity="one">La targeta SIM s\'ha desactivat. Introdueix el codi PUK per continuar. Et queda <xliff:g id="_NUMBER_0">%d</xliff:g> intent; si no l\'encertes, la SIM no es podrà tornar a fer servir. Contacta amb l\'operador de telefonia mòbil per obtenir-ne més informació.</item>

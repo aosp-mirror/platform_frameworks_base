@@ -152,7 +152,12 @@
       <item quantity="other">Ви не розблоковували пристрій <xliff:g id="NUMBER_1">%d</xliff:g> години. Підтвердьте пароль.</item>
     </plurals>
     <string name="fingerprint_not_recognized" msgid="348813995267914625">"Не розпізнано"</string>
-    <!-- no translation found for kg_password_default_pin_message (3739658416797652781) -->
+    <plurals name="kg_password_default_pin_message" formatted="false" msgid="3739658416797652781">
+      <item quantity="one">Введіть PIN-код SIM-карти. Залишилася <xliff:g id="NUMBER_1">%d</xliff:g> спроба.</item>
+      <item quantity="few">Введіть PIN-код SIM-карти. Залишилося <xliff:g id="NUMBER_1">%d</xliff:g> спроби.</item>
+      <item quantity="many">Введіть PIN-код SIM-карти. Залишилося <xliff:g id="NUMBER_1">%d</xliff:g> спроб.</item>
+      <item quantity="other">Введіть PIN-код SIM-карти. Залишилося <xliff:g id="NUMBER_1">%d</xliff:g> спроби.</item>
+    </plurals>
     <plurals name="kg_password_default_puk_message" formatted="false" msgid="8744416410184198352">
       <item quantity="one">SIM-карту заблоковано. Щоб продовжити, введіть PUK-код. Залишилася <xliff:g id="_NUMBER_1">%d</xliff:g> спроба. Після цього SIM-карту буде назавжди заблоковано. Щоб дізнатися більше, зверніться до свого оператора.</item>
       <item quantity="few">SIM-карту заблоковано. Щоб продовжити, введіть PUK-код. Залишилося <xliff:g id="_NUMBER_1">%d</xliff:g> спроби. Після цього SIM-карту буде назавжди заблоковано. Щоб дізнатися більше, зверніться до свого оператора.</item>
