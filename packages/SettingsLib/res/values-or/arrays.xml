@@ -55,7 +55,7 @@
   </string-array>
   <string-array name="hdcp_checking_summaries">
     <item msgid="505558545611516707">"କଦାପି HDCP ଯାଞ୍ଚ କରିବା ବ୍ୟବହାର କରନ୍ତୁ ନାହିଁ"</item>
-    <item msgid="3878793616631049349">"କେବଳ DRM ବିଷୟବସ୍ତୁ ପାଇଁ HDCP ଯାଞ୍ଚ ବ୍ୟବହାର କରନ୍ତୁ"</item>
+    <item msgid="3878793616631049349">"କେବଳ DRM କଣ୍ଟେଣ୍ଟ ପାଇଁ HDCP ଯାଞ୍ଚ ବ୍ୟବହାର କରନ୍ତୁ"</item>
     <item msgid="45075631231212732">"ସର୍ବଦା HDCP ଯାଞ୍ଚ ବ୍ୟବହାର କରନ୍ତୁ"</item>
   </string-array>
   <string-array name="bluetooth_avrcp_versions">
@@ -235,7 +235,7 @@
     <item msgid="2290859360633824369">"ଡିଉଟେରାନୋମାଲୀ ପାଇଁ କ୍ଷେତ୍ର ଦେଖନ୍ତୁ"</item>
   </string-array>
   <string-array name="app_process_limit_entries">
-    <item msgid="3401625457385943795">"ମାନକ ସୀମା"</item>
+    <item msgid="3401625457385943795">"ସାଧାରଣ ସୀମା"</item>
     <item msgid="4071574792028999443">"କୌଣସି ବ୍ୟାକ୍‌ଗ୍ରାଉଣ୍ଡ ପ୍ରୋସେସ୍ ଚାଲୁନାହିଁ"</item>
     <item msgid="4810006996171705398">"ସର୍ବାଧିକ 1ଟି ପ୍ରକ୍ରିୟା"</item>
     <item msgid="8586370216857360863">"ସର୍ବାଧିକ 2 ଟି ପ୍ରକ୍ରିୟା"</item>

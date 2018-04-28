@@ -196,7 +196,7 @@
     <string name="bugreport_in_power_summary" msgid="1778455732762984579">"​ສະ​ແດງ​ປຸ່ມ​ໃນ​ເມ​ນູ​ປິດ​ເປີດ​ເພື່ອ​ບັນ​ທຶກ​ການ​ລາຍ​ງານ​ຂໍ້​ຜິດ​ພາດ"</string>
     <string name="keep_screen_on" msgid="1146389631208760344">"ເປີດໜ້າຈໍຕະຫຼອດ"</string>
     <string name="keep_screen_on_summary" msgid="2173114350754293009">"ໜ້າຈໍຈະບໍ່ປິດໃນຂະນະທີ່ສາກໄຟຢູ່"</string>
-    <string name="bt_hci_snoop_log" msgid="3340699311158865670">"ເປີດໃຊ້ງານການຊອດແນມ Bluetooth HCI"</string>
+    <string name="bt_hci_snoop_log" msgid="3340699311158865670">"ບັນທຶກການເຮັດວຽກຂອງ Bluetooth HCI"</string>
     <string name="bt_hci_snoop_log_summary" msgid="366083475849911315">"ບັນທຶກແພັກເກັດ Bluetooth HCI ທັງໝົດໃນໄຟລ໌ (ສະຫຼັບການໃຊ້ Bluetooth ຫຼັງຈາກການປ່ຽນແປງການຕັ້ງຄ່ານີ້)"</string>
     <string name="oem_unlock_enable" msgid="6040763321967327691">"ການ​ປົດ​ລັອກ OEM"</string>
     <string name="oem_unlock_enable_summary" msgid="4720281828891618376">"ອະ​ນຸ​ຍາດ​ໃຫ້​ປົດ​ລັອກ​ບູດ​ໂຫຼດ​ເດີ"</string>
@@ -238,7 +238,7 @@
     <string name="wifi_connected_mac_randomization_summary" msgid="1743059848752201485">"ສຸ່ມທີ່ຢູ່ MAC ເມື່ອເຊື່ອມຕໍ່ຫາເຄືອຂ່າຍ Wi‑Fi"</string>
     <string name="wifi_metered_label" msgid="4514924227256839725">"ມີການວັດແທກ"</string>
     <string name="wifi_unmetered_label" msgid="6124098729457992931">"ບໍ່ໄດ້ວັດແທກ"</string>
-    <string name="select_logd_size_title" msgid="7433137108348553508">"ຂະ​ໜາດ​​ບັບ​ເຟີໂຕ​ລັອກ"</string>
+    <string name="select_logd_size_title" msgid="7433137108348553508">"ຂະໜາດບັບເຟີຕົວບັນທຶກ"</string>
     <string name="select_logd_size_dialog_title" msgid="1206769310236476760">"ເລືອກ​ຂະ​ໜາດ​ລັອກ​ຕໍ່​ບັບ​ເຟີ"</string>
     <string name="dev_logpersist_clear_warning_title" msgid="684806692440237967">"ລຶບລ້າງບ່ອນຈັດເກັບຖາວອນຂອງຕົວບັນທຶກບໍ່?"</string>
     <string name="dev_logpersist_clear_warning_message" msgid="2256582531342994562">"ເມື່ອພວກເຮົາບໍ່ກວດສອບຕົວບັນທຶກຖາວອນ, ພວກເຮົາຈະຕ້ອງລຶບຂໍ້ມູນຕົວບັນທຶກໃນອຸປະກອນຂອງທ່ານອອກ."</string>
@@ -249,7 +249,7 @@
     <string name="allow_mock_location" msgid="2787962564578664888">"ອະນຸຍາດໃຫ້ຈຳລອງຕຳແໜ່ງ"</string>
     <string name="allow_mock_location_summary" msgid="317615105156345626">"ອະນຸຍາດໃຫ້ຈຳລອງຕຳແໜ່ງ"</string>
     <string name="debug_view_attributes" msgid="6485448367803310384">"ເປີດ​ນຳ​ໃຊ້​ການກວດ​ສອບ​ຄຸນ​ສົມ​ບັດ​ມຸມມອງ"</string>
-    <string name="mobile_data_always_on_summary" msgid="8149773901431697910">"ໃຫ້​ຂໍ້​ມູນ​ມື​ຖື​ເປີດ​ຢູ່​ສະ​ເໝີ, ແມ້​ແຕ່​ເມື່ອ Wi‑Fi ເປີດ​ຢູ່ (ສຳ​ລັບ​ການ​ສະ​ຫຼັບ​ເຄືອ​ຂ່າຍ​ໄວ)."</string>
+    <string name="mobile_data_always_on_summary" msgid="8149773901431697910">"ເປີດໃຊ້ອິນເຕີເນັດມືຖືໄວ້ຕະຫຼອດ, ເຖິງແມ່ນວ່າ Wi-Fi ຈະເຮັດວຽກຢູ່ກໍຕາມ (ສຳລັບການສະຫຼັບເຄືອຂ່າຍແບບໄວ)."</string>
     <string name="tethering_hardware_offload_summary" msgid="7726082075333346982">"ເປີດໃຊ້ການເລັ່ງຄວາມໄວດ້ວຍຮາດແວຫາກວ່າສາມາດໃຊ້ໄດ້"</string>
     <string name="adb_warning_title" msgid="6234463310896563253">"ອະນຸຍາດໃຫ້ດີບັ໊ກຜ່ານ USB?"</string>
     <string name="adb_warning_message" msgid="7316799925425402244">"ການດີບັ໊ກຜ່ານ USB ແມ່ນມີຈຸດປະສົງເພື່ອການພັດທະນາເທົ່ານັ້ນ. ມັນສາມາດໃຊ້ເພື່ອສຳເນົາຂໍ້ມູນລະຫວ່າງຄອມພິວເຕີ ແລະອຸປະກອນຂອງທ່ານ, ຕິດຕັ້ງແອັບຯໂດຍບໍ່ຜ່ານການແຈ້ງເຕືອນ ແລະອ່ານຂໍ້ມູນການບັນທຶກ."</string>
@@ -327,8 +327,8 @@
     <string name="enable_freeform_support" msgid="1461893351278940416">"ເປີດໃຊ້ໜ້າຕ່າງຮູບແບບອິດສະຫຼະ"</string>
     <string name="enable_freeform_support_summary" msgid="8247310463288834487">"ເປີດໃຊ້ການຮອງຮັບໜ້າຈໍຮູບແບບອິດສະຫຼະແບບທົດລອງ."</string>
     <string name="local_backup_password_title" msgid="3860471654439418822">"ລະຫັດຜ່ານການສຳຮອງຂໍ້ມູນເດັກສະທັອບ"</string>
-    <string name="local_backup_password_summary_none" msgid="6951095485537767956">"ການ​ສຳຮອງ​ຂໍ້ມູນ​ເຕັມຮູບແບບ​ໃນ​ເດັກສະທັອບ​ຍັງ​ບໍ່​ໄດ້​ຮັບ​ການ​ປ້ອງກັນ​ໃນ​ເວລາ​ນີ້"</string>
-    <string name="local_backup_password_summary_change" msgid="5376206246809190364">"ແຕະເພື່ອປ່ຽນ ຫຼືລຶບລະຫັດຂອງການສຳຮອງຂໍ້ມູນເຕັມຮູບແບບໃນເດັກສະທັອບ"</string>
+    <string name="local_backup_password_summary_none" msgid="6951095485537767956">"ການ​ສຳຮອງ​ຂໍ້ມູນ​ເຕັມຮູບແບບ​ໃນ​ເດັສທັອບ​ຍັງ​ບໍ່​ໄດ້​ຮັບ​ການ​ປ້ອງກັນ​ໃນ​ເວລາ​ນີ້"</string>
+    <string name="local_backup_password_summary_change" msgid="5376206246809190364">"ແຕະເພື່ອປ່ຽນ ຫຼື ລຶບລະຫັດຂອງການສຳຮອງຂໍ້ມູນເຕັມຮູບແບບໃນເດັສທັອບ"</string>
     <string name="local_backup_password_toast_success" msgid="582016086228434290">"ຕັ້ງລະຫັດສຳຮອງໃໝ່ແລ້ວ"</string>
     <string name="local_backup_password_toast_confirmation_mismatch" msgid="7805892532752708288">"ລະຫັດຜ່ານໃໝ່ ແລະລະຫັດຢືນຢັນບໍ່ກົງກັນ"</string>
     <string name="local_backup_password_toast_validation_failure" msgid="5646377234895626531">"ການຕັ້ງລະຫັດສຳຮອງຂໍ້ມູນລົ້ມເຫລວ"</string>
@@ -367,11 +367,12 @@
     <string name="accessibility_display_daltonizer_preference_title" msgid="5800761362678707872">"ການ​ປັບ​ແຕ່ງ​ສີ"</string>
     <string name="accessibility_display_daltonizer_preference_subtitle" msgid="3484969015295282911">"​ຄຸນ​ສົມ​ບັດ​ນີ້​ກຳ​ລັງ​ຢູ່​ໃນ​ການ​ທົດ​ລອງ​ແລະ​ອາດ​ມີ​ຜົນ​ຕໍ່​ປະ​ສິດ​ທິ​ພາບ."</string>
     <string name="daltonizer_type_overridden" msgid="3116947244410245916">"ຖືກແທນໂດຍ <xliff:g id="TITLE">%1$s</xliff:g>"</string>
-    <string name="power_remaining_duration_only" msgid="845431008899029842">"ອີກປະມານ <xliff:g id="TIME">%1$s</xliff:g>"</string>
-    <string name="power_discharging_duration" msgid="6655472132189365839">"ເຫຼືອອີກປະມານ <xliff:g id="TIME">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
-    <string name="power_remaining_duration_only_enhanced" msgid="5992456722677973678">"ເຫຼືອອີກປະມານ <xliff:g id="TIME">%1$s</xliff:g> ໂດຍອ້າງອີງຈາກການນຳໃຊ້ຂອງທ່ານ"</string>
-    <string name="power_discharging_duration_enhanced" msgid="5726302316642148671">"ເຫຼືອອີກປະມານ <xliff:g id="TIME">%1$s</xliff:g> ໂດຍອ້າງອີງຈາກການນຳໃຊ້ຂອງທ່ານ (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
-    <string name="power_remaining_duration_only_short" msgid="5329694252258605547">"ຍັງເຫຼືອ <xliff:g id="TIME">%1$s</xliff:g>"</string>
+    <string name="power_remaining_settings_home_page" msgid="4845022416859002011">"<xliff:g id="PERCENTAGE">%1$s</xliff:g> - <xliff:g id="TIME_STRING">%2$s</xliff:g>"</string>
+    <string name="power_remaining_duration_only" msgid="6123167166221295462">"ເຫຼືອອີກປະມານ <xliff:g id="TIME_REMAINING">%1$s</xliff:g>"</string>
+    <string name="power_discharging_duration" msgid="8848256785736335185">"ເຫຼືອອີກປະມານ <xliff:g id="TIME_REMAINING">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
+    <string name="power_remaining_duration_only_enhanced" msgid="4189311599812296592">"ເຫຼືອອີກປະມານ <xliff:g id="TIME_REMAINING">%1$s</xliff:g> ອ້າງອີງຈາກການນຳໃຊ້ຂອງທ່ານ"</string>
+    <string name="power_discharging_duration_enhanced" msgid="1992003260664804080">"ເຫຼືອອີກປະມານ <xliff:g id="TIME_REMAINING">%1$s</xliff:g> ອ້າງອີງຈາກການນຳໃຊ້ຂອງທ່ານ (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
+    <string name="power_remaining_duration_only_short" msgid="3463575350656389957">"ເຫຼືອອີກ <xliff:g id="TIME_REMAINING">%1$s</xliff:g>"</string>
     <string name="power_discharge_by_enhanced" msgid="2095821536747992464">"Should last until about <xliff:g id="TIME">%1$s</xliff:g> based on your usage (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
     <string name="power_discharge_by_only_enhanced" msgid="2175151772952365149">"Should last until about <xliff:g id="TIME">%1$s</xliff:g> based on your usage"</string>
     <string name="power_discharge_by" msgid="6453537733650125582">"Should last until about <xliff:g id="TIME">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>

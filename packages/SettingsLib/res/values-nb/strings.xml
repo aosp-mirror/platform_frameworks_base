@@ -223,7 +223,7 @@
     <string name="bluetooth_select_a2dp_codec_bits_per_sample_dialog_title" msgid="8063859754619484760">"Utløs kodek for Bluetooth-lyd\nValg: bits per sample"</string>
     <string name="bluetooth_select_a2dp_codec_channel_mode" msgid="884855779449390540">"Kanalmodus for Bluetooth-lyd"</string>
     <string name="bluetooth_select_a2dp_codec_channel_mode_dialog_title" msgid="7234956835280563341">"Utløs kodek for Bluetooth-lyd\nValg: kanalmodus"</string>
-    <string name="bluetooth_select_a2dp_codec_ldac_playback_quality" msgid="3619694372407843405">"LDAC-kodek for Bluetooth-lyd: Avspillingskvalitet"</string>
+    <string name="bluetooth_select_a2dp_codec_ldac_playback_quality" msgid="3619694372407843405">"LDAC-kodek for Bluetooth-lyd: avspillingskvalitet"</string>
     <string name="bluetooth_select_a2dp_codec_ldac_playback_quality_dialog_title" msgid="7595776220458732825">"Utløs LDAC-kodek for Bluetooth-lyd\nValg: avspillingskvalitet"</string>
     <string name="bluetooth_select_a2dp_codec_streaming_label" msgid="5347862512596240506">"Strømming: <xliff:g id="STREAMING_PARAMETER">%1$s</xliff:g>"</string>
     <string name="select_private_dns_configuration_title" msgid="3700456559305263922">"Privat DNS"</string>
@@ -310,7 +310,7 @@
     <string name="enable_gpu_debug_layers_summary" msgid="8009136940671194940">"Tillat GPU-feilsøkingslag for feilsøkingsapper"</string>
     <string name="window_animation_scale_title" msgid="6162587588166114700">"Animasjonsskala for vindu"</string>
     <string name="transition_animation_scale_title" msgid="387527540523595875">"Overgangsanimasjonsskala"</string>
-    <string name="animator_duration_scale_title" msgid="3406722410819934083">"Varighetsskala animasjon"</string>
+    <string name="animator_duration_scale_title" msgid="3406722410819934083">"Varighetsskala for animasjon"</string>
     <string name="overlay_display_devices_title" msgid="5364176287998398539">"Simulering av sekundærskjermer"</string>
     <string name="debug_applications_category" msgid="4206913653849771549">"Apper"</string>
     <string name="immediately_destroy_activities" msgid="1579659389568133959">"Ikke behold aktiviteter"</string>
@@ -347,7 +347,7 @@
     <string name="inactive_app_active_summary" msgid="4174921824958516106">"Aktiv. Trykk for å slå av/på."</string>
     <string name="standby_bucket_summary" msgid="6567835350910684727">"Hvilemodus:<xliff:g id="BUCKET"> %s</xliff:g>"</string>
     <string name="runningservices_settings_title" msgid="8097287939865165213">"Aktive tjenester"</string>
-    <string name="runningservices_settings_summary" msgid="854608995821032748">"Se og kontrollér tjenester som kjører for øyeblikket"</string>
+    <string name="runningservices_settings_summary" msgid="854608995821032748">"Se og kontrollér tjenester som kjører"</string>
     <string name="select_webview_provider_title" msgid="4628592979751918907">"WebView-implementering"</string>
     <string name="select_webview_provider_dialog_title" msgid="4370551378720004872">"Angi WebView-implementering"</string>
     <string name="select_webview_provider_toast_text" msgid="5466970498308266359">"Dette valget er ikke gyldig lenger. Prøv på nytt."</string>
@@ -367,11 +367,12 @@
     <string name="accessibility_display_daltonizer_preference_title" msgid="5800761362678707872">"Fargekorrigering"</string>
     <string name="accessibility_display_daltonizer_preference_subtitle" msgid="3484969015295282911">"Dette er en eksperimentell funksjon som kan gjøre at telefonen ikke fungerer optimalt."</string>
     <string name="daltonizer_type_overridden" msgid="3116947244410245916">"Overstyres av <xliff:g id="TITLE">%1$s</xliff:g>"</string>
-    <string name="power_remaining_duration_only" msgid="845431008899029842">"Omtrent <xliff:g id="TIME">%1$s</xliff:g> gjenstår"</string>
-    <string name="power_discharging_duration" msgid="6655472132189365839">"Omtrent <xliff:g id="TIME">%1$s</xliff:g> gjenstår (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
-    <string name="power_remaining_duration_only_enhanced" msgid="5992456722677973678">"Omtrent <xliff:g id="TIME">%1$s</xliff:g> igjen basert på bruken din"</string>
-    <string name="power_discharging_duration_enhanced" msgid="5726302316642148671">"Omtrent <xliff:g id="TIME">%1$s</xliff:g> gjenstår basert på bruken din (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
-    <string name="power_remaining_duration_only_short" msgid="5329694252258605547">"<xliff:g id="TIME">%1$s</xliff:g> gjenstår"</string>
+    <string name="power_remaining_settings_home_page" msgid="4845022416859002011">"<xliff:g id="PERCENTAGE">%1$s</xliff:g> – <xliff:g id="TIME_STRING">%2$s</xliff:g>"</string>
+    <string name="power_remaining_duration_only" msgid="6123167166221295462">"Omtrent <xliff:g id="TIME_REMAINING">%1$s</xliff:g> gjenstår"</string>
+    <string name="power_discharging_duration" msgid="8848256785736335185">"Omtrent <xliff:g id="TIME_REMAINING">%1$s</xliff:g> gjenstår (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
+    <string name="power_remaining_duration_only_enhanced" msgid="4189311599812296592">"Omtrent <xliff:g id="TIME_REMAINING">%1$s</xliff:g> gjenstår basert på bruken din"</string>
+    <string name="power_discharging_duration_enhanced" msgid="1992003260664804080">"Omtrent <xliff:g id="TIME_REMAINING">%1$s</xliff:g> gjenstår basert på bruken din (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
+    <string name="power_remaining_duration_only_short" msgid="3463575350656389957">"<xliff:g id="TIME_REMAINING">%1$s</xliff:g> gjenstår"</string>
     <string name="power_discharge_by_enhanced" msgid="2095821536747992464">"Skal vare til omtrent <xliff:g id="TIME">%1$s</xliff:g>, basert på bruken din (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
     <string name="power_discharge_by_only_enhanced" msgid="2175151772952365149">"Skal vare til omtrent <xliff:g id="TIME">%1$s</xliff:g>, basert på bruken din"</string>
     <string name="power_discharge_by" msgid="6453537733650125582">"Skal vare til omtrent <xliff:g id="TIME">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>

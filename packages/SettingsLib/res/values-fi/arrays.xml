@@ -55,7 +55,7 @@
   </string-array>
   <string-array name="hdcp_checking_summaries">
     <item msgid="505558545611516707">"Älä koskaan käytä HDCP-tarkistusta"</item>
-    <item msgid="3878793616631049349">"Käytä HDCP-tarkistusta vain DRM-suojatulle sisällölle"</item>
+    <item msgid="3878793616631049349">"Käytä HDCP-tarkistusta vain DRM-suojatulle sisällölle."</item>
     <item msgid="45075631231212732">"Käytä aina HDCP-tarkistusta"</item>
   </string-array>
   <string-array name="bluetooth_avrcp_versions">
