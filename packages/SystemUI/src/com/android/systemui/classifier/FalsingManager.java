@@ -28,6 +28,7 @@ import android.os.Looper;
 import android.os.PowerManager;
 import android.os.UserHandle;
 import android.provider.Settings;
+import android.view.InputDevice;
 import android.view.MotionEvent;
 import android.view.accessibility.AccessibilityManager;
 
@@ -74,6 +75,7 @@ public class FalsingManager implements SensorEventListener {
     private boolean mEnforceBouncer = false;
     private boolean mBouncerOn = false;
     private boolean mSessionActive = false;
+    private boolean mIsTouchScreen = true;
     private int mState = StatusBarState.SHADE;
     private boolean mScreenOn;
     private boolean mShowingAod;
@@ -234,6 +236,11 @@ public class FalsingManager implements SensorEventListener {
         if (mAccessibilityManager.isTouchExplorationEnabled()) {
             // Touch exploration triggers false positives in the classifier and
             // already sufficiently prevents false unlocks.
+            return false;
+        }
+        if (!mIsTouchScreen) {
+            // Unlocking with input devices besides the touchscreen should already be sufficiently
+            // anti-falsed.
             return false;
         }
         return mHumanInteractionClassifier.isFalseTouch();
@@ -450,6 +457,9 @@ public class FalsingManager implements SensorEventListener {
     }
 
     public void onTouchEvent(MotionEvent event, int width, int height) {
+        if (event.getAction() == MotionEvent.ACTION_DOWN) {
+            mIsTouchScreen = event.isFromSource(InputDevice.SOURCE_TOUCHSCREEN);
+        }
         if (mSessionActive && !mBouncerOn) {
             mDataCollector.onTouchEvent(event, width, height);
             mHumanInteractionClassifier.onTouchEvent(event);
