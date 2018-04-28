@@ -65,7 +65,7 @@
     <string name="notification_channel_failure" msgid="9042250774797916414">"এগুলি প্রিন্ট করা যায়নি"</string>
     <string name="could_not_create_file" msgid="3425025039427448443">"ফাইল তৈরি করা গেল না"</string>
     <string name="print_services_disabled_toast" msgid="9089060734685174685">"কিছু প্রিন্ট পরিষেবা অক্ষম করা আছে"</string>
-    <string name="print_searching_for_printers" msgid="6550424555079932867">"মুদ্রকগুলি অনুসন্ধান করা হচ্ছে"</string>
+    <string name="print_searching_for_printers" msgid="6550424555079932867">"প্রিন্টার খোঁজা হচ্ছে"</string>
     <string name="print_no_print_services" msgid="8561247706423327966">"প্রিন্ট পরিষেবা সক্ষম নেই"</string>
     <string name="print_no_printers" msgid="4869403323900054866">"কোনো প্রিন্টার পাওয়া যায়নি"</string>
     <string name="cannot_add_printer" msgid="7840348733668023106">"মুদ্রকগুলি যোগ করা যাবে না"</string>

@@ -31,8 +31,8 @@
     <string name="template_all_pages" msgid="3322235982020148762">"તમામ <xliff:g id="PAGE_COUNT">%1$s</xliff:g>"</string>
     <string name="template_page_range" msgid="428638530038286328">"<xliff:g id="PAGE_COUNT">%1$s</xliff:g> ની શ્રેણી"</string>
     <string name="pages_range_example" msgid="8558694453556945172">"દા.ત. 1—5,8,11—13"</string>
-    <string name="print_preview" msgid="8010217796057763343">"પ્રિન્ટ પૂર્વાવલોકન"</string>
-    <string name="install_for_print_preview" msgid="6366303997385509332">"પૂર્વાવલોકન માટે PDF દર્શક ઇન્સ્ટોલ કરો"</string>
+    <string name="print_preview" msgid="8010217796057763343">"પ્રિન્ટ પ્રીવ્યૂ"</string>
+    <string name="install_for_print_preview" msgid="6366303997385509332">"પ્રીવ્યૂ માટે PDF દર્શક ઇન્સ્ટોલ કરો"</string>
     <string name="printing_app_crashed" msgid="854477616686566398">"પ્રિન્ટીંગ ઍપ્લિકેશન ક્રેશ થઈ"</string>
     <string name="generating_print_job" msgid="3119608742651698916">"છાપ કાર્ય બનાવી રહ્યું છે"</string>
     <string name="save_as_pdf" msgid="5718454119847596853">"PDF તરીકે સાચવો"</string>
@@ -106,6 +106,6 @@
     <string name="print_error_default_message" msgid="8602678405502922346">"માફ કરશો, તે કામ કરતું નહોતું. ફરીથી પ્રયાસ કરો."</string>
     <string name="print_error_retry" msgid="1426421728784259538">"ફરી પ્રયાસ કરો"</string>
     <string name="print_error_printer_unavailable" msgid="8985614415253203381">"આ પ્રિન્ટર અત્યારે ઉપલબ્ધ નથી."</string>
-    <string name="print_cannot_load_page" msgid="6179560924492912009">"પૂર્વાવલોકન પ્રદર્શિત કરી શકતાં નથી"</string>
-    <string name="print_preparing_preview" msgid="3939930735671364712">"પૂર્વાવલોકનની તૈયારી કરી રહ્યું છે..."</string>
+    <string name="print_cannot_load_page" msgid="6179560924492912009">"પ્રીવ્યૂ ડિસ્પ્લે કરી શકતાં નથી"</string>
+    <string name="print_preparing_preview" msgid="3939930735671364712">"પ્રીવ્યૂની તૈયારી કરી રહ્યું છે..."</string>
 </resources>

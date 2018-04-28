@@ -68,16 +68,16 @@
     <string name="notification_channel_progress" msgid="872788690775721436">"مهام الطباعة الجارية"</string>
     <string name="notification_channel_failure" msgid="9042250774797916414">"مهام الطباعة التي تعذَّر تنفيذها"</string>
     <string name="could_not_create_file" msgid="3425025039427448443">"تعذَّر إنشاء الملف"</string>
-    <string name="print_services_disabled_toast" msgid="9089060734685174685">"بعض خدمات الطباعة معطَّلة"</string>
+    <string name="print_services_disabled_toast" msgid="9089060734685174685">"بعض خدمات الطباعة غير مفعّلة"</string>
     <string name="print_searching_for_printers" msgid="6550424555079932867">"البحث عن طابعات"</string>
-    <string name="print_no_print_services" msgid="8561247706423327966">"لم يتم تمكين أي خدمات طباعة"</string>
+    <string name="print_no_print_services" msgid="8561247706423327966">"لم يتم تفعيل أي خدمات طباعة"</string>
     <string name="print_no_printers" msgid="4869403323900054866">"لم يتم العثور على طابعات"</string>
     <string name="cannot_add_printer" msgid="7840348733668023106">"تعذرت إضافة طابعات"</string>
     <string name="select_to_add_printers" msgid="3800709038689830974">"اختر لإضافة طابعة"</string>
     <string name="enable_print_service" msgid="3482815747043533842">"حدد للتمكين"</string>
     <string name="enabled_services_title" msgid="7036986099096582296">"الخدمات الممكنة"</string>
     <string name="recommended_services_title" msgid="3799434882937956924">"الخدمات الموصى بها"</string>
-    <string name="disabled_services_title" msgid="7313253167968363211">"الخدمات المعطَّلة"</string>
+    <string name="disabled_services_title" msgid="7313253167968363211">"الخدمات غير المفعّلة"</string>
     <string name="all_services_title" msgid="5578662754874906455">"جميع الخدمات"</string>
     <plurals name="print_services_recommendation_subtitle" formatted="false" msgid="5678487708807185138">
       <item quantity="zero">التثبيت لاستكشاف <xliff:g id="COUNT_1">%1$s</xliff:g> طابعات</item>
