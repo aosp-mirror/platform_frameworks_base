@@ -67,21 +67,17 @@
                 android:singleLine="true"
                 style="@style/widget_big_thin"
                 android:format12Hour="@string/keyguard_widget_12_hours_format"
-                android:format24Hour="@string/keyguard_widget_24_hours_format"
-                android:layout_marginBottom="@dimen/bottom_text_spacing_digital" />
+                android:format24Hour="@string/keyguard_widget_24_hours_format" />
             <View
                 android:id="@+id/clock_separator"
                 android:layout_width="@dimen/widget_separator_width"
                 android:layout_height="@dimen/widget_separator_thickness"
-                android:layout_marginTop="22dp"
                 android:layout_below="@id/clock_view"
                 android:background="#f00"
-                android:backgroundTint="?attr/wallpaperTextColor"
                 android:layout_centerHorizontal="true" />
 
             <include layout="@layout/keyguard_status_area"
                 android:id="@+id/keyguard_status_area"
-                android:layout_marginTop="20dp"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_below="@id/clock_separator" />

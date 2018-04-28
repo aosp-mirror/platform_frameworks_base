@@ -1309,6 +1309,7 @@ please see styles_device_defaults.xml.
     </style>
 
     <style name="Notification.Header.Ambient">
+        <item name="layout_marginTop">@dimen/notification_header_margin_top_ambient</item>
         <item name="gravity">top|center_horizontal</item>
     </style>
 

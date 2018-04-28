@@ -53,6 +53,7 @@
     </style>
     <style name="widget_big_thin">
         <item name="android:textSize">@dimen/widget_big_font_size</item>
+        <item name="android:paddingBottom">@dimen/bottom_text_spacing_digital</item>
         <item name="android:fontFamily">@*android:string/config_headlineFontFamilyLight</item>
         <item name="android:fontFeatureSettings">@*android:string/config_headlineFontFeatureSettings</item>
     </style>
@@ -89,6 +90,7 @@
     <style name="TextAppearance.Keyguard.Secondary">
         <item name="android:layout_width">wrap_content</item>
         <item name="android:layout_height">wrap_content</item>
+        <item name="android:lines">1</item>
         <item name="android:textSize">@dimen/widget_label_font_size</item>
     </style>
 
