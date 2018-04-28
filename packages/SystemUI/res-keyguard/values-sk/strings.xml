@@ -152,7 +152,12 @@
       <item quantity="one">Zariadenie nebolo odomknuté <xliff:g id="NUMBER_0">%d</xliff:g> hodinu. Potvrďte heslo.</item>
     </plurals>
     <string name="fingerprint_not_recognized" msgid="348813995267914625">"Nerozpoznané"</string>
-    <!-- no translation found for kg_password_default_pin_message (3739658416797652781) -->
+    <plurals name="kg_password_default_pin_message" formatted="false" msgid="3739658416797652781">
+      <item quantity="few">Zadajte kód PIN SIM karty. Zostávajú vám <xliff:g id="NUMBER_1">%d</xliff:g> pokusy.</item>
+      <item quantity="many">Enter SIM PIN. You have <xliff:g id="NUMBER_1">%d</xliff:g> remaining attempts.</item>
+      <item quantity="other">Zadajte kód PIN SIM karty. Zostáva vám <xliff:g id="NUMBER_1">%d</xliff:g> pokusov.</item>
+      <item quantity="one">Zadajte kód PIN SIM karty. Zostáva vám <xliff:g id="NUMBER_0">%d</xliff:g> pokus, potom budete musieť kontaktovať svojho operátora, aby zariadenie odomkol.</item>
+    </plurals>
     <plurals name="kg_password_default_puk_message" formatted="false" msgid="8744416410184198352">
       <item quantity="few">SIM karta je deaktivovaná. Pokračujte zadaním kódu PUK. Zostávajú vám <xliff:g id="_NUMBER_1">%d</xliff:g> pokusy, potom sa SIM karta natrvalo zablokuje. Podrobnosti vám poskytne operátor.</item>
       <item quantity="many">SIM karta je deaktivovaná. Pokračujte zadaním kódu PUK. Zostáva vám <xliff:g id="_NUMBER_1">%d</xliff:g> pokusu, potom sa SIM karta natrvalo zablokuje. Podrobnosti vám poskytne operátor.</item>

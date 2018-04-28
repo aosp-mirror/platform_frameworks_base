@@ -22,4 +22,6 @@
     <string name="car_guest" msgid="3738772168718508650">"ಅತಿಥಿ"</string>
     <string name="car_add_user" msgid="5245196248349230898">"ಬಳಕೆದಾರ ಸೇರಿಸು"</string>
     <string name="car_new_user" msgid="8142927244990323906">"ಹೊಸ ಬಳಕೆದಾರ"</string>
+    <string name="user_add_user_message_setup" msgid="1791011504259527329">"ನೀವು ಹೊಸ ಬಳಕೆದಾರರನ್ನು ಸೇರಿಸಿದಾಗ, ಆ ವ್ಯಕ್ತಿಯು ಅವರ ಸ್ಥಳವನ್ನು ಸೆಟಪ್ ಮಾಡಬೇಕಾಗುತ್ತದೆ."</string>
+    <string name="user_add_user_message_update" msgid="3383320289232716179">"ಯಾವುದೇ ಬಳಕೆದಾರರು ಎಲ್ಲಾ ಇತರೆ ಬಳಕೆದಾರರಿಗಾಗಿ ಅಪ್ಲಿಕೇಶನ್‌ಗಳನ್ನು ಅಪ್‌ಡೇಟ್‌ ಮಾಡಬಹುದು."</string>
 </resources>

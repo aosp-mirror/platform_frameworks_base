@@ -32,7 +32,7 @@
     <string name="status_bar_no_notifications_title" msgid="4755261167193833213">"কোনো জাননী নাই"</string>
     <string name="status_bar_ongoing_events_title" msgid="1682504513316879202">"চলিত"</string>
     <string name="status_bar_latest_events_title" msgid="6594767438577593172">"জাননীসমূহ"</string>
-    <string name="battery_low_title" msgid="6456385927409742437">"বেটাৰি কম আছে"</string>
+    <string name="battery_low_title" msgid="9187898087363540349">"বেটাৰি অতি সোনকালে শেষ হ\'ব পাৰে"</string>
     <string name="battery_low_percent_format" msgid="2900940511201380775">"<xliff:g id="PERCENTAGE">%s</xliff:g> বাকী আছে"</string>
     <string name="battery_low_percent_format_hybrid" msgid="6838677459286775617">"<xliff:g id="PERCENTAGE">%s</xliff:g> অৱশিষ্ট আছে, আপোনাৰ ব্যৱহাৰক ভিত্তি কৰি প্ৰায় <xliff:g id="TIME">%s</xliff:g> বাকী আছে"</string>
     <string name="battery_low_percent_format_hybrid_short" msgid="9025795469949145586">"<xliff:g id="PERCENTAGE">%s</xliff:g> অৱশিষ্ট আছে, প্ৰায় <xliff:g id="TIME">%s</xliff:g> বাকী"</string>
@@ -95,8 +95,7 @@
     <string name="accessibility_unlock_button" msgid="128158454631118828">"আনলক কৰক"</string>
     <string name="accessibility_waiting_for_fingerprint" msgid="4808860050517462885">"ফিংগাৰপ্ৰিণ্টৰ বাবে ৰৈ থকা হৈছে"</string>
     <string name="accessibility_unlock_without_fingerprint" msgid="7541705575183694446">"ফিংগাৰপ্ৰিণ্ট ব্যৱহাৰ নকৰাকৈ আনলক কৰক"</string>
-    <!-- no translation found for accessibility_send_smart_reply (7766727839703044493) -->
-    <skip />
+    <string name="accessibility_send_smart_reply" msgid="7766727839703044493">"পঠিয়াওক"</string>
     <string name="unlock_label" msgid="8779712358041029439">"আনলক কৰক"</string>
     <string name="phone_label" msgid="2320074140205331708">"ফ\'ন খোলক"</string>
     <string name="voice_assist_label" msgid="3956854378310019854">"কণ্ঠধ্বনিৰে সহায় খোলক"</string>
@@ -208,10 +207,8 @@
     <string name="accessibility_quick_settings_airplane_on" msgid="6406141469157599296">"এয়াৰপ্লেইন ম\'ড অন হৈ আছে৷"</string>
     <string name="accessibility_quick_settings_airplane_changed_off" msgid="66846307818850664">"এয়াৰপ্লেইন ম\'ড অফ কৰা হ\'ল।"</string>
     <string name="accessibility_quick_settings_airplane_changed_on" msgid="8983005603505087728">"এয়াৰপ্লেইন ম\'ড অন কৰা হ\'ল।"</string>
-    <!-- no translation found for accessibility_quick_settings_dnd_none_on (2960643943620637020) -->
-    <skip />
-    <!-- no translation found for accessibility_quick_settings_dnd_alarms_on (3357131899365865386) -->
-    <skip />
+    <string name="accessibility_quick_settings_dnd_none_on" msgid="2960643943620637020">"সম্পূৰ্ণ নিৰৱতা"</string>
+    <string name="accessibility_quick_settings_dnd_alarms_on" msgid="3357131899365865386">"কেৱল এলাৰ্মবোৰৰ বাবে"</string>
     <string name="accessibility_quick_settings_dnd" msgid="6607873236717185815">"অসুবিধা নিদিব।"</string>
     <string name="accessibility_quick_settings_dnd_changed_off" msgid="898107593453022935">"অসুবিধা নিদিব বন্ধ কৰা হ\'ল।"</string>
     <string name="accessibility_quick_settings_dnd_changed_on" msgid="4483780856613561039">"অসুবিধা নিদিব অন কৰা হৈছে।"</string>
@@ -620,8 +617,7 @@
       <item quantity="other"><xliff:g id="PERFORMING_ACTIVITY_1">%1$s</xliff:g> আৰু <xliff:g id="PERFORMING_ACTIVITY_2">%2$s</xliff:g> ব্যৱহাৰ কৰি আছে</item>
     </plurals>
     <string name="notification_appops_settings" msgid="1028328314935908050">"ছেটিংসমূহ"</string>
-    <!-- no translation found for notification_appops_ok (1156966426011011434) -->
-    <skip />
+    <string name="notification_appops_ok" msgid="1156966426011011434">"ঠিক আছে"</string>
     <string name="notification_channel_controls_opened_accessibility" msgid="6553950422055908113">"<xliff:g id="APP_NAME">%1$s</xliff:g>ৰ জাননী নিয়ন্ত্ৰণসমূহ খোলা অৱস্থাত আছে"</string>
     <string name="notification_channel_controls_closed_accessibility" msgid="7521619812603693144">"<xliff:g id="APP_NAME">%1$s</xliff:g>ৰ জাননী নিয়ন্ত্ৰণসমূহ বন্ধ অৱস্থাত আছে"</string>
     <string name="notification_channel_switch_accessibility" msgid="3420796005601900717">"এই চ্চেনেলৰ পৰা জাননী দিবলৈ অনুমতি দিয়ক"</string>
@@ -674,7 +670,7 @@
     <string name="keyboard_key_num_lock" msgid="5052537581246772117">"সংখ্য়া লক"</string>
     <string name="keyboard_key_numpad_template" msgid="8729216555174634026">"নামপেড <xliff:g id="NAME">%1$s</xliff:g>"</string>
     <string name="keyboard_shortcut_group_system" msgid="6472647649616541064">"ছিষ্টেম"</string>
-    <string name="keyboard_shortcut_group_system_home" msgid="3054369431319891965">"হ\'ম স্ক্ৰীণ"</string>
+    <string name="keyboard_shortcut_group_system_home" msgid="3054369431319891965">"গৃহ স্ক্ৰীণ"</string>
     <string name="keyboard_shortcut_group_system_recents" msgid="3154851905021926744">"শেহতীয়াসমূহ"</string>
     <string name="keyboard_shortcut_group_system_back" msgid="2207004531216446378">"উভতি যাওক"</string>
     <string name="keyboard_shortcut_group_system_notifications" msgid="8366964080041773224">"জাননীসমূহ"</string>

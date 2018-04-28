@@ -140,7 +140,10 @@
       <item quantity="one">裝置在過去 <xliff:g id="NUMBER_0">%d</xliff:g> 小時內未有解鎖，請確認密碼。</item>
     </plurals>
     <string name="fingerprint_not_recognized" msgid="348813995267914625">"未能識別"</string>
-    <!-- no translation found for kg_password_default_pin_message (3739658416797652781) -->
+    <plurals name="kg_password_default_pin_message" formatted="false" msgid="3739658416797652781">
+      <item quantity="other">輸入 SIM 卡的 PIN，您還可以再試 <xliff:g id="NUMBER_1">%d</xliff:g> 次。</item>
+      <item quantity="one">輸入 SIM 卡的 PIN，您還可以再試 <xliff:g id="NUMBER_0">%d</xliff:g> 次。如果仍然輸入錯誤，您必須聯絡流動網絡供應商解鎖您的裝置。</item>
+    </plurals>
     <plurals name="kg_password_default_puk_message" formatted="false" msgid="8744416410184198352">
       <item quantity="other">SIM 卡已停用。請輸入 PUK 碼以繼續進行。您還可以再試 <xliff:g id="_NUMBER_1">%d</xliff:g> 次。如果仍然輸入錯誤，SIM 卡將永久無法使用。詳情請與流動網絡供應商聯絡。</item>
       <item quantity="one">SIM 卡已停用。請輸入 PUK 碼以繼續進行。您還可以再試 <xliff:g id="_NUMBER_0">%d</xliff:g> 次。如果仍然輸入錯誤，SIM 卡將永久無法使用。詳情請與流動網絡供應商聯絡。</item>

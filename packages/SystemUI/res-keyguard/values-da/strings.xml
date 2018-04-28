@@ -140,7 +140,10 @@
       <item quantity="other">Enheden blev sidst låst op for <xliff:g id="NUMBER_1">%d</xliff:g> timer siden. Bekræft adgangskoden.</item>
     </plurals>
     <string name="fingerprint_not_recognized" msgid="348813995267914625">"Ikke genkendt"</string>
-    <!-- no translation found for kg_password_default_pin_message (3739658416797652781) -->
+    <plurals name="kg_password_default_pin_message" formatted="false" msgid="3739658416797652781">
+      <item quantity="one">Angiv pinkoden til SIM-kortet. Du har <xliff:g id="NUMBER_1">%d</xliff:g> forsøg tilbage.</item>
+      <item quantity="other">Angiv pinkoden til SIM-kortet. Du har <xliff:g id="NUMBER_1">%d</xliff:g> forsøg tilbage.</item>
+    </plurals>
     <plurals name="kg_password_default_puk_message" formatted="false" msgid="8744416410184198352">
       <item quantity="one">SIM-kortet er nu deaktiveret. Indtast PUK-koden for at fortsætte. Du har <xliff:g id="_NUMBER_1">%d</xliff:g> forsøg tilbage, før SIM-kortet bliver permanent ubrugeligt. Kontakt dit mobilselskab for at få flere oplysninger.</item>
       <item quantity="other">SIM-kortet er nu deaktiveret. Indtast PUK-koden for at fortsætte. Du har <xliff:g id="_NUMBER_1">%d</xliff:g> forsøg tilbage, før SIM-kortet bliver permanent ubrugeligt. Kontakt dit mobilselskab for at få flere oplysninger.</item>

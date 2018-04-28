@@ -46,7 +46,7 @@
     <string name="keyguard_missing_sim_instructions" msgid="7350295932015220392">"‏أدخل شريحة SIM."</string>
     <string name="keyguard_missing_sim_instructions_long" msgid="589889372883904477">"‏شريحة SIM مفقودة أو غير قابلة للقراءة. أدخل شريحة SIM."</string>
     <string name="keyguard_permanent_disabled_sim_message_short" msgid="654102080186420706">"‏شريحة SIM غير قابلة للاستخدام."</string>
-    <string name="keyguard_permanent_disabled_sim_instructions" msgid="4683178224791318347">"‏تم تعطيل شريحة SIM بشكل دائم.\n اتصل بمقدم خدمة اللاسلكي للحصول على شريحة SIM أخرى."</string>
+    <string name="keyguard_permanent_disabled_sim_instructions" msgid="4683178224791318347">"‏تم إيقاف شريحة SIM بشكل دائم.\n اتصل بمقدم خدمة اللاسلكي للحصول على شريحة SIM أخرى."</string>
     <string name="keyguard_sim_locked_message" msgid="953766009432168127">"‏شريحة SIM مؤمّنة."</string>
     <string name="keyguard_sim_puk_locked_message" msgid="1772789643694942073">"‏شريحة SIM مؤمّنة برمز PUK."</string>
     <string name="keyguard_sim_unlock_progress_dialog_message" msgid="3586601150825821675">"‏جارٍ إلغاء تأمين شريحة SIM…"</string>
@@ -55,7 +55,7 @@
     <string name="keyguard_accessibility_sim_puk_area" msgid="136979425761438705">"‏منطقة PUK لشريحة SIM"</string>
     <string name="keyguard_accessibility_next_alarm" msgid="5835196989158584991">"تم ضبط التنبيه التالي على <xliff:g id="ALARM">%1$s</xliff:g>"</string>
     <string name="keyboardview_keycode_delete" msgid="6883116827512721630">"Delete"</string>
-    <string name="disable_carrier_button_text" msgid="6914341927421916114">"‏تعطيل شريحة eSIM"</string>
+    <string name="disable_carrier_button_text" msgid="6914341927421916114">"‏إيقاف شريحة eSIM"</string>
     <string name="error_disable_esim_title" msgid="4852978431156228006">"‏يتعذّر إيقاف eSIM."</string>
     <string name="error_disable_esim_msg" msgid="676694908770135639">"‏يتعذّر إيقاف eSIM بسبب خطأ."</string>
     <string name="keyboardview_keycode_enter" msgid="4505833604411016668">"Enter"</string>
@@ -77,14 +77,14 @@
     <string name="kg_sim_lock_esim_instructions" msgid="4416732549172148542">"‏<xliff:g id="PREVIOUS_MSG">%1$s</xliff:g> يجب إيقاف eSIM لاستخدام الجهاز دون خدمة جوّال."</string>
     <string name="kg_pin_instructions" msgid="4069609316644030034">"أدخل رقم التعريف الشخصي"</string>
     <string name="kg_password_instructions" msgid="136952397352976538">"أدخل كلمة المرور"</string>
-    <string name="kg_puk_enter_puk_hint" msgid="2288964170039899277">"‏شريحة SIM معطّلة الآن. أدخل رمز PUK للمتابعة. اتصل بمشغل شبكة الجوّال للاطلاع على التفاصيل."</string>
-    <string name="kg_puk_enter_puk_hint_multi" msgid="1373131883510840794">"‏SIM \"<xliff:g id="CARRIER">%1$s</xliff:g>\" معطّلة الآن. أدخل رمز PUK للمتابعة. واتصل بمشغل شبكة الجوّال لمعرفة التفاصيل."</string>
+    <string name="kg_puk_enter_puk_hint" msgid="2288964170039899277">"‏شريحة SIM غير مفعّلة الآن. أدخل رمز PUK للمتابعة. اتصل بمشغل شبكة الجوّال للاطلاع على التفاصيل."</string>
+    <string name="kg_puk_enter_puk_hint_multi" msgid="1373131883510840794">"‏SIM \"<xliff:g id="CARRIER">%1$s</xliff:g>\" غير مفعّلة الآن. أدخل رمز PUK للمتابعة. واتصل بمشغل شبكة الجوّال لمعرفة التفاصيل."</string>
     <string name="kg_puk_enter_pin_hint" msgid="3137789674920391087">"أدخل رمز رقم التعريف الشخصي المطلوب"</string>
     <string name="kg_enter_confirm_pin_hint" msgid="3089485999116759671">"تأكيد رمز رقم التعريف الشخصي المطلوب"</string>
     <string name="kg_sim_unlock_progress_dialog_message" msgid="4471738151810900114">"‏جارٍ إلغاء تأمين شريحة SIM…"</string>
     <string name="kg_invalid_sim_pin_hint" msgid="3057533256729513335">"اكتب رمز رقم التعريف الشخصي المكوّن من ٤ إلى ٨ أرقام."</string>
     <string name="kg_invalid_sim_puk_hint" msgid="6003602401368264144">"‏يجب أن يتضمن رمز PUK‏ ۸ أرقام أو أكثر."</string>
-    <string name="kg_invalid_puk" msgid="5399287873762592502">"‏أعد إدخال رمز PUK الصحيح. وستؤدي المحاولات المتكررة إلى تعطيل شريحة SIM نهائيًا."</string>
+    <string name="kg_invalid_puk" msgid="5399287873762592502">"‏أعد إدخال رمز PUK الصحيح. وستؤدي المحاولات المتكررة إلى إيقاف شريحة SIM نهائيًا."</string>
     <string name="kg_invalid_confirm_pin_hint" product="default" msgid="5672736555427444330">"لا يتطابق رمز رقم التعريف الشخصي"</string>
     <string name="kg_login_too_many_attempts" msgid="6604574268387867255">"محاولات النقش كثيرة جدًا"</string>
     <string name="kg_too_many_failed_pin_attempts_dialog_message" msgid="8637788033282252027">"لقد كتبت رقم التعريف الشخصي بشكل غير صحيح <xliff:g id="NUMBER_0">%1$d</xliff:g> مرة. \n\nأعد المحاولة خلال <xliff:g id="NUMBER_1">%2$d</xliff:g> ثانية."</string>
@@ -164,7 +164,14 @@
       <item quantity="one">لم يتم إلغاء تأمين الجهاز لمدة <xliff:g id="NUMBER_0">%d</xliff:g> ساعة. تأكيد كلمة المرور.</item>
     </plurals>
     <string name="fingerprint_not_recognized" msgid="348813995267914625">"لم يتم التعرف عليها"</string>
-    <!-- no translation found for kg_password_default_pin_message (3739658416797652781) -->
+    <plurals name="kg_password_default_pin_message" formatted="false" msgid="3739658416797652781">
+      <item quantity="zero">‏أدخل رقم التعريف الشخصي لشريحة SIM. تتبقى لديك <xliff:g id="NUMBER_1">%d</xliff:g> محاولة.</item>
+      <item quantity="two">‏أدخل رقم التعريف الشخصي لشريحة SIM. تتبقى لديك محاولتان (<xliff:g id="NUMBER_1">%d</xliff:g>).</item>
+      <item quantity="few">‏أدخل رقم التعريف الشخصي لشريحة SIM. تتبقى لديك <xliff:g id="NUMBER_1">%d</xliff:g> محاولات.</item>
+      <item quantity="many">‏أدخل رقم التعريف الشخصي لشريحة SIM. تتبقى لديك <xliff:g id="NUMBER_1">%d</xliff:g> محاولة.</item>
+      <item quantity="other">‏أدخل رقم التعريف الشخصي لشريحة SIM. تتبقى لديك <xliff:g id="NUMBER_1">%d</xliff:g> محاولة.</item>
+      <item quantity="one">‏أدخل رقم التعريف الشخصي لشريحة SIM. تتبقى لديك محاولة واحدة (<xliff:g id="NUMBER_0">%d</xliff:g>) يجب أن تتصل بعدها بمشغّل شبكة الجوّال لفتح الجهاز.</item>
+    </plurals>
     <plurals name="kg_password_default_puk_message" formatted="false" msgid="8744416410184198352">
       <item quantity="zero">‏تم إيقاف شريحة SIM الآن. أدخل رمز PUK للمتابعة، وتتبقى لديك <xliff:g id="_NUMBER_1">%d</xliff:g> محاولة قبل أن تصبح شريحة SIM غير صالحة للاستخدام نهائيًا. ويمكنك الاتصال بمشغل شبكة الجوّال لمعرفة التفاصيل.</item>
       <item quantity="two">‏تم إيقاف شريحة SIM الآن. أدخل رمز PUK للمتابعة، وتتبقى لديك محاولتان (<xliff:g id="_NUMBER_1">%d</xliff:g>) قبل أن تصبح شريحة SIM غير صالحة للاستخدام نهائيًا. ويمكنك الاتصال بمشغل شبكة الجوّال لمعرفة التفاصيل.</item>

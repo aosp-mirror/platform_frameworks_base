@@ -32,7 +32,8 @@
     <string name="status_bar_no_notifications_title" msgid="4755261167193833213">"அறிவிப்புகள் இல்லை"</string>
     <string name="status_bar_ongoing_events_title" msgid="1682504513316879202">"செயலில் இருக்கும்"</string>
     <string name="status_bar_latest_events_title" msgid="6594767438577593172">"அறிவிப்புகள்"</string>
-    <string name="battery_low_title" msgid="6456385927409742437">"பேட்டரி குறைவு"</string>
+    <!-- no translation found for battery_low_title (9187898087363540349) -->
+    <skip />
     <string name="battery_low_percent_format" msgid="2900940511201380775">"<xliff:g id="PERCENTAGE">%s</xliff:g> உள்ளது"</string>
     <string name="battery_low_percent_format_hybrid" msgid="6838677459286775617">"<xliff:g id="PERCENTAGE">%s</xliff:g> பேட்டரி மீதமுள்ளது. உங்கள் உபயோகத்தைப் பொறுத்து, இதைச் சுமார் <xliff:g id="TIME">%s</xliff:g> மணி நேரத்திற்குப் பயன்படுத்தலாம்"</string>
     <string name="battery_low_percent_format_hybrid_short" msgid="9025795469949145586">"<xliff:g id="PERCENTAGE">%s</xliff:g> மீதமுள்ளது, இதைச் சுமார் <xliff:g id="TIME">%s</xliff:g> மணி நேரத்திற்குப் பயன்படுத்தலாம்"</string>
@@ -95,8 +96,7 @@
     <string name="accessibility_unlock_button" msgid="128158454631118828">"திற"</string>
     <string name="accessibility_waiting_for_fingerprint" msgid="4808860050517462885">"கைரேகைக்காகக் காத்திருக்கிறது"</string>
     <string name="accessibility_unlock_without_fingerprint" msgid="7541705575183694446">"உங்கள் கைரேகையைப் பயன்படுத்தாமல் திறக்கவும்"</string>
-    <!-- no translation found for accessibility_send_smart_reply (7766727839703044493) -->
-    <skip />
+    <string name="accessibility_send_smart_reply" msgid="7766727839703044493">"அனுப்பு"</string>
     <string name="unlock_label" msgid="8779712358041029439">"திற"</string>
     <string name="phone_label" msgid="2320074140205331708">"ஃபோனைத் திற"</string>
     <string name="voice_assist_label" msgid="3956854378310019854">"குரல் உதவியைத் திற"</string>
@@ -208,10 +208,8 @@
     <string name="accessibility_quick_settings_airplane_on" msgid="6406141469157599296">"விமானப் பயன்முறை இயக்கத்தில்."</string>
     <string name="accessibility_quick_settings_airplane_changed_off" msgid="66846307818850664">"விமானப் பயன்முறை முடக்கப்பட்டது."</string>
     <string name="accessibility_quick_settings_airplane_changed_on" msgid="8983005603505087728">"விமானப் பயன்முறை இயக்கப்பட்டது."</string>
-    <!-- no translation found for accessibility_quick_settings_dnd_none_on (2960643943620637020) -->
-    <skip />
-    <!-- no translation found for accessibility_quick_settings_dnd_alarms_on (3357131899365865386) -->
-    <skip />
+    <string name="accessibility_quick_settings_dnd_none_on" msgid="2960643943620637020">"முழு அமைதி"</string>
+    <string name="accessibility_quick_settings_dnd_alarms_on" msgid="3357131899365865386">"அலாரங்கள் மட்டும்"</string>
     <string name="accessibility_quick_settings_dnd" msgid="6607873236717185815">"தொந்தரவு செய்யாதே."</string>
     <string name="accessibility_quick_settings_dnd_changed_off" msgid="898107593453022935">"தொந்தரவு செய்ய வேண்டாம் என்பது முடக்கப்பட்டது."</string>
     <string name="accessibility_quick_settings_dnd_changed_on" msgid="4483780856613561039">"தொந்தரவு செய்ய வேண்டாம் என்பது இயக்கப்பட்டது."</string>
@@ -620,8 +618,7 @@
       <item quantity="one"><xliff:g id="PERFORMING_ACTIVITY_0">%1$s</xliff:g>ஐப் பயன்படுத்துகிறது</item>
     </plurals>
     <string name="notification_appops_settings" msgid="1028328314935908050">"அமைப்புகள்"</string>
-    <!-- no translation found for notification_appops_ok (1156966426011011434) -->
-    <skip />
+    <string name="notification_appops_ok" msgid="1156966426011011434">"சரி"</string>
     <string name="notification_channel_controls_opened_accessibility" msgid="6553950422055908113">"<xliff:g id="APP_NAME">%1$s</xliff:g>க்கான அறிவிப்புக் கட்டுப்பாடுகள் திறக்கப்பட்டன"</string>
     <string name="notification_channel_controls_closed_accessibility" msgid="7521619812603693144">"<xliff:g id="APP_NAME">%1$s</xliff:g>க்கான அறிவிப்புக் கட்டுப்பாடுகள் மூடப்பட்டன"</string>
     <string name="notification_channel_switch_accessibility" msgid="3420796005601900717">"இந்தச் சேனலிலிருந்து அறிவிப்புகளைப் பெறுவதை அனுமதிக்கும்"</string>

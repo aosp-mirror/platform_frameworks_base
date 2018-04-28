@@ -140,7 +140,10 @@
       <item quantity="other">Hindi na-unlock ang device sa loob ng <xliff:g id="NUMBER_1">%d</xliff:g> na oras. Kumpirmahin ang password.</item>
     </plurals>
     <string name="fingerprint_not_recognized" msgid="348813995267914625">"Hindi nakilala"</string>
-    <!-- no translation found for kg_password_default_pin_message (3739658416797652781) -->
+    <plurals name="kg_password_default_pin_message" formatted="false" msgid="3739658416797652781">
+      <item quantity="one">Ilagay ang PIN ng SIM. Mayroon kang <xliff:g id="NUMBER_1">%d</xliff:g> natitirang pagsubok.</item>
+      <item quantity="other">Ilagay ang PIN ng SIM. Mayroon kang <xliff:g id="NUMBER_1">%d</xliff:g> na natitirang pagsubok.</item>
+    </plurals>
     <plurals name="kg_password_default_puk_message" formatted="false" msgid="8744416410184198352">
       <item quantity="one">Naka-disable na ang SIM. Ilagay ang PUK code upang magpatuloy. Mayroon kang <xliff:g id="_NUMBER_1">%d</xliff:g> natitirang pagsubok bago tuluyang hindi magamit ang SIM. Makipag-ugnayan sa carrier para sa mga detalye.</item>
       <item quantity="other">Naka-disable na ang SIM. Ilagay ang PUK code upang magpatuloy. Mayroon kang <xliff:g id="_NUMBER_1">%d</xliff:g> na natitirang pagsubok bago tuluyang hindi magamit ang SIM. Makipag-ugnayan sa carrier para sa mga detalye.</item>

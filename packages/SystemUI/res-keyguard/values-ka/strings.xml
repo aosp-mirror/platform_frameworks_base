@@ -140,7 +140,10 @@
       <item quantity="one">მოწყობილობა არ განბლოკილა <xliff:g id="NUMBER_0">%d</xliff:g> საათის განმავლობაში. დაადასტურეთ პაროლი.</item>
     </plurals>
     <string name="fingerprint_not_recognized" msgid="348813995267914625">"არ არის ამოცნობილი"</string>
-    <!-- no translation found for kg_password_default_pin_message (3739658416797652781) -->
+    <plurals name="kg_password_default_pin_message" formatted="false" msgid="3739658416797652781">
+      <item quantity="other">შეიყვანეთ SIM ბარათის PIN-კოდი. თქვენ დაგრჩათ <xliff:g id="NUMBER_1">%d</xliff:g> მცდელობა.</item>
+      <item quantity="one">შეიყვანეთ SIM ბარათის PIN-კოდი. თქვენ დაგრჩათ <xliff:g id="NUMBER_0">%d</xliff:g> მცდელობა, რომლის შემდეგაც მოწყობილობის განსაბლოკად დაგჭირდებათ თქვენს ოპერატორთან დაკავშირება.</item>
+    </plurals>
     <plurals name="kg_password_default_puk_message" formatted="false" msgid="8744416410184198352">
       <item quantity="other">SIM ბარათი ახლა დეაქტივირებულია. გასაგრძელებლად შეიყვანეთ PUK-კოდი. თქვენ დაგრჩათ <xliff:g id="_NUMBER_1">%d</xliff:g> მცდელობა, სანამ SIM სამუდამოდ გამოუსადეგარი გახდება. დეტალური ინფორმაციისთვის დაუკავშირდით თქვენს ოპერატორს.</item>
       <item quantity="one">SIM ბარათი ახლა დეაქტივირებულია. გასაგრძელებლად შეიყვანეთ PUK-კოდი. თქვენ დაგრჩათ <xliff:g id="_NUMBER_0">%d</xliff:g> მცდელობა, სანამ SIM სამუდამოდ გამოუსადეგარი გახდება. დეტალური ინფორმაციისთვის დაუკავშირდით თქვენს ოპერატორს.</item>
