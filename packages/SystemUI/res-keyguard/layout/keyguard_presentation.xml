@@ -46,8 +46,7 @@
                 style="@style/widget_big_thin"
                 android:format12Hour="@string/keyguard_widget_12_hours_format"
                 android:format24Hour="@string/keyguard_widget_24_hours_format"
-                android:baselineAligned="true"
-                android:layout_marginBottom="@dimen/bottom_text_spacing_digital" />
+                android:baselineAligned="true" />
 
             <include layout="@layout/keyguard_status_area" />
             <ImageView

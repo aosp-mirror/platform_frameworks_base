@@ -16,6 +16,7 @@
 
 package com.android.server.wm;
 
+import android.app.WindowConfiguration;
 import android.content.res.Configuration;
 import android.graphics.Rect;
 import android.os.Handler;
@@ -244,12 +245,15 @@ public class StackWindowController
     }
 
     /**
-     * Adjusts the screen size in dp's for the {@param config} for the given params.
+     * Adjusts the screen size in dp's for the {@param config} for the given params. The provided
+     * params represent the desired state of a configuration change. Since this utility is used
+     * before mContainer has been updated, any relevant properties (like {@param windowingMode})
+     * need to be passed in.
      */
     public void adjustConfigurationForBounds(Rect bounds, Rect insetBounds,
             Rect nonDecorBounds, Rect stableBounds, boolean overrideWidth,
             boolean overrideHeight, float density, Configuration config,
-            Configuration parentConfig) {
+            Configuration parentConfig, int windowingMode) {
         synchronized (mWindowMap) {
             final TaskStack stack = mContainer;
             final DisplayContent displayContent = stack.getDisplayContent();
@@ -272,10 +276,10 @@ public class StackWindowController
             config.windowConfiguration.setAppBounds(!bounds.isEmpty() ? bounds : null);
             boolean intersectParentBounds = false;
 
-            if (stack.getWindowConfiguration().tasksAreFloating()) {
+            if (WindowConfiguration.isFloating(windowingMode)) {
                 // Floating tasks should not be resized to the screen's bounds.
 
-                if (stack.inPinnedWindowingMode()
+                if (windowingMode == WindowConfiguration.WINDOWING_MODE_PINNED
                         && bounds.width() == mTmpDisplayBounds.width()
                         && bounds.height() == mTmpDisplayBounds.height()) {
                     // If the bounds we are animating is the same as the fullscreen stack
@@ -316,7 +320,7 @@ public class StackWindowController
             config.screenWidthDp = width;
             config.screenHeightDp = height;
             config.smallestScreenWidthDp = getSmallestWidthForTaskBounds(
-                    insetBounds != null ? insetBounds : bounds, density);
+                    insetBounds != null ? insetBounds : bounds, density, windowingMode);
         }
     }
 
@@ -338,11 +342,12 @@ public class StackWindowController
     }
 
     /**
-     * Calculates the smallest width for a task given the {@param bounds}.
+     * Calculates the smallest width for a task given the target {@param bounds} and
+     * {@param windowingMode}. Avoid using values from mContainer since they can be out-of-date.
      *
      * @return the smallest width to be used in the Configuration, in dips
      */
-    private int getSmallestWidthForTaskBounds(Rect bounds, float density) {
+    private int getSmallestWidthForTaskBounds(Rect bounds, float density, int windowingMode) {
         final DisplayContent displayContent = mContainer.getDisplayContent();
         final DisplayInfo displayInfo = displayContent.getDisplayInfo();
 
@@ -350,7 +355,7 @@ public class StackWindowController
                 bounds.height() == displayInfo.logicalHeight)) {
             // If the bounds are fullscreen, return the value of the fullscreen configuration
             return displayContent.getConfiguration().smallestScreenWidthDp;
-        } else if (mContainer.getWindowConfiguration().tasksAreFloating()) {
+        } else if (WindowConfiguration.isFloating(windowingMode)) {
             // For floating tasks, calculate the smallest width from the bounds of the task
             return (int) (Math.min(bounds.width(), bounds.height()) / density);
         } else {

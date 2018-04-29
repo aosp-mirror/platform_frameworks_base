@@ -47,7 +47,7 @@
     <string name="savetopdf_button" msgid="2976186791686924743">"Sačuvaj u PDF"</string>
     <string name="print_options_expanded" msgid="6944679157471691859">"Opcije za štampanje su proširene"</string>
     <string name="print_options_collapsed" msgid="7455930445670414332">"Opcije za štampanje su skupljene"</string>
-    <string name="search" msgid="5421724265322228497">"Traži"</string>
+    <string name="search" msgid="5421724265322228497">"Pretraživanje"</string>
     <string name="all_printers_label" msgid="3178848870161526399">"Svi štampači"</string>
     <string name="add_print_service_label" msgid="5356702546188981940">"Dodaj uslugu"</string>
     <string name="print_search_box_shown_utterance" msgid="7967404953901376090">"Okvir za pretraživanje je prikazan"</string>
@@ -70,7 +70,7 @@
     <string name="print_no_print_services" msgid="8561247706423327966">"Usluga za štampanje nije uključena"</string>
     <string name="print_no_printers" msgid="4869403323900054866">"Nijedan štampač nije pronađen"</string>
     <string name="cannot_add_printer" msgid="7840348733668023106">"Ne mogu se dodati štampači"</string>
-    <string name="select_to_add_printers" msgid="3800709038689830974">"Odaberite da biste dodali štampač"</string>
+    <string name="select_to_add_printers" msgid="3800709038689830974">"Odaberite da dodate štampač"</string>
     <string name="enable_print_service" msgid="3482815747043533842">"Odaberite da biste uključili"</string>
     <string name="enabled_services_title" msgid="7036986099096582296">"Uključene usluge"</string>
     <string name="recommended_services_title" msgid="3799434882937956924">"Preporučene usluge"</string>

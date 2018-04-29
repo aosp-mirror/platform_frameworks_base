@@ -22,4 +22,6 @@
     <string name="car_guest" msgid="3738772168718508650">"게스트"</string>
     <string name="car_add_user" msgid="5245196248349230898">"사용자 추가"</string>
     <string name="car_new_user" msgid="8142927244990323906">"신규 사용자"</string>
+    <string name="user_add_user_message_setup" msgid="1791011504259527329">"추가된 새로운 사용자는 자신의 공간을 설정해야 합니다."</string>
+    <string name="user_add_user_message_update" msgid="3383320289232716179">"모든 사용자는 다른 사용자를 위해 앱을 업데이트할 수 있습니다."</string>
 </resources>

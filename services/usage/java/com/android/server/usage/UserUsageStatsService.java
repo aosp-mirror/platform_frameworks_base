@@ -17,15 +17,14 @@
 package com.android.server.usage;
 
 import android.app.usage.ConfigurationStats;
+import android.app.usage.EventList;
 import android.app.usage.EventStats;
-import android.app.usage.TimeSparseArray;
 import android.app.usage.UsageEvents;
 import android.app.usage.UsageStats;
 import android.app.usage.UsageStatsManager;
 import android.content.res.Configuration;
 import android.os.SystemClock;
 import android.content.Context;
-import android.text.format.DateFormat;
 import android.text.format.DateUtils;
 import android.util.ArrayMap;
 import android.util.ArraySet;
@@ -174,10 +173,10 @@ class UserUsageStatsService {
 
         // Add the event to the daily list.
         if (currentDailyStats.events == null) {
-            currentDailyStats.events = new TimeSparseArray<>();
+            currentDailyStats.events = new EventList();
         }
         if (event.mEventType != UsageEvents.Event.SYSTEM_INTERACTION) {
-            currentDailyStats.events.put(event.mTimeStamp, event);
+            currentDailyStats.events.insert(event);
         }
 
         boolean incrementAppLaunch = false;
@@ -367,18 +366,14 @@ class UserUsageStatsService {
                             return;
                         }
 
-                        final int startIndex = stats.events.closestIndexOnOrAfter(beginTime);
-                        if (startIndex < 0) {
-                            return;
-                        }
-
+                        final int startIndex = stats.events.firstIndexOnOrAfter(beginTime);
                         final int size = stats.events.size();
                         for (int i = startIndex; i < size; i++) {
-                            if (stats.events.keyAt(i) >= endTime) {
+                            if (stats.events.get(i).mTimeStamp >= endTime) {
                                 return;
                             }
 
-                            UsageEvents.Event event = stats.events.valueAt(i);
+                            UsageEvents.Event event = stats.events.get(i);
                             if (obfuscateInstantApps) {
                                 event = event.getObfuscatedIfInstantApp();
                             }
@@ -410,18 +405,14 @@ class UserUsageStatsService {
                         return;
                     }
 
-                    final int startIndex = stats.events.closestIndexOnOrAfter(beginTime);
-                    if (startIndex < 0) {
-                        return;
-                    }
-
+                    final int startIndex = stats.events.firstIndexOnOrAfter(beginTime);
                     final int size = stats.events.size();
                     for (int i = startIndex; i < size; i++) {
-                        if (stats.events.keyAt(i) >= endTime) {
+                        if (stats.events.get(i).mTimeStamp >= endTime) {
                             return;
                         }
 
-                        final UsageEvents.Event event = stats.events.valueAt(i);
+                        final UsageEvents.Event event = stats.events.get(i);
                         if (!packageName.equals(event.mPackage)) {
                             continue;
                         }
@@ -633,18 +624,14 @@ class UserUsageStatsService {
                             return;
                         }
 
-                        final int startIndex = stats.events.closestIndexOnOrAfter(beginTime);
-                        if (startIndex < 0) {
-                            return;
-                        }
-
+                        final int startIndex = stats.events.firstIndexOnOrAfter(beginTime);
                         final int size = stats.events.size();
                         for (int i = startIndex; i < size; i++) {
-                            if (stats.events.keyAt(i) >= endTime) {
+                            if (stats.events.get(i).mTimeStamp >= endTime) {
                                 return;
                             }
 
-                            UsageEvents.Event event = stats.events.valueAt(i);
+                            UsageEvents.Event event = stats.events.get(i);
                             if (pkg != null && !pkg.equals(event.mPackage)) {
                                 continue;
                             }
@@ -779,10 +766,10 @@ class UserUsageStatsService {
         if (!skipEvents) {
             pw.println("events");
             pw.increaseIndent();
-            final TimeSparseArray<UsageEvents.Event> events = stats.events;
+            final EventList events = stats.events;
             final int eventCount = events != null ? events.size() : 0;
             for (int i = 0; i < eventCount; i++) {
-                final UsageEvents.Event event = events.valueAt(i);
+                final UsageEvents.Event event = events.get(i);
                 if (pkg != null && !pkg.equals(event.mPackage)) {
                     continue;
                 }

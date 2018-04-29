@@ -399,7 +399,8 @@ public class NotificationManager {
 
         ActivityManager am = (ActivityManager) mContext.getSystemService(Context.ACTIVITY_SERVICE);
         boolean isLowRam = am.isLowRamDevice();
-        final Notification copy = Builder.maybeCloneStrippedForDelivery(notification, isLowRam);
+        final Notification copy = Builder.maybeCloneStrippedForDelivery(notification, isLowRam,
+                mContext);
         try {
             service.enqueueNotificationWithTag(pkg, mContext.getOpPackageName(), tag, id,
                     copy, user.getIdentifier());

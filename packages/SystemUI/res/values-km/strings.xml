@@ -32,7 +32,7 @@
     <string name="status_bar_no_notifications_title" msgid="4755261167193833213">"គ្មាន​ការ​ជូន​ដំណឹង"</string>
     <string name="status_bar_ongoing_events_title" msgid="1682504513316879202">"បន្ត"</string>
     <string name="status_bar_latest_events_title" msgid="6594767438577593172">"ការ​ជូន​ដំណឹង"</string>
-    <string name="battery_low_title" msgid="6456385927409742437">"ជិត​អស់​ថ្ម​ហើយ"</string>
+    <string name="battery_low_title" msgid="9187898087363540349">"អាចនឹងអស់ថ្មក្នុងពេលបន្តិចទៀត"</string>
     <string name="battery_low_percent_format" msgid="2900940511201380775">"នៅ​សល់ <xliff:g id="PERCENTAGE">%s</xliff:g>"</string>
     <string name="battery_low_percent_format_hybrid" msgid="6838677459286775617">"នៅសល់ <xliff:g id="PERCENTAGE">%s</xliff:g> អាច​ប្រើ​បាន​ប្រហែល <xliff:g id="TIME">%s</xliff:g> ទៀត​ផ្អែកលើ​ការប្រើប្រាស់​របស់អ្នក"</string>
     <string name="battery_low_percent_format_hybrid_short" msgid="9025795469949145586">"នៅសល់ <xliff:g id="PERCENTAGE">%s</xliff:g> អាច​ប្រើ​បាន​ប្រហែល <xliff:g id="TIME">%s</xliff:g> ទៀត"</string>
@@ -62,10 +62,10 @@
     <string name="label_view" msgid="6304565553218192990">"មើល"</string>
     <string name="always_use_device" msgid="4015357883336738417">"បើក <xliff:g id="APPLICATION">%1$s</xliff:g> ជានិច្ចនៅពេលដែល <xliff:g id="USB_DEVICE">%2$s</xliff:g> ត្រូវបានភ្ជាប់"</string>
     <string name="always_use_accessory" msgid="3257892669444535154">"បើក <xliff:g id="APPLICATION">%1$s</xliff:g> ជានិច្ចនៅពេលដែល <xliff:g id="USB_ACCESSORY">%2$s</xliff:g> ត្រូវបានភ្ជាប់"</string>
-    <string name="usb_debugging_title" msgid="4513918393387141949">"អនុញ្ញាត​ការ​កែ​កំហុស​យូអេសប៊ី?"</string>
+    <string name="usb_debugging_title" msgid="4513918393387141949">"អនុញ្ញាត​ការ​កែ​កំហុសតាម USB ឬ?"</string>
     <string name="usb_debugging_message" msgid="2220143855912376496">"ស្នាម​ម្រាម​ដៃ​ RSA របស់​កុំព្យូទ័រ​គឺ៖ \n<xliff:g id="FINGERPRINT">%1$s</xliff:g>"</string>
     <string name="usb_debugging_always" msgid="303335496705863070">"អនុញ្ញាត​ជា​និច្ច​សម្រាប់​កុំព្យូទ័រ​នេះ"</string>
-    <string name="usb_debugging_secondary_user_title" msgid="6353808721761220421">"មិនអនុញ្ញាតការកែកំហុសតាមរយៈយូអេសប៊ីទេ"</string>
+    <string name="usb_debugging_secondary_user_title" msgid="6353808721761220421">"មិនអនុញ្ញាតការកែកំហុសតាម USB ទេ"</string>
     <string name="usb_debugging_secondary_user_message" msgid="6067122453571699801">"អ្នកប្រើ​ដែលបច្ចុប្បន្ន​បានចូលគណនី​នៅលើឧបករណ៍នេះ​មិនអាចបើកការកែកំហុស USB បានទេ។ ដើម្បីប្រើមុខងារនេះ សូមប្តូរទៅអ្នកប្រើចម្បង។"</string>
     <string name="compat_mode_on" msgid="6623839244840638213">"ពង្រីក​​ដើម្បី​ឲ្យ​ពេញ​អេក្រង់"</string>
     <string name="compat_mode_off" msgid="4434467572461327898">"ទាញ​ដើម្បី​ឲ្យ​ពេញ​អេក្រង់"</string>
@@ -95,8 +95,7 @@
     <string name="accessibility_unlock_button" msgid="128158454631118828">"ដោះ​​សោ"</string>
     <string name="accessibility_waiting_for_fingerprint" msgid="4808860050517462885">"កំពុង​រង់ចាំ​ស្នាមម្រាមដៃ"</string>
     <string name="accessibility_unlock_without_fingerprint" msgid="7541705575183694446">"ដោះសោដោយមិនបាច់ប្រើស្នាមម្រាមដៃរបស់អ្នក"</string>
-    <!-- no translation found for accessibility_send_smart_reply (7766727839703044493) -->
-    <skip />
+    <string name="accessibility_send_smart_reply" msgid="7766727839703044493">"ផ្ញើ"</string>
     <string name="unlock_label" msgid="8779712358041029439">"ដោះ​សោ"</string>
     <string name="phone_label" msgid="2320074140205331708">"បើក​ទូរស័ព្ទ"</string>
     <string name="voice_assist_label" msgid="3956854378310019854">"បើកជំនួយសំឡេង"</string>
@@ -208,10 +207,8 @@
     <string name="accessibility_quick_settings_airplane_on" msgid="6406141469157599296">"បើក​របៀប​ជិះ​យន្តហោះ។"</string>
     <string name="accessibility_quick_settings_airplane_changed_off" msgid="66846307818850664">"បាន​បិទ​របៀប​ជិះ​យន្តហោះ។"</string>
     <string name="accessibility_quick_settings_airplane_changed_on" msgid="8983005603505087728">"បាន​បើក​របៀប​ជិះ​យន្តហោះ។"</string>
-    <!-- no translation found for accessibility_quick_settings_dnd_none_on (2960643943620637020) -->
-    <skip />
-    <!-- no translation found for accessibility_quick_settings_dnd_alarms_on (3357131899365865386) -->
-    <skip />
+    <string name="accessibility_quick_settings_dnd_none_on" msgid="2960643943620637020">"បិទសំឡេង​ទាំងស្រុង"</string>
+    <string name="accessibility_quick_settings_dnd_alarms_on" msgid="3357131899365865386">"សំឡេងរោទ៍​ប៉ុណ្ណោះ"</string>
     <string name="accessibility_quick_settings_dnd" msgid="6607873236717185815">"កុំរំខាន"</string>
     <string name="accessibility_quick_settings_dnd_changed_off" msgid="898107593453022935">"បានបិទមុខងារកុំរំខាន។"</string>
     <string name="accessibility_quick_settings_dnd_changed_on" msgid="4483780856613561039">"បានបើកមុខងារកុំរំខាន។"</string>
@@ -620,8 +617,7 @@
       <item quantity="one">កំពុងប្រើ <xliff:g id="PERFORMING_ACTIVITY_0">%1$s</xliff:g></item>
     </plurals>
     <string name="notification_appops_settings" msgid="1028328314935908050">"ការកំណត់"</string>
-    <!-- no translation found for notification_appops_ok (1156966426011011434) -->
-    <skip />
+    <string name="notification_appops_ok" msgid="1156966426011011434">"យល់ព្រម"</string>
     <string name="notification_channel_controls_opened_accessibility" msgid="6553950422055908113">"ការគ្រប់គ្រងការជូនដំណឹងសម្រាប់ <xliff:g id="APP_NAME">%1$s</xliff:g> បានបើក"</string>
     <string name="notification_channel_controls_closed_accessibility" msgid="7521619812603693144">"ការគ្រប់គ្រងការជូនដំណឹងសម្រាប់ <xliff:g id="APP_NAME">%1$s</xliff:g> បានបិទ"</string>
     <string name="notification_channel_switch_accessibility" msgid="3420796005601900717">"អនុញ្ញាតឲ្យមានការជូនដំណឹងពីប៉ុស្តិ៍នេះ"</string>

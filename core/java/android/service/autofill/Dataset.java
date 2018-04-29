@@ -336,6 +336,9 @@ public final class Dataset implements Parcelable {
          * higher, datasets that require authentication can be also be filtered by passing a
          * {@link AutofillValue#forText(CharSequence) text value} as the  {@code value} parameter.
          *
+         * <p>Theme does not work with RemoteViews layout. Avoid hardcoded text color
+         * or background color: Autofill on different platforms may have different themes.
+         *
          * @param id id returned by {@link
          *         android.app.assist.AssistStructure.ViewNode#getAutofillId()}.
          * @param value the value to be autofilled. Pass {@code null} if you do not have the value

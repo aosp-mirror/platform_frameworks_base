@@ -1820,7 +1820,7 @@ class TaskRecord extends ConfigurationContainer implements TaskWindowContainerLi
             final StackWindowController stackController = mStack.getWindowContainerController();
             stackController.adjustConfigurationForBounds(bounds, insetBounds,
                     mTmpNonDecorBounds, mTmpStableBounds, overrideWidth, overrideHeight, density,
-                    config, parentConfig);
+                    config, parentConfig, getWindowingMode());
         } else {
             throw new IllegalArgumentException("Expected stack when calculating override config");
         }

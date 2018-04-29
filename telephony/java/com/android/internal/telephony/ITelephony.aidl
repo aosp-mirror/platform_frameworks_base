@@ -1071,6 +1071,17 @@ interface ITelephony {
             in List<String> cdmaNonRoamingList);
 
     /**
+     * Returns the result and response from RIL for oem request
+     *
+     * @param oemReq the data is sent to ril.
+     * @param oemResp the respose data from RIL.
+     * @return negative value request was not handled or get error
+     *         0 request was handled succesfully, but no response data
+     *         positive value success, data length of response
+     */
+    int invokeOemRilRequestRaw(in byte[] oemReq, out byte[] oemResp);
+
+    /**
      * Check if any mobile Radios need to be shutdown.
      *
      * @return true is any mobile radio needs to be shutdown
@@ -1509,4 +1520,10 @@ interface ITelephony {
      * A test API to return installed carrier id list version.
      */
     int getCarrierIdListVersion(int subId);
+
+    /**
+     * A test API to reload the UICC profile.
+     * @hide
+     */
+    void refreshUiccProfile(int subId);
 }

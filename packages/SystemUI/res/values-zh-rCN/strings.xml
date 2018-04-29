@@ -32,7 +32,7 @@
     <string name="status_bar_no_notifications_title" msgid="4755261167193833213">"无通知"</string>
     <string name="status_bar_ongoing_events_title" msgid="1682504513316879202">"正在进行的"</string>
     <string name="status_bar_latest_events_title" msgid="6594767438577593172">"通知"</string>
-    <string name="battery_low_title" msgid="6456385927409742437">"电池电量偏低"</string>
+    <string name="battery_low_title" msgid="9187898087363540349">"电池电量可能很快就要耗尽"</string>
     <string name="battery_low_percent_format" msgid="2900940511201380775">"剩余<xliff:g id="PERCENTAGE">%s</xliff:g>"</string>
     <string name="battery_low_percent_format_hybrid" msgid="6838677459286775617">"剩余电量：<xliff:g id="PERCENTAGE">%s</xliff:g>；根据您的使用情况，大约还可使用 <xliff:g id="TIME">%s</xliff:g>"</string>
     <string name="battery_low_percent_format_hybrid_short" msgid="9025795469949145586">"剩余电量：<xliff:g id="PERCENTAGE">%s</xliff:g>；大约还可使用 <xliff:g id="TIME">%s</xliff:g>"</string>
@@ -95,8 +95,7 @@
     <string name="accessibility_unlock_button" msgid="128158454631118828">"解锁"</string>
     <string name="accessibility_waiting_for_fingerprint" msgid="4808860050517462885">"正在等待提供指纹"</string>
     <string name="accessibility_unlock_without_fingerprint" msgid="7541705575183694446">"不使用指纹解锁"</string>
-    <!-- no translation found for accessibility_send_smart_reply (7766727839703044493) -->
-    <skip />
+    <string name="accessibility_send_smart_reply" msgid="7766727839703044493">"发送"</string>
     <string name="unlock_label" msgid="8779712358041029439">"解锁"</string>
     <string name="phone_label" msgid="2320074140205331708">"打开电话"</string>
     <string name="voice_assist_label" msgid="3956854378310019854">"打开语音助理"</string>
@@ -208,10 +207,8 @@
     <string name="accessibility_quick_settings_airplane_on" msgid="6406141469157599296">"飞行模式开启。"</string>
     <string name="accessibility_quick_settings_airplane_changed_off" msgid="66846307818850664">"飞行模式已关闭。"</string>
     <string name="accessibility_quick_settings_airplane_changed_on" msgid="8983005603505087728">"飞行模式已开启。"</string>
-    <!-- no translation found for accessibility_quick_settings_dnd_none_on (2960643943620637020) -->
-    <skip />
-    <!-- no translation found for accessibility_quick_settings_dnd_alarms_on (3357131899365865386) -->
-    <skip />
+    <string name="accessibility_quick_settings_dnd_none_on" msgid="2960643943620637020">"完全静音"</string>
+    <string name="accessibility_quick_settings_dnd_alarms_on" msgid="3357131899365865386">"仅限闹钟"</string>
     <string name="accessibility_quick_settings_dnd" msgid="6607873236717185815">"勿扰。"</string>
     <string name="accessibility_quick_settings_dnd_changed_off" msgid="898107593453022935">"已关闭勿扰模式。"</string>
     <string name="accessibility_quick_settings_dnd_changed_on" msgid="4483780856613561039">"已开启勿扰模式。"</string>
@@ -620,8 +617,7 @@
       <item quantity="one">使用<xliff:g id="PERFORMING_ACTIVITY_0">%1$s</xliff:g></item>
     </plurals>
     <string name="notification_appops_settings" msgid="1028328314935908050">"设置"</string>
-    <!-- no translation found for notification_appops_ok (1156966426011011434) -->
-    <skip />
+    <string name="notification_appops_ok" msgid="1156966426011011434">"确定"</string>
     <string name="notification_channel_controls_opened_accessibility" msgid="6553950422055908113">"<xliff:g id="APP_NAME">%1$s</xliff:g>的通知控件已打开"</string>
     <string name="notification_channel_controls_closed_accessibility" msgid="7521619812603693144">"<xliff:g id="APP_NAME">%1$s</xliff:g>的通知控件已关闭"</string>
     <string name="notification_channel_switch_accessibility" msgid="3420796005601900717">"允许接收来自此频道的通知"</string>
@@ -681,7 +677,7 @@
     <string name="keyboard_shortcut_group_system_shortcuts_helper" msgid="4892255911160332762">"键盘快捷键"</string>
     <string name="keyboard_shortcut_group_system_switch_input" msgid="2334164096341310324">"切换输入法"</string>
     <string name="keyboard_shortcut_group_applications" msgid="9129465955073449206">"应用"</string>
-    <string name="keyboard_shortcut_group_applications_assist" msgid="9095441910537146013">"辅助应用"</string>
+    <string name="keyboard_shortcut_group_applications_assist" msgid="9095441910537146013">"助手应用"</string>
     <string name="keyboard_shortcut_group_applications_browser" msgid="6465985474000766533">"浏览器"</string>
     <string name="keyboard_shortcut_group_applications_contacts" msgid="2064197111278436375">"通讯录"</string>
     <string name="keyboard_shortcut_group_applications_email" msgid="6257036897441939004">"电子邮件"</string>

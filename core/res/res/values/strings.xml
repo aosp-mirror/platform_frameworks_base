@@ -2196,8 +2196,8 @@
     <!-- Text to show in the auto complete drop down list on a text view when the WebView can auto fill the entire form but the user has not configured an AutoFill profile [CHAR-LIMIT=19] -->
     <string name="setup_autofill">Set up Autofill</string>
 
-    <!-- Title of fullscreen autofill window [CHAR-LIMIT=80] -->
-    <string name="autofill_window_title">Autofill</string>
+    <!-- Title of fullscreen autofill window, including the name of which autofill service it is using [CHAR-LIMIT=NONE] -->
+    <string name="autofill_window_title">Autofill with <xliff:g id="serviceName" example="MyPass">%1$s</xliff:g></string>
 
     <!-- String used to separate FirstName and LastName when writing out a local name
          e.g. John<separator>Smith [CHAR-LIMIT=NONE]-->

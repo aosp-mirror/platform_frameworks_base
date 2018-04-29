@@ -836,7 +836,8 @@
     <string name="double_tap_toast" msgid="4595046515400268881">"Conseil : Appuyez deux fois pour faire un zoom avant ou arrière."</string>
     <string name="autofill_this_form" msgid="4616758841157816676">"Saisie auto"</string>
     <string name="setup_autofill" msgid="7103495070180590814">"Conf. saisie auto"</string>
-    <string name="autofill_window_title" msgid="921006636895825007">"Remplissage automatique"</string>
+    <!-- no translation found for autofill_window_title (4107745526909284887) -->
+    <skip />
     <string name="autofill_address_name_separator" msgid="6350145154779706772">" "</string>
     <string name="autofill_address_summary_name_format" msgid="3268041054899214945">"$1$2$3"</string>
     <string name="autofill_address_summary_separator" msgid="7483307893170324129">", "</string>
@@ -1690,6 +1691,7 @@
     <string name="package_installed_device_owner" msgid="6875717669960212648">"Installé par votre administrateur"</string>
     <string name="package_updated_device_owner" msgid="1847154566357862089">"Mise à jour par votre administrateur"</string>
     <string name="package_deleted_device_owner" msgid="2307122077550236438">"Supprimé par votre administrateur"</string>
+    <string name="battery_saver_description_with_learn_more" msgid="6323937147992667707">"Pour augmenter l\'autonomie de votre appareil, le mode Économie d\'énergie désactive certaines fonctionnalités et restreint les applications. "<annotation id="url">"En savoir plus"</annotation></string>
     <string name="battery_saver_description" msgid="769989536172631582">"Pour augmenter l\'autonomie de votre appareil, le mode Économie d\'énergie désactive certaines fonctionnalités et restreint les applications"</string>
     <string name="data_saver_description" msgid="6015391409098303235">"Pour aider à diminuer l\'utilisation des données, la fonction Économiseur de données empêche certaines applications d\'envoyer ou de recevoir des données en arrière-plan. Une application que vous utilisez actuellement peut accéder à des données, mais peut le faire moins souvent. Cela peut signifier, par exemple, que les images ne s\'affichent pas jusqu\'à ce que vous les touchiez."</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"Activer l\'Économiseur de données?"</string>
@@ -1738,8 +1740,7 @@
     <string name="zen_mode_default_weekends_name" msgid="2786495801019345244">"Fin de semaine"</string>
     <string name="zen_mode_default_events_name" msgid="8158334939013085363">"Événement"</string>
     <string name="zen_mode_default_every_night_name" msgid="3012363838882944175">"Dormir"</string>
-    <!-- no translation found for muted_by (5942954724562097128) -->
-    <skip />
+    <string name="muted_by" msgid="5942954724562097128">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g> désactive certains sons"</string>
     <string name="system_error_wipe_data" msgid="6608165524785354962">"Un problème interne est survenu avec votre appareil. Il se peut qu\'il soit instable jusqu\'à ce que vous le réinitialisiez à sa configuration d\'usine."</string>
     <string name="system_error_manufacturer" msgid="8086872414744210668">"Un problème interne est survenu avec votre appareil. Communiquez avec le fabricant pour obtenir plus de détails."</string>
     <string name="stk_cc_ussd_to_dial" msgid="5214333646366591205">"La demande USSD a été remplacée par une demande d\'appel régulier"</string>

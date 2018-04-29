@@ -21,6 +21,7 @@ import static android.app.WindowConfiguration.ACTIVITY_TYPE_HOME;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_UNDEFINED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
+import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
 import static android.content.Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS;
 import static android.content.Intent.FLAG_ACTIVITY_MULTIPLE_TASK;
@@ -303,6 +304,8 @@ public class RecentTasksTest extends ActivityTestsBase {
 
     @Test
     public void testAddTaskCompatibleActivityType_expectRemove() throws Exception {
+        // Test with undefined activity type since the type is not persisted by the task persister
+        // and we want to ensure that a new task will match a restored task
         Configuration config1 = new Configuration();
         config1.windowConfiguration.setActivityType(ACTIVITY_TYPE_UNDEFINED);
         TaskRecord task1 = createTaskBuilder(".Task1")
@@ -349,6 +352,65 @@ public class RecentTasksTest extends ActivityTestsBase {
         assertTrue(task2.getActivityType() == ACTIVITY_TYPE_STANDARD);
         mRecentTasks.add(task2);
         assertTrue(mCallbacksRecorder.added.size() == 1);
+        assertTrue(mCallbacksRecorder.added.contains(task2));
+        assertTrue(mCallbacksRecorder.trimmed.isEmpty());
+        assertTrue(mCallbacksRecorder.removed.isEmpty());
+    }
+
+    @Test
+    public void testAddTaskCompatibleWindowingMode_expectRemove() throws Exception {
+        Configuration config1 = new Configuration();
+        config1.windowConfiguration.setWindowingMode(WINDOWING_MODE_UNDEFINED);
+        TaskRecord task1 = createTaskBuilder(".Task1")
+                .setFlags(FLAG_ACTIVITY_NEW_TASK)
+                .setStack(mStack)
+                .build();
+        task1.onConfigurationChanged(config1);
+        assertTrue(task1.getWindowingMode() == WINDOWING_MODE_UNDEFINED);
+        mRecentTasks.add(task1);
+        mCallbacksRecorder.clear();
+
+        Configuration config2 = new Configuration();
+        config2.windowConfiguration.setWindowingMode(WINDOWING_MODE_FULLSCREEN);
+        TaskRecord task2 = createTaskBuilder(".Task1")
+                .setFlags(FLAG_ACTIVITY_NEW_TASK)
+                .setStack(mStack)
+                .build();
+        task2.onConfigurationChanged(config2);
+        assertTrue(task2.getWindowingMode() == WINDOWING_MODE_FULLSCREEN);
+        mRecentTasks.add(task2);
+
+        assertTrue(mCallbacksRecorder.added.size() == 1);
+        assertTrue(mCallbacksRecorder.added.contains(task2));
+        assertTrue(mCallbacksRecorder.trimmed.isEmpty());
+        assertTrue(mCallbacksRecorder.removed.size() == 1);
+        assertTrue(mCallbacksRecorder.removed.contains(task1));
+    }
+
+    @Test
+    public void testAddTaskIncompatibleWindowingMode_expectNoRemove() throws Exception {
+        Configuration config1 = new Configuration();
+        config1.windowConfiguration.setWindowingMode(WINDOWING_MODE_FULLSCREEN);
+        TaskRecord task1 = createTaskBuilder(".Task1")
+                .setFlags(FLAG_ACTIVITY_NEW_TASK)
+                .setStack(mStack)
+                .build();
+        task1.onConfigurationChanged(config1);
+        assertTrue(task1.getWindowingMode() == WINDOWING_MODE_FULLSCREEN);
+        mRecentTasks.add(task1);
+
+        Configuration config2 = new Configuration();
+        config2.windowConfiguration.setWindowingMode(WINDOWING_MODE_PINNED);
+        TaskRecord task2 = createTaskBuilder(".Task1")
+                .setFlags(FLAG_ACTIVITY_NEW_TASK)
+                .setStack(mStack)
+                .build();
+        task2.onConfigurationChanged(config2);
+        assertTrue(task2.getWindowingMode() == WINDOWING_MODE_PINNED);
+        mRecentTasks.add(task2);
+
+        assertTrue(mCallbacksRecorder.added.size() == 2);
+        assertTrue(mCallbacksRecorder.added.contains(task1));
         assertTrue(mCallbacksRecorder.added.contains(task2));
         assertTrue(mCallbacksRecorder.trimmed.isEmpty());
         assertTrue(mCallbacksRecorder.removed.isEmpty());

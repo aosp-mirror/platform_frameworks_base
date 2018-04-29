@@ -1673,6 +1673,15 @@ easier.
         <item name="toolbarStyle">@style/Widget.DeviceDefault.Toolbar</item>
     </style>
 
+
+    <!-- @hide DeviceDefault theme for the autofill FillUi -->
+    <style name="Theme.DeviceDefault.Autofill" parent="Theme.Material.Autofill.Light">
+    </style>
+
+    <!-- @hide DeviceDefault theme for the autofill SaveUi -->
+    <style name="Theme.DeviceDefault.Autofill.Save" parent="Theme.Material.Autofill.Save.Light">
+    </style>
+
     <!-- DeviceDefault theme for the default system theme.  -->
     <style name="Theme.DeviceDefault.System" parent="Theme.DeviceDefault.Light.DarkActionBar" />
 

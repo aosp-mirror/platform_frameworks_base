@@ -836,7 +836,8 @@
     <string name="double_tap_toast" msgid="4595046515400268881">"सलाह: ज़ूम इन और आउट करने के लिए दो बार छूएं."</string>
     <string name="autofill_this_form" msgid="4616758841157816676">"स्‍वत: भरण"</string>
     <string name="setup_autofill" msgid="7103495070180590814">"स्वत: भरण सेट करें"</string>
-    <string name="autofill_window_title" msgid="921006636895825007">"अपने आप जानकारी भरने की सुविधा"</string>
+    <!-- no translation found for autofill_window_title (4107745526909284887) -->
+    <skip />
     <string name="autofill_address_name_separator" msgid="6350145154779706772">" "</string>
     <string name="autofill_address_summary_name_format" msgid="3268041054899214945">"$1$2$3"</string>
     <string name="autofill_address_summary_separator" msgid="7483307893170324129">", "</string>
@@ -1690,6 +1691,8 @@
     <string name="package_installed_device_owner" msgid="6875717669960212648">"आपके व्यवस्थापक ने इंस्टॉल किया है"</string>
     <string name="package_updated_device_owner" msgid="1847154566357862089">"आपके व्यवस्थापक ने अपडेट किया है"</string>
     <string name="package_deleted_device_owner" msgid="2307122077550236438">"आपके व्यवस्थापक ने हटा दिया है"</string>
+    <!-- no translation found for battery_saver_description_with_learn_more (6323937147992667707) -->
+    <skip />
     <string name="battery_saver_description" msgid="769989536172631582">"अापके डिवाइस की बैटरी लाइफ़ बढ़ाने के लिए बैटरी सेवर, डिवाइस की कुछ सुविधाओं को बंद कर देता है और ऐप्लिकेशन को बैटरी इस्तेमाल करने से रोकता है."</string>
     <string name="data_saver_description" msgid="6015391409098303235">"डेटा खर्च, कम करने के लिए डेटा सेवर कुछ ऐप्लिकेशन को बैकग्राउंड में डेटा भेजने या डेटा पाने से रोकता है. आप फ़िलहाल जिस एेप्लिकेशन का इस्तेमाल कर रहे हैं वह डेटा तक पहुंच सकता है लेकिन ऐसा कभी-कभी ही हो पाएगा. उदाहरण के लिए, इमेज तब तक दिखाई नहीं देंगी जब तक कि आप उन्हें टैप नहीं करते."</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"डेटा बचाने की सेटिंग चालू करें?"</string>
@@ -1738,8 +1741,7 @@
     <string name="zen_mode_default_weekends_name" msgid="2786495801019345244">"सप्ताहांत"</string>
     <string name="zen_mode_default_events_name" msgid="8158334939013085363">"इवेंट"</string>
     <string name="zen_mode_default_every_night_name" msgid="3012363838882944175">"सोते समय"</string>
-    <!-- no translation found for muted_by (5942954724562097128) -->
-    <skip />
+    <string name="muted_by" msgid="5942954724562097128">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g> कुछ आवाज़ें म्‍यूट कर रहा है"</string>
     <string name="system_error_wipe_data" msgid="6608165524785354962">"आपके डिवाइस में कोई अंदरूनी समस्या है और यह तब तक ठीक नहीं होगी जब तक आप फ़ैक्‍टरी डेटा रीसेट नहीं करते."</string>
     <string name="system_error_manufacturer" msgid="8086872414744210668">"आपके डिवाइस के साथ कोई आंतरिक गड़बड़ी हुई. विवरणों के लिए अपने निर्माता से संपर्क करें."</string>
     <string name="stk_cc_ussd_to_dial" msgid="5214333646366591205">"यूएसएसडी कोड चलाने के अनुरोध को सामान्य कॉल में बदला गया"</string>

@@ -281,6 +281,7 @@ public class NavigationBarFragment extends Fragment implements Callbacks {
 
         IntentFilter filter = new IntentFilter(Intent.ACTION_SCREEN_OFF);
         filter.addAction(Intent.ACTION_SCREEN_ON);
+        filter.addAction(Intent.ACTION_USER_SWITCHED);
         getContext().registerReceiverAsUser(mBroadcastReceiver, UserHandle.ALL, filter, null, null);
         notifyNavigationBarScreenOn();
         mOverviewProxyService.addCallback(mOverviewProxyListener);
@@ -521,7 +522,7 @@ public class NavigationBarFragment extends Fragment implements Callbacks {
 
         // Clear any pending suggestion flag as it has either been nullified or is being shown
         mPendingRotationSuggestion = false;
-        getView().removeCallbacks(mCancelPendingRotationProposal);
+        if (getView() != null) getView().removeCallbacks(mCancelPendingRotationProposal);
 
         // Handle the visibility change and animation
         if (visible) { // Appear and change (cannot force)
@@ -1084,6 +1085,10 @@ public class NavigationBarFragment extends Fragment implements Callbacks {
                     || Intent.ACTION_SCREEN_ON.equals(action)) {
                 notifyNavigationBarScreenOn();
             }
+            if (Intent.ACTION_USER_SWITCHED.equals(action)) {
+                // The accessibility settings may be different for the new user
+                updateAccessibilityServicesState(mAccessibilityManager);
+            };
         }
     };
 
@@ -1141,6 +1146,7 @@ public class NavigationBarFragment extends Fragment implements Callbacks {
         private final Runnable mRipple = new Runnable() {
             @Override
             public void run() { // Cause the ripple to fire via false presses
+                if (!mRoot.isAttachedToWindow()) return;
                 mRoot.setPressed(true);
                 mRoot.setPressed(false);
             }

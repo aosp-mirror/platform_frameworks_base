@@ -838,7 +838,8 @@
     <string name="double_tap_toast" msgid="4595046515400268881">"උපදෙස: විශාලනය කිරීමට සහ කුඩා කිරීමට දෙවරක් තට්ටු කරන්න."</string>
     <string name="autofill_this_form" msgid="4616758841157816676">"ස්වයංක්‍රිය පිරවුම"</string>
     <string name="setup_autofill" msgid="7103495070180590814">"ස්වයංක්‍රිය පිරවුම සකසන්න"</string>
-    <string name="autofill_window_title" msgid="921006636895825007">"ස්වයං පිරවුම"</string>
+    <!-- no translation found for autofill_window_title (4107745526909284887) -->
+    <skip />
     <string name="autofill_address_name_separator" msgid="6350145154779706772">" "</string>
     <string name="autofill_address_summary_name_format" msgid="3268041054899214945">"$1$2$3"</string>
     <string name="autofill_address_summary_separator" msgid="7483307893170324129">", "</string>
@@ -1692,6 +1693,7 @@
     <string name="package_installed_device_owner" msgid="6875717669960212648">"ඔබගේ පරිපාලක මඟින් ස්ථාපනය කර ඇත"</string>
     <string name="package_updated_device_owner" msgid="1847154566357862089">"ඔබගේ පරිපාලක මඟින් යාවත්කාලීන කර ඇත"</string>
     <string name="package_deleted_device_owner" msgid="2307122077550236438">"ඔබගේ පරිපාලක මඟින් මකා දමා ඇත"</string>
+    <string name="battery_saver_description_with_learn_more" msgid="6323937147992667707">"ඔබේ බැටරි ආයු කාලය දිගු කිරීමට, බැටරි සුරැකුම සමහර උපාංග විශේෂාංග ක්‍රියාවිරහිත කර යෙදුම් සීමා කරයි. "<annotation id="url">"තව දැන ගන්න"</annotation></string>
     <string name="battery_saver_description" msgid="769989536172631582">"ඔබගේ බැටරි ආයු කාලය දිගු කිරීමට, බැටරි සුරැකුම සමහර උපාංග විශේෂාංග ක්‍රියාවිරහිත කර යෙදුම් සීමා කරයි."</string>
     <string name="data_saver_description" msgid="6015391409098303235">"දත්ත භාවිතය අඩු කිරීමට උදවු වීමට, දත්ත සුරැකුම සමහර යෙදුම් පසුබිමින් දත්ත යැවීම සහ ලබා ගැනීම වළක්වයි. ඔබ දැනට භාවිත කරන යෙදුමකට දත්ත වෙත පිවිසීමට හැකිය, නමුත් එසේ කරන්නේ කලාතුරකින් විය හැකිය. මෙයින් අදහස් වන්නේ, උදාහරණයක් ලෙස, එම රූප ඔබ ඒවාට තට්ටු කරන තෙක් සංදර්ශනය නොවන බවය."</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"දත්ත සුරැකුම ක්‍රියාත්මක කරන්නද?"</string>
@@ -1740,8 +1742,7 @@
     <string name="zen_mode_default_weekends_name" msgid="2786495801019345244">"සති අන්තය"</string>
     <string name="zen_mode_default_events_name" msgid="8158334939013085363">"සිදුවීම"</string>
     <string name="zen_mode_default_every_night_name" msgid="3012363838882944175">"නිදා ගනිමින්"</string>
-    <!-- no translation found for muted_by (5942954724562097128) -->
-    <skip />
+    <string name="muted_by" msgid="5942954724562097128">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g> සමහර ශබ්ද නිහඬ කරමින්"</string>
     <string name="system_error_wipe_data" msgid="6608165524785354962">"ඔබේ උපාංගය සමගින් ගැටලුවක් ඇති අතර, ඔබේ කර්මාන්තශාලා දත්ත යළි සකසන තෙක් එය අස්ථායි විය හැකිය."</string>
     <string name="system_error_manufacturer" msgid="8086872414744210668">"ඔබේ උපාංගය සමගින් අභ්‍යන්තර ගැටලුවක් ඇත. විස්තර සඳහා ඔබේ නිෂ්පාදක අමතන්න."</string>
     <string name="stk_cc_ussd_to_dial" msgid="5214333646366591205">"USSD ඉල්ලීම සාමාන්‍ය ඇමතුමට වෙනස් කරන ලදී"</string>

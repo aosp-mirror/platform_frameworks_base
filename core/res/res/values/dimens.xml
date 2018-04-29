@@ -207,6 +207,9 @@
     <!-- The bottom padding for the notification header -->
     <dimen name="notification_header_padding_bottom">16dp</dimen>
 
+    <!-- The margin at the top of the notification header when dozing. -->
+    <dimen name="notification_header_margin_top_ambient">3dp</dimen>
+
     <!-- The margin at the bottom of the notification header. -->
     <dimen name="notification_header_margin_bottom">0dp</dimen>
 
@@ -629,7 +632,7 @@
     <!-- The maximum width of a image in a media notification. The images will be reduced to that width in case they are bigger.-->
     <dimen name="notification_media_image_max_width_low_ram">100dp</dimen>
     <!-- The size of the right icon image when on low ram -->
-    <dimen name="notification_right_icon_size_low_ram">@dimen/notification_right_icon_size_low_ram</dimen>
+    <dimen name="notification_right_icon_size_low_ram">38dp</dimen>
 
     <dimen name="messaging_avatar_size">@dimen/notification_right_icon_size</dimen>
 

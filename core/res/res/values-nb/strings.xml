@@ -581,7 +581,7 @@
     <string name="policydesc_watchLogin_secondaryUser" product="tablet" msgid="4280246270601044505">"Overvåker antallet feil passord som er skrevet inn når skjermen låses opp, og låser nettbrettet eller sletter denne brukerens data når for mange feil passord er skrevet inn."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="TV" msgid="3484832653564483250">"Overvåker antallet feil passord som er skrevet inn når skjermen låses opp, og låser TV-en eller sletter denne brukerens data når for mange feil passord er skrevet inn."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="default" msgid="2185480427217127147">"Overvåker antallet feil passord som er skrevet inn når skjermen låses opp, og låser telefonen eller sletter denne brukerens data når for mange feil passord er skrevet inn."</string>
-    <string name="policylab_resetPassword" msgid="4934707632423915395">"Endring av skjermlåsen"</string>
+    <string name="policylab_resetPassword" msgid="4934707632423915395">"Endre skjermlåsen"</string>
     <string name="policydesc_resetPassword" msgid="1278323891710619128">"Endre skjermlåsen."</string>
     <string name="policylab_forceLock" msgid="2274085384704248431">"Lås skjermen"</string>
     <string name="policydesc_forceLock" msgid="1141797588403827138">"Kontrollér hvordan og når skjermen låses."</string>
@@ -836,7 +836,8 @@
     <string name="double_tap_toast" msgid="4595046515400268881">"Tips: Dobbelttrykk for å zoome inn og ut."</string>
     <string name="autofill_this_form" msgid="4616758841157816676">"Autofyll"</string>
     <string name="setup_autofill" msgid="7103495070180590814">"Konfig. autofyll"</string>
-    <string name="autofill_window_title" msgid="921006636895825007">"Autofyll"</string>
+    <!-- no translation found for autofill_window_title (4107745526909284887) -->
+    <skip />
     <string name="autofill_address_name_separator" msgid="6350145154779706772">" "</string>
     <string name="autofill_address_summary_name_format" msgid="3268041054899214945">"$1$2$3"</string>
     <string name="autofill_address_summary_separator" msgid="7483307893170324129">", "</string>
@@ -1690,6 +1691,7 @@
     <string name="package_installed_device_owner" msgid="6875717669960212648">"Installert av administratoren din"</string>
     <string name="package_updated_device_owner" msgid="1847154566357862089">"Oppdatert av administratoren din"</string>
     <string name="package_deleted_device_owner" msgid="2307122077550236438">"Slettet av administratoren din"</string>
+    <string name="battery_saver_description_with_learn_more" msgid="6323937147992667707">"For å forlenge batterilevetiden slår batterisparing av noen enhetsfunksjoner og begrenser apper. "<annotation id="url">"Finn ut mer"</annotation></string>
     <string name="battery_saver_description" msgid="769989536172631582">"For å forlenge batterilevetiden slår batterisparing av noen enhetsfunksjoner og begrenser apper."</string>
     <string name="data_saver_description" msgid="6015391409098303235">"Datasparing hindrer at apper kan sende og motta data i bakgrunnen. Apper du bruker i øyeblikket, bruker ikke data i like stor grad – for eksempel vises ikke bilder før du trykker på dem."</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"Vil du slå på Datasparing?"</string>
@@ -1738,8 +1740,7 @@
     <string name="zen_mode_default_weekends_name" msgid="2786495801019345244">"Helg"</string>
     <string name="zen_mode_default_events_name" msgid="8158334939013085363">"Aktivitet"</string>
     <string name="zen_mode_default_every_night_name" msgid="3012363838882944175">"Sover"</string>
-    <!-- no translation found for muted_by (5942954724562097128) -->
-    <skip />
+    <string name="muted_by" msgid="5942954724562097128">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g> slår av noen lyder"</string>
     <string name="system_error_wipe_data" msgid="6608165524785354962">"Det har oppstått et internt problem på enheten din, og den kan være ustabil til du tilbakestiller den til fabrikkdata."</string>
     <string name="system_error_manufacturer" msgid="8086872414744210668">"Det har oppstått et internt problem på enheten din. Ta kontakt med produsenten for mer informasjon."</string>
     <string name="stk_cc_ussd_to_dial" msgid="5214333646366591205">"USSD-forespørsel endret til vanlig anrop"</string>

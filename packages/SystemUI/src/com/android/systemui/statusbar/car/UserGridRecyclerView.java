@@ -207,7 +207,7 @@ public class UserGridRecyclerView extends PagedListView implements
 
                 // If the user selects Guest, start the guest session.
                 if (userRecord.mIsStartGuestSession) {
-                    mUserManagerHelper.switchToGuest(mGuestName);
+                    mUserManagerHelper.startNewGuestSession(mGuestName);
                     return;
                 }
 
@@ -241,8 +241,7 @@ public class UserGridRecyclerView extends PagedListView implements
 
         private Bitmap getUserRecordIcon(UserRecord userRecord) {
             if (userRecord.mIsStartGuestSession) {
-                return UserIcons.convertToBitmap(UserIcons.getDefaultUserIcon(
-                    mContext.getResources(), UserHandle.USER_NULL, false));
+                return mUserManagerHelper.getGuestDefaultIcon();
             }
 
             if (userRecord.mIsAddUser) {

@@ -500,11 +500,15 @@ please see styles_device_defaults.xml.
 
     <style name="Widget.Material.Notification.ProgressBar" parent="Widget.Material.Light.ProgressBar.Horizontal" />
 
-    <style name="Widget.Material.Notification.MessagingText" parent="Widget.Material.Light.TextView">
+    <style name="Widget.Material.Notification.Text" parent="Widget.Material.Light.TextView">
+        <item name="lineHeight">20sp</item>
+        <item name="textAppearance">@style/TextAppearance.Material.Notification</item>
+    </style>
+
+    <style name="Widget.Material.Notification.MessagingText" parent="Widget.Material.Notification.Text">
         <item name="layout_width">wrap_content</item>
         <item name="layout_height">wrap_content</item>
-        <item name="ellipsize">end</item>
-        <item name="textAppearance">@style/TextAppearance.Material.Notification</item>
+        <item name="ellipsize">end</item>z
     </style>
 
     <style name="Widget.Material.Notification.MessagingName" parent="Widget.Material.Light.TextView">
@@ -1305,6 +1309,7 @@ please see styles_device_defaults.xml.
     </style>
 
     <style name="Notification.Header.Ambient">
+        <item name="layout_marginTop">@dimen/notification_header_margin_top_ambient</item>
         <item name="gravity">top|center_horizontal</item>
     </style>
 

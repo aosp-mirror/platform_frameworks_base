@@ -420,7 +420,9 @@ class ActivityDisplay extends ConfigurationContainer<ActivityStack>
                 if (!otherStack.inSplitScreenSecondaryWindowingMode()) {
                     continue;
                 }
-                otherStack.setWindowingMode(WINDOWING_MODE_FULLSCREEN);
+                otherStack.setWindowingMode(WINDOWING_MODE_FULLSCREEN, false /* animate */,
+                        false /* showRecents */, false /* enteringSplitScreenMode */,
+                        true /* deferEnsuringVisibility */);
             }
         } finally {
             final ActivityStack topFullscreenStack =
@@ -450,7 +452,7 @@ class ActivityDisplay extends ConfigurationContainer<ActivityStack>
                 }
                 otherStack.setWindowingMode(WINDOWING_MODE_SPLIT_SCREEN_SECONDARY,
                         false /* animate */, false /* showRecents */,
-                        true /* enteringSplitScreenMode */);
+                        true /* enteringSplitScreenMode */, true /* deferEnsuringVisibility */);
             }
         } finally {
             mSupervisor.mWindowManager.continueSurfaceLayout();

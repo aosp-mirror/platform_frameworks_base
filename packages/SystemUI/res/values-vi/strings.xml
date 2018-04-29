@@ -32,7 +32,7 @@
     <string name="status_bar_no_notifications_title" msgid="4755261167193833213">"Không có thông báo nào"</string>
     <string name="status_bar_ongoing_events_title" msgid="1682504513316879202">"Đang diễn ra"</string>
     <string name="status_bar_latest_events_title" msgid="6594767438577593172">"Thông báo"</string>
-    <string name="battery_low_title" msgid="6456385927409742437">"Pin yếu"</string>
+    <string name="battery_low_title" msgid="9187898087363540349">"Có thể sắp hết pin"</string>
     <string name="battery_low_percent_format" msgid="2900940511201380775">"Còn lại <xliff:g id="PERCENTAGE">%s</xliff:g>"</string>
     <string name="battery_low_percent_format_hybrid" msgid="6838677459286775617">"Còn lại <xliff:g id="PERCENTAGE">%s</xliff:g>, còn khoảng <xliff:g id="TIME">%s</xliff:g> dựa trên mức sử dụng của bạn"</string>
     <string name="battery_low_percent_format_hybrid_short" msgid="9025795469949145586">"Còn lại <xliff:g id="PERCENTAGE">%s</xliff:g>, còn khoảng <xliff:g id="TIME">%s</xliff:g>"</string>
@@ -69,7 +69,7 @@
     <string name="usb_debugging_secondary_user_message" msgid="6067122453571699801">"Người dùng hiện đã đăng nhập vào thiết bị này không thể bật tính năng gỡ lỗi USB. Để sử dụng tính năng này, hãy chuyển sang người dùng chính."</string>
     <string name="compat_mode_on" msgid="6623839244840638213">"T.phóng để lấp đầy m.hình"</string>
     <string name="compat_mode_off" msgid="4434467572461327898">"Giãn ra để lấp đầy m.hình"</string>
-    <string name="global_action_screenshot" msgid="8329831278085426283">"Ảnh chụp màn hình"</string>
+    <string name="global_action_screenshot" msgid="8329831278085426283">"Chụp ảnh màn hình"</string>
     <string name="screenshot_saving_ticker" msgid="7403652894056693515">"Đang lưu ảnh chụp màn hình..."</string>
     <string name="screenshot_saving_title" msgid="8242282144535555697">"Đang lưu ảnh chụp màn hình..."</string>
     <string name="screenshot_saved_title" msgid="5637073968117370753">"Đã lưu ảnh chụp màn hình"</string>
@@ -85,7 +85,7 @@
     <string name="accessibility_back" msgid="567011538994429120">"Quay lại"</string>
     <string name="accessibility_home" msgid="8217216074895377641">"Trang chủ"</string>
     <string name="accessibility_menu" msgid="316839303324695949">"Menu"</string>
-    <string name="accessibility_accessibility_button" msgid="7601252764577607915">"Trợ năng"</string>
+    <string name="accessibility_accessibility_button" msgid="7601252764577607915">"Hỗ trợ tiếp cận"</string>
     <string name="accessibility_rotate_button" msgid="7402949513740253006">"Xoay màn hình"</string>
     <string name="accessibility_recent" msgid="5208608566793607626">"Tổng quan"</string>
     <string name="accessibility_search_light" msgid="1103867596330271848">"Tìm kiếm"</string>
@@ -95,8 +95,7 @@
     <string name="accessibility_unlock_button" msgid="128158454631118828">"Mở khóa"</string>
     <string name="accessibility_waiting_for_fingerprint" msgid="4808860050517462885">"Đang chờ vân tay"</string>
     <string name="accessibility_unlock_without_fingerprint" msgid="7541705575183694446">"Mở khóa không dùng vân tay của bạn"</string>
-    <!-- no translation found for accessibility_send_smart_reply (7766727839703044493) -->
-    <skip />
+    <string name="accessibility_send_smart_reply" msgid="7766727839703044493">"Gửi"</string>
     <string name="unlock_label" msgid="8779712358041029439">"mở khóa"</string>
     <string name="phone_label" msgid="2320074140205331708">"mở điện thoại"</string>
     <string name="voice_assist_label" msgid="3956854378310019854">"mở trợ lý thoại"</string>
@@ -208,10 +207,8 @@
     <string name="accessibility_quick_settings_airplane_on" msgid="6406141469157599296">"Chế độ trên máy bay bật."</string>
     <string name="accessibility_quick_settings_airplane_changed_off" msgid="66846307818850664">"Đã tắt chế độ trên máy bay."</string>
     <string name="accessibility_quick_settings_airplane_changed_on" msgid="8983005603505087728">"Đã bật chế độ trên máy bay."</string>
-    <!-- no translation found for accessibility_quick_settings_dnd_none_on (2960643943620637020) -->
-    <skip />
-    <!-- no translation found for accessibility_quick_settings_dnd_alarms_on (3357131899365865386) -->
-    <skip />
+    <string name="accessibility_quick_settings_dnd_none_on" msgid="2960643943620637020">"hoàn toàn tắt tiếng"</string>
+    <string name="accessibility_quick_settings_dnd_alarms_on" msgid="3357131899365865386">"chỉ báo thức"</string>
     <string name="accessibility_quick_settings_dnd" msgid="6607873236717185815">"Không làm phiền."</string>
     <string name="accessibility_quick_settings_dnd_changed_off" msgid="898107593453022935">"Đã tắt tính năng không làm phiền."</string>
     <string name="accessibility_quick_settings_dnd_changed_on" msgid="4483780856613561039">"Đã bật tính năng không làm phiền."</string>
@@ -345,7 +342,7 @@
     <string name="quick_settings_cellular_detail_data_limit" msgid="56011158504994128">"Giới hạn <xliff:g id="DATA_LIMIT">%s</xliff:g>"</string>
     <string name="quick_settings_cellular_detail_data_warning" msgid="2440098045692399009">"Cảnh báo <xliff:g id="DATA_LIMIT">%s</xliff:g>"</string>
     <string name="quick_settings_work_mode_label" msgid="7608026833638817218">"Hồ sơ công việc"</string>
-    <string name="quick_settings_night_display_label" msgid="3577098011487644395">"Đèn đọc sách"</string>
+    <string name="quick_settings_night_display_label" msgid="3577098011487644395">"Chế độ ánh sáng ban đêm"</string>
     <string name="quick_settings_night_secondary_label_on_at_sunset" msgid="8483259341596943314">"Bật khi trời tối"</string>
     <string name="quick_settings_night_secondary_label_until_sunrise" msgid="4453017157391574402">"Cho đến khi trời sáng"</string>
     <string name="quick_settings_night_secondary_label_on_at" msgid="6256314040368487637">"Bật vào lúc <xliff:g id="TIME">%s</xliff:g>"</string>
@@ -531,7 +528,7 @@
     <string name="stream_notification" msgid="2563720670905665031">"Thông báo"</string>
     <string name="stream_bluetooth_sco" msgid="2055645746402746292">"Bluetooth"</string>
     <string name="stream_dtmf" msgid="2447177903892477915">"Tần số đa chuông kép"</string>
-    <string name="stream_accessibility" msgid="301136219144385106">"Trợ năng"</string>
+    <string name="stream_accessibility" msgid="301136219144385106">"Hỗ trợ tiếp cận"</string>
     <string name="ring_toggle_title" msgid="3281244519428819576">"Cuộc gọi"</string>
     <string name="volume_ringer_status_normal" msgid="4273142424125855384">"Đổ chuông"</string>
     <string name="volume_ringer_status_vibrate" msgid="1825615171021346557">"Rung"</string>
@@ -564,7 +561,7 @@
     <string name="status_bar_ethernet" msgid="5044290963549500128">"Ethernet"</string>
     <string name="status_bar_alarm" msgid="8536256753575881818">"Báo thức"</string>
     <string name="status_bar_work" msgid="6022553324802866373">"Hồ sơ công việc"</string>
-    <string name="status_bar_airplane" msgid="7057575501472249002">"Chế độ trên máy bay"</string>
+    <string name="status_bar_airplane" msgid="7057575501472249002">"Chế độ máy bay"</string>
     <string name="add_tile" msgid="2995389510240786221">"Thêm ô"</string>
     <string name="broadcast_tile" msgid="3894036511763289383">"Ô chương trình phát"</string>
     <string name="zen_alarm_warning_indef" msgid="3482966345578319605">"Bạn sẽ không nghe thấy báo thức tiếp theo lúc <xliff:g id="WHEN">%1$s</xliff:g> của mình trừ khi bạn tắt chức năng này trước"</string>
@@ -620,8 +617,7 @@
       <item quantity="one">sử dụng <xliff:g id="PERFORMING_ACTIVITY_0">%1$s</xliff:g></item>
     </plurals>
     <string name="notification_appops_settings" msgid="1028328314935908050">"Cài đặt"</string>
-    <!-- no translation found for notification_appops_ok (1156966426011011434) -->
-    <skip />
+    <string name="notification_appops_ok" msgid="1156966426011011434">"OK"</string>
     <string name="notification_channel_controls_opened_accessibility" msgid="6553950422055908113">"Đã mở điều khiển thông báo đối với <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="notification_channel_controls_closed_accessibility" msgid="7521619812603693144">"Đã đóng điều khiển thông báo đối với <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="notification_channel_switch_accessibility" msgid="3420796005601900717">"Cho phép thông báo từ kênh này"</string>

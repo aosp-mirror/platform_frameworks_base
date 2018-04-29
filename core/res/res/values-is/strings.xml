@@ -836,7 +836,8 @@
     <string name="double_tap_toast" msgid="4595046515400268881">"Ábending: Ýttu tvisvar til að auka og minnka aðdrátt."</string>
     <string name="autofill_this_form" msgid="4616758841157816676">"Fylla út"</string>
     <string name="setup_autofill" msgid="7103495070180590814">"Stilla útfyllingu"</string>
-    <string name="autofill_window_title" msgid="921006636895825007">"Sjálfvirk útfylling"</string>
+    <!-- no translation found for autofill_window_title (4107745526909284887) -->
+    <skip />
     <string name="autofill_address_name_separator" msgid="6350145154779706772">" "</string>
     <string name="autofill_address_summary_name_format" msgid="3268041054899214945">"$1$2$3"</string>
     <string name="autofill_address_summary_separator" msgid="7483307893170324129">", "</string>
@@ -1691,6 +1692,7 @@
     <string name="package_installed_device_owner" msgid="6875717669960212648">"Kerfisstjóri setti upp"</string>
     <string name="package_updated_device_owner" msgid="1847154566357862089">"Kerfisstjóri uppfærði"</string>
     <string name="package_deleted_device_owner" msgid="2307122077550236438">"Kerfisstjóri eyddi"</string>
+    <string name="battery_saver_description_with_learn_more" msgid="6323937147992667707">"Til að auka líftíma rafhlöðunnar slekkur rafhlöðusparnaður á sumum eiginleikum tækisins og takmarkar forrit. "<annotation id="url">"Frekari upplýsingar"</annotation></string>
     <string name="battery_saver_description" msgid="769989536172631582">"Til að auka líftíma rafhlöðunnar slekkur rafhlöðusparnaður á sumum eiginleikum tækisins og takmarkar forrit."</string>
     <string name="data_saver_description" msgid="6015391409098303235">"Gagnasparnaður getur hjálpað til við að draga úr gagnanotkun með því að hindra forrit í að senda eða sækja gögn í bakgrunni. Forrit sem er í notkun getur náð í gögn, en gerir það kannski sjaldnar. Niðurstaðan gæti verið, svo dæmi sé tekið, að myndir séu ekki birtar fyrr en þú ýtir á þær."</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"Kveikja á gagnasparnaði?"</string>
@@ -1739,8 +1741,7 @@
     <string name="zen_mode_default_weekends_name" msgid="2786495801019345244">"Helgi"</string>
     <string name="zen_mode_default_events_name" msgid="8158334939013085363">"Viðburður"</string>
     <string name="zen_mode_default_every_night_name" msgid="3012363838882944175">"Svefn"</string>
-    <!-- no translation found for muted_by (5942954724562097128) -->
-    <skip />
+    <string name="muted_by" msgid="5942954724562097128">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g> þaggar í einhverjum hljóðum"</string>
     <string name="system_error_wipe_data" msgid="6608165524785354962">"Innra vandamál kom upp í tækinu og það kann að vera óstöðugt þangað til þú núllstillir það."</string>
     <string name="system_error_manufacturer" msgid="8086872414744210668">"Innra vandamál kom upp í tækinu. Hafðu samband við framleiðanda til að fá nánari upplýsingar."</string>
     <string name="stk_cc_ussd_to_dial" msgid="5214333646366591205">"SS-beiðni breytt í venjulegt símtal"</string>

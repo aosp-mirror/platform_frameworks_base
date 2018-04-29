@@ -55,7 +55,7 @@
     <string name="keyguard_accessibility_sim_puk_area" msgid="136979425761438705">"พื้นที่ PUK ของซิม"</string>
     <string name="keyguard_accessibility_next_alarm" msgid="5835196989158584991">"ตั้งเวลาปลุกครั้งถัดไปไว้ที่ <xliff:g id="ALARM">%1$s</xliff:g>"</string>
     <string name="keyboardview_keycode_delete" msgid="6883116827512721630">"ลบ"</string>
-    <string name="disable_carrier_button_text" msgid="6914341927421916114">"ปิดใช้ซิมอิเล็กทรอนิกส์"</string>
+    <string name="disable_carrier_button_text" msgid="6914341927421916114">"ปิดใช้ eSIM"</string>
     <string name="error_disable_esim_title" msgid="4852978431156228006">"ปิดใช้ eSIM ไม่ได้"</string>
     <string name="error_disable_esim_msg" msgid="676694908770135639">"ปิดใช้ eSIM ไม่ได้เนื่องจากมีข้อผิดพลาด"</string>
     <string name="keyboardview_keycode_enter" msgid="4505833604411016668">"Enter"</string>
@@ -140,7 +140,10 @@
       <item quantity="one">ไม่มีการปลดล็อกอุปกรณ์มา <xliff:g id="NUMBER_0">%d</xliff:g> ชั่วโมงแล้ว ยืนยันรหัสผ่าน</item>
     </plurals>
     <string name="fingerprint_not_recognized" msgid="348813995267914625">"ไม่รู้จัก"</string>
-    <!-- no translation found for kg_password_default_pin_message (3739658416797652781) -->
+    <plurals name="kg_password_default_pin_message" formatted="false" msgid="3739658416797652781">
+      <item quantity="other">โปรดป้อน PIN ของซิม คุณพยายามได้อีก <xliff:g id="NUMBER_1">%d</xliff:g> ครั้ง</item>
+      <item quantity="one">โปรดป้อน PIN ของซิม คุณพยายามได้อีก <xliff:g id="NUMBER_0">%d</xliff:g> ครั้งก่อนที่จะต้องติดต่อผู้ให้บริการเพื่อปลดล็อกอุปกรณ์</item>
+    </plurals>
     <plurals name="kg_password_default_puk_message" formatted="false" msgid="8744416410184198352">
       <item quantity="other">ซิมถูกปิดใช้งานในขณะนี้ โปรดป้อนรหัส PUK เพื่อทำต่อ คุณพยายามได้อีก <xliff:g id="_NUMBER_1">%d</xliff:g> ครั้งก่อนที่ซิมจะไม่สามารถใช้งานได้อย่างถาวร โปรดติดต่อสอบถามรายละเอียดจากผู้ให้บริการ</item>
       <item quantity="one">ซิมถูกปิดใช้งานในขณะนี้ โปรดป้อนรหัส PUK เพื่อทำต่อ คุณพยายามได้อีก <xliff:g id="_NUMBER_0">%d</xliff:g> ครั้งก่อนที่ซิมจะไม่สามารถใช้งานได้อย่างถาวร โปรดติดต่อสอบถามรายละเอียดจากผู้ให้บริการ</item>

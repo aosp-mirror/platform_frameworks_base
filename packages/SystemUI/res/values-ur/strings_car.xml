@@ -22,4 +22,6 @@
     <string name="car_guest" msgid="3738772168718508650">"مہمان"</string>
     <string name="car_add_user" msgid="5245196248349230898">"صارف شامل کریں"</string>
     <string name="car_new_user" msgid="8142927244990323906">"نیا صارف"</string>
+    <string name="user_add_user_message_setup" msgid="1791011504259527329">"جب آپ ایک نیا صارف شامل کرتے ہیں تو اس شخص کو اپنی جگہ کو ترتیب دینے کی ضرورت ہوتی ہے۔"</string>
+    <string name="user_add_user_message_update" msgid="3383320289232716179">"کوئی بھی صارف دیگر سبھی صارفین کیلئے ایپس کو اپ ڈیٹ کر سکتا ہے۔"</string>
 </resources>

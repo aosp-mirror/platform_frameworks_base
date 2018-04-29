@@ -22,4 +22,6 @@
     <string name="car_guest" msgid="3738772168718508650">"Конок"</string>
     <string name="car_add_user" msgid="5245196248349230898">"Колдонуучу кошуу"</string>
     <string name="car_new_user" msgid="8142927244990323906">"Жаңы колдонуучу"</string>
+    <string name="user_add_user_message_setup" msgid="1791011504259527329">"Жаңы колдонуучу кошулганда, ал өзүнүн профилин жөндөп алышы керек."</string>
+    <string name="user_add_user_message_update" msgid="3383320289232716179">"Колдонмолорду бир колдонуучу калган бардык колдонуучулар үчүн да жаңырта алат."</string>
 </resources>

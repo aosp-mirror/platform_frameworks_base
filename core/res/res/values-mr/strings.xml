@@ -836,7 +836,8 @@
     <string name="double_tap_toast" msgid="4595046515400268881">"टीप: झूम कमी करण्यासाठी आणि वाढवण्यासाठी दोनदा-टॅप करा."</string>
     <string name="autofill_this_form" msgid="4616758841157816676">"स्वयं-भरण"</string>
     <string name="setup_autofill" msgid="7103495070180590814">"स्वयं-भरण सेट करा"</string>
-    <string name="autofill_window_title" msgid="921006636895825007">"अॉटोफिल"</string>
+    <!-- no translation found for autofill_window_title (4107745526909284887) -->
+    <skip />
     <string name="autofill_address_name_separator" msgid="6350145154779706772">" "</string>
     <string name="autofill_address_summary_name_format" msgid="3268041054899214945">"$1$2$3"</string>
     <string name="autofill_address_summary_separator" msgid="7483307893170324129">", "</string>
@@ -1691,6 +1692,8 @@
     <string name="package_installed_device_owner" msgid="6875717669960212648">"आपल्या प्रशासकाने इंस्टॉल केले"</string>
     <string name="package_updated_device_owner" msgid="1847154566357862089">"आपल्या प्रशासकाने अपडेट केले"</string>
     <string name="package_deleted_device_owner" msgid="2307122077550236438">"आपल्या प्रशासकाने हटवले"</string>
+    <!-- no translation found for battery_saver_description_with_learn_more (6323937147992667707) -->
+    <skip />
     <string name="battery_saver_description" msgid="769989536172631582">"बॅटरी लाइफ वाढवण्‍यासाठी, बॅटरी सेव्‍हर काही वैशिष्‍ट्ये बंद करते आणि अॅप्‍स प्रतिबंधित करते."</string>
     <string name="data_saver_description" msgid="6015391409098303235">"डेटा वापर कमी करण्यात मदत करण्यासाठी, डेटा सर्व्हर काही अॅप्सना पार्श्वभूमीमध्ये डेटा पाठविण्यास किंवा प्राप्त करण्यास प्रतिबंधित करतो. तुम्ही सध्या वापरत असलेला अॅप डेटामध्ये प्रवेश करू शकतो परंतु तसे तो खूप कमी वेळा करू शकतो. याचा अर्थ, उदाहरणार्थ, तुम्ही इमेज टॅप करेपर्यंत त्या प्रदर्शित करणार नाहीत असा असू शकतो."</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"डेटा बचतकर्ता चालू करायचा?"</string>
@@ -1739,8 +1742,7 @@
     <string name="zen_mode_default_weekends_name" msgid="2786495801019345244">"आठवड्याच्या शेवटी"</string>
     <string name="zen_mode_default_events_name" msgid="8158334939013085363">"इव्‍हेंट"</string>
     <string name="zen_mode_default_every_night_name" msgid="3012363838882944175">"निष्क्रिय आहे"</string>
-    <!-- no translation found for muted_by (5942954724562097128) -->
-    <skip />
+    <string name="muted_by" msgid="5942954724562097128">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g> काही ध्‍वनी म्‍यूट करत आहे"</string>
     <string name="system_error_wipe_data" msgid="6608165524785354962">"आपल्‍या डिव्‍हाइसमध्‍ये अंतर्गत समस्‍या आहे आणि आपला फॅक्‍टरी डेटा रीसेट होईपर्यंत ती अस्‍थिर असू शकते."</string>
     <string name="system_error_manufacturer" msgid="8086872414744210668">"आपल्‍या डिव्‍हाइसमध्‍ये अंतर्गत समस्‍या आहे. तपशीलांसाठी आपल्‍या निर्मात्याशी संपर्क साधा."</string>
     <string name="stk_cc_ussd_to_dial" msgid="5214333646366591205">"USSD विनंती नियमित कॉलवर बदलली"</string>

@@ -208,7 +208,8 @@ public class WindowConfigurationTests extends WindowTestsBase {
         final WindowConfiguration winConfig = config.windowConfiguration;
         stackController.adjustConfigurationForBounds(bounds, null /*insetBounds*/,
                 new Rect() /*nonDecorBounds*/, new Rect() /*stableBounds*/, false /*overrideWidth*/,
-                false /*overrideHeight*/, mDisplayInfo.logicalDensityDpi, config, parentConfig);
+                false /*overrideHeight*/, mDisplayInfo.logicalDensityDpi, config, parentConfig,
+                windowingMode);
         // Assert that both expected and actual are null or are equal to each other
 
         assertEquals(expectedConfigBounds, winConfig.getAppBounds());

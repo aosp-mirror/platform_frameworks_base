@@ -140,6 +140,9 @@
     notification panel collapses -->
     <dimen name="shelf_appear_translation">42dp</dimen>
 
+    <!-- Vertical translation of pulsing notification animations -->
+    <dimen name="pulsing_notification_appear_translation">10dp</dimen>
+
     <!-- The amount the content shifts upwards when transforming into the icon -->
     <dimen name="notification_icon_transform_content_shift">32dp</dimen>
 
@@ -326,7 +329,7 @@
     <dimen name="pull_span_min">25dp</dimen>
 
     <dimen name="qs_tile_height">106dp</dimen>
-    <dimen name="qs_tile_layout_margin_side">9dp</dimen>
+    <dimen name="qs_tile_layout_margin_side">6dp</dimen>
     <dimen name="qs_tile_margin_horizontal">18dp</dimen>
     <dimen name="qs_tile_margin_vertical">24dp</dimen>
     <dimen name="qs_tile_margin_top_bottom">12dp</dimen>

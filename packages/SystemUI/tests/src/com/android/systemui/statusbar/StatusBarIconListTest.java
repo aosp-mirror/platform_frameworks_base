@@ -132,7 +132,7 @@ public class StatusBarIconListTest extends SysuiTestCase {
      */
 
     @Test
-    public void testSlot_OrderIsPreserved() {
+    public void testSlot_ViewOrder() {
         Slot testSlot = new Slot("test_name", null);
 
         // no tag bc it defaults to 0
@@ -144,17 +144,18 @@ public class StatusBarIconListTest extends SysuiTestCase {
         int sb3Tag = 2;
         when(sbHolder3.getTag()).thenReturn(sb3Tag);
 
-        ArrayList<StatusBarIconHolder> expected = new ArrayList<>();
-        expected.add(sbHolder1);
-        expected.add(sbHolder2);
-        expected.add(sbHolder3);
-
-
         // Add 3 icons in the same slot, and verify that the list we get is equal to what we gave
-        for (StatusBarIconHolder holder : expected) {
-            testSlot.addHolder(holder);
-        }
-        assertTrue(listsEqual(expected, testSlot.getHolderList()));
+        testSlot.addHolder(sbHolder1);
+        testSlot.addHolder(sbHolder2);
+        testSlot.addHolder(sbHolder3);
+
+        // View order is reverse of the order added
+        ArrayList<StatusBarIconHolder> expected = new ArrayList<>();
+        expected.add(sbHolder3);
+        expected.add(sbHolder2);
+        expected.add(sbHolder1);
+
+        assertTrue(listsEqual(expected, testSlot.getHolderListInViewOrder()));
     }
 
     private boolean listsEqual(List<StatusBarIconHolder> list1, List<StatusBarIconHolder> list2) {

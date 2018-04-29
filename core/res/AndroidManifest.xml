@@ -1424,6 +1424,13 @@
     <permission android:name="android.permission.NETWORK_SETTINGS"
         android:protectionLevel="signature" />
 
+    <!-- Allows SetupWizard to call methods in Networking services
+         <p>Not for use by any other third-party or privileged applications.
+         @hide This should only be used by SetupWizard.
+    -->
+    <permission android:name="android.permission.NETWORK_SETUP_WIZARD"
+        android:protectionLevel="signature|setup" />
+
     <!-- #SystemApi @hide Allows applications to access information about LoWPAN interfaces.
          <p>Not for use by third-party applications. -->
     <permission android:name="android.permission.ACCESS_LOWPAN_STATE"

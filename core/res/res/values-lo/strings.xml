@@ -601,7 +601,7 @@
     <string name="policydesc_encryptedStorage" msgid="2637732115325316992">"ຮຽກຮ້ອງໃຫ້ມີການເຂົ້າລະຫັດຂໍ້ມູນທີ່ຈັດເກັບໃນແອັບຯ"</string>
     <string name="policylab_disableCamera" msgid="6395301023152297826">"ປິດການໃຊ້ກ້ອງ"</string>
     <string name="policydesc_disableCamera" msgid="2306349042834754597">"ຫ້າມການໃຊ້ກ້ອງຈາກທຸກອຸປະກອນ."</string>
-    <string name="policylab_disableKeyguardFeatures" msgid="8552277871075367771">"ປິດໃຊ້ງານບາງຄຸນສົມບັດໜ້າຈໍລັອກ"</string>
+    <string name="policylab_disableKeyguardFeatures" msgid="8552277871075367771">"ປິດການນຳໃຊ້ຄຸນສົມບັດໜ້າຈໍລັອກ"</string>
     <string name="policydesc_disableKeyguardFeatures" msgid="2044755691354158439">"ປ້ອງກັນການໃຊ້ບາງຄຸນສົມບັດໜ້າຈໍລັອກ."</string>
   <string-array name="phoneTypes">
     <item msgid="8901098336658710359">"ເຮືອນ"</item>
@@ -836,7 +836,8 @@
     <string name="double_tap_toast" msgid="4595046515400268881">"ເຄັດລັບ: ແຕະສອງຄັ້ງເພື່ອຊູມເຂົ້າ ແລະຊູມອອກ."</string>
     <string name="autofill_this_form" msgid="4616758841157816676">"ຕື່ມຂໍ້ມູນອັດຕະໂນມັດ"</string>
     <string name="setup_autofill" msgid="7103495070180590814">"ຕັ້ງການຕື່ມຂໍ້ມູນອັດຕະໂນມັດ"</string>
-    <string name="autofill_window_title" msgid="921006636895825007">"ຕື່ມຂໍ້ມູນອັດຕະໂນມັດ"</string>
+    <!-- no translation found for autofill_window_title (4107745526909284887) -->
+    <skip />
     <string name="autofill_address_name_separator" msgid="6350145154779706772">" "</string>
     <string name="autofill_address_summary_name_format" msgid="3268041054899214945">"$1$2$3"</string>
     <string name="autofill_address_summary_separator" msgid="7483307893170324129">", "</string>
@@ -1690,9 +1691,10 @@
     <string name="package_installed_device_owner" msgid="6875717669960212648">"ຖືກຕິດຕັ້ງໂດຍຜູ້ເບິ່ງແຍງລະບົບຂອງທ່ານ"</string>
     <string name="package_updated_device_owner" msgid="1847154566357862089">"ຖືກອັບໂຫລດໂດຍຜູ້ເບິ່ງແຍງລະບົບຂອງທ່ານ"</string>
     <string name="package_deleted_device_owner" msgid="2307122077550236438">"ຖືກລຶບອອກໂດຍຜູ້ເບິ່ງແຍງລະບົບຂອງທ່ານ"</string>
+    <string name="battery_saver_description_with_learn_more" msgid="6323937147992667707">"ເພື່ອຍຶດອາຍຸແບັດເຕີຣີຂອງທ່ານ, ຕົວປະຢັດແບັດເຕີຣີຈະປິດຄຸນສົມບັດອຸປະກອນບາງຢ່າງໄວ້ ພ້ອມທັງຈຳກັດແອັບຕ່າງໆໄວ້ນຳ. "<annotation id="url">"ສຶກສາເພີ່ມເຕີມ"</annotation></string>
     <string name="battery_saver_description" msgid="769989536172631582">"ເພື່ອຂະຫຍາຍອາຍຸແບັດເຕີຣີຂອງທ່ານ, ຕົວປະຢັດແບັດເຕີຣີຈະປິດຄຸນສົມບັດອຸປະກອນບາງຢ່າງ ແລະ ຈຳກັດແອັບໄວ້."</string>
     <string name="data_saver_description" msgid="6015391409098303235">"ເພື່ອຊ່ວຍຫຼຸດຜ່ອນການນຳໃຊ້ຂໍ້ມູນ, ຕົວປະຢັດຂໍ້ມູນຈະປ້ອງກັນບໍ່ໃຫ້ບາງແອັບສົ່ງ ຫຼື ຮັບຂໍ້ມູນໃນພື້ນຫຼັງ. ແອັບໃດໜຶ່ງທີ່ທ່ານກຳລັງໃຊ້ຢູ່ຈະສາມາດເຂົ້າເຖິງຂໍ້ມູນໄດ້ ແຕ່ອາດເຂົ້າເຖິງໄດ້ຖີ່ໜ້ອຍລົງ. ນີ້ອາດໝາຍຄວາມວ່າ ຮູບພາບຕ່າງໆອາດບໍ່ສະແດງຈົນກວ່າທ່ານຈະແຕະໃສ່ກ່ອນ."</string>
-    <string name="data_saver_enable_title" msgid="4674073932722787417">"ເປີດໃຊ້ຕົວປະຢັດຂໍ້ມູນບໍ?"</string>
+    <string name="data_saver_enable_title" msgid="4674073932722787417">"ເປີດຕົວປະຢັດອິນເຕີເນັດບໍ?"</string>
     <string name="data_saver_enable_button" msgid="7147735965247211818">"ເປີດໃຊ້"</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="4367877408072000848">
       <item quantity="other">ເປັນ​ເວ​ລາ %1$d ນາ​ທີ (ຈົນ​ຮອດ <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
@@ -1738,8 +1740,7 @@
     <string name="zen_mode_default_weekends_name" msgid="2786495801019345244">"ທ້າຍອາທິດ"</string>
     <string name="zen_mode_default_events_name" msgid="8158334939013085363">"ການນັດໝາຍ"</string>
     <string name="zen_mode_default_every_night_name" msgid="3012363838882944175">"ການນອນ"</string>
-    <!-- no translation found for muted_by (5942954724562097128) -->
-    <skip />
+    <string name="muted_by" msgid="5942954724562097128">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g> ປິດສຽງບາງຢ່າງໄວ້"</string>
     <string name="system_error_wipe_data" msgid="6608165524785354962">"ມີ​ບັນ​ຫາ​ພາຍ​ໃນ​ກັບ​ອຸ​ປະ​ກອນ​ຂອງ​ທ່ານ, ແລະ​ມັນ​ອາດ​ຈະ​ບໍ່​ສະ​ຖຽນ​ຈົນ​ກວ່າ​ທ່ານ​ຕັ້ງ​ເປັນ​ຂໍ້​ມູນ​ໂຮງ​ງານ​ຄືນ​ແລ້ວ."</string>
     <string name="system_error_manufacturer" msgid="8086872414744210668">"ມີ​ບັນ​ຫາ​ພາຍ​ໃນ​ກັບ​ອຸ​ປະ​ກອນ​ຂອງ​ທ່ານ. ຕິດ​ຕໍ່ຜູ້​ຜະ​ລິດ​ຂອງ​ທ່ານ​ສຳ​ລັບ​ລາຍ​ລະ​ອຽດ​ຕ່າງໆ."</string>
     <string name="stk_cc_ussd_to_dial" msgid="5214333646366591205">"ປ່ຽນການຮ້ອງຂໍ USSD ເປັນການໂທທຳມະດາແລ້ວ"</string>

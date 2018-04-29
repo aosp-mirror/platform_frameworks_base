@@ -170,7 +170,7 @@ public final class Magnifier {
             if (mWindow == null) {
                 synchronized (mLock) {
                     mWindow = new InternalPopupWindow(mView.getContext(), mView.getDisplay(),
-                            getValidViewSurface(),
+                            getValidParentSurfaceForMagnifier(),
                             mWindowWidth, mWindowHeight, mWindowElevation, mWindowCornerRadius,
                             Handler.getMain() /* draw the magnifier on the UI thread */, mLock,
                             mCallback);
@@ -245,18 +245,20 @@ public final class Magnifier {
     }
 
     @Nullable
-    private Surface getValidViewSurface() {
-        // TODO: deduplicate this against the first part of #performPixelCopy
-        final Surface surface;
-        if (mView instanceof SurfaceView) {
-            surface = ((SurfaceView) mView).getHolder().getSurface();
-        } else if (mView.getViewRootImpl() != null) {
-            surface = mView.getViewRootImpl().mSurface;
-        } else {
-            surface = null;
+    private Surface getValidParentSurfaceForMagnifier() {
+        if (mView.getViewRootImpl() != null) {
+            final Surface mainWindowSurface = mView.getViewRootImpl().mSurface;
+            if (mainWindowSurface != null && mainWindowSurface.isValid()) {
+                return mainWindowSurface;
+            }
         }
-
-        return (surface != null && surface.isValid()) ? surface : null;
+        if (mView instanceof SurfaceView) {
+            final Surface surfaceViewSurface = ((SurfaceView) mView).getHolder().getSurface();
+            if (surfaceViewSurface != null && surfaceViewSurface.isValid()) {
+                return surfaceViewSurface;
+            }
+        }
+        return null;
     }
 
     private void configureCoordinates(final float xPosInView, final float yPosInView) {
@@ -264,12 +266,12 @@ public final class Magnifier {
         // magnifier. These are relative to the surface the content is copied from.
         final float posX;
         final float posY;
+        mView.getLocationInSurface(mViewCoordinatesInSurface);
         if (mView instanceof SurfaceView) {
             // No offset required if the backing Surface matches the size of the SurfaceView.
             posX = xPosInView;
             posY = yPosInView;
         } else {
-            mView.getLocationInSurface(mViewCoordinatesInSurface);
             posX = xPosInView + mViewCoordinatesInSurface[0];
             posY = yPosInView + mViewCoordinatesInSurface[1];
         }
@@ -282,6 +284,14 @@ public final class Magnifier {
                 R.dimen.magnifier_offset);
         mWindowCoords.x = mCenterZoomCoords.x - mWindowWidth / 2;
         mWindowCoords.y = mCenterZoomCoords.y - mWindowHeight / 2 - verticalOffset;
+        if (mView instanceof SurfaceView && mView.getViewRootImpl() != null) {
+            // TODO: deduplicate against the first part of #getValidParentSurfaceForMagnifier()
+            final Surface mainWindowSurface = mView.getViewRootImpl().mSurface;
+            if (mainWindowSurface != null && mainWindowSurface.isValid()) {
+                mWindowCoords.x += mViewCoordinatesInSurface[0];
+                mWindowCoords.y += mViewCoordinatesInSurface[1];
+            }
+        }
     }
 
     private void performPixelCopy(final int startXInSurface, final int startYInSurface,
@@ -361,6 +371,9 @@ public final class Magnifier {
         // The alpha set on the magnifier's content, which defines how
         // prominent the white background is.
         private static final int CONTENT_BITMAP_ALPHA = 242;
+        // The z of the magnifier surface, defining its z order in the list of
+        // siblings having the same parent surface (usually the main app surface).
+        private static final int SURFACE_Z = 5;
 
         // Display associated to the view the magnifier is attached to.
         private final Display mDisplay;
@@ -602,6 +615,7 @@ public final class Magnifier {
                                     mSurfaceControl.setPosition(pendingX, pendingY);
                                 }
                                 if (firstDraw) {
+                                    mSurfaceControl.setLayer(SURFACE_Z);
                                     mSurfaceControl.show();
                                 }
                                 SurfaceControl.closeTransaction();

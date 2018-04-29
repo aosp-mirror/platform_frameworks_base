@@ -1716,6 +1716,18 @@ public:
     bool getResourceFlags(uint32_t resID, uint32_t* outFlags) const;
 
     /**
+     * Returns whether or not the package for the given resource has been dynamically assigned.
+     * If the resource can't be found, returns 'false'.
+     */
+    bool isResourceDynamic(uint32_t resID) const;
+
+    /**
+     * Returns whether or not the given package has been dynamically assigned.
+     * If the package can't be found, returns 'false'.
+     */
+    bool isPackageDynamic(uint8_t packageID) const;
+
+    /**
      * Retrieve the value of a resource.  If the resource is found, returns a
      * value >= 0 indicating the table it is in (for use with
      * getTableStringBlock() and getTableCookie()) and fills in 'outValue'.  If
@@ -2024,6 +2036,7 @@ private:
             bool appAsLib, const int32_t cookie, bool copyData, bool isSystemAsset=false);
 
     ssize_t getResourcePackageIndex(uint32_t resID) const;
+    ssize_t getResourcePackageIndexFromPackage(uint8_t packageID) const;
 
     status_t getEntry(
         const PackageGroup* packageGroup, int typeIndex, int entryIndex,

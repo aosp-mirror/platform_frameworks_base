@@ -86,6 +86,7 @@ import android.util.MemoryIntArray;
 import android.view.textservice.TextServicesManager;
 
 import com.android.internal.annotations.GuardedBy;
+import com.android.internal.app.ColorDisplayController;
 import com.android.internal.widget.ILockSettings;
 
 import java.io.IOException;
@@ -3147,7 +3148,9 @@ public final class Settings {
         public static final String DISPLAY_COLOR_MODE = "display_color_mode";
 
         private static final Validator DISPLAY_COLOR_MODE_VALIDATOR =
-                new SettingsValidators.InclusiveIntegerRangeValidator(0, 2);
+                new SettingsValidators.InclusiveIntegerRangeValidator(
+                        ColorDisplayController.COLOR_MODE_NATURAL,
+                        ColorDisplayController.COLOR_MODE_AUTOMATIC);
 
         /**
          * The amount of time in milliseconds before the device goes to sleep or begins
@@ -10776,6 +10779,7 @@ public final class Settings {
          * read_binary_cpu_time          (boolean)
          * proc_state_cpu_times_read_delay_ms (long)
          * external_stats_collection_rate_limit_ms (long)
+         * battery_level_collection_delay_ms (long)
          * </pre>
          *
          * <p>

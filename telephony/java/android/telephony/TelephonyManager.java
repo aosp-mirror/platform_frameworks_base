@@ -2786,6 +2786,22 @@ public class TelephonyManager {
     }
 
     /**
+     * Test method to reload the UICC profile.
+     *
+     * @hide
+     */
+    @TestApi
+    @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE)
+    public void refreshUiccProfile() {
+        try {
+            ITelephony telephony = getITelephony();
+            telephony.refreshUiccProfile(mSubId);
+        } catch (RemoteException ex) {
+            Rlog.w(TAG, "RemoteException", ex);
+        }
+    }
+
+    /**
      * Map logicalSlot to physicalSlot, and activate the physicalSlot if it is inactive. For
      * example, passing the physicalSlots array [1, 0] means mapping the first item 1, which is
      * physical slot index 1, to the logical slot 0; and mapping the second item 0, which is
@@ -6477,6 +6493,29 @@ public class TelephonyManager {
         } catch (NullPointerException e) {
         }
         return retVal;
+    }
+
+    /**
+     * Returns the result and response from RIL for oem request
+     *
+     * @param oemReq the data is sent to ril.
+     * @param oemResp the respose data from RIL.
+     * @return negative value request was not handled or get error
+     *         0 request was handled succesfully, but no response data
+     *         positive value success, data length of response
+     * @hide
+     * @deprecated OEM needs a vendor-extension hal and their apps should use that instead
+     */
+    @Deprecated
+    public int invokeOemRilRequestRaw(byte[] oemReq, byte[] oemResp) {
+        try {
+            ITelephony telephony = getITelephony();
+            if (telephony != null)
+                return telephony.invokeOemRilRequestRaw(oemReq, oemResp);
+        } catch (RemoteException ex) {
+        } catch (NullPointerException ex) {
+        }
+        return -1;
     }
 
     /** @hide */

@@ -624,7 +624,14 @@ public class IpClient extends StateMachine {
     private ApfFilter mApfFilter;
     private boolean mMulticastFiltering;
     private long mStartTimeMillis;
-    private byte[] mApfDataSnapshot;
+
+    /**
+     * Reading the snapshot is an asynchronous operation initiated by invoking
+     * Callback.startReadPacketFilter() and completed when the WiFi Service responds with an
+     * EVENT_READ_PACKET_FILTER_COMPLETE message. The mApfDataSnapshotComplete condition variable
+     * signals when a new snapshot is ready.
+     */
+    private final ConditionVariable mApfDataSnapshotComplete = new ConditionVariable();
 
     public static class Dependencies {
         public INetworkManagementService getNMS() {
@@ -881,13 +888,21 @@ public class IpClient extends StateMachine {
         final ProvisioningConfiguration provisioningConfig = mConfiguration;
         final ApfCapabilities apfCapabilities = (provisioningConfig != null)
                 ? provisioningConfig.mApfCapabilities : null;
-        final byte[] apfDataSnapshot = mApfDataSnapshot;
 
         IndentingPrintWriter pw = new IndentingPrintWriter(writer, "  ");
         pw.println(mTag + " APF dump:");
         pw.increaseIndent();
         if (apfFilter != null) {
+            if (apfCapabilities.hasDataAccess()) {
+                // Request a new snapshot, then wait for it.
+                mApfDataSnapshotComplete.close();
+                mCallback.startReadPacketFilter();
+                if (!mApfDataSnapshotComplete.block(1000)) {
+                    pw.print("TIMEOUT: DUMPING STALE APF SNAPSHOT");
+                }
+            }
             apfFilter.dump(pw);
+
         } else {
             pw.print("No active ApfFilter; ");
             if (provisioningConfig == null) {
@@ -899,15 +914,6 @@ public class IpClient extends StateMachine {
             }
         }
         pw.decreaseIndent();
-        pw.println(mTag + " latest APF data snapshot: ");
-        pw.increaseIndent();
-        if (apfDataSnapshot != null) {
-            pw.println(HexDump.dumpHexString(apfDataSnapshot));
-        } else {
-            pw.println("No last snapshot.");
-        }
-        pw.decreaseIndent();
-
         pw.println();
         pw.println(mTag + " current ProvisioningConfiguration:");
         pw.increaseIndent();
@@ -1704,7 +1710,10 @@ public class IpClient extends StateMachine {
                 }
 
                 case EVENT_READ_PACKET_FILTER_COMPLETE: {
-                    mApfDataSnapshot = (byte[]) msg.obj;
+                    if (mApfFilter != null) {
+                        mApfFilter.setDataSnapshot((byte[]) msg.obj);
+                    }
+                    mApfDataSnapshotComplete.open();
                     break;
                 }
 

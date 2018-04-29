@@ -41,6 +41,7 @@ import android.util.Pair;
 import android.view.View;
 import android.view.WindowInsets;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
@@ -590,5 +591,17 @@ public class QuickStatusBarHeader extends RelativeLayout implements
 
     public static float getColorIntensity(@ColorInt int color) {
         return color == Color.WHITE ? 0 : 1;
+    }
+
+    public void setMargins(int sideMargins) {
+        for (int i = 0; i < getChildCount(); i++) {
+            View v = getChildAt(i);
+            if (v == mSystemIconsView || v == mQuickQsStatusIcons || v == mHeaderQsPanel) {
+                continue;
+            }
+            RelativeLayout.LayoutParams lp = (RelativeLayout.LayoutParams) v.getLayoutParams();
+            lp.leftMargin = sideMargins;
+            lp.rightMargin = sideMargins;
+        }
     }
 }
