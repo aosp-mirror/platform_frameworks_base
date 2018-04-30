@@ -20,12 +20,14 @@ import com.android.server.EventLogTags;
 import com.android.server.LocalServices;
 
 import android.annotation.Nullable;
+import android.app.ActivityManager;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.hardware.display.BrightnessConfiguration;
 import android.hardware.display.DisplayManagerInternal.DisplayPowerRequest;
+import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
@@ -91,6 +93,8 @@ class AutomaticBrightnessController {
     // The minimum and maximum screen brightnesses.
     private final int mScreenBrightnessRangeMinimum;
     private final int mScreenBrightnessRangeMaximum;
+
+    // How much to scale doze brightness by (should be (0, 1.0]).
     private final float mDozeScaleFactor;
 
     // Initial light sensor event rate in milliseconds.
@@ -122,8 +126,8 @@ class AutomaticBrightnessController {
     // weighting values positive.
     private final int mWeightingIntercept;
 
-    // accessor object for determining thresholds to change brightness dynamically
-    private final HysteresisLevels mDynamicHysteresis;
+    // Configuration object for determining thresholds to change brightness dynamically
+    private final HysteresisLevels mHysteresisLevels;
 
     // Amount of time to delay auto-brightness after screen on while waiting for
     // the light sensor to warm-up in milliseconds.
@@ -192,7 +196,7 @@ class AutomaticBrightnessController {
             int lightSensorWarmUpTime, int brightnessMin, int brightnessMax, float dozeScaleFactor,
             int lightSensorRate, int initialLightSensorRate, long brighteningLightDebounceConfig,
             long darkeningLightDebounceConfig, boolean resetAmbientLuxAfterWarmUpConfig,
-            int ambientLightHorizon, HysteresisLevels dynamicHysteresis) {
+            HysteresisLevels hysteresisLevels) {
         mCallbacks = callbacks;
         mSensorManager = sensorManager;
         mBrightnessMapper = mapper;
@@ -206,9 +210,9 @@ class AutomaticBrightnessController {
         mBrighteningLightDebounceConfig = brighteningLightDebounceConfig;
         mDarkeningLightDebounceConfig = darkeningLightDebounceConfig;
         mResetAmbientLuxAfterWarmUpConfig = resetAmbientLuxAfterWarmUpConfig;
-        mAmbientLightHorizon = ambientLightHorizon;
-        mWeightingIntercept = ambientLightHorizon;
-        mDynamicHysteresis = dynamicHysteresis;
+        mAmbientLightHorizon = AMBIENT_LIGHT_LONG_HORIZON_MILLIS;
+        mWeightingIntercept = AMBIENT_LIGHT_LONG_HORIZON_MILLIS;
+        mHysteresisLevels = hysteresisLevels;
         mShortTermModelValid = true;
         mShortTermModelAnchor = -1;
 
@@ -338,19 +342,24 @@ class AutomaticBrightnessController {
         pw.println("Automatic Brightness Controller Configuration:");
         pw.println("  mScreenBrightnessRangeMinimum=" + mScreenBrightnessRangeMinimum);
         pw.println("  mScreenBrightnessRangeMaximum=" + mScreenBrightnessRangeMaximum);
+        pw.println("  mDozeScaleFactor=" + mDozeScaleFactor);
+        pw.println("  mInitialLightSensorRate=" + mInitialLightSensorRate);
+        pw.println("  mNormalLightSensorRate=" + mNormalLightSensorRate);
         pw.println("  mLightSensorWarmUpTimeConfig=" + mLightSensorWarmUpTimeConfig);
         pw.println("  mBrighteningLightDebounceConfig=" + mBrighteningLightDebounceConfig);
         pw.println("  mDarkeningLightDebounceConfig=" + mDarkeningLightDebounceConfig);
         pw.println("  mResetAmbientLuxAfterWarmUpConfig=" + mResetAmbientLuxAfterWarmUpConfig);
+        pw.println("  mAmbientLightHorizon=" + mAmbientLightHorizon);
+        pw.println("  mWeightingIntercept=" + mWeightingIntercept);
 
         pw.println();
         pw.println("Automatic Brightness Controller State:");
         pw.println("  mLightSensor=" + mLightSensor);
         pw.println("  mLightSensorEnabled=" + mLightSensorEnabled);
         pw.println("  mLightSensorEnableTime=" + TimeUtils.formatUptime(mLightSensorEnableTime));
+        pw.println("  mCurrentLightSensorRate=" + mCurrentLightSensorRate);
         pw.println("  mAmbientLux=" + mAmbientLux);
         pw.println("  mAmbientLuxValid=" + mAmbientLuxValid);
-        pw.println("  mAmbientLightHorizon=" + mAmbientLightHorizon);
         pw.println("  mBrighteningLuxThreshold=" + mBrighteningLuxThreshold);
         pw.println("  mDarkeningLuxThreshold=" + mDarkeningLuxThreshold);
         pw.println("  mLastObservedLux=" + mLastObservedLux);
@@ -358,11 +367,20 @@ class AutomaticBrightnessController {
         pw.println("  mRecentLightSamples=" + mRecentLightSamples);
         pw.println("  mAmbientLightRingBuffer=" + mAmbientLightRingBuffer);
         pw.println("  mScreenAutoBrightness=" + mScreenAutoBrightness);
-        pw.println("  mDisplayPolicy=" + mDisplayPolicy);
+        pw.println("  mDisplayPolicy=" + DisplayPowerRequest.policyToString(mDisplayPolicy));
         pw.println("  mShortTermModelAnchor=" + mShortTermModelAnchor);
+        pw.println("  mShortTermModelValid=" + mShortTermModelValid);
+        pw.println("  mBrightnessAdjustmentSamplePending=" + mBrightnessAdjustmentSamplePending);
+        pw.println("  mBrightnessAdjustmentSampleOldLux=" + mBrightnessAdjustmentSampleOldLux);
+        pw.println("  mBrightnessAdjustmentSampleOldBrightness="
+                + mBrightnessAdjustmentSampleOldBrightness);
+        pw.println("  mShortTermModelValid=" + mShortTermModelValid);
 
         pw.println();
         mBrightnessMapper.dump(pw);
+
+        pw.println();
+        mHysteresisLevels.dump(pw);
     }
 
     private boolean setLightSensorEnabled(boolean enable) {
@@ -437,8 +455,8 @@ class AutomaticBrightnessController {
             lux = 0;
         }
         mAmbientLux = lux;
-        mBrighteningLuxThreshold = mDynamicHysteresis.getBrighteningThreshold(lux);
-        mDarkeningLuxThreshold = mDynamicHysteresis.getDarkeningThreshold(lux);
+        mBrighteningLuxThreshold = mHysteresisLevels.getBrighteningThreshold(lux);
+        mDarkeningLuxThreshold = mHysteresisLevels.getDarkeningThreshold(lux);
 
         // If the short term model was invalidated and the change is drastic enough, reset it.
         if (!mShortTermModelValid && mShortTermModelAnchor != -1) {
