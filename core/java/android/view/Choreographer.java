@@ -106,9 +106,15 @@ public final class Choreographer {
             if (looper == null) {
                 throw new IllegalStateException("The current thread must have a looper!");
             }
-            return new Choreographer(looper, VSYNC_SOURCE_APP);
+            Choreographer choreographer = new Choreographer(looper, VSYNC_SOURCE_APP);
+            if (looper == Looper.getMainLooper()) {
+                mMainInstance = choreographer;
+            }
+            return choreographer;
         }
     };
+
+    private static volatile Choreographer mMainInstance;
 
     // Thread local storage for the SF choreographer.
     private static final ThreadLocal<Choreographer> sSfThreadInstance =
@@ -261,6 +267,14 @@ public final class Choreographer {
      */
     public static Choreographer getSfInstance() {
         return sSfThreadInstance.get();
+    }
+
+    /**
+     * @return The Choreographer of the main thread, if it exists, or {@code null} otherwise.
+     * @hide
+     */
+    public static Choreographer getMainThreadInstance() {
+        return mMainInstance;
     }
 
     /** Destroys the calling thread's choreographer
