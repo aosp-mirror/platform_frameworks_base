@@ -2722,7 +2722,40 @@ public class Notification implements Parcelable
      * @hide
      */
     public static boolean areRemoteViewsChanged(Builder first, Builder second) {
-        return !first.usesStandardHeader() || !second.usesStandardHeader();
+        if (!Objects.equals(first.usesStandardHeader(), second.usesStandardHeader())) {
+            return true;
+        }
+
+        if (areRemoteViewsChanged(first.mN.contentView, second.mN.contentView)) {
+            return true;
+        }
+        if (areRemoteViewsChanged(first.mN.bigContentView, second.mN.bigContentView)) {
+            return true;
+        }
+        if (areRemoteViewsChanged(first.mN.headsUpContentView, second.mN.headsUpContentView)) {
+            return true;
+        }
+
+        return false;
+    }
+
+    private static boolean areRemoteViewsChanged(RemoteViews first, RemoteViews second) {
+        if (first == null && second == null) {
+            return false;
+        }
+        if (first == null && second != null || first != null && second == null) {
+            return true;
+        }
+
+        if (!Objects.equals(first.getLayoutId(), second.getLayoutId())) {
+            return true;
+        }
+
+        if (!Objects.equals(first.getSequenceNumber(), second.getSequenceNumber())) {
+            return true;
+        }
+
+        return false;
     }
 
     /**
