@@ -28,6 +28,7 @@ import android.os.Trace;
  */
 public final class UiThread extends ServiceThread {
     private static final long SLOW_DISPATCH_THRESHOLD_MS = 100;
+    private static final long SLOW_DELIVERY_THRESHOLD_MS = 200;
     private static UiThread sInstance;
     private static Handler sHandler;
 
@@ -48,7 +49,8 @@ public final class UiThread extends ServiceThread {
             sInstance.start();
             final Looper looper = sInstance.getLooper();
             looper.setTraceTag(Trace.TRACE_TAG_SYSTEM_SERVER);
-            looper.setSlowDispatchThresholdMs(SLOW_DISPATCH_THRESHOLD_MS);
+            looper.setSlowLogThresholdMs(
+                    SLOW_DISPATCH_THRESHOLD_MS, SLOW_DELIVERY_THRESHOLD_MS);
             sHandler = new Handler(sInstance.getLooper());
         }
     }
