@@ -118,7 +118,7 @@ public class InstallOverlayTests extends BaseHostJUnit4Test {
 
     @Test
     public void installPlatformSignedFrameworkOverlayAndUpdate() throws Exception {
-        assertTrue(runDeviceTests(DEVICE_TEST_PKG, DEVICE_TEST_CLS, "expectAppResource"));
+        assertTrue(runDeviceTests(DEVICE_TEST_PKG, DEVICE_TEST_CLS, "expectFrameworkResource"));
 
         installPackage("OverlayHostTests_FrameworkOverlayV1.apk");
         setOverlayEnabled(FRAMEWORK_OVERLAY_PACKAGE_NAME, true);
@@ -136,6 +136,27 @@ public class InstallOverlayTests extends BaseHostJUnit4Test {
                 .getVersionName());
         assertTrue(runDeviceTests(DEVICE_TEST_PKG, DEVICE_TEST_CLS,
                 "expectFrameworkOverlayV2Resource"));
+    }
+
+    @Test
+    public void enabledFrameworkOverlayMustAffectNewlyInstalledPackage() throws Exception {
+        try {
+            setPackageEnabled(DEVICE_TEST_PKG, false);
+
+            installPackage("OverlayHostTests_FrameworkOverlayV1.apk");
+            setOverlayEnabled(FRAMEWORK_OVERLAY_PACKAGE_NAME, true);
+            assertTrue(overlayManagerContainsPackage(FRAMEWORK_OVERLAY_PACKAGE_NAME));
+
+            setPackageEnabled(DEVICE_TEST_PKG, true);
+            assertTrue(runDeviceTests(DEVICE_TEST_PKG, DEVICE_TEST_CLS,
+                    "expectFrameworkOverlayV1Resource"));
+        } finally {
+            setPackageEnabled(DEVICE_TEST_PKG, true);
+        }
+    }
+
+    private void setPackageEnabled(String pkg, boolean enabled) throws Exception {
+        getDevice().executeShellCommand("cmd package " + (enabled ? "enable " : "disable ") + pkg);
     }
 
     private void setOverlayEnabled(String pkg, boolean enabled) throws Exception {
