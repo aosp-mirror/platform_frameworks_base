@@ -341,7 +341,8 @@ public class DevicePolicyManager {
      * <li>{@link #EXTRA_PROVISIONING_WIFI_PAC_URL}, optional</li>
      * <li>{@link #EXTRA_PROVISIONING_SUPPORT_URL}, optional</li>
      * <li>{@link #EXTRA_PROVISIONING_ORGANIZATION_NAME}, optional</li>
-     * <li>{@link #EXTRA_PROVISIONING_ADMIN_EXTRAS_BUNDLE}, optional</li></ul>
+     * <li>{@link #EXTRA_PROVISIONING_ADMIN_EXTRAS_BUNDLE}, optional</li>
+     * <li>{@link #EXTRA_PROVISIONING_USE_MOBILE_DATA, optional </li><ul>
      *
      * @hide
      */
@@ -1019,6 +1020,19 @@ public class DevicePolicyManager {
      */
     public static final String EXTRA_PROVISIONING_SKIP_USER_CONSENT =
             "android.app.extra.PROVISIONING_SKIP_USER_CONSENT";
+
+    /**
+     * A boolean extra indicating if mobile data should be used during NFC device owner provisioning
+     * for downloading the mobile device management application. If {@link
+     * #EXTRA_PROVISIONING_WIFI_SSID} is also specified, wifi network will be used instead.
+     *
+     * <p>Use in an NFC record with {@link #MIME_TYPE_PROVISIONING_NFC} that starts device owner
+     * provisioning via an NFC bump.
+     *
+     * @hide
+     */
+    public static final String EXTRA_PROVISIONING_USE_MOBILE_DATA =
+            "android.app.extra.PROVISIONING_USE_MOBILE_DATA";
 
     /**
      * This MIME type is used for starting the device owner provisioning.
