@@ -20,6 +20,8 @@
 #include <string>
 #include <vector>
 
+#include "BootParameters.h"
+
 #include <boot_action/boot_action.h>  // libandroidthings native API.
 #include <utils/RefBase.h>
 
@@ -31,7 +33,7 @@ public:
 
     // libraryPath is a fully qualified path to the target .so library.
     bool init(const std::string& libraryPath,
-              const std::vector<ABootActionParameter>& parameters);
+              const std::unique_ptr<BootParameters>& bootParameters);
 
     // The animation is going to start playing partNumber for the playCount'th
     // time, update the action as needed.
@@ -45,7 +47,7 @@ public:
 
 private:
     typedef bool (*libInit)(const ABootActionParameter* parameters,
-                            size_t num_parameters);
+                            size_t numParameters);
     typedef void (*libStartPart)(int partNumber, int playNumber);
     typedef void (*libShutdown)();
 
@@ -55,6 +57,9 @@ private:
     libInit mLibInit = nullptr;
     libStartPart mLibStartPart = nullptr;
     libShutdown mLibShutdown = nullptr;
+
+    // Called only if the boot is silent.
+    libInit mLibSilentBoot = nullptr;
 };
 
 }  // namespace android
