@@ -3441,14 +3441,13 @@ public class TelephonyManager {
      * to the TelephonyManager.
      * When the filter is enabled, {@link
      * VisualVoicemailService#onSmsReceived(VisualVoicemailTask, VisualVoicemailSms)} will be
-     * called when a SMS matching the settings is received. The caller should have
-     * {@link android.Manifest.permission#READ_PHONE_STATE READ_PHONE_STATE} and implement a
-     * VisualVoicemailService.
-     *
-     * <p>Requires Permission:
-     * {@link android.Manifest.permission#READ_PHONE_STATE READ_PHONE_STATE}
+     * called when a SMS matching the settings is received. Caller must be the default dialer,
+     * system dialer, or carrier visual voicemail app.
      *
      * @param settings The settings for the filter, or {@code null} to disable the filter.
+     *
+     * @see {@link TelecomManager#getDefaultDialerPackage()}
+     * @see {@link CarrierConfigManager#KEY_CARRIER_VVM_PACKAGE_NAME_STRING_ARRAY}
      */
     public void setVisualVoicemailSmsFilterSettings(VisualVoicemailSmsFilterSettings settings) {
         if (settings == null) {
