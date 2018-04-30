@@ -10,6 +10,7 @@ LOCAL_SRC_FILES := \
 
 LOCAL_STATIC_JAVA_LIBRARIES := \
     android-support-test \
+    androidx.annotation_annotation \
     apct-perftests-utils \
     guava
 
