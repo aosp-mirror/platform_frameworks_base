@@ -1380,6 +1380,15 @@ class GlobalActionsDialog implements DialogInterface.OnDismissListener,
             mHardwareLayout = HardwareUiLayout.get(mListView);
             mHardwareLayout.setOutsideTouchListener(view -> dismiss());
             setTitle(R.string.global_actions);
+            mListView.setAccessibilityDelegate(new View.AccessibilityDelegate() {
+                @Override
+                public boolean dispatchPopulateAccessibilityEvent(
+                        View host, AccessibilityEvent event) {
+                    // Populate the title here, just as Activity does
+                    event.getText().add(mContext.getString(R.string.global_actions));
+                    return true;
+                }
+            });
         }
 
         private void updateList() {
