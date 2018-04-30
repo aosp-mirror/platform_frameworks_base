@@ -486,8 +486,10 @@
         <item name="android:background">@drawable/btn_borderless_rect</item>
         <item name="android:gravity">center</item>
         <item name="android:focusable">true</item>
-        <item name="android:paddingStart">8dp</item>
-        <item name="android:paddingEnd">8dp</item>
+        <item name="android:paddingTop">@dimen/notification_guts_button_vertical_padding</item>
+        <item name="android:paddingBottom">@dimen/notification_guts_button_vertical_padding</item>
+        <item name="android:paddingLeft">@dimen/notification_guts_button_horizontal_padding</item>
+        <item name="android:paddingRight">@dimen/notification_guts_button_horizontal_padding</item>
     </style>
 
     <style name="TextAppearance.HeadsUpStatusBarText"

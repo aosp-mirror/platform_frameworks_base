@@ -155,8 +155,17 @@
     <!-- The space around a notification menu item  -->
     <dimen name="notification_menu_icon_padding">20dp</dimen>
 
-    <!-- The veritical space around the buttons in the inline settings -->
-    <dimen name="notification_guts_button_spacing">20dp</dimen>
+    <!-- The vertical space around the buttons in the inline settings -->
+    <dimen name="notification_guts_button_spacing">6dp</dimen>
+
+    <!-- The vertical padding a notification guts button has to fulfill the 48dp touch target -->
+    <dimen name="notification_guts_button_vertical_padding">14dp</dimen>
+
+    <!-- The horizontal padding for notification guts buttons-->
+    <dimen name="notification_guts_button_horizontal_padding">14dp</dimen>
+
+    <!-- The horizontal space around the buttons in the inline settings -->
+    <dimen name="notification_guts_button_horizontal_spacing">8dp</dimen>
 
     <!-- The height of the header in inline settings -->
     <dimen name="notification_guts_header_height">24dp</dimen>
