@@ -83,7 +83,7 @@ final class FieldClassificationStrategy {
     }
 
     @Nullable
-    private ServiceInfo getServiceInfo() {
+    ServiceInfo getServiceInfo() {
         final String packageName =
                 mContext.getPackageManager().getServicesSystemSharedLibraryPackageName();
         if (packageName == null) {
@@ -117,6 +117,18 @@ final class FieldClassificationStrategy {
 
         if (sVerbose) Slog.v(TAG, "getServiceComponentName(): " + name);
         return name;
+    }
+
+    void reset() {
+        synchronized (mLock) {
+            if (mServiceConnection != null) {
+                if (sDebug) Slog.d(TAG, "reset(): unbinding service.");
+                mContext.unbindService(mServiceConnection);
+                mServiceConnection = null;
+            } else {
+                if (sDebug) Slog.d(TAG, "reset(): service is not bound. Do nothing.");
+            }
+        }
     }
 
     /**
