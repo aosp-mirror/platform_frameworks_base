@@ -694,32 +694,25 @@ public final class OverlayManagerService extends SystemService {
     private final class OverlayChangeListener
             implements OverlayManagerServiceImpl.OverlayChangeListener {
         @Override
-        public void onChanged(@NonNull final String targetPackageName, final int userId,
-                boolean targetChanged, boolean overlayChanged) {
+        public void onOverlaysChanged(@NonNull final String targetPackageName, final int userId) {
             schedulePersistSettings();
             FgThread.getHandler().post(() -> {
-                // Update the targets' overlays if a change to the target or an overlay occurs
-                if (targetChanged || overlayChanged) {
-                    updateAssets(userId, targetPackageName);
+                updateAssets(userId, targetPackageName);
+
+                final Intent intent = new Intent(Intent.ACTION_OVERLAY_CHANGED,
+                        Uri.fromParts("package", targetPackageName, null));
+                intent.setFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT);
+
+                if (DEBUG) {
+                    Slog.d(TAG, "send broadcast " + intent);
                 }
 
-                // Create the broadcast if the overlay changes
-                if (overlayChanged) {
-                    final Intent intent = new Intent(Intent.ACTION_OVERLAY_CHANGED,
-                            Uri.fromParts("package", targetPackageName, null));
-                    intent.setFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT);
-
-                    if (DEBUG) {
-                        Slog.d(TAG, "send broadcast " + intent);
-                    }
-
-                    try {
-                        ActivityManager.getService().broadcastIntent(null, intent, null, null, 0,
-                                null, null, null, android.app.AppOpsManager.OP_NONE, null, false,
-                                false, userId);
-                    } catch (RemoteException e) {
-                        // Intentionally left empty.
-                    }
+                try {
+                    ActivityManager.getService().broadcastIntent(null, intent, null, null, 0,
+                            null, null, null, android.app.AppOpsManager.OP_NONE, null, false, false,
+                            userId);
+                } catch (RemoteException e) {
+                    // Intentionally left empty.
                 }
             });
         }
