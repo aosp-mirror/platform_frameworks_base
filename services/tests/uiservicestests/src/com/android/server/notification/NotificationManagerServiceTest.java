@@ -557,11 +557,34 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         assertEquals(IMPORTANCE_NONE,
                 mBinderService.getNotificationChannel(PKG, channel.getId()).getImportance());
 
-        final StatusBarNotification sbn = generateNotificationRecord(channel).sbn;
+        StatusBarNotification sbn = generateNotificationRecord(channel).sbn;
         sbn.getNotification().flags |= FLAG_FOREGROUND_SERVICE;
         mBinderService.enqueueNotificationWithTag(PKG, "opPkg", "tag",
                 sbn.getId(), sbn.getNotification(), sbn.getUserId());
         waitForIdle();
+        // The first time a foreground service notification is shown, we allow the channel
+        // to be updated to allow it to be seen.
+        assertEquals(1, mBinderService.getActiveNotifications(sbn.getPackageName()).length);
+        assertEquals(IMPORTANCE_LOW,
+                mService.getNotificationRecord(sbn.getKey()).getImportance());
+        assertEquals(IMPORTANCE_LOW,
+                mBinderService.getNotificationChannel(PKG, channel.getId()).getImportance());
+        mBinderService.cancelNotificationWithTag(PKG, "tag", sbn.getId(), sbn.getUserId());
+        waitForIdle();
+
+        update = new NotificationChannel("blockedbyuser", "name", IMPORTANCE_NONE);
+        update.setFgServiceShown(true);
+        mBinderService.updateNotificationChannelForPackage(PKG, mUid, update);
+        waitForIdle();
+        assertEquals(IMPORTANCE_NONE,
+                mBinderService.getNotificationChannel(PKG, channel.getId()).getImportance());
+
+        sbn = generateNotificationRecord(channel).sbn;
+        sbn.getNotification().flags |= FLAG_FOREGROUND_SERVICE;
+        mBinderService.enqueueNotificationWithTag(PKG, "opPkg", "tag",
+                sbn.getId(), sbn.getNotification(), sbn.getUserId());
+        waitForIdle();
+        // The second time it is shown, we keep the user's preference.
         assertEquals(0, mBinderService.getActiveNotifications(sbn.getPackageName()).length);
         assertNull(mService.getNotificationRecord(sbn.getKey()));
         assertEquals(IMPORTANCE_NONE,

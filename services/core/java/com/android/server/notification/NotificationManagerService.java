@@ -4051,17 +4051,29 @@ public class NotificationManagerService extends SystemService {
         final NotificationRecord r = new NotificationRecord(getContext(), n, channel);
         r.setIsAppImportanceLocked(mRankingHelper.getIsAppImportanceLocked(pkg, callingUid));
 
-        if ((notification.flags & FLAG_FOREGROUND_SERVICE) != 0
-                && (channel.getUserLockedFields() & NotificationChannel.USER_LOCKED_IMPORTANCE) == 0
-                && (r.getImportance() == IMPORTANCE_MIN || r.getImportance() == IMPORTANCE_NONE)) {
-            // Increase the importance of foreground service notifications unless the user had an
-            // opinion otherwise
-            if (TextUtils.isEmpty(channelId)
-                    || NotificationChannel.DEFAULT_CHANNEL_ID.equals(channelId)) {
-                r.setImportance(IMPORTANCE_LOW, "Bumped for foreground service");
-            } else {
-                channel.setImportance(IMPORTANCE_LOW);
-                mRankingHelper.updateNotificationChannel(pkg, notificationUid, channel, false);
+        if ((notification.flags & Notification.FLAG_FOREGROUND_SERVICE) != 0) {
+            final boolean fgServiceShown = channel.isFgServiceShown();
+            if (((channel.getUserLockedFields() & NotificationChannel.USER_LOCKED_IMPORTANCE) == 0
+                        || !fgServiceShown)
+                    && (r.getImportance() == IMPORTANCE_MIN
+                            || r.getImportance() == IMPORTANCE_NONE)) {
+                // Increase the importance of foreground service notifications unless the user had
+                // an opinion otherwise (and the channel hasn't yet shown a fg service).
+                if (TextUtils.isEmpty(channelId)
+                        || NotificationChannel.DEFAULT_CHANNEL_ID.equals(channelId)) {
+                    r.setImportance(IMPORTANCE_LOW, "Bumped for foreground service");
+                } else {
+                    channel.setImportance(IMPORTANCE_LOW);
+                    if (!fgServiceShown) {
+                        channel.unlockFields(NotificationChannel.USER_LOCKED_IMPORTANCE);
+                        channel.setFgServiceShown(true);
+                    }
+                    mRankingHelper.updateNotificationChannel(pkg, notificationUid, channel, false);
+                    r.updateNotificationChannel(channel);
+                }
+            } else if (!fgServiceShown && !TextUtils.isEmpty(channelId)
+                    && !NotificationChannel.DEFAULT_CHANNEL_ID.equals(channelId)) {
+                channel.setFgServiceShown(true);
                 r.updateNotificationChannel(channel);
             }
         }
