@@ -141,7 +141,7 @@
     <string name="launch_defaults_some" msgid="313159469856372621">"ਕੁਝ ਪੂਰਵ-ਨਿਰਧਾਰਤ ਸੈੱਟ ਕੀਤੇ"</string>
     <string name="launch_defaults_none" msgid="4241129108140034876">"ਕੋਈ ਡਿਫੌਲਟਸ ਸੈਟ ਨਹੀਂ ਕੀਤੇ"</string>
     <string name="tts_settings" msgid="8186971894801348327">"ਲਿਖਤ ਤੋਂ ਬੋਲੀ ਸੈਟਿੰਗਾਂ"</string>
-    <string name="tts_settings_title" msgid="1237820681016639683">"ਲਿਖਤ ਤੋਂ ਬੋਲੀ ਆਊਟਪੁਟ"</string>
+    <string name="tts_settings_title" msgid="1237820681016639683">"ਲਿਖਤ-ਤੋਂ-ਬੋਲੀ ਆਊਟਪੁੱਟ"</string>
     <string name="tts_default_rate_title" msgid="6030550998379310088">"ਸਪੀਚ ਰੇਟ"</string>
     <string name="tts_default_rate_summary" msgid="4061815292287182801">"ਸਪੀਡ ਜਿਸਤੇ ਟੈਕਸਟ ਬੋਲਿਆ ਜਾਂਦਾ ਹੈ"</string>
     <string name="tts_default_pitch_title" msgid="6135942113172488671">"ਪਿਚ"</string>
@@ -202,8 +202,8 @@
     <string name="oem_unlock_enable_summary" msgid="4720281828891618376">"ਬੂਟਲੋਡਰ ਨੂੰ ਅਣਲਾਕ ਕੀਤੇ ਜਾਣ ਦੀ ਆਗਿਆ ਦਿਓ"</string>
     <string name="confirm_enable_oem_unlock_title" msgid="4802157344812385674">"ਕੀ OEM ਨੂੰ ਅਣਲਾਕ ਕਰਨ ਦੀ ਆਗਿਆ ਦੇਣੀ ਹੈ?"</string>
     <string name="confirm_enable_oem_unlock_text" msgid="5517144575601647022">"ਚਿਤਾਵਨੀ: ਡੀਵਾਈਸ ਸੁਰੱਖਿਆ ਵਿਸ਼ੇਸ਼ਤਾਵਾਂ ਉਦੋਂ ਇਸ ਡੀਵਾਈਸ ਤੇ ਕੰਮ ਨਹੀਂ ਕਰਨਗੀਆਂ ਜਦੋਂ ਇਹ ਸੈਟਿੰਗ ਚਾਲੂ ਹੋਵੇਗੀ।"</string>
-    <string name="mock_location_app" msgid="7966220972812881854">"ਮੌਕ ਸਥਾਨ ਐਪ ਚੁਣੋ"</string>
-    <string name="mock_location_app_not_set" msgid="809543285495344223">"ਕੋਈ ਵੀ ਮੌਕ ਸਥਾਨ ਐਪ ਸੈੱਟ ਨਹੀਂ ਕੀਤੀ ਗਈ"</string>
+    <string name="mock_location_app" msgid="7966220972812881854">"ਮੌਕ ਟਿਕਾਣੇ ਵਾਲੀ ਐਪ ਚੁਣੋ"</string>
+    <string name="mock_location_app_not_set" msgid="809543285495344223">"ਕੋਈ ਵੀ ਮੌਕ ਟਿਕਾਣੇ ਵਾਲੀ ਐਪ ਸੈੱਟ ਨਹੀਂ ਹੈ"</string>
     <string name="mock_location_app_set" msgid="8966420655295102685">"ਮੌਕ ਸਥਾਨ ਐਪ: <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="debug_networking_category" msgid="7044075693643009662">"ਨੈੱਟਵਰਕਿੰਗ"</string>
     <string name="wifi_display_certification" msgid="8611569543791307533">"ਵਾਇਰਲੈੱਸ ਡਿਸਪਲੇ ਪ੍ਰਮਾਣੀਕਰਨ"</string>
@@ -256,7 +256,7 @@
     <string name="adb_keys_warning_message" msgid="5659849457135841625">"ਕੀ ਉਹਨਾਂ ਸਾਰੇ ਕੰਪਿਊਟਰਾਂ ਤੋਂ USB ਡੀਬੱਗਿੰਗ ਤੱਕ ਪਹੁੰਚ ਰੱਦ ਕਰਨੀ ਹੈ, ਜਿਹਨਾਂ ਲਈ ਪਹਿਲਾਂ ਤੁਸੀਂ ਅਧਿਕਾਰਤ ਕੀਤਾ ਹੈ?"</string>
     <string name="dev_settings_warning_title" msgid="7244607768088540165">"ਕੀ ਵਿਕਾਸ ਸੈਟਿੰਗਾਂ ਦੀ ਆਗਿਆ ਦੇਣੀ ਹੈ?"</string>
     <string name="dev_settings_warning_message" msgid="2298337781139097964">"ਇਹ ਸੈਟਿੰਗਾਂ ਕੇਵਲ ਵਿਕਾਸਕਾਰ ਦੀ ਵਰਤੋਂ ਲਈ ਹਨ। ਇਹ ਤੁਹਾਡੇ ਡੀਵਾਈਸ ਅਤੇ ਇਸਤੇ ਮੌਜੂਦ ਐਪਲੀਕੇਸ਼ਨ ਨੂੰ ਬ੍ਰੇਕ ਕਰਨ ਜਾਂ ਦੁਰਵਿਵਹਾਰ ਕਰਨ ਦਾ ਕਾਰਨ ਬਣ ਸਕਦੇ ਹਨ।"</string>
-    <string name="verify_apps_over_usb_title" msgid="4177086489869041953">"USB ਤੇ ਐਪਾਂ ਦੀ ਜਾਂਚ ਕਰੋ"</string>
+    <string name="verify_apps_over_usb_title" msgid="4177086489869041953">"USB \'ਤੇ ਐਪਾਂ ਦੀ ਪੁਸ਼ਟੀ ਕਰੋ"</string>
     <string name="verify_apps_over_usb_summary" msgid="9164096969924529200">"ਹਾਨੀਕਾਰਕ ਵਿਵਹਾਰ ਲਈ ADB/ADT ਰਾਹੀਂ ਸਥਾਪਤ ਕੀਤੀਆਂ ਐਪਾਂ ਦੀ ਜਾਂਚ ਕਰੋ।"</string>
     <string name="bluetooth_show_devices_without_names_summary" msgid="2351196058115755520">"ਅਨਾਮ ਬਲੂਟੁੱਥ ਡੀਵਾਈਸਾਂ ਦਿਖਾਈਆਂ ਜਾਣਗੀਆਂ (ਸਿਰਫ਼ MAC ਪਤੇ)"</string>
     <string name="bluetooth_disable_absolute_volume_summary" msgid="6031284410786545957">"ਰਿਮੋਟ ਡੀਵਾਈਸਾਂ ਨਾਲ ਅਵਾਜ਼ੀ ਸਮੱਸਿਆਵਾਂ ਜਿਵੇਂ ਕਿ ਨਾ ਪਸੰਦ ਕੀਤੀ ਜਾਣ ਵਾਲੀ ਉੱਚੀ ਅਵਾਜ਼ ਜਾਂ ਕੰਟਰੋਲ ਦੀ ਕਮੀ ਵਰਗੀ ਹਾਲਤ ਵਿੱਚ ਬਲੂਟੁੱਥ ਪੂਰਨ ਅਵਾਜ਼ਮ ਵਿਸ਼ੇਸ਼ਤਾ ਨੂੰ ਬੰਦ ਕਰਦਾ ਹੈ।"</string>
@@ -298,8 +298,8 @@
     <string name="usb_audio_disable_routing_summary" msgid="980282760277312264">"USB ਆਡੀਓ ਪੈਰੀਫੈਰਲ ਲਈ ਸਵੈਚਲਿਤ ਰੂਟਿੰਗ ਬੰਦ ਕਰੋ"</string>
     <string name="debug_layout" msgid="5981361776594526155">"ਲੇਆਉਟ ਬਾਊਂਡਸ ਦਿਖਾਓ"</string>
     <string name="debug_layout_summary" msgid="2001775315258637682">"ਕਲਿਪ ਬਾਊਂਡਸ, ਮਾਰਜਿਨ ਆਦਿ ਦਿਖਾਓ"</string>
-    <string name="force_rtl_layout_all_locales" msgid="2259906643093138978">"RTL ਲੇਆਉਟ ਦਿਸ਼ਾ ਤੇ ਜ਼ੋਰ ਪਾਓ"</string>
-    <string name="force_rtl_layout_all_locales_summary" msgid="9192797796616132534">"ਸਾਰੇ ਸਥਾਨਾਂ ਲਈ RTL ਵੱਲ ਸਕ੍ਰੀਨ ਲੇਆਉਟ ਦਿਸ਼ਾ ਤੇ ਜ਼ੋਰ ਪਾਓ"</string>
+    <string name="force_rtl_layout_all_locales" msgid="2259906643093138978">"ਸੱਜੇ ਤੋਂ ਖੱਬੇ ਵਾਲਾ ਲੇਆਊਟ ਲਾਗੂ ਕਰੋ"</string>
+    <string name="force_rtl_layout_all_locales_summary" msgid="9192797796616132534">"ਸਾਰੇ ਸਥਾਨਾਂ ਲਈ ਸਕ੍ਰੀਨ \'ਤੇ ਸੱਜੇ ਤੋਂ ਖੱਬੇ ਵਾਲਾ ਲੇਆਊਟ ਲਾਗੂ ਕਰੋ"</string>
     <string name="force_hw_ui" msgid="6426383462520888732">"GPU ਰੈਂਡਰਿੰਗ ਤੇ ਜ਼ੋਰ ਪਾਓ"</string>
     <string name="force_hw_ui_summary" msgid="5535991166074861515">"2d ਡ੍ਰਾਇੰਗ ਲਈ GPU ਦੀ ਵਰਤੋਂ ਤੇ ਜ਼ੋਰ ਪਾਓ"</string>
     <string name="force_msaa" msgid="7920323238677284387">"4x MSAA ਤੇ ਜ਼ੋਰ ਪਾਓ"</string>
@@ -347,7 +347,7 @@
     <string name="inactive_app_active_summary" msgid="4174921824958516106">"ਕਿਰਿਆਸ਼ੀਲ। ਟੌਗਲ ਕਰਨ ਲਈ ਟੈਪ ਕਰੋ।"</string>
     <string name="standby_bucket_summary" msgid="6567835350910684727">"ਐਪ ਸਟੈਂਡਬਾਈ ਸਥਿਤੀ:<xliff:g id="BUCKET"> %s</xliff:g>"</string>
     <string name="runningservices_settings_title" msgid="8097287939865165213">"ਚੱਲ ਰਹੀਆਂ ਸੇਵਾਵਾਂ"</string>
-    <string name="runningservices_settings_summary" msgid="854608995821032748">"ਇਸ ਵੇਲੇ ਚੱਲ ਰਹੀਆਂ ਸੇਵਾਵਾਂ ਦੇਖੋ ਅਤੇ ਇਹਨਾਂ ਤੇ ਨਿਯੰਤਰਣ ਪਾਓ"</string>
+    <string name="runningservices_settings_summary" msgid="854608995821032748">"ਇਸ ਵੇਲੇ ਚੱਲ ਰਹੀਆਂ ਸੇਵਾਵਾਂ ਦੇਖੋ ਅਤੇ ਇਹਨਾਂ ਨੂੰ ਕੰਟਰੋਲ ਕਰੋ"</string>
     <string name="select_webview_provider_title" msgid="4628592979751918907">"WebView ਅਮਲ"</string>
     <string name="select_webview_provider_dialog_title" msgid="4370551378720004872">"WebView ਅਮਲ ਸੈੱਟ ਕਰੋ"</string>
     <string name="select_webview_provider_toast_text" msgid="5466970498308266359">"ਇਹ ਚੋਣ ਹੁਣ ਵੈਧ ਨਹੀਂ ਹੈ। ਦੁਬਾਰਾ ਕੋਸ਼ਿਸ਼ ਕਰੋ।"</string>
@@ -367,11 +367,12 @@
     <string name="accessibility_display_daltonizer_preference_title" msgid="5800761362678707872">"ਰੰਗ ਸੁਧਾਈ"</string>
     <string name="accessibility_display_daltonizer_preference_subtitle" msgid="3484969015295282911">"ਇਹ ਵਿਸ਼ੇਸ਼ਤਾ ਪ੍ਰਯੋਗਾਤਮਿਕ ਹੈ ਅਤੇ ਪ੍ਰਦਰਸ਼ਨ ਤੇ ਅਸਰ ਪਾ ਸਕਦੀ ਹੈ।"</string>
     <string name="daltonizer_type_overridden" msgid="3116947244410245916">"<xliff:g id="TITLE">%1$s</xliff:g> ਦੁਆਰਾ ਓਵਰਰਾਈਡ ਕੀਤਾ"</string>
-    <string name="power_remaining_duration_only" msgid="845431008899029842">"ਲਗਭਗ <xliff:g id="TIME">%1$s</xliff:g> ਬਾਕੀ"</string>
-    <string name="power_discharging_duration" msgid="6655472132189365839">"ਲਗਭਗ <xliff:g id="TIME">%1$s</xliff:g> ਬਾਕੀ (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
-    <string name="power_remaining_duration_only_enhanced" msgid="5992456722677973678">"ਤੁਹਾਡੀ ਵਰਤੋਂ ਦੇ ਆਧਾਰ \'ਤੇ ਲਗਭਗ <xliff:g id="TIME">%1$s</xliff:g> ਬਾਕੀ"</string>
-    <string name="power_discharging_duration_enhanced" msgid="5726302316642148671">"ਤੁਹਾਡੀ ਵਰਤੋਂ ਦੇ ਆਧਾਰ \'ਤੇ ਲਗਭਗ <xliff:g id="TIME">%1$s</xliff:g> ਬਾਕੀ (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
-    <string name="power_remaining_duration_only_short" msgid="5329694252258605547">"<xliff:g id="TIME">%1$s</xliff:g> ਬਾਕੀ"</string>
+    <string name="power_remaining_settings_home_page" msgid="4845022416859002011">"<xliff:g id="PERCENTAGE">%1$s</xliff:g> - <xliff:g id="TIME_STRING">%2$s</xliff:g>"</string>
+    <string name="power_remaining_duration_only" msgid="6123167166221295462">"ਲਗਭਗ <xliff:g id="TIME_REMAINING">%1$s</xliff:g> ਬਾਕੀ"</string>
+    <string name="power_discharging_duration" msgid="8848256785736335185">"ਲਗਭਗ <xliff:g id="TIME_REMAINING">%1$s</xliff:g> ਬਾਕੀ (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
+    <string name="power_remaining_duration_only_enhanced" msgid="4189311599812296592">"ਤੁਹਾਡੀ ਵਰਤੋਂ ਦੇ ਆਧਾਰ \'ਤੇ ਲਗਭਗ <xliff:g id="TIME_REMAINING">%1$s</xliff:g> ਬਾਕੀ"</string>
+    <string name="power_discharging_duration_enhanced" msgid="1992003260664804080">"ਤੁਹਾਡੀ ਵਰਤੋਂ ਦੇ ਆਧਾਰ \'ਤੇ ਲਗਭਗ <xliff:g id="TIME_REMAINING">%1$s</xliff:g> ਬਾਕੀ (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
+    <string name="power_remaining_duration_only_short" msgid="3463575350656389957">"<xliff:g id="TIME_REMAINING">%1$s</xliff:g> ਬਾਕੀ"</string>
     <string name="power_discharge_by_enhanced" msgid="2095821536747992464">"ਤੁਹਾਡੀ ਵਰਤੋਂ ਦੇ ਆਧਾਰ \'ਤੇ ਲਗਭਗ <xliff:g id="TIME">%1$s</xliff:g> ਚੱਲੇਗਾ (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
     <string name="power_discharge_by_only_enhanced" msgid="2175151772952365149">"ਤੁਹਾਡੀ ਵਰਤੋਂ ਦੇ ਆਧਾਰ \'ਤੇ ਲਗਭਗ <xliff:g id="TIME">%1$s</xliff:g> ਚੱਲੇਗਾ"</string>
     <string name="power_discharge_by" msgid="6453537733650125582">"ਲਗਭਗ <xliff:g id="TIME">%1$s</xliff:g> ਚੱਲੇਗਾ (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>

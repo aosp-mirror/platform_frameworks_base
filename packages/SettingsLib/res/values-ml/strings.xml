@@ -301,7 +301,7 @@
     <string name="force_rtl_layout_all_locales" msgid="2259906643093138978">"RTL ലേഔട്ട് ഡയറക്ഷൻ നിർബന്ധമാക്കുക"</string>
     <string name="force_rtl_layout_all_locales_summary" msgid="9192797796616132534">"എല്ലാ ഭാഷകൾക്കുമായി സ്‌ക്രീൻ ലേഔട്ട് ഡയറക്ഷൻ RTL-ലേക്ക് നിർബന്ധമാക്കുക"</string>
     <string name="force_hw_ui" msgid="6426383462520888732">"GPU റെൻഡറിംഗ് ഫോഴ്സ്ചെയ്യുക"</string>
-    <string name="force_hw_ui_summary" msgid="5535991166074861515">"2d ഡ്രോയിംഗിനായുള്ള നിരബന്ധിത GPU ഉപയോഗം"</string>
+    <string name="force_hw_ui_summary" msgid="5535991166074861515">"2d ഡ്രോയിംഗിനായുള്ള നി‍‍ർബന്ധിത GPU ഉപയോഗം"</string>
     <string name="force_msaa" msgid="7920323238677284387">"4x MSAA നിർബന്ധമാക്കുക"</string>
     <string name="force_msaa_summary" msgid="9123553203895817537">"OpenGL ES 2.0 അപ്ലിക്കേഷനുകളിൽ 4x MSAA പ്രവർത്തനക്ഷമമാക്കുക"</string>
     <string name="show_non_rect_clip" msgid="505954950474595172">"ചതുരാകൃതിയിലല്ലാത്ത ക്ലിപ്പ്‌പ്രവർത്തനം ഡീബഗുചെയ്യൂ"</string>
@@ -347,7 +347,7 @@
     <string name="inactive_app_active_summary" msgid="4174921824958516106">"സജീവം. മാറ്റുന്നതിന് ടാപ്പുചെയ്യുക."</string>
     <string name="standby_bucket_summary" msgid="6567835350910684727">"ആപ്പ് സ്‌റ്റാൻഡ്‌ബൈ നില:<xliff:g id="BUCKET"> %s</xliff:g>"</string>
     <string name="runningservices_settings_title" msgid="8097287939865165213">"പ്രവർത്തിക്കുന്ന സേവനങ്ങൾ"</string>
-    <string name="runningservices_settings_summary" msgid="854608995821032748">"നിലവിൽ പ്രവർത്തിക്കുന്ന സേവങ്ങൾ കാണുക, നിയന്ത്രിക്കുക"</string>
+    <string name="runningservices_settings_summary" msgid="854608995821032748">"നിലവിൽ പ്രവർത്തിക്കുന്ന സേവനങ്ങൾ കാണുക, നിയന്ത്രിക്കുക"</string>
     <string name="select_webview_provider_title" msgid="4628592979751918907">"WebView നടപ്പാക്കൽ"</string>
     <string name="select_webview_provider_dialog_title" msgid="4370551378720004872">"WebView നടപ്പാക്കൽ സജ്ജമാക്കുക"</string>
     <string name="select_webview_provider_toast_text" msgid="5466970498308266359">"ഈ തിരഞ്ഞെടുപ്പിന് തുടർന്നങ്ങോട്ട് സാധുതയില്ല. വീണ്ടും ശ്രമിക്കുക."</string>
@@ -367,11 +367,12 @@
     <string name="accessibility_display_daltonizer_preference_title" msgid="5800761362678707872">"വർണ്ണം ക്രമീകരിക്കൽ"</string>
     <string name="accessibility_display_daltonizer_preference_subtitle" msgid="3484969015295282911">"ഈ ഫീച്ചർ പരീക്ഷണാത്മകമായതിനാൽ പ്രകടനത്തെ ബാധിച്ചേക്കാം."</string>
     <string name="daltonizer_type_overridden" msgid="3116947244410245916">"<xliff:g id="TITLE">%1$s</xliff:g> ഉപയോഗിച്ച് അസാധുവാക്കി"</string>
-    <string name="power_remaining_duration_only" msgid="845431008899029842">"ഏകദേശം <xliff:g id="TIME">%1$s</xliff:g> ശേഷിക്കുന്നു"</string>
-    <string name="power_discharging_duration" msgid="6655472132189365839">"ഏകദേശം <xliff:g id="TIME">%1$s</xliff:g> ശേഷിക്കുന്നു (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
-    <string name="power_remaining_duration_only_enhanced" msgid="5992456722677973678">"നിങ്ങളുടെ ഉപയോഗത്തെ അടിസ്ഥാനമാക്കി ഏതാണ്ട് <xliff:g id="TIME">%1$s</xliff:g> ശേഷിക്കുന്നു"</string>
-    <string name="power_discharging_duration_enhanced" msgid="5726302316642148671">"നിങ്ങളുടെ ഉപയോഗത്തെ അടിസ്ഥാനമാക്കി ഏതാണ്ട് <xliff:g id="TIME">%1$s</xliff:g> ശേഷിക്കുന്നു (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
-    <string name="power_remaining_duration_only_short" msgid="5329694252258605547">"<xliff:g id="TIME">%1$s</xliff:g> ശേഷിക്കുന്നു"</string>
+    <string name="power_remaining_settings_home_page" msgid="4845022416859002011">"<xliff:g id="PERCENTAGE">%1$s</xliff:g> - <xliff:g id="TIME_STRING">%2$s</xliff:g>"</string>
+    <string name="power_remaining_duration_only" msgid="6123167166221295462">"ഏതാണ്ട് <xliff:g id="TIME_REMAINING">%1$s</xliff:g> ശേഷിക്കുന്നു"</string>
+    <string name="power_discharging_duration" msgid="8848256785736335185">"ഏതാണ്ട് <xliff:g id="TIME_REMAINING">%1$s</xliff:g> ശേഷിക്കുന്നു (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
+    <string name="power_remaining_duration_only_enhanced" msgid="4189311599812296592">"നിങ്ങളുടെ ഉപയോഗത്തെ അടിസ്ഥാനമാക്കി ഏതാണ്ട് <xliff:g id="TIME_REMAINING">%1$s</xliff:g> ശേഷിക്കുന്നു"</string>
+    <string name="power_discharging_duration_enhanced" msgid="1992003260664804080">"നിങ്ങളുടെ ഉപയോഗത്തെ അടിസ്ഥാനമാക്കി ഏതാണ്ട് <xliff:g id="TIME_REMAINING">%1$s</xliff:g> ശേഷിക്കുന്നു (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
+    <string name="power_remaining_duration_only_short" msgid="3463575350656389957">"<xliff:g id="TIME_REMAINING">%1$s</xliff:g> ശേഷിക്കുന്നു"</string>
     <string name="power_discharge_by_enhanced" msgid="2095821536747992464">"നിങ്ങളുടെ ഉപയോഗത്തെ അടിസ്ഥാനമാക്കി ഏകദേശം <xliff:g id="TIME">%1$s</xliff:g> വരെ നീണ്ടുനിൽക്കേണ്ടതാണ് (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
     <string name="power_discharge_by_only_enhanced" msgid="2175151772952365149">"നിങ്ങളുടെ ഉപയോഗത്തെ അടിസ്ഥാനമാക്കി ഏകദേശം <xliff:g id="TIME">%1$s</xliff:g> വരെ നീണ്ടുനിൽക്കേണ്ടതാണ്"</string>
     <string name="power_discharge_by" msgid="6453537733650125582">"ഏകദേശം <xliff:g id="TIME">%1$s</xliff:g> വരെ നീണ്ടുനിൽക്കേണ്ടതാണ് (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>

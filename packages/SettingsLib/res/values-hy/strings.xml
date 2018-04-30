@@ -188,7 +188,7 @@
     <string name="development_settings_not_available" msgid="4308569041701535607">"Ծրագրավորման ընտրանքներն այլևս հասանելի չեն այս օգտատիրոջ"</string>
     <string name="vpn_settings_not_available" msgid="956841430176985598">"VPN-ի կարգավորումները հասանելի չեն այս օգտատիրոջը"</string>
     <string name="tethering_settings_not_available" msgid="6765770438438291012">"Այս օգտատերը չի կարող փոխել մոդեմի ռեժիմի կարգավորումները"</string>
-    <string name="apn_settings_not_available" msgid="7873729032165324000">"Մատչման կետի անվան կարգավորումները հասանելի չեն այս օգտատիրոջը"</string>
+    <string name="apn_settings_not_available" msgid="7873729032165324000">"Մուտքի կետի անվան կարգավորումները հասանելի չեն այս օգտատիրոջը"</string>
     <string name="enable_adb" msgid="7982306934419797485">"USB վրիպազերծում"</string>
     <string name="enable_adb_summary" msgid="4881186971746056635">"Միացնել վրիպազերծման ռեժիմը, երբ USB-ն միացված է"</string>
     <string name="clear_adb_keys" msgid="4038889221503122743">"Չեղարկել USB վրիպազերծման լիազորումները"</string>
@@ -226,11 +226,11 @@
     <string name="bluetooth_select_a2dp_codec_ldac_playback_quality" msgid="3619694372407843405">"Bluetooth աուդիո LDAC կոդեկ՝ նվագարկման որակ"</string>
     <string name="bluetooth_select_a2dp_codec_ldac_playback_quality_dialog_title" msgid="7595776220458732825">"Գործարկել Bluetooth աուդիո LDAC կոդեկը\nԸնտրություն՝ նվագարկման որակ"</string>
     <string name="bluetooth_select_a2dp_codec_streaming_label" msgid="5347862512596240506">"Հեռարձակում՝ <xliff:g id="STREAMING_PARAMETER">%1$s</xliff:g>"</string>
-    <string name="select_private_dns_configuration_title" msgid="3700456559305263922">"Անհատական DNS"</string>
+    <string name="select_private_dns_configuration_title" msgid="3700456559305263922">"Մասնավոր DNS սերվեր"</string>
     <string name="select_private_dns_configuration_dialog_title" msgid="9221994415765826811">"Ընտրեք անհատական DNS սերվերի ռեժիմը"</string>
     <string name="private_dns_mode_off" msgid="8236575187318721684">"Անջատված է"</string>
     <string name="private_dns_mode_opportunistic" msgid="8314986739896927399">"Ավտոմատ"</string>
-    <string name="private_dns_mode_provider" msgid="8354935160639360804">"Անհատական DNS ծառայության մատակարարի խնամորդի անունը"</string>
+    <string name="private_dns_mode_provider" msgid="8354935160639360804">"Մասնավոր DNS ծառայության մատակարարի խնամորդի անունը"</string>
     <string name="private_dns_mode_provider_hostname_hint" msgid="2487492386970928143">"Մուտքագրեք DNS ծառայության մատակարարի խնամորդի անունը"</string>
     <string name="private_dns_mode_provider_failure" msgid="231837290365031223">"Չհաջողվեց միանալ"</string>
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"Ցույց տալ անլար էկրանի հավաստագրման ընտրանքները"</string>
@@ -238,7 +238,7 @@
     <string name="wifi_connected_mac_randomization_summary" msgid="1743059848752201485">"Պատահականորեն ընտրել MAC հասցեն Wi-Fi ցանցերին միանալիս"</string>
     <string name="wifi_metered_label" msgid="4514924227256839725">"Վճարովի թրաֆիկ"</string>
     <string name="wifi_unmetered_label" msgid="6124098729457992931">"Անսահմանափակ թրաֆիկ"</string>
-    <string name="select_logd_size_title" msgid="7433137108348553508">"Մատյանի բուֆերի չափը չափերը"</string>
+    <string name="select_logd_size_title" msgid="7433137108348553508">"Մատյանի բուֆերի չափերը"</string>
     <string name="select_logd_size_dialog_title" msgid="1206769310236476760">"Ընտրեք տեղեկամատյանի չափը մեկ պահնակի համար"</string>
     <string name="dev_logpersist_clear_warning_title" msgid="684806692440237967">"Ջնջե՞լ մատյանի մշտական հիշողությունը:"</string>
     <string name="dev_logpersist_clear_warning_message" msgid="2256582531342994562">"Մշտական տվյալների գրանցման մատյանի միջոցով վերահսկողությունը դադարեցնելու դեպքում մենք պարտավոր ենք ջնջել մատյանի տվյալները, որոնք պահվում են ձեր սարքում:"</string>
@@ -272,7 +272,7 @@
     <string name="no_application" msgid="2813387563129153880">"Ոչինչ"</string>
     <string name="wait_for_debugger" msgid="1202370874528893091">"Սպասել վրիպազերծիչին"</string>
     <string name="wait_for_debugger_summary" msgid="1766918303462746804">"Հավելվածը սպասում է վրիպազերծիչի կցման"</string>
-    <string name="debug_input_category" msgid="1811069939601180246">"Մուտքագրում"</string>
+    <string name="debug_input_category" msgid="1811069939601180246">"Ներածում"</string>
     <string name="debug_drawing_category" msgid="6755716469267367852">"Պատկերում"</string>
     <string name="debug_hw_drawing_category" msgid="6220174216912308658">"Սարքաշարի արագացված նյութավորում"</string>
     <string name="media_category" msgid="4388305075496848353">"Մեդիա"</string>
@@ -367,11 +367,12 @@
     <string name="accessibility_display_daltonizer_preference_title" msgid="5800761362678707872">"Գունաշտկում"</string>
     <string name="accessibility_display_daltonizer_preference_subtitle" msgid="3484969015295282911">"Սա փորձնական գործառույթ է և կարող է ազդել սարքի աշխատանքի վրա:"</string>
     <string name="daltonizer_type_overridden" msgid="3116947244410245916">"Գերազանցված է <xliff:g id="TITLE">%1$s</xliff:g>-ից"</string>
-    <string name="power_remaining_duration_only" msgid="845431008899029842">"Մնացել է մոտ <xliff:g id="TIME">%1$s</xliff:g>"</string>
-    <string name="power_discharging_duration" msgid="6655472132189365839">"Լիցքը (<xliff:g id="LEVEL">%2$s</xliff:g>) կբավարարի մոտ <xliff:g id="TIME">%1$s</xliff:g>"</string>
-    <string name="power_remaining_duration_only_enhanced" msgid="5992456722677973678">"Մնացել է մոտ <xliff:g id="TIME">%1$s</xliff:g>՝ օգտագործման եղանակից կախված"</string>
-    <string name="power_discharging_duration_enhanced" msgid="5726302316642148671">"Լիցքը (<xliff:g id="LEVEL">%2$s</xliff:g>) կբավարարի մոտ <xliff:g id="TIME">%1$s</xliff:g>՝ կախված օգտագործման եղանակից"</string>
-    <string name="power_remaining_duration_only_short" msgid="5329694252258605547">"Մնացել է <xliff:g id="TIME">%1$s</xliff:g>"</string>
+    <string name="power_remaining_settings_home_page" msgid="4845022416859002011">"<xliff:g id="PERCENTAGE">%1$s</xliff:g> – <xliff:g id="TIME_STRING">%2$s</xliff:g>"</string>
+    <string name="power_remaining_duration_only" msgid="6123167166221295462">"Լիցքը կբավարարի մոտ <xliff:g id="TIME_REMAINING">%1$s</xliff:g>"</string>
+    <string name="power_discharging_duration" msgid="8848256785736335185">"Լիցքը (<xliff:g id="LEVEL">%2$s</xliff:g>) կբավարարի մոտ <xliff:g id="TIME_REMAINING">%1$s</xliff:g>"</string>
+    <string name="power_remaining_duration_only_enhanced" msgid="4189311599812296592">"Լիցքը կբավարարի մոտ <xliff:g id="TIME_REMAINING">%1$s</xliff:g>՝ կախված օգտագործման եղանակից"</string>
+    <string name="power_discharging_duration_enhanced" msgid="1992003260664804080">"Լիցքը (<xliff:g id="LEVEL">%2$s</xliff:g>) կբավարարի մոտ <xliff:g id="TIME_REMAINING">%1$s</xliff:g>՝ կախված օգտագործման եղանակից"</string>
+    <string name="power_remaining_duration_only_short" msgid="3463575350656389957">"Լիցքը կբավարարի <xliff:g id="TIME_REMAINING">%1$s</xliff:g>"</string>
     <string name="power_discharge_by_enhanced" msgid="2095821536747992464">"Լիցքը (<xliff:g id="LEVEL">%2$s</xliff:g>) պետք է, որ բավականացնի մոտ <xliff:g id="TIME">%1$s</xliff:g>՝ կախված օգտագործման եղանակից"</string>
     <string name="power_discharge_by_only_enhanced" msgid="2175151772952365149">"Լիցքը պետք է, որ բավականացնի մոտ <xliff:g id="TIME">%1$s</xliff:g>՝ կախված օգտագործման եղանակից"</string>
     <string name="power_discharge_by" msgid="6453537733650125582">"Լիցքը (<xliff:g id="LEVEL">%2$s</xliff:g>) պետք է, որ բավականացնի մոտ <xliff:g id="TIME">%1$s</xliff:g>"</string>
