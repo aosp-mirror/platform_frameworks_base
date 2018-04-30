@@ -283,6 +283,14 @@ final class PendingIntentRecord extends IIntentSender.Stub {
                 final int callingUid = Binder.getCallingUid();
                 final int callingPid = Binder.getCallingPid();
 
+                // Extract options before clearing calling identity
+                SafeActivityOptions mergedOptions = key.options;
+                if (mergedOptions == null) {
+                    mergedOptions = SafeActivityOptions.fromBundle(options);
+                } else {
+                    mergedOptions.setCallerOptions(ActivityOptions.fromBundle(options));
+                }
+
                 final long origId = Binder.clearCallingIdentity();
 
                 if (whitelistDuration != null) {
@@ -319,13 +327,6 @@ final class PendingIntentRecord extends IIntentSender.Stub {
                 switch (key.type) {
                     case ActivityManager.INTENT_SENDER_ACTIVITY:
                         try {
-                            SafeActivityOptions mergedOptions = key.options;
-                            if (mergedOptions == null) {
-                                mergedOptions = SafeActivityOptions.fromBundle(options);
-                            } else {
-                                mergedOptions.setCallerOptions(ActivityOptions.fromBundle(options));
-                            }
-
                             // Note when someone has a pending intent, even from different
                             // users, then there's no need to ensure the calling user matches
                             // the target user, so validateIncomingUser is always false below.
