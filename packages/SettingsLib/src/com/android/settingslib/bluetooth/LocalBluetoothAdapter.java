@@ -24,6 +24,7 @@ import android.content.Context;
 import android.os.ParcelUuid;
 import android.util.Log;
 
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -247,5 +248,9 @@ public class LocalBluetoothAdapter {
 
     public int getMaxConnectedAudioDevices() {
         return mAdapter.getMaxConnectedAudioDevices();
+    }
+
+    public List<Integer> getSupportedProfiles() {
+        return mAdapter.getSupportedProfiles();
     }
 }
