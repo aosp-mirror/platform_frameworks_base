@@ -1896,6 +1896,13 @@ public class StatusBar extends SystemUI implements DemoMode,
             }
         }
 
+        if (!panelsEnabled()) {
+            if (DEBUG) {
+                Log.d(TAG, "No peeking: disabled panel : " + sbn.getKey());
+            }
+            return false;
+        }
+
         if (sbn.getNotification().fullScreenIntent != null) {
             if (mAccessibilityManager.isTouchExplorationEnabled()) {
                 if (DEBUG) Log.d(TAG, "No peeking: accessible fullscreen: " + sbn.getKey());
