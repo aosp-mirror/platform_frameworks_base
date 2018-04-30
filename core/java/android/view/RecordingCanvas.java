@@ -34,6 +34,7 @@ import android.graphics.Rect;
 import android.graphics.RectF;
 import android.graphics.TemporaryBuffer;
 import android.text.GraphicsOperations;
+import android.text.MeasuredParagraph;
 import android.text.PrecomputedText;
 import android.text.SpannableString;
 import android.text.SpannedString;
@@ -500,21 +501,31 @@ public class RecordingCanvas extends Canvas {
             ((GraphicsOperations) text).drawTextRun(this, start, end,
                     contextStart, contextEnd, x, y, isRtl, paint);
         } else {
+            if (text instanceof PrecomputedText) {
+                final PrecomputedText pt = (PrecomputedText) text;
+                final int paraIndex = pt.findParaIndex(start);
+                if (end <= pt.getParagraphEnd(paraIndex)) {
+                    final int paraStart = pt.getParagraphStart(paraIndex);
+                    final MeasuredParagraph mp = pt.getMeasuredParagraph(paraIndex);
+                    // Only support if the target is in the same paragraph.
+                    nDrawTextRun(mNativeCanvasWrapper,
+                            mp.getChars(),
+                            start - paraStart,
+                            end - start,
+                            contextStart - paraStart,
+                            contextEnd - contextStart,
+                            x, y, isRtl, paint.getNativeInstance(),
+                            mp.getNativePtr());
+                    return;
+                }
+            }
             int contextLen = contextEnd - contextStart;
             int len = end - start;
             char[] buf = TemporaryBuffer.obtain(contextLen);
             TextUtils.getChars(text, contextStart, contextEnd, buf, 0);
-            long measuredTextPtr = 0;
-            if (text instanceof PrecomputedText) {
-                PrecomputedText mt = (PrecomputedText) text;
-                int paraIndex = mt.findParaIndex(start);
-                if (end <= mt.getParagraphEnd(paraIndex)) {
-                    // Only support if the target is in the same paragraph.
-                    measuredTextPtr = mt.getMeasuredParagraph(paraIndex).getNativePtr();
-                }
-            }
             nDrawTextRun(mNativeCanvasWrapper, buf, start - contextStart, len,
-                    0, contextLen, x, y, isRtl, paint.getNativeInstance(), measuredTextPtr);
+                    0, contextLen, x, y, isRtl, paint.getNativeInstance(),
+                    0 /* measured paragraph pointer */);
             TemporaryBuffer.recycle(buf);
         }
     }
