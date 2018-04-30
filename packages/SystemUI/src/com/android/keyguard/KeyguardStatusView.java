@@ -82,14 +82,14 @@ public class KeyguardStatusView extends GridLayout implements
 
         @Override
         public void onTimeChanged() {
-            refresh();
+            refreshTime();
         }
 
         @Override
         public void onKeyguardVisibilityChanged(boolean showing) {
             if (showing) {
                 if (DEBUG) Slog.v(TAG, "refresh statusview showing:" + showing);
-                refresh();
+                refreshTime();
                 updateOwnerInfo();
                 updateLogoutView();
             }
@@ -107,7 +107,7 @@ public class KeyguardStatusView extends GridLayout implements
 
         @Override
         public void onUserSwitchComplete(int userId) {
-            refresh();
+            refreshFormat();
             updateOwnerInfo();
             updateLogoutView();
         }
@@ -184,7 +184,7 @@ public class KeyguardStatusView extends GridLayout implements
 
         boolean shouldMarquee = KeyguardUpdateMonitor.getInstance(mContext).isDeviceInteractive();
         setEnableMarquee(shouldMarquee);
-        refresh();
+        refreshFormat();
         updateOwnerInfo();
         updateLogoutView();
         updateDark();
@@ -289,9 +289,10 @@ public class KeyguardStatusView extends GridLayout implements
         mClockView.refresh();
     }
 
-    private void refresh() {
+    private void refreshFormat() {
         Patterns.update(mContext);
-        refreshTime();
+        mClockView.setFormat12Hour(Patterns.clockView12);
+        mClockView.setFormat24Hour(Patterns.clockView24);
     }
 
     public int getLogoutButtonHeight() {
@@ -335,6 +336,11 @@ public class KeyguardStatusView extends GridLayout implements
         super.onDetachedFromWindow();
         KeyguardUpdateMonitor.getInstance(mContext).removeCallback(mInfoCallback);
         Dependency.get(ConfigurationController.class).removeCallback(this);
+    }
+
+    @Override
+    public void onLocaleListChanged() {
+        refreshFormat();
     }
 
     @Override
