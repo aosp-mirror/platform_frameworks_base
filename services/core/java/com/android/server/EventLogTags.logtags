@@ -33,10 +33,11 @@ option java_package com.android.server
 # It logs the time remaining before the device would've normally gone to sleep without the request.
 2731 power_soft_sleep_requested (savedwaketimems|2)
 # Power save state has changed. See BatterySaverController.java for the details.
-2739 battery_saver_mode (prevOffOrOn|1|5),(nowOffOrOn|1|5),(interactive|1|5),(features|3|5)
+2739 battery_saver_mode (prevOffOrOn|1|5),(nowOffOrOn|1|5),(interactive|1|5),(features|3|5),(reason|1|5)
 27390 battery_saving_stats (batterySaver|1|5),(interactive|1|5),(doze|1|5),(delta_duration|2|3),(delta_battery_drain|1|1),(delta_battery_drain_percent|1|6),(total_duration|2|3),(total_battery_drain|1|1),(total_battery_drain_percent|1|6)
 # Note when the user activity timeout has been overriden by ActivityManagerService
 27391 user_activity_timeout_override (override|2|3)
+27392 battery_saver_setting (threshold|1)
 
 #
 # Leave IDs through 2740 for more power logs (2730 used by battery_discharge above)
