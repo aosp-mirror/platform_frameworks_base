@@ -626,8 +626,24 @@ final class AutofillManagerServiceImpl {
     }
 
     @GuardedBy("mLock")
+    void handlePackageUpdateLocked(String packageName) {
+        final ServiceInfo serviceInfo = mFieldClassificationStrategy.getServiceInfo();
+        if (serviceInfo != null && serviceInfo.packageName.equals(packageName)) {
+            resetExtServiceLocked();
+        }
+    }
+
+    @GuardedBy("mLock")
+    void resetExtServiceLocked() {
+        if (sVerbose) Slog.v(TAG, "reset autofill service.");
+        mFieldClassificationStrategy.reset();
+    }
+
+    @GuardedBy("mLock")
     void destroyLocked() {
         if (sVerbose) Slog.v(TAG, "destroyLocked()");
+
+        resetExtServiceLocked();
 
         final int numSessions = mSessions.size();
         final ArraySet<RemoteFillService> remoteFillServices = new ArraySet<>(numSessions);
