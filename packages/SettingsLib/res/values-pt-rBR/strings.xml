@@ -295,11 +295,11 @@
     <string name="simulate_color_space" msgid="6745847141353345872">"Simular espaço de cores"</string>
     <string name="enable_opengl_traces_title" msgid="6790444011053219871">"Ativar rastream. OpenGL"</string>
     <string name="usb_audio_disable_routing" msgid="8114498436003102671">"Desat. roteam. áudio USB"</string>
-    <string name="usb_audio_disable_routing_summary" msgid="980282760277312264">"Desativar roteam. autom. para/ perif. de áudio USB"</string>
+    <string name="usb_audio_disable_routing_summary" msgid="980282760277312264">"Desativar roteam. autom. p/ perif. de áudio USB"</string>
     <string name="debug_layout" msgid="5981361776594526155">"Mostrar limites de layout"</string>
     <string name="debug_layout_summary" msgid="2001775315258637682">"Mostrar limites de corte, margens, etc."</string>
     <string name="force_rtl_layout_all_locales" msgid="2259906643093138978">"Forçar dir. layout (RTL)"</string>
-    <string name="force_rtl_layout_all_locales_summary" msgid="9192797796616132534">"Forçar direção do layout (RTL) p/ todas as local."</string>
+    <string name="force_rtl_layout_all_locales_summary" msgid="9192797796616132534">"Forçar direção do layout (RTL) p/ todas as localidades"</string>
     <string name="force_hw_ui" msgid="6426383462520888732">"Forçar renderização GPU"</string>
     <string name="force_hw_ui_summary" msgid="5535991166074861515">"Forçar uso da GPU para desenho em 2D"</string>
     <string name="force_msaa" msgid="7920323238677284387">"Forçar 4x MSAA"</string>
@@ -311,7 +311,7 @@
     <string name="window_animation_scale_title" msgid="6162587588166114700">"Escala de anim. da janela"</string>
     <string name="transition_animation_scale_title" msgid="387527540523595875">"Escala anim. de transição"</string>
     <string name="animator_duration_scale_title" msgid="3406722410819934083">"Escala de duração do Animator"</string>
-    <string name="overlay_display_devices_title" msgid="5364176287998398539">"Simular displays secund."</string>
+    <string name="overlay_display_devices_title" msgid="5364176287998398539">"Simular telas secundárias"</string>
     <string name="debug_applications_category" msgid="4206913653849771549">"Apps"</string>
     <string name="immediately_destroy_activities" msgid="1579659389568133959">"Não manter atividades"</string>
     <string name="immediately_destroy_activities_summary" msgid="3592221124808773368">"Destruir todas as atividades quando o usuário sair"</string>
@@ -367,11 +367,12 @@
     <string name="accessibility_display_daltonizer_preference_title" msgid="5800761362678707872">"Correção de cor"</string>
     <string name="accessibility_display_daltonizer_preference_subtitle" msgid="3484969015295282911">"Este recurso é experimental e pode afetar o desempenho."</string>
     <string name="daltonizer_type_overridden" msgid="3116947244410245916">"Substituído por <xliff:g id="TITLE">%1$s</xliff:g>"</string>
-    <string name="power_remaining_duration_only" msgid="845431008899029842">"Cerca de <xliff:g id="TIME">%1$s</xliff:g> restante(s)"</string>
-    <string name="power_discharging_duration" msgid="6655472132189365839">"Cerca de <xliff:g id="TIME">%1$s</xliff:g> restante(s) (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
-    <string name="power_remaining_duration_only_enhanced" msgid="5992456722677973678">"Cerca de <xliff:g id="TIME">%1$s</xliff:g> restante(s) com base no seu uso"</string>
-    <string name="power_discharging_duration_enhanced" msgid="5726302316642148671">"Cerca de <xliff:g id="TIME">%1$s</xliff:g> restante(s) com base no seu uso (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
-    <string name="power_remaining_duration_only_short" msgid="5329694252258605547">"<xliff:g id="TIME">%1$s</xliff:g> restante(s)"</string>
+    <string name="power_remaining_settings_home_page" msgid="4845022416859002011">"<xliff:g id="PERCENTAGE">%1$s</xliff:g> - <xliff:g id="TIME_STRING">%2$s</xliff:g>"</string>
+    <string name="power_remaining_duration_only" msgid="6123167166221295462">"Tempo restante aproximado: <xliff:g id="TIME_REMAINING">%1$s</xliff:g>"</string>
+    <string name="power_discharging_duration" msgid="8848256785736335185">"Tempo restante aproximado: <xliff:g id="TIME_REMAINING">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
+    <string name="power_remaining_duration_only_enhanced" msgid="4189311599812296592">"Tempo restante aproximado, com base no seu uso: <xliff:g id="TIME_REMAINING">%1$s</xliff:g>"</string>
+    <string name="power_discharging_duration_enhanced" msgid="1992003260664804080">"Tempo restante aproximado, com base no seu uso: <xliff:g id="TIME_REMAINING">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
+    <string name="power_remaining_duration_only_short" msgid="3463575350656389957">"Tempo restante: <xliff:g id="TIME_REMAINING">%1$s</xliff:g>"</string>
     <string name="power_discharge_by_enhanced" msgid="2095821536747992464">"Deve durar até cerca de <xliff:g id="TIME">%1$s</xliff:g> com base no seu uso (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
     <string name="power_discharge_by_only_enhanced" msgid="2175151772952365149">"Deve durar até cerca de <xliff:g id="TIME">%1$s</xliff:g> com base no seu uso"</string>
     <string name="power_discharge_by" msgid="6453537733650125582">"Deve durar até cerca de <xliff:g id="TIME">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
@@ -394,7 +395,7 @@
     <string name="battery_info_status_charging_lower" msgid="8689770213898117994">"carregando"</string>
     <string name="battery_info_status_discharging" msgid="310932812698268588">"Não está carregando"</string>
     <string name="battery_info_status_not_charging" msgid="8523453668342598579">"Conectado. Não é possível carregar no momento"</string>
-    <string name="battery_info_status_full" msgid="2824614753861462808">"Cheio"</string>
+    <string name="battery_info_status_full" msgid="2824614753861462808">"Carregada"</string>
     <string name="disabled_by_admin_summary_text" msgid="6750513964908334617">"Controlada pelo admin"</string>
     <string name="enabled_by_admin" msgid="5302986023578399263">"Ativado pelo administrador"</string>
     <string name="disabled_by_admin" msgid="8505398946020816620">"Desativada pelo administrador"</string>

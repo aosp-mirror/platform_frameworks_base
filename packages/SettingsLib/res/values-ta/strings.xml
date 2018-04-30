@@ -234,8 +234,8 @@
     <string name="private_dns_mode_provider_hostname_hint" msgid="2487492386970928143">"DNS வழங்குநரின் ஹோஸ்ட் பெயரை உள்ளிடவும்"</string>
     <string name="private_dns_mode_provider_failure" msgid="231837290365031223">"இணைக்க முடியவில்லை"</string>
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"வயர்லெஸ் காட்சி சான்றுக்கான விருப்பங்களைக் காட்டு"</string>
-    <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"Wifi நுழைவு அளவை அதிகரித்து, வைஃபை தேர்வியில் ஒவ்வொன்றிற்கும் SSID RSSI ஐ காட்டுக"</string>
-    <string name="wifi_connected_mac_randomization_summary" msgid="1743059848752201485">"Wi‑Fi நெட்வொர்க்குகளில் இணைக்கும்போது MAC முகவரிகளை ரேண்டம் ஆக்கு"</string>
+    <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"வைஃபை நுழைவு அளவை அதிகரித்து, வைஃபை தேர்வியில் ஒவ்வொன்றிற்கும் SSID RSSI ஐ காட்டுக"</string>
+    <string name="wifi_connected_mac_randomization_summary" msgid="1743059848752201485">"வைஃபை நெட்வொர்க்குகளில் இணைக்கும்போது MAC முகவரிகளை ரேண்டம் ஆக்கு"</string>
     <string name="wifi_metered_label" msgid="4514924227256839725">"கட்டண நெட்வொர்க்"</string>
     <string name="wifi_unmetered_label" msgid="6124098729457992931">"கட்டணமில்லா நெட்வொர்க்"</string>
     <string name="select_logd_size_title" msgid="7433137108348553508">"லாகர் பஃபர் அளவுகள்"</string>
@@ -301,7 +301,7 @@
     <string name="force_rtl_layout_all_locales" msgid="2259906643093138978">"RTL தளவமைப்பின் திசையை வலியுறுத்து"</string>
     <string name="force_rtl_layout_all_locales_summary" msgid="9192797796616132534">"எல்லா மொழிகளுக்கும் திரையின் தளவமைப்பு திசையை RTL க்கு மாற்று"</string>
     <string name="force_hw_ui" msgid="6426383462520888732">"GPU காட்சியாக்கத்தை வலியுறுத்து"</string>
-    <string name="force_hw_ui_summary" msgid="5535991166074861515">"2d வரைபடத்திற்கு GPU பயன்பாட்டை வலியுறுத்து"</string>
+    <string name="force_hw_ui_summary" msgid="5535991166074861515">"2டி வரைபடத்திற்கு GPU பயன்பாட்டை வலியுறுத்து"</string>
     <string name="force_msaa" msgid="7920323238677284387">"4x MSAA ஐ வலியுறுத்து"</string>
     <string name="force_msaa_summary" msgid="9123553203895817537">"OpenGL ES 2.0 பயன்பாடுகளில் 4x MSAA ஐ இயக்கு"</string>
     <string name="show_non_rect_clip" msgid="505954950474595172">"செவ்வகம் அல்லாத கிளிப் செயல்பாடுகளைப் பிழைத்திருத்து"</string>
@@ -367,11 +367,12 @@
     <string name="accessibility_display_daltonizer_preference_title" msgid="5800761362678707872">"வண்ணத்திருத்தம்"</string>
     <string name="accessibility_display_daltonizer_preference_subtitle" msgid="3484969015295282911">"இது சோதனை முறையிலான அம்சம், இது செயல்திறனைப் பாதிக்கலாம்."</string>
     <string name="daltonizer_type_overridden" msgid="3116947244410245916">"<xliff:g id="TITLE">%1$s</xliff:g> மூலம் மேலெழுதப்பட்டது"</string>
-    <string name="power_remaining_duration_only" msgid="845431008899029842">"கிட்டத்தட்ட <xliff:g id="TIME">%1$s</xliff:g> உள்ளது"</string>
-    <string name="power_discharging_duration" msgid="6655472132189365839">"<xliff:g id="TIME">%1$s</xliff:g> வரை மட்டுமே பயன்படுத்த முடியும் (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
-    <string name="power_remaining_duration_only_enhanced" msgid="5992456722677973678">"உபயோகத்தின் அடிப்படையில் கிட்டத்தட்ட <xliff:g id="TIME">%1$s</xliff:g> மீதமுள்ளது"</string>
-    <string name="power_discharging_duration_enhanced" msgid="5726302316642148671">"பயன்படுத்துவதன் அடிப்படையில், <xliff:g id="TIME">%1$s</xliff:g> வரை பயன்படுத்த முடியும் (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
-    <string name="power_remaining_duration_only_short" msgid="5329694252258605547">"<xliff:g id="TIME">%1$s</xliff:g> மீதமுள்ளது"</string>
+    <string name="power_remaining_settings_home_page" msgid="4845022416859002011">"<xliff:g id="PERCENTAGE">%1$s</xliff:g> - <xliff:g id="TIME_STRING">%2$s</xliff:g>"</string>
+    <string name="power_remaining_duration_only" msgid="6123167166221295462">"கிட்டத்தட்ட <xliff:g id="TIME_REMAINING">%1$s</xliff:g> மீதமுள்ளது"</string>
+    <string name="power_discharging_duration" msgid="8848256785736335185">"கிட்டத்தட்ட <xliff:g id="TIME_REMAINING">%1$s</xliff:g> மீதமுள்ளது (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
+    <string name="power_remaining_duration_only_enhanced" msgid="4189311599812296592">"உபயோகத்தின் அடிப்படையில் கிட்டத்தட்ட <xliff:g id="TIME_REMAINING">%1$s</xliff:g> மீதமுள்ளது"</string>
+    <string name="power_discharging_duration_enhanced" msgid="1992003260664804080">"உபயோகத்தின் அடிப்படையில் கிட்டத்தட்ட <xliff:g id="TIME_REMAINING">%1$s</xliff:g> மீதமுள்ளது (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
+    <string name="power_remaining_duration_only_short" msgid="3463575350656389957">"<xliff:g id="TIME_REMAINING">%1$s</xliff:g> மீதமுள்ளது"</string>
     <string name="power_discharge_by_enhanced" msgid="2095821536747992464">"நீங்கள் பயன்படுத்துவதன் அடிப்படையில், <xliff:g id="TIME">%1$s</xliff:g> வரை உபயோகிக்க முடியும் (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
     <string name="power_discharge_by_only_enhanced" msgid="2175151772952365149">"நீங்கள் பயன்படுத்துவதன் அடிப்படையில் <xliff:g id="TIME">%1$s</xliff:g> வரை உபயோகிக்க முடியும்"</string>
     <string name="power_discharge_by" msgid="6453537733650125582">"<xliff:g id="TIME">%1$s</xliff:g> வரை பயன்படுத்த முடியும் (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
@@ -422,7 +423,7 @@
     <string name="retail_demo_reset_next" msgid="8356731459226304963">"அடுத்து"</string>
     <string name="retail_demo_reset_title" msgid="696589204029930100">"கடவுச்சொல் தேவை"</string>
     <string name="active_input_method_subtypes" msgid="3596398805424733238">"செயலில் உள்ள உள்ளீட்டு முறைகள்"</string>
-    <string name="use_system_language_to_select_input_method_subtypes" msgid="5747329075020379587">"முறைமை மொழிகளைப் பயன்படுத்து"</string>
+    <string name="use_system_language_to_select_input_method_subtypes" msgid="5747329075020379587">"சாதன மொழிகளைப் பயன்படுத்து"</string>
     <string name="failed_to_open_app_settings_toast" msgid="1251067459298072462">"<xliff:g id="SPELL_APPLICATION_NAME">%1$s</xliff:g> க்கான அமைப்புகளைத் திறப்பதில் தோல்வி"</string>
     <string name="ime_security_warning" msgid="4135828934735934248">"இந்த உள்ளீட்டு முறையானது, கடவுச்சொற்கள் மற்றும் கிரெடிட் கார்டு எண்கள் போன்ற தனிப்பட்ட தகவல் உள்பட நீங்கள் உள்ளிடும் எல்லா உரையையும் சேகரிக்கக்கூடும். இது <xliff:g id="IME_APPLICATION_NAME">%1$s</xliff:g> பயன்பாட்டிலிருந்து வந்துள்ளது. இந்த உள்ளீட்டு முறையைப் பயன்படுத்தவா?"</string>
     <string name="direct_boot_unaware_dialog_message" msgid="7870273558547549125">"குறிப்பு: மறுதொடக்கம் செய்த பிறகு, மொபைலைத் திறக்கும் வரை இந்தப் பயன்பாட்டால் தொடங்க முடியாது"</string>

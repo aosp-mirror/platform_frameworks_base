@@ -249,7 +249,7 @@
     <string name="allow_mock_location" msgid="2787962564578664888">"Posizioni fittizie"</string>
     <string name="allow_mock_location_summary" msgid="317615105156345626">"Consenti posizioni fittizie"</string>
     <string name="debug_view_attributes" msgid="6485448367803310384">"Attiva controllo attributi visualizzazione"</string>
-    <string name="mobile_data_always_on_summary" msgid="8149773901431697910">"Mantieni sempre i dati cellulare attivi, anche se il Wi‑Fi è attivo (per un passaggio fra reti rapido)."</string>
+    <string name="mobile_data_always_on_summary" msgid="8149773901431697910">"Mantieni sempre i dati mobili attivi, anche se il Wi‑Fi è attivo (per un passaggio fra reti rapido)."</string>
     <string name="tethering_hardware_offload_summary" msgid="7726082075333346982">"Utilizza l\'accelerazione hardware per il tethering se disponibile"</string>
     <string name="adb_warning_title" msgid="6234463310896563253">"Consentire debug USB?"</string>
     <string name="adb_warning_message" msgid="7316799925425402244">"Il debug USB è solo a scopo di sviluppo. Utilizzalo per copiare dati tra il computer e il dispositivo, per installare applicazioni sul tuo dispositivo senza notifica e per leggere i dati dei log."</string>
@@ -367,11 +367,12 @@
     <string name="accessibility_display_daltonizer_preference_title" msgid="5800761362678707872">"Correzione del colore"</string>
     <string name="accessibility_display_daltonizer_preference_subtitle" msgid="3484969015295282911">"Questa funzione è sperimentale e potrebbe influire sulle prestazioni."</string>
     <string name="daltonizer_type_overridden" msgid="3116947244410245916">"Valore sostituito da <xliff:g id="TITLE">%1$s</xliff:g>"</string>
-    <string name="power_remaining_duration_only" msgid="845431008899029842">"Tempo approssimativo rimanente: <xliff:g id="TIME">%1$s</xliff:g>"</string>
-    <string name="power_discharging_duration" msgid="6655472132189365839">"Tempo rimanente: <xliff:g id="TIME">%1$s</xliff:g> circa (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
-    <string name="power_remaining_duration_only_enhanced" msgid="5992456722677973678">"Tempo rimanente in base al tuo utilizzo: <xliff:g id="TIME">%1$s</xliff:g> circa"</string>
-    <string name="power_discharging_duration_enhanced" msgid="5726302316642148671">"Tempo rimanente in base al tuo utilizzo (<xliff:g id="LEVEL">%2$s</xliff:g>): <xliff:g id="TIME">%1$s</xliff:g> circa"</string>
-    <string name="power_remaining_duration_only_short" msgid="5329694252258605547">"Tempo rimanente: <xliff:g id="TIME">%1$s</xliff:g>"</string>
+    <string name="power_remaining_settings_home_page" msgid="4845022416859002011">"<xliff:g id="PERCENTAGE">%1$s</xliff:g> - <xliff:g id="TIME_STRING">%2$s</xliff:g>"</string>
+    <string name="power_remaining_duration_only" msgid="6123167166221295462">"Tempo rimanente: <xliff:g id="TIME_REMAINING">%1$s</xliff:g> circa"</string>
+    <string name="power_discharging_duration" msgid="8848256785736335185">"Tempo rimanente: <xliff:g id="TIME_REMAINING">%1$s</xliff:g> circa (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
+    <string name="power_remaining_duration_only_enhanced" msgid="4189311599812296592">"Tempo rimanente in base al tuo utilizzo: <xliff:g id="TIME_REMAINING">%1$s</xliff:g> circa"</string>
+    <string name="power_discharging_duration_enhanced" msgid="1992003260664804080">"Tempo rimanente in base al tuo utilizzo (<xliff:g id="LEVEL">%2$s</xliff:g>): <xliff:g id="TIME_REMAINING">%1$s</xliff:g>"</string>
+    <string name="power_remaining_duration_only_short" msgid="3463575350656389957">"Tempo rimanente: <xliff:g id="TIME_REMAINING">%1$s</xliff:g>"</string>
     <string name="power_discharge_by_enhanced" msgid="2095821536747992464">"Tempo stimato rimanente in base al tuo utilizzo: <xliff:g id="TIME">%1$s</xliff:g> circa (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
     <string name="power_discharge_by_only_enhanced" msgid="2175151772952365149">"Tempo stimato rimanente in base al tuo utilizzo: <xliff:g id="TIME">%1$s</xliff:g> circa"</string>
     <string name="power_discharge_by" msgid="6453537733650125582">"Tempo stimato rimanente: <xliff:g id="TIME">%1$s</xliff:g> circa (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
