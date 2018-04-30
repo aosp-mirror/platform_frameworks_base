@@ -207,7 +207,9 @@ final class OverlayManagerServiceImpl {
             Slog.d(TAG, "onTargetPackageAdded packageName=" + packageName + " userId=" + userId);
         }
 
-        updateAllOverlaysForTarget(packageName, userId, 0);
+        if (updateAllOverlaysForTarget(packageName, userId, 0)) {
+            mListener.onOverlaysChanged(packageName, userId);
+        }
     }
 
     void onTargetPackageChanged(@NonNull final String packageName, final int userId) {
@@ -215,7 +217,9 @@ final class OverlayManagerServiceImpl {
             Slog.d(TAG, "onTargetPackageChanged packageName=" + packageName + " userId=" + userId);
         }
 
-        updateAllOverlaysForTarget(packageName, userId, 0);
+        if (updateAllOverlaysForTarget(packageName, userId, 0)) {
+            mListener.onOverlaysChanged(packageName, userId);
+        }
     }
 
     void onTargetPackageUpgrading(@NonNull final String packageName, final int userId) {
@@ -224,7 +228,9 @@ final class OverlayManagerServiceImpl {
                     + userId);
         }
 
-        updateAllOverlaysForTarget(packageName, userId, FLAG_TARGET_IS_UPGRADING);
+        if (updateAllOverlaysForTarget(packageName, userId, FLAG_TARGET_IS_UPGRADING)) {
+            mListener.onOverlaysChanged(packageName, userId);
+        }
     }
 
     void onTargetPackageUpgraded(@NonNull final String packageName, final int userId) {
@@ -232,7 +238,9 @@ final class OverlayManagerServiceImpl {
             Slog.d(TAG, "onTargetPackageUpgraded packageName=" + packageName + " userId=" + userId);
         }
 
-        updateAllOverlaysForTarget(packageName, userId, 0);
+        if (updateAllOverlaysForTarget(packageName, userId, 0)) {
+            mListener.onOverlaysChanged(packageName, userId);
+        }
     }
 
     void onTargetPackageRemoved(@NonNull final String packageName, final int userId) {
@@ -240,17 +248,17 @@ final class OverlayManagerServiceImpl {
             Slog.d(TAG, "onTargetPackageRemoved packageName=" + packageName + " userId=" + userId);
         }
 
-        updateAllOverlaysForTarget(packageName, userId, 0);
+        if (updateAllOverlaysForTarget(packageName, userId, 0)) {
+            mListener.onOverlaysChanged(packageName, userId);
+        }
     }
 
     /**
-     * Calls OverlayChangeListener#onChanged if the settings for the overlay target were modified,
-     * and calls OverlayChangeListener#onTargetChanged to signal a change in the target package that
-     * requires updating target overlays.
+     * Returns true if the settings were modified for this target.
      */
-    private void updateAllOverlaysForTarget(@NonNull final String targetPackageName,
+    private boolean updateAllOverlaysForTarget(@NonNull final String targetPackageName,
             final int userId, final int flags) {
-        boolean overlayModified = false;
+        boolean modified = false;
         final List<OverlayInfo> ois = mSettings.getOverlaysForTarget(targetPackageName, userId);
         final int N = ois.size();
         for (int i = 0; i < N; i++) {
@@ -258,19 +266,18 @@ final class OverlayManagerServiceImpl {
             final PackageInfo overlayPackage = mPackageManager.getPackageInfo(oi.packageName,
                     userId);
             if (overlayPackage == null) {
-                overlayModified |= mSettings.remove(oi.packageName, oi.userId);
+                modified |= mSettings.remove(oi.packageName, oi.userId);
                 removeIdmapIfPossible(oi);
             } else {
                 try {
-                    overlayModified |= updateState(targetPackageName, oi.packageName, userId, flags);
+                    modified |= updateState(targetPackageName, oi.packageName, userId, flags);
                 } catch (OverlayManagerSettings.BadKeyException e) {
                     Slog.e(TAG, "failed to update settings", e);
-                    overlayModified |= mSettings.remove(oi.packageName, userId);
+                    modified |= mSettings.remove(oi.packageName, userId);
                 }
             }
         }
-
-        mListener.onChanged(targetPackageName, userId, /* targetChanged */ true, overlayModified);
+        return modified;
     }
 
     void onOverlayPackageAdded(@NonNull final String packageName, final int userId) {
@@ -291,8 +298,7 @@ final class OverlayManagerServiceImpl {
                 overlayPackage.overlayCategory);
         try {
             if (updateState(overlayPackage.overlayTarget, packageName, userId, 0)) {
-                mListener.onChanged(overlayPackage.overlayTarget, userId,
-                        /* targetChanged */ false,  /* overlayChanged */ true);
+                mListener.onOverlaysChanged(overlayPackage.overlayTarget, userId);
             }
         } catch (OverlayManagerSettings.BadKeyException e) {
             Slog.e(TAG, "failed to update settings", e);
@@ -308,8 +314,7 @@ final class OverlayManagerServiceImpl {
         try {
             final OverlayInfo oi = mSettings.getOverlayInfo(packageName, userId);
             if (updateState(oi.targetPackageName, packageName, userId, 0)) {
-                mListener.onChanged(oi.targetPackageName, userId,
-                        /* targetChanged */ false,  /* overlayChanged */ true);
+                mListener.onOverlaysChanged(oi.targetPackageName, userId);
             }
         } catch (OverlayManagerSettings.BadKeyException e) {
             Slog.e(TAG, "failed to update settings", e);
@@ -326,8 +331,7 @@ final class OverlayManagerServiceImpl {
             final OverlayInfo oi = mSettings.getOverlayInfo(packageName, userId);
             if (updateState(oi.targetPackageName, packageName, userId, FLAG_OVERLAY_IS_UPGRADING)) {
                 removeIdmapIfPossible(oi);
-                mListener.onChanged(oi.targetPackageName, userId,
-                        /* targetChanged */ false,  /* overlayChanged */ true);
+                mListener.onOverlaysChanged(oi.targetPackageName, userId);
             }
         } catch (OverlayManagerSettings.BadKeyException e) {
             Slog.e(TAG, "failed to update settings", e);
@@ -361,8 +365,7 @@ final class OverlayManagerServiceImpl {
             }
 
             if (updateState(pkg.overlayTarget, packageName, userId, 0)) {
-                mListener.onChanged(pkg.overlayTarget, userId,
-                        /* targetChanged */ false,  /* overlayChanged */ true);
+                mListener.onOverlaysChanged(pkg.overlayTarget, userId);
             }
         } catch (OverlayManagerSettings.BadKeyException e) {
             Slog.e(TAG, "failed to update settings", e);
@@ -376,8 +379,7 @@ final class OverlayManagerServiceImpl {
                 removeIdmapIfPossible(overlayInfo);
                 if (overlayInfo.isEnabled()) {
                     // Only trigger updates if the overlay was enabled.
-                    mListener.onChanged(overlayInfo.targetPackageName, userId,
-                            /* targetChanged */ false,  /* overlayChanged */ true);
+                    mListener.onOverlaysChanged(overlayInfo.targetPackageName, userId);
                 }
             }
         } catch (OverlayManagerSettings.BadKeyException e) {
@@ -425,8 +427,7 @@ final class OverlayManagerServiceImpl {
             modified |= updateState(oi.targetPackageName, oi.packageName, userId, 0);
 
             if (modified) {
-                mListener.onChanged(oi.targetPackageName, userId,
-                        /* targetChanged */ false,  /* overlayChanged */ true);
+                mListener.onOverlaysChanged(oi.targetPackageName, userId);
             }
             return true;
         } catch (OverlayManagerSettings.BadKeyException e) {
@@ -485,8 +486,7 @@ final class OverlayManagerServiceImpl {
             modified |= updateState(targetPackageName, packageName, userId, 0);
 
             if (modified) {
-                mListener.onChanged(targetPackageName, userId,
-                        /* targetChanged */ false,  /* overlayChanged */ true);
+                mListener.onOverlaysChanged(targetPackageName, userId);
             }
             return true;
         } catch (OverlayManagerSettings.BadKeyException e) {
@@ -519,8 +519,7 @@ final class OverlayManagerServiceImpl {
         }
 
         if (mSettings.setPriority(packageName, newParentPackageName, userId)) {
-            mListener.onChanged(overlayPackage.overlayTarget, userId,
-                    /* targetChanged */ false,  /* overlayChanged */ true);
+            mListener.onOverlaysChanged(overlayPackage.overlayTarget, userId);
         }
         return true;
     }
@@ -540,8 +539,7 @@ final class OverlayManagerServiceImpl {
         }
 
         if (mSettings.setHighestPriority(packageName, userId)) {
-            mListener.onChanged(overlayPackage.overlayTarget, userId,
-                    /* targetChanged */ false,  /* overlayChanged */ true);
+            mListener.onOverlaysChanged(overlayPackage.overlayTarget, userId);
         }
         return true;
     }
@@ -561,8 +559,7 @@ final class OverlayManagerServiceImpl {
         }
 
         if (mSettings.setLowestPriority(packageName, userId)) {
-            mListener.onChanged(overlayPackage.overlayTarget, userId,
-                    /* targetChanged */ false,  /* overlayChanged */ true);
+            mListener.onOverlaysChanged(overlayPackage.overlayTarget, userId);
         }
         return true;
     }
@@ -693,8 +690,7 @@ final class OverlayManagerServiceImpl {
     }
 
     interface OverlayChangeListener {
-        void onChanged(@NonNull String targetPackage, int userId,
-                boolean targetChanged, boolean overlayChanged);
+        void onOverlaysChanged(@NonNull String targetPackage, int userId);
     }
 
     interface PackageManagerHelper {
