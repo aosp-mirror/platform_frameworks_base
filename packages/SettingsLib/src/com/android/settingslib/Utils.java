@@ -15,6 +15,7 @@ import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.location.LocationManager;
+import android.media.AudioManager;
 import android.net.ConnectivityManager;
 import android.os.BatteryManager;
 import android.os.SystemProperties;
@@ -371,5 +372,16 @@ public class Utils {
                 Settings.Secure.AUTOMATIC_STORAGE_MANAGER_ENABLED,
                 isDefaultOn ? 1 : 0)
                 != 0;
+    }
+
+    /**
+     * get that {@link AudioManager#getMode()} is in ringing/call/communication(VoIP) status.
+     */
+    public static boolean isAudioModeOngoingCall(Context context) {
+        final AudioManager audioManager = context.getSystemService(AudioManager.class);
+        final int audioMode = audioManager.getMode();
+        return audioMode == AudioManager.MODE_RINGTONE
+                || audioMode == AudioManager.MODE_IN_CALL
+                || audioMode == AudioManager.MODE_IN_COMMUNICATION;
     }
 }
