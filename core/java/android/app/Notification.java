@@ -4990,6 +4990,10 @@ public class Notification implements Parcelable
                     savedBundle.getBoolean(EXTRA_SHOW_CHRONOMETER));
             publicExtras.putBoolean(EXTRA_CHRONOMETER_COUNT_DOWN,
                     savedBundle.getBoolean(EXTRA_CHRONOMETER_COUNT_DOWN));
+            String appName = savedBundle.getString(EXTRA_SUBSTITUTE_APP_NAME);
+            if (appName != null) {
+                publicExtras.putString(EXTRA_SUBSTITUTE_APP_NAME, appName);
+            }
             mN.extras = publicExtras;
             RemoteViews view;
             if (ambient) {
