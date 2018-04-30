@@ -490,6 +490,7 @@ public class BluetoothEventManager {
     }
 
     private void dispatchAudioModeChanged() {
+        mDeviceManager.dispatchAudioModeChanged();
         synchronized (mCallbacks) {
             for (BluetoothCallback callback : mCallbacks) {
                 callback.onAudioModeChanged();
