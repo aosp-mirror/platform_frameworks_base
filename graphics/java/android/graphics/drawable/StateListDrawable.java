@@ -16,6 +16,14 @@
 
 package android.graphics.drawable;
 
+import android.annotation.NonNull;
+import android.annotation.Nullable;
+import android.content.res.Resources;
+import android.content.res.Resources.Theme;
+import android.content.res.TypedArray;
+import android.util.AttributeSet;
+import android.util.StateSet;
+
 import com.android.internal.R;
 
 import org.xmlpull.v1.XmlPullParser;
@@ -23,14 +31,6 @@ import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.IOException;
 import java.util.Arrays;
-
-import android.annotation.NonNull;
-import android.annotation.Nullable;
-import android.content.res.Resources;
-import android.content.res.TypedArray;
-import android.content.res.Resources.Theme;
-import android.util.AttributeSet;
-import android.util.StateSet;
 
 /**
  * Lets you assign a number of graphic images to a single Drawable and swap out the visible item by a string
@@ -73,9 +73,11 @@ public class StateListDrawable extends DrawableContainer {
     /**
      * Add a new image/string ID to the set of images.
      *
-     * @param stateSet - An array of resource Ids to associate with the image.
+     * @param stateSet An array of resource Ids to associate with the image.
      *                 Switch to this image by calling setState().
-     * @param drawable -The image to show.
+     * @param drawable The image to show. Note this must be a unique Drawable that is not shared
+     *                 between any other View or Drawable otherwise the results are
+     *                 undefined and can lead to unexpected rendering behavior
      */
     public void addState(int[] stateSet, Drawable drawable) {
         if (drawable != null) {
