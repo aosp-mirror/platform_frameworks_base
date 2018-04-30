@@ -77,10 +77,18 @@ public final class Looper {
     private Printer mLogging;
     private long mTraceTag;
 
-    /* If set, the looper will show a warning log if a message dispatch takes longer than time. */
+    /**
+     * If set, the looper will show a warning log if a message dispatch takes longer than this.
+     */
     private long mSlowDispatchThresholdMs;
 
-     /** Initialize the current thread as a looper.
+    /**
+     * If set, the looper will show a warning log if a message delivery (actual delivery time -
+     * post time) takes longer than this.
+     */
+    private long mSlowDeliveryThresholdMs;
+
+    /** Initialize the current thread as a looper.
       * This gives you a chance to create handlers that then reference
       * this looper, before actually starting the loop. Be sure to call
       * {@link #loop()} after calling this method, and end it by calling
@@ -138,6 +146,16 @@ public final class Looper {
         Binder.clearCallingIdentity();
         final long ident = Binder.clearCallingIdentity();
 
+        // Allow overriding a threshold with a system prop. e.g.
+        // adb shell 'setprop log.looper.1000.main.slow 1 && stop && start'
+        final int thresholdOverride =
+                SystemProperties.getInt("log.looper."
+                        + Process.myUid() + "."
+                        + Thread.currentThread().getName()
+                        + ".slow", 0);
+
+        boolean slowDeliveryDetected = false;
+
         for (;;) {
             Message msg = queue.next(); // might block
             if (msg == null) {
@@ -152,29 +170,49 @@ public final class Looper {
                         msg.callback + ": " + msg.what);
             }
 
-            final long slowDispatchThresholdMs = me.mSlowDispatchThresholdMs;
-
             final long traceTag = me.mTraceTag;
+            long slowDispatchThresholdMs = me.mSlowDispatchThresholdMs;
+            long slowDeliveryThresholdMs = me.mSlowDeliveryThresholdMs;
+            if (thresholdOverride > 0) {
+                slowDispatchThresholdMs = thresholdOverride;
+                slowDeliveryThresholdMs = thresholdOverride;
+            }
+            final boolean logSlowDelivery = (slowDeliveryThresholdMs > 0) && (msg.when > 0);
+            final boolean logSlowDispatch = (slowDispatchThresholdMs > 0);
+
+            final boolean needStartTime = logSlowDelivery || logSlowDispatch;
+            final boolean needEndTime = logSlowDispatch;
+
             if (traceTag != 0 && Trace.isTagEnabled(traceTag)) {
                 Trace.traceBegin(traceTag, msg.target.getTraceName(msg));
             }
-            final long start = (slowDispatchThresholdMs == 0) ? 0 : SystemClock.uptimeMillis();
-            final long end;
+
+            final long dispatchStart = needStartTime ? SystemClock.uptimeMillis() : 0;
+            final long dispatchEnd;
             try {
                 msg.target.dispatchMessage(msg);
-                end = (slowDispatchThresholdMs == 0) ? 0 : SystemClock.uptimeMillis();
+                dispatchEnd = needEndTime ? SystemClock.uptimeMillis() : 0;
             } finally {
                 if (traceTag != 0) {
                     Trace.traceEnd(traceTag);
                 }
             }
-            if (slowDispatchThresholdMs > 0) {
-                final long time = end - start;
-                if (time > slowDispatchThresholdMs) {
-                    Slog.w(TAG, "Dispatch took " + time + "ms on "
-                            + Thread.currentThread().getName() + ", h=" +
-                            msg.target + " cb=" + msg.callback + " msg=" + msg.what);
+            if (logSlowDelivery) {
+                if (slowDeliveryDetected) {
+                    if ((dispatchStart - msg.when) <= 10) {
+                        Slog.w(TAG, "Drained");
+                        slowDeliveryDetected = false;
+                    }
+                } else {
+                    if (showSlowLog(slowDeliveryThresholdMs, msg.when, dispatchStart, "delivery",
+                            msg)) {
+                        // Once we write a slow delivery log, suppress until the queue drains.
+                        slowDeliveryDetected = true;
+                    }
                 }
+            }
+            if (logSlowDispatch) {
+                showSlowLog(slowDispatchThresholdMs, dispatchStart, dispatchEnd, "dispatch", msg);
             }
 
             if (logging != null) {
@@ -194,6 +232,19 @@ public final class Looper {
 
             msg.recycleUnchecked();
         }
+    }
+
+    private static boolean showSlowLog(long threshold, long measureStart, long measureEnd,
+            String what, Message msg) {
+        final long actualTime = measureEnd - measureStart;
+        if (actualTime < threshold) {
+            return false;
+        }
+        // For slow delivery, the current message isn't really important, but log it anyway.
+        Slog.w(TAG, "Slow " + what + " took " + actualTime + "ms "
+                + Thread.currentThread().getName() + " h="
+                + msg.target.getClass().getName() + " c=" + msg.callback + " m=" + msg.what);
+        return true;
     }
 
     /**
@@ -243,9 +294,13 @@ public final class Looper {
         mTraceTag = traceTag;
     }
 
-    /** {@hide} */
-    public void setSlowDispatchThresholdMs(long slowDispatchThresholdMs) {
+    /**
+     * Set a thresholds for slow dispatch/delivery log.
+     * {@hide}
+     */
+    public void setSlowLogThresholdMs(long slowDispatchThresholdMs, long slowDeliveryThresholdMs) {
         mSlowDispatchThresholdMs = slowDispatchThresholdMs;
+        mSlowDeliveryThresholdMs = slowDeliveryThresholdMs;
     }
 
     /**
