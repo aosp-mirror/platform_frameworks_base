@@ -671,6 +671,17 @@ public class AppWindowContainerController
         }
     }
 
+    public void notifyAppStopping() {
+        synchronized(mWindowMap) {
+            if (mContainer == null) {
+                Slog.w(TAG_WM, "Attempted to notify stopping on non-existing app token: "
+                        + mToken);
+                return;
+            }
+            mContainer.detachChildren();
+        }
+    }
+
     public void notifyAppStopped() {
         synchronized(mWindowMap) {
             if (mContainer == null) {
