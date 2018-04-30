@@ -23,23 +23,25 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.robolectric.Shadows.shadowOf;
 
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothProfile;
 import android.content.Context;
+import android.media.AudioManager;
+
+import com.android.settingslib.SettingsLibRobolectricTestRunner;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.robolectric.RobolectricTestRunner;
 import org.robolectric.RuntimeEnvironment;
-import org.robolectric.annotation.Config;
+import org.robolectric.shadows.ShadowAudioManager;
 
-@RunWith(RobolectricTestRunner.class)
-@Config(resourceDir = "../../res")
+@RunWith(SettingsLibRobolectricTestRunner.class)
 public class CachedBluetoothDeviceTest {
     private final static String DEVICE_NAME = "TestName";
     private final static String DEVICE_ALIAS = "TestAlias";
@@ -60,6 +62,7 @@ public class CachedBluetoothDeviceTest {
     @Mock
     private BluetoothDevice mDevice;
     private CachedBluetoothDevice mCachedDevice;
+    private ShadowAudioManager mShadowAudioManager;
     private Context mContext;
     private int mBatteryLevel = BluetoothDevice.BATTERY_LEVEL_UNKNOWN;
 
@@ -67,6 +70,7 @@ public class CachedBluetoothDeviceTest {
     public void setUp() {
         MockitoAnnotations.initMocks(this);
         mContext = RuntimeEnvironment.application;
+        mShadowAudioManager = shadowOf(mContext.getSystemService(AudioManager.class));
         when(mDevice.getAddress()).thenReturn(DEVICE_ADDRESS);
         when(mAdapter.getBluetoothState()).thenReturn(BluetoothAdapter.STATE_ON);
         when(mHfpProfile.isProfileReady()).thenReturn(true);
@@ -83,7 +87,7 @@ public class CachedBluetoothDeviceTest {
         // Test without battery level
         // Set PAN profile to be connected and test connection state summary
         mCachedDevice.onProfileStateChanged(mPanProfile, BluetoothProfile.STATE_CONNECTED);
-        assertThat(mCachedDevice.getConnectionSummary()).isEqualTo("Connected");
+        assertThat(mCachedDevice.getConnectionSummary()).isNull();
 
         // Set PAN profile to be disconnected and test connection state summary
         mCachedDevice.onProfileStateChanged(mPanProfile, BluetoothProfile.STATE_DISCONNECTED);
@@ -93,7 +97,7 @@ public class CachedBluetoothDeviceTest {
         mBatteryLevel = 10;
         // Set PAN profile to be connected and test connection state summary
         mCachedDevice.onProfileStateChanged(mPanProfile, BluetoothProfile.STATE_CONNECTED);
-        assertThat(mCachedDevice.getConnectionSummary()).isEqualTo("Connected, battery 10%");
+        assertThat(mCachedDevice.getConnectionSummary()).isEqualTo("10% battery");
 
         // Set PAN profile to be disconnected and test connection state summary
         mCachedDevice.onProfileStateChanged(mPanProfile, BluetoothProfile.STATE_DISCONNECTED);
@@ -104,7 +108,7 @@ public class CachedBluetoothDeviceTest {
 
         // Set PAN profile to be connected and test connection state summary
         mCachedDevice.onProfileStateChanged(mPanProfile, BluetoothProfile.STATE_CONNECTED);
-        assertThat(mCachedDevice.getConnectionSummary()).isEqualTo("Connected");
+        assertThat(mCachedDevice.getConnectionSummary()).isNull();
 
         // Set PAN profile to be disconnected and test connection state summary
         mCachedDevice.onProfileStateChanged(mPanProfile, BluetoothProfile.STATE_DISCONNECTED);
@@ -119,23 +123,23 @@ public class CachedBluetoothDeviceTest {
         mCachedDevice.onProfileStateChanged(mHfpProfile, BluetoothProfile.STATE_CONNECTED);
         mCachedDevice.onProfileStateChanged(mA2dpProfile, BluetoothProfile.STATE_CONNECTED);
         mCachedDevice.onProfileStateChanged(mPanProfile, BluetoothProfile.STATE_CONNECTED);
-        assertThat(mCachedDevice.getConnectionSummary()).isEqualTo("Connected, battery 10%");
+        assertThat(mCachedDevice.getConnectionSummary()).isEqualTo("10% battery");
 
         // Disconnect HFP only and test connection state summary
         mCachedDevice.onProfileStateChanged(mHfpProfile, BluetoothProfile.STATE_DISCONNECTED);
         assertThat(mCachedDevice.getConnectionSummary()).isEqualTo(
-                "Connected (no phone), battery 10%");
+                "10% battery");
 
         // Disconnect A2DP only and test connection state summary
         mCachedDevice.onProfileStateChanged(mHfpProfile, BluetoothProfile.STATE_CONNECTED);
         mCachedDevice.onProfileStateChanged(mA2dpProfile, BluetoothProfile.STATE_DISCONNECTED);
         assertThat(mCachedDevice.getConnectionSummary()).isEqualTo(
-                "Connected (no media), battery 10%");
+                "10% battery");
 
         // Disconnect both HFP and A2DP and test connection state summary
         mCachedDevice.onProfileStateChanged(mHfpProfile, BluetoothProfile.STATE_DISCONNECTED);
         assertThat(mCachedDevice.getConnectionSummary()).isEqualTo(
-                "Connected (no phone or media), battery 10%");
+                "10% battery");
 
         // Disconnect all profiles and test connection state summary
         mCachedDevice.onProfileStateChanged(mPanProfile, BluetoothProfile.STATE_DISCONNECTED);
@@ -147,16 +151,16 @@ public class CachedBluetoothDeviceTest {
         // Test without battery level
         // Set A2DP profile to be connected and test connection state summary
         mCachedDevice.onProfileStateChanged(mA2dpProfile, BluetoothProfile.STATE_CONNECTED);
-        assertThat(mCachedDevice.getConnectionSummary()).isEqualTo("Connected");
+        assertThat(mCachedDevice.getConnectionSummary()).isNull();
 
         // Set device as Active for A2DP and test connection state summary
         mCachedDevice.onActiveDeviceChanged(true, BluetoothProfile.A2DP);
-        assertThat(mCachedDevice.getConnectionSummary()).isEqualTo("Connected, active(media)");
+        assertThat(mCachedDevice.getConnectionSummary()).isEqualTo("Active");
 
         // Test with battery level
         mBatteryLevel = 10;
-        assertThat(mCachedDevice.getConnectionSummary()).isEqualTo(
-                "Connected, battery 10%, active(media)");
+       assertThat(mCachedDevice.getConnectionSummary()).isEqualTo(
+                "Active, 10% battery");
 
         // Set A2DP profile to be disconnected and test connection state summary
         mCachedDevice.onProfileStateChanged(mA2dpProfile, BluetoothProfile.STATE_DISCONNECTED);
@@ -167,7 +171,7 @@ public class CachedBluetoothDeviceTest {
         // Set A2DP profile to be connected, Active and test connection state summary
         mCachedDevice.onProfileStateChanged(mA2dpProfile, BluetoothProfile.STATE_CONNECTED);
         mCachedDevice.onActiveDeviceChanged(true, BluetoothProfile.A2DP);
-        assertThat(mCachedDevice.getConnectionSummary()).isEqualTo("Connected, active(media)");
+        assertThat(mCachedDevice.getConnectionSummary()).isEqualTo("Active");
 
         // Set A2DP profile to be disconnected and test connection state summary
         mCachedDevice.onProfileStateChanged(mA2dpProfile, BluetoothProfile.STATE_DISCONNECTED);
@@ -179,16 +183,18 @@ public class CachedBluetoothDeviceTest {
         // Test without battery level
         // Set HFP profile to be connected and test connection state summary
         mCachedDevice.onProfileStateChanged(mHfpProfile, BluetoothProfile.STATE_CONNECTED);
-        assertThat(mCachedDevice.getConnectionSummary()).isEqualTo("Connected");
+        assertThat(mCachedDevice.getConnectionSummary()).isNull();
 
         // Set device as Active for HFP and test connection state summary
+        mCachedDevice.onAudioModeChanged();
+        mShadowAudioManager.setMode(AudioManager.MODE_IN_CALL);
         mCachedDevice.onActiveDeviceChanged(true, BluetoothProfile.HEADSET);
-        assertThat(mCachedDevice.getConnectionSummary()).isEqualTo("Connected, active(phone)");
+        assertThat(mCachedDevice.getConnectionSummary()).isEqualTo("Active");
 
         // Test with battery level
         mBatteryLevel = 10;
-        assertThat(mCachedDevice.getConnectionSummary()).isEqualTo(
-                "Connected, battery 10%, active(phone)");
+       assertThat(mCachedDevice.getConnectionSummary()).isEqualTo(
+                "Active, 10% battery");
 
         // Set HFP profile to be disconnected and test connection state summary
         mCachedDevice.onProfileStateChanged(mHfpProfile, BluetoothProfile.STATE_DISCONNECTED);
@@ -199,7 +205,7 @@ public class CachedBluetoothDeviceTest {
         // Set HFP profile to be connected, Active and test connection state summary
         mCachedDevice.onProfileStateChanged(mHfpProfile, BluetoothProfile.STATE_CONNECTED);
         mCachedDevice.onActiveDeviceChanged(true, BluetoothProfile.HEADSET);
-        assertThat(mCachedDevice.getConnectionSummary()).isEqualTo("Connected, active(phone)");
+        assertThat(mCachedDevice.getConnectionSummary()).isEqualTo("Active");
 
         // Set HFP profile to be disconnected and test connection state summary
         mCachedDevice.onProfileStateChanged(mHfpProfile, BluetoothProfile.STATE_DISCONNECTED);
@@ -211,15 +217,16 @@ public class CachedBluetoothDeviceTest {
         // Test without battery level
         // Set Hearing Aid profile to be connected and test connection state summary
         mCachedDevice.onProfileStateChanged(mHearingAidProfile, BluetoothProfile.STATE_CONNECTED);
-        assertThat(mCachedDevice.getConnectionSummary()).isEqualTo("Connected");
+        assertThat(mCachedDevice.getConnectionSummary()).isNull();
 
         // Set device as Active for Hearing Aid and test connection state summary
         mCachedDevice.onActiveDeviceChanged(true, BluetoothProfile.HEARING_AID);
-        assertThat(mCachedDevice.getConnectionSummary()).isEqualTo("Connected, active");
+        assertThat(mCachedDevice.getConnectionSummary()).isEqualTo("Active");
 
         // Set Hearing Aid profile to be disconnected and test connection state summary
         mCachedDevice.onActiveDeviceChanged(false, BluetoothProfile.HEARING_AID);
-        mCachedDevice.onProfileStateChanged(mHearingAidProfile, BluetoothProfile.STATE_DISCONNECTED);
+        mCachedDevice.
+                onProfileStateChanged(mHearingAidProfile, BluetoothProfile.STATE_DISCONNECTED);
         assertThat(mCachedDevice.getConnectionSummary()).isNull();
     }
 
@@ -229,23 +236,23 @@ public class CachedBluetoothDeviceTest {
         // Set A2DP and HFP profiles to be connected and test connection state summary
         mCachedDevice.onProfileStateChanged(mA2dpProfile, BluetoothProfile.STATE_CONNECTED);
         mCachedDevice.onProfileStateChanged(mHfpProfile, BluetoothProfile.STATE_CONNECTED);
-        assertThat(mCachedDevice.getConnectionSummary()).isEqualTo("Connected");
+        assertThat(mCachedDevice.getConnectionSummary()).isNull();
 
         // Set device as Active for A2DP and HFP and test connection state summary
         mCachedDevice.onActiveDeviceChanged(true, BluetoothProfile.A2DP);
         mCachedDevice.onActiveDeviceChanged(true, BluetoothProfile.HEADSET);
-        assertThat(mCachedDevice.getConnectionSummary()).isEqualTo("Connected, active");
+        assertThat(mCachedDevice.getConnectionSummary()).isEqualTo("Active");
 
         // Test with battery level
         mBatteryLevel = 10;
         assertThat(mCachedDevice.getConnectionSummary()).isEqualTo(
-                "Connected, battery 10%, active");
+                "Active, 10% battery");
 
         // Disconnect A2DP only and test connection state summary
         mCachedDevice.onActiveDeviceChanged(false, BluetoothProfile.A2DP);
         mCachedDevice.onProfileStateChanged(mA2dpProfile, BluetoothProfile.STATE_DISCONNECTED);
         assertThat(mCachedDevice.getConnectionSummary()).isEqualTo(
-                "Connected (no media), battery 10%, active(phone)");
+                "10% battery");
 
         // Disconnect HFP only and test connection state summary
         mCachedDevice.onActiveDeviceChanged(false, BluetoothProfile.HEADSET);
@@ -253,7 +260,7 @@ public class CachedBluetoothDeviceTest {
         mCachedDevice.onProfileStateChanged(mA2dpProfile, BluetoothProfile.STATE_CONNECTED);
         mCachedDevice.onActiveDeviceChanged(true, BluetoothProfile.A2DP);
         assertThat(mCachedDevice.getConnectionSummary()).isEqualTo(
-                "Connected (no phone), battery 10%, active(media)");
+                "Active, 10% battery");
 
         // Test with BluetoothDevice.BATTERY_LEVEL_UNKNOWN battery level
         mBatteryLevel = BluetoothDevice.BATTERY_LEVEL_UNKNOWN;
@@ -262,7 +269,7 @@ public class CachedBluetoothDeviceTest {
         mCachedDevice.onProfileStateChanged(mHfpProfile, BluetoothProfile.STATE_CONNECTED);
         mCachedDevice.onActiveDeviceChanged(true, BluetoothProfile.A2DP);
         mCachedDevice.onActiveDeviceChanged(true, BluetoothProfile.HEADSET);
-        assertThat(mCachedDevice.getConnectionSummary()).isEqualTo("Connected, active");
+        assertThat(mCachedDevice.getConnectionSummary()).isEqualTo("Active");
 
         // Set A2DP and HFP profiles to be disconnected and test connection state summary
         mCachedDevice.onProfileStateChanged(mA2dpProfile, BluetoothProfile.STATE_DISCONNECTED);
