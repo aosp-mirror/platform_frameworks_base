@@ -28,7 +28,7 @@ namespace uirenderer {
 class VkLayer : public Layer {
 public:
     VkLayer(RenderState& renderState, uint32_t layerWidth, uint32_t layerHeight,
-            SkColorFilter* colorFilter, int alpha, SkBlendMode mode, bool blend)
+            sk_sp<SkColorFilter> colorFilter, int alpha, SkBlendMode mode, bool blend)
             : Layer(renderState, Api::Vulkan, colorFilter, alpha, mode)
             , mWidth(layerWidth)
             , mHeight(layerHeight)
