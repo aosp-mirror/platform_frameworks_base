@@ -8433,7 +8433,7 @@ public class PackageManagerService extends IPackageManager.Stub
 
                 // Delete invalid userdata apps
                 if ((scanFlags & SCAN_AS_SYSTEM) == 0 &&
-                        errorCode == PackageManager.INSTALL_FAILED_INVALID_APK) {
+                        errorCode != PackageManager.INSTALL_SUCCEEDED) {
                     logCriticalInfo(Log.WARN,
                             "Deleting invalid package at " + parseResult.scanFile);
                     removeCodePathLI(parseResult.scanFile);
