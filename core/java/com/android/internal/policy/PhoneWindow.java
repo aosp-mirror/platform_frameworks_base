@@ -2298,7 +2298,7 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
             if (applicationContext == null) {
                 context = getContext();
             } else {
-                context = new DecorContext(applicationContext, getContext().getResources());
+                context = new DecorContext(applicationContext, getContext());
                 if (mTheme != -1) {
                     context.setTheme(mTheme);
                 }

@@ -1849,6 +1849,13 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
     }
 
     @Override
+    public Resources getResources() {
+        // Make sure the Resources object is propogated from the Context since it can be updated in
+        // the Context object.
+        return getContext().getResources();
+    }
+
+    @Override
     protected void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
 
