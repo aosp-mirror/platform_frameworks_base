@@ -316,7 +316,7 @@ class AutomaticBrightnessController {
         return true;
     }
 
-    private void resetShortTermModel() {
+    public void resetShortTermModel() {
         mBrightnessMapper.clearUserDataPoints();
         mShortTermModelValid = true;
         mShortTermModelAnchor = -1;
