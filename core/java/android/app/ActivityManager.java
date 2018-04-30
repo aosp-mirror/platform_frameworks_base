@@ -746,7 +746,7 @@ public class ActivityManager {
     /** @hide */
     public int getFrontActivityScreenCompatMode() {
         try {
-            return getService().getFrontActivityScreenCompatMode();
+            return getTaskService().getFrontActivityScreenCompatMode();
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -755,7 +755,7 @@ public class ActivityManager {
     /** @hide */
     public void setFrontActivityScreenCompatMode(int mode) {
         try {
-            getService().setFrontActivityScreenCompatMode(mode);
+            getTaskService().setFrontActivityScreenCompatMode(mode);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -1182,7 +1182,7 @@ public class ActivityManager {
         public static Bitmap loadTaskDescriptionIcon(String iconFilename, int userId) {
             if (iconFilename != null) {
                 try {
-                    return getService().getTaskDescriptionIcon(iconFilename,
+                    return getTaskService().getTaskDescriptionIcon(iconFilename,
                             userId);
                 } catch (RemoteException e) {
                     throw e.rethrowFromSystemServer();
@@ -1582,7 +1582,7 @@ public class ActivityManager {
             if (maxNum < 0) {
                 throw new IllegalArgumentException("The requested number of tasks should be >= 0");
             }
-            return getService().getRecentTasks(maxNum, flags, mContext.getUserId()).getList();
+            return getTaskService().getRecentTasks(maxNum, flags, mContext.getUserId()).getList();
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -1735,7 +1735,7 @@ public class ActivityManager {
         ArrayList<AppTask> tasks = new ArrayList<AppTask>();
         List<IBinder> appTasks;
         try {
-            appTasks = getService().getAppTasks(mContext.getPackageName());
+            appTasks = getTaskService().getAppTasks(mContext.getPackageName());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -1760,7 +1760,7 @@ public class ActivityManager {
     private void ensureAppTaskThumbnailSizeLocked() {
         if (mAppTaskThumbnailSize == null) {
             try {
-                mAppTaskThumbnailSize = getService().getAppTaskThumbnailSize();
+                mAppTaskThumbnailSize = getTaskService().getAppTaskThumbnailSize();
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
             }
@@ -1825,7 +1825,7 @@ public class ActivityManager {
             description = new TaskDescription();
         }
         try {
-            return getService().addAppTask(activity.getActivityToken(),
+            return getTaskService().addAppTask(activity.getActivityToken(),
                     intent, description, thumbnail);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
@@ -1868,7 +1868,7 @@ public class ActivityManager {
     public List<RunningTaskInfo> getRunningTasks(int maxNum)
             throws SecurityException {
         try {
-            return getService().getTasks(maxNum);
+            return getTaskService().getTasks(maxNum);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -2077,7 +2077,7 @@ public class ActivityManager {
     @RequiresPermission(android.Manifest.permission.REORDER_TASKS)
     public void moveTaskToFront(int taskId, @MoveTaskFlags int flags, Bundle options) {
         try {
-            getService().moveTaskToFront(taskId, flags, options);
+            getTaskService().moveTaskToFront(taskId, flags, options);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -3584,7 +3584,7 @@ public class ActivityManager {
     @TestApi
     public void alwaysShowUnsupportedCompileSdkWarning(ComponentName activity) {
         try {
-            getService().alwaysShowUnsupportedCompileSdkWarning(activity);
+            getTaskService().alwaysShowUnsupportedCompileSdkWarning(activity);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -3907,6 +3907,10 @@ public class ActivityManager {
         return IActivityManagerSingleton.get();
     }
 
+    private static IActivityTaskManager getTaskService() {
+        return ActivityTaskManager.getService();
+    }
+
     private static final Singleton<IActivityManager> IActivityManagerSingleton =
             new Singleton<IActivityManager>() {
                 @Override
@@ -4022,7 +4026,7 @@ public class ActivityManager {
      */
     public int getLockTaskModeState() {
         try {
-            return getService().getLockTaskModeState();
+            return getTaskService().getLockTaskModeState();
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

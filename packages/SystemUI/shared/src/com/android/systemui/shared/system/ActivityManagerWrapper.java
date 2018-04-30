@@ -30,6 +30,7 @@ import android.annotation.NonNull;
 import android.app.ActivityManager;
 import android.app.ActivityManager.RecentTaskInfo;
 import android.app.ActivityOptions;
+import android.app.ActivityTaskManager;
 import android.app.AppGlobals;
 import android.app.IAssistDataReceiver;
 import android.app.WindowConfiguration.ActivityType;
@@ -113,7 +114,7 @@ public class ActivityManagerWrapper {
         // Note: The set of running tasks from the system is ordered by recency
         try {
             List<ActivityManager.RunningTaskInfo> tasks =
-                    ActivityManager.getService().getFilteredTasks(1, ignoreActivityType,
+                    ActivityTaskManager.getService().getFilteredTasks(1, ignoreActivityType,
                             WINDOWING_MODE_PINNED /* ignoreWindowingMode */);
             if (tasks.isEmpty()) {
                 return null;
@@ -129,7 +130,7 @@ public class ActivityManagerWrapper {
      */
     public List<RecentTaskInfo> getRecentTasks(int numTasks, int userId) {
         try {
-            return ActivityManager.getService().getRecentTasks(numTasks,
+            return ActivityTaskManager.getService().getRecentTasks(numTasks,
                             RECENT_IGNORE_UNAVAILABLE, userId).getList();
         } catch (RemoteException e) {
             Log.e(TAG, "Failed to get recent tasks", e);
@@ -143,7 +144,7 @@ public class ActivityManagerWrapper {
     public @NonNull ThumbnailData getTaskThumbnail(int taskId, boolean reducedResolution) {
         ActivityManager.TaskSnapshot snapshot = null;
         try {
-            snapshot = ActivityManager.getService().getTaskSnapshot(taskId, reducedResolution);
+            snapshot = ActivityTaskManager.getService().getTaskSnapshot(taskId, reducedResolution);
         } catch (RemoteException e) {
             Log.w(TAG, "Failed to retrieve task snapshot", e);
         }
@@ -234,7 +235,7 @@ public class ActivityManagerWrapper {
                     }
                 };
             }
-            ActivityManager.getService().startRecentsActivity(intent, receiver, runner);
+            ActivityTaskManager.getService().startRecentsActivity(intent, receiver, runner);
             if (resultCallback != null) {
                 resultCallbackHandler.post(new Runnable() {
                     @Override
@@ -260,7 +261,7 @@ public class ActivityManagerWrapper {
      */
     public void cancelRecentsAnimation(boolean restoreHomeStackPosition) {
         try {
-            ActivityManager.getService().cancelRecentsAnimation(restoreHomeStackPosition);
+            ActivityTaskManager.getService().cancelRecentsAnimation(restoreHomeStackPosition);
         } catch (RemoteException e) {
             Log.e(TAG, "Failed to cancel recents animation", e);
         }
@@ -333,7 +334,7 @@ public class ActivityManagerWrapper {
     public boolean startActivityFromRecents(int taskId, ActivityOptions options) {
         try {
             Bundle optsBundle = options == null ? null : options.toBundle();
-            ActivityManager.getService().startActivityFromRecents(taskId, optsBundle);
+            ActivityTaskManager.getService().startActivityFromRecents(taskId, optsBundle);
             return true;
         } catch (Exception e) {
             return false;
@@ -384,7 +385,7 @@ public class ActivityManagerWrapper {
             @Override
             public void run() {
                 try {
-                    ActivityManager.getService().removeTask(taskId);
+                    ActivityTaskManager.getService().removeTask(taskId);
                 } catch (RemoteException e) {
                     Log.w(TAG, "Failed to remove task=" + taskId, e);
                 }
@@ -397,7 +398,7 @@ public class ActivityManagerWrapper {
      */
     public void cancelWindowTransition(int taskId) {
         try {
-            ActivityManager.getService().cancelTaskWindowTransition(taskId);
+            ActivityTaskManager.getService().cancelTaskWindowTransition(taskId);
         } catch (RemoteException e) {
             Log.w(TAG, "Failed to cancel window transition for task=" + taskId, e);
         }
@@ -408,7 +409,7 @@ public class ActivityManagerWrapper {
      */
     public boolean isScreenPinningActive() {
         try {
-            return ActivityManager.getService().getLockTaskModeState() == LOCK_TASK_MODE_PINNED;
+            return ActivityTaskManager.getService().getLockTaskModeState() == LOCK_TASK_MODE_PINNED;
         } catch (RemoteException e) {
             return false;
         }
@@ -427,7 +428,7 @@ public class ActivityManagerWrapper {
      */
     public boolean isLockToAppActive() {
         try {
-            return ActivityManager.getService().getLockTaskModeState() != LOCK_TASK_MODE_NONE;
+            return ActivityTaskManager.getService().getLockTaskModeState() != LOCK_TASK_MODE_NONE;
         } catch (RemoteException e) {
             return false;
         }

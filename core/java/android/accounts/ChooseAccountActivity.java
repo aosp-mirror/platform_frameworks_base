@@ -17,6 +17,7 @@ package android.accounts;
 
 import android.app.Activity;
 import android.app.ActivityManager;
+import android.app.ActivityTaskManager;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
@@ -72,8 +73,8 @@ public class ChooseAccountActivity extends Activity {
 
         try {
             IBinder activityToken = getActivityToken();
-            mCallingUid = ActivityManager.getService().getLaunchedFromUid(activityToken);
-            mCallingPackage = ActivityManager.getService().getLaunchedFromPackage(
+            mCallingUid = ActivityTaskManager.getService().getLaunchedFromUid(activityToken);
+            mCallingPackage = ActivityTaskManager.getService().getLaunchedFromPackage(
                     activityToken);
         } catch (RemoteException re) {
             // Couldn't figure out caller details

@@ -26,6 +26,7 @@ import static com.android.internal.widget.LockPatternUtils.StrongAuthTracker.STR
 import static com.android.internal.widget.LockPatternUtils.StrongAuthTracker.STRONG_AUTH_REQUIRED_AFTER_TIMEOUT;
 
 import android.app.ActivityManager;
+import android.app.ActivityTaskManager;
 import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.app.StatusBarManager;
@@ -1750,7 +1751,7 @@ public class KeyguardViewMediator extends SystemUI {
             int secondaryDisplayShowing) {
         mUiOffloadThread.submit(() -> {
             try {
-                ActivityManager.getService().setLockScreenShown(showing, aodShowing,
+                ActivityTaskManager.getService().setLockScreenShown(showing, aodShowing,
                         secondaryDisplayShowing);
             } catch (RemoteException e) {
             }
@@ -1813,7 +1814,7 @@ public class KeyguardViewMediator extends SystemUI {
                 // Don't actually hide the Keyguard at the moment, wait for window
                 // manager until it tells us it's safe to do so with
                 // startKeyguardExitAnimation.
-                ActivityManager.getService().keyguardGoingAway(flags);
+                ActivityTaskManager.getService().keyguardGoingAway(flags);
             } catch (RemoteException e) {
                 Log.e(TAG, "Error while calling WindowManager", e);
             }

@@ -3726,7 +3726,7 @@ public class DevicePolicyManagerTest extends DpmTestBase {
 
     private void verifyLockTaskState(int userId, String[] packages, int flags) throws Exception {
         verify(getServices().iactivityManager).updateLockTaskPackages(userId, packages);
-        verify(getServices().iactivityManager).updateLockTaskFeatures(userId, flags);
+        verify(getServices().iactivityTaskManager).updateLockTaskFeatures(userId, flags);
     }
 
     private void verifyCanSetLockTask(int uid, int userId, ComponentName who, String[] packages,
@@ -3819,7 +3819,7 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         // Lock task packages cleared when loading user data and when the user becomes unaffiliated.
         verify(getServices().iactivityManager, times(2)).updateLockTaskPackages(
                 MANAGED_PROFILE_USER_ID, new String[0]);
-        verify(getServices().iactivityManager, times(2)).updateLockTaskFeatures(
+        verify(getServices().iactivityTaskManager, times(2)).updateLockTaskFeatures(
                 MANAGED_PROFILE_USER_ID, DevicePolicyManager.LOCK_TASK_FEATURE_NONE);
 
         // Verify that lock task packages were not cleared for the DO

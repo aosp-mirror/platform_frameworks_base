@@ -35,6 +35,7 @@ import static org.mockito.Mockito.mock;
 
 import android.app.AppOpsManager;
 import android.app.IActivityManager;
+import android.app.IActivityTaskManager;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.os.Bundle;
@@ -87,6 +88,7 @@ public class AssistDataRequesterTest extends ActivityTestsBase {
     private Object mCallbacksLock;
     private Handler mHandler;
     private IActivityManager mAm;
+    private IActivityTaskManager mAtm;
     private IWindowManager mWm;
     private AppOpsManager mAppOpsManager;
 
@@ -104,6 +106,7 @@ public class AssistDataRequesterTest extends ActivityTestsBase {
     public void setUp() throws Exception {
         super.setUp();
         mAm = mock(IActivityManager.class);
+        mAtm = mock(IActivityTaskManager.class);
         mWm = mock(IWindowManager.class);
         mAppOpsManager = mock(AppOpsManager.class);
         mContext =  InstrumentationRegistry.getContext();
@@ -125,7 +128,7 @@ public class AssistDataRequesterTest extends ActivityTestsBase {
                 }
             });
             return true;
-        }).when(mAm).requestAssistContextExtras(anyInt(), any(), any(), any(), anyBoolean(),
+        }).when(mAtm).requestAssistContextExtras(anyInt(), any(), any(), any(), anyBoolean(),
                 anyBoolean());
         doAnswer(invocation -> {
             mHandler.post(() -> {
@@ -142,7 +145,7 @@ public class AssistDataRequesterTest extends ActivityTestsBase {
 
     private void setupMocks(boolean currentActivityAssistAllowed, boolean assistStructureAllowed,
             boolean assistScreenshotAllowed) throws Exception {
-        doReturn(currentActivityAssistAllowed).when(mAm).isAssistDataAllowedOnCurrentActivity();
+        doReturn(currentActivityAssistAllowed).when(mAtm).isAssistDataAllowedOnCurrentActivity();
         doReturn(assistStructureAllowed ? MODE_ALLOWED : MODE_ERRORED).when(mAppOpsManager)
                 .checkOpNoThrow(eq(OP_ASSIST_STRUCTURE), anyInt(), anyString());
         doReturn(assistScreenshotAllowed ? MODE_ALLOWED : MODE_ERRORED).when(mAppOpsManager)
@@ -240,7 +243,7 @@ public class AssistDataRequesterTest extends ActivityTestsBase {
     public void testDisallowAssistContextExtras_expectNullDataCallbacks() throws Exception {
         setupMocks(CURRENT_ACTIVITY_ASSIST_ALLOWED, CALLER_ASSIST_STRUCTURE_ALLOWED,
                 CALLER_ASSIST_SCREENSHOT_ALLOWED);
-        doReturn(false).when(mAm).requestAssistContextExtras(anyInt(), any(), any(), any(),
+        doReturn(false).when(mAtm).requestAssistContextExtras(anyInt(), any(), any(), any(),
                 anyBoolean(), anyBoolean());
 
         mDataRequester.requestAssistData(createActivityList(5), FETCH_DATA, FETCH_SCREENSHOTS,

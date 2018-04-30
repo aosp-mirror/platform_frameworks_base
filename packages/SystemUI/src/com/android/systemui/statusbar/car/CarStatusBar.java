@@ -17,6 +17,7 @@
 package com.android.systemui.statusbar.car;
 
 import android.app.ActivityManager;
+import android.app.ActivityTaskManager;
 import android.graphics.PixelFormat;
 import android.graphics.drawable.Drawable;
 import android.os.SystemProperties;
@@ -452,7 +453,7 @@ public class CarStatusBar extends StatusBar implements
         public void onTaskStackChanged() {
             try {
                 mCarFacetButtonController.taskChanged(
-                        ActivityManager.getService().getAllStackInfos());
+                        ActivityTaskManager.getService().getAllStackInfos());
             } catch (Exception e) {
                 Log.e(TAG, "Getting StackInfo from activity manager failed", e);
             }

@@ -486,7 +486,7 @@ class TaskRecord extends ConfigurationContainer implements TaskWindowContainerLi
     // TODO: Consolidate this with the resize() method below.
     @Override
     public void requestResize(Rect bounds, int resizeMode) {
-        mService.resizeTask(taskId, bounds, resizeMode);
+        mService.mActivityTaskManager.resizeTask(taskId, bounds, resizeMode);
     }
 
     boolean resize(Rect bounds, int resizeMode, boolean preserveWindow, boolean deferResume) {
@@ -1745,7 +1745,7 @@ class TaskRecord extends ConfigurationContainer implements TaskWindowContainerLi
      * @param bounds The bounds of the task.
      * @param insetBounds The bounds used to calculate the system insets, which is used here to
      *                    subtract the navigation bar/status bar size from the screen size reported
-     *                    to the application. See {@link IActivityManager#resizeDockedStack}.
+     *                    to the application. See {@link IActivityTaskManager#resizeDockedStack}.
      * @return True if the override configuration was updated.
      */
     boolean updateOverrideConfiguration(Rect bounds, @Nullable Rect insetBounds) {

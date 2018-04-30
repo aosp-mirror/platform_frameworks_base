@@ -19,6 +19,7 @@ package android.app.servertransaction;
 import static android.os.Trace.TRACE_TAG_ACTIVITY_MANAGER;
 
 import android.app.ActivityManager;
+import android.app.ActivityTaskManager;
 import android.app.ClientTransactionHandler;
 import android.os.IBinder;
 import android.os.Parcel;
@@ -60,7 +61,7 @@ public class PauseActivityItem extends ActivityLifecycleItem {
         }
         try {
             // TODO(lifecycler): Use interface callback instead of AMS.
-            ActivityManager.getService().activityPaused(token);
+            ActivityTaskManager.getService().activityPaused(token);
         } catch (RemoteException ex) {
             throw ex.rethrowFromSystemServer();
         }

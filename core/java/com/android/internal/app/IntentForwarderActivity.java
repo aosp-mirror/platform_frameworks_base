@@ -18,6 +18,7 @@ package com.android.internal.app;
 
 import android.app.Activity;
 import android.app.ActivityManager;
+import android.app.ActivityTaskManager;
 import android.app.ActivityThread;
 import android.app.AppGlobals;
 import android.app.admin.DevicePolicyManager;
@@ -112,9 +113,9 @@ public class IntentForwarderActivity extends Activity  {
                 int launchedFromUid = -1;
                 String launchedFromPackage = "?";
                 try {
-                    launchedFromUid = ActivityManager.getService().getLaunchedFromUid(
+                    launchedFromUid = ActivityTaskManager.getService().getLaunchedFromUid(
                             getActivityToken());
-                    launchedFromPackage = ActivityManager.getService().getLaunchedFromPackage(
+                    launchedFromPackage = ActivityTaskManager.getService().getLaunchedFromPackage(
                             getActivityToken());
                 } catch (RemoteException ignored) {
                 }

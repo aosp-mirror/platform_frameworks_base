@@ -25,7 +25,9 @@ import static android.app.WindowConfiguration.ACTIVITY_TYPE_ASSISTANT;
 import android.app.ActivityManager;
 import android.app.ActivityManagerInternal;
 import android.app.ActivityOptions;
+import android.app.ActivityTaskManager;
 import android.app.IActivityManager;
+import android.app.IActivityTaskManager;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
@@ -70,6 +72,7 @@ class VoiceInteractionManagerServiceImpl implements VoiceInteractionSessionConne
     final int mUser;
     final ComponentName mComponent;
     final IActivityManager mAm;
+    final IActivityTaskManager mAtm;
     final VoiceInteractionServiceInfo mInfo;
     final ComponentName mSessionComponentName;
     final IWindowManager mIWindowManager;
@@ -125,6 +128,7 @@ class VoiceInteractionManagerServiceImpl implements VoiceInteractionSessionConne
         mUser = userHandle;
         mComponent = service;
         mAm = ActivityManager.getService();
+        mAtm = ActivityTaskManager.getService();
         VoiceInteractionServiceInfo info;
         try {
             info = new VoiceInteractionServiceInfo(context.getPackageManager(), service, mUser);
@@ -205,7 +209,7 @@ class VoiceInteractionManagerServiceImpl implements VoiceInteractionSessionConne
             intent = new Intent(intent);
             intent.addCategory(Intent.CATEGORY_VOICE);
             intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_MULTIPLE_TASK);
-            return mAm.startVoiceActivity(mComponent.getPackageName(), callingPid, callingUid,
+            return mAtm.startVoiceActivity(mComponent.getPackageName(), callingPid, callingUid,
                     intent, resolvedType, mActiveSession.mSession, mActiveSession.mInteractor,
                     0, null, null, mUser);
         } catch (RemoteException e) {
@@ -228,7 +232,7 @@ class VoiceInteractionManagerServiceImpl implements VoiceInteractionSessionConne
             intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             final ActivityOptions options = ActivityOptions.makeBasic();
             options.setLaunchActivityType(ACTIVITY_TYPE_ASSISTANT);
-            return mAm.startAssistantActivity(mComponent.getPackageName(), callingPid, callingUid,
+            return mAtm.startAssistantActivity(mComponent.getPackageName(), callingPid, callingUid,
                     intent, resolvedType, options.toBundle(), mUser);
         } catch (RemoteException e) {
             throw new IllegalStateException("Unexpected remote error", e);

@@ -24,6 +24,7 @@ import static org.junit.Assert.assertTrue;
 import android.app.Activity;
 import android.app.ActivityManager;
 import android.app.ActivityManager.TaskDescription;
+import android.app.ActivityTaskManager;
 import android.app.IActivityManager;
 import android.app.ITaskStackListener;
 import android.app.Instrumentation.ActivityMonitor;
@@ -68,7 +69,7 @@ public class TaskStackChangedListenerTest {
 
     @After
     public void tearDown() throws Exception {
-        mService.unregisterTaskStackListener(mTaskStackListener);
+        ActivityTaskManager.getService().unregisterTaskStackListener(mTaskStackListener);
         mTaskStackListener = null;
     }
 
@@ -227,7 +228,7 @@ public class TaskStackChangedListenerTest {
 
     private void registerTaskStackChangedListener(ITaskStackListener listener) throws Exception {
         mTaskStackListener = listener;
-        mService.registerTaskStackListener(listener);
+        ActivityTaskManager.getService().registerTaskStackListener(listener);
     }
 
     private void waitForCallback(CountDownLatch latch) {

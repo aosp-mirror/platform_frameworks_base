@@ -361,7 +361,7 @@ public class LockTaskController {
      * @param task the task that requested the end of lock task mode ({@code null} for quitting app
      *             pinning mode)
      * @param isSystemCaller indicates whether this request comes from the system via
-     *                       {@link ActivityManagerService#stopSystemLockTaskMode()}. If
+     *                       {@link ActivityTaskManagerService#stopSystemLockTaskMode()}. If
      *                       {@code true}, it means the user intends to stop pinned mode through UI;
      *                       otherwise, it's called by an app and we need to stop locked or pinned
      *                       mode, subject to checks.
@@ -509,7 +509,7 @@ public class LockTaskController {
      *
      * @param task the task that should be locked.
      * @param isSystemCaller indicates whether this request was initiated by the system via
-     *                       {@link ActivityManagerService#startSystemLockTaskMode(int)}. If
+     *                       {@link ActivityTaskManagerService#startSystemLockTaskMode(int)}. If
      *                       {@code true}, this intends to start pinned mode; otherwise, we look
      *                       at the calling task's mLockTaskAuth to decide which mode to start.
      * @param callingUid the caller that requested the launch of lock task mode.

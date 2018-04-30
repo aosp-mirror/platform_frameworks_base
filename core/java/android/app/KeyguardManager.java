@@ -513,7 +513,8 @@ public class KeyguardManager {
     public void requestDismissKeyguard(@NonNull Activity activity, @Nullable CharSequence message,
             @Nullable KeyguardDismissCallback callback) {
         try {
-            mAm.dismissKeyguard(activity.getActivityToken(), new IKeyguardDismissCallback.Stub() {
+            ActivityTaskManager.getService().dismissKeyguard(
+                    activity.getActivityToken(), new IKeyguardDismissCallback.Stub() {
                 @Override
                 public void onDismissError() throws RemoteException {
                     if (callback != null && !activity.isDestroyed()) {

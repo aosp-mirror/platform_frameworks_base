@@ -46,6 +46,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.ActivityManager;
 import android.app.ActivityOptions;
+import android.app.ActivityTaskManager;
 import android.app.AlarmManager;
 import android.app.IWallpaperManager;
 import android.app.KeyguardManager;
@@ -2959,7 +2960,7 @@ public class StatusBar extends SystemUI implements DemoMode,
                         WindowManager.LayoutParams.ROTATION_ANIMATION_SEAMLESS);
             }
             try {
-                result = ActivityManager.getService().startActivityAsUser(
+                result = ActivityTaskManager.getService().startActivityAsUser(
                         null, mContext.getBasePackageName(),
                         intent,
                         intent.resolveTypeIfNeeded(mContext.getContentResolver()),
@@ -5152,7 +5153,7 @@ public class StatusBar extends SystemUI implements DemoMode,
                             row, wasOccluded);
                     try {
                         if (adapter != null) {
-                            ActivityManager.getService()
+                            ActivityTaskManager.getService()
                                     .registerRemoteAnimationForNextActivityStart(
                                             intent.getCreatorPackage(), adapter);
                         }

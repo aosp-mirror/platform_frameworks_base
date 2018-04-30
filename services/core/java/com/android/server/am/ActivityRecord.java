@@ -1293,7 +1293,7 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
         }
 
         boolean isKeyguardLocked = service.isKeyguardLocked();
-        boolean isCurrentAppLocked = service.getLockTaskModeState() != LOCK_TASK_MODE_NONE;
+        boolean isCurrentAppLocked = service.mActivityTaskManager.getLockTaskModeState() != LOCK_TASK_MODE_NONE;
         final ActivityDisplay display = getDisplay();
         boolean hasPinnedStack = display != null && display.hasPinnedStack();
         // Don't return early if !isNotLocked, since we want to throw an exception if the activity
@@ -2732,7 +2732,7 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
     }
 
     void relaunchActivityLocked(boolean andResume, boolean preserveWindow) {
-        if (service.mSuppressResizeConfigChanges && preserveWindow) {
+        if (service.mActivityTaskManager.mSuppressResizeConfigChanges && preserveWindow) {
             configChangeFlags = 0;
             return;
         }

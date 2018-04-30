@@ -1614,7 +1614,7 @@ public class TaskStack extends WindowContainer<Task> implements
         }
 
         try {
-            mService.mActivityManager.resizePinnedStack(stackBounds, tempTaskBounds);
+            mService.mActivityTaskManager.resizePinnedStack(stackBounds, tempTaskBounds);
         } catch (RemoteException e) {
             // I don't believe you.
         }
@@ -1647,7 +1647,7 @@ public class TaskStack extends WindowContainer<Task> implements
 
         if (inPinnedWindowingMode()) {
             try {
-                mService.mActivityManager.notifyPinnedStackAnimationStarted();
+                mService.mActivityTaskManager.notifyPinnedStackAnimationStarted();
             } catch (RemoteException e) {
                 // I don't believe you...
             }
@@ -1689,9 +1689,9 @@ public class TaskStack extends WindowContainer<Task> implements
             }
 
             try {
-                mService.mActivityManager.notifyPinnedStackAnimationEnded();
+                mService.mActivityTaskManager.notifyPinnedStackAnimationEnded();
                 if (moveToFullscreen) {
-                    mService.mActivityManager.moveTasksToFullscreenStack(mStackId,
+                    mService.mActivityTaskManager.moveTasksToFullscreenStack(mStackId,
                             true /* onTop */);
                 }
             } catch (RemoteException e) {

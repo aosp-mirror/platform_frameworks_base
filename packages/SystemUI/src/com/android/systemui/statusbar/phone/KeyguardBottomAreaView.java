@@ -26,6 +26,7 @@ import static com.android.systemui.tuner.LockscreenFragment.LOCKSCREEN_RIGHT_UNL
 
 import android.app.ActivityManager;
 import android.app.ActivityOptions;
+import android.app.ActivityTaskManager;
 import android.app.admin.DevicePolicyManager;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
@@ -523,7 +524,7 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
                     o.setRotationAnimationHint(
                             WindowManager.LayoutParams.ROTATION_ANIMATION_SEAMLESS);
                     try {
-                        result = ActivityManager.getService().startActivityAsUser(
+                        result = ActivityTaskManager.getService().startActivityAsUser(
                                 null, getContext().getBasePackageName(),
                                 intent,
                                 intent.resolveTypeIfNeeded(getContext().getContentResolver()),

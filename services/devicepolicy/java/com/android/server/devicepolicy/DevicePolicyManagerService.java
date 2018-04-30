@@ -90,10 +90,12 @@ import android.annotation.UserIdInt;
 import android.app.Activity;
 import android.app.ActivityManager;
 import android.app.ActivityManagerInternal;
+import android.app.ActivityTaskManager;
 import android.app.ActivityThread;
 import android.app.AlarmManager;
 import android.app.AppGlobals;
 import android.app.IActivityManager;
+import android.app.IActivityTaskManager;
 import android.app.IApplicationThread;
 import android.app.IServiceConnection;
 import android.app.Notification;
@@ -1865,6 +1867,10 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             return ActivityManager.getService();
         }
 
+        IActivityTaskManager getIActivityTaskManager() {
+            return ActivityTaskManager.getService();
+        }
+
         ActivityManagerInternal getActivityManagerInternal() {
             return LocalServices.getService(ActivityManagerInternal.class);
         }
@@ -3286,8 +3292,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     private void updateLockTaskFeaturesLocked(int flags, int userId) {
         long ident = mInjector.binderClearCallingIdentity();
         try {
-            mInjector.getIActivityManager()
-                    .updateLockTaskFeatures(userId, flags);
+            mInjector.getIActivityTaskManager().updateLockTaskFeatures(userId, flags);
         } catch (RemoteException e) {
             // Not gonna happen.
         } finally {
@@ -10155,7 +10160,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             if (policy.mStatusBarDisabled != disabled) {
                 boolean isLockTaskMode = false;
                 try {
-                    isLockTaskMode = mInjector.getIActivityManager().getLockTaskModeState()
+                    isLockTaskMode = mInjector.getIActivityTaskManager().getLockTaskModeState()
                             != LOCK_TASK_MODE_NONE;
                 } catch (RemoteException e) {
                     Slog.e(LOG_TAG, "Failed to get LockTask mode");

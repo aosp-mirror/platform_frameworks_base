@@ -207,7 +207,7 @@ public class SystemServicesProxy {
         if (mIam == null) return false;
 
         try {
-            List<StackInfo> stackInfos = mIam.getAllStackInfos();
+            List<StackInfo> stackInfos = mIatm.getAllStackInfos();
             ActivityManager.StackInfo homeStackInfo = null;
             ActivityManager.StackInfo fullscreenStackInfo = null;
             ActivityManager.StackInfo recentsStackInfo = null;
@@ -280,7 +280,7 @@ public class SystemServicesProxy {
 
     public ActivityManager.StackInfo getSplitScreenPrimaryStack() {
         try {
-            return mIam.getStackInfo(WINDOWING_MODE_SPLIT_SCREEN_PRIMARY, ACTIVITY_TYPE_UNDEFINED);
+            return mIatm.getStackInfo(WINDOWING_MODE_SPLIT_SCREEN_PRIMARY, ACTIVITY_TYPE_UNDEFINED);
         } catch (RemoteException e) {
             return null;
         }
@@ -376,7 +376,7 @@ public class SystemServicesProxy {
         if (mIam == null) return false;
 
         try {
-            return mIam.getLockTaskModeState() == ActivityManager.LOCK_TASK_MODE_PINNED;
+            return mIatm.getLockTaskModeState() == ActivityManager.LOCK_TASK_MODE_PINNED;
         } catch (RemoteException e) {
             return false;
         }
@@ -417,9 +417,9 @@ public class SystemServicesProxy {
         try {
             // Use the recents stack bounds, fallback to fullscreen stack if it is null
             ActivityManager.StackInfo stackInfo =
-                    mIam.getStackInfo(WINDOWING_MODE_UNDEFINED, ACTIVITY_TYPE_RECENTS);
+                    mIatm.getStackInfo(WINDOWING_MODE_UNDEFINED, ACTIVITY_TYPE_RECENTS);
             if (stackInfo == null) {
-                stackInfo = mIam.getStackInfo(WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD);
+                stackInfo = mIatm.getStackInfo(WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD);
             }
             if (stackInfo != null) {
                 windowRect.set(stackInfo.bounds);
@@ -441,7 +441,7 @@ public class SystemServicesProxy {
         if (mIam == null) return;
 
         try {
-            mIam.startInPlaceAnimationOnFrontMostApplication(
+            mIatm.startInPlaceAnimationOnFrontMostApplication(
                     opts == null ? null : opts.toBundle());
         } catch (Exception e) {
             e.printStackTrace();

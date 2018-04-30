@@ -38,6 +38,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.Activity;
 import android.app.ActivityManager;
+import android.app.ActivityTaskManager;
 import android.app.IAssistDataReceiver;
 import android.app.assist.AssistStructure;
 import android.app.assist.AssistStructure.AutofillOverlay;
@@ -515,7 +516,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
             receiverExtras.putInt(EXTRA_REQUEST_ID, requestId);
             final long identity = Binder.clearCallingIdentity();
             try {
-                if (!ActivityManager.getService().requestAutofillData(mAssistReceiver,
+                if (!ActivityTaskManager.getService().requestAutofillData(mAssistReceiver,
                         receiverExtras, mActivityToken, flags)) {
                     Slog.w(TAG, "failed to request autofill data for " + mActivityToken);
                 }

@@ -2818,7 +2818,7 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
 
     /**
      * Used from {@link ActivityStack#positionTask(TaskRecord, int)}.
-     * @see ActivityManagerService#positionTaskInStack(int, int, int).
+     * @see ActivityTaskManagerService#positionTaskInStack(int, int, int).
      */
     private void insertTaskAtPosition(TaskRecord task, int position) {
         if (position >= mTaskHistory.size()) {

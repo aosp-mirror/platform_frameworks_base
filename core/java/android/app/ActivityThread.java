@@ -1840,7 +1840,7 @@ public final class ActivityThread extends ClientTransactionHandler {
             }
             if (a != null) {
                 mNewActivities = null;
-                IActivityManager am = ActivityManager.getService();
+                IActivityTaskManager am = ActivityTaskManager.getService();
                 ActivityClientRecord prev;
                 do {
                     if (localLOGV) Slog.v(
@@ -2993,7 +2993,7 @@ public final class ActivityThread extends ClientTransactionHandler {
     private ContextImpl createBaseContextForActivity(ActivityClientRecord r) {
         final int displayId;
         try {
-            displayId = ActivityManager.getService().getActivityDisplayId(r.token);
+            displayId = ActivityTaskManager.getService().getActivityDisplayId(r.token);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -3061,7 +3061,7 @@ public final class ActivityThread extends ClientTransactionHandler {
         } else {
             // If there was an error, for any reason, tell the activity manager to stop us.
             try {
-                ActivityManager.getService()
+                ActivityTaskManager.getService()
                         .finishActivity(r.token, Activity.RESULT_CANCELED, null,
                                 Activity.DONT_FINISH_TASK_WITH_ACTIVITY);
             } catch (RemoteException ex) {
@@ -3093,7 +3093,7 @@ public final class ActivityThread extends ClientTransactionHandler {
             }
         }
         try {
-            ActivityManager.getService().reportSizeConfigurations(r.token,
+            ActivityTaskManager.getService().reportSizeConfigurations(r.token,
                     horizontal.copyKeys(), vertical.copyKeys(), smallest.copyKeys());
         } catch (RemoteException ex) {
             throw ex.rethrowFromSystemServer();
@@ -3210,7 +3210,7 @@ public final class ActivityThread extends ClientTransactionHandler {
         structure.setAcquisitionEndTime(SystemClock.uptimeMillis());
 
         mLastAssistStructures.add(new WeakReference<>(structure));
-        IActivityManager mgr = ActivityManager.getService();
+        IActivityTaskManager mgr = ActivityTaskManager.getService();
         try {
             mgr.reportAssistContextExtras(cmd.requestToken, data, structure, content, referrer);
         } catch (RemoteException e) {
@@ -3838,7 +3838,7 @@ public final class ActivityThread extends ClientTransactionHandler {
         boolean willBeVisible = !a.mStartedActivity;
         if (!willBeVisible) {
             try {
-                willBeVisible = ActivityManager.getService().willActivityBeVisible(
+                willBeVisible = ActivityTaskManager.getService().willActivityBeVisible(
                         a.getActivityToken());
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
@@ -4290,7 +4290,7 @@ public final class ActivityThread extends ClientTransactionHandler {
 
             // Tell activity manager we slept.
             try {
-                ActivityManager.getService().activitySlept(r.token);
+                ActivityTaskManager.getService().activitySlept(r.token);
             } catch (RemoteException ex) {
                 throw ex.rethrowFromSystemServer();
             }
@@ -4537,7 +4537,7 @@ public final class ActivityThread extends ClientTransactionHandler {
         }
         if (finishing) {
             try {
-                ActivityManager.getService().activityDestroyed(token);
+                ActivityTaskManager.getService().activityDestroyed(token);
             } catch (RemoteException ex) {
                 throw ex.rethrowFromSystemServer();
             }
@@ -4790,7 +4790,7 @@ public final class ActivityThread extends ClientTransactionHandler {
     @Override
     public void reportRelaunch(IBinder token, PendingTransactionActions pendingActions) {
         try {
-            ActivityManager.getService().activityRelaunched(token);
+            ActivityTaskManager.getService().activityRelaunched(token);
             final ActivityClientRecord r = mActivities.get(token);
             if (pendingActions.shouldReportRelaunchToWindowManager() && r != null
                     && r.window != null) {
@@ -6515,7 +6515,7 @@ public final class ActivityThread extends ClientTransactionHandler {
                                 + " used=" + (dalvikUsed/1024));
                         mSomeActivitiesChanged = false;
                         try {
-                            mgr.releaseSomeActivities(mAppThread);
+                            ActivityTaskManager.getService().releaseSomeActivities(mAppThread);
                         } catch (RemoteException e) {
                             throw e.rethrowFromSystemServer();
                         }
