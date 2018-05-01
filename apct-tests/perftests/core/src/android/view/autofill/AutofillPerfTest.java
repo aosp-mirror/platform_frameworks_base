@@ -109,7 +109,7 @@ public class AutofillPerfTest {
     public void testFocus_noService() throws Throwable {
         resetService();
 
-        focusTest();
+        focusTest(false);
     }
 
     /**
@@ -121,13 +121,7 @@ public class AutofillPerfTest {
         MyAutofillService.newCannedResponse().reply();
         setService();
 
-        // Must first focus in a field to trigger autofill and wait for service response
-        // outside the loop
-        mActivityRule.runOnUiThread(() -> mUsername.requestFocus());
-        MyAutofillService.getLastFillRequest();
-
-        // Test properly speaking
-        focusTest();
+        focusTest(true);
 
         // Sanity check
         MyAutofillService.assertNoAsyncErrors();
@@ -144,13 +138,7 @@ public class AutofillPerfTest {
                 .reply();
         setService();
 
-        // Must first focus in a field to trigger autofill and wait for service response
-        // outside the loop
-        mActivityRule.runOnUiThread(() -> mUsername.requestFocus());
-        MyAutofillService.getLastFillRequest();
-
-        // Test properly speaking
-        focusTest();
+        focusTest(true);
 
         // Sanity check
         MyAutofillService.assertNoAsyncErrors();
@@ -168,18 +156,19 @@ public class AutofillPerfTest {
                 .reply();
         setService();
 
-        // Must first focus in a field to trigger autofill and wait for service response
-        // outside the loop
-        mActivityRule.runOnUiThread(() -> mUsername.requestFocus());
-        MyAutofillService.getLastFillRequest();
-
-        focusTest();
+        focusTest(true);
 
         // Sanity check
         MyAutofillService.assertNoAsyncErrors();
     }
 
-    private void focusTest() throws Throwable {
+    private void focusTest(boolean waitForService) throws Throwable {
+        // Must first focus in a field to trigger autofill and wait for service response
+        // outside the loop
+        mActivityRule.runOnUiThread(() -> mUsername.requestFocus());
+        if (waitForService) {
+            MyAutofillService.getLastFillRequest();
+        }
         mActivityRule.runOnUiThread(() -> {
             BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
             while (state.keepRunning()) {
@@ -189,7 +178,84 @@ public class AutofillPerfTest {
         });
     }
 
-    // TODO: add tests for changing value of the fields
+    /**
+     * This is the baseline test for changing the 2 views when autofill is disabled.
+     */
+    @Test
+    public void testChange_noService() throws Throwable {
+        resetService();
+
+        changeTest(false);
+    }
+
+    /**
+     * This time the service is called, but it returns a {@code null} response so the UI behaves
+     * as if autofill was disabled.
+     */
+    @Test
+    public void testChange_serviceDoesNotAutofill() throws Throwable {
+        MyAutofillService.newCannedResponse().reply();
+        setService();
+
+        changeTest(true);
+
+        // Sanity check
+        MyAutofillService.assertNoAsyncErrors();
+    }
+
+    /**
+     * Now the service returns autofill data, for both username and password.
+     */
+    @Test
+    public void testChange_autofillBothFields() throws Throwable {
+        MyAutofillService.newCannedResponse()
+                .setUsername(mUsername.getAutofillId(), "user")
+                .setPassword(mPassword.getAutofillId(), "pass")
+                .reply();
+        setService();
+
+        changeTest(true);
+
+        // Sanity check
+        MyAutofillService.assertNoAsyncErrors();
+    }
+
+    /**
+     * Now the service returns autofill data, but just for username.
+     */
+    @Test
+    public void testChange_autofillUsernameOnly() throws Throwable {
+        // Must set ignored ids so focus on password does not trigger new requests
+        MyAutofillService.newCannedResponse()
+                .setUsername(mUsername.getAutofillId(), "user")
+                .setIgnored(mPassword.getAutofillId())
+                .reply();
+        setService();
+
+        changeTest(true);
+
+        // Sanity check
+        MyAutofillService.assertNoAsyncErrors();
+    }
+
+    private void changeTest(boolean waitForService) throws Throwable {
+        // Must first focus in a field to trigger autofill and wait for service response
+        // outside the loop
+        mActivityRule.runOnUiThread(() -> mUsername.requestFocus());
+        if (waitForService) {
+            MyAutofillService.getLastFillRequest();
+        }
+        mActivityRule.runOnUiThread(() -> {
+
+            BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
+            while (state.keepRunning()) {
+                mUsername.setText("");
+                mUsername.setText("a");
+                mPassword.setText("");
+                mPassword.setText("x");
+            }
+        });
+    }
 
     /**
      * Uses the {@code settings} binary to set the autofill service.
