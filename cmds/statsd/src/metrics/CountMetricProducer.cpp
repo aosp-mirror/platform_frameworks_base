@@ -122,6 +122,12 @@ void CountMetricProducer::onSlicedConditionMayChangeLocked(bool overallCondition
     VLOG("Metric %lld onSlicedConditionMayChange", (long long)mMetricId);
 }
 
+
+void CountMetricProducer::clearPastBucketsLocked(const int64_t dumpTimeNs) {
+    flushIfNeededLocked(dumpTimeNs);
+    mPastBuckets.clear();
+}
+
 void CountMetricProducer::onDumpReportLocked(const int64_t dumpTimeNs,
                                              const bool include_current_partial_bucket,
                                              ProtoOutputStream* protoOutput) {

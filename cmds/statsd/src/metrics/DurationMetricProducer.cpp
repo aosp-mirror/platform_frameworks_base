@@ -438,6 +438,11 @@ void DurationMetricProducer::dropDataLocked(const int64_t dropTimeNs) {
     mPastBuckets.clear();
 }
 
+void DurationMetricProducer::clearPastBucketsLocked(const int64_t dumpTimeNs) {
+    flushIfNeededLocked(dumpTimeNs);
+    mPastBuckets.clear();
+}
+
 void DurationMetricProducer::onDumpReportLocked(const int64_t dumpTimeNs,
                                                 const bool include_current_partial_bucket,
                                                 ProtoOutputStream* protoOutput) {
