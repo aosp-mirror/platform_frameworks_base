@@ -21,6 +21,8 @@ import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_SECOND
 import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
 import static android.view.PointerIcon.TYPE_HORIZONTAL_DOUBLE_ARROW;
 import static android.view.PointerIcon.TYPE_VERTICAL_DOUBLE_ARROW;
+import static android.view.WindowManager.DOCKED_LEFT;
+import static android.view.WindowManager.DOCKED_RIGHT;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
@@ -364,14 +366,7 @@ public class DividerView extends FrameLayout implements OnTouchListener,
         if (mStableInsets.isEmpty()) {
             SystemServicesProxy.getInstance(mContext).getStableInsets(mStableInsets);
         }
-        int position = (int) (mState.mRatioPositionBeforeMinimized *
-                (isHorizontalDivision() ? mDisplayHeight : mDisplayWidth));
-        mSnapAlgorithm = null;
-        initializeSnapAlgorithm();
-
-        // Set the snap target before minimized but do not save until divider is attached and not
-        // minimized because it does not know its minimized state yet.
-        mSnapTargetBeforeMinimized = mSnapAlgorithm.calculateNonDismissingSnapTarget(position);
+        repositionSnapTargetBeforeMinimized();
     }
 
     public WindowManagerProxy getWindowManagerProxy() {
@@ -878,9 +873,36 @@ public class DividerView extends FrameLayout implements OnTouchListener,
     }
 
     public void notifyDockSideChanged(int newDockSide) {
+        int oldDockSide = mDockSide;
         mDockSide = newDockSide;
         mMinimizedShadow.setDockSide(mDockSide);
         requestLayout();
+
+        // Update the snap position to the new docked side with correct insets
+        SystemServicesProxy.getInstance(mContext).getStableInsets(mStableInsets);
+        mMinimizedSnapAlgorithm = null;
+        initializeSnapAlgorithm();
+
+        if (oldDockSide == DOCKED_LEFT && mDockSide == DOCKED_RIGHT
+                || oldDockSide == DOCKED_RIGHT && mDockSide == DOCKED_LEFT) {
+            repositionSnapTargetBeforeMinimized();
+        }
+
+        // Landscape to seascape rotation requires minimized to resize docked app correctly
+        if (mHomeStackResizable && mDockedStackMinimized) {
+            resizeStack(mMinimizedSnapAlgorithm.getMiddleTarget());
+        }
+    }
+
+    private void repositionSnapTargetBeforeMinimized() {
+        int position = (int) (mState.mRatioPositionBeforeMinimized *
+                (isHorizontalDivision() ? mDisplayHeight : mDisplayWidth));
+        mSnapAlgorithm = null;
+        initializeSnapAlgorithm();
+
+        // Set the snap target before minimized but do not save until divider is attached and not
+        // minimized because it does not know its minimized state yet.
+        mSnapTargetBeforeMinimized = mSnapAlgorithm.calculateNonDismissingSnapTarget(position);
     }
 
     private void updateDisplayInfo() {
@@ -962,6 +984,12 @@ public class DividerView extends FrameLayout implements OnTouchListener,
         if (mHomeStackResizable && mIsInMinimizeInteraction) {
             calculateBoundsForPosition(mSnapTargetBeforeMinimized.position, mDockSide,
                     mDockedTaskRect);
+
+            // Move a right-docked-app to line up with the divider while dragging it
+            if (mDockSide == DOCKED_RIGHT) {
+                mDockedTaskRect.offset(Math.max(position, mStableInsets.left - mDividerSize)
+                        - mDockedTaskRect.left + mDividerSize, 0);
+            }
             calculateBoundsForPosition(mSnapTargetBeforeMinimized.position,
                     DockedDividerUtils.invertDockSide(mDockSide), mOtherTaskRect);
             mWindowManagerProxy.resizeDockedStack(mDockedRect, mDockedTaskRect, mDockedTaskRect,
@@ -975,6 +1003,12 @@ public class DividerView extends FrameLayout implements OnTouchListener,
             } else {
                 calculateBoundsForPosition(isHorizontalDivision() ? mDisplayHeight : mDisplayWidth,
                         mDockSide, mDockedTaskRect);
+            }
+
+            // Move a docked app if from the right in position with the divider up to insets
+            if (mDockSide == DOCKED_RIGHT) {
+                mDockedTaskRect.offset(Math.max(position,
+                        mStableInsets.left) - mDockedTaskRect.left, 0);
             }
             calculateBoundsForPosition(taskPosition, DockedDividerUtils.invertDockSide(mDockSide),
                     mOtherTaskRect);

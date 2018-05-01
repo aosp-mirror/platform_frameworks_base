@@ -28,12 +28,19 @@ import static android.view.WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION;
 import static android.view.WindowManager.LayoutParams.TYPE_BASE_APPLICATION;
 import static android.view.WindowManager.LayoutParams.TYPE_INPUT_METHOD;
+import static android.view.WindowManager.DOCKED_BOTTOM;
+import static android.view.WindowManager.DOCKED_LEFT;
+import static android.view.WindowManager.DOCKED_RIGHT;
+import static android.view.WindowManager.DOCKED_TOP;
 
+import static com.android.server.policy.WindowManagerPolicy.NAV_BAR_LEFT;
 import static com.android.server.policy.WindowManagerPolicy.NAV_BAR_BOTTOM;
 import static com.android.server.policy.WindowManagerPolicy.NAV_BAR_RIGHT;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 
 import android.graphics.PixelFormat;
 import android.platform.test.annotations.Presubmit;
@@ -193,5 +200,54 @@ public class PhoneWindowManagerTest {
         assertEquals(SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR,
                 PhoneWindowManager.updateLightNavigationBarLw(0, opaqueDarkNavBar,
                         opaqueDarkNavBar, imeDrawLightNavBar, imeDrawLightNavBar));
+    }
+
+    @Test
+    public void testIsDockSideAllowedDockTop() throws Exception {
+        // Docked top is always allowed
+        assertTrue(PhoneWindowManager.isDockSideAllowed(DOCKED_TOP, DOCKED_LEFT, NAV_BAR_BOTTOM,
+                true /* navigationBarCanMove */));
+        assertTrue(PhoneWindowManager.isDockSideAllowed(DOCKED_TOP, DOCKED_LEFT, NAV_BAR_BOTTOM,
+                false /* navigationBarCanMove */));
+    }
+
+    @Test
+    public void testIsDockSideAllowedDockBottom() throws Exception {
+        // Cannot dock bottom
+        assertFalse(PhoneWindowManager.isDockSideAllowed(DOCKED_BOTTOM, DOCKED_LEFT, NAV_BAR_BOTTOM,
+                true /* navigationBarCanMove */));
+    }
+
+    @Test
+    public void testIsDockSideAllowedNavigationBarMovable() throws Exception {
+        assertFalse(PhoneWindowManager.isDockSideAllowed(DOCKED_LEFT, DOCKED_LEFT, NAV_BAR_BOTTOM,
+                true /* navigationBarCanMove */));
+        assertFalse(PhoneWindowManager.isDockSideAllowed(DOCKED_LEFT, DOCKED_LEFT, NAV_BAR_LEFT,
+                true /* navigationBarCanMove */));
+        assertTrue(PhoneWindowManager.isDockSideAllowed(DOCKED_LEFT, DOCKED_LEFT, NAV_BAR_RIGHT,
+                true /* navigationBarCanMove */));
+        assertFalse(PhoneWindowManager.isDockSideAllowed(DOCKED_RIGHT, DOCKED_LEFT, NAV_BAR_BOTTOM,
+                true /* navigationBarCanMove */));
+        assertFalse(PhoneWindowManager.isDockSideAllowed(DOCKED_RIGHT, DOCKED_LEFT, NAV_BAR_RIGHT,
+                true /* navigationBarCanMove */));
+        assertTrue(PhoneWindowManager.isDockSideAllowed(DOCKED_RIGHT, DOCKED_LEFT, NAV_BAR_LEFT,
+                true /* navigationBarCanMove */));
+    }
+
+    @Test
+    public void testIsDockSideAllowedNavigationBarNotMovable() throws Exception {
+        // Navigation bar is not movable such as tablets
+        assertTrue(PhoneWindowManager.isDockSideAllowed(DOCKED_LEFT, DOCKED_LEFT, NAV_BAR_BOTTOM,
+                false /* navigationBarCanMove */));
+        assertTrue(PhoneWindowManager.isDockSideAllowed(DOCKED_LEFT, DOCKED_TOP, NAV_BAR_BOTTOM,
+                false /* navigationBarCanMove */));
+        assertFalse(PhoneWindowManager.isDockSideAllowed(DOCKED_LEFT, DOCKED_RIGHT, NAV_BAR_BOTTOM,
+                false /* navigationBarCanMove */));
+        assertFalse(PhoneWindowManager.isDockSideAllowed(DOCKED_RIGHT, DOCKED_LEFT, NAV_BAR_BOTTOM,
+                false /* navigationBarCanMove */));
+        assertFalse(PhoneWindowManager.isDockSideAllowed(DOCKED_RIGHT, DOCKED_TOP, NAV_BAR_BOTTOM,
+                false /* navigationBarCanMove */));
+        assertTrue(PhoneWindowManager.isDockSideAllowed(DOCKED_RIGHT, DOCKED_RIGHT, NAV_BAR_BOTTOM,
+                false /* navigationBarCanMove */));
     }
 }
