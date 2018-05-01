@@ -22462,9 +22462,13 @@ Slog.v(TAG, ":: stepped forward, applying functor at tag " + parser.getName());
         }
         final String volumeUuid = pkg.volumeUuid;
         final String packageName = pkg.packageName;
-        final ApplicationInfo app = (ps == null)
+
+        ApplicationInfo app = (ps == null)
                 ? pkg.applicationInfo
                 : PackageParser.generateApplicationInfo(pkg, 0, ps.readUserState(userId), userId);
+        if (app == null) {
+            app = pkg.applicationInfo;
+        }
 
         final int appId = UserHandle.getAppId(app.uid);
 
