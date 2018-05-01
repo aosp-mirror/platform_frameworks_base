@@ -212,16 +212,6 @@ final class OverlayManagerServiceImpl {
         }
     }
 
-    void onTargetPackageChanged(@NonNull final String packageName, final int userId) {
-        if (DEBUG) {
-            Slog.d(TAG, "onTargetPackageChanged packageName=" + packageName + " userId=" + userId);
-        }
-
-        if (updateAllOverlaysForTarget(packageName, userId, 0)) {
-            mListener.onOverlaysChanged(packageName, userId);
-        }
-    }
-
     void onTargetPackageUpgrading(@NonNull final String packageName, final int userId) {
         if (DEBUG) {
             Slog.d(TAG, "onTargetPackageUpgrading packageName=" + packageName + " userId="
