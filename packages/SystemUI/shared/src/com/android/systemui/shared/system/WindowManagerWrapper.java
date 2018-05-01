@@ -26,6 +26,10 @@ import android.util.Log;
 import android.view.WindowManager;
 import android.view.WindowManagerGlobal;
 
+import static android.view.WindowManagerPolicyConstants.NAV_BAR_RIGHT;
+import static android.view.WindowManagerPolicyConstants.NAV_BAR_BOTTOM;
+import static android.view.WindowManagerPolicyConstants.NAV_BAR_LEFT;
+
 import com.android.systemui.shared.recents.view.AppTransitionAnimationSpecsFuture;
 import com.android.systemui.shared.recents.view.RecentsTransition;
 
@@ -57,6 +61,11 @@ public class WindowManagerWrapper {
             WindowManager.TRANSIT_KEYGUARD_GOING_AWAY_ON_WALLPAPER;
     public static final int TRANSIT_KEYGUARD_OCCLUDE = WindowManager.TRANSIT_KEYGUARD_OCCLUDE;
     public static final int TRANSIT_KEYGUARD_UNOCCLUDE = WindowManager.TRANSIT_KEYGUARD_UNOCCLUDE;
+
+    public static final int NAV_BAR_POS_INVALID = -1;
+    public static final int NAV_BAR_POS_LEFT = NAV_BAR_LEFT;
+    public static final int NAV_BAR_POS_RIGHT = NAV_BAR_RIGHT;
+    public static final int NAV_BAR_POS_BOTTOM = NAV_BAR_BOTTOM;
 
     public static final int ACTIVITY_TYPE_STANDARD = WindowConfiguration.ACTIVITY_TYPE_STANDARD;
 
@@ -140,5 +149,21 @@ public class WindowManagerWrapper {
         } catch (RemoteException e) {
             Log.w(TAG, "Failed to set recents visibility");
         }
+    }
+
+    /**
+     * @return The side of the screen where navigation bar is positioned.
+     * @see #NAV_BAR_POS_RIGHT
+     * @see #NAV_BAR_POS_LEFT
+     * @see #NAV_BAR_POS_BOTTOM
+     * @see #NAV_BAR_POS_INVALID
+     */
+    public int getNavBarPosition() {
+        try {
+            return WindowManagerGlobal.getWindowManagerService().getNavBarPosition();
+        } catch (RemoteException e) {
+            Log.w(TAG, "Failed to get nav bar position");
+        }
+        return NAV_BAR_POS_INVALID;
     }
 }

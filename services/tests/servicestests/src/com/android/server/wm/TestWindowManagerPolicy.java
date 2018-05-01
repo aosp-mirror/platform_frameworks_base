@@ -552,7 +552,8 @@ class TestWindowManagerPolicy implements WindowManagerPolicy {
     }
 
     @Override
-    public boolean isDockSideAllowed(int dockSide) {
+    public boolean isDockSideAllowed(int dockSide, int originalDockSide, int displayWidth,
+            int displayHeight, int displayRotation) {
         return false;
     }
 

@@ -1706,11 +1706,19 @@ public interface WindowManagerPolicy extends WindowManagerPolicyConstants {
             DisplayCutout displayCutout, Rect outInsets);
 
     /**
+     * @param displayRotation the current display rotation
+     * @param displayWidth the current display width
+     * @param displayHeight the current display height
+     * @param dockSide the dockside asking if allowed
+     * @param originalDockSide the side that was original docked to in split screen
      * @return True if a specified {@param dockSide} is allowed on the current device, or false
      *         otherwise. It is guaranteed that at least one dock side for a particular orientation
      *         is allowed, so for example, if DOCKED_RIGHT is not allowed, DOCKED_LEFT is allowed.
+     *         If navigation bar is movable then the docked side would bias towards the
+     *         {@param originalDockSide}.
      */
-    public boolean isDockSideAllowed(int dockSide);
+    public boolean isDockSideAllowed(int dockSide, int originalDockSide, int displayWidth,
+            int displayHeight, int displayRotation);
 
     /**
      * Called when the configuration has changed, and it's safe to load new values from resources.

@@ -170,7 +170,7 @@ public class DockedStackDividerController {
             final int orientation = mTmpRect2.width() <= mTmpRect2.height()
                     ? ORIENTATION_PORTRAIT
                     : ORIENTATION_LANDSCAPE;
-            final int dockSide = TaskStack.getDockSideUnchecked(mTmpRect, mTmpRect2, orientation);
+            final int dockSide = getDockSide(mTmpRect, mTmpRect2, orientation);
             final int position = DockedDividerUtils.calculatePositionForBounds(mTmpRect, dockSide,
                     getContentWidth());
 
@@ -191,6 +191,39 @@ public class DockedStackDividerController {
         return (int) (minWidth / mDisplayContent.getDisplayMetrics().density);
     }
 
+    /**
+     * Get the current docked side. Determined by its location of {@param bounds} within
+     * {@param displayRect} but if both are the same, it will try to dock to each side and determine
+     * if allowed in its respected {@param orientation}.
+     *
+     * @param bounds bounds of the docked task to get which side is docked
+     * @param displayRect bounds of the display that contains the docked task
+     * @param orientation the origination of device
+     * @return current docked side
+     */
+    int getDockSide(Rect bounds, Rect displayRect, int orientation) {
+        if (orientation == Configuration.ORIENTATION_PORTRAIT) {
+            // Portrait mode, docked either at the top or the bottom.
+            final int diff = (displayRect.bottom - bounds.bottom) - (bounds.top - displayRect.top);
+            if (diff > 0) {
+                return DOCKED_TOP;
+            } else if (diff < 0) {
+                return DOCKED_BOTTOM;
+            }
+            return canPrimaryStackDockTo(DOCKED_TOP) ? DOCKED_TOP : DOCKED_BOTTOM;
+        } else if (orientation == Configuration.ORIENTATION_LANDSCAPE) {
+            // Landscape mode, docked either on the left or on the right.
+            final int diff = (displayRect.right - bounds.right) - (bounds.left - displayRect.left);
+            if (diff > 0) {
+                return DOCKED_LEFT;
+            } else if (diff < 0) {
+                return DOCKED_RIGHT;
+            }
+            return canPrimaryStackDockTo(DOCKED_LEFT) ? DOCKED_LEFT : DOCKED_RIGHT;
+        }
+        return DOCKED_INVALID;
+    }
+
     void getHomeStackBoundsInDockedMode(Rect outBounds) {
         final DisplayInfo di = mDisplayContent.getDisplayInfo();
         mService.mPolicy.getStableInsetsLw(di.rotation, di.logicalWidth, di.logicalHeight,
@@ -203,10 +236,20 @@ public class DockedStackDividerController {
             outBounds.set(0, mTaskHeightInMinimizedMode + dividerSize + mTmpRect.top,
                     di.logicalWidth, di.logicalHeight);
         } else {
-            // In landscape append the left position with the statusbar height to match the
+            // In landscape also inset the left/right side with the statusbar height to match the
             // minimized size height in portrait mode.
-            outBounds.set(mTaskHeightInMinimizedMode + dividerSize + mTmpRect.left + mTmpRect.top,
-                    0, di.logicalWidth, di.logicalHeight);
+            final TaskStack stack = mDisplayContent.getSplitScreenPrimaryStackIgnoringVisibility();
+            final int primaryTaskWidth = mTaskHeightInMinimizedMode + dividerSize + mTmpRect.top;
+            int left = mTmpRect.left;
+            int right = di.logicalWidth - mTmpRect.right;
+            if (stack != null) {
+                if (stack.getDockSide() == DOCKED_LEFT) {
+                    left += primaryTaskWidth;
+                } else if (stack.getDockSide() == DOCKED_RIGHT) {
+                    right -= primaryTaskWidth;
+                }
+            }
+            outBounds.set(left, 0, right, di.logicalHeight);
         }
     }
 
@@ -420,21 +463,9 @@ public class DockedStackDividerController {
      * @return true if the side provided is valid
      */
     boolean canPrimaryStackDockTo(int dockSide) {
-        if (mService.mPolicy.isDockSideAllowed(dockSide)) {
-            // Side is the same as original side
-            if (dockSide == mOriginalDockedSide) {
-                return true;
-            }
-            // Special rule that the top in portrait is always valid
-            if (dockSide == DOCKED_TOP) {
-                return true;
-            }
-            // Only if original docked side was top in portrait will allow left side for landscape
-            if (dockSide == DOCKED_LEFT && mOriginalDockedSide == DOCKED_TOP) {
-                return true;
-            }
-        }
-        return false;
+        final DisplayInfo di = mDisplayContent.getDisplayInfo();
+        return mService.mPolicy.isDockSideAllowed(dockSide, mOriginalDockedSide, di.logicalWidth,
+                di.logicalHeight, di.rotation);
     }
 
     void notifyDockedStackExistsChanged(boolean exists) {
