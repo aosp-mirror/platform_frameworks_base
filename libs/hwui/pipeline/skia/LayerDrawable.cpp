@@ -51,8 +51,13 @@ bool LayerDrawable::DrawLayer(GrContext* context, SkCanvas* canvas, Layer* layer
         GrGLTextureInfo externalTexture;
         externalTexture.fTarget = glLayer->getRenderTarget();
         externalTexture.fID = glLayer->getTextureId();
-        GrBackendTexture backendTexture(layerWidth, layerHeight, kRGBA_8888_GrPixelConfig,
-                                        externalTexture);
+        // The format may not be GL_RGBA8, but given the DeferredLayerUpdater and GLConsumer don't
+        // expose that info we use it as our default.  Further, given that we only use this texture
+        // as a source this will not impact how Skia uses the texture.  The only potential affect
+        // this is anticipated to have is that for some format types if we are not bound as an OES
+        // texture we may get invalid results for SKP capture if we read back the texture.
+        externalTexture.fFormat = GL_RGBA8;
+        GrBackendTexture backendTexture(layerWidth, layerHeight, GrMipMapped::kNo, externalTexture);
         layerImage = SkImage::MakeFromTexture(context, backendTexture, kTopLeft_GrSurfaceOrigin,
                                               kPremul_SkAlphaType, nullptr);
     } else {
@@ -82,7 +87,7 @@ bool LayerDrawable::DrawLayer(GrContext* context, SkCanvas* canvas, Layer* layer
         SkPaint paint;
         paint.setAlpha(layer->getAlpha());
         paint.setBlendMode(layer->getMode());
-        paint.setColorFilter(sk_ref_sp(layer->getColorFilter()));
+        paint.setColorFilter(layer->getColorSpaceWithFilter());
 
         const bool nonIdentityMatrix = !matrix.isIdentity();
         if (nonIdentityMatrix) {

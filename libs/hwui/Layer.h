@@ -19,6 +19,8 @@
 #include <GpuMemoryTracker.h>
 #include <utils/RefBase.h>
 
+#include <SkColorFilter.h>
+#include <SkColorSpace.h>
 #include <SkBlendMode.h>
 #include <SkPaint.h>
 
@@ -72,9 +74,15 @@ public:
 
     inline SkBlendMode getMode() const { return mode; }
 
-    inline SkColorFilter* getColorFilter() const { return colorFilter; }
+    inline SkColorFilter* getColorFilter() const { return mColorFilter.get(); }
 
-    void setColorFilter(SkColorFilter* filter);
+    void setColorFilter(sk_sp<SkColorFilter> filter);
+
+    void setDataSpace(android_dataspace dataspace);
+
+    void setColorSpace(sk_sp<SkColorSpace> colorSpace);
+
+    inline sk_sp<SkColorFilter> getColorSpaceWithFilter() const { return mColorSpaceWithFilter; }
 
     inline mat4& getTexTransform() { return texTransform; }
 
@@ -87,18 +95,30 @@ public:
     void postDecStrong();
 
 protected:
-    Layer(RenderState& renderState, Api api, SkColorFilter* colorFilter, int alpha,
+    Layer(RenderState& renderState, Api api, sk_sp<SkColorFilter>, int alpha,
           SkBlendMode mode);
 
     RenderState& mRenderState;
 
 private:
+    void buildColorSpaceWithFilter();
+
     Api mApi;
 
     /**
      * Color filter used to draw this layer. Optional.
      */
-    SkColorFilter* colorFilter;
+    sk_sp<SkColorFilter> mColorFilter;
+
+    /**
+     * Colorspace of the contents of the layer. Optional.
+     */
+    android_dataspace mCurrentDataspace = HAL_DATASPACE_UNKNOWN;
+
+    /**
+     * A color filter that is the combination of the mColorFilter and mColorSpace. Optional.
+     */
+    sk_sp<SkColorFilter> mColorSpaceWithFilter;
 
     /**
      * Indicates raster data backing the layer is scaled, requiring filtration.

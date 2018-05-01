@@ -115,7 +115,8 @@ bool SkiaVulkanPipeline::copyLayerInto(DeferredLayerUpdater* layer, SkBitmap* bi
 }
 
 static Layer* createLayer(RenderState& renderState, uint32_t layerWidth, uint32_t layerHeight,
-                          SkColorFilter* colorFilter, int alpha, SkBlendMode mode, bool blend) {
+                          sk_sp<SkColorFilter> colorFilter, int alpha, SkBlendMode mode,
+                          bool blend) {
     return new VkLayer(renderState, layerWidth, layerHeight, colorFilter, alpha, mode, blend);
 }
 

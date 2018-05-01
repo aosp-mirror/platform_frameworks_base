@@ -17,6 +17,7 @@
 #define COLOR_H
 
 #include <math.h>
+#include <system/graphics.h>
 
 #include <SkColor.h>
 #include <SkColorSpace.h>
@@ -111,6 +112,8 @@ static constexpr float EOCF(float srgb) {
 // approximated with the native sRGB transfer function. This method
 // returns true for sRGB, gamma 2.2 and Display P3 for instance
 bool transferFunctionCloseToSRGB(const SkColorSpace* colorSpace);
+
+sk_sp<SkColorSpace> DataSpaceToColorSpace(android_dataspace dataspace);
 } /* namespace uirenderer */
 } /* namespace android */
 

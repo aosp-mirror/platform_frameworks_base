@@ -18,34 +18,58 @@
 
 #include "renderstate/RenderState.h"
 
-#include <SkColorFilter.h>
+#include <SkToSRGBColorFilter.h>
 
 namespace android {
 namespace uirenderer {
 
-Layer::Layer(RenderState& renderState, Api api, SkColorFilter* colorFilter, int alpha,
+Layer::Layer(RenderState& renderState, Api api, sk_sp<SkColorFilter> colorFilter, int alpha,
              SkBlendMode mode)
         : GpuMemoryTracker(GpuObjectType::Layer)
         , mRenderState(renderState)
         , mApi(api)
-        , colorFilter(nullptr)
+        , mColorFilter(colorFilter)
         , alpha(alpha)
         , mode(mode) {
     // TODO: This is a violation of Android's typical ref counting, but it
     // preserves the old inc/dec ref locations. This should be changed...
     incStrong(nullptr);
-
+    buildColorSpaceWithFilter();
     renderState.registerLayer(this);
 }
 
 Layer::~Layer() {
-    SkSafeUnref(colorFilter);
-
     mRenderState.unregisterLayer(this);
 }
 
-void Layer::setColorFilter(SkColorFilter* filter) {
-    SkRefCnt_SafeAssign(colorFilter, filter);
+void Layer::setColorFilter(sk_sp<SkColorFilter> filter) {
+    if (filter != mColorFilter) {
+        mColorFilter = filter;
+        buildColorSpaceWithFilter();
+    }
+}
+
+void Layer::setDataSpace(android_dataspace dataspace) {
+    if (dataspace != mCurrentDataspace) {
+        mCurrentDataspace = dataspace;
+        buildColorSpaceWithFilter();
+    }
+}
+
+void Layer::buildColorSpaceWithFilter() {
+    sk_sp<SkColorFilter> colorSpaceFilter;
+    sk_sp<SkColorSpace> colorSpace = DataSpaceToColorSpace(mCurrentDataspace);
+    if (colorSpace && !colorSpace->isSRGB()) {
+        colorSpaceFilter = SkToSRGBColorFilter::Make(colorSpace);
+    }
+
+    if (mColorFilter && colorSpaceFilter) {
+        mColorSpaceWithFilter = mColorFilter->makeComposed(colorSpaceFilter);
+    } else if (colorSpaceFilter) {
+        mColorSpaceWithFilter = colorSpaceFilter;
+    } else {
+        mColorSpaceWithFilter = mColorFilter;
+    }
 }
 
 void Layer::postDecStrong() {
