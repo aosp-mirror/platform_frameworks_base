@@ -18,6 +18,7 @@ package com.android.server.power.batterysaver;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.database.ContentObserver;
+import android.os.Handler;
 import android.os.UserHandle;
 import android.provider.Settings;
 import android.provider.Settings.Global;
@@ -27,6 +28,7 @@ import android.util.proto.ProtoOutputStream;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.os.BackgroundThread;
+import com.android.server.EventLogTags;
 import com.android.server.power.BatterySaverPolicy;
 import com.android.server.power.BatterySaverStateMachineProto;
 
@@ -95,6 +97,18 @@ public class BatterySaverStateMachine {
     @GuardedBy("mLock")
     private boolean mBatterySaverSnoozing;
 
+    /**
+     * Last reason passed to {@link #enableBatterySaverLocked}.
+     */
+    @GuardedBy("mLock")
+    private int mLastChangedIntReason;
+
+    /**
+     * Last reason passed to {@link #enableBatterySaverLocked}.
+     */
+    @GuardedBy("mLock")
+    private String mLastChangedStrReason;
+
     private final ContentObserver mSettingsObserver = new ContentObserver(null) {
         @Override
         public void onChange(boolean selfChange) {
@@ -149,9 +163,23 @@ public class BatterySaverStateMachine {
         });
     }
 
+    /**
+     * Run a {@link Runnable} on a background handler.
+     */
     @VisibleForTesting
     void runOnBgThread(Runnable r) {
         BackgroundThread.getHandler().post(r);
+    }
+
+    /**
+     * Run a {@link Runnable} on a background handler, but lazily. If the same {@link Runnable},
+     * it'll be first removed before a new one is posted.
+     */
+    @VisibleForTesting
+    void runOnBgThreadLazy(Runnable r, int delayMillis) {
+        final Handler h = BackgroundThread.getHandler();
+        h.removeCallbacks(r);
+        h.postDelayed(r, delayMillis);
     }
 
     void refreshSettingsLocked() {
@@ -199,13 +227,22 @@ public class BatterySaverStateMachine {
         mSettingBatterySaverEnabledSticky = batterySaverEnabledSticky;
         mSettingBatterySaverTriggerThreshold = batterySaverTriggerThreshold;
 
+        if (thresholdChanged) {
+            // To avoid spamming the event log, we throttle logging here.
+            runOnBgThreadLazy(mThresholdChangeLogger, 2000);
+        }
+
         if (enabledChanged) {
             final String reason = batterySaverEnabled
                     ? "Global.low_power changed to 1" : "Global.low_power changed to 0";
             enableBatterySaverLocked(/*enable=*/ batterySaverEnabled, /*manual=*/ true,
-                    reason);
+                    BatterySaverController.REASON_SETTING_CHANGED, reason);
         }
     }
+
+    private final Runnable mThresholdChangeLogger = () -> {
+        EventLogTags.writeBatterySaverSetting(mSettingBatterySaverTriggerThreshold);
+    };
 
     /**
      * {@link com.android.server.power.PowerManagerService} calls it when battery state changes.
@@ -257,18 +294,26 @@ public class BatterySaverStateMachine {
         }
         if (mIsPowered) {
             updateSnoozingLocked(false, "Plugged in");
-            enableBatterySaverLocked(/*enable=*/ false, /*manual=*/ false, "Plugged in");
+            enableBatterySaverLocked(/*enable=*/ false, /*manual=*/ false,
+                    BatterySaverController.REASON_PLUGGED_IN,
+                    "Plugged in");
 
         } else if (mSettingBatterySaverEnabledSticky) {
             // Re-enable BS.
-            enableBatterySaverLocked(/*enable=*/ true, /*manual=*/ true, "Sticky restore");
+            enableBatterySaverLocked(/*enable=*/ true, /*manual=*/ true,
+                    BatterySaverController.REASON_STICKY_RESTORE,
+                    "Sticky restore");
 
         } else if (mIsBatteryLevelLow) {
             if (!mBatterySaverSnoozing && isAutoBatterySaverConfigured()) {
-                enableBatterySaverLocked(/*enable=*/ true, /*manual=*/ false, "Auto ON");
+                enableBatterySaverLocked(/*enable=*/ true, /*manual=*/ false,
+                        BatterySaverController.REASON_AUTOMATIC_ON,
+                        "Auto ON");
             }
         } else { // Battery not low
-            enableBatterySaverLocked(/*enable=*/ false, /*manual=*/ false, "Auto OFF");
+            enableBatterySaverLocked(/*enable=*/ false, /*manual=*/ false,
+                    BatterySaverController.REASON_AUTOMATIC_OFF,
+                    "Auto OFF");
         }
     }
 
@@ -284,6 +329,8 @@ public class BatterySaverStateMachine {
         }
         synchronized (mLock) {
             enableBatterySaverLocked(/*enable=*/ enabled, /*manual=*/ true,
+                    (enabled ? BatterySaverController.REASON_MANUAL_ON
+                            : BatterySaverController.REASON_MANUAL_OFF),
                     (enabled ? "Manual ON" : "Manual OFF"));
         }
     }
@@ -292,10 +339,11 @@ public class BatterySaverStateMachine {
      * Actually enable / disable battery saver. Write the new state to the global settings
      * and propagate it to {@link #mBatterySaverController}.
      */
-    private void enableBatterySaverLocked(boolean enable, boolean manual, String reason) {
+    private void enableBatterySaverLocked(boolean enable, boolean manual, int intReason,
+            String strReason) {
         if (DEBUG) {
             Slog.d(TAG, "enableBatterySaver: enable=" + enable + " manual=" + manual
-                    + " reason=" + reason);
+                    + " reason=" + strReason + "(" + intReason + ")");
         }
         final boolean wasEnabled = mBatterySaverController.isEnabled();
 
@@ -309,6 +357,8 @@ public class BatterySaverStateMachine {
             if (DEBUG) Slog.d(TAG, "Can't enable: isPowered");
             return;
         }
+        mLastChangedIntReason = intReason;
+        mLastChangedStrReason = strReason;
 
         if (manual) {
             if (enable) {
@@ -330,12 +380,12 @@ public class BatterySaverStateMachine {
             mSettingBatterySaverEnabledSticky = enable;
             putGlobalSetting(Global.LOW_POWER_MODE_STICKY, enable ? 1 : 0);
         }
-        mBatterySaverController.enableBatterySaver(enable);
+        mBatterySaverController.enableBatterySaver(enable, intReason);
 
         if (DEBUG) {
             Slog.d(TAG, "Battery saver: Enabled=" + enable
                     + " manual=" + manual
-                    + " reason=" + reason);
+                    + " reason=" + strReason + "(" + intReason + ")");
         }
     }
 
@@ -364,6 +414,11 @@ public class BatterySaverStateMachine {
 
             pw.print("  Enabled=");
             pw.println(mBatterySaverController.isEnabled());
+
+            pw.print("  mLastChangedIntReason=");
+            pw.println(mLastChangedIntReason);
+            pw.print("  mLastChangedStrReason=");
+            pw.println(mLastChangedStrReason);
 
             pw.print("  mBootCompleted=");
             pw.println(mBootCompleted);
