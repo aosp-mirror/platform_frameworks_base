@@ -114,7 +114,7 @@ public:
 
     // Soft memory limit per configuration. Once this limit is exceeded, we begin notifying the
     // data subscriber that it's time to call getData.
-    static const size_t kBytesPerConfigTriggerGetData = 128 * 1024;
+    static const size_t kBytesPerConfigTriggerGetData = 192 * 1024;
 
     // Cap the UID map's memory usage to this. This should be fairly high since the UID information
     // is critical for understanding the metrics.
