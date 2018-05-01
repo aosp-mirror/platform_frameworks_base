@@ -94,14 +94,6 @@ public class PackageHelper {
         abstract public boolean getAllow3rdPartyOnInternalConfig(Context context);
         abstract public ApplicationInfo getExistingAppInfo(Context context, String packageName);
         abstract public File getDataDirectory();
-
-        public boolean fitsOnInternalStorage(Context context, SessionParams params)
-                throws IOException {
-            StorageManager storage = getStorageManager(context);
-            final UUID target = storage.getUuidForPath(getDataDirectory());
-            return (params.sizeBytes <= storage.getAllocatableBytes(target,
-                    translateAllocateFlags(params.installFlags)));
-        }
     }
 
     private synchronized static TestableInterface getDefaultTestableInterface() {
@@ -175,6 +167,7 @@ public class PackageHelper {
     @VisibleForTesting
     public static String resolveInstallVolume(Context context, SessionParams params,
             TestableInterface testInterface) throws IOException {
+        final StorageManager storageManager = testInterface.getStorageManager(context);
         final boolean forceAllowOnExternal = testInterface.getForceAllowOnExternalSetting(context);
         final boolean allow3rdPartyOnInternal =
                 testInterface.getAllow3rdPartyOnInternalConfig(context);
@@ -183,9 +176,31 @@ public class PackageHelper {
         ApplicationInfo existingInfo = testInterface.getExistingAppInfo(context,
                 params.appPackageName);
 
-        final boolean fitsOnInternal = testInterface.fitsOnInternalStorage(context, params);
-        final StorageManager storageManager =
-                testInterface.getStorageManager(context);
+        // Figure out best candidate volume, and also if we fit on internal
+        final ArraySet<String> allCandidates = new ArraySet<>();
+        boolean fitsOnInternal = false;
+        VolumeInfo bestCandidate = null;
+        long bestCandidateAvailBytes = Long.MIN_VALUE;
+        for (VolumeInfo vol : storageManager.getVolumes()) {
+            if (vol.type == VolumeInfo.TYPE_PRIVATE && vol.isMountedWritable()) {
+                final boolean isInternalStorage = ID_PRIVATE_INTERNAL.equals(vol.id);
+                final UUID target = storageManager.getUuidForPath(new File(vol.path));
+                final long availBytes = storageManager.getAllocatableBytes(target,
+                        translateAllocateFlags(params.installFlags));
+                if (isInternalStorage) {
+                    fitsOnInternal = (params.sizeBytes <= availBytes);
+                }
+                if (!isInternalStorage || allow3rdPartyOnInternal) {
+                    if (availBytes >= params.sizeBytes) {
+                        allCandidates.add(vol.fsUuid);
+                    }
+                    if (availBytes >= bestCandidateAvailBytes) {
+                        bestCandidate = vol;
+                        bestCandidateAvailBytes = availBytes;
+                    }
+                }
+            }
+        }
 
         // System apps always forced to internal storage
         if (existingInfo != null && existingInfo.isSystemApp()) {
@@ -195,27 +210,6 @@ public class PackageHelper {
                 throw new IOException("Not enough space on existing volume "
                         + existingInfo.volumeUuid + " for system app " + params.appPackageName
                         + " upgrade");
-            }
-        }
-
-        // Now deal with non-system apps.
-        final ArraySet<String> allCandidates = new ArraySet<>();
-        VolumeInfo bestCandidate = null;
-        long bestCandidateAvailBytes = Long.MIN_VALUE;
-        for (VolumeInfo vol : storageManager.getVolumes()) {
-            boolean isInternalStorage = ID_PRIVATE_INTERNAL.equals(vol.id);
-            if (vol.type == VolumeInfo.TYPE_PRIVATE && vol.isMountedWritable()
-                    && (!isInternalStorage || allow3rdPartyOnInternal)) {
-                final UUID target = storageManager.getUuidForPath(new File(vol.path));
-                final long availBytes = storageManager.getAllocatableBytes(target,
-                        translateAllocateFlags(params.installFlags));
-                if (availBytes >= params.sizeBytes) {
-                    allCandidates.add(vol.fsUuid);
-                }
-                if (availBytes >= bestCandidateAvailBytes) {
-                    bestCandidate = vol;
-                    bestCandidateAvailBytes = availBytes;
-                }
             }
         }
 
