@@ -1087,10 +1087,10 @@ Landroid/graphics/GraphicBuffer;->createFromExisting(IIIIJ)Landroid/graphics/Gra
 Landroid/graphics/GraphicBuffer;->CREATOR:Landroid/os/Parcelable$Creator;
 Landroid/graphics/GraphicBuffer;->mNativeObject:J
 Landroid/graphics/ImageDecoder;->postProcessAndRelease(Landroid/graphics/Canvas;)I
-Landroid/graphics/Insets;->left:I
-Landroid/graphics/Insets;->top:I
-Landroid/graphics/Insets;->right:I
 Landroid/graphics/Insets;->bottom:I
+Landroid/graphics/Insets;->left:I
+Landroid/graphics/Insets;->right:I
+Landroid/graphics/Insets;->top:I
 Landroid/graphics/LinearGradient;->mColors:[I
 Landroid/graphics/Matrix;->native_instance:J
 Landroid/graphics/Movie;-><init>(J)V
@@ -2380,6 +2380,7 @@ Landroid/telephony/SignalStrength;->getAsuLevel()I
 Landroid/telephony/SignalStrength;->getCdmaLevel()I
 Landroid/telephony/SignalStrength;->getDbm()I
 Landroid/telephony/SignalStrength;->getGsmDbm()I
+Landroid/telephony/SignalStrength;->getLteCqi()I
 Landroid/telephony/SignalStrength;->getLteDbm()I
 Landroid/telephony/SignalStrength;->getLteRsrp()I
 Landroid/telephony/SignalStrength;->getLteRsrq()I
@@ -2970,6 +2971,7 @@ Landroid/webkit/WebView;->getTouchIconUrl()Ljava/lang/String;
 Landroid/webkit/WebView;->getVisibleTitleHeight()I
 Landroid/webkit/WebView;->isPaused()Z
 Landroid/webkit/WebView;->mProvider:Landroid/webkit/WebViewProvider;
+Landroid/webkit/WebView;->mWebViewThread:Landroid/os/Looper;
 Landroid/webkit/WebView;->notifyFindDialogDismissed()V
 Landroid/webkit/WebView;->onDrawVerticalScrollBar(Landroid/graphics/Canvas;Landroid/graphics/drawable/Drawable;IIII)V
 Landroid/webkit/WebView;->restorePicture(Landroid/os/Bundle;Ljava/io/File;)Z
@@ -3181,6 +3183,7 @@ Landroid/widget/ScrollView;->mMinimumVelocity:I
 Landroid/widget/ScrollView;->mOverflingDistance:I
 Landroid/widget/ScrollView;->mOverscrollDistance:I
 Landroid/widget/ScrollView;->mScroller:Landroid/widget/OverScroller;
+Landroid/widget/SearchView$SearchAutoComplete;-><init>(Landroid/content/Context;Landroid/util/AttributeSet;)V
 Landroid/widget/SearchView;->mCloseButton:Landroid/widget/ImageView;
 Landroid/widget/SearchView;->mSearchButton:Landroid/widget/ImageView;
 Landroid/widget/SearchView;->mSearchPlate:Landroid/view/View;
@@ -3234,6 +3237,8 @@ Landroid/widget/VideoView;->mSHCallback:Landroid/view/SurfaceHolder$Callback;
 Landroid/widget/VideoView;->mUri:Landroid/net/Uri;
 Landroid/widget/VideoView;->mVideoHeight:I
 Landroid/widget/VideoView;->mVideoWidth:I
+Landroid/widget/ViewAnimator;->mFirstTime:Z
+Landroid/widget/ViewAnimator;->mWhichChild:I
 Lcom/android/ims/internal/uce/common/CapInfo;-><init>()V
 Lcom/android/ims/internal/uce/common/CapInfo;->setCapTimestamp(J)V
 Lcom/android/ims/internal/uce/common/CapInfo;->setCdViaPresenceSupported(Z)V
@@ -3937,6 +3942,7 @@ Ljava/util/concurrent/ThreadPoolExecutor;->allowCoreThreadTimeOut:Z
 Ljava/util/EnumMap;->keyType:Ljava/lang/Class;
 Ljava/util/EnumSet;->elementType:Ljava/lang/Class;
 Ljava/util/HashMap$HashIterator;->hasNext()Z
+Ljava/util/HashMap$HashIterator;->remove()V
 Ljava/util/HashMap;->modCount:I
 Ljava/util/HashMap;->table:[Ljava/util/HashMap$Node;
 Ljava/util/HashSet;->map:Ljava/util/HashMap;

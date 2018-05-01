@@ -169,6 +169,7 @@ public class NotificationStackScrollLayout extends ViewGroup
     private int mCollapsedSize;
     private int mPaddingBetweenElements;
     private int mIncreasedPaddingBetweenElements;
+    private int mMaxTopPadding;
     private int mRegularTopPadding;
     private int mDarkTopPadding;
     // Current padding, will be either mRegularTopPadding or mDarkTopPadding
@@ -177,6 +178,7 @@ public class NotificationStackScrollLayout extends ViewGroup
     private int mDarkSeparatorPadding;
     private int mBottomMargin;
     private int mBottomInset = 0;
+    private float mQsExpansionFraction;
 
     /**
      * The algorithm which calculates the properties for our children
@@ -230,6 +232,7 @@ public class NotificationStackScrollLayout extends ViewGroup
     private boolean mPanelTracking;
     private boolean mExpandingNotification;
     private boolean mExpandedInThisMotion;
+    private boolean mShouldShowShelfOnly;
     protected boolean mScrollingEnabled;
     protected FooterView mFooterView;
     protected EmptyShadeView mEmptyShadeView;
@@ -883,7 +886,20 @@ public class NotificationStackScrollLayout extends ViewGroup
         float appearFraction = 1.0f;
         if (height >= appearEndPosition) {
             translationY = 0;
-            stackHeight = (int) height;
+            if (mShouldShowShelfOnly) {
+                stackHeight = mTopPadding + mShelf.getIntrinsicHeight();
+            } else if (mQsExpanded) {
+                int stackStartPosition = mContentHeight - mTopPadding + mIntrinsicPadding;
+                int stackEndPosition = mMaxTopPadding + mShelf.getIntrinsicHeight();
+                if (stackStartPosition <= stackEndPosition) {
+                    stackHeight = stackEndPosition;
+                } else {
+                    stackHeight = (int) NotificationUtils.interpolate(stackStartPosition,
+                            stackEndPosition, mQsExpansionFraction);
+                }
+            } else {
+                stackHeight = (int) height;
+            }
         } else {
             appearFraction = getAppearFraction(height);
             if (appearFraction >= 0) {
@@ -2579,6 +2595,10 @@ public class NotificationStackScrollLayout extends ViewGroup
         setTopPadding(ignoreIntrinsicPadding ? topPadding : clampPadding(topPadding),
                 animate);
         setExpandedHeight(mExpandedHeight);
+    }
+
+    public void setMaxTopPadding(int maxTopPadding) {
+        mMaxTopPadding = maxTopPadding;
     }
 
     public int getLayoutMinHeight() {
@@ -4484,6 +4504,10 @@ public class NotificationStackScrollLayout extends ViewGroup
         updateAlgorithmLayoutMinHeight();
     }
 
+    public void setQsExpansionFraction(float qsExpansionFraction) {
+        mQsExpansionFraction = qsExpansionFraction;
+    }
+
     public void setOwnScrollY(int ownScrollY) {
         if (ownScrollY != mOwnScrollY) {
             // We still want to call the normal scrolled changed for accessibility reasons
@@ -4517,6 +4541,11 @@ public class NotificationStackScrollLayout extends ViewGroup
             updateContentHeight();
             notifyHeightChangeListener(mShelf);
         }
+    }
+
+    public void setShouldShowShelfOnly(boolean shouldShowShelfOnly) {
+        mShouldShowShelfOnly =  shouldShowShelfOnly;
+        updateAlgorithmLayoutMinHeight();
     }
 
     public int getMinExpansionHeight() {
@@ -4574,7 +4603,8 @@ public class NotificationStackScrollLayout extends ViewGroup
 
     public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
         pw.println(String.format("[%s: pulsing=%s qsCustomizerShowing=%s visibility=%s"
-                        + " alpha:%f scrollY:%d]",
+                        + " alpha:%f scrollY:%d maxTopPadding:%d showShelfOnly=%s"
+                        + " qsExpandFraction=%f]",
                 this.getClass().getSimpleName(),
                 mPulsing ? "T":"f",
                 mAmbientState.isQsCustomizerShowing() ? "T":"f",
@@ -4582,7 +4612,10 @@ public class NotificationStackScrollLayout extends ViewGroup
                         : getVisibility() == View.GONE ? "gone"
                                 : "invisible",
                 getAlpha(),
-                mAmbientState.getScrollY()));
+                mAmbientState.getScrollY(),
+                mMaxTopPadding,
+                mShouldShowShelfOnly ? "T":"f",
+                mQsExpansionFraction));
     }
 
     public boolean isFullyDark() {

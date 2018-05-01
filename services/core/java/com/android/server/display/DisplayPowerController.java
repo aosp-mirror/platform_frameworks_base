@@ -774,14 +774,8 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
             brightness = mScreenBrightnessForVr;
         }
 
-        boolean setBrightnessToOverride = false;
         if (brightness < 0 && mPowerRequest.screenBrightnessOverride > 0) {
             brightness = mPowerRequest.screenBrightnessOverride;
-            // If there's a screen brightness override, we want to reset the brightness to it
-            // whenever the user changes it, to communicate that these changes aren't taking
-            // effect. However, for a nicer user experience, we don't do it here, but rather after
-            // the temporary brightness has been taken into account.
-            setBrightnessToOverride = true;
         }
 
         final boolean autoBrightnessEnabledInDoze =
@@ -802,12 +796,6 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
         if (mTemporaryScreenBrightness > 0) {
             brightness = mTemporaryScreenBrightness;
             brightnessIsTemporary = true;
-        }
-
-        // Reset the brightness to the screen brightness override to communicate to the user that
-        // her changes aren't taking effect.
-        if (setBrightnessToOverride && !brightnessIsTemporary) {
-            putScreenBrightnessSetting(brightness);
         }
 
         final boolean autoBrightnessAdjustmentChanged = updateAutoBrightnessAdjustment();
@@ -1452,6 +1440,9 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
         if (userSwitch) {
             // Don't treat user switches as user initiated change.
             mCurrentScreenBrightnessSetting = mPendingScreenBrightnessSetting;
+            if (mAutomaticBrightnessController != null) {
+                mAutomaticBrightnessController.resetShortTermModel();
+            }
         }
         mPendingAutoBrightnessAdjustment = getAutoBrightnessAdjustmentSetting();
         // We don't bother with a pending variable for VR screen brightness since we just

@@ -269,6 +269,29 @@ public final class RadioMetadata implements Parcelable {
         mBundle = in.readBundle();
     }
 
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder("RadioMetadata[");
+
+        final String removePrefix = "android.hardware.radio.metadata";
+
+        boolean first = true;
+        for (String key : mBundle.keySet()) {
+            if (first) first = false;
+            else sb.append(", ");
+
+            String keyDisp = key;
+            if (key.startsWith(removePrefix)) keyDisp = key.substring(removePrefix.length());
+
+            sb.append(keyDisp);
+            sb.append('=');
+            sb.append(mBundle.get(key));
+        }
+
+        sb.append("]");
+        return sb.toString();
+    }
+
     /**
      * Returns {@code true} if the given key is contained in the meta data
      *

@@ -151,6 +151,12 @@ void ValueMetricProducer::dropDataLocked(const int64_t dropTimeNs) {
     mPastBuckets.clear();
 }
 
+void ValueMetricProducer::clearPastBucketsLocked(const int64_t dumpTimeNs) {
+    flushIfNeededLocked(dumpTimeNs);
+    mPastBuckets.clear();
+    mSkippedBuckets.clear();
+}
+
 void ValueMetricProducer::onDumpReportLocked(const int64_t dumpTimeNs,
                                              const bool include_current_partial_bucket,
                                              ProtoOutputStream* protoOutput) {

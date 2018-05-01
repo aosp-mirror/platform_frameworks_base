@@ -19,51 +19,44 @@ package com.android.server.am;
 import static android.app.ActivityManager.START_DELIVERED_TO_TOP;
 import static android.app.ActivityManager.START_TASK_TO_FRONT;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
-import static android.app.WindowConfiguration.ACTIVITY_TYPE_UNDEFINED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
+import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN_OR_SPLIT_SCREEN_SECONDARY;
 import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
-
 import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_PRIMARY;
 import static android.content.pm.ActivityInfo.FLAG_ALWAYS_FOCUSABLE;
 import static android.content.pm.ActivityInfo.FLAG_SHOW_WHEN_LOCKED;
+
 import static com.android.server.am.ActivityStack.REMOVE_TASK_MODE_DESTROYING;
+import static com.android.server.am.ActivityStackSupervisor
+        .MATCH_TASK_IN_STACKS_OR_RECENT_TASKS_AND_RESTORE;
+
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.assertFalse;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Matchers.anyInt;
+import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
-import static org.mockito.Mockito.doAnswer;
-import static org.mockito.Mockito.mock;
-import static org.mockito.ArgumentMatchers.any;
-
-import android.app.ActivityManager;
+import android.app.ActivityOptions;
 import android.app.WaitResult;
-import android.content.ComponentName;
-import android.content.res.Configuration;
 import android.graphics.Rect;
-import android.hardware.display.DisplayManager;
 import android.platform.test.annotations.Presubmit;
 import android.support.test.filters.MediumTest;
 import android.support.test.runner.AndroidJUnit4;
 import android.util.SparseIntArray;
 
-import org.junit.runner.RunWith;
 import org.junit.Before;
 import org.junit.Test;
-
+import org.junit.runner.RunWith;
 import org.mockito.invocation.InvocationOnMock;
 
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-
-import static com.android.server.am.ActivityStackSupervisor.MATCH_TASK_IN_STACKS_OR_RECENT_TASKS_AND_RESTORE;
 
 /**
  * Tests for the {@link ActivityStackSupervisor} class.
@@ -377,5 +370,29 @@ public class ActivityStackSupervisorTests extends ActivityTestsBase {
         assertEquals(showWhenLockedActivity, mService.mStackSupervisor.topRunningActivityLocked());
         assertEquals(showWhenLockedActivity, mService.mStackSupervisor.topRunningActivityLocked(
                 true /* considerKeyguardState */));
+    }
+
+    /**
+     * Verify that split-screen primary stack will be chosen if activity is launched that targets
+     * split-screen secondary, but a matching existing instance is found on top of split-screen
+     * primary stack.
+     */
+    @Test
+    public void testSplitScreenPrimaryChosenWhenTopActivityLaunchedToSecondary() throws Exception {
+        // Create primary split-screen stack with a task and an activity.
+        final ActivityStack primaryStack = mService.mStackSupervisor.getDefaultDisplay()
+                .createStack(WINDOWING_MODE_SPLIT_SCREEN_PRIMARY, ACTIVITY_TYPE_STANDARD,
+                        true /* onTop */);
+        final TaskRecord task = new TaskBuilder(mSupervisor).setStack(primaryStack).build();
+        final ActivityRecord r = new ActivityBuilder(mService).setTask(task).build();
+
+        // Find a launch stack for the top activity in split-screen primary, while requesting
+        // split-screen secondary.
+        final ActivityOptions options = ActivityOptions.makeBasic();
+        options.setLaunchWindowingMode(WINDOWING_MODE_FULLSCREEN_OR_SPLIT_SCREEN_SECONDARY);
+        final ActivityStack result = mSupervisor.getLaunchStack(r, options, task, true /* onTop */);
+
+        // Assert that the primary stack is returned.
+        assertEquals(primaryStack, result);
     }
 }

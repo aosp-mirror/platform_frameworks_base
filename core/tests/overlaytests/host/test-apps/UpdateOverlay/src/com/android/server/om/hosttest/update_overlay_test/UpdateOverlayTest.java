@@ -61,7 +61,7 @@ public class UpdateOverlayTest {
     }
 
     @Test
-    public void expectFrameworkOverlayResource() throws Exception {
+    public void expectFrameworkResource() throws Exception {
         assertEquals("OK", mResources.getString(android.R.string.ok));
     }
 

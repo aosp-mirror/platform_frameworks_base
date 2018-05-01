@@ -201,6 +201,8 @@ void MetricsManager::onDumpReport(const int64_t dumpTimeStampNs,
                     protoOutput->start(FIELD_TYPE_MESSAGE | FIELD_COUNT_REPEATED | FIELD_ID_METRICS);
             producer->onDumpReport(dumpTimeStampNs, include_current_partial_bucket, protoOutput);
             protoOutput->end(token);
+        } else {
+            producer->clearPastBuckets(dumpTimeStampNs);
         }
     }
     for (const auto& annotation : mAnnotations) {

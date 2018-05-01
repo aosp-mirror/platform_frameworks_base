@@ -443,6 +443,30 @@ public class StatusBarTest extends SysuiTestCase {
     }
 
     @Test
+    public void testPeek_disabledStatusBar() {
+        Notification n = new Notification.Builder(getContext(), "a").build();
+        StatusBarNotification sbn = new StatusBarNotification("a", "a", 0, "a", 0, 0, n,
+                UserHandle.of(0), null, 0);
+        NotificationData.Entry entry = new NotificationData.Entry(sbn);
+        mStatusBar.disable(StatusBarManager.DISABLE_EXPAND, 0, false /* animate */);
+
+        assertFalse("The panel shouldn't allow peek while disabled",
+                mStatusBar.shouldPeek(entry, sbn));
+    }
+
+    @Test
+    public void testPeek_disabledNotificationShade() {
+        Notification n = new Notification.Builder(getContext(), "a").build();
+        StatusBarNotification sbn = new StatusBarNotification("a", "a", 0, "a", 0, 0, n,
+                UserHandle.of(0), null, 0);
+        NotificationData.Entry entry = new NotificationData.Entry(sbn);
+        mStatusBar.disable(0, StatusBarManager.DISABLE2_NOTIFICATION_SHADE, false /* animate */);
+
+        assertFalse("The panel shouldn't allow peek while notitifcation shade disabled",
+                mStatusBar.shouldPeek(entry, sbn));
+    }
+
+    @Test
     public void testLogHidden() {
         try {
             mStatusBar.handleVisibleToUserChanged(false);
