@@ -17,7 +17,7 @@
 
 set -e
 
-PATH_TO_FRAMEWORK_RES=$(gettop)/prebuilts/sdk/current/android.jar
+PATH_TO_FRAMEWORK_RES=$(gettop)/prebuilts/sdk/current/public/android.jar
 
 aapt package -M AndroidManifest.xml -S res -I $PATH_TO_FRAMEWORK_RES -F appaslib.apk -f
 aapt package -M AndroidManifest.xml -S res -I $PATH_TO_FRAMEWORK_RES -F appaslib_lib.apk -f --shared-lib

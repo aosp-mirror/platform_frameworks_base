@@ -17,7 +17,7 @@
 
 set -e
 
-PATH_TO_FRAMEWORK_RES=${ANDROID_BUILD_TOP}/prebuilts/sdk/current/android.jar
+PATH_TO_FRAMEWORK_RES=${ANDROID_BUILD_TOP}/prebuilts/sdk/current/public/android.jar
 PATH_TO_LIB_ONE=../lib_one/lib_one.apk
 PATH_TO_LIB_TWO=../lib_two/lib_two.apk
 
