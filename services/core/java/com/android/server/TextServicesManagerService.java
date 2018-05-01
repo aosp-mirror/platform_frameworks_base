@@ -396,10 +396,7 @@ public class TextServicesManagerService extends ITextServicesManager.Stub {
                     final String packageName = sci.getPackageName();
                     final int change = isPackageDisappearing(packageName);
                     if (DBG) Slog.d(TAG, "Changing package name: " + packageName);
-                    if (// Package disappearing
-                            change == PACKAGE_PERMANENT_CHANGE || change == PACKAGE_TEMPORARY_CHANGE
-                                    // Package modified
-                                    || isPackageModified(packageName)) {
+                    if (change == PACKAGE_PERMANENT_CHANGE || change == PACKAGE_TEMPORARY_CHANGE) {
                         SpellCheckerInfo availSci =
                                 findAvailSystemSpellCheckerLocked(packageName, tsd);
                         // Set the spell checker settings if different than before
