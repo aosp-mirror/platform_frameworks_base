@@ -389,11 +389,16 @@ public final class OverlayManagerService extends SystemService {
                     final PackageInfo pi = mPackageManager.getPackageInfo(packageName, userId,
                             false);
                     if (pi != null) {
+                        /*
+                         * Only update overlay settings when an overlay becomes enabled or disabled.
+                         * Enabling or disabling components of a target should not change the
+                         * target's overlays. Since, overlays do not have components, this will only
+                         * update overlay settings if an overlay package becomes enabled or
+                         * disabled.
+                         */
                         mPackageManager.cachePackageInfo(packageName, userId, pi);
                         if (pi.isOverlayPackage()) {
                             mImpl.onOverlayPackageChanged(packageName, userId);
-                        } else {
-                            mImpl.onTargetPackageChanged(packageName, userId);
                         }
                     }
                 }
