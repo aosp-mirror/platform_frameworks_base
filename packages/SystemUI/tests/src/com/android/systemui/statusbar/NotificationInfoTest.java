@@ -33,9 +33,12 @@ import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.anyBoolean;
 import static org.mockito.Mockito.anyInt;
 import static org.mockito.Mockito.anyString;
+import static org.mockito.Mockito.doCallRealMethod;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -44,7 +47,6 @@ import android.app.INotificationManager;
 import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationChannelGroup;
-import android.app.NotificationManager;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
@@ -52,7 +54,7 @@ import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.graphics.drawable.Drawable;
-import android.os.Looper;
+import android.os.IBinder;
 import android.os.UserHandle;
 import android.service.notification.StatusBarNotification;
 import android.test.suitebuilder.annotation.SmallTest;
@@ -65,6 +67,7 @@ import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.android.internal.logging.MetricsLogger;
 import com.android.systemui.Dependency;
 import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
@@ -100,7 +103,7 @@ public class NotificationInfoTest extends SysuiTestCase {
     private StatusBarNotification mSbn;
 
     @Rule public MockitoRule mockito = MockitoJUnit.rule();
-    private Looper mLooper;
+    @Mock private MetricsLogger mMetricsLogger;
     @Mock private INotificationManager mMockINotificationManager;
     @Mock private PackageManager mMockPackageManager;
     @Mock private NotificationBlockingHelperManager mBlockingHelperManager;
@@ -112,6 +115,7 @@ public class NotificationInfoTest extends SysuiTestCase {
                 mBlockingHelperManager);
         mTestableLooper = TestableLooper.get(this);
         mDependency.injectTestDependency(Dependency.BG_LOOPER, mTestableLooper.getLooper());
+        mDependency.injectTestDependency(MetricsLogger.class, mMetricsLogger);
         // Inflate the layout
         final LayoutInflater layoutInflater = LayoutInflater.from(mContext);
         mNotificationInfo = (NotificationInfo) layoutInflater.inflate(R.layout.notification_info,
@@ -301,6 +305,24 @@ public class NotificationInfoTest extends SysuiTestCase {
     }
 
     @Test
+    public void testLogBlockingHelperCounter_doesntLogForNormalGutsView() throws Exception {
+        mNotificationInfo.bindNotification(mMockPackageManager, mMockINotificationManager,
+                TEST_PACKAGE_NAME, mNotificationChannel, 1, mSbn, null, null, null, false);
+        mNotificationInfo.logBlockingHelperCounter("HowCanNotifsBeRealIfAppsArent");
+        verify(mMetricsLogger, times(0)).count(anyString(), anyInt());
+    }
+
+    @Test
+    public void testLogBlockingHelperCounter_logsForBlockingHelper() throws Exception {
+        // Bind notification logs an event, so this counts as one invocation for the metrics logger.
+        mNotificationInfo.bindNotification(mMockPackageManager, mMockINotificationManager,
+                TEST_PACKAGE_NAME, mNotificationChannel, 1, mSbn, null, null, null, false, true,
+                true);
+        mNotificationInfo.logBlockingHelperCounter("HowCanNotifsBeRealIfAppsArent");
+        verify(mMetricsLogger, times(2)).count(anyString(), anyInt());
+    }
+
+    @Test
     public void testOnClickListenerPassesNullChannelForBundle() throws Exception {
         final CountDownLatch latch = new CountDownLatch(1);
         mNotificationInfo.bindNotification(mMockPackageManager, mMockINotificationManager,
@@ -471,6 +493,13 @@ public class NotificationInfoTest extends SysuiTestCase {
                 false /* isNonblockable */, true /* isForBlockingHelper */,
                 true /* isUserSentimentNegative */);
 
+        NotificationGuts guts = spy(new NotificationGuts(mContext, null));
+        when(guts.getWindowToken()).thenReturn(mock(IBinder.class));
+        doNothing().when(guts).animateClose(anyInt(), anyInt(), anyBoolean());
+        doNothing().when(guts).setExposed(anyBoolean(), anyBoolean());
+        guts.setGutsContent(mNotificationInfo);
+        mNotificationInfo.setGutsParent(guts);
+
         mNotificationInfo.findViewById(R.id.keep).performClick();
 
         verify(mBlockingHelperManager).dismissCurrentBlockingHelper();
@@ -495,6 +524,9 @@ public class NotificationInfoTest extends SysuiTestCase {
                 false /* isNonblockable */,
                 true /* isForBlockingHelper */,
                 false /* isUserSentimentNegative */);
+        NotificationGuts guts = mock(NotificationGuts.class);
+        doCallRealMethod().when(guts).closeControls(anyInt(), anyInt(), anyBoolean(), anyBoolean());
+        mNotificationInfo.setGutsParent(guts);
 
         mNotificationInfo.closeControls(mNotificationInfo);
 

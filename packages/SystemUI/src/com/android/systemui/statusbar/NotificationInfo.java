@@ -54,17 +54,20 @@ import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.systemui.Dependency;
 import com.android.systemui.Interpolators;
 import com.android.systemui.R;
+import com.android.systemui.statusbar.notification.NotificationCounters;
 
 import java.util.List;
 
 /**
- * The guts of a notification revealed when performing a long press.
+ * The guts of a notification revealed when performing a long press. This also houses the blocking
+ * helper affordance that allows a user to keep/stop notifications after swiping one away.
  */
 public class NotificationInfo extends LinearLayout implements NotificationGuts.GutsContent {
     private static final String TAG = "InfoGuts";
 
     private INotificationManager mINotificationManager;
     private PackageManager mPm;
+    private MetricsLogger mMetricsLogger;
 
     private String mPackageName;
     private String mAppName;
@@ -84,17 +87,27 @@ public class NotificationInfo extends LinearLayout implements NotificationGuts.G
     private OnAppSettingsClickListener mAppSettingsClickListener;
     private NotificationGuts mGutsContainer;
 
-    /** Whether this view is being shown as part of the blocking helper */
+    /** Whether this view is being shown as part of the blocking helper. */
     private boolean mIsForBlockingHelper;
     private boolean mNegativeUserSentiment;
 
-    private OnClickListener mOnKeepShowing = this::closeControls;
+    /** Counter tag that describes how the user exit or quit out of this view. */
+    private String mExitReasonCounter = NotificationCounters.BLOCKING_HELPER_DISMISSED;
+
+    private OnClickListener mOnKeepShowing = v -> {
+        mExitReasonCounter = NotificationCounters.BLOCKING_HELPER_KEEP_SHOWING;
+        closeControls(v);
+    };
 
     private OnClickListener mOnStopOrMinimizeNotifications = v -> {
+        mExitReasonCounter = NotificationCounters.BLOCKING_HELPER_STOP_NOTIFICATIONS;
         swapContent(false);
     };
 
     private OnClickListener mOnUndo = v -> {
+        // Reset exit counter that we'll log and record an undo event separately (not an exit event)
+        mExitReasonCounter = NotificationCounters.BLOCKING_HELPER_DISMISSED;
+        logBlockingHelperCounter(NotificationCounters.BLOCKING_HELPER_UNDO);
         swapContent(true);
     };
 
@@ -151,6 +164,7 @@ public class NotificationInfo extends LinearLayout implements NotificationGuts.G
             boolean isUserSentimentNegative)
             throws RemoteException {
         mINotificationManager = iNotificationManager;
+        mMetricsLogger = Dependency.get(MetricsLogger.class);
         mPackageName = pkg;
         mNumUniqueChannelsInRow = numUniqueChannelsInRow;
         mSbn = sbn;
@@ -183,6 +197,8 @@ public class NotificationInfo extends LinearLayout implements NotificationGuts.G
         bindHeader();
         bindPrompt();
         bindButtons();
+
+        logBlockingHelperCounter(NotificationCounters.BLOCKING_HELPER_SHOWN);
     }
 
     private void bindHeader() throws RemoteException {
@@ -235,6 +251,8 @@ public class NotificationInfo extends LinearLayout implements NotificationGuts.G
             final int appUidF = mAppUid;
             settingsButton.setOnClickListener(
                     (View view) -> {
+                        logBlockingHelperCounter(
+                                NotificationCounters.BLOCKING_HELPER_NOTIF_SETTINGS);
                         mOnSettingsClickListener.onClick(view,
                                 mNumUniqueChannelsInRow > 1 ? null : mSingleNotificationChannel,
                                 appUidF);
@@ -266,6 +284,13 @@ public class NotificationInfo extends LinearLayout implements NotificationGuts.G
             channelName.setVisibility(View.GONE);
         } else {
             channelName.setText(mSingleNotificationChannel.getName());
+        }
+    }
+
+    @VisibleForTesting
+    void logBlockingHelperCounter(String counterTag) {
+        if (mIsForBlockingHelper) {
+            mMetricsLogger.count(counterTag, 1);
         }
     }
 
@@ -437,25 +462,15 @@ public class NotificationInfo extends LinearLayout implements NotificationGuts.G
      */
     @VisibleForTesting
     void closeControls(View v) {
-        if (mIsForBlockingHelper) {
-            NotificationBlockingHelperManager manager =
-                    Dependency.get(NotificationBlockingHelperManager.class);
-            manager.dismissCurrentBlockingHelper();
-
-            // Since this won't get a callback via gutsContainer.closeControls, save the new
-            // importance values immediately.
-            saveImportance();
-        } else {
-            int[] parentLoc = new int[2];
-            int[] targetLoc = new int[2];
-            mGutsContainer.getLocationOnScreen(parentLoc);
-            v.getLocationOnScreen(targetLoc);
-            final int centerX = v.getWidth() / 2;
-            final int centerY = v.getHeight() / 2;
-            final int x = targetLoc[0] - parentLoc[0] + centerX;
-            final int y = targetLoc[1] - parentLoc[1] + centerY;
-            mGutsContainer.closeControls(x, y, true /* save */, false /* force */);
-        }
+        int[] parentLoc = new int[2];
+        int[] targetLoc = new int[2];
+        mGutsContainer.getLocationOnScreen(parentLoc);
+        v.getLocationOnScreen(targetLoc);
+        final int centerX = v.getWidth() / 2;
+        final int centerY = v.getHeight() / 2;
+        final int x = targetLoc[0] - parentLoc[0] + centerX;
+        final int y = targetLoc[1] - parentLoc[1] + centerY;
+        mGutsContainer.closeControls(x, y, true /* save */, false /* force */);
     }
 
     @Override
@@ -480,6 +495,7 @@ public class NotificationInfo extends LinearLayout implements NotificationGuts.G
         if (save) {
             saveImportance();
         }
+        logBlockingHelperCounter(mExitReasonCounter);
         return false;
     }
 
