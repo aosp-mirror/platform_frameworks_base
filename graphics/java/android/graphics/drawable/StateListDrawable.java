@@ -73,9 +73,11 @@ public class StateListDrawable extends DrawableContainer {
     /**
      * Add a new image/string ID to the set of images.
      *
-     * @param stateSet - An array of resource Ids to associate with the image.
+     * @param stateSet An array of resource Ids to associate with the image.
      *                 Switch to this image by calling setState().
-     * @param drawable -The image to show.
+     * @param drawable The image to show. Note this must be a unique Drawable that is not shared
+     *                 between any other View or Drawable otherwise the results are
+     *                 undefined and can lead to unexpected rendering behavior
      */
     public void addState(int[] stateSet, Drawable drawable) {
         if (drawable != null) {
