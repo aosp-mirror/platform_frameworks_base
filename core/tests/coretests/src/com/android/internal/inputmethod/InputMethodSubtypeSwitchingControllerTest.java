@@ -23,7 +23,6 @@ import static org.junit.Assert.assertTrue;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.ResolveInfo;
 import android.content.pm.ServiceInfo;
-import android.platform.test.annotations.Presubmit;
 import android.support.test.filters.SmallTest;
 import android.support.test.runner.AndroidJUnit4;
 import android.view.inputmethod.InputMethodInfo;
@@ -41,7 +40,6 @@ import java.util.Arrays;
 import java.util.List;
 
 @SmallTest
-@Presubmit
 @RunWith(AndroidJUnit4.class)
 public class InputMethodSubtypeSwitchingControllerTest {
     private static final String DUMMY_PACKAGE_NAME = "dummy package name";
