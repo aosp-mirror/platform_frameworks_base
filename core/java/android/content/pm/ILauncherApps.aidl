@@ -16,6 +16,7 @@
 
 package android.content.pm;
 
+import android.app.IApplicationThread;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.content.IntentSender;
@@ -42,10 +43,10 @@ interface ILauncherApps {
             String callingPackage, String packageName, in UserHandle user);
     ActivityInfo resolveActivity(
             String callingPackage, in ComponentName component, in UserHandle user);
-    void startActivityAsUser(String callingPackage,
+    void startActivityAsUser(in IApplicationThread caller, String callingPackage,
             in ComponentName component, in Rect sourceBounds,
             in Bundle opts, in UserHandle user);
-    void showAppDetailsAsUser(
+    void showAppDetailsAsUser(in IApplicationThread caller,
             String callingPackage, in ComponentName component, in Rect sourceBounds,
             in Bundle opts, in UserHandle user);
     boolean isPackageEnabled(String callingPackage, String packageName, in UserHandle user);
