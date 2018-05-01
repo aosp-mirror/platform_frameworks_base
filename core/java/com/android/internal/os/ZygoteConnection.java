@@ -150,6 +150,11 @@ class ZygoteConnection {
             return null;
         }
 
+        if (parsedArgs.pidQuery) {
+            handlePidQuery();
+            return null;
+        }
+
         if (parsedArgs.preloadDefault) {
             handlePreload();
             return null;
@@ -261,6 +266,17 @@ class ZygoteConnection {
             final byte[] abiListBytes = abiList.getBytes(StandardCharsets.US_ASCII);
             mSocketOutStream.writeInt(abiListBytes.length);
             mSocketOutStream.write(abiListBytes);
+        } catch (IOException ioe) {
+            throw new IllegalStateException("Error writing to command socket", ioe);
+        }
+    }
+
+    private void handlePidQuery() {
+        try {
+            String pidString = String.valueOf(Process.myPid());
+            final byte[] pidStringBytes = pidString.getBytes(StandardCharsets.US_ASCII);
+            mSocketOutStream.writeInt(pidStringBytes.length);
+            mSocketOutStream.write(pidStringBytes);
         } catch (IOException ioe) {
             throw new IllegalStateException("Error writing to command socket", ioe);
         }
@@ -440,6 +456,11 @@ class ZygoteConnection {
         boolean startChildZygote;
 
         /**
+         * Whether the current arguments constitute a request for the zygote's PID.
+         */
+        boolean pidQuery;
+
+        /**
          * Exemptions from API blacklisting. These are sent to the pre-forked zygote at boot time,
          * or when they change, via --set-api-blacklist-exemptions.
          */
@@ -586,6 +607,8 @@ class ZygoteConnection {
                     mountExternal = Zygote.MOUNT_EXTERNAL_WRITE;
                 } else if (arg.equals("--query-abi-list")) {
                     abiListQuery = true;
+                } else if (arg.equals("--get-pid")) {
+                    pidQuery = true;
                 } else if (arg.startsWith("--instruction-set=")) {
                     instructionSet = arg.substring(arg.indexOf('=') + 1);
                 } else if (arg.startsWith("--app-data-dir=")) {
@@ -608,7 +631,7 @@ class ZygoteConnection {
                 }
             }
 
-            if (abiListQuery) {
+            if (abiListQuery || pidQuery) {
                 if (args.length - curArg > 0) {
                     throw new IllegalArgumentException("Unexpected arguments after --query-abi-list.");
                 }
