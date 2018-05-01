@@ -26,6 +26,7 @@ import android.os.Process;
 import android.os.UserHandle;
 import android.os.UserManager;
 import androidx.annotation.VisibleForTesting;
+import android.text.format.DateUtils;
 import android.util.IconDrawableFactory;
 import android.util.Log;
 import java.util.ArrayList;
@@ -41,7 +42,8 @@ public class RecentLocationApps {
     @VisibleForTesting
     static final String ANDROID_SYSTEM_PACKAGE_NAME = "android";
 
-    private static final int RECENT_TIME_INTERVAL_MILLIS = 15 * 60 * 1000;
+    // Keep last 24 hours of location app information.
+    private static final long RECENT_TIME_INTERVAL_MILLIS = DateUtils.DAY_IN_MILLIS;
 
     @VisibleForTesting
     static final int[] LOCATION_OPS = new int[] {
