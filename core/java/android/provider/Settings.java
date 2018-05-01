@@ -1785,6 +1785,12 @@ public final class Settings {
     public static final int USER_SETUP_PERSONALIZATION_STARTED = 1;
 
     /**
+     * User has snoozed personalization and will complete it later.
+     * @hide
+     */
+    public static final int USER_SETUP_PERSONALIZATION_PAUSED = 2;
+
+    /**
      * User has completed setup personalization.
      * @hide
      */
@@ -1795,6 +1801,7 @@ public final class Settings {
     @IntDef({
             USER_SETUP_PERSONALIZATION_NOT_STARTED,
             USER_SETUP_PERSONALIZATION_STARTED,
+            USER_SETUP_PERSONALIZATION_PAUSED,
             USER_SETUP_PERSONALIZATION_COMPLETE
     })
     public @interface UserSetupPersonalization {}
