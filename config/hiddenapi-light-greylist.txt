@@ -1066,10 +1066,6 @@ Landroid/graphics/drawable/NinePatchDrawable;->mNinePatchState:Landroid/graphics
 Landroid/graphics/drawable/RippleDrawable$RippleState;->mColor:Landroid/content/res/ColorStateList;
 Landroid/graphics/drawable/RippleDrawable;->mState:Landroid/graphics/drawable/RippleDrawable$RippleState;
 Landroid/graphics/drawable/StateListDrawable;->extractStateSet(Landroid/util/AttributeSet;)[I
-Landroid/graphics/drawable/StateListDrawable;->getStateCount()I
-Landroid/graphics/drawable/StateListDrawable;->getStateDrawable(I)Landroid/graphics/drawable/Drawable;
-Landroid/graphics/drawable/StateListDrawable;->getStateDrawableIndex([I)I
-Landroid/graphics/drawable/StateListDrawable;->getStateSet(I)[I
 Landroid/graphics/drawable/StateListDrawable;->mStateListState:Landroid/graphics/drawable/StateListDrawable$StateListState;
 Landroid/graphics/drawable/StateListDrawable;->updateStateFromTypedArray(Landroid/content/res/TypedArray;)V
 Landroid/graphics/drawable/VectorDrawable$VGroup;->setRotation(F)V
