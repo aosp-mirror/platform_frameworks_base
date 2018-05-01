@@ -3878,7 +3878,9 @@ public class NotificationManagerService extends SystemService {
                     for (int j = 0; j < listenerSize; j++) {
                         if (i > 0) pw.print(',');
                         final ManagedServiceInfo listener = listeners.valueAt(i);
-                        pw.print(listener.component);
+                        if (listener != null) {
+                            pw.print(listener.component);
+                        }
                     }
                 }
                 pw.println(')');
