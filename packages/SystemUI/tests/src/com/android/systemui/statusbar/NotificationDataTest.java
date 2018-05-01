@@ -18,6 +18,11 @@ package com.android.systemui.statusbar;
 
 import static android.app.AppOpsManager.OP_ACCEPT_HANDOVER;
 import static android.app.AppOpsManager.OP_CAMERA;
+import static android.app.Notification.CATEGORY_ALARM;
+import static android.app.Notification.CATEGORY_CALL;
+import static android.app.Notification.CATEGORY_EVENT;
+import static android.app.Notification.CATEGORY_MESSAGE;
+import static android.app.Notification.CATEGORY_REMINDER;
 
 import static junit.framework.Assert.assertEquals;
 
@@ -310,6 +315,40 @@ public class NotificationDataTest extends SysuiTestCase {
 
         assertTrue(mNotificationData.isExemptFromDndVisualSuppression(entry));
         assertFalse(mNotificationData.shouldSuppressAmbient(entry));
+    }
+
+    @Test
+    public void testIsNotExemptFromDndVisualSuppression_hiddenCategories() {
+        initStatusBarNotification(false);
+        when(mMockStatusBarNotification.getKey()).thenReturn(
+                TEST_EXEMPT_DND_VISUAL_SUPPRESSION_KEY);
+        NotificationData.Entry entry = new NotificationData.Entry(mMockStatusBarNotification);
+        entry.mIsSystemNotification = true;
+        when(mMockStatusBarNotification.getNotification()).thenReturn(
+                new Notification.Builder(mContext, "").setCategory(CATEGORY_CALL).build());
+
+        assertFalse(mNotificationData.isExemptFromDndVisualSuppression(entry));
+        assertTrue(mNotificationData.shouldSuppressAmbient(entry));
+
+        when(mMockStatusBarNotification.getNotification()).thenReturn(
+                new Notification.Builder(mContext, "").setCategory(CATEGORY_REMINDER).build());
+
+        assertFalse(mNotificationData.isExemptFromDndVisualSuppression(entry));
+
+        when(mMockStatusBarNotification.getNotification()).thenReturn(
+                new Notification.Builder(mContext, "").setCategory(CATEGORY_ALARM).build());
+
+        assertFalse(mNotificationData.isExemptFromDndVisualSuppression(entry));
+
+        when(mMockStatusBarNotification.getNotification()).thenReturn(
+                new Notification.Builder(mContext, "").setCategory(CATEGORY_EVENT).build());
+
+        assertFalse(mNotificationData.isExemptFromDndVisualSuppression(entry));
+
+        when(mMockStatusBarNotification.getNotification()).thenReturn(
+                new Notification.Builder(mContext, "").setCategory(CATEGORY_MESSAGE).build());
+
+        assertFalse(mNotificationData.isExemptFromDndVisualSuppression(entry));
     }
 
     private void initStatusBarNotification(boolean allowDuringSetup) {
