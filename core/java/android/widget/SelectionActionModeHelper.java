@@ -70,7 +70,6 @@ public final class SelectionActionModeHelper {
     private final Editor mEditor;
     private final TextView mTextView;
     private final TextClassificationHelper mTextClassificationHelper;
-    private final TextClassificationConstants mTextClassificationSettings;
 
     @Nullable private TextClassification mTextClassification;
     private AsyncTask mTextClassificationAsyncTask;
@@ -84,7 +83,6 @@ public final class SelectionActionModeHelper {
     SelectionActionModeHelper(@NonNull Editor editor) {
         mEditor = Preconditions.checkNotNull(editor);
         mTextView = mEditor.getTextView();
-        mTextClassificationSettings = TextClassificationManager.getSettings(mTextView.getContext());
         mTextClassificationHelper = new TextClassificationHelper(
                 mTextView.getContext(),
                 mTextView::getTextClassifier,
@@ -92,7 +90,7 @@ public final class SelectionActionModeHelper {
                 0, 1, mTextView.getTextLocales());
         mSelectionTracker = new SelectionTracker(mTextView);
 
-        if (mTextClassificationSettings.isSmartSelectionAnimationEnabled()) {
+        if (getTextClassificationSettings().isSmartSelectionAnimationEnabled()) {
             mSmartSelectSprite = new SmartSelectSprite(mTextView.getContext(),
                     editor.getTextView().mHighlightColor, mTextView::invalidate);
         } else {
@@ -105,7 +103,7 @@ public final class SelectionActionModeHelper {
      */
     public void startSelectionActionModeAsync(boolean adjustSelection) {
         // Check if the smart selection should run for editable text.
-        adjustSelection &= mTextClassificationSettings.isSmartSelectionEnabled();
+        adjustSelection &= getTextClassificationSettings().isSmartSelectionEnabled();
 
         mSelectionTracker.onOriginalSelection(
                 getText(mTextView),
@@ -212,6 +210,10 @@ public final class SelectionActionModeHelper {
         return mSmartSelectSprite != null && mSmartSelectSprite.isAnimationActive();
     }
 
+    private TextClassificationConstants getTextClassificationSettings() {
+        return TextClassificationManager.getSettings(mTextView.getContext());
+    }
+
     private void cancelAsyncTask() {
         if (mTextClassificationAsyncTask != null) {
             mTextClassificationAsyncTask.cancel(true);
@@ -245,7 +247,7 @@ public final class SelectionActionModeHelper {
         if (result != null && text instanceof Spannable
                 && (mTextView.isTextSelectable() || mTextView.isTextEditable())) {
             // Do not change the selection if TextClassifier should be dark launched.
-            if (!mTextClassificationSettings.isModelDarkLaunchEnabled()) {
+            if (!getTextClassificationSettings().isModelDarkLaunchEnabled()) {
                 Selection.setSelection((Spannable) text, result.mStart, result.mEnd);
                 mTextView.invalidate();
             }
@@ -906,7 +908,6 @@ public final class SelectionActionModeHelper {
         private static final int TRIM_DELTA = 120;  // characters
 
         private final Context mContext;
-        private final boolean mDarkLaunchEnabled;
         private Supplier<TextClassifier> mTextClassifier;
 
         /** The original TextView text. **/
@@ -942,8 +943,6 @@ public final class SelectionActionModeHelper {
                 CharSequence text, int selectionStart, int selectionEnd, LocaleList locales) {
             init(textClassifier, text, selectionStart, selectionEnd, locales);
             mContext = Preconditions.checkNotNull(context);
-            mDarkLaunchEnabled = TextClassificationManager.getSettings(mContext)
-                    .isModelDarkLaunchEnabled();
         }
 
         @UiThread
@@ -982,7 +981,7 @@ public final class SelectionActionModeHelper {
                         mTrimmedText, mRelativeStart, mRelativeEnd, mDefaultLocales);
             }
             // Do not classify new selection boundaries if TextClassifier should be dark launched.
-            if (!mDarkLaunchEnabled) {
+            if (!isDarkLaunchEnabled()) {
                 mSelectionStart = Math.max(0, selection.getSelectionStartIndex() + mTrimStart);
                 mSelectionEnd = Math.min(
                         mText.length(), selection.getSelectionEndIndex() + mTrimStart);
@@ -1008,6 +1007,10 @@ public final class SelectionActionModeHelper {
                 // selection handles or toolbar until after this timeout.
                 return 500;
             }
+        }
+
+        private boolean isDarkLaunchEnabled() {
+            return TextClassificationManager.getSettings(mContext).isModelDarkLaunchEnabled();
         }
 
         private SelectionResult performClassification(@Nullable TextSelection selection) {
