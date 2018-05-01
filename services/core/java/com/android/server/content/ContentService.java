@@ -1279,7 +1279,9 @@ public final class ContentService extends IContentService.Stub {
                 case Process.SYSTEM_UID:
                     break; // Okay
                 default:
-                    throw new SecurityException("Invalid extras specified.");
+                    final String msg = "Invalid extras specified.";
+                    Log.w(TAG, msg + " requestsync -f/-F needs to run on 'adb shell'");
+                    throw new SecurityException(msg);
             }
         }
     }
