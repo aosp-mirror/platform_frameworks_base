@@ -40,7 +40,6 @@ DeferredLayerUpdater::DeferredLayerUpdater(RenderState& renderState, CreateLayer
 }
 
 DeferredLayerUpdater::~DeferredLayerUpdater() {
-    SkSafeUnref(mColorFilter);
     setTransform(nullptr);
     mRenderState.unregisterDeferredLayerUpdater(this);
     destroyLayer();
@@ -67,8 +66,11 @@ void DeferredLayerUpdater::destroyLayer() {
 void DeferredLayerUpdater::setPaint(const SkPaint* paint) {
     mAlpha = PaintUtils::getAlphaDirect(paint);
     mMode = PaintUtils::getBlendModeDirect(paint);
-    SkColorFilter* colorFilter = (paint) ? paint->getColorFilter() : nullptr;
-    SkRefCnt_SafeAssign(mColorFilter, colorFilter);
+    if (paint) {
+        mColorFilter = paint->refColorFilter();
+    } else {
+        mColorFilter.reset();
+    }
 }
 
 void DeferredLayerUpdater::apply() {
@@ -143,7 +145,7 @@ void DeferredLayerUpdater::doUpdateTexImage() {
 #endif
         mSurfaceTexture->getTransformMatrix(transform);
 
-        updateLayer(forceFilter, transform);
+        updateLayer(forceFilter, transform, mSurfaceTexture->getCurrentDataSpace());
     }
 }
 
@@ -153,17 +155,19 @@ void DeferredLayerUpdater::doUpdateVkTexImage() {
                         Layer::Api::OpenGL, Layer::Api::Vulkan);
 
     static const mat4 identityMatrix;
-    updateLayer(false, identityMatrix.data);
+    updateLayer(false, identityMatrix.data, HAL_DATASPACE_UNKNOWN);
 
     VkLayer* vkLayer = static_cast<VkLayer*>(mLayer);
     vkLayer->updateTexture();
 }
 
-void DeferredLayerUpdater::updateLayer(bool forceFilter, const float* textureTransform) {
+void DeferredLayerUpdater::updateLayer(bool forceFilter, const float* textureTransform,
+                                       android_dataspace dataspace) {
     mLayer->setBlend(mBlend);
     mLayer->setForceFilter(forceFilter);
     mLayer->setSize(mWidth, mHeight);
     mLayer->getTexTransform().load(textureTransform);
+    mLayer->setDataSpace(dataspace);
 }
 
 void DeferredLayerUpdater::detachSurfaceTexture() {
