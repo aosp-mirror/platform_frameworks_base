@@ -80,7 +80,7 @@ public abstract class ClientMonitor implements IBinder.DeathRecipient {
         mGroupId = groupId;
         mIsRestricted = restricted;
         mOwner = owner;
-        mSuccessVibrationEffect = getSuccessVibrationEffect(context);
+        mSuccessVibrationEffect = VibrationEffect.get(VibrationEffect.EFFECT_CLICK);
         mErrorVibrationEffect = VibrationEffect.get(VibrationEffect.EFFECT_DOUBLE_CLICK);
         try {
             if (token != null) {
@@ -239,25 +239,4 @@ public abstract class ClientMonitor implements IBinder.DeathRecipient {
             vibrator.vibrate(mErrorVibrationEffect, FINGERPRINT_SONFICATION_ATTRIBUTES);
         }
     }
-
-    private static VibrationEffect getSuccessVibrationEffect(Context ctx) {
-        int[] arr = ctx.getResources().getIntArray(
-                com.android.internal.R.array.config_longPressVibePattern);
-        final long[] vibePattern;
-        if (arr == null || arr.length == 0) {
-            vibePattern = DEFAULT_SUCCESS_VIBRATION_PATTERN;
-        } else {
-            vibePattern = new long[arr.length];
-            for (int i = 0; i < arr.length; i++) {
-                vibePattern[i] = arr[i];
-            }
-        }
-        if (vibePattern.length == 1) {
-            return VibrationEffect.createOneShot(
-                    vibePattern[0], VibrationEffect.DEFAULT_AMPLITUDE);
-        } else {
-            return VibrationEffect.createWaveform(vibePattern, -1);
-        }
-    }
-
 }
