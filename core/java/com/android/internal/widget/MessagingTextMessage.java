@@ -105,7 +105,7 @@ public class MessagingTextMessage extends ImageFloatingTextView implements Messa
     public int getMeasuredType() {
         boolean measuredTooSmall = getMeasuredHeight()
                 < getLayoutHeight() + getPaddingTop() + getPaddingBottom();
-        if (measuredTooSmall) {
+        if (measuredTooSmall && getLineCount() <= 1) {
             return MEASURED_TOO_SMALL;
         } else {
             Layout layout = getLayout();
