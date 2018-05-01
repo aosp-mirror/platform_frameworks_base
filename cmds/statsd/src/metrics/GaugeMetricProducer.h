@@ -91,6 +91,7 @@ private:
     void onDumpReportLocked(const int64_t dumpTimeNs,
                             const bool include_current_partial_bucket,
                             android::util::ProtoOutputStream* protoOutput) override;
+    void clearPastBucketsLocked(const int64_t dumpTimeNs) override;
 
     // for testing
     GaugeMetricProducer(const ConfigKey& key, const GaugeMetric& gaugeMetric,
