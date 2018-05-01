@@ -17,6 +17,9 @@
 package com.android.server.notification;
 
 import static android.app.NotificationManager.Policy.SUPPRESSED_EFFECT_BADGE;
+import static android.app.NotificationManager.Policy.SUPPRESSED_EFFECT_FULL_SCREEN_INTENT;
+import static android.app.NotificationManager.Policy.SUPPRESSED_EFFECT_LIGHTS;
+import static android.app.NotificationManager.Policy.SUPPRESSED_EFFECT_PEEK;
 
 import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertEquals;
@@ -569,8 +572,6 @@ public class ZenModeHelperTest extends UiServiceTestCase {
         mZenModeHelperSpy.mConfig.allowMessages = true;
         mZenModeHelperSpy.mConfig.allowEvents = true;
         mZenModeHelperSpy.mConfig.allowRepeatCallers= true;
-        mZenModeHelperSpy.mConfig.allowWhenScreenOff = true;
-        mZenModeHelperSpy.mConfig.allowWhenScreenOn = true;
         mZenModeHelperSpy.mConfig.suppressedVisualEffects = SUPPRESSED_EFFECT_BADGE;
         mZenModeHelperSpy.mConfig.manualRule = new ZenModeConfig.ZenRule();
         mZenModeHelperSpy.mConfig.manualRule.component = new ComponentName("a", "a");
@@ -593,8 +594,6 @@ public class ZenModeHelperTest extends UiServiceTestCase {
         mZenModeHelperSpy.mConfig.allowMessages = true;
         mZenModeHelperSpy.mConfig.allowEvents = true;
         mZenModeHelperSpy.mConfig.allowRepeatCallers= true;
-        mZenModeHelperSpy.mConfig.allowWhenScreenOff = true;
-        mZenModeHelperSpy.mConfig.allowWhenScreenOn = true;
         mZenModeHelperSpy.mConfig.suppressedVisualEffects = SUPPRESSED_EFFECT_BADGE;
         mZenModeHelperSpy.mConfig.manualRule = new ZenModeConfig.ZenRule();
         mZenModeHelperSpy.mConfig.manualRule.zenMode =
@@ -642,6 +641,115 @@ public class ZenModeHelperTest extends UiServiceTestCase {
 
         assertTrue(mZenModeHelperSpy.mConfig.automaticRules.containsKey("customRule"));
         setupZenConfigMaintained();
+    }
+
+    @Test
+    public void testMigrateSuppressedVisualEffects_oneExistsButOff() throws Exception {
+        String xml = "<zen version=\"6\" user=\"0\">\n"
+                + "<allow calls=\"false\" repeatCallers=\"false\" messages=\"true\" "
+                + "reminders=\"false\" events=\"false\" callsFrom=\"1\" messagesFrom=\"2\" "
+                + "visualScreenOff=\"false\" alarms=\"true\" "
+                + "media=\"true\" system=\"false\" />\n"
+                + "<disallow visualEffects=\"511\" />"
+                + "</zen>";
+
+        XmlPullParser parser = Xml.newPullParser();
+        parser.setInput(new BufferedInputStream(
+                new ByteArrayInputStream(xml.getBytes())), null);
+        parser.nextTag();
+        mZenModeHelperSpy.readXml(parser, false);
+
+        assertEquals(0, mZenModeHelperSpy.mConfig.suppressedVisualEffects);
+
+        xml = "<zen version=\"6\" user=\"0\">\n"
+                + "<allow calls=\"false\" repeatCallers=\"false\" messages=\"true\" "
+                + "reminders=\"false\" events=\"false\" callsFrom=\"1\" messagesFrom=\"2\" "
+                + "visualScreenOn=\"false\" alarms=\"true\" "
+                + "media=\"true\" system=\"false\" />\n"
+                + "<disallow visualEffects=\"511\" />"
+                + "</zen>";
+
+        parser = Xml.newPullParser();
+        parser.setInput(new BufferedInputStream(
+                new ByteArrayInputStream(xml.getBytes())), null);
+        parser.nextTag();
+        mZenModeHelperSpy.readXml(parser, false);
+
+        assertEquals(0, mZenModeHelperSpy.mConfig.suppressedVisualEffects);
+    }
+
+    @Test
+    public void testMigrateSuppressedVisualEffects_bothExistButOff() throws Exception {
+        String xml = "<zen version=\"6\" user=\"0\">\n"
+                + "<allow calls=\"false\" repeatCallers=\"false\" messages=\"true\" "
+                + "reminders=\"false\" events=\"false\" callsFrom=\"1\" messagesFrom=\"2\" "
+                + "visualScreenOff=\"false\" visualScreenOn=\"false\" alarms=\"true\" "
+                + "media=\"true\" system=\"false\" />\n"
+                + "<disallow visualEffects=\"511\" />"
+                + "</zen>";
+
+        XmlPullParser parser = Xml.newPullParser();
+        parser.setInput(new BufferedInputStream(
+                new ByteArrayInputStream(xml.getBytes())), null);
+        parser.nextTag();
+        mZenModeHelperSpy.readXml(parser, false);
+
+        assertEquals(0, mZenModeHelperSpy.mConfig.suppressedVisualEffects);
+    }
+
+    @Test
+    public void testMigrateSuppressedVisualEffects_bothExistButOn() throws Exception {
+        String xml = "<zen version=\"6\" user=\"0\">\n"
+                + "<allow calls=\"false\" repeatCallers=\"false\" messages=\"true\" "
+                + "reminders=\"false\" events=\"false\" callsFrom=\"1\" messagesFrom=\"2\" "
+                + "visualScreenOff=\"true\" visualScreenOn=\"true\" alarms=\"true\" "
+                + "media=\"true\" system=\"false\" />\n"
+                + "<disallow visualEffects=\"511\" />"
+                + "</zen>";
+
+        XmlPullParser parser = Xml.newPullParser();
+        parser.setInput(new BufferedInputStream(
+                new ByteArrayInputStream(xml.getBytes())), null);
+        parser.nextTag();
+        mZenModeHelperSpy.readXml(parser, false);
+
+        assertEquals(SUPPRESSED_EFFECT_FULL_SCREEN_INTENT
+                | SUPPRESSED_EFFECT_LIGHTS
+                | SUPPRESSED_EFFECT_PEEK,
+                mZenModeHelperSpy.mConfig.suppressedVisualEffects);
+
+        xml = "<zen version=\"6\" user=\"0\">\n"
+                + "<allow calls=\"false\" repeatCallers=\"false\" messages=\"true\" "
+                + "reminders=\"false\" events=\"false\" callsFrom=\"1\" messagesFrom=\"2\" "
+                + "visualScreenOff=\"false\" visualScreenOn=\"true\" alarms=\"true\" "
+                + "media=\"true\" system=\"false\" />\n"
+                + "<disallow visualEffects=\"511\" />"
+                + "</zen>";
+
+        parser = Xml.newPullParser();
+        parser.setInput(new BufferedInputStream(
+                new ByteArrayInputStream(xml.getBytes())), null);
+        parser.nextTag();
+        mZenModeHelperSpy.readXml(parser, false);
+
+        assertEquals(SUPPRESSED_EFFECT_PEEK, mZenModeHelperSpy.mConfig.suppressedVisualEffects);
+
+        xml = "<zen version=\"6\" user=\"0\">\n"
+                + "<allow calls=\"false\" repeatCallers=\"false\" messages=\"true\" "
+                + "reminders=\"false\" events=\"false\" callsFrom=\"1\" messagesFrom=\"2\" "
+                + "visualScreenOff=\"true\" visualScreenOn=\"false\" alarms=\"true\" "
+                + "media=\"true\" system=\"false\" />\n"
+                + "<disallow visualEffects=\"511\" />"
+                + "</zen>";
+
+        parser = Xml.newPullParser();
+        parser.setInput(new BufferedInputStream(
+                new ByteArrayInputStream(xml.getBytes())), null);
+        parser.nextTag();
+        mZenModeHelperSpy.readXml(parser, false);
+
+        assertEquals(SUPPRESSED_EFFECT_FULL_SCREEN_INTENT | SUPPRESSED_EFFECT_LIGHTS,
+                mZenModeHelperSpy.mConfig.suppressedVisualEffects);
     }
 
     @Test
@@ -705,16 +813,6 @@ public class ZenModeHelperTest extends UiServiceTestCase {
         setupZenConfigMaintained();
     }
 
-    @Test
-    public void testPolicyReadsSuppressedEffects() {
-        mZenModeHelperSpy.mConfig.allowWhenScreenOff = true;
-        mZenModeHelperSpy.mConfig.allowWhenScreenOn = true;
-        mZenModeHelperSpy.mConfig.suppressedVisualEffects = SUPPRESSED_EFFECT_BADGE;
-
-        NotificationManager.Policy policy = mZenModeHelperSpy.getNotificationPolicy();
-        assertEquals(SUPPRESSED_EFFECT_BADGE, policy.suppressedVisualEffects);
-    }
-
     private void setupZenConfig() {
         mZenModeHelperSpy.mZenMode = Settings.Global.ZEN_MODE_IMPORTANT_INTERRUPTIONS;
         mZenModeHelperSpy.mConfig.allowAlarms = false;
@@ -725,8 +823,6 @@ public class ZenModeHelperTest extends UiServiceTestCase {
         mZenModeHelperSpy.mConfig.allowMessages = true;
         mZenModeHelperSpy.mConfig.allowEvents = true;
         mZenModeHelperSpy.mConfig.allowRepeatCallers= true;
-        mZenModeHelperSpy.mConfig.allowWhenScreenOff = true;
-        mZenModeHelperSpy.mConfig.allowWhenScreenOn = true;
         mZenModeHelperSpy.mConfig.suppressedVisualEffects = SUPPRESSED_EFFECT_BADGE;
         mZenModeHelperSpy.mConfig.manualRule = new ZenModeConfig.ZenRule();
         mZenModeHelperSpy.mConfig.manualRule.zenMode =
@@ -746,8 +842,6 @@ public class ZenModeHelperTest extends UiServiceTestCase {
         assertTrue(mZenModeHelperSpy.mConfig.allowMessages);
         assertTrue(mZenModeHelperSpy.mConfig.allowEvents);
         assertTrue(mZenModeHelperSpy.mConfig.allowRepeatCallers);
-        assertTrue(mZenModeHelperSpy.mConfig.allowWhenScreenOff);
-        assertTrue(mZenModeHelperSpy.mConfig.allowWhenScreenOn);
         assertEquals(SUPPRESSED_EFFECT_BADGE, mZenModeHelperSpy.mConfig.suppressedVisualEffects);
     }
 }

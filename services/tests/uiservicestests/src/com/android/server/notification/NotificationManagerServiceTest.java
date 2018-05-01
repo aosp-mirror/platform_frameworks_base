@@ -2189,7 +2189,6 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     @Test
     public void testReadPolicyXml_readApprovedServicesFromXml() throws Exception {
         final String upgradeXml = "<notification-policy version=\"1\">"
-                + "<zen></zen>"
                 + "<ranking></ranking>"
                 + "<enabled_listeners>"
                 + "<service_listing approved=\"test\" user=\"0\" primary=\"true\" />"
@@ -2217,7 +2216,6 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     @Test
     public void testReadPolicyXml_readApprovedServicesFromSettings() throws Exception {
         final String preupgradeXml = "<notification-policy version=\"1\">"
-                + "<zen></zen>"
                 + "<ranking></ranking>"
                 + "</notification-policy>";
         mService.readPolicyXml(
