@@ -110,7 +110,8 @@ public class MessagingLayout extends FrameLayout {
         // We still want to clip, but only on the top, since views can temporarily out of bounds
         // during transitions.
         DisplayMetrics displayMetrics = getResources().getDisplayMetrics();
-        Rect rect = new Rect(0, 0, displayMetrics.widthPixels, displayMetrics.heightPixels);
+        int size = Math.max(displayMetrics.widthPixels, displayMetrics.heightPixels);
+        Rect rect = new Rect(0, 0, size, size);
         mMessagingLinearLayout.setClipBounds(rect);
         mTitleView = findViewById(R.id.title);
         mAvatarSize = getResources().getDimensionPixelSize(R.dimen.messaging_avatar_size);
