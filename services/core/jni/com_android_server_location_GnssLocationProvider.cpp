@@ -64,6 +64,7 @@ static jmethodID method_reportGeofenceResumeStatus;
 static jmethodID method_reportMeasurementData;
 static jmethodID method_reportNavigationMessages;
 static jmethodID method_reportLocationBatch;
+static jmethodID method_reportGnssServiceDied;
 
 /*
  * Save a pointer to JavaVm to attach/detach threads executing
@@ -120,10 +121,10 @@ struct GnssDeathRecipient : virtual public hidl_death_recipient
 {
     // hidl_death_recipient interface
     virtual void serviceDied(uint64_t cookie, const wp<IBase>& who) override {
-      // TODO(b/37460011): implement a better death recovery mechanism without
-      // crashing system server process as described in go//treble-gnss-death
-      LOG_ALWAYS_FATAL("Abort due to IGNSS hidl service failure,"
-            " restarting system server");
+        ALOGE("IGNSS hidl service failed, trying to recover...");
+
+        JNIEnv* env = android::AndroidRuntime::getJNIEnv();
+        env->CallVoidMethod(mCallbacksObj, method_reportGnssServiceDied);
     }
 };
 
@@ -1177,6 +1178,7 @@ static void android_location_GnssLocationProvider_init_once(JNIEnv* env, jclass 
             clazz,
             "reportLocationBatch",
             "([Landroid/location/Location;)V");
+    method_reportGnssServiceDied = env->GetMethodID(clazz, "reportGnssServiceDied", "()V");
 
     /*
      * Save a pointer to JVM.
