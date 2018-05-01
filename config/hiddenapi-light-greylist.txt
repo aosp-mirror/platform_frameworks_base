@@ -803,6 +803,7 @@ Landroid/content/pm/PackageParser$Package;->mKeySetMapping:Landroid/util/ArrayMa
 Landroid/content/pm/PackageParser$Package;->mPreferredOrder:I
 Landroid/content/pm/PackageParser$Package;->mSharedUserId:Ljava/lang/String;
 Landroid/content/pm/PackageParser$Package;->mSharedUserLabel:I
+Landroid/content/pm/PackageParser$Package;->mSigningDetails:Landroid/content/pm/PackageParser$SigningDetails;
 Landroid/content/pm/PackageParser$Package;->mVersionCode:I
 Landroid/content/pm/PackageParser$Package;->mVersionName:Ljava/lang/String;
 Landroid/content/pm/PackageParser$Package;->packageName:Ljava/lang/String;
@@ -819,6 +820,7 @@ Landroid/content/pm/PackageParser$Provider;->info:Landroid/content/pm/ProviderIn
 Landroid/content/pm/PackageParser$ProviderIntentInfo;->provider:Landroid/content/pm/PackageParser$Provider;
 Landroid/content/pm/PackageParser$Service;->info:Landroid/content/pm/ServiceInfo;
 Landroid/content/pm/PackageParser$ServiceIntentInfo;->service:Landroid/content/pm/PackageParser$Service;
+Landroid/content/pm/PackageParser$SigningDetails;->signatures:[Landroid/content/pm/Signature;
 Landroid/content/pm/PackageParser;-><init>()V
 Landroid/content/pm/PackageParser;->collectCertificates(Landroid/content/pm/PackageParser$Package;Ljava/io/File;Z)V
 Landroid/content/pm/PackageParser;->collectCertificates(Landroid/content/pm/PackageParser$Package;Z)V
@@ -882,6 +884,7 @@ Landroid/content/res/CompatibilityInfo;->DEFAULT_COMPATIBILITY_INFO:Landroid/con
 Landroid/content/res/DrawableCache;-><init>()V
 Landroid/content/res/DrawableCache;->getInstance(JLandroid/content/res/Resources;Landroid/content/res/Resources$Theme;)Landroid/graphics/drawable/Drawable;
 Landroid/content/res/ObbInfo;->salt:[B
+Landroid/content/res/Resources$Theme;->mThemeImpl:Landroid/content/res/ResourcesImpl$ThemeImpl;
 Landroid/content/res/Resources;->getCompatibilityInfo()Landroid/content/res/CompatibilityInfo;
 Landroid/content/res/Resources;->loadXmlResourceParser(ILjava/lang/String;)Landroid/content/res/XmlResourceParser;
 Landroid/content/res/Resources;->loadXmlResourceParser(Ljava/lang/String;IILjava/lang/String;)Landroid/content/res/XmlResourceParser;
@@ -1461,6 +1464,7 @@ Landroid/media/session/MediaSession;->mCallback:Landroid/media/session/MediaSess
 Landroid/media/session/MediaSessionLegacyHelper;->getHelper(Landroid/content/Context;)Landroid/media/session/MediaSessionLegacyHelper;
 Landroid/media/soundtrigger/SoundTriggerDetector$EventPayload;->getCaptureSession()Ljava/lang/Integer;
 Landroid/media/soundtrigger/SoundTriggerDetector$EventPayload;->getData()[B
+Landroid/media/soundtrigger/SoundTriggerManager;->isRecognitionActive(Ljava/util/UUID;)Z
 Landroid/media/soundtrigger/SoundTriggerManager;->loadSoundModel(Landroid/hardware/soundtrigger/SoundTrigger$SoundModel;)I
 Landroid/media/soundtrigger/SoundTriggerManager;->startRecognition(Ljava/util/UUID;Landroid/os/Bundle;Landroid/content/ComponentName;Landroid/hardware/soundtrigger/SoundTrigger$RecognitionConfig;)I
 Landroid/media/soundtrigger/SoundTriggerManager;->stopRecognition(Ljava/util/UUID;)I
@@ -2277,6 +2281,7 @@ Landroid/renderscript/RenderScript;->getMinorID()J
 Landroid/renderscript/RenderScriptCacheDir;->mCacheDir:Ljava/io/File;
 Landroid/renderscript/RenderScriptCacheDir;->setupDiskCache(Ljava/io/File;)V
 Landroid/security/keystore/AndroidKeyStoreProvider;->getKeyStoreOperationHandle(Ljava/lang/Object;)J
+Landroid/security/keystore/recovery/RecoveryController;->getRecoveryStatus(Ljava/lang/String;Ljava/lang/String;)I
 Landroid/security/keystore/recovery/RecoveryController;->initRecoveryService(Ljava/lang/String;[B)V
 Landroid/security/KeyStore;->getInstance()Landroid/security/KeyStore;
 Landroid/security/net/config/RootTrustManager;->checkServerTrusted([Ljava/security/cert/X509Certificate;Ljava/lang/String;Ljava/lang/String;)Ljava/util/List;
