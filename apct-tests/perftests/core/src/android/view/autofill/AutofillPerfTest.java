@@ -21,6 +21,7 @@ import android.os.Looper;
 import android.os.Bundle;
 import android.perftests.utils.PerfStatusReporter;
 import android.perftests.utils.SettingsHelper;
+import android.perftests.utils.SettingsStateKeeperRule;
 import android.perftests.utils.ShellHelper;
 import android.util.Log;
 import android.view.View;
@@ -42,6 +43,7 @@ import java.util.Arrays;
 import org.junit.Test;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.ClassRule;
 import org.junit.Rule;
 import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
@@ -66,6 +68,10 @@ public class AutofillPerfTest {
     public AutofillPerfTest(String key, int layoutId) {
         mLayoutId = layoutId;
     }
+
+    @ClassRule
+    public static final SettingsStateKeeperRule mServiceSettingsKeeper = new SettingsStateKeeperRule(
+            InstrumentationRegistry.getTargetContext(), Settings.Secure.AUTOFILL_SERVICE);
 
     @Rule
     public ActivityTestRule<StubActivity> mActivityRule =
@@ -95,11 +101,6 @@ public class AutofillPerfTest {
     @Before
     public void resetStaticState() {
         MyAutofillService.resetStaticState();
-    }
-
-    @After
-    public void cleanup() {
-        resetService();
     }
 
     /**
