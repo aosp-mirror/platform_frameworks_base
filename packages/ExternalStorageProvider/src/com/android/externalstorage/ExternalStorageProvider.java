@@ -38,6 +38,9 @@ import android.provider.DocumentsContract.Document;
 import android.provider.DocumentsContract.Path;
 import android.provider.DocumentsContract.Root;
 import android.provider.Settings;
+import android.system.ErrnoException;
+import android.system.Os;
+import android.system.OsConstants;
 import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.DebugUtils;
@@ -360,14 +363,19 @@ public class ExternalStorageProvider extends FileSystemProvider {
 
     @Override
     protected File getFileForDocId(String docId, boolean visible) throws FileNotFoundException {
+        return getFileForDocId(docId, visible, true);
+    }
+
+    private File getFileForDocId(String docId, boolean visible, boolean mustExist)
+            throws FileNotFoundException {
         RootInfo root = getRootFromDocId(docId);
-        return buildFile(root, docId, visible);
+        return buildFile(root, docId, visible, mustExist);
     }
 
     private Pair<RootInfo, File> resolveDocId(String docId, boolean visible)
             throws FileNotFoundException {
         RootInfo root = getRootFromDocId(docId);
-        return Pair.create(root, buildFile(root, docId, visible));
+        return Pair.create(root, buildFile(root, docId, visible, true));
     }
 
     private RootInfo getRootFromDocId(String docId) throws FileNotFoundException {
@@ -385,7 +393,7 @@ public class ExternalStorageProvider extends FileSystemProvider {
         return root;
     }
 
-    private File buildFile(RootInfo root, String docId, boolean visible)
+    private File buildFile(RootInfo root, String docId, boolean visible, boolean mustExist)
             throws FileNotFoundException {
         final int splitIndex = docId.indexOf(':', 1);
         final String path = docId.substring(splitIndex + 1);
@@ -398,7 +406,7 @@ public class ExternalStorageProvider extends FileSystemProvider {
             target.mkdirs();
         }
         target = new File(target, path);
-        if (!target.exists()) {
+        if (mustExist && !target.exists()) {
             throw new FileNotFoundException("Missing file for " + docId + " at " + target);
         }
         return target;
@@ -407,6 +415,19 @@ public class ExternalStorageProvider extends FileSystemProvider {
     @Override
     protected Uri buildNotificationUri(String docId) {
         return DocumentsContract.buildChildDocumentsUri(AUTHORITY, docId);
+    }
+
+    @Override
+    protected void onDocIdChanged(String docId) {
+        try {
+            // Touch the visible path to ensure that any sdcardfs caches have
+            // been updated to reflect underlying changes on disk.
+            final File visiblePath = getFileForDocId(docId, true, false);
+            if (visiblePath != null) {
+                Os.access(visiblePath.getAbsolutePath(), OsConstants.F_OK);
+            }
+        } catch (FileNotFoundException | ErrnoException ignored) {
+        }
     }
 
     @Override
