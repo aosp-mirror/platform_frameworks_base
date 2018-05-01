@@ -183,8 +183,7 @@ public class SmartReplyView extends ViewGroup {
         };
 
         b.setOnClickListener(view -> {
-            mKeyguardDismissUtil.dismissKeyguardThenExecute(
-                    action, null /* cancelAction */, false /* afterKeyguardGone */);
+            mKeyguardDismissUtil.executeWhenUnlocked(action);
         });
 
         b.setAccessibilityDelegate(new AccessibilityDelegate() {

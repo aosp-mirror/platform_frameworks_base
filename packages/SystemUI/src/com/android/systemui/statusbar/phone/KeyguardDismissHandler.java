@@ -23,7 +23,9 @@ import com.android.keyguard.KeyguardHostView.OnDismissAction;
 
 /** Executes actions that require the screen to be unlocked. */
 public interface KeyguardDismissHandler {
-    /** Executes an action that requres the screen to be unlocked. */
-    void dismissKeyguardThenExecute(
-            OnDismissAction action, @Nullable Runnable cancelAction, boolean afterKeyguardGone);
+    /**
+     * Executes an action that requres the screen to be unlocked, showing the keyguard if
+     * necessary. Does not close the notification shade (in case it was open).
+     */
+    void executeWhenUnlocked(OnDismissAction action);
 }
