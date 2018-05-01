@@ -21,6 +21,7 @@ import android.annotation.UserIdInt;
 import android.app.ActivityManager;
 import android.app.ActivityManagerInternal;
 import android.app.AppGlobals;
+import android.app.IApplicationThread;
 import android.app.PendingIntent;
 import android.content.ComponentName;
 import android.content.Context;
@@ -560,7 +561,7 @@ public class LauncherAppsService extends SystemService {
         }
 
         @Override
-        public void startActivityAsUser(String callingPackage,
+        public void startActivityAsUser(IApplicationThread caller, String callingPackage,
                 ComponentName component, Rect sourceBounds,
                 Bundle opts, UserHandle user) throws RemoteException {
             if (!canAccessProfile(user.getIdentifier(), "Cannot start activity")) {
@@ -573,6 +574,8 @@ public class LauncherAppsService extends SystemService {
             launchIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK
                     | Intent.FLAG_ACTIVITY_RESET_TASK_IF_NEEDED);
             launchIntent.setPackage(component.getPackageName());
+
+            boolean canLaunch = false;
 
             final int callingUid = injectBinderCallingUid();
             long ident = Binder.clearCallingIdentity();
@@ -604,35 +607,42 @@ public class LauncherAppsService extends SystemService {
                         // this component so ok to launch.
                         launchIntent.setPackage(null);
                         launchIntent.setComponent(component);
-                        mContext.startActivityAsUser(launchIntent, opts, user);
-                        return;
+                        canLaunch = true;
+                        break;
                     }
                 }
-                throw new SecurityException("Attempt to launch activity without "
-                        + " category Intent.CATEGORY_LAUNCHER " + component);
+                if (!canLaunch) {
+                    throw new SecurityException("Attempt to launch activity without "
+                            + " category Intent.CATEGORY_LAUNCHER " + component);
+                }
             } finally {
                 Binder.restoreCallingIdentity(ident);
             }
+            mActivityManagerInternal.startActivityAsUser(caller, callingPackage,
+                    launchIntent, opts, user.getIdentifier());
         }
 
         @Override
-        public void showAppDetailsAsUser(String callingPackage, ComponentName component,
+        public void showAppDetailsAsUser(IApplicationThread caller,
+                String callingPackage, ComponentName component,
                 Rect sourceBounds, Bundle opts, UserHandle user) throws RemoteException {
             if (!canAccessProfile(user.getIdentifier(), "Cannot show app details")) {
                 return;
             }
 
+            final Intent intent;
             long ident = Binder.clearCallingIdentity();
             try {
                 String packageName = component.getPackageName();
-                Intent intent = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS,
+                intent = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS,
                         Uri.fromParts("package", packageName, null));
                 intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
                 intent.setSourceBounds(sourceBounds);
-                mContext.startActivityAsUser(intent, opts, user);
             } finally {
                 Binder.restoreCallingIdentity(ident);
             }
+            mActivityManagerInternal.startActivityAsUser(caller, callingPackage,
+                    intent, opts, user.getIdentifier());
         }
 
         /** Checks if user is a profile of or same as listeningUser.
