@@ -503,7 +503,8 @@ public class KeySyncTaskTest {
     @Test
     public void run_sendsEncryptedKeysIfAvailableToSync_withRawPublicKey() throws Exception {
         mRecoverableKeyStoreDb.setRecoveryServiceCertPath(
-                TEST_USER_ID, TEST_RECOVERY_AGENT_UID, TEST_ROOT_CERT_ALIAS, TestData.CERT_PATH_1);
+                TEST_USER_ID, TEST_RECOVERY_AGENT_UID, TEST_ROOT_CERT_ALIAS,
+                TestData.getInsecureCertPathForEndpoint1());
 
         mRecoverableKeyStoreDb.setServerParams(
                 TEST_USER_ID, TEST_RECOVERY_AGENT_UID, TEST_VAULT_HANDLE);
@@ -528,7 +529,8 @@ public class KeySyncTaskTest {
                 lockScreenHash,
                 keyChainSnapshot.getEncryptedRecoveryKeyBlob(),
                 /*vaultParams=*/ KeySyncUtils.packVaultParams(
-                        TestData.CERT_1_PUBLIC_KEY,
+                        TestData.getInsecureCertPathForEndpoint1().getCertificates().get(0)
+                                .getPublicKey(),
                         counterId,
                         /*maxAttempts=*/ 10,
                         TEST_VAULT_HANDLE));
@@ -537,7 +539,7 @@ public class KeySyncTaskTest {
         assertThat(keyChainSnapshot.getCounterId()).isEqualTo(counterId);
         assertThat(keyChainSnapshot.getMaxAttempts()).isEqualTo(10);
         assertThat(keyChainSnapshot.getTrustedHardwareCertPath())
-                .isEqualTo(TestData.CERT_PATH_1);
+                .isEqualTo(TestData.getInsecureCertPathForEndpoint1());
         assertThat(keyChainSnapshot.getServerParams()).isEqualTo(TEST_VAULT_HANDLE);
         WrappedApplicationKey keyData = applicationKeys.get(0);
         assertEquals(TEST_APP_KEY_ALIAS, keyData.getAlias());
@@ -805,7 +807,7 @@ public class KeySyncTaskTest {
     private byte[] decryptThmEncryptedKey(
             byte[] lockScreenHash, byte[] encryptedKey, byte[] vaultParams) throws Exception {
         byte[] locallyEncryptedKey = SecureBox.decrypt(
-                TestData.CERT_1_PRIVATE_KEY,
+                TestData.getInsecurePrivateKeyForEndpoint1(),
                 /*sharedSecret=*/ KeySyncUtils.calculateThmKfHash(lockScreenHash),
                 /*header=*/ KeySyncUtils.concat(THM_ENCRYPTED_RECOVERY_KEY_HEADER, vaultParams),
                 encryptedKey
