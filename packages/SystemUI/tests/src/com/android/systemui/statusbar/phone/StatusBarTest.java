@@ -78,6 +78,7 @@ import com.android.systemui.recents.misc.SystemServicesProxy;
 import com.android.systemui.statusbar.ActivatableNotificationView;
 import com.android.systemui.statusbar.AppOpsListener;
 import com.android.systemui.statusbar.CommandQueue;
+import com.android.systemui.statusbar.DndSuppressingNotificationsView;
 import com.android.systemui.statusbar.ExpandableNotificationRow;
 import com.android.systemui.statusbar.FooterView;
 import com.android.systemui.statusbar.FooterViewButton;
@@ -103,6 +104,7 @@ import com.android.systemui.statusbar.policy.DeviceProvisionedController;
 import com.android.systemui.statusbar.policy.KeyguardMonitor;
 import com.android.systemui.statusbar.policy.KeyguardMonitorImpl;
 import com.android.systemui.statusbar.policy.UserSwitcherController;
+import com.android.systemui.statusbar.policy.ZenModeController;
 import com.android.systemui.statusbar.stack.NotificationStackScrollLayout;
 
 import org.junit.Before;
@@ -132,6 +134,7 @@ public class StatusBarTest extends SysuiTestCase {
     @Mock private ScrimController mScrimController;
     @Mock private ArrayList<Entry> mNotificationList;
     @Mock private FingerprintUnlockController mFingerprintUnlockController;
+    @Mock private ZenModeController mZenController;
     @Mock private NotificationData mNotificationData;
 
     // Mock dependencies:
@@ -163,6 +166,7 @@ public class StatusBarTest extends SysuiTestCase {
         mDependency.injectTestDependency(NotificationListener.class, mNotificationListener);
         mDependency.injectTestDependency(KeyguardMonitor.class, mock(KeyguardMonitorImpl.class));
         mDependency.injectTestDependency(AppOpsListener.class, mock(AppOpsListener.class));
+        mDependency.injectTestDependency(ZenModeController.class, mZenController);
 
         mContext.addMockSystemService(TrustManager.class, mock(TrustManager.class));
         mContext.addMockSystemService(FingerprintManager.class, mock(FingerprintManager.class));
@@ -213,7 +217,7 @@ public class StatusBarTest extends SysuiTestCase {
                 mRemoteInputManager, mock(NotificationGroupManager.class),
                 mock(FalsingManager.class), mock(StatusBarWindowManager.class),
                 mock(NotificationIconAreaController.class), mock(DozeScrimController.class),
-                mock(NotificationShelf.class), mLockscreenUserManager,
+                mock(NotificationShelf.class), mLockscreenUserManager, mZenController,
                 mock(CommandQueue.class));
         mStatusBar.mContext = mContext;
         mStatusBar.mComponents = mContext.getComponents();
@@ -676,6 +680,60 @@ public class StatusBarTest extends SysuiTestCase {
     }
 
     @Test
+    public void testDNDView_atEnd() {
+        // add footer
+        mStatusBar.reevaluateStyles();
+
+        // add notification
+        ExpandableNotificationRow row = mock(ExpandableNotificationRow.class);
+        mStackScroller.addContainerView(row);
+
+        mStatusBar.onUpdateRowStates();
+
+        // move dnd view to end
+        verify(mStackScroller).changeViewPosition(any(FooterView.class), eq(-1 /* end */));
+        verify(mStackScroller).changeViewPosition(any(DndSuppressingNotificationsView.class),
+                eq(-2 /* end */));
+    }
+
+    @Test
+    public void updateEmptyShade_nonNotificationsDndOff() {
+        mStatusBar.setBarStateForTest(StatusBarState.SHADE);
+        when(mNotificationData.getActiveNotifications()).thenReturn(new ArrayList<>());
+        assertEquals(0, mEntryManager.getNotificationData().getActiveNotifications().size());
+
+        mStatusBar.updateEmptyShadeView();
+        verify(mNotificationPanelView).showDndView(false);
+        verify(mNotificationPanelView).showEmptyShadeView(true);
+    }
+
+    @Test
+    public void updateEmptyShade_noNotificationsDndOn() {
+        mStatusBar.setBarStateForTest(StatusBarState.SHADE);
+        when(mNotificationData.getActiveNotifications()).thenReturn(new ArrayList<>());
+        assertEquals(0, mEntryManager.getNotificationData().getActiveNotifications().size());
+        when(mZenController.areNotificationsHiddenInShade()).thenReturn(true);
+
+        mStatusBar.updateEmptyShadeView();
+        verify(mNotificationPanelView).showDndView(true);
+        verify(mNotificationPanelView).showEmptyShadeView(false);
+    }
+
+    @Test
+    public void updateEmptyShade_yesNotificationsDndOff() {
+        mStatusBar.setBarStateForTest(StatusBarState.SHADE);
+        ArrayList<Entry> entries = new ArrayList<>();
+        entries.add(mock(Entry.class));
+        when(mNotificationData.getActiveNotifications()).thenReturn(entries);
+        assertEquals(1, mEntryManager.getNotificationData().getActiveNotifications().size());
+        when(mZenController.areNotificationsHiddenInShade()).thenReturn(false);
+
+        mStatusBar.updateEmptyShadeView();
+        verify(mNotificationPanelView).showDndView(false);
+        verify(mNotificationPanelView).showEmptyShadeView(false);
+    }
+
+    @Test
     public void testSetState_changesIsFullScreenUserSwitcherState() {
         mStatusBar.setBarStateForTest(StatusBarState.KEYGUARD);
         assertFalse(mStatusBar.isFullScreenUserSwitcherState());
@@ -721,6 +779,7 @@ public class StatusBarTest extends SysuiTestCase {
                 DozeScrimController dozeScrimController,
                 NotificationShelf notificationShelf,
                 NotificationLockscreenUserManager notificationLockscreenUserManager,
+                ZenModeController zenController,
                 CommandQueue commandQueue) {
             mStatusBarKeyguardViewManager = man;
             mUnlockMethodCache = unlock;
@@ -749,6 +808,7 @@ public class StatusBarTest extends SysuiTestCase {
             mDozeScrimController = dozeScrimController;
             mNotificationShelf = notificationShelf;
             mLockscreenUserManager = notificationLockscreenUserManager;
+            mZenController = zenController;
             mCommandQueue = commandQueue;
         }
 
