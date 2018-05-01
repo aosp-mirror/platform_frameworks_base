@@ -1714,13 +1714,13 @@ public class RankingHelperTest extends UiServiceTestCase {
     }
 
     @Test
-    public void testAndroidPkgCanBypassDnd_creation() {
+    public void testAndroidPkgCannotBypassDnd_creation() {
         NotificationChannel test = new NotificationChannel("A", "a", IMPORTANCE_LOW);
         test.setBypassDnd(true);
 
         mHelper.createNotificationChannel(SYSTEM_PKG, SYSTEM_UID, test, true, false);
 
-        assertTrue(mHelper.getNotificationChannel(SYSTEM_PKG, SYSTEM_UID, "A", false)
+        assertFalse(mHelper.getNotificationChannel(SYSTEM_PKG, SYSTEM_UID, "A", false)
                 .canBypassDnd());
     }
 
@@ -1745,7 +1745,7 @@ public class RankingHelperTest extends UiServiceTestCase {
     }
 
     @Test
-    public void testAndroidPkgCanBypassDnd_update() throws Exception {
+    public void testAndroidPkgCannotBypassDnd_update() throws Exception {
         NotificationChannel test = new NotificationChannel("A", "a", IMPORTANCE_LOW);
         mHelper.createNotificationChannel(SYSTEM_PKG, SYSTEM_UID, test, true, false);
 
@@ -1753,11 +1753,8 @@ public class RankingHelperTest extends UiServiceTestCase {
         update.setBypassDnd(true);
         mHelper.createNotificationChannel(SYSTEM_PKG, SYSTEM_UID, update, true, false);
 
-        assertTrue(mHelper.getNotificationChannel(SYSTEM_PKG, SYSTEM_UID, "A", false)
+        assertFalse(mHelper.getNotificationChannel(SYSTEM_PKG, SYSTEM_UID, "A", false)
                 .canBypassDnd());
-
-        // setup + 1st check
-        verify(mPm, times(2)).getPackageInfoAsUser(any(), anyInt(), anyInt());
     }
 
     @Test
