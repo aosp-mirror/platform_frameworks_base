@@ -23,7 +23,6 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 import android.os.Parcel;
-import android.platform.test.annotations.Presubmit;
 import android.support.test.filters.SmallTest;
 import android.support.test.runner.AndroidJUnit4;
 import android.view.inputmethod.InputMethodSubtype.InputMethodSubtypeBuilder;
@@ -35,7 +34,6 @@ import java.util.Locale;
 import java.util.Objects;
 
 @SmallTest
-@Presubmit
 @RunWith(AndroidJUnit4.class)
 public class InputMethodSubtypeTest {
 

@@ -72,7 +72,7 @@ sp<DeferredLayerUpdater> TestUtils::createTextureLayerUpdater(
     layerUpdater->setTransform(&transform);
 
     // updateLayer so it's ready to draw
-    layerUpdater->updateLayer(true, Matrix4::identity().data);
+    layerUpdater->updateLayer(true, Matrix4::identity().data, HAL_DATASPACE_UNKNOWN);
     if (layerUpdater->backingLayer()->getApi() == Layer::Api::OpenGL) {
         static_cast<GlLayer*>(layerUpdater->backingLayer())
                 ->setRenderTarget(GL_TEXTURE_EXTERNAL_OES);
@@ -140,7 +140,7 @@ void TestUtils::TestTask::run() {
     if (Properties::getRenderPipelineType() == RenderPipelineType::SkiaVulkan) {
         renderThread.vulkanManager().initialize();
     } else {
-        renderThread.eglManager().initialize();
+        renderThread.requireGlContext();
     }
 
     rtCallback(renderThread);
@@ -149,7 +149,7 @@ void TestUtils::TestTask::run() {
         renderThread.vulkanManager().destroy();
     } else {
         renderThread.renderState().flush(Caches::FlushMode::Full);
-        renderThread.eglManager().destroy();
+        renderThread.destroyGlContext();
     }
 }
 

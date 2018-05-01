@@ -28,7 +28,6 @@ import static org.junit.Assert.assertTrue;
 import android.graphics.Matrix;
 import android.graphics.RectF;
 import android.os.Parcel;
-import android.platform.test.annotations.Presubmit;
 import android.support.test.filters.SmallTest;
 import android.support.test.runner.AndroidJUnit4;
 import android.text.TextUtils;
@@ -40,7 +39,6 @@ import org.junit.runner.RunWith;
 import java.util.Objects;
 
 @SmallTest
-@Presubmit
 @RunWith(AndroidJUnit4.class)
 public class CursorAnchorInfoTest {
     private static final float EPSILON = 0.0000001f;

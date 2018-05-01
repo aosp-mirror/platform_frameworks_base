@@ -394,6 +394,58 @@ public final class BluetoothAdapter {
     public static final int SCAN_MODE_CONNECTABLE_DISCOVERABLE = 23;
 
     /**
+     * Device only has a display.
+     *
+     * @hide
+     */
+    public static final int IO_CAPABILITY_OUT = 0;
+
+    /**
+     * Device has a display and the ability to input Yes/No.
+     *
+     * @hide
+     */
+    public static final int IO_CAPABILITY_IO = 1;
+
+    /**
+     * Device only has a keyboard for entry but no display.
+     *
+     * @hide
+     */
+    public static final int IO_CAPABILITY_IN = 2;
+
+    /**
+     * Device has no Input or Output capability.
+     *
+     * @hide
+     */
+    public static final int IO_CAPABILITY_NONE = 3;
+
+    /**
+     * Device has a display and a full keyboard.
+     *
+     * @hide
+     */
+    public static final int IO_CAPABILITY_KBDISP = 4;
+
+    /**
+     * Maximum range value for Input/Output capabilities.
+     *
+     * <p>This should be updated when adding a new Input/Output capability. Other code
+     * like validation depends on this being accurate.
+     *
+     * @hide
+     */
+    public static final int IO_CAPABILITY_MAX = 5;
+
+    /**
+     * The Input/Output capability of the device is unknown.
+     *
+     * @hide
+     */
+    public static final int IO_CAPABILITY_UNKNOWN = 255;
+
+    /**
      * Broadcast Action: The local Bluetooth adapter has started the remote
      * device discovery process.
      * <p>This usually involves an inquiry scan of about 12 seconds, followed
@@ -1218,6 +1270,106 @@ public final class BluetoothAdapter {
             }
         } catch (RemoteException e) {
             Log.e(TAG, "", e);
+        } finally {
+            mServiceLock.readLock().unlock();
+        }
+        return false;
+    }
+
+    /**
+     * Returns the Input/Output capability of the device for classic Bluetooth.
+     *
+     * @return Input/Output capability of the device. One of {@link #IO_CAPABILITY_OUT},
+     *         {@link #IO_CAPABILITY_IO}, {@link #IO_CAPABILITY_IN}, {@link #IO_CAPABILITY_NONE},
+     *         {@link #IO_CAPABILITY_KBDISP} or {@link #IO_CAPABILITY_UNKNOWN}.
+     *
+     * @hide
+     */
+    @RequiresPermission(Manifest.permission.BLUETOOTH_ADMIN)
+    public int getIoCapability() {
+        if (getState() != STATE_ON) return BluetoothAdapter.IO_CAPABILITY_UNKNOWN;
+        try {
+            mServiceLock.readLock().lock();
+            if (mService != null) return mService.getIoCapability();
+        } catch (RemoteException e) {
+            Log.e(TAG, e.getMessage(), e);
+        } finally {
+            mServiceLock.readLock().unlock();
+        }
+        return BluetoothAdapter.IO_CAPABILITY_UNKNOWN;
+    }
+
+    /**
+     * Sets the Input/Output capability of the device for classic Bluetooth.
+     *
+     * <p>Changing the Input/Output capability of a device only takes effect on restarting the
+     * Bluetooth stack. You would need to restart the stack using {@link BluetoothAdapter#disable()}
+     * and {@link BluetoothAdapter#enable()} to see the changes.
+     *
+     * @param capability Input/Output capability of the device. One of {@link #IO_CAPABILITY_OUT},
+     *                   {@link #IO_CAPABILITY_IO}, {@link #IO_CAPABILITY_IN},
+     *                   {@link #IO_CAPABILITY_NONE} or {@link #IO_CAPABILITY_KBDISP}.
+     *
+     * @hide
+     */
+    @RequiresPermission(Manifest.permission.BLUETOOTH_PRIVILEGED)
+    public boolean setIoCapability(int capability) {
+        if (getState() != STATE_ON) return false;
+        try {
+            mServiceLock.readLock().lock();
+            if (mService != null) return mService.setIoCapability(capability);
+        } catch (RemoteException e) {
+            Log.e(TAG, e.getMessage(), e);
+        } finally {
+            mServiceLock.readLock().unlock();
+        }
+        return false;
+    }
+
+    /**
+     * Returns the Input/Output capability of the device for BLE operations.
+     *
+     * @return Input/Output capability of the device. One of {@link #IO_CAPABILITY_OUT},
+     *         {@link #IO_CAPABILITY_IO}, {@link #IO_CAPABILITY_IN}, {@link #IO_CAPABILITY_NONE},
+     *         {@link #IO_CAPABILITY_KBDISP} or {@link #IO_CAPABILITY_UNKNOWN}.
+     *
+     * @hide
+     */
+    @RequiresPermission(Manifest.permission.BLUETOOTH_ADMIN)
+    public int getLeIoCapability() {
+        if (getState() != STATE_ON) return BluetoothAdapter.IO_CAPABILITY_UNKNOWN;
+        try {
+            mServiceLock.readLock().lock();
+            if (mService != null) return mService.getLeIoCapability();
+        } catch (RemoteException e) {
+            Log.e(TAG, e.getMessage(), e);
+        } finally {
+            mServiceLock.readLock().unlock();
+        }
+        return BluetoothAdapter.IO_CAPABILITY_UNKNOWN;
+    }
+
+    /**
+     * Sets the Input/Output capability of the device for BLE operations.
+     *
+     * <p>Changing the Input/Output capability of a device only takes effect on restarting the
+     * Bluetooth stack. You would need to restart the stack using {@link BluetoothAdapter#disable()}
+     * and {@link BluetoothAdapter#enable()} to see the changes.
+     *
+     * @param capability Input/Output capability of the device. One of {@link #IO_CAPABILITY_OUT},
+     *                   {@link #IO_CAPABILITY_IO}, {@link #IO_CAPABILITY_IN},
+     *                   {@link #IO_CAPABILITY_NONE} or {@link #IO_CAPABILITY_KBDISP}.
+     *
+     * @hide
+     */
+    @RequiresPermission(Manifest.permission.BLUETOOTH_PRIVILEGED)
+    public boolean setLeIoCapability(int capability) {
+        if (getState() != STATE_ON) return false;
+        try {
+            mServiceLock.readLock().lock();
+            if (mService != null) return mService.setLeIoCapability(capability);
+        } catch (RemoteException e) {
+            Log.e(TAG, e.getMessage(), e);
         } finally {
             mServiceLock.readLock().unlock();
         }

@@ -32,6 +32,7 @@ import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.os.Binder;
 import android.os.Bundle;
+import android.os.Process;
 import android.os.UserHandle;
 import android.util.Slog;
 import android.view.RemoteAnimationAdapter;
@@ -78,6 +79,9 @@ class SafeActivityOptions {
         mOriginalCallingPid = Binder.getCallingPid();
         mOriginalCallingUid = Binder.getCallingUid();
         mOriginalOptions = options;
+        if (mOriginalCallingPid == Process.myPid()) {
+            Slog.wtf(TAG, "Safe activity options constructed after clearing calling id");
+        }
     }
 
     /**
@@ -89,6 +93,9 @@ class SafeActivityOptions {
         mRealCallingPid = Binder.getCallingPid();
         mRealCallingUid = Binder.getCallingUid();
         mCallerOptions = options;
+        if (mRealCallingPid == Process.myPid()) {
+            Slog.wtf(TAG, "setCallerOptions called after clearing calling id");
+        }
     }
 
     /**

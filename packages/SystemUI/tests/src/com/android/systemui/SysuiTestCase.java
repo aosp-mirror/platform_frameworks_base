@@ -28,6 +28,8 @@ import android.testing.DexmakerShareClassLoaderRule;
 import android.testing.LeakCheck;
 import android.util.Log;
 
+import com.android.keyguard.KeyguardUpdateMonitor;
+
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
@@ -70,6 +72,7 @@ public abstract class SysuiTestCase {
                     "SysUI Tests should use SysuiTestCase#getContext or SysuiTestCase#mContext");
         });
         InstrumentationRegistry.registerInstance(inst, InstrumentationRegistry.getArguments());
+        KeyguardUpdateMonitor.disableHandlerCheckForTesting(inst);
     }
 
     @After

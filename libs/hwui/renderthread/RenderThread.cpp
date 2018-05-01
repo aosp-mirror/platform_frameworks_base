@@ -24,11 +24,18 @@
 #include "hwui/Bitmap.h"
 #include "pipeline/skia/SkiaOpenGLPipeline.h"
 #include "pipeline/skia/SkiaOpenGLReadback.h"
-#include "pipeline/skia/SkiaVulkanReadback.h"
 #include "pipeline/skia/SkiaVulkanPipeline.h"
+#include "pipeline/skia/SkiaVulkanReadback.h"
 #include "renderstate/RenderState.h"
 #include "utils/FatVector.h"
 #include "utils/TimeUtils.h"
+
+#ifdef HWUI_GLES_WRAP_ENABLED
+#include "debug/GlesDriver.h"
+#endif
+
+#include <GrContextOptions.h>
+#include <gl/GrGLInterface.h>
 
 #include <gui/DisplayEventReceiver.h>
 #include <sys/resource.h>
@@ -91,14 +98,11 @@ public:
     DummyVsyncSource(RenderThread* renderThread) : mRenderThread(renderThread) {}
 
     virtual void requestNextVsync() override {
-        mRenderThread->queue().postDelayed(16_ms, [this]() {
-            mRenderThread->drainDisplayEventQueue();
-        });
+        mRenderThread->queue().postDelayed(16_ms,
+                                           [this]() { mRenderThread->drainDisplayEventQueue(); });
     }
 
-    virtual nsecs_t latestVsyncEvent() override {
-        return systemTime(CLOCK_MONOTONIC);
-    }
+    virtual nsecs_t latestVsyncEvent() override { return systemTime(CLOCK_MONOTONIC); }
 
 private:
     RenderThread* mRenderThread;
@@ -145,13 +149,13 @@ void RenderThread::initializeDisplayEventReceiver() {
         auto receiver = std::make_unique<DisplayEventReceiver>();
         status_t status = receiver->initCheck();
         LOG_ALWAYS_FATAL_IF(status != NO_ERROR,
-                "Initialization of DisplayEventReceiver "
-                        "failed with status: %d",
-                status);
+                            "Initialization of DisplayEventReceiver "
+                            "failed with status: %d",
+                            status);
 
         // Register the FD
         mLooper->addFd(receiver->getFd(), 0, Looper::EVENT_INPUT,
-                RenderThread::displayEventReceiverCallback, this);
+                       RenderThread::displayEventReceiverCallback, this);
         mVsyncSource = new DisplayEventReceiverWrapper(std::move(receiver));
     } else {
         mVsyncSource = new DummyVsyncSource(this);
@@ -163,10 +167,41 @@ void RenderThread::initThreadLocals() {
     nsecs_t frameIntervalNanos = static_cast<nsecs_t>(1000000000 / mDisplayInfo.fps);
     mTimeLord.setFrameInterval(frameIntervalNanos);
     initializeDisplayEventReceiver();
-    mEglManager = new EglManager(*this);
+    mEglManager = new EglManager();
     mRenderState = new RenderState(*this);
     mVkManager = new VulkanManager(*this);
     mCacheManager = new CacheManager(mDisplayInfo);
+}
+
+void RenderThread::requireGlContext() {
+    if (mEglManager->hasEglContext()) {
+        return;
+    }
+    mEglManager->initialize();
+    renderState().onGLContextCreated();
+
+#ifdef HWUI_GLES_WRAP_ENABLED
+    debug::GlesDriver* driver = debug::GlesDriver::get();
+    sk_sp<const GrGLInterface> glInterface(driver->getSkiaInterface());
+#else
+    sk_sp<const GrGLInterface> glInterface(GrGLCreateNativeInterface());
+#endif
+    LOG_ALWAYS_FATAL_IF(!glInterface.get());
+
+    GrContextOptions options;
+    options.fDisableDistanceFieldPaths = true;
+    cacheManager().configureContext(&options);
+    sk_sp<GrContext> grContext(GrContext::MakeGL(std::move(glInterface), options));
+    LOG_ALWAYS_FATAL_IF(!grContext.get());
+    setGrContext(grContext);
+}
+
+void RenderThread::destroyGlContext() {
+    if (mEglManager->hasEglContext()) {
+        setGrContext(nullptr);
+        renderState().onGLContextDestroyed();
+        mEglManager->destroy();
+    }
 }
 
 void RenderThread::dumpGraphicsMemory(int fd) {
@@ -332,8 +367,6 @@ void RenderThread::pushBackFrameCallback(IFrameCallback* callback) {
 sk_sp<Bitmap> RenderThread::allocateHardwareBitmap(SkBitmap& skBitmap) {
     auto renderType = Properties::getRenderPipelineType();
     switch (renderType) {
-        case RenderPipelineType::SkiaGL:
-            return skiapipeline::SkiaOpenGLPipeline::allocateHardwareBitmap(*this, skBitmap);
         case RenderPipelineType::SkiaVulkan:
             return skiapipeline::SkiaVulkanPipeline::allocateHardwareBitmap(*this, skBitmap);
         default:

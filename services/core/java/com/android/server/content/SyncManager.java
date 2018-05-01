@@ -68,6 +68,7 @@ import android.os.Binder;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.HandlerThread;
 import android.os.IBinder;
 import android.os.Looper;
 import android.os.Message;
@@ -454,6 +455,7 @@ public class SyncManager {
         }
     };
 
+    private final HandlerThread mThread;
     private final SyncHandler mSyncHandler;
     private final SyncManagerConstants mConstants;
 
@@ -604,7 +606,9 @@ public class SyncManager {
 
         mSyncAdapters = new SyncAdaptersCache(mContext);
 
-        mSyncHandler = new SyncHandler(BackgroundThread.get().getLooper());
+        mThread = new HandlerThread("SyncManager", android.os.Process.THREAD_PRIORITY_BACKGROUND);
+        mThread.start();
+        mSyncHandler = new SyncHandler(mThread.getLooper());
 
         mSyncAdapters.setListener(new RegisteredServicesCacheListener<SyncAdapterType>() {
             @Override

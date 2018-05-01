@@ -156,6 +156,9 @@ public final class SystemServer {
     // give any timezone code room without going into negative time.
     private static final long EARLIEST_SUPPORTED_TIME = 86400 * 1000;
 
+    private static final long SLOW_DISPATCH_THRESHOLD_MS = 100;
+    private static final long SLOW_DELIVERY_THRESHOLD_MS = 200;
+
     /*
      * Implementation class names. TODO: Move them to a codegen class or load
      * them from the build system somehow.
@@ -396,6 +399,8 @@ public final class SystemServer {
                 android.os.Process.THREAD_PRIORITY_FOREGROUND);
             android.os.Process.setCanSelfBackground(false);
             Looper.prepareMainLooper();
+            Looper.getMainLooper().setSlowLogThresholdMs(
+                    SLOW_DISPATCH_THRESHOLD_MS, SLOW_DELIVERY_THRESHOLD_MS);
 
             // Initialize native services.
             System.loadLibrary("android_servers");

@@ -16,27 +16,19 @@
 
 #include "EglManager.h"
 
-#include <string>
-
 #include <cutils/properties.h>
 #include <log/log.h>
+#include <utils/Trace.h>
 #include "utils/StringUtils.h"
 
-#include "Caches.h"
 #include "DeviceInfo.h"
 #include "Frame.h"
 #include "Properties.h"
-#include "RenderThread.h"
-#include "Texture.h"
-#include "renderstate/RenderState.h"
 
 #include <EGL/eglext.h>
-#include <GrContextOptions.h>
-#include <gl/GrGLInterface.h>
 
-#ifdef HWUI_GLES_WRAP_ENABLED
-#include "debug/GlesDriver.h"
-#endif
+#include <string>
+#include <vector>
 
 #define GLES_VERSION 2
 
@@ -83,16 +75,20 @@ static struct {
     bool glColorSpace = false;
     bool scRGB = false;
     bool contextPriority = false;
+    bool surfacelessContext = false;
 } EglExtensions;
 
-EglManager::EglManager(RenderThread& thread)
-        : mRenderThread(thread)
-        , mEglDisplay(EGL_NO_DISPLAY)
+EglManager::EglManager()
+        : mEglDisplay(EGL_NO_DISPLAY)
         , mEglConfig(nullptr)
         , mEglConfigWideGamut(nullptr)
         , mEglContext(EGL_NO_CONTEXT)
         , mPBufferSurface(EGL_NO_SURFACE)
         , mCurrentSurface(EGL_NO_SURFACE) {}
+
+EglManager::~EglManager() {
+    destroy();
+}
 
 void EglManager::initialize() {
     if (hasEglContext()) return;
@@ -126,26 +122,8 @@ void EglManager::initialize() {
     loadConfigs();
     createContext();
     createPBufferSurface();
-    makeCurrent(mPBufferSurface);
+    makeCurrent(mPBufferSurface, nullptr, /* force */ true);
     DeviceInfo::initialize();
-    mRenderThread.renderState().onGLContextCreated();
-
-    if (Properties::getRenderPipelineType() == RenderPipelineType::SkiaGL) {
-#ifdef HWUI_GLES_WRAP_ENABLED
-        debug::GlesDriver* driver = debug::GlesDriver::get();
-        sk_sp<const GrGLInterface> glInterface(driver->getSkiaInterface());
-#else
-        sk_sp<const GrGLInterface> glInterface(GrGLCreateNativeInterface());
-#endif
-        LOG_ALWAYS_FATAL_IF(!glInterface.get());
-
-        GrContextOptions options;
-        options.fDisableDistanceFieldPaths = true;
-        mRenderThread.cacheManager().configureContext(&options);
-        sk_sp<GrContext> grContext(GrContext::MakeGL(std::move(glInterface), options));
-        LOG_ALWAYS_FATAL_IF(!grContext.get());
-        mRenderThread.setGrContext(grContext);
-    }
 }
 
 void EglManager::initExtensions() {
@@ -170,6 +148,7 @@ void EglManager::initExtensions() {
     EglExtensions.scRGB = extensions.has("EGL_EXT_gl_colorspace_scrgb");
 #endif
     EglExtensions.contextPriority = extensions.has("EGL_IMG_context_priority");
+    EglExtensions.surfacelessContext = extensions.has("EGL_KHR_surfaceless_context");
 }
 
 bool EglManager::hasEglContext() {
@@ -195,7 +174,7 @@ void EglManager::loadConfigs() {
                         EGL_CONFIG_CAVEAT,
                         EGL_NONE,
                         EGL_STENCIL_SIZE,
-                        Stencil::getStencilSize(),
+                        STENCIL_BUFFER_SIZE,
                         EGL_SURFACE_TYPE,
                         EGL_WINDOW_BIT | swapBehavior,
                         EGL_NONE};
@@ -232,7 +211,7 @@ void EglManager::loadConfigs() {
                                EGL_DEPTH_SIZE,
                                0,
                                EGL_STENCIL_SIZE,
-                               Stencil::getStencilSize(),
+                               STENCIL_BUFFER_SIZE,
                                EGL_SURFACE_TYPE,
                                EGL_WINDOW_BIT | swapBehavior,
                                EGL_NONE};
@@ -269,14 +248,14 @@ void EglManager::createPBufferSurface() {
     LOG_ALWAYS_FATAL_IF(mEglDisplay == EGL_NO_DISPLAY,
                         "usePBufferSurface() called on uninitialized GlobalContext!");
 
-    if (mPBufferSurface == EGL_NO_SURFACE) {
+    if (mPBufferSurface == EGL_NO_SURFACE && !EglExtensions.surfacelessContext) {
         EGLint attribs[] = {EGL_WIDTH, 1, EGL_HEIGHT, 1, EGL_NONE};
         mPBufferSurface = eglCreatePbufferSurface(mEglDisplay, mEglConfig, attribs);
     }
 }
 
 EGLSurface EglManager::createSurface(EGLNativeWindowType window, bool wideColorGamut) {
-    initialize();
+    LOG_ALWAYS_FATAL_IF(!hasEglContext(), "Not initialized");
 
     wideColorGamut = wideColorGamut && EglExtensions.glColorSpace && EglExtensions.scRGB &&
                      EglExtensions.pixelFormatFloat && EglExtensions.noConfigContext;
@@ -350,10 +329,10 @@ void EglManager::destroySurface(EGLSurface surface) {
 void EglManager::destroy() {
     if (mEglDisplay == EGL_NO_DISPLAY) return;
 
-    mRenderThread.setGrContext(nullptr);
-    mRenderThread.renderState().onGLContextDestroyed();
     eglDestroyContext(mEglDisplay, mEglContext);
-    eglDestroySurface(mEglDisplay, mPBufferSurface);
+    if (mPBufferSurface != EGL_NO_SURFACE) {
+        eglDestroySurface(mEglDisplay, mPBufferSurface);
+    }
     eglMakeCurrent(mEglDisplay, EGL_NO_SURFACE, EGL_NO_SURFACE, EGL_NO_CONTEXT);
     eglTerminate(mEglDisplay);
     eglReleaseThread();
@@ -364,8 +343,8 @@ void EglManager::destroy() {
     mCurrentSurface = EGL_NO_SURFACE;
 }
 
-bool EglManager::makeCurrent(EGLSurface surface, EGLint* errOut) {
-    if (isCurrent(surface)) return false;
+bool EglManager::makeCurrent(EGLSurface surface, EGLint* errOut, bool force) {
+    if (!force && isCurrent(surface)) return false;
 
     if (surface == EGL_NO_SURFACE) {
         // Ensure we always have a valid surface & context

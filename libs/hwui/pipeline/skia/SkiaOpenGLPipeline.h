@@ -49,8 +49,10 @@ public:
     bool isContextReady() override;
 
     static void invokeFunctor(const renderthread::RenderThread& thread, Functor* functor);
+
+    // May be called by any thread except RenderThread.
     static sk_sp<Bitmap> allocateHardwareBitmap(renderthread::RenderThread& thread,
-                                                SkBitmap& skBitmap);
+                                                const SkBitmap& skBitmap);
 
 private:
     renderthread::EglManager& mEglManager;

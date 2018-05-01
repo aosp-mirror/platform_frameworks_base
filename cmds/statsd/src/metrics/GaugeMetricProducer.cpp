@@ -160,6 +160,12 @@ void GaugeMetricProducer::dumpStatesLocked(FILE* out, bool verbose) const {
     }
 }
 
+void GaugeMetricProducer::clearPastBucketsLocked(const int64_t dumpTimeNs) {
+    flushIfNeededLocked(dumpTimeNs);
+    mPastBuckets.clear();
+    mSkippedBuckets.clear();
+}
+
 void GaugeMetricProducer::onDumpReportLocked(const int64_t dumpTimeNs,
                                              const bool include_current_partial_bucket,
                                              ProtoOutputStream* protoOutput) {

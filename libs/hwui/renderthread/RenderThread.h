@@ -103,6 +103,9 @@ public:
     sk_sp<Bitmap> allocateHardwareBitmap(SkBitmap& skBitmap);
     void dumpGraphicsMemory(int fd);
 
+    void requireGlContext();
+    void destroyGlContext();
+
     /**
      * isCurrent provides a way to query, if the caller is running on
      * the render thread.

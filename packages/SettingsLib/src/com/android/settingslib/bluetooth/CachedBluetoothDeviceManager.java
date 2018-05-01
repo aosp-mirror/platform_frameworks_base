@@ -358,6 +358,12 @@ public class CachedBluetoothDeviceManager {
         }
     }
 
+    public synchronized void dispatchAudioModeChanged() {
+        for (CachedBluetoothDevice cachedDevice : mCachedDevices) {
+            cachedDevice.onAudioModeChanged();
+        }
+    }
+
     private void log(String msg) {
         if (DEBUG) {
             Log.d(TAG, msg);

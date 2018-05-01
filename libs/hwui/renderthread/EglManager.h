@@ -33,8 +33,12 @@ class RenderThread;
 // and EGLConfig, which are re-used by CanvasContext
 class EglManager {
 public:
+    explicit EglManager();
+
+    ~EglManager();
+
     static const char* eglErrorString();
-    // Returns true on success, false on failure
+
     void initialize();
 
     bool hasEglContext();
@@ -46,7 +50,7 @@ public:
 
     bool isCurrent(EGLSurface surface) { return mCurrentSurface == surface; }
     // Returns true if the current surface changed, false if it was already current
-    bool makeCurrent(EGLSurface surface, EGLint* errOut = nullptr);
+    bool makeCurrent(EGLSurface surface, EGLint* errOut = nullptr, bool force = false);
     Frame beginFrame(EGLSurface surface);
     void damageFrame(const Frame& frame, const SkRect& dirty);
     // If this returns true it is mandatory that swapBuffers is called
@@ -61,18 +65,12 @@ public:
     void fence();
 
 private:
-    friend class RenderThread;
-    explicit EglManager(RenderThread& thread);
-    // EglContext is never destroyed, method is purposely not implemented
-    ~EglManager();
 
     void initExtensions();
     void createPBufferSurface();
     void loadConfigs();
     void createContext();
     EGLint queryBufferAge(EGLSurface surface);
-
-    RenderThread& mRenderThread;
 
     EGLDisplay mEglDisplay;
     EGLConfig mEglConfig;
