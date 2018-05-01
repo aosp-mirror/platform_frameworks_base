@@ -5735,6 +5735,11 @@ message MetricsEvent {
     // The path part of the subslice URI
     FIELD_SUBSLICE_PATH = 1405;
 
+    // OPEN: DND onboarding activity > don't update button
+    // CATEGORY: SETTINGS
+    // OS: P
+    ACTION_ZEN_ONBOARDING_KEEP_CURRENT_SETTINGS = 1406;
+
     // ---- End P Constants, all P constants go above this line ----
 
     // First Q constant in master goes here:
