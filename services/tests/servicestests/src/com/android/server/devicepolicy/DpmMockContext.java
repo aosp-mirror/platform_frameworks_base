@@ -254,6 +254,12 @@ public class DpmMockContext extends MockContext {
     }
 
     @Override
+    public void sendBroadcastAsUserMultiplePermissions(Intent intent, UserHandle user,
+            String[] receiverPermissions) {
+        spiedContext.sendBroadcastAsUserMultiplePermissions(intent, user, receiverPermissions);
+    }
+
+    @Override
     public void sendBroadcast(Intent intent, String receiverPermission, Bundle options) {
         spiedContext.sendBroadcast(intent, receiverPermission, options);
     }
