@@ -180,22 +180,20 @@ void RenderThread::requireGlContext() {
     mEglManager->initialize();
     renderState().onGLContextCreated();
 
-    if (Properties::getRenderPipelineType() == RenderPipelineType::SkiaGL) {
 #ifdef HWUI_GLES_WRAP_ENABLED
-        debug::GlesDriver* driver = debug::GlesDriver::get();
-        sk_sp<const GrGLInterface> glInterface(driver->getSkiaInterface());
+    debug::GlesDriver* driver = debug::GlesDriver::get();
+    sk_sp<const GrGLInterface> glInterface(driver->getSkiaInterface());
 #else
-        sk_sp<const GrGLInterface> glInterface(GrGLCreateNativeInterface());
+    sk_sp<const GrGLInterface> glInterface(GrGLCreateNativeInterface());
 #endif
-        LOG_ALWAYS_FATAL_IF(!glInterface.get());
+    LOG_ALWAYS_FATAL_IF(!glInterface.get());
 
-        GrContextOptions options;
-        options.fDisableDistanceFieldPaths = true;
-        cacheManager().configureContext(&options);
-        sk_sp<GrContext> grContext(GrContext::MakeGL(std::move(glInterface), options));
-        LOG_ALWAYS_FATAL_IF(!grContext.get());
-        setGrContext(grContext);
-    }
+    GrContextOptions options;
+    options.fDisableDistanceFieldPaths = true;
+    cacheManager().configureContext(&options);
+    sk_sp<GrContext> grContext(GrContext::MakeGL(std::move(glInterface), options));
+    LOG_ALWAYS_FATAL_IF(!grContext.get());
+    setGrContext(grContext);
 }
 
 void RenderThread::destroyGlContext() {
