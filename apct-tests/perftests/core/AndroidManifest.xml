@@ -16,6 +16,16 @@
           </intent-filter>
         </activity>
         <service android:name="android.os.SomeService" android:exported="false" android:process=":some_service" />
+
+        <service
+            android:name="android.view.autofill.MyAutofillService"
+            android:label="PERF AutofillService"
+            android:permission="android.permission.BIND_AUTOFILL_SERVICE" >
+            <intent-filter>
+                <action android:name="android.service.autofill.AutofillService" />
+            </intent-filter>
+        </service>
+
     </application>
 
     <instrumentation android:name="android.support.test.runner.AndroidJUnitRunner"
