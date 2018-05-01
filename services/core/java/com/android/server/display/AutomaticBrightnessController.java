@@ -330,7 +330,11 @@ class AutomaticBrightnessController {
     }
 
     public boolean setBrightnessConfiguration(BrightnessConfiguration configuration) {
-        return mBrightnessMapper.setBrightnessConfiguration(configuration);
+        if (mBrightnessMapper.setBrightnessConfiguration(configuration)) {
+            resetShortTermModel();
+            return true;
+        }
+        return false;
     }
 
     public void dump(PrintWriter pw) {
