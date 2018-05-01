@@ -18,6 +18,7 @@ package com.android.systemui.statusbar.stack;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.reset;
@@ -34,6 +35,7 @@ import com.android.systemui.ExpandHelper;
 import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.TestableDependency;
+import com.android.systemui.statusbar.DndSuppressingNotificationsView;
 import com.android.systemui.statusbar.EmptyShadeView;
 import com.android.systemui.statusbar.FooterView;
 import com.android.systemui.statusbar.NotificationBlockingHelperManager;
@@ -69,6 +71,7 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
     @Mock private NotificationGroupManager mGroupManager;
     @Mock private ExpandHelper mExpandHelper;
     @Mock private EmptyShadeView mEmptyShadeView;
+    @Mock private DndSuppressingNotificationsView mDndView;
 
     @Before
     @UiThreadTest
@@ -86,6 +89,7 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
         mStackScroller.setHeadsUpManager(mHeadsUpManager);
         mStackScroller.setGroupManager(mGroupManager);
         mStackScroller.setEmptyShadeView(mEmptyShadeView);
+        mStackScroller.setDndView(mDndView);
 
         // Stub out functionality that isn't necessary to test.
         doNothing().when(mBar)
@@ -120,40 +124,6 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
     }
 
     @Test
-    public void updateEmptyView_dndSuppressing() {
-        when(mEmptyShadeView.willBeGone()).thenReturn(true);
-        when(mBar.areNotificationsHidden()).thenReturn(true);
-
-        mStackScroller.updateEmptyShadeView(true);
-
-        verify(mEmptyShadeView).setText(R.string.dnd_suppressing_shade_text);
-    }
-
-    @Test
-    public void updateEmptyView_dndNotSuppressing() {
-        mStackScroller.setEmptyShadeView(mEmptyShadeView);
-        when(mEmptyShadeView.willBeGone()).thenReturn(true);
-        when(mBar.areNotificationsHidden()).thenReturn(false);
-
-        mStackScroller.updateEmptyShadeView(true);
-
-        verify(mEmptyShadeView).setText(R.string.empty_shade_text);
-    }
-
-    @Test
-    public void updateEmptyView_noNotificationsToDndSuppressing() {
-        mStackScroller.setEmptyShadeView(mEmptyShadeView);
-        when(mEmptyShadeView.willBeGone()).thenReturn(true);
-        when(mBar.areNotificationsHidden()).thenReturn(false);
-        mStackScroller.updateEmptyShadeView(true);
-        verify(mEmptyShadeView).setText(R.string.empty_shade_text);
-
-        when(mBar.areNotificationsHidden()).thenReturn(true);
-        mStackScroller.updateEmptyShadeView(true);
-        verify(mEmptyShadeView).setText(R.string.dnd_suppressing_shade_text);
-    }
-
-    @Test
     @UiThreadTest
     public void testSetExpandedHeight_blockingHelperManagerReceivedCallbacks() {
         mStackScroller.setExpandedHeight(0f);
@@ -173,7 +143,7 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
 
         mStackScroller.updateFooterView(true, false);
 
-        verify(view).setVisibility(View.VISIBLE);
+        verify(view).performVisibilityAnimation(eq(true), any());
         verify(view).performSecondaryVisibilityAnimation(false);
     }
 
@@ -186,7 +156,7 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
 
         mStackScroller.updateFooterView(true, true);
 
-        verify(view).setVisibility(View.VISIBLE);
+        verify(view).performVisibilityAnimation(eq(true), any());
         verify(view).performSecondaryVisibilityAnimation(true);
     }
 }
