@@ -76,6 +76,7 @@ import com.android.systemui.statusbar.NotificationGuts.GutsContent;
 import com.android.systemui.statusbar.notification.AboveShelfChangedListener;
 import com.android.systemui.statusbar.notification.ActivityLaunchAnimator;
 import com.android.systemui.statusbar.notification.HybridNotificationView;
+import com.android.systemui.statusbar.notification.NotificationCounters;
 import com.android.systemui.statusbar.notification.NotificationInflater;
 import com.android.systemui.statusbar.notification.NotificationUtils;
 import com.android.systemui.statusbar.notification.NotificationViewWrapper;
@@ -1251,6 +1252,8 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
         NotificationBlockingHelperManager manager =
                 Dependency.get(NotificationBlockingHelperManager.class);
         boolean isBlockingHelperShown = manager.perhapsShowBlockingHelper(this, mMenuRow);
+
+        Dependency.get(MetricsLogger.class).count(NotificationCounters.NOTIFICATION_DISMISSED, 1);
 
         // Continue with dismiss since we don't want the blocking helper to be directly associated
         // with a certain notification.
