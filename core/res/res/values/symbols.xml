@@ -2587,9 +2587,6 @@
   <java-symbol type="attr" name="floatingToolbarDividerColor" />
 
   <!-- Magnifier -->
-  <java-symbol type="id" name="magnifier_image" />
-  <java-symbol type="id" name="magnifier_inner" />
-  <java-symbol type="layout" name="magnifier" />
   <java-symbol type="dimen" name="magnifier_width" />
   <java-symbol type="dimen" name="magnifier_height" />
   <java-symbol type="dimen" name="magnifier_elevation" />
