@@ -56,7 +56,6 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
-            android:layout_marginStart="@dimen/notification_content_margin_start"
             android:layout_marginEnd="@dimen/notification_content_margin_end">
         <TextView
                 android:id="@+id/notification_material_reply_text_1"
@@ -72,7 +71,6 @@
             android:layout_height="@dimen/messaging_group_sending_progress_size"
             android:layout_width="@dimen/messaging_group_sending_progress_size"
             android:layout_marginStart="@dimen/notification_content_margin_start"
-            android:layout_marginEnd="@dimen/notification_content_margin_end"
             android:layout_gravity="center"
             android:indeterminate="true"
             style="?android:attr/progressBarStyleSmall" />
