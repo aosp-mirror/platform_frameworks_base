@@ -24,6 +24,7 @@ import android.util.Log;
 import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewGroup.LayoutParams;
 import android.widget.LinearLayout;
 
 import com.android.internal.statusbar.StatusBarIcon;
@@ -56,7 +57,14 @@ public class DemoStatusIcons extends StatusIconContainer implements DemoMode, Da
         mIconSize = iconSize;
         mColor = DarkIconDispatcher.DEFAULT_ICON_TINT;
 
+        if (statusIcons instanceof StatusIconContainer) {
+            setShouldRestrictIcons(((StatusIconContainer) statusIcons).isRestrictingIcons());
+        } else {
+            setShouldRestrictIcons(false);
+        }
         setLayoutParams(mStatusIcons.getLayoutParams());
+        setPadding(mStatusIcons.getPaddingLeft(),mStatusIcons.getPaddingTop(),
+                mStatusIcons.getPaddingRight(), mStatusIcons.getPaddingBottom());
         setOrientation(mStatusIcons.getOrientation());
         setGravity(Gravity.CENTER_VERTICAL); // no LL.getGravity()
         ViewGroup p = (ViewGroup) mStatusIcons.getParent();
@@ -77,6 +85,7 @@ public class DemoStatusIcons extends StatusIconContainer implements DemoMode, Da
         for (int i = 0; i < getChildCount(); i++) {
             StatusIconDisplayable child = (StatusIconDisplayable) getChildAt(i);
             child.setStaticDrawableColor(mColor);
+            child.setDecorColor(mColor);
         }
     }
 
@@ -189,11 +198,12 @@ public class DemoStatusIcons extends StatusIconContainer implements DemoMode, Da
         }
         StatusBarIcon icon = new StatusBarIcon(iconPkg, UserHandle.SYSTEM, iconId, 0, 0, "Demo");
         icon.visible = true;
-        StatusBarIconView v = new StatusBarIconView(getContext(), null, null);
+        StatusBarIconView v = new StatusBarIconView(getContext(), slot, null, false);
         v.setTag(slot);
         v.set(icon);
         v.setStaticDrawableColor(mColor);
-        addView(v, 0, new LinearLayout.LayoutParams(mIconSize, mIconSize));
+        v.setDecorColor(mColor);
+        addView(v, 0, new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, mIconSize));
     }
 
     public void addDemoWifiView(WifiIconState state) {
