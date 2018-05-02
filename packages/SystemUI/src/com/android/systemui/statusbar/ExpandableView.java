@@ -58,6 +58,7 @@ public abstract class ExpandableView extends FrameLayout {
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         final int givenSize = MeasureSpec.getSize(heightMeasureSpec);
+        final int viewHorizontalPadding = getPaddingStart() + getPaddingEnd();
         int ownMaxHeight = Integer.MAX_VALUE;
         int heightMode = MeasureSpec.getMode(heightMeasureSpec);
         if (heightMode != MeasureSpec.UNSPECIFIED && givenSize != 0) {
@@ -80,8 +81,8 @@ public abstract class ExpandableView extends FrameLayout {
                         ? MeasureSpec.makeMeasureSpec(ownMaxHeight, MeasureSpec.EXACTLY)
                         : MeasureSpec.makeMeasureSpec(layoutParams.height, MeasureSpec.EXACTLY);
                 }
-                child.measure(
-                        getChildMeasureSpec(widthMeasureSpec, 0 /* padding */, layoutParams.width),
+                child.measure(getChildMeasureSpec(
+                        widthMeasureSpec, viewHorizontalPadding, layoutParams.width),
                         childHeightSpec);
                 int childHeight = child.getMeasuredHeight();
                 maxChildHeight = Math.max(maxChildHeight, childHeight);
@@ -94,7 +95,7 @@ public abstract class ExpandableView extends FrameLayout {
         newHeightSpec = MeasureSpec.makeMeasureSpec(ownHeight, MeasureSpec.EXACTLY);
         for (View child : mMatchParentViews) {
             child.measure(getChildMeasureSpec(
-                    widthMeasureSpec, 0 /* padding */, child.getLayoutParams().width),
+                    widthMeasureSpec, viewHorizontalPadding, child.getLayoutParams().width),
                     newHeightSpec);
         }
         mMatchParentViews.clear();
