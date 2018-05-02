@@ -93,7 +93,8 @@ public class TileLayout extends ViewGroup implements QSTileLayout {
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         final int numTiles = mRecords.size();
-        final int width = MeasureSpec.getSize(widthMeasureSpec) - mPaddingLeft - mPaddingRight;
+        final int width = MeasureSpec.getSize(widthMeasureSpec)
+                - getPaddingStart() - getPaddingEnd();
         final int numRows = (numTiles + mColumns - 1) / mColumns;
         mCellWidth = (width - mSidePadding * 2 - (mCellMarginHorizontal * mColumns)) / mColumns;
 
@@ -140,16 +141,8 @@ public class TileLayout extends ViewGroup implements QSTileLayout {
 
             final TileRecord record = mRecords.get(i);
             final int top = getRowTop(row);
-            final int right;
-            final int left;
-            if (isRtl) {
-                right = w - getColumnStart(column);
-                left = right - mCellWidth;
-            } else {
-                left = getColumnStart(column);
-                right = left + mCellWidth;
-            }
-
+            final int left = getColumnStart(isRtl ? mColumns - column - 1 : column);
+            final int right = left + mCellWidth;
             record.tileView.layout(left, top, right, top + record.tileView.getMeasuredHeight());
         }
     }
@@ -159,6 +152,7 @@ public class TileLayout extends ViewGroup implements QSTileLayout {
     }
 
     private int getColumnStart(int column) {
-        return column * (mCellWidth + mCellMarginHorizontal) + mCellMarginHorizontal + mPaddingLeft;
+        return getPaddingStart() + mSidePadding + mCellMarginHorizontal / 2 +
+                column *  (mCellWidth + mCellMarginHorizontal);
     }
 }
