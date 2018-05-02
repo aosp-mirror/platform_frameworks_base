@@ -5295,8 +5295,8 @@ public final class ActivityThread {
                                         }
                                     }
                                 }
-                                final List<String> oldPaths =
-                                        sPackageManager.getPreviousCodePaths(packageName);
+                                final ArrayList<String> oldPaths = new ArrayList<>();
+                                LoadedApk.makePaths(this, loadedApk.getApplicationInfo(), oldPaths);
                                 loadedApk.updateApplicationInfo(aInfo, oldPaths);
                             } catch (RemoteException e) {
                             }
