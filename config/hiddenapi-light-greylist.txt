@@ -2660,6 +2660,7 @@ Landroid/view/IWindowManager$Stub;->asInterface(Landroid/os/IBinder;)Landroid/vi
 Landroid/view/IWindowManager;->getAnimationScale(I)F
 Landroid/view/IWindowManager;->hasNavigationBar()Z
 Landroid/view/IWindowManager;->setAnimationScale(IF)V
+Landroid/view/IWindowManager;->setAnimationScales([F)V
 Landroid/view/IWindowManager;->setShelfHeight(ZI)V
 Landroid/view/IWindowManager;->setStrictModeVisualIndicatorPreference(Ljava/lang/String;)V
 Landroid/view/IWindowSession$Stub$Proxy;->relayout(Landroid/view/IWindow;ILandroid/view/WindowManager$LayoutParams;IIIIJLandroid/graphics/Rect;Landroid/graphics/Rect;Landroid/graphics/Rect;Landroid/graphics/Rect;Landroid/graphics/Rect;Landroid/graphics/Rect;Landroid/graphics/Rect;Landroid/view/DisplayCutout$ParcelableWrapper;Landroid/util/MergedConfiguration;Landroid/view/Surface;)I
