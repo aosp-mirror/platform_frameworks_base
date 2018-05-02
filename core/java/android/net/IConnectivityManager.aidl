@@ -150,14 +150,14 @@ interface IConnectivityManager
 
     void setAirplaneMode(boolean enable);
 
-    void registerNetworkFactory(in Messenger messenger, in String name);
+    int registerNetworkFactory(in Messenger messenger, in String name);
 
     boolean requestBandwidthUpdate(in Network network);
 
     void unregisterNetworkFactory(in Messenger messenger);
 
     int registerNetworkAgent(in Messenger messenger, in NetworkInfo ni, in LinkProperties lp,
-            in NetworkCapabilities nc, int score, in NetworkMisc misc);
+            in NetworkCapabilities nc, int score, in NetworkMisc misc, in int factorySerialNumber);
 
     NetworkRequest requestNetwork(in NetworkCapabilities networkCapabilities,
             in Messenger messenger, int timeoutSec, in IBinder binder, int legacy);

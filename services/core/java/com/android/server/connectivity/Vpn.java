@@ -54,6 +54,7 @@ import android.net.LocalSocketAddress;
 import android.net.Network;
 import android.net.NetworkAgent;
 import android.net.NetworkCapabilities;
+import android.net.NetworkFactory;
 import android.net.NetworkInfo;
 import android.net.NetworkInfo.DetailedState;
 import android.net.NetworkMisc;
@@ -989,7 +990,8 @@ public class Vpn {
         try {
             mNetworkAgent = new NetworkAgent(mLooper, mContext, NETWORKTYPE /* logtag */,
                     mNetworkInfo, mNetworkCapabilities, lp,
-                    ConnectivityConstants.VPN_DEFAULT_SCORE, networkMisc) {
+                    ConnectivityConstants.VPN_DEFAULT_SCORE, networkMisc,
+                    NetworkFactory.SerialNumber.VPN) {
                             @Override
                             public void unwanted() {
                                 // We are user controlled, not driven by NetworkRequest.
