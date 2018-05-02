@@ -93,7 +93,7 @@ bool isValidEffect(jlong effect) {
         return false;
     }
     R val = static_cast<R>(effect);
-    auto iter = hardware::hidl_enum_iterator<R>();
+    auto iter = hardware::hidl_enum_range<R>();
     return val >= *iter.begin() && val < *std::prev(iter.end());
 }
 
