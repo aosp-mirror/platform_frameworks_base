@@ -1458,6 +1458,12 @@
     <permission android:name="android.permission.MANAGE_WIFI_WHEN_PERMISSION_REVIEW_REQUIRED"
         android:protectionLevel="signature" />
 
+    <!-- #SystemApi @hide Allows an app to bypass Private DNS.
+         <p>Not for use by third-party applications.
+         TODO: publish as system API in next API release. -->
+    <permission android:name="android.permission.NETWORK_BYPASS_PRIVATE_DNS"
+        android:protectionLevel="signature" />
+
     <!-- ======================================= -->
     <!-- Permissions for short range, peripheral networks -->
     <!-- ======================================= -->
