@@ -16,6 +16,7 @@
 #define DEBUG false  // STOPSHIP if true
 #include "Log.h"
 
+#include "hash.h"
 #include "stats_log_util.h"
 #include "guardrail/StatsdStats.h"
 #include "packages/UidMap.h"
@@ -34,6 +35,7 @@ using android::util::FIELD_TYPE_BOOL;
 using android::util::FIELD_TYPE_FLOAT;
 using android::util::FIELD_TYPE_INT32;
 using android::util::FIELD_TYPE_INT64;
+using android::util::FIELD_TYPE_UINT64;
 using android::util::FIELD_TYPE_MESSAGE;
 using android::util::FIELD_TYPE_STRING;
 using android::util::ProtoOutputStream;
@@ -46,6 +48,7 @@ const int FIELD_ID_SNAPSHOT_PACKAGE_NAME = 1;
 const int FIELD_ID_SNAPSHOT_PACKAGE_VERSION = 2;
 const int FIELD_ID_SNAPSHOT_PACKAGE_UID = 3;
 const int FIELD_ID_SNAPSHOT_PACKAGE_DELETED = 4;
+const int FIELD_ID_SNAPSHOT_PACKAGE_NAME_HASH = 5;
 const int FIELD_ID_SNAPSHOT_TIMESTAMP = 1;
 const int FIELD_ID_SNAPSHOT_PACKAGE_INFO = 2;
 const int FIELD_ID_SNAPSHOTS = 1;
@@ -56,6 +59,7 @@ const int FIELD_ID_CHANGE_PACKAGE = 3;
 const int FIELD_ID_CHANGE_UID = 4;
 const int FIELD_ID_CHANGE_NEW_VERSION = 5;
 const int FIELD_ID_CHANGE_PREV_VERSION = 6;
+const int FIELD_ID_CHANGE_PACKAGE_HASH = 7;
 
 UidMap::UidMap() : mBytesUsed(0) {}
 
@@ -312,7 +316,7 @@ size_t UidMap::getBytesUsed() const {
 }
 
 void UidMap::appendUidMap(const int64_t& timestamp, const ConfigKey& key,
-                          ProtoOutputStream* proto) {
+                          std::set<string> *str_set, ProtoOutputStream* proto) {
     lock_guard<mutex> lock(mMutex);  // Lock for updates
 
     for (const ChangeRecord& record : mChanges) {
@@ -322,7 +326,14 @@ void UidMap::appendUidMap(const int64_t& timestamp, const ConfigKey& key,
             proto->write(FIELD_TYPE_BOOL | FIELD_ID_CHANGE_DELETION, (bool)record.deletion);
             proto->write(FIELD_TYPE_INT64 | FIELD_ID_CHANGE_TIMESTAMP,
                          (long long)record.timestampNs);
-            proto->write(FIELD_TYPE_STRING | FIELD_ID_CHANGE_PACKAGE, record.package);
+            if (str_set != nullptr) {
+                str_set->insert(record.package);
+                proto->write(FIELD_TYPE_UINT64 | FIELD_ID_CHANGE_PACKAGE_HASH,
+                             (long long)Hash64(record.package));
+            } else {
+                proto->write(FIELD_TYPE_STRING | FIELD_ID_CHANGE_PACKAGE, record.package);
+            }
+
             proto->write(FIELD_TYPE_INT32 | FIELD_ID_CHANGE_UID, (int)record.uid);
             proto->write(FIELD_TYPE_INT64 | FIELD_ID_CHANGE_NEW_VERSION, (long long)record.version);
             proto->write(FIELD_TYPE_INT64 | FIELD_ID_CHANGE_PREV_VERSION,
@@ -338,7 +349,15 @@ void UidMap::appendUidMap(const int64_t& timestamp, const ConfigKey& key,
     for (const auto& kv : mMap) {
         uint64_t token = proto->start(FIELD_TYPE_MESSAGE | FIELD_COUNT_REPEATED |
                                       FIELD_ID_SNAPSHOT_PACKAGE_INFO);
-        proto->write(FIELD_TYPE_STRING | FIELD_ID_SNAPSHOT_PACKAGE_NAME, kv.first.second);
+
+        if (str_set != nullptr) {
+            str_set->insert(kv.first.second);
+            proto->write(FIELD_TYPE_UINT64 | FIELD_ID_SNAPSHOT_PACKAGE_NAME_HASH,
+                         (long long)Hash64(kv.first.second));
+        } else {
+            proto->write(FIELD_TYPE_STRING | FIELD_ID_SNAPSHOT_PACKAGE_NAME, kv.first.second);
+        }
+
         proto->write(FIELD_TYPE_INT64 | FIELD_ID_SNAPSHOT_PACKAGE_VERSION,
                      (long long)kv.second.versionCode);
         proto->write(FIELD_TYPE_INT32 | FIELD_ID_SNAPSHOT_PACKAGE_UID, kv.first.first);

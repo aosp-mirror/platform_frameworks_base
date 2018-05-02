@@ -28,8 +28,16 @@ namespace statsd {
 
 void writeFieldValueTreeToStream(int tagId, const std::vector<FieldValue>& values,
                                  util::ProtoOutputStream* protoOutput);
-void writeDimensionToProto(const HashableDimensionKey& dimension,
+void writeDimensionToProto(const HashableDimensionKey& dimension, std::set<string> *str_set,
                            util::ProtoOutputStream* protoOutput);
+
+void writeDimensionLeafNodesToProto(const HashableDimensionKey& dimension,
+                                    const int dimensionLeafFieldId,
+                                    std::set<string> *str_set,
+                                    util::ProtoOutputStream* protoOutput);
+
+void writeDimensionPathToProto(const std::vector<Matcher>& fieldMatchers,
+                               util::ProtoOutputStream* protoOutput);
 
 // Convert the TimeUnit enum to the bucket size in millis with a guardrail on
 // bucket size.
@@ -55,6 +63,10 @@ int64_t getWallClockMillis();
 
 // Gets the wall clock timestamp in seconds.
 int64_t getWallClockSec();
+
+int64_t NanoToMillis(const int64_t nano);
+
+int64_t MillisToNano(const int64_t millis);
 
 // Helper function to write PulledAtomStats to ProtoOutputStream
 void writePullerStatsToStream(const std::pair<int, StatsdStats::PulledAtomStats>& pair,

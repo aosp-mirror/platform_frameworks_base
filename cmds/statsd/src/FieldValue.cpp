@@ -237,6 +237,18 @@ bool HasPositionANY(const FieldMatcher& matcher) {
     return false;
 }
 
+bool HasPositionALL(const FieldMatcher& matcher) {
+    if (matcher.has_position() && matcher.position() == Position::ALL) {
+        return true;
+    }
+    for (const auto& child : matcher.child()) {
+        if (HasPositionALL(child)) {
+            return true;
+        }
+    }
+    return false;
+}
+
 }  // namespace statsd
 }  // namespace os
 }  // namespace android
