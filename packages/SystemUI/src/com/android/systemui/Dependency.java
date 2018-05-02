@@ -247,10 +247,14 @@ public class Dependency extends SystemUI {
                 getDependency(LeakDetector.class),
                 getDependency(LEAK_REPORT_EMAIL)));
 
-        mProviders.put(GarbageMonitor.class, () -> new GarbageMonitor(
-                getDependency(BG_LOOPER),
-                getDependency(LeakDetector.class),
-                getDependency(LeakReporter.class)));
+        mProviders.put(
+                GarbageMonitor.class,
+                () ->
+                        new GarbageMonitor(
+                                mContext,
+                                getDependency(BG_LOOPER),
+                                getDependency(LeakDetector.class),
+                                getDependency(LeakReporter.class)));
 
         mProviders.put(TunerService.class, () ->
                 new TunerServiceImpl(mContext));
