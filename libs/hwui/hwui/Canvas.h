@@ -268,9 +268,9 @@ public:
      * Converts utf16 text to glyphs, calculating position and boundary,
      * and delegating the final draw to virtual drawGlyphs method.
      */
-    void drawText(const uint16_t* text, int start, int count, int contextCount, float x, float y,
-                  minikin::Bidi bidiFlags, const Paint& origPaint, const Typeface* typeface,
-                  minikin::MeasuredText* mt);
+    void drawText(const uint16_t* text, int textSize, int start, int count, int contextStart,
+                  int contextCount, float x, float y, minikin::Bidi bidiFlags,
+                  const Paint& origPaint, const Typeface* typeface, minikin::MeasuredText* mt);
 
     void drawTextOnPath(const uint16_t* text, int count, minikin::Bidi bidiFlags,
                         const SkPath& path, float hOffset, float vOffset, const Paint& paint,
