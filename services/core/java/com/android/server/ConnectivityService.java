@@ -390,9 +390,9 @@ public class ConnectivityService extends IConnectivityManager.Stub
     private static final int EVENT_PROMPT_UNVALIDATED = 29;
 
     /**
-     * used internally to (re)configure mobile data always-on settings.
+     * used internally to (re)configure always-on networks.
      */
-    private static final int EVENT_CONFIGURE_MOBILE_DATA_ALWAYS_ON = 30;
+    private static final int EVENT_CONFIGURE_ALWAYS_ON_NETWORKS = 30;
 
     /**
      * used to add a network listener with a pending intent
@@ -748,6 +748,12 @@ public class ConnectivityService extends IConnectivityManager.Stub
         mDefaultMobileDataRequest = createDefaultInternetRequestForTransport(
                 NetworkCapabilities.TRANSPORT_CELLULAR, NetworkRequest.Type.BACKGROUND_REQUEST);
 
+        // The default WiFi request is a background request so that apps using WiFi are
+        // migrated to a better network (typically ethernet) when one comes up, instead
+        // of staying on WiFi forever.
+        mDefaultWifiRequest = createDefaultInternetRequestForTransport(
+                NetworkCapabilities.TRANSPORT_WIFI, NetworkRequest.Type.BACKGROUND_REQUEST);
+
         mHandlerThread = new HandlerThread("ConnectivityServiceThread");
         mHandlerThread.start();
         mHandler = new InternalHandler(mHandlerThread.getLooper());
@@ -944,8 +950,8 @@ public class ConnectivityService extends IConnectivityManager.Stub
     // 2. Give FakeSettingsProvider an alternative notification mechanism and have the test use it
     //    by subclassing SettingsObserver.
     @VisibleForTesting
-    void updateMobileDataAlwaysOn() {
-        mHandler.sendEmptyMessage(EVENT_CONFIGURE_MOBILE_DATA_ALWAYS_ON);
+    void updateAlwaysOnNetworks() {
+        mHandler.sendEmptyMessage(EVENT_CONFIGURE_ALWAYS_ON_NETWORKS);
     }
 
     // See FakeSettingsProvider comment above.
@@ -954,20 +960,28 @@ public class ConnectivityService extends IConnectivityManager.Stub
         mHandler.sendEmptyMessage(EVENT_PRIVATE_DNS_SETTINGS_CHANGED);
     }
 
-    private void handleMobileDataAlwaysOn() {
+    private void handleAlwaysOnNetworkRequest(
+            NetworkRequest networkRequest, String settingName, boolean defaultValue) {
         final boolean enable = toBool(Settings.Global.getInt(
-                mContext.getContentResolver(), Settings.Global.MOBILE_DATA_ALWAYS_ON, 1));
-        final boolean isEnabled = (mNetworkRequests.get(mDefaultMobileDataRequest) != null);
+                mContext.getContentResolver(), settingName, encodeBool(defaultValue)));
+        final boolean isEnabled = (mNetworkRequests.get(networkRequest) != null);
         if (enable == isEnabled) {
             return;  // Nothing to do.
         }
 
         if (enable) {
             handleRegisterNetworkRequest(new NetworkRequestInfo(
-                    null, mDefaultMobileDataRequest, new Binder()));
+                    null, networkRequest, new Binder()));
         } else {
-            handleReleaseNetworkRequest(mDefaultMobileDataRequest, Process.SYSTEM_UID);
+            handleReleaseNetworkRequest(networkRequest, Process.SYSTEM_UID);
         }
+    }
+
+    private void handleConfigureAlwaysOnNetworks() {
+        handleAlwaysOnNetworkRequest(
+                mDefaultMobileDataRequest,Settings.Global.MOBILE_DATA_ALWAYS_ON, true);
+        handleAlwaysOnNetworkRequest(mDefaultWifiRequest, Settings.Global.WIFI_ALWAYS_REQUESTED,
+                false);
     }
 
     private void registerSettingsCallbacks() {
@@ -979,7 +993,12 @@ public class ConnectivityService extends IConnectivityManager.Stub
         // Watch for whether or not to keep mobile data always on.
         mSettingsObserver.observe(
                 Settings.Global.getUriFor(Settings.Global.MOBILE_DATA_ALWAYS_ON),
-                EVENT_CONFIGURE_MOBILE_DATA_ALWAYS_ON);
+                EVENT_CONFIGURE_ALWAYS_ON_NETWORKS);
+
+        // Watch for whether or not to keep wifi always on.
+        mSettingsObserver.observe(
+                Settings.Global.getUriFor(Settings.Global.WIFI_ALWAYS_REQUESTED),
+                EVENT_CONFIGURE_ALWAYS_ON_NETWORKS);
     }
 
     private void registerPrivateDnsSettingsCallbacks() {
@@ -1814,8 +1833,8 @@ public class ConnectivityService extends IConnectivityManager.Stub
         // for user to unlock device too.
         updateLockdownVpn();
 
-        // Configure whether mobile data is always on.
-        mHandler.sendMessage(mHandler.obtainMessage(EVENT_CONFIGURE_MOBILE_DATA_ALWAYS_ON));
+        // Create network requests for always-on networks.
+        mHandler.sendMessage(mHandler.obtainMessage(EVENT_CONFIGURE_ALWAYS_ON_NETWORKS));
 
         mHandler.sendMessage(mHandler.obtainMessage(EVENT_SYSTEM_READY));
 
@@ -3106,8 +3125,8 @@ public class ConnectivityService extends IConnectivityManager.Stub
                     handlePromptUnvalidated((Network) msg.obj);
                     break;
                 }
-                case EVENT_CONFIGURE_MOBILE_DATA_ALWAYS_ON: {
-                    handleMobileDataAlwaysOn();
+                case EVENT_CONFIGURE_ALWAYS_ON_NETWORKS: {
+                    handleConfigureAlwaysOnNetworks();
                     break;
                 }
                 // Sent by KeepaliveTracker to process an app request on the state machine thread.
@@ -4534,6 +4553,10 @@ public class ConnectivityService extends IConnectivityManager.Stub
     // Request used to optionally keep mobile data active even when higher
     // priority networks like Wi-Fi are active.
     private final NetworkRequest mDefaultMobileDataRequest;
+
+    // Request used to optionally keep wifi data active even when higher
+    // priority networks like ethernet are active.
+    private final NetworkRequest mDefaultWifiRequest;
 
     private NetworkAgentInfo getNetworkForRequest(int requestId) {
         synchronized (mNetworkForRequestId) {
