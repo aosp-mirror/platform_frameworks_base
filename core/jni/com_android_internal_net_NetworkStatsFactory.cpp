@@ -205,37 +205,8 @@ static int legacyReadNetworkStatsDetail(std::vector<stats_line>* lines,
     return 0;
 }
 
-static int readNetworkStatsDetail(JNIEnv* env, jclass clazz, jobject stats, jstring path,
-                                  jint limitUid, jobjectArray limitIfacesObj, jint limitTag,
-                                  jboolean useBpfStats) {
-    ScopedUtfChars path8(env, path);
-    if (path8.c_str() == NULL) {
-        return -1;
-    }
-
-    std::vector<std::string> limitIfaces;
-    if (limitIfacesObj != NULL && env->GetArrayLength(limitIfacesObj) > 0) {
-        int num = env->GetArrayLength(limitIfacesObj);
-        for (int i = 0; i < num; i++) {
-            jstring string = (jstring)env->GetObjectArrayElement(limitIfacesObj, i);
-            ScopedUtfChars string8(env, string);
-            if (string8.c_str() != NULL) {
-                limitIfaces.push_back(std::string(string8.c_str()));
-            }
-        }
-    }
-    std::vector<stats_line> lines;
-
-
-    if (useBpfStats) {
-        if (parseBpfNetworkStatsDetail(&lines, limitIfaces, limitTag, limitUid) < 0)
-            return -1;
-    } else {
-        if (legacyReadNetworkStatsDetail(&lines, limitIfaces, limitTag,
-                                         limitUid, path8.c_str()) < 0)
-            return -1;
-    }
-
+static int statsLinesToNetworkStats(JNIEnv* env, jclass clazz, jobject stats,
+                            std::vector<stats_line>& lines) {
     int size = lines.size();
 
     bool grow = size > env->GetIntField(stats, gNetworkStatsClassInfo.capacity);
@@ -308,14 +279,58 @@ static int readNetworkStatsDetail(JNIEnv* env, jclass clazz, jobject stats, jstr
         env->SetObjectField(stats, gNetworkStatsClassInfo.txPackets, txPackets.getJavaArray());
         env->SetObjectField(stats, gNetworkStatsClassInfo.operations, operations.getJavaArray());
     }
-
     return 0;
+}
+
+static int readNetworkStatsDetail(JNIEnv* env, jclass clazz, jobject stats, jstring path,
+                                  jint limitUid, jobjectArray limitIfacesObj, jint limitTag,
+                                  jboolean useBpfStats) {
+    ScopedUtfChars path8(env, path);
+    if (path8.c_str() == NULL) {
+        return -1;
+    }
+
+    std::vector<std::string> limitIfaces;
+    if (limitIfacesObj != NULL && env->GetArrayLength(limitIfacesObj) > 0) {
+        int num = env->GetArrayLength(limitIfacesObj);
+        for (int i = 0; i < num; i++) {
+            jstring string = (jstring)env->GetObjectArrayElement(limitIfacesObj, i);
+            ScopedUtfChars string8(env, string);
+            if (string8.c_str() != NULL) {
+                limitIfaces.push_back(std::string(string8.c_str()));
+            }
+        }
+    }
+    std::vector<stats_line> lines;
+
+
+    if (useBpfStats) {
+        if (parseBpfNetworkStatsDetail(&lines, limitIfaces, limitTag, limitUid) < 0)
+            return -1;
+    } else {
+        if (legacyReadNetworkStatsDetail(&lines, limitIfaces, limitTag,
+                                         limitUid, path8.c_str()) < 0)
+            return -1;
+    }
+
+    return statsLinesToNetworkStats(env, clazz, stats, lines);
+}
+
+static int readNetworkStatsDev(JNIEnv* env, jclass clazz, jobject stats) {
+    std::vector<stats_line> lines;
+
+    if (parseBpfNetworkStatsDev(&lines) < 0)
+            return -1;
+
+    return statsLinesToNetworkStats(env, clazz, stats, lines);
 }
 
 static const JNINativeMethod gMethods[] = {
         { "nativeReadNetworkStatsDetail",
                 "(Landroid/net/NetworkStats;Ljava/lang/String;I[Ljava/lang/String;IZ)I",
-                (void*) readNetworkStatsDetail }
+                (void*) readNetworkStatsDetail },
+        { "nativeReadNetworkStatsDev", "(Landroid/net/NetworkStats;)I",
+                (void*) readNetworkStatsDev },
 };
 
 int register_com_android_internal_net_NetworkStatsFactory(JNIEnv* env) {
