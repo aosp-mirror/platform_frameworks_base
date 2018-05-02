@@ -944,20 +944,30 @@ TEST_F(ResourceParserTest, ParseIdItem) {
   ASSERT_THAT(test::GetValue<Id>(&table_, "id/bar"), NotNull());
   ASSERT_THAT(test::GetValue<Id>(&table_, "id/baz"), NotNull());
 
+  input = R"(
+    <id name="foo2">@id/bar</id>
+    <id name="bar2"/>
+    <id name="baz2"></id>)";
+  ASSERT_TRUE(TestParse(input));
+
+  ASSERT_THAT(test::GetValue<Reference>(&table_, "id/foo2"), NotNull());
+  ASSERT_THAT(test::GetValue<Id>(&table_, "id/bar2"), NotNull());
+  ASSERT_THAT(test::GetValue<Id>(&table_, "id/baz2"), NotNull());
+
   // Reject attribute references
-  input = R"(<item name="foo2" type="id">?attr/bar"</item>)";
+  input = R"(<item name="foo3" type="id">?attr/bar"</item>)";
   ASSERT_FALSE(TestParse(input));
 
   // Reject non-references
-  input = R"(<item name="foo3" type="id">0x7f010001</item>)";
+  input = R"(<item name="foo4" type="id">0x7f010001</item>)";
   ASSERT_FALSE(TestParse(input));
-  input = R"(<item name="foo4" type="id">@drawable/my_image</item>)";
+  input = R"(<item name="foo5" type="id">@drawable/my_image</item>)";
   ASSERT_FALSE(TestParse(input));
-  input = R"(<item name="foo5" type="id"><string name="biz"></string></item>)";
+  input = R"(<item name="foo6" type="id"><string name="biz"></string></item>)";
   ASSERT_FALSE(TestParse(input));
 
   // Ids that reference other resource ids cannot be public
-  input = R"(<public name="foo6" type="id">@id/bar6</item>)";
+  input = R"(<public name="foo7" type="id">@id/bar7</item>)";
   ASSERT_FALSE(TestParse(input));
 }
 

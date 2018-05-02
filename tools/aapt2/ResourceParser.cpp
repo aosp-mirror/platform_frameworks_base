@@ -601,10 +601,13 @@ bool ResourceParser::ParseResource(xml::XmlPullParser* parser,
       // If no inner element exists, represent a unique identifier
       out_resource->value = util::make_unique<Id>();
     } else {
-      // If an inner element exists, the inner element must be a reference to
-      // another resource id
       Reference* ref = ValueCast<Reference>(out_resource->value.get());
-      if (!ref || ref->name.value().type != ResourceType::kId) {
+      if (ref && !ref->name && !ref->id) {
+        // A null reference also means there is no inner element when ids are in the form:
+        //    <id name="name"/>
+        out_resource->value = util::make_unique<Id>();
+      } else if (!ref || ref->name.value().type != ResourceType::kId) {
+        // If an inner element exists, the inner element must be a reference to another resource id
         diag_->Error(DiagMessage(out_resource->source)
                          << "<" << parser->element_name()
                          << "> inner element must either be a resource reference or empty");
