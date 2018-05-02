@@ -56,8 +56,6 @@ public class NetworkStatsFactory {
     private static final boolean USE_NATIVE_PARSING = true;
     private static final boolean SANITY_CHECK_NATIVE = false;
 
-    /** Path to {@code /proc/net/dev}. */
-    private final File mStatsIfaceDev;
     /** Path to {@code /proc/net/xt_qtaguid/iface_stat_all}. */
     private final File mStatsXtIfaceAll;
     /** Path to {@code /proc/net/xt_qtaguid/iface_stat_fmt}. */
@@ -133,47 +131,16 @@ public class NetworkStatsFactory {
 
     @VisibleForTesting
     public NetworkStatsFactory(File procRoot, boolean useBpfStats) {
-        mStatsIfaceDev = new File(procRoot, "net/dev");
         mStatsXtIfaceAll = new File(procRoot, "net/xt_qtaguid/iface_stat_all");
         mStatsXtIfaceFmt = new File(procRoot, "net/xt_qtaguid/iface_stat_fmt");
         mStatsXtUid = new File(procRoot, "net/xt_qtaguid/stats");
         mUseBpfStats = useBpfStats;
     }
 
-    @VisibleForTesting
-    public NetworkStats readNetworkStatsIfaceDev() throws IOException {
-        final StrictMode.ThreadPolicy savedPolicy = StrictMode.allowThreadDiskReads();
-
+    public NetworkStats readBpfNetworkStatsDev() throws IOException {
         final NetworkStats stats = new NetworkStats(SystemClock.elapsedRealtime(), 6);
-        final NetworkStats.Entry entry = new NetworkStats.Entry();
-
-        BufferedReader reader = null;
-        try {
-            reader = new BufferedReader(new FileReader(mStatsIfaceDev));
-
-            // skip first two header lines
-            reader.readLine();
-            reader.readLine();
-
-            // parse remaining lines
-            String line;
-            while ((line = reader.readLine()) != null) {
-                String[] values = line.trim().split("\\:?\\s+");
-                entry.iface = values[0];
-                entry.uid = UID_ALL;
-                entry.set = SET_ALL;
-                entry.tag = TAG_NONE;
-                entry.rxBytes = Long.parseLong(values[1]);
-                entry.rxPackets = Long.parseLong(values[2]);
-                entry.txBytes = Long.parseLong(values[9]);
-                entry.txPackets = Long.parseLong(values[10]);
-                stats.addValues(entry);
-            }
-        } catch (NullPointerException|NumberFormatException e) {
-            throw new ProtocolException("problem parsing stats", e);
-        } finally {
-            IoUtils.closeQuietly(reader);
-            StrictMode.setThreadPolicy(savedPolicy);
+        if (nativeReadNetworkStatsDev(stats) != 0) {
+            throw new IOException("Failed to parse bpf iface stats");
         }
         return stats;
     }
@@ -188,9 +155,9 @@ public class NetworkStatsFactory {
      */
     public NetworkStats readNetworkStatsSummaryDev() throws IOException {
 
-        // Return the stats get from /proc/net/dev if switched to bpf module.
+        // Return xt_bpf stats if switched to bpf module.
         if (mUseBpfStats)
-            return readNetworkStatsIfaceDev();
+            return readBpfNetworkStatsDev();
 
         final StrictMode.ThreadPolicy savedPolicy = StrictMode.allowThreadDiskReads();
 
@@ -244,9 +211,9 @@ public class NetworkStatsFactory {
      */
     public NetworkStats readNetworkStatsSummaryXt() throws IOException {
 
-        // Return the stats get from /proc/net/dev if qtaguid  module is replaced.
+        // Return xt_bpf stats if qtaguid  module is replaced.
         if (mUseBpfStats)
-            return readNetworkStatsIfaceDev();
+            return readBpfNetworkStatsDev();
 
         final StrictMode.ThreadPolicy savedPolicy = StrictMode.allowThreadDiskReads();
 
@@ -408,4 +375,7 @@ public class NetworkStatsFactory {
     @VisibleForTesting
     public static native int nativeReadNetworkStatsDetail(NetworkStats stats, String path,
         int limitUid, String[] limitIfaces, int limitTag, boolean useBpfStats);
+
+    @VisibleForTesting
+    public static native int nativeReadNetworkStatsDev(NetworkStats stats);
 }
