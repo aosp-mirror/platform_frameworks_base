@@ -50,6 +50,7 @@ class SkRegion;
 namespace android {
 namespace uirenderer {
 
+struct ClipBase;
 class Rect;
 class Layer;
 

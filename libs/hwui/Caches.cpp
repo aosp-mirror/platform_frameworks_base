@@ -16,14 +16,10 @@
 
 #include "Caches.h"
 
-#include "GammaFontRenderer.h"
 #include "GlLayer.h"
 #include "Properties.h"
 #include "ShadowTessellator.h"
 #include "renderstate/RenderState.h"
-#ifdef BUGREPORT_FONT_CACHE_USAGE
-#include "font/FontCacheHistoryTracker.h"
-#endif
 #include "utils/GLUtils.h"
 
 #include <cutils/properties.h>
@@ -186,12 +182,8 @@ void Caches::dumpMemoryUsage(String8& log) {
                      pathCache.getMaxSize());
     log.appendFormat("  TessellationCache    %8d / %8d\n", tessellationCache.getSize(),
                      tessellationCache.getMaxSize());
-    log.appendFormat("  TextDropShadowCache  %8d / %8d\n", dropShadowCache.getSize(),
-                     dropShadowCache.getMaxSize());
     log.appendFormat("  PatchCache           %8d / %8d\n", patchCache.getSize(),
                      patchCache.getMaxSize());
-
-    fontRenderer.dumpMemoryUsage(log);
 
     log.appendFormat("Other:\n");
     log.appendFormat("  FboCache             %8d / %8d\n", fboCache.getSize(),
@@ -202,16 +194,10 @@ void Caches::dumpMemoryUsage(String8& log) {
     total += gradientCache.getSize();
     total += pathCache.getSize();
     total += tessellationCache.getSize();
-    total += dropShadowCache.getSize();
     total += patchCache.getSize();
-    total += fontRenderer.getSize();
 
     log.appendFormat("Total memory usage:\n");
     log.appendFormat("  %d bytes, %.2f MB\n", total, total / 1024.0f / 1024.0f);
-
-#ifdef BUGREPORT_FONT_CACHE_USAGE
-    fontRenderer.getFontRenderer().historyTracker().dump(log);
-#endif
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -230,13 +216,10 @@ void Caches::flush(FlushMode mode) {
         case FlushMode::Full:
             textureCache.clear();
             patchCache.clear();
-            dropShadowCache.clear();
             gradientCache.clear();
-            fontRenderer.clear();
             fboCache.clear();
         // fall through
         case FlushMode::Moderate:
-            fontRenderer.flush();
             textureCache.flush();
             pathCache.clear();
             tessellationCache.clear();

@@ -19,7 +19,6 @@
 #include "DeviceInfo.h"
 #include "Extensions.h"
 #include "FboCache.h"
-#include "GammaFontRenderer.h"
 #include "GradientCache.h"
 #include "PatchCache.h"
 #include "PathCache.h"
@@ -27,7 +26,6 @@
 #include "RenderBufferCache.h"
 #include "ResourceCache.h"
 #include "TessellationCache.h"
-#include "TextDropShadowCache.h"
 #include "TextureCache.h"
 #include "renderstate/PixelBufferState.h"
 #include "renderstate/TextureState.h"
@@ -149,10 +147,7 @@ public:
     PathCache pathCache;
     ProgramCache programCache;
     TessellationCache tessellationCache;
-    TextDropShadowCache dropShadowCache;
     FboCache fboCache;
-
-    GammaFontRenderer fontRenderer;
 
     TaskManager tasks;
 

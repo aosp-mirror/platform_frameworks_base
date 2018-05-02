@@ -722,48 +722,12 @@ void FrameBuilder::deferSimpleRectsOp(const SimpleRectsOp& op) {
     currentLayer().deferUnmergeableOp(mAllocator, bakedState, OpBatchType::Vertices);
 }
 
-static batchid_t textBatchId(const SkPaint& paint) {
-    // TODO: better handling of shader (since we won't care about color then)
-    return paint.getColor() == SK_ColorBLACK ? OpBatchType::Text : OpBatchType::ColorText;
-}
-
 void FrameBuilder::deferTextOp(const TextOp& op) {
-    BakedOpState* bakedState = BakedOpState::tryStrokeableOpConstruct(
-            mAllocator, *mCanvasState.writableSnapshot(), op,
-            BakedOpState::StrokeBehavior::StyleDefined, false);
-    if (!bakedState) return;  // quick rejected
-
-    batchid_t batchId = textBatchId(*(op.paint));
-    if (bakedState->computedState.transform.isPureTranslate() &&
-        PaintUtils::getBlendModeDirect(op.paint) == SkBlendMode::kSrcOver &&
-        hasMergeableClip(*bakedState)) {
-        mergeid_t mergeId = reinterpret_cast<mergeid_t>(op.paint->getColor());
-        currentLayer().deferMergeableOp(mAllocator, bakedState, batchId, mergeId);
-    } else {
-        currentLayer().deferUnmergeableOp(mAllocator, bakedState, batchId);
-    }
-
-    FontRenderer& fontRenderer = mCaches.fontRenderer.getFontRenderer();
-    auto& totalTransform = bakedState->computedState.transform;
-    if (totalTransform.isPureTranslate() || totalTransform.isPerspective()) {
-        fontRenderer.precache(op.paint, op.glyphs, op.glyphCount, SkMatrix::I());
-    } else {
-        // Partial transform case, see BakedOpDispatcher::renderTextOp
-        float sx, sy;
-        totalTransform.decomposeScale(sx, sy);
-        fontRenderer.precache(
-                op.paint, op.glyphs, op.glyphCount,
-                SkMatrix::MakeScale(roundf(std::max(1.0f, sx)), roundf(std::max(1.0f, sy))));
-    }
+    // DEAD CODE
 }
 
 void FrameBuilder::deferTextOnPathOp(const TextOnPathOp& op) {
-    BakedOpState* bakedState = tryBakeUnboundedOpState(op);
-    if (!bakedState) return;  // quick rejected
-    currentLayer().deferUnmergeableOp(mAllocator, bakedState, textBatchId(*(op.paint)));
-
-    mCaches.fontRenderer.getFontRenderer().precache(op.paint, op.glyphs, op.glyphCount,
-                                                    SkMatrix::I());
+    // DEAD CODE
 }
 
 void FrameBuilder::deferTextureLayerOp(const TextureLayerOp& op) {
@@ -969,7 +933,7 @@ void FrameBuilder::deferEndUnclippedLayerOp(const EndUnclippedLayerOp& /* ignore
 }
 
 void FrameBuilder::finishDefer() {
-    mCaches.fontRenderer.endPrecaching();
+    // DEAD CODE
 }
 
 }  // namespace uirenderer

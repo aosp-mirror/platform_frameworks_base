@@ -22,7 +22,6 @@
 #include "RenderNode.h"
 #include "TessellationCache.h"
 #include "Vector.h"
-#include "font/FontUtil.h"
 #include "utils/LinearAllocator.h"
 #include "utils/PaintUtils.h"
 
@@ -38,6 +37,7 @@ struct ClipBase;
 class OffscreenBuffer;
 class RenderNode;
 class DeferredLayerUpdater;
+typedef uint16_t glyph_t;
 
 struct Vertex;
 
