@@ -31,6 +31,7 @@ import android.view.inputmethod.InputMethodSubtype.InputMethodSubtypeBuilder;
 
 import com.android.internal.inputmethod.InputMethodSubtypeSwitchingController.ControllerImpl;
 import com.android.internal.inputmethod.InputMethodSubtypeSwitchingController.ImeSubtypeListItem;
+import com.android.internal.inputmethod.InputMethodUtils;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -78,7 +79,7 @@ public class InputMethodSubtypeSwitchingControllerTest {
         ri.serviceInfo = si;
         List<InputMethodSubtype> subtypes = null;
         if (subtypeLocales != null) {
-            subtypes = new ArrayList<>();
+            subtypes = new ArrayList<InputMethodSubtype>();
             for (String subtypeLocale : subtypeLocales) {
                 subtypes.add(createDummySubtype(subtypeLocale));
             }
@@ -128,7 +129,7 @@ public class InputMethodSubtypeSwitchingControllerTest {
     }
 
     private static List<ImeSubtypeListItem> createEnabledImeSubtypes() {
-        final List<ImeSubtypeListItem> items = new ArrayList<>();
+        final List<ImeSubtypeListItem> items = new ArrayList<ImeSubtypeListItem>();
         addDummyImeSubtypeListItems(items, "LatinIme", "LatinIme", Arrays.asList("en_US", "fr"),
                 true /* supportsSwitchingToNextInputMethod*/);
         addDummyImeSubtypeListItems(items, "switchUnawareLatinIme", "switchUnawareLatinIme",
@@ -144,7 +145,7 @@ public class InputMethodSubtypeSwitchingControllerTest {
     }
 
     private static List<ImeSubtypeListItem> createDisabledImeSubtypes() {
-        final List<ImeSubtypeListItem> items = new ArrayList<>();
+        final List<ImeSubtypeListItem> items = new ArrayList<ImeSubtypeListItem>();
         addDummyImeSubtypeListItems(items,
                 "UnknownIme", "UnknownIme",
                 Arrays.asList("en_US", "hi"),
@@ -160,18 +161,15 @@ public class InputMethodSubtypeSwitchingControllerTest {
     }
 
     private void assertNextInputMethod(final ControllerImpl controller,
-            final boolean onlyCurrentIme, final ImeSubtypeListItem currentItem,
-            final ImeSubtypeListItem nextItem, final ImeSubtypeListItem prevItem) {
+            final boolean onlyCurrentIme,
+            final ImeSubtypeListItem currentItem, final ImeSubtypeListItem nextItem) {
         InputMethodSubtype subtype = null;
         if (currentItem.mSubtypeName != null) {
             subtype = createDummySubtype(currentItem.mSubtypeName.toString());
         }
         final ImeSubtypeListItem nextIme = controller.getNextInputMethod(onlyCurrentIme,
-                currentItem.mImi, subtype, true /* forward */);
+                currentItem.mImi, subtype);
         assertEquals(nextItem, nextIme);
-        final ImeSubtypeListItem prevIme = controller.getNextInputMethod(onlyCurrentIme,
-                currentItem.mImi, subtype, false /* forward */);
-        assertEquals(prevItem, prevIme);
     }
 
     private void assertRotationOrder(final ControllerImpl controller,
@@ -180,13 +178,11 @@ public class InputMethodSubtypeSwitchingControllerTest {
         final int N = expectedRotationOrderOfImeSubtypeList.length;
         for (int i = 0; i < N; i++) {
             final int currentIndex = i;
-            final int prevIndex = (currentIndex + N - 1) % N;
             final int nextIndex = (currentIndex + 1) % N;
             final ImeSubtypeListItem currentItem =
                     expectedRotationOrderOfImeSubtypeList[currentIndex];
             final ImeSubtypeListItem nextItem = expectedRotationOrderOfImeSubtypeList[nextIndex];
-            final ImeSubtypeListItem prevItem = expectedRotationOrderOfImeSubtypeList[prevIndex];
-            assertNextInputMethod(controller, onlyCurrentIme, currentItem, nextItem, prevItem);
+            assertNextInputMethod(controller, onlyCurrentIme, currentItem, nextItem);
         }
     }
 
@@ -234,29 +230,29 @@ public class InputMethodSubtypeSwitchingControllerTest {
         assertRotationOrder(controller, true /* onlyCurrentIme */,
                 switchingUnawarelatinIme_en_UK, switchingUnawarelatinIme_hi);
         assertNextInputMethod(controller, true /* onlyCurrentIme */,
-                subtypeUnawareIme, null, null);
+                subtypeUnawareIme, null);
         assertNextInputMethod(controller, true /* onlyCurrentIme */,
-                japaneseIme_ja_JP, null, null);
+                japaneseIme_ja_JP, null);
         assertNextInputMethod(controller, true /* onlyCurrentIme */,
-                switchUnawareJapaneseIme_ja_JP, null, null);
+                switchUnawareJapaneseIme_ja_JP, null);
 
         // Make sure that disabled IMEs are not accepted.
         assertNextInputMethod(controller, false /* onlyCurrentIme */,
-                disabledIme_en_US, null, null);
+                disabledIme_en_US, null);
         assertNextInputMethod(controller, false /* onlyCurrentIme */,
-                disabledIme_hi, null, null);
+                disabledIme_hi, null);
         assertNextInputMethod(controller, false /* onlyCurrentIme */,
-                disabledSwitchingUnawareIme, null, null);
+                disabledSwitchingUnawareIme, null);
         assertNextInputMethod(controller, false /* onlyCurrentIme */,
-                disabledSubtypeUnawareIme, null, null);
+                disabledSubtypeUnawareIme, null);
         assertNextInputMethod(controller, true /* onlyCurrentIme */,
-                disabledIme_en_US, null, null);
+                disabledIme_en_US, null);
         assertNextInputMethod(controller, true /* onlyCurrentIme */,
-                disabledIme_hi, null, null);
+                disabledIme_hi, null);
         assertNextInputMethod(controller, true /* onlyCurrentIme */,
-                disabledSwitchingUnawareIme, null, null);
+                disabledSwitchingUnawareIme, null);
         assertNextInputMethod(controller, true /* onlyCurrentIme */,
-                disabledSubtypeUnawareIme, null, null);
+                disabledSubtypeUnawareIme, null);
     }
 
     @Test
@@ -290,7 +286,7 @@ public class InputMethodSubtypeSwitchingControllerTest {
                 japaneseIme_ja_JP, latinIme_fr, latinIme_en_US);
         // Check onlyCurrentIme == true.
         assertNextInputMethod(controller, true /* onlyCurrentIme */,
-                japaneseIme_ja_JP, null, null);
+                japaneseIme_ja_JP, null);
         assertRotationOrder(controller, true /* onlyCurrentIme */,
                 latinIme_fr, latinIme_en_US);
         assertRotationOrder(controller, true /* onlyCurrentIme */,
@@ -314,9 +310,9 @@ public class InputMethodSubtypeSwitchingControllerTest {
         assertRotationOrder(controller, true /* onlyCurrentIme */,
                 switchingUnawarelatinIme_en_UK, switchingUnawarelatinIme_hi);
         assertNextInputMethod(controller, true /* onlyCurrentIme */,
-                subtypeUnawareIme, null, null);
+                subtypeUnawareIme, null);
         assertNextInputMethod(controller, true /* onlyCurrentIme */,
-                switchUnawareJapaneseIme_ja_JP, null, null);
+                switchUnawareJapaneseIme_ja_JP, null);
 
         // Rotation order should be preserved when created with the same subtype list.
         final List<ImeSubtypeListItem> sameEnabledItems = createEnabledImeSubtypes();
@@ -342,7 +338,7 @@ public class InputMethodSubtypeSwitchingControllerTest {
 
     @Test
     public void testImeSubtypeListItem() throws Exception {
-        final List<ImeSubtypeListItem> items = new ArrayList<>();
+        final List<ImeSubtypeListItem> items = new ArrayList<ImeSubtypeListItem>();
         addDummyImeSubtypeListItems(items, "LatinIme", "LatinIme",
                 Arrays.asList("en_US", "fr", "en", "en_uk", "enn", "e", "EN_US"),
                 true /* supportsSwitchingToNextInputMethod*/);
