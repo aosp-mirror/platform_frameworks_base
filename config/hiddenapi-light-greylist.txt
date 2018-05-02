@@ -1904,6 +1904,7 @@ Landroid/os/StrictMode;->disableDeathOnFileUriExposure()V
 Landroid/os/StrictMode;->enterCriticalSpan(Ljava/lang/String;)Landroid/os/StrictMode$Span;
 Landroid/os/StrictMode;->getThreadPolicyMask()I
 Landroid/os/StrictMode;->onBinderStrictModePolicyChange(I)V
+Landroid/os/StrictMode;->sLastVmViolationTime:Ljava/util/HashMap;
 Landroid/os/StrictMode;->violationsBeingTimed:Ljava/lang/ThreadLocal;
 Landroid/os/SystemProperties;-><init>()V
 Landroid/os/SystemProperties;->addChangeCallback(Ljava/lang/Runnable;)V
@@ -2407,6 +2408,8 @@ Landroid/telephony/SignalStrength;->SIGNAL_STRENGTH_GREAT:I
 Landroid/telephony/SignalStrength;->SIGNAL_STRENGTH_MODERATE:I
 Landroid/telephony/SignalStrength;->SIGNAL_STRENGTH_NONE_OR_UNKNOWN:I
 Landroid/telephony/SignalStrength;->SIGNAL_STRENGTH_POOR:I
+Landroid/telephony/SmsManager;->deleteMessageFromIcc(I)Z
+Landroid/telephony/SmsManager;->getAllMessagesFromIcc()Ljava/util/ArrayList;
 Landroid/telephony/SmsManager;->sendMultipartTextMessage(Ljava/lang/String;Ljava/lang/String;Ljava/util/ArrayList;Ljava/util/ArrayList;Ljava/util/ArrayList;IZI)V
 Landroid/telephony/SmsManager;->sendTextMessage(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Landroid/app/PendingIntent;Landroid/app/PendingIntent;IZI)V
 Landroid/telephony/SmsMessage;->getSubId()I
@@ -2433,6 +2436,7 @@ Landroid/telephony/TelephonyManager;->getGroupIdLevel1(I)Ljava/lang/String;
 Landroid/telephony/TelephonyManager;->getITelephony()Lcom/android/internal/telephony/ITelephony;
 Landroid/telephony/TelephonyManager;->getLine1Number(I)Ljava/lang/String;
 Landroid/telephony/TelephonyManager;->getMultiSimConfiguration()Landroid/telephony/TelephonyManager$MultiSimVariants;
+Landroid/telephony/TelephonyManager;->getNai(I)Ljava/lang/String;
 Landroid/telephony/TelephonyManager;->getNetworkClass(I)I
 Landroid/telephony/TelephonyManager;->getNetworkCountryIso(I)Ljava/lang/String;
 Landroid/telephony/TelephonyManager;->getNetworkOperator(I)Ljava/lang/String;
@@ -3709,6 +3713,7 @@ Lcom/android/org/conscrypt/OpenSSLSocketImpl;->setSoWriteTimeout(I)V
 Lcom/android/org/conscrypt/OpenSSLSocketImpl;->setUseSessionTickets(Z)V
 Lcom/android/org/conscrypt/OpenSSLX509Certificate;->mContext:J
 Lcom/android/org/conscrypt/TrustManagerImpl;-><init>(Ljava/security/KeyStore;)V
+Lcom/android/org/conscrypt/TrustManagerImpl;->checkServerTrusted([Ljava/security/cert/X509Certificate;Ljava/lang/String;Ljava/lang/String;)Ljava/util/List;
 Ldalvik/system/BaseDexClassLoader;->addDexPath(Ljava/lang/String;)V
 Ldalvik/system/BaseDexClassLoader;->getLdLibraryPath()Ljava/lang/String;
 Ldalvik/system/BaseDexClassLoader;->pathList:Ldalvik/system/DexPathList;
