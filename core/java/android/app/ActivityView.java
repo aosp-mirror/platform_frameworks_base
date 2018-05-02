@@ -24,6 +24,7 @@ import android.hardware.display.DisplayManager;
 import android.hardware.display.VirtualDisplay;
 import android.hardware.input.InputManager;
 import android.os.RemoteException;
+import android.os.UserHandle;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
 import android.util.Log;
@@ -111,6 +112,11 @@ public class ActivityView extends ViewGroup {
          * @see #startActivity(Intent)
          */
         public abstract void onActivityViewDestroyed(ActivityView view);
+        /**
+         * Called when a task is moved to the front of the stack inside the container.
+         * This is a filtered version of {@link TaskStackListener}
+         */
+        public void onTaskMovedToFront(ActivityManager.StackInfo stackInfo) { }
     }
 
     /**
@@ -151,6 +157,28 @@ public class ActivityView extends ViewGroup {
     public void startActivity(@NonNull Intent intent) {
         final ActivityOptions options = prepareActivityOptions();
         getContext().startActivity(intent, options.toBundle());
+    }
+
+    /**
+     * Launch a new activity into this container.
+     * <p>Activity resolved by the provided {@link Intent} must have
+     * {@link android.R.attr#resizeableActivity} attribute set to {@code true} in order to be
+     * launched here. Also, if activity is not owned by the owner of this container, it must allow
+     * embedding and the caller must have permission to embed.
+     * <p>Note: This class must finish initializing and
+     * {@link StateCallback#onActivityViewReady(ActivityView)} callback must be triggered before
+     * this method can be called.
+     *
+     * @param intent Intent used to launch an activity.
+     * @param user The UserHandle of the user to start this activity for.
+     *
+     *
+     * @see StateCallback
+     * @see #startActivity(PendingIntent)
+     */
+    public void startActivity(@NonNull Intent intent, UserHandle user) {
+        final ActivityOptions options = prepareActivityOptions();
+        getContext().startActivityAsUser(intent, options.toBundle(), user);
     }
 
     /**
@@ -303,7 +331,9 @@ public class ActivityView extends ViewGroup {
         final DisplayManager displayManager = mContext.getSystemService(DisplayManager.class);
         mVirtualDisplay = displayManager.createVirtualDisplay(
                 DISPLAY_NAME + "@" + System.identityHashCode(this),
-                width, height, getBaseDisplayDensity(), mSurface, 0 /* flags */);
+                width, height, getBaseDisplayDensity(), mSurface,
+                DisplayManager.VIRTUAL_DISPLAY_FLAG_PUBLIC
+                        | DisplayManager.VIRTUAL_DISPLAY_FLAG_OWN_CONTENT_ONLY);
         if (mVirtualDisplay == null) {
             Log.e(TAG, "Failed to initialize ActivityView");
             return;
@@ -317,7 +347,7 @@ public class ActivityView extends ViewGroup {
             e.rethrowAsRuntimeException();
         }
         mInputForwarder = InputManager.getInstance().createInputForwarder(displayId);
-        mTaskStackListener = new TaskBackgroundChangeListener();
+        mTaskStackListener = new TaskStackListenerImpl();
         try {
             mActivityManager.registerTaskStackListener(mTaskStackListener);
         } catch (RemoteException e) {
@@ -403,8 +433,11 @@ public class ActivityView extends ViewGroup {
      * A task change listener that detects background color change of the topmost stack on our
      * virtual display and updates the background of the surface view. This background will be shown
      * when surface view is resized, but the app hasn't drawn its content in new size yet.
+     * It also calls StateCallback.onTaskMovedToFront to notify interested parties that the stack
+     * associated with the {@link ActivityView} has had a Task moved to the front. This is useful
+     * when needing to also bring the host Activity to the foreground at the same time.
      */
-    private class TaskBackgroundChangeListener extends TaskStackListener {
+    private class TaskStackListenerImpl extends TaskStackListener {
 
         @Override
         public void onTaskDescriptionChanged(int taskId, ActivityManager.TaskDescription td)
@@ -413,6 +446,31 @@ public class ActivityView extends ViewGroup {
                 return;
             }
 
+            StackInfo stackInfo = getTopMostStackInfo();
+            if (stackInfo == null) {
+                return;
+            }
+            // Found the topmost stack on target display. Now check if the topmost task's
+            // description changed.
+            if (taskId == stackInfo.taskIds[stackInfo.taskIds.length - 1]) {
+                mSurfaceView.setResizeBackgroundColor(td.getBackgroundColor());
+            }
+        }
+
+        @Override
+        public void onTaskMovedToFront(int taskId) throws RemoteException {
+            if (mActivityViewCallback  != null) {
+                StackInfo stackInfo = getTopMostStackInfo();
+                // if StackInfo was null or unrelated to the "move to front" then there's no use
+                // notifying the callback
+                if (stackInfo != null
+                        && taskId == stackInfo.taskIds[stackInfo.taskIds.length - 1]) {
+                    mActivityViewCallback.onTaskMovedToFront(stackInfo);
+                }
+            }
+        }
+
+        private StackInfo getTopMostStackInfo() throws RemoteException {
             // Find the topmost task on our virtual display - it will define the background
             // color of the surface view during resizing.
             final int displayId = mVirtualDisplay.getDisplay().getDisplayId();
@@ -426,14 +484,10 @@ public class ActivityView extends ViewGroup {
                 if (stackInfo.displayId != displayId) {
                     continue;
                 }
-                // Found the topmost stack on target display. Now check if the topmost task's
-                // description changed.
-                if (taskId == stackInfo.taskIds[stackInfo.taskIds.length - 1]) {
-                    mSurfaceView.setResizeBackgroundColor(td.getBackgroundColor());
-                }
-                break;
+                // Found the topmost stack on target display.
+                return stackInfo;
             }
+            return null;
         }
     }
-
 }
