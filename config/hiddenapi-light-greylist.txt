@@ -705,6 +705,7 @@ Landroid/content/pm/IPackageDataObserver;->onRemoveCompleted(Ljava/lang/String;Z
 Landroid/content/pm/IPackageDeleteObserver$Stub;->asInterface(Landroid/os/IBinder;)Landroid/content/pm/IPackageDeleteObserver;
 Landroid/content/pm/IPackageDeleteObserver2$Stub$Proxy;-><init>(Landroid/os/IBinder;)V
 Landroid/content/pm/IPackageDeleteObserver2$Stub$Proxy;->mRemote:Landroid/os/IBinder;
+Landroid/content/pm/IPackageDeleteObserver2$Stub;->asInterface(Landroid/os/IBinder;)Landroid/content/pm/IPackageDeleteObserver2;
 Landroid/content/pm/IPackageDeleteObserver2;->onPackageDeleted(Ljava/lang/String;ILjava/lang/String;)V
 Landroid/content/pm/IPackageInstallerCallback$Stub$Proxy;-><init>(Landroid/os/IBinder;)V
 Landroid/content/pm/IPackageInstallerCallback$Stub$Proxy;->mRemote:Landroid/os/IBinder;
@@ -1202,6 +1203,7 @@ Landroid/hardware/display/WifiDisplayStatus;->mActiveDisplay:Landroid/hardware/d
 Landroid/hardware/display/WifiDisplayStatus;->mDisplays:[Landroid/hardware/display/WifiDisplay;
 Landroid/hardware/fingerprint/Fingerprint;->getFingerId()I
 Landroid/hardware/fingerprint/Fingerprint;->getName()Ljava/lang/CharSequence;
+Landroid/hardware/fingerprint/FingerprintManager;->getEnrolledFingerprints()Ljava/util/List;
 Landroid/hardware/fingerprint/IFingerprintService$Stub$Proxy;-><init>(Landroid/os/IBinder;)V
 Landroid/hardware/HardwareBuffer;-><init>(J)V
 Landroid/hardware/HardwareBuffer;->mNativeObject:J
@@ -2373,6 +2375,9 @@ Landroid/telecom/AudioState;->isMuted:Z
 Landroid/telecom/TelecomManager;->EXTRA_IS_HANDOVER:Ljava/lang/String;
 Landroid/telecom/TelecomManager;->getUserSelectedOutgoingPhoneAccount()Landroid/telecom/PhoneAccountHandle;
 Landroid/telecom/TelecomManager;->setUserSelectedOutgoingPhoneAccount(Landroid/telecom/PhoneAccountHandle;)V
+Landroid/telephony/CellIdentityGsm;->mBsic:I
+Landroid/telephony/CellSignalStrengthGsm;->mBitErrorRate:I
+Landroid/telephony/CellSignalStrengthGsm;->mSignalStrength:I
 Landroid/telephony/CellSignalStrengthLte;->mCqi:I
 Landroid/telephony/CellSignalStrengthLte;->mRsrp:I
 Landroid/telephony/CellSignalStrengthLte;->mRsrq:I
@@ -2968,6 +2973,7 @@ Landroid/webkit/CacheManager;->getCacheFileBaseDir()Ljava/io/File;
 Landroid/webkit/CacheManager;->saveCacheFile(Ljava/lang/String;Landroid/webkit/CacheManager$CacheResult;)V
 Landroid/webkit/CacheManager;->startCacheTransaction()Z
 Landroid/webkit/IWebViewUpdateService$Stub$Proxy;-><init>(Landroid/os/IBinder;)V
+Landroid/webkit/IWebViewUpdateService$Stub$Proxy;->waitForAndGetProvider()Landroid/webkit/WebViewProviderResponse;
 Landroid/webkit/WebResourceResponse;->mImmutable:Z
 Landroid/webkit/WebSettings$TextSize;->value:I
 Landroid/webkit/WebSyncManager;->mHandler:Landroid/os/Handler;
@@ -3119,8 +3125,11 @@ Landroid/widget/MediaController;->mAnchor:Landroid/view/View;
 Landroid/widget/MediaController;->mDecor:Landroid/view/View;
 Landroid/widget/MediaController;->mDecorLayoutParams:Landroid/view/WindowManager$LayoutParams;
 Landroid/widget/MediaController;->mWindowManager:Landroid/view/WindowManager;
+Landroid/widget/NumberPicker;->initializeSelectorWheelIndices()V
 Landroid/widget/NumberPicker;->mInputText:Landroid/widget/EditText;
+Landroid/widget/NumberPicker;->mMaxValue:I
 Landroid/widget/NumberPicker;->mSelectionDivider:Landroid/graphics/drawable/Drawable;
+Landroid/widget/NumberPicker;->mSelectionDividerHeight:I
 Landroid/widget/NumberPicker;->mSelectorWheelPaint:Landroid/graphics/Paint;
 Landroid/widget/OverScroller$SplineOverScroller;->mCurrVelocity:F
 Landroid/widget/OverScroller;->isScrollingInDirection(FF)Z
