@@ -221,6 +221,11 @@ private:
     status_t cmd_clear_puller_cache(FILE* out);
 
     /**
+     * Print all stats logs received to logcat.
+     */
+    status_t cmd_print_logs(FILE* out, const Vector<String8>& args);
+
+    /**
      * Adds a configuration after checking permissions and obtaining UID from binder call.
      */
     bool addConfigurationChecked(int uid, int64_t key, const vector<uint8_t>& config);
