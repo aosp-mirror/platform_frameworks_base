@@ -365,11 +365,12 @@
     <string name="accessibility_display_daltonizer_preference_title" msgid="5800761362678707872">"වර්ණ නිවැරදි කිරීම"</string>
     <string name="accessibility_display_daltonizer_preference_subtitle" msgid="3484969015295282911">"මෙම විශේෂාංගය පරීක්ෂණාත්මක සහ ඇතැම් විට ක්‍රියාකාරිත්වයට බලපෑ හැක."</string>
     <string name="daltonizer_type_overridden" msgid="3116947244410245916">"<xliff:g id="TITLE">%1$s</xliff:g> මගින් ඉක්මවන ලදී"</string>
-    <string name="power_remaining_duration_only" msgid="845431008899029842">"<xliff:g id="TIME">%1$s</xliff:g> පමණ ඉතිරියි"</string>
-    <string name="power_discharging_duration" msgid="6655472132189365839">"<xliff:g id="TIME">%1$s</xliff:g> පමණ ඉතිරිය (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
-    <string name="power_remaining_duration_only_enhanced" msgid="5992456722677973678">"ඔබගේ භාවිතය මත පදනම්ව <xliff:g id="TIME">%1$s</xliff:g> පමණ ඉතිරිව ඇත"</string>
-    <string name="power_discharging_duration_enhanced" msgid="5726302316642148671">"ඔබේ භාවිතය මත පදනම්ව <xliff:g id="TIME">%1$s</xliff:g> පමණ ඉතිරිව ඇත <xliff:g id="LEVEL">%2$s</xliff:g>"</string>
-    <string name="power_remaining_duration_only_short" msgid="5329694252258605547">"ඉතිරි <xliff:g id="TIME">%1$s</xliff:g>"</string>
+    <string name="power_remaining_settings_home_page" msgid="4845022416859002011">"<xliff:g id="PERCENTAGE">%1$s</xliff:g> - <xliff:g id="TIME_STRING">%2$s</xliff:g>"</string>
+    <string name="power_remaining_duration_only" msgid="6123167166221295462">"<xliff:g id="TIME_REMAINING">%1$s</xliff:g> ක් පමණ ඉතිරියි"</string>
+    <string name="power_discharging_duration" msgid="8848256785736335185">"<xliff:g id="TIME_REMAINING">%1$s</xliff:g> ක් පමණ ඉතිරියි (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
+    <string name="power_remaining_duration_only_enhanced" msgid="4189311599812296592">"ඔබේ භාවිතය මත පදනම්ව <xliff:g id="TIME_REMAINING">%1$s</xliff:g> පමණ ඉතිරිව ඇත"</string>
+    <string name="power_discharging_duration_enhanced" msgid="1992003260664804080">"ඔබේ භාවිතය මත පදනම්ව <xliff:g id="TIME_REMAINING">%1$s</xliff:g> පමණ ඉතිරිව ඇත (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
+    <string name="power_remaining_duration_only_short" msgid="3463575350656389957">"<xliff:g id="TIME_REMAINING">%1$s</xliff:g> ඉතිරිව ඇත"</string>
     <string name="power_discharge_by_enhanced" msgid="2095821536747992464">"<xliff:g id="TIME">%1$s</xliff:g> පමණ වන තෙක් (<xliff:g id="LEVEL">%2$s</xliff:g>) ඔබේ භාවිතය මත පදනම්ව තිබිය යුුතුය"</string>
     <string name="power_discharge_by_only_enhanced" msgid="2175151772952365149">"ඔබේ භාවිතය මත පදනම්ව <xliff:g id="TIME">%1$s</xliff:g> පමන වන තෙක් තිබිය යුතුය"</string>
     <string name="power_discharge_by" msgid="6453537733650125582">"<xliff:g id="TIME">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>) පමණ වන තෙක් තිබිය යුතුය"</string>

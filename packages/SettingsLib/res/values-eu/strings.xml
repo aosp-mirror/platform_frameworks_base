@@ -324,7 +324,7 @@
     <string name="force_resizable_activities_summary" msgid="6667493494706124459">"Eman aukera jarduera guztien tamaina doitzeko, hainbat leihotan erabili ahal izan daitezen, manifestuan jartzen duena jartzen duela ere."</string>
     <string name="enable_freeform_support" msgid="1461893351278940416">"Gaitu estilo libreko leihoak"</string>
     <string name="enable_freeform_support_summary" msgid="8247310463288834487">"Onartu estilo libreko leiho esperimentalak."</string>
-    <string name="local_backup_password_title" msgid="3860471654439418822">"Tokiko babeskop. pasahitza"</string>
+    <string name="local_backup_password_title" msgid="3860471654439418822">"Babesk. pasahitz lokala"</string>
     <string name="local_backup_password_summary_none" msgid="6951095485537767956">"Une honetan, ordenagailuko babeskopia osoak ez daude babestuta"</string>
     <string name="local_backup_password_summary_change" msgid="5376206246809190364">"Ordenagailuko eduki guztiaren babeskopia egiteko erabiltzen den pasahitza aldatzeko edo kentzeko, sakatu hau"</string>
     <string name="local_backup_password_toast_success" msgid="582016086228434290">"Babeskopiaren pasahitz berria ezarri da"</string>
@@ -365,11 +365,12 @@
     <string name="accessibility_display_daltonizer_preference_title" msgid="5800761362678707872">"Koloreen zuzenketa"</string>
     <string name="accessibility_display_daltonizer_preference_subtitle" msgid="3484969015295282911">"Eginbidea esperimentala da eta eragina izan dezake funtzionamenduan."</string>
     <string name="daltonizer_type_overridden" msgid="3116947244410245916">"<xliff:g id="TITLE">%1$s</xliff:g> hobespena gainjarri zaio"</string>
-    <string name="power_remaining_duration_only" msgid="845431008899029842">"<xliff:g id="TIME">%1$s</xliff:g> inguru gelditzen dira"</string>
-    <string name="power_discharging_duration" msgid="6655472132189365839">"<xliff:g id="TIME">%1$s</xliff:g> inguru gelditzen dira (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
-    <string name="power_remaining_duration_only_enhanced" msgid="5992456722677973678">"<xliff:g id="TIME">%1$s</xliff:g> inguru gelditzen dira, erabileraren arabera"</string>
-    <string name="power_discharging_duration_enhanced" msgid="5726302316642148671">"Erabilera kontuan izanda, <xliff:g id="TIME">%1$s</xliff:g> inguru gelditzen dira (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
-    <string name="power_remaining_duration_only_short" msgid="5329694252258605547">"<xliff:g id="TIME">%1$s</xliff:g> guztiz kargatu arte"</string>
+    <string name="power_remaining_settings_home_page" msgid="4845022416859002011">"<xliff:g id="PERCENTAGE">%1$s</xliff:g> - <xliff:g id="TIME_STRING">%2$s</xliff:g>"</string>
+    <string name="power_remaining_duration_only" msgid="6123167166221295462">"<xliff:g id="TIME_REMAINING">%1$s</xliff:g> inguru gelditzen dira"</string>
+    <string name="power_discharging_duration" msgid="8848256785736335185">"<xliff:g id="TIME_REMAINING">%1$s</xliff:g> inguru gelditzen dira (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
+    <string name="power_remaining_duration_only_enhanced" msgid="4189311599812296592">"Erabilera kontuan izanda, <xliff:g id="TIME_REMAINING">%1$s</xliff:g> inguru gelditzen dira"</string>
+    <string name="power_discharging_duration_enhanced" msgid="1992003260664804080">"Erabilera kontuan izanda, <xliff:g id="TIME_REMAINING">%1$s</xliff:g> inguru gelditzen dira (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
+    <string name="power_remaining_duration_only_short" msgid="3463575350656389957">"<xliff:g id="TIME_REMAINING">%1$s</xliff:g> gelditzen dira"</string>
     <string name="power_discharge_by_enhanced" msgid="2095821536747992464">"Erabileraren arabera, ordu honetara arte iraungo du, gutxi gorabehera: <xliff:g id="TIME">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
     <string name="power_discharge_by_only_enhanced" msgid="2175151772952365149">"Erabileraren arabera, ordu honetara arte iraungo du, gutxi gorabehera: <xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="power_discharge_by" msgid="6453537733650125582">"Ordu honetara arte iraungo du, gutxi gorabehera: <xliff:g id="TIME">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
@@ -399,7 +400,7 @@
     <string name="disabled" msgid="9206776641295849915">"Desgaituta"</string>
     <string name="external_source_trusted" msgid="2707996266575928037">"Baimena dauka"</string>
     <string name="external_source_untrusted" msgid="2677442511837596726">"Ez dauka baimenik"</string>
-    <string name="install_other_apps" msgid="6986686991775883017">"Instalatu aplikazio ezezagunak"</string>
+    <string name="install_other_apps" msgid="6986686991775883017">"Aplikazio ezezagunak instalatzea"</string>
     <string name="home" msgid="3256884684164448244">"Ezarpenen hasierako pantaila"</string>
   <string-array name="battery_labels">
     <item msgid="8494684293649631252">"% 0"</item>

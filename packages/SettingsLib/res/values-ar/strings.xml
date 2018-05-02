@@ -23,7 +23,7 @@
     <string name="wifi_fail_to_scan" msgid="1265540342578081461">"لا يمكن فحص الشبكات"</string>
     <string name="wifi_security_none" msgid="7985461072596594400">"بدون"</string>
     <string name="wifi_remembered" msgid="4955746899347821096">"تم الحفظ"</string>
-    <string name="wifi_disabled_generic" msgid="4259794910584943386">"معطلة"</string>
+    <string name="wifi_disabled_generic" msgid="4259794910584943386">"غير مفعّلة"</string>
     <string name="wifi_disabled_network_failure" msgid="2364951338436007124">"‏تعذّرت تهيئة عنوان IP"</string>
     <string name="wifi_disabled_by_recommendation_provider" msgid="5168315140978066096">"الجهاز غير متصل بسبب انخفاض جودة الشبكة"</string>
     <string name="wifi_disabled_wifi_failure" msgid="3081668066612876581">"‏تعذّر اتصال WiFi"</string>
@@ -99,7 +99,7 @@
     <string name="bluetooth_opp_profile_summary_use_for" msgid="1255674547144769756">"استخدامه لنقل الملفات"</string>
     <string name="bluetooth_hid_profile_summary_use_for" msgid="232727040453645139">"استخدام للإدخال"</string>
     <string name="bluetooth_hearing_aid_profile_summary_use_for" msgid="908775281788309484">"استخدام سماعة الأذن الطبية"</string>
-    <string name="bluetooth_pairing_accept" msgid="6163520056536604875">"اقتران"</string>
+    <string name="bluetooth_pairing_accept" msgid="6163520056536604875">"إقران"</string>
     <string name="bluetooth_pairing_accept_all_caps" msgid="6061699265220789149">"إقران"</string>
     <string name="bluetooth_pairing_decline" msgid="4185420413578948140">"إلغاء"</string>
     <string name="bluetooth_pairing_will_share_phonebook" msgid="4982239145676394429">"يضمن لك الإقران إمكانية الدخول إلى جهات اتصالك وسجل المكالمات عند الاتصال."</string>
@@ -154,7 +154,7 @@
     <string name="tts_play_example_summary" msgid="8029071615047894486">"تشغيل عرض توضيحي قصير لتجميع الكلام"</string>
     <string name="tts_install_data_title" msgid="4264378440508149986">"تثبيت البيانات الصوتية"</string>
     <string name="tts_install_data_summary" msgid="5742135732511822589">"تثبيت البيانات الصوتية المطلوبة لتجميع الكلام"</string>
-    <string name="tts_engine_security_warning" msgid="8786238102020223650">"ربما يمكن لمحرك اصطناع الحديث جمع كل النص التي سيتم نطقه، بما في ذلك البيانات الشخصية مثل كلمات المرور وأرقام بطاقة الائتمان. يتم إحضار ذلك من المحرك <xliff:g id="TTS_PLUGIN_ENGINE_NAME">%s</xliff:g>. هل تريد تمكين استخدام محرك اصطناع الحديث هذا؟"</string>
+    <string name="tts_engine_security_warning" msgid="8786238102020223650">"ربما يمكن لمحرك اصطناع الحديث جمع كل النص التي سيتم نطقه، بما في ذلك البيانات الشخصية مثل كلمات المرور وأرقام بطاقة الائتمان. يتم إحضار ذلك من المحرك <xliff:g id="TTS_PLUGIN_ENGINE_NAME">%s</xliff:g>. هل تريد تفعيل استخدام محرك اصطناع الحديث هذا؟"</string>
     <string name="tts_engine_network_required" msgid="1190837151485314743">"تتطلب هذه اللغة اتصال شبكة سليمًا لتحويل النص إلى كلام."</string>
     <string name="tts_default_sample_string" msgid="4040835213373086322">"هذا مثال لتركيب الكلام"</string>
     <string name="tts_status_title" msgid="7268566550242584413">"حالة اللغة التلقائية"</string>
@@ -183,7 +183,7 @@
     <string name="category_personal" msgid="1299663247844969448">"شخصي"</string>
     <string name="category_work" msgid="8699184680584175622">"العمل"</string>
     <string name="development_settings_title" msgid="215179176067683667">"خيارات مطور البرامج"</string>
-    <string name="development_settings_enable" msgid="542530994778109538">"تمكين خيارات المطورين"</string>
+    <string name="development_settings_enable" msgid="542530994778109538">"تفعيل خيارات المطورين"</string>
     <string name="development_settings_summary" msgid="1815795401632854041">"تعيين خيارات تطوير التطبيق"</string>
     <string name="development_settings_not_available" msgid="4308569041701535607">"لا تتوفر خيارات مطوّر البرامج لهذا المستخدم"</string>
     <string name="vpn_settings_not_available" msgid="956841430176985598">"‏لا تتوفر إعدادات VPN لهذا المستخدم"</string>
@@ -207,7 +207,7 @@
     <string name="mock_location_app_set" msgid="8966420655295102685">"تطبيق الموقع الزائف: <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="debug_networking_category" msgid="7044075693643009662">"الشبكات"</string>
     <string name="wifi_display_certification" msgid="8611569543791307533">"شهادة عرض شاشة لاسلكي"</string>
-    <string name="wifi_verbose_logging" msgid="4203729756047242344">"‏تمكين تسجيل Wi‑Fi Verbose"</string>
+    <string name="wifi_verbose_logging" msgid="4203729756047242344">"‏تفعيل تسجيل Wi‑Fi Verbose"</string>
     <string name="wifi_connected_mac_randomization" msgid="3168165236877957767">"‏اختيار عشوائي لعنوان MAC"</string>
     <string name="mobile_data_always_on" msgid="8774857027458200434">"بيانات الجوّال نشطة دائمًا"</string>
     <string name="tethering_hardware_offload" msgid="7470077827090325814">"تسريع الأجهزة للتوصيل"</string>
@@ -236,7 +236,7 @@
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"عرض خيارات شهادة عرض شاشة لاسلكي"</string>
     <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"‏زيادة مستوى تسجيل Wi-Fi، وعرض لكل SSID RSSI في منتقي Wi-Fi"</string>
     <string name="wifi_connected_mac_randomization_summary" msgid="1743059848752201485">"‏اختيار عشوائي لعنوان MAC عند الاتصال بشبكات Wi‑Fi"</string>
-    <string name="wifi_metered_label" msgid="4514924227256839725">"مُقاسة"</string>
+    <string name="wifi_metered_label" msgid="4514924227256839725">"تفرض تكلفة استخدام"</string>
     <string name="wifi_unmetered_label" msgid="6124098729457992931">"بدون قياس"</string>
     <string name="select_logd_size_title" msgid="7433137108348553508">"أحجام ذاكرة التخزين المؤقت للتسجيل"</string>
     <string name="select_logd_size_dialog_title" msgid="1206769310236476760">"حدد أحجامًا أكبر لكل ذاكرة تخزين مؤقت للتسجيل"</string>
@@ -261,7 +261,7 @@
     <string name="bluetooth_show_devices_without_names_summary" msgid="2351196058115755520">"‏سيتم عرض أجهزة البلوتوث بدون أسماء (عناوين MAC فقط)"</string>
     <string name="bluetooth_disable_absolute_volume_summary" msgid="6031284410786545957">"لإيقاف ميزة مستوى الصوت المطلق للبلوتوث في حال حدوث مشاكل متعلقة بمستوى الصوت في الأجهزة البعيدة، مثل مستوى صوت عالٍ بشكل غير مقبول أو عدم إمكانية التحكّم في الصوت"</string>
     <string name="enable_terminal_title" msgid="95572094356054120">"تطبيق طرفي محلي"</string>
-    <string name="enable_terminal_summary" msgid="67667852659359206">"تمكين تطبيق طرفي يوفر إمكانية الدخول إلى واجهة النظام المحلية"</string>
+    <string name="enable_terminal_summary" msgid="67667852659359206">"تفعيل تطبيق طرفي يوفر إمكانية الدخول إلى واجهة النظام المحلية"</string>
     <string name="hdcp_checking_title" msgid="8605478913544273282">"‏التحقق من HDCP"</string>
     <string name="hdcp_checking_dialog_title" msgid="5141305530923283">"‏تعيين سلوك التحقق من HDCP"</string>
     <string name="debug_debugging_category" msgid="6781250159513471316">"تصحيح الأخطاء"</string>
@@ -280,7 +280,7 @@
     <string name="strict_mode" msgid="1938795874357830695">"تفعيل الوضع المتشدد"</string>
     <string name="strict_mode_summary" msgid="142834318897332338">"وميض الشاشة عند إجراء التطبيقات عمليات طويلة في سلسلة المحادثات الرئيسية"</string>
     <string name="pointer_location" msgid="6084434787496938001">"موقع المؤشر"</string>
-    <string name="pointer_location_summary" msgid="840819275172753713">"عرض تراكب الشاشة لبيانات اللمس الحالية"</string>
+    <string name="pointer_location_summary" msgid="840819275172753713">"عرض بيانات اللمس الحالية فوق المحتوى على الشاشة"</string>
     <string name="show_touches" msgid="2642976305235070316">"عرض النقرات"</string>
     <string name="show_touches_summary" msgid="6101183132903926324">"عرض التعليقات المرئية للنقرات"</string>
     <string name="show_screen_updates" msgid="5470814345876056420">"عرض تحديثات السطح"</string>
@@ -293,7 +293,7 @@
     <string name="disable_overlays" msgid="2074488440505934665">"إيقاف تراكبات الأجهزة"</string>
     <string name="disable_overlays_summary" msgid="3578941133710758592">"استخدام وحدة معالجة الرسومات دائمًا لتركيب الشاشة"</string>
     <string name="simulate_color_space" msgid="6745847141353345872">"محاكاة مسافة اللون"</string>
-    <string name="enable_opengl_traces_title" msgid="6790444011053219871">"‏تمكين عمليات تتبع OpenGL"</string>
+    <string name="enable_opengl_traces_title" msgid="6790444011053219871">"‏تفعيل عمليات تتبع OpenGL"</string>
     <string name="usb_audio_disable_routing" msgid="8114498436003102671">"‏إيقاف توجيه الصوت عبر USB"</string>
     <string name="usb_audio_disable_routing_summary" msgid="980282760277312264">"‏إيقاف التوجيه التلقائي إلى أجهزة الصوت الطرفية عبر USB"</string>
     <string name="debug_layout" msgid="5981361776594526155">"عرض حدود المخطط"</string>
@@ -301,7 +301,7 @@
     <string name="force_rtl_layout_all_locales" msgid="2259906643093138978">"فرض اتجاه التنسيق ليكون من اليمين إلى اليسار"</string>
     <string name="force_rtl_layout_all_locales_summary" msgid="9192797796616132534">"فرض اتجاه تنسيق الشاشة ليكون من اليمين إلى اليسار لجميع اللغات"</string>
     <string name="force_msaa" msgid="7920323238677284387">"‏فرض 4x MSAA"</string>
-    <string name="force_msaa_summary" msgid="9123553203895817537">"‏تمكين 4x MSAA في تطبيقات OpenGL ES 2.0"</string>
+    <string name="force_msaa_summary" msgid="9123553203895817537">"‏تفعيل 4x MSAA في تطبيقات OpenGL ES 2.0"</string>
     <string name="show_non_rect_clip" msgid="505954950474595172">"تصحيح أخطاء عمليات القصاصات غير المستطيلة"</string>
     <string name="track_frame_time" msgid="6094365083096851167">"‏عرض ملف التعريف HWUI"</string>
     <string name="enable_gpu_debug_layers" msgid="3848838293793255097">"‏تفعيل طبقات تصحيح أخطاء GPU"</string>
@@ -312,20 +312,20 @@
     <string name="overlay_display_devices_title" msgid="5364176287998398539">"محاكاة الشاشات الثانوية"</string>
     <string name="debug_applications_category" msgid="4206913653849771549">"التطبيقات"</string>
     <string name="immediately_destroy_activities" msgid="1579659389568133959">"عدم الاحتفاظ بالأنشطة"</string>
-    <string name="immediately_destroy_activities_summary" msgid="3592221124808773368">"مسح كل نشاط فور مغادرة المستخدم له"</string>
+    <string name="immediately_destroy_activities_summary" msgid="3592221124808773368">"محو كل نشاط فور مغادرة المستخدم له"</string>
     <string name="app_process_limit_title" msgid="4280600650253107163">"حد العمليات بالخلفية"</string>
     <string name="show_all_anrs" msgid="4924885492787069007">"‏عرض أخطاء ANR في الخلفية"</string>
     <string name="show_all_anrs_summary" msgid="6636514318275139826">"عرض مربع الحوار \"التطبيق لا يستجيب\" مع تطبيقات الخلفية"</string>
     <string name="show_notification_channel_warnings" msgid="1399948193466922683">"عرض تحذيرات قناة الإشعار"</string>
-    <string name="show_notification_channel_warnings_summary" msgid="5536803251863694895">"لعرض تحذير على الشاشة عند نشر تطبيق ما لإشعار بدون قناة صالحة"</string>
-    <string name="force_allow_on_external" msgid="3215759785081916381">"فرض السماح للتطبيقات على الخارجي"</string>
+    <string name="show_notification_channel_warnings_summary" msgid="5536803251863694895">"عرض تحذير على الشاشة عند ينشر تطبيق ما إشعارًا بدون قناة صالحة"</string>
+    <string name="force_allow_on_external" msgid="3215759785081916381">"السماح بإدراج التطبيقات في وحدة تخزين خارجية"</string>
     <string name="force_allow_on_external_summary" msgid="3640752408258034689">"تأهيل أي تطبيق بحيث تتم كتابته على وحدة تخزين خارجية، بغض النظر عن قيم البيان"</string>
-    <string name="force_resizable_activities" msgid="8615764378147824985">"فرض إمكانية تغيير على الأنشطة"</string>
-    <string name="force_resizable_activities_summary" msgid="6667493494706124459">"تمكين تغيير حجم جميع الأنشطة لتناسب تعدد النوافذ، بغض النظر عن قيم البيان."</string>
-    <string name="enable_freeform_support" msgid="1461893351278940416">"تمكين النوافذ الحرة"</string>
-    <string name="enable_freeform_support_summary" msgid="8247310463288834487">"تمكين إتاحة استخدام النوافذ الحرة التجريبية."</string>
+    <string name="force_resizable_activities" msgid="8615764378147824985">"فرض إمكانية تغيير حجم الأنشطة"</string>
+    <string name="force_resizable_activities_summary" msgid="6667493494706124459">"السماح بتغيير حجم جميع الأنشطة لتناسب تعدد النوافذ، بغض النظر عن قيم البيان"</string>
+    <string name="enable_freeform_support" msgid="1461893351278940416">"تفعيل النوافذ الحرة"</string>
+    <string name="enable_freeform_support_summary" msgid="8247310463288834487">"إتاحة استخدام النوافذ الحرة التجريبية"</string>
     <string name="local_backup_password_title" msgid="3860471654439418822">"كلمة مرور احتياطية للكمبيوتر"</string>
-    <string name="local_backup_password_summary_none" msgid="6951095485537767956">"النسخ الاحتياطية الكاملة لسطح المكتب غير محمية في الوقت الحالي"</string>
+    <string name="local_backup_password_summary_none" msgid="6951095485537767956">"النُسخ الاحتياطية الكاملة لسطح المكتب غير محمية في الوقت الحالي"</string>
     <string name="local_backup_password_summary_change" msgid="5376206246809190364">"انقر لتغيير كلمة مرور النسخ الاحتياطية الكاملة لسطح المكتب أو إزالتها."</string>
     <string name="local_backup_password_toast_success" msgid="582016086228434290">"تم تعيين كلمة مرور احتياطية جديدة"</string>
     <string name="local_backup_password_toast_confirmation_mismatch" msgid="7805892532752708288">"كلمة المرور الجديدة وتأكيدها لا يتطابقان"</string>
@@ -357,7 +357,7 @@
     <string name="button_convert_fbe" msgid="5152671181309826405">"مسح وتحويل…"</string>
     <string name="picture_color_mode" msgid="4560755008730283695">"نمط لون الصورة"</string>
     <string name="picture_color_mode_desc" msgid="1141891467675548590">"‏استخدام sRGB"</string>
-    <string name="daltonizer_mode_disabled" msgid="7482661936053801862">"معطَّل"</string>
+    <string name="daltonizer_mode_disabled" msgid="7482661936053801862">"غير مفعّل"</string>
     <string name="daltonizer_mode_monochromacy" msgid="8485709880666106721">"عمى ألوان كامل"</string>
     <string name="daltonizer_mode_deuteranomaly" msgid="5475532989673586329">"العجز في رؤية اللونين الأخضر والأحمر"</string>
     <string name="daltonizer_mode_protanomaly" msgid="8424148009038666065">"غطش الأحمر (الأحمر والأخضر)"</string>
@@ -365,11 +365,12 @@
     <string name="accessibility_display_daltonizer_preference_title" msgid="5800761362678707872">"تصحيح الألوان"</string>
     <string name="accessibility_display_daltonizer_preference_subtitle" msgid="3484969015295282911">"هذه الميزة تجريبية وقد تؤثر في الأداء."</string>
     <string name="daltonizer_type_overridden" msgid="3116947244410245916">"تم الاستبدال بـ <xliff:g id="TITLE">%1$s</xliff:g>"</string>
-    <string name="power_remaining_duration_only" msgid="845431008899029842">"يتبقى حوالي <xliff:g id="TIME">%1$s</xliff:g> لإتمام شحن البطارية"</string>
-    <string name="power_discharging_duration" msgid="6655472132189365839">"يتبقى <xliff:g id="TIME">%1$s</xliff:g> تقريبًا (<xliff:g id="LEVEL">%2$s</xliff:g>)."</string>
-    <string name="power_remaining_duration_only_enhanced" msgid="5992456722677973678">"يتبقى <xliff:g id="TIME">%1$s</xliff:g> تقريبًا بناءً على استخدامك"</string>
-    <string name="power_discharging_duration_enhanced" msgid="5726302316642148671">"يتبقى <xliff:g id="TIME">%1$s</xliff:g> تقريبًا، بناءً على استخدامك (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
-    <string name="power_remaining_duration_only_short" msgid="5329694252258605547">"يتبقى <xliff:g id="TIME">%1$s</xliff:g>"</string>
+    <string name="power_remaining_settings_home_page" msgid="4845022416859002011">"<xliff:g id="PERCENTAGE">%1$s</xliff:g> - <xliff:g id="TIME_STRING">%2$s</xliff:g>"</string>
+    <string name="power_remaining_duration_only" msgid="6123167166221295462">"يتبقى <xliff:g id="TIME_REMAINING">%1$s</xliff:g> تقريبًا"</string>
+    <string name="power_discharging_duration" msgid="8848256785736335185">"يتبقى <xliff:g id="TIME_REMAINING">%1$s</xliff:g> تقريبًا (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
+    <string name="power_remaining_duration_only_enhanced" msgid="4189311599812296592">"يتبقى <xliff:g id="TIME_REMAINING">%1$s</xliff:g> تقريبًا، بناءً على استخدامك"</string>
+    <string name="power_discharging_duration_enhanced" msgid="1992003260664804080">"يتبقى <xliff:g id="TIME_REMAINING">%1$s</xliff:g> تقريبًا، بناءً على استخدامك (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
+    <string name="power_remaining_duration_only_short" msgid="3463575350656389957">"الوقت المتبقي: <xliff:g id="TIME_REMAINING">%1$s</xliff:g>"</string>
     <string name="power_discharge_by_enhanced" msgid="2095821536747992464">"من المفترض أن يستمر شحن البطارية حوالي <xliff:g id="TIME">%1$s</xliff:g> حسب استخدامك (<xliff:g id="LEVEL">%2$s</xliff:g>)."</string>
     <string name="power_discharge_by_only_enhanced" msgid="2175151772952365149">"من المفترض أن يستمر شحن البطارية حوالي <xliff:g id="TIME">%1$s</xliff:g> حسب استخدامك."</string>
     <string name="power_discharge_by" msgid="6453537733650125582">"من المفترض أن يستمر شحن البطارية حوالي <xliff:g id="TIME">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)."</string>
@@ -394,9 +395,9 @@
     <string name="battery_info_status_not_charging" msgid="8523453668342598579">"تم التوصيل، ولكن يتعذّر الشحن الآن"</string>
     <string name="battery_info_status_full" msgid="2824614753861462808">"ممتلئة"</string>
     <string name="disabled_by_admin_summary_text" msgid="6750513964908334617">"إعدادات يتحكم فيها المشرف"</string>
-    <string name="enabled_by_admin" msgid="5302986023578399263">"تم تمكين الإعداد بواسطة المشرف"</string>
-    <string name="disabled_by_admin" msgid="8505398946020816620">"تم تعطيل الإعداد بواسطة المشرف"</string>
-    <string name="disabled" msgid="9206776641295849915">"معطل"</string>
+    <string name="enabled_by_admin" msgid="5302986023578399263">"تم تفعيل الإعداد بواسطة المشرف"</string>
+    <string name="disabled_by_admin" msgid="8505398946020816620">"تم إيقاف الإعداد بواسطة المشرف"</string>
+    <string name="disabled" msgid="9206776641295849915">"غير مفعّل"</string>
     <string name="external_source_trusted" msgid="2707996266575928037">"مسموح به"</string>
     <string name="external_source_untrusted" msgid="2677442511837596726">"غير مسموح به"</string>
     <string name="install_other_apps" msgid="6986686991775883017">"تثبيت التطبيقات غير المعروفة"</string>

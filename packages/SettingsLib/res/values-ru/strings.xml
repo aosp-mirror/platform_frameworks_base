@@ -193,7 +193,7 @@
     <string name="enable_adb_summary" msgid="4881186971746056635">"Включить режим отладки при подключении к компьютеру по USB"</string>
     <string name="clear_adb_keys" msgid="4038889221503122743">"Отозвать доступ для USB-отладки"</string>
     <string name="bugreport_in_power" msgid="7923901846375587241">"Отчет об ошибке"</string>
-    <string name="bugreport_in_power_summary" msgid="1778455732762984579">"Показывать в меню кнопку для отправки отчета об ошибке"</string>
+    <string name="bugreport_in_power_summary" msgid="1778455732762984579">"Показывать в меню кнопки питания пункт для отправки отчета об ошибке"</string>
     <string name="keep_screen_on" msgid="1146389631208760344">"Не выключать экран"</string>
     <string name="keep_screen_on_summary" msgid="2173114350754293009">"Во время зарядки экран будет всегда включен"</string>
     <string name="bt_hci_snoop_log" msgid="3340699311158865670">"Включить журнал HCI Bluetooth"</string>
@@ -365,11 +365,12 @@
     <string name="accessibility_display_daltonizer_preference_title" msgid="5800761362678707872">"Коррекция цвета"</string>
     <string name="accessibility_display_daltonizer_preference_subtitle" msgid="3484969015295282911">"Это экспериментальная функция, она может снизить производительность устройства."</string>
     <string name="daltonizer_type_overridden" msgid="3116947244410245916">"Новая настройка: <xliff:g id="TITLE">%1$s</xliff:g>"</string>
-    <string name="power_remaining_duration_only" msgid="845431008899029842">"Осталось примерно <xliff:g id="TIME">%1$s</xliff:g>"</string>
-    <string name="power_discharging_duration" msgid="6655472132189365839">"Заряда (<xliff:g id="LEVEL">%2$s</xliff:g>) хватит примерно на <xliff:g id="TIME">%1$s</xliff:g>"</string>
-    <string name="power_remaining_duration_only_enhanced" msgid="5992456722677973678">"Осталось примерно <xliff:g id="TIME">%1$s</xliff:g> при текущем уровне использования"</string>
-    <string name="power_discharging_duration_enhanced" msgid="5726302316642148671">"Заряда (<xliff:g id="LEVEL">%2$s</xliff:g>) хватит примерно на <xliff:g id="TIME">%1$s</xliff:g> при текущем уровне расхода"</string>
-    <string name="power_remaining_duration_only_short" msgid="5329694252258605547">"Осталось: <xliff:g id="TIME">%1$s</xliff:g>"</string>
+    <string name="power_remaining_settings_home_page" msgid="4845022416859002011">"Уровень заряда – <xliff:g id="PERCENTAGE">%1$s</xliff:g>. <xliff:g id="TIME_STRING">%2$s</xliff:g>."</string>
+    <string name="power_remaining_duration_only" msgid="6123167166221295462">"Заряда хватит примерно на <xliff:g id="TIME_REMAINING">%1$s</xliff:g>"</string>
+    <string name="power_discharging_duration" msgid="8848256785736335185">"Заряда (<xliff:g id="LEVEL">%2$s</xliff:g>) хватит примерно на <xliff:g id="TIME_REMAINING">%1$s</xliff:g>"</string>
+    <string name="power_remaining_duration_only_enhanced" msgid="4189311599812296592">"Заряда хватит примерно на <xliff:g id="TIME_REMAINING">%1$s</xliff:g> при текущем уровне расхода"</string>
+    <string name="power_discharging_duration_enhanced" msgid="1992003260664804080">"Заряда (<xliff:g id="LEVEL">%2$s</xliff:g>) хватит примерно на <xliff:g id="TIME_REMAINING">%1$s</xliff:g> при текущем уровне расхода"</string>
+    <string name="power_remaining_duration_only_short" msgid="3463575350656389957">"Заряда хватит на <xliff:g id="TIME_REMAINING">%1$s</xliff:g>"</string>
     <string name="power_discharge_by_enhanced" msgid="2095821536747992464">"При текущем уровне использования (<xliff:g id="LEVEL">%2$s</xliff:g>) заряда хватит примерно до <xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="power_discharge_by_only_enhanced" msgid="2175151772952365149">"При текущем уровне использования заряда хватит примерно до <xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="power_discharge_by" msgid="6453537733650125582">"Заряда (<xliff:g id="LEVEL">%2$s</xliff:g>) хватит примерно до <xliff:g id="TIME">%1$s</xliff:g>"</string>

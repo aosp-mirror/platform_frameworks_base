@@ -211,7 +211,7 @@
     <item msgid="238303513127879234">"4K (নিরাপদ)"</item>
     <item msgid="3547211260846843098">"4K (সম্পন্ন)"</item>
     <item msgid="5411365648951414254">"4K (সম্পন্ন, নিরাপদ)"</item>
-    <item msgid="1311305077526792901">"720p, 1080p (ডুয়েল স্ক্রীন)"</item>
+    <item msgid="1311305077526792901">"720p, 1080p (ডুয়েল স্ক্রিন)"</item>
   </string-array>
   <string-array name="enable_opengl_traces_entries">
     <item msgid="3191973083884253830">"কোনো কিছুই নয়"</item>

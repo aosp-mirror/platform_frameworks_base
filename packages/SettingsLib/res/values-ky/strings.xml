@@ -42,7 +42,7 @@
     <string name="wifi_connected_no_internet" msgid="8202906332837777829">"Туташып турат, Интернет жок"</string>
     <string name="wifi_status_no_internet" msgid="5784710974669608361">"Интернет жок"</string>
     <string name="wifi_status_sign_in_required" msgid="123517180404752756">"Аккаунтка кирүү талап кылынат"</string>
-    <string name="wifi_ap_unable_to_handle_new_sta" msgid="5348824313514404541">"Туташуу түйүнү убактылуу толуп калды"</string>
+    <string name="wifi_ap_unable_to_handle_new_sta" msgid="5348824313514404541">"Байланыш түйүнүнө өтө көп түзмөк туташып турат"</string>
     <string name="connected_via_carrier" msgid="7583780074526041912">"%1$s аркылуу туташты"</string>
     <string name="available_via_carrier" msgid="1469036129740799053">"%1$s аркылуу иштейт"</string>
     <string name="speed_label_very_slow" msgid="1867055264243608530">"Өтө жай"</string>
@@ -365,11 +365,12 @@
     <string name="accessibility_display_daltonizer_preference_title" msgid="5800761362678707872">"Түсүн тууралоо"</string>
     <string name="accessibility_display_daltonizer_preference_subtitle" msgid="3484969015295282911">"Бул сынамык мүмкүнчүлүк болгондуктан, түзмөктүн иштешине таасир этиши мүмкүн."</string>
     <string name="daltonizer_type_overridden" msgid="3116947244410245916">"<xliff:g id="TITLE">%1$s</xliff:g> менен алмаштырылган"</string>
-    <string name="power_remaining_duration_only" msgid="845431008899029842">"Батарея түгөнгөнгө чейин калган убакыт: <xliff:g id="TIME">%1$s</xliff:g>"</string>
-    <string name="power_discharging_duration" msgid="6655472132189365839">"Болжол менен <xliff:g id="TIME">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>) калды"</string>
-    <string name="power_remaining_duration_only_enhanced" msgid="5992456722677973678">"Колдонушуңузга караганда болжол менен <xliff:g id="TIME">%1$s</xliff:g> калды"</string>
-    <string name="power_discharging_duration_enhanced" msgid="5726302316642148671">"Колдонгонуңузга караганда болжол менен <xliff:g id="TIME">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>) калды"</string>
-    <string name="power_remaining_duration_only_short" msgid="5329694252258605547">"<xliff:g id="TIME">%1$s</xliff:g> калды"</string>
+    <string name="power_remaining_settings_home_page" msgid="4845022416859002011">"<xliff:g id="PERCENTAGE">%1$s</xliff:g> – <xliff:g id="TIME_STRING">%2$s</xliff:g>"</string>
+    <string name="power_remaining_duration_only" msgid="6123167166221295462">"Болжол менен <xliff:g id="TIME_REMAINING">%1$s</xliff:g> калды"</string>
+    <string name="power_discharging_duration" msgid="8848256785736335185">"Болжол менен <xliff:g id="TIME_REMAINING">%1$s</xliff:g> калды (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
+    <string name="power_remaining_duration_only_enhanced" msgid="4189311599812296592">"Колдонгонуңузга караганда болжол менен <xliff:g id="TIME_REMAINING">%1$s</xliff:g> калды"</string>
+    <string name="power_discharging_duration_enhanced" msgid="1992003260664804080">"Колдонгонуңузга караганда болжол менен <xliff:g id="TIME_REMAINING">%1$s</xliff:g> калды (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
+    <string name="power_remaining_duration_only_short" msgid="3463575350656389957">"<xliff:g id="TIME_REMAINING">%1$s</xliff:g> калды"</string>
     <string name="power_discharge_by_enhanced" msgid="2095821536747992464">"Колдонгонуңузга караганда болжол менен <xliff:g id="TIME">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>) кийин өчөт"</string>
     <string name="power_discharge_by_only_enhanced" msgid="2175151772952365149">"Колдонгонуңузга караганда болжол менен <xliff:g id="TIME">%1$s</xliff:g> кийин өчөт"</string>
     <string name="power_discharge_by" msgid="6453537733650125582">"Болжол менен <xliff:g id="TIME">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>) кийин өчөт"</string>

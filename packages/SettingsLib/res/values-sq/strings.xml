@@ -196,7 +196,7 @@
     <string name="bugreport_in_power_summary" msgid="1778455732762984579">"Shfaq një buton në menynë e fikjes për marrjen e raportit të defekteve"</string>
     <string name="keep_screen_on" msgid="1146389631208760344">"Qëndro zgjuar"</string>
     <string name="keep_screen_on_summary" msgid="2173114350754293009">"Ekrani nuk do të kalojë asnjëherë në gjendje gjumi gjatë ngarkimit"</string>
-    <string name="bt_hci_snoop_log" msgid="3340699311158865670">"Aktivizo regjistrin testues të Bluetooth HCI-së"</string>
+    <string name="bt_hci_snoop_log" msgid="3340699311158865670">"Aktivizo regjistrin testues të paketave HCI të Bluetooth-it"</string>
     <string name="bt_hci_snoop_log_summary" msgid="366083475849911315">"Kap të gjitha paketat HCI të Bluetooth-it në një skedar (ndryshoje Bluetooth-in pas ndryshimit të këtij cilësimi)"</string>
     <string name="oem_unlock_enable" msgid="6040763321967327691">"Shkyçja e OEM-së"</string>
     <string name="oem_unlock_enable_summary" msgid="4720281828891618376">"Lejo shkyçjen e ngarkimit të sistemit"</string>
@@ -208,9 +208,9 @@
     <string name="debug_networking_category" msgid="7044075693643009662">"Rrjetet"</string>
     <string name="wifi_display_certification" msgid="8611569543791307533">"Certifikimi i ekranit valor"</string>
     <string name="wifi_verbose_logging" msgid="4203729756047242344">"Aktivizo hyrjen Wi-Fi Verbose"</string>
-    <string name="wifi_connected_mac_randomization" msgid="3168165236877957767">"Zgjedhja e rastësishme e MAC të lidhur"</string>
+    <string name="wifi_connected_mac_randomization" msgid="3168165236877957767">"Zgjedhja e rastësishme e adresave MAC të lidhura"</string>
     <string name="mobile_data_always_on" msgid="8774857027458200434">"Të dhënat celulare gjithmonë aktive"</string>
-    <string name="tethering_hardware_offload" msgid="7470077827090325814">"Përshpejtimi i harduerit për ndarjen"</string>
+    <string name="tethering_hardware_offload" msgid="7470077827090325814">"Përshpejtimi i harduerit për ndarjen e lidhjes (internet)"</string>
     <string name="bluetooth_show_devices_without_names" msgid="4708446092962060176">"Shfaq pajisjet me Bluetooth pa emra"</string>
     <string name="bluetooth_disable_absolute_volume" msgid="2660673801947898809">"Çaktivizo volumin absolut"</string>
     <string name="bluetooth_select_avrcp_version_string" msgid="3750059931120293633">"Versioni AVRCP i Bluetooth-it"</string>
@@ -250,7 +250,7 @@
     <string name="allow_mock_location_summary" msgid="317615105156345626">"Lejo vendndodhje të simuluara"</string>
     <string name="debug_view_attributes" msgid="6485448367803310384">"Aktivizo shikimin e inspektimit të atributeve"</string>
     <string name="mobile_data_always_on_summary" msgid="8149773901431697910">"Mbaji të dhënat celulare gjithmonë aktive edhe kur Wi‑Fi është aktiv (për ndërrim të shpejtë të rrjetit)."</string>
-    <string name="tethering_hardware_offload_summary" msgid="7726082075333346982">"Përdor përshpejtimin e harduerit për ndarjen nëse është i disponueshëm"</string>
+    <string name="tethering_hardware_offload_summary" msgid="7726082075333346982">"Përdor përshpejtimin e harduerit për ndarjen e lidhjes (internet) nëse është i disponueshëm"</string>
     <string name="adb_warning_title" msgid="6234463310896563253">"Të lejohet korrigjimi i USB-së?"</string>
     <string name="adb_warning_message" msgid="7316799925425402244">"Korrigjuesi i USB-së është vetëm për qëllime zhvillimore. Përdore për të kopjuar të dhëna mes kompjuterit dhe pajisjes tënde, për të instaluar aplikacione në pajisjen tënde pa asnjë njoftim si dhe për të lexuar të dhënat e ditarit."</string>
     <string name="adb_keys_warning_message" msgid="5659849457135841625">"Të bllokohet qasja për korrigjim të USB-së nga të gjithë kompjuterët që ke autorizuar më parë?"</string>
@@ -365,11 +365,12 @@
     <string name="accessibility_display_daltonizer_preference_title" msgid="5800761362678707872">"Korrigjimi i ngjyrës"</string>
     <string name="accessibility_display_daltonizer_preference_subtitle" msgid="3484969015295282911">"Ky funksion është eksperimental dhe mund të ndikojë në veprimtari."</string>
     <string name="daltonizer_type_overridden" msgid="3116947244410245916">"Mbivendosur nga <xliff:g id="TITLE">%1$s</xliff:g>"</string>
-    <string name="power_remaining_duration_only" msgid="845431008899029842">"Rreth <xliff:g id="TIME">%1$s</xliff:g> të mbetura"</string>
-    <string name="power_discharging_duration" msgid="6655472132189365839">"Mbeten rreth <xliff:g id="TIME">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
-    <string name="power_remaining_duration_only_enhanced" msgid="5992456722677973678">"Rreth <xliff:g id="TIME">%1$s</xliff:g> të mbetura bazuar në përdorimin tënd"</string>
-    <string name="power_discharging_duration_enhanced" msgid="5726302316642148671">"Mbeten rreth <xliff:g id="TIME">%1$s</xliff:g> bazuar në përdorimin tënd (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
-    <string name="power_remaining_duration_only_short" msgid="5329694252258605547">"<xliff:g id="TIME">%1$s</xliff:g> të mbetura"</string>
+    <string name="power_remaining_settings_home_page" msgid="4845022416859002011">"<xliff:g id="PERCENTAGE">%1$s</xliff:g> - <xliff:g id="TIME_STRING">%2$s</xliff:g>"</string>
+    <string name="power_remaining_duration_only" msgid="6123167166221295462">"Rreth <xliff:g id="TIME_REMAINING">%1$s</xliff:g> të mbetura"</string>
+    <string name="power_discharging_duration" msgid="8848256785736335185">"Rreth <xliff:g id="TIME_REMAINING">%1$s</xliff:g> të mbetura (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
+    <string name="power_remaining_duration_only_enhanced" msgid="4189311599812296592">"Rreth <xliff:g id="TIME_REMAINING">%1$s</xliff:g> të mbetura bazuar në përdorimin tënd"</string>
+    <string name="power_discharging_duration_enhanced" msgid="1992003260664804080">"Rreth <xliff:g id="TIME_REMAINING">%1$s</xliff:g> të mbetura bazuar në përdorimin tënd (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
+    <string name="power_remaining_duration_only_short" msgid="3463575350656389957">"<xliff:g id="TIME_REMAINING">%1$s</xliff:g> të mbetura"</string>
     <string name="power_discharge_by_enhanced" msgid="2095821536747992464">"Duhet të zgjasë deri në rreth <xliff:g id="TIME">%1$s</xliff:g> bazuar në përdorimin tënd (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
     <string name="power_discharge_by_only_enhanced" msgid="2175151772952365149">"Duhet të zgjasë deri në rreth <xliff:g id="TIME">%1$s</xliff:g> bazuar në përdorimin tënd"</string>
     <string name="power_discharge_by" msgid="6453537733650125582">"Duhet të zgjasë deri në rreth <xliff:g id="TIME">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
