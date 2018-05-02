@@ -245,7 +245,7 @@ public final class ViewRootImpl implements ViewParent,
 
     final WindowLeaked mLocation;
 
-    final WindowManager.LayoutParams mWindowAttributes = new WindowManager.LayoutParams();
+    public final WindowManager.LayoutParams mWindowAttributes = new WindowManager.LayoutParams();
 
     final W mWindow;
 
