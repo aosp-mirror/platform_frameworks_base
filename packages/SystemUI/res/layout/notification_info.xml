@@ -17,10 +17,12 @@
 
 <com.android.systemui.statusbar.NotificationInfo
         xmlns:android="http://schemas.android.com/apk/res/android"
+        android:id="@+id/notification_guts"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:id="@+id/notification_guts"
         android:clickable="true"
+        android:clipChildren="false"
+        android:clipToPadding="false"
         android:orientation="vertical"
         android:paddingStart="@*android:dimen/notification_content_margin_start"
         android:paddingEnd="@*android:dimen/notification_content_margin_end"
@@ -33,8 +35,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:clipChildren="false"
-        android:clipToPadding="false"
-        android:layout_marginTop="2dp" >
+        android:clipToPadding="false">
         <ImageView
             android:id="@+id/pkgicon"
             android:layout_width="@dimen/notification_guts_header_height"
@@ -74,16 +75,16 @@
             android:layout_toEndOf="@id/pkg_group_divider" />
         <ImageButton
             android:id="@+id/info"
-            android:src="@drawable/ic_info"
-            android:tint="?android:attr/colorAccent"
-            android:layout_width="48dp"
-            android:layout_height="48dp"
-            android:padding="12dp"
-            android:layout_marginEnd="-12dp"
+            android:layout_width="56dp"
+            android:layout_height="56dp"
+            android:layout_alignParentEnd="true"
             android:layout_centerVertical="true"
-            android:contentDescription="@string/notification_more_settings"
+            android:layout_marginEnd="-16dp"
             android:background="@drawable/ripple_drawable"
-            android:layout_alignParentEnd="true" />
+            android:contentDescription="@string/notification_more_settings"
+            android:padding="16dp"
+            android:src="@drawable/ic_info"
+            android:tint="?android:attr/colorAccent" />
     </RelativeLayout>
 
     <LinearLayout
@@ -91,7 +92,8 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginBottom="@dimen/notification_guts_button_spacing"
-        android:layout_marginTop="@*android:dimen/notification_header_padding_top"
+        android:clipChildren="false"
+        android:clipToPadding="false"
         android:orientation="vertical">
 
         <!-- Channel Info Block -->
@@ -105,14 +107,13 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:layout_marginBottom="6dp"
-                style="@style/TextAppearance.NotificationInfo.Primary" />
+                style="@android:style/TextAppearance.Material.Notification.Title" />
             <!-- Question prompt -->
             <TextView
                 android:id="@+id/block_prompt"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                style="@style/TextAppearance.NotificationInfo.Secondary" />
+                style="@android:style/TextAppearance.Material.Notification" />
         </LinearLayout>
 
         <!-- Settings and Done buttons -->
@@ -139,12 +140,14 @@
                 android:text="@string/inline_stop_button"
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
+                android:layout_marginStart="@dimen/notification_guts_button_horizontal_spacing"
                 style="@style/TextAppearance.NotificationInfo.Button"/>
             <TextView
                 android:id="@+id/minimize"
                 android:text="@string/inline_minimize_button"
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
+                android:layout_marginStart="@dimen/notification_guts_button_horizontal_spacing"
                 style="@style/TextAppearance.NotificationInfo.Button" />
             <TextView
                 android:id="@+id/keep"
@@ -152,6 +155,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
                 android:layout_marginEnd="-8dp"
+                android:layout_marginStart="@dimen/notification_guts_button_horizontal_spacing"
                 style="@style/TextAppearance.NotificationInfo.Button"/>
         </LinearLayout>
     </LinearLayout>
@@ -160,22 +164,24 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginBottom="@dimen/notification_guts_button_spacing"
-        android:layout_marginTop="@*android:dimen/notification_header_padding_top"
+        android:layout_marginTop="@dimen/notification_guts_button_spacing"
         android:visibility="gone"
         android:orientation="horizontal" >
         <TextView
             android:id="@+id/confirmation_text"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
             android:text="@string/notification_channel_disabled"
             style="@style/TextAppearance.NotificationInfo.Confirmation"/>
         <TextView
             android:id="@+id/undo"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/inline_undo"
             android:layout_alignParentEnd="true"
+            android:layout_centerVertical="true"
             android:layout_marginEnd="-8dp"
+            android:text="@string/inline_undo"
             style="@style/TextAppearance.NotificationInfo.Button"/>
     </RelativeLayout>
 </com.android.systemui.statusbar.NotificationInfo>
