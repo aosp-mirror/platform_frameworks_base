@@ -33,6 +33,7 @@ message DimensionsValue {
     bool value_bool = 5;
     float value_float = 6;
     DimensionsValueTuple value_tuple = 7;
+    uint64 value_str_hash = 8;
   }
 }
 
@@ -54,6 +55,12 @@ message CountBucketInfo {
   optional int64 end_bucket_elapsed_nanos = 2;
 
   optional int64 count = 3;
+
+  optional int64 bucket_num = 4;
+
+  optional int64 start_bucket_elapsed_millis = 5;
+
+  optional int64 end_bucket_elapsed_millis = 6;
 }
 
 message CountMetricData {
@@ -62,6 +69,10 @@ message CountMetricData {
   optional DimensionsValue dimensions_in_condition = 2;
 
   repeated CountBucketInfo bucket_info = 3;
+
+  repeated DimensionsValue dimension_leaf_values_in_what = 4;
+
+  repeated DimensionsValue dimension_leaf_values_in_condition = 5;
 }
 
 message DurationBucketInfo {
@@ -70,6 +81,12 @@ message DurationBucketInfo {
   optional int64 end_bucket_elapsed_nanos = 2;
 
   optional int64 duration_nanos = 3;
+
+  optional int64 bucket_num = 4;
+
+  optional int64 start_bucket_elapsed_millis = 5;
+
+  optional int64 end_bucket_elapsed_millis = 6;
 }
 
 message DurationMetricData {
@@ -78,6 +95,10 @@ message DurationMetricData {
   optional DimensionsValue dimensions_in_condition = 2;
 
   repeated DurationBucketInfo bucket_info = 3;
+
+  repeated DimensionsValue dimension_leaf_values_in_what = 4;
+
+  repeated DimensionsValue dimension_leaf_values_in_condition = 5;
 }
 
 message ValueBucketInfo {
@@ -86,6 +107,12 @@ message ValueBucketInfo {
   optional int64 end_bucket_elapsed_nanos = 2;
 
   optional int64 value = 3;
+
+  optional int64 bucket_num = 4;
+
+  optional int64 start_bucket_elapsed_millis = 5;
+
+  optional int64 end_bucket_elapsed_millis = 6;
 }
 
 message ValueMetricData {
@@ -94,6 +121,10 @@ message ValueMetricData {
   optional DimensionsValue dimensions_in_condition = 2;
 
   repeated ValueBucketInfo bucket_info = 3;
+
+  repeated DimensionsValue dimension_leaf_values_in_what = 4;
+
+  repeated DimensionsValue dimension_leaf_values_in_condition = 5;
 }
 
 message GaugeBucketInfo {
@@ -106,6 +137,12 @@ message GaugeBucketInfo {
   repeated int64 elapsed_timestamp_nanos = 4;
 
   repeated int64 wall_clock_timestamp_nanos = 5;
+
+  optional int64 bucket_num = 6;
+
+  optional int64 start_bucket_elapsed_millis = 7;
+
+  optional int64 end_bucket_elapsed_millis = 8;
 }
 
 message GaugeMetricData {
@@ -114,6 +151,10 @@ message GaugeMetricData {
   optional DimensionsValue dimensions_in_condition = 2;
 
   repeated GaugeBucketInfo bucket_info = 3;
+
+  repeated DimensionsValue dimension_leaf_values_in_what = 4;
+
+  repeated DimensionsValue dimension_leaf_values_in_condition = 5;
 }
 
 message StatsLogReport {
@@ -122,8 +163,10 @@ message StatsLogReport {
   // Fields 2 and 3 are reserved.
 
   message SkippedBuckets {
-      optional int64 start_elapsed_nanos = 1;
-      optional int64 end_elapsed_nanos = 2;
+      optional int64 start_bucket_elapsed_nanos = 1;
+      optional int64 end_bucket_elapsed_nanos = 2;
+      optional int64 start_bucket_elapsed_millis = 3;
+      optional int64 end_bucket_elapsed_millis = 4;
   }
 
   message EventMetricDataWrapper {
@@ -152,6 +195,14 @@ message StatsLogReport {
     ValueMetricDataWrapper value_metrics = 7;
     GaugeMetricDataWrapper gauge_metrics = 8;
   }
+
+  optional int64 time_base_elapsed_nano_seconds = 9;
+
+  optional int64 bucket_size_nano_seconds = 10;
+
+  optional DimensionsValue dimensions_path_in_what = 11;
+
+  optional DimensionsValue dimensions_path_in_condition = 12;
 }
 
 message UidMapping {
@@ -164,6 +215,8 @@ message UidMapping {
             optional int32 uid = 3;
 
             optional bool deleted = 4;
+
+            optional uint64 name_hash = 5;
         }
         optional int64 elapsed_timestamp_nanos = 1;
 
@@ -180,6 +233,7 @@ message UidMapping {
 
         optional int64 new_version = 5;
         optional int64 prev_version = 6;
+        optional uint64 app_hash = 7;
     }
     repeated Change changes = 2;
 }
@@ -197,6 +251,12 @@ message ConfigMetricsReport {
 
   optional int64 current_report_wall_clock_nanos = 6;
 
+  message Annotation {
+      optional int64 field_int64 = 1;
+      optional int32 field_int32 = 2;
+  }
+  repeated Annotation annotation = 7;
+
   enum DumpReportReason {
       DEVICE_SHUTDOWN = 1;
       CONFIG_UPDATED = 2;
@@ -208,11 +268,7 @@ message ConfigMetricsReport {
   }
   optional DumpReportReason dump_report_reason = 8;
 
-  message Annotation {
-      optional int64 field_int64 = 1;
-      optional int32 field_int32 = 2;
-  }
-  repeated Annotation annotation = 7;
+  repeated string strings = 9;
 }
 
 message ConfigMetricsReportList {

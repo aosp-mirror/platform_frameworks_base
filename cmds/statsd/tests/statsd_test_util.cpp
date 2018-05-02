@@ -645,6 +645,183 @@ bool LessThan(const DimensionsPair& s1, const DimensionsPair& s2) {
     return LessThan(s1.dimInCondition, s2.dimInCondition);
 }
 
+void backfillStringInDimension(const std::map<uint64_t, string>& str_map,
+                               DimensionsValue* dimension) {
+    if (dimension->has_value_str_hash()) {
+        auto it = str_map.find((uint64_t)(dimension->value_str_hash()));
+        if (it != str_map.end()) {
+            dimension->clear_value_str_hash();
+            dimension->set_value_str(it->second);
+        } else {
+            ALOGE("Can not find the string hash: %llu",
+                (unsigned long long)dimension->value_str_hash());
+        }
+    } else if (dimension->has_value_tuple()) {
+        auto value_tuple = dimension->mutable_value_tuple();
+        for (int i = 0; i < value_tuple->dimensions_value_size(); ++i) {
+            backfillStringInDimension(str_map, value_tuple->mutable_dimensions_value(i));
+        }
+    }
+}
+
+void backfillStringInReport(ConfigMetricsReport *config_report) {
+    std::map<uint64_t, string> str_map;
+    for (const auto& str : config_report->strings()) {
+        uint64_t hash = Hash64(str);
+        if (str_map.find(hash) != str_map.end()) {
+            ALOGE("String hash conflicts: %s %s", str.c_str(), str_map[hash].c_str());
+        }
+        str_map[hash] = str;
+    }
+    for (int i = 0; i < config_report->metrics_size(); ++i) {
+        auto metric_report = config_report->mutable_metrics(i);
+        if (metric_report->has_count_metrics()) {
+            backfillStringInDimension(str_map, metric_report->mutable_count_metrics());
+        } else if (metric_report->has_duration_metrics()) {
+            backfillStringInDimension(str_map, metric_report->mutable_duration_metrics());
+        } else if (metric_report->has_gauge_metrics()) {
+            backfillStringInDimension(str_map, metric_report->mutable_gauge_metrics());
+        } else if (metric_report->has_value_metrics()) {
+            backfillStringInDimension(str_map, metric_report->mutable_value_metrics());
+        }
+    }
+    // Backfill the package names.
+    for (int i = 0 ; i < config_report->uid_map().snapshots_size(); ++i) {
+        auto snapshot = config_report->mutable_uid_map()->mutable_snapshots(i);
+        for (int j = 0 ; j < snapshot->package_info_size(); ++j) {
+            auto package_info = snapshot->mutable_package_info(j);
+            if (package_info->has_name_hash()) {
+                auto it = str_map.find((uint64_t)(package_info->name_hash()));
+                if (it != str_map.end()) {
+                    package_info->clear_name_hash();
+                    package_info->set_name(it->second);
+                } else {
+                    ALOGE("Can not find the string package name hash: %llu",
+                        (unsigned long long)package_info->name_hash());
+                }
+
+            }
+        }
+    }
+    // Backfill the app name in app changes.
+    for (int i = 0 ; i < config_report->uid_map().changes_size(); ++i) {
+        auto change = config_report->mutable_uid_map()->mutable_changes(i);
+        if (change->has_app_hash()) {
+            auto it = str_map.find((uint64_t)(change->app_hash()));
+            if (it != str_map.end()) {
+                change->clear_app_hash();
+                change->set_app(it->second);
+            } else {
+                ALOGE("Can not find the string change app name hash: %llu",
+                    (unsigned long long)change->app_hash());
+            }
+        }
+    }
+}
+
+void backfillStringInReport(ConfigMetricsReportList *config_report_list) {
+    for (int i = 0; i < config_report_list->reports_size(); ++i) {
+        backfillStringInReport(config_report_list->mutable_reports(i));
+    }
+}
+
+bool backfillDimensionPath(const DimensionsValue& path,
+                           const google::protobuf::RepeatedPtrField<DimensionsValue>& leafValues,
+                           int* leafIndex,
+                           DimensionsValue* dimension) {
+    dimension->set_field(path.field());
+    if (path.has_value_tuple()) {
+        for (int i = 0; i < path.value_tuple().dimensions_value_size(); ++i) {
+            if (!backfillDimensionPath(
+                path.value_tuple().dimensions_value(i), leafValues, leafIndex,
+                dimension->mutable_value_tuple()->add_dimensions_value())) {
+                return false;
+            }
+        }
+    } else {
+        if (*leafIndex < 0 || *leafIndex >= leafValues.size()) {
+            return false;
+        }
+        dimension->MergeFrom(leafValues.Get(*leafIndex));
+        (*leafIndex)++;
+    }
+    return true;
+}
+
+bool backfillDimensionPath(const DimensionsValue& path,
+                           const google::protobuf::RepeatedPtrField<DimensionsValue>& leafValues,
+                           DimensionsValue* dimension) {
+    int leafIndex = 0;
+    return backfillDimensionPath(path, leafValues, &leafIndex, dimension);
+}
+
+void backfillDimensionPath(ConfigMetricsReportList *config_report_list) {
+    for (int i = 0; i < config_report_list->reports_size(); ++i) {
+        auto report = config_report_list->mutable_reports(i);
+        for (int j = 0; j < report->metrics_size(); ++j) {
+            auto metric_report = report->mutable_metrics(j);
+            if (metric_report->has_dimensions_path_in_what() ||
+                metric_report->has_dimensions_path_in_condition()) {
+                auto whatPath = metric_report->dimensions_path_in_what();
+                auto conditionPath = metric_report->dimensions_path_in_condition();
+                if (metric_report->has_count_metrics()) {
+                    backfillDimensionPath(whatPath, conditionPath,
+                                          metric_report->mutable_count_metrics());
+                } else if (metric_report->has_duration_metrics()) {
+                    backfillDimensionPath(whatPath, conditionPath,
+                                          metric_report->mutable_duration_metrics());
+                } else if (metric_report->has_gauge_metrics()) {
+                    backfillDimensionPath(whatPath, conditionPath,
+                                          metric_report->mutable_gauge_metrics());
+                } else if (metric_report->has_value_metrics()) {
+                    backfillDimensionPath(whatPath, conditionPath,
+                                          metric_report->mutable_value_metrics());
+                }
+                metric_report->clear_dimensions_path_in_what();
+                metric_report->clear_dimensions_path_in_condition();
+            }
+        }
+    }
+}
+
+void backfillStartEndTimestamp(StatsLogReport *report) {
+    const int64_t timeBaseNs = report->time_base_elapsed_nano_seconds();
+    const int64_t bucketSizeNs = report->bucket_size_nano_seconds();
+    if (report->has_count_metrics()) {
+        backfillStartEndTimestampForMetrics(
+            timeBaseNs, bucketSizeNs, report->mutable_count_metrics());
+    } else if (report->has_duration_metrics()) {
+        backfillStartEndTimestampForMetrics(
+            timeBaseNs, bucketSizeNs, report->mutable_duration_metrics());
+    } else if (report->has_gauge_metrics()) {
+        backfillStartEndTimestampForMetrics(
+            timeBaseNs, bucketSizeNs, report->mutable_gauge_metrics());
+        if (report->gauge_metrics().skipped_size() > 0) {
+            backfillStartEndTimestampForSkippedBuckets(
+                timeBaseNs, report->mutable_gauge_metrics());
+        }
+    } else if (report->has_value_metrics()) {
+        backfillStartEndTimestampForMetrics(
+            timeBaseNs, bucketSizeNs, report->mutable_value_metrics());
+        if (report->value_metrics().skipped_size() > 0) {
+            backfillStartEndTimestampForSkippedBuckets(
+                timeBaseNs, report->mutable_value_metrics());
+        }
+    }
+}
+
+void backfillStartEndTimestamp(ConfigMetricsReport *config_report) {
+    for (int j = 0; j < config_report->metrics_size(); ++j) {
+        backfillStartEndTimestamp(config_report->mutable_metrics(j));
+    }
+}
+
+void backfillStartEndTimestamp(ConfigMetricsReportList *config_report_list) {
+    for (int i = 0; i < config_report_list->reports_size(); ++i) {
+        backfillStartEndTimestamp(config_report_list->mutable_reports(i));
+    }
+}
+
 }  // namespace statsd
 }  // namespace os
 }  // namespace android

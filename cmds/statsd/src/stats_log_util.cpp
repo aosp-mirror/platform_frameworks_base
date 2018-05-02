@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+#include "hash.h"
 #include "stats_log_util.h"
 
 #include <logd/LogEvent.h>
@@ -29,6 +30,8 @@ using android::util::FIELD_TYPE_BOOL;
 using android::util::FIELD_TYPE_FLOAT;
 using android::util::FIELD_TYPE_INT32;
 using android::util::FIELD_TYPE_INT64;
+using android::util::FIELD_TYPE_UINT64;
+using android::util::FIELD_TYPE_FIXED64;
 using android::util::FIELD_TYPE_MESSAGE;
 using android::util::FIELD_TYPE_STRING;
 using android::util::ProtoOutputStream;
@@ -45,6 +48,7 @@ const int DIMENSIONS_VALUE_VALUE_LONG = 4;
 // const int DIMENSIONS_VALUE_VALUE_BOOL = 5; // logd doesn't have bool data type.
 const int DIMENSIONS_VALUE_VALUE_FLOAT = 6;
 const int DIMENSIONS_VALUE_VALUE_TUPLE = 7;
+const int DIMENSIONS_VALUE_VALUE_STR_HASH = 8;
 
 const int DIMENSIONS_VALUE_TUPLE_VALUE = 1;
 
@@ -54,10 +58,12 @@ const int FIELD_ID_PULL_ATOM_ID = 1;
 const int FIELD_ID_TOTAL_PULL = 2;
 const int FIELD_ID_TOTAL_PULL_FROM_CACHE = 3;
 const int FIELD_ID_MIN_PULL_INTERVAL_SEC = 4;
+
 namespace {
 
 void writeDimensionToProtoHelper(const std::vector<FieldValue>& dims, size_t* index, int depth,
-                                 int prefix, ProtoOutputStream* protoOutput) {
+                                 int prefix, std::set<string> *str_set,
+                                 ProtoOutputStream* protoOutput) {
     size_t count = dims.size();
     while (*index < count) {
         const auto& dim = dims[*index];
@@ -87,8 +93,15 @@ void writeDimensionToProtoHelper(const std::vector<FieldValue>& dims, size_t* in
                                        dim.mValue.float_value);
                     break;
                 case STRING:
-                    protoOutput->write(FIELD_TYPE_STRING | DIMENSIONS_VALUE_VALUE_STR,
-                                       dim.mValue.str_value);
+                    if (str_set == nullptr) {
+                        protoOutput->write(FIELD_TYPE_STRING | DIMENSIONS_VALUE_VALUE_STR,
+                                           dim.mValue.str_value);
+                    } else {
+                        str_set->insert(dim.mValue.str_value);
+                        protoOutput->write(
+                                FIELD_TYPE_UINT64 | DIMENSIONS_VALUE_VALUE_STR_HASH,
+                                (long long)Hash64(dim.mValue.str_value));
+                    }
                     break;
                 default:
                     break;
@@ -105,7 +118,107 @@ void writeDimensionToProtoHelper(const std::vector<FieldValue>& dims, size_t* in
             uint64_t tupleToken =
                     protoOutput->start(FIELD_TYPE_MESSAGE | DIMENSIONS_VALUE_VALUE_TUPLE);
             writeDimensionToProtoHelper(dims, index, valueDepth, dim.mField.getPrefix(valueDepth),
-                                        protoOutput);
+                                        str_set, protoOutput);
+            protoOutput->end(tupleToken);
+            protoOutput->end(dimensionToken);
+        } else {
+            // Done with the prev sub tree
+            return;
+        }
+    }
+}
+
+void writeDimensionLeafToProtoHelper(const std::vector<FieldValue>& dims,
+                                     const int dimensionLeafField,
+                                     size_t* index, int depth,
+                                     int prefix, std::set<string> *str_set,
+                                     ProtoOutputStream* protoOutput) {
+    size_t count = dims.size();
+    while (*index < count) {
+        const auto& dim = dims[*index];
+        const int valueDepth = dim.mField.getDepth();
+        const int valuePrefix = dim.mField.getPrefix(depth);
+        if (valueDepth > 2) {
+            ALOGE("Depth > 2 not supported");
+            return;
+        }
+
+        if (depth == valueDepth && valuePrefix == prefix) {
+            uint64_t token = protoOutput->start(FIELD_TYPE_MESSAGE | FIELD_COUNT_REPEATED |
+                                                dimensionLeafField);
+            switch (dim.mValue.getType()) {
+                case INT:
+                    protoOutput->write(FIELD_TYPE_INT32 | DIMENSIONS_VALUE_VALUE_INT,
+                                       dim.mValue.int_value);
+                    break;
+                case LONG:
+                    protoOutput->write(FIELD_TYPE_INT64 | DIMENSIONS_VALUE_VALUE_LONG,
+                                       (long long)dim.mValue.long_value);
+                    break;
+                case FLOAT:
+                    protoOutput->write(FIELD_TYPE_FLOAT | DIMENSIONS_VALUE_VALUE_FLOAT,
+                                       dim.mValue.float_value);
+                    break;
+                case STRING:
+                    if (str_set == nullptr) {
+                        protoOutput->write(FIELD_TYPE_STRING | DIMENSIONS_VALUE_VALUE_STR,
+                                           dim.mValue.str_value);
+                    } else {
+                        str_set->insert(dim.mValue.str_value);
+                        protoOutput->write(
+                                FIELD_TYPE_UINT64 | DIMENSIONS_VALUE_VALUE_STR_HASH,
+                                (long long)Hash64(dim.mValue.str_value));
+                    }
+                    break;
+                default:
+                    break;
+            }
+            if (token != 0) {
+                protoOutput->end(token);
+            }
+            (*index)++;
+        } else if (valueDepth > depth && valuePrefix == prefix) {
+            writeDimensionLeafToProtoHelper(dims, dimensionLeafField,
+                                            index, valueDepth, dim.mField.getPrefix(valueDepth),
+                                            str_set, protoOutput);
+        } else {
+            // Done with the prev sub tree
+            return;
+        }
+    }
+}
+
+void writeDimensionPathToProtoHelper(const std::vector<Matcher>& fieldMatchers,
+                                     size_t* index, int depth, int prefix,
+                                     ProtoOutputStream* protoOutput) {
+    size_t count = fieldMatchers.size();
+    while (*index < count) {
+        const Field& field = fieldMatchers[*index].mMatcher;
+        const int valueDepth = field.getDepth();
+        const int valuePrefix = field.getPrefix(depth);
+        const int fieldNum = field.getPosAtDepth(depth);
+        if (valueDepth > 2) {
+            ALOGE("Depth > 2 not supported");
+            return;
+        }
+
+        if (depth == valueDepth && valuePrefix == prefix) {
+            uint64_t token = protoOutput->start(FIELD_TYPE_MESSAGE | FIELD_COUNT_REPEATED |
+                                                 DIMENSIONS_VALUE_TUPLE_VALUE);
+            protoOutput->write(FIELD_TYPE_INT32 | DIMENSIONS_VALUE_FIELD, fieldNum);
+            if (token != 0) {
+                protoOutput->end(token);
+            }
+            (*index)++;
+        } else if (valueDepth > depth && valuePrefix == prefix) {
+            // Writing the sub tree
+            uint64_t dimensionToken = protoOutput->start(
+                    FIELD_TYPE_MESSAGE | FIELD_COUNT_REPEATED | DIMENSIONS_VALUE_TUPLE_VALUE);
+            protoOutput->write(FIELD_TYPE_INT32 | DIMENSIONS_VALUE_FIELD, fieldNum);
+            uint64_t tupleToken =
+                    protoOutput->start(FIELD_TYPE_MESSAGE | DIMENSIONS_VALUE_VALUE_TUPLE);
+            writeDimensionPathToProtoHelper(fieldMatchers, index, valueDepth,
+                                            field.getPrefix(valueDepth), protoOutput);
             protoOutput->end(tupleToken);
             protoOutput->end(dimensionToken);
         } else {
@@ -117,7 +230,8 @@ void writeDimensionToProtoHelper(const std::vector<FieldValue>& dims, size_t* in
 
 }  // namespace
 
-void writeDimensionToProto(const HashableDimensionKey& dimension, ProtoOutputStream* protoOutput) {
+void writeDimensionToProto(const HashableDimensionKey& dimension, std::set<string> *str_set,
+                           ProtoOutputStream* protoOutput) {
     if (dimension.getValues().size() == 0) {
         return;
     }
@@ -125,7 +239,32 @@ void writeDimensionToProto(const HashableDimensionKey& dimension, ProtoOutputStr
                        dimension.getValues()[0].mField.getTag());
     uint64_t topToken = protoOutput->start(FIELD_TYPE_MESSAGE | DIMENSIONS_VALUE_VALUE_TUPLE);
     size_t index = 0;
-    writeDimensionToProtoHelper(dimension.getValues(), &index, 0, 0, protoOutput);
+    writeDimensionToProtoHelper(dimension.getValues(), &index, 0, 0, str_set, protoOutput);
+    protoOutput->end(topToken);
+}
+
+void writeDimensionLeafNodesToProto(const HashableDimensionKey& dimension,
+                                    const int dimensionLeafFieldId,
+                                    std::set<string> *str_set,
+                                    ProtoOutputStream* protoOutput) {
+    if (dimension.getValues().size() == 0) {
+        return;
+    }
+    size_t index = 0;
+    writeDimensionLeafToProtoHelper(dimension.getValues(), dimensionLeafFieldId,
+                                    &index, 0, 0, str_set, protoOutput);
+}
+
+void writeDimensionPathToProto(const std::vector<Matcher>& fieldMatchers,
+                               ProtoOutputStream* protoOutput) {
+    if (fieldMatchers.size() == 0) {
+        return;
+    }
+    protoOutput->write(FIELD_TYPE_INT32 | DIMENSIONS_VALUE_FIELD,
+                       fieldMatchers[0].mMatcher.getTag());
+    uint64_t topToken = protoOutput->start(FIELD_TYPE_MESSAGE | DIMENSIONS_VALUE_VALUE_TUPLE);
+    size_t index = 0;
+    writeDimensionPathToProtoHelper(fieldMatchers, &index, 0, 0, protoOutput);
     protoOutput->end(topToken);
 }
 
@@ -295,6 +434,14 @@ int64_t getWallClockMillis() {
 
 int64_t truncateTimestampNsToFiveMinutes(int64_t timestampNs) {
     return timestampNs / NS_PER_SEC / (5 * 60) * NS_PER_SEC * (5 * 60);
+}
+
+int64_t NanoToMillis(const int64_t nano) {
+    return nano / 1000000;
+}
+
+int64_t MillisToNano(const int64_t millis) {
+    return millis * 1000000;
 }
 
 }  // namespace statsd
