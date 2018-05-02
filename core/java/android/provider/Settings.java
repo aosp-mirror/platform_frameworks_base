@@ -10611,18 +10611,30 @@ public final class Settings {
          * App standby (app idle) specific settings.
          * This is encoded as a key=value list, separated by commas. Ex:
          * <p>
-         * "idle_duration=5000,parole_interval=4500"
+         * "idle_duration=5000,parole_interval=4500,screen_thresholds=0/0/60000/120000"
          * <p>
          * All durations are in millis.
+         * Array values are separated by forward slashes
          * The following keys are supported:
          *
          * <pre>
-         * idle_duration2       (long)
-         * wallclock_threshold  (long)
-         * parole_interval      (long)
-         * parole_duration      (long)
+         * parole_interval                  (long)
+         * parole_window                    (long)
+         * parole_duration                  (long)
+         * screen_thresholds                (long[4])
+         * elapsed_thresholds               (long[4])
+         * strong_usage_duration            (long)
+         * notification_seen_duration       (long)
+         * system_update_usage_duration     (long)
+         * prediction_timeout               (long)
+         * sync_adapter_duration            (long)
+         * exempted_sync_duration           (long)
+         * system_interaction_duration      (long)
+         * stable_charging_threshold        (long)
          *
          * idle_duration        (long) // This is deprecated and used to circumvent b/26355386.
+         * idle_duration2       (long) // deprecated
+         * wallclock_threshold  (long) // deprecated
          * </pre>
          *
          * <p>
