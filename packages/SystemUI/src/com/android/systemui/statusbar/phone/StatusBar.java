@@ -1326,8 +1326,7 @@ public class StatusBar extends SystemUI implements DemoMode,
 
         mKeyguardViewMediatorCallback = keyguardViewMediator.getViewMediatorCallback();
         mLightBarController.setFingerprintUnlockController(mFingerprintUnlockController);
-        Dependency.get(KeyguardDismissUtil.class).setDismissHandler(
-                this::dismissKeyguardThenExecute);
+        Dependency.get(KeyguardDismissUtil.class).setDismissHandler(this::executeWhenUnlocked);
         Trace.endSection();
     }
 
@@ -3086,6 +3085,13 @@ public class StatusBar extends SystemUI implements DemoMode,
                 entry.row.resetUserExpansion();
             }
         }
+    }
+
+    private void executeWhenUnlocked(OnDismissAction action) {
+        if (mStatusBarKeyguardViewManager.isShowing()) {
+            mLeaveOpenOnKeyguardHide = true;
+        }
+        dismissKeyguardThenExecute(action, null /* cancelAction */, false /* afterKeyguardGone */);
     }
 
     protected void dismissKeyguardThenExecute(OnDismissAction action, boolean afterKeyguardGone) {
