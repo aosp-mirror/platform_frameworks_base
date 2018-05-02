@@ -14,8 +14,12 @@
 
 package com.android.systemui.statusbar.phone;
 
+import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
+import android.animation.ValueAnimator;
 import android.view.View;
 
+import com.android.systemui.Interpolators;
 import com.android.systemui.plugins.statusbar.phone.NavBarButtonProvider.ButtonInterface;
 import com.android.systemui.statusbar.policy.KeyButtonDrawable;
 
@@ -26,6 +30,8 @@ import java.util.ArrayList;
  * multiples of the same nav bar icon appearing.
  */
 public class ButtonDispatcher {
+    private final static int FADE_DURATION_IN = 150;
+    private final static int FADE_DURATION_OUT = 100;
 
     private final ArrayList<View> mViews = new ArrayList<>();
 
@@ -36,13 +42,24 @@ public class ButtonDispatcher {
     private View.OnLongClickListener mLongClickListener;
     private View.OnHoverListener mOnHoverListener;
     private Boolean mLongClickable;
-    private Integer mAlpha;
+    private Float mAlpha;
     private Float mDarkIntensity;
     private Integer mVisibility = -1;
     private Boolean mDelayTouchFeedback;
     private KeyButtonDrawable mImageDrawable;
     private View mCurrentView;
     private boolean mVertical;
+    private ValueAnimator mFadeAnimator;
+
+    private final ValueAnimator.AnimatorUpdateListener mAlphaListener = animation ->
+            setAlpha((float) animation.getAnimatedValue());
+
+    private final AnimatorListenerAdapter mFadeListener = new AnimatorListenerAdapter() {
+        @Override
+        public void onAnimationEnd(Animator animation) {
+            setVisibility(getAlpha() == 1 ? View.VISIBLE : View.INVISIBLE);
+        }
+    };
 
     public ButtonDispatcher(int id) {
         mId = id;
@@ -64,19 +81,22 @@ public class ButtonDispatcher {
         if (mAlpha != null) {
             view.setAlpha(mAlpha);
         }
-        if (mDarkIntensity != null) {
-            ((ButtonInterface) view).setDarkIntensity(mDarkIntensity);
-        }
-        if (mVisibility != null) {
+        if (mVisibility != null && mVisibility != -1) {
             view.setVisibility(mVisibility);
         }
-        if (mImageDrawable != null) {
-            ((ButtonInterface) view).setImageDrawable(mImageDrawable);
+        if (view instanceof ButtonInterface) {
+            final ButtonInterface button = (ButtonInterface) view;
+            if (mDarkIntensity != null) {
+                button.setDarkIntensity(mDarkIntensity);
+            }
+            if (mImageDrawable != null) {
+                button.setImageDrawable(mImageDrawable);
+            }
+            if (mDelayTouchFeedback != null) {
+                button.setDelayTouchFeedback(mDelayTouchFeedback);
+            }
+            button.setVertical(mVertical);
         }
-        if (mDelayTouchFeedback != null) {
-            ((ButtonInterface) view).setDelayTouchFeedback(mDelayTouchFeedback);
-        }
-        ((ButtonInterface) view).setVertical(mVertical);
     }
 
     public int getId() {
@@ -99,7 +119,9 @@ public class ButtonDispatcher {
         mImageDrawable = drawable;
         final int N = mViews.size();
         for (int i = 0; i < N; i++) {
-            ((ButtonInterface) mViews.get(i)).setImageDrawable(mImageDrawable);
+            if (mViews.get(i) instanceof ButtonInterface) {
+                ((ButtonInterface) mViews.get(i)).setImageDrawable(mImageDrawable);
+            }
         }
     }
 
@@ -116,11 +138,13 @@ public class ButtonDispatcher {
         // This seems to be an instantaneous thing, so not going to persist it.
         final int N = mViews.size();
         for (int i = 0; i < N; i++) {
-            ((ButtonInterface) mViews.get(i)).abortCurrentGesture();
+            if (mViews.get(i) instanceof ButtonInterface) {
+                ((ButtonInterface) mViews.get(i)).abortCurrentGesture();
+            }
         }
     }
 
-    public void setAlpha(int alpha) {
+    public void setAlpha(float alpha) {
         mAlpha = alpha;
         final int N = mViews.size();
         for (int i = 0; i < N; i++) {
@@ -132,7 +156,9 @@ public class ButtonDispatcher {
         mDarkIntensity = darkIntensity;
         final int N = mViews.size();
         for (int i = 0; i < N; i++) {
-            ((ButtonInterface) mViews.get(i)).setDarkIntensity(darkIntensity);
+            if (mViews.get(i) instanceof ButtonInterface) {
+                ((ButtonInterface) mViews.get(i)).setDarkIntensity(darkIntensity);
+            }
         }
     }
 
@@ -140,7 +166,9 @@ public class ButtonDispatcher {
         mDelayTouchFeedback = delay;
         final int N = mViews.size();
         for (int i = 0; i < N; i++) {
-            ((ButtonInterface) mViews.get(i)).setDelayTouchFeedback(delay);
+            if (mViews.get(i) instanceof ButtonInterface) {
+                ((ButtonInterface) mViews.get(i)).setDelayTouchFeedback(delay);
+            }
         }
     }
 
@@ -190,6 +218,19 @@ public class ButtonDispatcher {
         for (int i = 0; i < N; i++) {
             mViews.get(i).setClickable(clickable);
         }
+    }
+
+    public void animateFade(boolean in) {
+        if (mFadeAnimator != null) {
+            mFadeAnimator.cancel();
+        }
+        mFadeAnimator = ValueAnimator.ofFloat(getAlpha(), in ? 1 : 0);
+        mFadeAnimator.setDuration(in? FADE_DURATION_IN : FADE_DURATION_OUT);
+        mFadeAnimator.setInterpolator(in ? Interpolators.ALPHA_IN : Interpolators.ALPHA_OUT);
+        mFadeAnimator.addListener(mFadeListener);
+        mFadeAnimator.addUpdateListener(mAlphaListener);
+        mFadeAnimator.start();
+        setVisibility(View.VISIBLE);
     }
 
     public ArrayList<View> getViews() {

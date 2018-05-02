@@ -260,6 +260,8 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
                 new ButtonDispatcher(R.id.accessibility_button));
         mButtonDispatchers.put(R.id.rotate_suggestion,
                 new ButtonDispatcher(R.id.rotate_suggestion));
+        mButtonDispatchers.put(R.id.menu_container,
+                new ButtonDispatcher(R.id.menu_container));
         mDeadZone = new DeadZone(this);
     }
 
@@ -366,6 +368,10 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
 
     public ButtonDispatcher getRotateSuggestionButton() {
         return mButtonDispatchers.get(R.id.rotate_suggestion);
+    }
+
+    public ButtonDispatcher getMenuContainer() {
+        return mButtonDispatchers.get(R.id.menu_container);
     }
 
     public SparseArray<ButtonDispatcher> getButtonDispatchers() {
@@ -795,6 +801,10 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
     }
 
     public boolean isRotateButtonVisible() { return mShowRotateButton; }
+
+    public void setMenuContainerVisibility(boolean visible) {
+        getMenuContainer().animateFade(visible);
+    }
 
     @Override
     public void onFinishInflate() {

@@ -168,10 +168,10 @@ public class NavigationBarInflaterView extends FrameLayout
         }
     }
 
-    public void setButtonDispatchers(SparseArray<ButtonDispatcher> buttonDisatchers) {
-        mButtonDispatchers = buttonDisatchers;
-        for (int i = 0; i < buttonDisatchers.size(); i++) {
-            initiallyFill(buttonDisatchers.valueAt(i));
+    public void setButtonDispatchers(SparseArray<ButtonDispatcher> buttonDispatchers) {
+        mButtonDispatchers = buttonDispatchers;
+        for (int i = 0; i < buttonDispatchers.size(); i++) {
+            initiallyFill(buttonDispatchers.valueAt(i));
         }
     }
 
@@ -220,7 +220,8 @@ public class NavigationBarInflaterView extends FrameLayout
             // and will only happen once.
             if (parent.getChildAt(i).getId() == buttonDispatcher.getId()) {
                 buttonDispatcher.addView(parent.getChildAt(i));
-            } else if (parent.getChildAt(i) instanceof ViewGroup) {
+            }
+            if (parent.getChildAt(i) instanceof ViewGroup) {
                 addAll(buttonDispatcher, (ViewGroup) parent.getChildAt(i));
             }
         }
@@ -411,7 +412,8 @@ public class NavigationBarInflaterView extends FrameLayout
             final int indexOfKey = mButtonDispatchers.indexOfKey(v.getId());
             if (indexOfKey >= 0) {
                 mButtonDispatchers.valueAt(indexOfKey).addView(v);
-            } else if (v instanceof ViewGroup) {
+            }
+            if (v instanceof ViewGroup) {
                 final ViewGroup viewGroup = (ViewGroup)v;
                 final int N = viewGroup.getChildCount();
                 for (int i = 0; i < N; i++) {
