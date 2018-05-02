@@ -25,6 +25,8 @@
 namespace android {
 namespace uirenderer {
 
+class BakedOpState;
+
 namespace OpClipSideFlags {
 enum {
     None = 0x0,

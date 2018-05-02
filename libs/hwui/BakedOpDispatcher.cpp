@@ -187,121 +187,14 @@ void BakedOpDispatcher::onMergedPatchOps(BakedOpRenderer& renderer,
 
 static void renderTextShadow(BakedOpRenderer& renderer, const TextOp& op,
                              const BakedOpState& textOpState) {
-    if (CC_LIKELY(!PaintUtils::hasTextShadow(op.paint))) return;
-
-    FontRenderer& fontRenderer = renderer.caches().fontRenderer.getFontRenderer();
-    fontRenderer.setFont(op.paint, SkMatrix::I());
-    renderer.caches().textureState().activateTexture(0);
-
-    PaintUtils::TextShadow textShadow;
-    if (!PaintUtils::getTextShadow(op.paint, &textShadow)) {
-        LOG_ALWAYS_FATAL("failed to query shadow attributes");
-    }
-
-    renderer.caches().dropShadowCache.setFontRenderer(fontRenderer);
-    ShadowTexture* texture = renderer.caches().dropShadowCache.get(
-            op.paint, op.glyphs, op.glyphCount, textShadow.radius, op.positions);
-    // If the drop shadow exceeds the max texture size or couldn't be
-    // allocated, skip drawing
-    if (!texture) return;
-    const AutoTexture autoCleanup(texture);
-
-    const float sx = op.x - texture->left + textShadow.dx;
-    const float sy = op.y - texture->top + textShadow.dy;
-
-    Glop glop;
-    GlopBuilder(renderer.renderState(), renderer.caches(), &glop)
-            .setRoundRectClipState(textOpState.roundRectClipState)
-            .setMeshTexturedUnitQuad(nullptr)
-            .setFillShadowTexturePaint(*texture, textShadow.color, *op.paint, textOpState.alpha)
-            .setTransform(textOpState.computedState.transform, TransformFlags::None)
-            .setModelViewMapUnitToRect(Rect(sx, sy, sx + texture->width(), sy + texture->height()))
-            .build();
-
-    // Compute damage bounds and clip (since may differ from those in textOpState).
-    // Bounds should be same as text op, but with dx/dy offset and radius outset
-    // applied in local space.
-    auto& transform = textOpState.computedState.transform;
-    Rect shadowBounds = op.unmappedBounds;  // STROKE
-    const bool expandForStroke = op.paint->getStyle() != SkPaint::kFill_Style;
-    if (expandForStroke) {
-        shadowBounds.outset(op.paint->getStrokeWidth() * 0.5f);
-    }
-    shadowBounds.translate(textShadow.dx, textShadow.dy);
-    shadowBounds.outset(textShadow.radius, textShadow.radius);
-    transform.mapRect(shadowBounds);
-    if (CC_UNLIKELY(expandForStroke &&
-                    (!transform.isPureTranslate() || op.paint->getStrokeWidth() < 1.0f))) {
-        shadowBounds.outset(0.5f);
-    }
-
-    auto clipState = textOpState.computedState.clipState;
-    if (clipState->mode != ClipMode::Rectangle || !clipState->rect.contains(shadowBounds)) {
-        // need clip, so pass it and clip bounds
-        shadowBounds.doIntersect(clipState->rect);
-    } else {
-        // don't need clip, ignore
-        clipState = nullptr;
-    }
-
-    renderer.renderGlop(&shadowBounds, clipState, glop);
+    // DEAD CODE
 }
 
 enum class TextRenderType { Defer, Flush };
 
 static void renderText(BakedOpRenderer& renderer, const TextOp& op, const BakedOpState& state,
                        const ClipBase* renderClip, TextRenderType renderType) {
-    FontRenderer& fontRenderer = renderer.caches().fontRenderer.getFontRenderer();
-    float x = op.x;
-    float y = op.y;
-    const Matrix4& transform = state.computedState.transform;
-    const bool pureTranslate = transform.isPureTranslate();
-    if (CC_LIKELY(pureTranslate)) {
-        x = floorf(x + transform.getTranslateX() + 0.5f);
-        y = floorf(y + transform.getTranslateY() + 0.5f);
-        fontRenderer.setFont(op.paint, SkMatrix::I());
-        fontRenderer.setTextureFiltering(false);
-    } else if (CC_UNLIKELY(transform.isPerspective())) {
-        fontRenderer.setFont(op.paint, SkMatrix::I());
-        fontRenderer.setTextureFiltering(true);
-    } else {
-        // We only pass a partial transform to the font renderer. That partial
-        // matrix defines how glyphs are rasterized. Typically we want glyphs
-        // to be rasterized at their final size on screen, which means the partial
-        // matrix needs to take the scale factor into account.
-        // When a partial matrix is used to transform glyphs during rasterization,
-        // the mesh is generated with the inverse transform (in the case of scale,
-        // the mesh is generated at 1.0 / scale for instance.) This allows us to
-        // apply the full transform matrix at draw time in the vertex shader.
-        // Applying the full matrix in the shader is the easiest way to handle
-        // rotation and perspective and allows us to always generated quads in the
-        // font renderer which greatly simplifies the code, clipping in particular.
-        float sx, sy;
-        transform.decomposeScale(sx, sy);
-        fontRenderer.setFont(op.paint, SkMatrix::MakeScale(roundf(std::max(1.0f, sx)),
-                                                           roundf(std::max(1.0f, sy))));
-        fontRenderer.setTextureFiltering(true);
-    }
-    Rect layerBounds(FLT_MAX / 2.0f, FLT_MAX / 2.0f, FLT_MIN / 2.0f, FLT_MIN / 2.0f);
-
-    int alpha = PaintUtils::getAlphaDirect(op.paint) * state.alpha;
-    SkBlendMode mode = PaintUtils::getBlendModeDirect(op.paint);
-    TextDrawFunctor functor(&renderer, &state, renderClip, x, y, pureTranslate, alpha, mode,
-                            op.paint);
-
-    bool forceFinish = (renderType == TextRenderType::Flush);
-    bool mustDirtyRenderTarget = renderer.offscreenRenderTarget();
-    const Rect* localOpClip = pureTranslate ? &state.computedState.clipRect() : nullptr;
-    fontRenderer.renderPosText(op.paint, localOpClip, op.glyphs, op.glyphCount, x, y, op.positions,
-                               mustDirtyRenderTarget ? &layerBounds : nullptr, &functor,
-                               forceFinish);
-
-    if (mustDirtyRenderTarget) {
-        if (!pureTranslate) {
-            transform.mapRect(layerBounds);
-        }
-        renderer.dirtyRenderTarget(layerBounds);
-    }
+    // DEAD CODE
 }
 
 void BakedOpDispatcher::onMergedTextOps(BakedOpRenderer& renderer,
@@ -747,32 +640,7 @@ void BakedOpDispatcher::onTextOp(BakedOpRenderer& renderer, const TextOp& op,
 
 void BakedOpDispatcher::onTextOnPathOp(BakedOpRenderer& renderer, const TextOnPathOp& op,
                                        const BakedOpState& state) {
-    // Note: can't trust clipSideFlags since we record with unmappedBounds == clip.
-    // TODO: respect clipSideFlags, once we record with bounds
-    auto renderTargetClip = state.computedState.clipState;
-
-    FontRenderer& fontRenderer = renderer.caches().fontRenderer.getFontRenderer();
-    fontRenderer.setFont(op.paint, SkMatrix::I());
-    fontRenderer.setTextureFiltering(true);
-
-    Rect layerBounds(FLT_MAX / 2.0f, FLT_MAX / 2.0f, FLT_MIN / 2.0f, FLT_MIN / 2.0f);
-
-    int alpha = PaintUtils::getAlphaDirect(op.paint) * state.alpha;
-    SkBlendMode mode = PaintUtils::getBlendModeDirect(op.paint);
-    TextDrawFunctor functor(&renderer, &state, renderTargetClip, 0.0f, 0.0f, false, alpha, mode,
-                            op.paint);
-
-    bool mustDirtyRenderTarget = renderer.offscreenRenderTarget();
-    const Rect localSpaceClip = state.computedState.computeLocalSpaceClip();
-    if (fontRenderer.renderTextOnPath(op.paint, &localSpaceClip, op.glyphs, op.glyphCount, op.path,
-                                      op.hOffset, op.vOffset,
-                                      mustDirtyRenderTarget ? &layerBounds : nullptr, &functor)) {
-        if (mustDirtyRenderTarget) {
-            // manually dirty render target, since TextDrawFunctor won't
-            state.computedState.transform.mapRect(layerBounds);
-            renderer.dirtyRenderTarget(layerBounds);
-        }
-    }
+    // DEAD CODE
 }
 
 void BakedOpDispatcher::onTextureLayerOp(BakedOpRenderer& renderer, const TextureLayerOp& op,

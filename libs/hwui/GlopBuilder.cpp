@@ -381,24 +381,7 @@ GlopBuilder& GlopBuilder::setFillPathTexturePaint(PathTexture& texture, const Sk
 
 GlopBuilder& GlopBuilder::setFillShadowTexturePaint(ShadowTexture& texture, int shadowColor,
                                                     const SkPaint& paint, float alphaScale) {
-    TRIGGER_STAGE(kFillStage);
-    REQUIRE_STAGES(kMeshStage | kRoundRectClipStage);
-
-    // specify invalid filter/clamp, since these are always static for ShadowTextures
-    mOutGlop->fill.texture = {&texture, GL_INVALID_ENUM, GL_INVALID_ENUM, nullptr};
-
-    const int ALPHA_BITMASK = SK_ColorBLACK;
-    const int COLOR_BITMASK = ~ALPHA_BITMASK;
-    if ((shadowColor & ALPHA_BITMASK) == ALPHA_BITMASK) {
-        // shadow color is fully opaque: override its alpha with that of paint
-        shadowColor &= paint.getColor() | COLOR_BITMASK;
-    }
-
-    setFill(shadowColor, alphaScale, paint.getBlendMode(), Blend::ModeOrderSwap::NoSwap,
-            paint.getShader(), paint.getColorFilter());
-
-    mDescription.hasAlpha8Texture = true;
-    mDescription.modulate = mOutGlop->fill.color.isNotBlack();
+    // DEAD CODE
     return *this;
 }
 

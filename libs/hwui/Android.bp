@@ -75,7 +75,6 @@ cc_defaults {
 
 cc_defaults {
     name: "hwui_bugreport_font_cache_usage",
-    srcs: ["font/FontCacheHistoryTracker.cpp"],
     cflags: ["-DBUGREPORT_FONT_CACHE_USAGE"],
 }
 
@@ -152,8 +151,6 @@ cc_defaults {
         "hwui/AnimatedImageDrawable.cpp",
         "hwui/AnimatedImageThread.cpp",
         "hwui/Bitmap.cpp",
-        "font/CacheTexture.cpp",
-        "font/Font.cpp",
         "hwui/Canvas.cpp",
         "hwui/MinikinSkia.cpp",
         "hwui/MinikinUtils.cpp",
@@ -215,11 +212,9 @@ cc_defaults {
         "DeviceInfo.cpp",
         "DisplayList.cpp",
         "FboCache.cpp",
-        "FontRenderer.cpp",
         "FrameBuilder.cpp",
         "FrameInfo.cpp",
         "FrameInfoVisualizer.cpp",
-        "GammaFontRenderer.cpp",
         "GlLayer.cpp",
         "GlopBuilder.cpp",
         "GpuMemoryTracker.cpp",
@@ -259,7 +254,6 @@ cc_defaults {
         "Snapshot.cpp",
         "SpotShadow.cpp",
         "TessellationCache.cpp",
-        "TextDropShadowCache.cpp",
         "Texture.cpp",
         "TextureCache.cpp",
         "VectorDrawable.cpp",
@@ -413,7 +407,6 @@ cc_benchmark {
     srcs: [
         "tests/microbench/main.cpp",
         "tests/microbench/DisplayListCanvasBench.cpp",
-        "tests/microbench/FontBench.cpp",
         "tests/microbench/FrameBuilderBench.cpp",
         "tests/microbench/LinearAllocatorBench.cpp",
         "tests/microbench/PathParserBench.cpp",
