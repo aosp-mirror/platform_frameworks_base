@@ -32,7 +32,7 @@
     <string name="status_bar_no_notifications_title" msgid="4755261167193833213">"Bildirishnomalar yo‘q"</string>
     <string name="status_bar_ongoing_events_title" msgid="1682504513316879202">"Hali bajarilmagan"</string>
     <string name="status_bar_latest_events_title" msgid="6594767438577593172">"Eslatmalar"</string>
-    <string name="battery_low_title" msgid="6456385927409742437">"Batareya quvvati kam qoldi"</string>
+    <string name="battery_low_title" msgid="9187898087363540349">"Batareya tez orada tugaydi"</string>
     <string name="battery_low_percent_format" msgid="2900940511201380775">"<xliff:g id="PERCENTAGE">%s</xliff:g> qoldi"</string>
     <string name="battery_low_percent_format_hybrid" msgid="6838677459286775617">"<xliff:g id="PERCENTAGE">%s</xliff:g> (joriy holatda taxminan <xliff:g id="TIME">%s</xliff:g> qoldi)"</string>
     <string name="battery_low_percent_format_hybrid_short" msgid="9025795469949145586">"<xliff:g id="PERCENTAGE">%s</xliff:g> (taxminan <xliff:g id="TIME">%s</xliff:g> qoldi)"</string>
@@ -95,8 +95,7 @@
     <string name="accessibility_unlock_button" msgid="128158454631118828">"Qulfdan chiqarish"</string>
     <string name="accessibility_waiting_for_fingerprint" msgid="4808860050517462885">"Barmoq izingizni skanerlang"</string>
     <string name="accessibility_unlock_without_fingerprint" msgid="7541705575183694446">"Barmoq izisiz qulfdan chiqarish"</string>
-    <!-- no translation found for accessibility_send_smart_reply (7766727839703044493) -->
-    <skip />
+    <string name="accessibility_send_smart_reply" msgid="7766727839703044493">"Yuborish"</string>
     <string name="unlock_label" msgid="8779712358041029439">"qulfdan chiqarish"</string>
     <string name="phone_label" msgid="2320074140205331708">"telefonni ochish"</string>
     <string name="voice_assist_label" msgid="3956854378310019854">"ovozli yordamni yoqish"</string>
@@ -210,10 +209,8 @@
     <string name="accessibility_quick_settings_airplane_on" msgid="6406141469157599296">"Parvoz rejimi yoqilgan."</string>
     <string name="accessibility_quick_settings_airplane_changed_off" msgid="66846307818850664">"Parvoz rejimi o‘chirildi."</string>
     <string name="accessibility_quick_settings_airplane_changed_on" msgid="8983005603505087728">"Parvoz rejimi yoqildi."</string>
-    <!-- no translation found for accessibility_quick_settings_dnd_none_on (2960643943620637020) -->
-    <skip />
-    <!-- no translation found for accessibility_quick_settings_dnd_alarms_on (3357131899365865386) -->
-    <skip />
+    <string name="accessibility_quick_settings_dnd_none_on" msgid="2960643943620637020">"jimjitlik"</string>
+    <string name="accessibility_quick_settings_dnd_alarms_on" msgid="3357131899365865386">"faqat signallar"</string>
     <string name="accessibility_quick_settings_dnd" msgid="6607873236717185815">"Bezovta qilinmasin."</string>
     <string name="accessibility_quick_settings_dnd_changed_off" msgid="898107593453022935">"“Bezovta qilinmasin” funksiyasi o‘chirildi."</string>
     <string name="accessibility_quick_settings_dnd_changed_on" msgid="4483780856613561039">"“Bezovta qilinmasin” funksiyasi yoqildi."</string>
@@ -506,21 +503,21 @@
     <string name="hidden_notifications_setup" msgid="41079514801976810">"Sozlash"</string>
     <string name="zen_mode_and_condition" msgid="4462471036429759903">"<xliff:g id="ZEN_MODE">%1$s</xliff:g>. <xliff:g id="EXIT_CONDITION">%2$s</xliff:g>"</string>
     <string name="volume_zen_end_now" msgid="6930243045593601084">"O‘chiring"</string>
-    <string name="accessibility_volume_settings" msgid="4915364006817819212">"Ovoz sozlamalari"</string>
+    <string name="accessibility_volume_settings" msgid="4915364006817819212">"Tovush sozlamalari"</string>
     <string name="accessibility_volume_expand" msgid="5946812790999244205">"Yoyish"</string>
     <string name="accessibility_volume_collapse" msgid="3609549593031810875">"Yig‘ish"</string>
     <string name="accessibility_output_chooser" msgid="8185317493017988680">"Audiochiqish qurilmasini almashtirish"</string>
     <string name="screen_pinning_title" msgid="3273740381976175811">"Ekran qadaldi"</string>
     <string name="screen_pinning_description" msgid="8909878447196419623">"Ekran yechilmaguncha u o‘zgarmas holatda qoladi. Uni yechish uchun “Orqaga” va “Umumiy ma’lumot” tugmalarini bosib turing."</string>
-    <string name="screen_pinning_description_recents_invisible" msgid="8281145542163727971">"Ekran yechilmaguncha u o‘zgarmas holatda qoladi. Uni yechish uchun Orqaga va Boshi tugmalarini bosib turing."</string>
+    <string name="screen_pinning_description_recents_invisible" msgid="8281145542163727971">"Ekran yechib olinmagunicha u mahkamlangan holatda qoladi. Uni yechish uchun Orqaga va Asosiy tugmalarni birga bosib turing."</string>
     <string name="screen_pinning_description_accessible" msgid="426190689254018656">"Ekran yechilmaguncha u o‘zgarmas holatda qoladi. Uni yechish uchun “Umumiy ma’lumot” tugmasini bosib turing."</string>
-    <string name="screen_pinning_description_recents_invisible_accessible" msgid="6134833683151189507">"Ekran yechilmaguncha u o‘zgarmas holatda qoladi. Uni yechish uchun Orqaga va Boshi tugmlarini bosib turing."</string>
+    <string name="screen_pinning_description_recents_invisible_accessible" msgid="6134833683151189507">"Ekran yechib olinmagunicha u mahkamlangan holatda qoladi. Uni yechish uchun Orqaga va Asosiy tugmlarni birga bosib turing."</string>
     <string name="screen_pinning_toast" msgid="2266705122951934150">"Bu ekrandan chiqish uchun Orqaga va Menyu tugmalarini bosib turing"</string>
     <string name="screen_pinning_toast_recents_invisible" msgid="8252402309499161281">"Bu ekrandan chiqish uchun Orqaga va Boshi tugmalarini bosib turing"</string>
     <string name="screen_pinning_positive" msgid="3783985798366751226">"OK"</string>
     <string name="screen_pinning_negative" msgid="3741602308343880268">"Yo‘q, kerakmas"</string>
     <string name="screen_pinning_start" msgid="1022122128489278317">"Ekran mahkamlandi"</string>
-    <string name="screen_pinning_exit" msgid="5187339744262325372">"Ekran olib tashlandi"</string>
+    <string name="screen_pinning_exit" msgid="5187339744262325372">"Ekran yechildi"</string>
     <string name="quick_settings_reset_confirmation_title" msgid="748792586749897883">"<xliff:g id="TILE_LABEL">%1$s</xliff:g> berkitilsinmi?"</string>
     <string name="quick_settings_reset_confirmation_message" msgid="2235970126803317374">"Keyingi safar sozlamalardan yoqilgan paydo bo‘ladi."</string>
     <string name="quick_settings_reset_confirmation_button" msgid="2660339101868367515">"Berkitish"</string>
@@ -622,8 +619,7 @@
       <item quantity="one"><xliff:g id="PERFORMING_ACTIVITY_0">%1$s</xliff:g> ishlatmoqda</item>
     </plurals>
     <string name="notification_appops_settings" msgid="1028328314935908050">"Sozlamalar"</string>
-    <!-- no translation found for notification_appops_ok (1156966426011011434) -->
-    <skip />
+    <string name="notification_appops_ok" msgid="1156966426011011434">"OK"</string>
     <string name="notification_channel_controls_opened_accessibility" msgid="6553950422055908113">"<xliff:g id="APP_NAME">%1$s</xliff:g> uchun bildirishnoma sozlamalari ochildi"</string>
     <string name="notification_channel_controls_closed_accessibility" msgid="7521619812603693144">"<xliff:g id="APP_NAME">%1$s</xliff:g> uchun bildirishnoma sozlamalari yopildi"</string>
     <string name="notification_channel_switch_accessibility" msgid="3420796005601900717">"Bu kanaldan keladigan bildirishnomalarga ruxsat berish"</string>
@@ -779,7 +775,7 @@
     <string name="accessibility_quick_settings_collapse" msgid="1792625797142648105">"Tezkor sozlamalarni yopish."</string>
     <string name="accessibility_quick_settings_alarm_set" msgid="1863000242431528676">"Signal o‘rnatildi."</string>
     <string name="accessibility_quick_settings_user" msgid="1567445362870421770">"<xliff:g id="ID_1">%s</xliff:g> sifatida kirgansiz"</string>
-    <string name="data_connection_no_internet" msgid="4503302451650972989">"Internet yo‘q"</string>
+    <string name="data_connection_no_internet" msgid="4503302451650972989">"Internetga ulanmagan"</string>
     <string name="accessibility_quick_settings_open_details" msgid="4230931801728005194">"Tafsilotlarini ko‘rsatish."</string>
     <string name="accessibility_quick_settings_open_settings" msgid="7806613775728380737">"<xliff:g id="ID_1">%s</xliff:g> sozlamalarini ochish."</string>
     <string name="accessibility_quick_settings_edit" msgid="7839992848995240393">"Sozlamalar tartibini o‘zgartirish."</string>

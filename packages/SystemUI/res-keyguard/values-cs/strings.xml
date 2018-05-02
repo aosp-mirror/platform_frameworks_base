@@ -152,7 +152,12 @@
       <item quantity="one">Zařízení již <xliff:g id="NUMBER_0">%d</xliff:g> hodinu nebylo odemknuto. Zadejte heslo.</item>
     </plurals>
     <string name="fingerprint_not_recognized" msgid="348813995267914625">"Nerozpoznáno"</string>
-    <!-- no translation found for kg_password_default_pin_message (3739658416797652781) -->
+    <plurals name="kg_password_default_pin_message" formatted="false" msgid="3739658416797652781">
+      <item quantity="few">Zadejte PIN SIM karty. Zbývají <xliff:g id="NUMBER_1">%d</xliff:g> pokusy.</item>
+      <item quantity="many">Zadejte PIN SIM karty. Zbývá <xliff:g id="NUMBER_1">%d</xliff:g> pokusu.</item>
+      <item quantity="other">Zadejte PIN SIM karty. Zbývá <xliff:g id="NUMBER_1">%d</xliff:g> pokusů.</item>
+      <item quantity="one">Zadejte PIN SIM karty. Zbývá <xliff:g id="NUMBER_0">%d</xliff:g> pokus, poté bude muset zařízení odemknout operátor.</item>
+    </plurals>
     <plurals name="kg_password_default_puk_message" formatted="false" msgid="8744416410184198352">
       <item quantity="few">SIM karta je teď zablokována. Chcete-li pokračovat, zadejte kód PUK. Máte ještě <xliff:g id="_NUMBER_1">%d</xliff:g> pokusy, poté bude SIM karta natrvalo zablokována. Podrobnosti vám poskytne operátor.</item>
       <item quantity="many">SIM karta je teď zablokována. Chcete-li pokračovat, zadejte kód PUK. Máte ještě <xliff:g id="_NUMBER_1">%d</xliff:g> pokusu, poté bude SIM karta natrvalo zablokována. Podrobnosti vám poskytne operátor.</item>

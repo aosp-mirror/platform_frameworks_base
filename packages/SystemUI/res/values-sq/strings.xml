@@ -32,7 +32,7 @@
     <string name="status_bar_no_notifications_title" msgid="4755261167193833213">"Asnjë njoftim"</string>
     <string name="status_bar_ongoing_events_title" msgid="1682504513316879202">"Në vazhdim"</string>
     <string name="status_bar_latest_events_title" msgid="6594767438577593172">"Njoftimet"</string>
-    <string name="battery_low_title" msgid="6456385927409742437">"Niveli i baterisë është i ulët"</string>
+    <string name="battery_low_title" msgid="9187898087363540349">"Bateria mund të mbarojë së shpejti"</string>
     <string name="battery_low_percent_format" msgid="2900940511201380775">"Ka mbetur edhe <xliff:g id="PERCENTAGE">%s</xliff:g>"</string>
     <string name="battery_low_percent_format_hybrid" msgid="6838677459286775617">"<xliff:g id="PERCENTAGE">%s</xliff:g> të mbetura, rreth <xliff:g id="TIME">%s</xliff:g> të mbetura bazuar në përdorimin tënd"</string>
     <string name="battery_low_percent_format_hybrid_short" msgid="9025795469949145586">"<xliff:g id="PERCENTAGE">%s</xliff:g> të mbetura, rreth <xliff:g id="TIME">%s</xliff:g> të mbetura"</string>
@@ -95,8 +95,7 @@
     <string name="accessibility_unlock_button" msgid="128158454631118828">"Shkyç"</string>
     <string name="accessibility_waiting_for_fingerprint" msgid="4808860050517462885">"Në pritje për gjurmën e gishtit"</string>
     <string name="accessibility_unlock_without_fingerprint" msgid="7541705575183694446">"Shkyçe pa përdorur gjurmën e gishtit"</string>
-    <!-- no translation found for accessibility_send_smart_reply (7766727839703044493) -->
-    <skip />
+    <string name="accessibility_send_smart_reply" msgid="7766727839703044493">"Dërgo"</string>
     <string name="unlock_label" msgid="8779712358041029439">"shkyç"</string>
     <string name="phone_label" msgid="2320074140205331708">"hap telefonin"</string>
     <string name="voice_assist_label" msgid="3956854378310019854">"hap ndihmën zanore"</string>
@@ -208,10 +207,8 @@
     <string name="accessibility_quick_settings_airplane_on" msgid="6406141469157599296">"Modaliteti i aeroplanit është i aktivizuar."</string>
     <string name="accessibility_quick_settings_airplane_changed_off" msgid="66846307818850664">"Modaliteti i aeroplanit është i çaktivizuar."</string>
     <string name="accessibility_quick_settings_airplane_changed_on" msgid="8983005603505087728">"Modaliteti i aeroplanit është i aktivizuar."</string>
-    <!-- no translation found for accessibility_quick_settings_dnd_none_on (2960643943620637020) -->
-    <skip />
-    <!-- no translation found for accessibility_quick_settings_dnd_alarms_on (3357131899365865386) -->
-    <skip />
+    <string name="accessibility_quick_settings_dnd_none_on" msgid="2960643943620637020">"heshtje e plotë"</string>
+    <string name="accessibility_quick_settings_dnd_alarms_on" msgid="3357131899365865386">"vetëm alarmet"</string>
     <string name="accessibility_quick_settings_dnd" msgid="6607873236717185815">"Mos shqetëso."</string>
     <string name="accessibility_quick_settings_dnd_changed_off" msgid="898107593453022935">"\"Mos shqetëso\" është i çaktivizuar."</string>
     <string name="accessibility_quick_settings_dnd_changed_on" msgid="4483780856613561039">"\"Mos shqetëso\" është i aktivizuar."</string>
@@ -620,8 +617,7 @@
       <item quantity="one">po përdor <xliff:g id="PERFORMING_ACTIVITY_0">%1$s</xliff:g></item>
     </plurals>
     <string name="notification_appops_settings" msgid="1028328314935908050">"Cilësimet"</string>
-    <!-- no translation found for notification_appops_ok (1156966426011011434) -->
-    <skip />
+    <string name="notification_appops_ok" msgid="1156966426011011434">"Në rregull"</string>
     <string name="notification_channel_controls_opened_accessibility" msgid="6553950422055908113">"Kontrollet e njoftimeve për <xliff:g id="APP_NAME">%1$s</xliff:g> janë hapur"</string>
     <string name="notification_channel_controls_closed_accessibility" msgid="7521619812603693144">"Kontrollet e njoftimeve për <xliff:g id="APP_NAME">%1$s</xliff:g> janë mbyllur"</string>
     <string name="notification_channel_switch_accessibility" msgid="3420796005601900717">"Lejo njoftimet nga ky kanal"</string>
@@ -655,7 +651,7 @@
     <string name="keyboard_key_dpad_left" msgid="1346446024676962251">"Majtas"</string>
     <string name="keyboard_key_dpad_right" msgid="3317323247127515341">"Djathtas"</string>
     <string name="keyboard_key_dpad_center" msgid="2566737770049304658">"Qendror"</string>
-    <string name="keyboard_key_tab" msgid="3871485650463164476">"Skedë"</string>
+    <string name="keyboard_key_tab" msgid="3871485650463164476">"Tab"</string>
     <string name="keyboard_key_space" msgid="2499861316311153293">"Hapësirë"</string>
     <string name="keyboard_key_enter" msgid="5739632123216118137">"Enter"</string>
     <string name="keyboard_key_backspace" msgid="1559580097512385854">"Kthim prapa"</string>

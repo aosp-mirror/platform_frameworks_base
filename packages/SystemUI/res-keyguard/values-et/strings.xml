@@ -140,7 +140,10 @@
       <item quantity="one">Seadet pole avatud <xliff:g id="NUMBER_0">%d</xliff:g> tund. Kinnitage parool.</item>
     </plurals>
     <string name="fingerprint_not_recognized" msgid="348813995267914625">"Ei tuvastatud"</string>
-    <!-- no translation found for kg_password_default_pin_message (3739658416797652781) -->
+    <plurals name="kg_password_default_pin_message" formatted="false" msgid="3739658416797652781">
+      <item quantity="other">Sisestage SIM-kaardi PIN-kood. Jäänud on <xliff:g id="NUMBER_1">%d</xliff:g> katset.</item>
+      <item quantity="one">Sisestage SIM-kaardi PIN-kood. Jäänud on <xliff:g id="NUMBER_0">%d</xliff:g> katse enne, kui peate seadme avamiseks ühendust võtma operaatoriga.</item>
+    </plurals>
     <plurals name="kg_password_default_puk_message" formatted="false" msgid="8744416410184198352">
       <item quantity="other">SIM-kaart on nüüd keelatud. Jätkamiseks sisestage PUK-kood. Teil on jäänud veel <xliff:g id="_NUMBER_1">%d</xliff:g> katset enne, kui SIM-kaart püsivalt lukustatakse. Lisateavet küsige operaatorilt.</item>
       <item quantity="one">SIM-kaart on nüüd keelatud. Jätkamiseks sisestage PUK-kood. Teil on jäänud veel <xliff:g id="_NUMBER_0">%d</xliff:g> katse enne, kui SIM-kaart püsivalt lukustatakse. Lisateavet küsige operaatorilt.</item>

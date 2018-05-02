@@ -32,7 +32,7 @@
     <string name="status_bar_no_notifications_title" msgid="4755261167193833213">"알림 없음"</string>
     <string name="status_bar_ongoing_events_title" msgid="1682504513316879202">"진행 중"</string>
     <string name="status_bar_latest_events_title" msgid="6594767438577593172">"알림"</string>
-    <string name="battery_low_title" msgid="6456385927409742437">"배터리 부족"</string>
+    <string name="battery_low_title" msgid="9187898087363540349">"배터리가 얼마 남지 않음"</string>
     <string name="battery_low_percent_format" msgid="2900940511201380775">"<xliff:g id="PERCENTAGE">%s</xliff:g> 남았습니다."</string>
     <string name="battery_low_percent_format_hybrid" msgid="6838677459286775617">"<xliff:g id="PERCENTAGE">%s</xliff:g> 남음, 내 사용량을 기준으로 약 <xliff:g id="TIME">%s</xliff:g> 남음"</string>
     <string name="battery_low_percent_format_hybrid_short" msgid="9025795469949145586">"<xliff:g id="PERCENTAGE">%s</xliff:g> 남음, 약 <xliff:g id="TIME">%s</xliff:g> 남음"</string>
@@ -95,8 +95,7 @@
     <string name="accessibility_unlock_button" msgid="128158454631118828">"잠금 해제"</string>
     <string name="accessibility_waiting_for_fingerprint" msgid="4808860050517462885">"지문 대기 중"</string>
     <string name="accessibility_unlock_without_fingerprint" msgid="7541705575183694446">"지문 파일을 사용하지 않고 잠금 해제"</string>
-    <!-- no translation found for accessibility_send_smart_reply (7766727839703044493) -->
-    <skip />
+    <string name="accessibility_send_smart_reply" msgid="7766727839703044493">"보내기"</string>
     <string name="unlock_label" msgid="8779712358041029439">"잠금 해제"</string>
     <string name="phone_label" msgid="2320074140205331708">"휴대전화 열기"</string>
     <string name="voice_assist_label" msgid="3956854378310019854">"음성 지원 열기"</string>
@@ -210,10 +209,8 @@
     <string name="accessibility_quick_settings_airplane_on" msgid="6406141469157599296">"비행기 모드: 사용"</string>
     <string name="accessibility_quick_settings_airplane_changed_off" msgid="66846307818850664">"비행기 모드가 사용 중지되었습니다."</string>
     <string name="accessibility_quick_settings_airplane_changed_on" msgid="8983005603505087728">"비행기 모드를 사용합니다."</string>
-    <!-- no translation found for accessibility_quick_settings_dnd_none_on (2960643943620637020) -->
-    <skip />
-    <!-- no translation found for accessibility_quick_settings_dnd_alarms_on (3357131899365865386) -->
-    <skip />
+    <string name="accessibility_quick_settings_dnd_none_on" msgid="2960643943620637020">"모두 음소거"</string>
+    <string name="accessibility_quick_settings_dnd_alarms_on" msgid="3357131899365865386">"알람만"</string>
     <string name="accessibility_quick_settings_dnd" msgid="6607873236717185815">"알림 일시중지"</string>
     <string name="accessibility_quick_settings_dnd_changed_off" msgid="898107593453022935">"알림 일시중지가 사용 중지되었습니다."</string>
     <string name="accessibility_quick_settings_dnd_changed_on" msgid="4483780856613561039">"알림 일시중지를 사용합니다."</string>
@@ -622,8 +619,7 @@
       <item quantity="one"><xliff:g id="PERFORMING_ACTIVITY_0">%1$s</xliff:g> 사용 중</item>
     </plurals>
     <string name="notification_appops_settings" msgid="1028328314935908050">"설정"</string>
-    <!-- no translation found for notification_appops_ok (1156966426011011434) -->
-    <skip />
+    <string name="notification_appops_ok" msgid="1156966426011011434">"확인"</string>
     <string name="notification_channel_controls_opened_accessibility" msgid="6553950422055908113">"<xliff:g id="APP_NAME">%1$s</xliff:g> 알림 컨트롤을 열었습니다."</string>
     <string name="notification_channel_controls_closed_accessibility" msgid="7521619812603693144">"<xliff:g id="APP_NAME">%1$s</xliff:g> 알림 컨트롤을 닫았습니다."</string>
     <string name="notification_channel_switch_accessibility" msgid="3420796005601900717">"이 채널의 알림을 허용합니다."</string>

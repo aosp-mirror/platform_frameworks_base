@@ -140,7 +140,10 @@
       <item quantity="one"><xliff:g id="NUMBER_0">%d</xliff:g> గంట పాటు పరికరాన్ని అన్‌లాక్ చేయలేదు. పాస్‌వర్డ్‌ని నమోదు చేయండి.</item>
     </plurals>
     <string name="fingerprint_not_recognized" msgid="348813995267914625">"గుర్తించలేదు"</string>
-    <!-- no translation found for kg_password_default_pin_message (3739658416797652781) -->
+    <plurals name="kg_password_default_pin_message" formatted="false" msgid="3739658416797652781">
+      <item quantity="other">SIM పిన్‌ని నమోదు చేయండి. మీకు <xliff:g id="NUMBER_1">%d</xliff:g> ప్రయత్నలు మిగిలి ఉన్నాయి.</item>
+      <item quantity="one">SIM పిన్‌ని నమోదు చేయండి, మీరు మీ పరికరాన్ని అన్‌లాక్ చేయడానికి తప్పనిసరిగా మీ క్యారియర్‌ను సంప్రదించడానికి ముందు మీకు <xliff:g id="NUMBER_0">%d</xliff:g> ప్రయత్నం మిగిలి ఉంది.</item>
+    </plurals>
     <plurals name="kg_password_default_puk_message" formatted="false" msgid="8744416410184198352">
       <item quantity="other">SIM ఇప్పుడు నిలిపివేయబడింది. PUK కోడ్‌ను నమోదు చేయండి. SIM శాశ్వతంగా నిరుపయోగం కాకుండా ఉండటానికి మీకు <xliff:g id="_NUMBER_1">%d</xliff:g> ప్రయత్నాలు మిగిలి ఉన్నాయి. వివరాల కోసం కారియర్‌ను సంప్రదించండి.</item>
       <item quantity="one">SIM ఇప్పుడు నిలిపివేయబడింది. PUK కోడ్‌ను నమోదు చేయండి. SIM శాశ్వతంగా నిరుపయోగం కాకుండా ఉండటానికి మీకు <xliff:g id="_NUMBER_0">%d</xliff:g> ప్రయత్నం మిగిలి ఉంది వివరాల కోసం కారియర్‌ను సంప్రదించండి.</item>

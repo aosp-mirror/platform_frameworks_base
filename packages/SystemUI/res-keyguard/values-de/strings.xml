@@ -140,7 +140,10 @@
       <item quantity="one">Das Gerät wurde seit <xliff:g id="NUMBER_0">%d</xliff:g> Stunde nicht mehr entsperrt. Bitte bestätige das Passwort.</item>
     </plurals>
     <string name="fingerprint_not_recognized" msgid="348813995267914625">"Nicht erkannt"</string>
-    <!-- no translation found for kg_password_default_pin_message (3739658416797652781) -->
+    <plurals name="kg_password_default_pin_message" formatted="false" msgid="3739658416797652781">
+      <item quantity="other">Gib die PIN für die SIM-Karte ein. Du hast noch <xliff:g id="NUMBER_1">%d</xliff:g> Versuche.</item>
+      <item quantity="one">Gib die PIN für die SIM-Karte ein. Du hast noch <xliff:g id="NUMBER_0">%d</xliff:g> Versuch, bevor das Gerät nur noch vom Mobilfunkanbieter entsperrt werden kann.</item>
+    </plurals>
     <plurals name="kg_password_default_puk_message" formatted="false" msgid="8744416410184198352">
       <item quantity="other">Die SIM-Karte ist jetzt deaktiviert. Gib den PUK-Code ein, um fortzufahren. Du hast noch <xliff:g id="_NUMBER_1">%d</xliff:g> Versuche, bevor die SIM-Karte endgültig gesperrt wird. Weitere Informationen erhältst du von deinem Mobilfunkanbieter.</item>
       <item quantity="one">Die SIM-Karte ist jetzt deaktiviert. Gib den PUK-Code ein, um fortzufahren. Du hast noch <xliff:g id="_NUMBER_0">%d</xliff:g> Versuch, bevor die SIM-Karte endgültig gesperrt wird. Weitere Informationen erhältst du von deinem Mobilfunkanbieter.</item>

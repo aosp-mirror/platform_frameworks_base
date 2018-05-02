@@ -32,7 +32,7 @@
     <string name="status_bar_no_notifications_title" msgid="4755261167193833213">"ບໍ່ມີການແຈ້ງເຕືອນ"</string>
     <string name="status_bar_ongoing_events_title" msgid="1682504513316879202">"ດຳເນີນຢູ່"</string>
     <string name="status_bar_latest_events_title" msgid="6594767438577593172">"ການແຈ້ງເຕືອນ"</string>
-    <string name="battery_low_title" msgid="6456385927409742437">"ແບັດເຕີຣີ​ເຫຼືອ​ໜ້ອຍ"</string>
+    <string name="battery_low_title" msgid="9187898087363540349">"ແບັດເຕີຣີໃກ້ຈະໝົດແລ້ວ"</string>
     <string name="battery_low_percent_format" msgid="2900940511201380775">"ຍັງ​ເຫຼືອ <xliff:g id="PERCENTAGE">%s</xliff:g>"</string>
     <string name="battery_low_percent_format_hybrid" msgid="6838677459286775617">"ຍັງເຫຼືອ <xliff:g id="PERCENTAGE">%s</xliff:g>, ປະມານ <xliff:g id="TIME">%s</xliff:g> ໂດຍອ້າງອີງຈາກການນຳໃຊ້ຂອງທ່ານ"</string>
     <string name="battery_low_percent_format_hybrid_short" msgid="9025795469949145586">"ຍັງເຫຼືອ <xliff:g id="PERCENTAGE">%s</xliff:g>, ປະມານ <xliff:g id="TIME">%s</xliff:g>"</string>
@@ -95,8 +95,7 @@
     <string name="accessibility_unlock_button" msgid="128158454631118828">"ປົດລັອກ"</string>
     <string name="accessibility_waiting_for_fingerprint" msgid="4808860050517462885">"ກຳລັງລໍຖ້າລາຍນິ້ວມື"</string>
     <string name="accessibility_unlock_without_fingerprint" msgid="7541705575183694446">"ປົດ​ລັອກ​ໂດຍ​ບໍ່​ມີ​ການ​ໃຊ້​ລາຍ​ນີ້ວ​ມື​ຂອງ​ທ່ານ"</string>
-    <!-- no translation found for accessibility_send_smart_reply (7766727839703044493) -->
-    <skip />
+    <string name="accessibility_send_smart_reply" msgid="7766727839703044493">"ສົ່ງ"</string>
     <string name="unlock_label" msgid="8779712358041029439">"ປົດລັອກ"</string>
     <string name="phone_label" msgid="2320074140205331708">"​ເປີດ​​ແປ້ນ​ໂທ​ລະ​ສັບ"</string>
     <string name="voice_assist_label" msgid="3956854378310019854">"ຊ່ວ​ເຫຼືອ​ເປີດ​ສຽງ"</string>
@@ -208,10 +207,8 @@
     <string name="accessibility_quick_settings_airplane_on" msgid="6406141469157599296">"ເປີດ​ໂໝດ​ຢູ່​ໃນ​ຍົນ."</string>
     <string name="accessibility_quick_settings_airplane_changed_off" msgid="66846307818850664">"ປິດ​ໂໝດ​ຢູ່​ໃນ​ຍົນ​ແລ້ວ."</string>
     <string name="accessibility_quick_settings_airplane_changed_on" msgid="8983005603505087728">"ເປີດ​ໂໝດ​ຢູ່​ໃນ​ຍົນ​ແລ້ວ."</string>
-    <!-- no translation found for accessibility_quick_settings_dnd_none_on (2960643943620637020) -->
-    <skip />
-    <!-- no translation found for accessibility_quick_settings_dnd_alarms_on (3357131899365865386) -->
-    <skip />
+    <string name="accessibility_quick_settings_dnd_none_on" msgid="2960643943620637020">"ງຽບທັງໝົດ"</string>
+    <string name="accessibility_quick_settings_dnd_alarms_on" msgid="3357131899365865386">"ໂມງປຸກເທົ່ານັ້ນ"</string>
     <string name="accessibility_quick_settings_dnd" msgid="6607873236717185815">"ຫ້າມລົບກວນ."</string>
     <string name="accessibility_quick_settings_dnd_changed_off" msgid="898107593453022935">"ຢ່າ​ລົບ​ກວນ​ປິດ​ແລ້ວ."</string>
     <string name="accessibility_quick_settings_dnd_changed_on" msgid="4483780856613561039">"ຢ່າ​ລົບ​ກວນ​ເປີດ​ແລ້ວ."</string>
@@ -244,8 +241,8 @@
     <string name="accessibility_quick_settings_work_mode_on" msgid="7650588553988014341">"ໂໝດການເຮັດວຽກເປີດຢູ່."</string>
     <string name="accessibility_quick_settings_work_mode_changed_off" msgid="5605534876107300711">"ໂໝດການເຮັດວຽກປິດຢູ່."</string>
     <string name="accessibility_quick_settings_work_mode_changed_on" msgid="249840330756998612">"ໂໝດການເຮັດວຽກເປີດຢູ່."</string>
-    <string name="accessibility_quick_settings_data_saver_changed_off" msgid="650231949881093289">"ປິດຕົວປະຢັດຂໍ້ມູນແລ້ວ."</string>
-    <string name="accessibility_quick_settings_data_saver_changed_on" msgid="4218725402373934151">"ເປີດຕົວປະຢັດຂໍ້ມູນແລ້ວ."</string>
+    <string name="accessibility_quick_settings_data_saver_changed_off" msgid="650231949881093289">"ປິດຕົວປະຢັດອິນເຕີເນັດແລ້ວ."</string>
+    <string name="accessibility_quick_settings_data_saver_changed_on" msgid="4218725402373934151">"ເປີດຕົວປະຢັດອິນເຕີເນັດແລ້ວ."</string>
     <string name="accessibility_brightness" msgid="8003681285547803095">"​ຄວາມ​ແຈ້ງ​​ຂອງ​ຈໍ"</string>
     <string name="accessibility_ambient_display_charging" msgid="9084521679384069087">"ກຳລັງສາກໄຟ"</string>
     <string name="data_usage_disabled_dialog_3g_title" msgid="5281770593459841889">"ຂໍ້​ມູນ 2G​-3G ຢຸດ​ຊົ່ວ​ຄາວແລ້ວ"</string>
@@ -330,7 +327,7 @@
     <string name="quick_settings_tethering_label" msgid="7153452060448575549">"​ການ​ປ່ອນ​ສັນ​ຍານ"</string>
     <string name="quick_settings_hotspot_label" msgid="6046917934974004879">"​ຮັອດ​ສະ​ປອດ"</string>
     <string name="quick_settings_hotspot_secondary_label_transient" msgid="8010579363691405477">"ກຳລັງເປີດ..."</string>
-    <string name="quick_settings_hotspot_secondary_label_data_saver_enabled" msgid="5672131949987422420">"ຕົວປະຢັດຂໍ້ມູນເປີດຢູ່"</string>
+    <string name="quick_settings_hotspot_secondary_label_data_saver_enabled" msgid="5672131949987422420">"ເປີດຕົວປະຢັດອິນເຕີເນັດຢູ່"</string>
     <plurals name="quick_settings_hotspot_secondary_label_num_devices" formatted="false" msgid="2324635800672199428">
       <item quantity="other">%d ອຸປະກອນ</item>
       <item quantity="one">%d ອຸປະກອນ</item>
@@ -620,8 +617,7 @@
       <item quantity="one">ກຳລັງໃຊ້ <xliff:g id="PERFORMING_ACTIVITY_0">%1$s</xliff:g></item>
     </plurals>
     <string name="notification_appops_settings" msgid="1028328314935908050">"ການຕັ້ງຄ່າ"</string>
-    <!-- no translation found for notification_appops_ok (1156966426011011434) -->
-    <skip />
+    <string name="notification_appops_ok" msgid="1156966426011011434">"ຕົກລົງ"</string>
     <string name="notification_channel_controls_opened_accessibility" msgid="6553950422055908113">"ເປີດຕົວຄວບຄຸມການແຈ້ງເຕືອນສຳລັບ <xliff:g id="APP_NAME">%1$s</xliff:g> ແລ້ວ"</string>
     <string name="notification_channel_controls_closed_accessibility" msgid="7521619812603693144">"ປິດຕົວຄວບຄຸມການແຈ້ງເຕືອນສຳລັບ <xliff:g id="APP_NAME">%1$s</xliff:g> ແລ້ວ"</string>
     <string name="notification_channel_switch_accessibility" msgid="3420796005601900717">"ອະນຸຍາດການແຈ້ງເຕືອນຈາກຊ່ອງນີ້"</string>
@@ -699,9 +695,9 @@
     <string name="accessibility_long_click_tile" msgid="6687350750091842525">"ເປີດການຕັ້ງຄ່າ"</string>
     <string name="accessibility_status_bar_headphones" msgid="9156307120060559989">"ເຊື່ອມຕໍ່ຊຸດຫູຟັງແລ້ວ"</string>
     <string name="accessibility_status_bar_headset" msgid="8666419213072449202">"ເຊື່ອມ​ຕໍ່ຊຸດ​ຫູ​ຟັງແລ້ວ"</string>
-    <string name="data_saver" msgid="5037565123367048522">"ຕົວປະຢັດຂໍ້ມູນ"</string>
-    <string name="accessibility_data_saver_on" msgid="8454111686783887148">"ຕົວປະຢັດຂໍ້ມູນເປີດຢູ່"</string>
-    <string name="accessibility_data_saver_off" msgid="8841582529453005337">"ຕົວປະຢັດຂໍ້ມູນປິດຢູ່"</string>
+    <string name="data_saver" msgid="5037565123367048522">"ຕົວປະຢັດອິນເຕີເນັດ"</string>
+    <string name="accessibility_data_saver_on" msgid="8454111686783887148">"ເປີດຕົວປະຢັດອິນເຕີເນັດຢູ່"</string>
+    <string name="accessibility_data_saver_off" msgid="8841582529453005337">"ປິດຕົວປະຢັດອິນເຕີເນັດຢູ່"</string>
     <string name="switch_bar_on" msgid="1142437840752794229">"ເປີດ"</string>
     <string name="switch_bar_off" msgid="8803270596930432874">"ປິດ"</string>
     <string name="nav_bar" msgid="1993221402773877607">"ແຖບນຳທາງ"</string>

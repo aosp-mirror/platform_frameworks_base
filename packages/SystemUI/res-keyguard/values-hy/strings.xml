@@ -140,7 +140,10 @@
       <item quantity="other">Սարքը չի ապակողպվել <xliff:g id="NUMBER_1">%d</xliff:g> ժամվա ընթացքում: Հաստատեք գաղտնաբառը:</item>
     </plurals>
     <string name="fingerprint_not_recognized" msgid="348813995267914625">"Չճանաչվեց"</string>
-    <!-- no translation found for kg_password_default_pin_message (3739658416797652781) -->
+    <plurals name="kg_password_default_pin_message" formatted="false" msgid="3739658416797652781">
+      <item quantity="one">Մուտքագրեք SIM քարտի PIN կոդը: Մնացել է <xliff:g id="NUMBER_1">%d</xliff:g> փորձ:</item>
+      <item quantity="other">Մուտքագրեք SIM քարտի PIN կոդը: Մնացել է <xliff:g id="NUMBER_1">%d</xliff:g> փորձ:</item>
+    </plurals>
     <plurals name="kg_password_default_puk_message" formatted="false" msgid="8744416410184198352">
       <item quantity="one">SIM քարտն անջատված է: Շարունակելու համար մուտքագրեք PUK կոդը: Մնացել է <xliff:g id="_NUMBER_1">%d</xliff:g> փորձ, որից հետո SIM քարտն այլևս հնարավոր չի լինի օգտագործել: Մանրամասների համար դիմեք օպերատորին:</item>
       <item quantity="other">SIM քարտն անջատված է: Շարունակելու համար մուտքագրեք PUK կոդը: Մնացել է <xliff:g id="_NUMBER_1">%d</xliff:g> փորձ, որից հետո SIM քարտն այլևս հնարավոր չի լինի օգտագործել: Մանրամասների համար դիմեք օպերատորին:</item>
