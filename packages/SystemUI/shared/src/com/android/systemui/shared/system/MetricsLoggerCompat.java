@@ -17,10 +17,12 @@
 package com.android.systemui.shared.system;
 
 import com.android.internal.logging.MetricsLogger;
+import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 
 public class MetricsLoggerCompat {
 
     private final MetricsLogger mMetricsLogger;
+    public static final int OVERVIEW_ACTIVITY = MetricsEvent.OVERVIEW_ACTIVITY;
 
     public MetricsLoggerCompat() {
         mMetricsLogger = new MetricsLogger();
@@ -36,5 +38,13 @@ public class MetricsLoggerCompat {
 
     public void visible(int category) {
         mMetricsLogger.visible(category);
+    }
+
+    public void hidden(int category) {
+        mMetricsLogger.hidden(category);
+    }
+
+    public void visibility(int category, boolean visible) {
+        mMetricsLogger.visibility(category, visible);
     }
 }
