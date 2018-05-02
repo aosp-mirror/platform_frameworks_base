@@ -63,4 +63,32 @@
         <attr name="hvacPropertyId" format="integer"/>
         <attr name="hvacTempFormat" format="string"/>
     </declare-styleable>
+
+    <declare-styleable name="carVolumeItems"/>
+    <declare-styleable name="carVolumeItems_item">
+        <!-- Align with AudioAttributes.USAGE_* -->
+        <attr name="usage">
+            <enum name="unknown" value="0"/>
+            <enum name="media" value="1"/>
+            <enum name="voice_communication" value="2"/>
+            <enum name="voice_communication_signalling" value="3"/>
+            <enum name="alarm" value="4"/>
+            <enum name="notification" value="5"/>
+            <enum name="notification_ringtone" value="6"/>
+            <enum name="notification_communication_request" value="7"/>
+            <enum name="notification_communication_instant" value="8"/>
+            <enum name="notification_communication_delayed" value="9"/>
+            <enum name="notification_event" value="10"/>
+            <enum name="assistance_accessibility" value="11"/>
+            <enum name="assistance_navigation_guidance" value="12"/>
+            <enum name="assistance_sonification" value="13"/>
+            <enum name="game" value="14"/>
+            <!-- hidden, do not use -->
+            <!-- enum name="virtual_source" value="15"/ -->
+            <enum name="assistant" value="16"/>
+        </attr>
+
+        <!-- Icon resource ids to render on UI -->
+        <attr name="icon" format="reference"/>
+    </declare-styleable>
 </resources>
