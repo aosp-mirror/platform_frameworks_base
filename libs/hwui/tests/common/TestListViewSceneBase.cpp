@@ -57,7 +57,8 @@ void TestListViewSceneBase::doFrame(int frameNr) {
     int pxOffset = -(scrollPx % (mItemSpacing + mItemHeight));
 
     std::unique_ptr<Canvas> canvas(Canvas::create_recording_canvas(
-            mListView->stagingProperties().getWidth(), mListView->stagingProperties().getHeight()));
+            mListView->stagingProperties().getWidth(), mListView->stagingProperties().getHeight(),
+            mListView.get()));
     for (size_t ci = 0; ci < mListItems.size(); ci++) {
         // update item position
         auto listItem = mListItems[(ci + itemIndexOffset) % mListItems.size()];

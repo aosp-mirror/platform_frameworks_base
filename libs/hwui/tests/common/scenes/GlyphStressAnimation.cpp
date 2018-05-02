@@ -44,7 +44,8 @@ public:
 
         std::unique_ptr<Canvas> canvas(
                 Canvas::create_recording_canvas(container->stagingProperties().getWidth(),
-                                                container->stagingProperties().getHeight()));
+                                                container->stagingProperties().getHeight(),
+                                                container.get()));
 
         Paint paint;
         paint.setAntiAlias(true);
