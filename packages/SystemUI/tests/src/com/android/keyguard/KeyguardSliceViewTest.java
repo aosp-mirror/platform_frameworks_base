@@ -21,9 +21,6 @@ import android.test.suitebuilder.annotation.SmallTest;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper.RunWithLooper;
 import android.view.LayoutInflater;
-import android.view.View;
-import android.view.View.MeasureSpec;
-import android.view.ViewGroup;
 
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.keyguard.KeyguardSliceProvider;
@@ -35,6 +32,7 @@ import org.junit.runner.RunWith;
 
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import androidx.slice.SliceProvider;
 import androidx.slice.SliceSpecs;
@@ -58,12 +56,24 @@ public class KeyguardSliceViewTest extends SysuiTestCase {
     @Test
     public void showSlice_notifiesListener() {
         ListBuilder builder = new ListBuilder(getContext(), mSliceUri);
-        boolean[] notified = {false};
+        AtomicBoolean notified = new AtomicBoolean();
         mKeyguardSliceView.setContentChangeListener((hasHeader)-> {
-            notified[0] = true;
+            notified.set(true);
         });
         mKeyguardSliceView.onChanged(builder.build());
-        Assert.assertTrue("Listener should be notified about slice changes.", notified[0]);
+        Assert.assertTrue("Listener should be notified about slice changes.",
+                notified.get());
+    }
+
+    @Test
+    public void showSlice_emptySliceNotifiesListener() {
+        AtomicBoolean notified = new AtomicBoolean();
+        mKeyguardSliceView.setContentChangeListener((hasHeader)-> {
+            notified.set(true);
+        });
+        mKeyguardSliceView.onChanged(null);
+        Assert.assertTrue("Listener should be notified about slice changes.",
+                notified.get());
     }
 
     @Test
