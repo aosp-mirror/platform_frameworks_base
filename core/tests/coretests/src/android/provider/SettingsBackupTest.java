@@ -591,6 +591,7 @@ public class SettingsBackupTest {
                  Settings.Secure.SHOW_ROTATION_SUGGESTIONS,
                  Settings.Secure.SKIP_FIRST_USE_HINTS, // candidate?
                  Settings.Secure.SMS_DEFAULT_APPLICATION,
+                 Settings.Secure.THEME_MODE,
                  Settings.Secure.TRUST_AGENTS_INITIALIZED,
                  Settings.Secure.TV_INPUT_CUSTOM_LABELS,
                  Settings.Secure.TV_INPUT_HIDDEN_INPUTS,
