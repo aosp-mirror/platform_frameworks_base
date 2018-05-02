@@ -95,7 +95,7 @@
     <color name="notification_gear_color">#ff757575</color>
 
     <!-- The "inside" of a notification, reached via longpress -->
-    <color name="notification_guts_bg_color">#eeeeee</color>
+    <color name="notification_guts_bg_color">#f8f9fa</color>
 
     <color name="assist_orb_color">#ffffff</color>
 
