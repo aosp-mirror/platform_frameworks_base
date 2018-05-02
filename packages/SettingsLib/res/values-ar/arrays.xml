@@ -59,7 +59,7 @@
     <item msgid="45075631231212732">"‏استخدام التحقق من HDCP دومًا"</item>
   </string-array>
   <string-array name="bluetooth_avrcp_versions">
-    <item msgid="5347678900838034763">"‏AVRCP 1.4 (الافتراضي)"</item>
+    <item msgid="5347678900838034763">"‏AVRCP 1.4 (التلقائي)"</item>
     <item msgid="2809759619990248160">"AVRCP 1.3"</item>
     <item msgid="6199178154704729352">"AVRCP 1.5"</item>
     <item msgid="5172170854953034852">"AVRCP 1.6"</item>
@@ -77,8 +77,8 @@
     <item msgid="5254942598247222737">"صوت <xliff:g id="QUALCOMM">Qualcomm®</xliff:g> <xliff:g id="APTX">aptX™</xliff:g>"</item>
     <item msgid="2091430979086738145">"صوت <xliff:g id="QUALCOMM">Qualcomm®</xliff:g> <xliff:g id="APTX_HD">aptX™ HD</xliff:g>"</item>
     <item msgid="6751080638867012696">"LDAC"</item>
-    <item msgid="723675059572222462">"تمكين برامج الترميز الاختيارية"</item>
-    <item msgid="3304843301758635896">"تعطيل برامج الترميز الاختيارية"</item>
+    <item msgid="723675059572222462">"تفعيل برامج الترميز الاختيارية"</item>
+    <item msgid="3304843301758635896">"إيقاف برامج الترميز الاختيارية"</item>
   </string-array>
   <string-array name="bluetooth_a2dp_codec_summaries">
     <item msgid="5062108632402595000">"استخدام اختيار النظام (تلقائي)"</item>
@@ -87,8 +87,8 @@
     <item msgid="7848030269621918608">"صوت <xliff:g id="QUALCOMM">Qualcomm®</xliff:g> <xliff:g id="APTX">aptX™</xliff:g>"</item>
     <item msgid="298198075927343893">"صوت <xliff:g id="QUALCOMM">Qualcomm®</xliff:g> <xliff:g id="APTX_HD">aptX™ HD</xliff:g>"</item>
     <item msgid="7950781694447359344">"LDAC"</item>
-    <item msgid="2209680154067241740">"تمكين برامج الترميز الاختيارية"</item>
-    <item msgid="741805482892725657">"تعطيل برامج الترميز الاختيارية"</item>
+    <item msgid="2209680154067241740">"تفعيل برامج الترميز الاختيارية"</item>
+    <item msgid="741805482892725657">"إيقاف برامج الترميز الاختيارية"</item>
   </string-array>
   <string-array name="bluetooth_a2dp_codec_sample_rate_titles">
     <item msgid="3093023430402746802">"استخدام اختيار النظام (تلقائي)"</item>

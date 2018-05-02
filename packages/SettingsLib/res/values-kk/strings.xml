@@ -259,7 +259,7 @@
     <string name="verify_apps_over_usb_title" msgid="4177086489869041953">"USB арқылы орнатылған қолданбаларды растау"</string>
     <string name="verify_apps_over_usb_summary" msgid="9164096969924529200">"ADB/ADT арқылы орнатылған қолданбалардың қауіпсіздігін тексеру."</string>
     <string name="bluetooth_show_devices_without_names_summary" msgid="2351196058115755520">"Bluetooth құрылғылары атаусыз (тек MAC мекенжайымен) көрсетіледі"</string>
-    <string name="bluetooth_disable_absolute_volume_summary" msgid="6031284410786545957">"Қолайсыз қатты дыбыс деңгейі немесе басқарудың болмауы сияқты қашықтағы құрылғыларда дыбыс деңгейіне қатысты мәселелер жағдайында Bluetooth абсолютті дыбыс деңгейі функциясын өшіреді."</string>
+    <string name="bluetooth_disable_absolute_volume_summary" msgid="6031284410786545957">"Қашықтағы құрылғыларда дыбыстың тым қатты шығуы немесе реттеуге келмеуі сияқты дыбыс деңгейіне қатысты мәселелер туындағанда, Bluetooth абсолютті дыбыс деңгейі функциясын өшіреді."</string>
     <string name="enable_terminal_title" msgid="95572094356054120">"Жергілікті терминал"</string>
     <string name="enable_terminal_summary" msgid="67667852659359206">"Жергілікті шелл-код қол жетімділігін ұсынатын терминалды қолданбаны қосу"</string>
     <string name="hdcp_checking_title" msgid="8605478913544273282">"HDCP тексеру"</string>
@@ -301,8 +301,8 @@
     <string name="force_rtl_layout_all_locales" msgid="2259906643093138978">"Оңнан солға орналастыру"</string>
     <string name="force_rtl_layout_all_locales_summary" msgid="9192797796616132534">"Экранның орналасу бағытын барлық тілдер үшін оңнан солға қарату"</string>
     <string name="force_msaa" msgid="7920323238677284387">"4x MSAA қолдану"</string>
-    <string name="force_msaa_summary" msgid="9123553203895817537">"4x MSAA функциясын OpenGL ES 2.0 (ашық графикалық кітапхана) қолданбаларында іске қосу"</string>
-    <string name="show_non_rect_clip" msgid="505954950474595172">"Тіктөртбұрышты емес кесу жұмыстарын жөндеу"</string>
+    <string name="force_msaa_summary" msgid="9123553203895817537">"4x MSAA функциясын OpenGL ES 2.0 қолданбаларында іске қосу"</string>
+    <string name="show_non_rect_clip" msgid="505954950474595172">"Тіктөртбұрышты емес қию қимылдарын жөндеу"</string>
     <string name="track_frame_time" msgid="6094365083096851167">"Профиль бойынша HWUI рендерингі"</string>
     <string name="enable_gpu_debug_layers" msgid="3848838293793255097">"GPU жөндеу қабаттарын қосу"</string>
     <string name="enable_gpu_debug_layers_summary" msgid="8009136940671194940">"GPU жқндеу қабаттарының жүктелуіне рұқсат ету"</string>
@@ -345,7 +345,7 @@
     <string name="inactive_app_active_summary" msgid="4174921824958516106">"Белсенді. Ауыстырып қосу үшін түртіңіз."</string>
     <string name="standby_bucket_summary" msgid="6567835350910684727">"Қолданбаның күту режимі: <xliff:g id="BUCKET"> %s</xliff:g>"</string>
     <string name="runningservices_settings_title" msgid="8097287939865165213">"Қосылып тұрған қызметтер"</string>
-    <string name="runningservices_settings_summary" msgid="854608995821032748">"Ағымдағы қосылып тұрған қызметтерді көру және басқару"</string>
+    <string name="runningservices_settings_summary" msgid="854608995821032748">"Қазір істеп тұрған қызметтерді көру және басқару"</string>
     <string name="select_webview_provider_title" msgid="4628592979751918907">"WebView ендіру"</string>
     <string name="select_webview_provider_dialog_title" msgid="4370551378720004872">"WebView ендіруін орнату"</string>
     <string name="select_webview_provider_toast_text" msgid="5466970498308266359">"Бұл таңдау енді жарамды емес. Әрекетті қайталаңыз."</string>
@@ -365,11 +365,12 @@
     <string name="accessibility_display_daltonizer_preference_title" msgid="5800761362678707872">"Түсті түзету"</string>
     <string name="accessibility_display_daltonizer_preference_subtitle" msgid="3484969015295282911">"Бұл мүмкіндік эксперименттік болып табылады және өнімділікке әсер етуі мүмкін."</string>
     <string name="daltonizer_type_overridden" msgid="3116947244410245916">"<xliff:g id="TITLE">%1$s</xliff:g> үстінен басқан"</string>
-    <string name="power_remaining_duration_only" msgid="845431008899029842">"Қалған <xliff:g id="TIME">%1$s</xliff:g> туралы"</string>
-    <string name="power_discharging_duration" msgid="6655472132189365839">"Шамамен <xliff:g id="TIME">%1$s</xliff:g> қалды (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
-    <string name="power_remaining_duration_only_enhanced" msgid="5992456722677973678">"Пайдалану негізінде шамамен <xliff:g id="TIME">%1$s</xliff:g> қалды"</string>
-    <string name="power_discharging_duration_enhanced" msgid="5726302316642148671">"Пайдалануға байланысты шамамен <xliff:g id="TIME">%1$s</xliff:g> қалды (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
-    <string name="power_remaining_duration_only_short" msgid="5329694252258605547">"<xliff:g id="TIME">%1$s</xliff:g> қалды"</string>
+    <string name="power_remaining_settings_home_page" msgid="4845022416859002011">"<xliff:g id="PERCENTAGE">%1$s</xliff:g> – <xliff:g id="TIME_STRING">%2$s</xliff:g>"</string>
+    <string name="power_remaining_duration_only" msgid="6123167166221295462">"Шамамен <xliff:g id="TIME_REMAINING">%1$s</xliff:g> қалды"</string>
+    <string name="power_discharging_duration" msgid="8848256785736335185">"Шамамен <xliff:g id="TIME_REMAINING">%1$s</xliff:g> қалды (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
+    <string name="power_remaining_duration_only_enhanced" msgid="4189311599812296592">"Пайдалану деректеріңізге сәйкес енді шамамен <xliff:g id="TIME_REMAINING">%1$s</xliff:g> қалды"</string>
+    <string name="power_discharging_duration_enhanced" msgid="1992003260664804080">"Пайдалану деректеріңізге сәйкес енді шамамен <xliff:g id="TIME_REMAINING">%1$s</xliff:g> қалды (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
+    <string name="power_remaining_duration_only_short" msgid="3463575350656389957">"<xliff:g id="TIME_REMAINING">%1$s</xliff:g> қалды"</string>
     <string name="power_discharge_by_enhanced" msgid="2095821536747992464">"Пайдалануға байланысты шамамен <xliff:g id="TIME">%1$s</xliff:g> уақытқа жетеді (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
     <string name="power_discharge_by_only_enhanced" msgid="2175151772952365149">"Пайдалануға байланысты шамамен <xliff:g id="TIME">%1$s</xliff:g> уақытқа жетеді"</string>
     <string name="power_discharge_by" msgid="6453537733650125582">"Шамамен <xliff:g id="TIME">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>) уақытқа жетеді"</string>

@@ -251,7 +251,7 @@
     <string name="debug_view_attributes" msgid="6485448367803310384">"បើក​ការ​ត្រួតពិនិត្យ​គុណ​លក្ខណៈ​ទិដ្ឋភាព"</string>
     <string name="mobile_data_always_on_summary" msgid="8149773901431697910">"រក្សាទិន្នន័យចល័តឲ្យសកម្មជានិច្ច បើទោះបីជា Wi‑Fi សកម្មក៏ដោយ (សម្រាប់ការប្តូរបណ្តាញដែលមានល្បឿនលឿន)។"</string>
     <string name="tethering_hardware_offload_summary" msgid="7726082075333346982">"ប្រើការ​បង្កើនល្បឿន​ផ្នែករឹងសម្រាប់​ការភ្ជាប់​ ប្រសិន​បើអាច​ប្រើបាន"</string>
-    <string name="adb_warning_title" msgid="6234463310896563253">"អនុញ្ញាត​ការ​កែ​កំហុស​យូអេសប៊ី?"</string>
+    <string name="adb_warning_title" msgid="6234463310896563253">"អនុញ្ញាត​ការ​កែ​កំហុស​តាម USB ឬ?"</string>
     <string name="adb_warning_message" msgid="7316799925425402244">"ការ​កែ​កំហុស​​យូអេសប៊ី​គឺ​សម្រាប់​តែ​ការ​អភិវឌ្ឍ​ប៉ុណ្ណោះ។ ប្រើ​វា​ដើម្បី​ចម្លង​ទិន្នន័យ​រវាង​កុំព្យូទ័រ និង​ឧបករណ៍​របស់​អ្នក ដំឡើង​កម្មវិធី​ក្នុង​ឧបករណ៍​របស់​អ្នក​ដោយ​មិន​ជូន​ដំណឹង និង​អាន​ទិន្នន័យ​កំណត់ហេតុ។"</string>
     <string name="adb_keys_warning_message" msgid="5659849457135841625">"ដក​សិទ្ធិ​ចូល​ការ​កែ​កំហុស​តាម​យូអេសប៊ី​ពី​គ្រប់​កុំព្យូទ័រ​ដែល​អ្នក​បាន​ផ្ដល់​សិទ្ធិ​ពី​មុន?"</string>
     <string name="dev_settings_warning_title" msgid="7244607768088540165">"អនុញ្ញាត​កំណត់​ការ​អភិវឌ្ឍ?"</string>
@@ -282,7 +282,7 @@
     <string name="pointer_location" msgid="6084434787496938001">"ទីតាំង​ទ្រនិច"</string>
     <string name="pointer_location_summary" msgid="840819275172753713">"អេក្រង់​ត្រួត​គ្នា​បង្ហាញ​ទិន្នន័យ​ប៉ះ​បច្ចុប្បន្ន"</string>
     <string name="show_touches" msgid="2642976305235070316">"បង្ហាញការចុច"</string>
-    <string name="show_touches_summary" msgid="6101183132903926324">"បង្ហាញមតិកែលម្អដែលអាចមើលឃើញចំពោះការចុច"</string>
+    <string name="show_touches_summary" msgid="6101183132903926324">"បង្ហាញដានចុច នៅពេលចុច"</string>
     <string name="show_screen_updates" msgid="5470814345876056420">"បង្ហាញ​បច្ចុប្បន្នភាព​ផ្ទៃ"</string>
     <string name="show_screen_updates_summary" msgid="2569622766672785529">"ផ្ទៃ​បង្អួច​ទាំង​មូល​បញ្ចេញ​ពន្លឺ​ពេល​ពួកវា​ធ្វើ​បច្ចុប្បន្នភាព"</string>
     <string name="show_hw_screen_updates" msgid="4117270979975470789">"បង្ហាញ​ការធ្វើ​បច្ចុប្បន្នភាព​នៃការមើល"</string>
@@ -309,7 +309,7 @@
     <string name="window_animation_scale_title" msgid="6162587588166114700">"មាត្រដ្ឋាន​ចលនា​វិនដូ"</string>
     <string name="transition_animation_scale_title" msgid="387527540523595875">"មាត្រដ្ឋាន​ដំណើរ​ផ្លាស់ប្ដូរ​ចលនា"</string>
     <string name="animator_duration_scale_title" msgid="3406722410819934083">"មាត្រដ្ឋាន​រយៈពេល​នៃ​កម្មវិធី​ចលនា"</string>
-    <string name="overlay_display_devices_title" msgid="5364176287998398539">"ក្លែង​ធ្វើ​ការ​បង្ហាញ​ទី​ពីរ"</string>
+    <string name="overlay_display_devices_title" msgid="5364176287998398539">"ត្រាប់ជាអេក្រង់​ទី​ពីរ"</string>
     <string name="debug_applications_category" msgid="4206913653849771549">"កម្មវិធី"</string>
     <string name="immediately_destroy_activities" msgid="1579659389568133959">"កុំ​រក្សា​ទុកសកម្មភាព"</string>
     <string name="immediately_destroy_activities_summary" msgid="3592221124808773368">"បំផ្លាញ​គ្រប់​សកម្មភាព ពេល​អ្នក​ប្រើ​ចាកចេញ"</string>
@@ -324,8 +324,8 @@
     <string name="force_resizable_activities_summary" msgid="6667493494706124459">"កំណត់ឲ្យសកម្មភាពទាំងអស់អាចប្តូរទំហំបានសម្រាប់ពហុផ្ទាំងវិនដូ ដោយមិនគិតពីតម្លៃជាក់លាក់ឡើយ។"</string>
     <string name="enable_freeform_support" msgid="1461893351278940416">"បើកដំណើរការផ្ទាំងវិនដូទម្រង់សេរី"</string>
     <string name="enable_freeform_support_summary" msgid="8247310463288834487">"បើកដំណើរការគាំទ្រផ្ទាំងវិនដូទម្រង់សេរីសាកល្បង"</string>
-    <string name="local_backup_password_title" msgid="3860471654439418822">"ពាក្យ​សម្ងាត់​បម្រុង​ទុក​អេក្រង់ដើម"</string>
-    <string name="local_backup_password_summary_none" msgid="6951095485537767956">"បច្ចុប្បន្ន ការ​បម្រុង​ទុក​ពេញលេញអេក្រង់ដើមមិន​ត្រូវ​បាន​ការពារ​ទេ"</string>
+    <string name="local_backup_password_title" msgid="3860471654439418822">"ពាក្យ​សម្ងាត់​បម្រុង​ទុក​លើកុំព្យូទ័រ"</string>
+    <string name="local_backup_password_summary_none" msgid="6951095485537767956">"បច្ចុប្បន្ន ការ​បម្រុង​ទុក​ពេញលេញនៅលើកុំព្យូទ័រមិន​ត្រូវ​បាន​ការពារ​ទេ"</string>
     <string name="local_backup_password_summary_change" msgid="5376206246809190364">"ប៉ះដើម្បីប្ដូរ ឬយកពាក្យសម្ងាត់ចេញសម្រាប់ការបម្រុងទុកពេញលេញលើកុំព្យូទ័រ"</string>
     <string name="local_backup_password_toast_success" msgid="582016086228434290">"កំណត់​ពាក្យ​សម្ងាត់​បម្រុង​ទុក​ថ្មី"</string>
     <string name="local_backup_password_toast_confirmation_mismatch" msgid="7805892532752708288">"ពាក្យ​សម្ងាត់​ថ្មី និង​ការ​បញ្ជាក់​​មិន​ដូច​គ្នា"</string>
@@ -365,11 +365,12 @@
     <string name="accessibility_display_daltonizer_preference_title" msgid="5800761362678707872">"ការ​កែ​ពណ៌"</string>
     <string name="accessibility_display_daltonizer_preference_subtitle" msgid="3484969015295282911">"មុខងារនេះ​គឺ​ជា​ការ​ពិសោធន៍ ហើយ​អាច​ប៉ះពាល់​ដំណើរការ​។"</string>
     <string name="daltonizer_type_overridden" msgid="3116947244410245916">"បដិសេធ​ដោយ <xliff:g id="TITLE">%1$s</xliff:g>"</string>
-    <string name="power_remaining_duration_only" msgid="845431008899029842">"សល់​ប្រហែល <xliff:g id="TIME">%1$s</xliff:g>"</string>
-    <string name="power_discharging_duration" msgid="6655472132189365839">"នៅសល់ប្រហែល <xliff:g id="TIME">%1$s</xliff:g> ទៀត (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
-    <string name="power_remaining_duration_only_enhanced" msgid="5992456722677973678">"សល់ប្រហែល <xliff:g id="TIME">%1$s</xliff:g> ទៀតផ្អែកលើការប្រើប្រាស់របស់អ្នក"</string>
-    <string name="power_discharging_duration_enhanced" msgid="5726302316642148671">"នៅសល់​ប្រហែល <xliff:g id="TIME">%1$s</xliff:g> ទៀត ផ្អែក​លើការ​ប្រើប្រាស់​របស់អ្នក (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
-    <string name="power_remaining_duration_only_short" msgid="5329694252258605547">"នៅសល់ <xliff:g id="TIME">%1$s</xliff:g>"</string>
+    <string name="power_remaining_settings_home_page" msgid="4845022416859002011">"<xliff:g id="PERCENTAGE">%1$s</xliff:g> - <xliff:g id="TIME_STRING">%2$s</xliff:g>"</string>
+    <string name="power_remaining_duration_only" msgid="6123167166221295462">"នៅសល់​ប្រហែល <xliff:g id="TIME_REMAINING">%1$s</xliff:g> ទៀត"</string>
+    <string name="power_discharging_duration" msgid="8848256785736335185">"នៅសល់​ប្រហែល <xliff:g id="TIME_REMAINING">%1$s</xliff:g> ទៀត (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
+    <string name="power_remaining_duration_only_enhanced" msgid="4189311599812296592">"នៅសល់​ប្រហែល <xliff:g id="TIME_REMAINING">%1$s</xliff:g> ទៀត ផ្អែក​លើការ​ប្រើប្រាស់​របស់អ្នក"</string>
+    <string name="power_discharging_duration_enhanced" msgid="1992003260664804080">"នៅសល់​ប្រហែល <xliff:g id="TIME_REMAINING">%1$s</xliff:g> ទៀត ផ្អែក​លើការ​ប្រើប្រាស់​របស់អ្នក (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
+    <string name="power_remaining_duration_only_short" msgid="3463575350656389957">"នៅសល់ <xliff:g id="TIME_REMAINING">%1$s</xliff:g> ទៀត"</string>
     <string name="power_discharge_by_enhanced" msgid="2095821536747992464">"គួរ​តែ​អាច​ប្រើបាន​រហូតដល់​ម៉ោងប្រហែល <xliff:g id="TIME">%1$s</xliff:g> ដោយផ្អែក​លើការ​ប្រើប្រាស់​របស់អ្នក (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
     <string name="power_discharge_by_only_enhanced" msgid="2175151772952365149">"គួរ​តែ​អាច​ប្រើបាន​រហូតដល់​ម៉ោងប្រហែល <xliff:g id="TIME">%1$s</xliff:g> ដោយផ្អែក​លើការ​ប្រើប្រាស់​របស់អ្នក"</string>
     <string name="power_discharge_by" msgid="6453537733650125582">"គួរ​តែ​អាច​ប្រើបាន​រហូតដល់​ម៉ោងប្រហែល <xliff:g id="TIME">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
