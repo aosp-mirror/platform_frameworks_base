@@ -45,7 +45,6 @@ import android.os.Looper;
 import android.os.PowerManager;
 import android.os.RemoteException;
 import android.os.UserHandle;
-import android.util.Log;
 import android.util.Slog;
 
 import java.security.Signature;
@@ -417,7 +416,7 @@ public class FingerprintManager implements BiometricFingerprintConstants {
 
         if (cancel != null) {
             if (cancel.isCanceled()) {
-                Log.w(TAG, "authentication already canceled");
+                Slog.w(TAG, "authentication already canceled");
                 return;
             } else {
                 cancel.setOnCancelListener(new OnAuthenticationCancelListener(crypto));
@@ -432,7 +431,7 @@ public class FingerprintManager implements BiometricFingerprintConstants {
             mService.authenticate(mToken, sessionId, userId, mServiceReceiver, flags,
                     mContext.getOpPackageName(), null /* bundle */, null /* receiver */);
         } catch (RemoteException e) {
-            Log.w(TAG, "Remote exception while authenticating: ", e);
+            Slog.w(TAG, "Remote exception while authenticating: ", e);
             if (callback != null) {
                 // Though this may not be a hardware issue, it will cause apps to give up or try
                 // again later.
@@ -456,7 +455,7 @@ public class FingerprintManager implements BiometricFingerprintConstants {
             @NonNull BiometricAuthenticator.AuthenticationCallback callback) {
         mCryptoObject = crypto;
         if (cancel.isCanceled()) {
-            Log.w(TAG, "authentication already canceled");
+            Slog.w(TAG, "authentication already canceled");
             return;
         } else {
             cancel.setOnCancelListener(new OnAuthenticationCancelListener(crypto));
@@ -470,7 +469,7 @@ public class FingerprintManager implements BiometricFingerprintConstants {
                 mService.authenticate(mToken, sessionId, userId, mServiceReceiver,
                         0 /* flags */, mContext.getOpPackageName(), bundle, receiver);
             } catch (RemoteException e) {
-                Log.w(TAG, "Remote exception while authenticating", e);
+                Slog.w(TAG, "Remote exception while authenticating", e);
                 mExecutor.execute(() -> {
                     callback.onAuthenticationError(FINGERPRINT_ERROR_HW_UNAVAILABLE,
                             getErrorString(FINGERPRINT_ERROR_HW_UNAVAILABLE, 0 /* vendorCode */));
@@ -576,7 +575,7 @@ public class FingerprintManager implements BiometricFingerprintConstants {
 
         if (cancel != null) {
             if (cancel.isCanceled()) {
-                Log.w(TAG, "enrollment already canceled");
+                Slog.w(TAG, "enrollment already canceled");
                 return;
             } else {
                 cancel.setOnCancelListener(new OnEnrollCancelListener());
@@ -588,7 +587,7 @@ public class FingerprintManager implements BiometricFingerprintConstants {
             mService.enroll(mToken, token, userId, mServiceReceiver, flags,
                     mContext.getOpPackageName());
         } catch (RemoteException e) {
-            Log.w(TAG, "Remote exception in enroll: ", e);
+            Slog.w(TAG, "Remote exception in enroll: ", e);
             if (callback != null) {
                 // Though this may not be a hardware issue, it will cause apps to give up or try
                 // again later.
@@ -660,7 +659,7 @@ public class FingerprintManager implements BiometricFingerprintConstants {
             mRemovalFingerprint = fp;
             mService.remove(mToken, fp.getFingerId(), fp.getGroupId(), userId, mServiceReceiver);
         } catch (RemoteException e) {
-            Log.w(TAG, "Remote exception in remove: ", e);
+            Slog.w(TAG, "Remote exception in remove: ", e);
             if (callback != null) {
                 callback.onRemovalError(fp, FINGERPRINT_ERROR_HW_UNAVAILABLE,
                         getErrorString(FINGERPRINT_ERROR_HW_UNAVAILABLE, 0 /* vendorCode */));
@@ -682,7 +681,7 @@ public class FingerprintManager implements BiometricFingerprintConstants {
             mEnumerateCallback = callback;
             mService.enumerate(mToken, userId, mServiceReceiver);
         } catch (RemoteException e) {
-            Log.w(TAG, "Remote exception in enumerate: ", e);
+            Slog.w(TAG, "Remote exception in enumerate: ", e);
             if (callback != null) {
                 callback.onEnumerateError(FINGERPRINT_ERROR_HW_UNAVAILABLE,
                         getErrorString(FINGERPRINT_ERROR_HW_UNAVAILABLE, 0 /* vendorCode */));
@@ -708,7 +707,7 @@ public class FingerprintManager implements BiometricFingerprintConstants {
                 throw e.rethrowFromSystemServer();
             }
         } else {
-            Log.w(TAG, "rename(): Service not connected!");
+            Slog.w(TAG, "rename(): Service not connected!");
         }
     }
 
@@ -791,7 +790,7 @@ public class FingerprintManager implements BiometricFingerprintConstants {
                 throw e.rethrowFromSystemServer();
             }
         } else {
-            Log.w(TAG, "isFingerprintHardwareDetected(): Service not connected!");
+            Slog.w(TAG, "isFingerprintHardwareDetected(): Service not connected!");
         }
         return false;
     }
@@ -810,7 +809,7 @@ public class FingerprintManager implements BiometricFingerprintConstants {
                 throw e.rethrowFromSystemServer();
             }
         } else {
-            Log.w(TAG, "getAuthenticatorId(): Service not connected!");
+            Slog.w(TAG, "getAuthenticatorId(): Service not connected!");
         }
         return 0;
     }
@@ -830,7 +829,7 @@ public class FingerprintManager implements BiometricFingerprintConstants {
                 throw e.rethrowFromSystemServer();
             }
         } else {
-            Log.w(TAG, "resetTimeout(): Service not connected!");
+            Slog.w(TAG, "resetTimeout(): Service not connected!");
         }
     }
 
@@ -867,7 +866,7 @@ public class FingerprintManager implements BiometricFingerprintConstants {
                 throw e.rethrowFromSystemServer();
             }
         } else {
-            Log.w(TAG, "addLockoutResetCallback(): Service not connected!");
+            Slog.w(TAG, "addLockoutResetCallback(): Service not connected!");
         }
     }
 
@@ -915,20 +914,20 @@ public class FingerprintManager implements BiometricFingerprintConstants {
                 return;
             }
             if (fingerprint == null) {
-                Log.e(TAG, "Received MSG_REMOVED, but fingerprint is null");
+                Slog.e(TAG, "Received MSG_REMOVED, but fingerprint is null");
                 return;
             }
 
             int fingerId = fingerprint.getFingerId();
             int reqFingerId = mRemovalFingerprint.getFingerId();
             if (reqFingerId != 0 && fingerId != 0 && fingerId != reqFingerId) {
-                Log.w(TAG, "Finger id didn't match: " + fingerId + " != " + reqFingerId);
+                Slog.w(TAG, "Finger id didn't match: " + fingerId + " != " + reqFingerId);
                 return;
             }
             int groupId = fingerprint.getGroupId();
             int reqGroupId = mRemovalFingerprint.getGroupId();
             if (groupId != reqGroupId) {
-                Log.w(TAG, "Group id didn't match: " + groupId + " != " + reqGroupId);
+                Slog.w(TAG, "Group id didn't match: " + groupId + " != " + reqGroupId);
                 return;
             }
 

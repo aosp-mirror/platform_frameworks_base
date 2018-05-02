@@ -118,7 +118,8 @@ public class MessagingGroup extends LinearLayout implements MessagingLinearLayou
             ViewGroup parent = (ViewGroup) mSenderName.getParent();
             int top = getDistanceFromParent(mSenderName, parent) - getDistanceFromParent(
                     mMessageContainer, parent) + mSenderName.getHeight();
-            clipRect = new Rect(0, top, mDisplaySize.x, mDisplaySize.y);
+            int size = Math.max(mDisplaySize.x, mDisplaySize.y);
+            clipRect = new Rect(0, top, size, size);
         } else {
             clipRect = null;
         }

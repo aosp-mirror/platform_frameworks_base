@@ -203,7 +203,7 @@ class ActivityStartInterceptor {
         mResolvedType = null;
 
         final UserInfo parent = mUserManager.getProfileParent(mUserId);
-        mRInfo = mSupervisor.resolveIntent(mIntent, mResolvedType, parent.id);
+        mRInfo = mSupervisor.resolveIntent(mIntent, mResolvedType, parent.id, 0, mRealCallingUid);
         mAInfo = mSupervisor.resolveActivity(mIntent, mRInfo, mStartFlags, null /*profilerInfo*/);
         return true;
     }
@@ -223,9 +223,11 @@ class ActivityStartInterceptor {
 
         final UserInfo parent = mUserManager.getProfileParent(mUserId);
         if (parent != null) {
-            mRInfo = mSupervisor.resolveIntent(mIntent, mResolvedType, parent.id);
+            mRInfo = mSupervisor.resolveIntent(mIntent, mResolvedType, parent.id, 0,
+                    mRealCallingUid);
         } else {
-            mRInfo = mSupervisor.resolveIntent(mIntent, mResolvedType, mUserId);
+            mRInfo = mSupervisor.resolveIntent(mIntent, mResolvedType, mUserId, 0,
+                    mRealCallingUid);
         }
         mAInfo = mSupervisor.resolveActivity(mIntent, mRInfo, mStartFlags, null /*profilerInfo*/);
         return true;
@@ -244,7 +246,8 @@ class ActivityStartInterceptor {
         final Intent moreDetailsIntent = new Intent(Intent.ACTION_SHOW_SUSPENDED_APP_DETAILS)
                 .setPackage(suspendingPackage);
         final String requiredPermission = Manifest.permission.SEND_SHOW_SUSPENDED_APP_DETAILS;
-        final ResolveInfo resolvedInfo = mSupervisor.resolveIntent(moreDetailsIntent, null, userId);
+        final ResolveInfo resolvedInfo = mSupervisor.resolveIntent(moreDetailsIntent, null, userId,
+                0, mRealCallingUid);
         if (resolvedInfo != null && resolvedInfo.activityInfo != null
                 && requiredPermission.equals(resolvedInfo.activityInfo.permission)) {
             moreDetailsIntent.putExtra(Intent.EXTRA_PACKAGE_NAME, suspendedPackage)
@@ -276,7 +279,7 @@ class ActivityStartInterceptor {
         mCallingPid = mRealCallingPid;
         mCallingUid = mRealCallingUid;
         mResolvedType = null;
-        mRInfo = mSupervisor.resolveIntent(mIntent, mResolvedType, 0);
+        mRInfo = mSupervisor.resolveIntent(mIntent, mResolvedType, mUserId, 0, mRealCallingUid);
         mAInfo = mSupervisor.resolveActivity(mIntent, mRInfo, mStartFlags, null /*profilerInfo*/);
         return true;
     }
@@ -309,7 +312,7 @@ class ActivityStartInterceptor {
         }
 
         final UserInfo parent = mUserManager.getProfileParent(mUserId);
-        mRInfo = mSupervisor.resolveIntent(mIntent, mResolvedType, parent.id);
+        mRInfo = mSupervisor.resolveIntent(mIntent, mResolvedType, parent.id, 0, mRealCallingUid);
         mAInfo = mSupervisor.resolveActivity(mIntent, mRInfo, mStartFlags, null /*profilerInfo*/);
         return true;
     }
@@ -362,7 +365,7 @@ class ActivityStartInterceptor {
         mCallingUid = mRealCallingUid;
         mResolvedType = null;
 
-        mRInfo = mSupervisor.resolveIntent(mIntent, mResolvedType, mUserId);
+        mRInfo = mSupervisor.resolveIntent(mIntent, mResolvedType, mUserId, 0, mRealCallingUid);
         mAInfo = mSupervisor.resolveActivity(mIntent, mRInfo, mStartFlags, null /*profilerInfo*/);
         return true;
     }

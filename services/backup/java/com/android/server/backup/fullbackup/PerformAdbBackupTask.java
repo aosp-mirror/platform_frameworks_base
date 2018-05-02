@@ -421,7 +421,7 @@ public class PerformAdbBackupTask extends FullBackupTask implements BackupRestor
 
                 // after the app's agent runs to handle its private filesystem
                 // contents, back up any OBB content it has on its behalf.
-                if (mIncludeObbs) {
+                if (mIncludeObbs && !isSharedStorage) {
                     boolean obbOkay = obbConnection.backupObbs(pkg, out);
                     if (!obbOkay) {
                         throw new RuntimeException("Failure writing OBB stack for " + pkg);

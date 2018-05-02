@@ -17,6 +17,7 @@
 package com.android.server.am;
 
 import static android.app.ITaskStackListener.FORCED_RESIZEABLE_REASON_SPLIT_SCREEN;
+import static android.app.WindowConfiguration.ACTIVITY_TYPE_HOME;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_RECENTS;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_UNDEFINED;
@@ -1784,6 +1785,14 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
             final int otherWindowingMode = other.getWindowingMode();
 
             if (otherWindowingMode == WINDOWING_MODE_FULLSCREEN) {
+                // In this case the home stack isn't resizeable even though we are in split-screen
+                // mode. We still want the primary splitscreen stack to be visible as there will be
+                // a slight hint of it in the status bar area above the non-resizeable home
+                // activity.
+                if (windowingMode == WINDOWING_MODE_SPLIT_SCREEN_PRIMARY
+                        && other.getActivityType() == ACTIVITY_TYPE_HOME) {
+                    return true;
+                }
                 if (other.isStackTranslucent(starting)) {
                     // Can be visible behind a translucent fullscreen stack.
                     continue;

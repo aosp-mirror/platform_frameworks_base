@@ -19,6 +19,7 @@ statsd_common_src := \
     ../../core/java/android/os/IStatsManager.aidl \
     src/statsd_config.proto \
     src/FieldValue.cpp \
+    src/hash.cpp \
     src/stats_log_util.cpp \
     src/anomaly/AlarmMonitor.cpp \
     src/anomaly/AlarmTracker.cpp \

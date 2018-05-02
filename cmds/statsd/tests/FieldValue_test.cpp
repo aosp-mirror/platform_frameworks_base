@@ -226,6 +226,68 @@ TEST(AtomMatcherTest, TestMetric2ConditionLink) {
     EXPECT_EQ((int32_t)27, link.conditionFields[0].mMatcher.getTag());
 }
 
+TEST(AtomMatcherTest, TestWriteDimensionPath) {
+    for (auto position : {Position::ANY, Position::ALL, Position::FIRST, Position::LAST}) {
+        FieldMatcher matcher1;
+        matcher1.set_field(10);
+        FieldMatcher* child = matcher1.add_child();
+        child->set_field(2);
+        child->set_position(position);
+        child->add_child()->set_field(1);
+        child->add_child()->set_field(3);
+
+        child = matcher1.add_child();
+        child->set_field(4);
+
+        child = matcher1.add_child();
+        child->set_field(6);
+        child->add_child()->set_field(2);
+
+        vector<Matcher> matchers;
+        translateFieldMatcher(matcher1, &matchers);
+
+        android::util::ProtoOutputStream protoOut;
+        writeDimensionPathToProto(matchers, &protoOut);
+
+        vector<uint8_t> outData;
+        outData.resize(protoOut.size());
+        size_t pos = 0;
+        auto iter = protoOut.data();
+        while (iter.readBuffer() != NULL) {
+            size_t toRead = iter.currentToRead();
+            std::memcpy(&(outData[pos]), iter.readBuffer(), toRead);
+            pos += toRead;
+            iter.rp()->move(toRead);
+        }
+
+        DimensionsValue result;
+        EXPECT_EQ(true, result.ParseFromArray(&outData[0], outData.size()));
+
+        EXPECT_EQ(10, result.field());
+        EXPECT_EQ(DimensionsValue::ValueCase::kValueTuple, result.value_case());
+        EXPECT_EQ(3, result.value_tuple().dimensions_value_size());
+
+        const auto& dim1 = result.value_tuple().dimensions_value(0);
+        EXPECT_EQ(2, dim1.field());
+        EXPECT_EQ(2, dim1.value_tuple().dimensions_value_size());
+
+        const auto& dim11 = dim1.value_tuple().dimensions_value(0);
+        EXPECT_EQ(1, dim11.field());
+
+        const auto& dim12 = dim1.value_tuple().dimensions_value(1);
+        EXPECT_EQ(3, dim12.field());
+
+        const auto& dim2 = result.value_tuple().dimensions_value(1);
+        EXPECT_EQ(4, dim2.field());
+
+        const auto& dim3 = result.value_tuple().dimensions_value(2);
+        EXPECT_EQ(6, dim3.field());
+        EXPECT_EQ(1, dim3.value_tuple().dimensions_value_size());
+        const auto& dim31 = dim3.value_tuple().dimensions_value(0);
+        EXPECT_EQ(2, dim31.field());
+    }
+}
+
 TEST(AtomMatcherTest, TestSubscriberDimensionWrite) {
     HashableDimensionKey dim;
 
@@ -275,7 +337,7 @@ TEST(AtomMatcherTest, TestWriteDimensionToProto) {
     dim.addValue(FieldValue(field4, value4));
 
     android::util::ProtoOutputStream protoOut;
-    writeDimensionToProto(dim, &protoOut);
+    writeDimensionToProto(dim, nullptr /* include strings */, &protoOut);
 
     vector<uint8_t> outData;
     outData.resize(protoOut.size());
@@ -313,6 +375,62 @@ TEST(AtomMatcherTest, TestWriteDimensionToProto) {
     const auto& dim2 = result.value_tuple().dimensions_value(1);
     EXPECT_EQ(DimensionsValue::ValueCase::kValueInt, dim2.value_case());
     EXPECT_EQ(99999, dim2.value_int());
+}
+
+TEST(AtomMatcherTest, TestWriteDimensionLeafNodesToProto) {
+    HashableDimensionKey dim;
+    int pos1[] = {1, 1, 1};
+    int pos2[] = {1, 1, 2};
+    int pos3[] = {1, 1, 3};
+    int pos4[] = {2, 0, 0};
+    Field field1(10, pos1, 2);
+    Field field2(10, pos2, 2);
+    Field field3(10, pos3, 2);
+    Field field4(10, pos4, 0);
+
+    Value value1((int32_t)10025);
+    Value value2("tag");
+    Value value3((int32_t)987654);
+    Value value4((int64_t)99999);
+
+    dim.addValue(FieldValue(field1, value1));
+    dim.addValue(FieldValue(field2, value2));
+    dim.addValue(FieldValue(field3, value3));
+    dim.addValue(FieldValue(field4, value4));
+
+    android::util::ProtoOutputStream protoOut;
+    writeDimensionLeafNodesToProto(dim, 1, nullptr /* include strings */, &protoOut);
+
+    vector<uint8_t> outData;
+    outData.resize(protoOut.size());
+    size_t pos = 0;
+    auto iter = protoOut.data();
+    while (iter.readBuffer() != NULL) {
+        size_t toRead = iter.currentToRead();
+        std::memcpy(&(outData[pos]), iter.readBuffer(), toRead);
+        pos += toRead;
+        iter.rp()->move(toRead);
+    }
+
+    DimensionsValueTuple result;
+    EXPECT_EQ(true, result.ParseFromArray(&outData[0], outData.size()));
+    EXPECT_EQ(4, result.dimensions_value_size());
+
+    const auto& dim1 = result.dimensions_value(0);
+    EXPECT_EQ(DimensionsValue::ValueCase::kValueInt, dim1.value_case());
+    EXPECT_EQ(10025, dim1.value_int());
+
+    const auto& dim2 = result.dimensions_value(1);
+    EXPECT_EQ(DimensionsValue::ValueCase::kValueStr, dim2.value_case());
+    EXPECT_EQ("tag", dim2.value_str());
+
+    const auto& dim3 = result.dimensions_value(2);
+    EXPECT_EQ(DimensionsValue::ValueCase::kValueInt, dim3.value_case());
+    EXPECT_EQ(987654, dim3.value_int());
+
+    const auto& dim4 = result.dimensions_value(3);
+    EXPECT_EQ(DimensionsValue::ValueCase::kValueLong, dim4.value_case());
+    EXPECT_EQ(99999, dim4.value_long());
 }
 
 TEST(AtomMatcherTest, TestWriteAtomToProto) {

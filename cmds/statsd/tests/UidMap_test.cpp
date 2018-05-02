@@ -17,6 +17,7 @@
 #include "config/ConfigKey.h"
 #include "guardrail/StatsdStats.h"
 #include "logd/LogEvent.h"
+#include "hash.h"
 #include "statslog.h"
 #include "statsd_test_util.h"
 
@@ -192,7 +193,7 @@ TEST(UidMapTest, TestOutputIncludesAtLeastOneSnapshot) {
     m.mLastUpdatePerConfigKey[config1] = 2;
 
     ProtoOutputStream proto;
-    m.appendUidMap(3, config1, &proto);
+    m.appendUidMap(3, config1, nullptr, &proto);
 
     // Check there's still a uidmap attached this one.
     UidMapping results;
@@ -215,7 +216,7 @@ TEST(UidMapTest, TestRemovedAppRetained) {
     m.removeApp(2, String16(kApp2.c_str()), 1000);
 
     ProtoOutputStream proto;
-    m.appendUidMap(3, config1, &proto);
+    m.appendUidMap(3, config1, nullptr, &proto);
 
     // Snapshot should still contain this item as deleted.
     UidMapping results;
@@ -243,7 +244,7 @@ TEST(UidMapTest, TestRemovedAppOverGuardrail) {
     // First, verify that we have the expected number of items.
     UidMapping results;
     ProtoOutputStream proto;
-    m.appendUidMap(3, config1, &proto);
+    m.appendUidMap(3, config1, nullptr, &proto);
     protoOutputStreamToUidMapping(&proto, &results);
     EXPECT_EQ(maxDeletedApps + 10, results.snapshots(0).package_info_size());
 
@@ -254,7 +255,7 @@ TEST(UidMapTest, TestRemovedAppOverGuardrail) {
     }
 
     proto.clear();
-    m.appendUidMap(5, config1, &proto);
+    m.appendUidMap(5, config1, nullptr, &proto);
     // Snapshot drops the first nine items.
     protoOutputStreamToUidMapping(&proto, &results);
     EXPECT_EQ(maxDeletedApps, results.snapshots(0).package_info_size());
@@ -280,14 +281,14 @@ TEST(UidMapTest, TestClearingOutput) {
     m.updateMap(1, uids, versions, apps);
 
     ProtoOutputStream proto;
-    m.appendUidMap(2, config1, &proto);
+    m.appendUidMap(2, config1, nullptr, &proto);
     UidMapping results;
     protoOutputStreamToUidMapping(&proto, &results);
     EXPECT_EQ(1, results.snapshots_size());
 
     // We have to keep at least one snapshot in memory at all times.
     proto.clear();
-    m.appendUidMap(2, config1, &proto);
+    m.appendUidMap(2, config1, nullptr, &proto);
     protoOutputStreamToUidMapping(&proto, &results);
     EXPECT_EQ(1, results.snapshots_size());
 
@@ -296,7 +297,7 @@ TEST(UidMapTest, TestClearingOutput) {
     m.updateApp(5, String16(kApp1.c_str()), 1000, 40);
     EXPECT_EQ(1U, m.mChanges.size());
     proto.clear();
-    m.appendUidMap(6, config1, &proto);
+    m.appendUidMap(6, config1, nullptr, &proto);
     protoOutputStreamToUidMapping(&proto, &results);
     EXPECT_EQ(1, results.snapshots_size());
     EXPECT_EQ(1, results.changes_size());
@@ -308,14 +309,14 @@ TEST(UidMapTest, TestClearingOutput) {
 
     // We still can't remove anything.
     proto.clear();
-    m.appendUidMap(8, config1, &proto);
+    m.appendUidMap(8, config1, nullptr, &proto);
     protoOutputStreamToUidMapping(&proto, &results);
     EXPECT_EQ(1, results.snapshots_size());
     EXPECT_EQ(1, results.changes_size());
     EXPECT_EQ(2U, m.mChanges.size());
 
     proto.clear();
-    m.appendUidMap(9, config2, &proto);
+    m.appendUidMap(9, config2, nullptr, &proto);
     protoOutputStreamToUidMapping(&proto, &results);
     EXPECT_EQ(1, results.snapshots_size());
     EXPECT_EQ(2, results.changes_size());
@@ -342,10 +343,10 @@ TEST(UidMapTest, TestMemoryComputed) {
 
     ProtoOutputStream proto;
     vector<uint8_t> bytes;
-    m.appendUidMap(2, config1, &proto);
+    m.appendUidMap(2, config1, nullptr, &proto);
     size_t prevBytes = m.mBytesUsed;
 
-    m.appendUidMap(4, config1, &proto);
+    m.appendUidMap(4, config1, nullptr, &proto);
     EXPECT_TRUE(m.mBytesUsed < prevBytes);
 }
 
@@ -376,6 +377,7 @@ TEST(UidMapTest, TestMemoryGuardrail) {
     m.updateApp(5, String16("EXTREMELY_LONG_STRING_FOR_APP_TO_WASTE_MEMORY.0"), 1000, 4);
     EXPECT_EQ(1U, m.mChanges.size());
 }
+
 #else
 GTEST_LOG_(INFO) << "This test does nothing.\n";
 #endif

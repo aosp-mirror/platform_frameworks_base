@@ -60,7 +60,7 @@ public enum ScrimState {
         @Override
         public float getBehindAlpha(float busynessFactor) {
             return MathUtils.map(0 /* start */, 1 /* stop */,
-                   ScrimController.GRADIENT_SCRIM_ALPHA, ScrimController.GRADIENT_SCRIM_ALPHA_BUSY,
+                   mScrimBehindAlphaKeyguard, ScrimController.GRADIENT_SCRIM_ALPHA_BUSY,
                    busynessFactor);
         }
     },

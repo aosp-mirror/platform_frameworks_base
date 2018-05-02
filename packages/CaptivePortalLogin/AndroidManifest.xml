@@ -23,6 +23,7 @@
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.CONNECTIVITY_INTERNAL" />
     <uses-permission android:name="android.permission.NETWORK_SETTINGS" />
+    <uses-permission android:name="android.permission.NETWORK_BYPASS_PRIVATE_DNS" />
 
     <application android:label="@string/app_name"
                  android:usesCleartextTraffic="true">

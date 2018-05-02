@@ -5049,9 +5049,20 @@ public class ActivityManagerService extends IActivityManager.Stub
     public final int startActivityAsUser(IApplicationThread caller, String callingPackage,
             Intent intent, String resolvedType, IBinder resultTo, String resultWho, int requestCode,
             int startFlags, ProfilerInfo profilerInfo, Bundle bOptions, int userId) {
+        return startActivityAsUser(caller, callingPackage, intent, resolvedType, resultTo,
+                resultWho, requestCode, startFlags, profilerInfo, bOptions, userId,
+                true /*validateIncomingUser*/);
+    }
+
+    public final int startActivityAsUser(IApplicationThread caller, String callingPackage,
+            Intent intent, String resolvedType, IBinder resultTo, String resultWho, int requestCode,
+            int startFlags, ProfilerInfo profilerInfo, Bundle bOptions, int userId,
+            boolean validateIncomingUser) {
         enforceNotIsolatedCaller("startActivity");
-        userId = mUserController.handleIncomingUser(Binder.getCallingPid(), Binder.getCallingUid(),
-                userId, false, ALLOW_FULL_ONLY, "startActivity", null);
+
+        userId = mActivityStartController.checkTargetUser(userId, validateIncomingUser,
+                Binder.getCallingPid(), Binder.getCallingUid(), "startActivityAsUser");
+
         // TODO: Switch to user app stacks here.
         return mActivityStartController.obtainStarter(intent, "startActivityAsUser")
                 .setCaller(caller)
@@ -26341,6 +26352,16 @@ public class ActivityManagerService extends IActivityManager.Stub
                         SafeActivityOptions.fromBundle(bOptions), userId,
                         false /* validateIncomingUser */);
             }
+        }
+
+        @Override
+        public int startActivityAsUser(IApplicationThread caller, String callerPacakge,
+                Intent intent, Bundle options, int userId) {
+            return ActivityManagerService.this.startActivityAsUser(
+                    caller, callerPacakge, intent,
+                    intent.resolveTypeIfNeeded(mContext.getContentResolver()),
+                    null, null, 0, Intent.FLAG_ACTIVITY_NEW_TASK, null, options, userId,
+                    false /*validateIncomingUser*/);
         }
 
         @Override

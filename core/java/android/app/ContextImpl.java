@@ -1048,6 +1048,22 @@ class ContextImpl extends Context {
     }
 
     @Override
+    public void sendBroadcastAsUserMultiplePermissions(Intent intent, UserHandle user,
+            String[] receiverPermissions) {
+        warnIfCallingFromSystemProcess();
+        String resolvedType = intent.resolveTypeIfNeeded(getContentResolver());
+        try {
+            intent.prepareToLeaveProcess(this);
+            ActivityManager.getService().broadcastIntent(
+                    mMainThread.getApplicationThread(), intent, resolvedType, null,
+                    Activity.RESULT_OK, null, null, receiverPermissions, AppOpsManager.OP_NONE,
+                    null, false, false, user.getIdentifier());
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    @Override
     public void sendBroadcast(Intent intent, String receiverPermission, Bundle options) {
         warnIfCallingFromSystemProcess();
         String resolvedType = intent.resolveTypeIfNeeded(getContentResolver());

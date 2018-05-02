@@ -5717,6 +5717,29 @@ message MetricsEvent {
     // OS: P
     SETTINGS_ZEN_NOTIFICATIONS = 1400;
 
+    // An event category for slices.
+    // OPEN: Slice became visible.
+    // CLOSE: Slice became invisible.
+    // ACTION: Slice was tapped.
+    SLICE = 1401;
+
+    // The authority part of the slice URI
+    FIELD_SLICE_AUTHORITY = 1402;
+
+    // The path part of the slice URI
+    FIELD_SLICE_PATH = 1403;
+
+    // The authority part of the subslice URI
+    FIELD_SUBSLICE_AUTHORITY = 1404;
+
+    // The path part of the subslice URI
+    FIELD_SUBSLICE_PATH = 1405;
+
+    // OPEN: DND onboarding activity > don't update button
+    // CATEGORY: SETTINGS
+    // OS: P
+    ACTION_ZEN_ONBOARDING_KEEP_CURRENT_SETTINGS = 1406;
+
     // ---- End P Constants, all P constants go above this line ----
     // Add new aosp constants above this line.
     // END OF AOSP CONSTANTS

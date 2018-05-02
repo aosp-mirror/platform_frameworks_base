@@ -152,7 +152,7 @@ bool SkiaOpenGLPipeline::copyLayerInto(DeferredLayerUpdater* deferredLayer, SkBi
 }
 
 static Layer* createLayer(RenderState& renderState, uint32_t layerWidth, uint32_t layerHeight,
-                          SkColorFilter* colorFilter, int alpha, SkBlendMode mode, bool blend) {
+                          sk_sp<SkColorFilter> colorFilter, int alpha, SkBlendMode mode, bool blend) {
     GlLayer* layer =
             new GlLayer(renderState, layerWidth, layerHeight, colorFilter, alpha, mode, blend);
     layer->generateTexture();
