@@ -3557,6 +3557,16 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                 return;
             }
             setInputMethodLocked(nextSubtype.mImi.getId(), nextSubtype.mSubtypeId);
+            if (mSubtypeSwitchedByShortCutToast != null) {
+                mSubtypeSwitchedByShortCutToast.cancel();
+                mSubtypeSwitchedByShortCutToast = null;
+            }
+            if ((mImeWindowVis & InputMethodService.IME_VISIBLE) != 0) {
+                // IME window is shown.  The user should be able to visually understand that the
+                // subtype is changed in most of cases.  To avoid UI overlap, we do not show a toast
+                // in this case.
+                return;
+            }
             final InputMethodInfo newInputMethodInfo = mMethodMap.get(mCurMethodId);
             if (newInputMethodInfo == null) {
                 return;
@@ -3564,12 +3574,8 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             final CharSequence toastText = InputMethodUtils.getImeAndSubtypeDisplayName(mContext,
                     newInputMethodInfo, mCurrentSubtype);
             if (!TextUtils.isEmpty(toastText)) {
-                if (mSubtypeSwitchedByShortCutToast == null) {
-                    mSubtypeSwitchedByShortCutToast = Toast.makeText(mContext, toastText,
-                            Toast.LENGTH_SHORT);
-                } else {
-                    mSubtypeSwitchedByShortCutToast.setText(toastText);
-                }
+                mSubtypeSwitchedByShortCutToast = Toast.makeText(mContext, toastText.toString(),
+                        Toast.LENGTH_SHORT);
                 mSubtypeSwitchedByShortCutToast.show();
             }
         }
