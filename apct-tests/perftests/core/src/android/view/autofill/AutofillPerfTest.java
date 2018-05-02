@@ -51,6 +51,7 @@ import org.junit.runner.RunWith;
 
 import static org.junit.Assert.assertTrue;
 
+@LargeTest
 @RunWith(Parameterized.class)
 public class AutofillPerfTest {
     @Parameters(name = "{0}")
