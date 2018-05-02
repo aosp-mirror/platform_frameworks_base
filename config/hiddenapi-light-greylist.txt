@@ -31,7 +31,10 @@ Landroid/app/Activity;->getActivityOptions()Landroid/app/ActivityOptions;
 Landroid/app/Activity;->getActivityToken()Landroid/os/IBinder;
 Landroid/app/Activity;->mActivityInfo:Landroid/content/pm/ActivityInfo;
 Landroid/app/Activity;->mApplication:Landroid/app/Application;
+Landroid/app/Activity;->mCalled:Z
 Landroid/app/Activity;->mComponent:Landroid/content/ComponentName;
+Landroid/app/Activity;->mConfigChangeFlags:I
+Landroid/app/Activity;->mCurrentConfig:Landroid/content/res/Configuration;
 Landroid/app/Activity;->mFinished:Z
 Landroid/app/Activity;->mFragments:Landroid/app/FragmentController;
 Landroid/app/Activity;->mHandler:Landroid/os/Handler;
@@ -41,6 +44,7 @@ Landroid/app/Activity;->mReferrer:Ljava/lang/String;
 Landroid/app/Activity;->mResultCode:I
 Landroid/app/Activity;->mResultData:Landroid/content/Intent;
 Landroid/app/Activity;->mResumed:Z
+Landroid/app/Activity;->mTitle:Ljava/lang/CharSequence;
 Landroid/app/Activity;->mToken:Landroid/os/IBinder;
 Landroid/app/Activity;->mWindow:Landroid/view/Window;
 Landroid/app/Activity;->mWindowManager:Landroid/view/WindowManager;
@@ -3048,7 +3052,9 @@ Landroid/widget/CursorAdapter;->mRowIDColumn:I
 Landroid/widget/DatePicker;->mDelegate:Landroid/widget/DatePicker$DatePickerDelegate;
 Landroid/widget/EdgeEffect;->mPaint:Landroid/graphics/Paint;
 Landroid/widget/Editor;->invalidateTextDisplayList()V
+Landroid/widget/Editor;->mInsertionControllerEnabled:Z
 Landroid/widget/Editor;->mSelectHandleLeft:Landroid/graphics/drawable/Drawable;
+Landroid/widget/Editor;->mSelectionControllerEnabled:Z
 Landroid/widget/Editor;->mShowCursor:J
 Landroid/widget/Editor;->mShowSoftInputOnFocus:Z
 Landroid/widget/ExpandableListView;->mChildDivider:Landroid/graphics/drawable/Drawable;
