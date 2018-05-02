@@ -26,6 +26,7 @@ import android.app.Dialog;
 import android.app.KeyguardManager;
 import android.app.WallpaperManager;
 import android.app.admin.DevicePolicyManager;
+import android.app.trust.TrustManager;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
@@ -699,6 +700,9 @@ class GlobalActionsDialog implements DialogInterface.OnDismissListener,
                                 UserHandle.USER_ALL);
                 try {
                     WindowManagerGlobal.getWindowManagerService().lockNow(null);
+                    // Lock profiles (if any) on the background thread.
+                    final Handler bgHandler = new Handler(Dependency.get(Dependency.BG_LOOPER));
+                    bgHandler.post(() -> lockProfiles());
                 } catch (RemoteException e) {
                     Log.e(TAG, "Error while trying to lock device.", e);
                 }
@@ -714,6 +718,18 @@ class GlobalActionsDialog implements DialogInterface.OnDismissListener,
                 return false;
             }
         };
+    }
+
+    private void lockProfiles() {
+        final UserManager um = (UserManager) mContext.getSystemService(Context.USER_SERVICE);
+        final TrustManager tm = (TrustManager) mContext.getSystemService(Context.TRUST_SERVICE);
+        final int currentUserId = getCurrentUser().id;
+        final int[] profileIds = um.getEnabledProfileIds(currentUserId);
+        for (final int id : profileIds) {
+            if (id != currentUserId) {
+                tm.setDeviceLockedForUser(id, true);
+            }
+        }
     }
 
     private UserInfo getCurrentUser() {
