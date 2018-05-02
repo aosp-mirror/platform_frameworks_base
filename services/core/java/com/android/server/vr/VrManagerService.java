@@ -1327,9 +1327,14 @@ public class VrManagerService extends SystemService
 
     public void setVr2dDisplayProperties(
         Vr2dDisplayProperties compatDisplayProp) {
-        if (mVr2dDisplay != null) {
-            mVr2dDisplay.setVirtualDisplayProperties(compatDisplayProp);
-            return;
+        final long token = Binder.clearCallingIdentity();
+        try {
+            if (mVr2dDisplay != null) {
+                mVr2dDisplay.setVirtualDisplayProperties(compatDisplayProp);
+                return;
+            }
+        } finally {
+            Binder.restoreCallingIdentity(token);
         }
         Slog.w(TAG, "Vr2dDisplay is null!");
     }
@@ -1345,10 +1350,13 @@ public class VrManagerService extends SystemService
     private void setAndBindCompositor(ComponentName componentName) {
         final int userId = UserHandle.getCallingUserId();
         final long token = Binder.clearCallingIdentity();
-        synchronized (mLock) {
-            updateCompositorServiceLocked(userId, componentName);
+        try {
+            synchronized (mLock) {
+                updateCompositorServiceLocked(userId, componentName);
+            }
+        } finally {
+            Binder.restoreCallingIdentity(token);
         }
-        Binder.restoreCallingIdentity(token);
     }
 
     private void updateCompositorServiceLocked(int userId, ComponentName componentName) {
