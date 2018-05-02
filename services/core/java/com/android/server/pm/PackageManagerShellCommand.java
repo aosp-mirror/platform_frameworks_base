@@ -77,7 +77,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.WeakHashMap;
-import java.util.concurrent.SynchronousQueue;
+import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 
 class PackageManagerShellCommand extends ShellCommand {
@@ -1750,7 +1750,7 @@ class PackageManagerShellCommand extends ShellCommand {
     }
 
     private static class LocalIntentReceiver {
-        private final SynchronousQueue<Intent> mResult = new SynchronousQueue<>();
+        private final LinkedBlockingQueue<Intent> mResult = new LinkedBlockingQueue<>();
 
         private IIntentSender.Stub mLocalSender = new IIntentSender.Stub() {
             @Override
