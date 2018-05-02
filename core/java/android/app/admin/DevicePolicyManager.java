@@ -3711,7 +3711,7 @@ public class DevicePolicyManager {
      */
     public static final int PROFILE_KEYGUARD_FEATURES_AFFECT_OWNER =
             DevicePolicyManager.KEYGUARD_DISABLE_TRUST_AGENTS
-            | DevicePolicyManager.KEYGUARD_DISABLE_FINGERPRINT;
+            | DevicePolicyManager.KEYGUARD_DISABLE_BIOMETRICS;
 
     /**
      * Called by an application that is administering the device to request that the storage system
@@ -4724,12 +4724,14 @@ public class DevicePolicyManager {
      * <ul>
      * <li>{@link #KEYGUARD_DISABLE_TRUST_AGENTS}, which affects the parent user, but only if there
      * is no separate challenge set on the managed profile.
-     * <li>{@link #KEYGUARD_DISABLE_FINGERPRINT} which affects the managed profile challenge if
+     * <li>{@link #KEYGUARD_DISABLE_FINGERPRINT}, {@link #KEYGUARD_DISABLE_FACE} or
+     * {@link #KEYGUARD_DISABLE_IRIS} which affects the managed profile challenge if
      * there is one, or the parent user otherwise.
      * <li>{@link #KEYGUARD_DISABLE_UNREDACTED_NOTIFICATIONS} which affects notifications generated
      * by applications in the managed profile.
      * </ul>
-     * {@link #KEYGUARD_DISABLE_TRUST_AGENTS} and {@link #KEYGUARD_DISABLE_FINGERPRINT} can also be
+     * {@link #KEYGUARD_DISABLE_TRUST_AGENTS}, {@link #KEYGUARD_DISABLE_FINGERPRINT},
+     * {@link #KEYGUARD_DISABLE_FACE} and {@link #KEYGUARD_DISABLE_IRIS} can also be
      * set on the {@link DevicePolicyManager} instance returned by
      * {@link #getParentProfileInstance(ComponentName)} in order to set restrictions on the parent
      * profile.
@@ -4740,12 +4742,16 @@ public class DevicePolicyManager {
      * {@link #getKeyguardDisabledFeatures(ComponentName)}
      *
      * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
-     * @param which {@link #KEYGUARD_DISABLE_FEATURES_NONE} (default),
+     * @param which The disabled features flag which can be either
+     *            {@link #KEYGUARD_DISABLE_FEATURES_NONE} (default),
+     *            {@link #KEYGUARD_DISABLE_FEATURES_ALL}, or a combination of
      *            {@link #KEYGUARD_DISABLE_WIDGETS_ALL}, {@link #KEYGUARD_DISABLE_SECURE_CAMERA},
      *            {@link #KEYGUARD_DISABLE_SECURE_NOTIFICATIONS},
      *            {@link #KEYGUARD_DISABLE_TRUST_AGENTS},
      *            {@link #KEYGUARD_DISABLE_UNREDACTED_NOTIFICATIONS},
-     *            {@link #KEYGUARD_DISABLE_FINGERPRINT}, {@link #KEYGUARD_DISABLE_FEATURES_ALL}
+     *            {@link #KEYGUARD_DISABLE_FINGERPRINT},
+     *            {@link #KEYGUARD_DISABLE_FACE},
+     *            {@link #KEYGUARD_DISABLE_IRIS}.
      * @throws SecurityException if {@code admin} is not an active administrator or does not user
      *             {@link DeviceAdminInfo#USES_POLICY_DISABLE_KEYGUARD_FEATURES}
      */
