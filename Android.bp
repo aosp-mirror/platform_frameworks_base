@@ -1038,8 +1038,8 @@ droiddoc {
         "api/current.txt",
     ],
     api_filename: "public_api.txt",
+    private_api_filename: "private.txt",
     removed_api_filename: "removed.txt",
-    removed_dex_api_filename: "removed-dex.txt",
     args: framework_docs_args + " -referenceonly -nodocs",
 }
 
@@ -1106,6 +1106,25 @@ java_library_static {
     srcs: [
         ":hwbinder-stubs-docs",
     ],
+}
+
+droiddoc {
+    name: "hiddenapi-lists",
+    defaults: ["framework-docs-default"],
+    arg_files: [
+        "core/res/AndroidManifest.xml",
+        ":api-version-xml",
+        "core/java/overview.html",
+        ":current-support-api",
+    ],
+    private_dex_api_filename: "private-dex.txt",
+    removed_dex_api_filename: "removed-dex.txt",
+    args: framework_docs_args +
+          " -referenceonly" +
+          " -nodocs" +
+          " -showUnannotated" +
+          " -showAnnotation android.annotation.SystemApi" +
+          " -showAnnotation android.annotation.TestApi",
 }
 
 filegroup {
