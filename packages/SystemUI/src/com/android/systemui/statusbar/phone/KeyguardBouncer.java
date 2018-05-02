@@ -54,6 +54,8 @@ public class KeyguardBouncer {
 
     private static final String TAG = "KeyguardBouncer";
     static final float ALPHA_EXPANSION_THRESHOLD = 0.95f;
+    private static final float EXPANSION_HIDDEN = 1f;
+    private static final float EXPANSION_VISIBLE = 0f;
 
     protected final Context mContext;
     protected final ViewMediatorCallback mCallback;
@@ -71,10 +73,15 @@ public class KeyguardBouncer {
                 }
             };
     private final Runnable mRemoveViewRunnable = this::removeView;
+    protected KeyguardHostView mKeyguardView;
+    private final Runnable mResetRunnable = ()-> {
+        if (mKeyguardView != null) {
+            mKeyguardView.reset();
+        }
+    };
 
     private int mStatusBarHeight;
-    private float mExpansion;
-    protected KeyguardHostView mKeyguardView;
+    private float mExpansion = EXPANSION_HIDDEN;
     protected ViewGroup mRoot;
     private boolean mShowingSoon;
     private int mBouncerPromptReason;
@@ -96,7 +103,7 @@ public class KeyguardBouncer {
     }
 
     public void show(boolean resetSecuritySelection) {
-        show(resetSecuritySelection, true /* notifyFalsing */);
+        show(resetSecuritySelection, true /* animated */);
     }
 
     /**
@@ -120,8 +127,7 @@ public class KeyguardBouncer {
         // Later, at the end of the animation, when the bouncer is at the top of the screen,
         // onFullyShown() will be called and FalsingManager will stop recording touches.
         if (animated) {
-            mFalsingManager.onBouncerShown();
-            setExpansion(0);
+            setExpansion(EXPANSION_VISIBLE);
         }
 
         if (resetSecuritySelection) {
@@ -152,6 +158,7 @@ public class KeyguardBouncer {
         mShowingSoon = true;
 
         // Split up the work over multiple frames.
+        DejankUtils.removeCallbacks(mResetRunnable);
         DejankUtils.postAfterTraversal(mShowRunnable);
 
         mCallback.onBouncerVisiblityChanged(true /* shown */);
@@ -181,6 +188,7 @@ public class KeyguardBouncer {
                 mRoot.setVisibility(View.INVISIBLE);
             }
             mFalsingManager.onBouncerHidden();
+            DejankUtils.postAfterTraversal(mResetRunnable);
         }
     }
 
@@ -210,6 +218,9 @@ public class KeyguardBouncer {
                 mKeyguardView.requestLayout();
             }
             mShowingSoon = false;
+            if (mExpansion == EXPANSION_VISIBLE) {
+                mKeyguardView.onResume();
+            }
             StatsLog.write(StatsLog.KEYGUARD_BOUNCER_STATE_CHANGED,
                 StatsLog.KEYGUARD_BOUNCER_STATE_CHANGED__STATE__SHOWN);
         }
@@ -303,7 +314,7 @@ public class KeyguardBouncer {
 
     public boolean isShowing() {
         return (mShowingSoon || (mRoot != null && mRoot.getVisibility() == View.VISIBLE))
-                && mExpansion == 0 && !isAnimatingAway();
+                && mExpansion == EXPANSION_VISIBLE && !isAnimatingAway();
     }
 
     /**
@@ -337,10 +348,10 @@ public class KeyguardBouncer {
             mKeyguardView.setTranslationY(fraction * mKeyguardView.getHeight());
         }
 
-        if (fraction == 0 && oldExpansion != 0) {
+        if (fraction == EXPANSION_VISIBLE && oldExpansion != EXPANSION_VISIBLE) {
             onFullyShown();
             mExpansionCallback.onFullyShown();
-        } else if (fraction == 1 && oldExpansion != 0) {
+        } else if (fraction == EXPANSION_HIDDEN && oldExpansion != EXPANSION_HIDDEN) {
             onFullyHidden();
             mExpansionCallback.onFullyHidden();
         }
