@@ -491,4 +491,6 @@
          This name is in the ComponentName flattened format (package/class)  -->
     <string name="config_screenshotEditor" translatable="false"></string>
 
+    <!-- On debuggable builds, alert the user if SystemUI PSS goes over this number (in kb) -->
+    <integer name="watch_heap_limit">256000</integer>
 </resources>

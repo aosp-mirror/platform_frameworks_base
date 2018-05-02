@@ -15,6 +15,7 @@
 package com.android.systemui.qs.tileimpl;
 
 import android.content.Context;
+import android.os.Build;
 import android.util.Log;
 import android.view.ContextThemeWrapper;
 
@@ -41,6 +42,7 @@ import com.android.systemui.qs.tiles.UserTile;
 import com.android.systemui.qs.tiles.WifiTile;
 import com.android.systemui.qs.tiles.WorkModeTile;
 import com.android.systemui.qs.QSTileHost;
+import com.android.systemui.util.leak.GarbageMonitor;
 
 public class QSFactoryImpl implements QSFactory {
 
@@ -60,30 +62,58 @@ public class QSFactoryImpl implements QSFactory {
     }
 
     private QSTileImpl createTileInternal(String tileSpec) {
-        if (tileSpec.equals("wifi")) return new WifiTile(mHost);
-        else if (tileSpec.equals("bt")) return new BluetoothTile(mHost);
-        else if (tileSpec.equals("cell")) return new CellularTile(mHost);
-        else if (tileSpec.equals("dnd")) return new DndTile(mHost);
-        else if (tileSpec.equals("inversion")) return new ColorInversionTile(mHost);
-        else if (tileSpec.equals("airplane")) return new AirplaneModeTile(mHost);
-        else if (tileSpec.equals("work")) return new WorkModeTile(mHost);
-        else if (tileSpec.equals("rotation")) return new RotationLockTile(mHost);
-        else if (tileSpec.equals("flashlight")) return new FlashlightTile(mHost);
-        else if (tileSpec.equals("location")) return new LocationTile(mHost);
-        else if (tileSpec.equals("cast")) return new CastTile(mHost);
-        else if (tileSpec.equals("hotspot")) return new HotspotTile(mHost);
-        else if (tileSpec.equals("user")) return new UserTile(mHost);
-        else if (tileSpec.equals("battery")) return new BatterySaverTile(mHost);
-        else if (tileSpec.equals("saver")) return new DataSaverTile(mHost);
-        else if (tileSpec.equals("night")) return new NightDisplayTile(mHost);
-        else if (tileSpec.equals("nfc")) return new NfcTile(mHost);
-        // Intent tiles.
-        else if (tileSpec.startsWith(IntentTile.PREFIX)) return IntentTile.create(mHost, tileSpec);
-        else if (tileSpec.startsWith(CustomTile.PREFIX)) return CustomTile.create(mHost, tileSpec);
-        else {
-            Log.w(TAG, "Bad tile spec: " + tileSpec);
-            return null;
+        // Stock tiles.
+        switch (tileSpec) {
+            case "wifi":
+                return new WifiTile(mHost);
+            case "bt":
+                return new BluetoothTile(mHost);
+            case "cell":
+                return new CellularTile(mHost);
+            case "dnd":
+                return new DndTile(mHost);
+            case "inversion":
+                return new ColorInversionTile(mHost);
+            case "airplane":
+                return new AirplaneModeTile(mHost);
+            case "work":
+                return new WorkModeTile(mHost);
+            case "rotation":
+                return new RotationLockTile(mHost);
+            case "flashlight":
+                return new FlashlightTile(mHost);
+            case "location":
+                return new LocationTile(mHost);
+            case "cast":
+                return new CastTile(mHost);
+            case "hotspot":
+                return new HotspotTile(mHost);
+            case "user":
+                return new UserTile(mHost);
+            case "battery":
+                return new BatterySaverTile(mHost);
+            case "saver":
+                return new DataSaverTile(mHost);
+            case "night":
+                return new NightDisplayTile(mHost);
+            case "nfc":
+                return new NfcTile(mHost);
         }
+
+        // Intent tiles.
+        if (tileSpec.startsWith(IntentTile.PREFIX)) return IntentTile.create(mHost, tileSpec);
+        if (tileSpec.startsWith(CustomTile.PREFIX)) return CustomTile.create(mHost, tileSpec);
+
+        // Debug tiles.
+        if (Build.IS_DEBUGGABLE) {
+            if (tileSpec.equals(GarbageMonitor.MemoryTile.TILE_SPEC)) {
+                return new GarbageMonitor.MemoryTile(mHost);
+            }
+        }
+
+        // Broken tiles.
+        Log.w(TAG, "Bad tile spec: " + tileSpec);
+        return null;
     }
 
     @Override
