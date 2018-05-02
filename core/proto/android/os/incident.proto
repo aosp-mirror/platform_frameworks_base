@@ -161,6 +161,7 @@ message IncidentProto {
 
     optional CpuFreqProto cpu_freq = 2004 [
         (section).type = SECTION_FILE,
+        (section).device_specific = true,
         (section).args = "/sys/devices/system/cpu/cpufreq/all_time_in_state"
     ];
 
@@ -170,7 +171,8 @@ message IncidentProto {
     ];
 
     optional BatteryTypeProto battery_type = 2006 [
-        (section).type = SECTION_NONE, // disabled since the path is device specific!
+        (section).type = SECTION_FILE,
+        (section).device_specific = true,
         (section).args = "/sys/class/power_supply/bms/battery_type"
     ];
 
