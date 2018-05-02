@@ -273,8 +273,8 @@
     <string name="permgrouplab_contacts" msgid="3657758145679177612">"পরিচিতি"</string>
     <string name="permgroupdesc_contacts" msgid="6951499528303668046">"আপনার পরিচিতিগুলিতে অ্যাক্সেস"</string>
     <string name="permgrouprequest_contacts" msgid="6032805601881764300">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;-কে আপনার পরিচিতিতে অ্যাক্সেস দেবেন?"</string>
-    <string name="permgrouplab_location" msgid="7275582855722310164">"অবস্থান"</string>
-    <string name="permgroupdesc_location" msgid="1346617465127855033">"এই ডিভাইসের অবস্থান অ্যাক্সেস"</string>
+    <string name="permgrouplab_location" msgid="7275582855722310164">"লোকেশন"</string>
+    <string name="permgroupdesc_location" msgid="1346617465127855033">"এই ডিভাইসের লোকেশন অ্যাক্সেস"</string>
     <string name="permgrouprequest_location" msgid="3788275734953323491">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;-কে এই ডিভাইসের লোকেশন অ্যাক্সেস করতে দেবেন?"</string>
     <string name="permgrouplab_calendar" msgid="5863508437783683902">"ক্যালেন্ডার"</string>
     <string name="permgroupdesc_calendar" msgid="3889615280211184106">"আপনার ক্যালেন্ডারে অ্যাক্সেস"</string>
@@ -300,11 +300,11 @@
     <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"উইন্ডোর কন্টেন্ট পুনরুদ্ধার করে"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"আপনি ইন্টারঅ্যাক্ট করছেন এমন একটি উইন্ডোর সামগ্রীকে সযত্নে নিরীক্ষণ করে৷"</string>
     <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"স্পর্শের মাধ্যমে অন্বেষণ করা চালু করুন"</string>
-    <string name="capability_desc_canRequestTouchExploration" msgid="7543249041581408313">"যে আইটেমগুলিতে আলতো চেপেছেন সেগুলি সশব্দে বলবে এবং ইঙ্গিতগুলি ব্যবহার করে স্ক্রীন অন্বেষণ করা যাবে৷"</string>
+    <string name="capability_desc_canRequestTouchExploration" msgid="7543249041581408313">"যে আইটেমগুলিতে আলতো চেপেছেন সেগুলি সশব্দে বলবে এবং ইঙ্গিতগুলি ব্যবহার করে স্ক্রিন অন্বেষণ করা যাবে৷"</string>
     <string name="capability_title_canRequestFilterKeyEvents" msgid="2103440391902412174">"আপনার লেখা পাঠ্যকে নিরীক্ষণ করে"</string>
     <string name="capability_desc_canRequestFilterKeyEvents" msgid="7463135292204152818">"ক্রেডিট কার্ডের নম্বর ও পাসওয়ার্ডগুলির মতো ব্যক্তিগত তথ্য অন্তর্ভুক্ত করে৷"</string>
     <string name="capability_title_canControlMagnification" msgid="3593493281059424855">"প্রদর্শনের বৃহত্তরীকরণ ব্যবস্থা নিয়ন্ত্রণ করুন"</string>
-    <string name="capability_desc_canControlMagnification" msgid="4791858203568383773">"প্রদর্শনের জুমের স্তর এবং অবস্থান নির্ধারন নিয়ন্ত্রণ করুন৷"</string>
+    <string name="capability_desc_canControlMagnification" msgid="4791858203568383773">"প্রদর্শনের জুমের স্তর এবং লোকেশন নির্ধারন নিয়ন্ত্রণ করুন৷"</string>
     <string name="capability_title_canPerformGestures" msgid="7418984730362576862">"অঙ্গভঙ্গির কাজগুলি সম্পাদন"</string>
     <string name="capability_desc_canPerformGestures" msgid="8296373021636981249">"আলতো চাপ দেওয়া, সোয়াইপ, পিঞ্চ করা এবং অন্যান্য ইঙ্গিতের কাজগুলি সম্পাদন করতে পারবেন৷"</string>
     <string name="capability_title_canCaptureFingerprintGestures" msgid="6309568287512278670">"ফিঙ্গারপ্রিন্ট সেন্সরের উপর করা অঙ্গভঙ্গিগুলি"</string>
@@ -397,11 +397,11 @@
     <string name="permdesc_writeCalendar" product="tablet" msgid="1675270619903625982">"এই অ্যাপটি আপনার ট্যাবলেটে ক্যালেন্ডার ইভেন্টগুলি যোগ করতে, সরাতে বা পরিবর্তিত করতে পারে৷ এই অ্যাপটি মেসেজ পাঠাতে পারে যা ক্যালেন্ডারের মাললিকের থেকে এসেছে বলে মনে হয় বা ইভেন্টগুলিকে তাদের মালিকদের না জানিয়েই পরিবর্তিত করতে পারে৷"</string>
     <string name="permdesc_writeCalendar" product="tv" msgid="9017809326268135866">"এই অ্যাপটি আপনার টিভিতে ক্যালেন্ডার ইভেন্টগুলি যোগ করতে, সরাতে বা পরিবর্তিত করতে পারে৷ এই অ্যাপটি মেসেজ পাঠাতে পারে যা ক্যালেন্ডারের মাললিকের থেকে এসেছে বলে মনে হয় বা ইভেন্টগুলিকে তাদের মালিকদের না জানিয়েই পরিবর্তিত করতে পারে৷"</string>
     <string name="permdesc_writeCalendar" product="default" msgid="7592791790516943173">"এই অ্যাপটি আপনার ফোনে ক্যালেন্ডার ইভেন্টগুলি যোগ করতে, সরাতে বা পরিবর্তিত করতে পারে৷ এই অ্যাপটি মেসেজ পাঠাতে পারে যা ক্যালেন্ডারের মাললিকের থেকে এসেছে বলে মনে হয় বা ইভেন্টগুলিকে তাদের মালিকদের না জানিয়েই পরিবর্তিত করতে পারে৷"</string>
-    <string name="permlab_accessLocationExtraCommands" msgid="2836308076720553837">"অতিরিক্ত অবস্থান প্রদানকারী কমান্ডগুলি অ্যাক্সেস করে"</string>
-    <string name="permdesc_accessLocationExtraCommands" msgid="6078307221056649927">"অবস্থানের সাথে সম্পর্কিত তথ্য প্রদানকারীর অতিরিক্ত কম্যান্ডগুলিকে অ্যাপ্লিকেশানটিকে মঞ্জুর করে৷ এটি অ্যাপ্লিকেশানটিকে GPS অথবা অন্যান্য অবস্থান নির্ণয়ের সাথে সম্পর্কিত উৎসগুলির ক্রিয়াপ্রণালীর নিয়ন্ত্রণকে মঞ্জুর করতে পারে৷"</string>
-    <string name="permlab_accessFineLocation" msgid="251034415460950944">"সুনির্দিষ্ট অবস্থান (GPS এবং নেটওয়ার্ক-ভিত্তিক) অ্যাক্সেস করুন"</string>
+    <string name="permlab_accessLocationExtraCommands" msgid="2836308076720553837">"অতিরিক্ত লোকেশন প্রদানকারী কমান্ডগুলি অ্যাক্সেস করে"</string>
+    <string name="permdesc_accessLocationExtraCommands" msgid="6078307221056649927">"লোকেশনের সাথে সম্পর্কিত তথ্য প্রদানকারীর অতিরিক্ত কম্যান্ডগুলিকে অ্যাপ্লিকেশানটিকে মঞ্জুর করে৷ এটি অ্যাপ্লিকেশানটিকে GPS অথবা অন্যান্য লোকেশন নির্ণয়ের সাথে সম্পর্কিত উৎসগুলির ক্রিয়াপ্রণালীর নিয়ন্ত্রণকে মঞ্জুর করতে পারে৷"</string>
+    <string name="permlab_accessFineLocation" msgid="251034415460950944">"সুনির্দিষ্ট লোকেশন (GPS এবং নেটওয়ার্ক-ভিত্তিক) অ্যাক্সেস করুন"</string>
     <string name="permdesc_accessFineLocation" msgid="5821994817969957884">"মোবাইল টাওয়ার এবং ওয়াই-ফাই নেটওয়ার্কগুলির মত নেটওয়ার্ক লোকেশন উৎসগুলি বা GPS এর উপর ভিত্তি করে এই অ্যাপটি আপনার লোকেশন শনাক্ত করতে পারে৷ এই লোকেশন পরিষেবাগুলি অবশ্যই চালু রাখতে হবে এবং অ্যাপটি যাতে সেগুলি ব্যবহার করতে পারে সেজন্য সেগুলিকে আপনার ফোনে উপলব্ধ করে রাখতে হবে৷ এর জন্য অতিরিক্ত ব্যাটারি খরচ হতে পারে৷"</string>
-    <string name="permlab_accessCoarseLocation" msgid="7715277613928539434">"আনুমানিক অবস্থান (নেটওয়ার্ক-ভিত্তিক) অ্যাক্সেস করুন"</string>
+    <string name="permlab_accessCoarseLocation" msgid="7715277613928539434">"আনুমানিক লোকেশন (নেটওয়ার্ক-ভিত্তিক) অ্যাক্সেস করুন"</string>
     <string name="permdesc_accessCoarseLocation" product="tablet" msgid="3373266766487862426">"মোবাইল টাওয়ার এবং ওয়াই-ফাই নেটওয়ার্কগুলির মত নেটওয়ার্ক উৎসগুলির উপর ভিত্তি করে এই অ্যাপটি আপনার লোকেশন শনাক্ত করতে পারে৷ এই লোকেশন পরিষেবাগুলি অবশ্যই চালু রাখতে হবে এবং অ্যাপটি যাতে সেগুলি ব্যবহার করতে পারে সেইজন্য সেগুলিকে আপনার ট্যাবলেটে উপলব্ধ করে রাখতে হবে৷"</string>
     <string name="permdesc_accessCoarseLocation" product="tv" msgid="1884022719818788511">"মোবাইল টাওয়ার এবং ওয়াই-ফাই নেটওয়ার্কগুলির মত নেটওয়ার্কের উৎসগুলির উপর ভিত্তি করে এই অ্যাপটি আপনার লোকেশন শনাক্ত করতে পারে৷ এই লোকেশন পরিষেবাগুলি অবশ্যই চালু রাখতে হবে এবং অ্যাপটি যাতে সেগুলি ব্যবহার করতে পারে সেজন্য সেগুলিকে আপনার টিভিতে উপলব্ধ করে রাখতে হবে৷"</string>
     <string name="permdesc_accessCoarseLocation" product="default" msgid="7788009094906196995">"মোবাইল টাওয়ার এবং ওয়াই-ফাই নেটওয়ার্কগুলির মত নেটওয়ার্ক উৎসগুলির উপর ভিত্তি করে এই অ্যাপটি আপনার লোকেশন শনাক্ত করতে পারে৷ এই লোকেশন পরিষেবাগুলি অবশ্যই চালু রাখতে হবে এবং অ্যাপটি যাতে সেগুলি ব্যবহার করতে পারে সেজন্য সেগুলিকে আপনার ফোনে উপলব্ধ করে রাখতে হবে৷"</string>
@@ -576,15 +576,15 @@
     <string name="policydesc_limitPassword" msgid="2502021457917874968">"স্ক্রিন লক করার পাসওয়ার্ডগুলিতে অনুমতিপ্রাপ্ত অক্ষর এবং দৈর্ঘ্য নিয়ন্ত্রণ করে৷"</string>
     <string name="policylab_watchLogin" msgid="5091404125971980158">"স্ক্রিন আনলক করার প্রচেষ্টাগুলির উপরে নজর রাখুন"</string>
     <string name="policydesc_watchLogin" product="tablet" msgid="3215729294215070072">"স্ক্রীণ আনলক করার সময় ভুলভাবে লেখা পাসওয়ার্ড প্রবেশের সংখ্যা মনিটার করে, এবং ট্যাবলেট লক করে এবং অনেক বার পাসওয়ার্ড ভুল ভাবে লেখা হলে ট্যাবলেটের ডেটা মুছে ফেলে৷"</string>
-    <string name="policydesc_watchLogin" product="TV" msgid="2707817988309890256">"স্ক্রীন আনলক করার সময় ভুলভাবে লেখা পাসওয়ার্ড প্রবেশের সংখ্যা মনিটার করে, এবং টিভি লক করে এবং অনেক বার পাসওয়ার্ড ভুল ভাবে লেখা হলে টিভির ডেটা মুছে ফেলে৷"</string>
+    <string name="policydesc_watchLogin" product="TV" msgid="2707817988309890256">"স্ক্রিন আনলক করার সময় ভুলভাবে লেখা পাসওয়ার্ড প্রবেশের সংখ্যা মনিটার করে, এবং টিভি লক করে এবং অনেক বার পাসওয়ার্ড ভুল ভাবে লেখা হলে টিভির ডেটা মুছে ফেলে৷"</string>
     <string name="policydesc_watchLogin" product="default" msgid="5712323091846761073">"স্ক্রীণ আনলক করার সময় ভুলভাবে লেখা পাসওয়ার্ড প্রবেশের সংখ্যা মনিটার করে, এবং ফোন লক করে এবং অনেক বার পাসওয়ার্ড ভুল ভাবে লেখা হলে ফোনের ডেটা মুছে ফেলে৷"</string>
-    <string name="policydesc_watchLogin_secondaryUser" product="tablet" msgid="4280246270601044505">"স্ক্রীন আনলক করার সময় ভুলভাবে লেখা পাসওয়ার্ড প্রবেশের সংখ্যা মনিটার করে, এবং ট্যাবলেট লক করে এবং অনেক বার পাসওয়ার্ড ভুল ভাবে লেখা হলে ব্যবহারকারীর ডেটা মুছে ফেলে৷"</string>
-    <string name="policydesc_watchLogin_secondaryUser" product="TV" msgid="3484832653564483250">"স্ক্রীন আনলক করার সময় ভুলভাবে লেখা পাসওয়ার্ড প্রবেশের সংখ্যা মনিটার করে, এবং টিভি লক করে এবং অনেক বার পাসওয়ার্ড ভুল ভাবে লেখা হলে ব্যবহারকারীর ডেটা মুছে ফেলে৷"</string>
-    <string name="policydesc_watchLogin_secondaryUser" product="default" msgid="2185480427217127147">"স্ক্রীন আনলক করার সময় ভুলভাবে লেখা পাসওয়ার্ড প্রবেশের সংখ্যা মনিটার করে, এবং ফোন লক করে এবং অনেক বার পাসওয়ার্ড ভুল ভাবে লেখা হলে ব্যবহারকারীর ডেটা মুছে ফেলে৷"</string>
+    <string name="policydesc_watchLogin_secondaryUser" product="tablet" msgid="4280246270601044505">"স্ক্রিন আনলক করার সময় ভুলভাবে লেখা পাসওয়ার্ড প্রবেশের সংখ্যা মনিটার করে, এবং ট্যাবলেট লক করে এবং অনেক বার পাসওয়ার্ড ভুল ভাবে লেখা হলে ব্যবহারকারীর ডেটা মুছে ফেলে৷"</string>
+    <string name="policydesc_watchLogin_secondaryUser" product="TV" msgid="3484832653564483250">"স্ক্রিন আনলক করার সময় ভুলভাবে লেখা পাসওয়ার্ড প্রবেশের সংখ্যা মনিটার করে, এবং টিভি লক করে এবং অনেক বার পাসওয়ার্ড ভুল ভাবে লেখা হলে ব্যবহারকারীর ডেটা মুছে ফেলে৷"</string>
+    <string name="policydesc_watchLogin_secondaryUser" product="default" msgid="2185480427217127147">"স্ক্রিন আনলক করার সময় ভুলভাবে লেখা পাসওয়ার্ড প্রবেশের সংখ্যা মনিটার করে, এবং ফোন লক করে এবং অনেক বার পাসওয়ার্ড ভুল ভাবে লেখা হলে ব্যবহারকারীর ডেটা মুছে ফেলে৷"</string>
     <string name="policylab_resetPassword" msgid="4934707632423915395">"স্ক্রিন লক পরিবর্তন করুন"</string>
     <string name="policydesc_resetPassword" msgid="1278323891710619128">"স্ক্রিন লক পরিবর্তন করুন৷"</string>
     <string name="policylab_forceLock" msgid="2274085384704248431">"স্ক্রিনটি লক করে"</string>
-    <string name="policydesc_forceLock" msgid="1141797588403827138">"স্ক্রীন কখন কিভাবে লক হবে তা নিয়ন্ত্রণ করে৷"</string>
+    <string name="policydesc_forceLock" msgid="1141797588403827138">"স্ক্রিন কখন কিভাবে লক হবে তা নিয়ন্ত্রণ করে৷"</string>
     <string name="policylab_wipeData" msgid="3910545446758639713">"সমস্ত ডেটা মুছে দেয়"</string>
     <string name="policydesc_wipeData" product="tablet" msgid="4306184096067756876">"ফ্যাক্টরি ডেটা আবার সেট কার্য সম্পাদনার দ্বারা কোনো রকম সতর্কতা ছাড়াই ট্যাবলেটের ডেটা মোছে৷"</string>
     <string name="policydesc_wipeData" product="tv" msgid="5816221315214527028">"সতর্কীকরণ ছাড়াই একটি ফ্যাক্টরি ডেটা আবার সেট করার দ্বারা টিভির ডেটা মুছে ফেলে৷"</string>
@@ -836,7 +836,7 @@
     <string name="double_tap_toast" msgid="4595046515400268881">"টিপ: জুম বাড়ানো ও কমানোর জন্য দুইবার আলতো চাপুন৷"</string>
     <string name="autofill_this_form" msgid="4616758841157816676">"স্বতঃপূর্ণ"</string>
     <string name="setup_autofill" msgid="7103495070180590814">"স্বতঃপূর্ণ সেট করুন"</string>
-    <string name="autofill_window_title" msgid="921006636895825007">"আপনাআপনি পূরণ করুন"</string>
+    <string name="autofill_window_title" msgid="4107745526909284887">"<xliff:g id="SERVICENAME">%1$s</xliff:g> দিয়ে অটোফিল করুন"</string>
     <string name="autofill_address_name_separator" msgid="6350145154779706772">" "</string>
     <string name="autofill_address_summary_name_format" msgid="3268041054899214945">"$১$২$৩"</string>
     <string name="autofill_address_summary_separator" msgid="7483307893170324129">", "</string>
@@ -1023,7 +1023,7 @@
     <string name="add_contact_desc" msgid="4830217847004590345">"পরিচিতিতে যোগ করুন"</string>
     <string name="view_calendar" msgid="979609872939597838">"দেখুন"</string>
     <string name="view_calendar_desc" msgid="5828320291870344584">"বেছে নেওয়া দিনটি ক্যালেন্ডারে দেখুন"</string>
-    <string name="add_calendar_event" msgid="1953664627192056206">"সময়সূচী"</string>
+    <string name="add_calendar_event" msgid="1953664627192056206">"সময়সূচি"</string>
     <string name="add_calendar_event_desc" msgid="4326891793260687388">"বেছে নেওয়া সময়ে ইভেন্ট সেট করুন"</string>
     <string name="view_flight" msgid="7691640491425680214">"ট্র্যাক"</string>
     <string name="view_flight_desc" msgid="3876322502674253506">"বেছে নেওয়া ফ্লাইট ট্র্যাক করুন"</string>
@@ -1038,7 +1038,7 @@
     <string name="no" msgid="5141531044935541497">"বাতিল করুন"</string>
     <string name="dialog_alert_title" msgid="2049658708609043103">"খেয়াল করুন"</string>
     <string name="loading" msgid="7933681260296021180">"লোড হচ্ছে..."</string>
-    <string name="capital_on" msgid="1544682755514494298">"চালু করুন"</string>
+    <string name="capital_on" msgid="1544682755514494298">"চালু"</string>
     <string name="capital_off" msgid="6815870386972805832">"বন্ধ করুন"</string>
     <string name="whichApplication" msgid="4533185947064773386">"এটি ব্যবহার করে ক্রিয়াকলাপ সম্পূর্ণ করুন"</string>
     <string name="whichApplicationNamed" msgid="8260158865936942783">"%1$s ব্যবহার করে ক্রিয়াকলাপ সম্পূর্ণ করুন"</string>
@@ -1500,8 +1500,8 @@
     <string name="media_route_status_available" msgid="6983258067194649391">"উপলব্ধ"</string>
     <string name="media_route_status_not_available" msgid="6739899962681886401">"উপলব্ধ নয়"</string>
     <string name="media_route_status_in_use" msgid="4533786031090198063">"ব্যবহারে আছে"</string>
-    <string name="display_manager_built_in_display_name" msgid="2583134294292563941">"ভেতরে থাকা স্ক্রীন"</string>
-    <string name="display_manager_hdmi_display_name" msgid="1555264559227470109">"HDMI স্ক্রীন"</string>
+    <string name="display_manager_built_in_display_name" msgid="2583134294292563941">"ভেতরে থাকা স্ক্রিন"</string>
+    <string name="display_manager_hdmi_display_name" msgid="1555264559227470109">"HDMI স্ক্রিন"</string>
     <string name="display_manager_overlay_display_name" msgid="5142365982271620716">"আচ্ছাদন #<xliff:g id="ID">%1$d</xliff:g>"</string>
     <string name="display_manager_overlay_display_title" msgid="652124517672257172">"<xliff:g id="NAME">%1$s</xliff:g>: <xliff:g id="WIDTH">%2$d</xliff:g>x<xliff:g id="HEIGHT">%3$d</xliff:g>, <xliff:g id="DPI">%4$d</xliff:g> dpi"</string>
     <string name="display_manager_overlay_display_secure_suffix" msgid="6022119702628572080">", নিরাপদ"</string>
@@ -1691,8 +1691,9 @@
     <string name="package_installed_device_owner" msgid="6875717669960212648">"আপনার প্রশাসক ইনস্টল করেছেন"</string>
     <string name="package_updated_device_owner" msgid="1847154566357862089">"আপনার প্রশাসক আপডেট করেছেন"</string>
     <string name="package_deleted_device_owner" msgid="2307122077550236438">"আপনার প্রশাসক মুছে দিয়েছেন"</string>
+    <string name="battery_saver_description_with_learn_more" msgid="6323937147992667707">"আপনার ডিভাইসের চার্জ যাতে তাড়াতাড়ি শেষ না হয়ে যায় তার জন্য ব্যাটারি সেভার ডিভাইসের কিছু বৈশিষ্ট্যকে বন্ধ করে দেয় এবং অ্যাপের কাজকর্মকে সীমাবদ্ধ করে।"<annotation id="url">"আরও জানুন"</annotation></string>
     <string name="battery_saver_description" msgid="769989536172631582">"আপনার ডিভাইসের চার্জ যাতে তাড়াতাড়ি শেষ না হয়ে যায় তার জন্য ব্যাটারি সেভার ডিভাইসের কিছু বৈশিষ্ট্যকে বন্ধ করে দেয় এবং অ্যাপের কাজকর্মকে সীমাবদ্ধ করে।"</string>
-    <string name="data_saver_description" msgid="6015391409098303235">"ডেটার ব্যবহার কমাতে সহায়তা করার জন্য, ডেটা সেভার পটভূমিতে কিছু অ্যাপ্লিকেশনকে ডেটা পাঠাতে বা গ্রহণ করতে বাধা দেয়৷ আপনি বর্তমানে এমন একটি অ্যাপ্লিকেশন ব্যবহার করছেন যেটি ডেটা অ্যাক্সেস করতে পারে, তবে সেটি কমই করে৷ এর ফলে যা হতে পারে, উদাহরণস্বরূপ, আপনি ছবিগুলিতে আলতো চাপ না দেওয়া পর্যন্ত সেগুলি প্রদর্শিত হবে না৷"</string>
+    <string name="data_saver_description" msgid="6015391409098303235">"ডেটার ব্যবহার কমাতে সহায়তা করার জন্য, ডেটা সেভার ব্যাকগ্রাউন্ডে কিছু অ্যাপ্লিকেশনকে ডেটা পাঠাতে বা গ্রহণ করতে বাধা দেয়৷ আপনি বর্তমানে এমন একটি অ্যাপ্লিকেশন ব্যবহার করছেন যেটি ডেটা অ্যাক্সেস করতে পারে, তবে সেটি কমই করে৷ এর ফলে যা হতে পারে, উদাহরণস্বরূপ, আপনি ছবির উপর ট্যাপ না করা পর্যন্ত সেগুলি দেখানো হবে না৷"</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"ডেটা সেভার চালু করবেন?"</string>
     <string name="data_saver_enable_button" msgid="7147735965247211818">"চালু করুন"</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="4367877408072000848">
@@ -1739,8 +1740,7 @@
     <string name="zen_mode_default_weekends_name" msgid="2786495801019345244">"সপ্তাহান্ত"</string>
     <string name="zen_mode_default_events_name" msgid="8158334939013085363">"ইভেন্ট"</string>
     <string name="zen_mode_default_every_night_name" msgid="3012363838882944175">"ঘুমানোর সময়"</string>
-    <!-- no translation found for muted_by (5942954724562097128) -->
-    <skip />
+    <string name="muted_by" msgid="5942954724562097128">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g> কিছু সাউন্ডকে মিউট করে দিচ্ছে"</string>
     <string name="system_error_wipe_data" msgid="6608165524785354962">"আপনার ডিভাইসে একটি অভ্যন্তরীন সমস্যা হয়েছে, এবং আপনি যতক্ষণ না পর্যন্ত এটিকে ফ্যাক্টরি ডেটা রিসেট করছেন ততক্ষণ এটি ঠিকভাবে কাজ নাও করতে পারে৷"</string>
     <string name="system_error_manufacturer" msgid="8086872414744210668">"আপনার ডিভাইসে একটি অভ্যন্তরীন সমস্যা হয়েছে৷ বিস্তারিত জানার জন্য প্রস্তুতকারকের সাথে যোগাযোগ করুন৷"</string>
     <string name="stk_cc_ussd_to_dial" msgid="5214333646366591205">"USSD অনুরোধ সাধারণ কলে পরিবর্তন করা হয়েছে"</string>

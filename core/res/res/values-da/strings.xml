@@ -45,10 +45,10 @@
     <string name="badPin" msgid="9015277645546710014">"Den gamle pinkode, som du har indtastet, er ikke korrekt."</string>
     <string name="badPuk" msgid="5487257647081132201">"Den indtastede PUK-kode er forkert."</string>
     <string name="mismatchPin" msgid="609379054496863419">"De indtastede pinkoder er ikke ens"</string>
-    <string name="invalidPin" msgid="3850018445187475377">"Indtast en pinkode på mellem 4 og 8 tal."</string>
+    <string name="invalidPin" msgid="3850018445187475377">"Angiv en pinkode på mellem 4 og 8 tal."</string>
     <string name="invalidPuk" msgid="8761456210898036513">"Angiv en PUK-kode på 8 eller flere cifre."</string>
-    <string name="needPuk" msgid="919668385956251611">"Dit SIM-kort er låst med PUK-koden. Indtast PUK-koden for at låse den op."</string>
-    <string name="needPuk2" msgid="4526033371987193070">"Indtast PUK2-koden for at låse op for SIM-kortet."</string>
+    <string name="needPuk" msgid="919668385956251611">"Dit SIM-kort er låst med PUK-koden. Angiv PUK-koden for at låse den op."</string>
+    <string name="needPuk2" msgid="4526033371987193070">"Angiv PUK2-koden for at låse op for SIM-kortet."</string>
     <string name="enablePin" msgid="209412020907207950">"Mislykkedes. Aktivér SIM-/RUIM-lås."</string>
     <plurals name="pinpuk_attempts" formatted="false" msgid="1251012001539225582">
       <item quantity="one">Du har <xliff:g id="NUMBER_1">%d</xliff:g> forsøg tilbage, før SIM-kortet bliver låst.</item>
@@ -717,13 +717,13 @@
     <string name="sipAddressTypeWork" msgid="6920725730797099047">"Arbejde"</string>
     <string name="sipAddressTypeOther" msgid="4408436162950119849">"Andet"</string>
     <string name="quick_contacts_not_available" msgid="746098007828579688">"Der blev ikke fundet nogen applikation, som kan vise denne kontaktperson."</string>
-    <string name="keyguard_password_enter_pin_code" msgid="3037685796058495017">"Indtast pinkode"</string>
-    <string name="keyguard_password_enter_puk_code" msgid="4800725266925845333">"Indtast PUK- og pinkode"</string>
+    <string name="keyguard_password_enter_pin_code" msgid="3037685796058495017">"Angiv pinkode"</string>
+    <string name="keyguard_password_enter_puk_code" msgid="4800725266925845333">"Angiv PUK- og pinkode"</string>
     <string name="keyguard_password_enter_puk_prompt" msgid="1341112146710087048">"PUK-kode"</string>
     <string name="keyguard_password_enter_pin_prompt" msgid="8027680321614196258">"Ny pinkode"</string>
     <string name="keyguard_password_entry_touch_hint" msgid="2644215452200037944"><font size="17">"Tryk for at skrive adgangskode"</font></string>
-    <string name="keyguard_password_enter_password_code" msgid="1054721668279049780">"Indtast adgangskoden for at låse op"</string>
-    <string name="keyguard_password_enter_pin_password_code" msgid="6391755146112503443">"Indtast pinkode for at låse op"</string>
+    <string name="keyguard_password_enter_password_code" msgid="1054721668279049780">"Angiv adgangskoden for at låse op"</string>
+    <string name="keyguard_password_enter_pin_password_code" msgid="6391755146112503443">"Angiv pinkode for at låse op"</string>
     <string name="keyguard_password_wrong_pin_code" msgid="2422225591006134936">"Forkert pinkode."</string>
     <string name="keyguard_label_text" msgid="861796461028298424">"Tryk på Menu og dernæst på 0 for at låse op."</string>
     <string name="emergency_call_dialog_number_for_display" msgid="696192103195090970">"Nødnummer"</string>
@@ -836,7 +836,7 @@
     <string name="double_tap_toast" msgid="4595046515400268881">"Tip! Dobbeltklik for at zoome ind eller ud."</string>
     <string name="autofill_this_form" msgid="4616758841157816676">"Autofyld"</string>
     <string name="setup_autofill" msgid="7103495070180590814">"Konfigurer Autofyld"</string>
-    <string name="autofill_window_title" msgid="921006636895825007">"AutoFyld"</string>
+    <string name="autofill_window_title" msgid="4107745526909284887">"Udfyld automatisk med <xliff:g id="SERVICENAME">%1$s</xliff:g>"</string>
     <string name="autofill_address_name_separator" msgid="6350145154779706772">" "</string>
     <string name="autofill_address_summary_name_format" msgid="3268041054899214945">"$1$2$3"</string>
     <string name="autofill_address_summary_separator" msgid="7483307893170324129">", "</string>
@@ -1513,17 +1513,17 @@
       <item quantity="other">Prøv igen om <xliff:g id="NUMBER">%d</xliff:g> sekunder.</item>
     </plurals>
     <string name="kg_pattern_instructions" msgid="398978611683075868">"Tegn dit mønster"</string>
-    <string name="kg_sim_pin_instructions" msgid="2319508550934557331">"Indtast pinkode til SIM-kort"</string>
-    <string name="kg_pin_instructions" msgid="2377242233495111557">"Indtast pinkode"</string>
+    <string name="kg_sim_pin_instructions" msgid="2319508550934557331">"Angiv pinkode til SIM-kort"</string>
+    <string name="kg_pin_instructions" msgid="2377242233495111557">"Angiv pinkode"</string>
     <string name="kg_password_instructions" msgid="5753646556186936819">"Angiv adgangskode"</string>
-    <string name="kg_puk_enter_puk_hint" msgid="453227143861735537">"SIM-kortet er nu deaktiveret. Indtast PUK-koden for at fortsætte. Kontakt mobilselskabet for at få flere oplysninger."</string>
-    <string name="kg_puk_enter_pin_hint" msgid="7871604527429602024">"Indtast den ønskede pinkode"</string>
+    <string name="kg_puk_enter_puk_hint" msgid="453227143861735537">"SIM-kortet er nu deaktiveret. Angiv PUK-koden for at fortsætte. Kontakt mobilselskabet for at få flere oplysninger."</string>
+    <string name="kg_puk_enter_pin_hint" msgid="7871604527429602024">"Angiv den ønskede pinkode"</string>
     <string name="kg_enter_confirm_pin_hint" msgid="325676184762529976">"Bekræft den ønskede pinkode"</string>
     <string name="kg_sim_unlock_progress_dialog_message" msgid="8950398016976865762">"SIM-kortet låses op…"</string>
     <string name="kg_password_wrong_pin_code" msgid="1139324887413846912">"Forkert pinkode."</string>
-    <string name="kg_invalid_sim_pin_hint" msgid="8795159358110620001">"Indtast en pinkode på mellem 4 og 8 tal."</string>
+    <string name="kg_invalid_sim_pin_hint" msgid="8795159358110620001">"Angiv en pinkode på mellem 4 og 8 tal."</string>
     <string name="kg_invalid_sim_puk_hint" msgid="6025069204539532000">"PUK-koden skal være på 8 tal."</string>
-    <string name="kg_invalid_puk" msgid="3638289409676051243">"Indtast den korrekte PUK-kode. Gentagne forsøg vil permanent deaktivere SIM-kortet."</string>
+    <string name="kg_invalid_puk" msgid="3638289409676051243">"Angiv den korrekte PUK-kode. Gentagne forsøg vil permanent deaktivere SIM-kortet."</string>
     <string name="kg_invalid_confirm_pin_hint" product="default" msgid="7003469261464593516">"Pinkoderne stemmer ikke overens"</string>
     <string name="kg_login_too_many_attempts" msgid="6486842094005698475">"For mange forsøg på at tegne mønstret korrekt"</string>
     <string name="kg_login_instructions" msgid="1100551261265506448">"Lås op ved at logge ind med din Google-konto."</string>
@@ -1656,8 +1656,8 @@
     <string name="reason_service_unavailable" msgid="7824008732243903268">"Udskrivningstjenesten er ikke aktiveret"</string>
     <string name="print_service_installed_title" msgid="2246317169444081628">"Tjenesten <xliff:g id="NAME">%s</xliff:g> er installeret"</string>
     <string name="print_service_installed_message" msgid="5897362931070459152">"Tryk for at aktivere"</string>
-    <string name="restr_pin_enter_admin_pin" msgid="8641662909467236832">"Indtast administratorpinkoden"</string>
-    <string name="restr_pin_enter_pin" msgid="3395953421368476103">"Indtast pinkode"</string>
+    <string name="restr_pin_enter_admin_pin" msgid="8641662909467236832">"Angiv administratorpinkoden"</string>
+    <string name="restr_pin_enter_pin" msgid="3395953421368476103">"Angiv pinkode"</string>
     <string name="restr_pin_incorrect" msgid="8571512003955077924">"Forkert"</string>
     <string name="restr_pin_enter_old_pin" msgid="1462206225512910757">"Aktuel pinkode:"</string>
     <string name="restr_pin_enter_new_pin" msgid="5959606691619959184">"Ny pinkode"</string>
@@ -1690,6 +1690,7 @@
     <string name="package_installed_device_owner" msgid="6875717669960212648">"Installeret af din administrator"</string>
     <string name="package_updated_device_owner" msgid="1847154566357862089">"Opdateret af din administrator"</string>
     <string name="package_deleted_device_owner" msgid="2307122077550236438">"Slettet af din administrator"</string>
+    <string name="battery_saver_description_with_learn_more" msgid="6323937147992667707">"Batterisparefunktionen deaktiverer nogle enhedsfunktioner og begrænser apps for at forlænge batteritiden."<annotation id="url">"Få flere oplysninger"</annotation></string>
     <string name="battery_saver_description" msgid="769989536172631582">"Batterisparefunktionen deaktiverer nogle enhedsfunktioner og begrænser apps for at forlænge batteritiden."</string>
     <string name="data_saver_description" msgid="6015391409098303235">"Datasparefunktionen forhindrer nogle apps i at sende eller modtage data i baggrunden for at reducere dataforbruget. En app, der er i brug, kan få adgang til data, men gør det måske ikke så ofte. Dette kan f.eks. betyde, at billeder ikke vises, før du trykker på dem."</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"Vil du slå Datasparefunktion til?"</string>
@@ -1738,8 +1739,7 @@
     <string name="zen_mode_default_weekends_name" msgid="2786495801019345244">"Weekend"</string>
     <string name="zen_mode_default_events_name" msgid="8158334939013085363">"Begivenhed"</string>
     <string name="zen_mode_default_every_night_name" msgid="3012363838882944175">"Sover"</string>
-    <!-- no translation found for muted_by (5942954724562097128) -->
-    <skip />
+    <string name="muted_by" msgid="5942954724562097128">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g> slår nogle lyde fra"</string>
     <string name="system_error_wipe_data" msgid="6608165524785354962">"Der er et internt problem med enheden, og den vil muligvis være ustabil, indtil du gendanner fabriksdataene."</string>
     <string name="system_error_manufacturer" msgid="8086872414744210668">"Der er et internt problem med enheden. Kontakt producenten for at få yderligere oplysninger."</string>
     <string name="stk_cc_ussd_to_dial" msgid="5214333646366591205">"USSD-anmodningen blev ændret til et almindeligt opkald"</string>

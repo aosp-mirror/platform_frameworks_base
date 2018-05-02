@@ -222,7 +222,7 @@
     <string name="global_action_bug_report" msgid="7934010578922304799">"Izvještaj o greškama"</string>
     <string name="global_action_logout" msgid="935179188218826050">"Završi sesiju"</string>
     <string name="global_action_screenshot" msgid="8329831278085426283">"Snimak ekrana"</string>
-    <string name="bugreport_title" msgid="2667494803742548533">"Kreirajte izvještaj o greškama"</string>
+    <string name="bugreport_title" msgid="2667494803742548533">"Kreiranje izvještaja o greškama"</string>
     <string name="bugreport_message" msgid="398447048750350456">"Ovim će se prikupljati informacije o trenutnom stanju uređaja, koji će biti poslani kao e-poruka. Može malo potrajati dok se izvještaj o greškama ne kreira i bude spreman za slanje. Budite strpljivi."</string>
     <string name="bugreport_option_interactive_title" msgid="8635056131768862479">"Interaktivni izvještaj"</string>
     <string name="bugreport_option_interactive_summary" msgid="229299488536107968">"Koristite ovu opciju u većini slučajeva. Ova opcija vam omogućava praćenje napretka izvještaja, unos dodatnih detalja o problemu i pravljenje snimaka ekrana. Moglo bi doći do izostavljanja nekih manje korištenih dijelova za čije prijavljivanje je potrebno dugo vremena."</string>
@@ -839,7 +839,7 @@
     <string name="double_tap_toast" msgid="4595046515400268881">"Savjet: Dodirnite ekran dva puta za uvećanje ili smanjenje prikaza."</string>
     <string name="autofill_this_form" msgid="4616758841157816676">"Autofill"</string>
     <string name="setup_autofill" msgid="7103495070180590814">"Podesite Autofill"</string>
-    <string name="autofill_window_title" msgid="921006636895825007">"Automatsko popunjavanje"</string>
+    <string name="autofill_window_title" msgid="4107745526909284887">"Automatsko popunjavanje koje pruža usluga <xliff:g id="SERVICENAME">%1$s</xliff:g>"</string>
     <string name="autofill_address_name_separator" msgid="6350145154779706772">" "</string>
     <string name="autofill_address_summary_name_format" msgid="3268041054899214945">"$1$2$3"</string>
     <string name="autofill_address_summary_separator" msgid="7483307893170324129">", "</string>
@@ -1381,7 +1381,7 @@
     <string name="vpn_lockdown_connecting" msgid="6443438964440960745">"Povezivanje na uvijek aktivni VPN…"</string>
     <string name="vpn_lockdown_connected" msgid="8202679674819213931">"Povezan na uvijek aktivni VPN"</string>
     <string name="vpn_lockdown_disconnected" msgid="735805531187559719">"Prekinuta je veza s uvijek uključenim VPN-om"</string>
-    <string name="vpn_lockdown_error" msgid="3133844445659711681">"Ne može se povezati na stalno uključen VPN"</string>
+    <string name="vpn_lockdown_error" msgid="3133844445659711681">"Povezivanje na stalno uključen VPN nije uspjelo na stalno uključen VPN"</string>
     <string name="vpn_lockdown_config" msgid="8151951501116759194">"Promijenite postavke mreže ili VPN-a"</string>
     <string name="upload_file" msgid="2897957172366730416">"Odabir fajla"</string>
     <string name="no_file_chosen" msgid="6363648562170759465">"Nije izabran nijedan fajl"</string>
@@ -1712,11 +1712,12 @@
     <string name="managed_profile_label_badge_2" msgid="5048136430082124036">"2. poslovni <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="managed_profile_label_badge_3" msgid="2808305070321719040">"3. poslovni <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"Traži PIN prije nego se otkači"</string>
-    <string name="lock_to_app_unlock_pattern" msgid="4182192144797225137">"Traži uzorak za otključavanje prije nego se otkači"</string>
+    <string name="lock_to_app_unlock_pattern" msgid="4182192144797225137">"Traži uzorak za otključavanje prije poništavanja kačenja"</string>
     <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"Traži lozinku prije nego se otkači"</string>
     <string name="package_installed_device_owner" msgid="6875717669960212648">"Instalirao je vaš administrator"</string>
     <string name="package_updated_device_owner" msgid="1847154566357862089">"Ažurirao je vaš administrator"</string>
     <string name="package_deleted_device_owner" msgid="2307122077550236438">"Izbrisao je vaš administrator"</string>
+    <string name="battery_saver_description_with_learn_more" msgid="6323937147992667707">"Kako bi se produžio vijek trajanja baterije, Ušteda baterije isključuje neke funkcije uređaja i ograničava aplikacije. "<annotation id="url">"Saznajte više"</annotation></string>
     <string name="battery_saver_description" msgid="769989536172631582">"Kako bi se produžio vijek trajanja baterije, Ušteda baterije isključuje neke funkcije uređaja i ograničava aplikacije."</string>
     <string name="data_saver_description" msgid="6015391409098303235">"Da bi se smanjio prijenos podataka, Ušteda podataka sprečava da neke aplikacije šalju ili primaju podatke u pozadini. Aplikacija koju trenutno koristite može pristupiti podacima, ali će to činiti rjeđe. To može značiti, naprimjer, da se slike ne prikazuju sve dok ih ne dodirnete."</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"Uključiti Uštedu podataka?"</string>
@@ -1773,8 +1774,7 @@
     <string name="zen_mode_default_weekends_name" msgid="2786495801019345244">"Vikend"</string>
     <string name="zen_mode_default_events_name" msgid="8158334939013085363">"Događaj"</string>
     <string name="zen_mode_default_every_night_name" msgid="3012363838882944175">"Spavanje"</string>
-    <!-- no translation found for muted_by (5942954724562097128) -->
-    <skip />
+    <string name="muted_by" msgid="5942954724562097128">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g> isključuje neke zvukove"</string>
     <string name="system_error_wipe_data" msgid="6608165524785354962">"Postoji problem u vašem uređaju i može biti nestabilan dok ga ne vratite na fabričke postavke."</string>
     <string name="system_error_manufacturer" msgid="8086872414744210668">"Postoji problem u vašem uređaju. Za više informacija obratite se proizvođaču."</string>
     <string name="stk_cc_ussd_to_dial" msgid="5214333646366591205">"USSD zahtjev je promijenjen u obični poziv"</string>

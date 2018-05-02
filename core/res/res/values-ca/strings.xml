@@ -237,8 +237,8 @@
     <string name="global_actions_airplane_mode_on_status" msgid="2719557982608919750">"Mode d\'avió activat"</string>
     <string name="global_actions_airplane_mode_off_status" msgid="5075070442854490296">"Mode d\'avió desactivat"</string>
     <string name="global_action_toggle_battery_saver" msgid="708515500418994208">"Estalvi de bateria"</string>
-    <string name="global_action_battery_saver_on_status" msgid="484059130698197787">"La funció Estalvi de bateria està desactivada"</string>
-    <string name="global_action_battery_saver_off_status" msgid="75550964969478405">"La funció Estalvi de bateria està activada"</string>
+    <string name="global_action_battery_saver_on_status" msgid="484059130698197787">"El mode d\'estalvi de bateria està desactivat"</string>
+    <string name="global_action_battery_saver_off_status" msgid="75550964969478405">"El mode d\'estalvi de bateria està activat"</string>
     <string name="global_action_settings" msgid="1756531602592545966">"Configuració"</string>
     <string name="global_action_assist" msgid="3892832961594295030">"Assistència"</string>
     <string name="global_action_voice_assist" msgid="7751191495200504480">"Assist. per veu"</string>
@@ -601,7 +601,7 @@
     <string name="policydesc_encryptedStorage" msgid="2637732115325316992">"Requereix que les dades de l\'aplicació emmagatzemades estiguin encriptades."</string>
     <string name="policylab_disableCamera" msgid="6395301023152297826">"Desactivar les càmeres"</string>
     <string name="policydesc_disableCamera" msgid="2306349042834754597">"Impedeix l\'ús de les càmeres del dispositiu."</string>
-    <string name="policylab_disableKeyguardFeatures" msgid="8552277871075367771">"Desactiva funcions de bloqueig"</string>
+    <string name="policylab_disableKeyguardFeatures" msgid="8552277871075367771">"Desactivar funcions de bloqueig"</string>
     <string name="policydesc_disableKeyguardFeatures" msgid="2044755691354158439">"Impedeix l\'ús d\'algunes funcions del bloqueig de pantalla."</string>
   <string-array name="phoneTypes">
     <item msgid="8901098336658710359">"Casa"</item>
@@ -836,7 +836,7 @@
     <string name="double_tap_toast" msgid="4595046515400268881">"Consell: Pica dos cops per ampliar i per reduir."</string>
     <string name="autofill_this_form" msgid="4616758841157816676">"Em. aut."</string>
     <string name="setup_autofill" msgid="7103495070180590814">"Conf. empl. aut."</string>
-    <string name="autofill_window_title" msgid="921006636895825007">"Emplena automàticament"</string>
+    <string name="autofill_window_title" msgid="4107745526909284887">"Emplenament automàtic amb <xliff:g id="SERVICENAME">%1$s</xliff:g>"</string>
     <string name="autofill_address_name_separator" msgid="6350145154779706772">" "</string>
     <string name="autofill_address_summary_name_format" msgid="3268041054899214945">"$1$2$3"</string>
     <string name="autofill_address_summary_separator" msgid="7483307893170324129">", "</string>
@@ -1690,6 +1690,7 @@
     <string name="package_installed_device_owner" msgid="6875717669960212648">"Instal·lat per l\'administrador"</string>
     <string name="package_updated_device_owner" msgid="1847154566357862089">"Actualitzat per l\'administrador"</string>
     <string name="package_deleted_device_owner" msgid="2307122077550236438">"Suprimit per l\'administrador"</string>
+    <string name="battery_saver_description_with_learn_more" msgid="6323937147992667707">"Per augmentar la durada de la bateria, el mode d\'estalvi de bateria desactiva algunes funcions i restringeix aplicacions. "<annotation id="url">"Més informació"</annotation></string>
     <string name="battery_saver_description" msgid="769989536172631582">"Per augmentar la durada de la bateria, el mode d\'estalvi de bateria desactiva algunes funcions i restringeix aplicacions."</string>
     <string name="data_saver_description" msgid="6015391409098303235">"Per reduir l\'ús de dades, la funció Economitzador de dades evita que determinades aplicacions enviïn o rebin dades en segon pla. L\'aplicació que estiguis fent servir podrà accedir a dades, però potser ho farà menys sovint. Això vol dir, per exemple, que les imatges no es mostraran fins que no les toquis."</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"Activar Economitzador de dades?"</string>
@@ -1738,8 +1739,7 @@
     <string name="zen_mode_default_weekends_name" msgid="2786495801019345244">"Cap de setmana"</string>
     <string name="zen_mode_default_events_name" msgid="8158334939013085363">"Esdeveniment"</string>
     <string name="zen_mode_default_every_night_name" msgid="3012363838882944175">"Mentre dormo"</string>
-    <!-- no translation found for muted_by (5942954724562097128) -->
-    <skip />
+    <string name="muted_by" msgid="5942954724562097128">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g> està silenciant alguns sons"</string>
     <string name="system_error_wipe_data" msgid="6608165524785354962">"S\'ha produït un error intern al dispositiu i és possible que funcioni de manera inestable fins que restableixis les dades de fàbrica."</string>
     <string name="system_error_manufacturer" msgid="8086872414744210668">"S\'ha produït un error intern al dispositiu. Contacta amb el fabricant del dispositiu per obtenir més informació."</string>
     <string name="stk_cc_ussd_to_dial" msgid="5214333646366591205">"La sol·licitud USSD s\'ha canviat per una trucada estàndard"</string>

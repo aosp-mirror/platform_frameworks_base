@@ -29,7 +29,7 @@
     <string name="fileSizeSuffix" msgid="8897567456150907538">"<xliff:g id="NUMBER">%1$s</xliff:g> <xliff:g id="UNIT">%2$s</xliff:g>"</string>
     <string name="untitled" msgid="4638956954852782576">"&lt;பெயரிடப்படாதது&gt;"</string>
     <string name="emptyPhoneNumber" msgid="7694063042079676517">"(தொலைபேசி எண் இல்லை)"</string>
-    <string name="unknownName" msgid="6867811765370350269">"அறியப்படாதவர்"</string>
+    <string name="unknownName" msgid="6867811765370350269">"அறிமுகமில்லாதவர்"</string>
     <string name="defaultVoiceMailAlphaTag" msgid="2660020990097733077">"குரலஞ்சல்"</string>
     <string name="defaultMsisdnAlphaTag" msgid="2850889754919584674">"MSISDN1"</string>
     <string name="mmiError" msgid="5154499457739052907">"இணைப்பு சிக்கல் அல்லது தவறான MMI குறியீடு."</string>
@@ -836,7 +836,7 @@
     <string name="double_tap_toast" msgid="4595046515400268881">"உதவிக்குறிப்பு: அளவைப் பெரிதாக்க மற்றும் குறைக்க இருமுறைத் தட்டவும்."</string>
     <string name="autofill_this_form" msgid="4616758841157816676">"தன்னிரப்பி"</string>
     <string name="setup_autofill" msgid="7103495070180590814">"தன்னிரப்பியை அமை"</string>
-    <string name="autofill_window_title" msgid="921006636895825007">"தன்னிரப்பி"</string>
+    <string name="autofill_window_title" msgid="4107745526909284887">"<xliff:g id="SERVICENAME">%1$s</xliff:g> இலிருந்து தன்னிரப்புதல்"</string>
     <string name="autofill_address_name_separator" msgid="6350145154779706772">" "</string>
     <string name="autofill_address_summary_name_format" msgid="3268041054899214945">"$1$2$3"</string>
     <string name="autofill_address_summary_separator" msgid="7483307893170324129">", "</string>
@@ -1691,6 +1691,7 @@
     <string name="package_installed_device_owner" msgid="6875717669960212648">"உங்கள் நிர்வாகி நிறுவியுள்ளார்"</string>
     <string name="package_updated_device_owner" msgid="1847154566357862089">"உங்கள் நிர்வாகி புதுப்பித்துள்ளார்"</string>
     <string name="package_deleted_device_owner" msgid="2307122077550236438">"உங்கள் நிர்வாகி நீக்கியுள்ளார்"</string>
+    <string name="battery_saver_description_with_learn_more" msgid="6323937147992667707">"பேட்டரியின் ஆயுளை அதிகரிக்க, பேட்டரி சேமிப்பான் அம்சமானது சில சாதன அம்சங்களை ஆஃப் செய்து, ஆப்ஸைக் கட்டுப்படுத்தும். "<annotation id="url">"மேலும் அறிக"</annotation></string>
     <string name="battery_saver_description" msgid="769989536172631582">"பேட்டரி இயங்கும் நேரத்தை அதிகரிக்க, பேட்டரி சேமிப்பான் அம்சமானது சில சாதன அம்சங்களை ஆஃப் செய்து, ஆப்ஸைக் கட்டுப்படுத்தும்."</string>
     <string name="data_saver_description" msgid="6015391409098303235">"டேட்டா உபயோகத்தைக் குறைப்பதற்கு உதவ, பின்புலத்தில் டேட்டாவை அனுப்புவது அல்லது பெறுவதிலிருந்து சில பயன்பாடுகளை டேட்டா சேமிப்பான் தடுக்கும். தற்போது பயன்படுத்தும் பயன்பாடானது எப்போதாவது டேட்டாவை அணுகலாம். எடுத்துக்காட்டாக, படங்களை நீங்கள் தட்டும் வரை அவை காட்டப்படாது."</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"டேட்டா சேமிப்பானை இயக்கவா?"</string>
@@ -1739,8 +1740,7 @@
     <string name="zen_mode_default_weekends_name" msgid="2786495801019345244">"வார இறுதி"</string>
     <string name="zen_mode_default_events_name" msgid="8158334939013085363">"நிகழ்வு"</string>
     <string name="zen_mode_default_every_night_name" msgid="3012363838882944175">"உறக்கத்தில்"</string>
-    <!-- no translation found for muted_by (5942954724562097128) -->
-    <skip />
+    <string name="muted_by" msgid="5942954724562097128">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g> சில ஒலிகளை முடக்குகிறது"</string>
     <string name="system_error_wipe_data" msgid="6608165524785354962">"சாதனத்தில் அகச் சிக்கல் இருக்கிறது, அதனை ஆரம்பநிலைக்கு மீட்டமைக்கும் வரை நிலையற்று இயங்கலாம்."</string>
     <string name="system_error_manufacturer" msgid="8086872414744210668">"சாதனத்தில் அகச் சிக்கல் இருக்கிறது. விவரங்களுக்கு சாதன தயாரிப்பாளரைத் தொடர்புகொள்ளவும்."</string>
     <string name="stk_cc_ussd_to_dial" msgid="5214333646366591205">"USSD கோரிக்கை, வழக்கமான அழைப்பிற்கு மாற்றப்பட்டது"</string>

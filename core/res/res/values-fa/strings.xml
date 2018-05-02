@@ -836,7 +836,7 @@
     <string name="double_tap_toast" msgid="4595046515400268881">"نکته: برای بزرگ‌نمایی و کوچک‌نمایی، دو بار ضربه بزنید."</string>
     <string name="autofill_this_form" msgid="4616758841157816676">"تکمیل خودکار"</string>
     <string name="setup_autofill" msgid="7103495070180590814">"راه‌اندازی تکمیل خودکار"</string>
-    <string name="autofill_window_title" msgid="921006636895825007">"تکمیل خودکار"</string>
+    <string name="autofill_window_title" msgid="4107745526909284887">"تکمیل خودکار با <xliff:g id="SERVICENAME">%1$s</xliff:g>"</string>
     <string name="autofill_address_name_separator" msgid="6350145154779706772">" "</string>
     <string name="autofill_address_summary_name_format" msgid="3268041054899214945">"$1$2$3"</string>
     <string name="autofill_address_summary_separator" msgid="7483307893170324129">"، "</string>
@@ -1690,6 +1690,7 @@
     <string name="package_installed_device_owner" msgid="6875717669960212648">"توسط سرپرست سیستم نصب شد"</string>
     <string name="package_updated_device_owner" msgid="1847154566357862089">"توسط سرپرست سیستم به‌روزرسانی شد"</string>
     <string name="package_deleted_device_owner" msgid="2307122077550236438">"توسط سرپرست سیستم حذف شد"</string>
+    <string name="battery_saver_description_with_learn_more" msgid="6323937147992667707">"برای افزایش عمر باتری،‌ «بهینه‌سازی باتری» بعضی از ویژگی‌های دستگاه را خاموش می‌کند و برنامه‌ها را محدود می‌کند. "<annotation id="url">"بیشتر بدانید"</annotation></string>
     <string name="battery_saver_description" msgid="769989536172631582">"برای افزایش ماندگاری شارژ باتری،‌ «بهینه‌سازی باتری» برخی ویژگی‌های دستگاه را خاموش می‌کند و برنامه‌ها را محدود می‌کند."</string>
     <string name="data_saver_description" msgid="6015391409098303235">"برای کمک به کاهش مصرف داده، «صرفه‌جویی داده» از ارسال و دریافت داده در پس‌زمینه از طرف بعضی برنامه‌ها جلوگیری می‌کند. برنامه‌ای که درحال‌حاضر استفاده می‌کنید می‌تواند به داده‌ها دسترسی داشته باشد اما دفعات دسترسی آن محدود است.این یعنی، برای مثال، تصاویر تا زمانی که روی آنها ضربه نزنید نشان داده نمی‌شوند."</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"صرفه‌جویی داده روشن شود؟"</string>
@@ -1738,8 +1739,7 @@
     <string name="zen_mode_default_weekends_name" msgid="2786495801019345244">"آخر هفته"</string>
     <string name="zen_mode_default_events_name" msgid="8158334939013085363">"رویداد"</string>
     <string name="zen_mode_default_every_night_name" msgid="3012363838882944175">"خوابیدن"</string>
-    <!-- no translation found for muted_by (5942954724562097128) -->
-    <skip />
+    <string name="muted_by" msgid="5942954724562097128">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g> درحال قطع کردن بعضی از صداهاست"</string>
     <string name="system_error_wipe_data" msgid="6608165524785354962">"دستگاهتان یک مشکل داخلی دارد، و ممکن است تا زمانی که بازنشانی داده‌های کارخانه انجام نگیرد، بی‌ثبات بماند."</string>
     <string name="system_error_manufacturer" msgid="8086872414744210668">"دستگاهتان یک مشکل داخلی دارد. برای جزئیات آن با سازنده‌تان تماس بگیرید."</string>
     <string name="stk_cc_ussd_to_dial" msgid="5214333646366591205">"‏درخواست USSD به تماس معمولی تغییر کرد"</string>
