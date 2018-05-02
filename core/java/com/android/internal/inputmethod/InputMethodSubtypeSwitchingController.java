@@ -291,22 +291,8 @@ public class InputMethodSubtypeSwitchingController {
             return -1;
         }
 
-        /**
-         * Provides the basic operation to implement bi-directional IME rotation.
-         * @param onlyCurrentIme {@code true} to limit the search space to IME subtypes that belong
-         * to {@code imi}.
-         * @param imi {@link InputMethodInfo} that will be used in conjunction with {@code subtype}
-         * from which we find the adjacent IME subtype.
-         * @param subtype {@link InputMethodSubtype} that will be used in conjunction with
-         * {@code imi} from which we find the next IME subtype.  {@code null} if the input method
-         * does not have a subtype.
-         * @param forward {@code true} to do forward search the next IME subtype. Specify
-         * {@code false} to do backward search.
-         * @return The IME subtype found. {@code null} if no IME subtype is found.
-         */
-        @Nullable
         public ImeSubtypeListItem getNextInputMethodLocked(boolean onlyCurrentIme,
-                InputMethodInfo imi, @Nullable InputMethodSubtype subtype, boolean forward) {
+                InputMethodInfo imi, InputMethodSubtype subtype, boolean forward) {
             if (imi == null) {
                 return null;
             }
@@ -319,7 +305,7 @@ public class InputMethodSubtypeSwitchingController {
             }
             final int N = mImeSubtypeList.size();
             for (int i = 1; i < N; ++i) {
-                // Start searching the next IME/subtype from +/- 1 indices.
+                // Start searching the next IME/subtype from the next of the current index.
                 final int offset = forward ? i : N - i;
                 final int candidateIndex = (currentIndex + offset) % N;
                 final ImeSubtypeListItem candidate = mImeSubtypeList.get(candidateIndex);
@@ -392,22 +378,8 @@ public class InputMethodSubtypeSwitchingController {
             mUsageHistoryOfSubtypeListItemIndex[0] = currentItemIndex;
         }
 
-        /**
-         * Provides the basic operation to implement bi-directional IME rotation.
-         * @param onlyCurrentIme {@code true} to limit the search space to IME subtypes that belong
-         * to {@code imi}.
-         * @param imi {@link InputMethodInfo} that will be used in conjunction with {@code subtype}
-         * from which we find the adjacent IME subtype.
-         * @param subtype {@link InputMethodSubtype} that will be used in conjunction with
-         * {@code imi} from which we find the next IME subtype.  {@code null} if the input method
-         * does not have a subtype.
-         * @param forward {@code true} to do forward search the next IME subtype. Specify
-         * {@code false} to do backward search.
-         * @return The IME subtype found. {@code null} if no IME subtype is found.
-         */
-        @Nullable
         public ImeSubtypeListItem getNextInputMethodLocked(boolean onlyCurrentIme,
-                InputMethodInfo imi, @Nullable InputMethodSubtype subtype, boolean forward) {
+                InputMethodInfo imi, InputMethodSubtype subtype, boolean forward) {
             int currentUsageRank = getUsageRank(imi, subtype);
             if (currentUsageRank < 0) {
                 if (DEBUG) {
@@ -491,22 +463,8 @@ public class InputMethodSubtypeSwitchingController {
             mSwitchingUnawareRotationList = switchingUnawareRotationList;
         }
 
-        /**
-         * Provides the basic operation to implement bi-directional IME rotation.
-         * @param onlyCurrentIme {@code true} to limit the search space to IME subtypes that belong
-         * to {@code imi}.
-         * @param imi {@link InputMethodInfo} that will be used in conjunction with {@code subtype}
-         * from which we find the adjacent IME subtype.
-         * @param subtype {@link InputMethodSubtype} that will be used in conjunction with
-         * {@code imi} from which we find the next IME subtype.  {@code null} if the input method
-         * does not have a subtype.
-         * @param forward {@code true} to do forward search the next IME subtype. Specify
-         * {@code false} to do backward search.
-         * @return The IME subtype found. {@code null} if no IME subtype is found.
-         */
-        @Nullable
         public ImeSubtypeListItem getNextInputMethod(boolean onlyCurrentIme, InputMethodInfo imi,
-                @Nullable InputMethodSubtype subtype, boolean forward) {
+                InputMethodSubtype subtype, boolean forward) {
             if (imi == null) {
                 return null;
             }
