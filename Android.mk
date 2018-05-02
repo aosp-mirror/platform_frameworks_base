@@ -614,6 +614,20 @@ $(INTERNAL_PLATFORM_HIDDENAPI_LIGHT_GREYLIST): $(INTERNAL_PLATFORM_PRIVATE_DEX_A
 	fi
 	comm -23 <(sort $(PRIVATE_API)) <(sort $(BLACKLIST) $(DARK_GREYLIST)) > $@
 
+# Build AOSP blacklist
+# ============================================================
+include $(CLEAR_VARS)
+
+LOCAL_LIGHT_GREYLIST_FILE := frameworks/base/config/hiddenapi-p-light-greylist.txt
+LOCAL_BLACKLIST_FILE := $(TARGET_OUT_COMMON_INTERMEDIATES)/PACKAGING/hiddenapi-aosp-blacklist.txt
+
+.PHONY: hiddenapi-aosp-blacklist
+hiddenapi-aosp-blacklist: $(LOCAL_BLACKLIST_FILE)
+
+$(LOCAL_BLACKLIST_FILE): $(LOCAL_LIGHT_GREYLIST_FILE) $(INTERNAL_PLATFORM_PRIVATE_DEX_API_FILE)
+	LC_COLLATE=C comm -13 <(sort $(LOCAL_LIGHT_GREYLIST_FILE)) \
+		   <(sort $(INTERNAL_PLATFORM_PRIVATE_DEX_API_FILE)) > $@
+
 # Include subdirectory makefiles
 # ============================================================
 
