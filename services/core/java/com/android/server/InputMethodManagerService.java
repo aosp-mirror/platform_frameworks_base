@@ -210,7 +210,6 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
     static final int MSG_SET_INTERACTIVE = 3030;
     static final int MSG_SET_USER_ACTION_NOTIFICATION_SEQUENCE_NUMBER = 3040;
     static final int MSG_REPORT_FULLSCREEN_MODE = 3045;
-    static final int MSG_SWITCH_IME = 3050;
 
     static final int MSG_HARD_KEYBOARD_SWITCH_CHANGED = 4000;
 
@@ -3489,9 +3488,6 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             case MSG_START_VR_INPUT:
                 startVrInputMethodNoCheck((ComponentName) msg.obj);
                 return true;
-            case MSG_SWITCH_IME:
-                handleSwitchInputMethod(msg.arg1 != 0);
-                return true;
             case MSG_SET_USER_ACTION_NOTIFICATION_SEQUENCE_NUMBER: {
                 final int sequenceNumber = msg.arg1;
                 final ClientState clientState = (ClientState)msg.obj;
@@ -3542,18 +3538,6 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                         MSG_SET_ACTIVE, mIsInteractive ? 1 : 0, mInFullscreenMode ? 1 : 0,
                         mCurClient));
             }
-        }
-    }
-
-    private void handleSwitchInputMethod(final boolean forwardDirection) {
-        synchronized (mMethodMap) {
-            // TODO: Support forwardDirection.
-            final ImeSubtypeListItem nextSubtype = mSwitchingController.getNextInputMethodLocked(
-                    false, mMethodMap.get(mCurMethodId), mCurrentSubtype);
-            if (nextSubtype == null) {
-                return;
-            }
-            setInputMethodLocked(nextSubtype.mImi.getId(), nextSubtype.mSubtypeId);
         }
     }
 
@@ -4454,13 +4438,6 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             // Do everything in handler so as not to block the caller.
             mHandler.sendMessage(mHandler.obtainMessage(MSG_SET_INTERACTIVE,
                     interactive ? 1 : 0, 0));
-        }
-
-        @Override
-        public void switchInputMethod(boolean forwardDirection) {
-            // Do everything in handler so as not to block the caller.
-            mHandler.sendMessage(mHandler.obtainMessage(MSG_SWITCH_IME,
-                    forwardDirection ? 1 : 0, 0));
         }
 
         @Override

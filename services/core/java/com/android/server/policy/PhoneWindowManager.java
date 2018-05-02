@@ -3985,22 +3985,13 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             hideRecentApps(true, false);
         }
 
-        // Handle keyboard layout switching.
-        // TODO: Deprecate this behavior when we fully migrate to IME subtype-based layout rotation.
-        if (down && repeatCount == 0 && keyCode == KeyEvent.KEYCODE_SPACE
-                && ((metaState & KeyEvent.META_CTRL_MASK) != 0)) {
-            int direction = (metaState & KeyEvent.META_SHIFT_MASK) != 0 ? -1 : 1;
-            mWindowManagerFuncs.switchKeyboardLayout(event.getDeviceId(), direction);
-            return -1;
-        }
-
-        // Handle input method switching.
+        // Handle keyboard language switching.
         if (down && repeatCount == 0
                 && (keyCode == KeyEvent.KEYCODE_LANGUAGE_SWITCH
                         || (keyCode == KeyEvent.KEYCODE_SPACE
-                                && (metaState & KeyEvent.META_META_MASK) != 0))) {
-            final boolean forwardDirection = (metaState & KeyEvent.META_SHIFT_MASK) == 0;
-            mWindowManagerFuncs.switchInputMethod(forwardDirection);
+                                && (metaState & KeyEvent.META_CTRL_MASK) != 0))) {
+            int direction = (metaState & KeyEvent.META_SHIFT_MASK) != 0 ? -1 : 1;
+            mWindowManagerFuncs.switchKeyboardLayout(event.getDeviceId(), direction);
             return -1;
         }
         if (mLanguageSwitchKeyPressed && !down
