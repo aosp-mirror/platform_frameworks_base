@@ -251,7 +251,6 @@ public abstract class DrawableWrapper extends Drawable implements Drawable.Callb
         return mDrawable != null && mDrawable.getPadding(padding);
     }
 
-    /** @hide */
     @Override
     public Insets getOpticalInsets() {
         return mDrawable != null ? mDrawable.getOpticalInsets() : Insets.NONE;

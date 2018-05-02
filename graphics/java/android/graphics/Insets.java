@@ -23,7 +23,6 @@ package android.graphics;
  * <p>
  * Insets are immutable so may be treated as values.
  *
- * @hide
  */
 public class Insets {
     public static final Insets NONE = new Insets(0, 0, 0, 0);

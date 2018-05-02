@@ -299,9 +299,6 @@ public class NinePatchDrawable extends Drawable {
         super.getOutline(outline);
     }
 
-    /**
-     * @hide
-     */
     @Override
     public Insets getOpticalInsets() {
         final Insets opticalInsets = mOpticalInsets;

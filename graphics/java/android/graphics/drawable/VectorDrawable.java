@@ -46,6 +46,9 @@ import android.util.Xml;
 import com.android.internal.R;
 import com.android.internal.util.VirtualRefBasePtr;
 
+import dalvik.annotation.optimization.FastNative;
+import dalvik.system.VMRuntime;
+
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 
@@ -55,9 +58,6 @@ import java.nio.ByteOrder;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Stack;
-
-import dalvik.annotation.optimization.FastNative;
-import dalvik.system.VMRuntime;
 
 /**
  * This lets you create a drawable based on an XML vector graphic.
@@ -543,7 +543,6 @@ public class VectorDrawable extends Drawable {
         return mDpiScaledHeight;
     }
 
-    /** @hide */
     @Override
     public Insets getOpticalInsets() {
         if (mDpiScaledDirty) {
