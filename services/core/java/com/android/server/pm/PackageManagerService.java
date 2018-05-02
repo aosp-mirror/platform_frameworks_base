@@ -4153,7 +4153,7 @@ public class PackageManagerService extends IPackageManager.Stub
      * Access may be limited based upon whether the calling or target applications
      * are instant applications.
      *
-     * @see #canAccessInstantApps(int)
+     * @see #canViewInstantApps(int, int)
      */
     private boolean filterAppAccessLPr(@Nullable PackageSetting ps, int callingUid,
             @Nullable ComponentName component, @ComponentType int componentType, int userId) {
@@ -4210,7 +4210,7 @@ public class PackageManagerService extends IPackageManager.Stub
     }
 
     /**
-     * @see #filterAppAccessLPr(PackageSetting, int, ComponentName, boolean, int)
+     * @see #filterAppAccessLPr(PackageSetting, int, ComponentName, int, int)
      */
     private boolean filterAppAccessLPr(@Nullable PackageSetting ps, int callingUid, int userId) {
         return filterAppAccessLPr(ps, callingUid, null, TYPE_UNKNOWN, userId);
@@ -15006,15 +15006,13 @@ public class PackageManagerService extends IPackageManager.Stub
         final File file;
 
         /**
-         * Flag indicating that {@link #file} or {@link #cid} has already been
-         * staged, meaning downstream users don't need to defensively copy the
-         * contents.
+         * Flag indicating that {@link #file} has already been staged, meaning downstream users
+         * don't need to defensively copy the contents.
          */
         final boolean staged;
 
         /**
-         * Flag indicating that {@link #file} or {@link #cid} is an already
-         * installed app that is being moved.
+         * Flag indicating that {@link #file} is an already installed app that is being moved.
          */
         final boolean existing;
 
