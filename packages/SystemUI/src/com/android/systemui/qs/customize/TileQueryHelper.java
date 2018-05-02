@@ -24,6 +24,7 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.graphics.drawable.Drawable;
+import android.os.Build;
 import android.os.Handler;
 import android.service.quicksettings.TileService;
 import android.text.TextUtils;
@@ -37,8 +38,10 @@ import com.android.systemui.plugins.qs.QSTile.State;
 import com.android.systemui.qs.QSTileHost;
 import com.android.systemui.qs.external.CustomTile;
 import com.android.systemui.qs.tileimpl.QSTileImpl.DrawableIcon;
+import com.android.systemui.util.leak.GarbageMonitor;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
@@ -68,7 +71,6 @@ public class TileQueryHelper {
         // Enqueue jobs to fetch every system tile and then ever package tile.
         addStockTiles(host);
         addPackageTiles(host);
-        // TODO: Live?
     }
 
     public boolean isFinished() {
@@ -77,10 +79,14 @@ public class TileQueryHelper {
 
     private void addStockTiles(QSTileHost host) {
         String possible = mContext.getString(R.string.quick_settings_tiles_stock);
-        String[] possibleTiles = possible.split(",");
+        final ArrayList<String> possibleTiles = new ArrayList<>();
+        possibleTiles.addAll(Arrays.asList(possible.split(",")));
+        if (Build.IS_DEBUGGABLE) {
+            possibleTiles.add(GarbageMonitor.MemoryTile.TILE_SPEC);
+        }
+
         final ArrayList<QSTile> tilesToAdd = new ArrayList<>();
-        for (int i = 0; i < possibleTiles.length; i++) {
-            final String spec = possibleTiles[i];
+        for (String spec : possibleTiles) {
             final QSTile tile = host.createTile(spec);
             if (tile == null) {
                 continue;
