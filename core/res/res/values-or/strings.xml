@@ -87,14 +87,14 @@
     <string name="NetworkPreferenceSwitchSummary" msgid="509327194863482733">"ନିଜ ପସନ୍ଦର ନେଟ୍‌ୱର୍କକୁ ଯିବାପାଇଁ ଚେଷ୍ଟା କରନ୍ତୁ। ବଦଳାଇବା ପାଇଁ ଟାପ୍ କରନ୍ତୁ।"</string>
     <string name="EmergencyCallWarningTitle" msgid="813380189532491336">"ଜରୁରୀକାଳୀନ କଲ୍ ଉପଲବ୍ଧ ନାହିଁ"</string>
     <string name="EmergencyCallWarningSummary" msgid="1899692069750260619">"ୱାଇ-ଫାଇ ସାହାଯ୍ୟରେ ଜରୁରୀକାଳୀନ କଲ୍ କରାଯାଇପାରିବ ନାହିଁ"</string>
-    <string name="notification_channel_network_alert" msgid="4427736684338074967">"ଅଲର୍ଟ"</string>
+    <string name="notification_channel_network_alert" msgid="4427736684338074967">"ଆଲର୍ଟ"</string>
     <string name="notification_channel_call_forward" msgid="2419697808481833249">"କଲ୍‌ ଫରୱାର୍ଡିଙ୍ଗ"</string>
     <string name="notification_channel_emergency_callback" msgid="6686166232265733921">"ଜରୁରୀକାଳୀନ କଲବ୍ୟାକ୍‍ ମୋଡ୍‍"</string>
     <string name="notification_channel_mobile_data_status" msgid="4575131690860945836">"ମୋବାଇଲ୍‍ ଡାଟା ଷ୍ଟାଟସ୍‌"</string>
     <string name="notification_channel_sms" msgid="3441746047346135073">"SMS ମେସେଜ୍‌"</string>
     <string name="notification_channel_voice_mail" msgid="3954099424160511919">"ଭଏସମେଲ୍‍ ମେସେଜ୍‍"</string>
     <string name="notification_channel_wfc" msgid="2130802501654254801">"ୱାଇ-ଫାଇ କଲିଙ୍ଗ"</string>
-    <string name="notification_channel_sim" msgid="4052095493875188564">"ସିମ୍‌ ଷ୍ଟାଟସ୍"</string>
+    <string name="notification_channel_sim" msgid="4052095493875188564">"SIM ଷ୍ଟାଟସ୍"</string>
     <string name="peerTtyModeFull" msgid="6165351790010341421">"ପୀଆର୍‌ ଅନୁରୋଧ କରିଥିବା TTY ମୋଡ୍‍ FULL ଅଟେ"</string>
     <string name="peerTtyModeHco" msgid="5728602160669216784">"ପୀଅର୍‌ ଅନୁରୋଧ କରିଥିବା TTY ମୋଡ୍‍ HCO ଅଟେ"</string>
     <string name="peerTtyModeVco" msgid="1742404978686538049">"ପୀଅର୍‌ ଅନୁରୋଧ କରିଥିବା TTY ମୋଡ୍‍ VCO ଅଟେ"</string>
@@ -465,9 +465,9 @@
     <string name="permdesc_changeWifiMulticastState" product="tablet" msgid="7969774021256336548">"କେବଳ ଆପଣଙ୍କ ଟାବ୍‍ଲେଟ୍‍ ନୁହେଁ, ବରଂ ମଲ୍ଟିକାଷ୍ଟ ଠିକଣାଗୁଡ଼ିକ ବ୍ୟବହାର କରି ଏକ ୱାଇ-ଫାଇ ନେଟ୍‍ୱର୍କରେ ଥିବା ସମସ୍ତ ଡିଭାଇସ୍‌‍କୁ ପଠାଯିବା ପ୍ୟାକେଟ୍‍ଗୁଡ଼ିକ ପ୍ରାପ୍ତ କରିବାକୁ ଆପ୍‍ଟି ଅନୁମତି ଦେଇଥାଏ। ଅଣ-ମଲ୍ଟିକାଷ୍ଟ ମୋଡ୍‍ ତୁଳନାରେ ଏହା ଅଧିକ ପାୱାର୍‍ ବ୍ୟବହାର କରେ।"</string>
     <string name="permdesc_changeWifiMulticastState" product="tv" msgid="9031975661145014160">"କେବଳ ଆପଣଙ୍କ ଟିଭି ନୁହେଁ, ମଲ୍ଟିକାଷ୍ଟ ଠିକଣା ବ୍ୟବହାର କରି ଏକ ୱାଇ-ଫାଇ ନେଟ୍‌ୱର୍କରେ ସମସ୍ତ ଡିଭାଇସ୍‍କୁ ପଠାଯାଇଥିବା ପ୍ୟାକେଟ୍‍ ପ୍ରାପ୍ତ କରିବା ପାଇଁ ଆପ୍‍କୁ ଅନୁମତି ଦିଏ। ଅଣ-ମଲ୍ଟିକାଷ୍ଟ ମୋଡ୍‍ ତୁଳନାରେ ଏହା ଅଧିକ ପାୱାର୍‍ ବ୍ୟବହାର କରେ।"</string>
     <string name="permdesc_changeWifiMulticastState" product="default" msgid="6851949706025349926">"କେବଳ ଆପଣଙ୍କ ଫୋନ୍‍ ନୁହେଁ, ବରଂ ମଲ୍ଟିକାଷ୍ଟ ଠିକଣାଗୁଡ଼ିକ ବ୍ୟବହାର କରି ଏକ ୱାଇ-ଫାଇ ନେଟ୍‍ୱର୍କରେ ଥିବା ସମସ୍ତ ଡିଭାଇସ୍‌‍କୁ ପଠାଯିବା ପ୍ୟାକେଟ୍‍ଗୁଡ଼ିକ ପ୍ରାପ୍ତ କରିବାକୁ ଆପ୍‍ଟି ଅନୁମତି ଦେଇଥାଏ। ଅଣ-ମଲ୍ଟିକାଷ୍ଟ ମୋଡ୍‍ ତୁଳନାରେ ଏହା ଅଧିକ ପାୱାର୍‍ ବ୍ୟବହାର କରେ।"</string>
-    <string name="permlab_bluetoothAdmin" msgid="6006967373935926659">"ବ୍ଲୁ-ଟୁଥ୍‍ ସେଟିଙ୍ଗ ଆକ୍ସେସ୍‌ କରନ୍ତୁ"</string>
+    <string name="permlab_bluetoothAdmin" msgid="6006967373935926659">"ବ୍ଲୁ-ଟୂଥ୍‍‍ ସେଟିଙ୍ଗ ଆକ୍ସେସ୍‌ କରନ୍ତୁ"</string>
     <string name="permdesc_bluetoothAdmin" product="tablet" msgid="6921177471748882137">"ସ୍ଥାନୀୟ ବ୍ଲୁ-ଟୁଥ, ଟାବଲେଟ୍‍କୁ କନଫିଗର୍ କରିବାକୁ ଏବଂ ରିମୋର୍ଟ ଡିଭାଇସ୍‌କୁ ଚିହ୍ନାଇବା ତଥା ସେଗୁଡ଼ିକୁ ପେୟାର୍‍ କରିବା ପାଇଁ ଆପ୍‍କୁ ଅନୁମତି ଦେଇଥାଏ।"</string>
-    <string name="permdesc_bluetoothAdmin" product="tv" msgid="3373125682645601429">"ଆପ୍‌କୁ ସ୍ଥାନୀୟ ବ୍ଲୁ-ଟୁଥ୍ TVକୁ କନଫିଗର୍ କରିବାକୁ ଦେଇଥାଏ ଏବଂ ରିମୋର୍ଟ ଡିଭାଇସ୍‌କୁ ଚିହ୍ନାଇ ସେମାନଙ୍କୁ ଯୋଡ଼ିଥାଏ।"</string>
+    <string name="permdesc_bluetoothAdmin" product="tv" msgid="3373125682645601429">"ଆପ୍‌କୁ ସ୍ଥାନୀୟ ବ୍ଲୁ-ଟୂଥ୍‍ TVକୁ କନଫିଗର୍ କରିବାକୁ ଦେଇଥାଏ ଏବଂ ରିମୋର୍ଟ ଡିଭାଇସ୍‌କୁ ଚିହ୍ନାଇ ସେମାନଙ୍କୁ ଯୋଡ଼ିଥାଏ।"</string>
     <string name="permdesc_bluetoothAdmin" product="default" msgid="8931682159331542137">"ସ୍ଥାନୀୟ ବ୍ଲୁ-ଟୁଥ, ଫୋନ୍‍କୁ କନଫିଗର୍ କରିବାକୁ ଏବଂ ରିମୋର୍ଟ ଡିଭାଇସ୍‌କୁ ଚିହ୍ନାଇବା ତଥା ସେଗୁଡ଼ିକୁ ପେୟାର୍‍ କରିବା ପାଇଁ ଆପ୍‍କୁ ଅନୁମତି ଦେଇଥାଏ।"</string>
     <string name="permlab_accessWimaxState" msgid="4195907010610205703">"WiMAX ସହିତ ସଂଯୋଗ ଏବଂ ଏଥିରୁ ବିଚ୍ଛିନ୍ନ କରନ୍ତୁ"</string>
     <string name="permdesc_accessWimaxState" msgid="6360102877261978887">"WiMAX ସକ୍ଷମ କି ନାହିଁ ସ୍ଥିର କରିବାକୁ ଏବଂ ସଂଯୁକ୍ତ ଥିବା କୌଣସି WiMAX ନେଟ୍‌ୱର୍କ ବିଷୟରେ ସୂଚନା ପାଇଁ ଆପ୍‌‍କୁ ଅନୁମତି ଦେଇଥାଏ ।"</string>
@@ -475,7 +475,7 @@
     <string name="permdesc_changeWimaxState" product="tablet" msgid="3156456504084201805">"WiMAX ନେଟ୍‌ୱର୍କରୁ ଟାବଲେଟ୍‌ ସଂଯୋଗ କରିବାକୁ ଏବଂ ବିଚ୍ଛିନ୍ନ କରିବା ପାଇଁ ଆପ୍‌କୁ ଅନୁମତି ଦେଇଥାଏ।"</string>
     <string name="permdesc_changeWimaxState" product="tv" msgid="6022307083934827718">"ଟିଭିକୁ ସଂଯୋଗ କରିବାକୁ ତଥା WiMAX ନେଟ୍‌ୱର୍କରୁ ଟିଭିକୁ ବିଚ୍ଛିନ୍ନ କରିବାକୁ ଆପ୍‍କୁ ଅନୁମତି ଦିଏ।"</string>
     <string name="permdesc_changeWimaxState" product="default" msgid="697025043004923798">"WiMAX ନେଟ୍‌ୱର୍କରୁ ଫୋନ୍ ସଂଯୋଗ କରିବାକୁ ଏବଂ ବିଚ୍ଛିନ୍ନ କରିବା ପାଇଁ ଆପ୍‌କୁ ଅନୁମତି ଦେଇଥାଏ।"</string>
-    <string name="permlab_bluetooth" msgid="6127769336339276828">"ବ୍ଲୁ-ଟୁଥ୍‍ ଡିଭାଇସ୍‍ ଦେଖନ୍ତୁ"</string>
+    <string name="permlab_bluetooth" msgid="6127769336339276828">"ବ୍ଲୁ-ଟୂଥ୍‍‍ ଡିଭାଇସ୍‍ ଦେଖନ୍ତୁ"</string>
     <string name="permdesc_bluetooth" product="tablet" msgid="3480722181852438628">"ଟାବଲେଟ୍‌ରେ ଥିବା ବ୍ଲୁ-ଟୁଥ୍‌ର କନଫିଗରେଶନ୍‍ ଦେଖିବାକୁ ଏବଂ ପେୟାର୍‍ କରାଯାଇଥିବା ଡିଭାଇସ୍‌ ସହିତ ସଂଯୋଗ ସ୍ୱୀକାର କରିବା ପାଇଁ ଆପ୍‌କୁ ଅନୁମତି ଦେଇଥାଏ।"</string>
     <string name="permdesc_bluetooth" product="tv" msgid="3974124940101104206">"ଟିଭିରେ ବ୍ଲୁ-ଟୁଥ୍‍ର କନଫିଗରେଶନ୍‍ ଦେଖିବାକୁ ଏବଂ ପେୟାର୍‍ ହୋଇଥିବା ଡିଭାଇସ୍‍ ସହ ସଂଯୋଗ ତିଆରି ତଥା ସ୍ୱୀକାର କରିବାକୁ ଆପ୍‍‍କୁ ଅନୁମତି ଦିଏ।"</string>
     <string name="permdesc_bluetooth" product="default" msgid="3207106324452312739">"ଫୋନ୍‌ରେ ଥିବା ବ୍ଲୁ-ଟୁଥ୍‌ର କନଫିଗରେଶନ୍‍ ଦେଖିବାକୁ ଏବଂ ପେୟାର୍‍ କରାଯାଇଥିବା ଡିଭାଇସ୍‌ ସହିତ ସଂଯୋଗ ସ୍ୱୀକାର କରିବା ପାଇଁ ଆପ୍‌କୁ ଅନୁମତି ଦେଇଥାଏ।"</string>
@@ -583,9 +583,9 @@
     <string name="policydesc_watchLogin_secondaryUser" product="default" msgid="2185480427217127147">"ସ୍କ୍ରୀନ୍‍ ଅନଲକ୍‍ କରିବାବେଳେ ଟାଇପ୍‍ କରାଯାଇଥିବା ଭୁଲ ପାସ୍‌ୱର୍ଡର ସଂଖ୍ୟାକୁ ନୀରିକ୍ଷଣ କରେ ଏବଂ ଫୋନ୍‍କୁ ଲକ୍‍ କରିଦିଏ କିମ୍ବା ଯଦି ଅନେକ ଭୁଲ ପାସ୍‌ୱର୍ଡ ଟାଇପ୍‍ କରାଯାଇଥାଏ, ତେବେ ସମସ୍ତ ଡାଟା ଲିଭାଇଦିଏ।"</string>
     <string name="policylab_resetPassword" msgid="4934707632423915395">"ସ୍କ୍ରୀନ୍‍ ଲକ୍‍ ବଦଳାନ୍ତୁ"</string>
     <string name="policydesc_resetPassword" msgid="1278323891710619128">"ସ୍କ୍ରୀନ୍‍ ଲକ୍‍ ବଦଳାନ୍ତୁ।"</string>
-    <string name="policylab_forceLock" msgid="2274085384704248431">"ସ୍କ୍ରୀନ୍‌କୁ ଲକ୍‌ କରନ୍ତୁ"</string>
+    <string name="policylab_forceLock" msgid="2274085384704248431">"ସ୍କ୍ରୀନ୍‌କୁ ଲକ୍‌ କରିବା"</string>
     <string name="policydesc_forceLock" msgid="1141797588403827138">"ସ୍କ୍ରୀନ୍‍ କିପରି ଓ କେତେବେଳେ ଲକ୍‍ କରାଯିବ, ତାହା ନିୟନ୍ତ୍ରଣ କରନ୍ତୁ।"</string>
-    <string name="policylab_wipeData" msgid="3910545446758639713">"ସମସ୍ତ ଡାଟା ଖାଲି କରନ୍ତୁ"</string>
+    <string name="policylab_wipeData" msgid="3910545446758639713">"ସମସ୍ତ ଡାଟା ଖାଲି କରିବା"</string>
     <string name="policydesc_wipeData" product="tablet" msgid="4306184096067756876">"ବିନା ଚେତାବନୀରେ ଫ୍ୟାକ୍ଟୋରୀ ସେଟିଙ୍ଗ କରାଇ ଟାବ୍‍ଲେଟ୍‍ର ଡାଟା ଲିଭାଇଥାଏ।"</string>
     <string name="policydesc_wipeData" product="tv" msgid="5816221315214527028">"ବିନା ଚେତାବନୀରେ ଫ୍ୟାକ୍ଟୋରୀ ସେଟିଙ୍ଗ କରାଇ ଟିଭିର ଡାଟା ଲିଭାଇଥାଏ।"</string>
     <string name="policydesc_wipeData" product="default" msgid="5096895604574188391">"ବିନା ଚେତାବନୀରେ ଫ୍ୟାକ୍ଟୋରୀ ସେଟିଙ୍ଗ କରାଇ ଫୋନ୍‍ର ଡାଟା ଲିଭାଇଥାଏ।"</string>
@@ -601,7 +601,7 @@
     <string name="policydesc_encryptedStorage" msgid="2637732115325316992">"ଷ୍ଟୋର୍ କରାଯାଇଥିବା ଡାଟା ଏନ୍‍କ୍ରେପ୍ଟ କରିବା ଆବଶ୍ୟକ।"</string>
     <string name="policylab_disableCamera" msgid="6395301023152297826">"କ୍ୟାମେରାଗୁଡ଼ିକୁ ଅକ୍ଷମ କରନ୍ତୁ"</string>
     <string name="policydesc_disableCamera" msgid="2306349042834754597">"ସମସ୍ତ ଡିଭାଇସ୍‍ର କ୍ୟାମେରା ବ୍ୟବହାର କରିବା ପ୍ରତିରୋଧ କରନ୍ତୁ।"</string>
-    <string name="policylab_disableKeyguardFeatures" msgid="8552277871075367771">"କିଛି ସ୍କ୍ରୀନ୍‍ ଲକ୍‍ ସୁବିଧାକୁ ଅକ୍ଷମ କରନ୍ତୁ"</string>
+    <string name="policylab_disableKeyguardFeatures" msgid="8552277871075367771">"କିଛି ସ୍କ୍ରୀନ୍‍ ଲକ୍‍ ସୁବିଧାକୁ ଅକ୍ଷମ କରିବା"</string>
     <string name="policydesc_disableKeyguardFeatures" msgid="2044755691354158439">"କିଛି ସ୍କ୍ରୀନ୍‍ ଲକ୍‍ ସୁବିଧା ବ୍ୟବହାର କରିବାରେ ପ୍ରତିରୋଧ କରନ୍ତୁ।"</string>
   <string-array name="phoneTypes">
     <item msgid="8901098336658710359">"ହୋମ୍"</item>
@@ -836,7 +836,7 @@
     <string name="double_tap_toast" msgid="4595046515400268881">"ଧ୍ୟାନଦିଅନ୍ତୁ: ଜୁମ୍‌ ଇନ୍‍ ଓ ଆଉଟ୍‍ କରିବା ପାଇଁ ଡବଲ୍‍-ଟାପ୍‌ କରନ୍ତୁ"</string>
     <string name="autofill_this_form" msgid="4616758841157816676">"ସ୍ୱତଃପୂରଣ"</string>
     <string name="setup_autofill" msgid="7103495070180590814">"ଅଟୋଫିଲ୍ ସେଟ୍ କରନ୍ତୁ"</string>
-    <string name="autofill_window_title" msgid="921006636895825007">"ଅଟୋଫିଲ୍‌"</string>
+    <string name="autofill_window_title" msgid="4107745526909284887">"<xliff:g id="SERVICENAME">%1$s</xliff:g> ସାହାଯ୍ୟରେ ଅଟୋଫିଲ୍ କରନ୍ତୁ"</string>
     <string name="autofill_address_name_separator" msgid="6350145154779706772">" "</string>
     <string name="autofill_address_summary_name_format" msgid="3268041054899214945">"$1$2$3"</string>
     <string name="autofill_address_summary_separator" msgid="7483307893170324129">", "</string>
@@ -1126,14 +1126,14 @@
     <string name="sendText" msgid="5209874571959469142">"ଟେକ୍ସଟ୍‍ ପାଇଁ ଏକ କାର୍ଯ୍ୟ ବାଛନ୍ତୁ"</string>
     <string name="volume_ringtone" msgid="6885421406845734650">"ରିଙ୍ଗର୍‌ ଭଲ୍ୟୁମ୍"</string>
     <string name="volume_music" msgid="5421651157138628171">"ମିଡିଆ ଭଲ୍ୟୁମ୍‌"</string>
-    <string name="volume_music_hint_playing_through_bluetooth" msgid="9165984379394601533">"ବ୍ଲୁ-ଟୁଥ୍ ମାଧ୍ୟମରେ ଚାଲୁଛି"</string>
+    <string name="volume_music_hint_playing_through_bluetooth" msgid="9165984379394601533">"ବ୍ଲୁ-ଟୂଥ୍‍ ମାଧ୍ୟମରେ ଚାଲୁଛି"</string>
     <string name="volume_music_hint_silent_ringtone_selected" msgid="8310739960973156272">"ରିଙ୍ଗଟୋନ୍‍‍କୁ ନିରବ ଭାବେ ସେଟ୍ କରାଯାଇଛି"</string>
     <string name="volume_call" msgid="3941680041282788711">"ଇନ୍‍-କଲ୍‍ ଭଲ୍ୟୁମ୍‌"</string>
-    <string name="volume_bluetooth_call" msgid="2002891926351151534">"ବ୍ଲୁ-ଟୁଥ୍ ଇନ୍-କଲ୍ ଭଲ୍ୟୁମ୍‌"</string>
+    <string name="volume_bluetooth_call" msgid="2002891926351151534">"ବ୍ଲୁ-ଟୂଥ୍‍ ଇନ୍-କଲ୍ ଭଲ୍ୟୁମ୍‌"</string>
     <string name="volume_alarm" msgid="1985191616042689100">"ଆଲାର୍ମର ଭଲ୍ୟୁମ୍‌"</string>
     <string name="volume_notification" msgid="2422265656744276715">"ବିଜ୍ଞପ୍ତି ଭଲ୍ୟୁମ୍‍"</string>
     <string name="volume_unknown" msgid="1400219669770445902">"ଭଲ୍ୟୁମ୍"</string>
-    <string name="volume_icon_description_bluetooth" msgid="6538894177255964340">"ବ୍ଲୁ-ଟୁଥ୍‍ ଭଲ୍ୟୁମ୍‍"</string>
+    <string name="volume_icon_description_bluetooth" msgid="6538894177255964340">"ବ୍ଲୁ-ଟୂଥ୍‍‍ ଭଲ୍ୟୁମ୍‍"</string>
     <string name="volume_icon_description_ringer" msgid="3326003847006162496">"ରିଙ୍ଗଟୋନ୍‌ ଭଲ୍ୟୁମ୍"</string>
     <string name="volume_icon_description_incall" msgid="8890073218154543397">"କଲ୍‍ ଭଲ୍ୟୁମ୍‍"</string>
     <string name="volume_icon_description_media" msgid="4217311719665194215">"ମିଡିଆ ଭଲ୍ୟୁମ୍‍"</string>
@@ -1178,7 +1178,7 @@
   <string-array name="network_switch_type_name">
     <item msgid="3979506840912951943">"ମୋବାଇଲ୍‌ ଡାଟା"</item>
     <item msgid="75483255295529161">"ୱାଇ-ଫାଇ"</item>
-    <item msgid="6862614801537202646">"ବ୍ଲୁ-ଟୁଥ୍‌"</item>
+    <item msgid="6862614801537202646">"ବ୍ଲୁ-ଟୂଥ୍‍‌"</item>
     <item msgid="5447331121797802871">"ଇଥରନେଟ୍‌"</item>
     <item msgid="8257233890381651999">"VPN"</item>
   </string-array>
@@ -1486,7 +1486,7 @@
     <string name="default_audio_route_name_headphones" msgid="8119971843803439110">"ହେଡଫୋନ୍‍"</string>
     <string name="default_audio_route_name_usb" msgid="1234984851352637769">"USB"</string>
     <string name="default_audio_route_category_name" msgid="3722811174003886946">"ସିଷ୍ଟମ୍‌"</string>
-    <string name="bluetooth_a2dp_audio_route_name" msgid="8575624030406771015">"ବ୍ଲୁ-ଟୁଥ୍‌ ଅଡିଓ"</string>
+    <string name="bluetooth_a2dp_audio_route_name" msgid="8575624030406771015">"ବ୍ଲୁ-ଟୂଥ୍‍‌ ଅଡିଓ"</string>
     <string name="wireless_display_route_description" msgid="9070346425023979651">"ୱେୟାର୍‍ଲେସ୍‍ ଡିସ୍‍ପ୍ଲେ"</string>
     <string name="media_route_button_content_description" msgid="591703006349356016">"କାଷ୍ଟ କରନ୍ତୁ"</string>
     <string name="media_route_chooser_title" msgid="1751618554539087622">"ଡିଭାଇସ୍‍ ସଂଯୋଗ କରନ୍ତୁ"</string>
@@ -1690,6 +1690,7 @@
     <string name="package_installed_device_owner" msgid="6875717669960212648">"ଆପଣଙ୍କ ଆଡମିନ୍‌‌ ଇନଷ୍ଟଲ୍‍ କରିଛନ୍ତି"</string>
     <string name="package_updated_device_owner" msgid="1847154566357862089">"ଆପଣଙ୍କ ଆଡମିନ୍‌‌ ଅପଡେଟ୍‍ କରିଛନ୍ତି"</string>
     <string name="package_deleted_device_owner" msgid="2307122077550236438">"ଆପଣଙ୍କ ଆଡମିନ୍‌‌ ଡିଲିଟ୍‍ କରିଛନ୍ତି"</string>
+    <string name="battery_saver_description_with_learn_more" msgid="6323937147992667707">"ବ୍ୟାଟେରୀର କାର୍ଯ୍ୟକାଳକୁ ବଢ଼ାଇବା ପାଇଁ, ବ୍ୟାଟେରୀ ସେଭର୍ କିଛି ଡିଭାଇସ୍‍ ଫିଚର୍‌କୁ ବନ୍ଦ କରିବା ସହ କେତେକ ଆପ୍‌କୁ ଚାଲିବାରୁ ରୋକିଥାଏ। "<annotation id="url">"ଅଧିକ ଜାଣନ୍ତୁ"</annotation></string>
     <!-- no translation found for battery_saver_description (769989536172631582) -->
     <skip />
     <string name="data_saver_description" msgid="6015391409098303235">"ଡାଟା ବ୍ୟବହାର କମ୍‍ କରିବାରେ ସାହାଯ୍ୟ କରିବାକୁ, ଡାଟା ସେଭର୍‍ ବ୍ୟାକ୍‌ଗ୍ରାଉଣ୍ଡରେ ଡାଟା ପଠାଇବା କିମ୍ବା ପ୍ରାପ୍ତ କରିବାକୁ କିଛି ଆପ୍‍କୁ ବ୍ଲକ୍‌ କରେ। ଆପଣ ବର୍ତ୍ତମାନ ବ୍ୟବହାର କରୁଥିବା ଆପ୍‍, ଡାଟା ଆକ୍ସେସ୍‍ କରିପାରେ, କିନ୍ତୁ ଏହା କମ୍‍ ସମୟରେ କରିପାରେ। ଏହାର ଅର୍ଥ ହୋଇପାରେ, ଯେପରି, ଆପଣ ଟାପ୍‍ ନକରିବା ପର୍ଯ୍ୟନ୍ତ ଯେଉଁ ଇମେଜ୍‍ ଦେଖାଯାଏ ନାହିଁ।"</string>
@@ -1739,8 +1740,7 @@
     <string name="zen_mode_default_weekends_name" msgid="2786495801019345244">"ସପ୍ତାହାନ୍ତ"</string>
     <string name="zen_mode_default_events_name" msgid="8158334939013085363">"ଇଭେଣ୍ଟ"</string>
     <string name="zen_mode_default_every_night_name" msgid="3012363838882944175">"ଶୋଇବା"</string>
-    <!-- no translation found for muted_by (5942954724562097128) -->
-    <skip />
+    <string name="muted_by" msgid="5942954724562097128">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g> କିଛି ସାଉଣ୍ଡକୁ ମ୍ୟୁଟ୍ କରୁଛି"</string>
     <string name="system_error_wipe_data" msgid="6608165524785354962">"ଆପଣଙ୍କ ଡିଭାଇସ୍‍ରେ ଏକ ସମସ୍ୟା ରହିଛି ଏବଂ ଆପଣ ଫ୍ୟାକ୍ଟୋରୀ ଡାଟା ରିସେଟ୍‍ ନକରିବା ପର୍ଯ୍ୟନ୍ତ ଏହା ଅସ୍ଥିର ରହିପାରେ।"</string>
     <string name="system_error_manufacturer" msgid="8086872414744210668">"ଆପଣଙ୍କ ଡିଭାଇସ୍‍ରେ ଏକ ସମସ୍ୟା ରହିଛି। ବିବରଣୀ ପାଇଁ ଆପଣଙ୍କ ଉତ୍ପାଦକଙ୍କ ସହ ଯୋଗାଯୋଗ କରନ୍ତୁ।"</string>
     <string name="stk_cc_ussd_to_dial" msgid="5214333646366591205">"USSD ଅନୁରୋଧ, ସ୍ଵାଭାବିକ କଲ୍‌ରେ ପରିବର୍ତ୍ତନ ହେଲା"</string>

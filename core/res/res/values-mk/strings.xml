@@ -220,7 +220,7 @@
     <string name="global_action_bug_report" msgid="7934010578922304799">"Извештај за грешка"</string>
     <string name="global_action_logout" msgid="935179188218826050">"Завршете ја сесијата"</string>
     <string name="global_action_screenshot" msgid="8329831278085426283">"Слика од екранот"</string>
-    <string name="bugreport_title" msgid="2667494803742548533">"Земи извештај за грешки"</string>
+    <string name="bugreport_title" msgid="2667494803742548533">"Направи извештај за грешки"</string>
     <string name="bugreport_message" msgid="398447048750350456">"Ова ќе собира информации за моменталната состојба на вашиот уред, за да ги испрати како порака по е-пошта. Тоа ќе одземе малку време почнувајќи од извештајот за грешки додека не се подготви за праќање; бидете трпеливи."</string>
     <string name="bugreport_option_interactive_title" msgid="8635056131768862479">"Интерактивен извештај"</string>
     <string name="bugreport_option_interactive_summary" msgid="229299488536107968">"Користете го ова во повеќето ситуации. Ви дозволува да го следите напредокот на извештајот, да внесете повеќе детали во врска со проблемот и да сликате слики од екранот. Може да испушти некои помалку користени делови за коишто е потребно долго време за да се пријават."</string>
@@ -836,7 +836,7 @@
     <string name="double_tap_toast" msgid="4595046515400268881">"Совет: допри двапати за да зумираш и да одзумираш."</string>
     <string name="autofill_this_form" msgid="4616758841157816676">"Автоматско пополнување"</string>
     <string name="setup_autofill" msgid="7103495070180590814">"Постави „Автоматско пополнување“"</string>
-    <string name="autofill_window_title" msgid="921006636895825007">"Автоматско пополнување"</string>
+    <string name="autofill_window_title" msgid="4107745526909284887">"Автоматско пополнување со <xliff:g id="SERVICENAME">%1$s</xliff:g>"</string>
     <string name="autofill_address_name_separator" msgid="6350145154779706772">" "</string>
     <string name="autofill_address_summary_name_format" msgid="3268041054899214945">"$1$2$3"</string>
     <string name="autofill_address_summary_separator" msgid="7483307893170324129">", "</string>
@@ -1693,6 +1693,7 @@
     <string name="package_installed_device_owner" msgid="6875717669960212648">"Инсталирано од администраторот"</string>
     <string name="package_updated_device_owner" msgid="1847154566357862089">"Ажурирано од администраторот"</string>
     <string name="package_deleted_device_owner" msgid="2307122077550236438">"Избришано од администраторот"</string>
+    <string name="battery_saver_description_with_learn_more" msgid="6323937147992667707">"За да го продолжи траењето на батеријата, „Штедачот на батерија“ исклучува некои функции на уредот и ограничува апликации. "<annotation id="url">"Дознајте повеќе"</annotation></string>
     <string name="battery_saver_description" msgid="769989536172631582">"За да го продолжи траењето на батеријата, „Штедачот на батерија“ исклучува некои функции на уредот и ограничува апликации."</string>
     <string name="data_saver_description" msgid="6015391409098303235">"За да се намали користењето интернет, Штедачот на интернет спречува дел од апликациите да испраќаат или да примаат податоци во заднина. Апликацијата што ја користите во моментов можеби ќе пристапува до интернет, но тоа ќе го прави поретко. Ова значи, на пример, дека сликите нема да се прикажат додека не ги допрете."</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"Вклучете Штедач на интернет?"</string>
@@ -1741,8 +1742,7 @@
     <string name="zen_mode_default_weekends_name" msgid="2786495801019345244">"Викенд"</string>
     <string name="zen_mode_default_events_name" msgid="8158334939013085363">"Настан"</string>
     <string name="zen_mode_default_every_night_name" msgid="3012363838882944175">"Спиење"</string>
-    <!-- no translation found for muted_by (5942954724562097128) -->
-    <skip />
+    <string name="muted_by" msgid="5942954724562097128">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g> исклучи некои звуци"</string>
     <string name="system_error_wipe_data" msgid="6608165524785354962">"Настана внатрешен проблем со уредот и може да биде нестабилен сè додека не ресетирате на фабричките податоци."</string>
     <string name="system_error_manufacturer" msgid="8086872414744210668">"Настана внатрешен проблем со уредот. Контактирајте го производителот за детали."</string>
     <string name="stk_cc_ussd_to_dial" msgid="5214333646366591205">"Барањето USSD е изменето во обичен повик"</string>

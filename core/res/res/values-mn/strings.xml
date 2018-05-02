@@ -836,7 +836,7 @@
     <string name="double_tap_toast" msgid="4595046515400268881">"Зөвлөмж: Өсгөх бол давхар товшино уу."</string>
     <string name="autofill_this_form" msgid="4616758841157816676">"Автомат бичих"</string>
     <string name="setup_autofill" msgid="7103495070180590814">"Автомат дүүргэлтийг тохируулах"</string>
-    <string name="autofill_window_title" msgid="921006636895825007">"Автоматaaр бөглөх"</string>
+    <string name="autofill_window_title" msgid="4107745526909284887">"<xliff:g id="SERVICENAME">%1$s</xliff:g>-р автоматаар бөглөх"</string>
     <string name="autofill_address_name_separator" msgid="6350145154779706772">" "</string>
     <string name="autofill_address_summary_name_format" msgid="3268041054899214945">"$1$2$3"</string>
     <string name="autofill_address_summary_separator" msgid="7483307893170324129">", "</string>
@@ -1130,7 +1130,7 @@
     <string name="volume_music_hint_silent_ringtone_selected" msgid="8310739960973156272">"Хонхны дууг чимээгүй болгов"</string>
     <string name="volume_call" msgid="3941680041282788711">"Ирсэн дуудлагын дууны хэмжээ"</string>
     <string name="volume_bluetooth_call" msgid="2002891926351151534">"Bluetooth ирсэн дуудлагын дууны хэмжээ"</string>
-    <string name="volume_alarm" msgid="1985191616042689100">"Сэрүүлгийн дууны хэмжээ"</string>
+    <string name="volume_alarm" msgid="1985191616042689100">"Сэрүүлгийн дууны түвшин"</string>
     <string name="volume_notification" msgid="2422265656744276715">"Мэдэгдлийн дууны хэмжээ"</string>
     <string name="volume_unknown" msgid="1400219669770445902">"Дууны хэмжээ"</string>
     <string name="volume_icon_description_bluetooth" msgid="6538894177255964340">"Блютүүтын хэмжээ"</string>
@@ -1690,6 +1690,7 @@
     <string name="package_installed_device_owner" msgid="6875717669960212648">"Таны админ суулгасан"</string>
     <string name="package_updated_device_owner" msgid="1847154566357862089">"Таны админ шинэчилсэн"</string>
     <string name="package_deleted_device_owner" msgid="2307122077550236438">"Таны админ устгасан"</string>
+    <string name="battery_saver_description_with_learn_more" msgid="6323937147992667707">"Батарейны ажиллах хугацааг уртасгахын тулд Батарей хэмнэгч төхөөрөмжийн зарим онцлогийг унтрааж аппуудыг хязгаарладаг. "<annotation id="url">"Илүү ихийг мэдэх"</annotation></string>
     <string name="battery_saver_description" msgid="769989536172631582">"Батарейны ажиллах хугацааг ихэсгэхийн тулд Батарей хэмнэгч төхөөрөмжийн зарим онцлогийг унтрааж аппуудыг хязгаарладаг."</string>
     <string name="data_saver_description" msgid="6015391409098303235">"Дата ашиглалтыг багасгахын тулд дата хэмнэгч нь зарим апп-н өгөгдлийг дэвсгэрт илгээх болон авахаас сэргийлдэг. Таны одоогийн ашиглаж буй апп нь өгөгдөлд хандах боломжтой хэдий ч тогтмол хандахгүй. Жишээлбэл зургийг товших хүртэл харагдахгүй."</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"Дата хэмнэгчийг асаах уу?"</string>
@@ -1728,7 +1729,7 @@
     </plurals>
     <string name="zen_mode_until" msgid="7336308492289875088">"<xliff:g id="FORMATTEDTIME">%1$s</xliff:g> хүртэл"</string>
     <string name="zen_mode_alarm" msgid="9128205721301330797">"<xliff:g id="FORMATTEDTIME">%1$s</xliff:g> хүртэл (дараагийн сэрүүлэг)"</string>
-    <string name="zen_mode_forever" msgid="931849471004038757">"Та унтраах хүртэл"</string>
+    <string name="zen_mode_forever" msgid="931849471004038757">"Таныг унтраах хүртэл"</string>
     <string name="zen_mode_forever_dnd" msgid="3792132696572189081">"\"Бүү саад бол\"-ыг унтраах хүртэл"</string>
     <string name="zen_mode_rule_name_combination" msgid="191109939968076477">"<xliff:g id="FIRST">%1$s</xliff:g> / <xliff:g id="REST">%2$s</xliff:g>"</string>
     <string name="toolbar_collapse_description" msgid="2821479483960330739">"Хумих"</string>
@@ -1738,8 +1739,7 @@
     <string name="zen_mode_default_weekends_name" msgid="2786495801019345244">"Амралтын өдөр"</string>
     <string name="zen_mode_default_events_name" msgid="8158334939013085363">"Үйл явдал"</string>
     <string name="zen_mode_default_every_night_name" msgid="3012363838882944175">"Идэвхгүй"</string>
-    <!-- no translation found for muted_by (5942954724562097128) -->
-    <skip />
+    <string name="muted_by" msgid="5942954724562097128">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g> зарим дууны дууг хааж байна"</string>
     <string name="system_error_wipe_data" msgid="6608165524785354962">"Таны төхөөрөмжид дотоод алдаа байна.Та төхөөрөмжөө үйлдвэрээс гарсан төлөвт шилжүүлэх хүртэл таны төхөөрөмж чинь тогтворгүй байж болох юм."</string>
     <string name="system_error_manufacturer" msgid="8086872414744210668">"Таны төхөөрөмжид дотоод алдаа байна. Дэлгэрэнгүй мэдээлэл авахыг хүсвэл үйлдвэрлэгчтэйгээ холбоо барина уу."</string>
     <string name="stk_cc_ussd_to_dial" msgid="5214333646366591205">"USSD хүсэлтийг энгийн дуудлага болгон өөрчилсөн"</string>
