@@ -37,9 +37,6 @@
 /* branchless on many architectures. */
 #define min(x, y) ((y) ^ (((x) ^ (y)) & -((x) < (y))))
 
-namespace android {
-namespace util {
-
 static pthread_mutex_t log_init_lock = PTHREAD_MUTEX_INITIALIZER;
 
 void statsd_writer_init_lock() {
@@ -65,13 +62,12 @@ static int statsdWrite(struct timespec* ts, struct iovec* vec, size_t nr);
 
 struct android_log_transport_write statsdLoggerWrite = {
         .name = "statsd",
+        .sock = -EBADF,
         .available = statsdAvailable,
         .open = statsdOpen,
         .close = statsdClose,
         .write = statsdWrite,
 };
-
-std::atomic_int android_log_transport_write::sock(-EBADF);
 
 /* log_init_lock assumed */
 static int statsdOpen() {
@@ -267,6 +263,3 @@ static int statsdWrite(struct timespec* ts, struct iovec* vec, size_t nr) {
 
     return ret;
 }
-
-}  // namespace util
-}  // namespace android
