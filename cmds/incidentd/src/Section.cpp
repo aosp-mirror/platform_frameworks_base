@@ -902,10 +902,15 @@ status_t TombstoneSection::BlockingCall(int pipeWriteFd) const {
         // Read from the pipe concurrently to avoid blocking the child.
         FdBuffer buffer;
         err = buffer.readFully(dumpPipe.readFd().get());
+        // Wait on the child to avoid it becoming a zombie process.
+        status_t cStatus = wait_child(child);
         if (err != NO_ERROR) {
             ALOGW("TombstoneSection '%s' failed to read stack dump: %d", this->name.string(), err);
             dumpPipe.readFd().reset();
             break;
+        }
+        if (cStatus != NO_ERROR) {
+            ALOGE("TombstoneSection '%s' child had an issue: %s\n", this->name.string(), strerror(-cStatus));
         }
 
         auto dump = std::make_unique<char[]>(buffer.size());
