@@ -1905,6 +1905,10 @@ public final class Configuration implements Parcelable, Comparable<Configuration
      * Return whether the screen has a wide color gamut and wide color gamut rendering
      * is supported by this device.
      *
+     * When true, it implies the screen is colorspace aware but not
+     * necessarily color-managed. The final colors may still be changed by the
+     * screen depending on user settings.
+     *
      * @return true if the screen has a wide color gamut and wide color gamut rendering
      * is supported, false otherwise
      */
