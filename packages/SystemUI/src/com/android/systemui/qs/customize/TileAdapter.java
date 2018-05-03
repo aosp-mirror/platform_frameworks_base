@@ -67,6 +67,10 @@ public class TileAdapter extends RecyclerView.Adapter<Holder> implements TileSta
     private static final long EDIT_ID = 10000;
     private static final long DIVIDER_ID = 20000;
 
+    private static final int ACTION_NONE = 0;
+    private static final int ACTION_ADD = 1;
+    private static final int ACTION_MOVE = 2;
+
     private final Context mContext;
 
     private final Handler mHandler = new Handler();
@@ -82,7 +86,7 @@ public class TileAdapter extends RecyclerView.Adapter<Holder> implements TileSta
     private List<TileInfo> mAllTiles;
 
     private Holder mCurrentDrag;
-    private boolean mAccessibilityMoving;
+    private int mAccessibilityAction = ACTION_NONE;
     private int mAccessibilityFromIndex;
     private QSTileHost mHost;
 
@@ -172,7 +176,7 @@ public class TileAdapter extends RecyclerView.Adapter<Holder> implements TileSta
 
     @Override
     public int getItemViewType(int position) {
-        if (mAccessibilityMoving && position == mEditIndex - 1) {
+        if (mAccessibilityAction == ACTION_ADD && position == mEditIndex - 1) {
             return TYPE_ACCESSIBLE_DROP;
         }
         if (position == mTileDividerIndex) {
@@ -266,18 +270,18 @@ public class TileAdapter extends RecyclerView.Adapter<Holder> implements TileSta
         if (position > mEditIndex) {
             info.state.contentDescription = mContext.getString(
                     R.string.accessibility_qs_edit_add_tile_label, info.state.label);
-        } else if (mAccessibilityMoving) {
+        } else if (mAccessibilityAction != ACTION_NONE) {
             info.state.contentDescription = mContext.getString(
                     R.string.accessibility_qs_edit_position_label, position + 1);
         } else {
             info.state.contentDescription = mContext.getString(
                     R.string.accessibility_qs_edit_tile_label, position + 1, info.state.label);
         }
-        holder.mTileView.onStateChanged(info.state);
+        holder.mTileView.handleStateChanged(info.state);
         holder.mTileView.setShowAppLabel(position > mEditIndex && !info.isSystem);
 
         if (mAccessibilityManager.isTouchExplorationEnabled()) {
-            final boolean selectable = !mAccessibilityMoving || position < mEditIndex;
+            final boolean selectable = mAccessibilityAction == ACTION_NONE || position < mEditIndex;
             holder.mTileView.setClickable(selectable);
             holder.mTileView.setFocusable(selectable);
             holder.mTileView.setImportantForAccessibility(selectable
@@ -288,13 +292,13 @@ public class TileAdapter extends RecyclerView.Adapter<Holder> implements TileSta
                     @Override
                     public void onClick(View v) {
                         int position = holder.getAdapterPosition();
-                        if (mAccessibilityMoving) {
+                        if (mAccessibilityAction != ACTION_NONE) {
                             selectPosition(position, v);
                         } else {
                             if (position < mEditIndex && canRemoveTiles()) {
                                 showAccessibilityDialog(position, v);
                             } else {
-                                startAccessibleDrag(position);
+                                startAccessibleAdd(position);
                             }
                         }
                     }
@@ -302,21 +306,21 @@ public class TileAdapter extends RecyclerView.Adapter<Holder> implements TileSta
             }
         }
     }
-    
+
     private boolean canRemoveTiles() {
         return mCurrentSpecs.size() > MIN_NUM_TILES;
     }
 
     private void selectPosition(int position, View v) {
-        // Remove the placeholder.
-        mAccessibilityMoving = false;
-        mTiles.remove(mEditIndex--);
-        notifyItemRemoved(mEditIndex - 1);
-        // Don't remove items when the last position is selected.
-        if (position == mEditIndex) position--;
-
+        if (mAccessibilityAction == ACTION_ADD) {
+            // Remove the placeholder.
+            mTiles.remove(mEditIndex--);
+            notifyItemRemoved(mEditIndex);
+            // Don't remove items when the last position is selected.
+            if (position == mEditIndex - 1) position--;
+        }
+        mAccessibilityAction = ACTION_NONE;
         move(mAccessibilityFromIndex, position, v);
-
         notifyDataSetChanged();
     }
 
@@ -331,7 +335,7 @@ public class TileAdapter extends RecyclerView.Adapter<Holder> implements TileSta
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         if (which == 0) {
-                            startAccessibleDrag(position);
+                            startAccessibleMove(position);
                         } else {
                             move(position, info.isSystem ? mEditIndex : mTileDividerIndex, v);
                             notifyItemChanged(mTileDividerIndex);
@@ -345,12 +349,18 @@ public class TileAdapter extends RecyclerView.Adapter<Holder> implements TileSta
         dialog.show();
     }
 
-    private void startAccessibleDrag(int position) {
-        mAccessibilityMoving = true;
-        mNeedsFocus = true;
+    private void startAccessibleAdd(int position) {
         mAccessibilityFromIndex = position;
+        mAccessibilityAction = ACTION_ADD;
         // Add placeholder for last slot.
         mTiles.add(mEditIndex++, null);
+        mNeedsFocus = true;
+        notifyDataSetChanged();
+    }
+
+    private void startAccessibleMove(int position) {
+        mAccessibilityFromIndex = position;
+        mAccessibilityAction = ACTION_MOVE;
         notifyDataSetChanged();
     }
 
@@ -365,30 +375,26 @@ public class TileAdapter extends RecyclerView.Adapter<Holder> implements TileSta
         CharSequence fromLabel = mTiles.get(from).state.label;
         move(from, to, mTiles);
         updateDividerLocations();
-        CharSequence announcement;
         if (to >= mEditIndex) {
             MetricsLogger.action(mContext, MetricsProto.MetricsEvent.ACTION_QS_EDIT_REMOVE_SPEC,
                     strip(mTiles.get(to)));
             MetricsLogger.action(mContext, MetricsProto.MetricsEvent.ACTION_QS_EDIT_REMOVE,
                     from);
-            announcement = mContext.getString(R.string.accessibility_qs_edit_tile_removed,
-                    fromLabel);
         } else if (from >= mEditIndex) {
             MetricsLogger.action(mContext, MetricsProto.MetricsEvent.ACTION_QS_EDIT_ADD_SPEC,
                     strip(mTiles.get(to)));
             MetricsLogger.action(mContext, MetricsProto.MetricsEvent.ACTION_QS_EDIT_ADD,
                     to);
-            announcement = mContext.getString(R.string.accessibility_qs_edit_tile_added,
-                    fromLabel, (to + 1));
+            v.announceForAccessibility(mContext.getString(R.string.accessibility_qs_edit_tile_added,
+                    fromLabel, (to + 1)));
         } else {
             MetricsLogger.action(mContext, MetricsProto.MetricsEvent.ACTION_QS_EDIT_MOVE_SPEC,
                     strip(mTiles.get(to)));
             MetricsLogger.action(mContext, MetricsProto.MetricsEvent.ACTION_QS_EDIT_MOVE,
                     to);
-            announcement = mContext.getString(R.string.accessibility_qs_edit_tile_moved,
-                    fromLabel, (to + 1));
+            v.announceForAccessibility(mContext.getString(R.string.accessibility_qs_edit_tile_moved,
+                    fromLabel, (to + 1)));
         }
-        v.announceForAccessibility(announcement);
         saveSpecs(mHost);
         return true;
     }
