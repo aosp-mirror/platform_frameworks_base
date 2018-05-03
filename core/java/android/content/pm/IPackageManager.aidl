@@ -644,8 +644,6 @@ interface IPackageManager {
 
     boolean isPackageDeviceAdminOnAnyUser(String packageName);
 
-    List<String> getPreviousCodePaths(in String packageName);
-
     int getInstallReason(String packageName, int userId);
 
     ParceledListSlice getSharedLibraries(in String packageName, int flags, int userId);
