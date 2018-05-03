@@ -5512,6 +5512,7 @@ public final class ActivityThread extends ClientTransactionHandler {
         Process.setArgV0(data.processName);
         android.ddm.DdmHandleAppName.setAppName(data.processName,
                                                 UserHandle.myUserId());
+        VMRuntime.setProcessPackageName(data.appInfo.packageName);
 
         if (mProfiler.profileFd != null) {
             mProfiler.startProfiling();
