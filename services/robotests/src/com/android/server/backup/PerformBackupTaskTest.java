@@ -419,7 +419,7 @@ public class PerformBackupTaskTest {
         runTask(task);
 
         verify(mObserver).onResult(PACKAGE_1, BackupManager.ERROR_TRANSPORT_PACKAGE_REJECTED);
-        verify(mObserver).backupFinished(BackupManager.ERROR_TRANSPORT_ABORTED);
+        verify(mObserver).backupFinished(BackupManager.SUCCESS);
     }
 
     @Test
@@ -467,8 +467,7 @@ public class PerformBackupTaskTest {
 
         verify(mObserver).onResult(PACKAGE_1, BackupManager.SUCCESS);
         verify(mObserver).onResult(PACKAGE_2, BackupManager.ERROR_TRANSPORT_PACKAGE_REJECTED);
-        // TODO: Should we return the status of the last?
-        verify(mObserver).backupFinished(BackupManager.ERROR_TRANSPORT_ABORTED);
+        verify(mObserver).backupFinished(BackupManager.SUCCESS);
     }
 
     @Test
@@ -488,7 +487,7 @@ public class PerformBackupTaskTest {
         runTask(task);
 
         verify(mObserver).onResult(PACKAGE_1, BackupManager.ERROR_TRANSPORT_QUOTA_EXCEEDED);
-        verify(mObserver).backupFinished(BackupManager.ERROR_TRANSPORT_ABORTED);
+        verify(mObserver).backupFinished(BackupManager.SUCCESS);
         verify(agentMock.agent).onQuotaExceeded(anyLong(), anyLong());
     }
 
