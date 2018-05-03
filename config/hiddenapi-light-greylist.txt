@@ -571,8 +571,8 @@ Landroid/bluetooth/BluetoothHeadset;->connectAudio()Z
 Landroid/bluetooth/BluetoothHeadset;->disconnectAudio()Z
 Landroid/bluetooth/BluetoothHeadset;->getActiveDevice()Landroid/bluetooth/BluetoothDevice;
 Landroid/bluetooth/BluetoothHeadset;->setActiveDevice(Landroid/bluetooth/BluetoothDevice;)Z
-Landroid/bluetooth/BluetoothHeadset;->startScoUsingVirtualVoiceCall(Landroid/bluetooth/BluetoothDevice;)Z
-Landroid/bluetooth/BluetoothHeadset;->stopScoUsingVirtualVoiceCall(Landroid/bluetooth/BluetoothDevice;)Z
+Landroid/bluetooth/BluetoothHeadset;->startScoUsingVirtualVoiceCall()Z
+Landroid/bluetooth/BluetoothHeadset;->stopScoUsingVirtualVoiceCall()Z
 Landroid/bluetooth/BluetoothHearingAid;->ACTION_ACTIVE_DEVICE_CHANGED:Ljava/lang/String;
 Landroid/bluetooth/BluetoothHearingAid;->getActiveDevices()Ljava/util/List;
 Landroid/bluetooth/BluetoothHearingAid;->setActiveDevice(Landroid/bluetooth/BluetoothDevice;)Z
