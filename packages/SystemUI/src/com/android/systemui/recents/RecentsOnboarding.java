@@ -67,7 +67,7 @@ public class RecentsOnboarding {
 
     private static final String TAG = "RecentsOnboarding";
     private static final boolean RESET_PREFS_FOR_DEBUG = false;
-    private static final boolean ONBOARDING_ENABLED = false;
+    private static final boolean ONBOARDING_ENABLED = true;
     private static final long SHOW_DELAY_MS = 500;
     private static final long SHOW_HIDE_DURATION_MS = 300;
     // Show swipe-up tips after opening overview from home this number of times.
