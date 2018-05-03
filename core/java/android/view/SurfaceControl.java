@@ -1580,6 +1580,20 @@ public class SurfaceControl implements Parcelable {
          */
         public Transaction destroy(SurfaceControl sc) {
             sc.checkNotReleased();
+
+            /**
+             * Perhaps it's safer to transfer the close guard to the Transaction
+             * but then we have a whole wonky scenario regarding merging, multiple
+             * close-guards per transaction etc...the whole scenario is kind of wonky
+             * and it seems really we'd like to just be able to call release here
+             * but the WindowManager has some code that looks like
+             * --- destroyInTransaction(a)
+             * --- reparentChildrenInTransaction(a)
+             * so we need to ensure the SC remains valid until the transaction
+             * is applied.
+             */
+            sc.mCloseGuard.close();
+
             nativeDestroy(mNativeObject, sc.mNativeObject);
             return this;
         }
