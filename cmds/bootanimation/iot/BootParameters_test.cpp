@@ -26,10 +26,12 @@ TEST(BootParametersTest, TestParseValidParameters) {
   BootParameters boot_parameters = BootParameters();
   boot_parameters.loadParameters(R"(
     {
-      "brightness":200,
-      "volume":100,
-      "param_names":["key1","key2"],
-      "param_values":["value1","value2"]
+      "brightness":0.2,
+      "volume":0.1,
+      "params":{
+        "key1":"value1",
+        "key2":"value2"
+      }
     }
   )");
 
@@ -46,14 +48,16 @@ TEST(BootParametersTest, TestParseValidParameters) {
   ASSERT_STREQ(parameters[1].value, "value2");
 }
 
-TEST(BootParametersTest, TestMismatchedParameters) {
+TEST(BootParametersTest, TestMalformedParametersAreSkipped) {
   BootParameters boot_parameters = BootParameters();
   boot_parameters.loadParameters(R"(
     {
-      "brightness":500,
-      "volume":500,
-      "param_names":["key1","key2"],
-      "param_values":["value1"]
+      "brightness":0.5,
+      "volume":0.5,
+      "params": {
+        "key1":1,
+        "key2":"value2"
+      }
     }
   )");
 
@@ -63,14 +67,16 @@ TEST(BootParametersTest, TestMismatchedParameters) {
   EXPECT_FLOAT_EQ(0.5f, boot_parameters.getVolume());
 
   auto parameters = boot_parameters.getParameters();
-  ASSERT_EQ(0u, parameters.size());
+  ASSERT_EQ(1u, parameters.size());
+  ASSERT_STREQ(parameters[0].key, "key2");
+  ASSERT_STREQ(parameters[0].value, "value2");
 }
 
-TEST(BootParametersTest, TestMissingParameters) {
+TEST(BootParametersTest, TestMissingParametersHaveDefaults) {
   BootParameters boot_parameters = BootParameters();
   boot_parameters.loadParameters(R"(
     {
-      "brightness":500
+      "brightness":0.5
     }
   )");
 

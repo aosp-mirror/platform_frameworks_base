@@ -21,8 +21,8 @@
 #include <string>
 #include <vector>
 
-#include <base/json/json_value_converter.h>
 #include <boot_action/boot_action.h>  // libandroidthings native API.
+#include <json/json.h>
 
 namespace android {
 
@@ -47,27 +47,14 @@ public:
     // Exposed for testing. Updates the parameters with new JSON values.
     void loadParameters(const std::string& raw_json);
 private:
-    // Raw boot saved_parameters loaded from .json.
-    struct SavedBootParameters {
-        int brightness;
-        int volume;
-        std::vector<std::unique_ptr<std::string>> param_names;
-        std::vector<std::unique_ptr<std::string>> param_values;
-
-        SavedBootParameters();
-        static void RegisterJSONConverter(
-                ::base::JSONValueConverter<SavedBootParameters>* converter);
-    };
-
     void loadParameters();
 
     float mVolume = -1.f;
     float mBrightness = -1.f;
     std::vector<ABootActionParameter> mParameters;
 
-    // ABootActionParameter is just a raw pointer so we need to keep the
-    // original strings around to avoid losing them.
-    SavedBootParameters mRawParameters;
+    // Store parsed JSON because mParameters makes a shallow copy.
+    Json::Value mJson;
 };
 
 }  // namespace android
