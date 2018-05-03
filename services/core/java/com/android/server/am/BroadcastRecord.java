@@ -32,6 +32,8 @@ import android.util.PrintWriterPrinter;
 import android.util.TimeUtils;
 import android.util.proto.ProtoOutputStream;
 
+import com.android.internal.annotations.VisibleForTesting;
+
 import java.io.PrintWriter;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
@@ -298,9 +300,16 @@ final class BroadcastRecord extends Binder {
         return new BroadcastRecord(this, intent.maybeStripForHistory());
     }
 
+    @VisibleForTesting
     boolean cleanupDisabledPackageReceiversLocked(
             String packageName, Set<String> filterByClasses, int userId, boolean doit) {
-        if ((userId != UserHandle.USER_ALL && this.userId != userId) || receivers == null) {
+        if (receivers == null) {
+            return false;
+        }
+
+        final boolean cleanupAllUsers = userId == UserHandle.USER_ALL;
+        final boolean sendToAllUsers = this.userId == UserHandle.USER_ALL;
+        if (this.userId != userId && !cleanupAllUsers && !sendToAllUsers) {
             return false;
         }
 
@@ -316,7 +325,8 @@ final class BroadcastRecord extends Binder {
             final boolean sameComponent = packageName == null
                     || (info.applicationInfo.packageName.equals(packageName)
                     && (filterByClasses == null || filterByClasses.contains(info.name)));
-            if (sameComponent) {
+            if (sameComponent && (cleanupAllUsers
+                    || UserHandle.getUserId(info.applicationInfo.uid) == userId)) {
                 if (!doit) {
                     return true;
                 }
