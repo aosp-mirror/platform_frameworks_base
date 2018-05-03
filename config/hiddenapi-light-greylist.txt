@@ -3842,7 +3842,6 @@ Landroid/os/FileUtils;->sync(Ljava/io/FileOutputStream;)Z
 Landroid/os/Handler;-><init>(Z)V
 Landroid/os/Handler;->getIMessenger()Landroid/os/IMessenger;
 Landroid/os/Handler;->getPostMessage(Ljava/lang/Runnable;Ljava/lang/Object;)Landroid/os/Message;
-Landroid/os/Handler;->hasCallbacks(Ljava/lang/Runnable;)Z
 Landroid/os/Handler;->mCallback:Landroid/os/Handler$Callback;
 Landroid/os/Handler;->mLooper:Landroid/os/Looper;
 Landroid/os/Handler;->mMessenger:Landroid/os/IMessenger;
