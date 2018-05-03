@@ -173,7 +173,8 @@ public class TransactionExecutor {
             log("Transitioning to state: " + state);
             switch (state) {
                 case ON_CREATE:
-                    mTransactionHandler.handleLaunchActivity(r, mPendingActions);
+                    mTransactionHandler.handleLaunchActivity(r, mPendingActions,
+                            null /* customIntent */);
                     break;
                 case ON_START:
                     mTransactionHandler.handleStartActivity(r, mPendingActions);
