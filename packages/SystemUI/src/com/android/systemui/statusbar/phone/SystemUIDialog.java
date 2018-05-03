@@ -20,6 +20,7 @@ import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.UserHandle;
@@ -29,6 +30,7 @@ import android.view.WindowManager.LayoutParams;
 import com.android.systemui.Dependency;
 import com.android.systemui.R;
 import com.android.systemui.statusbar.policy.KeyguardMonitor;
+
 
 /**
  * Base class for dialogs that should appear over panels and keyguard.
@@ -99,24 +101,40 @@ public class SystemUIDialog extends AlertDialog {
     }
 
     public static void registerDismissListener(Dialog dialog) {
-        boolean[] registered = new boolean[1];
-        Context context = dialog.getContext();
-        final BroadcastReceiver mReceiver = new BroadcastReceiver() {
-            @Override
-            public void onReceive(Context context, Intent intent) {
-                if (dialog != null) {
-                    dialog.dismiss();
-                }
-            }
-        };
-        context.registerReceiverAsUser(mReceiver, UserHandle.CURRENT,
-                new IntentFilter(Intent.ACTION_CLOSE_SYSTEM_DIALOGS), null, null);
-        registered[0] = true;
-        dialog.setOnDismissListener(d -> {
-            if (registered[0]) {
-                context.unregisterReceiver(mReceiver);
-                registered[0] = false;
-            }
-        });
+        DismissReceiver dismissReceiver = new DismissReceiver(dialog);
+        dismissReceiver.register();
     }
-}
+
+    private static class DismissReceiver extends BroadcastReceiver implements OnDismissListener {
+        private static final IntentFilter INTENT_FILTER = new IntentFilter();
+        static {
+            INTENT_FILTER.addAction(Intent.ACTION_CLOSE_SYSTEM_DIALOGS);
+            INTENT_FILTER.addAction(Intent.ACTION_SCREEN_OFF);
+        }
+
+        private final Dialog mDialog;
+        private boolean mRegistered;
+
+        DismissReceiver(Dialog dialog) {
+            mDialog = dialog;
+        }
+
+        void register() {
+            mDialog.getContext()
+                    .registerReceiverAsUser(this, UserHandle.CURRENT, INTENT_FILTER, null, null);
+            mRegistered = true;
+        }
+
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            mDialog.dismiss();
+        }
+
+        @Override
+        public void onDismiss(DialogInterface dialog) {
+            if (mRegistered) {
+                mDialog.getContext().unregisterReceiver(this);
+                mRegistered = false;
+            }
+        }
+    }}
