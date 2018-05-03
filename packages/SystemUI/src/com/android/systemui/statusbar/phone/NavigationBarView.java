@@ -124,6 +124,7 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
 
     private GestureHelper mGestureHelper;
     private final DeadZone mDeadZone;
+    private boolean mDeadZoneConsuming = false;
     private final NavigationBarTransitions mBarTransitions;
     private final OverviewProxyService mOverviewProxyService;
 
@@ -291,8 +292,7 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
 
     @Override
     public boolean onInterceptTouchEvent(MotionEvent event) {
-        if (mDeadZone.onTouchEvent(event)) {
-            // Consumed the touch event
+        if (shouldDeadZoneConsumeTouchEvents(event)) {
             return true;
         }
         switch (event.getActionMasked()) {
@@ -314,14 +314,33 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
 
     @Override
     public boolean onTouchEvent(MotionEvent event) {
-        if (mDeadZone.onTouchEvent(event)) {
-            // Consumed the touch event
+        if (shouldDeadZoneConsumeTouchEvents(event)) {
             return true;
         }
         if (mGestureHelper.onTouchEvent(event)) {
             return true;
         }
         return super.onTouchEvent(event);
+    }
+
+    private boolean shouldDeadZoneConsumeTouchEvents(MotionEvent event) {
+        if (mDeadZone.onTouchEvent(event) || mDeadZoneConsuming) {
+            switch (event.getActionMasked()) {
+                case MotionEvent.ACTION_DOWN:
+                    // Allow gestures starting in the deadzone to be slippery
+                    setSlippery(true);
+                    mDeadZoneConsuming = true;
+                    break;
+                case MotionEvent.ACTION_CANCEL:
+                case MotionEvent.ACTION_UP:
+                    // When a gesture started in the deadzone is finished, restore slippery state
+                    updateSlippery();
+                    mDeadZoneConsuming = false;
+                    break;
+            }
+            return true;
+        }
+        return false;
     }
 
     public @NavigationBarCompat.HitTarget int getDownHitTarget() {
