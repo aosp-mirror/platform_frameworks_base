@@ -129,6 +129,7 @@ import com.android.internal.net.NetworkStatsFactory;
 import com.android.internal.net.VpnConfig;
 import com.android.internal.net.VpnInfo;
 import com.android.internal.net.VpnProfile;
+import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.AsyncChannel;
 import com.android.internal.util.DumpUtils;
 import com.android.internal.util.IndentingPrintWriter;
@@ -1935,13 +1936,6 @@ public class ConnectivityService extends IConnectivityManager.Stub
         return ret;
     }
 
-    private boolean argsContain(String[] args, String target) {
-        for (String arg : args) {
-            if (target.equals(arg)) return true;
-        }
-        return false;
-    }
-
     private void dumpNetworkDiagnostics(IndentingPrintWriter pw) {
         final List<NetworkDiagnostics> netDiags = new ArrayList<NetworkDiagnostics>();
         final long DIAG_TIME_MS = 5000;
@@ -1965,10 +1959,10 @@ public class ConnectivityService extends IConnectivityManager.Stub
         final IndentingPrintWriter pw = new IndentingPrintWriter(writer, "  ");
         if (!DumpUtils.checkDumpPermission(mContext, TAG, pw)) return;
 
-        if (argsContain(args, DIAG_ARG)) {
+        if (ArrayUtils.contains(args, DIAG_ARG)) {
             dumpNetworkDiagnostics(pw);
             return;
-        } else if (argsContain(args, TETHERING_ARG)) {
+        } else if (ArrayUtils.contains(args, TETHERING_ARG)) {
             mTethering.dump(fd, pw, args);
             return;
         }
@@ -2033,7 +2027,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
         pw.println();
         dumpAvoidBadWifiSettings(pw);
 
-        if (argsContain(args, SHORT_ARG) == false) {
+        if (ArrayUtils.contains(args, SHORT_ARG) == false) {
             pw.println();
             synchronized (mValidationLogs) {
                 pw.println("mValidationLogs (most recent first):");
