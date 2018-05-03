@@ -16,6 +16,11 @@
 
 package com.android.systemui.statusbar;
 
+import static android.app.Notification.CATEGORY_ALARM;
+import static android.app.Notification.CATEGORY_CALL;
+import static android.app.Notification.CATEGORY_EVENT;
+import static android.app.Notification.CATEGORY_MESSAGE;
+import static android.app.Notification.CATEGORY_REMINDER;
 import static android.app.NotificationManager.Policy.SUPPRESSED_EFFECT_AMBIENT;
 import static android.app.NotificationManager.Policy.SUPPRESSED_EFFECT_FULL_SCREEN_INTENT;
 import static android.app.NotificationManager.Policy.SUPPRESSED_EFFECT_NOTIFICATION_LIST;
@@ -52,6 +57,7 @@ import com.android.systemui.statusbar.notification.InflationException;
 import com.android.systemui.statusbar.phone.NotificationGroupManager;
 import com.android.systemui.statusbar.phone.StatusBar;
 import com.android.systemui.statusbar.policy.HeadsUpManager;
+import com.android.systemui.statusbar.policy.ZenModeController;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -68,6 +74,7 @@ public class NotificationData {
     private final Environment mEnvironment;
     private HeadsUpManager mHeadsUpManager;
 
+    final ZenModeController mZen = Dependency.get(ZenModeController.class);
     final ForegroundServiceController mFsc = Dependency.get(ForegroundServiceController.class);
 
     public static final class Entry {
@@ -474,6 +481,10 @@ public class NotificationData {
     }
 
     protected boolean isExemptFromDndVisualSuppression(Entry entry) {
+        if (isNotificationBlockedByPolicy(entry.notification.getNotification())) {
+            return false;
+        }
+
         if ((entry.notification.getNotification().flags
                 & Notification.FLAG_FOREGROUND_SERVICE) != 0) {
             return true;
@@ -485,6 +496,26 @@ public class NotificationData {
             return true;
         }
         return false;
+    }
+
+    /**
+     * Categories that are explicitly called out on DND settings screens are always blocked, if
+     * DND has flagged them, even if they are foreground or system notifications that might
+     * otherwise visually bypass DND.
+     */
+    protected boolean isNotificationBlockedByPolicy(Notification n) {
+        if (isCategory(CATEGORY_CALL, n)
+                || isCategory(CATEGORY_MESSAGE, n)
+                || isCategory(CATEGORY_ALARM, n)
+                || isCategory(CATEGORY_EVENT, n)
+                || isCategory(CATEGORY_REMINDER, n)) {
+            return true;
+        }
+        return false;
+    }
+
+    private boolean isCategory(String category, Notification n) {
+        return Objects.equals(n.category, category);
     }
 
     public int getImportance(String key) {
