@@ -16,7 +16,11 @@
 
 package android.app.activity;
 
+import static android.content.Intent.ACTION_EDIT;
+import static android.content.Intent.ACTION_VIEW;
+
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 
 import android.app.Activity;
 import android.app.ActivityThread;
@@ -27,6 +31,7 @@ import android.app.servertransaction.ClientTransactionItem;
 import android.app.servertransaction.ResumeActivityItem;
 import android.app.servertransaction.StopActivityItem;
 import android.content.Intent;
+import android.os.IBinder;
 import android.support.test.InstrumentationRegistry;
 import android.support.test.filters.MediumTest;
 import android.support.test.rule.ActivityTestRule;
@@ -91,6 +96,36 @@ public class ActivityThreadTest {
 
             assertNull(activityThread.performResumeActivity(activity.getActivityToken(),
                     false /* finalStateRequest */, "test"));
+        });
+    }
+
+    /** Verify that custom intent set via Activity#setIntent() is preserved on relaunch. */
+    @Test
+    public void testCustomIntentPreservedOnRelaunch() throws Exception {
+        final Intent initIntent = new Intent();
+        initIntent.setAction(ACTION_VIEW);
+        final Activity activity = mActivityTestRule.launchActivity(initIntent);
+        IBinder token = activity.getActivityToken();
+
+        final ActivityThread activityThread = activity.getActivityThread();
+        InstrumentationRegistry.getInstrumentation().runOnMainSync(() -> {
+            // Recreate and check that intent is still the same.
+            activity.recreate();
+
+            final Activity newActivity = activityThread.getActivity(token);
+            assertTrue("Original intent must be preserved after recreate",
+                    initIntent.filterEquals(newActivity.getIntent()));
+
+            // Set custom intent, recreate and check if it is preserved.
+            final Intent customIntent = new Intent();
+            customIntent.setAction(ACTION_EDIT);
+            newActivity.setIntent(customIntent);
+
+            activity.recreate();
+
+            final Activity lastActivity = activityThread.getActivity(token);
+            assertTrue("Custom intent must be preserved after recreate",
+                    customIntent.filterEquals(lastActivity.getIntent()));
         });
     }
 

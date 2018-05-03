@@ -75,7 +75,7 @@ public class LaunchActivityItem extends ClientTransactionItem {
                 mOverrideConfig, mCompatInfo, mReferrer, mVoiceInteractor, mState, mPersistentState,
                 mPendingResults, mPendingNewIntents, mIsForward,
                 mProfilerInfo, client);
-        client.handleLaunchActivity(r, pendingActions);
+        client.handleLaunchActivity(r, pendingActions, null /* customIntent */);
         Trace.traceEnd(TRACE_TAG_ACTIVITY_MANAGER);
     }
 
