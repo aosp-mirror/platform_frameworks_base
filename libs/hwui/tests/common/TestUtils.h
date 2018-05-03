@@ -225,7 +225,8 @@ public:
 
     static void recordNode(RenderNode& node, std::function<void(Canvas&)> contentCallback) {
         std::unique_ptr<Canvas> canvas(Canvas::create_recording_canvas(
-                node.stagingProperties().getWidth(), node.stagingProperties().getHeight()));
+                node.stagingProperties().getWidth(), node.stagingProperties().getHeight(),
+                &node));
         contentCallback(*canvas.get());
         node.setStagingDisplayList(canvas->finishRecording());
     }
