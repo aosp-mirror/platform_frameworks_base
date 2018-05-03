@@ -38,6 +38,8 @@ import android.widget.TextView;
 
 import androidx.car.widget.PagedListView;
 
+import androidx.core.graphics.drawable.RoundedBitmapDrawable;
+import androidx.core.graphics.drawable.RoundedBitmapDrawableFactory;
 import com.android.internal.util.UserIcons;
 import com.android.settingslib.users.UserManagerHelper;
 import com.android.systemui.R;
@@ -193,7 +195,10 @@ public class UserGridRecyclerView extends PagedListView implements
         @Override
         public void onBindViewHolder(UserAdapterViewHolder holder, int position) {
             UserRecord userRecord = mUsers.get(position);
-            holder.mUserAvatarImageView.setImageBitmap(getUserRecordIcon(userRecord));
+            RoundedBitmapDrawable circleIcon = RoundedBitmapDrawableFactory.create(mRes,
+                getUserRecordIcon(userRecord));
+            circleIcon.setCircular(true);
+            holder.mUserAvatarImageView.setImageDrawable(circleIcon);
             holder.mUserNameTextView.setText(userRecord.mInfo.name);
             holder.mView.setOnClickListener(v -> {
                 if (userRecord == null) {
