@@ -2683,7 +2683,7 @@ public final class ActivityThread extends ClientTransactionHandler {
         // TODO(lifecycler): Can't switch to use #handleLaunchActivity() because it will try to
         // call #reportSizeConfigurations(), but the server might not know anything about the
         // activity if it was launched from LocalAcvitivyManager.
-        return performLaunchActivity(r);
+        return performLaunchActivity(r, null /* customIntent */);
     }
 
     public final Activity getActivity(IBinder token) {
@@ -2768,7 +2768,7 @@ public final class ActivityThread extends ClientTransactionHandler {
     }
 
     /**  Core implementation of activity launch. */
-    private Activity performLaunchActivity(ActivityClientRecord r) {
+    private Activity performLaunchActivity(ActivityClientRecord r, Intent customIntent) {
         ActivityInfo aInfo = r.activityInfo;
         if (r.packageInfo == null) {
             r.packageInfo = getPackageInfo(aInfo.applicationInfo, r.compatInfo,
@@ -2838,6 +2838,9 @@ public final class ActivityThread extends ClientTransactionHandler {
                         r.embeddedID, r.lastNonConfigurationInstances, config,
                         r.referrer, r.voiceInteractor, window, r.configCallback);
 
+                if (customIntent != null) {
+                    activity.mIntent = customIntent;
+                }
                 r.lastNonConfigurationInstances = null;
                 checkAndBlockForNetworkAccess();
                 activity.mStartedActivity = false;
@@ -2982,7 +2985,7 @@ public final class ActivityThread extends ClientTransactionHandler {
      */
     @Override
     public Activity handleLaunchActivity(ActivityClientRecord r,
-            PendingTransactionActions pendingActions) {
+            PendingTransactionActions pendingActions, Intent customIntent) {
         // If we are getting ready to gc after going to the background, well
         // we are back active so skip it.
         unscheduleGcIdler();
@@ -3005,7 +3008,7 @@ public final class ActivityThread extends ClientTransactionHandler {
         }
         WindowManagerGlobal.initialize();
 
-        final Activity a = performLaunchActivity(r);
+        final Activity a = performLaunchActivity(r, customIntent);
 
         if (a != null) {
             r.createdConfig = new Configuration(mConfiguration);
@@ -4699,6 +4702,8 @@ public final class ActivityThread extends ClientTransactionHandler {
             List<ResultInfo> pendingResults, List<ReferrerIntent> pendingIntents,
             PendingTransactionActions pendingActions, boolean startsNotResumed,
             Configuration overrideConfig, String reason) {
+        // Preserve last used intent, it may be set from Activity#setIntent().
+        final Intent customIntent = r.activity.mIntent;
         // Need to ensure state is saved.
         if (!r.paused) {
             performPauseActivity(r, false, reason, null /* pendingActions */);
@@ -4731,7 +4736,7 @@ public final class ActivityThread extends ClientTransactionHandler {
         r.startsNotResumed = startsNotResumed;
         r.overrideConfig = overrideConfig;
 
-        handleLaunchActivity(r, pendingActions);
+        handleLaunchActivity(r, pendingActions, customIntent);
     }
 
     @Override
