@@ -149,14 +149,6 @@ BakedOpState* BakedOpState::tryStrokeableOpConstruct(LinearAllocator& allocator,
     return bakedState;
 }
 
-BakedOpState* BakedOpState::tryShadowOpConstruct(LinearAllocator& allocator, Snapshot& snapshot,
-                                                 const ShadowOp* shadowOpPtr) {
-    if (CC_UNLIKELY(snapshot.getRenderTargetClip().isEmpty())) return nullptr;
-
-    // clip isn't empty, so construct the op
-    return allocator.create_trivial<BakedOpState>(allocator, snapshot, shadowOpPtr);
-}
-
 BakedOpState* BakedOpState::directConstruct(LinearAllocator& allocator, const ClipRect* clip,
                                             const Rect& dstRect, const RecordedOp& recordedOp) {
     return allocator.create_trivial<BakedOpState>(clip, dstRect, recordedOp);

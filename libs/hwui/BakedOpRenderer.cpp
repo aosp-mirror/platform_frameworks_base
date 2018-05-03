@@ -84,7 +84,6 @@ void BakedOpRenderer::endLayer() {
         // if stencil was used for clipping, detach it and return it to pool
         glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_STENCIL_ATTACHMENT, GL_RENDERBUFFER, 0);
         GL_CHECKPOINT(MODERATE);
-        mCaches.renderBufferCache.put(mRenderTarget.stencil);
         mRenderTarget.stencil = nullptr;
     }
     mRenderTarget.lastStencilClip = nullptr;
@@ -182,7 +181,7 @@ void BakedOpRenderer::clearColorBuffer(const Rect& rect) {
 }
 
 Texture* BakedOpRenderer::getTexture(Bitmap* bitmap) {
-    return mCaches.textureCache.get(bitmap);
+    return nullptr;
 }
 
 void BakedOpRenderer::drawRects(const float* rects, int count, const SkPaint* paint) {
@@ -304,15 +303,7 @@ void BakedOpRenderer::prepareRender(const Rect* dirtyBounds, const ClipBase* cli
                 // Stencil needed, but current stencil isn't up to date
                 mRenderTarget.lastStencilClip = clip;
 
-                if (mRenderTarget.frameBufferId != 0 && !mRenderTarget.stencil) {
-                    OffscreenBuffer* layer = mRenderTarget.offscreenBuffer;
-                    mRenderTarget.stencil = mCaches.renderBufferCache.get(
-                            Stencil::getLayerStencilFormat(), layer->texture.width(),
-                            layer->texture.height());
-                    // stencil is bound + allocated - associate it with current FBO
-                    glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_STENCIL_ATTACHMENT,
-                                              GL_RENDERBUFFER, mRenderTarget.stencil->getName());
-                }
+                // DEAD CODE
 
                 if (clip->mode == ClipMode::RectangleList) {
                     setupStencilRectList(clip);

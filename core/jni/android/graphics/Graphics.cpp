@@ -15,9 +15,6 @@
 #include <cutils/ashmem.h>
 #include <hwui/Canvas.h>
 
-#include <Caches.h>
-#include <TextureCache.h>
-
 using namespace android;
 
 void doThrowNPE(JNIEnv* env) {

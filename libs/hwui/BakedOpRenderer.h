@@ -26,6 +26,7 @@ namespace uirenderer {
 class Caches;
 struct Glop;
 class Layer;
+struct RenderBuffer;
 class RenderState;
 struct ClipBase;
 

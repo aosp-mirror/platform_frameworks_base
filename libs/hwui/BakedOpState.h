@@ -120,9 +120,6 @@ public:
                                                   StrokeBehavior strokeBehavior,
                                                   bool expandForPathTexture);
 
-    static BakedOpState* tryShadowOpConstruct(LinearAllocator& allocator, Snapshot& snapshot,
-                                              const ShadowOp* shadowOpPtr);
-
     static BakedOpState* directConstruct(LinearAllocator& allocator, const ClipRect* clip,
                                          const Rect& dstRect, const RecordedOp& recordedOp);
 
@@ -153,12 +150,6 @@ private:
             , alpha(snapshot.alpha)
             , roundRectClipState(snapshot.roundRectClipState)
             , op(&recordedOp) {}
-
-    BakedOpState(LinearAllocator& allocator, Snapshot& snapshot, const ShadowOp* shadowOpPtr)
-            : computedState(allocator, snapshot)
-            , alpha(snapshot.alpha)
-            , roundRectClipState(snapshot.roundRectClipState)
-            , op(shadowOpPtr) {}
 
     BakedOpState(const ClipRect* clipRect, const Rect& dstRect, const RecordedOp& recordedOp)
             : computedState(clipRect, dstRect)

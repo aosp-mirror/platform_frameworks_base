@@ -18,15 +18,8 @@
 
 #include "DeviceInfo.h"
 #include "Extensions.h"
-#include "FboCache.h"
-#include "GradientCache.h"
-#include "PatchCache.h"
-#include "PathCache.h"
-#include "ProgramCache.h"
-#include "RenderBufferCache.h"
+#include "Program.h"
 #include "ResourceCache.h"
-#include "TessellationCache.h"
-#include "TextureCache.h"
 #include "renderstate/PixelBufferState.h"
 #include "renderstate/TextureState.h"
 #include "thread/TaskManager.h"
@@ -140,15 +133,6 @@ public:
     GLint maxTextureSize;
 
 public:
-    TextureCache textureCache;
-    RenderBufferCache renderBufferCache;
-    GradientCache gradientCache;
-    PatchCache patchCache;
-    PathCache pathCache;
-    ProgramCache programCache;
-    TessellationCache tessellationCache;
-    FboCache fboCache;
-
     TaskManager tasks;
 
     bool gpuPixelBuffersEnabled;
