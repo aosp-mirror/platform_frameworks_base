@@ -616,6 +616,8 @@ public class PerformBackupTask implements BackupRestoreTask {
             mFullBackupTask.unregisterTask();
             switch (mStatus) {
                 case BackupTransport.TRANSPORT_OK:
+                case BackupTransport.TRANSPORT_QUOTA_EXCEEDED:
+                case BackupTransport.TRANSPORT_PACKAGE_REJECTED:
                     BackupObserverUtils.sendBackupFinished(mObserver,
                             BackupManager.SUCCESS);
                     break;
