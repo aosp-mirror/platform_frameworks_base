@@ -118,4 +118,48 @@ public class SettingsHelperRestoreTest {
                 defaultSettingValue);
         return defaultSettingValue;
     }
+
+    /** Tests for {@link Settings.Secure#ACCESSIBILITY_DISPLAY_MAGNIFICATION_NAVBAR_ENABLED}. */
+    @Test
+    public void
+            testRestoreAccessibilityDisplayMagnificationNavbarEnabled_alreadyConfigured_doesNotRestoreValue()
+                    throws Exception {
+        String settingName = Settings.Secure.ACCESSIBILITY_DISPLAY_MAGNIFICATION_NAVBAR_ENABLED;
+        // Simulate already configuring setting via SUW.
+        int configuredSettingValue = 1;
+        Settings.Secure.putInt(mContentResolver, settingName, configuredSettingValue);
+
+        mSettingsHelper.restoreValue(
+                mContext,
+                mContentResolver,
+                new ContentValues(2),
+                Settings.Secure.getUriFor(settingName),
+                settingName,
+                String.valueOf(0),
+                Build.VERSION.SDK_INT);
+
+        assertEquals(configuredSettingValue, Settings.Secure.getInt(mContentResolver, settingName));
+    }
+
+    @Test
+    public void
+            testRestoreAccessibilityDisplayMagnificationNavbarEnabled_notAlreadyConfigured_restoresValue()
+                    throws Exception {
+        String settingName = Settings.Secure.ACCESSIBILITY_DISPLAY_MAGNIFICATION_NAVBAR_ENABLED;
+        int defaultSettingValue = 0;
+        // Simulate system default at boot.
+        Settings.Secure.putInt(mContentResolver, settingName, defaultSettingValue);
+
+        int restoreSettingValue = 1;
+        mSettingsHelper.restoreValue(
+                mContext,
+                mContentResolver,
+                new ContentValues(2),
+                Settings.Secure.getUriFor(settingName),
+                settingName,
+                String.valueOf(restoreSettingValue),
+                Build.VERSION.SDK_INT);
+
+        assertEquals(restoreSettingValue, Settings.Secure.getInt(mContentResolver, settingName));
+    }
 }
