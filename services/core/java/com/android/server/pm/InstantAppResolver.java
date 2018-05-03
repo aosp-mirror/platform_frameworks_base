@@ -16,6 +16,8 @@
 
 package com.android.server.pm;
 
+import static android.content.Intent.FLAG_ACTIVITY_MATCH_EXTERNAL;
+
 import static com.android.internal.logging.nano.MetricsProto.MetricsEvent.ACTION_INSTANT_APP_RESOLUTION_PHASE_ONE;
 import static com.android.internal.logging.nano.MetricsProto.MetricsEvent.ACTION_INSTANT_APP_RESOLUTION_PHASE_TWO;
 import static com.android.internal.logging.nano.MetricsProto.MetricsEvent.FIELD_INSTANT_APP_LAUNCH_TOKEN;
@@ -366,6 +368,7 @@ public abstract class InstantAppResolver {
         final Intent failureIntent = new Intent(origIntent);
         boolean requiresSecondPhase = false;
         failureIntent.setFlags(failureIntent.getFlags() | Intent.FLAG_IGNORE_EPHEMERAL);
+        failureIntent.setFlags(failureIntent.getFlags() & ~Intent.FLAG_ACTIVITY_MATCH_EXTERNAL);
         failureIntent.setLaunchToken(token);
         ArrayList<AuxiliaryResolveInfo.AuxiliaryFilter> filters = null;
         boolean isWebIntent = origIntent.isWebIntent();
@@ -407,6 +410,10 @@ public abstract class InstantAppResolver {
         }
         if (filters != null && !filters.isEmpty()) {
             return new AuxiliaryResolveInfo(token, requiresSecondPhase, failureIntent, filters);
+        }
+        // if the match external flag is set, return an empty resolve info
+        if ((origIntent.getFlags() & FLAG_ACTIVITY_MATCH_EXTERNAL) != 0) {
+            return new AuxiliaryResolveInfo(token, false, failureIntent, null /* filters */);
         }
         // Hash or filter mis-match; no instant apps for this domain.
         return null;
