@@ -62,7 +62,7 @@ MetricsManager::MetricsManager(const ConfigKey& key, const StatsdConfig& config,
     : mConfigKey(key), mUidMap(uidMap),
       mTtlNs(config.has_ttl_in_seconds() ? config.ttl_in_seconds() * NS_PER_SEC : -1),
       mTtlEndNs(-1),
-      mLastReportTimeNs(timeBaseNs),
+      mLastReportTimeNs(currentTimeNs),
       mLastReportWallClockNs(getWallClockNs()) {
     // Init the ttl end timestamp.
     refreshTtl(timeBaseNs);

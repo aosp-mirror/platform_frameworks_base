@@ -158,11 +158,14 @@ StatsService::StatsService(const sp<Looper>& handlerLooper)
         auto receiver = mConfigManager->GetConfigReceiver(key);
         if (sc == nullptr) {
             VLOG("Could not find StatsCompanionService");
+            return false;
         } else if (receiver == nullptr) {
             VLOG("Statscompanion could not find a broadcast receiver for %s",
                  key.ToString().c_str());
+            return false;
         } else {
             sc->sendDataBroadcast(receiver, mProcessor->getLastReportTimeNs(key));
+            return true;
         }
     }
     );
@@ -948,6 +951,11 @@ Status StatsService::setDataFetchOperation(int64_t key,
     IPCThreadState* ipc = IPCThreadState::self();
     ConfigKey configKey(ipc->getCallingUid(), key);
     mConfigManager->SetConfigReceiver(configKey, intentSender);
+    if (StorageManager::hasConfigMetricsReport(configKey)) {
+        VLOG("StatsService::setDataFetchOperation marking configKey %s to dump reports on disk",
+             configKey.ToString().c_str());
+        mProcessor->noteOnDiskData(configKey);
+    }
     return Status::ok();
 }
 
