@@ -214,31 +214,4 @@ public class LoginTest extends AbstractAutofillPerfTestCase {
             }
         });
     }
-
-    // TODO(b/38345816): remove this test, it's used just to test the dashboard
-    @Test
-    public void stupidTestThatAlwaysPass() throws Throwable {
-        mActivityRule.runOnUiThread(() -> {
-            BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
-            while (state.keepRunning()) {
-            }
-        });
-    }
-
-    // TODO(b/38345816): remove this test, it's used just to test the dashboard
-    @Test
-    public void stupidTestThatAlwaysFail() throws Throwable {
-        mActivityRule.runOnUiThread(() -> {
-            BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
-            while (state.keepRunning()) {
-                throw new RuntimeException("TEST, Y U NO PASS?");
-            }
-        });
-    }
-
-    // TODO(b/38345816): remove this test, it's used just to test the dashboard
-    @Test
-    public void stupidTestThatAlwaysHang() throws Throwable {
-        android.os.SystemClock.sleep(60_000); // 1m
-    }
 }
