@@ -18,6 +18,7 @@ package android.app;
 import android.app.servertransaction.ClientTransaction;
 import android.app.servertransaction.PendingTransactionActions;
 import android.app.servertransaction.TransactionExecutor;
+import android.content.Intent;
 import android.content.pm.ApplicationInfo;
 import android.content.res.CompatibilityInfo;
 import android.content.res.Configuration;
@@ -140,7 +141,7 @@ public abstract class ClientTransactionHandler {
 
     /** Perform activity launch. */
     public abstract Activity handleLaunchActivity(ActivityThread.ActivityClientRecord r,
-            PendingTransactionActions pendingActions);
+            PendingTransactionActions pendingActions, Intent customIntent);
 
     /** Perform activity start. */
     public abstract void handleStartActivity(ActivityThread.ActivityClientRecord r,
