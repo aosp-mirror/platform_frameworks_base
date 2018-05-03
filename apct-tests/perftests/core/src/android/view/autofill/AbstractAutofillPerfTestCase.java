@@ -86,8 +86,17 @@ public abstract class AbstractAutofillPerfTestCase {
     }
 
     @Before
-    public void resetStaticState() {
+    public void enableService() {
         MyAutofillService.resetStaticState();
+        MyAutofillService.setEnabled(true);
+    }
+
+    @After
+    public void disableService() {
+        // Must disable service so calls are ignored in case of errors during the test case;
+        // otherwise, other tests will fail because these calls are made in the UI thread (as both
+        // the service, the tests, and the app run in the same process).
+        MyAutofillService.setEnabled(false);
     }
 
     /**

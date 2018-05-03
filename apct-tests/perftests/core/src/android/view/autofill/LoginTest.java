@@ -82,9 +82,6 @@ public class LoginTest extends AbstractAutofillPerfTestCase {
         setService();
 
         focusTest(true);
-
-        // Sanity check
-        MyAutofillService.assertNoAsyncErrors();
     }
 
     /**
@@ -99,9 +96,6 @@ public class LoginTest extends AbstractAutofillPerfTestCase {
         setService();
 
         focusTest(true);
-
-        // Sanity check
-        MyAutofillService.assertNoAsyncErrors();
     }
 
     /**
@@ -117,9 +111,6 @@ public class LoginTest extends AbstractAutofillPerfTestCase {
         setService();
 
         focusTest(true);
-
-        // Sanity check
-        MyAutofillService.assertNoAsyncErrors();
     }
 
     private void focusTest(boolean waitForService) throws Throwable {
@@ -158,9 +149,6 @@ public class LoginTest extends AbstractAutofillPerfTestCase {
         setService();
 
         changeTest(true);
-
-        // Sanity check
-        MyAutofillService.assertNoAsyncErrors();
     }
 
     /**
@@ -175,9 +163,6 @@ public class LoginTest extends AbstractAutofillPerfTestCase {
         setService();
 
         changeTest(true);
-
-        // Sanity check
-        MyAutofillService.assertNoAsyncErrors();
     }
 
     /**
@@ -193,9 +178,6 @@ public class LoginTest extends AbstractAutofillPerfTestCase {
         setService();
 
         changeTest(true);
-
-        // Sanity check
-        MyAutofillService.assertNoAsyncErrors();
     }
 
     private void changeTest(boolean waitForService) throws Throwable {
@@ -254,7 +236,6 @@ public class LoginTest extends AbstractAutofillPerfTestCase {
 
             // Sanity check
             callback.assertNoAsyncErrors();
-            MyAutofillService.assertNoAsyncErrors();
         } finally {
             mAfm.unregisterCallback(callback);
         }

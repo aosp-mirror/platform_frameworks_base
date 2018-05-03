@@ -52,7 +52,8 @@ public class MyAutofillService extends AutofillService {
     private static final BlockingQueue<FillRequest> sFillRequests = new LinkedBlockingQueue<>();
     private static final BlockingQueue<CannedResponse> sCannedResponses =
             new LinkedBlockingQueue<>();
-    private static final List<String> sAsyncErrors = new ArrayList<>();
+
+    private static boolean sEnabled;
 
     /**
      * Resets the static state associated with the service.
@@ -60,17 +61,15 @@ public class MyAutofillService extends AutofillService {
     static void resetStaticState() {
         sFillRequests.clear();
         sCannedResponses.clear();
-        sAsyncErrors.clear();
+        sEnabled = false;
     }
 
     /**
-     * Throws an exception if an error happened asynchronously while handing
-     * {@link #onFillRequest(FillRequest, CancellationSignal, FillCallback)}.
+     * Sets whether the service is enabled or not - when disabled, calls to
+     * {@link #onFillRequest(FillRequest, CancellationSignal, FillCallback)} will be ignored.
      */
-    static void assertNoAsyncErrors() {
-       if (!sAsyncErrors.isEmpty()) {
-           throw new IllegalStateException(sAsyncErrors.size() + " errors: " + sAsyncErrors);
-       }
+    static void setEnabled(boolean enabled) {
+        sEnabled = enabled;
     }
 
     /**
@@ -96,51 +95,59 @@ public class MyAutofillService extends AutofillService {
     @Override
     public void onFillRequest(FillRequest request, CancellationSignal cancellationSignal,
             FillCallback callback) {
-        CannedResponse response = null;
         try {
-            response = sCannedResponses.poll(TIMEOUT_MS, TimeUnit.MILLISECONDS);
+            handleRequest(request, callback);
         } catch (InterruptedException e) {
-            addAsyncError("onFillRequest() interrupted");
             Thread.currentThread().interrupt();
-            return;
-        }
-        if (response == null) {
-            addAsyncError("onFillRequest() called without setting a response");
-            return;
-        }
-        try {
-            Dataset.Builder dataset = new Dataset.Builder(newDatasetPresentation("dataset"));
-            boolean hasData = false;
-            if (response.mUsername != null) {
-                hasData = true;
-                dataset.setValue(response.mUsername.first,
-                        AutofillValue.forText(response.mUsername.second));
-            }
-            if (response.mPassword != null) {
-                hasData = true;
-                dataset.setValue(response.mPassword.first,
-                        AutofillValue.forText(response.mPassword.second));
-            }
-            if (hasData) {
-                FillResponse.Builder fillResponse = new FillResponse.Builder();
-                if (response.mIgnoredIds != null) {
-                    fillResponse.setIgnoredIds(response.mIgnoredIds);
-                }
-
-                callback.onSuccess(fillResponse.addDataset(dataset.build()).build());
-            } else {
-                callback.onSuccess(null);
-            }
+            onError("onFillRequest() interrupted", e, callback);
         } catch (Exception e) {
-            addAsyncError(e, callback);
+            onError("exception on onFillRequest()", e, callback);
         }
-        sFillRequests.offer(request);
+    }
+
+
+    private void handleRequest(FillRequest request, FillCallback callback) throws Exception {
+        if (!sEnabled) {
+            onError("ignoring onFillRequest(): service is disabled", callback);
+            return;
+        }
+        CannedResponse response = sCannedResponses.poll(TIMEOUT_MS, TimeUnit.MILLISECONDS);
+        if (response == null) {
+            onError("ignoring onFillRequest(): response not set", callback);
+            return;
+        }
+        Dataset.Builder dataset = new Dataset.Builder(newDatasetPresentation("dataset"));
+        boolean hasData = false;
+        if (response.mUsername != null) {
+            hasData = true;
+            dataset.setValue(response.mUsername.first,
+                    AutofillValue.forText(response.mUsername.second));
+        }
+        if (response.mPassword != null) {
+            hasData = true;
+            dataset.setValue(response.mPassword.first,
+                    AutofillValue.forText(response.mPassword.second));
+        }
+        if (hasData) {
+            FillResponse.Builder fillResponse = new FillResponse.Builder();
+            if (response.mIgnoredIds != null) {
+                fillResponse.setIgnoredIds(response.mIgnoredIds);
+            }
+
+            callback.onSuccess(fillResponse.addDataset(dataset.build()).build());
+        } else {
+            callback.onSuccess(null);
+        }
+        if (!sFillRequests.offer(request, TIMEOUT_MS, TimeUnit.MILLISECONDS)) {
+            Log.w(TAG, "could not offer request in " + TIMEOUT_MS + "ms");
+        }
     }
 
     @Override
     public void onSaveRequest(SaveRequest request, SaveCallback callback) {
         // No current test should have triggered it...
-        callback.onFailure("should not have called onSave");
+        Log.e(TAG, "onSaveRequest() should not have been called");
+        callback.onFailure("onSaveRequest() should not have been called");
     }
 
     static final class CannedResponse {
@@ -191,15 +198,14 @@ public class MyAutofillService extends AutofillService {
         return new CannedResponse.Builder();
     }
 
-    private void addAsyncError(@NonNull String error) {
-        sAsyncErrors.add(error);
-        Log.e(TAG, error);
+    private void onError(@NonNull String msg, @NonNull FillCallback callback) {
+        Log.e(TAG, msg);
+        callback.onFailure(msg);
     }
 
-    private void addAsyncError(@NonNull Exception e, @NonNull FillCallback callback) {
-        String msg = e.toString();
-        sAsyncErrors.add(msg);
-        Log.e(TAG, "async error", e);
+    private void onError(@NonNull String msg, @NonNull Exception e,
+            @NonNull FillCallback callback) {
+        Log.e(TAG, msg, e);
         callback.onFailure(msg);
     }
 
