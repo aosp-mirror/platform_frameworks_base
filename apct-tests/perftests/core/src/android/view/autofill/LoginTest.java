@@ -28,7 +28,6 @@ import android.perftests.utils.StubActivity;
 import android.provider.Settings;
 import android.support.test.rule.ActivityTestRule;
 import android.support.test.InstrumentationRegistry;
-
 import com.android.perftests.core.R;
 
 import java.util.Locale;
@@ -42,12 +41,14 @@ import org.junit.ClassRule;
 import org.junit.Rule;
 import org.junit.runner.RunWith;
 
-import static org.junit.Assert.assertTrue;
+import static android.view.autofill.AutofillManager.AutofillCallback.EVENT_INPUT_HIDDEN;
+import static android.view.autofill.AutofillManager.AutofillCallback.EVENT_INPUT_SHOWN;
 
 public class LoginTest extends AbstractAutofillPerfTestCase {
 
     private EditText mUsername;
     private EditText mPassword;
+    private AutofillManager mAfm;
 
     public LoginTest() {
         super(R.layout.test_autofill_login);
@@ -58,6 +59,7 @@ public class LoginTest extends AbstractAutofillPerfTestCase {
         View root = activity.getWindow().getDecorView();
         mUsername = root.findViewById(R.id.username);
         mPassword = root.findViewById(R.id.password);
+        mAfm = activity.getSystemService(AutofillManager.class);
     }
 
     /**
@@ -213,5 +215,48 @@ public class LoginTest extends AbstractAutofillPerfTestCase {
                 mPassword.setText("x");
             }
         });
+    }
+
+    @Test
+    public void testCallbacks() throws Throwable {
+        MyAutofillService.newCannedResponse()
+                .setUsername(mUsername.getAutofillId(), "user")
+                .setPassword(mPassword.getAutofillId(), "pass")
+                .reply();
+        setService();
+
+        MyAutofillCallback callback = new MyAutofillCallback();
+        mAfm.registerCallback(callback);
+
+        // Must first focus in a field to trigger autofill and wait for service response
+        // outside the loop
+        mActivityRule.runOnUiThread(() -> mUsername.requestFocus());
+        MyAutofillService.getLastFillRequest();
+        callback.expectEvent(mUsername, EVENT_INPUT_SHOWN);
+
+        // Now focus on password to prepare loop state
+        mActivityRule.runOnUiThread(() -> mPassword.requestFocus());
+        callback.expectEvent(mUsername, EVENT_INPUT_HIDDEN);
+        callback.expectEvent(mPassword, EVENT_INPUT_SHOWN);
+
+        // NOTE: we cannot run the whole loop inside the UI thread, because the autofill callback
+        // is called on it, which would cause a deadlock on expectEvent().
+        try {
+            BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
+            while (state.keepRunning()) {
+                mActivityRule.runOnUiThread(() -> mUsername.requestFocus());
+                callback.expectEvent(mPassword, EVENT_INPUT_HIDDEN);
+                callback.expectEvent(mUsername, EVENT_INPUT_SHOWN);
+                mActivityRule.runOnUiThread(() -> mPassword.requestFocus());
+                callback.expectEvent(mUsername, EVENT_INPUT_HIDDEN);
+                callback.expectEvent(mPassword, EVENT_INPUT_SHOWN);
+            }
+
+            // Sanity check
+            callback.assertNoAsyncErrors();
+            MyAutofillService.assertNoAsyncErrors();
+        } finally {
+            mAfm.unregisterCallback(callback);
+        }
     }
 }

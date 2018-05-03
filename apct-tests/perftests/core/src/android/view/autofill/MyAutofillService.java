@@ -69,7 +69,7 @@ public class MyAutofillService extends AutofillService {
      */
     static void assertNoAsyncErrors() {
        if (!sAsyncErrors.isEmpty()) {
-           throw new IllegalStateException("got errors: " + sAsyncErrors);
+           throw new IllegalStateException(sAsyncErrors.size() + " errors: " + sAsyncErrors);
        }
     }
 
