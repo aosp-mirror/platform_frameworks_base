@@ -6012,8 +6012,6 @@ public final class Settings {
         @Deprecated
         public static final String ACCESSIBILITY_SPEAK_PASSWORD = "speak_password";
 
-        private static final Validator ACCESSIBILITY_SPEAK_PASSWORD_VALIDATOR = BOOLEAN_VALIDATOR;
-
         /**
          * Whether to draw text with high contrast while in accessibility mode.
          *
@@ -7907,7 +7905,6 @@ public final class Settings {
             ACCESSIBILITY_SHORTCUT_DIALOG_SHOWN,
             ACCESSIBILITY_SHORTCUT_ENABLED,
             ACCESSIBILITY_SHORTCUT_ON_LOCK_SCREEN,
-            ACCESSIBILITY_SPEAK_PASSWORD,
             ACCESSIBILITY_HIGH_TEXT_CONTRAST_ENABLED,
             ACCESSIBILITY_CAPTIONING_PRESET,
             ACCESSIBILITY_CAPTIONING_ENABLED,
@@ -8021,7 +8018,6 @@ public final class Settings {
                     ACCESSIBILITY_SHORTCUT_ENABLED_VALIDATOR);
             VALIDATORS.put(ACCESSIBILITY_SHORTCUT_ON_LOCK_SCREEN,
                     ACCESSIBILITY_SHORTCUT_ON_LOCK_SCREEN_VALIDATOR);
-            VALIDATORS.put(ACCESSIBILITY_SPEAK_PASSWORD, ACCESSIBILITY_SPEAK_PASSWORD_VALIDATOR);
             VALIDATORS.put(ACCESSIBILITY_HIGH_TEXT_CONTRAST_ENABLED,
                     ACCESSIBILITY_HIGH_TEXT_CONTRAST_ENABLED_VALIDATOR);
             VALIDATORS.put(ACCESSIBILITY_CAPTIONING_PRESET,
