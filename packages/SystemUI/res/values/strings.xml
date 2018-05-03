@@ -1360,6 +1360,13 @@
     <string name="volume_stream_content_description_vibrate_a11y">%1$s. Tap to set to vibrate.</string>
     <string name="volume_stream_content_description_mute_a11y">%1$s. Tap to mute.</string>
 
+    <!-- Hint for accessibility. For example: double tap to mute [CHAR_LIMIT=NONE] -->
+    <string name="volume_ringer_hint_mute">mute</string>
+    <!-- Hint for accessibility. For example: double tap to unmute [CHAR_LIMIT=NONE] -->
+    <string name="volume_ringer_hint_unmute">unmute</string>
+    <!-- Hint for accessibility. For example: double tap to vibrate [CHAR_LIMIT=NONE] -->
+    <string name="volume_ringer_hint_vibrate">vibrate</string>
+
     <string name="volume_dialog_title">%s volume controls</string>
 
     <string name="volume_dialog_ringer_guidance_ring">Calls and notifications will ring (<xliff:g id="volume level" example="56">%1$s</xliff:g>)</string>
