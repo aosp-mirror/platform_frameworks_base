@@ -34,9 +34,11 @@ import android.view.KeyEvent;
 interface ISessionManager {
     ISession createSession(String packageName, in ISessionCallback cb, String tag, int userId);
     List<IBinder> getSessions(in ComponentName compName, int userId);
-    void dispatchMediaKeyEvent(in KeyEvent keyEvent, boolean needWakeLock);
-    void dispatchVolumeKeyEvent(in KeyEvent keyEvent, int stream, boolean musicOnly);
-    void dispatchAdjustVolume(int suggestedStream, int delta, int flags);
+    void dispatchMediaKeyEvent(String packageName, boolean asSystemService, in KeyEvent keyEvent,
+            boolean needWakeLock);
+    void dispatchVolumeKeyEvent(String packageName, boolean asSystemService, in KeyEvent keyEvent,
+            int stream, boolean musicOnly);
+    void dispatchAdjustVolume(String packageName, int suggestedStream, int delta, int flags);
     void addSessionsListener(in IActiveSessionsListener listener, in ComponentName compName,
             int userId);
     void removeSessionsListener(in IActiveSessionsListener listener);
