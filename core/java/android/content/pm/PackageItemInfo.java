@@ -43,6 +43,8 @@ import java.util.Comparator;
  */
 public class PackageItemInfo {
     private static final float MAX_LABEL_SIZE_PX = 500f;
+    /** The maximum length of a safe label, in characters */
+    private static final int MAX_SAFE_LABEL_LENGTH = 50000;
 
     private static volatile boolean sForceSafeLabels = false;
 
@@ -187,7 +189,8 @@ public class PackageItemInfo {
         // If the label contains new line characters it may push the UI
         // down to hide a part of it. Labels shouldn't have new line
         // characters, so just truncate at the first time one is seen.
-        final int labelLength = labelStr.length();
+        final int labelLength = Math.min(labelStr.length(), MAX_SAFE_LABEL_LENGTH);
+        final StringBuffer sb = new StringBuffer(labelLength);
         int offset = 0;
         while (offset < labelLength) {
             final int codePoint = labelStr.codePointAt(offset);
@@ -199,14 +202,19 @@ public class PackageItemInfo {
                 break;
             }
             // replace all non-break space to " " in order to be trimmed
+            final int charCount = Character.charCount(codePoint);
             if (type == Character.SPACE_SEPARATOR) {
-                labelStr = labelStr.substring(0, offset) + " " + labelStr.substring(offset +
-                        Character.charCount(codePoint));
+                sb.append(' ');
+            } else {
+                sb.append(labelStr.charAt(offset));
+                if (charCount == 2) {
+                    sb.append(labelStr.charAt(offset + 1));
+                }
             }
-            offset += Character.charCount(codePoint);
+            offset += charCount;
         }
 
-        labelStr = labelStr.trim();
+        labelStr = sb.toString().trim();
         if (labelStr.isEmpty()) {
             return packageName;
         }
