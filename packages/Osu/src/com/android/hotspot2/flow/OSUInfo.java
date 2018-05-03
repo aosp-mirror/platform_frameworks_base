@@ -42,6 +42,7 @@ public class OSUInfo implements Parcelable {
     private HSIconFileElement mIconFileElement;
     private String mIconFileName;
     private IconInfo mIconInfo;
+    private int mIconIndex;
 
     public OSUInfo(ScanResult scanResult, OSUProvider osuProvider, int osuID) {
         mOsuID = osuID;
@@ -50,6 +51,7 @@ public class OSUInfo implements Parcelable {
         mAnqpDomID = scanResult.anqpDomainId;
         mAdvertisingSSID = scanResult.SSID;
         mOSUProvider = osuProvider;
+        mIconIndex = -1;
     }
 
     public long getOSUBssid() {
@@ -157,12 +159,15 @@ public class OSUInfo implements Parcelable {
     public void setIconFileElement(HSIconFileElement iconFileElement, String fileName) {
         synchronized (mOSUProvider) {
             mIconFileElement = iconFileElement;
+            int index = 0;
             for (IconInfo iconInfo : mOSUProvider.getIcons()) {
                 if (iconInfo.getFileName().equals(fileName)) {
                     mIconInfo = iconInfo;
                     mIconFileName = fileName;
+                    mIconIndex = index;
                     break;
                 }
+                index++;
             }
             mIconStatus = IconStatus.Available;
         }
@@ -285,9 +290,9 @@ public class OSUInfo implements Parcelable {
             return;
         }
         mIconFileElement = new HSIconFileElement(in);
-        int iconIndex = in.readInt();
-        mIconInfo = iconIndex >= 0 && iconIndex < mOSUProvider.getIcons().size()
-                ? mOSUProvider.getIcons().get(iconIndex) : null;
+        mIconIndex = in.readInt();
+        mIconInfo = mIconIndex >= 0 && mIconIndex < mOSUProvider.getIcons().size()
+                ? mOSUProvider.getIcons().get(mIconIndex) : null;
     }
 
     public static final Parcelable.Creator<OSUInfo> CREATOR = new Parcelable.Creator<OSUInfo>() {
@@ -317,5 +322,6 @@ public class OSUInfo implements Parcelable {
         dest.writeInt(mIconStatus.ordinal());
         mOSUProvider.writeParcel(dest);
         mIconFileElement.writeParcel(dest);
+        dest.writeInt(mIconIndex);
     }
 }
