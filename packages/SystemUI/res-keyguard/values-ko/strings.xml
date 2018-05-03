@@ -140,7 +140,10 @@
       <item quantity="one">기기가 <xliff:g id="NUMBER_0">%d</xliff:g>시간 동안 잠금 해제되지 않았습니다. 비밀번호를 입력하세요.</item>
     </plurals>
     <string name="fingerprint_not_recognized" msgid="348813995267914625">"인식할 수 없음"</string>
-    <!-- no translation found for kg_password_default_pin_message (3739658416797652781) -->
+    <plurals name="kg_password_default_pin_message" formatted="false" msgid="3739658416797652781">
+      <item quantity="other">SIM PIN을 입력하세요. 입력은 <xliff:g id="NUMBER_1">%d</xliff:g>번 더 시도할 수 있습니다.</item>
+      <item quantity="one">SIM PIN을 입력하세요. 입력에 <xliff:g id="NUMBER_0">%d</xliff:g>번 더 실패하면 이동통신사에 문의하여 기기를 잠금 해제해야 합니다.</item>
+    </plurals>
     <plurals name="kg_password_default_puk_message" formatted="false" msgid="8744416410184198352">
       <item quantity="other">SIM이 사용 중지되었습니다. 계속하려면 PUK 코드를 입력하세요. <xliff:g id="_NUMBER_1">%d</xliff:g>번 더 실패하면 SIM을 완전히 사용할 수 없게 됩니다. 자세한 내용은 이동통신사에 문의하세요.</item>
       <item quantity="one">SIM이 사용 중지되었습니다. 계속하려면 PUK 코드를 입력하세요. <xliff:g id="_NUMBER_0">%d</xliff:g>번 더 실패하면 SIM을 완전히 사용할 수 없게 됩니다. 자세한 내용은 이동통신사에 문의하세요.</item>

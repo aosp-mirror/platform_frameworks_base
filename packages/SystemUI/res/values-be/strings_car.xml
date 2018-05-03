@@ -22,4 +22,6 @@
     <string name="car_guest" msgid="3738772168718508650">"Госць"</string>
     <string name="car_add_user" msgid="5245196248349230898">"Дадаць карыстальніка"</string>
     <string name="car_new_user" msgid="8142927244990323906">"Новы карыстальнік"</string>
+    <string name="user_add_user_message_setup" msgid="1791011504259527329">"Калі вы дадаяце новага карыстальніка, яму трэба наладзіць свой профіль."</string>
+    <string name="user_add_user_message_update" msgid="3383320289232716179">"Кожны карыстальнік прылады можа абнаўляць праграмы для іншых уліковых запісаў."</string>
 </resources>

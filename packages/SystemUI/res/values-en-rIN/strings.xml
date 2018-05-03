@@ -32,7 +32,7 @@
     <string name="status_bar_no_notifications_title" msgid="4755261167193833213">"No notifications"</string>
     <string name="status_bar_ongoing_events_title" msgid="1682504513316879202">"Ongoing"</string>
     <string name="status_bar_latest_events_title" msgid="6594767438577593172">"Notifications"</string>
-    <string name="battery_low_title" msgid="6456385927409742437">"Battery is low"</string>
+    <string name="battery_low_title" msgid="9187898087363540349">"Battery may run out soon"</string>
     <string name="battery_low_percent_format" msgid="2900940511201380775">"<xliff:g id="PERCENTAGE">%s</xliff:g> remaining"</string>
     <string name="battery_low_percent_format_hybrid" msgid="6838677459286775617">"<xliff:g id="PERCENTAGE">%s</xliff:g> remaining, about <xliff:g id="TIME">%s</xliff:g> left based on your usage"</string>
     <string name="battery_low_percent_format_hybrid_short" msgid="9025795469949145586">"<xliff:g id="PERCENTAGE">%s</xliff:g> remaining, about <xliff:g id="TIME">%s</xliff:g> left"</string>
@@ -95,8 +95,7 @@
     <string name="accessibility_unlock_button" msgid="128158454631118828">"Unlock"</string>
     <string name="accessibility_waiting_for_fingerprint" msgid="4808860050517462885">"Waiting for fingerprint"</string>
     <string name="accessibility_unlock_without_fingerprint" msgid="7541705575183694446">"Unlock without using your fingerprint"</string>
-    <!-- no translation found for accessibility_send_smart_reply (7766727839703044493) -->
-    <skip />
+    <string name="accessibility_send_smart_reply" msgid="7766727839703044493">"Send"</string>
     <string name="unlock_label" msgid="8779712358041029439">"unlock"</string>
     <string name="phone_label" msgid="2320074140205331708">"open phone"</string>
     <string name="voice_assist_label" msgid="3956854378310019854">"open voice assist"</string>
@@ -208,10 +207,8 @@
     <string name="accessibility_quick_settings_airplane_on" msgid="6406141469157599296">"Aeroplane mode on."</string>
     <string name="accessibility_quick_settings_airplane_changed_off" msgid="66846307818850664">"Aeroplane mode turned off."</string>
     <string name="accessibility_quick_settings_airplane_changed_on" msgid="8983005603505087728">"Aeroplane mode turned on."</string>
-    <!-- no translation found for accessibility_quick_settings_dnd_none_on (2960643943620637020) -->
-    <skip />
-    <!-- no translation found for accessibility_quick_settings_dnd_alarms_on (3357131899365865386) -->
-    <skip />
+    <string name="accessibility_quick_settings_dnd_none_on" msgid="2960643943620637020">"total silence"</string>
+    <string name="accessibility_quick_settings_dnd_alarms_on" msgid="3357131899365865386">"alarms only"</string>
     <string name="accessibility_quick_settings_dnd" msgid="6607873236717185815">"Do not disturb"</string>
     <string name="accessibility_quick_settings_dnd_changed_off" msgid="898107593453022935">"\'Do not disturb\' turned off."</string>
     <string name="accessibility_quick_settings_dnd_changed_on" msgid="4483780856613561039">"\'Do not disturb\' turned on."</string>
@@ -620,8 +617,7 @@
       <item quantity="one">using the <xliff:g id="PERFORMING_ACTIVITY_0">%1$s</xliff:g></item>
     </plurals>
     <string name="notification_appops_settings" msgid="1028328314935908050">"Settings"</string>
-    <!-- no translation found for notification_appops_ok (1156966426011011434) -->
-    <skip />
+    <string name="notification_appops_ok" msgid="1156966426011011434">"OK"</string>
     <string name="notification_channel_controls_opened_accessibility" msgid="6553950422055908113">"Notification controls for <xliff:g id="APP_NAME">%1$s</xliff:g> opened"</string>
     <string name="notification_channel_controls_closed_accessibility" msgid="7521619812603693144">"Notification controls for <xliff:g id="APP_NAME">%1$s</xliff:g> closed"</string>
     <string name="notification_channel_switch_accessibility" msgid="3420796005601900717">"Allow notifications from this channel"</string>

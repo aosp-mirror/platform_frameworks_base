@@ -32,7 +32,7 @@
     <string name="status_bar_no_notifications_title" msgid="4755261167193833213">"Ծանուցումներ չկան"</string>
     <string name="status_bar_ongoing_events_title" msgid="1682504513316879202">"Ընթացիկ"</string>
     <string name="status_bar_latest_events_title" msgid="6594767438577593172">"Ծանուցումներ"</string>
-    <string name="battery_low_title" msgid="6456385927409742437">"Մարտկոցի լիցքը սպառվում է"</string>
+    <string name="battery_low_title" msgid="9187898087363540349">"Մարտկոցի լիցքը շուտով կարող է սպառվել"</string>
     <string name="battery_low_percent_format" msgid="2900940511201380775">"Մնաց <xliff:g id="PERCENTAGE">%s</xliff:g>"</string>
     <string name="battery_low_percent_format_hybrid" msgid="6838677459286775617">"Մարտկոցի լիցքը՝ <xliff:g id="PERCENTAGE">%s</xliff:g>, մնացել է մոտ <xliff:g id="TIME">%s</xliff:g>՝ օգտագործման եղանակից կախված"</string>
     <string name="battery_low_percent_format_hybrid_short" msgid="9025795469949145586">"Մարտկոցի լիցքը՝ <xliff:g id="PERCENTAGE">%s</xliff:g>, մնացել է մոտ <xliff:g id="TIME">%s</xliff:g>"</string>
@@ -95,8 +95,7 @@
     <string name="accessibility_unlock_button" msgid="128158454631118828">"Ապակողպել"</string>
     <string name="accessibility_waiting_for_fingerprint" msgid="4808860050517462885">"Մատնահետքի սպասում"</string>
     <string name="accessibility_unlock_without_fingerprint" msgid="7541705575183694446">"Ապակողպել չօգտագործելով մատնահետքը"</string>
-    <!-- no translation found for accessibility_send_smart_reply (7766727839703044493) -->
-    <skip />
+    <string name="accessibility_send_smart_reply" msgid="7766727839703044493">"Ուղարկել"</string>
     <string name="unlock_label" msgid="8779712358041029439">"ապակողպել"</string>
     <string name="phone_label" msgid="2320074140205331708">"բացել հեռախոսը"</string>
     <string name="voice_assist_label" msgid="3956854378310019854">"բացեք ձայնային հուշումը"</string>
@@ -208,10 +207,8 @@
     <string name="accessibility_quick_settings_airplane_on" msgid="6406141469157599296">"Ինքնաթիռի ռեժիմը միացված է:"</string>
     <string name="accessibility_quick_settings_airplane_changed_off" msgid="66846307818850664">"Ինքնաթիռի ռեժիմն անջատվեց:"</string>
     <string name="accessibility_quick_settings_airplane_changed_on" msgid="8983005603505087728">"Ինքնաթիռի ռեժիմը միացավ:"</string>
-    <!-- no translation found for accessibility_quick_settings_dnd_none_on (2960643943620637020) -->
-    <skip />
-    <!-- no translation found for accessibility_quick_settings_dnd_alarms_on (3357131899365865386) -->
-    <skip />
+    <string name="accessibility_quick_settings_dnd_none_on" msgid="2960643943620637020">"կատարյալ լռություն"</string>
+    <string name="accessibility_quick_settings_dnd_alarms_on" msgid="3357131899365865386">"միայն զարթուցիչը"</string>
     <string name="accessibility_quick_settings_dnd" msgid="6607873236717185815">"Չանհանգստացնել:"</string>
     <string name="accessibility_quick_settings_dnd_changed_off" msgid="898107593453022935">"Չխանգարելու ընտրանքն անջատվեց:"</string>
     <string name="accessibility_quick_settings_dnd_changed_on" msgid="4483780856613561039">"Չխանգարելու ընտրանքը միացվեց:"</string>
@@ -356,7 +353,7 @@
     <string name="recents_empty_message" msgid="808480104164008572">"Վերջին տարրեր չկան"</string>
     <string name="recents_empty_message_dismissed_all" msgid="2791312568666558651">"Դուք ջնջել եք ամենը"</string>
     <string name="recents_app_info_button_label" msgid="2890317189376000030">"Հավելվածի մասին"</string>
-    <string name="recents_lock_to_app_button_label" msgid="6942899049072506044">"էկրանի ամրակցում"</string>
+    <string name="recents_lock_to_app_button_label" msgid="6942899049072506044">"էկրանի ամրացում"</string>
     <string name="recents_search_bar_label" msgid="8074997400187836677">"որոնել"</string>
     <string name="recents_launch_error_message" msgid="2969287838120550506">"Հնարավոր չէ գործարկել <xliff:g id="APP">%s</xliff:g>-ը:"</string>
     <string name="recents_launch_disabled_message" msgid="1624523193008871793">"<xliff:g id="APP">%s</xliff:g> հավելվածը անվտանգ ռեժիմում անջատված է:"</string>
@@ -620,8 +617,7 @@
       <item quantity="other">օգտագործում է <xliff:g id="PERFORMING_ACTIVITY_1">%1$s</xliff:g> և <xliff:g id="PERFORMING_ACTIVITY_2">%2$s</xliff:g></item>
     </plurals>
     <string name="notification_appops_settings" msgid="1028328314935908050">"Կարգավորումներ"</string>
-    <!-- no translation found for notification_appops_ok (1156966426011011434) -->
-    <skip />
+    <string name="notification_appops_ok" msgid="1156966426011011434">"Եղավ"</string>
     <string name="notification_channel_controls_opened_accessibility" msgid="6553950422055908113">"<xliff:g id="APP_NAME">%1$s</xliff:g> հավելվածի ծանուցումների կառավարումը բաց է"</string>
     <string name="notification_channel_controls_closed_accessibility" msgid="7521619812603693144">"<xliff:g id="APP_NAME">%1$s</xliff:g> հավելվածի ծանուցումների կառավարումը փակ է"</string>
     <string name="notification_channel_switch_accessibility" msgid="3420796005601900717">"Թույլ տալ ծանուցումներ այս ալիքից"</string>

@@ -32,7 +32,7 @@
     <string name="status_bar_no_notifications_title" msgid="4755261167193833213">"通知なし"</string>
     <string name="status_bar_ongoing_events_title" msgid="1682504513316879202">"実行中"</string>
     <string name="status_bar_latest_events_title" msgid="6594767438577593172">"通知"</string>
-    <string name="battery_low_title" msgid="6456385927409742437">"電池残量が少なくなっています"</string>
+    <string name="battery_low_title" msgid="9187898087363540349">"もうすぐ電池がなくなります"</string>
     <string name="battery_low_percent_format" msgid="2900940511201380775">"残量が<xliff:g id="PERCENTAGE">%s</xliff:g>です"</string>
     <string name="battery_low_percent_format_hybrid" msgid="6838677459286775617">"残量 <xliff:g id="PERCENTAGE">%s</xliff:g>、約 <xliff:g id="TIME">%s</xliff:g>（使用状況に基づく）"</string>
     <string name="battery_low_percent_format_hybrid_short" msgid="9025795469949145586">"残量 <xliff:g id="PERCENTAGE">%s</xliff:g>、約 <xliff:g id="TIME">%s</xliff:g>"</string>
@@ -95,8 +95,7 @@
     <string name="accessibility_unlock_button" msgid="128158454631118828">"ロック解除"</string>
     <string name="accessibility_waiting_for_fingerprint" msgid="4808860050517462885">"指紋を待っています"</string>
     <string name="accessibility_unlock_without_fingerprint" msgid="7541705575183694446">"指紋認証を使用せずにロック解除"</string>
-    <!-- no translation found for accessibility_send_smart_reply (7766727839703044493) -->
-    <skip />
+    <string name="accessibility_send_smart_reply" msgid="7766727839703044493">"送信"</string>
     <string name="unlock_label" msgid="8779712358041029439">"ロック解除"</string>
     <string name="phone_label" msgid="2320074140205331708">"電話を起動"</string>
     <string name="voice_assist_label" msgid="3956854378310019854">"音声アシストを開く"</string>
@@ -210,10 +209,8 @@
     <string name="accessibility_quick_settings_airplane_on" msgid="6406141469157599296">"機内モードがONです。"</string>
     <string name="accessibility_quick_settings_airplane_changed_off" msgid="66846307818850664">"機内モードをOFFにしました。"</string>
     <string name="accessibility_quick_settings_airplane_changed_on" msgid="8983005603505087728">"機内モードをONにしました。"</string>
-    <!-- no translation found for accessibility_quick_settings_dnd_none_on (2960643943620637020) -->
-    <skip />
-    <!-- no translation found for accessibility_quick_settings_dnd_alarms_on (3357131899365865386) -->
-    <skip />
+    <string name="accessibility_quick_settings_dnd_none_on" msgid="2960643943620637020">"サイレント"</string>
+    <string name="accessibility_quick_settings_dnd_alarms_on" msgid="3357131899365865386">"アラームのみ"</string>
     <string name="accessibility_quick_settings_dnd" msgid="6607873236717185815">"マナーモード"</string>
     <string name="accessibility_quick_settings_dnd_changed_off" msgid="898107593453022935">"マナーモードを OFF にしました。"</string>
     <string name="accessibility_quick_settings_dnd_changed_on" msgid="4483780856613561039">"マナーモードを ON にしました。"</string>
@@ -622,8 +619,7 @@
       <item quantity="one"><xliff:g id="PERFORMING_ACTIVITY_0">%1$s</xliff:g>の使用</item>
     </plurals>
     <string name="notification_appops_settings" msgid="1028328314935908050">"設定"</string>
-    <!-- no translation found for notification_appops_ok (1156966426011011434) -->
-    <skip />
+    <string name="notification_appops_ok" msgid="1156966426011011434">"OK"</string>
     <string name="notification_channel_controls_opened_accessibility" msgid="6553950422055908113">"<xliff:g id="APP_NAME">%1$s</xliff:g> の通知管理は開いています"</string>
     <string name="notification_channel_controls_closed_accessibility" msgid="7521619812603693144">"<xliff:g id="APP_NAME">%1$s</xliff:g> の通知管理は閉じています"</string>
     <string name="notification_channel_switch_accessibility" msgid="3420796005601900717">"このチャンネルからの通知を許可する"</string>

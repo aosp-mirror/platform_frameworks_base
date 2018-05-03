@@ -32,7 +32,7 @@
     <string name="status_bar_no_notifications_title" msgid="4755261167193833213">"Hakuna arifa"</string>
     <string name="status_bar_ongoing_events_title" msgid="1682504513316879202">"Inaendelea"</string>
     <string name="status_bar_latest_events_title" msgid="6594767438577593172">"Arifa"</string>
-    <string name="battery_low_title" msgid="6456385927409742437">"Betri inaisha"</string>
+    <string name="battery_low_title" msgid="9187898087363540349">"Huenda chaji itaisha hivi karibuni"</string>
     <string name="battery_low_percent_format" msgid="2900940511201380775">"Imebakisha <xliff:g id="PERCENTAGE">%s</xliff:g>"</string>
     <string name="battery_low_percent_format_hybrid" msgid="6838677459286775617">"Imesalia <xliff:g id="PERCENTAGE">%s</xliff:g>, itadumu takribani <xliff:g id="TIME">%s</xliff:g> kulingana na jinsi unavyotumia"</string>
     <string name="battery_low_percent_format_hybrid_short" msgid="9025795469949145586">"Imesalia <xliff:g id="PERCENTAGE">%s</xliff:g>, itadumu takribani <xliff:g id="TIME">%s</xliff:g>"</string>
@@ -95,8 +95,7 @@
     <string name="accessibility_unlock_button" msgid="128158454631118828">"Fungua"</string>
     <string name="accessibility_waiting_for_fingerprint" msgid="4808860050517462885">"Inasubiri alama ya kidole"</string>
     <string name="accessibility_unlock_without_fingerprint" msgid="7541705575183694446">"Fungua bila kutumia kitambulisho chako"</string>
-    <!-- no translation found for accessibility_send_smart_reply (7766727839703044493) -->
-    <skip />
+    <string name="accessibility_send_smart_reply" msgid="7766727839703044493">"Tuma"</string>
     <string name="unlock_label" msgid="8779712358041029439">"fungua"</string>
     <string name="phone_label" msgid="2320074140205331708">"fungua simu"</string>
     <string name="voice_assist_label" msgid="3956854378310019854">"fungua mapendekezo ya sauti"</string>
@@ -157,7 +156,7 @@
     <string name="data_connection_lte" msgid="2694876797724028614">"LTE"</string>
     <string name="data_connection_lte_plus" msgid="3423013208570937424">"LTE+"</string>
     <string name="data_connection_cdma" msgid="8176597308239086780">"1X"</string>
-    <string name="data_connection_roaming" msgid="6037232010953697354">"Matumizi ya mitandao mingine"</string>
+    <string name="data_connection_roaming" msgid="6037232010953697354">"Mitandao ya ng\'ambo"</string>
     <string name="data_connection_edge" msgid="871835227939216682">"EDGE"</string>
     <string name="accessibility_data_connection_wifi" msgid="2324496756590645221">"Wi-Fi"</string>
     <string name="accessibility_no_sim" msgid="8274017118472455155">"Hakuna SIM."</string>
@@ -208,10 +207,8 @@
     <string name="accessibility_quick_settings_airplane_on" msgid="6406141469157599296">"Hali ya ndegeni imewashwa."</string>
     <string name="accessibility_quick_settings_airplane_changed_off" msgid="66846307818850664">"Hali ya ndegeni imezimwa."</string>
     <string name="accessibility_quick_settings_airplane_changed_on" msgid="8983005603505087728">"Hali ya ndegeni imewashwa."</string>
-    <!-- no translation found for accessibility_quick_settings_dnd_none_on (2960643943620637020) -->
-    <skip />
-    <!-- no translation found for accessibility_quick_settings_dnd_alarms_on (3357131899365865386) -->
-    <skip />
+    <string name="accessibility_quick_settings_dnd_none_on" msgid="2960643943620637020">"kimya kabisa"</string>
+    <string name="accessibility_quick_settings_dnd_alarms_on" msgid="3357131899365865386">"kengele pekee"</string>
     <string name="accessibility_quick_settings_dnd" msgid="6607873236717185815">"Usinisumbue."</string>
     <string name="accessibility_quick_settings_dnd_changed_off" msgid="898107593453022935">"Kipengee cha usinisumbue kimezimwa."</string>
     <string name="accessibility_quick_settings_dnd_changed_on" msgid="4483780856613561039">"Kipengee cha usinisumbue kimewashwa."</string>
@@ -337,7 +334,7 @@
     </plurals>
     <string name="quick_settings_notifications_label" msgid="4818156442169154523">"Arifa"</string>
     <string name="quick_settings_flashlight_label" msgid="2133093497691661546">"Tochi"</string>
-    <string name="quick_settings_cellular_detail_title" msgid="3661194685666477347">"Data ya mtandao wa simu"</string>
+    <string name="quick_settings_cellular_detail_title" msgid="3661194685666477347">"Data ya simu"</string>
     <string name="quick_settings_cellular_detail_data_usage" msgid="1964260360259312002">"Matumizi ya data"</string>
     <string name="quick_settings_cellular_detail_remaining_data" msgid="722715415543541249">"Data iliyosalia"</string>
     <string name="quick_settings_cellular_detail_over_limit" msgid="967669665390990427">"Imezidi kikomo"</string>
@@ -620,8 +617,7 @@
       <item quantity="one">inatumia <xliff:g id="PERFORMING_ACTIVITY_0">%1$s</xliff:g></item>
     </plurals>
     <string name="notification_appops_settings" msgid="1028328314935908050">"Mipangilio"</string>
-    <!-- no translation found for notification_appops_ok (1156966426011011434) -->
-    <skip />
+    <string name="notification_appops_ok" msgid="1156966426011011434">"Sawa"</string>
     <string name="notification_channel_controls_opened_accessibility" msgid="6553950422055908113">"Vidhibiti vya arifa <xliff:g id="APP_NAME">%1$s</xliff:g> vimefunguliwa"</string>
     <string name="notification_channel_controls_closed_accessibility" msgid="7521619812603693144">"Vidhibiti vya arifa vya <xliff:g id="APP_NAME">%1$s</xliff:g> vimefungwa"</string>
     <string name="notification_channel_switch_accessibility" msgid="3420796005601900717">"Ruhusu arifa kutoka kwenye kituo hiki"</string>
@@ -825,7 +821,7 @@
     <string name="instant_apps_message" msgid="8116608994995104836">"Huhitaji kusakinisha programu zinazofunguka papo hapo."</string>
     <string name="app_info" msgid="6856026610594615344">"Maelezo ya programu"</string>
     <string name="go_to_web" msgid="2650669128861626071">"Tumia kivinjari"</string>
-    <string name="mobile_data" msgid="7094582042819250762">"Data ya mtandao wa simu"</string>
+    <string name="mobile_data" msgid="7094582042819250762">"Data ya simu"</string>
     <string name="mobile_data_text_format" msgid="3526214522670876454">"<xliff:g id="ID_1">%s</xliff:g><xliff:g id="ID_2">%s</xliff:g>"</string>
     <string name="wifi_is_off" msgid="1838559392210456893">"Wi-Fi imezimwa"</string>
     <string name="bt_is_off" msgid="2640685272289706392">"Bluetooth imezimwa"</string>

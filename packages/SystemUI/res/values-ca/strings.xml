@@ -32,18 +32,18 @@
     <string name="status_bar_no_notifications_title" msgid="4755261167193833213">"Cap notificació"</string>
     <string name="status_bar_ongoing_events_title" msgid="1682504513316879202">"Continu"</string>
     <string name="status_bar_latest_events_title" msgid="6594767438577593172">"Notificacions"</string>
-    <string name="battery_low_title" msgid="6456385927409742437">"Queda poca bateria"</string>
+    <string name="battery_low_title" msgid="9187898087363540349">"És possible que la bateria s\'esgoti aviat"</string>
     <string name="battery_low_percent_format" msgid="2900940511201380775">"Queda un <xliff:g id="PERCENTAGE">%s</xliff:g>."</string>
     <string name="battery_low_percent_format_hybrid" msgid="6838677459286775617">"Queda un <xliff:g id="PERCENTAGE">%s</xliff:g>; temps restant aproximat segons l\'ús que en fas: <xliff:g id="TIME">%s</xliff:g>"</string>
     <string name="battery_low_percent_format_hybrid_short" msgid="9025795469949145586">"Queda un <xliff:g id="PERCENTAGE">%s</xliff:g>; temps restant aproximat: <xliff:g id="TIME">%s</xliff:g>"</string>
-    <string name="battery_low_percent_format_saver_started" msgid="7879389868952879166">"Queda un <xliff:g id="PERCENTAGE">%s</xliff:g>. La funció Estalvi de bateria està activada."</string>
+    <string name="battery_low_percent_format_saver_started" msgid="7879389868952879166">"Queda un <xliff:g id="PERCENTAGE">%s</xliff:g>. El mode d\'estalvi de bateria està activat."</string>
     <string name="invalid_charger" msgid="2741987096648693172">"No es pot carregar el dispositiu per USB. Fes servir el carregador original del dispositiu."</string>
     <string name="invalid_charger_title" msgid="2836102177577255404">"No es pot carregar per USB"</string>
     <string name="invalid_charger_text" msgid="6480624964117840005">"Fes servir el carregador original del dispositiu"</string>
     <string name="battery_low_why" msgid="4553600287639198111">"Configuració"</string>
-    <string name="battery_saver_confirmation_title" msgid="2052100465684817154">"Vols activar la funció Estalvi de bateria?"</string>
+    <string name="battery_saver_confirmation_title" msgid="2052100465684817154">"Vols activar l\'estalvi de bateria?"</string>
     <string name="battery_saver_confirmation_ok" msgid="7507968430447930257">"Activa"</string>
-    <string name="battery_saver_start_action" msgid="8187820911065797519">"Activa la funció Estalvi de bateria"</string>
+    <string name="battery_saver_start_action" msgid="8187820911065797519">"Activa l\'estalvi de bateria"</string>
     <string name="status_bar_settings_settings_button" msgid="3023889916699270224">"Configuració"</string>
     <string name="status_bar_settings_wifi_button" msgid="1733928151698311923">"Wi-Fi"</string>
     <string name="status_bar_settings_auto_rotation" msgid="3790482541357798421">"Gira pantalla automàticament"</string>
@@ -95,8 +95,7 @@
     <string name="accessibility_unlock_button" msgid="128158454631118828">"Desbloqueja"</string>
     <string name="accessibility_waiting_for_fingerprint" msgid="4808860050517462885">"S\'està esperant l\'empremta digital"</string>
     <string name="accessibility_unlock_without_fingerprint" msgid="7541705575183694446">"Desbloqueja sense utilitzar l\'empremta digital"</string>
-    <!-- no translation found for accessibility_send_smart_reply (7766727839703044493) -->
-    <skip />
+    <string name="accessibility_send_smart_reply" msgid="7766727839703044493">"Envia"</string>
     <string name="unlock_label" msgid="8779712358041029439">"desbloqueja"</string>
     <string name="phone_label" msgid="2320074140205331708">"obre el telèfon"</string>
     <string name="voice_assist_label" msgid="3956854378310019854">"obre l\'assistència per veu"</string>
@@ -135,7 +134,7 @@
     <string name="accessibility_wimax_three_bars" msgid="6116551636752103927">"Tres barres de WiMAX."</string>
     <string name="accessibility_wimax_signal_full" msgid="2768089986795579558">"Senyal de WiMAX plena."</string>
     <string name="accessibility_ethernet_disconnected" msgid="5896059303377589469">"S\'ha desconnectat l\'Ethernet."</string>
-    <string name="accessibility_ethernet_connected" msgid="2692130313069182636">"S\'ha connectat l\'Ethernet."</string>
+    <string name="accessibility_ethernet_connected" msgid="2692130313069182636">"Ethernet connectada"</string>
     <string name="accessibility_no_signal" msgid="7064645320782585167">"Sense senyal."</string>
     <string name="accessibility_not_connected" msgid="6395326276213402883">"Sense connexió."</string>
     <string name="accessibility_zero_bars" msgid="3806060224467027887">"Cap barra."</string>
@@ -208,10 +207,8 @@
     <string name="accessibility_quick_settings_airplane_on" msgid="6406141469157599296">"El Mode d\'avió està activat."</string>
     <string name="accessibility_quick_settings_airplane_changed_off" msgid="66846307818850664">"S\'ha desactivat el Mode d\'avió."</string>
     <string name="accessibility_quick_settings_airplane_changed_on" msgid="8983005603505087728">"S\'ha activat el Mode d\'avió."</string>
-    <!-- no translation found for accessibility_quick_settings_dnd_none_on (2960643943620637020) -->
-    <skip />
-    <!-- no translation found for accessibility_quick_settings_dnd_alarms_on (3357131899365865386) -->
-    <skip />
+    <string name="accessibility_quick_settings_dnd_none_on" msgid="2960643943620637020">"silenci total"</string>
+    <string name="accessibility_quick_settings_dnd_alarms_on" msgid="3357131899365865386">"només alarmes"</string>
     <string name="accessibility_quick_settings_dnd" msgid="6607873236717185815">"Mode No molestis."</string>
     <string name="accessibility_quick_settings_dnd_changed_off" msgid="898107593453022935">"S\'ha desactivat el mode No molestis."</string>
     <string name="accessibility_quick_settings_dnd_changed_on" msgid="4483780856613561039">"S\'ha activat el mode No molestis."</string>
@@ -429,9 +426,9 @@
     <string name="user_remove_user_title" msgid="4681256956076895559">"Vols suprimir l\'usuari?"</string>
     <string name="user_remove_user_message" msgid="1453218013959498039">"Totes les aplicacions i les dades d\'aquest usuari se suprimiran."</string>
     <string name="user_remove_user_remove" msgid="7479275741742178297">"Suprimeix"</string>
-    <string name="battery_saver_notification_title" msgid="8614079794522291840">"S\'ha activat la funció Estalvi de bateria"</string>
+    <string name="battery_saver_notification_title" msgid="8614079794522291840">"S\'ha activat l\'estalvi de bateria"</string>
     <string name="battery_saver_notification_text" msgid="820318788126672692">"Redueix el rendiment i l\'ús de les dades en segon pla."</string>
-    <string name="battery_saver_notification_action_text" msgid="132118784269455533">"Desactiva la funció Estalvi de bateria"</string>
+    <string name="battery_saver_notification_action_text" msgid="132118784269455533">"Desactiva l\'estalvi de bateria"</string>
     <string name="media_projection_dialog_text" msgid="3071431025448218928">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> començarà a gravar tot el que es mostri a la pantalla."</string>
     <string name="media_projection_remember_text" msgid="3103510882172746752">"No ho tornis a mostrar"</string>
     <string name="clear_all_notifications_text" msgid="814192889771462828">"Esborra-ho tot"</string>
@@ -620,8 +617,7 @@
       <item quantity="one">utilitzant <xliff:g id="PERFORMING_ACTIVITY_0">%1$s</xliff:g></item>
     </plurals>
     <string name="notification_appops_settings" msgid="1028328314935908050">"Configuració"</string>
-    <!-- no translation found for notification_appops_ok (1156966426011011434) -->
-    <skip />
+    <string name="notification_appops_ok" msgid="1156966426011011434">"D\'acord"</string>
     <string name="notification_channel_controls_opened_accessibility" msgid="6553950422055908113">"S\'han obert els controls de notificació per a <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="notification_channel_controls_closed_accessibility" msgid="7521619812603693144">"S\'han tancat els controls de notificació per a <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="notification_channel_switch_accessibility" msgid="3420796005601900717">"Permet les notificacions d\'aquest canal"</string>
@@ -644,7 +640,7 @@
       <item quantity="one">%d minut</item>
     </plurals>
     <string name="battery_panel_title" msgid="7944156115535366613">"Ús de la bateria"</string>
-    <string name="battery_detail_charging_summary" msgid="1279095653533044008">"La funció Estalvi de bateria no està disponible durant la càrrega"</string>
+    <string name="battery_detail_charging_summary" msgid="1279095653533044008">"El mode d\'estalvi de bateria no està disponible durant la càrrega"</string>
     <string name="battery_detail_switch_title" msgid="6285872470260795421">"Estalvi de bateria"</string>
     <string name="battery_detail_switch_summary" msgid="9049111149407626804">"Redueix el rendiment i les dades en segon pla"</string>
     <string name="keyboard_key_button_template" msgid="6230056639734377300">"Botó <xliff:g id="NAME">%1$s</xliff:g>"</string>
@@ -848,11 +844,11 @@
     <string name="slice_permission_checkbox" msgid="7986504458640562900">"Permet que <xliff:g id="APP">%1$s</xliff:g> mostri porcions de qualsevol aplicació"</string>
     <string name="slice_permission_allow" msgid="2340244901366722709">"Permet"</string>
     <string name="slice_permission_deny" msgid="7683681514008048807">"Denega"</string>
-    <string name="auto_saver_title" msgid="1217959994732964228">"Toca per programar la funció Estalvi de bateria"</string>
+    <string name="auto_saver_title" msgid="1217959994732964228">"Toca per programar l\'estalvi de bateria"</string>
     <string name="auto_saver_text" msgid="6324376061044218113">"Activa automàticament quan el nivell de bateria sigui del <xliff:g id="PERCENTAGE">%d</xliff:g>%%"</string>
     <string name="no_auto_saver_action" msgid="8086002101711328500">"No"</string>
-    <string name="auto_saver_enabled_title" msgid="6726474226058316862">"S\'ha activat la programació de la funció Estalvi de bateria"</string>
-    <string name="auto_saver_enabled_text" msgid="874711029884777579">"La funció Estalvi de bateria s\'activarà automàticament quan el nivell de bateria sigui inferior al <xliff:g id="PERCENTAGE">%d</xliff:g>%%."</string>
+    <string name="auto_saver_enabled_title" msgid="6726474226058316862">"S\'ha activat la programació de l\'estalvi de bateria"</string>
+    <string name="auto_saver_enabled_text" msgid="874711029884777579">"L\'estalvi de bateria s\'activarà automàticament quan el nivell de bateria sigui inferior al <xliff:g id="PERCENTAGE">%d</xliff:g>%%."</string>
     <string name="open_saver_setting_action" msgid="8314624730997322529">"Configuració"</string>
     <string name="auto_saver_okay_action" msgid="2701221740227683650">"D\'acord"</string>
 </resources>

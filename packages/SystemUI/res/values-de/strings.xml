@@ -32,7 +32,7 @@
     <string name="status_bar_no_notifications_title" msgid="4755261167193833213">"Keine Benachrichtigungen"</string>
     <string name="status_bar_ongoing_events_title" msgid="1682504513316879202">"Aktuell"</string>
     <string name="status_bar_latest_events_title" msgid="6594767438577593172">"Benachrichtigungen"</string>
-    <string name="battery_low_title" msgid="6456385927409742437">"Akku ist schwach"</string>
+    <string name="battery_low_title" msgid="9187898087363540349">"Der Akku ist fast leer"</string>
     <string name="battery_low_percent_format" msgid="2900940511201380775">"<xliff:g id="PERCENTAGE">%s</xliff:g> verbleibend"</string>
     <string name="battery_low_percent_format_hybrid" msgid="6838677459286775617">"<xliff:g id="PERCENTAGE">%s</xliff:g> ausstehend; noch ca. <xliff:g id="TIME">%s</xliff:g>, basierend auf deiner Nutzung"</string>
     <string name="battery_low_percent_format_hybrid_short" msgid="9025795469949145586">"<xliff:g id="PERCENTAGE">%s</xliff:g> ausstehend; noch ca. <xliff:g id="TIME">%s</xliff:g>"</string>
@@ -95,8 +95,7 @@
     <string name="accessibility_unlock_button" msgid="128158454631118828">"Entsperren"</string>
     <string name="accessibility_waiting_for_fingerprint" msgid="4808860050517462885">"Auf Fingerabdruck wird gewartet"</string>
     <string name="accessibility_unlock_without_fingerprint" msgid="7541705575183694446">"Ohne Verwendung des Fingerabdrucks entsperren"</string>
-    <!-- no translation found for accessibility_send_smart_reply (7766727839703044493) -->
-    <skip />
+    <string name="accessibility_send_smart_reply" msgid="7766727839703044493">"Senden"</string>
     <string name="unlock_label" msgid="8779712358041029439">"Entsperren"</string>
     <string name="phone_label" msgid="2320074140205331708">"Telefon öffnen"</string>
     <string name="voice_assist_label" msgid="3956854378310019854">"Sprachassistent öffnen"</string>
@@ -212,10 +211,8 @@
     <string name="accessibility_quick_settings_airplane_on" msgid="6406141469157599296">"Flugmodus aktiviert"</string>
     <string name="accessibility_quick_settings_airplane_changed_off" msgid="66846307818850664">"Der Flugmodus ist deaktiviert."</string>
     <string name="accessibility_quick_settings_airplane_changed_on" msgid="8983005603505087728">"Der Flugmodus ist aktiviert."</string>
-    <!-- no translation found for accessibility_quick_settings_dnd_none_on (2960643943620637020) -->
-    <skip />
-    <!-- no translation found for accessibility_quick_settings_dnd_alarms_on (3357131899365865386) -->
-    <skip />
+    <string name="accessibility_quick_settings_dnd_none_on" msgid="2960643943620637020">"lautlos"</string>
+    <string name="accessibility_quick_settings_dnd_alarms_on" msgid="3357131899365865386">"nur Wecker"</string>
     <string name="accessibility_quick_settings_dnd" msgid="6607873236717185815">"Nicht stören."</string>
     <string name="accessibility_quick_settings_dnd_changed_off" msgid="898107593453022935">"\"Nicht stören\" deaktiviert"</string>
     <string name="accessibility_quick_settings_dnd_changed_on" msgid="4483780856613561039">"\"Nicht stören\" aktiviert"</string>
@@ -620,12 +617,11 @@
       <item quantity="one">Diese App <xliff:g id="PERFORMING_ACTIVITY_0">%1$s</xliff:g>.</item>
     </plurals>
     <plurals name="notification_using" formatted="false" msgid="2211008461429037973">
-      <item quantity="other">verwendet <xliff:g id="PERFORMING_ACTIVITY_1">%1$s</xliff:g> und <xliff:g id="PERFORMING_ACTIVITY_2">%2$s</xliff:g></item>
-      <item quantity="one">verwendet <xliff:g id="PERFORMING_ACTIVITY_0">%1$s</xliff:g></item>
+      <item quantity="other">verwendet: <xliff:g id="PERFORMING_ACTIVITY_1">%1$s</xliff:g>, <xliff:g id="PERFORMING_ACTIVITY_2">%2$s</xliff:g></item>
+      <item quantity="one">verwendet: <xliff:g id="PERFORMING_ACTIVITY_0">%1$s</xliff:g></item>
     </plurals>
     <string name="notification_appops_settings" msgid="1028328314935908050">"Einstellungen"</string>
-    <!-- no translation found for notification_appops_ok (1156966426011011434) -->
-    <skip />
+    <string name="notification_appops_ok" msgid="1156966426011011434">"OK"</string>
     <string name="notification_channel_controls_opened_accessibility" msgid="6553950422055908113">"Benachrichtigungseinstellungen für <xliff:g id="APP_NAME">%1$s</xliff:g> geöffnet"</string>
     <string name="notification_channel_controls_closed_accessibility" msgid="7521619812603693144">"Benachrichtigungseinstellungen für <xliff:g id="APP_NAME">%1$s</xliff:g> geschlossen"</string>
     <string name="notification_channel_switch_accessibility" msgid="3420796005601900717">"Benachrichtigungen von diesem Kanal zulassen"</string>
@@ -690,7 +686,7 @@
     <string name="keyboard_shortcut_group_applications_contacts" msgid="2064197111278436375">"Kontakte"</string>
     <string name="keyboard_shortcut_group_applications_email" msgid="6257036897441939004">"E-Mail"</string>
     <string name="keyboard_shortcut_group_applications_sms" msgid="638701213803242744">"SMS"</string>
-    <string name="keyboard_shortcut_group_applications_music" msgid="4775559515850922780">"Music"</string>
+    <string name="keyboard_shortcut_group_applications_music" msgid="4775559515850922780">"Musik"</string>
     <string name="keyboard_shortcut_group_applications_youtube" msgid="6555453761294723317">"YouTube"</string>
     <string name="keyboard_shortcut_group_applications_calendar" msgid="9043614299194991263">"Kalender"</string>
     <string name="tuner_full_zen_title" msgid="4540823317772234308">"Einschließlich Lautstärkeregler anzeigen"</string>

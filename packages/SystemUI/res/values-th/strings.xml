@@ -32,7 +32,7 @@
     <string name="status_bar_no_notifications_title" msgid="4755261167193833213">"ไม่มีการแจ้งเตือน"</string>
     <string name="status_bar_ongoing_events_title" msgid="1682504513316879202">"ดำเนินอยู่"</string>
     <string name="status_bar_latest_events_title" msgid="6594767438577593172">"การแจ้งเตือน"</string>
-    <string name="battery_low_title" msgid="6456385927409742437">"แบตเตอรี่เหลือน้อย"</string>
+    <string name="battery_low_title" msgid="9187898087363540349">"แบตเตอรี่อาจหมดเร็วๆ นี้"</string>
     <string name="battery_low_percent_format" msgid="2900940511201380775">"เหลืออีก <xliff:g id="PERCENTAGE">%s</xliff:g>"</string>
     <string name="battery_low_percent_format_hybrid" msgid="6838677459286775617">"เหลือ <xliff:g id="PERCENTAGE">%s</xliff:g> หรืออีกราว <xliff:g id="TIME">%s</xliff:g> ขึ้นอยู่กับการใช้งานของคุณ"</string>
     <string name="battery_low_percent_format_hybrid_short" msgid="9025795469949145586">"เหลือ <xliff:g id="PERCENTAGE">%s</xliff:g> หรืออีกราว <xliff:g id="TIME">%s</xliff:g>"</string>
@@ -95,8 +95,7 @@
     <string name="accessibility_unlock_button" msgid="128158454631118828">"ปลดล็อก"</string>
     <string name="accessibility_waiting_for_fingerprint" msgid="4808860050517462885">"กำลังรอลายนิ้วมือ"</string>
     <string name="accessibility_unlock_without_fingerprint" msgid="7541705575183694446">"ปลดล็อกโดยไม่ต้องใช้ลายนิ้วมือ"</string>
-    <!-- no translation found for accessibility_send_smart_reply (7766727839703044493) -->
-    <skip />
+    <string name="accessibility_send_smart_reply" msgid="7766727839703044493">"ส่ง"</string>
     <string name="unlock_label" msgid="8779712358041029439">"ปลดล็อก"</string>
     <string name="phone_label" msgid="2320074140205331708">"เปิดโทรศัพท์"</string>
     <string name="voice_assist_label" msgid="3956854378310019854">"เปิดตัวช่วยเสียง"</string>
@@ -161,7 +160,7 @@
     <string name="data_connection_edge" msgid="871835227939216682">"EDGE"</string>
     <string name="accessibility_data_connection_wifi" msgid="2324496756590645221">"WiFi"</string>
     <string name="accessibility_no_sim" msgid="8274017118472455155">"ไม่มีซิมการ์ด"</string>
-    <string name="accessibility_cell_data" msgid="5326139158682385073">"อินเทอร์เน็ตมือถือ"</string>
+    <string name="accessibility_cell_data" msgid="5326139158682385073">"เน็ตมือถือ"</string>
     <string name="accessibility_cell_data_on" msgid="5927098403452994422">"อินเทอร์เน็ตมือถือเปิดอยู่"</string>
     <string name="cell_data_off_content_description" msgid="4356113230238585072">"เน็ตมือถือปิดอยู่"</string>
     <string name="cell_data_off" msgid="1051264981229902873">"ปิด"</string>
@@ -208,10 +207,8 @@
     <string name="accessibility_quick_settings_airplane_on" msgid="6406141469157599296">"โหมดบนเครื่องบินเปิดอยู่"</string>
     <string name="accessibility_quick_settings_airplane_changed_off" msgid="66846307818850664">"ปิดโหมดบนเครื่องบินแล้ว"</string>
     <string name="accessibility_quick_settings_airplane_changed_on" msgid="8983005603505087728">"เปิดโหมดบนเครื่องบินแล้ว"</string>
-    <!-- no translation found for accessibility_quick_settings_dnd_none_on (2960643943620637020) -->
-    <skip />
-    <!-- no translation found for accessibility_quick_settings_dnd_alarms_on (3357131899365865386) -->
-    <skip />
+    <string name="accessibility_quick_settings_dnd_none_on" msgid="2960643943620637020">"ปิดเสียงทั้งหมด"</string>
+    <string name="accessibility_quick_settings_dnd_alarms_on" msgid="3357131899365865386">"เฉพาะปลุกเท่านั้น"</string>
     <string name="accessibility_quick_settings_dnd" msgid="6607873236717185815">"ห้ามรบกวน"</string>
     <string name="accessibility_quick_settings_dnd_changed_off" msgid="898107593453022935">"ปิดการห้ามรบกวนแล้ว"</string>
     <string name="accessibility_quick_settings_dnd_changed_on" msgid="4483780856613561039">"เปิดการห้ามรบกวนแล้ว"</string>
@@ -337,7 +334,7 @@
     </plurals>
     <string name="quick_settings_notifications_label" msgid="4818156442169154523">"การแจ้งเตือน"</string>
     <string name="quick_settings_flashlight_label" msgid="2133093497691661546">"ไฟฉาย"</string>
-    <string name="quick_settings_cellular_detail_title" msgid="3661194685666477347">"อินเทอร์เน็ตมือถือ"</string>
+    <string name="quick_settings_cellular_detail_title" msgid="3661194685666477347">"เน็ตมือถือ"</string>
     <string name="quick_settings_cellular_detail_data_usage" msgid="1964260360259312002">"การใช้อินเทอร์เน็ต"</string>
     <string name="quick_settings_cellular_detail_remaining_data" msgid="722715415543541249">"ข้อมูลที่เหลืออยู่"</string>
     <string name="quick_settings_cellular_detail_over_limit" msgid="967669665390990427">"เกินขีดจำกัด"</string>
@@ -620,8 +617,7 @@
       <item quantity="one">กำลังใช้<xliff:g id="PERFORMING_ACTIVITY_0">%1$s</xliff:g></item>
     </plurals>
     <string name="notification_appops_settings" msgid="1028328314935908050">"การตั้งค่า"</string>
-    <!-- no translation found for notification_appops_ok (1156966426011011434) -->
-    <skip />
+    <string name="notification_appops_ok" msgid="1156966426011011434">"ตกลง"</string>
     <string name="notification_channel_controls_opened_accessibility" msgid="6553950422055908113">"ส่วนควบคุมการแจ้งเตือนของ <xliff:g id="APP_NAME">%1$s</xliff:g> เปิดอยู่"</string>
     <string name="notification_channel_controls_closed_accessibility" msgid="7521619812603693144">"ส่วนควบคุมการแจ้งเตือนของ <xliff:g id="APP_NAME">%1$s</xliff:g> ปิดอยู่"</string>
     <string name="notification_channel_switch_accessibility" msgid="3420796005601900717">"อนุญาตการแจ้งเตือนจากช่องนี้"</string>
@@ -699,7 +695,7 @@
     <string name="accessibility_long_click_tile" msgid="6687350750091842525">"เปิดการตั้งค่า"</string>
     <string name="accessibility_status_bar_headphones" msgid="9156307120060559989">"เชื่อมต่อหูฟังแล้ว"</string>
     <string name="accessibility_status_bar_headset" msgid="8666419213072449202">"เชื่อมต่อชุดหูฟังแล้ว"</string>
-    <string name="data_saver" msgid="5037565123367048522">"โปรแกรมประหยัดอินเทอร์เน็ต"</string>
+    <string name="data_saver" msgid="5037565123367048522">"การประหยัดอินเทอร์เน็ต"</string>
     <string name="accessibility_data_saver_on" msgid="8454111686783887148">"โปรแกรมประหยัดอินเทอร์เน็ตเปิดอยู่"</string>
     <string name="accessibility_data_saver_off" msgid="8841582529453005337">"โปรแกรมประหยัดอินเทอร์เน็ตปิดอยู่"</string>
     <string name="switch_bar_on" msgid="1142437840752794229">"เปิด"</string>

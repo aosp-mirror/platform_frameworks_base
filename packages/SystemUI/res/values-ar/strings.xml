@@ -36,7 +36,7 @@
     <string name="status_bar_no_notifications_title" msgid="4755261167193833213">"ليس هناك أي اشعارات"</string>
     <string name="status_bar_ongoing_events_title" msgid="1682504513316879202">"مستمر"</string>
     <string name="status_bar_latest_events_title" msgid="6594767438577593172">"الإشعارات"</string>
-    <string name="battery_low_title" msgid="6456385927409742437">"البطارية منخفضة"</string>
+    <string name="battery_low_title" msgid="9187898087363540349">"قد ينفد شحن البطارية قريبًا"</string>
     <string name="battery_low_percent_format" msgid="2900940511201380775">"متبقي <xliff:g id="PERCENTAGE">%s</xliff:g>"</string>
     <string name="battery_low_percent_format_hybrid" msgid="6838677459286775617">"طاقة البطارية المتبقية <xliff:g id="PERCENTAGE">%s</xliff:g> ويتبقى على نفادها <xliff:g id="TIME">%s</xliff:g> تقريبًا بناءً على استخدامك."</string>
     <string name="battery_low_percent_format_hybrid_short" msgid="9025795469949145586">"طاقة البطارية المتبقية <xliff:g id="PERCENTAGE">%s</xliff:g> ويتبقى على نفادها <xliff:g id="TIME">%s</xliff:g> تقريبًا."</string>
@@ -99,8 +99,7 @@
     <string name="accessibility_unlock_button" msgid="128158454631118828">"إلغاء القفل"</string>
     <string name="accessibility_waiting_for_fingerprint" msgid="4808860050517462885">"في انتظار بصمة الإصبع"</string>
     <string name="accessibility_unlock_without_fingerprint" msgid="7541705575183694446">"إلغاء القفل دون استخدام بصمة إصبعك"</string>
-    <!-- no translation found for accessibility_send_smart_reply (7766727839703044493) -->
-    <skip />
+    <string name="accessibility_send_smart_reply" msgid="7766727839703044493">"إرسال"</string>
     <string name="unlock_label" msgid="8779712358041029439">"إلغاء القفل"</string>
     <string name="phone_label" msgid="2320074140205331708">"فتح الهاتف"</string>
     <string name="voice_assist_label" msgid="3956854378310019854">"فتح المساعد الصوتي"</string>
@@ -167,7 +166,7 @@
     <string name="accessibility_no_sim" msgid="8274017118472455155">"‏ليست هناك شريحة SIM."</string>
     <string name="accessibility_cell_data" msgid="5326139158682385073">"بيانات الجوّال"</string>
     <string name="accessibility_cell_data_on" msgid="5927098403452994422">"تشغيل بيانات الجوال"</string>
-    <string name="cell_data_off_content_description" msgid="4356113230238585072">"إيقاف بيانات الجوّال"</string>
+    <string name="cell_data_off_content_description" msgid="4356113230238585072">"تم إيقاف بيانات الجوال"</string>
     <string name="cell_data_off" msgid="1051264981229902873">"إيقاف"</string>
     <string name="accessibility_bluetooth_tether" msgid="4102784498140271969">"ربط البلوتوث."</string>
     <string name="accessibility_airplane_mode" msgid="834748999790763092">"وضع الطائرة."</string>
@@ -181,9 +180,9 @@
     <string name="accessibility_notifications_button" msgid="4498000369779421892">"الإشعارات."</string>
     <string name="accessibility_overflow_action" msgid="5681882033274783311">"الاطّلاع على جميع الإشعارات"</string>
     <string name="accessibility_remove_notification" msgid="3603099514902182350">"محو الإشعار."</string>
-    <string name="accessibility_gps_enabled" msgid="3511469499240123019">"‏تم تمكين GPS."</string>
+    <string name="accessibility_gps_enabled" msgid="3511469499240123019">"‏تم تفعيل GPS."</string>
     <string name="accessibility_gps_acquiring" msgid="8959333351058967158">"‏الحصول على GPS."</string>
-    <string name="accessibility_tty_enabled" msgid="4613200365379426561">"تم تمكين المبرقة الكاتبة."</string>
+    <string name="accessibility_tty_enabled" msgid="4613200365379426561">"تم تفعيل المبرقة الكاتبة."</string>
     <string name="accessibility_ringer_vibrate" msgid="666585363364155055">"رنين مع الاهتزاز."</string>
     <string name="accessibility_ringer_silent" msgid="9061243307939135383">"رنين صامت."</string>
     <!-- no translation found for accessibility_casting (6887382141726543668) -->
@@ -212,12 +211,10 @@
     <string name="accessibility_quick_settings_airplane_on" msgid="6406141469157599296">"تشغيل وضع الطائرة."</string>
     <string name="accessibility_quick_settings_airplane_changed_off" msgid="66846307818850664">"تم إيقاف وضع الطائرة."</string>
     <string name="accessibility_quick_settings_airplane_changed_on" msgid="8983005603505087728">"تم تشغيل وضع الطائرة."</string>
-    <!-- no translation found for accessibility_quick_settings_dnd_none_on (2960643943620637020) -->
-    <skip />
-    <!-- no translation found for accessibility_quick_settings_dnd_alarms_on (3357131899365865386) -->
-    <skip />
+    <string name="accessibility_quick_settings_dnd_none_on" msgid="2960643943620637020">"كتم الصوت تمامًا"</string>
+    <string name="accessibility_quick_settings_dnd_alarms_on" msgid="3357131899365865386">"المنبِّهات فقط"</string>
     <string name="accessibility_quick_settings_dnd" msgid="6607873236717185815">"عدم الإزعاج."</string>
-    <string name="accessibility_quick_settings_dnd_changed_off" msgid="898107593453022935">"تم تعطيل \"عدم الإزعاج\"."</string>
+    <string name="accessibility_quick_settings_dnd_changed_off" msgid="898107593453022935">"تم إيقاف \"عدم الإزعاج\"."</string>
     <string name="accessibility_quick_settings_dnd_changed_on" msgid="4483780856613561039">"تم تشغيل \"عدم الإزعاج\"."</string>
     <string name="accessibility_quick_settings_bluetooth" msgid="6341675755803320038">"البلوتوث."</string>
     <string name="accessibility_quick_settings_bluetooth_off" msgid="2133631372372064339">"إيقاف البلوتوث."</string>
@@ -246,9 +243,9 @@
     <string name="accessibility_casting_turned_off" msgid="1430668982271976172">"توقف إرسال الشاشة."</string>
     <string name="accessibility_quick_settings_work_mode_off" msgid="7045417396436552890">"وضع العمل معطَّل."</string>
     <string name="accessibility_quick_settings_work_mode_on" msgid="7650588553988014341">"وضع العمل قيد التشغيل."</string>
-    <string name="accessibility_quick_settings_work_mode_changed_off" msgid="5605534876107300711">"تم تعطيل وضع العمل."</string>
+    <string name="accessibility_quick_settings_work_mode_changed_off" msgid="5605534876107300711">"تم إيقاف وضع العمل."</string>
     <string name="accessibility_quick_settings_work_mode_changed_on" msgid="249840330756998612">"تم تشغيل وضع العمل."</string>
-    <string name="accessibility_quick_settings_data_saver_changed_off" msgid="650231949881093289">"تم تعطيل توفير البيانات."</string>
+    <string name="accessibility_quick_settings_data_saver_changed_off" msgid="650231949881093289">"تم إيقاف توفير البيانات."</string>
     <string name="accessibility_quick_settings_data_saver_changed_on" msgid="4218725402373934151">"تم تشغيل توفير البيانات."</string>
     <string name="accessibility_brightness" msgid="8003681285547803095">"سطوع الشاشة"</string>
     <string name="accessibility_ambient_display_charging" msgid="9084521679384069087">"جارٍ الشحن"</string>
@@ -304,7 +301,7 @@
     <string name="quick_settings_rotation_locked_portrait_label" msgid="5102691921442135053">"عمودي"</string>
     <string name="quick_settings_rotation_locked_landscape_label" msgid="8553157770061178719">"أفقي"</string>
     <string name="quick_settings_ime_label" msgid="7073463064369468429">"أسلوب الإدخال"</string>
-    <string name="quick_settings_location_label" msgid="5011327048748762257">"الموقع"</string>
+    <string name="quick_settings_location_label" msgid="5011327048748762257">"الموقع الجغرافي"</string>
     <string name="quick_settings_location_off_label" msgid="7464544086507331459">"الموقع قيد الإيقاف"</string>
     <string name="quick_settings_media_device_label" msgid="1302906836372603762">"جهاز الوسائط"</string>
     <string name="quick_settings_rssi_label" msgid="7725671335550695589">"RSSI"</string>
@@ -363,15 +360,15 @@
     <string name="quick_settings_night_secondary_label_on_at" msgid="6256314040368487637">"تفعيل الإعداد في <xliff:g id="TIME">%s</xliff:g>"</string>
     <string name="quick_settings_secondary_label_until" msgid="2749196569462600150">"حتى <xliff:g id="TIME">%s</xliff:g>"</string>
     <string name="quick_settings_nfc_label" msgid="9012153754816969325">"‏الاتصال القريب المدى (NFC)"</string>
-    <string name="quick_settings_nfc_off" msgid="6883274004315134333">"تم تعطيل الاتصال القريب المدى"</string>
-    <string name="quick_settings_nfc_on" msgid="6680317193676884311">"تم تمكين الاتصال القريب المدى"</string>
+    <string name="quick_settings_nfc_off" msgid="6883274004315134333">"تم إيقاف الاتصال القريب المدى"</string>
+    <string name="quick_settings_nfc_on" msgid="6680317193676884311">"تم تفعيل الاتصال القريب المدى"</string>
     <string name="recents_empty_message" msgid="808480104164008572">"ليست هناك عناصر تم استخدامها مؤخرًا"</string>
     <string name="recents_empty_message_dismissed_all" msgid="2791312568666558651">"لقد محوتَ كل شيء"</string>
     <string name="recents_app_info_button_label" msgid="2890317189376000030">"معلومات التطبيق"</string>
     <string name="recents_lock_to_app_button_label" msgid="6942899049072506044">"تثبيت الشاشة"</string>
     <string name="recents_search_bar_label" msgid="8074997400187836677">"بحث"</string>
     <string name="recents_launch_error_message" msgid="2969287838120550506">"تعذر بدء <xliff:g id="APP">%s</xliff:g>."</string>
-    <string name="recents_launch_disabled_message" msgid="1624523193008871793">"تم تعطيل <xliff:g id="APP">%s</xliff:g> في الوضع الآمن."</string>
+    <string name="recents_launch_disabled_message" msgid="1624523193008871793">"تم إيقاف <xliff:g id="APP">%s</xliff:g> في الوضع الآمن."</string>
     <string name="recents_stack_action_button_label" msgid="6593727103310426253">"مسح الكل"</string>
     <string name="recents_drag_hint_message" msgid="2649739267073203985">"اسحب هنا لاستخدام وضع تقسيم الشاشة"</string>
     <string name="recents_swipe_up_onboarding" msgid="3824607135920170001">"مرّر سريعًا لأعلى لتبديل التطبيقات"</string>
@@ -448,7 +445,7 @@
     <string name="media_projection_remember_text" msgid="3103510882172746752">"عدم الإظهار مرة أخرى"</string>
     <string name="clear_all_notifications_text" msgid="814192889771462828">"محو الكل"</string>
     <string name="manage_notifications_text" msgid="8035284146227267681">"إدارة الإشعارات"</string>
-    <string name="dnd_suppressing_shade_text" msgid="5179021215370153526">"يؤدي تفعيل وضع الرجاء عدم الإزعاج إلى إخفاء الإشعارات."</string>
+    <string name="dnd_suppressing_shade_text" msgid="5179021215370153526">"يؤدي تفعيل وضع \"الرجاء عدم الإزعاج\" إلى إخفاء الإشعارات."</string>
     <string name="media_projection_action_text" msgid="8470872969457985954">"البدء الآن"</string>
     <string name="empty_shade_text" msgid="708135716272867002">"ليس هناك أي اشعارات"</string>
     <string name="profile_owned_footer" msgid="8021888108553696069">"ربما تتم مراقبة الملف الشخصي"</string>
@@ -475,7 +472,7 @@
     <string name="monitoring_subtitle_vpn" msgid="876537538087857300">"‏شبكة افتراضية خاصة (VPN)"</string>
     <string name="monitoring_subtitle_network_logging" msgid="3341264304793193386">"تسجيل بيانات الشبكة"</string>
     <string name="monitoring_subtitle_ca_certificate" msgid="3874151893894355988">"‏شهادات CA"</string>
-    <string name="disable_vpn" msgid="4435534311510272506">"تعطيل الشبكة الافتراضية الخاصة"</string>
+    <string name="disable_vpn" msgid="4435534311510272506">"إيقاف الشبكة الافتراضية الخاصة"</string>
     <string name="disconnect_vpn" msgid="1324915059568548655">"‏قطع الاتصال بشبكة VPN"</string>
     <string name="monitoring_button_view_policies" msgid="100913612638514424">"عرض السياسات"</string>
     <string name="monitoring_description_named_management" msgid="5281789135578986303">"تتم إدارة جهازك بواسطة <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g>.\n\nيمكن للمشرف مراقبة وإدارة الإعدادات والدخول إلى المؤسسة والتطبيقات والبيانات المرتبطة بجهازك ومعلومات الموقع الجغرافي للجهاز.\n\nللحصول على المزيد من المعلومات، اتصل بالمشرف."</string>
@@ -571,7 +568,7 @@
     <string name="status_bar" msgid="4877645476959324760">"شريط الحالة"</string>
     <string name="overview" msgid="4018602013895926956">"نظرة عامة"</string>
     <string name="demo_mode" msgid="2532177350215638026">"وضع تجريبي لواجهة مستخدم النظام"</string>
-    <string name="enable_demo_mode" msgid="4844205668718636518">"تمكين الوضع التجريبي"</string>
+    <string name="enable_demo_mode" msgid="4844205668718636518">"تفعيل الوضع التجريبي"</string>
     <string name="show_demo_mode" msgid="2018336697782464029">"عرض الوضع التجريبي"</string>
     <string name="status_bar_ethernet" msgid="5044290963549500128">"إيثرنت"</string>
     <string name="status_bar_alarm" msgid="8536256753575881818">"المنبه"</string>
@@ -640,8 +637,7 @@
       <item quantity="one">يستخدم <xliff:g id="PERFORMING_ACTIVITY_0">%1$s</xliff:g></item>
     </plurals>
     <string name="notification_appops_settings" msgid="1028328314935908050">"الإعدادات"</string>
-    <!-- no translation found for notification_appops_ok (1156966426011011434) -->
-    <skip />
+    <string name="notification_appops_ok" msgid="1156966426011011434">"حسنًا"</string>
     <string name="notification_channel_controls_opened_accessibility" msgid="6553950422055908113">"تم فتح عناصر التحكم في الإشعارات لتطبيق <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="notification_channel_controls_closed_accessibility" msgid="7521619812603693144">"تم إغلاق عناصر التحكم في الإشعارات لتطبيق <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="notification_channel_switch_accessibility" msgid="3420796005601900717">"السماح بالإشعارات من هذه القناة"</string>
@@ -720,7 +716,7 @@
     <string name="tuner_full_zen_title" msgid="4540823317772234308">"عرض مع عناصر التحكم في مستوى الصوت"</string>
     <string name="volume_and_do_not_disturb" msgid="3373784330208603030">"عدم الإزعاج"</string>
     <string name="volume_dnd_silent" msgid="4363882330723050727">"اختصار أزرار مستوى الصوت"</string>
-    <string name="volume_up_silent" msgid="7141255269783588286">"تعطيل \"عدم الإزعاج\" عند رفع مستوى الصوت"</string>
+    <string name="volume_up_silent" msgid="7141255269783588286">"إيقاف \"عدم الإزعاج\" عند رفع مستوى الصوت"</string>
     <string name="battery" msgid="7498329822413202973">"البطارية"</string>
     <string name="clock" msgid="7416090374234785905">"الساعة"</string>
     <string name="headset" msgid="4534219457597457353">"سماعة الرأس"</string>
@@ -729,14 +725,14 @@
     <string name="accessibility_status_bar_headset" msgid="8666419213072449202">"تم توصيل سماعات رأس"</string>
     <string name="data_saver" msgid="5037565123367048522">"توفير البيانات"</string>
     <string name="accessibility_data_saver_on" msgid="8454111686783887148">"تم تشغيل توفير البيانات"</string>
-    <string name="accessibility_data_saver_off" msgid="8841582529453005337">"تم تعطيل توفير البيانات"</string>
+    <string name="accessibility_data_saver_off" msgid="8841582529453005337">"تم إيقاف توفير البيانات"</string>
     <string name="switch_bar_on" msgid="1142437840752794229">"تشغيل"</string>
     <string name="switch_bar_off" msgid="8803270596930432874">"إيقاف"</string>
     <string name="nav_bar" msgid="1993221402773877607">"شريط التنقل"</string>
     <string name="nav_bar_layout" msgid="3664072994198772020">"التنسيق"</string>
     <string name="left_nav_bar_button_type" msgid="8555981238887546528">"نوع زر اليسار الإضافي"</string>
     <string name="right_nav_bar_button_type" msgid="2481056627065649656">"نوع زر اليمين الإضافي"</string>
-    <string name="nav_bar_default" msgid="8587114043070993007">"(افتراضي)"</string>
+    <string name="nav_bar_default" msgid="8587114043070993007">"(تلقائي)"</string>
   <string-array name="nav_bar_buttons">
     <item msgid="1545641631806817203">"الحافظة"</item>
     <item msgid="5742013440802239414">"رمز المفتاح"</item>
@@ -766,12 +762,12 @@
     <string name="tuner_time" msgid="6572217313285536011">"الوقت"</string>
   <string-array name="clock_options">
     <item msgid="5965318737560463480">"عرض الساعات والدقائق والثواني"</item>
-    <item msgid="1427801730816895300">"عرض الساعات والدقائق (افتراضي)"</item>
+    <item msgid="1427801730816895300">"عرض الساعات والدقائق (تلقائي)"</item>
     <item msgid="3830170141562534721">"عدم عرض هذا الرمز"</item>
   </string-array>
   <string-array name="battery_options">
     <item msgid="3160236755818672034">"عرض النسبة المئوية دائمًا"</item>
-    <item msgid="2139628951880142927">"عرض النسبة المئوية عند الشحن (افتراضي)"</item>
+    <item msgid="2139628951880142927">"عرض النسبة المئوية عند الشحن (تلقائي)"</item>
     <item msgid="3327323682209964956">"عدم عرض هذا الرمز"</item>
   </string-array>
     <string name="other" msgid="4060683095962566764">"غير ذلك"</string>
