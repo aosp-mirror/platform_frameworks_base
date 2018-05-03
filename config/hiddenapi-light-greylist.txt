@@ -3700,6 +3700,7 @@ Ldalvik/system/DexPathList$NativeLibraryElement;-><init>(Ljava/io/File;)V
 Ldalvik/system/DexPathList$NativeLibraryElement;->path:Ljava/io/File;
 Ldalvik/system/DexPathList;-><init>(Ljava/lang/ClassLoader;Ljava/lang/String;Ljava/lang/String;Ljava/io/File;)V
 Ldalvik/system/DexPathList;->addDexPath(Ljava/lang/String;Ljava/io/File;)V
+Ldalvik/system/DexPathList;->addNativePath(Ljava/util/Collection;)V
 Ldalvik/system/DexPathList;->definingContext:Ljava/lang/ClassLoader;
 Ldalvik/system/DexPathList;->dexElements:[Ldalvik/system/DexPathList$Element;
 Ldalvik/system/DexPathList;->loadDexFile(Ljava/io/File;Ljava/io/File;Ljava/lang/ClassLoader;[Ldalvik/system/DexPathList$Element;)Ldalvik/system/DexFile;

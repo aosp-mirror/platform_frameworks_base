@@ -25,6 +25,8 @@ import com.android.internal.os.ClassLoaderFactory;
 
 import dalvik.system.PathClassLoader;
 
+import java.util.Collection;
+
 /** @hide */
 public class ApplicationLoaders {
     public static ApplicationLoaders getDefault() {
@@ -119,6 +121,17 @@ public class ApplicationLoaders {
         }
         final PathClassLoader baseDexClassLoader = (PathClassLoader) classLoader;
         baseDexClassLoader.addDexPath(dexPath);
+    }
+
+    /**
+     * @hide
+     */
+    void addNative(ClassLoader classLoader, Collection<String> libPaths) {
+        if (!(classLoader instanceof PathClassLoader)) {
+            throw new IllegalStateException("class loader is not a PathClassLoader");
+        }
+        final PathClassLoader baseDexClassLoader = (PathClassLoader) classLoader;
+        baseDexClassLoader.addNativePath(libPaths);
     }
 
     private final ArrayMap<String, ClassLoader> mLoaders = new ArrayMap<>();

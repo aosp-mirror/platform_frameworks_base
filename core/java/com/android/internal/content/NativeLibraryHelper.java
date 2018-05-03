@@ -282,7 +282,10 @@ public class NativeLibraryHelper {
         }
     }
 
-    private static void createNativeLibrarySubdir(File path) throws IOException {
+    /**
+     * @hide
+     */
+    public static void createNativeLibrarySubdir(File path) throws IOException {
         if (!path.isDirectory()) {
             path.delete();
 
