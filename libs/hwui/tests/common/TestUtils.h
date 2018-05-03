@@ -300,11 +300,6 @@ public:
 
     static SkColor interpolateColor(float fraction, SkColor start, SkColor end);
 
-    static void layoutTextUnscaled(const SkPaint& paint, const char* text,
-                                   std::vector<glyph_t>* outGlyphs,
-                                   std::vector<float>* outPositions, float* outTotalAdvance,
-                                   Rect* outBounds);
-
     static void drawUtf8ToCanvas(Canvas* canvas, const char* text, const SkPaint& paint, float x,
                                  float y);
 

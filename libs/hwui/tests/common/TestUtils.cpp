@@ -19,7 +19,6 @@
 #include "DeferredLayerUpdater.h"
 #include "hwui/Paint.h"
 
-#include <SkClipStack.h>
 #include <minikin/Layout.h>
 #include <pipeline/skia/SkiaOpenGLPipeline.h>
 #include <pipeline/skia/SkiaVulkanPipeline.h>
@@ -27,7 +26,7 @@
 #include <renderthread/VulkanManager.h>
 #include <utils/Unicode.h>
 
-#include <SkGlyphCache.h>
+#include "SkColorData.h"
 
 namespace android {
 namespace uirenderer {
@@ -78,42 +77,6 @@ sp<DeferredLayerUpdater> TestUtils::createTextureLayerUpdater(
                 ->setRenderTarget(GL_TEXTURE_EXTERNAL_OES);
     }
     return layerUpdater;
-}
-
-void TestUtils::layoutTextUnscaled(const SkPaint& paint, const char* text,
-                                   std::vector<glyph_t>* outGlyphs,
-                                   std::vector<float>* outPositions, float* outTotalAdvance,
-                                   Rect* outBounds) {
-    Rect bounds;
-    float totalAdvance = 0;
-    SkSurfaceProps surfaceProps(0, kUnknown_SkPixelGeometry);
-    SkAutoGlyphCacheNoGamma autoCache(paint, &surfaceProps, &SkMatrix::I());
-    while (*text != '\0') {
-        size_t nextIndex = 0;
-        int32_t unichar = utf32_from_utf8_at(text, 4, 0, &nextIndex);
-        text += nextIndex;
-
-        glyph_t glyph = autoCache->unicharToGlyph(unichar);
-        autoCache->unicharToGlyph(unichar);
-
-        // push glyph and its relative position
-        outGlyphs->push_back(glyph);
-        outPositions->push_back(totalAdvance);
-        outPositions->push_back(0);
-
-        // compute bounds
-        SkGlyph skGlyph = autoCache->getUnicharMetrics(unichar);
-        Rect glyphBounds(skGlyph.fWidth, skGlyph.fHeight);
-        glyphBounds.translate(totalAdvance + skGlyph.fLeft, skGlyph.fTop);
-        bounds.unionWith(glyphBounds);
-
-        // advance next character
-        SkScalar skWidth;
-        paint.getTextWidths(&glyph, sizeof(glyph), &skWidth, NULL);
-        totalAdvance += skWidth;
-    }
-    *outBounds = bounds;
-    *outTotalAdvance = totalAdvance;
 }
 
 void TestUtils::drawUtf8ToCanvas(Canvas* canvas, const char* text, const SkPaint& paint, float x,
