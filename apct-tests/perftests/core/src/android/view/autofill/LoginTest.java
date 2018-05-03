@@ -40,28 +40,17 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.ClassRule;
 import org.junit.Rule;
-import org.junit.runners.Parameterized;
-import org.junit.runners.Parameterized.Parameters;
 import org.junit.runner.RunWith;
 
 import static org.junit.Assert.assertTrue;
 
-// TODO(b/38345816): remove this test once we have enough runs from LoginTest
-@RunWith(Parameterized.class)
-public class AutofillPerfTest extends AbstractAutofillPerfTestCase {
-    @Parameters(name = "{0}")
-    @SuppressWarnings("rawtypes")
-    public static Collection layouts() {
-        return Arrays.asList(new Object[][] {
-                { "Simple login", R.layout.test_autofill_login}
-        });
-    }
+public class LoginTest extends AbstractAutofillPerfTestCase {
 
     private EditText mUsername;
     private EditText mPassword;
 
-    public AutofillPerfTest(@SuppressWarnings("unused") String key, int layoutId) {
-        super(layoutId);
+    public LoginTest() {
+        super(R.layout.test_autofill_login);
     }
 
     @Override
