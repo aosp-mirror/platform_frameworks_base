@@ -7854,8 +7854,13 @@ public class ActivityManagerService extends IActivityManager.Stub
                 try {
                     mInstaller.markBootComplete(VMRuntime.getInstructionSet(abi));
                 } catch (InstallerException e) {
-                    Slog.w(TAG, "Unable to mark boot complete for abi: " + abi + " (" +
-                            e.getMessage() +")");
+                    if (!VMRuntime.didPruneDalvikCache()) {
+                        // This is technically not the right filter, as different zygotes may
+                        // have made different pruning decisions. But the log is best effort,
+                        // anyways.
+                        Slog.w(TAG, "Unable to mark boot complete for abi: " + abi + " (" +
+                                e.getMessage() +")");
+                    }
                 }
                 completedIsas.add(instructionSet);
             }
