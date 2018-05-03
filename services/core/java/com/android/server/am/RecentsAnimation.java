@@ -238,7 +238,9 @@ class RecentsAnimation implements RecentsAnimationCallbacks {
 
                     final ActivityStack targetStack = mDefaultDisplay.getStack(
                             WINDOWING_MODE_UNDEFINED, mTargetActivityType);
-                    final ActivityRecord targetActivity = targetStack.getTopActivity();
+                    final ActivityRecord targetActivity = targetStack != null
+                            ? targetStack.getTopActivity()
+                            : null;
                     if (DEBUG) Slog.d(TAG, "onAnimationFinished(): targetStack=" + targetStack
                             + " targetActivity=" + targetActivity
                             + " mRestoreTargetBehindStack=" + mRestoreTargetBehindStack);
