@@ -589,10 +589,12 @@ include $(BUILD_HOST_JAVA_LIBRARY)
 # rules for building them. Other rules in the build system should depend on the
 # files in the build folder.
 
-$(eval $(call copy-one-file,frameworks/base/config/hiddenapi-blacklist.txt,\
-                            $(INTERNAL_PLATFORM_HIDDENAPI_BLACKLIST)))
 $(eval $(call copy-one-file,frameworks/base/config/hiddenapi-dark-greylist.txt,\
                             $(INTERNAL_PLATFORM_HIDDENAPI_DARK_GREYLIST)))
+
+$(INTERNAL_PLATFORM_HIDDENAPI_BLACKLIST):
+	rm -f $@
+	touch $@
 
 # Generate light greylist as private API minus (blacklist plus dark greylist).
 
