@@ -36,153 +36,14 @@
 namespace android {
 namespace uirenderer {
 
-static void storeTexturedRect(TextureVertex* vertices, const Rect& bounds) {
-    vertices[0] = {bounds.left, bounds.top, 0, 0};
-    vertices[1] = {bounds.right, bounds.top, 1, 0};
-    vertices[2] = {bounds.left, bounds.bottom, 0, 1};
-    vertices[3] = {bounds.right, bounds.bottom, 1, 1};
-}
-
 void BakedOpDispatcher::onMergedBitmapOps(BakedOpRenderer& renderer,
                                           const MergedBakedOpList& opList) {
-    const BakedOpState& firstState = *(opList.states[0]);
-    Bitmap* bitmap = (static_cast<const BitmapOp*>(opList.states[0]->op))->bitmap;
-
-    Texture* texture = renderer.caches().textureCache.get(bitmap);
-    if (!texture) return;
-    const AutoTexture autoCleanup(texture);
-
-    TextureVertex vertices[opList.count * 4];
-    for (size_t i = 0; i < opList.count; i++) {
-        const BakedOpState& state = *(opList.states[i]);
-        TextureVertex* rectVerts = &vertices[i * 4];
-
-        // calculate unclipped bounds, since they'll determine texture coordinates
-        Rect opBounds = state.op->unmappedBounds;
-        state.computedState.transform.mapRect(opBounds);
-        if (CC_LIKELY(state.computedState.transform.isPureTranslate())) {
-            // pure translate, so snap (same behavior as onBitmapOp)
-            opBounds.snapToPixelBoundaries();
-        }
-        storeTexturedRect(rectVerts, opBounds);
-        renderer.dirtyRenderTarget(opBounds);
-    }
-
-    const int textureFillFlags = (bitmap->colorType() == kAlpha_8_SkColorType)
-                                         ? TextureFillFlags::IsAlphaMaskTexture
-                                         : TextureFillFlags::None;
-    Glop glop;
-    GlopBuilder(renderer.renderState(), renderer.caches(), &glop)
-            .setRoundRectClipState(firstState.roundRectClipState)
-            .setMeshTexturedIndexedQuads(vertices, opList.count * 6)
-            .setFillTexturePaint(*texture, textureFillFlags, firstState.op->paint, firstState.alpha)
-            .setTransform(Matrix4::identity(), TransformFlags::None)
-            .setModelViewIdentityEmptyBounds()
-            .build();
-    ClipRect renderTargetClip(opList.clip);
-    const ClipBase* clip = opList.clipSideFlags ? &renderTargetClip : nullptr;
-    renderer.renderGlop(nullptr, clip, glop);
+    // DEAD CODE
 }
 
 void BakedOpDispatcher::onMergedPatchOps(BakedOpRenderer& renderer,
                                          const MergedBakedOpList& opList) {
-    const PatchOp& firstOp = *(static_cast<const PatchOp*>(opList.states[0]->op));
-    const BakedOpState& firstState = *(opList.states[0]);
-
-    // Batches will usually contain a small number of items so it's
-    // worth performing a first iteration to count the exact number
-    // of vertices we need in the new mesh
-    uint32_t totalVertices = 0;
-
-    for (size_t i = 0; i < opList.count; i++) {
-        const PatchOp& op = *(static_cast<const PatchOp*>(opList.states[i]->op));
-
-        // TODO: cache mesh lookups
-        const Patch* opMesh = renderer.caches().patchCache.get(
-                op.bitmap->width(), op.bitmap->height(), op.unmappedBounds.getWidth(),
-                op.unmappedBounds.getHeight(), op.patch);
-        totalVertices += opMesh->verticesCount;
-    }
-
-    const bool dirtyRenderTarget = renderer.offscreenRenderTarget();
-
-    uint32_t indexCount = 0;
-
-    TextureVertex vertices[totalVertices];
-    TextureVertex* vertex = &vertices[0];
-    // Create a mesh that contains the transformed vertices for all the
-    // 9-patch objects that are part of the batch. Note that onDefer()
-    // enforces ops drawn by this function to have a pure translate or
-    // identity matrix
-    for (size_t i = 0; i < opList.count; i++) {
-        const PatchOp& op = *(static_cast<const PatchOp*>(opList.states[i]->op));
-        const BakedOpState& state = *opList.states[i];
-
-        // TODO: cache mesh lookups
-        const Patch* opMesh = renderer.caches().patchCache.get(
-                op.bitmap->width(), op.bitmap->height(), op.unmappedBounds.getWidth(),
-                op.unmappedBounds.getHeight(), op.patch);
-
-        uint32_t vertexCount = opMesh->verticesCount;
-        if (vertexCount == 0) continue;
-
-        // We use the bounds to know where to translate our vertices
-        // Using patchOp->state.mBounds wouldn't work because these
-        // bounds are clipped
-        const float tx = floorf(state.computedState.transform.getTranslateX() +
-                                op.unmappedBounds.left + 0.5f);
-        const float ty = floorf(state.computedState.transform.getTranslateY() +
-                                op.unmappedBounds.top + 0.5f);
-
-        // Copy & transform all the vertices for the current operation
-        TextureVertex* opVertices = opMesh->vertices.get();
-        for (uint32_t j = 0; j < vertexCount; j++, opVertices++) {
-            TextureVertex::set(vertex++, opVertices->x + tx, opVertices->y + ty, opVertices->u,
-                               opVertices->v);
-        }
-
-        // Dirty the current layer if possible. When the 9-patch does not
-        // contain empty quads we can take a shortcut and simply set the
-        // dirty rect to the object's bounds.
-        if (dirtyRenderTarget) {
-            if (!opMesh->hasEmptyQuads) {
-                renderer.dirtyRenderTarget(Rect(tx, ty, tx + op.unmappedBounds.getWidth(),
-                                                ty + op.unmappedBounds.getHeight()));
-            } else {
-                const size_t count = opMesh->quads.size();
-                for (size_t i = 0; i < count; i++) {
-                    const Rect& quadBounds = opMesh->quads[i];
-                    const float x = tx + quadBounds.left;
-                    const float y = ty + quadBounds.top;
-                    renderer.dirtyRenderTarget(
-                            Rect(x, y, x + quadBounds.getWidth(), y + quadBounds.getHeight()));
-                }
-            }
-        }
-
-        indexCount += opMesh->indexCount;
-    }
-
-    Texture* texture = renderer.caches().textureCache.get(firstOp.bitmap);
-    if (!texture) return;
-    const AutoTexture autoCleanup(texture);
-
-    // 9 patches are built for stretching - always filter
-    int textureFillFlags = TextureFillFlags::ForceFilter;
-    if (firstOp.bitmap->colorType() == kAlpha_8_SkColorType) {
-        textureFillFlags |= TextureFillFlags::IsAlphaMaskTexture;
-    }
-    Glop glop;
-    GlopBuilder(renderer.renderState(), renderer.caches(), &glop)
-            .setRoundRectClipState(firstState.roundRectClipState)
-            .setMeshTexturedIndexedQuads(vertices, indexCount)
-            .setFillTexturePaint(*texture, textureFillFlags, firstOp.paint, firstState.alpha)
-            .setTransform(Matrix4::identity(), TransformFlags::None)
-            .setModelViewIdentityEmptyBounds()
-            .build();
-    ClipRect renderTargetClip(opList.clip);
-    const ClipBase* clip = opList.clipSideFlags ? &renderTargetClip : nullptr;
-    renderer.renderGlop(nullptr, clip, glop);
+    // DEAD CODE
 }
 
 static void renderTextShadow(BakedOpRenderer& renderer, const TextOp& op,
@@ -244,29 +105,6 @@ static void renderVertexBuffer(BakedOpRenderer& renderer, const BakedOpState& st
     }
 }
 
-static void renderConvexPath(BakedOpRenderer& renderer, const BakedOpState& state,
-                             const SkPath& path, const SkPaint& paint) {
-    VertexBuffer vertexBuffer;
-    // TODO: try clipping large paths to viewport
-    PathTessellator::tessellatePath(path, &paint, state.computedState.transform, vertexBuffer);
-    renderVertexBuffer(renderer, state, vertexBuffer, 0.0f, 0.0f, paint, 0);
-}
-
-static void renderPathTexture(BakedOpRenderer& renderer, const BakedOpState& state, float xOffset,
-                              float yOffset, PathTexture& texture, const SkPaint& paint) {
-    Rect dest(texture.width(), texture.height());
-    dest.translate(xOffset + texture.left - texture.offset, yOffset + texture.top - texture.offset);
-    Glop glop;
-    GlopBuilder(renderer.renderState(), renderer.caches(), &glop)
-            .setRoundRectClipState(state.roundRectClipState)
-            .setMeshTexturedUnitQuad(nullptr)
-            .setFillPathTexturePaint(texture, paint, state.alpha)
-            .setTransform(state.computedState.transform, TransformFlags::None)
-            .setModelViewMapUnitToRect(dest)
-            .build();
-    renderer.renderGlop(state, glop);
-}
-
 SkRect getBoundsOfFill(const RecordedOp& op) {
     SkRect bounds = op.unmappedBounds.toSkRect();
     if (op.paint->getStyle() == SkPaint::kStrokeAndFill_Style) {
@@ -278,29 +116,7 @@ SkRect getBoundsOfFill(const RecordedOp& op) {
 
 void BakedOpDispatcher::onArcOp(BakedOpRenderer& renderer, const ArcOp& op,
                                 const BakedOpState& state) {
-    // TODO: support fills (accounting for concavity if useCenter && sweepAngle > 180)
-    if (op.paint->getStyle() != SkPaint::kStroke_Style || op.paint->getPathEffect() != nullptr ||
-        op.useCenter) {
-        PathTexture* texture = renderer.caches().pathCache.getArc(
-                op.unmappedBounds.getWidth(), op.unmappedBounds.getHeight(), op.startAngle,
-                op.sweepAngle, op.useCenter, op.paint);
-        const AutoTexture holder(texture);
-        if (CC_LIKELY(holder.texture)) {
-            renderPathTexture(renderer, state, op.unmappedBounds.left, op.unmappedBounds.top,
-                              *texture, *(op.paint));
-        }
-    } else {
-        SkRect rect = getBoundsOfFill(op);
-        SkPath path;
-        if (op.useCenter) {
-            path.moveTo(rect.centerX(), rect.centerY());
-        }
-        path.arcTo(rect, op.startAngle, op.sweepAngle, !op.useCenter);
-        if (op.useCenter) {
-            path.close();
-        }
-        renderConvexPath(renderer, state, path, *(op.paint));
-    }
+    // DEAD CODE
 }
 
 void BakedOpDispatcher::onBitmapOp(BakedOpRenderer& renderer, const BitmapOp& op,
@@ -325,69 +141,7 @@ void BakedOpDispatcher::onBitmapOp(BakedOpRenderer& renderer, const BitmapOp& op
 
 void BakedOpDispatcher::onBitmapMeshOp(BakedOpRenderer& renderer, const BitmapMeshOp& op,
                                        const BakedOpState& state) {
-    Texture* texture = renderer.caches().textureCache.get(op.bitmap);
-    if (!texture) {
-        return;
-    }
-    const AutoTexture autoCleanup(texture);
-
-    const uint32_t elementCount = op.meshWidth * op.meshHeight * 6;
-
-    std::unique_ptr<ColorTextureVertex[]> mesh(new ColorTextureVertex[elementCount]);
-    ColorTextureVertex* vertex = &mesh[0];
-
-    const int* colors = op.colors;
-    std::unique_ptr<int[]> tempColors;
-    if (!colors) {
-        uint32_t colorsCount = (op.meshWidth + 1) * (op.meshHeight + 1);
-        tempColors.reset(new int[colorsCount]);
-        memset(tempColors.get(), 0xff, colorsCount * sizeof(int));
-        colors = tempColors.get();
-    }
-
-    for (int32_t y = 0; y < op.meshHeight; y++) {
-        for (int32_t x = 0; x < op.meshWidth; x++) {
-            uint32_t i = (y * (op.meshWidth + 1) + x) * 2;
-
-            float u1 = float(x) / op.meshWidth;
-            float u2 = float(x + 1) / op.meshWidth;
-            float v1 = float(y) / op.meshHeight;
-            float v2 = float(y + 1) / op.meshHeight;
-
-            int ax = i + (op.meshWidth + 1) * 2;
-            int ay = ax + 1;
-            int bx = i;
-            int by = bx + 1;
-            int cx = i + 2;
-            int cy = cx + 1;
-            int dx = i + (op.meshWidth + 1) * 2 + 2;
-            int dy = dx + 1;
-
-            const float* vertices = op.vertices;
-            ColorTextureVertex::set(vertex++, vertices[dx], vertices[dy], u2, v2, colors[dx / 2]);
-            ColorTextureVertex::set(vertex++, vertices[ax], vertices[ay], u1, v2, colors[ax / 2]);
-            ColorTextureVertex::set(vertex++, vertices[bx], vertices[by], u1, v1, colors[bx / 2]);
-
-            ColorTextureVertex::set(vertex++, vertices[dx], vertices[dy], u2, v2, colors[dx / 2]);
-            ColorTextureVertex::set(vertex++, vertices[bx], vertices[by], u1, v1, colors[bx / 2]);
-            ColorTextureVertex::set(vertex++, vertices[cx], vertices[cy], u2, v1, colors[cx / 2]);
-        }
-    }
-
-    /*
-     * TODO: handle alpha_8 textures correctly by applying paint color, but *not*
-     * shader in that case to mimic the behavior in SkiaCanvas::drawBitmapMesh.
-     */
-    const int textureFillFlags = TextureFillFlags::None;
-    Glop glop;
-    GlopBuilder(renderer.renderState(), renderer.caches(), &glop)
-            .setRoundRectClipState(state.roundRectClipState)
-            .setMeshColoredTexturedMesh(mesh.get(), elementCount)
-            .setFillTexturePaint(*texture, textureFillFlags, op.paint, state.alpha)
-            .setTransform(state.computedState.transform, TransformFlags::None)
-            .setModelViewOffsetRect(0, 0, op.unmappedBounds)
-            .build();
-    renderer.renderGlop(state, glop);
+    // DEAD CODE
 }
 
 void BakedOpDispatcher::onBitmapRectOp(BakedOpRenderer& renderer, const BitmapRectOp& op,
@@ -450,67 +204,17 @@ void BakedOpDispatcher::onLinesOp(BakedOpRenderer& renderer, const LinesOp& op,
 
 void BakedOpDispatcher::onOvalOp(BakedOpRenderer& renderer, const OvalOp& op,
                                  const BakedOpState& state) {
-    if (op.paint->getPathEffect() != nullptr) {
-        PathTexture* texture = renderer.caches().pathCache.getOval(
-                op.unmappedBounds.getWidth(), op.unmappedBounds.getHeight(), op.paint);
-        const AutoTexture holder(texture);
-        if (CC_LIKELY(holder.texture)) {
-            renderPathTexture(renderer, state, op.unmappedBounds.left, op.unmappedBounds.top,
-                              *texture, *(op.paint));
-        }
-    } else {
-        SkPath path;
-        SkRect rect = getBoundsOfFill(op);
-        path.addOval(rect);
-
-        if (state.computedState.localProjectionPathMask != nullptr) {
-            // Mask the ripple path by the local space projection mask in local space.
-            // Note that this can create CCW paths.
-            Op(path, *state.computedState.localProjectionPathMask, kIntersect_SkPathOp, &path);
-        }
-        renderConvexPath(renderer, state, path, *(op.paint));
-    }
+    // DEAD CODE
 }
 
 void BakedOpDispatcher::onPatchOp(BakedOpRenderer& renderer, const PatchOp& op,
                                   const BakedOpState& state) {
-    // 9 patches are built for stretching - always filter
-    int textureFillFlags = TextureFillFlags::ForceFilter;
-    if (op.bitmap->colorType() == kAlpha_8_SkColorType) {
-        textureFillFlags |= TextureFillFlags::IsAlphaMaskTexture;
-    }
-
-    // TODO: avoid redoing the below work each frame:
-    const Patch* mesh = renderer.caches().patchCache.get(op.bitmap->width(), op.bitmap->height(),
-                                                         op.unmappedBounds.getWidth(),
-                                                         op.unmappedBounds.getHeight(), op.patch);
-
-    Texture* texture = renderer.caches().textureCache.get(op.bitmap);
-    if (CC_LIKELY(texture)) {
-        const AutoTexture autoCleanup(texture);
-        Glop glop;
-        GlopBuilder(renderer.renderState(), renderer.caches(), &glop)
-                .setRoundRectClipState(state.roundRectClipState)
-                .setMeshPatchQuads(*mesh)
-                .setFillTexturePaint(*texture, textureFillFlags, op.paint, state.alpha)
-                .setTransform(state.computedState.transform, TransformFlags::None)
-                .setModelViewOffsetRectSnap(
-                        op.unmappedBounds.left, op.unmappedBounds.top,
-                        Rect(op.unmappedBounds.getWidth(), op.unmappedBounds.getHeight()))
-                .build();
-        renderer.renderGlop(state, glop);
-    }
+    // DEAD CODE
 }
 
 void BakedOpDispatcher::onPathOp(BakedOpRenderer& renderer, const PathOp& op,
                                  const BakedOpState& state) {
-    PathTexture* texture = renderer.caches().pathCache.get(op.path, op.paint);
-    const AutoTexture holder(texture);
-    if (CC_LIKELY(holder.texture)) {
-        // Unlike other callers to renderPathTexture, no offsets are used because PathOp doesn't
-        // have any translate built in, other than what's in the SkPath itself
-        renderPathTexture(renderer, state, 0, 0, *texture, *(op.paint));
-    }
+    // DEAD CODE
 }
 
 void BakedOpDispatcher::onPointsOp(BakedOpRenderer& renderer, const PointsOp& op,
@@ -527,96 +231,12 @@ void BakedOpDispatcher::onPointsOp(BakedOpRenderer& renderer, const PointsOp& op
 
 void BakedOpDispatcher::onRectOp(BakedOpRenderer& renderer, const RectOp& op,
                                  const BakedOpState& state) {
-    if (op.paint->getStyle() != SkPaint::kFill_Style) {
-        // only fill + default miter is supported by drawConvexPath, since others must handle joins
-        static_assert(SkPaintDefaults_MiterLimit == 4.0f, "Miter limit has changed");
-        if (CC_UNLIKELY(op.paint->getPathEffect() != nullptr ||
-                        op.paint->getStrokeJoin() != SkPaint::kMiter_Join ||
-                        op.paint->getStrokeMiter() != SkPaintDefaults_MiterLimit)) {
-            PathTexture* texture = renderer.caches().pathCache.getRect(
-                    op.unmappedBounds.getWidth(), op.unmappedBounds.getHeight(), op.paint);
-            const AutoTexture holder(texture);
-            if (CC_LIKELY(holder.texture)) {
-                renderPathTexture(renderer, state, op.unmappedBounds.left, op.unmappedBounds.top,
-                                  *texture, *(op.paint));
-            }
-        } else {
-            SkPath path;
-            path.addRect(getBoundsOfFill(op));
-            renderConvexPath(renderer, state, path, *(op.paint));
-        }
-    } else {
-        if (op.paint->isAntiAlias() && !state.computedState.transform.isSimple()) {
-            SkPath path;
-            path.addRect(op.unmappedBounds.toSkRect());
-            renderConvexPath(renderer, state, path, *(op.paint));
-        } else {
-            // render simple unit quad, no tessellation required
-            Glop glop;
-            GlopBuilder(renderer.renderState(), renderer.caches(), &glop)
-                    .setRoundRectClipState(state.roundRectClipState)
-                    .setMeshUnitQuad()
-                    .setFillPaint(*op.paint, state.alpha)
-                    .setTransform(state.computedState.transform, TransformFlags::None)
-                    .setModelViewMapUnitToRect(op.unmappedBounds)
-                    .build();
-            renderer.renderGlop(state, glop);
-        }
-    }
+    // DEAD CODE
 }
 
 void BakedOpDispatcher::onRoundRectOp(BakedOpRenderer& renderer, const RoundRectOp& op,
                                       const BakedOpState& state) {
-    if (op.paint->getPathEffect() != nullptr) {
-        PathTexture* texture = renderer.caches().pathCache.getRoundRect(
-                op.unmappedBounds.getWidth(), op.unmappedBounds.getHeight(), op.rx, op.ry,
-                op.paint);
-        const AutoTexture holder(texture);
-        if (CC_LIKELY(holder.texture)) {
-            renderPathTexture(renderer, state, op.unmappedBounds.left, op.unmappedBounds.top,
-                              *texture, *(op.paint));
-        }
-    } else {
-        const VertexBuffer* buffer = renderer.caches().tessellationCache.getRoundRect(
-                state.computedState.transform, *(op.paint), op.unmappedBounds.getWidth(),
-                op.unmappedBounds.getHeight(), op.rx, op.ry);
-        renderVertexBuffer(renderer, state, *buffer, op.unmappedBounds.left, op.unmappedBounds.top,
-                           *(op.paint), 0);
-    }
-}
-
-static void renderShadow(BakedOpRenderer& renderer, const BakedOpState& state, float casterAlpha,
-                         const VertexBuffer* ambientShadowVertexBuffer,
-                         const VertexBuffer* spotShadowVertexBuffer) {
-    SkPaint paint;
-    paint.setAntiAlias(true);  // want to use AlphaVertex
-
-    // The caller has made sure casterAlpha > 0.
-    uint8_t ambientShadowAlpha = renderer.getLightInfo().ambientShadowAlpha;
-    if (CC_UNLIKELY(Properties::overrideAmbientShadowStrength >= 0)) {
-        ambientShadowAlpha = Properties::overrideAmbientShadowStrength;
-    }
-    if (ambientShadowVertexBuffer && ambientShadowAlpha > 0) {
-        paint.setAlpha((uint8_t)(casterAlpha * ambientShadowAlpha));
-        renderVertexBuffer(renderer, state, *ambientShadowVertexBuffer, 0, 0, paint,
-                           VertexBufferRenderFlags::ShadowInterp);
-    }
-
-    uint8_t spotShadowAlpha = renderer.getLightInfo().spotShadowAlpha;
-    if (CC_UNLIKELY(Properties::overrideSpotShadowStrength >= 0)) {
-        spotShadowAlpha = Properties::overrideSpotShadowStrength;
-    }
-    if (spotShadowVertexBuffer && spotShadowAlpha > 0) {
-        paint.setAlpha((uint8_t)(casterAlpha * spotShadowAlpha));
-        renderVertexBuffer(renderer, state, *spotShadowVertexBuffer, 0, 0, paint,
-                           VertexBufferRenderFlags::ShadowInterp);
-    }
-}
-
-void BakedOpDispatcher::onShadowOp(BakedOpRenderer& renderer, const ShadowOp& op,
-                                   const BakedOpState& state) {
-    TessellationCache::vertexBuffer_pair_t buffers = op.shadowTask->getResult();
-    renderShadow(renderer, state, op.casterAlpha, buffers.first, buffers.second);
+    // DEAD CODE
 }
 
 void BakedOpDispatcher::onSimpleRectsOp(BakedOpRenderer& renderer, const SimpleRectsOp& op,

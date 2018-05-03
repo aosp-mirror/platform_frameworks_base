@@ -46,10 +46,7 @@ Caches* Caches::sInstance = nullptr;
 ///////////////////////////////////////////////////////////////////////////////
 
 Caches::Caches(RenderState& renderState)
-        : gradientCache(extensions())
-        , patchCache(renderState)
-        , programCache(extensions())
-        , mRenderState(&renderState)
+        : mRenderState(&renderState)
         , mInitialized(false) {
     INIT_LOGD("Creating OpenGL renderer caches");
     init();
@@ -102,12 +99,7 @@ void Caches::terminate() {
     if (!mInitialized) return;
     mRegionMesh.reset(nullptr);
 
-    fboCache.clear();
-
-    programCache.clear();
     mProgram = nullptr;
-
-    patchCache.clear();
 
     clearGarbage();
 
@@ -119,7 +111,7 @@ void Caches::terminate() {
 }
 
 void Caches::setProgram(const ProgramDescription& description) {
-    setProgram(programCache.get(description));
+    // DEAD CODE
 }
 
 void Caches::setProgram(Program* program) {
@@ -157,8 +149,6 @@ void Caches::dumpMemoryUsage() {
 void Caches::dumpMemoryUsage(String8& log) {
     uint32_t total = 0;
     log.appendFormat("Current memory usage / total memory usage (bytes):\n");
-    log.appendFormat("  TextureCache         %8d / %8d\n", textureCache.getSize(),
-                     textureCache.getMaxSize());
     if (mRenderState) {
         int memused = 0;
         for (std::set<Layer*>::iterator it = mRenderState->mActiveLayers.begin();
@@ -174,27 +164,6 @@ void Caches::dumpMemoryUsage(String8& log) {
                          mRenderState->mActiveLayers.size());
         total += memused;
     }
-    log.appendFormat("  RenderBufferCache    %8d / %8d\n", renderBufferCache.getSize(),
-                     renderBufferCache.getMaxSize());
-    log.appendFormat("  GradientCache        %8d / %8d\n", gradientCache.getSize(),
-                     gradientCache.getMaxSize());
-    log.appendFormat("  PathCache            %8d / %8d\n", pathCache.getSize(),
-                     pathCache.getMaxSize());
-    log.appendFormat("  TessellationCache    %8d / %8d\n", tessellationCache.getSize(),
-                     tessellationCache.getMaxSize());
-    log.appendFormat("  PatchCache           %8d / %8d\n", patchCache.getSize(),
-                     patchCache.getMaxSize());
-
-    log.appendFormat("Other:\n");
-    log.appendFormat("  FboCache             %8d / %8d\n", fboCache.getSize(),
-                     fboCache.getMaxSize());
-
-    total += textureCache.getSize();
-    total += renderBufferCache.getSize();
-    total += gradientCache.getSize();
-    total += pathCache.getSize();
-    total += tessellationCache.getSize();
-    total += patchCache.getSize();
 
     log.appendFormat("Total memory usage:\n");
     log.appendFormat("  %d bytes, %.2f MB\n", total, total / 1024.0f / 1024.0f);
@@ -205,30 +174,9 @@ void Caches::dumpMemoryUsage(String8& log) {
 ///////////////////////////////////////////////////////////////////////////////
 
 void Caches::clearGarbage() {
-    pathCache.clearGarbage();
-    patchCache.clearGarbage();
 }
 
 void Caches::flush(FlushMode mode) {
-    FLUSH_LOGD("Flushing caches (mode %d)", mode);
-
-    switch (mode) {
-        case FlushMode::Full:
-            textureCache.clear();
-            patchCache.clear();
-            gradientCache.clear();
-            fboCache.clear();
-        // fall through
-        case FlushMode::Moderate:
-            textureCache.flush();
-            pathCache.clear();
-            tessellationCache.clear();
-        // fall through
-        case FlushMode::Layers:
-            renderBufferCache.clear();
-            break;
-    }
-
     clearGarbage();
     glFinish();
     // Errors during cleanup should be considered non-fatal, dump them and

@@ -21,7 +21,6 @@
 #include "Layer.h"
 #include "Matrix.h"
 #include "Patch.h"
-#include "PathCache.h"
 #include "SkiaShader.h"
 #include "Texture.h"
 #include "VertexBuffer.h"
@@ -203,17 +202,7 @@ GlopBuilder& GlopBuilder::setMeshVertexBuffer(const VertexBuffer& vertexBuffer) 
 }
 
 GlopBuilder& GlopBuilder::setMeshPatchQuads(const Patch& patch) {
-    TRIGGER_STAGE(kMeshStage);
-
-    mOutGlop->mesh.primitiveMode = GL_TRIANGLES;
-    mOutGlop->mesh.indices = {mRenderState.meshState().getQuadListIBO(), nullptr};
-    mOutGlop->mesh.vertices = {mCaches.patchCache.getMeshBuffer(),
-                               VertexAttribFlags::TextureCoord,
-                               (void*)patch.positionOffset,
-                               (void*)patch.textureOffset,
-                               nullptr,
-                               kTextureVertexStride};
-    mOutGlop->mesh.elementCount = patch.indexCount;
+    // DEAD CODE
     return *this;
 }
 
@@ -365,17 +354,7 @@ GlopBuilder& GlopBuilder::setFillPaint(const SkPaint& paint, float alphaScale, b
 
 GlopBuilder& GlopBuilder::setFillPathTexturePaint(PathTexture& texture, const SkPaint& paint,
                                                   float alphaScale) {
-    TRIGGER_STAGE(kFillStage);
-    REQUIRE_STAGES(kMeshStage | kRoundRectClipStage);
-
-    // specify invalid filter/clamp, since these are always static for PathTextures
-    mOutGlop->fill.texture = {&texture, GL_INVALID_ENUM, GL_INVALID_ENUM, nullptr};
-
-    setFill(paint.getColor(), alphaScale, paint.getBlendMode(), Blend::ModeOrderSwap::NoSwap,
-            paint.getShader(), paint.getColorFilter());
-
-    mDescription.hasAlpha8Texture = true;
-    mDescription.modulate = mOutGlop->fill.color.isNotBlack();
+    // DEAD CODE
     return *this;
 }
 
@@ -625,9 +604,6 @@ void GlopBuilder::build() {
     mOutGlop->fill.colorEnabled = mDescription.modulate || singleColor;
 
     verify(mDescription, *mOutGlop);
-
-    // Final step: populate program and map bounds into render target space
-    mOutGlop->fill.program = mCaches.programCache.get(mDescription);
 }
 
 void GlopBuilder::dump(const Glop& glop) {

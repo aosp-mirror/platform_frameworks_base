@@ -386,71 +386,7 @@ void FrameBuilder::defer3dChildren(const ClipBase* reorderClip, ChildrenSelectMo
 }
 
 void FrameBuilder::deferShadow(const ClipBase* reorderClip, const RenderNodeOp& casterNodeOp) {
-    auto& node = *casterNodeOp.renderNode;
-    auto& properties = node.properties();
-
-    if (properties.getAlpha() <= 0.0f || properties.getOutline().getAlpha() <= 0.0f ||
-        !properties.getOutline().getPath() || properties.getScaleX() == 0 ||
-        properties.getScaleY() == 0) {
-        // no shadow to draw
-        return;
-    }
-
-    const SkPath* casterOutlinePath = properties.getOutline().getPath();
-    const SkPath* revealClipPath = properties.getRevealClip().getPath();
-    if (revealClipPath && revealClipPath->isEmpty()) return;
-
-    float casterAlpha = properties.getAlpha() * properties.getOutline().getAlpha();
-
-    // holds temporary SkPath to store the result of intersections
-    SkPath* frameAllocatedPath = nullptr;
-    const SkPath* casterPath = casterOutlinePath;
-
-    // intersect the shadow-casting path with the reveal, if present
-    if (revealClipPath) {
-        frameAllocatedPath = createFrameAllocatedPath();
-
-        Op(*casterPath, *revealClipPath, kIntersect_SkPathOp, frameAllocatedPath);
-        casterPath = frameAllocatedPath;
-    }
-
-    // intersect the shadow-casting path with the clipBounds, if present
-    if (properties.getClippingFlags() & CLIP_TO_CLIP_BOUNDS) {
-        if (!frameAllocatedPath) {
-            frameAllocatedPath = createFrameAllocatedPath();
-        }
-        Rect clipBounds;
-        properties.getClippingRectForFlags(CLIP_TO_CLIP_BOUNDS, &clipBounds);
-        SkPath clipBoundsPath;
-        clipBoundsPath.addRect(clipBounds.left, clipBounds.top, clipBounds.right,
-                               clipBounds.bottom);
-
-        Op(*casterPath, clipBoundsPath, kIntersect_SkPathOp, frameAllocatedPath);
-        casterPath = frameAllocatedPath;
-    }
-
-    // apply reorder clip to shadow, so it respects clip at beginning of reorderable chunk
-    int restoreTo = mCanvasState.save(SaveFlags::MatrixClip);
-    mCanvasState.writableSnapshot()->applyClip(reorderClip,
-                                               *mCanvasState.currentSnapshot()->transform);
-    if (CC_LIKELY(!mCanvasState.getRenderTargetClipBounds().isEmpty())) {
-        Matrix4 shadowMatrixXY(casterNodeOp.localMatrix);
-        Matrix4 shadowMatrixZ(casterNodeOp.localMatrix);
-        node.applyViewPropertyTransforms(shadowMatrixXY, false);
-        node.applyViewPropertyTransforms(shadowMatrixZ, true);
-
-        sp<TessellationCache::ShadowTask> task = mCaches.tessellationCache.getShadowTask(
-                mCanvasState.currentTransform(), mCanvasState.getLocalClipBounds(),
-                casterAlpha >= 1.0f, casterPath, &shadowMatrixXY, &shadowMatrixZ,
-                mCanvasState.currentSnapshot()->getRelativeLightCenter(), mLightRadius);
-        ShadowOp* shadowOp = mAllocator.create<ShadowOp>(task, casterAlpha);
-        BakedOpState* bakedOpState = BakedOpState::tryShadowOpConstruct(
-                mAllocator, *mCanvasState.writableSnapshot(), shadowOp);
-        if (CC_LIKELY(bakedOpState)) {
-            currentLayer().deferUnmergeableOp(mAllocator, bakedOpState, OpBatchType::Shadow);
-        }
-    }
-    mCanvasState.restoreToCount(restoreTo);
+    // DEAD CODE
 }
 
 void FrameBuilder::deferProjectedChildren(const RenderNode& renderNode) {
@@ -682,10 +618,7 @@ void FrameBuilder::deferPatchOp(const PatchOp& op) {
 }
 
 void FrameBuilder::deferPathOp(const PathOp& op) {
-    auto state = deferStrokeableOp(op, OpBatchType::AlphaMaskTexture);
-    if (CC_LIKELY(state)) {
-        mCaches.pathCache.precache(op.path, op.paint);
-    }
+    /*auto state = */deferStrokeableOp(op, OpBatchType::AlphaMaskTexture);
 }
 
 void FrameBuilder::deferPointsOp(const PointsOp& op) {
@@ -698,13 +631,7 @@ void FrameBuilder::deferRectOp(const RectOp& op) {
 }
 
 void FrameBuilder::deferRoundRectOp(const RoundRectOp& op) {
-    auto state = deferStrokeableOp(op, tessBatchId(op));
-    if (CC_LIKELY(state && !op.paint->getPathEffect())) {
-        // TODO: consider storing tessellation task in BakedOpState
-        mCaches.tessellationCache.precacheRoundRect(state->computedState.transform, *(op.paint),
-                                                    op.unmappedBounds.getWidth(),
-                                                    op.unmappedBounds.getHeight(), op.rx, op.ry);
-    }
+    // DEAD CODE
 }
 
 void FrameBuilder::deferRoundRectPropsOp(const RoundRectPropsOp& op) {

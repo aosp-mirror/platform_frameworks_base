@@ -20,6 +20,7 @@
 
 #include <SkColorFilter.h>
 #include <SkDrawLooper.h>
+#include <SkPaint.h>
 #include <SkShader.h>
 
 namespace android {
