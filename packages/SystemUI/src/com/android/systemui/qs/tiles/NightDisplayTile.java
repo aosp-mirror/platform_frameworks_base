@@ -45,8 +45,8 @@ public class NightDisplayTile extends QSTileImpl<BooleanState>
      * Pattern for {@link java.time.format.DateTimeFormatter} used to approximate the time to the
      * nearest hour and add on the AM/PM indicator.
      */
-    private static final String HOUR_MINUTE_DATE_TIME_PATTERN = "h a";
-    private static final String APPROXIMATE_HOUR_DATE_TIME_PATTERN = "h:m a";
+    private static final String PATTERN_HOUR = "h a";
+    private static final String PATTERN_HOUR_MINUTE = "h:mm a";
 
 
     private ColorDisplayController mController;
@@ -142,9 +142,7 @@ public class NightDisplayTile extends QSTileImpl<BooleanState>
                 // Choose between just showing the hour or also showing the minutes (based on the
                 // user-selected toggle time). This helps reduce how much space the label takes.
                 toggleTimeFormat = DateTimeFormatter.ofPattern(
-                        toggleTime.getMinute() == 0
-                                ? HOUR_MINUTE_DATE_TIME_PATTERN
-                                : APPROXIMATE_HOUR_DATE_TIME_PATTERN);
+                        toggleTime.getMinute() == 0 ? PATTERN_HOUR : PATTERN_HOUR_MINUTE);
 
                 return mContext.getString(toggleTimeStringRes, toggleTime.format(toggleTimeFormat));
 
