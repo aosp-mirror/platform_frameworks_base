@@ -199,7 +199,6 @@ public class NotificationPanelView extends PanelView implements
     private ValueAnimator mQsSizeChangeAnimator;
 
     private boolean mShowEmptyShadeView;
-    private boolean mShowDndView;
 
     private boolean mQsScrimEnabled = true;
     private boolean mLastAnnouncementWasQuickSettings;
@@ -1600,8 +1599,8 @@ public class NotificationPanelView extends PanelView implements
         // When only empty shade view is visible in QS collapsed state, simulate that we would have
         // it in expanded QS state as well so we don't run into troubles when fading the view in/out
         // and expanding/collapsing the whole panel from/to quick settings.
-        if ((mNotificationStackScroller.getNotGoneChildCount() == 0
-                && mShowEmptyShadeView) || mShowDndView) {
+        if (mNotificationStackScroller.getNotGoneChildCount() == 0
+                && mShowEmptyShadeView) {
             notificationHeight = mNotificationStackScroller.getEmptyShadeViewHeight();
         }
         int maxQsHeight = mQsMaxExpansionHeight;
@@ -2244,17 +2243,13 @@ public class NotificationPanelView extends PanelView implements
         return mDozing;
     }
 
-    public void showDndView(boolean dndViewVisible) {
-        mShowDndView = dndViewVisible;
-        mNotificationStackScroller.updateDndView(mShowDndView && !mQsExpanded);
-    }
-
     public void showEmptyShadeView(boolean emptyShadeViewVisible) {
         mShowEmptyShadeView = emptyShadeViewVisible;
         updateEmptyShadeView();
     }
 
     private void updateEmptyShadeView() {
+
         // Hide "No notifications" in QS.
         mNotificationStackScroller.updateEmptyShadeView(mShowEmptyShadeView && !mQsExpanded);
     }
