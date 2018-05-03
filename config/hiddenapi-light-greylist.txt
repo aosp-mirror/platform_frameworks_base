@@ -693,6 +693,7 @@ Landroid/content/pm/IPackageDataObserver$Stub$Proxy;-><init>(Landroid/os/IBinder
 Landroid/content/pm/IPackageDataObserver$Stub$Proxy;->mRemote:Landroid/os/IBinder;
 Landroid/content/pm/IPackageDataObserver$Stub;->asInterface(Landroid/os/IBinder;)Landroid/content/pm/IPackageDataObserver;
 Landroid/content/pm/IPackageDataObserver;->onRemoveCompleted(Ljava/lang/String;Z)V
+Landroid/content/pm/IPackageDeleteObserver$Stub$Proxy;-><init>(Landroid/os/IBinder;)V
 Landroid/content/pm/IPackageDeleteObserver$Stub;->asInterface(Landroid/os/IBinder;)Landroid/content/pm/IPackageDeleteObserver;
 Landroid/content/pm/IPackageDeleteObserver2$Stub$Proxy;-><init>(Landroid/os/IBinder;)V
 Landroid/content/pm/IPackageDeleteObserver2$Stub$Proxy;->mRemote:Landroid/os/IBinder;
@@ -765,6 +766,7 @@ Landroid/content/pm/PackageInstaller$SessionParams;->mode:I
 Landroid/content/pm/PackageInstaller$SessionParams;->sizeBytes:J
 Landroid/content/pm/PackageItemInfo;->setForceSafeLabels(Z)V
 Landroid/content/pm/PackageManager;->buildRequestPermissionsIntent([Ljava/lang/String;)Landroid/content/Intent;
+Landroid/content/pm/PackageManager;->deletePackage(Ljava/lang/String;Landroid/content/pm/IPackageDeleteObserver;I)V
 Landroid/content/pm/PackageManager;->freeStorage(JLandroid/content/IntentSender;)V
 Landroid/content/pm/PackageManager;->freeStorage(Ljava/lang/String;JLandroid/content/IntentSender;)V
 Landroid/content/pm/PackageManager;->freeStorageAndNotify(JLandroid/content/pm/IPackageDataObserver;)V
@@ -841,6 +843,7 @@ Landroid/content/pm/ShortcutManager;->mService:Landroid/content/pm/IShortcutServ
 Landroid/content/pm/Signature;->getPublicKey()Ljava/security/PublicKey;
 Landroid/content/pm/UserInfo;-><init>(ILjava/lang/String;I)V
 Landroid/content/pm/UserInfo;->FLAG_PRIMARY:I
+Landroid/content/pm/UserInfo;->getUserHandle()Landroid/os/UserHandle;
 Landroid/content/pm/UserInfo;->id:I
 Landroid/content/pm/UserInfo;->isPrimary()Z
 Landroid/content/pm/UserInfo;->serialNumber:I
