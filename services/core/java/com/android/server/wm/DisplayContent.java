@@ -393,6 +393,8 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
     /** Temporary float array to retrieve 3x3 matrix values. */
     private final float[] mTmpFloats = new float[9];
 
+    private MagnificationSpec mMagnificationSpec;
+
     private final Consumer<WindowState> mUpdateWindowsForAnimator = w -> {
         WindowStateAnimator winAnimator = w.mWinAnimator;
         final AppWindowToken atoken = w.mAppToken;
@@ -3837,8 +3839,20 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
     }
 
     void applyMagnificationSpec(MagnificationSpec spec) {
+        if (spec.scale != 1.0) {
+            mMagnificationSpec = spec;
+        } else {
+            mMagnificationSpec = null;
+        }
+
         applyMagnificationSpec(getPendingTransaction(), spec);
         getPendingTransaction().apply();
+    }
+
+    void reapplyMagnificationSpec() {
+        if (mMagnificationSpec != null) {
+            applyMagnificationSpec(getPendingTransaction(), mMagnificationSpec);
+        }
     }
 
     @Override
