@@ -16,6 +16,8 @@
 
 #pragma once
 
+#include "GlFunctorLifecycleListener.h"
+
 #include <SkCanvas.h>
 #include <SkDrawable.h>
 
@@ -24,8 +26,6 @@
 
 namespace android {
 namespace uirenderer {
-
-class GlFunctorLifecycleListener;
 
 namespace skiapipeline {
 

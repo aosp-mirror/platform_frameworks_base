@@ -25,6 +25,7 @@
 #include "renderstate/RenderState.h"
 #include "renderthread/EglManager.h"
 #include "renderthread/Frame.h"
+#include "utils/GLUtils.h"
 #include "utils/TraceUtils.h"
 
 #include <GrBackendSurface.h>
@@ -58,10 +59,10 @@ Frame SkiaOpenGLPipeline::getFrame() {
 }
 
 bool SkiaOpenGLPipeline::draw(const Frame& frame, const SkRect& screenDirty, const SkRect& dirty,
-                              const FrameBuilder::LightGeometry& lightGeometry,
+                              const LightGeometry& lightGeometry,
                               LayerUpdateQueue* layerUpdateQueue, const Rect& contentDrawBounds,
                               bool opaque, bool wideColorGamut,
-                              const BakedOpRenderer::LightInfo& lightInfo,
+                              const LightInfo& lightInfo,
                               const std::vector<sp<RenderNode>>& renderNodes,
                               FrameInfoVisualizer* profiler) {
     mEglManager.damageFrame(frame, dirty);

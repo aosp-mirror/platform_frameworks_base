@@ -17,6 +17,7 @@
 #pragma once
 
 #include "BakedOpState.h"
+#include "Lighting.h"
 #include "Matrix.h"
 #include "utils/Macros.h"
 
@@ -42,16 +43,6 @@ struct ClipBase;
 class BakedOpRenderer {
 public:
     typedef void (*GlopReceiver)(BakedOpRenderer&, const Rect*, const ClipBase*, const Glop&);
-    /**
-     * Position agnostic shadow lighting info. Used with all shadow ops in scene.
-     */
-    struct LightInfo {
-        LightInfo() : LightInfo(0, 0) {}
-        LightInfo(uint8_t ambientShadowAlpha, uint8_t spotShadowAlpha)
-                : ambientShadowAlpha(ambientShadowAlpha), spotShadowAlpha(spotShadowAlpha) {}
-        uint8_t ambientShadowAlpha;
-        uint8_t spotShadowAlpha;
-    };
 
     BakedOpRenderer(Caches& caches, RenderState& renderState, bool opaque, bool wideColorGamut,
                     const LightInfo& lightInfo)

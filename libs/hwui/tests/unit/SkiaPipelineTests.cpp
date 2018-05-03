@@ -167,10 +167,10 @@ RENDERTHREAD_SKIA_PIPELINE_TEST(SkiaPipeline, renderLayer) {
     ASSERT_EQ(layerUpdateQueue.entries().size(), 2UL);
 
     bool opaque = true;
-    FrameBuilder::LightGeometry lightGeometry;
+    LightGeometry lightGeometry;
     lightGeometry.radius = 1.0f;
     lightGeometry.center = {0.0f, 0.0f, 0.0f};
-    BakedOpRenderer::LightInfo lightInfo;
+    LightInfo lightInfo;
     auto pipeline = std::make_unique<SkiaOpenGLPipeline>(renderThread);
     pipeline->renderLayers(lightGeometry, &layerUpdateQueue, opaque, false, lightInfo);
     ASSERT_EQ(TestUtils::getColor(surfaceLayer1, 0, 0), SK_ColorRED);

@@ -16,8 +16,10 @@
 
 #include <benchmark/benchmark.h>
 
+#include "CanvasState.h"
 #include "DisplayList.h"
-#include "RecordingCanvas.h"
+#include "hwui/Canvas.h"
+#include "pipeline/skia/SkiaDisplayList.h"
 #include "tests/common/TestUtils.h"
 
 using namespace android;
@@ -25,7 +27,7 @@ using namespace android::uirenderer;
 
 void BM_DisplayList_alloc(benchmark::State& benchState) {
     while (benchState.KeepRunning()) {
-        auto displayList = new DisplayList();
+        auto displayList = new skiapipeline::SkiaDisplayList();
         benchmark::DoNotOptimize(displayList);
         delete displayList;
     }
@@ -34,7 +36,7 @@ BENCHMARK(BM_DisplayList_alloc);
 
 void BM_DisplayList_alloc_theoretical(benchmark::State& benchState) {
     while (benchState.KeepRunning()) {
-        auto displayList = new char[sizeof(DisplayList)];
+        auto displayList = new char[sizeof(skiapipeline::SkiaDisplayList)];
         benchmark::DoNotOptimize(displayList);
         delete[] displayList;
     }

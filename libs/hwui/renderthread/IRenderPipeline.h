@@ -17,7 +17,10 @@
 #pragma once
 
 #include "FrameInfoVisualizer.h"
+#include "LayerUpdateQueue.h"
 #include "SwapBehavior.h"
+#include "hwui/Bitmap.h"
+#include "thread/TaskManager.h"
 
 #include <SkRect.h>
 #include <utils/RefBase.h>
@@ -50,9 +53,9 @@ public:
     virtual MakeCurrentResult makeCurrent() = 0;
     virtual Frame getFrame() = 0;
     virtual bool draw(const Frame& frame, const SkRect& screenDirty, const SkRect& dirty,
-                      const FrameBuilder::LightGeometry& lightGeometry,
+                      const LightGeometry& lightGeometry,
                       LayerUpdateQueue* layerUpdateQueue, const Rect& contentDrawBounds,
-                      bool opaque, bool wideColorGamut, const BakedOpRenderer::LightInfo& lightInfo,
+                      bool opaque, bool wideColorGamut, const LightInfo& lightInfo,
                       const std::vector<sp<RenderNode>>& renderNodes,
                       FrameInfoVisualizer* profiler) = 0;
     virtual bool swapBuffers(const Frame& frame, bool drew, const SkRect& screenDirty,
@@ -64,9 +67,9 @@ public:
     virtual bool isSurfaceReady() = 0;
     virtual bool isContextReady() = 0;
     virtual void onDestroyHardwareResources() = 0;
-    virtual void renderLayers(const FrameBuilder::LightGeometry& lightGeometry,
+    virtual void renderLayers(const LightGeometry& lightGeometry,
                               LayerUpdateQueue* layerUpdateQueue, bool opaque, bool wideColorGamut,
-                              const BakedOpRenderer::LightInfo& lightInfo) = 0;
+                              const LightInfo& lightInfo) = 0;
     virtual TaskManager* getTaskManager() = 0;
     virtual bool createOrUpdateLayer(RenderNode* node, const DamageAccumulator& damageAccumulator,
                                      bool wideColorGamut, ErrorHandler* errorHandler) = 0;

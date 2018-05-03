@@ -48,8 +48,6 @@ namespace android {
 namespace uirenderer {
 
 class CanvasState;
-class DisplayListOp;
-class FrameBuilder;
 class OffscreenBuffer;
 class Rect;
 class SkiaShader;
@@ -76,7 +74,6 @@ class RenderNode;
  */
 class RenderNode : public VirtualLightRefBase {
     friend class TestUtils;  // allow TestUtils to access syncDisplayList / syncProperties
-    friend class FrameBuilder;
 
 public:
     enum DirtyPropertyMask {
@@ -103,8 +100,6 @@ public:
     enum ReplayFlag { kReplayFlag_ClipChildren = 0x1 };
 
     ANDROID_API void setStagingDisplayList(DisplayList* newData);
-
-    void computeOrdering();
 
     ANDROID_API void output();
     ANDROID_API int getDebugSize();
