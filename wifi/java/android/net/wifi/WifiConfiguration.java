@@ -264,7 +264,7 @@ public class WifiConfiguration implements Parcelable {
     public int status;
 
     /**
-     * The network's SSID. Can either be an ASCII string,
+     * The network's SSID. Can either be a UTF-8 string,
      * which must be enclosed in double quotation marks
      * (e.g., {@code "MyNetwork"}), or a string of
      * hex digits, which are not enclosed in quotes
