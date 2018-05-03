@@ -969,6 +969,7 @@ Landroid/database/sqlite/SQLiteCustomFunction;->dispatchCallback([Ljava/lang/Str
 Landroid/database/sqlite/SQLiteCustomFunction;->name:Ljava/lang/String;
 Landroid/database/sqlite/SQLiteCustomFunction;->numArgs:I
 Landroid/database/sqlite/SQLiteDatabase;->CONFLICT_VALUES:[Ljava/lang/String;
+Landroid/database/sqlite/SQLiteDatabase;->getThreadSession()Landroid/database/sqlite/SQLiteSession;
 Landroid/database/sqlite/SQLiteDatabase;->mConfigurationLocked:Landroid/database/sqlite/SQLiteDatabaseConfiguration;
 Landroid/database/sqlite/SQLiteDatabase;->mConnectionPoolLocked:Landroid/database/sqlite/SQLiteConnectionPool;
 Landroid/database/sqlite/SQLiteDatabase;->reopenReadWrite()V
@@ -977,6 +978,7 @@ Landroid/database/sqlite/SQLiteDebug$PagerStats;->largestMemAlloc:I
 Landroid/database/sqlite/SQLiteDebug$PagerStats;->memoryUsed:I
 Landroid/database/sqlite/SQLiteDebug$PagerStats;->pageCacheOverflow:I
 Landroid/database/sqlite/SQLiteOpenHelper;->mName:Ljava/lang/String;
+Landroid/database/sqlite/SQLiteSession;->beginTransaction(ILandroid/database/sqlite/SQLiteTransactionListener;ILandroid/os/CancellationSignal;)V
 Landroid/database/sqlite/SQLiteStatement;-><init>(Landroid/database/sqlite/SQLiteDatabase;Ljava/lang/String;[Ljava/lang/Object;)V
 Landroid/ddm/DdmHandleAppName;->getAppName()Ljava/lang/String;
 Landroid/ddm/DdmHandleAppName;->setAppName(Ljava/lang/String;I)V
