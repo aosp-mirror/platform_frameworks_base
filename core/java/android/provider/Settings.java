@@ -4146,7 +4146,8 @@ public final class Settings {
             SHOW_BATTERY_PERCENT,
             NOTIFICATION_VIBRATION_INTENSITY,
             HAPTIC_FEEDBACK_INTENSITY,
-            DISPLAY_COLOR_MODE
+            DISPLAY_COLOR_MODE,
+            ALARM_ALERT
         };
 
         /**

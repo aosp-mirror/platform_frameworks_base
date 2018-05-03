@@ -44,6 +44,7 @@ import android.telephony.TelephonyManager;
 import android.text.TextUtils;
 import android.util.ArraySet;
 
+import java.security.InvalidParameterException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Locale;
@@ -152,7 +153,8 @@ public class SettingsHelper {
             } else if (isAlreadyConfiguredCriticalAccessibilitySetting(name)) {
                 return;
             } else if (Settings.System.RINGTONE.equals(name)
-                    || Settings.System.NOTIFICATION_SOUND.equals(name)) {
+                    || Settings.System.NOTIFICATION_SOUND.equals(name)
+                    || Settings.System.ALARM_ALERT.equals(name)) {
                 setRingtone(name, value);
                 return;
             }
@@ -184,7 +186,8 @@ public class SettingsHelper {
     public String onBackupValue(String name, String value) {
         // Special processing for backing up ringtones & notification sounds
         if (Settings.System.RINGTONE.equals(name)
-                || Settings.System.NOTIFICATION_SOUND.equals(name)) {
+                || Settings.System.NOTIFICATION_SOUND.equals(name)
+                || Settings.System.ALARM_ALERT.equals(name)) {
             if (value == null) {
                 if (Settings.System.RINGTONE.equals(name)) {
                     // For ringtones, we need to distinguish between non-telephony vs telephony
@@ -196,7 +199,7 @@ public class SettingsHelper {
                         return null;
                     }
                 } else {
-                    // Backup a null notification sound as silent
+                    // Backup a null notification sound or alarm alert as silent
                     return SILENT_RINGTONE;
                 }
             } else {
@@ -210,13 +213,14 @@ public class SettingsHelper {
     /**
      * Sets the ringtone of type specified by the name.
      *
-     * @param name should be Settings.System.RINGTONE or Settings.System.NOTIFICATION_SOUND.
+     * @param name should be Settings.System.RINGTONE, Settings.System.NOTIFICATION_SOUND
+     * or Settings.System.ALARM_ALERT.
      * @param value can be a canonicalized uri or "_silent" to indicate a silent (null) ringtone.
      */
     private void setRingtone(String name, String value) {
         // If it's null, don't change the default
         if (value == null) return;
-        Uri ringtoneUri = null;
+        final Uri ringtoneUri;
         if (SILENT_RINGTONE.equals(value)) {
             ringtoneUri = null;
         } else {
@@ -227,9 +231,22 @@ public class SettingsHelper {
                 return;
             }
         }
-        final int ringtoneType = Settings.System.RINGTONE.equals(name)
-                ? RingtoneManager.TYPE_RINGTONE : RingtoneManager.TYPE_NOTIFICATION;
+        final int ringtoneType = getRingtoneType(name);
+
         RingtoneManager.setActualDefaultRingtoneUri(mContext, ringtoneType, ringtoneUri);
+    }
+
+    private int getRingtoneType(String name) {
+        switch (name) {
+            case Settings.System.RINGTONE:
+                return RingtoneManager.TYPE_RINGTONE;
+            case Settings.System.NOTIFICATION_SOUND:
+                return RingtoneManager.TYPE_NOTIFICATION;
+            case Settings.System.ALARM_ALERT:
+                return RingtoneManager.TYPE_ALARM;
+            default:
+                throw new InvalidParameterException("Incorrect ringtone name: " + name);
+        }
     }
 
     private String getCanonicalRingtoneValue(String value) {
