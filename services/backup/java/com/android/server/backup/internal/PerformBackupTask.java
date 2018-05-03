@@ -884,7 +884,12 @@ public class PerformBackupTask implements BackupRestoreTask {
                                         .sendBackupOnPackageResult(mObserver, pkgName,
                                                 BackupManager.ERROR_AGENT_FAILURE);
                                 errorCleanup();
-                                // agentErrorCleanup() implicitly executes next state properly
+                                if (MORE_DEBUG) {
+                                    Slog.i(TAG, "Agent failure for " + pkgName
+                                            + " with illegal key: " + key + "; dropped");
+                                }
+                                executeNextState(mQueue.isEmpty() ? BackupState.FINAL
+                                        : BackupState.RUNNING_QUEUE);
                                 return;
                             }
                             in.skipEntityData();
