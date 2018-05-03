@@ -77,7 +77,7 @@
     <dimen name="password_char_padding">8dp</dimen>
 
     <!-- The vertical margin between the date and the owner info. -->
-    <dimen name="date_owner_info_margin">2dp</dimen>
+    <dimen name="date_owner_info_margin">4dp</dimen>
 
     <!-- The translation for disappearing security views after having solved them. -->
     <dimen name="disappear_y_translation">-32dp</dimen>
