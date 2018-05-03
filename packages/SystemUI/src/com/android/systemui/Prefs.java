@@ -94,6 +94,8 @@ public final class Prefs {
         String OVERVIEW_OPENED_FROM_HOME_COUNT = "OverviewOpenedFromHomeCount";
         String HAS_SEEN_RECENTS_SWIPE_UP_ONBOARDING = "HasSeenRecentsSwipeUpOnboarding";
         String HAS_SEEN_RECENTS_QUICK_SCRUB_ONBOARDING = "HasSeenRecentsQuickScrubOnboarding";
+        String HAS_DISMISSED_RECENTS_QUICK_SCRUB_ONBOARDING_ONCE =
+                "HasDismissedRecentsQuickScrubOnboardingOnce";
         String SEEN_RINGER_GUIDANCE_COUNT = "RingerGuidanceCount";
         String QS_TILE_SPECS_REVEALED = "QsTileSpecsRevealed";
         String QS_HAS_TURNED_OFF_MOBILE_DATA = "QsHasTurnedOffMobileData";
