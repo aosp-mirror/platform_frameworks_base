@@ -589,10 +589,12 @@ include $(BUILD_HOST_JAVA_LIBRARY)
 # rules for building them. Other rules in the build system should depend on the
 # files in the build folder.
 
-$(eval $(call copy-one-file,frameworks/base/config/hiddenapi-blacklist.txt,\
-                            $(INTERNAL_PLATFORM_HIDDENAPI_BLACKLIST)))
 $(eval $(call copy-one-file,frameworks/base/config/hiddenapi-dark-greylist.txt,\
                             $(INTERNAL_PLATFORM_HIDDENAPI_DARK_GREYLIST)))
+
+$(INTERNAL_PLATFORM_HIDDENAPI_BLACKLIST):
+	rm -f $@
+	touch $@
 
 # Generate light greylist as private API minus (blacklist plus dark greylist).
 
@@ -613,6 +615,20 @@ $(INTERNAL_PLATFORM_HIDDENAPI_LIGHT_GREYLIST): $(INTERNAL_PLATFORM_PRIVATE_DEX_A
 		exit 3; \
 	fi
 	comm -23 <(sort $(PRIVATE_API)) <(sort $(BLACKLIST) $(DARK_GREYLIST)) > $@
+
+# Build AOSP blacklist
+# ============================================================
+include $(CLEAR_VARS)
+
+LOCAL_LIGHT_GREYLIST_FILE := frameworks/base/config/hiddenapi-p-light-greylist.txt
+LOCAL_BLACKLIST_FILE := $(TARGET_OUT_COMMON_INTERMEDIATES)/PACKAGING/hiddenapi-aosp-blacklist.txt
+
+.PHONY: hiddenapi-aosp-blacklist
+hiddenapi-aosp-blacklist: $(LOCAL_BLACKLIST_FILE)
+
+$(LOCAL_BLACKLIST_FILE): $(LOCAL_LIGHT_GREYLIST_FILE) $(INTERNAL_PLATFORM_PRIVATE_DEX_API_FILE)
+	LC_COLLATE=C comm -13 <(sort $(LOCAL_LIGHT_GREYLIST_FILE)) \
+		   <(sort $(INTERNAL_PLATFORM_PRIVATE_DEX_API_FILE)) > $@
 
 # Include subdirectory makefiles
 # ============================================================
