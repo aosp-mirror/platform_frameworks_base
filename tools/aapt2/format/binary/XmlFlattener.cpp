@@ -79,9 +79,19 @@ class XmlFlattenerVisitor : public xml::ConstVisitor {
   }
 
   void Visit(const xml::Text* node) override {
-    if (util::TrimWhitespace(node->text).empty()) {
-      // Skip whitespace only text nodes.
+    std::string text = util::TrimWhitespace(node->text).to_string();
+
+    // Skip whitespace only text nodes.
+    if (text.empty()) {
       return;
+    }
+
+    // Compact leading and trailing whitespace into a single space
+    if (isspace(node->text[0])) {
+      text = ' ' + text;
+    }
+    if (isspace(node->text[node->text.length() - 1])) {
+      text = text + ' ';
     }
 
     ChunkWriter writer(buffer_);
@@ -89,13 +99,11 @@ class XmlFlattenerVisitor : public xml::ConstVisitor {
     flat_node->lineNumber = util::HostToDevice32(node->line_number);
     flat_node->comment.index = util::HostToDevice32(-1);
 
-    ResXMLTree_cdataExt* flat_text = writer.NextBlock<ResXMLTree_cdataExt>();
-
     // Process plain strings to make sure they get properly escaped.
-    StringBuilder builder;
-    builder.AppendText(node->text);
-    AddString(builder.to_string(), kLowPriority, &flat_text->data);
+    text = StringBuilder(true /*preserve_spaces*/).AppendText(text).to_string();
 
+    ResXMLTree_cdataExt* flat_text = writer.NextBlock<ResXMLTree_cdataExt>();
+    AddString(text, kLowPriority, &flat_text->data);
     writer.Finish();
   }
 
