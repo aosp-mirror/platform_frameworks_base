@@ -401,6 +401,10 @@ public class QuickStepController implements GestureHelper {
             mDarkTrackColor = mContext.getColor(R.color.quick_step_track_background_dark);
             mTrackAnimator.setFloatValues(0, 1);
             mTrackAnimator.start();
+
+            // Hide menu buttons on nav bar until quick scrub has ended
+            mNavigationBarView.setMenuContainerVisibility(false /* visible */);
+
             try {
                 mOverviewEventSender.getProxy().onQuickScrubStart();
                 if (DEBUG_OVERVIEW_PROXY) {
@@ -416,6 +420,10 @@ public class QuickStepController implements GestureHelper {
     private void endQuickScrub(boolean animate) {
         if (mQuickScrubActive || mDragScrubActive) {
             animateEnd();
+
+            // Restore the nav bar menu buttons visibility
+            mNavigationBarView.setMenuContainerVisibility(true /* visible */);
+
             if (mQuickScrubActive) {
                 try {
                     mOverviewEventSender.getProxy().onQuickScrubEnd();

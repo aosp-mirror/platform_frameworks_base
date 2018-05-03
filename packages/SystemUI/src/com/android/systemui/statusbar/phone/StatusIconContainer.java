@@ -73,17 +73,21 @@ public class StatusIconContainer extends AlphaOptimizedLinearLayout {
 
     public StatusIconContainer(Context context, AttributeSet attrs) {
         super(context, attrs);
+        initDimens();
+        setWillNotDraw(!DEBUG_OVERFLOW);
     }
 
     @Override
     protected void onFinishInflate() {
         super.onFinishInflate();
-        setWillNotDraw(!DEBUG_OVERFLOW);
-        initDimens();
     }
 
     public void setShouldRestrictIcons(boolean should) {
         mShouldRestrictIcons = should;
+    }
+
+    public boolean isRestrictingIcons() {
+        return mShouldRestrictIcons;
     }
 
     private void initDimens() {
@@ -209,8 +213,8 @@ public class StatusIconContainer extends AlphaOptimizedLinearLayout {
         int childCount = getChildCount();
         // Underflow === don't show content until that index
         int firstUnderflowIndex = -1;
-        if (DEBUG) android.util.Log.d(TAG, "calculateIconTransitions: start=" + translationX
-                + " width=" + width);
+        if (DEBUG) android.util.Log.d(TAG, "calculateIconTranslations: start=" + translationX
+                + " width=" + width + " underflow=" + mNeedsUnderflow);
 
         // Collect all of the states which want to be visible
         for (int i = childCount - 1; i >= 0; i--) {

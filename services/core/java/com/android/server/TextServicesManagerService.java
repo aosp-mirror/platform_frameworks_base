@@ -71,6 +71,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.function.Predicate;
 
 public class TextServicesManagerService extends ITextServicesManager.Stub {
     private static final String TAG = TextServicesManagerService.class.getSimpleName();
@@ -396,10 +397,7 @@ public class TextServicesManagerService extends ITextServicesManager.Stub {
                     final String packageName = sci.getPackageName();
                     final int change = isPackageDisappearing(packageName);
                     if (DBG) Slog.d(TAG, "Changing package name: " + packageName);
-                    if (// Package disappearing
-                            change == PACKAGE_PERMANENT_CHANGE || change == PACKAGE_TEMPORARY_CHANGE
-                                    // Package modified
-                                    || isPackageModified(packageName)) {
+                    if (change == PACKAGE_PERMANENT_CHANGE || change == PACKAGE_TEMPORARY_CHANGE) {
                         SpellCheckerInfo availSci =
                                 findAvailSystemSpellCheckerLocked(packageName, tsd);
                         // Set the spell checker settings if different than before
@@ -885,6 +883,11 @@ public class TextServicesManagerService extends ITextServicesManager.Stub {
             }
             synchronized (mLock) {
                 mListeners.unregister(listener);
+                final IBinder scListenerBinder = listener.asBinder();
+                final Predicate<SessionRequest> removeCondition =
+                        request -> request.mScListener.asBinder() == scListenerBinder;
+                mPendingSessionRequests.removeIf(removeCondition);
+                mOnGoingSessionRequests.removeIf(removeCondition);
                 cleanLocked();
             }
         }
@@ -934,6 +937,7 @@ public class TextServicesManagerService extends ITextServicesManager.Stub {
             if (mUnbindCalled) {
                 return;
             }
+            mListeners.register(request.mScListener);
             if (!mConnected) {
                 mPendingSessionRequests.add(request);
                 return;
@@ -959,7 +963,6 @@ public class TextServicesManagerService extends ITextServicesManager.Stub {
                 if (mOnGoingSessionRequests.remove(request)) {
                     try {
                         request.mTsListener.onServiceConnected(newSession);
-                        mListeners.register(request.mScListener);
                     } catch (RemoteException e) {
                         // Technically this can happen if the spell checker client app is already
                         // dead.  We can just forget about this request; the request is already

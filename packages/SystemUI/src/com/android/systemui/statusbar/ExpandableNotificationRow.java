@@ -1635,6 +1635,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
                 mTranslateableViews.get(i).setTranslationX(0);
             }
             invalidateOutline();
+            getEntry().expandedIcon.setScrollX(0);
         }
 
         mMenuRow.resetMenu();

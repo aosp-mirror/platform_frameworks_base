@@ -53,4 +53,5 @@ message NotificationChannelProto {
     optional android.media.AudioAttributesProto audio_attributes = 16;
     // If this is a blockable system notification channel.
     optional bool is_blockable_system = 17;
+    optional bool fg_service_shown = 18;
 }

@@ -85,6 +85,14 @@ public abstract class FileSystemProvider extends DocumentsProvider {
 
     protected abstract Uri buildNotificationUri(String docId);
 
+    /**
+     * Callback indicating that the given document has been modified. This gives
+     * the provider a hook to invalidate cached data, such as {@code sdcardfs}.
+     */
+    protected void onDocIdChanged(String docId) {
+        // Default is no-op
+    }
+
     @Override
     public boolean onCreate() {
         throw new UnsupportedOperationException(
@@ -185,6 +193,7 @@ public abstract class FileSystemProvider extends DocumentsProvider {
                 throw new IllegalStateException("Failed to mkdir " + file);
             }
             childId = getDocIdForFile(file);
+            onDocIdChanged(childId);
             addFolderToMediaStore(getFileForDocId(childId, true));
         } else {
             try {
@@ -192,6 +201,7 @@ public abstract class FileSystemProvider extends DocumentsProvider {
                     throw new IllegalStateException("Failed to touch " + file);
                 }
                 childId = getDocIdForFile(file);
+                onDocIdChanged(childId);
             } catch (IOException e) {
                 throw new IllegalStateException("Failed to touch " + file + ": " + e);
             }
@@ -227,16 +237,20 @@ public abstract class FileSystemProvider extends DocumentsProvider {
 
         final File before = getFileForDocId(docId);
         final File after = FileUtils.buildUniqueFile(before.getParentFile(), displayName);
-        final File visibleFileBefore = getFileForDocId(docId, true);
         if (!before.renameTo(after)) {
             throw new IllegalStateException("Failed to rename to " + after);
         }
 
         final String afterDocId = getDocIdForFile(after);
-        moveInMediaStore(visibleFileBefore, getFileForDocId(afterDocId, true));
+        onDocIdChanged(docId);
+        onDocIdChanged(afterDocId);
+
+        final File beforeVisibleFile = getFileForDocId(docId, true);
+        final File afterVisibleFile = getFileForDocId(afterDocId, true);
+        moveInMediaStore(beforeVisibleFile, afterVisibleFile);
 
         if (!TextUtils.equals(docId, afterDocId)) {
-            scanFile(after);
+            scanFile(afterVisibleFile);
             return afterDocId;
         } else {
             return null;
@@ -259,6 +273,8 @@ public abstract class FileSystemProvider extends DocumentsProvider {
         }
 
         final String docId = getDocIdForFile(after);
+        onDocIdChanged(sourceDocumentId);
+        onDocIdChanged(docId);
         moveInMediaStore(visibleFileBefore, getFileForDocId(docId, true));
 
         return docId;
@@ -308,6 +324,7 @@ public abstract class FileSystemProvider extends DocumentsProvider {
             throw new IllegalStateException("Failed to delete " + file);
         }
 
+        onDocIdChanged(docId);
         removeFromMediaStore(visibleFile, isDirectory);
     }
 
@@ -418,7 +435,10 @@ public abstract class FileSystemProvider extends DocumentsProvider {
             try {
                 // When finished writing, kick off media scanner
                 return ParcelFileDescriptor.open(
-                        file, pfdMode, mHandler, (IOException e) -> scanFile(visibleFile));
+                        file, pfdMode, mHandler, (IOException e) -> {
+                            onDocIdChanged(documentId);
+                            scanFile(visibleFile);
+                        });
             } catch (IOException e) {
                 throw new FileNotFoundException("Failed to open for writing: " + e);
             }

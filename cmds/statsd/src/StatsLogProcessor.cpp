@@ -502,6 +502,7 @@ void StatsLogProcessor::WriteDataToDisk(bool isShutdown) {
 }
 
 void StatsLogProcessor::informPullAlarmFired(const int64_t timestampNs) {
+    std::lock_guard<std::mutex> lock(mMetricsMutex);
     mStatsPullerManager.OnAlarmFired(timestampNs);
 }
 

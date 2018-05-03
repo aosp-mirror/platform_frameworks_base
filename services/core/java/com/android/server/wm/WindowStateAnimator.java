@@ -1287,6 +1287,12 @@ class WindowStateAnimator {
         if (!shown)
             return false;
 
+        // If we had a preserved surface it's no longer needed, and it may be harmful
+        // if we are transparent.
+        if (mPendingDestroySurface != null && mDestroyPreservedSurfaceUponRedraw) {
+            mPendingDestroySurface.mSurfaceControl.hide();
+        }
+
         return true;
     }
 

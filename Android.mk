@@ -448,6 +448,7 @@ LOCAL_DROIDDOC_OPTIONS:=\
 		-showAnnotation android.annotation.SystemApi \
 		-showAnnotation android.annotation.TestApi \
 		-privateDexApi $(INTERNAL_PLATFORM_PRIVATE_DEX_API_FILE) \
+		-removedDexApi $(INTERNAL_PLATFORM_REMOVED_DEX_API_FILE) \
 		-nodocs
 
 LOCAL_DROIDDOC_CUSTOM_TEMPLATE_DIR:=external/doclava/res/assets/templates-sdk
@@ -456,7 +457,8 @@ LOCAL_UNINSTALLABLE_MODULE := true
 
 include $(BUILD_DROIDDOC)
 
-$(full_target): .KATI_IMPLICIT_OUTPUTS := $(INTERNAL_PLATFORM_PRIVATE_DEX_API_FILE)
+$(full_target): .KATI_IMPLICIT_OUTPUTS := $(INTERNAL_PLATFORM_PRIVATE_DEX_API_FILE) \
+                                          $(INTERNAL_PLATFORM_REMOVED_DEX_API_FILE)
 
 # ====  check javadoc comments but don't generate docs ========
 include $(CLEAR_VARS)
@@ -871,9 +873,16 @@ include $(BUILD_STATIC_JAVA_LIBRARY)
 # rules for building them. Other rules in the build system should depend on the
 # files in the build folder.
 
-# Automatically add all methods which match the following signatures.
-# These need to be greylisted in order to allow applications to write their
-# own serializers.
+# Merge light greylist from multiple files:
+#  (1) manual light greylist
+#  (2) list of usages from vendor apps
+#  (3) list of removed APIs
+#      @removed does not imply private in Doclava. We must take the subset also
+#      in PRIVATE_API.
+#  (4) list of serialization APIs
+#      Automatically adds all methods which match the signatures in
+#      REGEX_SERIALIZATION. These are greylisted in order to allow applications
+#      to write their own serializers.
 $(INTERNAL_PLATFORM_HIDDENAPI_LIGHT_GREYLIST): REGEX_SERIALIZATION := \
     "readObject\(Ljava/io/ObjectInputStream;\)V" \
     "readObjectNoData\(\)V" \
@@ -883,14 +892,15 @@ $(INTERNAL_PLATFORM_HIDDENAPI_LIGHT_GREYLIST): REGEX_SERIALIZATION := \
     "writeObject\(Ljava/io/ObjectOutputStream;\)V" \
     "writeReplace\(\)Ljava/lang/Object;"
 $(INTERNAL_PLATFORM_HIDDENAPI_LIGHT_GREYLIST): PRIVATE_API := $(INTERNAL_PLATFORM_PRIVATE_DEX_API_FILE)
-# Temporarily merge light greylist from two files. Vendor list will become dark
-# grey once we remove the UI toast.
+$(INTERNAL_PLATFORM_HIDDENAPI_LIGHT_GREYLIST): REMOVED_API := $(INTERNAL_PLATFORM_REMOVED_DEX_API_FILE)
 $(INTERNAL_PLATFORM_HIDDENAPI_LIGHT_GREYLIST): frameworks/base/config/hiddenapi-light-greylist.txt \
                                                frameworks/base/config/hiddenapi-vendor-list.txt \
-                                               $(INTERNAL_PLATFORM_PRIVATE_DEX_API_FILE)
+                                               $(INTERNAL_PLATFORM_PRIVATE_DEX_API_FILE) \
+                                               $(INTERNAL_PLATFORM_REMOVED_DEX_API_FILE)
 	sort frameworks/base/config/hiddenapi-light-greylist.txt \
 	     frameworks/base/config/hiddenapi-vendor-list.txt \
 	     <(grep -E "\->("$(subst $(space),"|",$(REGEX_SERIALIZATION))")$$" $(PRIVATE_API)) \
+	     <(comm -12 <(sort $(REMOVED_API)) <(sort $(PRIVATE_API))) \
 	> $@
 
 $(eval $(call copy-one-file,frameworks/base/config/hiddenapi-dark-greylist.txt,\

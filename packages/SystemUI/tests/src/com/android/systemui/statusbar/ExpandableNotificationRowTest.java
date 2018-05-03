@@ -298,4 +298,13 @@ public class ExpandableNotificationRowTest extends SysuiTestCase {
 
         assertEquals(3, mGroupRow.getNumUniqueChannels());
     }
+
+    @Test
+    public void testIconScrollXAfterTranslationAndReset() throws Exception {
+        mGroupRow.setTranslation(50);
+        assertEquals(50, -mGroupRow.getEntry().expandedIcon.getScrollX());
+
+        mGroupRow.resetTranslation();
+        assertEquals(0, mGroupRow.getEntry().expandedIcon.getScrollX());
+    }
 }

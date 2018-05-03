@@ -38,7 +38,6 @@ import android.os.Message;
 import android.view.ContextThemeWrapper;
 import android.view.Display;
 import android.view.DisplayListCanvas;
-import android.view.LayoutInflater;
 import android.view.PixelCopy;
 import android.view.RenderNode;
 import android.view.Surface;
@@ -71,8 +70,6 @@ public final class Magnifier {
     private final int[] mViewCoordinatesInSurface;
     // The window containing the magnifier.
     private InternalPopupWindow mWindow;
-    // The center coordinates of the window containing the magnifier.
-    private final Point mWindowCoords = new Point();
     // The width of the window containing the magnifier.
     private final int mWindowWidth;
     // The height of the window containing the magnifier.
@@ -87,8 +84,18 @@ public final class Magnifier {
     private final float mWindowElevation;
     // The corner radius of the window containing the magnifier.
     private final float mWindowCornerRadius;
-    // The center coordinates of the content that is to be magnified.
+    // The parent surface for the magnifier surface.
+    private SurfaceInfo mParentSurface;
+    // The surface where the content will be copied from.
+    private SurfaceInfo mContentCopySurface;
+    // The center coordinates of the window containing the magnifier.
+    private final Point mWindowCoords = new Point();
+    // The center coordinates of the content to be magnified,
+    // which can potentially contain a region outside the magnified view.
     private final Point mCenterZoomCoords = new Point();
+    // The center coordinates of the content to be magnified,
+    // clamped inside the visible region of the magnified view.
+    private final Point mClampedCenterZoomCoords = new Point();
     // Variables holding previous states, used for detecting redundant calls and invalidation.
     private final Point mPrevStartCoordsInSurface = new Point(
             NONEXISTENT_PREVIOUS_CONFIG_VALUE, NONEXISTENT_PREVIOUS_CONFIG_VALUE);
@@ -108,8 +115,6 @@ public final class Magnifier {
     public Magnifier(@NonNull View view) {
         mView = Preconditions.checkNotNull(view);
         final Context context = mView.getContext();
-        final View content = LayoutInflater.from(context).inflate(R.layout.magnifier, null);
-        content.findViewById(R.id.magnifier_inner).setClipToOutline(true);
         mWindowWidth = context.getResources().getDimensionPixelSize(R.dimen.magnifier_width);
         mWindowHeight = context.getResources().getDimensionPixelSize(R.dimen.magnifier_height);
         mWindowElevation = context.getResources().getDimension(R.dimen.magnifier_elevation);
@@ -155,22 +160,17 @@ public final class Magnifier {
         xPosInView = Math.max(0, Math.min(xPosInView, mView.getWidth()));
         yPosInView = Math.max(0, Math.min(yPosInView, mView.getHeight()));
 
-        configureCoordinates(xPosInView, yPosInView);
+        obtainSurfaces();
+        obtainContentCoordinates(xPosInView, yPosInView);
+        obtainWindowCoordinates();
 
-        // Clamp the startX location to avoid magnifying content which does not belong
-        // to the magnified view. This will not take into account overlapping views.
-        final Rect viewVisibleRegion = new Rect();
-        mView.getGlobalVisibleRect(viewVisibleRegion);
-        final int startX = Math.max(viewVisibleRegion.left, Math.min(
-                mCenterZoomCoords.x - mBitmapWidth / 2,
-                viewVisibleRegion.right - mBitmapWidth));
-        final int startY = mCenterZoomCoords.y - mBitmapHeight / 2;
-
+        final int startX = mClampedCenterZoomCoords.x - mBitmapWidth / 2;
+        final int startY = mClampedCenterZoomCoords.y - mBitmapHeight / 2;
         if (xPosInView != mPrevPosInView.x || yPosInView != mPrevPosInView.y) {
             if (mWindow == null) {
                 synchronized (mLock) {
                     mWindow = new InternalPopupWindow(mView.getContext(), mView.getDisplay(),
-                            getValidParentSurfaceForMagnifier(),
+                            mParentSurface.mSurface,
                             mWindowWidth, mWindowHeight, mWindowElevation, mWindowCornerRadius,
                             Handler.getMain() /* draw the magnifier on the UI thread */, mLock,
                             mCallback);
@@ -204,6 +204,7 @@ public final class Magnifier {
      */
     public void update() {
         if (mWindow != null) {
+            obtainSurfaces();
             // Update the content shown in the magnifier.
             performPixelCopy(mPrevStartCoordsInSurface.x, mPrevStartCoordsInSurface.y,
                     false /* update window position */);
@@ -235,35 +236,66 @@ public final class Magnifier {
 
     /**
      * @hide
+     *
+     * @return The top left coordinates of the magnifier, relative to the parent window.
      */
     @Nullable
     public Point getWindowCoords() {
         if (mWindow == null) {
             return null;
         }
-        return new Point(mWindow.mLastDrawContentPositionX, mWindow.mLastDrawContentPositionY);
+        final Rect surfaceInsets = mView.getViewRootImpl().mWindowAttributes.surfaceInsets;
+        return new Point(mWindow.mLastDrawContentPositionX - surfaceInsets.left,
+                mWindow.mLastDrawContentPositionY - surfaceInsets.top);
     }
 
-    @Nullable
-    private Surface getValidParentSurfaceForMagnifier() {
+    /**
+     * Retrieves the surfaces used by the magnifier:
+     * - a parent surface for the magnifier surface. This will usually be the main app window.
+     * - a surface where the magnified content will be copied from. This will be the main app
+     *   window unless the magnified view is a SurfaceView, in which case its backing surface
+     *   will be used.
+     */
+    private void obtainSurfaces() {
+        // Get the main window surface.
+        SurfaceInfo validMainWindowSurface = SurfaceInfo.NULL;
         if (mView.getViewRootImpl() != null) {
-            final Surface mainWindowSurface = mView.getViewRootImpl().mSurface;
+            final ViewRootImpl viewRootImpl = mView.getViewRootImpl();
+            final Surface mainWindowSurface = viewRootImpl.mSurface;
             if (mainWindowSurface != null && mainWindowSurface.isValid()) {
-                return mainWindowSurface;
+                final Rect surfaceInsets = viewRootImpl.mWindowAttributes.surfaceInsets;
+                final int surfaceWidth =
+                        viewRootImpl.getWidth() + surfaceInsets.left + surfaceInsets.right;
+                final int surfaceHeight =
+                        viewRootImpl.getHeight() + surfaceInsets.top + surfaceInsets.bottom;
+                validMainWindowSurface =
+                        new SurfaceInfo(mainWindowSurface, surfaceWidth, surfaceHeight, true);
             }
         }
+        // Get the surface backing the magnified view, if it is a SurfaceView.
+        SurfaceInfo validSurfaceViewSurface = SurfaceInfo.NULL;
         if (mView instanceof SurfaceView) {
-            final Surface surfaceViewSurface = ((SurfaceView) mView).getHolder().getSurface();
+            final SurfaceHolder surfaceHolder = ((SurfaceView) mView).getHolder();
+            final Surface surfaceViewSurface = surfaceHolder.getSurface();
             if (surfaceViewSurface != null && surfaceViewSurface.isValid()) {
-                return surfaceViewSurface;
+                final Rect surfaceFrame = surfaceHolder.getSurfaceFrame();
+                validSurfaceViewSurface = new SurfaceInfo(surfaceViewSurface,
+                        surfaceFrame.right, surfaceFrame.bottom, false);
             }
         }
-        return null;
+
+        // Choose the parent surface for the magnifier and the source surface for the content.
+        mParentSurface = validMainWindowSurface != SurfaceInfo.NULL
+                ? validMainWindowSurface : validSurfaceViewSurface;
+        mContentCopySurface = mView instanceof SurfaceView
+                ? validSurfaceViewSurface : validMainWindowSurface;
     }
 
-    private void configureCoordinates(final float xPosInView, final float yPosInView) {
-        // Compute the coordinates of the center of the content going to be displayed in the
-        // magnifier. These are relative to the surface the content is copied from.
+    /**
+     * Computes the coordinates of the center of the content going to be displayed in the
+     * magnifier. These are relative to the surface the content is copied from.
+     */
+    private void obtainContentCoordinates(final float xPosInView, final float yPosInView) {
         final float posX;
         final float posY;
         mView.getLocationInSurface(mViewCoordinatesInSurface);
@@ -278,61 +310,63 @@ public final class Magnifier {
         mCenterZoomCoords.x = Math.round(posX);
         mCenterZoomCoords.y = Math.round(posY);
 
+        // Clamp the x location to avoid magnifying content which does not belong
+        // to the magnified view. This will not take into account overlapping views.
+        final Rect viewVisibleRegion = new Rect();
+        mView.getGlobalVisibleRect(viewVisibleRegion);
+        if (mView.getViewRootImpl() != null) {
+            // Clamping coordinates relative to the surface, not to the window.
+            final Rect surfaceInsets = mView.getViewRootImpl().mWindowAttributes.surfaceInsets;
+            viewVisibleRegion.offset(surfaceInsets.left, surfaceInsets.top);
+        }
+        if (mView instanceof SurfaceView) {
+            // If we copy content from a SurfaceView, clamp coordinates relative to it.
+            viewVisibleRegion.offset(-mViewCoordinatesInSurface[0], -mViewCoordinatesInSurface[1]);
+        }
+        mClampedCenterZoomCoords.x = Math.max(viewVisibleRegion.left + mBitmapWidth / 2, Math.min(
+                mCenterZoomCoords.x, viewVisibleRegion.right - mBitmapWidth / 2));
+        mClampedCenterZoomCoords.y = mCenterZoomCoords.y;
+    }
+
+    private void obtainWindowCoordinates() {
         // Compute the position of the magnifier window. Again, this has to be relative to the
         // surface of the magnified view, as this surface is the parent of the magnifier surface.
         final int verticalOffset = mView.getContext().getResources().getDimensionPixelSize(
                 R.dimen.magnifier_offset);
         mWindowCoords.x = mCenterZoomCoords.x - mWindowWidth / 2;
         mWindowCoords.y = mCenterZoomCoords.y - mWindowHeight / 2 - verticalOffset;
-        if (mView instanceof SurfaceView && mView.getViewRootImpl() != null) {
-            // TODO: deduplicate against the first part of #getValidParentSurfaceForMagnifier()
-            final Surface mainWindowSurface = mView.getViewRootImpl().mSurface;
-            if (mainWindowSurface != null && mainWindowSurface.isValid()) {
-                mWindowCoords.x += mViewCoordinatesInSurface[0];
-                mWindowCoords.y += mViewCoordinatesInSurface[1];
-            }
+        if (mParentSurface != mContentCopySurface) {
+            mWindowCoords.x += mViewCoordinatesInSurface[0];
+            mWindowCoords.y += mViewCoordinatesInSurface[1];
         }
     }
 
     private void performPixelCopy(final int startXInSurface, final int startYInSurface,
             final boolean updateWindowPosition) {
-        // Get the view surface where the content will be copied from.
-        final Surface surface;
-        final int surfaceWidth;
-        final int surfaceHeight;
-        if (mView instanceof SurfaceView) {
-            final SurfaceHolder surfaceHolder = ((SurfaceView) mView).getHolder();
-            surface = surfaceHolder.getSurface();
-            surfaceWidth = surfaceHolder.getSurfaceFrame().right;
-            surfaceHeight = surfaceHolder.getSurfaceFrame().bottom;
-        } else if (mView.getViewRootImpl() != null) {
-            final ViewRootImpl viewRootImpl = mView.getViewRootImpl();
-            surface = viewRootImpl.mSurface;
-            surfaceWidth = viewRootImpl.getWidth();
-            surfaceHeight = viewRootImpl.getHeight();
-        } else {
-            surface = null;
-            surfaceWidth = NONEXISTENT_PREVIOUS_CONFIG_VALUE;
-            surfaceHeight = NONEXISTENT_PREVIOUS_CONFIG_VALUE;
-        }
-
-        if (surface == null || !surface.isValid()) {
+        if (mContentCopySurface.mSurface == null || !mContentCopySurface.mSurface.isValid()) {
             return;
         }
-
         // Clamp copy coordinates inside the surface to avoid displaying distorted content.
         final int clampedStartXInSurface = Math.max(0,
-                Math.min(startXInSurface, surfaceWidth - mBitmapWidth));
+                Math.min(startXInSurface, mContentCopySurface.mWidth - mBitmapWidth));
         final int clampedStartYInSurface = Math.max(0,
-                Math.min(startYInSurface, surfaceHeight - mBitmapHeight));
+                Math.min(startYInSurface, mContentCopySurface.mHeight - mBitmapHeight));
 
         // Clamp window coordinates inside the parent surface, to avoid displaying
         // the magnifier out of screen or overlapping with system insets.
-        final Rect insets = mView.getRootWindowInsets().getSystemWindowInsets();
-        final int windowCoordsX = Math.max(insets.left,
-                Math.min(surfaceWidth - mWindowWidth - insets.right, mWindowCoords.x));
-        final int windowCoordsY = Math.max(insets.top,
-                Math.min(surfaceHeight - mWindowHeight - insets.bottom, mWindowCoords.y));
+        final Rect windowBounds;
+        if (mParentSurface.mIsMainWindowSurface) {
+            final Rect systemInsets = mView.getRootWindowInsets().getSystemWindowInsets();
+            windowBounds = new Rect(systemInsets.left, systemInsets.top,
+                     mParentSurface.mWidth - systemInsets.right,
+                    mParentSurface.mHeight - systemInsets.bottom);
+        } else {
+            windowBounds = new Rect(0, 0, mParentSurface.mWidth, mParentSurface.mHeight);
+        }
+        final int windowCoordsX = Math.max(windowBounds.left,
+                Math.min(windowBounds.right - mWindowWidth, mWindowCoords.x));
+        final int windowCoordsY = Math.max(windowBounds.top,
+                Math.min(windowBounds.bottom - mWindowHeight, mWindowCoords.y));
 
         // Perform the pixel copy.
         mPixelCopyRequestRect.set(clampedStartXInSurface,
@@ -342,7 +376,7 @@ public final class Magnifier {
         final InternalPopupWindow currentWindowInstance = mWindow;
         final Bitmap bitmap =
                 Bitmap.createBitmap(mBitmapWidth, mBitmapHeight, Bitmap.Config.ARGB_8888);
-        PixelCopy.request(surface, mPixelCopyRequestRect, bitmap,
+        PixelCopy.request(mContentCopySurface.mSurface, mPixelCopyRequestRect, bitmap,
                 result -> {
                     synchronized (mLock) {
                         if (mWindow != currentWindowInstance) {
@@ -359,6 +393,26 @@ public final class Magnifier {
                 sPixelCopyHandlerThread.getThreadHandler());
         mPrevStartCoordsInSurface.x = startXInSurface;
         mPrevStartCoordsInSurface.y = startYInSurface;
+    }
+
+    /**
+     * Contains a surface and metadata corresponding to it.
+     */
+    private static class SurfaceInfo {
+        public static final SurfaceInfo NULL = new SurfaceInfo(null, 0, 0, false);
+
+        private Surface mSurface;
+        private int mWidth;
+        private int mHeight;
+        private boolean mIsMainWindowSurface;
+
+        SurfaceInfo(final Surface surface, final int width, final int height,
+                final boolean isMainWindowSurface) {
+            mSurface = surface;
+            mWidth = width;
+            mHeight = height;
+            mIsMainWindowSurface = isMainWindowSurface;
+        }
     }
 
     /**

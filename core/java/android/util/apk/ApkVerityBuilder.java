@@ -134,7 +134,7 @@ abstract class ApkVerityBuilder {
         assertSigningBlockAlignedAndHasFullPages(signatureInfo);
         long signingBlockSize =
                 signatureInfo.centralDirOffset - signatureInfo.apkSigningBlockOffset;
-        long dataSize = apk.length() - signingBlockSize - ZIP_EOCD_CENTRAL_DIR_OFFSET_FIELD_SIZE;
+        long dataSize = apk.length() - signingBlockSize;
         int[] levelOffset = calculateVerityLevelOffset(dataSize);
 
         if (treeOutput != null) {
@@ -346,8 +346,8 @@ abstract class ApkVerityBuilder {
 
         buffer.putLong(fileSize);           // original file size
 
-        buffer.put((byte) 0);               // auth block offset, disabled here
-        buffer.put((byte) 2);               // extension count
+        buffer.put((byte) 2);               // authenticated extension count
+        buffer.put((byte) 0);               // unauthenticated extension count
         buffer.put(salt);                   // salt (8 bytes)
         skip(buffer, 22);                   // reserved
 
@@ -358,12 +358,6 @@ abstract class ApkVerityBuilder {
     private static ByteBuffer generateFsverityExtensions(ByteBuffer buffer, long signingBlockOffset,
             long signingBlockSize, long eocdOffset) {
         // Snapshot of the FSVerity structs (subject to change once upstreamed).
-        //
-        // struct fsverity_extension {
-        //   __le16 length;
-        //   u8 type;
-        //   u8 reserved[5];
-        // };
         //
         // struct fsverity_extension_elide {
         //   __le64 offset;
@@ -382,10 +376,10 @@ abstract class ApkVerityBuilder {
             // struct fsverity_extension #1
             final int kSizeOfFsverityElidedExtension = 16;
 
-            buffer.putShort((short)  // total size of extension, padded to 64-bit alignment
-                    (kSizeOfFsverityExtensionHeader + kSizeOfFsverityElidedExtension));
-            buffer.put((byte) 0);    // ID of elide extension
-            skip(buffer, 5);         // reserved
+            // First field is total size of extension, padded to 64-bit alignment
+            buffer.putInt(kSizeOfFsverityExtensionHeader + kSizeOfFsverityElidedExtension);
+            buffer.putShort((short) 1);  // ID of elide extension
+            skip(buffer, 2);             // reserved
 
             // struct fsverity_extension_elide
             buffer.putLong(signingBlockOffset);
@@ -398,9 +392,9 @@ abstract class ApkVerityBuilder {
                     + 8 // offset size
                     + ZIP_EOCD_CENTRAL_DIR_OFFSET_FIELD_SIZE;
 
-            buffer.putShort((short) kTotalSize);
-            buffer.put((byte) 1);    // ID of patch extension
-            skip(buffer, 5);         // reserved
+            buffer.putInt(kTotalSize);   // Total size of extension, padded to 64-bit alignment
+            buffer.putShort((short) 2);  // ID of patch extension
+            skip(buffer, 2);             // reserved
 
             // struct fsverity_extension_patch
             buffer.putLong(eocdOffset + ZIP_EOCD_CENTRAL_DIR_OFFSET_FIELD_OFFSET);  // offset
@@ -412,7 +406,7 @@ abstract class ApkVerityBuilder {
             if (kPadding == kExtensionSizeAlignment) {
                 kPadding = 0;
             }
-            skip(buffer, kPadding);                              // padding
+            skip(buffer, kPadding);      // padding
         }
 
         buffer.flip();

@@ -247,7 +247,7 @@
     <dimen name="notification_header_shrink_min_width">72dp</dimen>
 
     <!-- The minimum height of the content if there are at least two lines or a picture-->
-    <dimen name="notification_min_content_height">41dp</dimen>
+    <dimen name="notification_min_content_height">39dp</dimen>
 
     <!-- The size of the media actions in the media notification. -->
     <dimen name="media_notification_action_button_size">48dp</dimen>

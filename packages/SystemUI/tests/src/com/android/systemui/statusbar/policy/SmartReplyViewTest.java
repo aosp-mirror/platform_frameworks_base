@@ -87,8 +87,7 @@ public class SmartReplyViewTest extends SysuiTestCase {
         MockitoAnnotations.initMocks(this);
         mReceiver = new BlockingQueueIntentReceiver();
         mContext.registerReceiver(mReceiver, new IntentFilter(TEST_ACTION));
-        mDependency.get(KeyguardDismissUtil.class).setDismissHandler(
-            (action, cancelAction, afterKeyguardGone) -> action.onDismiss());
+        mDependency.get(KeyguardDismissUtil.class).setDismissHandler(action -> action.onDismiss());
 
         mContainer = new View(mContext, null);
         mView = SmartReplyView.inflate(mContext, null);
@@ -130,12 +129,7 @@ public class SmartReplyViewTest extends SysuiTestCase {
 
     @Test
     public void testSendSmartReply_keyguardCancelled() throws InterruptedException {
-        mDependency.get(KeyguardDismissUtil.class).setDismissHandler(
-            (action, cancelAction, afterKeyguardGone) -> {
-                if (cancelAction != null) {
-                    cancelAction.run();
-                }
-            });
+        mDependency.get(KeyguardDismissUtil.class).setDismissHandler(action -> {});
         setRepliesFromRemoteInput(TEST_CHOICES);
 
         mView.getChildAt(2).performClick();
@@ -146,8 +140,7 @@ public class SmartReplyViewTest extends SysuiTestCase {
     @Test
     public void testSendSmartReply_waitsForKeyguard() throws InterruptedException {
         AtomicReference<OnDismissAction> actionRef = new AtomicReference<>();
-        mDependency.get(KeyguardDismissUtil.class).setDismissHandler(
-            (action, cancelAction, afterKeyguardGone) -> actionRef.set(action));
+        mDependency.get(KeyguardDismissUtil.class).setDismissHandler(actionRef::set);
         setRepliesFromRemoteInput(TEST_CHOICES);
 
         mView.getChildAt(2).performClick();

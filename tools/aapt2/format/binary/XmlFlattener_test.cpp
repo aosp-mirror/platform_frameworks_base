@@ -286,6 +286,165 @@ TEST_F(XmlFlattenerTest, ProcessEscapedStrings) {
   EXPECT_THAT(tree.getText(&len), StrEq(u"\\d{5}"));
 }
 
+TEST_F(XmlFlattenerTest, ProcessQuotes) {
+  std::unique_ptr<xml::XmlResource> doc = test::BuildXmlDom(
+      R"(<root>
+          <item>Regular text</item>
+          <item>"Text in double quotes"</item>
+          <item>'Text in single quotes'</item>
+          <item>Text containing "double quotes"</item>
+          <item>Text containing 'single quotes'</item>
+      </root>)");
+
+  size_t len;
+  android::ResXMLTree tree;
+
+  XmlFlattenerOptions options;
+  ASSERT_TRUE(Flatten(doc.get(), &tree, options));
+
+  ASSERT_THAT(tree.next(), Eq(android::ResXMLTree::START_TAG));
+  ASSERT_THAT(tree.next(), Eq(android::ResXMLTree::START_TAG));
+  EXPECT_THAT(tree.getElementName(&len), StrEq(u"item"));
+  ASSERT_THAT(tree.next(), Eq(android::ResXMLTree::TEXT));
+  EXPECT_THAT(tree.getText(&len), StrEq(u"Regular text"));
+  ASSERT_THAT(tree.next(), Eq(android::ResXMLTree::END_TAG));
+
+  ASSERT_THAT(tree.next(), Eq(android::ResXMLTree::START_TAG));
+  EXPECT_THAT(tree.getElementName(&len), StrEq(u"item"));
+  ASSERT_THAT(tree.next(), Eq(android::ResXMLTree::TEXT));
+  EXPECT_THAT(tree.getText(&len), StrEq(u"\"Text in double quotes\""));
+  ASSERT_THAT(tree.next(), Eq(android::ResXMLTree::END_TAG));
+
+  ASSERT_THAT(tree.next(), Eq(android::ResXMLTree::START_TAG));
+  EXPECT_THAT(tree.getElementNamespace(&len), IsNull());
+  EXPECT_THAT(tree.getElementName(&len), StrEq(u"item"));
+  ASSERT_THAT(tree.next(), Eq(android::ResXMLTree::TEXT));
+  EXPECT_THAT(tree.getText(&len), StrEq(u"'Text in single quotes'"));
+  ASSERT_THAT(tree.next(), Eq(android::ResXMLTree::END_TAG));
+
+  ASSERT_THAT(tree.next(), Eq(android::ResXMLTree::START_TAG));
+  EXPECT_THAT(tree.getElementName(&len), StrEq(u"item"));
+  ASSERT_THAT(tree.next(), Eq(android::ResXMLTree::TEXT));
+  EXPECT_THAT(tree.getText(&len), StrEq(u"Text containing \"double quotes\""));
+  ASSERT_THAT(tree.next(), Eq(android::ResXMLTree::END_TAG));
+
+  ASSERT_THAT(tree.next(), Eq(android::ResXMLTree::START_TAG));
+  EXPECT_THAT(tree.getElementName(&len), StrEq(u"item"));
+  ASSERT_THAT(tree.next(), Eq(android::ResXMLTree::TEXT));
+  EXPECT_THAT(tree.getText(&len), StrEq(u"Text containing 'single quotes'"));
+  ASSERT_THAT(tree.next(), Eq(android::ResXMLTree::END_TAG));
+  ASSERT_THAT(tree.next(), Eq(android::ResXMLTree::END_TAG));
+
+  ASSERT_THAT(tree.next(), Eq(android::ResXMLTree::END_DOCUMENT));
+}
+
+TEST_F(XmlFlattenerTest, ProcessWhitepspace) {
+  std::unique_ptr<xml::XmlResource> doc = test::BuildXmlDom(
+      R"(<root>
+          <item>   Compact   Spaces   </item>
+          <item>
+                 A
+          </item>
+          <item>B   </item>
+          <item>C </item>
+          <item> D  </item>
+          <item>   E</item>
+          <item> F</item>
+          <item>  G </item>
+          <item> H </item>
+<item>
+I
+</item>
+<item>
+
+   J
+
+</item>
+          <item>
+          </item>
+      </root>)");
+
+  size_t len;
+  android::ResXMLTree tree;
+
+  XmlFlattenerOptions options;
+  ASSERT_TRUE(Flatten(doc.get(), &tree, options));
+
+  ASSERT_THAT(tree.next(), Eq(android::ResXMLTree::START_TAG));
+  ASSERT_THAT(tree.next(), Eq(android::ResXMLTree::START_TAG));
+  EXPECT_THAT(tree.getElementName(&len), StrEq(u"item"));
+  ASSERT_THAT(tree.next(), Eq(android::ResXMLTree::TEXT));
+  EXPECT_THAT(tree.getText(&len), StrEq(u" Compact   Spaces "));
+  ASSERT_THAT(tree.next(), Eq(android::ResXMLTree::END_TAG));
+
+  ASSERT_THAT(tree.next(), Eq(android::ResXMLTree::START_TAG));
+  EXPECT_THAT(tree.getElementName(&len), StrEq(u"item"));
+  ASSERT_THAT(tree.next(), Eq(android::ResXMLTree::TEXT));
+  EXPECT_THAT(tree.getText(&len), StrEq(u" A "));
+  ASSERT_THAT(tree.next(), Eq(android::ResXMLTree::END_TAG));
+
+  ASSERT_THAT(tree.next(), Eq(android::ResXMLTree::START_TAG));
+  EXPECT_THAT(tree.getElementName(&len), StrEq(u"item"));
+  ASSERT_THAT(tree.next(), Eq(android::ResXMLTree::TEXT));
+  EXPECT_THAT(tree.getText(&len), StrEq(u"B "));
+  ASSERT_THAT(tree.next(), Eq(android::ResXMLTree::END_TAG));
+
+  ASSERT_THAT(tree.next(), Eq(android::ResXMLTree::START_TAG));
+  EXPECT_THAT(tree.getElementName(&len), StrEq(u"item"));
+  ASSERT_THAT(tree.next(), Eq(android::ResXMLTree::TEXT));
+  EXPECT_THAT(tree.getText(&len), StrEq(u"C "));
+  ASSERT_THAT(tree.next(), Eq(android::ResXMLTree::END_TAG));
+
+  ASSERT_THAT(tree.next(), Eq(android::ResXMLTree::START_TAG));
+  EXPECT_THAT(tree.getElementName(&len), StrEq(u"item"));
+  ASSERT_THAT(tree.next(), Eq(android::ResXMLTree::TEXT));
+  EXPECT_THAT(tree.getText(&len), StrEq(u" D "));
+  ASSERT_THAT(tree.next(), Eq(android::ResXMLTree::END_TAG));
+
+  ASSERT_THAT(tree.next(), Eq(android::ResXMLTree::START_TAG));
+  EXPECT_THAT(tree.getElementName(&len), StrEq(u"item"));
+  ASSERT_THAT(tree.next(), Eq(android::ResXMLTree::TEXT));
+  EXPECT_THAT(tree.getText(&len), StrEq(u" E"));
+  ASSERT_THAT(tree.next(), Eq(android::ResXMLTree::END_TAG));
+
+  ASSERT_THAT(tree.next(), Eq(android::ResXMLTree::START_TAG));
+  EXPECT_THAT(tree.getElementName(&len), StrEq(u"item"));
+  ASSERT_THAT(tree.next(), Eq(android::ResXMLTree::TEXT));
+  EXPECT_THAT(tree.getText(&len), StrEq(u" F"));
+  ASSERT_THAT(tree.next(), Eq(android::ResXMLTree::END_TAG));
+
+  ASSERT_THAT(tree.next(), Eq(android::ResXMLTree::START_TAG));
+  EXPECT_THAT(tree.getElementName(&len), StrEq(u"item"));
+  ASSERT_THAT(tree.next(), Eq(android::ResXMLTree::TEXT));
+  EXPECT_THAT(tree.getText(&len), StrEq(u" G "));
+  ASSERT_THAT(tree.next(), Eq(android::ResXMLTree::END_TAG));
+
+  ASSERT_THAT(tree.next(), Eq(android::ResXMLTree::START_TAG));
+  EXPECT_THAT(tree.getElementName(&len), StrEq(u"item"));
+  ASSERT_THAT(tree.next(), Eq(android::ResXMLTree::TEXT));
+  EXPECT_THAT(tree.getText(&len), StrEq(u" H "));
+  ASSERT_THAT(tree.next(), Eq(android::ResXMLTree::END_TAG));
+
+  ASSERT_THAT(tree.next(), Eq(android::ResXMLTree::START_TAG));
+  EXPECT_THAT(tree.getElementName(&len), StrEq(u"item"));
+  ASSERT_THAT(tree.next(), Eq(android::ResXMLTree::TEXT));
+  EXPECT_THAT(tree.getText(&len), StrEq(u" I "));
+  ASSERT_THAT(tree.next(), Eq(android::ResXMLTree::END_TAG));
+
+  ASSERT_THAT(tree.next(), Eq(android::ResXMLTree::START_TAG));
+  EXPECT_THAT(tree.getElementName(&len), StrEq(u"item"));
+  ASSERT_THAT(tree.next(), Eq(android::ResXMLTree::TEXT));
+  EXPECT_THAT(tree.getText(&len), StrEq(u" J "));
+  ASSERT_THAT(tree.next(), Eq(android::ResXMLTree::END_TAG));
+
+  ASSERT_THAT(tree.next(), Eq(android::ResXMLTree::START_TAG));
+  EXPECT_THAT(tree.getElementName(&len), StrEq(u"item"));
+  ASSERT_THAT(tree.next(), Eq(android::ResXMLTree::END_TAG));
+  ASSERT_THAT(tree.next(), Eq(android::ResXMLTree::END_TAG));
+
+  ASSERT_THAT(tree.next(), Eq(android::ResXMLTree::END_DOCUMENT));
+}
+
 TEST_F(XmlFlattenerTest, FlattenRawValueOnlyMakesCompiledValueToo) {
   std::unique_ptr<xml::XmlResource> doc = test::BuildXmlDom(R"(<element foo="bar" />)");
 
