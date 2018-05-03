@@ -4506,9 +4506,8 @@ public class PackageManagerService extends IPackageManager.Stub
 
     @Override
     public void deletePreloadsFileCache() {
-        if (!UserHandle.isSameApp(Binder.getCallingUid(), Process.SYSTEM_UID)) {
-            throw new SecurityException("Only system or settings may call deletePreloadsFileCache");
-        }
+        mContext.enforceCallingOrSelfPermission(android.Manifest.permission.CLEAR_APP_CACHE,
+                "deletePreloadsFileCache");
         File dir = Environment.getDataPreloadsFileCacheDirectory();
         Slog.i(TAG, "Deleting preloaded file cache " + dir);
         FileUtils.deleteContents(dir);
