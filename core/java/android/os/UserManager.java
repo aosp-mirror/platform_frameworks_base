@@ -157,8 +157,9 @@ public class UserManager {
     public static final String DISALLOW_CONFIG_LOCALE = "no_config_locale";
 
     /**
-     * Specifies if a user is disallowed from installing applications.
-     * The default value is <code>false</code>.
+     * Specifies if a user is disallowed from installing applications. This user restriction also
+     * prevents device owners and profile owners installing apps. The default value is
+     * {@code false}.
      *
      * <p>Key for user restrictions.
      * <p>Type: Boolean
