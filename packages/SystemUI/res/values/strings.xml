@@ -1062,7 +1062,7 @@
     <string name="manage_notifications_text">Manage notifications</string>
 
     <!-- The text to show in the notifications shade when dnd is suppressing notifications. [CHAR LIMIT=100] -->
-    <string name="dnd_suppressing_shade_text">Notifications hidden by Do Not Disturb</string>
+    <string name="dnd_suppressing_shade_text">Do Not Disturb is hiding notifications</string>
 
     <!-- Media projection permission dialog action text. [CHAR LIMIT=60] -->
     <string name="media_projection_action_text">Start now</string>
