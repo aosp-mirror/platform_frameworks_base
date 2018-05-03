@@ -123,6 +123,7 @@ import android.annotation.Nullable;
 import android.annotation.UserIdInt;
 import android.app.ActivityManager;
 import android.app.ActivityManagerInternal;
+import android.app.ActivityTaskManagerInternal;
 import android.app.AppOpsManager;
 import android.app.IActivityManager;
 import android.app.ResourcesManager;
@@ -1018,6 +1019,7 @@ public class PackageManagerService extends IPackageManager.Stub
 
     private UserManagerInternal mUserManagerInternal;
     private ActivityManagerInternal mActivityManagerInternal;
+    private ActivityTaskManagerInternal mActivityTaskManagerInternal;
 
     private DeviceIdleController.LocalService mDeviceIdleController;
 
@@ -4767,6 +4769,13 @@ public class PackageManagerService extends IPackageManager.Stub
         return mActivityManagerInternal;
     }
 
+    private ActivityTaskManagerInternal getActivityTaskManagerInternal() {
+        if (mActivityTaskManagerInternal == null) {
+            mActivityTaskManagerInternal =
+                    LocalServices.getService(ActivityTaskManagerInternal.class);
+        }
+        return mActivityTaskManagerInternal;
+    }
 
     private DeviceIdleController.LocalService getDeviceIdleController() {
         if (mDeviceIdleController == null) {
@@ -4956,7 +4965,7 @@ public class PackageManagerService extends IPackageManager.Stub
     }
 
     private boolean isRecentsAccessingChildProfiles(int callingUid, int targetUserId) {
-        if (!getActivityManagerInternal().isCallerRecents(callingUid)) {
+        if (!getActivityTaskManagerInternal().isCallerRecents(callingUid)) {
             return false;
         }
         final long token = Binder.clearCallingIdentity();

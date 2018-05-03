@@ -25,10 +25,10 @@ import static android.Manifest.permission.READ_FRAME_BUFFER;
 import static android.Manifest.permission.REMOVE_TASKS;
 import static android.Manifest.permission.START_TASKS_FROM_RECENTS;
 import static android.app.ActivityManager.LOCK_TASK_MODE_NONE;
-import static android.app.ActivityManagerInternal.ASSIST_KEY_CONTENT;
-import static android.app.ActivityManagerInternal.ASSIST_KEY_DATA;
-import static android.app.ActivityManagerInternal.ASSIST_KEY_RECEIVER_EXTRAS;
-import static android.app.ActivityManagerInternal.ASSIST_KEY_STRUCTURE;
+import static android.app.ActivityTaskManagerInternal.ASSIST_KEY_CONTENT;
+import static android.app.ActivityTaskManagerInternal.ASSIST_KEY_DATA;
+import static android.app.ActivityTaskManagerInternal.ASSIST_KEY_RECEIVER_EXTRAS;
+import static android.app.ActivityTaskManagerInternal.ASSIST_KEY_STRUCTURE;
 import static android.app.ActivityTaskManager.INVALID_STACK_ID;
 import static android.app.ActivityTaskManager.RESIZE_MODE_PRESERVE_WINDOW;
 import static android.app.ActivityTaskManager.SPLIT_SCREEN_CREATE_MODE_TOP_OR_LEFT;
@@ -46,12 +46,14 @@ import static android.os.Process.SYSTEM_UID;
 import static android.service.voice.VoiceInteractionSession.SHOW_SOURCE_APPLICATION;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.Display.INVALID_DISPLAY;
+import static android.view.WindowManager.TRANSIT_NONE;
 import static android.view.WindowManager.TRANSIT_TASK_IN_PLACE;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_ALL;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_CONFIGURATION;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_FOCUS;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_IMMERSIVE;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_LOCKTASK;
+import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_OOM_ADJ;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_STACK;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_SWITCH;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_VISIBILITY;
@@ -89,6 +91,7 @@ import android.app.Activity;
 import android.app.ActivityManager;
 import android.app.ActivityOptions;
 import android.app.ActivityTaskManager;
+import android.app.ActivityTaskManagerInternal;
 import android.app.AppGlobals;
 import android.app.IActivityTaskManager;
 import android.app.IApplicationThread;
@@ -122,6 +125,7 @@ import android.os.Binder;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.PersistableBundle;
+import android.os.Process;
 import android.os.RemoteException;
 import android.os.TransactionTooLargeException;
 import android.os.UserHandle;
@@ -132,6 +136,7 @@ import android.telecom.TelecomManager;
 import android.text.TextUtils;
 import android.util.Slog;
 
+import android.util.SparseIntArray;
 import android.view.IRecentsAnimationRunner;
 import android.view.RemoteAnimationAdapter;
 import android.view.RemoteAnimationDefinition;
@@ -143,6 +148,7 @@ import com.android.internal.os.logging.MetricsLoggerWrapper;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.internal.policy.IKeyguardDismissCallback;
 import com.android.internal.policy.KeyguardDismissCallback;
+import com.android.internal.util.Preconditions;
 import com.android.server.LocalServices;
 import com.android.server.SystemService;
 import com.android.server.Watchdog;
@@ -228,6 +234,10 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         mStackSupervisor = mAm.mStackSupervisor;
     }
 
+    private void start() {
+        LocalServices.addService(ActivityTaskManagerInternal.class, new LocalService());
+    }
+
     public static final class Lifecycle extends SystemService {
         private final ActivityTaskManagerService mService;
 
@@ -239,6 +249,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         @Override
         public void onStart() {
             publishBinderService(Context.ACTIVITY_TASK_SERVICE, mService);
+            mService.start();
         }
 
         public ActivityTaskManagerService getService() {
@@ -3328,6 +3339,218 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
             } finally {
                 Binder.restoreCallingIdentity(origId);
             }
+        }
+    }
+
+    final class LocalService extends ActivityTaskManagerInternal {
+        @Override
+        public SleepToken acquireSleepToken(String tag, int displayId) {
+            Preconditions.checkNotNull(tag);
+            return mAm.acquireSleepToken(tag, displayId);
+        }
+
+        @Override
+        public ComponentName getHomeActivityForUser(int userId) {
+            synchronized (mGlobalLock) {
+                ActivityRecord homeActivity = mStackSupervisor.getHomeActivityForUser(userId);
+                return homeActivity == null ? null : homeActivity.realActivity;
+            }
+        }
+
+        @Override
+        public void onLocalVoiceInteractionStarted(IBinder activity,
+                IVoiceInteractionSession voiceSession, IVoiceInteractor voiceInteractor) {
+            synchronized (mGlobalLock) {
+                mAm.onLocalVoiceInteractionStartedLocked(activity, voiceSession, voiceInteractor);
+            }
+        }
+
+        @Override
+        public void notifyAppTransitionStarting(SparseIntArray reasons, long timestamp) {
+            synchronized (mGlobalLock) {
+                mStackSupervisor.getActivityMetricsLogger().notifyTransitionStarting(
+                        reasons, timestamp);
+            }
+        }
+
+        @Override
+        public void notifyAppTransitionFinished() {
+            synchronized (mGlobalLock) {
+                mStackSupervisor.notifyAppTransitionDone();
+            }
+        }
+
+        @Override
+        public void notifyAppTransitionCancelled() {
+            synchronized (mGlobalLock) {
+                mStackSupervisor.notifyAppTransitionDone();
+            }
+        }
+
+        @Override
+        public List<IBinder> getTopVisibleActivities() {
+            synchronized (mGlobalLock) {
+                return mStackSupervisor.getTopVisibleActivities();
+            }
+        }
+
+        @Override
+        public void notifyDockedStackMinimizedChanged(boolean minimized) {
+            synchronized (mGlobalLock) {
+                mStackSupervisor.setDockedStackMinimized(minimized);
+            }
+        }
+
+        @Override
+        public int startActivitiesAsPackage(String packageName, int userId, Intent[] intents,
+                Bundle bOptions) {
+            Preconditions.checkNotNull(intents, "intents");
+            final String[] resolvedTypes = new String[intents.length];
+
+            // UID of the package on user userId.
+            // "= 0" is needed because otherwise catch(RemoteException) would make it look like
+            // packageUid may not be initialized.
+            int packageUid = 0;
+            final long ident = Binder.clearCallingIdentity();
+
+            try {
+                for (int i = 0; i < intents.length; i++) {
+                    resolvedTypes[i] =
+                            intents[i].resolveTypeIfNeeded(mContext.getContentResolver());
+                }
+
+                packageUid = AppGlobals.getPackageManager().getPackageUid(
+                        packageName, PackageManager.MATCH_DEBUG_TRIAGED_MISSING, userId);
+            } catch (RemoteException e) {
+                // Shouldn't happen.
+            } finally {
+                Binder.restoreCallingIdentity(ident);
+            }
+
+            synchronized (mGlobalLock) {
+                return mAm.getActivityStartController().startActivitiesInPackage(
+                        packageUid, packageName,
+                        intents, resolvedTypes, null /* resultTo */,
+                        SafeActivityOptions.fromBundle(bOptions), userId,
+                        false /* validateIncomingUser */);
+            }
+        }
+
+        @Override
+        public int startActivityAsUser(IApplicationThread caller, String callerPacakge,
+                Intent intent, Bundle options, int userId) {
+            return ActivityTaskManagerService.this.startActivityAsUser(
+                    caller, callerPacakge, intent,
+                    intent.resolveTypeIfNeeded(mContext.getContentResolver()),
+                    null, null, 0, Intent.FLAG_ACTIVITY_NEW_TASK, null, options, userId,
+                    false /*validateIncomingUser*/);
+        }
+
+        @Override
+        public void notifyKeyguardFlagsChanged(@Nullable Runnable callback) {
+            synchronized (mGlobalLock) {
+
+                // We might change the visibilities here, so prepare an empty app transition which
+                // might be overridden later if we actually change visibilities.
+                final boolean wasTransitionSet =
+                        mAm.mWindowManager.getPendingAppTransition() != TRANSIT_NONE;
+                if (!wasTransitionSet) {
+                    mAm.mWindowManager.prepareAppTransition(TRANSIT_NONE,
+                            false /* alwaysKeepCurrent */);
+                }
+                mStackSupervisor.ensureActivitiesVisibleLocked(null, 0, !PRESERVE_WINDOWS);
+
+                // If there was a transition set already we don't want to interfere with it as we
+                // might be starting it too early.
+                if (!wasTransitionSet) {
+                    mAm.mWindowManager.executeAppTransition();
+                }
+            }
+            if (callback != null) {
+                callback.run();
+            }
+        }
+
+        @Override
+        public void notifyKeyguardTrustedChanged() {
+            synchronized (mGlobalLock) {
+                if (mAm.mKeyguardController.isKeyguardShowing(DEFAULT_DISPLAY)) {
+                    mStackSupervisor.ensureActivitiesVisibleLocked(null, 0, !PRESERVE_WINDOWS);
+                }
+            }
+        }
+
+        /**
+         * Called after virtual display Id is updated by
+         * {@link com.android.server.vr.Vr2dDisplay} with a specific
+         * {@param vrVr2dDisplayId}.
+         */
+        @Override
+        public void setVr2dDisplayId(int vr2dDisplayId) {
+            if (DEBUG_STACK) Slog.d(TAG, "setVr2dDisplayId called for: " + vr2dDisplayId);
+            synchronized (mGlobalLock) {
+                mAm.mVr2dDisplayId = vr2dDisplayId;
+            }
+        }
+
+        @Override
+        public void setFocusedActivity(IBinder token) {
+            synchronized (mGlobalLock) {
+                final ActivityRecord r = ActivityRecord.forTokenLocked(token);
+                if (r == null) {
+                    throw new IllegalArgumentException(
+                            "setFocusedActivity: No activity record matching token=" + token);
+                }
+                if (mStackSupervisor.moveFocusableActivityStackToFrontLocked(
+                        r, "setFocusedActivity")) {
+                    mStackSupervisor.resumeFocusedStackTopActivityLocked();
+                }
+            }
+        }
+
+        @Override
+        public boolean hasRunningActivity(int uid, @Nullable String packageName) {
+            if (packageName == null) return false;
+
+            synchronized (mGlobalLock) {
+                for (int i = 0; i < mAm.mLruProcesses.size(); i++) {
+                    final ProcessRecord processRecord = mAm.mLruProcesses.get(i);
+                    if (processRecord.uid == uid) {
+                        for (int j = 0; j < processRecord.activities.size(); j++) {
+                            final ActivityRecord activityRecord = processRecord.activities.get(j);
+                            if (packageName.equals(activityRecord.packageName)) {
+                                return true;
+                            }
+                        }
+                    }
+                }
+            }
+            return false;
+        }
+
+        @Override
+        public void registerScreenObserver(ScreenObserver observer) {
+            mAm.mScreenObservers.add(observer);
+        }
+
+        @Override
+        public boolean isCallerRecents(int callingUid) {
+            return mAm.getRecentTasks().isCallerRecents(callingUid);
+        }
+
+        @Override
+        public boolean isRecentsComponentHomeActivity(int userId) {
+            return mAm.getRecentTasks().isRecentsComponentHomeActivity(userId);
+        }
+
+        @Override
+        public void cancelRecentsAnimation(boolean restoreHomeStackPosition) {
+            ActivityTaskManagerService.this.cancelRecentsAnimation(restoreHomeStackPosition);
+        }
+
+        @Override
+        public void enforceCallerIsRecentsOrHasPermission(String permission, String func) {
+            mAm.enforceCallerIsRecentsOrHasPermission(permission, func);
         }
     }
 }

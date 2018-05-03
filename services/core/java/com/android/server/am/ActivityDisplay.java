@@ -39,8 +39,8 @@ import static com.android.server.am.ActivityDisplayProto.STACKS;
 import static com.android.server.am.ActivityDisplayProto.ID;
 
 import android.annotation.Nullable;
-import android.app.ActivityManagerInternal;
 import android.app.ActivityOptions;
+import android.app.ActivityTaskManagerInternal;
 import android.app.WindowConfiguration;
 import android.graphics.Point;
 import android.util.IntArray;
@@ -90,9 +90,9 @@ class ActivityDisplay extends ConfigurationContainer<ActivityStack>
     private IntArray mDisplayAccessUIDs = new IntArray();
 
     /** All tokens used to put activities on this stack to sleep (including mOffToken) */
-    final ArrayList<ActivityManagerInternal.SleepToken> mAllSleepTokens = new ArrayList<>();
+    final ArrayList<ActivityTaskManagerInternal.SleepToken> mAllSleepTokens = new ArrayList<>();
     /** The token acquired by ActivityStackSupervisor to put stacks on the display to sleep */
-    ActivityManagerInternal.SleepToken mOffToken;
+    ActivityTaskManagerInternal.SleepToken mOffToken;
 
     private boolean mSleeping;
 

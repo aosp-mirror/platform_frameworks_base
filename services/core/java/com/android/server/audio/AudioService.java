@@ -33,6 +33,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.ActivityManager;
 import android.app.ActivityManagerInternal;
+import android.app.ActivityTaskManagerInternal;
 import android.app.AppGlobals;
 import android.app.AppOpsManager;
 import android.app.IUidObserver;
@@ -6642,7 +6643,8 @@ public class AudioService extends IAudioService.Stub
         // when the user switches back. For managed profiles, we should kill all recording apps
         ComponentName homeActivityName = null;
         if (!oldUser.isManagedProfile()) {
-            homeActivityName = mActivityManagerInternal.getHomeActivityForUser(oldUser.id);
+            homeActivityName = LocalServices.getService(
+                    ActivityTaskManagerInternal.class).getHomeActivityForUser(oldUser.id);
         }
         final String[] permissions = { Manifest.permission.RECORD_AUDIO };
         List<PackageInfo> packages;

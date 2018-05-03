@@ -21,6 +21,7 @@ import static com.android.internal.util.dump.DumpUtils.writeStringIfNotNull;
 
 import android.app.ActivityManager;
 import android.app.ActivityManagerInternal;
+import android.app.ActivityTaskManagerInternal;
 import android.app.KeyguardManager;
 import android.app.Notification;
 import android.app.NotificationChannel;
@@ -98,7 +99,7 @@ import java.util.Set;
 /**
  * UsbDeviceManager manages USB state in device mode.
  */
-public class UsbDeviceManager implements ActivityManagerInternal.ScreenObserver {
+public class UsbDeviceManager implements ActivityTaskManagerInternal.ScreenObserver {
 
     private static final String TAG = UsbDeviceManager.class.getSimpleName();
     private static final boolean DEBUG = false;
@@ -386,7 +387,7 @@ public class UsbDeviceManager implements ActivityManagerInternal.ScreenObserver 
     public void systemReady() {
         if (DEBUG) Slog.d(TAG, "systemReady");
 
-        LocalServices.getService(ActivityManagerInternal.class).registerScreenObserver(this);
+        LocalServices.getService(ActivityTaskManagerInternal.class).registerScreenObserver(this);
 
         mHandler.sendEmptyMessage(MSG_SYSTEM_READY);
     }

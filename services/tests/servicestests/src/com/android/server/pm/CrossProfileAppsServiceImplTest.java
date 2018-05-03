@@ -14,6 +14,7 @@ import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertThrows;
 
 import android.app.ActivityManagerInternal;
+import android.app.ActivityTaskManagerInternal;
 import android.app.AppOpsManager;
 import android.app.IApplicationThread;
 import android.content.ComponentName;
@@ -72,6 +73,8 @@ public class CrossProfileAppsServiceImplTest {
     private AppOpsManager mAppOpsManager;
     @Mock
     private ActivityManagerInternal mActivityManagerInternal;
+    @Mock
+    private ActivityTaskManagerInternal mActivityTaskManagerInternal;
 
     private TestInjector mTestInjector;
     private ActivityInfo mActivityInfo;
@@ -210,7 +213,7 @@ public class CrossProfileAppsServiceImplTest {
                                 ACTIVITY_COMPONENT,
                                 UserHandle.of(PRIMARY_USER)));
 
-        verify(mActivityManagerInternal, never())
+        verify(mActivityTaskManagerInternal, never())
                 .startActivityAsUser(
                         nullable(IApplicationThread.class),
                         anyString(),
@@ -232,7 +235,7 @@ public class CrossProfileAppsServiceImplTest {
                                 ACTIVITY_COMPONENT,
                                 UserHandle.of(PROFILE_OF_PRIMARY_USER)));
 
-        verify(mActivityManagerInternal, never())
+        verify(mActivityTaskManagerInternal, never())
                 .startActivityAsUser(
                         nullable(IApplicationThread.class),
                         anyString(),
@@ -252,7 +255,7 @@ public class CrossProfileAppsServiceImplTest {
                                 ACTIVITY_COMPONENT,
                                 UserHandle.of(PROFILE_OF_PRIMARY_USER)));
 
-        verify(mActivityManagerInternal, never())
+        verify(mActivityTaskManagerInternal, never())
                 .startActivityAsUser(
                         nullable(IApplicationThread.class),
                         anyString(),
@@ -274,7 +277,7 @@ public class CrossProfileAppsServiceImplTest {
                                 ACTIVITY_COMPONENT,
                                 UserHandle.of(PROFILE_OF_PRIMARY_USER)));
 
-        verify(mActivityManagerInternal, never())
+        verify(mActivityTaskManagerInternal, never())
                 .startActivityAsUser(
                         nullable(IApplicationThread.class),
                         anyString(),
@@ -294,7 +297,7 @@ public class CrossProfileAppsServiceImplTest {
                                 new ComponentName(PACKAGE_TWO, "test"),
                                 UserHandle.of(PROFILE_OF_PRIMARY_USER)));
 
-        verify(mActivityManagerInternal, never())
+        verify(mActivityTaskManagerInternal, never())
                 .startActivityAsUser(
                         nullable(IApplicationThread.class),
                         anyString(),
@@ -314,7 +317,7 @@ public class CrossProfileAppsServiceImplTest {
                                 ACTIVITY_COMPONENT,
                                 UserHandle.of(SECONDARY_USER)));
 
-        verify(mActivityManagerInternal, never())
+        verify(mActivityTaskManagerInternal, never())
                 .startActivityAsUser(
                         nullable(IApplicationThread.class),
                         anyString(),
@@ -333,7 +336,7 @@ public class CrossProfileAppsServiceImplTest {
                 ACTIVITY_COMPONENT,
                 UserHandle.of(PRIMARY_USER));
 
-        verify(mActivityManagerInternal)
+        verify(mActivityTaskManagerInternal)
                 .startActivityAsUser(
                         nullable(IApplicationThread.class),
                         eq(PACKAGE_ONE),
@@ -431,6 +434,11 @@ public class CrossProfileAppsServiceImplTest {
         @Override
         public ActivityManagerInternal getActivityManagerInternal() {
             return mActivityManagerInternal;
+        }
+
+        @Override
+        public ActivityTaskManagerInternal getActivityTaskManagerInternal() {
+            return mActivityTaskManagerInternal;
         }
     }
 }

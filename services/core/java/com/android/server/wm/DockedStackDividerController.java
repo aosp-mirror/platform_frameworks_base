@@ -651,7 +651,7 @@ public class DockedStackDividerController {
         if (wasMinimized && mMinimizedDock && containsAppInDockedStack(openingApps)
                 && appTransition != TRANSIT_NONE &&
                 !AppTransition.isKeyguardGoingAwayTransit(appTransition)) {
-            if (mService.mAmInternal.isRecentsComponentHomeActivity(mService.mCurrentUserId)) {
+            if (mService.mAtmInternal.isRecentsComponentHomeActivity(mService.mCurrentUserId)) {
                 // When the home activity is the recents component and we are already minimized,
                 // then there is nothing to do here since home is already visible
             } else {

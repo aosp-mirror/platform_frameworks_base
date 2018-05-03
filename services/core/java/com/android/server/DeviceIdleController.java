@@ -19,6 +19,7 @@ package com.android.server;
 import android.Manifest;
 import android.app.ActivityManager;
 import android.app.ActivityManagerInternal;
+import android.app.ActivityTaskManagerInternal;
 import android.app.AlarmManager;
 import android.content.BroadcastReceiver;
 import android.content.ContentResolver;
@@ -82,7 +83,6 @@ import com.android.internal.os.AtomicFile;
 import com.android.internal.os.BackgroundThread;
 import com.android.internal.util.DumpUtils;
 import com.android.internal.util.FastXmlSerializer;
-import com.android.internal.util.Preconditions;
 import com.android.internal.util.XmlUtils;
 import com.android.server.am.BatteryStatsService;
 import com.android.server.net.NetworkPolicyManagerInternal;
@@ -118,6 +118,7 @@ public class DeviceIdleController extends SystemService
     private AlarmManager mAlarmManager;
     private IBatteryStats mBatteryStats;
     private ActivityManagerInternal mLocalActivityManager;
+    private ActivityTaskManagerInternal mLocalActivityTaskManager;
     private PowerManagerInternal mLocalPowerManager;
     private PowerManager mPowerManager;
     private ConnectivityService mConnectivityService;
@@ -1359,8 +1360,8 @@ public class DeviceIdleController extends SystemService
         }
     }
 
-    private ActivityManagerInternal.ScreenObserver mScreenObserver =
-            new ActivityManagerInternal.ScreenObserver() {
+    private ActivityTaskManagerInternal.ScreenObserver mScreenObserver =
+            new ActivityTaskManagerInternal.ScreenObserver() {
                 @Override
                 public void onAwakeStateChanged(boolean isAwake) { }
 
@@ -1461,6 +1462,7 @@ public class DeviceIdleController extends SystemService
                 mAlarmManager = (AlarmManager) getContext().getSystemService(Context.ALARM_SERVICE);
                 mBatteryStats = BatteryStatsService.getService();
                 mLocalActivityManager = getLocalService(ActivityManagerInternal.class);
+                mLocalActivityTaskManager = getLocalService(ActivityTaskManagerInternal.class);
                 mLocalPowerManager = getLocalService(PowerManagerInternal.class);
                 mPowerManager = getContext().getSystemService(PowerManager.class);
                 mActiveIdleWakeLock = mPowerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK,
@@ -1539,7 +1541,7 @@ public class DeviceIdleController extends SystemService
                         mPowerSaveWhitelistAllAppIdArray, mPowerSaveWhitelistExceptIdleAppIdArray);
                 mLocalPowerManager.setDeviceIdleWhitelist(mPowerSaveWhitelistAllAppIdArray);
 
-                mLocalActivityManager.registerScreenObserver(mScreenObserver);
+                mLocalActivityTaskManager.registerScreenObserver(mScreenObserver);
 
                 passWhiteListsToForceAppStandbyTrackerLocked();
                 updateInteractivityLocked();

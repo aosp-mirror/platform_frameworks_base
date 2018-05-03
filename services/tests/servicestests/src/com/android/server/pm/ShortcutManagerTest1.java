@@ -2904,7 +2904,7 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
         runWithCaller(LAUNCHER_1, USER_0, () -> {
             // Not launchable.
             doReturn(ActivityManager.START_CLASS_NOT_FOUND)
-                    .when(mMockActivityManagerInternal).startActivitiesAsPackage(
+                    .when(mMockActivityTaskManagerInternal).startActivitiesAsPackage(
                     anyStringOrNull(), anyInt(),
                     anyOrNull(Intent[].class), anyOrNull(Bundle.class));
             assertStartShortcutThrowsException(CALLING_PACKAGE_1, "s1", USER_0,
@@ -2912,7 +2912,7 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
 
             // Still not launchable.
             doReturn(ActivityManager.START_CLASS_NOT_FOUND)
-                    .when(mMockActivityManagerInternal)
+                    .when(mMockActivityTaskManagerInternal)
                     .startActivitiesAsPackage(
                             anyStringOrNull(), anyInt(),
                             anyOrNull(Intent[].class), anyOrNull(Bundle.class));
