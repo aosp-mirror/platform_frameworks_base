@@ -211,6 +211,7 @@ Landroid/app/ApplicationPackageManager;->getPackageSizeInfoAsUser(Ljava/lang/Str
 Landroid/app/ApplicationPackageManager;->mPM:Landroid/content/pm/IPackageManager;
 Landroid/app/ApplicationPackageManager;->shouldShowRequestPermissionRationale(Ljava/lang/String;)Z
 Landroid/app/AppOpsManager$OpEntry;->getDuration()I
+Landroid/app/AppOpsManager$OpEntry;->getMode()I
 Landroid/app/AppOpsManager$OpEntry;->getRejectTime()J
 Landroid/app/AppOpsManager;->checkOp(IILjava/lang/String;)I
 Landroid/app/AppOpsManager;->checkOpNoThrow(IILjava/lang/String;)I
@@ -283,6 +284,7 @@ Landroid/app/DownloadManager$Request;->mUri:Landroid/net/Uri;
 Landroid/app/DownloadManager;->setAccessFilename(Z)V
 Landroid/app/Fragment;->mChildFragmentManager:Landroid/app/FragmentManagerImpl;
 Landroid/app/Fragment;->mWho:Ljava/lang/String;
+Landroid/app/FragmentManagerImpl;->loadAnimator(Landroid/app/Fragment;IZI)Landroid/animation/Animator;
 Landroid/app/FragmentManagerImpl;->mAdded:Ljava/util/ArrayList;
 Landroid/app/FragmentManagerImpl;->mStateSaved:Z
 Landroid/app/FragmentManagerImpl;->noteStateNotSaved()V
@@ -300,6 +302,7 @@ Landroid/app/IActivityManager;->forceStopPackage(Ljava/lang/String;I)V
 Landroid/app/IActivityManager;->getConfiguration()Landroid/content/res/Configuration;
 Landroid/app/IActivityManager;->getIntentSender(ILjava/lang/String;Landroid/os/IBinder;Ljava/lang/String;I[Landroid/content/Intent;[Ljava/lang/String;ILandroid/os/Bundle;I)Landroid/content/IIntentSender;
 Landroid/app/IActivityManager;->getLaunchedFromPackage(Landroid/os/IBinder;)Ljava/lang/String;
+Landroid/app/IActivityManager;->getPackageProcessState(Ljava/lang/String;Ljava/lang/String;)I
 Landroid/app/IActivityManager;->getProviderMimeType(Landroid/net/Uri;I)Ljava/lang/String;
 Landroid/app/IActivityManager;->getTaskForActivity(Landroid/os/IBinder;Z)I
 Landroid/app/IActivityManager;->moveActivityTaskToBack(Landroid/os/IBinder;Z)Z
@@ -962,6 +965,7 @@ Landroid/content/UriMatcher;->mText:Ljava/lang/String;
 Landroid/database/AbstractCursor;->mExtras:Landroid/os/Bundle;
 Landroid/database/AbstractCursor;->mNotifyUri:Landroid/net/Uri;
 Landroid/database/AbstractWindowedCursor;->clearOrCreateWindow(Ljava/lang/String;)V
+Landroid/database/AbstractWindowedCursor;->closeWindow()V
 Landroid/database/CursorWindow;->mWindowPtr:J
 Landroid/database/CursorWindow;->sCursorWindowSize:I
 Landroid/database/CursorWindow;->sWindowToPidMap:Landroid/util/LongSparseArray;
@@ -1047,6 +1051,7 @@ Landroid/graphics/drawable/GradientDrawable$GradientState;->mWidth:I
 Landroid/graphics/drawable/GradientDrawable;->getOpticalInsets()Landroid/graphics/Insets;
 Landroid/graphics/drawable/GradientDrawable;->mGradientState:Landroid/graphics/drawable/GradientDrawable$GradientState;
 Landroid/graphics/drawable/GradientDrawable;->mPadding:Landroid/graphics/Rect;
+Landroid/graphics/drawable/Icon;->createWithResource(Landroid/content/res/Resources;I)Landroid/graphics/drawable/Icon;
 Landroid/graphics/drawable/Icon;->getBitmap()Landroid/graphics/Bitmap;
 Landroid/graphics/drawable/Icon;->getDataBytes()[B
 Landroid/graphics/drawable/Icon;->getDataLength()I
@@ -1224,6 +1229,7 @@ Landroid/hardware/soundtrigger/SoundTrigger$RecognitionConfig;->captureRequested
 Landroid/hardware/soundtrigger/SoundTrigger$RecognitionConfig;->data:[B
 Landroid/hardware/soundtrigger/SoundTrigger$RecognitionConfig;->keyphrases:[Landroid/hardware/soundtrigger/SoundTrigger$KeyphraseRecognitionExtra;
 Landroid/hardware/soundtrigger/SoundTrigger$RecognitionEvent;-><init>(IIZIIIZLandroid/media/AudioFormat;[B)V
+Landroid/hardware/soundtrigger/SoundTrigger$RecognitionEvent;->captureSession:I
 Landroid/hardware/soundtrigger/SoundTrigger$RecognitionEvent;->data:[B
 Landroid/hardware/soundtrigger/SoundTrigger$SoundModel;->data:[B
 Landroid/hardware/soundtrigger/SoundTrigger$SoundModel;->uuid:Ljava/util/UUID;
@@ -1770,6 +1776,7 @@ Landroid/os/health/SystemHealthManager;->from(Landroid/content/Context;)Landroid
 Landroid/os/HwParcel;-><init>(Z)V
 Landroid/os/HwRemoteBinder;-><init>()V
 Landroid/os/IBatteryPropertiesRegistrar$Stub$Proxy;-><init>(Landroid/os/IBinder;)V
+Landroid/os/IDeviceIdleController;->getAppIdTempWhitelist()[I
 Landroid/os/IPermissionController$Stub$Proxy;->checkPermission(Ljava/lang/String;II)Z
 Landroid/os/IPermissionController$Stub;->asInterface(Landroid/os/IBinder;)Landroid/os/IPermissionController;
 Landroid/os/IPowerManager$Stub$Proxy;-><init>(Landroid/os/IBinder;)V
@@ -1825,6 +1832,7 @@ Landroid/os/Process;->getPids(Ljava/lang/String;[I)[I
 Landroid/os/Process;->getTotalMemory()J
 Landroid/os/Process;->getUidForPid(I)I
 Landroid/os/Process;->isIsolated(I)Z
+Landroid/os/Process;->parseProcLine([BII[I[Ljava/lang/String;[J[F)Z
 Landroid/os/Process;->readProcFile(Ljava/lang/String;[I[Ljava/lang/String;[J[F)Z
 Landroid/os/Process;->readProcLines(Ljava/lang/String;[Ljava/lang/String;[J)V
 Landroid/os/Process;->setArgV0(Ljava/lang/String;)V
@@ -1864,6 +1872,7 @@ Landroid/os/storage/StorageVolume;->getPath()Ljava/lang/String;
 Landroid/os/storage/StorageVolume;->getPathFile()Ljava/io/File;
 Landroid/os/storage/StorageVolume;->getUserLabel()Ljava/lang/String;
 Landroid/os/storage/StorageVolume;->mPath:Ljava/io/File;
+Landroid/os/storage/StorageVolume;->mRemovable:Z
 Landroid/os/storage/VolumeInfo;->buildStorageVolume(Landroid/content/Context;IZ)Landroid/os/storage/StorageVolume;
 Landroid/os/storage/VolumeInfo;->getDisk()Landroid/os/storage/DiskInfo;
 Landroid/os/storage/VolumeInfo;->getEnvironmentForState(I)Ljava/lang/String;
@@ -2885,6 +2894,7 @@ Landroid/view/ViewTreeObserver$InternalInsetsInfo;->touchableRegion:Landroid/gra
 Landroid/view/ViewTreeObserver$InternalInsetsInfo;->TOUCHABLE_INSETS_REGION:I
 Landroid/view/ViewTreeObserver;->addOnComputeInternalInsetsListener(Landroid/view/ViewTreeObserver$OnComputeInternalInsetsListener;)V
 Landroid/view/ViewTreeObserver;->removeOnComputeInternalInsetsListener(Landroid/view/ViewTreeObserver$OnComputeInternalInsetsListener;)V
+Landroid/view/Window;->addPrivateFlags(I)V
 Landroid/view/Window;->mAppName:Ljava/lang/String;
 Landroid/view/Window;->mAppToken:Landroid/os/IBinder;
 Landroid/view/Window;->mCallback:Landroid/view/Window$Callback;
@@ -3197,6 +3207,7 @@ Landroid/widget/TextView;->mMaxMode:I
 Landroid/widget/TextView;->mSingleLine:Z
 Landroid/widget/TextView;->mText:Ljava/lang/CharSequence;
 Landroid/widget/TextView;->mTextPaint:Landroid/text/TextPaint;
+Landroid/widget/TextView;->mTextSelectHandleLeftRes:I
 Landroid/widget/TextView;->setText(Ljava/lang/CharSequence;Landroid/widget/TextView$BufferType;ZI)V
 Landroid/widget/Toast$TN;->mNextView:Landroid/view/View;
 Landroid/widget/Toast$TN;->mParams:Landroid/view/WindowManager$LayoutParams;
@@ -3302,9 +3313,13 @@ Lcom/android/internal/app/IVoiceInteractionManagerService$Stub$Proxy;->showSessi
 Lcom/android/internal/app/IVoiceInteractionManagerService$Stub;->asInterface(Landroid/os/IBinder;)Lcom/android/internal/app/IVoiceInteractionManagerService;
 Lcom/android/internal/app/IVoiceInteractionManagerService;->getKeyphraseSoundModel(ILjava/lang/String;)Landroid/hardware/soundtrigger/SoundTrigger$KeyphraseSoundModel;
 Lcom/android/internal/appwidget/IAppWidgetService$Stub;->asInterface(Landroid/os/IBinder;)Lcom/android/internal/appwidget/IAppWidgetService;
+Lcom/android/internal/content/PackageMonitor;->onPackageRemoved(Ljava/lang/String;I)V
+Lcom/android/internal/content/PackageMonitor;->register(Landroid/content/Context;Landroid/os/Looper;Z)V
 Lcom/android/internal/content/ReferrerIntent;-><init>(Landroid/content/Intent;Ljava/lang/String;)V
 Lcom/android/internal/content/ReferrerIntent;->mReferrer:Ljava/lang/String;
 Lcom/android/internal/location/ILocationProvider$Stub;-><init>()V
+Lcom/android/internal/logging/MetricsLogger;-><init>()V
+Lcom/android/internal/logging/MetricsLogger;->write(Landroid/metrics/LogMaker;)V
 Lcom/android/internal/os/BatterySipper;-><init>(Lcom/android/internal/os/BatterySipper$DrainType;Landroid/os/BatteryStats$Uid;D)V
 Lcom/android/internal/os/BatterySipper;->add(Lcom/android/internal/os/BatterySipper;)V
 Lcom/android/internal/os/BatterySipper;->drainType:Lcom/android/internal/os/BatterySipper$DrainType;
