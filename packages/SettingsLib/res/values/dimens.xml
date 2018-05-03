@@ -57,6 +57,7 @@
 
     <dimen name="battery_height">14.5dp</dimen>
     <dimen name="battery_width">9.5dp</dimen>
+    <dimen name="battery_powersave_outline_thickness">1dp</dimen>
 
     <dimen name="bt_battery_padding">2dp</dimen>
 
