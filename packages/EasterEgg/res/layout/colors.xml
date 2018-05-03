@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
 <!--
     Copyright (C) 2018 The Android Open Source Project
 
@@ -13,7 +14,13 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 -->
-<adaptive-icon xmlns:android="http://schemas.android.com/apk/res/android">
-    <background android:drawable="@drawable/icon_bg"/>
-    <foreground android:drawable="@drawable/p"/>
-</adaptive-icon>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal"
+    android:gravity="left"
+    android:background="@drawable/toolbar_bg"
+    android:elevation="10dp"
+    >
+
+</LinearLayout>
