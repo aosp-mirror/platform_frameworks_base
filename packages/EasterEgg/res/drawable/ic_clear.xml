@@ -1,4 +1,3 @@
-<?xml version="1.0" encoding="utf-8"?>
 <!--
 Copyright (C) 2018 The Android Open Source Project
 
@@ -14,6 +13,15 @@ Copyright (C) 2018 The Android Open Source Project
     See the License for the specific language governing permissions and
     limitations under the License.
 -->
-<resources xmlns:android="http://schemas.android.com/apk/res/android">
-    <string name="app_name" translatable="false">PAINT.APK</string>
-</resources>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="24"
+    android:viewportHeight="24">
+  <path
+      android:pathData="M19,6.41l-1.41,-1.41l-5.59,5.59l-5.59,-5.59l-1.41,1.41l5.59,5.59l-5.59,5.59l1.41,1.41l5.59,-5.59l5.59,5.59l1.41,-1.41l-5.59,-5.59z"
+      android:strokeWidth="1"
+      android:fillColor="#000000"
+      android:fillType="nonZero"
+      android:strokeColor="#00000000"/>
+</vector>
