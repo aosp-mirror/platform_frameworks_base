@@ -28,6 +28,8 @@
 #include "utils/TraceUtils.h"
 
 #include <GrBackendSurface.h>
+#include <SkImageInfo.h>
+#include <SkBlendMode.h>
 
 #include <cutils/properties.h>
 #include <strings.h>
@@ -129,20 +131,49 @@ bool SkiaOpenGLPipeline::copyLayerInto(DeferredLayerUpdater* deferredLayer, SkBi
     deferredLayer->updateTexImage();
     deferredLayer->apply();
 
+    // drop the colorSpace as we only support readback into sRGB or extended sRGB
+    SkImageInfo surfaceInfo = bitmap->info().makeColorSpace(nullptr);
+
     /* This intermediate surface is present to work around a bug in SwiftShader that
      * prevents us from reading the contents of the layer's texture directly. The
      * workaround involves first rendering that texture into an intermediate buffer and
      * then reading from the intermediate buffer into the bitmap.
      */
     sk_sp<SkSurface> tmpSurface = SkSurface::MakeRenderTarget(mRenderThread.getGrContext(),
-                                                              SkBudgeted::kYes, bitmap->info());
+                                                              SkBudgeted::kYes, surfaceInfo);
+
+    if (!tmpSurface.get()) {
+        surfaceInfo = surfaceInfo.makeColorType(SkColorType::kN32_SkColorType);
+        tmpSurface = SkSurface::MakeRenderTarget(mRenderThread.getGrContext(),
+                                                 SkBudgeted::kYes, surfaceInfo);
+        if (!tmpSurface.get()) {
+            ALOGW("Unable to readback GPU contents into the provided bitmap");
+            return false;
+        }
+    }
 
     Layer* layer = deferredLayer->backingLayer();
     const SkRect dstRect = SkRect::MakeIWH(bitmap->width(), bitmap->height());
     if (LayerDrawable::DrawLayer(mRenderThread.getGrContext(), tmpSurface->getCanvas(), layer,
                                  &dstRect)) {
         sk_sp<SkImage> tmpImage = tmpSurface->makeImageSnapshot();
-        if (tmpImage->readPixels(bitmap->info(), bitmap->getPixels(), bitmap->rowBytes(), 0, 0)) {
+        if (tmpImage->readPixels(surfaceInfo, bitmap->getPixels(), bitmap->rowBytes(), 0, 0)) {
+            bitmap->notifyPixelsChanged();
+            return true;
+        }
+
+        // if we fail to readback from the GPU directly (e.g. 565) then we attempt to read into 8888
+        // and then draw that into the destination format before giving up.
+        SkBitmap tmpBitmap;
+        SkImageInfo bitmapInfo = SkImageInfo::MakeN32(bitmap->width(), bitmap->height(),
+                                                      bitmap->alphaType());
+        if (tmpBitmap.tryAllocPixels(bitmapInfo) &&
+                tmpImage->readPixels(bitmapInfo, tmpBitmap.getPixels(),
+                                     tmpBitmap.rowBytes(), 0, 0)) {
+            SkCanvas canvas(*bitmap);
+            SkPaint paint;
+            paint.setBlendMode(SkBlendMode::kSrc);
+            canvas.drawBitmap(tmpBitmap, 0, 0, &paint);
             bitmap->notifyPixelsChanged();
             return true;
         }
