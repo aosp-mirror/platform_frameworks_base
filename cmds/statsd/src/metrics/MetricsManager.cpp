@@ -247,16 +247,6 @@ void MetricsManager::onLogEvent(const LogEvent& event) {
             return;
         }
 
-        // Label is 2nd from last field and must be from [0, 15].
-        long appHookLabel = event.GetLong(event.size()-1, &err);
-        if (err != NO_ERROR ) {
-            VLOG("APP_BREADCRUMB_REPORTED had error when parsing the label field");
-            return;
-        } else if (appHookLabel < 0 || appHookLabel > 15) {
-            VLOG("APP_BREADCRUMB_REPORTED does not have valid label %ld", appHookLabel);
-            return;
-        }
-
         // The state must be from 0,3. This part of code must be manually updated.
         long appHookState = event.GetLong(event.size(), &err);
         if (err != NO_ERROR ) {
