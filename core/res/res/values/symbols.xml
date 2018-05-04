@@ -2555,6 +2555,7 @@
   <java-symbol type="drawable" name="ic_storage_48dp" />
   <java-symbol type="drawable" name="ic_usb_48dp" />
   <java-symbol type="drawable" name="ic_zen_24dp" />
+  <java-symbol type="drawable" name="ic_dnd_block_notifications" />
 
   <!-- Floating toolbar -->
   <java-symbol type="id" name="floating_toolbar_menu_item_image" />
@@ -2586,9 +2587,6 @@
   <java-symbol type="attr" name="floatingToolbarDividerColor" />
 
   <!-- Magnifier -->
-  <java-symbol type="id" name="magnifier_image" />
-  <java-symbol type="id" name="magnifier_inner" />
-  <java-symbol type="layout" name="magnifier" />
   <java-symbol type="dimen" name="magnifier_width" />
   <java-symbol type="dimen" name="magnifier_height" />
   <java-symbol type="dimen" name="magnifier_elevation" />

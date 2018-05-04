@@ -140,7 +140,10 @@
       <item quantity="one">Төхөөрөмжийн түгжээг <xliff:g id="NUMBER_0">%d</xliff:g> цагийн турш тайлаагүй байна. Нууц үгээ баталгаажуулна уу.</item>
     </plurals>
     <string name="fingerprint_not_recognized" msgid="348813995267914625">"Танигдахгүй байна"</string>
-    <!-- no translation found for kg_password_default_pin_message (3739658416797652781) -->
+    <plurals name="kg_password_default_pin_message" formatted="false" msgid="3739658416797652781">
+      <item quantity="other">SIM-н ПИН кодыг оруулна уу. Танд <xliff:g id="NUMBER_1">%d</xliff:g> оролдлого үлдлээ.</item>
+      <item quantity="one">SIM-н ПИН кодыг оруулна уу. Танд оператор компанитайгаа холбогдохгүйгээр төхөөрөмжийн түгжээг тайлах <xliff:g id="NUMBER_0">%d</xliff:g> оролдлого үлдлээ.</item>
+    </plurals>
     <plurals name="kg_password_default_puk_message" formatted="false" msgid="8744416410184198352">
       <item quantity="other">SIM-г идэвхгүй болголоо. Үргэлжлүүлэхийн тулд PUK кодыг оруулна уу. Таны SIM бүрмөсөн хүчингүй болох хүртэл <xliff:g id="_NUMBER_1">%d</xliff:g> оролдлого үлдлээ. Дэлгэрэнгүй мэдээлэл авахын тулд оператор компанитайгаа холбогдоно уу.</item>
       <item quantity="one">SIM-г идэвхгүй болголоо. Үргэлжлүүлэхийн тулд PUK кодыг оруулна уу. Таны SIM бүрмөсөн хүчингүй болох хүртэл <xliff:g id="_NUMBER_0">%d</xliff:g> оролдлого үлдлээ. Дэлгэрэнгүй мэдээлэл авахын тулд оператор компанитайгаа холбогдоно уу.</item>

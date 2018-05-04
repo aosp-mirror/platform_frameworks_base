@@ -32,7 +32,7 @@
     <string name="status_bar_no_notifications_title" msgid="4755261167193833213">"Билдирме жок"</string>
     <string name="status_bar_ongoing_events_title" msgid="1682504513316879202">"Учурдагы"</string>
     <string name="status_bar_latest_events_title" msgid="6594767438577593172">"Билдирмелер"</string>
-    <string name="battery_low_title" msgid="6456385927409742437">"Батареянын кубаты аз"</string>
+    <string name="battery_low_title" msgid="9187898087363540349">"Батарея жакында отуруп калышы мүмкүн"</string>
     <string name="battery_low_percent_format" msgid="2900940511201380775">"<xliff:g id="PERCENTAGE">%s</xliff:g> калды"</string>
     <string name="battery_low_percent_format_hybrid" msgid="6838677459286775617">"<xliff:g id="PERCENTAGE">%s</xliff:g> калды, колдонушуңузга караганда болжол менен дагы <xliff:g id="TIME">%s</xliff:g> бар"</string>
     <string name="battery_low_percent_format_hybrid_short" msgid="9025795469949145586">"<xliff:g id="PERCENTAGE">%s</xliff:g> калды, болжол менен дагы <xliff:g id="TIME">%s</xliff:g> бар"</string>
@@ -95,8 +95,7 @@
     <string name="accessibility_unlock_button" msgid="128158454631118828">"Кулпусун ачуу"</string>
     <string name="accessibility_waiting_for_fingerprint" msgid="4808860050517462885">"Манжаңызды сенсорго коюңуз"</string>
     <string name="accessibility_unlock_without_fingerprint" msgid="7541705575183694446">"Манжа изиңизди колдонбостон эле кулпуну ачыңыз"</string>
-    <!-- no translation found for accessibility_send_smart_reply (7766727839703044493) -->
-    <skip />
+    <string name="accessibility_send_smart_reply" msgid="7766727839703044493">"Жөнөтүү"</string>
     <string name="unlock_label" msgid="8779712358041029439">"кулпуну ачуу"</string>
     <string name="phone_label" msgid="2320074140205331708">"телефонду ачуу"</string>
     <string name="voice_assist_label" msgid="3956854378310019854">"үн жардамчысысын ачуу"</string>
@@ -208,10 +207,8 @@
     <string name="accessibility_quick_settings_airplane_on" msgid="6406141469157599296">"Учак режими күйүк."</string>
     <string name="accessibility_quick_settings_airplane_changed_off" msgid="66846307818850664">"Учак режими өчүрүлдү."</string>
     <string name="accessibility_quick_settings_airplane_changed_on" msgid="8983005603505087728">"Учак режими күйгүзүлдү."</string>
-    <!-- no translation found for accessibility_quick_settings_dnd_none_on (2960643943620637020) -->
-    <skip />
-    <!-- no translation found for accessibility_quick_settings_dnd_alarms_on (3357131899365865386) -->
-    <skip />
+    <string name="accessibility_quick_settings_dnd_none_on" msgid="2960643943620637020">"тымтырс"</string>
+    <string name="accessibility_quick_settings_dnd_alarms_on" msgid="3357131899365865386">"ойготкучтар гана"</string>
     <string name="accessibility_quick_settings_dnd" msgid="6607873236717185815">"Тынчымды алба."</string>
     <string name="accessibility_quick_settings_dnd_changed_off" msgid="898107593453022935">"Тынчымды алба деген өчүрүлдү."</string>
     <string name="accessibility_quick_settings_dnd_changed_on" msgid="4483780856613561039">"Тынчымды алба деген күйгүзүлдү."</string>
@@ -620,8 +617,7 @@
       <item quantity="one"><xliff:g id="PERFORMING_ACTIVITY_0">%1$s</xliff:g> колдонулууда</item>
     </plurals>
     <string name="notification_appops_settings" msgid="1028328314935908050">"Жөндөөлөр"</string>
-    <!-- no translation found for notification_appops_ok (1156966426011011434) -->
-    <skip />
+    <string name="notification_appops_ok" msgid="1156966426011011434">"ЖАРАЙТ"</string>
     <string name="notification_channel_controls_opened_accessibility" msgid="6553950422055908113">"<xliff:g id="APP_NAME">%1$s</xliff:g> колдонмосу үчүн эскертмени көзөмөлдөө функциялары ачылды"</string>
     <string name="notification_channel_controls_closed_accessibility" msgid="7521619812603693144">"<xliff:g id="APP_NAME">%1$s</xliff:g> колдонмосу үчүн эскертмени көзөмөлдөө функциялары жабылды"</string>
     <string name="notification_channel_switch_accessibility" msgid="3420796005601900717">"Бул каналдан келген эскертмелерге уруксат берүү"</string>
@@ -713,7 +709,7 @@
     <item msgid="1545641631806817203">"Алмашуу буфери"</item>
     <item msgid="5742013440802239414">"Баскыч коду"</item>
     <item msgid="1951959982985094069">"Бурууну ырастоо, баскычтопту которуштургуч"</item>
-    <item msgid="8175437057325747277">"Эч бири"</item>
+    <item msgid="8175437057325747277">"Жок"</item>
   </string-array>
   <string-array name="nav_bar_layouts">
     <item msgid="8077901629964902399">"Кадимки"</item>
@@ -731,7 +727,7 @@
     <string name="right_keycode" msgid="708447961000848163">"Оң жактагы баскыч коду"</string>
     <string name="left_icon" msgid="3096287125959387541">"Сол жактагы сүрөтчө"</string>
     <string name="right_icon" msgid="3952104823293824311">"Оң жактагы сүрөтчө"</string>
-    <string name="drag_to_add_tiles" msgid="230586591689084925">"Мозаикаларды кошуу үчүн кармап туруп, сүйрөңүз"</string>
+    <string name="drag_to_add_tiles" msgid="230586591689084925">"Керектүү элементтерди сүйрөп келиңиз"</string>
     <string name="drag_to_remove_tiles" msgid="3361212377437088062">"Алып салуу үчүн бул жерге сүйрөңүз"</string>
     <string name="drag_to_remove_disabled" msgid="2390968976638993382">"Сизге жок дегенде 6 мозаика керек"</string>
     <string name="qs_edit" msgid="2232596095725105230">"Түзөтүү"</string>
@@ -805,7 +801,7 @@
     <string name="lockscreen_shortcut_right" msgid="3328683699505226536">"Оң жактагы кыска жол"</string>
     <string name="lockscreen_unlock_left" msgid="2043092136246951985">"Сол жактагы кыска жол дагы кулпуну ачат"</string>
     <string name="lockscreen_unlock_right" msgid="1529992940510318775">"Оң жактагы кыска жол дагы кулпуну ачат"</string>
-    <string name="lockscreen_none" msgid="4783896034844841821">"Эч бири"</string>
+    <string name="lockscreen_none" msgid="4783896034844841821">"Жок"</string>
     <string name="tuner_launch_app" msgid="1527264114781925348">"<xliff:g id="APP">%1$s</xliff:g> колдонмосун жүргүзүү"</string>
     <string name="tuner_other_apps" msgid="4726596850501162493">"Башка колдонмолор"</string>
     <string name="tuner_circle" msgid="2340998864056901350">"Тегерек"</string>

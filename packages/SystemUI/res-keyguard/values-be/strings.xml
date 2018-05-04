@@ -152,7 +152,12 @@
       <item quantity="other">Прылада не была разблакіравана на працягу <xliff:g id="NUMBER_1">%d</xliff:g> гадзіны. Увядзіце пароль.</item>
     </plurals>
     <string name="fingerprint_not_recognized" msgid="348813995267914625">"Не распазнаны"</string>
-    <!-- no translation found for kg_password_default_pin_message (3739658416797652781) -->
+    <plurals name="kg_password_default_pin_message" formatted="false" msgid="3739658416797652781">
+      <item quantity="one">Увядзіце PIN-код SIM-карты. У вас засталася <xliff:g id="NUMBER_1">%d</xliff:g> спроба.</item>
+      <item quantity="few">Увядзіце PIN-код SIM-карты. У вас засталося <xliff:g id="NUMBER_1">%d</xliff:g> спробы.</item>
+      <item quantity="many">Увядзіце PIN-код SIM-карты. У вас засталося <xliff:g id="NUMBER_1">%d</xliff:g> спроб.</item>
+      <item quantity="other">Увядзіце PIN-код SIM-карты. У вас засталося <xliff:g id="NUMBER_1">%d</xliff:g> спробы.</item>
+    </plurals>
     <plurals name="kg_password_default_puk_message" formatted="false" msgid="8744416410184198352">
       <item quantity="one">SIM-карта заблакіравана. Каб працягнуць, увядзіце PUK-код. У вас ёсць яшчэ <xliff:g id="_NUMBER_1">%d</xliff:g> спроба, пасля чаго SIM-карта будзе заблакіравана назаўсёды. Звярніцеся да аператара, каб даведацца больш.</item>
       <item quantity="few">SIM-карта заблакіравана. Каб працягнуць, увядзіце PUK-код. У вас ёсць яшчэ <xliff:g id="_NUMBER_1">%d</xliff:g> спробы, пасля чаго SIM-карта будзе заблакіравана назаўсёды. Звярніцеся да аператара, каб даведацца больш.</item>

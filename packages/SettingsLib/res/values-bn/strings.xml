@@ -129,11 +129,11 @@
     <string name="process_kernel_label" msgid="3916858646836739323">"Android OS"</string>
     <string name="data_usage_uninstalled_apps" msgid="614263770923231598">"সরানো অ্যাপ্লিকেশানগুলি"</string>
     <string name="data_usage_uninstalled_apps_users" msgid="7986294489899813194">"সরানো অ্যাপ্লিকেশানগুলি এবং ব্যবহারকারীগণ"</string>
-    <string name="tether_settings_title_usb" msgid="6688416425801386511">"USB টেদারিং"</string>
+    <string name="tether_settings_title_usb" msgid="6688416425801386511">"USB টিথারিং"</string>
     <string name="tether_settings_title_wifi" msgid="3277144155960302049">"পোর্টেবল হটস্পট"</string>
-    <string name="tether_settings_title_bluetooth" msgid="355855408317564420">"ব্লুটুথ টেদারিং"</string>
-    <string name="tether_settings_title_usb_bluetooth" msgid="5355828977109785001">"টেদারিং"</string>
-    <string name="tether_settings_title_all" msgid="8356136101061143841">"টেদারিং ও পোর্টেবল হটস্পট"</string>
+    <string name="tether_settings_title_bluetooth" msgid="355855408317564420">"ব্লুটুথ টিথারিং"</string>
+    <string name="tether_settings_title_usb_bluetooth" msgid="5355828977109785001">"টিথারিং"</string>
+    <string name="tether_settings_title_all" msgid="8356136101061143841">"টিথারিং ও পোর্টেবল হটস্পট"</string>
     <string name="managed_user_title" msgid="8109605045406748842">"সমস্ত কাজের অ্যাপ্লিকেশান"</string>
     <string name="user_guest" msgid="8475274842845401871">"অতিথি"</string>
     <string name="unknown" msgid="1592123443519355854">"অজানা"</string>
@@ -187,7 +187,7 @@
     <string name="development_settings_summary" msgid="1815795401632854041">"অ্যাপ্লিকেশান উন্নয়নের জন্য বিকল্পগুলি সেট করুন"</string>
     <string name="development_settings_not_available" msgid="4308569041701535607">"এই ব্যবহারকারীর জন্য ডেভেলপার বিকল্প উপলব্ধ নয়"</string>
     <string name="vpn_settings_not_available" msgid="956841430176985598">"এই ব্যবহারকারীর জন্য VPN সেটিংস উপলব্ধ নয়"</string>
-    <string name="tethering_settings_not_available" msgid="6765770438438291012">"এই ব্যবহারকারীর জন্য টেদারিং সেটিংস উপলব্ধ নয়"</string>
+    <string name="tethering_settings_not_available" msgid="6765770438438291012">"এই ব্যবহারকারীর জন্য টিথারিং সেটিংস উপলব্ধ নয়"</string>
     <string name="apn_settings_not_available" msgid="7873729032165324000">"এই ব্যবহারকারীর জন্য অ্যাক্সেস পয়েন্ট নাম সেটিংস উপলব্ধ নয়"</string>
     <string name="enable_adb" msgid="7982306934419797485">"USB ডিবাগিং"</string>
     <string name="enable_adb_summary" msgid="4881186971746056635">"USB কানেক্ট থাকাকালীন ডিবাগ মোড"</string>
@@ -195,16 +195,16 @@
     <string name="bugreport_in_power" msgid="7923901846375587241">"ত্রুটি প্রতিবেদনের শর্টকাট"</string>
     <string name="bugreport_in_power_summary" msgid="1778455732762984579">"একটি ত্রুটি প্রতিবেদন গ্রহণের জন্য পাওয়ার মেনুতে একটি বোতাম দেখান"</string>
     <string name="keep_screen_on" msgid="1146389631208760344">"জাগিয়ে রাখুন"</string>
-    <string name="keep_screen_on_summary" msgid="2173114350754293009">"চার্জ হওয়ার স্ক্রীন কখনই নিদ্রা মোডে যাবে না"</string>
+    <string name="keep_screen_on_summary" msgid="2173114350754293009">"চার্জ হওয়ার স্ক্রিন কখনই নিদ্রা মোডে যাবে না"</string>
     <string name="bt_hci_snoop_log" msgid="3340699311158865670">"ব্লুটুথ HCI স্নুপ লগ সক্ষম করুন"</string>
     <string name="bt_hci_snoop_log_summary" msgid="366083475849911315">"সমস্ত ব্লুটুথ HCI প্যাকেট একটি ফাইলে ক্যাপচার করে রাখুন (এই সেটিং পরিবর্তন করার পরে ব্লুটুথ চালু অথবা বন্ধ করুন)"</string>
     <string name="oem_unlock_enable" msgid="6040763321967327691">"OEM আনলক করা হচ্ছে"</string>
     <string name="oem_unlock_enable_summary" msgid="4720281828891618376">"বুট-লোডার আনলক করার অনুমতি দিন"</string>
     <string name="confirm_enable_oem_unlock_title" msgid="4802157344812385674">"OEM আনলক করার অনুমতি দিতে চান?"</string>
     <string name="confirm_enable_oem_unlock_text" msgid="5517144575601647022">"সতর্কতা: এই ডিভাইসে সেটিংটি চালু থাকা অবস্থায় ডিভাইস সুরক্ষা বৈশিষ্ট্যগুলি কাজ করবে না৷"</string>
-    <string name="mock_location_app" msgid="7966220972812881854">"অনুরূপ অবস্থান অ্যাপ্লিকেশান বেছে নিন"</string>
-    <string name="mock_location_app_not_set" msgid="809543285495344223">"কোনো অনুরূপ অবস্থান অ্যাপ্লিকেশান সেট করা নেই"</string>
-    <string name="mock_location_app_set" msgid="8966420655295102685">"অনুরূপ অবস্থান অ্যাপ্লিকেশান: <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
+    <string name="mock_location_app" msgid="7966220972812881854">"অনুরূপ লোকেশন অ্যাপ্লিকেশান বেছে নিন"</string>
+    <string name="mock_location_app_not_set" msgid="809543285495344223">"কোনো অনুরূপ লোকেশন অ্যাপ্লিকেশান সেট করা নেই"</string>
+    <string name="mock_location_app_set" msgid="8966420655295102685">"অনুরূপ লোকেশন অ্যাপ্লিকেশান: <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="debug_networking_category" msgid="7044075693643009662">"নেটওয়ার্কিং"</string>
     <string name="wifi_display_certification" msgid="8611569543791307533">"ওয়্যারলেস ডিসপ্লে সার্টিফিকেশন"</string>
     <string name="wifi_verbose_logging" msgid="4203729756047242344">"ওয়াই-ফাই ভারবোস লগিং সক্ষম করুন"</string>
@@ -278,9 +278,9 @@
     <string name="media_category" msgid="4388305075496848353">"মিডিয়া"</string>
     <string name="debug_monitoring_category" msgid="7640508148375798343">"পর্যবেক্ষণে রাখা"</string>
     <string name="strict_mode" msgid="1938795874357830695">"কঠোর মোড সক্ষম"</string>
-    <string name="strict_mode_summary" msgid="142834318897332338">"মুখ্য থ্রেডে অ্যাপ্লিকেশানগুলির দীর্ঘ কার্যকলাপের সময় স্ক্রীন ফ্ল্যাশ করে"</string>
-    <string name="pointer_location" msgid="6084434787496938001">"পয়েন্টারের অবস্থান"</string>
-    <string name="pointer_location_summary" msgid="840819275172753713">"স্ক্রীন ওভারলে বর্তমান স্পর্শ ডেটা দেখাচ্ছে"</string>
+    <string name="strict_mode_summary" msgid="142834318897332338">"মুখ্য থ্রেডে অ্যাপ্লিকেশানগুলির দীর্ঘ কার্যকলাপের সময় স্ক্রিন ফ্ল্যাশ করে"</string>
+    <string name="pointer_location" msgid="6084434787496938001">"পয়েন্টারের লোকেশন"</string>
+    <string name="pointer_location_summary" msgid="840819275172753713">"স্ক্রিন ওভারলে বর্তমান স্পর্শ ডেটা দেখাচ্ছে"</string>
     <string name="show_touches" msgid="2642976305235070316">"আলতো চাপ দেখান"</string>
     <string name="show_touches_summary" msgid="6101183132903926324">"আলতো চাপ দিলে ভিজ্যুয়াল প্রতিক্রিয়া দেখান"</string>
     <string name="show_screen_updates" msgid="5470814345876056420">"সারফেস আপডেটগুলি দেখান"</string>
@@ -291,7 +291,7 @@
     <string name="show_hw_layers_updates_summary" msgid="5296917233236661465">"যখন হার্ডওয়্যার স্তরগুলি আপডেট হয় তখন সেগুলিকে সবুজ রঙে ফ্ল্যাশ করুন"</string>
     <string name="debug_hw_overdraw" msgid="2968692419951565417">"ডিবাগ GPU ওভারড্র"</string>
     <string name="disable_overlays" msgid="2074488440505934665">"HW আচ্ছাদনগুলি অক্ষম করুন"</string>
-    <string name="disable_overlays_summary" msgid="3578941133710758592">"সর্বদা স্ক্রীন কম্পোসিটিংয়ের জন্য GPU ব্যবহার করুন"</string>
+    <string name="disable_overlays_summary" msgid="3578941133710758592">"সর্বদা স্ক্রিন কম্পোসিটিংয়ের জন্য GPU ব্যবহার করুন"</string>
     <string name="simulate_color_space" msgid="6745847141353345872">"রঙ স্থান নকল করুন"</string>
     <string name="enable_opengl_traces_title" msgid="6790444011053219871">"OpenGL ট্রেসগুলি সক্ষম করুন"</string>
     <string name="usb_audio_disable_routing" msgid="8114498436003102671">"USB অডিও রাউটিং অক্ষম করুন"</string>
@@ -299,7 +299,7 @@
     <string name="debug_layout" msgid="5981361776594526155">"লেআউট সীমাগুলি দেখান"</string>
     <string name="debug_layout_summary" msgid="2001775315258637682">"ক্লিপ বাউন্ড, মার্জিন ইত্যাদি দেখান"</string>
     <string name="force_rtl_layout_all_locales" msgid="2259906643093138978">"RTL লেআউট দিকনির্দেশ জোর দিন"</string>
-    <string name="force_rtl_layout_all_locales_summary" msgid="9192797796616132534">"সমস্ত স্থানের জন্য RTL এ স্ক্রীন লেআউট দিকনির্দেশে জোর দেয়"</string>
+    <string name="force_rtl_layout_all_locales_summary" msgid="9192797796616132534">"সমস্ত স্থানের জন্য RTL এ স্ক্রিন লেআউট দিকনির্দেশে জোর দেয়"</string>
     <string name="force_msaa" msgid="7920323238677284387">"4x MSAA এ জোর দিন"</string>
     <string name="force_msaa_summary" msgid="9123553203895817537">"OpenGL ES 2.0 অ্যাপ্লিকেশানগুলির মধ্যে 4x MSAA সক্রিয় করুন"</string>
     <string name="show_non_rect_clip" msgid="505954950474595172">"অ-আয়তক্ষেত্রাকার ক্লিপ কার্যকলাপ ডিবাগ করুন"</string>
@@ -365,11 +365,12 @@
     <string name="accessibility_display_daltonizer_preference_title" msgid="5800761362678707872">"রঙ সংশোধন"</string>
     <string name="accessibility_display_daltonizer_preference_subtitle" msgid="3484969015295282911">"এই বৈশিষ্ট্যটি পরীক্ষামূলক এবং এটি কার্য-সম্পাদনা প্রভাবিত করতে পারে।"</string>
     <string name="daltonizer_type_overridden" msgid="3116947244410245916">"<xliff:g id="TITLE">%1$s</xliff:g> এর দ্বারা ওভাররাইড করা হয়েছে"</string>
-    <string name="power_remaining_duration_only" msgid="845431008899029842">"প্রায় <xliff:g id="TIME">%1$s</xliff:g> বাকি"</string>
-    <string name="power_discharging_duration" msgid="6655472132189365839">"আর <xliff:g id="TIME">%1$s</xliff:g> চলবে (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
-    <string name="power_remaining_duration_only_enhanced" msgid="5992456722677973678">"বর্তমান ব্যাটারি ব্যবহার অনুযায়ী আর <xliff:g id="TIME">%1$s</xliff:g> বাকি"</string>
-    <string name="power_discharging_duration_enhanced" msgid="5726302316642148671">"বর্তমান ব্যবহার অনুযায়ী আর আনুমানিক <xliff:g id="TIME">%1$s</xliff:g> চলবে (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
-    <string name="power_remaining_duration_only_short" msgid="5329694252258605547">"<xliff:g id="TIME">%1$s</xliff:g> বাকী আছে"</string>
+    <string name="power_remaining_settings_home_page" msgid="4845022416859002011">"<xliff:g id="PERCENTAGE">%1$s</xliff:g> - <xliff:g id="TIME_STRING">%2$s</xliff:g>"</string>
+    <string name="power_remaining_duration_only" msgid="6123167166221295462">"আর আনুমানিক <xliff:g id="TIME_REMAINING">%1$s</xliff:g> চলবে"</string>
+    <string name="power_discharging_duration" msgid="8848256785736335185">"আর আনুমানিক <xliff:g id="TIME_REMAINING">%1$s</xliff:g> চলবে (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
+    <string name="power_remaining_duration_only_enhanced" msgid="4189311599812296592">"ব্যবহারের উপর ভিত্তি করে আর আনুমানিক <xliff:g id="TIME_REMAINING">%1$s</xliff:g> চলবে"</string>
+    <string name="power_discharging_duration_enhanced" msgid="1992003260664804080">"ব্যবহারের উপর ভিত্তি করে আর আনুমানিক <xliff:g id="TIME_REMAINING">%1$s</xliff:g> চলবে (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
+    <string name="power_remaining_duration_only_short" msgid="3463575350656389957">"আর <xliff:g id="TIME_REMAINING">%1$s</xliff:g> চলবে"</string>
     <string name="power_discharge_by_enhanced" msgid="2095821536747992464">"বর্তমান ব্যবহার অনুযায়ী আনুমানিক <xliff:g id="TIME">%1$s</xliff:g> পর্যন্ত চলবে (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
     <string name="power_discharge_by_only_enhanced" msgid="2175151772952365149">"বর্তমান ব্যবহার অনুযায়ী আনুমানিক <xliff:g id="TIME">%1$s</xliff:g> পর্যন্ত চলবে"</string>
     <string name="power_discharge_by" msgid="6453537733650125582">"আনুমানিক <xliff:g id="TIME">%1$s</xliff:g> পর্যন্ত চলবে (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>

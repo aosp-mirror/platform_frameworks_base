@@ -32,7 +32,7 @@
     <string name="status_bar_no_notifications_title" msgid="4755261167193833213">"Tidak ada notifikasi"</string>
     <string name="status_bar_ongoing_events_title" msgid="1682504513316879202">"Berkelanjutan"</string>
     <string name="status_bar_latest_events_title" msgid="6594767438577593172">"Notifikasi"</string>
-    <string name="battery_low_title" msgid="6456385927409742437">"Baterai lemah"</string>
+    <string name="battery_low_title" msgid="9187898087363540349">"Baterai mungkin akan segera habis"</string>
     <string name="battery_low_percent_format" msgid="2900940511201380775">"Tersisa <xliff:g id="PERCENTAGE">%s</xliff:g>"</string>
     <string name="battery_low_percent_format_hybrid" msgid="6838677459286775617">"Sisa <xliff:g id="PERCENTAGE">%s</xliff:g>, kira-kira <xliff:g id="TIME">%s</xliff:g> lagi berdasarkan penggunaan Anda"</string>
     <string name="battery_low_percent_format_hybrid_short" msgid="9025795469949145586">"Sisa <xliff:g id="PERCENTAGE">%s</xliff:g>, kira-kira <xliff:g id="TIME">%s</xliff:g> lagi"</string>
@@ -95,8 +95,7 @@
     <string name="accessibility_unlock_button" msgid="128158454631118828">"Buka kunci"</string>
     <string name="accessibility_waiting_for_fingerprint" msgid="4808860050517462885">"Menunggu sidik jari"</string>
     <string name="accessibility_unlock_without_fingerprint" msgid="7541705575183694446">"Buka kunci tanpa menggunakan sidik jari"</string>
-    <!-- no translation found for accessibility_send_smart_reply (7766727839703044493) -->
-    <skip />
+    <string name="accessibility_send_smart_reply" msgid="7766727839703044493">"Kirim"</string>
     <string name="unlock_label" msgid="8779712358041029439">"buka kunci"</string>
     <string name="phone_label" msgid="2320074140205331708">"buka ponsel"</string>
     <string name="voice_assist_label" msgid="3956854378310019854">"buka bantuan suara"</string>
@@ -208,10 +207,8 @@
     <string name="accessibility_quick_settings_airplane_on" msgid="6406141469157599296">"Mode pesawat aktif."</string>
     <string name="accessibility_quick_settings_airplane_changed_off" msgid="66846307818850664">"Mode pesawat dinonaktifkan."</string>
     <string name="accessibility_quick_settings_airplane_changed_on" msgid="8983005603505087728">"Mode pesawat diaktifkan."</string>
-    <!-- no translation found for accessibility_quick_settings_dnd_none_on (2960643943620637020) -->
-    <skip />
-    <!-- no translation found for accessibility_quick_settings_dnd_alarms_on (3357131899365865386) -->
-    <skip />
+    <string name="accessibility_quick_settings_dnd_none_on" msgid="2960643943620637020">"senyap total"</string>
+    <string name="accessibility_quick_settings_dnd_alarms_on" msgid="3357131899365865386">"hanya alarm"</string>
     <string name="accessibility_quick_settings_dnd" msgid="6607873236717185815">"Jangan ganggu."</string>
     <string name="accessibility_quick_settings_dnd_changed_off" msgid="898107593453022935">"Status \"Jangan ganggu\" dinonaktifkan."</string>
     <string name="accessibility_quick_settings_dnd_changed_on" msgid="4483780856613561039">"Status \"Jangan ganggu\" diaktifkan."</string>
@@ -538,9 +535,9 @@
     <string name="volume_ringer_status_silent" msgid="6896394161022916369">"Nonaktifkan"</string>
     <string name="qs_status_phone_vibrate" msgid="204362991135761679">"Ponsel mode getar"</string>
     <string name="qs_status_phone_muted" msgid="5437668875879171548">"Ponsel dimatikan suaranya"</string>
-    <string name="volume_stream_content_description_unmute" msgid="4436631538779230857">"%1$s. Ketuk untuk menyuarakan."</string>
-    <string name="volume_stream_content_description_vibrate" msgid="1187944970457807498">"%1$s. Ketuk untuk menyetel agar bergetar. Layanan aksesibilitas mungkin dibisukan."</string>
-    <string name="volume_stream_content_description_mute" msgid="3625049841390467354">"%1$s. Ketuk untuk membisukan. Layanan aksesibilitas mungkin dibisukan."</string>
+    <string name="volume_stream_content_description_unmute" msgid="4436631538779230857">"%1$s. Tap untuk menyuarakan."</string>
+    <string name="volume_stream_content_description_vibrate" msgid="1187944970457807498">"%1$s. Tap untuk menyetel agar bergetar. Layanan aksesibilitas mungkin dibisukan."</string>
+    <string name="volume_stream_content_description_mute" msgid="3625049841390467354">"%1$s. Tap untuk membisukan. Layanan aksesibilitas mungkin dibisukan."</string>
     <string name="volume_stream_content_description_vibrate_a11y" msgid="6427727603978431301">"%1$s. Tap untuk menyetel agar bergetar."</string>
     <string name="volume_stream_content_description_mute_a11y" msgid="8995013018414535494">"%1$s. Tap untuk menonaktifkan."</string>
     <string name="volume_dialog_title" msgid="7272969888820035876">"%s kontrol volume"</string>
@@ -620,8 +617,7 @@
       <item quantity="one">menggunakan <xliff:g id="PERFORMING_ACTIVITY_0">%1$s</xliff:g></item>
     </plurals>
     <string name="notification_appops_settings" msgid="1028328314935908050">"Setelan"</string>
-    <!-- no translation found for notification_appops_ok (1156966426011011434) -->
-    <skip />
+    <string name="notification_appops_ok" msgid="1156966426011011434">"Ya"</string>
     <string name="notification_channel_controls_opened_accessibility" msgid="6553950422055908113">"Kontrol notifikasi untuk <xliff:g id="APP_NAME">%1$s</xliff:g> dibuka"</string>
     <string name="notification_channel_controls_closed_accessibility" msgid="7521619812603693144">"Kontrol notifikasi untuk <xliff:g id="APP_NAME">%1$s</xliff:g> ditutup"</string>
     <string name="notification_channel_switch_accessibility" msgid="3420796005601900717">"Izinkan notifikasi dari saluran ini"</string>
@@ -758,9 +754,9 @@
     <string name="accessibility_action_divider_top_50" msgid="6385859741925078668">"Atas 50%"</string>
     <string name="accessibility_action_divider_top_30" msgid="6201455163864841205">"Atas 30%"</string>
     <string name="accessibility_action_divider_bottom_full" msgid="301433196679548001">"Layar penuh di bawah"</string>
-    <string name="accessibility_qs_edit_tile_label" msgid="8374924053307764245">"Posisi <xliff:g id="POSITION">%1$d</xliff:g>, <xliff:g id="TILE_NAME">%2$s</xliff:g>. Ketuk dua kali untuk mengedit."</string>
-    <string name="accessibility_qs_edit_add_tile_label" msgid="8133209638023882667">"<xliff:g id="TILE_NAME">%1$s</xliff:g>. Ketuk dua kali untuk menambahkan."</string>
-    <string name="accessibility_qs_edit_position_label" msgid="5055306305919289819">"Posisi <xliff:g id="POSITION">%1$d</xliff:g>. Ketuk dua kali untuk memilih."</string>
+    <string name="accessibility_qs_edit_tile_label" msgid="8374924053307764245">"Posisi <xliff:g id="POSITION">%1$d</xliff:g>, <xliff:g id="TILE_NAME">%2$s</xliff:g>. Tap dua kali untuk mengedit."</string>
+    <string name="accessibility_qs_edit_add_tile_label" msgid="8133209638023882667">"<xliff:g id="TILE_NAME">%1$s</xliff:g>. Tap dua kali untuk menambahkan."</string>
+    <string name="accessibility_qs_edit_position_label" msgid="5055306305919289819">"Posisi <xliff:g id="POSITION">%1$d</xliff:g>. Tap dua kali untuk memilih."</string>
     <string name="accessibility_qs_edit_move_tile" msgid="2461819993780159542">"Pindahkan <xliff:g id="TILE_NAME">%1$s</xliff:g>"</string>
     <string name="accessibility_qs_edit_remove_tile" msgid="7484493384665907197">"Hapus <xliff:g id="TILE_NAME">%1$s</xliff:g>"</string>
     <string name="accessibility_qs_edit_tile_added" msgid="8050200862063548309">"<xliff:g id="TILE_NAME">%1$s</xliff:g> ditambahkan ke posisi <xliff:g id="POSITION">%2$d</xliff:g>"</string>
@@ -776,7 +772,7 @@
     <string name="accessibility_quick_settings_expand" msgid="2375165227880477530">"Buka setelan cepat."</string>
     <string name="accessibility_quick_settings_collapse" msgid="1792625797142648105">"Tutup setelan cepat."</string>
     <string name="accessibility_quick_settings_alarm_set" msgid="1863000242431528676">"Alarm disetel."</string>
-    <string name="accessibility_quick_settings_user" msgid="1567445362870421770">"Masuk sebagai <xliff:g id="ID_1">%s</xliff:g>"</string>
+    <string name="accessibility_quick_settings_user" msgid="1567445362870421770">"Login sebagai <xliff:g id="ID_1">%s</xliff:g>"</string>
     <string name="data_connection_no_internet" msgid="4503302451650972989">"Tidak ada internet"</string>
     <string name="accessibility_quick_settings_open_details" msgid="4230931801728005194">"Buka detail."</string>
     <string name="accessibility_quick_settings_open_settings" msgid="7806613775728380737">"Buka setelan <xliff:g id="ID_1">%s</xliff:g>."</string>

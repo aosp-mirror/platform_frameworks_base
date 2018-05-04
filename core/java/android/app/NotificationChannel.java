@@ -76,6 +76,7 @@ public final class NotificationChannel implements Parcelable {
     private static final String ATT_CONTENT_TYPE = "content_type";
     private static final String ATT_SHOW_BADGE = "show_badge";
     private static final String ATT_USER_LOCKED = "locked";
+    private static final String ATT_FG_SERVICE_SHOWN = "fgservice";
     private static final String ATT_GROUP = "group";
     private static final String ATT_BLOCKABLE_SYSTEM = "blockable_system";
     private static final String DELIMITER = ",";
@@ -144,6 +145,7 @@ public final class NotificationChannel implements Parcelable {
     // Bitwise representation of fields that have been changed by the user, preventing the app from
     // making changes to these fields.
     private int mUserLockedFields;
+    private boolean mFgServiceShown;
     private boolean mVibrationEnabled;
     private boolean mShowBadge = DEFAULT_SHOW_BADGE;
     private boolean mDeleted = DEFAULT_DELETED;
@@ -200,6 +202,7 @@ public final class NotificationChannel implements Parcelable {
         mLights = in.readByte() != 0;
         mVibration = in.createLongArray();
         mUserLockedFields = in.readInt();
+        mFgServiceShown = in.readByte() != 0;
         mVibrationEnabled = in.readByte() != 0;
         mShowBadge = in.readByte() != 0;
         mDeleted = in.readByte() != 0;
@@ -245,6 +248,7 @@ public final class NotificationChannel implements Parcelable {
         dest.writeByte(mLights ? (byte) 1 : (byte) 0);
         dest.writeLongArray(mVibration);
         dest.writeInt(mUserLockedFields);
+        dest.writeByte(mFgServiceShown ? (byte) 1 : (byte) 0);
         dest.writeByte(mVibrationEnabled ? (byte) 1 : (byte) 0);
         dest.writeByte(mShowBadge ? (byte) 1 : (byte) 0);
         dest.writeByte(mDeleted ? (byte) 1 : (byte) 0);
@@ -276,6 +280,13 @@ public final class NotificationChannel implements Parcelable {
      */
     public void unlockFields(int field) {
         mUserLockedFields &= ~field;
+    }
+
+    /**
+     * @hide
+     */
+    public void setFgServiceShown(boolean shown) {
+        mFgServiceShown = shown;
     }
 
     /**
@@ -576,6 +587,13 @@ public final class NotificationChannel implements Parcelable {
     /**
      * @hide
      */
+    public boolean isFgServiceShown() {
+        return mFgServiceShown;
+    }
+
+    /**
+     * @hide
+     */
     public boolean isBlockableSystem() {
         return mBlockableSystem;
     }
@@ -620,6 +638,7 @@ public final class NotificationChannel implements Parcelable {
         setDeleted(safeBool(parser, ATT_DELETED, false));
         setGroup(parser.getAttributeValue(null, ATT_GROUP));
         lockFields(safeInt(parser, ATT_USER_LOCKED, 0));
+        setFgServiceShown(safeBool(parser, ATT_FG_SERVICE_SHOWN, false));
         setBlockableSystem(safeBool(parser, ATT_BLOCKABLE_SYSTEM, false));
     }
 
@@ -724,6 +743,9 @@ public final class NotificationChannel implements Parcelable {
         if (getUserLockedFields() != 0) {
             out.attribute(null, ATT_USER_LOCKED, Integer.toString(getUserLockedFields()));
         }
+        if (isFgServiceShown()) {
+            out.attribute(null, ATT_FG_SERVICE_SHOWN, Boolean.toString(isFgServiceShown()));
+        }
         if (canShowBadge()) {
             out.attribute(null, ATT_SHOW_BADGE, Boolean.toString(canShowBadge()));
         }
@@ -772,6 +794,7 @@ public final class NotificationChannel implements Parcelable {
         record.put(ATT_LIGHT_COLOR, Integer.toString(getLightColor()));
         record.put(ATT_VIBRATION_ENABLED, Boolean.toString(shouldVibrate()));
         record.put(ATT_USER_LOCKED, Integer.toString(getUserLockedFields()));
+        record.put(ATT_FG_SERVICE_SHOWN, Boolean.toString(isFgServiceShown()));
         record.put(ATT_VIBRATION, longArrayToString(getVibrationPattern()));
         record.put(ATT_SHOW_BADGE, Boolean.toString(canShowBadge()));
         record.put(ATT_DELETED, Boolean.toString(isDeleted()));
@@ -933,6 +956,7 @@ public final class NotificationChannel implements Parcelable {
                 + ", mLightColor=" + mLightColor
                 + ", mVibration=" + Arrays.toString(mVibration)
                 + ", mUserLockedFields=" + Integer.toHexString(mUserLockedFields)
+                + ", mFgServiceShown=" + mFgServiceShown
                 + ", mVibrationEnabled=" + mVibrationEnabled
                 + ", mShowBadge=" + mShowBadge
                 + ", mDeleted=" + mDeleted
@@ -963,6 +987,7 @@ public final class NotificationChannel implements Parcelable {
             }
         }
         proto.write(NotificationChannelProto.USER_LOCKED_FIELDS, mUserLockedFields);
+        proto.write(NotificationChannelProto.FG_SERVICE_SHOWN, mFgServiceShown);
         proto.write(NotificationChannelProto.IS_VIBRATION_ENABLED, mVibrationEnabled);
         proto.write(NotificationChannelProto.SHOW_BADGE, mShowBadge);
         proto.write(NotificationChannelProto.IS_DELETED, mDeleted);

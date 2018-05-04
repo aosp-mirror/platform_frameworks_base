@@ -336,6 +336,90 @@ public class NotificationTest extends UiServiceTestCase {
     }
 
     @Test
+    public void testRemoteViews_layoutChange() {
+        RemoteViews a = mock(RemoteViews.class);
+        when(a.getLayoutId()).thenReturn(234);
+        RemoteViews b = mock(RemoteViews.class);
+        when(b.getLayoutId()).thenReturn(189);
+
+        Notification.Builder n1 = new Notification.Builder(mContext, "test").setContent(a);
+        Notification.Builder n2 = new Notification.Builder(mContext, "test").setContent(b);
+        assertTrue(Notification.areRemoteViewsChanged(n1, n2));
+
+        n1 = new Notification.Builder(mContext, "test").setCustomBigContentView(a);
+        n2 = new Notification.Builder(mContext, "test").setCustomBigContentView(b);
+        assertTrue(Notification.areRemoteViewsChanged(n1, n2));
+
+        n1 = new Notification.Builder(mContext, "test").setCustomHeadsUpContentView(a);
+        n2 = new Notification.Builder(mContext, "test").setCustomHeadsUpContentView(b);
+        assertTrue(Notification.areRemoteViewsChanged(n1, n2));
+    }
+
+    @Test
+    public void testRemoteViews_layoutSame() {
+        RemoteViews a = mock(RemoteViews.class);
+        when(a.getLayoutId()).thenReturn(234);
+        RemoteViews b = mock(RemoteViews.class);
+        when(b.getLayoutId()).thenReturn(234);
+
+        Notification.Builder n1 = new Notification.Builder(mContext, "test").setContent(a);
+        Notification.Builder n2 = new Notification.Builder(mContext, "test").setContent(b);
+        assertFalse(Notification.areRemoteViewsChanged(n1, n2));
+
+        n1 = new Notification.Builder(mContext, "test").setCustomBigContentView(a);
+        n2 = new Notification.Builder(mContext, "test").setCustomBigContentView(b);
+        assertFalse(Notification.areRemoteViewsChanged(n1, n2));
+
+        n1 = new Notification.Builder(mContext, "test").setCustomHeadsUpContentView(a);
+        n2 = new Notification.Builder(mContext, "test").setCustomHeadsUpContentView(b);
+        assertFalse(Notification.areRemoteViewsChanged(n1, n2));
+    }
+
+    @Test
+    public void testRemoteViews_sequenceChange() {
+        RemoteViews a = mock(RemoteViews.class);
+        when(a.getLayoutId()).thenReturn(234);
+        when(a.getSequenceNumber()).thenReturn(1);
+        RemoteViews b = mock(RemoteViews.class);
+        when(b.getLayoutId()).thenReturn(234);
+        when(b.getSequenceNumber()).thenReturn(2);
+
+        Notification.Builder n1 = new Notification.Builder(mContext, "test").setContent(a);
+        Notification.Builder n2 = new Notification.Builder(mContext, "test").setContent(b);
+        assertTrue(Notification.areRemoteViewsChanged(n1, n2));
+
+        n1 = new Notification.Builder(mContext, "test").setCustomBigContentView(a);
+        n2 = new Notification.Builder(mContext, "test").setCustomBigContentView(b);
+        assertTrue(Notification.areRemoteViewsChanged(n1, n2));
+
+        n1 = new Notification.Builder(mContext, "test").setCustomHeadsUpContentView(a);
+        n2 = new Notification.Builder(mContext, "test").setCustomHeadsUpContentView(b);
+        assertTrue(Notification.areRemoteViewsChanged(n1, n2));
+    }
+
+    @Test
+    public void testRemoteViews_sequenceSame() {
+        RemoteViews a = mock(RemoteViews.class);
+        when(a.getLayoutId()).thenReturn(234);
+        when(a.getSequenceNumber()).thenReturn(1);
+        RemoteViews b = mock(RemoteViews.class);
+        when(b.getLayoutId()).thenReturn(234);
+        when(b.getSequenceNumber()).thenReturn(1);
+
+        Notification.Builder n1 = new Notification.Builder(mContext, "test").setContent(a);
+        Notification.Builder n2 = new Notification.Builder(mContext, "test").setContent(b);
+        assertFalse(Notification.areRemoteViewsChanged(n1, n2));
+
+        n1 = new Notification.Builder(mContext, "test").setCustomBigContentView(a);
+        n2 = new Notification.Builder(mContext, "test").setCustomBigContentView(b);
+        assertFalse(Notification.areRemoteViewsChanged(n1, n2));
+
+        n1 = new Notification.Builder(mContext, "test").setCustomHeadsUpContentView(a);
+        n2 = new Notification.Builder(mContext, "test").setCustomHeadsUpContentView(b);
+        assertFalse(Notification.areRemoteViewsChanged(n1, n2));
+    }
+
+    @Test
     public void testActionsDifferent_null() {
         Notification n1 = new Notification.Builder(mContext, "test")
                 .build();

@@ -151,7 +151,8 @@ DONE:
 }
 
 // ================================================================================
-Section::Section(int i, const int64_t timeoutMs) : id(i), timeoutMs(timeoutMs) {}
+Section::Section(int i, int64_t timeoutMs, bool deviceSpecific)
+    : id(i), timeoutMs(timeoutMs), deviceSpecific(deviceSpecific) {}
 
 Section::~Section() {}
 
@@ -236,8 +237,9 @@ status_t MetadataSection::Execute(ReportRequestSet* requests) const {
 // ================================================================================
 static inline bool isSysfs(const char* filename) { return strncmp(filename, "/sys/", 5) == 0; }
 
-FileSection::FileSection(int id, const char* filename, const int64_t timeoutMs)
-    : Section(id, timeoutMs), mFilename(filename) {
+FileSection::FileSection(int id, const char* filename, const bool deviceSpecific,
+                         const int64_t timeoutMs)
+    : Section(id, timeoutMs, deviceSpecific), mFilename(filename) {
     name = "file ";
     name += filename;
     mIsSysfs = isSysfs(filename);
@@ -251,7 +253,7 @@ status_t FileSection::Execute(ReportRequestSet* requests) const {
     unique_fd fd(open(mFilename, O_RDONLY | O_CLOEXEC));
     if (fd.get() == -1) {
         ALOGW("[%s] failed to open file", this->name.string());
-        return -errno;
+        return this->deviceSpecific ? NO_ERROR : -errno;
     }
 
     FdBuffer buffer;
@@ -862,10 +864,15 @@ status_t TombstoneSection::BlockingCall(int pipeWriteFd) const {
         // Read from the pipe concurrently to avoid blocking the child.
         FdBuffer buffer;
         err = buffer.readFully(dumpPipe.readFd().get());
+        // Wait on the child to avoid it becoming a zombie process.
+        status_t cStatus = wait_child(child);
         if (err != NO_ERROR) {
             ALOGW("[%s] failed to read stack dump: %d", this->name.string(), err);
             dumpPipe.readFd().reset();
             break;
+        }
+        if (cStatus != NO_ERROR) {
+            ALOGE("TombstoneSection '%s' child had an issue: %s\n", this->name.string(), strerror(-cStatus));
         }
 
         auto dump = std::make_unique<char[]>(buffer.size());

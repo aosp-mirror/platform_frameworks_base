@@ -158,8 +158,17 @@
     <!-- The space around a notification menu item  -->
     <dimen name="notification_menu_icon_padding">20dp</dimen>
 
-    <!-- The veritical space around the buttons in the inline settings -->
-    <dimen name="notification_guts_button_spacing">20dp</dimen>
+    <!-- The vertical space around the buttons in the inline settings -->
+    <dimen name="notification_guts_button_spacing">6dp</dimen>
+
+    <!-- The vertical padding a notification guts button has to fulfill the 48dp touch target -->
+    <dimen name="notification_guts_button_vertical_padding">14dp</dimen>
+
+    <!-- The horizontal padding for notification guts buttons-->
+    <dimen name="notification_guts_button_horizontal_padding">14dp</dimen>
+
+    <!-- The horizontal space around the buttons in the inline settings -->
+    <dimen name="notification_guts_button_horizontal_spacing">8dp</dimen>
 
     <!-- The height of the header in inline settings -->
     <dimen name="notification_guts_header_height">24dp</dimen>
@@ -930,12 +939,13 @@
     <!-- Home button padding for sizing -->
     <dimen name="home_padding">16dp</dimen>
 
-    <!-- Smart reply button -->
+    <!-- Smart reply button. Total height 48dp, visible height 32dp. -->
     <dimen name="smart_reply_button_spacing">8dp</dimen>
-    <dimen name="smart_reply_button_padding_vertical">10dp</dimen>
-    <dimen name="smart_reply_button_padding_horizontal_single_line">16dp</dimen>
-    <dimen name="smart_reply_button_padding_horizontal_double_line">16dp</dimen>
-    <dimen name="smart_reply_button_min_height">32dp</dimen>
+    <dimen name="smart_reply_button_padding_vertical">14dp</dimen>
+    <!-- Note: The following two paddings need to be different until b/78876518 is fixed. -->
+    <dimen name="smart_reply_button_padding_horizontal_single_line">20dp</dimen>
+    <dimen name="smart_reply_button_padding_horizontal_double_line">19dp</dimen>
+    <dimen name="smart_reply_button_min_height">48dp</dimen>
     <dimen name="smart_reply_button_font_size">14sp</dimen>
     <dimen name="smart_reply_button_line_spacing_extra">6sp</dimen> <!-- Total line height 20sp. -->
 

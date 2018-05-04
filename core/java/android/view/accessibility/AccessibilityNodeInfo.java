@@ -901,7 +901,7 @@ public class AccessibilityNodeInfo implements Parcelable {
      * Refreshes this info with the latest state of the view it represents, and request new
      * data be added by the View.
      *
-     * @param extraDataKey A bitmask of the extra data requested. Data that must be requested
+     * @param extraDataKey The extra data requested. Data that must be requested
      *                     with this mechanism is generally expensive to retrieve, so should only be
      *                     requested when needed. See
      *                     {@link #EXTRA_DATA_TEXT_CHARACTER_LOCATION_KEY} and

@@ -4259,7 +4259,14 @@ public class DevicePolicyManagerTest extends DpmTestBase {
 
         // Drain ACTION_DEVICE_POLICY_MANAGER_STATE_CHANGED broadcasts as part of
         // reportPasswordChanged()
-        verify(mContext.spiedContext, times(3)).sendBroadcastAsUser(
+        // This broadcast should be sent 4 times:
+        // * Twice from calls to DevicePolicyManagerService.updatePasswordExpirationsLocked,
+        //   once for each affected user, in DevicePolicyManagerService.reportPasswordChanged.
+        // * Twice from calls to DevicePolicyManagerService.saveSettingsLocked
+        //   in DevicePolicyManagerService.reportPasswordChanged, once with the userId
+        //   the password change is relevant to and another with the credential owner of said
+        //   userId.
+        verify(mContext.spiedContext, times(4)).sendBroadcastAsUser(
                 MockUtils.checkIntentAction(
                         DevicePolicyManager.ACTION_DEVICE_POLICY_MANAGER_STATE_CHANGED),
                 MockUtils.checkUserHandle(userHandle));

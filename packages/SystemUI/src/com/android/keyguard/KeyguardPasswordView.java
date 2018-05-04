@@ -140,12 +140,6 @@ public class KeyguardPasswordView extends KeyguardAbsKeyInputView
         mImm.hideSoftInputFromWindow(getWindowToken(), 0);
     }
 
-    @Override
-    public void reset() {
-        super.reset();
-        mPasswordEntry.requestFocus();
-    }
-
     private void updateSwitchImeButton() {
         // If there's more than one IME, enable the IME switcher button
         final boolean wasVisible = mSwitchImeButton.getVisibility() == View.VISIBLE;
@@ -192,8 +186,6 @@ public class KeyguardPasswordView extends KeyguardAbsKeyInputView
 
         // Set selected property on so the view can send accessibility events.
         mPasswordEntry.setSelected(true);
-
-        mPasswordEntry.requestFocus();
 
         mSwitchImeButton = findViewById(R.id.switch_ime_button);
         mSwitchImeButton.setOnClickListener(new OnClickListener() {

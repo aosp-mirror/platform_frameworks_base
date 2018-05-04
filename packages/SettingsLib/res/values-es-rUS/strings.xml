@@ -276,7 +276,7 @@
     <string name="debug_drawing_category" msgid="6755716469267367852">"Dibujo"</string>
     <string name="debug_hw_drawing_category" msgid="6220174216912308658">"Representación acelerada mediante hardware"</string>
     <string name="media_category" msgid="4388305075496848353">"Multimedia"</string>
-    <string name="debug_monitoring_category" msgid="7640508148375798343">"Monitoreo"</string>
+    <string name="debug_monitoring_category" msgid="7640508148375798343">"Supervisión"</string>
     <string name="strict_mode" msgid="1938795874357830695">"Modo estricto"</string>
     <string name="strict_mode_summary" msgid="142834318897332338">"Destello por op. de apps en la conversación principal"</string>
     <string name="pointer_location" msgid="6084434787496938001">"Ubicación del puntero"</string>
@@ -365,11 +365,12 @@
     <string name="accessibility_display_daltonizer_preference_title" msgid="5800761362678707872">"Corrección de color"</string>
     <string name="accessibility_display_daltonizer_preference_subtitle" msgid="3484969015295282911">"Esta función es experimental y puede afectar el rendimiento."</string>
     <string name="daltonizer_type_overridden" msgid="3116947244410245916">"Reemplazado por <xliff:g id="TITLE">%1$s</xliff:g>"</string>
-    <string name="power_remaining_duration_only" msgid="845431008899029842">"Tiempo restante aproximado: <xliff:g id="TIME">%1$s</xliff:g>"</string>
-    <string name="power_discharging_duration" msgid="6655472132189365839">"Tiempo restante: <xliff:g id="TIME">%1$s</xliff:g> aproximadamente (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
-    <string name="power_remaining_duration_only_enhanced" msgid="5992456722677973678">"Aproximadamente <xliff:g id="TIME">%1$s</xliff:g> restantes en función del uso"</string>
-    <string name="power_discharging_duration_enhanced" msgid="5726302316642148671">"Tiempo restante: <xliff:g id="TIME">%1$s</xliff:g> aproximadamente según el uso (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
-    <string name="power_remaining_duration_only_short" msgid="5329694252258605547">"Tiempo restante: <xliff:g id="TIME">%1$s</xliff:g>"</string>
+    <string name="power_remaining_settings_home_page" msgid="4845022416859002011">"<xliff:g id="PERCENTAGE">%1$s</xliff:g> - <xliff:g id="TIME_STRING">%2$s</xliff:g>"</string>
+    <string name="power_remaining_duration_only" msgid="6123167166221295462">"Tiempo restante: aproximadamente <xliff:g id="TIME_REMAINING">%1$s</xliff:g>"</string>
+    <string name="power_discharging_duration" msgid="8848256785736335185">"Tiempo restante: aproximadamente <xliff:g id="TIME_REMAINING">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
+    <string name="power_remaining_duration_only_enhanced" msgid="4189311599812296592">"Tiempo restante: aproximadamente <xliff:g id="TIME_REMAINING">%1$s</xliff:g> en función de tu uso"</string>
+    <string name="power_discharging_duration_enhanced" msgid="1992003260664804080">"Tiempo restante: aproximadamente <xliff:g id="TIME_REMAINING">%1$s</xliff:g> en función de tu uso (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
+    <string name="power_remaining_duration_only_short" msgid="3463575350656389957">"Tiempo restante: <xliff:g id="TIME_REMAINING">%1$s</xliff:g>"</string>
     <string name="power_discharge_by_enhanced" msgid="2095821536747992464">"Debería durar aproximadamente hasta <xliff:g id="TIME">%1$s</xliff:g> según el uso (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
     <string name="power_discharge_by_only_enhanced" msgid="2175151772952365149">"Debería durar aproximadamente hasta <xliff:g id="TIME">%1$s</xliff:g> según el uso"</string>
     <string name="power_discharge_by" msgid="6453537733650125582">"Debería durar aproximadamente hasta <xliff:g id="TIME">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
@@ -396,7 +397,7 @@
     <string name="disabled_by_admin_summary_text" msgid="6750513964908334617">"Controlada por el administrador"</string>
     <string name="enabled_by_admin" msgid="5302986023578399263">"El administrador habilitó esta opción"</string>
     <string name="disabled_by_admin" msgid="8505398946020816620">"El administrador inhabilitó esta opción"</string>
-    <string name="disabled" msgid="9206776641295849915">"Inhabilitadas"</string>
+    <string name="disabled" msgid="9206776641295849915">"Inhabilitada"</string>
     <string name="external_source_trusted" msgid="2707996266575928037">"Permitida"</string>
     <string name="external_source_untrusted" msgid="2677442511837596726">"No permitida"</string>
     <string name="install_other_apps" msgid="6986686991775883017">"Instalar apps desconocidas"</string>

@@ -16,8 +16,10 @@
 
 package com.android.server.pm;
 
+import android.content.pm.PackageManagerInternal;
 import com.android.internal.util.XmlUtils;
 
+import com.android.server.LocalServices;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 import org.xmlpull.v1.XmlSerializer;
@@ -52,6 +54,7 @@ public class PreferredComponent {
     private String mParseError;
 
     private final Callbacks mCallbacks;
+    private final String mSetupWizardPackageName;
 
     public interface Callbacks {
         public boolean onReadTag(String tagName, XmlPullParser parser)
@@ -66,6 +69,7 @@ public class PreferredComponent {
         mAlways = always;
         mShortComponent = component.flattenToShortString();
         mParseError = null;
+        mSetupWizardPackageName = null;
         if (set != null) {
             final int N = set.length;
             String[] myPackages = new String[N];
@@ -170,6 +174,8 @@ public class PreferredComponent {
         mSetPackages = myPackages;
         mSetClasses = myClasses;
         mSetComponents = myComponents;
+        final PackageManagerInternal packageManagerInternal = LocalServices.getService(PackageManagerInternal.class);
+        mSetupWizardPackageName = packageManagerInternal.getSetupWizardPackageName();
     }
 
     public String getParseError() {
@@ -193,7 +199,7 @@ public class PreferredComponent {
         }
     }
 
-    public boolean sameSet(List<ResolveInfo> query) {
+    public boolean sameSet(List<ResolveInfo> query, boolean excludeSetupWizardPackage) {
         if (mSetPackages == null) {
             return query == null;
         }
@@ -202,12 +208,18 @@ public class PreferredComponent {
         }
         final int NQ = query.size();
         final int NS = mSetPackages.length;
-
         int numMatch = 0;
         for (int i=0; i<NQ; i++) {
             ResolveInfo ri = query.get(i);
             ActivityInfo ai = ri.activityInfo;
             boolean good = false;
+
+            // ignore SetupWizard package's launcher capability because it is only existed
+            // during SetupWizard is running
+            if (excludeSetupWizardPackage && ai.packageName.equals(mSetupWizardPackageName)) {
+                continue;
+            }
+
             for (int j=0; j<NS; j++) {
                 if (mSetPackages[j].equals(ai.packageName)
                         && mSetClasses[j].equals(ai.name)) {
@@ -242,7 +254,7 @@ public class PreferredComponent {
         return numMatch == NS;
     }
 
-    public boolean isSuperset(List<ResolveInfo> query) {
+    public boolean isSuperset(List<ResolveInfo> query, boolean excludeSetupWizardPackage) {
         if (mSetPackages == null) {
             return query == null;
         }
@@ -251,13 +263,20 @@ public class PreferredComponent {
         }
         final int NQ = query.size();
         final int NS = mSetPackages.length;
-        if (NS < NQ) {
+        if (!excludeSetupWizardPackage && NS < NQ) {
             return false;
         }
         for (int i=0; i<NQ; i++) {
             ResolveInfo ri = query.get(i);
             ActivityInfo ai = ri.activityInfo;
             boolean foundMatch = false;
+
+            // ignore SetupWizard package's launcher capability because it is only existed
+            // during SetupWizard is running
+            if (excludeSetupWizardPackage && ai.packageName.equals(mSetupWizardPackageName)) {
+                continue;
+            }
+
             for (int j=0; j<NS; j++) {
                 if (mSetPackages[j].equals(ai.packageName) && mSetClasses[j].equals(ai.name)) {
                     foundMatch = true;

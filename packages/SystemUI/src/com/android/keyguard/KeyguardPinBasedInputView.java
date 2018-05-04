@@ -23,13 +23,16 @@ import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.View;
 
+import com.android.internal.annotations.VisibleForTesting;
+
 /**
  * A Pin based Keyguard input view
  */
 public abstract class KeyguardPinBasedInputView extends KeyguardAbsKeyInputView
         implements View.OnKeyListener, View.OnTouchListener {
 
-    protected PasswordTextView mPasswordEntry;
+    @VisibleForTesting
+    PasswordTextView mPasswordEntry;
     private View mOkButton;
     private View mDeleteButton;
     private View mButton0;
@@ -49,12 +52,6 @@ public abstract class KeyguardPinBasedInputView extends KeyguardAbsKeyInputView
 
     public KeyguardPinBasedInputView(Context context, AttributeSet attrs) {
         super(context, attrs);
-    }
-
-    @Override
-    public void reset() {
-        mPasswordEntry.requestFocus();
-        super.reset();
     }
 
     @Override
@@ -235,6 +232,12 @@ public abstract class KeyguardPinBasedInputView extends KeyguardAbsKeyInputView
 
         mPasswordEntry.requestFocus();
         super.onFinishInflate();
+    }
+
+    @Override
+    public void onResume(int reason) {
+        super.onResume(reason);
+        mPasswordEntry.requestFocus();
     }
 
     @Override

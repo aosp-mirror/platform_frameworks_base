@@ -219,7 +219,7 @@
     <string name="global_action_emergency" msgid="7112311161137421166">"Khẩn cấp"</string>
     <string name="global_action_bug_report" msgid="7934010578922304799">"Báo cáo lỗi"</string>
     <string name="global_action_logout" msgid="935179188218826050">"Kết thúc phiên"</string>
-    <string name="global_action_screenshot" msgid="8329831278085426283">"Ảnh chụp màn hình"</string>
+    <string name="global_action_screenshot" msgid="8329831278085426283">"Chụp ảnh màn hình"</string>
     <string name="bugreport_title" msgid="2667494803742548533">"Tạo báo cáo lỗi"</string>
     <string name="bugreport_message" msgid="398447048750350456">"Báo cáo này sẽ thu thập thông tin về tình trạng thiết bị hiện tại của bạn, để gửi dưới dạng thông báo qua email. Sẽ mất một chút thời gian kể từ khi bắt đầu báo cáo lỗi cho tới khi báo cáo sẵn sàng để gửi; xin vui lòng kiên nhẫn."</string>
     <string name="bugreport_option_interactive_title" msgid="8635056131768862479">"Báo cáo tương tác"</string>
@@ -836,7 +836,7 @@
     <string name="double_tap_toast" msgid="4595046515400268881">"Mẹo: Nhấn đúp để phóng to và thu nhỏ."</string>
     <string name="autofill_this_form" msgid="4616758841157816676">"Tự động điền"</string>
     <string name="setup_autofill" msgid="7103495070180590814">"Thiết lập Tự động điền"</string>
-    <string name="autofill_window_title" msgid="921006636895825007">"Tự động điền"</string>
+    <string name="autofill_window_title" msgid="4107745526909284887">"Tự động điền với <xliff:g id="SERVICENAME">%1$s</xliff:g>"</string>
     <string name="autofill_address_name_separator" msgid="6350145154779706772">" "</string>
     <string name="autofill_address_summary_name_format" msgid="3268041054899214945">"$1$2$3"</string>
     <string name="autofill_address_summary_separator" msgid="7483307893170324129">", "</string>
@@ -1343,7 +1343,7 @@
     <string name="forward_intent_to_work" msgid="621480743856004612">"Bạn đang sử dụng ứng dụng này trong hồ sơ công việc của mình"</string>
     <string name="input_method_binding_label" msgid="1283557179944992649">"Phương thức nhập"</string>
     <string name="sync_binding_label" msgid="3687969138375092423">"Đồng bộ hóa"</string>
-    <string name="accessibility_binding_label" msgid="4148120742096474641">"Trợ năng"</string>
+    <string name="accessibility_binding_label" msgid="4148120742096474641">"Hỗ trợ tiếp cận"</string>
     <string name="wallpaper_binding_label" msgid="1240087844304687662">"Hình nền"</string>
     <string name="chooser_wallpaper" msgid="7873476199295190279">"Thay đổi hình nền"</string>
     <string name="notification_listener_binding_label" msgid="2014162835481906429">"Trình xử lý thông báo"</string>
@@ -1690,8 +1690,9 @@
     <string name="package_installed_device_owner" msgid="6875717669960212648">"Do quản trị viên của bạn cài đặt"</string>
     <string name="package_updated_device_owner" msgid="1847154566357862089">"Do quản trị viên của bạn cập nhật"</string>
     <string name="package_deleted_device_owner" msgid="2307122077550236438">"Do quản trị viên của bạn xóa"</string>
+    <string name="battery_saver_description_with_learn_more" msgid="6323937147992667707">"Để kéo dài thời lượng pin, Trình tiết kiệm pin sẽ tắt một số tính năng của thiết bị và hạn chế các ứng dụng. "<annotation id="url">"Hãy tìm hiểu thêm"</annotation></string>
     <string name="battery_saver_description" msgid="769989536172631582">"Để kéo dài thời lượng pin, Trình tiết kiệm pin sẽ tắt một số tính năng của thiết bị và hạn chế các ứng dụng."</string>
-    <string name="data_saver_description" msgid="6015391409098303235">"Để giúp giảm mức sử dụng dữ liệu, Trình tiết kiệm dữ liệu chặn một số ứng dụng gửi hoặc nhận dữ liệu trong nền. Ứng dụng mà bạn hiện sử dụng có thể truy cập dữ liệu nhưng có thể thực hiện việc đó ít thường xuyên hơn. Ví dụ: hình ảnh sẽ không hiển thị cho đến khi bạn nhấn vào hình ảnh đó."</string>
+    <string name="data_saver_description" msgid="6015391409098303235">"Để giúp giảm mức sử dụng dữ liệu, Trình tiết kiệm dữ liệu sẽ chặn một số ứng dụng gửi hoặc nhận dữ liệu trong nền. Một ứng dụng mà bạn hiện sử dụng có thể truy cập dữ liệu nhưng tần suất sẽ giảm. Ví dụ: hình ảnh sẽ không hiển thị cho đến khi bạn nhấn vào hình ảnh đó."</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"Bật Trình tiết kiệm dữ liệu?"</string>
     <string name="data_saver_enable_button" msgid="7147735965247211818">"Bật"</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="4367877408072000848">
@@ -1738,8 +1739,7 @@
     <string name="zen_mode_default_weekends_name" msgid="2786495801019345244">"Cuối tuần"</string>
     <string name="zen_mode_default_events_name" msgid="8158334939013085363">"Sự kiện"</string>
     <string name="zen_mode_default_every_night_name" msgid="3012363838882944175">"Ngủ"</string>
-    <!-- no translation found for muted_by (5942954724562097128) -->
-    <skip />
+    <string name="muted_by" msgid="5942954724562097128">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g> đang tắt một số âm thanh"</string>
     <string name="system_error_wipe_data" msgid="6608165524785354962">"Đã xảy ra sự cố nội bộ với thiết bị của bạn và thiết bị có thể sẽ không ổn định cho tới khi bạn thiết lập lại dữ liệu ban đầu."</string>
     <string name="system_error_manufacturer" msgid="8086872414744210668">"Đã xảy ra sự cố nội bộ với thiết bị. Hãy liên hệ với nhà sản xuất của bạn để biết chi tiết."</string>
     <string name="stk_cc_ussd_to_dial" msgid="5214333646366591205">"Yêu cầu USSD đã thay đổi thành cuộc gọi thông thường"</string>

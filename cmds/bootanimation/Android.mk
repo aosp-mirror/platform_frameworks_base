@@ -29,6 +29,9 @@ LOCAL_SHARED_LIBRARIES += \
     libandroidthings \
     libchrome \
 
+LOCAL_STATIC_LIBRARIES += \
+    libjsoncpp
+
 LOCAL_SRC_FILES += \
     iot/iotbootanimation_main.cpp \
     iot/BootAction.cpp \

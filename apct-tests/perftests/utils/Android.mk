@@ -1,7 +1,9 @@
 LOCAL_PATH := $(call my-dir)
 include $(CLEAR_VARS)
 
-LOCAL_STATIC_JAVA_LIBRARIES := android-support-test
+LOCAL_STATIC_JAVA_LIBRARIES := \
+    android-support-test \
+    androidx.annotation_annotation
 
 # Build all java files in the java subdirectory
 LOCAL_SRC_FILES := $(call all-subdir-java-files)

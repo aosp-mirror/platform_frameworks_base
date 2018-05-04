@@ -225,7 +225,8 @@ public:
 
     static void recordNode(RenderNode& node, std::function<void(Canvas&)> contentCallback) {
         std::unique_ptr<Canvas> canvas(Canvas::create_recording_canvas(
-                node.stagingProperties().getWidth(), node.stagingProperties().getHeight()));
+                node.stagingProperties().getWidth(), node.stagingProperties().getHeight(),
+                &node));
         contentCallback(*canvas.get());
         node.setStagingDisplayList(canvas->finishRecording());
     }
@@ -298,11 +299,6 @@ public:
     static bool isRenderThreadRunning() { return renderthread::RenderThread::hasInstance(); }
 
     static SkColor interpolateColor(float fraction, SkColor start, SkColor end);
-
-    static void layoutTextUnscaled(const SkPaint& paint, const char* text,
-                                   std::vector<glyph_t>* outGlyphs,
-                                   std::vector<float>* outPositions, float* outTotalAdvance,
-                                   Rect* outBounds);
 
     static void drawUtf8ToCanvas(Canvas* canvas, const char* text, const SkPaint& paint, float x,
                                  float y);

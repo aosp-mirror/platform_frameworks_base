@@ -29,6 +29,9 @@ LOCAL_SHARED_LIBRARIES := \
     libchrome \
     liblog \
 
+LOCAL_STATIC_LIBRARIES += \
+    libjsoncpp
+
 LOCAL_SRC_FILES := \
     BootParameters.cpp \
     BootParameters_test.cpp \

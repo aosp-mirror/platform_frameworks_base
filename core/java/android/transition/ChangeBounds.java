@@ -311,6 +311,38 @@ public class ChangeBounds extends Transition {
                 ++numChanges;
             }
             if (numChanges > 0) {
+                if (view.getParent() instanceof ViewGroup) {
+                    final ViewGroup parent = (ViewGroup) view.getParent();
+                    parent.suppressLayout(true);
+                    TransitionListener transitionListener = new TransitionListenerAdapter() {
+                        boolean mCanceled = false;
+
+                        @Override
+                        public void onTransitionCancel(Transition transition) {
+                            parent.suppressLayout(false);
+                            mCanceled = true;
+                        }
+
+                        @Override
+                        public void onTransitionEnd(Transition transition) {
+                            if (!mCanceled) {
+                                parent.suppressLayout(false);
+                            }
+                            transition.removeListener(this);
+                        }
+
+                        @Override
+                        public void onTransitionPause(Transition transition) {
+                            parent.suppressLayout(false);
+                        }
+
+                        @Override
+                        public void onTransitionResume(Transition transition) {
+                            parent.suppressLayout(true);
+                        }
+                    };
+                    addListener(transitionListener);
+                }
                 Animator anim;
                 if (!mResizeClip) {
                     view.setLeftTopRightBottom(startLeft, startTop, startRight, startBottom);
@@ -397,38 +429,6 @@ public class ChangeBounds extends Transition {
                     }
                     anim = TransitionUtils.mergeAnimators(positionAnimator,
                             clipAnimator);
-                }
-                if (view.getParent() instanceof ViewGroup) {
-                    final ViewGroup parent = (ViewGroup) view.getParent();
-                    parent.suppressLayout(true);
-                    TransitionListener transitionListener = new TransitionListenerAdapter() {
-                        boolean mCanceled = false;
-
-                        @Override
-                        public void onTransitionCancel(Transition transition) {
-                            parent.suppressLayout(false);
-                            mCanceled = true;
-                        }
-
-                        @Override
-                        public void onTransitionEnd(Transition transition) {
-                            if (!mCanceled) {
-                                parent.suppressLayout(false);
-                            }
-                            transition.removeListener(this);
-                        }
-
-                        @Override
-                        public void onTransitionPause(Transition transition) {
-                            parent.suppressLayout(false);
-                        }
-
-                        @Override
-                        public void onTransitionResume(Transition transition) {
-                            parent.suppressLayout(true);
-                        }
-                    };
-                    addListener(transitionListener);
                 }
                 return anim;
             }

@@ -19,7 +19,7 @@
 
 <!-- Default configuration for zen mode.  See android.service.notification.ZenModeConfig. -->
 <zen version="7">
-    <allow alarms="true" media="true" system="false" calls="false" messages="false"
+    <allow alarms="true" media="true" system="false" calls="false" callsFrom="2" messages="false"
            reminders="false" events="false" />
 
     <!-- all visual effects that exist as of P -->

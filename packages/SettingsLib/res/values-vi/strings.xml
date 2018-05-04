@@ -193,7 +193,7 @@
     <string name="enable_adb_summary" msgid="4881186971746056635">"Chế độ gỡ lỗi khi USB được kết nối"</string>
     <string name="clear_adb_keys" msgid="4038889221503122743">"Thu hồi ủy quyền gỡ lỗi USB"</string>
     <string name="bugreport_in_power" msgid="7923901846375587241">"Phím tắt báo cáo lỗi"</string>
-    <string name="bugreport_in_power_summary" msgid="1778455732762984579">"Hiển thị nút trong menu nguồn để thêm báo cáo lỗi"</string>
+    <string name="bugreport_in_power_summary" msgid="1778455732762984579">"Hiển thị một nút trong menu nguồn để thêm báo cáo lỗi"</string>
     <string name="keep_screen_on" msgid="1146389631208760344">"Không khóa màn hình"</string>
     <string name="keep_screen_on_summary" msgid="2173114350754293009">"Màn hình sẽ không bao giờ chuyển sang chế độ nghỉ khi sạc"</string>
     <string name="bt_hci_snoop_log" msgid="3340699311158865670">"Bật nhật ký theo dõi HCI Bluetooth"</string>
@@ -226,11 +226,11 @@
     <string name="bluetooth_select_a2dp_codec_ldac_playback_quality" msgid="3619694372407843405">"Codec LDAC âm thanh Bluetooth: Chất lượng phát lại"</string>
     <string name="bluetooth_select_a2dp_codec_ldac_playback_quality_dialog_title" msgid="7595776220458732825">"Kích hoạt chế độ chọn codec LDAC\nâm thanh Bluetooth: Chất lượng phát"</string>
     <string name="bluetooth_select_a2dp_codec_streaming_label" msgid="5347862512596240506">"Truyền trực tuyến: <xliff:g id="STREAMING_PARAMETER">%1$s</xliff:g>"</string>
-    <string name="select_private_dns_configuration_title" msgid="3700456559305263922">"DNS riêng tư"</string>
-    <string name="select_private_dns_configuration_dialog_title" msgid="9221994415765826811">"Chọn chế độ DNS riêng tư"</string>
+    <string name="select_private_dns_configuration_title" msgid="3700456559305263922">"DNS riêng"</string>
+    <string name="select_private_dns_configuration_dialog_title" msgid="9221994415765826811">"Chọn chế độ DNS riêng"</string>
     <string name="private_dns_mode_off" msgid="8236575187318721684">"Tắt"</string>
     <string name="private_dns_mode_opportunistic" msgid="8314986739896927399">"Tự động"</string>
-    <string name="private_dns_mode_provider" msgid="8354935160639360804">"Tên máy chủ của nhà cung cấp DNS riêng tư"</string>
+    <string name="private_dns_mode_provider" msgid="8354935160639360804">"Tên máy chủ của nhà cung cấp DNS riêng"</string>
     <string name="private_dns_mode_provider_hostname_hint" msgid="2487492386970928143">"Nhập tên máy chủ của nhà cung cấp DNS"</string>
     <string name="private_dns_mode_provider_failure" msgid="231837290365031223">"Không thể kết nối"</string>
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"Hiển thị tùy chọn chứng nhận hiển thị không dây"</string>
@@ -242,7 +242,7 @@
     <string name="select_logd_size_dialog_title" msgid="1206769310236476760">"Chọn kích thước Trình ghi nhật ký trên mỗi bộ đệm nhật ký"</string>
     <string name="dev_logpersist_clear_warning_title" msgid="684806692440237967">"Xóa bộ nhớ ổn định trong trình ghi nhật ký?"</string>
     <string name="dev_logpersist_clear_warning_message" msgid="2256582531342994562">"Khi chúng tôi không còn theo dõi bằng trình ghi nhật ký ổn định nữa, chúng tôi sẽ được yêu cầu xóa dữ liệu trong trình ghi nhật ký nằm trên thiết bị của bạn."</string>
-    <string name="select_logpersist_title" msgid="7530031344550073166">"Liên tục lưu dữ liệu của trình ghi nhật ký"</string>
+    <string name="select_logpersist_title" msgid="7530031344550073166">"Liên tục lưu dữ liệu của trình ghi nhật ký trên thiết bị"</string>
     <string name="select_logpersist_dialog_title" msgid="4003400579973269060">"Chọn lần tải nhật ký để lưu trữ ổn định trên thiết bị"</string>
     <string name="select_usb_configuration_title" msgid="2649938511506971843">"Chọn cấu hình USB"</string>
     <string name="select_usb_configuration_dialog_title" msgid="6385564442851599963">"Chọn cấu hình USB"</string>
@@ -266,7 +266,7 @@
     <string name="hdcp_checking_dialog_title" msgid="5141305530923283">"Đặt hành vi kiểm tra HDCP"</string>
     <string name="debug_debugging_category" msgid="6781250159513471316">"Gỡ lỗi"</string>
     <string name="debug_app" msgid="8349591734751384446">"Chọn ứng dụng gỡ lỗi"</string>
-    <string name="debug_app_not_set" msgid="718752499586403499">"Không có ứng dụng gỡ lỗi nào được đặt"</string>
+    <string name="debug_app_not_set" msgid="718752499586403499">"Chưa đặt ứng dụng gỡ lỗi nào"</string>
     <string name="debug_app_set" msgid="2063077997870280017">"Ứng dụng gỡ lỗi: <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="select_application" msgid="5156029161289091703">"Chọn ứng dụng"</string>
     <string name="no_application" msgid="2813387563129153880">"Không có ứng dụng"</string>
@@ -365,11 +365,12 @@
     <string name="accessibility_display_daltonizer_preference_title" msgid="5800761362678707872">"Sửa màu"</string>
     <string name="accessibility_display_daltonizer_preference_subtitle" msgid="3484969015295282911">"Tính năng này là tính năng thử nghiệm và có thể ảnh hưởng đến hoạt động."</string>
     <string name="daltonizer_type_overridden" msgid="3116947244410245916">"Bị ghi đè bởi <xliff:g id="TITLE">%1$s</xliff:g>"</string>
-    <string name="power_remaining_duration_only" msgid="845431008899029842">"Còn khoảng <xliff:g id="TIME">%1$s</xliff:g>"</string>
-    <string name="power_discharging_duration" msgid="6655472132189365839">"Còn khoảng <xliff:g id="TIME">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
-    <string name="power_remaining_duration_only_enhanced" msgid="5992456722677973678">"Còn khoảng <xliff:g id="TIME">%1$s</xliff:g> dựa trên mức sử dụng của bạn"</string>
-    <string name="power_discharging_duration_enhanced" msgid="5726302316642148671">"Còn khoảng <xliff:g id="TIME">%1$s</xliff:g> dựa vào mức sử dụng của bạn (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
-    <string name="power_remaining_duration_only_short" msgid="5329694252258605547">"Còn lại <xliff:g id="TIME">%1$s</xliff:g>"</string>
+    <string name="power_remaining_settings_home_page" msgid="4845022416859002011">"<xliff:g id="PERCENTAGE">%1$s</xliff:g> - <xliff:g id="TIME_STRING">%2$s</xliff:g>"</string>
+    <string name="power_remaining_duration_only" msgid="6123167166221295462">"Còn khoảng <xliff:g id="TIME_REMAINING">%1$s</xliff:g>"</string>
+    <string name="power_discharging_duration" msgid="8848256785736335185">"Còn khoảng <xliff:g id="TIME_REMAINING">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
+    <string name="power_remaining_duration_only_enhanced" msgid="4189311599812296592">"Còn khoảng <xliff:g id="TIME_REMAINING">%1$s</xliff:g> dựa trên mức sử dụng của bạn"</string>
+    <string name="power_discharging_duration_enhanced" msgid="1992003260664804080">"Còn khoảng <xliff:g id="TIME_REMAINING">%1$s</xliff:g> dựa trên mức sử dụng của bạn (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
+    <string name="power_remaining_duration_only_short" msgid="3463575350656389957">"Còn <xliff:g id="TIME_REMAINING">%1$s</xliff:g>"</string>
     <string name="power_discharge_by_enhanced" msgid="2095821536747992464">"Sẽ hết pin cho tới khoảng <xliff:g id="TIME">%1$s</xliff:g> dựa trên mức sử dụng của bạn (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
     <string name="power_discharge_by_only_enhanced" msgid="2175151772952365149">"Sẽ hết pin cho tới khoảng <xliff:g id="TIME">%1$s</xliff:g> dựa trên mức sử dụng của bạn"</string>
     <string name="power_discharge_by" msgid="6453537733650125582">"Sẽ hết pin cho tới khoảng <xliff:g id="TIME">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>

@@ -22,4 +22,6 @@
     <string name="car_guest" msgid="3738772168718508650">"Gas"</string>
     <string name="car_add_user" msgid="5245196248349230898">"Voeg gebruiker by"</string>
     <string name="car_new_user" msgid="8142927244990323906">"Nuwe gebruiker"</string>
+    <string name="user_add_user_message_setup" msgid="1791011504259527329">"Wanneer jy \'n nuwe gebruiker byvoeg, moet daardie persoon hul spasie opstel."</string>
+    <string name="user_add_user_message_update" msgid="3383320289232716179">"Enige gebruiker kan programme vir al die ander gebruikers opdateer."</string>
 </resources>

@@ -137,7 +137,7 @@
     <string name="managed_user_title" msgid="8109605045406748842">"အလုပ်သုံးအက်ပ်များအားလုံး"</string>
     <string name="user_guest" msgid="8475274842845401871">"ဧည့်သည်"</string>
     <string name="unknown" msgid="1592123443519355854">"မသိပါ"</string>
-    <string name="running_process_item_user_label" msgid="3129887865552025943">"သုံးစွဲသူ၊ <xliff:g id="USER_NAME">%1$s</xliff:g>"</string>
+    <string name="running_process_item_user_label" msgid="3129887865552025943">"အသုံးပြုသူ- <xliff:g id="USER_NAME">%1$s</xliff:g>"</string>
     <string name="launch_defaults_some" msgid="313159469856372621">"မူရင်းအချို့ သတ်မှတ်ပြီး"</string>
     <string name="launch_defaults_none" msgid="4241129108140034876">"ပုံမှန်သတ်မှတ်ထားခြင်းမရှိ"</string>
     <string name="tts_settings" msgid="8186971894801348327">"စာသားမှစကားပြောပြောင်း ဆက်တင်များ"</string>
@@ -193,7 +193,7 @@
     <string name="enable_adb_summary" msgid="4881186971746056635">"USBနှင့်ဆက်သွယ်ထားလျှင် အမှားရှာဖွေဖယ်ရှားမှုစနစ်စတင်ရန်"</string>
     <string name="clear_adb_keys" msgid="4038889221503122743">"USB အမှားရှာပြင်ဆင်ခွင့်များ ပြန်ရုပ်သိမ်းခြင်း"</string>
     <string name="bugreport_in_power" msgid="7923901846375587241">"ချွတ်ယွင်းမှု အစီရင်ခံရန် ဖြတ်လမ်း"</string>
-    <string name="bugreport_in_power_summary" msgid="1778455732762984579">"ဘာဂ် အစီရင်ခံစာကို လက်ခံရန် ပါဝါ မီနူးထဲက ခလုတ်ကို ပြပါ"</string>
+    <string name="bugreport_in_power_summary" msgid="1778455732762984579">"ချွတ်ယွင်းမှု အစီရင်ခံစာကို တင်ရန် ပါဝါမီနူးမှ ခလုတ်ကို ပြပါ"</string>
     <string name="keep_screen_on" msgid="1146389631208760344">"ဖွင့်လျက်သား"</string>
     <string name="keep_screen_on_summary" msgid="2173114350754293009">"အားသွင်းနေစဉ် ဖန်သားပြင်မှာဘယ်သောအခါမှ ပိတ်မည်မဟုတ်ပါ။"</string>
     <string name="bt_hci_snoop_log" msgid="3340699311158865670">"ဘလူးတုသ် HCI snoop မှတ်တမ်းကို ဖွင့်ခြင်း"</string>
@@ -203,7 +203,7 @@
     <string name="confirm_enable_oem_unlock_title" msgid="4802157344812385674">"OEM သော့ဖွင့်ခြင်း ခွင့်ပြုမလား?"</string>
     <string name="confirm_enable_oem_unlock_text" msgid="5517144575601647022">"သတိပေးချက်: ဤချိန်ညှိချက်ဖွင့်ထားလျှင်၊ ဤစက်ပစ္စည်းပေါ်တွင် စက်ပစ္စည်းကာကွယ်သည့် အထူးပြုလုပ်ချက် အလုပ်လုပ်မည်မဟုတ်ပါ။"</string>
     <string name="mock_location_app" msgid="7966220972812881854">"တည်နေရာအတုပြု အက်ပ်ရွေးရန်"</string>
-    <string name="mock_location_app_not_set" msgid="809543285495344223">"တည်နေရာအတုပြ အက်ပ်သတ်မှတ်ထားခြင်းမရှိပါ"</string>
+    <string name="mock_location_app_not_set" msgid="809543285495344223">"တည်နေရာအတုပြု အက်ပ်သတ်မှတ်ထားခြင်းမရှိပါ"</string>
     <string name="mock_location_app_set" msgid="8966420655295102685">"တည်နေရာအတုပြ အက်ပ်- <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="debug_networking_category" msgid="7044075693643009662">"ချိတ်ဆက်ဆောင်ရွက်ခြင်း"</string>
     <string name="wifi_display_certification" msgid="8611569543791307533">"ကြိုးမဲ့ပြသမှု အသိအမှတ်ပြုလက်မှတ်"</string>
@@ -266,11 +266,11 @@
     <string name="hdcp_checking_dialog_title" msgid="5141305530923283">"HDCP စစ်ဆေးပုံကို သတ်မှတ်မည်"</string>
     <string name="debug_debugging_category" msgid="6781250159513471316">"အမှားရှာဖွေဖယ်ရှားခြင်း"</string>
     <string name="debug_app" msgid="8349591734751384446">"အမှားရှာသည့်အပလီကေးရှင်းရွေးချယ်ရန်"</string>
-    <string name="debug_app_not_set" msgid="718752499586403499">"အမှားရှာသည့်အပလီကေးရှင်းတခုမှ မသတ်မှတ်ထားပါ"</string>
+    <string name="debug_app_not_set" msgid="718752499586403499">"အမှားရှာသည့် အပလီကေးရှင်းတစ်ခုမျှ သတ်မှတ်မထားပါ"</string>
     <string name="debug_app_set" msgid="2063077997870280017">"အမှားရှာသည့်အပလီကေးရှင်း: <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="select_application" msgid="5156029161289091703">"အပလီကေးရှင်းရွေးချယ်ရန်"</string>
     <string name="no_application" msgid="2813387563129153880">"တခုမှမရှိ"</string>
-    <string name="wait_for_debugger" msgid="1202370874528893091">"အပြစ်ရှာဖွေ ဖယ်ရှားချက်ကိုစောင့်ရန်"</string>
+    <string name="wait_for_debugger" msgid="1202370874528893091">"အမှားရှာဖွေ ဖယ်ရှားချက်ကို စောင့်ရန်"</string>
     <string name="wait_for_debugger_summary" msgid="1766918303462746804">"အမှားပြင်ဆင်ရှာဖွေသည့် အပလီကေးရှင်းသည် လုပ်ငန်းမစမီ တွဲဖက်ရန် အမှားရှာဖွေမည့်သူကို စောင့်နေသည်။"</string>
     <string name="debug_input_category" msgid="1811069939601180246">"ထည့်သွင်းရန်"</string>
     <string name="debug_drawing_category" msgid="6755716469267367852">"ရေးဆွဲခြင်း"</string>
@@ -311,7 +311,7 @@
     <string name="animator_duration_scale_title" msgid="3406722410819934083">"လှုပ်ရှားမှုကြာချိန်စကေး"</string>
     <string name="overlay_display_devices_title" msgid="5364176287998398539">"ဆင့်ပွားမျက်နှာပြင် အသွင်ဆောင်ခြင်း"</string>
     <string name="debug_applications_category" msgid="4206913653849771549">"အက်ပ်များ"</string>
-    <string name="immediately_destroy_activities" msgid="1579659389568133959">"ဆောင်ရွက်မှုများကို မသိမ်းထားပါနှင့်"</string>
+    <string name="immediately_destroy_activities" msgid="1579659389568133959">"ဆောင်ရွက်မှုများကို သိမ်းမထားပါနှင့်"</string>
     <string name="immediately_destroy_activities_summary" msgid="3592221124808773368">"အသုံးပြုသူထွက်ခွါသွားသည်နှင့် လုပ်ဆောင်ချက်များကို ဖျက်ပစ်မည်"</string>
     <string name="app_process_limit_title" msgid="4280600650253107163">"နောက်ခံလုပ်ငန်းစဉ်ကန့်သတ်ခြင်း"</string>
     <string name="show_all_anrs" msgid="4924885492787069007">"နောက်ခံ ANR များကို ပြရန်"</string>
@@ -365,11 +365,12 @@
     <string name="accessibility_display_daltonizer_preference_title" msgid="5800761362678707872">"အရောင်ပြင်ဆင်မှု"</string>
     <string name="accessibility_display_daltonizer_preference_subtitle" msgid="3484969015295282911">"ဤဝန်ဆောင်မှုမှာ စမ်းသပ်အဆင့်သာဖြစ်၍ လုပ်ဆောင်မှုအားနည်းနိုင်သည်။"</string>
     <string name="daltonizer_type_overridden" msgid="3116947244410245916">"<xliff:g id="TITLE">%1$s</xliff:g> မှ ကျော်၍ လုပ်ထားသည်။"</string>
-    <string name="power_remaining_duration_only" msgid="845431008899029842">"<xliff:g id="TIME">%1$s</xliff:g> ခန့်လိုပါသည်"</string>
-    <string name="power_discharging_duration" msgid="6655472132189365839">"<xliff:g id="TIME">%1$s</xliff:g> ခန့် ကျန်သည် (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
-    <string name="power_remaining_duration_only_enhanced" msgid="5992456722677973678">"သင့်အသုံးပြုမှုအရ <xliff:g id="TIME">%1$s</xliff:g> ခန့် ကျန်ပါသည်"</string>
-    <string name="power_discharging_duration_enhanced" msgid="5726302316642148671">"သင်၏ အသုံးပြုမှု အပေါ် မူတည်၍ <xliff:g id="TIME">%1$s</xliff:g> ခန့် ကျန်သည် (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
-    <string name="power_remaining_duration_only_short" msgid="5329694252258605547">"<xliff:g id="TIME">%1$s</xliff:g> ကျန်သည်"</string>
+    <string name="power_remaining_settings_home_page" msgid="4845022416859002011">"<xliff:g id="PERCENTAGE">%1$s</xliff:g> - <xliff:g id="TIME_STRING">%2$s</xliff:g>"</string>
+    <string name="power_remaining_duration_only" msgid="6123167166221295462">"<xliff:g id="TIME_REMAINING">%1$s</xliff:g> ခန့် ကျန်သည်"</string>
+    <string name="power_discharging_duration" msgid="8848256785736335185">"<xliff:g id="TIME_REMAINING">%1$s</xliff:g> ခန့် ကျန်သည် (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
+    <string name="power_remaining_duration_only_enhanced" msgid="4189311599812296592">"သင်၏ အသုံးပြုမှု အပေါ် မူတည်၍ <xliff:g id="TIME_REMAINING">%1$s</xliff:g> ခန့် ကျန်သည်"</string>
+    <string name="power_discharging_duration_enhanced" msgid="1992003260664804080">"သင်၏ အသုံးပြုမှု အပေါ် မူတည်၍ <xliff:g id="TIME_REMAINING">%1$s</xliff:g> ခန့် ကျန်သည် (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
+    <string name="power_remaining_duration_only_short" msgid="3463575350656389957">"<xliff:g id="TIME_REMAINING">%1$s</xliff:g> ကျန်သည်"</string>
     <string name="power_discharge_by_enhanced" msgid="2095821536747992464">"သင်၏ အသုံးပြုမှုအပေါ် မူတည်၍ <xliff:g id="TIME">%1$s</xliff:g> ခန့်အထိ သုံးနိုင်သည် (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
     <string name="power_discharge_by_only_enhanced" msgid="2175151772952365149">"သင်၏ အသုံးပြုမှုအပေါ် အခြေခံ၍ <xliff:g id="TIME">%1$s</xliff:g> ခန့်အထိ သုံးနိုင်သည်"</string>
     <string name="power_discharge_by" msgid="6453537733650125582">"<xliff:g id="TIME">%1$s</xliff:g> ခန့်အထိ သုံးနိုင်သည် (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>

@@ -99,11 +99,8 @@ Landroid/content/pm/IPackageManager;->getPackageInfo(Ljava/lang/String;II)Landro
 Landroid/content/pm/IPackageStatsObserver;->onGetStatsCompleted(Landroid/content/pm/PackageStats;Z)V
 Landroid/database/sqlite/SqliteWrapper;->insert(Landroid/content/Context;Landroid/content/ContentResolver;Landroid/net/Uri;Landroid/content/ContentValues;)Landroid/net/Uri;
 Landroid/database/sqlite/SqliteWrapper;->query(Landroid/content/Context;Landroid/content/ContentResolver;Landroid/net/Uri;[Ljava/lang/String;Ljava/lang/String;[Ljava/lang/String;Ljava/lang/String;)Landroid/database/Cursor;
-Landroid/graphics/AvoidXfermode;-><init>(IILandroid/graphics/AvoidXfermode$Mode;)V
 Landroid/graphics/Bitmap;->createGraphicBufferHandle()Landroid/graphics/GraphicBuffer;
 Landroid/graphics/Bitmap;->createHardwareBitmap(Landroid/graphics/GraphicBuffer;)Landroid/graphics/Bitmap;
-Landroid/graphics/Canvas;->clipRegion(Landroid/graphics/Region;)Z
-Landroid/graphics/Canvas;->clipRegion(Landroid/graphics/Region;Landroid/graphics/Region$Op;)Z
 Landroid/graphics/drawable/Drawable;->isProjected()Z
 Landroid/graphics/drawable/Drawable;->updateTintFilter(Landroid/graphics/PorterDuffColorFilter;Landroid/content/res/ColorStateList;Landroid/graphics/PorterDuff$Mode;)Landroid/graphics/PorterDuffColorFilter;
 Landroid/hardware/camera2/CaptureRequest$Key;-><init>(Ljava/lang/String;Ljava/lang/Class;)V
@@ -151,8 +148,6 @@ Landroid/net/ConnectivityManager$PacketKeepaliveCallback;->onStopped()V
 Landroid/net/ConnectivityManager;->getActiveNetworkQuotaInfo()Landroid/net/NetworkQuotaInfo;
 Landroid/net/ConnectivityManager;->setAirplaneMode(Z)V
 Landroid/net/ConnectivityManager;->startNattKeepalive(Landroid/net/Network;ILandroid/net/ConnectivityManager$PacketKeepaliveCallback;Ljava/net/InetAddress;ILjava/net/InetAddress;)Landroid/net/ConnectivityManager$PacketKeepalive;
-Landroid/net/ConnectivityManager;->startUsingNetworkFeature(ILjava/lang/String;)I
-Landroid/net/ConnectivityManager;->stopUsingNetworkFeature(ILjava/lang/String;)I
 Landroid/net/ConnectivityManager;->tether(Ljava/lang/String;)I
 Landroid/net/ConnectivityManager;->untether(Ljava/lang/String;)I
 Landroid/net/DhcpResults;-><init>()V
@@ -354,8 +349,6 @@ Landroid/os/Message;->setCallback(Ljava/lang/Runnable;)Landroid/os/Message;
 Landroid/os/Parcel;->readBlob()[B
 Landroid/os/Parcel;->readStringArray()[Ljava/lang/String;
 Landroid/os/Parcel;->writeBlob([B)V
-Landroid/os/PowerManager;->goToSleep(J)V
-Landroid/os/PowerManager;->isScreenBrightnessBoosted()Z
 Landroid/os/Registrant;-><init>(Landroid/os/Handler;ILjava/lang/Object;)V
 Landroid/os/Registrant;->clear()V
 Landroid/os/Registrant;->notifyRegistrant()V
@@ -513,12 +506,6 @@ Landroid/telephony/TelephonyManager;->nvResetConfig(I)Z
 Landroid/telephony/TelephonyManager;->putIntAtIndex(Landroid/content/ContentResolver;Ljava/lang/String;II)Z
 Landroid/telephony/TelephonyManager;->setPreferredNetworkType(II)Z
 Landroid/text/TextUtils;->isPrintableAsciiOnly(Ljava/lang/CharSequence;)Z
-Landroid/util/FloatMath;->ceil(F)F
-Landroid/util/FloatMath;->cos(F)F
-Landroid/util/FloatMath;->exp(F)F
-Landroid/util/FloatMath;->floor(F)F
-Landroid/util/FloatMath;->sin(F)F
-Landroid/util/FloatMath;->sqrt(F)F
 Landroid/util/IconDrawableFactory;->getBadgedIcon(Landroid/content/pm/PackageItemInfo;Landroid/content/pm/ApplicationInfo;I)Landroid/graphics/drawable/Drawable;
 Landroid/util/IconDrawableFactory;->newInstance(Landroid/content/Context;)Landroid/util/IconDrawableFactory;
 Landroid/util/LocalLog$ReadOnlyLocalLog;->dump(Ljava/io/FileDescriptor;Ljava/io/PrintWriter;[Ljava/lang/String;)V

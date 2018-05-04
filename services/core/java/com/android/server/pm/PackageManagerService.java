@@ -24,6 +24,9 @@ import static android.Manifest.permission.READ_EXTERNAL_STORAGE;
 import static android.Manifest.permission.REQUEST_DELETE_PACKAGES;
 import static android.Manifest.permission.SET_HARMFUL_APP_WARNINGS;
 import static android.Manifest.permission.WRITE_EXTERNAL_STORAGE;
+import static android.content.Intent.ACTION_MAIN;
+import static android.content.Intent.CATEGORY_DEFAULT;
+import static android.content.Intent.CATEGORY_HOME;
 import static android.content.pm.PackageManager.CERT_INPUT_RAW_X509;
 import static android.content.pm.PackageManager.CERT_INPUT_SHA256;
 import static android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_DEFAULT;
@@ -92,7 +95,6 @@ import static com.android.internal.app.IntentForwarderActivity.FORWARD_INTENT_TO
 import static com.android.internal.app.IntentForwarderActivity.FORWARD_INTENT_TO_PARENT;
 import static com.android.internal.content.NativeLibraryHelper.LIB64_DIR_NAME;
 import static com.android.internal.content.NativeLibraryHelper.LIB_DIR_NAME;
-import static com.android.internal.util.ArrayUtils.appendElement;
 import static com.android.internal.util.ArrayUtils.appendInt;
 import static com.android.server.pm.InstructionSets.getAppDexInstructionSets;
 import static com.android.server.pm.InstructionSets.getDexCodeInstructionSet;
@@ -275,7 +277,6 @@ import com.android.internal.R;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.app.IMediaContainerService;
 import com.android.internal.app.ResolverActivity;
-import com.android.internal.app.SuspendedAppActivity;
 import com.android.internal.content.NativeLibraryHelper;
 import com.android.internal.content.PackageHelper;
 import com.android.internal.logging.MetricsLogger;
@@ -4153,7 +4154,7 @@ public class PackageManagerService extends IPackageManager.Stub
      * Access may be limited based upon whether the calling or target applications
      * are instant applications.
      *
-     * @see #canAccessInstantApps(int)
+     * @see #canViewInstantApps(int, int)
      */
     private boolean filterAppAccessLPr(@Nullable PackageSetting ps, int callingUid,
             @Nullable ComponentName component, @ComponentType int componentType, int userId) {
@@ -4210,7 +4211,7 @@ public class PackageManagerService extends IPackageManager.Stub
     }
 
     /**
-     * @see #filterAppAccessLPr(PackageSetting, int, ComponentName, boolean, int)
+     * @see #filterAppAccessLPr(PackageSetting, int, ComponentName, int, int)
      */
     private boolean filterAppAccessLPr(@Nullable PackageSetting ps, int callingUid, int userId) {
         return filterAppAccessLPr(ps, callingUid, null, TYPE_UNKNOWN, userId);
@@ -6289,6 +6290,17 @@ public class PackageManagerService extends IPackageManager.Stub
         return null;
     }
 
+    private boolean isHomeIntent(Intent intent) {
+        return ACTION_MAIN.equals(intent.getAction())
+                && intent.hasCategory(CATEGORY_HOME)
+                && intent.hasCategory(CATEGORY_DEFAULT);
+    }
+
+    private boolean isDeviceProvisioned() {
+        return android.provider.Settings.Global.getInt(mContext.getContentResolver(),
+                android.provider.Settings.Global.DEVICE_PROVISIONED, 0) == 1;
+    }
+
     // TODO: handle preferred activities missing while user has amnesia
     ResolveInfo findPreferredActivity(Intent intent, String resolvedType, int flags,
             List<ResolveInfo> query, int priority, boolean always,
@@ -6373,7 +6385,15 @@ public class PackageManagerService extends IPackageManager.Stub
                                 Slog.v(TAG, "  null");
                             }
                         }
+                        final boolean excludeSetupWizardHomeActivity = isHomeIntent(intent)
+                                && !isDeviceProvisioned();
                         if (ai == null) {
+                            // Do not remove launcher's preferred activity during SetupWizard
+                            // due to it may not install yet
+                            if (excludeSetupWizardHomeActivity) {
+                                continue;
+                            }
+
                             // This previously registered preferred activity
                             // component is no longer known.  Most likely an update
                             // to the app was installed and in the new version this
@@ -6409,25 +6429,34 @@ public class PackageManagerService extends IPackageManager.Stub
                             // was created, and is not a subset of the preferred set, we need to
                             // clear it and re-ask the user their preference, if we're looking for
                             // an "always" type entry.
-                            if (always && !pa.mPref.sameSet(query)) {
-                                if (pa.mPref.isSuperset(query)) {
-                                    // some components of the set are no longer present in
-                                    // the query, but the preferred activity can still be reused
-                                    if (DEBUG_PREFERRED) {
-                                        Slog.i(TAG, "Result set changed, but PreferredActivity is"
-                                                + " still valid as only non-preferred components"
-                                                + " were removed for " + intent + " type "
-                                                + resolvedType);
+
+                            if (always && !pa.mPref.sameSet(query, excludeSetupWizardHomeActivity)) {
+                                if (pa.mPref.isSuperset(query, excludeSetupWizardHomeActivity)) {
+                                    if (!excludeSetupWizardHomeActivity) {
+                                        // some components of the set are no longer present in
+                                        // the query, but the preferred activity can still be reused
+                                        if (DEBUG_PREFERRED) {
+                                            Slog.i(TAG, "Result set changed, but PreferredActivity"
+                                                    + " is still valid as only non-preferred"
+                                                    + " components were removed for " + intent
+                                                    + " type " + resolvedType);
+                                        }
+                                        // remove obsolete components and re-add the up-to-date
+                                        // filter
+                                        PreferredActivity freshPa = new PreferredActivity(pa,
+                                                pa.mPref.mMatch,
+                                                pa.mPref.discardObsoleteComponents(query),
+                                                pa.mPref.mComponent,
+                                                pa.mPref.mAlways);
+                                        pir.removeFilter(pa);
+                                        pir.addFilter(freshPa);
+                                        changed = true;
+                                    } else {
+                                        if (DEBUG_PREFERRED) {
+                                            Slog.i(TAG, "Do not remove preferred activity for launcher"
+                                                    + " during SetupWizard");
+                                        }
                                     }
-                                    // remove obsolete components and re-add the up-to-date filter
-                                    PreferredActivity freshPa = new PreferredActivity(pa,
-                                            pa.mPref.mMatch,
-                                            pa.mPref.discardObsoleteComponents(query),
-                                            pa.mPref.mComponent,
-                                            pa.mPref.mAlways);
-                                    pir.removeFilter(pa);
-                                    pir.addFilter(freshPa);
-                                    changed = true;
                                 } else {
                                     Slog.i(TAG,
                                             "Result set changed, dropping preferred activity for "
@@ -15006,15 +15035,13 @@ public class PackageManagerService extends IPackageManager.Stub
         final File file;
 
         /**
-         * Flag indicating that {@link #file} or {@link #cid} has already been
-         * staged, meaning downstream users don't need to defensively copy the
-         * contents.
+         * Flag indicating that {@link #file} has already been staged, meaning downstream users
+         * don't need to defensively copy the contents.
          */
         final boolean staged;
 
         /**
-         * Flag indicating that {@link #file} or {@link #cid} is an already
-         * installed app that is being moved.
+         * Flag indicating that {@link #file} is an already installed app that is being moved.
          */
         final boolean existing;
 
@@ -16416,22 +16443,6 @@ public class PackageManagerService extends IPackageManager.Stub
             replaceNonSystemPackageLIF(oldPackage, pkg, parseFlags, scanFlags,
                     user, allUsers, installerPackageName, res, installReason);
         }
-    }
-
-    @Override
-    public List<String> getPreviousCodePaths(String packageName) {
-        final int callingUid = Binder.getCallingUid();
-        final List<String> result = new ArrayList<>();
-        if (getInstantAppPackageName(callingUid) != null) {
-            return result;
-        }
-        final PackageSetting ps = mSettings.mPackages.get(packageName);
-        if (ps != null
-                && ps.oldCodePaths != null
-                && !filterAppAccessLPr(ps, callingUid, UserHandle.getUserId(callingUid))) {
-            result.addAll(ps.oldCodePaths);
-        }
-        return result;
     }
 
     private void replaceNonSystemPackageLIF(PackageParser.Package deletedPackage,
@@ -22477,9 +22488,13 @@ Slog.v(TAG, ":: stepped forward, applying functor at tag " + parser.getName());
         }
         final String volumeUuid = pkg.volumeUuid;
         final String packageName = pkg.packageName;
-        final ApplicationInfo app = (ps == null)
+
+        ApplicationInfo app = (ps == null)
                 ? pkg.applicationInfo
                 : PackageParser.generateApplicationInfo(pkg, 0, ps.readUserState(userId), userId);
+        if (app == null) {
+            app = pkg.applicationInfo;
+        }
 
         final int appId = UserHandle.getAppId(app.uid);
 

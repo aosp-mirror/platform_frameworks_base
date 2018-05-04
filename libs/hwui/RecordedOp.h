@@ -20,9 +20,7 @@
 #include "Matrix.h"
 #include "Rect.h"
 #include "RenderNode.h"
-#include "TessellationCache.h"
 #include "Vector.h"
-#include "font/FontUtil.h"
 #include "utils/LinearAllocator.h"
 #include "utils/PaintUtils.h"
 
@@ -38,6 +36,7 @@ struct ClipBase;
 class OffscreenBuffer;
 class RenderNode;
 class DeferredLayerUpdater;
+typedef uint16_t glyph_t;
 
 struct Vertex;
 
@@ -84,7 +83,6 @@ class Tree;
     PRE_RENDER_OP_FN(EndUnclippedLayerOp)                                             \
     PRE_RENDER_OP_FN(VectorDrawableOp)                                                \
                                                                                       \
-    RENDER_ONLY_OP_FN(ShadowOp)                                                       \
     RENDER_ONLY_OP_FN(LayerOp)                                                        \
     RENDER_ONLY_OP_FN(CopyToLayerOp)                                                  \
     RENDER_ONLY_OP_FN(CopyFromLayerOp)                                                \
@@ -331,23 +329,6 @@ struct VectorDrawableOp : RecordedOp {
     VectorDrawableOp(VectorDrawable::Tree* tree, BASE_PARAMS_PAINTLESS)
             : SUPER_PAINTLESS(VectorDrawableOp), vectorDrawable(tree) {}
     VectorDrawable::Tree* vectorDrawable;
-};
-
-/**
- * Real-time, dynamic-lit shadow.
- *
- * Uses invalid/empty bounds and matrix since ShadowOp bounds aren't known at defer time,
- * and are resolved dynamically, and transform isn't needed.
- *
- * State construction handles these properties specially, ignoring matrix/bounds.
- */
-struct ShadowOp : RecordedOp {
-    ShadowOp(sp<TessellationCache::ShadowTask>& shadowTask, float casterAlpha)
-            : RecordedOp(RecordedOpId::ShadowOp, Rect(), Matrix4::identity(), nullptr, nullptr)
-            , shadowTask(shadowTask)
-            , casterAlpha(casterAlpha){};
-    sp<TessellationCache::ShadowTask> shadowTask;
-    const float casterAlpha;
 };
 
 struct SimpleRectsOp : RecordedOp {  // Filled, no AA (TODO: better name?)

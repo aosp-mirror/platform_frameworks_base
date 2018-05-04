@@ -30,6 +30,7 @@ import android.view.ViewAnimationUtils;
 import android.view.accessibility.AccessibilityEvent;
 import android.widget.FrameLayout;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.systemui.Dependency;
 import com.android.systemui.Interpolators;
 import com.android.systemui.R;
@@ -270,7 +271,8 @@ public class NotificationGuts extends FrameLayout {
 
 
     /** Animates out the guts view via either a fade or a circular reveal. */
-    private void animateClose(int x, int y, boolean shouldDoCircularReveal) {
+    @VisibleForTesting
+    void animateClose(int x, int y, boolean shouldDoCircularReveal) {
         if (shouldDoCircularReveal) {
             // Circular reveal originating at (x, y)
             if (x == -1 || y == -1) {
@@ -340,7 +342,8 @@ public class NotificationGuts extends FrameLayout {
         }
     }
 
-    private void setExposed(boolean exposed, boolean needsFalsingProtection) {
+    @VisibleForTesting
+    void setExposed(boolean exposed, boolean needsFalsingProtection) {
         final boolean wasExposed = mExposed;
         mExposed = exposed;
         mNeedsFalsingProtection = needsFalsingProtection;

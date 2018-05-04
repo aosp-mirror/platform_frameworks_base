@@ -208,7 +208,7 @@
     <string name="debug_networking_category" msgid="7044075693643009662">"నెట్‌వర్కింగ్"</string>
     <string name="wifi_display_certification" msgid="8611569543791307533">"వైర్‌లెస్ ప్రదర్శన ప్రమాణీకరణ"</string>
     <string name="wifi_verbose_logging" msgid="4203729756047242344">"Wi‑Fi విశదీకృత లాగింగ్‌ను ప్రారంభించండి"</string>
-    <string name="wifi_connected_mac_randomization" msgid="3168165236877957767">"MAC యాదృచ్ఛికతకు కనెక్ట్ చేయబడింది"</string>
+    <string name="wifi_connected_mac_randomization" msgid="3168165236877957767">"కనెక్ట్ చేయబడిన MAC చిరునామాలను యాదృచ్ఛికం చేయడం"</string>
     <string name="mobile_data_always_on" msgid="8774857027458200434">"మొబైల్ డేటాని ఎల్లప్పుడూ యాక్టివ్‌గా ఉంచు"</string>
     <string name="tethering_hardware_offload" msgid="7470077827090325814">"టెథెరింగ్ హార్డ్‌వేర్ వేగవృద్ధి"</string>
     <string name="bluetooth_show_devices_without_names" msgid="4708446092962060176">"పేర్లు లేని బ్లూటూత్ పరికరాలు  చూపించు"</string>
@@ -312,7 +312,7 @@
     <string name="overlay_display_devices_title" msgid="5364176287998398539">"ప్రత్యామ్నాయ ప్రదర్శనలను అనుకరించండి"</string>
     <string name="debug_applications_category" msgid="4206913653849771549">"యాప్‌లు"</string>
     <string name="immediately_destroy_activities" msgid="1579659389568133959">"కార్యకలాపాలను ఉంచవద్దు"</string>
-    <string name="immediately_destroy_activities_summary" msgid="3592221124808773368">"ప్రతి కార్యాచరణను వినియోగదారు నిష్క్రమించిన వెంటనే తొలగించండి"</string>
+    <string name="immediately_destroy_activities_summary" msgid="3592221124808773368">"ప్రతి కార్యకలాపాన్ని వినియోగదారు నిష్క్రమించిన వెంటనే తొలగించండి"</string>
     <string name="app_process_limit_title" msgid="4280600650253107163">"నేపథ్య ప్రాసెస్ పరిమితి"</string>
     <string name="show_all_anrs" msgid="4924885492787069007">"నేపథ్య ANRలను చూపు"</string>
     <string name="show_all_anrs_summary" msgid="6636514318275139826">"నేపథ్య యాప్‌ల కోసం యాప్ ప్రతిస్పందించడం లేదు అనే డైలాగ్‌ను చూపు"</string>
@@ -365,11 +365,12 @@
     <string name="accessibility_display_daltonizer_preference_title" msgid="5800761362678707872">"రంగు సవరణ"</string>
     <string name="accessibility_display_daltonizer_preference_subtitle" msgid="3484969015295282911">"ఈ లక్షణం ప్రయోగాత్మకమైనది మరియు పనితీరుపై ప్రభావం చూపవచ్చు."</string>
     <string name="daltonizer_type_overridden" msgid="3116947244410245916">"<xliff:g id="TITLE">%1$s</xliff:g> ద్వారా భర్తీ చేయబడింది"</string>
-    <string name="power_remaining_duration_only" msgid="845431008899029842">"మిగిలి ఉన్న సమయం, <xliff:g id="TIME">%1$s</xliff:g>"</string>
-    <string name="power_discharging_duration" msgid="6655472132189365839">"దాదాపు <xliff:g id="TIME">%1$s</xliff:g> ఉండవచ్చు (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
-    <string name="power_remaining_duration_only_enhanced" msgid="5992456722677973678">"మీ వినియోగం ఆధారంగా సుమారు <xliff:g id="TIME">%1$s</xliff:g> సమయం మిగిలి ఉంది"</string>
-    <string name="power_discharging_duration_enhanced" msgid="5726302316642148671">"మీ వినియోగం ఆధారంగా దాదాపు <xliff:g id="TIME">%1$s</xliff:g> ఉండవచ్చు (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
-    <string name="power_remaining_duration_only_short" msgid="5329694252258605547">"<xliff:g id="TIME">%1$s</xliff:g> మిగిలి ఉంది"</string>
+    <string name="power_remaining_settings_home_page" msgid="4845022416859002011">"<xliff:g id="PERCENTAGE">%1$s</xliff:g> - <xliff:g id="TIME_STRING">%2$s</xliff:g>"</string>
+    <string name="power_remaining_duration_only" msgid="6123167166221295462">"<xliff:g id="TIME_REMAINING">%1$s</xliff:g> సమయం మిగిలి ఉంది"</string>
+    <string name="power_discharging_duration" msgid="8848256785736335185">"దాదాపు <xliff:g id="TIME_REMAINING">%1$s</xliff:g> సమయం మిగిలి ఉంది (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
+    <string name="power_remaining_duration_only_enhanced" msgid="4189311599812296592">"మీ వినియోగం ఆధారంగా దాదాపు <xliff:g id="TIME_REMAINING">%1$s</xliff:g> సమయం మిగిలి ఉంది"</string>
+    <string name="power_discharging_duration_enhanced" msgid="1992003260664804080">"మీ వినియోగం ఆధారంగా దాదాపు <xliff:g id="TIME_REMAINING">%1$s</xliff:g> సమయం మిగిలి ఉంది (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
+    <string name="power_remaining_duration_only_short" msgid="3463575350656389957">"<xliff:g id="TIME_REMAINING">%1$s</xliff:g> మిగిలి ఉంది"</string>
     <string name="power_discharge_by_enhanced" msgid="2095821536747992464">"మీ వినియోగం ఆధారంగా <xliff:g id="TIME">%1$s</xliff:g> వరకు ఉండాలి (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
     <string name="power_discharge_by_only_enhanced" msgid="2175151772952365149">"మీ వినియోగం ఆధారంగా దాదాపు <xliff:g id="TIME">%1$s</xliff:g> వరకు ఉండాలి"</string>
     <string name="power_discharge_by" msgid="6453537733650125582">"దాదాపు <xliff:g id="TIME">%1$s</xliff:g> వరకు ఉండాలి (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>

@@ -40,14 +40,13 @@ public class KeyguardDismissUtil implements KeyguardDismissHandler {
      * <p>Must be called after {@link #setDismissHandler}.
      */
     @Override
-    public void dismissKeyguardThenExecute(
-            OnDismissAction action, Runnable cancelAction, boolean afterKeyguardGone) {
+    public void executeWhenUnlocked(OnDismissAction action) {
         KeyguardDismissHandler dismissHandler = mDismissHandler;
         if (dismissHandler == null) {
             Log.wtf(TAG, "KeyguardDismissHandler not set.");
             action.onDismiss();
             return;
         }
-        dismissHandler.dismissKeyguardThenExecute(action, cancelAction, afterKeyguardGone);
+        dismissHandler.executeWhenUnlocked(action);
     }
 }

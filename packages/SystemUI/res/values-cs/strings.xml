@@ -34,7 +34,7 @@
     <string name="status_bar_no_notifications_title" msgid="4755261167193833213">"Žádná oznámení"</string>
     <string name="status_bar_ongoing_events_title" msgid="1682504513316879202">"Probíhající"</string>
     <string name="status_bar_latest_events_title" msgid="6594767438577593172">"Oznámení"</string>
-    <string name="battery_low_title" msgid="6456385927409742437">"Baterie je slabá"</string>
+    <string name="battery_low_title" msgid="9187898087363540349">"Baterie se brzy vybije"</string>
     <string name="battery_low_percent_format" msgid="2900940511201380775">"Zbývá <xliff:g id="PERCENTAGE">%s</xliff:g>"</string>
     <string name="battery_low_percent_format_hybrid" msgid="6838677459286775617">"Zbývá <xliff:g id="PERCENTAGE">%s</xliff:g>, při obvyklém využití asi <xliff:g id="TIME">%s</xliff:g>"</string>
     <string name="battery_low_percent_format_hybrid_short" msgid="9025795469949145586">"Zbývá <xliff:g id="PERCENTAGE">%s</xliff:g>, asi <xliff:g id="TIME">%s</xliff:g>"</string>
@@ -97,8 +97,7 @@
     <string name="accessibility_unlock_button" msgid="128158454631118828">"Odemknout"</string>
     <string name="accessibility_waiting_for_fingerprint" msgid="4808860050517462885">"Čeká se na použití otisku"</string>
     <string name="accessibility_unlock_without_fingerprint" msgid="7541705575183694446">"Odemknout bez otisku prstu"</string>
-    <!-- no translation found for accessibility_send_smart_reply (7766727839703044493) -->
-    <skip />
+    <string name="accessibility_send_smart_reply" msgid="7766727839703044493">"Odeslat"</string>
     <string name="unlock_label" msgid="8779712358041029439">"odemknout"</string>
     <string name="phone_label" msgid="2320074140205331708">"otevřít telefon"</string>
     <string name="voice_assist_label" msgid="3956854378310019854">"otevřít hlasovou asistenci"</string>
@@ -212,10 +211,8 @@
     <string name="accessibility_quick_settings_airplane_on" msgid="6406141469157599296">"Režim Letadlo je zapnutý."</string>
     <string name="accessibility_quick_settings_airplane_changed_off" msgid="66846307818850664">"Režim Letadlo je vypnutý."</string>
     <string name="accessibility_quick_settings_airplane_changed_on" msgid="8983005603505087728">"Režim Letadlo je zapnutý."</string>
-    <!-- no translation found for accessibility_quick_settings_dnd_none_on (2960643943620637020) -->
-    <skip />
-    <!-- no translation found for accessibility_quick_settings_dnd_alarms_on (3357131899365865386) -->
-    <skip />
+    <string name="accessibility_quick_settings_dnd_none_on" msgid="2960643943620637020">"úplné ticho"</string>
+    <string name="accessibility_quick_settings_dnd_alarms_on" msgid="3357131899365865386">"pouze budíky"</string>
     <string name="accessibility_quick_settings_dnd" msgid="6607873236717185815">"Nerušit."</string>
     <string name="accessibility_quick_settings_dnd_changed_off" msgid="898107593453022935">"Stav Nerušit je vypnutý"</string>
     <string name="accessibility_quick_settings_dnd_changed_on" msgid="4483780856613561039">"Stav Nerušit je zapnutý."</string>
@@ -632,8 +629,7 @@
       <item quantity="one">používá položku <xliff:g id="PERFORMING_ACTIVITY_0">%1$s</xliff:g></item>
     </plurals>
     <string name="notification_appops_settings" msgid="1028328314935908050">"Nastavení"</string>
-    <!-- no translation found for notification_appops_ok (1156966426011011434) -->
-    <skip />
+    <string name="notification_appops_ok" msgid="1156966426011011434">"OK"</string>
     <string name="notification_channel_controls_opened_accessibility" msgid="6553950422055908113">"Ovládací prvky oznámení aplikace <xliff:g id="APP_NAME">%1$s</xliff:g> byly otevřeny"</string>
     <string name="notification_channel_controls_closed_accessibility" msgid="7521619812603693144">"Ovládací prvky oznámení aplikace <xliff:g id="APP_NAME">%1$s</xliff:g> byly zavřeny"</string>
     <string name="notification_channel_switch_accessibility" msgid="3420796005601900717">"Povolit oznámení z tohoto kanálu"</string>

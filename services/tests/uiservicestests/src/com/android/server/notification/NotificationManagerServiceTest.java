@@ -16,6 +16,7 @@
 
 package com.android.server.notification;
 
+import static android.app.Notification.FLAG_FOREGROUND_SERVICE;
 import static android.app.NotificationManager.EXTRA_BLOCKED_STATE;
 import static android.app.NotificationManager.IMPORTANCE_HIGH;
 import static android.app.NotificationManager.IMPORTANCE_LOW;
@@ -529,7 +530,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
                 PKG, new ParceledListSlice(Arrays.asList(channel)));
 
         final StatusBarNotification sbn = generateNotificationRecord(channel).sbn;
-        sbn.getNotification().flags |= Notification.FLAG_FOREGROUND_SERVICE;
+        sbn.getNotification().flags |= FLAG_FOREGROUND_SERVICE;
         mBinderService.enqueueNotificationWithTag(PKG, "opPkg", "tag",
                 sbn.getId(), sbn.getNotification(), sbn.getUserId());
         waitForIdle();
@@ -557,11 +558,34 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         assertEquals(IMPORTANCE_NONE,
                 mBinderService.getNotificationChannel(PKG, channel.getId()).getImportance());
 
-        final StatusBarNotification sbn = generateNotificationRecord(channel).sbn;
-        sbn.getNotification().flags |= Notification.FLAG_FOREGROUND_SERVICE;
+        StatusBarNotification sbn = generateNotificationRecord(channel).sbn;
+        sbn.getNotification().flags |= FLAG_FOREGROUND_SERVICE;
         mBinderService.enqueueNotificationWithTag(PKG, "opPkg", "tag",
                 sbn.getId(), sbn.getNotification(), sbn.getUserId());
         waitForIdle();
+        // The first time a foreground service notification is shown, we allow the channel
+        // to be updated to allow it to be seen.
+        assertEquals(1, mBinderService.getActiveNotifications(sbn.getPackageName()).length);
+        assertEquals(IMPORTANCE_LOW,
+                mService.getNotificationRecord(sbn.getKey()).getImportance());
+        assertEquals(IMPORTANCE_LOW,
+                mBinderService.getNotificationChannel(PKG, channel.getId()).getImportance());
+        mBinderService.cancelNotificationWithTag(PKG, "tag", sbn.getId(), sbn.getUserId());
+        waitForIdle();
+
+        update = new NotificationChannel("blockedbyuser", "name", IMPORTANCE_NONE);
+        update.setFgServiceShown(true);
+        mBinderService.updateNotificationChannelForPackage(PKG, mUid, update);
+        waitForIdle();
+        assertEquals(IMPORTANCE_NONE,
+                mBinderService.getNotificationChannel(PKG, channel.getId()).getImportance());
+
+        sbn = generateNotificationRecord(channel).sbn;
+        sbn.getNotification().flags |= FLAG_FOREGROUND_SERVICE;
+        mBinderService.enqueueNotificationWithTag(PKG, "opPkg", "tag",
+                sbn.getId(), sbn.getNotification(), sbn.getUserId());
+        waitForIdle();
+        // The second time it is shown, we keep the user's preference.
         assertEquals(0, mBinderService.getActiveNotifications(sbn.getPackageName()).length);
         assertNull(mService.getNotificationRecord(sbn.getKey()));
         assertEquals(IMPORTANCE_NONE,
@@ -602,7 +626,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         mBinderService.setNotificationsEnabledForPackage(PKG, mUid, false);
 
         final StatusBarNotification sbn = generateNotificationRecord(null).sbn;
-        sbn.getNotification().flags |= Notification.FLAG_FOREGROUND_SERVICE;
+        sbn.getNotification().flags |= FLAG_FOREGROUND_SERVICE;
         mBinderService.enqueueNotificationWithTag(PKG, "opPkg", "tag",
                 sbn.getId(), sbn.getNotification(), sbn.getUserId());
         waitForIdle();
@@ -760,7 +784,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     @Test
     public void testCancelAllNotifications_IgnoreForegroundService() throws Exception {
         final StatusBarNotification sbn = generateNotificationRecord(null).sbn;
-        sbn.getNotification().flags |= Notification.FLAG_FOREGROUND_SERVICE;
+        sbn.getNotification().flags |= FLAG_FOREGROUND_SERVICE;
         mBinderService.enqueueNotificationWithTag(PKG, "opPkg", "tag",
                 sbn.getId(), sbn.getNotification(), sbn.getUserId());
         mBinderService.cancelAllNotifications(PKG, sbn.getUserId());
@@ -774,7 +798,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     @Test
     public void testCancelAllNotifications_IgnoreOtherPackages() throws Exception {
         final StatusBarNotification sbn = generateNotificationRecord(null).sbn;
-        sbn.getNotification().flags |= Notification.FLAG_FOREGROUND_SERVICE;
+        sbn.getNotification().flags |= FLAG_FOREGROUND_SERVICE;
         mBinderService.enqueueNotificationWithTag(PKG, "opPkg", "tag",
                 sbn.getId(), sbn.getNotification(), sbn.getUserId());
         mBinderService.cancelAllNotifications("other_pkg_name", sbn.getUserId());
@@ -902,7 +926,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     @Test
     public void testRemoveForegroundServiceFlag_ImmediatelyAfterEnqueue() throws Exception {
         final StatusBarNotification sbn = generateNotificationRecord(null).sbn;
-        sbn.getNotification().flags |= Notification.FLAG_FOREGROUND_SERVICE;
+        sbn.getNotification().flags |= FLAG_FOREGROUND_SERVICE;
         mBinderService.enqueueNotificationWithTag(PKG, "opPkg", null,
                 sbn.getId(), sbn.getNotification(), sbn.getUserId());
         mInternalService.removeForegroundServiceFlagFromNotification(PKG, sbn.getId(),
@@ -910,14 +934,14 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         waitForIdle();
         StatusBarNotification[] notifs =
                 mBinderService.getActiveNotifications(sbn.getPackageName());
-        assertEquals(0, notifs[0].getNotification().flags & Notification.FLAG_FOREGROUND_SERVICE);
+        assertEquals(0, notifs[0].getNotification().flags & FLAG_FOREGROUND_SERVICE);
     }
 
     @Test
     public void testCancelAfterSecondEnqueueDoesNotSpecifyForegroundFlag() throws Exception {
         final StatusBarNotification sbn = generateNotificationRecord(null).sbn;
         sbn.getNotification().flags =
-                Notification.FLAG_ONGOING_EVENT | Notification.FLAG_FOREGROUND_SERVICE;
+                Notification.FLAG_ONGOING_EVENT | FLAG_FOREGROUND_SERVICE;
         mBinderService.enqueueNotificationWithTag(PKG, "opPkg", "tag",
                 sbn.getId(), sbn.getNotification(), sbn.getUserId());
         sbn.getNotification().flags = Notification.FLAG_ONGOING_EVENT;
@@ -938,7 +962,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
                 mTestNotificationChannel, 2, "group", false);
         final NotificationRecord child2 = generateNotificationRecord(
                 mTestNotificationChannel, 3, "group", false);
-        child2.getNotification().flags |= Notification.FLAG_FOREGROUND_SERVICE;
+        child2.getNotification().flags |= FLAG_FOREGROUND_SERVICE;
         final NotificationRecord newGroup = generateNotificationRecord(
                 mTestNotificationChannel, 4, "group2", false);
         mService.addNotification(parent);
@@ -961,7 +985,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
                 mTestNotificationChannel, 2, "group", false);
         final NotificationRecord child2 = generateNotificationRecord(
                 mTestNotificationChannel, 3, "group", false);
-        child2.getNotification().flags |= Notification.FLAG_FOREGROUND_SERVICE;
+        child2.getNotification().flags |= FLAG_FOREGROUND_SERVICE;
         final NotificationRecord newGroup = generateNotificationRecord(
                 mTestNotificationChannel, 4, "group2", false);
         mService.addNotification(parent);
@@ -985,7 +1009,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
                 mTestNotificationChannel, 2, "group", false);
         final NotificationRecord child2 = generateNotificationRecord(
                 mTestNotificationChannel, 3, "group", false);
-        child2.getNotification().flags |= Notification.FLAG_FOREGROUND_SERVICE;
+        child2.getNotification().flags |= FLAG_FOREGROUND_SERVICE;
         final NotificationRecord newGroup = generateNotificationRecord(
                 mTestNotificationChannel, 4, "group2", false);
         mService.addNotification(parent);
@@ -2188,7 +2212,6 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     @Test
     public void testReadPolicyXml_readApprovedServicesFromXml() throws Exception {
         final String upgradeXml = "<notification-policy version=\"1\">"
-                + "<zen></zen>"
                 + "<ranking></ranking>"
                 + "<enabled_listeners>"
                 + "<service_listing approved=\"test\" user=\"0\" primary=\"true\" />"
@@ -2216,7 +2239,6 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     @Test
     public void testReadPolicyXml_readApprovedServicesFromSettings() throws Exception {
         final String preupgradeXml = "<notification-policy version=\"1\">"
-                + "<zen></zen>"
                 + "<ranking></ranking>"
                 + "</notification-policy>";
         mService.readPolicyXml(
@@ -2258,7 +2280,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
                 NotificationChannel.DEFAULT_CHANNEL_ID)
                 .setContentTitle("foo")
                 .setSmallIcon(android.R.drawable.sym_def_app_icon)
-                .setFlag(Notification.FLAG_FOREGROUND_SERVICE, true)
+                .setFlag(FLAG_FOREGROUND_SERVICE, true)
                 .setPriority(Notification.PRIORITY_MIN);
 
         StatusBarNotification sbn = new StatusBarNotification(preOPkg, preOPkg, 9, "tag", preOUid,
@@ -2273,7 +2295,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         nb = new Notification.Builder(mContext)
                 .setContentTitle("foo")
                 .setSmallIcon(android.R.drawable.sym_def_app_icon)
-                .setFlag(Notification.FLAG_FOREGROUND_SERVICE, true)
+                .setFlag(FLAG_FOREGROUND_SERVICE, true)
                 .setPriority(Notification.PRIORITY_MIN);
 
         sbn = new StatusBarNotification(preOPkg, preOPkg, 9, "tag", preOUid,
@@ -2689,6 +2711,26 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         actual = mService.calculateSuppressedVisualEffects(appPolicy, userPolicy, P);
 
         assertEquals(expected, actual);
+    }
+
+    @Test
+    public void testVisualDifference_foreground() {
+        Notification.Builder nb1 = new Notification.Builder(mContext, "")
+                .setContentTitle("foo");
+        StatusBarNotification sbn1 = new StatusBarNotification(PKG, PKG, 0, "tag", mUid, 0,
+                nb1.build(), new UserHandle(mUid), null, 0);
+        NotificationRecord r1 =
+                new NotificationRecord(mContext, sbn1, mock(NotificationChannel.class));
+
+        Notification.Builder nb2 = new Notification.Builder(mContext, "")
+                .setFlag(FLAG_FOREGROUND_SERVICE, true)
+                .setContentTitle("bar");
+        StatusBarNotification sbn2 = new StatusBarNotification(PKG, PKG, 0, "tag", mUid, 0,
+                nb2.build(), new UserHandle(mUid), null, 0);
+        NotificationRecord r2 =
+                new NotificationRecord(mContext, sbn2, mock(NotificationChannel.class));
+
+        assertFalse(mService.isVisuallyInterruptive(r1, r2));
     }
 
     @Test

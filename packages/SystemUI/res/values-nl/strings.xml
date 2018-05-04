@@ -32,7 +32,7 @@
     <string name="status_bar_no_notifications_title" msgid="4755261167193833213">"Geen meldingen"</string>
     <string name="status_bar_ongoing_events_title" msgid="1682504513316879202">"Actief"</string>
     <string name="status_bar_latest_events_title" msgid="6594767438577593172">"Meldingen"</string>
-    <string name="battery_low_title" msgid="6456385927409742437">"Batterij is bijna leeg"</string>
+    <string name="battery_low_title" msgid="9187898087363540349">"Batterij is bijna leeg"</string>
     <string name="battery_low_percent_format" msgid="2900940511201380775">"<xliff:g id="PERCENTAGE">%s</xliff:g> resterend"</string>
     <string name="battery_low_percent_format_hybrid" msgid="6838677459286775617">"<xliff:g id="PERCENTAGE">%s</xliff:g> resterend, nog ongeveer <xliff:g id="TIME">%s</xliff:g> over op basis van je gebruik"</string>
     <string name="battery_low_percent_format_hybrid_short" msgid="9025795469949145586">"<xliff:g id="PERCENTAGE">%s</xliff:g> resterend, nog ongeveer <xliff:g id="TIME">%s</xliff:g> over"</string>
@@ -83,7 +83,7 @@
     <string name="use_ptp_button_title" msgid="7517127540301625751">"Koppelen als camera (PTP)"</string>
     <string name="installer_cd_button_title" msgid="2312667578562201583">"AFT-app voor Mac installeren"</string>
     <string name="accessibility_back" msgid="567011538994429120">"Terug"</string>
-    <string name="accessibility_home" msgid="8217216074895377641">"Homepage"</string>
+    <string name="accessibility_home" msgid="8217216074895377641">"Startscherm"</string>
     <string name="accessibility_menu" msgid="316839303324695949">"Menu"</string>
     <string name="accessibility_accessibility_button" msgid="7601252764577607915">"Toegankelijkheid"</string>
     <string name="accessibility_rotate_button" msgid="7402949513740253006">"Scherm draaien"</string>
@@ -95,8 +95,7 @@
     <string name="accessibility_unlock_button" msgid="128158454631118828">"Ontgrendelen"</string>
     <string name="accessibility_waiting_for_fingerprint" msgid="4808860050517462885">"Wachten op vingerafdruk"</string>
     <string name="accessibility_unlock_without_fingerprint" msgid="7541705575183694446">"Ontgrendelen zonder je vingerafdruk te gebruiken"</string>
-    <!-- no translation found for accessibility_send_smart_reply (7766727839703044493) -->
-    <skip />
+    <string name="accessibility_send_smart_reply" msgid="7766727839703044493">"Verzenden"</string>
     <string name="unlock_label" msgid="8779712358041029439">"ontgrendelen"</string>
     <string name="phone_label" msgid="2320074140205331708">"telefoon openen"</string>
     <string name="voice_assist_label" msgid="3956854378310019854">"spraakassistent openen"</string>
@@ -208,10 +207,8 @@
     <string name="accessibility_quick_settings_airplane_on" msgid="6406141469157599296">"Vliegtuigmodus aan."</string>
     <string name="accessibility_quick_settings_airplane_changed_off" msgid="66846307818850664">"Vliegtuigmodus uitgeschakeld."</string>
     <string name="accessibility_quick_settings_airplane_changed_on" msgid="8983005603505087728">"Vliegtuigmodus ingeschakeld."</string>
-    <!-- no translation found for accessibility_quick_settings_dnd_none_on (2960643943620637020) -->
-    <skip />
-    <!-- no translation found for accessibility_quick_settings_dnd_alarms_on (3357131899365865386) -->
-    <skip />
+    <string name="accessibility_quick_settings_dnd_none_on" msgid="2960643943620637020">"totale stilte"</string>
+    <string name="accessibility_quick_settings_dnd_alarms_on" msgid="3357131899365865386">"alleen wekkers"</string>
     <string name="accessibility_quick_settings_dnd" msgid="6607873236717185815">"Niet storen."</string>
     <string name="accessibility_quick_settings_dnd_changed_off" msgid="898107593453022935">"Niet storen uitgeschakeld."</string>
     <string name="accessibility_quick_settings_dnd_changed_on" msgid="4483780856613561039">"Niet storen ingeschakeld."</string>
@@ -620,8 +617,7 @@
       <item quantity="one">gebruikt de <xliff:g id="PERFORMING_ACTIVITY_0">%1$s</xliff:g></item>
     </plurals>
     <string name="notification_appops_settings" msgid="1028328314935908050">"Instellingen"</string>
-    <!-- no translation found for notification_appops_ok (1156966426011011434) -->
-    <skip />
+    <string name="notification_appops_ok" msgid="1156966426011011434">"OK"</string>
     <string name="notification_channel_controls_opened_accessibility" msgid="6553950422055908113">"Beheeropties voor meldingen voor <xliff:g id="APP_NAME">%1$s</xliff:g> geopend"</string>
     <string name="notification_channel_controls_closed_accessibility" msgid="7521619812603693144">"Beheeropties voor meldingen voor <xliff:g id="APP_NAME">%1$s</xliff:g> gesloten"</string>
     <string name="notification_channel_switch_accessibility" msgid="3420796005601900717">"Meldingen van dit kanaal toestaan"</string>
@@ -674,7 +670,7 @@
     <string name="keyboard_key_num_lock" msgid="5052537581246772117">"Num Lock"</string>
     <string name="keyboard_key_numpad_template" msgid="8729216555174634026">"<xliff:g id="NAME">%1$s</xliff:g> op numeriek toetsenblok"</string>
     <string name="keyboard_shortcut_group_system" msgid="6472647649616541064">"Systeem"</string>
-    <string name="keyboard_shortcut_group_system_home" msgid="3054369431319891965">"Homepage"</string>
+    <string name="keyboard_shortcut_group_system_home" msgid="3054369431319891965">"Startscherm"</string>
     <string name="keyboard_shortcut_group_system_recents" msgid="3154851905021926744">"Recent"</string>
     <string name="keyboard_shortcut_group_system_back" msgid="2207004531216446378">"Terug"</string>
     <string name="keyboard_shortcut_group_system_notifications" msgid="8366964080041773224">"Meldingen"</string>

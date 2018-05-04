@@ -33,7 +33,7 @@
     <string name="status_bar_no_notifications_title" msgid="4755261167193833213">"Bez obavijesti"</string>
     <string name="status_bar_ongoing_events_title" msgid="1682504513316879202">"U tijeku"</string>
     <string name="status_bar_latest_events_title" msgid="6594767438577593172">"Obavijesti"</string>
-    <string name="battery_low_title" msgid="6456385927409742437">"Niska razina baterije"</string>
+    <string name="battery_low_title" msgid="9187898087363540349">"Baterija bi se uskoro mogla isprazniti"</string>
     <string name="battery_low_percent_format" msgid="2900940511201380775">"Preostalo <xliff:g id="PERCENTAGE">%s</xliff:g>"</string>
     <string name="battery_low_percent_format_hybrid" msgid="6838677459286775617">"Preostalo je <xliff:g id="PERCENTAGE">%s</xliff:g>, još otprilike <xliff:g id="TIME">%s</xliff:g> na temelju vaše upotrebe"</string>
     <string name="battery_low_percent_format_hybrid_short" msgid="9025795469949145586">"Preostalo je <xliff:g id="PERCENTAGE">%s</xliff:g>, još otprilike <xliff:g id="TIME">%s</xliff:g>"</string>
@@ -96,8 +96,7 @@
     <string name="accessibility_unlock_button" msgid="128158454631118828">"Otključavanje"</string>
     <string name="accessibility_waiting_for_fingerprint" msgid="4808860050517462885">"Čekanje na otisak prsta"</string>
     <string name="accessibility_unlock_without_fingerprint" msgid="7541705575183694446">"Otključavanje bez otiska prsta"</string>
-    <!-- no translation found for accessibility_send_smart_reply (7766727839703044493) -->
-    <skip />
+    <string name="accessibility_send_smart_reply" msgid="7766727839703044493">"Pošalji"</string>
     <string name="unlock_label" msgid="8779712358041029439">"otključavanje"</string>
     <string name="phone_label" msgid="2320074140205331708">"otvaranje telefona"</string>
     <string name="voice_assist_label" msgid="3956854378310019854">"otvaranje glasovne pomoći"</string>
@@ -209,10 +208,8 @@
     <string name="accessibility_quick_settings_airplane_on" msgid="6406141469157599296">"Način rada u zrakoplovu uključen."</string>
     <string name="accessibility_quick_settings_airplane_changed_off" msgid="66846307818850664">"Način rada u zrakoplovu isključen."</string>
     <string name="accessibility_quick_settings_airplane_changed_on" msgid="8983005603505087728">"Način rada u zrakoplovu uključen."</string>
-    <!-- no translation found for accessibility_quick_settings_dnd_none_on (2960643943620637020) -->
-    <skip />
-    <!-- no translation found for accessibility_quick_settings_dnd_alarms_on (3357131899365865386) -->
-    <skip />
+    <string name="accessibility_quick_settings_dnd_none_on" msgid="2960643943620637020">"potpuna tišina"</string>
+    <string name="accessibility_quick_settings_dnd_alarms_on" msgid="3357131899365865386">"samo alarmi"</string>
     <string name="accessibility_quick_settings_dnd" msgid="6607873236717185815">"Ne ometaj."</string>
     <string name="accessibility_quick_settings_dnd_changed_off" msgid="898107593453022935">"\"Ne ometaj\" isključeno."</string>
     <string name="accessibility_quick_settings_dnd_changed_on" msgid="4483780856613561039">"\"Ne ometaj\" uključeno."</string>
@@ -625,8 +622,7 @@
       <item quantity="other">upotrebljava <xliff:g id="PERFORMING_ACTIVITY_1">%1$s</xliff:g> i <xliff:g id="PERFORMING_ACTIVITY_2">%2$s</xliff:g></item>
     </plurals>
     <string name="notification_appops_settings" msgid="1028328314935908050">"Postavke"</string>
-    <!-- no translation found for notification_appops_ok (1156966426011011434) -->
-    <skip />
+    <string name="notification_appops_ok" msgid="1156966426011011434">"U redu"</string>
     <string name="notification_channel_controls_opened_accessibility" msgid="6553950422055908113">"Otvorene su kontrole obavijesti za <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="notification_channel_controls_closed_accessibility" msgid="7521619812603693144">"Zatvorene su kontrole obavijesti za <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="notification_channel_switch_accessibility" msgid="3420796005601900717">"Dopusti obavijesti za ovaj kanal"</string>

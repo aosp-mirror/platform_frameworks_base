@@ -386,71 +386,7 @@ void FrameBuilder::defer3dChildren(const ClipBase* reorderClip, ChildrenSelectMo
 }
 
 void FrameBuilder::deferShadow(const ClipBase* reorderClip, const RenderNodeOp& casterNodeOp) {
-    auto& node = *casterNodeOp.renderNode;
-    auto& properties = node.properties();
-
-    if (properties.getAlpha() <= 0.0f || properties.getOutline().getAlpha() <= 0.0f ||
-        !properties.getOutline().getPath() || properties.getScaleX() == 0 ||
-        properties.getScaleY() == 0) {
-        // no shadow to draw
-        return;
-    }
-
-    const SkPath* casterOutlinePath = properties.getOutline().getPath();
-    const SkPath* revealClipPath = properties.getRevealClip().getPath();
-    if (revealClipPath && revealClipPath->isEmpty()) return;
-
-    float casterAlpha = properties.getAlpha() * properties.getOutline().getAlpha();
-
-    // holds temporary SkPath to store the result of intersections
-    SkPath* frameAllocatedPath = nullptr;
-    const SkPath* casterPath = casterOutlinePath;
-
-    // intersect the shadow-casting path with the reveal, if present
-    if (revealClipPath) {
-        frameAllocatedPath = createFrameAllocatedPath();
-
-        Op(*casterPath, *revealClipPath, kIntersect_SkPathOp, frameAllocatedPath);
-        casterPath = frameAllocatedPath;
-    }
-
-    // intersect the shadow-casting path with the clipBounds, if present
-    if (properties.getClippingFlags() & CLIP_TO_CLIP_BOUNDS) {
-        if (!frameAllocatedPath) {
-            frameAllocatedPath = createFrameAllocatedPath();
-        }
-        Rect clipBounds;
-        properties.getClippingRectForFlags(CLIP_TO_CLIP_BOUNDS, &clipBounds);
-        SkPath clipBoundsPath;
-        clipBoundsPath.addRect(clipBounds.left, clipBounds.top, clipBounds.right,
-                               clipBounds.bottom);
-
-        Op(*casterPath, clipBoundsPath, kIntersect_SkPathOp, frameAllocatedPath);
-        casterPath = frameAllocatedPath;
-    }
-
-    // apply reorder clip to shadow, so it respects clip at beginning of reorderable chunk
-    int restoreTo = mCanvasState.save(SaveFlags::MatrixClip);
-    mCanvasState.writableSnapshot()->applyClip(reorderClip,
-                                               *mCanvasState.currentSnapshot()->transform);
-    if (CC_LIKELY(!mCanvasState.getRenderTargetClipBounds().isEmpty())) {
-        Matrix4 shadowMatrixXY(casterNodeOp.localMatrix);
-        Matrix4 shadowMatrixZ(casterNodeOp.localMatrix);
-        node.applyViewPropertyTransforms(shadowMatrixXY, false);
-        node.applyViewPropertyTransforms(shadowMatrixZ, true);
-
-        sp<TessellationCache::ShadowTask> task = mCaches.tessellationCache.getShadowTask(
-                mCanvasState.currentTransform(), mCanvasState.getLocalClipBounds(),
-                casterAlpha >= 1.0f, casterPath, &shadowMatrixXY, &shadowMatrixZ,
-                mCanvasState.currentSnapshot()->getRelativeLightCenter(), mLightRadius);
-        ShadowOp* shadowOp = mAllocator.create<ShadowOp>(task, casterAlpha);
-        BakedOpState* bakedOpState = BakedOpState::tryShadowOpConstruct(
-                mAllocator, *mCanvasState.writableSnapshot(), shadowOp);
-        if (CC_LIKELY(bakedOpState)) {
-            currentLayer().deferUnmergeableOp(mAllocator, bakedOpState, OpBatchType::Shadow);
-        }
-    }
-    mCanvasState.restoreToCount(restoreTo);
+    // DEAD CODE
 }
 
 void FrameBuilder::deferProjectedChildren(const RenderNode& renderNode) {
@@ -682,10 +618,7 @@ void FrameBuilder::deferPatchOp(const PatchOp& op) {
 }
 
 void FrameBuilder::deferPathOp(const PathOp& op) {
-    auto state = deferStrokeableOp(op, OpBatchType::AlphaMaskTexture);
-    if (CC_LIKELY(state)) {
-        mCaches.pathCache.precache(op.path, op.paint);
-    }
+    /*auto state = */deferStrokeableOp(op, OpBatchType::AlphaMaskTexture);
 }
 
 void FrameBuilder::deferPointsOp(const PointsOp& op) {
@@ -698,13 +631,7 @@ void FrameBuilder::deferRectOp(const RectOp& op) {
 }
 
 void FrameBuilder::deferRoundRectOp(const RoundRectOp& op) {
-    auto state = deferStrokeableOp(op, tessBatchId(op));
-    if (CC_LIKELY(state && !op.paint->getPathEffect())) {
-        // TODO: consider storing tessellation task in BakedOpState
-        mCaches.tessellationCache.precacheRoundRect(state->computedState.transform, *(op.paint),
-                                                    op.unmappedBounds.getWidth(),
-                                                    op.unmappedBounds.getHeight(), op.rx, op.ry);
-    }
+    // DEAD CODE
 }
 
 void FrameBuilder::deferRoundRectPropsOp(const RoundRectPropsOp& op) {
@@ -722,48 +649,12 @@ void FrameBuilder::deferSimpleRectsOp(const SimpleRectsOp& op) {
     currentLayer().deferUnmergeableOp(mAllocator, bakedState, OpBatchType::Vertices);
 }
 
-static batchid_t textBatchId(const SkPaint& paint) {
-    // TODO: better handling of shader (since we won't care about color then)
-    return paint.getColor() == SK_ColorBLACK ? OpBatchType::Text : OpBatchType::ColorText;
-}
-
 void FrameBuilder::deferTextOp(const TextOp& op) {
-    BakedOpState* bakedState = BakedOpState::tryStrokeableOpConstruct(
-            mAllocator, *mCanvasState.writableSnapshot(), op,
-            BakedOpState::StrokeBehavior::StyleDefined, false);
-    if (!bakedState) return;  // quick rejected
-
-    batchid_t batchId = textBatchId(*(op.paint));
-    if (bakedState->computedState.transform.isPureTranslate() &&
-        PaintUtils::getBlendModeDirect(op.paint) == SkBlendMode::kSrcOver &&
-        hasMergeableClip(*bakedState)) {
-        mergeid_t mergeId = reinterpret_cast<mergeid_t>(op.paint->getColor());
-        currentLayer().deferMergeableOp(mAllocator, bakedState, batchId, mergeId);
-    } else {
-        currentLayer().deferUnmergeableOp(mAllocator, bakedState, batchId);
-    }
-
-    FontRenderer& fontRenderer = mCaches.fontRenderer.getFontRenderer();
-    auto& totalTransform = bakedState->computedState.transform;
-    if (totalTransform.isPureTranslate() || totalTransform.isPerspective()) {
-        fontRenderer.precache(op.paint, op.glyphs, op.glyphCount, SkMatrix::I());
-    } else {
-        // Partial transform case, see BakedOpDispatcher::renderTextOp
-        float sx, sy;
-        totalTransform.decomposeScale(sx, sy);
-        fontRenderer.precache(
-                op.paint, op.glyphs, op.glyphCount,
-                SkMatrix::MakeScale(roundf(std::max(1.0f, sx)), roundf(std::max(1.0f, sy))));
-    }
+    // DEAD CODE
 }
 
 void FrameBuilder::deferTextOnPathOp(const TextOnPathOp& op) {
-    BakedOpState* bakedState = tryBakeUnboundedOpState(op);
-    if (!bakedState) return;  // quick rejected
-    currentLayer().deferUnmergeableOp(mAllocator, bakedState, textBatchId(*(op.paint)));
-
-    mCaches.fontRenderer.getFontRenderer().precache(op.paint, op.glyphs, op.glyphCount,
-                                                    SkMatrix::I());
+    // DEAD CODE
 }
 
 void FrameBuilder::deferTextureLayerOp(const TextureLayerOp& op) {
@@ -969,7 +860,7 @@ void FrameBuilder::deferEndUnclippedLayerOp(const EndUnclippedLayerOp& /* ignore
 }
 
 void FrameBuilder::finishDefer() {
-    mCaches.fontRenderer.endPrecaching();
+    // DEAD CODE
 }
 
 }  // namespace uirenderer

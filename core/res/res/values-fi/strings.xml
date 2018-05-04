@@ -601,7 +601,7 @@
     <string name="policydesc_encryptedStorage" msgid="2637732115325316992">"Pakota tallennettujen sovellustietojen salaus."</string>
     <string name="policylab_disableCamera" msgid="6395301023152297826">"Poista kamerat käytöstä"</string>
     <string name="policydesc_disableCamera" msgid="2306349042834754597">"Estä laitteen kaikkien kameroiden käyttö."</string>
-    <string name="policylab_disableKeyguardFeatures" msgid="8552277871075367771">"Estä lukitun näytön toimintoja"</string>
+    <string name="policylab_disableKeyguardFeatures" msgid="8552277871075367771">"Estää lukitun näytön toimintoja"</string>
     <string name="policydesc_disableKeyguardFeatures" msgid="2044755691354158439">"Estä joidenkin lukitun näytön toimintojen käyttö."</string>
   <string-array name="phoneTypes">
     <item msgid="8901098336658710359">"Koti"</item>
@@ -836,7 +836,7 @@
     <string name="double_tap_toast" msgid="4595046515400268881">"Vinkki: lähennä ja loitonna kaksoisnapauttamalla."</string>
     <string name="autofill_this_form" msgid="4616758841157816676">"Aut. täyttö"</string>
     <string name="setup_autofill" msgid="7103495070180590814">"Määritä autom. täyttö"</string>
-    <string name="autofill_window_title" msgid="921006636895825007">"Automaattinen täyttö"</string>
+    <string name="autofill_window_title" msgid="4107745526909284887">"Automaattinen täyttö: <xliff:g id="SERVICENAME">%1$s</xliff:g>"</string>
     <string name="autofill_address_name_separator" msgid="6350145154779706772">" "</string>
     <string name="autofill_address_summary_name_format" msgid="3268041054899214945">"$1$2$3"</string>
     <string name="autofill_address_summary_separator" msgid="7483307893170324129">", "</string>
@@ -1690,6 +1690,7 @@
     <string name="package_installed_device_owner" msgid="6875717669960212648">"Järjestelmänvalvoja asensi tämän."</string>
     <string name="package_updated_device_owner" msgid="1847154566357862089">"Järjestelmänvalvoja päivitti tämän."</string>
     <string name="package_deleted_device_owner" msgid="2307122077550236438">"Järjestelmänvalvoja poisti tämän."</string>
+    <string name="battery_saver_description_with_learn_more" msgid="6323937147992667707">"Virransäästö poistaa joitakin laitteen ominaisuuksia käytöstä ja rajoittaa sovelluksia parantaakseen akunkestoa. "<annotation id="url">"Lisätietoja"</annotation></string>
     <string name="battery_saver_description" msgid="769989536172631582">"Virransäästö poistaa joitakin laitteen ominaisuuksia käytöstä ja rajoittaa sovelluksia parantaakseen akunkestoa."</string>
     <string name="data_saver_description" msgid="6015391409098303235">"Data Saver estää joitakin sovelluksia lähettämästä tai vastaanottamasta tietoja taustalla, jotta datan käyttöä voidaan vähentää. Käytössäsi oleva sovellus voi yhä käyttää dataa, mutta se saattaa tehdä niin tavallista harvemmin. Tämä voi tarkoittaa esimerkiksi sitä, että kuva ladataan vasta, kun kosketat sitä."</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"Otetaanko Data Saver käyttöön?"</string>
@@ -1738,8 +1739,7 @@
     <string name="zen_mode_default_weekends_name" msgid="2786495801019345244">"Viikonloppuna"</string>
     <string name="zen_mode_default_events_name" msgid="8158334939013085363">"Tapahtuma"</string>
     <string name="zen_mode_default_every_night_name" msgid="3012363838882944175">"Nukkuminen"</string>
-    <!-- no translation found for muted_by (5942954724562097128) -->
-    <skip />
+    <string name="muted_by" msgid="5942954724562097128">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g> mykistää joitakin ääniä"</string>
     <string name="system_error_wipe_data" msgid="6608165524785354962">"Laitteellasi on sisäinen ongelma, joka aiheuttaa epävakautta. Voit korjata tilanteen palauttamalla tehdasasetukset."</string>
     <string name="system_error_manufacturer" msgid="8086872414744210668">"Laitteesi yhdistäminen ei onnistu sisäisen virheen takia. Saat lisätietoja valmistajalta."</string>
     <string name="stk_cc_ussd_to_dial" msgid="5214333646366591205">"USSD-pyyntö vaihdettu tavalliseksi puheluksi"</string>

@@ -23,6 +23,8 @@
 namespace android {
 namespace uirenderer {
 
+class BakedOpRenderer;
+
 /**
  * Provides all "onBitmapOp(...)" style static methods for every op type, which convert the
  * RecordedOps and their state to Glops, and renders them with the provided BakedOpRenderer.

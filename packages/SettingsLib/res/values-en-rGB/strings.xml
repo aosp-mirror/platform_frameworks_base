@@ -141,7 +141,7 @@
     <string name="launch_defaults_some" msgid="313159469856372621">"Some defaults set"</string>
     <string name="launch_defaults_none" msgid="4241129108140034876">"No defaults set"</string>
     <string name="tts_settings" msgid="8186971894801348327">"Text-to-Speech settings"</string>
-    <string name="tts_settings_title" msgid="1237820681016639683">"Text-to-Speech output"</string>
+    <string name="tts_settings_title" msgid="1237820681016639683">"Text-to-speech output"</string>
     <string name="tts_default_rate_title" msgid="6030550998379310088">"Speech rate"</string>
     <string name="tts_default_rate_summary" msgid="4061815292287182801">"Speed at which the text is spoken"</string>
     <string name="tts_default_pitch_title" msgid="6135942113172488671">"Pitch"</string>
@@ -208,22 +208,22 @@
     <string name="debug_networking_category" msgid="7044075693643009662">"Networking"</string>
     <string name="wifi_display_certification" msgid="8611569543791307533">"Wireless display certification"</string>
     <string name="wifi_verbose_logging" msgid="4203729756047242344">"Enable Wi‑Fi verbose logging"</string>
-    <string name="wifi_connected_mac_randomization" msgid="3168165236877957767">"Connected MAC Randomisation"</string>
+    <string name="wifi_connected_mac_randomization" msgid="3168165236877957767">"Connected MAC randomisation"</string>
     <string name="mobile_data_always_on" msgid="8774857027458200434">"Mobile data always active"</string>
     <string name="tethering_hardware_offload" msgid="7470077827090325814">"Tethering hardware acceleration"</string>
     <string name="bluetooth_show_devices_without_names" msgid="4708446092962060176">"Show Bluetooth devices without names"</string>
     <string name="bluetooth_disable_absolute_volume" msgid="2660673801947898809">"Disable absolute volume"</string>
-    <string name="bluetooth_select_avrcp_version_string" msgid="3750059931120293633">"Bluetooth AVRCP Version"</string>
+    <string name="bluetooth_select_avrcp_version_string" msgid="3750059931120293633">"Bluetooth AVRCP version"</string>
     <string name="bluetooth_select_avrcp_version_dialog_title" msgid="7277329668298705702">"Select Bluetooth AVRCP Version"</string>
-    <string name="bluetooth_select_a2dp_codec_type" msgid="90597356942154882">"Bluetooth Audio Codec"</string>
+    <string name="bluetooth_select_a2dp_codec_type" msgid="90597356942154882">"Bluetooth audio codec"</string>
     <string name="bluetooth_select_a2dp_codec_type_dialog_title" msgid="8436224899475822557">"Trigger Bluetooth Audio Codec\nSelection"</string>
-    <string name="bluetooth_select_a2dp_codec_sample_rate" msgid="4788245703824623062">"Bluetooth Audio Sample Rate"</string>
+    <string name="bluetooth_select_a2dp_codec_sample_rate" msgid="4788245703824623062">"Bluetooth audio sample rate"</string>
     <string name="bluetooth_select_a2dp_codec_sample_rate_dialog_title" msgid="8010380028880963535">"Trigger Bluetooth Audio Codec\nSelection: Sample Rate"</string>
     <string name="bluetooth_select_a2dp_codec_bits_per_sample" msgid="2099645202720164141">"Bluetooth Audio Bits Per Sample"</string>
     <string name="bluetooth_select_a2dp_codec_bits_per_sample_dialog_title" msgid="8063859754619484760">"Trigger Bluetooth Audio Codec\nSelection: Bits Per Sample"</string>
-    <string name="bluetooth_select_a2dp_codec_channel_mode" msgid="884855779449390540">"Bluetooth Audio Channel Mode"</string>
+    <string name="bluetooth_select_a2dp_codec_channel_mode" msgid="884855779449390540">"Bluetooth audio channel mode"</string>
     <string name="bluetooth_select_a2dp_codec_channel_mode_dialog_title" msgid="7234956835280563341">"Trigger Bluetooth Audio Codec\nSelection: Channel Mode"</string>
-    <string name="bluetooth_select_a2dp_codec_ldac_playback_quality" msgid="3619694372407843405">"Bluetooth Audio LDAC Codec: Playback Quality"</string>
+    <string name="bluetooth_select_a2dp_codec_ldac_playback_quality" msgid="3619694372407843405">"Bluetooth audio LDAC codec: Playback quality"</string>
     <string name="bluetooth_select_a2dp_codec_ldac_playback_quality_dialog_title" msgid="7595776220458732825">"Trigger Bluetooth Audio LDAC Codec\nSelection: Playback Quality"</string>
     <string name="bluetooth_select_a2dp_codec_streaming_label" msgid="5347862512596240506">"Streaming: <xliff:g id="STREAMING_PARAMETER">%1$s</xliff:g>"</string>
     <string name="select_private_dns_configuration_title" msgid="3700456559305263922">"Private DNS"</string>
@@ -365,11 +365,12 @@
     <string name="accessibility_display_daltonizer_preference_title" msgid="5800761362678707872">"Colour correction"</string>
     <string name="accessibility_display_daltonizer_preference_subtitle" msgid="3484969015295282911">"This feature is experimental and may affect performance."</string>
     <string name="daltonizer_type_overridden" msgid="3116947244410245916">"Overridden by <xliff:g id="TITLE">%1$s</xliff:g>"</string>
-    <string name="power_remaining_duration_only" msgid="845431008899029842">"About <xliff:g id="TIME">%1$s</xliff:g> left"</string>
-    <string name="power_discharging_duration" msgid="6655472132189365839">"About <xliff:g id="TIME">%1$s</xliff:g> left (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
-    <string name="power_remaining_duration_only_enhanced" msgid="5992456722677973678">"About <xliff:g id="TIME">%1$s</xliff:g> left based on your usage"</string>
-    <string name="power_discharging_duration_enhanced" msgid="5726302316642148671">"About <xliff:g id="TIME">%1$s</xliff:g> left based on your usage (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
-    <string name="power_remaining_duration_only_short" msgid="5329694252258605547">"<xliff:g id="TIME">%1$s</xliff:g> left"</string>
+    <string name="power_remaining_settings_home_page" msgid="4845022416859002011">"<xliff:g id="PERCENTAGE">%1$s</xliff:g> - <xliff:g id="TIME_STRING">%2$s</xliff:g>"</string>
+    <string name="power_remaining_duration_only" msgid="6123167166221295462">"About <xliff:g id="TIME_REMAINING">%1$s</xliff:g> left"</string>
+    <string name="power_discharging_duration" msgid="8848256785736335185">"About <xliff:g id="TIME_REMAINING">%1$s</xliff:g> left (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
+    <string name="power_remaining_duration_only_enhanced" msgid="4189311599812296592">"About <xliff:g id="TIME_REMAINING">%1$s</xliff:g> left based on your usage"</string>
+    <string name="power_discharging_duration_enhanced" msgid="1992003260664804080">"About <xliff:g id="TIME_REMAINING">%1$s</xliff:g> left based on your usage (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
+    <string name="power_remaining_duration_only_short" msgid="3463575350656389957">"<xliff:g id="TIME_REMAINING">%1$s</xliff:g> left"</string>
     <string name="power_discharge_by_enhanced" msgid="2095821536747992464">"Should last until about <xliff:g id="TIME">%1$s</xliff:g> based on your usage (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
     <string name="power_discharge_by_only_enhanced" msgid="2175151772952365149">"Should last until about <xliff:g id="TIME">%1$s</xliff:g> based on your usage"</string>
     <string name="power_discharge_by" msgid="6453537733650125582">"Should last until about <xliff:g id="TIME">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>

@@ -104,6 +104,8 @@ public:
 
     const static int kMaxLoggerErrors = 20;
 
+    const static int kMaxSystemServerRestarts = 20;
+
     const static int kMaxTimestampCount = 20;
 
     const static int kMaxLogSourceCount = 50;
@@ -114,7 +116,7 @@ public:
 
     // Soft memory limit per configuration. Once this limit is exceeded, we begin notifying the
     // data subscriber that it's time to call getData.
-    static const size_t kBytesPerConfigTriggerGetData = 128 * 1024;
+    static const size_t kBytesPerConfigTriggerGetData = 192 * 1024;
 
     // Cap the UID map's memory usage to this. This should be fairly high since the UID information
     // is critical for understanding the metrics.
@@ -275,6 +277,11 @@ public:
      */
     void noteLoggerError(int error);
 
+    /*
+    * Records when system server restarts.
+    */
+    void noteSystemServerRestart(int32_t timeSec);
+
     /**
      * Records statsd skipped an event.
      */
@@ -338,6 +345,8 @@ private:
     // Timestamps when we detect log loss after logd reconnect.
     std::list<int64_t> mLogLossTimestampNs;
 
+    std::list<int32_t> mSystemServerRestartSec;
+
     // Stores the number of times statsd modified the anomaly alarm registered with
     // StatsCompanionService.
     int mAnomalyAlarmRegisteredStats = 0;
@@ -366,6 +375,7 @@ private:
     FRIEND_TEST(StatsdStatsTest, TestAtomLog);
     FRIEND_TEST(StatsdStatsTest, TestTimestampThreshold);
     FRIEND_TEST(StatsdStatsTest, TestAnomalyMonitor);
+    FRIEND_TEST(StatsdStatsTest, TestSystemServerCrash);
 };
 
 }  // namespace statsd

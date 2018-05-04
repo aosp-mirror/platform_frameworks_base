@@ -128,6 +128,14 @@ public class Resources {
     private final ArrayList<WeakReference<Theme>> mThemeRefs = new ArrayList<>();
 
     /**
+     * To avoid leaking WeakReferences to garbage collected Themes on the
+     * mThemeRefs list, we flush the list of stale references any time the
+     * mThemeRefNextFlushSize is reached.
+     */
+    private static final int MIN_THEME_REFS_FLUSH_SIZE = 32;
+    private int mThemeRefsNextFlushSize = MIN_THEME_REFS_FLUSH_SIZE;
+
+    /**
      * Returns the most appropriate default theme for the specified target SDK version.
      * <ul>
      * <li>Below API 11: Gingerbread
@@ -1770,6 +1778,13 @@ public class Resources {
         theme.setImpl(mResourcesImpl.newThemeImpl());
         synchronized (mThemeRefs) {
             mThemeRefs.add(new WeakReference<>(theme));
+
+            // Clean up references to garbage collected themes
+            if (mThemeRefs.size() > mThemeRefsNextFlushSize) {
+                mThemeRefs.removeIf(ref -> ref.get() == null);
+                mThemeRefsNextFlushSize = Math.max(MIN_THEME_REFS_FLUSH_SIZE,
+                        2 * mThemeRefs.size());
+            }
         }
         return theme;
     }

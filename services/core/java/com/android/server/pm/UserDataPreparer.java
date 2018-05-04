@@ -24,6 +24,8 @@ import android.os.Environment;
 import android.os.FileUtils;
 import android.os.storage.StorageManager;
 import android.os.storage.VolumeInfo;
+import android.os.SystemProperties;
+import android.os.UserHandle;
 import android.system.ErrnoException;
 import android.system.Os;
 import android.system.OsConstants;
@@ -96,6 +98,14 @@ class UserDataPreparer {
             }
 
             mInstaller.createUserData(volumeUuid, userId, userSerial, flags);
+
+            // CE storage is available after they are prepared.
+            if ((flags & StorageManager.FLAG_STORAGE_CE) != 0 &&
+                    (userId == UserHandle.USER_SYSTEM)) {
+                String propertyName = "sys.user." + userId + ".ce_available";
+                Slog.d(TAG, "Setting property: " + propertyName + "=true");
+                SystemProperties.set(propertyName, "true");
+            }
         } catch (Exception e) {
             logCriticalInfo(Log.WARN, "Destroying user " + userId + " on volume " + volumeUuid
                     + " because we failed to prepare: " + e);
@@ -103,7 +113,8 @@ class UserDataPreparer {
 
             if (allowRecover) {
                 // Try one last time; if we fail again we're really in trouble
-                prepareUserDataLI(volumeUuid, userId, userSerial, flags, false);
+                prepareUserDataLI(volumeUuid, userId, userSerial,
+                    flags | StorageManager.FLAG_STORAGE_DE, false);
             }
         }
     }

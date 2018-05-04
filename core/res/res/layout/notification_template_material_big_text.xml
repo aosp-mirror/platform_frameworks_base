@@ -24,7 +24,7 @@
     >
     <include layout="@layout/notification_template_header" />
 
-    <LinearLayout
+    <com.android.internal.widget.RemeasuringLinearLayout
             android:id="@+id/notification_action_list_margin_target"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
@@ -34,7 +34,7 @@
             android:clipToPadding="false"
             android:orientation="vertical">
 
-        <LinearLayout
+        <com.android.internal.widget.RemeasuringLinearLayout
             android:id="@+id/notification_main_column"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -62,7 +62,7 @@
                 android:visibility="gone"
                 android:textAlignment="viewStart"
                 />
-        </LinearLayout>
+        </com.android.internal.widget.RemeasuringLinearLayout>
 
         <ViewStub android:layout="@layout/notification_material_reply_text"
                 android:id="@+id/notification_material_reply_container"
@@ -75,6 +75,6 @@
                 android:layout_marginEnd="@dimen/notification_content_margin_end"
                 android:layout_marginTop="@dimen/notification_content_margin" />
         <include layout="@layout/notification_material_action_list" />
-    </LinearLayout>
+    </com.android.internal.widget.RemeasuringLinearLayout>
     <include layout="@layout/notification_template_right_icon" />
 </FrameLayout>

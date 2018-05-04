@@ -93,7 +93,6 @@ namespace PaintGlue {
         static_assert(1 <<  5 == SkPaint::kFakeBoldText_Flag,          "paint_flags_mismatch");
         static_assert(1 <<  6 == SkPaint::kLinearText_Flag,            "paint_flags_mismatch");
         static_assert(1 <<  7 == SkPaint::kSubpixelText_Flag,          "paint_flags_mismatch");
-        static_assert(1 <<  8 == SkPaint::kDevKernText_Flag,           "paint_flags_mismatch");
         static_assert(1 << 10 == SkPaint::kEmbeddedBitmapText_Flag,    "paint_flags_mismatch");
 
         Paint* obj = new Paint();

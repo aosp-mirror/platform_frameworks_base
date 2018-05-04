@@ -146,14 +146,10 @@ public class KeyguardSliceView extends LinearLayout implements View.OnClickListe
     }
 
     private void showSlice() {
-        if (mPulsing) {
+        if (mPulsing || mSlice == null) {
             mTitle.setVisibility(GONE);
             mRow.setVisibility(GONE);
             mContentChangeListener.accept(getLayoutTransition() != null);
-            return;
-        }
-
-        if (mSlice == null) {
             return;
         }
 
@@ -171,18 +167,6 @@ public class KeyguardSliceView extends LinearLayout implements View.OnClickListe
             SliceItem mainTitle = header.getTitleItem();
             CharSequence title = mainTitle != null ? mainTitle.getText() : null;
             mTitle.setText(title);
-
-            // Check if we're already ellipsizing the text.
-            // We're going to figure out the best possible line break if not.
-            Layout layout = mTitle.getLayout();
-            if (layout != null){
-                final int lineCount = layout.getLineCount();
-                if (lineCount > 0) {
-                    if (layout.getEllipsisCount(lineCount - 1) == 0) {
-                        mTitle.setText(findBestLineBreak(title));
-                    }
-                }
-            }
         }
 
         mClickActions.clear();
@@ -384,6 +368,27 @@ public class KeyguardSliceView extends LinearLayout implements View.OnClickListe
     @Override
     public void onDensityOrFontScaleChanged() {
         mIconSize = mContext.getResources().getDimensionPixelSize(R.dimen.widget_icon_size);
+    }
+
+    @Override
+    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+        super.onMeasure(widthMeasureSpec, heightMeasureSpec);
+
+        // Find best ellipsis strategy for the title.
+        // Done on onMeasure since TextView#getLayout needs a measure pass to calculate its bounds.
+        Layout layout = mTitle.getLayout();
+        if (layout != null) {
+            final int lineCount = layout.getLineCount();
+            if (lineCount > 0) {
+                if (layout.getEllipsisCount(lineCount - 1) == 0) {
+                    CharSequence title = mTitle.getText();
+                    CharSequence bestLineBreak = findBestLineBreak(title);
+                    if (!TextUtils.equals(title, bestLineBreak)) {
+                        mTitle.setText(bestLineBreak);
+                    }
+                }
+            }
+        }
     }
 
     public static class Row extends LinearLayout {

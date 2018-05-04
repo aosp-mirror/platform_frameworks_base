@@ -592,7 +592,8 @@ status_t StatsService::cmd_dump_report(FILE* out, FILE* err, const Vector<String
         if (good) {
             vector<uint8_t> data;
             mProcessor->onDumpReport(ConfigKey(uid, StrToInt64(name)), getElapsedRealtimeNs(),
-                                     false /* include_current_bucket*/, ADB_DUMP, &data);
+                                     false /* include_current_bucket*/,
+                                     true /* include strings */, ADB_DUMP, &data);
             // TODO: print the returned StatsLogReport to file instead of printing to logcat.
             if (proto) {
                 for (size_t i = 0; i < data.size(); i ++) {
@@ -658,7 +659,7 @@ status_t StatsService::cmd_print_uid_map(FILE* out, const Vector<String8>& args)
 
 status_t StatsService::cmd_write_data_to_disk(FILE* out) {
     fprintf(out, "Writing data to disk\n");
-    mProcessor->WriteDataToDisk(false);
+    mProcessor->WriteDataToDisk(ADB_DUMP);
     return NO_ERROR;
 }
 
@@ -815,10 +816,10 @@ Status StatsService::systemRunning() {
     return Status::ok();
 }
 
-Status StatsService::informDeviceShutdown(bool isShutdown) {
+Status StatsService::informDeviceShutdown() {
     ENFORCE_UID(AID_SYSTEM);
     VLOG("StatsService::informDeviceShutdown");
-    mProcessor->WriteDataToDisk(isShutdown);
+    mProcessor->WriteDataToDisk(DEVICE_SHUTDOWN);
     return Status::ok();
 }
 
@@ -865,8 +866,9 @@ Status StatsService::getData(int64_t key, const String16& packageName, vector<ui
     IPCThreadState* ipc = IPCThreadState::self();
     VLOG("StatsService::getData with Pid %i, Uid %i", ipc->getCallingPid(), ipc->getCallingUid());
     ConfigKey configKey(ipc->getCallingUid(), key);
-    mProcessor->onDumpReport(configKey, getElapsedRealtimeNs(), false /* include_current_bucket*/,
-                             GET_DATA_CALLED, output);
+    mProcessor->onDumpReport(configKey, getElapsedRealtimeNs(),
+                             false /* include_current_bucket*/, true /* include strings */,
+                              GET_DATA_CALLED, output);
     return Status::ok();
 }
 
@@ -965,7 +967,12 @@ Status StatsService::unsetBroadcastSubscriber(int64_t configId,
 
 void StatsService::binderDied(const wp <IBinder>& who) {
     ALOGW("statscompanion service died");
-    mProcessor->WriteDataToDisk(STATSCOMPANION_DIED);
+    StatsdStats::getInstance().noteSystemServerRestart(getWallClockSec());
+    if (mProcessor != nullptr) {
+        ALOGW("Reset statsd upon system server restars.");
+        mProcessor->WriteDataToDisk(STATSCOMPANION_DIED);
+        mProcessor->resetConfigs();
+    }
     mAnomalyAlarmMonitor->setStatsCompanionService(nullptr);
     mPeriodicAlarmMonitor->setStatsCompanionService(nullptr);
     SubscriberReporter::getInstance().setStatsCompanionService(nullptr);

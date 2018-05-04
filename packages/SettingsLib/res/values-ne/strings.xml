@@ -47,7 +47,7 @@
     <string name="available_via_carrier" msgid="1469036129740799053">"%1$s मार्फत उपलब्ध"</string>
     <string name="speed_label_very_slow" msgid="1867055264243608530">"धेरै ढिलो"</string>
     <string name="speed_label_slow" msgid="813109590815810235">"बिस्तारै"</string>
-    <string name="speed_label_okay" msgid="2331665440671174858">"ठीक छ"</string>
+    <string name="speed_label_okay" msgid="2331665440671174858">"ठिक छ"</string>
     <string name="speed_label_medium" msgid="3175763313268941953">"मध्यम"</string>
     <string name="speed_label_fast" msgid="7715732164050975057">"छिटो"</string>
     <string name="speed_label_very_fast" msgid="2265363430784523409">"धेरै छिटो"</string>
@@ -353,7 +353,7 @@
     <string name="convert_to_file_encryption_enabled" msgid="2861258671151428346">"रुपान्तरण गर्नुहोस्…"</string>
     <string name="convert_to_file_encryption_done" msgid="7859766358000523953">"पहिल्यै फाइल इन्क्रिप्ट गरिएको छ"</string>
     <string name="title_convert_fbe" msgid="1263622876196444453">"इन्क्रिप्सन आधारित फाइलमा रुपान्तरण गर्दै"</string>
-    <string name="convert_to_fbe_warning" msgid="6139067817148865527">"डेटा विभाजनलाई इन्क्रिप्सन आधारित फाइलमा रूपान्तर गर्नुहोस्।\n !!चेतावनी!! यसले तपाईँको सबै डेटा मेट्नेछ।\n यो विशेषता अल्फा चरणमा छ, र ठीकसँग काम नगर्न सक्छ।\n जारी गर्न \'हटाएर रुपान्तरण गर्नुहोस्...\' मा थिच्नुहोस्।"</string>
+    <string name="convert_to_fbe_warning" msgid="6139067817148865527">"डेटा विभाजनलाई इन्क्रिप्सन आधारित फाइलमा रूपान्तर गर्नुहोस्।\n !!चेतावनी!! यसले तपाईँको सबै डेटा मेट्नेछ।\n यो विशेषता अल्फा चरणमा छ, र ठिकसँग काम नगर्न सक्छ।\n जारी गर्न \'हटाएर रुपान्तरण गर्नुहोस्...\' मा थिच्नुहोस्।"</string>
     <string name="button_convert_fbe" msgid="5152671181309826405">"हटाएर रूपान्तरण गर्नुहोस्..."</string>
     <string name="picture_color_mode" msgid="4560755008730283695">"चित्र रङ्ग मोड"</string>
     <string name="picture_color_mode_desc" msgid="1141891467675548590">"sRGB प्रयोग गर्नुहोस्"</string>
@@ -365,11 +365,12 @@
     <string name="accessibility_display_daltonizer_preference_title" msgid="5800761362678707872">"रङ्ग सुधार"</string>
     <string name="accessibility_display_daltonizer_preference_subtitle" msgid="3484969015295282911">"यो सुविधा प्रयोगात्मक छ र प्रदर्शनमा असर गर्न सक्छ।"</string>
     <string name="daltonizer_type_overridden" msgid="3116947244410245916">"<xliff:g id="TITLE">%1$s</xliff:g> द्वारा अधिरोहित"</string>
-    <string name="power_remaining_duration_only" msgid="845431008899029842">"लगभग <xliff:g id="TIME">%1$s</xliff:g> बाँकी"</string>
-    <string name="power_discharging_duration" msgid="6655472132189365839">"लगभग <xliff:g id="TIME">%1$s</xliff:g> बाँकी (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
-    <string name="power_remaining_duration_only_enhanced" msgid="5992456722677973678">"तपाईंको प्रयोगका आधारमा लगभग <xliff:g id="TIME">%1$s</xliff:g> बाँकी"</string>
-    <string name="power_discharging_duration_enhanced" msgid="5726302316642148671">"तपाईंको प्रयोगका आधारमा <xliff:g id="TIME">%1$s</xliff:g> बाँकी (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
-    <string name="power_remaining_duration_only_short" msgid="5329694252258605547">"बाँकी समय <xliff:g id="TIME">%1$s</xliff:g>"</string>
+    <string name="power_remaining_settings_home_page" msgid="4845022416859002011">"<xliff:g id="PERCENTAGE">%1$s</xliff:g> - <xliff:g id="TIME_STRING">%2$s</xliff:g>"</string>
+    <string name="power_remaining_duration_only" msgid="6123167166221295462">"लगभग <xliff:g id="TIME_REMAINING">%1$s</xliff:g> बाँकी छ"</string>
+    <string name="power_discharging_duration" msgid="8848256785736335185">"लगभग <xliff:g id="TIME_REMAINING">%1$s</xliff:g> बाँकी छ (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
+    <string name="power_remaining_duration_only_enhanced" msgid="4189311599812296592">"तपाईंको प्रयोगको आधारमा लगभग <xliff:g id="TIME_REMAINING">%1$s</xliff:g> बाँकी छ"</string>
+    <string name="power_discharging_duration_enhanced" msgid="1992003260664804080">"तपाईंको प्रयोगको आधारमा लगभग <xliff:g id="TIME_REMAINING">%1$s</xliff:g> बाँकी छ (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
+    <string name="power_remaining_duration_only_short" msgid="3463575350656389957">"<xliff:g id="TIME_REMAINING">%1$s</xliff:g> बाँकी छ"</string>
     <string name="power_discharge_by_enhanced" msgid="2095821536747992464">"तपाईंको प्रयोगका आधारमा लगभग <xliff:g id="TIME">%1$s</xliff:g> सम्म टिक्नु पर्छ (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
     <string name="power_discharge_by_only_enhanced" msgid="2175151772952365149">"तपाईंको प्रयोगका आधारमा लगभग <xliff:g id="TIME">%1$s</xliff:g> सम्म टिक्नु पर्छ"</string>
     <string name="power_discharge_by" msgid="6453537733650125582">"ब्याट्री लगभग <xliff:g id="TIME">%1$s</xliff:g> सम्म टिक्नु पर्छ (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
@@ -436,7 +437,7 @@
     <string name="accessibility_manual_zen_more_time" msgid="1636187409258564291">"थप समय।"</string>
     <string name="accessibility_manual_zen_less_time" msgid="6590887204171164991">"कम समय।"</string>
     <string name="cancel" msgid="6859253417269739139">"रद्द गर्नुहोस्"</string>
-    <string name="okay" msgid="1997666393121016642">"ठीक छ"</string>
+    <string name="okay" msgid="1997666393121016642">"ठिक छ"</string>
     <string name="zen_mode_enable_dialog_turn_on" msgid="8287824809739581837">"सक्रिय गर्नुहोस्"</string>
     <string name="zen_mode_settings_turn_on_dialog_title" msgid="2297134204747331078">"बाधा नपुऱ्याउनुहोस् नामक मोडलाई सक्रिय गर्नुहोस्"</string>
     <string name="zen_mode_settings_summary_off" msgid="6119891445378113334">"कहिल्यै होइन"</string>

@@ -191,7 +191,7 @@
     <string name="turn_on_radio" msgid="3912793092339962371">"Радиону күйгүзүү"</string>
     <string name="turn_off_radio" msgid="8198784949987062346">"Радиону өчүрүү"</string>
     <string name="screen_lock" msgid="799094655496098153">"Экран кулпусу"</string>
-    <string name="power_off" msgid="4266614107412865048">"Кубатын өчүрүү"</string>
+    <string name="power_off" msgid="4266614107412865048">"Өчүрүү"</string>
     <string name="silent_mode_silent" msgid="319298163018473078">"Коңгуроо өчүк"</string>
     <string name="silent_mode_vibrate" msgid="7072043388581551395">"Чалганда титирөө"</string>
     <string name="silent_mode_ring" msgid="8592241816194074353">"Коңгуроо жандырылган"</string>
@@ -215,7 +215,7 @@
     <string name="global_actions" product="tv" msgid="7240386462508182976">"Сыналгы параметрлери"</string>
     <string name="global_actions" product="default" msgid="2406416831541615258">"Телефон мүмкүнчүлүктөрү"</string>
     <string name="global_action_lock" msgid="2844945191792119712">"Экран кулпусу"</string>
-    <string name="global_action_power_off" msgid="4471879440839879722">"Кубатын өчүрүү"</string>
+    <string name="global_action_power_off" msgid="4471879440839879722">"Өчүрүү"</string>
     <string name="global_action_emergency" msgid="7112311161137421166">"Тез жардам"</string>
     <string name="global_action_bug_report" msgid="7934010578922304799">"Ката тууралуу билдирүү"</string>
     <string name="global_action_logout" msgid="935179188218826050">"Сеансты бүтүрүү"</string>
@@ -836,7 +836,7 @@
     <string name="double_tap_toast" msgid="4595046515400268881">"Кыйытма: Чоңойтуп-кичирейтиш үчүн эки жолу басыңыз."</string>
     <string name="autofill_this_form" msgid="4616758841157816676">"Авто-толтуруу"</string>
     <string name="setup_autofill" msgid="7103495070180590814">"Автотолтурууну тууралоо"</string>
-    <string name="autofill_window_title" msgid="921006636895825007">"Автотолтуруу"</string>
+    <string name="autofill_window_title" msgid="4107745526909284887">"<xliff:g id="SERVICENAME">%1$s</xliff:g> менен автотолтуруу"</string>
     <string name="autofill_address_name_separator" msgid="6350145154779706772">" "</string>
     <string name="autofill_address_summary_name_format" msgid="3268041054899214945">"$1$2$3"</string>
     <string name="autofill_address_summary_separator" msgid="7483307893170324129">", "</string>
@@ -1692,6 +1692,7 @@
     <string name="package_installed_device_owner" msgid="6875717669960212648">"Администраторуңуз орнотуп койгон"</string>
     <string name="package_updated_device_owner" msgid="1847154566357862089">"Администраторуңуз жаңыртып койгон"</string>
     <string name="package_deleted_device_owner" msgid="2307122077550236438">"Администраторуңуз жок кылып салган"</string>
+    <string name="battery_saver_description_with_learn_more" msgid="6323937147992667707">"Батареянын кубатынын мөөнөтүн узартуу үчүн Батареяны үнөмдөгүч режиминде түзмөгүңүздүн айрым функциялары өчүп, колдонмолор чектелет. "<annotation id="url">"Кеңири маалымат"</annotation></string>
     <string name="battery_saver_description" msgid="769989536172631582">"Батареянын кубатынын мөөнөтүн узартуу үчүн Батареяны үнөмдөгүч режиминде түзмөгүңүздүн айрым функциялары өчүп, колдонмолор чектелет."</string>
     <string name="data_saver_description" msgid="6015391409098303235">"Трафикти үнөмдөө режиминде айрым колдонмолор дайындарды фондо өткөрө алышпайт. Учурда сиз пайдаланып жаткан колдонмо дайындарды жөнөтүп/ала алат, бирок адаттагыдан азыраак өткөргөндүктөн, анын айрым функциялары талаптагыдай иштебей коюшу мүмкүн. Мисалы, сүрөттөр басылмайынча жүктөлбөйт."</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"Трафикти үнөмдөө режимин иштетесизби?"</string>
@@ -1740,8 +1741,7 @@
     <string name="zen_mode_default_weekends_name" msgid="2786495801019345244">"Дем алыш"</string>
     <string name="zen_mode_default_events_name" msgid="8158334939013085363">"Иш-чара"</string>
     <string name="zen_mode_default_every_night_name" msgid="3012363838882944175">"Уйку режими"</string>
-    <!-- no translation found for muted_by (5942954724562097128) -->
-    <skip />
+    <string name="muted_by" msgid="5942954724562097128">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g> айрым үндөрдү өчүрүүдө"</string>
     <string name="system_error_wipe_data" msgid="6608165524785354962">"Түзмөгүңүздө ички көйгөй бар жана ал баштапкы абалга кайтарылмайынча туруктуу иштебей коюшу мүмкүн."</string>
     <string name="system_error_manufacturer" msgid="8086872414744210668">"Түзмөгүңүздө ички көйгөй бар. Анын чоо-жайын билүү үчүн өндүрүүчүңүзгө кайрылыңыз."</string>
     <string name="stk_cc_ussd_to_dial" msgid="5214333646366591205">"USSD сурамы демейки чалууга өзгөртүлдү"</string>

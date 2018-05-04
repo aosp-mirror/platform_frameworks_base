@@ -152,7 +152,12 @@
       <item quantity="one">נעילת המכשיר לא בוטלה במשך <xliff:g id="NUMBER_0">%d</xliff:g> שעה. הזן את הסיסמה.</item>
     </plurals>
     <string name="fingerprint_not_recognized" msgid="348813995267914625">"לא זוהתה"</string>
-    <!-- no translation found for kg_password_default_pin_message (3739658416797652781) -->
+    <plurals name="kg_password_default_pin_message" formatted="false" msgid="3739658416797652781">
+      <item quantity="two">‏יש להזין קוד גישה לכרטיס SIM. נותרו לך <xliff:g id="NUMBER_1">%d</xliff:g> ניסונות נוספים.</item>
+      <item quantity="many">‏יש להזין קוד גישה לכרטיס SIM. נותרו לך <xliff:g id="NUMBER_1">%d</xliff:g> ניסונות נוספים.</item>
+      <item quantity="other">‏יש להזין קוד גישה לכרטיס SIM. נותרו לך <xliff:g id="NUMBER_1">%d</xliff:g> ניסונות נוספים.</item>
+      <item quantity="one">‏יש להזין קוד גישה לכרטיס SIM. נותר לך <xliff:g id="NUMBER_0">%d</xliff:g> ניסיון נוסף לפני שיהיה צורך ליצור קשר עם הספק כדי לבטל את נעילת המכשיר.</item>
+    </plurals>
     <plurals name="kg_password_default_puk_message" formatted="false" msgid="8744416410184198352">
       <item quantity="two">‏כרטיס ה-SIM מושבת כעת. יש להזין קוד PUK כדי להמשיך. נותרו לך <xliff:g id="_NUMBER_1">%d</xliff:g> ניסיונות נוספים לפני שכרטיס ה-SIM ינעל לצמיתות. למידע נוסף, ניתן לפנות לספק שלך.</item>
       <item quantity="many">‏כרטיס ה-SIM מושבת כעת. יש להזין קוד PUK כדי להמשיך. נותרו לך <xliff:g id="_NUMBER_1">%d</xliff:g> ניסיונות נוספים לפני שכרטיס ה-SIM ינעל לצמיתות. למידע נוסף, ניתן לפנות לספק שלך.</item>

@@ -365,11 +365,12 @@
     <string name="accessibility_display_daltonizer_preference_title" msgid="5800761362678707872">"Διόρθωση χρωμάτων"</string>
     <string name="accessibility_display_daltonizer_preference_subtitle" msgid="3484969015295282911">"Αυτή η λειτουργία είναι πειραματική και ενδεχομένως να επηρεάσει τις επιδόσεις."</string>
     <string name="daltonizer_type_overridden" msgid="3116947244410245916">"Αντικαταστάθηκε από <xliff:g id="TITLE">%1$s</xliff:g>"</string>
-    <string name="power_remaining_duration_only" msgid="845431008899029842">"Απομένουν περίπου <xliff:g id="TIME">%1$s</xliff:g>"</string>
-    <string name="power_discharging_duration" msgid="6655472132189365839">"Απομένει/ουν περίπου <xliff:g id="TIME">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
-    <string name="power_remaining_duration_only_enhanced" msgid="5992456722677973678">"Απομένει/ουν περίπου <xliff:g id="TIME">%1$s</xliff:g> με βάση τη χρήση σας"</string>
-    <string name="power_discharging_duration_enhanced" msgid="5726302316642148671">"Απομένει/ουν περίπου <xliff:g id="TIME">%1$s</xliff:g>, ανάλογα με τη χρήση σας (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
-    <string name="power_remaining_duration_only_short" msgid="5329694252258605547">"Απομένει/ουν <xliff:g id="TIME">%1$s</xliff:g>"</string>
+    <string name="power_remaining_settings_home_page" msgid="4845022416859002011">"<xliff:g id="PERCENTAGE">%1$s</xliff:g> - <xliff:g id="TIME_STRING">%2$s</xliff:g>"</string>
+    <string name="power_remaining_duration_only" msgid="6123167166221295462">"Απομένει/ουν περίπου <xliff:g id="TIME_REMAINING">%1$s</xliff:g>"</string>
+    <string name="power_discharging_duration" msgid="8848256785736335185">"Απομένει/ουν περίπου <xliff:g id="TIME_REMAINING">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
+    <string name="power_remaining_duration_only_enhanced" msgid="4189311599812296592">"Απομένει/ουν περίπου <xliff:g id="TIME_REMAINING">%1$s</xliff:g>, βάσει της χρήσης σας"</string>
+    <string name="power_discharging_duration_enhanced" msgid="1992003260664804080">"Απομένει/ουν περίπου <xliff:g id="TIME_REMAINING">%1$s</xliff:g>, βάσει της χρήσης σας (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
+    <string name="power_remaining_duration_only_short" msgid="3463575350656389957">"Απομένει/ουν <xliff:g id="TIME_REMAINING">%1$s</xliff:g>"</string>
     <string name="power_discharge_by_enhanced" msgid="2095821536747992464">"Θα διαρκέσει μέχρι τις <xliff:g id="TIME">%1$s</xliff:g> περίπου, ανάλογα με τη χρήση σας (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
     <string name="power_discharge_by_only_enhanced" msgid="2175151772952365149">"Θα διαρκέσει μέχρι τις <xliff:g id="TIME">%1$s</xliff:g> περίπου, ανάλογα με τη χρήση σας"</string>
     <string name="power_discharge_by" msgid="6453537733650125582">"Θα διαρκέσει μέχρι τις <xliff:g id="TIME">%1$s</xliff:g> περίπου (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>

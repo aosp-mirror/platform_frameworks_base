@@ -245,6 +245,18 @@ framework_docs_LOCAL_DROIDDOC_OPTIONS += \
 		-federate AndroidX https://developer.android.com \
 		-federationapi AndroidX prebuilts/sdk/current/androidx-api.txt
 
+# Get the highest numbered api txt for the given api level.
+# $(1): the api level (e.g. public, system)
+define highest_sdk_txt
+$(HISTORICAL_SDK_VERSIONS_ROOT)/$(lastword $(call numerically_sort, \
+    $(patsubst \
+        $(HISTORICAL_SDK_VERSIONS_ROOT)/%,\
+        %,\
+        $(wildcard $(HISTORICAL_SDK_VERSIONS_ROOT)/*/$(1)/api/android.txt)\
+    ) \
+))
+endef
+
 # ====  Public API diff ===========================
 include $(CLEAR_VARS)
 
@@ -260,13 +272,8 @@ LOCAL_ADDITIONAL_DEPENDENCIES := \
 
 LOCAL_MODULE := offline-sdk-referenceonly
 
-last_released_sdk_version := $(lastword $(call numerically_sort, \
-			$(filter-out current, \
-				$(patsubst $(SRC_API_DIR)/%.txt,%, $(wildcard $(SRC_API_DIR)/*.txt)) \
-			 )\
-		))
-
-LOCAL_APIDIFF_OLDAPI := $(LOCAL_PATH)/../../$(SRC_API_DIR)/$(last_released_sdk_version)
+# Basename, because apidiff adds .txt internally.
+LOCAL_APIDIFF_OLDAPI := $(basename $(call highest_sdk_txt,public))
 LOCAL_APIDIFF_NEWAPI := $(LOCAL_PATH)/../../$(basename $(INTERNAL_PLATFORM_API_FILE))
 
 include $(BUILD_APIDIFF)
@@ -290,13 +297,8 @@ LOCAL_ADDITIONAL_DEPENDENCIES := \
 
 LOCAL_MODULE := offline-system-sdk-referenceonly
 
-last_released_sdk_version := $(lastword $(call numerically_sort, \
-			$(filter-out current, \
-				$(patsubst $(SRC_SYSTEM_API_DIR)/%.txt,%, $(wildcard $(SRC_SYSTEM_API_DIR)/*.txt)) \
-			 )\
-		))
-
-LOCAL_APIDIFF_OLDAPI := $(LOCAL_PATH)/../../$(SRC_SYSTEM_API_DIR)/$(last_released_sdk_version)
+# Basename, because apidiff adds .txt internally.
+LOCAL_APIDIFF_OLDAPI := $(basename $(call highest_sdk_txt,system))
 LOCAL_APIDIFF_NEWAPI := $(LOCAL_PATH)/../../$(basename $(INTERNAL_PLATFORM_SYSTEM_API_FILE))
 
 include $(BUILD_APIDIFF)
@@ -308,38 +310,6 @@ $(out_zip): $(full_target)
 $(call dist-for-goals,sdk,$(INTERNAL_PLATFORM_API_FILE))
 $(call dist-for-goals,sdk,$(INTERNAL_PLATFORM_SYSTEM_API_FILE))
 $(call dist-for-goals,sdk,$(INTERNAL_PLATFORM_TEST_API_FILE))
-
-# ====  the complete hidden api list ===================================
-include $(CLEAR_VARS)
-
-LOCAL_SRC_FILES:=$(framework_docs_LOCAL_API_CHECK_SRC_FILES)
-LOCAL_GENERATED_SOURCES:=$(framework_docs_LOCAL_GENERATED_SOURCES)
-LOCAL_SRCJARS:=$(framework_docs_LOCAL_SRCJARS)
-LOCAL_JAVA_LIBRARIES:=$(framework_docs_LOCAL_API_CHECK_JAVA_LIBRARIES)
-LOCAL_MODULE_CLASS:=$(framework_docs_LOCAL_MODULE_CLASS)
-LOCAL_DROIDDOC_SOURCE_PATH:=$(framework_docs_LOCAL_DROIDDOC_SOURCE_PATH)
-LOCAL_DROIDDOC_HTML_DIR:=$(framework_docs_LOCAL_DROIDDOC_HTML_DIR)
-LOCAL_ADDITIONAL_JAVA_DIR:=$(framework_docs_LOCAL_API_CHECK_ADDITIONAL_JAVA_DIR)
-LOCAL_ADDITIONAL_DEPENDENCIES:=$(framework_docs_LOCAL_ADDITIONAL_DEPENDENCIES)
-
-LOCAL_MODULE := hidden-api-list
-
-LOCAL_DROIDDOC_OPTIONS:=\
-		$(framework_docs_LOCAL_DROIDDOC_OPTIONS) \
-		-referenceonly \
-		-showUnannotated \
-		-showAnnotation android.annotation.SystemApi \
-		-showAnnotation android.annotation.TestApi \
-		-privateDexApi $(INTERNAL_PLATFORM_PRIVATE_DEX_API_FILE) \
-		-nodocs
-
-LOCAL_DROIDDOC_CUSTOM_TEMPLATE_DIR:=external/doclava/res/assets/templates-sdk
-
-LOCAL_UNINSTALLABLE_MODULE := true
-
-include $(BUILD_DROIDDOC)
-
-$(full_target): .KATI_IMPLICIT_OUTPUTS := $(INTERNAL_PLATFORM_PRIVATE_DEX_API_FILE)
 
 # ====  check javadoc comments but don't generate docs ========
 include $(CLEAR_VARS)
@@ -754,9 +724,16 @@ include $(BUILD_STATIC_JAVA_LIBRARY)
 # rules for building them. Other rules in the build system should depend on the
 # files in the build folder.
 
-# Automatically add all methods which match the following signatures.
-# These need to be greylisted in order to allow applications to write their
-# own serializers.
+# Merge light greylist from multiple files:
+#  (1) manual light greylist
+#  (2) list of usages from vendor apps
+#  (3) list of removed APIs
+#      @removed does not imply private in Doclava. We must take the subset also
+#      in PRIVATE_API.
+#  (4) list of serialization APIs
+#      Automatically adds all methods which match the signatures in
+#      REGEX_SERIALIZATION. These are greylisted in order to allow applications
+#      to write their own serializers.
 $(INTERNAL_PLATFORM_HIDDENAPI_LIGHT_GREYLIST): REGEX_SERIALIZATION := \
     "readObject\(Ljava/io/ObjectInputStream;\)V" \
     "readObjectNoData\(\)V" \
@@ -766,14 +743,15 @@ $(INTERNAL_PLATFORM_HIDDENAPI_LIGHT_GREYLIST): REGEX_SERIALIZATION := \
     "writeObject\(Ljava/io/ObjectOutputStream;\)V" \
     "writeReplace\(\)Ljava/lang/Object;"
 $(INTERNAL_PLATFORM_HIDDENAPI_LIGHT_GREYLIST): PRIVATE_API := $(INTERNAL_PLATFORM_PRIVATE_DEX_API_FILE)
-# Temporarily merge light greylist from two files. Vendor list will become dark
-# grey once we remove the UI toast.
+$(INTERNAL_PLATFORM_HIDDENAPI_LIGHT_GREYLIST): REMOVED_API := $(INTERNAL_PLATFORM_REMOVED_DEX_API_FILE)
 $(INTERNAL_PLATFORM_HIDDENAPI_LIGHT_GREYLIST): frameworks/base/config/hiddenapi-light-greylist.txt \
                                                frameworks/base/config/hiddenapi-vendor-list.txt \
-                                               $(INTERNAL_PLATFORM_PRIVATE_DEX_API_FILE)
+                                               $(INTERNAL_PLATFORM_PRIVATE_DEX_API_FILE) \
+                                               $(INTERNAL_PLATFORM_REMOVED_DEX_API_FILE)
 	sort frameworks/base/config/hiddenapi-light-greylist.txt \
 	     frameworks/base/config/hiddenapi-vendor-list.txt \
 	     <(grep -E "\->("$(subst $(space),"|",$(REGEX_SERIALIZATION))")$$" $(PRIVATE_API)) \
+	     <(comm -12 <(sort $(REMOVED_API)) <(sort $(PRIVATE_API))) \
 	> $@
 
 $(eval $(call copy-one-file,frameworks/base/config/hiddenapi-dark-greylist.txt,\

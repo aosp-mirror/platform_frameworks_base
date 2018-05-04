@@ -426,7 +426,7 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
                     return;
                 }
                 try {
-                  sStatsd.informDeviceShutdown(true);
+                  sStatsd.informDeviceShutdown();
                 } catch (Exception e) {
                     Slog.w(TAG, "Failed to inform statsd of a shutdown event.", e);
                 }

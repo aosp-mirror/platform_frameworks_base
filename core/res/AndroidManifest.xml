@@ -840,6 +840,77 @@
         android:protectionLevel="dangerous|instant" />
 
     <!-- ====================================================================== -->
+    <!-- Permissions for accessing the call log                                 -->
+    <!-- ====================================================================== -->
+    <eat-comment />
+
+    <!-- Used for permissions that are associated telephony features. -->
+    <permission-group android:name="android.permission-group.CALL_LOG"
+        android:icon="@drawable/perm_group_phone_calls"
+        android:label="@string/permgrouplab_calllog"
+        android:description="@string/permgroupdesc_calllog"
+        android:request="@string/permgrouprequest_calllog"
+        android:priority="450" />
+
+    <!-- Allows an application to access the IMS call service: making and
+         modifying a call
+        <p>Protection level: signature|privileged
+        @hide
+    -->
+    <permission android:name="android.permission.ACCESS_IMS_CALL_SERVICE"
+        android:label="@string/permlab_accessImsCallService"
+        android:description="@string/permdesc_accessImsCallService"
+        android:protectionLevel="signature|privileged" />
+
+    <!-- Allows an application to read the user's call log.
+         <p class="note"><strong>Note:</strong> If your app uses the
+         {@link #READ_CONTACTS} permission and <em>both</em> your <a
+         href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#min">{@code
+         minSdkVersion}</a> and <a
+         href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#target">{@code
+         targetSdkVersion}</a> values are set to 15 or lower, the system implicitly
+         grants your app this permission. If you don't need this permission, be sure your <a
+         href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#target">{@code
+         targetSdkVersion}</a> is 16 or higher.</p>
+         <p>Protection level: dangerous
+    -->
+    <permission android:name="android.permission.READ_CALL_LOG"
+        android:permissionGroup="android.permission-group.CALL_LOG"
+        android:label="@string/permlab_readCallLog"
+        android:description="@string/permdesc_readCallLog"
+        android:protectionLevel="dangerous" />
+
+    <!-- Allows an application to write (but not read) the user's
+         call log data.
+         <p class="note"><strong>Note:</strong> If your app uses the
+         {@link #WRITE_CONTACTS} permission and <em>both</em> your <a
+         href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#min">{@code
+         minSdkVersion}</a> and <a
+         href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#target">{@code
+         targetSdkVersion}</a> values are set to 15 or lower, the system implicitly
+         grants your app this permission. If you don't need this permission, be sure your <a
+         href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#target">{@code
+         targetSdkVersion}</a> is 16 or higher.</p>
+         <p>Protection level: dangerous
+    -->
+    <permission android:name="android.permission.WRITE_CALL_LOG"
+        android:permissionGroup="android.permission-group.CALL_LOG"
+        android:label="@string/permlab_writeCallLog"
+        android:description="@string/permdesc_writeCallLog"
+        android:protectionLevel="dangerous" />
+
+    <!-- Allows an application to see the number being dialed during an outgoing
+         call with the option to redirect the call to a different number or
+         abort the call altogether.
+         <p>Protection level: dangerous
+    -->
+    <permission android:name="android.permission.PROCESS_OUTGOING_CALLS"
+        android:permissionGroup="android.permission-group.CALL_LOG"
+        android:label="@string/permlab_processOutgoingCalls"
+        android:description="@string/permdesc_processOutgoingCalls"
+        android:protectionLevel="dangerous" />
+
+    <!-- ====================================================================== -->
     <!-- Permissions for accessing the device telephony                         -->
     <!-- ====================================================================== -->
     <eat-comment />
@@ -891,54 +962,6 @@
         android:description="@string/permdesc_callPhone"
         android:protectionLevel="dangerous" />
 
-    <!-- Allows an application to access the IMS call service: making and
-         modifying a call
-        <p>Protection level: signature|privileged
-        @hide
-    -->
-    <permission android:name="android.permission.ACCESS_IMS_CALL_SERVICE"
-        android:permissionGroup="android.permission-group.PHONE"
-        android:label="@string/permlab_accessImsCallService"
-        android:description="@string/permdesc_accessImsCallService"
-        android:protectionLevel="signature|privileged" />
-
-    <!-- Allows an application to read the user's call log.
-         <p class="note"><strong>Note:</strong> If your app uses the
-         {@link #READ_CONTACTS} permission and <em>both</em> your <a
-         href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#min">{@code
-         minSdkVersion}</a> and <a
-         href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#target">{@code
-         targetSdkVersion}</a> values are set to 15 or lower, the system implicitly
-         grants your app this permission. If you don't need this permission, be sure your <a
-         href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#target">{@code
-         targetSdkVersion}</a> is 16 or higher.</p>
-         <p>Protection level: dangerous
-    -->
-    <permission android:name="android.permission.READ_CALL_LOG"
-        android:permissionGroup="android.permission-group.PHONE"
-        android:label="@string/permlab_readCallLog"
-        android:description="@string/permdesc_readCallLog"
-        android:protectionLevel="dangerous" />
-
-    <!-- Allows an application to write (but not read) the user's
-         call log data.
-         <p class="note"><strong>Note:</strong> If your app uses the
-         {@link #WRITE_CONTACTS} permission and <em>both</em> your <a
-         href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#min">{@code
-         minSdkVersion}</a> and <a
-         href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#target">{@code
-         targetSdkVersion}</a> values are set to 15 or lower, the system implicitly
-         grants your app this permission. If you don't need this permission, be sure your <a
-         href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#target">{@code
-         targetSdkVersion}</a> is 16 or higher.</p>
-         <p>Protection level: dangerous
-    -->
-    <permission android:name="android.permission.WRITE_CALL_LOG"
-        android:permissionGroup="android.permission-group.PHONE"
-        android:label="@string/permlab_writeCallLog"
-        android:description="@string/permdesc_writeCallLog"
-        android:protectionLevel="dangerous" />
-
     <!-- Allows an application to add voicemails into the system.
          <p>Protection level: dangerous
     -->
@@ -956,18 +979,6 @@
         android:description="@string/permdesc_use_sip"
         android:label="@string/permlab_use_sip"
         android:protectionLevel="dangerous"/>
-
-    <!-- Allows an application to see the number being dialed during an outgoing
-         call with the option to redirect the call to a different number or
-         abort the call altogether.
-         <p>Protection level: dangerous
-    -->
-    <permission android:name="android.permission.PROCESS_OUTGOING_CALLS"
-        android:permissionGroup="android.permission-group.PHONE"
-        android:label="@string/permlab_processOutgoingCalls"
-        android:description="@string/permdesc_processOutgoingCalls"
-        android:protectionLevel="dangerous" />
-
 
     <!-- Allows the app to answer an incoming phone call.
          <p>Protection level: dangerous
@@ -1456,6 +1467,12 @@
          permission review mode.
          <p>Not for use by third-party applications. -->
     <permission android:name="android.permission.MANAGE_WIFI_WHEN_PERMISSION_REVIEW_REQUIRED"
+        android:protectionLevel="signature" />
+
+    <!-- #SystemApi @hide Allows an app to bypass Private DNS.
+         <p>Not for use by third-party applications.
+         TODO: publish as system API in next API release. -->
+    <permission android:name="android.permission.NETWORK_BYPASS_PRIVATE_DNS"
         android:protectionLevel="signature" />
 
     <!-- ======================================= -->

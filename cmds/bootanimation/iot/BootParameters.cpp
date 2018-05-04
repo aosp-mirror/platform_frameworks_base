@@ -18,29 +18,25 @@
 
 #define LOG_TAG "BootParameters"
 
+#include <errno.h>
 #include <fcntl.h>
 
 #include <android-base/file.h>
-#include <base/json/json_parser.h>
-#include <base/json/json_reader.h>
-#include <base/json/json_value_converter.h>
 #include <utils/Log.h>
 
 using android::base::RemoveFileIfExists;
 using android::base::ReadFileToString;
-using base::JSONReader;
-using base::JSONValueConverter;
-using base::Value;
+using Json::Reader;
+using Json::Value;
 
 namespace android {
 
 namespace {
 
-// Brightness and volume are stored as integer strings in next_boot.json.
-// They are divided by this constant to produce the actual float values in
-// range [0.0, 1.0]. This constant must match its counterpart in
-// DeviceManager.
-constexpr const float kFloatScaleFactor = 1000.0f;
+// Keys for volume, brightness, and user-defined parameters.
+constexpr const char* kKeyVolume = "volume";
+constexpr const char* kKeyBrightness = "brightness";
+constexpr const char* kKeyParams = "params";
 
 constexpr const char* kNextBootFile = "/data/misc/bootanimation/next_boot.json";
 constexpr const char* kLastBootFile = "/data/misc/bootanimation/last_boot.json";
@@ -69,19 +65,6 @@ void swapBootConfigs() {
 
 }  // namespace
 
-BootParameters::SavedBootParameters::SavedBootParameters()
-    : brightness(-kFloatScaleFactor), volume(-kFloatScaleFactor) {}
-
-void BootParameters::SavedBootParameters::RegisterJSONConverter(
-        JSONValueConverter<SavedBootParameters>* converter) {
-    converter->RegisterIntField("brightness", &SavedBootParameters::brightness);
-    converter->RegisterIntField("volume", &SavedBootParameters::volume);
-    converter->RegisterRepeatedString("param_names",
-                                      &SavedBootParameters::param_names);
-    converter->RegisterRepeatedString("param_values",
-                                      &SavedBootParameters::param_values);
-}
-
 BootParameters::BootParameters() {
     swapBootConfigs();
     loadParameters();
@@ -100,27 +83,34 @@ void BootParameters::loadParameters() {
 }
 
 void BootParameters::loadParameters(const std::string& raw_json) {
-    std::unique_ptr<Value> json = JSONReader::Read(raw_json);
-    if (json.get() == nullptr) {
-        return;
-    }
+  if (!Reader().parse(raw_json, mJson)) {
+    return;
+  }
 
-    JSONValueConverter<SavedBootParameters> converter;
-    if (converter.Convert(*(json.get()), &mRawParameters)) {
-        mBrightness = mRawParameters.brightness / kFloatScaleFactor;
-        mVolume = mRawParameters.volume / kFloatScaleFactor;
+  // A missing key returns a safe, missing value.
+  // Ignore invalid or missing JSON parameters.
+  Value& jsonValue = mJson[kKeyVolume];
+  if (jsonValue.isDouble()) {
+    mVolume = jsonValue.asFloat();
+  }
 
-        if (mRawParameters.param_names.size() == mRawParameters.param_values.size()) {
-            for (size_t i = 0; i < mRawParameters.param_names.size(); i++) {
-                mParameters.push_back({
-                        .key = mRawParameters.param_names[i]->c_str(),
-                        .value = mRawParameters.param_values[i]->c_str()
-                });
-            }
-        } else {
-            ALOGW("Parameter names and values size mismatch");
-        }
+  jsonValue = mJson[kKeyBrightness];
+  if (jsonValue.isDouble()) {
+    mBrightness = jsonValue.asFloat();
+  }
+
+  jsonValue = mJson[kKeyParams];
+  if (jsonValue.isObject()) {
+    for (auto &key : jsonValue.getMemberNames()) {
+      Value& value = jsonValue[key];
+      if (value.isString()) {
+        mParameters.push_back({
+          .key = key.c_str(),
+          .value = value.asCString()
+        });
+      }
     }
+  }
 }
 
 }  // namespace android
