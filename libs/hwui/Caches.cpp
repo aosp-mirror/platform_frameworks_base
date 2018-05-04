@@ -18,7 +18,6 @@
 
 #include "GlLayer.h"
 #include "Properties.h"
-#include "ShadowTessellator.h"
 #include "renderstate/RenderState.h"
 #include "utils/GLUtils.h"
 
