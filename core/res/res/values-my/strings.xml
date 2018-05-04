@@ -291,6 +291,12 @@
     <string name="permgrouplab_camera" msgid="4820372495894586615">"ကင်မရာ"</string>
     <string name="permgroupdesc_camera" msgid="3250611594678347720">"ဓာတ်ပုံ ရိုက်ပြီးနောက် ဗွီဒီယို မှတ်တမ်းတင်ရန်"</string>
     <string name="permgrouprequest_camera" msgid="1299833592069671756">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; အား ဓာတ်ပုံနှင့် ဗီဒီယိုရိုက်ကူးခွင့် ပေးလိုပါသလား။"</string>
+    <!-- no translation found for permgrouplab_calllog (8798646184930388160) -->
+    <skip />
+    <!-- no translation found for permgroupdesc_calllog (3006237336748283775) -->
+    <skip />
+    <!-- no translation found for permgrouprequest_calllog (8487355309583773267) -->
+    <skip />
     <string name="permgrouplab_phone" msgid="5229115638567440675">"ဖုန်း"</string>
     <string name="permgroupdesc_phone" msgid="6234224354060641055">"ဖုန်းခေါ်ဆိုမှုများ ပြုလုပ်ရန်နှင့် စီမံရန်"</string>
     <string name="permgrouprequest_phone" msgid="9166979577750581037">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; အား ဖုန်းခေါ်ဆိုမှုများ ပြုလုပ်ခွင့်နှင့် စီမံခွင့်ပေးလိုပါသလား။"</string>
@@ -836,8 +842,7 @@
     <string name="double_tap_toast" msgid="4595046515400268881">"အကြံပေးချက်- ဇူးမ်ဆွဲရန်နှင့် ဖြုတ်ရန် နှစ်ကြိမ်ဆက်တိုက် တို့ပါ"</string>
     <string name="autofill_this_form" msgid="4616758841157816676">"အလိုအလျောက်ဖြည့်ပါ"</string>
     <string name="setup_autofill" msgid="7103495070180590814">"အလိုအလျောက်ဖြည့်ရန် သတ်မှတ်သည်"</string>
-    <!-- no translation found for autofill_window_title (4107745526909284887) -->
-    <skip />
+    <string name="autofill_window_title" msgid="4107745526909284887">"<xliff:g id="SERVICENAME">%1$s</xliff:g> သုံးပြီး အလိုအလျောက်ဖြည့်ပါ"</string>
     <string name="autofill_address_name_separator" msgid="6350145154779706772">" "</string>
     <string name="autofill_address_summary_name_format" msgid="3268041054899214945">"$1$2$3"</string>
     <string name="autofill_address_summary_separator" msgid="7483307893170324129">", "</string>

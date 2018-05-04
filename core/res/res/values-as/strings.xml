@@ -291,6 +291,12 @@
     <string name="permgrouplab_camera" msgid="4820372495894586615">"কেমেৰা"</string>
     <string name="permgroupdesc_camera" msgid="3250611594678347720">"ফট\' তুলিব আৰু ভিডিঅ\' ৰেকৰ্ড কৰিব পাৰে"</string>
     <string name="permgrouprequest_camera" msgid="1299833592069671756">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;ক ছবি তুলিবলৈ আৰু ভিডিঅ\' ৰেকৰ্ড কৰিবলৈ অনুমতি দিবনে?"</string>
+    <!-- no translation found for permgrouplab_calllog (8798646184930388160) -->
+    <skip />
+    <!-- no translation found for permgroupdesc_calllog (3006237336748283775) -->
+    <skip />
+    <!-- no translation found for permgrouprequest_calllog (8487355309583773267) -->
+    <skip />
     <string name="permgrouplab_phone" msgid="5229115638567440675">"ফ’ন"</string>
     <string name="permgroupdesc_phone" msgid="6234224354060641055">"ফ\'ন কল কৰিব আৰু পৰিচলনা কৰিব পাৰে"</string>
     <string name="permgrouprequest_phone" msgid="9166979577750581037">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;ক ফ\'ন কল কৰিবলৈ আৰু পৰিচালনা কৰিবলৈ অনুমতি দিবনে?"</string>
@@ -836,8 +842,7 @@
     <string name="double_tap_toast" msgid="4595046515400268881">"পৰামৰ্শ: জুম ইন আৰু আউট কৰিবলৈ দুবাৰ টিপক৷"</string>
     <string name="autofill_this_form" msgid="4616758841157816676">"স্বয়ংপূৰ্তি"</string>
     <string name="setup_autofill" msgid="7103495070180590814">"স্বয়ংপূৰ্তি ছেট আপ কৰক"</string>
-    <!-- no translation found for autofill_window_title (4107745526909284887) -->
-    <skip />
+    <string name="autofill_window_title" msgid="4107745526909284887">"<xliff:g id="SERVICENAME">%1$s</xliff:g>ৰ জৰিয়তে স্বয়ংক্ৰিয়ভাৱে পূৰ্ণ কৰা সুবিধা"</string>
     <string name="autofill_address_name_separator" msgid="6350145154779706772">" "</string>
     <string name="autofill_address_summary_name_format" msgid="3268041054899214945">"$1$2$3"</string>
     <string name="autofill_address_summary_separator" msgid="7483307893170324129">", "</string>
@@ -1691,8 +1696,7 @@
     <string name="package_installed_device_owner" msgid="6875717669960212648">"আপোনাৰ প্ৰশাসকে ইনষ্টল কৰিছে"</string>
     <string name="package_updated_device_owner" msgid="1847154566357862089">"আপোনাৰ প্ৰশাসকে আপেডট কৰিছে"</string>
     <string name="package_deleted_device_owner" msgid="2307122077550236438">"আপোনাৰ প্ৰশাসকে মচিছে"</string>
-    <!-- no translation found for battery_saver_description_with_learn_more (6323937147992667707) -->
-    <skip />
+    <string name="battery_saver_description_with_learn_more" msgid="6323937147992667707">"আপোনাৰ বেটাৰিৰ অৱস্থা উন্নত কৰিবলৈ বেটাৰি সঞ্চয়কাৰীয়ে ডিভাইচৰ কিছুমান সুবিধা অফ কৰে আৰু এপসমূহক সীমিত কৰে। "<annotation id="url">"অধিক জানক"</annotation></string>
     <string name="battery_saver_description" msgid="769989536172631582">"আপোনাৰ বেটাৰিৰ অৱস্থা উন্নত কৰিবলৈ বেটাৰি সঞ্চয়কাৰীয়ে ডিভাইচৰ কিছুমান সুবিধা অফ কৰে আৰু এপসমূহক সীমিত কৰে।"</string>
     <string name="data_saver_description" msgid="6015391409098303235">"ডেটা ব্য়ৱহাৰ মাত্ৰা কম কৰিবৰ বাবে ডেটা সঞ্চয়কাৰীয়ে কিছুমান এপক নেপথ্য়ত ডেটা প্ৰেৰণ বা সংগ্ৰহ কৰাত বাধা প্ৰদান কৰে। আপুনি বৰ্তমান ব্য়ৱহাৰ কৰি থকা এটা এপে ডেটা ব্য়ৱহাৰ কৰিব পাৰে, কিন্তু সঘনাই এই কার্য কৰিব নোৱাৰিব পাৰে। ইয়াৰ অৰ্থ এইয়ে হ\'ব পাৰে যে, উদাহৰণস্বৰূপে, আপুনি নিটিপা পর্যন্ত প্ৰতিচ্ছবিসমূহ দেখুওৱা নহ\'ব।"</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"ডেটা সঞ্চয়কাৰী অন কৰিবনে?"</string>

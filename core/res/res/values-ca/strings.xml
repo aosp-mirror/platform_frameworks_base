@@ -121,16 +121,16 @@
     <string name="roamingText11" msgid="4154476854426920970">"Bàner d\'itinerància activat"</string>
     <string name="roamingText12" msgid="1189071119992726320">"Bàner d\'itinerància desactivat"</string>
     <string name="roamingTextSearching" msgid="8360141885972279963">"S\'està cercant el servei"</string>
-    <string name="wfcRegErrorTitle" msgid="3855061241207182194">"No s\'ha pogut configurar la funció Trucades per Wi-Fi"</string>
+    <string name="wfcRegErrorTitle" msgid="3855061241207182194">"No s\'han pogut configurar les trucades per Wi-Fi"</string>
   <string-array name="wfcOperatorErrorAlertMessages">
     <item msgid="3910386316304772394">"Per fer trucades i enviar missatges per Wi-Fi, primer has de demanar a l\'operador de telefonia mòbil que configuri aquest servei. Després, torna a activar les trucades per Wi-Fi a Configuració. (Codi d\'error: <xliff:g id="CODE">%1$s</xliff:g>)"</item>
   </string-array>
   <string-array name="wfcOperatorErrorNotificationMessages">
-    <item msgid="7372514042696663278">"Hi ha hagut un problema en registrar la funció Trucades per Wi-Fi amb el teu operador de telefonia mòbil: <xliff:g id="CODE">%1$s</xliff:g>"</item>
+    <item msgid="7372514042696663278">"Hi ha hagut un problema en registrar les trucades per Wi-Fi amb el teu operador de telefonia mòbil: <xliff:g id="CODE">%1$s</xliff:g>"</item>
   </string-array>
   <string-array name="wfcSpnFormats">
     <item msgid="6830082633573257149">"%s"</item>
-    <item msgid="4397097370387921767">"Trucada de Wi-Fi de: %s"</item>
+    <item msgid="4397097370387921767">"Trucades per Wi-Fi %s"</item>
   </string-array>
     <string name="wifi_calling_off_summary" msgid="8720659586041656098">"Desactivat"</string>
     <string name="wfc_mode_wifi_preferred_summary" msgid="1994113411286935263">"Preferència per a la Wi-Fi"</string>
@@ -291,6 +291,12 @@
     <string name="permgrouplab_camera" msgid="4820372495894586615">"Càmera"</string>
     <string name="permgroupdesc_camera" msgid="3250611594678347720">"fer fotos i vídeos"</string>
     <string name="permgrouprequest_camera" msgid="1299833592069671756">"Vols permetre que &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; faci fotos i vídeos?"</string>
+    <!-- no translation found for permgrouplab_calllog (8798646184930388160) -->
+    <skip />
+    <!-- no translation found for permgroupdesc_calllog (3006237336748283775) -->
+    <skip />
+    <!-- no translation found for permgrouprequest_calllog (8487355309583773267) -->
+    <skip />
     <string name="permgrouplab_phone" msgid="5229115638567440675">"Telèfon"</string>
     <string name="permgroupdesc_phone" msgid="6234224354060641055">"fer i gestionar trucades telefòniques"</string>
     <string name="permgrouprequest_phone" msgid="9166979577750581037">"Vols permetre que &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; faci trucades i les gestioni?"</string>
@@ -836,8 +842,7 @@
     <string name="double_tap_toast" msgid="4595046515400268881">"Consell: Pica dos cops per ampliar i per reduir."</string>
     <string name="autofill_this_form" msgid="4616758841157816676">"Em. aut."</string>
     <string name="setup_autofill" msgid="7103495070180590814">"Conf. empl. aut."</string>
-    <!-- no translation found for autofill_window_title (4107745526909284887) -->
-    <skip />
+    <string name="autofill_window_title" msgid="4107745526909284887">"Emplenament automàtic amb <xliff:g id="SERVICENAME">%1$s</xliff:g>"</string>
     <string name="autofill_address_name_separator" msgid="6350145154779706772">" "</string>
     <string name="autofill_address_summary_name_format" msgid="3268041054899214945">"$1$2$3"</string>
     <string name="autofill_address_summary_separator" msgid="7483307893170324129">", "</string>

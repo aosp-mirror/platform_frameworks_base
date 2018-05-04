@@ -123,10 +123,10 @@
     <string name="roamingTextSearching" msgid="8360141885972279963">"Inatafuta Huduma"</string>
     <string name="wfcRegErrorTitle" msgid="3855061241207182194">"Imeshindwa kuweka mipangilio ya kupiga simu kupitia Wi‑Fi"</string>
   <string-array name="wfcOperatorErrorAlertMessages">
-    <item msgid="3910386316304772394">"Ili upige simu na kutuma ujumbe kupitia Wi-Fi, mwambie mtoa huduma wako aweke mipangilio ya huduma hii kwanza. Kisha uwashe tena kipengele cha kupiga simu kupitia Wi-Fi kwenye Mipangilio. (Msimbo wa hitilafu: <xliff:g id="CODE">%1$s</xliff:g>)"</item>
+    <item msgid="3910386316304772394">"Ili upige simu na utume ujumbe kupitia Wi-Fi, kwanza mwambie mtoa huduma wako aweke mipangilio ya huduma hii. Kisha nenda kwenye mipangilio na uwashe tena kipengele cha kupiga simu kupitia Wi-Fi. (Msimbo wa hitilafu: <xliff:g id="CODE">%1$s</xliff:g>)"</item>
   </string-array>
   <string-array name="wfcOperatorErrorNotificationMessages">
-    <item msgid="7372514042696663278">"Tatizo limetokea wakati wa kusajili huduma ya kupiga simu kupitia Wi‑Fi ya mtoa huduma wako: <xliff:g id="CODE">%1$s</xliff:g>"</item>
+    <item msgid="7372514042696663278">"Tatizo limetokea wakati wa kuisajili huduma ya kupiga simu kupitia Wi‑Fi kwa mtoa huduma wako: <xliff:g id="CODE">%1$s</xliff:g>"</item>
   </string-array>
     <!-- String.format failed for translation -->
     <!-- no translation found for wfcSpnFormats:0 (6830082633573257149) -->
@@ -289,6 +289,12 @@
     <string name="permgrouplab_camera" msgid="4820372495894586615">"Kamera"</string>
     <string name="permgroupdesc_camera" msgid="3250611594678347720">"ipige picha na kurekodi video"</string>
     <string name="permgrouprequest_camera" msgid="1299833592069671756">"Ungependa kuiruhusu &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ipige picha na kurekodi video?"</string>
+    <!-- no translation found for permgrouplab_calllog (8798646184930388160) -->
+    <skip />
+    <!-- no translation found for permgroupdesc_calllog (3006237336748283775) -->
+    <skip />
+    <!-- no translation found for permgrouprequest_calllog (8487355309583773267) -->
+    <skip />
     <string name="permgrouplab_phone" msgid="5229115638567440675">"Simu"</string>
     <string name="permgroupdesc_phone" msgid="6234224354060641055">"piga na udhibiti simu"</string>
     <string name="permgrouprequest_phone" msgid="9166979577750581037">"Ungependa kuiruhusu &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ipige na kudhibiti simu?"</string>
@@ -834,8 +840,7 @@
     <string name="double_tap_toast" msgid="4595046515400268881">"Kidokezo: Gusa mara mbili ili kukuza ndani na nje."</string>
     <string name="autofill_this_form" msgid="4616758841157816676">"Kujaza kiotomatiki"</string>
     <string name="setup_autofill" msgid="7103495070180590814">"Weka uwezo wa kujaza kiotomatiki"</string>
-    <!-- no translation found for autofill_window_title (4107745526909284887) -->
-    <skip />
+    <string name="autofill_window_title" msgid="4107745526909284887">"Jaza kiotomatiki ukitumia <xliff:g id="SERVICENAME">%1$s</xliff:g>"</string>
     <string name="autofill_address_name_separator" msgid="6350145154779706772">" "</string>
     <string name="autofill_address_summary_name_format" msgid="3268041054899214945">"$1$2$3"</string>
     <string name="autofill_address_summary_separator" msgid="7483307893170324129">", "</string>
