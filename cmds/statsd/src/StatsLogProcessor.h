@@ -92,6 +92,13 @@ public:
 
     int64_t getLastReportTimeNs(const ConfigKey& key);
 
+    inline void setPrintLogs(bool enabled) {
+#ifdef VERY_VERBOSE_PRINTING
+        std::lock_guard<std::mutex> lock(mMetricsMutex);
+        mPrintAllLogs = enabled;
+#endif
+    }
+
 private:
     // For testing only.
     inline sp<AlarmMonitor> getAnomalyAlarmMonitor() const {
@@ -170,6 +177,10 @@ private:
     int mLogLossCount = 0;
 
     long mLastPullerCacheClearTimeSec = 0;
+
+#ifdef VERY_VERBOSE_PRINTING
+    bool mPrintAllLogs = false;
+#endif
 
     FRIEND_TEST(StatsLogProcessorTest, TestOutOfOrderLogs);
     FRIEND_TEST(StatsLogProcessorTest, TestRateLimitByteSize);

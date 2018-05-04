@@ -334,6 +334,10 @@ status_t StatsService::command(FILE* in, FILE* out, FILE* err, Vector<String8>& 
         if (!args[0].compare(String8("clear-puller-cache"))) {
             return cmd_clear_puller_cache(out);
         }
+
+        if (!args[0].compare(String8("print-logs"))) {
+            return cmd_print_logs(out, args);
+        }
     }
 
     print_cmd_help(out);
@@ -419,6 +423,9 @@ void StatsService::print_cmd_help(FILE* out) {
     fprintf(out, "\n");
     fprintf(out, "usage: adb shell cmd stats clear-puller-cache\n");
     fprintf(out, "  Clear cached puller data.\n");
+    fprintf(out, "\n");
+    fprintf(out, "usage: adb shell cmd stats print-logs\n");
+    fprintf(out, "      Only works on eng build\n");
 }
 
 status_t StatsService::cmd_trigger_broadcast(FILE* out, Vector<String8>& args) {
@@ -732,6 +739,22 @@ status_t StatsService::cmd_clear_puller_cache(FILE* out) {
     if (checkCallingPermission(String16(kPermissionDump))) {
         int cleared = mStatsPullerManager.ForceClearPullerCache();
         fprintf(out, "Puller removed %d cached data!\n", cleared);
+        return NO_ERROR;
+    } else {
+        return PERMISSION_DENIED;
+    }
+}
+
+status_t StatsService::cmd_print_logs(FILE* out, const Vector<String8>& args) {
+    IPCThreadState* ipc = IPCThreadState::self();
+    VLOG("StatsService::cmd_print_logs with Pid %i, Uid %i", ipc->getCallingPid(),
+         ipc->getCallingUid());
+    if (checkCallingPermission(String16(kPermissionDump))) {
+        bool enabled = true;
+        if (args.size() >= 2) {
+            enabled = atoi(args[1].c_str()) != 0;
+        }
+        mProcessor->setPrintLogs(enabled);
         return NO_ERROR;
     } else {
         return PERMISSION_DENIED;
