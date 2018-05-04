@@ -112,10 +112,8 @@ public final class ConnectivityController extends StateController implements
         final boolean connected = (info != null) && info.isConnected();
         final boolean connectionUsable = connected && validated;
 
-        final boolean metered = connected && (capabilities != null)
-                && !capabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_NOT_METERED);
-        final boolean unmetered = connected && (capabilities != null)
-                && capabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_NOT_METERED);
+        final boolean metered = connected && mConnManager.isActiveNetworkMeteredForUid(jobUid);
+        final boolean unmetered = connected && !mConnManager.isActiveNetworkMeteredForUid(jobUid);
         final boolean notRoaming = connected && (info != null)
                 && !info.isRoaming();
 
