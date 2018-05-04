@@ -383,6 +383,8 @@
     <item type="id" name="action_split_task_to_right" />
     <item type="id" name="action_split_task_to_top" />
 
+    <item type="id" name="action_toggle_overview"/>
+
     <!-- Whether or not the gear icon on notifications should be shown. The gear is shown when the
          the notification is not swiped enough to dismiss it. -->
     <bool name="config_showNotificationGear">true</bool>

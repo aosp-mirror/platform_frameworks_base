@@ -19,6 +19,7 @@ import android.animation.AnimatorListenerAdapter;
 import android.animation.ValueAnimator;
 import android.view.View;
 
+import android.view.View.AccessibilityDelegate;
 import com.android.systemui.Interpolators;
 import com.android.systemui.plugins.statusbar.phone.NavBarButtonProvider.ButtonInterface;
 import com.android.systemui.statusbar.policy.KeyButtonDrawable;
@@ -50,6 +51,7 @@ public class ButtonDispatcher {
     private View mCurrentView;
     private boolean mVertical;
     private ValueAnimator mFadeAnimator;
+    private AccessibilityDelegate mAccessibilityDelegate;
 
     private final ValueAnimator.AnimatorUpdateListener mAlphaListener = animation ->
             setAlpha((float) animation.getAnimatedValue());
@@ -83,6 +85,9 @@ public class ButtonDispatcher {
         }
         if (mVisibility != null && mVisibility != -1) {
             view.setVisibility(mVisibility);
+        }
+        if (mAccessibilityDelegate != null) {
+            view.setAccessibilityDelegate(mAccessibilityDelegate);
         }
         if (view instanceof ButtonInterface) {
             final ButtonInterface button = (ButtonInterface) view;
@@ -209,6 +214,14 @@ public class ButtonDispatcher {
         final int N = mViews.size();
         for (int i = 0; i < N; i++) {
             mViews.get(i).setOnHoverListener(mOnHoverListener);
+        }
+    }
+
+    public void setAccessibilityDelegate(AccessibilityDelegate delegate) {
+        mAccessibilityDelegate = delegate;
+        final int N = mViews.size();
+        for (int i = 0; i < N; i++) {
+            mViews.get(i).setAccessibilityDelegate(delegate);
         }
     }
 
