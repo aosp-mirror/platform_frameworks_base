@@ -224,7 +224,8 @@
     <string name="bluetooth_select_a2dp_codec_channel_mode" msgid="884855779449390540">"Regjimi i kanalit Bluetooth Audio"</string>
     <string name="bluetooth_select_a2dp_codec_channel_mode_dialog_title" msgid="7234956835280563341">"Aktivizo kodekun e audios me Bluetooth\nZgjedhja: Modaliteti i kanalit"</string>
     <string name="bluetooth_select_a2dp_codec_ldac_playback_quality" msgid="3619694372407843405">"Kodeku LDAC i audios së Bluetooth-it: Cilësia e luajtjes"</string>
-    <string name="bluetooth_select_a2dp_codec_ldac_playback_quality_dialog_title" msgid="7595776220458732825">"Aktivizo kodekun LDAC të audios me Bluetooth\nZgjedhja: Cilësia e luajtjes"</string>
+    <!-- no translation found for bluetooth_select_a2dp_codec_ldac_playback_quality_dialog_title (6893955536658137179) -->
+    <skip />
     <string name="bluetooth_select_a2dp_codec_streaming_label" msgid="5347862512596240506">"Transmetimi: <xliff:g id="STREAMING_PARAMETER">%1$s</xliff:g>"</string>
     <string name="select_private_dns_configuration_title" msgid="3700456559305263922">"DNS-ja private"</string>
     <string name="select_private_dns_configuration_dialog_title" msgid="9221994415765826811">"Zgjidh modalitetin e DNS-së private"</string>

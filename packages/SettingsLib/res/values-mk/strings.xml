@@ -224,7 +224,8 @@
     <string name="bluetooth_select_a2dp_codec_channel_mode" msgid="884855779449390540">"Режим на канал за аудио преку Bluetooth"</string>
     <string name="bluetooth_select_a2dp_codec_channel_mode_dialog_title" msgid="7234956835280563341">"Вклучете го аудио кодекот преку Bluetooth\nСелекција: режим на канал"</string>
     <string name="bluetooth_select_a2dp_codec_ldac_playback_quality" msgid="3619694372407843405">"Кодек за LDAC-аудио преку Bluetooth: квалитет на репродукција"</string>
-    <string name="bluetooth_select_a2dp_codec_ldac_playback_quality_dialog_title" msgid="7595776220458732825">"Вклучете кодек за LDAC-аудио преку Bluetooth\nСелекција: квалитет на репродукција"</string>
+    <!-- no translation found for bluetooth_select_a2dp_codec_ldac_playback_quality_dialog_title (6893955536658137179) -->
+    <skip />
     <string name="bluetooth_select_a2dp_codec_streaming_label" msgid="5347862512596240506">"Емитување: <xliff:g id="STREAMING_PARAMETER">%1$s</xliff:g>"</string>
     <string name="select_private_dns_configuration_title" msgid="3700456559305263922">"Приватен DNS"</string>
     <string name="select_private_dns_configuration_dialog_title" msgid="9221994415765826811">"Изберете режим на приватен DNS"</string>

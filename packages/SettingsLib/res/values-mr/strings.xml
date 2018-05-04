@@ -59,7 +59,7 @@
     <string name="bluetooth_pairing" msgid="1426882272690346242">"जोडत आहे…"</string>
     <string name="bluetooth_connected_no_headset" msgid="616068069034994802">"कनेक्ट केले (फोन नाही)<xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g>"</string>
     <string name="bluetooth_connected_no_a2dp" msgid="3736431800395923868">"कनेक्ट केले (मीडिया नाही)<xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g>"</string>
-    <string name="bluetooth_connected_no_map" msgid="3200033913678466453">"कनेक्ट केले (संदेश अ‍ॅक्सेस नाही)<xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g>"</string>
+    <string name="bluetooth_connected_no_map" msgid="3200033913678466453">"कनेक्ट केले (मेसेज अ‍ॅक्सेस नाही)<xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g>"</string>
     <string name="bluetooth_connected_no_headset_no_a2dp" msgid="2047403011284187056">"कनेक्ट केले (फोन किंवा मीडिया नाही)<xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g>"</string>
     <string name="bluetooth_connected_battery_level" msgid="5162924691231307748">"कनेक्ट केले, बॅटरी <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g><xliff:g id="ACTIVE_DEVICE">%2$s</xliff:g>"</string>
     <string name="bluetooth_connected_no_headset_battery_level" msgid="1610296229139400266">"कनेक्ट केले (फोन नाही), बॅटरी <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g><xliff:g id="ACTIVE_DEVICE">%2$s</xliff:g>"</string>
@@ -76,7 +76,7 @@
     <string name="bluetooth_profile_pbap" msgid="5372051906968576809">"संपर्क सामायिकरण"</string>
     <string name="bluetooth_profile_pbap_summary" msgid="6605229608108852198">"संपर्क सामायिकरणासाठी वापरा"</string>
     <string name="bluetooth_profile_pan_nap" msgid="8429049285027482959">"इंटरनेट कनेक्शन शेअररण"</string>
-    <string name="bluetooth_profile_map" msgid="1019763341565580450">"मजकूर संदेश"</string>
+    <string name="bluetooth_profile_map" msgid="1019763341565580450">"मजकूर मेसेज"</string>
     <string name="bluetooth_profile_sap" msgid="5764222021851283125">"सिम प्रवेश"</string>
     <string name="bluetooth_profile_a2dp_high_quality" msgid="5444517801472820055">"HD ऑडिओ: <xliff:g id="CODEC_NAME">%1$s</xliff:g>"</string>
     <string name="bluetooth_profile_a2dp_high_quality_unknown_codec" msgid="8510588052415438887">"HD ऑडिओ"</string>
@@ -224,7 +224,8 @@
     <string name="bluetooth_select_a2dp_codec_channel_mode" msgid="884855779449390540">"ब्लूटूथ ऑडिओ चॅनेल मोड"</string>
     <string name="bluetooth_select_a2dp_codec_channel_mode_dialog_title" msgid="7234956835280563341">"ब्लूटूथ ऑडिओ Codec ट्रिगर करा\nनिवड: चॅनेल मोड"</string>
     <string name="bluetooth_select_a2dp_codec_ldac_playback_quality" msgid="3619694372407843405">"ब्लूटूथ ऑडिओ LDAC कोडेक: प्लेबॅक गुणवत्ता"</string>
-    <string name="bluetooth_select_a2dp_codec_ldac_playback_quality_dialog_title" msgid="7595776220458732825">"ब्लूटूथ ऑडिओ Codec ट्रिगर करा\nनिवड: प्लेबॅक गुणवत्ता"</string>
+    <!-- no translation found for bluetooth_select_a2dp_codec_ldac_playback_quality_dialog_title (6893955536658137179) -->
+    <skip />
     <string name="bluetooth_select_a2dp_codec_streaming_label" msgid="5347862512596240506">"स्ट्रीमिंग: <xliff:g id="STREAMING_PARAMETER">%1$s</xliff:g>"</string>
     <string name="select_private_dns_configuration_title" msgid="3700456559305263922">"खाजगी DNS"</string>
     <string name="select_private_dns_configuration_dialog_title" msgid="9221994415765826811">"खाजगी DNS मोड निवडा"</string>
