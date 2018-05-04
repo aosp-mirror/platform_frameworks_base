@@ -451,10 +451,11 @@ public class KeyguardSliceView extends LinearLayout implements View.OnClickListe
         @Override
         protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
             int width = MeasureSpec.getSize(widthMeasureSpec);
-            for (int i = 0; i < getChildCount(); i++) {
+            int childCount = getChildCount();
+            for (int i = 0; i < childCount; i++) {
                 View child = getChildAt(i);
                 if (child instanceof KeyguardSliceButton) {
-                    ((KeyguardSliceButton) child).setMaxWidth(width / 2);
+                    ((KeyguardSliceButton) child).setMaxWidth(width / childCount);
                 }
             }
             super.onMeasure(widthMeasureSpec, heightMeasureSpec);
@@ -482,12 +483,10 @@ public class KeyguardSliceView extends LinearLayout implements View.OnClickListe
     @VisibleForTesting
     static class KeyguardSliceButton extends Button implements
             ConfigurationController.ConfigurationListener {
-        private final Context mContext;
 
         public KeyguardSliceButton(Context context) {
             super(context, null /* attrs */, 0 /* styleAttr */,
                     com.android.keyguard.R.style.TextAppearance_Keyguard_Secondary);
-            mContext = context;
             onDensityOrFontScaleChanged();
             setEllipsize(TruncateAt.END);
         }
@@ -506,9 +505,20 @@ public class KeyguardSliceView extends LinearLayout implements View.OnClickListe
 
         @Override
         public void onDensityOrFontScaleChanged() {
-            int horizontalPadding = (int) mContext.getResources()
-                    .getDimension(R.dimen.widget_horizontal_padding);
-            setPadding(horizontalPadding / 2, 0, horizontalPadding / 2, 0);
+            updatePadding();
+        }
+
+        @Override
+        public void setText(CharSequence text, BufferType type) {
+            super.setText(text, type);
+            updatePadding();
+        }
+
+        private void updatePadding() {
+            boolean hasText = !TextUtils.isEmpty(getText());
+            int horizontalPadding = (int) getContext().getResources()
+                    .getDimension(R.dimen.widget_horizontal_padding) / 2;
+            setPadding(horizontalPadding, 0, horizontalPadding * (hasText ? 1 : -1), 0);
             setCompoundDrawablePadding((int) mContext.getResources()
                     .getDimension(R.dimen.widget_icon_padding));
         }
@@ -524,6 +534,7 @@ public class KeyguardSliceView extends LinearLayout implements View.OnClickListe
                 Drawable bottom) {
             super.setCompoundDrawables(left, top, right, bottom);
             updateDrawableColors();
+            updatePadding();
         }
 
         private void updateDrawableColors() {
