@@ -19,7 +19,6 @@
 #include "MinikinUtils.h"
 #include "Paint.h"
 #include "Properties.h"
-#include "RecordingCanvas.h"
 #include "RenderNode.h"
 #include "Typeface.h"
 #include "pipeline/skia/SkiaRecordingCanvas.h"

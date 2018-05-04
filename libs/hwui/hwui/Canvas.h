@@ -44,8 +44,16 @@ namespace uirenderer {
 class CanvasPropertyPaint;
 class CanvasPropertyPrimitive;
 class DeferredLayerUpdater;
-class DisplayList;
 class RenderNode;
+
+namespace skiapipeline {
+class SkiaDisplayList;
+}
+
+/**
+ * Data structure that holds the list of commands used in display list stream
+ */
+using DisplayList = skiapipeline::SkiaDisplayList;
 }
 
 namespace SaveFlags {

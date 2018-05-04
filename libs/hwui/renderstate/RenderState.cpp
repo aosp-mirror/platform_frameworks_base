@@ -18,6 +18,7 @@
 #include "DeferredLayerUpdater.h"
 #include "GlLayer.h"
 #include "VkLayer.h"
+#include "Snapshot.h"
 
 #include "renderthread/CanvasContext.h"
 #include "renderthread/EglManager.h"

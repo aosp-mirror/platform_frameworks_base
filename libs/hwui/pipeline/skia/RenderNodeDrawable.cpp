@@ -25,6 +25,19 @@ namespace android {
 namespace uirenderer {
 namespace skiapipeline {
 
+RenderNodeDrawable::RenderNodeDrawable(RenderNode* node, SkCanvas* canvas, bool composeLayer,
+                                       bool inReorderingSection)
+        : mRenderNode(node)
+        , mRecordedTransform(canvas->getTotalMatrix())
+        , mComposeLayer(composeLayer)
+        , mInReorderingSection(inReorderingSection) {}
+
+RenderNodeDrawable::~RenderNodeDrawable() {
+    // Just here to move the destructor into the cpp file where we can access RenderNode.
+
+    // TODO: Detangle the header nightmare.
+}
+
 void RenderNodeDrawable::drawBackwardsProjectedNodes(SkCanvas* canvas,
                                                      const SkiaDisplayList& displayList,
                                                      int nestLevel) {
@@ -115,7 +128,6 @@ void RenderNodeDrawable::forceDraw(SkCanvas* canvas) {
         return;
     }
 
-    SkASSERT(renderNode->getDisplayList()->isSkiaDL());
     SkiaDisplayList* displayList = (SkiaDisplayList*)renderNode->getDisplayList();
 
     SkAutoCanvasRestore acr(canvas, true);

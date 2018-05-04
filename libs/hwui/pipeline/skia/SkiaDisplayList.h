@@ -16,10 +16,11 @@
 
 #pragma once
 
-#include "DisplayList.h"
 #include "hwui/AnimatedImageDrawable.h"
 #include "GLFunctorDrawable.h"
 #include "RenderNodeDrawable.h"
+#include "TreeInfo.h"
+#include "utils/LinearAllocator.h"
 
 #include <SkLiteDL.h>
 #include <SkLiteRecorder.h>
@@ -28,7 +29,16 @@
 namespace android {
 namespace uirenderer {
 
+namespace renderthread {
+class CanvasContext;
+}
+
 class Outline;
+
+namespace VectorDrawable {
+class Tree;
+};
+typedef uirenderer::VectorDrawable::Tree VectorDrawableRoot;
 
 namespace skiapipeline {
 
@@ -38,10 +48,14 @@ namespace skiapipeline {
  * runtime.  The downside of this inheritance is that we pay for the overhead
  * of the parent class construction/destruction without any real benefit.
  */
-class SkiaDisplayList : public DisplayList {
+class SkiaDisplayList {
 public:
-    SkiaDisplayList() { SkASSERT(projectionReceiveIndex == -1); }
-    virtual ~SkiaDisplayList() {
+    // index of DisplayListOp restore, after which projected descendants should be drawn
+    int projectionReceiveIndex = -1;
+
+    size_t getUsedSize() { return allocator.usedSize(); }
+
+    ~SkiaDisplayList() {
         /* Given that we are using a LinearStdAllocator to store some of the
          * SkDrawable contents we must ensure that any other object that is
          * holding a reference to those drawables is destroyed prior to their
@@ -68,29 +82,27 @@ public:
         return allocator.create<T>(std::forward<Params>(params)...);
     }
 
-    bool isSkiaDL() const override { return true; }
-
     /**
      * Returns true if the DisplayList does not have any recorded content
      */
-    bool isEmpty() const override { return mDisplayList.empty(); }
+    bool isEmpty() const { return mDisplayList.empty(); }
 
     /**
      * Returns true if this list directly contains a GLFunctor drawing command.
      */
-    bool hasFunctor() const override { return !mChildFunctors.empty(); }
+    bool hasFunctor() const { return !mChildFunctors.empty(); }
 
     /**
      * Returns true if this list directly contains a VectorDrawable drawing command.
      */
-    bool hasVectorDrawables() const override { return !mVectorDrawables.empty(); }
+    bool hasVectorDrawables() const { return !mVectorDrawables.empty(); }
 
     /**
      * Attempts to reset and reuse this DisplayList.
      *
      * @return true if the displayList will be reused and therefore should not be deleted
      */
-    bool reuseDisplayList(RenderNode* node, renderthread::CanvasContext* context) override;
+    bool reuseDisplayList(RenderNode* node, renderthread::CanvasContext* context);
 
     /**
      * ONLY to be called by RenderNode::syncDisplayList so that we can notify any
@@ -99,7 +111,7 @@ public:
      * NOTE: This function can be folded into RenderNode when we no longer need
      *       to subclass from DisplayList
      */
-    void syncContents() override;
+    void syncContents();
 
     /**
      * ONLY to be called by RenderNode::prepareTree in order to prepare this
@@ -116,12 +128,12 @@ public:
 
     bool prepareListAndChildren(
             TreeObserver& observer, TreeInfo& info, bool functorsNeedLayer,
-            std::function<void(RenderNode*, TreeObserver&, TreeInfo&, bool)> childFn) override;
+            std::function<void(RenderNode*, TreeObserver&, TreeInfo&, bool)> childFn);
 
     /**
      *  Calls the provided function once for each child of this DisplayList
      */
-    void updateChildren(std::function<void(RenderNode*)> updateFn) override;
+    void updateChildren(std::function<void(RenderNode*)> updateFn);
 
     /**
      *  Returns true if there is a child render node that is a projection receiver.
@@ -134,7 +146,9 @@ public:
 
     void draw(SkCanvas* canvas) { mDisplayList.draw(canvas); }
 
-    void output(std::ostream& output, uint32_t level) override;
+    void output(std::ostream& output, uint32_t level);
+
+    LinearAllocator allocator;
 
     /**
      * We use std::deque here because (1) we need to iterate through these

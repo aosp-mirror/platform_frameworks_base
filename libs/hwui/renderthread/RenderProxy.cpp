@@ -66,10 +66,7 @@ void RenderProxy::setSwapBehavior(SwapBehavior swapBehavior) {
 
 bool RenderProxy::loadSystemProperties() {
     return mRenderThread.queue().runSync([this]() -> bool {
-        bool needsRedraw = false;
-        if (Caches::hasInstance()) {
-            needsRedraw = Properties::load();
-        }
+        bool needsRedraw = Properties::load();
         if (mContext->profiler().consumeProperties()) {
             needsRedraw = true;
         }

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2015 The Android Open Source Project
+ * Copyright (C) 2016 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,16 +16,23 @@
 
 #pragma once
 
-#include "hwui/Canvas.h"
-#include "RenderNode.h"
-#include "tests/common/TestContext.h"
-#include "tests/common/TestScene.h"
-#include "tests/common/TestUtils.h"
-#include "utils/Color.h"
+#include "Vector.h"
 
-#include <functional>
+namespace android {
+namespace uirenderer {
 
-using namespace android;
-using namespace android::uirenderer;
-using namespace android::uirenderer::renderthread;
-using namespace android::uirenderer::test;
+struct LightGeometry {
+    Vector3 center;
+    float radius;
+};
+
+struct LightInfo {
+    LightInfo() : LightInfo(0, 0) {}
+    LightInfo(uint8_t ambientShadowAlpha, uint8_t spotShadowAlpha)
+            : ambientShadowAlpha(ambientShadowAlpha), spotShadowAlpha(spotShadowAlpha) {}
+    uint8_t ambientShadowAlpha;
+    uint8_t spotShadowAlpha;
+};
+
+};  // namespace uirenderer
+};  // namespace android

@@ -81,9 +81,9 @@ void SkiaPipeline::onPrepareTree() {
     mVectorDrawables.clear();
 }
 
-void SkiaPipeline::renderLayers(const FrameBuilder::LightGeometry& lightGeometry,
+void SkiaPipeline::renderLayers(const LightGeometry& lightGeometry,
                                 LayerUpdateQueue* layerUpdateQueue, bool opaque,
-                                bool wideColorGamut, const BakedOpRenderer::LightInfo& lightInfo) {
+                                bool wideColorGamut, const LightInfo& lightInfo) {
     updateLighting(lightGeometry, lightInfo);
     ATRACE_NAME("draw layers");
     renderVectorDrawableCache();
@@ -103,7 +103,6 @@ void SkiaPipeline::renderLayersImpl(const LayerUpdateQueue& layers, bool opaque,
         // as not to lose info on what portion is damaged
         if (CC_LIKELY(layerNode->getLayerSurface() != nullptr)) {
             SkASSERT(layerNode->getLayerSurface());
-            SkASSERT(layerNode->getDisplayList()->isSkiaDL());
             SkiaDisplayList* displayList = (SkiaDisplayList*)layerNode->getDisplayList();
             if (!displayList || displayList->isEmpty()) {
                 SkDEBUGF(("%p drawLayers(%s) : missing drawable", layerNode, layerNode->getName()));

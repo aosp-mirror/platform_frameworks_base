@@ -47,11 +47,9 @@ public:
      *      layer into the canvas.
      */
     explicit RenderNodeDrawable(RenderNode* node, SkCanvas* canvas, bool composeLayer = true,
-                                bool inReorderingSection = false)
-            : mRenderNode(node)
-            , mRecordedTransform(canvas->getTotalMatrix())
-            , mComposeLayer(composeLayer)
-            , mInReorderingSection(inReorderingSection) {}
+                                bool inReorderingSection = false);
+
+    ~RenderNodeDrawable();
 
     /**
      * Draws into the canvas this render node and its children. If the node is marked as a
