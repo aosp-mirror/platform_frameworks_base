@@ -1339,7 +1339,18 @@ public class ConnectivityService extends IConnectivityManager.Stub
     public boolean isActiveNetworkMetered() {
         enforceAccessPermission();
 
-        final NetworkCapabilities caps = getNetworkCapabilities(getActiveNetwork());
+        return isActiveNetworkMeteredCommon(Binder.getCallingUid());
+    }
+
+    @Override
+    public boolean isActiveNetworkMeteredForUid(int uid) {
+        enforceConnectivityInternalPermission();
+
+        return isActiveNetworkMeteredCommon(uid);
+    }
+
+    private boolean isActiveNetworkMeteredCommon(int uid) {
+        final NetworkCapabilities caps = getUnfilteredActiveNetworkState(uid).networkCapabilities;
         if (caps != null) {
             return !caps.hasCapability(NetworkCapabilities.NET_CAPABILITY_NOT_METERED);
         } else {
