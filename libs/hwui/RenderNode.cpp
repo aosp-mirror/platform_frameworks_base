@@ -16,7 +16,6 @@
 
 #include "RenderNode.h"
 
-#include "BakedOpRenderer.h"
 #include "DamageAccumulator.h"
 #include "Debug.h"
 #include "RecordedOp.h"

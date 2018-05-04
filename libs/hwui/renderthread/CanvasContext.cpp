@@ -29,7 +29,6 @@
 #include "pipeline/skia/SkiaPipeline.h"
 #include "pipeline/skia/SkiaVulkanPipeline.h"
 #include "renderstate/RenderState.h"
-#include "renderstate/Stencil.h"
 #include "utils/GLUtils.h"
 #include "utils/TimeUtils.h"
 #include "../Properties.h"
