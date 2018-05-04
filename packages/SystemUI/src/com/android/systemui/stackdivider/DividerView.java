@@ -180,16 +180,20 @@ public class DividerView extends FrameLayout implements OnTouchListener,
         @Override
         public void onInitializeAccessibilityNodeInfo(View host, AccessibilityNodeInfo info) {
             super.onInitializeAccessibilityNodeInfo(host, info);
+            final DividerSnapAlgorithm snapAlgorithm = getSnapAlgorithm();
             if (isHorizontalDivision()) {
                 info.addAction(new AccessibilityAction(R.id.action_move_tl_full,
                         mContext.getString(R.string.accessibility_action_divider_top_full)));
-                if (mSnapAlgorithm.isFirstSplitTargetAvailable()) {
+                if (snapAlgorithm.isFirstSplitTargetAvailable()) {
                     info.addAction(new AccessibilityAction(R.id.action_move_tl_70,
                             mContext.getString(R.string.accessibility_action_divider_top_70)));
                 }
-                info.addAction(new AccessibilityAction(R.id.action_move_tl_50,
+                if (snapAlgorithm.showMiddleSplitTargetForAccessibility()) {
+                    // Only show the middle target if there are more than 1 split target
+                    info.addAction(new AccessibilityAction(R.id.action_move_tl_50,
                         mContext.getString(R.string.accessibility_action_divider_top_50)));
-                if (mSnapAlgorithm.isLastSplitTargetAvailable()) {
+                }
+                if (snapAlgorithm.isLastSplitTargetAvailable()) {
                     info.addAction(new AccessibilityAction(R.id.action_move_tl_30,
                             mContext.getString(R.string.accessibility_action_divider_top_30)));
                 }
@@ -198,13 +202,16 @@ public class DividerView extends FrameLayout implements OnTouchListener,
             } else {
                 info.addAction(new AccessibilityAction(R.id.action_move_tl_full,
                         mContext.getString(R.string.accessibility_action_divider_left_full)));
-                if (mSnapAlgorithm.isFirstSplitTargetAvailable()) {
+                if (snapAlgorithm.isFirstSplitTargetAvailable()) {
                     info.addAction(new AccessibilityAction(R.id.action_move_tl_70,
                             mContext.getString(R.string.accessibility_action_divider_left_70)));
                 }
-                info.addAction(new AccessibilityAction(R.id.action_move_tl_50,
+                if (snapAlgorithm.showMiddleSplitTargetForAccessibility()) {
+                    // Only show the middle target if there are more than 1 split target
+                    info.addAction(new AccessibilityAction(R.id.action_move_tl_50,
                         mContext.getString(R.string.accessibility_action_divider_left_50)));
-                if (mSnapAlgorithm.isLastSplitTargetAvailable()) {
+                }
+                if (snapAlgorithm.isLastSplitTargetAvailable()) {
                     info.addAction(new AccessibilityAction(R.id.action_move_tl_30,
                             mContext.getString(R.string.accessibility_action_divider_left_30)));
                 }
