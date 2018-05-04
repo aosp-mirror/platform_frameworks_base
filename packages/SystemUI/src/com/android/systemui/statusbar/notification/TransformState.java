@@ -530,6 +530,7 @@ public class TransformState {
 
     protected void reset() {
         mTransformedView = null;
+        mTransformInfo = null;
         mSameAsAny = false;
         mTransformationEndX = UNDEFINED;
         mTransformationEndY = UNDEFINED;
