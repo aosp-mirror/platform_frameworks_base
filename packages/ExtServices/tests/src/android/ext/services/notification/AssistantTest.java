@@ -20,6 +20,7 @@ import static android.app.NotificationManager.IMPORTANCE_DEFAULT;
 import static android.app.NotificationManager.IMPORTANCE_LOW;
 import static android.app.NotificationManager.IMPORTANCE_MIN;
 
+import static junit.framework.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -27,11 +28,15 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import android.app.Application;
 import android.app.INotificationManager;
 import android.app.Notification;
 import android.app.NotificationChannel;
+import android.content.ContentResolver;
+import android.content.IContentProvider;
 import android.content.Intent;
 import android.os.UserHandle;
+import android.provider.Settings;
 import android.service.notification.Adjustment;
 import android.service.notification.NotificationListenerService;
 import android.service.notification.NotificationListenerService.Ranking;
@@ -78,10 +83,10 @@ public class AssistantTest extends ServiceTestCase<Assistant> {
             new NotificationChannel("one", "", IMPORTANCE_LOW);
 
     @Mock INotificationManager mNoMan;
-    @Mock
-    AtomicFile mFile;
+    @Mock AtomicFile mFile;
 
     Assistant mAssistant;
+    Application mApplication;
 
     @Rule
     public final TestableContext mContext =
@@ -98,6 +103,16 @@ public class AssistantTest extends ServiceTestCase<Assistant> {
         Intent startIntent =
                 new Intent("android.service.notification.NotificationAssistantService");
         startIntent.setPackage("android.ext.services");
+
+        // To bypass real calls to global settings values, set the Settings values here.
+        Settings.Global.putFloat(mContext.getContentResolver(),
+                Settings.Global.BLOCKING_HELPER_DISMISS_TO_VIEW_RATIO_LIMIT, 0.8f);
+        Settings.Global.putInt(mContext.getContentResolver(),
+                Settings.Global.BLOCKING_HELPER_STREAK_LIMIT, 2);
+        mApplication = (Application) InstrumentationRegistry.getInstrumentation().
+                getTargetContext().getApplicationContext();
+        // Force the test to use the correct application instead of trying to use a mock application
+        setApplication(mApplication);
         bindService(startIntent);
         mAssistant = getService();
         mAssistant.setNoMan(mNoMan);
@@ -128,7 +143,7 @@ public class AssistantTest extends ServiceTestCase<Assistant> {
     }
 
     private void almostBlockChannel(String pkg, int uid, NotificationChannel channel) {
-        for (int i = 0; i < ChannelImpressions.STREAK_LIMIT; i++) {
+        for (int i = 0; i < ChannelImpressions.DEFAULT_STREAK_LIMIT; i++) {
             dismissBadNotification(pkg, uid, channel, String.valueOf(i));
         }
     }
@@ -358,7 +373,7 @@ public class AssistantTest extends ServiceTestCase<Assistant> {
     @Test
     public void testRoundTripXml() throws Exception {
         String key1 = mAssistant.getKey("pkg1", 1, "channel1");
-        ChannelImpressions ci1 = new ChannelImpressions(9, 10);
+        ChannelImpressions ci1 = new ChannelImpressions();
         String key2 = mAssistant.getKey("pkg1", 1, "channel2");
         ChannelImpressions ci2 = new ChannelImpressions();
         for (int i = 0; i < 3; i++) {
@@ -391,4 +406,43 @@ public class AssistantTest extends ServiceTestCase<Assistant> {
         assertEquals(ci3, assistant.getImpressions(key3));
     }
 
+    @Test
+    public void testSettingsProviderUpdate() {
+        ContentResolver resolver = mApplication.getContentResolver();
+
+        // Set up channels
+        String key = mAssistant.getKey("pkg1", 1, "channel1");
+        ChannelImpressions ci = new ChannelImpressions();
+        for (int i = 0; i < 3; i++) {
+            ci.incrementViews();
+            if (i % 2 == 0) {
+                ci.incrementDismissals();
+            }
+        }
+
+        mAssistant.insertImpressions(key, ci);
+
+        // With default values, the blocking helper shouldn't be triggered.
+        assertEquals(false, ci.shouldTriggerBlock());
+
+        // Update settings values.
+        float newDismissToViewRatioLimit = 0f;
+        int newStreakLimit = 0;
+        Settings.Global.putFloat(resolver,
+                Settings.Global.BLOCKING_HELPER_DISMISS_TO_VIEW_RATIO_LIMIT,
+                newDismissToViewRatioLimit);
+        Settings.Global.putInt(resolver,
+                Settings.Global.BLOCKING_HELPER_STREAK_LIMIT, newStreakLimit);
+
+        // Notify for the settings values we updated.
+        resolver.notifyChange(
+                Settings.Global.getUriFor(Settings.Global.BLOCKING_HELPER_STREAK_LIMIT), null);
+        resolver.notifyChange(
+                Settings.Global.getUriFor(
+                        Settings.Global.BLOCKING_HELPER_DISMISS_TO_VIEW_RATIO_LIMIT),
+                null);
+
+        // With the new threshold, the blocking helper should be triggered.
+        assertEquals(true, ci.shouldTriggerBlock());
+    }
 }
