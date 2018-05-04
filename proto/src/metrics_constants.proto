@@ -5740,6 +5740,41 @@ message MetricsEvent {
     // OS: P
     ACTION_ZEN_ONBOARDING_KEEP_CURRENT_SETTINGS = 1406;
 
+    // ACTION: Storage initialization wizard initialization choice of external/portable
+    // CATEGORY: SETTINGS
+    // OS: P
+    ACTION_STORAGE_INIT_EXTERNAL = 1407;
+
+    // ACTION: Storage initialization wizard initialization choice of internal/adoptable
+    // CATEGORY: SETTINGS
+    // OS: P
+    ACTION_STORAGE_INIT_INTERNAL = 1408;
+
+    // ACTION: Storage initialization wizard benchmark fast choice of continue
+    // CATEGORY: SETTINGS
+    // OS: P
+    ACTION_STORAGE_BENCHMARK_FAST_CONTINUE = 1409;
+
+    // ACTION: Storage initialization wizard benchmark slow choice of continue
+    // CATEGORY: SETTINGS
+    // OS: P
+    ACTION_STORAGE_BENCHMARK_SLOW_CONTINUE = 1410;
+
+    // ACTION: Storage initialization wizard benchmark slow choice of abort
+    // CATEGORY: SETTINGS
+    // OS: P
+    ACTION_STORAGE_BENCHMARK_SLOW_ABORT = 1411;
+
+    // ACTION: Storage initialization wizard migration choice of now
+    // CATEGORY: SETTINGS
+    // OS: P
+    ACTION_STORAGE_MIGRATE_NOW = 1412;
+
+    // ACTION: Storage initialization wizard migration choice of later
+    // CATEGORY: SETTINGS
+    // OS: P
+    ACTION_STORAGE_MIGRATE_LATER = 1413;
+
     // ---- End P Constants, all P constants go above this line ----
 
     // First Q constant in master goes here:
