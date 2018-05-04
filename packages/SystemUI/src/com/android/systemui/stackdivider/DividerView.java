@@ -376,15 +376,15 @@ public class DividerView extends FrameLayout implements OnTouchListener,
     public Rect getNonMinimizedSplitScreenSecondaryBounds() {
         calculateBoundsForPosition(mSnapTargetBeforeMinimized.position,
                 DockedDividerUtils.invertDockSide(mDockSide), mOtherTaskRect);
+        mOtherTaskRect.bottom -= mStableInsets.bottom;
         switch (mDockSide) {
             case WindowManager.DOCKED_LEFT:
+                mOtherTaskRect.top += mStableInsets.top;
                 mOtherTaskRect.right -= mStableInsets.right;
                 break;
             case WindowManager.DOCKED_RIGHT:
-                mOtherTaskRect.left -= mStableInsets.left;
-                break;
-            case WindowManager.DOCKED_TOP:
-                mOtherTaskRect.bottom -= mStableInsets.bottom;
+                mOtherTaskRect.top += mStableInsets.top;
+                mOtherTaskRect.left += mStableInsets.left;
                 break;
         }
         return mOtherTaskRect;
