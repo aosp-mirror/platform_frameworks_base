@@ -28,7 +28,7 @@ import android.support.test.filters.LargeTest;
 import android.support.test.rule.ActivityTestRule;
 import android.support.test.InstrumentationRegistry;
 
-import com.android.perftests.core.R;
+import com.android.perftests.autofill.R;
 
 import java.util.Locale;
 import java.util.Collection;
