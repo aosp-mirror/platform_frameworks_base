@@ -14,17 +14,12 @@
  * limitations under the License.
  */
 
-#include "stats_event_list.h"
+#include "include/stats_event_list.h"
 
+#include <string.h>
 #include "statsd_writer.h"
 
-namespace android {
-namespace util {
-
-enum ReadWriteFlag {
-    kAndroidLoggerRead = 1,
-    kAndroidLoggerWrite = 2,
-};
+#define MAX_EVENT_PAYLOAD (LOGGER_ENTRY_MAX_PAYLOAD - sizeof(int32_t))
 
 typedef struct {
     uint32_t tag;
@@ -35,7 +30,10 @@ typedef struct {
     unsigned len; /* Length or raw buffer. */
     bool overflow;
     bool list_stop; /* next call decrement list_nest_depth and issue a stop */
-    ReadWriteFlag read_write_flag;
+    enum {
+        kAndroidLoggerRead = 1,
+        kAndroidLoggerWrite = 2,
+    } read_write_flag;
     uint8_t storage[LOGGER_ENTRY_MAX_PAYLOAD];
 } android_log_context_internal;
 
@@ -44,6 +42,29 @@ extern struct android_log_transport_write statsdLoggerWrite;
 static int __write_to_statsd_init(struct iovec* vec, size_t nr);
 static int (*write_to_statsd)(struct iovec* vec,
                               size_t nr) = __write_to_statsd_init;
+
+// Similar to create_android_logger(), but instead of allocation a new buffer,
+// this function resets the buffer for resuse.
+void reset_log_context(android_log_context ctx) {
+    if (!ctx) {
+        return;
+    }
+    android_log_context_internal* context =
+            (android_log_context_internal*)(ctx);
+    uint32_t tag = context->tag;
+    memset(context, 0, sizeof(android_log_context_internal));
+
+    context->tag = tag;
+    context->read_write_flag = kAndroidLoggerWrite;
+    size_t needed = sizeof(uint8_t) + sizeof(uint8_t);
+    if ((context->pos + needed) > MAX_EVENT_PAYLOAD) {
+        context->overflow = true;
+    }
+    /* Everything is a list */
+    context->storage[context->pos + 0] = EVENT_TYPE_LIST;
+    context->list[0] = context->pos + 1;
+    context->pos += needed;
+}
 
 int stats_write_list(android_log_context ctx) {
     android_log_context_internal* context;
@@ -80,7 +101,7 @@ int stats_write_list(android_log_context ctx) {
     return write_to_statsd(vec, 2);
 }
 
-int stats_event_list::write_to_logger(android_log_context ctx, log_id_t id) {
+int write_to_logger(android_log_context ctx, log_id_t id) {
     int retValue = 0;
 
     if (WRITE_TO_LOGD) {
@@ -89,9 +110,9 @@ int stats_event_list::write_to_logger(android_log_context ctx, log_id_t id) {
 
     if (WRITE_TO_STATSD) {
         // log_event_list's cast operator is overloaded.
-        int ret = stats_write_list(static_cast<android_log_context>(*this));
-        // In debugging phase, we may write to both logd and statsd. Prefer to return
-        // statsd socket write error code here.
+        int ret = stats_write_list(ctx);
+        // In debugging phase, we may write to both logd and statsd. Prefer to
+        // return statsd socket write error code here.
         if (ret < 0) {
             retValue = ret;
         }
@@ -160,6 +181,3 @@ static int __write_to_statsd_init(struct iovec* vec, size_t nr) {
     errno = save_errno;
     return ret;
 }
-
-}  // namespace util
-}  // namespace android
