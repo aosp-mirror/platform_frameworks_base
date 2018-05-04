@@ -104,6 +104,8 @@ public:
 
     const static int kMaxLoggerErrors = 20;
 
+    const static int kMaxSystemServerRestarts = 20;
+
     const static int kMaxTimestampCount = 20;
 
     const static int kMaxLogSourceCount = 50;
@@ -275,6 +277,11 @@ public:
      */
     void noteLoggerError(int error);
 
+    /*
+    * Records when system server restarts.
+    */
+    void noteSystemServerRestart(int32_t timeSec);
+
     /**
      * Records statsd skipped an event.
      */
@@ -338,6 +345,8 @@ private:
     // Timestamps when we detect log loss after logd reconnect.
     std::list<int64_t> mLogLossTimestampNs;
 
+    std::list<int32_t> mSystemServerRestartSec;
+
     // Stores the number of times statsd modified the anomaly alarm registered with
     // StatsCompanionService.
     int mAnomalyAlarmRegisteredStats = 0;
@@ -366,6 +375,7 @@ private:
     FRIEND_TEST(StatsdStatsTest, TestAtomLog);
     FRIEND_TEST(StatsdStatsTest, TestTimestampThreshold);
     FRIEND_TEST(StatsdStatsTest, TestAnomalyMonitor);
+    FRIEND_TEST(StatsdStatsTest, TestSystemServerCrash);
 };
 
 }  // namespace statsd

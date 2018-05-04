@@ -383,4 +383,6 @@ message StatsdStatsReport {
     repeated SkippedLogEventStats skipped_log_event_stats = 13;
 
     repeated int64 log_loss_stats = 14;
+
+    repeated int32 system_restart_sec = 15;
 }

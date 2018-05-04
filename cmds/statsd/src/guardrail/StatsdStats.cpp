@@ -51,6 +51,7 @@ const int FIELD_ID_ANOMALY_ALARM_STATS = 9;
 const int FIELD_ID_LOGGER_ERROR_STATS = 11;
 const int FIELD_ID_PERIODIC_ALARM_STATS = 12;
 const int FIELD_ID_LOG_LOSS_STATS = 14;
+const int FIELD_ID_SYSTEM_SERVER_RESTART = 15;
 
 const int FIELD_ID_ATOM_STATS_TAG = 1;
 const int FIELD_ID_ATOM_STATS_COUNT = 2;
@@ -355,6 +356,15 @@ void StatsdStats::noteAtomLogged(int atomId, int32_t timeSec) {
     mPushedAtomStats[atomId]++;
 }
 
+void StatsdStats::noteSystemServerRestart(int32_t timeSec) {
+    lock_guard<std::mutex> lock(mLock);
+
+    if (mSystemServerRestartSec.size() == kMaxSystemServerRestarts) {
+        mSystemServerRestartSec.pop_front();
+    }
+    mSystemServerRestartSec.push_back(timeSec);
+}
+
 void StatsdStats::noteLoggerError(int error) {
     lock_guard<std::mutex> lock(mLock);
     // grows strictly one at a time. so it won't > kMaxLoggerErrors
@@ -377,6 +387,7 @@ void StatsdStats::resetInternalLocked() {
     mAnomalyAlarmRegisteredStats = 0;
     mPeriodicAlarmRegisteredStats = 0;
     mLoggerErrors.clear();
+    mSystemServerRestartSec.clear();
     mLogLossTimestampNs.clear();
     for (auto& config : mConfigStats) {
         config.second->broadcast_sent_time_sec.clear();
@@ -395,7 +406,7 @@ string buildTimeString(int64_t timeSec) {
     time_t t = timeSec;
     struct tm* tm = localtime(&t);
     char timeBuffer[80];
-    strftime(timeBuffer, sizeof(timeBuffer), "%Y-%m-%d %I:%M%p\n", tm);
+    strftime(timeBuffer, sizeof(timeBuffer), "%Y-%m-%d %I:%M%p", tm);
     return string(timeBuffer);
 }
 
@@ -511,6 +522,12 @@ void StatsdStats::dumpStats(FILE* out) const {
         strftime(buffer, sizeof(buffer), "%Y-%m-%d %I:%M%p\n", error_tm);
         fprintf(out, "Logger error %d at %s\n", error.second, buffer);
     }
+
+    for (const auto& restart : mSystemServerRestartSec) {
+        fprintf(out, "System server restarts at %s(%lld)\n",
+            buildTimeString(restart).c_str(), (long long)restart);
+    }
+
     for (const auto& loss : mLogLossTimestampNs) {
         fprintf(out, "Log loss detected at %lld (elapsedRealtimeNs)\n", (long long)loss);
     }
@@ -671,6 +688,11 @@ void StatsdStats::dumpStats(std::vector<uint8_t>* output, bool reset) {
     for (const auto& loss : mLogLossTimestampNs) {
         proto.write(FIELD_TYPE_INT64 | FIELD_ID_LOG_LOSS_STATS | FIELD_COUNT_REPEATED,
                     (long long)loss);
+    }
+
+    for (const auto& restart : mSystemServerRestartSec) {
+        proto.write(FIELD_TYPE_INT32 | FIELD_ID_SYSTEM_SERVER_RESTART | FIELD_COUNT_REPEATED,
+                    restart);
     }
 
     output->clear();
