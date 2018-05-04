@@ -13,7 +13,9 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertThrows;
 
+import android.app.ActivityManagerInternal;
 import android.app.AppOpsManager;
+import android.app.IApplicationThread;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -68,10 +70,13 @@ public class CrossProfileAppsServiceImplTest {
     private PackageManagerInternal mPackageManagerInternal;
     @Mock
     private AppOpsManager mAppOpsManager;
+    @Mock
+    private ActivityManagerInternal mActivityManagerInternal;
 
     private TestInjector mTestInjector;
     private ActivityInfo mActivityInfo;
     private CrossProfileAppsServiceImpl mCrossProfileAppsServiceImpl;
+    private IApplicationThread mIApplicationThread;
 
     private SparseArray<Boolean> mUserEnabled = new SparseArray<>();
 
@@ -200,15 +205,18 @@ public class CrossProfileAppsServiceImplTest {
                 SecurityException.class,
                 () ->
                         mCrossProfileAppsServiceImpl.startActivityAsUser(
+                                mIApplicationThread,
                                 PACKAGE_ONE,
                                 ACTIVITY_COMPONENT,
                                 UserHandle.of(PRIMARY_USER)));
 
-        verify(mContext, never())
+        verify(mActivityManagerInternal, never())
                 .startActivityAsUser(
+                        nullable(IApplicationThread.class),
+                        anyString(),
                         any(Intent.class),
                         nullable(Bundle.class),
-                        any(UserHandle.class));
+                        anyInt());
     }
 
     @Test
@@ -219,15 +227,18 @@ public class CrossProfileAppsServiceImplTest {
                 SecurityException.class,
                 () ->
                         mCrossProfileAppsServiceImpl.startActivityAsUser(
+                                mIApplicationThread,
                                 PACKAGE_ONE,
                                 ACTIVITY_COMPONENT,
                                 UserHandle.of(PROFILE_OF_PRIMARY_USER)));
 
-        verify(mContext, never())
+        verify(mActivityManagerInternal, never())
                 .startActivityAsUser(
+                        nullable(IApplicationThread.class),
+                        anyString(),
                         any(Intent.class),
                         nullable(Bundle.class),
-                        any(UserHandle.class));
+                        anyInt());
     }
 
     @Test
@@ -236,15 +247,18 @@ public class CrossProfileAppsServiceImplTest {
                 SecurityException.class,
                 () ->
                         mCrossProfileAppsServiceImpl.startActivityAsUser(
+                                mIApplicationThread,
                                 PACKAGE_TWO,
                                 ACTIVITY_COMPONENT,
                                 UserHandle.of(PROFILE_OF_PRIMARY_USER)));
 
-        verify(mContext, never())
+        verify(mActivityManagerInternal, never())
                 .startActivityAsUser(
+                        nullable(IApplicationThread.class),
+                        anyString(),
                         any(Intent.class),
                         nullable(Bundle.class),
-                        any(UserHandle.class));
+                        anyInt());
     }
 
     @Test
@@ -255,15 +269,18 @@ public class CrossProfileAppsServiceImplTest {
                 SecurityException.class,
                 () ->
                         mCrossProfileAppsServiceImpl.startActivityAsUser(
+                                mIApplicationThread,
                                 PACKAGE_ONE,
                                 ACTIVITY_COMPONENT,
                                 UserHandle.of(PROFILE_OF_PRIMARY_USER)));
 
-        verify(mContext, never())
+        verify(mActivityManagerInternal, never())
                 .startActivityAsUser(
+                        nullable(IApplicationThread.class),
+                        anyString(),
                         any(Intent.class),
                         nullable(Bundle.class),
-                        any(UserHandle.class));
+                        anyInt());
     }
 
     @Test
@@ -272,15 +289,18 @@ public class CrossProfileAppsServiceImplTest {
                 SecurityException.class,
                 () ->
                         mCrossProfileAppsServiceImpl.startActivityAsUser(
+                                mIApplicationThread,
                                 PACKAGE_ONE,
                                 new ComponentName(PACKAGE_TWO, "test"),
                                 UserHandle.of(PROFILE_OF_PRIMARY_USER)));
 
-        verify(mContext, never())
+        verify(mActivityManagerInternal, never())
                 .startActivityAsUser(
+                        nullable(IApplicationThread.class),
+                        anyString(),
                         any(Intent.class),
                         nullable(Bundle.class),
-                        any(UserHandle.class));
+                        anyInt());
     }
 
     @Test
@@ -289,15 +309,18 @@ public class CrossProfileAppsServiceImplTest {
                 SecurityException.class,
                 () ->
                         mCrossProfileAppsServiceImpl.startActivityAsUser(
+                                mIApplicationThread,
                                 PACKAGE_ONE,
                                 ACTIVITY_COMPONENT,
                                 UserHandle.of(SECONDARY_USER)));
 
-        verify(mContext, never())
+        verify(mActivityManagerInternal, never())
                 .startActivityAsUser(
+                        nullable(IApplicationThread.class),
+                        anyString(),
                         any(Intent.class),
                         nullable(Bundle.class),
-                        any(UserHandle.class));
+                        anyInt());
     }
 
     @Test
@@ -305,15 +328,18 @@ public class CrossProfileAppsServiceImplTest {
         mTestInjector.setCallingUserId(PROFILE_OF_PRIMARY_USER);
 
         mCrossProfileAppsServiceImpl.startActivityAsUser(
+                mIApplicationThread,
                 PACKAGE_ONE,
                 ACTIVITY_COMPONENT,
                 UserHandle.of(PRIMARY_USER));
 
-        verify(mContext)
+        verify(mActivityManagerInternal)
                 .startActivityAsUser(
+                        nullable(IApplicationThread.class),
+                        eq(PACKAGE_ONE),
                         any(Intent.class),
                         nullable(Bundle.class),
-                        eq(UserHandle.of(PRIMARY_USER)));
+                        eq(PRIMARY_USER));
     }
 
     private void mockAppsInstalled(String packageName, int user, boolean installed) {
@@ -400,6 +426,11 @@ public class CrossProfileAppsServiceImplTest {
         @Override
         public AppOpsManager getAppOpsManager() {
             return mAppOpsManager;
+        }
+
+        @Override
+        public ActivityManagerInternal getActivityManagerInternal() {
+            return mActivityManagerInternal;
         }
     }
 }

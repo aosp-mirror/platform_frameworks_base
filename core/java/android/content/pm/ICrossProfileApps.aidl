@@ -16,6 +16,7 @@
 
 package android.content.pm;
 
+import android.app.IApplicationThread;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.graphics.Rect;
@@ -26,7 +27,7 @@ import android.os.UserHandle;
  * @hide
  */
 interface ICrossProfileApps {
-    void startActivityAsUser(in String callingPackage, in ComponentName component,
-        in UserHandle user);
+    void startActivityAsUser(in IApplicationThread caller, in String callingPackage,
+            in ComponentName component, in UserHandle user);
     List<UserHandle> getTargetUserProfiles(in String callingPackage);
 }
