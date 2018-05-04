@@ -558,14 +558,17 @@ public class RecentsAnimationController implements DeathRecipient {
         }
 
         RemoteAnimationTarget createRemoteAnimationApp() {
-            final WindowState mainWindow = mTask.getTopVisibleAppMainWindow();
+            final AppWindowToken topApp = mTask.getTopVisibleAppToken();
+            final WindowState mainWindow = topApp != null
+                    ? topApp.findMainWindow()
+                    : null;
             if (mainWindow == null) {
                 return null;
             }
             final Rect insets = new Rect(mainWindow.mContentInsets);
             InsetUtils.addInsets(insets, mainWindow.mAppToken.getLetterboxInsets());
             mTarget = new RemoteAnimationTarget(mTask.mTaskId, MODE_CLOSING, mCapturedLeash,
-                    !mTask.fillsParent(), mainWindow.mWinAnimator.mLastClipRect,
+                    !topApp.fillsParent(), mainWindow.mWinAnimator.mLastClipRect,
                     insets, mTask.getPrefixOrderIndex(), mPosition, mBounds,
                     mTask.getWindowConfiguration(), mIsRecentTaskInvisible);
             return mTarget;
