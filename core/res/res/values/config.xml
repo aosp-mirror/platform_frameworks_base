@@ -665,7 +665,7 @@
 
     <!-- Wifi driver supports IEEE80211AC for softap -->
     <bool translatable="false" name="config_wifi_softap_ieee80211ac_supported">false</bool>
-    
+
     <!-- Flag indicating whether the we should enable the automatic brightness in Settings.
          Software implementation will be used if config_hardware_auto_brightness_available is not set -->
     <bool name="config_automatic_brightness_available">false</bool>
@@ -3423,4 +3423,8 @@
 
     <!-- Package name for ManagedProvisioning which is responsible for provisioning work profiles. -->
     <string name="config_managed_provisioning_package" translatable="false">com.android.managedprovisioning</string>
+
+    <!-- Whether or not swipe up gesture is enabled by default -->
+    <bool name="config_swipe_up_gesture_default">false</bool>
+
 </resources>
