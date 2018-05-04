@@ -234,7 +234,9 @@ public class DeviceDiscoveryService extends Service {
 
         DeviceChooserActivity activity = mActivity;
         if (activity != null) {
-            activity.mDeviceListView.removeFooterView(activity.mLoadingIndicator);
+            if (activity.mDeviceListView != null) {
+                activity.mDeviceListView.removeFooterView(activity.mLoadingIndicator);
+            }
             mActivity = null;
         }
 
