@@ -145,14 +145,10 @@ public class KeyguardSliceView extends LinearLayout implements View.OnClickListe
     }
 
     private void showSlice() {
-        if (mPulsing) {
+        if (mPulsing || mSlice == null) {
             mTitle.setVisibility(GONE);
             mRow.setVisibility(GONE);
             mContentChangeListener.accept(getLayoutTransition() != null);
-            return;
-        }
-
-        if (mSlice == null) {
             return;
         }
 
