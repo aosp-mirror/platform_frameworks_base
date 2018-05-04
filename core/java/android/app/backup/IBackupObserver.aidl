@@ -51,7 +51,7 @@ oneway interface IBackupObserver {
      * even if no individual package backup operations were attempted.
      *
      * @param status Zero on success; a nonzero error code if the backup operation
-     *   as a whole failed.
+     *   as a whole failed with a transport error.
      */
     void backupFinished(int status);
 }
