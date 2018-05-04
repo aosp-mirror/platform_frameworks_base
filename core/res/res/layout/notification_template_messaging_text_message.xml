@@ -17,5 +17,6 @@
 <com.android.internal.widget.MessagingTextMessage
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/message_text"
+    android:textAlignment="viewStart"
     style="@style/Widget.Material.Notification.MessagingText"
 />
