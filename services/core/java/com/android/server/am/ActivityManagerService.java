@@ -5291,14 +5291,9 @@ public class ActivityManagerService extends IActivityManager.Stub
         final int callingPid = Binder.getCallingPid();
         final long origId = Binder.clearCallingIdentity();
         try {
-            final int recentsUid;
-            final String recentsPackage;
-            final List<IBinder> topVisibleActivities;
             synchronized (this) {
                 final ComponentName recentsComponent = mRecentTasks.getRecentsComponent();
-                recentsPackage = recentsComponent.getPackageName();
-                recentsUid = mRecentTasks.getRecentsComponentUid();
-                topVisibleActivities = mStackSupervisor.getTopVisibleActivities();
+                final int recentsUid = mRecentTasks.getRecentsComponentUid();
 
                 // Start a new recents animation
                 final RecentsAnimation anim = new RecentsAnimation(this, mStackSupervisor,
@@ -5314,13 +5309,14 @@ public class ActivityManagerService extends IActivityManager.Stub
     @Override
     public void cancelRecentsAnimation(boolean restoreHomeStackPosition) {
         enforceCallerIsRecentsOrHasPermission(MANAGE_ACTIVITY_STACKS, "cancelRecentsAnimation()");
+        final long callingUid = Binder.getCallingUid();
         final long origId = Binder.clearCallingIdentity();
         try {
             synchronized (this) {
                 // Cancel the recents animation synchronously (do not hold the WM lock)
                 mWindowManager.cancelRecentsAnimationSynchronously(restoreHomeStackPosition
                         ? REORDER_MOVE_TO_ORIGINAL_POSITION
-                        : REORDER_KEEP_IN_PLACE, "cancelRecentsAnimation");
+                        : REORDER_KEEP_IN_PLACE, "cancelRecentsAnimation/uid=" + callingUid);
             }
         } finally {
             Binder.restoreCallingIdentity(origId);
