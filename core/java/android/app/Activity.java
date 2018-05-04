@@ -5578,7 +5578,7 @@ public class Activity extends ContextThemeWrapper
         if (mParent != null) {
             throw new IllegalStateException("Can only be called on top-level activity");
         }
-        mMainThread.handleRelaunchActivityLocally(mToken);
+        mMainThread.scheduleRelaunchActivity(mToken);
     }
 
     /**
