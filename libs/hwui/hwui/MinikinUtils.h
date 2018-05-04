@@ -44,7 +44,8 @@ public:
 
     ANDROID_API static minikin::Layout doLayout(const Paint* paint, minikin::Bidi bidiFlags,
                                                 const Typeface* typeface, const uint16_t* buf,
-                                                size_t start, size_t count, size_t bufSize,
+                                                size_t bufSize, size_t start, size_t count,
+                                                size_t contextStart, size_t contextCount,
                                                 minikin::MeasuredText* mt);
 
     ANDROID_API static float measureText(const Paint* paint, minikin::Bidi bidiFlags,
