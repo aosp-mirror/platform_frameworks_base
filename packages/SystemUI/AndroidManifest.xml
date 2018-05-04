@@ -419,7 +419,8 @@
             android:theme="@style/Theme.AlertDialogHost"
             android:finishOnCloseSystemDialogs="true"
             android:launchMode="singleTop"
-            android:excludeFromRecents="true" />
+            android:excludeFromRecents="true"
+            android:visibleToInstantApps="true"/>
 
         <!-- started from PipUI -->
         <activity
