@@ -227,7 +227,9 @@ public class NotificationTemplateViewWrapper extends NotificationHeaderViewWrapp
             if (mUiOffloadThread == null) {
                 mUiOffloadThread = Dependency.get(UiOffloadThread.class);
             }
-            mUiOffloadThread.submit(() -> pendingIntent.registerCancelListener(listener));
+            if (view.isAttachedToWindow()) {
+                mUiOffloadThread.submit(() -> pendingIntent.registerCancelListener(listener));
+            }
             view.addOnAttachStateChangeListener(new View.OnAttachStateChangeListener() {
                 @Override
                 public void onViewAttachedToWindow(View v) {
