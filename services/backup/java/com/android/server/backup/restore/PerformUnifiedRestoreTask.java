@@ -841,7 +841,7 @@ public class PerformUnifiedRestoreTask implements BackupRestoreTask {
 
         final String TAG = "StreamFeederThread";
         FullRestoreEngine mEngine;
-        EngineThread mEngineThread;
+        FullRestoreEngineThread mEngineThread;
 
         // pipe through which we read data from the transport. [0] read, [1] write
         ParcelFileDescriptor[] mTransportPipes;
@@ -867,8 +867,8 @@ public class PerformUnifiedRestoreTask implements BackupRestoreTask {
                     mCurrentPackage.packageName);
 
             mEngine = new FullRestoreEngine(backupManagerService, this, null,
-                    mMonitor, mCurrentPackage, false, false, mEphemeralOpToken);
-            mEngineThread = new EngineThread(mEngine, mEnginePipes[0]);
+                    mMonitor, mCurrentPackage, false, false, mEphemeralOpToken, false);
+            mEngineThread = new FullRestoreEngineThread(mEngine, mEnginePipes[0]);
 
             ParcelFileDescriptor eWriteEnd = mEnginePipes[1];
             ParcelFileDescriptor tReadEnd = mTransportPipes[0];
@@ -1028,50 +1028,6 @@ public class PerformUnifiedRestoreTask implements BackupRestoreTask {
             mEnginePipes[1] = null;
             IoUtils.closeQuietly(mEnginePipes[0]);
             mEnginePipes[0] = null;
-        }
-    }
-
-    class EngineThread implements Runnable {
-
-        FullRestoreEngine mEngine;
-        FileInputStream mEngineStream;
-
-        EngineThread(FullRestoreEngine engine, ParcelFileDescriptor engineSocket) {
-            mEngine = engine;
-            engine.setRunning(true);
-            // We *do* want this FileInputStream to own the underlying fd, so that
-            // when we are finished with it, it closes this end of the pipe in a way
-            // that signals its other end.
-            mEngineStream = new FileInputStream(engineSocket.getFileDescriptor(), true);
-        }
-
-        public boolean isRunning() {
-            return mEngine.isRunning();
-        }
-
-        public int waitForResult() {
-            return mEngine.waitForResult();
-        }
-
-        @Override
-        public void run() {
-            try {
-                while (mEngine.isRunning()) {
-                    // Tell it to be sure to leave the agent instance up after finishing
-                    mEngine.restoreOneFile(mEngineStream, false, mEngine.mBuffer,
-                            mEngine.mOnlyPackage, mEngine.mAllowApks, mEngine.mEphemeralOpToken,
-                            mEngine.mMonitor);
-                }
-            } finally {
-                // Because mEngineStream adopted its underlying FD, this also
-                // closes this end of the pipe.
-                IoUtils.closeQuietly(mEngineStream);
-            }
-        }
-
-        public void handleTimeout() {
-            IoUtils.closeQuietly(mEngineStream);
-            mEngine.handleTimeout();
         }
     }
 
