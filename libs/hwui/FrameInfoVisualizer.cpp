@@ -15,7 +15,6 @@
  */
 #include "FrameInfoVisualizer.h"
 
-#include "BakedOpRenderer.h"
 #include "IProfileRenderer.h"
 #include "utils/Color.h"
 
