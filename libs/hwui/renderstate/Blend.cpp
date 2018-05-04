@@ -16,8 +16,6 @@
 #include <renderstate/Blend.h>
 #include "Program.h"
 
-#include "ShadowTessellator.h"
-
 namespace android {
 namespace uirenderer {
 
