@@ -58,8 +58,6 @@ Landroid/app/TaskStackListener;->onTaskProfileLocked(II)V
 Landroid/app/TaskStackListener;->onTaskRemoved(I)V
 Landroid/app/TaskStackListener;->onTaskSnapshotChanged(ILandroid/app/ActivityManager$TaskSnapshot;)V
 Landroid/app/TaskStackListener;->onTaskStackChanged()V
-Landroid/app/VrStateCallback;-><init>()V
-Landroid/app/VrStateCallback;->onPersistentVrStateChanged(Z)V
 Landroid/app/WallpaperColors;-><init>(Landroid/graphics/Color;Landroid/graphics/Color;Landroid/graphics/Color;I)V
 Landroid/bluetooth/BluetoothHeadset;->phoneStateChanged(IIILjava/lang/String;I)V
 Landroid/bluetooth/IBluetooth;->sendConnectionStateChange(Landroid/bluetooth/BluetoothDevice;III)V

@@ -16,19 +16,30 @@
 
 package android.app;
 
+import android.annotation.IntDef;
+import android.annotation.SystemApi;
 import android.os.Parcel;
 import android.os.Parcelable;
 
 import java.io.PrintWriter;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 
 /**
  * Display properties to be used by VR mode when creating a virtual display.
  *
  * @hide
  */
+@SystemApi
 public final class Vr2dDisplayProperties implements Parcelable {
 
     public static final int FLAG_VIRTUAL_DISPLAY_ENABLED = 1;
+
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef({
+        FLAG_VIRTUAL_DISPLAY_ENABLED
+    })
+    public @interface Vr2dDisplayFlag {}
 
     /**
      * The actual width, height and dpi.
@@ -79,7 +90,7 @@ public final class Vr2dDisplayProperties implements Parcelable {
 
         Vr2dDisplayProperties that = (Vr2dDisplayProperties) o;
 
-        if (getFlags() != that.getFlags()) return false;
+        if (getAddedFlags() != that.getAddedFlags()) return false;
         if (getRemovedFlags() != that.getRemovedFlags()) return false;
         if (getWidth() != that.getWidth()) return false;
         if (getHeight() != that.getHeight()) return false;
@@ -121,26 +132,46 @@ public final class Vr2dDisplayProperties implements Parcelable {
         mRemovedFlags = source.readInt();
     }
 
+    /**
+     * Prints out dump info.
+     */
     public void dump(PrintWriter pw, String prefix) {
         pw.println(prefix + toString());
     }
 
+    /**
+     * Returns the width of VR 2d display.
+     */
     public int getWidth() {
         return mWidth;
     }
 
+    /**
+     * Returns the height of VR 2d display.
+     */
     public int getHeight() {
         return mHeight;
     }
 
+    /**
+     * Returns the dpi of VR 2d display.
+     */
     public int getDpi() {
         return mDpi;
     }
 
-    public int getFlags() {
+    /**
+     * Returns the added flags of VR 2d display. Flags are combined by logic or.
+     */
+    @Vr2dDisplayFlag
+    public int getAddedFlags() {
         return mAddedFlags;
     }
 
+    /**
+     * Returns the removed flags of VR 2d display. Flags are combined by logic or.
+     */
+    @Vr2dDisplayFlag
     public int getRemovedFlags() {
         return mRemovedFlags;
     }
@@ -193,7 +224,7 @@ public final class Vr2dDisplayProperties implements Parcelable {
         /**
          * Adds property flags.
          */
-        public Builder addFlags(int flags) {
+        public Builder addFlags(@Vr2dDisplayFlag int flags) {
             mAddedFlags |= flags;
             mRemovedFlags &= ~flags;
             return this;
@@ -202,7 +233,7 @@ public final class Vr2dDisplayProperties implements Parcelable {
         /**
          * Removes property flags.
          */
-        public Builder removeFlags(int flags) {
+        public Builder removeFlags(@Vr2dDisplayFlag int flags) {
             mRemovedFlags |= flags;
             mAddedFlags &= ~flags;
             return this;

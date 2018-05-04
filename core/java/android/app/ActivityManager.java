@@ -4257,6 +4257,7 @@ public class ActivityManager {
      * @param tid tid of the VR thread
      * @hide
      */
+    @SystemApi
     @RequiresPermission(Manifest.permission.RESTRICTED_VR_ACCESS)
     public static void setPersistentVrThread(int tid) {
         try {
