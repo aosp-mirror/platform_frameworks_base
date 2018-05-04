@@ -165,6 +165,16 @@ public class RemoteInputController {
         return mSpinning.containsKey(key);
     }
 
+    /**
+     * Same as {@link #isSpinning}, but also verifies that the token is the same
+     * @param key the key that is spinning
+     * @param token the token that needs to be the same
+     * @return if this key with a given token is spinning
+     */
+    public boolean isSpinning(String key, Object token) {
+        return mSpinning.get(key) == token;
+    }
+
     private void apply(NotificationData.Entry entry) {
         mDelegate.setRemoteInputActive(entry, isRemoteInputActive(entry));
         boolean remoteInputActive = isRemoteInputActive();

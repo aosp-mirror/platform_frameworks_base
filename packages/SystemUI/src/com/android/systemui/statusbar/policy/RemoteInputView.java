@@ -285,12 +285,12 @@ public class RemoteInputView extends LinearLayout implements View.OnClickListene
         if (mWrapper != null) {
             mWrapper.setRemoteInputVisible(true);
         }
-        mController.addRemoteInput(mEntry, mToken);
         mEditText.setInnerFocusable(true);
         mEditText.mShowImeOnInputConnection = true;
         mEditText.setText(mEntry.remoteInputText);
         mEditText.setSelection(mEditText.getText().length());
         mEditText.requestFocus();
+        mController.addRemoteInput(mEntry, mToken);
         updateSendButton();
     }
 
@@ -464,6 +464,10 @@ public class RemoteInputView extends LinearLayout implements View.OnClickListene
         if (changedView == this && mOnVisibilityChangedListener != null) {
             mOnVisibilityChangedListener.accept(visibility == VISIBLE);
         }
+    }
+
+    public boolean isSending() {
+        return getVisibility() == VISIBLE && mController.isSpinning(mEntry.key, mToken);
     }
 
     /**
