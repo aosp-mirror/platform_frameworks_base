@@ -30,7 +30,7 @@ import android.widget.RemoteViews;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
-import com.android.perftests.core.R;
+import com.android.perftests.autofill.R;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -46,7 +46,7 @@ public class MyAutofillService extends AutofillService {
     private static final String TAG = "MyAutofillService";
     private static final int TIMEOUT_MS = 5000;
 
-    private static final String PACKAGE_NAME = "com.android.perftests.core";
+    private static final String PACKAGE_NAME = "com.android.perftests.autofill";
     static final String COMPONENT_NAME = PACKAGE_NAME + "/android.view.autofill.MyAutofillService";
 
     private static final BlockingQueue<FillRequest> sFillRequests = new LinkedBlockingQueue<>();
