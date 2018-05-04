@@ -161,11 +161,14 @@
     <!-- The vertical space around the buttons in the inline settings -->
     <dimen name="notification_guts_button_spacing">6dp</dimen>
 
+    <!-- Extra horizontal space for properly aligning guts buttons with the notification content -->
+    <dimen name="notification_guts_button_side_margin">8dp</dimen>
+
     <!-- The vertical padding a notification guts button has to fulfill the 48dp touch target -->
     <dimen name="notification_guts_button_vertical_padding">14dp</dimen>
 
     <!-- The horizontal padding for notification guts buttons-->
-    <dimen name="notification_guts_button_horizontal_padding">14dp</dimen>
+    <dimen name="notification_guts_button_horizontal_padding">8dp</dimen>
 
     <!-- The horizontal space around the buttons in the inline settings -->
     <dimen name="notification_guts_button_horizontal_spacing">8dp</dimen>

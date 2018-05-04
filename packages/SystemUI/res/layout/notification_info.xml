@@ -16,24 +16,23 @@
 -->
 
 <com.android.systemui.statusbar.NotificationInfo
-        xmlns:android="http://schemas.android.com/apk/res/android"
-        android:id="@+id/notification_guts"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:clickable="true"
-        android:clipChildren="false"
-        android:clipToPadding="false"
-        android:orientation="vertical"
-        android:paddingStart="@*android:dimen/notification_content_margin_start"
-        android:paddingEnd="@*android:dimen/notification_content_margin_end"
-        android:background="@color/notification_guts_bg_color"
-        android:theme="@*android:style/Theme.DeviceDefault.Light">
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/notification_guts"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:clickable="true"
+    android:clipChildren="false"
+    android:clipToPadding="false"
+    android:orientation="vertical"
+    android:background="@color/notification_guts_bg_color"
+    android:theme="@*android:style/Theme.DeviceDefault.Light">
 
     <!-- Package Info -->
     <RelativeLayout
         android:id="@+id/header"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_marginStart="@*android:dimen/notification_content_margin_start"
         android:clipChildren="false"
         android:clipToPadding="false">
         <ImageView
@@ -73,13 +72,13 @@
             android:maxLines="1"
             android:layout_centerVertical="true"
             android:layout_toEndOf="@id/pkg_group_divider" />
+        <!-- 24 dp icon with 16 dp padding all around to mirror notification content margins -->
         <ImageButton
             android:id="@+id/info"
             android:layout_width="56dp"
             android:layout_height="56dp"
             android:layout_alignParentEnd="true"
             android:layout_centerVertical="true"
-            android:layout_marginEnd="-16dp"
             android:background="@drawable/ripple_drawable"
             android:contentDescription="@string/notification_more_settings"
             android:padding="16dp"
@@ -100,6 +99,8 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginStart="@*android:dimen/notification_content_margin_start"
+            android:layout_marginEnd="@*android:dimen/notification_content_margin_start"
             android:orientation="vertical">
             <!-- Channel Name -->
             <TextView
@@ -120,9 +121,11 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
             android:layout_marginTop="@dimen/notification_guts_button_spacing"
-            android:gravity="end" >
+            android:layout_marginStart="@dimen/notification_guts_button_side_margin"
+            android:layout_marginEnd="@dimen/notification_guts_button_side_margin"
+            android:gravity="end"
+            android:orientation="horizontal">
 
             <!-- Optional link to app. Only appears if the channel is not disabled and the app
             asked for it -->
@@ -154,7 +157,6 @@
                 android:text="@string/inline_keep_button"
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
-                android:layout_marginEnd="-8dp"
                 android:layout_marginStart="@dimen/notification_guts_button_horizontal_spacing"
                 style="@style/TextAppearance.NotificationInfo.Button"/>
         </LinearLayout>
@@ -165,6 +167,8 @@
         android:layout_height="wrap_content"
         android:layout_marginBottom="@dimen/notification_guts_button_spacing"
         android:layout_marginTop="@dimen/notification_guts_button_spacing"
+        android:layout_marginStart="@dimen/notification_guts_button_side_margin"
+        android:layout_marginEnd="@dimen/notification_guts_button_side_margin"
         android:visibility="gone"
         android:orientation="horizontal" >
         <TextView
@@ -180,7 +184,6 @@
             android:layout_height="wrap_content"
             android:layout_alignParentEnd="true"
             android:layout_centerVertical="true"
-            android:layout_marginEnd="-8dp"
             android:text="@string/inline_undo"
             style="@style/TextAppearance.NotificationInfo.Button"/>
     </RelativeLayout>
