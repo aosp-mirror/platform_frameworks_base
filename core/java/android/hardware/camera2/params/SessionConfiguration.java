@@ -181,7 +181,13 @@ public final class SessionConfiguration {
      * to pass their initial values as part of this method.
      *
      * @param params A capture request that includes the initial values for any available
-     *               session wide capture keys.
+     *               session wide capture keys. Tags (see {@link CaptureRequest.Builder#setTag}) and
+     *               output targets (see {@link CaptureRequest.Builder#addTarget}) are ignored if
+     *               set. Parameter values not part of
+     *               {@link CameraCharacteristics#getAvailableSessionKeys} will also be ignored. It
+     *               is recommended to build the session parameters using the same template type as
+     *               the initial capture request, so that the session and initial request parameters
+     *               match as much as possible.
      */
     public void setSessionParameters(CaptureRequest params) {
         mSessionParameters = params;
