@@ -95,6 +95,8 @@
     <string name="accessibility_unlock_button" msgid="128158454631118828">"Déverrouiller"</string>
     <string name="accessibility_waiting_for_fingerprint" msgid="4808860050517462885">"Attente de l\'empreinte digitale"</string>
     <string name="accessibility_unlock_without_fingerprint" msgid="7541705575183694446">"Déverrouiller le système sans utiliser votre empreinte digitale"</string>
+    <!-- no translation found for accessibility_scanning_face (769545173211758586) -->
+    <skip />
     <string name="accessibility_send_smart_reply" msgid="7766727839703044493">"Envoyer"</string>
     <string name="unlock_label" msgid="8779712358041029439">"déverrouiller"</string>
     <string name="phone_label" msgid="2320074140205331708">"ouvrir le téléphone"</string>
@@ -853,4 +855,6 @@
     <string name="auto_saver_enabled_text" msgid="874711029884777579">"L\'économiseur de batterie s\'active automatiquement lorsque l\'autonomie de la batterie est inférieure à <xliff:g id="PERCENTAGE">%d</xliff:g> %%."</string>
     <string name="open_saver_setting_action" msgid="8314624730997322529">"Paramètres"</string>
     <string name="auto_saver_okay_action" msgid="2701221740227683650">"OK"</string>
+    <!-- no translation found for heap_dump_tile_name (9141031328971226374) -->
+    <skip />
 </resources>

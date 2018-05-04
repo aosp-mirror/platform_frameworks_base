@@ -95,6 +95,8 @@
     <string name="accessibility_unlock_button" msgid="128158454631118828">"Desbloquear"</string>
     <string name="accessibility_waiting_for_fingerprint" msgid="4808860050517462885">"Agardando pola impresión dixital"</string>
     <string name="accessibility_unlock_without_fingerprint" msgid="7541705575183694446">"Desbloquea sen usar a túa impresión dixital"</string>
+    <!-- no translation found for accessibility_scanning_face (769545173211758586) -->
+    <skip />
     <string name="accessibility_send_smart_reply" msgid="7766727839703044493">"Enviar"</string>
     <string name="unlock_label" msgid="8779712358041029439">"desbloquear"</string>
     <string name="phone_label" msgid="2320074140205331708">"abrir teléfono"</string>
@@ -853,4 +855,6 @@
     <string name="auto_saver_enabled_text" msgid="874711029884777579">"Activarase automaticamente a función Aforro de batería en canto o nivel de carga sexa inferior ao <xliff:g id="PERCENTAGE">%d</xliff:g> %%."</string>
     <string name="open_saver_setting_action" msgid="8314624730997322529">"Configuración"</string>
     <string name="auto_saver_okay_action" msgid="2701221740227683650">"De acordo"</string>
+    <!-- no translation found for heap_dump_tile_name (9141031328971226374) -->
+    <skip />
 </resources>

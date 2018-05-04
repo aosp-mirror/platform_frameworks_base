@@ -95,6 +95,8 @@
     <string name="accessibility_unlock_button" msgid="128158454631118828">"అన్‌లాక్ చేయి"</string>
     <string name="accessibility_waiting_for_fingerprint" msgid="4808860050517462885">"వేలిముద్ర కోసం వేచి ఉంది"</string>
     <string name="accessibility_unlock_without_fingerprint" msgid="7541705575183694446">"మీ వేలిముద్రను ఉపయోగించకుండా అన్‌లాక్ చేయండి"</string>
+    <!-- no translation found for accessibility_scanning_face (769545173211758586) -->
+    <skip />
     <string name="accessibility_send_smart_reply" msgid="7766727839703044493">"పంపు"</string>
     <string name="unlock_label" msgid="8779712358041029439">"అన్‌లాక్ చేయి"</string>
     <string name="phone_label" msgid="2320074140205331708">"ఫోన్‌ను తెరువు"</string>
@@ -851,4 +853,6 @@
     <string name="auto_saver_enabled_text" msgid="874711029884777579">"బ్యాటరీ <xliff:g id="PERCENTAGE">%d</xliff:g>%% కంటే తగ్గినప్పుడు బ్యాటరీ సేవర్ ఆటోమేటిక్‌గా ఆన్ అవుతుంది."</string>
     <string name="open_saver_setting_action" msgid="8314624730997322529">"సెట్టింగ్‌లు"</string>
     <string name="auto_saver_okay_action" msgid="2701221740227683650">"అర్థమైంది"</string>
+    <!-- no translation found for heap_dump_tile_name (9141031328971226374) -->
+    <skip />
 </resources>

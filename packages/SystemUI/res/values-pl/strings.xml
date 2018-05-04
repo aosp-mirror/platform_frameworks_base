@@ -97,6 +97,8 @@
     <string name="accessibility_unlock_button" msgid="128158454631118828">"Odblokuj"</string>
     <string name="accessibility_waiting_for_fingerprint" msgid="4808860050517462885">"Czekam na odcisk palca"</string>
     <string name="accessibility_unlock_without_fingerprint" msgid="7541705575183694446">"Odblokuj bez używania odcisku palca"</string>
+    <!-- no translation found for accessibility_scanning_face (769545173211758586) -->
+    <skip />
     <string name="accessibility_send_smart_reply" msgid="7766727839703044493">"Wyślij"</string>
     <string name="unlock_label" msgid="8779712358041029439">"odblokuj"</string>
     <string name="phone_label" msgid="2320074140205331708">"otwórz telefon"</string>
@@ -344,7 +346,7 @@
     <string name="quick_settings_cellular_detail_data_usage" msgid="1964260360259312002">"Użycie danych"</string>
     <string name="quick_settings_cellular_detail_remaining_data" msgid="722715415543541249">"Pozostały limit"</string>
     <string name="quick_settings_cellular_detail_over_limit" msgid="967669665390990427">"Przekroczono limit"</string>
-    <string name="quick_settings_cellular_detail_data_used" msgid="1476810587475761478">"Wykorzystano: <xliff:g id="DATA_USED">%s</xliff:g>"</string>
+    <string name="quick_settings_cellular_detail_data_used" msgid="1476810587475761478">"Wykorzyst.: <xliff:g id="DATA_USED">%s</xliff:g>"</string>
     <string name="quick_settings_cellular_detail_data_limit" msgid="56011158504994128">"Limit <xliff:g id="DATA_LIMIT">%s</xliff:g>"</string>
     <string name="quick_settings_cellular_detail_data_warning" msgid="2440098045692399009">"Ostrzeżenie: <xliff:g id="DATA_LIMIT">%s</xliff:g>"</string>
     <string name="quick_settings_work_mode_label" msgid="7608026833638817218">"Profil do pracy"</string>
@@ -865,4 +867,6 @@
     <string name="auto_saver_enabled_text" msgid="874711029884777579">"Oszczędzanie baterii włączy się automatycznie, gdy poziom naładowania baterii spadnie poniżej <xliff:g id="PERCENTAGE">%d</xliff:g>%%."</string>
     <string name="open_saver_setting_action" msgid="8314624730997322529">"Ustawienia"</string>
     <string name="auto_saver_okay_action" msgid="2701221740227683650">"OK"</string>
+    <!-- no translation found for heap_dump_tile_name (9141031328971226374) -->
+    <skip />
 </resources>

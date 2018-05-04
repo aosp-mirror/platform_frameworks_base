@@ -95,6 +95,8 @@
     <string name="accessibility_unlock_button" msgid="128158454631118828">"Desblokeatu"</string>
     <string name="accessibility_waiting_for_fingerprint" msgid="4808860050517462885">"Hatz-markaren zain"</string>
     <string name="accessibility_unlock_without_fingerprint" msgid="7541705575183694446">"Desblokeatu hatz-markaren bidez"</string>
+    <!-- no translation found for accessibility_scanning_face (769545173211758586) -->
+    <skip />
     <string name="accessibility_send_smart_reply" msgid="7766727839703044493">"Bidali"</string>
     <string name="unlock_label" msgid="8779712358041029439">"desblokeatu"</string>
     <string name="phone_label" msgid="2320074140205331708">"ireki telefonoan"</string>
@@ -853,4 +855,6 @@
     <string name="auto_saver_enabled_text" msgid="874711029884777579">"Bateria-aurrezlea automatikoki aktibatuko da bateriaren %% <xliff:g id="PERCENTAGE">%d</xliff:g> gelditzen denean."</string>
     <string name="open_saver_setting_action" msgid="8314624730997322529">"Ezarpenak"</string>
     <string name="auto_saver_okay_action" msgid="2701221740227683650">"Ados"</string>
+    <!-- no translation found for heap_dump_tile_name (9141031328971226374) -->
+    <skip />
 </resources>

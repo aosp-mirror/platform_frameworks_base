@@ -95,6 +95,7 @@
     <string name="accessibility_unlock_button" msgid="128158454631118828">"Desbloquear"</string>
     <string name="accessibility_waiting_for_fingerprint" msgid="4808860050517462885">"Esperando huella digital"</string>
     <string name="accessibility_unlock_without_fingerprint" msgid="7541705575183694446">"Desbloquear sin usar tu huella digital"</string>
+    <string name="accessibility_scanning_face" msgid="769545173211758586">"Escaneando cara"</string>
     <string name="accessibility_send_smart_reply" msgid="7766727839703044493">"Enviar"</string>
     <string name="unlock_label" msgid="8779712358041029439">"desbloquear"</string>
     <string name="phone_label" msgid="2320074140205331708">"abrir teléfono"</string>
@@ -853,4 +854,5 @@
     <string name="auto_saver_enabled_text" msgid="874711029884777579">"El modo Ahorro de batería se activará automáticamente cuando quede menos de un <xliff:g id="PERCENTAGE">%d</xliff:g> %% de batería."</string>
     <string name="open_saver_setting_action" msgid="8314624730997322529">"Ajustes"</string>
     <string name="auto_saver_okay_action" msgid="2701221740227683650">"Entendido"</string>
+    <string name="heap_dump_tile_name" msgid="9141031328971226374">"Volcar pila de SysUI"</string>
 </resources>

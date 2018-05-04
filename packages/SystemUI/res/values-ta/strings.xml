@@ -32,8 +32,7 @@
     <string name="status_bar_no_notifications_title" msgid="4755261167193833213">"அறிவிப்புகள் இல்லை"</string>
     <string name="status_bar_ongoing_events_title" msgid="1682504513316879202">"செயலில் இருக்கும்"</string>
     <string name="status_bar_latest_events_title" msgid="6594767438577593172">"அறிவிப்புகள்"</string>
-    <!-- no translation found for battery_low_title (9187898087363540349) -->
-    <skip />
+    <string name="battery_low_title" msgid="9187898087363540349">"பேட்டரி விரைவில் தீர்ந்துவிடக்கூடும்"</string>
     <string name="battery_low_percent_format" msgid="2900940511201380775">"<xliff:g id="PERCENTAGE">%s</xliff:g> உள்ளது"</string>
     <string name="battery_low_percent_format_hybrid" msgid="6838677459286775617">"<xliff:g id="PERCENTAGE">%s</xliff:g> பேட்டரி மீதமுள்ளது. உங்கள் உபயோகத்தைப் பொறுத்து, இதைச் சுமார் <xliff:g id="TIME">%s</xliff:g> மணி நேரத்திற்குப் பயன்படுத்தலாம்"</string>
     <string name="battery_low_percent_format_hybrid_short" msgid="9025795469949145586">"<xliff:g id="PERCENTAGE">%s</xliff:g> மீதமுள்ளது, இதைச் சுமார் <xliff:g id="TIME">%s</xliff:g> மணி நேரத்திற்குப் பயன்படுத்தலாம்"</string>
@@ -96,6 +95,8 @@
     <string name="accessibility_unlock_button" msgid="128158454631118828">"திற"</string>
     <string name="accessibility_waiting_for_fingerprint" msgid="4808860050517462885">"கைரேகைக்காகக் காத்திருக்கிறது"</string>
     <string name="accessibility_unlock_without_fingerprint" msgid="7541705575183694446">"உங்கள் கைரேகையைப் பயன்படுத்தாமல் திறக்கவும்"</string>
+    <!-- no translation found for accessibility_scanning_face (769545173211758586) -->
+    <skip />
     <string name="accessibility_send_smart_reply" msgid="7766727839703044493">"அனுப்பு"</string>
     <string name="unlock_label" msgid="8779712358041029439">"திற"</string>
     <string name="phone_label" msgid="2320074140205331708">"ஃபோனைத் திற"</string>
@@ -852,4 +853,6 @@
     <string name="auto_saver_enabled_text" msgid="874711029884777579">"பேட்டரியின் அளவு <xliff:g id="PERCENTAGE">%d</xliff:g>%%க்குக் கீழ் குறையும்போது, பேட்டரி சேமிப்பான் தானாகவே ஆன் செய்யப்படும்."</string>
     <string name="open_saver_setting_action" msgid="8314624730997322529">"அமைப்புகள்"</string>
     <string name="auto_saver_okay_action" msgid="2701221740227683650">"சரி"</string>
+    <!-- no translation found for heap_dump_tile_name (9141031328971226374) -->
+    <skip />
 </resources>
