@@ -141,4 +141,6 @@ public interface MessagingMessage extends MessagingLinearLayout.MessagingChild {
     MessagingMessageState getState();
 
     void setVisibility(int visibility);
+
+    int getVisibility();
 }
