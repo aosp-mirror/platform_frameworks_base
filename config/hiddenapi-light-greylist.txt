@@ -29,6 +29,7 @@ Landroid/animation/ValueAnimator;->sDurationScale:F
 Landroid/app/ActionBar;->setShowHideAnimationEnabled(Z)V
 Landroid/app/Activity;->getActivityOptions()Landroid/app/ActivityOptions;
 Landroid/app/Activity;->getActivityToken()Landroid/os/IBinder;
+Landroid/app/Activity;->isResumed()Z
 Landroid/app/Activity;->mActivityInfo:Landroid/content/pm/ActivityInfo;
 Landroid/app/Activity;->mApplication:Landroid/app/Application;
 Landroid/app/Activity;->mCalled:Z
@@ -268,6 +269,7 @@ Landroid/app/ContextImpl;->mPackageInfo:Landroid/app/LoadedApk;
 Landroid/app/ContextImpl;->mPackageManager:Landroid/content/pm/PackageManager;
 Landroid/app/ContextImpl;->mResources:Landroid/content/res/Resources;
 Landroid/app/ContextImpl;->mServiceCache:[Ljava/lang/Object;
+Landroid/app/ContextImpl;->mSharedPrefsPaths:Landroid/util/ArrayMap;
 Landroid/app/ContextImpl;->mTheme:Landroid/content/res/Resources$Theme;
 Landroid/app/ContextImpl;->mThemeResource:I
 Landroid/app/ContextImpl;->scheduleFinalCleanup(Ljava/lang/String;Ljava/lang/String;)V
@@ -3405,16 +3407,19 @@ Lcom/android/internal/R$drawable;->maps_google_logo:I
 Lcom/android/internal/R$drawable;->no_tile_256:I
 Lcom/android/internal/R$drawable;->reticle:I
 Lcom/android/internal/R$id;->amPm:I
+Lcom/android/internal/R$id;->day:I
 Lcom/android/internal/R$id;->edittext_container:I
 Lcom/android/internal/R$id;->icon:I
 Lcom/android/internal/R$id;->message:I
 Lcom/android/internal/R$id;->minute:I
+Lcom/android/internal/R$id;->month:I
 Lcom/android/internal/R$id;->shortcut:I
 Lcom/android/internal/R$id;->text:I
 Lcom/android/internal/R$id;->time:I
 Lcom/android/internal/R$id;->timePicker:I
 Lcom/android/internal/R$id;->title:I
 Lcom/android/internal/R$id;->title_container:I
+Lcom/android/internal/R$id;->year:I
 Lcom/android/internal/R$integer;->config_screenBrightnessDim:I
 Lcom/android/internal/R$integer;->config_toastDefaultGravity:I
 Lcom/android/internal/R$layout;->screen_title:I
