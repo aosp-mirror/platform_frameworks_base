@@ -135,6 +135,24 @@ public class ScheduleCalendar {
     }
 
     /**
+     * @param alarm milliseconds since Epoch
+     * @param now milliseconds since Epoch
+     * @return true if alarm and now is within the schedule, else false
+     */
+    public boolean isAlarmInSchedule(long alarm, long now) {
+        if (mSchedule == null || mDays.size() == 0) return false;
+        final long start = getTime(alarm, mSchedule.startHour, mSchedule.startMinute);
+        long end = getTime(alarm, mSchedule.endHour, mSchedule.endMinute);
+        if (end <= start) {
+            end = addDays(end, 1);
+        }
+        return (isInSchedule(-1, alarm, start, end)
+                && isInSchedule(-1, now, start, end))
+                || (isInSchedule(0, alarm, start, end)
+                && isInSchedule(0, now, start, end));
+    }
+
+    /**
      * @param time milliseconds since Epoch
      * @return true if should exit at time for next alarm, else false
      */
@@ -145,7 +163,7 @@ public class ScheduleCalendar {
         return mSchedule.exitAtAlarm
                 && mSchedule.nextAlarm != 0
                 && time >= mSchedule.nextAlarm
-                && isInSchedule(mSchedule.nextAlarm);
+                && isAlarmInSchedule(mSchedule.nextAlarm, time);
     }
 
     private boolean isInSchedule(int daysOffset, long time, long start, long end) {

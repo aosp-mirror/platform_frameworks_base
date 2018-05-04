@@ -206,15 +206,14 @@ public class ScheduleCalendarTest extends UiServiceTestCase {
         assertTrue(mScheduleCalendar.shouldExitForAlarm(1000));
     }
 
-    @Ignore
     @Test
     public void testShouldExitForAlarm_oldAlarm() {
         // Cal: today 2:15pm
-        Calendar cal = new GregorianCalendar();
-        cal.set(Calendar.HOUR_OF_DAY, 14);
-        cal.set(Calendar.MINUTE, 15);
-        cal.set(Calendar.SECOND, 0);
-        cal.set(Calendar.MILLISECOND, 0);
+        Calendar now = new GregorianCalendar();
+        now.set(Calendar.HOUR_OF_DAY, 14);
+        now.set(Calendar.MINUTE, 15);
+        now.set(Calendar.SECOND, 0);
+        now.set(Calendar.MILLISECOND, 0);
 
         // ScheduleInfo: today 12:16pm  - today 3:15pm
         mScheduleInfo.days = new int[] {getTodayDay()};
@@ -226,10 +225,45 @@ public class ScheduleCalendarTest extends UiServiceTestCase {
         mScheduleInfo.nextAlarm = 1000; // very old alarm
 
         mScheduleCalendar.setSchedule(mScheduleInfo);
-        assertTrue(mScheduleCalendar.isInSchedule(cal.getTimeInMillis()));
+        assertTrue(mScheduleCalendar.isInSchedule(now.getTimeInMillis()));
 
         // don't exit for an alarm if it's an old alarm
-        assertFalse(mScheduleCalendar.shouldExitForAlarm(1000));
+        assertFalse(mScheduleCalendar.shouldExitForAlarm(now.getTimeInMillis()));
+    }
+
+    @Test
+    public void testShouldExitForAlarm_oldAlarmInSchedule() {
+        // calNow: day 2 at 9pm
+        Calendar calNow = new GregorianCalendar();
+        calNow.set(Calendar.HOUR_OF_DAY, 21);
+        calNow.set(Calendar.MINUTE, 0);
+        calNow.set(Calendar.SECOND, 0);
+        calNow.set(Calendar.MILLISECOND, 0);
+        calNow.add(Calendar.DATE, 1); // add a day
+
+        // calAlarm: day 2 at 5am
+        Calendar calAlarm = new GregorianCalendar();
+        calAlarm.set(Calendar.HOUR_OF_DAY, 5);
+        calAlarm.set(Calendar.MINUTE, 0);
+        calAlarm.set(Calendar.SECOND, 0);
+        calAlarm.set(Calendar.MILLISECOND, 0);
+        calAlarm.add(Calendar.DATE, 1); // add a day
+
+        // ScheduleInfo: day 1, day 2: 9pm-7am
+        mScheduleInfo.days = new int[] {getTodayDay(), getTodayDay() + 1};
+        mScheduleInfo.startHour = 21;
+        mScheduleInfo.endHour = 7;
+        mScheduleInfo.startMinute = 0;
+        mScheduleInfo.endMinute = 0;
+        mScheduleInfo.exitAtAlarm = true;
+        mScheduleInfo.nextAlarm = calAlarm.getTimeInMillis(); // old alarm (5am day 2)
+
+        mScheduleCalendar.setSchedule(mScheduleInfo);
+        assertTrue(mScheduleCalendar.isInSchedule(calNow.getTimeInMillis()));
+        assertTrue(mScheduleCalendar.isInSchedule(calAlarm.getTimeInMillis()));
+
+        // don't exit for an alarm if it's an old alarm
+        assertFalse(mScheduleCalendar.shouldExitForAlarm(calNow.getTimeInMillis()));
     }
 
     @Test
@@ -367,6 +401,64 @@ public class ScheduleCalendarTest extends UiServiceTestCase {
         mScheduleCalendar.setSchedule(mScheduleInfo);
 
         assertFalse(mScheduleCalendar.isInSchedule(cal.getTimeInMillis()));
+    }
+
+    @Test
+    public void testIsAlarmInSchedule_alarmAndNowInSchedule_sameScheduleTrigger() {
+        Calendar alarm = new GregorianCalendar();
+        alarm.set(Calendar.HOUR_OF_DAY, 23);
+        alarm.set(Calendar.MINUTE, 15);
+        alarm.set(Calendar.SECOND, 0);
+        alarm.set(Calendar.MILLISECOND, 0);
+
+        Calendar now = new GregorianCalendar();
+        now.set(Calendar.HOUR_OF_DAY, 2);
+        now.set(Calendar.MINUTE, 15);
+        now.set(Calendar.SECOND, 0);
+        now.set(Calendar.MILLISECOND, 0);
+        now.add(Calendar.DATE, 1); // add a day
+
+        mScheduleInfo.days = new int[] {getTodayDay(), getTodayDay() + 1};
+        mScheduleInfo.startHour = 22;
+        mScheduleInfo.startMinute = 15;
+        mScheduleInfo.endHour = 3;
+        mScheduleInfo.endMinute = 15;
+        mScheduleCalendar.setSchedule(mScheduleInfo);
+
+        assertTrue(mScheduleCalendar.isInSchedule(alarm.getTimeInMillis()));
+        assertTrue(mScheduleCalendar.isInSchedule(now.getTimeInMillis()));
+        assertTrue(mScheduleCalendar.isAlarmInSchedule(alarm.getTimeInMillis(),
+                now.getTimeInMillis()));
+    }
+
+    @Test
+    public void testIsAlarmInSchedule_alarmAndNowInSchedule_differentScheduleTrigger() {
+        Calendar alarm = new GregorianCalendar();
+        alarm.set(Calendar.HOUR_OF_DAY, 23);
+        alarm.set(Calendar.MINUTE, 15);
+        alarm.set(Calendar.SECOND, 0);
+        alarm.set(Calendar.MILLISECOND, 0);
+
+        Calendar now = new GregorianCalendar();
+        now.set(Calendar.HOUR_OF_DAY, 23);
+        now.set(Calendar.MINUTE, 15);
+        now.set(Calendar.SECOND, 0);
+        now.set(Calendar.MILLISECOND, 0);
+        now.add(Calendar.DATE, 1); // add a day
+
+        mScheduleInfo.days = new int[] {getTodayDay(), getTodayDay() + 1};
+        mScheduleInfo.startHour = 22;
+        mScheduleInfo.startMinute = 15;
+        mScheduleInfo.endHour = 3;
+        mScheduleInfo.endMinute = 15;
+        mScheduleCalendar.setSchedule(mScheduleInfo);
+
+        // even though both alarm and now are in schedule, they are not in the same part of
+        // the schedule (alarm is in schedule for the previous day's schedule compared to now)
+        assertTrue(mScheduleCalendar.isInSchedule(alarm.getTimeInMillis()));
+        assertTrue(mScheduleCalendar.isInSchedule(now.getTimeInMillis()));
+        assertFalse(mScheduleCalendar.isAlarmInSchedule(alarm.getTimeInMillis(),
+                now.getTimeInMillis()));
     }
 
     private int getTodayDay() {
