@@ -95,6 +95,10 @@ public class DiscoverySessionCallback {
     /**
      * Called when a discovery (publish or subscribe) operation results in a
      * service discovery.
+     * <p>
+     * Note that this method and
+     * {@link #onServiceDiscoveredWithinRange(PeerHandle, byte[], List, int)} may be called
+     * multiple times per service discovery.
      *
      * @param peerHandle An opaque handle to the peer matching our discovery operation.
      * @param serviceSpecificInfo The service specific information (arbitrary
@@ -122,6 +126,9 @@ public class DiscoverySessionCallback {
      * If either Publisher or Subscriber does not enable Ranging, or if Ranging is temporarily
      * disabled by the underlying device, service discovery proceeds without ranging and the
      * {@link #onServiceDiscovered(PeerHandle, byte[], List)} is called.
+     * <p>
+     * Note that this method and {@link #onServiceDiscovered(PeerHandle, byte[], List)} may be
+     * called multiple times per service discovery.
      *
      * @param peerHandle An opaque handle to the peer matching our discovery operation.
      * @param serviceSpecificInfo The service specific information (arbitrary
