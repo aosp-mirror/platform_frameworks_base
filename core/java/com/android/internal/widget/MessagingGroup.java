@@ -147,7 +147,7 @@ public class MessagingGroup extends LinearLayout implements MessagingLinearLayou
             setAvatar(sender.getIcon());
         }
         mAvatarView.setVisibility(VISIBLE);
-        mSenderName.setVisibility(VISIBLE);
+        mSenderName.setVisibility(TextUtils.isEmpty(nameOverride) ? GONE : VISIBLE);
         mTextColor = getNormalTextColor();
         mSendingTextColor = calculateSendingTextColor();
     }
