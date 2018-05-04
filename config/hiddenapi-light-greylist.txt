@@ -2591,10 +2591,13 @@ Landroid/view/ContextThemeWrapper;->mTheme:Landroid/content/res/Resources$Theme;
 Landroid/view/ContextThemeWrapper;->mThemeResource:I
 Landroid/view/Display$HdrCapabilities;-><init>([IFFF)V
 Landroid/view/Display;->getDisplayAdjustments()Landroid/view/DisplayAdjustments;
+Landroid/view/Display;->getDisplayInfo(Landroid/view/DisplayInfo;)Z
 Landroid/view/DisplayAdjustments;->getConfiguration()Landroid/content/res/Configuration;
 Landroid/view/DisplayAdjustments;->setCompatibilityInfo(Landroid/content/res/CompatibilityInfo;)V
 Landroid/view/DisplayEventReceiver;->dispatchHotplug(JIZ)V
 Landroid/view/DisplayEventReceiver;->dispatchVsync(JII)V
+Landroid/view/DisplayInfo;-><init>()V
+Landroid/view/DisplayInfo;->displayCutout:Landroid/view/DisplayCutout;
 Landroid/view/DisplayListCanvas;->callDrawGLFunction2(J)V
 Landroid/view/DisplayListCanvas;->drawGLFunctor2(JLjava/lang/Runnable;)V
 Landroid/view/FrameMetrics;->mTimingData:[J
