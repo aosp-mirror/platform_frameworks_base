@@ -399,6 +399,13 @@ public class AudioService extends IAudioService.Stub
 
     private final boolean mUseFixedVolume;
 
+    /**
+    * Default stream type used for volume control in the absence of playback
+    * e.g. user on homescreen, no app playing anything, presses hardware volume buttons, this
+    *    stream type is controlled.
+    */
+   protected static final int DEFAULT_VOL_STREAM_NO_PLAYBACK = AudioSystem.STREAM_MUSIC;
+
     private final AudioSystem.ErrorCallback mAudioSystemCallback = new AudioSystem.ErrorCallback() {
         public void onError(int error) {
             switch (error) {
@@ -4285,9 +4292,11 @@ public class AudioService extends IAudioService.Stub
                         Log.v(TAG, "getActiveStreamType: Forcing STREAM_NOTIFICATION stream active");
                     return AudioSystem.STREAM_NOTIFICATION;
                 } else {
-                    if (DEBUG_VOL)
-                        Log.v(TAG, "getActiveStreamType: Forcing STREAM_MUSIC b/c default");
-                    return AudioSystem.STREAM_MUSIC;
+                    if (DEBUG_VOL) {
+                        Log.v(TAG, "getActiveStreamType: Forcing DEFAULT_VOL_STREAM_NO_PLAYBACK("
+                                + DEFAULT_VOL_STREAM_NO_PLAYBACK + ") b/c default");
+                    }
+                    return DEFAULT_VOL_STREAM_NO_PLAYBACK;
                 }
             } else if (
                     wasStreamActiveRecently(AudioSystem.STREAM_NOTIFICATION, sStreamOverrideDelayMs)) {
@@ -4327,8 +4336,11 @@ public class AudioService extends IAudioService.Stub
                     if (DEBUG_VOL) Log.v(TAG, "getActiveStreamType: Forcing STREAM_RING");
                     return AudioSystem.STREAM_RING;
                 } else {
-                    if (DEBUG_VOL) Log.v(TAG, "getActiveStreamType: using STREAM_MUSIC as default");
-                    return AudioSystem.STREAM_MUSIC;
+                    if (DEBUG_VOL) {
+                        Log.v(TAG, "getActiveStreamType: Forcing DEFAULT_VOL_STREAM_NO_PLAYBACK("
+                                + DEFAULT_VOL_STREAM_NO_PLAYBACK + ") b/c default");
+                    }
+                    return DEFAULT_VOL_STREAM_NO_PLAYBACK;
                 }
             }
             break;
@@ -7210,7 +7222,7 @@ public class AudioService extends IAudioService.Stub
                 return false;
             }
             boolean suppress = false;
-            if (resolvedStream == AudioSystem.STREAM_RING && mController != null) {
+            if (resolvedStream == DEFAULT_VOL_STREAM_NO_PLAYBACK && mController != null) {
                 final long now = SystemClock.uptimeMillis();
                 if ((flags & AudioManager.FLAG_SHOW_UI) != 0 && !mVisible) {
                     // ui will become visible
