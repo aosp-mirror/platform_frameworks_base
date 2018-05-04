@@ -266,6 +266,26 @@ private:
     GLuint mTexture = 0;
 };
 
+static bool isFP16Supported(const sk_sp<GrContext>& grContext) {
+    static std::once_flag sOnceFlag;
+    static bool supported = false;
+
+    std::call_once(sOnceFlag, [](const sk_sp<GrContext>& grContext) {
+        if (!grContext->caps()->isConfigTexturable(kRGBA_half_GrPixelConfig)) {
+            supported = false;
+            return;
+        }
+
+        sp<GraphicBuffer> buffer = new GraphicBuffer(1, 1, PIXEL_FORMAT_RGBA_FP16,
+                GraphicBuffer::USAGE_HW_TEXTURE | GraphicBuffer::USAGE_SW_WRITE_NEVER |
+                        GraphicBuffer::USAGE_SW_READ_NEVER, "tempFp16Buffer");
+        status_t error = buffer->initCheck();
+        supported = !error;
+    }, grContext);
+
+    return supported;
+}
+
 sk_sp<Bitmap> SkiaOpenGLPipeline::allocateHardwareBitmap(renderthread::RenderThread& renderThread,
                                                          SkBitmap& skBitmap) {
     renderThread.eglManager().initialize();
@@ -287,7 +307,7 @@ sk_sp<Bitmap> SkiaOpenGLPipeline::allocateHardwareBitmap(renderthread::RenderThr
             type = GL_UNSIGNED_BYTE;
             break;
         case kRGBA_F16_SkColorType:
-            isSupported = grContext->caps()->isConfigTexturable(kRGBA_half_GrPixelConfig);
+            isSupported = isFP16Supported(grContext);
             if (isSupported) {
                 type = GL_HALF_FLOAT;
                 pixelFormat = PIXEL_FORMAT_RGBA_FP16;
