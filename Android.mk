@@ -584,37 +584,66 @@ include $(BUILD_HOST_JAVA_LIBRARY)
 
 # ==== hiddenapi lists =======================================
 
-# Copy blacklist and dark greylist over into the build folder.
+# Copy light and dark greylist over into the build folder.
 # This is for ART buildbots which need to mock these lists and have alternative
 # rules for building them. Other rules in the build system should depend on the
 # files in the build folder.
 
+# Merge light greylist from multiple files:
+#  (1) manual light greylist
+#  (2) list of usages from vendor apps
+#  (3) list of removed APIs
+#      @removed does not imply private in Doclava. We must take the subset also
+#      in PRIVATE_API.
+#  (4) list of serialization APIs
+#      Automatically adds all methods which match the signatures in
+#      REGEX_SERIALIZATION. These are greylisted in order to allow applications
+#      to write their own serializers.
+$(INTERNAL_PLATFORM_HIDDENAPI_LIGHT_GREYLIST): REGEX_SERIALIZATION := \
+    "readObject\(Ljava/io/ObjectInputStream;\)V" \
+    "readObjectNoData\(\)V" \
+    "readResolve\(\)Ljava/lang/Object;" \
+    "serialVersionUID:J" \
+    "serialPersistentFields:\[Ljava/io/ObjectStreamField;" \
+    "writeObject\(Ljava/io/ObjectOutputStream;\)V" \
+    "writeReplace\(\)Ljava/lang/Object;"
+$(INTERNAL_PLATFORM_HIDDENAPI_LIGHT_GREYLIST): PRIVATE_API := $(INTERNAL_PLATFORM_PRIVATE_DEX_API_FILE)
+$(INTERNAL_PLATFORM_HIDDENAPI_LIGHT_GREYLIST): REMOVED_API := $(INTERNAL_PLATFORM_REMOVED_DEX_API_FILE)
+$(INTERNAL_PLATFORM_HIDDENAPI_LIGHT_GREYLIST): frameworks/base/config/hiddenapi-light-greylist.txt \
+                                               frameworks/base/config/hiddenapi-vendor-list.txt \
+                                               $(INTERNAL_PLATFORM_PRIVATE_DEX_API_FILE) \
+                                               $(INTERNAL_PLATFORM_REMOVED_DEX_API_FILE)
+	sort frameworks/base/config/hiddenapi-light-greylist.txt \
+	     frameworks/base/config/hiddenapi-vendor-list.txt \
+	     <(grep -E "\->("$(subst $(space),"|",$(REGEX_SERIALIZATION))")$$" $(PRIVATE_API)) \
+	     <(comm -12 <(sort $(REMOVED_API)) <(sort $(PRIVATE_API))) \
+	> $@
+
 $(eval $(call copy-one-file,frameworks/base/config/hiddenapi-dark-greylist.txt,\
                             $(INTERNAL_PLATFORM_HIDDENAPI_DARK_GREYLIST)))
 
-$(INTERNAL_PLATFORM_HIDDENAPI_BLACKLIST):
-	rm -f $@
-	touch $@
+# Generate dark greylist as private API minus (blacklist plus light greylist).
 
-# Generate light greylist as private API minus (blacklist plus dark greylist).
-
-$(INTERNAL_PLATFORM_HIDDENAPI_LIGHT_GREYLIST): PRIVATE_API := $(INTERNAL_PLATFORM_PRIVATE_DEX_API_FILE)
-$(INTERNAL_PLATFORM_HIDDENAPI_LIGHT_GREYLIST): BLACKLIST := $(INTERNAL_PLATFORM_HIDDENAPI_BLACKLIST)
-$(INTERNAL_PLATFORM_HIDDENAPI_LIGHT_GREYLIST): DARK_GREYLIST := $(INTERNAL_PLATFORM_HIDDENAPI_DARK_GREYLIST)
-$(INTERNAL_PLATFORM_HIDDENAPI_LIGHT_GREYLIST): $(INTERNAL_PLATFORM_PRIVATE_DEX_API_FILE) \
-                                               $(INTERNAL_PLATFORM_HIDDENAPI_BLACKLIST) \
-                                               $(INTERNAL_PLATFORM_HIDDENAPI_DARK_GREYLIST)
-	if [ ! -z "`comm -12 <(sort $(BLACKLIST)) <(sort $(DARK_GREYLIST))`" ]; then \
-		echo "There should be no overlap between $(BLACKLIST) and $(DARK_GREYLIST)" 1>&2; \
+$(INTERNAL_PLATFORM_HIDDENAPI_BLACKLIST): PRIVATE_API := $(INTERNAL_PLATFORM_PRIVATE_DEX_API_FILE)
+$(INTERNAL_PLATFORM_HIDDENAPI_BLACKLIST): LIGHT_GREYLIST := $(INTERNAL_PLATFORM_HIDDENAPI_LIGHT_GREYLIST)
+$(INTERNAL_PLATFORM_HIDDENAPI_BLACKLIST): DARK_GREYLIST := $(INTERNAL_PLATFORM_HIDDENAPI_DARK_GREYLIST)
+$(INTERNAL_PLATFORM_HIDDENAPI_BLACKLIST): $(INTERNAL_PLATFORM_PRIVATE_DEX_API_FILE) \
+                                          $(INTERNAL_PLATFORM_HIDDENAPI_LIGHT_GREYLIST) \
+                                          $(INTERNAL_PLATFORM_HIDDENAPI_DARK_GREYLIST)
+	if [ ! -z "`comm -12 <(sort $(LIGHT_GREYLIST)) <(sort $(DARK_GREYLIST))`" ]; then \
+		echo "There should be no overlap between $(LIGHT_GREYLIST) and $(DARK_GREYLIST)" 1>&2; \
+		comm -12 <(sort $(LIGHT_GREYLIST)) <(sort $(DARK_GREYLIST)) 1>&2; \
 		exit 1; \
-	elif [ ! -z "`comm -13 <(sort $(PRIVATE_API)) <(sort $(BLACKLIST))`" ]; then \
-		echo "$(BLACKLIST) must be a subset of $(PRIVATE_API)" 1>&2; \
+	elif [ ! -z "`comm -13 <(sort $(PRIVATE_API)) <(sort $(LIGHT_GREYLIST))`" ]; then \
+		echo "$(LIGHT_GREYLIST) must be a subset of $(PRIVATE_API)" 1>&2; \
+		comm -13 <(sort $(PRIVATE_API)) <(sort $(LIGHT_GREYLIST)) 1>&2; \
 		exit 2; \
 	elif [ ! -z "`comm -13 <(sort $(PRIVATE_API)) <(sort $(DARK_GREYLIST))`" ]; then \
 		echo "$(DARK_GREYLIST) must be a subset of $(PRIVATE_API)" 1>&2; \
+		comm -13 <(sort $(PRIVATE_API)) <(sort $(DARK_GREYLIST)) 1>&2; \
 		exit 3; \
 	fi
-	comm -23 <(sort $(PRIVATE_API)) <(sort $(BLACKLIST) $(DARK_GREYLIST)) > $@
+	comm -23 <(sort $(PRIVATE_API)) <(sort $(LIGHT_GREYLIST) $(DARK_GREYLIST)) > $@
 
 # Build AOSP blacklist
 # ============================================================
