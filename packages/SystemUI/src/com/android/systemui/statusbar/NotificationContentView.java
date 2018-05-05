@@ -425,7 +425,6 @@ public class NotificationContentView extends FrameLayout {
         mContractedChild = child;
         mContractedWrapper = NotificationViewWrapper.wrap(getContext(), child,
                 mContainingNotification);
-        mContractedWrapper.setDark(mDark, false /* animate */, 0 /* delay */);
     }
 
     private NotificationViewWrapper getWrapperForView(View child) {
@@ -1103,18 +1102,6 @@ public class NotificationContentView extends FrameLayout {
             return;
         }
         mDark = dark;
-        if (mVisibleType == VISIBLE_TYPE_CONTRACTED || !dark) {
-            mContractedWrapper.setDark(dark, fade, delay);
-        }
-        if (mVisibleType == VISIBLE_TYPE_EXPANDED || (mExpandedChild != null && !dark)) {
-            mExpandedWrapper.setDark(dark, fade, delay);
-        }
-        if (mVisibleType == VISIBLE_TYPE_HEADSUP || (mHeadsUpChild != null && !dark)) {
-            mHeadsUpWrapper.setDark(dark, fade, delay);
-        }
-        if (mSingleLineView != null && (mVisibleType == VISIBLE_TYPE_SINGLELINE || !dark)) {
-            mSingleLineView.setDark(dark, fade, delay);
-        }
         selectLayout(!dark && fade /* animate */, false /* force */);
     }
 
