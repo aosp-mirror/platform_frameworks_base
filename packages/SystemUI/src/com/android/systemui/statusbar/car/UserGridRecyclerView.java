@@ -28,6 +28,8 @@ import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.os.AsyncTask;
 import android.os.UserHandle;
+import android.support.v4.graphics.drawable.RoundedBitmapDrawable;
+import android.support.v4.graphics.drawable.RoundedBitmapDrawableFactory;
 import android.support.v7.widget.RecyclerView;
 import android.util.AttributeSet;
 import android.view.LayoutInflater;
@@ -38,8 +40,6 @@ import android.widget.TextView;
 
 import androidx.car.widget.PagedListView;
 
-import androidx.core.graphics.drawable.RoundedBitmapDrawable;
-import androidx.core.graphics.drawable.RoundedBitmapDrawableFactory;
 import com.android.internal.util.UserIcons;
 import com.android.settingslib.users.UserManagerHelper;
 import com.android.systemui.R;
