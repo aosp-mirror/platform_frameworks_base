@@ -315,8 +315,7 @@ public class NotificationContentView extends FrameLayout {
      * @return The extra height needed.
      */
     private int getExtraRemoteInputHeight(RemoteInputView remoteInput) {
-        if (remoteInput != null && remoteInput.getVisibility() == VISIBLE
-                && remoteInput.isActive()) {
+        if (remoteInput != null && (remoteInput.isActive() || remoteInput.isSending())) {
             return getResources().getDimensionPixelSize(
                     com.android.internal.R.dimen.notification_content_margin);
         }
@@ -1705,7 +1704,10 @@ public class NotificationContentView extends FrameLayout {
         if (mHeadsUpChild == null) {
             viewType = VISIBLE_TYPE_CONTRACTED;
         }
-        return getViewHeight(viewType) + getExtraRemoteInputHeight(mHeadsUpRemoteInput);
+        // The headsUp remote input quickly switches to the expanded one, so lets also include that
+        // one
+        return getViewHeight(viewType) + getExtraRemoteInputHeight(mHeadsUpRemoteInput)
+                + getExtraRemoteInputHeight(mExpandedRemoteInput);
     }
 
     public void setRemoteInputVisible(boolean remoteInputVisible) {
