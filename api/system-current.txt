@@ -255,6 +255,7 @@ package android.app {
     method public int getUidImportance(int);
     method public void killUid(int, java.lang.String);
     method public void removeOnUidImportanceListener(android.app.ActivityManager.OnUidImportanceListener);
+    method public static void setPersistentVrThread(int);
   }
 
   public static abstract interface ActivityManager.OnUidImportanceListener {
@@ -409,9 +410,49 @@ package android.app {
     ctor public StatsManager.StatsUnavailableException(java.lang.String, java.lang.Throwable);
   }
 
+  public final class Vr2dDisplayProperties implements android.os.Parcelable {
+    ctor public Vr2dDisplayProperties(int, int, int);
+    method public int describeContents();
+    method public void dump(java.io.PrintWriter, java.lang.String);
+    method public int getAddedFlags();
+    method public int getDpi();
+    method public int getHeight();
+    method public int getRemovedFlags();
+    method public int getWidth();
+    method public void writeToParcel(android.os.Parcel, int);
+    field public static final android.os.Parcelable.Creator<android.app.Vr2dDisplayProperties> CREATOR;
+    field public static final int FLAG_VIRTUAL_DISPLAY_ENABLED = 1; // 0x1
+  }
+
+  public static class Vr2dDisplayProperties.Builder {
+    ctor public Vr2dDisplayProperties.Builder();
+    method public android.app.Vr2dDisplayProperties.Builder addFlags(int);
+    method public android.app.Vr2dDisplayProperties build();
+    method public android.app.Vr2dDisplayProperties.Builder removeFlags(int);
+    method public android.app.Vr2dDisplayProperties.Builder setDimensions(int, int, int);
+    method public android.app.Vr2dDisplayProperties.Builder setEnabled(boolean);
+  }
+
+  public static abstract class Vr2dDisplayProperties.Vr2dDisplayFlag implements java.lang.annotation.Annotation {
+  }
+
   public class VrManager {
+    method public int getVr2dDisplayId();
+    method public boolean isPersistentVrModeEnabled();
+    method public boolean isVrModeEnabled();
+    method public void registerVrStateCallback(java.util.concurrent.Executor, android.app.VrStateCallback);
     method public void setAndBindVrCompositor(android.content.ComponentName);
     method public void setPersistentVrModeEnabled(boolean);
+    method public void setStandbyEnabled(boolean);
+    method public void setVr2dDisplayProperties(android.app.Vr2dDisplayProperties);
+    method public void setVrInputMethod(android.content.ComponentName);
+    method public void unregisterVrStateCallback(android.app.VrStateCallback);
+  }
+
+  public abstract class VrStateCallback {
+    ctor public VrStateCallback();
+    method public void onPersistentVrStateChanged(boolean);
+    method public void onVrStateChanged(boolean);
   }
 
   public class WallpaperManager {

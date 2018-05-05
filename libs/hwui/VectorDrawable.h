@@ -718,6 +718,8 @@ private:
 }  // namespace VectorDrawable
 
 typedef VectorDrawable::Path::Data PathData;
+typedef uirenderer::VectorDrawable::Tree VectorDrawableRoot;
+
 }  // namespace uirenderer
 }  // namespace android
 

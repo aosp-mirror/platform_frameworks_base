@@ -20,6 +20,8 @@ import android.os.Parcelable;
 import android.os.Parcel;
 import android.util.Log;
 
+import java.util.Objects;
+
 import java.util.regex.Pattern;
 import java.util.regex.Matcher;
 
@@ -312,6 +314,11 @@ public class WifiP2pDevice implements Parcelable {
             return (deviceAddress == null);
         }
         return other.deviceAddress.equals(deviceAddress);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(deviceAddress);
     }
 
     @Override

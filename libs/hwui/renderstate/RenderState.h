@@ -18,12 +18,8 @@
 
 #include "Caches.h"
 #include "Glop.h"
-#include "renderstate/Blend.h"
-#include "renderstate/MeshState.h"
 #include "renderstate/OffscreenBufferPool.h"
 #include "renderstate/PixelBufferState.h"
-#include "renderstate/Scissor.h"
-#include "renderstate/Stencil.h"
 #include "utils/Macros.h"
 
 #include <GLES2/gl2.h>
@@ -105,11 +101,6 @@ public:
 
     void render(const Glop& glop, const Matrix4& orthoMatrix, bool overrideDisableBlending);
 
-    Blend& blend() { return *mBlend; }
-    MeshState& meshState() { return *mMeshState; }
-    Scissor& scissor() { return *mScissor; }
-    Stencil& stencil() { return *mStencil; }
-
     OffscreenBufferPool& layerPool() { return *mLayerPool; }
 
     GrContext* getGrContext() const;
@@ -126,11 +117,6 @@ private:
 
     renderthread::RenderThread& mRenderThread;
     Caches* mCaches = nullptr;
-
-    Blend* mBlend = nullptr;
-    MeshState* mMeshState = nullptr;
-    Scissor* mScissor = nullptr;
-    Stencil* mStencil = nullptr;
 
     OffscreenBufferPool* mLayerPool = nullptr;
 

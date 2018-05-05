@@ -18,7 +18,6 @@
 
 #include "GlLayer.h"
 #include "Properties.h"
-#include "ShadowTessellator.h"
 #include "renderstate/RenderState.h"
 #include "utils/GLUtils.h"
 
@@ -189,12 +188,7 @@ void Caches::flush(FlushMode mode) {
 ///////////////////////////////////////////////////////////////////////////////
 
 TextureVertex* Caches::getRegionMesh() {
-    // Create the mesh, 2 triangles and 4 vertices per rectangle in the region
-    if (!mRegionMesh) {
-        mRegionMesh.reset(new TextureVertex[kMaxNumberOfQuads * 4]);
-    }
-
-    return mRegionMesh.get();
+    return nullptr;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

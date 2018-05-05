@@ -177,6 +177,12 @@ void StatsLogProcessor::resetConfigsLocked(const int64_t timestampNs) {
 
 void StatsLogProcessor::OnLogEvent(LogEvent* event, bool reconnected) {
     std::lock_guard<std::mutex> lock(mMetricsMutex);
+
+#ifdef VERY_VERBOSE_PRINTING
+    if (mPrintAllLogs) {
+        ALOGI("%s", event->ToString().c_str());
+    }
+#endif
     const int64_t currentTimestampNs = event->GetElapsedTimestampNs();
 
     if (reconnected && mLastTimestampSeen != 0) {

@@ -15,11 +15,14 @@
  */
 package android.app;
 
+import android.annotation.SystemApi;
+
 /**
  * Listens to VR Mode state changes. Use with methods in {@link VrManager}.
  *
  * @hide
  */
+@SystemApi
 public abstract class VrStateCallback {
 
     /**

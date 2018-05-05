@@ -17,7 +17,7 @@
 #pragma once
 
 #include <SkSurface.h>
-#include "FrameBuilder.h"
+#include "Lighting.h"
 #include "hwui/AnimatedImageDrawable.h"
 #include "renderthread/CanvasContext.h"
 #include "renderthread/IRenderPipeline.h"
@@ -42,9 +42,9 @@ public:
     void unpinImages() override;
     void onPrepareTree() override;
 
-    void renderLayers(const FrameBuilder::LightGeometry& lightGeometry,
+    void renderLayers(const LightGeometry& lightGeometry,
                       LayerUpdateQueue* layerUpdateQueue, bool opaque, bool wideColorGamut,
-                      const BakedOpRenderer::LightInfo& lightInfo) override;
+                      const LightInfo& lightInfo) override;
 
     bool createOrUpdateLayer(RenderNode* node, const DamageAccumulator& damageAccumulator,
                              bool wideColorGamut, ErrorHandler* errorHandler) override;
@@ -97,8 +97,8 @@ public:
         return mLightCenter;
     }
 
-    static void updateLighting(const FrameBuilder::LightGeometry& lightGeometry,
-                               const BakedOpRenderer::LightInfo& lightInfo) {
+    static void updateLighting(const LightGeometry& lightGeometry,
+                               const LightInfo& lightInfo) {
         mLightRadius = lightGeometry.radius;
         mAmbientShadowAlpha = lightInfo.ambientShadowAlpha;
         mSpotShadowAlpha = lightInfo.spotShadowAlpha;

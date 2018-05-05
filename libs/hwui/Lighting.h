@@ -14,27 +14,25 @@
  * limitations under the License.
  */
 
-#include "IProfileRenderer.h"
+#pragma once
 
-#include "BakedOpRenderer.h"
+#include "Vector.h"
 
 namespace android {
 namespace uirenderer {
 
-class ProfileRenderer : public IProfileRenderer {
-public:
-    ProfileRenderer(BakedOpRenderer& renderer) : mRenderer(renderer) {}
-
-    void drawRect(float left, float top, float right, float bottom, const SkPaint& paint) override;
-    void drawRects(const float* rects, int count, const SkPaint& paint) override;
-    uint32_t getViewportWidth() override;
-    uint32_t getViewportHeight() override;
-
-    virtual ~ProfileRenderer() {}
-
-private:
-    BakedOpRenderer& mRenderer;
+struct LightGeometry {
+    Vector3 center;
+    float radius;
 };
 
-} /* namespace uirenderer */
-} /* namespace android */
+struct LightInfo {
+    LightInfo() : LightInfo(0, 0) {}
+    LightInfo(uint8_t ambientShadowAlpha, uint8_t spotShadowAlpha)
+            : ambientShadowAlpha(ambientShadowAlpha), spotShadowAlpha(spotShadowAlpha) {}
+    uint8_t ambientShadowAlpha;
+    uint8_t spotShadowAlpha;
+};
+
+};  // namespace uirenderer
+};  // namespace android

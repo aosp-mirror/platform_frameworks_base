@@ -98,9 +98,23 @@ cc_library_shared {
     name: "libstatslog",
     generated_sources: ["statslog.cpp"],
     generated_headers: ["statslog.h"],
+    cflags: [
+        "-Wall",
+        "-Werror",
+    ],
+    export_generated_headers: ["statslog.h"],
+    shared_libs: [
+        "liblog",
+        "libutils",
+    ],
+    static_libs: ["libstatssocket"],
+}
+
+cc_library_static {
+    name: "libstatssocket",
     srcs: [
-        "stats_event_list.cpp",
-        "statsd_writer.cpp",
+        "stats_event_list.c",
+        "statsd_writer.c",
     ],
     cflags: [
         "-Wall",
@@ -109,10 +123,9 @@ cc_library_shared {
         "-DWRITE_TO_STATSD=1",
         "-DWRITE_TO_LOGD=0",
     ],
-    export_generated_headers: ["statslog.h"],
+    export_include_dirs: ["include"],
     shared_libs: [
         "liblog",
-        "libutils",
     ],
 }
 

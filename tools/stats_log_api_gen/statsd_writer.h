@@ -21,9 +21,6 @@
 #include <stdatomic.h>
 #include <sys/socket.h>
 
-namespace android {
-namespace util {
-
 /**
  * Internal lock should not be exposed. This is bad design.
  * TODO: rewrite it in c++ code and encapsulate the functionality in a
@@ -35,7 +32,7 @@ void statsd_writer_init_unlock();
 
 struct android_log_transport_write {
     const char* name; /* human name to describe the transport */
-    static std::atomic_int sock;
+    atomic_int sock;
     int (*available)(); /* Does not cause resources to be taken */
     int (*open)(); /* can be called multiple times, reusing current resources */
     void (*close)(); /* free up resources */
@@ -43,7 +40,5 @@ struct android_log_transport_write {
     int (*write)(struct timespec* ts, struct iovec* vec, size_t nr);
 };
 
-}  // namespace util
-}  // namespace android
 
 #endif  // ANDROID_STATS_LOG_STATS_WRITER_H

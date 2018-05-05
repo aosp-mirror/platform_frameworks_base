@@ -35,6 +35,7 @@ import android.os.ServiceSpecificException;
 import android.os.SystemClock;
 import android.os.SystemProperties;
 import android.os.Trace;
+import android.os.UserHandle;
 import android.os.ZygoteProcess;
 import android.os.storage.StorageManager;
 import android.security.keystore.AndroidKeyStoreProvider;
@@ -466,13 +467,7 @@ public class ZygoteInit {
                     "dalvik.vm.profilesystemserver", false);
             if (profileSystemServer && (Build.IS_USERDEBUG || Build.IS_ENG)) {
                 try {
-                    File profileDir = Environment.getDataProfilesDePackageDirectory(
-                            Process.SYSTEM_UID, "system_server");
-                    File profile = new File(profileDir, "primary.prof");
-                    profile.getParentFile().mkdirs();
-                    profile.createNewFile();
-                    String[] codePaths = systemServerClasspath.split(":");
-                    VMRuntime.registerAppInfo(profile.getPath(), codePaths);
+                    prepareSystemServerProfile(systemServerClasspath);
                 } catch (Exception e) {
                     Log.wtf(TAG, "Failed to set up system server profile", e);
                 }
@@ -512,6 +507,37 @@ public class ZygoteInit {
         }
 
         /* should never reach here */
+    }
+
+    /**
+     * Note that preparing the profiles for system server does not require special
+     * selinux permissions. From the installer perspective the system server is a regular package
+     * which can capture profile information.
+     */
+    private static void prepareSystemServerProfile(String systemServerClasspath)
+            throws RemoteException {
+        if (systemServerClasspath.isEmpty()) {
+            return;
+        }
+        String[] codePaths = systemServerClasspath.split(":");
+
+        final IInstalld installd = IInstalld.Stub
+                .asInterface(ServiceManager.getService("installd"));
+
+        String systemServerPackageName = "android";
+        String systemServerProfileName = "primary.prof";
+        installd.prepareAppProfile(
+                systemServerPackageName,
+                UserHandle.USER_SYSTEM,
+                UserHandle.getAppId(Process.SYSTEM_UID),
+                systemServerProfileName,
+                codePaths[0],
+                /*dexMetadata*/ null);
+
+        File profileDir = Environment.getDataProfilesDePackageDirectory(
+                UserHandle.USER_SYSTEM, systemServerPackageName);
+        String profilePath = new File(profileDir, systemServerProfileName).getAbsolutePath();
+        VMRuntime.registerAppInfo(profilePath, codePaths);
     }
 
     public static void setApiBlacklistExemptions(String[] exemptions) {

@@ -16,7 +16,6 @@
 
 #include "tests/common/TestUtils.h"
 
-#include <RecordingCanvas.h>
 #include <SkBlurDrawLooper.h>
 #include <SkCanvasStateUtils.h>
 #include <SkPicture.h>

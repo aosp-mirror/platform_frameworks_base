@@ -67,37 +67,7 @@ void OffscreenBuffer::dirty(Rect dirtyArea) {
 }
 
 void OffscreenBuffer::updateMeshFromRegion() {
-    // avoid T-junctions as they cause artifacts in between the resultant
-    // geometry when complex transforms occur.
-    // TODO: generate the safeRegion only if necessary based on drawing transform
-    Region safeRegion = Region::createTJunctionFreeRegion(region);
-
-    size_t count;
-    const android::Rect* rects = safeRegion.getArray(&count);
-
-    const float texX = 1.0f / float(texture.width());
-    const float texY = 1.0f / float(texture.height());
-
-    FatVector<TextureVertex, 64> meshVector(count *
-                                            4);  // uses heap if more than 64 vertices needed
-    TextureVertex* mesh = &meshVector[0];
-    for (size_t i = 0; i < count; i++) {
-        const android::Rect* r = &rects[i];
-
-        const float u1 = r->left * texX;
-        const float v1 = (viewportHeight - r->top) * texY;
-        const float u2 = r->right * texX;
-        const float v2 = (viewportHeight - r->bottom) * texY;
-
-        TextureVertex::set(mesh++, r->left, r->top, u1, v1);
-        TextureVertex::set(mesh++, r->right, r->top, u2, v1);
-        TextureVertex::set(mesh++, r->left, r->bottom, u1, v2);
-        TextureVertex::set(mesh++, r->right, r->bottom, u2, v2);
-    }
-    elementCount = count * 6;
-    renderState.meshState().genOrUpdateMeshBuffer(
-            &vbo, sizeof(TextureVertex) * count * 4, &meshVector[0],
-            GL_DYNAMIC_DRAW);  // TODO: GL_STATIC_DRAW if savelayer
+    // DEAD CODE
 }
 
 uint32_t OffscreenBuffer::computeIdealDimension(uint32_t dimension) {
@@ -105,11 +75,7 @@ uint32_t OffscreenBuffer::computeIdealDimension(uint32_t dimension) {
 }
 
 OffscreenBuffer::~OffscreenBuffer() {
-    ATRACE_FORMAT("Destroy %ux%u HW Layer", texture.width(), texture.height());
-    texture.deleteTexture();
-    renderState.meshState().deleteMeshBuffer(vbo);
-    elementCount = 0;
-    vbo = 0;
+    // DEAD CODE
 }
 
 ///////////////////////////////////////////////////////////////////////////////

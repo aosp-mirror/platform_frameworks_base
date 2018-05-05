@@ -32,7 +32,6 @@ namespace android {
 namespace uirenderer {
 
 class DeferredLayerUpdater;
-class DisplayList;
 class RenderNode;
 
 namespace renderthread {

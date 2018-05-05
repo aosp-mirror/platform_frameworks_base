@@ -307,7 +307,10 @@ namespace PaintGlue {
     static void getTextPath(JNIEnv* env, Paint* paint, const Typeface* typeface, const jchar* text,
             jint count, jint bidiFlags, jfloat x, jfloat y, SkPath* path) {
         minikin::Layout layout = MinikinUtils::doLayout(
-                paint, static_cast<minikin::Bidi>(bidiFlags), typeface, text, 0, count, count,
+                paint, static_cast<minikin::Bidi>(bidiFlags), typeface,
+                text, count,  // text buffer
+                0, count,  // draw range
+                0, count,  // context range
                 nullptr);
         size_t nGlyphs = layout.nGlyphs();
         uint16_t* glyphs = new uint16_t[nGlyphs];
@@ -350,7 +353,11 @@ namespace PaintGlue {
         SkIRect ir;
 
         minikin::Layout layout = MinikinUtils::doLayout(&paint,
-                static_cast<minikin::Bidi>(bidiFlags), typeface, text, 0, count, count, nullptr);
+                static_cast<minikin::Bidi>(bidiFlags), typeface,
+                text, count,  // text buffer
+                0, count,  // draw range
+                0, count,  // context range
+                nullptr);
         minikin::MinikinRect rect;
         layout.getBounds(&rect);
         r.fLeft = rect.mLeft;
@@ -465,8 +472,11 @@ namespace PaintGlue {
             prevCp = cp;
         }
         minikin::Layout layout = MinikinUtils::doLayout(paint,
-                static_cast<minikin::Bidi>(bidiFlags), typeface, str.get(), 0, str.size(),
-                str.size(), nullptr);
+                static_cast<minikin::Bidi>(bidiFlags), typeface,
+                str.get(), str.size(),  // text buffer
+                0, str.size(),  // draw range
+                0, str.size(),  // context range
+                nullptr);
         size_t nGlyphs = countNonSpaceGlyphs(layout);
         if (nGlyphs != 1 && nChars > 1) {
             // multiple-character input, and was not a ligature
@@ -486,7 +496,10 @@ namespace PaintGlue {
             // U+1F1FF (REGIONAL INDICATOR SYMBOL LETTER Z) is \uD83C\uDDFF in UTF16.
             static const jchar ZZ_FLAG_STR[] = { 0xD83C, 0xDDFF, 0xD83C, 0xDDFF };
             minikin::Layout zzLayout = MinikinUtils::doLayout(paint,
-                    static_cast<minikin::Bidi>(bidiFlags), typeface, ZZ_FLAG_STR, 0, 4, 4,
+                    static_cast<minikin::Bidi>(bidiFlags), typeface,
+                    ZZ_FLAG_STR, 4,  // text buffer
+                    0, 4,  // draw range
+                    0, 4,  // context range
                     nullptr);
             if (zzLayout.nGlyphs() != 1 || layoutContainsNotdef(zzLayout)) {
                 // The font collection doesn't have a glyph for unknown flag. Just return true.

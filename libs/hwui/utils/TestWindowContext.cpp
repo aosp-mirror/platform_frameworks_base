@@ -17,7 +17,6 @@
 
 #include "AnimationContext.h"
 #include "IContextFactory.h"
-#include "RecordingCanvas.h"
 #include "RenderNode.h"
 #include "SkTypes.h"
 #include "gui/BufferQueue.h"
@@ -25,6 +24,7 @@
 #include "gui/IGraphicBufferConsumer.h"
 #include "gui/IGraphicBufferProducer.h"
 #include "gui/Surface.h"
+#include "hwui/Canvas.h"
 #include "renderthread/RenderProxy.h"
 
 #include <cutils/memory.h>
@@ -81,7 +81,7 @@ public:
         android::uirenderer::Vector3 lightVector{lightX, -200.0f, 800.0f};
         mProxy->setup(800.0f, 255 * 0.075f, 255 * 0.15f);
         mProxy->setLightCenter(lightVector);
-        mCanvas.reset(new android::uirenderer::RecordingCanvas(mSize.width(), mSize.height()));
+        mCanvas.reset(Canvas::create_recording_canvas(mSize.width(), mSize.height(), mRootNode.get()));
     }
 
     SkCanvas* prepareToDraw() {
@@ -155,7 +155,7 @@ public:
 private:
     std::unique_ptr<android::uirenderer::RenderNode> mRootNode;
     std::unique_ptr<android::uirenderer::renderthread::RenderProxy> mProxy;
-    std::unique_ptr<android::uirenderer::RecordingCanvas> mCanvas;
+    std::unique_ptr<android::Canvas> mCanvas;
     android::sp<android::IGraphicBufferProducer> mProducer;
     android::sp<android::IGraphicBufferConsumer> mConsumer;
     android::sp<android::CpuConsumer> mCpuConsumer;

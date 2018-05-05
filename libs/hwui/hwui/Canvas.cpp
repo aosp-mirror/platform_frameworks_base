@@ -19,7 +19,6 @@
 #include "MinikinUtils.h"
 #include "Paint.h"
 #include "Properties.h"
-#include "RecordingCanvas.h"
 #include "RenderNode.h"
 #include "Typeface.h"
 #include "pipeline/skia/SkiaRecordingCanvas.h"
@@ -153,15 +152,15 @@ private:
     float totalAdvance;
 };
 
-void Canvas::drawText(const uint16_t* text, int start, int count, int contextCount, float x,
-                      float y, minikin::Bidi bidiFlags, const Paint& origPaint,
-                      const Typeface* typeface, minikin::MeasuredText* mt) {
+void Canvas::drawText(const uint16_t* text, int textSize, int start, int count, int contextStart,
+                      int contextCount, float x, float y, minikin::Bidi bidiFlags,
+                      const Paint& origPaint, const Typeface* typeface, minikin::MeasuredText* mt) {
     // minikin may modify the original paint
     Paint paint(origPaint);
 
     minikin::Layout layout =
-            MinikinUtils::doLayout(&paint, bidiFlags, typeface, text, start, count, contextCount,
-                                   mt);
+            MinikinUtils::doLayout(&paint, bidiFlags, typeface, text, textSize, start, count,
+                                   contextStart, contextCount, mt);
 
     x += MinikinUtils::xOffsetForTextAlign(&paint, layout);
 
@@ -208,8 +207,11 @@ void Canvas::drawTextOnPath(const uint16_t* text, int count, minikin::Bidi bidiF
                             const SkPath& path, float hOffset, float vOffset, const Paint& paint,
                             const Typeface* typeface) {
     Paint paintCopy(paint);
-    minikin::Layout layout =
-            MinikinUtils::doLayout(&paintCopy, bidiFlags, typeface, text, 0, count, count, nullptr);
+    minikin::Layout layout = MinikinUtils::doLayout(&paintCopy, bidiFlags, typeface,
+            text, count,  // text buffer
+            0, count,  // draw range
+            0, count,  // context range
+            nullptr);
     hOffset += MinikinUtils::hOffsetForTextAlign(&paintCopy, layout, path);
 
     // Set align to left for drawing, as we don't want individual

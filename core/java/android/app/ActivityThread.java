@@ -1555,6 +1555,7 @@ public final class ActivityThread extends ClientTransactionHandler {
         public static final int APPLICATION_INFO_CHANGED = 156;
         public static final int RUN_ISOLATED_ENTRY_POINT = 158;
         public static final int EXECUTE_TRANSACTION = 159;
+        public static final int RELAUNCH_ACTIVITY = 160;
 
         String codeToString(int code) {
             if (DEBUG_MESSAGES) {
@@ -1598,6 +1599,7 @@ public final class ActivityThread extends ClientTransactionHandler {
                     case APPLICATION_INFO_CHANGED: return "APPLICATION_INFO_CHANGED";
                     case RUN_ISOLATED_ENTRY_POINT: return "RUN_ISOLATED_ENTRY_POINT";
                     case EXECUTE_TRANSACTION: return "EXECUTE_TRANSACTION";
+                    case RELAUNCH_ACTIVITY: return "RELAUNCH_ACTIVITY";
                 }
             }
             return Integer.toString(code);
@@ -1779,6 +1781,9 @@ public final class ActivityThread extends ClientTransactionHandler {
                         transaction.recycle();
                     }
                     // TODO(lifecycler): Recycle locally scheduled transactions.
+                    break;
+                case RELAUNCH_ACTIVITY:
+                    handleRelaunchActivityLocally((IBinder) msg.obj);
                     break;
             }
             Object obj = msg.obj;
@@ -4284,7 +4289,7 @@ public final class ActivityThread extends ClientTransactionHandler {
         for (Map.Entry<IBinder, ActivityClientRecord> entry : mActivities.entrySet()) {
             final Activity activity = entry.getValue().activity;
             if (!activity.mFinished) {
-                handleRelaunchActivityLocally(entry.getKey());
+                scheduleRelaunchActivity(entry.getKey());
             }
         }
     }
@@ -4662,21 +4667,29 @@ public final class ActivityThread extends ClientTransactionHandler {
         }
     }
 
-    /** Performs the activity relaunch locally vs. requesting from system-server. */
-    void handleRelaunchActivityLocally(IBinder token) {
-        if (Looper.myLooper() != getLooper()) {
-            throw new IllegalStateException("Must be called from main thread");
-        }
+    /**
+     * Post a message to relaunch the activity. We do this instead of launching it immediately,
+     * because this will destroy the activity from which it was called and interfere with the
+     * lifecycle changes it was going through before. We need to make sure that we have finished
+     * handling current transaction item before relaunching the activity.
+     */
+    void scheduleRelaunchActivity(IBinder token) {
+        sendMessage(H.RELAUNCH_ACTIVITY, token);
+    }
 
+    /** Performs the activity relaunch locally vs. requesting from system-server. */
+    private void handleRelaunchActivityLocally(IBinder token) {
         final ActivityClientRecord r = mActivities.get(token);
         if (r == null) {
+            Log.w(TAG, "Activity to relaunch no longer exists");
             return;
         }
 
         final int prevState = r.getLifecycleState();
 
-        if (prevState < ON_RESUME) {
-            Log.w(TAG, "Activity needs to be already resumed in other to be relaunched.");
+        if (prevState < ON_RESUME || prevState > ON_STOP) {
+            Log.w(TAG, "Activity state must be in [ON_RESUME..ON_STOP] in order to be relaunched,"
+                    + "current state is " + prevState);
             return;
         }
 

@@ -19,21 +19,25 @@ package com.android.systemui.keyguard;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
-
-import androidx.slice.Slice;
+import static org.mockito.Mockito.when;
 
 import android.app.AlarmManager;
 import android.content.ContentResolver;
 import android.content.Intent;
 import android.net.Uri;
-import android.os.Handler;
+import android.provider.Settings;
 import android.support.test.filters.SmallTest;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.testing.TestableLooper.RunWithLooper;
+import android.util.Log;
 
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.statusbar.policy.ZenModeController;
 
 import org.junit.Assert;
 import org.junit.Before;
@@ -43,12 +47,14 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import java.util.Arrays;
-import java.util.concurrent.TimeUnit;
 import java.util.HashSet;
+import java.util.concurrent.TimeUnit;
 
+import androidx.slice.Slice;
 import androidx.slice.SliceItem;
 import androidx.slice.SliceProvider;
 import androidx.slice.SliceSpecs;
+import androidx.slice.builders.ListBuilder;
 import androidx.slice.core.SliceQuery;
 
 @SmallTest
@@ -61,10 +67,12 @@ public class KeyguardSliceProviderTest extends SysuiTestCase {
     @Mock
     private AlarmManager mAlarmManager;
     private TestableKeyguardSliceProvider mProvider;
+    private boolean mIsZenMode;
 
     @Before
     public void setup() {
         MockitoAnnotations.initMocks(this);
+        mIsZenMode = false;
         mProvider = new TestableKeyguardSliceProvider();
         mProvider.attachInfo(getContext(), null);
         SliceProvider.setSpecs(new HashSet<>(Arrays.asList(SliceSpecs.LIST)));
@@ -128,13 +136,26 @@ public class KeyguardSliceProviderTest extends SysuiTestCase {
         verify(mContentResolver).notifyChange(eq(mProvider.getUri()), eq(null));
     }
 
+    @Test
+    public void onZenChanged_updatesSlice() {
+        mProvider.onZenChanged(Settings.Global.ZEN_MODE_ALARMS);
+        verify(mContentResolver).notifyChange(eq(mProvider.getUri()), eq(null));
+    }
+
+    @Test
+    public void addZenMode_addedToSlice() {
+        ListBuilder listBuilder = spy(new ListBuilder(getContext(), mProvider.getUri()));
+        mProvider.addZenMode(listBuilder);
+        verify(listBuilder, never()).addRow(any(ListBuilder.RowBuilder.class));
+
+        mIsZenMode = true;
+        mProvider.addZenMode(listBuilder);
+        verify(listBuilder).addRow(any(ListBuilder.RowBuilder.class));
+    }
+
     private class TestableKeyguardSliceProvider extends KeyguardSliceProvider {
         int mCleanDateFormatInvokations;
         private int mCounter;
-
-        TestableKeyguardSliceProvider() {
-            super(new Handler(TestableLooper.get(KeyguardSliceProviderTest.this).getLooper()));
-        }
 
         Uri getUri() {
             return mSliceUri;
@@ -146,6 +167,11 @@ public class KeyguardSliceProviderTest extends SysuiTestCase {
             mAlarmManager = KeyguardSliceProviderTest.this.mAlarmManager;
             mContentResolver = KeyguardSliceProviderTest.this.mContentResolver;
             return true;
+        }
+
+        @Override
+        protected boolean isDndSuppressingNotifications() {
+            return mIsZenMode;
         }
 
         @Override

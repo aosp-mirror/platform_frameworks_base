@@ -29,7 +29,6 @@
 #include <renderthread/RenderThread.h>
 
 #include <RecordedOp.h>
-#include <RecordingCanvas.h>
 
 #include <memory>
 
@@ -335,16 +334,10 @@ private:
         }
         auto displayList = node->getDisplayList();
         if (displayList) {
-            if (displayList->isSkiaDL()) {
-                for (auto&& childDr : static_cast<skiapipeline::SkiaDisplayList*>(
-                                              const_cast<DisplayList*>(displayList))
-                                              ->mChildNodes) {
-                    syncHierarchyPropertiesAndDisplayListImpl(childDr.getRenderNode());
-                }
-            } else {
-                for (auto&& childOp : displayList->getChildren()) {
-                    syncHierarchyPropertiesAndDisplayListImpl(childOp->renderNode);
-                }
+            for (auto&& childDr : static_cast<skiapipeline::SkiaDisplayList*>(
+                                          const_cast<DisplayList*>(displayList))
+                                          ->mChildNodes) {
+                syncHierarchyPropertiesAndDisplayListImpl(childDr.getRenderNode());
             }
         }
     }

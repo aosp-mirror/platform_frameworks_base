@@ -18,6 +18,7 @@
 #include "DeferredLayerUpdater.h"
 #include "GlLayer.h"
 #include "VkLayer.h"
+#include "Snapshot.h"
 
 #include "renderthread/CanvasContext.h"
 #include "renderthread/EglManager.h"
@@ -36,19 +37,10 @@ RenderState::RenderState(renderthread::RenderThread& thread)
 }
 
 RenderState::~RenderState() {
-    LOG_ALWAYS_FATAL_IF(mBlend || mMeshState || mScissor || mStencil,
-                        "State object lifecycle not managed correctly");
 }
 
 void RenderState::onGLContextCreated() {
-    LOG_ALWAYS_FATAL_IF(mBlend || mMeshState || mScissor || mStencil,
-                        "State object lifecycle not managed correctly");
     GpuMemoryTracker::onGpuContextCreated();
-
-    mBlend = new Blend();
-    mMeshState = new MeshState();
-    mScissor = new Scissor();
-    mStencil = new Stencil();
 
     // Deferred because creation needs GL context for texture limits
     if (!mLayerPool) {
@@ -76,22 +68,11 @@ void RenderState::onGLContextDestroyed() {
 
     mCaches->terminate();
 
-    delete mBlend;
-    mBlend = nullptr;
-    delete mMeshState;
-    mMeshState = nullptr;
-    delete mScissor;
-    mScissor = nullptr;
-    delete mStencil;
-    mStencil = nullptr;
-
     destroyLayersInUpdater();
     GpuMemoryTracker::onGpuContextDestroyed();
 }
 
 void RenderState::onVkContextCreated() {
-    LOG_ALWAYS_FATAL_IF(mBlend || mMeshState || mScissor || mStencil,
-                        "State object lifecycle not managed correctly");
     GpuMemoryTracker::onGpuContextCreated();
 }
 
@@ -176,10 +157,6 @@ void RenderState::invokeFunctor(Functor* functor, DrawGlInfo::Mode mode, DrawGlI
 void RenderState::interruptForFunctorInvoke() {
     mCaches->setProgram(nullptr);
     mCaches->textureState().resetActiveTexture();
-    meshState().unbindMeshBuffer();
-    meshState().unbindIndicesBuffer();
-    meshState().resetVertexPointers();
-    meshState().disableTexCoordsVertexArray();
     debugOverdraw(false, false);
     // TODO: We need a way to know whether the functor is sRGB aware (b/32072673)
     if (mCaches->extensions().hasLinearBlending() && mCaches->extensions().hasSRGBWriteControl()) {
@@ -198,25 +175,12 @@ void RenderState::resumeFromFunctorInvoke() {
 
     glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
 
-    scissor().invalidate();
-    blend().invalidate();
-
     mCaches->textureState().activateTexture(0);
     mCaches->textureState().resetBoundTextures();
 }
 
 void RenderState::debugOverdraw(bool enable, bool clear) {
-    if (Properties::debugOverdraw && mFramebuffer == 0) {
-        if (clear) {
-            scissor().setEnabled(false);
-            stencil().clear();
-        }
-        if (enable) {
-            stencil().enableDebugWrite();
-        } else {
-            stencil().disable();
-        }
-    }
+    // DEAD CODE
 }
 
 static void destroyLayerInUpdater(DeferredLayerUpdater* layerUpdater) {
@@ -241,9 +205,6 @@ void RenderState::postDecStrong(VirtualLightRefBase* object) {
 
 void RenderState::render(const Glop& glop, const Matrix4& orthoMatrix,
                          bool overrideDisableBlending) {
-    const Glop::Mesh& mesh = glop.mesh;
-    const Glop::Mesh::Vertices& vertices = mesh.vertices;
-    const Glop::Mesh::Indices& indices = mesh.indices;
     const Glop::Fill& fill = glop.fill;
 
     GL_CHECKPOINT(MODERATE);
@@ -296,16 +257,6 @@ void RenderState::render(const Glop& glop, const Matrix4& orthoMatrix,
 
     GL_CHECKPOINT(MODERATE);
 
-    // --------------------------------
-    // ---------- Mesh setup ----------
-    // --------------------------------
-    // vertices
-    meshState().bindMeshBuffer(vertices.bufferObject);
-    meshState().bindPositionVertexPointer(vertices.position, vertices.stride);
-
-    // indices
-    meshState().bindIndicesBuffer(indices.bufferObject);
-
     // texture
     if (fill.texture.texture != nullptr) {
         const Glop::Fill::TextureData& texture = fill.texture;
@@ -326,28 +277,6 @@ void RenderState::render(const Glop& glop, const Matrix4& orthoMatrix,
         }
     }
 
-    // vertex attributes (tex coord, color, alpha)
-    if (vertices.attribFlags & VertexAttribFlags::TextureCoord) {
-        meshState().enableTexCoordsVertexArray();
-        meshState().bindTexCoordsVertexPointer(vertices.texCoord, vertices.stride);
-    } else {
-        meshState().disableTexCoordsVertexArray();
-    }
-    int colorLocation = -1;
-    if (vertices.attribFlags & VertexAttribFlags::Color) {
-        colorLocation = fill.program->getAttrib("colors");
-        glEnableVertexAttribArray(colorLocation);
-        glVertexAttribPointer(colorLocation, 4, GL_FLOAT, GL_FALSE, vertices.stride,
-                              vertices.color);
-    }
-    int alphaLocation = -1;
-    if (vertices.attribFlags & VertexAttribFlags::Alpha) {
-        // NOTE: alpha vertex position is computed assuming no VBO
-        const void* alphaCoords = ((const GLbyte*)vertices.position) + kVertexAlphaOffset;
-        alphaLocation = fill.program->getAttrib("vtxAlpha");
-        glEnableVertexAttribArray(alphaLocation);
-        glVertexAttribPointer(alphaLocation, 1, GL_FLOAT, GL_FALSE, vertices.stride, alphaCoords);
-    }
     // Shader uniforms
     SkiaShader::apply(*mCaches, fill.skiaShaderData, mViewportWidth, mViewportHeight);
 
@@ -391,77 +320,11 @@ void RenderState::render(const Glop& glop, const Matrix4& orthoMatrix,
         }
     }
 
-    // ------------------------------------
-    // ---------- GL state setup ----------
-    // ------------------------------------
-    if (CC_UNLIKELY(overrideDisableBlending)) {
-        blend().setFactors(GL_ZERO, GL_ZERO);
-    } else {
-        blend().setFactors(glop.blend.src, glop.blend.dst);
-    }
-
-    GL_CHECKPOINT(MODERATE);
-
-    // ------------------------------------
-    // ---------- Actual drawing ----------
-    // ------------------------------------
-    if (indices.bufferObject == meshState().getQuadListIBO()) {
-        // Since the indexed quad list is of limited length, we loop over
-        // the glDrawXXX method while updating the vertex pointer
-        GLsizei elementsCount = mesh.elementCount;
-        const GLbyte* vertexData = static_cast<const GLbyte*>(vertices.position);
-        while (elementsCount > 0) {
-            GLsizei drawCount = std::min(elementsCount, (GLsizei)kMaxNumberOfQuads * 6);
-            GLsizei vertexCount = (drawCount / 6) * 4;
-            meshState().bindPositionVertexPointer(vertexData, vertices.stride);
-            if (vertices.attribFlags & VertexAttribFlags::TextureCoord) {
-                meshState().bindTexCoordsVertexPointer(vertexData + kMeshTextureOffset,
-                                                       vertices.stride);
-            }
-
-            if (mCaches->extensions().getMajorGlVersion() >= 3) {
-                glDrawRangeElements(mesh.primitiveMode, 0, vertexCount - 1, drawCount,
-                                    GL_UNSIGNED_SHORT, nullptr);
-            } else {
-                glDrawElements(mesh.primitiveMode, drawCount, GL_UNSIGNED_SHORT, nullptr);
-            }
-            elementsCount -= drawCount;
-            vertexData += vertexCount * vertices.stride;
-        }
-    } else if (indices.bufferObject || indices.indices) {
-        if (mCaches->extensions().getMajorGlVersion() >= 3) {
-            // use glDrawRangeElements to reduce CPU overhead (otherwise the driver has to determine
-            // the min/max index values)
-            glDrawRangeElements(mesh.primitiveMode, 0, mesh.vertexCount - 1, mesh.elementCount,
-                                GL_UNSIGNED_SHORT, indices.indices);
-        } else {
-            glDrawElements(mesh.primitiveMode, mesh.elementCount, GL_UNSIGNED_SHORT,
-                           indices.indices);
-        }
-    } else {
-        glDrawArrays(mesh.primitiveMode, 0, mesh.elementCount);
-    }
-
-    GL_CHECKPOINT(MODERATE);
-
-    // -----------------------------------
-    // ---------- Mesh teardown ----------
-    // -----------------------------------
-    if (vertices.attribFlags & VertexAttribFlags::Alpha) {
-        glDisableVertexAttribArray(alphaLocation);
-    }
-    if (vertices.attribFlags & VertexAttribFlags::Color) {
-        glDisableVertexAttribArray(colorLocation);
-    }
-
     GL_CHECKPOINT(MODERATE);
 }
 
 void RenderState::dump() {
-    blend().dump();
-    meshState().dump();
-    scissor().dump();
-    stencil().dump();
+    // DEAD CODE
 }
 
 } /* namespace uirenderer */
