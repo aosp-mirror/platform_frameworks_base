@@ -3183,7 +3183,7 @@ public class AudioService extends IAudioService.Stub
         }
 
         // Only enable calls from system components
-        if (Binder.getCallingUid() >= FIRST_APPLICATION_UID) {
+        if (UserHandle.getCallingAppId() >= FIRST_APPLICATION_UID) {
             mForcedUseForCommExt = on ? AudioSystem.FORCE_BT_SCO : AudioSystem.FORCE_NONE;
             return;
         }
