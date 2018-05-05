@@ -85,13 +85,6 @@ public class KeyguardSliceProviderTest extends SysuiTestCase {
     }
 
     @Test
-    public void unregisterClockUpdate() {
-        mProvider.unregisterClockUpdate();
-        Assert.assertFalse("Clock updates should have been unregistered.",
-                mProvider.isRegistered());
-    }
-
-    @Test
     public void returnsValidSlice() {
         Slice slice = mProvider.onBindSlice(mProvider.getUri());
         SliceItem text = SliceQuery.find(slice, android.app.slice.SliceItem.FORMAT_TEXT,

@@ -2267,7 +2267,7 @@ public class NotificationPanelView extends PanelView implements
     }
 
     public void onScreenTurningOn() {
-        mKeyguardStatusView.refreshTime();
+        mKeyguardStatusView.dozeTimeTick();
     }
 
     @Override
@@ -2690,7 +2690,7 @@ public class NotificationPanelView extends PanelView implements
     }
 
     public void dozeTimeTick() {
-        mKeyguardStatusView.refreshTime();
+        mKeyguardStatusView.dozeTimeTick();
         mKeyguardBottomArea.dozeTimeTick();
         if (mDarkAmount > 0) {
             positionClockAndNotifications();
