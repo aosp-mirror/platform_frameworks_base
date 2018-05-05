@@ -1168,7 +1168,6 @@ public class NotificationChildrenContainer extends ViewGroup {
         if (mOverflowNumber != null) {
             mHybridGroupManager.setOverflowNumberDark(mOverflowNumber, dark, fade, delay);
         }
-        mNotificationHeaderWrapper.setDark(dark, fade, delay);
     }
 
     public void reInflateViews(OnClickListener listener, StatusBarNotification notification) {
