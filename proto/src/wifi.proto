@@ -435,6 +435,9 @@ message WifiLog {
 
   // Wi-Fi RTT metrics
   optional WifiRttLog wifi_rtt_log = 110;
+
+  // Flag which indicates if Connected MAC Randomization is enabled
+  optional bool is_mac_randomization_on = 111 [default = false];
 }
 
 // Information that gets logged for every WiFi connection.
@@ -748,6 +751,9 @@ message StaEvent {
     // The NetworkAgent score for wifi has changed in a way that may impact
     // connectivity
     TYPE_SCORE_BREACH = 16;
+
+    // Framework changed Sta interface MAC address
+    TYPE_MAC_CHANGE = 17;
   }
 
   enum FrameworkDisconnectReason {

@@ -9544,6 +9544,15 @@ public final class Settings {
                 "wifi_scan_always_enabled";
 
         /**
+         * The interval in milliseconds at which wifi rtt ranging requests will be throttled when
+         * they are coming from the background.
+         *
+         * @hide
+         */
+        public static final String WIFI_RTT_BACKGROUND_EXEC_GAP_MS =
+                "wifi_rtt_background_exec_gap_ms";
+
+        /**
          * Whether soft AP will shut down after a timeout period when no devices are connected.
          *
          * Type: int (0 for false, 1 for true)

@@ -36,6 +36,7 @@
             android:id="@+id/message_name"
             style="@style/Widget.Material.Notification.MessagingName"
             android:layout_width="wrap_content"
+            android:textAlignment="viewStart"
         />
         <com.android.internal.widget.MessagingLinearLayout
             android:id="@+id/group_message_container"

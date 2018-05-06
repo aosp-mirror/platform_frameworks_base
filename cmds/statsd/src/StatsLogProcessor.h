@@ -77,7 +77,10 @@ public:
             unordered_set<sp<const InternalAlarm>, SpHash<InternalAlarm>> alarmSet);
 
     /* Flushes data to disk. Data on memory will be gone after written to disk. */
-    void WriteDataToDisk(bool shutdown);
+    void WriteDataToDisk(const DumpReportReason dumpReportReason);
+
+    // Reset all configs.
+    void resetConfigs();
 
     inline sp<UidMap> getUidMap() {
         return mUidMap;
@@ -88,6 +91,13 @@ public:
     void informPullAlarmFired(const int64_t timestampNs);
 
     int64_t getLastReportTimeNs(const ConfigKey& key);
+
+    inline void setPrintLogs(bool enabled) {
+#ifdef VERY_VERBOSE_PRINTING
+        std::lock_guard<std::mutex> lock(mMetricsMutex);
+        mPrintAllLogs = enabled;
+#endif
+    }
 
 private:
     // For testing only.
@@ -121,8 +131,9 @@ private:
     void OnConfigUpdatedLocked(
         const int64_t currentTimestampNs, const ConfigKey& key, const StatsdConfig& config);
 
-    void WriteDataToDiskLocked(DumpReportReason dumpReportReason);
-    void WriteDataToDiskLocked(const ConfigKey& key, DumpReportReason dumpReportReason);
+    void WriteDataToDiskLocked(const DumpReportReason dumpReportReason);
+    void WriteDataToDiskLocked(const ConfigKey& key, const int64_t timestampNs,
+                               const DumpReportReason dumpReportReason);
 
     void onConfigMetricsReportLocked(const ConfigKey& key, const int64_t dumpTimeStampNs,
                                      const bool include_current_partial_bucket,
@@ -141,6 +152,9 @@ private:
     // Handler over the isolated uid change event.
     void onIsolatedUidChangedEventLocked(const LogEvent& event);
 
+    // Reset all configs.
+    void resetConfigsLocked(const int64_t timestampNs);
+    // Reset the specified configs.
     void resetConfigsLocked(const int64_t timestampNs, const std::vector<ConfigKey>& configs);
 
     // Function used to send a broadcast so that receiver for the config key can call getData
@@ -163,6 +177,10 @@ private:
     int mLogLossCount = 0;
 
     long mLastPullerCacheClearTimeSec = 0;
+
+#ifdef VERY_VERBOSE_PRINTING
+    bool mPrintAllLogs = false;
+#endif
 
     FRIEND_TEST(StatsLogProcessorTest, TestOutOfOrderLogs);
     FRIEND_TEST(StatsLogProcessorTest, TestRateLimitByteSize);

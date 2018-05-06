@@ -19,8 +19,10 @@ import static android.content.pm.PackageManager.MATCH_DIRECT_BOOT_AWARE;
 import static android.content.pm.PackageManager.MATCH_DIRECT_BOOT_UNAWARE;
 
 import android.annotation.UserIdInt;
+import android.app.ActivityManagerInternal;
 import android.app.ActivityOptions;
 import android.app.AppOpsManager;
+import android.app.IApplicationThread;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -71,6 +73,7 @@ public class CrossProfileAppsServiceImpl extends ICrossProfileApps.Stub {
 
     @Override
     public void startActivityAsUser(
+            IApplicationThread caller,
             String callingPackage,
             ComponentName component,
             UserHandle user) throws RemoteException {
@@ -107,15 +110,12 @@ public class CrossProfileAppsServiceImpl extends ICrossProfileApps.Stub {
         launchIntent.setPackage(component.getPackageName());
         verifyActivityCanHandleIntentAndExported(launchIntent, component, callingUid, user);
 
-        final long ident = mInjector.clearCallingIdentity();
-        try {
-            launchIntent.setPackage(null);
-            launchIntent.setComponent(component);
-            mContext.startActivityAsUser(launchIntent,
-                    ActivityOptions.makeOpenCrossProfileAppsAnimation().toBundle(), user);
-        } finally {
-            mInjector.restoreCallingIdentity(ident);
-        }
+        launchIntent.setPackage(null);
+        launchIntent.setComponent(component);
+        mInjector.getActivityManagerInternal().startActivityAsUser(
+                caller, callingPackage, launchIntent,
+                ActivityOptions.makeOpenCrossProfileAppsAnimation().toBundle(),
+                user.getIdentifier());
     }
 
     private List<UserHandle> getTargetUserProfilesUnchecked(
@@ -236,6 +236,11 @@ public class CrossProfileAppsServiceImpl extends ICrossProfileApps.Stub {
         public AppOpsManager getAppOpsManager() {
             return mContext.getSystemService(AppOpsManager.class);
         }
+
+        @Override
+        public ActivityManagerInternal getActivityManagerInternal() {
+            return LocalServices.getService(ActivityManagerInternal.class);
+        }
     }
 
     @VisibleForTesting
@@ -258,5 +263,6 @@ public class CrossProfileAppsServiceImpl extends ICrossProfileApps.Stub {
 
         AppOpsManager getAppOpsManager();
 
+        ActivityManagerInternal getActivityManagerInternal();
     }
 }

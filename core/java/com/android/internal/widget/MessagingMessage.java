@@ -73,16 +73,20 @@ public interface MessagingMessage extends MessagingLinearLayout.MessagingChild {
         if (!Objects.equals(message.getSender(), ownMessage.getSender())) {
             return false;
         }
-        if (!Objects.equals(message.getTimestamp(), ownMessage.getTimestamp())) {
+        boolean hasRemoteInputHistoryChanged = message.isRemoteInputHistory()
+                != ownMessage.isRemoteInputHistory();
+        // When the remote input history has changed, we want to regard messages equal even when
+        // the timestamp changes. The main reason is that the message that the system inserts
+        // will have a different time set than the one that the app will update us with and we
+        // still want to reuse that message.
+        if (!hasRemoteInputHistoryChanged
+                && !Objects.equals(message.getTimestamp(), ownMessage.getTimestamp())) {
             return false;
         }
         if (!Objects.equals(message.getDataMimeType(), ownMessage.getDataMimeType())) {
             return false;
         }
         if (!Objects.equals(message.getDataUri(), ownMessage.getDataUri())) {
-            return false;
-        }
-        if (message.isRemoteInputHistory() != ownMessage.isRemoteInputHistory()) {
             return false;
         }
         return true;

@@ -841,6 +841,14 @@ public final class DefaultPermissionGrantPolicy {
             }
         }
 
+        // There is no real "marker" interface to identify the shared storage backup, it is
+        // hardcoded in BackupManagerService.SHARED_BACKUP_AGENT_PACKAGE.
+        PackageParser.Package sharedStorageBackupPackage = getSystemPackage(
+                "com.android.sharedstoragebackup");
+        if (sharedStorageBackupPackage != null) {
+            grantRuntimePermissions(sharedStorageBackupPackage, STORAGE_PERMISSIONS, true, userId);
+        }
+
         if (mPermissionGrantedCallback != null) {
             mPermissionGrantedCallback.onDefaultRuntimePermissionsGranted(userId);
         }

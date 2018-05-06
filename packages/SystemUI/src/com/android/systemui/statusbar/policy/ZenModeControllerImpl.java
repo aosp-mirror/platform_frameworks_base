@@ -122,7 +122,7 @@ public class ZenModeControllerImpl extends CurrentUserTracker implements ZenMode
 
     @Override
     public int getZen() {
-        return mModeSetting.getValue();
+        return mZenMode;
     }
 
     @Override

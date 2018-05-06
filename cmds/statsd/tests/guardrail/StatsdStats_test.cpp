@@ -298,6 +298,28 @@ TEST(StatsdStatsTest, TestTimestampThreshold) {
     EXPECT_EQ(newTimestamp, configStats->dump_report_stats.back().first);
 }
 
+TEST(StatsdStatsTest, TestSystemServerCrash) {
+    StatsdStats stats;
+    vector<int32_t> timestamps;
+    for (int i = 0; i < StatsdStats::kMaxSystemServerRestarts; i++) {
+        timestamps.push_back(i);
+        stats.noteSystemServerRestart(timestamps[i]);
+    }
+    vector<uint8_t> output;
+    stats.dumpStats(&output, false);
+    StatsdStatsReport report;
+    EXPECT_TRUE(report.ParseFromArray(&output[0], output.size()));
+    const int maxCount = StatsdStats::kMaxSystemServerRestarts;
+    EXPECT_EQ(maxCount, (int)report.system_restart_sec_size());
+
+    stats.noteSystemServerRestart(StatsdStats::kMaxSystemServerRestarts + 1);
+    output.clear();
+    stats.dumpStats(&output, false);
+    EXPECT_TRUE(report.ParseFromArray(&output[0], output.size()));
+    EXPECT_EQ(maxCount, (int)report.system_restart_sec_size());
+    EXPECT_EQ(StatsdStats::kMaxSystemServerRestarts + 1, report.system_restart_sec(maxCount - 1));
+}
+
 }  // namespace statsd
 }  // namespace os
 }  // namespace android

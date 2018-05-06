@@ -64,7 +64,11 @@ public class CrossProfileApps {
     public void startMainActivity(@NonNull ComponentName component,
             @NonNull UserHandle targetUser) {
         try {
-            mService.startActivityAsUser(mContext.getPackageName(), component, targetUser);
+            mService.startActivityAsUser(
+                    mContext.getIApplicationThread(),
+                    mContext.getPackageName(),
+                    component,
+                    targetUser);
         } catch (RemoteException ex) {
             throw ex.rethrowFromSystemServer();
         }

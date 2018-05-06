@@ -20,6 +20,7 @@ import android.content.Context;
 import android.net.ConnectivityMetricsEvent;
 import android.net.IIpConnectivityMetrics;
 import android.net.INetdEventCallback;
+import android.net.ip.IpClient;
 import android.net.metrics.ApfProgramEvent;
 import android.net.metrics.IpConnectivityLog;
 import android.os.Binder;
@@ -269,10 +270,12 @@ final public class IpConnectivityMetrics extends SystemService {
         // Dump the rolling buffer of metrics event and pretty print events using a human readable
         // format. Also print network dns/connect statistics and default network event time series.
         static final String CMD_LIST = "list";
-        // By default any other argument will fall into the default case which is remapped to the
-        // "list" command. This includes most notably bug reports collected by dumpsys.cpp with
-        // the "-a" argument.
-        static final String CMD_DEFAULT = CMD_LIST;
+        // Dump all IpClient logs ("ipclient").
+        static final String CMD_IPCLIENT = IpClient.DUMP_ARG;
+        // By default any other argument will fall into the default case which is the equivalent
+        // of calling both the "list" and "ipclient" commands. This includes most notably bug
+        // reports collected by dumpsys.cpp with the "-a" argument.
+        static final String CMD_DEFAULT = "";
 
         @Override
         public int logEvent(ConnectivityMetricsEvent event) {
@@ -292,9 +295,20 @@ final public class IpConnectivityMetrics extends SystemService {
                 case CMD_PROTO:
                     cmdListAsProto(pw);
                     return;
-                case CMD_LIST: // fallthrough
+                case CMD_IPCLIENT: {
+                    final String[] ipclientArgs = ((args != null) && (args.length > 1))
+                            ? Arrays.copyOfRange(args, 1, args.length)
+                            : null;
+                    IpClient.dumpAllLogs(pw, ipclientArgs);
+                    return;
+                }
+                case CMD_LIST:
+                    cmdList(pw);
+                    return;
                 default:
                     cmdList(pw);
+                    pw.println("");
+                    IpClient.dumpAllLogs(pw, null);
                     return;
             }
         }

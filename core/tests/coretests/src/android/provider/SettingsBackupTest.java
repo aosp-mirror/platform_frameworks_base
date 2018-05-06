@@ -466,6 +466,7 @@ public class SettingsBackupTest {
                     Settings.Global.WIFI_ON,
                     Settings.Global.WIFI_P2P_DEVICE_NAME,
                     Settings.Global.WIFI_REENABLE_DELAY_MS,
+                    Settings.Global.WIFI_RTT_BACKGROUND_EXEC_GAP_MS,
                     Settings.Global.WIFI_SAVED_STATE,
                     Settings.Global.WIFI_SCAN_ALWAYS_AVAILABLE,
                     Settings.Global.WIFI_SCAN_INTERVAL_WHEN_P2P_CONNECTED_MS,

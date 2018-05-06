@@ -108,6 +108,8 @@ public final class ActiveServices {
 
     private static final boolean LOG_SERVICE_START_STOP = false;
 
+    private static final boolean SHOW_DUNGEON_NOTIFICATION = false;
+
     // How long we wait for a service to finish executing.
     static final int SERVICE_TIMEOUT = 20*1000;
 
@@ -940,6 +942,10 @@ public final class ActiveServices {
                 return;
             }
             smap.mActiveForegroundAppsChanged = false;
+        }
+
+        if (!SHOW_DUNGEON_NOTIFICATION) {
+            return;
         }
 
         final NotificationManager nm = (NotificationManager) mAm.mContext.getSystemService(

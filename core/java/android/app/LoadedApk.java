@@ -90,6 +90,7 @@ final class ServiceConnectionLeaked extends AndroidRuntimeException {
 public final class LoadedApk {
     static final String TAG = "LoadedApk";
     static final boolean DEBUG = false;
+    private static final String PROPERTY_NAME_APPEND_NATIVE = "pi.append_native_lib_paths";
 
     private final ActivityThread mActivityThread;
     final String mPackageName;
@@ -721,6 +722,10 @@ public final class LoadedApk {
             StrictMode.setThreadPolicy(oldPolicy);
             // Setup the class loader paths for profiling.
             needToSetupJitProfiles = true;
+        }
+
+        if (!libPaths.isEmpty() && SystemProperties.getBoolean(PROPERTY_NAME_APPEND_NATIVE, true)) {
+            ApplicationLoaders.getDefault().addNative(mClassLoader, libPaths);
         }
 
         if (addedPaths != null && addedPaths.size() > 0) {

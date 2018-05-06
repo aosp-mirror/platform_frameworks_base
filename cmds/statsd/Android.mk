@@ -141,10 +141,12 @@ LOCAL_SHARED_LIBRARIES := $(statsd_common_shared_libraries) \
 
 LOCAL_MODULE_CLASS := EXECUTABLES
 
-# Enable sanitizer on eng builds
+# Enable sanitizer and allow very verbose printing on eng builds
 ifeq ($(TARGET_BUILD_VARIANT),eng)
     LOCAL_CLANG := true
     LOCAL_SANITIZE := address
+    LOCAL_CFLAGS += \
+        -DVERY_VERBOSE_PRINTING
 endif
 
 LOCAL_INIT_RC := statsd.rc
