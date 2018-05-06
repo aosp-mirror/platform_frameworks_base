@@ -10186,10 +10186,14 @@ public class PackageManagerService extends IPackageManager.Stub
 
                 // if this is is a sharedUser, check to see if the new package is signed by a newer
                 // signing certificate than the existing one, and if so, copy over the new details
-                if (signatureCheckPs.sharedUser != null
-                        && pkg.mSigningDetails.hasAncestor(
+                if (signatureCheckPs.sharedUser != null) {
+                    if (pkg.mSigningDetails.hasAncestor(
                                 signatureCheckPs.sharedUser.signatures.mSigningDetails)) {
-                    signatureCheckPs.sharedUser.signatures.mSigningDetails = pkg.mSigningDetails;
+                        signatureCheckPs.sharedUser.signatures.mSigningDetails = pkg.mSigningDetails;
+                    }
+                    if (signatureCheckPs.sharedUser.signaturesChanged == null) {
+                        signatureCheckPs.sharedUser.signaturesChanged = Boolean.FALSE;
+                    }
                 }
             } catch (PackageManagerException e) {
                 if ((parseFlags & PackageParser.PARSE_IS_SYSTEM_DIR) == 0) {
@@ -10198,20 +10202,24 @@ public class PackageManagerService extends IPackageManager.Stub
                 // The signature has changed, but this package is in the system
                 // image...  let's recover!
                 pkgSetting.signatures.mSigningDetails = pkg.mSigningDetails;
-                // However...  if this package is part of a shared user, but it
-                // doesn't match the signature of the shared user, let's fail.
-                // What this means is that you can't change the signatures
-                // associated with an overall shared user, which doesn't seem all
-                // that unreasonable.
+
+                // If the system app is part of a shared user we allow that shared user to change
+                // signatures as well as part of an OTA. We still need to verify that the signatures
+                // are consistent within the shared user for a given boot, so only allow updating
+                // the signatures on the first package scanned for the shared user (i.e. if the
+                // signaturesChanged state hasn't been initialized yet in SharedUserSetting).
                 if (signatureCheckPs.sharedUser != null) {
-                    if (compareSignatures(
+                    if (signatureCheckPs.sharedUser.signaturesChanged != null &&
+                        compareSignatures(
                             signatureCheckPs.sharedUser.signatures.mSigningDetails.signatures,
                             pkg.mSigningDetails.signatures) != PackageManager.SIGNATURE_MATCH) {
                         throw new PackageManagerException(
                                 INSTALL_PARSE_FAILED_INCONSISTENT_CERTIFICATES,
-                                "Signature mismatch for shared user: "
-                                        + pkgSetting.sharedUser);
+                                "Signature mismatch for shared user: " + pkgSetting.sharedUser);
                     }
+
+                    signatureCheckPs.sharedUser.signatures.mSigningDetails = pkg.mSigningDetails;
+                    signatureCheckPs.sharedUser.signaturesChanged = Boolean.TRUE;
                 }
                 // File a report about this.
                 String msg = "System package " + pkg.packageName
