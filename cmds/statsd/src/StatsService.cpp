@@ -988,6 +988,15 @@ Status StatsService::unsetBroadcastSubscriber(int64_t configId,
     return Status::ok();
 }
 
+Status StatsService::sendAppBreadcrumbAtom(int32_t label, int32_t state) {
+    // Permission check not necessary as it's meant for applications to write to
+    // statsd.
+    android::util::stats_write(util::APP_BREADCRUMB_REPORTED,
+                               IPCThreadState::self()->getCallingUid(), label,
+                               state);
+    return Status::ok();
+}
+
 void StatsService::binderDied(const wp <IBinder>& who) {
     ALOGW("statscompanion service died");
     StatsdStats::getInstance().noteSystemServerRestart(getWallClockSec());
