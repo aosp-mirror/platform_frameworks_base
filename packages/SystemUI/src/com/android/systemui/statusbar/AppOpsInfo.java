@@ -109,7 +109,7 @@ public class AppOpsInfo extends LinearLayout implements NotificationGuts.GutsCon
 
     private void bindPrompt() {
         final TextView prompt = findViewById(R.id.prompt);
-        prompt.setText(getPromptString());
+        prompt.setText(getPrompt());
     }
 
     private void bindButtons() {
@@ -121,41 +121,30 @@ public class AppOpsInfo extends LinearLayout implements NotificationGuts.GutsCon
         ok.setOnClickListener(mOnOk);
     }
 
-    private String getPromptString() {
-        String cameraString =
-                mContext.getResources().getString(R.string.notification_appops_camera_active);
-        String micString =
-                mContext.getResources().getString(R.string.notification_appops_microphone_active);
-        String overlayString =
-                mContext.getResources().getString(R.string.notification_appops_overlay_active);
-        String using = null;
-        String promptString;
-        if (mAppOps.contains(AppOpsManager.OP_CAMERA)
-                && mAppOps.contains(AppOpsManager.OP_RECORD_AUDIO)) {
-            using = mContext.getResources().getQuantityString(
-                    R.plurals.notification_using, 2, micString, cameraString);
-        } else if (mAppOps.contains(AppOpsManager.OP_CAMERA)) {
-            using = mContext.getResources().getQuantityString(
-                    R.plurals.notification_using, 1, cameraString);
-        } else if (mAppOps.contains(AppOpsManager.OP_RECORD_AUDIO)){
-            using = mContext.getResources().getQuantityString(
-                    R.plurals.notification_using, 1, micString);
-        }
-
-        if (mAppOps.contains(AppOpsManager.OP_SYSTEM_ALERT_WINDOW)) {
-            if (using != null) {
-                promptString = mContext.getResources().getQuantityString(
-                        R.plurals.notification_appops, 2, overlayString, using);
+    private String getPrompt() {
+        if (mAppOps == null || mAppOps.size() == 0) {
+            return "";
+        } else if (mAppOps.size() == 1) {
+            if (mAppOps.contains(AppOpsManager.OP_CAMERA)) {
+                return mContext.getString(R.string.appops_camera);
+            } else if (mAppOps.contains(AppOpsManager.OP_RECORD_AUDIO)) {
+                return mContext.getString(R.string.appops_microphone);
             } else {
-                promptString = mContext.getResources().getQuantityString(
-                        R.plurals.notification_appops, 1, overlayString);
+                return mContext.getString(R.string.appops_overlay);
+            }
+        } else if (mAppOps.size() == 2) {
+            if (mAppOps.contains(AppOpsManager.OP_CAMERA)) {
+                if (mAppOps.contains(AppOpsManager.OP_RECORD_AUDIO)) {
+                    return mContext.getString(R.string.appops_camera_mic);
+                } else {
+                    return mContext.getString(R.string.appops_camera_overlay);
+                }
+            } else {
+                return mContext.getString(R.string.appops_mic_overlay);
             }
         } else {
-            promptString = mContext.getResources().getQuantityString(
-                    R.plurals.notification_appops, 1, using);
+            return mContext.getString(R.string.appops_camera_mic_overlay);
         }
-
-        return promptString;
     }
 
     @Override
