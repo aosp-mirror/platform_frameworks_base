@@ -1732,13 +1732,6 @@ public interface WindowManagerPolicy extends WindowManagerPolicyConstants {
     boolean canDismissBootAnimation();
 
     /**
-     * Called when the magnification state changes.
-     *
-     * @param active Whether magnification is active (that is, we are zoomed in).
-     */
-    void onScreenMagnificationStateChanged(boolean active);
-
-    /**
      * Convert the user rotation mode to a human readable format.
      */
     static String userRotationModeToString(int mode) {
