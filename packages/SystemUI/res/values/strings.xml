@@ -862,6 +862,9 @@
     <!-- Recents: Accessibility split to the right -->
     <string name="recents_accessibility_split_screen_right">Split screen to the right</string>
 
+    <!-- QuickStep: Accessibility to toggle overview [CHAR LIMIT=40] -->
+    <string name="quick_step_accessibility_toggle_overview">Toggle Overview</string>
+
     <!-- Expanded Status Bar Header: Battery Charged [CHAR LIMIT=40] -->
     <string name="expanded_header_battery_charged">Charged</string>
 
