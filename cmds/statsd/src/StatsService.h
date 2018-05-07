@@ -139,6 +139,11 @@ public:
     /** Inform statsCompanion that statsd is ready. */
     virtual void sayHiToStatsCompanion();
 
+    /**
+     * Binder call to get AppBreadcrumbReported atom.
+     */
+    virtual Status sendAppBreadcrumbAtom(int32_t label, int32_t state) override;
+
     /** IBinder::DeathRecipient */
     virtual void binderDied(const wp<IBinder>& who) override;
 
