@@ -170,13 +170,14 @@ public final class AutoFillUI {
     public void showFillUi(@NonNull AutofillId focusedId, @NonNull FillResponse response,
             @Nullable String filterText, @Nullable String servicePackageName,
             @NonNull String packageName, @NonNull CharSequence serviceLabel,
-            @NonNull Drawable serviceIcon, @NonNull AutoFillUiCallback callback) {
+            @NonNull Drawable serviceIcon, @NonNull AutoFillUiCallback callback, boolean compatMode) {
         if (sDebug) {
             final int size = filterText == null ? 0 : filterText.length();
             Slog.d(TAG, "showFillUi(): id=" + focusedId + ", filter=" + size + " chars");
         }
-        final LogMaker log =
-                Helper.newLogMaker(MetricsEvent.AUTOFILL_FILL_UI, packageName, servicePackageName)
+        final LogMaker log = Helper
+                .newLogMaker(MetricsEvent.AUTOFILL_FILL_UI, packageName, servicePackageName,
+                        compatMode)
                 .addTaggedData(MetricsEvent.FIELD_AUTOFILL_FILTERTEXT_LEN,
                         filterText == null ? 0 : filterText.length())
                 .addTaggedData(MetricsEvent.FIELD_AUTOFILL_NUM_DATASETS,
@@ -262,14 +263,16 @@ public final class AutoFillUI {
     public void showSaveUi(@NonNull CharSequence serviceLabel, @NonNull Drawable serviceIcon,
             @Nullable String servicePackageName, @NonNull SaveInfo info,
             @NonNull ValueFinder valueFinder, @NonNull String packageName,
-            @NonNull AutoFillUiCallback callback, @NonNull PendingUi pendingSaveUi) {
+            @NonNull AutoFillUiCallback callback, @NonNull PendingUi pendingSaveUi,
+            boolean compatMode) {
         if (sVerbose) Slog.v(TAG, "showSaveUi() for " + packageName + ": " + info);
         int numIds = 0;
         numIds += info.getRequiredIds() == null ? 0 : info.getRequiredIds().length;
         numIds += info.getOptionalIds() == null ? 0 : info.getOptionalIds().length;
 
-        final LogMaker log =
-                Helper.newLogMaker(MetricsEvent.AUTOFILL_SAVE_UI, packageName, servicePackageName)
+        final LogMaker log = Helper
+                .newLogMaker(MetricsEvent.AUTOFILL_SAVE_UI, packageName, servicePackageName,
+                        compatMode)
                 .addTaggedData(MetricsEvent.FIELD_AUTOFILL_NUM_IDS, numIds);
 
         mHandler.post(() -> {
@@ -319,7 +322,7 @@ public final class AutoFillUI {
                     }
                     mMetricsLogger.write(log);
                 }
-            });
+            }, compatMode);
         });
     }
 
