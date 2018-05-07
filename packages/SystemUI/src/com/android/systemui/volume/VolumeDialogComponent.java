@@ -103,11 +103,7 @@ public class VolumeDialogComponent implements VolumeComponent, TunerService.Tuna
     }
 
     private VolumeDialog createCarDefault() {
-        CarVolumeDialogImpl impl = new CarVolumeDialogImpl(mContext);
-        impl.setStreamImportant(AudioManager.STREAM_SYSTEM, false);
-        impl.setAutomute(true);
-        impl.setSilentMode(false);
-        return impl;
+        return new CarVolumeDialogImpl(mContext);
     }
 
     @Override
