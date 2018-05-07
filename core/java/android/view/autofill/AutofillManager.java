@@ -1132,8 +1132,7 @@ public final class AutofillManager {
             if (mSaveTriggerId != null && mSaveTriggerId.equals(id)) {
                 if (sDebug) Log.d(TAG, "triggering commit by click of " + id);
                 commitLocked();
-                mMetricsLogger.action(MetricsEvent.AUTOFILL_SAVE_EXPLICITLY_TRIGGERED,
-                        mContext.getPackageName());
+                mMetricsLogger.write(newLog(MetricsEvent.AUTOFILL_SAVE_EXPLICITLY_TRIGGERED));
             }
         }
     }
@@ -1893,12 +1892,17 @@ public final class AutofillManager {
                 }
             }
 
-            final LogMaker log = new LogMaker(MetricsEvent.AUTOFILL_DATASET_APPLIED)
-                    .setPackageName(mContext.getPackageName())
+            mMetricsLogger.write(newLog(MetricsEvent.AUTOFILL_DATASET_APPLIED)
                     .addTaggedData(MetricsEvent.FIELD_AUTOFILL_NUM_VALUES, itemCount)
-                    .addTaggedData(MetricsEvent.FIELD_AUTOFILL_NUM_VIEWS_FILLED, numApplied);
-            mMetricsLogger.write(log);
+                    .addTaggedData(MetricsEvent.FIELD_AUTOFILL_NUM_VIEWS_FILLED, numApplied));
         }
+    }
+
+    private LogMaker newLog(int category) {
+        return new LogMaker(category)
+                .setPackageName(mContext.getPackageName())
+                .addTaggedData(MetricsEvent.FIELD_AUTOFILL_COMPAT_MODE,
+                        isCompatibilityModeEnabledLocked() ? 1 : 0);
     }
 
     /**
