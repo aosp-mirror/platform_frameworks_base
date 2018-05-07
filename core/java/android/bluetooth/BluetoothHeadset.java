@@ -16,6 +16,7 @@
 
 package android.bluetooth;
 
+import android.Manifest;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.annotation.SdkConstant;
@@ -633,8 +634,9 @@ public final class BluetoothHeadset implements BluetoothProfile {
      * <p>Requires {@link android.Manifest.permission#BLUETOOTH} permission.
      *
      * @param device Bluetooth headset
-     * @return false if there is no headset connected of if the connected headset doesn't support
-     * voice recognition or on error, true otherwise
+     * @return false if there is no headset connected, or the connected headset doesn't support
+     * voice recognition, or voice recognition is already started, or audio channel is occupied,
+     * or on error, true otherwise
      */
     public boolean startVoiceRecognition(BluetoothDevice device) {
         if (DBG) log("startVoiceRecognition()");
@@ -654,10 +656,15 @@ public final class BluetoothHeadset implements BluetoothProfile {
      * Stop Bluetooth Voice Recognition mode, and shut down the
      * Bluetooth audio path.
      *
+     * <p> Users can listen to {@link #ACTION_AUDIO_STATE_CHANGED}.
+     * If this function returns true, this intent will be broadcasted with
+     * {@link #EXTRA_STATE} set to {@link #STATE_AUDIO_DISCONNECTED}.
+     *
      * <p>Requires {@link android.Manifest.permission#BLUETOOTH} permission.
      *
      * @param device Bluetooth headset
-     * @return false if there is no headset connected or on error, true otherwise
+     * @return false if there is no headset connected, or voice recognition has not started,
+     * or voice recognition has ended on this headset, or on error, true otherwise
      */
     public boolean stopVoiceRecognition(BluetoothDevice device) {
         if (DBG) log("stopVoiceRecognition()");
@@ -798,11 +805,12 @@ public final class BluetoothHeadset implements BluetoothProfile {
     }
 
     /**
-     * Check if Bluetooth SCO audio is connected.
+     * Check if at least one headset's SCO audio is connected or connecting
      *
      * <p>Requires {@link android.Manifest.permission#BLUETOOTH} permission.
      *
-     * @return true if SCO is connected, false otherwise or on error
+     * @return true if at least one device's SCO audio is connected or connecting, false otherwise
+     * or on error
      * @hide
      */
     public boolean isAudioOn() {
@@ -821,11 +829,21 @@ public final class BluetoothHeadset implements BluetoothProfile {
     }
 
     /**
-     * Initiates a connection of headset audio.
-     * It setup SCO channel with remote connected headset device.
+     * Initiates a connection of headset audio to the current active device
      *
-     * @return true if successful false if there was some error such as there is no connected
-     * headset
+     * <p> Users can listen to {@link #ACTION_AUDIO_STATE_CHANGED}.
+     * If this function returns true, this intent will be broadcasted with
+     * {@link #EXTRA_STATE} set to {@link #STATE_AUDIO_CONNECTING}.
+     *
+     * <p> {@link #EXTRA_STATE} will transition from
+     * {@link #STATE_AUDIO_CONNECTING} to {@link #STATE_AUDIO_CONNECTED} when
+     * audio connection is established and to {@link #STATE_AUDIO_DISCONNECTED}
+     * in case of failure to establish the audio connection.
+     *
+     * Note that this intent will not be sent if {@link BluetoothHeadset#isAudioOn()} is true
+     * before calling this method
+     *
+     * @return false if there was some error such as there is no active headset
      * @hide
      */
     public boolean connectAudio() {
@@ -844,11 +862,14 @@ public final class BluetoothHeadset implements BluetoothProfile {
     }
 
     /**
-     * Initiates a disconnection of headset audio.
-     * It tears down the SCO channel from remote headset device.
+     * Initiates a disconnection of HFP SCO audio.
+     * Tear down voice recognition or virtual voice call if any.
      *
-     * @return true if successful false if there was some error such as there is no connected SCO
-     * channel
+     * <p> Users can listen to {@link #ACTION_AUDIO_STATE_CHANGED}.
+     * If this function returns true, this intent will be broadcasted with
+     * {@link #EXTRA_STATE} set to {@link #STATE_AUDIO_DISCONNECTED}.
+     *
+     * @return false if audio is not connected, or on error, true otherwise
      * @hide
      */
     public boolean disconnectAudio() {
@@ -867,22 +888,33 @@ public final class BluetoothHeadset implements BluetoothProfile {
     }
 
     /**
-     * Initiates a SCO channel connection with the headset (if connected).
-     * Also initiates a virtual voice call for Handsfree devices as many devices
-     * do not accept SCO audio without a call.
-     * This API allows the handsfree device to be used for routing non-cellular
-     * call audio.
+     * Initiates a SCO channel connection as a virtual voice call to the current active device
+     * Active handsfree device will be notified of incoming call and connected call.
      *
-     * @param device Remote Bluetooth Device
-     * @return true if successful, false if there was some error.
+     * <p> Users can listen to {@link #ACTION_AUDIO_STATE_CHANGED}.
+     * If this function returns true, this intent will be broadcasted with
+     * {@link #EXTRA_STATE} set to {@link #STATE_AUDIO_CONNECTING}.
+     *
+     * <p> {@link #EXTRA_STATE} will transition from
+     * {@link #STATE_AUDIO_CONNECTING} to {@link #STATE_AUDIO_CONNECTED} when
+     * audio connection is established and to {@link #STATE_AUDIO_DISCONNECTED}
+     * in case of failure to establish the audio connection.
+     *
+     * @return true if successful, false if one of the following case applies
+     *  - SCO audio is not idle (connecting or connected)
+     *  - virtual call has already started
+     *  - there is no active device
+     *  - a Telecom managed call is going on
+     *  - binder is dead or Bluetooth is disabled or other error
      * @hide
      */
-    public boolean startScoUsingVirtualVoiceCall(BluetoothDevice device) {
+    @RequiresPermission(Manifest.permission.BLUETOOTH_ADMIN)
+    public boolean startScoUsingVirtualVoiceCall() {
         if (DBG) log("startScoUsingVirtualVoiceCall()");
         final IBluetoothHeadset service = mService;
-        if (service != null && isEnabled() && isValidDevice(device)) {
+        if (service != null && isEnabled()) {
             try {
-                return service.startScoUsingVirtualVoiceCall(device);
+                return service.startScoUsingVirtualVoiceCall();
             } catch (RemoteException e) {
                 Log.e(TAG, e.toString());
             }
@@ -894,19 +926,24 @@ public final class BluetoothHeadset implements BluetoothProfile {
     }
 
     /**
-     * Terminates an ongoing SCO connection and the associated virtual
-     * call.
+     * Terminates an ongoing SCO connection and the associated virtual call.
      *
-     * @param device Remote Bluetooth Device
-     * @return true if successful, false if there was some error.
+     * <p> Users can listen to {@link #ACTION_AUDIO_STATE_CHANGED}.
+     * If this function returns true, this intent will be broadcasted with
+     * {@link #EXTRA_STATE} set to {@link #STATE_AUDIO_DISCONNECTED}.
+     *
+     * @return true if successful, false if one of the following case applies
+     *  - virtual voice call is not started or has ended
+     *  - binder is dead or Bluetooth is disabled or other error
      * @hide
      */
-    public boolean stopScoUsingVirtualVoiceCall(BluetoothDevice device) {
+    @RequiresPermission(Manifest.permission.BLUETOOTH_ADMIN)
+    public boolean stopScoUsingVirtualVoiceCall() {
         if (DBG) log("stopScoUsingVirtualVoiceCall()");
         final IBluetoothHeadset service = mService;
-        if (service != null && isEnabled() && isValidDevice(device)) {
+        if (service != null && isEnabled()) {
             try {
-                return service.stopScoUsingVirtualVoiceCall(device);
+                return service.stopScoUsingVirtualVoiceCall();
             } catch (RemoteException e) {
                 Log.e(TAG, e.toString());
             }
