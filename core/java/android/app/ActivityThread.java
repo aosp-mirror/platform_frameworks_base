@@ -857,6 +857,27 @@ public final class ActivityThread extends ClientTransactionHandler {
                 String buildSerial, boolean autofillCompatibilityEnabled) {
 
             if (services != null) {
+                if (false) {
+                    // Test code to make sure the app could see the passed-in services.
+                    for (Object oname : services.keySet()) {
+                        if (services.get(oname) == null) {
+                            continue; // AM just passed in a null service.
+                        }
+                        String name = (String) oname;
+
+                        // See b/79378449 about the following exemption.
+                        switch (name) {
+                            case "package":
+                            case Context.WINDOW_SERVICE:
+                                continue;
+                        }
+
+                        if (ServiceManager.getService(name) == null) {
+                            Log.wtf(TAG, "Service " + name + " should be accessible by this app");
+                        }
+                    }
+                }
+
                 // Setup the service cache in the ServiceManager
                 ServiceManager.initServiceCache(services);
             }
