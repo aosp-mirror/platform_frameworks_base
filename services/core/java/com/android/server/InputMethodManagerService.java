@@ -152,7 +152,6 @@ import android.widget.CompoundButton.OnCheckedChangeListener;
 import android.widget.RadioButton;
 import android.widget.Switch;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.android.server.wm.WindowManagerInternal;
 
@@ -211,7 +210,6 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
     static final int MSG_SET_INTERACTIVE = 3030;
     static final int MSG_SET_USER_ACTION_NOTIFICATION_SEQUENCE_NUMBER = 3040;
     static final int MSG_REPORT_FULLSCREEN_MODE = 3045;
-    static final int MSG_SWITCH_IME = 3050;
 
     static final int MSG_HARD_KEYBOARD_SWITCH_CHANGED = 4000;
 
@@ -608,7 +606,6 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
     private AlertDialog mSwitchingDialog;
     private IBinder mSwitchingDialogToken = new Binder();
     private View mSwitchingDialogTitleView;
-    private Toast mSubtypeSwitchedByShortCutToast;
     private InputMethodInfo[] mIms;
     private int[] mSubtypeIds;
     private LocaleList mLastSystemLocales;
@@ -3108,8 +3105,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                 return false;
             }
             final ImeSubtypeListItem nextSubtype = mSwitchingController.getNextInputMethodLocked(
-                    onlyCurrentIme, mMethodMap.get(mCurMethodId), mCurrentSubtype,
-                    true /* forward */);
+                    onlyCurrentIme, mMethodMap.get(mCurMethodId), mCurrentSubtype);
             if (nextSubtype == null) {
                 return false;
             }
@@ -3129,8 +3125,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                 return false;
             }
             final ImeSubtypeListItem nextSubtype = mSwitchingController.getNextInputMethodLocked(
-                    false /* onlyCurrentIme */, mMethodMap.get(mCurMethodId), mCurrentSubtype,
-                    true /* forward */);
+                    false /* onlyCurrentIme */, mMethodMap.get(mCurMethodId), mCurrentSubtype);
             if (nextSubtype == null) {
                 return false;
             }
@@ -3493,9 +3488,6 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             case MSG_START_VR_INPUT:
                 startVrInputMethodNoCheck((ComponentName) msg.obj);
                 return true;
-            case MSG_SWITCH_IME:
-                handleSwitchInputMethod(msg.arg1 != 0);
-                return true;
             case MSG_SET_USER_ACTION_NOTIFICATION_SEQUENCE_NUMBER: {
                 final int sequenceNumber = msg.arg1;
                 final ClientState clientState = (ClientState)msg.obj;
@@ -3545,32 +3537,6 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                 executeOrSendMessage(mCurClient.client, mCaller.obtainMessageIIO(
                         MSG_SET_ACTIVE, mIsInteractive ? 1 : 0, mInFullscreenMode ? 1 : 0,
                         mCurClient));
-            }
-        }
-    }
-
-    private void handleSwitchInputMethod(final boolean forwardDirection) {
-        synchronized (mMethodMap) {
-            final ImeSubtypeListItem nextSubtype = mSwitchingController.getNextInputMethodLocked(
-                    false, mMethodMap.get(mCurMethodId), mCurrentSubtype, forwardDirection);
-            if (nextSubtype == null) {
-                return;
-            }
-            setInputMethodLocked(nextSubtype.mImi.getId(), nextSubtype.mSubtypeId);
-            final InputMethodInfo newInputMethodInfo = mMethodMap.get(mCurMethodId);
-            if (newInputMethodInfo == null) {
-                return;
-            }
-            final CharSequence toastText = InputMethodUtils.getImeAndSubtypeDisplayName(mContext,
-                    newInputMethodInfo, mCurrentSubtype);
-            if (!TextUtils.isEmpty(toastText)) {
-                if (mSubtypeSwitchedByShortCutToast == null) {
-                    mSubtypeSwitchedByShortCutToast = Toast.makeText(mContext, toastText,
-                            Toast.LENGTH_SHORT);
-                } else {
-                    mSubtypeSwitchedByShortCutToast.setText(toastText);
-                }
-                mSubtypeSwitchedByShortCutToast.show();
             }
         }
     }
@@ -4475,13 +4441,6 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         }
 
         @Override
-        public void switchInputMethod(boolean forwardDirection) {
-            // Do everything in handler so as not to block the caller.
-            mHandler.sendMessage(mHandler.obtainMessage(MSG_SWITCH_IME,
-                    forwardDirection ? 1 : 0, 0));
-        }
-
-        @Override
         public void hideCurrentInputMethod() {
             mHandler.removeMessages(MSG_HIDE_CURRENT_INPUT_METHOD);
             mHandler.sendEmptyMessage(MSG_HIDE_CURRENT_INPUT_METHOD);
@@ -4491,22 +4450,6 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         public void startVrInputMethodNoCheck(@Nullable ComponentName componentName) {
             mHandler.sendMessage(mHandler.obtainMessage(MSG_START_VR_INPUT, componentName));
         }
-    }
-
-    private static String imeWindowStatusToString(final int imeWindowVis) {
-        final StringBuilder sb = new StringBuilder();
-        boolean first = true;
-        if ((imeWindowVis & InputMethodService.IME_ACTIVE) != 0) {
-            sb.append("Active");
-            first = false;
-        }
-        if ((imeWindowVis & InputMethodService.IME_VISIBLE) != 0) {
-            if (!first) {
-                sb.append("|");
-            }
-            sb.append("Visible");
-        }
-        return sb.toString();
     }
 
     @Override
@@ -4626,7 +4569,6 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             method = mCurMethod;
             p.println("  mCurMethod=" + mCurMethod);
             p.println("  mEnabledSession=" + mEnabledSession);
-            p.println("  mImeWindowVis=" + imeWindowStatusToString(mImeWindowVis));
             p.println("  mShowRequested=" + mShowRequested
                     + " mShowExplicitlyRequested=" + mShowExplicitlyRequested
                     + " mShowForced=" + mShowForced

@@ -31,11 +31,6 @@ public interface InputMethodManagerInternal {
     void setInteractive(boolean interactive);
 
     /**
-     * Called by the window manager to let the input method manager rotate the input method.
-     */
-    void switchInputMethod(boolean forwardDirection);
-
-    /**
      * Hides the current input method, if visible.
      */
     void hideCurrentInputMethod();
