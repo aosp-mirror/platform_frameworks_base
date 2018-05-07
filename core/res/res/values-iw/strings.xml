@@ -297,6 +297,12 @@
     <string name="permgrouplab_camera" msgid="4820372495894586615">"מצלמה"</string>
     <string name="permgroupdesc_camera" msgid="3250611594678347720">"צילום תמונות והקלטת וידאו"</string>
     <string name="permgrouprequest_camera" msgid="1299833592069671756">"‏לתת לאפליקציה &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; הרשאה לצלם תמונות וסרטונים?"</string>
+    <!-- no translation found for permgrouplab_calllog (8798646184930388160) -->
+    <skip />
+    <!-- no translation found for permgroupdesc_calllog (3006237336748283775) -->
+    <skip />
+    <!-- no translation found for permgrouprequest_calllog (8487355309583773267) -->
+    <skip />
     <string name="permgrouplab_phone" msgid="5229115638567440675">"טלפון"</string>
     <string name="permgroupdesc_phone" msgid="6234224354060641055">"התקשרות וניהול של שיחות טלפון"</string>
     <string name="permgrouprequest_phone" msgid="9166979577750581037">"‏לתת לאפליקציה &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; הרשאה להתקשרות ולניהול של שיחות טלפון?"</string>
@@ -842,8 +848,7 @@
     <string name="double_tap_toast" msgid="4595046515400268881">"טיפ: הקש פעמיים כדי להגדיל ולהקטין."</string>
     <string name="autofill_this_form" msgid="4616758841157816676">"מילוי אוטומטי"</string>
     <string name="setup_autofill" msgid="7103495070180590814">"הגדר מילוי אוטומטי"</string>
-    <!-- no translation found for autofill_window_title (4107745526909284887) -->
-    <skip />
+    <string name="autofill_window_title" msgid="4107745526909284887">"מילוי אוטומטי באמצעות <xliff:g id="SERVICENAME">%1$s</xliff:g>"</string>
     <string name="autofill_address_name_separator" msgid="6350145154779706772">" "</string>
     <string name="autofill_address_summary_name_format" msgid="3268041054899214945">"$1$2$3"</string>
     <string name="autofill_address_summary_separator" msgid="7483307893170324129">", "</string>
@@ -1741,8 +1746,7 @@
     <string name="package_installed_device_owner" msgid="6875717669960212648">"הותקנה על ידי מנהל המערכת"</string>
     <string name="package_updated_device_owner" msgid="1847154566357862089">"עודכנה על ידי מנהל המערכת"</string>
     <string name="package_deleted_device_owner" msgid="2307122077550236438">"נמחקה על ידי מנהל המערכת"</string>
-    <!-- no translation found for battery_saver_description_with_learn_more (6323937147992667707) -->
-    <skip />
+    <string name="battery_saver_description_with_learn_more" msgid="6323937147992667707">"כדי להאריך את חיי הסוללה, מצב החיסכון בסוללה מכבה תכונות מסוימות במכשיר ומגביל אפליקציות. "<annotation id="url">"מידע נוסף"</annotation></string>
     <string name="battery_saver_description" msgid="769989536172631582">"כדי להאריך את חיי הסוללה, מצב החיסכון בסוללה מכבה תכונות מסוימות במכשיר ומגביל אפליקציות."</string>
     <string name="data_saver_description" msgid="6015391409098303235">"‏כדי לסייע בהפחתת השימוש בנתונים, חוסך הנתונים (Data Saver) מונע מאפליקציות מסוימות שליחה או קבלה של נתונים ברקע. אפליקציה שבה אתה משתמש כרגע יכולה לגשת לנתונים, אבל בתדירות נמוכה יותר. משמעות הדבר היא, למשל, שתמונות יוצגו רק לאחר שתקיש עליהן."</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"‏האם להפעיל את חוסך הנתונים (Data Saver)?"</string>

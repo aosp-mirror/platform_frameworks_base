@@ -291,6 +291,12 @@
     <string name="permgrouplab_camera" msgid="4820372495894586615">"ക്യാമറ"</string>
     <string name="permgroupdesc_camera" msgid="3250611594678347720">"ചിത്രങ്ങളെടുത്ത് വീഡിയോ റെക്കോർഡുചെയ്യുക"</string>
     <string name="permgrouprequest_camera" msgid="1299833592069671756">"ചിത്രം എടുക്കാനും വീഡിയോ റെക്കോർഡ് ചെയ്യാനും &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ആപ്പിനെ അനുവദിക്കണോ?"</string>
+    <!-- no translation found for permgrouplab_calllog (8798646184930388160) -->
+    <skip />
+    <!-- no translation found for permgroupdesc_calllog (3006237336748283775) -->
+    <skip />
+    <!-- no translation found for permgrouprequest_calllog (8487355309583773267) -->
+    <skip />
     <string name="permgrouplab_phone" msgid="5229115638567440675">"ഫോണ്‍"</string>
     <string name="permgroupdesc_phone" msgid="6234224354060641055">"ഫോൺ വിളിക്കുകയും നിയന്ത്രിക്കുകയും ചെയ്യുക"</string>
     <string name="permgrouprequest_phone" msgid="9166979577750581037">"ഫോൺ കോളുകൾ ചെയ്യാനും അവ നിയന്ത്രിക്കാനും &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ആപ്പിനെ അനുവദിക്കണോ?"</string>
@@ -836,8 +842,7 @@
     <string name="double_tap_toast" msgid="4595046515400268881">"നുറുങ്ങ്: സൂം ഇൻ ചെയ്യാനും സൂം ഔട്ട് ചെയ്യാനും ഇരട്ട-ടാപ്പുചെയ്യുക."</string>
     <string name="autofill_this_form" msgid="4616758841157816676">"ഓട്ടോഫിൽ"</string>
     <string name="setup_autofill" msgid="7103495070180590814">"ഓട്ടോഫിൽ സജ്ജീകരിക്കുക"</string>
-    <!-- no translation found for autofill_window_title (4107745526909284887) -->
-    <skip />
+    <string name="autofill_window_title" msgid="4107745526909284887">"<xliff:g id="SERVICENAME">%1$s</xliff:g> ഉപയോഗിച്ച് സ്വമേധയാ പൂരിപ്പിക്കുക"</string>
     <string name="autofill_address_name_separator" msgid="6350145154779706772">" "</string>
     <string name="autofill_address_summary_name_format" msgid="3268041054899214945">"$1$2$3"</string>
     <string name="autofill_address_summary_separator" msgid="7483307893170324129">", "</string>
@@ -1692,8 +1697,7 @@
     <string name="package_installed_device_owner" msgid="6875717669960212648">"നിങ്ങളുടെ അഡ്‌മിൻ ഇൻസ്റ്റാൾ ചെയ്യുന്നത്"</string>
     <string name="package_updated_device_owner" msgid="1847154566357862089">"നിങ്ങളുടെ അഡ്‌മിൻ അപ്‌ഡേറ്റ് ചെയ്യുന്നത്"</string>
     <string name="package_deleted_device_owner" msgid="2307122077550236438">"നിങ്ങളുടെ അഡ്‌മിൻ ഇല്ലാതാക്കുന്നത്"</string>
-    <!-- no translation found for battery_saver_description_with_learn_more (6323937147992667707) -->
-    <skip />
+    <string name="battery_saver_description_with_learn_more" msgid="6323937147992667707">"നിങ്ങളുടെ ബാറ്ററി ലൈഫ് ദീർഘിപ്പിക്കാൻ, ബാറ്ററി ലാഭിക്കൽ, ചില ഉപകരണ ഫീച്ചറുകളെ ഓഫാക്കുകയും ആപ്പുകളെ പരിമിതപ്പെടുത്തുകയും ചെയ്യുന്നു. "<annotation id="url">"കൂടുതലറിയുക"</annotation></string>
     <string name="battery_saver_description" msgid="769989536172631582">"നിങ്ങളുടെ ബാറ്ററി ലൈഫ് ദീർഘിപ്പിക്കാൻ, ബാറ്ററി ലാഭിക്കൽ, ചില ഉപകരണ ഫീച്ചറുകളെ ഓഫാക്കുകയും ആപ്പുകളെ നിയന്ത്രിക്കുകയും ചെയ്യുന്നു.‌"</string>
     <string name="data_saver_description" msgid="6015391409098303235">"ഡാറ്റാ ഉപയോഗം കുറയ്ക്കാൻ സഹായിക്കുന്നതിന്, പശ്ചാത്തലത്തിൽ ഡാറ്റ അയയ്ക്കുകയോ സ്വീകരിക്കുകയോ ചെയ്യുന്നതിൽ നിന്ന് ചില ആപ്‌സിനെ ഡാറ്റ സേവർ തടയുന്നു. നിങ്ങൾ നിലവിൽ ഉപയോഗിക്കുന്ന ഒരു ആപ്പിന് ഡാറ്റ ആക്സസ്സ് ചെയ്യാൻ കഴിയും, എന്നാൽ കുറഞ്ഞ ആവൃത്തിയിലാണിത് നടക്കുക. ഇതിനർത്ഥം, ഉദാഹരണമായി നിങ്ങൾ ടാപ്പ് ചെയ്യുന്നത് വരെ ചിത്രങ്ങൾ പ്രദ‍‍‍ർശിപ്പിക്കുകയില്ല എന്നാണ്."</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"ഡാറ്റ സേവർ ഓണാക്കണോ?"</string>

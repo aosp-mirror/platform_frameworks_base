@@ -294,6 +294,12 @@
     <string name="permgrouplab_camera" msgid="4820372495894586615">"Kamera"</string>
     <string name="permgroupdesc_camera" msgid="3250611594678347720">"slika i snima videozapise"</string>
     <string name="permgrouprequest_camera" msgid="1299833592069671756">"Dozvoliti aplikaciji &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; snimanje slika i videozapisa?"</string>
+    <!-- no translation found for permgrouplab_calllog (8798646184930388160) -->
+    <skip />
+    <!-- no translation found for permgroupdesc_calllog (3006237336748283775) -->
+    <skip />
+    <!-- no translation found for permgrouprequest_calllog (8487355309583773267) -->
+    <skip />
     <string name="permgrouplab_phone" msgid="5229115638567440675">"Telefon"</string>
     <string name="permgroupdesc_phone" msgid="6234224354060641055">"poziva i upravlja pozivima"</string>
     <string name="permgrouprequest_phone" msgid="9166979577750581037">"Dozvoliti aplikaciji &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; uspostavljanje poziva i njihovo upravljanje?"</string>
@@ -839,8 +845,7 @@
     <string name="double_tap_toast" msgid="4595046515400268881">"Savjet: Dodirnite ekran dva puta za uvećanje ili smanjenje prikaza."</string>
     <string name="autofill_this_form" msgid="4616758841157816676">"Autofill"</string>
     <string name="setup_autofill" msgid="7103495070180590814">"Podesite Autofill"</string>
-    <!-- no translation found for autofill_window_title (4107745526909284887) -->
-    <skip />
+    <string name="autofill_window_title" msgid="4107745526909284887">"Automatsko popunjavanje koje pruža usluga <xliff:g id="SERVICENAME">%1$s</xliff:g>"</string>
     <string name="autofill_address_name_separator" msgid="6350145154779706772">" "</string>
     <string name="autofill_address_summary_name_format" msgid="3268041054899214945">"$1$2$3"</string>
     <string name="autofill_address_summary_separator" msgid="7483307893170324129">", "</string>
@@ -1382,7 +1387,7 @@
     <string name="vpn_lockdown_connecting" msgid="6443438964440960745">"Povezivanje na uvijek aktivni VPN…"</string>
     <string name="vpn_lockdown_connected" msgid="8202679674819213931">"Povezan na uvijek aktivni VPN"</string>
     <string name="vpn_lockdown_disconnected" msgid="735805531187559719">"Prekinuta je veza s uvijek uključenim VPN-om"</string>
-    <string name="vpn_lockdown_error" msgid="3133844445659711681">"Ne može se povezati na stalno uključen VPN"</string>
+    <string name="vpn_lockdown_error" msgid="3133844445659711681">"Povezivanje na stalno uključen VPN nije uspjelo na stalno uključen VPN"</string>
     <string name="vpn_lockdown_config" msgid="8151951501116759194">"Promijenite postavke mreže ili VPN-a"</string>
     <string name="upload_file" msgid="2897957172366730416">"Odabir fajla"</string>
     <string name="no_file_chosen" msgid="6363648562170759465">"Nije izabran nijedan fajl"</string>

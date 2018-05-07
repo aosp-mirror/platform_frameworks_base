@@ -291,6 +291,12 @@
     <string name="permgrouplab_camera" msgid="4820372495894586615">"कॅमेरा"</string>
     <string name="permgroupdesc_camera" msgid="3250611594678347720">"चित्रे घेण्याची आणि व्हिडिओ रेकॉर्ड"</string>
     <string name="permgrouprequest_camera" msgid="1299833592069671756">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ला फोटो घेऊ आणि व्हिडिओ रेकॉर्ड करू द्यायचे?"</string>
+    <!-- no translation found for permgrouplab_calllog (8798646184930388160) -->
+    <skip />
+    <!-- no translation found for permgroupdesc_calllog (3006237336748283775) -->
+    <skip />
+    <!-- no translation found for permgrouprequest_calllog (8487355309583773267) -->
+    <skip />
     <string name="permgrouplab_phone" msgid="5229115638567440675">"फोन"</string>
     <string name="permgroupdesc_phone" msgid="6234224354060641055">"फोन कॉल आणि व्यवस्थापित"</string>
     <string name="permgrouprequest_phone" msgid="9166979577750581037">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ला फोन कॉल करू आणि ते व्यवस्थापित करू द्यायचे?"</string>
@@ -836,8 +842,7 @@
     <string name="double_tap_toast" msgid="4595046515400268881">"टीप: झूम कमी करण्यासाठी आणि वाढवण्यासाठी दोनदा-टॅप करा."</string>
     <string name="autofill_this_form" msgid="4616758841157816676">"स्वयं-भरण"</string>
     <string name="setup_autofill" msgid="7103495070180590814">"स्वयं-भरण सेट करा"</string>
-    <!-- no translation found for autofill_window_title (4107745526909284887) -->
-    <skip />
+    <string name="autofill_window_title" msgid="4107745526909284887">"<xliff:g id="SERVICENAME">%1$s</xliff:g> सह ऑटोफील करा"</string>
     <string name="autofill_address_name_separator" msgid="6350145154779706772">" "</string>
     <string name="autofill_address_summary_name_format" msgid="3268041054899214945">"$1$2$3"</string>
     <string name="autofill_address_summary_separator" msgid="7483307893170324129">", "</string>
@@ -1692,8 +1697,7 @@
     <string name="package_installed_device_owner" msgid="6875717669960212648">"आपल्या प्रशासकाने इंस्टॉल केले"</string>
     <string name="package_updated_device_owner" msgid="1847154566357862089">"आपल्या प्रशासकाने अपडेट केले"</string>
     <string name="package_deleted_device_owner" msgid="2307122077550236438">"आपल्या प्रशासकाने हटवले"</string>
-    <!-- no translation found for battery_saver_description_with_learn_more (6323937147992667707) -->
-    <skip />
+    <string name="battery_saver_description_with_learn_more" msgid="6323937147992667707">"बॅटरी लाइफ वाढवण्‍यासाठी, बॅटरी सेव्‍हर काही डिव्‍हाइस वैशिष्‍ट्ये बंद करते आणि अॅप्‍सना प्रतिबंधित करते. "<annotation id="url">"अधिक जाणून घ्‍या"</annotation></string>
     <string name="battery_saver_description" msgid="769989536172631582">"बॅटरी लाइफ वाढवण्‍यासाठी, बॅटरी सेव्‍हर काही वैशिष्‍ट्ये बंद करते आणि अॅप्‍स प्रतिबंधित करते."</string>
     <string name="data_saver_description" msgid="6015391409098303235">"डेटा वापर कमी करण्यात मदत करण्यासाठी, डेटा सर्व्हर काही अॅप्सना पार्श्वभूमीमध्ये डेटा पाठविण्यास किंवा प्राप्त करण्यास प्रतिबंधित करतो. तुम्ही सध्या वापरत असलेला अॅप डेटामध्ये प्रवेश करू शकतो परंतु तसे तो खूप कमी वेळा करू शकतो. याचा अर्थ, उदाहरणार्थ, तुम्ही इमेज टॅप करेपर्यंत त्या प्रदर्शित करणार नाहीत असा असू शकतो."</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"डेटा बचतकर्ता चालू करायचा?"</string>
