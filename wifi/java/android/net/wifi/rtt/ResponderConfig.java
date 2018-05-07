@@ -16,6 +16,9 @@
 
 package android.net.wifi.rtt;
 
+import static android.net.wifi.ScanResult.InformationElement.EID_HT_CAPABILITIES;
+import static android.net.wifi.ScanResult.InformationElement.EID_VHT_CAPABILITIES;
+
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.SystemApi;
@@ -24,6 +27,7 @@ import android.net.wifi.ScanResult;
 import android.net.wifi.aware.PeerHandle;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.util.Log;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -40,6 +44,7 @@ import java.util.Objects;
  */
 @SystemApi
 public final class ResponderConfig implements Parcelable {
+    private static final String TAG = "ResponderConfig";
     private static final int AWARE_BAND_2_DISCOVERY_CHANNEL = 2437;
 
     /** @hide */
@@ -297,12 +302,31 @@ public final class ResponderConfig implements Parcelable {
         int centerFreq0 = scanResult.centerFreq0;
         int centerFreq1 = scanResult.centerFreq1;
 
-        // TODO: b/68936111 - extract preamble info from IE
         int preamble;
-        if (channelWidth == CHANNEL_WIDTH_80MHZ || channelWidth == CHANNEL_WIDTH_160MHZ) {
-            preamble = PREAMBLE_VHT;
+        if (scanResult.informationElements != null && scanResult.informationElements.length != 0) {
+            boolean htCapabilitiesPresent = false;
+            boolean vhtCapabilitiesPresent = false;
+            for (ScanResult.InformationElement ie : scanResult.informationElements) {
+                if (ie.id == EID_HT_CAPABILITIES) {
+                    htCapabilitiesPresent = true;
+                } else if (ie.id == EID_VHT_CAPABILITIES) {
+                    vhtCapabilitiesPresent = true;
+                }
+            }
+            if (vhtCapabilitiesPresent) {
+                preamble = PREAMBLE_VHT;
+            } else if (htCapabilitiesPresent) {
+                preamble = PREAMBLE_HT;
+            } else {
+                preamble = PREAMBLE_LEGACY;
+            }
         } else {
-            preamble = PREAMBLE_HT;
+            Log.e(TAG, "Scan Results do not contain IEs - using backup method to select preamble");
+            if (channelWidth == CHANNEL_WIDTH_80MHZ || channelWidth == CHANNEL_WIDTH_160MHZ) {
+                preamble = PREAMBLE_VHT;
+            } else {
+                preamble = PREAMBLE_HT;
+            }
         }
 
         return new ResponderConfig(macAddress, responderType, supports80211mc, channelWidth,
