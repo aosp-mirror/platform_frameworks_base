@@ -4558,8 +4558,7 @@ public class AudioManager {
     /**
      * The list of {@link AudioDeviceCallback} objects to receive add/remove notifications.
      */
-    private ArrayMap<AudioDeviceCallback, NativeEventHandlerDelegate>
-        mDeviceCallbacks =
+    private final ArrayMap<AudioDeviceCallback, NativeEventHandlerDelegate> mDeviceCallbacks =
             new ArrayMap<AudioDeviceCallback, NativeEventHandlerDelegate>();
 
     /**
@@ -4859,21 +4858,20 @@ public class AudioManager {
                     calcListDeltas(mPreviousPorts, current_ports, GET_DEVICES_ALL);
             AudioDeviceInfo[] removed_devices =
                     calcListDeltas(current_ports, mPreviousPorts, GET_DEVICES_ALL);
-
             if (added_devices.length != 0 || removed_devices.length != 0) {
                 synchronized (mDeviceCallbacks) {
                     for (int i = 0; i < mDeviceCallbacks.size(); i++) {
                         handler = mDeviceCallbacks.valueAt(i).getHandler();
                         if (handler != null) {
-                            if (added_devices.length != 0) {
-                                handler.sendMessage(Message.obtain(handler,
-                                                                   MSG_DEVICES_DEVICES_ADDED,
-                                                                   added_devices));
-                            }
                             if (removed_devices.length != 0) {
                                 handler.sendMessage(Message.obtain(handler,
                                                                    MSG_DEVICES_DEVICES_REMOVED,
                                                                    removed_devices));
+                            }
+                            if (added_devices.length != 0) {
+                                handler.sendMessage(Message.obtain(handler,
+                                                                   MSG_DEVICES_DEVICES_ADDED,
+                                                                   added_devices));
                             }
                         }
                     }
