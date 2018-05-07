@@ -5772,22 +5772,15 @@ public class ActivityManagerService extends IActivityManager.Stub
         if (true || Build.IS_USER) {
             return;
         }
-        String tracesPath = SystemProperties.get("dalvik.vm.stack-trace-file", null);
-        if (tracesPath == null || tracesPath.length() == 0) {
-            return;
-        }
 
         StrictMode.ThreadPolicy oldPolicy = StrictMode.allowThreadDiskReads();
         StrictMode.allowThreadDiskWrites();
         try {
-            final File tracesFile = new File(tracesPath);
-            final File tracesDir = tracesFile.getParentFile();
-            final File tracesTmp = new File(tracesDir, "__tmp__");
+            File tracesDir = new File("/data/anr");
+            File tracesFile = null;
             try {
-                if (tracesFile.exists()) {
-                    tracesTmp.delete();
-                    tracesFile.renameTo(tracesTmp);
-                }
+                tracesFile = File.createTempFile("app_slow", null, tracesDir);
+
                 StringBuilder sb = new StringBuilder();
                 Time tobj = new Time();
                 tobj.set(System.currentTimeMillis());
@@ -5804,14 +5797,14 @@ public class ActivityManagerService extends IActivityManager.Stub
                 fos.close();
                 FileUtils.setPermissions(tracesFile.getPath(), 0666, -1, -1); // -rw-rw-rw-
             } catch (IOException e) {
-                Slog.w(TAG, "Unable to prepare slow app traces file: " + tracesPath, e);
+                Slog.w(TAG, "Unable to prepare slow app traces file: " + tracesFile, e);
                 return;
             }
 
             if (app != null) {
                 ArrayList<Integer> firstPids = new ArrayList<Integer>();
                 firstPids.add(app.pid);
-                dumpStackTraces(tracesPath, firstPids, null, null);
+                dumpStackTraces(tracesFile.getAbsolutePath(), firstPids, null, null);
             }
 
             File lastTracesFile = null;
@@ -5829,9 +5822,6 @@ public class ActivityManagerService extends IActivityManager.Stub
                 lastTracesFile = curTracesFile;
             }
             tracesFile.renameTo(curTracesFile);
-            if (tracesTmp.exists()) {
-                tracesTmp.renameTo(tracesFile);
-            }
         } finally {
             StrictMode.setThreadPolicy(oldPolicy);
         }
