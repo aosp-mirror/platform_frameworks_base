@@ -722,6 +722,7 @@ Landroid/content/pm/IPackageManager;->getInstalledPackages(II)Landroid/content/p
 Landroid/content/pm/IPackageManager;->getInstallerPackageName(Ljava/lang/String;)Ljava/lang/String;
 Landroid/content/pm/IPackageManager;->getInstallLocation()I
 Landroid/content/pm/IPackageManager;->getLastChosenActivity(Landroid/content/Intent;Ljava/lang/String;I)Landroid/content/pm/ResolveInfo;
+Landroid/content/pm/IPackageManager;->getPackagesForUid(I)[Ljava/lang/String;
 Landroid/content/pm/IPackageManager;->getProviderInfo(Landroid/content/ComponentName;II)Landroid/content/pm/ProviderInfo;
 Landroid/content/pm/IPackageManager;->getReceiverInfo(Landroid/content/ComponentName;II)Landroid/content/pm/ActivityInfo;
 Landroid/content/pm/IPackageManager;->getServiceInfo(Landroid/content/ComponentName;II)Landroid/content/pm/ServiceInfo;
@@ -962,6 +963,7 @@ Landroid/database/CursorWindow;->mWindowPtr:J
 Landroid/database/CursorWindow;->sCursorWindowSize:I
 Landroid/database/CursorWindow;->sWindowToPidMap:Landroid/util/LongSparseArray;
 Landroid/database/CursorWrapper;->mCursor:Landroid/database/Cursor;
+Landroid/database/MatrixCursor;->get(I)Ljava/lang/Object;
 Landroid/database/sqlite/SQLiteCustomFunction;->dispatchCallback([Ljava/lang/String;)V
 Landroid/database/sqlite/SQLiteCustomFunction;->name:Ljava/lang/String;
 Landroid/database/sqlite/SQLiteCustomFunction;->numArgs:I
@@ -1396,6 +1398,7 @@ Landroid/media/JetPlayer;->mNativePlayerInJavaObj:J
 Landroid/media/JetPlayer;->postEventFromNative(Ljava/lang/Object;III)V
 Landroid/media/MediaCodec$CodecException;-><init>(IILjava/lang/String;)V
 Landroid/media/MediaCodec;->getBuffers(Z)[Ljava/nio/ByteBuffer;
+Landroid/media/MediaCodec;->mNativeContext:J
 Landroid/media/MediaCodec;->releaseOutputBuffer(IZZJ)V
 Landroid/media/MediaFile$MediaFileType;->fileType:I
 Landroid/media/MediaFile$MediaFileType;->mimeType:Ljava/lang/String;
@@ -2349,6 +2352,7 @@ Landroid/telephony/CellSignalStrengthWcdma;->mBitErrorRate:I
 Landroid/telephony/CellSignalStrengthWcdma;->mSignalStrength:I
 Landroid/telephony/PhoneNumberUtils;->isLocalEmergencyNumber(Landroid/content/Context;ILjava/lang/String;)Z
 Landroid/telephony/PhoneStateListener;->mSubId:Ljava/lang/Integer;
+Landroid/telephony/Rlog;->v(Ljava/lang/String;Ljava/lang/String;)I
 Landroid/telephony/ServiceState;->newFromBundle(Landroid/os/Bundle;)Landroid/telephony/ServiceState;
 Landroid/telephony/SignalStrength;-><init>()V
 Landroid/telephony/SignalStrength;->getAsuLevel()I
@@ -2880,6 +2884,7 @@ Landroid/view/ViewRootImpl;->dispatchInputEvent(Landroid/view/InputEvent;Landroi
 Landroid/view/ViewRootImpl;->enqueueInputEvent(Landroid/view/InputEvent;)V
 Landroid/view/ViewRootImpl;->getWindowFlags()I
 Landroid/view/ViewRootImpl;->invokeFunctor(JZ)V
+Landroid/view/ViewRootImpl;->mLastScrolledFocus:Ljava/lang/ref/WeakReference;
 Landroid/view/ViewRootImpl;->mStopped:Z
 Landroid/view/ViewRootImpl;->mSurface:Landroid/view/Surface;
 Landroid/view/ViewRootImpl;->mView:Landroid/view/View;
@@ -2965,6 +2970,7 @@ Landroid/webkit/WebViewFactory;->getUpdateService()Landroid/webkit/IWebViewUpdat
 Landroid/webkit/WebViewFactory;->getWebViewContextAndSetProvider()Landroid/content/Context;
 Landroid/webkit/WebViewFactory;->sPackageInfo:Landroid/content/pm/PackageInfo;
 Landroid/webkit/WebViewFactory;->sProviderInstance:Landroid/webkit/WebViewFactoryProvider;
+Landroid/webkit/WebViewProviderResponse;->packageInfo:Landroid/content/pm/PackageInfo;
 Landroid/widget/AbsListView$FlingRunnable;->endFling()V
 Landroid/widget/AbsListView$FlingRunnable;->mScroller:Landroid/widget/OverScroller;
 Landroid/widget/AbsListView$FlingRunnable;->start(I)V
@@ -3198,6 +3204,7 @@ Landroid/widget/TextView;->mListeners:Ljava/util/ArrayList;
 Landroid/widget/TextView;->mMarquee:Landroid/widget/TextView$Marquee;
 Landroid/widget/TextView;->mMaximum:I
 Landroid/widget/TextView;->mMaxMode:I
+Landroid/widget/TextView;->mShadowRadius:F
 Landroid/widget/TextView;->mSingleLine:Z
 Landroid/widget/TextView;->mText:Ljava/lang/CharSequence;
 Landroid/widget/TextView;->mTextPaint:Landroid/text/TextPaint;
@@ -3546,6 +3553,7 @@ Lcom/android/internal/R$styleable;->TabWidget:[I
 Lcom/android/internal/R$styleable;->TextAppearance:[I
 Lcom/android/internal/R$styleable;->TextView:[I
 Lcom/android/internal/R$styleable;->TextViewAppearance:[I
+Lcom/android/internal/R$styleable;->TextViewAppearance_textAppearance:I
 Lcom/android/internal/R$styleable;->TextView_drawableBottom:I
 Lcom/android/internal/R$styleable;->TextView_drawableLeft:I
 Lcom/android/internal/R$styleable;->TextView_drawableRight:I
@@ -3599,6 +3607,8 @@ Lcom/android/internal/telephony/SmsHeader$ConcatRef;->msgCount:I
 Lcom/android/internal/telephony/SmsHeader$ConcatRef;->refNumber:I
 Lcom/android/internal/telephony/SmsHeader$ConcatRef;->seqNumber:I
 Lcom/android/internal/telephony/SmsHeader;->concatRef:Lcom/android/internal/telephony/SmsHeader$ConcatRef;
+Lcom/android/internal/telephony/SmsMessageBase;->getOriginatingAddress()Ljava/lang/String;
+Lcom/android/internal/telephony/SmsMessageBase;->getPseudoSubject()Ljava/lang/String;
 Lcom/android/internal/telephony/SmsMessageBase;->mUserDataHeader:Lcom/android/internal/telephony/SmsHeader;
 Lcom/android/internal/telephony/SmsRawData;-><init>([B)V
 Lcom/android/internal/telephony/SmsRawData;->CREATOR:Landroid/os/Parcelable$Creator;
@@ -3809,6 +3819,7 @@ Ljava/lang/Runtime;->mLibPaths:[Ljava/lang/String;
 Ljava/lang/Runtime;->nativeLoad(Ljava/lang/String;Ljava/lang/ClassLoader;)Ljava/lang/String;
 Ljava/lang/Short;->value:S
 Ljava/lang/String;-><init>(II[C)V
+Ljava/lang/String;->count:I
 Ljava/lang/String;->getCharsNoCheck(II[CI)V
 Ljava/lang/System;-><init>()V
 Ljava/lang/System;->arraycopy([CI[CII)V
@@ -3913,6 +3924,7 @@ Ljava/util/ArrayList;->size:I
 Ljava/util/Arrays$ArrayList;->a:[Ljava/lang/Object;
 Ljava/util/Calendar;->zone:Ljava/util/TimeZone;
 Ljava/util/Collections$EmptyList;-><init>()V
+Ljava/util/Collections$EmptyMap;-><init>()V
 Ljava/util/Collections$SynchronizedCollection;->c:Ljava/util/Collection;
 Ljava/util/Collections$SynchronizedMap;->m:Ljava/util/Map;
 Ljava/util/Collections$UnmodifiableCollection;->c:Ljava/util/Collection;
