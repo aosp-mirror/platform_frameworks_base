@@ -44,9 +44,7 @@ Caches* Caches::sInstance = nullptr;
 // Constructors/destructor
 ///////////////////////////////////////////////////////////////////////////////
 
-Caches::Caches(RenderState& renderState)
-        : mRenderState(&renderState)
-        , mInitialized(false) {
+Caches::Caches(RenderState& renderState) : mRenderState(&renderState), mInitialized(false) {
     INIT_LOGD("Creating OpenGL renderer caches");
     init();
     initConstraints();
@@ -153,8 +151,7 @@ void Caches::dumpMemoryUsage(String8& log) {
 // Memory management
 ///////////////////////////////////////////////////////////////////////////////
 
-void Caches::clearGarbage() {
-}
+void Caches::clearGarbage() {}
 
 void Caches::flush(FlushMode mode) {
     clearGarbage();

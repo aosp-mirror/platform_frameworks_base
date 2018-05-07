@@ -25,11 +25,11 @@
 #define _ANDROID_GRAPHICS_MINIKIN_UTILS_H_
 
 #include <cutils/compiler.h>
+#include <log/log.h>
 #include <minikin/Layout.h>
 #include "MinikinSkia.h"
 #include "Paint.h"
 #include "Typeface.h"
-#include <log/log.h>
 
 namespace minikin {
 class MeasuredText;

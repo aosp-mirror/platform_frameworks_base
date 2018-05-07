@@ -319,17 +319,6 @@ void RenderProxy::prepareToDraw(Bitmap& bitmap) {
     }
 }
 
-sk_sp<Bitmap> RenderProxy::allocateHardwareBitmap(SkBitmap& bitmap) {
-    auto& thread = RenderThread::getInstance();
-    if (Properties::getRenderPipelineType() == RenderPipelineType::SkiaGL) {
-        return skiapipeline::SkiaOpenGLPipeline::allocateHardwareBitmap(thread, bitmap);
-    } else {
-        return thread.queue().runSync([&]() -> auto {
-            return thread.allocateHardwareBitmap(bitmap);
-        });
-    }
-}
-
 int RenderProxy::copyGraphicBufferInto(GraphicBuffer* buffer, SkBitmap* bitmap) {
     RenderThread& thread = RenderThread::getInstance();
     if (gettid() == thread.getTid()) {

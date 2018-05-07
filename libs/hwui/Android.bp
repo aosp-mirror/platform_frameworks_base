@@ -206,6 +206,7 @@ cc_defaults {
         "FrameInfoVisualizer.cpp",
         "GlLayer.cpp",
         "GpuMemoryTracker.cpp",
+        "HardwareBitmapUploader.cpp",
         "Interpolator.cpp",
         "JankTracker.cpp",
         "Layer.cpp",

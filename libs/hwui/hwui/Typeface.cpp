@@ -132,8 +132,10 @@ Typeface* Typeface::createFromFamilies(std::vector<std::shared_ptr<minikin::Font
         bool italicFromFont;
 
         const minikin::FontStyle defaultStyle;
-        const minikin::MinikinFont* mf = families.empty() ? nullptr
-                : families[0]->getClosestMatch(defaultStyle).font->typeface().get();
+        const minikin::MinikinFont* mf =
+                families.empty()
+                        ? nullptr
+                        : families[0]->getClosestMatch(defaultStyle).font->typeface().get();
         if (mf != nullptr) {
             SkTypeface* skTypeface = reinterpret_cast<const MinikinFontSkia*>(mf)->GetSkTypeface();
             const SkFontStyle& style = skTypeface->fontStyle();
