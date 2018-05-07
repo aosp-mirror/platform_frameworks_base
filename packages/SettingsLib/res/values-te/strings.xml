@@ -224,7 +224,8 @@
     <string name="bluetooth_select_a2dp_codec_channel_mode" msgid="884855779449390540">"బ్లూటూత్ ఆడియో ఛానెల్ మోడ్"</string>
     <string name="bluetooth_select_a2dp_codec_channel_mode_dialog_title" msgid="7234956835280563341">"బ్లూటూత్ ఆడియో కోడెక్‌ని సక్రియం చేయండి\nఎంపిక: ఛానెల్ మోడ్"</string>
     <string name="bluetooth_select_a2dp_codec_ldac_playback_quality" msgid="3619694372407843405">"బ్లూటూత్ ఆడియో LDAC కోడెక్: ప్లేబ్యాక్ నాణ్యత"</string>
-    <string name="bluetooth_select_a2dp_codec_ldac_playback_quality_dialog_title" msgid="7595776220458732825">"బ్లూటూత్ ఆడియో LDAC కోడెక్‌ని సక్రియం చేయండి\nఎంపిక: ప్లేబ్యాక్ నాణ్యత"</string>
+    <!-- no translation found for bluetooth_select_a2dp_codec_ldac_playback_quality_dialog_title (6893955536658137179) -->
+    <skip />
     <string name="bluetooth_select_a2dp_codec_streaming_label" msgid="5347862512596240506">"ప్రసారం చేస్తోంది: <xliff:g id="STREAMING_PARAMETER">%1$s</xliff:g>"</string>
     <string name="select_private_dns_configuration_title" msgid="3700456559305263922">"ప్రైవేట్ DNS"</string>
     <string name="select_private_dns_configuration_dialog_title" msgid="9221994415765826811">"ప్రైవేట్ DNS మోడ్‌ను ఎంచుకోండి"</string>

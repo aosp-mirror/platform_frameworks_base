@@ -224,7 +224,8 @@
     <string name="bluetooth_select_a2dp_codec_channel_mode" msgid="884855779449390540">"બ્લૂટૂથ ઑડિઓ ચેનલ મોડ"</string>
     <string name="bluetooth_select_a2dp_codec_channel_mode_dialog_title" msgid="7234956835280563341">"બ્લૂટૂથ ઑડિઓ કોડેક\nપસંદગી ટ્રિગર કરો: ચૅનલ મોડ"</string>
     <string name="bluetooth_select_a2dp_codec_ldac_playback_quality" msgid="3619694372407843405">"બ્લૂટૂથ ઑડિઓ LDAC કોડેક: પ્લેબૅક ગુણવત્તા"</string>
-    <string name="bluetooth_select_a2dp_codec_ldac_playback_quality_dialog_title" msgid="7595776220458732825">"બ્લૂટૂથ ઑડિઓ LDAC કોડેક\nપસંદગી ટ્રિગર કરો: પ્લેબૅક ક્વૉલિટી"</string>
+    <!-- no translation found for bluetooth_select_a2dp_codec_ldac_playback_quality_dialog_title (6893955536658137179) -->
+    <skip />
     <string name="bluetooth_select_a2dp_codec_streaming_label" msgid="5347862512596240506">"સ્ટ્રીમિંગ: <xliff:g id="STREAMING_PARAMETER">%1$s</xliff:g>"</string>
     <string name="select_private_dns_configuration_title" msgid="3700456559305263922">"ખાનગી DNS"</string>
     <string name="select_private_dns_configuration_dialog_title" msgid="9221994415765826811">"ખાનગી DNS મોડને પસંદ કરો"</string>

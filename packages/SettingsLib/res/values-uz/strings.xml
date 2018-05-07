@@ -224,7 +224,8 @@
     <string name="bluetooth_select_a2dp_codec_channel_mode" msgid="884855779449390540">"Bluetooth audio kanali rejimi"</string>
     <string name="bluetooth_select_a2dp_codec_channel_mode_dialog_title" msgid="7234956835280563341">"Bluetooth orqali uzatish uchun audiokodek\nTanlash: kanal rejimi"</string>
     <string name="bluetooth_select_a2dp_codec_ldac_playback_quality" msgid="3619694372407843405">"LDAC audiokodeki bilan ijro etish sifati (Bluetooth orqali)"</string>
-    <string name="bluetooth_select_a2dp_codec_ldac_playback_quality_dialog_title" msgid="7595776220458732825">"Bluetooth orqali uzatish uchun LDAC audiokodeki\nTanlash: ijro etish sifati"</string>
+    <!-- no translation found for bluetooth_select_a2dp_codec_ldac_playback_quality_dialog_title (6893955536658137179) -->
+    <skip />
     <string name="bluetooth_select_a2dp_codec_streaming_label" msgid="5347862512596240506">"Translatsiya: <xliff:g id="STREAMING_PARAMETER">%1$s</xliff:g>"</string>
     <string name="select_private_dns_configuration_title" msgid="3700456559305263922">"Shaxsiy DNS"</string>
     <string name="select_private_dns_configuration_dialog_title" msgid="9221994415765826811">"Shaxsiy DNS rejimini tanlang"</string>
@@ -431,7 +432,7 @@
     <string name="ims_reg_status_registered" msgid="933003316932739188">"Registratsiya qilingan"</string>
     <string name="ims_reg_status_not_registered" msgid="6529783773485229486">"Registratsiya qilinmagan"</string>
     <string name="status_unavailable" msgid="7862009036663793314">"Mavjud emas"</string>
-    <string name="wifi_status_mac_randomized" msgid="5589328382467438245">"MAC tasodifiy tanlandi"</string>
+    <string name="wifi_status_mac_randomized" msgid="5589328382467438245">"Tasodifiy MAC manzil"</string>
     <plurals name="wifi_tether_connected_summary" formatted="false" msgid="3871603864314407780">
       <item quantity="other">%1$d ta qurilma ulangan</item>
       <item quantity="one">%1$d ta qurilma ulangan</item>

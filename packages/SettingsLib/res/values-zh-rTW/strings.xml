@@ -224,7 +224,8 @@
     <string name="bluetooth_select_a2dp_codec_channel_mode" msgid="884855779449390540">"藍牙音訊聲道模式"</string>
     <string name="bluetooth_select_a2dp_codec_channel_mode_dialog_title" msgid="7234956835280563341">"觸發藍牙音訊轉碼器\n選項：聲道模式"</string>
     <string name="bluetooth_select_a2dp_codec_ldac_playback_quality" msgid="3619694372407843405">"藍牙音訊 LDAC 轉碼器：播放品質"</string>
-    <string name="bluetooth_select_a2dp_codec_ldac_playback_quality_dialog_title" msgid="7595776220458732825">"觸發藍牙音訊 LDAC 轉碼器\n選項：播放品質"</string>
+    <!-- no translation found for bluetooth_select_a2dp_codec_ldac_playback_quality_dialog_title (6893955536658137179) -->
+    <skip />
     <string name="bluetooth_select_a2dp_codec_streaming_label" msgid="5347862512596240506">"串流中：<xliff:g id="STREAMING_PARAMETER">%1$s</xliff:g>"</string>
     <string name="select_private_dns_configuration_title" msgid="3700456559305263922">"私人 DNS"</string>
     <string name="select_private_dns_configuration_dialog_title" msgid="9221994415765826811">"選取私人 DNS 模式"</string>
