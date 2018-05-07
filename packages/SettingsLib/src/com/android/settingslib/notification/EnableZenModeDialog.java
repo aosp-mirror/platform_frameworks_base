@@ -185,6 +185,7 @@ public class EnableZenModeDialog {
     @VisibleForTesting
     protected void bind(final Condition condition, final View row, final int rowId) {
         if (condition == null) throw new IllegalArgumentException("condition must not be null");
+
         final boolean enabled = condition.state == Condition.STATE_TRUE;
         final ConditionTag tag = row.getTag() != null ? (ConditionTag) row.getTag() :
                 new ConditionTag();
@@ -207,7 +208,6 @@ public class EnableZenModeDialog {
                     MetricsLogger.action(mContext,
                             MetricsProto.MetricsEvent.QS_DND_CONDITION_SELECT);
                     updateAlarmWarningText(tag.condition);
-                    announceConditionSelection(tag);
                 }
             }
         });
@@ -328,6 +328,7 @@ public class EnableZenModeDialog {
             boolean enabled, int rowId, Uri conditionId) {
         if (tag.lines == null) {
             tag.lines = row.findViewById(android.R.id.content);
+            tag.lines.setAccessibilityLiveRegion(View.ACCESSIBILITY_LIVE_REGION_POLITE);
         }
         if (tag.line1 == null) {
             tag.line1 = (TextView) row.findViewById(android.R.id.text1);
@@ -450,16 +451,6 @@ public class EnableZenModeDialog {
         bind(newCondition, row, rowId);
         updateAlarmWarningText(tag.condition);
         tag.rb.setChecked(true);
-        announceConditionSelection(tag);
-    }
-
-    private void announceConditionSelection(ConditionTag tag) {
-        // condition will always be priority-only
-        String modeText = mContext.getString(R.string.zen_interruption_level_priority);
-        if (tag.line1 != null) {
-            mZenRadioGroupContent.announceForAccessibility(mContext.getString(
-                    R.string.zen_mode_and_condition, modeText, tag.line1.getText()));
-        }
     }
 
     private void updateAlarmWarningText(Condition condition) {
