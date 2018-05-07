@@ -46,6 +46,10 @@ import android.hardware.soundtrigger.SoundTrigger.KeyphraseSoundModel;
 import android.hardware.soundtrigger.SoundTrigger.ModuleProperties;
 import android.hardware.soundtrigger.SoundTrigger.RecognitionConfig;
 import android.hardware.soundtrigger.SoundTrigger.SoundModel;
+import android.media.AudioAttributes;
+import android.media.AudioFormat;
+import android.media.AudioRecord;
+import android.media.MediaRecorder;
 import android.media.soundtrigger.ISoundTriggerDetectionService;
 import android.media.soundtrigger.ISoundTriggerDetectionServiceClient;
 import android.media.soundtrigger.SoundTriggerDetectionService;
@@ -654,8 +658,45 @@ public class SoundTriggerService extends SystemService {
         }
     }
 
-    private interface Operation {
-        void run(int opId, ISoundTriggerDetectionService service) throws RemoteException;
+    /**
+     * A single operation run in a {@link RemoteSoundTriggerDetectionService}.
+     *
+     * <p>Once the remote service is connected either setup + execute or setup + stop is executed.
+     */
+    private static class Operation {
+        private interface ExecuteOp {
+            void run(int opId, ISoundTriggerDetectionService service) throws RemoteException;
+        }
+
+        private final @Nullable Runnable mSetupOp;
+        private final @NonNull ExecuteOp mExecuteOp;
+        private final @Nullable Runnable mDropOp;
+
+        private Operation(@Nullable Runnable setupOp, @NonNull ExecuteOp executeOp,
+                @Nullable Runnable cancelOp) {
+            mSetupOp = setupOp;
+            mExecuteOp = executeOp;
+            mDropOp = cancelOp;
+        }
+
+        private void setup() {
+            if (mSetupOp != null) {
+                mSetupOp.run();
+            }
+        }
+
+        void run(int opId, @NonNull ISoundTriggerDetectionService service) throws RemoteException {
+            setup();
+            mExecuteOp.run(opId, service);
+        }
+
+        void drop() {
+            setup();
+
+            if (mDropOp != null) {
+                mDropOp.run();
+            }
+        }
     }
 
     /**
@@ -902,6 +943,10 @@ public class SoundTriggerService extends SystemService {
         private void runOrAddOperation(Operation op) {
             synchronized (mRemoteServiceLock) {
                 if (mIsDestroyed || mDestroyOnceRunningOpsDone) {
+                    Slog.w(TAG, mPuuid + ": Dropped operation as already destroyed or marked for "
+                            + "destruction");
+
+                    op.drop();
                     return;
                 }
 
@@ -922,9 +967,15 @@ public class SoundTriggerService extends SystemService {
 
                     int opsAdded = mNumOps.getOpsAdded();
                     if (mNumOps.getOpsAdded() >= opsAllowed) {
-                        if (DEBUG || opsAllowed + 10 > opsAdded) {
-                            Slog.w(TAG, mPuuid + ": Dropped operation as too many operations were "
-                                    + "run in last 24 hours");
+                        try {
+                            if (DEBUG || opsAllowed + 10 > opsAdded) {
+                                Slog.w(TAG, mPuuid + ": Dropped operation as too many operations "
+                                        + "were run in last 24 hours");
+                            }
+
+                            op.drop();
+                        } catch (Exception e) {
+                            Slog.e(TAG, mPuuid + ": Could not drop operation", e);
                         }
                     } else {
                         mNumOps.addOp(currentTime);
@@ -972,34 +1023,87 @@ public class SoundTriggerService extends SystemService {
                     + ")");
         }
 
+        /**
+         * Create an AudioRecord enough for starting and releasing the data buffered for the event.
+         *
+         * @param event The event that was received
+         * @return The initialized AudioRecord
+         */
+        private @NonNull AudioRecord createAudioRecordForEvent(
+                @NonNull SoundTrigger.GenericRecognitionEvent event) {
+            AudioAttributes.Builder attributesBuilder = new AudioAttributes.Builder();
+            attributesBuilder.setInternalCapturePreset(MediaRecorder.AudioSource.HOTWORD);
+            AudioAttributes attributes = attributesBuilder.build();
+
+            // Use same AudioFormat processing as in RecognitionEvent.fromParcel
+            AudioFormat originalFormat = event.getCaptureFormat();
+            AudioFormat captureFormat = (new AudioFormat.Builder())
+                    .setChannelMask(originalFormat.getChannelMask())
+                    .setEncoding(originalFormat.getEncoding())
+                    .setSampleRate(originalFormat.getSampleRate())
+                    .build();
+
+            int bufferSize = AudioRecord.getMinBufferSize(
+                    captureFormat.getSampleRate() == AudioFormat.SAMPLE_RATE_UNSPECIFIED
+                            ? AudioFormat.SAMPLE_RATE_HZ_MAX
+                            : captureFormat.getSampleRate(),
+                    captureFormat.getChannelCount() == 2
+                            ? AudioFormat.CHANNEL_IN_STEREO
+                            : AudioFormat.CHANNEL_IN_MONO,
+                    captureFormat.getEncoding());
+
+            return new AudioRecord(attributes, captureFormat, bufferSize,
+                    event.getCaptureSession());
+        }
+
         @Override
         public void onGenericSoundTriggerDetected(SoundTrigger.GenericRecognitionEvent event) {
             if (DEBUG) Slog.v(TAG, mPuuid + ": Generic sound trigger event: " + event);
 
-            runOrAddOperation((opId, service) -> {
-                if (!mRecognitionConfig.allowMultipleTriggers) {
-                    synchronized (mCallbacksLock) {
-                        mCallbacks.remove(mPuuid.getUuid());
-                    }
-                    mDestroyOnceRunningOpsDone = true;
-                }
+            runOrAddOperation(new Operation(
+                    // always execute:
+                    () -> {
+                        if (!mRecognitionConfig.allowMultipleTriggers) {
+                            // Unregister this remoteService once op is done
+                            synchronized (mCallbacksLock) {
+                                mCallbacks.remove(mPuuid.getUuid());
+                            }
+                            mDestroyOnceRunningOpsDone = true;
+                        }
+                    },
+                    // execute if not throttled:
+                    (opId, service) -> service.onGenericRecognitionEvent(mPuuid, opId, event),
+                    // execute if throttled:
+                    () -> {
+                        if (event.isCaptureAvailable()) {
+                            AudioRecord capturedData = createAudioRecordForEvent(event);
 
-                service.onGenericRecognitionEvent(mPuuid, opId, event);
-            });
+                            // Currently we need to start and release the audio record to reset
+                            // the DSP even if we don't want to process the event
+                            capturedData.startRecording();
+                            capturedData.release();
+                        }
+                    }));
         }
 
         @Override
         public void onError(int status) {
             if (DEBUG) Slog.v(TAG, mPuuid + ": onError: " + status);
 
-            runOrAddOperation((opId, service) -> {
-                synchronized (mCallbacksLock) {
-                    mCallbacks.remove(mPuuid.getUuid());
-                }
-                mDestroyOnceRunningOpsDone = true;
-
-                service.onError(mPuuid, opId, status);
-            });
+            runOrAddOperation(
+                    new Operation(
+                            // always execute:
+                            () -> {
+                                // Unregister this remoteService once op is done
+                                synchronized (mCallbacksLock) {
+                                    mCallbacks.remove(mPuuid.getUuid());
+                                }
+                                mDestroyOnceRunningOpsDone = true;
+                            },
+                            // execute if not throttled:
+                            (opId, service) -> service.onError(mPuuid, opId, status),
+                            // nothing to do if throttled
+                            null));
         }
 
         @Override
