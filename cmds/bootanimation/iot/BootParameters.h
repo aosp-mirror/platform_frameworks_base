@@ -33,13 +33,8 @@ public:
     // to clear the parameters for next boot.
     BootParameters();
 
-    // Returns true if volume/brightness were explicitly set on reboot.
-    bool hasVolume() const { return mVolume >= 0; }
-    bool hasBrightness() const { return mBrightness >= 0; }
-
-    // Returns volume/brightness in [0,1], or -1 if unset.
-    float getVolume() const { return mVolume; }
-    float getBrightness() const { return mBrightness; }
+    // Returns whether or not this is a silent boot.
+    bool isSilentBoot() const { return mIsSilentBoot; }
 
     // Returns the additional boot parameters that were set on reboot.
     const std::vector<ABootActionParameter>& getParameters() const { return mParameters; }
@@ -49,12 +44,17 @@ public:
 private:
     void loadParameters();
 
-    float mVolume = -1.f;
-    float mBrightness = -1.f;
+    void parseBootParameters();
+
+    bool mIsSilentBoot = false;
+
     std::vector<ABootActionParameter> mParameters;
 
     // Store parsed JSON because mParameters makes a shallow copy.
     Json::Value mJson;
+
+    // Store parameter keys because mParameters makes a shallow copy.
+    Json::Value::Members mKeys;
 };
 
 }  // namespace android
