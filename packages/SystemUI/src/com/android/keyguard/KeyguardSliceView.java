@@ -57,6 +57,7 @@ import java.util.function.Consumer;
 
 import androidx.slice.Slice;
 import androidx.slice.SliceItem;
+import androidx.slice.SliceManager;
 import androidx.slice.core.SliceQuery;
 import androidx.slice.widget.ListContent;
 import androidx.slice.widget.RowContent;
@@ -388,6 +389,11 @@ public class KeyguardSliceView extends LinearLayout implements View.OnClickListe
                 }
             }
         }
+    }
+
+    public void refresh() {
+        Slice slice = SliceManager.getInstance(getContext()).bindSlice(mKeyguardSliceUri);
+        onChanged(slice);
     }
 
     public static class Row extends LinearLayout {
