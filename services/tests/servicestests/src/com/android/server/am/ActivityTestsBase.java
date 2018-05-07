@@ -108,18 +108,22 @@ public class ActivityTestsBase {
         return service;
     }
 
-    protected ActivityManagerService setupActivityManagerService(ActivityManagerService service) {
+    protected ActivityManagerService setupActivityManagerService(
+            ActivityManagerService service, ActivityTaskManagerService atm) {
         service = spy(service);
+        atm = spy(atm);
         // Makes sure the supervisor is using with the spy object.
         service.mStackSupervisor.setService(service);
-        // Makes sure activity task is created with the spy object.
-        TestActivityTaskManagerService atm =
-                spy(new TestActivityTaskManagerService(service.mContext));
         service.setActivityTaskManager(atm);
         doReturn(mock(IPackageManager.class)).when(service).getPackageManager();
         doNothing().when(service).grantEphemeralAccessLocked(anyInt(), any(), anyInt(), anyInt());
         service.mWindowManager = prepareMockWindowManager();
         return service;
+    }
+
+    protected ActivityManagerService setupActivityManagerService(ActivityManagerService service) {
+        return setupActivityManagerService(
+                service, new TestActivityTaskManagerService(service.mContext));
     }
 
     /**

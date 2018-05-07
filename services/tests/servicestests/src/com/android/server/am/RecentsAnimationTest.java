@@ -63,7 +63,8 @@ public class RecentsAnimationTest extends ActivityTestsBase {
         super.setUp();
 
         mRecentsComponent = new ComponentName(mContext.getPackageName(), "RecentsActivity");
-        mService = setupActivityManagerService(new MyTestActivityManagerService(mContext));
+        mService = setupActivityManagerService(new TestActivityManagerService(mContext),
+                new MyTestActivityTaskManagerService(mContext));
         AttributeCache.init(mContext);
     }
 
@@ -99,8 +100,8 @@ public class RecentsAnimationTest extends ActivityTestsBase {
                 eq(REORDER_KEEP_IN_PLACE), any());
     }
 
-    private class MyTestActivityManagerService extends TestActivityManagerService {
-        MyTestActivityManagerService(Context context) {
+    private class MyTestActivityTaskManagerService extends TestActivityTaskManagerService {
+        MyTestActivityTaskManagerService(Context context) {
             super(context);
         }
 

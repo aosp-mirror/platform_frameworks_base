@@ -1099,7 +1099,7 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
             return true;
         }
         // Allow the recents component to launch the home activity.
-        final RecentTasks recentTasks = mStackSupervisor.mService.getRecentTasks();
+        final RecentTasks recentTasks = mStackSupervisor.mService.mActivityTaskManager.getRecentTasks();
         if (recentTasks != null && recentTasks.isCallerRecents(uid)) {
             return true;
         }
@@ -1131,8 +1131,8 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
                 // We only allow home activities to be resizeable if they explicitly requested it.
                 info.resizeMode = RESIZE_MODE_UNRESIZEABLE;
             }
-        } else if (realActivity.getClassName().contains(LEGACY_RECENTS_PACKAGE_NAME) ||
-                service.getRecentTasks().isRecentsComponent(realActivity, appInfo.uid)) {
+        } else if (realActivity.getClassName().contains(LEGACY_RECENTS_PACKAGE_NAME)
+                || service.mActivityTaskManager.getRecentTasks().isRecentsComponent(realActivity, appInfo.uid)) {
             activityType = ACTIVITY_TYPE_RECENTS;
         } else if (options != null && options.getLaunchActivityType() == ACTIVITY_TYPE_ASSISTANT
                 && canLaunchAssistActivity(launchedFromPackage)) {
@@ -2280,7 +2280,7 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
             final File iconFile = new File(TaskPersister.getUserImagesDir(task.userId),
                     iconFilename);
             final String iconFilePath = iconFile.getAbsolutePath();
-            service.getRecentTasks().saveImage(icon, iconFilePath);
+            service.mActivityTaskManager.getRecentTasks().saveImage(icon, iconFilePath);
             _taskDescription.setIconFilename(iconFilePath);
         }
         taskDescription = _taskDescription;

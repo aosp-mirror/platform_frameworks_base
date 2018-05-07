@@ -2187,7 +2187,7 @@ class UserController implements Handler.Callback {
 
         void loadUserRecents(int userId) {
             synchronized (mService) {
-                mService.getRecentTasks().loadUserRecentsLocked(userId);
+                mService.mActivityTaskManager.getRecentTasks().loadUserRecentsLocked(userId);
             }
         }
 
@@ -2253,7 +2253,7 @@ class UserController implements Handler.Callback {
         }
 
         protected boolean isCallerRecents(int callingUid) {
-            return mService.getRecentTasks().isCallerRecents(callingUid);
+            return mService.mActivityTaskManager.getRecentTasks().isCallerRecents(callingUid);
         }
     }
 }

@@ -2760,7 +2760,7 @@ final class ActivityManagerShellCommand extends ShellCommand {
     int runWrite(PrintWriter pw) {
         mInternal.enforceCallingPermission(android.Manifest.permission.SET_ACTIVITY_WATCHER,
                 "registerUidObserver()");
-        mInternal.getRecentTasks().flush();
+        mInternal.mActivityTaskManager.getRecentTasks().flush();
         pw.println("All tasks persisted.");
         return 0;
     }

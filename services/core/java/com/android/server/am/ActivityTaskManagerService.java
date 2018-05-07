@@ -173,12 +173,13 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
     private static final String TAG_VISIBILITY = TAG + POSTFIX_VISIBILITY;
     private static final String TAG_LOCKTASK = TAG + POSTFIX_LOCKTASK;
 
-    private Context mContext;
-    private ActivityManagerService mAm;
+    Context mContext;
+    ActivityManagerService mAm;
     /* Global service lock used by the package the owns this service. */
     Object mGlobalLock;
-    private ActivityStackSupervisor mStackSupervisor;
-
+    ActivityStackSupervisor mStackSupervisor;
+    /** List of intents that were used to start the most recent tasks. */
+    private RecentTasks mRecentTasks;
     /** State of external calls telling us if the device is awake or asleep. */
     private boolean mKeyguardShown = false;
 
@@ -232,6 +233,16 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         mAm = am;
         mGlobalLock = mAm;
         mStackSupervisor = mAm.mStackSupervisor;
+        mRecentTasks = createRecentTasks();
+        mStackSupervisor.setRecentTasks(mRecentTasks);
+    }
+
+    protected RecentTasks createRecentTasks() {
+        return new RecentTasks(this, mStackSupervisor);
+    }
+
+    RecentTasks getRecentTasks() {
+        return mRecentTasks;
     }
 
     private void start() {
@@ -653,8 +664,8 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         final long origId = Binder.clearCallingIdentity();
         try {
             synchronized (mGlobalLock) {
-                final ComponentName recentsComponent = mAm.getRecentTasks().getRecentsComponent();
-                final int recentsUid = mAm.getRecentTasks().getRecentsComponentUid();
+                final ComponentName recentsComponent = mRecentTasks.getRecentsComponent();
+                final int recentsUid = mRecentTasks.getRecentsComponentUid();
 
                 // Start a new recents animation
                 final RecentsAnimation anim = new RecentsAnimation(mAm, mStackSupervisor,
@@ -1640,7 +1651,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                 == PackageManager.PERMISSION_GRANTED;
 
         synchronized (mGlobalLock) {
-            return mAm.getRecentTasks().getRecentTasks(maxNum, flags, allowed, detailed, userId,
+            return mRecentTasks.getRecentTasks(maxNum, flags, allowed, detailed, userId,
                     callingUid);
         }
     }
@@ -1833,7 +1844,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         long ident = Binder.clearCallingIdentity();
         try {
             synchronized (mGlobalLock) {
-                return mAm.getRecentTasks().getAppTasksList(callingUid, callingPackage);
+                return mRecentTasks.getAppTasksList(callingUid, callingPackage);
             }
         } finally {
             Binder.restoreCallingIdentity(ident);
@@ -2000,7 +2011,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                 final TaskRecord task = stack.createTaskRecord(
                         mStackSupervisor.getNextTaskIdForUserLocked(r.userId), ainfo, intent,
                         null /* voiceSession */, null /* voiceInteractor */, !ON_TOP);
-                if (!mAm.getRecentTasks().addToBottom(task)) {
+                if (!mRecentTasks.addToBottom(task)) {
                     // The app has too many tasks already and we can't add any more
                     stack.removeTask(task, "addAppTask", REMOVE_TASK_MODE_DESTROYING);
                     return INVALID_TASK_ID;
@@ -2153,7 +2164,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
             throw new IllegalArgumentException("Bad file path: " + filePath
                     + " passed for userId " + userId);
         }
-        return mAm.getRecentTasks().getTaskDescriptionIcon(filePath);
+        return mRecentTasks.getTaskDescriptionIcon(filePath);
     }
 
     @Override
@@ -3535,12 +3546,12 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
 
         @Override
         public boolean isCallerRecents(int callingUid) {
-            return mAm.getRecentTasks().isCallerRecents(callingUid);
+            return getRecentTasks().isCallerRecents(callingUid);
         }
 
         @Override
         public boolean isRecentsComponentHomeActivity(int userId) {
-            return mAm.getRecentTasks().isRecentsComponentHomeActivity(userId);
+            return getRecentTasks().isRecentsComponentHomeActivity(userId);
         }
 
         @Override
