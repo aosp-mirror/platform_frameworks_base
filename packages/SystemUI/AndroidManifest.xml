@@ -208,6 +208,9 @@
     <!-- to read and change hvac values in a car -->
     <uses-permission android:name="android.car.permission.CONTROL_CAR_CLIMATE" />
 
+    <!-- Permission necessary to change car audio volume through CarAudioManager -->
+    <uses-permission android:name="android.car.permission.CAR_CONTROL_AUDIO_VOLUME" />
+
     <application
         android:name=".SystemUIApplication"
         android:persistent="true"
