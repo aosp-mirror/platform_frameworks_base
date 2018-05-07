@@ -70,6 +70,10 @@ statsd_common_src := \
     src/guardrail/StatsdStats.cpp \
     src/socket/StatsSocketListener.cpp
 
+# TODO: Once statsd is using a blueprint file, migrate to the proper filegroup.
+statsd_common_src += \
+    src/perfprofd/perfprofd_config.proto
+
 statsd_common_c_includes := \
     $(LOCAL_PATH)/src \
     $(LOCAL_PATH)/../../libs/services/include
@@ -247,6 +251,7 @@ LOCAL_SRC_FILES := \
     src/stats_log.proto \
     src/statsd_config.proto \
     src/perfetto/perfetto_config.proto \
+    src/perfprofd/perfprofd_config.proto \
     src/atoms.proto
 
 LOCAL_PROTOC_OPTIMIZE_TYPE := lite
