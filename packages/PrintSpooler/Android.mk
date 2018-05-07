@@ -18,18 +18,27 @@ include $(CLEAR_VARS)
 
 LOCAL_MODULE_TAGS := optional
 
-LOCAL_RESOURCE_DIR := $(LOCAL_PATH)/res frameworks/support/v7/recyclerview/res
-LOCAL_AAPT_FLAGS := --auto-add-overlay --extra-packages android.support.v7.recyclerview
+LOCAL_RESOURCE_DIR := $(LOCAL_PATH)/res
+LOCAL_USE_AAPT2 := true
 LOCAL_SRC_FILES := $(call all-java-files-under, src)
 LOCAL_SRC_FILES += \
-        src/com/android/printspooler/renderer/IPdfRenderer.aidl \
-        src/com/android/printspooler/renderer/IPdfEditor.aidl
+    src/com/android/printspooler/renderer/IPdfRenderer.aidl \
+    src/com/android/printspooler/renderer/IPdfEditor.aidl
 
 LOCAL_PACKAGE_NAME := PrintSpooler
 LOCAL_PRIVATE_PLATFORM_APIS := true
 
 LOCAL_JNI_SHARED_LIBRARIES := libprintspooler_jni
-LOCAL_STATIC_JAVA_LIBRARIES := android-support-v4 android-support-v7-recyclerview
+LOCAL_STATIC_ANDROID_LIBRARIES := \
+    android-support-v7-recyclerview \
+    android-support-compat \
+    android-support-media-compat \
+    android-support-core-utils \
+    android-support-core-ui \
+    android-support-fragment
+
+LOCAL_STATIC_JAVA_LIBRARIES := \
+    android-support-annotations
 
 include $(BUILD_PACKAGE)
 
