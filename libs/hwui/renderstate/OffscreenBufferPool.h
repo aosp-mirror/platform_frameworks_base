@@ -20,6 +20,7 @@
 #include <GpuMemoryTracker.h>
 #include <ui/Region.h>
 #include "Caches.h"
+#include "Matrix.h"
 #include "Texture.h"
 #include "utils/Macros.h"
 

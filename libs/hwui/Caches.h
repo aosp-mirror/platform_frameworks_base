@@ -18,7 +18,6 @@
 
 #include "DeviceInfo.h"
 #include "Extensions.h"
-#include "Program.h"
 #include "ResourceCache.h"
 #include "renderstate/PixelBufferState.h"
 #include "renderstate/TextureState.h"
@@ -142,11 +141,7 @@ public:
     PFNGLPUSHGROUPMARKEREXTPROC startMark;
     PFNGLPOPGROUPMARKEREXTPROC endMark;
 
-    void setProgram(const ProgramDescription& description);
-    void setProgram(Program* program);
-
     const Extensions& extensions() const { return DeviceInfo::get()->extensions(); }
-    Program& program() { return *mProgram; }
     PixelBufferState& pixelBufferState() { return *mPixelBufferState; }
     TextureState& textureState() { return *mTextureState; }
 
@@ -172,7 +167,6 @@ private:
     // TODO: move below to RenderState
     PixelBufferState* mPixelBufferState = nullptr;
     TextureState* mTextureState = nullptr;
-    Program* mProgram = nullptr;  // note: object owned by ProgramCache
 
 };  // class Caches
 

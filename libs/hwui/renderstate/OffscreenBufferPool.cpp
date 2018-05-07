@@ -17,6 +17,7 @@
 #include "OffscreenBufferPool.h"
 
 #include "Caches.h"
+#include "Properties.h"
 #include "renderstate/RenderState.h"
 #include "utils/FatVector.h"
 #include "utils/TraceUtils.h"
