@@ -18,6 +18,7 @@ syntax = "proto2";
 option java_multiple_files = true;
 
 import "frameworks/base/core/proto/android/os/backtrace.proto";
+import "frameworks/base/core/proto/android/os/batterystats.proto";
 import "frameworks/base/core/proto/android/os/batterytype.proto";
 import "frameworks/base/core/proto/android/os/cpufreq.proto";
 import "frameworks/base/core/proto/android/os/cpuinfo.proto";
@@ -287,6 +288,14 @@ message IncidentProto {
     optional android.service.usb.UsbServiceDumpProto usb = 3021 [
         (section).type = SECTION_DUMPSYS,
         (section).args = "usb --proto"
+    ];
+
+    // The history can be large and may cause issues in consumers, so put the
+    // history in a separate section to compensate.
+    optional android.service.batterystats.BatteryStatsServiceDumpHistoryProto battery_history = 3022 [
+        (section).type = SECTION_DUMPSYS,
+        (section).args = "batterystats --proto --history",
+        (section).userdebug_and_eng_only = true
     ];
 
     // Reserved for OEMs.
