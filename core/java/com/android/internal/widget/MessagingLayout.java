@@ -436,9 +436,28 @@ public class MessagingLayout extends FrameLayout {
     }
 
     private void updateHistoricMessageVisibility() {
-        for (int i = 0; i < mHistoricMessages.size(); i++) {
+        int numHistoric = mHistoricMessages.size();
+        for (int i = 0; i < numHistoric; i++) {
             MessagingMessage existing = mHistoricMessages.get(i);
             existing.setVisibility(mShowHistoricMessages ? VISIBLE : GONE);
+        }
+        int numGroups = mGroups.size();
+        for (int i = 0; i < numGroups; i++) {
+            MessagingGroup group = mGroups.get(i);
+            int visibleChildren = 0;
+            List<MessagingMessage> messages = group.getMessages();
+            int numGroupMessages = messages.size();
+            for (int j = 0; j < numGroupMessages; j++) {
+                MessagingMessage message = messages.get(j);
+                if (message.getVisibility() != GONE) {
+                    visibleChildren++;
+                }
+            }
+            if (visibleChildren > 0 && group.getVisibility() == GONE) {
+                group.setVisibility(VISIBLE);
+            } else if (visibleChildren == 0 && group.getVisibility() != GONE)   {
+                group.setVisibility(GONE);
+            }
         }
     }
 
