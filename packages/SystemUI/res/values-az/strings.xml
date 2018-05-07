@@ -95,6 +95,7 @@
     <string name="accessibility_unlock_button" msgid="128158454631118828">"Kiliddən çıxarın"</string>
     <string name="accessibility_waiting_for_fingerprint" msgid="4808860050517462885">"Barmaq izi gözlənilir"</string>
     <string name="accessibility_unlock_without_fingerprint" msgid="7541705575183694446">"Barmaq izi istifadə etmədən kilidi açın"</string>
+    <string name="accessibility_scanning_face" msgid="769545173211758586">"Üzün skan edilməsi"</string>
     <string name="accessibility_send_smart_reply" msgid="7766727839703044493">"Göndərin"</string>
     <string name="unlock_label" msgid="8779712358041029439">"kiliddən çıxarın"</string>
     <string name="phone_label" msgid="2320074140205331708">"telefonu açın"</string>
@@ -851,4 +852,5 @@
     <string name="auto_saver_enabled_text" msgid="874711029884777579">"Batareya <xliff:g id="PERCENTAGE">%d</xliff:g>%%-dən aşağı düşdükdə Batareya Qənaəti avtomatik aktiv ediləcək."</string>
     <string name="open_saver_setting_action" msgid="8314624730997322529">"Ayarlar"</string>
     <string name="auto_saver_okay_action" msgid="2701221740227683650">"Anladım"</string>
+    <string name="heap_dump_tile_name" msgid="9141031328971226374">"Dump SysUI Heap"</string>
 </resources>

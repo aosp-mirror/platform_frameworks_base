@@ -83,8 +83,8 @@
     <string name="screenshot_failed_to_save_text" msgid="3041612585107107310">"يتعذر حفظ لقطة الشاشة لأن مساحة التخزين المتاحة محدودة."</string>
     <string name="screenshot_failed_to_capture_text" msgid="173674476457581486">"يحظر التطبيق أو تحظر مؤسستك التقاط لقطات شاشة"</string>
     <string name="usb_preference_title" msgid="6551050377388882787">"‏خيارات نقل الملفات عبر USB"</string>
-    <string name="use_mtp_button_title" msgid="4333504413563023626">"‏تحميل كمشغل وسائط (MTP)"</string>
-    <string name="use_ptp_button_title" msgid="7517127540301625751">"‏تحميل ككاميرا (PTP)"</string>
+    <string name="use_mtp_button_title" msgid="4333504413563023626">"‏تثبيت كمشغل وسائط (MTP)"</string>
+    <string name="use_ptp_button_title" msgid="7517127540301625751">"‏تثبيت ككاميرا (PTP)"</string>
     <string name="installer_cd_button_title" msgid="2312667578562201583">"‏تثبيت تطبيق Android File Transfer لـ Mac"</string>
     <string name="accessibility_back" msgid="567011538994429120">"رجوع"</string>
     <string name="accessibility_home" msgid="8217216074895377641">"الرئيسية"</string>
@@ -99,6 +99,8 @@
     <string name="accessibility_unlock_button" msgid="128158454631118828">"إلغاء القفل"</string>
     <string name="accessibility_waiting_for_fingerprint" msgid="4808860050517462885">"في انتظار بصمة الإصبع"</string>
     <string name="accessibility_unlock_without_fingerprint" msgid="7541705575183694446">"إلغاء القفل دون استخدام بصمة إصبعك"</string>
+    <!-- no translation found for accessibility_scanning_face (769545173211758586) -->
+    <skip />
     <string name="accessibility_send_smart_reply" msgid="7766727839703044493">"إرسال"</string>
     <string name="unlock_label" msgid="8779712358041029439">"إلغاء القفل"</string>
     <string name="phone_label" msgid="2320074140205331708">"فتح الهاتف"</string>
@@ -879,4 +881,6 @@
     <string name="auto_saver_enabled_text" msgid="874711029884777579">"سيتم تفعيل ميزة \"توفير شحن البطارية\" عندما تنخفض البطارية عن <xliff:g id="PERCENTAGE">%d</xliff:g>%%."</string>
     <string name="open_saver_setting_action" msgid="8314624730997322529">"الإعدادات"</string>
     <string name="auto_saver_okay_action" msgid="2701221740227683650">"حسنًا"</string>
+    <!-- no translation found for heap_dump_tile_name (9141031328971226374) -->
+    <skip />
 </resources>

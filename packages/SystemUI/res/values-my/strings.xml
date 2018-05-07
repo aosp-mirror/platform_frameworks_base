@@ -95,6 +95,7 @@
     <string name="accessibility_unlock_button" msgid="128158454631118828">"သော့ဖွင့်ရန်"</string>
     <string name="accessibility_waiting_for_fingerprint" msgid="4808860050517462885">"လက်ဗွေရာကို စောင့်နေပါသည်"</string>
     <string name="accessibility_unlock_without_fingerprint" msgid="7541705575183694446">"လက်ဗွေရာ မသုံးဘဲ ဖွင့်ပါ"</string>
+    <string name="accessibility_scanning_face" msgid="769545173211758586">"မျက်နှာ စကင်ဖတ်နေသည်"</string>
     <string name="accessibility_send_smart_reply" msgid="7766727839703044493">"ပို့ရန်"</string>
     <string name="unlock_label" msgid="8779712358041029439">"သော့ဖွင့်ရန်"</string>
     <string name="phone_label" msgid="2320074140205331708">"ဖုန်းကို ဖွင့်ရန်"</string>
@@ -851,4 +852,5 @@
     <string name="auto_saver_enabled_text" msgid="874711029884777579">"ဘက်ထရီ <xliff:g id="PERCENTAGE">%d</xliff:g>%% အောက် ရောက်သွားသည်နှင့် \'ဘက်ထရီ အားထိန်း\' အလိုအလျောက် ဖွင့်ပါမည်။"</string>
     <string name="open_saver_setting_action" msgid="8314624730997322529">"ဆက်တင်များ"</string>
     <string name="auto_saver_okay_action" msgid="2701221740227683650">"ရပါပြီ"</string>
+    <string name="heap_dump_tile_name" msgid="9141031328971226374">"SysUI အပုံ ပစ်ခြင်း"</string>
 </resources>
