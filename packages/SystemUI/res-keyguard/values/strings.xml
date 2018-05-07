@@ -120,6 +120,9 @@
 
     <!-- Accessibility description of the PIN password view. [CHAR_LIMIT=none] -->
     <string name="keyguard_accessibility_pin_area">PIN area</string>
+    <!-- Accessibility description of the normal password view. [CHAR_LIMIT=none] -->
+    <string name="keyguard_accessibility_password">Device password</string>
+
     <!-- Accessibility description of the SIM PIN password view. [CHAR_LIMIT=none] -->
     <string name="keyguard_accessibility_sim_pin_area">SIM PIN area</string>
     <!-- Accessibility description of the SIM PUK password view. [CHAR_LIMIT=none] -->
