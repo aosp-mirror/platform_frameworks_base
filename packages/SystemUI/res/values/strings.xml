@@ -1725,8 +1725,8 @@
     <string name="keyboard_shortcut_group_system_notifications">Notifications</string>
     <!-- User visible title for the the keyboard shortcut that triggers the keyboard shortcuts helper. -->
     <string name="keyboard_shortcut_group_system_shortcuts_helper">Keyboard Shortcuts</string>
-    <!-- User visible title for the the keyboard shortcut that switches input methods. -->
-    <string name="keyboard_shortcut_group_system_switch_input">Switch input method</string>
+    <!-- User visible title for the the keyboard shortcut that switches to the next hardware keyboard layout. [CHAR LIMIT=30] -->
+    <string name="keyboard_shortcut_group_system_switch_input">Switch keyboard layout</string>
 
     <!-- User visible title for the system-wide applications keyboard shortcuts list. -->
     <string name="keyboard_shortcut_group_applications">Applications</string>

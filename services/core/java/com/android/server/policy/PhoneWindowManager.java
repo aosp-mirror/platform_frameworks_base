@@ -3986,10 +3986,10 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         }
 
         // Handle keyboard language switching.
+        final boolean isCtrlOrMetaSpace = keyCode == KeyEvent.KEYCODE_SPACE
+                && (metaState & (KeyEvent.META_CTRL_MASK | KeyEvent.META_META_MASK)) != 0;
         if (down && repeatCount == 0
-                && (keyCode == KeyEvent.KEYCODE_LANGUAGE_SWITCH
-                        || (keyCode == KeyEvent.KEYCODE_SPACE
-                                && (metaState & KeyEvent.META_CTRL_MASK) != 0))) {
+                && (keyCode == KeyEvent.KEYCODE_LANGUAGE_SWITCH || isCtrlOrMetaSpace)) {
             int direction = (metaState & KeyEvent.META_SHIFT_MASK) != 0 ? -1 : 1;
             mWindowManagerFuncs.switchKeyboardLayout(event.getDeviceId(), direction);
             return -1;
