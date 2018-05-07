@@ -62,6 +62,7 @@ package android.app {
   }
 
   public class AppOpsManager {
+    method public static int getNumOps();
     method public static java.lang.String[] getOpStrs();
     method public boolean isOperationActive(int, int, java.lang.String);
     method public static java.lang.String opToPermission(int);
@@ -115,7 +116,6 @@ package android.app {
     field public static final java.lang.String OPSTR_WRITE_WALLPAPER = "android:write_wallpaper";
     field public static final int OP_RECORD_AUDIO = 27; // 0x1b
     field public static final int OP_SYSTEM_ALERT_WINDOW = 24; // 0x18
-    field public static final int _NUM_OP = 78; // 0x4e
   }
 
   public static abstract interface AppOpsManager.OnOpActiveChangedListener {
