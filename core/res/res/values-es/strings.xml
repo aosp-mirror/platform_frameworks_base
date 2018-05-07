@@ -291,6 +291,12 @@
     <string name="permgrouplab_camera" msgid="4820372495894586615">"Cámara"</string>
     <string name="permgroupdesc_camera" msgid="3250611594678347720">"hacer fotos y grabar vídeos"</string>
     <string name="permgrouprequest_camera" msgid="1299833592069671756">"¿Quieres permitir que &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; haga fotos y grabe vídeos?"</string>
+    <!-- no translation found for permgrouplab_calllog (8798646184930388160) -->
+    <skip />
+    <!-- no translation found for permgroupdesc_calllog (3006237336748283775) -->
+    <skip />
+    <!-- no translation found for permgrouprequest_calllog (8487355309583773267) -->
+    <skip />
     <string name="permgrouplab_phone" msgid="5229115638567440675">"Teléfono"</string>
     <string name="permgroupdesc_phone" msgid="6234224354060641055">"hacer y administrar llamadas telefónicas"</string>
     <string name="permgrouprequest_phone" msgid="9166979577750581037">"¿Quieres permitir que &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; haga y gestione llamadas?"</string>
@@ -836,8 +842,7 @@
     <string name="double_tap_toast" msgid="4595046515400268881">"Sugerencia: toca dos veces para ampliar o reducir el contenido."</string>
     <string name="autofill_this_form" msgid="4616758841157816676">"Autocompletar"</string>
     <string name="setup_autofill" msgid="7103495070180590814">"Configurar Autocompletar"</string>
-    <!-- no translation found for autofill_window_title (4107745526909284887) -->
-    <skip />
+    <string name="autofill_window_title" msgid="4107745526909284887">"Autocompletar con <xliff:g id="SERVICENAME">%1$s</xliff:g>"</string>
     <string name="autofill_address_name_separator" msgid="6350145154779706772">" "</string>
     <string name="autofill_address_summary_name_format" msgid="3268041054899214945">"$1$2$3"</string>
     <string name="autofill_address_summary_separator" msgid="7483307893170324129">", "</string>
@@ -1691,7 +1696,7 @@
     <string name="package_installed_device_owner" msgid="6875717669960212648">"Instalado por el administrador"</string>
     <string name="package_updated_device_owner" msgid="1847154566357862089">"Actualizado por el administrador"</string>
     <string name="package_deleted_device_owner" msgid="2307122077550236438">"Eliminado por el administrador"</string>
-    <string name="battery_saver_description_with_learn_more" msgid="6323937147992667707">"Para aumentar la duración de la batería, el ahorro de batería desactiva algunas funciones del dispositivo y limita aplicaciones. "<annotation id="url">"Más información"</annotation></string>
+    <string name="battery_saver_description_with_learn_more" msgid="6323937147992667707">"Para aumentar la duración de la batería, Ahorro de batería desactiva algunas funciones del dispositivo y limita aplicaciones. "<annotation id="url">"Más información"</annotation></string>
     <string name="battery_saver_description" msgid="769989536172631582">"Para aumentar la duración de la batería, el ahorro de batería desactiva algunas funciones del dispositivo y limita aplicaciones."</string>
     <string name="data_saver_description" msgid="6015391409098303235">"El ahorro de datos evita que algunas aplicaciones envíen o reciban datos en segundo plano, lo que permite reducir el uso de datos. Una aplicación activa podrá acceder a los datos, aunque con menos frecuencia. Esto significa que, por ejemplo, algunas imágenes no se mostrarán hasta que las toques."</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"¿Activar ahorro de datos?"</string>

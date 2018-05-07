@@ -95,6 +95,8 @@
     <string name="accessibility_unlock_button" msgid="128158454631118828">"잠금 해제"</string>
     <string name="accessibility_waiting_for_fingerprint" msgid="4808860050517462885">"지문 대기 중"</string>
     <string name="accessibility_unlock_without_fingerprint" msgid="7541705575183694446">"지문 파일을 사용하지 않고 잠금 해제"</string>
+    <!-- no translation found for accessibility_scanning_face (769545173211758586) -->
+    <skip />
     <string name="accessibility_send_smart_reply" msgid="7766727839703044493">"보내기"</string>
     <string name="unlock_label" msgid="8779712358041029439">"잠금 해제"</string>
     <string name="phone_label" msgid="2320074140205331708">"휴대전화 열기"</string>
@@ -857,4 +859,6 @@
     <skip />
     <string name="open_saver_setting_action" msgid="8314624730997322529">"설정"</string>
     <string name="auto_saver_okay_action" msgid="2701221740227683650">"확인"</string>
+    <!-- no translation found for heap_dump_tile_name (9141031328971226374) -->
+    <skip />
 </resources>

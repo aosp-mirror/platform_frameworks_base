@@ -32,7 +32,7 @@
     <string name="status_bar_no_notifications_title" msgid="4755261167193833213">"Hakuna arifa"</string>
     <string name="status_bar_ongoing_events_title" msgid="1682504513316879202">"Inaendelea"</string>
     <string name="status_bar_latest_events_title" msgid="6594767438577593172">"Arifa"</string>
-    <string name="battery_low_title" msgid="9187898087363540349">"Huenda chaji ya betri ikaisha baada ya muda mfupi"</string>
+    <string name="battery_low_title" msgid="9187898087363540349">"Huenda chaji itaisha hivi karibuni"</string>
     <string name="battery_low_percent_format" msgid="2900940511201380775">"Imebakisha <xliff:g id="PERCENTAGE">%s</xliff:g>"</string>
     <string name="battery_low_percent_format_hybrid" msgid="6838677459286775617">"Imesalia <xliff:g id="PERCENTAGE">%s</xliff:g>, itadumu takribani <xliff:g id="TIME">%s</xliff:g> kulingana na jinsi unavyotumia"</string>
     <string name="battery_low_percent_format_hybrid_short" msgid="9025795469949145586">"Imesalia <xliff:g id="PERCENTAGE">%s</xliff:g>, itadumu takribani <xliff:g id="TIME">%s</xliff:g>"</string>
@@ -95,6 +95,8 @@
     <string name="accessibility_unlock_button" msgid="128158454631118828">"Fungua"</string>
     <string name="accessibility_waiting_for_fingerprint" msgid="4808860050517462885">"Inasubiri alama ya kidole"</string>
     <string name="accessibility_unlock_without_fingerprint" msgid="7541705575183694446">"Fungua bila kutumia kitambulisho chako"</string>
+    <!-- no translation found for accessibility_scanning_face (769545173211758586) -->
+    <skip />
     <string name="accessibility_send_smart_reply" msgid="7766727839703044493">"Tuma"</string>
     <string name="unlock_label" msgid="8779712358041029439">"fungua"</string>
     <string name="phone_label" msgid="2320074140205331708">"fungua simu"</string>
@@ -851,4 +853,6 @@
     <string name="auto_saver_enabled_text" msgid="874711029884777579">"Kiokoa Betri kitawaka kiotomatiki baada ya chaji ya betri kufika chini ya <xliff:g id="PERCENTAGE">%d</xliff:g>%%."</string>
     <string name="open_saver_setting_action" msgid="8314624730997322529">"Mipangilio"</string>
     <string name="auto_saver_okay_action" msgid="2701221740227683650">"Nimeelewa"</string>
+    <!-- no translation found for heap_dump_tile_name (9141031328971226374) -->
+    <skip />
 </resources>

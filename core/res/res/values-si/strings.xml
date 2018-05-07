@@ -291,6 +291,12 @@
     <string name="permgrouplab_camera" msgid="4820372495894586615">"කැමරාව"</string>
     <string name="permgroupdesc_camera" msgid="3250611594678347720">"පින්තූර ගැනීම සහ වීඩියෝ පටිගත කිරීම"</string>
     <string name="permgrouprequest_camera" msgid="1299833592069671756">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;b&gt; වෙත පින්තූර සහ වීඩියෝ ගැනීමට ඉඩ දෙන්නද?"</string>
+    <!-- no translation found for permgrouplab_calllog (8798646184930388160) -->
+    <skip />
+    <!-- no translation found for permgroupdesc_calllog (3006237336748283775) -->
+    <skip />
+    <!-- no translation found for permgrouprequest_calllog (8487355309583773267) -->
+    <skip />
     <string name="permgrouplab_phone" msgid="5229115638567440675">"දුරකථනය"</string>
     <string name="permgroupdesc_phone" msgid="6234224354060641055">"දුරකථන ඇමතුම් සිදු කිරීම සහ කළමනාකරණය කිරීම"</string>
     <string name="permgrouprequest_phone" msgid="9166979577750581037">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;b&gt; වෙත දුරකථන ඇමතුම් ලබා ගැනීමට සහ කළමනාකරණය කිරීමට ඉඩ දෙන්නද?"</string>
@@ -838,8 +844,7 @@
     <string name="double_tap_toast" msgid="4595046515400268881">"උපදෙස: විශාලනය කිරීමට සහ කුඩා කිරීමට දෙවරක් තට්ටු කරන්න."</string>
     <string name="autofill_this_form" msgid="4616758841157816676">"ස්වයංක්‍රිය පිරවුම"</string>
     <string name="setup_autofill" msgid="7103495070180590814">"ස්වයංක්‍රිය පිරවුම සකසන්න"</string>
-    <!-- no translation found for autofill_window_title (4107745526909284887) -->
-    <skip />
+    <string name="autofill_window_title" msgid="4107745526909284887">"<xliff:g id="SERVICENAME">%1$s</xliff:g> සමගින් ස්වයං පුරවන්න"</string>
     <string name="autofill_address_name_separator" msgid="6350145154779706772">" "</string>
     <string name="autofill_address_summary_name_format" msgid="3268041054899214945">"$1$2$3"</string>
     <string name="autofill_address_summary_separator" msgid="7483307893170324129">", "</string>

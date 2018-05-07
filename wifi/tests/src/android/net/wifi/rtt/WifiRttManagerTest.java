@@ -295,4 +295,96 @@ public class WifiRttManagerTest {
 
         assertEquals(rr1, rr2);
     }
+
+    /**
+     * Validate that ResponderConfig parcel works (produces same object on write/read).
+     */
+    @Test
+    public void testResponderConfigParcel() {
+        // ResponderConfig constructed with a MAC address
+        ResponderConfig config = new ResponderConfig(MacAddress.fromString("00:01:02:03:04:05"),
+                ResponderConfig.RESPONDER_AP, true, ResponderConfig.CHANNEL_WIDTH_80MHZ, 2134, 2345,
+                2555, ResponderConfig.PREAMBLE_LEGACY);
+
+        Parcel parcelW = Parcel.obtain();
+        config.writeToParcel(parcelW, 0);
+        byte[] bytes = parcelW.marshall();
+        parcelW.recycle();
+
+        Parcel parcelR = Parcel.obtain();
+        parcelR.unmarshall(bytes, 0, bytes.length);
+        parcelR.setDataPosition(0);
+        ResponderConfig rereadConfig = ResponderConfig.CREATOR.createFromParcel(parcelR);
+
+        assertEquals(config, rereadConfig);
+
+        // ResponderConfig constructed with a PeerHandle
+        config = new ResponderConfig(new PeerHandle(10), ResponderConfig.RESPONDER_AWARE, false,
+                ResponderConfig.CHANNEL_WIDTH_80MHZ_PLUS_MHZ, 5555, 6666, 7777,
+                ResponderConfig.PREAMBLE_VHT);
+
+        parcelW = Parcel.obtain();
+        config.writeToParcel(parcelW, 0);
+        bytes = parcelW.marshall();
+        parcelW.recycle();
+
+        parcelR = Parcel.obtain();
+        parcelR.unmarshall(bytes, 0, bytes.length);
+        parcelR.setDataPosition(0);
+        rereadConfig = ResponderConfig.CREATOR.createFromParcel(parcelR);
+
+        assertEquals(config, rereadConfig);
+    }
+
+    /**
+     * Validate preamble selection from ScanResults.
+     */
+    @Test
+    public void testResponderPreambleSelection() {
+        ScanResult.InformationElement htCap = new ScanResult.InformationElement();
+        htCap.id = ScanResult.InformationElement.EID_HT_CAPABILITIES;
+
+        ScanResult.InformationElement vhtCap = new ScanResult.InformationElement();
+        vhtCap.id = ScanResult.InformationElement.EID_VHT_CAPABILITIES;
+
+        ScanResult.InformationElement vsa = new ScanResult.InformationElement();
+        vsa.id = ScanResult.InformationElement.EID_VSA;
+
+        // no IE
+        ScanResult scan = new ScanResult();
+        scan.BSSID = "00:01:02:03:04:05";
+        scan.informationElements = null;
+        scan.channelWidth = ResponderConfig.CHANNEL_WIDTH_80MHZ;
+
+        ResponderConfig config = ResponderConfig.fromScanResult(scan);
+
+        assertEquals(ResponderConfig.PREAMBLE_VHT, config.preamble);
+
+        // IE with HT & VHT
+        scan.channelWidth = ResponderConfig.CHANNEL_WIDTH_40MHZ;
+
+        scan.informationElements = new ScanResult.InformationElement[2];
+        scan.informationElements[0] = htCap;
+        scan.informationElements[1] = vhtCap;
+
+        config = ResponderConfig.fromScanResult(scan);
+
+        assertEquals(ResponderConfig.PREAMBLE_VHT, config.preamble);
+
+        // IE with some entries but no HT or VHT
+        scan.informationElements[0] = vsa;
+        scan.informationElements[1] = vsa;
+
+        config = ResponderConfig.fromScanResult(scan);
+
+        assertEquals(ResponderConfig.PREAMBLE_LEGACY, config.preamble);
+
+        // IE with HT
+        scan.informationElements[0] = vsa;
+        scan.informationElements[1] = htCap;
+
+        config = ResponderConfig.fromScanResult(scan);
+
+        assertEquals(ResponderConfig.PREAMBLE_HT, config.preamble);
+    }
 }
