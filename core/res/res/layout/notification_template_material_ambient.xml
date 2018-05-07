@@ -59,7 +59,7 @@
                 android:singleLine="true"
                 android:ellipsize="marquee"
                 android:fadingEdge="horizontal"
-                android:textSize="24sp"
+                android:textSize="@dimen/notification_ambient_title_text_size"
                 android:textColor="#ffffffff"
             />
             <TextView android:id="@+id/text"
@@ -70,7 +70,7 @@
                 android:layout_weight="1"
                 android:gravity="top|center_horizontal"
                 android:visibility="gone"
-                android:textSize="16sp"
+                android:textSize="@dimen/notification_ambient_text_size"
                 android:textColor="#eeffffff"
                 android:layout_marginTop="4dp"
                 android:ellipsize="end"
