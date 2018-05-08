@@ -734,10 +734,10 @@ public final class Settings {
                                 true /*notLaunched*/,
                                 false /*hidden*/,
                                 false /*suspended*/,
-                                null, /*suspendingPackage*/
-                                null, /*dialogMessage*/
-                                null, /*suspendedAppExtras*/
-                                null, /*suspendedLauncherExtras*/
+                                null /*suspendingPackage*/,
+                                null /*dialogMessage*/,
+                                null /*suspendedAppExtras*/,
+                                null /*suspendedLauncherExtras*/,
                                 instantApp,
                                 virtualPreload,
                                 null /*lastDisableAppCaller*/,
@@ -1634,10 +1634,10 @@ public final class Settings {
                                 false /*notLaunched*/,
                                 false /*hidden*/,
                                 false /*suspended*/,
-                                null, /*suspendingPackage*/
-                                null, /*dialogMessage*/
-                                null, /*suspendedAppExtras*/
-                                null, /*suspendedLauncherExtras*/
+                                null /*suspendingPackage*/,
+                                null /*dialogMessage*/,
+                                null /*suspendedAppExtras*/,
+                                null /*suspendedLauncherExtras*/,
                                 false /*instantApp*/,
                                 false /*virtualPreload*/,
                                 null /*lastDisableAppCaller*/,
