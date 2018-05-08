@@ -78,9 +78,13 @@ class ActivityDisplay extends ConfigurationContainer<ActivityStack>
     int mDisplayId;
     Display mDisplay;
 
-    /** All of the stacks on this display. Order matters, topmost stack is in front of all other
-     * stacks, bottommost behind. Accessed directly by ActivityManager package classes */
+    /**
+     * All of the stacks on this display. Order matters, topmost stack is in front of all other
+     * stacks, bottommost behind. Accessed directly by ActivityManager package classes. Any calls
+     * changing the list should also call {@link #onStackOrderChanged()}.
+     */
     private final ArrayList<ActivityStack> mStacks = new ArrayList<>();
+    private ArrayList<OnStackOrderChangedListener> mStackOrderChangedCallbacks = new ArrayList<>();
 
     /** Array of all UIDs that are present on the display. */
     private IntArray mDisplayAccessUIDs = new IntArray();
@@ -145,6 +149,7 @@ class ActivityDisplay extends ConfigurationContainer<ActivityStack>
         mStacks.remove(stack);
         removeStackReferenceIfNeeded(stack);
         mSupervisor.mService.updateSleepIfNeededLocked();
+        onStackOrderChanged();
     }
 
     void positionChildAtTop(ActivityStack stack) {
@@ -163,6 +168,7 @@ class ActivityDisplay extends ConfigurationContainer<ActivityStack>
         mStacks.add(insertPosition, stack);
         mWindowContainerController.positionChildAt(stack.getWindowContainerController(),
                 insertPosition);
+        onStackOrderChanged();
     }
 
     private int getTopInsertPosition(ActivityStack stack, int candidatePosition) {
@@ -770,6 +776,30 @@ class ActivityDisplay extends ConfigurationContainer<ActivityStack>
         mSleeping = asleep;
     }
 
+    /**
+     * Adds a listener to be notified whenever the stack order in the display changes. Currently
+     * only used by the {@link RecentsAnimation} to determine whether to interrupt and cancel the
+     * current animation when the system state changes.
+     */
+    void registerStackOrderChangedListener(OnStackOrderChangedListener listener) {
+        if (!mStackOrderChangedCallbacks.contains(listener)) {
+            mStackOrderChangedCallbacks.add(listener);
+        }
+    }
+
+    /**
+     * Removes a previously registered stack order change listener.
+     */
+    void unregisterStackOrderChangedListener(OnStackOrderChangedListener listener) {
+        mStackOrderChangedCallbacks.remove(listener);
+    }
+
+    private void onStackOrderChanged() {
+        for (int i = mStackOrderChangedCallbacks.size() - 1; i >= 0; i--) {
+            mStackOrderChangedCallbacks.get(i).onStackOrderChanged();
+        }
+    }
+
     public void dump(PrintWriter pw, String prefix) {
         pw.println(prefix + "displayId=" + mDisplayId + " stacks=" + mStacks.size());
         final String myPrefix = prefix + " ";
@@ -805,5 +835,12 @@ class ActivityDisplay extends ConfigurationContainer<ActivityStack>
             stack.writeToProto(proto, STACKS);
         }
         proto.end(token);
+    }
+
+    /**
+     * Callback for when the order of the stacks in the display changes.
+     */
+    interface OnStackOrderChangedListener {
+        void onStackOrderChanged();
     }
 }
