@@ -530,6 +530,8 @@ class WebViewUpdater {
                         mCurrentWebViewPackage.packageName,
                         mCurrentWebViewPackage.versionName));
             }
+            pw.println(String.format("  Minimum targetSdkVersion: %d",
+                    UserPackage.MINIMUM_SUPPORTED_SDK));
             pw.println(String.format("  Minimum WebView version code: %d",
                   mMinimumVersionCode));
             pw.println(String.format("  Number of relros started: %d",
