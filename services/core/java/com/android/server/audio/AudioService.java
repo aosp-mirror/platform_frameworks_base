@@ -486,16 +486,13 @@ public class AudioService extends IAudioService.Stub
     // SCO audio state is active or starting due to a request from AudioManager API
     private static final int SCO_STATE_ACTIVE_INTERNAL = 3;
     // SCO audio deactivation request waiting for headset service to connect
-    private static final int SCO_STATE_DEACTIVATE_REQ = 5;
+    private static final int SCO_STATE_DEACTIVATE_REQ = 4;
     // SCO audio deactivation in progress, waiting for Bluetooth audio intent
-    private static final int SCO_STATE_DEACTIVATING = 6;
+    private static final int SCO_STATE_DEACTIVATING = 5;
 
     // SCO audio state is active due to an action in BT handsfree (either voice recognition or
     // in call audio)
     private static final int SCO_STATE_ACTIVE_EXTERNAL = 2;
-    // Deactivation request for all SCO connections (initiated by audio mode change)
-    // waiting for headset service to connect
-    private static final int SCO_STATE_DEACTIVATE_EXT_REQ = 4;
 
     // Indicates the mode used for SCO audio connection. The mode is virtual call if the request
     // originated from an app targeting an API version before JB MR2 and raw audio after that.
@@ -3332,33 +3329,19 @@ public class AudioService extends IAudioService.Stub
         return result;
     }
 
+    /**
+     * Disconnect all SCO connections started by {@link AudioManager} except those started by
+     * {@param exceptPid}
+     *
+     * @param exceptPid pid whose SCO connections through {@link AudioManager} should be kept
+     */
     private void disconnectBluetoothSco(int exceptPid) {
         synchronized(mScoClients) {
             checkScoAudioState();
-            if (mScoAudioState == SCO_STATE_ACTIVE_EXTERNAL ||
-                    mScoAudioState == SCO_STATE_DEACTIVATE_EXT_REQ) {
-                if (mBluetoothHeadsetDevice != null) {
-                    if (mBluetoothHeadset != null) {
-                        boolean status = disconnectBluetoothScoAudioHelper(mBluetoothHeadset,
-                                mBluetoothHeadsetDevice, SCO_MODE_RAW)
-                                || disconnectBluetoothScoAudioHelper(mBluetoothHeadset,
-                                mBluetoothHeadsetDevice, SCO_MODE_VIRTUAL_CALL)
-                                || disconnectBluetoothScoAudioHelper(mBluetoothHeadset,
-                                mBluetoothHeadsetDevice, SCO_MODE_VR);
-                        if (status) {
-                            mScoAudioState = SCO_STATE_DEACTIVATING;
-                        } else {
-                            clearAllScoClients(exceptPid, false);
-                            mScoAudioState = SCO_STATE_INACTIVE;
-                        }
-                    } else if (mScoAudioState == SCO_STATE_ACTIVE_EXTERNAL &&
-                            getBluetoothHeadset()) {
-                        mScoAudioState = SCO_STATE_DEACTIVATE_EXT_REQ;
-                    }
-                }
-            } else {
-                clearAllScoClients(exceptPid, true);
+            if (mScoAudioState == SCO_STATE_ACTIVE_EXTERNAL) {
+                return;
             }
+            clearAllScoClients(exceptPid, true);
         }
     }
 
@@ -3524,8 +3507,7 @@ public class AudioService extends IAudioService.Stub
                     checkScoAudioState();
                     // Continue pending action if any
                     if (mScoAudioState == SCO_STATE_ACTIVATE_REQ ||
-                            mScoAudioState == SCO_STATE_DEACTIVATE_REQ ||
-                            mScoAudioState == SCO_STATE_DEACTIVATE_EXT_REQ) {
+                            mScoAudioState == SCO_STATE_DEACTIVATE_REQ) {
                         boolean status = false;
                         if (mBluetoothHeadsetDevice != null) {
                             switch (mScoAudioState) {
@@ -3539,17 +3521,6 @@ public class AudioService extends IAudioService.Stub
                                 case SCO_STATE_DEACTIVATE_REQ:
                                     status = disconnectBluetoothScoAudioHelper(mBluetoothHeadset,
                                             mBluetoothHeadsetDevice, mScoAudioMode);
-                                    if (status) {
-                                        mScoAudioState = SCO_STATE_DEACTIVATING;
-                                    }
-                                    break;
-                                case SCO_STATE_DEACTIVATE_EXT_REQ:
-                                    status = disconnectBluetoothScoAudioHelper(mBluetoothHeadset,
-                                            mBluetoothHeadsetDevice, SCO_MODE_RAW) ||
-                                            disconnectBluetoothScoAudioHelper(mBluetoothHeadset,
-                                            mBluetoothHeadsetDevice, SCO_MODE_VIRTUAL_CALL) ||
-                                            disconnectBluetoothScoAudioHelper(mBluetoothHeadset,
-                                            mBluetoothHeadsetDevice, SCO_MODE_VR);
                                     if (status) {
                                         mScoAudioState = SCO_STATE_DEACTIVATING;
                                     }
@@ -5828,8 +5799,7 @@ public class AudioService extends IAudioService.Stub
                         case BluetoothHeadset.STATE_AUDIO_CONNECTED:
                             scoAudioState = AudioManager.SCO_AUDIO_STATE_CONNECTED;
                             if (mScoAudioState != SCO_STATE_ACTIVE_INTERNAL &&
-                                mScoAudioState != SCO_STATE_DEACTIVATE_REQ &&
-                                mScoAudioState != SCO_STATE_DEACTIVATE_EXT_REQ) {
+                                mScoAudioState != SCO_STATE_DEACTIVATE_REQ) {
                                 mScoAudioState = SCO_STATE_ACTIVE_EXTERNAL;
                             }
                             setBluetoothScoOn(true);
@@ -5853,8 +5823,7 @@ public class AudioService extends IAudioService.Stub
                             break;
                         case BluetoothHeadset.STATE_AUDIO_CONNECTING:
                             if (mScoAudioState != SCO_STATE_ACTIVE_INTERNAL &&
-                                mScoAudioState != SCO_STATE_DEACTIVATE_REQ &&
-                                mScoAudioState != SCO_STATE_DEACTIVATE_EXT_REQ) {
+                                mScoAudioState != SCO_STATE_DEACTIVATE_REQ) {
                                 mScoAudioState = SCO_STATE_ACTIVE_EXTERNAL;
                             }
                         default:
