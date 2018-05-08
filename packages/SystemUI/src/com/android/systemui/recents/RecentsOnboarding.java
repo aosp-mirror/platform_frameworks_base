@@ -317,15 +317,8 @@ public class RecentsOnboarding {
             mLayout.setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_STABLE);
 
             mWindowManager.addView(mLayout, getWindowLayoutParams());
-            int layoutHeight = mLayout.getHeight();
-            if (layoutHeight == 0) {
-                mLayout.measure(View.MeasureSpec.UNSPECIFIED, View.MeasureSpec.UNSPECIFIED);
-                layoutHeight = mLayout.getMeasuredHeight();
-            }
-            mLayout.setTranslationY(layoutHeight);
             mLayout.setAlpha(0);
             mLayout.animate()
-                    .translationY(0)
                     .alpha(1f)
                     .withLayer()
                     .setStartDelay(SHOW_DELAY_MS)
@@ -349,7 +342,6 @@ public class RecentsOnboarding {
         if (mLayoutAttachedToWindow) {
             if (animate) {
                 mLayout.animate()
-                        .translationY(mLayout.getHeight())
                         .alpha(0f)
                         .withLayer()
                         .setDuration(SHOW_HIDE_DURATION_MS)
