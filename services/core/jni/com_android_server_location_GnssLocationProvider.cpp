@@ -38,6 +38,7 @@
 #include <pthread.h>
 #include <string.h>
 #include <cinttypes>
+#include <iomanip>
 
 static jobject mCallbacksObj = NULL;
 
@@ -1692,25 +1693,25 @@ static jstring android_location_GnssLocationProvider_get_internal_state(JNIEnv* 
                           << " satellites:: " << std::endl;
         }
 
-        internalState << "constellation: 1=GPS, 2=SBAS, 3=GLO, 4=QZSS, 5=BDS, 6=GAL; "
-                      << "ephemerisType: 0=Eph, 1=Alm, 2=?; "
-                      << "ephemerisSource: 0=Demod, 1=Supl, 2=Server, 3=?; "
-                      << "ephemerisHealth: 0=Good, 1=Bad, 2=?" << std::endl;
+        internalState << "constell: 1=GPS, 2=SBAS, 3=GLO, 4=QZSS, 5=BDS, 6=GAL; "
+                      << "ephType: 0=Eph, 1=Alm, 2=Unk; "
+                      << "ephSource: 0=Demod, 1=Supl, 2=Server, 3=Unk; "
+                      << "ephHealth: 0=Good, 1=Bad, 2=Unk" << std::endl;
         for (size_t i = 0; i < data.satelliteDataArray.size(); i++) {
-            internalState << "svid: " << data.satelliteDataArray[i].svid
-                          << ", constellation: "
+            internalState << "constell: "
                           << static_cast<uint32_t>(data.satelliteDataArray[i].constellation)
-                          << ", ephemerisType: "
-                          << static_cast<uint32_t>(data.satelliteDataArray[i].ephemerisType)
-                          << ", ephemerisSource: "
-                          << static_cast<uint32_t>(data.satelliteDataArray[i].ephemerisSource)
-                          << ", ephemerisHealth: "
-                          << static_cast<uint32_t>(data.satelliteDataArray[i].ephemerisHealth)
-                          << ", serverPredictionIsAvailable: "
+                          << ", svid: " << std::setw(3) << data.satelliteDataArray[i].svid
+                          << ", serverPredAvail: "
                           << data.satelliteDataArray[i].serverPredictionIsAvailable
-                          << ", serverPredictionAgeSeconds: "
+                          << ", serverPredAgeSec: " << std::setw(7)
                           << data.satelliteDataArray[i].serverPredictionAgeSeconds
-                          << ", ephemerisAgeSeconds: "
+                          << ", ephType: "
+                          << static_cast<uint32_t>(data.satelliteDataArray[i].ephemerisType)
+                          << ", ephSource: "
+                          << static_cast<uint32_t>(data.satelliteDataArray[i].ephemerisSource)
+                          << ", ephHealth: "
+                          << static_cast<uint32_t>(data.satelliteDataArray[i].ephemerisHealth)
+                          << ", ephAgeSec: " << std::setw(7)
                           << data.satelliteDataArray[i].ephemerisAgeSeconds << std::endl;
         }
     }

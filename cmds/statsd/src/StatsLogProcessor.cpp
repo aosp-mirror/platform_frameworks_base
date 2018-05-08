@@ -75,7 +75,7 @@ StatsLogProcessor::StatsLogProcessor(const sp<UidMap>& uidMap,
                                      const sp<AlarmMonitor>& anomalyAlarmMonitor,
                                      const sp<AlarmMonitor>& periodicAlarmMonitor,
                                      const int64_t timeBaseNs,
-                                     const std::function<void(const ConfigKey&)>& sendBroadcast)
+                                     const std::function<bool(const ConfigKey&)>& sendBroadcast)
     : mUidMap(uidMap),
       mAnomalyAlarmMonitor(anomalyAlarmMonitor),
       mPeriodicAlarmMonitor(periodicAlarmMonitor),
@@ -465,12 +465,21 @@ void StatsLogProcessor::flushIfNecessaryLocked(
     // We suspect that the byteSize() computation is expensive, so we set a rate limit.
     size_t totalBytes = metricsManager.byteSize();
     mLastByteSizeTimes[key] = timestampNs;
+    bool requestDump = false;
     if (totalBytes >
         StatsdStats::kMaxMetricsBytesPerConfig) {  // Too late. We need to start clearing data.
         metricsManager.dropData(timestampNs);
         StatsdStats::getInstance().noteDataDropped(key);
         VLOG("StatsD had to toss out metrics for %s", key.ToString().c_str());
-    } else if (totalBytes > StatsdStats::kBytesPerConfigTriggerGetData) {
+    } else if ((totalBytes > StatsdStats::kBytesPerConfigTriggerGetData) ||
+               (mOnDiskDataConfigs.find(key) != mOnDiskDataConfigs.end())) {
+        // Request to send a broadcast if:
+        // 1. in memory data > threshold   OR
+        // 2. config has old data report on disk.
+        requestDump = true;
+    }
+
+    if (requestDump) {
         // Send broadcast so that receivers can pull data.
         auto lastBroadcastTime = mLastBroadcastTimes.find(key);
         if (lastBroadcastTime != mLastBroadcastTimes.end()) {
@@ -479,10 +488,12 @@ void StatsLogProcessor::flushIfNecessaryLocked(
                 return;
             }
         }
-        mLastBroadcastTimes[key] = timestampNs;
-        VLOG("StatsD requesting broadcast for %s", key.ToString().c_str());
-        mSendBroadcast(key);
-        StatsdStats::getInstance().noteBroadcastSent(key);
+        if (mSendBroadcast(key)) {
+            mOnDiskDataConfigs.erase(key);
+            VLOG("StatsD triggered data fetch for %s", key.ToString().c_str());
+            mLastBroadcastTimes[key] = timestampNs;
+            StatsdStats::getInstance().noteBroadcastSent(key);
+        }
     }
 }
 
@@ -505,6 +516,8 @@ void StatsLogProcessor::WriteDataToDiskLocked(const ConfigKey& key,
         return;
     }
     proto.flush(fd.get());
+    // We were able to write the ConfigMetricsReport to disk, so we should trigger collection ASAP.
+    mOnDiskDataConfigs.insert(key);
 }
 
 void StatsLogProcessor::WriteDataToDiskLocked(const DumpReportReason dumpReportReason) {
@@ -531,6 +544,11 @@ int64_t StatsLogProcessor::getLastReportTimeNs(const ConfigKey& key) {
     } else {
         return it->second->getLastReportTimeNs();
     }
+}
+
+void StatsLogProcessor::noteOnDiskData(const ConfigKey& key) {
+    std::lock_guard<std::mutex> lock(mMetricsMutex);
+    mOnDiskDataConfigs.insert(key);
 }
 
 }  // namespace statsd

@@ -121,8 +121,8 @@ public class NotificationChildrenContainer extends ViewGroup {
     public NotificationChildrenContainer(Context context, AttributeSet attrs, int defStyleAttr,
             int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
-        initDimens();
         mHybridGroupManager = new HybridGroupManager(getContext(), this);
+        initDimens();
         setClipChildren(false);
     }
 
@@ -148,6 +148,7 @@ public class NotificationChildrenContainer extends ViewGroup {
         mTranslationForHeader = res.getDimensionPixelSize(
                 com.android.internal.R.dimen.notification_content_margin)
                 - mNotificationHeaderMargin;
+        mHybridGroupManager.initDimens();
     }
 
     @Override

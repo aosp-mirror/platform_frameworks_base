@@ -16,59 +16,101 @@
 
 package android.util;
 
-import android.os.Process;
+import android.os.IStatsManager;
+import android.os.RemoteException;
+import android.os.ServiceManager;
 
 /**
  * StatsLog provides an API for developers to send events to statsd. The events can be used to
  * define custom metrics inside statsd.
  */
 public final class StatsLog extends StatsLogInternal {
-    private static final String TAG = "StatsManager";
+    private static final String TAG = "StatsLog";
+    private static final boolean DEBUG = false;
+
+    private static IStatsManager sService;
 
     private StatsLog() {}
 
     /**
      * Logs a start event.
      *
-     * @param label developer-chosen label that is from [0, 16).
+     * @param label developer-chosen label.
      * @return True if the log request was sent to statsd.
      */
     public static boolean logStart(int label) {
-        if (label >= 0 && label < 16) {
-            StatsLog.write(APP_BREADCRUMB_REPORTED, Process.myUid(),
-                    label, APP_BREADCRUMB_REPORTED__STATE__START);
-            return true;
+        synchronized (StatsLog.class) {
+            try {
+                IStatsManager service = getIStatsManagerLocked();
+                if (service == null) {
+                    if (DEBUG) Slog.d(TAG, "Failed to find statsd when logging start");
+                    return false;
+                }
+                service.sendAppBreadcrumbAtom(label,
+                        StatsLog.APP_BREADCRUMB_REPORTED__STATE__START);
+                return true;
+            } catch (RemoteException e) {
+                sService = null;
+                if (DEBUG) Slog.d(TAG, "Failed to connect to statsd when logging start");
+                return false;
+            }
         }
-        return false;
     }
 
     /**
      * Logs a stop event.
      *
-     * @param label developer-chosen label that is from [0, 16).
+     * @param label developer-chosen label.
      * @return True if the log request was sent to statsd.
      */
     public static boolean logStop(int label) {
-        if (label >= 0 && label < 16) {
-            StatsLog.write(APP_BREADCRUMB_REPORTED, Process.myUid(),
-                    label, APP_BREADCRUMB_REPORTED__STATE__STOP);
-            return true;
+        synchronized (StatsLog.class) {
+            try {
+                IStatsManager service = getIStatsManagerLocked();
+                if (service == null) {
+                    if (DEBUG) Slog.d(TAG, "Failed to find statsd when logging stop");
+                    return false;
+                }
+                service.sendAppBreadcrumbAtom(label, StatsLog.APP_BREADCRUMB_REPORTED__STATE__STOP);
+                return true;
+            } catch (RemoteException e) {
+                sService = null;
+                if (DEBUG) Slog.d(TAG, "Failed to connect to statsd when logging stop");
+                return false;
+            }
         }
-        return false;
     }
 
     /**
      * Logs an event that does not represent a start or stop boundary.
      *
-     * @param label developer-chosen label that is from [0, 16).
+     * @param label developer-chosen label.
      * @return True if the log request was sent to statsd.
      */
     public static boolean logEvent(int label) {
-        if (label >= 0 && label < 16) {
-            StatsLog.write(APP_BREADCRUMB_REPORTED, Process.myUid(), label,
-                    APP_BREADCRUMB_REPORTED__STATE__UNSPECIFIED);
-            return true;
+        synchronized (StatsLog.class) {
+            try {
+                IStatsManager service = getIStatsManagerLocked();
+                if (service == null) {
+                    if (DEBUG) Slog.d(TAG, "Failed to find statsd when logging event");
+                    return false;
+                }
+                service.sendAppBreadcrumbAtom(
+                        label, StatsLog.APP_BREADCRUMB_REPORTED__STATE__UNSPECIFIED);
+                return true;
+            } catch (RemoteException e) {
+                sService = null;
+                if (DEBUG) Slog.d(TAG, "Failed to connect to statsd when logging event");
+                return false;
+            }
         }
-        return false;
+    }
+
+    private static IStatsManager getIStatsManagerLocked() throws RemoteException {
+        if (sService != null) {
+            return sService;
+        }
+        sService = IStatsManager.Stub.asInterface(ServiceManager.getService("stats"));
+        return sService;
     }
 }

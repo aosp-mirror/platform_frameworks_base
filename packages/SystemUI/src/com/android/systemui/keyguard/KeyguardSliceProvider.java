@@ -79,7 +79,6 @@ public class KeyguardSliceProvider extends SliceProvider implements
     private DateFormat mDateFormat;
     private String mLastText;
     private boolean mRegistered;
-    private boolean mRegisteredEveryMinute;
     private String mNextAlarm;
     private NextAlarmController mNextAlarmController;
     protected AlarmManager mAlarmManager;
@@ -175,7 +174,7 @@ public class KeyguardSliceProvider extends SliceProvider implements
         mZenModeController = new ZenModeControllerImpl(getContext(), mHandler);
         mZenModeController.addCallback(this);
         mDatePattern = getContext().getString(R.string.system_ui_aod_date_pattern);
-        registerClockUpdate(false /* everyMinute */);
+        registerClockUpdate();
         updateClock();
         return true;
     }
@@ -214,22 +213,13 @@ public class KeyguardSliceProvider extends SliceProvider implements
     /**
      * Registers a broadcast receiver for clock updates, include date, time zone and manually
      * changing the date/time via the settings app.
-     *
-     * @param everyMinute {@code true} if you also want updates every minute.
      */
-    protected void registerClockUpdate(boolean everyMinute) {
+    private void registerClockUpdate() {
         if (mRegistered) {
-            if (mRegisteredEveryMinute == everyMinute) {
-                return;
-            } else {
-                unregisterClockUpdate();
-            }
+            return;
         }
 
         IntentFilter filter = new IntentFilter();
-        if (everyMinute) {
-            filter.addAction(Intent.ACTION_TIME_TICK);
-        }
         filter.addAction(Intent.ACTION_DATE_CHANGED);
         filter.addAction(Intent.ACTION_TIME_CHANGED);
         filter.addAction(Intent.ACTION_TIMEZONE_CHANGED);
@@ -237,15 +227,6 @@ public class KeyguardSliceProvider extends SliceProvider implements
         getContext().registerReceiver(mIntentReceiver, filter, null /* permission*/,
                 null /* scheduler */);
         mRegistered = true;
-        mRegisteredEveryMinute = everyMinute;
-    }
-
-    protected void unregisterClockUpdate() {
-        if (!mRegistered) {
-            return;
-        }
-        getContext().unregisterReceiver(mIntentReceiver);
-        mRegistered = false;
     }
 
     @VisibleForTesting

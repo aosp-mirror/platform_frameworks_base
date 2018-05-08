@@ -62,7 +62,7 @@ MetricsManager::MetricsManager(const ConfigKey& key, const StatsdConfig& config,
     : mConfigKey(key), mUidMap(uidMap),
       mTtlNs(config.has_ttl_in_seconds() ? config.ttl_in_seconds() * NS_PER_SEC : -1),
       mTtlEndNs(-1),
-      mLastReportTimeNs(timeBaseNs),
+      mLastReportTimeNs(currentTimeNs),
       mLastReportWallClockNs(getWallClockNs()) {
     // Init the ttl end timestamp.
     refreshTtl(timeBaseNs);
@@ -244,16 +244,6 @@ void MetricsManager::onLogEvent(const LogEvent& event) {
         if (loggerUid != appHookUid && loggerUid != AID_STATSD) {
             VLOG("APP_BREADCRUMB_REPORTED has invalid uid: claimed %ld but caller is %d",
                  appHookUid, loggerUid);
-            return;
-        }
-
-        // Label is 2nd from last field and must be from [0, 15].
-        long appHookLabel = event.GetLong(event.size()-1, &err);
-        if (err != NO_ERROR ) {
-            VLOG("APP_BREADCRUMB_REPORTED had error when parsing the label field");
-            return;
-        } else if (appHookLabel < 0 || appHookLabel > 15) {
-            VLOG("APP_BREADCRUMB_REPORTED does not have valid label %ld", appHookLabel);
             return;
         }
 
