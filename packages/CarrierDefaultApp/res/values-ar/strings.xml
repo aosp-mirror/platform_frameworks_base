@@ -13,7 +13,7 @@
     <skip />
     <string name="mobile_data_status_notification_channel_name" msgid="833999690121305708">"حالة بيانات الجوّال"</string>
     <string name="action_bar_label" msgid="4290345990334377177">"تسجيل الدخول إلى شبكة الجوّال"</string>
-    <string name="ssl_error_warning" msgid="3127935140338254180">"الشبكة التي تحاول الانضمام إليها بها مشكلات أمنية."</string>
+    <string name="ssl_error_warning" msgid="3127935140338254180">"الشبكة التي تحاول الانضمام إليها بها مشاكل أمنية."</string>
     <string name="ssl_error_example" msgid="6188711843183058764">"على سبيل المثال، قد لا تنتمي صفحة تسجيل الدخول إلى المؤسسة المعروضة."</string>
     <string name="ssl_error_continue" msgid="1138548463994095584">"المتابعة على أي حال عبر المتصفح"</string>
 </resources>
