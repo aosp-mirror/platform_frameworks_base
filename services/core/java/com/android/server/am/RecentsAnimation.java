@@ -49,7 +49,8 @@ import com.android.server.wm.WindowManagerService;
  * Manages the recents animation, including the reordering of the stacks for the transition and
  * cleanup. See {@link com.android.server.wm.RecentsAnimationController}.
  */
-class RecentsAnimation implements RecentsAnimationCallbacks {
+class RecentsAnimation implements RecentsAnimationCallbacks,
+        ActivityDisplay.OnStackOrderChangedListener {
     private static final String TAG = RecentsAnimation.class.getSimpleName();
     // TODO (b/73188263): Reset debugging flags
     private static final boolean DEBUG = true;
@@ -140,13 +141,11 @@ class RecentsAnimation implements RecentsAnimationCallbacks {
                         recentsUid, recentsComponent.getPackageName());
             }
 
-            final ActivityDisplay display;
             if (hasExistingActivity) {
                 // Move the recents activity into place for the animation if it is not top most
-                display = targetActivity.getDisplay();
-                display.moveStackBehindBottomMostVisibleStack(targetStack);
+                mDefaultDisplay.moveStackBehindBottomMostVisibleStack(targetStack);
                 if (DEBUG) Slog.d(TAG, "Moved stack=" + targetStack + " behind stack="
-                            + display.getStackAbove(targetStack));
+                            + mDefaultDisplay.getStackAbove(targetStack));
 
                 // If there are multiple tasks in the target stack (ie. the home stack, with 3p
                 // and default launchers coexisting), then move the task to the top as a part of
@@ -173,7 +172,6 @@ class RecentsAnimation implements RecentsAnimationCallbacks {
 
                 targetActivity = mDefaultDisplay.getStack(WINDOWING_MODE_UNDEFINED,
                         mTargetActivityType).getTopActivity();
-                display = targetActivity.getDisplay();
 
                 // TODO: Maybe wait for app to draw in this particular case?
 
@@ -190,7 +188,8 @@ class RecentsAnimation implements RecentsAnimationCallbacks {
             mWindowManager.cancelRecentsAnimationSynchronously(REORDER_MOVE_TO_ORIGINAL_POSITION,
                     "startRecentsActivity");
             mWindowManager.initializeRecentsAnimation(mTargetActivityType, recentsAnimationRunner,
-                    this, display.mDisplayId, mStackSupervisor.mRecentTasks.getRecentTaskIds());
+                    this, mDefaultDisplay.mDisplayId,
+                    mStackSupervisor.mRecentTasks.getRecentTaskIds());
 
             // If we updated the launch-behind state, update the visibility of the activities after
             // we fetch the visible tasks to be controlled by the animation
@@ -198,6 +197,9 @@ class RecentsAnimation implements RecentsAnimationCallbacks {
 
             mStackSupervisor.getActivityMetricsLogger().notifyActivityLaunched(START_TASK_TO_FRONT,
                     targetActivity);
+
+            // Register for stack order changes
+            mDefaultDisplay.registerStackOrderChangedListener(this);
         } catch (Exception e) {
             Slog.e(TAG, "Failed to start recents activity", e);
             throw e;
@@ -218,6 +220,9 @@ class RecentsAnimation implements RecentsAnimationCallbacks {
                 mAssistDataRequester.cancel();
                 mAssistDataRequester = null;
             }
+
+            // Unregister for stack order changes
+            mDefaultDisplay.unregisterStackOrderChangedListener(this);
 
             if (mWindowManager.getRecentsAnimationController() == null) return;
 
@@ -314,6 +319,14 @@ class RecentsAnimation implements RecentsAnimationCallbacks {
         } else {
             mService.mHandler.post(() -> finishAnimation(reorderMode));
         }
+    }
+
+    @Override
+    public void onStackOrderChanged() {
+        // If the activity display stack order changes, cancel any running recents animation in
+        // place
+        mWindowManager.cancelRecentsAnimationSynchronously(REORDER_KEEP_IN_PLACE,
+                "stackOrderChanged");
     }
 
     /**
