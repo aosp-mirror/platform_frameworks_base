@@ -725,7 +725,7 @@ class ActivityStarter {
                 ? options.getOptions(intent, aInfo, callerApp, mSupervisor)
                 : null;
         if (allowPendingRemoteAnimationRegistryLookup) {
-            checkedOptions = mService.getActivityStartController()
+            checkedOptions = mService.mActivityTaskManager.getActivityStartController()
                     .getPendingRemoteAnimationRegistry()
                     .overrideOptionsIfNeeded(callingPackage, checkedOptions);
         }

@@ -1549,8 +1549,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
                 clientTransaction.setLifecycleStateRequest(lifecycleItem);
 
                 // Schedule transaction.
-                mService.getLifecycleManager().scheduleTransaction(clientTransaction);
-
+                mService.mActivityTaskManager.getLifecycleManager().scheduleTransaction(clientTransaction);
 
                 if ((app.info.privateFlags & ApplicationInfo.PRIVATE_FLAG_CANT_SAVE_STATE) != 0
                         && mService.mHasHeavyWeightFeature) {
@@ -1621,7 +1620,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
         // a chance to initialize itself while in the background, making the
         // switch back to it faster and look better.
         if (isFocusedStack(stack)) {
-            mService.getActivityStartController().startSetupActivity();
+            mService.mActivityTaskManager.getActivityStartController().startSetupActivity();
         }
 
         // Update any services we are bound to that might care about whether
@@ -4837,7 +4836,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
                             targetActivity);
                 }
 
-                mService.getActivityStartController().postStartActivityProcessingForLastStarter(
+                mService.mActivityTaskManager.getActivityStartController().postStartActivityProcessingForLastStarter(
                         task.getTopActivity(), ActivityManager.START_TASK_TO_FRONT,
                         task.getStack());
                 return ActivityManager.START_TASK_TO_FRONT;
@@ -4846,7 +4845,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
             intent = task.intent;
             intent.addFlags(Intent.FLAG_ACTIVITY_LAUNCHED_FROM_HISTORY);
             userId = task.userId;
-            return mService.getActivityStartController().startActivityInPackage(
+            return mService.mActivityTaskManager.getActivityStartController().startActivityInPackage(
                     task.mCallingUid, callingPid, callingUid, callingPackage, intent, null, null,
                     null, 0, 0, options, userId, task, "startActivityFromRecents",
                     false /* validateIncomingUser */);

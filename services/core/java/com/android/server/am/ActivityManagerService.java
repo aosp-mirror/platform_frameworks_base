@@ -618,8 +618,6 @@ public class ActivityManagerService extends IActivityManager.Stub
     final ActivityStackSupervisor mStackSupervisor;
     final KeyguardController mKeyguardController;
 
-    private final ActivityStartController mActivityStartController;
-
     final InstrumentationReporter mInstrumentationReporter = new InstrumentationReporter();
 
     final ArrayList<ActiveInstrumentation> mActiveInstrumentation = new ArrayList<>();
@@ -2837,7 +2835,6 @@ public class ActivityManagerService extends IActivityManager.Stub
         mContext = mInjector.getContext();
         mUiContext = null;
         GL_ES_VERSION = 0;
-        mActivityStartController = null;
         mAppErrors = null;
         mAppWarnings = null;
         mAppOpsService = mInjector.getAppOpsService(null, null);
@@ -2949,7 +2946,6 @@ public class ActivityManagerService extends IActivityManager.Stub
         mKeyguardController = mStackSupervisor.getKeyguardController();
         mCompatModePackages = new CompatModePackages(this, systemDir, mHandler);
         mIntentFirewall = new IntentFirewall(new IntentFirewallInterface(), mHandler);
-        mActivityStartController = new ActivityStartController(this);
 
         mProcessCpuThread = new Thread("CpuTracker") {
             @Override
@@ -4397,7 +4393,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                 // For ANR debugging to verify if the user activity is the one that actually
                 // launched.
                 final String myReason = reason + ":" + userId + ":" + resolvedUserId;
-                mActivityStartController.startHomeActivity(intent, aInfo, myReason);
+                mActivityTaskManager.getActivityStartController().startHomeActivity(intent, aInfo, myReason);
             }
         } else {
             Slog.wtf(TAG, "No home screen found for " + intent, new Throwable());
@@ -6188,7 +6184,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                 ProcessList.INVALID_ADJ, callerWillRestart, true, doit, evenPersistent,
                 packageName == null ? ("stop user " + userId) : ("stop " + packageName));
 
-        didSomething |= mActivityStartController.clearPendingActivityLaunches(packageName);
+        didSomething |= mActivityTaskManager.getActivityStartController().clearPendingActivityLaunches(packageName);
 
         if (mStackSupervisor.finishDisabledPackageActivitiesLocked(
                 packageName, null, doit, evenPersistent, userId)) {
@@ -10130,14 +10126,6 @@ public class ActivityManagerService extends IActivityManager.Stub
         return AppGlobals.getPackageManager();
     }
 
-    ActivityStartController getActivityStartController() {
-        return mActivityStartController;
-    }
-
-    ClientLifecycleManager getLifecycleManager() {
-        return mActivityTaskManager.getLifecycleManager();
-    }
-
     PackageManagerInternal getPackageManagerInternalLocked() {
         if (mPackageManagerInt == null) {
             mPackageManagerInt = LocalServices.getService(PackageManagerInternal.class);
@@ -11017,7 +11005,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             mAppSwitchesAllowedTime = SystemClock.uptimeMillis()
                     + APP_SWITCH_DELAY_TIME;
             mDidAppSwitch = false;
-            mActivityStartController.schedulePendingActivityLaunches(APP_SWITCH_DELAY_TIME);
+            mActivityTaskManager.getActivityStartController().schedulePendingActivityLaunches(APP_SWITCH_DELAY_TIME);
         }
     }
 
@@ -13585,7 +13573,7 @@ public class ActivityManagerService extends IActivityManager.Stub
 
     private void dumpActivityStarterLocked(PrintWriter pw, String dumpPackage) {
         pw.println("ACTIVITY MANAGER STARTER (dumpsys activity starter)");
-        mActivityStartController.dump(pw, "", dumpPackage);
+        mActivityTaskManager.getActivityStartController().dump(pw, "", dumpPackage);
     }
 
     void dumpActivitiesLocked(FileDescriptor fd, PrintWriter pw, String[] args,
@@ -19629,7 +19617,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                 if (app.thread != null) {
                     if (DEBUG_CONFIGURATION) Slog.v(TAG_CONFIGURATION, "Sending to proc "
                             + app.processName + " new config " + configCopy);
-                    getLifecycleManager().scheduleTransaction(app.thread,
+                    mActivityTaskManager.getLifecycleManager().scheduleTransaction(app.thread,
                             ConfigurationChangeItem.obtain(configCopy));
                 }
             } catch (Exception e) {
@@ -23438,7 +23426,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                     pw.println("  Reason: " + reason);
                 }
                 pw.println();
-                mActivityStartController.dump(pw, "  ", null);
+                mActivityTaskManager.getActivityStartController().dump(pw, "  ", null);
                 pw.println();
                 pw.println("-------------------------------------------------------------------------------");
                 dumpActivitiesLocked(null /* fd */, pw, null /* args */, 0 /* opti */,
