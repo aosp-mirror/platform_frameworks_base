@@ -35,6 +35,7 @@ statsd_common_src := \
     src/config/ConfigListener.cpp \
     src/config/ConfigManager.cpp \
     src/external/Perfetto.cpp \
+    src/external/Perfprofd.cpp \
     src/external/StatsPuller.cpp \
     src/external/StatsCompanionServicePuller.cpp \
     src/external/SubsystemSleepStatePuller.cpp \
@@ -70,8 +71,9 @@ statsd_common_src := \
     src/guardrail/StatsdStats.cpp \
     src/socket/StatsSocketListener.cpp
 
-# TODO: Once statsd is using a blueprint file, migrate to the proper filegroup.
+# TODO: Once statsd is using a blueprint file, migrate to the proper filegroups.
 statsd_common_src += \
+    ../../../../system/extras/perfprofd/binder_interface/aidl/android/os/IPerfProfd.aidl \
     src/perfprofd/perfprofd_config.proto
 
 statsd_common_c_includes := \
