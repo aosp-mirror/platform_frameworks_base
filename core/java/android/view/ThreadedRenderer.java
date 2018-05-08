@@ -791,14 +791,10 @@ public final class ThreadedRenderer {
      * @param callbacks Callbacks invoked when drawing happens.
      */
     void draw(View view, AttachInfo attachInfo, DrawCallbacks callbacks) {
-        attachInfo.mIgnoreDirtyState = true;
-
         final Choreographer choreographer = attachInfo.mViewRootImpl.mChoreographer;
         choreographer.mFrameInfo.markDrawStart();
 
         updateRootDisplayList(view, callbacks);
-
-        attachInfo.mIgnoreDirtyState = false;
 
         // register animating rendernodes which started animating prior to renderer
         // creation, which is typical for animators started prior to first draw
