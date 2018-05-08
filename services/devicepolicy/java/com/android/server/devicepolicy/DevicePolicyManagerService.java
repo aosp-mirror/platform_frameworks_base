@@ -5906,35 +5906,41 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
     private void forceWipeDeviceNoLock(boolean wipeExtRequested, String reason, boolean wipeEuicc) {
         wtfIfInLock();
-
-        if (wipeExtRequested) {
-            StorageManager sm = (StorageManager) mContext.getSystemService(
-                    Context.STORAGE_SERVICE);
-            sm.wipeAdoptableDisks();
-        }
+        boolean success = false;
         try {
+            if (wipeExtRequested) {
+                StorageManager sm = (StorageManager) mContext.getSystemService(
+                    Context.STORAGE_SERVICE);
+                sm.wipeAdoptableDisks();
+            }
             mInjector.recoverySystemRebootWipeUserData(
-                    /*shutdown=*/ false, reason, /*force=*/ true, /*wipeEuicc=*/ wipeEuicc);
+                /*shutdown=*/ false, reason, /*force=*/ true, /*wipeEuicc=*/ wipeEuicc);
+            success = true;
         } catch (IOException | SecurityException e) {
             Slog.w(LOG_TAG, "Failed requesting data wipe", e);
+        } finally {
+            if (!success) SecurityLog.writeEvent(SecurityLog.TAG_WIPE_FAILURE);
         }
     }
 
     private void forceWipeUser(int userId, String wipeReasonForUser) {
+        boolean success = false;
         try {
             IActivityManager am = mInjector.getIActivityManager();
             if (am.getCurrentUser().id == userId) {
                 am.switchUser(UserHandle.USER_SYSTEM);
             }
 
-            boolean userRemoved = mUserManagerInternal.removeUserEvenWhenDisallowed(userId);
-            if (!userRemoved) {
+            success = mUserManagerInternal.removeUserEvenWhenDisallowed(userId);
+            if (!success) {
                 Slog.w(LOG_TAG, "Couldn't remove user " + userId);
             } else if (isManagedProfile(userId)) {
                 sendWipeProfileNotification(wipeReasonForUser);
             }
         } catch (RemoteException re) {
             // Shouldn't happen
+        } finally {
+            if (!success) SecurityLog.writeEvent(SecurityLog.TAG_WIPE_FAILURE);
         }
     }
 
