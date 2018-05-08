@@ -36,7 +36,10 @@ import java.util.List;
 
 /**
  * Helper class for managing users, providing methods for removing, adding and switching users.
+ *
+ * @deprecated - Do not use
  */
+@Deprecated
 public final class UserManagerHelper {
     private static final String TAG = "UserManagerHelper";
     private final Context mContext;
