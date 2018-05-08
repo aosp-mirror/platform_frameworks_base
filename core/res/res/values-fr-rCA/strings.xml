@@ -291,6 +291,9 @@
     <string name="permgrouplab_camera" msgid="4820372495894586615">"Appareil photo"</string>
     <string name="permgroupdesc_camera" msgid="3250611594678347720">"prendre des photos et filmer des vidéos"</string>
     <string name="permgrouprequest_camera" msgid="1299833592069671756">"Autoriser « <xliff:g id="APP_NAME">%1$s</xliff:g> » à prendre des photos et à filmer des vidéos?"</string>
+    <string name="permgrouplab_calllog" msgid="8798646184930388160">"Journaux d\'appels"</string>
+    <string name="permgroupdesc_calllog" msgid="3006237336748283775">"lire et écrire le journal des appels téléphoniques"</string>
+    <string name="permgrouprequest_calllog" msgid="8487355309583773267">"Autoriser &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; à accéder à vos journaux d\'appels?"</string>
     <string name="permgrouplab_phone" msgid="5229115638567440675">"Téléphone"</string>
     <string name="permgroupdesc_phone" msgid="6234224354060641055">"faire et gérer des appels téléphoniques"</string>
     <string name="permgrouprequest_phone" msgid="9166979577750581037">"Autoriser « <xliff:g id="APP_NAME">%1$s</xliff:g> » à faire et à gérer les appels téléphoniques?"</string>

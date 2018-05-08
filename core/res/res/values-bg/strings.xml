@@ -291,6 +291,9 @@
     <string name="permgrouplab_camera" msgid="4820372495894586615">"Камера"</string>
     <string name="permgroupdesc_camera" msgid="3250611594678347720">"да прави снимки и записва видеоклипове"</string>
     <string name="permgrouprequest_camera" msgid="1299833592069671756">"Да се разреши ли на &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; да прави снимки и да записва видеоклипове?"</string>
+    <string name="permgrouplab_calllog" msgid="8798646184930388160">"Списъци с обажданията"</string>
+    <string name="permgroupdesc_calllog" msgid="3006237336748283775">"четене и запис на списъка с телефонните обаждания"</string>
+    <string name="permgrouprequest_calllog" msgid="8487355309583773267">"Да се разреши ли на &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; да осъществява достъп до списъците с телефонните ви обаждания?"</string>
     <string name="permgrouplab_phone" msgid="5229115638567440675">"Телефон"</string>
     <string name="permgroupdesc_phone" msgid="6234224354060641055">"да извършва телефонни обаждания и да ги управлява"</string>
     <string name="permgrouprequest_phone" msgid="9166979577750581037">"Да се разреши ли на &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; да извършва и управлява телефонни обаждания?"</string>
