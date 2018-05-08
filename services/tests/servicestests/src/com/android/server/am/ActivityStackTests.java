@@ -565,6 +565,47 @@ public class ActivityStackTests extends ActivityTestsBase {
                 false /* displaySleeping */, false /* expected*/);
     }
 
+    @Test
+    public void testStackOrderChangedOnRemoveStack() throws Exception {
+        StackOrderChangedListener listener = new StackOrderChangedListener();
+        mDefaultDisplay.registerStackOrderChangedListener(listener);
+        try {
+            mDefaultDisplay.removeChild(mStack);
+        } finally {
+            mDefaultDisplay.unregisterStackOrderChangedListener(listener);
+        }
+        assertTrue(listener.changed);
+    }
+
+    @Test
+    public void testStackOrderChangedOnAddPositionStack() throws Exception {
+        mDefaultDisplay.removeChild(mStack);
+
+        StackOrderChangedListener listener = new StackOrderChangedListener();
+        mDefaultDisplay.registerStackOrderChangedListener(listener);
+        try {
+            mDefaultDisplay.addChild(mStack, 0);
+        } finally {
+            mDefaultDisplay.unregisterStackOrderChangedListener(listener);
+        }
+        assertTrue(listener.changed);
+    }
+
+    @Test
+    public void testStackOrderChangedOnPositionStack() throws Exception {
+        StackOrderChangedListener listener = new StackOrderChangedListener();
+        try {
+            final TestActivityStack fullscreenStack1 = createStackForShouldBeVisibleTest(
+                    mDefaultDisplay, WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD,
+                    true /* onTop */);
+            mDefaultDisplay.registerStackOrderChangedListener(listener);
+            mDefaultDisplay.positionChildAtBottom(fullscreenStack1);
+        } finally {
+            mDefaultDisplay.unregisterStackOrderChangedListener(listener);
+        }
+        assertTrue(listener.changed);
+    }
+
     private void verifyShouldSleepActivities(boolean focusedStack,
             boolean keyguardGoingAway, boolean displaySleeping, boolean expected) {
         mSupervisor.mFocusedStack = focusedStack ? mStack : null;
@@ -577,5 +618,14 @@ public class ActivityStackTests extends ActivityTestsBase {
         doReturn(displaySleeping).when(display).isSleeping();
 
         assertEquals(expected, mStack.shouldSleepActivities());
+    }
+
+    private class StackOrderChangedListener implements ActivityDisplay.OnStackOrderChangedListener {
+        boolean changed = false;
+
+        @Override
+        public void onStackOrderChanged() {
+            changed = true;
+        }
     }
 }
