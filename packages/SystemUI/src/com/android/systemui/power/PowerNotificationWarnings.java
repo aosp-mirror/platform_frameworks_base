@@ -198,7 +198,13 @@ public class PowerNotificationWarnings implements PowerUI.WarningsUI {
             showWarningNotification();
             mShowing = SHOWING_WARNING;
         } else if (mShowAutoSaverSuggestion) {
-            showAutoSaverSuggestionNotification();
+            // Once we showed the notification, don't show it again until it goes SHOWING_NOTHING.
+            // This shouldn't be needed, because we have a delete intent on this notification
+            // so when it's dismissed we should notice it and clear mShowAutoSaverSuggestion,
+            // However we double check here just in case the dismiss intent broadcast is delayed.
+            if (mShowing != SHOWING_AUTO_SAVER_SUGGESTION) {
+                showAutoSaverSuggestionNotification();
+            }
             mShowing = SHOWING_AUTO_SAVER_SUGGESTION;
         } else {
             mNoMan.cancelAsUser(TAG_BATTERY, SystemMessage.NOTE_BAD_CHARGER, UserHandle.ALL);
@@ -303,7 +309,9 @@ public class PowerNotificationWarnings implements PowerUI.WarningsUI {
 
     private PendingIntent pendingBroadcast(String action) {
         return PendingIntent.getBroadcastAsUser(mContext, 0,
-                new Intent(action).setPackage(mContext.getPackageName()), 0, UserHandle.CURRENT);
+                new Intent(action).setPackage(mContext.getPackageName())
+                    .setFlags(Intent.FLAG_RECEIVER_FOREGROUND),
+                0, UserHandle.CURRENT);
     }
 
     private static Intent settings(String action) {
