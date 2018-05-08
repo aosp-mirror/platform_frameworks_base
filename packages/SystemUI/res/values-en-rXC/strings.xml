@@ -368,6 +368,7 @@
     <string name="recents_accessibility_split_screen_top" msgid="9056056469282256287">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‏‏‏‎‏‏‎‏‎‏‏‎‏‏‎‎‏‎‎‏‏‎‏‏‎‎‎‎‎‏‎‏‏‎‏‎‏‎‏‏‏‎‎‏‎‎‏‏‏‎‏‎‏‏‎‎‏‏‏‏‏‎Split screen to the top‎‏‎‎‏‎"</string>
     <string name="recents_accessibility_split_screen_left" msgid="8987144699630620019">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‏‏‏‎‎‏‎‏‏‏‎‎‎‏‏‎‎‎‎‎‎‎‏‏‏‏‏‎‏‎‎‎‎‎‏‏‎‏‎‎‎‎‏‎‎‏‎‎‎‏‏‎‏‎‏‏‏‎‎‏‏‎Split screen to the left‎‏‎‎‏‎"</string>
     <string name="recents_accessibility_split_screen_right" msgid="275069779299592867">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‎‏‎‏‏‏‏‎‏‎‎‎‏‎‎‏‏‏‏‏‎‏‎‎‎‎‎‎‏‏‏‎‎‎‎‏‏‏‎‎‏‏‎‎‎‏‏‏‎‏‎‏‎‏‎‏‎‎‎‏‏‎Split screen to the right‎‏‎‎‏‎"</string>
+    <string name="quick_step_accessibility_toggle_overview" msgid="7171470775439860480">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‎‎‎‏‏‏‎‎‎‎‏‏‎‎‎‏‎‏‏‏‎‏‎‏‎‏‏‎‎‏‎‎‏‎‏‏‏‎‎‏‏‎‎‎‎‎‎‏‎‎‎‏‏‎‎‎‎‎‎‎‎‎Toggle Overview‎‏‎‎‏‎"</string>
     <string name="expanded_header_battery_charged" msgid="5945855970267657951">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‎‏‎‎‏‎‏‎‎‎‎‎‏‏‏‏‏‎‏‏‎‎‏‎‎‎‎‎‎‎‏‎‏‎‎‎‎‏‎‏‏‏‎‎‎‎‎‏‏‏‎‏‏‎‏‏‎‏‏‏‏‏‎Charged‎‏‎‎‏‎"</string>
     <string name="expanded_header_battery_charging" msgid="205623198487189724">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‎‏‎‏‎‏‏‎‏‏‎‏‎‏‎‎‎‎‏‎‏‎‎‏‏‎‏‎‏‏‎‏‎‎‏‏‏‎‏‏‎‏‎‎‎‏‎‎‏‏‎‎‎‏‏‎‏‏‏‎‎‎Charging‎‏‎‎‏‎"</string>
     <string name="expanded_header_battery_charging_with_time" msgid="457559884275395376">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‎‏‏‏‏‎‎‏‎‏‏‎‎‏‏‎‎‏‎‏‎‎‎‏‎‎‏‎‏‎‎‏‎‏‏‏‎‏‏‎‏‏‎‏‎‎‎‎‏‎‏‎‏‏‎‎‏‏‎‎‎‎‎‎‏‎‎‏‏‎<xliff:g id="CHARGING_TIME">%s</xliff:g>‎‏‎‎‏‏‏‎ until full‎‏‎‎‏‎"</string>
@@ -541,6 +542,9 @@
     <string name="volume_stream_content_description_mute" msgid="3625049841390467354">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‏‎‎‏‎‎‏‎‎‏‏‏‎‏‏‎‎‎‎‏‏‏‎‎‏‏‏‏‏‏‏‎‏‏‎‎‏‎‎‏‎‏‎‏‎‎‎‏‏‏‎‎‏‎‎‎‏‏‎‏‎‎%1$s. Tap to mute. Accessibility services may be muted.‎‏‎‎‏‎"</string>
     <string name="volume_stream_content_description_vibrate_a11y" msgid="6427727603978431301">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‎‏‏‎‎‏‎‎‏‏‎‎‏‏‏‏‏‎‎‎‎‎‎‎‏‏‎‎‏‏‎‏‎‎‎‏‎‎‎‎‎‏‏‎‏‏‎‏‏‎‏‎‏‏‎‏‎‎‎‏‎‏‎%1$s. Tap to set to vibrate.‎‏‎‎‏‎"</string>
     <string name="volume_stream_content_description_mute_a11y" msgid="8995013018414535494">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‏‏‏‎‎‏‏‎‏‎‏‎‎‏‎‏‏‎‏‎‎‏‎‏‎‏‏‏‎‏‏‎‎‎‎‎‎‏‎‎‏‏‏‎‎‏‏‎‏‎‎‏‏‎‏‎‎‎‏‏‎‎%1$s. Tap to mute.‎‏‎‎‏‎"</string>
+    <string name="volume_ringer_hint_mute" msgid="9199811307292269601">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‎‏‎‏‏‎‎‎‏‎‎‏‎‏‏‏‎‏‎‎‏‎‎‎‎‏‎‏‎‏‏‏‏‎‎‎‏‏‏‎‎‎‏‏‏‎‎‎‎‏‎‎‎‎‏‎mute‎‏‎‎‏‎"</string>
+    <string name="volume_ringer_hint_unmute" msgid="6602880133293060368">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‎‏‏‎‏‏‏‎‏‎‎‎‏‎‎‎‏‎‎‏‎‎‎‏‏‏‏‏‏‏‎‏‏‎‎‏‏‏‎‏‏‎‏‎‏‎‏‎‏‏‎‎‎‏‎‎‎‏‎‎‎‎‎unmute‎‏‎‎‏‎"</string>
+    <string name="volume_ringer_hint_vibrate" msgid="4036802135666515202">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‏‏‎‎‎‎‎‎‎‎‏‎‏‏‎‎‏‏‎‏‎‎‎‏‎‎‏‏‏‏‎‎‎‏‏‎‎‏‏‏‏‎‎‎‎‏‏‎‏‏‏‎‏‎‎‎‎‎‎‏‎‎vibrate‎‏‎‎‏‎"</string>
     <string name="volume_dialog_title" msgid="7272969888820035876">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‎‎‏‎‎‏‏‏‎‏‏‏‎‏‏‎‎‎‏‏‏‏‎‎‏‎‏‎‎‎‏‏‏‏‏‎‏‎‎‏‏‏‎‏‏‎‎‎‎‎‎‎‏‎‎‏‎‎‏‎‎‎%s volume controls‎‏‎‎‏‎"</string>
     <string name="volume_dialog_ringer_guidance_ring" msgid="3360373718388509040">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‎‏‏‏‎‏‎‏‎‎‎‏‎‎‏‏‏‎‎‏‎‎‎‎‏‎‏‏‏‏‏‎‎‎‏‎‏‎‎‎‏‏‎‏‏‎‎‎‎‏‎‎‏‎‏‏‏‎‎‎‎‎Calls and notifications will ring (‎‏‎‎‏‏‎<xliff:g id="VOLUME_LEVEL">%1$s</xliff:g>‎‏‎‎‏‏‏‎)‎‏‎‎‏‎"</string>
     <string name="output_title" msgid="5355078100792942802">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‎‎‏‎‏‎‎‏‎‏‎‎‎‏‎‎‎‎‏‏‏‏‎‎‏‎‏‎‎‏‎‎‎‎‎‏‏‎‎‎‏‏‏‏‎‎‏‎‏‎‎‎‎‎‏‏‎‏‎‎‏‎‎Media output‎‏‎‎‏‎"</string>
@@ -606,17 +610,13 @@
     <string name="inline_minimize_button" msgid="966233327974702195">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‎‎‏‏‎‏‎‏‏‎‏‎‎‎‏‏‎‎‎‎‎‎‎‎‎‏‎‏‏‏‏‎‏‎‏‏‎‎‎‎‎‏‎‎‏‏‎‏‎‏‏‏‎‎‎‏‏‏‎‎‏‏‎Minimize‎‏‎‎‏‎"</string>
     <string name="inline_keep_showing_app" msgid="1723113469580031041">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‎‏‏‎‏‏‏‏‏‏‎‏‎‎‏‏‎‏‏‏‎‏‎‏‎‎‏‎‎‏‎‎‎‏‏‎‏‏‎‎‎‎‎‎‎‏‎‎‎‏‏‎‏‎‎‎‏‎‎‎‎‎‏‎Keep showing notifications from this app?‎‏‎‎‏‎"</string>
     <string name="notification_unblockable_desc" msgid="1037434112919403708">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‎‎‏‏‏‎‎‏‏‎‎‏‎‏‏‎‏‏‎‏‎‎‏‏‎‏‎‏‎‎‎‏‎‎‎‎‏‎‎‏‏‎‏‏‏‎‏‏‏‏‏‏‎‎‏‎‏‏‏‏‎‎‎These notifications can\'t be turned off‎‏‎‎‏‎"</string>
-    <string name="notification_appops_camera_active" msgid="730959943016785931">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‎‎‏‎‏‎‎‎‏‎‎‏‎‎‏‏‏‎‎‏‎‎‎‎‏‏‎‎‏‎‎‎‎‎‎‏‎‎‏‎‎‎‏‏‏‎‎‎‏‎‏‎‎‎‎‎‎‎‏‎‏‏‎camera‎‏‎‎‏‎"</string>
-    <string name="notification_appops_microphone_active" msgid="1546319728924580686">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‎‏‏‎‏‎‏‎‏‏‏‎‏‎‏‏‎‏‎‎‎‎‏‏‎‎‏‏‎‎‏‏‏‎‎‎‏‏‏‏‎‏‏‏‎‏‎‎‏‎‏‏‎‏‏‎‏‎‎‏‏‏‎‎microphone‎‏‎‎‏‎"</string>
-    <string name="notification_appops_overlay_active" msgid="633813008357934729">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‎‎‏‎‎‎‏‏‎‎‏‎‏‏‏‏‎‎‎‎‎‏‏‎‎‏‎‎‏‎‏‎‏‏‎‎‎‏‎‎‏‏‎‎‏‎‎‏‎‎‎‏‏‎‏‎‎‎‏‎‎‏‎displaying over other apps on your screen‎‏‎‎‏‎"</string>
-    <plurals name="notification_appops" formatted="false" msgid="1258122060887196817">
-      <item quantity="other">‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‎‏‏‎‎‎‏‎‏‏‏‎‏‎‏‏‎‏‏‏‏‏‏‎‏‎‏‏‎‎‏‎‎‏‏‏‎‏‏‎‏‎‎‎‎‏‏‏‎‎‎‎‏‎‎‏‎‎‏‎‎‎‏‎This app is ‎‏‎‎‏‏‎<xliff:g id="PERFORMING_ACTIVITY_1">%1$s</xliff:g>‎‏‎‎‏‏‏‎ and ‎‏‎‎‏‏‎<xliff:g id="PERFORMING_ACTIVITY_2">%2$s</xliff:g>‎‏‎‎‏‏‏‎.‎‏‎‎‏‎</item>
-      <item quantity="one">‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‎‏‏‎‎‎‏‎‏‏‏‎‏‎‏‏‎‏‏‏‏‏‏‎‏‎‏‏‎‎‏‎‎‏‏‏‎‏‏‎‏‎‎‎‎‏‏‏‎‎‎‎‏‎‎‏‎‎‏‎‎‎‏‎This app is ‎‏‎‎‏‏‎<xliff:g id="PERFORMING_ACTIVITY_0">%1$s</xliff:g>‎‏‎‎‏‏‏‎.‎‏‎‎‏‎</item>
-    </plurals>
-    <plurals name="notification_using" formatted="false" msgid="2211008461429037973">
-      <item quantity="other">‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‎‏‏‏‏‏‎‏‎‏‎‏‏‏‏‎‎‎‏‎‏‎‎‎‏‏‏‏‎‏‏‎‎‏‏‎‎‏‎‏‏‎‏‏‏‎‎‎‏‎‏‏‎‏‏‏‎‎‏‎‏‎‏‎using the ‎‏‎‎‏‏‎<xliff:g id="PERFORMING_ACTIVITY_1">%1$s</xliff:g>‎‏‎‎‏‏‏‎ and ‎‏‎‎‏‏‎<xliff:g id="PERFORMING_ACTIVITY_2">%2$s</xliff:g>‎‏‎‎‏‏‏‎‎‏‎‎‏‎</item>
-      <item quantity="one">‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‎‏‏‏‏‏‎‏‎‏‎‏‏‏‏‎‎‎‏‎‏‎‎‎‏‏‏‏‎‏‏‎‎‏‏‎‎‏‎‏‏‎‏‏‏‎‎‎‏‎‏‏‎‏‏‏‎‎‏‎‏‎‏‎using the ‎‏‎‎‏‏‎<xliff:g id="PERFORMING_ACTIVITY_0">%1$s</xliff:g>‎‏‎‎‏‏‏‎‎‏‎‎‏‎</item>
-    </plurals>
+    <string name="appops_camera" msgid="8100147441602585776">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‏‎‎‎‎‎‏‏‎‏‎‎‏‏‎‎‎‎‎‎‏‎‎‏‎‏‏‏‎‏‎‎‎‎‏‎‏‎‎‎‎‎‎‏‎‏‏‏‎‎‏‎‎‏‎‏‏‎‎‎‎‎This app is using the camera.‎‏‎‎‏‎"</string>
+    <string name="appops_microphone" msgid="741508267659494555">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‎‎‏‎‏‎‎‏‎‎‏‎‏‎‎‏‎‏‏‏‎‏‏‏‎‏‎‏‏‏‎‎‏‏‏‎‏‏‏‏‎‏‏‏‎‎‎‎‎‎‎‏‎‎‏‎‎‏‏‎‏‏‎This app is using the microphone.‎‏‎‎‏‎"</string>
+    <string name="appops_overlay" msgid="6165912637560323464">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‎‏‎‏‎‏‏‎‎‏‎‎‎‏‏‎‏‏‏‎‎‎‏‏‏‎‎‎‎‎‎‎‎‏‏‏‎‏‏‏‎‏‏‏‏‏‏‏‏‏‏‏‎‏‏‎‎‎‏‎‎‎‎This app is displaying over other apps on your screen.‎‏‎‎‏‎"</string>
+    <string name="appops_camera_mic" msgid="1576901651150187433">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‎‏‏‎‏‎‏‏‏‏‎‎‎‏‎‎‏‎‎‎‏‏‏‏‎‏‏‎‎‏‎‎‏‏‎‏‎‏‎‏‎‎‎‏‎‎‎‏‎‏‎‏‎‏‏‏‎‏‎‏‎‎‏‎This app is using the microphone and camera.‎‏‎‎‏‎"</string>
+    <string name="appops_camera_overlay" msgid="8869400080809298814">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‏‏‎‏‏‎‎‎‏‎‏‏‎‎‏‏‏‎‎‎‎‎‏‏‎‎‎‎‏‏‎‏‎‎‎‏‏‎‏‏‏‎‏‎‏‏‎‎‎‏‎‏‏‎‏‏‏‏‏‏‎‎This app is displaying over other apps on your screen and using the camera.‎‏‎‎‏‎"</string>
+    <string name="appops_mic_overlay" msgid="4835157962857919804">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‎‎‎‎‏‏‎‎‎‏‏‎‎‏‏‏‏‎‏‏‏‎‏‎‎‎‏‏‎‎‏‎‏‎‏‎‎‏‎‎‎‎‏‏‎‎‎‎‏‏‎‏‎‏‎‎‏‏‏‏‎‎‎This app is displaying over other apps on your screen and using the microphone.‎‏‎‎‏‎"</string>
+    <string name="appops_camera_mic_overlay" msgid="6718768197048030993">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‎‏‏‏‎‏‎‎‏‏‏‏‎‏‏‏‎‏‏‏‎‎‎‎‎‏‎‎‏‏‏‏‏‎‎‎‎‏‎‎‏‏‏‏‎‏‎‏‎‏‎‏‏‏‎‎‎‏‎‎‎‏‎This app is displaying over other apps on your screen and using the microphone and camera.‎‏‎‎‏‎"</string>
     <string name="notification_appops_settings" msgid="1028328314935908050">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‎‎‏‏‏‎‎‏‎‎‎‏‎‏‎‏‎‏‏‎‏‏‎‎‏‎‎‏‏‏‎‏‏‏‎‏‎‎‎‎‏‏‏‎‏‏‎‎‎‏‎‏‏‎‏‏‎‏‎‎‏‎‎Settings‎‏‎‎‏‎"</string>
     <string name="notification_appops_ok" msgid="1156966426011011434">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‎‏‏‎‎‎‎‎‎‎‎‏‏‏‎‎‏‎‏‏‏‏‎‏‏‎‏‎‏‎‏‏‎‏‎‎‏‏‏‎‏‏‏‎‎‎‎‏‎‎‎‏‎‎‏‎‏‏‎‏‎‏‎‎OK‎‏‎‎‏‎"</string>
     <string name="notification_channel_controls_opened_accessibility" msgid="6553950422055908113">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‎‏‏‎‏‎‏‏‏‏‎‏‎‎‎‏‎‎‏‏‏‏‎‎‏‎‏‏‏‏‎‎‏‏‏‏‏‎‎‎‏‎‏‎‎‏‏‏‏‏‎‎‏‏‎‎‎‏‎‎‎‏‎Notification controls for ‎‏‎‎‏‏‎<xliff:g id="APP_NAME">%1$s</xliff:g>‎‏‎‎‏‏‏‎ opened‎‏‎‎‏‎"</string>

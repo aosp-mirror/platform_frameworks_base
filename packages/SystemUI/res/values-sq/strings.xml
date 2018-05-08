@@ -95,8 +95,7 @@
     <string name="accessibility_unlock_button" msgid="128158454631118828">"Shkyç"</string>
     <string name="accessibility_waiting_for_fingerprint" msgid="4808860050517462885">"Në pritje për gjurmën e gishtit"</string>
     <string name="accessibility_unlock_without_fingerprint" msgid="7541705575183694446">"Shkyçe pa përdorur gjurmën e gishtit"</string>
-    <!-- no translation found for accessibility_scanning_face (769545173211758586) -->
-    <skip />
+    <string name="accessibility_scanning_face" msgid="769545173211758586">"Po skanon fytyrën"</string>
     <string name="accessibility_send_smart_reply" msgid="7766727839703044493">"Dërgo"</string>
     <string name="unlock_label" msgid="8779712358041029439">"shkyç"</string>
     <string name="phone_label" msgid="2320074140205331708">"hap telefonin"</string>
@@ -369,6 +368,8 @@
     <string name="recents_accessibility_split_screen_top" msgid="9056056469282256287">"Ndaje ekranin lart"</string>
     <string name="recents_accessibility_split_screen_left" msgid="8987144699630620019">"Ndaje ekranin në të majtë"</string>
     <string name="recents_accessibility_split_screen_right" msgid="275069779299592867">"Ndaje ekranin në të djathtë"</string>
+    <!-- no translation found for quick_step_accessibility_toggle_overview (7171470775439860480) -->
+    <skip />
     <string name="expanded_header_battery_charged" msgid="5945855970267657951">"I ngarkuar"</string>
     <string name="expanded_header_battery_charging" msgid="205623198487189724">"Po ngarkohet"</string>
     <string name="expanded_header_battery_charging_with_time" msgid="457559884275395376">"<xliff:g id="CHARGING_TIME">%s</xliff:g> deri sa të mbushet"</string>
@@ -542,6 +543,12 @@
     <string name="volume_stream_content_description_mute" msgid="3625049841390467354">"%1$s. Trokit për të çaktivizuar. Shërbimet e qasshmërisë mund të çaktivizohen."</string>
     <string name="volume_stream_content_description_vibrate_a11y" msgid="6427727603978431301">"%1$s. Trokit për ta vendosur në dridhje."</string>
     <string name="volume_stream_content_description_mute_a11y" msgid="8995013018414535494">"%1$s. Trokit për ta çaktivizuar."</string>
+    <!-- no translation found for volume_ringer_hint_mute (9199811307292269601) -->
+    <skip />
+    <!-- no translation found for volume_ringer_hint_unmute (6602880133293060368) -->
+    <skip />
+    <!-- no translation found for volume_ringer_hint_vibrate (4036802135666515202) -->
+    <skip />
     <string name="volume_dialog_title" msgid="7272969888820035876">"Kontrollet e volumit %s"</string>
     <string name="volume_dialog_ringer_guidance_ring" msgid="3360373718388509040">"Do të bjerë zilja për telefonatat dhe njoftimet (<xliff:g id="VOLUME_LEVEL">%1$s</xliff:g>)"</string>
     <string name="output_title" msgid="5355078100792942802">"Dalja e pajisjes"</string>
@@ -607,17 +614,20 @@
     <string name="inline_minimize_button" msgid="966233327974702195">"Minimizo"</string>
     <string name="inline_keep_showing_app" msgid="1723113469580031041">"Do të vazhdosh t\'i shfaqësh njoftimet nga ky aplikacion?"</string>
     <string name="notification_unblockable_desc" msgid="1037434112919403708">"Këto njoftime nuk mund të çaktivizohen"</string>
-    <string name="notification_appops_camera_active" msgid="730959943016785931">"kamerën"</string>
-    <string name="notification_appops_microphone_active" msgid="1546319728924580686">"mikrofonin"</string>
-    <string name="notification_appops_overlay_active" msgid="633813008357934729">"po shfaqet mbi aplikacionet e tjera në ekranin tënd"</string>
-    <plurals name="notification_appops" formatted="false" msgid="1258122060887196817">
-      <item quantity="other">Ky aplikacion <xliff:g id="PERFORMING_ACTIVITY_1">%1$s</xliff:g> dhe <xliff:g id="PERFORMING_ACTIVITY_2">%2$s</xliff:g>.</item>
-      <item quantity="one">Ky aplikacion <xliff:g id="PERFORMING_ACTIVITY_0">%1$s</xliff:g>.</item>
-    </plurals>
-    <plurals name="notification_using" formatted="false" msgid="2211008461429037973">
-      <item quantity="other">po përdor <xliff:g id="PERFORMING_ACTIVITY_1">%1$s</xliff:g> dhe <xliff:g id="PERFORMING_ACTIVITY_2">%2$s</xliff:g></item>
-      <item quantity="one">po përdor <xliff:g id="PERFORMING_ACTIVITY_0">%1$s</xliff:g></item>
-    </plurals>
+    <!-- no translation found for appops_camera (8100147441602585776) -->
+    <skip />
+    <!-- no translation found for appops_microphone (741508267659494555) -->
+    <skip />
+    <!-- no translation found for appops_overlay (6165912637560323464) -->
+    <skip />
+    <!-- no translation found for appops_camera_mic (1576901651150187433) -->
+    <skip />
+    <!-- no translation found for appops_camera_overlay (8869400080809298814) -->
+    <skip />
+    <!-- no translation found for appops_mic_overlay (4835157962857919804) -->
+    <skip />
+    <!-- no translation found for appops_camera_mic_overlay (6718768197048030993) -->
+    <skip />
     <string name="notification_appops_settings" msgid="1028328314935908050">"Cilësimet"</string>
     <string name="notification_appops_ok" msgid="1156966426011011434">"Në rregull"</string>
     <string name="notification_channel_controls_opened_accessibility" msgid="6553950422055908113">"Kontrollet e njoftimeve për <xliff:g id="APP_NAME">%1$s</xliff:g> janë hapur"</string>
@@ -853,6 +863,5 @@
     <string name="auto_saver_enabled_text" msgid="874711029884777579">"\"Kursyesi i baterisë\" do të aktivizohet automatikisht kur bateria të jetë nën <xliff:g id="PERCENTAGE">%d</xliff:g>%%."</string>
     <string name="open_saver_setting_action" msgid="8314624730997322529">"Cilësimet"</string>
     <string name="auto_saver_okay_action" msgid="2701221740227683650">"E kuptova"</string>
-    <!-- no translation found for heap_dump_tile_name (9141031328971226374) -->
-    <skip />
+    <string name="heap_dump_tile_name" msgid="9141031328971226374">"Hidh grumbullin SysUI"</string>
 </resources>
