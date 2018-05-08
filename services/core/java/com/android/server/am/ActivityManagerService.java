@@ -1448,8 +1448,8 @@ public class ActivityManagerService extends IActivityManager.Stub
      * List of initialization arguments to pass to all processes when binding applications to them.
      * For example, references to the commonly used services.
      */
-    HashMap<String, IBinder> mAppBindArgs;
-    HashMap<String, IBinder> mIsolatedAppBindArgs;
+    ArrayMap<String, IBinder> mAppBindArgs;
+    ArrayMap<String, IBinder> mIsolatedAppBindArgs;
 
     /**
      * Temporary to avoid allocations.  Protected by main lock.
@@ -3434,27 +3434,54 @@ public class ActivityManagerService extends IActivityManager.Stub
      * process when the bindApplication() IPC is sent to the process. They're
      * lazily setup to make sure the services are running when they're asked for.
      */
-    private HashMap<String, IBinder> getCommonServicesLocked(boolean isolated) {
+    private ArrayMap<String, IBinder> getCommonServicesLocked(boolean isolated) {
         // Isolated processes won't get this optimization, so that we don't
         // violate the rules about which services they have access to.
         if (isolated) {
             if (mIsolatedAppBindArgs == null) {
-                mIsolatedAppBindArgs = new HashMap<>();
-                mIsolatedAppBindArgs.put("package", ServiceManager.getService("package"));
+                mIsolatedAppBindArgs = new ArrayMap<>(1);
+                addServiceToMap(mIsolatedAppBindArgs, "package");
             }
             return mIsolatedAppBindArgs;
         }
 
         if (mAppBindArgs == null) {
-            mAppBindArgs = new HashMap<>();
+            mAppBindArgs = new ArrayMap<>();
 
-            // Setup the application init args
-            mAppBindArgs.put("package", ServiceManager.getService("package"));
-            mAppBindArgs.put("window", ServiceManager.getService("window"));
-            mAppBindArgs.put(Context.ALARM_SERVICE,
-                    ServiceManager.getService(Context.ALARM_SERVICE));
+            // Add common services.
+            // IMPORTANT: Before adding services here, make sure ephemeral apps can access them too.
+            // Enable the check in ApplicationThread.bindApplication() to make sure.
+            addServiceToMap(mAppBindArgs, "package");
+            addServiceToMap(mAppBindArgs, Context.WINDOW_SERVICE);
+            addServiceToMap(mAppBindArgs, Context.ALARM_SERVICE);
+            addServiceToMap(mAppBindArgs, Context.DISPLAY_SERVICE);
+            addServiceToMap(mAppBindArgs, Context.NETWORKMANAGEMENT_SERVICE);
+            addServiceToMap(mAppBindArgs, Context.CONNECTIVITY_SERVICE);
+            addServiceToMap(mAppBindArgs, Context.ACCESSIBILITY_SERVICE);
+            addServiceToMap(mAppBindArgs, Context.INPUT_METHOD_SERVICE);
+            addServiceToMap(mAppBindArgs, Context.INPUT_SERVICE);
+            addServiceToMap(mAppBindArgs, "graphicsstats");
+            addServiceToMap(mAppBindArgs, Context.APP_OPS_SERVICE);
+            addServiceToMap(mAppBindArgs, "content");
+            addServiceToMap(mAppBindArgs, Context.JOB_SCHEDULER_SERVICE);
+            addServiceToMap(mAppBindArgs, Context.NOTIFICATION_SERVICE);
+            addServiceToMap(mAppBindArgs, Context.VIBRATOR_SERVICE);
+            addServiceToMap(mAppBindArgs, Context.ACCOUNT_SERVICE);
+            addServiceToMap(mAppBindArgs, Context.POWER_SERVICE);
+            addServiceToMap(mAppBindArgs, Context.USER_SERVICE);
+            addServiceToMap(mAppBindArgs, "mount");
         }
         return mAppBindArgs;
+    }
+
+    private static void addServiceToMap(ArrayMap<String, IBinder> map, String name) {
+        final IBinder service = ServiceManager.getService(name);
+        if (service != null) {
+            map.put(name, service);
+            if (false) {
+                Log.i(TAG, "Adding " + name + " to the pre-loaded service cache.");
+            }
+        }
     }
 
     /**
