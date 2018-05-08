@@ -1214,11 +1214,12 @@ public final class BatteryStatsService extends IBatteryStats.Stub
 
     private void dumpHelp(PrintWriter pw) {
         pw.println("Battery stats (batterystats) dump options:");
-        pw.println("  [--checkin] [--history] [--history-start] [--charged] [-c]");
+        pw.println("  [--checkin] [--proto] [--history] [--history-start] [--charged] [-c]");
         pw.println("  [--daily] [--reset] [--write] [--new-daily] [--read-daily] [-h] [<package.name>]");
         pw.println("  --checkin: generate output for a checkin report; will write (and clear) the");
         pw.println("             last old completed stats when they had been reset.");
         pw.println("  -c: write the current stats in checkin format.");
+        pw.println("  --proto: write the current aggregate stats (without history) in proto format.");
         pw.println("  --history: show only history data.");
         pw.println("  --history-start <num>: show only history data starting at given time offset.");
         pw.println("  --charged: only output data since last charged.");
@@ -1431,7 +1432,8 @@ public final class BatteryStatsService extends IBatteryStats.Stub
                                         null, mStats.mHandler, null, mUserManagerUserInfoProvider);
                                 checkinStats.readSummaryFromParcel(in);
                                 in.recycle();
-                                checkinStats.dumpProtoLocked(mContext, fd, apps, flags);
+                                checkinStats.dumpProtoLocked(
+                                        mContext, fd, apps, flags, historyStart);
                                 mStats.mCheckinFile.delete();
                                 return;
                             }
@@ -1444,7 +1446,7 @@ public final class BatteryStatsService extends IBatteryStats.Stub
             }
             if (DBG) Slog.d(TAG, "begin dumpProtoLocked from UID " + Binder.getCallingUid());
             synchronized (mStats) {
-                mStats.dumpProtoLocked(mContext, fd, apps, flags);
+                mStats.dumpProtoLocked(mContext, fd, apps, flags, historyStart);
                 if (writeData) {
                     mStats.writeAsyncLocked();
                 }
