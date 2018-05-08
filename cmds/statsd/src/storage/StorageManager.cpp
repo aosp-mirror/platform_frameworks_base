@@ -160,6 +160,34 @@ void StorageManager::sendBroadcast(const char* path,
     }
 }
 
+bool StorageManager::hasConfigMetricsReport(const ConfigKey& key) {
+    unique_ptr<DIR, decltype(&closedir)> dir(opendir(STATS_DATA_DIR), closedir);
+    if (dir == NULL) {
+        VLOG("Path %s does not exist", STATS_DATA_DIR);
+        return false;
+    }
+
+    string suffix = StringPrintf("%d_%lld", key.GetUid(), (long long)key.GetId());
+
+    dirent* de;
+    while ((de = readdir(dir.get()))) {
+        char* name = de->d_name;
+        if (name[0] == '.') continue;
+
+        size_t nameLen = strlen(name);
+        size_t suffixLen = suffix.length();
+        if (suffixLen <= nameLen &&
+            strncmp(name + nameLen - suffixLen, suffix.c_str(), suffixLen) == 0) {
+            // Check again that the file name is parseable.
+            int64_t result[3];
+            parseFileName(name, result);
+            if (result[0] == -1) continue;
+            return true;
+        }
+    }
+    return false;
+}
+
 void StorageManager::appendConfigMetricsReport(const ConfigKey& key, ProtoOutputStream* proto) {
     unique_ptr<DIR, decltype(&closedir)> dir(opendir(STATS_DATA_DIR), closedir);
     if (dir == NULL) {
