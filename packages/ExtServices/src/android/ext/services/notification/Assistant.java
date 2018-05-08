@@ -250,7 +250,7 @@ public class Assistant extends NotificationAssistantService {
             mFile = new AtomicFile(new File(new File(
                     Environment.getDataUserCePackageDirectory(
                             StorageManager.UUID_PRIVATE_INTERNAL, getUserId(), getPackageName()),
-                    "assistant"), "block_stats.xml"));
+                    "assistant"), "blocking_helper_stats.xml"));
             loadFile();
             for (StatusBarNotification sbn : getActiveNotifications()) {
                 onNotificationPosted(sbn);
