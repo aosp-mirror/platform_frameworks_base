@@ -4706,7 +4706,7 @@ public final class Settings {
         pw.print(prefix); pw.print("  pkgFlags="); printFlags(pw, ps.pkgFlags, FLAG_DUMP_SPEC);
                 pw.println();
 
-        if (ps.pkg.mOverlayTarget != null) {
+        if (ps.pkg != null && ps.pkg.mOverlayTarget != null) {
             pw.print(prefix); pw.print("  overlayTarget="); pw.println(ps.pkg.mOverlayTarget);
             pw.print(prefix); pw.print("  overlayCategory="); pw.println(ps.pkg.mOverlayCategory);
         }
