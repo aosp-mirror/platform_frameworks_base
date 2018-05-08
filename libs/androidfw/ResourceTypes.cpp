@@ -7367,222 +7367,238 @@ void ResTable::print(bool inclValues) const
             printf("\n");
         }
 
-        int packageId = pg->id;
-        size_t pkgCount = pg->packages.size();
-        for (size_t pkgIndex=0; pkgIndex<pkgCount; pkgIndex++) {
-            const Package* pkg = pg->packages[pkgIndex];
-            // Use a package's real ID, since the ID may have been assigned
-            // if this package is a shared library.
-            packageId = pkg->package->id;
-            char16_t tmpName[sizeof(pkg->package->name)/sizeof(pkg->package->name[0])];
-            strcpy16_dtoh(tmpName, pkg->package->name, sizeof(pkg->package->name)/sizeof(pkg->package->name[0]));
-            printf("  Package %d id=0x%02x name=%s\n", (int)pkgIndex,
-                    pkg->package->id, String8(tmpName).string());
+        // Determine the number of resource splits for the resource types in this package.
+        // It needs to be done outside of the loop below so all of the information for a
+        // is displayed in a single block. Otherwise, a resource split's resource types
+        // would be interleaved with other splits.
+        size_t splitCount = 0;
+        for (size_t typeIndex = 0; typeIndex < pg->types.size(); typeIndex++) {
+            splitCount = max(splitCount, pg->types[typeIndex].size());
         }
 
-        for (size_t typeIndex=0; typeIndex < pg->types.size(); typeIndex++) {
-            const TypeList& typeList = pg->types[typeIndex];
-            if (typeList.isEmpty()) {
-                continue;
+        int packageId = pg->id;
+        for (size_t splitIndex = 0; splitIndex < splitCount; splitIndex++) {
+            size_t pkgCount = pg->packages.size();
+            for (size_t pkgIndex=0; pkgIndex<pkgCount; pkgIndex++) {
+                const Package* pkg = pg->packages[pkgIndex];
+                // Use a package's real ID, since the ID may have been assigned
+                // if this package is a shared library.
+                packageId = pkg->package->id;
+                char16_t tmpName[sizeof(pkg->package->name)/sizeof(pkg->package->name[0])];
+                strcpy16_dtoh(tmpName, pkg->package->name,
+                              sizeof(pkg->package->name)/sizeof(pkg->package->name[0]));
+                printf("  Package %d id=0x%02x name=%s\n", (int)pkgIndex,
+                        pkg->package->id, String8(tmpName).string());
             }
-            const Type* typeConfigs = typeList[0];
-            const size_t NTC = typeConfigs->configs.size();
-            printf("    type %d configCount=%d entryCount=%d\n",
-                   (int)typeIndex, (int)NTC, (int)typeConfigs->entryCount);
-            if (typeConfigs->typeSpecFlags != NULL) {
-                for (size_t entryIndex=0; entryIndex<typeConfigs->entryCount; entryIndex++) {
-                    uint32_t resID = (0xff000000 & ((packageId)<<24))
-                                | (0x00ff0000 & ((typeIndex+1)<<16))
-                                | (0x0000ffff & (entryIndex));
-                    // Since we are creating resID without actually
-                    // iterating over them, we have no idea which is a
-                    // dynamic reference. We must check.
-                    if (packageId == 0) {
-                        pg->dynamicRefTable.lookupResourceId(&resID);
-                    }
 
-                    resource_name resName;
-                    if (this->getResourceName(resID, true, &resName)) {
-                        String8 type8;
-                        String8 name8;
-                        if (resName.type8 != NULL) {
-                            type8 = String8(resName.type8, resName.typeLen);
-                        } else {
-                            type8 = String8(resName.type, resName.typeLen);
+            for (size_t typeIndex = 0; typeIndex < pg->types.size(); typeIndex++) {
+                const TypeList& typeList = pg->types[typeIndex];
+                if (splitIndex >= typeList.size() || typeList.isEmpty()) {
+                    // Only dump if the split exists and contains entries for this type
+                    continue;
+                }
+                const Type* typeConfigs = typeList[splitIndex];
+                const size_t NTC = typeConfigs->configs.size();
+                printf("    type %d configCount=%d entryCount=%d\n",
+                       (int)typeIndex, (int)NTC, (int)typeConfigs->entryCount);
+                if (typeConfigs->typeSpecFlags != NULL) {
+                    for (size_t entryIndex=0; entryIndex<typeConfigs->entryCount; entryIndex++) {
+                        uint32_t resID = (0xff000000 & ((packageId)<<24))
+                                    | (0x00ff0000 & ((typeIndex+1)<<16))
+                                    | (0x0000ffff & (entryIndex));
+                        // Since we are creating resID without actually
+                        // iterating over them, we have no idea which is a
+                        // dynamic reference. We must check.
+                        if (packageId == 0) {
+                            pg->dynamicRefTable.lookupResourceId(&resID);
                         }
-                        if (resName.name8 != NULL) {
-                            name8 = String8(resName.name8, resName.nameLen);
+
+                        resource_name resName;
+                        if (this->getResourceName(resID, true, &resName)) {
+                            String8 type8;
+                            String8 name8;
+                            if (resName.type8 != NULL) {
+                                type8 = String8(resName.type8, resName.typeLen);
+                            } else {
+                                type8 = String8(resName.type, resName.typeLen);
+                            }
+                            if (resName.name8 != NULL) {
+                                name8 = String8(resName.name8, resName.nameLen);
+                            } else {
+                                name8 = String8(resName.name, resName.nameLen);
+                            }
+                            printf("      spec resource 0x%08x %s:%s/%s: flags=0x%08x\n",
+                                resID,
+                                CHAR16_TO_CSTR(resName.package, resName.packageLen),
+                                type8.string(), name8.string(),
+                                dtohl(typeConfigs->typeSpecFlags[entryIndex]));
                         } else {
-                            name8 = String8(resName.name, resName.nameLen);
+                            printf("      INVALID TYPE CONFIG FOR RESOURCE 0x%08x\n", resID);
                         }
-                        printf("      spec resource 0x%08x %s:%s/%s: flags=0x%08x\n",
-                            resID,
-                            CHAR16_TO_CSTR(resName.package, resName.packageLen),
-                            type8.string(), name8.string(),
-                            dtohl(typeConfigs->typeSpecFlags[entryIndex]));
-                    } else {
-                        printf("      INVALID TYPE CONFIG FOR RESOURCE 0x%08x\n", resID);
                     }
                 }
-            }
-            for (size_t configIndex=0; configIndex<NTC; configIndex++) {
-                const ResTable_type* type = typeConfigs->configs[configIndex];
-                if ((((uint64_t)type)&0x3) != 0) {
-                    printf("      NON-INTEGER ResTable_type ADDRESS: %p\n", type);
-                    continue;
-                }
-
-                // Always copy the config, as fields get added and we need to
-                // set the defaults.
-                ResTable_config thisConfig;
-                thisConfig.copyFromDtoH(type->config);
-
-                String8 configStr = thisConfig.toString();
-                printf("      config %s", configStr.size() > 0
-                        ? configStr.string() : "(default)");
-                if (type->flags != 0u) {
-                    printf(" flags=0x%02x", type->flags);
-                    if (type->flags & ResTable_type::FLAG_SPARSE) {
-                        printf(" [sparse]");
+                for (size_t configIndex=0; configIndex<NTC; configIndex++) {
+                    const ResTable_type* type = typeConfigs->configs[configIndex];
+                    if ((((uint64_t)type)&0x3) != 0) {
+                        printf("      NON-INTEGER ResTable_type ADDRESS: %p\n", type);
+                        continue;
                     }
-                }
 
-                printf(":\n");
+                    // Always copy the config, as fields get added and we need to
+                    // set the defaults.
+                    ResTable_config thisConfig;
+                    thisConfig.copyFromDtoH(type->config);
 
-                size_t entryCount = dtohl(type->entryCount);
-                uint32_t entriesStart = dtohl(type->entriesStart);
-                if ((entriesStart&0x3) != 0) {
-                    printf("      NON-INTEGER ResTable_type entriesStart OFFSET: 0x%x\n", entriesStart);
-                    continue;
-                }
-                uint32_t typeSize = dtohl(type->header.size);
-                if ((typeSize&0x3) != 0) {
-                    printf("      NON-INTEGER ResTable_type header.size: 0x%x\n", typeSize);
-                    continue;
-                }
+                    String8 configStr = thisConfig.toString();
+                    printf("      config %s", configStr.size() > 0
+                            ? configStr.string() : "(default)");
+                    if (type->flags != 0u) {
+                        printf(" flags=0x%02x", type->flags);
+                        if (type->flags & ResTable_type::FLAG_SPARSE) {
+                            printf(" [sparse]");
+                        }
+                    }
 
-                const uint32_t* const eindex = (const uint32_t*)
-                        (((const uint8_t*)type) + dtohs(type->header.headerSize));
-                for (size_t entryIndex=0; entryIndex<entryCount; entryIndex++) {
-                    size_t entryId;
-                    uint32_t thisOffset;
-                    if (type->flags & ResTable_type::FLAG_SPARSE) {
-                        const ResTable_sparseTypeEntry* entry =
-                                reinterpret_cast<const ResTable_sparseTypeEntry*>(
-                                        eindex + entryIndex);
-                        entryId = dtohs(entry->idx);
-                        // Offsets are encoded as divided by 4.
-                        thisOffset = static_cast<uint32_t>(dtohs(entry->offset)) * 4u;
-                    } else {
-                        entryId = entryIndex;
-                        thisOffset = dtohl(eindex[entryIndex]);
-                        if (thisOffset == ResTable_type::NO_ENTRY) {
+                    printf(":\n");
+
+                    size_t entryCount = dtohl(type->entryCount);
+                    uint32_t entriesStart = dtohl(type->entriesStart);
+                    if ((entriesStart&0x3) != 0) {
+                        printf("      NON-INTEGER ResTable_type entriesStart OFFSET: 0x%x\n",
+                               entriesStart);
+                        continue;
+                    }
+                    uint32_t typeSize = dtohl(type->header.size);
+                    if ((typeSize&0x3) != 0) {
+                        printf("      NON-INTEGER ResTable_type header.size: 0x%x\n", typeSize);
+                        continue;
+                    }
+
+                    const uint32_t* const eindex = (const uint32_t*)
+                            (((const uint8_t*)type) + dtohs(type->header.headerSize));
+                    for (size_t entryIndex=0; entryIndex<entryCount; entryIndex++) {
+                        size_t entryId;
+                        uint32_t thisOffset;
+                        if (type->flags & ResTable_type::FLAG_SPARSE) {
+                            const ResTable_sparseTypeEntry* entry =
+                                    reinterpret_cast<const ResTable_sparseTypeEntry*>(
+                                            eindex + entryIndex);
+                            entryId = dtohs(entry->idx);
+                            // Offsets are encoded as divided by 4.
+                            thisOffset = static_cast<uint32_t>(dtohs(entry->offset)) * 4u;
+                        } else {
+                            entryId = entryIndex;
+                            thisOffset = dtohl(eindex[entryIndex]);
+                            if (thisOffset == ResTable_type::NO_ENTRY) {
+                                continue;
+                            }
+                        }
+
+                        uint32_t resID = (0xff000000 & ((packageId)<<24))
+                                    | (0x00ff0000 & ((typeIndex+1)<<16))
+                                    | (0x0000ffff & (entryId));
+                        if (packageId == 0) {
+                            pg->dynamicRefTable.lookupResourceId(&resID);
+                        }
+                        resource_name resName;
+                        if (this->getResourceName(resID, true, &resName)) {
+                            String8 type8;
+                            String8 name8;
+                            if (resName.type8 != NULL) {
+                                type8 = String8(resName.type8, resName.typeLen);
+                            } else {
+                                type8 = String8(resName.type, resName.typeLen);
+                            }
+                            if (resName.name8 != NULL) {
+                                name8 = String8(resName.name8, resName.nameLen);
+                            } else {
+                                name8 = String8(resName.name, resName.nameLen);
+                            }
+                            printf("        resource 0x%08x %s:%s/%s: ", resID,
+                                    CHAR16_TO_CSTR(resName.package, resName.packageLen),
+                                    type8.string(), name8.string());
+                        } else {
+                            printf("        INVALID RESOURCE 0x%08x: ", resID);
+                        }
+                        if ((thisOffset&0x3) != 0) {
+                            printf("NON-INTEGER OFFSET: 0x%x\n", thisOffset);
                             continue;
                         }
-                    }
-
-                    uint32_t resID = (0xff000000 & ((packageId)<<24))
-                                | (0x00ff0000 & ((typeIndex+1)<<16))
-                                | (0x0000ffff & (entryId));
-                    if (packageId == 0) {
-                        pg->dynamicRefTable.lookupResourceId(&resID);
-                    }
-                    resource_name resName;
-                    if (this->getResourceName(resID, true, &resName)) {
-                        String8 type8;
-                        String8 name8;
-                        if (resName.type8 != NULL) {
-                            type8 = String8(resName.type8, resName.typeLen);
-                        } else {
-                            type8 = String8(resName.type, resName.typeLen);
+                        if ((thisOffset+sizeof(ResTable_entry)) > typeSize) {
+                            printf("OFFSET OUT OF BOUNDS: 0x%x+0x%x (size is 0x%x)\n",
+                                   entriesStart, thisOffset, typeSize);
+                            continue;
                         }
-                        if (resName.name8 != NULL) {
-                            name8 = String8(resName.name8, resName.nameLen);
-                        } else {
-                            name8 = String8(resName.name, resName.nameLen);
+
+                        const ResTable_entry* ent = (const ResTable_entry*)
+                            (((const uint8_t*)type) + entriesStart + thisOffset);
+                        if (((entriesStart + thisOffset)&0x3) != 0) {
+                            printf("NON-INTEGER ResTable_entry OFFSET: 0x%x\n",
+                                 (entriesStart + thisOffset));
+                            continue;
                         }
-                        printf("        resource 0x%08x %s:%s/%s: ", resID,
-                                CHAR16_TO_CSTR(resName.package, resName.packageLen),
-                                type8.string(), name8.string());
-                    } else {
-                        printf("        INVALID RESOURCE 0x%08x: ", resID);
-                    }
-                    if ((thisOffset&0x3) != 0) {
-                        printf("NON-INTEGER OFFSET: 0x%x\n", thisOffset);
-                        continue;
-                    }
-                    if ((thisOffset+sizeof(ResTable_entry)) > typeSize) {
-                        printf("OFFSET OUT OF BOUNDS: 0x%x+0x%x (size is 0x%x)\n",
-                               entriesStart, thisOffset, typeSize);
-                        continue;
-                    }
 
-                    const ResTable_entry* ent = (const ResTable_entry*)
-                        (((const uint8_t*)type) + entriesStart + thisOffset);
-                    if (((entriesStart + thisOffset)&0x3) != 0) {
-                        printf("NON-INTEGER ResTable_entry OFFSET: 0x%x\n",
-                             (entriesStart + thisOffset));
-                        continue;
-                    }
+                        uintptr_t esize = dtohs(ent->size);
+                        if ((esize&0x3) != 0) {
+                            printf("NON-INTEGER ResTable_entry SIZE: %p\n", (void *)esize);
+                            continue;
+                        }
+                        if ((thisOffset+esize) > typeSize) {
+                            printf("ResTable_entry OUT OF BOUNDS: 0x%x+0x%x+%p (size is 0x%x)\n",
+                                   entriesStart, thisOffset, (void *)esize, typeSize);
+                            continue;
+                        }
 
-                    uintptr_t esize = dtohs(ent->size);
-                    if ((esize&0x3) != 0) {
-                        printf("NON-INTEGER ResTable_entry SIZE: %p\n", (void *)esize);
-                        continue;
-                    }
-                    if ((thisOffset+esize) > typeSize) {
-                        printf("ResTable_entry OUT OF BOUNDS: 0x%x+0x%x+%p (size is 0x%x)\n",
-                               entriesStart, thisOffset, (void *)esize, typeSize);
-                        continue;
-                    }
+                        const Res_value* valuePtr = NULL;
+                        const ResTable_map_entry* bagPtr = NULL;
+                        Res_value value;
+                        if ((dtohs(ent->flags)&ResTable_entry::FLAG_COMPLEX) != 0) {
+                            printf("<bag>");
+                            bagPtr = (const ResTable_map_entry*)ent;
+                        } else {
+                            valuePtr = (const Res_value*)
+                                (((const uint8_t*)ent) + esize);
+                            value.copyFrom_dtoh(*valuePtr);
+                            printf("t=0x%02x d=0x%08x (s=0x%04x r=0x%02x)",
+                                   (int)value.dataType, (int)value.data,
+                                   (int)value.size, (int)value.res0);
+                        }
 
-                    const Res_value* valuePtr = NULL;
-                    const ResTable_map_entry* bagPtr = NULL;
-                    Res_value value;
-                    if ((dtohs(ent->flags)&ResTable_entry::FLAG_COMPLEX) != 0) {
-                        printf("<bag>");
-                        bagPtr = (const ResTable_map_entry*)ent;
-                    } else {
-                        valuePtr = (const Res_value*)
-                            (((const uint8_t*)ent) + esize);
-                        value.copyFrom_dtoh(*valuePtr);
-                        printf("t=0x%02x d=0x%08x (s=0x%04x r=0x%02x)",
-                               (int)value.dataType, (int)value.data,
-                               (int)value.size, (int)value.res0);
-                    }
+                        if ((dtohs(ent->flags)&ResTable_entry::FLAG_PUBLIC) != 0) {
+                            printf(" (PUBLIC)");
+                        }
+                        printf("\n");
 
-                    if ((dtohs(ent->flags)&ResTable_entry::FLAG_PUBLIC) != 0) {
-                        printf(" (PUBLIC)");
-                    }
-                    printf("\n");
-
-                    if (inclValues) {
-                        if (valuePtr != NULL) {
-                            printf("          ");
-                            print_value(typeConfigs->package, value);
-                        } else if (bagPtr != NULL) {
-                            const int N = dtohl(bagPtr->count);
-                            const uint8_t* baseMapPtr = (const uint8_t*)ent;
-                            size_t mapOffset = esize;
-                            const ResTable_map* mapPtr = (ResTable_map*)(baseMapPtr+mapOffset);
-                            const uint32_t parent = dtohl(bagPtr->parent.ident);
-                            uint32_t resolvedParent = parent;
-                            if (Res_GETPACKAGE(resolvedParent) + 1 == 0) {
-                                status_t err = pg->dynamicRefTable.lookupResourceId(&resolvedParent);
-                                if (err != NO_ERROR) {
-                                    resolvedParent = 0;
-                                }
-                            }
-                            printf("          Parent=0x%08x(Resolved=0x%08x), Count=%d\n",
-                                    parent, resolvedParent, N);
-                            for (int i=0; i<N && mapOffset < (typeSize-sizeof(ResTable_map)); i++) {
-                                printf("          #%i (Key=0x%08x): ",
-                                    i, dtohl(mapPtr->name.ident));
-                                value.copyFrom_dtoh(mapPtr->value);
+                        if (inclValues) {
+                            if (valuePtr != NULL) {
+                                printf("          ");
                                 print_value(typeConfigs->package, value);
-                                const size_t size = dtohs(mapPtr->value.size);
-                                mapOffset += size + sizeof(*mapPtr)-sizeof(mapPtr->value);
-                                mapPtr = (ResTable_map*)(baseMapPtr+mapOffset);
+                            } else if (bagPtr != NULL) {
+                                const int N = dtohl(bagPtr->count);
+                                const uint8_t* baseMapPtr = (const uint8_t*)ent;
+                                size_t mapOffset = esize;
+                                const ResTable_map* mapPtr = (ResTable_map*)(baseMapPtr+mapOffset);
+                                const uint32_t parent = dtohl(bagPtr->parent.ident);
+                                uint32_t resolvedParent = parent;
+                                if (Res_GETPACKAGE(resolvedParent) + 1 == 0) {
+                                    status_t err =
+                                        pg->dynamicRefTable.lookupResourceId(&resolvedParent);
+                                    if (err != NO_ERROR) {
+                                        resolvedParent = 0;
+                                    }
+                                }
+                                printf("          Parent=0x%08x(Resolved=0x%08x), Count=%d\n",
+                                        parent, resolvedParent, N);
+                                for (int i=0;
+                                     i<N && mapOffset < (typeSize-sizeof(ResTable_map)); i++) {
+                                    printf("          #%i (Key=0x%08x): ",
+                                        i, dtohl(mapPtr->name.ident));
+                                    value.copyFrom_dtoh(mapPtr->value);
+                                    print_value(typeConfigs->package, value);
+                                    const size_t size = dtohs(mapPtr->value.size);
+                                    mapOffset += size + sizeof(*mapPtr)-sizeof(mapPtr->value);
+                                    mapPtr = (ResTable_map*)(baseMapPtr+mapOffset);
+                                }
                             }
                         }
                     }
