@@ -2599,6 +2599,9 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
 
     @Override
     protected boolean disallowSingleClick(MotionEvent event) {
+        if (areGutsExposed()) {
+            return false;
+        }
         float x = event.getX();
         float y = event.getY();
         NotificationHeaderView header = getVisibleNotificationHeader();
