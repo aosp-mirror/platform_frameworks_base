@@ -40,10 +40,12 @@ class Section {
 public:
     const int id;
     const int64_t timeoutMs;  // each section must have a timeout
+    const bool userdebugAndEngOnly;
     const bool deviceSpecific;
     String8 name;
 
-    Section(int id, int64_t timeoutMs = REMOTE_CALL_TIMEOUT_MS, bool deviceSpecific = false);
+    Section(int id, int64_t timeoutMs = REMOTE_CALL_TIMEOUT_MS, bool userdebugAndEngOnly = false,
+            bool deviceSpecific = false);
     virtual ~Section();
 
     virtual status_t Execute(ReportRequestSet* requests) const = 0;
@@ -107,7 +109,8 @@ private:
  */
 class WorkerThreadSection : public Section {
 public:
-    WorkerThreadSection(int id, int64_t timeoutMs = REMOTE_CALL_TIMEOUT_MS);
+    WorkerThreadSection(int id, int64_t timeoutMs = REMOTE_CALL_TIMEOUT_MS,
+                        bool userdebugAndEngOnly = false);
     virtual ~WorkerThreadSection();
 
     virtual status_t Execute(ReportRequestSet* requests) const;
@@ -137,7 +140,7 @@ private:
  */
 class DumpsysSection : public WorkerThreadSection {
 public:
-    DumpsysSection(int id, const char* service, ...);
+    DumpsysSection(int id, bool userdebugAndEngOnly, const char* service, ...);
     virtual ~DumpsysSection();
 
     virtual status_t BlockingCall(int pipeWriteFd) const;
