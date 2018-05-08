@@ -3331,8 +3331,16 @@ public class NotificationStackScrollLayout extends ViewGroup
 
     private void generateTopPaddingEvent() {
         if (mTopPaddingNeedsAnimation) {
-            mAnimationEvents.add(
-                    new AnimationEvent(null, AnimationEvent.ANIMATION_TYPE_TOP_PADDING_CHANGED));
+            AnimationEvent event;
+            if (mAmbientState.isDark()) {
+                event = new AnimationEvent(null /* view */,
+                        AnimationEvent.ANIMATION_TYPE_TOP_PADDING_CHANGED,
+                        KeyguardSliceView.DEFAULT_ANIM_DURATION);
+            } else {
+                event = new AnimationEvent(null /* view */,
+                        AnimationEvent.ANIMATION_TYPE_TOP_PADDING_CHANGED);
+            }
+            mAnimationEvents.add(event);
         }
         mTopPaddingNeedsAnimation = false;
     }
