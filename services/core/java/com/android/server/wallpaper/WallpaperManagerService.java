@@ -1303,8 +1303,10 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
         synchronized (mLock) {
             if (mCurrentUserId == userId) {
                 if (mWaitingForUnlock) {
-                    // If we're switching users, now is when we transition the wallpaper
-                    switchUser(userId, null);
+                    // the desired wallpaper is not direct-boot aware, load it now
+                    final WallpaperData systemWallpaper =
+                            getWallpaperSafeLocked(userId, FLAG_SYSTEM);
+                    switchWallpaper(systemWallpaper, null);
                 }
 
                 // Make sure that the SELinux labeling of all the relevant files is correct.
