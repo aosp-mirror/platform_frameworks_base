@@ -224,8 +224,7 @@
     <string name="bluetooth_select_a2dp_codec_channel_mode" msgid="884855779449390540">"ब्लूटूथ ऑडिओ चॅनेल मोड"</string>
     <string name="bluetooth_select_a2dp_codec_channel_mode_dialog_title" msgid="7234956835280563341">"ब्लूटूथ ऑडिओ Codec ट्रिगर करा\nनिवड: चॅनेल मोड"</string>
     <string name="bluetooth_select_a2dp_codec_ldac_playback_quality" msgid="3619694372407843405">"ब्लूटूथ ऑडिओ LDAC कोडेक: प्लेबॅक गुणवत्ता"</string>
-    <!-- no translation found for bluetooth_select_a2dp_codec_ldac_playback_quality_dialog_title (6893955536658137179) -->
-    <skip />
+    <string name="bluetooth_select_a2dp_codec_ldac_playback_quality_dialog_title" msgid="6893955536658137179">"ब्लूटूथ ऑडिओ LDAC\nकोडेक निवड ट्रिगर करा: प्लेबॅक गुणवत्ता"</string>
     <string name="bluetooth_select_a2dp_codec_streaming_label" msgid="5347862512596240506">"स्ट्रीमिंग: <xliff:g id="STREAMING_PARAMETER">%1$s</xliff:g>"</string>
     <string name="select_private_dns_configuration_title" msgid="3700456559305263922">"खाजगी DNS"</string>
     <string name="select_private_dns_configuration_dialog_title" msgid="9221994415765826811">"खाजगी DNS मोड निवडा"</string>
