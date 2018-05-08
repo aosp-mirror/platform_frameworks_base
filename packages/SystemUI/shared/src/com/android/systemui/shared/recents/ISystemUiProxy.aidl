@@ -54,4 +54,10 @@ interface ISystemUiProxy {
      * Get the secondary split screen app's rectangle when not minimized.
      */
     Rect getNonMinimizedSplitScreenSecondaryBounds() = 7;
+
+    /**
+     * Control the {@param alpha} of the back button in the navigation bar and {@param animate} if
+     * needed from current value
+     */
+    void setBackButtonAlpha(float alpha, boolean animate) = 8;
 }

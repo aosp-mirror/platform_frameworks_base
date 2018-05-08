@@ -186,6 +186,13 @@ public class NavigationBarFragment extends Fragment implements Callbacks {
             mNavigationBarView.updateStates();
             updateScreenPinningGestures();
         }
+
+        @Override
+        public void onBackButtonAlphaChanged(float alpha, boolean animate) {
+            final ButtonDispatcher backButton = mNavigationBarView.getBackButton();
+            backButton.setVisibility(alpha > 0 ? View.VISIBLE : View.INVISIBLE);
+            backButton.setAlpha(alpha, animate);
+        }
     };
 
     // ----- Fragment Lifecycle Callbacks -----

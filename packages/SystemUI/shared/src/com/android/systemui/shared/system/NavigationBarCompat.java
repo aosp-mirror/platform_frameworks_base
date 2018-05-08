@@ -62,8 +62,7 @@ public class NavigationBarCompat {
     @Retention(RetentionPolicy.SOURCE)
     @IntDef({FLAG_DISABLE_SWIPE_UP,
             FLAG_DISABLE_QUICK_SCRUB,
-            FLAG_SHOW_OVERVIEW_BUTTON,
-            FLAG_HIDE_BACK_BUTTON
+            FLAG_SHOW_OVERVIEW_BUTTON
     })
     public @interface InteractionType {}
 
@@ -81,11 +80,6 @@ public class NavigationBarCompat {
      * Interaction type: show/hide the overview button while this service is connected to launcher
      */
     public static final int FLAG_SHOW_OVERVIEW_BUTTON = 0x4;
-
-    /**
-     * Interaction type: show/hide the back button while this service is connected to launcher
-     */
-    public static final int FLAG_HIDE_BACK_BUTTON = 0x8;
 
     private static int convertDpToPixel(float dp){
         return (int) (dp * Resources.getSystem().getDisplayMetrics().density);
