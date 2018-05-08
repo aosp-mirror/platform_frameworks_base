@@ -3373,6 +3373,12 @@ public class RemoteViews implements Parcelable, Filter {
      * @hide
      */
     public interface OnViewAppliedListener {
+        /**
+         * Callback when the RemoteView has finished inflating,
+         * but no actions have been applied yet.
+         */
+        default void onViewInflated(View v) {};
+
         void onViewApplied(View v);
 
         void onError(Exception e);
@@ -3469,6 +3475,10 @@ public class RemoteViews implements Parcelable, Filter {
         @Override
         protected void onPostExecute(ViewTree viewTree) {
             if (mError == null) {
+                if (mListener != null) {
+                    mListener.onViewInflated(viewTree.mRoot);
+                }
+
                 try {
                     if (mActions != null) {
                         OnClickHandler handler = mHandler == null
