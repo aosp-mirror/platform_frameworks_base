@@ -291,12 +291,9 @@
     <string name="permgrouplab_camera" msgid="4820372495894586615">"Κάμερα"</string>
     <string name="permgroupdesc_camera" msgid="3250611594678347720">"γίνεται λήψη φωτογραφιών και εγγραφή βίντεο"</string>
     <string name="permgrouprequest_camera" msgid="1299833592069671756">"Να επιτρέπεται στην εφαρμογή &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; η λήψη φωτογραφιών και η εγγραφή βίντεο;"</string>
-    <!-- no translation found for permgrouplab_calllog (8798646184930388160) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_calllog (3006237336748283775) -->
-    <skip />
-    <!-- no translation found for permgrouprequest_calllog (8487355309583773267) -->
-    <skip />
+    <string name="permgrouplab_calllog" msgid="8798646184930388160">"Αρχεία καταγραφής κλήσεων"</string>
+    <string name="permgroupdesc_calllog" msgid="3006237336748283775">"ανάγνωση και εγγραφή αρχείου καταγραφής τηλεφωνικών κλήσεων"</string>
+    <string name="permgrouprequest_calllog" msgid="8487355309583773267">"Να επιτρέπεται στην εφαρμογή &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; να έχει πρόσβαση στα αρχεία καταγραφής τηλεφωνικών κλήσεών σας;"</string>
     <string name="permgrouplab_phone" msgid="5229115638567440675">"Τηλέφωνο"</string>
     <string name="permgroupdesc_phone" msgid="6234224354060641055">"πραγματοποιεί και να διαχειρίζεται τηλ/κές κλήσεις"</string>
     <string name="permgrouprequest_phone" msgid="9166979577750581037">"Να επιτρέπεται στην εφαρμογή &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; η πραγματοποίηση και η διαχείριση τηλεφωνικών κλήσεων;"</string>
