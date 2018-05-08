@@ -2690,6 +2690,10 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
         return mNotificationViewState;
     }
 
+    public NotificationViewState getViewState() {
+        return mNotificationViewState;
+    }
+
     @Override
     public boolean isAboveShelf() {
         return !isOnKeyguard()

@@ -3201,6 +3201,7 @@ public class NotificationStackScrollLayout extends ViewGroup
                 if (row.isChildInGroup()) {
                     // We can otherwise get stuck in there if it was just isolated
                     row.setHeadsUpAnimatingAway(false);
+                    continue;
                 }
             } else {
                 ExpandableViewState viewState = mCurrentStackScrollState.getViewStateForView(row);
