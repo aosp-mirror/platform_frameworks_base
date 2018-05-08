@@ -48,7 +48,10 @@ public abstract class NotificationAssistantService extends NotificationListenerS
     public static final String SERVICE_INTERFACE
             = "android.service.notification.NotificationAssistantService";
 
-    private Handler mHandler;
+    /**
+     * @hide
+     */
+    protected Handler mHandler;
 
     @Override
     protected void attachBaseContext(Context base) {
