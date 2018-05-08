@@ -529,7 +529,7 @@ class RecentTasks {
         }
         for (int i = mTasks.size() - 1; i >= 0; --i) {
             final TaskRecord tr = mTasks.get(i);
-            if (tr.userId == userId && !mService.mAm.getLockTaskController().isTaskWhitelisted(tr)) {
+            if (tr.userId == userId && !mService.getLockTaskController().isTaskWhitelisted(tr)) {
                 remove(tr);
             }
         }
@@ -1162,7 +1162,7 @@ class RecentTasks {
         }
 
         // If we're in lock task mode, ignore the root task
-        if (task == mService.mAm.getLockTaskController().getRootTask()) {
+        if (task == mService.getLockTaskController().getRootTask()) {
             return false;
         }
 

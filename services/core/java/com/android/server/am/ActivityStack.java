@@ -3739,7 +3739,7 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
                 }
 
                 if (endTask) {
-                    mService.getLockTaskController().clearLockedTask(task);
+                    mService.mActivityTaskManager.getLockTaskController().clearLockedTask(task);
                 }
             } else if (!r.isState(PAUSING)) {
                 // If the activity is PAUSING, we will complete the finish once
@@ -4656,7 +4656,7 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
 
         // In LockTask mode, moving a locked task to the back of the stack may expose unlocked
         // ones. Therefore we need to check if this operation is allowed.
-        if (!mService.getLockTaskController().canMoveTaskToBack(tr)) {
+        if (!mService.mActivityTaskManager.getLockTaskController().canMoveTaskToBack(tr)) {
             return false;
         }
 
@@ -5176,7 +5176,7 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
             boolean toTop, ActivityRecord activity, ActivityRecord source,
             ActivityOptions options) {
         final TaskRecord task = TaskRecord.create(
-                mService, taskId, info, intent, voiceSession, voiceInteractor);
+                mService.mActivityTaskManager, taskId, info, intent, voiceSession, voiceInteractor);
         // add the task to stack first, mTaskPositioner might need the stack association
         addTask(task, toTop, "createTaskRecord");
         final int displayId = mDisplayId != INVALID_DISPLAY ? mDisplayId : DEFAULT_DISPLAY;
