@@ -19,11 +19,13 @@ package android.net;
 import android.os.SystemProperties;
 import android.util.Log;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.os.RoSystemProperties;
 import com.android.org.conscrypt.Conscrypt;
 import com.android.org.conscrypt.OpenSSLContextImpl;
 import com.android.org.conscrypt.OpenSSLSocketImpl;
 import com.android.org.conscrypt.SSLClientSessionCache;
+
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.Socket;
@@ -31,6 +33,7 @@ import java.net.SocketException;
 import java.security.KeyManagementException;
 import java.security.PrivateKey;
 import java.security.cert.X509Certificate;
+
 import javax.net.SocketFactory;
 import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.HttpsURLConnection;
@@ -306,8 +309,10 @@ public class SSLCertificateSocketFactory extends SSLSocketFactory {
     /**
      * Returns an array containing the concatenation of length-prefixed byte
      * strings.
+     * @hide
      */
-    static byte[] toLengthPrefixedList(byte[]... items) {
+    @VisibleForTesting
+    public static byte[] toLengthPrefixedList(byte[]... items) {
         if (items.length == 0) {
             throw new IllegalArgumentException("items.length == 0");
         }
