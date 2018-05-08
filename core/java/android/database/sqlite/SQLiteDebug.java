@@ -29,6 +29,7 @@ import java.util.ArrayList;
  *
  * {@hide}
  */
+@TestApi
 public final class SQLiteDebug {
     private static native void nativeGetPagerStats(PagerStats stats);
 
