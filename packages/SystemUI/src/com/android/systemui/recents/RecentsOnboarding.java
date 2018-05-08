@@ -93,7 +93,6 @@ public class RecentsOnboarding {
     private boolean mOverviewProxyListenerRegistered;
     private boolean mTaskListenerRegistered;
     private boolean mLayoutAttachedToWindow;
-    private int mLastTaskId;
     private boolean mHasDismissedSwipeUpTip;
     private boolean mHasDismissedQuickScrubTip;
     private int mNumAppsLaunchedSinceSwipeUpTipDismiss;
@@ -111,14 +110,8 @@ public class RecentsOnboarding {
                 hide(true);
                 return;
             }
-            if (info.id == mLastTaskId) {
-                // We only count launches that go to a new task.
-                return;
-            }
             int activityType = info.configuration.windowConfiguration.getActivityType();
             if (activityType == ACTIVITY_TYPE_STANDARD) {
-                mLastTaskId = info.id;
-
                 boolean alreadySeenSwipeUpOnboarding = hasSeenSwipeUpOnboarding();
                 boolean alreadySeenQuickScrubsOnboarding = hasSeenQuickScrubOnboarding();
                 if (alreadySeenSwipeUpOnboarding && alreadySeenQuickScrubsOnboarding) {
