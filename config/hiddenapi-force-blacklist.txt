@@ -1,0 +1,1 @@
+Ldalvik/system/VMRuntime;->setHiddenApiExemptions([Ljava/lang/String;)V
