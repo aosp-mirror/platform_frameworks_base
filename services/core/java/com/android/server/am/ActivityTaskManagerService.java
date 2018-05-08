@@ -42,12 +42,16 @@ import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_PRIMAR
 import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_SECONDARY;
 import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
 import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
+import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 import static android.os.Process.SYSTEM_UID;
 import static android.service.voice.VoiceInteractionSession.SHOW_SOURCE_APPLICATION;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.Display.INVALID_DISPLAY;
+import static android.view.WindowManager.TRANSIT_ACTIVITY_OPEN;
 import static android.view.WindowManager.TRANSIT_NONE;
 import static android.view.WindowManager.TRANSIT_TASK_IN_PLACE;
+import static android.view.WindowManager.TRANSIT_TASK_OPEN;
+import static android.view.WindowManager.TRANSIT_TASK_TO_FRONT;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_ALL;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_CONFIGURATION;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_FOCUS;
@@ -68,7 +72,6 @@ import static com.android.server.am.ActivityManagerDebugConfig.TAG_WITH_CLASS_NA
 import static com.android.server.am.ActivityManagerService.ALLOW_FULL_ONLY;
 import static com.android.server.am.ActivityManagerService.ANIMATE;
 import static com.android.server.am.ActivityManagerService.DISPATCH_SCREEN_KEYGUARD_MSG;
-import static com.android.server.am.ActivityManagerService.ENTER_ANIMATION_COMPLETE_MSG;
 import static com.android.server.am.ActivityManagerService.STOCK_PM_FLAGS;
 import static com.android.server.am.ActivityStack.REMOVE_TASK_MODE_DESTROYING;
 import static com.android.server.am.ActivityStackSupervisor.DEFER_RESUME;
@@ -123,7 +126,10 @@ import android.metrics.LogMaker;
 import android.net.Uri;
 import android.os.Binder;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.IBinder;
+import android.os.Looper;
+import android.os.Message;
 import android.os.PersistableBundle;
 import android.os.Process;
 import android.os.RemoteException;
@@ -137,6 +143,7 @@ import android.text.TextUtils;
 import android.util.Slog;
 
 import android.util.SparseIntArray;
+import android.util.proto.ProtoOutputStream;
 import android.view.IRecentsAnimationRunner;
 import android.view.RemoteAnimationAdapter;
 import android.view.RemoteAnimationDefinition;
@@ -154,8 +161,10 @@ import com.android.server.SystemService;
 import com.android.server.Watchdog;
 import com.android.server.vr.VrManagerInternal;
 import com.android.server.wm.PinnedStackWindowController;
+import com.android.server.wm.WindowManagerService;
 
 import java.io.File;
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -174,10 +183,12 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
     private static final String TAG_LOCKTASK = TAG + POSTFIX_LOCKTASK;
 
     Context mContext;
+    H mH;
     ActivityManagerService mAm;
     /* Global service lock used by the package the owns this service. */
     Object mGlobalLock;
     ActivityStackSupervisor mStackSupervisor;
+    WindowManagerService mWindowManager;
     /** List of intents that were used to start the most recent tasks. */
     private RecentTasks mRecentTasks;
     /** State of external calls telling us if the device is awake or asleep. */
@@ -203,6 +214,15 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
 
     private final ArrayList<PendingAssistExtras> mPendingAssistExtras = new ArrayList<>();
 
+    // Keeps track of the active voice interaction service component, notified from
+    // VoiceInteractionManagerService
+    ComponentName mActiveVoiceInteractionServiceComponent;
+
+    private VrController mVrController;
+    KeyguardController mKeyguardController;
+    private final ClientLifecycleManager mLifecycleManager;
+    private TaskChangeNotificationController mTaskChangeNotificationController;
+
     boolean mSuppressResizeConfigChanges;
 
     private final UpdateConfigurationResult mTmpUpdateConfigurationResult =
@@ -222,19 +242,31 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
 
     ActivityTaskManagerService(Context context) {
         mContext = context;
+        mLifecycleManager = new ClientLifecycleManager();
     }
 
     void onSystemReady() {
         mAssistUtils = new AssistUtils(mContext);
+        mVrController.onSystemReady();
+        mRecentTasks.onSystemReadyLocked();
     }
 
     // TODO: Will be converted to WM lock once transition is complete.
     void setActivityManagerService(ActivityManagerService am) {
         mAm = am;
         mGlobalLock = mAm;
+        mH = new H(mAm.mHandlerThread.getLooper());
         mStackSupervisor = mAm.mStackSupervisor;
+        mTaskChangeNotificationController =
+                new TaskChangeNotificationController(mAm, mStackSupervisor, mH);
         mRecentTasks = createRecentTasks();
         mStackSupervisor.setRecentTasks(mRecentTasks);
+        mVrController = new VrController(mAm);
+        mKeyguardController = mStackSupervisor.getKeyguardController();
+    }
+
+    void setWindowManager(WindowManagerService wm) {
+        mWindowManager = wm;
     }
 
     protected RecentTasks createRecentTasks() {
@@ -243,6 +275,14 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
 
     RecentTasks getRecentTasks() {
         return mRecentTasks;
+    }
+
+    ClientLifecycleManager getLifecycleManager() {
+        return mLifecycleManager;
+    }
+
+    TaskChangeNotificationController getTaskChangeNotificationController() {
+        return mTaskChangeNotificationController;
     }
 
     private void start() {
@@ -1816,7 +1856,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                 r.setTaskDescription(td);
                 final TaskRecord task = r.getTask();
                 task.updateTaskDescription();
-                mAm.mTaskChangeNotificationController.notifyTaskDescriptionChanged(task.taskId, td);
+                mTaskChangeNotificationController.notifyTaskDescriptionChanged(task.taskId, td);
             }
         }
     }
@@ -1884,7 +1924,18 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
 
     @Override
     public void notifyEnterAnimationComplete(IBinder token) {
-        mAm.mHandler.sendMessage(mAm.mHandler.obtainMessage(ENTER_ANIMATION_COMPLETE_MSG, token));
+        mH.post(() -> {
+            synchronized (mGlobalLock) {
+                ActivityRecord r = ActivityRecord.forTokenLocked(token);
+                if (r != null && r.app != null && r.app.thread != null) {
+                    try {
+                        r.app.thread.scheduleEnterAnimationComplete(r.appToken);
+                    } catch (RemoteException e) {
+                    }
+                }
+            }
+
+        });
     }
 
     /** Called from an app when assist data is ready. */
@@ -2140,7 +2191,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                 reportCurKeyguardUsageEventLocked(keyguardShowing);
             }
             try {
-                mAm.mKeyguardController.setKeyguardShown(keyguardShowing, aodShowing,
+                mKeyguardController.setKeyguardShown(keyguardShowing, aodShowing,
                         secondaryDisplayShowing);
             } finally {
                 Binder.restoreCallingIdentity(ident);
@@ -2270,7 +2321,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
     public void registerTaskStackListener(ITaskStackListener listener) {
         mAm.enforceCallerIsRecentsOrHasPermission(MANAGE_ACTIVITY_STACKS,
                 "registerTaskStackListener()");
-        mAm.mTaskChangeNotificationController.registerTaskStackListener(listener);
+        mTaskChangeNotificationController.registerTaskStackListener(listener);
     }
 
     /** Unregister a task stack listener so that it stops receiving callbacks. */
@@ -2278,7 +2329,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
     public void unregisterTaskStackListener(ITaskStackListener listener) {
         mAm.enforceCallerIsRecentsOrHasPermission(MANAGE_ACTIVITY_STACKS,
                 "unregisterTaskStackListener()");
-        mAm.mTaskChangeNotificationController.unregisterTaskStackListener(listener);
+        mTaskChangeNotificationController.unregisterTaskStackListener(listener);
     }
 
     private void reportCurKeyguardUsageEventLocked(boolean keyguardShowing) {
@@ -2560,7 +2611,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         final long token = Binder.clearCallingIdentity();
         try {
             synchronized (mGlobalLock) {
-                mAm.mKeyguardController.keyguardGoingAway(flags);
+                mKeyguardController.keyguardGoingAway(flags);
             }
         } finally {
             Binder.restoreCallingIdentity(token);
@@ -2848,7 +2899,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                     }
                 };
 
-                if (mAm.isKeyguardLocked()) {
+                if (isKeyguardLocked()) {
                     // If the keyguard is showing or occluded, then try and dismiss it before
                     // entering picture-in-picture (this will prompt the user to authenticate if the
                     // device is currently locked).
@@ -3030,7 +3081,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
 
                 // Update associated state if this activity is currently focused
                 if (r == mStackSupervisor.getResumedActivityLocked()) {
-                    mAm.applyUpdateVrModeLocked(r);
+                    applyUpdateVrModeLocked(r);
                 }
                 return 0;
             }
@@ -3077,13 +3128,13 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
     /** Notifies all listeners when the pinned stack animation starts. */
     @Override
     public void notifyPinnedStackAnimationStarted() {
-        mAm.mTaskChangeNotificationController.notifyPinnedStackAnimationStarted();
+        mTaskChangeNotificationController.notifyPinnedStackAnimationStarted();
     }
 
     /** Notifies all listeners when the pinned stack animation ends. */
     @Override
     public void notifyPinnedStackAnimationEnded() {
-        mAm.mTaskChangeNotificationController.notifyPinnedStackAnimationEnded();
+        mTaskChangeNotificationController.notifyPinnedStackAnimationEnded();
     }
 
     @Override
@@ -3178,7 +3229,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         final long callingId = Binder.clearCallingIdentity();
         try {
             synchronized (mGlobalLock) {
-                mAm.mKeyguardController.dismissKeyguard(token, callback, message);
+                mKeyguardController.dismissKeyguard(token, callback, message);
             }
         } finally {
             Binder.restoreCallingIdentity(callingId);
@@ -3353,6 +3404,111 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         }
     }
 
+    @Override
+    public void setVrThread(int tid) {
+        mAm.enforceSystemHasVrFeature();
+        synchronized (mGlobalLock) {
+            synchronized (mAm.mPidsSelfLocked) {
+                final int pid = Binder.getCallingPid();
+                final ProcessRecord proc = mAm.mPidsSelfLocked.get(pid);
+                mVrController.setVrThreadLocked(tid, pid, proc);
+            }
+        }
+    }
+
+    @Override
+    public void setPersistentVrThread(int tid) {
+        if (mAm.checkCallingPermission(Manifest.permission.RESTRICTED_VR_ACCESS)
+                != PERMISSION_GRANTED) {
+            final String msg = "Permission Denial: setPersistentVrThread() from pid="
+                    + Binder.getCallingPid()
+                    + ", uid=" + Binder.getCallingUid()
+                    + " requires " + Manifest.permission.RESTRICTED_VR_ACCESS;
+            Slog.w(TAG, msg);
+            throw new SecurityException(msg);
+        }
+        mAm.enforceSystemHasVrFeature();
+        synchronized (mGlobalLock) {
+            synchronized (mAm.mPidsSelfLocked) {
+                final int pid = Binder.getCallingPid();
+                final ProcessRecord proc = mAm.mPidsSelfLocked.get(pid);
+                mVrController.setPersistentVrThreadLocked(tid, pid, proc);
+            }
+        }
+    }
+
+    /**
+     * @return whether the system should disable UI modes incompatible with VR mode.
+     */
+    boolean shouldDisableNonVrUiLocked() {
+        return mVrController.shouldDisableNonVrUiLocked();
+    }
+
+    void applyUpdateVrModeLocked(ActivityRecord r) {
+        // VR apps are expected to run in a main display. If an app is turning on VR for
+        // itself, but lives in a dynamic stack, then make sure that it is moved to the main
+        // fullscreen stack before enabling VR Mode.
+        // TODO: The goal of this code is to keep the VR app on the main display. When the
+        // stack implementation changes in the future, keep in mind that the use of the fullscreen
+        // stack is a means to move the activity to the main display and a moveActivityToDisplay()
+        // option would be a better choice here.
+        if (r.requestedVrComponent != null && r.getDisplayId() != DEFAULT_DISPLAY) {
+            Slog.i(TAG, "Moving " + r.shortComponentName + " from stack " + r.getStackId()
+                    + " to main stack for VR");
+            final ActivityStack stack = mStackSupervisor.getDefaultDisplay().getOrCreateStack(
+                    WINDOWING_MODE_FULLSCREEN, r.getActivityType(), true /* toTop */);
+            moveTaskToStack(r.getTask().taskId, stack.mStackId, true /* toTop */);
+        }
+        mH.post(() -> {
+            if (!mVrController.onVrModeChanged(r)) {
+                return;
+            }
+            synchronized (mGlobalLock) {
+                final boolean disableNonVrUi = mVrController.shouldDisableNonVrUiLocked();
+                mWindowManager.disableNonVrUi(disableNonVrUi);
+                if (disableNonVrUi) {
+                    // If we are in a VR mode where Picture-in-Picture mode is unsupported,
+                    // then remove the pinned stack.
+                    mStackSupervisor.removeStacksInWindowingModes(WINDOWING_MODE_PINNED);
+                }
+            }
+        });
+    }
+
+    /** Pokes the task persister. */
+    void notifyTaskPersisterLocked(TaskRecord task, boolean flush) {
+        mRecentTasks.notifyTaskPersisterLocked(task, flush);
+    }
+
+    void onTopProcChangedLocked(ProcessRecord proc) {
+        mVrController.onTopProcChangedLocked(proc);
+    }
+
+    boolean isKeyguardLocked() {
+        return mKeyguardController.isKeyguardLocked();
+    }
+
+    boolean isNextTransitionForward() {
+        int transit = mWindowManager.getPendingAppTransition();
+        return transit == TRANSIT_ACTIVITY_OPEN
+                || transit == TRANSIT_TASK_OPEN
+                || transit == TRANSIT_TASK_TO_FRONT;
+    }
+
+    void dumpVrControllerLocked(PrintWriter pw) {
+        pw.println("  mVrController=" + mVrController);
+    }
+
+    void writeVrControllerToProto(ProtoOutputStream proto, long fieldId) {
+        mVrController.writeToProto(proto, fieldId);
+    }
+
+    final class H extends Handler {
+        public H(Looper looper) {
+            super(looper, null, true);
+        }
+    }
+
     final class LocalService extends ActivityTaskManagerInternal {
         @Override
         public SleepToken acquireSleepToken(String tag, int displayId) {
@@ -3485,7 +3641,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         @Override
         public void notifyKeyguardTrustedChanged() {
             synchronized (mGlobalLock) {
-                if (mAm.mKeyguardController.isKeyguardShowing(DEFAULT_DISPLAY)) {
+                if (mKeyguardController.isKeyguardShowing(DEFAULT_DISPLAY)) {
                     mStackSupervisor.ensureActivitiesVisibleLocked(null, 0, !PRESERVE_WINDOWS);
                 }
             }
@@ -3562,6 +3718,13 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         @Override
         public void enforceCallerIsRecentsOrHasPermission(String permission, String func) {
             mAm.enforceCallerIsRecentsOrHasPermission(permission, func);
+        }
+
+        @Override
+        public void notifyActiveVoiceInteractionServiceChanged(ComponentName component) {
+            synchronized (mGlobalLock) {
+                mActiveVoiceInteractionServiceComponent = component;
+            }
         }
     }
 }

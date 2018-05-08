@@ -465,7 +465,6 @@ interface IActivityManager {
     boolean isBackgroundRestricted(in String packageName);
 
     // Start of N MR1 transactions
-    void setVrThread(int tid);
     void setRenderThread(int tid);
     /**
      * Lets activity manager know whether the calling process is currently showing "top-level" UI

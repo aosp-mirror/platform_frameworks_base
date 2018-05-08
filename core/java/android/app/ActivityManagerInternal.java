@@ -144,11 +144,6 @@ public abstract class ActivityManagerInternal {
     public abstract void notifyNetworkPolicyRulesUpdated(int uid, long procStateSeq);
 
     /**
-     * Called after the voice interaction service has changed.
-     */
-    public abstract void notifyActiveVoiceInteractionServiceChanged(ComponentName component);
-
-    /**
      * Saves the current activity manager state and includes the saved state in the next dump of
      * activity manager.
      */

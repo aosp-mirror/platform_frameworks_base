@@ -238,4 +238,9 @@ public abstract class ActivityTaskManagerInternal {
      */
     public abstract void enforceCallerIsRecentsOrHasPermission(String permission, String func);
 
+    /**
+     * Called after the voice interaction service has changed.
+     */
+    public abstract void notifyActiveVoiceInteractionServiceChanged(ComponentName component);
+
 }

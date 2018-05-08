@@ -612,10 +612,6 @@ public class ActivityManagerService extends IActivityManager.Stub
     /** All system services */
     SystemServiceManager mSystemServiceManager;
 
-    // Keeps track of the active voice interaction service component, notified from
-    // VoiceInteractionManagerService
-    ComponentName mActiveVoiceInteractionServiceComponent;
-
     private Installer mInstaller;
 
     /** Run all ActivityStacks through this */
@@ -623,10 +619,6 @@ public class ActivityManagerService extends IActivityManager.Stub
     final KeyguardController mKeyguardController;
 
     private final ActivityStartController mActivityStartController;
-
-    private final ClientLifecycleManager mLifecycleManager;
-
-    final TaskChangeNotificationController mTaskChangeNotificationController;
 
     final InstrumentationReporter mInstrumentationReporter = new InstrumentationReporter();
 
@@ -638,8 +630,6 @@ public class ActivityManagerService extends IActivityManager.Stub
     // default action automatically.  Important for devices without direct input
     // devices.
     private boolean mShowDialogs = true;
-
-    private final VrController mVrController;
 
     // VR Vr2d Display Id.
     int mVr2dDisplayId = INVALID_DISPLAY;
@@ -1779,7 +1769,6 @@ public class ActivityManagerService extends IActivityManager.Stub
     static final int IMMERSIVE_MODE_LOCK_MSG = 37;
     static final int PERSIST_URI_GRANTS_MSG = 38;
     static final int UPDATE_TIME_PREFERENCE_MSG = 41;
-    static final int ENTER_ANIMATION_COMPLETE_MSG = 44;
     static final int FINISH_BOOTING_MSG = 45;
     static final int SEND_LOCALE_TO_MOUNT_DAEMON_MSG = 47;
     static final int DISMISS_DIALOG_UI_MSG = 48;
@@ -1791,8 +1780,6 @@ public class ActivityManagerService extends IActivityManager.Stub
     static final int SHUTDOWN_UI_AUTOMATION_CONNECTION_MSG = 56;
     static final int CONTENT_PROVIDER_PUBLISH_TIMEOUT_MSG = 57;
     static final int IDLE_UIDS_MSG = 58;
-    static final int LOG_STACK_STATE = 60;
-    static final int VR_MODE_CHANGE_MSG = 61;
     static final int HANDLE_TRUST_STORAGE_UPDATE_MSG = 63;
     static final int DISPATCH_SCREEN_AWAKE_MSG = 64;
     static final int DISPATCH_SCREEN_KEYGUARD_MSG = 65;
@@ -2265,18 +2252,6 @@ public class ActivityManagerService extends IActivityManager.Stub
                 }
                 break;
             }
-            case ENTER_ANIMATION_COMPLETE_MSG: {
-                synchronized (ActivityManagerService.this) {
-                    ActivityRecord r = ActivityRecord.forTokenLocked((IBinder) msg.obj);
-                    if (r != null && r.app != null && r.app.thread != null) {
-                        try {
-                            r.app.thread.scheduleEnterAnimationComplete(r.appToken);
-                        } catch (RemoteException e) {
-                        }
-                    }
-                }
-                break;
-            }
             case FINISH_BOOTING_MSG: {
                 if (msg.arg1 != 0) {
                     Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, "FinishBooting");
@@ -2421,20 +2396,6 @@ public class ActivityManagerService extends IActivityManager.Stub
             } break;
             case IDLE_UIDS_MSG: {
                 idleUids();
-            } break;
-            case VR_MODE_CHANGE_MSG: {
-                if (!mVrController.onVrModeChanged((ActivityRecord) msg.obj)) {
-                    return;
-                }
-                synchronized (ActivityManagerService.this) {
-                    final boolean disableNonVrUi = mVrController.shouldDisableNonVrUiLocked();
-                    mWindowManager.disableNonVrUi(disableNonVrUi);
-                    if (disableNonVrUi) {
-                        // If we are in a VR mode where Picture-in-Picture mode is unsupported,
-                        // then remove the pinned stack.
-                        mStackSupervisor.removeStacksInWindowingModes(WINDOWING_MODE_PINNED);
-                    }
-                }
             } break;
             case DISPATCH_SCREEN_AWAKE_MSG: {
                 final boolean isAwake = msg.arg1 != 0;
@@ -2633,6 +2594,7 @@ public class ActivityManagerService extends IActivityManager.Stub
     public void setWindowManager(WindowManagerService wm) {
         synchronized (this) {
             mWindowManager = wm;
+            mActivityTaskManager.setWindowManager(wm);
             mStackSupervisor.setWindowManager(wm);
             mLockTaskController.setWindowManager(wm);
         }
@@ -2900,12 +2862,9 @@ public class ActivityManagerService extends IActivityManager.Stub
         mServices = null;
         mStackSupervisor = null;
         mSystemThread = null;
-        mTaskChangeNotificationController = null;
         mUiHandler = injector.getUiHandler(null);
         mUserController = null;
-        mVrController = null;
         mLockTaskController = null;
-        mLifecycleManager = null;
         mProcStartHandlerThread = null;
         mProcStartHandler = null;
         mHiddenApiBlacklist = null;
@@ -2981,8 +2940,6 @@ public class ActivityManagerService extends IActivityManager.Stub
 
         mUserController = new UserController(this);
 
-        mVrController = new VrController(this);
-
         GL_ES_VERSION = SystemProperties.getInt("ro.opengles.version",
             ConfigurationInfo.GL_ES_VERSION_UNDEFINED);
 
@@ -2999,11 +2956,8 @@ public class ActivityManagerService extends IActivityManager.Stub
         mKeyguardController = mStackSupervisor.getKeyguardController();
         mCompatModePackages = new CompatModePackages(this, systemDir, mHandler);
         mIntentFirewall = new IntentFirewall(new IntentFirewallInterface(), mHandler);
-        mTaskChangeNotificationController =
-                new TaskChangeNotificationController(this, mStackSupervisor, mHandler);
         mActivityStartController = new ActivityStartController(this);
         mLockTaskController = new LockTaskController(mContext, mStackSupervisor, mHandler);
-        mLifecycleManager = new ClientLifecycleManager();
 
         mProcessCpuThread = new Thread("CpuTracker") {
             @Override
@@ -3419,7 +3373,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         mWindowManager.setFocusedApp(r.appToken, true);
 
         applyUpdateLockStateLocked(r);
-        applyUpdateVrModeLocked(r);
+        mActivityTaskManager.applyUpdateVrModeLocked(r);
 
         EventLogTags.writeAmSetResumedActivity(
                 r == null ? -1 : r.userId,
@@ -3470,26 +3424,6 @@ public class ActivityManagerService extends IActivityManager.Stub
         final boolean nextState = r != null && r.immersive;
         mHandler.sendMessage(
                 mHandler.obtainMessage(IMMERSIVE_MODE_LOCK_MSG, (nextState) ? 1 : 0, 0, r));
-    }
-
-    final void applyUpdateVrModeLocked(ActivityRecord r) {
-        // VR apps are expected to run in a main display. If an app is turning on VR for
-        // itself, but lives in a dynamic stack, then make sure that it is moved to the main
-        // fullscreen stack before enabling VR Mode.
-        // TODO: The goal of this code is to keep the VR app on the main display. When the
-        // stack implementation changes in the future, keep in mind that the use of the fullscreen
-        // stack is a means to move the activity to the main display and a moveActivityToDisplay()
-        // option would be a better choice here.
-        if (r.requestedVrComponent != null && r.getDisplayId() != DEFAULT_DISPLAY) {
-            Slog.i(TAG, "Moving " + r.shortComponentName + " from stack " + r.getStackId()
-                    + " to main stack for VR");
-            final ActivityStack stack = mStackSupervisor.getDefaultDisplay().getOrCreateStack(
-                    WINDOWING_MODE_FULLSCREEN, r.getActivityType(), true /* toTop */);
-            mActivityTaskManager.moveTaskToStack(r.getTask().taskId, stack.mStackId,
-                    true /* toTop */);
-        }
-        mHandler.sendMessage(
-                mHandler.obtainMessage(VR_MODE_CHANGE_MSG, 0, 0, r));
     }
 
     final void showAskCompatModeDialogLocked(ActivityRecord r) {
@@ -3827,13 +3761,6 @@ public class ActivityManagerService extends IActivityManager.Stub
         synchronized(this) {
             getPackageManagerInternalLocked().notifyPackageUse(packageName, reason);
         }
-    }
-
-    boolean isNextTransitionForward() {
-        int transit = mWindowManager.getPendingAppTransition();
-        return transit == TRANSIT_ACTIVITY_OPEN
-                || transit == TRANSIT_TASK_OPEN
-                || transit == TRANSIT_TASK_TO_FRONT;
     }
 
     boolean startIsolatedProcess(String entryPoint, String[] entryPointArgs,
@@ -6956,13 +6883,6 @@ public class ActivityManagerService extends IActivityManager.Stub
             throw new SecurityException();
         }
         mWindowManager.showBootMessage(msg, always);
-    }
-
-    /**
-     * @return whther the keyguard is currently locked.
-     */
-    boolean isKeyguardLocked() {
-        return mKeyguardController.isKeyguardLocked();
     }
 
     final void finishBooting() {
@@ -10227,7 +10147,7 @@ public class ActivityManagerService extends IActivityManager.Stub
     }
 
     ClientLifecycleManager getLifecycleManager() {
-        return mLifecycleManager;
+        return mActivityTaskManager.getLifecycleManager();
     }
 
     PackageManagerInternal getPackageManagerInternalLocked() {
@@ -11611,35 +11531,8 @@ public class ActivityManagerService extends IActivityManager.Stub
     }
 
     @Override
-    public void setVrThread(int tid) {
-        enforceSystemHasVrFeature();
-        synchronized (this) {
-            synchronized (mPidsSelfLocked) {
-                final int pid = Binder.getCallingPid();
-                final ProcessRecord proc = mPidsSelfLocked.get(pid);
-                mVrController.setVrThreadLocked(tid, pid, proc);
-            }
-        }
-    }
-
-    @Override
     public void setPersistentVrThread(int tid) {
-        if (checkCallingPermission(permission.RESTRICTED_VR_ACCESS) != PERMISSION_GRANTED) {
-            final String msg = "Permission Denial: setPersistentVrThread() from pid="
-                    + Binder.getCallingPid()
-                    + ", uid=" + Binder.getCallingUid()
-                    + " requires " + permission.RESTRICTED_VR_ACCESS;
-            Slog.w(TAG, msg);
-            throw new SecurityException(msg);
-        }
-        enforceSystemHasVrFeature();
-        synchronized (this) {
-            synchronized (mPidsSelfLocked) {
-                final int pid = Binder.getCallingPid();
-                final ProcessRecord proc = mPidsSelfLocked.get(pid);
-                mVrController.setPersistentVrThreadLocked(tid, pid, proc);
-            }
-        }
+        mActivityTaskManager.setPersistentVrThread(tid);
     }
 
     /**
@@ -11765,13 +11658,6 @@ public class ActivityManagerService extends IActivityManager.Stub
 
     public boolean isTopActivityImmersive() {
         return mActivityTaskManager.isTopActivityImmersive();
-    }
-
-    /**
-     * @return whether the system should disable UI modes incompatible with VR mode.
-     */
-    boolean shouldDisableNonVrUiLocked() {
-        return mVrController.shouldDisableNonVrUiLocked();
     }
 
     @Override
@@ -12343,10 +12229,8 @@ public class ActivityManagerService extends IActivityManager.Stub
             mLocalDeviceIdleController
                     = LocalServices.getService(DeviceIdleController.LocalService.class);
             mActivityTaskManager.onSystemReady();
-            mVrController.onSystemReady();
             // Make sure we have the current profile info, since it is needed for security checks.
             mUserController.onSystemReady();
-            mActivityTaskManager.getRecentTasks().onSystemReadyLocked();
             mAppOpsService.systemReady();
             mSystemReady = true;
         }
@@ -14215,7 +14099,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                 pw.println("  mRunningVoice=" + mRunningVoice);
                 pw.println("  mVoiceWakeLock" + mVoiceWakeLock);
             }
-            pw.println("  mVrController=" + mVrController);
+            mActivityTaskManager.dumpVrControllerLocked(pw);
         }
         if (mDebugApp != null || mOrigDebugApp != null || mDebugTransient
                 || mOrigWaitForDebugger) {
@@ -14583,7 +14467,8 @@ public class ActivityManagerService extends IActivityManager.Stub
                 proto.end(vrToken);
             }
 
-            mVrController.writeToProto(proto, ActivityManagerServiceDumpProcessesProto.VR_CONTROLLER);
+            mActivityTaskManager.writeVrControllerToProto(
+                    proto, ActivityManagerServiceDumpProcessesProto.VR_CONTROLLER);
         }
 
         if (mDebugApp != null || mOrigDebugApp != null || mDebugTransient
@@ -19761,7 +19646,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                 if (app.thread != null) {
                     if (DEBUG_CONFIGURATION) Slog.v(TAG_CONFIGURATION, "Sending to proc "
                             + app.processName + " new config " + configCopy);
-                    mLifecycleManager.scheduleTransaction(app.thread,
+                    getLifecycleManager().scheduleTransaction(app.thread,
                             ConfigurationChangeItem.obtain(configCopy));
                 }
             } catch (Exception e) {
@@ -21499,7 +21384,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                     if (app.curSchedGroup == ProcessList.SCHED_GROUP_TOP_APP) {
                         // do nothing if we already switched to RT
                         if (oldSchedGroup != ProcessList.SCHED_GROUP_TOP_APP) {
-                            mVrController.onTopProcChangedLocked(app);
+                            mActivityTaskManager.onTopProcChangedLocked(app);
                             if (mUseFifoUiScheduling) {
                                 // Switch UI pipeline for app to SCHED_FIFO
                                 app.savedPriority = Process.getThreadPriority(app.pid);
@@ -21531,7 +21416,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                         }
                     } else if (oldSchedGroup == ProcessList.SCHED_GROUP_TOP_APP &&
                                app.curSchedGroup != ProcessList.SCHED_GROUP_TOP_APP) {
-                        mVrController.onTopProcChangedLocked(app);
+                        mActivityTaskManager.onTopProcChangedLocked(app);
                         if (mUseFifoUiScheduling) {
                             try {
                                 // Reset UI pipeline to SCHED_OTHER
@@ -23557,13 +23442,6 @@ public class ActivityManagerService extends IActivityManager.Stub
                     }
                     record.networkStateLock.notifyAll();
                 }
-            }
-        }
-
-        @Override
-        public void notifyActiveVoiceInteractionServiceChanged(ComponentName component) {
-            synchronized (ActivityManagerService.this) {
-                mActiveVoiceInteractionServiceComponent = component;
             }
         }
 

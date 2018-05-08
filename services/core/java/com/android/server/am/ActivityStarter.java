@@ -823,7 +823,8 @@ class ActivityStarter {
             aInfo = mSupervisor.resolveActivity(intent, rInfo, startFlags, null /*profilerInfo*/);
         }
 
-        ActivityRecord r = new ActivityRecord(mService, callerApp, callingPid, callingUid,
+        ActivityRecord r = new ActivityRecord(mService.mActivityTaskManager, callerApp, callingPid,
+                callingUid,
                 callingPackage, intent, resolvedType, aInfo, mService.getGlobalConfiguration(),
                 resultRecord, resultWho, requestCode, componentSpecified, voiceSession != null,
                 mSupervisor, checkedOptions, sourceRecord);
@@ -929,7 +930,7 @@ class ActivityStarter {
             // anyone interested in this piece of information.
             switch (startedActivityStack.getWindowingMode()) {
                 case WINDOWING_MODE_PINNED:
-                    mService.mTaskChangeNotificationController.notifyPinnedActivityRestartAttempt(
+                    mService.mActivityTaskManager.getTaskChangeNotificationController().notifyPinnedActivityRestartAttempt(
                             clearedTask);
                     break;
                 case WINDOWING_MODE_SPLIT_SCREEN_PRIMARY:

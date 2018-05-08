@@ -118,6 +118,7 @@ public class ActivityTestsBase {
         doReturn(mock(IPackageManager.class)).when(service).getPackageManager();
         doNothing().when(service).grantEphemeralAccessLocked(anyInt(), any(), anyInt(), anyInt());
         service.mWindowManager = prepareMockWindowManager();
+        atm.setWindowManager(service.mWindowManager);
         return service;
     }
 
@@ -204,7 +205,8 @@ public class ActivityTestsBase {
             aInfo.applicationInfo.uid = mUid;
             aInfo.flags |= mActivityFlags;
 
-            final ActivityRecord activity = new ActivityRecord(mService, null /* caller */,
+            final ActivityRecord activity = new ActivityRecord(mService.mActivityTaskManager,
+                    null /* caller */,
                     0 /* launchedFromPid */, 0, null, intent, null,
                     aInfo /*aInfo*/, new Configuration(), null /* resultTo */, null /* resultWho */,
                     0 /* reqCode */, false /*componentSpecified*/, false /* rootVoiceInteraction */,

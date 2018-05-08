@@ -911,7 +911,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
                         // result to an activity belonging to userId. Example case: a document
                         // picker for personal files, opened by a work app, should still get locked.
                         if (taskTopActivityIsUser(task, userId)) {
-                            mService.mTaskChangeNotificationController.notifyTaskProfileLocked(
+                            mService.mActivityTaskManager.getTaskChangeNotificationController().notifyTaskProfileLocked(
                                     task.taskId, userId);
                         }
                     }
@@ -1536,13 +1536,13 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
                         mergedConfiguration.getGlobalConfiguration(),
                         mergedConfiguration.getOverrideConfiguration(), r.compat,
                         r.launchedFromPackage, task.voiceInteractor, app.repProcState, r.icicle,
-                        r.persistentState, results, newIntents, mService.isNextTransitionForward(),
+                        r.persistentState, results, newIntents, mService.mActivityTaskManager.isNextTransitionForward(),
                         profilerInfo));
 
                 // Set desired final state.
                 final ActivityLifecycleItem lifecycleItem;
                 if (andResume) {
-                    lifecycleItem = ResumeActivityItem.obtain(mService.isNextTransitionForward());
+                    lifecycleItem = ResumeActivityItem.obtain(mService.mActivityTaskManager.isNextTransitionForward());
                 } else {
                     lifecycleItem = PauseActivityItem.obtain();
                 }
@@ -3388,7 +3388,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
         ensureActivitiesVisibleLocked(null, 0, !PRESERVE_WINDOWS);
         resumeFocusedStackTopActivityLocked();
 
-        mService.mTaskChangeNotificationController.notifyActivityPinned(r);
+        mService.mActivityTaskManager.getTaskChangeNotificationController().notifyActivityPinned(r);
     }
 
     /** Move activity with its stack to front and make the stack focused. */
@@ -3675,7 +3675,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
 
         r.mLaunchTaskBehind = false;
         mRecentTasks.add(task);
-        mService.mTaskChangeNotificationController.notifyTaskStackChanged();
+        mService.mActivityTaskManager.getTaskChangeNotificationController().notifyTaskStackChanged();
         r.setVisibility(false);
 
         // When launching tasks behind, update the last active time of the top task after the new
@@ -4508,7 +4508,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
             if (preferredDisplayId != actualDisplayId) {
                 // Display a warning toast that we tried to put a non-resizeable task on a secondary
                 // display with config different from global config.
-                mService.mTaskChangeNotificationController
+                mService.mActivityTaskManager.getTaskChangeNotificationController()
                         .notifyActivityLaunchOnSecondaryDisplayFailed();
                 return;
             }
@@ -4517,7 +4517,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
         if (!task.supportsSplitScreenWindowingMode() || forceNonResizable) {
             // Display a warning toast that we tried to put an app that doesn't support split-screen
             // in split-screen.
-            mService.mTaskChangeNotificationController.notifyActivityDismissingDockedStack();
+            mService.mActivityTaskManager.getTaskChangeNotificationController().notifyActivityDismissingDockedStack();
 
             // Dismiss docked stack. If task appeared to be in docked stack but is not resizable -
             // we need to move it to top of fullscreen stack, otherwise it will be covered.
@@ -4537,7 +4537,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
             final int reason = isSecondaryDisplayPreferred
                     ? FORCED_RESIZEABLE_REASON_SECONDARY_DISPLAY
                     : FORCED_RESIZEABLE_REASON_SPLIT_SCREEN;
-            mService.mTaskChangeNotificationController.notifyActivityForcedResizable(
+            mService.mActivityTaskManager.getTaskChangeNotificationController().notifyActivityForcedResizable(
                     task.taskId, reason, packageName);
         }
     }
