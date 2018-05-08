@@ -21,7 +21,6 @@ import android.annotation.Nullable;
 import android.app.assist.AssistStructure;
 import android.app.assist.AssistStructure.ViewNode;
 import android.metrics.LogMaker;
-import android.os.Bundle;
 import android.service.autofill.Dataset;
 import android.util.ArrayMap;
 import android.util.ArraySet;
@@ -35,10 +34,7 @@ import com.android.internal.util.ArrayUtils;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.LinkedList;
-import java.util.Objects;
-import java.util.Set;
 
 public final class Helper {
 
@@ -117,6 +113,13 @@ public final class Helper {
             log.addTaggedData(MetricsEvent.FIELD_AUTOFILL_SERVICE, servicePackageName);
         }
         return log;
+    }
+
+    @NonNull
+    public static LogMaker newLogMaker(int category, String packageName,
+            String servicePackageName, boolean compatMode) {
+        return newLogMaker(category, packageName, servicePackageName)
+                .addTaggedData(MetricsEvent.FIELD_AUTOFILL_COMPAT_MODE, compatMode ? 1 : 0);
     }
 
     public static void printlnRedactedText(@NonNull PrintWriter pw, @Nullable CharSequence text) {
