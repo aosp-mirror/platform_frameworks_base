@@ -40,6 +40,7 @@ import android.os.UserManager;
 import android.support.test.filters.SmallTest;
 import android.testing.DexmakerShareClassLoaderRule;
 
+import com.android.internal.app.SuspendedAppActivity;
 import com.android.internal.app.UnlaunchableAppActivity;
 import com.android.server.LocalServices;
 import com.android.server.pm.PackageManagerService;
@@ -147,6 +148,28 @@ public class ActivityStartInterceptorTest {
 
         // THEN the returned intent is the admin support intent
         assertEquals(ADMIN_SUPPORT_INTENT, mInterceptor.mIntent);
+    }
+
+    @Test
+    public void testSuspendedPackage() {
+        mAInfo.applicationInfo.flags = FLAG_SUSPENDED;
+        final String suspendingPackage = "com.test.suspending.package";
+        final String dialogMessage = "Test Message";
+        when(mPackageManagerInternal.getSuspendingPackage(TEST_PACKAGE_NAME, TEST_USER_ID))
+                .thenReturn(suspendingPackage);
+        when(mPackageManagerInternal.getSuspendedDialogMessage(TEST_PACKAGE_NAME, TEST_USER_ID))
+                .thenReturn(dialogMessage);
+        // THEN calling intercept returns true
+        assertTrue(mInterceptor.intercept(null, null, mAInfo, null, null, 0, 0, null));
+
+        // Check intent parameters
+        assertEquals(dialogMessage,
+                mInterceptor.mIntent.getStringExtra(SuspendedAppActivity.EXTRA_DIALOG_MESSAGE));
+        assertEquals(suspendingPackage,
+                mInterceptor.mIntent.getStringExtra(SuspendedAppActivity.EXTRA_SUSPENDING_PACKAGE));
+        assertEquals(TEST_PACKAGE_NAME,
+                mInterceptor.mIntent.getStringExtra(SuspendedAppActivity.EXTRA_SUSPENDED_PACKAGE));
+        assertEquals(TEST_USER_ID, mInterceptor.mIntent.getIntExtra(Intent.EXTRA_USER_ID, -1000));
     }
 
     @Test
