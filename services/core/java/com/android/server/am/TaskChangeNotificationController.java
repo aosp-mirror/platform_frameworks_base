@@ -52,7 +52,8 @@ class TaskChangeNotificationController {
     // Delay in notifying task stack change listeners (in millis)
     private static final int NOTIFY_TASK_STACK_CHANGE_LISTENERS_DELAY = 100;
 
-    private final ActivityManagerService mService;
+    // Global lock used by the service the instantiate objects of this class.
+    private final Object mServiceLock;
     private final ActivityStackSupervisor mStackSupervisor;
     private final Handler mHandler;
 
@@ -149,7 +150,7 @@ class TaskChangeNotificationController {
         public void handleMessage(Message msg) {
             switch (msg.what) {
                 case LOG_STACK_STATE_MSG: {
-                    synchronized (mService) {
+                    synchronized (mServiceLock) {
                         mStackSupervisor.logStackState();
                     }
                     break;
@@ -209,15 +210,15 @@ class TaskChangeNotificationController {
         }
     }
 
-    public TaskChangeNotificationController(ActivityManagerService service,
+    public TaskChangeNotificationController(Object serviceLock,
             ActivityStackSupervisor stackSupervisor, Handler handler) {
-        mService = service;
+        mServiceLock = serviceLock;
         mStackSupervisor = stackSupervisor;
         mHandler = new MainHandler(handler.getLooper());
     }
 
     public void registerTaskStackListener(ITaskStackListener listener) {
-        synchronized (mService) {
+        synchronized (mServiceLock) {
             if (listener != null) {
                 if (Binder.getCallingPid() == android.os.Process.myPid()) {
                     if (!mLocalTaskStackListeners.contains(listener)) {
@@ -231,7 +232,7 @@ class TaskChangeNotificationController {
     }
 
     public void unregisterTaskStackListener(ITaskStackListener listener) {
-        synchronized (mService) {
+        synchronized (mServiceLock) {
             if (listener != null) {
                 if (Binder.getCallingPid() == android.os.Process.myPid()) {
                     mLocalTaskStackListeners.remove(listener);
@@ -243,7 +244,7 @@ class TaskChangeNotificationController {
     }
 
     private void forAllRemoteListeners(TaskStackConsumer callback, Message message) {
-        synchronized (mService) {
+        synchronized (mServiceLock) {
             for (int i = mRemoteTaskStackListeners.beginBroadcast() - 1; i >= 0; i--) {
                 try {
                     // Make a one-way callback to the listener
@@ -257,7 +258,7 @@ class TaskChangeNotificationController {
     }
 
     private void forAllLocalListeners(TaskStackConsumer callback, Message message) {
-        synchronized (mService) {
+        synchronized (mServiceLock) {
             for (int i = mLocalTaskStackListeners.size() - 1; i >= 0; i--) {
                 try {
                     callback.accept(mLocalTaskStackListeners.get(i), message);

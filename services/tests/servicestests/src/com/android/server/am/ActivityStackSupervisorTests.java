@@ -174,7 +174,7 @@ public class ActivityStackSupervisorTests extends ActivityTestsBase {
 
         // #notifyAll will be called on the ActivityManagerService. we must hold the object lock
         // when this happens.
-        synchronized (mSupervisor.mService) {
+        synchronized (mSupervisor.mService.mGlobalLock) {
             final WaitResult taskToFrontWait = new WaitResult();
             mSupervisor.mWaitingActivityLaunched.add(taskToFrontWait);
             mSupervisor.reportWaitingActivityLaunchedIfNeeded(firstActivity, START_TASK_TO_FRONT);

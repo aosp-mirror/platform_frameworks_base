@@ -192,7 +192,7 @@ class SafeActivityOptions {
         // component or has the START_TASKS_FROM_RECENTS permission
         if (options.getLaunchTaskId() != INVALID_TASK_ID
                 && !supervisor.mRecentTasks.isCallerRecents(callingUid)) {
-            final int startInTaskPerm = supervisor.mService.checkPermission(
+            final int startInTaskPerm = supervisor.mService.mAm.checkPermission(
                     START_TASKS_FROM_RECENTS, callingPid, callingUid);
             if (startInTaskPerm == PERMISSION_DENIED) {
                 final String msg = "Permission Denial: starting " + getIntentString(intent)
@@ -219,7 +219,7 @@ class SafeActivityOptions {
         // Check if someone tries to launch an unwhitelisted activity into LockTask mode.
         final boolean lockTaskMode = options.getLockTaskMode();
         if (aInfo != null && lockTaskMode
-                && !supervisor.mService.mActivityTaskManager.getLockTaskController().isPackageWhitelisted(
+                && !supervisor.mService.getLockTaskController().isPackageWhitelisted(
                         UserHandle.getUserId(callingUid), aInfo.packageName)) {
             final String msg = "Permission Denial: starting " + getIntentString(intent)
                     + " from " + callerApp + " (pid=" + callingPid
@@ -230,7 +230,7 @@ class SafeActivityOptions {
 
         // Check permission for remote animations
         final RemoteAnimationAdapter adapter = options.getRemoteAnimationAdapter();
-        if (adapter != null && supervisor.mService.checkPermission(
+        if (adapter != null && supervisor.mService.mAm.checkPermission(
                 CONTROL_REMOTE_APP_TRANSITION_ANIMATIONS, callingPid, callingUid)
                         != PERMISSION_GRANTED) {
             final String msg = "Permission Denial: starting " + getIntentString(intent)

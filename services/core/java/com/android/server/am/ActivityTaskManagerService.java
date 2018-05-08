@@ -128,6 +128,7 @@ import android.os.Binder;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
+import android.os.LocaleList;
 import android.os.Looper;
 import android.os.Message;
 import android.os.PersistableBundle;
@@ -243,6 +244,16 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         }
     }
 
+    /** Current sequencing integer of the configuration, for skipping old configurations. */
+    int mConfigurationSeq;
+
+    /**
+     * Temp object used when global and/or display override configuration is updated. It is also
+     * sent to outer world instead of {@link #getGlobalConfiguration} because we don't trust
+     * anyone...
+     */
+    Configuration mTempConfig = new Configuration();
+
     ActivityTaskManagerService(Context context) {
         mContext = context;
         mLifecycleManager = new ClientLifecycleManager();
@@ -259,15 +270,27 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         mAm = am;
         mGlobalLock = mAm;
         mH = new H(mAm.mHandlerThread.getLooper());
-        mStackSupervisor = mAm.mStackSupervisor;
+
+        mTempConfig.setToDefaults();
+        mTempConfig.setLocales(LocaleList.getDefault());
+        mConfigurationSeq = mTempConfig.seq = 1;
+        mStackSupervisor = createStackSupervisor();
+        mStackSupervisor.onConfigurationChanged(mTempConfig);
+
         mTaskChangeNotificationController =
                 new TaskChangeNotificationController(mAm, mStackSupervisor, mH);
         mLockTaskController = new LockTaskController(mContext, mStackSupervisor, mH);
-        mActivityStartController = new ActivityStartController(mAm);
+        mActivityStartController = new ActivityStartController(this);
         mRecentTasks = createRecentTasks();
         mStackSupervisor.setRecentTasks(mRecentTasks);
         mVrController = new VrController(mAm);
         mKeyguardController = mStackSupervisor.getKeyguardController();
+    }
+
+    protected ActivityStackSupervisor createStackSupervisor() {
+        final ActivityStackSupervisor supervisor = new ActivityStackSupervisor(this, mH.getLooper());
+        supervisor.initialize();
+        return supervisor;
     }
 
     void setWindowManager(WindowManagerService wm) {
