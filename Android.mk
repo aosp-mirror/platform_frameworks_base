@@ -593,12 +593,14 @@ LOCAL_BLACKLIST := $(INTERNAL_PLATFORM_HIDDENAPI_BLACKLIST)
 # File names of source files we will use to generate the final API lists.
 LOCAL_SRC_GREYLIST := frameworks/base/config/hiddenapi-light-greylist.txt
 LOCAL_SRC_VENDOR_LIST := frameworks/base/config/hiddenapi-vendor-list.txt
+LOCAL_SRC_FORCE_BLACKLIST := frameworks/base/config/hiddenapi-force-blacklist.txt
 LOCAL_SRC_PRIVATE_API := $(INTERNAL_PLATFORM_PRIVATE_DEX_API_FILE)
 LOCAL_SRC_REMOVED_API := $(INTERNAL_PLATFORM_REMOVED_DEX_API_FILE)
 
 LOCAL_SRC_ALL := \
 	$(LOCAL_SRC_GREYLIST) \
 	$(LOCAL_SRC_VENDOR_LIST) \
+	$(LOCAL_SRC_FORCE_BLACKLIST) \
 	$(LOCAL_SRC_PRIVATE_API) \
 	$(LOCAL_SRC_REMOVED_API)
 
@@ -657,6 +659,7 @@ $(LOCAL_LIGHT_GREYLIST): $(LOCAL_SRC_ALL)
 	     > $@
 	$(call assert-has-no-duplicates,$@)
 	$(call assert-is-subset,$@,$(LOCAL_SRC_PRIVATE_API))
+	$(call assert-has-no-overlap,$@,$(LOCAL_SRC_FORCE_BLACKLIST))
 
 # Generate dark greylist as remaining members of classes on the light greylist,
 # as well as the members of their inner classes.
@@ -669,7 +672,7 @@ $(LOCAL_LIGHT_GREYLIST): $(LOCAL_SRC_ALL)
 #       '^Lpackage/class[;$]'
 #   (4) subtract entries shared with LOCAL_LIGHT_GREYLIST
 $(LOCAL_DARK_GREYLIST): $(LOCAL_SRC_ALL) $(LOCAL_LIGHT_GREYLIST)
-	comm -13 $(LOCAL_LIGHT_GREYLIST) \
+	comm -13 <(sort $(LOCAL_LIGHT_GREYLIST) $(LOCAL_SRC_FORCE_BLACKLIST)) \
 	         <(sed 's/;\->.*//' $(LOCAL_LIGHT_GREYLIST) | sed 's/$$.*//' | sort | uniq | \
 	               while read CLASS_DESC; do \
 	                   grep -E "^$${CLASS_DESC}[;$$]" $(LOCAL_SRC_PRIVATE_API); \
@@ -678,6 +681,7 @@ $(LOCAL_DARK_GREYLIST): $(LOCAL_SRC_ALL) $(LOCAL_LIGHT_GREYLIST)
 	$(call assert-is-subset,$@,$(LOCAL_SRC_PRIVATE_API))
 	$(call assert-has-no-duplicates,$@)
 	$(call assert-has-no-overlap,$@,$(LOCAL_LIGHT_GREYLIST))
+	$(call assert-has-no-overlap,$@,$(LOCAL_SRC_FORCE_BLACKLIST))
 
 # Generate blacklist as private API minus (light greylist plus dark greylist).
 $(LOCAL_BLACKLIST): $(LOCAL_SRC_ALL) $(LOCAL_LIGHT_GREYLIST) $(LOCAL_DARK_GREYLIST)
@@ -688,6 +692,7 @@ $(LOCAL_BLACKLIST): $(LOCAL_SRC_ALL) $(LOCAL_LIGHT_GREYLIST) $(LOCAL_DARK_GREYLI
 	$(call assert-has-no-duplicates,$@)
 	$(call assert-has-no-overlap,$@,$(LOCAL_LIGHT_GREYLIST))
 	$(call assert-has-no-overlap,$@,$(LOCAL_DARK_GREYLIST))
+	$(call assert-is-subset,$(LOCAL_SRC_FORCE_BLACKLIST),$@)
 
 # Build AOSP blacklist
 # ============================================================
