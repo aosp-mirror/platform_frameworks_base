@@ -17,7 +17,6 @@
 #define RENDERSTATE_H
 
 #include "Caches.h"
-#include "Glop.h"
 #include "renderstate/OffscreenBufferPool.h"
 #include "renderstate/PixelBufferState.h"
 #include "utils/Macros.h"
@@ -98,8 +97,6 @@ public:
     // TODO: This system is a little clunky feeling, this could use some
     // more thinking...
     void postDecStrong(VirtualLightRefBase* object);
-
-    void render(const Glop& glop, const Matrix4& orthoMatrix, bool overrideDisableBlending);
 
     OffscreenBufferPool& layerPool() { return *mLayerPool; }
 
