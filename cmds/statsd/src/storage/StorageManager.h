@@ -63,6 +63,11 @@ public:
                               const std::function<void(const ConfigKey&)>& sendBroadcast);
 
     /**
+     * Returns true if there's at least one report on disk.
+     */
+    static bool hasConfigMetricsReport(const ConfigKey& key);
+
+    /**
      * Appends ConfigMetricsReport found on disk to the specific proto and
      * delete it.
      */

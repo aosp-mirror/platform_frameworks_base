@@ -48,7 +48,7 @@ public:
     StatsLogProcessor(const sp<UidMap>& uidMap, const sp<AlarmMonitor>& anomalyAlarmMonitor,
                       const sp<AlarmMonitor>& subscriberTriggerAlarmMonitor,
                       const int64_t timeBaseNs,
-                      const std::function<void(const ConfigKey&)>& sendBroadcast);
+                      const std::function<bool(const ConfigKey&)>& sendBroadcast);
     virtual ~StatsLogProcessor();
 
     void OnLogEvent(LogEvent* event, bool reconnectionStarts);
@@ -99,6 +99,9 @@ public:
 #endif
     }
 
+    // Add a specific config key to the possible configs to dump ASAP.
+    void noteOnDiskData(const ConfigKey& key);
+
 private:
     // For testing only.
     inline sp<AlarmMonitor> getAnomalyAlarmMonitor() const {
@@ -117,6 +120,9 @@ private:
 
     // Tracks when we last checked the bytes consumed for each config key.
     std::unordered_map<ConfigKey, long> mLastByteSizeTimes;
+
+    // Tracks which config keys has metric reports on disk
+    std::set<ConfigKey> mOnDiskDataConfigs;
 
     sp<UidMap> mUidMap;  // Reference to the UidMap to lookup app name and version for each uid.
 
@@ -159,7 +165,7 @@ private:
 
     // Function used to send a broadcast so that receiver for the config key can call getData
     // to retrieve the stored data.
-    std::function<void(const ConfigKey& key)> mSendBroadcast;
+    std::function<bool(const ConfigKey& key)> mSendBroadcast;
 
     const int64_t mTimeBaseNs;
 
