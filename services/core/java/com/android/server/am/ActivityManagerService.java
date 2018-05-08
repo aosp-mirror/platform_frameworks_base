@@ -1970,6 +1970,8 @@ public class ActivityManagerService extends IActivityManager.Stub
 
     final boolean mPermissionReviewRequired;
 
+    boolean mHasHeavyWeightFeature;
+
     /**
      * Whether to force background check on all apps (for battery saver) or not.
      */
@@ -15081,6 +15083,8 @@ public class ActivityManagerService extends IActivityManager.Stub
                 return;
             }
 
+            mHasHeavyWeightFeature = mContext.getPackageManager().hasSystemFeature(
+                    PackageManager.FEATURE_CANT_SAVE_STATE);
             mLocalDeviceIdleController
                     = LocalServices.getService(DeviceIdleController.LocalService.class);
             mAssistUtils = new AssistUtils(mContext);
