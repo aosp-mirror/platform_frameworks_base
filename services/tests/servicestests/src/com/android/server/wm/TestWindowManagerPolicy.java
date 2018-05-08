@@ -591,10 +591,6 @@ class TestWindowManagerPolicy implements WindowManagerPolicy {
     }
 
     @Override
-    public void onScreenMagnificationStateChanged(boolean active) {
-    }
-
-    @Override
     public void requestUserActivityNotification() {
     }
 
