@@ -8481,6 +8481,29 @@ public class PackageManagerService extends IPackageManager.Stub
     }
 
     /**
+     * Clear the package profile if this was an upgrade and the package
+     * version was updated.
+     */
+    private void maybeClearProfilesForUpgradesLI(
+            @Nullable PackageSetting originalPkgSetting,
+            @NonNull PackageParser.Package currentPkg) {
+        if (originalPkgSetting == null || !isUpgrade()) {
+          return;
+        }
+        if (originalPkgSetting.versionCode == currentPkg.mVersionCode) {
+          return;
+        }
+
+        clearAppProfilesLIF(currentPkg, UserHandle.USER_ALL);
+        if (DEBUG_INSTALL) {
+            Slog.d(TAG, originalPkgSetting.name
+                  + " clear profile due to version change "
+                  + originalPkgSetting.versionCode + " != "
+                  + currentPkg.mVersionCode);
+        }
+    }
+
+    /**
      *  Traces a package scan.
      *  @see #scanPackageLI(File, int, int, long, UserHandle)
      */
@@ -8762,6 +8785,13 @@ public class PackageManagerService extends IPackageManager.Stub
                 (forceCollect && canSkipFullPackageVerification(pkg));
         collectCertificatesLI(pkgSetting, pkg, forceCollect, skipVerify);
 
+        // Reset profile if the application version is changed
+        maybeClearProfilesForUpgradesLI(pkgSetting, pkg);
+
+        /*
+         * A new system app appeared, but we already had a non-system one of the
+         * same name installed earlier.
+         */
         boolean shouldHideSystemApp = false;
         // A new application appeared on /system, but, we already have a copy of
         // the application installed on /data.
