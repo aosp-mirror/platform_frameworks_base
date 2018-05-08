@@ -396,7 +396,7 @@ void ValueMetricProducer::onMatchedLogEventInternalLocked(
             // If not, there was a reset event. We take the absolute value as
             // diff in this case.
             if (interval.startUpdated) {
-                if (value > interval.start) {
+                if (value >= interval.start) {
                     interval.sum += (value - interval.start);
                 } else {
                     interval.sum += value;
