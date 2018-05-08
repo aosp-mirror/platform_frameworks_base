@@ -755,14 +755,8 @@ public final class TextClassifierImpl implements TextClassifier {
 
         @NonNull
         private static List<LabeledIntent> createForUrl(Context context, String text) {
-            final String httpPrefix = "http://";
-            final String httpsPrefix = "https://";
-            if (text.toLowerCase().startsWith(httpPrefix)) {
-                text = httpPrefix + text.substring(httpPrefix.length());
-            } else if (text.toLowerCase().startsWith(httpsPrefix)) {
-                text = httpsPrefix + text.substring(httpsPrefix.length());
-            } else {
-                text = httpPrefix + text;
+            if (Uri.parse(text).getScheme() == null) {
+                text = "http://" + text;
             }
             return Arrays.asList(new LabeledIntent(
                     context.getString(com.android.internal.R.string.browse),
