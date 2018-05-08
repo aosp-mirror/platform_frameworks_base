@@ -49,7 +49,6 @@ public class ViewInvalidateTest {
     public ActivityTestRule<Activity> mActivityRule = new ActivityTestRule<>(Activity.class);
 
     private static final int INVAL_TEST_FLAG_MASK = View.PFLAG_DIRTY
-            | View.PFLAG_DIRTY_OPAQUE
             | View.PFLAG_DRAWN
             | View.PFLAG_DRAWING_CACHE_VALID
             | View.PFLAG_INVALIDATED

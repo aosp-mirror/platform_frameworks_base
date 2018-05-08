@@ -5853,11 +5853,8 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
             // Views being animated or transformed are not considered opaque because we may
             // be invalidating their old position and need the parent to paint behind them.
             Matrix childMatrix = child.getMatrix();
-            final boolean isOpaque = child.isOpaque() && !drawAnimation &&
-                    child.getAnimation() == null && childMatrix.isIdentity();
             // Mark the child as dirty, using the appropriate flag
             // Make sure we do not set both flags at the same time
-            int opaqueFlag = isOpaque ? PFLAG_DIRTY_OPAQUE : PFLAG_DIRTY;
 
             if (child.mLayerType != LAYER_TYPE_NONE) {
                 mPrivateFlags |= PFLAG_INVALIDATED;
@@ -5911,12 +5908,8 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
                 // If the parent is dirty opaque or not dirty, mark it dirty with the opaque
                 // flag coming from the child that initiated the invalidate
                 if (view != null) {
-                    if ((view.mViewFlags & FADING_EDGE_MASK) != 0 &&
-                            view.getSolidColor() == 0) {
-                        opaqueFlag = PFLAG_DIRTY;
-                    }
                     if ((view.mPrivateFlags & PFLAG_DIRTY_MASK) != PFLAG_DIRTY) {
-                        view.mPrivateFlags = (view.mPrivateFlags & ~PFLAG_DIRTY_MASK) | opaqueFlag;
+                        view.mPrivateFlags = (view.mPrivateFlags & ~PFLAG_DIRTY_MASK) | PFLAG_DIRTY;
                     }
                 }
 
