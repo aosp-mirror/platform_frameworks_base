@@ -53,7 +53,11 @@
                 android:layout_gravity="center"
                 android:soundEffectsEnabled="false" />
 
-            <include layout="@layout/volume_dnd_icon"/>
+            <include layout="@layout/volume_dnd_icon"
+                     android:layout_width="match_parent"
+                     android:layout_height="wrap_content"
+                     android:layout_marginRight="@dimen/volume_dialog_stream_padding"
+                     android:layout_marginTop="6dp"/>
         </FrameLayout>
 
         <LinearLayout
@@ -71,7 +75,9 @@
                 android:layout_height="wrap_content"
                 android:minWidth="@dimen/volume_dialog_panel_width"
                 android:gravity="center"
-                android:orientation="horizontal" >
+                android:orientation="horizontal"
+                android:paddingRight="@dimen/volume_dialog_stream_padding"
+                android:paddingLeft="@dimen/volume_dialog_stream_padding">
                     <!-- volume rows added and removed here! :-) -->
             </LinearLayout>
             <FrameLayout
