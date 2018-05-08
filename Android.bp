@@ -215,7 +215,6 @@ java_library {
         "core/java/android/se/omapi/ISecureElementChannel.aidl",
         "core/java/android/se/omapi/ISecureElementReader.aidl",
         "core/java/android/se/omapi/ISecureElementSession.aidl",
-        "core/java/android/os/IBatteryPropertiesListener.aidl",
         "core/java/android/os/IBatteryPropertiesRegistrar.aidl",
         "core/java/android/os/ICancellationSignal.aidl",
         "core/java/android/os/IDeviceIdentifiersPolicyService.aidl",
