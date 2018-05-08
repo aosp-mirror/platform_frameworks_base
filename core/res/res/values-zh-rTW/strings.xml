@@ -291,12 +291,9 @@
     <string name="permgrouplab_camera" msgid="4820372495894586615">"相機"</string>
     <string name="permgroupdesc_camera" msgid="3250611594678347720">"拍照及錄製影片"</string>
     <string name="permgrouprequest_camera" msgid="1299833592069671756">"要允許「<xliff:g id="APP_NAME">%1$s</xliff:g>」拍攝相片及錄製影片嗎？"</string>
-    <!-- no translation found for permgrouplab_calllog (8798646184930388160) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_calllog (3006237336748283775) -->
-    <skip />
-    <!-- no translation found for permgrouprequest_calllog (8487355309583773267) -->
-    <skip />
+    <string name="permgrouplab_calllog" msgid="8798646184930388160">"通話記錄"</string>
+    <string name="permgroupdesc_calllog" msgid="3006237336748283775">"讀取及寫入通話記錄"</string>
+    <string name="permgrouprequest_calllog" msgid="8487355309583773267">"要允許「<xliff:g id="APP_NAME">%1$s</xliff:g>」&lt;b&gt;&lt;/b&gt;存取你的通話記錄嗎？"</string>
     <string name="permgrouplab_phone" msgid="5229115638567440675">"電話"</string>
     <string name="permgroupdesc_phone" msgid="6234224354060641055">"撥打電話及管理通話"</string>
     <string name="permgrouprequest_phone" msgid="9166979577750581037">"要允許「<xliff:g id="APP_NAME">%1$s</xliff:g>」撥打電話及管理通話嗎？"</string>

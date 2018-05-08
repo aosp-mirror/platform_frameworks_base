@@ -297,12 +297,9 @@
     <string name="permgrouplab_camera" msgid="4820372495894586615">"Fotoaparatas"</string>
     <string name="permgroupdesc_camera" msgid="3250611594678347720">"fotografuoti ir filmuoti"</string>
     <string name="permgrouprequest_camera" msgid="1299833592069671756">"Leisti &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; fotografuoti ir įrašyti vaizdo įrašus?"</string>
-    <!-- no translation found for permgrouplab_calllog (8798646184930388160) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_calllog (3006237336748283775) -->
-    <skip />
-    <!-- no translation found for permgrouprequest_calllog (8487355309583773267) -->
-    <skip />
+    <string name="permgrouplab_calllog" msgid="8798646184930388160">"Skambučių žurnalai"</string>
+    <string name="permgroupdesc_calllog" msgid="3006237336748283775">"skaityti ir rašyti telefono skambučių žurnalą"</string>
+    <string name="permgrouprequest_calllog" msgid="8487355309583773267">"Leisti &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; pasiekti jūsų telefono skambučių žurnalus?"</string>
     <string name="permgrouplab_phone" msgid="5229115638567440675">"Telefonas"</string>
     <string name="permgroupdesc_phone" msgid="6234224354060641055">"skambinti ir tvarkyti telefonų skambučius"</string>
     <string name="permgrouprequest_phone" msgid="9166979577750581037">"Leisti &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; skambinti ir tvarkyti telefono skambučius?"</string>
