@@ -158,11 +158,14 @@ StatsService::StatsService(const sp<Looper>& handlerLooper)
         auto receiver = mConfigManager->GetConfigReceiver(key);
         if (sc == nullptr) {
             VLOG("Could not find StatsCompanionService");
+            return false;
         } else if (receiver == nullptr) {
             VLOG("Statscompanion could not find a broadcast receiver for %s",
                  key.ToString().c_str());
+            return false;
         } else {
             sc->sendDataBroadcast(receiver, mProcessor->getLastReportTimeNs(key));
+            return true;
         }
     }
     );
@@ -948,6 +951,11 @@ Status StatsService::setDataFetchOperation(int64_t key,
     IPCThreadState* ipc = IPCThreadState::self();
     ConfigKey configKey(ipc->getCallingUid(), key);
     mConfigManager->SetConfigReceiver(configKey, intentSender);
+    if (StorageManager::hasConfigMetricsReport(configKey)) {
+        VLOG("StatsService::setDataFetchOperation marking configKey %s to dump reports on disk",
+             configKey.ToString().c_str());
+        mProcessor->noteOnDiskData(configKey);
+    }
     return Status::ok();
 }
 
@@ -985,6 +993,15 @@ Status StatsService::unsetBroadcastSubscriber(int64_t configId,
     ConfigKey configKey(ipc->getCallingUid(), configId);
     SubscriberReporter::getInstance()
             .unsetBroadcastSubscriber(configKey, subscriberId);
+    return Status::ok();
+}
+
+Status StatsService::sendAppBreadcrumbAtom(int32_t label, int32_t state) {
+    // Permission check not necessary as it's meant for applications to write to
+    // statsd.
+    android::util::stats_write(util::APP_BREADCRUMB_REPORTED,
+                               IPCThreadState::self()->getCallingUid(), label,
+                               state);
     return Status::ok();
 }
 

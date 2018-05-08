@@ -414,7 +414,9 @@ public final class AudioFocusRequest {
          *   with {@link AudioManager#abandonAudioFocusRequest(AudioFocusRequest)}.
          *   Note that only focus changes (gains and losses) affecting the focus owner are reported,
          *   not gains and losses of other focus requesters in the system.<br>
-         *   Notifications are delivered on the main {@link Looper}.
+         *   Notifications are delivered on the {@link Looper} associated with the one of
+         *   the creation of the {@link AudioManager} used to request focus
+         *   (see {@link AudioManager#requestAudioFocus(AudioFocusRequest)}).
          * @param listener the listener receiving the focus change notifications.
          * @return this {@code Builder} instance.
          * @throws NullPointerException thrown when a null focus listener is used.

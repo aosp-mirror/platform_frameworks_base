@@ -151,8 +151,11 @@ DONE:
 }
 
 // ================================================================================
-Section::Section(int i, int64_t timeoutMs, bool deviceSpecific)
-    : id(i), timeoutMs(timeoutMs), deviceSpecific(deviceSpecific) {}
+Section::Section(int i, int64_t timeoutMs, bool userdebugAndEngOnly, bool deviceSpecific)
+    : id(i),
+      timeoutMs(timeoutMs),
+      userdebugAndEngOnly(userdebugAndEngOnly),
+      deviceSpecific(deviceSpecific) {}
 
 Section::~Section() {}
 
@@ -239,7 +242,7 @@ static inline bool isSysfs(const char* filename) { return strncmp(filename, "/sy
 
 FileSection::FileSection(int id, const char* filename, const bool deviceSpecific,
                          const int64_t timeoutMs)
-    : Section(id, timeoutMs, deviceSpecific), mFilename(filename) {
+    : Section(id, timeoutMs, false, deviceSpecific), mFilename(filename) {
     name = "file ";
     name += filename;
     mIsSysfs = isSysfs(filename);
@@ -399,8 +402,8 @@ WorkerThreadData::WorkerThreadData(const WorkerThreadSection* sec)
 WorkerThreadData::~WorkerThreadData() {}
 
 // ================================================================================
-WorkerThreadSection::WorkerThreadSection(int id, const int64_t timeoutMs)
-    : Section(id, timeoutMs) {}
+WorkerThreadSection::WorkerThreadSection(int id, const int64_t timeoutMs, bool userdebugAndEngOnly)
+    : Section(id, timeoutMs, userdebugAndEngOnly) {}
 
 WorkerThreadSection::~WorkerThreadSection() {}
 
@@ -575,8 +578,8 @@ status_t CommandSection::Execute(ReportRequestSet* requests) const {
 }
 
 // ================================================================================
-DumpsysSection::DumpsysSection(int id, const char* service, ...)
-    : WorkerThreadSection(id), mService(service) {
+DumpsysSection::DumpsysSection(int id, bool userdebugAndEngOnly, const char* service, ...)
+    : WorkerThreadSection(id, REMOTE_CALL_TIMEOUT_MS, userdebugAndEngOnly), mService(service) {
     name = "dumpsys ";
     name += service;
 

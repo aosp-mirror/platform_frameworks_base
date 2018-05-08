@@ -71,6 +71,7 @@ import android.view.Window;
 import android.view.WindowManager;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityManager.AccessibilityServicesStateChangeListener;
+import android.view.accessibility.AccessibilityNodeInfo;
 import android.view.animation.DecelerateInterpolator;
 import android.widget.FrameLayout;
 import android.widget.ImageButton;
@@ -627,41 +628,63 @@ public class VolumeDialogImpl implements VolumeDialog {
             switch (mState.ringerModeInternal) {
                 case AudioManager.RINGER_MODE_VIBRATE:
                     mRingerIcon.setImageResource(R.drawable.ic_volume_ringer_vibrate);
+                    addAccessibilityDescription(mRingerIcon, RINGER_MODE_VIBRATE,
+                            mContext.getString(R.string.volume_ringer_hint_mute));
                     mRingerIcon.setTag(Events.ICON_STATE_VIBRATE);
                     break;
                 case AudioManager.RINGER_MODE_SILENT:
                     mRingerIcon.setImageResource(R.drawable.ic_volume_ringer_mute);
-                    mRingerIcon.setContentDescription(mContext.getString(
-                            R.string.volume_stream_content_description_unmute,
-                            getStreamLabelH(ss)));
                     mRingerIcon.setTag(Events.ICON_STATE_MUTE);
+                    addAccessibilityDescription(mRingerIcon, RINGER_MODE_SILENT,
+                            mContext.getString(R.string.volume_ringer_hint_unmute));
                     break;
                 case AudioManager.RINGER_MODE_NORMAL:
                 default:
                     boolean muted = (mAutomute && ss.level == 0) || ss.muted;
                     if (!isZenMuted && muted) {
                         mRingerIcon.setImageResource(R.drawable.ic_volume_ringer_mute);
-                        mRingerIcon.setContentDescription(mContext.getString(
-                                R.string.volume_stream_content_description_unmute,
-                                getStreamLabelH(ss)));
+                        addAccessibilityDescription(mRingerIcon, RINGER_MODE_NORMAL,
+                                mContext.getString(R.string.volume_ringer_hint_unmute));
                         mRingerIcon.setTag(Events.ICON_STATE_MUTE);
                     } else {
                         mRingerIcon.setImageResource(R.drawable.ic_volume_ringer);
                         if (mController.hasVibrator()) {
-                            mRingerIcon.setContentDescription(mContext.getString(
-                                    mShowA11yStream
-                                            ? R.string.volume_stream_content_description_vibrate_a11y
-                                            : R.string.volume_stream_content_description_vibrate,
-                                    getStreamLabelH(ss)));
-
+                            addAccessibilityDescription(mRingerIcon, RINGER_MODE_NORMAL,
+                                    mContext.getString(R.string.volume_ringer_hint_vibrate));
                         } else {
-                            mRingerIcon.setContentDescription(getStreamLabelH(ss));
+                            addAccessibilityDescription(mRingerIcon, RINGER_MODE_NORMAL,
+                                    mContext.getString(R.string.volume_ringer_hint_mute));
                         }
                         mRingerIcon.setTag(Events.ICON_STATE_UNMUTE);
                     }
                     break;
             }
         }
+    }
+
+    private void addAccessibilityDescription(View view, int currState, String hintLabel) {
+        int currStateResId;
+        switch (currState) {
+            case RINGER_MODE_SILENT:
+                currStateResId = R.string.volume_ringer_status_silent;
+                break;
+            case RINGER_MODE_VIBRATE:
+                currStateResId = R.string.volume_ringer_status_vibrate;
+                break;
+            case RINGER_MODE_NORMAL:
+            default:
+                currStateResId = R.string.volume_ringer_status_normal;
+        }
+
+        view.setContentDescription(mContext.getString(currStateResId));
+
+        view.setAccessibilityDelegate(new AccessibilityDelegate() {
+            public void onInitializeAccessibilityNodeInfo(View host, AccessibilityNodeInfo info) {
+                super.onInitializeAccessibilityNodeInfo(host, info);
+                info.addAction(new AccessibilityNodeInfo.AccessibilityAction(
+                                AccessibilityNodeInfo.ACTION_CLICK, hintLabel));
+            }
+        });
     }
 
     /**

@@ -91,6 +91,7 @@ import static android.os.storage.StorageManager.FLAG_STORAGE_CE;
 import static android.os.storage.StorageManager.FLAG_STORAGE_DE;
 import static android.system.OsConstants.O_CREAT;
 import static android.system.OsConstants.O_RDWR;
+
 import static com.android.internal.app.IntentForwarderActivity.FORWARD_INTENT_TO_MANAGED_PROFILE;
 import static com.android.internal.app.IntentForwarderActivity.FORWARD_INTENT_TO_PARENT;
 import static com.android.internal.content.NativeLibraryHelper.LIB64_DIR_NAME;
@@ -412,7 +413,7 @@ public class PackageManagerService extends IPackageManager.Stub
     static final boolean DEBUG_DOMAIN_VERIFICATION = false;
     private static final boolean DEBUG_BACKUP = false;
     public static final boolean DEBUG_INSTALL = false;
-    public static final boolean DEBUG_REMOVE = true;
+    public static final boolean DEBUG_REMOVE = false;
     private static final boolean DEBUG_BROADCASTS = false;
     private static final boolean DEBUG_SHOW_INFO = false;
     private static final boolean DEBUG_PACKAGE_INFO = false;
@@ -4507,9 +4508,8 @@ public class PackageManagerService extends IPackageManager.Stub
 
     @Override
     public void deletePreloadsFileCache() {
-        if (!UserHandle.isSameApp(Binder.getCallingUid(), Process.SYSTEM_UID)) {
-            throw new SecurityException("Only system or settings may call deletePreloadsFileCache");
-        }
+        mContext.enforceCallingOrSelfPermission(android.Manifest.permission.CLEAR_APP_CACHE,
+                "deletePreloadsFileCache");
         File dir = Environment.getDataPreloadsFileCacheDirectory();
         Slog.i(TAG, "Deleting preloaded file cache " + dir);
         FileUtils.deleteContents(dir);
@@ -8515,6 +8515,29 @@ public class PackageManagerService extends IPackageManager.Stub
     }
 
     /**
+     * Clear the package profile if this was an upgrade and the package
+     * version was updated.
+     */
+    private void maybeClearProfilesForUpgradesLI(
+            @Nullable PackageSetting originalPkgSetting,
+            @NonNull PackageParser.Package currentPkg) {
+        if (originalPkgSetting == null || !isUpgrade()) {
+          return;
+        }
+        if (originalPkgSetting.versionCode == currentPkg.mVersionCode) {
+          return;
+        }
+
+        clearAppProfilesLIF(currentPkg, UserHandle.USER_ALL);
+        if (DEBUG_INSTALL) {
+            Slog.d(TAG, originalPkgSetting.name
+                  + " clear profile due to version change "
+                  + originalPkgSetting.versionCode + " != "
+                  + currentPkg.mVersionCode);
+        }
+    }
+
+    /**
      *  Traces a package scan.
      *  @see #scanPackageLI(File, int, int, long, UserHandle)
      */
@@ -8796,6 +8819,13 @@ public class PackageManagerService extends IPackageManager.Stub
                 (forceCollect && canSkipFullPackageVerification(pkg));
         collectCertificatesLI(pkgSetting, pkg, forceCollect, skipVerify);
 
+        // Reset profile if the application version is changed
+        maybeClearProfilesForUpgradesLI(pkgSetting, pkg);
+
+        /*
+         * A new system app appeared, but we already had a non-system one of the
+         * same name installed earlier.
+         */
         boolean shouldHideSystemApp = false;
         // A new application appeared on /system, but, we already have a copy of
         // the application installed on /data.
@@ -10230,10 +10260,14 @@ public class PackageManagerService extends IPackageManager.Stub
 
                 // if this is is a sharedUser, check to see if the new package is signed by a newer
                 // signing certificate than the existing one, and if so, copy over the new details
-                if (signatureCheckPs.sharedUser != null
-                        && pkg.mSigningDetails.hasAncestor(
+                if (signatureCheckPs.sharedUser != null) {
+                    if (pkg.mSigningDetails.hasAncestor(
                                 signatureCheckPs.sharedUser.signatures.mSigningDetails)) {
-                    signatureCheckPs.sharedUser.signatures.mSigningDetails = pkg.mSigningDetails;
+                        signatureCheckPs.sharedUser.signatures.mSigningDetails = pkg.mSigningDetails;
+                    }
+                    if (signatureCheckPs.sharedUser.signaturesChanged == null) {
+                        signatureCheckPs.sharedUser.signaturesChanged = Boolean.FALSE;
+                    }
                 }
             } catch (PackageManagerException e) {
                 if ((parseFlags & PackageParser.PARSE_IS_SYSTEM_DIR) == 0) {
@@ -10242,10 +10276,24 @@ public class PackageManagerService extends IPackageManager.Stub
                 // The signature has changed, but this package is in the system
                 // image...  let's recover!
                 pkgSetting.signatures.mSigningDetails = pkg.mSigningDetails;
+
                 // If the system app is part of a shared user we allow that shared user to change
-                // signatures as well in part as part of an OTA.
+                // signatures as well as part of an OTA. We still need to verify that the signatures
+                // are consistent within the shared user for a given boot, so only allow updating
+                // the signatures on the first package scanned for the shared user (i.e. if the
+                // signaturesChanged state hasn't been initialized yet in SharedUserSetting).
                 if (signatureCheckPs.sharedUser != null) {
+                    if (signatureCheckPs.sharedUser.signaturesChanged != null &&
+                        compareSignatures(
+                            signatureCheckPs.sharedUser.signatures.mSigningDetails.signatures,
+                            pkg.mSigningDetails.signatures) != PackageManager.SIGNATURE_MATCH) {
+                        throw new PackageManagerException(
+                                INSTALL_PARSE_FAILED_INCONSISTENT_CERTIFICATES,
+                                "Signature mismatch for shared user: " + pkgSetting.sharedUser);
+                    }
+
                     signatureCheckPs.sharedUser.signatures.mSigningDetails = pkg.mSigningDetails;
+                    signatureCheckPs.sharedUser.signaturesChanged = Boolean.TRUE;
                 }
                 // File a report about this.
                 String msg = "System package " + pkg.packageName
@@ -14075,13 +14123,10 @@ public class PackageManagerService extends IPackageManager.Stub
                             + Manifest.permission.MANAGE_USERS);
         }
         final int callingUid = Binder.getCallingUid();
-        mPermissionManager.enforceCrossUserPermission(callingUid, userId,
-                true /* requireFullPermission */, true /* checkShell */,
-                "setPackagesSuspended for user " + userId);
-        if (callingUid != Process.ROOT_UID &&
-                !UserHandle.isSameApp(getPackageUid(callingPackage, 0, userId), callingUid)) {
-            throw new IllegalArgumentException("CallingPackage " + callingPackage + " does not"
-                    + " belong to calling app id " + UserHandle.getAppId(callingUid));
+        if (callingUid != Process.ROOT_UID && callingUid != Process.SYSTEM_UID
+                && getPackageUid(callingPackage, 0, userId) != callingUid) {
+            throw new SecurityException("Calling package " + callingPackage + " in user "
+                    + userId + " does not belong to calling uid " + callingUid);
         }
         if (!PLATFORM_PACKAGE_NAME.equals(callingPackage)
                 && mProtectedPackages.getDeviceOwnerOrProfileOwnerPackage(userId) != null) {
@@ -14208,9 +14253,19 @@ public class PackageManagerService extends IPackageManager.Stub
         }
     }
 
-    void onSuspendingPackageRemoved(String packageName, int removedForUser) {
-        final int[] userIds = (removedForUser == UserHandle.USER_ALL) ? sUserManager.getUserIds()
-                : new int[] {removedForUser};
+    /**
+     * Immediately unsuspends any packages suspended by the given package. To be called
+     * when such a package's data is cleared or it is removed from the device.
+     *
+     * <p><b>Should not be used on a frequent code path</b> as it flushes state to disk
+     * synchronously
+     *
+     * @param packageName The package holding {@link Manifest.permission#SUSPEND_APPS} permission
+     * @param affectedUser The user for which the changes are taking place.
+     */
+    void unsuspendForSuspendingPackage(String packageName, int affectedUser) {
+        final int[] userIds = (affectedUser == UserHandle.USER_ALL) ? sUserManager.getUserIds()
+                : new int[] {affectedUser};
         for (int userId : userIds) {
             List<String> affectedPackages = new ArrayList<>();
             synchronized (mPackages) {
@@ -14227,6 +14282,8 @@ public class PackageManagerService extends IPackageManager.Stub
                         new String[affectedPackages.size()]);
                 sendMyPackageSuspendedOrUnsuspended(packageArray, false, null, userId);
                 sendPackagesSuspendedForUser(packageArray, userId, false, null);
+                // Write package restrictions immediately to avoid an inconsistent state.
+                mSettings.writePackageRestrictionsLPr(userId);
             }
         }
     }
@@ -18800,7 +18857,7 @@ public class PackageManagerService extends IPackageManager.Stub
 
         final int userId = user == null ? UserHandle.USER_ALL : user.getIdentifier();
         if (ps.getPermissionsState().hasPermission(Manifest.permission.SUSPEND_APPS, userId)) {
-            onSuspendingPackageRemoved(packageName, userId);
+            unsuspendForSuspendingPackage(packageName, userId);
         }
 
 
@@ -18941,10 +18998,10 @@ public class PackageManagerService extends IPackageManager.Stub
                     true /*notLaunched*/,
                     false /*hidden*/,
                     false /*suspended*/,
-                    null, /*suspendingPackage*/
-                    null, /*dialogMessage*/
-                    null, /*suspendedAppExtras*/
-                    null, /*suspendedLauncherExtras*/
+                    null /*suspendingPackage*/,
+                    null /*dialogMessage*/,
+                    null /*suspendedAppExtras*/,
+                    null /*suspendedLauncherExtras*/,
                     false /*instantApp*/,
                     false /*virtualPreload*/,
                     null /*lastDisableAppCaller*/,
@@ -19130,6 +19187,10 @@ public class PackageManagerService extends IPackageManager.Stub
                                 .getService(DeviceStorageMonitorInternal.class);
                         if (dsm != null) {
                             dsm.checkMemory();
+                        }
+                        if (checkPermission(Manifest.permission.SUSPEND_APPS, packageName, userId)
+                                == PERMISSION_GRANTED) {
+                            unsuspendForSuspendingPackage(packageName, userId);
                         }
                     }
                 } else {

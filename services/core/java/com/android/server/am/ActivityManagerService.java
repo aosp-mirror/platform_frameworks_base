@@ -18785,7 +18785,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                                 thread.dumpMemInfo(tp.getWriteFd(),
                                         mi, opts.isCheckinRequest, opts.dumpFullDetails,
                                         opts.dumpDalvik, opts.dumpSummaryOnly, opts.dumpUnreachable, innerArgs);
-                                tp.go(fd);
+                                tp.go(fd, opts.dumpUnreachable ? 30000 : 5000);
                             } finally {
                                 tp.kill();
                             }

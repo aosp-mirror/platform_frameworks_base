@@ -211,6 +211,11 @@ public class StatusBarMobileView extends AlphaOptimizedLinearLayout implements D
         //TODO: May not be needed. Mobile is always expected to be visible (not a dot)
     }
 
+    @Override
+    public int getVisibleState() {
+        return 0;
+    }
+
     @VisibleForTesting
     public MobileIconState getState() {
         return mState;

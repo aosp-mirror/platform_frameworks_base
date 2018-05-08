@@ -22,6 +22,7 @@
 #include "report_directory.h"
 #include "section_list.h"
 
+#include <android-base/properties.h>
 #include <android/os/DropBoxManager.h>
 #include <private/android_filesystem_config.h>
 #include <utils/SystemClock.h>
@@ -31,6 +32,7 @@
 #include <fcntl.h>
 #include <sys/stat.h>
 #include <sys/types.h>
+#include <string>
 
 /**
  * The directory where the incident reports are stored.
@@ -129,6 +131,8 @@ Reporter::run_report_status_t Reporter::runReport(size_t* reportByteSize) {
     int mainDest = -1;
     HeaderSection headers;
     MetadataSection metadataSection;
+    std::string buildType = android::base::GetProperty("ro.build.type", "");
+    const bool isUserdebugOrEng = buildType == "userdebug" || buildType == "eng";
 
     // See if we need the main file
     for (ReportRequestSet::iterator it = batch.begin(); it != batch.end(); it++) {
@@ -175,6 +179,11 @@ Reporter::run_report_status_t Reporter::runReport(size_t* reportByteSize) {
     // and report to those that care that we're doing it.
     for (const Section** section = SECTION_LIST; *section; section++) {
         const int id = (*section)->id;
+        if ((*section)->userdebugAndEngOnly && !isUserdebugOrEng) {
+            ALOGD("Skipping incident report section %d '%s' because it's limited to userdebug/eng",
+                  id, (*section)->name.string());
+            continue;
+        }
         if (this->batch.containsSection(id)) {
             ALOGD("Taking incident report section %d '%s'", id, (*section)->name.string());
             for (ReportRequestSet::iterator it = batch.begin(); it != batch.end(); it++) {

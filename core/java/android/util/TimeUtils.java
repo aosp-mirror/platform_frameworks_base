@@ -240,6 +240,14 @@ public class TimeUtils {
     }
 
     /** @hide Just for debugging; not internationalized. */
+    public static void formatDuration(long duration, StringBuilder builder, int fieldLen) {
+        synchronized (sFormatSync) {
+            int len = formatDurationLocked(duration, fieldLen);
+            builder.append(sFormatStr, 0, len);
+        }
+    }
+
+    /** @hide Just for debugging; not internationalized. */
     public static void formatDuration(long duration, PrintWriter pw, int fieldLen) {
         synchronized (sFormatSync) {
             int len = formatDurationLocked(duration, fieldLen);

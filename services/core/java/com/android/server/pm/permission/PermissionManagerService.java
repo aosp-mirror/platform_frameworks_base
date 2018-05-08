@@ -1953,7 +1953,7 @@ public class PermissionManagerService {
                     UserManager.DISALLOW_DEBUGGING_FEATURES, callingUid, userId);
         }
         if (userId == UserHandle.getUserId(callingUid)) return;
-        if (callingUid != Process.SYSTEM_UID && callingUid != 0) {
+        if (callingUid != Process.SYSTEM_UID && callingUid != Process.ROOT_UID) {
             if (requireFullPermission) {
                 mContext.enforceCallingOrSelfPermission(
                         android.Manifest.permission.INTERACT_ACROSS_USERS_FULL, message);

@@ -30,12 +30,12 @@ import android.util.AttributeSet;
 import android.util.Log;
 
 import android.view.View;
-import android.view.ViewGroup;
 import com.android.keyguard.AlphaOptimizedLinearLayout;
 import com.android.systemui.R;
 import com.android.systemui.statusbar.StatusIconDisplayable;
+import com.android.systemui.statusbar.stack.AnimationFilter;
+import com.android.systemui.statusbar.stack.AnimationProperties;
 import com.android.systemui.statusbar.stack.ViewState;
-import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 
 /**
@@ -50,8 +50,8 @@ public class StatusIconContainer extends AlphaOptimizedLinearLayout {
     private static final boolean DEBUG = false;
     private static final boolean DEBUG_OVERFLOW = false;
     // Max 5 status icons including battery
-    private static final int MAX_ICONS = 4;
-    private static final int MAX_DOTS = 3;
+    private static final int MAX_ICONS = 7;
+    private static final int MAX_DOTS = 1;
 
     private int mDotPadding;
     private int mStaticDotDiameter;
@@ -97,7 +97,7 @@ public class StatusIconContainer extends AlphaOptimizedLinearLayout {
         mDotPadding = getResources().getDimensionPixelSize(R.dimen.overflow_icon_dot_padding);
         int radius = getResources().getDimensionPixelSize(R.dimen.overflow_dot_radius);
         mStaticDotDiameter = 2 * radius;
-        mUnderflowWidth = mIconDotFrameWidth + 2 * (mStaticDotDiameter + mDotPadding);
+        mUnderflowWidth = mIconDotFrameWidth + (MAX_DOTS - 1) * (mStaticDotDiameter + mDotPadding);
     }
 
     @Override
@@ -193,6 +193,7 @@ public class StatusIconContainer extends AlphaOptimizedLinearLayout {
     public void onViewAdded(View child) {
         super.onViewAdded(child);
         StatusIconState vs = new StatusIconState();
+        vs.justAdded = true;
         child.setTag(R.id.status_bar_view_state_tag, vs);
     }
 
@@ -212,7 +213,6 @@ public class StatusIconContainer extends AlphaOptimizedLinearLayout {
         float contentStart = getPaddingStart();
         int childCount = getChildCount();
         // Underflow === don't show content until that index
-        int firstUnderflowIndex = -1;
         if (DEBUG) android.util.Log.d(TAG, "calculateIconTranslations: start=" + translationX
                 + " width=" + width + " underflow=" + mNeedsUnderflow);
 
@@ -235,13 +235,13 @@ public class StatusIconContainer extends AlphaOptimizedLinearLayout {
             translationX -= getViewTotalWidth(child);
         }
 
-        // Show either 1-4 dots, or 3 dots + overflow
+        // Show either 1-MAX_ICONS icons, or (MAX_ICONS - 1) icons + overflow
         int totalVisible = mLayoutStates.size();
         int maxVisible = totalVisible <= MAX_ICONS ? MAX_ICONS : MAX_ICONS - 1;
 
         mUnderflowStart = 0;
         int visible = 0;
-        firstUnderflowIndex = -1;
+        int firstUnderflowIndex = -1;
         for (int i = totalVisible - 1; i >= 0; i--) {
             StatusIconState state = mLayoutStates.get(i);
             // Allow room for underflow if we found we need it in onMeasure
@@ -324,14 +324,52 @@ public class StatusIconContainer extends AlphaOptimizedLinearLayout {
     public static class StatusIconState extends ViewState {
         /// StatusBarIconView.STATE_*
         public int visibleState = STATE_ICON;
+        public boolean justAdded = true;
 
         @Override
         public void applyToView(View view) {
-            if (view instanceof  StatusIconDisplayable) {
-                StatusIconDisplayable icon = (StatusIconDisplayable) view;
-                icon.setVisibleState(visibleState);
+            if (!(view instanceof StatusIconDisplayable)) {
+                return;
             }
-            super.applyToView(view);
+            StatusIconDisplayable icon = (StatusIconDisplayable) view;
+            AnimationProperties animationProperties = null;
+            boolean animate = false;
+
+            if (justAdded) {
+                super.applyToView(view);
+                animationProperties = ADD_ICON_PROPERTIES;
+                animate = true;
+            } else if (icon.getVisibleState() != visibleState) {
+                animationProperties = DOT_ANIMATION_PROPERTIES;
+                animate = true;
+            }
+
+            icon.setVisibleState(visibleState);
+            if (animate) {
+                animateTo(view, animationProperties);
+            } else {
+                super.applyToView(view);
+            }
+
+            justAdded = false;
         }
     }
+
+    private static final AnimationProperties ADD_ICON_PROPERTIES = new AnimationProperties() {
+        private AnimationFilter mAnimationFilter = new AnimationFilter().animateAlpha();
+
+        @Override
+        public AnimationFilter getAnimationFilter() {
+            return mAnimationFilter;
+        }
+    }.setDuration(200).setDelay(50);
+
+    private static final AnimationProperties DOT_ANIMATION_PROPERTIES = new AnimationProperties() {
+        private AnimationFilter mAnimationFilter = new AnimationFilter().animateX();
+
+        @Override
+        public AnimationFilter getAnimationFilter() {
+            return mAnimationFilter;
+        }
+    }.setDuration(200);
 }

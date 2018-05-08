@@ -29,8 +29,8 @@
 #include "utils/TraceUtils.h"
 
 #include <GrBackendSurface.h>
-#include <SkImageInfo.h>
 #include <SkBlendMode.h>
+#include <SkImageInfo.h>
 
 #include <cutils/properties.h>
 #include <strings.h>
@@ -63,8 +63,7 @@ Frame SkiaOpenGLPipeline::getFrame() {
 bool SkiaOpenGLPipeline::draw(const Frame& frame, const SkRect& screenDirty, const SkRect& dirty,
                               const LightGeometry& lightGeometry,
                               LayerUpdateQueue* layerUpdateQueue, const Rect& contentDrawBounds,
-                              bool opaque, bool wideColorGamut,
-                              const LightInfo& lightInfo,
+                              bool opaque, bool wideColorGamut, const LightInfo& lightInfo,
                               const std::vector<sp<RenderNode>>& renderNodes,
                               FrameInfoVisualizer* profiler) {
     mEglManager.damageFrame(frame, dirty);
@@ -151,8 +150,8 @@ bool SkiaOpenGLPipeline::copyLayerInto(DeferredLayerUpdater* deferredLayer, SkBi
 
     if (!tmpSurface.get()) {
         surfaceInfo = surfaceInfo.makeColorType(SkColorType::kN32_SkColorType);
-        tmpSurface = SkSurface::MakeRenderTarget(mRenderThread.getGrContext(),
-                                                 SkBudgeted::kYes, surfaceInfo);
+        tmpSurface = SkSurface::MakeRenderTarget(mRenderThread.getGrContext(), SkBudgeted::kYes,
+                                                 surfaceInfo);
         if (!tmpSurface.get()) {
             ALOGW("Unable to readback GPU contents into the provided bitmap");
             return false;
@@ -172,11 +171,10 @@ bool SkiaOpenGLPipeline::copyLayerInto(DeferredLayerUpdater* deferredLayer, SkBi
         // if we fail to readback from the GPU directly (e.g. 565) then we attempt to read into 8888
         // and then draw that into the destination format before giving up.
         SkBitmap tmpBitmap;
-        SkImageInfo bitmapInfo = SkImageInfo::MakeN32(bitmap->width(), bitmap->height(),
-                                                      bitmap->alphaType());
+        SkImageInfo bitmapInfo =
+                SkImageInfo::MakeN32(bitmap->width(), bitmap->height(), bitmap->alphaType());
         if (tmpBitmap.tryAllocPixels(bitmapInfo) &&
-                tmpImage->readPixels(bitmapInfo, tmpBitmap.getPixels(),
-                                     tmpBitmap.rowBytes(), 0, 0)) {
+            tmpImage->readPixels(bitmapInfo, tmpBitmap.getPixels(), tmpBitmap.rowBytes(), 0, 0)) {
             SkCanvas canvas(*bitmap);
             SkPaint paint;
             paint.setBlendMode(SkBlendMode::kSrc);
@@ -190,7 +188,8 @@ bool SkiaOpenGLPipeline::copyLayerInto(DeferredLayerUpdater* deferredLayer, SkBi
 }
 
 static Layer* createLayer(RenderState& renderState, uint32_t layerWidth, uint32_t layerHeight,
-                          sk_sp<SkColorFilter> colorFilter, int alpha, SkBlendMode mode, bool blend) {
+                          sk_sp<SkColorFilter> colorFilter, int alpha, SkBlendMode mode,
+                          bool blend) {
     GlLayer* layer =
             new GlLayer(renderState, layerWidth, layerHeight, colorFilter, alpha, mode, blend);
     layer->generateTexture();
@@ -288,7 +287,6 @@ private:
 };
 
 struct FormatInfo {
-
     PixelFormat pixelFormat;
     GLint format, type;
     bool isSupported = false;
@@ -299,7 +297,16 @@ static bool gpuSupportsHalfFloatTextures(renderthread::RenderThread& renderThrea
     static bool isSupported = renderThread.queue().runSync([&renderThread]() -> bool {
         renderThread.requireGlContext();
         sk_sp<GrContext> grContext = sk_ref_sp(renderThread.getGrContext());
-        return grContext->colorTypeSupportedAsImage(kRGBA_F16_SkColorType);
+        if (!grContext->colorTypeSupportedAsImage(kRGBA_F16_SkColorType)) {
+            return false;
+        }
+        sp<GraphicBuffer> buffer = new GraphicBuffer(1, 1, PIXEL_FORMAT_RGBA_FP16,
+                                                     GraphicBuffer::USAGE_HW_TEXTURE |
+                                                             GraphicBuffer::USAGE_SW_WRITE_NEVER |
+                                                             GraphicBuffer::USAGE_SW_READ_NEVER,
+                                                     "tempFp16Buffer");
+        status_t error = buffer->initCheck();
+        return error != OK;
     });
     return isSupported;
 }

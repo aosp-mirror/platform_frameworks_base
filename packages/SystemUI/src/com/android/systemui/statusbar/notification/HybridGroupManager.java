@@ -37,10 +37,10 @@ public class HybridGroupManager {
     private final NotificationDozeHelper mDozer;
     private final ViewGroup mParent;
 
-    private final float mOverflowNumberSizeDark;
-    private final int mOverflowNumberPaddingDark;
-    private final float mOverflowNumberSize;
-    private final int mOverflowNumberPadding;
+    private float mOverflowNumberSizeDark;
+    private int mOverflowNumberPaddingDark;
+    private float mOverflowNumberSize;
+    private int mOverflowNumberPadding;
 
     private int mOverflowNumberColor;
     private int mOverflowNumberColorDark;
@@ -50,7 +50,10 @@ public class HybridGroupManager {
         mContext = ctx;
         mParent = parent;
         mDozer = new NotificationDozeHelper();
+        initDimens();
+    }
 
+    public void initDimens() {
         Resources res = mContext.getResources();
         mOverflowNumberSize = res.getDimensionPixelSize(
                 R.dimen.group_overflow_number_size);

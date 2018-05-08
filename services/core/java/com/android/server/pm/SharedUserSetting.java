@@ -46,6 +46,7 @@ public final class SharedUserSetting extends SettingBase {
     final ArraySet<PackageSetting> packages = new ArraySet<PackageSetting>();
 
     final PackageSignatures signatures = new PackageSignatures();
+    Boolean signaturesChanged;
 
     SharedUserSetting(String _name, int _pkgFlags, int _pkgPrivateFlags) {
         super(_pkgFlags, _pkgPrivateFlags);

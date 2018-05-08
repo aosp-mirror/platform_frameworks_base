@@ -80,7 +80,7 @@ public class NetworkPolicyManagerTest {
         uidPoliciesToStringTest(POLICY_REJECT_METERED_BACKGROUND,
                 "1 (REJECT_METERED_BACKGROUND)");
         uidPoliciesToStringTest(POLICY_ALLOW_METERED_BACKGROUND,
-                "4 (ALLOW_BACKGROUND_BATTERY_SAVE)");
+                "4 (ALLOW_METERED_BACKGROUND)");
     }
 
     private void uidPoliciesToStringTest(int policyRules, String... expectedOptions) {

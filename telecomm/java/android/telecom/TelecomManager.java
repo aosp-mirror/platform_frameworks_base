@@ -1299,13 +1299,18 @@ public class TelecomManager {
     }
 
     /**
-     * Ends an ongoing call.
-     * TODO: L-release - need to convert all invocations of ITelecomService#endCall to use this
-     * method (clockwork & gearhead).
-     * @hide
+     * Ends the foreground call on the device.
+     * <p>
+     * If there is a ringing call, calling this method rejects the ringing call.  Otherwise the
+     * foreground call is ended.
+     * <p>
+     * Requires permission {@link android.Manifest.permission#ANSWER_PHONE_CALLS}.
+     *
+     * @return {@code true} if there is a call which will be rejected or terminated, {@code false}
+     * otherwise.
      */
+    @RequiresPermission(Manifest.permission.ANSWER_PHONE_CALLS)
     @SystemApi
-    @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE)
     public boolean endCall() {
         try {
             if (isServiceConnected()) {

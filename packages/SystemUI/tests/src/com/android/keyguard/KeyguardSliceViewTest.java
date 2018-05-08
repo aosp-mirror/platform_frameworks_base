@@ -90,6 +90,17 @@ public class KeyguardSliceViewTest extends SysuiTestCase {
     }
 
     @Test
+    public void refresh_replacesSliceContentAndNotifiesListener() {
+        AtomicBoolean notified = new AtomicBoolean();
+        mKeyguardSliceView.setContentChangeListener((hasHeader)-> {
+            notified.set(true);
+        });
+        mKeyguardSliceView.refresh();
+        Assert.assertTrue("Listener should be notified about slice changes.",
+                notified.get());
+    }
+
+    @Test
     public void getTextColor_whiteTextWhenAOD() {
         // Set text color to red since the default is white and test would always pass
         mKeyguardSliceView.setTextColor(Color.RED);

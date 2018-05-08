@@ -79,7 +79,8 @@ public:
         }
     };
 
-    // Returns the elapsed realtime when this metric manager last reported metrics.
+    // Returns the elapsed realtime when this metric manager last reported metrics. If this config
+    // has not yet dumped any reports, this is the time the metricsmanager was initialized.
     inline int64_t getLastReportTimeNs() const {
         return mLastReportTimeNs;
     };

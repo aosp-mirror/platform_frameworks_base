@@ -121,7 +121,7 @@ public class CollapsedStatusBarFragmentTest extends SysuiBaseFragmentTest {
         fragment.initNotificationIconArea(mMockNotificiationAreaController);
         fragment.disable(StatusBarManager.DISABLE_CLOCK, 0, false);
 
-        assertEquals(View.INVISIBLE, mFragment.getView().findViewById(R.id.clock).getVisibility());
+        assertEquals(View.GONE, mFragment.getView().findViewById(R.id.clock).getVisibility());
 
         fragment.disable(0, 0, false);
 

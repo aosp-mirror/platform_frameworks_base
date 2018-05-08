@@ -287,7 +287,12 @@ public class KeyguardStatusView extends GridLayout implements
         }
     }
 
-    public void refreshTime() {
+    public void dozeTimeTick() {
+        refreshTime();
+        mKeyguardSlice.refresh();
+    }
+
+    private void refreshTime() {
         mClockView.refresh();
     }
 

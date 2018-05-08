@@ -203,8 +203,14 @@ public class ZenDurationDialog {
 
 
     private void setupUi(ConditionTag tag, View row) {
-        tag.lines = row.findViewById(android.R.id.content);
-        tag.line1 = (TextView) row.findViewById(android.R.id.text1);
+        if (tag.lines == null) {
+            tag.lines = row.findViewById(android.R.id.content);
+            tag.lines.setAccessibilityLiveRegion(View.ACCESSIBILITY_LIVE_REGION_POLITE);
+        }
+
+        if (tag.line1 == null) {
+            tag.line1 = (TextView) row.findViewById(android.R.id.text1);
+        }
 
         // text2 is not used in zen duration dialog
         row.findViewById(android.R.id.text2).setVisibility(View.GONE);

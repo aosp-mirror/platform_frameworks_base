@@ -24,8 +24,8 @@
 #include <android-base/file.h>
 #include <utils/Log.h>
 
-using android::base::RemoveFileIfExists;
 using android::base::ReadFileToString;
+using android::base::RemoveFileIfExists;
 using Json::Reader;
 using Json::Value;
 
@@ -33,9 +33,8 @@ namespace android {
 
 namespace {
 
-// Keys for volume, brightness, and user-defined parameters.
-constexpr const char* kKeyVolume = "volume";
-constexpr const char* kKeyBrightness = "brightness";
+// Keys for supporting a silent boot and user-defined BootAction parameters.
+constexpr const char *kKeySilentBoot = "silent_boot";
 constexpr const char* kKeyParams = "params";
 
 constexpr const char* kNextBootFile = "/data/misc/bootanimation/next_boot.json";
@@ -82,35 +81,37 @@ void BootParameters::loadParameters() {
     loadParameters(contents);
 }
 
+// If the boot parameters -
+// - File is missing, we assume a normal, non-silent boot.
+// - Are well-formed, initially assume a normal, non-silent boot and parse.
 void BootParameters::loadParameters(const std::string& raw_json) {
   if (!Reader().parse(raw_json, mJson)) {
     return;
   }
 
-  // A missing key returns a safe, missing value.
-  // Ignore invalid or missing JSON parameters.
-  Value& jsonValue = mJson[kKeyVolume];
-  if (jsonValue.isDouble()) {
-    mVolume = jsonValue.asFloat();
-  }
+  parseBootParameters();
+}
 
-  jsonValue = mJson[kKeyBrightness];
-  if (jsonValue.isDouble()) {
-    mBrightness = jsonValue.asFloat();
-  }
-
-  jsonValue = mJson[kKeyParams];
-  if (jsonValue.isObject()) {
-    for (auto &key : jsonValue.getMemberNames()) {
-      Value& value = jsonValue[key];
-      if (value.isString()) {
-        mParameters.push_back({
-          .key = key.c_str(),
-          .value = value.asCString()
-        });
-      }
+void BootParameters::parseBootParameters() {
+    // A missing key returns a safe, missing value.
+    // Ignore invalid or missing JSON parameters.
+    Value &jsonValue = mJson[kKeySilentBoot];
+    if (jsonValue.isBool()) {
+        mIsSilentBoot = jsonValue.asBool();
     }
-  }
+
+    jsonValue = mJson[kKeyParams];
+    if (jsonValue.isObject()) {
+        // getMemberNames returns a copy of the keys which must be stored.
+        mKeys = jsonValue.getMemberNames();
+        for (auto &key : mKeys) {
+            Value &value = jsonValue[key];
+            if (value.isString()) {
+                mParameters.push_back(
+                    {.key = key.c_str(), .value = value.asCString()});
+            }
+        }
+    }
 }
 
 }  // namespace android

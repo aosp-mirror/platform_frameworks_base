@@ -60,6 +60,7 @@ import com.android.internal.R;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.server.UiThread;
+import com.android.server.autofill.Helper;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -134,6 +135,7 @@ final class SaveUi {
     private final PendingUi mPendingUi;
     private final String mServicePackageName;
     private final String mPackageName;
+    private final boolean mCompatMode;
 
     private boolean mDestroyed;
 
@@ -141,12 +143,14 @@ final class SaveUi {
            @NonNull CharSequence serviceLabel, @NonNull Drawable serviceIcon,
            @Nullable String servicePackageName, @NonNull String packageName,
            @NonNull SaveInfo info, @NonNull ValueFinder valueFinder,
-           @NonNull OverlayControl overlayControl, @NonNull OnSaveListener listener) {
+           @NonNull OverlayControl overlayControl, @NonNull OnSaveListener listener,
+           boolean compatMode) {
         mPendingUi= pendingUi;
         mListener = new OneTimeListener(listener);
         mOverlayControl = overlayControl;
         mServicePackageName = servicePackageName;
         mPackageName = packageName;
+        mCompatMode = compatMode;
 
         context = new ContextThemeWrapper(context, THEME_ID);
         final LayoutInflater inflater = LayoutInflater.from(context);
@@ -409,14 +413,12 @@ final class SaveUi {
     }
 
     private LogMaker newLogMaker(int category, int saveType) {
-        return newLogMaker(category)
+        return Helper.newLogMaker(category, mPackageName, mServicePackageName, mCompatMode)
                 .addTaggedData(MetricsEvent.FIELD_AUTOFILL_SAVE_TYPE, saveType);
     }
 
     private LogMaker newLogMaker(int category) {
-        return new LogMaker(category)
-                .setPackageName(mPackageName)
-                .addTaggedData(MetricsEvent.FIELD_AUTOFILL_SERVICE, mServicePackageName);
+        return Helper.newLogMaker(category, mPackageName, mServicePackageName, mCompatMode);
     }
 
     private void writeLog(int category, int saveType) {
@@ -505,6 +507,7 @@ final class SaveUi {
         pw.print(prefix); pw.print("pendingUi: "); pw.println(mPendingUi);
         pw.print(prefix); pw.print("service: "); pw.println(mServicePackageName);
         pw.print(prefix); pw.print("app: "); pw.println(mPackageName);
+        pw.print(prefix); pw.print("compat mode: "); pw.println(mCompatMode);
 
         final View view = mDialog.getWindow().getDecorView();
         final int[] loc = view.getLocationOnScreen();
