@@ -95,6 +95,8 @@
     <string name="accessibility_unlock_button" msgid="128158454631118828">"திற"</string>
     <string name="accessibility_waiting_for_fingerprint" msgid="4808860050517462885">"கைரேகைக்காகக் காத்திருக்கிறது"</string>
     <string name="accessibility_unlock_without_fingerprint" msgid="7541705575183694446">"உங்கள் கைரேகையைப் பயன்படுத்தாமல் திறக்கவும்"</string>
+    <!-- no translation found for accessibility_scanning_face (769545173211758586) -->
+    <skip />
     <string name="accessibility_send_smart_reply" msgid="7766727839703044493">"அனுப்பு"</string>
     <string name="unlock_label" msgid="8779712358041029439">"திற"</string>
     <string name="phone_label" msgid="2320074140205331708">"ஃபோனைத் திற"</string>
@@ -367,6 +369,8 @@
     <string name="recents_accessibility_split_screen_top" msgid="9056056469282256287">"திரையை மேல்புறமாகப் பிரி"</string>
     <string name="recents_accessibility_split_screen_left" msgid="8987144699630620019">"திரையை இடப்புறமாகப் பிரி"</string>
     <string name="recents_accessibility_split_screen_right" msgid="275069779299592867">"திரையை வலப்புறமாகப் பிரி"</string>
+    <!-- no translation found for quick_step_accessibility_toggle_overview (7171470775439860480) -->
+    <skip />
     <string name="expanded_header_battery_charged" msgid="5945855970267657951">"சார்ஜ் செய்யப்பட்டது"</string>
     <string name="expanded_header_battery_charging" msgid="205623198487189724">"சார்ஜ் ஆகிறது"</string>
     <string name="expanded_header_battery_charging_with_time" msgid="457559884275395376">"முழுவதும் சார்ஜாக <xliff:g id="CHARGING_TIME">%s</xliff:g> ஆகும்"</string>
@@ -540,6 +544,12 @@
     <string name="volume_stream_content_description_mute" msgid="3625049841390467354">"%1$s. ஒலியடக்க, தட்டவும். அணுகல்தன்மை சேவைகள் ஒலியடக்கப்படக்கூடும்."</string>
     <string name="volume_stream_content_description_vibrate_a11y" msgid="6427727603978431301">"%1$s. அதிர்விற்கு அமைக்க, தட்டவும்."</string>
     <string name="volume_stream_content_description_mute_a11y" msgid="8995013018414535494">"%1$s. ஒலியடக்க, தட்டவும்."</string>
+    <!-- no translation found for volume_ringer_hint_mute (9199811307292269601) -->
+    <skip />
+    <!-- no translation found for volume_ringer_hint_unmute (6602880133293060368) -->
+    <skip />
+    <!-- no translation found for volume_ringer_hint_vibrate (4036802135666515202) -->
+    <skip />
     <string name="volume_dialog_title" msgid="7272969888820035876">"%s ஒலியளவுக் கட்டுப்பாடுகள்"</string>
     <string name="volume_dialog_ringer_guidance_ring" msgid="3360373718388509040">"அழைப்புகளும் அறிவிப்புகளும் வரும்போது ஒலிக்கச் செய்யும் (<xliff:g id="VOLUME_LEVEL">%1$s</xliff:g>)"</string>
     <string name="output_title" msgid="5355078100792942802">"மீடியா வெளியீடு"</string>
@@ -605,17 +615,20 @@
     <string name="inline_minimize_button" msgid="966233327974702195">"சிறிதாக்கு"</string>
     <string name="inline_keep_showing_app" msgid="1723113469580031041">"இந்தப் பயன்பாட்டின் அறிவிப்புகளைத் தொடர்ந்து காட்டவா?"</string>
     <string name="notification_unblockable_desc" msgid="1037434112919403708">"இந்த அறிவிப்புகளை ஆஃப் செய்ய முடியாது"</string>
-    <string name="notification_appops_camera_active" msgid="730959943016785931">"கேமரா"</string>
-    <string name="notification_appops_microphone_active" msgid="1546319728924580686">"மைக்ரோஃபோன்"</string>
-    <string name="notification_appops_overlay_active" msgid="633813008357934729">"உங்கள் திரையில் உள்ள பிற பயன்பாடுகளின் மேல் காட்டுகிறது"</string>
-    <plurals name="notification_appops" formatted="false" msgid="1258122060887196817">
-      <item quantity="other">இந்தப் பயன்பாடானது <xliff:g id="PERFORMING_ACTIVITY_1">%1$s</xliff:g> மற்றும் <xliff:g id="PERFORMING_ACTIVITY_2">%2$s</xliff:g>.</item>
-      <item quantity="one">இந்தப் பயன்பாடானது <xliff:g id="PERFORMING_ACTIVITY_0">%1$s</xliff:g>.</item>
-    </plurals>
-    <plurals name="notification_using" formatted="false" msgid="2211008461429037973">
-      <item quantity="other"><xliff:g id="PERFORMING_ACTIVITY_1">%1$s</xliff:g> மற்றும் <xliff:g id="PERFORMING_ACTIVITY_2">%2$s</xliff:g>ஐப் பயன்படுத்துகிறது</item>
-      <item quantity="one"><xliff:g id="PERFORMING_ACTIVITY_0">%1$s</xliff:g>ஐப் பயன்படுத்துகிறது</item>
-    </plurals>
+    <!-- no translation found for appops_camera (8100147441602585776) -->
+    <skip />
+    <!-- no translation found for appops_microphone (741508267659494555) -->
+    <skip />
+    <!-- no translation found for appops_overlay (6165912637560323464) -->
+    <skip />
+    <!-- no translation found for appops_camera_mic (1576901651150187433) -->
+    <skip />
+    <!-- no translation found for appops_camera_overlay (8869400080809298814) -->
+    <skip />
+    <!-- no translation found for appops_mic_overlay (4835157962857919804) -->
+    <skip />
+    <!-- no translation found for appops_camera_mic_overlay (6718768197048030993) -->
+    <skip />
     <string name="notification_appops_settings" msgid="1028328314935908050">"அமைப்புகள்"</string>
     <string name="notification_appops_ok" msgid="1156966426011011434">"சரி"</string>
     <string name="notification_channel_controls_opened_accessibility" msgid="6553950422055908113">"<xliff:g id="APP_NAME">%1$s</xliff:g>க்கான அறிவிப்புக் கட்டுப்பாடுகள் திறக்கப்பட்டன"</string>
@@ -851,4 +864,6 @@
     <string name="auto_saver_enabled_text" msgid="874711029884777579">"பேட்டரியின் அளவு <xliff:g id="PERCENTAGE">%d</xliff:g>%%க்குக் கீழ் குறையும்போது, பேட்டரி சேமிப்பான் தானாகவே ஆன் செய்யப்படும்."</string>
     <string name="open_saver_setting_action" msgid="8314624730997322529">"அமைப்புகள்"</string>
     <string name="auto_saver_okay_action" msgid="2701221740227683650">"சரி"</string>
+    <!-- no translation found for heap_dump_tile_name (9141031328971226374) -->
+    <skip />
 </resources>

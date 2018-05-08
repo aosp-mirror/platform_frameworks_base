@@ -83,8 +83,8 @@
     <string name="screenshot_failed_to_save_text" msgid="3041612585107107310">"يتعذر حفظ لقطة الشاشة لأن مساحة التخزين المتاحة محدودة."</string>
     <string name="screenshot_failed_to_capture_text" msgid="173674476457581486">"يحظر التطبيق أو تحظر مؤسستك التقاط لقطات شاشة"</string>
     <string name="usb_preference_title" msgid="6551050377388882787">"‏خيارات نقل الملفات عبر USB"</string>
-    <string name="use_mtp_button_title" msgid="4333504413563023626">"‏تحميل كمشغل وسائط (MTP)"</string>
-    <string name="use_ptp_button_title" msgid="7517127540301625751">"‏تحميل ككاميرا (PTP)"</string>
+    <string name="use_mtp_button_title" msgid="4333504413563023626">"‏تثبيت كمشغل وسائط (MTP)"</string>
+    <string name="use_ptp_button_title" msgid="7517127540301625751">"‏تثبيت ككاميرا (PTP)"</string>
     <string name="installer_cd_button_title" msgid="2312667578562201583">"‏تثبيت تطبيق Android File Transfer لـ Mac"</string>
     <string name="accessibility_back" msgid="567011538994429120">"رجوع"</string>
     <string name="accessibility_home" msgid="8217216074895377641">"الرئيسية"</string>
@@ -99,6 +99,7 @@
     <string name="accessibility_unlock_button" msgid="128158454631118828">"إلغاء القفل"</string>
     <string name="accessibility_waiting_for_fingerprint" msgid="4808860050517462885">"في انتظار بصمة الإصبع"</string>
     <string name="accessibility_unlock_without_fingerprint" msgid="7541705575183694446">"إلغاء القفل دون استخدام بصمة إصبعك"</string>
+    <string name="accessibility_scanning_face" msgid="769545173211758586">"مسح الوجه"</string>
     <string name="accessibility_send_smart_reply" msgid="7766727839703044493">"إرسال"</string>
     <string name="unlock_label" msgid="8779712358041029439">"إلغاء القفل"</string>
     <string name="phone_label" msgid="2320074140205331708">"فتح الهاتف"</string>
@@ -379,6 +380,8 @@
     <string name="recents_accessibility_split_screen_top" msgid="9056056469282256287">"تقسيم الشاشة بمحاذاة الجزء العلوي"</string>
     <string name="recents_accessibility_split_screen_left" msgid="8987144699630620019">"تقسيم الشاشة بمحاذاة اليسار"</string>
     <string name="recents_accessibility_split_screen_right" msgid="275069779299592867">"تقسيم الشاشة بمحاذاة اليمين"</string>
+    <!-- no translation found for quick_step_accessibility_toggle_overview (7171470775439860480) -->
+    <skip />
     <string name="expanded_header_battery_charged" msgid="5945855970267657951">"تم الشحن"</string>
     <string name="expanded_header_battery_charging" msgid="205623198487189724">"جارٍ الشحن"</string>
     <string name="expanded_header_battery_charging_with_time" msgid="457559884275395376">"<xliff:g id="CHARGING_TIME">%s</xliff:g> حتى الاكتمال"</string>
@@ -387,10 +390,10 @@
     <string name="description_target_search" msgid="3091587249776033139">"بحث"</string>
     <string name="description_direction_up" msgid="7169032478259485180">"تمرير لأعلى لـ <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>."</string>
     <string name="description_direction_left" msgid="7207478719805562165">"تمرير لليسار لـ <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>."</string>
-    <string name="zen_priority_introduction" msgid="1149025108714420281">"لن يتم إزعاجك بالأصوات والاهتزاز، باستثناء المُنبِّهات والتذكيرات والأحداث والمتصلين الذين تحددهم. وسيظل بإمكانك سماع أي عناصر أخرى تختار تشغيلها، بما في ذلك الموسيقى ومقاطع الفيديو والألعاب."</string>
-    <string name="zen_alarms_introduction" msgid="4934328096749380201">"لن يتم إزعاجك بالأصوات والاهتزاز، باستثناء المُنبِّهات. وسيظل بإمكانك سماع أي عناصر أخرى تختار تشغيلها، بما في ذلك الموسيقى ومقاطع الفيديو والألعاب."</string>
+    <string name="zen_priority_introduction" msgid="1149025108714420281">"لن يتم إزعاجك بالأصوات والاهتزاز، باستثناء المُنبِّهات والتذكيرات والأحداث والمتصلين الذين تحددهم. وسيظل بإمكانك سماع أي عناصر أخرى تختار تشغيلها، بما في ذلك الموسيقى والفيديوهات والألعاب."</string>
+    <string name="zen_alarms_introduction" msgid="4934328096749380201">"لن يتم إزعاجك بالأصوات والاهتزاز، باستثناء المُنبِّهات. وسيظل بإمكانك سماع أي عناصر أخرى تختار تشغيلها، بما في ذلك الموسيقى والفيديوهات والألعاب."</string>
     <string name="zen_priority_customize_button" msgid="7948043278226955063">"تخصيص"</string>
-    <string name="zen_silence_introduction_voice" msgid="3948778066295728085">"سيؤدي هذا إلى منع صدور جميع الأصوات والاهتزازات، بما في ذلك المُنبِّهات والموسيقى ومقاطع الفيديو والألعاب. وسيظل بإمكانك إجراء مكالمات هاتفية."</string>
+    <string name="zen_silence_introduction_voice" msgid="3948778066295728085">"سيؤدي هذا إلى منع صدور جميع الأصوات والاهتزازات، بما في ذلك المُنبِّهات والموسيقى والفيديوهات والألعاب. وسيظل بإمكانك إجراء مكالمات هاتفية."</string>
     <string name="zen_silence_introduction" msgid="3137882381093271568">"سيؤدي هذا إلى حظر جميع الأصوات والاهتزازات، بما في ذلك ما يرد من التنبيهات والموسيقى والفيديو والألعاب."</string>
     <string name="keyguard_more_overflow_text" msgid="9195222469041601365">"+<xliff:g id="NUMBER_OF_NOTIFICATIONS">%d</xliff:g>"</string>
     <string name="speed_bump_explanation" msgid="1288875699658819755">"الإشعارات الأقل إلحاحًا أدناه"</string>
@@ -552,6 +555,12 @@
     <string name="volume_stream_content_description_mute" msgid="3625049841390467354">"‏%1$s. انقر للتجاهل. قد يتم تجاهل خدمات إمكانية الوصول."</string>
     <string name="volume_stream_content_description_vibrate_a11y" msgid="6427727603978431301">"‏%1$s. انقر للتعيين على الاهتزاز."</string>
     <string name="volume_stream_content_description_mute_a11y" msgid="8995013018414535494">"‏%1$s. انقر لكتم الصوت."</string>
+    <!-- no translation found for volume_ringer_hint_mute (9199811307292269601) -->
+    <skip />
+    <!-- no translation found for volume_ringer_hint_unmute (6602880133293060368) -->
+    <skip />
+    <!-- no translation found for volume_ringer_hint_vibrate (4036802135666515202) -->
+    <skip />
     <string name="volume_dialog_title" msgid="7272969888820035876">"‏%s عنصر للتحكم في مستوى الصوت"</string>
     <string name="volume_dialog_ringer_guidance_ring" msgid="3360373718388509040">"سيصدر الهاتف رنينًا عند تلقي المكالمات والإشعارات (<xliff:g id="VOLUME_LEVEL">%1$s</xliff:g>)."</string>
     <string name="output_title" msgid="5355078100792942802">"إخراج الوسائط"</string>
@@ -617,25 +626,20 @@
     <string name="inline_minimize_button" msgid="966233327974702195">"تصغير"</string>
     <string name="inline_keep_showing_app" msgid="1723113469580031041">"هل تريد الاستمرار في تلقي إشعارات من هذا التطبيق؟"</string>
     <string name="notification_unblockable_desc" msgid="1037434112919403708">"يتعذَّر إيقاف هذه الإشعارات."</string>
-    <string name="notification_appops_camera_active" msgid="730959943016785931">"الكاميرا"</string>
-    <string name="notification_appops_microphone_active" msgid="1546319728924580686">"الميكروفون"</string>
-    <string name="notification_appops_overlay_active" msgid="633813008357934729">"العرض فوق التطبيقات الأخرى على شاشتك"</string>
-    <plurals name="notification_appops" formatted="false" msgid="1258122060887196817">
-      <item quantity="zero">هذا التطبيق <xliff:g id="PERFORMING_ACTIVITY_1">%1$s</xliff:g> و<xliff:g id="PERFORMING_ACTIVITY_2">%2$s</xliff:g>.</item>
-      <item quantity="two">هذا التطبيق <xliff:g id="PERFORMING_ACTIVITY_1">%1$s</xliff:g> و<xliff:g id="PERFORMING_ACTIVITY_2">%2$s</xliff:g>.</item>
-      <item quantity="few">هذا التطبيق <xliff:g id="PERFORMING_ACTIVITY_1">%1$s</xliff:g> و<xliff:g id="PERFORMING_ACTIVITY_2">%2$s</xliff:g>.</item>
-      <item quantity="many">هذا التطبيق <xliff:g id="PERFORMING_ACTIVITY_1">%1$s</xliff:g> و<xliff:g id="PERFORMING_ACTIVITY_2">%2$s</xliff:g>.</item>
-      <item quantity="other">هذا التطبيق <xliff:g id="PERFORMING_ACTIVITY_1">%1$s</xliff:g> و<xliff:g id="PERFORMING_ACTIVITY_2">%2$s</xliff:g>.</item>
-      <item quantity="one">هذا التطبيق <xliff:g id="PERFORMING_ACTIVITY_0">%1$s</xliff:g>.</item>
-    </plurals>
-    <plurals name="notification_using" formatted="false" msgid="2211008461429037973">
-      <item quantity="zero">يستخدم <xliff:g id="PERFORMING_ACTIVITY_1">%1$s</xliff:g> و<xliff:g id="PERFORMING_ACTIVITY_2">%2$s</xliff:g></item>
-      <item quantity="two">يستخدم <xliff:g id="PERFORMING_ACTIVITY_1">%1$s</xliff:g> و<xliff:g id="PERFORMING_ACTIVITY_2">%2$s</xliff:g></item>
-      <item quantity="few">يستخدم <xliff:g id="PERFORMING_ACTIVITY_1">%1$s</xliff:g> و<xliff:g id="PERFORMING_ACTIVITY_2">%2$s</xliff:g></item>
-      <item quantity="many">يستخدم <xliff:g id="PERFORMING_ACTIVITY_1">%1$s</xliff:g> و<xliff:g id="PERFORMING_ACTIVITY_2">%2$s</xliff:g></item>
-      <item quantity="other">يستخدم <xliff:g id="PERFORMING_ACTIVITY_1">%1$s</xliff:g> و<xliff:g id="PERFORMING_ACTIVITY_2">%2$s</xliff:g></item>
-      <item quantity="one">يستخدم <xliff:g id="PERFORMING_ACTIVITY_0">%1$s</xliff:g></item>
-    </plurals>
+    <!-- no translation found for appops_camera (8100147441602585776) -->
+    <skip />
+    <!-- no translation found for appops_microphone (741508267659494555) -->
+    <skip />
+    <!-- no translation found for appops_overlay (6165912637560323464) -->
+    <skip />
+    <!-- no translation found for appops_camera_mic (1576901651150187433) -->
+    <skip />
+    <!-- no translation found for appops_camera_overlay (8869400080809298814) -->
+    <skip />
+    <!-- no translation found for appops_mic_overlay (4835157962857919804) -->
+    <skip />
+    <!-- no translation found for appops_camera_mic_overlay (6718768197048030993) -->
+    <skip />
     <string name="notification_appops_settings" msgid="1028328314935908050">"الإعدادات"</string>
     <string name="notification_appops_ok" msgid="1156966426011011434">"حسنًا"</string>
     <string name="notification_channel_controls_opened_accessibility" msgid="6553950422055908113">"تم فتح عناصر التحكم في الإشعارات لتطبيق <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
@@ -782,9 +786,9 @@
     <string name="accessibility_action_divider_top_50" msgid="6385859741925078668">"ضبط حجم النافذة العلوية ليكون ٥٠%"</string>
     <string name="accessibility_action_divider_top_30" msgid="6201455163864841205">"ضبط حجم النافذة العلوية ليكون ٣٠%"</string>
     <string name="accessibility_action_divider_bottom_full" msgid="301433196679548001">"عرض النافذة السفلية بملء الشاشة"</string>
-    <string name="accessibility_qs_edit_tile_label" msgid="8374924053307764245">"الموضع <xliff:g id="POSITION">%1$d</xliff:g>، <xliff:g id="TILE_NAME">%2$s</xliff:g>. انقر نقرًا مزدوجًا للتعديل."</string>
-    <string name="accessibility_qs_edit_add_tile_label" msgid="8133209638023882667">"<xliff:g id="TILE_NAME">%1$s</xliff:g>. انقر نقرًا مزدوجًا للإضافة."</string>
-    <string name="accessibility_qs_edit_position_label" msgid="5055306305919289819">"الموضع <xliff:g id="POSITION">%1$d</xliff:g>. انقر نقرًا مزدوجًا للتحديد."</string>
+    <string name="accessibility_qs_edit_tile_label" msgid="8374924053307764245">"الموضع <xliff:g id="POSITION">%1$d</xliff:g>، <xliff:g id="TILE_NAME">%2$s</xliff:g>. انقر مرّتين للتعديل."</string>
+    <string name="accessibility_qs_edit_add_tile_label" msgid="8133209638023882667">"<xliff:g id="TILE_NAME">%1$s</xliff:g>. انقر مرّتين للإضافة."</string>
+    <string name="accessibility_qs_edit_position_label" msgid="5055306305919289819">"الموضع <xliff:g id="POSITION">%1$d</xliff:g>. انقر مرّتين للتحديد."</string>
     <string name="accessibility_qs_edit_move_tile" msgid="2461819993780159542">"نقل <xliff:g id="TILE_NAME">%1$s</xliff:g>"</string>
     <string name="accessibility_qs_edit_remove_tile" msgid="7484493384665907197">"إزالة <xliff:g id="TILE_NAME">%1$s</xliff:g>"</string>
     <string name="accessibility_qs_edit_tile_added" msgid="8050200862063548309">"تمت إضافة <xliff:g id="TILE_NAME">%1$s</xliff:g> إلى الموضع <xliff:g id="POSITION">%2$d</xliff:g>"</string>
@@ -879,4 +883,5 @@
     <string name="auto_saver_enabled_text" msgid="874711029884777579">"سيتم تفعيل ميزة \"توفير شحن البطارية\" عندما تنخفض البطارية عن <xliff:g id="PERCENTAGE">%d</xliff:g>%%."</string>
     <string name="open_saver_setting_action" msgid="8314624730997322529">"الإعدادات"</string>
     <string name="auto_saver_okay_action" msgid="2701221740227683650">"حسنًا"</string>
+    <string name="heap_dump_tile_name" msgid="9141031328971226374">"‏تفريغ ذاكرة SysUI"</string>
 </resources>
