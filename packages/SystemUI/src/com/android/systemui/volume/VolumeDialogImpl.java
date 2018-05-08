@@ -695,26 +695,6 @@ public class VolumeDialogImpl implements VolumeDialog {
     private void enableVolumeRowViewsH(VolumeRow row, boolean enable) {
         boolean showDndIcon = !enable;
         row.dndIcon.setVisibility(showDndIcon ? VISIBLE : GONE);
-
-        if (showDndIcon && getNumVisibleRows() == 1) {
-            row.dndIcon.setLayoutParams(new FrameLayout.LayoutParams(
-                    mContext.getResources().getDimensionPixelSize(
-                            R.dimen.volume_dialog_panel_width),
-                    FrameLayout.LayoutParams.WRAP_CONTENT));
-        } else if (row.view.getVisibility() == VISIBLE) {
-            row.dndIcon.setLayoutParams(new FrameLayout.LayoutParams(
-                    FrameLayout.LayoutParams.MATCH_PARENT, FrameLayout.LayoutParams.WRAP_CONTENT));
-        }
-    }
-
-    private int getNumVisibleRows() {
-        int count = 0;
-        for (int i = 0; i < mRows.size(); i++) {
-            if (mRows.get(i).view.getVisibility() == VISIBLE) {
-                count++;
-            }
-        }
-        return count;
     }
 
     /**
