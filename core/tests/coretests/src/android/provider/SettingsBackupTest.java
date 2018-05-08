@@ -57,7 +57,6 @@ public class SettingsBackupTest {
     private static final Set<String> BACKUP_BLACKLISTED_SYSTEM_SETTINGS =
             newHashSet(
                     Settings.System.ADVANCED_SETTINGS, // candidate for backup?
-                    Settings.System.ALARM_ALERT, // backup candidate?
                     Settings.System.ALARM_ALERT_CACHE, // internal cache
                     Settings.System.APPEND_FOR_LAST_AUDIBLE, // suffix deprecated since API 2
                     Settings.System.EGG_MODE, // I am the lolrus
