@@ -95,6 +95,7 @@
     <string name="accessibility_unlock_button" msgid="128158454631118828">"Desbloquear"</string>
     <string name="accessibility_waiting_for_fingerprint" msgid="4808860050517462885">"Esperando huella digital"</string>
     <string name="accessibility_unlock_without_fingerprint" msgid="7541705575183694446">"Desbloquear sin usar tu huella digital"</string>
+    <string name="accessibility_scanning_face" msgid="769545173211758586">"Escaneando cara"</string>
     <string name="accessibility_send_smart_reply" msgid="7766727839703044493">"Enviar"</string>
     <string name="unlock_label" msgid="8779712358041029439">"desbloquear"</string>
     <string name="phone_label" msgid="2320074140205331708">"abrir teléfono"</string>
@@ -369,6 +370,8 @@
     <string name="recents_accessibility_split_screen_top" msgid="9056056469282256287">"Dividir la pantalla en la parte superior"</string>
     <string name="recents_accessibility_split_screen_left" msgid="8987144699630620019">"Dividir la pantalla a la izquierda"</string>
     <string name="recents_accessibility_split_screen_right" msgid="275069779299592867">"Dividir la pantalla a la derecha"</string>
+    <!-- no translation found for quick_step_accessibility_toggle_overview (7171470775439860480) -->
+    <skip />
     <string name="expanded_header_battery_charged" msgid="5945855970267657951">"Cargada"</string>
     <string name="expanded_header_battery_charging" msgid="205623198487189724">"Cargando"</string>
     <string name="expanded_header_battery_charging_with_time" msgid="457559884275395376">"<xliff:g id="CHARGING_TIME">%s</xliff:g> para completarse"</string>
@@ -542,6 +545,12 @@
     <string name="volume_stream_content_description_mute" msgid="3625049841390467354">"%1$s. Toca para silenciar. Los servicios de accesibilidad pueden silenciarse."</string>
     <string name="volume_stream_content_description_vibrate_a11y" msgid="6427727603978431301">"%1$s. Toca para activar la vibración."</string>
     <string name="volume_stream_content_description_mute_a11y" msgid="8995013018414535494">"%1$s. Toca para silenciar."</string>
+    <!-- no translation found for volume_ringer_hint_mute (9199811307292269601) -->
+    <skip />
+    <!-- no translation found for volume_ringer_hint_unmute (6602880133293060368) -->
+    <skip />
+    <!-- no translation found for volume_ringer_hint_vibrate (4036802135666515202) -->
+    <skip />
     <string name="volume_dialog_title" msgid="7272969888820035876">"Controles de volumen %s"</string>
     <string name="volume_dialog_ringer_guidance_ring" msgid="3360373718388509040">"Las llamadas y las notificaciones sonarán (<xliff:g id="VOLUME_LEVEL">%1$s</xliff:g>)"</string>
     <string name="output_title" msgid="5355078100792942802">"Salida multimedia"</string>
@@ -607,17 +616,20 @@
     <string name="inline_minimize_button" msgid="966233327974702195">"Minimizar"</string>
     <string name="inline_keep_showing_app" msgid="1723113469580031041">"¿Quieres seguir viendo las notificaciones de esta aplicación?"</string>
     <string name="notification_unblockable_desc" msgid="1037434112919403708">"Estas notificaciones no se pueden desactivar"</string>
-    <string name="notification_appops_camera_active" msgid="730959943016785931">"la cámara"</string>
-    <string name="notification_appops_microphone_active" msgid="1546319728924580686">"el micrófono"</string>
-    <string name="notification_appops_overlay_active" msgid="633813008357934729">"se muestra sobre otras aplicaciones que haya en la pantalla"</string>
-    <plurals name="notification_appops" formatted="false" msgid="1258122060887196817">
-      <item quantity="other">Esta aplicación está <xliff:g id="PERFORMING_ACTIVITY_1">%1$s</xliff:g> y <xliff:g id="PERFORMING_ACTIVITY_2">%2$s</xliff:g>.</item>
-      <item quantity="one">Esta aplicación está <xliff:g id="PERFORMING_ACTIVITY_0">%1$s</xliff:g>.</item>
-    </plurals>
-    <plurals name="notification_using" formatted="false" msgid="2211008461429037973">
-      <item quantity="other">usando <xliff:g id="PERFORMING_ACTIVITY_1">%1$s</xliff:g> y <xliff:g id="PERFORMING_ACTIVITY_2">%2$s</xliff:g></item>
-      <item quantity="one">usando <xliff:g id="PERFORMING_ACTIVITY_0">%1$s</xliff:g></item>
-    </plurals>
+    <!-- no translation found for appops_camera (8100147441602585776) -->
+    <skip />
+    <!-- no translation found for appops_microphone (741508267659494555) -->
+    <skip />
+    <!-- no translation found for appops_overlay (6165912637560323464) -->
+    <skip />
+    <!-- no translation found for appops_camera_mic (1576901651150187433) -->
+    <skip />
+    <!-- no translation found for appops_camera_overlay (8869400080809298814) -->
+    <skip />
+    <!-- no translation found for appops_mic_overlay (4835157962857919804) -->
+    <skip />
+    <!-- no translation found for appops_camera_mic_overlay (6718768197048030993) -->
+    <skip />
     <string name="notification_appops_settings" msgid="1028328314935908050">"Ajustes"</string>
     <string name="notification_appops_ok" msgid="1156966426011011434">"Aceptar"</string>
     <string name="notification_channel_controls_opened_accessibility" msgid="6553950422055908113">"Se han abierto los controles de las notificaciones de <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
@@ -853,4 +865,5 @@
     <string name="auto_saver_enabled_text" msgid="874711029884777579">"El modo Ahorro de batería se activará automáticamente cuando quede menos de un <xliff:g id="PERCENTAGE">%d</xliff:g> %% de batería."</string>
     <string name="open_saver_setting_action" msgid="8314624730997322529">"Ajustes"</string>
     <string name="auto_saver_okay_action" msgid="2701221740227683650">"Entendido"</string>
+    <string name="heap_dump_tile_name" msgid="9141031328971226374">"Volcar pila de SysUI"</string>
 </resources>

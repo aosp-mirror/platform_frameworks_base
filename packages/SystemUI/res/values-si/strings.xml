@@ -95,6 +95,7 @@
     <string name="accessibility_unlock_button" msgid="128158454631118828">"අඟුල අරින්න"</string>
     <string name="accessibility_waiting_for_fingerprint" msgid="4808860050517462885">"ඇඟිලි සලකුණ සඳහා බලා සිටිමින්"</string>
     <string name="accessibility_unlock_without_fingerprint" msgid="7541705575183694446">"ඔබේ ඇඟිලි සලකුණ භාවිත නොකර අගුළු අරින්න"</string>
+    <string name="accessibility_scanning_face" msgid="769545173211758586">"මුහුණ ස්කෑන් කිරීම"</string>
     <string name="accessibility_send_smart_reply" msgid="7766727839703044493">"යවන්න"</string>
     <string name="unlock_label" msgid="8779712358041029439">"අඟුල අරින්න"</string>
     <string name="phone_label" msgid="2320074140205331708">"දුරකථනය විවෘත කරන්න"</string>
@@ -367,6 +368,8 @@
     <string name="recents_accessibility_split_screen_top" msgid="9056056469282256287">"තිරය ඉහළට බෙදන්න"</string>
     <string name="recents_accessibility_split_screen_left" msgid="8987144699630620019">"තිරය වමට බෙදන්න"</string>
     <string name="recents_accessibility_split_screen_right" msgid="275069779299592867">"තිරය දකුණට බෙදන්න"</string>
+    <!-- no translation found for quick_step_accessibility_toggle_overview (7171470775439860480) -->
+    <skip />
     <string name="expanded_header_battery_charged" msgid="5945855970267657951">"අරෝපිතයි"</string>
     <string name="expanded_header_battery_charging" msgid="205623198487189724">"ආරෝපණය වෙමින්"</string>
     <string name="expanded_header_battery_charging_with_time" msgid="457559884275395376">"<xliff:g id="CHARGING_TIME">%s</xliff:g> සම්පූර්ණ වන තෙක්"</string>
@@ -540,6 +543,12 @@
     <string name="volume_stream_content_description_mute" msgid="3625049841390467354">"%1$s. නිහඬ කිරීමට තට්ටු කරන්න. ප්‍රවේශ්‍යතා සේවා නිහඬ කළ හැකිය."</string>
     <string name="volume_stream_content_description_vibrate_a11y" msgid="6427727603978431301">"%1$s. කම්පනය කිරීමට සකස් කිරීමට තට්ටු කරන්න."</string>
     <string name="volume_stream_content_description_mute_a11y" msgid="8995013018414535494">"%1$s. නිහඬ කිරීමට තට්ටු කරන්න."</string>
+    <!-- no translation found for volume_ringer_hint_mute (9199811307292269601) -->
+    <skip />
+    <!-- no translation found for volume_ringer_hint_unmute (6602880133293060368) -->
+    <skip />
+    <!-- no translation found for volume_ringer_hint_vibrate (4036802135666515202) -->
+    <skip />
     <string name="volume_dialog_title" msgid="7272969888820035876">"හඬ පරිමා පාලන %s"</string>
     <string name="volume_dialog_ringer_guidance_ring" msgid="3360373718388509040">"ඇමතුම් සහ දැනුම්දීම් (<xliff:g id="VOLUME_LEVEL">%1$s</xliff:g>) නාද කරනු ඇත"</string>
     <string name="output_title" msgid="5355078100792942802">"මාධ්‍ය ප්‍රතිදානය"</string>
@@ -605,17 +614,20 @@
     <string name="inline_minimize_button" msgid="966233327974702195">"කුඩා කරන්න"</string>
     <string name="inline_keep_showing_app" msgid="1723113469580031041">"මෙම යෙදුම වෙතින් දැනුම්දීම් පෙන්වමින් තබන්නද?"</string>
     <string name="notification_unblockable_desc" msgid="1037434112919403708">"මෙම දැනුම්දීම් ක්‍රියාවිරහිත කළ නොහැකිය"</string>
-    <string name="notification_appops_camera_active" msgid="730959943016785931">"කැමරාව"</string>
-    <string name="notification_appops_microphone_active" msgid="1546319728924580686">"මයික්‍රෝෆෝනය"</string>
-    <string name="notification_appops_overlay_active" msgid="633813008357934729">"ඔබගේ තිරය මත වෙනත් යෙදුම්වලට උඩින් සංදර්ශනය කරමින්"</string>
-    <plurals name="notification_appops" formatted="false" msgid="1258122060887196817">
-      <item quantity="one">මෙම යෙදුම <xliff:g id="PERFORMING_ACTIVITY_1">%1$s</xliff:g> සහ <xliff:g id="PERFORMING_ACTIVITY_2">%2$s</xliff:g>.</item>
-      <item quantity="other">මෙම යෙදුම <xliff:g id="PERFORMING_ACTIVITY_1">%1$s</xliff:g> සහ <xliff:g id="PERFORMING_ACTIVITY_2">%2$s</xliff:g>.</item>
-    </plurals>
-    <plurals name="notification_using" formatted="false" msgid="2211008461429037973">
-      <item quantity="one"><xliff:g id="PERFORMING_ACTIVITY_1">%1$s</xliff:g> සහ <xliff:g id="PERFORMING_ACTIVITY_2">%2$s</xliff:g> භාවිත කරමින්</item>
-      <item quantity="other"><xliff:g id="PERFORMING_ACTIVITY_1">%1$s</xliff:g> සහ <xliff:g id="PERFORMING_ACTIVITY_2">%2$s</xliff:g> භාවිත කරමින්</item>
-    </plurals>
+    <!-- no translation found for appops_camera (8100147441602585776) -->
+    <skip />
+    <!-- no translation found for appops_microphone (741508267659494555) -->
+    <skip />
+    <!-- no translation found for appops_overlay (6165912637560323464) -->
+    <skip />
+    <!-- no translation found for appops_camera_mic (1576901651150187433) -->
+    <skip />
+    <!-- no translation found for appops_camera_overlay (8869400080809298814) -->
+    <skip />
+    <!-- no translation found for appops_mic_overlay (4835157962857919804) -->
+    <skip />
+    <!-- no translation found for appops_camera_mic_overlay (6718768197048030993) -->
+    <skip />
     <string name="notification_appops_settings" msgid="1028328314935908050">"සැකසීම්"</string>
     <string name="notification_appops_ok" msgid="1156966426011011434">"හරි"</string>
     <string name="notification_channel_controls_opened_accessibility" msgid="6553950422055908113">"<xliff:g id="APP_NAME">%1$s</xliff:g> සඳහා දැනුම්දීම් පාලන විවෘත කරන ලදී"</string>
@@ -851,4 +863,5 @@
     <string name="auto_saver_enabled_text" msgid="874711029884777579">"බැටරිය <xliff:g id="PERCENTAGE">%d</xliff:g>%%ට වඩා අඩු වූ පසු බැටරි සුරැකුම ස්වයංක්‍රියව ක්‍රියාත්මක කරනු ඇත."</string>
     <string name="open_saver_setting_action" msgid="8314624730997322529">"සැකසීම්"</string>
     <string name="auto_saver_okay_action" msgid="2701221740227683650">"තේරුණා"</string>
+    <string name="heap_dump_tile_name" msgid="9141031328971226374">"Dump SysUI Heap"</string>
 </resources>
