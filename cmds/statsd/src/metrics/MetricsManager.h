@@ -89,6 +89,10 @@ public:
         return mLastReportWallClockNs;
     };
 
+    inline size_t getNumMetrics() const {
+        return mAllMetricProducers.size();
+    }
+
     virtual void dropData(const int64_t dropTimeNs);
 
     virtual void onDumpReport(const int64_t dumpTimeNs,
