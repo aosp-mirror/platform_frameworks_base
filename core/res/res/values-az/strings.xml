@@ -291,6 +291,9 @@
     <string name="permgrouplab_camera" msgid="4820372495894586615">"Kamera"</string>
     <string name="permgroupdesc_camera" msgid="3250611594678347720">"şəkil çəkin və video yazın"</string>
     <string name="permgrouprequest_camera" msgid="1299833592069671756">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; tətbiqinə şəkil və video çəkmək icazəsi verilsin?"</string>
+    <string name="permgrouplab_calllog" msgid="8798646184930388160">"Zənd qeydləri"</string>
+    <string name="permgroupdesc_calllog" msgid="3006237336748283775">"telefonun zəng qeydini oxuyun və yazın"</string>
+    <string name="permgrouprequest_calllog" msgid="8487355309583773267">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; tətbiqinə telefonun zəng qeydlərinə daxil olmaq icazəsi verilsin?"</string>
     <string name="permgrouplab_phone" msgid="5229115638567440675">"Telefon"</string>
     <string name="permgroupdesc_phone" msgid="6234224354060641055">"telefon zəngləri edin və onları idarə edin"</string>
     <string name="permgrouprequest_phone" msgid="9166979577750581037">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; tətbiqinə telefon zəngləri etmək və onları idarə etmək icazəsi verilsin?"</string>

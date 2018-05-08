@@ -297,6 +297,9 @@
     <string name="permgrouplab_camera" msgid="4820372495894586615">"Fotoaparát"</string>
     <string name="permgroupdesc_camera" msgid="3250611594678347720">"fotenie a natáčanie videí"</string>
     <string name="permgrouprequest_camera" msgid="1299833592069671756">"Povoliť aplikácii &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; snímať fotky a zaznamenávať video?"</string>
+    <string name="permgrouplab_calllog" msgid="8798646184930388160">"Denníky hovorov"</string>
+    <string name="permgroupdesc_calllog" msgid="3006237336748283775">"čítanie a zapisovanie do denníka hovorov telefónu"</string>
+    <string name="permgrouprequest_calllog" msgid="8487355309583773267">"Povoliť aplikácii &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; prístup k denníku hovorov telefónu?"</string>
     <string name="permgrouplab_phone" msgid="5229115638567440675">"Telefón"</string>
     <string name="permgroupdesc_phone" msgid="6234224354060641055">"telefonovanie a správu hovorov"</string>
     <string name="permgrouprequest_phone" msgid="9166979577750581037">"Povoliť aplikácii &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; uskutočňovať a spravovať telefonické hovory?"</string>

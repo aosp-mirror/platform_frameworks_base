@@ -291,6 +291,9 @@
     <string name="permgrouplab_camera" msgid="4820372495894586615">"カメラ"</string>
     <string name="permgroupdesc_camera" msgid="3250611594678347720">"写真と動画の撮影"</string>
     <string name="permgrouprequest_camera" msgid="1299833592069671756">"写真と動画の撮影を &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; に許可しますか？"</string>
+    <string name="permgrouplab_calllog" msgid="8798646184930388160">"通話履歴"</string>
+    <string name="permgroupdesc_calllog" msgid="3006237336748283775">"通話履歴の読み取りと書き込み"</string>
+    <string name="permgrouprequest_calllog" msgid="8487355309583773267">"通話履歴へのアクセスを &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; に許可しますか？"</string>
     <string name="permgrouplab_phone" msgid="5229115638567440675">"電話"</string>
     <string name="permgroupdesc_phone" msgid="6234224354060641055">"電話の発信と管理"</string>
     <string name="permgrouprequest_phone" msgid="9166979577750581037">"電話の発信と管理を &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; に許可しますか？"</string>

@@ -291,6 +291,12 @@
     <string name="permgrouplab_camera" msgid="4820372495894586615">"கேமரா"</string>
     <string name="permgroupdesc_camera" msgid="3250611594678347720">"படங்கள் மற்றும் வீடியோக்கள் எடுக்கலாம்"</string>
     <string name="permgrouprequest_camera" msgid="1299833592069671756">"படங்கள் எடுக்கவும், வீடியோ பதிவு செய்யவும் &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; பயன்பாட்டை அனுமதிக்கவா?"</string>
+    <!-- no translation found for permgrouplab_calllog (8798646184930388160) -->
+    <skip />
+    <!-- no translation found for permgroupdesc_calllog (3006237336748283775) -->
+    <skip />
+    <!-- no translation found for permgrouprequest_calllog (8487355309583773267) -->
+    <skip />
     <string name="permgrouplab_phone" msgid="5229115638567440675">"ஃபோன்"</string>
     <string name="permgroupdesc_phone" msgid="6234224354060641055">"யாரையும் தொலைபேசியில் அழைக்கலாம்"</string>
     <string name="permgrouprequest_phone" msgid="9166979577750581037">"மொபைல் அழைப்புகள் செய்யவும், அவற்றை நிர்வகிக்கவும், &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; பயன்பாட்டை அனுமதிக்கவா?"</string>

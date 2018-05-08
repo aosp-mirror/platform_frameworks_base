@@ -291,6 +291,9 @@
     <string name="permgrouplab_camera" msgid="4820372495894586615">"Kamera"</string>
     <string name="permgroupdesc_camera" msgid="3250611594678347720">"ta bilder og ta opp video"</string>
     <string name="permgrouprequest_camera" msgid="1299833592069671756">"Vil du la &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ta bilder og spille inn video?"</string>
+    <string name="permgrouplab_calllog" msgid="8798646184930388160">"Samtalelogger"</string>
+    <string name="permgroupdesc_calllog" msgid="3006237336748283775">"lese og skrive samtaleloggen"</string>
+    <string name="permgrouprequest_calllog" msgid="8487355309583773267">"Vil du gi &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; tilgang til samtaleloggene dine?"</string>
     <string name="permgrouplab_phone" msgid="5229115638567440675">"Telefon"</string>
     <string name="permgroupdesc_phone" msgid="6234224354060641055">"ring og administrer anrop"</string>
     <string name="permgrouprequest_phone" msgid="9166979577750581037">"Vil du la &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ringe og administrere telefonsamtaler?"</string>
