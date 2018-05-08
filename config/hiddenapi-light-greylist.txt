@@ -366,8 +366,12 @@ Landroid/app/job/IJobService$Stub;-><init>()V
 Landroid/app/job/IJobService$Stub;->asInterface(Landroid/os/IBinder;)Landroid/app/job/IJobService;
 Landroid/app/job/IJobService;->startJob(Landroid/app/job/JobParameters;)V
 Landroid/app/job/IJobService;->stopJob(Landroid/app/job/JobParameters;)V
+Landroid/app/job/JobInfo$Builder;->setFlags(I)Landroid/app/job/JobInfo$Builder;
+Landroid/app/job/JobInfo$Builder;->setPriority(I)Landroid/app/job/JobInfo$Builder;
 Landroid/app/job/JobInfo;->flags:I
+Landroid/app/job/JobInfo;->FLAG_WILL_BE_FOREGROUND:I
 Landroid/app/job/JobInfo;->jobId:I
+Landroid/app/job/JobInfo;->PRIORITY_FOREGROUND_APP:I
 Landroid/app/job/JobInfo;->service:Landroid/content/ComponentName;
 Landroid/app/job/JobParameters;->callback:Landroid/os/IBinder;
 Landroid/app/job/JobParameters;->jobId:I
