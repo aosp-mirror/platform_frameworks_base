@@ -95,8 +95,7 @@
     <string name="accessibility_unlock_button" msgid="128158454631118828">"Vula"</string>
     <string name="accessibility_waiting_for_fingerprint" msgid="4808860050517462885">"Ilindele izigxivizo zeminwe"</string>
     <string name="accessibility_unlock_without_fingerprint" msgid="7541705575183694446">"Vula ngaphandle kokusebenzisa izigxivizo zakho zeminwe"</string>
-    <!-- no translation found for accessibility_scanning_face (769545173211758586) -->
-    <skip />
+    <string name="accessibility_scanning_face" msgid="769545173211758586">"Ukuskena ubuso"</string>
     <string name="accessibility_send_smart_reply" msgid="7766727839703044493">"Thumela"</string>
     <string name="unlock_label" msgid="8779712358041029439">"vula"</string>
     <string name="phone_label" msgid="2320074140205331708">"vula ifoni"</string>
@@ -369,6 +368,8 @@
     <string name="recents_accessibility_split_screen_top" msgid="9056056469282256287">"Hlukanisela isikrini phezulu"</string>
     <string name="recents_accessibility_split_screen_left" msgid="8987144699630620019">"Hlukanisela isikrini ngakwesokunxele"</string>
     <string name="recents_accessibility_split_screen_right" msgid="275069779299592867">"Hlukanisela isikrini ngakwesokudla"</string>
+    <!-- no translation found for quick_step_accessibility_toggle_overview (7171470775439860480) -->
+    <skip />
     <string name="expanded_header_battery_charged" msgid="5945855970267657951">"Kushajiwe"</string>
     <string name="expanded_header_battery_charging" msgid="205623198487189724">"Iyashaja"</string>
     <string name="expanded_header_battery_charging_with_time" msgid="457559884275395376">"<xliff:g id="CHARGING_TIME">%s</xliff:g> ize igcwale"</string>
@@ -542,6 +543,12 @@
     <string name="volume_stream_content_description_mute" msgid="3625049841390467354">"%1$s. Thepha ukuze uthulise. Amasevisi okufinyelela angathuliswa."</string>
     <string name="volume_stream_content_description_vibrate_a11y" msgid="6427727603978431301">"%1$s. Thepha ukuze usethele ekudlidlizeni."</string>
     <string name="volume_stream_content_description_mute_a11y" msgid="8995013018414535494">"%1$s. Thepha ukuze uthulise."</string>
+    <!-- no translation found for volume_ringer_hint_mute (9199811307292269601) -->
+    <skip />
+    <!-- no translation found for volume_ringer_hint_unmute (6602880133293060368) -->
+    <skip />
+    <!-- no translation found for volume_ringer_hint_vibrate (4036802135666515202) -->
+    <skip />
     <string name="volume_dialog_title" msgid="7272969888820035876">"%s izilawuli zevolomu"</string>
     <string name="volume_dialog_ringer_guidance_ring" msgid="3360373718388509040">"Amakholi nezaziso zizokhala (<xliff:g id="VOLUME_LEVEL">%1$s</xliff:g>)"</string>
     <string name="output_title" msgid="5355078100792942802">"Okukhiphayo kwemidiya"</string>
@@ -607,17 +614,20 @@
     <string name="inline_minimize_button" msgid="966233327974702195">"Nciphisa"</string>
     <string name="inline_keep_showing_app" msgid="1723113469580031041">"Qhubeka nokubonisa izaziso kusuka kulolu hlelo lokusebenza?"</string>
     <string name="notification_unblockable_desc" msgid="1037434112919403708">"Lezi zaziso azikwazi ukuvalwa"</string>
-    <string name="notification_appops_camera_active" msgid="730959943016785931">"ikhamera"</string>
-    <string name="notification_appops_microphone_active" msgid="1546319728924580686">"imakrofoni"</string>
-    <string name="notification_appops_overlay_active" msgid="633813008357934729">"iboniswa ngaphezulu kwezinye izinhlelo zokusebenza kusikrini sakho"</string>
-    <plurals name="notification_appops" formatted="false" msgid="1258122060887196817">
-      <item quantity="one">Lolu hlelo lokusebenza lwenza i-<xliff:g id="PERFORMING_ACTIVITY_1">%1$s</xliff:g> ne-<xliff:g id="PERFORMING_ACTIVITY_2">%2$s</xliff:g>.</item>
-      <item quantity="other">Lolu hlelo lokusebenza lwenza i-<xliff:g id="PERFORMING_ACTIVITY_1">%1$s</xliff:g> ne-<xliff:g id="PERFORMING_ACTIVITY_2">%2$s</xliff:g>.</item>
-    </plurals>
-    <plurals name="notification_using" formatted="false" msgid="2211008461429037973">
-      <item quantity="one">kusetshenziswa i-<xliff:g id="PERFORMING_ACTIVITY_1">%1$s</xliff:g> ne-<xliff:g id="PERFORMING_ACTIVITY_2">%2$s</xliff:g></item>
-      <item quantity="other">kusetshenziswa i-<xliff:g id="PERFORMING_ACTIVITY_1">%1$s</xliff:g> ne-<xliff:g id="PERFORMING_ACTIVITY_2">%2$s</xliff:g></item>
-    </plurals>
+    <!-- no translation found for appops_camera (8100147441602585776) -->
+    <skip />
+    <!-- no translation found for appops_microphone (741508267659494555) -->
+    <skip />
+    <!-- no translation found for appops_overlay (6165912637560323464) -->
+    <skip />
+    <!-- no translation found for appops_camera_mic (1576901651150187433) -->
+    <skip />
+    <!-- no translation found for appops_camera_overlay (8869400080809298814) -->
+    <skip />
+    <!-- no translation found for appops_mic_overlay (4835157962857919804) -->
+    <skip />
+    <!-- no translation found for appops_camera_mic_overlay (6718768197048030993) -->
+    <skip />
     <string name="notification_appops_settings" msgid="1028328314935908050">"Izilungiselelo"</string>
     <string name="notification_appops_ok" msgid="1156966426011011434">"KULUNGILE"</string>
     <string name="notification_channel_controls_opened_accessibility" msgid="6553950422055908113">"Izilawuli zesaziso ze-<xliff:g id="APP_NAME">%1$s</xliff:g> zivuliwe"</string>
@@ -853,6 +863,5 @@
     <string name="auto_saver_enabled_text" msgid="874711029884777579">"Isilondolozi sebhethri sizovuleka ngokuzenzakalelayo uma ibhethri lifika ngaphansi kuka-<xliff:g id="PERCENTAGE">%d</xliff:g>%%."</string>
     <string name="open_saver_setting_action" msgid="8314624730997322529">"Izilungiselelo"</string>
     <string name="auto_saver_okay_action" msgid="2701221740227683650">"Ngiyezwa"</string>
-    <!-- no translation found for heap_dump_tile_name (9141031328971226374) -->
-    <skip />
+    <string name="heap_dump_tile_name" msgid="9141031328971226374">"I-Dump SysUI Heap"</string>
 </resources>
