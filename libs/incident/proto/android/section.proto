@@ -52,6 +52,9 @@ message SectionFlags {
   optional SectionType type = 1 [default = SECTION_NONE];
   optional string args = 2;
   optional bool device_specific = 3 [default = false];
+  // If true, then the section will only be generated for userdebug and eng
+  // builds.
+  optional bool userdebug_and_eng_only = 4 [default = false];
 }
 
 extend google.protobuf.FieldOptions {
