@@ -659,9 +659,27 @@
     <!-- Boolean indicating that wifi only link configuratios that have exact same credentials (i.e PSK) -->
     <bool translatable="false" name="config_wifi_only_link_same_credential_configurations">true</bool>
 
-    <!-- Boolean indicating whether framework needs to set the tx power limit for meeting SAR requirements
-         during voice calls -->
-    <bool translatable="false" name="config_wifi_framework_enable_voice_call_sar_tx_power_limit">false</bool>
+    <!-- Boolean indicating whether framework needs to set the tx power limit for meeting SAR requirements -->
+    <bool translatable="false" name="config_wifi_framework_enable_sar_tx_power_limit">false</bool>
+
+    <!-- Boolean indicating whether framework needs to use body proximity to set the tx power limit
+         for meeting SAR requirements -->
+    <bool translatable="false" name="config_wifi_framework_enable_body_proximity_sar_tx_power_limit">false</bool>
+
+    <!-- String for the sensor type for body/head proximity for SAR -->
+    <string translatable="false" name="config_wifi_sar_sensor_type"></string>
+
+    <!-- Integer indicating event id by sar sensor for free space -->
+    <integer translatable="false" name="config_wifi_framework_sar_free_space_event_id">1</integer>
+
+    <!-- Integer indicating event id by sar sensor for near hand -->
+    <integer translatable="false" name="config_wifi_framework_sar_near_hand_event_id">2</integer>
+
+    <!-- Integer indicating event id by sar sensor for near head -->
+    <integer translatable="false" name="config_wifi_framework_sar_near_head_event_id">3</integer>
+
+    <!-- Integer indicating event id by sar sensor for near body -->
+    <integer translatable="false" name="config_wifi_framework_sar_near_body_event_id">4</integer>
 
     <!-- Wifi driver supports batched scan -->
     <bool translatable="false" name="config_wifi_batched_scan_supported">false</bool>

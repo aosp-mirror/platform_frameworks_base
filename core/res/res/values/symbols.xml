@@ -336,7 +336,13 @@
   <java-symbol type="bool" name="config_wifi_framework_enable_associated_network_selection" />
   <java-symbol type="bool" name="config_wifi_framework_use_single_radio_chain_scan_results_network_selection" />
   <java-symbol type="bool" name="config_wifi_only_link_same_credential_configurations" />
-  <java-symbol type="bool" name="config_wifi_framework_enable_voice_call_sar_tx_power_limit" />
+  <java-symbol type="bool" name="config_wifi_framework_enable_sar_tx_power_limit" />
+  <java-symbol type="bool" name="config_wifi_framework_enable_body_proximity_sar_tx_power_limit" />
+  <java-symbol type="string" name="config_wifi_sar_sensor_type" />
+  <java-symbol type="integer" name="config_wifi_framework_sar_free_space_event_id" />
+  <java-symbol type="integer" name="config_wifi_framework_sar_near_hand_event_id" />
+  <java-symbol type="integer" name="config_wifi_framework_sar_near_head_event_id" />
+  <java-symbol type="integer" name="config_wifi_framework_sar_near_body_event_id" />
   <java-symbol type="bool" name="config_wifi_enable_disconnection_debounce" />
   <java-symbol type="bool" name="config_wifi_revert_country_code_on_cellular_loss" />
   <java-symbol type="bool" name="config_wifi_enable_wifi_firmware_debugging" />
