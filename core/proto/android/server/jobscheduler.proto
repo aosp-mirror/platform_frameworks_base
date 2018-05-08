@@ -40,6 +40,7 @@ message JobSchedulerServiceDumpProto {
     repeated int32 next_heartbeat = 15;
     optional int64 last_heartbeat_time_millis = 16;
     optional int64 next_heartbeat_time_millis = 17;
+    optional bool in_parole = 18;
 
     repeated int32 started_users = 2;
 
