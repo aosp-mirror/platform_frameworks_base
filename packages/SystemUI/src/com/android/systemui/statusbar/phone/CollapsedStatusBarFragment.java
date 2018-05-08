@@ -212,7 +212,7 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
     }
 
     public void hideClock(boolean animate) {
-        animateHide(mClockView, animate);
+        animateHiddenState(mClockView, View.GONE, animate);
     }
 
     public void showClock(boolean animate) {
@@ -240,21 +240,29 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
     }
 
     /**
-     * Hides a view.
+     * Animate a view to INVISIBLE or GONE
      */
-    private void animateHide(final View v, boolean animate) {
+    private void animateHiddenState(final View v, int state, boolean animate) {
         v.animate().cancel();
         if (!animate) {
             v.setAlpha(0f);
-            v.setVisibility(View.INVISIBLE);
+            v.setVisibility(state);
             return;
         }
+
         v.animate()
                 .alpha(0f)
                 .setDuration(160)
                 .setStartDelay(0)
                 .setInterpolator(Interpolators.ALPHA_OUT)
-                .withEndAction(() -> v.setVisibility(View.INVISIBLE));
+                .withEndAction(() -> v.setVisibility(state));
+    }
+
+    /**
+     * Hides a view.
+     */
+    private void animateHide(final View v, boolean animate) {
+        animateHiddenState(v, View.INVISIBLE, animate);
     }
 
     /**
