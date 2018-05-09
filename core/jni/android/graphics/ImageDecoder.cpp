@@ -139,18 +139,9 @@ static jobject ImageDecoder_nCreateFd(JNIEnv* env, jobject /*clazz*/,
         return throw_exception(env, ImageDecoder::kSourceMalformedData, "Could not open file",
                                nullptr, source);
     }
+
     std::unique_ptr<SkFILEStream> fileStream(new SkFILEStream(file));
-
-    if (::lseek(descriptor, 0, SEEK_CUR) == 0) {
-        return native_create(env, std::move(fileStream), source);
-    }
-
-    // FIXME: This allows us to pretend the current location is the beginning,
-    // but it would be better if SkFILEStream allowed treating its starting
-    // point as the beginning.
-    std::unique_ptr<SkStream> stream(SkFrontBufferedStream::Make(std::move(fileStream),
-                SkCodec::MinBufferedBytesNeeded()));
-    return native_create(env, std::move(stream), source);
+    return native_create(env, std::move(fileStream), source);
 }
 
 static jobject ImageDecoder_nCreateInputStream(JNIEnv* env, jobject /*clazz*/,
