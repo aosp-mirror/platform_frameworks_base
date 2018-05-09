@@ -324,6 +324,10 @@ void GaugeMetricProducer::pullLocked(const int64_t timestampNs) {
             triggerPuller = true;
             break;
         }
+        case GaugeMetric::CONDITION_CHANGE_TO_TRUE: {
+            triggerPuller = mCondition;
+            break;
+        }
         default:
             break;
     }
@@ -348,7 +352,7 @@ void GaugeMetricProducer::onConditionChangedLocked(const bool conditionMet,
     flushIfNeededLocked(eventTimeNs);
     mCondition = conditionMet;
 
-    if (mPullTagId != -1 && mCondition) {
+    if (mPullTagId != -1) {
         pullLocked(eventTimeNs);
     }  // else: Push mode. No need to proactively pull the gauge data.
 }
