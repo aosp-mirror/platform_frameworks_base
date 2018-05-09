@@ -984,6 +984,17 @@ public class Notification implements Parcelable
     public static final String EXTRA_SHOW_REMOTE_INPUT_SPINNER = "android.remoteInputSpinner";
 
     /**
+     * {@link #extras} key: boolean as supplied to
+     * {@link Builder#setHideSmartReplies(boolean)}.
+     *
+     * If set to true, then any smart reply buttons will be hidden.
+     *
+     * @see Builder#setHideSmartReplies(boolean)
+     * @hide
+     */
+    public static final String EXTRA_HIDE_SMART_REPLIES = "android.hideSmartReplies";
+
+    /**
      * {@link #extras} key: this is a small piece of additional text as supplied to
      * {@link Builder#setContentInfo(CharSequence)}.
      */
@@ -3591,6 +3602,15 @@ public class Notification implements Parcelable
          */
         public Builder setShowRemoteInputSpinner(boolean showSpinner) {
             mN.extras.putBoolean(EXTRA_SHOW_REMOTE_INPUT_SPINNER, showSpinner);
+            return this;
+        }
+
+        /**
+         * Sets whether smart reply buttons should be hidden.
+         * @hide
+         */
+        public Builder setHideSmartReplies(boolean hideSmartReplies) {
+            mN.extras.putBoolean(EXTRA_HIDE_SMART_REPLIES, hideSmartReplies);
             return this;
         }
 
