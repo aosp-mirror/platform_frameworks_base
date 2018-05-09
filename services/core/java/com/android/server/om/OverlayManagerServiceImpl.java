@@ -212,15 +212,21 @@ final class OverlayManagerServiceImpl {
         }
     }
 
+    void onTargetPackageChanged(@NonNull final String packageName, final int userId) {
+        if (DEBUG) {
+            Slog.d(TAG, "onTargetPackageChanged packageName=" + packageName + " userId=" + userId);
+        }
+
+        updateAllOverlaysForTarget(packageName, userId, 0);
+    }
+
     void onTargetPackageUpgrading(@NonNull final String packageName, final int userId) {
         if (DEBUG) {
             Slog.d(TAG, "onTargetPackageUpgrading packageName=" + packageName + " userId="
                     + userId);
         }
 
-        if (updateAllOverlaysForTarget(packageName, userId, FLAG_TARGET_IS_UPGRADING)) {
-            mListener.onOverlaysChanged(packageName, userId);
-        }
+        updateAllOverlaysForTarget(packageName, userId, FLAG_TARGET_IS_UPGRADING);
     }
 
     void onTargetPackageUpgraded(@NonNull final String packageName, final int userId) {
@@ -228,9 +234,7 @@ final class OverlayManagerServiceImpl {
             Slog.d(TAG, "onTargetPackageUpgraded packageName=" + packageName + " userId=" + userId);
         }
 
-        if (updateAllOverlaysForTarget(packageName, userId, 0)) {
-            mListener.onOverlaysChanged(packageName, userId);
-        }
+        updateAllOverlaysForTarget(packageName, userId, 0);
     }
 
     void onTargetPackageRemoved(@NonNull final String packageName, final int userId) {
@@ -688,6 +692,11 @@ final class OverlayManagerServiceImpl {
     }
 
     interface OverlayChangeListener {
+
+        /**
+         * An event triggered by changes made to overlay state or settings as well as changes that
+         * add or remove target packages of overlays.
+         **/
         void onOverlaysChanged(@NonNull String targetPackage, int userId);
     }
 
