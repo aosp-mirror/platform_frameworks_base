@@ -8615,6 +8615,14 @@ public final class Settings {
         private static final Validator CHARGING_SOUNDS_ENABLED_VALIDATOR = BOOLEAN_VALIDATOR;
 
         /**
+         * Whether to vibrate for wireless charging events.
+         * @hide
+         */
+        public static final String CHARGING_VIBRATION_ENABLED = "charging_vibration_enabled";
+
+        private static final Validator CHARGING_VIBRATION_ENABLED_VALIDATOR = BOOLEAN_VALIDATOR;
+
+        /**
          * Whether we keep the device on while the device is plugged in.
          * Supported values are:
          * <ul>
@@ -12023,6 +12031,7 @@ public final class Settings {
             PRIVATE_DNS_SPECIFIER,
             SOFT_AP_TIMEOUT_ENABLED,
             ZEN_DURATION,
+            CHARGING_VIBRATION_ENABLED,
         };
 
         /**
@@ -12066,6 +12075,7 @@ public final class Settings {
                     WIFI_CARRIER_NETWORKS_AVAILABLE_NOTIFICATION_ON_VALIDATOR);
             VALIDATORS.put(APP_AUTO_RESTRICTION_ENABLED, APP_AUTO_RESTRICTION_ENABLED_VALIDATOR);
             VALIDATORS.put(ZEN_DURATION, ZEN_DURATION_VALIDATOR);
+            VALIDATORS.put(CHARGING_VIBRATION_ENABLED, CHARGING_VIBRATION_ENABLED_VALIDATOR);
         }
 
         /**
