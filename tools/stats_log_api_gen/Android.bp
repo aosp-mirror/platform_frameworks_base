@@ -109,23 +109,3 @@ cc_library_shared {
     ],
     static_libs: ["libstatssocket"],
 }
-
-cc_library_static {
-    name: "libstatssocket",
-    srcs: [
-        "stats_event_list.c",
-        "statsd_writer.c",
-    ],
-    cflags: [
-        "-Wall",
-        "-Werror",
-        "-DLIBLOG_LOG_TAG=1006",
-        "-DWRITE_TO_STATSD=1",
-        "-DWRITE_TO_LOGD=0",
-    ],
-    export_include_dirs: ["include"],
-    shared_libs: [
-        "liblog",
-    ],
-}
-
