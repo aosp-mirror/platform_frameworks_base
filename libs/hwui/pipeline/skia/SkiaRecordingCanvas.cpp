@@ -219,8 +219,20 @@ void SkiaRecordingCanvas::drawNinePatch(Bitmap& bitmap, const Res_png_9patch& ch
     SkPaint tmpPaint;
     sk_sp<SkColorFilter> colorFilter;
     sk_sp<SkImage> image = bitmap.makeImage(&colorFilter);
-    mRecorder.drawImageLattice(image.get(), lattice, dst,
-                               bitmapPaint(paint, &tmpPaint, colorFilter));
+    const SkPaint* filteredPaint = bitmapPaint(paint, &tmpPaint, colorFilter);
+    // Besides kNone, the other three SkFilterQualities are treated the same. And Android's
+    // Java API only supports kLow and kNone anyway.
+    if (!filteredPaint || filteredPaint->getFilterQuality() == kNone_SkFilterQuality) {
+        if (filteredPaint != &tmpPaint) {
+            if (paint) {
+                tmpPaint = *paint;
+            }
+            filteredPaint = &tmpPaint;
+        }
+        tmpPaint.setFilterQuality(kLow_SkFilterQuality);
+    }
+
+    mRecorder.drawImageLattice(image.get(), lattice, dst, filteredPaint);
     if (!bitmap.isImmutable() && image.get() && !image->unique() && !dst.isEmpty()) {
         mDisplayList->mMutableImages.push_back(image.get());
     }
