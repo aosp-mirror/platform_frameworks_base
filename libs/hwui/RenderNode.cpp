@@ -18,7 +18,6 @@
 
 #include "DamageAccumulator.h"
 #include "Debug.h"
-#include "RecordedOp.h"
 #include "TreeInfo.h"
 #include "VectorDrawable.h"
 #include "renderstate/RenderState.h"
