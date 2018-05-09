@@ -340,7 +340,6 @@ public class AppOpsManager {
     /** @hide */
     public static final int OP_BLUETOOTH_SCAN = 77;
     /** @hide */
-    @TestApi
     public static final int _NUM_OP = 78;
 
     /** Access to coarse location information. */
@@ -2509,6 +2508,16 @@ public class AppOpsManager {
     @TestApi
     public static String[] getOpStrs() {
         return Arrays.copyOf(sOpToString, sOpToString.length);
+    }
+
+
+    /**
+     * @return number of App ops
+     * @hide
+     */
+    @TestApi
+    public static int getNumOps() {
+        return _NUM_OP;
     }
 
     /**
