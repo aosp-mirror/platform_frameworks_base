@@ -86,6 +86,9 @@ public final class AutofillManagerServiceShellCommand extends ShellCommand {
             pw.println("  get fc_score [--algorithm ALGORITHM] value1 value2");
             pw.println("    Gets the field classification score for 2 fields.");
             pw.println("");
+            pw.println("  get bind-instant-service-allowed");
+            pw.println("    Gets whether binding to services provided by instant apps is allowed");
+            pw.println("");
             pw.println("  set log_level [off | debug | verbose]");
             pw.println("    Sets the Autofill log level.");
             pw.println("");
@@ -97,6 +100,9 @@ public final class AutofillManagerServiceShellCommand extends ShellCommand {
             pw.println("");
             pw.println("  set full_screen_mode [true | false | default]");
             pw.println("    Sets the Fill UI full screen mode");
+            pw.println("");
+            pw.println("  set bind-instant-service-allowed [true | false]");
+            pw.println("    Sets whether binding to services provided by instant apps is allowed");
             pw.println("");
             pw.println("  list sessions [--user USER_ID]");
             pw.println("    Lists all pending sessions.");
@@ -123,6 +129,8 @@ public final class AutofillManagerServiceShellCommand extends ShellCommand {
                 return getFieldClassificationScore(pw);
             case "full_screen_mode":
                 return getFullScreenMode(pw);
+            case "bind-instant-service-allowed":
+                return getBindInstantService(pw);
             default:
                 pw.println("Invalid set: " + what);
                 return -1;
@@ -141,6 +149,8 @@ public final class AutofillManagerServiceShellCommand extends ShellCommand {
                 return setMaxVisibileDatasets();
             case "full_screen_mode":
                 return setFullScreenMode(pw);
+            case "bind-instant-service-allowed":
+                return setBindInstantService(pw);
             default:
                 pw.println("Invalid set: " + what);
                 return -1;
@@ -252,6 +262,30 @@ public final class AutofillManagerServiceShellCommand extends ShellCommand {
                 return 0;
             case "default":
                 mService.setFullScreenMode(null);
+                return 0;
+            default:
+                pw.println("Invalid mode: " + mode);
+                return -1;
+        }
+    }
+
+    private int getBindInstantService(PrintWriter pw) {
+        if (mService.getAllowInstantService()) {
+            pw.println("true");
+        } else {
+            pw.println("false");
+        }
+        return 0;
+    }
+
+    private int setBindInstantService(PrintWriter pw) {
+        final String mode = getNextArgRequired();
+        switch (mode.toLowerCase()) {
+            case "true":
+                mService.setAllowInstantService(true);
+                return 0;
+            case "false":
+                mService.setAllowInstantService(false);
                 return 0;
             default:
                 pw.println("Invalid mode: " + mode);
