@@ -1698,7 +1698,6 @@ public class GradientDrawable extends Drawable {
         return mGradientState.mHeight;
     }
 
-    /** @hide */
     @Override
     public Insets getOpticalInsets() {
         return mGradientState.mOpticalInsets;

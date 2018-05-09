@@ -120,9 +120,6 @@ public class DrawableContainer extends Drawable implements Drawable.Callback {
         return result;
     }
 
-    /**
-     * @hide
-     */
     @Override
     public Insets getOpticalInsets() {
         if (mCurrDrawable != null) {

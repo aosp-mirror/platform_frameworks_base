@@ -2903,6 +2903,10 @@
   <eat-comment />
 
     <public-group type="attr" first-id="0x01010587">
+        <public name="opticalInsetLeft" />
+        <public name="opticalInsetTop" />
+        <public name="opticalInsetRight" />
+        <public name="opticalInsetBottom" />
     </public-group>
 
     <public-group type="style" first-id="0x010302e2">

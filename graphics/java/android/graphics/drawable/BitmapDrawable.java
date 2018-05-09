@@ -23,7 +23,6 @@ import android.content.res.Resources;
 import android.content.res.Resources.Theme;
 import android.content.res.TypedArray;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.BitmapShader;
 import android.graphics.Canvas;
 import android.graphics.ColorFilter;
@@ -627,9 +626,6 @@ public class BitmapDrawable extends Drawable {
         mDstRectAndInsetsDirty = false;
     }
 
-    /**
-     * @hide
-     */
     @Override
     public Insets getOpticalInsets() {
         updateDstRectAndInsetsIfDirty();

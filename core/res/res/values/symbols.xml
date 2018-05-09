@@ -3379,4 +3379,9 @@
   <java-symbol type="id" name="user_loading" />
 
   <java-symbol type="string" name="battery_saver_description_with_learn_more" />
+
+  <java-symbol type="attr" name="opticalInsetLeft" />
+  <java-symbol type="attr" name="opticalInsetTop" />
+  <java-symbol type="attr" name="opticalInsetRight" />
+  <java-symbol type="attr" name="opticalInsetBottom" />
 </resources>
