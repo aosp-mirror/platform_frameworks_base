@@ -466,6 +466,7 @@ import com.android.server.firewall.IntentFirewall;
 import com.android.server.job.JobSchedulerInternal;
 import com.android.server.pm.Installer;
 import com.android.server.pm.Installer.InstallerException;
+import com.android.server.pm.dex.DexManager;
 import com.android.server.utils.PriorityDump;
 import com.android.server.vr.VrManagerInternal;
 import com.android.server.wm.PinnedStackWindowController;
@@ -4311,7 +4312,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             }
 
             if (app.info.isPrivilegedApp() &&
-                    SystemProperties.getBoolean("pm.dexopt.priv-apps-oob", false)) {
+                    DexManager.isPackageSelectedToRunOob(app.pkgList.keySet())) {
                 runtimeFlags |= Zygote.ONLY_USE_SYSTEM_OAT_FILES;
             }
 
