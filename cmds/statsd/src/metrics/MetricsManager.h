@@ -67,6 +67,10 @@ public:
         return !mAllowedPkg.empty();
     }
 
+    bool shouldWriteToDisk() const {
+        return mNoReportMetricIds.size() != mAllMetricProducers.size();
+    }
+
     void dumpStates(FILE* out, bool verbose);
 
     inline bool isInTtl(const int64_t timestampNs) const {
