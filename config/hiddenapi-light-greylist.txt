@@ -922,6 +922,7 @@ Landroid/content/pm/PackageParser;->parsePackage(Ljava/io/File;I)Landroid/conten
 Landroid/content/pm/PackageParser;->parsePackage(Ljava/io/File;IZ)Landroid/content/pm/PackageParser$Package;
 Landroid/content/pm/PackageUserState;-><init>()V
 Landroid/content/pm/ParceledListSlice;-><init>(Ljava/util/List;)V
+Landroid/content/pm/ShortcutInfo;->getIcon()Landroid/graphics/drawable/Icon;
 Landroid/content/pm/ShortcutManager;->mService:Landroid/content/pm/IShortcutService;
 Landroid/content/pm/Signature;->getPublicKey()Ljava/security/PublicKey;
 Landroid/content/pm/UserInfo;-><init>(ILjava/lang/String;I)V
@@ -2500,6 +2501,7 @@ Landroid/service/voice/AlwaysOnHotwordDetector$EventPayload;->getCaptureSession(
 Landroid/service/voice/VoiceInteractionService;->isKeyphraseAndLocaleSupportedForHotword(Ljava/lang/String;Ljava/util/Locale;)Z
 Landroid/service/wallpaper/WallpaperService$Engine;->setFixedSizeAllowed(Z)V
 Landroid/speech/tts/TextToSpeech;->getCurrentEngine()Ljava/lang/String;
+Landroid/speech/tts/TtsEngines;-><init>(Landroid/content/Context;)V
 Landroid/system/Int32Ref;->value:I
 Landroid/system/OsConstants;-><init>()V
 Landroid/system/OsConstants;->AF_NETLINK:I
