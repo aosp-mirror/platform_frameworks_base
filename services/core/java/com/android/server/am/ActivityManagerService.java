@@ -22995,18 +22995,27 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
     }
 
-    private final int computeOomAdjLocked(ProcessRecord app, int cachedAdj, ProcessRecord TOP_APP,
+    private final boolean computeOomAdjLocked(ProcessRecord app, int cachedAdj, ProcessRecord TOP_APP,
             boolean doingAll, long now) {
         if (mAdjSeq == app.adjSeq) {
-            // This adjustment has already been computed.
-            return app.curRawAdj;
+            if (app.adjSeq == app.completedAdjSeq) {
+                // This adjustment has already been computed successfully.
+                return false;
+            } else {
+                // The process is being computed, so there is a cycle. We cannot
+                // rely on this process's state.
+                app.containsCycle = true;
+                return false;
+            }
         }
 
         if (app.thread == null) {
             app.adjSeq = mAdjSeq;
             app.curSchedGroup = ProcessList.SCHED_GROUP_BACKGROUND;
             app.curProcState = ActivityManager.PROCESS_STATE_CACHED_EMPTY;
-            return (app.curAdj=app.curRawAdj=ProcessList.CACHED_APP_MAX_ADJ);
+            app.curAdj=app.curRawAdj=ProcessList.CACHED_APP_MAX_ADJ;
+            app.completedAdjSeq = app.adjSeq;
+            return false;
         }
 
         app.adjTypeCode = ActivityManager.RunningAppProcessInfo.REASON_UNKNOWN;
@@ -23018,6 +23027,8 @@ public class ActivityManagerService extends IActivityManager.Stub
         final int activitiesSize = app.activities.size();
         final int appUid = app.info.uid;
         final int logUid = mCurOomAdjUid;
+
+        int prevAppAdj = app.curAdj;
 
         if (app.maxAdj <= ProcessList.FOREGROUND_APP_ADJ) {
             // The max adjustment doesn't allow this app to be anything
@@ -23063,7 +23074,10 @@ public class ActivityManagerService extends IActivityManager.Stub
                   app.curSchedGroup = ProcessList.SCHED_GROUP_RESTRICTED;
               }
             }
-            return (app.curAdj=app.maxAdj);
+            app.curAdj = app.maxAdj;
+            app.completedAdjSeq = app.adjSeq;
+            // if curAdj is less than prevAppAdj, then this process was promoted
+            return app.curAdj < prevAppAdj;
         }
 
         app.systemNoUi = false;
@@ -23075,6 +23089,8 @@ public class ActivityManagerService extends IActivityManager.Stub
         int adj;
         int schedGroup;
         int procState;
+        int cachedAdjSeq;
+
         boolean foregroundActivities = false;
         mTmpBroadcastQueue.clear();
         if (PROCESS_STATE_CUR_TOP == ActivityManager.PROCESS_STATE_TOP && app == TOP_APP) {
@@ -23388,9 +23404,9 @@ public class ActivityManagerService extends IActivityManager.Stub
         // there are applications dependent on our services or providers, but
         // this gives us a baseline and makes sure we don't get into an
         // infinite recursion.
-        app.adjSeq = mAdjSeq;
         app.curRawAdj = adj;
         app.hasStartedServices = false;
+        app.adjSeq = mAdjSeq;
 
         if (mBackupTarget != null && app == mBackupTarget.app) {
             // If possible we want to avoid killing apps while they're being backed up
@@ -23489,8 +23505,15 @@ public class ActivityManagerService extends IActivityManager.Stub
 
                     if ((cr.flags&Context.BIND_WAIVE_PRIORITY) == 0) {
                         ProcessRecord client = cr.binding.client;
-                        int clientAdj = computeOomAdjLocked(client, cachedAdj,
-                                TOP_APP, doingAll, now);
+                        computeOomAdjLocked(client, cachedAdj, TOP_APP, doingAll, now);
+                        if (client.containsCycle) {
+                            // We've detected a cycle. We should ignore this connection and allow
+                            // this process to retry computeOomAdjLocked later in case a later-checked
+                            // connection from a client  would raise its priority legitimately.
+                            app.containsCycle = true;
+                            continue;
+                        }
+                        int clientAdj = client.curRawAdj;
                         int clientProcState = client.curProcState;
                         if (clientProcState >= ActivityManager.PROCESS_STATE_CACHED_ACTIVITY) {
                             // If the other app is cached for any reason, for purposes here
@@ -23709,7 +23732,15 @@ public class ActivityManagerService extends IActivityManager.Stub
                     // Being our own client is not interesting.
                     continue;
                 }
-                int clientAdj = computeOomAdjLocked(client, cachedAdj, TOP_APP, doingAll, now);
+                computeOomAdjLocked(client, cachedAdj, TOP_APP, doingAll, now);
+                if (client.containsCycle) {
+                    // We've detected a cycle. We should ignore this connection and allow
+                    // this process to retry computeOomAdjLocked later in case a later-checked
+                    // connection from a client  would raise its priority legitimately.
+                    app.containsCycle = true;
+                    continue;
+                }
+                int clientAdj = client.curRawAdj;
                 int clientProcState = client.curProcState;
                 if (clientProcState >= ActivityManager.PROCESS_STATE_CACHED_ACTIVITY) {
                     // If the other app is cached for any reason, for purposes here
@@ -23937,8 +23968,10 @@ public class ActivityManagerService extends IActivityManager.Stub
         app.curSchedGroup = schedGroup;
         app.curProcState = procState;
         app.foregroundActivities = foregroundActivities;
+        app.completedAdjSeq = mAdjSeq;
 
-        return app.curRawAdj;
+        // if curAdj is less than prevAppAdj, then this process was promoted
+        return app.curAdj < prevAppAdj;
     }
 
     /**
@@ -24912,11 +24945,22 @@ public class ActivityManagerService extends IActivityManager.Stub
         int nextCachedAdj = curCachedAdj+1;
         int curEmptyAdj = ProcessList.CACHED_APP_MIN_ADJ;
         int nextEmptyAdj = curEmptyAdj+2;
+
+        boolean retryCycles = false;
+
+        // need to reset cycle state before calling computeOomAdjLocked because of service connections
+        for (int i=N-1; i>=0; i--) {
+            ProcessRecord app = mLruProcesses.get(i);
+            app.containsCycle = false;
+        }
         for (int i=N-1; i>=0; i--) {
             ProcessRecord app = mLruProcesses.get(i);
             if (!app.killedByAm && app.thread != null) {
                 app.procStateChanged = false;
                 computeOomAdjLocked(app, ProcessList.UNKNOWN_ADJ, TOP_APP, true, now);
+
+                // if any app encountered a cycle, we need to perform an additional loop later
+                retryCycles |= app.containsCycle;
 
                 // If we haven't yet assigned the final cached adj
                 // to the process, do that now.
@@ -24971,6 +25015,39 @@ public class ActivityManagerService extends IActivityManager.Stub
                     }
                 }
 
+
+            }
+        }
+
+        // Cycle strategy:
+        // - Retry computing any process that has encountered a cycle.
+        // - Continue retrying until no process was promoted.
+        // - Iterate from least important to most important.
+        int cycleCount = 0;
+        while (retryCycles) {
+            cycleCount++;
+            retryCycles = false;
+
+            for (int i=0; i<N; i++) {
+                ProcessRecord app = mLruProcesses.get(i);
+                if (!app.killedByAm && app.thread != null && app.containsCycle == true) {
+                    app.adjSeq--;
+                    app.completedAdjSeq--;
+                }
+            }
+
+            for (int i=0; i<N; i++) {
+                ProcessRecord app = mLruProcesses.get(i);
+                if (!app.killedByAm && app.thread != null && app.containsCycle == true) {
+                    if (computeOomAdjLocked(app, ProcessList.UNKNOWN_ADJ, TOP_APP, true, now)) {
+                        retryCycles = true;
+                    }
+                }
+            }
+        }
+        for (int i=N-1; i>=0; i--) {
+            ProcessRecord app = mLruProcesses.get(i);
+            if (!app.killedByAm && app.thread != null) {
                 applyOomAdjLocked(app, true, now, nowElapsed);
 
                 // Count the number of process types.
