@@ -21,6 +21,7 @@ import android.app.job.JobParameters;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.server.ServerProtoEnums;
+import android.service.batterystats.BatteryStatsServiceDumpHistoryProto;
 import android.service.batterystats.BatteryStatsServiceDumpProto;
 import android.telephony.SignalStrength;
 import android.telephony.TelephonyManager;
@@ -6030,51 +6031,51 @@ public abstract class BatteryStats implements Parcelable {
         }
     }
 
-    static void printBitDescriptions(PrintWriter pw, int oldval, int newval, HistoryTag wakelockTag,
-            BitDescription[] descriptions, boolean longNames) {
+    static void printBitDescriptions(StringBuilder sb, int oldval, int newval,
+            HistoryTag wakelockTag, BitDescription[] descriptions, boolean longNames) {
         int diff = oldval ^ newval;
         if (diff == 0) return;
         boolean didWake = false;
         for (int i=0; i<descriptions.length; i++) {
             BitDescription bd = descriptions[i];
             if ((diff&bd.mask) != 0) {
-                pw.print(longNames ? " " : ",");
+                sb.append(longNames ? " " : ",");
                 if (bd.shift < 0) {
-                    pw.print((newval&bd.mask) != 0 ? "+" : "-");
-                    pw.print(longNames ? bd.name : bd.shortName);
+                    sb.append((newval & bd.mask) != 0 ? "+" : "-");
+                    sb.append(longNames ? bd.name : bd.shortName);
                     if (bd.mask == HistoryItem.STATE_WAKE_LOCK_FLAG && wakelockTag != null) {
                         didWake = true;
-                        pw.print("=");
+                        sb.append("=");
                         if (longNames) {
-                            UserHandle.formatUid(pw, wakelockTag.uid);
-                            pw.print(":\"");
-                            pw.print(wakelockTag.string);
-                            pw.print("\"");
+                            UserHandle.formatUid(sb, wakelockTag.uid);
+                            sb.append(":\"");
+                            sb.append(wakelockTag.string);
+                            sb.append("\"");
                         } else {
-                            pw.print(wakelockTag.poolIdx);
+                            sb.append(wakelockTag.poolIdx);
                         }
                     }
                 } else {
-                    pw.print(longNames ? bd.name : bd.shortName);
-                    pw.print("=");
+                    sb.append(longNames ? bd.name : bd.shortName);
+                    sb.append("=");
                     int val = (newval&bd.mask)>>bd.shift;
                     if (bd.values != null && val >= 0 && val < bd.values.length) {
-                        pw.print(longNames? bd.values[val] : bd.shortValues[val]);
+                        sb.append(longNames ? bd.values[val] : bd.shortValues[val]);
                     } else {
-                        pw.print(val);
+                        sb.append(val);
                     }
                 }
             }
         }
         if (!didWake && wakelockTag != null) {
-            pw.print(longNames ? " wake_lock=" : ",w=");
+            sb.append(longNames ? " wake_lock=" : ",w=");
             if (longNames) {
-                UserHandle.formatUid(pw, wakelockTag.uid);
-                pw.print(":\"");
-                pw.print(wakelockTag.string);
-                pw.print("\"");
+                UserHandle.formatUid(sb, wakelockTag.uid);
+                sb.append(":\"");
+                sb.append(wakelockTag.string);
+                sb.append("\"");
             } else {
-                pw.print(wakelockTag.poolIdx);
+                sb.append(wakelockTag.poolIdx);
             }
         }
     }
@@ -6108,339 +6109,360 @@ public abstract class BatteryStats implements Parcelable {
 
         public void printNextItem(PrintWriter pw, HistoryItem rec, long baseTime, boolean checkin,
                 boolean verbose) {
+            pw.print(printNextItem(rec, baseTime, checkin, verbose));
+        }
+
+        /** Print the next history item to proto. */
+        public void printNextItem(ProtoOutputStream proto, HistoryItem rec, long baseTime,
+                boolean verbose) {
+            String item = printNextItem(rec, baseTime, true, verbose);
+            for (String line : item.split("\n")) {
+                proto.write(BatteryStatsServiceDumpHistoryProto.CSV_LINES, line);
+            }
+        }
+
+        private String printNextItem(HistoryItem rec, long baseTime, boolean checkin,
+                boolean verbose) {
+            StringBuilder item = new StringBuilder();
             if (!checkin) {
-                pw.print("  ");
-                TimeUtils.formatDuration(rec.time - baseTime, pw, TimeUtils.HUNDRED_DAY_FIELD_LEN);
-                pw.print(" (");
-                pw.print(rec.numReadInts);
-                pw.print(") ");
+                item.append("  ");
+                TimeUtils.formatDuration(
+                        rec.time - baseTime, item, TimeUtils.HUNDRED_DAY_FIELD_LEN);
+                item.append(" (");
+                item.append(rec.numReadInts);
+                item.append(") ");
             } else {
-                pw.print(BATTERY_STATS_CHECKIN_VERSION); pw.print(',');
-                pw.print(HISTORY_DATA); pw.print(',');
+                item.append(BATTERY_STATS_CHECKIN_VERSION); item.append(',');
+                item.append(HISTORY_DATA); item.append(',');
                 if (lastTime < 0) {
-                    pw.print(rec.time - baseTime);
+                    item.append(rec.time - baseTime);
                 } else {
-                    pw.print(rec.time - lastTime);
+                    item.append(rec.time - lastTime);
                 }
                 lastTime = rec.time;
             }
             if (rec.cmd == HistoryItem.CMD_START) {
                 if (checkin) {
-                    pw.print(":");
+                    item.append(":");
                 }
-                pw.println("START");
+                item.append("START\n");
                 reset();
             } else if (rec.cmd == HistoryItem.CMD_CURRENT_TIME
                     || rec.cmd == HistoryItem.CMD_RESET) {
                 if (checkin) {
-                    pw.print(":");
+                    item.append(":");
                 }
                 if (rec.cmd == HistoryItem.CMD_RESET) {
-                    pw.print("RESET:");
+                    item.append("RESET:");
                     reset();
                 }
-                pw.print("TIME:");
+                item.append("TIME:");
                 if (checkin) {
-                    pw.println(rec.currentTime);
+                    item.append(rec.currentTime);
+                    item.append("\n");
                 } else {
-                    pw.print(" ");
-                    pw.println(DateFormat.format("yyyy-MM-dd-HH-mm-ss",
+                    item.append(" ");
+                    item.append(DateFormat.format("yyyy-MM-dd-HH-mm-ss",
                             rec.currentTime).toString());
+                    item.append("\n");
                 }
             } else if (rec.cmd == HistoryItem.CMD_SHUTDOWN) {
                 if (checkin) {
-                    pw.print(":");
+                    item.append(":");
                 }
-                pw.println("SHUTDOWN");
+                item.append("SHUTDOWN\n");
             } else if (rec.cmd == HistoryItem.CMD_OVERFLOW) {
                 if (checkin) {
-                    pw.print(":");
+                    item.append(":");
                 }
-                pw.println("*OVERFLOW*");
+                item.append("*OVERFLOW*\n");
             } else {
                 if (!checkin) {
-                    if (rec.batteryLevel < 10) pw.print("00");
-                    else if (rec.batteryLevel < 100) pw.print("0");
-                    pw.print(rec.batteryLevel);
+                    if (rec.batteryLevel < 10) item.append("00");
+                    else if (rec.batteryLevel < 100) item.append("0");
+                    item.append(rec.batteryLevel);
                     if (verbose) {
-                        pw.print(" ");
+                        item.append(" ");
                         if (rec.states < 0) ;
-                        else if (rec.states < 0x10) pw.print("0000000");
-                        else if (rec.states < 0x100) pw.print("000000");
-                        else if (rec.states < 0x1000) pw.print("00000");
-                        else if (rec.states < 0x10000) pw.print("0000");
-                        else if (rec.states < 0x100000) pw.print("000");
-                        else if (rec.states < 0x1000000) pw.print("00");
-                        else if (rec.states < 0x10000000) pw.print("0");
-                        pw.print(Integer.toHexString(rec.states));
+                        else if (rec.states < 0x10) item.append("0000000");
+                        else if (rec.states < 0x100) item.append("000000");
+                        else if (rec.states < 0x1000) item.append("00000");
+                        else if (rec.states < 0x10000) item.append("0000");
+                        else if (rec.states < 0x100000) item.append("000");
+                        else if (rec.states < 0x1000000) item.append("00");
+                        else if (rec.states < 0x10000000) item.append("0");
+                        item.append(Integer.toHexString(rec.states));
                     }
                 } else {
                     if (oldLevel != rec.batteryLevel) {
                         oldLevel = rec.batteryLevel;
-                        pw.print(",Bl="); pw.print(rec.batteryLevel);
+                        item.append(",Bl="); item.append(rec.batteryLevel);
                     }
                 }
                 if (oldStatus != rec.batteryStatus) {
                     oldStatus = rec.batteryStatus;
-                    pw.print(checkin ? ",Bs=" : " status=");
+                    item.append(checkin ? ",Bs=" : " status=");
                     switch (oldStatus) {
                         case BatteryManager.BATTERY_STATUS_UNKNOWN:
-                            pw.print(checkin ? "?" : "unknown");
+                            item.append(checkin ? "?" : "unknown");
                             break;
                         case BatteryManager.BATTERY_STATUS_CHARGING:
-                            pw.print(checkin ? "c" : "charging");
+                            item.append(checkin ? "c" : "charging");
                             break;
                         case BatteryManager.BATTERY_STATUS_DISCHARGING:
-                            pw.print(checkin ? "d" : "discharging");
+                            item.append(checkin ? "d" : "discharging");
                             break;
                         case BatteryManager.BATTERY_STATUS_NOT_CHARGING:
-                            pw.print(checkin ? "n" : "not-charging");
+                            item.append(checkin ? "n" : "not-charging");
                             break;
                         case BatteryManager.BATTERY_STATUS_FULL:
-                            pw.print(checkin ? "f" : "full");
+                            item.append(checkin ? "f" : "full");
                             break;
                         default:
-                            pw.print(oldStatus);
+                            item.append(oldStatus);
                             break;
                     }
                 }
                 if (oldHealth != rec.batteryHealth) {
                     oldHealth = rec.batteryHealth;
-                    pw.print(checkin ? ",Bh=" : " health=");
+                    item.append(checkin ? ",Bh=" : " health=");
                     switch (oldHealth) {
                         case BatteryManager.BATTERY_HEALTH_UNKNOWN:
-                            pw.print(checkin ? "?" : "unknown");
+                            item.append(checkin ? "?" : "unknown");
                             break;
                         case BatteryManager.BATTERY_HEALTH_GOOD:
-                            pw.print(checkin ? "g" : "good");
+                            item.append(checkin ? "g" : "good");
                             break;
                         case BatteryManager.BATTERY_HEALTH_OVERHEAT:
-                            pw.print(checkin ? "h" : "overheat");
+                            item.append(checkin ? "h" : "overheat");
                             break;
                         case BatteryManager.BATTERY_HEALTH_DEAD:
-                            pw.print(checkin ? "d" : "dead");
+                            item.append(checkin ? "d" : "dead");
                             break;
                         case BatteryManager.BATTERY_HEALTH_OVER_VOLTAGE:
-                            pw.print(checkin ? "v" : "over-voltage");
+                            item.append(checkin ? "v" : "over-voltage");
                             break;
                         case BatteryManager.BATTERY_HEALTH_UNSPECIFIED_FAILURE:
-                            pw.print(checkin ? "f" : "failure");
+                            item.append(checkin ? "f" : "failure");
                             break;
                         case BatteryManager.BATTERY_HEALTH_COLD:
-                            pw.print(checkin ? "c" : "cold");
+                            item.append(checkin ? "c" : "cold");
                             break;
                         default:
-                            pw.print(oldHealth);
+                            item.append(oldHealth);
                             break;
                     }
                 }
                 if (oldPlug != rec.batteryPlugType) {
                     oldPlug = rec.batteryPlugType;
-                    pw.print(checkin ? ",Bp=" : " plug=");
+                    item.append(checkin ? ",Bp=" : " plug=");
                     switch (oldPlug) {
                         case 0:
-                            pw.print(checkin ? "n" : "none");
+                            item.append(checkin ? "n" : "none");
                             break;
                         case BatteryManager.BATTERY_PLUGGED_AC:
-                            pw.print(checkin ? "a" : "ac");
+                            item.append(checkin ? "a" : "ac");
                             break;
                         case BatteryManager.BATTERY_PLUGGED_USB:
-                            pw.print(checkin ? "u" : "usb");
+                            item.append(checkin ? "u" : "usb");
                             break;
                         case BatteryManager.BATTERY_PLUGGED_WIRELESS:
-                            pw.print(checkin ? "w" : "wireless");
+                            item.append(checkin ? "w" : "wireless");
                             break;
                         default:
-                            pw.print(oldPlug);
+                            item.append(oldPlug);
                             break;
                     }
                 }
                 if (oldTemp != rec.batteryTemperature) {
                     oldTemp = rec.batteryTemperature;
-                    pw.print(checkin ? ",Bt=" : " temp=");
-                    pw.print(oldTemp);
+                    item.append(checkin ? ",Bt=" : " temp=");
+                    item.append(oldTemp);
                 }
                 if (oldVolt != rec.batteryVoltage) {
                     oldVolt = rec.batteryVoltage;
-                    pw.print(checkin ? ",Bv=" : " volt=");
-                    pw.print(oldVolt);
+                    item.append(checkin ? ",Bv=" : " volt=");
+                    item.append(oldVolt);
                 }
                 final int chargeMAh = rec.batteryChargeUAh / 1000;
                 if (oldChargeMAh != chargeMAh) {
                     oldChargeMAh = chargeMAh;
-                    pw.print(checkin ? ",Bcc=" : " charge=");
-                    pw.print(oldChargeMAh);
+                    item.append(checkin ? ",Bcc=" : " charge=");
+                    item.append(oldChargeMAh);
                 }
-                printBitDescriptions(pw, oldState, rec.states, rec.wakelockTag,
+                printBitDescriptions(item, oldState, rec.states, rec.wakelockTag,
                         HISTORY_STATE_DESCRIPTIONS, !checkin);
-                printBitDescriptions(pw, oldState2, rec.states2, null,
+                printBitDescriptions(item, oldState2, rec.states2, null,
                         HISTORY_STATE2_DESCRIPTIONS, !checkin);
                 if (rec.wakeReasonTag != null) {
                     if (checkin) {
-                        pw.print(",wr=");
-                        pw.print(rec.wakeReasonTag.poolIdx);
+                        item.append(",wr=");
+                        item.append(rec.wakeReasonTag.poolIdx);
                     } else {
-                        pw.print(" wake_reason=");
-                        pw.print(rec.wakeReasonTag.uid);
-                        pw.print(":\"");
-                        pw.print(rec.wakeReasonTag.string);
-                        pw.print("\"");
+                        item.append(" wake_reason=");
+                        item.append(rec.wakeReasonTag.uid);
+                        item.append(":\"");
+                        item.append(rec.wakeReasonTag.string);
+                        item.append("\"");
                     }
                 }
                 if (rec.eventCode != HistoryItem.EVENT_NONE) {
-                    pw.print(checkin ? "," : " ");
+                    item.append(checkin ? "," : " ");
                     if ((rec.eventCode&HistoryItem.EVENT_FLAG_START) != 0) {
-                        pw.print("+");
+                        item.append("+");
                     } else if ((rec.eventCode&HistoryItem.EVENT_FLAG_FINISH) != 0) {
-                        pw.print("-");
+                        item.append("-");
                     }
                     String[] eventNames = checkin ? HISTORY_EVENT_CHECKIN_NAMES
                             : HISTORY_EVENT_NAMES;
                     int idx = rec.eventCode & ~(HistoryItem.EVENT_FLAG_START
                             | HistoryItem.EVENT_FLAG_FINISH);
                     if (idx >= 0 && idx < eventNames.length) {
-                        pw.print(eventNames[idx]);
+                        item.append(eventNames[idx]);
                     } else {
-                        pw.print(checkin ? "Ev" : "event");
-                        pw.print(idx);
+                        item.append(checkin ? "Ev" : "event");
+                        item.append(idx);
                     }
-                    pw.print("=");
+                    item.append("=");
                     if (checkin) {
-                        pw.print(rec.eventTag.poolIdx);
+                        item.append(rec.eventTag.poolIdx);
                     } else {
-                        pw.append(HISTORY_EVENT_INT_FORMATTERS[idx]
+                        item.append(HISTORY_EVENT_INT_FORMATTERS[idx]
                                 .applyAsString(rec.eventTag.uid));
-                        pw.print(":\"");
-                        pw.print(rec.eventTag.string);
-                        pw.print("\"");
+                        item.append(":\"");
+                        item.append(rec.eventTag.string);
+                        item.append("\"");
                     }
                 }
-                pw.println();
+                item.append("\n");
                 if (rec.stepDetails != null) {
                     if (!checkin) {
-                        pw.print("                 Details: cpu=");
-                        pw.print(rec.stepDetails.userTime);
-                        pw.print("u+");
-                        pw.print(rec.stepDetails.systemTime);
-                        pw.print("s");
+                        item.append("                 Details: cpu=");
+                        item.append(rec.stepDetails.userTime);
+                        item.append("u+");
+                        item.append(rec.stepDetails.systemTime);
+                        item.append("s");
                         if (rec.stepDetails.appCpuUid1 >= 0) {
-                            pw.print(" (");
-                            printStepCpuUidDetails(pw, rec.stepDetails.appCpuUid1,
+                            item.append(" (");
+                            printStepCpuUidDetails(item, rec.stepDetails.appCpuUid1,
                                     rec.stepDetails.appCpuUTime1, rec.stepDetails.appCpuSTime1);
                             if (rec.stepDetails.appCpuUid2 >= 0) {
-                                pw.print(", ");
-                                printStepCpuUidDetails(pw, rec.stepDetails.appCpuUid2,
+                                item.append(", ");
+                                printStepCpuUidDetails(item, rec.stepDetails.appCpuUid2,
                                         rec.stepDetails.appCpuUTime2, rec.stepDetails.appCpuSTime2);
                             }
                             if (rec.stepDetails.appCpuUid3 >= 0) {
-                                pw.print(", ");
-                                printStepCpuUidDetails(pw, rec.stepDetails.appCpuUid3,
+                                item.append(", ");
+                                printStepCpuUidDetails(item, rec.stepDetails.appCpuUid3,
                                         rec.stepDetails.appCpuUTime3, rec.stepDetails.appCpuSTime3);
                             }
-                            pw.print(')');
+                            item.append(')');
                         }
-                        pw.println();
-                        pw.print("                          /proc/stat=");
-                        pw.print(rec.stepDetails.statUserTime);
-                        pw.print(" usr, ");
-                        pw.print(rec.stepDetails.statSystemTime);
-                        pw.print(" sys, ");
-                        pw.print(rec.stepDetails.statIOWaitTime);
-                        pw.print(" io, ");
-                        pw.print(rec.stepDetails.statIrqTime);
-                        pw.print(" irq, ");
-                        pw.print(rec.stepDetails.statSoftIrqTime);
-                        pw.print(" sirq, ");
-                        pw.print(rec.stepDetails.statIdlTime);
-                        pw.print(" idle");
+                        item.append("\n");
+                        item.append("                          /proc/stat=");
+                        item.append(rec.stepDetails.statUserTime);
+                        item.append(" usr, ");
+                        item.append(rec.stepDetails.statSystemTime);
+                        item.append(" sys, ");
+                        item.append(rec.stepDetails.statIOWaitTime);
+                        item.append(" io, ");
+                        item.append(rec.stepDetails.statIrqTime);
+                        item.append(" irq, ");
+                        item.append(rec.stepDetails.statSoftIrqTime);
+                        item.append(" sirq, ");
+                        item.append(rec.stepDetails.statIdlTime);
+                        item.append(" idle");
                         int totalRun = rec.stepDetails.statUserTime + rec.stepDetails.statSystemTime
                                 + rec.stepDetails.statIOWaitTime + rec.stepDetails.statIrqTime
                                 + rec.stepDetails.statSoftIrqTime;
                         int total = totalRun + rec.stepDetails.statIdlTime;
                         if (total > 0) {
-                            pw.print(" (");
+                            item.append(" (");
                             float perc = ((float)totalRun) / ((float)total) * 100;
-                            pw.print(String.format("%.1f%%", perc));
-                            pw.print(" of ");
+                            item.append(String.format("%.1f%%", perc));
+                            item.append(" of ");
                             StringBuilder sb = new StringBuilder(64);
                             formatTimeMsNoSpace(sb, total*10);
-                            pw.print(sb);
-                            pw.print(")");
+                            item.append(sb);
+                            item.append(")");
                         }
-                        pw.print(", PlatformIdleStat ");
-                        pw.print(rec.stepDetails.statPlatformIdleState);
-                        pw.println();
+                        item.append(", PlatformIdleStat ");
+                        item.append(rec.stepDetails.statPlatformIdleState);
+                        item.append("\n");
 
-                        pw.print(", SubsystemPowerState ");
-                        pw.print(rec.stepDetails.statSubsystemPowerState);
-                        pw.println();
+                        item.append(", SubsystemPowerState ");
+                        item.append(rec.stepDetails.statSubsystemPowerState);
+                        item.append("\n");
                     } else {
-                        pw.print(BATTERY_STATS_CHECKIN_VERSION); pw.print(',');
-                        pw.print(HISTORY_DATA); pw.print(",0,Dcpu=");
-                        pw.print(rec.stepDetails.userTime);
-                        pw.print(":");
-                        pw.print(rec.stepDetails.systemTime);
+                        item.append(BATTERY_STATS_CHECKIN_VERSION); item.append(',');
+                        item.append(HISTORY_DATA); item.append(",0,Dcpu=");
+                        item.append(rec.stepDetails.userTime);
+                        item.append(":");
+                        item.append(rec.stepDetails.systemTime);
                         if (rec.stepDetails.appCpuUid1 >= 0) {
-                            printStepCpuUidCheckinDetails(pw, rec.stepDetails.appCpuUid1,
+                            printStepCpuUidCheckinDetails(item, rec.stepDetails.appCpuUid1,
                                     rec.stepDetails.appCpuUTime1, rec.stepDetails.appCpuSTime1);
                             if (rec.stepDetails.appCpuUid2 >= 0) {
-                                printStepCpuUidCheckinDetails(pw, rec.stepDetails.appCpuUid2,
+                                printStepCpuUidCheckinDetails(item, rec.stepDetails.appCpuUid2,
                                         rec.stepDetails.appCpuUTime2, rec.stepDetails.appCpuSTime2);
                             }
                             if (rec.stepDetails.appCpuUid3 >= 0) {
-                                printStepCpuUidCheckinDetails(pw, rec.stepDetails.appCpuUid3,
+                                printStepCpuUidCheckinDetails(item, rec.stepDetails.appCpuUid3,
                                         rec.stepDetails.appCpuUTime3, rec.stepDetails.appCpuSTime3);
                             }
                         }
-                        pw.println();
-                        pw.print(BATTERY_STATS_CHECKIN_VERSION); pw.print(',');
-                        pw.print(HISTORY_DATA); pw.print(",0,Dpst=");
-                        pw.print(rec.stepDetails.statUserTime);
-                        pw.print(',');
-                        pw.print(rec.stepDetails.statSystemTime);
-                        pw.print(',');
-                        pw.print(rec.stepDetails.statIOWaitTime);
-                        pw.print(',');
-                        pw.print(rec.stepDetails.statIrqTime);
-                        pw.print(',');
-                        pw.print(rec.stepDetails.statSoftIrqTime);
-                        pw.print(',');
-                        pw.print(rec.stepDetails.statIdlTime);
-                        pw.print(',');
+                        item.append("\n");
+                        item.append(BATTERY_STATS_CHECKIN_VERSION); item.append(',');
+                        item.append(HISTORY_DATA); item.append(",0,Dpst=");
+                        item.append(rec.stepDetails.statUserTime);
+                        item.append(',');
+                        item.append(rec.stepDetails.statSystemTime);
+                        item.append(',');
+                        item.append(rec.stepDetails.statIOWaitTime);
+                        item.append(',');
+                        item.append(rec.stepDetails.statIrqTime);
+                        item.append(',');
+                        item.append(rec.stepDetails.statSoftIrqTime);
+                        item.append(',');
+                        item.append(rec.stepDetails.statIdlTime);
+                        item.append(',');
                         if (rec.stepDetails.statPlatformIdleState != null) {
-                            pw.print(rec.stepDetails.statPlatformIdleState);
+                            item.append(rec.stepDetails.statPlatformIdleState);
                             if (rec.stepDetails.statSubsystemPowerState != null) {
-                                pw.print(',');
+                                item.append(',');
                             }
                         }
 
                         if (rec.stepDetails.statSubsystemPowerState != null) {
-                            pw.print(rec.stepDetails.statSubsystemPowerState);
+                            item.append(rec.stepDetails.statSubsystemPowerState);
                         }
-                        pw.println();
+                        item.append("\n");
                     }
                 }
                 oldState = rec.states;
                 oldState2 = rec.states2;
             }
+
+            return item.toString();
         }
 
-        private void printStepCpuUidDetails(PrintWriter pw, int uid, int utime, int stime) {
-            UserHandle.formatUid(pw, uid);
-            pw.print("=");
-            pw.print(utime);
-            pw.print("u+");
-            pw.print(stime);
-            pw.print("s");
+        private void printStepCpuUidDetails(StringBuilder sb, int uid, int utime, int stime) {
+            UserHandle.formatUid(sb, uid);
+            sb.append("=");
+            sb.append(utime);
+            sb.append("u+");
+            sb.append(stime);
+            sb.append("s");
         }
 
-        private void printStepCpuUidCheckinDetails(PrintWriter pw, int uid, int utime, int stime) {
-            pw.print('/');
-            pw.print(uid);
-            pw.print(":");
-            pw.print(utime);
-            pw.print(":");
-            pw.print(stime);
+        private void printStepCpuUidCheckinDetails(StringBuilder sb, int uid, int utime,
+                int stime) {
+            sb.append('/');
+            sb.append(uid);
+            sb.append(":");
+            sb.append(utime);
+            sb.append(":");
+            sb.append(stime);
         }
     }
 
@@ -7046,21 +7068,30 @@ public abstract class BatteryStats implements Parcelable {
         }
     }
 
-    /** Dump #STATS_SINCE_CHARGED batterystats data to a proto. @hide */
+    /**
+     * Dump #STATS_SINCE_CHARGED batterystats data to a proto. If the flags include
+     * DUMP_INCLUDE_HISTORY or DUMP_HISTORY_ONLY, only the history will be dumped.
+     * @hide
+     */
     public void dumpProtoLocked(Context context, FileDescriptor fd, List<ApplicationInfo> apps,
-            int flags) {
+            int flags, long histStart) {
         final ProtoOutputStream proto = new ProtoOutputStream(fd);
-        final long bToken = proto.start(BatteryStatsServiceDumpProto.BATTERYSTATS);
         prepareForDumpLocked();
+
+        if ((flags & (DUMP_INCLUDE_HISTORY | DUMP_HISTORY_ONLY)) != 0) {
+            dumpProtoHistoryLocked(proto, flags, histStart);
+            proto.flush();
+            return;
+        }
+
+        final long bToken = proto.start(BatteryStatsServiceDumpProto.BATTERYSTATS);
 
         proto.write(BatteryStatsProto.REPORT_VERSION, CHECKIN_VERSION);
         proto.write(BatteryStatsProto.PARCEL_VERSION, getParcelVersion());
         proto.write(BatteryStatsProto.START_PLATFORM_VERSION, getStartPlatformVersion());
         proto.write(BatteryStatsProto.END_PLATFORM_VERSION, getEndPlatformVersion());
 
-        // History intentionally not included in proto dump.
-
-        if ((flags & (DUMP_HISTORY_ONLY | DUMP_DAILY_ONLY)) == 0) {
+        if ((flags & DUMP_DAILY_ONLY) == 0) {
             final BatteryStatsHelper helper = new BatteryStatsHelper(context, false,
                     (flags & DUMP_DEVICE_WIFI_ONLY) != 0);
             helper.create(this);
@@ -7527,6 +7558,108 @@ public abstract class BatteryStats implements Parcelable {
             proto.end(wToken);
 
             proto.end(uTkn);
+        }
+    }
+
+    private void dumpProtoHistoryLocked(ProtoOutputStream proto, int flags, long histStart) {
+        if (!startIteratingHistoryLocked()) {
+            return;
+        }
+
+        proto.write(BatteryStatsServiceDumpHistoryProto.REPORT_VERSION, CHECKIN_VERSION);
+        proto.write(BatteryStatsServiceDumpHistoryProto.PARCEL_VERSION, getParcelVersion());
+        proto.write(BatteryStatsServiceDumpHistoryProto.START_PLATFORM_VERSION,
+                getStartPlatformVersion());
+        proto.write(BatteryStatsServiceDumpHistoryProto.END_PLATFORM_VERSION,
+                getEndPlatformVersion());
+        try {
+            long token;
+            // History string pool (HISTORY_STRING_POOL)
+            for (int i = 0; i < getHistoryStringPoolSize(); ++i) {
+                token = proto.start(BatteryStatsServiceDumpHistoryProto.KEYS);
+                proto.write(BatteryStatsServiceDumpHistoryProto.Key.INDEX, i);
+                proto.write(BatteryStatsServiceDumpHistoryProto.Key.UID, getHistoryTagPoolUid(i));
+                proto.write(BatteryStatsServiceDumpHistoryProto.Key.TAG,
+                        getHistoryTagPoolString(i));
+                proto.end(token);
+            }
+
+            // History data (HISTORY_DATA)
+            final HistoryPrinter hprinter = new HistoryPrinter();
+            final HistoryItem rec = new HistoryItem();
+            long lastTime = -1;
+            long baseTime = -1;
+            boolean printed = false;
+            HistoryEventTracker tracker = null;
+            while (getNextHistoryLocked(rec)) {
+                lastTime = rec.time;
+                if (baseTime < 0) {
+                    baseTime = lastTime;
+                }
+                if (rec.time >= histStart) {
+                    if (histStart >= 0 && !printed) {
+                        if (rec.cmd == HistoryItem.CMD_CURRENT_TIME
+                                || rec.cmd == HistoryItem.CMD_RESET
+                                || rec.cmd == HistoryItem.CMD_START
+                                || rec.cmd == HistoryItem.CMD_SHUTDOWN) {
+                            printed = true;
+                            hprinter.printNextItem(proto, rec, baseTime,
+                                    (flags & DUMP_VERBOSE) != 0);
+                            rec.cmd = HistoryItem.CMD_UPDATE;
+                        } else if (rec.currentTime != 0) {
+                            printed = true;
+                            byte cmd = rec.cmd;
+                            rec.cmd = HistoryItem.CMD_CURRENT_TIME;
+                            hprinter.printNextItem(proto, rec, baseTime,
+                                    (flags & DUMP_VERBOSE) != 0);
+                            rec.cmd = cmd;
+                        }
+                        if (tracker != null) {
+                            if (rec.cmd != HistoryItem.CMD_UPDATE) {
+                                hprinter.printNextItem(proto, rec, baseTime,
+                                        (flags & DUMP_VERBOSE) != 0);
+                                rec.cmd = HistoryItem.CMD_UPDATE;
+                            }
+                            int oldEventCode = rec.eventCode;
+                            HistoryTag oldEventTag = rec.eventTag;
+                            rec.eventTag = new HistoryTag();
+                            for (int i = 0; i < HistoryItem.EVENT_COUNT; i++) {
+                                HashMap<String, SparseIntArray> active =
+                                        tracker.getStateForEvent(i);
+                                if (active == null) {
+                                    continue;
+                                }
+                                for (HashMap.Entry<String, SparseIntArray> ent
+                                        : active.entrySet()) {
+                                    SparseIntArray uids = ent.getValue();
+                                    for (int j = 0; j < uids.size(); j++) {
+                                        rec.eventCode = i;
+                                        rec.eventTag.string = ent.getKey();
+                                        rec.eventTag.uid = uids.keyAt(j);
+                                        rec.eventTag.poolIdx = uids.valueAt(j);
+                                        hprinter.printNextItem(proto, rec, baseTime,
+                                                (flags & DUMP_VERBOSE) != 0);
+                                        rec.wakeReasonTag = null;
+                                        rec.wakelockTag = null;
+                                    }
+                                }
+                            }
+                            rec.eventCode = oldEventCode;
+                            rec.eventTag = oldEventTag;
+                            tracker = null;
+                        }
+                    }
+                    hprinter.printNextItem(proto, rec, baseTime,
+                            (flags & DUMP_VERBOSE) != 0);
+                }
+            }
+            if (histStart >= 0) {
+                commitCurrentHistoryBatchLocked();
+                proto.write(BatteryStatsServiceDumpHistoryProto.CSV_LINES,
+                        "NEXT: " + (lastTime + 1));
+            }
+        } finally {
+            finishIteratingHistoryLocked();
         }
     }
 

@@ -291,12 +291,9 @@
     <string name="permgrouplab_camera" msgid="4820372495894586615">"카메라"</string>
     <string name="permgroupdesc_camera" msgid="3250611594678347720">"사진 및 동영상 촬영"</string>
     <string name="permgrouprequest_camera" msgid="1299833592069671756">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;에서 사진을 촬영하고 동영상을 녹화하도록 허용하시겠습니까?"</string>
-    <!-- no translation found for permgrouplab_calllog (8798646184930388160) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_calllog (3006237336748283775) -->
-    <skip />
-    <!-- no translation found for permgrouprequest_calllog (8487355309583773267) -->
-    <skip />
+    <string name="permgrouplab_calllog" msgid="8798646184930388160">"통화 기록"</string>
+    <string name="permgroupdesc_calllog" msgid="3006237336748283775">"통화 기록 읽고 쓰기"</string>
+    <string name="permgrouprequest_calllog" msgid="8487355309583773267">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;이(가) 통화 기록에 액세스하도록 허용하시겠습니까?"</string>
     <string name="permgrouplab_phone" msgid="5229115638567440675">"전화"</string>
     <string name="permgroupdesc_phone" msgid="6234224354060641055">"전화 걸기 및 관리"</string>
     <string name="permgrouprequest_phone" msgid="9166979577750581037">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;에서 전화를 걸고 관리하도록 허용하시겠습니까?"</string>

@@ -1526,7 +1526,8 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
                 mService.getLifecycleManager().scheduleTransaction(clientTransaction);
 
 
-                if ((app.info.privateFlags & ApplicationInfo.PRIVATE_FLAG_CANT_SAVE_STATE) != 0) {
+                if ((app.info.privateFlags & ApplicationInfo.PRIVATE_FLAG_CANT_SAVE_STATE) != 0
+                        && mService.mHasHeavyWeightFeature) {
                     // This may be a heavy-weight process!  Note that the package
                     // manager will ensure that only activity can run in the main
                     // process of the .apk, which is the only thing that will be

@@ -291,12 +291,9 @@
     <string name="permgrouplab_camera" msgid="4820372495894586615">"Appareil photo"</string>
     <string name="permgroupdesc_camera" msgid="3250611594678347720">"prendre des photos et enregistrer des vidéos"</string>
     <string name="permgrouprequest_camera" msgid="1299833592069671756">"Permettre à &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; de prendre des photos et de filmer des vidéos ?"</string>
-    <!-- no translation found for permgrouplab_calllog (8798646184930388160) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_calllog (3006237336748283775) -->
-    <skip />
-    <!-- no translation found for permgrouprequest_calllog (8487355309583773267) -->
-    <skip />
+    <string name="permgrouplab_calllog" msgid="8798646184930388160">"Journaux d\'appels"</string>
+    <string name="permgroupdesc_calllog" msgid="3006237336748283775">"Lire et écrire les journaux d\'appels du téléphone"</string>
+    <string name="permgrouprequest_calllog" msgid="8487355309583773267">"Autoriser &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; à accéder aux journaux d\'appels de votre téléphone ?"</string>
     <string name="permgrouplab_phone" msgid="5229115638567440675">"Téléphone"</string>
     <string name="permgroupdesc_phone" msgid="6234224354060641055">"effectuer et gérer des appels téléphoniques"</string>
     <string name="permgrouprequest_phone" msgid="9166979577750581037">"Permettre à &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; de passer et gérer des appels téléphoniques ?"</string>

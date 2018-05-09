@@ -803,9 +803,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
     private int mCurrentUserId;
 
-    /* Whether accessibility is magnifying the screen */
-    private boolean mScreenMagnificationActive;
-
     // Maps global key codes to the components that will handle them.
     private GlobalKeyManager mGlobalKeyManager;
 
@@ -6092,14 +6089,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 && (!isNavBarVirtKey || mNavBarVirtualKeyHapticFeedbackEnabled)
                 && event.getRepeatCount() == 0;
 
-        // Cancel any pending remote recents animations before handling the button itself. In the
-        // case where we are going home and the recents animation has already started, just cancel
-        // the recents animation, leaving the home stack in place for the pending start activity
-        if (isNavBarVirtKey && !down && !canceled) {
-            boolean isHomeKey = keyCode == KeyEvent.KEYCODE_HOME;
-            mActivityManagerInternal.cancelRecentsAnimation(!isHomeKey);
-        }
-
         // Handle special keys.
         switch (keyCode) {
             case KeyEvent.KEYCODE_BACK: {
@@ -8420,11 +8409,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
      */
     private int configureNavBarOpacity(int visibility, boolean dockedStackVisible,
             boolean freeformStackVisible, boolean isDockedDividerResizing) {
-        if (mScreenMagnificationActive) {
-            // When the screen is magnified, the nav bar should be opaque since its background
-            // can vary as the user pans and zooms
-            visibility = setNavBarOpaqueFlag(visibility);
-        } else if (mNavBarOpacityMode == NAV_BAR_OPAQUE_WHEN_FREEFORM_OR_DOCKED) {
+        if (mNavBarOpacityMode == NAV_BAR_OPAQUE_WHEN_FREEFORM_OR_DOCKED) {
             if (dockedStackVisible || freeformStackVisible || isDockedDividerResizing) {
                 visibility = setNavBarOpaqueFlag(visibility);
             }
@@ -8576,14 +8561,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             return true;
         }
         return false;
-    }
-
-    @Override
-    public void onScreenMagnificationStateChanged(boolean active) {
-        synchronized (mWindowManagerFuncs.getWindowManagerLock()) {
-            mScreenMagnificationActive = active;
-            updateSystemUiVisibilityLw();
-        }
     }
 
     @Override

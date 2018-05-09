@@ -168,7 +168,7 @@
     <string name="accessibility_bluetooth_tether" msgid="4102784498140271969">"ဘလူးတုသ်သုံး၍ ချိတ်ဆက်ခြင်း"</string>
     <string name="accessibility_airplane_mode" msgid="834748999790763092">"လေယာဥ်ပျံပေါ်အသုံးပြုသောစနစ်။"</string>
     <string name="accessibility_vpn_on" msgid="5993385083262856059">"VPN ကို ဖွင့်ထားသည်။"</string>
-    <string name="accessibility_no_sims" msgid="3957997018324995781">"SIM ကဒ် မရှိပါ"</string>
+    <string name="accessibility_no_sims" msgid="3957997018324995781">"SIM ကတ် မရှိပါ"</string>
     <string name="carrier_network_change_mode" msgid="8149202439957837762">"ဝန်ဆောင်မှုပေးသူ ကွန်ရက် ပြောင်းလဲနေသည်။"</string>
     <string name="accessibility_battery_details" msgid="7645516654955025422">"ဘက်ထရီ အသေးစိတ် အချက်အလက်များကို ဖွင့်ပါ"</string>
     <string name="accessibility_battery_level" msgid="7451474187113371965">"ဘတ္တရီ <xliff:g id="NUMBER">%d</xliff:g> ရာခိုင်နှုန်း။"</string>
@@ -368,6 +368,8 @@
     <string name="recents_accessibility_split_screen_top" msgid="9056056469282256287">"မျက်နှာပြင်ကို အပေါ်သို့ ခွဲရန်"</string>
     <string name="recents_accessibility_split_screen_left" msgid="8987144699630620019">"မျက်နှာပြင်ကို ဘယ်ဘက်သို့ ခွဲရန်"</string>
     <string name="recents_accessibility_split_screen_right" msgid="275069779299592867">"မျက်နှာပြင်ကို ညာဘက်သို့ ခွဲရန်"</string>
+    <!-- no translation found for quick_step_accessibility_toggle_overview (7171470775439860480) -->
+    <skip />
     <string name="expanded_header_battery_charged" msgid="5945855970267657951">"အားသွင်းပြီး"</string>
     <string name="expanded_header_battery_charging" msgid="205623198487189724">"အားသွင်းနေ"</string>
     <string name="expanded_header_battery_charging_with_time" msgid="457559884275395376">"<xliff:g id="CHARGING_TIME">%s</xliff:g> ပြည်သည့် အထိ"</string>
@@ -541,6 +543,12 @@
     <string name="volume_stream_content_description_mute" msgid="3625049841390467354">"%1$s။ အသံပိတ်ရန် တို့ပါ။ အများသုံးစွဲနိုင်မှု ဝန်ဆောင်မှုများကို အသံပိတ်ထားနိုင်ပါသည်။"</string>
     <string name="volume_stream_content_description_vibrate_a11y" msgid="6427727603978431301">"%1$s။ တုန်ခါခြင်းသို့ သတ်မှတ်ရန်တို့ပါ။"</string>
     <string name="volume_stream_content_description_mute_a11y" msgid="8995013018414535494">"%1$s။ အသံတိတ်ရန် တို့ပါ။"</string>
+    <!-- no translation found for volume_ringer_hint_mute (9199811307292269601) -->
+    <skip />
+    <!-- no translation found for volume_ringer_hint_unmute (6602880133293060368) -->
+    <skip />
+    <!-- no translation found for volume_ringer_hint_vibrate (4036802135666515202) -->
+    <skip />
     <string name="volume_dialog_title" msgid="7272969888820035876">"%s အသံအတိုးအလျှော့ ခလုတ်များ"</string>
     <string name="volume_dialog_ringer_guidance_ring" msgid="3360373718388509040">"ခေါ်ဆိုမှုများနှင့် အကြောင်းကြားချက်များအတွက် အသံမြည်နှုန်း (<xliff:g id="VOLUME_LEVEL">%1$s</xliff:g>) ဖြစ်သည်"</string>
     <string name="output_title" msgid="5355078100792942802">"မီဒီယာ အထွက်"</string>
@@ -606,17 +614,20 @@
     <string name="inline_minimize_button" msgid="966233327974702195">"ချုံ့ရန်"</string>
     <string name="inline_keep_showing_app" msgid="1723113469580031041">"ဤအက်ပ်ထံမှ အကြောင်းကြားချက်များကို ဆက်ပြလိုပါသလား။"</string>
     <string name="notification_unblockable_desc" msgid="1037434112919403708">"ဤအကြောင်းကြားချက်များကို ပိတ်၍မရပါ"</string>
-    <string name="notification_appops_camera_active" msgid="730959943016785931">"ကင်မရာ"</string>
-    <string name="notification_appops_microphone_active" msgid="1546319728924580686">"မိုက်ခရိုဖုန်း"</string>
-    <string name="notification_appops_overlay_active" msgid="633813008357934729">"သင့်မျက်နှာပြင်ပေါ်ရှိ အခြားအက်ပ်များပေါ်တွင် ပြသခြင်း"</string>
-    <plurals name="notification_appops" formatted="false" msgid="1258122060887196817">
-      <item quantity="other">ဤအက်ပ်သည် <xliff:g id="PERFORMING_ACTIVITY_1">%1$s</xliff:g> နှင့် <xliff:g id="PERFORMING_ACTIVITY_2">%2$s</xliff:g>။</item>
-      <item quantity="one">ဤအက်ပ်သည် <xliff:g id="PERFORMING_ACTIVITY_0">%1$s</xliff:g>။</item>
-    </plurals>
-    <plurals name="notification_using" formatted="false" msgid="2211008461429037973">
-      <item quantity="other"><xliff:g id="PERFORMING_ACTIVITY_1">%1$s</xliff:g> နှင့် <xliff:g id="PERFORMING_ACTIVITY_2">%2$s</xliff:g> ကို အသုံးပြုနေပါသည်</item>
-      <item quantity="one"><xliff:g id="PERFORMING_ACTIVITY_0">%1$s</xliff:g> ကို အသုံးပြုနေပါသည်</item>
-    </plurals>
+    <!-- no translation found for appops_camera (8100147441602585776) -->
+    <skip />
+    <!-- no translation found for appops_microphone (741508267659494555) -->
+    <skip />
+    <!-- no translation found for appops_overlay (6165912637560323464) -->
+    <skip />
+    <!-- no translation found for appops_camera_mic (1576901651150187433) -->
+    <skip />
+    <!-- no translation found for appops_camera_overlay (8869400080809298814) -->
+    <skip />
+    <!-- no translation found for appops_mic_overlay (4835157962857919804) -->
+    <skip />
+    <!-- no translation found for appops_camera_mic_overlay (6718768197048030993) -->
+    <skip />
     <string name="notification_appops_settings" msgid="1028328314935908050">"ဆက်တင်များ"</string>
     <string name="notification_appops_ok" msgid="1156966426011011434">"OK"</string>
     <string name="notification_channel_controls_opened_accessibility" msgid="6553950422055908113">"<xliff:g id="APP_NAME">%1$s</xliff:g> အတွက် အကြောင်းကြားချက်ထိန်းချုပ်မှုများကို ဖွင့်ထားသည်"</string>
@@ -852,5 +863,5 @@
     <string name="auto_saver_enabled_text" msgid="874711029884777579">"ဘက်ထရီ <xliff:g id="PERCENTAGE">%d</xliff:g>%% အောက် ရောက်သွားသည်နှင့် \'ဘက်ထရီ အားထိန်း\' အလိုအလျောက် ဖွင့်ပါမည်။"</string>
     <string name="open_saver_setting_action" msgid="8314624730997322529">"ဆက်တင်များ"</string>
     <string name="auto_saver_okay_action" msgid="2701221740227683650">"ရပါပြီ"</string>
-    <string name="heap_dump_tile_name" msgid="9141031328971226374">"SysUI အပုံ ပစ်ခြင်း"</string>
+    <string name="heap_dump_tile_name" msgid="9141031328971226374">"Dump SysUI Heap"</string>
 </resources>

@@ -266,6 +266,7 @@ public class FingerprintUnlockController extends KeyguardUpdateMonitorCallback {
     }
 
     private void showBouncer() {
+        mStatusBarKeyguardViewManager.showBouncer(false);
         mStatusBarKeyguardViewManager.animateCollapsePanels(
                 FINGERPRINT_COLLAPSE_SPEEDUP_FACTOR);
         mPendingShowBouncer = false;

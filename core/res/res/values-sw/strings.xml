@@ -289,12 +289,9 @@
     <string name="permgrouplab_camera" msgid="4820372495894586615">"Kamera"</string>
     <string name="permgroupdesc_camera" msgid="3250611594678347720">"ipige picha na kurekodi video"</string>
     <string name="permgrouprequest_camera" msgid="1299833592069671756">"Ungependa kuiruhusu &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ipige picha na kurekodi video?"</string>
-    <!-- no translation found for permgrouplab_calllog (8798646184930388160) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_calllog (3006237336748283775) -->
-    <skip />
-    <!-- no translation found for permgrouprequest_calllog (8487355309583773267) -->
-    <skip />
+    <string name="permgrouplab_calllog" msgid="8798646184930388160">"Rekodi ya nambari za simu"</string>
+    <string name="permgroupdesc_calllog" msgid="3006237336748283775">"kusoma na kuandika rekodi ya nambari za simu"</string>
+    <string name="permgrouprequest_calllog" msgid="8487355309583773267">"Ungependa kuruhusu &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ifikie rekodi zako za nambari za simu?"</string>
     <string name="permgrouplab_phone" msgid="5229115638567440675">"Simu"</string>
     <string name="permgroupdesc_phone" msgid="6234224354060641055">"piga na udhibiti simu"</string>
     <string name="permgrouprequest_phone" msgid="9166979577750581037">"Ungependa kuiruhusu &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ipige na kudhibiti simu?"</string>
@@ -904,7 +901,7 @@
     </plurals>
     <string name="last_month" msgid="3959346739979055432">"Mwezi uliopita"</string>
     <string name="older" msgid="5211975022815554840">"Kuukuu zaidi"</string>
-    <string name="preposition_for_date" msgid="9093949757757445117">"tarehe <xliff:g id="DATE">%s</xliff:g>"</string>
+    <string name="preposition_for_date" msgid="9093949757757445117">"mnamo <xliff:g id="DATE">%s</xliff:g>"</string>
     <string name="preposition_for_time" msgid="5506831244263083793">"Saa <xliff:g id="TIME">%s</xliff:g>"</string>
     <string name="preposition_for_year" msgid="5040395640711867177">"ndani  ya <xliff:g id="YEAR">%s</xliff:g>"</string>
     <string name="day" msgid="8144195776058119424">"siku"</string>

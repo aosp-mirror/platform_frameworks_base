@@ -95,8 +95,7 @@
     <string name="accessibility_unlock_button" msgid="128158454631118828">"അണ്‍ലോക്ക് ചെയ്യുക"</string>
     <string name="accessibility_waiting_for_fingerprint" msgid="4808860050517462885">"ഫിംഗർപ്രിന്റിനായി കാക്കുന്നു"</string>
     <string name="accessibility_unlock_without_fingerprint" msgid="7541705575183694446">"നിങ്ങളുടെ ഫിംഗർപ്രിന്റ് ഉപയോഗിക്കാതെ അൺലോക്കുചെയ്യുക"</string>
-    <!-- no translation found for accessibility_scanning_face (769545173211758586) -->
-    <skip />
+    <string name="accessibility_scanning_face" msgid="769545173211758586">"മുഖം സ്കാൻ ചെയ്യുന്നു"</string>
     <string name="accessibility_send_smart_reply" msgid="7766727839703044493">"അയയ്ക്കുക"</string>
     <string name="unlock_label" msgid="8779712358041029439">"അൺലോക്കുചെയ്യുക"</string>
     <string name="phone_label" msgid="2320074140205331708">"ഫോൺ തുറക്കുക"</string>
@@ -369,6 +368,8 @@
     <string name="recents_accessibility_split_screen_top" msgid="9056056469282256287">"സ്ക്രീൻ മുകളിലേക്ക് സ്പ്ലിറ്റ് ചെയ്യുക"</string>
     <string name="recents_accessibility_split_screen_left" msgid="8987144699630620019">"സ്ക്രീൻ ഇടതുവശത്തേക്ക് സ്പ്ലിറ്റ് ചെയ്യുക"</string>
     <string name="recents_accessibility_split_screen_right" msgid="275069779299592867">"സ്ക്രീൻ വലതുവശത്തേക്ക് പിളർത്തുക"</string>
+    <!-- no translation found for quick_step_accessibility_toggle_overview (7171470775439860480) -->
+    <skip />
     <string name="expanded_header_battery_charged" msgid="5945855970267657951">"ചാർജായി"</string>
     <string name="expanded_header_battery_charging" msgid="205623198487189724">"ചാർജ്ജുചെയ്യുന്നു"</string>
     <string name="expanded_header_battery_charging_with_time" msgid="457559884275395376">"ഫുൾ ചാർജാകാൻ, <xliff:g id="CHARGING_TIME">%s</xliff:g>"</string>
@@ -542,6 +543,12 @@
     <string name="volume_stream_content_description_mute" msgid="3625049841390467354">"%1$s. മ്യൂട്ടുചെയ്യുന്നതിന് ടാപ്പുചെയ്യുക. ഉപയോഗസഹായി സേവനങ്ങൾ മ്യൂട്ടുചെയ്യപ്പെട്ടേക്കാം."</string>
     <string name="volume_stream_content_description_vibrate_a11y" msgid="6427727603978431301">"%1$s വൈബ്രേറ്റിലേക്ക് സജ്ജമാക്കുന്നതിന് ടാപ്പുചെയ്യുക."</string>
     <string name="volume_stream_content_description_mute_a11y" msgid="8995013018414535494">"%1$s മ്യൂട്ടുചെയ്യുന്നതിന് ടാപ്പുചെയ്യുക."</string>
+    <!-- no translation found for volume_ringer_hint_mute (9199811307292269601) -->
+    <skip />
+    <!-- no translation found for volume_ringer_hint_unmute (6602880133293060368) -->
+    <skip />
+    <!-- no translation found for volume_ringer_hint_vibrate (4036802135666515202) -->
+    <skip />
     <string name="volume_dialog_title" msgid="7272969888820035876">"%s ശബ്‌ദ നിയന്ത്രണങ്ങൾ"</string>
     <string name="volume_dialog_ringer_guidance_ring" msgid="3360373718388509040">"കോളുകളും അറിയിപ്പുകളും ലഭിക്കുമ്പോൾ റിംഗ് ചെയ്യും (<xliff:g id="VOLUME_LEVEL">%1$s</xliff:g>)"</string>
     <string name="output_title" msgid="5355078100792942802">"മീഡിയ ഔട്ട്പുട്ട്"</string>
@@ -607,17 +614,20 @@
     <string name="inline_minimize_button" msgid="966233327974702195">"ചെറുതാക്കുക‍"</string>
     <string name="inline_keep_showing_app" msgid="1723113469580031041">"ഈ ആപ്പിൽ നിന്നുള്ള അറിയിപ്പുകൾ തുടർന്നും കാണിക്കണോ?"</string>
     <string name="notification_unblockable_desc" msgid="1037434112919403708">"ഈ അറിയിപ്പുകൾ ഓഫാക്കാനാവില്ല"</string>
-    <string name="notification_appops_camera_active" msgid="730959943016785931">"ക്യാമറ"</string>
-    <string name="notification_appops_microphone_active" msgid="1546319728924580686">"മൈക്രോഫോൺ"</string>
-    <string name="notification_appops_overlay_active" msgid="633813008357934729">"നിങ്ങളുടെ സ്‌ക്രീനിലെ മറ്റ് ആപ്പുകൾക്ക് മുകളിൽ പ്രദർശിപ്പിക്കുന്നു"</string>
-    <plurals name="notification_appops" formatted="false" msgid="1258122060887196817">
-      <item quantity="other">ഈ ആപ്പ് <xliff:g id="PERFORMING_ACTIVITY_1">%1$s</xliff:g>, <xliff:g id="PERFORMING_ACTIVITY_2">%2$s</xliff:g> എന്നിവയാണ്.</item>
-      <item quantity="one">ഈ ആപ്പ് <xliff:g id="PERFORMING_ACTIVITY_0">%1$s</xliff:g> ആണ്.</item>
-    </plurals>
-    <plurals name="notification_using" formatted="false" msgid="2211008461429037973">
-      <item quantity="other"><xliff:g id="PERFORMING_ACTIVITY_1">%1$s</xliff:g>, <xliff:g id="PERFORMING_ACTIVITY_2">%2$s</xliff:g> എന്നിവ ഉപയോഗിക്കുന്നു</item>
-      <item quantity="one"><xliff:g id="PERFORMING_ACTIVITY_0">%1$s</xliff:g> ഉപയോഗിക്കുന്നു</item>
-    </plurals>
+    <!-- no translation found for appops_camera (8100147441602585776) -->
+    <skip />
+    <!-- no translation found for appops_microphone (741508267659494555) -->
+    <skip />
+    <!-- no translation found for appops_overlay (6165912637560323464) -->
+    <skip />
+    <!-- no translation found for appops_camera_mic (1576901651150187433) -->
+    <skip />
+    <!-- no translation found for appops_camera_overlay (8869400080809298814) -->
+    <skip />
+    <!-- no translation found for appops_mic_overlay (4835157962857919804) -->
+    <skip />
+    <!-- no translation found for appops_camera_mic_overlay (6718768197048030993) -->
+    <skip />
     <string name="notification_appops_settings" msgid="1028328314935908050">"ക്രമീകരണം"</string>
     <string name="notification_appops_ok" msgid="1156966426011011434">"ശരി"</string>
     <string name="notification_channel_controls_opened_accessibility" msgid="6553950422055908113">"<xliff:g id="APP_NAME">%1$s</xliff:g> ആപ്പിന്റെ അറിയിപ്പ് നിയന്ത്രണങ്ങൾ തുറന്നു"</string>
@@ -853,6 +863,5 @@
     <string name="auto_saver_enabled_text" msgid="874711029884777579">"ബാറ്ററി <xliff:g id="PERCENTAGE">%d</xliff:g>%%-ൽ താഴെയാകുമ്പോൾ, ബാറ്ററി ലാഭിക്കൽ സ്വമേധയാ ഓണാകും."</string>
     <string name="open_saver_setting_action" msgid="8314624730997322529">"ക്രമീകരണം"</string>
     <string name="auto_saver_okay_action" msgid="2701221740227683650">"മനസ്സിലായി"</string>
-    <!-- no translation found for heap_dump_tile_name (9141031328971226374) -->
-    <skip />
+    <string name="heap_dump_tile_name" msgid="9141031328971226374">"SysUI ഹീപ്പ് ഡമ്പ് ചെയ്യുക"</string>
 </resources>

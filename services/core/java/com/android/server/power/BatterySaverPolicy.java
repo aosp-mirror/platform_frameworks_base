@@ -29,6 +29,7 @@ import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.KeyValueListParser;
 import android.util.Slog;
+import android.view.accessibility.AccessibilityManager;
 
 import com.android.internal.R;
 import com.android.internal.annotations.GuardedBy;
@@ -98,7 +99,14 @@ public class BatterySaverPolicy extends ContentObserver {
      * @see #KEY_VIBRATION_DISABLED
      */
     @GuardedBy("mLock")
-    private boolean mVibrationDisabled;
+    private boolean mVibrationDisabledConfig;
+
+    /**
+     * Whether vibration should *really* be disabled -- i.e. {@link #mVibrationDisabledConfig}
+     * is true *and* {@link #mAccessibilityEnabled} is false.
+     */
+    @GuardedBy("mLock")
+    private boolean mVibrationDisabledEffective;
 
     /**
      * {@code true} if animation is disabled in battery saver mode.
@@ -226,6 +234,9 @@ public class BatterySaverPolicy extends ContentObserver {
     private ContentResolver mContentResolver;
 
     @GuardedBy("mLock")
+    private AccessibilityManager mAccessibilityManager;
+
+    @GuardedBy("mLock")
     private final List<BatterySaverPolicyListener> mListeners = new ArrayList<>();
 
     /**
@@ -246,6 +257,12 @@ public class BatterySaverPolicy extends ContentObserver {
     @GuardedBy("mLock")
     private ArrayMap<String, String> mFilesForNoninteractive;
 
+    /**
+     * Whether accessibility is enabled or not.
+     */
+    @GuardedBy("mLock")
+    private boolean mAccessibilityEnabled;
+
     public interface BatterySaverPolicyListener {
         void onBatterySaverPolicyChanged(BatterySaverPolicy policy);
     }
@@ -259,10 +276,16 @@ public class BatterySaverPolicy extends ContentObserver {
             mContext = context;
             mContentResolver = context.getContentResolver();
 
+            mAccessibilityManager = context.getSystemService(AccessibilityManager.class);
+
             mContentResolver.registerContentObserver(Settings.Global.getUriFor(
                     Settings.Global.BATTERY_SAVER_CONSTANTS), false, this);
             mContentResolver.registerContentObserver(Settings.Global.getUriFor(
                     Global.BATTERY_SAVER_DEVICE_SPECIFIC_CONSTANTS), false, this);
+
+            mAccessibilityManager.addAccessibilityStateChangeListener((enabled) -> {
+                refreshSettings();
+            });
         }
         onChange(true, null);
     }
@@ -289,6 +312,10 @@ public class BatterySaverPolicy extends ContentObserver {
 
     @Override
     public void onChange(boolean selfChange, Uri uri) {
+        refreshSettings();
+    }
+
+    private void refreshSettings() {
         final BatterySaverPolicyListener[] listeners;
         synchronized (mLock) {
             // Load the non-device-specific setting.
@@ -340,7 +367,7 @@ public class BatterySaverPolicy extends ContentObserver {
             Slog.wtf(TAG, "Bad battery saver constants: " + setting);
         }
 
-        mVibrationDisabled = parser.getBoolean(KEY_VIBRATION_DISABLED, true);
+        mVibrationDisabledConfig = parser.getBoolean(KEY_VIBRATION_DISABLED, true);
         mAnimationDisabled = parser.getBoolean(KEY_ANIMATION_DISABLED, false);
         mSoundTriggerDisabled = parser.getBoolean(KEY_SOUNDTRIGGER_DISABLED, true);
         mFullBackupDeferred = parser.getBoolean(KEY_FULLBACKUP_DEFERRED, true);
@@ -375,12 +402,18 @@ public class BatterySaverPolicy extends ContentObserver {
         mFilesForNoninteractive = (new CpuFrequencies()).parseString(
                 parser.getString(KEY_CPU_FREQ_NONINTERACTIVE, "")).toSysFileMap();
 
+        // Update the effective policy.
+        mAccessibilityEnabled = mAccessibilityManager.isEnabled();
+
+        mVibrationDisabledEffective = mVibrationDisabledConfig
+                && !mAccessibilityEnabled; // Don't disable vibration when accessibility is on.
+
         final StringBuilder sb = new StringBuilder();
 
         if (mForceAllAppsStandby) sb.append("A");
         if (mForceBackgroundCheck) sb.append("B");
 
-        if (mVibrationDisabled) sb.append("v");
+        if (mVibrationDisabledEffective) sb.append("v");
         if (mAnimationDisabled) sb.append("a");
         if (mSoundTriggerDisabled) sb.append("s");
         if (mFullBackupDeferred) sb.append("F");
@@ -446,7 +479,7 @@ public class BatterySaverPolicy extends ContentObserver {
                     return builder.setBatterySaverEnabled(mSoundTriggerDisabled)
                             .build();
                 case ServiceType.VIBRATION:
-                    return builder.setBatterySaverEnabled(mVibrationDisabled)
+                    return builder.setBatterySaverEnabled(mVibrationDisabledEffective)
                             .build();
                 case ServiceType.FORCE_ALL_APPS_STANDBY:
                     return builder.setBatterySaverEnabled(mForceAllAppsStandby)
@@ -504,7 +537,9 @@ public class BatterySaverPolicy extends ContentObserver {
             pw.println("    value: " + mDeviceSpecificSettings);
 
             pw.println();
-            pw.println("  " + KEY_VIBRATION_DISABLED + "=" + mVibrationDisabled);
+            pw.println("  mAccessibilityEnabled=" + mAccessibilityEnabled);
+            pw.println("  " + KEY_VIBRATION_DISABLED + ":config=" + mVibrationDisabledConfig);
+            pw.println("  " + KEY_VIBRATION_DISABLED + ":effective=" + mVibrationDisabledEffective);
             pw.println("  " + KEY_ANIMATION_DISABLED + "=" + mAnimationDisabled);
             pw.println("  " + KEY_FULLBACKUP_DEFERRED + "=" + mFullBackupDeferred);
             pw.println("  " + KEY_KEYVALUE_DEFERRED + "=" + mKeyValueBackupDeferred);

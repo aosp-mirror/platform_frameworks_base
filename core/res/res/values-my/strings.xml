@@ -291,12 +291,9 @@
     <string name="permgrouplab_camera" msgid="4820372495894586615">"ကင်မရာ"</string>
     <string name="permgroupdesc_camera" msgid="3250611594678347720">"ဓာတ်ပုံ ရိုက်ပြီးနောက် ဗွီဒီယို မှတ်တမ်းတင်ရန်"</string>
     <string name="permgrouprequest_camera" msgid="1299833592069671756">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; အား ဓာတ်ပုံနှင့် ဗီဒီယိုရိုက်ကူးခွင့် ပေးလိုပါသလား။"</string>
-    <!-- no translation found for permgrouplab_calllog (8798646184930388160) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_calllog (3006237336748283775) -->
-    <skip />
-    <!-- no translation found for permgrouprequest_calllog (8487355309583773267) -->
-    <skip />
+    <string name="permgrouplab_calllog" msgid="8798646184930388160">"ခေါ်ဆိုထားသော မှတ်တမ်းများ"</string>
+    <string name="permgroupdesc_calllog" msgid="3006237336748283775">"ဖုန်းခေါ်ဆိုထားသော မှတ်တမ်း ဖတ်ပြီး ရေးရန်"</string>
+    <string name="permgrouprequest_calllog" msgid="8487355309583773267">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; အား သင်၏ခေါ်ဆိုထားသော မှတ်တမ်းများကို သုံးခွင့်ပေးလိုပါသလား။"</string>
     <string name="permgrouplab_phone" msgid="5229115638567440675">"ဖုန်း"</string>
     <string name="permgroupdesc_phone" msgid="6234224354060641055">"ဖုန်းခေါ်ဆိုမှုများ ပြုလုပ်ရန်နှင့် စီမံရန်"</string>
     <string name="permgrouprequest_phone" msgid="9166979577750581037">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; အား ဖုန်းခေါ်ဆိုမှုများ ပြုလုပ်ခွင့်နှင့် စီမံခွင့်ပေးလိုပါသလား။"</string>
@@ -747,7 +744,7 @@
     <string name="faceunlock_multiple_failures" msgid="754137583022792429">"မျက်မှာမှတ် သော့ဖွင့်ခြင်း ခွင့်ပြုသော အကြိမ်ရေထက် ကျော်လွန်သွားပါပြီ"</string>
     <string name="lockscreen_missing_sim_message_short" msgid="5099439277819215399">"ဆင်းကဒ် မရှိပါ"</string>
     <string name="lockscreen_missing_sim_message" product="tablet" msgid="151659196095791474">"တက်ပလက်ထဲတွင်း ဆင်းကဒ် မရှိပါ"</string>
-    <string name="lockscreen_missing_sim_message" product="tv" msgid="1943633865476989599">"တီဗွီတွင် SIM ကဒ် မရှိပါ။"</string>
+    <string name="lockscreen_missing_sim_message" product="tv" msgid="1943633865476989599">"တီဗွီတွင် SIM ကတ် မရှိပါ။"</string>
     <string name="lockscreen_missing_sim_message" product="default" msgid="2186920585695169078">"ဖုန်းထဲတွင် ဆင်းကဒ် မရှိပါ"</string>
     <string name="lockscreen_missing_sim_instructions" msgid="5372787138023272615">"ဆင်းမ်ကဒ် ထည့်ပါ"</string>
     <string name="lockscreen_missing_sim_instructions_long" msgid="3526573099019319472">"ဆင်းမ်ကဒ် မရှိဘူး သို့မဟုတ် ဖတ်မရပါ။ ဆင်းမ်ကဒ် တစ်ခုကို ထည့်ပါ။"</string>
@@ -1387,7 +1384,7 @@
     </plurals>
     <string name="action_mode_done" msgid="7217581640461922289">"ပြီးပါပြီ"</string>
     <string name="progress_erasing" product="nosdcard" msgid="4521573321524340058">"USB သိုလှောင်မှု အချက်အလက်များ ဖျက်နေစဉ်…"</string>
-    <string name="progress_erasing" product="default" msgid="6596988875507043042">"SD ကဒ် အား ဖျက်နေစဉ်…"</string>
+    <string name="progress_erasing" product="default" msgid="6596988875507043042">"SD ကတ် အား ဖျက်နေစဉ်…"</string>
     <string name="share" msgid="1778686618230011964">"မျှဝေခြင်း"</string>
     <string name="find" msgid="4808270900322985960">"ရှာဖွေရန်"</string>
     <string name="websearch" msgid="4337157977400211589">"ဝဘ်တွင် ရှာရန်"</string>
@@ -1443,8 +1440,8 @@
     <string name="action_bar_home_description_format" msgid="7965984360903693903">"%1$s ၊ %2$s"</string>
     <string name="action_bar_home_subtitle_description_format" msgid="6985546530471780727">"%1$s ၊ %2$s ၊ %3$s"</string>
     <string name="storage_internal" msgid="3570990907910199483">"စက်တွင်းမျှဝေထားသည့် သိုလှောင်ခန်း"</string>
-    <string name="storage_sd_card" msgid="3282948861378286745">"SD ကဒ်"</string>
-    <string name="storage_sd_card_label" msgid="6347111320774379257">"<xliff:g id="MANUFACTURER">%s</xliff:g> SD ကဒ်"</string>
+    <string name="storage_sd_card" msgid="3282948861378286745">"SD ကတ်"</string>
+    <string name="storage_sd_card_label" msgid="6347111320774379257">"<xliff:g id="MANUFACTURER">%s</xliff:g> SD ကတ်"</string>
     <string name="storage_usb_drive" msgid="6261899683292244209">"USB ဒရိုက်ဗ်"</string>
     <string name="storage_usb_drive_label" msgid="4501418548927759953">"<xliff:g id="MANUFACTURER">%s</xliff:g> USB ဒရိုက်ဗ်"</string>
     <string name="storage_usb" msgid="3017954059538517278">"USBဖြင့် သိမ်းဆည်း"</string>
@@ -1613,9 +1610,9 @@
     <string name="mediasize_na_junior_legal" msgid="3309324162155085904">"ဂျူနီယာ လီဂယ်လ်"</string>
     <string name="mediasize_na_ledger" msgid="5567030340509075333">"လယ်ဂျာ"</string>
     <string name="mediasize_na_tabloid" msgid="4571735038501661757">"တက်ဘလွိုက်"</string>
-    <string name="mediasize_na_index_3x5" msgid="5182901917818625126">"အက္ခရာစဥ် အညွှန်း ကဒ် ၃x၅"</string>
-    <string name="mediasize_na_index_4x6" msgid="7687620625422312396">"အက္ခရာစဥ် အညွှန်း ကဒ် ၄x၆"</string>
-    <string name="mediasize_na_index_5x8" msgid="8834215284646872800">"အက္ခရာစဥ် အညွှန်း ကဒ် ၅x၈"</string>
+    <string name="mediasize_na_index_3x5" msgid="5182901917818625126">"အက္ခရာစဥ် အညွှန်း ကတ် ၃x၅"</string>
+    <string name="mediasize_na_index_4x6" msgid="7687620625422312396">"အက္ခရာစဥ် အညွှန်း ကတ် ၄x၆"</string>
+    <string name="mediasize_na_index_5x8" msgid="8834215284646872800">"အက္ခရာစဥ် အညွှန်း ကတ် ၅x၈"</string>
     <string name="mediasize_na_monarch" msgid="213639906956550754">"မိုနာချ့်"</string>
     <string name="mediasize_na_quarto" msgid="835778493593023223">"ကွာတို"</string>
     <string name="mediasize_na_foolscap" msgid="1573911237983677138">"ဖူးစကဒ်"</string>
