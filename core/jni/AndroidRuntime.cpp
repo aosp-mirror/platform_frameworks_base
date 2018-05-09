@@ -730,6 +730,12 @@ int AndroidRuntime::startVm(JavaVM** pJavaVM, JNIEnv** pEnv, bool zygote)
                        jittransitionweightOptBuf,
                        "-Xjittransitionweight:");
 
+    property_get("dalvik.vm.profilebootimage", propBuf, "");
+    if (strcmp(propBuf, "true") == 0) {
+        addOption("-Xps-profile-boot-class-path");
+        addOption("-Xps-profile-aot-code");
+    }
+
     /*
      * Madvise related options.
      */
