@@ -32,7 +32,7 @@ public final class ChannelImpressions implements Parcelable {
     private static final String TAG = "ExtAssistant.CI";
     private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
 
-    static final float DEFAULT_DISMISS_TO_VIEW_RATIO_LIMIT = .4f;
+    static final float DEFAULT_DISMISS_TO_VIEW_RATIO_LIMIT = .8f;
     static final int DEFAULT_STREAK_LIMIT = 2;
     static final String ATT_DISMISSALS = "dismisses";
     static final String ATT_VIEWS = "views";
