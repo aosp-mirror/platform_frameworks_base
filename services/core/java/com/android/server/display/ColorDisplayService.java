@@ -189,7 +189,7 @@ public final class ColorDisplayService extends SystemService
         mController = new ColorDisplayController(getContext(), mCurrentUser);
         mController.setListener(this);
 
-        setCoefficientMatrix(getContext(), DisplayTransformManager.isNativeModeEnabled());
+        setCoefficientMatrix(getContext(), DisplayTransformManager.needsLinearColorMatrix());
 
         // Prepare color transformation matrix.
         setMatrix(mController.getColorTemperature(), mMatrixNight);
@@ -293,7 +293,7 @@ public final class ColorDisplayService extends SystemService
             mColorMatrixAnimator.cancel();
         }
 
-        setCoefficientMatrix(getContext(), DisplayTransformManager.isColorModeNative(mode));
+        setCoefficientMatrix(getContext(), DisplayTransformManager.needsLinearColorMatrix(mode));
         setMatrix(mController.getColorTemperature(), mMatrixNight);
 
         final DisplayTransformManager dtm = getLocalService(DisplayTransformManager.class);
@@ -306,13 +306,12 @@ public final class ColorDisplayService extends SystemService
     }
 
     /**
-     * Set coefficients based on native mode. Use DisplayTransformManager#isNativeModeEnabled while
-     * setting is stable; when setting is changing, pass native mode selection directly.
+     * Set coefficients based on whether the color matrix is linear or not.
      */
-    private void setCoefficientMatrix(Context context, boolean isNative) {
-        final String[] coefficients = context.getResources().getStringArray(isNative
-                ? R.array.config_nightDisplayColorTemperatureCoefficientsNative
-                : R.array.config_nightDisplayColorTemperatureCoefficients);
+    private void setCoefficientMatrix(Context context, boolean needsLinear) {
+        final String[] coefficients = context.getResources().getStringArray(needsLinear
+                ? R.array.config_nightDisplayColorTemperatureCoefficients
+                : R.array.config_nightDisplayColorTemperatureCoefficientsNative);
         for (int i = 0; i < 9 && i < coefficients.length; i++) {
             mColorTempCoefficients[i] = Float.parseFloat(coefficients[i]);
         }

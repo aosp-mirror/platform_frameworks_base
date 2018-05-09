@@ -231,21 +231,19 @@ public class DisplayTransformManager {
     }
 
     /**
-     * Return true when colors are stretched from the working color space to the
-     * native color space.
+     * Return true when the color matrix works in linear space.
      */
-    public static boolean isNativeModeEnabled() {
+    public static boolean needsLinearColorMatrix() {
         return SystemProperties.getInt(PERSISTENT_PROPERTY_DISPLAY_COLOR,
-                DISPLAY_COLOR_MANAGED) != DISPLAY_COLOR_MANAGED;
+                DISPLAY_COLOR_UNMANAGED) != DISPLAY_COLOR_UNMANAGED;
     }
 
     /**
-     * Return true when the specified colorMode stretches colors from the
-     * working color space to the native color space.
+     * Return true when the specified colorMode requires the color matrix to
+     * work in linear space.
      */
-    public static boolean isColorModeNative(int colorMode) {
-        return !(colorMode == ColorDisplayController.COLOR_MODE_NATURAL ||
-                 colorMode == ColorDisplayController.COLOR_MODE_BOOSTED);
+    public static boolean needsLinearColorMatrix(int colorMode) {
+        return colorMode != ColorDisplayController.COLOR_MODE_SATURATED;
     }
 
     public boolean setColorMode(int colorMode, float[] nightDisplayMatrix) {
