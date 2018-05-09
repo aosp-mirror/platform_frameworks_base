@@ -149,6 +149,8 @@ final class ProcessRecord {
     String waitingToKill;       // Process is waiting to be killed when in the bg, and reason
     Object forcingToImportant;  // Token that is forcing this process to be important
     int adjSeq;                 // Sequence id for identifying oom_adj assignment cycles
+    int completedAdjSeq;        // Sequence id for identifying oom_adj assignment cycles
+    boolean containsCycle;      // Whether this app has encountered a cycle in the most recent update
     int lruSeq;                 // Sequence id for identifying LRU update cycles
     CompatibilityInfo compat;   // last used compatibility mode
     IBinder.DeathRecipient deathRecipient; // Who is watching for the death.
