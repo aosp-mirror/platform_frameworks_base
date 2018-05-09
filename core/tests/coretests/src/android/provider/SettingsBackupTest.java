@@ -357,6 +357,7 @@ public class SettingsBackupTest {
                     Settings.Global.POWER_MANAGER_CONSTANTS,
                     Settings.Global.PREFERRED_NETWORK_MODE,
                     Settings.Global.PRIV_APP_OOB_ENABLED,
+                    Settings.Global.PRIV_APP_OOB_LIST,
                     Settings.Global.PROVISIONING_APN_ALARM_DELAY_IN_MS,
                     Settings.Global.RADIO_BLUETOOTH,
                     Settings.Global.RADIO_CELL,

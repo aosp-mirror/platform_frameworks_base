@@ -8902,6 +8902,14 @@ public final class Settings {
         public static final String PRIV_APP_OOB_ENABLED = "priv_app_oob_enabled";
 
         /**
+         * Comma separated list of privileged package names, which will be running out-of-box APK.
+         * Default: "ALL"
+         *
+         * @hide
+         */
+        public static final String PRIV_APP_OOB_LIST = "priv_app_oob_list";
+
+        /**
          * The interval in milliseconds at which location requests will be throttled when they are
          * coming from the background.
          *
