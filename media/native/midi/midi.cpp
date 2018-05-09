@@ -87,36 +87,19 @@ enum {
 #define AMIDI_PACKET_OVERHEAD   9
 #define AMIDI_BUFFER_SIZE       (AMIDI_PACKET_SIZE - AMIDI_PACKET_OVERHEAD)
 
+// JNI IDs (see android_media_midi.cpp)
+namespace android { namespace midi {
 //  MidiDevice Fields
-static jobject deviceClassGlobalRef = nullptr;     // A GlobalRef for MidiDevice Class
-static jfieldID fidDeviceClosed = nullptr;         // MidiDevice.mIsDeviceClosed
-static jfieldID fidNativeHandle = nullptr;         // MidiDevice.mNativeHandle
-static jfieldID fidDeviceServerBinder = nullptr;   // MidiDevice.mDeviceServerBinder
-static jfieldID fidDeviceInfo = nullptr;           // MidiDevice.mDeviceInfo
+extern jfieldID gFidMidiNativeHandle;         // MidiDevice.mNativeHandle
+extern jfieldID gFidMidiDeviceServerBinder;   // MidiDevice.mDeviceServerBinder
+extern jfieldID gFidMidiDeviceInfo;           // MidiDevice.mDeviceInfo
 
 //  MidiDeviceInfo Fields
-static jobject deviceInfoClassGlobalRef = nullptr; // A GlobalRef for MidiDeviceInfoClass
-static jfieldID fidDeviceId = nullptr;             // MidiDeviceInfo.mId
+extern jfieldID mFidMidiDeviceId;             // MidiDeviceInfo.mId
+}}
+using namespace android::midi;
 
 static std::mutex openMutex; // Ensure that the device can be connected just once to 1 thread
-
-static void AMIDI_initJNI(JNIEnv *env) {
-    jclass deviceClass = android::FindClassOrDie(env, "android/media/midi/MidiDevice");
-    deviceClassGlobalRef = env->NewGlobalRef(deviceClass);
-
-    // MidiDevice Field IDs
-    fidDeviceClosed = android::GetFieldIDOrDie(env, deviceClass, "mIsDeviceClosed", "Z");
-    fidNativeHandle = android::GetFieldIDOrDie(env, deviceClass, "mNativeHandle", "J");
-    fidDeviceServerBinder = android::GetFieldIDOrDie(env, deviceClass,
-            "mDeviceServerBinder", "Landroid/os/IBinder;");
-    fidDeviceInfo = android::GetFieldIDOrDie(env, deviceClass,
-            "mDeviceInfo", "Landroid/media/midi/MidiDeviceInfo;");
-
-    // MidiDeviceInfo Field IDs
-    jclass deviceInfoClass = android::FindClassOrDie(env, "android/media/midi/MidiDeviceInfo");
-    deviceInfoClassGlobalRef = env->NewGlobalRef(deviceInfoClass);
-    fidDeviceId = android::GetFieldIDOrDie(env, deviceInfoClass, "mId", "I");
-}
 
 //// Handy debugging function.
 //static void AMIDI_logBuffer(const uint8_t *data, size_t numBytes) {
@@ -162,10 +145,6 @@ static media_status_t AMIDI_API AMIDI_getDeviceInfo(const AMidiDevice *device,
 media_status_t AMIDI_API AMidiDevice_fromJava(JNIEnv *env, jobject j_midiDeviceObj,
         AMidiDevice** devicePtrPtr)
 {
-    // Ensures JNI initialization is performed just once.
-    static std::once_flag initCallFlag;
-    std::call_once(initCallFlag, AMIDI_initJNI, env);
-
     if (j_midiDeviceObj == nullptr) {
         ALOGE("AMidiDevice_fromJava() invalid MidiDevice object.");
         return AMEDIA_ERROR_INVALID_OBJECT;
@@ -174,13 +153,13 @@ media_status_t AMIDI_API AMidiDevice_fromJava(JNIEnv *env, jobject j_midiDeviceO
     {
         std::lock_guard<std::mutex> guard(openMutex);
 
-        long handle = env->GetLongField(j_midiDeviceObj, fidNativeHandle);
+        long handle = env->GetLongField(j_midiDeviceObj, gFidMidiNativeHandle);
         if (handle != 0) {
             // Already opened by someone.
             return AMEDIA_ERROR_INVALID_OBJECT;
         }
 
-        jobject serverBinderObj = env->GetObjectField(j_midiDeviceObj, fidDeviceServerBinder);
+        jobject serverBinderObj = env->GetObjectField(j_midiDeviceObj, gFidMidiDeviceServerBinder);
         sp<IBinder> serverBinder = android::ibinderForJavaObject(env, serverBinderObj);
         if (serverBinder.get() == nullptr) {
             ALOGE("AMidiDevice_fromJava couldn't connect to native MIDI server.");
@@ -190,11 +169,11 @@ media_status_t AMIDI_API AMidiDevice_fromJava(JNIEnv *env, jobject j_midiDeviceO
         // don't check allocation failures, just abort..
         AMidiDevice* devicePtr = new AMidiDevice;
         devicePtr->server = new BpMidiDeviceServer(serverBinder);
-        jobject midiDeviceInfoObj = env->GetObjectField(j_midiDeviceObj, fidDeviceInfo);
-        devicePtr->deviceId = env->GetIntField(midiDeviceInfoObj, fidDeviceId);
+        jobject midiDeviceInfoObj = env->GetObjectField(j_midiDeviceObj, gFidMidiDeviceInfo);
+        devicePtr->deviceId = env->GetIntField(midiDeviceInfoObj, mFidMidiDeviceId);
 
         // Synchronize with the associated Java MidiDevice.
-        env->SetLongField(j_midiDeviceObj, fidNativeHandle, (long)devicePtr);
+        env->SetLongField(j_midiDeviceObj, gFidMidiNativeHandle, (long)devicePtr);
         env->GetJavaVM(&devicePtr->javaVM);
         devicePtr->midiDeviceObj = env->NewGlobalRef(j_midiDeviceObj);
 
@@ -220,17 +199,16 @@ media_status_t AMIDI_API AMidiDevice_release(const AMidiDevice *device)
     LOG_ALWAYS_FATAL_IF(err != JNI_OK, "AMidiDevice_release Error accessing JNIEnv err:%d", err);
 
     // Synchronize with the associated Java MidiDevice.
-    // env->CallVoidMethod(j_midiDeviceObj, midClearNativeHandle);
     {
         std::lock_guard<std::mutex> guard(openMutex);
-        long handle = env->GetLongField(device->midiDeviceObj, fidNativeHandle);
+        long handle = env->GetLongField(device->midiDeviceObj, gFidMidiNativeHandle);
         if (handle == 0) {
             // Not opened as native.
             ALOGE("AMidiDevice_release() device not opened in native client.");
             return AMEDIA_ERROR_INVALID_OBJECT;
         }
 
-        env->SetLongField(device->midiDeviceObj, fidNativeHandle, 0L);
+        env->SetLongField(device->midiDeviceObj, gFidMidiNativeHandle, 0L);
     }
     env->DeleteGlobalRef(device->midiDeviceObj);
 

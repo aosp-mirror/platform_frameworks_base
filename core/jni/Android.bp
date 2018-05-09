@@ -165,6 +165,7 @@ cc_library_shared {
         "android_media_JetPlayer.cpp",
         "android_media_MediaMetricsJNI.cpp",
         "android_media_MicrophoneInfo.cpp",
+        "android_media_midi.cpp",
         "android_media_RemoteDisplay.cpp",
         "android_media_ToneGenerator.cpp",
         "android_hardware_Camera.cpp",
