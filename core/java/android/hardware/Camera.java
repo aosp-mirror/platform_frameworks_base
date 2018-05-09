@@ -1660,23 +1660,29 @@ public class Camera {
      * @see ShutterCallback
      */
     public final boolean enableShutterSound(boolean enabled) {
-        if (!enabled) {
-            IBinder b = ServiceManager.getService(Context.AUDIO_SERVICE);
-            IAudioService audioService = IAudioService.Stub.asInterface(b);
-            try {
-                if (audioService.isCameraSoundForced()) return false;
-            } catch (RemoteException e) {
-                Log.e(TAG, "Audio service is unavailable for queries");
+        boolean canDisableShutterSound = true;
+        IBinder b = ServiceManager.getService(Context.AUDIO_SERVICE);
+        IAudioService audioService = IAudioService.Stub.asInterface(b);
+        try {
+            if (audioService.isCameraSoundForced()) {
+                canDisableShutterSound = false;
             }
+        } catch (RemoteException e) {
+            Log.e(TAG, "Audio service is unavailable for queries");
+        }
+        if (!enabled && !canDisableShutterSound) {
+            return false;
         }
         synchronized (mShutterSoundLock) {
-            if (enabled && mHasAppOpsPlayAudio) {
-                Log.i(TAG, "Shutter sound is not allowed by AppOpsManager");
-                return false;
-            }
+            mShutterSoundEnabledFromApp = enabled;
+            // Return the result of _enableShutterSound(enabled) in all cases.
+            // If the shutter sound can be disabled, disable it when the device is in DnD mode.
             boolean ret = _enableShutterSound(enabled);
-            if (ret) {
-                mShutterSoundEnabledFromApp = enabled;
+            if (enabled && !mHasAppOpsPlayAudio) {
+                Log.i(TAG, "Shutter sound is not allowed by AppOpsManager");
+                if (canDisableShutterSound) {
+                    _enableShutterSound(false);
+                }
             }
             return ret;
         }
@@ -1739,9 +1745,18 @@ public class Camera {
             }
             if (oldHasAppOpsPlayAudio != mHasAppOpsPlayAudio) {
                 if (!mHasAppOpsPlayAudio) {
+                    IBinder b = ServiceManager.getService(Context.AUDIO_SERVICE);
+                    IAudioService audioService = IAudioService.Stub.asInterface(b);
+                    try {
+                        if (audioService.isCameraSoundForced()) {
+                            return;
+                        }
+                    } catch (RemoteException e) {
+                        Log.e(TAG, "Audio service is unavailable for queries");
+                    }
                     _enableShutterSound(false);
                 } else {
-                    _enableShutterSound(mShutterSoundEnabledFromApp);
+                    enableShutterSound(mShutterSoundEnabledFromApp);
                 }
             }
         }
