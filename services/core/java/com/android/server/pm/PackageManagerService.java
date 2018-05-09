@@ -8804,7 +8804,7 @@ public class PackageManagerService extends IPackageManager.Stub
             // equal to the version on the /data partition. Throw an exception and use
             // the application already installed on the /data partition.
             throw new PackageManagerException(Log.WARN, "Package " + pkg.packageName + " at "
-                    + pkg.codePath + " ignored: updated version " + disabledPkgSetting.versionCode
+                    + pkg.codePath + " ignored: updated version " + pkgSetting.versionCode
                     + " better than this " + pkg.getLongVersionCode());
         }
 
