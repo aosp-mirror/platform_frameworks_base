@@ -244,8 +244,6 @@ interface IBackupManager {
      *     {@code null} and MUST NOT be {@code null} when dataManagementIntent is not {@code null}.
      * @throws SecurityException If the UID of the calling process differs from the package UID of
      *     {@code transportComponent} or if the caller does NOT have BACKUP permission.
-     *
-     * @hide
      */
     void updateTransportAttributes(in ComponentName transportComponent, in String name,
             in Intent configurationIntent, in String currentDestinationString,
@@ -256,6 +254,13 @@ interface IBackupManager {
      * android.permission.BACKUP permission to use this method.
      */
     String getCurrentTransport();
+
+     /**
+      * Returns the {@link ComponentName} of the host service of the selected transport or {@code
+      * null} if no transport selected or if the transport selected is not registered.  Callers must
+      * hold the android.permission.BACKUP permission to use this method.
+      */
+    ComponentName getCurrentTransportComponent();
 
     /**
      * Request a list of all available backup transports' names.  Callers must
@@ -296,8 +301,6 @@ interface IBackupManager {
      *                  the transport's name that is returned by {@link BackupTransport#name()}.
      * @param listener A listener object to get a callback on the transport being selected. It may
      *                 be {@code null}.
-     *
-     * @hide
      */
     void selectBackupTransportAsync(in ComponentName transport, ISelectBackupTransportCallback listener);
 
@@ -364,7 +367,6 @@ interface IBackupManager {
      * @param result In the case of a full backup measure operation, the estimated
      *        total file size that would result from the operation. Unused in all other
      *        cases.
-     * {@hide}
      */
     void opComplete(int token, long result);
 

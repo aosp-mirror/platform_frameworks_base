@@ -19,8 +19,8 @@ package com.android.server.backup;
 import android.annotation.Nullable;
 import android.app.backup.BackupManager;
 import android.app.backup.IBackupManager;
-import android.app.backup.IBackupObserver;
 import android.app.backup.IBackupManagerMonitor;
+import android.app.backup.IBackupObserver;
 import android.app.backup.IFullBackupRestoreObserver;
 import android.app.backup.IRestoreSession;
 import android.app.backup.ISelectBackupTransportCallback;
@@ -339,6 +339,17 @@ public class Trampoline extends IBackupManager.Stub {
     public String getCurrentTransport() throws RemoteException {
         BackupManagerServiceInterface svc = mService;
         return (svc != null) ? svc.getCurrentTransport() : null;
+    }
+
+    /**
+     * Returns the {@link ComponentName} of the host service of the selected transport or
+     * {@code null} if no transport selected or if the transport selected is not registered.
+     */
+    @Override
+    @Nullable
+    public ComponentName getCurrentTransportComponent() {
+        BackupManagerServiceInterface svc = mService;
+        return (svc != null) ? svc.getCurrentTransportComponent() : null;
     }
 
     @Override

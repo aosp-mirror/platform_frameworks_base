@@ -443,6 +443,27 @@ public class BackupManager {
     }
 
     /**
+     * Returns the {@link ComponentName} of the host service of the selected transport or {@code
+     * null} if no transport selected or if the transport selected is not registered.
+     *
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.BACKUP)
+    @Nullable
+    public ComponentName getCurrentTransportComponent() {
+        checkServiceBinder();
+        if (sService != null) {
+            try {
+                return sService.getCurrentTransportComponent();
+            } catch (RemoteException e) {
+                Log.e(TAG, "getCurrentTransportComponent() couldn't connect");
+            }
+        }
+        return null;
+    }
+
+    /**
      * Request a list of all available backup transports' names.
      *
      * @hide
