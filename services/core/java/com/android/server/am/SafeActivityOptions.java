@@ -192,7 +192,7 @@ class SafeActivityOptions {
         // component or has the START_TASKS_FROM_RECENTS permission
         if (options.getLaunchTaskId() != INVALID_TASK_ID
                 && !supervisor.mRecentTasks.isCallerRecents(callingUid)) {
-            final int startInTaskPerm = supervisor.mService.mAm.checkPermission(
+            final int startInTaskPerm = ActivityTaskManagerService.checkPermission(
                     START_TASKS_FROM_RECENTS, callingPid, callingUid);
             if (startInTaskPerm == PERMISSION_DENIED) {
                 final String msg = "Permission Denial: starting " + getIntentString(intent)

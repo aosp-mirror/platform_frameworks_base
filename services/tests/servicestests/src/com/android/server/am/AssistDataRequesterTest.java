@@ -113,7 +113,7 @@ public class AssistDataRequesterTest extends ActivityTestsBase {
         mHandler = new Handler(Looper.getMainLooper());
         mCallbacksLock = new Object();
         mCallbacks = new Callbacks();
-        mDataRequester = new AssistDataRequester(mContext, mAm, mWm, mAppOpsManager, mCallbacks,
+        mDataRequester = new AssistDataRequester(mContext, mWm, mAppOpsManager, mCallbacks,
                 mCallbacksLock, OP_ASSIST_STRUCTURE, OP_ASSIST_SCREENSHOT);
 
         // Gate the continuation of the assist data callbacks until we are ready within the tests

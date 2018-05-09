@@ -729,15 +729,15 @@ class ActivityStarter {
                     .getPendingRemoteAnimationRegistry()
                     .overrideOptionsIfNeeded(callingPackage, checkedOptions);
         }
-        if (mService.mAm.mController != null) {
+        if (mService.mController != null) {
             try {
                 // The Intent we give to the watcher has the extra data
                 // stripped off, since it can contain private information.
                 Intent watchIntent = intent.cloneFilter();
-                abort |= !mService.mAm.mController.activityStarting(watchIntent,
+                abort |= !mService.mController.activityStarting(watchIntent,
                         aInfo.applicationInfo.packageName);
             } catch (RemoteException e) {
-                mService.mAm.mController = null;
+                mService.mController = null;
             }
         }
 
@@ -844,7 +844,7 @@ class ActivityStarter {
         // one, check whether app switches are allowed.
         if (voiceSession == null && (stack.getResumedActivity() == null
                 || stack.getResumedActivity().info.applicationInfo.uid != realCallingUid)) {
-            if (!mService.mAm.checkAppSwitchAllowedLocked(callingPid, callingUid,
+            if (!mService.checkAppSwitchAllowedLocked(callingPid, callingUid,
                     realCallingPid, realCallingUid, "Activity start")) {
                 mController.addPendingActivityLaunch(new PendingActivityLaunch(r,
                         sourceRecord, startFlags, stack, callerApp));
@@ -853,17 +853,7 @@ class ActivityStarter {
             }
         }
 
-        if (mService.mAm.mDidAppSwitch) {
-            // This is the second allowed switch since we stopped switches,
-            // so now just generally allow switches.  Use case: user presses
-            // home (switches disabled, switch to home, mDidAppSwitch now true);
-            // user taps a home icon (coming from home so allowed, we hit here
-            // and now allow anyone to switch again).
-            mService.mAm.mAppSwitchesAllowedTime = 0;
-        } else {
-            mService.mAm.mDidAppSwitch = true;
-        }
-
+        mService.onStartActivitySetDidAppSwitch();
         mController.doPendingActivityLaunches(false);
 
         return startActivity(r, sourceRecord, voiceSession, voiceInteractor, startFlags,
@@ -1110,12 +1100,12 @@ class ActivityStarter {
                 // do so now.  This allows a clean switch, as we are waiting
                 // for the current activity to pause (so we will not destroy
                 // it), and have not yet started the next activity.
-                mService.mAm.enforceCallingPermission(android.Manifest.permission.CHANGE_CONFIGURATION,
+                mService.mAmInternal.enforceCallingPermission(android.Manifest.permission.CHANGE_CONFIGURATION,
                         "updateConfiguration()");
                 stack.mConfigWillChange = false;
                 if (DEBUG_CONFIGURATION) Slog.v(TAG_CONFIGURATION,
                         "Updating to new configuration after starting activity.");
-                mService.mAm.updateConfigurationLocked(globalConfig, null, false);
+                mService.updateConfigurationLocked(globalConfig, null, false);
             }
 
             if (outResult != null) {
@@ -1821,7 +1811,7 @@ class ActivityStarter {
         }
 
         // Get the virtual display id from ActivityManagerService.
-        int displayId = mService.mAm.mVr2dDisplayId;
+        int displayId = mService.mVr2dDisplayId;
         if (displayId != INVALID_DISPLAY) {
             if (DEBUG_STACK) {
                 Slog.d(TAG, "getSourceDisplayId :" + displayId);

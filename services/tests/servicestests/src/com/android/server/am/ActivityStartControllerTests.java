@@ -60,8 +60,8 @@ public class ActivityStartControllerTests extends ActivityTestsBase {
         mService = createActivityManagerService();
         mFactory = mock(Factory.class);
         mController = new ActivityStartController(mService.mActivityTaskManager, mService.mStackSupervisor, mFactory);
-        mStarter = spy(new ActivityStarter(mController, mService.mActivityTaskManager, mService.mStackSupervisor,
-                mock(ActivityStartInterceptor.class)));
+        mStarter = spy(new ActivityStarter(mController, mService.mActivityTaskManager,
+                mService.mStackSupervisor, mock(ActivityStartInterceptor.class)));
         doReturn(mStarter).when(mFactory).obtain();
     }
 

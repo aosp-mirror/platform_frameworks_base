@@ -94,7 +94,7 @@ public class RecentTasksTest extends ActivityTestsBase {
     private static int INVALID_STACK_ID = 999;
 
     private Context mContext = InstrumentationRegistry.getContext();
-    private ActivityManagerService mService;
+    private ActivityTaskManagerService mService;
     private ActivityDisplay mDisplay;
     private ActivityDisplay mOtherDisplay;
     private ActivityStack mStack;
@@ -146,8 +146,8 @@ public class RecentTasksTest extends ActivityTestsBase {
 
         mTaskPersister = new TestTaskPersister(mContext.getFilesDir());
         mService = setupActivityManagerService(new MyTestActivityManagerService(mContext),
-                new MyTestActivityTaskManagerService(mContext));
-        mRecentTasks = (TestRecentTasks) mService.mActivityTaskManager.getRecentTasks();
+                new MyTestActivityTaskManagerService(mContext)).mActivityTaskManager;
+        mRecentTasks = (TestRecentTasks) mService.getRecentTasks();
         mRecentTasks.loadParametersFromResources(mContext.getResources());
         mHomeStack = mService.mStackSupervisor.getDefaultDisplay().createStack(
                 WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_HOME, true /* onTop */);
@@ -674,9 +674,8 @@ public class RecentTasksTest extends ActivityTestsBase {
 
     @Test
     public void testNotRecentsComponent_denyApiAccess() throws Exception {
-        doReturn(PackageManager.PERMISSION_DENIED).when(mService).checkPermission(anyString(),
-                anyInt(), anyInt());
-
+        doReturn(PackageManager.PERMISSION_DENIED).when(mService)
+                .checkGetTasksPermission(anyString(), anyInt(), anyInt());
         // Expect the following methods to fail due to recents component not being set
         mRecentTasks.setIsCallerRecentsOverride(TestRecentTasks.DENY_THROW_SECURITY_EXCEPTION);
         testRecentTasksApis(false /* expectNoSecurityException */);
@@ -687,8 +686,8 @@ public class RecentTasksTest extends ActivityTestsBase {
 
     @Test
     public void testRecentsComponent_allowApiAccessWithoutPermissions() throws Exception {
-        doReturn(PackageManager.PERMISSION_DENIED).when(mService).checkPermission(anyString(),
-                anyInt(), anyInt());
+        doReturn(PackageManager.PERMISSION_DENIED).when(mService)
+                .checkGetTasksPermission(anyString(), anyInt(), anyInt());
 
         // Set the recents component and ensure that the following calls do not fail
         mRecentTasks.setIsCallerRecentsOverride(TestRecentTasks.GRANT);
@@ -697,58 +696,52 @@ public class RecentTasksTest extends ActivityTestsBase {
     }
 
     private void testRecentTasksApis(boolean expectCallable) {
-        assertSecurityException(expectCallable, () -> mService.mActivityTaskManager.removeStack(INVALID_STACK_ID));
+        assertSecurityException(expectCallable, () -> mService.removeStack(INVALID_STACK_ID));
         assertSecurityException(expectCallable,
-                () -> mService.mActivityTaskManager.removeStacksInWindowingModes(
-                        new int[] {WINDOWING_MODE_UNDEFINED}));
+                () -> mService.removeStacksInWindowingModes(new int[] {WINDOWING_MODE_UNDEFINED}));
         assertSecurityException(expectCallable,
-                () -> mService.mActivityTaskManager.removeStacksWithActivityTypes(
-                        new int[] {ACTIVITY_TYPE_UNDEFINED}));
+                () -> mService.removeStacksWithActivityTypes(new int[] {ACTIVITY_TYPE_UNDEFINED}));
         assertSecurityException(expectCallable, () -> mService.removeTask(0));
         assertSecurityException(expectCallable,
-                () -> mService.mActivityTaskManager.setTaskWindowingMode(
-                        0, WINDOWING_MODE_UNDEFINED, true));
+                () -> mService.setTaskWindowingMode(0, WINDOWING_MODE_UNDEFINED, true));
         assertSecurityException(expectCallable,
                 () -> mService.moveTaskToStack(0, INVALID_STACK_ID, true));
         assertSecurityException(expectCallable,
-                () -> mService.mActivityTaskManager.setTaskWindowingModeSplitScreenPrimary(0,
+                () -> mService.setTaskWindowingModeSplitScreenPrimary(0,
                         SPLIT_SCREEN_CREATE_MODE_TOP_OR_LEFT, true, true, new Rect(), true));
-        assertSecurityException(expectCallable, () -> mService.mActivityTaskManager.dismissSplitScreenMode(true));
-        assertSecurityException(expectCallable, () -> mService.mActivityTaskManager.dismissPip(true, 0));
+        assertSecurityException(expectCallable, () -> mService.dismissSplitScreenMode(true));
+        assertSecurityException(expectCallable, () -> mService.dismissPip(true, 0));
         assertSecurityException(expectCallable,
-                () -> mService.mActivityTaskManager.moveTopActivityToPinnedStack(INVALID_STACK_ID, new Rect()));
+                () -> mService.moveTopActivityToPinnedStack(INVALID_STACK_ID, new Rect()));
         assertSecurityException(expectCallable,
                 () -> mService.resizeStack(INVALID_STACK_ID, new Rect(), true, true, true, 0));
         assertSecurityException(expectCallable,
-                () -> mService.mActivityTaskManager.resizeDockedStack(new Rect(), new Rect(), new Rect(), new Rect(),
+                () -> mService.resizeDockedStack(new Rect(), new Rect(), new Rect(), new Rect(),
                         new Rect()));
         assertSecurityException(expectCallable,
-                () -> mService.mActivityTaskManager.resizePinnedStack(new Rect(), new Rect()));
-        assertSecurityException(expectCallable, () -> mService.mActivityTaskManager.getAllStackInfos());
+                () -> mService.resizePinnedStack(new Rect(), new Rect()));
+        assertSecurityException(expectCallable, () -> mService.getAllStackInfos());
         assertSecurityException(expectCallable,
-                () -> mService.mActivityTaskManager.getStackInfo(WINDOWING_MODE_UNDEFINED, ACTIVITY_TYPE_UNDEFINED));
+                () -> mService.getStackInfo(WINDOWING_MODE_UNDEFINED, ACTIVITY_TYPE_UNDEFINED));
         assertSecurityException(expectCallable, () -> {
             try {
-                mService.mActivityTaskManager.getFocusedStackInfo();
+                mService.getFocusedStackInfo();
             } catch (RemoteException e) {
                 // Ignore
             }
         });
         assertSecurityException(expectCallable,
-                () -> mService.mActivityTaskManager.moveTasksToFullscreenStack(INVALID_STACK_ID, true));
+                () -> mService.moveTasksToFullscreenStack(INVALID_STACK_ID, true));
         assertSecurityException(expectCallable,
-                () -> mService.mActivityTaskManager.startActivityFromRecents(0, new Bundle()));
-        assertSecurityException(expectCallable,
-                () -> mService.mActivityTaskManager.getTaskSnapshot(0, true));
-        assertSecurityException(expectCallable,
-                () -> mService.mActivityTaskManager.registerTaskStackListener(null));
-        assertSecurityException(expectCallable,
-                () -> mService.mActivityTaskManager.unregisterTaskStackListener(null));
-        assertSecurityException(expectCallable, () -> mService.mActivityTaskManager.getTaskDescription(0));
-        assertSecurityException(expectCallable, () -> mService.mActivityTaskManager.cancelTaskWindowTransition(0));
-        assertSecurityException(expectCallable, () -> mService.mActivityTaskManager.startRecentsActivity(null, null,
+                () -> mService.startActivityFromRecents(0, new Bundle()));
+        assertSecurityException(expectCallable,() -> mService.getTaskSnapshot(0, true));
+        assertSecurityException(expectCallable,() -> mService.registerTaskStackListener(null));
+        assertSecurityException(expectCallable,() -> mService.unregisterTaskStackListener(null));
+        assertSecurityException(expectCallable, () -> mService.getTaskDescription(0));
+        assertSecurityException(expectCallable, () -> mService.cancelTaskWindowTransition(0));
+        assertSecurityException(expectCallable, () -> mService.startRecentsActivity(null, null,
                 null));
-        assertSecurityException(expectCallable, () -> mService.mActivityTaskManager.cancelRecentsAnimation(true));
+        assertSecurityException(expectCallable, () -> mService.cancelRecentsAnimation(true));
         assertSecurityException(expectCallable, () -> mService.stopAppSwitches());
         assertSecurityException(expectCallable, () -> mService.resumeAppSwitches());
     }

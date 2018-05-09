@@ -21,6 +21,7 @@ import android.annotation.Nullable;
 import android.content.ComponentName;
 import android.content.IIntentSender;
 import android.content.Intent;
+import android.content.pm.ApplicationInfo;
 import android.content.res.Configuration;
 import android.os.Bundle;
 import android.os.IBinder;
@@ -40,6 +41,11 @@ import java.util.List;
  */
 public abstract class ActivityManagerInternal {
 
+
+    // Access modes for handleIncomingUser.
+    public static final int ALLOW_NON_FULL = 0;
+    public static final int ALLOW_NON_FULL_IN_PROFILE = 1;
+    public static final int ALLOW_FULL_ONLY = 2;
 
     /**
      * Grant Uri permissions from one app to another. This method only extends
@@ -63,15 +69,6 @@ public abstract class ActivityManagerInternal {
             String processName, String abiOverride, int uid, Runnable crashHandler);
 
     /**
-     * Called when a user has been deleted. This can happen during normal device usage
-     * or just at startup, when partially removed users are purged. Any state persisted by the
-     * ActivityManager should be purged now.
-     *
-     * @param userId The user being cleaned up.
-     */
-    public abstract void onUserRemoved(int userId);
-
-    /**
      * Kill foreground apps from the specified user.
      */
     public abstract void killForegroundAppsForUser(int userHandle);
@@ -93,15 +90,6 @@ public abstract class ActivityManagerInternal {
      */
     public abstract void updateDeviceIdleTempWhitelist(int[] appids, int changingAppId,
             boolean adding);
-
-    /**
-     * Updates and persists the {@link Configuration} for a given user.
-     *
-     * @param values the configuration to update
-     * @param userId the user to update the configuration for
-     */
-    public abstract void updatePersistentConfigurationForUser(@NonNull Configuration values,
-            int userId);
 
     /**
      * Get the procstate for the UID.  The return value will be between
@@ -155,17 +143,6 @@ public abstract class ActivityManagerInternal {
     public abstract void clearSavedANRState();
 
     /**
-     * Set a uid that is allowed to bypass stopped app switches, launching an app
-     * whenever it wants.
-     *
-     * @param type Type of the caller -- unique string the caller supplies to identify itself
-     * and disambiguate with other calles.
-     * @param uid The uid of the app to be allowed, or -1 to clear the uid for this type.
-     * @param userId The user it is allowed for.
-     */
-    public abstract void setAllowAppSwitches(@NonNull String type, int uid, int userId);
-
-    /**
      * @return true if runtime was restarted, false if it's normal boot
      */
     public abstract boolean isRuntimeRestarted();
@@ -199,4 +176,32 @@ public abstract class ActivityManagerInternal {
      * Returns a list that contains the memory stats for currently running processes.
      */
     public abstract List<ProcessMemoryState> getMemoryStateForProcesses();
+
+    /**
+     * Checks to see if the calling pid is allowed to handle the user. Returns adjusted user id as
+     * needed.
+     */
+    public abstract int handleIncomingUser(int callingPid, int callingUid, int userId,
+            boolean allowAll, int allowMode, String name, String callerPackage);
+
+    /** Checks if the calling binder pid as the permission. */
+    public abstract void enforceCallingPermission(String permission, String func);
+
+    /** Returns the current user id. */
+    public abstract int getCurrentUserId();
+
+    /** Returns true if the user is running. */
+    public abstract boolean isUserRunning(int userId, int flags);
+
+    /** Trims memory usage in the system by removing/stopping unused application processes. */
+    public abstract void trimApplications();
+
+    /** Returns the screen compatibility mode for the given application. */
+    public abstract int getPackageScreenCompatMode(ApplicationInfo ai);
+
+    /** Sets the screen compatibility mode for the given application. */
+    public abstract void setPackageScreenCompatMode(ApplicationInfo ai, int mode);
+
+    /** Closes all system dialogs. */
+    public abstract void closeSystemDialogs(String reason);
 }

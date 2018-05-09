@@ -3956,7 +3956,9 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
             }
         }
 
-        IActivityController controller = mService.mAm.mController;
+        // TODO: There is a dup. of this block of code in ActivityTaskManagerService.finishActivity
+        // We should consolidate.
+        IActivityController controller = mService.mController;
         if (controller != null) {
             ActivityRecord next = topRunningActivityLocked(srec.appToken, 0);
             if (next != null) {
@@ -3965,7 +3967,7 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
                 try {
                     resumeOK = controller.activityResuming(next.packageName);
                 } catch (RemoteException e) {
-                    mService.mAm.mController = null;
+                    mService.mController = null;
                     Watchdog.getInstance().setActivityController(null);
                 }
 
@@ -4662,7 +4664,7 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
         // If we have a watcher, preflight the move before committing to it.  First check
         // for *other* available tasks, but if none are available, then try again allowing the
         // current task to be selected.
-        if (isTopStackOnDisplay() && mService.mAm.mController != null) {
+        if (isTopStackOnDisplay() && mService.mController != null) {
             ActivityRecord next = topRunningActivityLocked(null, taskId);
             if (next == null) {
                 next = topRunningActivityLocked(null, 0);
@@ -4671,9 +4673,9 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
                 // ask watcher if this is allowed
                 boolean moveOK = true;
                 try {
-                    moveOK = mService.mAm.mController.activityResuming(next.packageName);
+                    moveOK = mService.mController.activityResuming(next.packageName);
                 } catch (RemoteException e) {
-                    mService.mAm.mController = null;
+                    mService.mController = null;
                     Watchdog.getInstance().setActivityController(null);
                 }
                 if (!moveOK) {

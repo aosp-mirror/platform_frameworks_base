@@ -1220,7 +1220,7 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
      * @return whether this activity supports PiP multi-window and can be put in the pinned stack.
      */
     boolean supportsPictureInPicture() {
-        return service.mAm.mSupportsPictureInPicture && isActivityTypeStandardOrUndefined()
+        return service.mSupportsPictureInPicture && isActivityTypeStandardOrUndefined()
                 && info.supportsPictureInPicture();
     }
 
@@ -1233,7 +1233,7 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
         // An activity can not be docked even if it is considered resizeable because it only
         // supports picture-in-picture mode but has a non-resizeable resizeMode
         return super.supportsSplitScreenWindowingMode()
-                && service.mAm.mSupportsSplitScreenMultiWindow && supportsResizeableMultiWindow();
+                && service.mSupportsSplitScreenMultiWindow && supportsResizeableMultiWindow();
     }
 
     /**
@@ -1241,16 +1241,16 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
      *         stack.
      */
     boolean supportsFreeform() {
-        return service.mAm.mSupportsFreeformWindowManagement && supportsResizeableMultiWindow();
+        return service.mSupportsFreeformWindowManagement && supportsResizeableMultiWindow();
     }
 
     /**
      * @return whether this activity supports non-PiP multi-window.
      */
     private boolean supportsResizeableMultiWindow() {
-        return service.mAm.mSupportsMultiWindow && !isActivityTypeHome()
+        return service.mSupportsMultiWindow && !isActivityTypeHome()
                 && (ActivityInfo.isResizeableMode(info.resizeMode)
-                        || service.mAm.mForceResizableActivities);
+                        || service.mForceResizableActivities);
     }
 
     /**
@@ -2347,7 +2347,7 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
                 displayId, displayConfig, mayFreezeScreenLocked(app));
         if (config != null) {
             frozenBeforeDestroy = true;
-            if (!service.mAm.updateDisplayOverrideConfigurationLocked(config, this,
+            if (!service.updateDisplayOverrideConfigurationLocked(config, this,
                     false /* deferResume */, displayId)) {
                 mStackSupervisor.resumeFocusedStackTopActivityLocked();
             }
