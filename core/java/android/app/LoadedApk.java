@@ -736,7 +736,13 @@ public final class LoadedApk {
         }
 
         if (!libPaths.isEmpty() && SystemProperties.getBoolean(PROPERTY_NAME_APPEND_NATIVE, true)) {
-            ApplicationLoaders.getDefault().addNative(mClassLoader, libPaths);
+            // Temporarily disable logging of disk reads on the Looper thread as this is necessary
+            StrictMode.ThreadPolicy oldPolicy = StrictMode.allowThreadDiskReads();
+            try {
+                ApplicationLoaders.getDefault().addNative(mClassLoader, libPaths);
+            } finally {
+                StrictMode.setThreadPolicy(oldPolicy);
+            }
         }
 
         if (addedPaths != null && addedPaths.size() > 0) {
