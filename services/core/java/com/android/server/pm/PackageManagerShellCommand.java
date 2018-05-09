@@ -25,6 +25,7 @@ import static android.content.pm.PackageManager.INTENT_FILTER_DOMAIN_VERIFICATIO
 import android.accounts.IAccountManager;
 import android.app.ActivityManager;
 import android.app.ActivityManagerInternal;
+import android.app.Application;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.IIntentReceiver;
@@ -53,17 +54,20 @@ import android.content.pm.PermissionInfo;
 import android.content.pm.ResolveInfo;
 import android.content.pm.UserInfo;
 import android.content.pm.VersionedPackage;
+import android.content.pm.dex.ArtManager;
 import android.content.pm.dex.DexMetadataHelper;
+import android.content.pm.dex.ISnapshotRuntimeProfileCallback;
 import android.content.res.AssetManager;
 import android.content.res.Resources;
 import android.net.Uri;
-import android.os.BaseBundle;
 import android.os.Binder;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.IUserManager;
 import android.os.ParcelFileDescriptor;
+import android.os.ParcelFileDescriptor.AutoCloseInputStream;
+import android.os.ParcelFileDescriptor.AutoCloseOutputStream;
 import android.os.PersistableBundle;
 import android.os.Process;
 import android.os.RemoteException;
@@ -78,28 +82,42 @@ import android.text.TextUtils;
 import android.text.format.DateUtils;
 import android.util.ArraySet;
 import android.util.PrintWriterPrinter;
-
 import com.android.internal.content.PackageHelper;
 import com.android.internal.util.ArrayUtils;
 import com.android.server.LocalServices;
 import com.android.server.SystemConfig;
-
 import dalvik.system.DexFile;
-
-import libcore.io.IoUtils;
-
-import java.io.FileDescriptor;
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.net.URISyntaxException;
-import java.util.*;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
+import java.nio.file.attribute.FileAttribute;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.WeakHashMap;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.SynchronousQueue;
 import java.util.concurrent.TimeUnit;
+import libcore.io.IoUtils;
+import libcore.io.Streams;
 
 class PackageManagerShellCommand extends ShellCommand {
     /** Path for streaming APK content */
     private static final String STDIN_PATH = "-";
+    /** Path where ART profiles snapshots are dumped for the shell user */
+    private final static String ART_PROFILE_SNAPSHOT_DEBUG_LOCATION = "/data/misc/profman/";
 
     final IPackageManager mInterface;
     final private WeakHashMap<String, Resources> mResourceCache =
@@ -168,6 +186,8 @@ class PackageManagerShellCommand extends ShellCommand {
                     return runDexoptJob();
                 case "dump-profiles":
                     return runDumpProfiles();
+                case "snapshot-profile":
+                    return runSnapshotProfile();
                 case "uninstall":
                     return runUninstall();
                 case "clear":
@@ -1286,6 +1306,120 @@ class PackageManagerShellCommand extends ShellCommand {
         String packageName = getNextArg();
         mInterface.dumpProfiles(packageName);
         return 0;
+    }
+
+    private int runSnapshotProfile() throws RemoteException {
+        PrintWriter pw = getOutPrintWriter();
+
+        // Parse the arguments
+        final String packageName = getNextArg();
+        final boolean isBootImage = "android".equals(packageName);
+
+        String codePath = null;
+        String opt;
+        while ((opt = getNextArg()) != null) {
+            switch (opt) {
+                case "--code-path":
+                    if (isBootImage) {
+                        pw.write("--code-path cannot be used for the boot image.");
+                        return -1;
+                    }
+                    codePath = getNextArg();
+                    break;
+                default:
+                    pw.write("Unknown arg: " + opt);
+                    return -1;
+            }
+        }
+
+        // If no code path was explicitly requested, select the base code path.
+        String baseCodePath = null;
+        if (!isBootImage) {
+            PackageInfo packageInfo = mInterface.getPackageInfo(packageName, /* flags */ 0,
+                    /* userId */0);
+            if (packageInfo == null) {
+                pw.write("Package not found " + packageName);
+                return -1;
+            }
+            baseCodePath = packageInfo.applicationInfo.getBaseCodePath();
+            if (codePath == null) {
+                codePath = baseCodePath;
+            }
+        }
+
+        // Create the profile snapshot.
+        final SnapshotRuntimeProfileCallback callback = new SnapshotRuntimeProfileCallback();
+        // The calling package is needed to debug permission access.
+        final String callingPackage = (Binder.getCallingUid() == Process.ROOT_UID)
+                ? "root" : "com.android.shell";
+        final int profileType = isBootImage
+                ? ArtManager.PROFILE_BOOT_IMAGE : ArtManager.PROFILE_APPS;
+        if (!mInterface.getArtManager().isRuntimeProfilingEnabled(profileType, callingPackage)) {
+            pw.println("Error: Runtime profiling is not enabled");
+            return -1;
+        }
+        mInterface.getArtManager().snapshotRuntimeProfile(profileType, packageName,
+                codePath, callback, callingPackage);
+        if (!callback.waitTillDone()) {
+            pw.println("Error: callback not called");
+            return callback.mErrCode;
+        }
+
+        // Copy the snapshot profile to the output profile file.
+        try (InputStream inStream = new AutoCloseInputStream(callback.mProfileReadFd)) {
+            final String outputFileSuffix = isBootImage || Objects.equals(baseCodePath, codePath)
+                    ? "" : ("-" + new File(codePath).getName());
+            final String outputProfilePath =
+                    ART_PROFILE_SNAPSHOT_DEBUG_LOCATION + packageName + outputFileSuffix + ".prof";
+            try (OutputStream outStream = new FileOutputStream(outputProfilePath)) {
+                Streams.copy(inStream, outStream);
+            }
+        } catch (IOException e) {
+            pw.println("Error when reading the profile fd: " + e.getMessage());
+            e.printStackTrace(pw);
+            return -1;
+        }
+        return 0;
+    }
+
+    private static class SnapshotRuntimeProfileCallback
+            extends ISnapshotRuntimeProfileCallback.Stub {
+        private boolean mSuccess = false;
+        private int mErrCode = -1;
+        private ParcelFileDescriptor mProfileReadFd = null;
+        private CountDownLatch mDoneSignal = new CountDownLatch(1);
+
+        @Override
+        public void onSuccess(ParcelFileDescriptor profileReadFd) {
+            mSuccess = true;
+            try {
+                // We need to dup the descriptor. We are in the same process as system server
+                // and we will be receiving the same object (which will be closed on the
+                // server side).
+                mProfileReadFd = profileReadFd.dup();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            mDoneSignal.countDown();
+        }
+
+        @Override
+        public void onError(int errCode) {
+            mSuccess = false;
+            mErrCode = errCode;
+            mDoneSignal.countDown();
+        }
+
+        boolean waitTillDone() {
+            boolean done = false;
+            try {
+                // The time-out is an arbitrary large value. Since this is a local call the result
+                // will come very fast.
+                done = mDoneSignal.await(10000000, TimeUnit.MILLISECONDS);
+            } catch (InterruptedException ignored) {
+            }
+            return done && mSuccess;
+        }
     }
 
     private int runUninstall() throws RemoteException {
@@ -2762,7 +2896,13 @@ class PackageManagerShellCommand extends ShellCommand {
         pw.println("");
         pw.println("  dump-profiles TARGET-PACKAGE");
         pw.println("    Dumps method/class profile files to");
-        pw.println("    /data/misc/profman/TARGET-PACKAGE.txt");
+        pw.println("    " + ART_PROFILE_SNAPSHOT_DEBUG_LOCATION + "TARGET-PACKAGE.txt");
+        pw.println("");
+        pw.println("  snapshot-profile TARGET-PACKAGE [--code-path path]");
+        pw.println("    Take a snapshot of the package profiles to");
+        pw.println("    " + ART_PROFILE_SNAPSHOT_DEBUG_LOCATION
+                + "TARGET-PACKAGE[-code-path].prof");
+        pw.println("    If TARGET-PACKAGE=android it will take a snapshot of the boot image");
         pw.println("");
         pw.println("  set-home-activity [--user USER_ID] TARGET-COMPONENT");
         pw.println("    Set the default home activity (aka launcher).");
