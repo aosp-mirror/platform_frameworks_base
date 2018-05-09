@@ -4262,7 +4262,7 @@
         <receiver android:name="com.android.server.updates.CarrierIdInstallReceiver"
                   android:permission="android.permission.UPDATE_CONFIG">
             <intent-filter>
-                <action android:name="com.android.internal.intent.action.UPDATE_CARRIER_ID_DB" />
+                <action android:name="android.os.action.UPDATE_CARRIER_ID_DB" />
                 <data android:scheme="content" android:host="*" android:mimeType="*/*" />
             </intent-filter>
         </receiver>

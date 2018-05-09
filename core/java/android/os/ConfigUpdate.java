@@ -90,6 +90,14 @@ public final class ConfigUpdate {
     public static final String ACTION_UPDATE_NETWORK_WATCHLIST
             = "android.intent.action.UPDATE_NETWORK_WATCHLIST";
 
+    /**
+     * Update carrier id config file.
+     * @hide
+     */
+    @SystemApi
+    public static final String ACTION_UPDATE_CARRIER_ID_DB
+            = "android.os.action.UPDATE_CARRIER_ID_DB";
+
     private ConfigUpdate() {
     }
 }
