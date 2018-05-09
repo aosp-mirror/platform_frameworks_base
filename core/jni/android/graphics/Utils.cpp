@@ -49,6 +49,38 @@ SkStreamRewindable* AssetStreamAdaptor::onDuplicate() const {
     return NULL;
 }
 
+bool AssetStreamAdaptor::hasPosition() const {
+    return fAsset->seek(0, SEEK_CUR) != -1;
+}
+
+size_t AssetStreamAdaptor::getPosition() const {
+    const off64_t offset = fAsset->seek(0, SEEK_CUR);
+    if (offset == -1) {
+        SkDebugf("---- fAsset->seek(0, SEEK_CUR) failed\n");
+        return 0;
+    }
+
+    return offset;
+}
+
+bool AssetStreamAdaptor::seek(size_t position) {
+    if (fAsset->seek(position, SEEK_SET) == -1) {
+        SkDebugf("---- fAsset->seek(0, SEEK_SET) failed\n");
+        return false;
+    }
+
+    return true;
+}
+
+bool AssetStreamAdaptor::move(long offset) {
+    if (fAsset->seek(offset, SEEK_CUR) == -1) {
+        SkDebugf("---- fAsset->seek(%i, SEEK_CUR) failed\n", offset);
+        return false;
+    }
+
+    return true;
+}
+
 size_t AssetStreamAdaptor::read(void* buffer, size_t size) {
     ssize_t amount;
 
