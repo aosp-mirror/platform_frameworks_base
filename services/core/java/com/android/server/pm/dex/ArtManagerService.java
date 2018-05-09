@@ -34,6 +34,7 @@ import android.os.Binder;
 import android.os.Build;
 import android.os.Handler;
 import android.os.ParcelFileDescriptor;
+import android.os.Process;
 import android.os.RemoteException;
 import android.os.SystemProperties;
 import android.os.UserHandle;
@@ -44,6 +45,7 @@ import android.util.Slog;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.os.BackgroundThread;
+import com.android.internal.os.RoSystemProperties;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.Preconditions;
 import com.android.server.LocalServices;
@@ -106,7 +108,7 @@ public class ArtManagerService extends android.content.pm.dex.IArtManager.Stub {
         LocalServices.addService(ArtManagerInternal.class, new ArtManagerInternalImpl());
     }
 
-    private boolean checkPermission(int callingUid, String callingPackage) {
+    private boolean checkAndroidPermissions(int callingUid, String callingPackage) {
         // Callers always need this permission
         mContext.enforceCallingOrSelfPermission(
                 android.Manifest.permission.READ_RUNTIME_PROFILES, TAG);
@@ -125,11 +127,51 @@ public class ArtManagerService extends android.content.pm.dex.IArtManager.Stub {
         }
     }
 
+    /**
+     * Checks if the calling user is the shell user and if it is, it checks if it can
+     * to take a profile snapshot of the give package:
+     *   - on debuggable builds the shell user can take profile snapshots of any app.
+     *   - on non-debuggable builds the shell user can only take snapshots of debuggable apps.
+     *
+     * Returns true iff the callingUid is the shell uid and the shell is allowed snapshot profiles.
+     *
+     * Note that the root users will go through the regular {@link #checkAndroidPermissions) checks.
+     */
+    private boolean checkShellPermissions(@ProfileType int profileType, String packageName,
+            int callingUid) {
+        if (callingUid != Process.SHELL_UID) {
+            return false;
+        }
+        if (RoSystemProperties.DEBUGGABLE) {
+            return true;
+        }
+        if (profileType == ArtManager.PROFILE_BOOT_IMAGE) {
+            // The shell cannot profile the boot image on non-debuggable builds.
+            return false;
+        }
+        PackageInfo info = null;
+        try {
+            info = mPackageManager.getPackageInfo(packageName, /*flags*/ 0, /*userId*/ 0);
+        } catch (RemoteException ignored) {
+            // Should not happen.
+        }
+        if (info == null) {
+            return false;
+        }
+
+        // On user builds the shell can only profile debuggable apps.
+        return (info.applicationInfo.flags & ApplicationInfo.FLAG_DEBUGGABLE)
+                == ApplicationInfo.FLAG_DEBUGGABLE;
+    }
+
+
     @Override
     public void snapshotRuntimeProfile(@ProfileType int profileType, @Nullable String packageName,
             @Nullable String codePath, @NonNull ISnapshotRuntimeProfileCallback callback,
             String callingPackage) {
-        if (!checkPermission(Binder.getCallingUid(), callingPackage)) {
+        int callingUid = Binder.getCallingUid();
+        if (!checkShellPermissions(profileType, packageName, callingUid) &&
+                !checkAndroidPermissions(callingUid, callingPackage)) {
             try {
                 callback.onError(ArtManager.SNAPSHOT_FAILED_INTERNAL_ERROR);
             } catch (RemoteException ignored) {
@@ -266,7 +308,8 @@ public class ArtManagerService extends android.content.pm.dex.IArtManager.Stub {
 
     @Override
     public boolean isRuntimeProfilingEnabled(@ProfileType int profileType, String callingPackage) {
-        if (!checkPermission(Binder.getCallingUid(), callingPackage)) {
+        int callingUid = Binder.getCallingUid();
+        if (callingUid != Process.SHELL_UID && !checkAndroidPermissions(callingUid, callingPackage)) {
             return false;
         }
 
