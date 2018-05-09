@@ -16,6 +16,7 @@
 
 package android.view;
 
+import android.annotation.NonNull;
 import android.annotation.TestApi;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -810,7 +811,12 @@ public class KeyEvent extends InputEvent implements Parcelable {
     /** Key code constant: Refresh key. */
     public static final int KEYCODE_REFRESH = 285;
 
-    private static final int LAST_KEYCODE = KEYCODE_REFRESH;
+    /**
+     * Integer value of the last KEYCODE. Increases as new keycodes are added to KeyEvent.
+     * @hide
+     */
+    @TestApi
+    public static final int LAST_KEYCODE = KEYCODE_REFRESH;
 
     // NOTE: If you add a new keycode here you must also add it to:
     //  isSystem()
@@ -2889,25 +2895,34 @@ public class KeyEvent extends InputEvent implements Parcelable {
 
     /**
      * Gets a keycode by its symbolic name such as "KEYCODE_A" or an equivalent
-     * numeric constant such as "1001".
+     * numeric constant such as "29". For symbolic names,
+     * starting in {@link android.os.Build.VERSION_CODES#Q} the prefix "KEYCODE_" is optional.
      *
      * @param symbolicName The symbolic name of the keycode.
      * @return The keycode or {@link #KEYCODE_UNKNOWN} if not found.
      * @see #keycodeToString(int)
      */
-    public static int keyCodeFromString(String symbolicName) {
-        if (symbolicName.startsWith(LABEL_PREFIX)) {
-            symbolicName = symbolicName.substring(LABEL_PREFIX.length());
-            int keyCode = nativeKeyCodeFromString(symbolicName);
-            if (keyCode > 0) {
+    public static int keyCodeFromString(@NonNull String symbolicName) {
+        try {
+            int keyCode = Integer.parseInt(symbolicName);
+            if (keyCodeIsValid(keyCode)) {
                 return keyCode;
             }
-        }
-        try {
-            return Integer.parseInt(symbolicName, 10);
         } catch (NumberFormatException ex) {
-            return KEYCODE_UNKNOWN;
         }
+
+        if (symbolicName.startsWith(LABEL_PREFIX)) {
+            symbolicName = symbolicName.substring(LABEL_PREFIX.length());
+        }
+        int keyCode = nativeKeyCodeFromString(symbolicName);
+        if (keyCodeIsValid(keyCode)) {
+            return keyCode;
+        }
+        return KEYCODE_UNKNOWN;
+    }
+
+    private static boolean keyCodeIsValid(int keyCode) {
+        return keyCode >= KEYCODE_UNKNOWN && keyCode <= LAST_KEYCODE;
     }
 
     /**

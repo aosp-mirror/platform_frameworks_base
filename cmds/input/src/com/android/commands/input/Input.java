@@ -91,9 +91,6 @@ public class Input {
                     if (args.length > start) {
                         for (int i = start; i < args.length; i++) {
                             int keyCode = KeyEvent.keyCodeFromString(args[i]);
-                            if (keyCode == KeyEvent.KEYCODE_UNKNOWN) {
-                                keyCode = KeyEvent.keyCodeFromString("KEYCODE_" + args[i]);
-                            }
                             sendKeyEvent(inputSource, keyCode, longpress);
                         }
                         return;
