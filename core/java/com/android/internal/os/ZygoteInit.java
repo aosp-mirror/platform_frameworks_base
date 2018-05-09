@@ -671,6 +671,12 @@ public class ZygoteInit {
             ZygoteConnection.applyDebuggerSystemProperty(parsedArgs);
             ZygoteConnection.applyInvokeWithSystemProperty(parsedArgs);
 
+            boolean profileSystemServer = SystemProperties.getBoolean(
+                    "dalvik.vm.profilesystemserver", false);
+            if (profileSystemServer) {
+                parsedArgs.runtimeFlags |= Zygote.PROFILE_SYSTEM_SERVER;
+            }
+
             /* Request to fork the system server process */
             pid = Zygote.forkSystemServer(
                     parsedArgs.uid, parsedArgs.gid,
