@@ -27,13 +27,13 @@ import android.util.Log;
 
 import libcore.io.IoBridge;
 import libcore.io.Streams;
+import libcore.util.ArrayUtils;
 
 import java.io.FileDescriptor;
 import java.io.FilterOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.net.UnknownServiceException;
-import java.util.Arrays;
 
 /**
  * Stream that applies a {@link DrmManagerClient} transformation to data before
@@ -91,7 +91,7 @@ public class DrmOutputStream extends OutputStream {
 
     @Override
     public void write(byte[] buffer, int offset, int count) throws IOException {
-        Arrays.checkOffsetAndCount(buffer.length, offset, count);
+        ArrayUtils.throwsIfOutOfBounds(buffer.length, offset, count);
 
         final byte[] exactBuffer;
         if (count == buffer.length) {
