@@ -59,8 +59,7 @@ public abstract class AbstractEnableAdbPreferenceController extends
 
     @Override
     public boolean isAvailable() {
-        final UserManager um = mContext.getSystemService(UserManager.class);
-        return um != null && (um.isAdminUser() || um.isDemoUser());
+        return mContext.getSystemService(UserManager.class).isAdminUser();
     }
 
     @Override
