@@ -23,8 +23,10 @@ import android.service.notification.StatusBarNotification;
 import androidx.annotation.VisibleForTesting;
 import android.util.Log;
 
+import com.android.internal.logging.MetricsLogger;
 import com.android.systemui.Dependency;
 import com.android.systemui.plugins.statusbar.NotificationMenuRowPlugin;
+import com.android.systemui.statusbar.notification.NotificationCounters;
 import com.android.systemui.statusbar.phone.StatusBar;
 
 import java.util.Collections;
@@ -97,6 +99,9 @@ public class NotificationBlockingHelperManager {
             // We don't care about the touch origin (x, y) since we're opening guts without any
             // explicit user interaction.
             manager.openGuts(mBlockingHelperRow, 0, 0, menuRow.getLongpressMenuItem(mContext));
+
+            Dependency.get(MetricsLogger.class)
+                    .count(NotificationCounters.BLOCKING_HELPER_SHOWN, 1);
             return true;
         }
         return false;
