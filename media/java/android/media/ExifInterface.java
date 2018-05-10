@@ -2540,19 +2540,20 @@ public class ExifInterface {
                     if (position < 0) {
                         return -1;
                     }
-                    if (mPosition != position) {
-                        in.seek(position);
-                        mPosition = position;
-                    }
+                    try {
+                        if (mPosition != position) {
+                            in.seek(position);
+                            mPosition = position;
+                        }
 
-                    int bytesRead = in.read(buffer, offset, size);
-                    if (bytesRead < 0) {
-                        mPosition = -1; // need to seek on next read
-                        return -1;
-                    }
-
-                    mPosition += bytesRead;
-                    return bytesRead;
+                        int bytesRead = in.read(buffer, offset, size);
+                        if (bytesRead >= 0) {
+                            mPosition += bytesRead;
+                            return bytesRead;
+                        }
+                    } catch (IOException e) {}
+                    mPosition = -1; // need to seek on next read
+                    return -1;
                 }
 
                 @Override
