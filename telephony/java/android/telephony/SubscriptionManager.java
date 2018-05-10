@@ -1016,6 +1016,8 @@ public class SubscriptionManager {
             if (iSub != null) {
                 // FIXME: This returns 1 on success, 0 on error should should we return it?
                 iSub.addSubInfoRecord(iccId, slotIndex);
+            } else {
+                logd("[addSubscriptionInfoRecord]- ISub service is null");
             }
         } catch (RemoteException ex) {
             // ignore it
