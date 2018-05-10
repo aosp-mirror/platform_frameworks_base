@@ -74,6 +74,7 @@ public class FalsingManager implements SensorEventListener {
 
     private boolean mEnforceBouncer = false;
     private boolean mBouncerOn = false;
+    private boolean mBouncerOffOnDown = false;
     private boolean mSessionActive = false;
     private boolean mIsTouchScreen = true;
     private int mState = StatusBarState.SHADE;
@@ -459,10 +460,19 @@ public class FalsingManager implements SensorEventListener {
     public void onTouchEvent(MotionEvent event, int width, int height) {
         if (event.getAction() == MotionEvent.ACTION_DOWN) {
             mIsTouchScreen = event.isFromSource(InputDevice.SOURCE_TOUCHSCREEN);
+            // If the bouncer was not shown during the down event,
+            // we want the entire gesture going to HumanInteractionClassifier
+            mBouncerOffOnDown = !mBouncerOn;
         }
-        if (mSessionActive && !mBouncerOn) {
-            mDataCollector.onTouchEvent(event, width, height);
-            mHumanInteractionClassifier.onTouchEvent(event);
+        if (mSessionActive) {
+            if (!mBouncerOn) {
+                // In case bouncer is "visible", but onFullyShown has not yet been called,
+                // avoid adding the event to DataCollector
+                mDataCollector.onTouchEvent(event, width, height);
+            }
+            if (mBouncerOffOnDown) {
+                mHumanInteractionClassifier.onTouchEvent(event);
+            }
         }
     }
 

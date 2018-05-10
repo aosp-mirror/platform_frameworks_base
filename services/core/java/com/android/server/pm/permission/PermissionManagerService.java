@@ -620,9 +620,8 @@ public class PermissionManagerService {
                 enforcePermissionCapLocked(info, tree);
                 bp = new BasePermission(info.name, tree.getSourcePackageName(),
                         BasePermission.TYPE_DYNAMIC);
-            } else if (bp.isDynamic()) {
-                // TODO: switch this back to SecurityException
-                Slog.wtf(TAG, "Not allowed to modify non-dynamic permission "
+            } else if (!bp.isDynamic()) {
+                throw new SecurityException("Not allowed to modify non-dynamic permission "
                         + info.name);
             }
             changed = bp.addToTree(fixedLevel, info, tree);

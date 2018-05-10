@@ -66,6 +66,7 @@ TEST(GaugeMetricE2eTest, TestRandomSamplePulledEvents) {
         baseTimeNs, configAddedTimeNs, config, cfgKey);
     EXPECT_EQ(processor->mMetricsManagers.size(), 1u);
     EXPECT_TRUE(processor->mMetricsManagers.begin()->second->isConfigValid());
+    processor->mStatsPullerManager.ForceClearPullerCache();
 
     int startBucketNum = processor->mMetricsManagers.begin()->second->
             mAllMetricProducers[0]->getCurrentBucketNum();
@@ -211,6 +212,7 @@ TEST(GaugeMetricE2eTest, TestAllConditionChangesSamplePulledEvents) {
         baseTimeNs, configAddedTimeNs, config, cfgKey);
     EXPECT_EQ(processor->mMetricsManagers.size(), 1u);
     EXPECT_TRUE(processor->mMetricsManagers.begin()->second->isConfigValid());
+    processor->mStatsPullerManager.ForceClearPullerCache();
 
     int startBucketNum = processor->mMetricsManagers.begin()->second->
             mAllMetricProducers[0]->getCurrentBucketNum();
@@ -311,6 +313,7 @@ TEST(GaugeMetricE2eTest, TestRandomSamplePulledEvent_LateAlarm) {
         baseTimeNs, configAddedTimeNs, config, cfgKey);
     EXPECT_EQ(processor->mMetricsManagers.size(), 1u);
     EXPECT_TRUE(processor->mMetricsManagers.begin()->second->isConfigValid());
+    processor->mStatsPullerManager.ForceClearPullerCache();
 
     int startBucketNum = processor->mMetricsManagers.begin()->second->
             mAllMetricProducers[0]->getCurrentBucketNum();

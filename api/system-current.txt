@@ -3663,6 +3663,7 @@ package android.os {
   }
 
   public final class ConfigUpdate {
+    field public static final java.lang.String ACTION_UPDATE_CARRIER_ID_DB = "android.os.action.UPDATE_CARRIER_ID_DB";
     field public static final java.lang.String ACTION_UPDATE_CARRIER_PROVISIONING_URLS = "android.intent.action.UPDATE_CARRIER_PROVISIONING_URLS";
     field public static final java.lang.String ACTION_UPDATE_CT_LOGS = "android.intent.action.UPDATE_CT_LOGS";
     field public static final java.lang.String ACTION_UPDATE_INTENT_FIREWALL = "android.intent.action.UPDATE_INTENT_FIREWALL";

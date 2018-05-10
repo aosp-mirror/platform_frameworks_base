@@ -370,6 +370,14 @@ public class DividerSnapAlgorithm {
         return snapTarget;
     }
 
+    /**
+     * @return whether or not there are more than 1 split targets that do not include the two
+     * dismiss targets, used in deciding to display the middle target for accessibility
+     */
+    public boolean showMiddleSplitTargetForAccessibility() {
+        return (mTargets.size() - 2) > 1;
+    }
+
     public boolean isFirstSplitTargetAvailable() {
         return mFirstSplitTarget != mMiddleTarget;
     }

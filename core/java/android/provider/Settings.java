@@ -8902,6 +8902,14 @@ public final class Settings {
         public static final String PRIV_APP_OOB_ENABLED = "priv_app_oob_enabled";
 
         /**
+         * Comma separated list of privileged package names, which will be running out-of-box APK.
+         * Default: "ALL"
+         *
+         * @hide
+         */
+        public static final String PRIV_APP_OOB_LIST = "priv_app_oob_list";
+
+        /**
          * The interval in milliseconds at which location requests will be throttled when they are
          * coming from the background.
          *
@@ -10415,6 +10423,25 @@ public final class Settings {
          * @see com.android.server.am.ActivityManagerConstants
          */
         public static final String ACTIVITY_MANAGER_CONSTANTS = "activity_manager_constants";
+
+        /**
+         * App ops specific settings.
+         * This is encoded as a key=value list, separated by commas. Ex:
+         *
+         * "state_settle_time=10000"
+         *
+         * The following keys are supported:
+         *
+         * <pre>
+         * state_settle_time                (long)
+         * </pre>
+         *
+         * <p>
+         * Type: string
+         * @hide
+         * @see com.android.server.AppOpsService.Constants
+         */
+        public static final String APP_OPS_CONSTANTS = "app_ops_constants";
 
         /**
          * Device Idle (Doze) specific settings.

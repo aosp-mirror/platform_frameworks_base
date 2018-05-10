@@ -23,7 +23,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.media.AudioManager;
-import android.media.session.MediaSessionLegacyHelper;
+import android.media.session.MediaSessionManager;
 import android.os.UserHandle;
 import android.provider.Settings;
 import android.telephony.TelephonyManager;
@@ -48,6 +48,7 @@ public class PhoneFallbackEventHandler implements FallbackEventHandler {
     KeyguardManager mKeyguardManager;
     SearchManager mSearchManager;
     TelephonyManager mTelephonyManager;
+    MediaSessionManager mMediaSessionManager;
 
     public PhoneFallbackEventHandler(Context context) {
         mContext = context;
@@ -84,8 +85,7 @@ public class PhoneFallbackEventHandler implements FallbackEventHandler {
             case KeyEvent.KEYCODE_VOLUME_UP:
             case KeyEvent.KEYCODE_VOLUME_DOWN:
             case KeyEvent.KEYCODE_VOLUME_MUTE: {
-                MediaSessionLegacyHelper.getHelper(mContext).sendVolumeKeyEvent(
-                        event, AudioManager.USE_DEFAULT_STREAM_TYPE, false);
+                handleVolumeKeyEvent(event);
                 return true;
             }
 
@@ -216,8 +216,7 @@ public class PhoneFallbackEventHandler implements FallbackEventHandler {
             case KeyEvent.KEYCODE_VOLUME_DOWN:
             case KeyEvent.KEYCODE_VOLUME_MUTE: {
                 if (!event.isCanceled()) {
-                    MediaSessionLegacyHelper.getHelper(mContext).sendVolumeKeyEvent(
-                            event, AudioManager.USE_DEFAULT_STREAM_TYPE, false);
+                    handleVolumeKeyEvent(event);
                 }
                 return true;
             }
@@ -306,12 +305,25 @@ public class PhoneFallbackEventHandler implements FallbackEventHandler {
         return mAudioManager;
     }
 
+    MediaSessionManager getMediaSessionManager() {
+        if (mMediaSessionManager == null) {
+            mMediaSessionManager =
+                    (MediaSessionManager) mContext.getSystemService(Context.MEDIA_SESSION_SERVICE);
+        }
+        return mMediaSessionManager;
+    }
+
     void sendCloseSystemWindows() {
         PhoneWindow.sendCloseSystemWindows(mContext, null);
     }
 
+    private void handleVolumeKeyEvent(KeyEvent keyEvent) {
+        getMediaSessionManager().dispatchVolumeKeyEventAsSystemService(keyEvent,
+                AudioManager.USE_DEFAULT_STREAM_TYPE);
+    }
+
     private void handleMediaKeyEvent(KeyEvent keyEvent) {
-        MediaSessionLegacyHelper.getHelper(mContext).sendMediaButtonEvent(keyEvent, false);
+        getMediaSessionManager().dispatchMediaKeyEventAsSystemService(keyEvent);
     }
 
     private boolean isUserSetupComplete() {
