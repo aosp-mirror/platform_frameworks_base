@@ -426,9 +426,13 @@ public class RecentsAnimationController implements DeathRecipient {
             removeAnimation(taskAdapter);
         }
 
+        // Clear any pending failsafe runnables
+        mService.mH.removeCallbacks(mFailsafeRunnable);
+
         // Clear references to the runner
         unlinkToDeathOfRunner();
         mRunner = null;
+        mCanceled = true;
 
         // Clear associated input consumers
         mService.mInputMonitor.updateInputWindowsLw(true /*force*/);
