@@ -509,6 +509,36 @@ public class NotificationInfoTest extends SysuiTestCase {
                         anyString(), eq(TEST_UID), eq(true));
     }
 
+
+    @Test
+    public void testCloseControls_nonNullCheckSaveListenerDoesntDelayKeepShowing()
+            throws Exception {
+        NotificationInfo.CheckSaveListener listener =
+                mock(NotificationInfo.CheckSaveListener.class);
+        mNotificationInfo.bindNotification(mMockPackageManager, mMockINotificationManager,
+                TEST_PACKAGE_NAME, mNotificationChannel /* notificationChannel */,
+                10 /* numUniqueChannelsInRow */, mSbn, listener /* checkSaveListener */,
+                null /* onSettingsClick */, null /* onAppSettingsClick */ ,
+                false /* isNonblockable */, true /* isForBlockingHelper */,
+                true /* isUserSentimentNegative */);
+
+        NotificationGuts guts = spy(new NotificationGuts(mContext, null));
+        when(guts.getWindowToken()).thenReturn(mock(IBinder.class));
+        doNothing().when(guts).animateClose(anyInt(), anyInt(), anyBoolean());
+        doNothing().when(guts).setExposed(anyBoolean(), anyBoolean());
+        guts.setGutsContent(mNotificationInfo);
+        mNotificationInfo.setGutsParent(guts);
+
+        mNotificationInfo.findViewById(R.id.keep).performClick();
+
+        verify(mBlockingHelperManager).dismissCurrentBlockingHelper();
+        mTestableLooper.processAllMessages();
+        verify(mMockINotificationManager, times(1))
+                .setNotificationsEnabledWithImportanceLockForPackage(
+                        anyString(), eq(TEST_UID), eq(true));
+    }
+
+
     @Test
     public void testCloseControls_blockingHelperDismissedIfShown() throws Exception {
         mNotificationInfo.bindNotification(
