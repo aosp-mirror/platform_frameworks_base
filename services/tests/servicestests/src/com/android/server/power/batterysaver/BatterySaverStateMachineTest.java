@@ -125,7 +125,7 @@ public class BatterySaverStateMachineTest {
      */
     private class TestableBatterySaverStateMachine extends BatterySaverStateMachine {
         public TestableBatterySaverStateMachine() {
-            super(mMockContext, mMockBatterySaverController);
+            super(new Object(), mMockContext, mMockBatterySaverController);
         }
 
         @Override

@@ -38,6 +38,9 @@ import java.util.Date;
 /**
  * This class keeps track of battery drain rate.
  *
+ * IMPORTANT: This class shares the power manager lock, which is very low in the lock hierarchy.
+ * Do not call out with the lock held. (Settings provider is okay.)
+ *
  * TODO: The use of the terms "percent" and "level" in this class is not standard. Fix it.
  *
  * Test:
@@ -49,7 +52,7 @@ public class BatterySavingStats {
 
     private static final boolean DEBUG = BatterySaverPolicy.DEBUG;
 
-    private final Object mLock = new Object();
+    private final Object mLock;
 
     /** Whether battery saver is on or off. */
     interface BatterySaverState {
@@ -138,8 +141,6 @@ public class BatterySavingStats {
         }
     }
 
-    private static BatterySavingStats sInstance;
-
     private BatteryManagerInternal mBatteryManagerInternal;
     private final MetricsLogger mMetricsLogger;
 
@@ -177,21 +178,16 @@ public class BatterySavingStats {
     @GuardedBy("mLock")
     private boolean mSendTronLog;
 
-    /**
-     * Don't call it directly -- use {@link #getInstance()}. Not private for testing.
-     * @param metricsLogger
-     */
+    /** Visible for unit tests */
     @VisibleForTesting
-    BatterySavingStats(MetricsLogger metricsLogger) {
+    public BatterySavingStats(Object lock, MetricsLogger metricsLogger) {
+        mLock = lock;
         mBatteryManagerInternal = LocalServices.getService(BatteryManagerInternal.class);
         mMetricsLogger = metricsLogger;
     }
 
-    public static synchronized BatterySavingStats getInstance() {
-        if (sInstance == null) {
-            sInstance = new BatterySavingStats(new MetricsLogger());
-        }
-        return sInstance;
+    public BatterySavingStats(Object lock) {
+        this(lock, new MetricsLogger());
     }
 
     public void setSendTronLog(boolean send) {

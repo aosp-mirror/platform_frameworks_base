@@ -99,6 +99,7 @@ import com.android.server.lights.LightsManager;
 import com.android.server.policy.WindowManagerPolicy;
 import com.android.server.power.batterysaver.BatterySaverController;
 import com.android.server.power.batterysaver.BatterySaverStateMachine;
+import com.android.server.power.batterysaver.BatterySavingStats;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -228,6 +229,7 @@ public final class PowerManagerService extends SystemService
     private final BatterySaverPolicy mBatterySaverPolicy;
     private final BatterySaverController mBatterySaverController;
     private final BatterySaverStateMachine mBatterySaverStateMachine;
+    private final BatterySavingStats mBatterySavingStats;
 
     private LightsManager mLightsManager;
     private BatteryManagerInternal mBatteryManagerInternal;
@@ -655,10 +657,12 @@ public final class PowerManagerService extends SystemService
         mConstants = new Constants(mHandler);
         mAmbientDisplayConfiguration = new AmbientDisplayConfiguration(mContext);
 
-        mBatterySaverPolicy = new BatterySaverPolicy(mHandler);
-        mBatterySaverController = new BatterySaverController(mContext,
-                BackgroundThread.get().getLooper(), mBatterySaverPolicy);
-        mBatterySaverStateMachine = new BatterySaverStateMachine(mContext, mBatterySaverController);
+        mBatterySavingStats = new BatterySavingStats(mLock);
+        mBatterySaverPolicy = new BatterySaverPolicy(mLock, mContext, mBatterySavingStats);
+        mBatterySaverController = new BatterySaverController(mLock, mContext,
+                BackgroundThread.get().getLooper(), mBatterySaverPolicy, mBatterySavingStats);
+        mBatterySaverStateMachine = new BatterySaverStateMachine(
+                mLock, mContext, mBatterySaverController);
 
         synchronized (mLock) {
             mWakeLockSuspendBlocker = createSuspendBlockerLocked("PowerManagerService.WakeLocks");
@@ -693,10 +697,12 @@ public final class PowerManagerService extends SystemService
         mDisplaySuspendBlocker = null;
         mWakeLockSuspendBlocker = null;
 
+        mBatterySavingStats = new BatterySavingStats(mLock);
         mBatterySaverPolicy = batterySaverPolicy;
-        mBatterySaverController = new BatterySaverController(context,
-                BackgroundThread.getHandler().getLooper(), batterySaverPolicy);
-        mBatterySaverStateMachine = new BatterySaverStateMachine(mContext, mBatterySaverController);
+        mBatterySaverController = new BatterySaverController(mLock, context,
+                BackgroundThread.getHandler().getLooper(), batterySaverPolicy, mBatterySavingStats);
+        mBatterySaverStateMachine = new BatterySaverStateMachine(
+                mLock, mContext, mBatterySaverController);
     }
 
     @Override
@@ -787,7 +793,7 @@ public final class PowerManagerService extends SystemService
         mConstants.start(resolver);
 
         mBatterySaverController.systemReady();
-        mBatterySaverPolicy.systemReady(mContext);
+        mBatterySaverPolicy.systemReady();
 
         // Register for settings changes.
         resolver.registerContentObserver(Settings.Secure.getUriFor(
@@ -2679,10 +2685,6 @@ public final class PowerManagerService extends SystemService
         }
     }
 
-    private boolean isLowPowerModeInternal() {
-        return mBatterySaverController.isEnabled();
-    }
-
     private boolean setLowPowerModeInternal(boolean enabled) {
         synchronized (mLock) {
             if (DEBUG) {
@@ -4334,7 +4336,7 @@ public final class PowerManagerService extends SystemService
         public boolean isPowerSaveMode() {
             final long ident = Binder.clearCallingIdentity();
             try {
-                return isLowPowerModeInternal();
+                return mBatterySaverController.isEnabled();
             } finally {
                 Binder.restoreCallingIdentity(ident);
             }
@@ -4344,10 +4346,8 @@ public final class PowerManagerService extends SystemService
         public PowerSaveState getPowerSaveState(@ServiceType int serviceType) {
             final long ident = Binder.clearCallingIdentity();
             try {
-                synchronized (mLock) {
-                    return mBatterySaverPolicy.getBatterySaverPolicy(
-                            serviceType, isLowPowerModeInternal());
-                }
+                return mBatterySaverPolicy.getBatterySaverPolicy(
+                        serviceType, mBatterySaverController.isEnabled());
             } finally {
                 Binder.restoreCallingIdentity(ident);
             }
@@ -4673,10 +4673,8 @@ public final class PowerManagerService extends SystemService
 
         @Override
         public PowerSaveState getLowPowerState(@ServiceType int serviceType) {
-            synchronized (mLock) {
-                return mBatterySaverPolicy.getBatterySaverPolicy(serviceType,
-                        mBatterySaverController.isEnabled());
-            }
+            return mBatterySaverPolicy.getBatterySaverPolicy(serviceType,
+                    mBatterySaverController.isEnabled());
         }
 
         @Override
