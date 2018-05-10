@@ -470,9 +470,10 @@ public class PermissionManagerService {
                                     userId) == PackageManager.PERMISSION_GRANTED) {
                                 EventLog.writeEvent(0x534e4554, "72710897",
                                         newPackage.applicationInfo.uid,
-                                        "Revoking permission", permissionName, "from package",
-                                        packageName, "as the group changed from",
-                                        oldPermissionGroupName, "to", newPermissionGroupName);
+                                        "Revoking permission " + permissionName +
+                                        " from package " + packageName +
+                                        " as the group changed from " + oldPermissionGroupName +
+                                        " to " + newPermissionGroupName);
 
                                 try {
                                     revokeRuntimePermission(permissionName, packageName, false,
