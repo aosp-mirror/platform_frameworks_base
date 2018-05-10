@@ -418,10 +418,23 @@ public class NotificationColorUtil {
      *
      * @param isBgDarker {@code true} if {@code bg} is darker than {@code color}.
      */
-    private static int ensureTextContrast(int color, int bg, boolean isBgDarker) {
+    public static int ensureTextContrast(int color, int bg, boolean isBgDarker) {
+        return ensureContrast(color, bg, isBgDarker, 4.5);
+    }
+
+    /**
+     * Finds a color with sufficient contrast over bg that has the same or darker hue as the
+     * original color, depending on the value of {@code isBgDarker}.
+     *
+     * @param color the color to start searching from
+     * @param bg the color to ensure contrast against
+     * @param isBgDarker {@code true} if {@code bg} is darker than {@code color}
+     * @param minRatio the minimum contrast ratio required
+     */
+    public static int ensureContrast(int color, int bg, boolean isBgDarker, double minRatio) {
         return isBgDarker
-                ? findContrastColorAgainstDark(color, bg, true, 4.5)
-                : findContrastColor(color, bg, true, 4.5);
+                ? findContrastColorAgainstDark(color, bg, true, minRatio)
+                : findContrastColor(color, bg, true, minRatio);
     }
 
     /** Finds a background color for a text view with given text color and hint text color, that
