@@ -34,7 +34,6 @@ import static android.content.pm.ApplicationInfo.FLAG_SUSPENDED;
 
 import static com.android.server.pm.PackageManagerService.PLATFORM_PACKAGE_NAME;
 
-import android.Manifest;
 import android.app.ActivityOptions;
 import android.app.KeyguardManager;
 import android.app.admin.DevicePolicyManagerInternal;
@@ -233,31 +232,6 @@ class ActivityStartInterceptor {
         return true;
     }
 
-    private Intent createSuspendedAppInterceptIntent(String suspendedPackage,
-            String suspendingPackage, String dialogMessage, int userId) {
-        final Intent interceptIntent = new Intent(mServiceContext, SuspendedAppActivity.class)
-                .putExtra(SuspendedAppActivity.EXTRA_SUSPENDED_PACKAGE, suspendedPackage)
-                .putExtra(SuspendedAppActivity.EXTRA_DIALOG_MESSAGE, dialogMessage)
-                .putExtra(SuspendedAppActivity.EXTRA_SUSPENDING_PACKAGE, suspendingPackage)
-                .putExtra(Intent.EXTRA_USER_ID, userId)
-                .setFlags(Intent.FLAG_ACTIVITY_NEW_TASK
-                        | Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS);
-
-        final Intent moreDetailsIntent = new Intent(Intent.ACTION_SHOW_SUSPENDED_APP_DETAILS)
-                .setPackage(suspendingPackage);
-        final String requiredPermission = Manifest.permission.SEND_SHOW_SUSPENDED_APP_DETAILS;
-        final ResolveInfo resolvedInfo = mSupervisor.resolveIntent(moreDetailsIntent, null, userId,
-                0, mRealCallingUid);
-        if (resolvedInfo != null && resolvedInfo.activityInfo != null
-                && requiredPermission.equals(resolvedInfo.activityInfo.permission)) {
-            moreDetailsIntent.putExtra(Intent.EXTRA_PACKAGE_NAME, suspendedPackage)
-                    .setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-            interceptIntent.putExtra(SuspendedAppActivity.EXTRA_MORE_DETAILS_INTENT,
-                    moreDetailsIntent);
-        }
-        return interceptIntent;
-    }
-
     private boolean interceptSuspendedPackageIfNeeded() {
         // Do not intercept if the package is not suspended
         if (mAInfo == null || mAInfo.applicationInfo == null ||
@@ -274,8 +248,8 @@ class ActivityStartInterceptor {
             return interceptSuspendedByAdminPackage();
         }
         final String dialogMessage = pmi.getSuspendedDialogMessage(suspendedPackage, mUserId);
-        mIntent = createSuspendedAppInterceptIntent(suspendedPackage, suspendingPackage,
-                dialogMessage, mUserId);
+        mIntent = SuspendedAppActivity.createSuspendedAppInterceptIntent(suspendedPackage,
+                suspendingPackage, dialogMessage, mUserId);
         mCallingPid = mRealCallingPid;
         mCallingUid = mRealCallingUid;
         mResolvedType = null;
