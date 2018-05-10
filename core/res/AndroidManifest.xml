@@ -1696,7 +1696,7 @@
          @hide This should only be used by OEM's TvInputService's.
     -->
     <permission android:name="android.permission.TV_INPUT_HARDWARE"
-        android:protectionLevel="signature|privileged" />
+        android:protectionLevel="signature|privileged|vendorPrivileged" />
 
     <!-- @SystemApi Allows to capture a frame of TV input hardware such as
          built-in tuners and HDMI-in's.
