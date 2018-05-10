@@ -19,6 +19,9 @@ package com.android.server.wm;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.view.Display.DEFAULT_DISPLAY;
+import static com.android.server.wm.RecentsAnimationController.REORDER_KEEP_IN_PLACE;
+import static com.android.server.wm.RecentsAnimationController.REORDER_MOVE_TO_ORIGINAL_POSITION;
+import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.atLeast;
 import static org.mockito.Mockito.verify;
@@ -80,6 +83,25 @@ public class RecentsAnimationControllerTest extends WindowTestsBase {
         // Verify the animation canceled callback to the app was made
         verify(mMockRunner).onAnimationCanceled();
         verifyNoMoreInteractionsExceptAsBinder(mMockRunner);
+    }
+
+    @Test
+    public void testCancelAfterRemove_expectIgnored() throws Exception {
+        final AppWindowToken appWindow = createAppWindowToken(mDisplayContent,
+                WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD);
+        AnimationAdapter adapter = mController.addAnimation(appWindow.getTask(),
+                false /* isRecentTaskInvisible */);
+        adapter.startAnimation(mMockLeash, mMockTransaction, mFinishedCallback);
+
+        // Remove the app window so that the animation target can not be created
+        appWindow.removeImmediately();
+        mController.startAnimation();
+        mController.cleanupAnimation(REORDER_KEEP_IN_PLACE);
+        try {
+            mController.cancelAnimation(REORDER_MOVE_TO_ORIGINAL_POSITION, "test");
+        } catch (Exception e) {
+            fail("Unexpected failure when canceling animation after finishing it");
+        }
     }
 
     private static void verifyNoMoreInteractionsExceptAsBinder(IInterface binder) {
