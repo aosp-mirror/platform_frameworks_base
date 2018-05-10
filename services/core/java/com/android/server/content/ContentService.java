@@ -166,7 +166,7 @@ public final class ContentService extends IContentService.Stub {
     private SyncManager getSyncManager() {
         synchronized(mSyncManagerLock) {
             try {
-                // Try to create the SyncManager, return null if it fails (e.g. the disk is full).
+                // Try to create the SyncManager, return null if it fails (which it shouldn't).
                 if (mSyncManager == null) mSyncManager = new SyncManager(mContext, mFactoryTest);
             } catch (SQLiteException e) {
                 Log.e(TAG, "Can't create SyncManager", e);
@@ -199,7 +199,7 @@ public final class ContentService extends IContentService.Stub {
         final long identityToken = clearCallingIdentity();
         try {
             if (mSyncManager == null) {
-                pw.println("No SyncManager created!  (Disk full?)");
+                pw.println("SyncManager not available yet");
             } else {
                 mSyncManager.dump(fd, pw, dumpAll);
             }
