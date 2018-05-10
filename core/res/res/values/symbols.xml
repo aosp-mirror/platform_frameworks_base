@@ -3301,6 +3301,8 @@
   <java-symbol type="string" name="shortcut_restore_signature_mismatch" />
   <java-symbol type="string" name="shortcut_restore_unknown_issue" />
 
+  <java-symbol type="bool" name="config_swipe_up_gesture_default" />
+
   <!-- From media projection -->
   <java-symbol type="string" name="config_mediaProjectionPermissionDialogComponent" />
   <java-symbol type="string" name="config_batterySaverDeviceSpecificConfig" />
