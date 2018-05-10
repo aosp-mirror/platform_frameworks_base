@@ -151,7 +151,8 @@
     <color name="zen_introduction">#ffffffff</color>
 
     <color name="smart_reply_button_text">#5F6368</color>
-    <color name="smart_reply_button_background">#feffffff</color>
+    <color name="smart_reply_button_text_dark_bg">@*android:color/notification_primary_text_color_dark</color>
+    <color name="smart_reply_button_background">#ffffffff</color>
     <color name="smart_reply_button_stroke">#ffdadce0</color>
 
     <!-- Fingerprint dialog colors -->

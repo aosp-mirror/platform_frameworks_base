@@ -1090,6 +1090,15 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
         }
     }
 
+    @Override
+    protected void setBackgroundTintColor(int color) {
+        super.setBackgroundTintColor(color);
+        NotificationContentView view = getShowingLayout();
+        if (view != null) {
+            view.setBackgroundTintColor(color);
+        }
+    }
+
     public void closeRemoteInput() {
         for (NotificationContentView l : mLayouts) {
             l.closeRemoteInput();

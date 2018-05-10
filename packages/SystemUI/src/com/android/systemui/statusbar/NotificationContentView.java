@@ -887,6 +887,12 @@ public class NotificationContentView extends FrameLayout {
         mContainingNotification.setContentBackground(customBackgroundColor, animate, this);
     }
 
+    public void setBackgroundTintColor(int color) {
+        if (mExpandedSmartReplyView != null) {
+            mExpandedSmartReplyView.setBackgroundTintColor(color);
+        }
+    }
+
     public int getVisibleType() {
         return mVisibleType;
     }
