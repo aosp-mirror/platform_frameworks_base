@@ -372,7 +372,7 @@ public class NotificationGutsManager implements Dumpable {
             @Override
             public void run() {
                 if (row.getWindowToken() == null) {
-                    Log.e(TAG, "Trying to show notification guts, but not attached to "
+                    Log.e(TAG, "Trying to show notification guts in post(), but not attached to "
                             + "window");
                     return;
                 }
