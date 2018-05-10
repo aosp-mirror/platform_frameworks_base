@@ -37,8 +37,8 @@ public class RecentLocationAppsTest {
     // App running duration in milliseconds
     private static final int DURATION = 10;
     private static final long ONE_MIN_AGO = NOW - TimeUnit.MINUTES.toMillis(1);
-    private static final long FOURTEEN_MIN_AGO = NOW - TimeUnit.MINUTES.toMillis(14);
-    private static final long TWENTY_MIN_AGO = NOW - TimeUnit.MINUTES.toMillis(20);
+    private static final long TWENTY_THREE_HOURS_AGO = NOW - TimeUnit.HOURS.toMillis(23);
+    private static final long TWO_DAYS_AGO = NOW - TimeUnit.DAYS.toMillis(2);
     private static final String[] TEST_PACKAGE_NAMES =
             {"package_1MinAgo", "package_14MinAgo", "package_20MinAgo"};
 
@@ -74,7 +74,7 @@ public class RecentLocationAppsTest {
         when(mUserManager.getUserProfiles())
                 .thenReturn(Collections.singletonList(new UserHandle(mTestUserId)));
 
-        long[] testRequestTime = {ONE_MIN_AGO, FOURTEEN_MIN_AGO, TWENTY_MIN_AGO};
+        long[] testRequestTime = {ONE_MIN_AGO, TWENTY_THREE_HOURS_AGO, TWO_DAYS_AGO};
         List<PackageOps> appOps = createTestPackageOpsList(TEST_PACKAGE_NAMES, testRequestTime);
         when(mAppOpsManager.getPackagesForOps(RecentLocationApps.LOCATION_OPS)).thenReturn(appOps);
         mockTestApplicationInfos(mTestUserId, TEST_PACKAGE_NAMES);
@@ -91,7 +91,7 @@ public class RecentLocationAppsTest {
         assertThat(requests.get(0).packageName).isEqualTo(TEST_PACKAGE_NAMES[0]);
         assertThat(requests.get(0).requestFinishTime).isEqualTo(ONE_MIN_AGO + DURATION);
         assertThat(requests.get(1).packageName).isEqualTo(TEST_PACKAGE_NAMES[1]);
-        assertThat(requests.get(1).requestFinishTime).isEqualTo(FOURTEEN_MIN_AGO + DURATION);
+        assertThat(requests.get(1).requestFinishTime).isEqualTo(TWENTY_THREE_HOURS_AGO + DURATION);
     }
 
     @Test
@@ -105,7 +105,7 @@ public class RecentLocationAppsTest {
                         ONE_MIN_AGO,
                         DURATION);
         long[] testRequestTime =
-                {ONE_MIN_AGO, FOURTEEN_MIN_AGO, TWENTY_MIN_AGO, ONE_MIN_AGO};
+                {ONE_MIN_AGO, TWENTY_THREE_HOURS_AGO, TWO_DAYS_AGO, ONE_MIN_AGO};
         List<PackageOps> appOps = createTestPackageOpsList(TEST_PACKAGE_NAMES, testRequestTime);
         appOps.add(androidSystemPackageOps);
         when(mAppOpsManager.getPackagesForOps(RecentLocationApps.LOCATION_OPS)).thenReturn(appOps);
@@ -119,7 +119,7 @@ public class RecentLocationAppsTest {
         assertThat(requests.get(0).packageName).isEqualTo(TEST_PACKAGE_NAMES[0]);
         assertThat(requests.get(0).requestFinishTime).isEqualTo(ONE_MIN_AGO + DURATION);
         assertThat(requests.get(1).packageName).isEqualTo(TEST_PACKAGE_NAMES[1]);
-        assertThat(requests.get(1).requestFinishTime).isEqualTo(FOURTEEN_MIN_AGO + DURATION);
+        assertThat(requests.get(1).requestFinishTime).isEqualTo(TWENTY_THREE_HOURS_AGO + DURATION);
     }
 
     private void mockTestApplicationInfos(int userId, String... packageNameList)
