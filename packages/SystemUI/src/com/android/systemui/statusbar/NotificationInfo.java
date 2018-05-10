@@ -197,8 +197,6 @@ public class NotificationInfo extends LinearLayout implements NotificationGuts.G
         bindHeader();
         bindPrompt();
         bindButtons();
-
-        logBlockingHelperCounter(NotificationCounters.BLOCKING_HELPER_SHOWN);
     }
 
     private void bindHeader() throws RemoteException {
