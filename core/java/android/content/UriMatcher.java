@@ -134,12 +134,12 @@ public class UriMatcher
         mText = null;
     }
 
-    private UriMatcher()
+    private UriMatcher(int which, String text)
     {
         mCode = NO_MATCH;
-        mWhich = -1;
+        mWhich = which;
         mChildren = new ArrayList<UriMatcher>();
-        mText = null;
+        mText = text;
     }
 
     /**
@@ -190,15 +190,7 @@ public class UriMatcher
             }
             if (j == numChildren) {
                 // Child not found, create it
-                child = new UriMatcher();
-                if (token.equals("#")) {
-                    child.mWhich = NUMBER;
-                } else if (token.equals("*")) {
-                    child.mWhich = TEXT;
-                } else {
-                    child.mWhich = EXACT;
-                }
-                child.mText = token;
+                child = createChild(token);
                 node.mChildren.add(child);
                 node = child;
             }
@@ -206,12 +198,23 @@ public class UriMatcher
         node.mCode = code;
     }
 
+    private static UriMatcher createChild(String token) {
+        switch (token) {
+            case "#":
+                return new UriMatcher(NUMBER, "#");
+            case "*":
+                return new UriMatcher(TEXT, "*");
+            default:
+                return new UriMatcher(EXACT, token);
+        }
+    }
+
     /**
      * Try to match against the path in a url.
      *
      * @param uri       The url whose path we will match against.
      *
-     * @return  The code for the matched node (added using addURI), 
+     * @return  The code for the matched node (added using addURI),
      * or -1 if there is no matched node.
      */
     public int match(Uri uri)
@@ -273,7 +276,7 @@ public class UriMatcher
     private static final int TEXT = 2;
 
     private int mCode;
-    private int mWhich;
-    private String mText;
+    private final int mWhich;
+    private final String mText;
     private ArrayList<UriMatcher> mChildren;
 }
