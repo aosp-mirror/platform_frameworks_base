@@ -503,7 +503,8 @@ void StatsLogProcessor::flushIfNecessaryLocked(
 void StatsLogProcessor::WriteDataToDiskLocked(const ConfigKey& key,
                                               const int64_t timestampNs,
                                               const DumpReportReason dumpReportReason) {
-    if (mMetricsManagers.find(key) == mMetricsManagers.end()) {
+    if (mMetricsManagers.find(key) == mMetricsManagers.end() ||
+        !mMetricsManagers.find(key)->second->shouldWriteToDisk()) {
         return;
     }
     ProtoOutputStream proto;
