@@ -21,6 +21,7 @@ import static android.content.DialogInterface.BUTTON_POSITIVE;
 import android.app.AlertDialog;
 import android.app.AlertDialog.Builder;
 import android.app.Dialog;
+import android.car.user.CarUserManagerHelper;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.pm.UserInfo;
@@ -41,7 +42,6 @@ import android.widget.TextView;
 import androidx.car.widget.PagedListView;
 
 import com.android.internal.util.UserIcons;
-import com.android.settingslib.users.UserManagerHelper;
 import com.android.systemui.R;
 
 import com.android.systemui.statusbar.phone.SystemUIDialog;
@@ -53,16 +53,16 @@ import java.util.List;
  * One of the uses of this is for the lock screen in auto.
  */
 public class UserGridRecyclerView extends PagedListView implements
-        UserManagerHelper.OnUsersUpdateListener {
+        CarUserManagerHelper.OnUsersUpdateListener {
     private UserSelectionListener mUserSelectionListener;
     private UserAdapter mAdapter;
-    private UserManagerHelper mUserManagerHelper;
+    private CarUserManagerHelper mCarUserManagerHelper;
     private Context mContext;
 
     public UserGridRecyclerView(Context context, AttributeSet attrs) {
         super(context, attrs);
         mContext = context;
-        mUserManagerHelper = new UserManagerHelper(mContext);
+        mCarUserManagerHelper = new CarUserManagerHelper(mContext);
     }
 
     /**
@@ -71,7 +71,7 @@ public class UserGridRecyclerView extends PagedListView implements
     @Override
     public void onFinishInflate() {
         super.onFinishInflate();
-        mUserManagerHelper.registerOnUsersUpdateListener(this);
+        mCarUserManagerHelper.registerOnUsersUpdateListener(this);
     }
 
     /**
@@ -80,7 +80,7 @@ public class UserGridRecyclerView extends PagedListView implements
     @Override
     public void onDetachedFromWindow() {
         super.onDetachedFromWindow();
-        mUserManagerHelper.unregisterOnUsersUpdateListener();
+        mCarUserManagerHelper.unregisterOnUsersUpdateListener();
     }
 
     /**
@@ -89,7 +89,7 @@ public class UserGridRecyclerView extends PagedListView implements
      * @return the adapter
      */
     public void buildAdapter() {
-        List<UserRecord> userRecords = createUserRecords(mUserManagerHelper
+        List<UserRecord> userRecords = createUserRecords(mCarUserManagerHelper
                 .getAllUsers());
         mAdapter = new UserAdapter(mContext, userRecords);
         super.setAdapter(mAdapter);
@@ -102,19 +102,20 @@ public class UserGridRecyclerView extends PagedListView implements
                 // Don't display guests in the switcher.
                 continue;
             }
-            boolean isForeground = mUserManagerHelper.getForegroundUserId() == userInfo.id;
+            boolean isForeground =
+                mCarUserManagerHelper.getCurrentForegroundUserId() == userInfo.id;
             UserRecord record = new UserRecord(userInfo, false /* isStartGuestSession */,
                     false /* isAddUser */, isForeground);
             userRecords.add(record);
         }
 
         // Add guest user record if the foreground user is not a guest
-        if (!mUserManagerHelper.foregroundUserIsGuestUser()) {
+        if (!mCarUserManagerHelper.isForegroundUserGuest()) {
             userRecords.add(addGuestUserRecord());
         }
 
         // Add add user record if the foreground user can add users
-        if (mUserManagerHelper.foregroundUserCanAddUsers()) {
+        if (mCarUserManagerHelper.canForegroundUserAddUsers()) {
             userRecords.add(addUserRecord());
         }
 
@@ -148,7 +149,7 @@ public class UserGridRecyclerView extends PagedListView implements
     @Override
     public void onUsersUpdate() {
         mAdapter.clearUsers();
-        mAdapter.updateUsers(createUserRecords(mUserManagerHelper.getAllUsers()));
+        mAdapter.updateUsers(createUserRecords(mCarUserManagerHelper.getAllUsers()));
         mAdapter.notifyDataSetChanged();
     }
 
@@ -212,7 +213,7 @@ public class UserGridRecyclerView extends PagedListView implements
 
                 // If the user selects Guest, start the guest session.
                 if (userRecord.mIsStartGuestSession) {
-                    mUserManagerHelper.startNewGuestSession(mGuestName);
+                    mCarUserManagerHelper.startNewGuestSession(mGuestName);
                     return;
                 }
 
@@ -239,14 +240,14 @@ public class UserGridRecyclerView extends PagedListView implements
                     return;
                 }
                 // If the user doesn't want to be a guest or add a user, switch to the user selected
-                mUserManagerHelper.switchToUser(userRecord.mInfo);
+                mCarUserManagerHelper.switchToUser(userRecord.mInfo);
             });
 
         }
 
         private Bitmap getUserRecordIcon(UserRecord userRecord) {
             if (userRecord.mIsStartGuestSession) {
-                return mUserManagerHelper.getGuestDefaultIcon();
+                return mCarUserManagerHelper.getGuestDefaultIcon();
             }
 
             if (userRecord.mIsAddUser) {
@@ -254,7 +255,7 @@ public class UserGridRecyclerView extends PagedListView implements
                     .getDrawable(R.drawable.car_add_circle_round));
             }
 
-            return mUserManagerHelper.getUserIcon(userRecord.mInfo);
+            return mCarUserManagerHelper.getUserIcon(userRecord.mInfo);
         }
 
         @Override
@@ -272,7 +273,10 @@ public class UserGridRecyclerView extends PagedListView implements
 
             @Override
             protected UserInfo doInBackground(String... userNames) {
-                return mUserManagerHelper.createNewUser(userNames[0]);
+                // Default to create a non admin user for now. Need to add logic
+                // for user to choose whether they want to create an admin or non-admin
+                // user later.
+                return mCarUserManagerHelper.createNewNonAdminUser(userNames[0]);
             }
 
             @Override
@@ -282,7 +286,7 @@ public class UserGridRecyclerView extends PagedListView implements
             @Override
             protected void onPostExecute(UserInfo user) {
                 if (user != null) {
-                    mUserManagerHelper.switchToUser(user);
+                    mCarUserManagerHelper.switchToUser(user);
                 }
             }
         }
