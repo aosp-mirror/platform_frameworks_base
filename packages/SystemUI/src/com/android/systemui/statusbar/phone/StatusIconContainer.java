@@ -49,7 +49,7 @@ public class StatusIconContainer extends AlphaOptimizedLinearLayout {
     private static final String TAG = "StatusIconContainer";
     private static final boolean DEBUG = false;
     private static final boolean DEBUG_OVERFLOW = false;
-    // Max 5 status icons including battery
+    // Max 8 status icons including battery
     private static final int MAX_ICONS = 7;
     private static final int MAX_DOTS = 1;
 
@@ -152,7 +152,7 @@ public class StatusIconContainer extends AlphaOptimizedLinearLayout {
 
         int visibleCount = mMeasureViews.size();
         int maxVisible = visibleCount <= MAX_ICONS ? MAX_ICONS : MAX_ICONS - 1;
-        int totalWidth = getPaddingStart() + getPaddingEnd();
+        int totalWidth = mPaddingLeft + mPaddingRight;
         boolean trackWidth = true;
 
         // Measure all children so that they report the correct width
@@ -208,8 +208,8 @@ public class StatusIconContainer extends AlphaOptimizedLinearLayout {
      */
     private void calculateIconTranslations() {
         mLayoutStates.clear();
-        float width = getWidth() - getPaddingEnd();
-        float translationX = width;
+        float width = getWidth();
+        float translationX = width - getPaddingEnd();
         float contentStart = getPaddingStart();
         int childCount = getChildCount();
         // Underflow === don't show content until that index
@@ -344,10 +344,11 @@ public class StatusIconContainer extends AlphaOptimizedLinearLayout {
                 animate = true;
             }
 
-            icon.setVisibleState(visibleState);
             if (animate) {
                 animateTo(view, animationProperties);
+                icon.setVisibleState(visibleState);
             } else {
+                icon.setVisibleState(visibleState);
                 super.applyToView(view);
             }
 
