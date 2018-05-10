@@ -2223,7 +2223,7 @@ public class NotificationStackScrollLayout extends ViewGroup
     }
 
     private void updateScrollability() {
-        boolean scrollable = getScrollRange() > 0;
+        boolean scrollable = !mQsExpanded && getScrollRange() > 0;
         if (scrollable != mScrollable) {
             mScrollable = scrollable;
             setFocusable(scrollable);
@@ -4504,6 +4504,7 @@ public class NotificationStackScrollLayout extends ViewGroup
     public void setQsExpanded(boolean qsExpanded) {
         mQsExpanded = qsExpanded;
         updateAlgorithmLayoutMinHeight();
+        updateScrollability();
     }
 
     public void setQsExpansionFraction(float qsExpansionFraction) {
