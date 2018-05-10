@@ -24,6 +24,7 @@ import static android.view.WindowManager.LayoutParams.*;
 import android.annotation.NonNull;
 import android.app.ActivityManager;
 import android.app.SearchManager;
+import android.media.session.MediaSessionManager;
 import android.os.UserHandle;
 
 import android.text.TextUtils;
@@ -75,7 +76,6 @@ import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.media.AudioManager;
 import android.media.session.MediaController;
-import android.media.session.MediaSessionLegacyHelper;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
@@ -251,6 +251,7 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
 
     private AudioManager mAudioManager;
     private KeyguardManager mKeyguardManager;
+    private MediaSessionManager mMediaSessionManager;
 
     private int mUiOptions = 0;
 
@@ -1872,22 +1873,10 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
                 // If we have a session send it the volume command, otherwise
                 // use the suggested stream.
                 if (mMediaController != null) {
-                    int direction = 0;
-                    switch (keyCode) {
-                        case KeyEvent.KEYCODE_VOLUME_UP:
-                            direction = AudioManager.ADJUST_RAISE;
-                            break;
-                        case KeyEvent.KEYCODE_VOLUME_DOWN:
-                            direction = AudioManager.ADJUST_LOWER;
-                            break;
-                        case KeyEvent.KEYCODE_VOLUME_MUTE:
-                            direction = AudioManager.ADJUST_TOGGLE_MUTE;
-                            break;
-                    }
-                    mMediaController.adjustVolume(direction, AudioManager.FLAG_SHOW_UI);
+                    mMediaController.dispatchVolumeButtonEventAsSystemService(event);
                 } else {
-                    MediaSessionLegacyHelper.getHelper(getContext()).sendVolumeKeyEvent(
-                            event, mVolumeControlStreamType, false);
+                    getMediaSessionManager().dispatchVolumeKeyEventAsSystemService(event,
+                            mVolumeControlStreamType);
                 }
                 return true;
             }
@@ -1905,7 +1894,7 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
             case KeyEvent.KEYCODE_MEDIA_RECORD:
             case KeyEvent.KEYCODE_MEDIA_FAST_FORWARD: {
                 if (mMediaController != null) {
-                    if (mMediaController.dispatchMediaButtonEvent(event)) {
+                    if (mMediaController.dispatchMediaButtonEventAsSystemService(event)) {
                         return true;
                     }
                 }
@@ -1947,6 +1936,14 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
         return mAudioManager;
     }
 
+    private MediaSessionManager getMediaSessionManager() {
+        if (mMediaSessionManager == null) {
+            mMediaSessionManager = (MediaSessionManager) getContext().getSystemService(
+                    Context.MEDIA_SESSION_SERVICE);
+        }
+        return mMediaSessionManager;
+    }
+
     /**
      * A key was released and not handled by anything else in the window.
      *
@@ -1968,12 +1965,10 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
                 // If we have a session send it the volume command, otherwise
                 // use the suggested stream.
                 if (mMediaController != null) {
-                    final int flags = AudioManager.FLAG_PLAY_SOUND | AudioManager.FLAG_VIBRATE
-                            | AudioManager.FLAG_FROM_KEY;
-                    mMediaController.adjustVolume(0, flags);
+                    mMediaController.dispatchVolumeButtonEventAsSystemService(event);
                 } else {
-                    MediaSessionLegacyHelper.getHelper(getContext()).sendVolumeKeyEvent(
-                            event, mVolumeControlStreamType, false);
+                    getMediaSessionManager().dispatchVolumeKeyEventAsSystemService(
+                            event, mVolumeControlStreamType);
                 }
                 return true;
             }
@@ -1982,8 +1977,8 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
                 // doesn't have one of these.  In this case, we execute it here and
                 // eat the event instead, because we have mVolumeControlStreamType
                 // and they don't.
-                MediaSessionLegacyHelper.getHelper(getContext()).sendVolumeKeyEvent(
-                        event, AudioManager.USE_DEFAULT_STREAM_TYPE, false);
+                getMediaSessionManager().dispatchVolumeKeyEventAsSystemService(
+                        event, AudioManager.USE_DEFAULT_STREAM_TYPE);
                 return true;
             }
             // These are all the recognized media key codes in
@@ -2000,7 +1995,7 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
             case KeyEvent.KEYCODE_MEDIA_RECORD:
             case KeyEvent.KEYCODE_MEDIA_FAST_FORWARD: {
                 if (mMediaController != null) {
-                    if (mMediaController.dispatchMediaButtonEvent(event)) {
+                    if (mMediaController.dispatchMediaButtonEventAsSystemService(event)) {
                         return true;
                     }
                 }

@@ -46,6 +46,8 @@ import java.io.PrintStream;
 import java.util.List;
 
 public class Media extends BaseCommand {
+    // This doesn't belongs to any package. Setting the package name to empty string.
+    private static final String PACKAGE_NAME = "";
     private ISessionManager mSessionService;
 
     /**
@@ -104,7 +106,7 @@ public class Media extends BaseCommand {
 
     private void sendMediaKey(KeyEvent event) {
         try {
-            mSessionService.dispatchMediaKeyEvent(event, false);
+            mSessionService.dispatchMediaKeyEvent(PACKAGE_NAME, false, event, false);
         } catch (RemoteException e) {
         }
     }
@@ -264,13 +266,13 @@ public class Media extends BaseCommand {
                     } else if ("q".equals(line) || "quit".equals(line)) {
                         break;
                     } else if ("play".equals(line)) {
-                        mController.play("");
+                        mController.play(PACKAGE_NAME);
                     } else if ("pause".equals(line)) {
-                        mController.pause("");
+                        mController.pause(PACKAGE_NAME);
                     } else if ("next".equals(line)) {
-                        mController.next("");
+                        mController.next(PACKAGE_NAME);
                     } else if ("previous".equals(line)) {
-                        mController.previous("");
+                        mController.previous(PACKAGE_NAME);
                     } else {
                         System.out.println("Invalid command: " + line);
                     }

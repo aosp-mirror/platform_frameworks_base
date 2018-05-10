@@ -126,6 +126,27 @@ public final class MediaController {
      * @return true if the event was sent to the session, false otherwise.
      */
     public boolean dispatchMediaButtonEvent(@NonNull KeyEvent keyEvent) {
+        return dispatchMediButtonEventInternal(false, keyEvent);
+    }
+
+    /**
+     * Dispatches the media button event as system service to the session. This only effects the
+     * {@link MediaSession.Callback#getCurrentControllerInfo()} and doesn't bypass any permission
+     * check done by the system service.
+     * <p>
+     * Should be only called by the {@link com.android.internal.policy.PhoneWindow} when the
+     * foreground activity didn't consume the key from the hardware devices.
+     *
+     * @param keyEvent media key event
+     * @return {@code true} if the event was sent to the session, {@code false} otherwise
+     * @hide
+     */
+    public boolean dispatchMediaButtonEventAsSystemService(@NonNull KeyEvent keyEvent) {
+        return dispatchMediButtonEventInternal(true, keyEvent);
+    }
+
+    private boolean dispatchMediButtonEventInternal(boolean asSystemService,
+            @NonNull KeyEvent keyEvent) {
         if (keyEvent == null) {
             throw new IllegalArgumentException("KeyEvent may not be null");
         }
@@ -133,11 +154,58 @@ public final class MediaController {
             return false;
         }
         try {
-            return mSessionBinder.sendMediaButton(mContext.getPackageName(), keyEvent);
+            return mSessionBinder.sendMediaButton(mContext.getPackageName(), asSystemService,
+                    keyEvent);
         } catch (RemoteException e) {
             // System is dead. =(
         }
         return false;
+    }
+
+    /**
+     * Dispatches the volume button event as system service to the session. This only effects the
+     * {@link MediaSession.Callback#getCurrentControllerInfo()} and doesn't bypass any permission
+     * check done by the system service.
+     * <p>
+     * Should be only called by the {@link com.android.internal.policy.PhoneWindow} when the
+     * foreground activity didn't consume the key from the hardware devices.
+     *
+     * @param keyEvent volume key event
+     * @hide
+     */
+    public void dispatchVolumeButtonEventAsSystemService(@NonNull KeyEvent keyEvent) {
+        switch (keyEvent.getAction()) {
+            case KeyEvent.ACTION_DOWN: {
+                int direction = 0;
+                switch (keyEvent.getKeyCode()) {
+                    case KeyEvent.KEYCODE_VOLUME_UP:
+                        direction = AudioManager.ADJUST_RAISE;
+                        break;
+                    case KeyEvent.KEYCODE_VOLUME_DOWN:
+                        direction = AudioManager.ADJUST_LOWER;
+                        break;
+                    case KeyEvent.KEYCODE_VOLUME_MUTE:
+                        direction = AudioManager.ADJUST_TOGGLE_MUTE;
+                        break;
+                }
+                try {
+                    mSessionBinder.adjustVolume(mContext.getPackageName(), true, direction,
+                            AudioManager.FLAG_SHOW_UI);
+                } catch (RemoteException e) {
+                    Log.wtf(TAG, "Error calling adjustVolumeBy", e);
+                }
+            }
+
+            case KeyEvent.ACTION_UP: {
+                final int flags = AudioManager.FLAG_PLAY_SOUND | AudioManager.FLAG_VIBRATE
+                        | AudioManager.FLAG_FROM_KEY;
+                try {
+                    mSessionBinder.adjustVolume(mContext.getPackageName(), true, 0, flags);
+                } catch (RemoteException e) {
+                    Log.wtf(TAG, "Error calling adjustVolumeBy", e);
+                }
+            }
+        }
     }
 
     /**
@@ -322,7 +390,7 @@ public final class MediaController {
      */
     public void adjustVolume(int direction, int flags) {
         try {
-            mSessionBinder.adjustVolume(mContext.getPackageName(), direction, flags);
+            mSessionBinder.adjustVolume(mContext.getPackageName(), false, direction, flags);
         } catch (RemoteException e) {
             Log.wtf(TAG, "Error calling adjustVolumeBy.", e);
         }

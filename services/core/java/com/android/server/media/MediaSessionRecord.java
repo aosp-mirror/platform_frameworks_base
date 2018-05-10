@@ -45,6 +45,7 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
 import android.os.Message;
+import android.os.Process;
 import android.os.RemoteException;
 import android.os.ResultReceiver;
 import android.os.SystemClock;
@@ -82,6 +83,7 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
     private final SessionStub mSession;
     private final SessionCb mSessionCb;
     private final MediaSessionService mService;
+    private final Context mContext;
 
     private final Object mLock = new Object();
     private final ArrayList<ISessionControllerCallbackHolder> mControllerCallbackHolders =
@@ -126,8 +128,9 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
         mSession = new SessionStub();
         mSessionCb = new SessionCb(cb);
         mService = service;
+        mContext = mService.getContext();
         mHandler = new MessageHandler(handlerLooper);
-        mAudioManager = (AudioManager) service.getContext().getSystemService(Context.AUDIO_SERVICE);
+        mAudioManager = (AudioManager) mContext.getSystemService(Context.AUDIO_SERVICE);
         mAudioManagerInternal = LocalServices.getService(AudioManagerInternal.class);
         mAudioAttrs = new AudioAttributes.Builder().setUsage(AudioAttributes.USAGE_MEDIA).build();
     }
@@ -232,12 +235,17 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
      * @param packageName The package that made the original volume request.
      * @param pid The pid that made the original volume request.
      * @param uid The uid that made the original volume request.
+     * @param asSystemService {@code true} if the event sent to the session as if it was come from
+     *          the system service instead of the app process. This helps sessions to distinguish
+     *          between the key injection by the app and key events from the hardware devices.
+     *          Should be used only when the volume key events aren't handled by foreground
+     *          activity. {@code false} otherwise to tell session about the real caller.
      * @param direction The direction to adjust volume in.
      * @param flags Any of the flags from {@link AudioManager}.
      * @param useSuggested True to use adjustSuggestedStreamVolume instead of
      */
-    public void adjustVolume(String packageName, int pid, int uid, int direction, int flags,
-            boolean useSuggested) {
+    public void adjustVolume(String packageName, int pid, int uid, boolean asSystemService,
+            int direction, int flags, boolean useSuggested) {
         int previousFlagPlaySound = flags & AudioManager.FLAG_PLAY_SOUND;
         if (isPlaybackActive() || hasFlag(MediaSession.FLAG_EXCLUSIVE_GLOBAL_PRIORITY)) {
             flags &= ~AudioManager.FLAG_PLAY_SOUND;
@@ -258,7 +266,7 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
                 Log.w(TAG, "Muting remote playback is not supported");
                 return;
             }
-            mSessionCb.adjustVolume(packageName, pid, uid, direction);
+            mSessionCb.adjustVolume(packageName, pid, uid, asSystemService, direction);
 
             int volumeBefore = (mOptimisticVolume < 0 ? mCurrentVolume : mOptimisticVolume);
             mOptimisticVolume = volumeBefore + direction;
@@ -418,9 +426,9 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
         return mSessionCb.mCb;
     }
 
-    public void sendMediaButton(String packageName, int pid, int uid, KeyEvent ke, int sequenceId,
-            ResultReceiver cb) {
-        mSessionCb.sendMediaButton(packageName, pid, uid, ke, sequenceId, cb);
+    public void sendMediaButton(String packageName, int pid, int uid, boolean asSystemService,
+            KeyEvent ke, int sequenceId, ResultReceiver cb) {
+        mSessionCb.sendMediaButton(packageName, pid, uid, asSystemService, ke, sequenceId, cb);
     }
 
     public void dump(PrintWriter pw, String prefix) {
@@ -698,11 +706,7 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
     }
 
     private String getPackageName(int uid) {
-        Context context = mService.getContext();
-        if (context == null) {
-            return null;
-        }
-        String[] packages = context.getPackageManager().getPackagesForUid(uid);
+        String[] packages = mContext.getPackageManager().getPackagesForUid(uid);
         if (packages != null && packages.length > 0) {
             return packages[0];
         }
@@ -907,12 +911,17 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
             mCb = cb;
         }
 
-        public boolean sendMediaButton(String packageName, int pid, int uid, KeyEvent keyEvent,
-                int sequenceId, ResultReceiver cb) {
+        public boolean sendMediaButton(String packageName, int pid, int uid,
+                boolean asSystemService, KeyEvent keyEvent, int sequenceId, ResultReceiver cb) {
             Intent mediaButtonIntent = new Intent(Intent.ACTION_MEDIA_BUTTON);
             mediaButtonIntent.putExtra(Intent.EXTRA_KEY_EVENT, keyEvent);
             try {
-                mCb.onMediaButton(packageName, pid, uid, mediaButtonIntent, sequenceId, cb);
+                if (asSystemService) {
+                    mCb.onMediaButton(mContext.getPackageName(), Process.myPid(),
+                            Process.SYSTEM_UID, mediaButtonIntent, sequenceId, cb);
+                } else {
+                    mCb.onMediaButton(packageName, pid, uid, mediaButtonIntent, sequenceId, cb);
+                }
                 return true;
             } catch (RemoteException e) {
                 Slog.e(TAG, "Remote failure in sendMediaRequest.", e);
@@ -1079,9 +1088,15 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
             }
         }
 
-        public void adjustVolume(String packageName, int pid, int uid, int direction) {
+        public void adjustVolume(String packageName, int pid, int uid, boolean asSystemService,
+                int direction) {
             try {
-                mCb.onAdjustVolume(packageName, pid, uid, direction);
+                if (asSystemService) {
+                    mCb.onAdjustVolume(mContext.getPackageName(), Process.myPid(),
+                            Process.SYSTEM_UID, direction);
+                } else {
+                    mCb.onAdjustVolume(packageName, pid, uid, direction);
+                }
             } catch (RemoteException e) {
                 Slog.e(TAG, "Remote failure in adjustVolume.", e);
             }
@@ -1105,9 +1120,10 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
         }
 
         @Override
-        public boolean sendMediaButton(String packageName, KeyEvent mediaButtonIntent) {
+        public boolean sendMediaButton(String packageName, boolean asSystemService,
+                KeyEvent mediaButtonIntent) {
             return mSessionCb.sendMediaButton(packageName, Binder.getCallingPid(),
-                    Binder.getCallingUid(), mediaButtonIntent, 0, null);
+                    Binder.getCallingUid(), asSystemService, mediaButtonIntent, 0, null);
         }
 
         @Override
@@ -1188,13 +1204,14 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
         }
 
         @Override
-        public void adjustVolume(String packageName, int direction, int flags) {
+        public void adjustVolume(String packageName, boolean asSystemService, int direction,
+                int flags) {
             int pid = Binder.getCallingPid();
             int uid = Binder.getCallingUid();
             final long token = Binder.clearCallingIdentity();
             try {
-                MediaSessionRecord.this.adjustVolume(packageName, pid, uid, direction, flags,
-                        false /* useSuggested */);
+                MediaSessionRecord.this.adjustVolume(packageName, pid, uid, asSystemService,
+                        direction, flags, false /* useSuggested */);
             } finally {
                 Binder.restoreCallingIdentity(token);
             }
