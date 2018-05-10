@@ -1352,7 +1352,7 @@ public final class SystemServer {
 
             if (mPackageManager.hasSystemFeature(PackageManager.FEATURE_APP_WIDGETS)
                 || context.getResources().getBoolean(R.bool.config_enableAppWidgetService)) {
-                traceBeginAndSlog("StartAppWidgerService");
+                traceBeginAndSlog("StartAppWidgetService");
                 mSystemServiceManager.startService(APPWIDGET_SERVICE_CLASS);
                 traceEnd();
             }
