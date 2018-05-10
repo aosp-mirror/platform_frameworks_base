@@ -21,13 +21,16 @@ import android.app.ActivityManager;
 import android.app.ActivityThread;
 import android.app.AppGlobals;
 import android.app.AppOpsManager;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.IPackageManager;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManagerInternal;
 import android.content.pm.UserInfo;
+import android.database.ContentObserver;
 import android.media.AudioAttributes;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Binder;
 import android.os.Bundle;
@@ -43,9 +46,11 @@ import android.os.SystemClock;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.os.storage.StorageManagerInternal;
+import android.provider.Settings;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.AtomicFile;
+import android.util.KeyValueListParser;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.util.SparseBooleanArray;
@@ -108,9 +113,6 @@ public class AppOpsService extends IAppOpsService.Stub {
 
     // Write at most every 30 minutes.
     static final long WRITE_DELAY = DEBUG ? 1000 : 30*60*1000;
-
-    // How long we want for a drop in uid state to settle before applying it.
-    static final long STATE_SETTLE_TIME = 10*1000;
 
     // Constant meaning that any UID should be matched when dispatching callbacks
     private static final int UID_ANY = -2;
@@ -198,6 +200,75 @@ public class AppOpsService extends IAppOpsService.Stub {
      */
     private final ArrayMap<IBinder, ClientRestrictionState> mOpUserRestrictions = new ArrayMap<>();
 
+    /**
+     * All times are in milliseconds. These constants are kept synchronized with the system
+     * global Settings. Any access to this class or its fields should be done while
+     * holding the AppOpsService lock.
+     */
+    private final class Constants extends ContentObserver {
+        // Key names stored in the settings value.
+        private static final String KEY_STATE_SETTLE_TIME = "state_settle_time";
+
+        /**
+         * How long we want for a drop in uid state to settle before applying it.
+         * @see Settings.Global#APP_OPS_CONSTANTS
+         * @see #KEY_STATE_SETTLE_TIME
+         */
+        public long STATE_SETTLE_TIME;
+
+
+        private final KeyValueListParser mParser = new KeyValueListParser(',');
+        private ContentResolver mResolver;
+
+        public Constants(Handler handler) {
+            super(handler);
+            updateConstants();
+        }
+
+        public void startMonitoring(ContentResolver resolver) {
+            mResolver = resolver;
+            mResolver.registerContentObserver(
+                    Settings.Global.getUriFor(Settings.Global.DEVICE_IDLE_CONSTANTS),
+                    false, this);
+            updateConstants();
+        }
+
+        @Override
+        public void onChange(boolean selfChange, Uri uri) {
+            updateConstants();
+        }
+
+        private void updateConstants() {
+            synchronized (AppOpsService.this) {
+                try {
+                    if (mResolver != null) {
+                        mParser.setString(Settings.Global.getString(mResolver,
+                                Settings.Global.APP_OPS_CONSTANTS));
+                    } else {
+                        mParser.setString("");
+                    }
+                } catch (IllegalArgumentException e) {
+                    // Failed to parse the settings string, log this and move on
+                    // with defaults.
+                    Slog.e(TAG, "Bad app ops settings", e);
+                }
+
+                STATE_SETTLE_TIME = mParser.getDurationMillis(
+                        KEY_STATE_SETTLE_TIME, 10 * 1000L);
+            }
+        }
+
+        void dump(PrintWriter pw) {
+            pw.println("  Settings:");
+
+            pw.print("    "); pw.print(KEY_STATE_SETTLE_TIME); pw.print("=");
+            TimeUtils.formatDuration(STATE_SETTLE_TIME, pw);
+            pw.println();
+        }
+    }
+
+    private final Constants mConstants;
+
     @VisibleForTesting
     static final class UidState {
         public final int uid;
@@ -210,7 +281,9 @@ public class AppOpsService extends IAppOpsService.Stub {
         public ArrayMap<String, Ops> pkgOps;
         public SparseIntArray opModes;
 
+        // true indicates there is an interested observer, false there isn't but it has such an op
         public SparseBooleanArray foregroundOps;
+        public boolean hasForegroundWatchers;
 
         public UidState(int uid) {
             this.uid = uid;
@@ -234,8 +307,35 @@ public class AppOpsService extends IAppOpsService.Stub {
             return mode;
         }
 
-        public void evalForegroundOps() {
+        private void evalForegroundWatchers(int op, SparseArray<ArraySet<ModeCallback>> watchers,
+                SparseBooleanArray which) {
+            boolean curValue = which.get(op, false);
+            ArraySet<ModeCallback> callbacks = watchers.get(op);
+            if (callbacks != null) {
+                for (int cbi = callbacks.size() - 1; !curValue && cbi >= 0; cbi--) {
+                    if ((callbacks.valueAt(cbi).mFlags
+                            & AppOpsManager.WATCH_FOREGROUND_CHANGES) != 0) {
+                        hasForegroundWatchers = true;
+                        curValue = true;
+                    }
+                }
+            }
+            which.put(op, curValue);
+        }
+
+        public void evalForegroundOps(SparseArray<ArraySet<ModeCallback>> watchers) {
             SparseBooleanArray which = null;
+            hasForegroundWatchers = false;
+            if (opModes != null) {
+                for (int i = opModes.size() - 1; i >= 0; i--) {
+                    if (opModes.valueAt(i) == AppOpsManager.MODE_FOREGROUND) {
+                        if (which == null) {
+                            which = new SparseBooleanArray();
+                        }
+                        evalForegroundWatchers(opModes.keyAt(i), watchers, which);
+                    }
+                }
+            }
             if (pkgOps != null) {
                 for (int i = pkgOps.size() - 1; i >= 0; i--) {
                     Ops ops = pkgOps.valueAt(i);
@@ -244,7 +344,7 @@ public class AppOpsService extends IAppOpsService.Stub {
                             if (which == null) {
                                 which = new SparseBooleanArray();
                             }
-                            which.put(ops.keyAt(j), true);
+                            evalForegroundWatchers(ops.keyAt(j), watchers, which);
                         }
                     }
                 }
@@ -313,19 +413,25 @@ public class AppOpsService extends IAppOpsService.Stub {
     final class ModeCallback implements DeathRecipient {
         final IAppOpsCallback mCallback;
         final int mWatchingUid;
+        final int mFlags;
         final int mCallingUid;
         final int mCallingPid;
 
-        ModeCallback(IAppOpsCallback callback, int watchingUid, int callingUid,
+        ModeCallback(IAppOpsCallback callback, int watchingUid, int flags, int callingUid,
                 int callingPid) {
             mCallback = callback;
             mWatchingUid = watchingUid;
+            mFlags = flags;
             mCallingUid = callingUid;
             mCallingPid = callingPid;
             try {
                 mCallback.asBinder().linkToDeath(this, 0);
             } catch (RemoteException e) {
             }
+        }
+
+        public boolean isWatchingUid(int uid) {
+            return uid == UID_ANY || mWatchingUid < 0 || mWatchingUid == uid;
         }
 
         @Override
@@ -335,6 +441,8 @@ public class AppOpsService extends IAppOpsService.Stub {
             sb.append(Integer.toHexString(System.identityHashCode(this)));
             sb.append(" watchinguid=");
             UserHandle.formatUid(sb, mWatchingUid);
+            sb.append(" flags=0x");
+            sb.append(Integer.toHexString(mFlags));
             sb.append(" from uid=");
             UserHandle.formatUid(sb, mCallingUid);
             sb.append(" pid=");
@@ -439,6 +547,7 @@ public class AppOpsService extends IAppOpsService.Stub {
         LockGuard.installLock(this, LockGuard.INDEX_APP_OPS);
         mFile = new AtomicFile(storagePath, "appops");
         mHandler = handler;
+        mConstants = new Constants(mHandler);
         readState();
     }
 
@@ -449,6 +558,7 @@ public class AppOpsService extends IAppOpsService.Stub {
 
     public void systemReady() {
         synchronized (this) {
+            mConstants.startMonitoring(mContext.getContentResolver());
             boolean changed = false;
             for (int i = mUidStates.size() - 1; i >= 0; i--) {
                 UidState uidState = mUidStates.valueAt(i);
@@ -611,14 +721,16 @@ public class AppOpsService extends IAppOpsService.Stub {
             final UidState uidState = getUidStateLocked(uid, true);
             final int newState = PROCESS_STATE_TO_UID_STATE[procState];
             if (uidState != null && uidState.pendingState != newState) {
+                final int oldPendingState = uidState.pendingState;
+                uidState.pendingState = newState;
                 if (newState < uidState.state) {
                     // We are moving to a more important state, always do it immediately.
-                    uidState.state = newState;
-                    uidState.pendingStateCommitTime = 0;
+                    commitUidPendingStateLocked(uidState);
                 } else if (uidState.pendingStateCommitTime == 0) {
                     // We are moving to a less important state for the first time,
                     // delay the application for a bit.
-                    uidState.pendingStateCommitTime = SystemClock.uptimeMillis() + STATE_SETTLE_TIME;
+                    uidState.pendingStateCommitTime = SystemClock.uptimeMillis() +
+                            mConstants.STATE_SETTLE_TIME;
                 }
                 if (uidState.startNesting != 0) {
                     // There is some actively running operation...  need to find it
@@ -629,13 +741,12 @@ public class AppOpsService extends IAppOpsService.Stub {
                         for (int j = ops.size() - 1; j >= 0; j--) {
                             final Op op = ops.valueAt(j);
                             if (op.startNesting > 0) {
-                                op.time[uidState.pendingState] = now;
+                                op.time[oldPendingState] = now;
                                 op.time[newState] = now;
                             }
                         }
                     }
                 }
-                uidState.pendingState = newState;
             }
         }
     }
@@ -867,7 +978,9 @@ public class AppOpsService extends IAppOpsService.Stub {
                     ModeCallback callback = callbacks.valueAt(i);
                     ArraySet<String> changedPackages = new ArraySet<>();
                     Collections.addAll(changedPackages, uidPackageNames);
-                    callbackSpecs = new ArrayMap<>();
+                    if (callbackSpecs == null) {
+                        callbackSpecs = new ArrayMap<>();
+                    }
                     callbackSpecs.put(callback, changedPackages);
                 }
             }
@@ -932,7 +1045,7 @@ public class AppOpsService extends IAppOpsService.Stub {
                 if (op.mode != mode) {
                     op.mode = mode;
                     if (uidState != null) {
-                        uidState.evalForegroundOps();
+                        uidState.evalForegroundOps(mOpModeWatchers);
                     }
                     ArraySet<ModeCallback> cbs = mOpModeWatchers.get(code);
                     if (cbs != null) {
@@ -1126,7 +1239,7 @@ public class AppOpsService extends IAppOpsService.Stub {
                     mUidStates.remove(uidState.uid);
                 }
                 if (uidChanged) {
-                    uidState.evalForegroundOps();
+                    uidState.evalForegroundOps(mOpModeWatchers);
                 }
             }
 
@@ -1148,8 +1261,23 @@ public class AppOpsService extends IAppOpsService.Stub {
         }
     }
 
+    private void evalAllForegroundOpsLocked() {
+        for (int uidi = mUidStates.size() - 1; uidi >= 0; uidi--) {
+            final UidState uidState = mUidStates.valueAt(uidi);
+            if (uidState.foregroundOps != null) {
+                uidState.evalForegroundOps(mOpModeWatchers);
+            }
+        }
+    }
+
     @Override
     public void startWatchingMode(int op, String packageName, IAppOpsCallback callback) {
+        startWatchingModeWithFlags(op, packageName, 0, callback);
+    }
+
+    @Override
+    public void startWatchingModeWithFlags(int op, String packageName, int flags,
+            IAppOpsCallback callback) {
         int watchedUid = -1;
         final int callingUid = Binder.getCallingUid();
         final int callingPid = Binder.getCallingPid();
@@ -1166,7 +1294,7 @@ public class AppOpsService extends IAppOpsService.Stub {
             op = (op != AppOpsManager.OP_NONE) ? AppOpsManager.opToSwitch(op) : op;
             ModeCallback cb = mModeWatchers.get(callback.asBinder());
             if (cb == null) {
-                cb = new ModeCallback(callback, watchedUid, callingUid, callingPid);
+                cb = new ModeCallback(callback, watchedUid, flags, callingUid, callingPid);
                 mModeWatchers.put(callback.asBinder(), cb);
             }
             if (op != AppOpsManager.OP_NONE) {
@@ -1185,6 +1313,7 @@ public class AppOpsService extends IAppOpsService.Stub {
                 }
                 cbs.add(cb);
             }
+            evalAllForegroundOpsLocked();
         }
     }
 
@@ -1212,6 +1341,7 @@ public class AppOpsService extends IAppOpsService.Stub {
                     }
                 }
             }
+            evalAllForegroundOpsLocked();
         }
     }
 
@@ -1249,7 +1379,7 @@ public class AppOpsService extends IAppOpsService.Stub {
             if (op == null) {
                 return AppOpsManager.opToDefaultMode(code);
             }
-            return op.mode == AppOpsManager.MODE_FOREGROUND ? AppOpsManager.MODE_ALLOWED : op.mode;
+            return op.mode;
         }
     }
 
@@ -1699,18 +1829,54 @@ public class AppOpsService extends IAppOpsService.Stub {
         } else {
             if (uidState.pendingStateCommitTime != 0) {
                 if (uidState.pendingStateCommitTime < mLastUptime) {
-                    uidState.state = uidState.pendingState;
-                    uidState.pendingStateCommitTime = 0;
+                    commitUidPendingStateLocked(uidState);
                 } else {
                     mLastUptime = SystemClock.uptimeMillis();
                     if (uidState.pendingStateCommitTime < mLastUptime) {
-                        uidState.state = uidState.pendingState;
-                        uidState.pendingStateCommitTime = 0;
+                        commitUidPendingStateLocked(uidState);
                     }
                 }
             }
         }
         return uidState;
+    }
+
+    private void commitUidPendingStateLocked(UidState uidState) {
+        uidState.state = uidState.pendingState;
+        uidState.pendingStateCommitTime = 0;
+        if (uidState.hasForegroundWatchers) {
+            for (int fgi = uidState.foregroundOps.size() - 1; fgi >= 0; fgi--) {
+                if (!uidState.foregroundOps.valueAt(fgi)) {
+                    continue;
+                }
+                final int code = uidState.foregroundOps.keyAt(fgi);
+
+                final ArraySet<ModeCallback> callbacks = mOpModeWatchers.get(code);
+                if (callbacks != null) {
+                    for (int cbi = callbacks.size() - 1; cbi >= 0; cbi--) {
+                        final ModeCallback callback = callbacks.valueAt(cbi);
+                        if ((callback.mFlags & AppOpsManager.WATCH_FOREGROUND_CHANGES) == 0
+                                || !callback.isWatchingUid(uidState.uid)) {
+                            continue;
+                        }
+                        boolean doAllPackages = uidState.opModes != null
+                                && uidState.opModes.get(code) == AppOpsManager.MODE_FOREGROUND;
+                        if (uidState.pkgOps != null) {
+                            for (int pkgi = uidState.pkgOps.size() - 1; pkgi >= 0; pkgi--) {
+                                final Op op = uidState.pkgOps.valueAt(pkgi).get(code);
+                                if (doAllPackages || (op != null
+                                        && op.mode == AppOpsManager.MODE_FOREGROUND)) {
+                                    mHandler.sendMessage(PooledLambda.obtainMessage(
+                                            AppOpsService::notifyOpChanged,
+                                            this, callback, code, uidState.uid,
+                                            uidState.pkgOps.keyAt(pkgi)));
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
     }
 
     private Ops getOpsRawLocked(int uid, String packageName, boolean edit,
@@ -1952,7 +2118,7 @@ public class AppOpsService extends IAppOpsService.Stub {
                 }
             }
             if (changed) {
-                uidState.evalForegroundOps();
+                uidState.evalForegroundOps(mOpModeWatchers);
             }
         }
     }
@@ -2151,7 +2317,7 @@ public class AppOpsService extends IAppOpsService.Stub {
         }
         UidState uidState = getUidStateLocked(uid, false);
         if (uidState != null) {
-            uidState.evalForegroundOps();
+            uidState.evalForegroundOps(mOpModeWatchers);
         }
     }
 
@@ -2322,7 +2488,7 @@ public class AppOpsService extends IAppOpsService.Stub {
             }
         }
 
-        int strModeToMode(String modeStr, PrintWriter err) {
+        static int strModeToMode(String modeStr, PrintWriter err) {
             for (int i = AppOpsManager.MODE_NAMES.length - 1; i >= 0; i--) {
                 if (AppOpsManager.MODE_NAMES[i].equals(modeStr)) {
                     return i;
@@ -2716,6 +2882,10 @@ public class AppOpsService extends IAppOpsService.Stub {
         pw.println("    Print this help text.");
         pw.println("  --op [OP]");
         pw.println("    Limit output to data associated with the given app op code.");
+        pw.println("  --mode [MODE]");
+        pw.println("    Limit output to data associated with the given app op mode.");
+        pw.println("  --package [PACKAGE]");
+        pw.println("    Limit output to data associated with the given package name.");
     }
 
     private void dumpTimesLocked(PrintWriter pw, String firstPrefix, String prefix, long[] times,
@@ -2751,6 +2921,9 @@ public class AppOpsService extends IAppOpsService.Stub {
         if (!DumpUtils.checkDumpAndUsageStatsPermission(mContext, TAG, pw)) return;
 
         int dumpOp = -1;
+        String dumpPackage = null;
+        int dumpUid = -1;
+        int dumpMode = -1;
 
         if (args != null) {
             for (int i=0; i<args.length; i++) {
@@ -2770,6 +2943,34 @@ public class AppOpsService extends IAppOpsService.Stub {
                     if (dumpOp < 0) {
                         return;
                     }
+                } else if ("--package".equals(arg)) {
+                    i++;
+                    if (i >= args.length) {
+                        pw.println("No argument for --package option");
+                        return;
+                    }
+                    dumpPackage = args[i];
+                    try {
+                        dumpUid = AppGlobals.getPackageManager().getPackageUid(dumpPackage,
+                                PackageManager.MATCH_KNOWN_PACKAGES | PackageManager.MATCH_INSTANT,
+                                0);
+                    } catch (RemoteException e) {
+                    }
+                    if (dumpUid < 0) {
+                        pw.println("Unknown package: " + dumpPackage);
+                        return;
+                    }
+                    dumpUid = UserHandle.getAppId(dumpUid);
+                } else if ("--mode".equals(arg)) {
+                    i++;
+                    if (i >= args.length) {
+                        pw.println("No argument for --mode option");
+                        return;
+                    }
+                    dumpMode = Shell.strModeToMode(args[i], pw);
+                    if (dumpMode < 0) {
+                        return;
+                    }
                 } else if (arg.length() > 0 && arg.charAt(0) == '-'){
                     pw.println("Unknown option: " + arg);
                     return;
@@ -2782,6 +2983,8 @@ public class AppOpsService extends IAppOpsService.Stub {
 
         synchronized (this) {
             pw.println("Current AppOps Service state:");
+            mConstants.dump(pw);
+            pw.println();
             final long now = System.currentTimeMillis();
             final long nowElapsed = SystemClock.elapsedRealtime();
             final long nowUptime = SystemClock.uptimeMillis();
@@ -2789,29 +2992,46 @@ public class AppOpsService extends IAppOpsService.Stub {
             final Date date = new Date();
             boolean needSep = false;
             if (mOpModeWatchers.size() > 0) {
-                needSep = true;
                 boolean printedHeader = false;
                 for (int i=0; i<mOpModeWatchers.size(); i++) {
                     if (dumpOp >= 0 && dumpOp != mOpModeWatchers.keyAt(i)) {
                         continue;
                     }
-                    if (!printedHeader) {
-                        pw.println("  Op mode watchers:");
-                        printedHeader = true;
-                    }
-                    pw.print("    Op "); pw.print(AppOpsManager.opToName(mOpModeWatchers.keyAt(i)));
-                    pw.println(":");
+                    boolean printedOpHeader = false;
                     ArraySet<ModeCallback> callbacks = mOpModeWatchers.valueAt(i);
                     for (int j=0; j<callbacks.size(); j++) {
+                        final ModeCallback cb = callbacks.valueAt(j);
+                        if (dumpPackage != null && cb.mWatchingUid >= 0
+                                && dumpUid != UserHandle.getAppId(cb.mWatchingUid)) {
+                            continue;
+                        }
+                        needSep = true;
+                        if (!printedHeader) {
+                            pw.println("  Op mode watchers:");
+                            printedHeader = true;
+                        }
+                        if (!printedOpHeader) {
+                            pw.print("    Op ");
+                            pw.print(AppOpsManager.opToName(mOpModeWatchers.keyAt(i)));
+                            pw.println(":");
+                            printedOpHeader = true;
+                        }
                         pw.print("      #"); pw.print(j); pw.print(": ");
-                        pw.println(callbacks.valueAt(j));
+                        pw.println(cb);
                     }
                 }
             }
-            if (mPackageModeWatchers.size() > 0) {
-                needSep = true;
-                pw.println("  Package mode watchers:");
+            if (mPackageModeWatchers.size() > 0 && dumpOp < 0) {
+                boolean printedHeader = false;
                 for (int i=0; i<mPackageModeWatchers.size(); i++) {
+                    if (dumpPackage != null && !dumpPackage.equals(mPackageModeWatchers.keyAt(i))) {
+                        continue;
+                    }
+                    needSep = true;
+                    if (!printedHeader) {
+                        pw.println("  Package mode watchers:");
+                        printedHeader = true;
+                    }
                     pw.print("    Pkg "); pw.print(mPackageModeWatchers.keyAt(i));
                     pw.println(":");
                     ArraySet<ModeCallback> callbacks = mPackageModeWatchers.valueAt(i);
@@ -2822,15 +3042,24 @@ public class AppOpsService extends IAppOpsService.Stub {
                 }
             }
             if (mModeWatchers.size() > 0 && dumpOp < 0) {
-                needSep = true;
-                pw.println("  All op mode watchers:");
+                boolean printedHeader = false;
                 for (int i=0; i<mModeWatchers.size(); i++) {
+                    final ModeCallback cb = mModeWatchers.valueAt(i);
+                    if (dumpPackage != null && cb.mWatchingUid >= 0
+                            && dumpUid != UserHandle.getAppId(cb.mWatchingUid)) {
+                        continue;
+                    }
+                    needSep = true;
+                    if (!printedHeader) {
+                        pw.println("  All op mode watchers:");
+                        printedHeader = true;
+                    }
                     pw.print("    ");
                     pw.print(Integer.toHexString(System.identityHashCode(mModeWatchers.keyAt(i))));
-                    pw.print(": "); pw.println(mModeWatchers.valueAt(i));
+                    pw.print(": "); pw.println(cb);
                 }
             }
-            if (mActiveWatchers.size() > 0) {
+            if (mActiveWatchers.size() > 0 && dumpMode < 0) {
                 needSep = true;
                 boolean printedHeader = false;
                 for (int i = 0; i < mActiveWatchers.size(); i++) {
@@ -2838,7 +3067,12 @@ public class AppOpsService extends IAppOpsService.Stub {
                     if (activeWatchers.size() <= 0) {
                         continue;
                     }
+                    final ActiveCallback cb = activeWatchers.valueAt(0);
                     if (dumpOp >= 0 && activeWatchers.indexOfKey(dumpOp) < 0) {
+                        continue;
+                    }
+                    if (dumpPackage != null && cb.mWatchingUid >= 0
+                            && dumpUid != UserHandle.getAppId(cb.mWatchingUid)) {
                         continue;
                     }
                     if (!printedHeader) {
@@ -2862,10 +3096,10 @@ public class AppOpsService extends IAppOpsService.Stub {
                     }
                     pw.println("]");
                     pw.print("        ");
-                    pw.println(activeWatchers.valueAt(0));
+                    pw.println(cb);
                 }
             }
-            if (mClients.size() > 0) {
+            if (mClients.size() > 0 && dumpMode < 0) {
                 needSep = true;
                 boolean printedHeader = false;
                 for (int i=0; i<mClients.size(); i++) {
@@ -2876,6 +3110,9 @@ public class AppOpsService extends IAppOpsService.Stub {
                         for (int j=0; j<cs.mStartedOps.size(); j++) {
                             Op op = cs.mStartedOps.get(j);
                             if (dumpOp >= 0 && op.op != dumpOp) {
+                                continue;
+                            }
+                            if (dumpPackage != null && !dumpPackage.equals(op.packageName)) {
                                 continue;
                             }
                             if (!printedHeader) {
@@ -2898,7 +3135,8 @@ public class AppOpsService extends IAppOpsService.Stub {
                     }
                 }
             }
-            if (mAudioRestrictions.size() > 0 && dumpOp < 0) {
+            if (mAudioRestrictions.size() > 0 && dumpOp < 0 && dumpPackage != null
+                    && dumpMode < 0) {
                 boolean printedHeader = false;
                 for (int o=0; o<mAudioRestrictions.size(); o++) {
                     final String op = AppOpsManager.opToName(mAudioRestrictions.keyAt(o));
@@ -2931,19 +3169,44 @@ public class AppOpsService extends IAppOpsService.Stub {
                 final SparseIntArray opModes = uidState.opModes;
                 final ArrayMap<String, Ops> pkgOps = uidState.pkgOps;
 
-                if (dumpOp >= 0) {
-                    boolean hasOp = uidState.opModes != null
-                            && uidState.opModes.indexOfKey(dumpOp) >= 0;
-                    if (pkgOps != null) {
-                        for (int pkgi = 0; !hasOp && pkgi < pkgOps.size(); pkgi++) {
-                            Ops ops = pkgOps.valueAt(pkgi);
-                            if (ops != null && ops.indexOfKey(dumpOp) >= 0) {
-                                hasOp = true;
-                                continue;
+                if (dumpOp >= 0 || dumpPackage != null || dumpMode >= 0) {
+                    boolean hasOp = dumpOp < 0 || (uidState.opModes != null
+                            && uidState.opModes.indexOfKey(dumpOp) >= 0);
+                    boolean hasPackage = dumpPackage == null;
+                    boolean hasMode = dumpMode < 0;
+                    if (!hasMode && opModes != null) {
+                        for (int opi = 0; !hasMode && opi < opModes.size(); opi++) {
+                            if (opModes.valueAt(opi) == dumpMode) {
+                                hasMode = true;
                             }
                         }
                     }
-                    if (!hasOp) {
+                    if (pkgOps != null) {
+                        for (int pkgi = 0;
+                                (!hasOp || !hasPackage || !hasMode) && pkgi < pkgOps.size();
+                                pkgi++) {
+                            Ops ops = pkgOps.valueAt(pkgi);
+                            if (!hasOp && ops != null && ops.indexOfKey(dumpOp) >= 0) {
+                                hasOp = true;
+                            }
+                            if (!hasMode) {
+                                for (int opi = 0; !hasMode && opi < ops.size(); opi++) {
+                                    if (ops.valueAt(opi).mode == dumpMode) {
+                                        hasMode = true;
+                                    }
+                                }
+                            }
+                            if (!hasPackage && dumpPackage.equals(ops.packageName)) {
+                                hasPackage = true;
+                            }
+                        }
+                    }
+                    if (uidState.foregroundOps != null && !hasOp) {
+                        if (uidState.foregroundOps.indexOfKey(dumpOp) > 0) {
+                            hasOp = true;
+                        }
+                    }
+                    if (!hasOp || !hasPackage || !hasMode) {
                         continue;
                     }
                 }
@@ -2964,12 +3227,20 @@ public class AppOpsService extends IAppOpsService.Stub {
                     pw.print("    startNesting=");
                     pw.println(uidState.startNesting);
                 }
-                if (uidState.foregroundOps != null) {
+                if (uidState.foregroundOps != null && (dumpMode < 0
+                        || dumpMode == AppOpsManager.MODE_FOREGROUND)) {
                     pw.println("    foregroundOps:");
                     for (int j = 0; j < uidState.foregroundOps.size(); j++) {
-                        pw.print("    ");
-                        pw.println(AppOpsManager.opToName(uidState.foregroundOps.keyAt(j)));
+                        if (dumpOp >= 0 && dumpOp != uidState.foregroundOps.keyAt(j)) {
+                            continue;
+                        }
+                        pw.print("      ");
+                        pw.print(AppOpsManager.opToName(uidState.foregroundOps.keyAt(j)));
+                        pw.print(": ");
+                        pw.println(uidState.foregroundOps.valueAt(j) ? "WATCHER" : "SILENT");
                     }
+                    pw.print("    hasForegroundWatchers=");
+                    pw.println(uidState.hasForegroundWatchers);
                 }
                 needSep = true;
 
@@ -2979,6 +3250,9 @@ public class AppOpsService extends IAppOpsService.Stub {
                         final int code = opModes.keyAt(j);
                         final int mode = opModes.valueAt(j);
                         if (dumpOp >= 0 && dumpOp != code) {
+                            continue;
+                        }
+                        if (dumpMode >= 0 && dumpMode != mode) {
                             continue;
                         }
                         pw.print("      "); pw.print(AppOpsManager.opToName(code));
@@ -2991,11 +3265,17 @@ public class AppOpsService extends IAppOpsService.Stub {
                 }
 
                 for (int pkgi = 0; pkgi < pkgOps.size(); pkgi++) {
-                    Ops ops = pkgOps.valueAt(pkgi);
+                    final Ops ops = pkgOps.valueAt(pkgi);
+                    if (dumpPackage != null && !dumpPackage.equals(ops.packageName)) {
+                        continue;
+                    }
                     boolean printedPackage = false;
                     for (int j=0; j<ops.size(); j++) {
-                        Op op = ops.valueAt(j);
+                        final Op op = ops.valueAt(j);
                         if (dumpOp >= 0 && dumpOp != op.op) {
+                            continue;
+                        }
+                        if (dumpMode >= 0 && dumpMode != op.mode) {
                             continue;
                         }
                         if (!printedPackage) {
@@ -3004,6 +3284,15 @@ public class AppOpsService extends IAppOpsService.Stub {
                         }
                         pw.print("      "); pw.print(AppOpsManager.opToName(op.op));
                         pw.print(" ("); pw.print(AppOpsManager.modeToName(op.mode));
+                        final int switchOp = AppOpsManager.opToSwitch(op.op);
+                        if (switchOp != op.op) {
+                            pw.print(" / switch ");
+                            pw.print(AppOpsManager.opToName(switchOp));
+                            final Op switchObj = ops.get(switchOp);
+                            int mode = switchObj != null
+                                    ? switchObj.mode : AppOpsManager.opToDefaultMode(switchOp);
+                            pw.print("="); pw.print(AppOpsManager.modeToName(mode));
+                        }
                         pw.println("): ");
                         dumpTimesLocked(pw,
                                 "          Access: ",
