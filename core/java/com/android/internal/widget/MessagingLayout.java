@@ -73,6 +73,8 @@ public class MessagingLayout extends FrameLayout {
     private ArrayList<MessagingGroup> mGroups = new ArrayList<>();
     private TextView mTitleView;
     private int mLayoutColor;
+    private int mSenderTextColor;
+    private int mMessageTextColor;
     private int mAvatarSize;
     private Paint mPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
     private Paint mTextPaint = new Paint();
@@ -301,6 +303,16 @@ public class MessagingLayout extends FrameLayout {
         mIsOneToOne = oneToOne;
     }
 
+    @RemotableViewMethod
+    public void setSenderTextColor(int color) {
+        mSenderTextColor = color;
+    }
+
+    @RemotableViewMethod
+    public void setMessageTextColor(int color) {
+        mMessageTextColor = color;
+    }
+
     public void setUser(Person user) {
         mUser = user;
         if (mUser.getIcon() == null) {
@@ -344,6 +356,7 @@ public class MessagingLayout extends FrameLayout {
             }
             newGroup.setDisplayImagesAtEnd(mDisplayImagesAtEnd);
             newGroup.setLayoutColor(mLayoutColor);
+            newGroup.setTextColors(mSenderTextColor, mMessageTextColor);
             Person sender = senders.get(groupIndex);
             CharSequence nameOverride = null;
             if (sender != mUser && mNameReplacement != null) {

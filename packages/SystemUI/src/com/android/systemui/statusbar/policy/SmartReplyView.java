@@ -1,12 +1,17 @@
 package com.android.systemui.statusbar.policy;
 
+import android.annotation.ColorInt;
 import android.app.PendingIntent;
 import android.app.RemoteInput;
 import android.content.Context;
 import android.content.Intent;
+import android.content.res.ColorStateList;
 import android.content.res.TypedArray;
 import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.drawable.Drawable;
 import android.graphics.drawable.GradientDrawable;
+import android.graphics.drawable.InsetDrawable;
 import android.graphics.drawable.RippleDrawable;
 import android.os.Bundle;
 import android.text.Layout;
@@ -22,6 +27,7 @@ import android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction;
 import android.widget.Button;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.util.NotificationColorUtil;
 import com.android.keyguard.KeyguardHostView.OnDismissAction;
 import com.android.systemui.Dependency;
 import com.android.systemui.R;
@@ -75,6 +81,23 @@ public class SmartReplyView extends ViewGroup {
 
     private View mSmartReplyContainer;
 
+    @ColorInt
+    private int mCurrentBackgroundColor;
+    @ColorInt
+    private final int mDefaultBackgroundColor;
+    @ColorInt
+    private final int mDefaultStrokeColor;
+    @ColorInt
+    private final int mDefaultTextColor;
+    @ColorInt
+    private final int mDefaultTextColorDarkBg;
+    @ColorInt
+    private final int mRippleColorDarkBg;
+    @ColorInt
+    private final int mRippleColor;
+    private final int mStrokeWidth;
+    private final double mMinStrokeContrast;
+
     public SmartReplyView(Context context, AttributeSet attrs) {
         super(context, attrs);
         mConstants = Dependency.get(SmartReplyConstants.class);
@@ -83,9 +106,21 @@ public class SmartReplyView extends ViewGroup {
         mHeightUpperLimit = NotificationUtils.getFontScaledHeight(mContext,
             R.dimen.smart_reply_button_max_height);
 
+        mCurrentBackgroundColor = context.getColor(R.color.smart_reply_button_background);
+        mDefaultBackgroundColor = mCurrentBackgroundColor;
+        mDefaultTextColor = mContext.getColor(R.color.smart_reply_button_text);
+        mDefaultTextColorDarkBg = mContext.getColor(R.color.smart_reply_button_text_dark_bg);
+        mDefaultStrokeColor = mContext.getColor(R.color.smart_reply_button_stroke);
+        mRippleColor = mContext.getColor(R.color.notification_ripple_untinted_color);
+        mRippleColorDarkBg = Color.argb(Color.alpha(mRippleColor),
+                255 /* red */, 255 /* green */, 255 /* blue */);
+        mMinStrokeContrast = NotificationColorUtil.calculateContrast(mDefaultStrokeColor,
+                mDefaultBackgroundColor);
+
         int spacing = 0;
         int singleLineButtonPaddingHorizontal = 0;
         int doubleLineButtonPaddingHorizontal = 0;
+        int strokeWidth = 0;
 
         final TypedArray arr = context.obtainStyledAttributes(attrs, R.styleable.SmartReplyView,
                 0, 0);
@@ -102,10 +137,14 @@ public class SmartReplyView extends ViewGroup {
                 case R.styleable.SmartReplyView_doubleLineButtonPaddingHorizontal:
                     doubleLineButtonPaddingHorizontal = arr.getDimensionPixelSize(i, 0);
                     break;
+                case R.styleable.SmartReplyView_buttonStrokeWidth:
+                    strokeWidth = arr.getDimensionPixelSize(i, 0);
+                    break;
             }
         }
         arr.recycle();
 
+        mStrokeWidth = strokeWidth;
         mSpacing = spacing;
         mSingleLineButtonPaddingHorizontal = singleLineButtonPaddingHorizontal;
         mDoubleLineButtonPaddingHorizontal = doubleLineButtonPaddingHorizontal;
@@ -139,6 +178,7 @@ public class SmartReplyView extends ViewGroup {
             View smartReplyContainer) {
         mSmartReplyContainer = smartReplyContainer;
         removeAllViews();
+        mCurrentBackgroundColor = mDefaultBackgroundColor;
         if (remoteInput != null && pendingIntent != null) {
             CharSequence[] choices = remoteInput.getChoices();
             if (choices != null) {
@@ -194,6 +234,7 @@ public class SmartReplyView extends ViewGroup {
             }
         });
 
+        setColors(b, mCurrentBackgroundColor, mDefaultStrokeColor, mDefaultTextColor, mRippleColor);
         return b;
     }
 
@@ -521,6 +562,51 @@ public class SmartReplyView extends ViewGroup {
     protected boolean drawChild(Canvas canvas, View child, long drawingTime) {
         final LayoutParams lp = (LayoutParams) child.getLayoutParams();
         return lp.show && super.drawChild(canvas, child, drawingTime);
+    }
+
+    public void setBackgroundTintColor(int backgroundColor) {
+        if (backgroundColor == mCurrentBackgroundColor) {
+            // Same color ignoring.
+           return;
+        }
+        mCurrentBackgroundColor = backgroundColor;
+
+        final boolean dark = !NotificationColorUtil.isColorLight(backgroundColor);
+
+        int textColor = NotificationColorUtil.ensureTextContrast(
+                dark ? mDefaultTextColorDarkBg : mDefaultTextColor,
+                backgroundColor | 0xff000000, dark);
+        int strokeColor = NotificationColorUtil.ensureContrast(
+                mDefaultStrokeColor, backgroundColor | 0xff000000, dark, mMinStrokeContrast);
+        int rippleColor = dark ? mRippleColorDarkBg : mRippleColor;
+
+        int childCount = getChildCount();
+        for (int i = 0; i < childCount; i++) {
+            final Button child = (Button) getChildAt(i);
+            setColors(child, backgroundColor, strokeColor, textColor, rippleColor);
+        }
+    }
+
+    private void setColors(Button button, int backgroundColor, int strokeColor, int textColor,
+            int rippleColor) {
+        Drawable drawable = button.getBackground();
+        if (drawable instanceof RippleDrawable) {
+            // Mutate in case other notifications are using this drawable.
+            drawable = drawable.mutate();
+            RippleDrawable ripple = (RippleDrawable) drawable;
+            ripple.setColor(ColorStateList.valueOf(rippleColor));
+            Drawable inset = ripple.getDrawable(0);
+            if (inset instanceof InsetDrawable) {
+                Drawable background = ((InsetDrawable) inset).getDrawable();
+                if (background instanceof GradientDrawable) {
+                    GradientDrawable gradientDrawable = (GradientDrawable) background;
+                    gradientDrawable.setColor(backgroundColor);
+                    gradientDrawable.setStroke(mStrokeWidth, strokeColor);
+                }
+            }
+            button.setBackground(drawable);
+        }
+        button.setTextColor(textColor);
     }
 
     @VisibleForTesting
