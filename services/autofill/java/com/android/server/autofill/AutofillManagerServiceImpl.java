@@ -32,6 +32,7 @@ import android.app.IActivityManager;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageItemInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.ServiceInfo;
@@ -667,7 +668,10 @@ final class AutofillManagerServiceImpl {
 
     @NonNull
     CharSequence getServiceLabel() {
-        return mInfo.getServiceInfo().loadLabel(mContext.getPackageManager());
+        final CharSequence label = mInfo.getServiceInfo().loadSafeLabel(
+                mContext.getPackageManager(), 0 /* do not ellipsize */,
+                PackageItemInfo.SAFE_LABEL_FLAG_FIRST_LINE | PackageItemInfo.SAFE_LABEL_FLAG_TRIM);
+        return label;
     }
 
     @NonNull
@@ -912,6 +916,7 @@ final class AutofillManagerServiceImpl {
         } else {
             pw.println();
             mInfo.dump(prefix2, pw);
+            pw.print(prefix); pw.print("Service Label: "); pw.println(getServiceLabel());
         }
         pw.print(prefix); pw.print("Component from settings: ");
             pw.println(getComponentNameFromSettings());
