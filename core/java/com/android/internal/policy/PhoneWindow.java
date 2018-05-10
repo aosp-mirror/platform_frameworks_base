@@ -2512,11 +2512,10 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
                 if (a.hasValue(R.styleable.Window_windowBackground)) {
                     mBackgroundDrawable = a.getDrawable(R.styleable.Window_windowBackground);
                 }
-
-                if (a.hasValue(R.styleable.Window_windowBackgroundFallback)) {
-                    mBackgroundFallbackDrawable =
-                            a.getDrawable(R.styleable.Window_windowBackgroundFallback);
-                }
+            }
+            if (a.hasValue(R.styleable.Window_windowBackgroundFallback)) {
+                mBackgroundFallbackDrawable =
+                        a.getDrawable(R.styleable.Window_windowBackgroundFallback);
             }
             if (mLoadElevation) {
                 mElevation = a.getDimension(R.styleable.Window_windowElevation, 0);
