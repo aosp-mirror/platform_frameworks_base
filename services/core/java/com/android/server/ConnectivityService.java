@@ -500,24 +500,24 @@ public class ConnectivityService extends IConnectivityManager.Stub
     private static final int MAX_VALIDATION_LOGS = 10;
     private static class ValidationLog {
         final Network mNetwork;
-        final String mNetworkExtraInfo;
+        final String mName;
         final ReadOnlyLocalLog mLog;
 
-        ValidationLog(Network network, String networkExtraInfo, ReadOnlyLocalLog log) {
+        ValidationLog(Network network, String name, ReadOnlyLocalLog log) {
             mNetwork = network;
-            mNetworkExtraInfo = networkExtraInfo;
+            mName = name;
             mLog = log;
         }
     }
     private final ArrayDeque<ValidationLog> mValidationLogs =
             new ArrayDeque<ValidationLog>(MAX_VALIDATION_LOGS);
 
-    private void addValidationLogs(ReadOnlyLocalLog log, Network network, String networkExtraInfo) {
+    private void addValidationLogs(ReadOnlyLocalLog log, Network network, String name) {
         synchronized (mValidationLogs) {
             while (mValidationLogs.size() >= MAX_VALIDATION_LOGS) {
                 mValidationLogs.removeLast();
             }
-            mValidationLogs.addFirst(new ValidationLog(network, networkExtraInfo, log));
+            mValidationLogs.addFirst(new ValidationLog(network, name, log));
         }
     }
 
@@ -2097,7 +2097,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
             synchronized (mValidationLogs) {
                 pw.println("mValidationLogs (most recent first):");
                 for (ValidationLog p : mValidationLogs) {
-                    pw.println(p.mNetwork + " - " + p.mNetworkExtraInfo);
+                    pw.println(p.mNetwork + " - " + p.mName);
                     pw.increaseIndent();
                     p.mLog.dump(fd, pw, args);
                     pw.decreaseIndent();
@@ -4628,8 +4628,10 @@ public class ConnectivityService extends IConnectivityManager.Stub
         synchronized (this) {
             nai.networkMonitor.systemReady = mSystemReady;
         }
-        addValidationLogs(nai.networkMonitor.getValidationLogs(), nai.network,
-                networkInfo.getExtraInfo());
+        final String extraInfo = networkInfo.getExtraInfo();
+        final String name = TextUtils.isEmpty(extraInfo)
+                ? nai.networkCapabilities.getSSID() : extraInfo;
+        addValidationLogs(nai.networkMonitor.getValidationLogs(), nai.network, name);
         if (DBG) log("registerNetworkAgent " + nai);
         mHandler.sendMessage(mHandler.obtainMessage(EVENT_REGISTER_NETWORK_AGENT, nai));
         return nai.network.netId;
