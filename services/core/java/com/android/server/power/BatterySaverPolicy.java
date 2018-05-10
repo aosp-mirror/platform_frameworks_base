@@ -310,6 +310,11 @@ public class BatterySaverPolicy extends ContentObserver {
         return R.string.config_batterySaverDeviceSpecificConfig;
     }
 
+    @VisibleForTesting
+    boolean isAccessibilityEnabled() {
+        return mAccessibilityManager.isEnabled();
+    }
+
     @Override
     public void onChange(boolean selfChange, Uri uri) {
         refreshSettings();
@@ -403,7 +408,7 @@ public class BatterySaverPolicy extends ContentObserver {
                 parser.getString(KEY_CPU_FREQ_NONINTERACTIVE, "")).toSysFileMap();
 
         // Update the effective policy.
-        mAccessibilityEnabled = mAccessibilityManager.isEnabled();
+        mAccessibilityEnabled = isAccessibilityEnabled();
 
         mVibrationDisabledEffective = mVibrationDisabledConfig
                 && !mAccessibilityEnabled; // Don't disable vibration when accessibility is on.
