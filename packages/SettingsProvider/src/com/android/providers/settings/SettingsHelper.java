@@ -44,7 +44,7 @@ import android.telephony.TelephonyManager;
 import android.text.TextUtils;
 import android.util.ArraySet;
 
-import java.security.InvalidParameterException;
+import java.lang.IllegalArgumentException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Locale;
@@ -245,7 +245,7 @@ public class SettingsHelper {
             case Settings.System.ALARM_ALERT:
                 return RingtoneManager.TYPE_ALARM;
             default:
-                throw new InvalidParameterException("Incorrect ringtone name: " + name);
+                throw new IllegalArgumentException("Incorrect ringtone name: " + name);
         }
     }
 
