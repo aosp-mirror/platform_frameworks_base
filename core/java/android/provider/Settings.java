@@ -10882,21 +10882,13 @@ public final class Settings {
                 = "forced_app_standby_for_small_battery_enabled";
 
         /**
-         * Whether or not to enable the Off Body, Radios Off feature on small battery devices.
+         * Whether or not to enable the User Absent, Radios Off feature on small battery devices.
          * Type: int (0 for false, 1 for true)
          * Default: 0
          * @hide
          */
-        public static final String OFF_BODY_RADIOS_OFF_FOR_SMALL_BATTERY_ENABLED
-                = "off_body_radios_off_for_small_battery_enabled";
-
-        /**
-         * How long after the device goes off body to disable radios, in milliseconds.
-         * Type: long
-         * Default: 10 minutes
-         * @hide
-         */
-        public static final String OFF_BODY_RADIOS_OFF_DELAY_MS = "off_body_radios_off_delay_ms";
+        public static final String USER_ABSENT_RADIOS_OFF_FOR_SMALL_BATTERY_ENABLED
+                = "user_absent_radios_off_for_small_battery_enabled";
 
         /**
          * Whether or not to turn on Wifi when proxy is disconnected.

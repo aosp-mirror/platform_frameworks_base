@@ -963,14 +963,11 @@ class SettingsProtoDumpUtil {
                 GlobalSettingsProto.Ntp.TIMEOUT_MS);
         p.end(ntpToken);
 
-        final long obroToken = p.start(GlobalSettingsProto.OFF_BODY_RADIOS_OFF);
+        final long uaroToken = p.start(GlobalSettingsProto.USER_ABSENT_RADIOS_OFF);
         dumpSetting(s, p,
-                Settings.Global.OFF_BODY_RADIOS_OFF_FOR_SMALL_BATTERY_ENABLED,
-                GlobalSettingsProto.OffBodyRadiosOff.ENABLED_FOR_SMALL_BATTERY);
-        dumpSetting(s, p,
-                Settings.Global.OFF_BODY_RADIOS_OFF_DELAY_MS,
-                GlobalSettingsProto.OffBodyRadiosOff.DELAY_MS);
-        p.end(obroToken);
+                Settings.Global.USER_ABSENT_RADIOS_OFF_FOR_SMALL_BATTERY_ENABLED,
+                GlobalSettingsProto.UserAbsentRadiosOff.ENABLED_FOR_SMALL_BATTERY);
+        p.end(uaroToken);
 
         dumpSetting(s, p,
                 Settings.Global.OTA_DISABLE_AUTOMATIC_UPDATE,
