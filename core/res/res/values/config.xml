@@ -506,11 +506,11 @@
     <!-- String containing the apn value for tethering.  May be overriden by secure settings
          TETHER_DUN_APN.  Value is a comma separated series of strings:
          "name,apn,proxy,port,username,password,server,mmsc,mmsproxy,mmsport,mcc,mnc,auth,type",
-         Or string format of ApnSettingV3.
+         Or string format of ApnSettingV3 or higher.
          note that empty fields can be ommitted: "name,apn,,,,,,,,,310,260,,DUN"
          Multiple entries are separated by using string-array:
          "<item>[ApnSettingV3]Name,apn,,,,,,,,,123,45,,mms|*,IPV6,IP,true,14,,,,,,,spn,testspn</item>
-          <item>[ApnSettingV3]Name1,apn2,,,,,,,,,123,46,,mms|*,IPV6,IP,true,12,,,,,,,,</item>" -->
+          <item>[ApnSettingV5]Name1,apn2,,,,,,,,,123,46,,mms|*,IPV6,IP,true,12,,,,,,,,,,</item>" -->
     <string-array translatable="false" name="config_tether_apndata">
     </string-array>
 
