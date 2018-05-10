@@ -20,5 +20,3 @@ LOCAL_JNI_SHARED_LIBRARIES := libperftestscore_jni
 LOCAL_ASSET_DIR := $(TOP)/external/google-fonts/dancing-script
 
 include $(BUILD_PACKAGE)
-
-include $(call all-makefiles-under, $(LOCAL_PATH))

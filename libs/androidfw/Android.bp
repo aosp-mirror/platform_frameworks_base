@@ -44,6 +44,7 @@ cc_library {
         "ZipUtils.cpp",
     ],
     export_include_dirs: ["include"],
+    export_shared_lib_headers: ["libz"],
     target: {
         android: {
             srcs: [
