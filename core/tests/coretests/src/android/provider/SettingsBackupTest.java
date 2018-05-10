@@ -116,6 +116,7 @@ public class SettingsBackupTest {
                     Settings.Global.APN_DB_UPDATE_CONTENT_URL,
                     Settings.Global.APN_DB_UPDATE_METADATA_URL,
                     Settings.Global.APP_IDLE_CONSTANTS,
+                    Settings.Global.APP_OPS_CONSTANTS,
                     Settings.Global.APP_STANDBY_ENABLED,
                     Settings.Global.ASSISTED_GPS_ENABLED,
                     Settings.Global.AUDIO_SAFE_VOLUME_STATE,

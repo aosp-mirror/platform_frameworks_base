@@ -10433,6 +10433,25 @@ public final class Settings {
         public static final String ACTIVITY_MANAGER_CONSTANTS = "activity_manager_constants";
 
         /**
+         * App ops specific settings.
+         * This is encoded as a key=value list, separated by commas. Ex:
+         *
+         * "state_settle_time=10000"
+         *
+         * The following keys are supported:
+         *
+         * <pre>
+         * state_settle_time                (long)
+         * </pre>
+         *
+         * <p>
+         * Type: string
+         * @hide
+         * @see com.android.server.AppOpsService.Constants
+         */
+        public static final String APP_OPS_CONSTANTS = "app_ops_constants";
+
+        /**
          * Device Idle (Doze) specific settings.
          * This is encoded as a key=value list, separated by commas. Ex:
          *
