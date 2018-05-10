@@ -37,7 +37,7 @@ import java.util.List;
  */
 interface ISessionController {
     void sendCommand(String packageName, String command, in Bundle args, in ResultReceiver cb);
-    boolean sendMediaButton(String packageName, in KeyEvent mediaButton);
+    boolean sendMediaButton(String packageName, boolean asSystemService, in KeyEvent mediaButton);
     void registerCallbackListener(in ISessionControllerCallback cb);
     void unregisterCallbackListener(in ISessionControllerCallback cb);
     boolean isTransportControlEnabled();
@@ -46,7 +46,7 @@ interface ISessionController {
     PendingIntent getLaunchPendingIntent();
     long getFlags();
     ParcelableVolumeInfo getVolumeAttributes();
-    void adjustVolume(String packageName, int direction, int flags);
+    void adjustVolume(String packageName, boolean asSystemService, int direction, int flags);
     void setVolumeTo(String packageName, int value, int flags);
 
     // These commands are for the TransportControls
