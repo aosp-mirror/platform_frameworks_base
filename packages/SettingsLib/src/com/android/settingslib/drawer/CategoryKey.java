@@ -49,8 +49,8 @@ public final class CategoryKey {
             "com.android.settings.category.ia.notifications";
     public static final String CATEGORY_DO_NOT_DISTURB = "com.android.settings.category.ia.dnd";
     public static final String CATEGORY_GESTURES = "com.android.settings.category.ia.gestures";
-    public static final String CATEGORY_NIGHT_LIGHT =
-            "com.android.settings.category.ia.night_light";
+    public static final String CATEGORY_NIGHT_DISPLAY =
+            "com.android.settings.category.ia.night_display";
 
     public static final Map<String, String> KEY_COMPAT_MAP;
 
