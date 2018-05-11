@@ -29,4 +29,6 @@
      int32 inset_bottom = 5;
      bool is_real_snapshot = 6;
      int32 windowing_mode = 7;
+     int32 system_ui_visibility = 8;
+     bool is_translucent = 9;
  }

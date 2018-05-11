@@ -62,7 +62,7 @@ public class TaskSnapshotSurfaceTest extends WindowTestsBase {
                 GraphicBuffer.USAGE_SW_READ_NEVER | GraphicBuffer.USAGE_SW_WRITE_NEVER);
         final TaskSnapshot snapshot = new TaskSnapshot(buffer,
                 ORIENTATION_PORTRAIT, contentInsets, false, 1.0f, true /* isRealSnapshot */,
-                WINDOWING_MODE_FULLSCREEN);
+                WINDOWING_MODE_FULLSCREEN, 0 /* systemUiVisibility */, false /* isTranslucent */);
         mSurface = new TaskSnapshotSurface(sWm, new Window(), new Surface(), snapshot, "Test",
                 Color.WHITE, Color.RED, Color.BLUE, sysuiVis, windowFlags, 0, taskBounds,
                 ORIENTATION_PORTRAIT);
