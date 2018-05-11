@@ -159,6 +159,7 @@ public class NotificationGutsManager implements Dumpable {
         row.setGutsView(item);
         row.setTag(sbn.getPackageName());
         row.getGuts().setClosedListener((NotificationGuts g) -> {
+            row.onGutsClosed();
             if (!g.willBeRemoved() && !row.isRemoved()) {
                 mListContainer.onHeightChanged(
                         row, !mPresenter.isPresenterFullyCollapsed() /* needsAnimation */);
@@ -390,7 +391,7 @@ public class NotificationGutsManager implements Dumpable {
                         x,
                         y,
                         needsFalsingProtection,
-                        row::resetTranslation);
+                        row::onGutsOpened);
 
                 row.closeRemoteInput();
                 mListContainer.onHeightChanged(row, true /* needsAnimation */);
