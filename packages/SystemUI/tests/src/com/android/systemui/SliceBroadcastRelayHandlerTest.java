@@ -60,6 +60,7 @@ public class SliceBroadcastRelayHandlerTest extends SysuiTestCase {
                 new ComponentName(mContext.getPackageName(), Receiver.class.getName()));
         IntentFilter value = new IntentFilter(TEST_ACTION);
         intent.putExtra(SliceBroadcastRelay.EXTRA_FILTER, value);
+        intent.putExtra(SliceBroadcastRelay.EXTRA_URI, testUri);
 
         relayHandler.handleIntent(intent);
         verify(relayHandler.mContext).registerReceiver(any(), eq(value));
