@@ -228,7 +228,7 @@ public class AppOpsService extends IAppOpsService.Stub {
         public void startMonitoring(ContentResolver resolver) {
             mResolver = resolver;
             mResolver.registerContentObserver(
-                    Settings.Global.getUriFor(Settings.Global.DEVICE_IDLE_CONSTANTS),
+                    Settings.Global.getUriFor(Settings.Global.APP_OPS_CONSTANTS),
                     false, this);
             updateConstants();
         }
@@ -239,20 +239,17 @@ public class AppOpsService extends IAppOpsService.Stub {
         }
 
         private void updateConstants() {
+            String value = mResolver != null ? Settings.Global.getString(mResolver,
+                    Settings.Global.APP_OPS_CONSTANTS) : "";
+
             synchronized (AppOpsService.this) {
                 try {
-                    if (mResolver != null) {
-                        mParser.setString(Settings.Global.getString(mResolver,
-                                Settings.Global.APP_OPS_CONSTANTS));
-                    } else {
-                        mParser.setString("");
-                    }
+                    mParser.setString(value);
                 } catch (IllegalArgumentException e) {
                     // Failed to parse the settings string, log this and move on
                     // with defaults.
                     Slog.e(TAG, "Bad app ops settings", e);
                 }
-
                 STATE_SETTLE_TIME = mParser.getDurationMillis(
                         KEY_STATE_SETTLE_TIME, 10 * 1000L);
             }
@@ -557,8 +554,9 @@ public class AppOpsService extends IAppOpsService.Stub {
     }
 
     public void systemReady() {
+        mConstants.startMonitoring(mContext.getContentResolver());
+
         synchronized (this) {
-            mConstants.startMonitoring(mContext.getContentResolver());
             boolean changed = false;
             for (int i = mUidStates.size() - 1; i >= 0; i--) {
                 UidState uidState = mUidStates.valueAt(i);
