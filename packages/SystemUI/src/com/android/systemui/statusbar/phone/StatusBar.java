@@ -249,7 +249,7 @@ import java.util.Map;
 
 public class StatusBar extends SystemUI implements DemoMode,
         DragDownHelper.DragDownCallback, ActivityStarter, OnUnlockMethodChangedListener,
-        OnHeadsUpChangedListener, CommandQueue.Callbacks,
+        OnHeadsUpChangedListener, CommandQueue.Callbacks, ZenModeController.Callback,
         ColorExtractor.OnColorsChangedListener, ConfigurationListener, NotificationPresenter {
     public static final boolean MULTIUSER_DEBUG = false;
 
@@ -785,12 +785,7 @@ public class StatusBar extends SystemUI implements DemoMode,
         // into fragments, but the rest here, it leaves some awkward lifecycle and whatnot.
         mNotificationPanel = mStatusBarWindow.findViewById(R.id.notification_panel);
         mStackScroller = mStatusBarWindow.findViewById(R.id.notification_stack_scroller);
-        mZenController.addCallback(new ZenModeController.Callback() {
-            @Override
-            public void onZenChanged(int zen) {
-                updateEmptyShadeView();
-            }
-        });
+        mZenController.addCallback(this);
         mActivityLaunchAnimator = new ActivityLaunchAnimator(mStatusBarWindow,
                 this,
                 mNotificationPanel,
@@ -3376,6 +3371,7 @@ public class StatusBar extends SystemUI implements DemoMode,
         Dependency.get(ActivityStarterDelegate.class).setActivityStarterImpl(null);
         mDeviceProvisionedController.removeCallback(mUserSetupObserver);
         Dependency.get(ConfigurationController.class).removeCallback(this);
+        mZenController.removeCallback(this);
         mAppOpsListener.destroy();
     }
 
@@ -5533,6 +5529,11 @@ public class StatusBar extends SystemUI implements DemoMode,
             return false;
         }
         return mStatusBarKeyguardViewManager.isSecure();
+    }
+
+    @Override
+    public void onZenChanged(int zen) {
+        updateEmptyShadeView();
     }
 
     @Override
