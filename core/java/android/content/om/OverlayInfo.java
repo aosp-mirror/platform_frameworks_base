@@ -18,7 +18,6 @@ package android.content.om;
 
 import android.annotation.IntDef;
 import android.annotation.NonNull;
-import android.annotation.Nullable;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -39,6 +38,7 @@ public final class OverlayInfo implements Parcelable {
             STATE_NO_IDMAP,
             STATE_DISABLED,
             STATE_ENABLED,
+            STATE_ENABLED_STATIC,
             STATE_TARGET_UPGRADING,
             STATE_OVERLAY_UPGRADING,
     })
@@ -91,7 +91,16 @@ public final class OverlayInfo implements Parcelable {
     public static final int STATE_OVERLAY_UPGRADING = 5;
 
     /**
-     * Category for theme overlays.
+     * The overlay package is currently enabled because it is marked as
+     * 'static'. It cannot be disabled but will change state if for instance
+     * its target is uninstalled.
+     */
+    public static final int STATE_ENABLED_STATIC = 6;
+
+    /**
+     * Overlay category: theme.
+     * <p>
+     * Change how Android (including the status bar, dialogs, ...) looks.
      */
     public static final String CATEGORY_THEME = "android.theme";
 
@@ -126,6 +135,23 @@ public final class OverlayInfo implements Parcelable {
     public final int userId;
 
     /**
+     * Priority as read from the manifest. Used if isStatic is true. Not
+     * intended to be exposed to 3rd party.
+     *
+     * @hide
+     */
+    public final int priority;
+
+    /**
+     * isStatic as read from the manifest. If true, the overlay is
+     * unconditionally loaded and cannot be unloaded. Not intended to be
+     * exposed to 3rd party.
+     *
+     * @hide
+     */
+    public final boolean isStatic;
+
+    /**
      * Create a new OverlayInfo based on source with an updated state.
      *
      * @param source the source OverlayInfo to base the new instance on
@@ -133,17 +159,20 @@ public final class OverlayInfo implements Parcelable {
      */
     public OverlayInfo(@NonNull OverlayInfo source, @State int state) {
         this(source.packageName, source.targetPackageName, source.category, source.baseCodePath,
-                state, source.userId);
+                state, source.userId, source.priority, source.isStatic);
     }
 
     public OverlayInfo(@NonNull String packageName, @NonNull String targetPackageName,
-            @Nullable String category, @NonNull String baseCodePath, int state, int userId) {
+            @NonNull String category, @NonNull String baseCodePath, int state, int userId,
+            int priority, boolean isStatic) {
         this.packageName = packageName;
         this.targetPackageName = targetPackageName;
         this.category = category;
         this.baseCodePath = baseCodePath;
         this.state = state;
         this.userId = userId;
+        this.priority = priority;
+        this.isStatic = isStatic;
         ensureValidState();
     }
 
@@ -154,6 +183,8 @@ public final class OverlayInfo implements Parcelable {
         baseCodePath = source.readString();
         state = source.readInt();
         userId = source.readInt();
+        priority = source.readInt();
+        isStatic = source.readBoolean();
         ensureValidState();
     }
 
@@ -173,6 +204,7 @@ public final class OverlayInfo implements Parcelable {
             case STATE_NO_IDMAP:
             case STATE_DISABLED:
             case STATE_ENABLED:
+            case STATE_ENABLED_STATIC:
             case STATE_TARGET_UPGRADING:
             case STATE_OVERLAY_UPGRADING:
                 break;
@@ -194,6 +226,8 @@ public final class OverlayInfo implements Parcelable {
         dest.writeString(baseCodePath);
         dest.writeInt(state);
         dest.writeInt(userId);
+        dest.writeInt(priority);
+        dest.writeBoolean(isStatic);
     }
 
     public static final Parcelable.Creator<OverlayInfo> CREATOR =
@@ -220,6 +254,7 @@ public final class OverlayInfo implements Parcelable {
     public boolean isEnabled() {
         switch (state) {
             case STATE_ENABLED:
+            case STATE_ENABLED_STATIC:
                 return true;
             default:
                 return false;
@@ -244,6 +279,8 @@ public final class OverlayInfo implements Parcelable {
                 return "STATE_DISABLED";
             case STATE_ENABLED:
                 return "STATE_ENABLED";
+            case STATE_ENABLED_STATIC:
+                return "STATE_ENABLED_STATIC";
             case STATE_TARGET_UPGRADING:
                 return "STATE_TARGET_UPGRADING";
             case STATE_OVERLAY_UPGRADING:
