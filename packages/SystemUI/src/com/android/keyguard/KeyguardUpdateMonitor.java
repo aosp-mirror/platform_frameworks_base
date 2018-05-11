@@ -55,6 +55,7 @@ import android.os.BatteryManager;
 import android.os.CancellationSignal;
 import android.os.Handler;
 import android.os.IRemoteCallback;
+import android.os.Looper;
 import android.os.Message;
 import android.os.RemoteException;
 import android.os.ServiceManager;
@@ -244,7 +245,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
     private static final int HW_UNAVAILABLE_TIMEOUT = 3000; // ms
     private static final int HW_UNAVAILABLE_RETRY_MAX = 3;
 
-    private final Handler mHandler = new Handler() {
+    private final Handler mHandler = new Handler(Looper.getMainLooper()) {
         @Override
         public void handleMessage(Message msg) {
             switch (msg.what) {
@@ -338,6 +339,9 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
                     break;
                 case MSG_DEVICE_POLICY_MANAGER_STATE_CHANGED:
                     updateLogoutEnabled();
+                    break;
+                default:
+                    super.handleMessage(msg);
                     break;
             }
         }
@@ -1181,12 +1185,12 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
         filter.addAction(TelephonyManager.ACTION_PHONE_STATE_CHANGED);
         filter.addAction(AudioManager.RINGER_MODE_CHANGED_ACTION);
         filter.addAction(DevicePolicyManager.ACTION_DEVICE_POLICY_MANAGER_STATE_CHANGED);
-        context.registerReceiver(mBroadcastReceiver, filter);
+        context.registerReceiver(mBroadcastReceiver, filter, null, mHandler);
 
         final IntentFilter bootCompleteFilter = new IntentFilter();
         bootCompleteFilter.setPriority(IntentFilter.SYSTEM_HIGH_PRIORITY);
         bootCompleteFilter.addAction(Intent.ACTION_BOOT_COMPLETED);
-        context.registerReceiver(mBroadcastReceiver, bootCompleteFilter);
+        context.registerReceiver(mBroadcastReceiver, bootCompleteFilter, null, mHandler);
 
         final IntentFilter allUserFilter = new IntentFilter();
         allUserFilter.addAction(Intent.ACTION_USER_INFO_CHANGED);
@@ -1196,7 +1200,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
         allUserFilter.addAction(DevicePolicyManager.ACTION_DEVICE_POLICY_MANAGER_STATE_CHANGED);
         allUserFilter.addAction(ACTION_USER_UNLOCKED);
         context.registerReceiverAsUser(mBroadcastAllReceiver, UserHandle.ALL, allUserFilter,
-                null, null);
+                null, mHandler);
 
         mSubscriptionManager.addOnSubscriptionsChangedListener(mSubscriptionListener);
         try {
