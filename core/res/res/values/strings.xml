@@ -4969,6 +4969,14 @@
     <!-- Application name displayed in notifications [CHAR LIMIT=60] -->
     <string name="notification_app_name_settings">Settings</string>
 
+    <!-- Active Permission - accessibility support -->
+    <!-- Content description of the camera icon in the notification. [CHAR LIMIT=NONE] -->
+    <string name="notification_appops_camera_active">Camera</string>
+    <!-- Content description of the mic icon in the notification. [CHAR LIMIT=NONE] -->
+    <string name="notification_appops_microphone_active">Microphone</string>
+    <!-- Content description of the overlay icon in the notification. [CHAR LIMIT=NONE] -->
+    <string name="notification_appops_overlay_active">displaying over other apps on your screen</string>
+
     <!-- Strings for car -->
     <!-- String displayed when loading a user in the car [CHAR LIMIT=30] -->
     <string name="car_loading_profile">Loading</string>
