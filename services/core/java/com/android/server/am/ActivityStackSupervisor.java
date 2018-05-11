@@ -1224,7 +1224,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
     ActivityRecord topRunningActivityLocked(boolean considerKeyguardState) {
         final ActivityStack focusedStack = mFocusedStack;
         ActivityRecord r = focusedStack.topRunningActivityLocked();
-        if (r != null) {
+        if (r != null && isValidTopRunningActivity(r, considerKeyguardState)) {
             return r;
         }
 
@@ -1257,17 +1257,35 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
                 continue;
             }
 
-            final boolean keyguardLocked = getKeyguardController().isKeyguardLocked();
 
             // This activity can be considered the top running activity if we are not
             // considering the locked state, the keyguard isn't locked, or we can show when
             // locked.
-            if (!considerKeyguardState || !keyguardLocked || topActivity.canShowWhenLocked()) {
+            if (isValidTopRunningActivity(topActivity, considerKeyguardState)) {
                 return topActivity;
             }
         }
 
         return null;
+    }
+
+    /**
+     * Verifies an {@link ActivityRecord} can be the top activity based on keyguard state and
+     * whether we are considering it.
+     */
+    private boolean isValidTopRunningActivity(ActivityRecord record,
+            boolean considerKeyguardState) {
+        if (!considerKeyguardState) {
+            return true;
+        }
+
+        final boolean keyguardLocked = getKeyguardController().isKeyguardLocked();
+
+        if (!keyguardLocked) {
+            return true;
+        }
+
+        return record.canShowWhenLocked();
     }
 
     @VisibleForTesting
