@@ -16,36 +16,27 @@
 
 package com.android.server;
 
-import android.app.ActivityManagerInternal;
-import android.database.ContentObserver;
-import android.os.BatteryStats;
-
-import android.os.Bundle;
-import android.os.PowerManager;
-import android.os.ResultReceiver;
-import android.os.ShellCallback;
-import android.os.ShellCommand;
-import com.android.internal.annotations.VisibleForTesting;
-import com.android.internal.app.IBatteryStats;
-import com.android.internal.util.DumpUtils;
-import com.android.server.am.BatteryStatsService;
-import com.android.server.lights.Light;
-import com.android.server.lights.LightsManager;
+import static com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 
 import android.app.ActivityManager;
+import android.app.ActivityManagerInternal;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
+import android.database.ContentObserver;
+import android.hardware.health.V1_0.HealthInfo;
+import android.hardware.health.V2_0.IHealth;
+import android.hardware.health.V2_0.IHealthInfoCallback;
+import android.hardware.health.V2_0.Result;
 import android.hidl.manager.V1_0.IServiceManager;
 import android.hidl.manager.V1_0.IServiceNotification;
-import android.hardware.health.V1_0.HealthInfo;
-import android.hardware.health.V2_0.IHealthInfoCallback;
-import android.hardware.health.V2_0.IHealth;
-import android.hardware.health.V2_0.Result;
+import android.metrics.LogMaker;
 import android.os.BatteryManager;
 import android.os.BatteryManagerInternal;
 import android.os.BatteryProperty;
+import android.os.BatteryStats;
 import android.os.Binder;
+import android.os.Bundle;
 import android.os.DropBoxManager;
 import android.os.FileUtils;
 import android.os.Handler;
@@ -53,8 +44,12 @@ import android.os.HandlerThread;
 import android.os.IBatteryPropertiesRegistrar;
 import android.os.IBinder;
 import android.os.OsProtoEnums;
+import android.os.PowerManager;
 import android.os.RemoteException;
+import android.os.ResultReceiver;
 import android.os.ServiceManager;
+import android.os.ShellCallback;
+import android.os.ShellCommand;
 import android.os.SystemClock;
 import android.os.Trace;
 import android.os.UEventObserver;
@@ -66,12 +61,19 @@ import android.util.MutableInt;
 import android.util.Slog;
 import android.util.proto.ProtoOutputStream;
 
+import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.app.IBatteryStats;
+import com.android.internal.logging.MetricsLogger;
+import com.android.internal.util.DumpUtils;
+import com.android.server.am.BatteryStatsService;
+import com.android.server.lights.Light;
+import com.android.server.lights.LightsManager;
+
 import java.io.File;
 import java.io.FileDescriptor;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
-
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -170,6 +172,9 @@ public final class BatteryService extends SystemService {
     private long mDischargeStartTime;
     private int mDischargeStartLevel;
 
+    private long mChargeStartTime;
+    private int mChargeStartLevel;
+
     private boolean mUpdatesStopped;
 
     private Led mLed;
@@ -183,6 +188,8 @@ public final class BatteryService extends SystemService {
     private BatteryPropertiesRegistrar mBatteryPropertiesRegistrar;
     private ArrayDeque<Bundle> mBatteryLevelsEventQueue;
     private long mLastBatteryLevelChangedSentMs;
+
+    private MetricsLogger mMetricsLogger;
 
     public BatteryService(Context context) {
         super(context);
@@ -203,6 +210,7 @@ public final class BatteryService extends SystemService {
                 com.android.internal.R.integer.config_shutdownBatteryTemperature);
 
         mBatteryLevelsEventQueue = new ArrayDeque<>();
+        mMetricsLogger = new MetricsLogger();
 
         // watch for invalid charger messages if the invalid_charger switch exists
         if (new File("/sys/devices/virtual/switch/invalid_charger/state").exists()) {
@@ -475,6 +483,15 @@ public final class BatteryService extends SystemService {
             if (mPlugType != mLastPlugType) {
                 if (mLastPlugType == BATTERY_PLUGGED_NONE) {
                     // discharging -> charging
+                    mChargeStartLevel = mHealthInfo.batteryLevel;
+                    mChargeStartTime = SystemClock.elapsedRealtime();
+
+                    final LogMaker builder = new LogMaker(MetricsEvent.ACTION_CHARGE);
+                    builder.setType(MetricsEvent.TYPE_ACTION);
+                    builder.addTaggedData(MetricsEvent.FIELD_PLUG_TYPE, mPlugType);
+                    builder.addTaggedData(MetricsEvent.FIELD_BATTERY_LEVEL_START,
+                            mHealthInfo.batteryLevel);
+                    mMetricsLogger.write(builder);
 
                     // There's no value in this data unless we've discharged at least once and the
                     // battery level has changed; so don't log until it does.
@@ -490,6 +507,21 @@ public final class BatteryService extends SystemService {
                     // charging -> discharging or we just powered up
                     mDischargeStartTime = SystemClock.elapsedRealtime();
                     mDischargeStartLevel = mHealthInfo.batteryLevel;
+
+                    long chargeDuration = SystemClock.elapsedRealtime() - mChargeStartTime;
+                    if (mChargeStartTime != 0 && chargeDuration != 0) {
+                        final LogMaker builder = new LogMaker(MetricsEvent.ACTION_CHARGE);
+                        builder.setType(MetricsEvent.TYPE_DISMISS);
+                        builder.addTaggedData(MetricsEvent.FIELD_PLUG_TYPE, mLastPlugType);
+                        builder.addTaggedData(MetricsEvent.FIELD_CHARGING_DURATION_MILLIS,
+                                chargeDuration);
+                        builder.addTaggedData(MetricsEvent.FIELD_BATTERY_LEVEL_START,
+                                mChargeStartLevel);
+                        builder.addTaggedData(MetricsEvent.FIELD_BATTERY_LEVEL_END,
+                                mHealthInfo.batteryLevel);
+                        mMetricsLogger.write(builder);
+                    }
+                    mChargeStartTime = 0;
                 }
             }
             if (mHealthInfo.batteryStatus != mLastBatteryStatus ||
