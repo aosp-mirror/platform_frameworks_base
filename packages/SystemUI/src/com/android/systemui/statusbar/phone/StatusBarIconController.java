@@ -296,8 +296,7 @@ public interface StatusBarIconController {
         }
 
         private StatusBarMobileView onCreateStatusBarMobileView(String slot) {
-            StatusBarMobileView view = StatusBarMobileView.fromContext(mContext);
-            view.setSlot(slot);
+            StatusBarMobileView view = StatusBarMobileView.fromContext(mContext, slot);
             return view;
         }
 
