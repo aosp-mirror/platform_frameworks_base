@@ -58,7 +58,7 @@ public class CategoryKeyTest {
         allKeys.add(CategoryKey.CATEGORY_SYSTEM_LANGUAGE);
         allKeys.add(CategoryKey.CATEGORY_SYSTEM_DEVELOPMENT);
         allKeys.add(CategoryKey.CATEGORY_GESTURES);
-        allKeys.add(CategoryKey.CATEGORY_NIGHT_LIGHT);
+        allKeys.add(CategoryKey.CATEGORY_NIGHT_DISPLAY);
         // DO NOT REMOVE ANYTHING ABOVE
 
         assertThat(allKeys.size()).isEqualTo(18);
