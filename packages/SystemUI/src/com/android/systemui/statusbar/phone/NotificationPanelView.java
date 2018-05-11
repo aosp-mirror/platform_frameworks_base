@@ -32,6 +32,8 @@ import android.content.res.Resources;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.graphics.PorterDuff;
+import android.graphics.PorterDuffXfermode;
 import android.graphics.Rect;
 import android.os.PowerManager;
 import android.util.AttributeSet;
@@ -250,6 +252,33 @@ public class NotificationPanelView extends PanelView implements
     private ArrayList<Runnable> mVerticalTranslationListener = new ArrayList<>();
     private HeadsUpAppearanceController mHeadsUpAppearanceController;
 
+    private int mPanelAlpha;
+    private int mCurrentPanelAlpha;
+    private final Paint mAlphaPaint = new Paint();
+    private Runnable mPanelAlphaEndAction;
+    private AnimatorListenerAdapter mAnimatorListenerAdapter = new AnimatorListenerAdapter() {
+        @Override
+        public void onAnimationEnd(Animator animation) {
+            if (mPanelAlphaEndAction != null) {
+                mPanelAlphaEndAction.run();
+            }
+        }
+    };
+    private final AnimatableProperty PANEL_ALPHA = AnimatableProperty.from(
+            "panelAlpha",
+            NotificationPanelView::setPanelAlphaInternal,
+            NotificationPanelView::getCurrentPanelAlpha,
+            R.id.panel_alpha_animator_tag,
+            R.id.panel_alpha_animator_start_tag,
+            R.id.panel_alpha_animator_end_tag);
+    private final AnimationProperties PANEL_ALPHA_OUT_PROPERTIES = new AnimationProperties()
+            .setDuration(150)
+            .setCustomInterpolator(PANEL_ALPHA.getProperty(), Interpolators.ALPHA_OUT);
+    private final AnimationProperties PANEL_ALPHA_IN_PROPERTIES = new AnimationProperties()
+            .setDuration(200)
+            .setAnimationFinishListener(mAnimatorListenerAdapter)
+            .setCustomInterpolator(PANEL_ALPHA.getProperty(), Interpolators.ALPHA_IN);
+
     public NotificationPanelView(Context context, AttributeSet attrs) {
         super(context, attrs);
         setWillNotDraw(!DEBUG);
@@ -257,6 +286,8 @@ public class NotificationPanelView extends PanelView implements
         mPowerManager = context.getSystemService(PowerManager.class);
         mAccessibilityManager = context.getSystemService(AccessibilityManager.class);
         setAccessibilityPaneTitle(determineAccessibilityPaneTitle());
+        mAlphaPaint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.MULTIPLY));
+        setPanelAlpha(255, false /* animate */);
     }
 
     public void setStatusBar(StatusBar bar) {
@@ -2300,6 +2331,38 @@ public class NotificationPanelView extends PanelView implements
             default:
                 return true;
         }
+    }
+
+    @Override
+    protected void dispatchDraw(Canvas canvas) {
+        super.dispatchDraw(canvas);
+        if (mCurrentPanelAlpha != 255) {
+            canvas.drawRect(0, 0, canvas.getWidth(), canvas.getHeight(), mAlphaPaint);
+        }
+    }
+
+    public float getCurrentPanelAlpha() {
+        return mCurrentPanelAlpha;
+    }
+
+    public boolean setPanelAlpha(int alpha, boolean animate) {
+        if (mPanelAlpha != alpha) {
+            mPanelAlpha = alpha;
+            PropertyAnimator.setProperty(this, PANEL_ALPHA, alpha,
+                    alpha == 255 ? PANEL_ALPHA_IN_PROPERTIES : PANEL_ALPHA_OUT_PROPERTIES, animate);
+            return true;
+        }
+        return false;
+    }
+
+    public void setPanelAlphaInternal(float alpha) {
+        mCurrentPanelAlpha = (int) alpha;
+        mAlphaPaint.setARGB(mCurrentPanelAlpha, 255, 255, 255);
+        invalidate();
+    }
+
+    public void setPanelAlphaEndAction(Runnable r) {
+        mPanelAlphaEndAction = r;
     }
 
     @Override
