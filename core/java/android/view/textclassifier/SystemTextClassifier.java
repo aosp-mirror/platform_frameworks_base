@@ -129,6 +129,18 @@ public final class SystemTextClassifier implements TextClassifier {
         return mFallback.generateLinks(request);
     }
 
+    @Override
+    public void onSelectionEvent(SelectionEvent event) {
+        Preconditions.checkNotNull(event);
+        Utils.checkMainThread();
+
+        try {
+            mManagerService.onSelectionEvent(mSessionId, event);
+        } catch (RemoteException e) {
+            Log.e(LOG_TAG, "Error reporting selection event.", e);
+        }
+    }
+
     /**
      * @inheritDoc
      */
