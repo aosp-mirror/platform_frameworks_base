@@ -342,7 +342,8 @@ final class AutofillManagerServiceImpl {
     int startSessionLocked(@NonNull IBinder activityToken, int uid,
             @NonNull IBinder appCallbackToken, @NonNull AutofillId autofillId,
             @NonNull Rect virtualBounds, @Nullable AutofillValue value, boolean hasCallback,
-            int flags, @NonNull ComponentName componentName, boolean compatMode) {
+            @NonNull ComponentName componentName, boolean compatMode,
+            boolean bindInstantServiceAllowed, int flags) {
         if (!isEnabledLocked()) {
             return 0;
         }
@@ -372,7 +373,7 @@ final class AutofillManagerServiceImpl {
         pruneAbandonedSessionsLocked();
 
         final Session newSession = createSessionByTokenLocked(activityToken, uid, appCallbackToken,
-                hasCallback, componentName, compatMode, flags);
+                hasCallback, componentName, compatMode, bindInstantServiceAllowed, flags);
         if (newSession == null) {
             return NO_SESSION;
         }
@@ -491,7 +492,8 @@ final class AutofillManagerServiceImpl {
     @GuardedBy("mLock")
     private Session createSessionByTokenLocked(@NonNull IBinder activityToken, int uid,
             @NonNull IBinder appCallbackToken, boolean hasCallback,
-            @NonNull ComponentName componentName, boolean compatMode, int flags) {
+            @NonNull ComponentName componentName, boolean compatMode,
+            boolean bindInstantServiceAllowed, int flags) {
         // use random ids so that one app cannot know that another app creates sessions
         int sessionId;
         int tries = 0;
@@ -510,7 +512,7 @@ final class AutofillManagerServiceImpl {
         final Session newSession = new Session(this, mUi, mContext, mHandler, mUserId, mLock,
                 sessionId, uid, activityToken, appCallbackToken, hasCallback, mUiLatencyHistory,
                 mWtfHistory, mInfo.getServiceInfo().getComponentName(), componentName, compatMode,
-                flags);
+                bindInstantServiceAllowed, flags);
         mSessions.put(newSession.id, newSession);
 
         return newSession;
