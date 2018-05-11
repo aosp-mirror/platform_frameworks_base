@@ -31,8 +31,7 @@ import com.android.internal.annotations.VisibleForTesting;
 public abstract class KeyguardPinBasedInputView extends KeyguardAbsKeyInputView
         implements View.OnKeyListener, View.OnTouchListener {
 
-    @VisibleForTesting
-    PasswordTextView mPasswordEntry;
+    protected PasswordTextView mPasswordEntry;
     private View mOkButton;
     private View mDeleteButton;
     private View mButton0;
