@@ -85,16 +85,57 @@ class TaskSnapshotPersisterTestBase extends WindowTestsBase {
     }
 
     TaskSnapshot createSnapshot(float scale) {
-        return createSnapshot(scale, true /* isRealSnapshot */, WINDOWING_MODE_FULLSCREEN);
+        return new TaskSnapshotBuilder()
+                .setScale(scale)
+                .build();
     }
 
-    TaskSnapshot createSnapshot(float scale, boolean isRealSnapshot, int windowingMode) {
-        final GraphicBuffer buffer = GraphicBuffer.create(100, 100, PixelFormat.RGBA_8888,
-                USAGE_HW_TEXTURE | USAGE_SW_READ_RARELY | USAGE_SW_READ_RARELY);
-        Canvas c = buffer.lockCanvas();
-        c.drawColor(Color.RED);
-        buffer.unlockCanvasAndPost(c);
-        return new TaskSnapshot(buffer, ORIENTATION_PORTRAIT, TEST_INSETS,
-                scale < 1f /* reducedResolution */, scale, isRealSnapshot, windowingMode);
+    /**
+     * Builds a TaskSnapshot.
+     */
+    class TaskSnapshotBuilder {
+
+        private float mScale = 1f;
+        private boolean mIsRealSnapshot = true;
+        private boolean mIsTranslucent = false;
+        private int mWindowingMode = WINDOWING_MODE_FULLSCREEN;
+        private int mSystemUiVisibility = 0;
+
+        public TaskSnapshotBuilder setScale(float scale) {
+            mScale = scale;
+            return this;
+        }
+
+        public TaskSnapshotBuilder setIsRealSnapshot(boolean isRealSnapshot) {
+            mIsRealSnapshot = isRealSnapshot;
+            return this;
+        }
+
+        public TaskSnapshotBuilder setIsTranslucent(boolean isTranslucent) {
+            mIsTranslucent = isTranslucent;
+            return this;
+        }
+
+        public TaskSnapshotBuilder setWindowingMode(int windowingMode) {
+            mWindowingMode = windowingMode;
+            return this;
+        }
+
+        public TaskSnapshotBuilder setSystemUiVisibility(int systemUiVisibility) {
+            mSystemUiVisibility = systemUiVisibility;
+            return this;
+        }
+
+        public TaskSnapshot build() {
+            final GraphicBuffer buffer = GraphicBuffer.create(100, 100, PixelFormat.RGBA_8888,
+                    USAGE_HW_TEXTURE | USAGE_SW_READ_RARELY | USAGE_SW_READ_RARELY);
+            Canvas c = buffer.lockCanvas();
+            c.drawColor(Color.RED);
+            buffer.unlockCanvasAndPost(c);
+            return new TaskSnapshot(buffer, ORIENTATION_PORTRAIT, TEST_INSETS,
+                    mScale < 1f /* reducedResolution */, mScale, mIsRealSnapshot, mWindowingMode,
+                    mSystemUiVisibility, mIsTranslucent);
+        }
+
     }
 }

@@ -33,7 +33,9 @@ public class ThumbnailData {
     public Rect insets;
     public boolean reducedResolution;
     public boolean isRealSnapshot;
+    public boolean isTranslucent;
     public int windowingMode;
+    public int systemUiVisibility;
     public float scale;
 
     public ThumbnailData() {
@@ -43,7 +45,9 @@ public class ThumbnailData {
         reducedResolution = false;
         scale = 1f;
         isRealSnapshot = true;
+        isTranslucent = false;
         windowingMode = WINDOWING_MODE_UNDEFINED;
+        systemUiVisibility = 0;
     }
 
     public ThumbnailData(TaskSnapshot snapshot) {
@@ -53,6 +57,8 @@ public class ThumbnailData {
         reducedResolution = snapshot.isReducedResolution();
         scale = snapshot.getScale();
         isRealSnapshot = snapshot.isRealSnapshot();
+        isTranslucent = snapshot.isTranslucent();
         windowingMode = snapshot.getWindowingMode();
+        systemUiVisibility = snapshot.getSystemUiVisibility();
     }
 }
