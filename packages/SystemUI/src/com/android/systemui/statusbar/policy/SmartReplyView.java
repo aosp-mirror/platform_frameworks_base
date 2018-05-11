@@ -495,12 +495,14 @@ public class SmartReplyView extends ViewGroup {
             // measured with the wrong number of lines).
             if (child.getPaddingLeft() != buttonPaddingHorizontal) {
                 requiresNewMeasure = true;
-                if (buttonPaddingHorizontal == mSingleLineButtonPaddingHorizontal) {
-                    // Decrease padding (2->1 line).
-                    newWidth -= mSingleToDoubleLineButtonWidthIncrease;
-                } else {
-                    // Increase padding (1->2 lines).
-                    newWidth += mSingleToDoubleLineButtonWidthIncrease;
+                if (newWidth != Integer.MAX_VALUE) {
+                    if (buttonPaddingHorizontal == mSingleLineButtonPaddingHorizontal) {
+                        // Change padding (2->1 line).
+                        newWidth -= mSingleToDoubleLineButtonWidthIncrease;
+                    } else {
+                        // Change padding (1->2 lines).
+                        newWidth += mSingleToDoubleLineButtonWidthIncrease;
+                    }
                 }
                 child.setPadding(buttonPaddingHorizontal, child.getPaddingTop(),
                         buttonPaddingHorizontal, child.getPaddingBottom());
