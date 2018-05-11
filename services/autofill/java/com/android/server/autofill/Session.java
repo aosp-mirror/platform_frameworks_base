@@ -517,7 +517,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
             @NonNull IBinder client, boolean hasCallback, @NonNull LocalLog uiLatencyHistory,
             @NonNull LocalLog wtfHistory,
             @NonNull ComponentName serviceComponentName, @NonNull ComponentName componentName,
-            boolean compatMode, int flags) {
+            boolean compatMode, boolean bindInstantServiceAllowed, int flags) {
         id = sessionId;
         mFlags = flags;
         this.uid = uid;
@@ -526,7 +526,8 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
         mLock = lock;
         mUi = ui;
         mHandler = handler;
-        mRemoteFillService = new RemoteFillService(context, serviceComponentName, userId, this);
+        mRemoteFillService = new RemoteFillService(context, serviceComponentName, userId, this,
+                bindInstantServiceAllowed);
         mActivityToken = activityToken;
         mHasCallback = hasCallback;
         mUiLatencyHistory = uiLatencyHistory;

@@ -157,6 +157,9 @@ public final class AutofillManagerService extends SystemService {
         }
     };
 
+    @GuardedBy("mLock")
+    private boolean mAllowInstantService;
+
     public AutofillManagerService(Context context) {
         super(context);
         mContext = context;
@@ -518,6 +521,23 @@ public final class AutofillManagerService extends SystemService {
         sFullScreenMode = mode;
     }
 
+    // Called by Shell command.
+    boolean getAllowInstantService() {
+        mContext.enforceCallingPermission(MANAGE_AUTO_FILL, TAG);
+        synchronized (mLock) {
+            return mAllowInstantService;
+        }
+    }
+
+    // Called by Shell command.
+    void setAllowInstantService(boolean mode) {
+        mContext.enforceCallingPermission(MANAGE_AUTO_FILL, TAG);
+        Slog.i(TAG, "setAllowInstantService(): " + mode);
+        synchronized (mLock) {
+            mAllowInstantService = mode;
+        }
+    }
+
     private void setDebugLocked(boolean debug) {
         com.android.server.autofill.Helper.sDebug = debug;
         android.view.autofill.Helper.sDebug = debug;
@@ -866,7 +886,8 @@ public final class AutofillManagerService extends SystemService {
             synchronized (mLock) {
                 final AutofillManagerServiceImpl service = getServiceForUserLocked(userId);
                 return service.startSessionLocked(activityToken, getCallingUid(), appCallback,
-                        autofillId, bounds, value, hasCallback, flags, componentName, compatMode);
+                        autofillId, bounds, value, hasCallback, componentName, compatMode,
+                        mAllowInstantService, flags);
             }
         }
 
@@ -1202,6 +1223,7 @@ public final class AutofillManagerService extends SystemService {
                     mAutofillCompatState.dump(prefix2, pw);
                     pw.print(prefix2); pw.print("from settings: ");
                     pw.println(getWhitelistedCompatModePackagesFromSettings());
+                    pw.print("Allow instant service: "); pw.println(mAllowInstantService);
                 }
                 if (showHistory) {
                     pw.println(); pw.println("Requests history:"); pw.println();
