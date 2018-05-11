@@ -18,6 +18,7 @@
 
 #include <DeviceInfo.h>
 #include <DisplayList.h>
+#include <GlLayer.h>
 #include <Matrix.h>
 #include <Properties.h>
 #include <Rect.h>
@@ -27,8 +28,6 @@
 #include <pipeline/skia/SkiaRecordingCanvas.h>
 #include <renderstate/RenderState.h>
 #include <renderthread/RenderThread.h>
-
-#include <RecordedOp.h>
 
 #include <memory>
 

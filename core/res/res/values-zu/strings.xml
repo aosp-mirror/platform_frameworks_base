@@ -291,6 +291,9 @@
     <string name="permgrouplab_camera" msgid="4820372495894586615">"Ikhamela"</string>
     <string name="permgroupdesc_camera" msgid="3250611594678347720">"thatha izithombe uphinde urekhode ividiyo"</string>
     <string name="permgrouprequest_camera" msgid="1299833592069671756">"Vumela i-&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ukuthatha izithombe iphinde irekhode ividiyo?"</string>
+    <string name="permgrouplab_calllog" msgid="8798646184930388160">"Amarekhodi wamakholi"</string>
+    <string name="permgroupdesc_calllog" msgid="3006237336748283775">"funda futhi ubhale irekhodi lamakholi efoni"</string>
+    <string name="permgrouprequest_calllog" msgid="8487355309583773267">"Vumela i-&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ukufinyelela irekhodi lakho lamakholi wefoni?"</string>
     <string name="permgrouplab_phone" msgid="5229115638567440675">"Ifoni"</string>
     <string name="permgroupdesc_phone" msgid="6234224354060641055">"yenza uphinde uphathe amakholi wefoni"</string>
     <string name="permgrouprequest_phone" msgid="9166979577750581037">"Vumela i-&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ukuthi yenze iphinde iphathe amakholi efoni?"</string>

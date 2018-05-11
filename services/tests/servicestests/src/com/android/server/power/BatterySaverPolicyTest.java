@@ -15,6 +15,7 @@
  */
 package com.android.server.power;
 
+import android.os.PowerManager;
 import android.os.PowerManager.ServiceType;
 import android.os.PowerSaveState;
 import android.os.Handler;
@@ -41,7 +42,8 @@ public class BatterySaverPolicyTest extends AndroidTestCase {
     private static final float DEFAULT_BRIGHTNESS_FACTOR = 0.5f;
     private static final float PRECISION = 0.001f;
     private static final int GPS_MODE = 0;
-    private static final int DEFAULT_GPS_MODE = 0;
+    private static final int DEFAULT_GPS_MODE =
+            PowerManager.LOCATION_MODE_ALL_DISABLED_WHEN_SCREEN_OFF;
     private static final String BATTERY_SAVER_CONSTANTS = "vibration_disabled=true,"
             + "animation_disabled=false,"
             + "soundtrigger_disabled=true,"
@@ -69,6 +71,10 @@ public class BatterySaverPolicyTest extends AndroidTestCase {
             return mDeviceSpecificConfigResId;
         }
 
+        @Override
+        boolean isAccessibilityEnabled() {
+            return mMockAccessibilityEnabled;
+        }
 
         @VisibleForTesting
         void onChange() {
@@ -83,11 +89,15 @@ public class BatterySaverPolicyTest extends AndroidTestCase {
     private final ArrayMap<String, String> mMockGlobalSettings = new ArrayMap<>();
     private int mDeviceSpecificConfigResId = R.string.config_batterySaverDeviceSpecificConfig_1;
 
+    private boolean mMockAccessibilityEnabled;
+
     public void setUp() throws Exception {
         super.setUp();
         MockitoAnnotations.initMocks(this);
         mBatterySaverPolicy = new BatterySaverPolicyForTest(mHandler);
         mBatterySaverPolicy.systemReady(getContext());
+
+        mMockAccessibilityEnabled = false;
     }
 
     @SmallTest
@@ -98,6 +108,12 @@ public class BatterySaverPolicyTest extends AndroidTestCase {
     @SmallTest
     public void testGetBatterySaverPolicy_PolicyVibration_DefaultValueCorrect() {
         testServiceDefaultValue(ServiceType.VIBRATION);
+    }
+
+    @SmallTest
+    public void testGetBatterySaverPolicy_PolicyVibration_WithAccessibilityEnabled() {
+        mMockAccessibilityEnabled = true;
+        testServiceDefaultValue_unchanged(ServiceType.VIBRATION);
     }
 
     @SmallTest
@@ -117,7 +133,7 @@ public class BatterySaverPolicyTest extends AndroidTestCase {
 
     @SmallTest
     public void testGetBatterySaverPolicy_PolicyAnimation_DefaultValueCorrect() {
-        testServiceDefaultValue(ServiceType.ANIMATION);
+        testServiceDefaultValue_unchanged(ServiceType.ANIMATION);
     }
 
     @SmallTest
@@ -144,11 +160,7 @@ public class BatterySaverPolicyTest extends AndroidTestCase {
 
     @SmallTest
     public void testGetBatterySaverPolicy_PolicyScreenBrightness_DefaultValueCorrect() {
-        testServiceDefaultValue(ServiceType.SCREEN_BRIGHTNESS);
-
-        PowerSaveState stateOn =
-                mBatterySaverPolicy.getBatterySaverPolicy(ServiceType.SCREEN_BRIGHTNESS, true);
-        assertThat(stateOn.brightnessFactor).isWithin(PRECISION).of(DEFAULT_BRIGHTNESS_FACTOR);
+        testServiceDefaultValue_unchanged(ServiceType.SCREEN_BRIGHTNESS);
     }
 
     @SmallTest
@@ -216,6 +228,17 @@ public class BatterySaverPolicyTest extends AndroidTestCase {
         final PowerSaveState batterySaverStateOn =
                 mBatterySaverPolicy.getBatterySaverPolicy(type, BATTERY_SAVER_ON);
         assertThat(batterySaverStateOn.batterySaverEnabled).isTrue();
+
+        final PowerSaveState batterySaverStateOff =
+                mBatterySaverPolicy.getBatterySaverPolicy(type, BATTERY_SAVER_OFF);
+        assertThat(batterySaverStateOff.batterySaverEnabled).isFalse();
+    }
+
+    private void testServiceDefaultValue_unchanged(@ServiceType int type) {
+        mBatterySaverPolicy.updateConstantsLocked("", "");
+        final PowerSaveState batterySaverStateOn =
+                mBatterySaverPolicy.getBatterySaverPolicy(type, BATTERY_SAVER_ON);
+        assertThat(batterySaverStateOn.batterySaverEnabled).isFalse();
 
         final PowerSaveState batterySaverStateOff =
                 mBatterySaverPolicy.getBatterySaverPolicy(type, BATTERY_SAVER_OFF);

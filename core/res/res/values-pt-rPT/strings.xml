@@ -291,6 +291,9 @@
     <string name="permgrouplab_camera" msgid="4820372495894586615">"Câmara"</string>
     <string name="permgroupdesc_camera" msgid="3250611594678347720">"tirar fotos e gravar vídeos"</string>
     <string name="permgrouprequest_camera" msgid="1299833592069671756">"Pretende permitir que a aplicação &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; tire fotos e grave vídeo?"</string>
+    <string name="permgrouplab_calllog" msgid="8798646184930388160">"Registos de chamadas"</string>
+    <string name="permgroupdesc_calllog" msgid="3006237336748283775">"ler e escrever o registo de chamadas do telemóvel"</string>
+    <string name="permgrouprequest_calllog" msgid="8487355309583773267">"Pretende permitir que a aplicação &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; aceda aos registos de chamadas do seu telemóvel?"</string>
     <string name="permgrouplab_phone" msgid="5229115638567440675">"Telemóvel"</string>
     <string name="permgroupdesc_phone" msgid="6234224354060641055">"fazer e gerir chamadas"</string>
     <string name="permgrouprequest_phone" msgid="9166979577750581037">"Pretende permitir que a aplicação &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; faça e gira chamadas telefónicas?"</string>

@@ -110,7 +110,6 @@
         <item name="android:paddingStart">@*android:dimen/notification_extra_margin_ambient</item>
         <item name="android:paddingEnd">@*android:dimen/notification_extra_margin_ambient</item>
         <item name="android:orientation">vertical</item>
-        <item name="android:paddingBottom">23.5dp</item>
     </style>
 
     <style name="hybrid_notification">
@@ -119,22 +118,28 @@
     </style>
 
     <style name="hybrid_notification_title_ambient">
+        <item name="android:layout_marginTop">@*android:dimen/notification_header_margin_top_ambient</item>
         <item name="android:paddingStart">@*android:dimen/notification_content_margin_start</item>
         <item name="android:paddingEnd">@*android:dimen/notification_content_margin_end</item>
-        <item name="android:textSize">20sp</item>
+        <item name="android:textAppearance">@*android:style/Notification.Header.Ambient</item>
+        <item name="android:layout_gravity">top|center_horizontal</item>
+        <item name="android:textSize">@*android:dimen/notification_ambient_title_text_size</item>
         <item name="android:textColor">#ffffffff</item>
     </style>
 
     <style name="hybrid_notification_title">
         <item name="android:paddingEnd">4dp</item>
+        <item name="android:textAppearance">@*android:style/TextAppearance.Material.Notification.Title</item>
     </style>
 
     <style name="hybrid_notification_text_ambient">
         <item name="android:paddingStart">@*android:dimen/notification_content_margin_start</item>
         <item name="android:paddingEnd">@*android:dimen/notification_content_margin_end</item>
-        <item name="android:textSize">16sp</item>
+        <item name="android:textSize">@*android:dimen/notification_ambient_text_size</item>
         <item name="android:textColor">#eeffffff</item>
-        <item name="android:layout_marginTop">4dp</item>
+        <item name="android:gravity">top|center_horizontal</item>
+        <item name="android:ellipsize">end</item>
+        <item name="android:maxLines">3</item>
     </style>
 
     <style name="hybrid_notification_text"

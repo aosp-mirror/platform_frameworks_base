@@ -57,6 +57,8 @@ import android.view.View;
 import com.android.internal.R;
 import com.android.internal.util.VirtualRefBasePtr;
 
+import dalvik.annotation.optimization.FastNative;
+
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 
@@ -64,7 +66,6 @@ import java.io.IOException;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 
-import dalvik.annotation.optimization.FastNative;
 
 /**
  * This class animates properties of a {@link android.graphics.drawable.VectorDrawable} with
@@ -515,7 +516,6 @@ public class AnimatedVectorDrawable extends Drawable implements Animatable2 {
         mAnimatedVectorState.mVectorDrawable.getOutline(outline);
     }
 
-    /** @hide */
     @Override
     public Insets getOpticalInsets() {
         return mAnimatedVectorState.mVectorDrawable.getOpticalInsets();

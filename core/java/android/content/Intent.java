@@ -1420,6 +1420,9 @@ public class Intent implements Parcelable, Cloneable {
      * Activity Action: Start Voice Command.
      * <p>Input: Nothing.
      * <p>Output: Nothing.
+     * <p class="note">
+     * In some cases, a matching Activity may not exist, so ensure you
+     * safeguard against this.
      */
     @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
     public static final String ACTION_VOICE_COMMAND = "android.intent.action.VOICE_COMMAND";
@@ -5683,9 +5686,24 @@ public class Intent implements Parcelable, Cloneable {
 
 
     /**
-     * If set, resolution of this intent may take place via an instant app not
-     * yet on the device if there does not yet exist an app on device to
-     * resolve it.
+     * If set in an Intent passed to {@link Context#startActivity Context.startActivity()},
+     * this flag will attempt to launch an instant app if no full app on the device can already
+     * handle the intent.
+     * <p>
+     * When attempting to resolve instant apps externally, the following {@link Intent} properties
+     * are supported:
+     * <ul>
+     *     <li>{@link Intent#setAction(String)}</li>
+     *     <li>{@link Intent#addCategory(String)}</li>
+     *     <li>{@link Intent#setData(Uri)}</li>
+     *     <li>{@link Intent#setType(String)}</li>
+     *     <li>{@link Intent#setPackage(String)}</li>
+     *     <li>{@link Intent#addFlags(int)}</li>
+     * </ul>
+     * <p>
+     * In the case that no instant app can be found, the installer will be launched to notify the
+     * user that the intent could not be resolved. On devices that do not support instant apps,
+     * the flag will be ignored.
      */
     public static final int FLAG_ACTIVITY_MATCH_EXTERNAL = 0x00000800;
 

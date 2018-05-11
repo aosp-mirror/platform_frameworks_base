@@ -69,7 +69,8 @@ public class RecentsOnboarding {
     private static final boolean RESET_PREFS_FOR_DEBUG = false;
     private static final boolean ONBOARDING_ENABLED = true;
     private static final long SHOW_DELAY_MS = 500;
-    private static final long SHOW_HIDE_DURATION_MS = 300;
+    private static final long SHOW_DURATION_MS = 300;
+    private static final long HIDE_DURATION_MS = 100;
     // Show swipe-up tips after opening overview from home this number of times.
     private static final int SWIPE_UP_SHOW_ON_OVERVIEW_OPENED_FROM_HOME_COUNT = 3;
     // Show quick scrub tips after opening overview this number of times.
@@ -93,7 +94,6 @@ public class RecentsOnboarding {
     private boolean mOverviewProxyListenerRegistered;
     private boolean mTaskListenerRegistered;
     private boolean mLayoutAttachedToWindow;
-    private int mLastTaskId;
     private boolean mHasDismissedSwipeUpTip;
     private boolean mHasDismissedQuickScrubTip;
     private int mNumAppsLaunchedSinceSwipeUpTipDismiss;
@@ -111,14 +111,8 @@ public class RecentsOnboarding {
                 hide(true);
                 return;
             }
-            if (info.id == mLastTaskId) {
-                // We only count launches that go to a new task.
-                return;
-            }
             int activityType = info.configuration.windowConfiguration.getActivityType();
             if (activityType == ACTIVITY_TYPE_STANDARD) {
-                mLastTaskId = info.id;
-
                 boolean alreadySeenSwipeUpOnboarding = hasSeenSwipeUpOnboarding();
                 boolean alreadySeenQuickScrubsOnboarding = hasSeenQuickScrubOnboarding();
                 if (alreadySeenSwipeUpOnboarding && alreadySeenQuickScrubsOnboarding) {
@@ -176,6 +170,11 @@ public class RecentsOnboarding {
                             mOverviewOpenedCountSinceQuickScrubTipDismiss++;
                         }
                     }
+                }
+
+                @Override
+                public void onQuickStepStarted() {
+                    hide(true);
                 }
 
                 @Override
@@ -299,7 +298,7 @@ public class RecentsOnboarding {
         mHasDismissedQuickScrubTip = false;
         mNumAppsLaunchedSinceSwipeUpTipDismiss = 0;
         mOverviewOpenedCountSinceQuickScrubTipDismiss = 0;
-        hide(false);
+        hide(true);
     }
 
     public void onConfigurationChanged(Configuration newConfiguration) {
@@ -312,31 +311,21 @@ public class RecentsOnboarding {
         if (!shouldShow()) {
             return;
         }
-        if (mLayoutAttachedToWindow) {
-            hide(false);
-        }
         mDismissView.setTag(stringRes);
         mLayout.setTag(stringRes);
         mTextView.setText(stringRes);
         // Only show in portrait.
         int orientation = mContext.getResources().getConfiguration().orientation;
-        if (orientation == Configuration.ORIENTATION_PORTRAIT) {
+        if (!mLayoutAttachedToWindow && orientation == Configuration.ORIENTATION_PORTRAIT) {
             mLayout.setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_STABLE);
 
             mWindowManager.addView(mLayout, getWindowLayoutParams());
-            int layoutHeight = mLayout.getHeight();
-            if (layoutHeight == 0) {
-                mLayout.measure(View.MeasureSpec.UNSPECIFIED, View.MeasureSpec.UNSPECIFIED);
-                layoutHeight = mLayout.getMeasuredHeight();
-            }
-            mLayout.setTranslationY(layoutHeight);
             mLayout.setAlpha(0);
             mLayout.animate()
-                    .translationY(0)
                     .alpha(1f)
                     .withLayer()
                     .setStartDelay(SHOW_DELAY_MS)
-                    .setDuration(SHOW_HIDE_DURATION_MS)
+                    .setDuration(SHOW_DURATION_MS)
                     .setInterpolator(new DecelerateInterpolator())
                     .start();
         }
@@ -356,10 +345,10 @@ public class RecentsOnboarding {
         if (mLayoutAttachedToWindow) {
             if (animate) {
                 mLayout.animate()
-                        .translationY(mLayout.getHeight())
                         .alpha(0f)
                         .withLayer()
-                        .setDuration(SHOW_HIDE_DURATION_MS)
+                        .setStartDelay(0)
+                        .setDuration(HIDE_DURATION_MS)
                         .setInterpolator(new AccelerateInterpolator())
                         .withEndAction(() -> mWindowManager.removeViewImmediate(mLayout))
                         .start();

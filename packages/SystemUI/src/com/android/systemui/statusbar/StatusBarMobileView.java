@@ -16,6 +16,9 @@
 
 package com.android.systemui.statusbar;
 
+import static com.android.systemui.statusbar.StatusBarIconView.STATE_DOT;
+import static com.android.systemui.statusbar.StatusBarIconView.STATE_HIDDEN;
+import static com.android.systemui.statusbar.StatusBarIconView.STATE_ICON;
 import static com.android.systemui.statusbar.policy.DarkIconDispatcher.getTint;
 import static com.android.systemui.statusbar.policy.DarkIconDispatcher.isInArea;
 
@@ -24,10 +27,14 @@ import android.content.res.ColorStateList;
 import android.graphics.Color;
 import android.graphics.Rect;
 import android.util.AttributeSet;
+import android.util.Log;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.widget.FrameLayout;
 import android.widget.ImageView;
 
+import android.widget.LinearLayout;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.keyguard.AlphaOptimizedLinearLayout;
 import com.android.settingslib.graph.SignalDrawable;
@@ -35,10 +42,14 @@ import com.android.systemui.R;
 import com.android.systemui.statusbar.phone.StatusBarSignalPolicy.MobileIconState;
 import com.android.systemui.statusbar.policy.DarkIconDispatcher.DarkReceiver;
 
-public class StatusBarMobileView extends AlphaOptimizedLinearLayout implements DarkReceiver,
+public class StatusBarMobileView extends FrameLayout implements DarkReceiver,
         StatusIconDisplayable {
     private static final String TAG = "StatusBarMobileView";
 
+    /// Used to show etc dots
+    private StatusBarIconView mDotView;
+    /// The main icon view
+    private LinearLayout mMobileGroup;
     private String mSlot;
     private MobileIconState mState;
     private SignalDrawable mMobileDrawable;
@@ -47,12 +58,17 @@ public class StatusBarMobileView extends AlphaOptimizedLinearLayout implements D
     private ImageView mOut;
     private ImageView mMobile, mMobileType, mMobileRoaming;
     private View mMobileRoamingSpace;
+    private int mVisibleState = -1;
 
-    public static StatusBarMobileView fromContext(Context context) {
+    public static StatusBarMobileView fromContext(Context context, String slot) {
         LayoutInflater inflater = LayoutInflater.from(context);
-
-        return (StatusBarMobileView)
+        StatusBarMobileView v = (StatusBarMobileView)
                 inflater.inflate(R.layout.status_bar_mobile_signal_group, null);
+
+        v.setSlot(slot);
+        v.init();
+        v.setVisibleState(STATE_ICON);
+        return v;
     }
 
     public StatusBarMobileView(Context context) {
@@ -72,14 +88,8 @@ public class StatusBarMobileView extends AlphaOptimizedLinearLayout implements D
         super(context, attrs, defStyleAttr, defStyleRes);
     }
 
-    @Override
-    protected void onFinishInflate() {
-        super.onFinishInflate();
-
-        init();
-    }
-
     private void init() {
+        mMobileGroup = findViewById(R.id.mobile_group);
         mMobile = findViewById(R.id.mobile_signal);
         mMobileType = findViewById(R.id.mobile_type);
         mMobileRoaming = findViewById(R.id.mobile_roaming);
@@ -90,6 +100,18 @@ public class StatusBarMobileView extends AlphaOptimizedLinearLayout implements D
 
         mMobileDrawable = new SignalDrawable(getContext());
         mMobile.setImageDrawable(mMobileDrawable);
+
+        initDotView();
+    }
+
+    private void initDotView() {
+        mDotView = new StatusBarIconView(mContext, mSlot, null);
+        mDotView.setVisibleState(STATE_DOT);
+
+        int width = mContext.getResources().getDimensionPixelSize(R.dimen.status_bar_icon_size);
+        LayoutParams lp = new LayoutParams(width, width);
+        lp.gravity = Gravity.CENTER_VERTICAL | Gravity.START;
+        addView(mDotView, lp);
     }
 
     public void applyMobileState(MobileIconState state) {
@@ -113,9 +135,9 @@ public class StatusBarMobileView extends AlphaOptimizedLinearLayout implements D
     private void initViewState() {
         setContentDescription(mState.contentDescription);
         if (!mState.visible) {
-            setVisibility(View.GONE);
+            mMobileGroup.setVisibility(View.GONE);
         } else {
-            setVisibility(View.VISIBLE);
+            mMobileGroup.setVisibility(View.VISIBLE);
         }
         mMobileDrawable.setLevel(mState.strengthId);
         if (mState.typeId > 0) {
@@ -137,7 +159,7 @@ public class StatusBarMobileView extends AlphaOptimizedLinearLayout implements D
     private void updateState(MobileIconState state) {
         setContentDescription(state.contentDescription);
         if (mState.visible != state.visible) {
-            setVisibility(state.visible ? View.VISIBLE : View.GONE);
+            mMobileGroup.setVisibility(state.visible ? View.VISIBLE : View.GONE);
         }
         if (mState.strengthId != state.strengthId) {
             mMobileDrawable.setLevel(state.strengthId);
@@ -173,6 +195,8 @@ public class StatusBarMobileView extends AlphaOptimizedLinearLayout implements D
         mOut.setImageTintList(color);
         mMobileType.setImageTintList(color);
         mMobileRoaming.setImageTintList(color);
+        mDotView.setDecorColor(tint);
+        mDotView.setIconColor(tint, false);
     }
 
     @Override
@@ -194,11 +218,12 @@ public class StatusBarMobileView extends AlphaOptimizedLinearLayout implements D
         mOut.setImageTintList(list);
         mMobileType.setImageTintList(list);
         mMobileRoaming.setImageTintList(list);
+        mDotView.setDecorColor(color);
     }
 
     @Override
     public void setDecorColor(int color) {
-        //TODO: May also not be needed
+        mDotView.setDecorColor(color);
     }
 
     @Override
@@ -208,12 +233,30 @@ public class StatusBarMobileView extends AlphaOptimizedLinearLayout implements D
 
     @Override
     public void setVisibleState(int state) {
-        //TODO: May not be needed. Mobile is always expected to be visible (not a dot)
+        if (state == mVisibleState) {
+            return;
+        }
+
+        mVisibleState = state;
+        switch (state) {
+            case STATE_ICON:
+                mMobileGroup.setVisibility(View.VISIBLE);
+                mDotView.setVisibility(View.GONE);
+                break;
+            case STATE_DOT:
+                mMobileGroup.setVisibility(View.INVISIBLE);
+                mDotView.setVisibility(View.VISIBLE);
+                break;
+            case STATE_HIDDEN:
+            default:
+                setVisibility(View.INVISIBLE);
+                break;
+        }
     }
 
     @Override
     public int getVisibleState() {
-        return 0;
+        return mVisibleState;
     }
 
     @VisibleForTesting

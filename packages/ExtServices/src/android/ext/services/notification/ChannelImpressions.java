@@ -21,6 +21,8 @@ import android.os.Parcelable;
 import android.text.TextUtils;
 import android.util.Log;
 
+import com.android.internal.annotations.VisibleForTesting;
+
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlSerializer;
 
@@ -30,8 +32,8 @@ public final class ChannelImpressions implements Parcelable {
     private static final String TAG = "ExtAssistant.CI";
     private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
 
-    static final double DISMISS_TO_VIEW_RATIO_LIMIT = .4;
-    static final int STREAK_LIMIT = 2;
+    static final float DEFAULT_DISMISS_TO_VIEW_RATIO_LIMIT = .8f;
+    static final int DEFAULT_STREAK_LIMIT = 2;
     static final String ATT_DISMISSALS = "dismisses";
     static final String ATT_VIEWS = "views";
     static final String ATT_STREAK = "streak";
@@ -40,18 +42,20 @@ public final class ChannelImpressions implements Parcelable {
     private int mViews = 0;
     private int mStreak = 0;
 
-    public ChannelImpressions() {
-    }
+    private float mDismissToViewRatioLimit;
+    private int mStreakLimit;
 
-    public ChannelImpressions(int dismissals, int views) {
-        mDismissals = dismissals;
-        mViews = views;
+    public ChannelImpressions() {
+        mDismissToViewRatioLimit = DEFAULT_DISMISS_TO_VIEW_RATIO_LIMIT;
+        mStreakLimit = DEFAULT_STREAK_LIMIT;
     }
 
     protected ChannelImpressions(Parcel in) {
         mDismissals = in.readInt();
         mViews = in.readInt();
         mStreak = in.readInt();
+        mDismissToViewRatioLimit = in.readFloat();
+        mStreakLimit = in.readInt();
     }
 
     public int getStreak() {
@@ -69,6 +73,21 @@ public final class ChannelImpressions implements Parcelable {
     public void incrementDismissals() {
         mDismissals++;
         mStreak++;
+    }
+
+    void updateThresholds(float dismissToViewRatioLimit, int streakLimit) {
+        mDismissToViewRatioLimit = dismissToViewRatioLimit;
+        mStreakLimit = streakLimit;
+    }
+
+    @VisibleForTesting
+    float getDismissToViewRatioLimit() {
+        return mDismissToViewRatioLimit;
+    }
+
+    @VisibleForTesting
+    int getStreakLimit() {
+        return mStreakLimit;
     }
 
     public void append(ChannelImpressions additionalImpressions) {
@@ -94,8 +113,8 @@ public final class ChannelImpressions implements Parcelable {
         if (DEBUG) {
             Log.d(TAG, "should trigger? " + getDismissals() + " " + getViews() + " " + getStreak());
         }
-        return ((double) getDismissals() / getViews()) > DISMISS_TO_VIEW_RATIO_LIMIT
-                && getStreak() > STREAK_LIMIT;
+        return ((float) getDismissals() / getViews()) > mDismissToViewRatioLimit
+                && getStreak() > mStreakLimit;
     }
 
     @Override
@@ -103,6 +122,8 @@ public final class ChannelImpressions implements Parcelable {
         dest.writeInt(mDismissals);
         dest.writeInt(mViews);
         dest.writeInt(mStreak);
+        dest.writeFloat(mDismissToViewRatioLimit);
+        dest.writeInt(mStreakLimit);
     }
 
     @Override
@@ -148,7 +169,9 @@ public final class ChannelImpressions implements Parcelable {
         sb.append("mDismissals=").append(mDismissals);
         sb.append(", mViews=").append(mViews);
         sb.append(", mStreak=").append(mStreak);
-        sb.append('}');
+        sb.append(", thresholds=(").append(mDismissToViewRatioLimit);
+        sb.append(",").append(mStreakLimit);
+        sb.append(")}");
         return sb.toString();
     }
 

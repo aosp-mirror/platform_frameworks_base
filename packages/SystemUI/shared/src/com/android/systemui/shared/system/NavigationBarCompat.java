@@ -57,6 +57,7 @@ public class NavigationBarCompat {
     public static final int HIT_TARGET_BACK = 1;
     public static final int HIT_TARGET_HOME = 2;
     public static final int HIT_TARGET_OVERVIEW = 3;
+    public static final int HIT_TARGET_ROTATION = 4;
 
     @Retention(RetentionPolicy.SOURCE)
     @IntDef({FLAG_DISABLE_SWIPE_UP,

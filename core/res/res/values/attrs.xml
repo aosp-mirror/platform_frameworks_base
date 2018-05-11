@@ -5734,17 +5734,13 @@
         <!-- When a tint color is set, specifies its Porter-Duff blending mode. The
              default value is src_in, which treats the drawable as an alpha mask. -->
         <attr name="tintMode" />
-        <!-- Left optical inset.
-             @hide Until optical insets are fully supported. -->
+        <!-- Left optical inset. -->
         <attr name="opticalInsetLeft" />
-        <!-- Top optical inset.
-             @hide Until optical insets are fully supported. -->
+        <!-- Top optical inset. -->
         <attr name="opticalInsetTop" />
-        <!-- Right optical inset.
-             @hide Until optical insets are fully supported. -->
+        <!-- Right optical inset. -->
         <attr name="opticalInsetRight" />
-        <!-- Bottom optical inset.
-             @hide Until optical insets are fully supported. -->
+        <!-- Bottom optical inset. -->
         <attr name="opticalInsetBottom" />
     </declare-styleable>
 
@@ -6243,17 +6239,13 @@
         <!-- The opacity of the whole vector drawable, as a value between 0
              (completely transparent) and 1 (completely opaque). -->
         <attr name="alpha" />
-        <!-- Left optical inset.
-             @hide Until optical insets are fully supported. -->
+        <!-- Left optical inset. -->
         <attr name="opticalInsetLeft" format="dimension" />
-        <!-- Top optical inset.
-             @hide Until optical insets are fully supported. -->
+        <!-- Top optical inset. -->
         <attr name="opticalInsetTop" format="dimension" />
-        <!-- Right optical inset.
-             @hide Until optical insets are fully supported. -->
+        <!-- Right optical inset. -->
         <attr name="opticalInsetRight" format="dimension" />
-        <!-- Bottom optical inset.
-             @hide Until optical insets are fully supported. -->
+        <!-- Bottom optical inset. -->
         <attr name="opticalInsetBottom" format="dimension" />
     </declare-styleable>
 

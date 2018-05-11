@@ -17,16 +17,20 @@
 package android.ext.services.notification;
 
 import static android.app.NotificationManager.IMPORTANCE_MIN;
-import static android.service.notification.NotificationListenerService.Ranking
-        .USER_SENTIMENT_NEGATIVE;
+import static android.service.notification.NotificationListenerService.Ranking.USER_SENTIMENT_NEGATIVE;
 
 import android.app.INotificationManager;
+import android.content.ContentResolver;
 import android.content.Context;
+import android.database.ContentObserver;
 import android.ext.services.R;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
+import android.os.Handler;
 import android.os.storage.StorageManager;
+import android.provider.Settings;
 import android.service.notification.Adjustment;
 import android.service.notification.NotificationAssistantService;
 import android.service.notification.NotificationStats;
@@ -74,9 +78,12 @@ public class Assistant extends NotificationAssistantService {
         PREJUDICAL_DISMISSALS.add(REASON_LISTENER_CANCEL);
     }
 
+    private float mDismissToViewRatioLimit;
+    private int mStreakLimit;
+
     // key : impressions tracker
     // TODO: prune deleted channels and apps
-    ArrayMap<String, ChannelImpressions> mkeyToImpressions = new ArrayMap<>();
+    final ArrayMap<String, ChannelImpressions> mkeyToImpressions = new ArrayMap<>();
     // SBN key : channel id
     ArrayMap<String, String> mLiveNotifications = new ArrayMap<>();
 
@@ -84,6 +91,14 @@ public class Assistant extends NotificationAssistantService {
     private AtomicFile mFile = null;
 
     public Assistant() {
+    }
+
+    @Override
+    public void onCreate() {
+        super.onCreate();
+        // Contexts are correctly hooked up by the creation step, which is required for the observer
+        // to be hooked up/initialized.
+        new SettingsObserver(mHandler);
     }
 
     private void loadFile() {
@@ -120,7 +135,7 @@ public class Assistant extends NotificationAssistantService {
                     continue;
                 }
                 String key = parser.getAttributeValue(null, ATT_KEY);
-                ChannelImpressions ci = new ChannelImpressions();
+                ChannelImpressions ci = createChannelImpressionsWithThresholds();
                 ci.populateFromXml(parser);
                 synchronized (mkeyToImpressions) {
                     ci.append(mkeyToImpressions.get(key));
@@ -184,7 +199,7 @@ public class Assistant extends NotificationAssistantService {
                 String key = getKey(
                         sbn.getPackageName(), sbn.getUserId(), ranking.getChannel().getId());
                 ChannelImpressions ci = mkeyToImpressions.getOrDefault(key,
-                        new ChannelImpressions());
+                        createChannelImpressionsWithThresholds());
                 if (ranking.getImportance() > IMPORTANCE_MIN && ci.shouldTriggerBlock()) {
                     adjustNotification(createNegativeAdjustment(
                             sbn.getPackageName(), sbn.getKey(), sbn.getUserId()));
@@ -206,7 +221,7 @@ public class Assistant extends NotificationAssistantService {
             String key = getKey(sbn.getPackageName(), sbn.getUserId(), channelId);
             synchronized (mkeyToImpressions) {
                 ChannelImpressions ci = mkeyToImpressions.getOrDefault(key,
-                        new ChannelImpressions());
+                        createChannelImpressionsWithThresholds());
                 if (stats.hasSeen()) {
                     ci.incrementViews();
                     updatedImpressions = true;
@@ -250,7 +265,7 @@ public class Assistant extends NotificationAssistantService {
             mFile = new AtomicFile(new File(new File(
                     Environment.getDataUserCePackageDirectory(
                             StorageManager.UUID_PRIVATE_INTERNAL, getUserId(), getPackageName()),
-                    "assistant"), "block_stats.xml"));
+                    "assistant"), "blocking_helper_stats.xml"));
             loadFile();
             for (StatusBarNotification sbn : getActiveNotifications()) {
                 onNotificationPosted(sbn);
@@ -308,6 +323,60 @@ public class Assistant extends NotificationAssistantService {
     protected void insertImpressions(String key, ChannelImpressions ci) {
         synchronized (mkeyToImpressions) {
             mkeyToImpressions.put(key, ci);
+        }
+    }
+
+    private ChannelImpressions createChannelImpressionsWithThresholds() {
+        ChannelImpressions impressions = new ChannelImpressions();
+        impressions.updateThresholds(mDismissToViewRatioLimit, mStreakLimit);
+        return impressions;
+    }
+
+    /**
+     * Observer for updates on blocking helper threshold values.
+     */
+    private final class SettingsObserver extends ContentObserver {
+        private final Uri STREAK_LIMIT_URI =
+                Settings.Global.getUriFor(Settings.Global.BLOCKING_HELPER_STREAK_LIMIT);
+        private final Uri DISMISS_TO_VIEW_RATIO_LIMIT_URI =
+                Settings.Global.getUriFor(
+                        Settings.Global.BLOCKING_HELPER_DISMISS_TO_VIEW_RATIO_LIMIT);
+
+        public SettingsObserver(Handler handler) {
+            super(handler);
+            ContentResolver resolver = getApplicationContext().getContentResolver();
+            resolver.registerContentObserver(
+                    DISMISS_TO_VIEW_RATIO_LIMIT_URI, false, this, getUserId());
+            resolver.registerContentObserver(STREAK_LIMIT_URI, false, this, getUserId());
+
+            // Update all uris on creation.
+            update(null);
+        }
+
+        @Override
+        public void onChange(boolean selfChange, Uri uri) {
+            update(uri);
+        }
+
+        private void update(Uri uri) {
+            ContentResolver resolver = getApplicationContext().getContentResolver();
+            if (uri == null || DISMISS_TO_VIEW_RATIO_LIMIT_URI.equals(uri)) {
+                mDismissToViewRatioLimit = Settings.Global.getFloat(
+                        resolver, Settings.Global.BLOCKING_HELPER_DISMISS_TO_VIEW_RATIO_LIMIT,
+                        ChannelImpressions.DEFAULT_DISMISS_TO_VIEW_RATIO_LIMIT);
+            }
+            if (uri == null || STREAK_LIMIT_URI.equals(uri)) {
+                mStreakLimit = Settings.Global.getInt(
+                        resolver, Settings.Global.BLOCKING_HELPER_STREAK_LIMIT,
+                        ChannelImpressions.DEFAULT_STREAK_LIMIT);
+            }
+
+            // Update all existing channel impression objects with any new limits/thresholds.
+            synchronized (mkeyToImpressions) {
+                for (ChannelImpressions channelImpressions: mkeyToImpressions.values()) {
+                    channelImpressions.updateThresholds(mDismissToViewRatioLimit, mStreakLimit);
+                }
+            }
         }
     }
 }

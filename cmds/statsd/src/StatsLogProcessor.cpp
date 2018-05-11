@@ -382,10 +382,13 @@ void StatsLogProcessor::onConfigMetricsReportLocked(const ConfigKey& key,
     it->second->onDumpReport(dumpTimeStampNs, include_current_partial_bucket,
                              &str_set, proto);
 
-    // Fill in UidMap.
-    uint64_t uidMapToken = proto->start(FIELD_TYPE_MESSAGE | FIELD_ID_UID_MAP);
-    mUidMap->appendUidMap(dumpTimeStampNs, key, &str_set, proto);
-    proto->end(uidMapToken);
+    // Fill in UidMap if there is at least one metric to report.
+    // This skips the uid map if it's an empty config.
+    if (it->second->getNumMetrics() > 0) {
+        uint64_t uidMapToken = proto->start(FIELD_TYPE_MESSAGE | FIELD_ID_UID_MAP);
+        mUidMap->appendUidMap(dumpTimeStampNs, key, &str_set, proto);
+        proto->end(uidMapToken);
+    }
 
     // Fill in the timestamps.
     proto->write(FIELD_TYPE_INT64 | FIELD_ID_LAST_REPORT_ELAPSED_NANOS,
@@ -500,7 +503,8 @@ void StatsLogProcessor::flushIfNecessaryLocked(
 void StatsLogProcessor::WriteDataToDiskLocked(const ConfigKey& key,
                                               const int64_t timestampNs,
                                               const DumpReportReason dumpReportReason) {
-    if (mMetricsManagers.find(key) == mMetricsManagers.end()) {
+    if (mMetricsManagers.find(key) == mMetricsManagers.end() ||
+        !mMetricsManagers.find(key)->second->shouldWriteToDisk()) {
         return;
     }
     ProtoOutputStream proto;

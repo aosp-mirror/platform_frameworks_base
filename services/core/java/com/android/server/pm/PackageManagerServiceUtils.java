@@ -26,7 +26,6 @@ import static com.android.server.pm.PackageManagerService.TAG;
 import static com.android.server.pm.PackageManagerServiceUtils.logCriticalInfo;
 
 import com.android.internal.content.NativeLibraryHelper;
-import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.FastPrintWriter;
 import com.android.server.EventLogTags;
 import com.android.server.pm.dex.DexManager;
@@ -56,7 +55,6 @@ import android.util.ArraySet;
 import android.util.Log;
 import android.util.PackageUtils;
 import android.util.Slog;
-import android.util.jar.StrictJarFile;
 import android.util.proto.ProtoOutputStream;
 
 import dalvik.system.VMRuntime;
@@ -85,12 +83,10 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.function.Predicate;
 import java.util.zip.GZIPInputStream;
-import java.util.zip.ZipEntry;
 
 /**
  * Class containing helper methods for the PackageManagerService.
@@ -315,61 +311,6 @@ public class PackageManagerServiceUtils {
             }
         }
         return maxModifiedTime;
-    }
-
-    /**
-     * Checks that the archive located at {@code fileName} has uncompressed dex file and so
-     * files that can be direclty mapped.
-     */
-    public static void logApkHasUncompressedCode(String fileName) {
-        StrictJarFile jarFile = null;
-        try {
-            jarFile = new StrictJarFile(fileName,
-                    false /*verify*/, false /*signatureSchemeRollbackProtectionsEnforced*/);
-            Iterator<ZipEntry> it = jarFile.iterator();
-            while (it.hasNext()) {
-                ZipEntry entry = it.next();
-                if (entry.getName().endsWith(".dex")) {
-                    if (entry.getMethod() != ZipEntry.STORED) {
-                        Slog.w(TAG, "APK " + fileName + " has compressed dex code " +
-                                entry.getName());
-                    } else if ((entry.getDataOffset() & 0x3) != 0) {
-                        Slog.w(TAG, "APK " + fileName + " has unaligned dex code " +
-                                entry.getName());
-                    }
-                } else if (entry.getName().endsWith(".so")) {
-                    if (entry.getMethod() != ZipEntry.STORED) {
-                        Slog.w(TAG, "APK " + fileName + " has compressed native code " +
-                                entry.getName());
-                    } else if ((entry.getDataOffset() & (0x1000 - 1)) != 0) {
-                        Slog.w(TAG, "APK " + fileName + " has unaligned native code " +
-                                entry.getName());
-                    }
-                }
-            }
-        } catch (IOException ignore) {
-            Slog.wtf(TAG, "Error when parsing APK " + fileName);
-        } finally {
-            try {
-                if (jarFile != null) {
-                    jarFile.close();
-                }
-            } catch (IOException ignore) {}
-        }
-        return;
-    }
-
-    /**
-     * Checks that the APKs in the given package have uncompressed dex file and so
-     * files that can be direclty mapped.
-     */
-    public static void logPackageHasUncompressedCode(PackageParser.Package pkg) {
-        logApkHasUncompressedCode(pkg.baseCodePath);
-        if (!ArrayUtils.isEmpty(pkg.splitCodePaths)) {
-            for (int i = 0; i < pkg.splitCodePaths.length; i++) {
-                logApkHasUncompressedCode(pkg.splitCodePaths[i]);
-            }
-        }
     }
 
     private static File getSettingsProblemFile() {

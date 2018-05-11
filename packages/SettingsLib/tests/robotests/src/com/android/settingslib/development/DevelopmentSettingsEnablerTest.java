@@ -73,22 +73,11 @@ public class DevelopmentSettingsEnablerTest {
     }
 
     @Test
-    public void isEnabled_settingsOn_noRestriction_notAdmin_notDemo_shouldReturnFalse() {
+    public void isEnabled_settingsOn_noRestriction_notAdmin_shouldReturnFalse() {
         Settings.Global.putInt(mContext.getContentResolver(),
                 Settings.Global.DEVELOPMENT_SETTINGS_ENABLED, 1);
         ShadowUserManager.getShadow().setIsAdminUser(false);
-        ShadowUserManager.getShadow().setIsDemoUser(false);
 
         assertThat(DevelopmentSettingsEnabler.isDevelopmentSettingsEnabled(mContext)).isFalse();
-    }
-
-    @Test
-    public void isEnabled_settingsOn_noRestriction_notAdmin_isDemo_shouldReturnTrue() {
-        Settings.Global.putInt(mContext.getContentResolver(),
-            Settings.Global.DEVELOPMENT_SETTINGS_ENABLED, 1);
-        ShadowUserManager.getShadow().setIsAdminUser(false);
-        ShadowUserManager.getShadow().setIsDemoUser(true);
-
-        assertThat(DevelopmentSettingsEnabler.isDevelopmentSettingsEnabled(mContext)).isTrue();
     }
 }

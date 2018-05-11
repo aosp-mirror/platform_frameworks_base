@@ -3036,6 +3036,9 @@ public class JobSchedulerService extends com.android.server.SystemService
             TimeUtils.formatDuration(mLastHeartbeatTime + mConstants.STANDBY_HEARTBEAT_TIME,
                     nowElapsed, pw);
             pw.println();
+            pw.print("    In parole?: ");
+            pw.print(mInParole);
+            pw.println();
             pw.println();
 
             pw.println("Started users: " + Arrays.toString(mStartedUsers));
@@ -3210,6 +3213,7 @@ public class JobSchedulerService extends com.android.server.SystemService
                     mLastHeartbeatTime - nowUptime);
             proto.write(JobSchedulerServiceDumpProto.NEXT_HEARTBEAT_TIME_MILLIS,
                     mLastHeartbeatTime + mConstants.STANDBY_HEARTBEAT_TIME - nowUptime);
+            proto.write(JobSchedulerServiceDumpProto.IN_PAROLE, mInParole);
 
             for (int u : mStartedUsers) {
                 proto.write(JobSchedulerServiceDumpProto.STARTED_USERS, u);

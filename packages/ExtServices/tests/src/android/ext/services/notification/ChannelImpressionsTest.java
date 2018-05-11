@@ -16,7 +16,8 @@
 
 package android.ext.services.notification;
 
-import static android.ext.services.notification.ChannelImpressions.STREAK_LIMIT;
+import static android.ext.services.notification.ChannelImpressions.DEFAULT_DISMISS_TO_VIEW_RATIO_LIMIT;
+import static android.ext.services.notification.ChannelImpressions.DEFAULT_STREAK_LIMIT;
 
 import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertTrue;
@@ -37,7 +38,7 @@ public class ChannelImpressionsTest {
     public void testNoStreakNoBlock() {
         ChannelImpressions ci = new ChannelImpressions();
 
-        for (int i = 0; i < STREAK_LIMIT - 1; i++) {
+        for (int i = 0; i < DEFAULT_STREAK_LIMIT - 1; i++) {
             ci.incrementViews();
             ci.incrementDismissals();
         }
@@ -49,10 +50,10 @@ public class ChannelImpressionsTest {
     public void testNoStreakNoBlock_breakStreak() {
         ChannelImpressions ci = new ChannelImpressions();
 
-        for (int i = 0; i < STREAK_LIMIT; i++) {
+        for (int i = 0; i < DEFAULT_STREAK_LIMIT; i++) {
             ci.incrementViews();
             ci.incrementDismissals();
-            if (i == STREAK_LIMIT - 1) {
+            if (i == DEFAULT_STREAK_LIMIT - 1) {
                 ci.resetStreak();
             }
         }
@@ -64,7 +65,7 @@ public class ChannelImpressionsTest {
     public void testStreakBlock() {
         ChannelImpressions ci = new ChannelImpressions();
 
-        for (int i = 0; i <= STREAK_LIMIT; i++) {
+        for (int i = 0; i <= DEFAULT_STREAK_LIMIT; i++) {
             ci.incrementViews();
             ci.incrementDismissals();
         }
@@ -76,7 +77,7 @@ public class ChannelImpressionsTest {
     public void testRatio_NoBlockEvenWithStreak() {
         ChannelImpressions ci = new ChannelImpressions();
 
-        for (int i = 0; i < STREAK_LIMIT; i++) {
+        for (int i = 0; i < DEFAULT_STREAK_LIMIT; i++) {
             ci.incrementViews();
             ci.incrementDismissals();
             ci.incrementViews();
@@ -107,5 +108,54 @@ public class ChannelImpressionsTest {
 
         // no crash
         ci.append(null);
+    }
+
+    @Test
+    public void testUpdateThresholds_streakLimitsCorrectlyApplied() {
+        int updatedStreakLimit = DEFAULT_STREAK_LIMIT + 3;
+        ChannelImpressions ci = new ChannelImpressions();
+        ci.updateThresholds(DEFAULT_DISMISS_TO_VIEW_RATIO_LIMIT, updatedStreakLimit);
+
+        for (int i = 0; i <= updatedStreakLimit; i++) {
+            ci.incrementViews();
+            ci.incrementDismissals();
+        }
+
+        ChannelImpressions ci2 = new ChannelImpressions();
+        ci2.updateThresholds(DEFAULT_DISMISS_TO_VIEW_RATIO_LIMIT, updatedStreakLimit);
+
+        for (int i = 0; i < updatedStreakLimit; i++) {
+            ci2.incrementViews();
+            ci2.incrementDismissals();
+        }
+
+        assertTrue(ci.shouldTriggerBlock());
+        assertFalse(ci2.shouldTriggerBlock());
+    }
+
+    @Test
+    public void testUpdateThresholds_ratioLimitsCorrectlyApplied() {
+        float updatedDismissRatio = .99f;
+        ChannelImpressions ci = new ChannelImpressions();
+        ci.updateThresholds(updatedDismissRatio, DEFAULT_STREAK_LIMIT);
+
+        // N views, N-1 dismissals, which doesn't satisfy the ratio = 1 criteria.
+        for (int i = 0; i <= DEFAULT_STREAK_LIMIT; i++) {
+            ci.incrementViews();
+            if (i != DEFAULT_STREAK_LIMIT) {
+                ci.incrementDismissals();
+            }
+        }
+
+        ChannelImpressions ci2 = new ChannelImpressions();
+        ci2.updateThresholds(updatedDismissRatio, DEFAULT_STREAK_LIMIT);
+
+        for (int i = 0; i <= DEFAULT_STREAK_LIMIT; i++) {
+            ci2.incrementViews();
+            ci2.incrementDismissals();
+        }
+
+        assertFalse(ci.shouldTriggerBlock());
+        assertTrue(ci2.shouldTriggerBlock());
     }
 }

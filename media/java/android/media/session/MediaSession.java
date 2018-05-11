@@ -122,6 +122,15 @@ public final class MediaSession {
             FLAG_EXCLUSIVE_GLOBAL_PRIORITY })
     public @interface SessionFlags { }
 
+    private static final String EXTRA_KEY_CALLING_PACKAGE =
+            "android.media.session.extra.CALLING_PACKAGE";
+    private static final String EXTRA_KEY_CALLING_PID =
+            "android.media.session.extra.CALLING_PID";
+    private static final String EXTRA_KEY_CALLING_UID =
+            "android.media.session.extra.CALLING_UID";
+    private static final String EXTRA_KEY_ORIGINAL_BUNDLE =
+            "android.media.session.extra.ORIGINAL_BUNDLE";
+
     private final Object mLock = new Object();
     private final int mMaxBitmapSize;
 
@@ -520,11 +529,15 @@ public final class MediaSession {
      * @see MediaSessionManager#isTrustedForMediaControl(RemoteUserInfo)
      */
     public final @NonNull RemoteUserInfo getCurrentControllerInfo() {
-        if (mCallback == null || mCallback.mCurrentControllerInfo == null) {
+        return createRemoteUserInfo(getCurrentData());
+    }
+
+    private @NonNull Bundle getCurrentData() {
+        if (mCallback == null || mCallback.mCurrentData == null) {
             throw new IllegalStateException(
                     "This should be called inside of MediaSession.Callback methods");
         }
-        return mCallback.mCurrentControllerInfo;
+        return mCallback.mCurrentData;
     }
 
     /**
@@ -556,7 +569,7 @@ public final class MediaSession {
      */
     public String getCallingPackage() {
         if (mCallback != null) {
-            return mCallback.mCurrentControllerInfo.getPackageName();
+            return createRemoteUserInfo(mCallback.mCurrentData).getPackageName();
         }
         return null;
     }
@@ -659,6 +672,57 @@ public final class MediaSession {
     }
 
     /**
+     * Creates the extra bundle that includes the caller information.
+     *
+     * @return An extraBundle that contains caller information
+     */
+    private static Bundle createExtraBundle(String packageName, int pid, int uid) {
+        return createExtraBundle(packageName, pid, uid, null);
+    }
+
+    /**
+     * Creates the extra bundle that includes the caller information.
+     *
+     * @param originalBundle bundle
+     * @return An extraBundle that contains caller information
+     */
+    private static Bundle createExtraBundle(String packageName, int pid, int uid,
+            Bundle originalBundle) {
+        Bundle bundle = new Bundle();
+        bundle.putString(EXTRA_KEY_CALLING_PACKAGE, packageName);
+        bundle.putInt(EXTRA_KEY_CALLING_PID, pid);
+        bundle.putInt(EXTRA_KEY_CALLING_UID, uid);
+        if (originalBundle != null) {
+            bundle.putBundle(EXTRA_KEY_ORIGINAL_BUNDLE, originalBundle);
+        }
+        return bundle;
+    }
+
+    /**
+     * Creates the {@link RemoteUserInfo} from the extra bundle created by
+     * {@link #createExtraBundle}.
+     *
+     * @param extraBundle that previously created by createExtraBundle()
+     * @return a RemoteUserInfo
+     */
+    private static RemoteUserInfo createRemoteUserInfo(Bundle extraBundle) {
+        return new RemoteUserInfo(
+                extraBundle.getString(EXTRA_KEY_CALLING_PACKAGE),
+                extraBundle.getInt(EXTRA_KEY_CALLING_PID, INVALID_PID),
+                extraBundle.getInt(EXTRA_KEY_CALLING_UID, INVALID_UID));
+    }
+
+    /**
+     * Gets the original bundle from the extra bundle created by {@link #createExtraBundle}.
+     *
+     * @param extraBundle that previously created by createExtraBundle()
+     * @return a Bundle
+     */
+    private static Bundle getOriginalBundle(Bundle extraBundle) {
+        return extraBundle.getBundle(EXTRA_KEY_ORIGINAL_BUNDLE);
+    }
+
+    /**
      * Return true if this is considered an active playback state.
      *
      * @hide
@@ -755,9 +819,6 @@ public final class MediaSession {
         private MediaSession mSession;
         private CallbackMessageHandler mHandler;
         private boolean mMediaPlayPauseKeyPending;
-        private String mCallingPackage;
-        private int mCallingPid;
-        private int mCallingUid;
 
         public Callback() {
         }
@@ -811,8 +872,9 @@ public final class MediaSession {
                                 }
                             } else {
                                 mMediaPlayPauseKeyPending = true;
-                                mHandler.sendEmptyMessageDelayed(CallbackMessageHandler
-                                        .MSG_PLAY_PAUSE_KEY_DOUBLE_TAP_TIMEOUT,
+                                mHandler.postDelayed(CallbackMessageHandler
+                                                .MSG_PLAY_PAUSE_KEY_DOUBLE_TAP_TIMEOUT,
+                                        mSession.getCurrentData(),
                                         ViewConfiguration.getDoubleTapTimeout());
                             }
                             return true;
@@ -1242,22 +1304,6 @@ public final class MediaSession {
                 session.dispatchSetVolumeTo(value, createExtraBundle(packageName, pid, uid));
             }
         }
-
-        private Bundle createExtraBundle(String packageName, int pid, int uid) {
-            return createExtraBundle(packageName, pid, uid, null);
-        }
-
-        private Bundle createExtraBundle(String packageName, int pid, int uid,
-                Bundle originalBundle) {
-            Bundle bundle = new Bundle();
-            bundle.putString(CallbackMessageHandler.EXTRA_KEY_CALLING_PACKAGE, packageName);
-            bundle.putInt(CallbackMessageHandler.EXTRA_KEY_CALLING_PID, pid);
-            bundle.putInt(CallbackMessageHandler.EXTRA_KEY_CALLING_UID, uid);
-            if (originalBundle != null) {
-                bundle.putBundle(CallbackMessageHandler.EXTRA_KEY_ORIGINAL_BUNDLE, originalBundle);
-            }
-            return bundle;
-        }
     }
 
     /**
@@ -1379,15 +1425,6 @@ public final class MediaSession {
 
     private class CallbackMessageHandler extends Handler {
 
-        private static final String EXTRA_KEY_CALLING_PACKAGE =
-                "android.media.session.extra.CALLING_PACKAGE";
-        private static final String EXTRA_KEY_CALLING_PID =
-                "android.media.session.extra.CALLING_PID";
-        private static final String EXTRA_KEY_CALLING_UID =
-                "android.media.session.extra.CALLING_UID";
-        private static final String EXTRA_KEY_ORIGINAL_BUNDLE =
-                "android.media.session.extra.ORIGINAL_BUNDLE";
-
         private static final int MSG_COMMAND = 1;
         private static final int MSG_MEDIA_BUTTON = 2;
         private static final int MSG_PREPARE = 3;
@@ -1413,8 +1450,7 @@ public final class MediaSession {
         private static final int MSG_PLAY_PAUSE_KEY_DOUBLE_TAP_TIMEOUT = 23;
 
         private MediaSession.Callback mCallback;
-
-        private RemoteUserInfo mCurrentControllerInfo;
+        private Bundle mCurrentData;
 
         public CallbackMessageHandler(Looper looper, MediaSession.Callback callback) {
             super(looper, null, true);
@@ -1422,22 +1458,25 @@ public final class MediaSession {
             mCallback.mHandler = this;
         }
 
-        public void post(int what, Object obj, Bundle bundle) {
+        public void post(int what, Object obj, Bundle data) {
             Message msg = obtainMessage(what, obj);
-            msg.setData(bundle);
+            msg.setData(data);
             msg.sendToTarget();
+        }
+
+        public void postDelayed(int what, Bundle data, long delayMs) {
+            Message msg = obtainMessage(what);
+            msg.setData(data);
+            sendMessageDelayed(msg, delayMs);
         }
 
         @Override
         public void handleMessage(Message msg) {
             VolumeProvider vp;
-            Bundle bundle = msg.getData();
-            Bundle originalBundle = bundle.getBundle(EXTRA_KEY_ORIGINAL_BUNDLE);
+            Bundle data = msg.getData();
+            Bundle originalBundle = getOriginalBundle(data);
 
-            mCurrentControllerInfo = new RemoteUserInfo(
-                    bundle.getString(EXTRA_KEY_CALLING_PACKAGE),
-                    bundle.getInt(EXTRA_KEY_CALLING_PID, INVALID_PID),
-                    bundle.getInt(EXTRA_KEY_CALLING_UID, INVALID_UID));
+            mCurrentData = data;
 
             switch (msg.what) {
                 case MSG_COMMAND:
@@ -1521,7 +1560,7 @@ public final class MediaSession {
                     mCallback.handleMediaPlayPauseKeySingleTapIfPending();
                     break;
             }
-            mCurrentControllerInfo = null;
+            mCurrentData = null;
         }
     }
 }

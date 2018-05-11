@@ -291,6 +291,9 @@
     <string name="permgrouplab_camera" msgid="4820372495894586615">"Kamera"</string>
     <string name="permgroupdesc_camera" msgid="3250611594678347720">"atera argazkiak eta grabatu bideoak"</string>
     <string name="permgrouprequest_camera" msgid="1299833592069671756">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; aplikazioari argazkiak ateratzea eta bideoak grabatzea baimendu nahi diozu?"</string>
+    <string name="permgrouplab_calllog" msgid="8798646184930388160">"Deien erregistroa"</string>
+    <string name="permgroupdesc_calllog" msgid="3006237336748283775">"irakurri telefonoko deien erregistroa eta idatzi bertan"</string>
+    <string name="permgrouprequest_calllog" msgid="8487355309583773267">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; aplikazioari telefonoko deien erregistroa atzitzea baimendu nahi diozu?"</string>
     <string name="permgrouplab_phone" msgid="5229115638567440675">"Telefonoa"</string>
     <string name="permgroupdesc_phone" msgid="6234224354060641055">"egin eta kudeatu telefono-deiak"</string>
     <string name="permgrouprequest_phone" msgid="9166979577750581037">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; aplikazioari telefono-deiak egitea eta kudeatzea baimendu nahi diozu?"</string>
@@ -361,7 +364,7 @@
     <string name="permdesc_persistentActivity" product="default" msgid="4384760047508278272">"Beren zati batzuk memoria modu iraunkorrean ezartzeko baimena ematen die aplikazioei. Horrela, beste aplikazioek erabilgarri duten memoria murritz daiteke eta telefonoa motel daiteke."</string>
     <string name="permlab_foregroundService" msgid="3310786367649133115">"Exekutatu zerbitzuak aurreko planoan"</string>
     <string name="permdesc_foregroundService" msgid="6471634326171344622">"Aurreko planoko zerbitzuak erabiltzea baimentzen dio aplikazioari."</string>
-    <string name="permlab_getPackageSize" msgid="7472921768357981986">"neurtu aplikazioen biltegiratze-tokia"</string>
+    <string name="permlab_getPackageSize" msgid="7472921768357981986">"neurtu aplikazioen biltegiratzeko tokia"</string>
     <string name="permdesc_getPackageSize" msgid="3921068154420738296">"Bere kodea, datuak eta cache-tamainak eskuratzea baimentzen die aplikazioei."</string>
     <string name="permlab_writeSettings" msgid="2226195290955224730">"aldatu sistemaren ezarpenak"</string>
     <string name="permdesc_writeSettings" msgid="7775723441558907181">"Sistemaren ezarpenen datuak aldatzea baimentzen die aplikazioei. Aplikazio gaiztoek sistemaren konfigurazioa hondatzeko erabil dezakete."</string>
@@ -836,7 +839,7 @@
     <string name="double_tap_toast" msgid="4595046515400268881">"Aholkua: sakatu birritan handitzeko edo txikitzeko."</string>
     <string name="autofill_this_form" msgid="4616758841157816676">"Betetze automatikoa"</string>
     <string name="setup_autofill" msgid="7103495070180590814">"Konfiguratu betetze automatikoa"</string>
-    <string name="autofill_window_title" msgid="4107745526909284887">"Bete automatikoki honekin: <xliff:g id="SERVICENAME">%1$s</xliff:g>"</string>
+    <string name="autofill_window_title" msgid="4107745526909284887">"Bete automatikoki <xliff:g id="SERVICENAME">%1$s</xliff:g> erabiliz"</string>
     <string name="autofill_address_name_separator" msgid="6350145154779706772">" "</string>
     <string name="autofill_address_summary_name_format" msgid="3268041054899214945">"$1$2$3"</string>
     <string name="autofill_address_summary_separator" msgid="7483307893170324129">", "</string>

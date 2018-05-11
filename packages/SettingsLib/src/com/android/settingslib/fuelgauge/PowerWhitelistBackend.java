@@ -67,6 +67,19 @@ public class PowerWhitelistBackend {
         return mWhitelistedApps.contains(pkg);
     }
 
+    public boolean isWhitelisted(String[] pkgs) {
+        if (ArrayUtils.isEmpty(pkgs)) {
+            return false;
+        }
+        for (String pkg : pkgs) {
+            if (isWhitelisted(pkg)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
     public boolean isSysWhitelistedExceptIdle(String pkg) {
         return mSysWhitelistedAppsExceptIdle.contains(pkg);
     }

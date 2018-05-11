@@ -294,6 +294,9 @@
     <string name="permgrouplab_camera" msgid="4820372495894586615">"Kamera"</string>
     <string name="permgroupdesc_camera" msgid="3250611594678347720">"slika i snima videozapise"</string>
     <string name="permgrouprequest_camera" msgid="1299833592069671756">"Dozvoliti aplikaciji &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; snimanje slika i videozapisa?"</string>
+    <string name="permgrouplab_calllog" msgid="8798646184930388160">"Zapisnici poziva"</string>
+    <string name="permgroupdesc_calllog" msgid="3006237336748283775">"čitanje i pisanje zapisnika telefonskih poziva"</string>
+    <string name="permgrouprequest_calllog" msgid="8487355309583773267">"Dozvoliti aplikaciji &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; pristup zapisnicima poziva?"</string>
     <string name="permgrouplab_phone" msgid="5229115638567440675">"Telefon"</string>
     <string name="permgroupdesc_phone" msgid="6234224354060641055">"poziva i upravlja pozivima"</string>
     <string name="permgrouprequest_phone" msgid="9166979577750581037">"Dozvoliti aplikaciji &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; uspostavljanje poziva i njihovo upravljanje?"</string>
@@ -850,7 +853,7 @@
     <string name="autofill_zip_code" msgid="8697544592627322946">"Poštanski broj"</string>
     <string name="autofill_county" msgid="237073771020362891">"Okrug"</string>
     <string name="autofill_island" msgid="4020100875984667025">"Ostrvo"</string>
-    <string name="autofill_district" msgid="8400735073392267672">"Oblast"</string>
+    <string name="autofill_district" msgid="8400735073392267672">"Distrikt"</string>
     <string name="autofill_department" msgid="5343279462564453309">"Odsjek"</string>
     <string name="autofill_prefecture" msgid="2028499485065800419">"Prefektura"</string>
     <string name="autofill_parish" msgid="8202206105468820057">"Parohija"</string>

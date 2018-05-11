@@ -581,8 +581,6 @@ public class PackageManagerService extends IPackageManager.Stub
 
     private static final String PRODUCT_OVERLAY_DIR = "/product/overlay";
 
-    private static final String PROPERTY_NAME_PM_DEXOPT_PRIV_APPS_OOB = "pm.dexopt.priv-apps-oob";
-
     /** Canonical intent used to identify what counts as a "web browser" app */
     private static final Intent sBrowserIntent;
     static {
@@ -2462,7 +2460,7 @@ public class PackageManagerService extends IPackageManager.Stub
                 "*dexopt*");
         DexManager.Listener dexManagerListener = DexLogger.getListener(this,
                 installer, mInstallLock);
-        mDexManager = new DexManager(this, mPackageDexOptimizer, installer, mInstallLock,
+        mDexManager = new DexManager(mContext, this, mPackageDexOptimizer, installer, mInstallLock,
                 dexManagerListener);
         mArtManagerService = new ArtManagerService(mContext, this, installer, mInstallLock);
         mMoveCallbacks = new MoveCallbacks(FgThread.get().getLooper());
@@ -8804,7 +8802,7 @@ public class PackageManagerService extends IPackageManager.Stub
             // equal to the version on the /data partition. Throw an exception and use
             // the application already installed on the /data partition.
             throw new PackageManagerException(Log.WARN, "Package " + pkg.packageName + " at "
-                    + pkg.codePath + " ignored: updated version " + disabledPkgSetting.versionCode
+                    + pkg.codePath + " ignored: updated version " + pkgSetting.versionCode
                     + " better than this " + pkg.getLongVersionCode());
         }
 
@@ -10462,11 +10460,7 @@ public class PackageManagerService extends IPackageManager.Stub
                 Log.d(TAG, "Scanning package " + pkg.packageName);
         }
 
-        if (Build.IS_DEBUGGABLE &&
-                pkg.isPrivileged() &&
-                SystemProperties.getBoolean(PROPERTY_NAME_PM_DEXOPT_PRIV_APPS_OOB, false)) {
-            PackageManagerServiceUtils.logPackageHasUncompressedCode(pkg);
-        }
+        DexManager.maybeLogUnexpectedPackageDetails(pkg);
 
         // Initialize package source and resource directories
         final File scanFile = new File(pkg.codePath);
@@ -11194,8 +11188,23 @@ public class PackageManagerService extends IPackageManager.Stub
                                 mSettings.getPackageLPr(pkg.packageName),
                                 "previous package state not present");
 
+                        // previousPkg.pkg may be null: the package will be not be scanned if the
+                        // package manager knows there is a newer version on /data.
+                        // TODO[b/79435695]: Find a better way to keep track of the "static"
+                        // property for RROs instead of having to parse packages on /system
+                        PackageParser.Package ppkg = previousPkg.pkg;
+                        if (ppkg == null) {
+                            try {
+                                final PackageParser pp = new PackageParser();
+                                ppkg = pp.parsePackage(previousPkg.codePath,
+                                        parseFlags | PackageParser.PARSE_IS_SYSTEM_DIR);
+                            } catch (PackageParserException e) {
+                                Slog.w(TAG, "failed to parse " + previousPkg.codePath, e);
+                            }
+                        }
+
                         // Static overlays cannot be updated.
-                        if (previousPkg.pkg.mOverlayIsStatic) {
+                        if (ppkg != null && ppkg.mOverlayIsStatic) {
                             throw new PackageManagerException("Overlay " + pkg.packageName +
                                     " is static and cannot be upgraded.");
                         // Non-static overlays cannot be converted to static overlays.
@@ -21055,23 +21064,6 @@ Slog.v(TAG, ":: stepped forward, applying functor at tag " + parser.getName());
                         .getUriFor(Secure.INSTANT_APPS_ENABLED), false, co, UserHandle.USER_SYSTEM);
         co.onChange(true);
 
-        // This observer provides an one directional mapping from Global.PRIV_APP_OOB_ENABLED to
-        // pm.dexopt.priv-apps-oob property. This is only for experiment and should be removed once
-        // it is done.
-        ContentObserver privAppOobObserver = new ContentObserver(mHandler) {
-            @Override
-            public void onChange(boolean selfChange) {
-                int oobEnabled = Global.getInt(resolver, Global.PRIV_APP_OOB_ENABLED, 0);
-                SystemProperties.set(PROPERTY_NAME_PM_DEXOPT_PRIV_APPS_OOB,
-                        oobEnabled == 1 ? "true" : "false");
-            }
-        };
-        mContext.getContentResolver().registerContentObserver(
-                Global.getUriFor(Global.PRIV_APP_OOB_ENABLED), false, privAppOobObserver,
-                UserHandle.USER_SYSTEM);
-        // At boot, restore the value from the setting, which persists across reboot.
-        privAppOobObserver.onChange(true);
-
         // Disable any carrier apps. We do this very early in boot to prevent the apps from being
         // disabled after already being started.
         CarrierAppUtils.disableCarrierAppsUntilPrivileged(mContext.getOpPackageName(), this,
@@ -21160,6 +21152,7 @@ Slog.v(TAG, ":: stepped forward, applying functor at tag " + parser.getName());
         storage.registerListener(mStorageListener);
 
         mInstallerService.systemReady();
+        mDexManager.systemReady();
         mPackageDexOptimizer.systemReady();
 
         StorageManagerInternal StorageManagerInternal = LocalServices.getService(

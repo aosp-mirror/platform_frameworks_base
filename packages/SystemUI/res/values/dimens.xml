@@ -296,6 +296,8 @@
 
     <dimen name="volume_dialog_panel_transparent_padding">20dp</dimen>
 
+    <dimen name="volume_dialog_stream_padding">8dp</dimen>
+
     <!-- the amount the volume panel should be offset at the end from the view next to it (or
     the screen edge, in portrait-->
     <dimen name="volume_dialog_base_margin">8dp</dimen>
@@ -949,6 +951,7 @@
     <dimen name="smart_reply_button_padding_horizontal_single_line">20dp</dimen>
     <dimen name="smart_reply_button_padding_horizontal_double_line">19dp</dimen>
     <dimen name="smart_reply_button_min_height">48dp</dimen>
+    <dimen name="smart_reply_button_stroke_width">1dp</dimen>
     <dimen name="smart_reply_button_font_size">14sp</dimen>
     <dimen name="smart_reply_button_line_spacing_extra">6sp</dimen> <!-- Total line height 20sp. -->
 

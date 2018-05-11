@@ -300,8 +300,28 @@ public final class MediaSessionManager {
      * @hide
      */
     public void dispatchMediaKeyEvent(@NonNull KeyEvent keyEvent, boolean needWakeLock) {
+        dispatchMediaKeyEventInternal(false, keyEvent, needWakeLock);
+    }
+
+    /**
+     * Send a media key event as system component. The receiver will be selected automatically.
+     * <p>
+     * Should be only called by the {@link com.android.internal.policy.PhoneWindow} or
+     * {@link android.view.FallbackEventHandler} when the foreground activity didn't consume the key
+     * from the hardware devices.
+     *
+     * @param keyEvent The KeyEvent to send.
+     * @hide
+     */
+    public void dispatchMediaKeyEventAsSystemService(KeyEvent keyEvent) {
+        dispatchMediaKeyEventInternal(true, keyEvent, false);
+    }
+
+    private void dispatchMediaKeyEventInternal(boolean asSystemService, @NonNull KeyEvent keyEvent,
+            boolean needWakeLock) {
         try {
-            mService.dispatchMediaKeyEvent(keyEvent, needWakeLock);
+            mService.dispatchMediaKeyEvent(mContext.getPackageName(), asSystemService, keyEvent,
+                    needWakeLock);
         } catch (RemoteException e) {
             Log.e(TAG, "Failed to send key event.", e);
         }
@@ -311,12 +331,33 @@ public final class MediaSessionManager {
      * Send a volume key event. The receiver will be selected automatically.
      *
      * @param keyEvent The volume KeyEvent to send.
-     * @param needWakeLock True if a wake lock should be held while sending the key.
      * @hide
      */
     public void dispatchVolumeKeyEvent(@NonNull KeyEvent keyEvent, int stream, boolean musicOnly) {
+        dispatchVolumeKeyEventInternal(false, keyEvent, stream, musicOnly);
+    }
+
+    /**
+     * Dispatches the volume button event as system service to the session. This only effects the
+     * {@link MediaSession.Callback#getCurrentControllerInfo()} and doesn't bypass any permission
+     * check done by the system service.
+     * <p>
+     * Should be only called by the {@link com.android.internal.policy.PhoneWindow} or
+     * {@link android.view.FallbackEventHandler} when the foreground activity didn't consume the key
+     * from the hardware devices.
+     *
+     * @param keyEvent The KeyEvent to send.
+     * @hide
+     */
+    public void dispatchVolumeKeyEventAsSystemService(@NonNull KeyEvent keyEvent, int streamType) {
+        dispatchVolumeKeyEventInternal(true, keyEvent, streamType, false);
+    }
+
+    private void dispatchVolumeKeyEventInternal(boolean asSystemService, @NonNull KeyEvent keyEvent,
+            int stream, boolean musicOnly) {
         try {
-            mService.dispatchVolumeKeyEvent(keyEvent, stream, musicOnly);
+            mService.dispatchVolumeKeyEvent(mContext.getPackageName(), asSystemService, keyEvent,
+                    stream, musicOnly);
         } catch (RemoteException e) {
             Log.e(TAG, "Failed to send volume key event.", e);
         }
@@ -336,7 +377,8 @@ public final class MediaSessionManager {
      */
     public void dispatchAdjustVolume(int suggestedStream, int direction, int flags) {
         try {
-            mService.dispatchAdjustVolume(suggestedStream, direction, flags);
+            mService.dispatchAdjustVolume(mContext.getPackageName(), suggestedStream, direction,
+                    flags);
         } catch (RemoteException e) {
             Log.e(TAG, "Failed to send adjust volume.", e);
         }

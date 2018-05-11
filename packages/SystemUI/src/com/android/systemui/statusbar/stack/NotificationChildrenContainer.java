@@ -52,7 +52,7 @@ public class NotificationChildrenContainer extends ViewGroup {
     private static final int NUMBER_OF_CHILDREN_WHEN_COLLAPSED = 2;
     private static final int NUMBER_OF_CHILDREN_WHEN_SYSTEM_EXPANDED = 5;
     private static final int NUMBER_OF_CHILDREN_WHEN_CHILDREN_EXPANDED = 8;
-    private static final int NUMBER_OF_CHILDREN_WHEN_AMBIENT = 3;
+    private static final int NUMBER_OF_CHILDREN_WHEN_AMBIENT = 1;
     private static final AnimationProperties ALPHA_FADE_IN = new AnimationProperties() {
         private AnimationFilter mAnimationFilter = new AnimationFilter().animateAlpha();
 
@@ -208,9 +208,9 @@ public class NotificationChildrenContainer extends ViewGroup {
             // We need to measure all children even the GONE ones, such that the heights are
             // calculated correctly as they are used to calculate how many we can fit on the screen.
             boolean isOverflow = i == overflowIndex;
-            child.setSingleLineWidthIndention(isOverflow && mOverflowNumber != null
-                    ? mOverflowNumber.getMeasuredWidth()
-                    : 0);
+            child.setSingleLineWidthIndention(isOverflow && mOverflowNumber != null &&
+                    !mContainingNotification.isShowingAmbient()
+                    ? mOverflowNumber.getMeasuredWidth() : 0);
             child.measure(widthMeasureSpec, newHeightSpec);
             // layout the divider
             View divider = mDividers.get(i);
@@ -394,8 +394,19 @@ public class NotificationChildrenContainer extends ViewGroup {
         int childCount = mChildren.size();
         int maxAllowedVisibleChildren = getMaxAllowedVisibleChildren(true /* likeCollapsed */);
         if (childCount > maxAllowedVisibleChildren) {
-            mOverflowNumber = mHybridGroupManager.bindOverflowNumber(
-                    mOverflowNumber, childCount - maxAllowedVisibleChildren);
+            int number = childCount - maxAllowedVisibleChildren;
+            mOverflowNumber = mHybridGroupManager.bindOverflowNumber(mOverflowNumber, number);
+            if (mContainingNotification.isShowingAmbient()) {
+                ExpandableNotificationRow overflowView = mChildren.get(0);
+                HybridNotificationView ambientSingleLineView = overflowView == null ? null
+                        : overflowView.getAmbientSingleLineView();
+                if (ambientSingleLineView != null) {
+                    mHybridGroupManager.bindOverflowNumberAmbient(
+                            ambientSingleLineView.getTitleView(),
+                            mContainingNotification.getStatusBarNotification().getNotification(),
+                            number);
+                }
+            }
             if (mGroupOverFlowState == null) {
                 mGroupOverFlowState = new ViewState();
                 mNeverAppliedGroupState = true;
@@ -617,16 +628,13 @@ public class NotificationChildrenContainer extends ViewGroup {
         }
         if (mOverflowNumber != null) {
             ExpandableNotificationRow overflowView = mChildren.get(Math.min(
-                    getMaxAllowedVisibleChildren(true /* likeCollpased */), childCount) - 1);
+                    getMaxAllowedVisibleChildren(true /* likeCollapsed */), childCount) - 1);
             mGroupOverFlowState.copyFrom(resultState.getViewStateForView(overflowView));
 
-            if (mContainingNotification.isShowingAmbient() || !mChildrenExpanded) {
-                HybridNotificationView alignView = null;
-                if (mContainingNotification.isShowingAmbient()) {
-                    alignView = overflowView.getAmbientSingleLineView();
-                } else if (mUserLocked) {
-                    alignView = overflowView.getSingleLineView();
-                }
+            if (mContainingNotification.isShowingAmbient()) {
+                mGroupOverFlowState.alpha = 0.0f;
+            } else if (!mChildrenExpanded) {
+                HybridNotificationView alignView = overflowView.getSingleLineView();
                 if (alignView != null) {
                     View mirrorView = alignView.getTextView();
                     if (mirrorView.getVisibility() == GONE) {
@@ -635,9 +643,9 @@ public class NotificationChildrenContainer extends ViewGroup {
                     if (mirrorView.getVisibility() == GONE) {
                         mirrorView = alignView;
                     }
+                    mGroupOverFlowState.alpha = mirrorView.getAlpha();
                     mGroupOverFlowState.yTranslation += NotificationUtils.getRelativeYOffset(
                             mirrorView, overflowView);
-                    mGroupOverFlowState.alpha = mirrorView.getAlpha();
                 }
             } else {
                 mGroupOverFlowState.yTranslation += mNotificationHeaderMargin;
@@ -881,6 +889,7 @@ public class NotificationChildrenContainer extends ViewGroup {
 
     public void notifyShowAmbientChanged() {
         updateHeaderVisibility(false);
+        updateGroupOverflow();
     }
 
     private void updateHeaderVisibility(boolean animate) {

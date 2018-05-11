@@ -110,8 +110,8 @@ StatsdConfig MakeGaugeMetricConfig(int64_t minTime) {
 TEST(PartialBucketE2eTest, TestCountMetricWithoutSplit) {
     StatsService service(nullptr);
     SendConfig(service, MakeConfig());
-    const long start = getElapsedRealtimeNs();  // This is the start-time the metrics producers are
-                                                // initialized with.
+    int64_t start = getElapsedRealtimeNs();  // This is the start-time the metrics producers are
+                                             // initialized with.
 
     service.mProcessor->OnLogEvent(CreateAppCrashEvent(100, start + 1).get());
     service.mProcessor->OnLogEvent(CreateAppCrashEvent(100, start + 2).get());
@@ -124,8 +124,8 @@ TEST(PartialBucketE2eTest, TestCountMetricWithoutSplit) {
 TEST(PartialBucketE2eTest, TestCountMetricNoSplitOnNewApp) {
     StatsService service(nullptr);
     SendConfig(service, MakeConfig());
-    const long start = getElapsedRealtimeNs();  // This is the start-time the metrics producers are
-                                                // initialized with.
+    int64_t start = getElapsedRealtimeNs();  // This is the start-time the metrics producers are
+                                             // initialized with.
 
     // Force the uidmap to update at timestamp 2.
     service.mProcessor->OnLogEvent(CreateAppCrashEvent(100, start + 1).get());
@@ -142,8 +142,8 @@ TEST(PartialBucketE2eTest, TestCountMetricNoSplitOnNewApp) {
 TEST(PartialBucketE2eTest, TestCountMetricSplitOnUpgrade) {
     StatsService service(nullptr);
     SendConfig(service, MakeConfig());
-    const long start = getElapsedRealtimeNs();  // This is the start-time the metrics producers are
-                                                // initialized with.
+    int64_t start = getElapsedRealtimeNs();  // This is the start-time the metrics producers are
+                                             // initialized with.
     service.mUidMap->updateMap(start, {1}, {1}, {String16(kApp1.c_str())});
 
     // Force the uidmap to update at timestamp 2.
@@ -165,8 +165,8 @@ TEST(PartialBucketE2eTest, TestCountMetricSplitOnUpgrade) {
 TEST(PartialBucketE2eTest, TestCountMetricSplitOnRemoval) {
     StatsService service(nullptr);
     SendConfig(service, MakeConfig());
-    const long start = getElapsedRealtimeNs();  // This is the start-time the metrics producers are
-                                                // initialized with.
+    int64_t start = getElapsedRealtimeNs();  // This is the start-time the metrics producers are
+                                             // initialized with.
     service.mUidMap->updateMap(start, {1}, {1}, {String16(kApp1.c_str())});
 
     // Force the uidmap to update at timestamp 2.
@@ -190,8 +190,8 @@ TEST(PartialBucketE2eTest, TestValueMetricWithoutMinPartialBucket) {
     // Partial buckets don't occur when app is first installed.
     service.mUidMap->updateApp(1, String16(kApp1.c_str()), 1, 1);
     SendConfig(service, MakeValueMetricConfig(0));
-    const long start = getElapsedRealtimeNs();  // This is the start-time the metrics producers are
-                                                // initialized with.
+    int64_t start = getElapsedRealtimeNs();  // This is the start-time the metrics producers are
+                                             // initialized with.
 
     service.mProcessor->informPullAlarmFired(5 * 60 * NS_PER_SEC + start);
     service.mUidMap->updateApp(5 * 60 * NS_PER_SEC + start + 2, String16(kApp1.c_str()), 1, 2);
@@ -207,8 +207,8 @@ TEST(PartialBucketE2eTest, TestValueMetricWithMinPartialBucket) {
     // Partial buckets don't occur when app is first installed.
     service.mUidMap->updateApp(1, String16(kApp1.c_str()), 1, 1);
     SendConfig(service, MakeValueMetricConfig(60 * NS_PER_SEC /* One minute */));
-    const long start = getElapsedRealtimeNs();  // This is the start-time the metrics producers are
-                                                // initialized with.
+    int64_t start = getElapsedRealtimeNs();  // This is the start-time the metrics producers are
+                                             // initialized with.
 
     const int64_t endSkipped = 5 * 60 * NS_PER_SEC + start + 2;
     service.mProcessor->informPullAlarmFired(5 * 60 * NS_PER_SEC + start);
@@ -230,8 +230,8 @@ TEST(PartialBucketE2eTest, TestGaugeMetricWithoutMinPartialBucket) {
     // Partial buckets don't occur when app is first installed.
     service.mUidMap->updateApp(1, String16(kApp1.c_str()), 1, 1);
     SendConfig(service, MakeGaugeMetricConfig(0));
-    const long start = getElapsedRealtimeNs();  // This is the start-time the metrics producers are
-                                                // initialized with.
+    int64_t start = getElapsedRealtimeNs();  // This is the start-time the metrics producers are
+                                             // initialized with.
 
     service.mProcessor->informPullAlarmFired(5 * 60 * NS_PER_SEC + start);
     service.mUidMap->updateApp(5 * 60 * NS_PER_SEC + start + 2, String16(kApp1.c_str()), 1, 2);
@@ -247,8 +247,8 @@ TEST(PartialBucketE2eTest, TestGaugeMetricWithMinPartialBucket) {
     // Partial buckets don't occur when app is first installed.
     service.mUidMap->updateApp(1, String16(kApp1.c_str()), 1, 1);
     SendConfig(service, MakeGaugeMetricConfig(60 * NS_PER_SEC /* One minute */));
-    const long start = getElapsedRealtimeNs();  // This is the start-time the metrics producers are
-                                                // initialized with.
+    int64_t start = getElapsedRealtimeNs();  // This is the start-time the metrics producers are
+                                             // initialized with.
 
     const int64_t endSkipped = 5 * 60 * NS_PER_SEC + start + 2;
     service.mProcessor->informPullAlarmFired(5 * 60 * NS_PER_SEC + start);

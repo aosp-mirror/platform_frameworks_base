@@ -32,7 +32,6 @@
 #include <SkBlendMode.h>
 
 #include <DeferredLayerUpdater.h>
-#include <SkiaShader.h>
 #include <Rect.h>
 #include <RenderNode.h>
 

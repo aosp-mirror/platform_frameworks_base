@@ -88,6 +88,7 @@ import static com.android.systemui.shared.system.NavigationBarCompat.FLAG_DISABL
 import static com.android.systemui.shared.system.NavigationBarCompat.FLAG_HIDE_BACK_BUTTON;
 import static com.android.systemui.shared.system.NavigationBarCompat.FLAG_SHOW_OVERVIEW_BUTTON;
 import static com.android.systemui.shared.system.NavigationBarCompat.HIT_TARGET_OVERVIEW;
+import static com.android.systemui.shared.system.NavigationBarCompat.HIT_TARGET_ROTATION;
 
 public class NavigationBarView extends FrameLayout implements PluginListener<NavGesture> {
     final static boolean DEBUG = false;
@@ -116,6 +117,7 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
     private Rect mHomeButtonBounds = new Rect();
     private Rect mBackButtonBounds = new Rect();
     private Rect mRecentsButtonBounds = new Rect();
+    private Rect mRotationButtonBounds = new Rect();
     private int[] mTmpPosition = new int[2];
 
     private KeyButtonDrawable mBackIcon, mBackLandIcon, mBackAltIcon, mBackAltLandIcon;
@@ -341,6 +343,8 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
                     mDownHitTarget = HIT_TARGET_HOME;
                 } else if (mRecentsButtonBounds.contains(x, y)) {
                     mDownHitTarget = HIT_TARGET_OVERVIEW;
+                } else if (mRotationButtonBounds.contains(x, y)) {
+                    mDownHitTarget = HIT_TARGET_ROTATION;
                 }
                 break;
         }
@@ -893,6 +897,7 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
         updateButtonLocationOnScreen(getBackButton(), mBackButtonBounds);
         updateButtonLocationOnScreen(getHomeButton(), mHomeButtonBounds);
         updateButtonLocationOnScreen(getRecentsButton(), mRecentsButtonBounds);
+        updateButtonLocationOnScreen(getRotateSuggestionButton(), mRotationButtonBounds);
         mGestureHelper.onLayout(changed, left, top, right, bottom);
         mRecentsOnboarding.setNavBarHeight(getMeasuredHeight());
     }

@@ -1088,7 +1088,6 @@ public abstract class Drawable {
      * Return in insets the layout insets suggested by this Drawable for use with alignment
      * operations during layout.
      *
-     * @hide
      */
     public @NonNull Insets getOpticalInsets() {
         return Insets.NONE;

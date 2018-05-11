@@ -3284,37 +3284,6 @@ public class TelephonyManager {
     }
 
     /**
-     * Returns the complete voice mail number. Return null if it is unavailable.
-     *
-     * @hide
-     */
-    @RequiresPermission(android.Manifest.permission.CALL_PRIVILEGED)
-    public String getCompleteVoiceMailNumber() {
-        return getCompleteVoiceMailNumber(getSubId());
-    }
-
-    /**
-     * Returns the complete voice mail number. Return null if it is unavailable.
-     *
-     * @param subId
-     * @hide
-     */
-    @RequiresPermission(android.Manifest.permission.CALL_PRIVILEGED)
-    public String getCompleteVoiceMailNumber(int subId) {
-        try {
-            IPhoneSubInfo info = getSubscriberInfo();
-            if (info == null)
-                return null;
-            return info.getCompleteVoiceMailNumberForSubscriber(subId);
-        } catch (RemoteException ex) {
-            return null;
-        } catch (NullPointerException ex) {
-            // This could happen before phone restarts due to crashing
-            return null;
-        }
-    }
-
-    /**
      * Sets the voice mail number.
      *
      * <p>Requires that the calling app has carrier privileges (see {@link #hasCarrierPrivileges}).

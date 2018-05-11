@@ -803,9 +803,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
     private int mCurrentUserId;
 
-    /* Whether accessibility is magnifying the screen */
-    private boolean mScreenMagnificationActive;
-
     // Maps global key codes to the components that will handle them.
     private GlobalKeyManager mGlobalKeyManager;
 
@@ -3986,10 +3983,10 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         }
 
         // Handle keyboard language switching.
+        final boolean isCtrlOrMetaSpace = keyCode == KeyEvent.KEYCODE_SPACE
+                && (metaState & (KeyEvent.META_CTRL_MASK | KeyEvent.META_META_MASK)) != 0;
         if (down && repeatCount == 0
-                && (keyCode == KeyEvent.KEYCODE_LANGUAGE_SWITCH
-                        || (keyCode == KeyEvent.KEYCODE_SPACE
-                                && (metaState & KeyEvent.META_CTRL_MASK) != 0))) {
+                && (keyCode == KeyEvent.KEYCODE_LANGUAGE_SWITCH || isCtrlOrMetaSpace)) {
             int direction = (metaState & KeyEvent.META_SHIFT_MASK) != 0 ? -1 : 1;
             mWindowManagerFuncs.switchKeyboardLayout(event.getDeviceId(), direction);
             return -1;
@@ -6082,14 +6079,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 && (policyFlags & WindowManagerPolicy.FLAG_VIRTUAL) != 0
                 && (!isNavBarVirtKey || mNavBarVirtualKeyHapticFeedbackEnabled)
                 && event.getRepeatCount() == 0;
-
-        // Cancel any pending remote recents animations before handling the button itself. In the
-        // case where we are going home and the recents animation has already started, just cancel
-        // the recents animation, leaving the home stack in place for the pending start activity
-        if (isNavBarVirtKey && !down && !canceled) {
-            boolean isHomeKey = keyCode == KeyEvent.KEYCODE_HOME;
-            mActivityManagerInternal.cancelRecentsAnimation(!isHomeKey);
-        }
 
         // Handle special keys.
         switch (keyCode) {
@@ -8411,11 +8400,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
      */
     private int configureNavBarOpacity(int visibility, boolean dockedStackVisible,
             boolean freeformStackVisible, boolean isDockedDividerResizing) {
-        if (mScreenMagnificationActive) {
-            // When the screen is magnified, the nav bar should be opaque since its background
-            // can vary as the user pans and zooms
-            visibility = setNavBarOpaqueFlag(visibility);
-        } else if (mNavBarOpacityMode == NAV_BAR_OPAQUE_WHEN_FREEFORM_OR_DOCKED) {
+        if (mNavBarOpacityMode == NAV_BAR_OPAQUE_WHEN_FREEFORM_OR_DOCKED) {
             if (dockedStackVisible || freeformStackVisible || isDockedDividerResizing) {
                 visibility = setNavBarOpaqueFlag(visibility);
             }
@@ -8567,14 +8552,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             return true;
         }
         return false;
-    }
-
-    @Override
-    public void onScreenMagnificationStateChanged(boolean active) {
-        synchronized (mWindowManagerFuncs.getWindowManagerLock()) {
-            mScreenMagnificationActive = active;
-            updateSystemUiVisibilityLw();
-        }
     }
 
     @Override

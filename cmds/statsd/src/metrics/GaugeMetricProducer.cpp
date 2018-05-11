@@ -186,7 +186,6 @@ void GaugeMetricProducer::onDumpReportLocked(const int64_t dumpTimeNs,
         flushIfNeededLocked(dumpTimeNs);
     }
 
-    flushIfNeededLocked(dumpTimeNs);
     if (mPastBuckets.empty()) {
         return;
     }
@@ -324,6 +323,10 @@ void GaugeMetricProducer::pullLocked(const int64_t timestampNs) {
             triggerPuller = true;
             break;
         }
+        case GaugeMetric::CONDITION_CHANGE_TO_TRUE: {
+            triggerPuller = mCondition;
+            break;
+        }
         default:
             break;
     }
@@ -348,7 +351,7 @@ void GaugeMetricProducer::onConditionChangedLocked(const bool conditionMet,
     flushIfNeededLocked(eventTimeNs);
     mCondition = conditionMet;
 
-    if (mPullTagId != -1 && mCondition) {
+    if (mPullTagId != -1) {
         pullLocked(eventTimeNs);
     }  // else: Push mode. No need to proactively pull the gauge data.
 }
@@ -538,7 +541,14 @@ void GaugeMetricProducer::flushCurrentBucketLocked(const int64_t& eventTimeNs) {
 size_t GaugeMetricProducer::byteSizeLocked() const {
     size_t totalSize = 0;
     for (const auto& pair : mPastBuckets) {
-        totalSize += pair.second.size() * kBucketSize;
+        for (const auto& bucket : pair.second) {
+            totalSize += bucket.mGaugeAtoms.size() * sizeof(GaugeAtom);
+            for (const auto& atom : bucket.mGaugeAtoms) {
+                if (atom.mFields != nullptr) {
+                    totalSize += atom.mFields->size() * sizeof(FieldValue);
+                }
+            }
+        }
     }
     return totalSize;
 }

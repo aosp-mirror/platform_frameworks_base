@@ -34,6 +34,10 @@ public:
     virtual size_t read(void* buffer, size_t size);
     virtual bool hasLength() const { return true; }
     virtual size_t getLength() const;
+    virtual bool hasPosition() const;
+    virtual size_t getPosition() const;
+    virtual bool seek(size_t position);
+    virtual bool move(long offset);
     virtual bool isAtEnd() const;
 
 protected:

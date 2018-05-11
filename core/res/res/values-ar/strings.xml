@@ -303,6 +303,9 @@
     <string name="permgrouplab_camera" msgid="4820372495894586615">"الكاميرا"</string>
     <string name="permgroupdesc_camera" msgid="3250611594678347720">"التقاط صور وتسجيل فيديو"</string>
     <string name="permgrouprequest_camera" msgid="1299833592069671756">"‏هل تريد السماح لتطبيق &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; بالتقاط الصور وتسجيل الفيديو؟"</string>
+    <string name="permgrouplab_calllog" msgid="8798646184930388160">"سجلّ المكالمات"</string>
+    <string name="permgroupdesc_calllog" msgid="3006237336748283775">"قراءة سجلّ المكالمات الهاتفية والكتابة إليه"</string>
+    <string name="permgrouprequest_calllog" msgid="8487355309583773267">"‏هل تريد السماح لتطبيق &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; بالدخول إلى سجلات مكالماتك الهاتفية؟"</string>
     <string name="permgrouplab_phone" msgid="5229115638567440675">"الهاتف"</string>
     <string name="permgroupdesc_phone" msgid="6234224354060641055">"إجراء مكالمات هاتفية وإدارتها"</string>
     <string name="permgrouprequest_phone" msgid="9166979577750581037">"‏هل تريد السماح لتطبيق &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; بإجراء المكالمات الهاتفية وإدارتها؟"</string>
@@ -423,8 +426,8 @@
     <string name="permdesc_recordAudio" msgid="4245930455135321433">"يمكن لهذا التطبيق تسجيل الصوت باستخدام الميكروفون في أي وقت."</string>
     <string name="permlab_sim_communication" msgid="2935852302216852065">"‏إرسال أوامر إلى شريحة SIM"</string>
     <string name="permdesc_sim_communication" msgid="5725159654279639498">"‏السماح للتطبيق بإرسال أوامر إلى شريحة SIM. وهذا أمر بالغ الخطورة."</string>
-    <string name="permlab_camera" msgid="3616391919559751192">"التقاط صور ومقاطع فيديو"</string>
-    <string name="permdesc_camera" msgid="5392231870049240670">"يمكن لهذا التطبيق التقاط صور وتسجيل مقاطع فيديو باستخدام الكاميرا في أي وقت."</string>
+    <string name="permlab_camera" msgid="3616391919559751192">"التقاط صور وفيديوهات"</string>
+    <string name="permdesc_camera" msgid="5392231870049240670">"يمكن لهذا التطبيق التقاط صور وتسجيل فيديوهات باستخدام الكاميرا في أي وقت."</string>
     <string name="permlab_vibrate" msgid="7696427026057705834">"التحكم في الاهتزاز"</string>
     <string name="permdesc_vibrate" msgid="6284989245902300945">"للسماح للتطبيق بالتحكم في الهزّاز."</string>
     <string name="permlab_callPhone" msgid="3925836347681847954">"اتصال مباشر بأرقام الهواتف"</string>
@@ -530,12 +533,12 @@
     <string name="permdesc_writeSyncSettings" msgid="8956262591306369868">"للسماح للتطبيق بتعديل إعدادات المزامنة لحساب ما. على سبيل المثال، يمكن استخدام ذلك لتمكين مزامنة تطبيق \"الأشخاص\" مع حساب ما."</string>
     <string name="permlab_readSyncStats" msgid="7396577451360202448">"قراءة إحصاءات المزامنة"</string>
     <string name="permdesc_readSyncStats" msgid="1510143761757606156">"للسماح للتطبيق بقراءة إحصائيات المزامنة لحساب ما، بما في ذلك سجل الأحداث المتزامنة ومقدار البيانات التي تمت مزامنتها."</string>
-    <string name="permlab_sdcardRead" product="nosdcard" msgid="367275095159405468">"‏قراءة محتويات وحدة تخزين USB"</string>
-    <string name="permlab_sdcardRead" product="default" msgid="2188156462934977940">"‏قراءة محتويات بطاقة SD"</string>
-    <string name="permdesc_sdcardRead" product="nosdcard" msgid="3446988712598386079">"‏للسماح للتطبيق بقراءة محتويات وحدة تخزين USB."</string>
-    <string name="permdesc_sdcardRead" product="default" msgid="2607362473654975411">"‏للسماح للتطبيق بقراءة محتويات بطاقة SD."</string>
-    <string name="permlab_sdcardWrite" product="nosdcard" msgid="8485979062254666748">"‏تعديل محتويات وحدة تخزين USB أو حذفها"</string>
-    <string name="permlab_sdcardWrite" product="default" msgid="8805693630050458763">"‏تعديل محتويات بطاقة SD أو حذفها"</string>
+    <string name="permlab_sdcardRead" product="nosdcard" msgid="367275095159405468">"‏قراءة محتوى وحدة تخزين USB"</string>
+    <string name="permlab_sdcardRead" product="default" msgid="2188156462934977940">"‏قراءة محتوى بطاقة SD"</string>
+    <string name="permdesc_sdcardRead" product="nosdcard" msgid="3446988712598386079">"‏للسماح للتطبيق بقراءة محتوى وحدة تخزين USB."</string>
+    <string name="permdesc_sdcardRead" product="default" msgid="2607362473654975411">"‏للسماح للتطبيق بقراءة محتوى بطاقة SD."</string>
+    <string name="permlab_sdcardWrite" product="nosdcard" msgid="8485979062254666748">"‏تعديل محتوى وحدة تخزين USB أو حذفها"</string>
+    <string name="permlab_sdcardWrite" product="default" msgid="8805693630050458763">"‏تعديل محتوى بطاقة SD أو حذفها"</string>
     <string name="permdesc_sdcardWrite" product="nosdcard" msgid="6175406299445710888">"‏للسماح للتطبيق بالكتابة إلى وحدة تخزين USB."</string>
     <string name="permdesc_sdcardWrite" product="default" msgid="4337417790936632090">"‏للسماح للتطبيق بالكتابة إلى بطاقة SD."</string>
     <string name="permlab_use_sip" msgid="2052499390128979920">"‏إجراء/تلقي مكالمات SIP"</string>

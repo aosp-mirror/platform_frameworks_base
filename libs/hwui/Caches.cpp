@@ -60,7 +60,6 @@ bool Caches::init() {
     ATRACE_NAME("Caches::init");
 
     mRegionMesh = nullptr;
-    mProgram = nullptr;
 
     mInitialized = true;
 
@@ -98,8 +97,6 @@ void Caches::terminate() {
     if (!mInitialized) return;
     mRegionMesh.reset(nullptr);
 
-    mProgram = nullptr;
-
     clearGarbage();
 
     delete mPixelBufferState;
@@ -107,22 +104,6 @@ void Caches::terminate() {
     delete mTextureState;
     mTextureState = nullptr;
     mInitialized = false;
-}
-
-void Caches::setProgram(const ProgramDescription& description) {
-    // DEAD CODE
-}
-
-void Caches::setProgram(Program* program) {
-    if (!program || !program->isInUse()) {
-        if (mProgram) {
-            mProgram->remove();
-        }
-        if (program) {
-            program->use();
-        }
-        mProgram = program;
-    }
 }
 
 ///////////////////////////////////////////////////////////////////////////////

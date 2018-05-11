@@ -297,6 +297,9 @@
     <string name="permgrouplab_camera" msgid="4820372495894586615">"Fotoaparat"</string>
     <string name="permgroupdesc_camera" msgid="3250611594678347720">"fotografiranje in snemanje videoposnetkov"</string>
     <string name="permgrouprequest_camera" msgid="1299833592069671756">"Želite aplikaciji &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; omogočiti fotografiranje in snemanje videoposnetkov?"</string>
+    <string name="permgrouplab_calllog" msgid="8798646184930388160">"Dnevniki klicev"</string>
+    <string name="permgroupdesc_calllog" msgid="3006237336748283775">"branje in zapisovanje dnevnika klicev v telefonu"</string>
+    <string name="permgrouprequest_calllog" msgid="8487355309583773267">"Želite aplikaciji &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; omogočiti dostop do dnevnikov klicev v telefonu?"</string>
     <string name="permgrouplab_phone" msgid="5229115638567440675">"Telefon"</string>
     <string name="permgroupdesc_phone" msgid="6234224354060641055">"opravljanje in upravljanje telefonskih klicev"</string>
     <string name="permgrouprequest_phone" msgid="9166979577750581037">"Želite aplikaciji &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; omogočiti opravljanje in upravljanje telefonskih klicev?"</string>

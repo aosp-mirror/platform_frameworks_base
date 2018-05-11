@@ -36,6 +36,7 @@ import android.service.notification.Condition;
 import android.service.notification.ZenModeConfig;
 import android.service.notification.ZenModeConfig.ZenRule;
 import android.util.Log;
+import android.util.Slog;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.systemui.qs.GlobalSetting;
@@ -112,6 +113,10 @@ public class ZenModeControllerImpl extends CurrentUserTracker implements ZenMode
 
     @Override
     public void addCallback(Callback callback) {
+        if (callback == null) {
+            Slog.e(TAG, "Attempted to add a null callback.");
+            return;
+        }
         mCallbacks.add(callback);
     }
 

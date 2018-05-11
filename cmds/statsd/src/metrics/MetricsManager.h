@@ -67,6 +67,10 @@ public:
         return !mAllowedPkg.empty();
     }
 
+    bool shouldWriteToDisk() const {
+        return mNoReportMetricIds.size() != mAllMetricProducers.size();
+    }
+
     void dumpStates(FILE* out, bool verbose);
 
     inline bool isInTtl(const int64_t timestampNs) const {
@@ -88,6 +92,10 @@ public:
     inline int64_t getLastReportWallClockNs() const {
         return mLastReportWallClockNs;
     };
+
+    inline size_t getNumMetrics() const {
+        return mAllMetricProducers.size();
+    }
 
     virtual void dropData(const int64_t dropTimeNs);
 

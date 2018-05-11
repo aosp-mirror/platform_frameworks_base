@@ -291,6 +291,9 @@
     <string name="permgrouplab_camera" msgid="4820372495894586615">"Myndavél"</string>
     <string name="permgroupdesc_camera" msgid="3250611594678347720">"taka myndir og taka upp myndskeið"</string>
     <string name="permgrouprequest_camera" msgid="1299833592069671756">"Viltu leyfa &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; að taka myndir og myndskeið?"</string>
+    <string name="permgrouplab_calllog" msgid="8798646184930388160">"Símtalaskrár"</string>
+    <string name="permgroupdesc_calllog" msgid="3006237336748283775">"lesa og skrifa símtalaskrá síma"</string>
+    <string name="permgrouprequest_calllog" msgid="8487355309583773267">"Viltu veita &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; aðgang að símtalaskrám símans?"</string>
     <string name="permgrouplab_phone" msgid="5229115638567440675">"Sími"</string>
     <string name="permgroupdesc_phone" msgid="6234224354060641055">"hringja og stjórna símtölum"</string>
     <string name="permgrouprequest_phone" msgid="9166979577750581037">"Viltu leyfa &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; að hringja og stjórna símtölum?"</string>

@@ -123,6 +123,10 @@ public final class Settings {
      * Input: Nothing.
      * <p>
      * Output: Nothing.
+     *
+     * <p class="note">
+     * In some cases, a matching Activity may not exist, so ensure you
+     * safeguard against this.
      */
     @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
     public static final String ACTION_APN_SETTINGS = "android.settings.APN_SETTINGS";
@@ -882,6 +886,10 @@ public final class Settings {
      * Applications can also use {@link android.net.ConnectivityManager#getRestrictBackgroundStatus
      * ConnectivityManager#getRestrictBackgroundStatus()} to determine the
      * status of the background data restrictions for them.
+     *
+     * <p class="note">
+     * In some cases, a matching Activity may not exist, so ensure you
+     * safeguard against this.
      */
     @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
     public static final String ACTION_IGNORE_BACKGROUND_DATA_RESTRICTIONS_SETTINGS =
@@ -1148,6 +1156,10 @@ public final class Settings {
      * Input: Nothing.
      * <p>
      * Output: Nothing.
+     *
+     * <p class="note">
+     * In some cases, a matching Activity may not exist, so ensure you
+     * safeguard against this.
      */
     @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
     public static final String ACTION_NOTIFICATION_POLICY_ACCESS_SETTINGS
@@ -4146,7 +4158,8 @@ public final class Settings {
             SHOW_BATTERY_PERCENT,
             NOTIFICATION_VIBRATION_INTENSITY,
             HAPTIC_FEEDBACK_INTENSITY,
-            DISPLAY_COLOR_MODE
+            DISPLAY_COLOR_MODE,
+            ALARM_ALERT
         };
 
         /**
@@ -6011,8 +6024,6 @@ public final class Settings {
          */
         @Deprecated
         public static final String ACCESSIBILITY_SPEAK_PASSWORD = "speak_password";
-
-        private static final Validator ACCESSIBILITY_SPEAK_PASSWORD_VALIDATOR = BOOLEAN_VALIDATOR;
 
         /**
          * Whether to draw text with high contrast while in accessibility mode.
@@ -7907,7 +7918,6 @@ public final class Settings {
             ACCESSIBILITY_SHORTCUT_DIALOG_SHOWN,
             ACCESSIBILITY_SHORTCUT_ENABLED,
             ACCESSIBILITY_SHORTCUT_ON_LOCK_SCREEN,
-            ACCESSIBILITY_SPEAK_PASSWORD,
             ACCESSIBILITY_HIGH_TEXT_CONTRAST_ENABLED,
             ACCESSIBILITY_CAPTIONING_PRESET,
             ACCESSIBILITY_CAPTIONING_ENABLED,
@@ -8021,7 +8031,6 @@ public final class Settings {
                     ACCESSIBILITY_SHORTCUT_ENABLED_VALIDATOR);
             VALIDATORS.put(ACCESSIBILITY_SHORTCUT_ON_LOCK_SCREEN,
                     ACCESSIBILITY_SHORTCUT_ON_LOCK_SCREEN_VALIDATOR);
-            VALIDATORS.put(ACCESSIBILITY_SPEAK_PASSWORD, ACCESSIBILITY_SPEAK_PASSWORD_VALIDATOR);
             VALIDATORS.put(ACCESSIBILITY_HIGH_TEXT_CONTRAST_ENABLED,
                     ACCESSIBILITY_HIGH_TEXT_CONTRAST_ENABLED_VALIDATOR);
             VALIDATORS.put(ACCESSIBILITY_CAPTIONING_PRESET,
@@ -8908,6 +8917,14 @@ public final class Settings {
          * @hide
          */
         public static final String PRIV_APP_OOB_ENABLED = "priv_app_oob_enabled";
+
+        /**
+         * Comma separated list of privileged package names, which will be running out-of-box APK.
+         * Default: "ALL"
+         *
+         * @hide
+         */
+        public static final String PRIV_APP_OOB_LIST = "priv_app_oob_list";
 
         /**
          * The interval in milliseconds at which location requests will be throttled when they are
@@ -10423,6 +10440,25 @@ public final class Settings {
          * @see com.android.server.am.ActivityManagerConstants
          */
         public static final String ACTIVITY_MANAGER_CONSTANTS = "activity_manager_constants";
+
+        /**
+         * App ops specific settings.
+         * This is encoded as a key=value list, separated by commas. Ex:
+         *
+         * "state_settle_time=10000"
+         *
+         * The following keys are supported:
+         *
+         * <pre>
+         * state_settle_time                (long)
+         * </pre>
+         *
+         * <p>
+         * Type: string
+         * @hide
+         * @see com.android.server.AppOpsService.Constants
+         */
+        public static final String APP_OPS_CONSTANTS = "app_ops_constants";
 
         /**
          * Device Idle (Doze) specific settings.
@@ -12438,7 +12474,7 @@ public final class Settings {
           */
         public static final String MULTI_SIM_SMS_SUBSCRIPTION = "multi_sim_sms";
 
-       /**
+        /**
           * Used to provide option to user to select subscription during send SMS.
           * The value 1 - enable, 0 - disable
           * @hide
@@ -12578,6 +12614,28 @@ public final class Settings {
          */
         public static final String NOTIFICATION_SNOOZE_OPTIONS =
                 "notification_snooze_options";
+
+        /**
+         * Settings key for the ratio of notification dismissals to notification views - one of the
+         * criteria for showing the notification blocking helper.
+         *
+         * <p>The value is a float ranging from 0.0 to 1.0 (the closer to 0.0, the more intrusive
+         * the blocking helper will be).
+         *
+         * @hide
+         */
+        public static final String BLOCKING_HELPER_DISMISS_TO_VIEW_RATIO_LIMIT =
+                "blocking_helper_dismiss_to_view_ratio";
+
+        /**
+         * Settings key for the longest streak of dismissals  - one of the criteria for showing the
+         * notification blocking helper.
+         *
+         * <p>The value is an integer greater than 0.
+         *
+         * @hide
+         */
+        public static final String BLOCKING_HELPER_STREAK_LIMIT = "blocking_helper_streak_limit";
 
         /**
          * Configuration flags for SQLite Compatibility WAL. Encoded as a key-value list, separated
@@ -12945,19 +13003,6 @@ public final class Settings {
             ResolveInfo info = packageManager.resolveActivity(intent, 0);
             return info != null ? info.loadLabel(packageManager) : "";
         }
-    }
-
-    /**
-     * Returns the device ID that we should use when connecting to the mobile gtalk server.
-     * This is a string like "android-0x1242", where the hex string is the Android ID obtained
-     * from the GoogleLoginService.
-     *
-     * @param androidId The Android ID for this device.
-     * @return The device ID that should be used when connecting to the mobile gtalk server.
-     * @hide
-     */
-    public static String getGTalkDeviceId(long androidId) {
-        return "android-" + Long.toHexString(androidId);
     }
 
     private static final String[] PM_WRITE_SETTINGS = {

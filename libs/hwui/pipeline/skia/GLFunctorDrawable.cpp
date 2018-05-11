@@ -18,6 +18,7 @@
 #include <GrContext.h>
 #include <private/hwui/DrawGlInfo.h>
 #include "GlFunctorLifecycleListener.h"
+#include "Properties.h"
 #include "RenderNode.h"
 #include "SkAndroidFrameworkUtils.h"
 #include "SkClipStack.h"

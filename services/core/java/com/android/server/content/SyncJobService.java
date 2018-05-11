@@ -115,7 +115,10 @@ public class SyncJobService extends JobService {
             Slog.v(TAG, "onStopJob called " + params.getJobId() + ", reason: "
                     + params.getStopReason());
         }
-        mLogger.log("onStopJob() ", mLogger.jobParametersToString(params));
+        final boolean readyToSync = SyncManager.readyToSync();
+
+        mLogger.log("onStopJob() ", mLogger.jobParametersToString(params),
+                " readyToSync=", readyToSync);
         synchronized (mLock) {
             final int jobId = params.getJobId();
             mJobParamsMap.remove(jobId);
@@ -124,13 +127,15 @@ public class SyncJobService extends JobService {
             final long nowUptime = SystemClock.uptimeMillis();
             final long runtime = nowUptime - startUptime;
 
+
             if (startUptime == 0) {
                 wtf("Job " + jobId + " start uptime not found: "
                         + " params=" + jobParametersToString(params));
             } else if (runtime > 60 * 1000) {
                 // WTF if startSyncH() hasn't happened, *unless* onStopJob() was called too soon.
                 // (1 minute threshold.)
-                if (!mStartedSyncs.get(jobId)) {
+                // Also don't wtf when it's not ready to sync.
+                if (readyToSync && !mStartedSyncs.get(jobId)) {
                     wtf("Job " + jobId + " didn't start: "
                             + " startUptime=" + startUptime
                             + " nowUptime=" + nowUptime

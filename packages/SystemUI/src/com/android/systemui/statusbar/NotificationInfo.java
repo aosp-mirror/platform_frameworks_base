@@ -91,22 +91,24 @@ public class NotificationInfo extends LinearLayout implements NotificationGuts.G
     private boolean mIsForBlockingHelper;
     private boolean mNegativeUserSentiment;
 
-    /** Counter tag that describes how the user exit or quit out of this view. */
-    private String mExitReasonCounter = NotificationCounters.BLOCKING_HELPER_DISMISSED;
+    /**
+     * String that describes how the user exit or quit out of this view, also used as a counter tag.
+     */
+    private String mExitReason = NotificationCounters.BLOCKING_HELPER_DISMISSED;
 
     private OnClickListener mOnKeepShowing = v -> {
-        mExitReasonCounter = NotificationCounters.BLOCKING_HELPER_KEEP_SHOWING;
+        mExitReason = NotificationCounters.BLOCKING_HELPER_KEEP_SHOWING;
         closeControls(v);
     };
 
     private OnClickListener mOnStopOrMinimizeNotifications = v -> {
-        mExitReasonCounter = NotificationCounters.BLOCKING_HELPER_STOP_NOTIFICATIONS;
+        mExitReason = NotificationCounters.BLOCKING_HELPER_STOP_NOTIFICATIONS;
         swapContent(false);
     };
 
     private OnClickListener mOnUndo = v -> {
         // Reset exit counter that we'll log and record an undo event separately (not an exit event)
-        mExitReasonCounter = NotificationCounters.BLOCKING_HELPER_DISMISSED;
+        mExitReason = NotificationCounters.BLOCKING_HELPER_DISMISSED;
         logBlockingHelperCounter(NotificationCounters.BLOCKING_HELPER_UNDO);
         swapContent(true);
     };
@@ -197,8 +199,6 @@ public class NotificationInfo extends LinearLayout implements NotificationGuts.G
         bindHeader();
         bindPrompt();
         bindButtons();
-
-        logBlockingHelperCounter(NotificationCounters.BLOCKING_HELPER_SHOWN);
     }
 
     private void bindHeader() throws RemoteException {
@@ -300,7 +300,9 @@ public class NotificationInfo extends LinearLayout implements NotificationGuts.G
 
     private void saveImportance() {
         if (!mIsNonblockable) {
-            if (mCheckSaveListener != null) {
+            // Only go through the lock screen/bouncer if the user didn't hit 'Keep showing'.
+            if (mCheckSaveListener != null
+                    && !NotificationCounters.BLOCKING_HELPER_KEEP_SHOWING.equals(mExitReason)) {
                 mCheckSaveListener.checkSave(this::updateImportance, mSbn);
             } else {
                 updateImportance();
@@ -495,7 +497,7 @@ public class NotificationInfo extends LinearLayout implements NotificationGuts.G
         if (save) {
             saveImportance();
         }
-        logBlockingHelperCounter(mExitReasonCounter);
+        logBlockingHelperCounter(mExitReason);
         return false;
     }
 

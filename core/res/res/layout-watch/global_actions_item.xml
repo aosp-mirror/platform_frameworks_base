@@ -13,46 +13,52 @@
      See the License for the specific language governing permissions and
      limitations under the License.
 -->
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        android:gravity="center"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:minHeight="?attr/listPreferredItemHeightSmall"
-        android:gravity="center_vertical"
-        android:paddingStart="?attr/listPreferredItemPaddingStart"
-        android:paddingEnd="?attr/listPreferredItemPaddingEnd"
-        android:background="?attr/activatedBackgroundIndicator"
-        android:clipToPadding="false">
-    <ImageView android:id="@+id/icon"
-            android:background="@drawable/global_action_icon_background"
-            android:scaleType="centerInside"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
-            android:padding="8dp"
-            android:gravity="center"
-            android:orientation="horizontal"
-            android:layout_marginEnd="8dp"
-            android:layout_marginTop="8dp"
-            android:layout_marginBottom="8dp"/>
-
-    <RelativeLayout
-            android:layout_width="wrap_content"
+        android:layout_height="wrap_content">
+    <LinearLayout
+            android:duplicateParentState="true"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:layout_marginTop="8dp"
-            android:layout_marginBottom="8dp">
+            android:maxHeight="?attr/listPreferredItemHeightSmall"
+            android:gravity="center_vertical"
+            android:paddingStart="?attr/listPreferredItemPaddingStart"
+            android:paddingEnd="?attr/listPreferredItemPaddingEnd"
+            android:background="?attr/selectableItemBackground"
+            android:clipToPadding="false">
+
+        <ImageView android:id="@+id/icon"
+                android:duplicateParentState="true"
+                android:background="@drawable/global_action_icon_background"
+                android:scaleType="centerInside"
+                android:padding="8dp"
+                android:gravity="center"
+                android:layout_marginEnd="8dp"
+                android:layout_marginTop="4dp"
+                android:layout_marginBottom="4dp"
+                android:layout_width="40dp"
+                android:layout_height="40dp"/>
+
+        <FrameLayout android:id="@+id/widget_frame"
+                android:duplicateParentState="true"
+                android:gravity="center"
+                android:visibility="gone"
+                android:orientation="horizontal"
+                android:layout_marginEnd="8dp"
+                android:layout_marginTop="4dp"
+                android:layout_marginBottom="4dp"
+                android:layout_width="40dp"
+                android:layout_height="40dp"/>
 
         <TextView android:id="@+id/message"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+                android:duplicateParentState="true"
                 android:textAppearance="?attr/textAppearanceListItem"
-                android:ellipsize="end" />
-
-        <TextView android:id="@+id/status"
+                android:ellipsize="end"
+                android:layout_weight="1"
+                android:layout_marginTop="4dp"
+                android:layout_marginBottom="4dp"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_below="@id/message"
-                android:layout_alignStart="@id/message"
-                android:textAppearance="?attr/textAppearanceListItemSecondary"
-                android:textColor="?attr/textColorSecondary"/>
-    </RelativeLayout>
-</LinearLayout>
+                android:layout_height="wrap_content"/>
+    </LinearLayout>
+</FrameLayout>

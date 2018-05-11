@@ -469,6 +469,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
         updateNotificationColor();
         if (mMenuRow != null) {
             mMenuRow.onNotificationUpdated(mStatusBarNotification);
+            mMenuRow.setAppName(mAppName);
         }
         if (mIsSummaryWithChildren) {
             mChildrenContainer.recreateNotificationHeader(mExpandClickListener);
@@ -1086,6 +1087,15 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
             NotificationContentView notificationContentView) {
         if (getShowingLayout() == notificationContentView) {
             setTintColor(customBackgroundColor, animate);
+        }
+    }
+
+    @Override
+    protected void setBackgroundTintColor(int color) {
+        super.setBackgroundTintColor(color);
+        NotificationContentView view = getShowingLayout();
+        if (view != null) {
+            view.setBackgroundTintColor(color);
         }
     }
 
@@ -2599,6 +2609,9 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
 
     @Override
     protected boolean disallowSingleClick(MotionEvent event) {
+        if (areGutsExposed()) {
+            return false;
+        }
         float x = event.getX();
         float y = event.getY();
         NotificationHeaderView header = getVisibleNotificationHeader();

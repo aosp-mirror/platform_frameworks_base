@@ -2297,19 +2297,11 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     static final int PFLAG_DIRTY                       = 0x00200000;
 
     /**
-     * View flag indicating whether this view was invalidated by an opaque
-     * invalidate request.
+     * Mask for {@link #PFLAG_DIRTY}.
      *
      * @hide
      */
-    static final int PFLAG_DIRTY_OPAQUE                = 0x00400000;
-
-    /**
-     * Mask for {@link #PFLAG_DIRTY} and {@link #PFLAG_DIRTY_OPAQUE}.
-     *
-     * @hide
-     */
-    static final int PFLAG_DIRTY_MASK                  = 0x00600000;
+    static final int PFLAG_DIRTY_MASK                  = 0x00200000;
 
     /**
      * Indicates whether the background is opaque.
@@ -3833,7 +3825,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             name = "DRAWING_CACHE_INVALID", outputIf = false),
         @ViewDebug.FlagToString(mask = PFLAG_DRAWN, equals = PFLAG_DRAWN, name = "DRAWN", outputIf = true),
         @ViewDebug.FlagToString(mask = PFLAG_DRAWN, equals = PFLAG_DRAWN, name = "NOT_DRAWN", outputIf = false),
-        @ViewDebug.FlagToString(mask = PFLAG_DIRTY_MASK, equals = PFLAG_DIRTY_OPAQUE, name = "DIRTY_OPAQUE"),
         @ViewDebug.FlagToString(mask = PFLAG_DIRTY_MASK, equals = PFLAG_DIRTY, name = "DIRTY")
     }, formatToHexString = true)
 
@@ -20173,8 +20164,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     @CallSuper
     public void draw(Canvas canvas) {
         final int privateFlags = mPrivateFlags;
-        final boolean dirtyOpaque = (privateFlags & PFLAG_DIRTY_MASK) == PFLAG_DIRTY_OPAQUE &&
-                (mAttachInfo == null || !mAttachInfo.mIgnoreDirtyState);
         mPrivateFlags = (privateFlags & ~PFLAG_DIRTY_MASK) | PFLAG_DRAWN;
 
         /*
@@ -20192,9 +20181,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         // Step 1, draw the background, if needed
         int saveCount;
 
-        if (!dirtyOpaque) {
-            drawBackground(canvas);
-        }
+        drawBackground(canvas);
 
         // skip step 2 & 5 if possible (common case)
         final int viewFlags = mViewFlags;
@@ -20202,7 +20189,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         boolean verticalEdges = (viewFlags & FADING_EDGE_VERTICAL) != 0;
         if (!verticalEdges && !horizontalEdges) {
             // Step 3, draw the content
-            if (!dirtyOpaque) onDraw(canvas);
+            onDraw(canvas);
 
             // Step 4, draw the children
             dispatchDraw(canvas);
@@ -20316,7 +20303,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         }
 
         // Step 3, draw the content
-        if (!dirtyOpaque) onDraw(canvas);
+        onDraw(canvas);
 
         // Step 4, draw the children
         dispatchDraw(canvas);
@@ -26472,17 +26459,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
          * Indicates the time at which drawing started to occur.
          */
         long mDrawingTime;
-
-        /**
-         * Indicates whether or not ignoring the DIRTY_MASK flags.
-         */
-        boolean mIgnoreDirtyState;
-
-        /**
-         * This flag tracks when the mIgnoreDirtyState flag is set during draw(),
-         * to avoid clearing that flag prematurely.
-         */
-        boolean mSetIgnoreDirtyState = false;
 
         /**
          * Indicates whether the view's window is currently in touch mode.

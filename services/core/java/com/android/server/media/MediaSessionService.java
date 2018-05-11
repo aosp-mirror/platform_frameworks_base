@@ -1093,13 +1093,21 @@ public class MediaSessionService extends SystemService implements Monitor {
          * registered listeners, or if there was none, broadcast an
          * ACTION_MEDIA_BUTTON intent to the rest of the system.
          *
+         * @param packageName The caller package
+         * @param asSystemService {@code true} if the event sent to the session as if it was come
+         *          from the system service instead of the app process. This helps sessions to
+         *          distinguish between the key injection by the app and key events from the
+         *          hardware devices. Should be used only when the volume key events aren't handled
+         *          by foreground activity. {@code false} otherwise to tell session about the real
+         *          caller.
          * @param keyEvent a non-null KeyEvent whose key code is one of the
          *            supported media buttons
          * @param needWakeLock true if a PARTIAL_WAKE_LOCK needs to be held
          *            while this key event is dispatched.
          */
         @Override
-        public void dispatchMediaKeyEvent(KeyEvent keyEvent, boolean needWakeLock) {
+        public void dispatchMediaKeyEvent(String packageName, boolean asSystemService,
+                KeyEvent keyEvent, boolean needWakeLock) {
             if (keyEvent == null || !KeyEvent.isMediaKey(keyEvent.getKeyCode())) {
                 Log.w(TAG, "Attempted to dispatch null or non-media key event.");
                 return;
@@ -1110,7 +1118,8 @@ public class MediaSessionService extends SystemService implements Monitor {
             final long token = Binder.clearCallingIdentity();
             try {
                 if (DEBUG) {
-                    Log.d(TAG, "dispatchMediaKeyEvent, pid=" + pid + ", uid=" + uid + ", event="
+                    Log.d(TAG, "dispatchMediaKeyEvent, pkg=" + packageName + " pid=" + pid
+                            + ", uid=" + uid + ", asSystem=" + asSystemService + ", event="
                             + keyEvent);
                 }
                 if (!isUserSetupComplete()) {
@@ -1137,7 +1146,8 @@ public class MediaSessionService extends SystemService implements Monitor {
                             }
                             try {
                                 mCurrentFullUserRecord.mOnMediaKeyListener.onMediaKey(keyEvent,
-                                        new MediaKeyListenerResultReceiver(keyEvent, needWakeLock));
+                                        new MediaKeyListenerResultReceiver(packageName, pid, uid,
+                                                asSystemService, keyEvent, needWakeLock));
                                 return;
                             } catch (RemoteException e) {
                                 Log.w(TAG, "Failed to send " + keyEvent
@@ -1146,9 +1156,11 @@ public class MediaSessionService extends SystemService implements Monitor {
                         }
                     }
                     if (!isGlobalPriorityActive && isVoiceKey(keyEvent.getKeyCode())) {
-                        handleVoiceKeyEventLocked(keyEvent, needWakeLock);
+                        handleVoiceKeyEventLocked(packageName, pid, uid, asSystemService, keyEvent,
+                                needWakeLock);
                     } else {
-                        dispatchMediaKeyEventLocked(keyEvent, needWakeLock);
+                        dispatchMediaKeyEventLocked(packageName, pid, uid, asSystemService,
+                                keyEvent, needWakeLock);
                     }
                 }
             } finally {
@@ -1324,6 +1336,13 @@ public class MediaSessionService extends SystemService implements Monitor {
          * there's no active global priority session, long-pressess will be sent to the
          * long-press listener instead of adjusting volume.
          *
+         * @param packageName The caller package.
+         * @param asSystemService {@code true} if the event sent to the session as if it was come
+         *          from the system service instead of the app process. This helps sessions to
+         *          distinguish between the key injection by the app and key events from the
+         *          hardware devices. Should be used only when the volume key events aren't handled
+         *          by foreground activity. {@code false} otherwise to tell session about the real
+         *          caller.
          * @param keyEvent a non-null KeyEvent whose key code is one of the
          *            {@link KeyEvent#KEYCODE_VOLUME_UP},
          *            {@link KeyEvent#KEYCODE_VOLUME_DOWN},
@@ -1332,7 +1351,8 @@ public class MediaSessionService extends SystemService implements Monitor {
          * @param musicOnly true if both UI nor haptic feedback aren't needed when adjust volume.
          */
         @Override
-        public void dispatchVolumeKeyEvent(KeyEvent keyEvent, int stream, boolean musicOnly) {
+        public void dispatchVolumeKeyEvent(String packageName, boolean asSystemService,
+                KeyEvent keyEvent, int stream, boolean musicOnly) {
             if (keyEvent == null ||
                     (keyEvent.getKeyCode() != KeyEvent.KEYCODE_VOLUME_UP
                              && keyEvent.getKeyCode() != KeyEvent.KEYCODE_VOLUME_DOWN
@@ -1346,15 +1366,16 @@ public class MediaSessionService extends SystemService implements Monitor {
             final long token = Binder.clearCallingIdentity();
 
             if (DEBUG_KEY_EVENT) {
-                Log.d(TAG, "dispatchVolumeKeyEvent, pid=" + pid + ", uid=" + uid + ", event="
-                        + keyEvent);
+                Log.d(TAG, "dispatchVolumeKeyEvent, pkg=" + packageName + ", pid=" + pid + ", uid="
+                        + uid + ", asSystem=" + asSystemService + ", event=" + keyEvent);
             }
 
             try {
                 synchronized (mLock) {
                     if (isGlobalPriorityActiveLocked()
                             || mCurrentFullUserRecord.mOnVolumeKeyLongPressListener == null) {
-                        dispatchVolumeKeyEventLocked(keyEvent, stream, musicOnly);
+                        dispatchVolumeKeyEventLocked(packageName, pid, uid, asSystemService,
+                                keyEvent, stream, musicOnly);
                     } else {
                         // TODO: Consider the case when both volume up and down keys are pressed
                         //       at the same time.
@@ -1387,11 +1408,12 @@ public class MediaSessionService extends SystemService implements Monitor {
                                     && mCurrentFullUserRecord.mInitialDownVolumeKeyEvent
                                             .getDownTime() == keyEvent.getDownTime()) {
                                 // Short-press. Should change volume.
-                                dispatchVolumeKeyEventLocked(
+                                dispatchVolumeKeyEventLocked(packageName, pid, uid, asSystemService,
                                         mCurrentFullUserRecord.mInitialDownVolumeKeyEvent,
                                         mCurrentFullUserRecord.mInitialDownVolumeStream,
                                         mCurrentFullUserRecord.mInitialDownMusicOnly);
-                                dispatchVolumeKeyEventLocked(keyEvent, stream, musicOnly);
+                                dispatchVolumeKeyEventLocked(packageName, pid, uid, asSystemService,
+                                        keyEvent, stream, musicOnly);
                             } else {
                                 dispatchVolumeKeyLongPressLocked(keyEvent);
                             }
@@ -1403,8 +1425,8 @@ public class MediaSessionService extends SystemService implements Monitor {
             }
         }
 
-        private void dispatchVolumeKeyEventLocked(
-                KeyEvent keyEvent, int stream, boolean musicOnly) {
+        private void dispatchVolumeKeyEventLocked(String packageName, int pid, int uid,
+                boolean asSystemService, KeyEvent keyEvent, int stream, boolean musicOnly) {
             boolean down = keyEvent.getAction() == KeyEvent.ACTION_DOWN;
             boolean up = keyEvent.getAction() == KeyEvent.ACTION_UP;
             int direction = 0;
@@ -1438,21 +1460,27 @@ public class MediaSessionService extends SystemService implements Monitor {
                     if (up) {
                         direction = 0;
                     }
-                    dispatchAdjustVolumeLocked(stream, direction, flags);
+                    dispatchAdjustVolumeLocked(packageName, pid, uid, asSystemService, stream,
+                            direction, flags);
                 } else if (isMute) {
                     if (down && keyEvent.getRepeatCount() == 0) {
-                        dispatchAdjustVolumeLocked(stream, AudioManager.ADJUST_TOGGLE_MUTE, flags);
+                        dispatchAdjustVolumeLocked(packageName, pid, uid, asSystemService, stream,
+                                AudioManager.ADJUST_TOGGLE_MUTE, flags);
                     }
                 }
             }
         }
 
         @Override
-        public void dispatchAdjustVolume(int suggestedStream, int delta, int flags) {
+        public void dispatchAdjustVolume(String packageName, int suggestedStream, int delta,
+                int flags) {
+            final int pid = Binder.getCallingPid();
+            final int uid = Binder.getCallingUid();
             final long token = Binder.clearCallingIdentity();
             try {
                 synchronized (mLock) {
-                    dispatchAdjustVolumeLocked(suggestedStream, delta, flags);
+                    dispatchAdjustVolumeLocked(packageName, pid, uid, false,
+                            suggestedStream, delta, flags);
                 }
             } finally {
                 Binder.restoreCallingIdentity(token);
@@ -1777,7 +1805,8 @@ public class MediaSessionService extends SystemService implements Monitor {
             return false;
         }
 
-        private void dispatchAdjustVolumeLocked(int suggestedStream, int direction, int flags) {
+        private void dispatchAdjustVolumeLocked(String packageName, int pid, int uid,
+                boolean asSystemService, int suggestedStream, int direction, int flags) {
             MediaSessionRecord session = isGlobalPriorityActiveLocked() ? mGlobalPrioritySession
                     : mCurrentFullUserRecord.mPriorityStack.getDefaultVolumeSession();
 
@@ -1822,12 +1851,13 @@ public class MediaSessionService extends SystemService implements Monitor {
                     }
                 });
             } else {
-                session.adjustVolume(getContext().getPackageName(), Process.myPid(),
-                        Process.SYSTEM_UID, direction, flags, true);
+                session.adjustVolume(packageName, pid, uid, asSystemService,
+                        direction, flags, true);
             }
         }
 
-        private void handleVoiceKeyEventLocked(KeyEvent keyEvent, boolean needWakeLock) {
+        private void handleVoiceKeyEventLocked(String packageName, int pid, int uid,
+                boolean asSystemService, KeyEvent keyEvent, boolean needWakeLock) {
             int action = keyEvent.getAction();
             boolean isLongPress = (keyEvent.getFlags() & KeyEvent.FLAG_LONG_PRESS) != 0;
             if (action == KeyEvent.ACTION_DOWN) {
@@ -1844,14 +1874,17 @@ public class MediaSessionService extends SystemService implements Monitor {
                     if (!mVoiceButtonHandled && !keyEvent.isCanceled()) {
                         // Resend the down then send this event through
                         KeyEvent downEvent = KeyEvent.changeAction(keyEvent, KeyEvent.ACTION_DOWN);
-                        dispatchMediaKeyEventLocked(downEvent, needWakeLock);
-                        dispatchMediaKeyEventLocked(keyEvent, needWakeLock);
+                        dispatchMediaKeyEventLocked(packageName, pid, uid, asSystemService,
+                                downEvent, needWakeLock);
+                        dispatchMediaKeyEventLocked(packageName, pid, uid, asSystemService,
+                                keyEvent, needWakeLock);
                     }
                 }
             }
         }
 
-        private void dispatchMediaKeyEventLocked(KeyEvent keyEvent, boolean needWakeLock) {
+        private void dispatchMediaKeyEventLocked(String packageName, int pid, int uid,
+                boolean asSystemService, KeyEvent keyEvent, boolean needWakeLock) {
             MediaSessionRecord session = mCurrentFullUserRecord.getMediaButtonSessionLocked();
             if (session != null) {
                 if (DEBUG_KEY_EVENT) {
@@ -1861,17 +1894,13 @@ public class MediaSessionService extends SystemService implements Monitor {
                     mKeyEventReceiver.aquireWakeLockLocked();
                 }
                 // If we don't need a wakelock use -1 as the id so we won't release it later.
-                session.sendMediaButton(getContext().getPackageName(),
-                        Process.myPid(),
-                        Process.SYSTEM_UID,
-                        keyEvent,
+                session.sendMediaButton(packageName, pid, uid, asSystemService, keyEvent,
                         needWakeLock ? mKeyEventReceiver.mLastTimeoutId : -1,
                         mKeyEventReceiver);
                 if (mCurrentFullUserRecord.mCallback != null) {
                     try {
                         mCurrentFullUserRecord.mCallback.onMediaKeyEventDispatchedToMediaSession(
-                                keyEvent,
-                                new MediaSession.Token(session.getControllerBinder()));
+                                keyEvent, new MediaSession.Token(session.getControllerBinder()));
                     } catch (RemoteException e) {
                         Log.w(TAG, "Failed to send callback", e);
                     }
@@ -1884,6 +1913,10 @@ public class MediaSessionService extends SystemService implements Monitor {
                 Intent mediaButtonIntent = new Intent(Intent.ACTION_MEDIA_BUTTON);
                 mediaButtonIntent.addFlags(Intent.FLAG_RECEIVER_FOREGROUND);
                 mediaButtonIntent.putExtra(Intent.EXTRA_KEY_EVENT, keyEvent);
+                // TODO: Find a way to also send PID/UID in secure way.
+                String callerPackageName =
+                        (asSystemService) ? getContext().getPackageName() : packageName;
+                mediaButtonIntent.putExtra(Intent.EXTRA_PACKAGE_NAME, callerPackageName);
                 try {
                     if (mCurrentFullUserRecord.mLastMediaButtonReceiver != null) {
                         PendingIntent receiver = mCurrentFullUserRecord.mLastMediaButtonReceiver;
@@ -1984,13 +2017,22 @@ public class MediaSessionService extends SystemService implements Monitor {
         }
 
         private class MediaKeyListenerResultReceiver extends ResultReceiver implements Runnable {
-            private KeyEvent mKeyEvent;
-            private boolean mNeedWakeLock;
+            private final String mPackageName;
+            private final int mPid;
+            private final int mUid;
+            private final boolean mAsSystemService;
+            private final KeyEvent mKeyEvent;
+            private final boolean mNeedWakeLock;
             private boolean mHandled;
 
-            private MediaKeyListenerResultReceiver(KeyEvent keyEvent, boolean needWakeLock) {
+            private MediaKeyListenerResultReceiver(String packageName, int pid, int uid,
+                    boolean asSystemService, KeyEvent keyEvent, boolean needWakeLock) {
                 super(mHandler);
                 mHandler.postDelayed(this, MEDIA_KEY_LISTENER_TIMEOUT);
+                mPackageName = packageName;
+                mPid = pid;
+                mUid = uid;
+                mAsSystemService = asSystemService;
                 mKeyEvent = keyEvent;
                 mNeedWakeLock = needWakeLock;
             }
@@ -2020,9 +2062,11 @@ public class MediaSessionService extends SystemService implements Monitor {
                 synchronized (mLock) {
                     if (!isGlobalPriorityActiveLocked()
                             && isVoiceKey(mKeyEvent.getKeyCode())) {
-                        handleVoiceKeyEventLocked(mKeyEvent, mNeedWakeLock);
+                        handleVoiceKeyEventLocked(mPackageName, mPid, mUid, mAsSystemService,
+                                mKeyEvent, mNeedWakeLock);
                     } else {
-                        dispatchMediaKeyEventLocked(mKeyEvent, mNeedWakeLock);
+                        dispatchMediaKeyEventLocked(mPackageName, mPid, mUid, mAsSystemService,
+                                mKeyEvent, mNeedWakeLock);
                     }
                 }
             }

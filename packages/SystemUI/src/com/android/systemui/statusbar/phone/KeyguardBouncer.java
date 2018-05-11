@@ -76,7 +76,7 @@ public class KeyguardBouncer {
     protected KeyguardHostView mKeyguardView;
     private final Runnable mResetRunnable = ()-> {
         if (mKeyguardView != null) {
-            mKeyguardView.reset();
+            mKeyguardView.resetSecurityContainer();
         }
     };
 

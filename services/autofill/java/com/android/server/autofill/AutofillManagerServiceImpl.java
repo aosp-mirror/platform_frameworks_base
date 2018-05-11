@@ -32,6 +32,7 @@ import android.app.IActivityManager;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageItemInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.ServiceInfo;
@@ -341,7 +342,8 @@ final class AutofillManagerServiceImpl {
     int startSessionLocked(@NonNull IBinder activityToken, int uid,
             @NonNull IBinder appCallbackToken, @NonNull AutofillId autofillId,
             @NonNull Rect virtualBounds, @Nullable AutofillValue value, boolean hasCallback,
-            int flags, @NonNull ComponentName componentName, boolean compatMode) {
+            @NonNull ComponentName componentName, boolean compatMode,
+            boolean bindInstantServiceAllowed, int flags) {
         if (!isEnabledLocked()) {
             return 0;
         }
@@ -371,7 +373,7 @@ final class AutofillManagerServiceImpl {
         pruneAbandonedSessionsLocked();
 
         final Session newSession = createSessionByTokenLocked(activityToken, uid, appCallbackToken,
-                hasCallback, componentName, compatMode, flags);
+                hasCallback, componentName, compatMode, bindInstantServiceAllowed, flags);
         if (newSession == null) {
             return NO_SESSION;
         }
@@ -490,7 +492,8 @@ final class AutofillManagerServiceImpl {
     @GuardedBy("mLock")
     private Session createSessionByTokenLocked(@NonNull IBinder activityToken, int uid,
             @NonNull IBinder appCallbackToken, boolean hasCallback,
-            @NonNull ComponentName componentName, boolean compatMode, int flags) {
+            @NonNull ComponentName componentName, boolean compatMode,
+            boolean bindInstantServiceAllowed, int flags) {
         // use random ids so that one app cannot know that another app creates sessions
         int sessionId;
         int tries = 0;
@@ -509,7 +512,7 @@ final class AutofillManagerServiceImpl {
         final Session newSession = new Session(this, mUi, mContext, mHandler, mUserId, mLock,
                 sessionId, uid, activityToken, appCallbackToken, hasCallback, mUiLatencyHistory,
                 mWtfHistory, mInfo.getServiceInfo().getComponentName(), componentName, compatMode,
-                flags);
+                bindInstantServiceAllowed, flags);
         mSessions.put(newSession.id, newSession);
 
         return newSession;
@@ -667,7 +670,10 @@ final class AutofillManagerServiceImpl {
 
     @NonNull
     CharSequence getServiceLabel() {
-        return mInfo.getServiceInfo().loadLabel(mContext.getPackageManager());
+        final CharSequence label = mInfo.getServiceInfo().loadSafeLabel(
+                mContext.getPackageManager(), 0 /* do not ellipsize */,
+                PackageItemInfo.SAFE_LABEL_FLAG_FIRST_LINE | PackageItemInfo.SAFE_LABEL_FLAG_TRIM);
+        return label;
     }
 
     @NonNull
@@ -912,6 +918,7 @@ final class AutofillManagerServiceImpl {
         } else {
             pw.println();
             mInfo.dump(prefix2, pw);
+            pw.print(prefix); pw.print("Service Label: "); pw.println(getServiceLabel());
         }
         pw.print(prefix); pw.print("Component from settings: ");
             pw.println(getComponentNameFromSettings());

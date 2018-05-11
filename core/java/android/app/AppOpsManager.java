@@ -118,6 +118,13 @@ public class AppOpsManager {
      */
     public static final int MODE_FOREGROUND = 4;
 
+    /**
+     * Flag for {@link #startWatchingMode(String, String, int, OnOpChangedListener)}:
+     * Also get reports if the foreground state of an op's uid changes.  This only works
+     * when watching a particular op, not when watching a package.
+     * @hide
+     */
+    public static final int WATCH_FOREGROUND_CHANGES = 1 << 0;
 
     /**
      * @hide
@@ -340,7 +347,6 @@ public class AppOpsManager {
     /** @hide */
     public static final int OP_BLUETOOTH_SCAN = 77;
     /** @hide */
-    @TestApi
     public static final int _NUM_OP = 78;
 
     /** Access to coarse location information. */
@@ -1903,6 +1909,21 @@ public class AppOpsManager {
 
     /**
      * Monitor for changes to the operating mode for the given op in the given app package.
+     * You can watch op changes only for your UID.
+     *
+     * @param op The operation to monitor, one of OPSTR_*.
+     * @param packageName The name of the application to monitor.
+     * @param flags Option flags: any combination of {@link #WATCH_FOREGROUND_CHANGES} or 0.
+     * @param callback Where to report changes.
+     * @hide
+     */
+    public void startWatchingMode(String op, String packageName, int flags,
+            final OnOpChangedListener callback) {
+        startWatchingMode(strOpToOp(op), packageName, flags, callback);
+    }
+
+    /**
+     * Monitor for changes to the operating mode for the given op in the given app package.
      *
      * <p> If you don't hold the {@link android.Manifest.permission#WATCH_APPOPS} permission
      * you can watch changes only for your UID.
@@ -1914,6 +1935,24 @@ public class AppOpsManager {
      */
     @RequiresPermission(value=android.Manifest.permission.WATCH_APPOPS, conditional=true)
     public void startWatchingMode(int op, String packageName, final OnOpChangedListener callback) {
+        startWatchingMode(op, packageName, 0, callback);
+    }
+
+    /**
+     * Monitor for changes to the operating mode for the given op in the given app package.
+     *
+     * <p> If you don't hold the {@link android.Manifest.permission#WATCH_APPOPS} permission
+     * you can watch changes only for your UID.
+     *
+     * @param op The operation to monitor, one of OP_*.
+     * @param packageName The name of the application to monitor.
+     * @param flags Option flags: any combination of {@link #WATCH_FOREGROUND_CHANGES} or 0.
+     * @param callback Where to report changes.
+     * @hide
+     */
+    @RequiresPermission(value=android.Manifest.permission.WATCH_APPOPS, conditional=true)
+    public void startWatchingMode(int op, String packageName, int flags,
+            final OnOpChangedListener callback) {
         synchronized (mModeWatchers) {
             IAppOpsCallback cb = mModeWatchers.get(callback);
             if (cb == null) {
@@ -1930,7 +1969,7 @@ public class AppOpsManager {
                 mModeWatchers.put(callback, cb);
             }
             try {
-                mService.startWatchingMode(op, packageName, cb);
+                mService.startWatchingModeWithFlags(op, packageName, flags, cb);
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
             }
@@ -2084,6 +2123,19 @@ public class AppOpsManager {
     }
 
     /**
+     * Like {@link #checkOp} but returns the <em>raw</em> mode associated with the op.
+     * Does not throw a security exception, does not translate {@link #MODE_FOREGROUND}.
+     * @hide
+     */
+    public int unsafeCheckOpRaw(String op, int uid, String packageName) {
+        try {
+            return mService.checkOperation(strOpToOp(op), uid, packageName);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
      * Make note of an application performing an operation.  Note that you must pass
      * in both the uid and name of the application to be checked; this function will verify
      * that these two match, and if not, return {@link #MODE_IGNORED}.  If this call
@@ -2221,7 +2273,8 @@ public class AppOpsManager {
      */
     public int checkOpNoThrow(int op, int uid, String packageName) {
         try {
-            return mService.checkOperation(op, uid, packageName);
+            int mode = mService.checkOperation(op, uid, packageName);
+            return mode == AppOpsManager.MODE_FOREGROUND ? AppOpsManager.MODE_ALLOWED : mode;
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -2509,6 +2562,16 @@ public class AppOpsManager {
     @TestApi
     public static String[] getOpStrs() {
         return Arrays.copyOf(sOpToString, sOpToString.length);
+    }
+
+
+    /**
+     * @return number of App ops
+     * @hide
+     */
+    @TestApi
+    public static int getNumOps() {
+        return _NUM_OP;
     }
 
     /**

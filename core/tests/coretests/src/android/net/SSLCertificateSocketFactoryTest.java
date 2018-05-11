@@ -16,39 +16,19 @@
 
 package android.net;
 
-import android.test.suitebuilder.annotation.Suppress;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.net.Socket;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+
+import android.support.test.runner.AndroidJUnit4;
+
+import org.junit.Test;
+import org.junit.runner.RunWith;
+
 import java.util.Arrays;
-import junit.framework.TestCase;
 
-public class SSLTest extends TestCase {
-    //This test relies on network resources.
-    @Suppress
-    public void testCertificate() throws Exception {
-        // test www.fortify.net/sslcheck.html
-        Socket ssl = SSLCertificateSocketFactory.getDefault().createSocket("www.fortify.net",443);
-        assertNotNull(ssl);
-
-        OutputStream out = ssl.getOutputStream();
-        assertNotNull(out);
-
-        InputStream in = ssl.getInputStream();
-        assertNotNull(in);
-
-        String get = "GET /sslcheck.html HTTP/1.1\r\nHost: 68.178.217.222\r\n\r\n";
-
-        // System.out.println("going for write...");
-        out.write(get.getBytes());
-
-        byte[] b = new byte[1024];
-        // System.out.println("going for read...");
-        int ret = in.read(b);
-
-        // System.out.println(new String(b));
-    }
-
+@RunWith(AndroidJUnit4.class)
+public class SSLCertificateSocketFactoryTest {
+    @Test
     public void testStringsToLengthPrefixedBytes() {
         byte[] expected = {
                 6, 's', 'p', 'd', 'y', '/', '2',
@@ -59,6 +39,7 @@ public class SSLTest extends TestCase {
                 new byte[] { 'h', 't', 't', 'p', '/', '1', '.', '1' })));
     }
 
+    @Test
     public void testStringsToLengthPrefixedBytesEmptyArray() {
         try {
             SSLCertificateSocketFactory.toLengthPrefixedList();
@@ -67,6 +48,7 @@ public class SSLTest extends TestCase {
         }
     }
 
+    @Test
     public void testStringsToLengthPrefixedBytesEmptyByteArray() {
         try {
             SSLCertificateSocketFactory.toLengthPrefixedList(new byte[0]);
@@ -75,6 +57,7 @@ public class SSLTest extends TestCase {
         }
     }
 
+    @Test
     public void testStringsToLengthPrefixedBytesOversizedInput() {
         try {
             SSLCertificateSocketFactory.toLengthPrefixedList(new byte[256]);

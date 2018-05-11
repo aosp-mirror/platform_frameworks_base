@@ -155,7 +155,6 @@ void RenderState::invokeFunctor(Functor* functor, DrawGlInfo::Mode mode, DrawGlI
 }
 
 void RenderState::interruptForFunctorInvoke() {
-    mCaches->setProgram(nullptr);
     mCaches->textureState().resetActiveTexture();
     debugOverdraw(false, false);
     // TODO: We need a way to know whether the functor is sRGB aware (b/32072673)
@@ -202,126 +201,6 @@ void RenderState::postDecStrong(VirtualLightRefBase* object) {
 ///////////////////////////////////////////////////////////////////////////////
 // Render
 ///////////////////////////////////////////////////////////////////////////////
-
-void RenderState::render(const Glop& glop, const Matrix4& orthoMatrix,
-                         bool overrideDisableBlending) {
-    const Glop::Fill& fill = glop.fill;
-
-    GL_CHECKPOINT(MODERATE);
-
-    // ---------------------------------------------
-    // ---------- Program + uniform setup ----------
-    // ---------------------------------------------
-    mCaches->setProgram(fill.program);
-
-    if (fill.colorEnabled) {
-        fill.program->setColor(fill.color);
-    }
-
-    fill.program->set(orthoMatrix, glop.transform.modelView, glop.transform.meshTransform(),
-                      glop.transform.transformFlags & TransformFlags::OffsetByFudgeFactor);
-
-    // Color filter uniforms
-    if (fill.filterMode == ProgramDescription::ColorFilterMode::Blend) {
-        const FloatColor& color = fill.filter.color;
-        glUniform4f(mCaches->program().getUniform("colorBlend"), color.r, color.g, color.b,
-                    color.a);
-    } else if (fill.filterMode == ProgramDescription::ColorFilterMode::Matrix) {
-        glUniformMatrix4fv(mCaches->program().getUniform("colorMatrix"), 1, GL_FALSE,
-                           fill.filter.matrix.matrix);
-        glUniform4fv(mCaches->program().getUniform("colorMatrixVector"), 1,
-                     fill.filter.matrix.vector);
-    }
-
-    // Round rect clipping uniforms
-    if (glop.roundRectClipState) {
-        // TODO: avoid query, and cache values (or RRCS ptr) in program
-        const RoundRectClipState* state = glop.roundRectClipState;
-        const Rect& innerRect = state->innerRect;
-
-        // add half pixel to round out integer rect space to cover pixel centers
-        float roundedOutRadius = state->radius + 0.5f;
-
-        // Divide by the radius to simplify the calculations in the fragment shader
-        // roundRectPos is also passed from vertex shader relative to top/left & radius
-        glUniform4f(fill.program->getUniform("roundRectInnerRectLTWH"),
-                    innerRect.left / roundedOutRadius, innerRect.top / roundedOutRadius,
-                    (innerRect.right - innerRect.left) / roundedOutRadius,
-                    (innerRect.bottom - innerRect.top) / roundedOutRadius);
-
-        glUniformMatrix4fv(fill.program->getUniform("roundRectInvTransform"), 1, GL_FALSE,
-                           &state->matrix.data[0]);
-
-        glUniform1f(fill.program->getUniform("roundRectRadius"), roundedOutRadius);
-    }
-
-    GL_CHECKPOINT(MODERATE);
-
-    // texture
-    if (fill.texture.texture != nullptr) {
-        const Glop::Fill::TextureData& texture = fill.texture;
-        // texture always takes slot 0, shader samplers increment from there
-        mCaches->textureState().activateTexture(0);
-
-        mCaches->textureState().bindTexture(texture.texture->target(), texture.texture->id());
-        if (texture.clamp != GL_INVALID_ENUM) {
-            texture.texture->setWrap(texture.clamp, false, false);
-        }
-        if (texture.filter != GL_INVALID_ENUM) {
-            texture.texture->setFilter(texture.filter, false, false);
-        }
-
-        if (texture.textureTransform) {
-            glUniformMatrix4fv(fill.program->getUniform("mainTextureTransform"), 1, GL_FALSE,
-                               &texture.textureTransform->data[0]);
-        }
-    }
-
-    // Shader uniforms
-    SkiaShader::apply(*mCaches, fill.skiaShaderData, mViewportWidth, mViewportHeight);
-
-    GL_CHECKPOINT(MODERATE);
-    Texture* texture = (fill.skiaShaderData.skiaShaderType & kBitmap_SkiaShaderType)
-                               ? fill.skiaShaderData.bitmapData.bitmapTexture
-                               : nullptr;
-    const AutoTexture autoCleanup(texture);
-
-    // If we have a shader and a base texture, the base texture is assumed to be an alpha mask
-    // which means the color space conversion applies to the shader's bitmap
-    Texture* colorSpaceTexture = texture != nullptr ? texture : fill.texture.texture;
-    if (colorSpaceTexture != nullptr) {
-        if (colorSpaceTexture->hasColorSpaceConversion()) {
-            const ColorSpaceConnector* connector = colorSpaceTexture->getColorSpaceConnector();
-            glUniformMatrix3fv(fill.program->getUniform("colorSpaceMatrix"), 1, GL_FALSE,
-                               connector->getTransform().asArray());
-        }
-
-        TransferFunctionType transferFunction = colorSpaceTexture->getTransferFunctionType();
-        if (transferFunction != TransferFunctionType::None) {
-            const ColorSpaceConnector* connector = colorSpaceTexture->getColorSpaceConnector();
-            const ColorSpace& source = connector->getSource();
-
-            switch (transferFunction) {
-                case TransferFunctionType::None:
-                    break;
-                case TransferFunctionType::Full:
-                    glUniform1fv(fill.program->getUniform("transferFunction"), 7,
-                                 reinterpret_cast<const float*>(&source.getTransferParameters().g));
-                    break;
-                case TransferFunctionType::Limited:
-                    glUniform1fv(fill.program->getUniform("transferFunction"), 5,
-                                 reinterpret_cast<const float*>(&source.getTransferParameters().g));
-                    break;
-                case TransferFunctionType::Gamma:
-                    glUniform1f(fill.program->getUniform("transferFunctionGamma"),
-                                source.getTransferParameters().g);
-                    break;
-            }
-        }
-    }
-
-    GL_CHECKPOINT(MODERATE);
-}
 
 void RenderState::dump() {
     // DEAD CODE

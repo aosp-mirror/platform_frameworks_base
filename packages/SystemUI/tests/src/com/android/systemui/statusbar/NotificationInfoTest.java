@@ -314,12 +314,11 @@ public class NotificationInfoTest extends SysuiTestCase {
 
     @Test
     public void testLogBlockingHelperCounter_logsForBlockingHelper() throws Exception {
-        // Bind notification logs an event, so this counts as one invocation for the metrics logger.
         mNotificationInfo.bindNotification(mMockPackageManager, mMockINotificationManager,
                 TEST_PACKAGE_NAME, mNotificationChannel, 1, mSbn, null, null, null, false, true,
                 true);
         mNotificationInfo.logBlockingHelperCounter("HowCanNotifsBeRealIfAppsArent");
-        verify(mMetricsLogger, times(2)).count(anyString(), anyInt());
+        verify(mMetricsLogger, times(1)).count(anyString(), anyInt());
     }
 
     @Test
@@ -508,6 +507,36 @@ public class NotificationInfoTest extends SysuiTestCase {
                 .setNotificationsEnabledWithImportanceLockForPackage(
                         anyString(), eq(TEST_UID), eq(true));
     }
+
+
+    @Test
+    public void testCloseControls_nonNullCheckSaveListenerDoesntDelayKeepShowing()
+            throws Exception {
+        NotificationInfo.CheckSaveListener listener =
+                mock(NotificationInfo.CheckSaveListener.class);
+        mNotificationInfo.bindNotification(mMockPackageManager, mMockINotificationManager,
+                TEST_PACKAGE_NAME, mNotificationChannel /* notificationChannel */,
+                10 /* numUniqueChannelsInRow */, mSbn, listener /* checkSaveListener */,
+                null /* onSettingsClick */, null /* onAppSettingsClick */ ,
+                false /* isNonblockable */, true /* isForBlockingHelper */,
+                true /* isUserSentimentNegative */);
+
+        NotificationGuts guts = spy(new NotificationGuts(mContext, null));
+        when(guts.getWindowToken()).thenReturn(mock(IBinder.class));
+        doNothing().when(guts).animateClose(anyInt(), anyInt(), anyBoolean());
+        doNothing().when(guts).setExposed(anyBoolean(), anyBoolean());
+        guts.setGutsContent(mNotificationInfo);
+        mNotificationInfo.setGutsParent(guts);
+
+        mNotificationInfo.findViewById(R.id.keep).performClick();
+
+        verify(mBlockingHelperManager).dismissCurrentBlockingHelper();
+        mTestableLooper.processAllMessages();
+        verify(mMockINotificationManager, times(1))
+                .setNotificationsEnabledWithImportanceLockForPackage(
+                        anyString(), eq(TEST_UID), eq(true));
+    }
+
 
     @Test
     public void testCloseControls_blockingHelperDismissedIfShown() throws Exception {

@@ -57,7 +57,6 @@ public class SettingsBackupTest {
     private static final Set<String> BACKUP_BLACKLISTED_SYSTEM_SETTINGS =
             newHashSet(
                     Settings.System.ADVANCED_SETTINGS, // candidate for backup?
-                    Settings.System.ALARM_ALERT, // backup candidate?
                     Settings.System.ALARM_ALERT_CACHE, // internal cache
                     Settings.System.APPEND_FOR_LAST_AUDIBLE, // suffix deprecated since API 2
                     Settings.System.EGG_MODE, // I am the lolrus
@@ -116,6 +115,7 @@ public class SettingsBackupTest {
                     Settings.Global.APN_DB_UPDATE_CONTENT_URL,
                     Settings.Global.APN_DB_UPDATE_METADATA_URL,
                     Settings.Global.APP_IDLE_CONSTANTS,
+                    Settings.Global.APP_OPS_CONSTANTS,
                     Settings.Global.APP_STANDBY_ENABLED,
                     Settings.Global.ASSISTED_GPS_ENABLED,
                     Settings.Global.AUDIO_SAFE_VOLUME_STATE,
@@ -132,6 +132,8 @@ public class SettingsBackupTest {
                     Settings.Global.BLE_SCAN_LOW_LATENCY_WINDOW_MS,
                     Settings.Global.BLE_SCAN_LOW_LATENCY_INTERVAL_MS,
                     Settings.Global.BLE_SCAN_BACKGROUND_MODE,
+                    Settings.Global.BLOCKING_HELPER_DISMISS_TO_VIEW_RATIO_LIMIT,
+                    Settings.Global.BLOCKING_HELPER_STREAK_LIMIT,
                     Settings.Global.BLUETOOTH_A2DP_SINK_PRIORITY_PREFIX,
                     Settings.Global.BLUETOOTH_A2DP_SRC_PRIORITY_PREFIX,
                     Settings.Global.BLUETOOTH_A2DP_SUPPORTS_OPTIONAL_CODECS_PREFIX,
@@ -356,6 +358,7 @@ public class SettingsBackupTest {
                     Settings.Global.POWER_MANAGER_CONSTANTS,
                     Settings.Global.PREFERRED_NETWORK_MODE,
                     Settings.Global.PRIV_APP_OOB_ENABLED,
+                    Settings.Global.PRIV_APP_OOB_LIST,
                     Settings.Global.PROVISIONING_APN_ALARM_DELAY_IN_MS,
                     Settings.Global.RADIO_BLUETOOTH,
                     Settings.Global.RADIO_CELL,
@@ -492,6 +495,7 @@ public class SettingsBackupTest {
     private static final Set<String> BACKUP_BLACKLISTED_SECURE_SETTINGS =
              newHashSet(
                  Settings.Secure.ACCESSIBILITY_SOFT_KEYBOARD_MODE,
+                 Settings.Secure.ACCESSIBILITY_SPEAK_PASSWORD, // Deprecated since O.
                  Settings.Secure.ALLOWED_GEOLOCATION_ORIGINS,
                  Settings.Secure.ALWAYS_ON_VPN_APP,
                  Settings.Secure.ALWAYS_ON_VPN_LOCKDOWN,
