@@ -118,6 +118,24 @@ public final class PhoneWindowTest {
         assertThat(colorDrawable.getColor(), is(Color.BLUE));
     }
 
+    @Test
+    public void testWindowBackgroundFallbackWithExplicitBackgroundSet_colorLiteral() {
+        createPhoneWindowWithTheme(R.style.WindowBackgroundFallbackColorLiteral);
+        // set background before decorView is created
+        mPhoneWindow.setBackgroundDrawable(new ColorDrawable(Color.CYAN));
+        installDecor();
+        // clear background so that fallback is used
+        mPhoneWindow.setBackgroundDrawable(null);
+
+        DecorView decorView = (DecorView) mPhoneWindow.getDecorView();
+        Drawable fallbackDrawable = decorView.getBackgroundFallback();
+
+        assertThat(fallbackDrawable instanceof ColorDrawable, is(true));
+
+        ColorDrawable colorDrawable = (ColorDrawable) fallbackDrawable;
+        assertThat(colorDrawable.getColor(), is(Color.BLUE));
+    }
+
     private void createPhoneWindowWithTheme(int theme) {
         mPhoneWindow = new PhoneWindow(new ContextThemeWrapper(mContext, theme));
     }
