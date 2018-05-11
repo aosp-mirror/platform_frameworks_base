@@ -123,6 +123,10 @@ public final class Settings {
      * Input: Nothing.
      * <p>
      * Output: Nothing.
+     *
+     * <p class="note">
+     * In some cases, a matching Activity may not exist, so ensure you
+     * safeguard against this.
      */
     @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
     public static final String ACTION_APN_SETTINGS = "android.settings.APN_SETTINGS";
@@ -882,6 +886,10 @@ public final class Settings {
      * Applications can also use {@link android.net.ConnectivityManager#getRestrictBackgroundStatus
      * ConnectivityManager#getRestrictBackgroundStatus()} to determine the
      * status of the background data restrictions for them.
+     *
+     * <p class="note">
+     * In some cases, a matching Activity may not exist, so ensure you
+     * safeguard against this.
      */
     @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
     public static final String ACTION_IGNORE_BACKGROUND_DATA_RESTRICTIONS_SETTINGS =
@@ -1148,6 +1156,10 @@ public final class Settings {
      * Input: Nothing.
      * <p>
      * Output: Nothing.
+     *
+     * <p class="note">
+     * In some cases, a matching Activity may not exist, so ensure you
+     * safeguard against this.
      */
     @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
     public static final String ACTION_NOTIFICATION_POLICY_ACCESS_SETTINGS
