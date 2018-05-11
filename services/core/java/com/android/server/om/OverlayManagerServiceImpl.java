@@ -18,6 +18,7 @@ package com.android.server.om;
 
 import static android.content.om.OverlayInfo.STATE_DISABLED;
 import static android.content.om.OverlayInfo.STATE_ENABLED;
+import static android.content.om.OverlayInfo.STATE_ENABLED_STATIC;
 import static android.content.om.OverlayInfo.STATE_MISSING_TARGET;
 import static android.content.om.OverlayInfo.STATE_NO_IDMAP;
 import static android.content.om.OverlayInfo.STATE_OVERLAY_UPGRADING;
@@ -683,6 +684,10 @@ final class OverlayManagerServiceImpl {
 
         if (!mIdmapManager.idmapExists(overlayPackage, userId)) {
             return STATE_NO_IDMAP;
+        }
+
+        if (overlayPackage.isStaticOverlayPackage()) {
+            return STATE_ENABLED_STATIC;
         }
 
         final boolean enabled = mSettings.getEnabled(overlayPackage.packageName, userId);
