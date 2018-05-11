@@ -251,6 +251,9 @@ public class SlicePermissionManager implements DirtyTracker {
             }
             // Can't read or no permissions exist, create a clean object.
             client = new SliceClientPermissions(pkgUser, this);
+            synchronized (mCachedClients) {
+                mCachedClients.put(pkgUser, client);
+            }
         }
         return client;
     }
@@ -278,6 +281,9 @@ public class SlicePermissionManager implements DirtyTracker {
             }
             // Can't read or no permissions exist, create a clean object.
             provider = new SliceProviderPermissions(pkgUser, this);
+            synchronized (mCachedProviders) {
+                mCachedProviders.put(pkgUser, provider);
+            }
         }
         return provider;
     }

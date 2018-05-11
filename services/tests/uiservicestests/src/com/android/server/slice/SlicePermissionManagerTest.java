@@ -26,7 +26,6 @@ import android.support.test.filters.SmallTest;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.testing.TestableLooper.RunWithLooper;
-import android.util.Log;
 import android.util.Xml.Encoding;
 
 import com.android.server.UiServiceTestCase;
@@ -47,6 +46,20 @@ import java.io.IOException;
 @RunWith(AndroidTestingRunner.class)
 @RunWithLooper
 public class SlicePermissionManagerTest extends UiServiceTestCase {
+
+    @Test
+    public void testGrant() {
+        File sliceDir = new File(mContext.getDataDir(), "system/slices");
+        SlicePermissionManager permissions = new SlicePermissionManager(mContext,
+                TestableLooper.get(this).getLooper(), sliceDir);
+        Uri uri = new Builder().scheme(ContentResolver.SCHEME_CONTENT)
+                .authority("authority")
+                .path("something").build();
+
+        permissions.grantSliceAccess("my.pkg", 0, "provider.pkg", 0, uri);
+
+        assertTrue(permissions.hasPermission("my.pkg", 0, uri));
+    }
 
     @Test
     public void testBackup() throws XmlPullParserException, IOException {
