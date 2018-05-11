@@ -398,12 +398,7 @@ public abstract class SliceProvider extends ContentProvider {
 
     private Collection<Uri> handleGetDescendants(Uri uri) {
         mCallback = "onGetSliceDescendants";
-        Handler.getMain().postDelayed(mAnr, SLICE_BIND_ANR);
-        try {
-            return onGetSliceDescendants(uri);
-        } finally {
-            Handler.getMain().removeCallbacks(mAnr);
-        }
+        return onGetSliceDescendants(uri);
     }
 
     private void handlePinSlice(Uri sliceUri) {
