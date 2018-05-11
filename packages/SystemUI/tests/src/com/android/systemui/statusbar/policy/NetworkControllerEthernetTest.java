@@ -38,7 +38,7 @@ public class NetworkControllerEthernetTest extends NetworkControllerBaseTest {
     }
 
     protected void setEthernetState(boolean connected, boolean validated) {
-        setConnectivity(NetworkCapabilities.TRANSPORT_ETHERNET, validated, connected);
+        setConnectivityViaBroadcast(NetworkCapabilities.TRANSPORT_ETHERNET, validated, connected);
     }
 
     protected void verifyLastEthernetIcon(boolean visible, int icon) {
