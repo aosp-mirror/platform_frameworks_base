@@ -923,10 +923,12 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
     }
 
     void detachChildren() {
+        SurfaceControl.openTransaction();
         for (int i = mChildren.size() - 1; i >= 0; i--) {
             final WindowState w = mChildren.get(i);
             w.mWinAnimator.detachChildren();
         }
+        SurfaceControl.closeTransaction();
     }
 
     void finishRelaunching() {
