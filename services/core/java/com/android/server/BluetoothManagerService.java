@@ -762,26 +762,16 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
     }
 
     /**
-     * Action taken when GattService is turned on
+     * Call IBluetooth.onLeServiceUp() to continue if Bluetooth should be on.
      */
-    private void onBluetoothGattServiceUp() {
+    private void continueFromBleOnState() {
         if (DBG) {
-            Slog.d(TAG, "BluetoothGatt Service is Up");
+            Slog.d(TAG, "continueFromBleOnState()");
         }
         try {
             mBluetoothLock.readLock().lock();
             if (mBluetooth == null) {
-                if (DBG) {
-                    Slog.w(TAG, "onBluetoothServiceUp: mBluetooth is null!");
-                }
-                return;
-            }
-            int st = mBluetooth.getState();
-            if (st != BluetoothAdapter.STATE_BLE_ON) {
-                if (DBG) {
-                    Slog.v(TAG, "onBluetoothServiceUp: state isn't BLE_ON: "
-                            + BluetoothAdapter.nameForState(st));
-                }
+                Slog.e(TAG, "onBluetoothServiceUp: mBluetooth is null!");
                 return;
             }
             if (isBluetoothPersistedStateOnBluetooth() || !isBleAppPresent()) {
@@ -1637,7 +1627,7 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
                         if (msg.arg1 == SERVICE_IBLUETOOTHGATT) {
                             mBluetoothGatt =
                                     IBluetoothGatt.Stub.asInterface(Binder.allowBlocking(service));
-                            onBluetoothGattServiceUp();
+                            continueFromBleOnState();
                             break;
                         } // else must be SERVICE_IBLUETOOTH
 
@@ -2054,21 +2044,16 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
                 if (DBG) {
                     Slog.d(TAG, "Bluetooth is in LE only mode");
                 }
-                if (mBluetoothGatt != null) {
-                    if (DBG) {
-                        Slog.d(TAG, "Calling BluetoothGattServiceUp");
-                    }
-                    onBluetoothGattServiceUp();
+                if (mBluetoothGatt != null || !mContext.getPackageManager()
+                            .hasSystemFeature(PackageManager.FEATURE_BLUETOOTH_LE)) {
+                    continueFromBleOnState();
                 } else {
                     if (DBG) {
                         Slog.d(TAG, "Binding Bluetooth GATT service");
                     }
-                    if (mContext.getPackageManager()
-                            .hasSystemFeature(PackageManager.FEATURE_BLUETOOTH_LE)) {
-                        Intent i = new Intent(IBluetoothGatt.class.getName());
-                        doBind(i, mConnection, Context.BIND_AUTO_CREATE | Context.BIND_IMPORTANT,
-                                UserHandle.CURRENT);
-                    }
+                    Intent i = new Intent(IBluetoothGatt.class.getName());
+                    doBind(i, mConnection, Context.BIND_AUTO_CREATE | Context.BIND_IMPORTANT,
+                            UserHandle.CURRENT);
                 }
                 sendBleStateChanged(prevState, newState);
                 //Don't broadcase this as std intent
