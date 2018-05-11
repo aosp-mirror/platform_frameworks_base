@@ -19,6 +19,7 @@ package com.android.server.usage;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import android.app.PendingIntent;
 import android.os.HandlerThread;
@@ -49,9 +50,20 @@ public class AppTimeLimitControllerTests {
     private static final int OBS_ID1 = 1;
     private static final int OBS_ID2 = 2;
     private static final int OBS_ID3 = 3;
+    private static final int OBS_ID4 = 4;
+    private static final int OBS_ID5 = 5;
+    private static final int OBS_ID6 = 6;
+    private static final int OBS_ID7 = 7;
+    private static final int OBS_ID8 = 8;
+    private static final int OBS_ID9 = 9;
+    private static final int OBS_ID10 = 10;
+    private static final int OBS_ID11 = 11;
 
-    private static final long TIME_30_MIN = 30 * 60_1000L;
-    private static final long TIME_10_MIN = 10 * 60_1000L;
+    private static final long TIME_30_MIN = 30 * 60_000L;
+    private static final long TIME_10_MIN = 10 * 60_000L;
+
+    private static final long MAX_OBSERVER_PER_UID = 10;
+    private static final long MIN_TIME_LIMIT = 4_000L;
 
     private static final String[] GROUP1 = {
             PKG_SOC1, PKG_GAME1, PKG_PROD
@@ -92,6 +104,16 @@ public class AppTimeLimitControllerTests {
         @Override
         protected long getUptimeMillis() {
             return mUptimeMillis;
+        }
+
+        @Override
+        protected long getObserverPerUidLimit() {
+            return MAX_OBSERVER_PER_UID;
+        }
+
+        @Override
+        protected long getMinTimeLimit() {
+            return MIN_TIME_LIMIT;
         }
     }
 
@@ -231,6 +253,47 @@ public class AppTimeLimitControllerTests {
         assertTrue(mCountDownLatch.await(5_000L, TimeUnit.MILLISECONDS));
         // Verify that the observer was removed
         assertFalse(hasObserver(OBS_ID1));
+    }
+
+    /** Verify that App Time Limit Controller will limit the number of observerIds */
+    @Test
+    public void testMaxObserverLimit() throws Exception {
+        boolean receivedException = false;
+        int ANOTHER_UID = UID + 1;
+        addObserver(OBS_ID1, GROUP1, TIME_30_MIN);
+        addObserver(OBS_ID2, GROUP1, TIME_30_MIN);
+        addObserver(OBS_ID3, GROUP1, TIME_30_MIN);
+        addObserver(OBS_ID4, GROUP1, TIME_30_MIN);
+        addObserver(OBS_ID5, GROUP1, TIME_30_MIN);
+        addObserver(OBS_ID6, GROUP1, TIME_30_MIN);
+        addObserver(OBS_ID7, GROUP1, TIME_30_MIN);
+        addObserver(OBS_ID8, GROUP1, TIME_30_MIN);
+        addObserver(OBS_ID9, GROUP1, TIME_30_MIN);
+        addObserver(OBS_ID10, GROUP1, TIME_30_MIN);
+        // Readding an observer should not cause an IllegalStateException
+        addObserver(OBS_ID5, GROUP1, TIME_30_MIN);
+        // Adding an observer for a different uid shouldn't cause an IllegalStateException
+        mController.addObserver(ANOTHER_UID, OBS_ID11, GROUP1, TIME_30_MIN, null, USER_ID);
+        try {
+            addObserver(OBS_ID11, GROUP1, TIME_30_MIN);
+        } catch (IllegalStateException ise) {
+            receivedException = true;
+        }
+        assertTrue("Should have caused an IllegalStateException", receivedException);
+    }
+
+    /** Verify that addObserver minimum time limit is one minute */
+    @Test
+    public void testMinimumTimeLimit() throws Exception {
+        boolean receivedException = false;
+        // adding an observer with a one minute time limit should not cause an exception
+        addObserver(OBS_ID1, GROUP1, MIN_TIME_LIMIT);
+        try {
+            addObserver(OBS_ID1, GROUP1, MIN_TIME_LIMIT - 1);
+        } catch (IllegalArgumentException iae) {
+            receivedException = true;
+        }
+        assertTrue("Should have caused an IllegalArgumentException", receivedException);
     }
 
     private void moveToForeground(String packageName) {

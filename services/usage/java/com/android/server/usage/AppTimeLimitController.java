@@ -26,6 +26,7 @@ import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.Slog;
 import android.util.SparseArray;
+import android.util.SparseIntArray;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
@@ -58,6 +59,10 @@ public class AppTimeLimitController {
 
     private OnLimitReachedListener mListener;
 
+    private static final long MAX_OBSERVER_PER_UID = 1000;
+
+    private static final long ONE_MINUTE = 60_000L;
+
     @GuardedBy("mLock")
     private final SparseArray<UserData> mUsers = new SparseArray<>();
 
@@ -76,6 +81,9 @@ public class AppTimeLimitController {
 
         /** Map of observerId to details of the time limit group */
         private SparseArray<TimeLimitGroup> groups = new SparseArray<>();
+
+        /** Map of the number of observerIds registered by uid */
+        private SparseIntArray observerIdCounts = new SparseIntArray();
 
         private UserData(@UserIdInt int userId) {
             this.userId = userId;
@@ -147,6 +155,18 @@ public class AppTimeLimitController {
         return SystemClock.uptimeMillis();
     }
 
+    /** Overrideable for testing purposes */
+    @VisibleForTesting
+    protected long getObserverPerUidLimit() {
+        return MAX_OBSERVER_PER_UID;
+    }
+
+    /** Overrideable for testing purposes */
+    @VisibleForTesting
+    protected long getMinTimeLimit() {
+        return ONE_MINUTE;
+    }
+
     /** Returns an existing UserData object for the given userId, or creates one */
     private UserData getOrCreateUserDataLocked(int userId) {
         UserData userData = mUsers.get(userId);
@@ -171,10 +191,20 @@ public class AppTimeLimitController {
      */
     public void addObserver(int requestingUid, int observerId, String[] packages, long timeLimit,
             PendingIntent callbackIntent, @UserIdInt int userId) {
+
+        if (timeLimit < getMinTimeLimit()) {
+            throw new IllegalArgumentException("Time limit must be >= " + getMinTimeLimit());
+        }
         synchronized (mLock) {
             UserData user = getOrCreateUserDataLocked(userId);
+            removeObserverLocked(user, requestingUid, observerId, /*readding =*/ true);
 
-            removeObserverLocked(user, requestingUid, observerId);
+            final int observerIdCount = user.observerIdCounts.get(requestingUid, 0);
+            if (observerIdCount >= getObserverPerUidLimit()) {
+                throw new IllegalStateException(
+                        "Too many observers added by uid " + requestingUid);
+            }
+            user.observerIdCounts.put(requestingUid, observerIdCount + 1);
 
             TimeLimitGroup group = new TimeLimitGroup();
             group.observerId = observerId;
@@ -216,7 +246,7 @@ public class AppTimeLimitController {
     public void removeObserver(int requestingUid, int observerId, @UserIdInt int userId) {
         synchronized (mLock) {
             UserData user = getOrCreateUserDataLocked(userId);
-            removeObserverLocked(user, requestingUid, observerId);
+            removeObserverLocked(user, requestingUid, observerId, /*readding =*/ false);
         }
     }
 
@@ -232,12 +262,19 @@ public class AppTimeLimitController {
     }
 
     @GuardedBy("mLock")
-    private void removeObserverLocked(UserData user, int requestingUid, int observerId) {
+    private void removeObserverLocked(UserData user, int requestingUid, int observerId,
+            boolean readding) {
         TimeLimitGroup group = user.groups.get(observerId);
         if (group != null && group.requestingUid == requestingUid) {
             removeGroupFromPackageMapLocked(user, group);
             user.groups.remove(observerId);
             mHandler.removeMessages(MyHandler.MSG_CHECK_TIMEOUT, group);
+            final int observerIdCount = user.observerIdCounts.get(requestingUid);
+            if (observerIdCount <= 1 && !readding) {
+                user.observerIdCounts.delete(requestingUid);
+            } else {
+                user.observerIdCounts.put(requestingUid, observerIdCount - 1);
+            }
         }
     }
 
@@ -321,7 +358,7 @@ public class AppTimeLimitController {
         // Unregister since the limit has been met and observer was informed.
         synchronized (mLock) {
             UserData user = getOrCreateUserDataLocked(group.userId);
-            removeObserverLocked(user, group.requestingUid, group.observerId);
+            removeObserverLocked(user, group.requestingUid, group.observerId, false);
         }
     }
 
