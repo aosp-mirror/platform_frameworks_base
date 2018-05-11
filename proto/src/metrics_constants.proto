@@ -5818,10 +5818,15 @@ message MetricsEvent {
     // Tag used to report whether an activity is being autofilled  on compatibility mode.
     FIELD_AUTOFILL_COMPAT_MODE = 1414;
 
-    // OPEN: Settings > Sound > Switch connected devices dialog
+    // OPEN: Settings > Sound > Switch a2dp devices dialog
     // CATEGORY: SETTINGS
     // OS: P
-    DIALOG_UPDATABLE_LIST_PREFERENCE = 1415;
+    DIALOG_SWITCH_A2DP_DEVICES = 1415;
+
+    // OPEN: Settings > Sound > Switch hfp devices dialog
+    // CATEGORY: SETTINGS
+    // OS: P
+    DIALOG_SWITCH_HFP_DEVICES = 1416;
 
     // ---- End P Constants, all P constants go above this line ----
     // Add new aosp constants above this line.
