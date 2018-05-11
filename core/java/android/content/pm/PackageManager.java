@@ -5406,6 +5406,8 @@ public abstract class PackageManager {
      * @param newState The new enabled state for the component.
      * @param flags Optional behavior flags.
      */
+    @RequiresPermission(value = android.Manifest.permission.CHANGE_COMPONENT_ENABLED_STATE,
+            conditional = true)
     public abstract void setComponentEnabledSetting(ComponentName componentName,
             @EnabledState int newState, @EnabledFlags int flags);
 
@@ -5433,6 +5435,8 @@ public abstract class PackageManager {
      * @param newState The new enabled state for the application.
      * @param flags Optional behavior flags.
      */
+    @RequiresPermission(value = android.Manifest.permission.CHANGE_COMPONENT_ENABLED_STATE,
+            conditional = true)
     public abstract void setApplicationEnabledSetting(String packageName,
             @EnabledState int newState, @EnabledFlags int flags);
 
