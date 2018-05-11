@@ -275,6 +275,23 @@ bool ManifestFixer::BuildRules(xml::XmlActionExecutor* executor,
                            options_.version_code_default.value()});
       }
     }
+
+    if (el->FindAttribute("", "platformBuildVersionCode") == nullptr) {
+      auto versionCode = el->FindAttribute(xml::kSchemaAndroid, "versionCode");
+      if (versionCode != nullptr) {
+        el->attributes.push_back(xml::Attribute{"", "platformBuildVersionCode",
+                                                versionCode->value});
+      }
+    }
+
+    if (el->FindAttribute("", "platformBuildVersionName") == nullptr) {
+      auto versionName = el->FindAttribute(xml::kSchemaAndroid, "versionName");
+      if (versionName != nullptr) {
+        el->attributes.push_back(xml::Attribute{"", "platformBuildVersionName",
+                                                versionName->value});
+      }
+    }
+
     return true;
   });
 
