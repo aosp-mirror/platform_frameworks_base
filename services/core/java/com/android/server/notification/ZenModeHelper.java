@@ -508,6 +508,8 @@ public class ZenModeHelper {
 
     public void setManualZenMode(int zenMode, Uri conditionId, String caller, String reason) {
         setManualZenMode(zenMode, conditionId, reason, caller, true /*setRingerMode*/);
+        Settings.Global.putInt(mContext.getContentResolver(), Global.SHOW_ZEN_SETTINGS_SUGGESTION,
+                0);
     }
 
     private void setManualZenMode(int zenMode, Uri conditionId, String reason, String caller,
@@ -635,6 +637,10 @@ public class ZenModeHelper {
                     appendDefaultRules(config);
                     reason += ", reset to default rules";
                 }
+            } else {
+                // devices not restoring/upgrading already have updated zen settings
+                Settings.Global.putInt(mContext.getContentResolver(),
+                        Global.ZEN_SETTINGS_UPDATED, 1);
             }
             if (DEBUG) Log.d(TAG, reason);
             synchronized (mConfig) {
@@ -813,6 +819,12 @@ public class ZenModeHelper {
             for (ZenRule automaticRule : mConfig.automaticRules.values()) {
                 if (automaticRule.isAutomaticActive()) {
                     if (zenSeverity(automaticRule.zenMode) > zenSeverity(zen)) {
+                        // automatic rule triggered dnd and user hasn't seen update dnd dialog
+                        if (Settings.Global.getInt(mContext.getContentResolver(),
+                                Global.ZEN_SETTINGS_SUGGESTION_VIEWED, 1) == 0) {
+                            Settings.Global.putInt(mContext.getContentResolver(),
+                                    Global.SHOW_ZEN_SETTINGS_SUGGESTION, 1);
+                        }
                         zen = automaticRule.zenMode;
                     }
                 }
