@@ -246,7 +246,12 @@ public abstract class KeyguardAbsKeyInputView extends LinearLayout
 
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
-        onUserInput();
+        // Fingerprint sensor sends a KeyEvent.KEYCODE_UNKNOWN.
+        // We don't want to consider it valid user input because the UI
+        // will already respond to the event.
+        if (keyCode != KeyEvent.KEYCODE_UNKNOWN) {
+            onUserInput();
+        }
         return false;
     }
 
