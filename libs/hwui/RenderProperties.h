@@ -328,9 +328,7 @@ public:
 
     bool isPivotExplicitlySet() const { return mPrimitiveFields.mPivotExplicitlySet; }
 
-    bool resetPivot() {
-        return RP_SET_AND_DIRTY(mPrimitiveFields.mPivotExplicitlySet, false);
-    }
+    bool resetPivot() { return RP_SET_AND_DIRTY(mPrimitiveFields.mPivotExplicitlySet, false); }
 
     bool setCameraDistance(float distance) {
         if (distance != getCameraDistance()) {
@@ -510,17 +508,13 @@ public:
                getOutline().getAlpha() != 0.0f;
     }
 
-    SkColor getSpotShadowColor() const {
-        return mPrimitiveFields.mSpotShadowColor;
-    }
+    SkColor getSpotShadowColor() const { return mPrimitiveFields.mSpotShadowColor; }
 
     bool setSpotShadowColor(SkColor shadowColor) {
         return RP_SET(mPrimitiveFields.mSpotShadowColor, shadowColor);
     }
 
-    SkColor getAmbientShadowColor() const {
-        return mPrimitiveFields.mAmbientShadowColor;
-    }
+    SkColor getAmbientShadowColor() const { return mPrimitiveFields.mAmbientShadowColor; }
 
     bool setAmbientShadowColor(SkColor shadowColor) {
         return RP_SET(mPrimitiveFields.mAmbientShadowColor, shadowColor);

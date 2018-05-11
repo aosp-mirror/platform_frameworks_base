@@ -50,10 +50,6 @@ public:
 
     static void invokeFunctor(const renderthread::RenderThread& thread, Functor* functor);
 
-    // May be called by any thread except RenderThread.
-    static sk_sp<Bitmap> allocateHardwareBitmap(renderthread::RenderThread& thread,
-                                                const SkBitmap& skBitmap);
-
 private:
     renderthread::EglManager& mEglManager;
     EGLSurface mEglSurface = EGL_NO_SURFACE;

@@ -25,8 +25,7 @@
 namespace android {
 namespace uirenderer {
 
-CopyResult EglReadback::copySurfaceInto(Surface& surface, const Rect& srcRect,
-                                           SkBitmap* bitmap) {
+CopyResult EglReadback::copySurfaceInto(Surface& surface, const Rect& srcRect, SkBitmap* bitmap) {
     ATRACE_CALL();
     // Setup the source
     sp<GraphicBuffer> sourceBuffer;
@@ -55,9 +54,8 @@ CopyResult EglReadback::copySurfaceInto(Surface& surface, const Rect& srcRect,
     return copyGraphicBufferInto(sourceBuffer.get(), texTransform, srcRect, bitmap);
 }
 
-CopyResult EglReadback::copyGraphicBufferInto(GraphicBuffer* graphicBuffer,
-                                                 Matrix4& texTransform, const Rect& srcRect,
-                                                 SkBitmap* bitmap) {
+CopyResult EglReadback::copyGraphicBufferInto(GraphicBuffer* graphicBuffer, Matrix4& texTransform,
+                                              const Rect& srcRect, SkBitmap* bitmap) {
     mRenderThread.requireGlContext();
     // TODO: Can't use Image helper since it forces GL_TEXTURE_2D usage via
     // GL_OES_EGL_image, which doesn't work since we need samplerExternalOES

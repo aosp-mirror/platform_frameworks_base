@@ -31,7 +31,7 @@
 namespace android {
 namespace uirenderer {
 
-static constexpr android::DisplayInfo sDummyDisplay {
+static constexpr android::DisplayInfo sDummyDisplay{
         1080,   // w
         1920,   // h
         320.0,  // xdpi

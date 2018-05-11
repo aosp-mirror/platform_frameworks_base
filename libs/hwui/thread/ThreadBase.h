@@ -47,6 +47,8 @@ public:
 
     void join() { Thread::join(); }
 
+    bool isRunning() const { return Thread::isRunning(); }
+
 protected:
     void waitForWork() {
         nsecs_t nextWakeup;
