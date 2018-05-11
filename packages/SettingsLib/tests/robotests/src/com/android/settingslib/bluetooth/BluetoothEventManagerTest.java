@@ -15,13 +15,17 @@
  */
 package com.android.settingslib.bluetooth;
 
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.verify;
 
 import android.bluetooth.BluetoothHeadset;
+import android.bluetooth.BluetoothProfile;
 import android.content.Context;
 import android.content.Intent;
 
 import android.telephony.TelephonyManager;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -39,6 +43,8 @@ public class BluetoothEventManagerTest {
     private CachedBluetoothDeviceManager mCachedDeviceManager;
     @Mock
     private BluetoothCallback mBluetoothCallback;
+    @Mock
+    private CachedBluetoothDevice mCachedBluetoothDevice;
 
     private Context mContext;
     private Intent mIntent;
@@ -77,5 +83,20 @@ public class BluetoothEventManagerTest {
         mContext.sendBroadcast(mIntent);
 
         verify(mBluetoothCallback).onAudioModeChanged();
+    }
+
+    /**
+     * dispatchProfileConnectionStateChanged should dispatch to onProfileConnectionStateChanged
+     * callback.
+     */
+    @Test
+    public void dispatchProfileConnectionStateChanged_registerCallback_shouldDispatchCallback() {
+        mBluetoothEventManager.registerCallback(mBluetoothCallback);
+
+        mBluetoothEventManager.dispatchProfileConnectionStateChanged(mCachedBluetoothDevice,
+                BluetoothProfile.STATE_CONNECTED, BluetoothProfile.A2DP);
+
+        verify(mBluetoothCallback).onProfileConnectionStateChanged(mCachedBluetoothDevice,
+                BluetoothProfile.STATE_CONNECTED, BluetoothProfile.A2DP);
     }
 }

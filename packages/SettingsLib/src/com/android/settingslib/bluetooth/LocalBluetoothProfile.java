@@ -49,6 +49,8 @@ public interface LocalBluetoothProfile {
 
     boolean isProfileReady();
 
+    int getProfileId();
+
     /** Display order for device profile settings. */
     int getOrdinal();
 

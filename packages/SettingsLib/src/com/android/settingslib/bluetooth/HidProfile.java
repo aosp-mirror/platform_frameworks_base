@@ -80,6 +80,11 @@ public class HidProfile implements LocalBluetoothProfile {
         return mIsProfileReady;
     }
 
+    @Override
+    public int getProfileId() {
+        return BluetoothProfile.HID_HOST;
+    }
+
     HidProfile(Context context, LocalBluetoothAdapter adapter,
         CachedBluetoothDeviceManager deviceManager,
         LocalBluetoothProfileManager profileManager) {
