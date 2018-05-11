@@ -37,6 +37,7 @@ import android.view.DisplayListCanvas;
 import android.view.RenderNode;
 import android.view.SurfaceControl;
 import android.view.ThreadedRenderer;
+import android.view.View;
 import android.view.WindowManager.LayoutParams;
 
 import com.android.internal.annotations.VisibleForTesting;
@@ -274,7 +275,8 @@ class TaskSnapshotController {
         }
         return new TaskSnapshot(buffer, top.getConfiguration().orientation,
                 getInsets(mainWindow), isLowRamDevice /* reduced */, scaleFraction /* scale */,
-                true /* isRealSnapshot */, task.getWindowingMode());
+                true /* isRealSnapshot */, task.getWindowingMode(), getSystemUiVisibility(task),
+                !top.fillsParent());
     }
 
     private boolean shouldDisableSnapshots() {
@@ -364,7 +366,8 @@ class TaskSnapshotController {
         return new TaskSnapshot(hwBitmap.createGraphicBufferHandle(),
                 topChild.getConfiguration().orientation, mainWindow.mStableInsets,
                 ActivityManager.isLowRamDeviceStatic() /* reduced */, 1.0f /* scale */,
-                false /* isRealSnapshot */, task.getWindowingMode());
+                false /* isRealSnapshot */, task.getWindowingMode(), getSystemUiVisibility(task),
+                !topChild.fillsParent());
     }
 
     /**
@@ -427,6 +430,21 @@ class TaskSnapshotController {
                 listener.onScreenOff();
             }
         });
+    }
+
+    /**
+     * @return The SystemUI visibility flags for the top fullscreen window in the given
+     *         {@param task}.
+     */
+    private int getSystemUiVisibility(Task task) {
+        final AppWindowToken topFullscreenToken = task.getTopFullscreenAppToken();
+        final WindowState topFullscreenWindow = topFullscreenToken != null
+                ? topFullscreenToken.getTopFullscreenWindow()
+                : null;
+        if (topFullscreenWindow != null) {
+            return topFullscreenWindow.getSystemUiVisibility();
+        }
+        return 0;
     }
 
     void dump(PrintWriter pw, String prefix) {

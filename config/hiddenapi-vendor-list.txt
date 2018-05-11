@@ -531,8 +531,7 @@ Landroid/view/IRecentsAnimationController;->screenshotTask(I)Landroid/app/Activi
 Landroid/view/IRecentsAnimationController;->setInputConsumerEnabled(Z)V
 Landroid/view/IRecentsAnimationRunner$Stub;-><init>()V
 Landroid/view/IRecentsAnimationRunner;->onAnimationCanceled()V
-Landroid/view/IRecentsAnimationRunner;->onAnimationStart(Landroid/view/IRecentsAnimationController;[Landroid/view/RemoteAnimationTarget;)V
-Landroid/view/IRecentsAnimationRunner;->onAnimationStart_New(Landroid/view/IRecentsAnimationController;[Landroid/view/RemoteAnimationTarget;Landroid/graphics/Rect;Landroid/graphics/Rect;)V
+Landroid/view/IRecentsAnimationRunner;->onAnimationStart(Landroid/view/IRecentsAnimationController;[Landroid/view/RemoteAnimationTarget;Landroid/graphics/Rect;Landroid/graphics/Rect;)V
 Landroid/view/IRemoteAnimationFinishedCallback;->onAnimationFinished()V
 Landroid/view/IRemoteAnimationRunner$Stub;-><init>()V
 Landroid/view/IRemoteAnimationRunner;->onAnimationCancelled()V

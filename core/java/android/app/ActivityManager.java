@@ -2110,9 +2110,12 @@ public class ActivityManager {
         private final boolean mIsRealSnapshot;
         private final int mWindowingMode;
         private final float mScale;
+        private final int mSystemUiVisibility;
+        private final boolean mIsTranslucent;
 
         public TaskSnapshot(GraphicBuffer snapshot, int orientation, Rect contentInsets,
-                boolean reducedResolution, float scale, boolean isRealSnapshot, int windowingMode) {
+                boolean reducedResolution, float scale, boolean isRealSnapshot, int windowingMode,
+                int systemUiVisibility, boolean isTranslucent) {
             mSnapshot = snapshot;
             mOrientation = orientation;
             mContentInsets = new Rect(contentInsets);
@@ -2120,6 +2123,8 @@ public class ActivityManager {
             mScale = scale;
             mIsRealSnapshot = isRealSnapshot;
             mWindowingMode = windowingMode;
+            mSystemUiVisibility = systemUiVisibility;
+            mIsTranslucent = isTranslucent;
         }
 
         private TaskSnapshot(Parcel source) {
@@ -2130,6 +2135,8 @@ public class ActivityManager {
             mScale = source.readFloat();
             mIsRealSnapshot = source.readBoolean();
             mWindowingMode = source.readInt();
+            mSystemUiVisibility = source.readInt();
+            mIsTranslucent = source.readBoolean();
         }
 
         /**
@@ -2170,10 +2177,25 @@ public class ActivityManager {
         }
 
         /**
+         * @return Whether or not the snapshot is of a translucent app window.
+         */
+        public boolean isTranslucent() {
+            return mIsTranslucent;
+        }
+
+        /**
          * @return The windowing mode of the task when this snapshot was taken.
          */
         public int getWindowingMode() {
             return mWindowingMode;
+        }
+
+        /**
+         * @return The system ui visibility flags for the top most visible fullscreen window at the
+         *         time that the snapshot was taken.
+         */
+        public int getSystemUiVisibility() {
+            return mSystemUiVisibility;
         }
 
         /**
@@ -2197,6 +2219,8 @@ public class ActivityManager {
             dest.writeFloat(mScale);
             dest.writeBoolean(mIsRealSnapshot);
             dest.writeInt(mWindowingMode);
+            dest.writeInt(mSystemUiVisibility);
+            dest.writeBoolean(mIsTranslucent);
         }
 
         @Override
@@ -2207,7 +2231,9 @@ public class ActivityManager {
                     + " mOrientation=" + mOrientation
                     + " mContentInsets=" + mContentInsets.toShortString()
                     + " mReducedResolution=" + mReducedResolution + " mScale=" + mScale
-                    + " mIsRealSnapshot=" + mIsRealSnapshot + " mWindowingMode=" + mWindowingMode;
+                    + " mIsRealSnapshot=" + mIsRealSnapshot + " mWindowingMode=" + mWindowingMode
+                    + " mSystemUiVisibility=" + mSystemUiVisibility
+                    + " mIsTranslucent=" + mIsTranslucent;
         }
 
         public static final Creator<TaskSnapshot> CREATOR = new Creator<TaskSnapshot>() {
