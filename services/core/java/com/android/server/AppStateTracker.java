@@ -1056,9 +1056,9 @@ public class AppStateTracker {
      * @return whether alarms should be restricted for a UID package-name.
      */
     public boolean areAlarmsRestricted(int uid, @NonNull String packageName,
-            boolean allowWhileIdle) {
+            boolean isExemptOnBatterySaver) {
         return isRestricted(uid, packageName, /*useTempWhitelistToo=*/ false,
-                /* exemptOnBatterySaver =*/ allowWhileIdle);
+                isExemptOnBatterySaver);
     }
 
     /**
