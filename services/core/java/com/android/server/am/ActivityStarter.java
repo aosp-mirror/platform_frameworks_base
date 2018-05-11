@@ -791,7 +791,8 @@ class ActivityStarter {
                 callingUid = realCallingUid;
                 callingPid = realCallingPid;
 
-                rInfo = mSupervisor.resolveIntent(intent, resolvedType, userId, 0, realCallingUid);
+                rInfo = mSupervisor.resolveIntent(intent, resolvedType, userId, 0,
+                        computeResolveFilterUid(callingUid, realCallingUid));
                 aInfo = mSupervisor.resolveActivity(intent, rInfo, startFlags,
                         null /*profilerInfo*/);
 
@@ -955,6 +956,16 @@ class ActivityStarter {
         final int realCallingPid = Binder.getCallingPid();
         final int realCallingUid = Binder.getCallingUid();
 
+        int callingPid;
+        if (callingUid >= 0) {
+            callingPid = -1;
+        } else if (caller == null) {
+            callingPid = realCallingPid;
+            callingUid = realCallingUid;
+        } else {
+            callingPid = callingUid = -1;
+        }
+
         // Save a copy in case ephemeral needs it
         final Intent ephemeralIntent = new Intent(intent);
         // Don't modify the client's object!
@@ -973,7 +984,7 @@ class ActivityStarter {
         }
 
         ResolveInfo rInfo = mSupervisor.resolveIntent(intent, resolvedType, userId,
-                0 /* matchFlags */, realCallingUid);
+                0 /* matchFlags */, computeResolveFilterUid(callingUid, realCallingUid));
         if (rInfo == null) {
             UserInfo userInfo = mSupervisor.getUserInfo(userId);
             if (userInfo != null && userInfo.isManagedProfile()) {
@@ -995,7 +1006,7 @@ class ActivityStarter {
                     rInfo = mSupervisor.resolveIntent(intent, resolvedType, userId,
                             PackageManager.MATCH_DIRECT_BOOT_AWARE
                                     | PackageManager.MATCH_DIRECT_BOOT_UNAWARE,
-                            realCallingUid);
+                            computeResolveFilterUid(callingUid, realCallingUid));
                 }
             }
         }
@@ -1003,16 +1014,6 @@ class ActivityStarter {
         ActivityInfo aInfo = mSupervisor.resolveActivity(intent, rInfo, startFlags, profilerInfo);
 
         synchronized (mService) {
-            int callingPid;
-            if (callingUid >= 0) {
-                callingPid = -1;
-            } else if (caller == null) {
-                callingPid = realCallingPid;
-                callingUid = realCallingUid;
-            } else {
-                callingPid = callingUid = -1;
-            }
-
             final ActivityStack stack = mSupervisor.mFocusedStack;
             stack.mConfigWillChange = globalConfig != null
                     && mService.getGlobalConfiguration().diff(globalConfig) != 0;
@@ -1077,7 +1078,8 @@ class ActivityStarter {
                         callingPid = Binder.getCallingPid();
                         componentSpecified = true;
                         rInfo = mSupervisor.resolveIntent(intent, null /*resolvedType*/, userId,
-                                0 /* matchFlags */, realCallingUid);
+                                0 /* matchFlags */, computeResolveFilterUid(callingUid,
+                                        realCallingUid));
                         aInfo = rInfo != null ? rInfo.activityInfo : null;
                         if (aInfo != null) {
                             aInfo = mService.getActivityInfoForUser(aInfo, userId);
@@ -1162,6 +1164,19 @@ class ActivityStarter {
             mSupervisor.getActivityMetricsLogger().notifyActivityLaunched(res, outRecord[0]);
             return res;
         }
+    }
+
+    /**
+     * Compute the logical UID based on which the package manager would filter
+     * app components i.e. based on which the instant app policy would be applied
+     * because it is the logical calling UID.
+     *
+     * @param customCallingUid The UID on whose behalf to make the call.
+     * @param actualCallingUid The UID actually making the call.
+     * @return The logical UID making the call.
+     */
+    static int computeResolveFilterUid(int customCallingUid, int actualCallingUid) {
+        return customCallingUid >= 0 ? customCallingUid : actualCallingUid;
     }
 
     private int startActivity(final ActivityRecord r, ActivityRecord sourceRecord,
