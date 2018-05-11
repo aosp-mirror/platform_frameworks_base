@@ -375,6 +375,8 @@ public class LocalBluetoothProfileManager {
                 }
             }
 
+            mEventManager.dispatchProfileConnectionStateChanged(cachedDevice, newState,
+                    mProfile.getProfileId());
             cachedDevice.onProfileStateChanged(mProfile, newState);
             cachedDevice.refresh();
         }
