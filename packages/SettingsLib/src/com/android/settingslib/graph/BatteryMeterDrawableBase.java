@@ -24,9 +24,11 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.ColorFilter;
 import android.graphics.Paint;
+import android.graphics.Paint.Style;
 import android.graphics.Path;
 import android.graphics.Path.Direction;
 import android.graphics.Path.FillType;
+import android.graphics.Path.Op;
 import android.graphics.Rect;
 import android.graphics.RectF;
 import android.graphics.Typeface;
@@ -49,6 +51,7 @@ public class BatteryMeterDrawableBase extends Drawable {
     protected final Paint mTextPaint;
     protected final Paint mBoltPaint;
     protected final Paint mPlusPaint;
+    protected final Paint mPowersavePaint;
     protected float mButtonHeightFraction;
 
     private int mLevel = -1;
@@ -90,6 +93,7 @@ public class BatteryMeterDrawableBase extends Drawable {
     private final RectF mPlusFrame = new RectF();
 
     private final Path mShapePath = new Path();
+    private final Path mOutlinePath = new Path();
     private final Path mTextPath = new Path();
 
     public BatteryMeterDrawableBase(Context context, int frameColor) {
@@ -157,6 +161,12 @@ public class BatteryMeterDrawableBase extends Drawable {
         mPlusPaint.setColor(Utils.getColorStateListDefaultColor(mContext,
                 R.color.batterymeter_plus_color));
         mPlusPoints = loadPoints(res, R.array.batterymeter_plus_points);
+
+        mPowersavePaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+        mPowersavePaint.setColor(mPlusPaint.getColor());
+        mPowersavePaint.setStyle(Style.STROKE);
+        mPowersavePaint.setStrokeWidth(context.getResources()
+                .getDimensionPixelSize(R.dimen.battery_powersave_outline_thickness));
 
         mIntrinsicWidth = context.getResources().getDimensionPixelSize(R.dimen.battery_width);
         mIntrinsicHeight = context.getResources().getDimensionPixelSize(R.dimen.battery_height);
@@ -289,7 +299,9 @@ public class BatteryMeterDrawableBase extends Drawable {
     }
 
     protected int batteryColorForLevel(int level) {
-        return mCharging ? mChargeColor : getColorForLevel(level);
+        return (mCharging || (mPowerSaveEnabled && mPowerSaveAsColorError))
+                ? mChargeColor
+                : getColorForLevel(level);
     }
 
     @Override
@@ -334,10 +346,15 @@ public class BatteryMeterDrawableBase extends Drawable {
 
         // define the battery shape
         mShapePath.reset();
+        mOutlinePath.reset();
         final float radius = getRadiusRatio() * (mFrame.height() + buttonHeight);
         mShapePath.setFillType(FillType.WINDING);
         mShapePath.addRoundRect(mFrame, radius, radius, Direction.CW);
         mShapePath.addRect(mButtonFrame, Direction.CW);
+        mOutlinePath.addRoundRect(mFrame, radius, radius, Direction.CW);
+        Path p = new Path();
+        p.addRect(mButtonFrame, Direction.CW);
+        mOutlinePath.op(p, Op.XOR);
 
         if (mCharging) {
             // define the bolt shape
@@ -445,6 +462,11 @@ public class BatteryMeterDrawableBase extends Drawable {
                 // draw the percentage text
                 c.drawText(pctText, pctX, pctY, mTextPaint);
             }
+        }
+
+        // Draw the powersave outline last
+        if (!mCharging && mPowerSaveEnabled && mPowerSaveAsColorError) {
+            c.drawPath(mOutlinePath, mPowersavePaint);
         }
     }
 
