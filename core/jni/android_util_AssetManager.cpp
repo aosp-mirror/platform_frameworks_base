@@ -75,9 +75,8 @@ static struct assetfiledescriptor_offsets_t {
   jfieldID mLength;
 } gAssetFileDescriptorOffsets;
 
-static struct assetmanager_offsets_t {
-  jfieldID mObject;
-} gAssetManagerOffsets;
+// This is also used by asset_manager.cpp.
+assetmanager_offsets_t gAssetManagerOffsets;
 
 static struct {
   jfieldID native_ptr;
