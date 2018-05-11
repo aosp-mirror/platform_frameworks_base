@@ -128,13 +128,7 @@ public class KeyguardStatusBarView extends RelativeLayout
         mMultiUserSwitch.setLayoutParams(lp);
 
         // System icons
-        lp = (MarginLayoutParams) mStatusIconArea.getLayoutParams();
-        lp.height = getResources().getDimensionPixelSize(
-                com.android.internal.R.dimen.status_bar_height);
-
         lp = (MarginLayoutParams) mSystemIconsContainer.getLayoutParams();
-        lp.height = getResources().getDimensionPixelSize(
-                R.dimen.status_bar_height);
         lp.setMarginStart(getResources().getDimensionPixelSize(
                 R.dimen.system_icons_super_container_margin_start));
         mSystemIconsContainer.setLayoutParams(lp);
