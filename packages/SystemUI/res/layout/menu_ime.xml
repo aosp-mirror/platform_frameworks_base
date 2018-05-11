@@ -19,6 +19,7 @@
     android:id="@+id/menu_container"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:importantForAccessibility="no"
     >
     <!-- Use width & height=match_parent for parent FrameLayout and buttons because they are placed
     inside a view that has a size controlled by weight. Ensure weight is large enough to support
