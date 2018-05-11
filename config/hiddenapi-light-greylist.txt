@@ -5208,8 +5208,6 @@ Landroid/telephony/TelephonyManager;->nvReadItem(I)Ljava/lang/String;
 Landroid/telephony/TelephonyManager;->setBasebandVersionForPhone(ILjava/lang/String;)V
 Landroid/telephony/TelephonyManager;->setDataNetworkTypeForPhone(II)V
 Landroid/telephony/TelephonyManager;->setImsRegistrationState(Z)V
-Landroid/telephony/TelephonyManager;->setNetworkCountryIso(Ljava/lang/String;)V
-Landroid/telephony/TelephonyManager;->setNetworkCountryIsoForPhone(ILjava/lang/String;)V
 Landroid/telephony/TelephonyManager;->setNetworkOperatorNameForPhone(ILjava/lang/String;)V
 Landroid/telephony/TelephonyManager;->setNetworkOperatorNumericForPhone(ILjava/lang/String;)V
 Landroid/telephony/TelephonyManager;->setNetworkRoamingForPhone(IZ)V
