@@ -164,6 +164,8 @@ private:
 
     const size_t mDimensionHardLimit;
 
+    const size_t mGaugeAtomsPerDimensionLimit;
+
     FRIEND_TEST(GaugeMetricProducerTest, TestWithCondition);
     FRIEND_TEST(GaugeMetricProducerTest, TestWithSlicedCondition);
     FRIEND_TEST(GaugeMetricProducerTest, TestNoCondition);
