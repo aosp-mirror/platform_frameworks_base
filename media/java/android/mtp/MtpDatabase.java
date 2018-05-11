@@ -52,11 +52,10 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.Iterator;
+import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.IntStream;
-import java.util.stream.Stream;
 
 /**
  * MtpDatabase provides an interface for MTP operations that MtpServer can use. To do this, it uses
@@ -453,21 +452,25 @@ public class MtpDatabase implements AutoCloseable {
     }
 
     private int[] getObjectList(int storageID, int format, int parent) {
-        Stream<MtpStorageManager.MtpObject> objectStream = mManager.getObjects(parent,
+        List<MtpStorageManager.MtpObject> objs = mManager.getObjects(parent,
                 format, storageID);
-        if (objectStream == null) {
+        if (objs == null) {
             return null;
         }
-        return objectStream.mapToInt(MtpStorageManager.MtpObject::getId).toArray();
+        int[] ret = new int[objs.size()];
+        for (int i = 0; i < objs.size(); i++) {
+            ret[i] = objs.get(i).getId();
+        }
+        return ret;
     }
 
     private int getNumObjects(int storageID, int format, int parent) {
-        Stream<MtpStorageManager.MtpObject> objectStream = mManager.getObjects(parent,
+        List<MtpStorageManager.MtpObject> objs = mManager.getObjects(parent,
                 format, storageID);
-        if (objectStream == null) {
+        if (objs == null) {
             return -1;
         }
-        return (int) objectStream.count();
+        return objs.size();
     }
 
     private MtpPropertyList getObjectPropertyList(int handle, int format, int property,
@@ -489,11 +492,12 @@ public class MtpDatabase implements AutoCloseable {
             // depth 0: single object, depth 1: immediate children
             return new MtpPropertyList(MtpConstants.RESPONSE_SPECIFICATION_BY_DEPTH_UNSUPPORTED);
         }
-        Stream<MtpStorageManager.MtpObject> objectStream = Stream.of();
+        List<MtpStorageManager.MtpObject> objs = null;
+        MtpStorageManager.MtpObject thisObj = null;
         if (handle == 0xFFFFFFFF) {
             // All objects are requested
-            objectStream = mManager.getObjects(0, format, 0xFFFFFFFF);
-            if (objectStream == null) {
+            objs = mManager.getObjects(0, format, 0xFFFFFFFF);
+            if (objs == null) {
                 return new MtpPropertyList(MtpConstants.RESPONSE_INVALID_OBJECT_HANDLE);
             }
         } else if (handle != 0) {
@@ -503,7 +507,7 @@ public class MtpDatabase implements AutoCloseable {
                 return new MtpPropertyList(MtpConstants.RESPONSE_INVALID_OBJECT_HANDLE);
             }
             if (obj.getFormat() == format || format == 0) {
-                objectStream = Stream.of(obj);
+                thisObj = obj;
             }
         }
         if (handle == 0 || depth == 1) {
@@ -511,19 +515,22 @@ public class MtpDatabase implements AutoCloseable {
                 handle = 0xFFFFFFFF;
             }
             // Get the direct children of root or this object.
-            Stream<MtpStorageManager.MtpObject> childStream = mManager.getObjects(handle, format,
+            objs = mManager.getObjects(handle, format,
                     0xFFFFFFFF);
-            if (childStream == null) {
+            if (objs == null) {
                 return new MtpPropertyList(MtpConstants.RESPONSE_INVALID_OBJECT_HANDLE);
             }
-            objectStream = Stream.concat(objectStream, childStream);
+        }
+        if (objs == null) {
+            objs = new ArrayList<>();
+        }
+        if (thisObj != null) {
+            objs.add(thisObj);
         }
 
         MtpPropertyList ret = new MtpPropertyList(MtpConstants.RESPONSE_OK);
         MtpPropertyGroup propertyGroup;
-        Iterator<MtpStorageManager.MtpObject> iter = objectStream.iterator();
-        while (iter.hasNext()) {
-            MtpStorageManager.MtpObject obj = iter.next();
+        for (MtpStorageManager.MtpObject obj : objs) {
             if (property == 0xffffffff) {
                 // Get all properties supported by this object
                 propertyGroup = mPropertyGroupsByFormat.get(obj.getFormat());
