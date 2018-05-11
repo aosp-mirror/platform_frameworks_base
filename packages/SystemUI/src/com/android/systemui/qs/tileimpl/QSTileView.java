@@ -91,7 +91,6 @@ public class QSTileView extends QSTileBaseView {
         mExpandIndicator = mLabelContainer.findViewById(R.id.expand_indicator);
         mExpandSpace = mLabelContainer.findViewById(R.id.expand_space);
         mSecondLine = mLabelContainer.findViewById(R.id.app_label);
-        mSecondLine.setAlpha(.6f);
         addView(mLabelContainer);
     }
 
