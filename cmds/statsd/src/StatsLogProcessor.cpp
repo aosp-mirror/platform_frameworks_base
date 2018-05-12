@@ -306,7 +306,6 @@ void StatsLogProcessor::dumpStates(FILE* out, bool verbose) {
  */
 void StatsLogProcessor::onDumpReport(const ConfigKey& key, const int64_t dumpTimeStampNs,
                                      const bool include_current_partial_bucket,
-                                     const bool include_string,
                                      const DumpReportReason dumpReportReason,
                                      vector<uint8_t>* outData) {
     std::lock_guard<std::mutex> lock(mMetricsMutex);
@@ -334,7 +333,7 @@ void StatsLogProcessor::onDumpReport(const ConfigKey& key, const int64_t dumpTim
         uint64_t reportsToken =
                 proto.start(FIELD_TYPE_MESSAGE | FIELD_COUNT_REPEATED | FIELD_ID_REPORTS);
         onConfigMetricsReportLocked(key, dumpTimeStampNs, include_current_partial_bucket,
-                                    include_string, dumpReportReason, &proto);
+                                    dumpReportReason, &proto);
         proto.end(reportsToken);
         // End of ConfigMetricsReport (reports).
     } else {
@@ -363,7 +362,6 @@ void StatsLogProcessor::onDumpReport(const ConfigKey& key, const int64_t dumpTim
 void StatsLogProcessor::onConfigMetricsReportLocked(const ConfigKey& key,
                                                     const int64_t dumpTimeStampNs,
                                                     const bool include_current_partial_bucket,
-                                                    const bool include_string,
                                                     const DumpReportReason dumpReportReason,
                                                     ProtoOutputStream* proto) {
     // We already checked whether key exists in mMetricsManagers in
@@ -402,10 +400,8 @@ void StatsLogProcessor::onConfigMetricsReportLocked(const ConfigKey& key,
     // Dump report reason
     proto->write(FIELD_TYPE_INT32 | FIELD_ID_DUMP_REPORT_REASON, dumpReportReason);
 
-    if (include_string) {
-        for (const auto& str : str_set) {
-            proto->write(FIELD_TYPE_STRING | FIELD_COUNT_REPEATED | FIELD_ID_STRINGS, str);
-        }
+    for (const auto& str : str_set) {
+        proto->write(FIELD_TYPE_STRING | FIELD_COUNT_REPEATED | FIELD_ID_STRINGS, str);
     }
 }
 
@@ -508,9 +504,8 @@ void StatsLogProcessor::WriteDataToDiskLocked(const ConfigKey& key,
         return;
     }
     ProtoOutputStream proto;
-    onConfigMetricsReportLocked(key, timestampNs,
-                                true /* include_current_partial_bucket*/,
-                                false /* include strings */, dumpReportReason, &proto);
+    onConfigMetricsReportLocked(key, timestampNs, true /* include_current_partial_bucket*/,
+                                dumpReportReason, &proto);
     string file_name = StringPrintf("%s/%ld_%d_%lld", STATS_DATA_DIR,
          (long)getWallClockSec(), key.GetUid(), (long long)key.GetId());
     android::base::unique_fd fd(open(file_name.c_str(),

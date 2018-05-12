@@ -63,7 +63,7 @@ public:
     size_t GetMetricsSize(const ConfigKey& key) const;
 
     void onDumpReport(const ConfigKey& key, const int64_t dumpTimeNs,
-                      const bool include_current_partial_bucket, const bool include_string,
+                      const bool include_current_partial_bucket,
                       const DumpReportReason dumpReportReason, vector<uint8_t>* outData);
 
     /* Tells MetricsManager that the alarms in alarmSet have fired. Modifies anomaly alarmSet. */
@@ -143,7 +143,6 @@ private:
 
     void onConfigMetricsReportLocked(const ConfigKey& key, const int64_t dumpTimeStampNs,
                                      const bool include_current_partial_bucket,
-                                     const bool include_string,
                                      const DumpReportReason dumpReportReason,
                                      util::ProtoOutputStream* proto);
 
