@@ -86,8 +86,10 @@ public final class SelectionSessionLogger {
                 .addTaggedData(SMART_START, event.getSmartStart())
                 .addTaggedData(SMART_END, event.getSmartEnd())
                 .addTaggedData(EVENT_START, event.getStart())
-                .addTaggedData(EVENT_END, event.getEnd())
-                .addTaggedData(SESSION_ID, event.getSessionId().flattenToString());
+                .addTaggedData(EVENT_END, event.getEnd());
+        if (event.getSessionId() != null) {
+            log.addTaggedData(SESSION_ID, event.getSessionId().flattenToString());
+        }
         mMetricsLogger.write(log);
         debugLog(log);
     }

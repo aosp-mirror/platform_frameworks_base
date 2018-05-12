@@ -374,6 +374,7 @@ Landroid/app/AppOpsManager;->OP_AUDIO_NOTIFICATION_VOLUME:I
 Landroid/app/AppOpsManager;->OP_AUDIO_RING_VOLUME:I
 Landroid/app/AppOpsManager;->OP_AUDIO_VOICE_VOLUME:I
 Landroid/app/AppOpsManager;->OP_BIND_ACCESSIBILITY_SERVICE:I
+Landroid/app/AppOpsManager;->OP_BLUETOOTH_SCAN:I
 Landroid/app/AppOpsManager;->OP_BODY_SENSORS:I
 Landroid/app/AppOpsManager;->OP_CALL_PHONE:I
 Landroid/app/AppOpsManager;->OP_CAMERA:I
@@ -630,6 +631,7 @@ Landroid/app/IActivityManager;->unlockUser(I[B[BLandroid/os/IProgressListener;)Z
 Landroid/app/IActivityManager;->unregisterProcessObserver(Landroid/app/IProcessObserver;)V
 Landroid/app/IActivityManager;->unregisterReceiver(Landroid/content/IIntentReceiver;)V
 Landroid/app/IActivityManager;->unstableProviderDied(Landroid/os/IBinder;)V
+Landroid/app/IActivityManager;->updateConfiguration(Landroid/content/res/Configuration;)Z
 Landroid/app/IActivityManager;->updatePersistentConfiguration(Landroid/content/res/Configuration;)V
 Landroid/app/IAlarmManager$Stub$Proxy;-><init>(Landroid/os/IBinder;)V
 Landroid/app/IAlarmManager$Stub;-><init>()V
@@ -650,6 +652,7 @@ Landroid/app/IApplicationThread;->scheduleUnbindService(Landroid/os/IBinder;Land
 Landroid/app/IApplicationThread;->updateTimeZone()V
 Landroid/app/IAppTask;->getTaskInfo()Landroid/app/ActivityManager$RecentTaskInfo;
 Landroid/app/IBackupAgent$Stub;->asInterface(Landroid/os/IBinder;)Landroid/app/IBackupAgent;
+Landroid/app/IInputForwarder;->forwardEvent(Landroid/view/InputEvent;)Z
 Landroid/app/IInstrumentationWatcher$Stub;-><init>()V
 Landroid/app/IInstrumentationWatcher$Stub;->asInterface(Landroid/os/IBinder;)Landroid/app/IInstrumentationWatcher;
 Landroid/app/IInstrumentationWatcher;->instrumentationFinished(Landroid/content/ComponentName;ILandroid/os/Bundle;)V
@@ -2338,6 +2341,7 @@ Landroid/hardware/input/IInputManager$Stub$Proxy;-><init>(Landroid/os/IBinder;)V
 Landroid/hardware/input/IInputManager$Stub;->asInterface(Landroid/os/IBinder;)Landroid/hardware/input/IInputManager;
 Landroid/hardware/input/IInputManager$Stub;->TRANSACTION_injectInputEvent:I
 Landroid/hardware/input/IInputManager;->injectInputEvent(Landroid/view/InputEvent;I)Z
+Landroid/hardware/input/InputManager;->createInputForwarder(I)Landroid/app/IInputForwarder;
 Landroid/hardware/input/InputManager;->getInstance()Landroid/hardware/input/InputManager;
 Landroid/hardware/input/InputManager;->injectInputEvent(Landroid/view/InputEvent;I)Z
 Landroid/hardware/input/InputManager;->INJECT_INPUT_EVENT_MODE_WAIT_FOR_FINISH:I
@@ -3919,6 +3923,7 @@ Landroid/os/storage/StorageManager;->unmount(Ljava/lang/String;)V
 Landroid/os/storage/StorageVolume;->allowMassStorage()Z
 Landroid/os/storage/StorageVolume;->getFatVolumeId()I
 Landroid/os/storage/StorageVolume;->getMaxFileSize()J
+Landroid/os/storage/StorageVolume;->getOwner()Landroid/os/UserHandle;
 Landroid/os/storage/StorageVolume;->getPath()Ljava/lang/String;
 Landroid/os/storage/StorageVolume;->getPathFile()Ljava/io/File;
 Landroid/os/storage/StorageVolume;->getUserLabel()Ljava/lang/String;
@@ -4876,6 +4881,7 @@ Landroid/telecom/TelecomManager;->setUserSelectedOutgoingPhoneAccount(Landroid/t
 Landroid/telecom/TelecomManager;->TTY_MODE_OFF:I
 Landroid/telecom/VideoCallImpl;->destroy()V
 Landroid/telephony/CarrierConfigManager;->KEY_CARRIER_DEFAULT_ACTIONS_ON_REDIRECTION_STRING_ARRAY:Ljava/lang/String;
+Landroid/telephony/CarrierConfigManager;->KEY_DISABLE_VOICE_BARRING_NOTIFICATION_BOOL:Ljava/lang/String;
 Landroid/telephony/CarrierMessagingServiceManager;-><init>()V
 Landroid/telephony/CellBroadcastMessage;-><init>(Landroid/telephony/SmsCbMessage;)V
 Landroid/telephony/CellBroadcastMessage;->createFromCursor(Landroid/database/Cursor;)Landroid/telephony/CellBroadcastMessage;

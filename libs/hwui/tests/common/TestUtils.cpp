@@ -27,6 +27,7 @@
 #include <utils/Unicode.h>
 
 #include "SkColorData.h"
+#include "SkUnPreMultiply.h"
 
 namespace android {
 namespace uirenderer {

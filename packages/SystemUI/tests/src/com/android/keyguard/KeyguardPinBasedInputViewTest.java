@@ -16,11 +16,15 @@
 
 package com.android.keyguard;
 
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyZeroInteractions;
 
 import android.support.test.filters.SmallTest;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper.RunWithLooper;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 
 import com.android.systemui.SysuiTestCase;
@@ -28,6 +32,7 @@ import com.android.systemui.SysuiTestCase;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
@@ -37,21 +42,35 @@ import org.mockito.MockitoAnnotations;
 public class KeyguardPinBasedInputViewTest extends SysuiTestCase {
 
     @Mock
-    private PasswordTextView mPasswordTextView;
+    private PasswordTextView mPasswordEntry;
+    @Mock
+    private SecurityMessageDisplay mSecurityMessageDisplay;
+    @InjectMocks
     private KeyguardPinBasedInputView mKeyguardPinView;
 
     @Before
     public void setup() {
-        MockitoAnnotations.initMocks(this);
         LayoutInflater inflater = LayoutInflater.from(getContext());
         mKeyguardPinView =
                 (KeyguardPinBasedInputView) inflater.inflate(R.layout.keyguard_pin_view, null);
-        mKeyguardPinView.mPasswordEntry = mPasswordTextView;
+        MockitoAnnotations.initMocks(this);
     }
 
     @Test
     public void onResume_requestsFocus() {
         mKeyguardPinView.onResume(KeyguardSecurityView.SCREEN_ON);
-        verify(mPasswordTextView).requestFocus();
+        verify(mPasswordEntry).requestFocus();
+    }
+
+    @Test
+    public void onKeyDown_clearsSecurityMessage() {
+        mKeyguardPinView.onKeyDown(KeyEvent.KEYCODE_0, mock(KeyEvent.class));
+        verify(mSecurityMessageDisplay).setMessage(eq(""));
+    }
+
+    @Test
+    public void onKeyDown_noSecurityMessageInteraction() {
+        mKeyguardPinView.onKeyDown(KeyEvent.KEYCODE_UNKNOWN, mock(KeyEvent.class));
+        verifyZeroInteractions(mSecurityMessageDisplay);
     }
 }

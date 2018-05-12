@@ -309,6 +309,7 @@ final class OverlayManagerSettings {
             pw.print("mState.............: "); pw.println(OverlayInfo.stateToString(item.getState()));
             pw.print("mIsEnabled.........: "); pw.println(item.isEnabled());
             pw.print("mIsStatic..........: "); pw.println(item.isStatic());
+            pw.print("mPriority..........: "); pw.println(item.mPriority);
             pw.print("mCategory..........: "); pw.println(item.mCategory);
 
             pw.decreaseIndent();
@@ -528,7 +529,7 @@ final class OverlayManagerSettings {
         private OverlayInfo getOverlayInfo() {
             if (mCache == null) {
                 mCache = new OverlayInfo(mPackageName, mTargetPackageName, mCategory, mBaseCodePath,
-                        mState, mUserId);
+                        mState, mUserId, mPriority, mIsStatic);
             }
             return mCache;
         }

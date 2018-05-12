@@ -108,6 +108,7 @@ extern int register_android_media_AudioTrack(JNIEnv *env);
 extern int register_android_media_MicrophoneInfo(JNIEnv *env);
 extern int register_android_media_JetPlayer(JNIEnv *env);
 extern int register_android_media_ToneGenerator(JNIEnv *env);
+extern int register_android_media_midi(JNIEnv *env);
 
 namespace android {
 
@@ -1441,6 +1442,7 @@ static const RegJNIRec gRegJNI[] = {
     REG_JNI(register_android_media_MicrophoneInfo),
     REG_JNI(register_android_media_RemoteDisplay),
     REG_JNI(register_android_media_ToneGenerator),
+    REG_JNI(register_android_media_midi),
 
     REG_JNI(register_android_opengl_classes),
     REG_JNI(register_android_server_NetworkManagementSocketTagger),

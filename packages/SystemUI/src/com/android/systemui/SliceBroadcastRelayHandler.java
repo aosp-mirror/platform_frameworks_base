@@ -87,9 +87,11 @@ public class SliceBroadcastRelayHandler extends SystemUI {
 
         private final ArraySet<ComponentName> mReceivers = new ArraySet<>();
         private final UserHandle mUserId;
+        private final Uri mUri;
 
         public BroadcastRelay(Uri uri) {
             mUserId = new UserHandle(ContentProvider.getUserIdFromUri(uri));
+            mUri = uri;
         }
 
         public void register(Context context, ComponentName receiver, IntentFilter filter) {
@@ -106,6 +108,7 @@ public class SliceBroadcastRelayHandler extends SystemUI {
             intent.addFlags(Intent.FLAG_RECEIVER_FOREGROUND);
             for (ComponentName receiver : mReceivers) {
                 intent.setComponent(receiver);
+                intent.putExtra(SliceBroadcastRelay.EXTRA_URI, mUri.toString());
                 if (DEBUG) Log.d(TAG, "Forwarding " + receiver + " " + intent + " " + mUserId);
                 context.sendBroadcastAsUser(intent, mUserId);
             }

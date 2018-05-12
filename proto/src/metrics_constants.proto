@@ -5818,10 +5818,39 @@ message MetricsEvent {
     // Tag used to report whether an activity is being autofilled  on compatibility mode.
     FIELD_AUTOFILL_COMPAT_MODE = 1414;
 
-    // OPEN: Settings > Sound > Switch connected devices dialog
+    // OPEN: Settings > Sound > Switch a2dp devices dialog
     // CATEGORY: SETTINGS
     // OS: P
-    DIALOG_UPDATABLE_LIST_PREFERENCE = 1415;
+    DIALOG_SWITCH_A2DP_DEVICES = 1415;
+
+    // OPEN: Settings > Sound > Switch hfp devices dialog
+    // CATEGORY: SETTINGS
+    // OS: P
+    DIALOG_SWITCH_HFP_DEVICES = 1416;
+
+    // ACTION: User has started or ended charging
+    // Type TYPE_DISMISS: Charging has ended
+    // Type TYPE_ACTION: Charging has started, contains fields: battery level
+    // Tag FIELD_BATTERY_LEVEL_START: Battery level at the start
+    // Tag FIELD_BATTERY_LEVEL_END: Battery level at the end
+    // Tag FIELD_CHARGING_DURATION: Time in ms phone was charging
+    // Tag FIELD_PLUG_TYPE: Charging plug type
+    ACTION_CHARGE = 1417;
+
+    // Tag used to determine battery level when device started charging
+    FIELD_BATTERY_LEVEL_START = 1418;
+
+    // Tag used to determine battery level when device ended charging
+    FIELD_BATTERY_LEVEL_END = 1419;
+
+    // Tag used to determine length of charging
+    FIELD_CHARGING_DURATION_MILLIS = 1420;
+
+    // Tag used to determine what type of charging was started/ended
+    // 1 = Plugged AC
+    // 2 = Plugged USB
+    // 3 = Wireless
+    FIELD_PLUG_TYPE = 1421;
 
     // ---- End P Constants, all P constants go above this line ----
 

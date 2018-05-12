@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2017 The Android Open Source Project
+ * Copyright (C) 2018 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,21 +14,15 @@
  * limitations under the License.
  */
 
- syntax = "proto3";
+#pragma once
 
- package com.android.server.wm;
+#include <hwui/Bitmap.h>
 
- option java_package = "com.android.server.wm";
- option java_outer_classname = "WindowManagerProtos";
+namespace android::uirenderer {
 
- message TaskSnapshotProto {
-     int32 orientation = 1;
-     int32 inset_left = 2;
-     int32 inset_top = 3;
-     int32 inset_right = 4;
-     int32 inset_bottom = 5;
-     bool is_real_snapshot = 6;
-     int32 windowing_mode = 7;
-     int32 system_ui_visibility = 8;
-     bool is_translucent = 9;
- }
+class HardwareBitmapUploader {
+public:
+    static sk_sp<Bitmap> allocateHardwareBitmap(const SkBitmap& sourceBitmap);
+};
+
+};  // namespace android::uirenderer

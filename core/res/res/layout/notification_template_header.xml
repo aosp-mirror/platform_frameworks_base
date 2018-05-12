@@ -126,7 +126,6 @@
         android:visibility="gone"
         android:contentDescription="@string/notification_work_profile_content_description"
         />
-
     <LinearLayout
         android:id="@+id/app_ops"
         android:layout_height="match_parent"
@@ -140,6 +139,8 @@
             android:src="@drawable/ic_camera"
             android:background="?android:selectableItemBackgroundBorderless"
             android:visibility="gone"
+            android:clickable="false"
+            android:contentDescription="@string/notification_appops_camera_active"
             />
         <ImageButton
             android:id="@+id/mic"
@@ -149,6 +150,8 @@
             android:background="?android:selectableItemBackgroundBorderless"
             android:layout_marginStart="4dp"
             android:visibility="gone"
+            android:clickable="false"
+            android:contentDescription="@string/notification_appops_microphone_active"
             />
         <ImageButton
             android:id="@+id/overlay"
@@ -158,6 +161,8 @@
             android:background="?android:selectableItemBackgroundBorderless"
             android:layout_marginStart="4dp"
             android:visibility="gone"
+            android:clickable="false"
+            android:contentDescription="@string/notification_appops_overlay_active"
             />
     </LinearLayout>
 </NotificationHeaderView>

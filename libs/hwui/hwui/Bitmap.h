@@ -65,9 +65,7 @@ public:
     Bitmap(void* address, int fd, size_t mappedSize, const SkImageInfo& info, size_t rowBytes);
     Bitmap(GraphicBuffer* buffer, const SkImageInfo& info);
 
-    int rowBytesAsPixels() const {
-        return rowBytes() >> mInfo.shiftPerPixel();
-    }
+    int rowBytesAsPixels() const { return rowBytes() >> mInfo.shiftPerPixel(); }
 
     void reconfigure(const SkImageInfo& info, size_t rowBytes);
     void reconfigure(const SkImageInfo& info);

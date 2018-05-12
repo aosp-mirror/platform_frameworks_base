@@ -20601,7 +20601,7 @@ public class ActivityManagerService extends IActivityManager.Stub
     // BROADCASTS
     // =========================================================
 
-    private boolean isInstantApp(ProcessRecord record, String callerPackage, int uid) {
+    private boolean isInstantApp(ProcessRecord record, @Nullable String callerPackage, int uid) {
         if (UserHandle.getAppId(uid) < FIRST_APPLICATION_UID) {
             return false;
         }
@@ -20610,13 +20610,17 @@ public class ActivityManagerService extends IActivityManager.Stub
             return record.info.isInstantApp();
         }
         // Otherwise check with PackageManager.
-        if (callerPackage == null) {
-            Slog.e(TAG, "isInstantApp with an application's uid, no record, and no package name");
-            throw new IllegalArgumentException("Calling application did not provide package name");
-        }
-        mAppOpsService.checkPackage(uid, callerPackage);
+        IPackageManager pm = AppGlobals.getPackageManager();
         try {
-            IPackageManager pm = AppGlobals.getPackageManager();
+            if (callerPackage == null) {
+                final String[] packageNames = pm.getPackagesForUid(uid);
+                if (packageNames == null || packageNames.length == 0) {
+                    throw new IllegalArgumentException("Unable to determine caller package name");
+                }
+                // Instant Apps can't use shared uids, so its safe to only check the first package.
+                callerPackage = packageNames[0];
+            }
+            mAppOpsService.checkPackage(uid, callerPackage);
             return pm.isInstantApp(callerPackage, UserHandle.getUserId(uid));
         } catch (RemoteException e) {
             Slog.e(TAG, "Error looking up if " + callerPackage + " is an instant app.", e);

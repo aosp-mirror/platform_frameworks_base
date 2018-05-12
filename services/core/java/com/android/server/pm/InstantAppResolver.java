@@ -47,7 +47,6 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.RemoteException;
-import android.text.TextUtils;
 import android.util.Log;
 import android.util.Slog;
 
@@ -163,6 +162,11 @@ public abstract class InstantAppResolver {
             } else {
                 Log.d(TAG, "[" + token + "] Phase1; No results matched");
             }
+        }
+        // if the match external flag is set, return an empty resolve info instead of a null result.
+        if (resolveInfo == null && (origIntent.getFlags() & FLAG_ACTIVITY_MATCH_EXTERNAL) != 0) {
+            return new AuxiliaryResolveInfo(token, false, createFailureIntent(origIntent, token),
+                    null /* filters */);
         }
         return resolveInfo;
     }
@@ -365,23 +369,20 @@ public abstract class InstantAppResolver {
             InstantAppDigest digest, String token) {
         final int[] shaPrefix = digest.getDigestPrefix();
         final byte[][] digestBytes = digest.getDigestBytes();
-        final Intent failureIntent = new Intent(origIntent);
         boolean requiresSecondPhase = false;
-        failureIntent.setFlags(failureIntent.getFlags() | Intent.FLAG_IGNORE_EPHEMERAL);
-        failureIntent.setFlags(failureIntent.getFlags() & ~Intent.FLAG_ACTIVITY_MATCH_EXTERNAL);
-        failureIntent.setLaunchToken(token);
         ArrayList<AuxiliaryResolveInfo.AuxiliaryFilter> filters = null;
-        boolean isWebIntent = origIntent.isWebIntent();
+        boolean requiresPrefixMatch = origIntent.isWebIntent() || (shaPrefix.length > 0
+                        && (origIntent.getFlags() & Intent.FLAG_ACTIVITY_MATCH_EXTERNAL) == 0);
         for (InstantAppResolveInfo instantAppResolveInfo : instantAppResolveInfoList) {
-            if (shaPrefix.length > 0 && instantAppResolveInfo.shouldLetInstallerDecide()) {
-                Slog.e(TAG, "InstantAppResolveInfo with mShouldLetInstallerDecide=true when digest"
-                        + " provided; ignoring");
+            if (requiresPrefixMatch && instantAppResolveInfo.shouldLetInstallerDecide()) {
+                Slog.d(TAG, "InstantAppResolveInfo with mShouldLetInstallerDecide=true when digest"
+                        + " required; ignoring");
                 continue;
             }
             byte[] filterDigestBytes = instantAppResolveInfo.getDigestBytes();
             // Only include matching digests if we have a prefix and we're either dealing with a
-            // web intent or the resolveInfo specifies digest details.
-            if (shaPrefix.length > 0 && (isWebIntent || filterDigestBytes.length > 0)) {
+            // prefixed request or the resolveInfo specifies digest details.
+            if (shaPrefix.length > 0 && (requiresPrefixMatch || filterDigestBytes.length > 0)) {
                 boolean matchFound = false;
                 // Go in reverse order so we match the narrowest scope first.
                 for (int i = shaPrefix.length - 1; i >= 0; --i) {
@@ -409,14 +410,23 @@ public abstract class InstantAppResolver {
             }
         }
         if (filters != null && !filters.isEmpty()) {
-            return new AuxiliaryResolveInfo(token, requiresSecondPhase, failureIntent, filters);
-        }
-        // if the match external flag is set, return an empty resolve info
-        if ((origIntent.getFlags() & FLAG_ACTIVITY_MATCH_EXTERNAL) != 0) {
-            return new AuxiliaryResolveInfo(token, false, failureIntent, null /* filters */);
+            return new AuxiliaryResolveInfo(token, requiresSecondPhase,
+                    createFailureIntent(origIntent, token), filters);
         }
         // Hash or filter mis-match; no instant apps for this domain.
         return null;
+    }
+
+    /**
+     * Creates a failure intent for the installer to send in the case that the instant app cannot be
+     * launched for any reason.
+     */
+    private static Intent createFailureIntent(Intent origIntent, String token) {
+        final Intent failureIntent = new Intent(origIntent);
+        failureIntent.setFlags(failureIntent.getFlags() | Intent.FLAG_IGNORE_EPHEMERAL);
+        failureIntent.setFlags(failureIntent.getFlags() & ~Intent.FLAG_ACTIVITY_MATCH_EXTERNAL);
+        failureIntent.setLaunchToken(token);
+        return failureIntent;
     }
 
     /**

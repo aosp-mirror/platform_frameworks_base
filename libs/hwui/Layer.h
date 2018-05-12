@@ -19,9 +19,9 @@
 #include <GpuMemoryTracker.h>
 #include <utils/RefBase.h>
 
+#include <SkBlendMode.h>
 #include <SkColorFilter.h>
 #include <SkColorSpace.h>
-#include <SkBlendMode.h>
 #include <SkPaint.h>
 
 #include "Matrix.h"
@@ -95,8 +95,7 @@ public:
     void postDecStrong();
 
 protected:
-    Layer(RenderState& renderState, Api api, sk_sp<SkColorFilter>, int alpha,
-          SkBlendMode mode);
+    Layer(RenderState& renderState, Api api, sk_sp<SkColorFilter>, int alpha, SkBlendMode mode);
 
     RenderState& mRenderState;
 

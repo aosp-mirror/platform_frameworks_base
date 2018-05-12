@@ -347,6 +347,30 @@ public class SmartReplyViewTest extends SysuiTestCase {
         assertEqualLayouts(expectedView.getChildAt(2), mView.getChildAt(2));
     }
 
+    @Test
+    public void testMeasure_dropLongest() {
+        final CharSequence[] choices = new CharSequence[]{"Short", "Short",
+                "LooooooongUnbreakableReplyyyyy"};
+
+        // Short choices should be shown as single line views
+        ViewGroup expectedView = buildExpectedView(
+                new CharSequence[]{"Short", "Short"}, 1);
+        expectedView.measure(MeasureSpec.UNSPECIFIED, MeasureSpec.UNSPECIFIED);
+        expectedView.layout(10, 10, 10 + expectedView.getMeasuredWidth(),
+                10 + expectedView.getMeasuredHeight());
+
+        setRepliesFromRemoteInput(choices);
+        mView.measure(
+                MeasureSpec.makeMeasureSpec(expectedView.getMeasuredWidth(), MeasureSpec.AT_MOST),
+                MeasureSpec.UNSPECIFIED);
+        mView.layout(10, 10, 10 + mView.getMeasuredWidth(), 10 + mView.getMeasuredHeight());
+
+        assertEqualLayouts(expectedView, mView);
+        assertReplyButtonShownWithEqualMeasures(expectedView.getChildAt(0), mView.getChildAt(0));
+        assertReplyButtonShownWithEqualMeasures(expectedView.getChildAt(1), mView.getChildAt(1));
+        assertReplyButtonHidden(mView.getChildAt(2));
+    }
+
     private void setRepliesFromRemoteInput(CharSequence[] choices) {
         PendingIntent pendingIntent = PendingIntent.getBroadcast(mContext, 0,
                 new Intent(TEST_ACTION), 0);
@@ -407,10 +431,7 @@ public class SmartReplyViewTest extends SysuiTestCase {
     private static void assertReplyButtonShownWithEqualMeasures(View expected, View actual) {
         assertReplyButtonShown(actual);
         assertEqualMeasures(expected, actual);
-        assertEquals(expected.getPaddingLeft(), actual.getPaddingLeft());
-        assertEquals(expected.getPaddingTop(), actual.getPaddingTop());
-        assertEquals(expected.getPaddingRight(), actual.getPaddingRight());
-        assertEquals(expected.getPaddingBottom(), actual.getPaddingBottom());
+        assertEqualPadding(expected, actual);
     }
 
     private static void assertReplyButtonShown(View view) {
@@ -426,5 +447,12 @@ public class SmartReplyViewTest extends SysuiTestCase {
         assertEquals(expected.getTop(), actual.getTop());
         assertEquals(expected.getRight(), actual.getRight());
         assertEquals(expected.getBottom(), actual.getBottom());
+    }
+
+    private static void assertEqualPadding(View expected, View actual) {
+        assertEquals(expected.getPaddingLeft(), actual.getPaddingLeft());
+        assertEquals(expected.getPaddingTop(), actual.getPaddingTop());
+        assertEquals(expected.getPaddingRight(), actual.getPaddingRight());
+        assertEquals(expected.getPaddingBottom(), actual.getPaddingBottom());
     }
 }

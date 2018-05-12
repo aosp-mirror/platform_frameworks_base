@@ -16,9 +16,8 @@
 #include "Bitmap.h"
 
 #include "Caches.h"
-#include "renderthread/EglManager.h"
+#include "HardwareBitmapUploader.h"
 #include "renderthread/RenderProxy.h"
-#include "renderthread/RenderThread.h"
 #include "utils/Color.h"
 
 #include <sys/mman.h>
@@ -85,7 +84,7 @@ static sk_sp<Bitmap> allocateHeapBitmap(size_t size, const SkImageInfo& info, si
 }
 
 sk_sp<Bitmap> Bitmap::allocateHardwareBitmap(SkBitmap& bitmap) {
-    return uirenderer::renderthread::RenderProxy::allocateHardwareBitmap(bitmap);
+    return uirenderer::HardwareBitmapUploader::allocateHardwareBitmap(bitmap);
 }
 
 sk_sp<Bitmap> Bitmap::allocateHeapBitmap(SkBitmap* bitmap) {
@@ -206,7 +205,7 @@ Bitmap::Bitmap(GraphicBuffer* buffer, const SkImageInfo& info)
     buffer->incStrong(buffer);
     setImmutable();  // HW bitmaps are always immutable
     mImage = SkImage::MakeFromAHardwareBuffer(reinterpret_cast<AHardwareBuffer*>(buffer),
-            mInfo.alphaType(), mInfo.refColorSpace());
+                                              mInfo.alphaType(), mInfo.refColorSpace());
 }
 
 Bitmap::~Bitmap() {
@@ -286,9 +285,8 @@ void Bitmap::setAlphaType(SkAlphaType alphaType) {
 void Bitmap::getSkBitmap(SkBitmap* outBitmap) {
     outBitmap->setHasHardwareMipMap(mHasHardwareMipMap);
     if (isHardware()) {
-            outBitmap->allocPixels(SkImageInfo::Make(info().width(), info().height(),
-                                                     info().colorType(), info().alphaType(),
-                                                     nullptr));
+        outBitmap->allocPixels(SkImageInfo::Make(info().width(), info().height(),
+                                                 info().colorType(), info().alphaType(), nullptr));
         uirenderer::renderthread::RenderProxy::copyGraphicBufferInto(graphicBuffer(), outBitmap);
         if (mInfo.colorSpace()) {
             sk_sp<SkPixelRef> pixelRef = sk_ref_sp(outBitmap->pixelRef());

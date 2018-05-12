@@ -31,5 +31,6 @@
     <com.android.systemui.BatteryMeterView android:id="@+id/battery"
         android:layout_height="match_parent"
         android:layout_width="wrap_content"
-        />
+        android:clipToPadding="false"
+        android:clipChildren="false" />
 </LinearLayout>

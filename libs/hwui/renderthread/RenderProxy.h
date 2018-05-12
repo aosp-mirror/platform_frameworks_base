@@ -123,8 +123,6 @@ public:
                                            int bottom, SkBitmap* bitmap);
     ANDROID_API static void prepareToDraw(Bitmap& bitmap);
 
-    static sk_sp<Bitmap> allocateHardwareBitmap(SkBitmap& bitmap);
-
     static int copyGraphicBufferInto(GraphicBuffer* buffer, SkBitmap* bitmap);
 
     static void onBitmapDestroyed(uint32_t pixelRefId);

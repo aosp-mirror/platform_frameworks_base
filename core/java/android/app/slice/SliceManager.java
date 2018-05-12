@@ -23,6 +23,7 @@ import android.annotation.Nullable;
 import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
 import android.annotation.SystemService;
+import android.annotation.WorkerThread;
 import android.content.ContentProviderClient;
 import android.content.ContentResolver;
 import android.content.Context;
@@ -217,6 +218,7 @@ public class SliceManager {
      * @return All slices within the space.
      * @see SliceProvider#onGetSliceDescendants(Uri)
      */
+    @WorkerThread
     public @NonNull Collection<Uri> getSliceDescendants(@NonNull Uri uri) {
         ContentResolver resolver = mContext.getContentResolver();
         try (ContentProviderClient provider = resolver.acquireContentProviderClient(uri)) {

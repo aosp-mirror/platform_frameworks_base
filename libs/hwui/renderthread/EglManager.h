@@ -64,6 +64,8 @@ public:
 
     void fence();
 
+    EGLDisplay eglDisplay() const { return mEglDisplay; }
+
 private:
 
     void initExtensions();

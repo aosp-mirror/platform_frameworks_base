@@ -69,6 +69,11 @@ public class PanProfile implements LocalBluetoothProfile {
         return mIsProfileReady;
     }
 
+    @Override
+    public int getProfileId() {
+        return BluetoothProfile.PAN;
+    }
+
     PanProfile(Context context, LocalBluetoothAdapter adapter) {
         mLocalAdapter = adapter;
         mLocalAdapter.getProfileProxy(context, new PanServiceListener(),
