@@ -19,6 +19,7 @@ package android.telecom;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.TestApi;
 import android.bluetooth.BluetoothDevice;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -100,6 +101,7 @@ public final class CallAudioState implements Parcelable {
     }
 
     /** @hide */
+    @TestApi
     public CallAudioState(boolean isMuted, @CallAudioRoute int route,
             @CallAudioRoute int supportedRouteMask,
             @Nullable BluetoothDevice activeBluetoothDevice,
