@@ -94,6 +94,31 @@ public class DisplayWindowController
         }
     }
 
+    /**
+     * Starts deferring the ability to update the IME target. This is needed when a call will
+     * attempt to update the IME target before all information about the Windows have been updated.
+     */
+    public void deferUpdateImeTarget() {
+        synchronized (mWindowMap) {
+            final DisplayContent dc = mRoot.getDisplayContent(mDisplayId);
+            if (dc != null) {
+                dc.deferUpdateImeTarget();
+            }
+        }
+    }
+
+    /**
+     * Resumes updating the IME target after deferring. See {@link #deferUpdateImeTarget()}
+     */
+    public void continueUpdateImeTarget() {
+        synchronized (mWindowMap) {
+            final DisplayContent dc = mRoot.getDisplayContent(mDisplayId);
+            if (dc != null) {
+                dc.continueUpdateImeTarget();
+            }
+        }
+    }
+
     @Override
     public String toString() {
         return "{DisplayWindowController displayId=" + mDisplayId + "}";
