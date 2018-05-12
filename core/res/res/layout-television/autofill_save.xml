@@ -62,8 +62,9 @@
                     android:textSize="24sp" />
             </LinearLayout>
 
-            <com.android.server.autofill.ui.CustomScrollView
+            <LinearLayout
                 android:id="@+id/autofill_save_custom_subtitle"
+                android:orientation="vertical"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="4dp"
