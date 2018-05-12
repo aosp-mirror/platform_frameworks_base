@@ -25,7 +25,6 @@ import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.graphics.Rect;
 import android.hardware.display.DisplayManager;
-import android.util.Log;
 import android.view.Display;
 import android.view.DisplayInfo;
 
@@ -105,6 +104,12 @@ public class DividerSnapAlgorithm {
             boolean isHorizontalDivision, Rect insets) {
         this(res, displayWidth, displayHeight, dividerSize, isHorizontalDivision, insets,
                 DOCKED_INVALID, false);
+    }
+
+    public DividerSnapAlgorithm(Resources res, int displayWidth, int displayHeight, int dividerSize,
+        boolean isHorizontalDivision, Rect insets, int dockSide) {
+        this(res, displayWidth, displayHeight, dividerSize, isHorizontalDivision, insets,
+            dockSide, false);
     }
 
     public DividerSnapAlgorithm(Resources res, int displayWidth, int displayHeight, int dividerSize,
@@ -265,7 +270,11 @@ public class DividerSnapAlgorithm {
                 ? mDisplayHeight
                 : mDisplayWidth;
         int navBarSize = isHorizontalDivision ? mInsets.bottom : mInsets.right;
-        mTargets.add(new SnapTarget(-mDividerSize, -mDividerSize, SnapTarget.FLAG_DISMISS_START,
+        int startPos = -mDividerSize;
+        if (dockedSide == DOCKED_RIGHT) {
+            startPos += mInsets.left;
+        }
+        mTargets.add(new SnapTarget(startPos, startPos, SnapTarget.FLAG_DISMISS_START,
                 0.35f));
         switch (mSnapMode) {
             case SNAP_MODE_16_9:

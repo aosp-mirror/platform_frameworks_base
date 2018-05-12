@@ -639,6 +639,9 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
                 // so that the divider matches and remove this logic.
                 // TODO: This is currently only called when entering split-screen while in another
                 // task, and from the tests
+                // TODO (b/78247419): Check if launcher and overview are same then move home stack
+                // instead of recents stack. Then fix the rotation animation from fullscreen to
+                // minimized mode
                 final ActivityStack recentStack = display.getOrCreateStack(
                         WINDOWING_MODE_SPLIT_SCREEN_SECONDARY, ACTIVITY_TYPE_RECENTS,
                         true /* onTop */);
