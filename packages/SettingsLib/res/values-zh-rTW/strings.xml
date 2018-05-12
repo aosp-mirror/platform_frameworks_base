@@ -181,7 +181,7 @@
   </string-array>
     <string name="choose_profile" msgid="6921016979430278661">"選擇設定檔"</string>
     <string name="category_personal" msgid="1299663247844969448">"個人"</string>
-    <string name="category_work" msgid="8699184680584175622">"公司"</string>
+    <string name="category_work" msgid="8699184680584175622">"工作"</string>
     <string name="development_settings_title" msgid="215179176067683667">"開發人員選項"</string>
     <string name="development_settings_enable" msgid="542530994778109538">"啟用開發人員選項"</string>
     <string name="development_settings_summary" msgid="1815795401632854041">"設定應用程式開發選項"</string>
