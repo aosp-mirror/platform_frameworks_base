@@ -3351,6 +3351,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             case SystemService.PHASE_LOCK_SETTINGS_READY:
                 onLockSettingsReady();
                 loadAdminDataAsync();
+                mOwners.systemReady();
                 break;
             case SystemService.PHASE_BOOT_COMPLETED:
                 ensureDeviceOwnerUserStarted(); // TODO Consider better place to do this.

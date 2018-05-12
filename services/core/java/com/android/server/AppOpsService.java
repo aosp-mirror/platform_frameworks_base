@@ -21,6 +21,7 @@ import android.app.ActivityManager;
 import android.app.ActivityThread;
 import android.app.AppGlobals;
 import android.app.AppOpsManager;
+import android.app.AppOpsManagerInternal;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
@@ -172,6 +173,9 @@ public class AppOpsService extends IAppOpsService.Stub {
     final AtomicFile mFile;
     final Handler mHandler;
 
+    private final AppOpsManagerInternalImpl mAppOpsManagerInternal
+            = new AppOpsManagerInternalImpl();
+
     boolean mWriteScheduled;
     boolean mFastWriteScheduled;
     final Runnable mWriteRunner = new Runnable() {
@@ -199,6 +203,8 @@ public class AppOpsService extends IAppOpsService.Stub {
      * These are app op restrictions imposed per user from various parties.
      */
     private final ArrayMap<IBinder, ClientRestrictionState> mOpUserRestrictions = new ArrayMap<>();
+
+    SparseIntArray mProfileOwners;
 
     /**
      * All times are in milliseconds. These constants are kept synchronized with the system
@@ -554,6 +560,7 @@ public class AppOpsService extends IAppOpsService.Stub {
     public void publish(Context context) {
         mContext = context;
         ServiceManager.addService(Context.APP_OPS_SERVICE, asBinder());
+        LocalServices.addService(AppOpsManagerInternal.class, mAppOpsManagerInternal);
     }
 
     public void systemReady() {
@@ -923,12 +930,27 @@ public class AppOpsService extends IAppOpsService.Stub {
         }
     }
 
+    void enforceManageAppOpsModes(int callingPid, int callingUid, int targetUid) {
+        if (callingPid == Process.myPid()) {
+            return;
+        }
+        final int callingUser = UserHandle.getUserId(callingUid);
+        synchronized (this) {
+            if (mProfileOwners != null && mProfileOwners.get(callingUser, -1) == callingUid) {
+                if (targetUid >= 0 && callingUser == UserHandle.getUserId(targetUid)) {
+                    // Profile owners are allowed to change modes but only for apps
+                    // within their user.
+                    return;
+                }
+            }
+        }
+        mContext.enforcePermission(android.Manifest.permission.MANAGE_APP_OPS_MODES,
+                Binder.getCallingPid(), Binder.getCallingUid(), null);
+    }
+
     @Override
     public void setUidMode(int code, int uid, int mode) {
-        if (Binder.getCallingPid() != Process.myPid()) {
-            mContext.enforcePermission(android.Manifest.permission.MANAGE_APP_OPS_MODES,
-                    Binder.getCallingPid(), Binder.getCallingUid(), null);
-        }
+        enforceManageAppOpsModes(Binder.getCallingPid(), Binder.getCallingUid(), uid);
         verifyIncomingOp(code);
         code = AppOpsManager.opToSwitch(code);
 
@@ -1031,10 +1053,7 @@ public class AppOpsService extends IAppOpsService.Stub {
 
     @Override
     public void setMode(int code, int uid, String packageName, int mode) {
-        if (Binder.getCallingPid() != Process.myPid()) {
-            mContext.enforcePermission(android.Manifest.permission.MANAGE_APP_OPS_MODES,
-                    Binder.getCallingPid(), Binder.getCallingUid(), null);
-        }
+        enforceManageAppOpsModes(Binder.getCallingPid(), Binder.getCallingUid(), uid);
         verifyIncomingOp(code);
         ArraySet<ModeCallback> repCbs = null;
         code = AppOpsManager.opToSwitch(code);
@@ -1153,8 +1172,6 @@ public class AppOpsService extends IAppOpsService.Stub {
     public void resetAllModes(int reqUserId, String reqPackageName) {
         final int callingPid = Binder.getCallingPid();
         final int callingUid = Binder.getCallingUid();
-        mContext.enforcePermission(android.Manifest.permission.MANAGE_APP_OPS_MODES,
-                callingPid, callingUid, null);
         reqUserId = ActivityManager.handleIncomingUser(callingPid, callingUid, reqUserId,
                 true, true, "resetAllModes", null);
 
@@ -1167,6 +1184,8 @@ public class AppOpsService extends IAppOpsService.Stub {
                 /* ignore - local call */
             }
         }
+
+        enforceManageAppOpsModes(callingPid, callingUid, reqUid);
 
         HashMap<ModeCallback, ArrayList<ChangeRec>> callbacks = null;
         synchronized (this) {
@@ -1430,10 +1449,9 @@ public class AppOpsService extends IAppOpsService.Stub {
     @Override
     public void setAudioRestriction(int code, int usage, int uid, int mode,
             String[] exceptionPackages) {
+        enforceManageAppOpsModes(Binder.getCallingPid(), Binder.getCallingUid(), uid);
         verifyIncomingUid(uid);
         verifyIncomingOp(code);
-        mContext.enforcePermission(android.Manifest.permission.MANAGE_APP_OPS_MODES,
-                Binder.getCallingPid(), Binder.getCallingUid(), null);
         synchronized (this) {
             SparseArray<Restriction> usageRestrictions = mAudioRestrictions.get(code);
             if (usageRestrictions == null) {
@@ -2811,9 +2829,8 @@ public class AppOpsService extends IAppOpsService.Stub {
                     return 0;
                 }
                 case "write-settings": {
-                    shell.mInternal.mContext.enforcePermission(
-                            android.Manifest.permission.MANAGE_APP_OPS_MODES,
-                            Binder.getCallingPid(), Binder.getCallingUid(), null);
+                    shell.mInternal.enforceManageAppOpsModes(Binder.getCallingPid(),
+                            Binder.getCallingUid(), -1);
                     long token = Binder.clearCallingIdentity();
                     try {
                         synchronized (shell.mInternal) {
@@ -2827,9 +2844,8 @@ public class AppOpsService extends IAppOpsService.Stub {
                     return 0;
                 }
                 case "read-settings": {
-                    shell.mInternal.mContext.enforcePermission(
-                            android.Manifest.permission.MANAGE_APP_OPS_MODES,
-                            Binder.getCallingPid(), Binder.getCallingUid(), null);
+                    shell.mInternal.enforceManageAppOpsModes(Binder.getCallingPid(),
+                            Binder.getCallingUid(), -1);
                     long token = Binder.clearCallingIdentity();
                     try {
                         shell.mInternal.readState();
@@ -2991,6 +3007,17 @@ public class AppOpsService extends IAppOpsService.Stub {
             final SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
             final Date date = new Date();
             boolean needSep = false;
+            if (dumpOp < 0 && dumpMode < 0 && dumpPackage == null && mProfileOwners != null) {
+                pw.println("  Profile owners:");
+                for (int poi = 0; poi < mProfileOwners.size(); poi++) {
+                    pw.print("    User #");
+                    pw.print(mProfileOwners.keyAt(poi));
+                    pw.print(": ");
+                    UserHandle.formatUid(pw, mProfileOwners.valueAt(poi));
+                    pw.println();
+                }
+                pw.println();
+            }
             if (mOpModeWatchers.size() > 0) {
                 boolean printedHeader = false;
                 for (int i=0; i<mOpModeWatchers.size(); i++) {
@@ -3702,6 +3729,14 @@ public class AppOpsService extends IAppOpsService.Stub {
                 }
             }
             return true;
+        }
+    }
+
+    private final class AppOpsManagerInternalImpl extends AppOpsManagerInternal {
+        @Override public void setDeviceAndProfileOwners(SparseIntArray owners) {
+            synchronized (AppOpsService.this) {
+                mProfileOwners = owners;
+            }
         }
     }
 }
