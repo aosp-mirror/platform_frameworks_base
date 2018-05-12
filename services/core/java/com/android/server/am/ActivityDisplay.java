@@ -800,6 +800,20 @@ class ActivityDisplay extends ConfigurationContainer<ActivityStack>
         }
     }
 
+    /**
+     * See {@link DisplayWindowController#deferUpdateImeTarget()}
+     */
+    public void deferUpdateImeTarget() {
+        mWindowContainerController.deferUpdateImeTarget();
+    }
+
+    /**
+     * See {@link DisplayWindowController#deferUpdateImeTarget()}
+     */
+    public void continueUpdateImeTarget() {
+        mWindowContainerController.continueUpdateImeTarget();
+    }
+
     public void dump(PrintWriter pw, String prefix) {
         pw.println(prefix + "displayId=" + mDisplayId + " stacks=" + mStacks.size());
         final String myPrefix = prefix + " ";

@@ -2726,7 +2726,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     }
 
     boolean isClosing() {
-        return mAnimatingExit || (mService.mClosingApps.contains(mAppToken));
+        return mAnimatingExit || (mAppToken.isAnimating() && mAppToken.hiddenRequested);
     }
 
     void addWinAnimatorToList(ArrayList<WindowStateAnimator> animators) {
