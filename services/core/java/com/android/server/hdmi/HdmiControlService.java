@@ -88,7 +88,7 @@ import libcore.util.EmptyArray;
  * Provides a service for sending and processing HDMI control messages,
  * HDMI-CEC and MHL control command, and providing the information on both standard.
  */
-public final class HdmiControlService extends SystemService {
+public class HdmiControlService extends SystemService {
     private static final String TAG = "HdmiControlService";
     private final Locale HONG_KONG = new Locale("zh", "HK");
     private final Locale MACAU = new Locale("zh", "MO");
