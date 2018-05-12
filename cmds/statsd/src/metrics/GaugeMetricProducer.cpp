@@ -84,7 +84,8 @@ GaugeMetricProducer::GaugeMetricProducer(const ConfigKey& key, const GaugeMetric
       mDimensionHardLimit(StatsdStats::kAtomDimensionKeySizeLimitMap.find(pullTagId) !=
                                           StatsdStats::kAtomDimensionKeySizeLimitMap.end()
                                   ? StatsdStats::kAtomDimensionKeySizeLimitMap.at(pullTagId).second
-                                  : StatsdStats::kDimensionKeySizeHardLimit) {
+                                  : StatsdStats::kDimensionKeySizeHardLimit),
+      mGaugeAtomsPerDimensionLimit(metric.max_num_gauge_atoms_per_bucket()) {
     mCurrentSlicedBucket = std::make_shared<DimToGaugeAtomsMap>();
     mCurrentSlicedBucketForAnomaly = std::make_shared<DimToValMap>();
     int64_t bucketSizeMills = 0;
@@ -431,6 +432,9 @@ void GaugeMetricProducer::onMatchedLogEventInternalLocked(
         return;
     }
     if (hitGuardRailLocked(eventKey)) {
+        return;
+    }
+    if ((*mCurrentSlicedBucket)[eventKey].size() >= mGaugeAtomsPerDimensionLimit) {
         return;
     }
     GaugeAtom gaugeAtom(getGaugeFields(event), eventTimeNs, getWallClockNs());
