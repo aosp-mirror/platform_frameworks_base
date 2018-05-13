@@ -409,7 +409,7 @@
     <item msgid="8934126114226089439">"50%"</item>
     <item msgid="1286113608943010849">"100%"</item>
   </string-array>
-    <string name="charge_length_format" msgid="8978516217024434156">"hace <xliff:g id="ID_1">%1$s</xliff:g>"</string>
+    <string name="charge_length_format" msgid="8978516217024434156">"Hace <xliff:g id="ID_1">%1$s</xliff:g>"</string>
     <string name="remaining_length_format" msgid="7886337596669190587">"Tiempo restante: <xliff:g id="ID_1">%1$s</xliff:g>"</string>
     <string name="screen_zoom_summary_small" msgid="5867245310241621570">"Pequeño"</string>
     <string name="screen_zoom_summary_default" msgid="2247006805614056507">"Predeterminado"</string>
