@@ -191,13 +191,14 @@ public abstract class SoundTriggerDetectionService extends Service {
                 client = mClients.get(uuid);
 
                 if (client == null) {
-                    throw new IllegalStateException("operationFinished called, but no client for "
+                    Log.w(LOG_TAG, "operationFinished called, but no client for "
                             + uuid + ". Was this called after onDisconnected?");
+                    return;
                 }
             }
             client.onOpFinished(opId);
         } catch (RemoteException e) {
-            e.rethrowFromSystemServer();
+            Log.e(LOG_TAG, "operationFinished, remote exception for client " + uuid, e);
         }
     }
 

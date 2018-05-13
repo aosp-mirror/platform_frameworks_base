@@ -155,7 +155,7 @@ TEST(StatsLogProcessorTest, TestUidMapHasSnapshot) {
 
     // Expect to get no metrics, but snapshot specified above in uidmap.
     vector<uint8_t> bytes;
-    p.onDumpReport(key, 1, false, true, ADB_DUMP, &bytes);
+    p.onDumpReport(key, 1, false, ADB_DUMP, &bytes);
 
     ConfigMetricsReportList output;
     output.ParseFromArray(bytes.data(), bytes.size());
@@ -180,7 +180,7 @@ TEST(StatsLogProcessorTest, TestEmptyConfigHasNoUidMap) {
 
     // Expect to get no metrics, but snapshot specified above in uidmap.
     vector<uint8_t> bytes;
-    p.onDumpReport(key, 1, false, true, ADB_DUMP, &bytes);
+    p.onDumpReport(key, 1, false, ADB_DUMP, &bytes);
 
     ConfigMetricsReportList output;
     output.ParseFromArray(bytes.data(), bytes.size());
@@ -206,7 +206,7 @@ TEST(StatsLogProcessorTest, TestReportIncludesSubConfig) {
 
     // Expect to get no metrics, but snapshot specified above in uidmap.
     vector<uint8_t> bytes;
-    p.onDumpReport(key, 1, false, true, ADB_DUMP, &bytes);
+    p.onDumpReport(key, 1, false, ADB_DUMP, &bytes);
 
     ConfigMetricsReportList output;
     output.ParseFromArray(bytes.data(), bytes.size());

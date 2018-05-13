@@ -123,6 +123,10 @@ public final class Settings {
      * Input: Nothing.
      * <p>
      * Output: Nothing.
+     *
+     * <p class="note">
+     * In some cases, a matching Activity may not exist, so ensure you
+     * safeguard against this.
      */
     @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
     public static final String ACTION_APN_SETTINGS = "android.settings.APN_SETTINGS";
@@ -882,6 +886,10 @@ public final class Settings {
      * Applications can also use {@link android.net.ConnectivityManager#getRestrictBackgroundStatus
      * ConnectivityManager#getRestrictBackgroundStatus()} to determine the
      * status of the background data restrictions for them.
+     *
+     * <p class="note">
+     * In some cases, a matching Activity may not exist, so ensure you
+     * safeguard against this.
      */
     @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
     public static final String ACTION_IGNORE_BACKGROUND_DATA_RESTRICTIONS_SETTINGS =
@@ -1148,6 +1156,10 @@ public final class Settings {
      * Input: Nothing.
      * <p>
      * Output: Nothing.
+     *
+     * <p class="note">
+     * In some cases, a matching Activity may not exist, so ensure you
+     * safeguard against this.
      */
     @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
     public static final String ACTION_NOTIFICATION_POLICY_ACCESS_SETTINGS
@@ -12726,6 +12738,25 @@ public final class Settings {
          * @hide
          */
         public static final String SHOW_ZEN_UPGRADE_NOTIFICATION = "show_zen_upgrade_notification";
+
+        /**
+         * If nonzero, will show the zen update settings suggestion.
+         * @hide
+         */
+        public static final String SHOW_ZEN_SETTINGS_SUGGESTION = "show_zen_settings_suggestion";
+
+        /**
+         * If nonzero, zen has not been updated to reflect new changes.
+         * @hide
+         */
+        public static final String ZEN_SETTINGS_UPDATED = "zen_settings_updated";
+
+        /**
+         * If nonzero, zen setting suggestion has beem viewed by user
+         * @hide
+         */
+        public static final String ZEN_SETTINGS_SUGGESTION_VIEWED =
+                "zen_settings_suggestion_viewed";
 
         /**
          * Backup and restore agent timeout parameters.

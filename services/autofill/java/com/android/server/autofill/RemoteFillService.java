@@ -84,6 +84,8 @@ final class RemoteFillService implements DeathRecipient {
 
     private final Handler mHandler;
 
+    private final boolean mBindInstantServiceAllowed;
+
     private IAutoFillService mAutoFillService;
 
     private boolean mBinding;
@@ -109,13 +111,14 @@ final class RemoteFillService implements DeathRecipient {
     }
 
     public RemoteFillService(Context context, ComponentName componentName,
-            int userId, FillServiceCallbacks callbacks) {
+            int userId, FillServiceCallbacks callbacks, boolean bindInstantServiceAllowed) {
         mContext = context;
         mCallbacks = callbacks;
         mComponentName = componentName;
         mIntent = new Intent(AutofillService.SERVICE_INTERFACE).setComponent(mComponentName);
         mUserId = userId;
         mHandler = new Handler(FgThread.getHandler().getLooper());
+        mBindInstantServiceAllowed = bindInstantServiceAllowed;
     }
 
     public void destroy() {
@@ -207,6 +210,7 @@ final class RemoteFillService implements DeathRecipient {
                 .append(String.valueOf(isBound())).println();
         pw.append(prefix).append(tab).append("hasPendingRequest=")
                 .append(String.valueOf(mPendingRequest != null)).println();
+        pw.append(prefix).append("mBindInstantServiceAllowed=").println(mBindInstantServiceAllowed);
         pw.println();
     }
 
@@ -258,12 +262,17 @@ final class RemoteFillService implements DeathRecipient {
         if (sVerbose) Slog.v(LOG_TAG, "[user: " + mUserId + "] ensureBound()");
         mBinding = true;
 
-        boolean willBind = mContext.bindServiceAsUser(mIntent, mServiceConnection,
-                Context.BIND_AUTO_CREATE | Context.BIND_FOREGROUND_SERVICE,
+        int flags = Context.BIND_AUTO_CREATE | Context.BIND_FOREGROUND_SERVICE;
+        if (mBindInstantServiceAllowed) {
+            flags |= Context.BIND_ALLOW_INSTANT;
+        }
+
+        final boolean willBind = mContext.bindServiceAsUser(mIntent, mServiceConnection, flags,
                 new UserHandle(mUserId));
 
         if (!willBind) {
-            if (sDebug) Slog.d(LOG_TAG, "[user: " + mUserId + "] could not bind to " + mIntent);
+            Slog.w(LOG_TAG, "[user: " + mUserId + "] could not bind to " + mIntent + " using flags "
+                    + flags);
             mBinding = false;
 
             if (!mServiceDied) {

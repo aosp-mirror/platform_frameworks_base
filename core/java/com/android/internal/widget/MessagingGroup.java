@@ -148,8 +148,6 @@ public class MessagingGroup extends LinearLayout implements MessagingLinearLayou
         }
         mAvatarView.setVisibility(VISIBLE);
         mSenderName.setVisibility(TextUtils.isEmpty(nameOverride) ? GONE : VISIBLE);
-        mTextColor = getNormalTextColor();
-        mSendingTextColor = calculateSendingTextColor();
     }
 
     public void setSending(boolean sending) {
@@ -158,10 +156,6 @@ public class MessagingGroup extends LinearLayout implements MessagingLinearLayou
             mSendingSpinnerContainer.setVisibility(visibility);
             updateMessageColor();
         }
-    }
-
-    private int getNormalTextColor() {
-        return mContext.getColor(R.color.notification_secondary_text_color_light);
     }
 
     private int calculateSendingTextColor() {
@@ -361,6 +355,13 @@ public class MessagingGroup extends LinearLayout implements MessagingLinearLayou
             setLayoutColor(layoutColor);
             mAvatarName = avatarName;
         }
+    }
+
+    public void setTextColors(int senderTextColor, int messageTextColor) {
+        mTextColor = messageTextColor;
+        mSendingTextColor = calculateSendingTextColor();
+        updateMessageColor();
+        mSenderName.setTextColor(senderTextColor);
     }
 
     public void setLayoutColor(int layoutColor) {

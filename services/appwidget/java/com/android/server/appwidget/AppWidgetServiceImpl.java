@@ -568,8 +568,9 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
             Context userContext = mContext.createPackageContextAsUser(providerPackage, 0,
                     UserHandle.of(providerUserId));
             PackageManager pm = userContext.getPackageManager();
-            Drawable icon = pm.getApplicationInfo(providerPackage, 0).loadUnbadgedIcon(pm);
+            Drawable icon = pm.getApplicationInfo(providerPackage, 0).loadUnbadgedIcon(pm).mutate();
             // Create a bitmap of the icon which is what the widget's remoteview requires.
+            icon.setColorFilter(mIconUtilities.getDisabledColorFilter());
             return mIconUtilities.createIconBitmap(icon);
         } catch (NameNotFoundException e) {
             Slog.e(TAG, "Fail to get application icon", e);

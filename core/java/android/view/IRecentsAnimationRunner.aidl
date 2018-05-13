@@ -29,12 +29,6 @@ import android.view.IRecentsAnimationController;
 oneway interface IRecentsAnimationRunner {
 
     /**
-     * Deprecated, to be removed once Launcher updates
-     */
-    void onAnimationStart(in IRecentsAnimationController controller,
-            in RemoteAnimationTarget[] apps) = 0;
-
-    /**
      * Called when the system needs to cancel the current animation. This can be due to the
      * wallpaper not drawing in time, or the handler not finishing the animation within a predefined
      * amount of time.
@@ -48,7 +42,7 @@ oneway interface IRecentsAnimationRunner {
      * @param minimizedHomeBounds Specifies the bounds of the minimized home app, will be
      *                            {@code null} if the device is not currently in split screen
      */
-    void onAnimationStart_New(in IRecentsAnimationController controller,
+    void onAnimationStart(in IRecentsAnimationController controller,
             in RemoteAnimationTarget[] apps, in Rect homeContentInsets,
             in Rect minimizedHomeBounds) = 2;
 }

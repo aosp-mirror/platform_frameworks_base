@@ -429,9 +429,13 @@ public class ApfFilter {
         try {
             mHardwareAddress = mInterfaceParams.macAddr.toByteArray();
             synchronized(this) {
-                // Clear APF memory.
-                byte[] zeroes = new byte[mApfCapabilities.maximumApfProgramSize];
-                mIpClientCallback.installPacketFilter(zeroes);
+                // Clear the APF memory to reset all counters upon connecting to the first AP
+                // in an SSID. This is limited to APFv4 devices because this large write triggers
+                // a crash on some older devices (b/78905546).
+                if (mApfCapabilities.hasDataAccess()) {
+                    byte[] zeroes = new byte[mApfCapabilities.maximumApfProgramSize];
+                    mIpClientCallback.installPacketFilter(zeroes);
+                }
 
                 // Install basic filters
                 installNewProgramLocked();

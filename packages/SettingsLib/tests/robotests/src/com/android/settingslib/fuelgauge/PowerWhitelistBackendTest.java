@@ -61,24 +61,32 @@ public class PowerWhitelistBackendTest {
 
         assertThat(mPowerWhitelistBackend.isWhitelisted(PACKAGE_ONE)).isTrue();
         assertThat(mPowerWhitelistBackend.isWhitelisted(PACKAGE_TWO)).isFalse();
+        assertThat(mPowerWhitelistBackend.isWhitelisted(new String[]{PACKAGE_ONE})).isTrue();
+        assertThat(mPowerWhitelistBackend.isWhitelisted(new String[]{PACKAGE_TWO})).isFalse();
 
         mPowerWhitelistBackend.addApp(PACKAGE_TWO);
 
         verify(mDeviceIdleService, atLeastOnce()).addPowerSaveWhitelistApp(PACKAGE_TWO);
         assertThat(mPowerWhitelistBackend.isWhitelisted(PACKAGE_ONE)).isTrue();
         assertThat(mPowerWhitelistBackend.isWhitelisted(PACKAGE_TWO)).isTrue();
+        assertThat(mPowerWhitelistBackend.isWhitelisted(
+                new String[]{PACKAGE_ONE, PACKAGE_TWO})).isTrue();
 
         mPowerWhitelistBackend.removeApp(PACKAGE_TWO);
 
         verify(mDeviceIdleService, atLeastOnce()).removePowerSaveWhitelistApp(PACKAGE_TWO);
         assertThat(mPowerWhitelistBackend.isWhitelisted(PACKAGE_ONE)).isTrue();
         assertThat(mPowerWhitelistBackend.isWhitelisted(PACKAGE_TWO)).isFalse();
+        assertThat(mPowerWhitelistBackend.isWhitelisted(new String[]{PACKAGE_ONE})).isTrue();
+        assertThat(mPowerWhitelistBackend.isWhitelisted(new String[]{PACKAGE_TWO})).isFalse();
 
         mPowerWhitelistBackend.removeApp(PACKAGE_ONE);
 
         verify(mDeviceIdleService, atLeastOnce()).removePowerSaveWhitelistApp(PACKAGE_ONE);
         assertThat(mPowerWhitelistBackend.isWhitelisted(PACKAGE_ONE)).isFalse();
         assertThat(mPowerWhitelistBackend.isWhitelisted(PACKAGE_TWO)).isFalse();
+        assertThat(mPowerWhitelistBackend.isWhitelisted(
+                new String[]{PACKAGE_ONE, PACKAGE_TWO})).isFalse();
     }
 
     @Test

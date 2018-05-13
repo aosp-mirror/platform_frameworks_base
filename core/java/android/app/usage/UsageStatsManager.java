@@ -572,13 +572,14 @@ public final class UsageStatsManager {
      * the sum of usages of apps in the packages array exceeds the {@code timeLimit} specified. The
      * observer will automatically be unregistered when the time limit is reached and the intent
      * is delivered. Registering an {@code observerId} that was already registered will override
-     * the previous one.
+     * the previous one. No more than 1000 unique {@code observerId} may be registered by a single
+     * uid at any one time.
      * @param observerId A unique id associated with the group of apps to be monitored. There can
      *                  be multiple groups with common packages and different time limits.
      * @param packages The list of packages to observe for foreground activity time. Cannot be null
      *                 and must include at least one package.
      * @param timeLimit The total time the set of apps can be in the foreground before the
-     *                  callbackIntent is delivered. Must be greater than 0.
+     *                  callbackIntent is delivered. Must be at least one minute.
      * @param timeUnit The unit for time specified in {@code timeLimit}. Cannot be null.
      * @param callbackIntent The PendingIntent that will be dispatched when the time limit is
      *                       exceeded by the group of apps. The delivered Intent will also contain

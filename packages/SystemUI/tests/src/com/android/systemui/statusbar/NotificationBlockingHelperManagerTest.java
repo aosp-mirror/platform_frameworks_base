@@ -20,6 +20,7 @@ import com.android.systemui.SysuiTestCase;
 import com.android.systemui.plugins.statusbar.NotificationMenuRowPlugin;
 
 import android.content.Context;
+import android.support.test.filters.FlakyTest;
 import android.support.test.filters.SmallTest;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
@@ -29,6 +30,7 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 import org.mockito.junit.MockitoJUnit;
 import org.mockito.junit.MockitoRule;
 
@@ -48,6 +50,7 @@ import static org.mockito.Mockito.when;
  * Tests for {@link NotificationBlockingHelperManager}.
  */
 @SmallTest
+@FlakyTest
 @org.junit.runner.RunWith(AndroidTestingRunner.class)
 @TestableLooper.RunWithLooper
 public class NotificationBlockingHelperManagerTest extends SysuiTestCase {
@@ -56,7 +59,6 @@ public class NotificationBlockingHelperManagerTest extends SysuiTestCase {
 
     private NotificationTestHelper mHelper;
 
-    @Rule public MockitoRule mockito = MockitoJUnit.rule();
     @Mock private NotificationGutsManager mGutsManager;
     @Mock private NotificationEntryManager mEntryManager;
     @Mock private NotificationMenuRow mMenuRow;
@@ -64,20 +66,22 @@ public class NotificationBlockingHelperManagerTest extends SysuiTestCase {
 
     @Before
     public void setUp() {
-        mBlockingHelperManager = new NotificationBlockingHelperManager(mContext);
-        // By default, have the shade visible/expanded.
-        mBlockingHelperManager.setNotificationShadeExpanded(1f);
-
-        mHelper = new NotificationTestHelper(mContext);
+        MockitoAnnotations.initMocks(this);
         when(mGutsManager.openGuts(
                 any(View.class),
                 anyInt(),
                 anyInt(),
                 any(NotificationMenuRowPlugin.MenuItem.class)))
                 .thenReturn(true);
+        when(mMenuRow.getLongpressMenuItem(any(Context.class))).thenReturn(mMenuItem);
         mDependency.injectTestDependency(NotificationGutsManager.class, mGutsManager);
         mDependency.injectTestDependency(NotificationEntryManager.class, mEntryManager);
-        when(mMenuRow.getLongpressMenuItem(any(Context.class))).thenReturn(mMenuItem);
+
+        mHelper = new NotificationTestHelper(mContext);
+
+        mBlockingHelperManager = new NotificationBlockingHelperManager(mContext);
+        // By default, have the shade visible/expanded.
+        mBlockingHelperManager.setNotificationShadeExpanded(1f);
     }
 
     @Test
@@ -89,7 +93,7 @@ public class NotificationBlockingHelperManagerTest extends SysuiTestCase {
 
     @Test
     public void testDismissCurrentBlockingHelper_withDetachedBlockingHelperRow() throws Exception {
-        ExpandableNotificationRow row = spy(createBlockableRowSpy());
+        ExpandableNotificationRow row = createBlockableRowSpy();
         row.setBlockingHelperShowing(true);
         when(row.isAttachedToWindow()).thenReturn(false);
         mBlockingHelperManager.setBlockingHelperRowForTest(row);
@@ -102,7 +106,7 @@ public class NotificationBlockingHelperManagerTest extends SysuiTestCase {
 
     @Test
     public void testDismissCurrentBlockingHelper_withAttachedBlockingHelperRow() throws Exception {
-        ExpandableNotificationRow row = spy(createBlockableRowSpy());
+        ExpandableNotificationRow row = createBlockableRowSpy();
         row.setBlockingHelperShowing(true);
         when(row.isAttachedToWindow()).thenReturn(true);
         mBlockingHelperManager.setBlockingHelperRowForTest(row);
@@ -200,7 +204,7 @@ public class NotificationBlockingHelperManagerTest extends SysuiTestCase {
 
     @Test
     public void testBlockingHelperShowAndDismiss() throws Exception{
-        ExpandableNotificationRow row = spy(createBlockableRowSpy());
+        ExpandableNotificationRow row = createBlockableRowSpy();
         row.getEntry().userSentiment = USER_SENTIMENT_NEGATIVE;
         when(row.isAttachedToWindow()).thenReturn(true);
 
@@ -227,6 +231,4 @@ public class NotificationBlockingHelperManagerTest extends SysuiTestCase {
         when(row.getIsNonblockable()).thenReturn(false);
         return row;
     }
-
-
 }

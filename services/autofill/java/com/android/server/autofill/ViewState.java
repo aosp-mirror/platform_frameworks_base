@@ -18,7 +18,6 @@ package com.android.server.autofill;
 
 import static android.service.autofill.FillRequest.FLAG_MANUAL_REQUEST;
 import static com.android.server.autofill.Helper.sDebug;
-import static com.android.server.autofill.Helper.sVerbose;
 
 import android.annotation.Nullable;
 import android.graphics.Rect;

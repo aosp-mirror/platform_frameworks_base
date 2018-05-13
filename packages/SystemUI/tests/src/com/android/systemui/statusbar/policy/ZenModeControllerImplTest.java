@@ -105,4 +105,10 @@ public class ZenModeControllerImplTest extends SysuiTestCase {
 
         assertTrue(mController.areNotificationsHiddenInShade());
     }
+
+    @Test
+    public void testAddNullCallback() {
+        mController.addCallback(null);
+        mController.fireConfigChanged(null);
+    }
 }

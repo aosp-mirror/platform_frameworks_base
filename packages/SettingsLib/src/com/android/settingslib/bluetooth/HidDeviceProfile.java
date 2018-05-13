@@ -98,6 +98,11 @@ public class HidDeviceProfile implements LocalBluetoothProfile {
     }
 
     @Override
+    public int getProfileId() {
+        return BluetoothProfile.HID_DEVICE;
+    }
+
+    @Override
     public boolean isConnectable() {
         return true;
     }

@@ -56,32 +56,10 @@ struct AAsset {
 // -------------------- Public native C API --------------------
 
 /**
- * Supporting information
- */
-
-static struct assetmanager_offsets_t
-{
-    jfieldID mObject;
-} gAssetManagerOffsets;
-
-static volatile bool gJNIConfigured = false;
-static Mutex gMutex;
-
-/**
  * Asset Manager functionality
  */
 AAssetManager* AAssetManager_fromJava(JNIEnv* env, jobject assetManager)
 {
-    {
-        Mutex::Autolock _l(gMutex);
-
-        if (gJNIConfigured == false) {
-            jclass amClass = env->FindClass("android/content/res/AssetManager");
-            gAssetManagerOffsets.mObject = env->GetFieldID(amClass, "mObject", "J");
-            gJNIConfigured = true;
-        }
-    }
-
     return (AAssetManager*) env->GetLongField(assetManager, gAssetManagerOffsets.mObject);
 }
 

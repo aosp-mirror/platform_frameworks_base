@@ -68,6 +68,9 @@ public final class Helper {
 
     /**
      * When non-null, overrides whether the UI should be shown on full-screen mode.
+     *
+     * <p>Note: access to this variable is not synchronized because it's "final" on real usage -
+     * it's only set by Shell cmd, for development purposes.
      */
     public static Boolean sFullScreenMode = null;
 

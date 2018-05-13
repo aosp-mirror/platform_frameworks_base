@@ -7015,7 +7015,12 @@ public class Notification implements Parcelable
             contentView.setViewLayoutMarginEnd(R.id.notification_messaging,
                     bindResult.getIconMarginEnd());
             contentView.setInt(R.id.status_bar_latest_event_content, "setLayoutColor",
-                    mBuilder.resolveContrastColor());
+                    mBuilder.isColorized() ? mBuilder.getPrimaryTextColor()
+                            : mBuilder.resolveContrastColor());
+            contentView.setInt(R.id.status_bar_latest_event_content, "setSenderTextColor",
+                    mBuilder.getPrimaryTextColor());
+            contentView.setInt(R.id.status_bar_latest_event_content, "setMessageTextColor",
+                    mBuilder.getSecondaryTextColor());
             contentView.setBoolean(R.id.status_bar_latest_event_content, "setDisplayImagesAtEnd",
                     displayImagesAtEnd);
             contentView.setIcon(R.id.status_bar_latest_event_content, "setLargeIcon",

@@ -1090,6 +1090,15 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
         }
     }
 
+    @Override
+    protected void setBackgroundTintColor(int color) {
+        super.setBackgroundTintColor(color);
+        NotificationContentView view = getShowingLayout();
+        if (view != null) {
+            view.setBackgroundTintColor(color);
+        }
+    }
+
     public void closeRemoteInput() {
         for (NotificationContentView l : mLayouts) {
             l.closeRemoteInput();
@@ -1640,6 +1649,45 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
         }
 
         mMenuRow.resetMenu();
+    }
+
+    void onGutsOpened() {
+        resetTranslation();
+        updateContentAccessibilityImportanceForGuts(false /* isEnabled */);
+    }
+
+    void onGutsClosed() {
+        updateContentAccessibilityImportanceForGuts(true /* isEnabled */);
+    }
+
+    /**
+     * Updates whether all the non-guts content inside this row is important for accessibility.
+     *
+     * @param isEnabled whether the content views should be enabled for accessibility
+     */
+    private void updateContentAccessibilityImportanceForGuts(boolean isEnabled) {
+        if (mChildrenContainer != null) {
+            updateChildAccessibilityImportance(mChildrenContainer, isEnabled);
+        }
+        if (mLayouts != null) {
+            for (View view : mLayouts) {
+                updateChildAccessibilityImportance(view, isEnabled);
+            }
+        }
+
+        if (isEnabled) {
+            this.requestAccessibilityFocus();
+        }
+    }
+
+    /**
+     * Updates whether the given childView is important for accessibility based on
+     * {@code isEnabled}.
+     */
+    private void updateChildAccessibilityImportance(View childView, boolean isEnabled) {
+        childView.setImportantForAccessibility(isEnabled
+                ? View.IMPORTANT_FOR_ACCESSIBILITY_AUTO
+                : View.IMPORTANT_FOR_ACCESSIBILITY_NO_HIDE_DESCENDANTS);
     }
 
     public CharSequence getActiveRemoteInputText() {

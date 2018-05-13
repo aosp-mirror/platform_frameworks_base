@@ -159,6 +159,7 @@ public class NotificationGutsManager implements Dumpable {
         row.setGutsView(item);
         row.setTag(sbn.getPackageName());
         row.getGuts().setClosedListener((NotificationGuts g) -> {
+            row.onGutsClosed();
             if (!g.willBeRemoved() && !row.isRemoved()) {
                 mListContainer.onHeightChanged(
                         row, !mPresenter.isPresenterFullyCollapsed() /* needsAnimation */);
@@ -372,7 +373,7 @@ public class NotificationGutsManager implements Dumpable {
             @Override
             public void run() {
                 if (row.getWindowToken() == null) {
-                    Log.e(TAG, "Trying to show notification guts, but not attached to "
+                    Log.e(TAG, "Trying to show notification guts in post(), but not attached to "
                             + "window");
                     return;
                 }
@@ -390,7 +391,7 @@ public class NotificationGutsManager implements Dumpable {
                         x,
                         y,
                         needsFalsingProtection,
-                        row::resetTranslation);
+                        row::onGutsOpened);
 
                 row.closeRemoteInput();
                 mListContainer.onHeightChanged(row, true /* needsAnimation */);

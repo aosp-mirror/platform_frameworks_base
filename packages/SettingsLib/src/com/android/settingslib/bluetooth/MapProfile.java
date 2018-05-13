@@ -93,6 +93,11 @@ public class MapProfile implements LocalBluetoothProfile {
         return mIsProfileReady;
     }
 
+    @Override
+    public int getProfileId() {
+        return BluetoothProfile.MAP;
+    }
+
     MapProfile(Context context, LocalBluetoothAdapter adapter,
             CachedBluetoothDeviceManager deviceManager,
             LocalBluetoothProfileManager profileManager) {

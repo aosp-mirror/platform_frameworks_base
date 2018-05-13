@@ -64,6 +64,7 @@ import android.os.IBinder;
 import android.os.IProgressListener;
 import android.os.IRemoteCallback;
 import android.os.IUserManager;
+import android.os.Looper;
 import android.os.Message;
 import android.os.Process;
 import android.os.RemoteCallbackList;
@@ -962,6 +963,11 @@ class UserController implements Handler.Callback {
                     updateStartedUserArrayLU();
                     needStart = true;
                     updateUmState = true;
+                } else if (uss.state == UserState.STATE_SHUTDOWN && !isCallingOnHandlerThread()) {
+                    Slog.i(TAG, "User #" + userId
+                            + " is shutting down - will start after full stop");
+                    mHandler.post(() -> startUser(userId, foreground, unlockListener));
+                    return true;
                 }
                 final Integer userIdInt = userId;
                 mUserLru.remove(userIdInt);
@@ -1084,6 +1090,10 @@ class UserController implements Handler.Callback {
         }
 
         return true;
+    }
+
+    private boolean isCallingOnHandlerThread() {
+        return Looper.myLooper() == mHandler.getLooper();
     }
 
     /**

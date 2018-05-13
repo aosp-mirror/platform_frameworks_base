@@ -4714,11 +4714,11 @@
     <!-- Menu item in the locale menu  [CHAR LIMIT=30] -->
     <string name="locale_search_menu">Search</string>
 
-    <!-- Title of the dialog that is shown when the user tries to launch a suspended application [CHAR LIMIT=30] -->
-    <string name="app_suspended_title">Can\u2019t open app</string>
+    <!-- Title of the dialog that is shown when the user tries to launch a suspended application [CHAR LIMIT=50] -->
+    <string name="app_suspended_title">App isn\u2019t available</string>
     <!-- Default message shown in the dialog that is shown when the user tries to launch a suspended application [CHAR LIMIT=NONE] -->
     <string name="app_suspended_default_message">
-        The app <xliff:g id="app_name" example="Gmail">%1$s</xliff:g> isn\u2019t available right now. This is managed by <xliff:g id="app_name" example="Settings">%2$s</xliff:g>.
+        <xliff:g id="app_name" example="Gmail">%1$s</xliff:g> isn\u2019t available right now. This is managed by <xliff:g id="app_name" example="Settings">%2$s</xliff:g>.
     </string>
     <!-- Title of the button to show users more details about why the app has been suspended [CHAR LIMIT=50]-->
     <string name="app_suspended_more_details">Learn more</string>
@@ -4968,6 +4968,14 @@
     <string name="notification_app_name_system">System</string>
     <!-- Application name displayed in notifications [CHAR LIMIT=60] -->
     <string name="notification_app_name_settings">Settings</string>
+
+    <!-- Active Permission - accessibility support -->
+    <!-- Content description of the camera icon in the notification. [CHAR LIMIT=NONE] -->
+    <string name="notification_appops_camera_active">Camera</string>
+    <!-- Content description of the mic icon in the notification. [CHAR LIMIT=NONE] -->
+    <string name="notification_appops_microphone_active">Microphone</string>
+    <!-- Content description of the overlay icon in the notification. [CHAR LIMIT=NONE] -->
+    <string name="notification_appops_overlay_active">displaying over other apps on your screen</string>
 
     <!-- Strings for car -->
     <!-- String displayed when loading a user in the car [CHAR LIMIT=30] -->
