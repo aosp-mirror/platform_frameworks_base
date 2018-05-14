@@ -8574,6 +8574,8 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
 
         private final Rect mLocation = new Rect();
 
+        private ViewGroup mRoot;
+
         public View mView;
 
         private int mLayoutDirection;
@@ -8603,47 +8605,100 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
                 return 1;
             }
 
+            int boundsResult = compareBoundsOfTree(this, another);
+            if (boundsResult != 0) {
+                return boundsResult;
+            }
+
+            // Just break the tie somehow. The accessibility ids are unique
+            // and stable, hence this is deterministic tie breaking.
+            return mView.getAccessibilityViewId() - another.mView.getAccessibilityViewId();
+        }
+
+        /**
+         * Compare two views based on their bounds. Use the bounds of their children to break ties.
+         *
+         * @param holder1 Holder of first view to compare
+         * @param holder2 Holder of second view to compare. Must have the same root at holder1.
+         * @return The compare result, with equality if no good comparison was found.
+         */
+        private static int compareBoundsOfTree(
+                ViewLocationHolder holder1, ViewLocationHolder holder2) {
             if (sComparisonStrategy == COMPARISON_STRATEGY_STRIPE) {
                 // First is above second.
-                if (mLocation.bottom - another.mLocation.top <= 0) {
+                if (holder1.mLocation.bottom - holder2.mLocation.top <= 0) {
                     return -1;
                 }
                 // First is below second.
-                if (mLocation.top - another.mLocation.bottom >= 0) {
+                if (holder1.mLocation.top - holder2.mLocation.bottom >= 0) {
                     return 1;
                 }
             }
 
             // We are ordering left-to-right, top-to-bottom.
-            if (mLayoutDirection == LAYOUT_DIRECTION_LTR) {
-                final int leftDifference = mLocation.left - another.mLocation.left;
+            if (holder1.mLayoutDirection == LAYOUT_DIRECTION_LTR) {
+                final int leftDifference = holder1.mLocation.left - holder2.mLocation.left;
                 if (leftDifference != 0) {
                     return leftDifference;
                 }
             } else { // RTL
-                final int rightDifference = mLocation.right - another.mLocation.right;
+                final int rightDifference = holder1.mLocation.right - holder2.mLocation.right;
                 if (rightDifference != 0) {
                     return -rightDifference;
                 }
             }
             // We are ordering left-to-right, top-to-bottom.
-            final int topDifference = mLocation.top - another.mLocation.top;
+            final int topDifference = holder1.mLocation.top - holder2.mLocation.top;
             if (topDifference != 0) {
                 return topDifference;
             }
             // Break tie by height.
-            final int heightDiference = mLocation.height() - another.mLocation.height();
+            final int heightDiference = holder1.mLocation.height() - holder2.mLocation.height();
             if (heightDiference != 0) {
                 return -heightDiference;
             }
             // Break tie by width.
-            final int widthDiference = mLocation.width() - another.mLocation.width();
-            if (widthDiference != 0) {
-                return -widthDiference;
+            final int widthDifference = holder1.mLocation.width() - holder2.mLocation.width();
+            if (widthDifference != 0) {
+                return -widthDifference;
             }
-            // Just break the tie somehow. The accessibliity ids are unique
-            // and stable, hence this is deterministic tie breaking.
-            return mView.getAccessibilityViewId() - another.mView.getAccessibilityViewId();
+
+            // Find a child of each view with different screen bounds.
+            final Rect view1Bounds = new Rect();
+            final Rect view2Bounds = new Rect();
+            final Rect tempRect = new Rect();
+            holder1.mView.getBoundsOnScreen(view1Bounds, true);
+            holder2.mView.getBoundsOnScreen(view2Bounds, true);
+            final View child1 = holder1.mView.findViewByPredicateTraversal((view) -> {
+                view.getBoundsOnScreen(tempRect, true);
+                return !tempRect.equals(view1Bounds);
+            }, null);
+            final View child2 = holder2.mView.findViewByPredicateTraversal((view) -> {
+                view.getBoundsOnScreen(tempRect, true);
+                return !tempRect.equals(view2Bounds);
+            }, null);
+
+
+            // Compare the children recursively
+            if ((child1 != null) && (child2 != null)) {
+                final ViewLocationHolder childHolder1 =
+                        ViewLocationHolder.obtain(holder1.mRoot, child1);
+                final ViewLocationHolder childHolder2 =
+                        ViewLocationHolder.obtain(holder1.mRoot, child2);
+                return compareBoundsOfTree(childHolder1, childHolder2);
+            }
+
+            // If only one has a child, use that one
+            if (child1 != null) {
+                return 1;
+            }
+
+            if (child2 != null) {
+                return -1;
+            }
+
+            // Give up
+            return 0;
         }
 
         private void init(ViewGroup root, View view) {
@@ -8651,6 +8706,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
             view.getDrawingRect(viewLocation);
             root.offsetDescendantRectToMyCoords(view, viewLocation);
             mView = view;
+            mRoot = root;
             mLayoutDirection = root.getLayoutDirection();
         }
 
