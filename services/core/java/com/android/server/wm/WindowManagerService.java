@@ -1797,6 +1797,12 @@ public class WindowManagerService extends IWindowManager.Stub
                     }
                     w.setDisplayLayoutNeeded();
                     mWindowPlacerLocked.performSurfacePlacement();
+
+                    // We need to report touchable region changes to accessibility.
+                    if (mAccessibilityController != null
+                            && w.getDisplayContent().getDisplayId() == DEFAULT_DISPLAY) {
+                        mAccessibilityController.onSomeWindowResizedOrMovedLocked();
+                    }
                 }
             }
         } finally {
