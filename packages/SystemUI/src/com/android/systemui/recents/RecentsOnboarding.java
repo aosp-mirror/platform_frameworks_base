@@ -24,6 +24,10 @@ import static com.android.systemui.Prefs.Key.HAS_SEEN_RECENTS_QUICK_SCRUB_ONBOAR
 import static com.android.systemui.Prefs.Key.HAS_SEEN_RECENTS_SWIPE_UP_ONBOARDING;
 import static com.android.systemui.Prefs.Key.OVERVIEW_OPENED_COUNT;
 import static com.android.systemui.Prefs.Key.OVERVIEW_OPENED_FROM_HOME_COUNT;
+import static com.android.systemui.shared.system.LauncherEventUtil.VISIBLE;
+import static com.android.systemui.shared.system.LauncherEventUtil.DISMISS;
+import static com.android.systemui.shared.system.LauncherEventUtil.RECENTS_QUICK_SCRUB_ONBOARDING_TIP;
+import static com.android.systemui.shared.system.LauncherEventUtil.RECENTS_SWIPE_UP_ONBOARDING_TIP;
 
 import android.annotation.StringRes;
 import android.annotation.TargetApi;
@@ -38,6 +42,7 @@ import android.graphics.drawable.ShapeDrawable;
 import android.os.Build;
 import android.os.SystemProperties;
 import android.os.UserManager;
+import android.os.RemoteException;
 import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -53,7 +58,9 @@ import com.android.systemui.OverviewProxyService;
 import com.android.systemui.Prefs;
 import com.android.systemui.R;
 import com.android.systemui.recents.misc.SysUiTaskStackChangeListener;
+import com.android.systemui.shared.recents.IOverviewProxy;
 import com.android.systemui.shared.system.ActivityManagerWrapper;
+import com.android.systemui.shared.system.LauncherEventUtil;
 
 import java.util.Collections;
 import java.util.HashSet;
@@ -120,6 +127,7 @@ public class RecentsOnboarding {
                     return;
                 }
 
+                boolean shouldLog = false;
                 if (!alreadySeenSwipeUpOnboarding) {
                     if (getOpenedOverviewFromHomeCount()
                             >= SWIPE_UP_SHOW_ON_OVERVIEW_OPENED_FROM_HOME_COUNT) {
@@ -128,10 +136,13 @@ public class RecentsOnboarding {
                             if (mNumAppsLaunchedSinceSwipeUpTipDismiss
                                     == SWIPE_UP_SHOW_ON_APP_LAUNCH_AFTER_DISMISS) {
                                 mNumAppsLaunchedSinceSwipeUpTipDismiss = 0;
-                                show(R.string.recents_swipe_up_onboarding);
+                                shouldLog = show(R.string.recents_swipe_up_onboarding);
                             }
                         } else {
-                            show(R.string.recents_swipe_up_onboarding);
+                            shouldLog = show(R.string.recents_swipe_up_onboarding);
+                        }
+                        if (shouldLog) {
+                            notifyOnTip(VISIBLE, RECENTS_SWIPE_UP_ONBOARDING_TIP);
                         }
                     }
                 } else {
@@ -140,12 +151,16 @@ public class RecentsOnboarding {
                             if (mOverviewOpenedCountSinceQuickScrubTipDismiss
                                     == QUICK_SCRUB_SHOW_ON_OVERVIEW_OPENED_COUNT) {
                                 mOverviewOpenedCountSinceQuickScrubTipDismiss = 0;
-                                show(R.string.recents_quick_scrub_onboarding);
+                                shouldLog = show(R.string.recents_quick_scrub_onboarding);
                             }
                         } else {
-                            show(R.string.recents_quick_scrub_onboarding);
+                            shouldLog = show(R.string.recents_quick_scrub_onboarding);
+                        }
+                        if (shouldLog) {
+                            notifyOnTip(VISIBLE, RECENTS_QUICK_SCRUB_ONBOARDING_TIP);
                         }
                     }
+
                 }
             } else {
                 hide(false);
@@ -244,6 +259,9 @@ public class RecentsOnboarding {
             if (v.getTag().equals(R.string.recents_swipe_up_onboarding)) {
                 mHasDismissedSwipeUpTip = true;
                 mNumAppsLaunchedSinceSwipeUpTipDismiss = 0;
+                notifyOnTip(DISMISS, RECENTS_SWIPE_UP_ONBOARDING_TIP);
+            } else {
+                notifyOnTip(DISMISS, RECENTS_QUICK_SCRUB_ONBOARDING_TIP);
             }
         });
 
@@ -263,6 +281,15 @@ public class RecentsOnboarding {
             setOpenedOverviewCount(0);
             setOpenedOverviewFromHomeCount(0);
         }
+    }
+
+    private void notifyOnTip(int action, int target) {
+        try {
+            IOverviewProxy overviewProxy = mOverviewProxyService.getProxy();
+            if(overviewProxy != null) {
+                overviewProxy.onTip(action, target);
+            }
+        } catch (RemoteException e) {}
     }
 
     public void onConnectedToLauncher() {
@@ -307,9 +334,9 @@ public class RecentsOnboarding {
         }
     }
 
-    public void show(@StringRes int stringRes) {
+    public boolean show(@StringRes int stringRes) {
         if (!shouldShow()) {
-            return;
+            return false;
         }
         mDismissView.setTag(stringRes);
         mLayout.setTag(stringRes);
@@ -328,7 +355,9 @@ public class RecentsOnboarding {
                     .setDuration(SHOW_DURATION_MS)
                     .setInterpolator(new DecelerateInterpolator())
                     .start();
+            return true;
         }
+        return false;
     }
 
     /**
