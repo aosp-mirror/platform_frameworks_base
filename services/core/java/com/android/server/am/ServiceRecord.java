@@ -73,7 +73,7 @@ final class ServiceRecord extends Binder implements ComponentName.WithComponentN
                             // original intent used to find service.
     final ServiceInfo serviceInfo;
                             // all information about the service.
-    final ApplicationInfo appInfo;
+    ApplicationInfo appInfo;
                             // information about service's app.
     final int userId;       // user that this service is running as
     final String packageName; // the package implementing intent's component
