@@ -53,7 +53,7 @@ public class BatterySavingStatsTest {
         private int mBatteryLevel = 1_000_000_000;
 
         private BatterySavingStatsTestable() {
-            super(mMetricsLogger);
+            super(new Object(), mMetricsLogger);
         }
 
         @Override
