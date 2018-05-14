@@ -17,6 +17,8 @@
 package com.android.systemui.volume;
 
 import static android.media.AudioManager.RINGER_MODE_NORMAL;
+import static android.media.AudioManager.RINGER_MODE_SILENT;
+import static android.media.AudioManager.RINGER_MODE_VIBRATE;
 
 import android.app.NotificationManager;
 import android.content.BroadcastReceiver;
@@ -581,11 +583,28 @@ public class VolumeDialogControllerImpl implements VolumeDialogController, Dumpa
         mState.ringerModeInternal = rm;
         Events.writeEvent(mContext, Events.EVENT_INTERNAL_RINGER_MODE_CHANGED, rm);
 
-        if (mState.ringerModeInternal == RINGER_MODE_NORMAL) {
-            playTouchFeedback();
+        provideFeedback(mState.ringerModeInternal);
+        return true;
+    }
+
+    private void provideFeedback(int newRingerMode) {
+        VibrationEffect effect = null;
+        switch (newRingerMode) {
+            case RINGER_MODE_NORMAL:
+                scheduleTouchFeedback();
+                playTouchFeedback();
+                break;
+            case RINGER_MODE_SILENT:
+                effect = VibrationEffect.get(VibrationEffect.EFFECT_CLICK);
+                break;
+            case RINGER_MODE_VIBRATE:
+            default:
+                effect = VibrationEffect.get(VibrationEffect.EFFECT_DOUBLE_CLICK);
         }
 
-        return true;
+        if (effect != null) {
+            vibrate(effect);
+        }
     }
 
     private void onSetRingerModeW(int mode, boolean external) {
