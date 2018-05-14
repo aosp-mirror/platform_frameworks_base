@@ -217,7 +217,7 @@ public class DeviceDiscoveryService extends Service {
         stopScan();
         mDevicesFound.clear();
         mSelectedDevice = null;
-        mDevicesAdapter.notifyDataSetChanged();
+        notifyDataSetChanged();
     }
 
     @Override
@@ -265,7 +265,12 @@ public class DeviceDiscoveryService extends Service {
             onReadyToShowUI();
         }
         mDevicesFound.add(device);
-        mDevicesAdapter.notifyDataSetChanged();
+        notifyDataSetChanged();
+    }
+
+    private void notifyDataSetChanged() {
+        Handler.getMain().sendMessage(obtainMessage(
+                DevicesAdapter::notifyDataSetChanged, mDevicesAdapter));
     }
 
     //TODO also, on timeout -> call onFailure
@@ -283,7 +288,7 @@ public class DeviceDiscoveryService extends Service {
 
     private void onDeviceLost(@Nullable DeviceFilterPair device) {
         mDevicesFound.remove(device);
-        mDevicesAdapter.notifyDataSetChanged();
+        notifyDataSetChanged();
         if (DEBUG) Log.i(LOG_TAG, "Lost device " + device.getDisplayName());
     }
 
