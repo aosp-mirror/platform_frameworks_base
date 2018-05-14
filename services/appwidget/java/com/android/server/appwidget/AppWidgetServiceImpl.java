@@ -102,7 +102,6 @@ import com.android.internal.appwidget.IAppWidgetService;
 import com.android.internal.os.BackgroundThread;
 import com.android.internal.os.SomeArgs;
 import com.android.internal.util.ArrayUtils;
-import com.android.internal.util.CollectionUtils;
 import com.android.internal.util.DumpUtils;
 import com.android.internal.util.FastXmlSerializer;
 import com.android.internal.widget.IRemoteViewsFactory;
@@ -110,7 +109,6 @@ import com.android.server.LocalServices;
 import com.android.server.WidgetBackupProvider;
 import com.android.server.policy.IconUtilities;
 
-import libcore.util.EmptyArray;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 import org.xmlpull.v1.XmlSerializer;
@@ -823,6 +821,12 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
         mSecurityPolicy.enforceCallFromPackage(callingPackage);
 
         synchronized (mLock) {
+            // Instant apps cannot host app widgets.
+            if (mSecurityPolicy.isInstantAppLocked(callingPackage, userId)) {
+                Slog.w(TAG, "Instant package " + callingPackage + " cannot host app widgets");
+                return ParceledListSlice.emptyList();
+            }
+
             ensureGroupStateLoadedLocked(userId);
 
             // NOTE: The lookup is enforcing security across users by making
@@ -889,6 +893,12 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
         mSecurityPolicy.enforceCallFromPackage(callingPackage);
 
         synchronized (mLock) {
+            // Instant apps cannot host app widgets.
+            if (mSecurityPolicy.isInstantAppLocked(callingPackage, userId)) {
+                Slog.w(TAG, "Instant package " + callingPackage + " cannot host app widgets");
+                return AppWidgetManager.INVALID_APPWIDGET_ID;
+            }
+
             ensureGroupStateLoadedLocked(userId);
 
             if (mNextAppWidgetIds.indexOfKey(userId) < 0) {
@@ -1620,6 +1630,13 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
 
     @Override
     public boolean isRequestPinAppWidgetSupported() {
+        synchronized (mLock) {
+            if (mSecurityPolicy.isCallerInstantAppLocked()) {
+                Slog.w(TAG, "Instant uid " + Binder.getCallingUid()
+                        + " query information about app widgets");
+                return false;
+            }
+        }
         return LocalServices.getService(ShortcutServiceInternal.class)
                 .isRequestPinItemSupported(UserHandle.getCallingUserId(),
                         LauncherApps.PinItemRequest.REQUEST_TYPE_APPWIDGET);
@@ -1670,6 +1687,12 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
         }
 
         synchronized (mLock) {
+            if (mSecurityPolicy.isCallerInstantAppLocked()) {
+                Slog.w(TAG, "Instant uid " + Binder.getCallingUid()
+                        + " cannot access widget providers");
+                return ParceledListSlice.emptyList();
+            }
+
             ensureGroupStateLoadedLocked(userId);
 
             ArrayList<AppWidgetProviderInfo> result = new ArrayList<AppWidgetProviderInfo>();
@@ -3649,6 +3672,35 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
             mContext.enforceCallingPermission(
                     android.Manifest.permission.MODIFY_APPWIDGET_BIND_PERMISSIONS,
                     "hasBindAppWidgetPermission packageName=" + packageName);
+        }
+
+        public boolean isCallerInstantAppLocked() {
+            final int callingUid =  Binder.getCallingUid();
+            final long identity = Binder.clearCallingIdentity();
+            try {
+                final String[] uidPackages = mPackageManager.getPackagesForUid(callingUid);
+                if (!ArrayUtils.isEmpty(uidPackages)) {
+                    return mPackageManager.isInstantApp(uidPackages[0],
+                            UserHandle.getCallingUserId());
+                }
+            } catch (RemoteException e) {
+                /* ignore - same process */
+            } finally {
+                Binder.restoreCallingIdentity(identity);
+            }
+            return false;
+        }
+
+        public boolean isInstantAppLocked(String packageName, int userId) {
+            final long identity = Binder.clearCallingIdentity();
+            try {
+                return mPackageManager.isInstantApp(packageName, userId);
+            } catch (RemoteException e) {
+                /* ignore - same process */
+            } finally {
+                Binder.restoreCallingIdentity(identity);
+            }
+            return false;
         }
 
         public void enforceCallFromPackage(String packageName) {
