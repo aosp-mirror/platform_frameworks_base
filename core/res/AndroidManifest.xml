@@ -1315,7 +1315,7 @@
          This should only be used by HDMI-CEC service.
     -->
     <permission android:name="android.permission.HDMI_CEC"
-        android:protectionLevel="signature|privileged" />
+        android:protectionLevel="signature|privileged|vendorPrivileged" />
 
     <!-- @SystemApi Allows an application to use location features in hardware,
          such as the geofencing api.
