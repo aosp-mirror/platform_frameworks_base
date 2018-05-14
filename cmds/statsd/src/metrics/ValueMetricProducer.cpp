@@ -87,7 +87,8 @@ ValueMetricProducer::ValueMetricProducer(const ConfigKey& key, const ValueMetric
       mDimensionHardLimit(StatsdStats::kAtomDimensionKeySizeLimitMap.find(pullTagId) !=
                                           StatsdStats::kAtomDimensionKeySizeLimitMap.end()
                                   ? StatsdStats::kAtomDimensionKeySizeLimitMap.at(pullTagId).second
-                                  : StatsdStats::kDimensionKeySizeHardLimit) {
+                                  : StatsdStats::kDimensionKeySizeHardLimit),
+      mUseAbsoluteValueOnReset(metric.use_absolute_value_on_reset()) {
     // TODO: valuemetric for pushed events may need unlimited bucket length
     int64_t bucketSizeMills = 0;
     if (metric.has_bucket()) {
@@ -393,15 +394,20 @@ void ValueMetricProducer::onMatchedLogEventInternalLocked(
             }
         } else {
             // Generally we expect value to be monotonically increasing.
-            // If not, there was a reset event. We take the absolute value as
-            // diff in this case.
+            // If not, take absolute value or drop it, based on config.
             if (interval.startUpdated) {
                 if (value >= interval.start) {
                     interval.sum += (value - interval.start);
+                    interval.hasValue = true;
                 } else {
-                    interval.sum += value;
+                    if (mUseAbsoluteValueOnReset) {
+                        interval.sum += value;
+                        interval.hasValue = true;
+                    } else {
+                        VLOG("Dropping data for atom %d, prev: %lld, now: %lld", mPullTagId,
+                             (long long)interval.start, (long long)value);
+                    }
                 }
-                interval.hasValue = true;
                 interval.startUpdated = false;
             } else {
                 VLOG("No start for matching end %lld", (long long)value);
