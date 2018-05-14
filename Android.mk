@@ -661,21 +661,21 @@ $(LOCAL_LIGHT_GREYLIST): $(LOCAL_SRC_ALL)
 	$(call assert-is-subset,$@,$(LOCAL_SRC_PRIVATE_API))
 	$(call assert-has-no-overlap,$@,$(LOCAL_SRC_FORCE_BLACKLIST))
 
-# Generate dark greylist as remaining members of classes on the light greylist,
-# as well as the members of their inner classes.
+# Generate dark greylist as remaining classes and class members in the same
+# package as classes listed in the light greylist.
 # The algorithm is as follows:
 #   (1) extract the class descriptor from each entry in LOCAL_LIGHT_GREYLIST
-#   (2) strip the final semicolon and anything after (and including) a dollar sign,
-#       e.g. 'Lpackage/class$inner;' turns into 'Lpackage/class'
-#   (3) insert all entries from LOCAL_SRC_PRIVATE_API which begin with the stripped
-#       descriptor followed by a semi-colon or a dollar sign, e.g. matching a regex
-#       '^Lpackage/class[;$]'
+#   (2) strip everything after the last forward-slash,
+#       e.g. 'Lpackage/subpackage/class$inner;' turns into 'Lpackage/subpackage/'
+#   (3) insert all entries from LOCAL_SRC_PRIVATE_API which begin with the package
+#       name but do not contain another forward-slash in the class name, e.g.
+#       matching '^Lpackage/subpackage/[^/;]*;'
 #   (4) subtract entries shared with LOCAL_LIGHT_GREYLIST
 $(LOCAL_DARK_GREYLIST): $(LOCAL_SRC_ALL) $(LOCAL_LIGHT_GREYLIST)
 	comm -13 <(sort $(LOCAL_LIGHT_GREYLIST) $(LOCAL_SRC_FORCE_BLACKLIST)) \
-	         <(sed 's/;\->.*//' $(LOCAL_LIGHT_GREYLIST) | sed 's/$$.*//' | sort | uniq | \
-	               while read CLASS_DESC; do \
-	                   grep -E "^$${CLASS_DESC}[;$$]" $(LOCAL_SRC_PRIVATE_API); \
+	         <(sed 's/\->.*//' $(LOCAL_LIGHT_GREYLIST) | sed 's/\(.*\/\).*/\1/' | sort | uniq | \
+	               while read PKG_NAME; do \
+	                   grep -E "^$${PKG_NAME}[^/;]*;" $(LOCAL_SRC_PRIVATE_API); \
 	               done | sort | uniq) \
 	         > $@
 	$(call assert-is-subset,$@,$(LOCAL_SRC_PRIVATE_API))
@@ -718,4 +718,3 @@ include $(call first-makefiles-under,$(LOCAL_PATH))
 endif
 
 endif # ANDROID_BUILD_EMBEDDED
-
