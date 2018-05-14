@@ -70,6 +70,7 @@ public class NotificationMenuRow implements NotificationMenuRowPlugin, View.OnCl
     private FrameLayout mMenuContainer;
     private MenuItem mInfoItem;
     private MenuItem mAppOpsItem;
+    private MenuItem mSnoozeItem;
     private ArrayList<MenuItem> mMenuItems;
     private OnMenuEventListener mMenuListener;
 
@@ -125,6 +126,11 @@ public class NotificationMenuRow implements NotificationMenuRowPlugin, View.OnCl
     @Override
     public MenuItem getAppOpsMenuItem(Context context) {
         return mAppOpsItem;
+    }
+
+    @Override
+    public MenuItem getSnoozeMenuItem(Context context) {
+        return mSnoozeItem;
     }
 
     @Override
@@ -190,7 +196,8 @@ public class NotificationMenuRow implements NotificationMenuRowPlugin, View.OnCl
             boolean isForeground = (flags & Notification.FLAG_FOREGROUND_SERVICE) != 0;
             if (!isForeground) {
                 // Only show snooze for non-foreground notifications
-                mMenuItems.add(createSnoozeItem(mContext));
+                mSnoozeItem = createSnoozeItem(mContext);
+                mMenuItems.add(mSnoozeItem);
             }
         }
         mInfoItem = createInfoItem(mContext);
