@@ -17,11 +17,14 @@
 package com.android.server.devicepolicy;
 
 import android.annotation.Nullable;
+import android.app.AppOpsManagerInternal;
 import android.app.admin.SystemUpdateInfo;
 import android.app.admin.SystemUpdatePolicy;
 import android.content.ComponentName;
+import android.content.pm.PackageManager;
 import android.content.pm.PackageManagerInternal;
 import android.content.pm.UserInfo;
+import android.os.Binder;
 import android.os.Environment;
 import android.os.UserHandle;
 import android.os.UserManager;
@@ -32,10 +35,12 @@ import android.util.Log;
 import android.util.Pair;
 import android.util.Slog;
 import android.util.SparseArray;
+import android.util.SparseIntArray;
 import android.util.Xml;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.FastXmlSerializer;
+import com.android.server.LocalServices;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
@@ -98,6 +103,8 @@ class Owners {
     private final UserManager mUserManager;
     private final UserManagerInternal mUserManagerInternal;
     private final PackageManagerInternal mPackageManagerInternal;
+
+    private boolean mSystemReady;
 
     // Internal state for the device owner package.
     private OwnerInfo mDeviceOwner;
@@ -179,6 +186,7 @@ class Owners {
                         getDeviceOwnerUserId()));
             }
             pushToPackageManagerLocked();
+            pushToAppOpsLocked();
         }
     }
 
@@ -262,6 +270,7 @@ class Owners {
 
             mUserManagerInternal.setDeviceManaged(true);
             pushToPackageManagerLocked();
+            pushToAppOpsLocked();
         }
     }
 
@@ -272,6 +281,7 @@ class Owners {
 
             mUserManagerInternal.setDeviceManaged(false);
             pushToPackageManagerLocked();
+            pushToAppOpsLocked();
         }
     }
 
@@ -283,6 +293,7 @@ class Owners {
                     /* remoteBugreportHash =*/ null));
             mUserManagerInternal.setUserManaged(userId, true);
             pushToPackageManagerLocked();
+            pushToAppOpsLocked();
         }
     }
 
@@ -291,6 +302,7 @@ class Owners {
             mProfileOwners.remove(userId);
             mUserManagerInternal.setUserManaged(userId, false);
             pushToPackageManagerLocked();
+            pushToAppOpsLocked();
         }
     }
 
@@ -302,6 +314,7 @@ class Owners {
                     ownerInfo.remoteBugreportHash);
             mProfileOwners.put(userId, newOwnerInfo);
             pushToPackageManagerLocked();
+            pushToAppOpsLocked();
         }
     }
 
@@ -313,6 +326,7 @@ class Owners {
                     mDeviceOwner.userRestrictionsMigrated, mDeviceOwner.remoteBugreportUri,
                     mDeviceOwner.remoteBugreportHash);
             pushToPackageManagerLocked();
+            pushToAppOpsLocked();
         }
     }
 
@@ -578,6 +592,48 @@ class Owners {
     public SystemUpdateInfo getSystemUpdateInfo() {
         synchronized (mLock) {
             return mSystemUpdateInfo;
+        }
+    }
+
+    void pushToAppOpsLocked() {
+        if (!mSystemReady) {
+            return;
+        }
+        final long ident = Binder.clearCallingIdentity();
+        try {
+            final SparseIntArray owners = new SparseIntArray();
+            if (mDeviceOwner != null) {
+                final int uid = mPackageManagerInternal.getPackageUid(mDeviceOwner.packageName,
+                        PackageManager.MATCH_ALL | PackageManager.MATCH_KNOWN_PACKAGES,
+                        mDeviceOwnerUserId);
+                if (uid >= 0) {
+                    owners.put(mDeviceOwnerUserId, uid);
+                }
+            }
+            if (mProfileOwners != null) {
+                for (int poi = mProfileOwners.size() - 1; poi >= 0; poi--) {
+                    final int uid = mPackageManagerInternal.getPackageUid(
+                            mProfileOwners.valueAt(poi).packageName,
+                            PackageManager.MATCH_ALL | PackageManager.MATCH_KNOWN_PACKAGES,
+                            mProfileOwners.keyAt(poi));
+                    if (uid >= 0) {
+                        owners.put(mProfileOwners.keyAt(poi), uid);
+                    }
+                }
+            }
+            AppOpsManagerInternal appops = LocalServices.getService(AppOpsManagerInternal.class);
+            if (appops != null) {
+                appops.setDeviceAndProfileOwners(owners.size() > 0 ? owners : null);
+            }
+        } finally {
+            Binder.restoreCallingIdentity(ident);
+        }
+    }
+
+    public void systemReady() {
+        synchronized (mLock) {
+            mSystemReady = true;
+            pushToAppOpsLocked();
         }
     }
 
