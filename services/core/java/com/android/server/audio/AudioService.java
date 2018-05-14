@@ -3653,26 +3653,35 @@ public class AudioService extends IAudioService.Stub
         }
         String address = btDevice.getAddress();
         BluetoothClass btClass = btDevice.getBluetoothClass();
-        int outDevice = AudioSystem.DEVICE_OUT_BLUETOOTH_SCO;
         int inDevice = AudioSystem.DEVICE_IN_BLUETOOTH_SCO_HEADSET;
+        int[] outDeviceTypes = {
+            AudioSystem.DEVICE_OUT_BLUETOOTH_SCO,
+            AudioSystem.DEVICE_OUT_BLUETOOTH_SCO_HEADSET,
+            AudioSystem.DEVICE_OUT_BLUETOOTH_SCO_CARKIT
+        };
         if (btClass != null) {
             switch (btClass.getDeviceClass()) {
                 case BluetoothClass.Device.AUDIO_VIDEO_WEARABLE_HEADSET:
                 case BluetoothClass.Device.AUDIO_VIDEO_HANDSFREE:
-                    outDevice = AudioSystem.DEVICE_OUT_BLUETOOTH_SCO_HEADSET;
+                    outDeviceTypes = new int[] { AudioSystem.DEVICE_OUT_BLUETOOTH_SCO_HEADSET };
                     break;
                 case BluetoothClass.Device.AUDIO_VIDEO_CAR_AUDIO:
-                    outDevice = AudioSystem.DEVICE_OUT_BLUETOOTH_SCO_CARKIT;
+                    outDeviceTypes = new int[] { AudioSystem.DEVICE_OUT_BLUETOOTH_SCO_CARKIT };
                     break;
             }
         }
-
         if (!BluetoothAdapter.checkBluetoothAddress(address)) {
             address = "";
         }
-
         String btDeviceName =  btDevice.getName();
-        boolean result = handleDeviceConnection(isActive, outDevice, address, btDeviceName);
+        boolean result = false;
+        if (isActive) {
+            result |= handleDeviceConnection(isActive, outDeviceTypes[0], address, btDeviceName);
+        } else {
+            for (int outDeviceType : outDeviceTypes) {
+                result |= handleDeviceConnection(isActive, outDeviceType, address, btDeviceName);
+            }
+        }
         // handleDeviceConnection() && result to make sure the method get executed
         result = handleDeviceConnection(isActive, inDevice, address, btDeviceName) && result;
         return result;
