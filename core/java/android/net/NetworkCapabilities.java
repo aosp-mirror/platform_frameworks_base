@@ -18,6 +18,7 @@ package android.net;
 
 import android.annotation.IntDef;
 import android.annotation.SystemApi;
+import android.annotation.TestApi;
 import android.net.ConnectivityManager.NetworkCallback;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -435,6 +436,7 @@ public final class NetworkCapabilities implements Parcelable {
      * @return an array of capability values for this instance.
      * @hide
      */
+    @TestApi
     public @NetCapability int[] getCapabilities() {
         return BitUtils.unpackBits(mNetworkCapabilities);
     }
@@ -699,6 +701,7 @@ public final class NetworkCapabilities implements Parcelable {
      * @return an array of transport type values for this instance.
      * @hide
      */
+    @TestApi
     public @Transport int[] getTransportTypes() {
         return BitUtils.unpackBits(mTransportTypes);
     }
