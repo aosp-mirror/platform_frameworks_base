@@ -17,8 +17,6 @@
 <resources>
     <style name="SlowDialog" parent="@android:style/Theme.Holo.Dialog">
         <item name="android:windowAnimationStyle">@style/SlowDialog</item>
-    </style>
-    <style name="SlowDialog">
         <item name="android:windowEnterAnimation">@anim/slow_enter</item>
         <item name="android:windowExitAnimation">@anim/slow_exit</item>
     </style>
