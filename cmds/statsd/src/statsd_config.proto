@@ -265,6 +265,8 @@ message ValueMetric {
   optional AggregationType aggregation_type = 8 [default = SUM];
 
   optional int64 min_bucket_size_nanos = 10;
+
+  optional bool use_absolute_value_on_reset = 11 [default = false];
 }
 
 message Alert {
