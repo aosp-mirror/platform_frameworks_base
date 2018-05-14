@@ -4335,6 +4335,8 @@ Landroid/provider/Settings$System;->LOCK_SOUND:Ljava/lang/String;
 Landroid/provider/Settings$System;->MASTER_MONO:Ljava/lang/String;
 Landroid/provider/Settings$System;->POINTER_LOCATION:Ljava/lang/String;
 Landroid/provider/Settings$System;->POINTER_SPEED:Ljava/lang/String;
+Landroid/provider/Settings$System;->PRIVATE_SETTINGS:Ljava/util/Set;
+Landroid/provider/Settings$System;->PUBLIC_SETTINGS:Ljava/util/Set;
 Landroid/provider/Settings$System;->putIntForUser(Landroid/content/ContentResolver;Ljava/lang/String;II)Z
 Landroid/provider/Settings$System;->putStringForUser(Landroid/content/ContentResolver;Ljava/lang/String;Ljava/lang/String;I)Z
 Landroid/provider/Settings$System;->SCREEN_AUTO_BRIGHTNESS_ADJ:Ljava/lang/String;
