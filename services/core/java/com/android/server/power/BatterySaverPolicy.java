@@ -34,6 +34,8 @@ import android.view.accessibility.AccessibilityManager;
 import com.android.internal.R;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.os.BackgroundThread;
+import com.android.internal.util.ConcurrentUtils;
 import com.android.server.power.batterysaver.BatterySavingStats;
 import com.android.server.power.batterysaver.CpuFrequencies;
 
@@ -43,6 +45,9 @@ import java.util.List;
 
 /**
  * Class to decide whether to turn on battery saver mode for specific service
+ *
+ * IMPORTANT: This class shares the power manager lock, which is very low in the lock hierarchy.
+ * Do not call out with the lock held, such as AccessibilityManager. (Settings provider is okay.)
  *
  * Test:
  atest ${ANDROID_BUILD_TOP}/frameworks/base/services/tests/servicestests/src/com/android/server/power/BatterySaverPolicyTest.java
@@ -75,7 +80,8 @@ public class BatterySaverPolicy extends ContentObserver {
     private static final String KEY_CPU_FREQ_INTERACTIVE = "cpufreq-i";
     private static final String KEY_CPU_FREQ_NONINTERACTIVE = "cpufreq-n";
 
-    private final Object mLock = new Object();
+    private final Object mLock;
+    private final Handler mHandler;
 
     @GuardedBy("mLock")
     private String mSettings;
@@ -227,14 +233,9 @@ public class BatterySaverPolicy extends ContentObserver {
     @GuardedBy("mLock")
     private boolean mSendTronLog;
 
-    @GuardedBy("mLock")
-    private Context mContext;
-
-    @GuardedBy("mLock")
-    private ContentResolver mContentResolver;
-
-    @GuardedBy("mLock")
-    private AccessibilityManager mAccessibilityManager;
+    private final Context mContext;
+    private final ContentResolver mContentResolver;
+    private final BatterySavingStats mBatterySavingStats;
 
     @GuardedBy("mLock")
     private final List<BatterySaverPolicyListener> mListeners = new ArrayList<>();
@@ -267,25 +268,37 @@ public class BatterySaverPolicy extends ContentObserver {
         void onBatterySaverPolicyChanged(BatterySaverPolicy policy);
     }
 
-    public BatterySaverPolicy(Handler handler) {
-        super(handler);
+    public BatterySaverPolicy(Object lock, Context context, BatterySavingStats batterySavingStats) {
+        super(BackgroundThread.getHandler());
+        mLock = lock;
+        mHandler = BackgroundThread.getHandler();
+        mContext = context;
+        mContentResolver = context.getContentResolver();
+        mBatterySavingStats = batterySavingStats;
     }
 
-    public void systemReady(Context context) {
+    /**
+     * Called by {@link PowerManagerService#systemReady}, *with no lock held.*
+     */
+    public void systemReady() {
+        ConcurrentUtils.wtfIfLockHeld(TAG, mLock);
+
+        mContentResolver.registerContentObserver(Settings.Global.getUriFor(
+                Settings.Global.BATTERY_SAVER_CONSTANTS), false, this);
+        mContentResolver.registerContentObserver(Settings.Global.getUriFor(
+                Global.BATTERY_SAVER_DEVICE_SPECIFIC_CONSTANTS), false, this);
+
+        final AccessibilityManager acm = mContext.getSystemService(AccessibilityManager.class);
+
+        acm.addAccessibilityStateChangeListener((enabled) -> {
+            synchronized (mLock) {
+                mAccessibilityEnabled = enabled;
+            }
+            refreshSettings();
+        });
+        final boolean enabled = acm.isEnabled();
         synchronized (mLock) {
-            mContext = context;
-            mContentResolver = context.getContentResolver();
-
-            mAccessibilityManager = context.getSystemService(AccessibilityManager.class);
-
-            mContentResolver.registerContentObserver(Settings.Global.getUriFor(
-                    Settings.Global.BATTERY_SAVER_CONSTANTS), false, this);
-            mContentResolver.registerContentObserver(Settings.Global.getUriFor(
-                    Global.BATTERY_SAVER_DEVICE_SPECIFIC_CONSTANTS), false, this);
-
-            mAccessibilityManager.addAccessibilityStateChangeListener((enabled) -> {
-                refreshSettings();
-            });
+            mAccessibilityEnabled = enabled;
         }
         onChange(true, null);
     }
@@ -298,21 +311,12 @@ public class BatterySaverPolicy extends ContentObserver {
 
     @VisibleForTesting
     String getGlobalSetting(String key) {
-        final ContentResolver cr;
-        synchronized (mLock) {
-            cr = mContentResolver;
-        }
-        return Settings.Global.getString(cr, key);
+        return Settings.Global.getString(mContentResolver, key);
     }
 
     @VisibleForTesting
     int getDeviceSpecificConfigResId() {
         return R.string.config_batterySaverDeviceSpecificConfig;
-    }
-
-    @VisibleForTesting
-    boolean isAccessibilityEnabled() {
-        return mAccessibilityManager.isEnabled();
     }
 
     @Override
@@ -347,9 +351,11 @@ public class BatterySaverPolicy extends ContentObserver {
         }
 
         // Notify the listeners.
-        for (BatterySaverPolicyListener listener : listeners) {
-            listener.onBatterySaverPolicyChanged(this);
-        }
+        mHandler.post(() -> {
+            for (BatterySaverPolicyListener listener : listeners) {
+                listener.onBatterySaverPolicyChanged(this);
+            }
+        });
     }
 
     @GuardedBy("mLock")
@@ -408,8 +414,6 @@ public class BatterySaverPolicy extends ContentObserver {
                 parser.getString(KEY_CPU_FREQ_NONINTERACTIVE, "")).toSysFileMap();
 
         // Update the effective policy.
-        mAccessibilityEnabled = isAccessibilityEnabled();
-
         mVibrationDisabledEffective = mVibrationDisabledConfig
                 && !mAccessibilityEnabled; // Don't disable vibration when accessibility is on.
 
@@ -436,7 +440,7 @@ public class BatterySaverPolicy extends ContentObserver {
 
         mEventLogKeys = sb.toString();
 
-        BatterySavingStats.getInstance().setSendTronLog(mSendTronLog);
+        mBatterySavingStats.setSendTronLog(mSendTronLog);
     }
 
     /**
@@ -532,7 +536,7 @@ public class BatterySaverPolicy extends ContentObserver {
     public void dump(PrintWriter pw) {
         synchronized (mLock) {
             pw.println();
-            BatterySavingStats.getInstance().dump(pw, "");
+            mBatterySavingStats.dump(pw, "");
 
             pw.println();
             pw.println("Battery saver policy (*NOTE* they only apply when battery saver is ON):");
@@ -581,6 +585,13 @@ public class BatterySaverPolicy extends ContentObserver {
             pw.print(": '");
             pw.print(map.valueAt(i));
             pw.println("'");
+        }
+    }
+
+    @VisibleForTesting
+    public void setAccessibilityEnabledForTest(boolean enabled) {
+        synchronized (mLock) {
+            mAccessibilityEnabled = enabled;
         }
     }
 }
