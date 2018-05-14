@@ -23,6 +23,7 @@
     android:layout_width="match_parent"
     android:layout_height="@dimen/status_bar_header_height_keyguard"
     android:baselineAligned="false"
+    android:gravity="center_vertical"
     >
 
     <LinearLayout
@@ -33,7 +34,7 @@
         android:gravity="center_vertical|end" >
         <FrameLayout android:id="@+id/system_icons_container"
             android:layout_width="0dp"
-            android:layout_height="@dimen/status_bar_height"
+            android:layout_height="match_parent"
             android:layout_weight="1"
             android:layout_marginStart="@dimen/system_icons_super_container_margin_start"
             android:gravity="center_vertical|end"
