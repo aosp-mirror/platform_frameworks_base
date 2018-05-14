@@ -213,6 +213,9 @@ private:
     // stopped indicates the CanvasContext will reject actual redraw operations,
     // and defer repaint until it is un-stopped
     bool mStopped = false;
+    // Incremented each time the CanvasContext is stopped. Used to ignore
+    // delayed messages that are triggered after stopping.
+    int mGenerationID;
     // CanvasContext is dirty if it has received an update that it has not
     // painted onto its surface.
     bool mIsDirty = false;

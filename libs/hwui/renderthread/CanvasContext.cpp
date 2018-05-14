@@ -140,6 +140,7 @@ CanvasContext::CanvasContext(RenderThread& thread, bool translucent, RenderNode*
                              IContextFactory* contextFactory,
                              std::unique_ptr<IRenderPipeline> renderPipeline)
         : mRenderThread(thread)
+        , mGenerationID(0)
         , mOpaque(!translucent)
         , mAnimationContext(contextFactory->createAnimationContext(mRenderThread.timeLord()))
         , mJankTracker(&thread.globalProfileData(), thread.mainDisplayInfo())
@@ -196,6 +197,7 @@ void CanvasContext::setSurface(sp<Surface>&& surface) {
         mSwapHistory.clear();
     } else {
         mRenderThread.removeFrameCallback(this);
+        mGenerationID++;
     }
 }
 
@@ -204,6 +206,7 @@ void CanvasContext::setSwapBehavior(SwapBehavior swapBehavior) {
 }
 
 bool CanvasContext::pauseSurface() {
+    mGenerationID++;
     return mRenderThread.removeFrameCallback(this);
 }
 
@@ -211,6 +214,7 @@ void CanvasContext::setStopped(bool stopped) {
     if (mStopped != stopped) {
         mStopped = stopped;
         if (mStopped) {
+            mGenerationID++;
             mRenderThread.removeFrameCallback(this);
             mRenderPipeline->onStop();
         } else if (mIsDirty && hasSurface()) {
@@ -383,6 +387,7 @@ void CanvasContext::prepareTree(TreeInfo& info, int64_t* uiFrameInfo, int64_t sy
         mCurrentFrameInfo->addFlag(FrameInfoFlags::SkippedFrame);
     }
 
+    bool postedFrameCallback = false;
     if (info.out.hasAnimations || !info.out.canDrawThisFrame) {
         if (CC_UNLIKELY(!Properties::enableRTAnimations)) {
             info.out.requiresUiRedraw = true;
@@ -391,6 +396,24 @@ void CanvasContext::prepareTree(TreeInfo& info, int64_t* uiFrameInfo, int64_t sy
             // If animationsNeedsRedraw is set don't bother posting for an RT anim
             // as we will just end up fighting the UI thread.
             mRenderThread.postFrameCallback(this);
+            postedFrameCallback = true;
+        }
+    }
+
+    if (!postedFrameCallback &&
+        info.out.animatedImageDelay != TreeInfo::Out::kNoAnimatedImageDelay) {
+        // Subtract the time of one frame so it can be displayed on time.
+        const nsecs_t kFrameTime = mRenderThread.timeLord().frameIntervalNanos();
+        if (info.out.animatedImageDelay <= kFrameTime) {
+            mRenderThread.postFrameCallback(this);
+        } else {
+            const auto delay = info.out.animatedImageDelay - kFrameTime;
+            int genId = mGenerationID;
+            mRenderThread.queue().postDelayed(delay, [this, genId]() {
+                if (mGenerationID == genId) {
+                    mRenderThread.postFrameCallback(this);
+                }
+            });
         }
     }
 }
@@ -398,6 +421,7 @@ void CanvasContext::prepareTree(TreeInfo& info, int64_t* uiFrameInfo, int64_t sy
 void CanvasContext::stopDrawing() {
     mRenderThread.removeFrameCallback(this);
     mAnimationContext->pauseAnimators();
+    mGenerationID++;
 }
 
 void CanvasContext::notifyFramePending() {
