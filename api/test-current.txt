@@ -897,6 +897,14 @@ package android.service.quicksettings {
 
 }
 
+package android.telecom {
+
+  public final class CallAudioState implements android.os.Parcelable {
+    ctor public CallAudioState(boolean, int, int, android.bluetooth.BluetoothDevice, java.util.Collection<android.bluetooth.BluetoothDevice>);
+  }
+
+}
+
 package android.telephony {
 
   public class MbmsDownloadSession implements java.lang.AutoCloseable {
