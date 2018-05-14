@@ -22,9 +22,7 @@ import static com.android.server.backup.testing.TransportData.d2dTransport;
 import static com.android.server.backup.testing.TransportData.localTransport;
 import static com.android.server.backup.testing.TransportTestUtils.setUpCurrentTransport;
 import static com.android.server.backup.testing.TransportTestUtils.setUpTransports;
-
 import static com.google.common.truth.Truth.assertThat;
-
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
@@ -43,9 +41,10 @@ import android.content.Context;
 import android.content.ContextWrapper;
 import android.content.Intent;
 import android.os.HandlerThread;
+import android.os.PowerManager;
+import android.os.PowerSaveState;
 import android.platform.test.annotations.Presubmit;
 import android.provider.Settings;
-
 import com.android.server.backup.internal.BackupRequest;
 import com.android.server.backup.testing.TransportData;
 import com.android.server.backup.testing.TransportTestUtils.TransportMock;
@@ -54,8 +53,11 @@ import com.android.server.testing.FrameworkRobolectricTestRunner;
 import com.android.server.testing.SystemLoaderPackages;
 import com.android.server.testing.shadows.ShadowAppBackupUtils;
 import com.android.server.testing.shadows.ShadowBackupPolicyEnforcer;
+import com.android.server.testing.shadows.ShadowBinder;
+import com.android.server.testing.shadows.ShadowKeyValueBackupJob;
 import com.android.server.testing.shadows.ShadowPerformBackupTask;
-
+import java.io.File;
+import java.util.List;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -64,15 +66,13 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.robolectric.RuntimeEnvironment;
 import org.robolectric.annotation.Config;
+import org.robolectric.annotation.Implements;
 import org.robolectric.shadows.ShadowContextWrapper;
 import org.robolectric.shadows.ShadowLog;
 import org.robolectric.shadows.ShadowLooper;
 import org.robolectric.shadows.ShadowPackageManager;
 import org.robolectric.shadows.ShadowSettings;
 import org.robolectric.shadows.ShadowSystemClock;
-
-import java.io.File;
-import java.util.List;
 
 @RunWith(FrameworkRobolectricTestRunner.class)
 @Config(
@@ -796,6 +796,34 @@ public class BackupManagerServiceTest {
         tearDownForRequestBackup();
     }
 
+    @Test
+    @Config(shadows = {ShadowBinder.class, ShadowKeyValueBackupJob.class})
+    public void testBackupNow_clearsCallingIdentityForJobScheduler() {
+        mShadowContext.grantPermissions(android.Manifest.permission.BACKUP);
+        BackupManagerService backupManagerService = createInitializedBackupManagerService();
+        setUpPowerManager(backupManagerService);
+        ShadowBinder.setCallingUid(1);
+
+        backupManagerService.backupNow();
+
+        assertThat(ShadowKeyValueBackupJob.getCallingUid()).isEqualTo(ShadowBinder.LOCAL_UID);
+        assertThat(ShadowBinder.getCallingUid()).isEqualTo(1);
+    }
+
+    @Test
+    @Config(shadows = {ShadowBinder.class, ShadowKeyValueBackupJobException.class})
+    public void testBackupNow_whenExceptionThrown_restoresCallingIdentity() {
+        mShadowContext.grantPermissions(android.Manifest.permission.BACKUP);
+        BackupManagerService backupManagerService = createInitializedBackupManagerService();
+        setUpPowerManager(backupManagerService);
+        ShadowBinder.setCallingUid(1);
+
+        expectThrows(IllegalArgumentException.class, backupManagerService::backupNow);
+        assertThat(ShadowKeyValueBackupJobException.getCallingUid())
+                .isEqualTo(ShadowBinder.LOCAL_UID);
+        assertThat(ShadowBinder.getCallingUid()).isEqualTo(1);
+    }
+
     private BackupManagerService createBackupManagerServiceForRequestBackup() {
         BackupManagerService backupManagerService = createInitializedBackupManagerService();
         backupManagerService.setEnabled(true);
@@ -852,5 +880,24 @@ public class BackupManagerServiceTest {
         // time.
         ShadowSystemClock.setCurrentTimeMillis(mShadowBackupLooper.getScheduler().getCurrentTime());
         return backupManagerService;
+    }
+
+    private void setUpPowerManager(BackupManagerService backupManagerService) {
+        PowerManager powerManagerMock = mock(PowerManager.class);
+        when(powerManagerMock.getPowerSaveState(anyInt()))
+                .thenReturn(new PowerSaveState.Builder().setBatterySaverEnabled(true).build());
+        backupManagerService.setPowerManager(powerManagerMock);
+    }
+
+    /**
+     * We can't mock the void method {@link #schedule(Context, long, BackupManagerConstants)} so we
+     * extend {@link ShadowKeyValueBackupJob} and throw an exception at the end of the method.
+     */
+    @Implements(KeyValueBackupJob.class)
+    public static class ShadowKeyValueBackupJobException extends ShadowKeyValueBackupJob {
+        public static void schedule(Context ctx, long delay, BackupManagerConstants constants) {
+            ShadowKeyValueBackupJob.schedule(ctx, delay, constants);
+            throw new IllegalArgumentException();
+        }
     }
 }
