@@ -513,7 +513,7 @@ public final class UsageStatsManager {
         try {
             mService.setAppStandbyBucket(packageName, bucket, mContext.getUserId());
         } catch (RemoteException e) {
-            // Nothing to do
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -539,8 +539,8 @@ public final class UsageStatsManager {
             }
             return bucketMap;
         } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
         }
-        return Collections.EMPTY_MAP;
     }
 
     /**
@@ -563,6 +563,7 @@ public final class UsageStatsManager {
         try {
             mService.setAppStandbyBuckets(slice, mContext.getUserId());
         } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -596,6 +597,7 @@ public final class UsageStatsManager {
             mService.registerAppUsageObserver(observerId, packages, timeUnit.toMillis(timeLimit),
                     callbackIntent, mContext.getOpPackageName());
         } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -614,6 +616,7 @@ public final class UsageStatsManager {
         try {
             mService.unregisterAppUsageObserver(observerId, mContext.getOpPackageName());
         } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -698,6 +701,7 @@ public final class UsageStatsManager {
         try {
             mService.whitelistAppTemporarily(packageName, duration, user.getIdentifier());
         } catch (RemoteException re) {
+            throw re.rethrowFromSystemServer();
         }
     }
 
@@ -709,6 +713,7 @@ public final class UsageStatsManager {
         try {
             mService.onCarrierPrivilegedAppsChanged();
         } catch (RemoteException re) {
+            throw re.rethrowFromSystemServer();
         }
     }
 
