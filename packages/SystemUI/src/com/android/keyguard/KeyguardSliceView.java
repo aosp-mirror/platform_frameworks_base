@@ -154,7 +154,7 @@ public class KeyguardSliceView extends LinearLayout implements View.OnClickListe
             return;
         }
 
-        ListContent lc = new ListContent(getContext(), mSlice);
+        ListContent lc = new ListContent(getContext(), mSlice, null, 0, 0);
         mHasHeader = lc.hasHeader();
         List<SliceItem> subItems = lc.getRowItems();
         if (!mHasHeader) {
