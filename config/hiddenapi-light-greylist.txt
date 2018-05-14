@@ -8014,6 +8014,7 @@ Lcom/android/org/conscrypt/TrustedCertificateStore;-><init>()V
 Lcom/android/org/conscrypt/TrustedCertificateStore;->getCertificateChain(Ljava/security/cert/X509Certificate;)Ljava/util/List;
 Lcom/android/org/conscrypt/TrustManagerImpl;-><init>(Ljava/security/KeyStore;)V
 Lcom/android/org/conscrypt/TrustManagerImpl;->checkServerTrusted([Ljava/security/cert/X509Certificate;Ljava/lang/String;Ljava/lang/String;)Ljava/util/List;
+Ldalvik/system/BaseDexClassLoader;-><init>(Ljava/lang/String;Ljava/io/File;Ljava/lang/String;Ljava/lang/ClassLoader;Z)V
 Ldalvik/system/BaseDexClassLoader;->addDexPath(Ljava/lang/String;)V
 Ldalvik/system/BaseDexClassLoader;->addDexPath(Ljava/lang/String;Z)V
 Ldalvik/system/BaseDexClassLoader;->getLdLibraryPath()Ljava/lang/String;
