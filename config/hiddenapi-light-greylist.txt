@@ -3154,6 +3154,8 @@ Landroid/net/INetworkStatsService$Stub$Proxy;-><init>(Landroid/os/IBinder;)V
 Landroid/net/INetworkStatsService$Stub$Proxy;->getMobileIfaces()[Ljava/lang/String;
 Landroid/net/INetworkStatsService;->forceUpdate()V
 Landroid/net/INetworkStatsService;->getMobileIfaces()[Ljava/lang/String;
+Landroid/net/INetworkStatsService;->openSession()Landroid/net/INetworkStatsSession;
+Landroid/net/INetworkStatsService;->openSessionForUsageStats(ILjava/lang/String;)Landroid/net/INetworkStatsSession;
 Landroid/net/INetworkStatsSession;->close()V
 Landroid/net/INetworkStatsSession;->getSummaryForAllUid(Landroid/net/NetworkTemplate;JJZ)Landroid/net/NetworkStats;
 Landroid/net/INetworkStatsSession;->getSummaryForNetwork(Landroid/net/NetworkTemplate;JJ)Landroid/net/NetworkStats;
@@ -3281,6 +3283,7 @@ Landroid/net/NetworkStatsHistory;->getValues(ILandroid/net/NetworkStatsHistory$E
 Landroid/net/NetworkStatsHistory;->getValues(JJJLandroid/net/NetworkStatsHistory$Entry;)Landroid/net/NetworkStatsHistory$Entry;
 Landroid/net/NetworkStatsHistory;->recordEntireHistory(Landroid/net/NetworkStatsHistory;)V
 Landroid/net/NetworkStatsHistory;->size()I
+Landroid/net/NetworkTemplate;-><init>(ILjava/lang/String;Ljava/lang/String;)V
 Landroid/net/NetworkTemplate;->buildTemplateEthernet()Landroid/net/NetworkTemplate;
 Landroid/net/NetworkTemplate;->buildTemplateMobileWildcard()Landroid/net/NetworkTemplate;
 Landroid/net/NetworkTemplate;->buildTemplateWifi()Landroid/net/NetworkTemplate;
