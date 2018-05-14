@@ -10285,9 +10285,12 @@ public class PackageManagerService extends IPackageManager.Stub
                         compareSignatures(
                             signatureCheckPs.sharedUser.signatures.mSigningDetails.signatures,
                             pkg.mSigningDetails.signatures) != PackageManager.SIGNATURE_MATCH) {
-                        throw new PackageManagerException(
-                                INSTALL_PARSE_FAILED_INCONSISTENT_CERTIFICATES,
-                                "Signature mismatch for shared user: " + pkgSetting.sharedUser);
+                        // Treat mismatched signatures on system packages using a shared UID as
+                        // fatal for the system overall, rather than just failing to install
+                        // whichever package happened to be scanned later.
+                        throw new IllegalStateException(
+                                "Signature mismatch on system package " + pkg.packageName
+                                + " for shared user " + pkgSetting.sharedUser);
                     }
 
                     signatureCheckPs.sharedUser.signatures.mSigningDetails = pkg.mSigningDetails;
@@ -10298,12 +10301,11 @@ public class PackageManagerService extends IPackageManager.Stub
                         + " signature changed; retaining data.";
                 reportSettingsProblem(Log.WARN, msg);
             } catch (IllegalArgumentException e) {
-
                 // should never happen: certs matched when checking, but not when comparing
                 // old to new for sharedUser
-                throw new PackageManagerException(INSTALL_PARSE_FAILED_INCONSISTENT_CERTIFICATES,
+                throw new RuntimeException(
                         "Signing certificates comparison made on incomparable signing details"
-                        + " but somehow passed verifySignatures!");
+                        + " but somehow passed verifySignatures!", e);
             }
         }
 
