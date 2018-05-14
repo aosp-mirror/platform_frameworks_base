@@ -28,10 +28,11 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.content.res.Resources;
-import android.graphics.Bitmap;
-import android.graphics.Canvas;
+import android.graphics.BitmapFactory;
+import android.graphics.drawable.AdaptiveIconDrawable;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
+import android.graphics.drawable.Icon;
 import android.os.LocaleList;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -68,7 +69,7 @@ import java.util.Map;
  *   Button button = new Button(context);
  *   button.setCompoundDrawablesWithIntrinsicBounds(classification.getIcon(), null, null, null);
  *   button.setText(classification.getLabel());
- *   button.setOnClickListener(v -> context.startActivity(classification.getIntent()));
+ *   button.setOnClickListener(v -> classification.getActions().get(0).getActionIntent().send());
  * }</pre>
  *
  * <p>e.g. starting an action mode with menu items that can handle the classified text:
@@ -194,6 +195,9 @@ public final class TextClassification implements Parcelable {
     /**
      * Returns an icon that may be rendered on a widget used to act on the classified text.
      *
+     * <p><strong>NOTE: </strong>This field is not parcelable and only represents the icon of the
+     * first {@link RemoteAction} (if one exists) when this object is read from a parcel.
+     *
      * @deprecated Use {@link #getActions()} instead.
      */
     @Deprecated
@@ -204,6 +208,9 @@ public final class TextClassification implements Parcelable {
 
     /**
      * Returns a label that may be rendered on a widget used to act on the classified text.
+     *
+     * <p><strong>NOTE: </strong>This field is not parcelable and only represents the label of the
+     * first {@link RemoteAction} (if one exists) when this object is read from a parcel.
      *
      * @deprecated Use {@link #getActions()} instead.
      */
@@ -216,6 +223,9 @@ public final class TextClassification implements Parcelable {
     /**
      * Returns an intent that may be fired to act on the classified text.
      *
+     * <p><strong>NOTE: </strong>This field is not parcelled and will always return null when this
+     * object is read from a parcel.
+     *
      * @deprecated Use {@link #getActions()} instead.
      */
     @Deprecated
@@ -225,10 +235,10 @@ public final class TextClassification implements Parcelable {
     }
 
     /**
-     * Returns the OnClickListener that may be triggered to act on the classified text. This field
-     * is not parcelable and will be null for all objects read from a parcel. Instead, call
-     * Context#startActivity(Intent) with the result of #getSecondaryIntent(int). Note that this may
-     * fail if the activity doesn't have permission to send the intent.
+     * Returns the OnClickListener that may be triggered to act on the classified text.
+     *
+     * <p><strong>NOTE: </strong>This field is not parcelable and only represents the first
+     * {@link RemoteAction} (if one exists) when this object is read from a parcel.
      *
      * @deprecated Use {@link #getActions()} instead.
      */
@@ -324,41 +334,6 @@ public final class TextClassification implements Parcelable {
     }
 
     /**
-     * Returns a Bitmap representation of the Drawable
-     *
-     * @param drawable The drawable to convert.
-     * @param maxDims The maximum edge length of the resulting bitmap (in pixels).
-     */
-    @Nullable
-    private static Bitmap drawableToBitmap(@Nullable Drawable drawable, int maxDims) {
-        if (drawable == null) {
-            return null;
-        }
-        final int actualWidth = Math.max(1, drawable.getIntrinsicWidth());
-        final int actualHeight = Math.max(1, drawable.getIntrinsicHeight());
-        final double scaleWidth = ((double) maxDims) / actualWidth;
-        final double scaleHeight = ((double) maxDims) / actualHeight;
-        final double scale = Math.min(1.0, Math.min(scaleWidth, scaleHeight));
-        final int width = (int) (actualWidth * scale);
-        final int height = (int) (actualHeight * scale);
-        if (drawable instanceof BitmapDrawable) {
-            final BitmapDrawable bitmapDrawable = (BitmapDrawable) drawable;
-            if (actualWidth != width || actualHeight != height) {
-                return Bitmap.createScaledBitmap(
-                        bitmapDrawable.getBitmap(), width, height, /*filter=*/false);
-            } else {
-                return bitmapDrawable.getBitmap();
-            }
-        } else {
-            final Bitmap bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
-            final Canvas canvas = new Canvas(bitmap);
-            drawable.setBounds(0, 0, canvas.getWidth(), canvas.getHeight());
-            drawable.draw(canvas);
-            return bitmap;
-        }
-    }
-
-    /**
      * Builder for building {@link TextClassification} objects.
      *
      * <p>e.g.
@@ -426,6 +401,9 @@ public final class TextClassification implements Parcelable {
          * Sets the icon for the <i>primary</i> action that may be rendered on a widget used to act
          * on the classified text.
          *
+         * <p><strong>NOTE: </strong>This field is not parcelled. If read from a parcel, the
+         * returned icon represents the icon of the first {@link RemoteAction} (if one exists).
+         *
          * @deprecated Use {@link #addAction(RemoteAction)} instead.
          */
         @Deprecated
@@ -438,6 +416,9 @@ public final class TextClassification implements Parcelable {
         /**
          * Sets the label for the <i>primary</i> action that may be rendered on a widget used to
          * act on the classified text.
+         *
+         * <p><strong>NOTE: </strong>This field is not parcelled. If read from a parcel, the
+         * returned label represents the label of the first {@link RemoteAction} (if one exists).
          *
          * @deprecated Use {@link #addAction(RemoteAction)} instead.
          */
@@ -452,6 +433,8 @@ public final class TextClassification implements Parcelable {
          * Sets the intent for the <i>primary</i> action that may be fired to act on the classified
          * text.
          *
+         * <p><strong>NOTE: </strong>This field is not parcelled.
+         *
          * @deprecated Use {@link #addAction(RemoteAction)} instead.
          */
         @Deprecated
@@ -463,8 +446,10 @@ public final class TextClassification implements Parcelable {
 
         /**
          * Sets the OnClickListener for the <i>primary</i> action that may be triggered to act on
-         * the classified text. This field is not parcelable and will always be null when the
-         * object is read from a parcel.
+         * the classified text.
+         *
+         * <p><strong>NOTE: </strong>This field is not parcelable. If read from a parcel, the
+         * returned OnClickListener represents the first {@link RemoteAction} (if one exists).
          *
          * @deprecated Use {@link #addAction(RemoteAction)} instead.
          */
@@ -674,17 +659,7 @@ public final class TextClassification implements Parcelable {
     @Override
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeString(mText);
-        final Bitmap legacyIconBitmap = drawableToBitmap(mLegacyIcon, MAX_LEGACY_ICON_SIZE);
-        dest.writeInt(legacyIconBitmap != null ? 1 : 0);
-        if (legacyIconBitmap != null) {
-            legacyIconBitmap.writeToParcel(dest, flags);
-        }
-        dest.writeString(mLegacyLabel);
-        dest.writeInt(mLegacyIntent != null ? 1 : 0);
-        if (mLegacyIntent != null) {
-            mLegacyIntent.writeToParcel(dest, flags);
-        }
-        // mOnClickListener is not parcelable.
+        // NOTE: legacy fields are not parcelled.
         dest.writeTypedList(mActions);
         mEntityConfidence.writeToParcel(dest, flags);
         dest.writeString(mId);
@@ -705,21 +680,41 @@ public final class TextClassification implements Parcelable {
 
     private TextClassification(Parcel in) {
         mText = in.readString();
-        mLegacyIcon = in.readInt() == 0
-                ? null
-                : new BitmapDrawable(Resources.getSystem(), Bitmap.CREATOR.createFromParcel(in));
-        mLegacyLabel = in.readString();
-        if (in.readInt() == 0) {
-            mLegacyIntent = null;
-        } else {
-            mLegacyIntent = Intent.CREATOR.createFromParcel(in);
-            mLegacyIntent.removeFlags(
-                    Intent.FLAG_GRANT_READ_URI_PERMISSION | Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
-        }
-        mLegacyOnClickListener = null;  // not parcelable
         mActions = in.createTypedArrayList(RemoteAction.CREATOR);
+        if (!mActions.isEmpty()) {
+            final RemoteAction action = mActions.get(0);
+            mLegacyIcon = maybeLoadDrawable(action.getIcon());
+            mLegacyLabel = action.getTitle().toString();
+            mLegacyOnClickListener = createIntentOnClickListener(mActions.get(0).getActionIntent());
+        } else {
+            mLegacyIcon = null;
+            mLegacyLabel = null;
+            mLegacyOnClickListener = null;
+        }
+        mLegacyIntent = null; // mLegacyIntent is not parcelled.
         mEntityConfidence = EntityConfidence.CREATOR.createFromParcel(in);
         mId = in.readString();
+    }
+
+    // Best effort attempt to try to load a drawable from the provided icon.
+    @Nullable
+    private static Drawable maybeLoadDrawable(Icon icon) {
+        if (icon == null) {
+            return null;
+        }
+        switch (icon.getType()) {
+            case Icon.TYPE_BITMAP:
+                return new BitmapDrawable(Resources.getSystem(), icon.getBitmap());
+            case Icon.TYPE_ADAPTIVE_BITMAP:
+                return new AdaptiveIconDrawable(null,
+                        new BitmapDrawable(Resources.getSystem(), icon.getBitmap()));
+            case Icon.TYPE_DATA:
+                return new BitmapDrawable(
+                        Resources.getSystem(),
+                        BitmapFactory.decodeByteArray(
+                                icon.getDataBytes(), icon.getDataOffset(), icon.getDataLength()));
+        }
+        return null;
     }
 
     // TODO: Remove once apps can build against the latest sdk.
