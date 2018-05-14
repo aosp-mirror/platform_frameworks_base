@@ -2086,7 +2086,11 @@ Landroid/graphics/drawable/StateListDrawable;->updateStateFromTypedArray(Landroi
 Landroid/graphics/drawable/TransitionDrawable;->mAlpha:I
 Landroid/graphics/drawable/TransitionDrawable;->mCrossFade:Z
 Landroid/graphics/drawable/TransitionDrawable;->mTo:I
+Landroid/graphics/drawable/VectorDrawable$VGroup;->setPivotX(F)V
+Landroid/graphics/drawable/VectorDrawable$VGroup;->setPivotY(F)V
 Landroid/graphics/drawable/VectorDrawable$VGroup;->setRotation(F)V
+Landroid/graphics/drawable/VectorDrawable$VGroup;->setTranslateX(F)V
+Landroid/graphics/drawable/VectorDrawable$VGroup;->setTranslateY(F)V
 Landroid/graphics/drawable/VectorDrawable;->getTargetByName(Ljava/lang/String;)Ljava/lang/Object;
 Landroid/graphics/drawable/VectorDrawable;->mTintFilter:Landroid/graphics/PorterDuffColorFilter;
 Landroid/graphics/drawable/VectorDrawable;->setAllowCaching(Z)V
@@ -2117,6 +2121,7 @@ Landroid/graphics/Movie;-><init>(J)V
 Landroid/graphics/Movie;->mNativeMovie:J
 Landroid/graphics/NinePatch$InsetStruct;-><init>(IIIIIIIIFIF)V
 Landroid/graphics/NinePatch;->mBitmap:Landroid/graphics/Bitmap;
+Landroid/graphics/NinePatch;->mNativeChunk:J
 Landroid/graphics/Paint;->getNativeInstance()J
 Landroid/graphics/Paint;->getTextRunAdvances([CIIIIZ[FI)F
 Landroid/graphics/Paint;->getTextRunCursor([CIIIII)I
@@ -2703,6 +2708,7 @@ Landroid/media/AudioSystem;->setErrorCallback(Landroid/media/AudioSystem$ErrorCa
 Landroid/media/AudioSystem;->setMasterMute(Z)I
 Landroid/media/AudioSystem;->setPhoneState(I)I
 Landroid/media/AudioSystem;->setStreamVolumeIndex(III)I
+Landroid/media/AudioSystem;->STREAM_SYSTEM_ENFORCED:I
 Landroid/media/AudioTrack;->deferred_connect(J)V
 Landroid/media/AudioTrack;->getLatency()I
 Landroid/media/AudioTrack;->mJniData:J
