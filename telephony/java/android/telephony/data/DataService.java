@@ -429,8 +429,10 @@ public abstract class DataService extends Service {
         }
     }
 
-    /** @hide */
-    protected DataService() {
+    /**
+     * Default constructor.
+     */
+    public DataService() {
         mHandlerThread = new HandlerThread(TAG);
         mHandlerThread.start();
 
