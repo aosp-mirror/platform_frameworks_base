@@ -269,6 +269,12 @@ public class NotificationChildrenContainer extends ViewGroup {
 
         updateGroupOverflow();
         row.setContentTransformationAmount(0, false /* isLastChild */);
+        // It doesn't make sense to keep old animations around, lets cancel them!
+        ExpandableNotificationRow.NotificationViewState viewState = row.getViewState();
+        if (viewState != null) {
+            viewState.cancelAnimations(row);
+            row.cancelAppearDrawing();
+        }
     }
 
     public void removeNotification(ExpandableNotificationRow row) {
