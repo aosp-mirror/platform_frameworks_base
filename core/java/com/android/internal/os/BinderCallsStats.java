@@ -71,6 +71,7 @@ public class BinderCallsStats {
 
         s.mCpuTimeStarted = getThreadTimeMicro();
         s.mTimeStarted = getElapsedRealtimeNanos() / 1_000;
+        s.exceptionThrown = false;
         return s;
     }
 
@@ -98,6 +99,7 @@ public class BinderCallsStats {
                 callStat.callCount++;
                 callStat.latencyMicros += latencyDuration;
                 callStat.cpuTimeMicros += duration;
+                callStat.exceptionCount += s.exceptionThrown ? 1 : 0;
             }
 
             uidEntry.cpuTimeMicros += duration;
@@ -106,6 +108,18 @@ public class BinderCallsStats {
         if (mCallSessionsPool.size() < CALL_SESSIONS_POOL_SIZE) {
             mCallSessionsPool.add(s);
         }
+    }
+
+    /**
+     * Called if an exception is thrown while executing the binder transaction.
+     *
+     * <li>BinderCallsStats#callEnded will be called afterwards.
+     * <li>Do not throw an exception in this method, it will swallow the original exception thrown
+     * by the binder transaction.
+     */
+    public void callThrewException(CallSession s) {
+        Preconditions.checkNotNull(s);
+        s.exceptionThrown = true;
     }
 
     public void dump(PrintWriter pw) {
@@ -134,7 +148,7 @@ public class BinderCallsStats {
             }
         }
         if (mDetailedTracking) {
-            pw.println("Raw data (uid,call_desc,cpu_time_micros,latency_time_micros,call_count):");
+            pw.println("Raw data (uid,call_desc,cpu_time_micros,latency_time_micros,exception_count,call_count):");
             entries.sort((o1, o2) -> {
                 if (o1.cpuTimeMicros < o2.cpuTimeMicros) {
                     return 1;
@@ -157,8 +171,10 @@ public class BinderCallsStats {
                 for (CallStat e : callStats) {
                     sb.setLength(0);
                     sb.append("    ")
-                            .append(uidEntry.uid).append(",").append(e).append(',').append(e.cpuTimeMicros)
+                            .append(uidEntry.uid).append(",").append(e)
+                            .append(',').append(e.cpuTimeMicros)
                             .append(',').append(e.latencyMicros)
+                            .append(',').append(e.exceptionCount)
                             .append(',').append(e.callCount);
                     pw.println(sb);
                 }
@@ -225,6 +241,7 @@ public class BinderCallsStats {
         long cpuTimeMicros;
         long latencyMicros;
         long callCount;
+        long exceptionCount;
 
         CallStat() {
         }
@@ -262,6 +279,7 @@ public class BinderCallsStats {
         int mCallingUId;
         long mCpuTimeStarted;
         long mTimeStarted;
+        boolean exceptionThrown;
         CallStat mCallStat = new CallStat();
     }
 
