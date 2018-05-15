@@ -23,6 +23,7 @@ public class RotationUtils {
     public static final int ROTATION_NONE = 0;
     public static final int ROTATION_LANDSCAPE = 1;
     public static final int ROTATION_SEASCAPE = 2;
+    public static final int ROTATION_UPSIDE_DOWN = 3;
 
     public static int getRotation(Context context) {
         Configuration config = context.getResources().getConfiguration();
@@ -32,6 +33,21 @@ public class RotationUtils {
                 return ROTATION_LANDSCAPE;
             } else if (rot == Surface.ROTATION_270) {
                 return ROTATION_SEASCAPE;
+            }
+        }
+        return ROTATION_NONE;
+    }
+
+    public static int getExactRotation(Context context) {
+        Configuration config = context.getResources().getConfiguration();
+        int rot = context.getDisplay().getRotation();
+        if (config.smallestScreenWidthDp < 600) {
+            if (rot == Surface.ROTATION_90) {
+                return ROTATION_LANDSCAPE;
+            } else if (rot == Surface.ROTATION_270) {
+                return ROTATION_SEASCAPE;
+            } else if (rot == Surface.ROTATION_180) {
+                return ROTATION_UPSIDE_DOWN;
             }
         }
         return ROTATION_NONE;
