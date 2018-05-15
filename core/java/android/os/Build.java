@@ -916,6 +916,15 @@ public class Build {
          * </ul>
          */
         public static final int P = 28;
+
+        /**
+         * Q.
+         * <p>
+         * <em>Why? Why, to give you a taste of your future, a preview of things
+         * to come. Con permiso, Capitan. The hall is rented, the orchestra
+         * engaged. It's now time to see if you can dance.</em>
+         */
+        public static final int Q = CUR_DEVELOPMENT;
     }
 
     /** The type of build, like "user" or "eng". */
