@@ -99,6 +99,7 @@ import com.android.systemui.statusbar.notification.FakeShadowView;
 import com.android.systemui.statusbar.notification.NotificationUtils;
 import com.android.systemui.statusbar.notification.VisibilityLocationProvider;
 import com.android.systemui.statusbar.phone.DozeParameters;
+import com.android.systemui.statusbar.phone.HeadsUpAppearanceController;
 import com.android.systemui.statusbar.phone.HeadsUpManagerPhone;
 import com.android.systemui.statusbar.phone.NotificationGroupManager;
 import com.android.systemui.statusbar.phone.ScrimController;
@@ -416,6 +417,7 @@ public class NotificationStackScrollLayout extends ViewGroup
     private int mAntiBurnInOffsetX;
     private ArrayList<BiConsumer<Float, Float>> mExpandedHeightListeners = new ArrayList<>();
     private int mHeadsUpInset;
+    private HeadsUpAppearanceController mHeadsUpAppearanceController;
 
     public NotificationStackScrollLayout(Context context) {
         this(context, null);
@@ -3078,8 +3080,10 @@ public class NotificationStackScrollLayout extends ViewGroup
 
     @Override
     public void bindRow(ExpandableNotificationRow row) {
-        row.setHeadsUpAnimatingAwayListener(animatingAway
-                -> mRoundnessManager.onHeadsupAnimatingAwayChanged(row, animatingAway));
+        row.setHeadsUpAnimatingAwayListener(animatingAway -> {
+            mRoundnessManager.onHeadsupAnimatingAwayChanged(row, animatingAway);
+            mHeadsUpAppearanceController.updateHeader(row.getEntry());
+        });
     }
 
     @Override
@@ -4651,6 +4655,11 @@ public class NotificationStackScrollLayout extends ViewGroup
      */
     public void removeOnExpandedHeightListener(BiConsumer<Float, Float> listener) {
         mExpandedHeightListeners.remove(listener);
+    }
+
+    public void setHeadsUpAppearanceController(
+            HeadsUpAppearanceController headsUpAppearanceController) {
+        mHeadsUpAppearanceController = headsUpAppearanceController;
     }
 
     /**
