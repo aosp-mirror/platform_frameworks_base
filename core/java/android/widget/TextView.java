@@ -1508,6 +1508,13 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         }
 
         setText(text, bufferType);
+        if (mText == null) {
+            mText = "";
+        }
+        if (mTransformed == null) {
+            mTransformed = "";
+        }
+
         if (textIsSetFromXml) {
             mTextSetFromXmlOrResourceId = true;
         }
@@ -2189,6 +2196,14 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      */
     public Editable getEditableText() {
         return (mText instanceof Editable) ? (Editable) mText : null;
+    }
+
+    /**
+     * @hide
+     */
+    @VisibleForTesting
+    public CharSequence getTransformed() {
+        return mTransformed;
     }
 
     /**
@@ -5532,6 +5547,11 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      * PrecomputedText mismatches with this TextView, IllegalArgumentException is thrown. To ensure
      * the parameters match, you can call {@link TextView#setTextMetricsParams} before calling this.
      *
+     * Subclasses overriding this method should ensure that the following post condition holds,
+     * in order to guarantee the safety of the view's measurement and layout operations:
+     * regardless of the input, after calling #setText both {@code mText} and {@code mTransformed}
+     * will be different from {@code null}.
+     *
      * @param text text to be displayed
      *
      * @attr ref android.R.styleable#TextView_text
@@ -5553,6 +5573,11 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      * intermediate {@link Spannable Spannables}. Likewise it will use
      * {@link android.text.Editable.Factory} to create final or intermediate
      * {@link Editable Editables}.
+     *
+     * Subclasses overriding this method should ensure that the following post condition holds,
+     * in order to guarantee the safety of the view's measurement and layout operations:
+     * regardless of the input, after calling #setText both {@code mText} and {@code mTransformed}
+     * will be different from {@code null}.
      *
      * @param text text to be displayed
      *
@@ -5705,6 +5730,10 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             mTransformed = text;
         } else {
             mTransformed = mTransformation.getTransformation(text, this);
+        }
+        if (mTransformed == null) {
+            // Should not happen if the transformation method follows the non-null postcondition.
+            mTransformed = "";
         }
 
         final int textLength = text.length();

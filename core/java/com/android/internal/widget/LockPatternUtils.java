@@ -276,6 +276,10 @@ public class LockPatternUtils {
         return getDevicePolicyManager().getPasswordMinimumLength(null, userId);
     }
 
+    public int getMaximumPasswordLength(int quality) {
+        return getDevicePolicyManager().getPasswordMaximumLength(quality);
+    }
+
     /**
      * Gets the device policy password mode. If the mode is non-specific, returns
      * MODE_PATTERN which allows the user to choose anything.

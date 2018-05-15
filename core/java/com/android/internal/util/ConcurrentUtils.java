@@ -17,6 +17,7 @@
 package com.android.internal.util;
 
 import android.os.Process;
+import android.util.Slog;
 
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutionException;
@@ -109,6 +110,24 @@ public class ConcurrentUtils {
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
             throw new IllegalStateException(description + " interrupted.");
+        }
+    }
+
+    /**
+     * Calls {@link Slog#wtf} if a given lock is held.
+     */
+    public static void wtfIfLockHeld(String tag, Object lock) {
+        if (Thread.holdsLock(lock)) {
+            Slog.wtf(tag, "Lock mustn't be held");
+        }
+    }
+
+    /**
+     * Calls {@link Slog#wtf} if a given lock is not held.
+     */
+    public static void wtfIfLockNotHeld(String tag, Object lock) {
+        if (!Thread.holdsLock(lock)) {
+            Slog.wtf(tag, "Lock must be held");
         }
     }
 }

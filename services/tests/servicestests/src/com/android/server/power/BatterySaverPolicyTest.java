@@ -15,10 +15,15 @@
  */
 package com.android.server.power;
 
+import static com.google.common.truth.Truth.assertThat;
+
+import static org.mockito.Mockito.mock;
+
+import android.content.Context;
+import android.os.Handler;
 import android.os.PowerManager;
 import android.os.PowerManager.ServiceType;
 import android.os.PowerSaveState;
-import android.os.Handler;
 import android.provider.Settings.Global;
 import android.test.AndroidTestCase;
 import android.test.suitebuilder.annotation.SmallTest;
@@ -26,11 +31,11 @@ import android.util.ArrayMap;
 
 import com.android.frameworks.servicestests.R;
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.logging.MetricsLogger;
+import com.android.server.power.batterysaver.BatterySavingStats;
 
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-
-import static com.google.common.truth.Truth.assertThat;
 
 /**
  * Tests for {@link com.android.server.power.BatterySaverPolicy}
@@ -57,8 +62,9 @@ public class BatterySaverPolicyTest extends AndroidTestCase {
     private static final String BATTERY_SAVER_INCORRECT_CONSTANTS = "vi*,!=,,true";
 
     private class BatterySaverPolicyForTest extends BatterySaverPolicy {
-        public BatterySaverPolicyForTest(Handler handler) {
-            super(handler);
+        public BatterySaverPolicyForTest(Object lock, Context context,
+                BatterySavingStats batterySavingStats) {
+            super(lock, context, batterySavingStats);
         }
 
         @Override
@@ -71,11 +77,6 @@ public class BatterySaverPolicyTest extends AndroidTestCase {
             return mDeviceSpecificConfigResId;
         }
 
-        @Override
-        boolean isAccessibilityEnabled() {
-            return mMockAccessibilityEnabled;
-        }
-
         @VisibleForTesting
         void onChange() {
             onChange(true, null);
@@ -84,20 +85,22 @@ public class BatterySaverPolicyTest extends AndroidTestCase {
 
     @Mock
     Handler mHandler;
+
+    @Mock
+    MetricsLogger mMetricsLogger = mock(MetricsLogger.class);
+
     private BatterySaverPolicyForTest mBatterySaverPolicy;
 
     private final ArrayMap<String, String> mMockGlobalSettings = new ArrayMap<>();
     private int mDeviceSpecificConfigResId = R.string.config_batterySaverDeviceSpecificConfig_1;
 
-    private boolean mMockAccessibilityEnabled;
-
     public void setUp() throws Exception {
         super.setUp();
         MockitoAnnotations.initMocks(this);
-        mBatterySaverPolicy = new BatterySaverPolicyForTest(mHandler);
-        mBatterySaverPolicy.systemReady(getContext());
-
-        mMockAccessibilityEnabled = false;
+        final Object lock = new Object();
+        mBatterySaverPolicy = new BatterySaverPolicyForTest(lock, getContext(),
+                new BatterySavingStats(lock, mMetricsLogger));
+        mBatterySaverPolicy.systemReady();
     }
 
     @SmallTest
@@ -112,7 +115,7 @@ public class BatterySaverPolicyTest extends AndroidTestCase {
 
     @SmallTest
     public void testGetBatterySaverPolicy_PolicyVibration_WithAccessibilityEnabled() {
-        mMockAccessibilityEnabled = true;
+        mBatterySaverPolicy.setAccessibilityEnabledForTest(true);
         testServiceDefaultValue_unchanged(ServiceType.VIBRATION);
     }
 

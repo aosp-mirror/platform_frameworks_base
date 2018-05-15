@@ -20,6 +20,8 @@ import static android.content.Context.KEYGUARD_SERVICE;
 import static android.content.Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS;
 import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
 
+import static com.android.server.pm.PackageManagerService.PLATFORM_PACKAGE_NAME;
+
 import android.annotation.UserIdInt;
 import android.app.ActivityManager;
 import android.app.AlarmManager;
@@ -50,6 +52,7 @@ import android.content.pm.LauncherApps;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
+import android.content.pm.PackageManagerInternal;
 import android.content.pm.ParceledListSlice;
 import android.content.pm.ResolveInfo;
 import android.content.pm.ServiceInfo;
@@ -96,6 +99,7 @@ import android.view.WindowManager;
 import android.widget.RemoteViews;
 
 import com.android.internal.R;
+import com.android.internal.app.SuspendedAppActivity;
 import com.android.internal.app.UnlaunchableAppActivity;
 import com.android.internal.appwidget.IAppWidgetHost;
 import com.android.internal.appwidget.IAppWidgetService;
@@ -228,6 +232,7 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
     private AppOpsManager mAppOpsManager;
     private KeyguardManager mKeyguardManager;
     private DevicePolicyManagerInternal mDevicePolicyManagerInternal;
+    private PackageManagerInternal mPackageManagerInternal;
 
     private SecurityPolicy mSecurityPolicy;
 
@@ -254,6 +259,7 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
         mAppOpsManager = (AppOpsManager) mContext.getSystemService(Context.APP_OPS_SERVICE);
         mKeyguardManager = (KeyguardManager) mContext.getSystemService(KEYGUARD_SERVICE);
         mDevicePolicyManagerInternal = LocalServices.getService(DevicePolicyManagerInternal.class);
+        mPackageManagerInternal = LocalServices.getService(PackageManagerInternal.class);
         mSaveStateHandler = BackgroundThread.getHandler();
         mCallbackHandler = new CallbackHandler(mContext.getMainLooper());
         mBackupRestoreController = new BackupRestoreController();
@@ -620,8 +626,17 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
             if (provider.maskedBySuspendedPackage) {
                 UserInfo userInfo = mUserManager.getUserInfo(providerUserId);
                 showBadge = userInfo.isManagedProfile();
-                onClickIntent = mDevicePolicyManagerInternal.createShowAdminSupportIntent(
-                        providerUserId, true);
+                final String suspendingPackage = mPackageManagerInternal.getSuspendingPackage(
+                        providerPackage, providerUserId);
+                if (PLATFORM_PACKAGE_NAME.equals(suspendingPackage)) {
+                    onClickIntent = mDevicePolicyManagerInternal.createShowAdminSupportIntent(
+                            providerUserId, true);
+                } else {
+                    final String dialogMessage = mPackageManagerInternal.getSuspendedDialogMessage(
+                            providerPackage, providerUserId);
+                    onClickIntent = SuspendedAppActivity.createSuspendedAppInterceptIntent(
+                            providerPackage, suspendingPackage, dialogMessage, providerUserId);
+                }
             } else if (provider.maskedByQuietProfile) {
                 showBadge = true;
                 onClickIntent = UnlaunchableAppActivity.createInQuietModeDialogIntent(
