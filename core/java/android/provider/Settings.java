@@ -10445,7 +10445,9 @@ public final class Settings {
          * The following keys are supported:
          *
          * <pre>
-         * state_settle_time                (long)
+         * top_state_settle_time                (long)
+         * fg_service_state_settle_time         (long)
+         * bg_state_settle_time                 (long)
          * </pre>
          *
          * <p>
