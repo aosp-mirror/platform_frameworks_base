@@ -3169,8 +3169,6 @@ Landroid/net/NetworkAgent;->sendNetworkInfo(Landroid/net/NetworkInfo;)V
 Landroid/net/NetworkCapabilities;-><init>()V
 Landroid/net/NetworkCapabilities;->addCapability(I)Landroid/net/NetworkCapabilities;
 Landroid/net/NetworkCapabilities;->addTransportType(I)Landroid/net/NetworkCapabilities;
-Landroid/net/NetworkCapabilities;->getCapabilities()[I
-Landroid/net/NetworkCapabilities;->getTransportTypes()[I
 Landroid/net/NetworkCapabilities;->mNetworkCapabilities:J
 Landroid/net/NetworkCapabilities;->mSignalStrength:I
 Landroid/net/NetworkCapabilities;->removeCapability(I)Landroid/net/NetworkCapabilities;
