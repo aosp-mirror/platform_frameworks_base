@@ -1842,7 +1842,7 @@ Landroid/os/ServiceManager;->checkService(Ljava/lang/String;)Landroid/os/IBinder
 Landroid/os/ServiceManager;->getIServiceManager()Landroid/os/IServiceManager;
 Landroid/os/ServiceManager;->getService(Ljava/lang/String;)Landroid/os/IBinder;
 Landroid/os/ServiceManager;->listServices()[Ljava/lang/String;
-Landroid/os/ServiceManager;->sCache:Ljava/util/HashMap;
+Landroid/os/ServiceManager;->sCache:Ljava/util/Map;
 Landroid/os/ServiceManager;->sServiceManager:Landroid/os/IServiceManager;
 Landroid/os/ServiceManagerNative;->asInterface(Landroid/os/IBinder;)Landroid/os/IServiceManager;
 Landroid/os/SharedMemory;->getFd()I
