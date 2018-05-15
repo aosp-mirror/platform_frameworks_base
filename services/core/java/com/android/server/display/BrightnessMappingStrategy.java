@@ -341,7 +341,7 @@ public abstract class BrightnessMappingStrategy {
         // Extreme edge cases: use a simpler heuristic, as proper gamma correction around the edges
         // affects the curve rather drastically.
         if (currentBrightness <= 0.1f || currentBrightness >= 0.9f) {
-            adjustment = (desiredBrightness - currentBrightness) * 2;
+            adjustment = (desiredBrightness - currentBrightness);
         // Edge case: darkest adjustment possible.
         } else if (desiredBrightness == 0) {
             adjustment = -1;
