@@ -164,6 +164,8 @@ private:
 
     const size_t mDimensionHardLimit;
 
+    const bool mUseAbsoluteValueOnReset;
+
     FRIEND_TEST(ValueMetricProducerTest, TestNonDimensionalEvents);
     FRIEND_TEST(ValueMetricProducerTest, TestEventsWithNonSlicedCondition);
     FRIEND_TEST(ValueMetricProducerTest, TestPushedEventsWithUpgrade);

@@ -2691,12 +2691,7 @@ public class WindowManagerService extends IWindowManager.Stub
                     + " Callers=" + Debug.getCallers(5));
             if (mAppTransition.isTransitionSet()) {
                 mAppTransition.setReady();
-                final long origId = Binder.clearCallingIdentity();
-                try {
-                    mWindowPlacerLocked.performSurfacePlacement();
-                } finally {
-                    Binder.restoreCallingIdentity(origId);
-                }
+                mWindowPlacerLocked.requestTraversal();
             }
         }
     }

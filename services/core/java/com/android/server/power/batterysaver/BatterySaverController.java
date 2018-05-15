@@ -50,13 +50,16 @@ import java.util.ArrayList;
 
 /**
  * Responsible for battery saver mode transition logic.
+ *
+ * IMPORTANT: This class shares the power manager lock, which is very low in the lock hierarchy.
+ * Do not call out with the lock held. (Settings provider is okay.)
  */
 public class BatterySaverController implements BatterySaverPolicyListener {
     static final String TAG = "BatterySaverController";
 
     static final boolean DEBUG = BatterySaverPolicy.DEBUG;
 
-    private final Object mLock = new Object();
+    private final Object mLock;
     private final Context mContext;
     private final MyHandler mHandler;
     private final FileUpdater mFileUpdater;
@@ -142,13 +145,15 @@ public class BatterySaverController implements BatterySaverPolicyListener {
     /**
      * Constructor.
      */
-    public BatterySaverController(Context context, Looper looper, BatterySaverPolicy policy) {
+    public BatterySaverController(Object lock, Context context, Looper looper,
+            BatterySaverPolicy policy, BatterySavingStats batterySavingStats) {
+        mLock = lock;
         mContext = context;
         mHandler = new MyHandler(looper);
         mBatterySaverPolicy = policy;
         mBatterySaverPolicy.addListener(this);
         mFileUpdater = new FileUpdater(context);
-        mBatterySavingStats = BatterySavingStats.getInstance();
+        mBatterySavingStats = batterySavingStats;
 
         // Initialize plugins.
         final ArrayList<Plugin> plugins = new ArrayList<>();
@@ -167,7 +172,7 @@ public class BatterySaverController implements BatterySaverPolicyListener {
     }
 
     /**
-     * Called by {@link PowerManagerService} on system ready.
+     * Called by {@link PowerManagerService} on system ready, *with no lock held*.
      */
     public void systemReady() {
         final IntentFilter filter = new IntentFilter(Intent.ACTION_SCREEN_ON);

@@ -80,7 +80,7 @@
         android:visibility="gone"
         android:gravity="center"
         android:textAppearance="@style/TextAppearance.QS.TileLabel"
-        android:textColor="?android:attr/textColorPrimary"/>
+        android:textColor="?android:attr/textColorSecondary"/>
 
     <View
         android:id="@+id/underline"

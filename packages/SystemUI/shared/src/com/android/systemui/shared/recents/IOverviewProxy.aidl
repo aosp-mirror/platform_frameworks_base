@@ -85,4 +85,9 @@ oneway interface IOverviewProxy {
      * cancel (long) press.
      */
     void onQuickStep(in MotionEvent event);
+
+    /**
+     * Sent when there was an action on one of the onboarding tips view.
+     */
+    void onTip(int actionType, int viewType);
 }

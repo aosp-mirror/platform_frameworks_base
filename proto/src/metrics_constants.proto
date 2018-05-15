@@ -188,6 +188,23 @@ message MetricsEvent {
     ACCESS_METHOD_LINKING = 3; // never logged, included for completeness
   }
 
+  enum HardwareType {
+        HARDWARE_UNKNOWN = 0;
+        HARDWARE_MICROPHONE = 1;
+        HARDWARE_CODEC = 2;
+        HARDWARE_SPEAKER = 3;
+        HARDWARE_FINGERPRINT = 4;
+    }
+
+    enum HardwareFailureCode {
+        HARDWARE_FAILURE_UNKNOWN = 0;
+        HARDWARE_FAILURE_COMPLETE = 1;
+        HARDWARE_FAILURE_SPEAKER_HIGH_Z = 2;
+        HARDWARE_FAILURE_SPEAKER_SHORT = 3;
+        HARDWARE_FAILURE_FINGERPRINT_SENSOR_BROKEN = 4;
+        HARDWARE_FAILURE_FINGERPRINT_TOO_MANY_DEAD_PIXELS = 5;
+    }
+
   // Known visual elements: views or controls.
   enum View {
     // Unknown view
@@ -5851,6 +5868,107 @@ message MetricsEvent {
     // 2 = Plugged USB
     // 3 = Wireless
     FIELD_PLUG_TYPE = 1421;
+
+    // ACTION: USB-C Connector connected.
+    // CATEGORY: OTHER
+    // OS: P
+    ACTION_USB_CONNECTOR_CONNECTED = 1422;
+
+    // ACTION: USB-C Connector disconnected.
+    // CATEGORY: OTHER
+    // OS: P
+    // uses FIELD_DURATION_MILLIS for connected duration
+    ACTION_USB_CONNECTOR_DISCONNECTED = 1423;
+
+    // ACTION: USB-C Audio device connected
+    // CATEGORY: OTHER
+    // OS: P
+    ACTION_USB_AUDIO_CONNECTED = 1424;
+
+    // FIELD: VIDPID of connected USB Audio device
+    // CATEGORY: OTHER
+    // OS: P
+    FIELD_USB_AUDIO_VIDPID = 1425;
+
+    // ACTION: USB-C Audio device disconnected
+    // CATEGORY: OTHER
+    // OS: P
+    // use FIELD_DURATION_MILLIS for time
+    ACTION_USB_AUDIO_DISCONNECTED = 1426;
+
+    // ACTION: Hardware failure event
+    // CATEGORY: OTHER
+    // OS: P
+    ACTION_HARDWARE_FAILED = 1427;
+
+    // FIELD: Hardware failure category
+    // CATEGORY: OTHER
+    // OS: P
+    // Uses enum HardwareType
+    FIELD_HARDWARE_TYPE = 1428;
+
+    // FIELD: Hardware failure category
+    // CATEGORY: OTHER
+    // OS: P
+    // Uses enum HardwareFailureCode
+    FIELD_HARDWARE_FAILURE_CODE = 1429;
+
+    // ACTION: Physical drop event
+    // CATEGORY: OTHER
+    // OS: P
+    // use FIELD_DURATION_MILLIS for time
+    ACTION_PHYSICAL_DROP = 1430;
+
+    // FIELD: Confidence in detection of drop, in integer percentage.
+    // CATEGORY: OTHER
+    // OS: P
+    FIELD_CONFIDENCE_PERCENT = 1431;
+
+    // FIELD: Detected bounce acceleration, in 1/1000th of a G.
+    // CATEGORY: OTHER
+    // OS: P
+    FIELD_ACCEL_MILLI_G = 1432;
+
+    // ACTION: Battery health snapshot
+    // CATEGORY: OTHER
+    // OS: P
+    // uses FIELD_END_BATTERY_PERCENT for batt %
+    // uses FIELD_END_BATTERY_UA for instantaneous current load
+    ACTION_BATTERY_HEALTH = 1433;
+
+    // FIELD: Battery health snapshot type - min daily voltage, resistance, etc.
+    // CATEGORY: OTHER
+    // OS: P
+    FIELD_BATTERY_HEALTH_SNAPSHOT_TYPE = 1434;
+
+    // FIELD: Battery temperature at snapshop.
+    // CATEGORY: OTHER
+    // OS: P
+    FIELD_BATTERY_TEMPERATURE = 1435;
+
+    // FIELD: Battery voltage at snapshot.
+    // CATEGORY: OTHER
+    // OS: P
+    FIELD_BATTERY_VOLTAGE = 1436;
+
+    // FIELD: Battery open circuit voltage at snapshot.
+    // CATEGORY: OTHER
+    // OS: P
+    FIELD_BATTERY_OPEN_CIRCUIT_VOLTAGE = 1437;
+
+    // ACTION: Battery charge cycles
+    //         Number of times the battery has charged beyond a
+    //         fractional threshold of full capacity.
+    // CATEGORY: OTHER
+    // OS: P
+    ACTION_BATTERY_CHARGE_CYCLES = 1438;
+
+    // FIELD: Battery charge cycles
+    //        Number of times the battery has charged beyond a
+    //        fractional threshold of full capacity.
+    // CATEGORY: OTHER
+    // OS: P
+    FIELD_BATTERY_CHARGE_CYCLES = 1439;
 
     // ---- End P Constants, all P constants go above this line ----
     // Add new aosp constants above this line.

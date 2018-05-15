@@ -53,6 +53,7 @@ import android.view.KeyEvent;
 import android.view.View;
 import android.view.ViewRootImpl;
 import android.view.WindowManager.LayoutParams.SoftInputModeFlags;
+import android.view.autofill.AutofillManager;
 
 import com.android.internal.inputmethod.IInputContentUriToken;
 import com.android.internal.os.SomeArgs;
@@ -406,6 +407,17 @@ public final class InputMethodManager {
     static final int MSG_SET_USER_ACTION_NOTIFICATION_SEQUENCE_NUMBER = 9;
     static final int MSG_REPORT_FULLSCREEN_MODE = 10;
 
+    private static boolean isAutofillUIShowing(View servedView) {
+        AutofillManager afm = servedView.getContext().getSystemService(AutofillManager.class);
+        return afm != null && afm.isAutofillUiShowing();
+    }
+
+    private static boolean canStartInput(View servedView) {
+        // We can start input ether the servedView has window focus
+        // or the activity is showing autofill ui.
+        return servedView.hasWindowFocus() || isAutofillUIShowing(servedView);
+    }
+
     class H extends Handler {
         H(Looper looper) {
             super(looper, null, true);
@@ -506,7 +518,7 @@ public final class InputMethodManager {
                         }
                         // Check focus again in case that "onWindowFocus" is called before
                         // handling this message.
-                        if (mServedView != null && mServedView.hasWindowFocus()) {
+                        if (mServedView != null && canStartInput(mServedView)) {
                             if (checkFocusNoStartInput(mRestartOnNextWindowFocus)) {
                                 final int reason = active ?
                                         InputMethodClient.START_INPUT_REASON_ACTIVATED_BY_IMMS :
@@ -1435,7 +1447,7 @@ public final class InputMethodManager {
                 // at times when we don't really want it to.  For now it
                 // seems better to just turn it all off.
                 // TODO: Check view.isTemporarilyDetached() when re-enable the following code.
-                if (false && view.hasWindowFocus()) {
+                if (false && canStartInput(view)) {
                     mNextServedView = null;
                     scheduleCheckFocusLocked(view);
                 }
@@ -2572,6 +2584,7 @@ public final class InputMethodManager {
         sb.append(view);
         sb.append(",focus=" + view.hasFocus());
         sb.append(",windowFocus=" + view.hasWindowFocus());
+        sb.append(",autofillUiShowing=" + isAutofillUIShowing(view));
         sb.append(",window=" + view.getWindowToken());
         sb.append(",temporaryDetach=" + view.isTemporarilyDetached());
         return sb.toString();
