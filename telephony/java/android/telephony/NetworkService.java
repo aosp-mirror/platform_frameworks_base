@@ -206,8 +206,10 @@ public abstract class NetworkService extends Service {
         }
     }
 
-    /** @hide */
-    protected NetworkService() {
+    /**
+     * Default constructor.
+     */
+    public NetworkService() {
         mHandlerThread = new HandlerThread(TAG);
         mHandlerThread.start();
 
