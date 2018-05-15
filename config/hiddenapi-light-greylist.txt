@@ -6619,6 +6619,7 @@ Landroid/widget/RemoteViews;->mBitmapCache:Landroid/widget/RemoteViews$BitmapCac
 Landroid/widget/RemoteViews;->mergeRemoteViews(Landroid/widget/RemoteViews;)V
 Landroid/widget/RemoteViews;->mLayoutId:I
 Landroid/widget/RemoteViews;->mPortrait:Landroid/widget/RemoteViews;
+Landroid/widget/RemoteViews;->setIsWidgetCollectionChild(Z)V
 Landroid/widget/RemoteViews;->setRemoteAdapter(ILjava/util/ArrayList;I)V
 Landroid/widget/RemoteViewsAdapter;->getRemoteViewsServiceIntent()Landroid/content/Intent;
 Landroid/widget/RemoteViewsAdapter;->isDataReady()Z
