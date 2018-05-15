@@ -979,7 +979,9 @@ public class Activity extends ContextThemeWrapper
     @Override
     protected void attachBaseContext(Context newBase) {
         super.attachBaseContext(newBase);
-        newBase.setAutofillClient(this);
+        if (newBase != null) {
+            newBase.setAutofillClient(this);
+        }
     }
 
     /** @hide */
