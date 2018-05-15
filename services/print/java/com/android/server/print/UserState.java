@@ -19,6 +19,7 @@ package com.android.server.print;
 import static android.content.pm.PackageManager.GET_META_DATA;
 import static android.content.pm.PackageManager.GET_SERVICES;
 import static android.content.pm.PackageManager.MATCH_DEBUG_TRIAGED_MISSING;
+import static android.content.pm.PackageManager.MATCH_INSTANT;
 
 import static com.android.internal.print.DumpUtils.writePrintJobInfo;
 import static com.android.internal.print.DumpUtils.writePrinterId;
@@ -154,6 +155,11 @@ final class UserState implements PrintSpoolerCallbacks, PrintServiceCallbacks,
      * recommendations}.
      */
     private RemotePrintServiceRecommendationService mPrintServiceRecommendationsService;
+
+    /**
+     * Can services from instant apps be bound? (usually disabled, only used by testing)
+     */
+    private boolean mIsInstantServiceAllowed;
 
     public UserState(Context context, int userId, Object lock, boolean lowPriority) {
         mContext = context;
@@ -872,9 +878,14 @@ final class UserState implements PrintSpoolerCallbacks, PrintServiceCallbacks,
     private void readInstalledPrintServicesLocked() {
         Set<PrintServiceInfo> tempPrintServices = new HashSet<PrintServiceInfo>();
 
+        int queryIntentFlags = GET_SERVICES | GET_META_DATA | MATCH_DEBUG_TRIAGED_MISSING;
+
+        if (mIsInstantServiceAllowed) {
+            queryIntentFlags |= MATCH_INSTANT;
+        }
+
         List<ResolveInfo> installedServices = mContext.getPackageManager()
-                .queryIntentServicesAsUser(mQueryIntent,
-                        GET_SERVICES | GET_META_DATA | MATCH_DEBUG_TRIAGED_MISSING, mUserId);
+                .queryIntentServicesAsUser(mQueryIntent, queryIntentFlags, mUserId);
 
         final int installedCount = installedServices.size();
         for (int i = 0, count = installedCount; i < count; i++) {
@@ -1182,6 +1193,18 @@ final class UserState implements PrintSpoolerCallbacks, PrintServiceCallbacks,
     private void onConfigurationChanged() {
         synchronized (mLock) {
             onConfigurationChangedLocked();
+        }
+    }
+
+    public boolean getBindInstantServiceAllowed() {
+        return mIsInstantServiceAllowed;
+    }
+
+    public void setBindInstantServiceAllowed(boolean allowed) {
+        synchronized (mLock) {
+            mIsInstantServiceAllowed = allowed;
+
+            updateIfNeededLocked();
         }
     }
 
