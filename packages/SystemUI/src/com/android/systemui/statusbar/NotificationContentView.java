@@ -1196,8 +1196,13 @@ public class NotificationContentView extends FrameLayout {
     }
     private void updateSingleLineView() {
         if (mIsChildInGroup) {
+            boolean isNewView = mSingleLineView == null;
             mSingleLineView = mHybridGroupManager.bindFromNotification(
                     mSingleLineView, mStatusBarNotification.getNotification());
+            if (isNewView) {
+                updateViewVisibility(mVisibleType, VISIBLE_TYPE_SINGLELINE,
+                        mSingleLineView, mSingleLineView);
+            }
         } else if (mSingleLineView != null) {
             removeView(mSingleLineView);
             mSingleLineView = null;
@@ -1206,8 +1211,13 @@ public class NotificationContentView extends FrameLayout {
 
     private void updateAmbientSingleLineView() {
         if (mIsChildInGroup) {
+            boolean isNewView = mAmbientSingleLineChild == null;
             mAmbientSingleLineChild = mHybridGroupManager.bindAmbientFromNotification(
                     mAmbientSingleLineChild, mStatusBarNotification.getNotification());
+            if (isNewView) {
+                updateViewVisibility(mVisibleType, VISIBLE_TYPE_AMBIENT_SINGLELINE,
+                        mAmbientSingleLineChild, mAmbientSingleLineChild);
+            }
         } else if (mAmbientSingleLineChild != null) {
             removeView(mAmbientSingleLineChild);
             mAmbientSingleLineChild = null;
