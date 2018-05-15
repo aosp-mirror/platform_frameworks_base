@@ -20,7 +20,6 @@ import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.ValueAnimator;
 import android.app.ActivityManager;
-import android.app.ActivityOptions;
 import android.graphics.Matrix;
 import android.graphics.Rect;
 import android.os.RemoteException;
@@ -76,8 +75,8 @@ public class ActivityLaunchAnimator {
     }
 
     public RemoteAnimationAdapter getLaunchAnimation(
-            ExpandableNotificationRow sourceNotification) {
-        if (mStatusBar.getBarState() != StatusBarState.SHADE) {
+            ExpandableNotificationRow sourceNotification, boolean occluded) {
+        if (mStatusBar.getBarState() != StatusBarState.SHADE || occluded) {
             return null;
         }
         AnimationRunner animationRunner = new AnimationRunner(sourceNotification);
