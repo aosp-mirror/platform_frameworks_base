@@ -421,7 +421,7 @@ static bool generateSectionListCpp(Descriptor const* descriptor) {
                 printf(" NULL),\n");
                 break;
             case SECTION_DUMPSYS:
-                printf("    new DumpsysSection(%d, \"%s\",", field->number(),
+                printf("    new DumpsysSection(%d, %s,", field->number(),
                        s.userdebug_and_eng_only() ? "true" : "false");
                 splitAndPrint(s.args());
                 printf(" NULL),\n");
