@@ -571,8 +571,8 @@ final class RemotePrintService implements DeathRecipient {
         mBinding = true;
 
         boolean wasBound = mContext.bindServiceAsUser(mIntent, mServiceConnection,
-                Context.BIND_AUTO_CREATE | Context.BIND_FOREGROUND_SERVICE,
-                new UserHandle(mUserId));
+                Context.BIND_AUTO_CREATE | Context.BIND_FOREGROUND_SERVICE
+                        | Context.BIND_ALLOW_INSTANT, new UserHandle(mUserId));
 
         if (!wasBound) {
             if (DEBUG) {

@@ -811,6 +811,8 @@ public class PrintActivity extends Activity implements RemotePrintDocument.Updat
         List<ResolveInfo> resolvedActivities = getPackageManager()
                 .queryIntentActivities(intent, 0);
         if (resolvedActivities.isEmpty()) {
+            Log.w(LOG_TAG, "Advanced options activity " + mAdvancedPrintOptionsActivity + " could "
+                    + "not be found");
             return;
         }
 
