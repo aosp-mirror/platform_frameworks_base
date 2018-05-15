@@ -399,8 +399,8 @@ public class MtpStorageManager {
      */
     public synchronized MtpStorage addMtpStorage(StorageVolume volume) {
         int storageId = ((getNextStorageId() & 0x0000FFFF) << 16) + 1;
-        MtpObject root = new MtpObject(volume.getPath(), storageId, null, true);
         MtpStorage storage = new MtpStorage(volume, storageId);
+        MtpObject root = new MtpObject(storage.getPath(), storageId, null, true);
         mRoots.put(storageId, root);
         return storage;
     }
