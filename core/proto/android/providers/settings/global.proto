@@ -600,16 +600,14 @@ message GlobalSettingsProto {
     }
     optional Ntp ntp = 84;
 
-    // Details about the Off Body, Radios Off feature.
-    message OffBodyRadiosOff {
+    // Details about the User Absent, Radios Off feature.
+    message UserAbsentRadiosOff {
         option (android.msg_privacy).dest = DEST_EXPLICIT;
 
-        // Whether or not to enable the Off Body, Radios Off feature on small battery devices.
+        // Whether or not to enable the User Absent, Radios Off feature on small battery devices.
         optional SettingProto enabled_for_small_battery = 1 [ (android.privacy).dest = DEST_AUTOMATIC ];
-        // How long after the device goes off body to disable radios, in milliseconds.
-        optional SettingProto delay_ms = 2 [ (android.privacy).dest = DEST_AUTOMATIC ];
     }
-    optional OffBodyRadiosOff off_body_radios_off = 85;
+    optional UserAbsentRadiosOff user_absent_radios_off = 85;
 
     // Whether to disable the automatic scheduling of system updates.
     optional SettingProto ota_disable_automatic_update = 86 [ (android.privacy).dest = DEST_AUTOMATIC ];
