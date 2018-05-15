@@ -713,7 +713,7 @@ class ActivityStarter {
 
         boolean abort = !mSupervisor.checkStartAnyActivityPermission(intent, aInfo, resultWho,
                 requestCode, callingPid, callingUid, callingPackage, ignoreTargetSecurity,
-                callerApp, resultRecord, resultStack);
+                inTask != null, callerApp, resultRecord, resultStack);
         abort |= !mService.mIntentFirewall.checkStartActivity(intent, callingUid,
                 callingPid, resolvedType, aInfo.applicationInfo);
 
