@@ -1597,7 +1597,8 @@ static volatile int32_t gCount = 0;
 
 ResXMLTree::ResXMLTree(const DynamicRefTable* dynamicRefTable)
     : ResXMLParser(*this)
-    , mDynamicRefTable(dynamicRefTable)
+    , mDynamicRefTable((dynamicRefTable != nullptr) ? dynamicRefTable->clone()
+                                                    : std::unique_ptr<DynamicRefTable>(nullptr))
     , mError(NO_INIT), mOwnedData(NULL)
 {
     if (kDebugResXMLTree) {
@@ -1608,7 +1609,7 @@ ResXMLTree::ResXMLTree(const DynamicRefTable* dynamicRefTable)
 
 ResXMLTree::ResXMLTree()
     : ResXMLParser(*this)
-    , mDynamicRefTable(NULL)
+    , mDynamicRefTable(std::unique_ptr<DynamicRefTable>(nullptr))
     , mError(NO_INIT), mOwnedData(NULL)
 {
     if (kDebugResXMLTree) {
@@ -6864,6 +6865,13 @@ DynamicRefTable::DynamicRefTable(uint8_t packageId, bool appAsLib)
     mLookupTable[SYS_PACKAGE_ID] = SYS_PACKAGE_ID;
 }
 
+std::unique_ptr<DynamicRefTable> DynamicRefTable::clone() const {
+  std::unique_ptr<DynamicRefTable> clone = std::unique_ptr<DynamicRefTable>(
+      new DynamicRefTable(mAssignedPackageId, mAppAsLib));
+  clone->addMappings(*this);
+  return clone;
+}
+
 status_t DynamicRefTable::load(const ResTable_lib_header* const header)
 {
     const uint32_t entryCount = dtohl(header->count);
@@ -6904,7 +6912,7 @@ status_t DynamicRefTable::addMappings(const DynamicRefTable& other) {
     for (size_t i = 0; i < entryCount; i++) {
         ssize_t index = mEntries.indexOfKey(other.mEntries.keyAt(i));
         if (index < 0) {
-            mEntries.add(other.mEntries.keyAt(i), other.mEntries[i]);
+            mEntries.add(String16(other.mEntries.keyAt(i)), other.mEntries[i]);
         } else {
             if (other.mEntries[i] != mEntries[index]) {
                 return UNKNOWN_ERROR;
