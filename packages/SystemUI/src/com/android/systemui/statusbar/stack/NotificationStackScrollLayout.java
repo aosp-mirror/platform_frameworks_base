@@ -727,7 +727,7 @@ public class NotificationStackScrollLayout extends ViewGroup
     }
 
     private void updateAlgorithmLayoutMinHeight() {
-        mAmbientState.setLayoutMinHeight(mQsExpanded && !onKeyguard() || isHeadsUpTransition()
+        mAmbientState.setLayoutMinHeight(mQsExpanded || isHeadsUpTransition()
                 ? getLayoutMinHeight() : 0);
     }
 
@@ -2451,7 +2451,6 @@ public class NotificationStackScrollLayout extends ViewGroup
             }
             int finalHeight = ExpandableViewState.getFinalActualHeight(lastView);
             int finalBottom = finalTranslationY + finalHeight - lastView.getClipBottomAmount();
-            finalBottom = Math.min(finalBottom, getHeight());
             if (mAnimateNextBackgroundBottom
                     || mBottomAnimator == null && mCurrentBounds.bottom == finalBottom
                     || mBottomAnimator != null && mEndAnimationRect.bottom == finalBottom) {
@@ -2460,7 +2459,6 @@ public class NotificationStackScrollLayout extends ViewGroup
             } else {
                 bottom = (int) (lastView.getTranslationY() + lastView.getActualHeight()
                         - lastView.getClipBottomAmount());
-                bottom = Math.min(bottom, getHeight());
             }
         } else {
             top = mTopPadding;
@@ -2473,7 +2471,7 @@ public class NotificationStackScrollLayout extends ViewGroup
             top = Math.max(0, top);
         }
         mBackgroundBounds.top = top;
-        mBackgroundBounds.bottom = Math.min(getHeight(), Math.max(bottom, top));
+        mBackgroundBounds.bottom = Math.max(bottom, top);
     }
 
     private ActivatableNotificationView getFirstPinnedHeadsUp() {
