@@ -1041,6 +1041,23 @@ droiddoc {
     private_api_filename: "private.txt",
     removed_api_filename: "removed.txt",
     args: framework_docs_args + " -referenceonly -nodocs",
+    check_api: {
+        last_released: {
+            api_file: ":last-released-public-api",
+            removed_api_file: "api/removed.txt",
+            args: "-hide 2 -hide 3 -hide 4 -hide 5 -hide 6 -hide 24 -hide 25 -hide 26 -hide 27 " +
+                  "-error 7 -error 8 -error 9 -error 10 -error 11 -error 12 -error 13 -error 14 -error 15 " +
+                  "-error 16 -error 17 -error 18 -error 31",
+        },
+        current: {
+            api_file: "api/current.txt",
+            removed_api_file: "api/removed.txt",
+            args: "-error 2 -error 3 -error 4 -error 5 -error 6 " +
+                  "-error 7 -error 8 -error 9 -error 10 -error 11 -error 12 -error 13 -error 14 -error 15 " +
+                  "-error 16 -error 17 -error 18 -error 19 -error 20 -error 21 -error 23 -error 24 " +
+                  "-error 25 -error 26 -error 27",
+        },
+    },
 }
 
 droiddoc {
@@ -1058,6 +1075,23 @@ droiddoc {
     removed_api_filename: "system-removed.txt",
     exact_api_filename: "system-exact.txt",
     args: framework_docs_args + " -referenceonly -showAnnotation android.annotation.SystemApi -nodocs",
+    check_api: {
+        last_released: {
+            api_file: ":last-released-system-api",
+            removed_api_file: "api/system-removed.txt",
+            args: "-hide 2 -hide 3 -hide 4 -hide 5 -hide 6 -hide 24 -hide 25 -hide 26 -hide 27 " +
+                  "-error 7 -error 8 -error 9 -error 10 -error 11 -error 12 -error 13 -error 14 -error 15 " +
+                  "-error 16 -error 17 -error 18 -error 31",
+        },
+        current: {
+            api_file: "api/system-current.txt",
+            removed_api_file: "api/system-removed.txt",
+            args: "-error 2 -error 3 -error 4 -error 5 -error 6 " +
+                  "-error 7 -error 8 -error 9 -error 10 -error 11 -error 12 -error 13 -error 14 -error 15 " +
+                  "-error 16 -error 17 -error 18 -error 19 -error 20 -error 21 -error 23 -error 24 " +
+                  "-error 25 -error 26 -error 27",
+        },
+    },
 }
 
 droiddoc {
@@ -1075,6 +1109,16 @@ droiddoc {
     removed_api_filename: "test-removed.txt",
     exact_api_filename: "test-exact.txt",
     args: framework_docs_args + " -referenceonly -showAnnotation android.annotation.TestApi -nodocs",
+    check_api: {
+        current: {
+            api_file: "api/test-current.txt",
+            removed_api_file: "api/test-removed.txt",
+            args: "-error 2 -error 3 -error 4 -error 5 -error 6 " +
+                  "-error 7 -error 8 -error 9 -error 10 -error 11 -error 12 -error 13 -error 14 -error 15 " +
+                  "-error 16 -error 17 -error 18 -error 19 -error 20 -error 21 -error 23 -error 24 " +
+                  "-error 25 -error 26 -error 27",
+        },
+    },
 }
 
 droiddoc {
