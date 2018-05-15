@@ -54,6 +54,7 @@ public class TunerServiceImpl extends TunerService {
     // shouldn't be reset with tuner settings.
     private static final String[] RESET_BLACKLIST = new String[] {
             QSTileHost.TILES_SETTING,
+            Settings.Secure.DOZE_ALWAYS_ON
     };
 
     private final Observer mObserver = new Observer();
