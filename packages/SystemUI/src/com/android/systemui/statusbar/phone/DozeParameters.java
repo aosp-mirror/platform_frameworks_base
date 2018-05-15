@@ -38,6 +38,8 @@ import java.io.PrintWriter;
 public class DozeParameters implements TunerService.Tunable {
     private static final int MAX_DURATION = 60 * 1000;
     public static final String DOZE_SENSORS_WAKE_UP_FULLY = "doze_sensors_wake_up_fully";
+    public static final boolean FORCE_NO_BLANKING =
+            SystemProperties.getBoolean("debug.force_no_blanking", false);
 
     private static IntInOutMatcher sPickupSubtypePerformsProxMatcher;
     private static DozeParameters sInstance;
@@ -181,7 +183,7 @@ public class DozeParameters implements TunerService.Tunable {
      * @return {@code true} if screen needs to be completely black before a power transition.
      */
     public boolean getDisplayNeedsBlanking() {
-        return mContext.getResources().getBoolean(
+        return !FORCE_NO_BLANKING && mContext.getResources().getBoolean(
                 com.android.internal.R.bool.config_displayBlanksAfterDoze);
     }
 
