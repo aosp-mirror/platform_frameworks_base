@@ -32,7 +32,10 @@ import static com.android.systemui.shared.system.LauncherEventUtil.RECENTS_SWIPE
 import android.annotation.StringRes;
 import android.annotation.TargetApi;
 import android.app.ActivityManager;
+import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.graphics.CornerPathEffect;
@@ -206,6 +209,7 @@ public class RecentsOnboarding {
         @Override
         public void onViewAttachedToWindow(View view) {
             if (view == mLayout) {
+                mContext.registerReceiver(mReceiver, new IntentFilter(Intent.ACTION_SCREEN_OFF));
                 mLayoutAttachedToWindow = true;
                 if (view.getTag().equals(R.string.recents_swipe_up_onboarding)) {
                     mHasDismissedSwipeUpTip = false;
@@ -230,6 +234,7 @@ public class RecentsOnboarding {
                     }
                     mOverviewOpenedCountSinceQuickScrubTipDismiss = 0;
                 }
+                mContext.unregisterReceiver(mReceiver);
             }
         }
     };
@@ -399,7 +404,7 @@ public class RecentsOnboarding {
                 ViewGroup.LayoutParams.MATCH_PARENT,
                 ViewGroup.LayoutParams.WRAP_CONTENT,
                 0, -mNavBarHeight / 2,
-                WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY,
+                WindowManager.LayoutParams.TYPE_NAVIGATION_BAR_PANEL,
                 flags,
                 PixelFormat.TRANSLUCENT);
         lp.privateFlags |= WindowManager.LayoutParams.PRIVATE_FLAG_SHOW_FOR_ALL_USERS;
@@ -456,4 +461,13 @@ public class RecentsOnboarding {
     private void setOpenedOverviewCount(int openedOverviewCount) {
         Prefs.putInt(mContext, OVERVIEW_OPENED_COUNT, openedOverviewCount);
     }
+
+    private final BroadcastReceiver mReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if (intent.getAction().equals(Intent.ACTION_SCREEN_OFF)) {
+                hide(false);
+            }
+        }
+    };
 }
