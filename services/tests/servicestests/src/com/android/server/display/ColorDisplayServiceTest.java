@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.server;
+package com.android.server.display;
 
 import android.annotation.NonNull;
 import android.app.ActivityManager;
@@ -32,8 +32,8 @@ import android.test.mock.MockContentResolver;
 
 import com.android.internal.app.ColorDisplayController;
 import com.android.internal.util.test.FakeSettingsProvider;
-import com.android.server.display.DisplayTransformManager;
-import com.android.server.display.ColorDisplayService;
+import com.android.server.LocalServices;
+import com.android.server.SystemService;
 import com.android.server.twilight.TwilightListener;
 import com.android.server.twilight.TwilightManager;
 import com.android.server.twilight.TwilightState;
