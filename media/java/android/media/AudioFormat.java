@@ -1074,4 +1074,58 @@ public final class AudioFormat implements Parcelable {
     @Retention(RetentionPolicy.SOURCE)
     public @interface Encoding {}
 
+    /** @hide */
+    public static final int[] SURROUND_SOUND_ENCODING = {
+            ENCODING_AC3,
+            ENCODING_E_AC3,
+            ENCODING_DTS,
+            ENCODING_DTS_HD,
+            ENCODING_AAC_LC,
+            ENCODING_DOLBY_TRUEHD,
+            ENCODING_E_AC3_JOC,
+    };
+
+    /** @hide */
+    @IntDef(flag = false, prefix = "ENCODING", value = {
+            ENCODING_AC3,
+            ENCODING_E_AC3,
+            ENCODING_DTS,
+            ENCODING_DTS_HD,
+            ENCODING_AAC_LC,
+            ENCODING_DOLBY_TRUEHD,
+            ENCODING_E_AC3_JOC }
+    )
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface SurroundSoundEncoding {}
+
+    /**
+     * @hide
+     *
+     * Return default name for a surround format. This is not an International name.
+     * It is just a default to use if an international name is not available.
+     *
+     * @param audioFormat a surround format
+     * @return short default name for the format, eg. “AC3” for ENCODING_AC3.
+     */
+    public static String toDisplayName(@SurroundSoundEncoding int audioFormat) {
+        switch (audioFormat) {
+            case ENCODING_AC3:
+                return "Dolby Digital (AC3)";
+            case ENCODING_E_AC3:
+                return "Dolby Digital Plus (E_AC3)";
+            case ENCODING_DTS:
+                return "DTS";
+            case ENCODING_DTS_HD:
+                return "DTS HD";
+            case ENCODING_AAC_LC:
+                return "AAC";
+            case ENCODING_DOLBY_TRUEHD:
+                return "Dolby TrueHD";
+            case ENCODING_E_AC3_JOC:
+                return "Dolby Atmos";
+            default:
+                return "Unknown surround sound format";
+        }
+    }
+
 }

@@ -48,6 +48,15 @@ static struct {
     jmethodID    toArray;
 } gArrayListMethods;
 
+static jclass gBooleanClass;
+static jmethodID gBooleanCstor;
+
+static jclass gIntegerClass;
+static jmethodID gIntegerCstor;
+
+static jclass gMapClass;
+static jmethodID gMapPut;
+
 static jclass gAudioHandleClass;
 static jmethodID gAudioHandleCstor;
 static struct {
@@ -1829,6 +1838,72 @@ android_media_AudioSystem_getMicrophones(JNIEnv *env, jobject thiz, jobject jMic
     return jStatus;
 }
 
+static jint
+android_media_AudioSystem_getSurroundFormats(JNIEnv *env, jobject thiz,
+                                             jobject jSurroundFormats, jboolean reported)
+{
+    ALOGV("getSurroundFormats");
+
+    if (jSurroundFormats == NULL) {
+        ALOGE("jSurroundFormats is NULL");
+        return (jint)AUDIO_JAVA_BAD_VALUE;
+    }
+    if (!env->IsInstanceOf(jSurroundFormats, gMapClass)) {
+        ALOGE("getSurroundFormats not a map");
+        return (jint)AUDIO_JAVA_BAD_VALUE;
+    }
+
+    jint jStatus;
+    unsigned int numSurroundFormats = 0;
+    audio_format_t *surroundFormats = NULL;
+    bool *surroundFormatsEnabled = NULL;
+    status_t status = AudioSystem::getSurroundFormats(
+            &numSurroundFormats, surroundFormats, surroundFormatsEnabled, reported);
+    if (status != NO_ERROR) {
+        ALOGE_IF(status != NO_ERROR, "AudioSystem::getSurroundFormats error %d", status);
+        jStatus = nativeToJavaStatus(status);
+        goto exit;
+    }
+    if (numSurroundFormats == 0) {
+        jStatus = (jint)AUDIO_JAVA_SUCCESS;
+        goto exit;
+    }
+    surroundFormats = (audio_format_t *)calloc(numSurroundFormats, sizeof(audio_format_t));
+    surroundFormatsEnabled = (bool *)calloc(numSurroundFormats, sizeof(bool));
+    status = AudioSystem::getSurroundFormats(
+            &numSurroundFormats, surroundFormats, surroundFormatsEnabled, reported);
+    jStatus = nativeToJavaStatus(status);
+    if (status != NO_ERROR) {
+        ALOGE_IF(status != NO_ERROR, "AudioSystem::getSurroundFormats error %d", status);
+        goto exit;
+    }
+    for (size_t i = 0; i < numSurroundFormats; i++) {
+        jobject surroundFormat = env->NewObject(gIntegerClass, gIntegerCstor,
+                                                audioFormatFromNative(surroundFormats[i]));
+        jobject enabled = env->NewObject(gBooleanClass, gBooleanCstor, surroundFormatsEnabled[i]);
+        env->CallObjectMethod(jSurroundFormats, gMapPut, surroundFormat, enabled);
+        env->DeleteLocalRef(surroundFormat);
+        env->DeleteLocalRef(enabled);
+    }
+
+exit:
+    free(surroundFormats);
+    free(surroundFormatsEnabled);
+    return jStatus;
+}
+
+static jint
+android_media_AudioSystem_setSurroundFormatEnabled(JNIEnv *env, jobject thiz,
+                                                   jint audioFormat, jboolean enabled)
+{
+    status_t status = AudioSystem::setSurroundFormatEnabled(audioFormatToNative(audioFormat),
+                                                            (bool)enabled);
+    if (status != NO_ERROR) {
+        ALOGE_IF(status != NO_ERROR, "AudioSystem::setSurroundFormatEnabled error %d", status);
+    }
+    return (jint)nativeToJavaStatus(status);
+}
+
 // ----------------------------------------------------------------------------
 
 static const JNINativeMethod gMethods[] = {
@@ -1884,6 +1959,8 @@ static const JNINativeMethod gMethods[] = {
     {"getStreamVolumeDB", "(III)F", (void *)android_media_AudioSystem_getStreamVolumeDB},
     {"native_is_offload_supported", "(IIII)Z", (void *)android_media_AudioSystem_isOffloadSupported},
     {"getMicrophones", "(Ljava/util/ArrayList;)I", (void *)android_media_AudioSystem_getMicrophones},
+    {"getSurroundFormats", "(Ljava/util/Map;Z)I", (void *)android_media_AudioSystem_getSurroundFormats},
+    {"setSurroundFormatEnabled", "(IZ)I", (void *)android_media_AudioSystem_setSurroundFormatEnabled},
 };
 
 
@@ -1902,6 +1979,18 @@ int register_android_media_AudioSystem(JNIEnv *env)
     gArrayListClass = MakeGlobalRefOrDie(env, arrayListClass);
     gArrayListMethods.add = GetMethodIDOrDie(env, arrayListClass, "add", "(Ljava/lang/Object;)Z");
     gArrayListMethods.toArray = GetMethodIDOrDie(env, arrayListClass, "toArray", "()[Ljava/lang/Object;");
+
+    jclass booleanClass = FindClassOrDie(env, "java/lang/Boolean");
+    gBooleanClass = MakeGlobalRefOrDie(env, booleanClass);
+    gBooleanCstor = GetMethodIDOrDie(env, booleanClass, "<init>", "(Z)V");
+
+    jclass integerClass = FindClassOrDie(env, "java/lang/Integer");
+    gIntegerClass = MakeGlobalRefOrDie(env, integerClass);
+    gIntegerCstor = GetMethodIDOrDie(env, integerClass, "<init>", "(I)V");
+
+    jclass mapClass = FindClassOrDie(env, "java/util/Map");
+    gMapClass = MakeGlobalRefOrDie(env, mapClass);
+    gMapPut = GetMethodIDOrDie(env, mapClass, "put", "(Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;");
 
     jclass audioHandleClass = FindClassOrDie(env, "android/media/AudioHandle");
     gAudioHandleClass = MakeGlobalRefOrDie(env, audioHandleClass);
