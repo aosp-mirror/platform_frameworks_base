@@ -11030,6 +11030,7 @@ public final class Settings {
          *
          * <pre>
          * enabled                  (boolean)
+         * disable_home             (boolean)
          * disable_tilt_to_wake     (boolean)
          * disable_touch_to_wake    (boolean)
          * </pre>
