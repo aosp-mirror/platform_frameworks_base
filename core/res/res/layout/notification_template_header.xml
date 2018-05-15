@@ -139,7 +139,6 @@
             android:src="@drawable/ic_camera"
             android:background="?android:selectableItemBackgroundBorderless"
             android:visibility="gone"
-            android:clickable="false"
             android:contentDescription="@string/notification_appops_camera_active"
             />
         <ImageButton
@@ -150,7 +149,6 @@
             android:background="?android:selectableItemBackgroundBorderless"
             android:layout_marginStart="4dp"
             android:visibility="gone"
-            android:clickable="false"
             android:contentDescription="@string/notification_appops_microphone_active"
             />
         <ImageButton
@@ -161,7 +159,6 @@
             android:background="?android:selectableItemBackgroundBorderless"
             android:layout_marginStart="4dp"
             android:visibility="gone"
-            android:clickable="false"
             android:contentDescription="@string/notification_appops_overlay_active"
             />
     </LinearLayout>
