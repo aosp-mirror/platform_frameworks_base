@@ -15040,8 +15040,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     public void setAlpha(@FloatRange(from=0.0, to=1.0) float alpha) {
         ensureTransformationInfo();
         if (mTransformationInfo.mAlpha != alpha) {
-            float oldAlpha = mTransformationInfo.mAlpha;
-            mTransformationInfo.mAlpha = alpha;
+            setAlphaInternal(alpha);
             if (onSetAlpha((int) (alpha * 255))) {
                 mPrivateFlags |= PFLAG_ALPHA_SET;
                 // subclass is handling alpha - don't optimize rendering cache invalidation
@@ -15051,10 +15050,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                 mPrivateFlags &= ~PFLAG_ALPHA_SET;
                 invalidateViewProperty(true, false);
                 mRenderNode.setAlpha(getFinalAlpha());
-            }
-            // Report visibility changes, which can affect children, to accessibility
-            if ((alpha == 0) ^ (oldAlpha == 0)) {
-                notifySubtreeAccessibilityStateChangedIfNeeded();
             }
         }
     }
@@ -15072,7 +15067,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     boolean setAlphaNoInvalidation(float alpha) {
         ensureTransformationInfo();
         if (mTransformationInfo.mAlpha != alpha) {
-            mTransformationInfo.mAlpha = alpha;
+            setAlphaInternal(alpha);
             boolean subclassHandlesAlpha = onSetAlpha((int) (alpha * 255));
             if (subclassHandlesAlpha) {
                 mPrivateFlags |= PFLAG_ALPHA_SET;
@@ -15083,6 +15078,15 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             }
         }
         return false;
+    }
+
+    private void setAlphaInternal(float alpha) {
+        float oldAlpha = mTransformationInfo.mAlpha;
+        mTransformationInfo.mAlpha = alpha;
+        // Report visibility changes, which can affect children, to accessibility
+        if ((alpha == 0) ^ (oldAlpha == 0)) {
+            notifySubtreeAccessibilityStateChangedIfNeeded();
+        }
     }
 
     /**
