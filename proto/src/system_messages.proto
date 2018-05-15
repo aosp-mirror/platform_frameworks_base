@@ -184,19 +184,19 @@ message SystemMessage {
     NOTE_USB_AUDIO_ACCESSORY_NOT_SUPPORTED = 41;
 
     // Inform the user that a wrong password was detected while attempting to connect
-    // to a Wi-Fi network
+    // to a wifi network
     NOTE_WIFI_WRONG_PASSWORD = 42;
 
     // Inform the user that Wifi Wake will re-enable wifi when possible
     NOTE_WIFI_WAKE_ONBOARD = 43;
 
-    // Inform the user that Wifi Wake has automatically re-enabled Wifi
+    // Inform the user that Wifi Wake has automatically re-enabled wifi
     NOTE_WIFI_WAKE_TURNED_BACK_ON = 44;
 
     // Inform the user that unexpectedly rapid network usage is happening
     NOTE_NET_RAPID = 45;
 
-    // Notify the user that carrier Wi-Fi networks are available.
+    // Notify the user that carrier wifi networks are available.
     // Package: android
     NOTE_CARRIER_NETWORK_AVAILABLE = 46;
 
@@ -248,10 +248,10 @@ message SystemMessage {
     // Package: com.android.systemui
     NOTE_TV_PIP = 1100;
 
-    // Extreme battery saver notifiaction.
+    // Extreme battery saver notification.
     NOTE_BATTERY_SAVER_WARNING = 1200;
 
-    // Notify the user that open Wi-Fi networks are available.
+    // Notify the user that open wifi networks are available.
     // Package: android
     NOTE_NETWORK_AVAILABLE = 17303299;
 
@@ -261,7 +261,6 @@ message SystemMessage {
 
     // Notify the user about public volume state changes..
     // Package: com.android.systemui
-
     NOTE_STORAGE_PUBLIC = 0x53505542;  // 1397773634
 
     // Notify the user about private volume state changes.
