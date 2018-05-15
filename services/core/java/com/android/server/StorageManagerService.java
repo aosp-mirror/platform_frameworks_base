@@ -2795,7 +2795,7 @@ class StorageManagerService extends IStorageManager.Stub
             final String uuid = null;
             final String state = Environment.MEDIA_REMOVED;
 
-            res.add(0, new StorageVolume(id, path,
+            res.add(0, new StorageVolume(id, path, path,
                     description, primary, removable, emulated,
                     allowMassStorage, maxFileSize, owner, uuid, state));
         }
