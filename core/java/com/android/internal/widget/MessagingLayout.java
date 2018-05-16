@@ -50,6 +50,7 @@ import com.android.internal.util.NotificationColorUtil;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
+import java.util.regex.Pattern;
 
 /**
  * A custom-built layout for the Notification.MessagingStyle allows dynamic addition and removal
@@ -59,6 +60,8 @@ import java.util.function.Consumer;
 public class MessagingLayout extends FrameLayout {
 
     private static final float COLOR_SHIFT_AMOUNT = 60;
+    private static final Pattern SPECIAL_CHAR_PATTERN
+            = Pattern.compile ("[!@#$%&*()_+=|<>?{}\\[\\]~-]");
     private static final Consumer<MessagingMessage> REMOVE_MESSAGE
             = MessagingMessage::removeMessage;
     public static final Interpolator LINEAR_OUT_SLOW_IN = new PathInterpolator(0f, 0f, 0.2f, 1f);
@@ -259,18 +262,26 @@ public class MessagingLayout extends FrameLayout {
     }
 
     public Icon createAvatarSymbol(CharSequence senderName, String symbol, int layoutColor) {
-        Bitmap bitmap = Bitmap.createBitmap(mAvatarSize, mAvatarSize, Bitmap.Config.ARGB_8888);
-        Canvas canvas = new Canvas(bitmap);
-        float radius = mAvatarSize / 2.0f;
-        int color = findColor(senderName, layoutColor);
-        mPaint.setColor(color);
-        canvas.drawCircle(radius, radius, radius, mPaint);
-        boolean needDarkText  = ColorUtils.calculateLuminance(color) > 0.5f;
-        mTextPaint.setColor(needDarkText ? Color.BLACK : Color.WHITE);
-        mTextPaint.setTextSize(symbol.length() == 1 ? mAvatarSize * 0.5f : mAvatarSize * 0.3f);
-        int yPos = (int) (radius - ((mTextPaint.descent() + mTextPaint.ascent()) / 2)) ;
-        canvas.drawText(symbol, radius, yPos, mTextPaint);
-        return Icon.createWithBitmap(bitmap);
+        if (symbol.isEmpty() || TextUtils.isDigitsOnly(symbol) ||
+                SPECIAL_CHAR_PATTERN.matcher(symbol).find()) {
+            Icon avatarIcon = Icon.createWithResource(getContext(),
+                    com.android.internal.R.drawable.messaging_user);
+            avatarIcon.setTint(findColor(senderName, layoutColor));
+            return avatarIcon;
+        } else {
+            Bitmap bitmap = Bitmap.createBitmap(mAvatarSize, mAvatarSize, Bitmap.Config.ARGB_8888);
+            Canvas canvas = new Canvas(bitmap);
+            float radius = mAvatarSize / 2.0f;
+            int color = findColor(senderName, layoutColor);
+            mPaint.setColor(color);
+            canvas.drawCircle(radius, radius, radius, mPaint);
+            boolean needDarkText = ColorUtils.calculateLuminance(color) > 0.5f;
+            mTextPaint.setColor(needDarkText ? Color.BLACK : Color.WHITE);
+            mTextPaint.setTextSize(symbol.length() == 1 ? mAvatarSize * 0.5f : mAvatarSize * 0.3f);
+            int yPos = (int) (radius - ((mTextPaint.descent() + mTextPaint.ascent()) / 2));
+            canvas.drawText(symbol, radius, yPos, mTextPaint);
+            return Icon.createWithBitmap(bitmap);
+        }
     }
 
     private int findColor(CharSequence senderName, int layoutColor) {
