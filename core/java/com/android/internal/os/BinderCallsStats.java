@@ -69,13 +69,16 @@ public class BinderCallsStats {
         s.mCallStat.className = className;
         s.mCallStat.msg = code;
 
-        s.mStarted = getThreadTimeMicro();
+        s.mCpuTimeStarted = getThreadTimeMicro();
+        s.mTimeStarted = getElapsedRealtimeNanos() / 1_000;
         return s;
     }
 
     public void callEnded(CallSession s) {
         Preconditions.checkNotNull(s);
-        long duration = mDetailedTracking ? getThreadTimeMicro() - s.mStarted : 1;
+        long duration = mDetailedTracking ? getThreadTimeMicro() - s.mCpuTimeStarted : 1;
+        long latencyDuration =
+            mDetailedTracking ? SystemClock.elapsedRealtimeNanos() / 1_000 - s.mTimeStarted : 1;
         s.mCallingUId = Binder.getCallingUid();
 
         synchronized (mLock) {
@@ -84,7 +87,6 @@ public class BinderCallsStats {
                 uidEntry = new UidEntry(s.mCallingUId);
                 mUidEntries.put(s.mCallingUId, uidEntry);
             }
-
             if (mDetailedTracking) {
                 // Find CallDesc entry and update its total time
                 CallStat callStat = uidEntry.mCallStats.get(s.mCallStat);
@@ -94,10 +96,11 @@ public class BinderCallsStats {
                     uidEntry.mCallStats.put(callStat, callStat);
                 }
                 callStat.callCount++;
-                callStat.time += duration;
+                callStat.latencyMicros += latencyDuration;
+                callStat.cpuTimeMicros += duration;
             }
 
-            uidEntry.time += duration;
+            uidEntry.cpuTimeMicros += duration;
             uidEntry.callCount++;
         }
         if (mCallSessionsPool.size() < CALL_SESSIONS_POOL_SIZE) {
@@ -109,7 +112,8 @@ public class BinderCallsStats {
         Map<Integer, Long> uidTimeMap = new HashMap<>();
         Map<Integer, Long> uidCallCountMap = new HashMap<>();
         long totalCallsCount = 0;
-        long totalCallsTime = 0;
+        long totalCpuCallsTime = 0;
+        long totalLatencyCallsTime = 0;
         pw.print("Start time: ");
         pw.println(DateFormat.format("yyyy-MM-dd HH:mm:ss", mStartTime));
         int uidEntriesSize = mUidEntries.size();
@@ -118,11 +122,11 @@ public class BinderCallsStats {
             for (int i = 0; i < uidEntriesSize; i++) {
                 UidEntry e = mUidEntries.valueAt(i);
                 entries.add(e);
-                totalCallsTime += e.time;
+                totalCpuCallsTime += e.cpuTimeMicros;
                 // Update per-uid totals
                 Long totalTimePerUid = uidTimeMap.get(e.uid);
                 uidTimeMap.put(e.uid,
-                        totalTimePerUid == null ? e.time : totalTimePerUid + e.time);
+                        totalTimePerUid == null ? e.cpuTimeMicros : totalTimePerUid + e.cpuTimeMicros);
                 Long totalCallsPerUid = uidCallCountMap.get(e.uid);
                 uidCallCountMap.put(e.uid, totalCallsPerUid == null ? e.callCount
                         : totalCallsPerUid + e.callCount);
@@ -130,11 +134,11 @@ public class BinderCallsStats {
             }
         }
         if (mDetailedTracking) {
-            pw.println("Raw data (uid,call_desc,time):");
+            pw.println("Raw data (uid,call_desc,cpu_time_micros,latency_time_micros,call_count):");
             entries.sort((o1, o2) -> {
-                if (o1.time < o2.time) {
+                if (o1.cpuTimeMicros < o2.cpuTimeMicros) {
                     return 1;
-                } else if (o1.time > o2.time) {
+                } else if (o1.cpuTimeMicros > o2.cpuTimeMicros) {
                     return -1;
                 }
                 return 0;
@@ -143,9 +147,9 @@ public class BinderCallsStats {
             for (UidEntry uidEntry : entries) {
                 List<CallStat> callStats = new ArrayList<>(uidEntry.mCallStats.keySet());
                 callStats.sort((o1, o2) -> {
-                    if (o1.time < o2.time) {
+                    if (o1.cpuTimeMicros < o2.cpuTimeMicros) {
                         return 1;
-                    } else if (o1.time > o2.time) {
+                    } else if (o1.cpuTimeMicros > o2.cpuTimeMicros) {
                         return -1;
                     }
                     return 0;
@@ -153,7 +157,9 @@ public class BinderCallsStats {
                 for (CallStat e : callStats) {
                     sb.setLength(0);
                     sb.append("    ")
-                            .append(uidEntry.uid).append(",").append(e).append(',').append(e.time);
+                            .append(uidEntry.uid).append(",").append(e).append(',').append(e.cpuTimeMicros)
+                            .append(',').append(e.latencyMicros)
+                            .append(',').append(e.callCount);
                     pw.println(sb);
                 }
             }
@@ -165,13 +171,13 @@ public class BinderCallsStats {
                 Long callCount = uidCallCountMap.get(uidTotal.getKey());
                 pw.println(String.format("  %7d: %11d %3.0f%% %8d",
                         uidTotal.getKey(), uidTotal.getValue(),
-                        100d * uidTotal.getValue() / totalCallsTime, callCount));
+                        100d * uidTotal.getValue() / totalCpuCallsTime, callCount));
             }
             pw.println();
             pw.println(String.format("  Summary: total_time=%d, "
                             + "calls_count=%d, avg_call_time=%.0f",
-                    totalCallsTime, totalCallsCount,
-                    (double)totalCallsTime / totalCallsCount));
+                    totalCpuCallsTime, totalCallsCount,
+                    (double)totalCpuCallsTime / totalCallsCount));
         } else {
             pw.println("Per UID Summary(UID: calls_count, % of total calls_count):");
             List<Map.Entry<Integer, Long>> uidTotals = new ArrayList<>(uidTimeMap.entrySet());
@@ -179,7 +185,7 @@ public class BinderCallsStats {
             for (Map.Entry<Integer, Long> uidTotal : uidTotals) {
                 Long callCount = uidCallCountMap.get(uidTotal.getKey());
                 pw.println(String.format("    %7d: %8d %3.0f%%",
-                        uidTotal.getKey(), callCount, 100d * uidTotal.getValue() / totalCallsTime));
+                        uidTotal.getKey(), callCount, 100d * uidTotal.getValue() / totalCpuCallsTime));
             }
         }
     }
@@ -188,6 +194,10 @@ public class BinderCallsStats {
         // currentThreadTimeMicro is expensive, so we measure cpu time only if detailed tracking is
         // enabled
         return mDetailedTracking ? SystemClock.currentThreadTimeMicro() : 0;
+    }
+
+    private long getElapsedRealtimeNanos() {
+        return mDetailedTracking ? SystemClock.elapsedRealtimeNanos() : 0;
     }
 
     public static BinderCallsStats getInstance() {
@@ -208,10 +218,12 @@ public class BinderCallsStats {
         }
     }
 
+
     private static class CallStat {
         String className;
         int msg;
-        long time;
+        long cpuTimeMicros;
+        long latencyMicros;
         long callCount;
 
         CallStat() {
@@ -248,13 +260,14 @@ public class BinderCallsStats {
 
     public static class CallSession {
         int mCallingUId;
-        long mStarted;
+        long mCpuTimeStarted;
+        long mTimeStarted;
         CallStat mCallStat = new CallStat();
     }
 
     private static class UidEntry {
         int uid;
-        long time;
+        long cpuTimeMicros;
         long callCount;
 
         UidEntry(int uid) {
@@ -267,7 +280,7 @@ public class BinderCallsStats {
         @Override
         public String toString() {
             return "UidEntry{" +
-                    "time=" + time +
+                    "cpuTimeMicros=" + cpuTimeMicros +
                     ", callCount=" + callCount +
                     ", mCallStats=" + mCallStats +
                     '}';
