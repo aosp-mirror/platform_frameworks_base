@@ -77,7 +77,7 @@ public class TestableInstrumentation extends AndroidJUnitRunner {
         private TestLooperManager mManager;
 
         public MainLooperManager() {
-            mMainHandler = new Handler(Looper.getMainLooper());
+            mMainHandler = Handler.createAsync(Looper.getMainLooper());
             startManaging();
         }
 
