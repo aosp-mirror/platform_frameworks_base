@@ -750,7 +750,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
     private DisplayClientState mDisplayClientState = new DisplayClientState();
 
     @VisibleForTesting
-    final BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
+    protected final BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
 
         @Override
         public void onReceive(Context context, Intent intent) {
