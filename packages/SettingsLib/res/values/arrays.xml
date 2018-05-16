@@ -250,6 +250,18 @@
         <item>Best Effort (Adaptive Bit Rate)</item>
     </string-array>
 
+    <!-- Summaries for Android Auto Bluetooth Audio Active Device status. [CHAR LIMIT=50]-->
+    <string-array name="bluetooth_audio_active_device_summaries" >
+        <!-- Status message when the device is not Active. -->
+        <item></item>
+        <!-- Status message when the device is Active for Media and Phone. -->
+        <item>, active</item>
+        <!-- Status message when the device is Active for Media only. -->
+        <item>, active (media)</item>
+        <!-- Status message when the device is Active for Phone only. -->
+        <item>, active (phone)</item>
+    </string-array>
+
     <!-- Titles for logd limit size selection preference. [CHAR LIMIT=14] -->
     <string-array name="select_logd_size_titles">
         <item>Off</item>
