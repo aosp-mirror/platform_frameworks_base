@@ -243,7 +243,7 @@ public class ActivityStarterTests extends ActivityTestsBase {
         if (containsConditions(preconditions,PRECONDITION_CANNOT_START_ANY_ACTIVITY)) {
             doReturn(false).when(service.mStackSupervisor).checkStartAnyActivityPermission(
                     any(), any(), any(), anyInt(), anyInt(), anyInt(), any(),
-                    anyBoolean(), any(), any(), any());
+                    anyBoolean(), anyBoolean(), any(), any(), any());
         }
 
         try {
@@ -302,7 +302,7 @@ public class ActivityStarterTests extends ActivityTestsBase {
         // always allow test to start activity.
         doReturn(true).when(mService.mStackSupervisor).checkStartAnyActivityPermission(
                 any(), any(), any(), anyInt(), anyInt(), anyInt(), any(),
-                anyBoolean(), any(), any(), any());
+                anyBoolean(), anyBoolean(), any(), any(), any());
 
         // instrument the stack and task used.
         final ActivityStack stack = mService.mStackSupervisor.getDefaultDisplay().createStack(
