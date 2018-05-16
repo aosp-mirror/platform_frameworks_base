@@ -16,6 +16,7 @@
 
 package com.android.keyguard;
 
+import android.content.Context;
 import android.content.Intent;
 import android.test.suitebuilder.annotation.SmallTest;
 import android.testing.AndroidTestingRunner;
@@ -35,7 +36,12 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 @SmallTest
 @RunWith(AndroidTestingRunner.class)
-@RunWithLooper
+// We must run on the main looper because KeyguardUpdateMonitor#mHandler is initialized with
+// new Handler(Looper.getMainLooper()).
+//
+// Using the main looper should be avoided whenever possible, please don't copy this over to
+// new tests.
+@RunWithLooper(setAsMainLooper = true)
 public class KeyguardUpdateMonitorTest extends SysuiTestCase {
 
     private TestableLooper mTestableLooper;
@@ -49,24 +55,39 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
     public void testIgnoresSimStateCallback_rebroadcast() {
         Intent intent = new Intent(TelephonyIntents.ACTION_SIM_STATE_CHANGED);
 
-        AtomicBoolean simStateChanged = new AtomicBoolean(false);
-        KeyguardUpdateMonitor keyguardUpdateMonitor = new KeyguardUpdateMonitor(getContext()) {
-            @Override
-            protected void handleSimStateChange(int subId, int slotId,
-                    IccCardConstants.State state) {
-                simStateChanged.set(true);
-                super.handleSimStateChange(subId, slotId, state);
-            }
-        };
+        TestableKeyguardUpdateMonitor keyguardUpdateMonitor =
+                new TestableKeyguardUpdateMonitor(getContext());
 
         keyguardUpdateMonitor.mBroadcastReceiver.onReceive(getContext(), intent);
         mTestableLooper.processAllMessages();
-        Assert.assertTrue("onSimStateChanged not called", simStateChanged.get());
+        Assert.assertTrue("onSimStateChanged not called",
+                keyguardUpdateMonitor.hasSimStateJustChanged());
 
         intent.putExtra(TelephonyIntents.EXTRA_REBROADCAST_ON_UNLOCK, true);
-        simStateChanged.set(false);
         keyguardUpdateMonitor.mBroadcastReceiver.onReceive(getContext(), intent);
         mTestableLooper.processAllMessages();
-        Assert.assertFalse("onSimStateChanged should have been skipped", simStateChanged.get());
+        Assert.assertFalse("onSimStateChanged should have been skipped",
+                keyguardUpdateMonitor.hasSimStateJustChanged());
+    }
+
+    private class TestableKeyguardUpdateMonitor extends KeyguardUpdateMonitor {
+        AtomicBoolean mSimStateChanged = new AtomicBoolean(false);
+
+        protected TestableKeyguardUpdateMonitor(Context context) {
+            super(context);
+            // Avoid race condition when unexpected broadcast could be received.
+            context.unregisterReceiver(mBroadcastReceiver);
+        }
+
+        public boolean hasSimStateJustChanged() {
+            return mSimStateChanged.getAndSet(false);
+        }
+
+        @Override
+        protected void handleSimStateChange(int subId, int slotId,
+                IccCardConstants.State state) {
+            mSimStateChanged.set(true);
+            super.handleSimStateChange(subId, slotId, state);
+        }
     }
 }
