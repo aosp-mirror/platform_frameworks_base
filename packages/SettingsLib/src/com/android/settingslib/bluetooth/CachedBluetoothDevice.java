@@ -1076,6 +1076,116 @@ public class CachedBluetoothDevice implements Comparable<CachedBluetoothDevice> 
     }
 
     /**
+     * @return resource for android auto string that describes the connection state of this device.
+     */
+    public String getCarConnectionSummary() {
+        boolean profileConnected = false;       // at least one profile is connected
+        boolean a2dpNotConnected = false;       // A2DP is preferred but not connected
+        boolean hfpNotConnected = false;        // HFP is preferred but not connected
+        boolean hearingAidNotConnected = false; // Hearing Aid is preferred but not connected
+
+        for (LocalBluetoothProfile profile : getProfiles()) {
+            int connectionStatus = getProfileConnectionState(profile);
+
+            switch (connectionStatus) {
+                case BluetoothProfile.STATE_CONNECTING:
+                case BluetoothProfile.STATE_DISCONNECTING:
+                    return mContext.getString(Utils.getConnectionStateSummary(connectionStatus));
+
+                case BluetoothProfile.STATE_CONNECTED:
+                    profileConnected = true;
+                    break;
+
+                case BluetoothProfile.STATE_DISCONNECTED:
+                    if (profile.isProfileReady()) {
+                        if ((profile instanceof A2dpProfile) ||
+                                (profile instanceof A2dpSinkProfile)){
+                            a2dpNotConnected = true;
+                        } else if ((profile instanceof HeadsetProfile) ||
+                                (profile instanceof HfpClientProfile)) {
+                            hfpNotConnected = true;
+                        } else if (profile instanceof  HearingAidProfile) {
+                            hearingAidNotConnected = true;
+                        }
+                    }
+                    break;
+            }
+        }
+
+        String batteryLevelPercentageString = null;
+        // Android framework should only set mBatteryLevel to valid range [0-100] or
+        // BluetoothDevice.BATTERY_LEVEL_UNKNOWN, any other value should be a framework bug.
+        // Thus assume here that if value is not BluetoothDevice.BATTERY_LEVEL_UNKNOWN, it must
+        // be valid
+        final int batteryLevel = getBatteryLevel();
+        if (batteryLevel != BluetoothDevice.BATTERY_LEVEL_UNKNOWN) {
+            // TODO: name com.android.settingslib.bluetooth.Utils something different
+            batteryLevelPercentageString =
+                    com.android.settingslib.Utils.formatPercentage(batteryLevel);
+        }
+
+        // Prepare the string for the Active Device summary
+        String[] activeDeviceStringsArray = mContext.getResources().getStringArray(
+                R.array.bluetooth_audio_active_device_summaries);
+        String activeDeviceString = activeDeviceStringsArray[0];  // Default value: not active
+        if (mIsActiveDeviceA2dp && mIsActiveDeviceHeadset) {
+            activeDeviceString = activeDeviceStringsArray[1];     // Active for Media and Phone
+        } else {
+            if (mIsActiveDeviceA2dp) {
+                activeDeviceString = activeDeviceStringsArray[2]; // Active for Media only
+            }
+            if (mIsActiveDeviceHeadset) {
+                activeDeviceString = activeDeviceStringsArray[3]; // Active for Phone only
+            }
+        }
+        if (!hearingAidNotConnected && mIsActiveDeviceHearingAid) {
+            activeDeviceString = activeDeviceStringsArray[1];
+            return mContext.getString(R.string.bluetooth_connected, activeDeviceString);
+        }
+
+        if (profileConnected) {
+            if (a2dpNotConnected && hfpNotConnected) {
+                if (batteryLevelPercentageString != null) {
+                    return mContext.getString(
+                            R.string.bluetooth_connected_no_headset_no_a2dp_battery_level,
+                            batteryLevelPercentageString, activeDeviceString);
+                } else {
+                    return mContext.getString(R.string.bluetooth_connected_no_headset_no_a2dp,
+                            activeDeviceString);
+                }
+
+            } else if (a2dpNotConnected) {
+                if (batteryLevelPercentageString != null) {
+                    return mContext.getString(R.string.bluetooth_connected_no_a2dp_battery_level,
+                            batteryLevelPercentageString, activeDeviceString);
+                } else {
+                    return mContext.getString(R.string.bluetooth_connected_no_a2dp,
+                            activeDeviceString);
+                }
+
+            } else if (hfpNotConnected) {
+                if (batteryLevelPercentageString != null) {
+                    return mContext.getString(R.string.bluetooth_connected_no_headset_battery_level,
+                            batteryLevelPercentageString, activeDeviceString);
+                } else {
+                    return mContext.getString(R.string.bluetooth_connected_no_headset,
+                            activeDeviceString);
+                }
+            } else {
+                if (batteryLevelPercentageString != null) {
+                    return mContext.getString(R.string.bluetooth_connected_battery_level,
+                            batteryLevelPercentageString, activeDeviceString);
+                } else {
+                    return mContext.getString(R.string.bluetooth_connected, activeDeviceString);
+                }
+            }
+        }
+
+        return getBondState() == BluetoothDevice.BOND_BONDING ?
+                mContext.getString(R.string.bluetooth_pairing) : null;
+    }
+
+    /**
      * @return {@code true} if {@code cachedBluetoothDevice} is a2dp device
      */
     public boolean isA2dpDevice() {
