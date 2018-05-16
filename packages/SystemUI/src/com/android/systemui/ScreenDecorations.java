@@ -554,7 +554,18 @@ public class ScreenDecorations extends SystemUI implements Tunable {
                 return null;
             }
 
-            return mInfo.displayCutout.getBounds();
+            View rootView = getRootView();
+            Region cutoutBounds = mInfo.displayCutout.getBounds();
+
+            // Transform to window's coordinate space
+            rootView.getLocationOnScreen(mLocation);
+            cutoutBounds.translate(-mLocation[0], -mLocation[1]);
+
+            // Intersect with window's frame
+            cutoutBounds.op(rootView.getLeft(), rootView.getTop(), rootView.getRight(),
+                    rootView.getBottom(), Region.Op.INTERSECT);
+
+            return cutoutBounds;
         }
     }
 }
