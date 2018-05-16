@@ -123,7 +123,6 @@ public class CellularTile extends QSTileImpl<SignalState> {
             mDataController.setMobileDataEnabled(false);
             return;
         }
-        mHost.collapsePanels();
         String carrierName = mController.getMobileDataNetworkName();
         if (TextUtils.isEmpty(carrierName)) {
             carrierName = mContext.getString(R.string.mobile_data_disable_message_default_carrier);
