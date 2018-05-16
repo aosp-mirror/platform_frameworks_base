@@ -51,7 +51,7 @@ public class AutoTileManagerTest extends SysuiTestCase {
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
         mAutoTileManager = new AutoTileManager(mContext, mAutoAddTracker, mQsTileHost,
-                new Handler(TestableLooper.get(this).getLooper()));
+                Handler.createAsync(TestableLooper.get(this).getLooper()));
     }
 
     @Test
