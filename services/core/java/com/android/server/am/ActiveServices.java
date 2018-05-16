@@ -3592,6 +3592,21 @@ public final class ActiveServices {
         }
     }
 
+    public void updateServiceApplicationInfoLocked(ApplicationInfo applicationInfo) {
+        final int userId = UserHandle.getUserId(applicationInfo.uid);
+        ServiceMap serviceMap = mServiceMap.get(userId);
+        if (serviceMap != null) {
+            ArrayMap<ComponentName, ServiceRecord> servicesByName = serviceMap.mServicesByName;
+            for (int j = servicesByName.size() - 1; j >= 0; j--) {
+                ServiceRecord serviceRecord = servicesByName.valueAt(j);
+                if (applicationInfo.packageName.equals(serviceRecord.appInfo.packageName)) {
+                    serviceRecord.appInfo = applicationInfo;
+                    serviceRecord.serviceInfo.applicationInfo = applicationInfo;
+                }
+            }
+        }
+    }
+
     void serviceForegroundCrash(ProcessRecord app, CharSequence serviceRecord) {
         mAm.crashApplication(app.uid, app.pid, app.info.packageName, app.userId,
                 "Context.startForegroundService() did not then call Service.startForeground(): "

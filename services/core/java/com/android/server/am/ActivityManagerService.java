@@ -21334,6 +21334,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                             return ActivityManager.BROADCAST_SUCCESS;
                         }
                         mStackSupervisor.updateActivityApplicationInfoLocked(aInfo);
+                        mServices.updateServiceApplicationInfoLocked(aInfo);
                         sendPackageBroadcastLocked(ApplicationThreadConstants.PACKAGE_REPLACED,
                                 new String[] {ssp}, userId);
                     }
