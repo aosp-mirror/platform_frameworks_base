@@ -358,6 +358,7 @@ public class SettingsBackupTest {
                     Settings.Global.PREFERRED_NETWORK_MODE,
                     Settings.Global.PRIV_APP_OOB_ENABLED,
                     Settings.Global.PRIV_APP_OOB_LIST,
+                    Settings.Global.PRIVATE_DNS_DEFAULT_MODE,
                     Settings.Global.PROVISIONING_APN_ALARM_DELAY_IN_MS,
                     Settings.Global.RADIO_BLUETOOTH,
                     Settings.Global.RADIO_CELL,
