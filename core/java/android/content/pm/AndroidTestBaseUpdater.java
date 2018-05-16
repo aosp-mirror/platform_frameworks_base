@@ -19,11 +19,12 @@ import static android.content.pm.SharedLibraryNames.ANDROID_TEST_BASE;
 import static android.content.pm.SharedLibraryNames.ANDROID_TEST_RUNNER;
 
 import android.content.pm.PackageParser.Package;
+import android.os.Build;
 
 import com.android.internal.annotations.VisibleForTesting;
 
 /**
- * Updates a package to ensure that if it targets < P that the android.test.base library is
+ * Updates a package to ensure that if it targets <= P that the android.test.base library is
  * included by default.
  *
  * <p>This is separated out so that it can be conditionally included at build time depending on
@@ -37,12 +38,17 @@ import com.android.internal.annotations.VisibleForTesting;
 @VisibleForTesting
 public class AndroidTestBaseUpdater extends PackageSharedLibraryUpdater {
 
+    private static boolean apkTargetsApiLevelLessThanOrEqualToP(Package pkg) {
+        int targetSdkVersion = pkg.applicationInfo.targetSdkVersion;
+        return targetSdkVersion <= Build.VERSION_CODES.P;
+    }
+
     @Override
     public void updatePackage(Package pkg) {
-        // Packages targeted at <= O_MR1 expect the classes in the android.test.base library
+        // Packages targeted at <= P expect the classes in the android.test.base library
         // to be accessible so this maintains backward compatibility by adding the
         // android.test.base library to those packages.
-        if (apkTargetsApiLevelLessThanOrEqualToOMR1(pkg)) {
+        if (apkTargetsApiLevelLessThanOrEqualToP(pkg)) {
             prefixRequiredLibrary(pkg, ANDROID_TEST_BASE);
         } else {
             // If a package already depends on android.test.runner then add a dependency on
