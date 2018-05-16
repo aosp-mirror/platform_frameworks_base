@@ -446,10 +446,30 @@ public class VolumeDialogImpl implements VolumeDialog {
             }
             Events.writeEvent(mContext, Events.EVENT_RINGER_TOGGLE, newRingerMode);
             updateRingerH();
+            provideTouchFeedbackH(newRingerMode);
             mController.setRingerMode(newRingerMode, false);
             maybeShowToastH(newRingerMode);
         });
         updateRingerH();
+    }
+
+
+    private void provideTouchFeedbackH(int newRingerMode) {
+        VibrationEffect effect = null;
+        switch (newRingerMode) {
+            case RINGER_MODE_NORMAL:
+                mController.scheduleTouchFeedback();
+                break;
+            case RINGER_MODE_SILENT:
+                effect = VibrationEffect.get(VibrationEffect.EFFECT_CLICK);
+                break;
+            case RINGER_MODE_VIBRATE:
+            default:
+                effect = VibrationEffect.get(VibrationEffect.EFFECT_DOUBLE_CLICK);
+        }
+        if (effect != null) {
+            mController.vibrate(effect);
+        }
     }
 
     private void maybeShowToastH(int newRingerMode) {
