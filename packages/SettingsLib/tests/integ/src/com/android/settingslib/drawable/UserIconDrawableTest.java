@@ -37,7 +37,7 @@ public class UserIconDrawableTest {
     public void getConstantState_shouldNotBeNull() {
         final Bitmap b = BitmapFactory.decodeResource(
                 InstrumentationRegistry.getTargetContext().getResources(),
-                R.drawable.home);
+                R.drawable.ic_mode_edit);
         mDrawable = new UserIconDrawable(100 /* size */).setIcon(b).bake();
 
         assertThat(mDrawable.getConstantState()).isNotNull();
