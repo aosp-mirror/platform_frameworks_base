@@ -22,14 +22,12 @@ import android.util.ArraySet;
 import android.view.ContextThemeWrapper;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewPropertyAnimator;
 import android.widget.FrameLayout;
 
 import com.android.internal.util.Preconditions;
-import com.android.systemui.Interpolators;
 import com.android.systemui.R;
+import com.android.systemui.statusbar.phone.NotificationPanelView;
 import com.android.systemui.statusbar.phone.StatusBarWindowView;
-import com.android.systemui.statusbar.stack.NotificationStackScrollLayout;
 
 import java.util.function.Consumer;
 
@@ -39,13 +37,9 @@ import java.util.function.Consumer;
 public class BrightnessMirrorController
         implements CallbackController<BrightnessMirrorController.BrightnessMirrorListener> {
 
-    private final static long TRANSITION_DURATION_OUT = 150;
-    private final static long TRANSITION_DURATION_IN = 200;
-
     private final StatusBarWindowView mStatusBarWindow;
-    private final NotificationStackScrollLayout mStackScroller;
     private final Consumer<Boolean> mVisibilityCallback;
-    private final View mNotificationPanel;
+    private final NotificationPanelView mNotificationPanel;
     private final ArraySet<BrightnessMirrorListener> mBrightnessMirrorListeners = new ArraySet<>();
     private final int[] mInt2Cache = new int[2];
     private View mBrightnessMirror;
@@ -55,38 +49,21 @@ public class BrightnessMirrorController
         mStatusBarWindow = statusBarWindow;
         mBrightnessMirror = statusBarWindow.findViewById(R.id.brightness_mirror);
         mNotificationPanel = statusBarWindow.findViewById(R.id.notification_panel);
-        mStackScroller = statusBarWindow.findViewById(R.id.notification_stack_scroller);
+        mNotificationPanel.setPanelAlphaEndAction(() -> {
+            mBrightnessMirror.setVisibility(View.INVISIBLE);
+        });
         mVisibilityCallback = visibilityCallback;
     }
 
     public void showMirror() {
         mBrightnessMirror.setVisibility(View.VISIBLE);
-        mStackScroller.setFadingOut(true);
         mVisibilityCallback.accept(true);
-        outAnimation(mNotificationPanel.animate())
-                .withLayer();
+        mNotificationPanel.setPanelAlpha(0, true /* animate */);
     }
 
     public void hideMirror() {
         mVisibilityCallback.accept(false);
-        inAnimation(mNotificationPanel.animate())
-                .withLayer()
-                .withEndAction(() -> {
-                    mBrightnessMirror.setVisibility(View.INVISIBLE);
-                    mStackScroller.setFadingOut(false);
-                });
-    }
-
-    private ViewPropertyAnimator outAnimation(ViewPropertyAnimator a) {
-        return a.alpha(0.0f)
-                .setDuration(TRANSITION_DURATION_OUT)
-                .setInterpolator(Interpolators.ALPHA_OUT)
-                .withEndAction(null);
-    }
-    private ViewPropertyAnimator inAnimation(ViewPropertyAnimator a) {
-        return a.alpha(1.0f)
-                .setDuration(TRANSITION_DURATION_IN)
-                .setInterpolator(Interpolators.ALPHA_IN);
+        mNotificationPanel.setPanelAlpha(255, true /* animate */);
     }
 
     public void setLocation(View original) {
