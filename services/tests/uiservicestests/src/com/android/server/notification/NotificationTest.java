@@ -221,10 +221,15 @@ public class NotificationTest extends UiServiceTestCase {
 
     @Test
     public void testBigPictureChange() {
+        Bitmap bitA = mock(Bitmap.class);
+        when(bitA.getGenerationId()).thenReturn(100);
+        Bitmap bitB = mock(Bitmap.class);
+        when(bitB.getGenerationId()).thenReturn(200);
+
         Notification.Builder nBigPic1 = new Notification.Builder(mContext, "test")
-                .setStyle(new Notification.BigPictureStyle().bigPicture(mock(Bitmap.class)));
+                .setStyle(new Notification.BigPictureStyle().bigPicture(bitA));
         Notification.Builder nBigPic2 = new Notification.Builder(mContext, "test")
-                .setStyle(new Notification.BigPictureStyle().bigPicture(mock(Bitmap.class)));
+                .setStyle(new Notification.BigPictureStyle().bigPicture(bitB));
 
         assertTrue(Notification.areStyledNotificationsVisiblyDifferent(nBigPic1, nBigPic2));
     }
