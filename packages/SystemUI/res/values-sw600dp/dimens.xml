@@ -91,7 +91,4 @@
 
     <!-- The offsets the tasks animate from when recents is launched while docking -->
     <dimen name="recents_task_stack_animation_launched_while_docking_offset">192dp</dimen>
-
-    <!-- Home button padding for sizing -->
-    <dimen name="home_padding">0dp</dimen>
 </resources>
