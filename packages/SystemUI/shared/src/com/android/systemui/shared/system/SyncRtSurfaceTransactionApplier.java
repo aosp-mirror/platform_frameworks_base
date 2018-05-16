@@ -30,7 +30,6 @@ import java.util.ArrayList;
  */
 public class SyncRtSurfaceTransactionApplier {
 
-    private final Object mLock = new Object();
     private final Surface mTargetSurface;
     private final ViewRootImpl mTargetViewRootImpl;
     private final float[] mTmpFloat9 = new float[9];
@@ -46,48 +45,31 @@ public class SyncRtSurfaceTransactionApplier {
     /**
      * Schedules applying surface parameters on the next frame.
      *
-     * @param params The parameters for the surface to apply.
-     */
-    public void scheduleApply(SurfaceParams params) {
-        ArrayList<SurfaceParams> list = new ArrayList<>(1);
-        list.add(params);
-        scheduleApply(list);
-    }
-
-    /**
-     * Schedules applying surface parameters on the next frame.
-     *
      * @param params The surface parameters to apply. DO NOT MODIFY the list after passing into
      *               this method to avoid synchronization issues.
      */
-    public void scheduleApply(ArrayList<SurfaceParams> params) {
-        if (mTargetViewRootImpl != null) {
-
-            // Acquire mLock to establish a happens-before relationship to ensure the other thread
-            // sees the surface parameters.
-            synchronized (mLock) {
-                mTargetViewRootImpl.registerRtFrameCallback(frame -> {
-                    synchronized (mLock) {
-                        if (mTargetSurface == null || !mTargetSurface.isValid()) {
-                            return;
-                        }
-                        SurfaceControl.Transaction t = new SurfaceControl.Transaction();
-                        for (int i = params.size() - 1; i >= 0; i--) {
-                            SurfaceParams surfaceParams = params.get(i);
-                            SurfaceControl surface = surfaceParams.surface;
-                            t.deferTransactionUntilSurface(surface, mTargetSurface, frame);
-                            t.setMatrix(surface, surfaceParams.matrix, mTmpFloat9);
-                            t.setWindowCrop(surface, surfaceParams.windowCrop);
-                            t.setAlpha(surface, surfaceParams.alpha);
-                            t.setLayer(surface, surfaceParams.layer);
-                            t.show(surface);
-                        }
-                        t.setEarlyWakeup();
-                        t.apply();
-                    }
-                });
-            }
+    public void scheduleApply(SurfaceParams... params) {
+        if (mTargetViewRootImpl == null) {
+            return;
         }
+        mTargetViewRootImpl.registerRtFrameCallback(frame -> {
+                if (mTargetSurface == null || !mTargetSurface.isValid()) {
+                    return;
+                }
+                SurfaceControl.Transaction t = new SurfaceControl.Transaction();
+                for (int i = params.length - 1; i >= 0; i--) {
+                    SurfaceParams surfaceParams = params[i];
+                    SurfaceControl surface = surfaceParams.surface;
+                    t.deferTransactionUntilSurface(surface, mTargetSurface, frame);
+                    t.setMatrix(surface, surfaceParams.matrix, mTmpFloat9);
+                    t.setWindowCrop(surface, surfaceParams.windowCrop);
+                    t.setAlpha(surface, surfaceParams.alpha);
+                    t.setLayer(surface, surfaceParams.layer);
+                    t.show(surface);
+                }
+                t.setEarlyWakeup();
+                t.apply();
+        });
     }
 
     public static class SurfaceParams {
