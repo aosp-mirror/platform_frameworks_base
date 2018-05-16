@@ -104,6 +104,7 @@ import android.testing.AndroidTestingRunner;
 import android.testing.TestableContext;
 import android.testing.TestableLooper;
 import android.testing.TestableLooper.RunWithLooper;
+import android.text.Html;
 import android.util.ArrayMap;
 import android.util.AtomicFile;
 
@@ -2731,6 +2732,56 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     }
 
     @Test
+    public void testVisualDifference_inboxStyle() {
+        Notification.Builder nb1 = new Notification.Builder(mContext, "")
+                .setStyle(new Notification.InboxStyle()
+                    .addLine("line1").addLine("line2"));
+        StatusBarNotification sbn1 = new StatusBarNotification(PKG, PKG, 0, "tag", mUid, 0,
+                nb1.build(), new UserHandle(mUid), null, 0);
+        NotificationRecord r1 =
+                new NotificationRecord(mContext, sbn1, mock(NotificationChannel.class));
+
+        Notification.Builder nb2 = new Notification.Builder(mContext, "")
+                .setStyle(new Notification.InboxStyle()
+                        .addLine("line1").addLine("line2_changed"));
+        StatusBarNotification sbn2 = new StatusBarNotification(PKG, PKG, 0, "tag", mUid, 0,
+                nb2.build(), new UserHandle(mUid), null, 0);
+        NotificationRecord r2 =
+                new NotificationRecord(mContext, sbn2, mock(NotificationChannel.class));
+
+        assertTrue(mService.isVisuallyInterruptive(r1, r2)); // line 2 changed unnoticed
+
+        Notification.Builder nb3 = new Notification.Builder(mContext, "")
+                .setStyle(new Notification.InboxStyle()
+                        .addLine("line1"));
+        StatusBarNotification sbn3 = new StatusBarNotification(PKG, PKG, 0, "tag", mUid, 0,
+                nb3.build(), new UserHandle(mUid), null, 0);
+        NotificationRecord r3 =
+                new NotificationRecord(mContext, sbn3, mock(NotificationChannel.class));
+
+        assertTrue(mService.isVisuallyInterruptive(r1, r3)); // line 2 removed unnoticed
+
+        Notification.Builder nb4 = new Notification.Builder(mContext, "")
+                .setStyle(new Notification.InboxStyle()
+                        .addLine("line1").addLine("line2").addLine("line3"));
+        StatusBarNotification sbn4 = new StatusBarNotification(PKG, PKG, 0, "tag", mUid, 0,
+                nb4.build(), new UserHandle(mUid), null, 0);
+        NotificationRecord r4 =
+                new NotificationRecord(mContext, sbn4, mock(NotificationChannel.class));
+
+        assertTrue(mService.isVisuallyInterruptive(r1, r4)); // line 3 added unnoticed
+
+        Notification.Builder nb5 = new Notification.Builder(mContext, "")
+            .setContentText("not an inbox");
+        StatusBarNotification sbn5 = new StatusBarNotification(PKG, PKG, 0, "tag", mUid, 0,
+                nb5.build(), new UserHandle(mUid), null, 0);
+        NotificationRecord r5 =
+                new NotificationRecord(mContext, sbn5, mock(NotificationChannel.class));
+
+        assertTrue(mService.isVisuallyInterruptive(r1, r5)); // changed Styles, went unnoticed
+    }
+
+    @Test
     public void testVisualDifference_diffText() {
         Notification.Builder nb1 = new Notification.Builder(mContext, "")
                 .setContentText("foo");
@@ -2741,6 +2792,63 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
 
         Notification.Builder nb2 = new Notification.Builder(mContext, "")
                 .setContentText("bar");
+        StatusBarNotification sbn2 = new StatusBarNotification(PKG, PKG, 0, "tag", mUid, 0,
+                nb2.build(), new UserHandle(mUid), null, 0);
+        NotificationRecord r2 =
+                new NotificationRecord(mContext, sbn2, mock(NotificationChannel.class));
+
+        assertTrue(mService.isVisuallyInterruptive(r1, r2));
+    }
+
+    @Test
+    public void testVisualDifference_sameText() {
+        Notification.Builder nb1 = new Notification.Builder(mContext, "")
+                .setContentText("foo");
+        StatusBarNotification sbn1 = new StatusBarNotification(PKG, PKG, 0, "tag", mUid, 0,
+                nb1.build(), new UserHandle(mUid), null, 0);
+        NotificationRecord r1 =
+                new NotificationRecord(mContext, sbn1, mock(NotificationChannel.class));
+
+        Notification.Builder nb2 = new Notification.Builder(mContext, "")
+                .setContentText("foo");
+        StatusBarNotification sbn2 = new StatusBarNotification(PKG, PKG, 0, "tag", mUid, 0,
+                nb2.build(), new UserHandle(mUid), null, 0);
+        NotificationRecord r2 =
+                new NotificationRecord(mContext, sbn2, mock(NotificationChannel.class));
+
+        assertFalse(mService.isVisuallyInterruptive(r1, r2));
+    }
+
+    @Test
+    public void testVisualDifference_sameTextButStyled() {
+        Notification.Builder nb1 = new Notification.Builder(mContext, "")
+                .setContentText(Html.fromHtml("<b>foo</b>"));
+        StatusBarNotification sbn1 = new StatusBarNotification(PKG, PKG, 0, "tag", mUid, 0,
+                nb1.build(), new UserHandle(mUid), null, 0);
+        NotificationRecord r1 =
+                new NotificationRecord(mContext, sbn1, mock(NotificationChannel.class));
+
+        Notification.Builder nb2 = new Notification.Builder(mContext, "")
+                .setContentText(Html.fromHtml("<b>foo</b>"));
+        StatusBarNotification sbn2 = new StatusBarNotification(PKG, PKG, 0, "tag", mUid, 0,
+                nb2.build(), new UserHandle(mUid), null, 0);
+        NotificationRecord r2 =
+                new NotificationRecord(mContext, sbn2, mock(NotificationChannel.class));
+
+        assertFalse(mService.isVisuallyInterruptive(r1, r2));
+    }
+
+    @Test
+    public void testVisualDifference_diffTextButStyled() {
+        Notification.Builder nb1 = new Notification.Builder(mContext, "")
+                .setContentText(Html.fromHtml("<b>foo</b>"));
+        StatusBarNotification sbn1 = new StatusBarNotification(PKG, PKG, 0, "tag", mUid, 0,
+                nb1.build(), new UserHandle(mUid), null, 0);
+        NotificationRecord r1 =
+                new NotificationRecord(mContext, sbn1, mock(NotificationChannel.class));
+
+        Notification.Builder nb2 = new Notification.Builder(mContext, "")
+                .setContentText(Html.fromHtml("<b>bar</b>"));
         StatusBarNotification sbn2 = new StatusBarNotification(PKG, PKG, 0, "tag", mUid, 0,
                 nb2.build(), new UserHandle(mUid), null, 0);
         NotificationRecord r2 =
@@ -2779,6 +2887,25 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
 
         Notification.Builder nb2 = new Notification.Builder(mContext, "")
                 .setProgress(100, 91, false);
+        StatusBarNotification sbn2 = new StatusBarNotification(PKG, PKG, 0, "tag", mUid, 0,
+                nb2.build(), new UserHandle(mUid), null, 0);
+        NotificationRecord r2 =
+                new NotificationRecord(mContext, sbn2, mock(NotificationChannel.class));
+
+        assertFalse(mService.isVisuallyInterruptive(r1, r2));
+    }
+
+    @Test
+    public void testVisualDifference_sameProgressStillDone() {
+        Notification.Builder nb1 = new Notification.Builder(mContext, "")
+                .setProgress(100, 100, false);
+        StatusBarNotification sbn1 = new StatusBarNotification(PKG, PKG, 0, "tag", mUid, 0,
+                nb1.build(), new UserHandle(mUid), null, 0);
+        NotificationRecord r1 =
+                new NotificationRecord(mContext, sbn1, mock(NotificationChannel.class));
+
+        Notification.Builder nb2 = new Notification.Builder(mContext, "")
+                .setProgress(100, 100, false);
         StatusBarNotification sbn2 = new StatusBarNotification(PKG, PKG, 0, "tag", mUid, 0,
                 nb2.build(), new UserHandle(mUid), null, 0);
         NotificationRecord r2 =
