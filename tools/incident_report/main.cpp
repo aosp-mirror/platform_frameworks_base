@@ -529,6 +529,7 @@ main(int argc, char** argv)
             args[argpos++] = NULL;
             execvp(args[0], (char*const*)args);
             fprintf(stderr, "execvp failed: %s\n", strerror(errno));
+            free(args);
             return 0;
         } else {
             // parent
