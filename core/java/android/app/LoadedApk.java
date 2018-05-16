@@ -700,7 +700,7 @@ public final class LoadedApk {
                         librarySearchPath, libraryPermittedPath, mBaseClassLoader,
                         null /* classLoaderName */);
                 StrictMode.setThreadPolicy(oldPolicy);
-                mAppComponentFactory = createAppFactory(mApplicationInfo, mClassLoader);
+                mAppComponentFactory = AppComponentFactory.DEFAULT;
             }
 
             return;

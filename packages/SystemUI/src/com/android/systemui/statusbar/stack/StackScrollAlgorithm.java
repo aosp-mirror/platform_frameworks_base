@@ -478,6 +478,22 @@ public class StackScrollAlgorithm {
                 childState.hidden = false;
             }
         }
+        // Let's hide all the views if we are not expanded. the views might otherwise be visible
+        // in the headsup area if a view was swiped away
+        if (!mIsExpanded) {
+            for (int i = 0; i < childCount; i++) {
+                boolean visible = false;
+                View child = algorithmState.visibleChildren.get(i);
+                if (child instanceof ExpandableNotificationRow) {
+                    ExpandableNotificationRow row = (ExpandableNotificationRow) child;
+                    visible = row.isHeadsUp() || row.isHeadsUpAnimatingAway();
+                }
+                if (!visible) {
+                    ExpandableViewState childState = resultState.getViewStateForView(child);
+                    childState.hidden = true;
+                }
+            }
+        }
     }
 
     private void clampHunToTop(AmbientState ambientState, ExpandableNotificationRow row,

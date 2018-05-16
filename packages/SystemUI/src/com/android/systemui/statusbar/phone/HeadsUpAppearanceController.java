@@ -36,7 +36,7 @@ import java.util.function.Consumer;
 /**
  * Controls the appearance of heads up notifications in the icon area and the header itself.
  */
-class HeadsUpAppearanceController implements OnHeadsUpChangedListener,
+public class HeadsUpAppearanceController implements OnHeadsUpChangedListener,
         DarkIconDispatcher.DarkReceiver {
     public static final int CONTENT_FADE_DURATION = 110;
     public static final int CONTENT_FADE_DELAY = 100;
@@ -92,6 +92,7 @@ class HeadsUpAppearanceController implements OnHeadsUpChangedListener,
         panelView.setHeadsUpAppearanceController(this);
         mStackScroller.addOnExpandedHeightListener(mSetExpandedHeight);
         mStackScroller.addOnLayoutChangeListener(mStackScrollLayoutChangeListener);
+        mStackScroller.setHeadsUpAppearanceController(this);
         mClockView = clockView;
         mDarkIconDispatcher = Dependency.get(DarkIconDispatcher.class);
         mDarkIconDispatcher.addDarkReceiver(this);
@@ -226,10 +227,10 @@ class HeadsUpAppearanceController implements OnHeadsUpChangedListener,
         });
     }
 
-    private void updateHeader(NotificationData.Entry entry) {
+    public void updateHeader(NotificationData.Entry entry) {
         ExpandableNotificationRow row = entry.row;
         float headerVisibleAmount = 1.0f;
-        if (row.isPinned() || row == mTrackedChild) {
+        if (row.isPinned() || row.isHeadsUpAnimatingAway() || row == mTrackedChild) {
             headerVisibleAmount = mExpandFraction;
         }
         row.setHeaderVisibleAmount(headerVisibleAmount);

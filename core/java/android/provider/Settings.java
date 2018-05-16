@@ -58,6 +58,7 @@ import android.content.res.Resources;
 import android.database.Cursor;
 import android.database.SQLException;
 import android.location.LocationManager;
+import android.media.AudioFormat;
 import android.net.ConnectivityManager;
 import android.net.NetworkScoreManager;
 import android.net.Uri;
@@ -4186,6 +4187,7 @@ public final class Settings {
             PUBLIC_SETTINGS.add(DIM_SCREEN);
             PUBLIC_SETTINGS.add(SCREEN_OFF_TIMEOUT);
             PUBLIC_SETTINGS.add(SCREEN_BRIGHTNESS);
+            PUBLIC_SETTINGS.add(SCREEN_BRIGHTNESS_FOR_VR);
             PUBLIC_SETTINGS.add(SCREEN_BRIGHTNESS_MODE);
             PUBLIC_SETTINGS.add(MODE_RINGER_STREAMS_AFFECTED);
             PUBLIC_SETTINGS.add(MUTE_STREAMS_AFFECTED);
@@ -10921,21 +10923,13 @@ public final class Settings {
                 = "forced_app_standby_for_small_battery_enabled";
 
         /**
-         * Whether or not to enable the Off Body, Radios Off feature on small battery devices.
+         * Whether or not to enable the User Absent, Radios Off feature on small battery devices.
          * Type: int (0 for false, 1 for true)
          * Default: 0
          * @hide
          */
-        public static final String OFF_BODY_RADIOS_OFF_FOR_SMALL_BATTERY_ENABLED
-                = "off_body_radios_off_for_small_battery_enabled";
-
-        /**
-         * How long after the device goes off body to disable radios, in milliseconds.
-         * Type: long
-         * Default: 10 minutes
-         * @hide
-         */
-        public static final String OFF_BODY_RADIOS_OFF_DELAY_MS = "off_body_radios_off_delay_ms";
+        public static final String USER_ABSENT_RADIOS_OFF_FOR_SMALL_BATTERY_ENABLED
+                = "user_absent_radios_off_for_small_battery_enabled";
 
         /**
          * Whether or not to turn on Wifi when proxy is disconnected.
@@ -11308,15 +11302,66 @@ public final class Settings {
          public static final int ENCODED_SURROUND_OUTPUT_ALWAYS = 2;
 
         /**
+         * Surround sound formats are available according to the choice
+         * of user, even if they are not detected by the hardware. Those
+         * formats will be reported as part of the HDMI output capability.
+         * Applications are then free to use either PCM or encoded output.
+         *
+         * An example use case would be an AVR that doesn't report a surround
+         * format while the user knows the AVR does support it.
+         * @hide
+         */
+        public static final int ENCODED_SURROUND_OUTPUT_MANUAL = 3;
+
+        /**
          * Set to ENCODED_SURROUND_OUTPUT_AUTO,
-         * ENCODED_SURROUND_OUTPUT_NEVER or
-         * ENCODED_SURROUND_OUTPUT_ALWAYS
+         * ENCODED_SURROUND_OUTPUT_NEVER,
+         * ENCODED_SURROUND_OUTPUT_ALWAYS or
+         * ENCODED_SURROUND_OUTPUT_MANUAL
          * @hide
          */
         public static final String ENCODED_SURROUND_OUTPUT = "encoded_surround_output";
 
         private static final Validator ENCODED_SURROUND_OUTPUT_VALIDATOR =
-                new SettingsValidators.DiscreteValueValidator(new String[] {"0", "1", "2"});
+                new SettingsValidators.DiscreteValueValidator(new String[] {"0", "1", "2", "3"});
+
+        /**
+         * Surround sounds formats that are enabled when ENCODED_SURROUND_OUTPUT is set to
+         * ENCODED_SURROUND_OUTPUT_MANUAL. Encoded as comma separated list. Allowed values
+         * are the format constants defined in AudioFormat.java. Ex:
+         *
+         * "5,6"
+         *
+         * @hide
+         */
+        public static final String ENCODED_SURROUND_OUTPUT_ENABLED_FORMATS =
+                "encoded_surround_output_enabled_formats";
+
+        private static final Validator ENCODED_SURROUND_OUTPUT_ENABLED_FORMATS_VALIDATOR =
+                new Validator() {
+            @Override
+            public boolean validate(String value) {
+                try {
+                    String[] surroundFormats = TextUtils.split(value, ",");
+                    for (String format : surroundFormats) {
+                        int audioFormat = Integer.valueOf(format);
+                        boolean isSurroundFormat = false;
+                        for (int sf : AudioFormat.SURROUND_SOUND_ENCODING) {
+                            if (sf == audioFormat) {
+                                isSurroundFormat = true;
+                                break;
+                            }
+                        }
+                        if (!isSurroundFormat) {
+                            return false;
+                        }
+                    }
+                    return true;
+                } catch (NumberFormatException e) {
+                    return false;
+                }
+            }
+        };
 
         /**
          * Persisted safe headphone volume management state by AudioService
@@ -11963,6 +12008,7 @@ public final class Settings {
             CALL_AUTO_RETRY,
             DOCK_AUDIO_MEDIA_ENABLED,
             ENCODED_SURROUND_OUTPUT,
+            ENCODED_SURROUND_OUTPUT_ENABLED_FORMATS,
             LOW_POWER_MODE_TRIGGER_LEVEL,
             BLUETOOTH_ON,
             PRIVATE_DNS_MODE,
@@ -11999,6 +12045,8 @@ public final class Settings {
             VALIDATORS.put(CALL_AUTO_RETRY, CALL_AUTO_RETRY_VALIDATOR);
             VALIDATORS.put(DOCK_AUDIO_MEDIA_ENABLED, DOCK_AUDIO_MEDIA_ENABLED_VALIDATOR);
             VALIDATORS.put(ENCODED_SURROUND_OUTPUT, ENCODED_SURROUND_OUTPUT_VALIDATOR);
+            VALIDATORS.put(ENCODED_SURROUND_OUTPUT_ENABLED_FORMATS,
+                    ENCODED_SURROUND_OUTPUT_ENABLED_FORMATS_VALIDATOR);
             VALIDATORS.put(LOW_POWER_MODE_TRIGGER_LEVEL, LOW_POWER_MODE_TRIGGER_LEVEL_VALIDATOR);
             VALIDATORS.put(LOW_POWER_MODE_TRIGGER_LEVEL_MAX,
                     LOW_POWER_MODE_TRIGGER_LEVEL_VALIDATOR);
