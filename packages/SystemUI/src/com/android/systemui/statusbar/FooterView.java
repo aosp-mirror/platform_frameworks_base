@@ -98,7 +98,7 @@ public class FooterView extends StackScrollerDecorView {
             if (view instanceof FooterView) {
                 FooterView footerView = (FooterView) view;
                 boolean visible = this.clipTopAmount < mClearAllTopPadding;
-                footerView.performVisibilityAnimation(visible && !footerView.willBeGone());
+                footerView.setContentVisible(visible && footerView.isVisible());
             }
         }
     }
