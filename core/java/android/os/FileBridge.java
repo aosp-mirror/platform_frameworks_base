@@ -27,12 +27,12 @@ import libcore.io.IoBridge;
 import libcore.io.IoUtils;
 import libcore.io.Memory;
 import libcore.io.Streams;
+import libcore.util.ArrayUtils;
 
 import java.io.FileDescriptor;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.ByteOrder;
-import java.util.Arrays;
 
 /**
  * Simple bridge that allows file access across process boundaries without
@@ -178,7 +178,7 @@ public class FileBridge extends Thread {
 
         @Override
         public void write(byte[] buffer, int byteOffset, int byteCount) throws IOException {
-            Arrays.checkOffsetAndCount(buffer.length, byteOffset, byteCount);
+            ArrayUtils.throwsIfOutOfBounds(buffer.length, byteOffset, byteCount);
             Memory.pokeInt(mTemp, 0, CMD_WRITE, ByteOrder.BIG_ENDIAN);
             Memory.pokeInt(mTemp, 4, byteCount, ByteOrder.BIG_ENDIAN);
             IoBridge.write(mClient, mTemp, 0, MSG_LENGTH);

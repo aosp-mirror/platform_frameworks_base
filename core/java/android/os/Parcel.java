@@ -31,6 +31,7 @@ import dalvik.annotation.optimization.CriticalNative;
 import dalvik.annotation.optimization.FastNative;
 import dalvik.system.VMRuntime;
 
+import libcore.util.ArrayUtils;
 import libcore.util.SneakyThrow;
 
 import java.io.ByteArrayInputStream;
@@ -46,7 +47,6 @@ import java.lang.reflect.Array;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -602,7 +602,7 @@ public final class Parcel {
             writeInt(-1);
             return;
         }
-        Arrays.checkOffsetAndCount(b.length, offset, len);
+        ArrayUtils.throwsIfOutOfBounds(b.length, offset, len);
         nativeWriteByteArray(mNativePtr, b, offset, len);
     }
 
@@ -631,7 +631,7 @@ public final class Parcel {
             writeInt(-1);
             return;
         }
-        Arrays.checkOffsetAndCount(b.length, offset, len);
+        ArrayUtils.throwsIfOutOfBounds(b.length, offset, len);
         nativeWriteBlob(mNativePtr, b, offset, len);
     }
 
