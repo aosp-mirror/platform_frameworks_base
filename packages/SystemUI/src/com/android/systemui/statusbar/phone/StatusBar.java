@@ -5058,6 +5058,7 @@ public class StatusBar extends SystemUI implements DemoMode,
         final boolean afterKeyguardGone = intent.isActivity()
                 && PreviewInflater.wouldLaunchResolverActivity(mContext, intent.getIntent(),
                 mLockscreenUserManager.getCurrentUserId());
+        final boolean wasOccluded = mIsOccluded;
         dismissKeyguardThenExecute(() -> {
             // TODO: Some of this code may be able to move to NotificationEntryManager.
             if (mHeadsUpManager != null && mHeadsUpManager.isHeadsUp(notificationKey)) {
@@ -5121,7 +5122,7 @@ public class StatusBar extends SystemUI implements DemoMode,
                                 remoteInputText.toString());
                     }
                     RemoteAnimationAdapter adapter = mActivityLaunchAnimator.getLaunchAnimation(
-                            row);
+                            row, wasOccluded);
                     try {
                         if (adapter != null) {
                             ActivityManager.getService()
@@ -5168,6 +5169,7 @@ public class StatusBar extends SystemUI implements DemoMode,
             if (mStatusBarKeyguardViewManager.isShowing()
                     && mStatusBarKeyguardViewManager.isOccluded()) {
                 mStatusBarKeyguardViewManager.addAfterKeyguardGoneRunnable(runnable);
+                collapsePanel(true /* animate */);
             } else {
                 new Thread(runnable).start();
             }
@@ -5252,7 +5254,7 @@ public class StatusBar extends SystemUI implements DemoMode,
                 int launchResult = TaskStackBuilder.create(mContext)
                         .addNextIntentWithParentStack(intent)
                         .startActivities(getActivityOptions(
-                                mActivityLaunchAnimator.getLaunchAnimation(row)),
+                                mActivityLaunchAnimator.getLaunchAnimation(row, mIsOccluded)),
                                 new UserHandle(UserHandle.getUserId(appUid)));
                 mActivityLaunchAnimator.setLaunchResult(launchResult);
                 if (shouldCollapse()) {

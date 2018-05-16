@@ -76,8 +76,8 @@ public class ActivityLaunchAnimator {
     }
 
     public RemoteAnimationAdapter getLaunchAnimation(
-            ExpandableNotificationRow sourceNotification) {
-        if (mStatusBar.getBarState() != StatusBarState.SHADE) {
+            ExpandableNotificationRow sourceNotification, boolean occluded) {
+        if (mStatusBar.getBarState() != StatusBarState.SHADE || occluded) {
             return null;
         }
         AnimationRunner animationRunner = new AnimationRunner(sourceNotification);
