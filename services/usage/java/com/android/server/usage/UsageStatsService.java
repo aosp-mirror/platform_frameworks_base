@@ -585,6 +585,9 @@ public class UsageStatsService extends SystemService implements
                         flushToDiskLocked();
                         pw.println("Flushed stats to disk");
                         return;
+                    } else if ("is-app-standby-enabled".equals(arg)) {
+                        pw.println(mAppStandby.mAppIdleEnabled);
+                        return;
                     } else if (arg != null && !arg.startsWith("-")) {
                         // Anything else that doesn't start with '-' is a pkg to filter
                         pkg = arg;
