@@ -282,6 +282,9 @@ public class NotificationHeaderView extends ViewGroup {
     public void setAppOpsOnClickListener(OnClickListener l) {
         mAppOpsListener = l;
         mAppOps.setOnClickListener(mAppOpsListener);
+        mCameraIcon.setOnClickListener(mAppOpsListener);
+        mMicIcon.setOnClickListener(mAppOpsListener);
+        mOverlayIcon.setOnClickListener(mAppOpsListener);
         updateTouchListener();
     }
 
