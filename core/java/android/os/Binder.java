@@ -607,7 +607,7 @@ public class Binder implements IBinder {
 
     /**
      * Print the object's state into the given stream.
-     * 
+     *
      * @param fd The raw file descriptor that the dump is being sent to.
      * @param fout The file to which you should dump your state.  This will be
      * closed for you after you return.
@@ -730,6 +730,7 @@ public class Binder implements IBinder {
             }
             res = onTransact(code, data, reply, flags);
         } catch (RemoteException|RuntimeException e) {
+            binderCallsStats.callThrewException(callSession);
             if (LOG_RUNTIME_EXCEPTION) {
                 Log.w(TAG, "Caught a RuntimeException from the binder stub implementation.", e);
             }
