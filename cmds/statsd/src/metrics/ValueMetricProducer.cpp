@@ -414,9 +414,11 @@ void ValueMetricProducer::onMatchedLogEventInternalLocked(
                 interval.tainted += 1;
             }
         }
-    } else {    // for pushed events
-        interval.sum += value;
-        interval.hasValue = true;
+    } else {    // for pushed events, only accumulate when condition is true
+        if (mCondition == true || mConditionTrackerIndex < 0) {
+            interval.sum += value;
+            interval.hasValue = true;
+        }
     }
 
     long wholeBucketVal = interval.sum;
