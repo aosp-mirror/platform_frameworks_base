@@ -143,7 +143,7 @@ public class NetworkControllerSignalTest extends NetworkControllerBaseTest {
                     testStrength, DEFAULT_ICON);
 
             // Verify low inet number indexing.
-            setConnectivity(NetworkCapabilities.TRANSPORT_CELLULAR, false, true);
+            setConnectivityViaBroadcast(NetworkCapabilities.TRANSPORT_CELLULAR, false, true);
             verifyLastMobileDataIndicators(true,
                     testStrength, DEFAULT_ICON, false, false);
         }
@@ -230,8 +230,8 @@ public class NetworkControllerSignalTest extends NetworkControllerBaseTest {
     @Test
     public void testNoBangWithWifi() {
         setupDefaultSignal();
-        setConnectivity(mMobileSignalController.mTransportType, false, false);
-        setConnectivity(NetworkCapabilities.TRANSPORT_WIFI, true, true);
+        setConnectivityViaBroadcast(mMobileSignalController.mTransportType, false, false);
+        setConnectivityViaBroadcast(NetworkCapabilities.TRANSPORT_WIFI, true, true);
 
         verifyLastMobileDataIndicators(true, DEFAULT_LEVEL, 0);
     }
