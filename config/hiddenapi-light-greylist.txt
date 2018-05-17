@@ -2853,6 +2853,7 @@ Landroid/media/EncoderCapabilities$VideoEncoderCap;->mMinFrameWidth:I
 Landroid/media/EncoderCapabilities;->getVideoEncoders()Ljava/util/List;
 Landroid/media/ExifInterface;->convertRationalLatLonToFloat(Ljava/lang/String;Ljava/lang/String;)F
 Landroid/media/ExifInterface;->getDateTime()J
+Landroid/media/ExifInterface;->getGpsDateTime()J
 Landroid/media/ExifInterface;->mAttributes:[Ljava/util/HashMap;
 Landroid/media/ExifInterface;->mFilename:Ljava/lang/String;
 Landroid/media/ExifInterface;->mHasThumbnail:Z
@@ -4119,6 +4120,7 @@ Landroid/os/storage/StorageManager;->getVolumes()Ljava/util/List;
 Landroid/os/storage/StorageManager;->getVolumeState(Ljava/lang/String;)Ljava/lang/String;
 Landroid/os/storage/StorageManager;->isFileEncryptedNativeOnly()Z
 Landroid/os/storage/StorageManager;->isUsbMassStorageEnabled()Z
+Landroid/os/storage/StorageManager;->partitionPublic(Ljava/lang/String;)V
 Landroid/os/storage/StorageManager;->unmount(Ljava/lang/String;)V
 Landroid/os/storage/StorageVolume;->allowMassStorage()Z
 Landroid/os/storage/StorageVolume;->getFatVolumeId()I
@@ -8123,6 +8125,12 @@ Lcom/android/internal/telephony/IWapPushManager;->addPackage(Ljava/lang/String;L
 Lcom/android/internal/telephony/IWapPushManager;->deletePackage(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)Z
 Lcom/android/internal/telephony/IWapPushManager;->updatePackage(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;IZZ)Z
 Lcom/android/internal/telephony/OperatorInfo;-><init>(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V
+Lcom/android/internal/telephony/OperatorInfo;-><init>(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lcom/android/internal/telephony/OperatorInfo$State;)V
+Lcom/android/internal/telephony/OperatorInfo;->mOperatorAlphaLong:Ljava/lang/String;
+Lcom/android/internal/telephony/OperatorInfo;->mOperatorAlphaShort:Ljava/lang/String;
+Lcom/android/internal/telephony/OperatorInfo;->mOperatorNumeric:Ljava/lang/String;
+Lcom/android/internal/telephony/OperatorInfo;->mState:Lcom/android/internal/telephony/OperatorInfo$State;
+Lcom/android/internal/telephony/OperatorInfo;->rilStateToState(Ljava/lang/String;)Lcom/android/internal/telephony/OperatorInfo$State;
 Lcom/android/internal/telephony/SmsAddress;->origBytes:[B
 Lcom/android/internal/telephony/SmsConstants$MessageClass;->CLASS_0:Lcom/android/internal/telephony/SmsConstants$MessageClass;
 Lcom/android/internal/telephony/SmsConstants$MessageClass;->CLASS_1:Lcom/android/internal/telephony/SmsConstants$MessageClass;
