@@ -79,7 +79,7 @@ public class SettingsValidators {
     public static final Validator COMPONENT_NAME_VALIDATOR = new Validator() {
         @Override
         public boolean validate(String value) {
-            return ComponentName.unflattenFromString(value) != null;
+            return value != null && ComponentName.unflattenFromString(value) != null;
         }
     };
 
