@@ -2530,6 +2530,10 @@ final public class MediaCodec {
             pattern = newPattern;
         }
 
+        private void setPattern(int blocksToEncrypt, int blocksToSkip) {
+            pattern = new Pattern(blocksToEncrypt, blocksToSkip);
+        }
+
         @Override
         public String toString() {
             StringBuilder builder = new StringBuilder();
