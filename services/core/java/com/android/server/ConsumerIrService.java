@@ -50,8 +50,6 @@ public class ConsumerIrService extends IConsumerIrService.Stub {
             if (!mHasNativeHal) {
                 throw new RuntimeException("FEATURE_CONSUMER_IR present, but no IR HAL loaded!");
             }
-        } else if (mHasNativeHal) {
-            throw new RuntimeException("IR HAL present, but FEATURE_CONSUMER_IR is not set!");
         }
     }
 
