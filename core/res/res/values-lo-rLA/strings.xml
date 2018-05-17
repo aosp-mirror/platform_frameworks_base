@@ -263,7 +263,7 @@
     <string name="permgroupdesc_sensors" msgid="7147968539346634043">"ເຂົ້າ​ຫາ​ຂໍ້​ມູນ​ເຊັນ​ເຊີ​ກ່ຽວ​ກັບ​ສັນ​ຍານ​ຊີບ​ຂອງ​ທ່ານ"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"ດຶງຂໍ້ມູນເນື້ອຫາໃນໜ້າຈໍ"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"ກວດກາເນື້ອຫາຂອງໜ້າຈໍທີ່ທ່ານກຳລັງມີປະຕິສຳພັນນຳ."</string>
-    <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"ເປີດໃຊ້ \"ການສຳຫຼວດໂດຍສຳພັດ\""</string>
+    <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"ເປີດໃຊ້ \"ການສຳຫຼວດໂດຍສຳຜັດ\""</string>
     <string name="capability_desc_canRequestTouchExploration" msgid="7543249041581408313">"ລາຍການທີ່ແຕະຈະຖືກເວົ້າອອກມາ ແລະ ສາມາດສຳຫຼວດໜ້າຈໍໄດ້ດ້ວຍທ່າທາງໄດ້."</string>
     <string name="capability_title_canRequestEnhancedWebAccessibility" msgid="1739881766522594073">"ເປີດການເຂົ້າເຖິງເວັບທີ່ມີປະສິດທິພາບຫຼາຍຂຶ້ນ"</string>
     <string name="capability_desc_canRequestEnhancedWebAccessibility" msgid="7881063961507511765">"ສະຄຣິບອາດຖືກຕິດຕັ້ງ ເພື່ອເຮັດໃຫ້ເນື້ອຫາແອັບຯເຂົ້າເຖິງໄດ້ຫຼາຍຂຶ້ນ."</string>
@@ -543,7 +543,7 @@
     <string name="policydesc_encryptedStorage" msgid="2637732115325316992">"ຮຽກຮ້ອງໃຫ້ມີການເຂົ້າລະຫັດຂໍ້ມູນທີ່ຈັດເກັບໃນແອັບຯ"</string>
     <string name="policylab_disableCamera" msgid="6395301023152297826">"ປິດການໃຊ້ກ້ອງ"</string>
     <string name="policydesc_disableCamera" msgid="2306349042834754597">"ຫ້າມການໃຊ້ກ້ອງຈາກທຸກອຸປະກອນ."</string>
-    <string name="policylab_disableKeyguardFeatures" msgid="8552277871075367771">"ປິດໃຊ້ງານບາງຄຸນສົມບັດໜ້າຈໍລັອກ"</string>
+    <string name="policylab_disableKeyguardFeatures" msgid="8552277871075367771">"ປິດການນຳໃຊ້ຄຸນສົມບັດໜ້າຈໍລັອກ"</string>
     <string name="policydesc_disableKeyguardFeatures" msgid="2044755691354158439">"ປ້ອງກັນການໃຊ້ບາງຄຸນສົມບັດໜ້າຈໍລັອກ."</string>
   <string-array name="phoneTypes">
     <item msgid="8901098336658710359">"ເຮືອນ"</item>
@@ -1570,7 +1570,7 @@
     <string name="package_deleted_device_owner" msgid="7650577387493101353">"ຖືກ​ຜູ້​ຄວບ​ຄຸມ​ຂອງ​ທ່ານ​ລຶບ​ໄປ​ແລ້ວ"</string>
     <string name="battery_saver_description" msgid="1960431123816253034">"ເພື່ອຊ່ວຍເພີ່ມອາຍຸແບັດເຕີຣີ, ຕົວປະຢັດໄຟແບັດເຕີຣີຫຼຸດປະສິດທິພາບການເຮັດວຽກຂອງອຸປະກອນຂອງທ່ານລົງ ແລະຈຳກັດການສັ່ນ, ບໍລິການສະຖານທີ່ ແລະ ຂໍ້ມູນພື້ນຫຼັງເກືອບທັງໝົດ. ອີເມວ, ການສົ່ງຂໍ້ຄວາມ ແລະ ແອັບອື່ນໆທີ່ອາໄສການຊິ້ງຂໍ້ມູນອາດຈະບໍ່ອັບເດດ ນອກຈາກວ່າທ່ານເປີດມັນ.\n\nຕົວປະຢັດໄຟແບັດເຕີຣີຈະປິດອັດຕະໂນມັດເມື່ອທ່ານສາກໄຟອຸປະກອນ."</string>
     <string name="data_saver_description" msgid="6015391409098303235">"ເພື່ອຊ່ວຍຫຼຸດຜ່ອນການນຳໃຊ້ຂໍ້ມູນ, ຕົວປະຢັດຂໍ້ມູນຈະປ້ອງກັນບໍ່ໃຫ້ບາງແອັບສົ່ງ ຫຼື ຮັບຂໍ້ມູນໃນພື້ນຫຼັງ. ແອັບໃດໜຶ່ງທີ່ທ່ານກຳລັງໃຊ້ຢູ່ຈະສາມາດເຂົ້າເຖິງຂໍ້ມູນໄດ້ ແຕ່ອາດເຂົ້າເຖິງໄດ້ຖີ່ໜ້ອຍລົງ. ນີ້ອາດໝາຍຄວາມວ່າ ຮູບພາບຕ່າງໆອາດບໍ່ສະແດງຈົນກວ່າທ່ານຈະແຕະໃສ່ກ່ອນ."</string>
-    <string name="data_saver_enable_title" msgid="4674073932722787417">"ເປີດໃຊ້ຕົວປະຢັດຂໍ້ມູນບໍ?"</string>
+    <string name="data_saver_enable_title" msgid="4674073932722787417">"ເປີດຕົວປະຢັດອິນເຕີເນັດບໍ?"</string>
     <string name="data_saver_enable_button" msgid="7147735965247211818">"ເປີດໃຊ້"</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="4367877408072000848">
       <item quantity="other">ເປັນ​ເວ​ລາ %1$d ນາ​ທີ (ຈົນ​ຮອດ <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>

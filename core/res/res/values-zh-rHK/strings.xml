@@ -81,7 +81,7 @@
     <string name="ThreeWCMmi" msgid="9051047170321190368">"三方通話"</string>
     <string name="RuacMmi" msgid="7827887459138308886">"拒接不想接聽的騷擾電話"</string>
     <string name="CndMmi" msgid="3116446237081575808">"顯示發話號碼"</string>
-    <string name="DndMmi" msgid="1265478932418334331">"請勿打擾"</string>
+    <string name="DndMmi" msgid="1265478932418334331">"請勿騷擾"</string>
     <string name="CLIRDefaultOnNextCallOn" msgid="429415409145781923">"預設不顯示來電號碼，下一通電話也不顯示。"</string>
     <string name="CLIRDefaultOnNextCallOff" msgid="3092918006077864624">"預設不顯示來電號碼，但下一通電話則顯示。"</string>
     <string name="CLIRDefaultOffNextCallOn" msgid="6179425182856418465">"預設顯示來電號碼，但下一通電話不顯示。"</string>
@@ -233,7 +233,7 @@
     <string name="global_actions_airplane_mode_on_status" msgid="2719557982608919750">"飛航模式為 [開啟]"</string>
     <string name="global_actions_airplane_mode_off_status" msgid="5075070442854490296">"飛行模式為 [關閉]"</string>
     <string name="global_action_settings" msgid="1756531602592545966">"設定"</string>
-    <string name="global_action_assist" msgid="3892832961594295030">"協助"</string>
+    <string name="global_action_assist" msgid="3892832961594295030">"小幫手"</string>
     <string name="global_action_voice_assist" msgid="7751191495200504480">"語音助手"</string>
     <string name="global_action_lockdown" msgid="8751542514724332873">"立即鎖定"</string>
     <string name="status_bar_notification_info_overflow" msgid="5301981741705354993">"999+"</string>
@@ -245,7 +245,7 @@
     <string name="managed_profile_label" msgid="5289992269827577857">"切換至工作設定檔"</string>
     <string name="permgrouplab_contacts" msgid="3657758145679177612">"通訊錄"</string>
     <string name="permgroupdesc_contacts" msgid="6951499528303668046">"存取您的通訊錄"</string>
-    <string name="permgrouplab_location" msgid="7275582855722310164">"位置"</string>
+    <string name="permgrouplab_location" msgid="7275582855722310164">"位置資訊"</string>
     <string name="permgroupdesc_location" msgid="1346617465127855033">"存取此裝置的位置"</string>
     <string name="permgrouplab_calendar" msgid="5863508437783683902">"日曆"</string>
     <string name="permgroupdesc_calendar" msgid="3889615280211184106">"存取您的日曆"</string>
@@ -272,7 +272,7 @@
     <string name="capability_title_canControlMagnification" msgid="3593493281059424855">"控制顯示屏的放大功能"</string>
     <string name="capability_desc_canControlMagnification" msgid="4791858203568383773">"控制顯示屏的縮放程度和位置。"</string>
     <string name="capability_title_canPerformGestures" msgid="7418984730362576862">"執行手勢"</string>
-    <string name="capability_desc_canPerformGestures" msgid="8296373021636981249">"可以輕按、快速滑動和兩指縮放，並執行其他手勢。"</string>
+    <string name="capability_desc_canPerformGestures" msgid="8296373021636981249">"可以輕按、滑動和兩指縮放，並執行其他手勢。"</string>
     <string name="permlab_statusBar" msgid="7417192629601890791">"停用或修改狀態列"</string>
     <string name="permdesc_statusBar" msgid="8434669549504290975">"允許應用程式停用狀態列，並可新增或移除系統圖示。"</string>
     <string name="permlab_statusBarService" msgid="4826835508226139688">"成為狀態列"</string>
@@ -346,7 +346,7 @@
     <string name="permdesc_writeCallLog" product="tv" msgid="4225034892248398019">"允許應用程式修改電視的通話記錄，包括來電和撥出電話的相關資料。惡意應用程式可能會藉此清除或修改您的通話記錄。"</string>
     <string name="permdesc_writeCallLog" product="default" msgid="683941736352787842">"允許應用程式修改手機的通話記錄，包括來電和已撥電話相關資料。惡意應用程式可能會藉此刪除或修改您的通話記錄。"</string>
     <string name="permlab_bodySensors" msgid="4683341291818520277">"存取身體感應器 (例如心跳監測器)"</string>
-    <string name="permdesc_bodySensors" product="default" msgid="4380015021754180431">"允許應用程式存取感應器所收集的資料 (這類感應器可監測您的體能狀態，例如您的心跳速率)。"</string>
+    <string name="permdesc_bodySensors" product="default" msgid="4380015021754180431">"允許應用程式存取感應器所收集的資料 (這類感應器可監測您的體能狀態，例如您的心率)。"</string>
     <string name="permlab_readCalendar" msgid="5972727560257612398">"讀取日曆活動與機密資訊"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="4216462049057658723">"允許應用程式讀取平板電腦上儲存的所有日曆活動，包括好友或同事的活動。如此一來，應用程式或可不論資料是否機密或敏感，自行共用或儲存您的日曆資料。"</string>
     <string name="permdesc_readCalendar" product="tv" msgid="3191352452242394196">"允許應用程式讀取儲存在電視中的所有日曆活動，包括好友或同事的活動。這可能允許應用程式分享或儲存您的日曆資料 (不論是否機密或敏感資料)。"</string>
@@ -1315,7 +1315,7 @@
     <string name="shareactionprovider_share_with_application" msgid="5627411384638389738">"與「<xliff:g id="APPLICATION_NAME">%s</xliff:g>」分享"</string>
     <string name="content_description_sliding_handle" msgid="415975056159262248">"滑動控制。持續輕觸。"</string>
     <string name="description_target_unlock_tablet" msgid="3833195335629795055">"滑動即可解鎖。"</string>
-    <string name="keyboard_headset_required_to_hear_password" msgid="7011927352267668657">"插上耳機即可聽到系統朗讀密碼鍵。"</string>
+    <string name="keyboard_headset_required_to_hear_password" msgid="7011927352267668657">"插上耳機即可聽到系統讀出密碼鍵。"</string>
     <string name="keyboard_password_character_no_headset" msgid="2859873770886153678">"點。"</string>
     <string name="action_bar_home_description" msgid="5293600496601490216">"瀏覽首頁"</string>
     <string name="action_bar_up_description" msgid="2237496562952152589">"向上瀏覽"</string>
@@ -1381,7 +1381,7 @@
     <string name="media_route_chooser_searching" msgid="4776236202610828706">"正在搜尋裝置…"</string>
     <string name="media_route_chooser_extended_settings" msgid="87015534236701604">"設定"</string>
     <string name="media_route_controller_disconnect" msgid="8966120286374158649">"停止連接"</string>
-    <string name="media_route_status_scanning" msgid="7279908761758293783">"正在掃描…"</string>
+    <string name="media_route_status_scanning" msgid="7279908761758293783">"正在掃瞄…"</string>
     <string name="media_route_status_connecting" msgid="6422571716007825440">"正在連線..."</string>
     <string name="media_route_status_available" msgid="6983258067194649391">"可用"</string>
     <string name="media_route_status_not_available" msgid="6739899962681886401">"無法使用"</string>
@@ -1547,7 +1547,7 @@
     </plurals>
     <string name="restr_pin_try_later" msgid="973144472490532377">"稍後再試"</string>
     <string name="immersive_cling_title" msgid="8394201622932303336">"開啟全螢幕"</string>
-    <string name="immersive_cling_description" msgid="3482371193207536040">"由頂部向下快速滑動即可退出。"</string>
+    <string name="immersive_cling_description" msgid="3482371193207536040">"由頂部向下滑動即可退出。"</string>
     <string name="immersive_cling_positive" msgid="5016839404568297683">"知道了"</string>
     <string name="done_label" msgid="2093726099505892398">"完成"</string>
     <string name="hour_picker_description" msgid="6698199186859736512">"小時環形滑桿"</string>

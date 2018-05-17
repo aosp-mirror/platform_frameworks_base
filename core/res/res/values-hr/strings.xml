@@ -274,7 +274,7 @@
     <string name="capability_desc_canRequestFilterKeyEvents" msgid="7463135292204152818">"Uključuje osobne podatke kao što su brojevi kreditnih kartica i zaporke."</string>
     <string name="capability_title_canControlMagnification" msgid="3593493281059424855">"Kontrolirati uvećanje zaslona"</string>
     <string name="capability_desc_canControlMagnification" msgid="4791858203568383773">"Kontrolirat će stupanj i mjesto zumiranja."</string>
-    <string name="capability_title_canPerformGestures" msgid="7418984730362576862">"Izvođenje pokreta"</string>
+    <string name="capability_title_canPerformGestures" msgid="7418984730362576862">"Izvoditi pokrete"</string>
     <string name="capability_desc_canPerformGestures" msgid="8296373021636981249">"Može dodirnuti, prijeći prstom, spojiti prste i izvoditi druge pokrete."</string>
     <string name="permlab_statusBar" msgid="7417192629601890791">"onemogućavanje ili izmjena trake statusa"</string>
     <string name="permdesc_statusBar" msgid="8434669549504290975">"Aplikaciji omogućuje onemogućavanje trake statusa ili dodavanje i uklanjanje sistemskih ikona."</string>
@@ -546,7 +546,7 @@
     <string name="policydesc_encryptedStorage" msgid="2637732115325316992">"Zahtijevajte da pohranjeni podaci aplikacije budu šifrirani."</string>
     <string name="policylab_disableCamera" msgid="6395301023152297826">"Onemogući fotoaparate"</string>
     <string name="policydesc_disableCamera" msgid="2306349042834754597">"Spriječite upotrebu svih kamera uređaja."</string>
-    <string name="policylab_disableKeyguardFeatures" msgid="8552277871075367771">"Onemogući dio značajki zaklj. zaslona"</string>
+    <string name="policylab_disableKeyguardFeatures" msgid="8552277871075367771">"Onemogućavanje nekih značajki zaključavanja zaslona"</string>
     <string name="policydesc_disableKeyguardFeatures" msgid="2044755691354158439">"Sprječava upotrebu nekih značajki zaključavanja zaslona."</string>
   <string-array name="phoneTypes">
     <item msgid="8901098336658710359">"Privatni"</item>
@@ -1118,7 +1118,7 @@
     <string name="wifi_connect_alert_title" msgid="8455846016001810172">"Dopustiti povezivanje?"</string>
     <string name="wifi_connect_alert_message" msgid="6451273376815958922">"Aplikacija %1$s traži povezivanje s Wi-Fi mrežom %2$s"</string>
     <string name="wifi_connect_default_application" msgid="7143109390475484319">"Aplikacija"</string>
-    <string name="wifi_p2p_dialog_title" msgid="97611782659324517">"Izravni Wi-Fi"</string>
+    <string name="wifi_p2p_dialog_title" msgid="97611782659324517">"Wi-Fi Direct"</string>
     <string name="wifi_p2p_turnon_message" msgid="2909250942299627244">"Pokreni izravan rad s Wi-Fi mrežom. To će isključiti rad s Wi-Fi klijentom/žarišnom točkom."</string>
     <string name="wifi_p2p_failed_message" msgid="3763669677935623084">"Pokretanje izravne Wi-Fi veze nije moguće."</string>
     <string name="wifi_p2p_enabled_notification_title" msgid="2068321881673734886">"Wi-Fi Direct uključen"</string>

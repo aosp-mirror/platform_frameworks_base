@@ -261,8 +261,8 @@
     <string name="permgroupdesc_phone" msgid="6234224354060641055">"ហៅទូរស័ព្ទ និងគ្រប់គ្រងការហៅទូរស័ព្ទ"</string>
     <string name="permgrouplab_sensors" msgid="416037179223226722">"ឧបករណ៍ចាប់សញ្ញារាងកាយ"</string>
     <string name="permgroupdesc_sensors" msgid="7147968539346634043">"ចូលដំណើរការទិន្នន័យឧបករណ៍ចាប់សញ្ញាអំពីស្ថានភាពសុខភាពរបស់អ្នក"</string>
-    <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"ទាញយក​មាតិកា​វិនដូ"</string>
-    <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"ពិនិត្យ​មាតិកាវិនដូ​ដែល​អ្នក​កំពុង​ទាក់ទង​ជា​មួយ។"</string>
+    <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"ទាញយក​ខ្លឹមសារ​វិនដូ"</string>
+    <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"ពិនិត្យ​ខ្លឹមសារវិនដូ​ដែល​អ្នក​កំពុង​ទាក់ទង​ជា​មួយ។"</string>
     <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"បើក​ការ​រក​មើល​​ដោយ​ប៉ះ"</string>
     <string name="capability_desc_canRequestTouchExploration" msgid="7543249041581408313">"ធាតុដែលបានប៉ះនឹងត្រូវបានអានឮៗ ហើយអេក្រង់នោះអាចត្រូវបានស្វែងរកដោយប្រើកាយវិការ។"</string>
     <string name="capability_title_canRequestEnhancedWebAccessibility" msgid="1739881766522594073">"បើក​ការ​ចូល​ដំណើរការ​បណ្ដាញ​ដែល​បាន​ធ្វើ​ឲ្យ​ប្រសើរ"</string>
@@ -543,7 +543,7 @@
     <string name="policydesc_encryptedStorage" msgid="2637732115325316992">"តម្រូវ​ឲ្យ​ដាក់​លេខ​កូដ​ទិន្នន័យ​កម្មវិធី​បាន​រក្សាទុក។"</string>
     <string name="policylab_disableCamera" msgid="6395301023152297826">"បិទ​ម៉ាស៊ីន​ថត"</string>
     <string name="policydesc_disableCamera" msgid="2306349042834754597">"ការពារ​ការ​ប្រើ​ម៉ាស៊ីន​ថត​ឧបករណ៍​ទាំងអស់។"</string>
-    <string name="policylab_disableKeyguardFeatures" msgid="8552277871075367771">"បិទលក្ខណៈពិសេសចាក់សោអេក្រង់មួយចំនួន"</string>
+    <string name="policylab_disableKeyguardFeatures" msgid="8552277871075367771">"បិទមុខងារចាក់សោអេក្រង់មួយចំនួន"</string>
     <string name="policydesc_disableKeyguardFeatures" msgid="2044755691354158439">"រារាំងការប្រើលក្ខណៈពិសេសនៃការចាក់សោអេក្រង់មួយចំនួន។"</string>
   <string-array name="phoneTypes">
     <item msgid="8901098336658710359">"ផ្ទះ"</item>
@@ -982,7 +982,7 @@
     <string name="whichSendToApplication" msgid="8272422260066642057">"ផ្ញើដោយប្រើ"</string>
     <string name="whichSendToApplicationNamed" msgid="7768387871529295325">"ផ្ញើដោយប្រើ %1$s"</string>
     <string name="whichSendToApplicationLabel" msgid="8878962419005813500">"ផ្ញើ"</string>
-    <string name="whichHomeApplication" msgid="4307587691506919691">"ជ្រើស​កម្មវិធី​ដើម"</string>
+    <string name="whichHomeApplication" msgid="4307587691506919691">"ជ្រើសរើស​កម្មវិធីអេក្រង់​ដើម"</string>
     <string name="whichHomeApplicationNamed" msgid="4493438593214760979">"ប្រើ %1$s ជា​ដើម"</string>
     <string name="whichHomeApplicationLabel" msgid="809529747002918649">"ថតរូប"</string>
     <string name="whichImageCaptureApplication" msgid="3680261417470652882">"ថតរូបជាមួយ"</string>
@@ -1152,8 +1152,8 @@
     <string name="usb_midi_notification_title" msgid="4850904915889144654">"USB សម្រាប់ MIDI"</string>
     <string name="usb_accessory_notification_title" msgid="7848236974087653666">"បាន​ភ្ជាប់​ឧបករណ៍​យូអេសប៊ី"</string>
     <string name="usb_notification_message" msgid="3370903770828407960">"ប៉ះសម្រាប់ជម្រើសជាច្រើនទៀត"</string>
-    <string name="adb_active_notification_title" msgid="6729044778949189918">"បាន​ភ្ជាប់​ការ​កែ​កំហុស​ USB"</string>
-    <string name="adb_active_notification_message" msgid="4948470599328424059">"ប៉ះដើម្បីបិទដំណើរការកែកំហុស USB"</string>
+    <string name="adb_active_notification_title" msgid="6729044778949189918">"បាន​ភ្ជាប់​ការ​កែ​កំហុសតាម​ USB"</string>
+    <string name="adb_active_notification_message" msgid="4948470599328424059">"ប៉ះដើម្បីបិទដំណើរការកែកំហុសតាម USB"</string>
     <string name="taking_remote_bugreport_notification_title" msgid="6742483073875060934">"កំពុងទទួលយករបាយការណ៍កំហុស…"</string>
     <string name="share_remote_bugreport_notification_title" msgid="4987095013583691873">"ចែករំលែករបាយការណ៍កំហុសឬ?"</string>
     <string name="sharing_remote_bugreport_notification_title" msgid="7572089031496651372">"កំពុងចែករំលែករបាយកំហុស…"</string>
@@ -1284,7 +1284,7 @@
     <string name="sync_undo_deletes" msgid="2941317360600338602">"មិន​ធ្វើ​ការ​លុប​វិញ"</string>
     <string name="sync_do_nothing" msgid="3743764740430821845">"មិន​ធ្វើអ្វី​ទេ​ឥឡូវ"</string>
     <string name="choose_account_label" msgid="5655203089746423927">"ជ្រើស​គណនី"</string>
-    <string name="add_account_label" msgid="2935267344849993553">"បន្ថែម​គណនី​ថ្មី​​"</string>
+    <string name="add_account_label" msgid="2935267344849993553">"បញ្ចូល​គណនី​"</string>
     <string name="add_account_button_label" msgid="3611982894853435874">"បន្ថែម​គណនី"</string>
     <string name="number_picker_increment_button" msgid="2412072272832284313">"បង្កើន"</string>
     <string name="number_picker_decrement_button" msgid="476050778386779067">"បន្ថយ"</string>

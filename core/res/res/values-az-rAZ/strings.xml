@@ -772,7 +772,7 @@
     <string name="js_dialog_before_unload_positive_button" msgid="3112752010600484130">"Bu Səhifəni Tərk edin"</string>
     <string name="js_dialog_before_unload_negative_button" msgid="5614861293026099715">"Bu səhifədə qalın"</string>
     <string name="js_dialog_before_unload" msgid="3468816357095378590">"<xliff:g id="MESSAGE">%s</xliff:g>\n\nBu səhifədən kənara naviqasiya etmək istədiyinizə əminsiniz mi?"</string>
-    <string name="save_password_label" msgid="6860261758665825069">"Təsdiqlə"</string>
+    <string name="save_password_label" msgid="6860261758665825069">"Təsdiq edin"</string>
     <string name="double_tap_toast" msgid="4595046515400268881">"Məsləhət: Böyütmək və kiçiltmək üçün iki dəfə tıklayın."</string>
     <string name="autofill_this_form" msgid="4616758841157816676">"Avtodoldurma"</string>
     <string name="setup_autofill" msgid="7103495070180590814">"AvtoDoldurmanı ayarla"</string>

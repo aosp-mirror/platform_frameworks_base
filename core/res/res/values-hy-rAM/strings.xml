@@ -216,7 +216,7 @@
     <string name="global_action_power_off" msgid="4471879440839879722">"Անջատել"</string>
     <string name="global_action_emergency" msgid="7112311161137421166">"Շտապ կանչ"</string>
     <string name="global_action_bug_report" msgid="7934010578922304799">"Վրիպակի զեկույց"</string>
-    <string name="bugreport_title" msgid="2667494803742548533">"Գրել սխալի զեկույց"</string>
+    <string name="bugreport_title" msgid="2667494803742548533">"Հաղորդել սխալի մասին"</string>
     <string name="bugreport_message" msgid="398447048750350456">"Սա տեղեկություններ կհավաքագրի ձեր սարքի առկա կարգավիճակի մասին և կուղարկի այն էլեկտրոնային նամակով: Որոշակի ժամանակ կպահանջվի վրիպակի մասին զեկուցելու պահից սկսած մինչ ուղարկելը: Խնդրում ենք փոքր-ինչ համբերատար լինել:"</string>
     <string name="bugreport_option_interactive_title" msgid="8635056131768862479">"Ինտերակտիվ զեկույց"</string>
     <string name="bugreport_option_interactive_summary" msgid="229299488536107968">"Հիմնականում օգտագործեք այս տարբերակը: Այն ձեզ թույլ է տալիս հետևել զեկույցի ստեղծման գործընթացին, խնդրի մասին լրացուցիչ տեղեկություններ մուտքագրել և էկրանի պատկերներ կորզել: Կարող է բաց թողնել քիչ օգտագործվող որոշ բաժինները, որոնց ստեղծումը երկար է տևում:"</string>
@@ -322,7 +322,7 @@
     <string name="permlab_writeSettings" msgid="2226195290955224730">"փոփոխել համակարգի կարգավորումները"</string>
     <string name="permdesc_writeSettings" msgid="7775723441558907181">"Թույլ է տալիս հավելվածին փոփոխել համակարգի կարգավորումների տվյալները: Վնասարար հավելվածները կարող են վնասել ձեր համակարգի կարգավորումները:"</string>
     <string name="permlab_receiveBootCompleted" msgid="5312965565987800025">"աշխատել մեկնարկային ռեժիմով"</string>
-    <string name="permdesc_receiveBootCompleted" product="tablet" msgid="7390304664116880704">"Թույլ է տալիս հավելվածին ինքնաշխատ մեկնարկել համակարգի բեռնման ավարտից հետո: Սա կարող է երկարացնել պլանշետի մեկնարկը և թույլ տալ հավելավածին դանդաղեցնել ամբողջ պլանշետի աշխատանքը` միշտ աշխատելով:"</string>
+    <string name="permdesc_receiveBootCompleted" product="tablet" msgid="7390304664116880704">"Թույլ է տալիս հավելվածին ավտոմատ մեկնարկել համակարգի բեռնման ավարտից հետո: Սա կարող է երկարացնել պլանշետի մեկնարկը և թույլ տալ հավելավածին դանդաղեցնել ամբողջ պլանշետի աշխատանքը` միշտ աշխատելով:"</string>
     <string name="permdesc_receiveBootCompleted" product="tv" msgid="4525890122209673621">"Թույլ է տալիս հավելվածին ինքնամեկնարկել համակարգի սկզբնաբեռնումից հետո: Սա կարող է երկարացնել հեռուստացույցի մեկնարկը և թույլ է տալիս հավելվածին դանդաղեցնել ողջ պլանշետի աշխատանքը՝ իր մշտական աշխատանքով:"</string>
     <string name="permdesc_receiveBootCompleted" product="default" msgid="513950589102617504">"Թույլ է տալիս հավելվածին ինքն իրեն սկսել` համակարգի բեռնումն ավարտվելուն պես: Սա կարող է հեռախոսի մեկնարկը դարձնել ավելի երկար և թույլ տալ, որ հավելվածը դանդաղեցնի ընդհանուր հեռախոսի աշխատանքը` միշտ աշխատելով:"</string>
     <string name="permlab_broadcastSticky" msgid="7919126372606881614">"ուղարկել կպչուն հաղորդում"</string>
@@ -771,7 +771,7 @@
     <string name="js_dialog_before_unload_title" msgid="2619376555525116593">"Գործողության հաստատում"</string>
     <string name="js_dialog_before_unload_positive_button" msgid="3112752010600484130">"Լքել այս էջը"</string>
     <string name="js_dialog_before_unload_negative_button" msgid="5614861293026099715">"Մնալ այս էջում"</string>
-    <string name="js_dialog_before_unload" msgid="3468816357095378590">"<xliff:g id="MESSAGE">%s</xliff:g>\n\nՎստա՞հ եք, որ ցանկանում եք հեռանալ այս էջից:"</string>
+    <string name="js_dialog_before_unload" msgid="3468816357095378590">"<xliff:g id="MESSAGE">%s</xliff:g>\n\nԻսկապե՞ս ուզում եք հեռանալ այս էջից:"</string>
     <string name="save_password_label" msgid="6860261758665825069">"Հաստատել"</string>
     <string name="double_tap_toast" msgid="4595046515400268881">"Հուշակ` կրկնակի հպեք` մեծացնելու և փոքրացնելու համար:"</string>
     <string name="autofill_this_form" msgid="4616758841157816676">"Ինքնալրացում"</string>
@@ -1397,7 +1397,7 @@
     <string name="kg_wrong_pin" msgid="1131306510833563801">"Սխալ PIN"</string>
     <string name="kg_too_many_failed_attempts_countdown" msgid="6358110221603297548">"Փորձեք կրկին <xliff:g id="NUMBER">%1$d</xliff:g> վայրկյանից:"</string>
     <string name="kg_pattern_instructions" msgid="398978611683075868">"Հավաքեք ձեր սխեման"</string>
-    <string name="kg_sim_pin_instructions" msgid="2319508550934557331">"Մուտքագրեք SIM-քարտի PIN-կոդը"</string>
+    <string name="kg_sim_pin_instructions" msgid="2319508550934557331">"Մուտքագրեք SIM քարտի PIN կոդը"</string>
     <string name="kg_pin_instructions" msgid="2377242233495111557">"Մուտքագրեք PIN-ը"</string>
     <string name="kg_password_instructions" msgid="5753646556186936819">"Մուտքագրեք գաղտնաբառը"</string>
     <string name="kg_puk_enter_puk_hint" msgid="453227143861735537">"SIM-ը այս պահին անջատված է: Մուտքագրեք PUK կոդը շարունակելու համար: Մանրամասների համար կապվեք օպերատորի հետ:"</string>
@@ -1562,9 +1562,9 @@
     <string name="lock_to_app_toast_locked" msgid="9125176335701699164">"Հավելվածն ամրացված է: Ապամրացումն այս սարքում չի թույլատրվում:"</string>
     <string name="lock_to_app_start" msgid="6643342070839862795">"Էկրանն ամրացված է"</string>
     <string name="lock_to_app_exit" msgid="8598219838213787430">"Էկրանն ապամրացված է"</string>
-    <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"Ապաամրացնելուց առաջ հարցնել PIN-կոդը"</string>
-    <string name="lock_to_app_unlock_pattern" msgid="4182192144797225137">"Ապաամրացնելուց առաջ հարցնել ապակողպող նախշը"</string>
-    <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"Ապաամրացնելուց առաջ հարցնել գաղտնաբառը"</string>
+    <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"Հարցնել PIN կոդը"</string>
+    <string name="lock_to_app_unlock_pattern" msgid="4182192144797225137">"Հարցնել ապակողպող նախշը"</string>
+    <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"Հարցնել գաղտնաբառը"</string>
     <string name="package_installed_device_owner" msgid="8420696545959087545">"Ադմինիստրատորը տեղադրել է այն"</string>
     <string name="package_updated_device_owner" msgid="8856631322440187071">"Ադմինիստրատորը թարմացրել է այն"</string>
     <string name="package_deleted_device_owner" msgid="7650577387493101353">"Ադմինիստրատորը ջնջել է այն"</string>

@@ -65,14 +65,14 @@
       <item quantity="one">सिम के लॉक हो जाने से पहले आपके पास <xliff:g id="NUMBER_1">%d</xliff:g> प्रयास शेष हैं.</item>
       <item quantity="other">सिम के लॉक हो जाने से पहले आपके पास <xliff:g id="NUMBER_1">%d</xliff:g> प्रयास शेष हैं.</item>
     </plurals>
-    <string name="imei" msgid="2625429890869005782">"IMEI"</string>
+    <string name="imei" msgid="2625429890869005782">"आईएमईआई"</string>
     <string name="meid" msgid="4841221237681254195">"MEID"</string>
     <string name="ClipMmi" msgid="6952821216480289285">"इनकमिंग कॉलर आईडी"</string>
     <string name="ClirMmi" msgid="7784673673446833091">"आउटगोइंग कॉलर आईडी"</string>
     <string name="ColpMmi" msgid="3065121483740183974">"कनेक्ट किया गया लाइन आईडी"</string>
     <string name="ColrMmi" msgid="4996540314421889589">"कनेक्ट किया गया लाइन आईडी प्रतिबंध"</string>
     <string name="CfMmi" msgid="5123218989141573515">"कॉल आगे भेजना"</string>
-    <string name="CwMmi" msgid="9129678056795016867">"कॉल प्रतीक्षा"</string>
+    <string name="CwMmi" msgid="9129678056795016867">"कॉल वेटिंग"</string>
     <string name="BaMmi" msgid="455193067926770581">"कॉल बाधित करना"</string>
     <string name="PwdMmi" msgid="7043715687905254199">"पासवर्ड बदलें"</string>
     <string name="PinMmi" msgid="3113117780361190304">"पिन परिवर्तन"</string>
@@ -196,9 +196,9 @@
     <string name="reboot_to_update_title" msgid="6212636802536823850">"Android सिस्टम उपडेट हो रहा है"</string>
     <string name="reboot_to_update_prepare" msgid="6305853831955310890">"अपडेट करने के लिए तैयार हो रहा है…"</string>
     <string name="reboot_to_update_package" msgid="3871302324500927291">"अपडेट पैकेज को संसाधित कर रहा है…"</string>
-    <string name="reboot_to_update_reboot" msgid="6428441000951565185">"पुन: प्रारंभ हो रहा है…"</string>
+    <string name="reboot_to_update_reboot" msgid="6428441000951565185">"फिर चालू हो रहा है…"</string>
     <string name="reboot_to_reset_title" msgid="4142355915340627490">"फ़ैक्टरी डेटा रीसेट"</string>
-    <string name="reboot_to_reset_message" msgid="2432077491101416345">"पुन: प्रारंभ हो रहा है…"</string>
+    <string name="reboot_to_reset_message" msgid="2432077491101416345">"फिर चालू हो रहा है…"</string>
     <string name="shutdown_progress" msgid="2281079257329981203">"शट डाउन हो रहा है..."</string>
     <string name="shutdown_confirm" product="tablet" msgid="3385745179555731470">"आपकी टैबलेट शट डाउन हो जाएगी."</string>
     <string name="shutdown_confirm" product="tv" msgid="476672373995075359">"आपका टीवी बंद हो जाएगा."</string>
@@ -261,14 +261,14 @@
     <string name="permgroupdesc_phone" msgid="6234224354060641055">"फ़ोन कॉल करें और प्रबंधित करें"</string>
     <string name="permgrouplab_sensors" msgid="416037179223226722">"शरीर संवेदक"</string>
     <string name="permgroupdesc_sensors" msgid="7147968539346634043">"अपने महत्वपूर्ण संकेतों के बारे में सेंसर डेटा को ऐक्सेस करें"</string>
-    <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"विंडो सामग्री प्राप्त करें"</string>
-    <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"उस विंडो की सामग्री का निरीक्षण करें जिससे आप सहभागिता कर रहे हैं."</string>
-    <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"छूकर, उससे जुड़ी जानकारी सुनने की सुविधा चालू करें"</string>
-    <string name="capability_desc_canRequestTouchExploration" msgid="7543249041581408313">"टैप किए गए आइटम ज़ोर से बोले जाएंगे और स्क्रीन को जेस्चर के ज़रिए एक्सप्लोर किया जा सकता है."</string>
+    <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"विंडो की सामग्री वापस पाएं"</string>
+    <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"उस विंडो की सामग्री की जाँच करें, जिसका आप इस्तेमाल कर रहे हैं."</string>
+    <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"छूकर, किसी चीज़ से जुड़ी जानकारी सुनने की सुविधा चालू करें"</string>
+    <string name="capability_desc_canRequestTouchExploration" msgid="7543249041581408313">"जिन चीज़ों पर आप टैप करेंगे उन्हें ज़ोर से बोला जाएगा और स्क्रीन को जेस्चर के ज़रिए एक्सप्लोर किया जा सकेगा."</string>
     <string name="capability_title_canRequestEnhancedWebAccessibility" msgid="1739881766522594073">"एन्हांस की गई वेब आसान तरीका चालू करें"</string>
     <string name="capability_desc_canRequestEnhancedWebAccessibility" msgid="7881063961507511765">"ऐप्स  सामग्री को अधिक पहुंच-योग्य बनाने के लिए स्क्रिप्ट इंस्टॉल किए जा सकते हैं."</string>
-    <string name="capability_title_canRequestFilterKeyEvents" msgid="2103440391902412174">"आपके द्वारा लिखे हुए लेख को ध्यान से देखें"</string>
-    <string name="capability_desc_canRequestFilterKeyEvents" msgid="7463135292204152818">"क्रेडिट कार्ड नंबर और पासवर्ड जैसा व्यक्तिगत डेटा शामिल होता है."</string>
+    <string name="capability_title_canRequestFilterKeyEvents" msgid="2103440391902412174">"अपने लिखे हुए लेख पर गौर करें"</string>
+    <string name="capability_desc_canRequestFilterKeyEvents" msgid="7463135292204152818">"क्रेडिट कार्ड नंबर और पासवर्ड जैसा निजी डेटा शामिल होता है."</string>
     <string name="capability_title_canControlMagnification" msgid="3593493281059424855">"डिसप्ले को बड़ा-छोटा करने की सुविधा को नियंत्रित करें"</string>
     <string name="capability_desc_canControlMagnification" msgid="4791858203568383773">"डिसप्ले के ज़ूम का स्‍तर और पोज़िशनिंग नियंत्रित करें."</string>
     <string name="capability_title_canPerformGestures" msgid="7418984730362576862">"जेस्चर करें"</string>
@@ -450,7 +450,7 @@
     <string name="fingerprint_error_canceled" msgid="4402024612660774395">"फ़िंगरप्रिंट क्रियान्वयन रोक दिया गया."</string>
     <string name="fingerprint_error_lockout" msgid="5536934748136933450">"बहुत अधिक प्रयास कर लिए गए हैं. बाद में पुन: प्रयास करें."</string>
     <string name="fingerprint_error_unable_to_process" msgid="6107816084103552441">"पुन: प्रयास करें."</string>
-    <string name="fingerprint_name_template" msgid="5870957565512716938">"उंगली <xliff:g id="FINGERID">%d</xliff:g>"</string>
+    <string name="fingerprint_name_template" msgid="5870957565512716938">"पहला फ़िगरप्रिंट <xliff:g id="FINGERID">%d</xliff:g>"</string>
   <string-array name="fingerprint_error_vendor">
   </string-array>
     <string name="fingerprint_icon_content_description" msgid="2340202869968465936">"फ़िंगरप्रिंट आइकॉन"</string>
@@ -543,7 +543,7 @@
     <string name="policydesc_encryptedStorage" msgid="2637732115325316992">"संग्रहित ऐप्स डेटा को एन्क्रिप्ट किया जाना आवश्‍यक है."</string>
     <string name="policylab_disableCamera" msgid="6395301023152297826">"कैमरों को अक्षम करें"</string>
     <string name="policydesc_disableCamera" msgid="2306349042834754597">"सभी डिवाइस कैमरों का उपयोग रोकें."</string>
-    <string name="policylab_disableKeyguardFeatures" msgid="8552277871075367771">"कुछ स्‍क्रीन लॉक सुविधाओं को अक्षम करें"</string>
+    <string name="policylab_disableKeyguardFeatures" msgid="8552277871075367771">"स्‍क्रीन लॉक की कुछ सुविधाएं बंद करें"</string>
     <string name="policydesc_disableKeyguardFeatures" msgid="2044755691354158439">"कुछ स्‍क्रीन लाॅक सुविधाओं का उपयोग रोकें."</string>
   <string-array name="phoneTypes">
     <item msgid="8901098336658710359">"घर"</item>
@@ -645,12 +645,12 @@
     <string name="relationTypeChild" msgid="1890746277276881626">"बच्चा"</string>
     <string name="relationTypeDomesticPartner" msgid="6904807112121122133">"हमसफ़र"</string>
     <string name="relationTypeFather" msgid="5228034687082050725">"पिता"</string>
-    <string name="relationTypeFriend" msgid="7313106762483391262">"मित्र"</string>
+    <string name="relationTypeFriend" msgid="7313106762483391262">"दोस्त"</string>
     <string name="relationTypeManager" msgid="6365677861610137895">"प्रबंधक"</string>
     <string name="relationTypeMother" msgid="4578571352962758304">"मां"</string>
     <string name="relationTypeParent" msgid="4755635567562925226">"अभिभावक"</string>
     <string name="relationTypePartner" msgid="7266490285120262781">"सहयोगी"</string>
-    <string name="relationTypeReferredBy" msgid="101573059844135524">"इसके द्वारा संदर्भित"</string>
+    <string name="relationTypeReferredBy" msgid="101573059844135524">"इन्होंने बताया"</string>
     <string name="relationTypeRelative" msgid="1799819930085610271">"संबंधी"</string>
     <string name="relationTypeSister" msgid="1735983554479076481">"बहन"</string>
     <string name="relationTypeSpouse" msgid="394136939428698117">"पति/पत्नी"</string>
@@ -810,14 +810,14 @@
     <string name="save_password_never" msgid="8274330296785855105">"कभी नहीं"</string>
     <string name="open_permission_deny" msgid="7374036708316629800">"आपके पास इस पेज को खोलने की अनुमति नहीं है."</string>
     <string name="text_copied" msgid="4985729524670131385">"लेख को क्‍लिपबोर्ड पर कॉपी किया गया."</string>
-    <string name="more_item_label" msgid="4650918923083320495">"अधिक"</string>
+    <string name="more_item_label" msgid="4650918923083320495">"और"</string>
     <string name="prepend_shortcut_label" msgid="2572214461676015642">"मेन्यू+"</string>
     <string name="menu_space_shortcut_label" msgid="2410328639272162537">"space"</string>
     <string name="menu_enter_shortcut_label" msgid="2743362785111309668">"enter"</string>
     <string name="menu_delete_shortcut_label" msgid="3658178007202748164">"मिटाएं"</string>
-    <string name="search_go" msgid="8298016669822141719">"सर्च करें"</string>
-    <string name="search_hint" msgid="1733947260773056054">"सर्च करें…"</string>
-    <string name="searchview_description_search" msgid="6749826639098512120">"सर्च करें"</string>
+    <string name="search_go" msgid="8298016669822141719">"खोजें"</string>
+    <string name="search_hint" msgid="1733947260773056054">"खोजें…"</string>
+    <string name="searchview_description_search" msgid="6749826639098512120">"खोजें"</string>
     <string name="searchview_description_query" msgid="5911778593125355124">"सर्च क्वेरी"</string>
     <string name="searchview_description_clear" msgid="1330281990951833033">"क्‍वेरी साफ़ करें"</string>
     <string name="searchview_description_submit" msgid="2688450133297983542">"क्वेरी सबमिट करें"</string>
@@ -1113,7 +1113,7 @@
     <string name="sms_control_title" msgid="7296612781128917719">"मैसेज (एसएमएस) भेज रहा है"</string>
     <string name="sms_control_message" msgid="3867899169651496433">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; बड़ी संख्या में मैसेज (एसएमएस) भेज रहा है. क्या आप इस ऐप को मैसेज भेजना जारी रखने देना चाहते हैं?"</string>
     <string name="sms_control_yes" msgid="3663725993855816807">"अनुमति दें"</string>
-    <string name="sms_control_no" msgid="625438561395534982">"अस्वीकार करें"</string>
+    <string name="sms_control_no" msgid="625438561395534982">"नामंजूर करें"</string>
     <string name="sms_short_code_confirm_message" msgid="1645436466285310855">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;, &lt;b&gt;<xliff:g id="DEST_ADDRESS">%2$s</xliff:g>&lt;/b&gt; पर संदेश भेजना चाहता है."</string>
     <string name="sms_short_code_details" msgid="5873295990846059400">"इससे आपके मोबाइल खाते पर "<b>"शुल्क लग सकता है"</b>"."</string>
     <string name="sms_premium_short_code_details" msgid="7869234868023975"><b>"इससे आपके मोबाइल खाते पर शुल्क लगेगा."</b></string>
@@ -1151,7 +1151,7 @@
     <string name="usb_accessory_notification_title" msgid="7848236974087653666">"USB सहायक सामग्री से कनेक्‍ट कि‍या गया"</string>
     <string name="usb_notification_message" msgid="3370903770828407960">"ज़्यादा विकल्पों के लिए टैप करें."</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"USB डीबग कनेक्ट किया गया"</string>
-    <string name="adb_active_notification_message" msgid="4948470599328424059">"USB डीबग करना अक्षम करने के लिए टैप करें."</string>
+    <string name="adb_active_notification_message" msgid="4948470599328424059">"USB डीबग करना बंद करने के लिए टैप करें."</string>
     <string name="taking_remote_bugreport_notification_title" msgid="6742483073875060934">"गड़बड़ी की रिपोर्ट ली जा रही है…"</string>
     <string name="share_remote_bugreport_notification_title" msgid="4987095013583691873">"गड़बड़ी की रिपोर्ट शेयर करें?"</string>
     <string name="sharing_remote_bugreport_notification_title" msgid="7572089031496651372">"गड़बड़ी की रिपोर्ट शेयर की जा रही है…"</string>
@@ -1160,7 +1160,7 @@
     <string name="decline_remote_bugreport_action" msgid="6230987241608770062">"अस्वीकार करें"</string>
     <string name="select_input_method" msgid="8547250819326693584">"कीबोर्ड बदलें"</string>
     <string name="show_ime" msgid="2506087537466597099">"सामान्य कीबोर्ड के सक्रिय होने के दौरान इसे स्‍क्रीन पर बनाए रखें"</string>
-    <string name="hardware" msgid="194658061510127999">"वर्चुअल कीबोर्ड दिखाएं"</string>
+    <string name="hardware" msgid="194658061510127999">"वर्चूअल कीबोर्ड दिखाएं"</string>
     <string name="select_keyboard_layout_notification_title" msgid="597189518763083494">"सामान्य कीबोर्ड कॉन्फ़िगर करें"</string>
     <string name="select_keyboard_layout_notification_message" msgid="8084622969903004900">"भाषा और लेआउट चुनने के लिए टैप करें"</string>
     <string name="fast_scroll_alphabet" msgid="5433275485499039199">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
@@ -1211,7 +1211,7 @@
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="1311810005957319690">"ज़ूम नियंत्रण के लिए दो बार टैप करें"</string>
     <string name="gadget_host_error_inflating" msgid="4882004314906466162">"विजेट नहीं जोड़ा जा सका."</string>
     <string name="ime_action_go" msgid="8320845651737369027">"जाएं"</string>
-    <string name="ime_action_search" msgid="658110271822807811">"सर्च करें"</string>
+    <string name="ime_action_search" msgid="658110271822807811">"खोजें"</string>
     <string name="ime_action_send" msgid="2316166556349314424">"भेजें"</string>
     <string name="ime_action_next" msgid="3138843904009813834">"आगे"</string>
     <string name="ime_action_done" msgid="8971516117910934605">"हो गया"</string>
@@ -1230,7 +1230,7 @@
     <string name="forward_intent_to_work" msgid="621480743856004612">"आप इस ऐप्स का उपयोग अपनी कार्य प्रोफ़ाइल में कर रहे हैं"</string>
     <string name="input_method_binding_label" msgid="1283557179944992649">"इनपुट विधि"</string>
     <string name="sync_binding_label" msgid="3687969138375092423">"समन्वयन"</string>
-    <string name="accessibility_binding_label" msgid="4148120742096474641">"सरल उपयोग"</string>
+    <string name="accessibility_binding_label" msgid="4148120742096474641">"सुलभता"</string>
     <string name="wallpaper_binding_label" msgid="1240087844304687662">"वॉलपेपर"</string>
     <string name="chooser_wallpaper" msgid="7873476199295190279">"वॉलपेपर बदलें"</string>
     <string name="notification_listener_binding_label" msgid="2014162835481906429">"सूचना को सुनने की सुविधा"</string>
@@ -1383,7 +1383,7 @@
     <string name="media_route_controller_disconnect" msgid="8966120286374158649">"डिसकनेक्ट करें"</string>
     <string name="media_route_status_scanning" msgid="7279908761758293783">"स्‍कैन कर रहा है..."</string>
     <string name="media_route_status_connecting" msgid="6422571716007825440">"कनेक्ट हो रहा है..."</string>
-    <string name="media_route_status_available" msgid="6983258067194649391">"उपलब्ध"</string>
+    <string name="media_route_status_available" msgid="6983258067194649391">"मौजूद"</string>
     <string name="media_route_status_not_available" msgid="6739899962681886401">"उपलब्‍ध नहीं"</string>
     <string name="media_route_status_in_use" msgid="4533786031090198063">"उपयोग में"</string>
     <string name="display_manager_built_in_display_name" msgid="2583134294292563941">"अंतर्निहित स्क्रीन"</string>
@@ -1569,7 +1569,7 @@
     <string name="package_updated_device_owner" msgid="8856631322440187071">"आपके नियंत्रक द्वारा अपडेट किया गया"</string>
     <string name="package_deleted_device_owner" msgid="7650577387493101353">"आपके नियंत्रक द्वारा हटाया गया"</string>
     <string name="battery_saver_description" msgid="1960431123816253034">"बैटरी लाइफ़ को बेहतर बनाने में मदद करने के लिए, बैटरी सेवर आपके डिवाइस के प्रदर्शन को कम कर देता है और कंपन (वाइब्रेशन), स्‍थान सेवाओं और ज़्यादातर बैकग्राउंड डेटा को सीमित कर देता है. हो सकता है कि ईमेल, मैसेज सेवा और सिंक पर आधारित अन्‍य ऐप तब तक ना खुलें जब तक कि आप उन्‍हें नहीं खोलते.\n\nजब आपका डिवाइस चार्ज हो रहा होता है तो बैटरी सेवर अपने आप बंद हो जाता है."</string>
-    <string name="data_saver_description" msgid="6015391409098303235">"डेटा खर्च, कम करने के लिए डेटा सेवर कुछ ऐप को बैकग्राउंड में डेटा भेजने या पाने से रोकता है. आप फ़िलहाल जिस एेप का इस्तेमाल कर रहे हैं वह डेटा तक पहुंच सकता है, लेकिन ऐसा कभी-कभी ही हो पाएगा. उदाहरण के लिए, इसे समझिये कि तस्वीर तब तक दिखाई नहीं देंगी जब तक कि आप उन्हें टैप नहीं करते."</string>
+    <string name="data_saver_description" msgid="6015391409098303235">"डेटा खर्च, कम करने के लिए डेटा सेवर कुछ ऐप्लिकेशन को बैकग्राउंड में डेटा भेजने या डेटा पाने से रोकता है. आप फ़िलहाल जिस एेप्लिकेशन का इस्तेमाल कर रहे हैं वह डेटा तक पहुंच सकता है लेकिन ऐसा कभी-कभी ही हो पाएगा. उदाहरण के लिए, इमेज तब तक दिखाई नहीं देंगी जब तक कि आप उन्हें टैप नहीं करते."</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"डेटा बचाने की सेटिंग चालू करें?"</string>
     <string name="data_saver_enable_button" msgid="7147735965247211818">"चालू करें"</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="4367877408072000848">
@@ -1646,10 +1646,10 @@
     <string name="language_selection_title" msgid="2680677278159281088">"भाषा जोड़ें"</string>
     <string name="country_selection_title" msgid="2954859441620215513">"क्षेत्र प्राथमिकता"</string>
     <string name="search_language_hint" msgid="7042102592055108574">"भाषा का नाम लिखें"</string>
-    <string name="language_picker_section_suggested" msgid="8414489646861640885">"सुझाए गए"</string>
+    <string name="language_picker_section_suggested" msgid="8414489646861640885">"दिए गए सुझाव"</string>
     <string name="language_picker_section_all" msgid="3097279199511617537">"सभी भाषाएं"</string>
     <string name="region_picker_section_all" msgid="8966316787153001779">"सभी क्षेत्र"</string>
-    <string name="locale_search_menu" msgid="2560710726687249178">"सर्च करें"</string>
+    <string name="locale_search_menu" msgid="2560710726687249178">"खोजें"</string>
     <string name="work_mode_off_title" msgid="8954725060677558855">"कार्य मोड बंद है"</string>
     <string name="work_mode_off_message" msgid="3286169091278094476">"ऐप्स, पृष्ठभूमि समन्वयन और संबंधित सुविधाओं सहित कार्य प्रोफ़ाइल को काम करने की अनुमति दें"</string>
     <string name="work_mode_turn_on" msgid="2062544985670564875">"चालू करें"</string>

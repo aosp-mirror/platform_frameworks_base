@@ -216,7 +216,7 @@
     <string name="global_action_power_off" msgid="4471879440839879722">"ပါဝါပိတ်ရန်"</string>
     <string name="global_action_emergency" msgid="7112311161137421166">"အရေးပေါ်"</string>
     <string name="global_action_bug_report" msgid="7934010578922304799">"အမှားရှာဖွေပြင်ဆင်မှုမှတ်တမ်း"</string>
-    <string name="bugreport_title" msgid="2667494803742548533">"အမှားရှာဖွေပြင်ဆင်မှုမှတ်တမ်းအား ယူရန်"</string>
+    <string name="bugreport_title" msgid="2667494803742548533">"ချွတ်ယွင်းမှုမှတ်တမ်း ယူခြင်း"</string>
     <string name="bugreport_message" msgid="398447048750350456">"သင့်ရဲ့ လက်ရှိ စက်အခြေအနေ အချက်အလက်များကို အီးမေးလ် အနေဖြင့် ပေးပို့ရန် စုဆောင်းပါမည်။ အမှားရှာဖွေပြင်ဆင်မှုမှတ်တမ်းမှ ပေးပို့ရန် အသင့်ဖြစ်သည်အထိ အချိန် အနည်းငယ်ကြာမြင့်မှာ ဖြစ်သဖြင့် သည်းခံပြီး စောင့်ပါရန်"</string>
     <string name="bugreport_option_interactive_title" msgid="8635056131768862479">"လက်ငင်းတုံ့ပြန်နိုင်သည့် အစီရင်ခံချက်"</string>
     <string name="bugreport_option_interactive_summary" msgid="229299488536107968">"အခြေအနေတော်တော်များများတွင် ၎င်းကိုအသုံးပြုပါ။ ၎င်းသည် အစီရင်ခံစာကို မှတ်သားခြင်း၊ ပြဿနာအကြောင်း နောက်ထပ်အသေးစိတ်များကို ထည့်သွင်းခြင်းနှင့် မျက်နှာပြင်ပုံဖမ်းယူခြင်းတို့ကို ပြုလုပ်ခွင့်ပေးပါသည်။ ပေးပို့ရန် အလွန်ကြာပြီး အသုံးပြုခြင်းနည်းပါးသည့်အပိုင်းကို ၎င်းက ချန်ခဲ့နိုင်ပါသည်။"</string>
@@ -270,7 +270,7 @@
     <string name="capability_title_canRequestFilterKeyEvents" msgid="2103440391902412174">"ရိုက်သောစာများကို စောင့်ကြည့်ရန်"</string>
     <string name="capability_desc_canRequestFilterKeyEvents" msgid="7463135292204152818">"ကိုယ်ရေးအချက်အလက်များဖြစ်သော ခရက်ဒစ်ကဒ်နံပါတ်နှင့် စကားဝှက်များ ပါဝင်သည်။"</string>
     <string name="capability_title_canControlMagnification" msgid="3593493281059424855">"မျက်နှာပြင် ချဲ့ခြင်းကို ထိန်းချုပ်ရန်"</string>
-    <string name="capability_desc_canControlMagnification" msgid="4791858203568383773">"မျက်နှာပြင် ဇူးမ်အရွယ်နှင့် နေရာချထားခြင်းကို ထိန်းချုပ်ပါ။"</string>
+    <string name="capability_desc_canControlMagnification" msgid="4791858203568383773">"မျက်နှာပြင် ဇူးမ်အရွယ်နှင့် နေရာချထားခြင်းကို ထိန်းချုပ်ပါသည်။"</string>
     <string name="capability_title_canPerformGestures" msgid="7418984730362576862">"လက်ဟန်များ အသုံးပြုပါ"</string>
     <string name="capability_desc_canPerformGestures" msgid="8296373021636981249">"တို့ခြင်း၊ ပွတ်ဆွဲခြင်း၊ နှင့် အခြား လက်ဟန်များကို အသုံးပြုနိုင်ပါသည်။"</string>
     <string name="permlab_statusBar" msgid="7417192629601890791">"အခြေအနေပြဘားအား အလုပ်မလုပ်ခိုင်းရန်သို့မဟုတ် မွမ်းမံရန်"</string>
@@ -543,7 +543,7 @@
     <string name="policydesc_encryptedStorage" msgid="2637732115325316992">"အပလီကေးရှင်းမှ သိမ်းဆည်းထားသော အရာများအား လျို့ဝှက် အသွင်းပြောင်းရန် လိုအပ်ခြင်း"</string>
     <string name="policylab_disableCamera" msgid="6395301023152297826">"ကင်မရာအား ပိတ်ခြင်း"</string>
     <string name="policydesc_disableCamera" msgid="2306349042834754597">"စက်မှ ကင်မရာအားလုံး အသုံးပြုမှုအား ကန့်သတ်ရန်"</string>
-    <string name="policylab_disableKeyguardFeatures" msgid="8552277871075367771">"ဖန်သားပြင်သော့ခတ်နိုင်သည့်အင်္ဂါရပ် အချို့အား ပိတ်ထားပါ"</string>
+    <string name="policylab_disableKeyguardFeatures" msgid="8552277871075367771">"ဖန်သားပြင် လော့ခ်ချသည့် ဝန်ဆောင်မှုအချို့ ပိတ်ခြင်း"</string>
     <string name="policydesc_disableKeyguardFeatures" msgid="2044755691354158439">"ဖန်သားပြင်သော့ခတ်နိုင်သည့်အင်္ဂါရပ် အချို့ အသုံးပြုမှုအား ကာကွယ်ပါ။"</string>
   <string-array name="phoneTypes">
     <item msgid="8901098336658710359">"အိမ်"</item>
@@ -683,7 +683,7 @@
     <string name="faceunlock_multiple_failures" msgid="754137583022792429">"မျက်မှာမှတ် သော့ဖွင့်ခြင်း ခွင့်ပြုသော အကြိမ်ရေထက် ကျော်လွန်သွားပါပြီ"</string>
     <string name="lockscreen_missing_sim_message_short" msgid="5099439277819215399">"ဆင်းကဒ် မရှိပါ"</string>
     <string name="lockscreen_missing_sim_message" product="tablet" msgid="151659196095791474">"တက်ပလက်ထဲတွင်း ဆင်းကဒ် မရှိပါ"</string>
-    <string name="lockscreen_missing_sim_message" product="tv" msgid="1943633865476989599">"တီဗွီတွင် SIM ကဒ် မရှိပါ။"</string>
+    <string name="lockscreen_missing_sim_message" product="tv" msgid="1943633865476989599">"တီဗွီတွင် SIM ကတ် မရှိပါ။"</string>
     <string name="lockscreen_missing_sim_message" product="default" msgid="2186920585695169078">"ဖုန်းထဲတွင် ဆင်းကဒ် မရှိပါ"</string>
     <string name="lockscreen_missing_sim_instructions" msgid="5372787138023272615">"ဆင်းမ်ကဒ် ထည့်ပါ"</string>
     <string name="lockscreen_missing_sim_instructions_long" msgid="3526573099019319472">"ဆင်းမ်ကဒ် မရှိဘူး သို့မဟုတ် ဖတ်မရပါ။ ဆင်းမ်ကဒ် တစ်ခုကို ထည့်ပါ။"</string>
@@ -1124,11 +1124,11 @@
     <string name="sms_short_code_confirm_always_allow" msgid="3241181154869493368">"အမြဲခွင့်ပြုရန်"</string>
     <string name="sms_short_code_confirm_never_allow" msgid="446992765774269673">"ဘယ်တော့မှခွင့်မပြုပါ"</string>
     <string name="sim_removed_title" msgid="6227712319223226185">"SIMကဒ်ဖယ်ရှားခြင်း"</string>
-    <string name="sim_removed_message" msgid="5450336489923274918">"သင်က မှန်ကန်သည့် ဆင်းမ် ကဒ် တစ်ခုနှင့် ပြန်မစမချင်း ဆဲလ်လူလာ ကွန်ရက်ကို ရှာတွေ့မည် မဟုတ်ပါ။"</string>
+    <string name="sim_removed_message" msgid="5450336489923274918">"သင်က မှန်ကန်သည့် ဆင်းမ် ကတ် တစ်ခုနှင့် ပြန်မစမချင်း ဆဲလ်လူလာ ကွန်ရက်ကို ရှာတွေ့မည် မဟုတ်ပါ။"</string>
     <string name="sim_done_button" msgid="827949989369963775">"ပြီးပါပြီ"</string>
     <string name="sim_added_title" msgid="3719670512889674693">"ဆင်းမ်ကဒ် ထည့်ပါသည်"</string>
     <string name="sim_added_message" msgid="7797975656153714319">"ဆဲလ်လူလာ ကွန်ရက်ကို ရယူသုံးရန် သင့် ကိရိယာကို ပြန်ဖွင့်ပေးပါ။"</string>
-    <string name="sim_restart_button" msgid="4722407842815232347">"အစက ပြန်စရန်"</string>
+    <string name="sim_restart_button" msgid="4722407842815232347">"ပြန်စရန်"</string>
     <string name="carrier_app_dialog_message" msgid="7066156088266319533">"သင့် SIM အသစ်ပုံမှန် အလုပ်လုပ်ရန်၊ သင်အသုံးပြုသည့် မိုဘိုင်းဝန်ဆောင်မှုမှ အက်ပ်တစ်ခုထည့်သွင်း၍ ဖွင့်ရန်လိုအပ်ပါသည်။"</string>
     <string name="carrier_app_dialog_button" msgid="7900235513678617329">"အက်ပ်ကို ရယူပါ"</string>
     <string name="carrier_app_dialog_not_now" msgid="6361378684292268027">"ယခုမလုပ်ပါ"</string>
@@ -1265,7 +1265,7 @@
     </plurals>
     <string name="action_mode_done" msgid="7217581640461922289">"ပြီးပါပြီ"</string>
     <string name="progress_erasing" product="nosdcard" msgid="4521573321524340058">"USB သိုလှောင်မှု အချက်အလက်များ ဖျက်နေစဉ်…"</string>
-    <string name="progress_erasing" product="default" msgid="6596988875507043042">"SD ကဒ် အား ဖျက်နေစဉ်…"</string>
+    <string name="progress_erasing" product="default" msgid="6596988875507043042">"SD ကတ် အား ဖျက်နေစဉ်…"</string>
     <string name="share" msgid="1778686618230011964">"မျှဝေခြင်း"</string>
     <string name="find" msgid="4808270900322985960">"ရှာဖွေရန်"</string>
     <string name="websearch" msgid="4337157977400211589">"ဝဘ်တွင် ရှာရန်"</string>
@@ -1323,8 +1323,8 @@
     <string name="action_bar_home_description_format" msgid="7965984360903693903">"%1$s ၊ %2$s"</string>
     <string name="action_bar_home_subtitle_description_format" msgid="6985546530471780727">"%1$s ၊ %2$s ၊ %3$s"</string>
     <string name="storage_internal" msgid="3570990907910199483">"စက်တွင်းမျှဝေထားသည့် သိုလှောင်ခန်း"</string>
-    <string name="storage_sd_card" msgid="3282948861378286745">"SD ကဒ်"</string>
-    <string name="storage_sd_card_label" msgid="6347111320774379257">"<xliff:g id="MANUFACTURER">%s</xliff:g> SD ကဒ်"</string>
+    <string name="storage_sd_card" msgid="3282948861378286745">"SD ကတ်"</string>
+    <string name="storage_sd_card_label" msgid="6347111320774379257">"<xliff:g id="MANUFACTURER">%s</xliff:g> SD ကတ်"</string>
     <string name="storage_usb_drive" msgid="6261899683292244209">"USB ဒရိုက်ဗ်"</string>
     <string name="storage_usb_drive_label" msgid="4501418548927759953">"<xliff:g id="MANUFACTURER">%s</xliff:g> USB ဒရိုက်ဗ်"</string>
     <string name="storage_usb" msgid="3017954059538517278">"USBဖြင့် သိမ်းဆည်း"</string>
@@ -1482,9 +1482,9 @@
     <string name="mediasize_na_junior_legal" msgid="3309324162155085904">"ဂျူနီယာ လီဂယ်လ်"</string>
     <string name="mediasize_na_ledger" msgid="5567030340509075333">"လယ်ဂျာ"</string>
     <string name="mediasize_na_tabloid" msgid="4571735038501661757">"တက်ဘလွိုက်"</string>
-    <string name="mediasize_na_index_3x5" msgid="5182901917818625126">"အက္ခရာစဥ် အညွှန်း ကဒ် ၃x၅"</string>
-    <string name="mediasize_na_index_4x6" msgid="7687620625422312396">"အက္ခရာစဥ် အညွှန်း ကဒ် ၄x၆"</string>
-    <string name="mediasize_na_index_5x8" msgid="8834215284646872800">"အက္ခရာစဥ် အညွှန်း ကဒ် ၅x၈"</string>
+    <string name="mediasize_na_index_3x5" msgid="5182901917818625126">"အက္ခရာစဥ် အညွှန်း ကတ် ၃x၅"</string>
+    <string name="mediasize_na_index_4x6" msgid="7687620625422312396">"အက္ခရာစဥ် အညွှန်း ကတ် ၄x၆"</string>
+    <string name="mediasize_na_index_5x8" msgid="8834215284646872800">"အက္ခရာစဥ် အညွှန်း ကတ် ၅x၈"</string>
     <string name="mediasize_na_monarch" msgid="213639906956550754">"မိုနာချ့်"</string>
     <string name="mediasize_na_quarto" msgid="835778493593023223">"ကွာတို"</string>
     <string name="mediasize_na_foolscap" msgid="1573911237983677138">"ဖူးစကဒ်"</string>
@@ -1528,7 +1528,7 @@
     <string name="mediasize_unknown_landscape" msgid="4876995327029361552">"အလျားလိုက် အရွယ်မသိ"</string>
     <string name="write_fail_reason_cancelled" msgid="7091258378121627624">"ဖျက်သိမ်းလိုက်ပြီး"</string>
     <string name="write_fail_reason_cannot_write" msgid="8132505417935337724">"အချက်အလက်များ ရိုက်ကူးစဉ် အမှားပေါ်နေ"</string>
-    <string name="reason_unknown" msgid="6048913880184628119">"အကြောင်းအရာ မသိရှိပါ"</string>
+    <string name="reason_unknown" msgid="6048913880184628119">"မသိပါ"</string>
     <string name="reason_service_unavailable" msgid="7824008732243903268">"စာထုတ်သောဆားဗစ်အားဖွင့်မထားပါ"</string>
     <string name="print_service_installed_title" msgid="2246317169444081628">"<xliff:g id="NAME">%s</xliff:g> ဆားဗစ် ထည့်သွင်းပြီး"</string>
     <string name="print_service_installed_message" msgid="5897362931070459152">"ထိတို့ခြင်းဖြင့် ဖွင့်ပါ"</string>
@@ -1546,7 +1546,7 @@
       <item quantity="one">1 စက္ကန့်အတွင်း ထပ်မံကြိုးစားပါ</item>
     </plurals>
     <string name="restr_pin_try_later" msgid="973144472490532377">"နောက်မှ ပြန်ကြိုးစားပါ"</string>
-    <string name="immersive_cling_title" msgid="8394201622932303336">"မျက်နှာပြင်အပြည့် ကြည့်နေစဉ်"</string>
+    <string name="immersive_cling_title" msgid="8394201622932303336">"မျက်နှာပြင်အပြည့် ကြည့်နေသည်"</string>
     <string name="immersive_cling_description" msgid="3482371193207536040">"ထွက်ရန် အပေါ်မှ အောက်သို့ ဆွဲချပါ။"</string>
     <string name="immersive_cling_positive" msgid="5016839404568297683">"ရပါပြီ"</string>
     <string name="done_label" msgid="2093726099505892398">"ပြီးပါပြီ"</string>
@@ -1569,7 +1569,7 @@
     <string name="package_updated_device_owner" msgid="8856631322440187071">"သင့်စီမံခန့်ခွဲသူမှ အဆင့်မြှင့်ထားပါသည်။"</string>
     <string name="package_deleted_device_owner" msgid="7650577387493101353">"သင့် အက်ဒမင်အား ဖျက်ရန်"</string>
     <string name="battery_saver_description" msgid="1960431123816253034">"ဘက်ထရီသက်တမ်း ကြာရှည်ခံရန် ဘက်ထရီအားထိန်းသည် သင့်ကိရိယာ၏ ဆောင်ရွက်ချက်ကိုလျှော့ပေးပြီး တုန်ခါမှု၊ တည်နေရာဝန်ဆောင်မှုများနှင့် နောက်ခံဒေတာအများစုကို ကန့်သတ်ပေး၏။ စင့်ခ်လုပ်ပေးရလေ့ရှိသည့် အီးမေးလ်၊ စာပို့ခြင်းနှင့် အခြားအပလီကေးရှင်းများကို ၎င်းတို့အား သင် ဖွင့်မှသာ အပ်ဒိတ်လုပ်မည်ဖြစ်၏။ \n\n ကိရိယာအား အားသွင်းနေစဉ် ဘက်ထရီအားထိန်းကို အလိုအလျောက် ပိတ်ထားသည်။"</string>
-    <string name="data_saver_description" msgid="6015391409098303235">"ဒေတာအသုံးလျှော့ချနိုင်ရန် အက်ပ်များကို နောက်ခံတွင် ဒေတာပို့ခြင်းနှင့် လက်ခံခြင်းမရှိစေရန် ဒေတာချွေတာမှုစနစ်က တားဆီးထားပါသည်။ ယခုအက်ပ်ဖြင့် ဒေတာအသုံးပြုနိုင်သော်လည်း အကြိမ်လျှော့၍သုံးရပါမည်။ ဥပမာ၊ သင် မတို့မချင်း ပုံများပေါ်လာမည် မဟုတ်ပါ။"</string>
+    <string name="data_saver_description" msgid="6015391409098303235">"ဒေတာအသုံးလျှော့ချနိုင်ရန်အတွက် အက်ပ်များကို နောက်ခံတွင် ဒေတာပို့ခြင်းနှင့် လက်ခံခြင်းမပြုရန် ဒေတာချွေတာမှုစနစ်က တားဆီးထားပါသည်။ ယခုအက်ပ်ဖြင့် ဒေတာအသုံးပြုနိုင်သော်လည်း အကြိမ်လျှော့၍သုံးရပါမည်။ ဥပမာ၊ သင်က မတို့မချင်း ပုံများပေါ်လာမည် မဟုတ်ပါ။"</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"ဒေတာအသုံးပြုမှု ချွေတာမှုစနစ်ကို ဖွင့်မလား။"</string>
     <string name="data_saver_enable_button" msgid="7147735965247211818">"ဖွင့်ပါ"</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="4367877408072000848">
@@ -1614,7 +1614,7 @@
     <string name="zen_mode_downtime_feature_name" msgid="2626974636779860146">"ကျချိန်"</string>
     <string name="zen_mode_default_weeknights_name" msgid="3081318299464998143">"ကြားရက်ည"</string>
     <string name="zen_mode_default_weekends_name" msgid="2786495801019345244">"စနေ၊ တနင်္ဂနွေ"</string>
-    <string name="zen_mode_default_events_name" msgid="8158334939013085363">"ဖြစ်ရပ်"</string>
+    <string name="zen_mode_default_events_name" msgid="8158334939013085363">"အစီအစဉ်"</string>
     <string name="muted_by" msgid="6147073845094180001">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g> အသံပိတ်သည်"</string>
     <string name="system_error_wipe_data" msgid="6608165524785354962">"သင့်ကိရိယာအတွင်းပိုင်းတွင် ပြဿနာရှိနေပြီး၊ မူလစက်ရုံထုတ်အခြေအနေအဖြစ် ပြန်လည်ရယူနိုင်သည်အထိ အခြေအနေမတည်ငြိမ်နိုင်ပါ။"</string>
     <string name="system_error_manufacturer" msgid="8086872414744210668">"သင့်ကိရိယာအတွင်းပိုင်းတွင် ပြဿနာရှိနေ၏။ အသေးစိတ်သိရန်အတွက် ပစ္စည်းထုတ်လုပ်သူအား ဆက်သွယ်ပါ။"</string>

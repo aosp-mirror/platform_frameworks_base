@@ -42,7 +42,7 @@
     <string name="untitled" msgid="4638956954852782576">"&lt;제목 없음&gt;"</string>
     <string name="emptyPhoneNumber" msgid="7694063042079676517">"(전화번호 없음)"</string>
     <string name="unknownName" msgid="6867811765370350269">"알 수 없음"</string>
-    <string name="defaultVoiceMailAlphaTag" msgid="2660020990097733077">"음성메일"</string>
+    <string name="defaultVoiceMailAlphaTag" msgid="2660020990097733077">"음성사서함"</string>
     <string name="defaultMsisdnAlphaTag" msgid="2850889754919584674">"MSISDN1"</string>
     <string name="mmiError" msgid="5154499457739052907">"연결에 문제가 있거나 MMI 코드가 잘못되었습니다."</string>
     <string name="mmiFdnError" msgid="5224398216385316471">"발신 허용 번호에서만 수행할 수 있는 작업입니다."</string>

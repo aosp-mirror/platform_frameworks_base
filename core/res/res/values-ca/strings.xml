@@ -131,7 +131,7 @@
   </string-array>
   <string-array name="wfcSpnFormats">
     <item msgid="6830082633573257149">"%s"</item>
-    <item msgid="4397097370387921767">"Trucada de Wi-Fi de: %s"</item>
+    <item msgid="4397097370387921767">"Trucades per Wi-Fi %s"</item>
   </string-array>
     <string name="wifi_calling_off_summary" msgid="8720659586041656098">"Desactivat"</string>
     <string name="wfc_mode_wifi_preferred_summary" msgid="1994113411286935263">"Preferència per a la Wi-Fi"</string>
@@ -271,7 +271,7 @@
     <string name="capability_desc_canRequestFilterKeyEvents" msgid="7463135292204152818">"Inclou dades personals com ara números de targetes de crèdit i contrasenyes."</string>
     <string name="capability_title_canControlMagnification" msgid="3593493281059424855">"Controlar l\'ampliació de la pantalla"</string>
     <string name="capability_desc_canControlMagnification" msgid="4791858203568383773">"Controla el nivell i la posició del zoom de la pantalla."</string>
-    <string name="capability_title_canPerformGestures" msgid="7418984730362576862">"Utilitza gestos"</string>
+    <string name="capability_title_canPerformGestures" msgid="7418984730362576862">"Fer gestos"</string>
     <string name="capability_desc_canPerformGestures" msgid="8296373021636981249">"Permet tocar, lliscar, pinçar i fer altres gestos."</string>
     <string name="permlab_statusBar" msgid="7417192629601890791">"desactivar o modificar la barra d\'estat"</string>
     <string name="permdesc_statusBar" msgid="8434669549504290975">"Permet que l\'aplicació desactivi la barra d\'estat o afegeixi i elimini icones del sistema."</string>
@@ -543,7 +543,7 @@
     <string name="policydesc_encryptedStorage" msgid="2637732115325316992">"Requereix que les dades de l\'aplicació emmagatzemades estiguin encriptades."</string>
     <string name="policylab_disableCamera" msgid="6395301023152297826">"Desactivar les càmeres"</string>
     <string name="policydesc_disableCamera" msgid="2306349042834754597">"Impedeix l\'ús de les càmeres del dispositiu."</string>
-    <string name="policylab_disableKeyguardFeatures" msgid="8552277871075367771">"Desactiva funcions de bloqueig"</string>
+    <string name="policylab_disableKeyguardFeatures" msgid="8552277871075367771">"Desactivar funcions de bloqueig"</string>
     <string name="policydesc_disableKeyguardFeatures" msgid="2044755691354158439">"Impedeix l\'ús d\'algunes funcions del bloqueig de pantalla."</string>
   <string-array name="phoneTypes">
     <item msgid="8901098336658710359">"Casa"</item>
@@ -1151,7 +1151,7 @@
     <string name="usb_accessory_notification_title" msgid="7848236974087653666">"Connectat a un accessori USB"</string>
     <string name="usb_notification_message" msgid="3370903770828407960">"Toca per veure més opcions."</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"Depuració USB activada"</string>
-    <string name="adb_active_notification_message" msgid="4948470599328424059">"Toca per desactivar la depuració USB."</string>
+    <string name="adb_active_notification_message" msgid="4948470599328424059">"Toca per desactivar la depuració USB"</string>
     <string name="taking_remote_bugreport_notification_title" msgid="6742483073875060934">"S\'està creant l\'informe d\'errors…"</string>
     <string name="share_remote_bugreport_notification_title" msgid="4987095013583691873">"Vols compartir l\'informe d\'errors?"</string>
     <string name="sharing_remote_bugreport_notification_title" msgid="7572089031496651372">"S\'està compartint l\'informe d\'errors…"</string>

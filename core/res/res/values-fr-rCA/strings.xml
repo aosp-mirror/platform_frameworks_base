@@ -816,7 +816,7 @@
     <string name="menu_enter_shortcut_label" msgid="2743362785111309668">"entrée"</string>
     <string name="menu_delete_shortcut_label" msgid="3658178007202748164">"suppr"</string>
     <string name="search_go" msgid="8298016669822141719">"Rechercher"</string>
-    <string name="search_hint" msgid="1733947260773056054">"Recherche en cours..."</string>
+    <string name="search_hint" msgid="1733947260773056054">"Rechercher…"</string>
     <string name="searchview_description_search" msgid="6749826639098512120">"Rechercher"</string>
     <string name="searchview_description_query" msgid="5911778593125355124">"Requête de recherche"</string>
     <string name="searchview_description_clear" msgid="1330281990951833033">"Effacer la requête"</string>

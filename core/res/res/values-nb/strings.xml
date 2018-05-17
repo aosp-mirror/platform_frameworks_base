@@ -523,7 +523,7 @@
     <string name="policydesc_watchLogin_secondaryUser" product="tablet" msgid="4280246270601044505">"Overvåker antallet feil passord som er skrevet inn når skjermen låses opp, og låser nettbrettet eller sletter denne brukerens data når for mange feil passord er skrevet inn."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="TV" msgid="3484832653564483250">"Overvåker antallet feil passord som er skrevet inn når skjermen låses opp, og låser TV-en eller sletter denne brukerens data når for mange feil passord er skrevet inn."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="default" msgid="2185480427217127147">"Overvåker antallet feil passord som er skrevet inn når skjermen låses opp, og låser telefonen eller sletter denne brukerens data når for mange feil passord er skrevet inn."</string>
-    <string name="policylab_resetPassword" msgid="4934707632423915395">"Endring av skjermlåsen"</string>
+    <string name="policylab_resetPassword" msgid="4934707632423915395">"Endre skjermlåsen"</string>
     <string name="policydesc_resetPassword" msgid="1278323891710619128">"Endre skjermlåsen."</string>
     <string name="policylab_forceLock" msgid="2274085384704248431">"Lås skjermen"</string>
     <string name="policydesc_forceLock" msgid="1141797588403827138">"Kontrollér hvordan og når skjermen låses."</string>
@@ -1134,7 +1134,7 @@
     <string name="carrier_app_dialog_not_now" msgid="6361378684292268027">"IKKE NÅ"</string>
     <string name="carrier_app_notification_title" msgid="8921767385872554621">"Et nytt SIM-kort er satt inn"</string>
     <string name="carrier_app_notification_text" msgid="1132487343346050225">"Trykk for å konfigurere"</string>
-    <string name="time_picker_dialog_title" msgid="8349362623068819295">"Oppgi tidspunkt"</string>
+    <string name="time_picker_dialog_title" msgid="8349362623068819295">"Angi tidspunkt"</string>
     <string name="date_picker_dialog_title" msgid="5879450659453782278">"Angi dato"</string>
     <string name="date_time_set" msgid="5777075614321087758">"Lagre"</string>
     <string name="date_time_done" msgid="2507683751759308828">"Ferdig"</string>

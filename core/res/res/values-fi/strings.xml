@@ -269,7 +269,7 @@
     <string name="capability_desc_canRequestEnhancedWebAccessibility" msgid="7881063961507511765">"Sovellus voi asentaa ohjelmia tehdäkseen sisällöstään esteettömämmän."</string>
     <string name="capability_title_canRequestFilterKeyEvents" msgid="2103440391902412174">"Tarkkailla kirjoittamaasi tekstiä"</string>
     <string name="capability_desc_canRequestFilterKeyEvents" msgid="7463135292204152818">"Sisältää henkilökohtaisia tietoja, kuten luottokortin numeroita ja salasanoja."</string>
-    <string name="capability_title_canControlMagnification" msgid="3593493281059424855">"Näytön suurentamisen hallinnointi"</string>
+    <string name="capability_title_canControlMagnification" msgid="3593493281059424855">"Kontrolloida näytön suurentamista"</string>
     <string name="capability_desc_canControlMagnification" msgid="4791858203568383773">"Hallinnoi näytön zoomaustasoa ja asettelua."</string>
     <string name="capability_title_canPerformGestures" msgid="7418984730362576862">"Eleiden käyttäminen"</string>
     <string name="capability_desc_canPerformGestures" msgid="8296373021636981249">"Lupa napauttaa, pyyhkäistä, nipistää ja käyttää muita eleitä."</string>
@@ -543,7 +543,7 @@
     <string name="policydesc_encryptedStorage" msgid="2637732115325316992">"Pakota tallennettujen sovellustietojen salaus."</string>
     <string name="policylab_disableCamera" msgid="6395301023152297826">"Poista kamerat käytöstä"</string>
     <string name="policydesc_disableCamera" msgid="2306349042834754597">"Estä laitteen kaikkien kameroiden käyttö."</string>
-    <string name="policylab_disableKeyguardFeatures" msgid="8552277871075367771">"Estä lukitun näytön toimintoja"</string>
+    <string name="policylab_disableKeyguardFeatures" msgid="8552277871075367771">"Estää lukitun näytön toimintoja"</string>
     <string name="policydesc_disableKeyguardFeatures" msgid="2044755691354158439">"Estä joidenkin lukitun näytön toimintojen käyttö."</string>
   <string-array name="phoneTypes">
     <item msgid="8901098336658710359">"Koti"</item>

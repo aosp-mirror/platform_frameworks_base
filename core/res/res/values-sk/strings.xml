@@ -275,7 +275,7 @@
     <string name="capability_desc_canRequestEnhancedWebAccessibility" msgid="7881063961507511765">"Môže nainštalovať skripty na sprístupnenie obsahu aplikácie."</string>
     <string name="capability_title_canRequestFilterKeyEvents" msgid="2103440391902412174">"Sledovať zadávaný text"</string>
     <string name="capability_desc_canRequestFilterKeyEvents" msgid="7463135292204152818">"Sledovanie zahŕňa osobné údaje ako sú čísla kreditných kariet a heslá."</string>
-    <string name="capability_title_canControlMagnification" msgid="3593493281059424855">"Ovládanie priblíženia obrazovky"</string>
+    <string name="capability_title_canControlMagnification" msgid="3593493281059424855">"Ovládať priblíženie obrazovky"</string>
     <string name="capability_desc_canControlMagnification" msgid="4791858203568383773">"Ovládajte umiestnenie a úroveň priblíženia obrazovky."</string>
     <string name="capability_title_canPerformGestures" msgid="7418984730362576862">"Gestá"</string>
     <string name="capability_desc_canPerformGestures" msgid="8296373021636981249">"Je možné použiť klepnutie, prejdenie, stiahnutie prstami a ďalšie gestá."</string>
@@ -549,7 +549,7 @@
     <string name="policydesc_encryptedStorage" msgid="2637732115325316992">"Vyžadovať šifrovanie uložených údajov aplikácií."</string>
     <string name="policylab_disableCamera" msgid="6395301023152297826">"Zakázať fotoaparáty"</string>
     <string name="policydesc_disableCamera" msgid="2306349042834754597">"Zakázať používanie všetkých fotoaparátov zariadenia."</string>
-    <string name="policylab_disableKeyguardFeatures" msgid="8552277871075367771">"Deaktivácia niektorých funkcií zámky obrazovky"</string>
+    <string name="policylab_disableKeyguardFeatures" msgid="8552277871075367771">"Deaktivovať niektoré funkcie zámky obrazovky"</string>
     <string name="policydesc_disableKeyguardFeatures" msgid="2044755691354158439">"Zabráňte používaniu niektorých funkcií zámky obrazovky."</string>
   <string-array name="phoneTypes">
     <item msgid="8901098336658710359">"Domov"</item>
@@ -1601,7 +1601,7 @@
     </plurals>
     <string name="restr_pin_try_later" msgid="973144472490532377">"Skúste to znova neskôr"</string>
     <string name="immersive_cling_title" msgid="8394201622932303336">"Zobrazenie na celú obrazovku"</string>
-    <string name="immersive_cling_description" msgid="3482371193207536040">"Ukončíte prejdením prstom zhora nadol."</string>
+    <string name="immersive_cling_description" msgid="3482371193207536040">"Ukončíte potiahnutím zhora nadol."</string>
     <string name="immersive_cling_positive" msgid="5016839404568297683">"Dobre"</string>
     <string name="done_label" msgid="2093726099505892398">"Hotovo"</string>
     <string name="hour_picker_description" msgid="6698199186859736512">"Kruhový posúvač hodín"</string>

@@ -56,10 +56,10 @@
     <string name="badPin" msgid="9015277645546710014">"Den gamle pinkode, som du har indtastet, er ikke korrekt."</string>
     <string name="badPuk" msgid="5487257647081132201">"Den indtastede PUK-kode er forkert."</string>
     <string name="mismatchPin" msgid="609379054496863419">"De indtastede pinkoder er ikke ens"</string>
-    <string name="invalidPin" msgid="3850018445187475377">"Indtast en pinkode på mellem 4 og 8 tal."</string>
+    <string name="invalidPin" msgid="3850018445187475377">"Angiv en pinkode på mellem 4 og 8 tal."</string>
     <string name="invalidPuk" msgid="8761456210898036513">"Angiv en PUK-kode på 8 eller flere cifre."</string>
-    <string name="needPuk" msgid="919668385956251611">"Dit SIM-kort er låst med PUK-koden. Indtast PUK-koden for at låse den op."</string>
-    <string name="needPuk2" msgid="4526033371987193070">"Indtast PUK2-koden for at låse op for SIM-kortet."</string>
+    <string name="needPuk" msgid="919668385956251611">"Dit SIM-kort er låst med PUK-koden. Angiv PUK-koden for at låse den op."</string>
+    <string name="needPuk2" msgid="4526033371987193070">"Angiv PUK2-koden for at låse op for SIM-kortet."</string>
     <string name="enablePin" msgid="209412020907207950">"Mislykkedes. Aktivér SIM-/RUIM-lås."</string>
     <plurals name="pinpuk_attempts" formatted="false" msgid="1251012001539225582">
       <item quantity="one">Du har <xliff:g id="NUMBER_1">%d</xliff:g> forsøg tilbage, før SIM-kortet bliver låst.</item>
@@ -217,7 +217,7 @@
     <string name="global_action_emergency" msgid="7112311161137421166">"Nødopkald"</string>
     <string name="global_action_bug_report" msgid="7934010578922304799">"Fejlrapport"</string>
     <string name="bugreport_title" msgid="2667494803742548533">"Lav fejlrapport"</string>
-    <string name="bugreport_message" msgid="398447048750350456">"Der indsamles oplysninger om din enheds aktuelle status, der efterfølgende sendes i en e-mail. Der går lidt tid, fra fejlrapporten påbegyndes, til den er klar til at blive sendt. Tak for tålmodigheden."</string>
+    <string name="bugreport_message" msgid="398447048750350456">"Der indsamles oplysninger om din enheds aktuelle status, der efterfølgende sendes i en mail. Der går lidt tid, fra fejlrapporten påbegyndes, til den er klar til at blive sendt. Tak for tålmodigheden."</string>
     <string name="bugreport_option_interactive_title" msgid="8635056131768862479">"Interaktiv rapport"</string>
     <string name="bugreport_option_interactive_summary" msgid="229299488536107968">"Brug dette workflow under de fleste omstændigheder. Det giver dig mulighed for at se status på rapporten, angive flere oplysninger om problemet og tage screenshots. Nogle mindre brugte sektioner, der tager lang tid at rapportere, udelades muligvis."</string>
     <string name="bugreport_option_full_title" msgid="6354382025840076439">"Fuld rapport"</string>
@@ -261,17 +261,17 @@
     <string name="permgroupdesc_phone" msgid="6234224354060641055">"foretage og administrere telefonopkald"</string>
     <string name="permgrouplab_sensors" msgid="416037179223226722">"Kropssensorer"</string>
     <string name="permgroupdesc_sensors" msgid="7147968539346634043">"få adgang til sensordata om dine livstegn"</string>
-    <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"hente indholdet i vinduet"</string>
-    <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"undersøge indholdet i et vindue, du interagerer med."</string>
-    <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"aktivere Udforsk ved berøring"</string>
+    <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"Hente indholdet i vinduet"</string>
+    <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"Undersøge indholdet i et vindue, du interagerer med."</string>
+    <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"Aktivere Udforsk ved berøring"</string>
     <string name="capability_desc_canRequestTouchExploration" msgid="7543249041581408313">"De elementer, der trykkes på, læses højt, og skærmen kan udforskes ved hjælp af bevægelser."</string>
     <string name="capability_title_canRequestEnhancedWebAccessibility" msgid="1739881766522594073">"aktivere forbedrede webhjælpefunktioner"</string>
     <string name="capability_desc_canRequestEnhancedWebAccessibility" msgid="7881063961507511765">"Der installeres muligvis scripts for at gøre appindhold mere tilgængeligt."</string>
-    <string name="capability_title_canRequestFilterKeyEvents" msgid="2103440391902412174">"observere tekst, du skriver"</string>
+    <string name="capability_title_canRequestFilterKeyEvents" msgid="2103440391902412174">"Observere tekst, du skriver"</string>
     <string name="capability_desc_canRequestFilterKeyEvents" msgid="7463135292204152818">"Dette omfatter personlige data såsom kreditkortnumre og adgangskoder."</string>
-    <string name="capability_title_canControlMagnification" msgid="3593493281059424855">"administrere skærmforstørrelsen"</string>
+    <string name="capability_title_canControlMagnification" msgid="3593493281059424855">"Administrere skærmforstørrelsen"</string>
     <string name="capability_desc_canControlMagnification" msgid="4791858203568383773">"Tjek skærmens zoomniveau og position."</string>
-    <string name="capability_title_canPerformGestures" msgid="7418984730362576862">"Udfør bevægelser"</string>
+    <string name="capability_title_canPerformGestures" msgid="7418984730362576862">"Udføre bevægelser"</string>
     <string name="capability_desc_canPerformGestures" msgid="8296373021636981249">"Kan trykke, stryge, knibe sammen og udføre andre bevægelser."</string>
     <string name="permlab_statusBar" msgid="7417192629601890791">"deaktivere eller redigere statuslinje"</string>
     <string name="permdesc_statusBar" msgid="8434669549504290975">"Tillader, at appen kan deaktivere statusbjælken eller tilføje og fjerne systemikoner."</string>
@@ -302,7 +302,7 @@
     <string name="permlab_receiveWapPush" msgid="5991398711936590410">"modtage tekstbeskeder (WAP)"</string>
     <string name="permdesc_receiveWapPush" msgid="748232190220583385">"Tillader, at appen kan modtage og behandle WAP-beskeder. Denne tilladelse omfatter muligheden for at overvåge eller slette de beskeder, der sendes til dig, uden at vise dem til dig."</string>
     <string name="permlab_getTasks" msgid="6466095396623933906">"hente kørende apps"</string>
-    <string name="permdesc_getTasks" msgid="7454215995847658102">"Tillader, at appen kan hente oplysninger om nuværende og seneste opgaver. Med denne tilladelse kan appen finde oplysninger om, hvilke applikationer der bruges på enheden."</string>
+    <string name="permdesc_getTasks" msgid="7454215995847658102">"Tillader, at appen kan hente oplysninger om nuværende og seneste opgaver. Med denne tilladelse kan appen finde oplysninger om, hvilke apps der bruges på enheden."</string>
     <string name="permlab_manageProfileAndDeviceOwners" msgid="7918181259098220004">"administrer profil- og enhedsejere"</string>
     <string name="permdesc_manageProfileAndDeviceOwners" msgid="106894851498657169">"Tillader, at apps konfigurerer profilejerne og enhedens ejer."</string>
     <string name="permlab_reorderTasks" msgid="2018575526934422779">"omorganisere kørende apps"</string>
@@ -312,7 +312,7 @@
     <string name="permlab_killBackgroundProcesses" msgid="3914026687420177202">"lukke andre apps"</string>
     <string name="permdesc_killBackgroundProcesses" msgid="4593353235959733119">"Tillader, at appen kan afslutte baggrundsprocesser for andre apps. Dette kan forårsage, at andre apps holder op med at virke."</string>
     <string name="permlab_systemAlertWindow" msgid="3543347980839518613">"ignorere andre apps"</string>
-    <string name="permdesc_systemAlertWindow" msgid="8584678381972820118">"Tillader, at appen trækkes oven på andre applikationer eller dele af brugergrænsefladen. De kan forstyrre din brug af grænsefladen i en applikation eller ændre det, du tror, du ser i andre applikationer."</string>
+    <string name="permdesc_systemAlertWindow" msgid="8584678381972820118">"Tillader, at appen trækkes oven på andre apps eller dele af brugergrænsefladen. De kan forstyrre din brug af grænsefladen i en applikation eller ændre det, du tror, du ser i andre apps."</string>
     <string name="permlab_persistentActivity" msgid="8841113627955563938">"sørge for, at appen altid kører"</string>
     <string name="permdesc_persistentActivity" product="tablet" msgid="8525189272329086137">"Tillader, at appen gør dele af sig selv vedholdende i hukommelsen. Dette kan begrænse den tilgængelige hukommelse for andre apps, hvilket gør tabletten langsommere."</string>
     <string name="permdesc_persistentActivity" product="tv" msgid="5086862529499103587">"Giver appen lov til at gøre dele af sig selv vedholdende i hukommelsen. Dette kan begrænse den tilgængelige hukommelse for andre apps og derved gøre fjernsynet langsommere."</string>
@@ -330,13 +330,13 @@
     <string name="permdesc_broadcastSticky" product="tv" msgid="6839285697565389467">"Giver appen lov til at sende klæbende udsendelser, som ikke forsvinder, når udsendelsen er slut. Overdreven brug kan gøre fjernsynet langsomt eller ustabilt ved at få det til at bruge for meget hukommelse."</string>
     <string name="permdesc_broadcastSticky" product="default" msgid="2825803764232445091">"Tillader, at appen kan sende klæbende udsendelser, der forbliver tilbage, når udsendelsen er slut. Overdreven brug kan gøre din telefon langsom eller ustabil ved at tvinge den til at bruge for meget hukommelse."</string>
     <string name="permlab_readContacts" msgid="8348481131899886131">"læse dine kontaktpersoner"</string>
-    <string name="permdesc_readContacts" product="tablet" msgid="5294866856941149639">"Tillader, at appen kan læse data om de kontaktpersoner, der er gemt på din tablet, f.eks. hvor ofte du har ringet til, sendt e-mail til eller på anden måde kommunikeret med bestemte personer. Med denne tilladelse kan apps gemme dine kontaktdata, og skadelige apps kan dele kontaktdata uden din viden."</string>
+    <string name="permdesc_readContacts" product="tablet" msgid="5294866856941149639">"Tillader, at appen kan læse data om de kontaktpersoner, der er gemt på din tablet, f.eks. hvor ofte du har ringet til, sendt mail til eller på anden måde kommunikeret med bestemte personer. Med denne tilladelse kan apps gemme dine kontaktdata, og skadelige apps kan dele kontaktdata uden din viden."</string>
     <string name="permdesc_readContacts" product="tv" msgid="1839238344654834087">"Giver appen lov til at læse data om dine kontaktpersoner, der er gemt på dit tv, herunder hvor ofte du har ringet, mailet eller på andre måder kommunikeret med bestemte personer. Denne tilladelse gør det muligt for apps at gemme dine kontaktoplysninger, og ondsindede apps kan dele kontaktoplysninger uden din viden."</string>
-    <string name="permdesc_readContacts" product="default" msgid="8440654152457300662">"Tillader, at appen kan læse data om de kontaktpersoner, der er gemt på din telefon, f.eks. hvor ofte du har ringet til, sendt e-mail til eller på anden måde kommunikeret med bestemte personer. Med denne tilladelse kan apps gemme dine kontaktdata, og skadelige apps kan dele kontaktdata uden din viden."</string>
+    <string name="permdesc_readContacts" product="default" msgid="8440654152457300662">"Tillader, at appen kan læse data om de kontaktpersoner, der er gemt på din telefon, f.eks. hvor ofte du har ringet til, sendt mail til eller på anden måde kommunikeret med bestemte personer. Med denne tilladelse kan apps gemme dine kontaktdata, og skadelige apps kan dele kontaktdata uden din viden."</string>
     <string name="permlab_writeContacts" msgid="5107492086416793544">"ændre dine kontaktpersoner"</string>
-    <string name="permdesc_writeContacts" product="tablet" msgid="897243932521953602">"Tillader, at appen kan ændre data om de kontaktpersoner, der er gemt på din tablet, f.eks. hvor ofte du har ringet til dem, sendt dem en e-mail eller på anden måde kommunikeret med bestemte kontaktpersoner. Med denne tilladelse kan apps slette kontaktoplysninger."</string>
+    <string name="permdesc_writeContacts" product="tablet" msgid="897243932521953602">"Tillader, at appen kan ændre data om de kontaktpersoner, der er gemt på din tablet, f.eks. hvor ofte du har ringet til dem, sendt dem en mail eller på anden måde kommunikeret med bestemte kontaktpersoner. Med denne tilladelse kan apps slette kontaktoplysninger."</string>
     <string name="permdesc_writeContacts" product="tv" msgid="5438230957000018959">"Giver appen lov til at ændre data om dine kontaktpersoner, der er gemt på dit tv, herunder hvor ofte du har ringet, mailet eller på anden måde kommunikeret med bestemte kontaktpersoner. Denne tilladelse gør det muligt for apps at slette kontaktoplysninger."</string>
-    <string name="permdesc_writeContacts" product="default" msgid="589869224625163558">"Tillader, at appen kan ændre data om de kontaktpersoner, der er gemt på din telefon, f.eks. hvor ofte du har ringet til dem, sendt en e-mail til dem eller på anden måde kommunikeret med bestemte kontaktpersoner. Med denne tilladelse kan apps slette kontaktoplysninger."</string>
+    <string name="permdesc_writeContacts" product="default" msgid="589869224625163558">"Tillader, at appen kan ændre data om de kontaktpersoner, der er gemt på din telefon, f.eks. hvor ofte du har ringet til dem, sendt en mail til dem eller på anden måde kommunikeret med bestemte kontaktpersoner. Med denne tilladelse kan apps slette kontaktoplysninger."</string>
     <string name="permlab_readCallLog" msgid="3478133184624102739">"læse opkaldsliste"</string>
     <string name="permdesc_readCallLog" product="tablet" msgid="3700645184870760285">"Tillader, at appen kan læse din tablets opkaldsliste, f.eks. data om indgående og udgående opkald. Med denne tilladelse kan apps gemme dine opkaldslistedata, og skadelige apps kan dele opkaldslistedata uden din viden."</string>
     <string name="permdesc_readCallLog" product="tv" msgid="5611770887047387926">"Giver appen lov til at læse tv\'ets opkaldsliste, herunder data om ind- og udgående opkald. Denne tilladelse gør det muligt for apps at gemme data fra din opkaldslog, og ondsindede apps kan dele data fra din opkaldslog uden din viden."</string>
@@ -351,7 +351,7 @@
     <string name="permdesc_readCalendar" product="tablet" msgid="4216462049057658723">"Tillader, at appen kan læse alle de kalenderbegivenheder, der er gemt på din tablet, f.eks. venners eller kollegers. Med denne tilladelse kan appen dele eller gemme dine kalenderdata, uanset fortrolighed eller følsomhed."</string>
     <string name="permdesc_readCalendar" product="tv" msgid="3191352452242394196">"Giver appen lov til at læse alle kalenderbegivenheder, der er gemt på dit tv, herunder begivenheder tilhørende venner og kolleger. Dette kan give appen lov til at dele eller gemme dine kalenderdata, uanset om de er fortrolige eller følsomme."</string>
     <string name="permdesc_readCalendar" product="default" msgid="7434548682470851583">"Tillader, at appen kan læse alle de kalenderbegivenheder, der er gemt på din telefon, f.eks. venners eller kollegers. Med denne tilladelse kan appen dele eller gemme dine kalenderdata, uanset fortrolighed eller følsomhed."</string>
-    <string name="permlab_writeCalendar" msgid="8438874755193825647">"tilføje eller ændre kalenderbegivenheder og sende e-mail til gæster uden ejerens viden"</string>
+    <string name="permlab_writeCalendar" msgid="8438874755193825647">"tilføje eller ændre kalenderbegivenheder og sende mail til gæster uden ejerens viden"</string>
     <string name="permdesc_writeCalendar" product="tablet" msgid="6679035520113668528">"Tillader, at appen kan tilføje, fjerne, ændre begivenheder, som du kan redigere på din tablet, f.eks. venners eller kollegers. Med denne tilladelelse kan appen sende meddelelser, der synes at komme fra ejere af kalendere, eller ændre begivenheder uden ejernes viden."</string>
     <string name="permdesc_writeCalendar" product="tv" msgid="1273290605500902507">"Giver appen lov til at tilføje, fjerne eller ændre begivenheder, som du kan redigere på dit tv, herunder venners og kollegers begivenheder. Dette kan give appen mulighed for at sende meddelelser, der ser ud, som om de kommer fra ejere af kalendere, eller for at ændre begivenheder uden ejernes viden."</string>
     <string name="permdesc_writeCalendar" product="default" msgid="2324469496327249376">"Tillader, at appen kan tilføje, fjerne og ændre begivenheder, som du kan redigere på din telefon, f.eks. venners eller kollegers. Med denne tilladelse kan appen sende meddelelser, der synes at komme fra ejere af kalendere, eller ændre begivenheder uden ejernes viden."</string>
@@ -396,13 +396,13 @@
     <string name="permdesc_setTimeZone" product="tv" msgid="888864653946175955">"Giver appen lov til at ændre tidszonen på dit tv."</string>
     <string name="permdesc_setTimeZone" product="default" msgid="4499943488436633398">"Tillader, at appen kan ændre tidszonen på din telefon."</string>
     <string name="permlab_getAccounts" msgid="1086795467760122114">"finde konti på enheden"</string>
-    <string name="permdesc_getAccounts" product="tablet" msgid="2741496534769660027">"Tillader, at appen kan hente listen over konti, der er kendt af tabletten. Dette kan omfatte alle konti, der er oprettet af de applikationer, som du har installeret."</string>
+    <string name="permdesc_getAccounts" product="tablet" msgid="2741496534769660027">"Tillader, at appen kan hente listen over konti, der er kendt af tabletten. Dette kan omfatte alle konti, der er oprettet af de apps, som du har installeret."</string>
     <string name="permdesc_getAccounts" product="tv" msgid="4190633395633907543">"Giver appen lov til at hente listen over konti, der er kendt af tv\'et. Dette kan omfatte konti, der er oprettet af programmer, som du har installeret."</string>
-    <string name="permdesc_getAccounts" product="default" msgid="3448316822451807382">"Tillader, at appen kan hente listen over konti, der er kendt af telefonen. Dette kan omfatte alle konti, der er oprettet af de applikationer, som du har installeret."</string>
+    <string name="permdesc_getAccounts" product="default" msgid="3448316822451807382">"Tillader, at appen kan hente listen over konti, der er kendt af telefonen. Dette kan omfatte alle konti, der er oprettet af de apps, som du har installeret."</string>
     <string name="permlab_accessNetworkState" msgid="4951027964348974773">"se netværksforbindelser"</string>
     <string name="permdesc_accessNetworkState" msgid="8318964424675960975">"Tillader, at appen kan læse oplysninger om netværksforbindelser, f.eks. eksisterende og forbundne netværk."</string>
     <string name="permlab_createNetworkSockets" msgid="7934516631384168107">"få fuld netværksadgang"</string>
-    <string name="permdesc_createNetworkSockets" msgid="3403062187779724185">"Tillader, at appen kan oprette netværkssockets og bruge tilpassede netværksprotokoller. Browseren og andre applikationer indeholder midler til at sende data til internettet, så med denne tilladelse er der ingen forpligtelse til at sende data til internettet."</string>
+    <string name="permdesc_createNetworkSockets" msgid="3403062187779724185">"Tillader, at appen kan oprette netværkssockets og bruge tilpassede netværksprotokoller. Browseren og andre apps indeholder midler til at sende data til internettet, så med denne tilladelse er der ingen forpligtelse til at sende data til internettet."</string>
     <string name="permlab_changeNetworkState" msgid="958884291454327309">"skifte netværksforbindelse"</string>
     <string name="permdesc_changeNetworkState" msgid="6789123912476416214">"Tillader, at appen kan ændre netværksforbindelsens tilstand."</string>
     <string name="permlab_changeTetherState" msgid="5952584964373017960">"skifte forbindelse til netdeling"</string>
@@ -503,7 +503,7 @@
     <string name="permlab_setInputCalibration" msgid="4902620118878467615">"skift kalibrering for inputenheden"</string>
     <string name="permdesc_setInputCalibration" msgid="4527511047549456929">"Tillader, at appen ændrer kalibreringsparametrene for berøringsskærmen. Dette bør aldrig være nødvendigt for almindelige apps."</string>
     <string name="permlab_accessDrmCertificates" msgid="7436886640723203615">"få adgang til DRM-certifikater"</string>
-    <string name="permdesc_accessDrmCertificates" msgid="8073288354426159089">"Tillader, at en applikation leverer og anvender DRM-certfikater. Dette bør aldrig være nødvendigt for almindelige apps."</string>
+    <string name="permdesc_accessDrmCertificates" msgid="8073288354426159089">"Tillader, at en applikation provisionerer og anvender DRM-certifikater. Dette bør aldrig være nødvendigt for almindelige apps."</string>
     <string name="permlab_handoverStatus" msgid="7820353257219300883">"modtag status for Android Beam-overførsler"</string>
     <string name="permdesc_handoverStatus" msgid="4788144087245714948">"Tillader, at applikationen modtager oplysninger om aktuelle Android Beam-overførsler"</string>
     <string name="permlab_removeDrmCertificates" msgid="7044888287209892751">"fjerne DRM-certifikater"</string>
@@ -659,13 +659,13 @@
     <string name="sipAddressTypeWork" msgid="6920725730797099047">"Arbejde"</string>
     <string name="sipAddressTypeOther" msgid="4408436162950119849">"Andet"</string>
     <string name="quick_contacts_not_available" msgid="746098007828579688">"Der blev ikke fundet nogen applikation, som kan vise denne kontaktperson."</string>
-    <string name="keyguard_password_enter_pin_code" msgid="3037685796058495017">"Indtast pinkode"</string>
-    <string name="keyguard_password_enter_puk_code" msgid="4800725266925845333">"Indtast PUK- og pinkode"</string>
+    <string name="keyguard_password_enter_pin_code" msgid="3037685796058495017">"Angiv pinkode"</string>
+    <string name="keyguard_password_enter_puk_code" msgid="4800725266925845333">"Angiv PUK- og pinkode"</string>
     <string name="keyguard_password_enter_puk_prompt" msgid="1341112146710087048">"PUK-kode"</string>
     <string name="keyguard_password_enter_pin_prompt" msgid="8027680321614196258">"Ny pinkode"</string>
     <string name="keyguard_password_entry_touch_hint" msgid="2644215452200037944"><font size="17">"Tryk for at skrive adgangskode"</font></string>
-    <string name="keyguard_password_enter_password_code" msgid="1054721668279049780">"Indtast adgangskoden for at låse op"</string>
-    <string name="keyguard_password_enter_pin_password_code" msgid="6391755146112503443">"Indtast pinkode for at låse op"</string>
+    <string name="keyguard_password_enter_password_code" msgid="1054721668279049780">"Angiv adgangskoden for at låse op"</string>
+    <string name="keyguard_password_enter_pin_password_code" msgid="6391755146112503443">"Angiv pinkode for at låse op"</string>
     <string name="keyguard_password_wrong_pin_code" msgid="2422225591006134936">"Forkert pinkode."</string>
     <string name="keyguard_label_text" msgid="861796461028298424">"Tryk på Menu og dernæst på 0 for at låse op."</string>
     <string name="emergency_call_dialog_number_for_display" msgid="696192103195090970">"Nødnummer"</string>
@@ -719,7 +719,7 @@
     <string name="lockscreen_glogin_forgot_pattern" msgid="2588521501166032747">"Oplåsning af konto"</string>
     <string name="lockscreen_glogin_too_many_attempts" msgid="2751368605287288808">"For mange forsøg på at tegne mønstret korrekt"</string>
     <string name="lockscreen_glogin_instructions" msgid="3931816256100707784">"Lås op ved at logge ind med din Google-konto."</string>
-    <string name="lockscreen_glogin_username_hint" msgid="8846881424106484447">"Brugernavn (e-mail)"</string>
+    <string name="lockscreen_glogin_username_hint" msgid="8846881424106484447">"Brugernavn (mail)"</string>
     <string name="lockscreen_glogin_password_hint" msgid="5958028383954738528">"Adgangskode"</string>
     <string name="lockscreen_glogin_submit_button" msgid="7130893694795786300">"Log ind"</string>
     <string name="lockscreen_glogin_invalid_input" msgid="1364051473347485908">"Ugyldigt brugernavn eller ugyldig adgangskode."</string>
@@ -793,11 +793,11 @@
     <string name="autofill_area" msgid="3547409050889952423">"Område"</string>
     <string name="autofill_emirate" msgid="2893880978835698818">"Emirat"</string>
     <string name="permlab_readHistoryBookmarks" msgid="3775265775405106983">"læse dine webbogmærker og -historik"</string>
-    <string name="permdesc_readHistoryBookmarks" msgid="8462378226600439658">"Tillader, at appen kan læse historikken om alle webadresser, som browseren har besøgt, og alle browserens bogmærker. Bemærk! Denne tilladelse håndhæves muligvis ikke af tredjepartsbrowsere eller andre applikationer med websøgningsfunktioner."</string>
+    <string name="permdesc_readHistoryBookmarks" msgid="8462378226600439658">"Tillader, at appen kan læse historikken om alle webadresser, som browseren har besøgt, og alle browserens bogmærker. Bemærk! Denne tilladelse håndhæves muligvis ikke af tredjepartsbrowsere eller andre apps med websøgningsfunktioner."</string>
     <string name="permlab_writeHistoryBookmarks" msgid="3714785165273314490">"skrive webbogmærker og -historik"</string>
-    <string name="permdesc_writeHistoryBookmarks" product="tablet" msgid="6825527469145760922">"Tillader, at appen kan ændre browserens historik eller de bogmærker, der er gemt på din tablet. Dette kan give appen tilladelse til at slette eller ændre browserdata. Bemærk! Denne tilladelse håndhæves muligvis ikke af tredjepartsbrowsere eller andre applikationer med websøgningsfunktioner."</string>
+    <string name="permdesc_writeHistoryBookmarks" product="tablet" msgid="6825527469145760922">"Tillader, at appen kan ændre browserens historik eller de bogmærker, der er gemt på din tablet. Dette kan give appen tilladelse til at slette eller ændre browserdata. Bemærk! Denne tilladelse håndhæves muligvis ikke af tredjepartsbrowsere eller andre apps med websøgningsfunktioner."</string>
     <string name="permdesc_writeHistoryBookmarks" product="tv" msgid="7007393823197766548">"Giver appen lov til at ændre browserens historik eller bogmærker, der er gemt på dit tv. Dette kan give appen tilladelse til at slette eller ændre browserdata. Bemærk! Denne tilladelse håndhæves muligvis ikke af tredjepartsbrowsere eller andre programmer med mulighed for webbrowsing."</string>
-    <string name="permdesc_writeHistoryBookmarks" product="default" msgid="8497389531014185509">"Tillader, at appen kan ændre browserens historik eller de bogmærker, der er gemt på din telefon. Dette kan give appen tilladelse til at slette eller ændre browserdata. Bemærk! Denne tilladelse håndhæves muligvis ikke af tredjepartsbrowsere eller andre applikationer med websøgningsfunktioner."</string>
+    <string name="permdesc_writeHistoryBookmarks" product="default" msgid="8497389531014185509">"Tillader, at appen kan ændre browserens historik eller de bogmærker, der er gemt på din telefon. Dette kan give appen tilladelse til at slette eller ændre browserdata. Bemærk! Denne tilladelse håndhæves muligvis ikke af tredjepartsbrowsere eller andre apps med websøgningsfunktioner."</string>
     <string name="permlab_setAlarm" msgid="1379294556362091814">"indstille en alarm"</string>
     <string name="permdesc_setAlarm" msgid="316392039157473848">"Tillader, at appen kan indstille en alarm i en installeret alarmapp. Nogle alarmapps har muligvis ikke denne funktion."</string>
     <string name="permlab_addVoicemail" msgid="5525660026090959044">"tilføje telefonsvarer"</string>
@@ -961,7 +961,7 @@
     <string name="cancel" msgid="6442560571259935130">"Annuller"</string>
     <string name="yes" msgid="5362982303337969312">"OK"</string>
     <string name="no" msgid="5141531044935541497">"Annuller"</string>
-    <string name="dialog_alert_title" msgid="2049658708609043103">"Bemærk"</string>
+    <string name="dialog_alert_title" msgid="2049658708609043103">"Bemærk!"</string>
     <string name="loading" msgid="7933681260296021180">"Indlæser…"</string>
     <string name="capital_on" msgid="1544682755514494298">"TIL"</string>
     <string name="capital_off" msgid="6815870386972805832">"FRA"</string>
@@ -1397,21 +1397,21 @@
     <string name="kg_wrong_pin" msgid="1131306510833563801">"Forkert pinkode"</string>
     <string name="kg_too_many_failed_attempts_countdown" msgid="6358110221603297548">"Prøv igen om <xliff:g id="NUMBER">%1$d</xliff:g> sekunder."</string>
     <string name="kg_pattern_instructions" msgid="398978611683075868">"Tegn dit mønster"</string>
-    <string name="kg_sim_pin_instructions" msgid="2319508550934557331">"Indtast pinkode til SIM-kort"</string>
-    <string name="kg_pin_instructions" msgid="2377242233495111557">"Indtast pinkode"</string>
+    <string name="kg_sim_pin_instructions" msgid="2319508550934557331">"Angiv pinkode til SIM-kort"</string>
+    <string name="kg_pin_instructions" msgid="2377242233495111557">"Angiv pinkode"</string>
     <string name="kg_password_instructions" msgid="5753646556186936819">"Angiv adgangskode"</string>
-    <string name="kg_puk_enter_puk_hint" msgid="453227143861735537">"SIM-kortet er nu deaktiveret. Indtast PUK-koden for at fortsætte. Kontakt mobilselskabet for at få flere oplysninger."</string>
-    <string name="kg_puk_enter_pin_hint" msgid="7871604527429602024">"Indtast den ønskede pinkode"</string>
+    <string name="kg_puk_enter_puk_hint" msgid="453227143861735537">"SIM-kortet er nu deaktiveret. Angiv PUK-koden for at fortsætte. Kontakt mobilselskabet for at få flere oplysninger."</string>
+    <string name="kg_puk_enter_pin_hint" msgid="7871604527429602024">"Angiv den ønskede pinkode"</string>
     <string name="kg_enter_confirm_pin_hint" msgid="325676184762529976">"Bekræft den ønskede pinkode"</string>
     <string name="kg_sim_unlock_progress_dialog_message" msgid="8950398016976865762">"SIM-kortet låses op…"</string>
     <string name="kg_password_wrong_pin_code" msgid="1139324887413846912">"Forkert pinkode."</string>
-    <string name="kg_invalid_sim_pin_hint" msgid="8795159358110620001">"Indtast en pinkode på mellem 4 og 8 tal."</string>
+    <string name="kg_invalid_sim_pin_hint" msgid="8795159358110620001">"Angiv en pinkode på mellem 4 og 8 tal."</string>
     <string name="kg_invalid_sim_puk_hint" msgid="6025069204539532000">"PUK-koden skal være på 8 tal."</string>
-    <string name="kg_invalid_puk" msgid="3638289409676051243">"Indtast den korrekte PUK-kode. Gentagne forsøg vil permanent deaktivere SIM-kortet."</string>
+    <string name="kg_invalid_puk" msgid="3638289409676051243">"Angiv den korrekte PUK-kode. Gentagne forsøg vil permanent deaktivere SIM-kortet."</string>
     <string name="kg_invalid_confirm_pin_hint" product="default" msgid="7003469261464593516">"Pinkoderne stemmer ikke overens"</string>
     <string name="kg_login_too_many_attempts" msgid="6486842094005698475">"For mange forsøg på at tegne mønstret korrekt"</string>
     <string name="kg_login_instructions" msgid="1100551261265506448">"Lås op ved at logge ind med din Google-konto."</string>
-    <string name="kg_login_username_hint" msgid="5718534272070920364">"Brugernavn (e-mail)"</string>
+    <string name="kg_login_username_hint" msgid="5718534272070920364">"Brugernavn (mail)"</string>
     <string name="kg_login_password_hint" msgid="9057289103827298549">"Adgangskode"</string>
     <string name="kg_login_submit_button" msgid="5355904582674054702">"Log ind"</string>
     <string name="kg_login_invalid_input" msgid="5754664119319872197">"Ugyldigt brugernavn eller ugyldig adgangskode."</string>
@@ -1532,8 +1532,8 @@
     <string name="reason_service_unavailable" msgid="7824008732243903268">"Udskrivningstjenesten er ikke aktiveret"</string>
     <string name="print_service_installed_title" msgid="2246317169444081628">"Tjenesten <xliff:g id="NAME">%s</xliff:g> er installeret"</string>
     <string name="print_service_installed_message" msgid="5897362931070459152">"Tryk for at aktivere"</string>
-    <string name="restr_pin_enter_admin_pin" msgid="783643731895143970">"Indtast administratorpinkoden"</string>
-    <string name="restr_pin_enter_pin" msgid="3395953421368476103">"Indtast pinkode"</string>
+    <string name="restr_pin_enter_admin_pin" msgid="783643731895143970">"Angiv administratorpinkoden"</string>
+    <string name="restr_pin_enter_pin" msgid="3395953421368476103">"Angiv pinkode"</string>
     <string name="restr_pin_incorrect" msgid="8571512003955077924">"Forkert"</string>
     <string name="restr_pin_enter_old_pin" msgid="1462206225512910757">"Aktuel pinkode:"</string>
     <string name="restr_pin_enter_new_pin" msgid="5959606691619959184">"Ny pinkode"</string>

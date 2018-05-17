@@ -270,7 +270,7 @@
     <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"Атрымліваць змесціва вакна"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"Аналізаваць змесціва актыўнага вакна."</string>
     <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"Уключаць Азнаямленне дотыкам"</string>
-    <string name="capability_desc_canRequestTouchExploration" msgid="7543249041581408313">"Элементы, да якіх дакрануліся, будуць агучаны, а экранам можна даследаваць пры дапамозе жэстаў."</string>
+    <string name="capability_desc_canRequestTouchExploration" msgid="7543249041581408313">"Агучваць элементы пры націсканні і дазволіць кіраванне прыладай з дапамогай жэстаў."</string>
     <string name="capability_title_canRequestEnhancedWebAccessibility" msgid="1739881766522594073">"Уключаць спецыяльныя магчымасці для інтэрнэту"</string>
     <string name="capability_desc_canRequestEnhancedWebAccessibility" msgid="7881063961507511765">"Могуць усталёўвацца скрыпты, каб зрабіць змесціва праграмы больш даступным."</string>
     <string name="capability_title_canRequestFilterKeyEvents" msgid="2103440391902412174">"Праглядаць тэкст, які вы набіраеце"</string>
@@ -549,7 +549,7 @@
     <string name="policydesc_encryptedStorage" msgid="2637732115325316992">"Запыт на шыфраванне захаваных дадзеных прыкладанняў."</string>
     <string name="policylab_disableCamera" msgid="6395301023152297826">"Адключыць камеры"</string>
     <string name="policydesc_disableCamera" msgid="2306349042834754597">"Забараніць выкарыстанне ўсіх камер прылады."</string>
-    <string name="policylab_disableKeyguardFeatures" msgid="8552277871075367771">"Адкл.некат.функцыі блак.экрана"</string>
+    <string name="policylab_disableKeyguardFeatures" msgid="8552277871075367771">"Адключаць функцыі блакіроўкі"</string>
     <string name="policydesc_disableKeyguardFeatures" msgid="2044755691354158439">"Забараніць выкарыстанне некаторых функцый блакіроўкі экрана."</string>
   <string-array name="phoneTypes">
     <item msgid="8901098336658710359">"Хатні"</item>
@@ -1282,7 +1282,7 @@
     <string name="sync_binding_label" msgid="3687969138375092423">"Сінхранізацыя"</string>
     <string name="accessibility_binding_label" msgid="4148120742096474641">"Спецыяльныя магчымасці"</string>
     <string name="wallpaper_binding_label" msgid="1240087844304687662">"Шпалеры"</string>
-    <string name="chooser_wallpaper" msgid="7873476199295190279">"Змена шпалер"</string>
+    <string name="chooser_wallpaper" msgid="7873476199295190279">"Змяніць шпалеры"</string>
     <string name="notification_listener_binding_label" msgid="2014162835481906429">"Слухач апавяшчэння"</string>
     <string name="vr_listener_binding_label" msgid="4316591939343607306">"Сродак праслухоўвання ў рэжыме віртуальнай рэальнасці (VR)"</string>
     <string name="condition_provider_service_binding_label" msgid="1321343352906524564">"Пастаўшчык умоў"</string>
@@ -1623,7 +1623,7 @@
     <string name="package_updated_device_owner" msgid="8856631322440187071">"Абноўлена вашым адміністратарам"</string>
     <string name="package_deleted_device_owner" msgid="7650577387493101353">"Выдалена вашым адміністратарам"</string>
     <string name="battery_saver_description" msgid="1960431123816253034">"Каб падоўжыць час працы акумулятара, у рэжыме эканоміі зараду памяншаецца прадукцыйнасць вашай прылады, абмяжоўваецца выкарыстанне вібрацыі, службаў вызначэння месцазнаходжання і большасці задач фонавай перадачы даных. Электронная пошта, абмен паведамленнямі і іншыя праграмы, якія выкарыстоўваюць сінхранізацыю, могуць не абнаўляцца, пакуль вы іх не адкрыеце.\n\nРэжым эканоміі зараду адключаецца аўтаматычна, калі прылада зараджаецца."</string>
-    <string name="data_saver_description" msgid="6015391409098303235">"Каб паменшыць выкарыстанне даных, Эканомія трафіку не дазваляе некаторым праграмам адпраўляць ці атрымліваць даныя ў фонавым рэжыме. Праграма, якую вы зараз выкарыстоўваеце, можа атрымліваць доступ да даных, але можа рабіць гэта радзей. Гэта можа азначаць, напрыклад, што відарысы не паказваюцца, пакуль вы не дакраняцеся да іх."</string>
+    <string name="data_saver_description" msgid="6015391409098303235">"У рэжыме Эканомія трафіка фонавая перадача для некаторых праграмам адключана. Праграма, якую вы зараз выкарыстоўваеце, можа атрымліваць доступ да даных, але радзей, чым звычайна. Напрыклад, відарысы могуць не загружацца, пакуль вы не націсніце на іх."</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"Уключыць Эканомію трафіка?"</string>
     <string name="data_saver_enable_button" msgid="7147735965247211818">"Уключыць"</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="4367877408072000848">

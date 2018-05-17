@@ -189,7 +189,7 @@
     <string name="turn_on_radio" msgid="3912793092339962371">"ਵਾਇਰਲੈਸ ਚਾਲੂ ਕਰੋ"</string>
     <string name="turn_off_radio" msgid="8198784949987062346">"ਵਾਇਰਲੈਸ ਬੰਦ ਕਰੋ"</string>
     <string name="screen_lock" msgid="799094655496098153">"ਸਕ੍ਰੀਨ  ਲਾਕ"</string>
-    <string name="power_off" msgid="4266614107412865048">"ਪਾਵਰ ਬੰਦ"</string>
+    <string name="power_off" msgid="4266614107412865048">"ਫ਼ੋਨ ਬੰਦ ਕਰੋ"</string>
     <string name="silent_mode_silent" msgid="319298163018473078">"ਰਿੰਗਰ ਬੰਦ"</string>
     <string name="silent_mode_vibrate" msgid="7072043388581551395">"ਰਿੰਗਰ ਥਰਥਰਾਹਟ"</string>
     <string name="silent_mode_ring" msgid="8592241816194074353">"ਰਿੰਗਰ ਚਾਲੂ"</string>
@@ -216,7 +216,7 @@
     <string name="global_action_power_off" msgid="4471879440839879722">"ਪਾਵਰ ਬੰਦ"</string>
     <string name="global_action_emergency" msgid="7112311161137421166">"ਸੰਕਟਕਾਲ"</string>
     <string name="global_action_bug_report" msgid="7934010578922304799">"ਬਗ ਰਿਪੋਰਟ"</string>
-    <string name="bugreport_title" msgid="2667494803742548533">"ਬਗ ਰਿਪੋਰਟ ਲਓ"</string>
+    <string name="bugreport_title" msgid="2667494803742548533">"ਬੱਗ ਰਿਪੋਰਟ ਲਓ"</string>
     <string name="bugreport_message" msgid="398447048750350456">"ਇਹ ਇੱਕ ਈਮੇਲ ਸੁਨੇਹਾ ਭੇਜਣ ਲਈ, ਤੁਹਾਡੇ ਵਰਤਮਾਨ ਡੀਵਾਈਸ ਬਾਰੇ ਜਾਣਕਾਰੀ ਇਕੱਠੀ ਕਰੇਗਾ। ਬੱਗ ਰਿਪੋਰਟ ਸ਼ੁਰੂ ਕਰਨ ਵਿੱਚ ਥੋੜ੍ਹਾ ਸਮਾਂ ਲੱਗੇਗਾ ਜਦੋਂ ਤੱਕ ਇਹ ਭੇਜੇ ਜਾਣ ਲਈ ਤਿਆਰ ਨਾ ਹੋਵੇ, ਕਿਰਪਾ ਕਰਕੇ ਧੀਰਜ ਰੱਖੋ।"</string>
     <string name="bugreport_option_interactive_title" msgid="8635056131768862479">"ਅੰਤਰਕਿਰਿਆਤਮਕ ਰਿਪੋਰਟ"</string>
     <string name="bugreport_option_interactive_summary" msgid="229299488536107968">"ਜ਼ਿਆਦਾਤਰ ਹਾਲਾਤਾਂ ਵਿੱਚ ਇਸ ਦੀ ਵਰਤੋਂ ਕਰੋ। ਇਹ ਤੁਹਾਨੂੰ ਰਿਪੋਰਟ ਦੀ ਪ੍ਰਗਤੀ ਨੂੰ ਟਰੈਕ ਕਰਨ, ਸਮੱਸਿਆ ਬਾਰੇ ਹੋਰ ਵੇਰਵੇ ਦਾਖਲ ਕਰਨ, ਅਤੇ ਸਕ੍ਰੀਨਸ਼ਾਟ ਲੈਣ ਦਿੰਦਾ ਹੈ। ਇਹ ਉਹਨਾਂ ਘੱਟ-ਵਰਤੇ ਗਏ ਕੁਝ ਭਾਗਾਂ ਨੂੰ ਨਜ਼ਰ-ਅੰਦਾਜ਼ ਕਰ ਸਕਦਾ ਹੈ ਜਿਨ੍ਹਾਂ ਦੀ ਰਿਪੋਰਟ ਕਰਨ ਵਿੱਚ ਵੱਧ ਸਮਾਂ ਲੱਗ ਸਕਦਾ ਹੈ।"</string>
@@ -263,12 +263,12 @@
     <string name="permgroupdesc_sensors" msgid="7147968539346634043">"ਆਪਣੇ ਸਰੀਰ ਦੇ ਅਹਿਮ ਚਿੰਨ੍ਹਾਂ ਬਾਰੇ ਸੰਵੇਦਕ ਡਾਟਾ ਤੱਕ ਪਹੁੰਚ ਕਰਨ"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"ਵਿੰਡੋ ਸਮੱਗਰੀ ਮੁੜ ਪ੍ਰਾਪਤ ਕਰਨਾ"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"ਇੱਕ ਵਿੰਡੋ ਦੀ ਸਮੱਗਰੀ ਦੀ ਜਾਂਚ ਕਰੋ, ਜਿਸ ਨਾਲ ਤੁਸੀਂ ਅੰਤਰਕਿਰਿਆ ਕਰ ਰਹੇ ਹੋ"</string>
-    <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"ਐਕਸਪਲੋਰ ਬਾਈ ਟੱਚ ਚਾਲੂ ਕਰਨਾ"</string>
+    <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"\'ਸਪੱਰਸ਼ ਰਾਹੀਂ ਪੜਚੋਲ ਕਰੋ\' ਚਾਲੂ ਕਰਨਾ"</string>
     <string name="capability_desc_canRequestTouchExploration" msgid="7543249041581408313">"ਟੈਪ ਕੀਤੀਆਂ ਆਈਟਮਾਂ ਨੂੰ ਉੱਚੀ ਆਵਾਜ਼ ਵਿੱਚ ਬੋਲਿਆ ਜਾਵੇਗਾ ਅਤੇ ਸਕ੍ਰੀਨ ਦੀ ਸੰਕੇਤਾਂ ਦੀ ਵਰਤੋਂ ਨਾਲ ਪੜਚੋਲ ਕੀਤੀ ਜਾ ਸਕਦੀ ਹੈ।"</string>
     <string name="capability_title_canRequestEnhancedWebAccessibility" msgid="1739881766522594073">"ਵਧੀ ਹੋਈ ਵੈੱਬ ਪਹੁੰਚਯੋਗਤਾ ਚਾਲੂ ਕਰਨਾ"</string>
     <string name="capability_desc_canRequestEnhancedWebAccessibility" msgid="7881063961507511765">"ਐਪ ਸਮੱਗਰੀ ਨੂੰ ਵੱਧ ਪਹੁੰਚਯੋਗ ਬਣਾਉਣ ਲਈ ਸਕ੍ਰਿਪਟਾਂ ਸਥਾਪਤ ਨਹੀਂ ਕੀਤੀਆਂ ਜਾ ਸਕਦੀਆਂ।"</string>
     <string name="capability_title_canRequestFilterKeyEvents" msgid="2103440391902412174">"ਤੁਹਾਡੇ ਵੱਲੋਂ ਟਾਈਪ ਕੀਤੀ ਲਿਖਤ ਦਾ ਨਿਰੀਖਣ ਕਰਨਾ"</string>
-    <string name="capability_desc_canRequestFilterKeyEvents" msgid="7463135292204152818">"ਇਸ ਵਿੱਚ ਨਿੱਜੀ  ਡਾਟਾ  ਸ਼ਾਮਲ ਹੈ ਜਿਵੇਂ ਕ੍ਰੈਡਿਟ ਕਾਰਡ ਨੰਬਰ ਅਤੇ ਪਾਸਵਰਡ।"</string>
+    <string name="capability_desc_canRequestFilterKeyEvents" msgid="7463135292204152818">"ਇਸ ਵਿੱਚ ਨਿੱਜੀ ਡਾਟਾ ਸ਼ਾਮਲ ਹੈ ਜਿਵੇਂ ਕ੍ਰੈਡਿਟ ਕਾਰਡ ਨੰਬਰ ਅਤੇ ਪਾਸਵਰਡ।"</string>
     <string name="capability_title_canControlMagnification" msgid="3593493281059424855">"ਡਿਸਪਲੇ ਵੱਡਦਰਸ਼ੀਕਰਨ ਨੂੰ ਕੰਟਰੋਲ ਕਰਨਾ"</string>
     <string name="capability_desc_canControlMagnification" msgid="4791858203568383773">"ਡਿਸਪਲੇ ਦੇ ਜ਼ੂਮ ਪੱਧਰ ਅਤੇ ਸਥਿਤੀ ਨੂੰ ਕੰਟਰੋਲ ਕਰੋ।"</string>
     <string name="capability_title_canPerformGestures" msgid="7418984730362576862">"ਸੰਕੇਤ ਕਰਦੀ ਹੈ"</string>
@@ -523,11 +523,11 @@
     <string name="policydesc_watchLogin_secondaryUser" product="tablet" msgid="4280246270601044505">"ਸਕ੍ਰੀਨ ਨੂੰ ਅਣਲਾਕ ਕਰਦੇ ਹੋਏ ਟਾਈਪ ਕੀਤੇ ਗਲਤ ਪਾਸਵਰਡਾਂ ਦੀ ਸੰਖਿਆ ਦਾ ਨਿਰੀਖਣ ਕਰੋ ਅਤੇ ਟੈਬਲੈੱਟ ਨੂੰ ਲਾਕ ਕਰੋ ਜਾਂ ਟੈਬਲੈੱਟ ਦਾ ਸਾਰਾ ਡਾਟਾ ਮਿਟਾਓ, ਜੇਕਰ ਬਹੁਤ ਜ਼ਿਆਦਾ ਗਲਤ ਪਾਸਵਰਡ ਟਾਈਪ ਕੀਤੇ ਹਨ।"</string>
     <string name="policydesc_watchLogin_secondaryUser" product="TV" msgid="3484832653564483250">"ਸਕ੍ਰੀਨ ਨੂੰ ਅਣਲਾਕ ਕਰਦੇ ਸਮੇਂ ਟਾਈਪ ਕੀਤੇ ਗ਼ਲਤ ਪਾਸਵਰਡਾਂ ਦੀ ਸੰਖਿਆ ਦਾ ਨਿਰੀਖਣ ਕਰੋ ਅਤੇ TV ਨੂੰ  ਲਾਕ  ਕਰੋ ਜਾਂ TV ਦਾ ਸਾਰਾ  ਡਾਟਾ  ਮਿਟਾਓ ਜੇਕਰ ਬਹੁਤ ਜ਼ਿਆਦਾ ਗ਼ਲਤ ਪਾਸਵਰਡ ਟਾਈਪ ਕੀਤੇ ਹਨ।"</string>
     <string name="policydesc_watchLogin_secondaryUser" product="default" msgid="2185480427217127147">"ਸਕ੍ਰੀਨ ਨੂੰ ਅਣਲਾਕ ਕਰਦੇ ਸਮੇਂ ਟਾਈਪ ਕੀਤੇ ਗਲਤ ਪਾਸਵਰਡਾਂ ਦੀ ਸੰਖਿਆ ਦਾ ਨਿਰੀਖਣ ਕਰੋ ਅਤੇ ਫ਼ੋਨ ਨੂੰ ਲਾਕ ਕਰੋ ਜਾਂ ਫ਼ੋਨ ਦਾ ਸਾਰਾ ਡਾਟਾ ਮਿਟਾਓ ਜੇਕਰ ਬਹੁਤ ਜ਼ਿਆਦਾ ਗਲਤ ਪਾਸਵਰਡ ਟਾਈਪ ਕੀਤੇ ਹਨ।"</string>
-    <string name="policylab_resetPassword" msgid="4934707632423915395">"ਸਕ੍ਰੀਨ  ਲਾਕ  ਬਦਲੋ"</string>
+    <string name="policylab_resetPassword" msgid="4934707632423915395">"ਸਕ੍ਰੀਨ ਲਾਕ ਬਦਲੋ"</string>
     <string name="policydesc_resetPassword" msgid="1278323891710619128">"ਸਕ੍ਰੀਨ  ਲਾਕ  ਬਦਲੋ।"</string>
-    <string name="policylab_forceLock" msgid="2274085384704248431">"ਸਕ੍ਰੀਨ  ਲਾਕ  ਕਰੋ"</string>
+    <string name="policylab_forceLock" msgid="2274085384704248431">"ਸਕ੍ਰੀਨ ਲਾਕ ਕਰੋ"</string>
     <string name="policydesc_forceLock" msgid="1141797588403827138">"ਇਸਤੇ ਨਿਯੰਤਰਣ ਪਾਓ ਕਿ ਸਕ੍ਰਿਨ ਕਿਵੇਂ ਅਤੇ ਕਦੋਂ  ਲਾਕ  ਹੁੰਦੀ ਹੈ।"</string>
-    <string name="policylab_wipeData" msgid="3910545446758639713">"ਸਾਰਾ  ਡਾਟਾ  ਮਿਟਾਓ"</string>
+    <string name="policylab_wipeData" msgid="3910545446758639713">"ਸਾਰਾ ਡਾਟਾ ਮਿਟਾਓ"</string>
     <string name="policydesc_wipeData" product="tablet" msgid="4306184096067756876">"ਇੱਕ ਫੈਕਟਰੀ ਡਾਟਾ ਰੀਸੈੱਟ ਕਰਕੇ ਚਿਤਾਵਨੀ ਤੋਂ ਬਿਨਾਂ ਟੈਬਲੈੱਟ ਦਾ ਡਾਟਾ ਮਿਟਾਓ।"</string>
     <string name="policydesc_wipeData" product="tv" msgid="5816221315214527028">"ਇੱਕ ਫੈਕਟਰੀ ਡਾਟਾ ਰੀਸੈੱਟ ਕਰਕੇ ਚਿਤਾਵਨੀ ਤੋਂ ਬਿਨਾਂ ਟੀਵੀ ਦਾ ਡਾਟਾ ਮਿਟਾਓ।"</string>
     <string name="policydesc_wipeData" product="default" msgid="5096895604574188391">"ਇੱਕ ਫੈਕਟਰੀ ਡਾਟਾ ਰੀਸੈੱਟ ਕਰਕੇ ਚਿਤਾਵਨੀ ਤੋਂ ਬਿਨਾਂ ਫ਼ੋਨ ਦਾ ਡਾਟਾ ਮਿਟਾਓ।"</string>
@@ -543,7 +543,7 @@
     <string name="policydesc_encryptedStorage" msgid="2637732115325316992">"ਲੋੜ ਹੈ ਕਿ ਸਟੋਰ ਕੀਤਾ ਐਪ  ਡਾਟਾ  ਇਨਕ੍ਰਿਪਟ ਕੀਤਾ ਜਾਏ।"</string>
     <string name="policylab_disableCamera" msgid="6395301023152297826">"ਕੈਮਰੇ ਅਸਮਰੱਥ ਬਣਾਓ"</string>
     <string name="policydesc_disableCamera" msgid="2306349042834754597">"ਸਾਰੇ ਡੀਵਾਈਸ ਕੈਮਰਿਆਂ ਦੀ ਵਰਤੋਂ ਰੋਕੋ।"</string>
-    <string name="policylab_disableKeyguardFeatures" msgid="8552277871075367771">"ਸਕ੍ਰੀਨ  ਲਾਕ  ਦੀਆਂ ਕੁਝ ਵਿਸ਼ੇਸ਼ਤਾਵਾਂ ਨੂੰ ਅਸਮਰੱਥ ਬਣਾਓ"</string>
+    <string name="policylab_disableKeyguardFeatures" msgid="8552277871075367771">"ਸਕ੍ਰੀਨ ਲਾਕ ਦੀਆਂ ਕੁਝ ਵਿਸ਼ੇਸ਼ਤਾਵਾਂ ਬੰਦ ਕਰੋ"</string>
     <string name="policydesc_disableKeyguardFeatures" msgid="2044755691354158439">"ਸਕ੍ਰੀਨ  ਲਾਕ  ਦੀਆਂ ਕੁਝ ਵਿਸ਼ੇਸ਼ਤਾਵਾਂ ਦੀ ਵਰਤੋਂ ਰੋਕੋ।"</string>
   <string-array name="phoneTypes">
     <item msgid="8901098336658710359">"ਘਰ"</item>
@@ -957,7 +957,7 @@
     <string name="low_internal_storage_view_text_no_boot" msgid="6935190099204693424">"ਸਿਸਟਮ ਲਈ ਲੋੜੀਂਦੀ ਸਟੋਰੇਜ ਨਹੀਂ ਹੈ। ਯਕੀਨੀ ਬਣਾਓ ਕਿ ਤੁਹਾਡੇ ਕੋਲ 250MB ਖਾਲੀ ਜਗ੍ਹਾ ਹੈ ਅਤੇ ਮੁੜ-ਚਾਲੂ ਕਰੋ।"</string>
     <string name="app_running_notification_title" msgid="8718335121060787914">"<xliff:g id="APP_NAME">%1$s</xliff:g> ਚੱਲ ਰਿਹਾ ਹੈ"</string>
     <string name="app_running_notification_text" msgid="1197581823314971177">"ਹੋਰ ਜਾਣਕਾਰੀ ਜਾਂ ਐਪ ਨੂੰ ਬੰਦ ਕਰਨ ਲਈ ਟੈਪ ਕਰੋ।"</string>
-    <string name="ok" msgid="5970060430562524910">"ਠੀਕ"</string>
+    <string name="ok" msgid="5970060430562524910">"ਠੀਕ ਹੈ"</string>
     <string name="cancel" msgid="6442560571259935130">"ਰੱਦ ਕਰੋ"</string>
     <string name="yes" msgid="5362982303337969312">"ਠੀਕ"</string>
     <string name="no" msgid="5141531044935541497">"ਰੱਦ ਕਰੋ"</string>
@@ -997,7 +997,7 @@
     <string name="aerr_application_repeated" msgid="3146328699537439573">"<xliff:g id="APPLICATION">%1$s</xliff:g> ਵਾਰ-ਵਾਰ ਰੁਕ ਰਹੀ ਹੈ"</string>
     <string name="aerr_process_repeated" msgid="6235302956890402259">"<xliff:g id="PROCESS">%1$s</xliff:g> ਵਾਰ-ਵਾਰ ਰੁਕ ਰਹੀ ਹੈ"</string>
     <string name="aerr_restart" msgid="7581308074153624475">"ਦੁਬਾਰਾ ਐਪ ਖੋਲ੍ਹੋ"</string>
-    <string name="aerr_report" msgid="5371800241488400617">"ਪ੍ਰਤੀਕਰਮ ਭੇਜੋ"</string>
+    <string name="aerr_report" msgid="5371800241488400617">"ਵਿਚਾਰ ਭੇਜੋ"</string>
     <string name="aerr_close" msgid="2991640326563991340">"ਬੰਦ ਕਰੋ"</string>
     <string name="aerr_mute" msgid="1974781923723235953">"ਡੀਵਾਈਸ ਦੇ ਮੁੜ-ਚਾਲੂ ਹੋਣ ਤੱਕ ਮਿਊਟ ਕਰੋ"</string>
     <string name="aerr_wait" msgid="3199956902437040261">"ਉਡੀਕ ਕਰੋ"</string>
@@ -1160,7 +1160,7 @@
     <string name="decline_remote_bugreport_action" msgid="6230987241608770062">"ਅਸਵੀਕਾਰ ਕਰੋ"</string>
     <string name="select_input_method" msgid="8547250819326693584">"ਕੀ-ਬੋਰਡ ਬਦਲੋ"</string>
     <string name="show_ime" msgid="2506087537466597099">"ਭੌਤਿਕ ਕੀ-ਬੋਰਡ ਸਰਗਰਮ ਹੋਣ ਦੌਰਾਨ ਇਸ ਨੂੰ ਸਕ੍ਰੀਨ \'ਤੇ ਬਣਾਈ ਰੱਖੋ"</string>
-    <string name="hardware" msgid="194658061510127999">"ਆਭਾਸੀ ਕੀ-ਬੋਰਡ  ਦਿਖਾਓ"</string>
+    <string name="hardware" msgid="194658061510127999">"ਆਭਾਸੀ ਕੀ-ਬੋਰਡ ਦਿਖਾਓ"</string>
     <string name="select_keyboard_layout_notification_title" msgid="597189518763083494">"ਭੌਤਿਕ ਕੀ-ਬੋਰਡ ਦੀ ਰੂਪ-ਰੇਖਾ ਬਦਲੋ"</string>
     <string name="select_keyboard_layout_notification_message" msgid="8084622969903004900">"ਭਾਸ਼ਾ ਅਤੇ ਖਾਕਾ ਚੁਣਨ ਲਈ ਟੈਪ ਕਰੋ"</string>
     <string name="fast_scroll_alphabet" msgid="5433275485499039199">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>

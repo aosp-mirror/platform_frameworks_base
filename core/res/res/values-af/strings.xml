@@ -262,15 +262,15 @@
     <string name="permgrouplab_sensors" msgid="416037179223226722">"Liggaamsensors"</string>
     <string name="permgroupdesc_sensors" msgid="7147968539346634043">"toegang te verkry tot sensordata oor jou lewenstekens"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"Venster-inhoud ophaal"</string>
-    <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"Ondersoek die inhoud van \'n venster waarmee jy interaksie het."</string>
+    <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"Die inhoud ondersoek van \'n venster waarmee jy interaksie het."</string>
     <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"Verken deur raak aanskakel"</string>
     <string name="capability_desc_canRequestTouchExploration" msgid="7543249041581408313">"Items waarop getik word, sal hardop gesê word en die skerm kan met behulp van gebare verken word."</string>
     <string name="capability_title_canRequestEnhancedWebAccessibility" msgid="1739881766522594073">"Verbeterde webtoeganklikheid aanskakel"</string>
     <string name="capability_desc_canRequestEnhancedWebAccessibility" msgid="7881063961507511765">"Skripte kan geïnstalleer word om program-inhoud meer toeganklik te maak."</string>
     <string name="capability_title_canRequestFilterKeyEvents" msgid="2103440391902412174">"Teks wat jy tik waarneem"</string>
-    <string name="capability_desc_canRequestFilterKeyEvents" msgid="7463135292204152818">"Sluit persoonlike data soos kredietkaartnommers en wagwoorde in."</string>
+    <string name="capability_desc_canRequestFilterKeyEvents" msgid="7463135292204152818">"Dit sluit persoonlike data soos kredietkaartnommers en wagwoorde in."</string>
     <string name="capability_title_canControlMagnification" msgid="3593493281059424855">"Vertoonskermvergroting beheer"</string>
-    <string name="capability_desc_canControlMagnification" msgid="4791858203568383773">"Beheer die vertoonskerm se zoemvlak en posisionering."</string>
+    <string name="capability_desc_canControlMagnification" msgid="4791858203568383773">"Die vertoonskerm se zoemvlak en posisionering beheer."</string>
     <string name="capability_title_canPerformGestures" msgid="7418984730362576862">"Voer gebare uit"</string>
     <string name="capability_desc_canPerformGestures" msgid="8296373021636981249">"Kan tik, swiep, knyp en ander gebare uitvoer."</string>
     <string name="permlab_statusBar" msgid="7417192629601890791">"deaktiveer of verander statusbalk"</string>

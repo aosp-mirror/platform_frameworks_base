@@ -261,10 +261,10 @@
     <string name="permgroupdesc_phone" msgid="6234224354060641055">"ફોન કૉલ કરો અને સંચાલિત કરો"</string>
     <string name="permgrouplab_sensors" msgid="416037179223226722">"બોડી સેન્સર્સ"</string>
     <string name="permgroupdesc_sensors" msgid="7147968539346634043">"તમારા મહત્વપૂર્ણ ચિહ્નો વિશે સેન્સર ડેટા ઍક્સેસ કરો"</string>
-    <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"વિંડો સામગ્રી પુનર્પ્રાપ્ત કરો"</string>
-    <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"તમે જેની સાથે ક્રિયાપ્રતિક્રિયા કરી રહ્યાં છો તે વિંડોની સામગ્રીની તપાસ કરો."</string>
-    <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"સ્પર્શ કરીને શોધખોળ કરવું સક્ષમ કરો"</string>
-    <string name="capability_desc_canRequestTouchExploration" msgid="7543249041581408313">"ટૅપ કરેલ આઇટમ્સ મોટેથી બોલવામાં આવશે અને હાવભાવની મદદથી સ્ક્રીનનું અન્વેષણ કરી શકાય છે."</string>
+    <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"વિંડો કન્ટેન્ટ પુનઃપ્રાપ્ત કરો"</string>
+    <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"તમે જેની સાથે ક્રિયા-પ્રતિક્રિયા કરી રહ્યાં છો તે વિંડોનું કન્ટેન્ટ તપાસો."</string>
+    <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"સ્પર્શ કરીને શોધખોળ કરવું ચાલુ કરો"</string>
+    <string name="capability_desc_canRequestTouchExploration" msgid="7543249041581408313">"ટૅપ કરેલ આઇટમ મોટેથી બોલવામાં આવશે અને હાવભાવની મદદથી સ્ક્રીનને શોધી શકાય છે."</string>
     <string name="capability_title_canRequestEnhancedWebAccessibility" msgid="1739881766522594073">"વિસ્તૃત વેબ ઍક્સેસિબિલિટી ચાલુ કરો"</string>
     <string name="capability_desc_canRequestEnhancedWebAccessibility" msgid="7881063961507511765">"ઍપ્લિકેશન સામગ્રીને વધુ ઍક્સેસિબલ બનાવવા માટે સ્ક્રિપ્ટ્સ ઇન્સ્ટોલ કરી શકાય છે."</string>
     <string name="capability_title_canRequestFilterKeyEvents" msgid="2103440391902412174">"તમે લખો તે ટેક્સ્ટનું અવલોકન કરો"</string>
@@ -302,11 +302,11 @@
     <string name="permlab_receiveWapPush" msgid="5991398711936590410">"ટેક્સ્ટ સંદેશા (WAP) પ્રાપ્ત કરો"</string>
     <string name="permdesc_receiveWapPush" msgid="748232190220583385">"એપ્લિકેશનને WAP સંદેશા પ્રાપ્ત કરવાની અને તેના પર પ્રક્રિયા કરવાની મંજૂરી આપે છે. આ પરવાનગીમાં તમને દર્શાવ્યા વિના તમને મોકલેલ સંદેશાઓનું નિરીક્ષણ કરવાની અને કાઢી નાખવાની ક્ષમતાનો સમાવેશ થાય છે."</string>
     <string name="permlab_getTasks" msgid="6466095396623933906">"ચાલુ ઍપ્લિકેશનો પુનઃપ્રાપ્ત કરો"</string>
-    <string name="permdesc_getTasks" msgid="7454215995847658102">"એપ્લિકેશનને વર્તમાનમાં અને તાજેતરમાં ચાલી રહેલ કાર્યો વિશેની વિગતવાર માહિતી પુનઃપ્રાપ્ત કરવાની મંજૂરી આપે છે. આ એપ્લિકેશનને ઉપકરણ પર કઈ એપ્લિકેશન્સનો ઉપયોગ થાય છે તેના વિશેની માહિતી શોધવાની મંજૂરી આપી શકે છે."</string>
+    <string name="permdesc_getTasks" msgid="7454215995847658102">"એપ્લિકેશનને વર્તમાનમાં અને તાજેતરમાં ચાલી રહેલ Tasks વિશેની વિગતવાર માહિતી પુનઃપ્રાપ્ત કરવાની મંજૂરી આપે છે. આ એપ્લિકેશનને ઉપકરણ પર કઈ એપ્લિકેશન્સનો ઉપયોગ થાય છે તેના વિશેની માહિતી શોધવાની મંજૂરી આપી શકે છે."</string>
     <string name="permlab_manageProfileAndDeviceOwners" msgid="7918181259098220004">"પ્રોફાઇલ અને ઉપકરણ માલિકોને સંચાલિત કરો"</string>
     <string name="permdesc_manageProfileAndDeviceOwners" msgid="106894851498657169">"એપ્લિકેશન્સને પ્રોફાઇલ માલિકો અને ઉપકરણ માલિકો સેટ કરવાની મંજૂરી આપે છે."</string>
     <string name="permlab_reorderTasks" msgid="2018575526934422779">"ચાલુ એપ્લિકેશન્સને ફરી ગોઠવો"</string>
-    <string name="permdesc_reorderTasks" msgid="7734217754877439351">"ઍપ્લિકેશનને અગ્રભૂમિ અને પૃષ્ટભૂમિમાં કાર્યો ખસેડવાની મંજૂરી આપે છે. તમારા ઇનપુટ વિના ઍપ્લિકેશન આ કરી શકે છે."</string>
+    <string name="permdesc_reorderTasks" msgid="7734217754877439351">"ઍપ્લિકેશનને અગ્રભૂમિ અને પૃષ્ટભૂમિમાં Tasks ખસેડવાની મંજૂરી આપે છે. તમારા ઇનપુટ વિના ઍપ્લિકેશન આ કરી શકે છે."</string>
     <string name="permlab_enableCarMode" msgid="5684504058192921098">"કાર મોડ સક્ષમ કરો"</string>
     <string name="permdesc_enableCarMode" msgid="4853187425751419467">"એપ્લિકેશનને કાર મોડ સક્ષમ કરવાની મંજૂરી આપે છે."</string>
     <string name="permlab_killBackgroundProcesses" msgid="3914026687420177202">"અન્ય ઍપ્લિકેશનો બંધ કરો"</string>
@@ -814,7 +814,7 @@
     <string name="prepend_shortcut_label" msgid="2572214461676015642">"મેનૂ+"</string>
     <string name="menu_space_shortcut_label" msgid="2410328639272162537">"space"</string>
     <string name="menu_enter_shortcut_label" msgid="2743362785111309668">"enter"</string>
-    <string name="menu_delete_shortcut_label" msgid="3658178007202748164">"કાઢી નાખો"</string>
+    <string name="menu_delete_shortcut_label" msgid="3658178007202748164">"ડિલીટ કરો"</string>
     <string name="search_go" msgid="8298016669822141719">"શોધો"</string>
     <string name="search_hint" msgid="1733947260773056054">"શોધો…"</string>
     <string name="searchview_description_search" msgid="6749826639098512120">"શોધ"</string>
@@ -942,18 +942,18 @@
     <string name="paste" msgid="5629880836805036433">"પેસ્ટ કરો"</string>
     <string name="paste_as_plain_text" msgid="5427792741908010675">"સાદી ટેક્સ્ટ તરીકે પેસ્ટ કરો"</string>
     <string name="replace" msgid="5781686059063148930">"બદલો…"</string>
-    <string name="delete" msgid="6098684844021697789">"કાઢી નાખો"</string>
+    <string name="delete" msgid="6098684844021697789">"ડિલીટ કરો"</string>
     <string name="copyUrl" msgid="2538211579596067402">"URL ની કૉપિ કરો"</string>
     <string name="selectTextMode" msgid="1018691815143165326">"ટેક્સ્ટ પસંદ કરો"</string>
     <string name="undo" msgid="7905788502491742328">"પૂર્વવત્ કરો"</string>
     <string name="redo" msgid="7759464876566803888">"ફરી કરો"</string>
     <string name="textSelectionCABTitle" msgid="5236850394370820357">"ટેક્સ્ટ પસંદગી"</string>
     <string name="addToDictionary" msgid="4352161534510057874">"શબ્દકોશમાં ઉમેરો"</string>
-    <string name="deleteText" msgid="6979668428458199034">"કાઢી નાખો"</string>
+    <string name="deleteText" msgid="6979668428458199034">"ડિલીટ કરો"</string>
     <string name="inputMethod" msgid="1653630062304567879">"ઇનપુટ પદ્ધતિ"</string>
     <string name="editTextMenuTitle" msgid="4909135564941815494">"ટેક્સ્ટ ક્રિયાઓ"</string>
     <string name="low_internal_storage_view_title" msgid="5576272496365684834">"સ્ટોરેજ સ્થાન સમાપ્ત થયું"</string>
-    <string name="low_internal_storage_view_text" msgid="6640505817617414371">"કેટલાક સિસ્ટમ કાર્યો કામ કરી શકશે નહીં"</string>
+    <string name="low_internal_storage_view_text" msgid="6640505817617414371">"કેટલાક સિસ્ટમ Tasks કામ કરી શકશે નહીં"</string>
     <string name="low_internal_storage_view_text_no_boot" msgid="6935190099204693424">"સિસ્ટમ માટે પર્યાપ્ત સ્ટોરેજ નથી. ખાતરી કરો કે તમારી પાસે 250MB ખાલી સ્થાન છે અને ફરીથી પ્રારંભ કરો."</string>
     <string name="app_running_notification_title" msgid="8718335121060787914">"<xliff:g id="APP_NAME">%1$s</xliff:g> ચાલી રહી છે"</string>
     <string name="app_running_notification_text" msgid="1197581823314971177">"વધુ માહિતી માટે અથવા ઍપ્લિકેશન રોકવા માટે ટૅપ કરો."</string>
@@ -1102,7 +1102,7 @@
     <string name="decline" msgid="2112225451706137894">"નકારો"</string>
     <string name="wifi_p2p_invitation_sent_title" msgid="1318975185112070734">"આમંત્રણ મોકલ્યું"</string>
     <string name="wifi_p2p_invitation_to_connect_title" msgid="4958803948658533637">"કનેક્ટ થવા માટે આમંત્રણ"</string>
-    <string name="wifi_p2p_from_message" msgid="570389174731951769">"પ્રેષક:"</string>
+    <string name="wifi_p2p_from_message" msgid="570389174731951769">"મોકલનાર:"</string>
     <string name="wifi_p2p_to_message" msgid="248968974522044099">"પ્રતિ:"</string>
     <string name="wifi_p2p_enter_pin_message" msgid="5920929550367828970">"આવશ્યક પિન લખો:"</string>
     <string name="wifi_p2p_show_pin_message" msgid="8530563323880921094">"પિન:"</string>
@@ -1282,7 +1282,7 @@
     <string name="sync_undo_deletes" msgid="2941317360600338602">"કાઢી નાખવાનું પૂર્વવત્ કરો"</string>
     <string name="sync_do_nothing" msgid="3743764740430821845">"હાલ પૂરતું કંઈ કરશો નહીં"</string>
     <string name="choose_account_label" msgid="5655203089746423927">"એક એકાઉન્ટ પસંદ કરો"</string>
-    <string name="add_account_label" msgid="2935267344849993553">"એક એકાઉન્ટ ઉમેરો"</string>
+    <string name="add_account_label" msgid="2935267344849993553">"એકાઉન્ટ ઉમેરો"</string>
     <string name="add_account_button_label" msgid="3611982894853435874">"એકાઉન્ટ ઉમેરો"</string>
     <string name="number_picker_increment_button" msgid="2412072272832284313">"વધારો"</string>
     <string name="number_picker_decrement_button" msgid="476050778386779067">"ઘટાડો"</string>
@@ -1304,7 +1304,7 @@
     <string name="date_picker_next_month_button" msgid="5559507736887605055">"આગલો મહિનો"</string>
     <string name="keyboardview_keycode_alt" msgid="4856868820040051939">"ALT"</string>
     <string name="keyboardview_keycode_cancel" msgid="1203984017245783244">"રદ કરો"</string>
-    <string name="keyboardview_keycode_delete" msgid="3337914833206635744">"કાઢી નાખો"</string>
+    <string name="keyboardview_keycode_delete" msgid="3337914833206635744">"ડિલીટ કરો"</string>
     <string name="keyboardview_keycode_done" msgid="1992571118466679775">"થઈ ગયું"</string>
     <string name="keyboardview_keycode_mode_change" msgid="4547387741906537519">"મોડ ફેરફાર"</string>
     <string name="keyboardview_keycode_shift" msgid="2270748814315147690">"Shift"</string>
@@ -1546,7 +1546,7 @@
       <item quantity="other"><xliff:g id="COUNT">%d</xliff:g> સેકંડમાં ફરીથી પ્રયાસ કરો</item>
     </plurals>
     <string name="restr_pin_try_later" msgid="973144472490532377">"પછી ફરી પ્રયાસ કરો"</string>
-    <string name="immersive_cling_title" msgid="8394201622932303336">"પૂર્ણ સ્ક્રીન પર જુવો"</string>
+    <string name="immersive_cling_title" msgid="8394201622932303336">"પૂર્ણ સ્ક્રીન પર જુઓ"</string>
     <string name="immersive_cling_description" msgid="3482371193207536040">"બહાર નીકળવા માટે, ટોચ પરથી નીચે સ્વાઇપ કરો."</string>
     <string name="immersive_cling_positive" msgid="5016839404568297683">"સમજાઈ ગયું"</string>
     <string name="done_label" msgid="2093726099505892398">"થઈ ગયું"</string>
@@ -1643,10 +1643,10 @@
     <string name="importance_from_person" msgid="9160133597262938296">"શામેલ થયેલ લોકોને કારણે આ મહત્વપૂર્ણ છે."</string>
     <string name="user_creation_account_exists" msgid="1942606193570143289">"<xliff:g id="APP">%1$s</xliff:g> ને <xliff:g id="ACCOUNT">%2$s</xliff:g> સાથે એક નવા વપરાશકર્તાને બનાવવાની મંજૂરી આપીએ?"</string>
     <string name="user_creation_adding" msgid="4482658054622099197">"<xliff:g id="ACCOUNT">%2$s</xliff:g> સાથે <xliff:g id="APP">%1$s</xliff:g> ને એક નવા વપરાશકર્તાને બનાવવાની મંજૂરી આપીએ (આ એકાઉન્ટ સાથેના એક વપરાશકર્તા પહેલાંથી અસ્તિત્વમાં છે)?"</string>
-    <string name="language_selection_title" msgid="2680677278159281088">"એક ભાષા ઉમેરો"</string>
+    <string name="language_selection_title" msgid="2680677278159281088">"ભાષા ઉમેરો"</string>
     <string name="country_selection_title" msgid="2954859441620215513">"પ્રદેશ પસંદગી"</string>
     <string name="search_language_hint" msgid="7042102592055108574">"ભાષાનું નામ ટાઇપ કરો"</string>
-    <string name="language_picker_section_suggested" msgid="8414489646861640885">"સૂચવેલા"</string>
+    <string name="language_picker_section_suggested" msgid="8414489646861640885">"સૂચવેલી ભાષા"</string>
     <string name="language_picker_section_all" msgid="3097279199511617537">"બધી ભાષાઓ"</string>
     <string name="region_picker_section_all" msgid="8966316787153001779">"તમામ પ્રદેશ"</string>
     <string name="locale_search_menu" msgid="2560710726687249178">"શોધ"</string>

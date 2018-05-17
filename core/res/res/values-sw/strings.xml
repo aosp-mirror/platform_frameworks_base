@@ -81,7 +81,7 @@
     <string name="ThreeWCMmi" msgid="9051047170321190368">"Upigaji simu kwa njia tatu"</string>
     <string name="RuacMmi" msgid="7827887459138308886">"Ukataaji wa simu zinazokera zisizohitajika"</string>
     <string name="CndMmi" msgid="3116446237081575808">"Kuonyeshwa kwa nambari inayopiga"</string>
-    <string name="DndMmi" msgid="1265478932418334331">"Usisumbue"</string>
+    <string name="DndMmi" msgid="1265478932418334331">"Usinisumbue"</string>
     <string name="CLIRDefaultOnNextCallOn" msgid="429415409145781923">"Chaguo-msingi za ID ya mpigaji simu za kutozuia. Simu ifuatayo: Imezuiliwa"</string>
     <string name="CLIRDefaultOnNextCallOff" msgid="3092918006077864624">"Chaguo-msingi za kitambulisho cha mpigaji simu huwa kuzuiwa. Simu ifuatayo: Haijazuiliwa"</string>
     <string name="CLIRDefaultOffNextCallOn" msgid="6179425182856418465">"Chaguo-msingi za ID ya mpigaji simu za kutozuia. Simu ifuatayo:Imezuiliwa"</string>
@@ -122,9 +122,9 @@
     <string name="roamingText11" msgid="4154476854426920970">"Washa Bango la Uzururaji"</string>
     <string name="roamingText12" msgid="1189071119992726320">"Zima Bango la Uzururaji"</string>
     <string name="roamingTextSearching" msgid="8360141885972279963">"Inatafuta Huduma"</string>
-    <string name="wfcRegErrorTitle" msgid="2301376280632110664">"Upigaji Simu kwa Wi-Fi"</string>
+    <string name="wfcRegErrorTitle" msgid="2301376280632110664">"Kupiga simu kupitia Wi-Fi"</string>
   <string-array name="wfcOperatorErrorAlertMessages">
-    <item msgid="2254967670088539682">"Ili upige simu na kutuma ujumbe kupitia Wi-Fi, mwambie mtoa huduma wako asanidi huduma hii kwanza. Kisha uwashe tena upigaji simu kwa Wi-Fi kutoka kwenye Mipangilio."</item>
+    <item msgid="2254967670088539682">"Ili upige simu na utume ujumbe kupitia Wi-Fi, kwanza mwambie mtoa huduma wako asanidi huduma hii. Kisha nenda kwenye mipangilio na uwashe tena kipengele ch kupiga simu kupitia Wi-Fi."</item>
   </string-array>
   <string-array name="wfcOperatorErrorNotificationMessages">
     <item msgid="6177300162212449033">"Jisajili na mtoa huduma wako"</item>
@@ -259,18 +259,18 @@
     <string name="permgroupdesc_phone" msgid="6234224354060641055">"piga na udhibiti simu"</string>
     <string name="permgrouplab_sensors" msgid="416037179223226722">"Vihisi vya Mwili"</string>
     <string name="permgroupdesc_sensors" msgid="7147968539346634043">"fikia data ya kitambuzi kuhusu alama zako muhimu"</string>
-    <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"Kurejesha maudhui ya dirisha"</string>
+    <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"Kufikia maudhui ya dirisha"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"Kuchunguza maudhui ya dirisha unalotumia."</string>
     <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"Kuwasha \'Chunguza kwa Kugusa\'"</string>
-    <string name="capability_desc_canRequestTouchExploration" msgid="7543249041581408313">"Ukigonga vipengee, vitatamka maneno kwa sauti na unaweza kukagua skrini kwa kutumia ishara."</string>
+    <string name="capability_desc_canRequestTouchExploration" msgid="7543249041581408313">"Vipengee utakavyogusa vitatamkwa kwa sauti na unaweza kukagua skrini kwa kutumia ishara."</string>
     <string name="capability_title_canRequestEnhancedWebAccessibility" msgid="1739881766522594073">"Kuwasha ufikiaji wa wavuti ulioboreshwa"</string>
     <string name="capability_desc_canRequestEnhancedWebAccessibility" msgid="7881063961507511765">"Hati zinaweza kusakinishwa ili kuyafanya maudhui ya programu kufikiwa zaidi."</string>
-    <string name="capability_title_canRequestFilterKeyEvents" msgid="2103440391902412174">"Kuangalia maandishi unayoyacharaza"</string>
-    <string name="capability_desc_canRequestFilterKeyEvents" msgid="7463135292204152818">"Inajumuisha data binafsi kama vile nambari za kadi ya mkopo na manenosiri."</string>
-    <string name="capability_title_canControlMagnification" msgid="3593493281059424855">"Kudhibiti ukuzaji wa onyesho"</string>
-    <string name="capability_desc_canControlMagnification" msgid="4791858203568383773">"Kudhibiti kiwango cha kukuza na nafasi cha onyesho."</string>
+    <string name="capability_title_canRequestFilterKeyEvents" msgid="2103440391902412174">"Kutambua maandishi unayocharaza"</string>
+    <string name="capability_desc_canRequestFilterKeyEvents" msgid="7463135292204152818">"Inajumuisha data binafsi kama vile nambari za kadi za mikopo na manenosiri."</string>
+    <string name="capability_title_canControlMagnification" msgid="3593493281059424855">"Kudhibiti ukuzaji kwenye skrini"</string>
+    <string name="capability_desc_canControlMagnification" msgid="4791858203568383773">"Kudhibiti kiwango cha kukuza na nafasi kwenye skrini."</string>
     <string name="capability_title_canPerformGestures" msgid="7418984730362576862">"Tekeleza ishara"</string>
-    <string name="capability_desc_canPerformGestures" msgid="8296373021636981249">"Unaweza kugonga, kutelezesha kidole, kubana na kutekeleza ishara zingine."</string>
+    <string name="capability_desc_canPerformGestures" msgid="8296373021636981249">"Unaweza kugusa, kutelezesha kidole, kubana na kutekeleza ishara zingine."</string>
     <string name="permlab_statusBar" msgid="7417192629601890791">"zima au rekebisha mwambaa hali"</string>
     <string name="permdesc_statusBar" msgid="8434669549504290975">"Inaruhusu programu kulemaza upau wa hali au kuongeza na kutoa aikoni za mfumo."</string>
     <string name="permlab_statusBarService" msgid="4826835508226139688">"kuwa sehemu ya arifa"</string>
@@ -541,7 +541,7 @@
     <string name="policydesc_encryptedStorage" msgid="2637732115325316992">"Inahitaji kwamba data iliyohifadhiwa ya programu iwe na msimbo fiche."</string>
     <string name="policylab_disableCamera" msgid="6395301023152297826">"Kuzima kamera"</string>
     <string name="policydesc_disableCamera" msgid="2306349042834754597">"Kuzuia matumizi yote ya kamera za kifaa."</string>
-    <string name="policylab_disableKeyguardFeatures" msgid="8552277871075367771">"Zima matumizi ya baadhi ya vipengele vya kufunga skrini"</string>
+    <string name="policylab_disableKeyguardFeatures" msgid="8552277871075367771">"Kuzima baadhi ya vipengele vya kufunga skrini"</string>
     <string name="policydesc_disableKeyguardFeatures" msgid="2044755691354158439">"Zuia matumizi ya baadhi ya vipengele vya kufunga skrini."</string>
   <string-array name="phoneTypes">
     <item msgid="8901098336658710359">"Nyumbani"</item>
@@ -831,7 +831,7 @@
     </plurals>
     <string name="last_month" msgid="3959346739979055432">"Mwezi uliopita"</string>
     <string name="older" msgid="5211975022815554840">"Kuukuu zaidi"</string>
-    <string name="preposition_for_date" msgid="9093949757757445117">"tarehe <xliff:g id="DATE">%s</xliff:g>"</string>
+    <string name="preposition_for_date" msgid="9093949757757445117">"mnamo <xliff:g id="DATE">%s</xliff:g>"</string>
     <string name="preposition_for_time" msgid="5506831244263083793">"Saa <xliff:g id="TIME">%s</xliff:g>"</string>
     <string name="preposition_for_year" msgid="5040395640711867177">"ndani  ya <xliff:g id="YEAR">%s</xliff:g>"</string>
     <string name="day" msgid="8144195776058119424">"siku"</string>
@@ -959,7 +959,7 @@
     <string name="cancel" msgid="6442560571259935130">"Ghairi"</string>
     <string name="yes" msgid="5362982303337969312">"Sawa"</string>
     <string name="no" msgid="5141531044935541497">"Ghairi"</string>
-    <string name="dialog_alert_title" msgid="2049658708609043103">"Zingatia"</string>
+    <string name="dialog_alert_title" msgid="2049658708609043103">"Kumbuka"</string>
     <string name="loading" msgid="7933681260296021180">"Inapakia…"</string>
     <string name="capital_on" msgid="1544682755514494298">"Washa"</string>
     <string name="capital_off" msgid="6815870386972805832">"ZIMA"</string>
@@ -1126,7 +1126,7 @@
     <string name="sim_done_button" msgid="827949989369963775">"Nimemaliza"</string>
     <string name="sim_added_title" msgid="3719670512889674693">"SIM kadi imeongezwa"</string>
     <string name="sim_added_message" msgid="7797975656153714319">"Zima na uwashe kifaa chako tena ili ufikie mitandao ya simu za mkononi."</string>
-    <string name="sim_restart_button" msgid="4722407842815232347">"Anza upya"</string>
+    <string name="sim_restart_button" msgid="4722407842815232347">"Washa upya"</string>
     <string name="carrier_app_dialog_message" msgid="7066156088266319533">"Ili SIM yako mpya ifanye kazi vizuri, utahitaji kusakinisha na kufungua programu kutoka kwa mtoa huduma wako."</string>
     <string name="carrier_app_dialog_button" msgid="7900235513678617329">"PATA PROGRAMU"</string>
     <string name="carrier_app_dialog_not_now" msgid="6361378684292268027">"SIYO SASA"</string>

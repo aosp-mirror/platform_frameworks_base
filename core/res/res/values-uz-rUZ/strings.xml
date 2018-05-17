@@ -164,10 +164,10 @@
     <string name="contentServiceSync" msgid="8353523060269335667">"Sinx."</string>
     <string name="contentServiceSyncNotificationTitle" msgid="397743349191901458">"Sinx."</string>
     <string name="contentServiceTooManyDeletesNotificationDesc" msgid="8100981435080696431">"Juda ko‘p <xliff:g id="CONTENT_TYPE">%s</xliff:g> o‘chirishlar."</string>
-    <string name="low_memory" product="tablet" msgid="6494019234102154896">"Planshet xotirasi to‘la. Joy bo‘shatish uchun ba’zi fayllarni o‘chiring."</string>
-    <string name="low_memory" product="watch" msgid="4415914910770005166">"Soat xotirasi to‘lgan. Joy bo‘shatish uchun ba’zi fayllarni o‘chiring."</string>
-    <string name="low_memory" product="tv" msgid="516619861191025923">"Televizor xotirasi to‘lgan. Joy bo‘shatish uchun ba’zi fayllarni o‘chiring."</string>
-    <string name="low_memory" product="default" msgid="3475999286680000541">"Telefon xotirasi to‘la. Joy bo‘shatish uchun ba’zi fayllarni o‘chiring."</string>
+    <string name="low_memory" product="tablet" msgid="6494019234102154896">"Planshet xotirasi to‘la. Joy ochish uchun ba’zi fayllarni o‘chiring."</string>
+    <string name="low_memory" product="watch" msgid="4415914910770005166">"Soat xotirasi to‘lgan. Joy ochish uchun ba’zi fayllarni o‘chiring."</string>
+    <string name="low_memory" product="tv" msgid="516619861191025923">"Televizor xotirasi to‘lgan. Joy ochish uchun ba’zi fayllarni o‘chiring."</string>
+    <string name="low_memory" product="default" msgid="3475999286680000541">"Telefon xotirasi to‘la. Joy ochish uchun ba’zi fayllarni o‘chiring."</string>
     <plurals name="ssl_ca_cert_warning" formatted="false" msgid="5106721205300213569">
       <item quantity="other">Sertifikat markazi sertifikatlari o‘rnatildi</item>
       <item quantity="one">Sertifikat markazi sertifikati o‘rnatildi</item>
@@ -997,7 +997,7 @@
     <string name="aerr_application_repeated" msgid="3146328699537439573">"<xliff:g id="APPLICATION">%1$s</xliff:g> yana ishdan chiqdi"</string>
     <string name="aerr_process_repeated" msgid="6235302956890402259">"<xliff:g id="PROCESS">%1$s</xliff:g> yana ishdan chiqdi"</string>
     <string name="aerr_restart" msgid="7581308074153624475">"Ilovani qayta ochish"</string>
-    <string name="aerr_report" msgid="5371800241488400617">"Fikr-mulohaza yuborish"</string>
+    <string name="aerr_report" msgid="5371800241488400617">"Fikr-mulohaza"</string>
     <string name="aerr_close" msgid="2991640326563991340">"Yopish"</string>
     <string name="aerr_mute" msgid="1974781923723235953">"Qurilma o‘chib yonguncha e’tiborsiz qoldirish"</string>
     <string name="aerr_wait" msgid="3199956902437040261">"Kutish"</string>
@@ -1569,7 +1569,7 @@
     <string name="package_updated_device_owner" msgid="8856631322440187071">"Administratoringiz tomonidan yangilandi"</string>
     <string name="package_deleted_device_owner" msgid="7650577387493101353">"Administratoringiz tomonidan o‘chirilgan"</string>
     <string name="battery_saver_description" msgid="1960431123816253034">"Batareya quvvatini uzoqroq vaqtga yetkazish uchun quvvat tejash funksiyasi qurilmangiz unumdorligini kamaytiradi hamda uning tebranishi va orqa fonda internetdan foydalanishini cheklaydi. Sinxronlanishni talab qiladigan e-pochta, xabar almashinuv va boshqa ilovalar esa qachonki ularni ishga tushirganingizda yangilanadi.\n\nQurilma quvvat olayotganda quvvat tejash funksiyasi avtomatik tarzda o‘chadi."</string>
-    <string name="data_saver_description" msgid="6015391409098303235">"Trafik tejash rejimida ayrim ilovalar uchun orqa fondan internetdan foydalanish imkoniyati cheklanadi. Siz ishlatayotgan ilova zaruratga qarab internet-trafik sarflashi mumkin, biroq cheklangan miqdorda. Masalan, rasmlar ustiga bosmaguningizcha ular yuklanmaydi."</string>
+    <string name="data_saver_description" msgid="6015391409098303235">"Trafik tejash rejimida ayrim ilovalar uchun orqa fonda internetdan foydalanish imkoniyati cheklanadi. Siz ishlatayotgan ilova zaruratga qarab internet-trafik sarflashi mumkin, biroq cheklangan miqdorda. Masalan, rasmlar ustiga bosmaguningizcha ular yuklanmaydi."</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"Trafik tejash yoqilsinmi?"</string>
     <string name="data_saver_enable_button" msgid="7147735965247211818">"Yoqish"</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="4367877408072000848">
@@ -1650,7 +1650,7 @@
     <string name="language_picker_section_all" msgid="3097279199511617537">"Barcha tillar"</string>
     <string name="region_picker_section_all" msgid="8966316787153001779">"Barcha hududlar"</string>
     <string name="locale_search_menu" msgid="2560710726687249178">"Qidiruv"</string>
-    <string name="work_mode_off_title" msgid="8954725060677558855">"Ish rejimi O‘CHIQ"</string>
+    <string name="work_mode_off_title" msgid="8954725060677558855">"Ish rejimi YOQILMAGAN"</string>
     <string name="work_mode_off_message" msgid="3286169091278094476">"Ishchi profilini yoqish: ilovalar, fonda sinxronlash va bog‘liq funksiyalar."</string>
     <string name="work_mode_turn_on" msgid="2062544985670564875">"Yoqish"</string>
     <string name="new_sms_notification_title" msgid="8442817549127555977">"Sizga yangi SMS keldi"</string>

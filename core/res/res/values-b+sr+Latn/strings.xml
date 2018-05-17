@@ -769,7 +769,7 @@
     <string name="factorytest_not_system" msgid="4435201656767276723">"Radnja FACTORY_TEST je podržana samo za pakete instalirane u direktorijumu /system/app."</string>
     <string name="factorytest_no_action" msgid="872991874799998561">"Nije pronađen nijedan paket koji obezbeđuje radnju FACTORY_TEST."</string>
     <string name="factorytest_reboot" msgid="6320168203050791643">"Ponovo pokreni"</string>
-    <string name="js_dialog_title" msgid="1987483977834603872">"Na stranici na adresi „<xliff:g id="TITLE">%s</xliff:g>“ piše sledeće:"</string>
+    <string name="js_dialog_title" msgid="1987483977834603872">"Na stranici na adresi „<xliff:g id="TITLE">%s</xliff:g>“ piše:"</string>
     <string name="js_dialog_title_default" msgid="6961903213729667573">"JavaScript"</string>
     <string name="js_dialog_before_unload_title" msgid="2619376555525116593">"Potvrda navigacije"</string>
     <string name="js_dialog_before_unload_positive_button" msgid="3112752010600484130">"Zatvori ovu stranicu"</string>
@@ -980,7 +980,7 @@
     <string name="low_internal_storage_view_text_no_boot" msgid="6935190099204693424">"Nema dovoljno memorijskog prostora za sistem. Uverite se da imate 250 MB slobodnog prostora i ponovo pokrenite."</string>
     <string name="app_running_notification_title" msgid="8718335121060787914">"Aplikacija <xliff:g id="APP_NAME">%1$s</xliff:g> je pokrenuta"</string>
     <string name="app_running_notification_text" msgid="1197581823314971177">"Dodirnite za više informacija ili zaustavljanje aplikacije."</string>
-    <string name="ok" msgid="5970060430562524910">"U redu"</string>
+    <string name="ok" msgid="5970060430562524910">"Potvrdi"</string>
     <string name="cancel" msgid="6442560571259935130">"Otkaži"</string>
     <string name="yes" msgid="5362982303337969312">"Potvrdi"</string>
     <string name="no" msgid="5141531044935541497">"Otkaži"</string>
@@ -1159,7 +1159,7 @@
     <string name="carrier_app_dialog_not_now" msgid="6361378684292268027">"NE SADA"</string>
     <string name="carrier_app_notification_title" msgid="8921767385872554621">"Nova SIM kartica je umetnuta"</string>
     <string name="carrier_app_notification_text" msgid="1132487343346050225">"Dodirnite za podešavanje"</string>
-    <string name="time_picker_dialog_title" msgid="8349362623068819295">"Podešavanje vremena"</string>
+    <string name="time_picker_dialog_title" msgid="8349362623068819295">"Podesite vreme"</string>
     <string name="date_picker_dialog_title" msgid="5879450659453782278">"Podešavanje datuma"</string>
     <string name="date_time_set" msgid="5777075614321087758">"Podesi"</string>
     <string name="date_time_done" msgid="2507683751759308828">"Gotovo"</string>
@@ -1238,7 +1238,7 @@
     <string name="ime_action_go" msgid="8320845651737369027">"Idi"</string>
     <string name="ime_action_search" msgid="658110271822807811">"Pretraži"</string>
     <string name="ime_action_send" msgid="2316166556349314424">"Pošalji"</string>
-    <string name="ime_action_next" msgid="3138843904009813834">"Sledeće"</string>
+    <string name="ime_action_next" msgid="3138843904009813834">"Dalje"</string>
     <string name="ime_action_done" msgid="8971516117910934605">"Gotovo"</string>
     <string name="ime_action_previous" msgid="1443550039250105948">"Prethodno"</string>
     <string name="ime_action_default" msgid="2840921885558045721">"Izvrši"</string>
@@ -1267,7 +1267,7 @@
     <string name="vpn_text" msgid="1610714069627824309">"Dodirnite da biste upravljali mrežom."</string>
     <string name="vpn_text_long" msgid="4907843483284977618">"Povezano sa sesijom <xliff:g id="SESSION">%s</xliff:g>. Dodirnite da biste upravljali mrežom."</string>
     <string name="vpn_lockdown_connecting" msgid="6443438964440960745">"Povezivanje stalno uključenog VPN-a..."</string>
-    <string name="vpn_lockdown_connected" msgid="8202679674819213931">"Stalno uključeni VPN je povezan"</string>
+    <string name="vpn_lockdown_connected" msgid="8202679674819213931">"Stalno uključen VPN je povezan"</string>
     <string name="vpn_lockdown_disconnected" msgid="4532298952570796327">"Veza sa stalno uključenim VPN-om je prekinuta"</string>
     <string name="vpn_lockdown_error" msgid="6009249814034708175">"Greška stalno uključenog VPN-a"</string>
     <string name="vpn_lockdown_config" msgid="5099330695245008680">"Dodirnite da biste podesili"</string>

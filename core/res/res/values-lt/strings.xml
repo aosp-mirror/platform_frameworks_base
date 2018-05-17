@@ -276,7 +276,7 @@
     <string name="capability_title_canRequestFilterKeyEvents" msgid="2103440391902412174">"Stebėti jūsų įvedamą tekstą"</string>
     <string name="capability_desc_canRequestFilterKeyEvents" msgid="7463135292204152818">"Įtraukiami asmeniniai duomenys, pavyzdžiui, kredito kortelių numeriai ir slaptažodžiai."</string>
     <string name="capability_title_canControlMagnification" msgid="3593493281059424855">"Valdyti ekrano didinimą"</string>
-    <string name="capability_desc_canControlMagnification" msgid="4791858203568383773">"Valdykite ekrano mastelio keitimo lygį ir pozicijos nustatymą."</string>
+    <string name="capability_desc_canControlMagnification" msgid="4791858203568383773">"Valdyti ekrano mastelio keitimo lygį ir pozicijos nustatymą."</string>
     <string name="capability_title_canPerformGestures" msgid="7418984730362576862">"Veiksmai gestais"</string>
     <string name="capability_desc_canPerformGestures" msgid="8296373021636981249">"Galima paliesti, perbraukti, suimti ir atlikti kitus veiksmus gestais."</string>
     <string name="permlab_statusBar" msgid="7417192629601890791">"išjungti ar keisti būsenos juostą"</string>

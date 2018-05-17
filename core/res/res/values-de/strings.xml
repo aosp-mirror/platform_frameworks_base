@@ -100,7 +100,7 @@
     <string name="peerTtyModeHco" msgid="5728602160669216784">"Peer hat TTY-Modus \"HCO\" angefordert."</string>
     <string name="peerTtyModeVco" msgid="1742404978686538049">"Peer hat TTY-Modus \"VC\" angefordert."</string>
     <string name="peerTtyModeOff" msgid="3280819717850602205">"Peer hat TTY-Modus \"Aus\" angefordert."</string>
-    <string name="serviceClassVoice" msgid="1258393812335258019">"Sprachnotiz"</string>
+    <string name="serviceClassVoice" msgid="1258393812335258019">"Stimme"</string>
     <string name="serviceClassData" msgid="872456782077937893">"Daten"</string>
     <string name="serviceClassFAX" msgid="5566624998840486475">"FAX"</string>
     <string name="serviceClassSMS" msgid="2015460373701527489">"SMS"</string>
@@ -122,16 +122,16 @@
     <string name="roamingText11" msgid="4154476854426920970">"Roaming-Banner ein"</string>
     <string name="roamingText12" msgid="1189071119992726320">"Roaming-Banner aus"</string>
     <string name="roamingTextSearching" msgid="8360141885972279963">"Suche nach Dienst"</string>
-    <string name="wfcRegErrorTitle" msgid="2301376280632110664">"Anrufe über WLAN"</string>
+    <string name="wfcRegErrorTitle" msgid="2301376280632110664">"WLAN-Telefonie"</string>
   <string-array name="wfcOperatorErrorAlertMessages">
-    <item msgid="2254967670088539682">"Um über WLAN telefonieren und Nachrichten senden zu können, bitte zuerst deinen Mobilfunkanbieter, diesen Dienst einzurichten. Aktiviere die Option \"Anrufe über WLAN\" dann erneut über die Einstellungen."</item>
+    <item msgid="2254967670088539682">"Um über WLAN telefonieren und Nachrichten senden zu können, bitte zuerst deinen Mobilfunkanbieter, diesen Dienst einzurichten. Anschließend kannst du die Option \"WLAN-Telefonie\" über die Einstellungen erneut aktivieren."</item>
   </string-array>
   <string-array name="wfcOperatorErrorNotificationMessages">
     <item msgid="6177300162212449033">"Registriere dich bei deinem Mobilfunkanbieter."</item>
   </string-array>
   <string-array name="wfcSpnFormats">
     <item msgid="6830082633573257149">"%s"</item>
-    <item msgid="4397097370387921767">"%s Anrufe über WLAN"</item>
+    <item msgid="4397097370387921767">"%s WLAN-Telefonie"</item>
   </string-array>
     <string name="wifi_calling_off_summary" msgid="8720659586041656098">"Aus"</string>
     <string name="wfc_mode_wifi_preferred_summary" msgid="1994113411286935263">"WLAN bevorzugt"</string>
@@ -669,7 +669,7 @@
     <string name="keyguard_password_wrong_pin_code" msgid="2422225591006134936">"Falscher PIN-Code"</string>
     <string name="keyguard_label_text" msgid="861796461028298424">"Drücke zum Entsperren die Menütaste und dann auf \"0\"."</string>
     <string name="emergency_call_dialog_number_for_display" msgid="696192103195090970">"Notrufnummer"</string>
-    <string name="lockscreen_carrier_default" msgid="6169005837238288522">"Kein Dienst"</string>
+    <string name="lockscreen_carrier_default" msgid="6169005837238288522">"Dienst nicht verfügbar"</string>
     <string name="lockscreen_screen_locked" msgid="7288443074806832904">"Display gesperrt"</string>
     <string name="lockscreen_instructions_when_pattern_enabled" msgid="46154051614126049">"Drücke die Menütaste, um das Telefon zu entsperren oder einen Notruf zu tätigen."</string>
     <string name="lockscreen_instructions_when_pattern_disabled" msgid="686260028797158364">"Zum Entsperren die Menütaste drücken"</string>
@@ -1274,7 +1274,7 @@
     <string name="gpsNotifTicker" msgid="5622683912616496172">"Standortabfrage von <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="gpsNotifTitle" msgid="5446858717157416839">"Standortabfrage"</string>
     <string name="gpsNotifMessage" msgid="1374718023224000702">"Angefordert von <xliff:g id="NAME">%1$s</xliff:g> (<xliff:g id="SERVICE">%2$s</xliff:g>)"</string>
-    <string name="gpsVerifYes" msgid="2346566072867213563">"Ja"</string>
+    <string name="gpsVerifYes" msgid="2346566072867213563">"\"Ja\""</string>
     <string name="gpsVerifNo" msgid="1146564937346454865">"Nein"</string>
     <string name="sync_too_many_deletes" msgid="5296321850662746890">"Löschbegrenzung überschritten"</string>
     <string name="sync_too_many_deletes_desc" msgid="496551671008694245">"Es sind <xliff:g id="NUMBER_OF_DELETED_ITEMS">%1$d</xliff:g> gelöschte Elemente für <xliff:g id="TYPE_OF_SYNC">%2$s</xliff:g>, Konto <xliff:g id="ACCOUNT_NAME">%3$s</xliff:g>, vorhanden. Wie möchtest du fortfahren?"</string>
@@ -1307,7 +1307,7 @@
     <string name="keyboardview_keycode_delete" msgid="3337914833206635744">"Löschen"</string>
     <string name="keyboardview_keycode_done" msgid="1992571118466679775">"Fertig"</string>
     <string name="keyboardview_keycode_mode_change" msgid="4547387741906537519">"Modusänderung"</string>
-    <string name="keyboardview_keycode_shift" msgid="2270748814315147690">"Shift"</string>
+    <string name="keyboardview_keycode_shift" msgid="2270748814315147690">"Umschalttaste"</string>
     <string name="keyboardview_keycode_enter" msgid="2985864015076059467">"Eingabetaste"</string>
     <string name="activitychooserview_choose_application" msgid="2125168057199941199">"App auswählen"</string>
     <string name="activitychooserview_choose_application_error" msgid="8624618365481126668">"<xliff:g id="APPLICATION_NAME">%s</xliff:g> konnte nicht gestartet werden."</string>

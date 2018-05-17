@@ -146,7 +146,7 @@
     <string name="fcError" msgid="3327560126588500777">"Проблем со поврзувањето или неважечки код за карактеристиката."</string>
     <string name="httpErrorOk" msgid="1191919378083472204">"Во ред"</string>
     <string name="httpError" msgid="7956392511146698522">"Настана грешка на мрежа."</string>
-    <string name="httpErrorLookup" msgid="4711687456111963163">"Не можеше да се најде УРЛ."</string>
+    <string name="httpErrorLookup" msgid="4711687456111963163">"Не можеше да се најде URL."</string>
     <string name="httpErrorUnsupportedAuthScheme" msgid="6299980280442076799">"Шемата за автентикација на локацијата не е поддржана."</string>
     <string name="httpErrorAuth" msgid="1435065629438044534">"Не можеше да се автентицира."</string>
     <string name="httpErrorProxyAuth" msgid="1788207010559081331">"Автентикацијата преку прокси серверот беше неуспешна."</string>
@@ -156,7 +156,7 @@
     <string name="httpErrorRedirectLoop" msgid="8679596090392779516">"Страницата содржи премногу пренасочувања од серверот."</string>
     <string name="httpErrorUnsupportedScheme" msgid="5015730812906192208">"Протоколот не е поддржан."</string>
     <string name="httpErrorFailedSslHandshake" msgid="96549606000658641">"Не можеше да се воспостави безбедна врска."</string>
-    <string name="httpErrorBadUrl" msgid="3636929722728881972">"Страницата не можеше да се отвори, бидејќи УРЛ е неважечки."</string>
+    <string name="httpErrorBadUrl" msgid="3636929722728881972">"Страницата не можеше да се отвори, бидејќи URL е неважечки."</string>
     <string name="httpErrorFile" msgid="2170788515052558676">"Не можеше да се пристапи до датотеката."</string>
     <string name="httpErrorFileNotFound" msgid="6203856612042655084">"Не можеше да се најде бараната датотека."</string>
     <string name="httpErrorTooManyRequests" msgid="1235396927087188253">"Се обработуваат премногу барања. Обидете се повторно подоцна."</string>
@@ -216,7 +216,7 @@
     <string name="global_action_power_off" msgid="4471879440839879722">"Исклучи"</string>
     <string name="global_action_emergency" msgid="7112311161137421166">"Итен случај"</string>
     <string name="global_action_bug_report" msgid="7934010578922304799">"Извештај за грешка"</string>
-    <string name="bugreport_title" msgid="2667494803742548533">"Земи извештај за грешки"</string>
+    <string name="bugreport_title" msgid="2667494803742548533">"Направи извештај за грешки"</string>
     <string name="bugreport_message" msgid="398447048750350456">"Ова ќе собира информации за моменталната состојба на вашиот уред, за да ги испрати како порака по е-пошта. Тоа ќе одземе малку време почнувајќи од извештајот за грешки додека не се подготви за праќање; бидете трпеливи."</string>
     <string name="bugreport_option_interactive_title" msgid="8635056131768862479">"Интерактивен извештај"</string>
     <string name="bugreport_option_interactive_summary" msgid="229299488536107968">"Користете го ова во повеќето ситуации. Ви дозволува да го следите напредокот на извештајот, да внесете повеќе детали во врска со проблемот и да сликате слики од екранот. Може да испушти некои помалку користени делови за коишто е потребно долго време за да се пријават."</string>
@@ -502,12 +502,12 @@
     <string name="permdesc_accessNetworkConditions" msgid="6899102075825272211">"Овозможува апликацијата да слуша за набљудувања во врска со условите на мрежата. Не треба да се користи за стандардни апликации."</string>
     <string name="permlab_setInputCalibration" msgid="4902620118878467615">"промени калибрирање на уред за внес"</string>
     <string name="permdesc_setInputCalibration" msgid="4527511047549456929">"Дозволува апликацијата да ги изменува калибрирачките параметри на екранот на допир. Не треба да се користи за стандардни апликации."</string>
-    <string name="permlab_accessDrmCertificates" msgid="7436886640723203615">"пристап до ДРМ-сертификати"</string>
-    <string name="permdesc_accessDrmCertificates" msgid="8073288354426159089">"Дозволува апликацијата да обезбедува и користи ДРМ-сертификати. Не треба да се користи за стандардни апликации."</string>
+    <string name="permlab_accessDrmCertificates" msgid="7436886640723203615">"пристап до DRM-сертификати"</string>
+    <string name="permdesc_accessDrmCertificates" msgid="8073288354426159089">"Дозволува апликацијата да обезбедува и користи DRM-сертификати. Не треба да се користи за стандардни апликации."</string>
     <string name="permlab_handoverStatus" msgid="7820353257219300883">"добивање статус на пренос на Android Beam"</string>
     <string name="permdesc_handoverStatus" msgid="4788144087245714948">"Ѝ дозволува на оваа апликација да добива информации за моменталните трансфери на Android Beam"</string>
-    <string name="permlab_removeDrmCertificates" msgid="7044888287209892751">"отстранување ДРМ-сетификати"</string>
-    <string name="permdesc_removeDrmCertificates" msgid="7272999075113400993">"Дозволува апликација да отстранува ДРМ-сертификати. Не треба да се користи за стандардни апликации."</string>
+    <string name="permlab_removeDrmCertificates" msgid="7044888287209892751">"отстранување DRM-сетификати"</string>
+    <string name="permdesc_removeDrmCertificates" msgid="7272999075113400993">"Дозволува апликација да отстранува DRM-сертификати. Не треба да се користи за стандардни апликации."</string>
     <string name="permlab_bindCarrierMessagingService" msgid="1490229371796969158">"сврзување со давателот на услугата за пораки"</string>
     <string name="permdesc_bindCarrierMessagingService" msgid="2762882888502113944">"Дозволува сопственикот да се сврзе со интерфејсот од највисоко ниво на давателот на услугата за пораки. Не треба да се користи за стандардни апликации."</string>
     <string name="permlab_bindCarrierServices" msgid="3233108656245526783">"поврзи се со услуги на операторот"</string>
@@ -793,7 +793,7 @@
     <string name="autofill_area" msgid="3547409050889952423">"Област"</string>
     <string name="autofill_emirate" msgid="2893880978835698818">"Емират"</string>
     <string name="permlab_readHistoryBookmarks" msgid="3775265775405106983">"прочитај ги своите веб обележувачи и историја"</string>
-    <string name="permdesc_readHistoryBookmarks" msgid="8462378226600439658">"Овозможува апликацијата да ја чита историјата на сите УРЛ кои ги посетил прелистувачот и сите обележувачи на прелистувачот. Напомена: оваа дозвола не може да ја наметнат прелистувачи на трети лица или други апликации со способности за прелистување на интернет."</string>
+    <string name="permdesc_readHistoryBookmarks" msgid="8462378226600439658">"Овозможува апликацијата да ја чита историјата на сите URL кои ги посетил прелистувачот и сите обележувачи на прелистувачот. Напомена: оваа дозвола не може да ја наметнат прелистувачи на трети лица или други апликации со способности за прелистување на интернет."</string>
     <string name="permlab_writeHistoryBookmarks" msgid="3714785165273314490">"напиши веб обележувачи и историја"</string>
     <string name="permdesc_writeHistoryBookmarks" product="tablet" msgid="6825527469145760922">"Овозможува апликацијата да ја менува историјата на прелистувачот или обележувачите зачувани во вашиот таблет. Ова може да овозможи апликацијата да избрише или да измени податоци за прелистувач. Напомена: оваа дозвола не може да ја наметнат прелистувачи на трети лица или други апликации со способности за прелистување на интернет."</string>
     <string name="permdesc_writeHistoryBookmarks" product="tv" msgid="7007393823197766548">"Дозволува апликацијата да ги менува историјата на прелистувачот или обележувачите складирани во вашиот телевизор. Ова може да ѝ дозволи на апликацијата да ги брише или менува податоците на прелистувачот. Забелешка: оваа дозвола не може да биде наметната од прелистувачи на трети лица или други апликации со можности за прелистување."</string>
@@ -943,7 +943,7 @@
     <string name="paste_as_plain_text" msgid="5427792741908010675">"Залепи како обичен текст"</string>
     <string name="replace" msgid="5781686059063148930">"Замени..."</string>
     <string name="delete" msgid="6098684844021697789">"Избриши"</string>
-    <string name="copyUrl" msgid="2538211579596067402">"Копирај УРЛ"</string>
+    <string name="copyUrl" msgid="2538211579596067402">"Копирај URL"</string>
     <string name="selectTextMode" msgid="1018691815143165326">"Избери текст"</string>
     <string name="undo" msgid="7905788502491742328">"Врати"</string>
     <string name="redo" msgid="7759464876566803888">"Повтори"</string>
@@ -966,7 +966,7 @@
     <string name="capital_on" msgid="1544682755514494298">"ВКЛУЧЕНО"</string>
     <string name="capital_off" msgid="6815870386972805832">"ИСКЛУЧЕНО"</string>
     <string name="whichApplication" msgid="4533185947064773386">"Заврши дејство со"</string>
-    <string name="whichApplicationNamed" msgid="8260158865936942783">"Завршете го дејството со користење %1$s"</string>
+    <string name="whichApplicationNamed" msgid="8260158865936942783">"Остварете го дејството со %1$s"</string>
     <string name="whichApplicationLabel" msgid="7425855495383818784">"Заврши го дејството"</string>
     <string name="whichViewApplication" msgid="3272778576700572102">"Отвори со"</string>
     <string name="whichViewApplicationNamed" msgid="2286418824011249620">"Отвори со %1$s"</string>

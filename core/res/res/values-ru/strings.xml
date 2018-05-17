@@ -257,14 +257,14 @@
     <string name="permgroupdesc_calendar" msgid="3889615280211184106">"доступ к календарю"</string>
     <string name="permgrouplab_sms" msgid="228308803364967808">"SMS"</string>
     <string name="permgroupdesc_sms" msgid="4656988620100940350">"отправлять и просматривать SMS-сообщения"</string>
-    <string name="permgrouplab_storage" msgid="1971118770546336966">"Память"</string>
+    <string name="permgrouplab_storage" msgid="1971118770546336966">"Хранилище"</string>
     <string name="permgroupdesc_storage" msgid="637758554581589203">"доступ к фото, мультимедиа и файлам на вашем устройстве"</string>
     <string name="permgrouplab_microphone" msgid="171539900250043464">"Микрофон"</string>
     <string name="permgroupdesc_microphone" msgid="4988812113943554584">"записывать аудио"</string>
     <string name="permgrouplab_camera" msgid="4820372495894586615">"Камера"</string>
     <string name="permgroupdesc_camera" msgid="3250611594678347720">"снимать фото и видео"</string>
     <string name="permgrouplab_phone" msgid="5229115638567440675">"Телефон"</string>
-    <string name="permgroupdesc_phone" msgid="6234224354060641055">"осуществление телефонных звонков и управление ими"</string>
+    <string name="permgroupdesc_phone" msgid="6234224354060641055">"осуществлять вызовы и управлять ими"</string>
     <string name="permgrouplab_sensors" msgid="416037179223226722">"Нательные датчики"</string>
     <string name="permgroupdesc_sensors" msgid="7147968539346634043">"доступ к данным датчиков о состоянии организма"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"Получать содержимое окна"</string>
@@ -1007,7 +1007,7 @@
     <string name="cancel" msgid="6442560571259935130">"Отмена"</string>
     <string name="yes" msgid="5362982303337969312">"ОК"</string>
     <string name="no" msgid="5141531044935541497">"Отмена"</string>
-    <string name="dialog_alert_title" msgid="2049658708609043103">"Внимание"</string>
+    <string name="dialog_alert_title" msgid="2049658708609043103">"Внимание!"</string>
     <string name="loading" msgid="7933681260296021180">"Загрузка…"</string>
     <string name="capital_on" msgid="1544682755514494298">"I"</string>
     <string name="capital_off" msgid="6815870386972805832">"O"</string>
@@ -1429,7 +1429,7 @@
     <string name="wireless_display_route_description" msgid="9070346425023979651">"Беспроводной монитор"</string>
     <string name="media_route_button_content_description" msgid="591703006349356016">"Транслировать."</string>
     <string name="media_route_chooser_title" msgid="1751618554539087622">"Подключение к устройству"</string>
-    <string name="media_route_chooser_title_for_remote_display" msgid="3395541745872017583">"Подключение к удаленному дисплею"</string>
+    <string name="media_route_chooser_title_for_remote_display" msgid="3395541745872017583">"Трансляция экрана"</string>
     <string name="media_route_chooser_searching" msgid="4776236202610828706">"Поиск устройств…"</string>
     <string name="media_route_chooser_extended_settings" msgid="87015534236701604">"Настройки"</string>
     <string name="media_route_controller_disconnect" msgid="8966120286374158649">"Отключить"</string>
