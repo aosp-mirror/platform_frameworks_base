@@ -48,7 +48,7 @@ import com.android.settingslib.bluetooth.CachedBluetoothDeviceManager;
 import com.android.settingslib.bluetooth.LocalBluetoothAdapter;
 import com.android.settingslib.bluetooth.LocalBluetoothManager;
 import com.android.settingslib.bluetooth.LocalBluetoothProfileManager;
-import com.android.settingslib.bluetooth.Utils;
+import com.android.settingslib.bluetooth.BluetoothUtils;
 import com.android.systemui.R;
 import com.android.systemui.SystemUI;
 
@@ -183,7 +183,7 @@ public class KeyboardUI extends SystemUI implements InputManager.OnTabletModeCha
         mLocalBluetoothAdapter = bluetoothManager.getBluetoothAdapter();
         mProfileManager = bluetoothManager.getProfileManager();
         bluetoothManager.getEventManager().registerCallback(new BluetoothCallbackHandler());
-        Utils.setErrorListener(new BluetoothErrorListener());
+        BluetoothUtils.setErrorListener(new BluetoothErrorListener());
 
         InputManager im = context.getSystemService(InputManager.class);
         im.registerOnTabletModeChangedListener(this, mHandler);
@@ -616,7 +616,7 @@ public class KeyboardUI extends SystemUI implements InputManager.OnTabletModeCha
         public void onAudioModeChanged() { }
     }
 
-    private final class BluetoothErrorListener implements Utils.ErrorListener {
+    private final class BluetoothErrorListener implements BluetoothUtils.ErrorListener {
         public void onShowError(Context context, String name, int messageResId) {
             mHandler.obtainMessage(MSG_SHOW_ERROR, messageResId, 0 /*unused*/,
                     new Pair<>(context, name)).sendToTarget();

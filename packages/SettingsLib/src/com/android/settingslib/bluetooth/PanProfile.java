@@ -153,7 +153,7 @@ public class PanProfile implements LocalBluetoothProfile {
                 }
 
             default:
-                return Utils.getConnectionStateSummary(state);
+                return BluetoothUtils.getConnectionStateSummary(state);
         }
     }
 

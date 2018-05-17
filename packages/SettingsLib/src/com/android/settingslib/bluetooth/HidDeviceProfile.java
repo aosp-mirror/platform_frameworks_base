@@ -26,7 +26,6 @@ import android.util.Log;
 
 import com.android.settingslib.R;
 
-import java.util.Collection;
 import java.util.List;
 
 /**
@@ -179,7 +178,7 @@ public class HidDeviceProfile implements LocalBluetoothProfile {
             case BluetoothProfile.STATE_CONNECTED:
                 return R.string.bluetooth_hid_profile_summary_connected;
             default:
-                return Utils.getConnectionStateSummary(state);
+                return BluetoothUtils.getConnectionStateSummary(state);
         }
     }
 

@@ -29,20 +29,22 @@ import org.junit.runner.RunWith;
 import org.robolectric.RuntimeEnvironment;
 
 @RunWith(SettingsLibRobolectricTestRunner.class)
-public class UtilsTest {
+public class BluetoothUtilsTest {
 
     @Test
     public void testGetBluetoothDrawable_noBatteryLevel_returnSimpleDrawable() {
-        final Drawable drawable = Utils.getBluetoothDrawable(RuntimeEnvironment.application,
-                R.drawable.ic_bt_laptop, BluetoothDevice.BATTERY_LEVEL_UNKNOWN, 1 /* iconScale */);
+        final Drawable drawable = BluetoothUtils.getBluetoothDrawable(
+                RuntimeEnvironment.application, R.drawable.ic_bt_laptop,
+                BluetoothDevice.BATTERY_LEVEL_UNKNOWN, 1 /* iconScale */);
 
         assertThat(drawable).isNotInstanceOf(BluetoothDeviceLayerDrawable.class);
     }
 
     @Test
     public void testGetBluetoothDrawable_hasBatteryLevel_returnLayerDrawable() {
-        final Drawable drawable = Utils.getBluetoothDrawable(RuntimeEnvironment.application,
-                R.drawable.ic_bt_laptop, 10 /* batteryLevel */, 1 /* iconScale */);
+        final Drawable drawable = BluetoothUtils.getBluetoothDrawable(
+                RuntimeEnvironment.application, R.drawable.ic_bt_laptop,
+                10 /* batteryLevel */, 1 /* iconScale */);
 
         assertThat(drawable).isInstanceOf(BluetoothDeviceLayerDrawable.class);
     }
