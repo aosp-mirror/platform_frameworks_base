@@ -806,7 +806,7 @@ public class StatusBarIconView extends AnimatedImageView implements StatusIconDi
             updateDecorColor();
             updateIconColor();
             updateAllowAnimation();
-        }, dark, fade, delay);
+        }, dark, fade, delay, this);
     }
 
     private void updateAllowAnimation() {
