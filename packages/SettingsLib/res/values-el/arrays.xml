@@ -138,6 +138,9 @@
     <item msgid="4681409244565426925">"Βελτιστοποιημένο για ποιότητα σύνδεσης"</item>
     <item msgid="364670732877872677">"Βέλτιστη προσπάθεια (ρυθμός δεδομένων με δυνατότητα προσαρμογής)"</item>
   </string-array>
+    <!-- no translation found for bluetooth_audio_active_device_summaries:1 (6481691720774549651) -->
+    <!-- no translation found for bluetooth_audio_active_device_summaries:2 (8962366465966010158) -->
+    <!-- no translation found for bluetooth_audio_active_device_summaries:3 (4046665544396189228) -->
   <string-array name="select_logd_size_titles">
     <item msgid="8665206199209698501">"Ανενεργό"</item>
     <item msgid="1593289376502312923">"64 K"</item>
