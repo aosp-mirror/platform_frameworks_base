@@ -93,12 +93,18 @@ bool SkiaDisplayList::prepareListAndChildren(
 
     bool isDirty = false;
     for (auto& animatedImage : mAnimatedImages) {
+        nsecs_t timeTilNextFrame = TreeInfo::Out::kNoAnimatedImageDelay;
         // If any animated image in the display list needs updated, then damage the node.
-        if (animatedImage->isDirty()) {
+        if (animatedImage->isDirty(&timeTilNextFrame)) {
             isDirty = true;
         }
-        if (animatedImage->isRunning()) {
-            info.out.hasAnimations = true;
+
+        if (animatedImage->isRunning() &&
+            timeTilNextFrame != TreeInfo::Out::kNoAnimatedImageDelay) {
+            auto& delay = info.out.animatedImageDelay;
+            if (delay == TreeInfo::Out::kNoAnimatedImageDelay || timeTilNextFrame < delay) {
+                delay = timeTilNextFrame;
+            }
         }
     }
 

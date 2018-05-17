@@ -19,6 +19,7 @@
 #include <cutils/compiler.h>
 #include <utils/Macros.h>
 #include <utils/RefBase.h>
+#include <utils/Timers.h>
 
 #include <SkAnimatedImage.h>
 #include <SkCanvas.h>
@@ -50,12 +51,15 @@ public:
     AnimatedImageDrawable(sk_sp<SkAnimatedImage> animatedImage, size_t bytesUsed);
 
     /**
-     * This updates the internal time and returns true if the animation needs
-     * to be redrawn.
+     * This updates the internal time and returns true if the image needs
+     * to be redrawn this frame.
      *
      * This is called on RenderThread, while the UI thread is locked.
+     *
+     * @param outDelay Nanoseconds in the future when the following frame
+     *      will need to be drawn. 0 if not running.
      */
-    bool isDirty();
+    bool isDirty(nsecs_t* outDelay);
 
     int getStagingAlpha() const { return mStagingProperties.mAlpha; }
     void setStagingAlpha(int alpha) { mStagingProperties.mAlpha = alpha; }
@@ -68,7 +72,9 @@ public:
     virtual SkRect onGetBounds() override { return mSkAnimatedImage->getBounds(); }
 
     // Draw to software canvas, and return time to next draw.
-    double drawStaging(SkCanvas* canvas);
+    // 0 means the animation is not running.
+    // -1 means the animation advanced to the final frame.
+    int drawStaging(SkCanvas* canvas);
 
     // Returns true if the animation was started; false otherwise (e.g. it was
     // already running)
@@ -84,11 +90,9 @@ public:
         mEndListener = std::move(listener);
     }
 
-    void markInvisible() { mDidDraw = false; }
-
     struct Snapshot {
         sk_sp<SkPicture> mPic;
-        int mDuration;
+        int mDurationMS;
 
         Snapshot() = default;
 
@@ -124,16 +128,13 @@ private:
     bool nextSnapshotReady() const;
 
     // When to switch from mSnapshot to mNextSnapshot.
-    double mTimeToShowNextSnapshot = 0.0;
+    nsecs_t mTimeToShowNextSnapshot = 0;
 
     // The current time for the drawable itself.
-    double mCurrentTime = 0.0;
+    nsecs_t mCurrentTime = 0;
 
     // The wall clock of the last time we called isDirty.
-    double mLastWallTime = 0.0;
-
-    // Whether we drew since the last call to isDirty.
-    bool mDidDraw = false;
+    nsecs_t mLastWallTime = 0;
 
     // Locked when assigning snapshots and times. Operations while this is held
     // should be short.

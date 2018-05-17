@@ -31,6 +31,7 @@ import android.graphics.PixelFormat;
 import android.graphics.Rect;
 import android.os.Handler;
 import android.os.Looper;
+import android.os.SystemClock;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
 import android.util.TypedValue;
@@ -348,7 +349,7 @@ public class AnimatedImageDrawable extends Drawable implements Animatable2 {
             if (mRunnable == null) {
                 mRunnable = this::invalidateSelf;
             }
-            scheduleSelf(mRunnable, nextUpdate);
+            scheduleSelf(mRunnable, nextUpdate + SystemClock.uptimeMillis());
         } else if (nextUpdate == FINISHED) {
             // This means the animation was drawn in software mode and ended.
             postOnAnimationEnd();
@@ -428,23 +429,6 @@ public class AnimatedImageDrawable extends Drawable implements Animatable2 {
     @Override
     public final boolean isAutoMirrored() {
         return mState.mAutoMirrored;
-    }
-
-    @Override
-    public boolean setVisible(boolean visible, boolean restart) {
-        if (!super.setVisible(visible, restart)) {
-            return false;
-        }
-
-        if (mState.mNativePtr == 0) {
-            throw new IllegalStateException("called setVisible on empty AnimatedImageDrawable");
-        }
-
-        if (!visible) {
-            nMarkInvisible(mState.mNativePtr);
-        }
-
-        return true;
     }
 
     // Animatable overrides
@@ -615,8 +599,6 @@ public class AnimatedImageDrawable extends Drawable implements Animatable2 {
             @Nullable AnimatedImageDrawable drawable);
     @FastNative
     private static native long nNativeByteSize(long nativePtr);
-    @FastNative
-    private static native void nMarkInvisible(long nativePtr);
     @FastNative
     private static native void nSetMirrored(long nativePtr, boolean mirror);
 }
