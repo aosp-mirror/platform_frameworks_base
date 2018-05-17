@@ -670,23 +670,6 @@ LOCAL_DROIDDOC_CUSTOM_TEMPLATE_DIR:=external/doclava/res/assets/templates-sdk
 
 include $(BUILD_DROIDDOC)
 
-# ====  java proto host library  ==============================
-include $(CLEAR_VARS)
-LOCAL_MODULE := platformprotos
-LOCAL_PROTOC_OPTIMIZE_TYPE := full
-LOCAL_PROTOC_FLAGS := \
-    -Iexternal/protobuf/src
-LOCAL_SOURCE_FILES_ALL_GENERATED := true
-LOCAL_SRC_FILES := \
-    cmds/am/proto/instrumentation_data.proto \
-    cmds/statsd/src/perfetto/perfetto_config.proto \
-    $(call all-proto-files-under, core/proto) \
-    $(call all-proto-files-under, libs/incident/proto) \
-    $(call all-proto-files-under, cmds/statsd/src)
-# b/72714520
-LOCAL_ERROR_PRONE_FLAGS := -Xep:MissingOverride:OFF
-include $(BUILD_HOST_JAVA_LIBRARY)
-
 # ====  java proto device library (for test only)  ==============================
 include $(CLEAR_VARS)
 LOCAL_MODULE := platformprotosnano
