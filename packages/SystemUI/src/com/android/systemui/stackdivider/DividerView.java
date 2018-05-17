@@ -781,7 +781,8 @@ public class DividerView extends FrameLayout implements OnTouchListener,
             mMinimizedSnapAlgorithm = null;
             mDockedStackMinimized = minimized;
             initializeSnapAlgorithm();
-            if (mIsInMinimizeInteraction != minimized) {
+            if (mIsInMinimizeInteraction != minimized || mCurrentAnimator != null) {
+                cancelFlingAnimation();
                 if (minimized) {
                     // Relayout to recalculate the divider shadow when minimizing
                     requestLayout();
