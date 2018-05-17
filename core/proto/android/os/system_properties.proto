@@ -434,7 +434,7 @@ message SystemPropertiesProto {
         optional Product product = 32;
 
         optional int32  property_service_version = 33;
-        optional string retaildemo_video_path = 34;
+        reserved 34; // Removed retaildemo_video_path.
         optional string revision = 35;
         optional int32  sf_lcd_density = 36;
         optional bool   storage_manager_enabled = 37;
