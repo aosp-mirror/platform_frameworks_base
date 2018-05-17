@@ -636,7 +636,7 @@ public final class SelectionActionModeHelper {
                             mSelectionStart, mSelectionEnd,
                             SelectionEvent.ACTION_ABANDON, null /* classification */);
                     mSelectionStart = mSelectionEnd = -1;
-                    mTextView.getTextClassificationSession().destroy();
+                    mLogger.endTextClassificationSession();
                     mIsPending = false;
                 }
             }
@@ -702,8 +702,10 @@ public final class SelectionActionModeHelper {
                 mTokenIterator.setText(mText);
                 mStartIndex = index;
                 mClassificationSession = classificationSession;
-                mClassificationSession.onSelectionEvent(
-                        SelectionEvent.createSelectionStartedEvent(invocationMethod, 0));
+                if (hasActiveClassificationSession()) {
+                    mClassificationSession.onSelectionEvent(
+                            SelectionEvent.createSelectionStartedEvent(invocationMethod, 0));
+                }
             } catch (Exception e) {
                 // Avoid crashes due to logging.
                 Log.e(LOG_TAG, "" + e.getMessage(), e);
@@ -713,23 +715,19 @@ public final class SelectionActionModeHelper {
         public void logSelectionModified(int start, int end,
                 @Nullable TextClassification classification, @Nullable TextSelection selection) {
             try {
-                Preconditions.checkArgumentInRange(start, 0, mText.length(), "start");
-                Preconditions.checkArgumentInRange(end, start, mText.length(), "end");
-                int[] wordIndices = getWordDelta(start, end);
-                if (selection != null) {
-                    if (mClassificationSession != null) {
+                if (hasActiveClassificationSession()) {
+                    Preconditions.checkArgumentInRange(start, 0, mText.length(), "start");
+                    Preconditions.checkArgumentInRange(end, start, mText.length(), "end");
+                    int[] wordIndices = getWordDelta(start, end);
+                    if (selection != null) {
                         mClassificationSession.onSelectionEvent(
                                 SelectionEvent.createSelectionModifiedEvent(
                                         wordIndices[0], wordIndices[1], selection));
-                    }
-                } else if (classification != null) {
-                    if (mClassificationSession != null) {
+                    } else if (classification != null) {
                         mClassificationSession.onSelectionEvent(
                                 SelectionEvent.createSelectionModifiedEvent(
                                         wordIndices[0], wordIndices[1], classification));
-                    }
-                } else {
-                    if (mClassificationSession != null) {
+                    } else {
                         mClassificationSession.onSelectionEvent(
                                 SelectionEvent.createSelectionModifiedEvent(
                                         wordIndices[0], wordIndices[1]));
@@ -746,20 +744,22 @@ public final class SelectionActionModeHelper {
                 @SelectionEvent.ActionType int action,
                 @Nullable TextClassification classification) {
             try {
-                Preconditions.checkArgumentInRange(start, 0, mText.length(), "start");
-                Preconditions.checkArgumentInRange(end, start, mText.length(), "end");
-                int[] wordIndices = getWordDelta(start, end);
-                if (classification != null) {
-                    if (mClassificationSession != null) {
+                if (hasActiveClassificationSession()) {
+                    Preconditions.checkArgumentInRange(start, 0, mText.length(), "start");
+                    Preconditions.checkArgumentInRange(end, start, mText.length(), "end");
+                    int[] wordIndices = getWordDelta(start, end);
+                    if (classification != null) {
                         mClassificationSession.onSelectionEvent(
                                 SelectionEvent.createSelectionActionEvent(
-                                        wordIndices[0], wordIndices[1], action, classification));
-                    }
-                } else {
-                    if (mClassificationSession != null) {
+                                        wordIndices[0], wordIndices[1], action,
+                                        classification));
+                    } else {
                         mClassificationSession.onSelectionEvent(
                                 SelectionEvent.createSelectionActionEvent(
                                         wordIndices[0], wordIndices[1], action));
+                    }
+                    if (SelectionEvent.isTerminal(action)) {
+                        endTextClassificationSession();
                     }
                 }
             } catch (Exception e) {
@@ -770,6 +770,16 @@ public final class SelectionActionModeHelper {
 
         public boolean isEditTextLogger() {
             return mEditTextLogger;
+        }
+
+        public void endTextClassificationSession() {
+            if (hasActiveClassificationSession()) {
+                mClassificationSession.destroy();
+            }
+        }
+
+        private boolean hasActiveClassificationSession() {
+            return mClassificationSession != null && !mClassificationSession.isDestroyed();
         }
 
         private int[] getWordDelta(int start, int end) {
