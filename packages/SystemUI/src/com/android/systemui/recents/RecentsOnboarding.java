@@ -33,6 +33,7 @@ import android.annotation.StringRes;
 import android.annotation.TargetApi;
 import android.app.ActivityManager;
 import android.content.BroadcastReceiver;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -63,7 +64,6 @@ import com.android.systemui.R;
 import com.android.systemui.recents.misc.SysUiTaskStackChangeListener;
 import com.android.systemui.shared.recents.IOverviewProxy;
 import com.android.systemui.shared.system.ActivityManagerWrapper;
-import com.android.systemui.shared.system.LauncherEventUtil;
 
 import java.util.Collections;
 import java.util.HashSet;
@@ -110,8 +110,19 @@ public class RecentsOnboarding {
     private int mOverviewOpenedCountSinceQuickScrubTipDismiss;
 
     private final SysUiTaskStackChangeListener mTaskListener = new SysUiTaskStackChangeListener() {
+        private String mLastPackageName;
+
         @Override
-        public void onTaskStackChanged() {
+        public void onTaskCreated(int taskId, ComponentName componentName) {
+            onAppLaunch();
+        }
+
+        @Override
+        public void onTaskMovedToFront(int taskId) {
+            onAppLaunch();
+        }
+
+        private void onAppLaunch() {
             ActivityManager.RunningTaskInfo info = ActivityManagerWrapper.getInstance()
                     .getRunningTask(ACTIVITY_TYPE_UNDEFINED /* ignoreActivityType */);
             if (info == null) {
@@ -121,6 +132,10 @@ public class RecentsOnboarding {
                 hide(true);
                 return;
             }
+            if (info.baseActivity.getPackageName().equals(mLastPackageName)) {
+                return;
+            }
+            mLastPackageName = info.baseActivity.getPackageName();
             int activityType = info.configuration.windowConfiguration.getActivityType();
             if (activityType == ACTIVITY_TYPE_STANDARD) {
                 boolean alreadySeenSwipeUpOnboarding = hasSeenSwipeUpOnboarding();
