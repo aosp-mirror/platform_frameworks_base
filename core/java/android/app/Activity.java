@@ -5580,6 +5580,9 @@ public class Activity extends ContextThemeWrapper
         if (mParent != null) {
             throw new IllegalStateException("Can only be called on top-level activity");
         }
+        if (Looper.myLooper() != mMainThread.getLooper()) {
+            throw new IllegalStateException("Must be called from main thread");
+        }
         mMainThread.scheduleRelaunchActivity(mToken);
     }
 
