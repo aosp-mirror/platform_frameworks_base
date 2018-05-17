@@ -169,6 +169,7 @@ class RecentsAnimation implements RecentsAnimationCallbacks,
                         .setMayWait(mUserController.getCurrentUserId())
                         .execute();
                 mWindowManager.prepareAppTransition(TRANSIT_NONE, false);
+                mWindowManager.executeAppTransition();
 
                 targetActivity = mDefaultDisplay.getStack(WINDOWING_MODE_UNDEFINED,
                         mTargetActivityType).getTopActivity();
