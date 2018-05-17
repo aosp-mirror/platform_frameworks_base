@@ -36,7 +36,7 @@
     <string name="menu_new_window" msgid="1226032889278727538">"Nouvelle fenêtre"</string>
     <string name="menu_copy_to_clipboard" msgid="489311381979634291">"Copier"</string>
     <string name="menu_paste_from_clipboard" msgid="2071583031180257091">"Coller"</string>
-    <string name="menu_advanced_show" msgid="4693652895715631401">"Aff. mém. stock. interne"</string>
+    <string name="menu_advanced_show" msgid="4693652895715631401">"Aff. mémoire stockage interne"</string>
     <string name="menu_advanced_hide" msgid="4218809952721972589">"Masquer mém. stock. int."</string>
     <string name="menu_file_size_show" msgid="3240323619260823076">"Afficher taille fichier"</string>
     <string name="menu_file_size_hide" msgid="8881975928502581042">"Masquer taille fichier"</string>

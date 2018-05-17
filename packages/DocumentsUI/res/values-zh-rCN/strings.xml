@@ -36,8 +36,8 @@
     <string name="menu_new_window" msgid="1226032889278727538">"新建窗口"</string>
     <string name="menu_copy_to_clipboard" msgid="489311381979634291">"复制"</string>
     <string name="menu_paste_from_clipboard" msgid="2071583031180257091">"粘贴"</string>
-    <string name="menu_advanced_show" msgid="4693652895715631401">"显示内部存储设备"</string>
-    <string name="menu_advanced_hide" msgid="4218809952721972589">"隐藏内部存储设备"</string>
+    <string name="menu_advanced_show" msgid="4693652895715631401">"显示内部存储空间"</string>
+    <string name="menu_advanced_hide" msgid="4218809952721972589">"隐藏内部存储空间"</string>
     <string name="menu_file_size_show" msgid="3240323619260823076">"显示文件大小"</string>
     <string name="menu_file_size_hide" msgid="8881975928502581042">"隐藏文件大小"</string>
     <string name="button_select" msgid="527196987259139214">"选择"</string>

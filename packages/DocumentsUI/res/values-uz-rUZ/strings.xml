@@ -59,7 +59,7 @@
     <string name="root_type_shortcut" msgid="3318760609471618093">"Yorliqlar"</string>
     <string name="root_type_device" msgid="7121342474653483538">"Qurilmalar"</string>
     <string name="root_type_apps" msgid="8838065367985945189">"Ko‘proq dasturlar"</string>
-    <string name="empty" msgid="7858882803708117596">"Hech narsa yo‘q"</string>
+    <string name="empty" msgid="7858882803708117596">"Hech narsa topilmadi"</string>
     <string name="no_results" msgid="6622510343880730446">"%1$s jildidan topilmadi"</string>
     <string name="toast_no_application" msgid="4632640357724698144">"Fayl ochilmadi"</string>
     <string name="toast_failed_delete" msgid="2180678019407244069">"Ba’zi hujjatlar o‘chirilmadi"</string>

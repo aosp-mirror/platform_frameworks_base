@@ -28,7 +28,7 @@
     <string name="menu_settings" msgid="8239065133341597825">"संचयन सेटिंग्ज"</string>
     <string name="menu_open" msgid="432922957274920903">"उघडा"</string>
     <string name="menu_save" msgid="2394743337684426338">"सेव्ह करा"</string>
-    <string name="menu_share" msgid="3075149983979628146">"सामायिक करा"</string>
+    <string name="menu_share" msgid="3075149983979628146">"शेअर करा"</string>
     <string name="menu_delete" msgid="8138799623850614177">"हटवा"</string>
     <string name="menu_select_all" msgid="8323579667348729928">"सर्व निवडा"</string>
     <string name="menu_copy" msgid="3612326052677229148">"यावर कॉपी करा…"</string>
@@ -50,7 +50,7 @@
     <string name="sort_size" msgid="3350681319735474741">"आकारानुसार"</string>
     <string name="drawer_open" msgid="4545466532430226949">"रूट दर्शवा"</string>
     <string name="drawer_close" msgid="7602734368552123318">"रूट लपवा"</string>
-    <string name="save_error" msgid="6167009778003223664">"दस्तऐवज जतन करणे अयशस्वी झाले"</string>
+    <string name="save_error" msgid="6167009778003223664">"दस्तऐवज सेव्ह करणे अयशस्वी झाले"</string>
     <string name="create_error" msgid="3735649141335444215">"फोल्डर तयार करण्यात अयशस्वी"</string>
     <string name="query_error" msgid="5999895349602476581">"याक्षणी सामग्री लोड करू शकत नाही"</string>
     <string name="root_recent" msgid="4470053704320518133">"अलीकडील"</string>
@@ -63,7 +63,7 @@
     <string name="no_results" msgid="6622510343880730446">"%1$s मध्‍ये कोणत्याही जुळण्‍या नाहीत"</string>
     <string name="toast_no_application" msgid="4632640357724698144">"फाईल उघडू शकत नाही"</string>
     <string name="toast_failed_delete" msgid="2180678019407244069">"काही दस्‍तऐवज हटविण्‍यात अक्षम"</string>
-    <string name="share_via" msgid="8966594246261344259">"द्वारे सामायिक करा"</string>
+    <string name="share_via" msgid="8966594246261344259">"द्वारे शेअर करा"</string>
     <string name="copy_notification_title" msgid="6374299806748219777">"फायली कॉपी करत आहे"</string>
     <string name="move_notification_title" msgid="6193835179777284805">"फायली हलविणे"</string>
     <string name="delete_notification_title" msgid="3329403967712437496">"फायली हटवित आहे"</string>
@@ -138,6 +138,6 @@
       <item quantity="one"><xliff:g id="COUNT_1">%1$d</xliff:g> आयटम हटवायचा?</item>
       <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> आयटम हटवायचे?</item>
     </plurals>
-    <string name="too_many_selected" msgid="6781456208116966753">"क्षमस्व, आपण एका वेळी केवळ 1000 आयटम निवडू शकता"</string>
+    <string name="too_many_selected" msgid="6781456208116966753">"क्षमस्व, तुम्ही एका वेळी केवळ 1000 आयटम निवडू शकता"</string>
     <string name="too_many_in_select_all" msgid="8281987479885307456">"फक्त 1000 आयटम निवडू शकता"</string>
 </resources>
