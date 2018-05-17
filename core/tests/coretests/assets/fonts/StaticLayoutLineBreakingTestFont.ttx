@@ -144,6 +144,8 @@
       <map code="0x0056" name="5em" />  <!-- V -->
       <map code="0x0058" name="10em" />  <!-- X -->
       <map code="0x005f" name="0em" /> <!-- _ -->
+      <map code="0x05D0" name="1em" /> <!-- HEBREW LETTER ALEF -->
+      <map code="0x05D1" name="5em" /> <!-- HEBREW LETTER BET -->
       <map code="0xfffd" name="7em" /> <!-- REPLACEMENT CHAR -->
       <map code="0x10331" name="10em" />
     </cmap_format_12>

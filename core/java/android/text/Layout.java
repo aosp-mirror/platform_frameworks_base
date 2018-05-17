@@ -1966,12 +1966,13 @@ public abstract class Layout {
     /**
      * @hide
      */
-    /* package */ static class TabStops {
+    @VisibleForTesting(visibility = VisibleForTesting.Visibility.PACKAGE)
+    public static class TabStops {
         private int[] mStops;
         private int mNumStops;
         private int mIncrement;
 
-        TabStops(int increment, Object[] spans) {
+        public TabStops(int increment, Object[] spans) {
             reset(increment, spans);
         }
 
