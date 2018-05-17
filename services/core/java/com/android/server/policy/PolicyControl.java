@@ -65,7 +65,8 @@ public class PolicyControl {
 
     public static int getSystemUiVisibility(WindowState win, LayoutParams attrs) {
         attrs = attrs != null ? attrs : win.getAttrs();
-        int vis = win != null ? win.getSystemUiVisibility() : attrs.systemUiVisibility;
+        int vis = win != null ? win.getSystemUiVisibility()
+                : (attrs.systemUiVisibility | attrs.subtreeSystemUiVisibility);
         if (sImmersiveStatusFilter != null && sImmersiveStatusFilter.matches(attrs)) {
             vis |= View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
                     | View.SYSTEM_UI_FLAG_FULLSCREEN
