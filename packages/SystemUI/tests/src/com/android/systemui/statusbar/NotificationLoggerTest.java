@@ -26,7 +26,6 @@ import android.app.Notification;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.UserHandle;
-import android.service.notification.NotificationListenerService;
 import android.service.notification.StatusBarNotification;
 import android.support.test.filters.SmallTest;
 import android.testing.AndroidTestingRunner;
@@ -35,7 +34,6 @@ import android.testing.TestableLooper;
 import com.android.internal.statusbar.IStatusBarService;
 import com.android.internal.statusbar.NotificationVisibility;
 import com.android.systemui.SysuiTestCase;
-import com.android.systemui.UiOffloadThread;
 
 import com.google.android.collect.Lists;
 
@@ -48,7 +46,7 @@ import org.mockito.MockitoAnnotations;
 
 @SmallTest
 @RunWith(AndroidTestingRunner.class)
-@TestableLooper.RunWithLooper
+@TestableLooper.RunWithLooper(setAsMainLooper = true)
 public class NotificationLoggerTest extends SysuiTestCase {
     private static final String TEST_PACKAGE_NAME = "test";
     private static final int TEST_UID = 0;
@@ -89,7 +87,7 @@ public class NotificationLoggerTest extends SysuiTestCase {
         when(mListContainer.isInVisibleLocation(any())).thenReturn(true);
         when(mNotificationData.getActiveNotifications()).thenReturn(Lists.newArrayList(mEntry));
         mLogger.getChildLocationsChangedListenerForTest().onChildLocationsChanged();
-        waitForIdleSync(mLogger.getHandlerForTest());
+        TestableLooper.get(this).processAllMessages();
         waitForUiOffloadThread();
 
         NotificationVisibility[] newlyVisibleKeys = {
@@ -101,7 +99,7 @@ public class NotificationLoggerTest extends SysuiTestCase {
         // |mEntry| won't change visibility, so it shouldn't be reported again:
         Mockito.reset(mBarService);
         mLogger.getChildLocationsChangedListenerForTest().onChildLocationsChanged();
-        waitForIdleSync(mLogger.getHandlerForTest());
+        TestableLooper.get(this).processAllMessages();
         waitForUiOffloadThread();
 
         verify(mBarService, never()).onNotificationVisibilityChanged(any(), any());
@@ -113,7 +111,7 @@ public class NotificationLoggerTest extends SysuiTestCase {
         when(mListContainer.isInVisibleLocation(any())).thenReturn(true);
         when(mNotificationData.getActiveNotifications()).thenReturn(Lists.newArrayList(mEntry));
         mLogger.getChildLocationsChangedListenerForTest().onChildLocationsChanged();
-        waitForIdleSync(mLogger.getHandlerForTest());
+        TestableLooper.get(this).processAllMessages();
         waitForUiOffloadThread();
         Mockito.reset(mBarService);
 
@@ -128,8 +126,8 @@ public class NotificationLoggerTest extends SysuiTestCase {
 
         public TestableNotificationLogger(IStatusBarService barService) {
             mBarService = barService;
-            // Make this on the main thread so we can wait for it during tests.
-            mHandler = new Handler(Looper.getMainLooper());
+            // Make this on the current thread so we can wait for it during tests.
+            mHandler = Handler.createAsync(Looper.myLooper());
         }
 
         public OnChildLocationsChangedListener

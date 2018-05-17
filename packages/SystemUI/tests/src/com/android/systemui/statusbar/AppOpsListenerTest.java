@@ -16,8 +16,6 @@
 
 package com.android.systemui.statusbar;
 
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -53,7 +51,6 @@ public class AppOpsListenerTest extends SysuiTestCase {
     @Mock private ForegroundServiceController mFsc;
 
     private AppOpsListener mListener;
-    private Handler mHandler;
 
     @Before
     public void setUp() {
@@ -61,8 +58,7 @@ public class AppOpsListenerTest extends SysuiTestCase {
         mDependency.injectTestDependency(NotificationEntryManager.class, mEntryManager);
         mDependency.injectTestDependency(ForegroundServiceController.class, mFsc);
         getContext().addMockSystemService(AppOpsManager.class, mAppOpsManager);
-        mHandler = new Handler(Looper.getMainLooper());
-        when(mPresenter.getHandler()).thenReturn(mHandler);
+        when(mPresenter.getHandler()).thenReturn(Handler.createAsync(Looper.myLooper()));
 
         mListener = new AppOpsListener(mContext);
     }
@@ -85,7 +81,7 @@ public class AppOpsListenerTest extends SysuiTestCase {
         mListener.setUpWithPresenter(mPresenter, mEntryManager);
         mListener.onOpActiveChanged(
                 AppOpsManager.OP_RECORD_AUDIO, TEST_UID, TEST_PACKAGE_NAME, true);
-        waitForIdleSync(mHandler);
+        TestableLooper.get(this).processAllMessages();
         verify(mEntryManager, times(1)).updateNotificationsForAppOp(
                 AppOpsManager.OP_RECORD_AUDIO, TEST_UID, TEST_PACKAGE_NAME, true);
     }
@@ -95,7 +91,7 @@ public class AppOpsListenerTest extends SysuiTestCase {
         mListener.setUpWithPresenter(mPresenter, mEntryManager);
         mListener.onOpActiveChanged(
                 AppOpsManager.OP_RECORD_AUDIO, TEST_UID, TEST_PACKAGE_NAME, true);
-        waitForIdleSync(mHandler);
+        TestableLooper.get(this).processAllMessages();
         verify(mFsc, times(1)).onAppOpChanged(
                 AppOpsManager.OP_RECORD_AUDIO, TEST_UID, TEST_PACKAGE_NAME, true);
     }

@@ -50,7 +50,7 @@ import java.util.List;
 
 @SmallTest
 @RunWith(AndroidTestingRunner.class)
-@TestableLooper.RunWithLooper
+@TestableLooper.RunWithLooper(setAsMainLooper = true)
 public class NotificationViewHierarchyManagerTest extends SysuiTestCase {
     @Mock private NotificationPresenter mPresenter;
     @Mock private NotificationData mNotificationData;

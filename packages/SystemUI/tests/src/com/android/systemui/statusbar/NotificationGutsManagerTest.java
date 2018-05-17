@@ -74,7 +74,7 @@ import java.util.Set;
  */
 @SmallTest
 @RunWith(AndroidTestingRunner.class)
-@TestableLooper.RunWithLooper
+@TestableLooper.RunWithLooper(setAsMainLooper = true)
 public class NotificationGutsManagerTest extends SysuiTestCase {
     private static final String TEST_CHANNEL_ID = "NotificationManagerServiceTestChannelId";
 
@@ -95,7 +95,7 @@ public class NotificationGutsManagerTest extends SysuiTestCase {
     @Before
     public void setUp() {
         mTestableLooper = TestableLooper.get(this);
-        mHandler = new Handler(mTestableLooper.getLooper());
+        mHandler = Handler.createAsync(mTestableLooper.getLooper());
 
         mHelper = new NotificationTestHelper(mContext);
 

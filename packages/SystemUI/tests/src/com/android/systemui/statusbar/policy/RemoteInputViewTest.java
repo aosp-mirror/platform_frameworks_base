@@ -21,6 +21,7 @@ import android.app.RemoteInput;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.ShortcutManager;
+import android.os.Handler;
 import android.support.test.filters.SmallTest;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
@@ -28,6 +29,7 @@ import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageButton;
 
+import com.android.systemui.Dependency;
 import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.statusbar.ExpandableNotificationRow;
@@ -42,7 +44,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 @RunWith(AndroidTestingRunner.class)
-@TestableLooper.RunWithLooper
+@TestableLooper.RunWithLooper(setAsMainLooper = true)
 @SmallTest
 public class RemoteInputViewTest extends SysuiTestCase {
 
@@ -60,7 +62,8 @@ public class RemoteInputViewTest extends SysuiTestCase {
         MockitoAnnotations.initMocks(this);
 
         mReceiver = new BlockingQueueIntentReceiver();
-        mContext.registerReceiver(mReceiver, new IntentFilter(TEST_ACTION));
+        mContext.registerReceiver(mReceiver, new IntentFilter(TEST_ACTION), null,
+                Handler.createAsync(Dependency.get(Dependency.BG_LOOPER)));
 
         // Avoid SecurityException RemoteInputView#sendRemoteInput().
         mContext.addMockSystemService(ShortcutManager.class, mShortcutManager);

@@ -137,9 +137,15 @@ public class NotificationInflater {
             return;
         }
         StatusBarNotification sbn = mRow.getEntry().notification;
-        new AsyncInflationTask(sbn, reInflateFlags, mRow, mIsLowPriority,
+        AsyncInflationTask task = new AsyncInflationTask(sbn, reInflateFlags, mRow,
+                mIsLowPriority,
                 mIsChildInGroup, mUsesIncreasedHeight, mUsesIncreasedHeadsUpHeight, mRedactAmbient,
-                mCallback, mRemoteViewClickHandler).execute();
+                mCallback, mRemoteViewClickHandler);
+        if (mCallback != null && mCallback.doInflateSynchronous()) {
+            task.onPostExecute(task.doInBackground());
+        } else {
+            task.execute();
+        }
     }
 
     @VisibleForTesting
@@ -331,6 +337,30 @@ public class NotificationInflater {
             final HashMap<Integer, CancellationSignal> runningInflations,
             ApplyCallback applyCallback) {
         RemoteViews newContentView = applyCallback.getRemoteView();
+        if (callback != null && callback.doInflateSynchronous()) {
+            try {
+                if (isNewView) {
+                    View v = newContentView.apply(
+                            result.packageContext,
+                            parentLayout,
+                            remoteViewClickHandler);
+                    v.setIsRootNamespace(true);
+                    applyCallback.setResultView(v);
+                } else {
+                    newContentView.reapply(
+                            result.packageContext,
+                            existingView,
+                            remoteViewClickHandler);
+                    existingWrapper.onReinflated();
+                }
+            } catch (Exception e) {
+                handleInflationError(runningInflations, e, entry.notification, callback);
+                // Add a running inflation to make sure we don't trigger callbacks.
+                // Safe to do because only happens in tests.
+                runningInflations.put(inflationId, new CancellationSignal());
+            }
+            return;
+        }
         RemoteViews.OnViewAppliedListener listener
                 = new RemoteViews.OnViewAppliedListener() {
 
@@ -515,6 +545,13 @@ public class NotificationInflater {
     public interface InflationCallback {
         void handleInflationException(StatusBarNotification notification, Exception e);
         void onAsyncInflationFinished(NotificationData.Entry entry);
+
+        /**
+         * Used to disable async-ness for tests. Should only be used for tests.
+         */
+        default boolean doInflateSynchronous() {
+            return false;
+        }
     }
 
     public void onDensityOrFontScaleChanged() {
@@ -645,6 +682,11 @@ public class NotificationInflater {
             mRow.getEntry().onInflationTaskFinished();
             mRow.onNotificationUpdated();
             mCallback.onAsyncInflationFinished(mRow.getEntry());
+        }
+
+        @Override
+        public boolean doInflateSynchronous() {
+            return mCallback != null && mCallback.doInflateSynchronous();
         }
     }
 

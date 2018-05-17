@@ -16,29 +16,18 @@
 
 package com.android.systemui.statusbar.stack;
 
-import static org.mockito.ArgumentMatchers.anyBoolean;
-import static org.mockito.ArgumentMatchers.anyFloat;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.atLeast;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.reset;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyZeroInteractions;
-import static org.mockito.Mockito.when;
 
-import android.support.test.annotation.UiThreadTest;
 import android.support.test.filters.SmallTest;
-import android.support.test.runner.AndroidJUnit4;
+import android.testing.AndroidTestingRunner;
+import android.testing.TestableLooper.RunWithLooper;
 import android.view.View;
 
 import com.android.systemui.SysuiTestCase;
-import com.android.systemui.statusbar.ActivatableNotificationView;
 import com.android.systemui.statusbar.ExpandableNotificationRow;
 import com.android.systemui.statusbar.NotificationTestHelper;
-import com.android.systemui.statusbar.StatusBarState;
-import com.android.systemui.statusbar.phone.ScrimController;
-import com.android.systemui.statusbar.phone.StatusBar;
 
 import org.junit.Assert;
 import org.junit.Before;
@@ -46,10 +35,10 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import java.util.HashSet;
-import java.util.function.Consumer;
 
 @SmallTest
-@RunWith(AndroidJUnit4.class)
+@RunWith(AndroidTestingRunner.class)
+@RunWithLooper(setAsMainLooper = true)
 public class NotificationRoundnessManagerTest extends SysuiTestCase {
 
     private NotificationRoundnessManager mRoundnessManager = new NotificationRoundnessManager();

@@ -100,7 +100,6 @@ public class NotificationEntryManagerTest extends SysuiTestCase {
 
     private NotificationData.Entry mEntry;
     private StatusBarNotification mSbn;
-    private Handler mHandler;
     private TestableNotificationEntryManager mEntryManager;
     private CountDownLatch mCountDownLatch;
 
@@ -160,10 +159,9 @@ public class NotificationEntryManagerTest extends SysuiTestCase {
         mDependency.injectTestDependency(VisualStabilityManager.class, mVisualStabilityManager);
         mDependency.injectTestDependency(MetricsLogger.class, mMetricsLogger);
 
-        mHandler = new Handler(Looper.getMainLooper());
         mCountDownLatch = new CountDownLatch(1);
 
-        when(mPresenter.getHandler()).thenReturn(mHandler);
+        when(mPresenter.getHandler()).thenReturn(Handler.createAsync(Looper.myLooper()));
         when(mPresenter.getNotificationLockscreenUserManager()).thenReturn(mLockscreenUserManager);
         when(mPresenter.getGroupManager()).thenReturn(mGroupManager);
         when(mRemoteInputManager.getController()).thenReturn(mRemoteInputController);
@@ -188,6 +186,7 @@ public class NotificationEntryManagerTest extends SysuiTestCase {
     @Test
     public void testAddNotification() throws Exception {
         com.android.systemui.util.Assert.isNotMainThread();
+        TestableLooper.get(this).processAllMessages();
 
         doAnswer(invocation -> {
             mCountDownLatch.countDown();
@@ -196,12 +195,10 @@ public class NotificationEntryManagerTest extends SysuiTestCase {
 
         // Post on main thread, otherwise we will be stuck waiting here for the inflation finished
         // callback forever, since it won't execute until the tests ends.
-        mHandler.post(() -> {
-            mEntryManager.addNotification(mSbn, mRankingMap);
-        });
-        assertTrue(mCountDownLatch.await(1, TimeUnit.MINUTES));
-        assertTrue(mEntryManager.getCountDownLatch().await(1, TimeUnit.MINUTES));
-        waitForIdleSync(mHandler);
+        mEntryManager.addNotification(mSbn, mRankingMap);
+        TestableLooper.get(this).processMessages(1);
+        assertTrue(mCountDownLatch.await(10, TimeUnit.SECONDS));
+        assertTrue(mEntryManager.getCountDownLatch().await(10, TimeUnit.SECONDS));
 
         // Check that no inflation error occurred.
         verify(mBarService, never()).onNotificationError(any(), any(), anyInt(), anyInt(), anyInt(),
@@ -228,17 +225,16 @@ public class NotificationEntryManagerTest extends SysuiTestCase {
     @Test
     public void testUpdateNotification() throws Exception {
         com.android.systemui.util.Assert.isNotMainThread();
+        TestableLooper.get(this).processAllMessages();
 
         mEntryManager.getNotificationData().add(mEntry);
 
         setUserSentiment(mEntry.key, NotificationListenerService.Ranking.USER_SENTIMENT_NEGATIVE);
 
-        mHandler.post(() -> {
-            mEntryManager.updateNotification(mSbn, mRankingMap);
-        });
+        mEntryManager.updateNotification(mSbn, mRankingMap);
+        TestableLooper.get(this).processMessages(1);
         // Wait for content update.
-        mEntryManager.getCountDownLatch().await(1, TimeUnit.MINUTES);
-        waitForIdleSync(mHandler);
+        assertTrue(mEntryManager.getCountDownLatch().await(10, TimeUnit.SECONDS));
 
         verify(mBarService, never()).onNotificationError(any(), any(), anyInt(), anyInt(), anyInt(),
                 any(), anyInt());
@@ -259,10 +255,7 @@ public class NotificationEntryManagerTest extends SysuiTestCase {
         mEntry.row = mRow;
         mEntryManager.getNotificationData().add(mEntry);
 
-        mHandler.post(() -> {
-            mEntryManager.removeNotification(mSbn.getKey(), mRankingMap);
-        });
-        waitForIdleSync(mHandler);
+        mEntryManager.removeNotification(mSbn.getKey(), mRankingMap);
 
         verify(mBarService, never()).onNotificationError(any(), any(), anyInt(), anyInt(), anyInt(),
                 any(), anyInt());
@@ -287,12 +280,9 @@ public class NotificationEntryManagerTest extends SysuiTestCase {
         mEntry.row = mRow;
         mEntryManager.getNotificationData().add(mEntry);
 
-        mHandler.post(() -> {
-            mEntryManager.updateNotificationsForAppOp(
-                    AppOpsManager.OP_CAMERA, mEntry.notification.getUid(),
-                    mEntry.notification.getPackageName(), true);
-        });
-        waitForIdleSync(mHandler);
+        mEntryManager.updateNotificationsForAppOp(
+                AppOpsManager.OP_CAMERA, mEntry.notification.getUid(),
+                mEntry.notification.getPackageName(), true);
 
         verify(mPresenter, times(1)).updateNotificationViews();
         assertTrue(mEntryManager.getNotificationData().get(mEntry.key).mActiveAppOps.contains(
@@ -305,10 +295,7 @@ public class NotificationEntryManagerTest extends SysuiTestCase {
 
         when(mForegroundServiceController.getStandardLayoutKey(anyInt(), anyString()))
                 .thenReturn(null);
-        mHandler.post(() -> {
-            mEntryManager.updateNotificationsForAppOp(AppOpsManager.OP_CAMERA, 1000, "pkg", true);
-        });
-        waitForIdleSync(mHandler);
+        mEntryManager.updateNotificationsForAppOp(AppOpsManager.OP_CAMERA, 1000, "pkg", true);
 
         verify(mPresenter, never()).updateNotificationViews();
     }
