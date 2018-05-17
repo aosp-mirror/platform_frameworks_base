@@ -1004,7 +1004,9 @@ public abstract class Layout {
         return TextUtils.packRangeInLong(0, getLineEnd(line));
     }
 
-    private boolean primaryIsTrailingPrevious(int offset) {
+    /** @hide */
+    @VisibleForTesting
+    public boolean primaryIsTrailingPrevious(int offset) {
         int line = getLineForOffset(offset);
         int lineStart = getLineStart(line);
         int lineEnd = getLineEnd(line);
