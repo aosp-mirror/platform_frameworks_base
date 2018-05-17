@@ -17,20 +17,25 @@
 package com.android.systemui.statusbar.policy;
 
 import static junit.framework.Assert.assertEquals;
+import static junit.framework.Assert.assertNotNull;
 
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyBoolean;
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
+import static org.mockito.Matchers.isA;
+import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import android.content.Intent;
 import android.net.ConnectivityManager;
+import android.net.Network;
 import android.net.NetworkCapabilities;
 import android.net.wifi.WifiManager;
+import android.os.Handler;
 import android.provider.Settings;
 import android.provider.Settings.Global;
 import android.telephony.PhoneStateListener;
@@ -90,6 +95,7 @@ public class NetworkControllerBaseTest extends SysuiTestCase {
     protected int mSubId;
 
     private NetworkCapabilities mNetCapabilities;
+    private ConnectivityManager.NetworkCallback mNetworkCallback;
 
     @Rule
     public TestWatcher failWatcher = new TestWatcher() {
@@ -154,6 +160,13 @@ public class NetworkControllerBaseTest extends SysuiTestCase {
         setSubscriptions(mSubId);
         mMobileSignalController = mNetworkController.mMobileSignalControllers.get(mSubId);
         mPhoneStateListener = mMobileSignalController.mPhoneStateListener;
+
+        ArgumentCaptor<ConnectivityManager.NetworkCallback> callbackArg =
+            ArgumentCaptor.forClass(ConnectivityManager.NetworkCallback.class);
+        Mockito.verify(mMockCm, atLeastOnce())
+            .registerDefaultNetworkCallback(callbackArg.capture(), isA(Handler.class));
+        mNetworkCallback = callbackArg.getValue();
+        assertNotNull(mNetworkCallback);
     }
 
     protected void setDefaultSubId(int subId) {
@@ -195,24 +208,37 @@ public class NetworkControllerBaseTest extends SysuiTestCase {
         setLevel(DEFAULT_LEVEL);
         updateDataConnectionState(TelephonyManager.DATA_CONNECTED,
                 TelephonyManager.NETWORK_TYPE_UMTS);
-        setConnectivity(NetworkCapabilities.TRANSPORT_CELLULAR, true, true);
+        setConnectivityViaBroadcast(
+            NetworkCapabilities.TRANSPORT_CELLULAR, true, true);
     }
 
-    public void setConnectivity(int networkType, boolean inetCondition, boolean isConnected) {
+    public void setConnectivityViaBroadcast(
+        int networkType, boolean validated, boolean isConnected) {
+        setConnectivityCommon(networkType, validated, isConnected);
         Intent i = new Intent(ConnectivityManager.INET_CONDITION_ACTION);
+        mNetworkController.onReceive(mContext, i);
+    }
+
+    public void setConnectivityViaCallback(
+        int networkType, boolean validated, boolean isConnected){
+        setConnectivityCommon(networkType, validated, isConnected);
+        mNetworkCallback.onCapabilitiesChanged(
+            mock(Network.class), new NetworkCapabilities(mNetCapabilities));
+    }
+
+    private void setConnectivityCommon(
+        int networkType, boolean validated, boolean isConnected){
         // TODO: Separate out into several NetworkCapabilities.
         if (isConnected) {
             mNetCapabilities.addTransportType(networkType);
         } else {
             mNetCapabilities.removeTransportType(networkType);
         }
-        if (inetCondition) {
+        if (validated) {
             mNetCapabilities.addCapability(NetworkCapabilities.NET_CAPABILITY_VALIDATED);
         } else {
             mNetCapabilities.removeCapability(NetworkCapabilities.NET_CAPABILITY_VALIDATED);
         }
-
-        mNetworkController.onReceive(mContext, i);
     }
 
     public void setGsmRoaming(boolean isRoaming) {
