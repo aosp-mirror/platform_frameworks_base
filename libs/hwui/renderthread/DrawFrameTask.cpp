@@ -90,6 +90,11 @@ void DrawFrameTask::run() {
         TreeInfo info(TreeInfo::MODE_FULL, *mContext);
         canUnblockUiThread = syncFrameState(info);
         canDrawThisFrame = info.out.canDrawThisFrame;
+
+        if (mFrameCompleteCallback) {
+            mContext->addFrameCompleteListener(std::move(mFrameCompleteCallback));
+            mFrameCompleteCallback = nullptr;
+        }
     }
 
     // Grab a copy of everything we need
@@ -151,6 +156,9 @@ bool DrawFrameTask::syncFrameState(TreeInfo& info) {
         if (info.out.requiresUiRedraw) {
             mSyncResult |= SyncResult::UIRedrawRequired;
         }
+    }
+    if (!info.out.canDrawThisFrame) {
+        mSyncResult |= SyncResult::FrameDropped;
     }
     // If prepareTextures is false, we ran out of texture cache space
     return info.prepareTextures;

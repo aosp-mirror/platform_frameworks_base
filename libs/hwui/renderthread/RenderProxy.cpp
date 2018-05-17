@@ -275,6 +275,10 @@ void RenderProxy::setFrameCallback(std::function<void(int64_t)>&& callback) {
     mDrawFrameTask.setFrameCallback(std::move(callback));
 }
 
+void RenderProxy::setFrameCompleteCallback(std::function<void(int64_t)>&& callback) {
+    mDrawFrameTask.setFrameCompleteCallback(std::move(callback));
+}
+
 void RenderProxy::addFrameMetricsObserver(FrameMetricsObserver* observerPtr) {
     mRenderThread.queue().post([ this, observer = sp{observerPtr} ]() {
         mContext->addFrameMetricsObserver(observer.get());
