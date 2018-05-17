@@ -127,7 +127,7 @@
     <string name="accessibility_ethernet_disconnected" msgid="5896059303377589469">"Conexión Ethernet desconectada."</string>
     <string name="accessibility_ethernet_connected" msgid="2692130313069182636">"Conexión Ethernet conectada."</string>
     <string name="accessibility_no_signal" msgid="7064645320782585167">"No hay señal"</string>
-    <string name="accessibility_not_connected" msgid="6395326276213402883">"Sin conexión"</string>
+    <string name="accessibility_not_connected" msgid="6395326276213402883">"No conectado"</string>
     <string name="accessibility_zero_bars" msgid="3806060224467027887">"Ninguna barra"</string>
     <string name="accessibility_one_bar" msgid="1685730113192081895">"Una barra"</string>
     <string name="accessibility_two_bars" msgid="6437363648385206679">"Dos barras"</string>

@@ -46,7 +46,7 @@
     <string name="status_bar_settings_wifi_button" msgid="1733928151698311923">"Wi-Fi"</string>
     <string name="status_bar_settings_auto_rotation" msgid="3790482541357798421">"Ինքնապտտվող էկրան"</string>
     <string name="status_bar_settings_mute_label" msgid="554682549917429396">"Համրեցնել"</string>
-    <string name="status_bar_settings_auto_brightness_label" msgid="511453614962324674">"Ինքնաշխատ"</string>
+    <string name="status_bar_settings_auto_brightness_label" msgid="511453614962324674">"Ավտոմատ"</string>
     <string name="status_bar_settings_notifications" msgid="397146176280905137">"Ծանուցումներ"</string>
     <string name="bluetooth_tethered" msgid="7094101612161133267">"Bluetooth-ը կապված է"</string>
     <string name="status_bar_input_method_settings_configure_input_methods" msgid="3504292471512317827">"Կարգավորել մուտքագրման եղանակները"</string>
@@ -253,7 +253,7 @@
     </plurals>
     <string name="status_bar_notification_inspect_item_title" msgid="5668348142410115323">"Ծանուցման կարգավորումներ"</string>
     <string name="status_bar_notification_app_settings_title" msgid="5525260160341558869">"<xliff:g id="APP_NAME">%s</xliff:g>-ի կարգավորումներ"</string>
-    <string name="accessibility_rotation_lock_off" msgid="4062780228931590069">"Էկրանը ինքնաշխատ կպտտվի:"</string>
+    <string name="accessibility_rotation_lock_off" msgid="4062780228931590069">"Էկրանը ավտոմատ կպտտվի:"</string>
     <string name="accessibility_rotation_lock_on_landscape" msgid="6731197337665366273">"Էկրանը կողպված է հորիզոնական դիրքավորման մեջ:"</string>
     <string name="accessibility_rotation_lock_on_portrait" msgid="5809367521644012115">"Էկրանը կողպված է ուղղաձիգ դիրքավորմամբ:"</string>
     <string name="accessibility_rotation_lock_off_changed" msgid="8134601071026305153">"Էկրանն այժմ ավտոմատ կպտտվի:"</string>
@@ -300,7 +300,7 @@
     <string name="quick_settings_cast_device_default_description" msgid="2484573682378634413">"Պատրաստ է հեռարձակման"</string>
     <string name="quick_settings_cast_detail_empty_text" msgid="311785821261640623">"Հասանելի սարքեր չկան"</string>
     <string name="quick_settings_brightness_dialog_title" msgid="8599674057673605368">"Պայծառություն"</string>
-    <string name="quick_settings_brightness_dialog_auto_brightness_label" msgid="5064982743784071218">"Ինքնաշխատ"</string>
+    <string name="quick_settings_brightness_dialog_auto_brightness_label" msgid="5064982743784071218">"Ավտոմատ"</string>
     <string name="quick_settings_inversion_label" msgid="8790919884718619648">"Շրջել գույները"</string>
     <string name="quick_settings_color_space_label" msgid="853443689745584770">"Գունաշտկման ռեժիմ"</string>
     <string name="quick_settings_more_settings" msgid="326112621462813682">"Հավելյալ կարգավորումներ"</string>
@@ -319,13 +319,13 @@
     <string name="quick_settings_cellular_detail_data_limit" msgid="56011158504994128">"Սահմանաչափ՝ <xliff:g id="DATA_LIMIT">%s</xliff:g>"</string>
     <string name="quick_settings_cellular_detail_data_warning" msgid="2440098045692399009">"<xliff:g id="DATA_LIMIT">%s</xliff:g> զգուշացում"</string>
     <string name="quick_settings_work_mode_label" msgid="6244915274350490429">"Աշխատանքային ռեժիմ"</string>
-    <string name="quick_settings_night_display_label" msgid="3577098011487644395">"Գիշերային լույս"</string>
-    <string name="quick_settings_night_display_summary_on" msgid="1814901757887526769">"Գիշերային լույսը միացված է, հպեք՝ անջատելու համար"</string>
-    <string name="quick_settings_night_display_summary_off" msgid="7892102914128777905">"Գիշերային լույսն անջատված է, հպեք՝ միացնելու համար"</string>
+    <string name="quick_settings_night_display_label" msgid="3577098011487644395">"Գիշերային ռեժիմ"</string>
+    <string name="quick_settings_night_display_summary_on" msgid="1814901757887526769">"Գիշերային ռեժիմը միացված է, հպեք՝ անջատելու համար"</string>
+    <string name="quick_settings_night_display_summary_off" msgid="7892102914128777905">"Գիշերային ռեժիմն անջատված է, հպեք՝ միացնելու համար"</string>
     <string name="recents_empty_message" msgid="808480104164008572">"Վերջին տարրեր չկան"</string>
     <string name="recents_empty_message_dismissed_all" msgid="2791312568666558651">"Դուք ջնջել եք ամենը"</string>
     <string name="recents_app_info_button_label" msgid="2890317189376000030">"Հավելվածի մասին"</string>
-    <string name="recents_lock_to_app_button_label" msgid="6942899049072506044">"էկրանի ամրակցում"</string>
+    <string name="recents_lock_to_app_button_label" msgid="6942899049072506044">"էկրանի ամրացում"</string>
     <string name="recents_search_bar_label" msgid="8074997400187836677">"որոնել"</string>
     <string name="recents_launch_error_message" msgid="2969287838120550506">"Հնարավոր չէ գործարկել <xliff:g id="APP">%s</xliff:g>-ը:"</string>
     <string name="recents_launch_disabled_message" msgid="1624523193008871793">"<xliff:g id="APP">%s</xliff:g> հավելվածը անվտանգ ռեժիմում անջատված է:"</string>

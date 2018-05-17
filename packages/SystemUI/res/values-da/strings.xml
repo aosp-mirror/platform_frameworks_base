@@ -55,7 +55,7 @@
     <string name="usb_accessory_permission_prompt" msgid="5171775411178865750">"Vil du tillade, at appen <xliff:g id="APPLICATION">%1$s</xliff:g> får adgang til USB-enheden?"</string>
     <string name="usb_device_confirm_prompt" msgid="5161205258635253206">"Vil du åbne <xliff:g id="ACTIVITY">%1$s</xliff:g>, når denne USB-enhed er tilsluttet?"</string>
     <string name="usb_accessory_confirm_prompt" msgid="3808984931830229888">"Vil du åbne <xliff:g id="ACTIVITY">%1$s</xliff:g>, når dette USB-ekstraudstyr er tilsluttet?"</string>
-    <string name="usb_accessory_uri_prompt" msgid="513450621413733343">"Ingen installerede apps fungerer med USB-enheden. Få oplysninger om enheden på <xliff:g id="URL">%1$s</xliff:g>"</string>
+    <string name="usb_accessory_uri_prompt" msgid="513450621413733343">"Ingen installerede apps fungerer sammen med USB-enheden. Få oplysninger om enheden på <xliff:g id="URL">%1$s</xliff:g>"</string>
     <string name="title_usb_accessory" msgid="4966265263465181372">"USB-ekstraudstyr"</string>
     <string name="label_view" msgid="6304565553218192990">"Vis"</string>
     <string name="always_use_device" msgid="1450287437017315906">"Brug som standard til denne USB-enhed"</string>
@@ -174,7 +174,7 @@
     <string name="accessibility_work_mode" msgid="2478631941714607225">"Arbejdstilstand"</string>
     <string name="accessibility_recents_item_will_be_dismissed" msgid="395770242498031481">"Afvis <xliff:g id="APP">%s</xliff:g>."</string>
     <string name="accessibility_recents_item_dismissed" msgid="6803574935084867070">"<xliff:g id="APP">%s</xliff:g> er annulleret."</string>
-    <string name="accessibility_recents_all_items_dismissed" msgid="4464697366179168836">"Alle de seneste applikationer er lukket."</string>
+    <string name="accessibility_recents_all_items_dismissed" msgid="4464697366179168836">"Alle de seneste apps er lukket."</string>
     <string name="accessibility_recents_item_open_app_info" msgid="5107479759905883540">"Åbn appoplysningerne for <xliff:g id="APP">%s</xliff:g>."</string>
     <string name="accessibility_recents_item_launched" msgid="7616039892382525203">"<xliff:g id="APP">%s</xliff:g> startes."</string>
     <string name="accessibility_recents_task_header" msgid="1437183540924535457">"<xliff:g id="APP">%1$s</xliff:g> <xliff:g id="ACTIVITY_LABEL">%2$s</xliff:g>"</string>
@@ -217,11 +217,11 @@
     <string name="accessibility_quick_settings_close" msgid="3115847794692516306">"Luk panelet."</string>
     <string name="accessibility_quick_settings_more_time" msgid="3659274935356197708">"Mere tid."</string>
     <string name="accessibility_quick_settings_less_time" msgid="2404728746293515623">"Mindre tid."</string>
-    <string name="accessibility_quick_settings_flashlight_off" msgid="4936432000069786988">"Lommelygten er slået fra."</string>
+    <string name="accessibility_quick_settings_flashlight_off" msgid="4936432000069786988">"Lommelygten er slukket."</string>
     <string name="accessibility_quick_settings_flashlight_unavailable" msgid="8012811023312280810">"Lommelygten er ikke tilgængelig."</string>
-    <string name="accessibility_quick_settings_flashlight_on" msgid="2003479320007841077">"Lommelygten er slået til."</string>
-    <string name="accessibility_quick_settings_flashlight_changed_off" msgid="3303701786768224304">"Lommelygten er slået fra."</string>
-    <string name="accessibility_quick_settings_flashlight_changed_on" msgid="6531793301533894686">"Lommelygten er slået til."</string>
+    <string name="accessibility_quick_settings_flashlight_on" msgid="2003479320007841077">"Lommelygten er tændt."</string>
+    <string name="accessibility_quick_settings_flashlight_changed_off" msgid="3303701786768224304">"Lommelygten er slukket."</string>
+    <string name="accessibility_quick_settings_flashlight_changed_on" msgid="6531793301533894686">"Lommelygten er tændt."</string>
     <string name="accessibility_quick_settings_color_inversion_changed_off" msgid="4406577213290173911">"Invertering af farver er slået fra."</string>
     <string name="accessibility_quick_settings_color_inversion_changed_on" msgid="6897462320184911126">"Invertering af farver er slået til."</string>
     <string name="accessibility_quick_settings_hotspot_changed_off" msgid="5004708003447561394">"Mobilhotspot er slået fra."</string>

@@ -644,13 +644,13 @@
     <string name="dock_forced_resizable" msgid="5914261505436217520">"Pode que a aplicación non funcione coa pantalla dividida."</string>
     <string name="dock_non_resizeble_failed_to_dock_text" msgid="3871617304250207291">"A aplicación non é compatible coa función de pantalla dividida."</string>
     <string name="accessibility_quick_settings_settings" msgid="6132460890024942157">"Abrir configuración."</string>
-    <string name="accessibility_quick_settings_expand" msgid="2375165227880477530">"Abrir a configuración rápida."</string>
+    <string name="accessibility_quick_settings_expand" msgid="2375165227880477530">"Abrir configuración rápida."</string>
     <string name="accessibility_quick_settings_collapse" msgid="1792625797142648105">"Pechar a configuración rápida."</string>
     <string name="accessibility_quick_settings_alarm_set" msgid="1863000242431528676">"Alarma definida."</string>
     <string name="accessibility_quick_settings_user" msgid="1567445362870421770">"Iniciaches sesión como <xliff:g id="ID_1">%s</xliff:g>"</string>
     <string name="accessibility_quick_settings_no_internet" msgid="31890692343084075">"Non hai conexión a Internet."</string>
     <string name="accessibility_quick_settings_open_details" msgid="4230931801728005194">"Abrir detalles."</string>
-    <string name="accessibility_quick_settings_open_settings" msgid="7806613775728380737">"Abrir a configuración de <xliff:g id="ID_1">%s</xliff:g>."</string>
+    <string name="accessibility_quick_settings_open_settings" msgid="7806613775728380737">"Abrir configuración de <xliff:g id="ID_1">%s</xliff:g>."</string>
     <string name="accessibility_quick_settings_edit" msgid="7839992848995240393">"Editar a orde das opcións de configuración."</string>
     <string name="accessibility_quick_settings_page" msgid="5032979051755200721">"Páxina <xliff:g id="ID_1">%1$d</xliff:g> de <xliff:g id="ID_2">%2$d</xliff:g>"</string>
     <string name="cant_silence_or_block" msgid="999689262131488625">"As notificacións non se poden silenciar nin bloquear"</string>

@@ -384,7 +384,7 @@
     <string name="guest_exit_guest_dialog_remove" msgid="7402231963862520531">"Entfernen"</string>
     <string name="guest_wipe_session_title" msgid="6419439912885956132">"Willkommen zurück im Gastmodus"</string>
     <string name="guest_wipe_session_message" msgid="8476238178270112811">"Möchtest du deine Sitzung fortsetzen?"</string>
-    <string name="guest_wipe_session_wipe" msgid="5065558566939858884">"Von vorn"</string>
+    <string name="guest_wipe_session_wipe" msgid="5065558566939858884">"Neu starten"</string>
     <string name="guest_wipe_session_dontwipe" msgid="1401113462524894716">"Ja, weiter"</string>
     <string name="guest_notification_title" msgid="1585278533840603063">"Gastnutzer"</string>
     <string name="guest_notification_text" msgid="335747957734796689">"Zum Löschen von Apps und Daten Gastnutzer entfernen"</string>
@@ -570,7 +570,7 @@
     <string name="keyboard_shortcut_group_applications_contacts" msgid="2064197111278436375">"Kontakte"</string>
     <string name="keyboard_shortcut_group_applications_email" msgid="6257036897441939004">"E-Mail"</string>
     <string name="keyboard_shortcut_group_applications_im" msgid="1892749399083161405">"IM"</string>
-    <string name="keyboard_shortcut_group_applications_music" msgid="4775559515850922780">"Music"</string>
+    <string name="keyboard_shortcut_group_applications_music" msgid="4775559515850922780">"Musik"</string>
     <string name="keyboard_shortcut_group_applications_youtube" msgid="6555453761294723317">"YouTube"</string>
     <string name="keyboard_shortcut_group_applications_calendar" msgid="9043614299194991263">"Kalender"</string>
     <string name="tuner_full_zen_title" msgid="4540823317772234308">"Einschließlich Lautstärkeregler anzeigen"</string>

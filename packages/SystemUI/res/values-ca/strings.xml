@@ -125,7 +125,7 @@
     <string name="accessibility_wimax_three_bars" msgid="6116551636752103927">"Tres barres de WiMAX."</string>
     <string name="accessibility_wimax_signal_full" msgid="2768089986795579558">"Senyal de WiMAX plena."</string>
     <string name="accessibility_ethernet_disconnected" msgid="5896059303377589469">"S\'ha desconnectat l\'Ethernet."</string>
-    <string name="accessibility_ethernet_connected" msgid="2692130313069182636">"S\'ha connectat l\'Ethernet."</string>
+    <string name="accessibility_ethernet_connected" msgid="2692130313069182636">"Ethernet connectada"</string>
     <string name="accessibility_no_signal" msgid="7064645320782585167">"Sense senyal."</string>
     <string name="accessibility_not_connected" msgid="6395326276213402883">"Sense connexió."</string>
     <string name="accessibility_zero_bars" msgid="3806060224467027887">"Cap barra."</string>
@@ -135,7 +135,7 @@
     <string name="accessibility_signal_full" msgid="9122922886519676839">"Senyal complet."</string>
     <string name="accessibility_desc_on" msgid="2385254693624345265">"Activat."</string>
     <string name="accessibility_desc_off" msgid="6475508157786853157">"Desactivat."</string>
-    <string name="accessibility_desc_connected" msgid="8366256693719499665">"Connectat."</string>
+    <string name="accessibility_desc_connected" msgid="8366256693719499665">"Connectat"</string>
     <string name="accessibility_desc_connecting" msgid="3812924520316280149">"S’està connectant."</string>
     <string name="accessibility_data_connection_gprs" msgid="1606477224486747751">"GPRS"</string>
     <string name="accessibility_data_connection_1x" msgid="994133468120244018">"1 X"</string>
@@ -158,7 +158,7 @@
     <string name="accessibility_airplane_mode" msgid="834748999790763092">"Mode d\'avió."</string>
     <string name="accessibility_no_sims" msgid="3957997018324995781">"No hi ha cap targeta SIM."</string>
     <string name="accessibility_carrier_network_change_mode" msgid="4017301580441304305">"S\'està canviant la xarxa de l\'operador de telefonia mòbil."</string>
-    <string name="accessibility_battery_details" msgid="7645516654955025422">"Obre la informació detallada de la bateria"</string>
+    <string name="accessibility_battery_details" msgid="7645516654955025422">"Obre els detalls de la bateria"</string>
     <string name="accessibility_battery_level" msgid="7451474187113371965">"<xliff:g id="NUMBER">%d</xliff:g> per cent de bateria."</string>
     <string name="accessibility_battery_level_charging" msgid="1147587904439319646">"La bateria s\'està carregant, <xliff:g id="BATTERY_PERCENTAGE">%d</xliff:g>%%."</string>
     <string name="accessibility_settings_button" msgid="799583911231893380">"Configuració del sistema."</string>
@@ -222,8 +222,8 @@
     <string name="accessibility_quick_settings_flashlight_on" msgid="2003479320007841077">"Llanterna activada"</string>
     <string name="accessibility_quick_settings_flashlight_changed_off" msgid="3303701786768224304">"Llanterna desactivada."</string>
     <string name="accessibility_quick_settings_flashlight_changed_on" msgid="6531793301533894686">"Llanterna activada."</string>
-    <string name="accessibility_quick_settings_color_inversion_changed_off" msgid="4406577213290173911">"La inversió de color està desactivada."</string>
-    <string name="accessibility_quick_settings_color_inversion_changed_on" msgid="6897462320184911126">"La inversió de color està activada."</string>
+    <string name="accessibility_quick_settings_color_inversion_changed_off" msgid="4406577213290173911">"La inversió dels colors està desactivada."</string>
+    <string name="accessibility_quick_settings_color_inversion_changed_on" msgid="6897462320184911126">"La inversió dels colors està activada."</string>
     <string name="accessibility_quick_settings_hotspot_changed_off" msgid="5004708003447561394">"El punt d\'accés mòbil està desactivat."</string>
     <string name="accessibility_quick_settings_hotspot_changed_on" msgid="2890951609226476206">"El punt d\'accés mòbil està activat."</string>
     <string name="accessibility_casting_turned_off" msgid="1430668982271976172">"S\'ha aturat l\'emissió de la pantalla."</string>
@@ -315,7 +315,7 @@
     <string name="quick_settings_cellular_detail_data_usage" msgid="1964260360259312002">"Ús de dades"</string>
     <string name="quick_settings_cellular_detail_remaining_data" msgid="722715415543541249">"Dades restants"</string>
     <string name="quick_settings_cellular_detail_over_limit" msgid="967669665390990427">"Límit excedit"</string>
-    <string name="quick_settings_cellular_detail_data_used" msgid="1476810587475761478">"Utilitzats: <xliff:g id="DATA_USED">%s</xliff:g>"</string>
+    <string name="quick_settings_cellular_detail_data_used" msgid="1476810587475761478">"Dades utilitzades: <xliff:g id="DATA_USED">%s</xliff:g>"</string>
     <string name="quick_settings_cellular_detail_data_limit" msgid="56011158504994128">"Límit: <xliff:g id="DATA_LIMIT">%s</xliff:g>"</string>
     <string name="quick_settings_cellular_detail_data_warning" msgid="2440098045692399009">"Advertiment: <xliff:g id="DATA_LIMIT">%s</xliff:g>"</string>
     <string name="quick_settings_work_mode_label" msgid="6244915274350490429">"Mode de feina"</string>
@@ -523,8 +523,8 @@
     <string name="notification_more_settings" msgid="816306283396553571">"Més opcions"</string>
     <string name="notification_done" msgid="5279426047273930175">"Fet"</string>
     <string name="notification_gear_accessibility" msgid="94429150213089611">"Controls de notificació de l\'aplicació <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
-    <string name="battery_panel_title" msgid="7944156115535366613">"Consum de la bateria"</string>
-    <string name="battery_detail_charging_summary" msgid="1279095653533044008">"La funció Estalvi de bateria no està disponible durant la càrrega"</string>
+    <string name="battery_panel_title" msgid="7944156115535366613">"Ús de la bateria"</string>
+    <string name="battery_detail_charging_summary" msgid="1279095653533044008">"El mode d\'estalvi de bateria no està disponible durant la càrrega"</string>
     <string name="battery_detail_switch_title" msgid="6285872470260795421">"Estalvi de bateria"</string>
     <string name="battery_detail_switch_summary" msgid="9049111149407626804">"Redueix el rendiment i les dades en segon pla"</string>
     <string name="keyboard_key_button_template" msgid="6230056639734377300">"Botó <xliff:g id="NAME">%1$s</xliff:g>"</string>
@@ -579,8 +579,8 @@
     <string name="accessibility_status_bar_headphones" msgid="9156307120060559989">"Auriculars connectats"</string>
     <string name="accessibility_status_bar_headset" msgid="8666419213072449202">"Auriculars connectats"</string>
     <string name="data_saver" msgid="5037565123367048522">"Economitzador de dades"</string>
-    <string name="accessibility_data_saver_on" msgid="8454111686783887148">"L\'extensió Economitzador de dades està activada"</string>
-    <string name="accessibility_data_saver_off" msgid="8841582529453005337">"L\'extensió Economitzador de dades està desactivada"</string>
+    <string name="accessibility_data_saver_on" msgid="8454111686783887148">"L\'Economitzador de dades està activat"</string>
+    <string name="accessibility_data_saver_off" msgid="8841582529453005337">"Economitzador de dades desactivada"</string>
     <string name="switch_bar_on" msgid="1142437840752794229">"Activat"</string>
     <string name="switch_bar_off" msgid="8803270596930432874">"Desactivat"</string>
     <string name="nav_bar" msgid="1993221402773877607">"Barra de navegació"</string>

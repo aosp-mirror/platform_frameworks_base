@@ -500,12 +500,12 @@
     <string name="enable_bluetooth_title" msgid="5027037706500635269">"Attivare il Bluetooth?"</string>
     <string name="enable_bluetooth_message" msgid="9106595990708985385">"Per connettere la tastiera al tablet, devi prima attivare il Bluetooth."</string>
     <string name="enable_bluetooth_confirmation_ok" msgid="6258074250948309715">"Attiva"</string>
-    <string name="show_silently" msgid="6841966539811264192">"Mostra le notifiche silenziosamente"</string>
+    <string name="show_silently" msgid="6841966539811264192">"Mostra notifiche in modalità silenziosa"</string>
     <string name="block" msgid="2734508760962682611">"Blocca tutte le notifiche"</string>
     <string name="do_not_silence" msgid="6878060322594892441">"Non silenziare"</string>
     <string name="do_not_silence_block" msgid="4070647971382232311">"Non silenziare e non bloccare"</string>
     <string name="tuner_full_importance_settings" msgid="3207312268609236827">"Controlli di gestione delle notifiche"</string>
-    <string name="tuner_full_importance_settings_on" msgid="7545060756610299966">"On"</string>
+    <string name="tuner_full_importance_settings_on" msgid="7545060756610299966">"Attiva"</string>
     <string name="tuner_full_importance_settings_off" msgid="8208165412614935229">"Off"</string>
     <string name="power_notification_controls_description" msgid="4372459941671353358">"I controlli di gestione delle notifiche ti consentono di impostare un livello di importanza compreso tra 0 e 5 per le notifiche di un\'app. \n\n"<b>"Livello 5"</b>" \n- Mostra in cima all\'elenco di notifiche \n- Consenti l\'interruzione a schermo intero \n- Visualizza sempre \n\n"<b>"Livello 4"</b>" \n- Impedisci l\'interruzione a schermo intero \n- Visualizza sempre \n\n"<b>"Livello 3"</b>" \n- Impedisci l\'interruzione a schermo intero \n- Non visualizzare mai \n\n"<b>"Livello 2"</b>" \n- Impedisci l\'interruzione a schermo intero \n- Non visualizzare mai \n- Non emettere mai suoni e vibrazioni \n\n"<b>"Livello 1"</b>" \n- Impedisci l\'interruzione a schermo intero \n- Non visualizzare mai \n- Non emettere mai suoni e vibrazioni \n- Nascondi da schermata di blocco e barra di stato \n- Mostra in fondo all\'elenco di notifiche \n\n"<b>"Livello 0"</b>" \n- Blocca tutte le notifiche dell\'app"</string>
     <string name="user_unspecified_importance" msgid="361613856933432117">"Importanza: automatica"</string>
@@ -583,7 +583,7 @@
     <string name="data_saver" msgid="5037565123367048522">"Risparmio dati"</string>
     <string name="accessibility_data_saver_on" msgid="8454111686783887148">"Risparmio dati attivo"</string>
     <string name="accessibility_data_saver_off" msgid="8841582529453005337">"Risparmio dati disattivato"</string>
-    <string name="switch_bar_on" msgid="1142437840752794229">"Attiva"</string>
+    <string name="switch_bar_on" msgid="1142437840752794229">"On"</string>
     <string name="switch_bar_off" msgid="8803270596930432874">"Off"</string>
     <string name="nav_bar" msgid="1993221402773877607">"Barra di navigazione"</string>
     <string name="start" msgid="6873794757232879664">"All\'inizio"</string>
@@ -648,7 +648,7 @@
     <string name="accessibility_quick_settings_collapse" msgid="1792625797142648105">"Chiudi le impostazioni rapide."</string>
     <string name="accessibility_quick_settings_alarm_set" msgid="1863000242431528676">"Sveglia impostata."</string>
     <string name="accessibility_quick_settings_user" msgid="1567445362870421770">"Accesso eseguito come <xliff:g id="ID_1">%s</xliff:g>"</string>
-    <string name="accessibility_quick_settings_no_internet" msgid="31890692343084075">"Nessuna connessione Internet."</string>
+    <string name="accessibility_quick_settings_no_internet" msgid="31890692343084075">"Nessuna connessione a Internet."</string>
     <string name="accessibility_quick_settings_open_details" msgid="4230931801728005194">"Apri i dettagli."</string>
     <string name="accessibility_quick_settings_open_settings" msgid="7806613775728380737">"Apri le impostazioni <xliff:g id="ID_1">%s</xliff:g>."</string>
     <string name="accessibility_quick_settings_edit" msgid="7839992848995240393">"Modifica l\'ordine delle impostazioni."</string>

@@ -318,16 +318,16 @@
     <string name="quick_settings_notifications_label" msgid="4818156442169154523">"Апавяшчэнні"</string>
     <string name="quick_settings_flashlight_label" msgid="2133093497691661546">"Ліхтарык"</string>
     <string name="quick_settings_cellular_detail_title" msgid="8575062783675171695">"Мабільная перадача даных"</string>
-    <string name="quick_settings_cellular_detail_data_usage" msgid="1964260360259312002">"Выкарыстанне трафіку"</string>
+    <string name="quick_settings_cellular_detail_data_usage" msgid="1964260360259312002">"Выкарыстанне трафіка"</string>
     <string name="quick_settings_cellular_detail_remaining_data" msgid="722715415543541249">"Засталося трафіку"</string>
     <string name="quick_settings_cellular_detail_over_limit" msgid="967669665390990427">"Ліміт перавышаны"</string>
     <string name="quick_settings_cellular_detail_data_used" msgid="1476810587475761478">"Выкарыстана <xliff:g id="DATA_USED">%s</xliff:g>"</string>
     <string name="quick_settings_cellular_detail_data_limit" msgid="56011158504994128">"Ліміт <xliff:g id="DATA_LIMIT">%s</xliff:g>"</string>
     <string name="quick_settings_cellular_detail_data_warning" msgid="2440098045692399009">"Папярэджанне: <xliff:g id="DATA_LIMIT">%s</xliff:g>"</string>
     <string name="quick_settings_work_mode_label" msgid="6244915274350490429">"Рэжым працы"</string>
-    <string name="quick_settings_night_display_label" msgid="3577098011487644395">"Начная падсветка"</string>
-    <string name="quick_settings_night_display_summary_on" msgid="1814901757887526769">"\"Начная падсветка\" ўключана; дакраніцеся, каб выключыць"</string>
-    <string name="quick_settings_night_display_summary_off" msgid="7892102914128777905">"\"Начная падсветка\" выключана; дакраніцеся, каб уключыць"</string>
+    <string name="quick_settings_night_display_label" msgid="3577098011487644395">"Начны рэжым"</string>
+    <string name="quick_settings_night_display_summary_on" msgid="1814901757887526769">"Начны рэжым ўключаны; дакраніцеся, каб выключыць"</string>
+    <string name="quick_settings_night_display_summary_off" msgid="7892102914128777905">"Начны рэжым выключаны; дакраніцеся, каб уключыць"</string>
     <string name="recents_empty_message" msgid="808480104164008572">"Няма нядаўніх элементаў"</string>
     <string name="recents_empty_message_dismissed_all" msgid="2791312568666558651">"Вы ачысцілі усё"</string>
     <string name="recents_app_info_button_label" msgid="2890317189376000030">"Звесткі аб праграме"</string>

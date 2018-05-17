@@ -331,7 +331,7 @@
     <string name="recents_launch_disabled_message" msgid="1624523193008871793">"<xliff:g id="APP">%s</xliff:g>已在安全模式下停用。"</string>
     <string name="recents_stack_action_button_label" msgid="6593727103310426253">"全部清除"</string>
     <string name="recents_incompatible_app_message" msgid="5075812958564082451">"该应用不支持分屏"</string>
-    <string name="recents_drag_hint_message" msgid="2649739267073203985">"在此处拖动即可使用分屏功能"</string>
+    <string name="recents_drag_hint_message" msgid="2649739267073203985">"拖动到此处即可使用分屏功能"</string>
     <string name="recents_multistack_add_stack_dialog_split_horizontal" msgid="8848514474543427332">"水平分割"</string>
     <string name="recents_multistack_add_stack_dialog_split_vertical" msgid="9075292233696180813">"垂直分割"</string>
     <string name="recents_multistack_add_stack_dialog_split_custom" msgid="4177837597513701943">"自定义分割"</string>
@@ -561,7 +561,7 @@
     <string name="keyboard_shortcut_group_system_shortcuts_helper" msgid="4892255911160332762">"键盘快捷键"</string>
     <string name="keyboard_shortcut_group_system_switch_input" msgid="2334164096341310324">"切换输入法"</string>
     <string name="keyboard_shortcut_group_applications" msgid="9129465955073449206">"应用"</string>
-    <string name="keyboard_shortcut_group_applications_assist" msgid="9095441910537146013">"辅助应用"</string>
+    <string name="keyboard_shortcut_group_applications_assist" msgid="9095441910537146013">"助手应用"</string>
     <string name="keyboard_shortcut_group_applications_browser" msgid="6465985474000766533">"浏览器"</string>
     <string name="keyboard_shortcut_group_applications_contacts" msgid="2064197111278436375">"通讯录"</string>
     <string name="keyboard_shortcut_group_applications_email" msgid="6257036897441939004">"电子邮件"</string>
@@ -605,7 +605,7 @@
     <string name="preview" msgid="9077832302472282938">"预览"</string>
     <string name="drag_to_add_tiles" msgid="7058945779098711293">"拖动即可添加图块"</string>
     <string name="drag_to_remove_tiles" msgid="3361212377437088062">"拖动到此处即可移除"</string>
-    <string name="qs_edit" msgid="2232596095725105230">"修改"</string>
+    <string name="qs_edit" msgid="2232596095725105230">"编辑"</string>
     <string name="tuner_time" msgid="6572217313285536011">"时间"</string>
   <string-array name="clock_options">
     <item msgid="5965318737560463480">"显示小时、分钟和秒"</item>

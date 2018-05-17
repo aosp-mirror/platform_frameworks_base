@@ -602,7 +602,7 @@
     <string name="keycode" msgid="7335281375728356499">"કીકોડ"</string>
     <string name="keycode_description" msgid="1403795192716828949">"કીકોડ બટન કીબોર્ડની કીઝને નેવિગેશન બારમાં ઉમેરવાની મંજૂરી આપે છે. જ્યારે દબાવવામાં આવે ત્યારે તે પસંદ કરેલ કીબોર્ડની કીનું અનુસરણ કરે છે. બટન માટે પહેલા કીબોર્ડની કીઝને પસંદ કરવી આવશ્યક છે, તે પછી બટન પર બતાવવામાં આવેલ છબી પસંદ કરવી આવશ્યક છે."</string>
     <string name="select_keycode" msgid="7413765103381924584">"કીબોર્ડ બટન પસંદ કરો"</string>
-    <string name="preview" msgid="9077832302472282938">"પૂર્વાવલોકન કરો"</string>
+    <string name="preview" msgid="9077832302472282938">"પ્રીવ્યૂ કરો"</string>
     <string name="drag_to_add_tiles" msgid="7058945779098711293">"ટાઇલ્સ ઉમેરવા માટે ખેંચો"</string>
     <string name="drag_to_remove_tiles" msgid="3361212377437088062">"દૂર કરવા માટે અહીં ખેંચો"</string>
     <string name="qs_edit" msgid="2232596095725105230">"સંપાદિત કરો"</string>

@@ -535,7 +535,7 @@
     <string name="keyboard_key_dpad_left" msgid="1346446024676962251">"Majtas"</string>
     <string name="keyboard_key_dpad_right" msgid="3317323247127515341">"Djathtas"</string>
     <string name="keyboard_key_dpad_center" msgid="2566737770049304658">"Qendror"</string>
-    <string name="keyboard_key_tab" msgid="3871485650463164476">"Skedë"</string>
+    <string name="keyboard_key_tab" msgid="3871485650463164476">"Tab"</string>
     <string name="keyboard_key_space" msgid="2499861316311153293">"Hapësirë"</string>
     <string name="keyboard_key_enter" msgid="5739632123216118137">"Enter"</string>
     <string name="keyboard_key_backspace" msgid="1559580097512385854">"Kthim prapa"</string>

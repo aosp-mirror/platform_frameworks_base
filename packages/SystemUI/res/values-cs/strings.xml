@@ -262,9 +262,9 @@
     <string name="accessibility_rotation_lock_off" msgid="4062780228931590069">"Obrazovka se automaticky otočí."</string>
     <string name="accessibility_rotation_lock_on_landscape" msgid="6731197337665366273">"Obrazovka je uzamčena v orientaci na šířku."</string>
     <string name="accessibility_rotation_lock_on_portrait" msgid="5809367521644012115">"Obrazovka je uzamčena v orientaci na výšku."</string>
-    <string name="accessibility_rotation_lock_off_changed" msgid="8134601071026305153">"Obrazovka se nyní otáčí automaticky."</string>
-    <string name="accessibility_rotation_lock_on_landscape_changed" msgid="3135965553707519743">"Obrazovka je nyní uzamčena v orientaci na šířku."</string>
-    <string name="accessibility_rotation_lock_on_portrait_changed" msgid="8922481981834012126">"Obrazovka je nyní uzamčena v orientaci na výšku."</string>
+    <string name="accessibility_rotation_lock_off_changed" msgid="8134601071026305153">"Obrazovka se teď otáčí automaticky."</string>
+    <string name="accessibility_rotation_lock_on_landscape_changed" msgid="3135965553707519743">"Obrazovka je teď uzamčena v orientaci na šířku."</string>
+    <string name="accessibility_rotation_lock_on_portrait_changed" msgid="8922481981834012126">"Obrazovka je teď uzamčena v orientaci na výšku."</string>
     <string name="dessert_case" msgid="1295161776223959221">"Pult se sladkostmi"</string>
     <string name="start_dreams" msgid="5640361424498338327">"Spořič obrazovky"</string>
     <string name="ethernet_label" msgid="7967563676324087464">"Ethernet"</string>
@@ -300,7 +300,7 @@
     <string name="quick_settings_wifi_off_label" msgid="7558778100843885864">"Wi-Fi vypnuta"</string>
     <string name="quick_settings_wifi_on_label" msgid="7607810331387031235">"Wi-Fi je zapnutá"</string>
     <string name="quick_settings_wifi_detail_empty_text" msgid="269990350383909226">"Žádné sítě Wi-Fi nejsou k dispozici"</string>
-    <string name="quick_settings_cast_title" msgid="7709016546426454729">"Odeslat"</string>
+    <string name="quick_settings_cast_title" msgid="7709016546426454729">"Odesílání"</string>
     <string name="quick_settings_casting" msgid="6601710681033353316">"Odesílání"</string>
     <string name="quick_settings_cast_device_default_name" msgid="5367253104742382945">"Nepojmenované zařízení"</string>
     <string name="quick_settings_cast_device_default_description" msgid="2484573682378634413">"Připraveno k vysílání"</string>

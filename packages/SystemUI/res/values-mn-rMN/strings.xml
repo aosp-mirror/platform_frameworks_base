@@ -229,8 +229,8 @@
     <string name="accessibility_quick_settings_work_mode_on" msgid="7650588553988014341">"Ажлын горимыг асаасан."</string>
     <string name="accessibility_quick_settings_work_mode_changed_off" msgid="5605534876107300711">"Ажлын горимыг унтраасан."</string>
     <string name="accessibility_quick_settings_work_mode_changed_on" msgid="249840330756998612">"Ажлын горимыг асаасан."</string>
-    <string name="accessibility_quick_settings_data_saver_changed_off" msgid="650231949881093289">"Өгөгдөл хамгаалагчийг унтраасан."</string>
-    <string name="accessibility_quick_settings_data_saver_changed_on" msgid="4218725402373934151">"Өгөгдөл хамгаалагчийг асаасан."</string>
+    <string name="accessibility_quick_settings_data_saver_changed_off" msgid="650231949881093289">"Дата хэмнэгчийг унтраасан."</string>
+    <string name="accessibility_quick_settings_data_saver_changed_on" msgid="4218725402373934151">"Дата хэмнэгчийг асаасан."</string>
     <string name="accessibility_brightness" msgid="8003681285547803095">"Дэлгэцийн гэрэлтэлт"</string>
     <string name="data_usage_disabled_dialog_3g_title" msgid="5281770593459841889">"2G-3G дата-г түр зогсоосон байна"</string>
     <string name="data_usage_disabled_dialog_4g_title" msgid="1601769736881078016">"4G дата-г түр зогсоосон байна"</string>
@@ -387,7 +387,7 @@
     <string name="user_logout_notification_text" msgid="3350262809611876284">"Одоогийн хэрэглэгчийг гаргах"</string>
     <string name="user_logout_notification_action" msgid="1195428991423425062">"ХЭРЭГЛЭГЧЭЭС ГАРАХ"</string>
     <string name="user_add_user_title" msgid="4553596395824132638">"Шинэ хэрэглэгч нэмэх үү?"</string>
-    <string name="user_add_user_message_short" msgid="2161624834066214559">"Та шинэ хэрэглэгч нэмбэл, тухайн хүн өөрийн профайлыг тохируулах шаардлагатай.\n\nАль ч хэрэглэгч бүх хэрэглэгчийн апп-уудыг шинэчлэх боломжтой."</string>
+    <string name="user_add_user_message_short" msgid="2161624834066214559">"Та шинэ хэрэглэгч нэмбэл тухайн хүн өөрийн профайлыг тохируулах шаардлагатай.\n\nАль ч хэрэглэгч бүх хэрэглэгчийн апп-уудыг шинэчлэх боломжтой."</string>
     <string name="user_remove_user_title" msgid="4681256956076895559">"Хэрэглэгчийг устгах уу?"</string>
     <string name="user_remove_user_message" msgid="1453218013959498039">"Энэ хэрэглэгчийн бүх апп болон мэдээлэл устах болно."</string>
     <string name="user_remove_user_remove" msgid="7479275741742178297">"Арилгах"</string>
@@ -525,7 +525,7 @@
     <string name="notification_gear_accessibility" msgid="94429150213089611">"<xliff:g id="APP_NAME">%1$s</xliff:g> мэдэгдлийн хяналт"</string>
     <string name="battery_panel_title" msgid="7944156115535366613">"Тэжээл ашиглалт"</string>
     <string name="battery_detail_charging_summary" msgid="1279095653533044008">"Цэнэглэх үед тэжээл хэмнэгч ажиллахгүй"</string>
-    <string name="battery_detail_switch_title" msgid="6285872470260795421">"Тэжээл хэмнэгч"</string>
+    <string name="battery_detail_switch_title" msgid="6285872470260795421">"Батарей хэмнэгч"</string>
     <string name="battery_detail_switch_summary" msgid="9049111149407626804">"Гүйцэтгэл болон дэвсгэрийн датаг багасгадаг"</string>
     <string name="keyboard_key_button_template" msgid="6230056639734377300">"<xliff:g id="NAME">%1$s</xliff:g> товчлуур"</string>
     <string name="keyboard_key_home" msgid="2243500072071305073">"Нүүр хуудас"</string>
@@ -571,16 +571,16 @@
     <string name="keyboard_shortcut_group_applications_calendar" msgid="9043614299194991263">"Хуанли"</string>
     <string name="tuner_full_zen_title" msgid="4540823317772234308">"Түвшний хяналттай харуулах"</string>
     <string name="volume_and_do_not_disturb" msgid="3373784330208603030">"Бүү саад бол"</string>
-    <string name="volume_dnd_silent" msgid="4363882330723050727">"Түвшний товчлуурын товчлол"</string>
+    <string name="volume_dnd_silent" msgid="4363882330723050727">"Дууны түвшний товчлуурын товчлол"</string>
     <string name="volume_up_silent" msgid="7141255269783588286">"Бүү саад бол тохиргооноос гарахын тулд дууны түвшинг нэмэх"</string>
-    <string name="battery" msgid="7498329822413202973">"Зай"</string>
+    <string name="battery" msgid="7498329822413202973">"Батарей"</string>
     <string name="clock" msgid="7416090374234785905">"Цаг"</string>
     <string name="headset" msgid="4534219457597457353">"Чихэвч"</string>
     <string name="accessibility_status_bar_headphones" msgid="9156307120060559989">"Чихэвч холбогдсон"</string>
     <string name="accessibility_status_bar_headset" msgid="8666419213072449202">"Чихэвч холбогдсон"</string>
-    <string name="data_saver" msgid="5037565123367048522">"Өгөгдөл хамгаалагч"</string>
-    <string name="accessibility_data_saver_on" msgid="8454111686783887148">"Өгөгдөл хамгаалагчийг асаасан байна"</string>
-    <string name="accessibility_data_saver_off" msgid="8841582529453005337">"Өгөгдөл хамгаалагчийг унтраасан байна"</string>
+    <string name="data_saver" msgid="5037565123367048522">"Дата хэмнэгч"</string>
+    <string name="accessibility_data_saver_on" msgid="8454111686783887148">"Дата хэмнэгчийг асаасан байна"</string>
+    <string name="accessibility_data_saver_off" msgid="8841582529453005337">"Дата хэмнэгчийг унтраасан байна"</string>
     <string name="switch_bar_on" msgid="1142437840752794229">"Идэвхтэй"</string>
     <string name="switch_bar_off" msgid="8803270596930432874">"Идэвхгүй"</string>
     <string name="nav_bar" msgid="1993221402773877607">"Навигацийн самбар"</string>
@@ -642,7 +642,7 @@
     <string name="dock_forced_resizable" msgid="5914261505436217520">"Апп хуваагдсан дэлгэцэд ажиллахгүй."</string>
     <string name="dock_non_resizeble_failed_to_dock_text" msgid="3871617304250207291">"Энэ апп нь дэлгэц хуваах тохиргоог дэмждэггүй."</string>
     <string name="accessibility_quick_settings_settings" msgid="6132460890024942157">"Тохиргоог нээнэ үү."</string>
-    <string name="accessibility_quick_settings_expand" msgid="2375165227880477530">"Хурдан тохиргоог нээнэ үү."</string>
+    <string name="accessibility_quick_settings_expand" msgid="2375165227880477530">"Шуурхай тохиргоог нээнэ үү."</string>
     <string name="accessibility_quick_settings_collapse" msgid="1792625797142648105">"Хурдан тохиргоог хаана уу."</string>
     <string name="accessibility_quick_settings_alarm_set" msgid="1863000242431528676">"Сэрүүлэг тавьсан."</string>
     <string name="accessibility_quick_settings_user" msgid="1567445362870421770">"<xliff:g id="ID_1">%s</xliff:g>-р нэвтэрсэн"</string>

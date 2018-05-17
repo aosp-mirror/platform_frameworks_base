@@ -22,7 +22,7 @@
     <string name="app_label" msgid="7164937344850004466">"சாதனத்தின் UI"</string>
     <string name="status_bar_clear_all_button" msgid="7774721344716731603">"அழி"</string>
     <string name="status_bar_recent_remove_item_title" msgid="6026395868129852968">"பட்டியலில் இருந்து அகற்று"</string>
-    <string name="status_bar_recent_inspect_item_title" msgid="7793624864528818569">"ஆப்ஸ் தகவல்"</string>
+    <string name="status_bar_recent_inspect_item_title" msgid="7793624864528818569">"பயன்பாட்டுத் தகவல்"</string>
     <string name="status_bar_no_recent_apps" msgid="7374907845131203189">"சமீபத்திய திரைகள் இங்கு தோன்றும்"</string>
     <string name="status_bar_accessibility_dismiss_recents" msgid="4576076075226540105">"சமீபத்திய பயன்பாடுகளை நிராகரி"</string>
     <plurals name="status_bar_accessibility_recent_apps" formatted="false" msgid="9138535907802238759">
@@ -133,8 +133,8 @@
     <string name="accessibility_two_bars" msgid="6437363648385206679">"இரண்டு கோடுகள்."</string>
     <string name="accessibility_three_bars" msgid="2648241415119396648">"மூன்று கோடுகள்."</string>
     <string name="accessibility_signal_full" msgid="9122922886519676839">"சிக்னல் முழுமையாக உள்ளது."</string>
-    <string name="accessibility_desc_on" msgid="2385254693624345265">"இயக்கப்பட்டுள்ளது."</string>
-    <string name="accessibility_desc_off" msgid="6475508157786853157">"முடக்கப்பட்டுள்ளது."</string>
+    <string name="accessibility_desc_on" msgid="2385254693624345265">"ஆன்."</string>
+    <string name="accessibility_desc_off" msgid="6475508157786853157">"ஆஃப்."</string>
     <string name="accessibility_desc_connected" msgid="8366256693719499665">"இணைக்கப்பட்டது."</string>
     <string name="accessibility_desc_connecting" msgid="3812924520316280149">"இணைக்கிறது."</string>
     <string name="accessibility_data_connection_gprs" msgid="1606477224486747751">"GPRS"</string>
@@ -238,7 +238,7 @@
     <string name="data_usage_disabled_dialog_4g_title" msgid="1601769736881078016">"4G டேட்டா இடைநிறுத்தப்பட்டது"</string>
     <string name="data_usage_disabled_dialog_mobile_title" msgid="4651001290947318931">"மொபைல் டேட்டா இடைநிறுத்தப்பட்டது"</string>
     <string name="data_usage_disabled_dialog_title" msgid="3932437232199671967">"தரவு இடைநிறுத்தப்பட்டது"</string>
-    <string name="data_usage_disabled_dialog" msgid="1841738975235283398">"நீங்கள் அமைத்த டேட்டா வரம்பை அடைந்துவிட்டீர்கள். இப்போது செல்லுலார் டேட்டாவைப் பயன்படுத்த முடியாது.\n\nமீண்டும் செல்லுலார் டேட்டாவைப் பயன்படுத்தத் தொடங்கினால், டேட்டா பயன்பாட்டிற்குக் கட்டணம் விதிக்கப்படலாம்."</string>
+    <string name="data_usage_disabled_dialog" msgid="1841738975235283398">"நீங்கள் அமைத்த டேட்டா வரம்பை அடைந்துவிட்டீர்கள். இப்போது செல்லுலார் டேட்டாவைப் பயன்படுத்த முடியாது.\n\nமீண்டும் செல்லுலார் டேட்டாவைப் பயன்படுத்தத் தொடங்கினால், டேட்டா உபயோகத்திற்குக் கட்டணம் விதிக்கப்படலாம்."</string>
     <string name="data_usage_disabled_dialog_enable" msgid="1412395410306390593">"மீண்டும் தொடங்கு"</string>
     <string name="status_bar_settings_signal_meter_disconnected" msgid="1940231521274147771">"இணைய இணைப்பு இல்லை"</string>
     <string name="status_bar_settings_signal_meter_wifi_nossid" msgid="6557486452774597820">"வைஃபை இணைக்கப்பட்டது"</string>
@@ -312,7 +312,7 @@
     <string name="quick_settings_notifications_label" msgid="4818156442169154523">"அறிவிப்புகள்"</string>
     <string name="quick_settings_flashlight_label" msgid="2133093497691661546">"டார்ச் லைட்"</string>
     <string name="quick_settings_cellular_detail_title" msgid="8575062783675171695">"மொபைல் டேட்டா"</string>
-    <string name="quick_settings_cellular_detail_data_usage" msgid="1964260360259312002">"டேட்டா பயன்பாடு"</string>
+    <string name="quick_settings_cellular_detail_data_usage" msgid="1964260360259312002">"டேட்டா உபயோகம்"</string>
     <string name="quick_settings_cellular_detail_remaining_data" msgid="722715415543541249">"மீதமுள்ள தரவு"</string>
     <string name="quick_settings_cellular_detail_over_limit" msgid="967669665390990427">"வரம்பைக் கடந்தது"</string>
     <string name="quick_settings_cellular_detail_data_used" msgid="1476810587475761478">"பயன்படுத்தியது - <xliff:g id="DATA_USED">%s</xliff:g>"</string>
@@ -505,7 +505,7 @@
     <string name="tuner_full_importance_settings" msgid="3207312268609236827">"ஆற்றல்மிக்க அறிவிப்புக் கட்டுப்பாடுகள்"</string>
     <string name="tuner_full_importance_settings_on" msgid="7545060756610299966">"ஆன்"</string>
     <string name="tuner_full_importance_settings_off" msgid="8208165412614935229">"ஆஃப்"</string>
-    <string name="power_notification_controls_description" msgid="4372459941671353358">"ஆற்றல்மிக்க அறிவிப்புக் கட்டுப்பாடுகள் மூலம், பயன்பாட்டின் அறிவிப்புகளுக்கு முக்கியத்துவ நிலையை (0-5) அமைக்கலாம். \n\n"<b>"நிலை 5"</b>" \n- அறிவிப்புப் பட்டியலின் மேலே காட்டும் \n- முழுத் திரைக் குறுக்கீட்டை அனுமதிக்கும் \n- எப்போதும் நடப்புத் திரையின் மேல் பகுதியில் அறிவிப்புகளைக் காட்டும் \n\n"<b>"நிலை 4"</b>" \n- முழுத் திரைக் குறுக்கீட்டைத் தடுக்கும் \n- எப்போதும் நடப்புத் திரையின் மேல் பகுதியில் அறிவிப்புகளைக் காட்டும் \n\n"<b>"நிலை 3"</b>" \n- முழுத் திரைக் குறுக்கீட்டைத் தடுக்கும் \n- ஒருபோதும் நடப்புத் திரையின் மேல் பகுதியில் அறிவிப்புகளைக் காட்டாது \n\n"<b>"நிலை 2"</b>" \n- முழுத் திரைக் குறுக்கீட்டைத் தடுக்கும் \n- ஒருபோதும் நடப்புத் திரையின் மேல் பகுதியில் அறிவிப்புகளைக் காட்டாது \n- ஒருபோதும் ஒலி எழுப்பாது, அதிர்வுறாது \n\n"<b>"நிலை 1"</b>" \n- முழுத் திரைக் குறுக்கீட்டைத் தடுக்கும் \n- ஒருபோதும் நடப்புத் திரையின் மேல் பகுதியில் அறிவிப்புகளைக் காட்டாது \n- ஒருபோதும் ஒலி எழுப்பாது அல்லது அதிர்வுறாது \n- பூட்டுத்திரை மற்றும் நிலைப்பட்டியிலிருந்து மறைக்கும் \n- அறிவிப்புகள் பட்டியலின் கீழே காட்டும் \n\n"<b>"நிலை 0"</b>" \n- பயன்பாட்டின் எல்லா அறிவிப்புகளையும் தடுக்கும்"</string>
+    <string name="power_notification_controls_description" msgid="4372459941671353358">"ஆற்றல்மிக்க அறிவிப்புக் கட்டுப்பாடுகள் மூலம், பயன்பாட்டின் அறிவிப்புகளுக்கு முக்கியத்துவ நிலையை (0-5) அமைக்கலாம். \n\n"<b>"நிலை 5"</b>" \n- அறிவிப்புப் பட்டியலின் மேலே காட்டும் \n- முழுத் திரைக் குறுக்கீட்டை அனுமதிக்கும் \n- எப்போதும் நடப்புத் திரையின் மேல் பகுதியில் அறிவிப்புகளைக் காட்டும் \n\n"<b>"நிலை 4"</b>" \n- முழுத் திரைக் குறுக்கீட்டைத் தடுக்கும் \n- எப்போதும் நடப்புத் திரையின் மேல் பகுதியில் அறிவிப்புகளைக் காட்டும் \n\n"<b>"நிலை 3"</b>" \n- முழுத் திரைக் குறுக்கீட்டைத் தடுக்கும் \n- ஒருபோதும் நடப்புத் திரையின் மேல் பகுதியில் அறிவிப்புகளைக் காட்டாது \n\n"<b>"நிலை 2"</b>" \n- முழுத் திரைக் குறுக்கீட்டைத் தடுக்கும் \n- ஒருபோதும் நடப்புத் திரையின் மேல் பகுதியில் அறிவிப்புகளைக் காட்டாது \n- ஒருபோதும் ஒலி எழுப்பாது, அதிர்வுறாது \n\n"<b>"நிலை 1"</b>" \n- முழுத் திரைக் குறுக்கீட்டைத் தடுக்கும் \n- ஒருபோதும் நடப்புத் திரையின் மேல் பகுதியில் அறிவிப்புகளைக் காட்டாது \n- ஒருபோதும் ஒலி எழுப்பாது அல்லது அதிர்வுறாது \n- லாக் ஸ்கிரீன் மற்றும் நிலைப்பட்டியிலிருந்து மறைக்கும் \n- அறிவிப்புகள் பட்டியலின் கீழே காட்டும் \n\n"<b>"நிலை 0"</b>" \n- பயன்பாட்டின் எல்லா அறிவிப்புகளையும் தடுக்கும்"</string>
     <string name="user_unspecified_importance" msgid="361613856933432117">"முக்கியத்துவம்: தானியங்கு"</string>
     <string name="blocked_importance" msgid="5035073235408414397">"முக்கியத்துவம்: நிலை 0"</string>
     <string name="min_importance" msgid="560779348928574878">"முக்கியத்துவம்: நிலை 1"</string>
@@ -535,7 +535,7 @@
     <string name="keyboard_key_dpad_left" msgid="1346446024676962251">"இடது"</string>
     <string name="keyboard_key_dpad_right" msgid="3317323247127515341">"வலது"</string>
     <string name="keyboard_key_dpad_center" msgid="2566737770049304658">"நடு"</string>
-    <string name="keyboard_key_tab" msgid="3871485650463164476">"டேப்"</string>
+    <string name="keyboard_key_tab" msgid="3871485650463164476">"Tab"</string>
     <string name="keyboard_key_space" msgid="2499861316311153293">"ஸ்பேஸ்"</string>
     <string name="keyboard_key_enter" msgid="5739632123216118137">"என்டர்"</string>
     <string name="keyboard_key_backspace" msgid="1559580097512385854">"பேக்ஸ்பேஸ்"</string>
@@ -558,7 +558,7 @@
     <string name="keyboard_shortcut_group_system_recents" msgid="3154851905021926744">"சமீபத்தியவை"</string>
     <string name="keyboard_shortcut_group_system_back" msgid="2207004531216446378">"முந்தையது"</string>
     <string name="keyboard_shortcut_group_system_notifications" msgid="8366964080041773224">"அறிவிப்புகள்"</string>
-    <string name="keyboard_shortcut_group_system_shortcuts_helper" msgid="4892255911160332762">"விசைப்பலகைக் குறுக்குவழிகள்"</string>
+    <string name="keyboard_shortcut_group_system_shortcuts_helper" msgid="4892255911160332762">"கீபோர்ட் ஷார்ட்கட்கள்"</string>
     <string name="keyboard_shortcut_group_system_switch_input" msgid="2334164096341310324">"உள்ளீட்டு முறையை மாற்று"</string>
     <string name="keyboard_shortcut_group_applications" msgid="9129465955073449206">"பயன்பாடுகள்"</string>
     <string name="keyboard_shortcut_group_applications_assist" msgid="9095441910537146013">"அசிஸ்ட்"</string>

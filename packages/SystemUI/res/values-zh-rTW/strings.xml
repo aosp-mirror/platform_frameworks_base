@@ -413,13 +413,13 @@
     <string name="monitoring_description_device_owned" msgid="5780988291898461883">"你的裝置由下列機構管理：<xliff:g id="ORGANIZATION">%1$s</xliff:g>。\n\n你的管理員可以監控及管理與裝置相關的設定、企業網路存取權、應用程式和資料，以及裝置的位置資訊。如需詳細資訊，請洽你的管理員。"</string>
     <string name="monitoring_description_vpn" msgid="4445150119515393526">"你已授權一個應用程式設定 VPN 連線。\n\n這個應用程式可以監控你的裝置和網路活動，包括收發電子郵件、使用應用程式和瀏覽網站。"</string>
     <string name="monitoring_description_vpn_device_owned" msgid="3090670777499161246">"你的裝置由下列機構管理：<xliff:g id="ORGANIZATION">%1$s</xliff:g>。\n\n你的管理員可以監控及管理與裝置相關的設定、企業網路存取權、應用程式和資料，以及裝置的位置資訊。\n\n由於你的裝置已連線至 VPN，你的網路活動也會受到 VPN 監控，包括收發電子郵件、使用應用程式和瀏覽網站。\n\n如需詳細資訊，請洽你的管理員。"</string>
-    <string name="monitoring_description_vpn_profile_owned" msgid="2054949132145039290">"你的 Work 設定檔由下列機構管理：<xliff:g id="ORGANIZATION">%1$s</xliff:g>。\n\n你的管理員可以監控你的網路活動，包括收發電子郵件、使用應用程式及瀏覽網站。\n\n如需詳細資訊，請洽你的管理員。\n\n同時，由於你的裝置已連線至 VPN，你的網路活動也會受到 VPN 監控。"</string>
+    <string name="monitoring_description_vpn_profile_owned" msgid="2054949132145039290">"你的工作資料夾由下列機構管理：<xliff:g id="ORGANIZATION">%1$s</xliff:g>。\n\n你的管理員可以監控你的網路活動，包括收發電子郵件、使用應用程式及瀏覽網站。\n\n如需詳細資訊，請洽你的管理員。\n\n同時，由於你的裝置已連線至 VPN，你的網路活動也會受到 VPN 監控。"</string>
     <string name="legacy_vpn_name" msgid="6604123105765737830">"VPN"</string>
     <string name="monitoring_description_app" msgid="6259179342284742878">"由於你已連線至 <xliff:g id="APPLICATION">%1$s</xliff:g>，你的網路活動也會受到這個應用程式監控，包括收發電子郵件、使用應用程式和瀏覽網站。"</string>
     <string name="monitoring_description_app_personal" msgid="484599052118316268">"由於你已連線至 <xliff:g id="APPLICATION">%1$s</xliff:g>，你的個人網路活動也會受到這個應用程式監控，包括收發電子郵件、使用應用程式和瀏覽網站。"</string>
     <string name="branded_monitoring_description_app_personal" msgid="2669518213949202599">"由於你已連結至「<xliff:g id="APPLICATION">%1$s</xliff:g>」，你的個人網路活動 (包括收發電子郵件、使用應用程式及瀏覽網站) 可能會受到這個應用程式監控。"</string>
-    <string name="monitoring_description_app_work" msgid="1754325860918060897">"你的 Work 設定檔是由下列機構管理：<xliff:g id="ORGANIZATION">%1$s</xliff:g>。由於設定檔已連線至 <xliff:g id="APPLICATION">%2$s</xliff:g>，你的工作網路活動也會受到這個應用程式監控，包括收發電子郵件、使用應用程式和瀏覽網站。\n\n詳情請洽你的管理員。"</string>
-    <string name="monitoring_description_app_personal_work" msgid="4946600443852045903">"你的 Work 設定檔是由下列機構管理：<xliff:g id="ORGANIZATION">%1$s</xliff:g>。由於設定檔已連線至 <xliff:g id="APPLICATION_WORK">%2$s</xliff:g>，你的工作網路活動也會受到這個應用程式監控，包括收發電子郵件、使用應用程式和瀏覽網站。\n\n同時由於你也連線至<xliff:g id="APPLICATION_PERSONAL">%3$s</xliff:g>，你的個人網路活動也會受到這個應用程式監控。"</string>
+    <string name="monitoring_description_app_work" msgid="1754325860918060897">"你的工作資料夾是由下列機構管理：<xliff:g id="ORGANIZATION">%1$s</xliff:g>。由於設定檔已連線至 <xliff:g id="APPLICATION">%2$s</xliff:g>，你的工作網路活動也會受到這個應用程式監控，包括收發電子郵件、使用應用程式和瀏覽網站。\n\n詳情請洽你的管理員。"</string>
+    <string name="monitoring_description_app_personal_work" msgid="4946600443852045903">"你的工作資料夾是由下列機構管理：<xliff:g id="ORGANIZATION">%1$s</xliff:g>。由於設定檔已連線至 <xliff:g id="APPLICATION_WORK">%2$s</xliff:g>，你的工作網路活動也會受到這個應用程式監控，包括收發電子郵件、使用應用程式和瀏覽網站。\n\n同時由於你也連線至<xliff:g id="APPLICATION_PERSONAL">%3$s</xliff:g>，你的個人網路活動也會受到這個應用程式監控。"</string>
     <string name="monitoring_description_vpn_app_device_owned" msgid="4970443827043261703">"你的裝置由下列機構管理：<xliff:g id="ORGANIZATION">%1$s</xliff:g>。\n\n你的管理員可以監控及管理與裝置相關的設定、企業網路存取權、應用程式和資料，以及裝置的位置資訊。\n\n由於你的裝置已連線至 <xliff:g id="APPLICATION">%2$s</xliff:g>，你的網路活動也會受到這個應用程式監控，包括收發電子郵件、使用應用程式和瀏覽網站。\n\n如需詳細資訊，請洽你的管理員。"</string>
     <string name="keyguard_indication_trust_disabled" msgid="7412534203633528135">"在你手動解鎖前，裝置將保持鎖定狀態"</string>
     <string name="hidden_notifications_title" msgid="7139628534207443290">"更快取得通知"</string>
@@ -442,7 +442,7 @@
     <string name="volumeui_prompt_deny" msgid="5720663643411696731">"拒絕"</string>
     <string name="volumeui_notification_title" msgid="4906770126345910955">"「<xliff:g id="APP_NAME">%1$s</xliff:g>」現在是預設的音量控制對話方塊。"</string>
     <string name="volumeui_notification_text" msgid="8819536904234337445">"輕觸即可恢復原始設定。"</string>
-    <string name="managed_profile_foreground_toast" msgid="5421487114739245972">"你正在使用 Work 設定檔"</string>
+    <string name="managed_profile_foreground_toast" msgid="5421487114739245972">"你正在使用工作資料夾"</string>
   <string-array name="volume_stream_titles">
     <item msgid="5841843895402729630">"通話"</item>
     <item msgid="5997713001067658559">"系統"</item>
@@ -471,7 +471,7 @@
     <string name="show_demo_mode" msgid="2018336697782464029">"顯示示範模式"</string>
     <string name="status_bar_ethernet" msgid="5044290963549500128">"乙太網路"</string>
     <string name="status_bar_alarm" msgid="8536256753575881818">"鬧鐘"</string>
-    <string name="status_bar_work" msgid="6022553324802866373">"Work 設定檔"</string>
+    <string name="status_bar_work" msgid="6022553324802866373">"工作資料夾"</string>
     <string name="status_bar_airplane" msgid="7057575501472249002">"飛航模式"</string>
     <string name="add_tile" msgid="2995389510240786221">"新增圖塊"</string>
     <string name="broadcast_tile" msgid="3894036511763289383">"播送圖塊"</string>
@@ -481,7 +481,7 @@
     <string name="alarm_template_far" msgid="4242179982586714810">"於<xliff:g id="WHEN">%1$s</xliff:g>"</string>
     <string name="accessibility_quick_settings_detail" msgid="2579369091672902101">"快速設定，<xliff:g id="TITLE">%s</xliff:g>。"</string>
     <string name="accessibility_status_bar_hotspot" msgid="4099381329956402865">"無線基地台"</string>
-    <string name="accessibility_managed_profile" msgid="6613641363112584120">"Work 設定檔"</string>
+    <string name="accessibility_managed_profile" msgid="6613641363112584120">"工作資料夾"</string>
     <string name="tuner_warning_title" msgid="7094689930793031682">"有趣與否，見仁見智"</string>
     <string name="tuner_warning" msgid="8730648121973575701">"系統使用者介面調整精靈可讓你透過其他方式，調整及自訂 Android 使用者介面。這些實驗性功能隨著版本更新可能會變更、損壞或消失，執行時請務必謹慎。"</string>
     <string name="tuner_persistent_warning" msgid="8597333795565621795">"這些實驗性功能隨著版本更新可能會變更、損壞或消失，執行時請務必謹慎。"</string>

@@ -60,10 +60,10 @@
     <string name="label_view" msgid="6304565553218192990">"មើល"</string>
     <string name="always_use_device" msgid="1450287437017315906">"ប្រើ​តាម​លំនាំដើម​សម្រាប់​ឧបករណ៍​យូអេសប៊ី​នេះ"</string>
     <string name="always_use_accessory" msgid="1210954576979621596">"ប្រើ​តាម​លំនាំដើម​សម្រាប់​ខ្សែ​យូអេសប៊ី​នេះ"</string>
-    <string name="usb_debugging_title" msgid="4513918393387141949">"អនុញ្ញាត​ការ​កែ​កំហុស​យូអេសប៊ី?"</string>
+    <string name="usb_debugging_title" msgid="4513918393387141949">"អនុញ្ញាត​ការ​កែ​កំហុសតាម USB ឬ?"</string>
     <string name="usb_debugging_message" msgid="2220143855912376496">"ស្នាម​ម្រាម​ដៃ​ RSA របស់​កុំព្យូទ័រ​គឺ៖ \n<xliff:g id="FINGERPRINT">%1$s</xliff:g>"</string>
     <string name="usb_debugging_always" msgid="303335496705863070">"អនុញ្ញាត​ជា​និច្ច​សម្រាប់​កុំព្យូទ័រ​នេះ"</string>
-    <string name="usb_debugging_secondary_user_title" msgid="6353808721761220421">"មិនអនុញ្ញាតការកែកំហុសតាមរយៈយូអេសប៊ីទេ"</string>
+    <string name="usb_debugging_secondary_user_title" msgid="6353808721761220421">"មិនអនុញ្ញាតការកែកំហុសតាម USB ទេ"</string>
     <string name="usb_debugging_secondary_user_message" msgid="8572228137833020196">"អ្នកប្រើដែលបានចូលទៅឧបករណ៍នេះនាពេលបច្ចុប្បន្នមិនអាចបើកការកែកំហុសតាមរយៈយូអេសប៊ីបានទេ។ ដើម្បីប្រើលក្ខណៈពិសេសនេះ សូមប្តូរទៅរបៀបអ្នកប្រើជា អ្នកគ្រប់គ្រង។"</string>
     <string name="compat_mode_on" msgid="6623839244840638213">"ពង្រីក​​ដើម្បី​ឲ្យ​ពេញ​អេក្រង់"</string>
     <string name="compat_mode_off" msgid="4434467572461327898">"ទាញ​ដើម្បី​ឲ្យ​ពេញ​អេក្រង់"</string>
@@ -86,7 +86,7 @@
     <string name="accessibility_recent" msgid="5208608566793607626">"ទិដ្ឋភាព"</string>
     <string name="accessibility_search_light" msgid="1103867596330271848">"ស្វែងរក"</string>
     <string name="accessibility_camera_button" msgid="8064671582820358152">"ម៉ាស៊ីន​ថត"</string>
-    <string name="accessibility_phone_button" msgid="6738112589538563574">"ទូរស័ព្ទ"</string>
+    <string name="accessibility_phone_button" msgid="6738112589538563574">"ទូរសព្ទ"</string>
     <string name="accessibility_voice_assist_button" msgid="487611083884852965">"ជំនួយសំឡេង"</string>
     <string name="accessibility_unlock_button" msgid="128158454631118828">"ដោះ​​សោ"</string>
     <string name="accessibility_unlock_button_fingerprint" msgid="8214125623493923751">"ប៊ូតុងដោះសោ កំពុងរង់ចាំស្នាមម្រាមដៃ"</string>
@@ -602,7 +602,7 @@
     <string name="keycode" msgid="7335281375728356499">"លេខកូដគ្រាប់ចុច"</string>
     <string name="keycode_description" msgid="1403795192716828949">"ប៊ូតុងលេខកូដគ្រាប់ចុចអនុញ្ញាតឲ្យមានការបន្ថែមគ្រាប់ចុចនៃក្តារចុចទៅក្នុងរបាររុករក។ នៅពេលចុចប៊ូតុងទាំងនោះ ពួកវាបង្កើតមុខងារឲ្យគ្រាប់ចុចនៃក្តារចុចដែលបានជ្រើស។ សូមជ្រើសរើសគ្រាប់ចុចសម្រាប់ប៊ូតុងជាមុនសិន មុនពេលដែលរូបភាពត្រូវបានបង្ហាញនៅលើប៊ូតុង។"</string>
     <string name="select_keycode" msgid="7413765103381924584">"ជ្រើសប៊ូតុងក្តារចុច"</string>
-    <string name="preview" msgid="9077832302472282938">"មើលជាមុន"</string>
+    <string name="preview" msgid="9077832302472282938">"មើលសាកល្បង"</string>
     <string name="drag_to_add_tiles" msgid="7058945779098711293">"អូសដើម្បីបន្ថែមប្រអប់"</string>
     <string name="drag_to_remove_tiles" msgid="3361212377437088062">"អូសទីនេះដើម្បីយកចេញ"</string>
     <string name="qs_edit" msgid="2232596095725105230">"កែសម្រួល"</string>
