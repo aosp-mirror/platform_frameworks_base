@@ -3986,6 +3986,26 @@ public class Intent implements Parcelable, Cloneable {
      */
     public static final int EXTRA_THERMAL_STATE_EXCEEDED = 2;
 
+    /**
+     * Broadcast Action: Indicates the dock in idle state while device is docked.
+     *
+     * <p class="note">This is a protected intent that can only be sent
+     * by the system.
+     *
+     * @hide
+     */
+    public static final String ACTION_DOCK_IDLE = "android.intent.action.DOCK_IDLE";
+
+    /**
+     * Broadcast Action: Indicates the dock in active state while device is docked.
+     *
+     * <p class="note">This is a protected intent that can only be sent
+     * by the system.
+     *
+     * @hide
+     */
+    public static final String ACTION_DOCK_ACTIVE = "android.intent.action.DOCK_ACTIVE";
+
 
     // ---------------------------------------------------------------------
     // ---------------------------------------------------------------------
