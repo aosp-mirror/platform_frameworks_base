@@ -23,6 +23,7 @@ import static android.provider.SettingsValidators.COMPONENT_NAME_VALIDATOR;
 import static android.provider.SettingsValidators.LENIENT_IP_ADDRESS_VALIDATOR;
 import static android.provider.SettingsValidators.LOCALE_VALIDATOR;
 import static android.provider.SettingsValidators.NON_NEGATIVE_INTEGER_VALIDATOR;
+import static android.provider.SettingsValidators.NULLABLE_COMPONENT_NAME_VALIDATOR;
 import static android.provider.SettingsValidators.PACKAGE_NAME_VALIDATOR;
 import static android.provider.SettingsValidators.URI_VALIDATOR;
 
@@ -5452,7 +5453,8 @@ public final class Settings {
         @TestApi
         public static final String AUTOFILL_SERVICE = "autofill_service";
 
-        private static final Validator AUTOFILL_SERVICE_VALIDATOR = COMPONENT_NAME_VALIDATOR;
+        private static final Validator AUTOFILL_SERVICE_VALIDATOR =
+                NULLABLE_COMPONENT_NAME_VALIDATOR;
 
         /**
          * Boolean indicating if Autofill supports field classification.
@@ -5950,7 +5952,7 @@ public final class Settings {
                 "accessibility_shortcut_target_service";
 
         private static final Validator ACCESSIBILITY_SHORTCUT_TARGET_SERVICE_VALIDATOR =
-                COMPONENT_NAME_VALIDATOR;
+                NULLABLE_COMPONENT_NAME_VALIDATOR;
 
         /**
          * Setting specifying the accessibility service or feature to be toggled via the
