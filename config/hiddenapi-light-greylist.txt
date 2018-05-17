@@ -3843,6 +3843,8 @@ Landroid/os/PerformanceCollector;->beginSnapshot(Ljava/lang/String;)V
 Landroid/os/PerformanceCollector;->endSnapshot()Landroid/os/Bundle;
 Landroid/os/PerformanceCollector;->startTiming(Ljava/lang/String;)V
 Landroid/os/PerformanceCollector;->stopTiming(Ljava/lang/String;)Landroid/os/Bundle;
+Landroid/os/PowerManager$WakeLock;->mFlags:I
+Landroid/os/PowerManager$WakeLock;->mTag:Ljava/lang/String;
 Landroid/os/PowerManager;->ACTION_LIGHT_DEVICE_IDLE_MODE_CHANGED:Ljava/lang/String;
 Landroid/os/PowerManager;->ACTION_POWER_SAVE_MODE_CHANGING:Ljava/lang/String;
 Landroid/os/PowerManager;->BRIGHTNESS_ON:I
