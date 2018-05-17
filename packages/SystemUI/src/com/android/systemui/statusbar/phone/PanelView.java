@@ -252,7 +252,8 @@ public abstract class PanelView extends FrameLayout {
 
     @Override
     public boolean onTouchEvent(MotionEvent event) {
-        if (mInstantExpanding || mTouchDisabled
+        if (mInstantExpanding
+                || (mTouchDisabled && event.getActionMasked() != MotionEvent.ACTION_CANCEL)
                 || (mMotionAborted && event.getActionMasked() != MotionEvent.ACTION_DOWN)) {
             return false;
         }
