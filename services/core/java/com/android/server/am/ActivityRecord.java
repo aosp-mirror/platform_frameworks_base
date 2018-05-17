@@ -1927,11 +1927,12 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
         if (displayStartTime != 0) {
             reportLaunchTimeLocked(curTime);
         }
-        final ActivityStack stack = getStack();
-        if (fullyDrawnStartTime != 0 && stack != null) {
+        final LaunchTimeTracker.Entry entry = mStackSupervisor.getLaunchTimeTracker().getEntry(
+                getWindowingMode());
+        if (fullyDrawnStartTime != 0 && entry != null) {
             final long thisTime = curTime - fullyDrawnStartTime;
-            final long totalTime = stack.mFullyDrawnStartTime != 0
-                    ? (curTime - stack.mFullyDrawnStartTime) : thisTime;
+            final long totalTime = entry.mFullyDrawnStartTime != 0
+                    ? (curTime - entry.mFullyDrawnStartTime) : thisTime;
             if (SHOW_ACTIVITY_START_TIME) {
                 Trace.asyncTraceEnd(TRACE_TAG_ACTIVITY_MANAGER, "drawing", 0);
                 EventLog.writeEvent(AM_ACTIVITY_FULLY_DRAWN_TIME,
@@ -1953,7 +1954,7 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
             if (totalTime > 0) {
                 //service.mUsageStatsService.noteFullyDrawnTime(realActivity, (int) totalTime);
             }
-            stack.mFullyDrawnStartTime = 0;
+            entry.mFullyDrawnStartTime = 0;
         }
         mStackSupervisor.getActivityMetricsLogger().logAppTransitionReportedDrawn(this,
                 restoredFromBundle);
@@ -1961,13 +1962,14 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
     }
 
     private void reportLaunchTimeLocked(final long curTime) {
-        final ActivityStack stack = getStack();
-        if (stack == null) {
+        final LaunchTimeTracker.Entry entry = mStackSupervisor.getLaunchTimeTracker().getEntry(
+                getWindowingMode());
+        if (entry == null) {
             return;
         }
         final long thisTime = curTime - displayStartTime;
-        final long totalTime = stack.mLaunchStartTime != 0
-                ? (curTime - stack.mLaunchStartTime) : thisTime;
+        final long totalTime = entry.mLaunchStartTime != 0
+                ? (curTime - entry.mLaunchStartTime) : thisTime;
         if (SHOW_ACTIVITY_START_TIME) {
             Trace.asyncTraceEnd(TRACE_TAG_ACTIVITY_MANAGER, "launching: " + packageName, 0);
             EventLog.writeEvent(AM_ACTIVITY_LAUNCH_TIME,
@@ -1991,7 +1993,7 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
             //service.mUsageStatsService.noteLaunchTime(realActivity, (int)totalTime);
         }
         displayStartTime = 0;
-        stack.mLaunchStartTime = 0;
+        entry.mLaunchStartTime = 0;
     }
 
     @Override
