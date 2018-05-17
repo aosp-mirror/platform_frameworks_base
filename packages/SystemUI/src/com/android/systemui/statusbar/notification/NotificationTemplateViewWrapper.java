@@ -45,8 +45,6 @@ import com.android.systemui.statusbar.ViewTransformationHelper;
  */
 public class NotificationTemplateViewWrapper extends NotificationHeaderViewWrapper {
 
-    private static final int mDarkProgressTint = 0xffffffff;
-
     protected ImageView mPicture;
     private ProgressBar mProgressBar;
     private TextView mTitle;
@@ -275,15 +273,6 @@ public class NotificationTemplateViewWrapper extends NotificationHeaderViewWrapp
     }
 
     @Override
-    protected void updateInvertHelper() {
-        super.updateInvertHelper();
-        View mainColumn = mView.findViewById(com.android.internal.R.id.notification_main_column);
-        if (mainColumn != null) {
-            mInvertHelper.addTarget(mainColumn);
-        }
-    }
-
-    @Override
     protected void updateTransformedTypes() {
         // This also clears the existing types
         super.updateTransformedTypes();
@@ -303,65 +292,6 @@ public class NotificationTemplateViewWrapper extends NotificationHeaderViewWrapp
             mTransformationHelper.addTransformedView(TransformableView.TRANSFORMING_VIEW_PROGRESS,
                     mProgressBar);
         }
-    }
-
-    @Override
-    public void setDark(boolean dark, boolean fade, long delay) {
-        if (dark == mDark && mDarkInitialized) {
-            return;
-        }
-        super.setDark(dark, fade, delay);
-        setPictureDark(dark, fade, delay);
-        setProgressBarDark(dark, fade, delay);
-    }
-
-    private void setProgressBarDark(boolean dark, boolean fade, long delay) {
-        if (mProgressBar != null) {
-            if (fade) {
-                fadeProgressDark(mProgressBar, dark, delay);
-            } else {
-                updateProgressDark(mProgressBar, dark);
-            }
-        }
-    }
-
-    private void fadeProgressDark(final ProgressBar target, final boolean dark, long delay) {
-        getDozer().startIntensityAnimation(animation -> {
-            float t = (float) animation.getAnimatedValue();
-            updateProgressDark(target, t);
-        }, dark, delay, null /* listener */);
-    }
-
-    private void updateProgressDark(ProgressBar target, float intensity) {
-        int color = interpolateColor(mColor, mDarkProgressTint, intensity);
-        target.getIndeterminateDrawable().mutate().setTint(color);
-        target.getProgressDrawable().mutate().setTint(color);
-    }
-
-    private void updateProgressDark(ProgressBar target, boolean dark) {
-        updateProgressDark(target, dark ? 1f : 0f);
-    }
-
-    private void setPictureDark(boolean dark, boolean fade, long delay) {
-        if (mPicture != null) {
-            getDozer().setImageDark(mPicture, dark, fade, delay, true /* useGrayscale */);
-        }
-    }
-
-    private static int interpolateColor(int source, int target, float t) {
-        int aSource = Color.alpha(source);
-        int rSource = Color.red(source);
-        int gSource = Color.green(source);
-        int bSource = Color.blue(source);
-        int aTarget = Color.alpha(target);
-        int rTarget = Color.red(target);
-        int gTarget = Color.green(target);
-        int bTarget = Color.blue(target);
-        return Color.argb(
-                (int) (aSource * (1f - t) + aTarget * t),
-                (int) (rSource * (1f - t) + rTarget * t),
-                (int) (gSource * (1f - t) + gTarget * t),
-                (int) (bSource * (1f - t) + bTarget * t));
     }
 
     @Override
