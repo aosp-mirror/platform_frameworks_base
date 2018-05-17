@@ -99,6 +99,20 @@ public final class PhysicalChannelConfig implements Parcelable {
         return mCellConnectionStatus;
     }
 
+    /** @return String representation of the connection status */
+    private String getConnectionStatusString() {
+        switch(mCellConnectionStatus) {
+            case CONNECTION_PRIMARY_SERVING:
+                return "PrimaryServing";
+            case CONNECTION_SECONDARY_SERVING:
+                return "SecondaryServing";
+            case CONNECTION_UNKNOWN:
+                return "Unknown";
+            default:
+                return "Invalid(" + mCellConnectionStatus + ")";
+        }
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) {
@@ -129,4 +143,15 @@ public final class PhysicalChannelConfig implements Parcelable {
                 return new PhysicalChannelConfig[size];
             }
         };
+
+    @Override
+    public String toString() {
+        return new StringBuilder()
+            .append("{mConnectionStatus=")
+            .append(getConnectionStatusString())
+            .append(",mCellBandwidthDownlinkKhz=")
+            .append(mCellBandwidthDownlinkKhz)
+            .append("}")
+            .toString();
+    }
 }
