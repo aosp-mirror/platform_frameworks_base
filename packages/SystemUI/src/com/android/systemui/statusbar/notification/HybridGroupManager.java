@@ -166,7 +166,7 @@ public class HybridGroupManager {
         mDozer.setIntensityDark((f)->{
             mDarkAmount = f;
             updateOverFlowNumberColor(view);
-        }, dark, fade, delay);
+        }, dark, fade, delay, view);
         view.setTextSize(TypedValue.COMPLEX_UNIT_PX,
                 dark ? mOverflowNumberSizeDark : mOverflowNumberSize);
         int paddingEnd = dark ? mOverflowNumberPaddingDark : mOverflowNumberPadding;
