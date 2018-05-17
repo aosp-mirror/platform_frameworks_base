@@ -42,7 +42,7 @@
     <string name="keyguard_missing_sim_instructions" msgid="5210891509995942250">"ဆင်းမ်ကဒ်ကို ထည့်ပါ"</string>
     <string name="keyguard_missing_sim_instructions_long" msgid="5968985489463870358">"ဆင်းမ်ကဒ် ပျောက်ဆုံးခြင်း သို့ ဖတ်လို့ မရပါ။ ဆင်းမ်ကဒ်ကို ထည့်ပါ"</string>
     <string name="keyguard_permanent_disabled_sim_message_short" msgid="8340813989586622356">"ဆင်းမ်ကဒ် သုံးလို့ မရပါ"</string>
-    <string name="keyguard_permanent_disabled_sim_instructions" msgid="5892940909699723544">"ဆင်းမ်ကဒ် က လုံး၀ ပြန်ဖွင့်လို့ မရတော့ါ.\n နောက် ကဒ် တစ်ခုအတွက် ဝန်ဆောင်မှုပေးသူနှင့် ဆက်သွယ်ပါ"</string>
+    <string name="keyguard_permanent_disabled_sim_instructions" msgid="5892940909699723544">"ဆင်းမ်ကတ် က လုံး၀ ပြန်ဖွင့်လို့ မရတော့ါ.\n နောက် ကတ် တစ်ခုအတွက် ဝန်ဆောင်မှုပေးသူနှင့် ဆက်သွယ်ပါ"</string>
     <string name="keyguard_sim_locked_message" msgid="6875773413306380902">"ဆင်းမ်ကဒ် သော့ကျနေပါသည်"</string>
     <string name="keyguard_sim_puk_locked_message" msgid="3747232467471801633">"ဆင်းမ်ကဒ် ရဲ့ ပင်နံပါတ် ပြန်ဖွင့်သည့် ကုဒ် သော့ကျနေပါသည်"</string>
     <string name="keyguard_sim_unlock_progress_dialog_message" msgid="7975221805033614426">"ဆင်းမ်ကဒ် ကို သော့ဖွင့်နေပါသည်"</string>
@@ -103,7 +103,7 @@
     <string name="kg_password_puk_failed" msgid="2838824369502455984">"ပင်နံပါတ် ပြန်ဖွင့်သည့် ကုဒ် လုပ်ဆောင်မှု မအောင်မြင်ပါ"</string>
     <string name="kg_pin_accepted" msgid="1448241673570020097">"ကုဒ်နံပါတ်ကို လက်ခံလိုက်ပါသည်"</string>
     <string name="keyguard_carrier_default" msgid="8700650403054042153">"ဆားဗစ် မရှိပါ"</string>
-    <string name="accessibility_ime_switch_button" msgid="2829803408288433429">"ထည့်သွင်းမှုနည်းလမ်းကို ပြောင်းလဲပါ"</string>
+    <string name="accessibility_ime_switch_button" msgid="2829803408288433429">"ထည့်သွင်းရန်နည်းလမ်း ပြောင်းလဲရန်"</string>
     <string name="airplane_mode" msgid="3122107900897202805">"လေယာဉ်ပျံမုဒ်"</string>
     <string name="kg_prompt_reason_restart_pattern" msgid="5519822969283306009">"ကိရိယာကို ပြန်ဖွင့်လျှင် ပုံစံ လိုအပ်ပါသည်"</string>
     <string name="kg_prompt_reason_restart_pin" msgid="4411398237158448198">"ကိရိယာကို ပြန်ဖွင့်လျှင် PIN လိုအပ်ပါသည်"</string>
