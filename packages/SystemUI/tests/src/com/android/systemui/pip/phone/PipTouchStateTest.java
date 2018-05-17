@@ -24,43 +24,36 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import android.os.Handler;
-import android.os.HandlerThread;
 import android.os.Looper;
 import android.os.SystemClock;
 import android.support.test.filters.SmallTest;
-import android.support.test.runner.AndroidJUnit4;
+import android.testing.AndroidTestingRunner;
+import android.testing.TestableLooper;
+import android.testing.TestableLooper.RunWithLooper;
 import android.view.MotionEvent;
 import android.view.ViewConfiguration;
 
 import com.android.systemui.SysuiTestCase;
-import com.android.systemui.pip.phone.PipTouchState;
 
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.TimeUnit;
 
-@RunWith(AndroidJUnit4.class)
+@RunWith(AndroidTestingRunner.class)
 @SmallTest
+@RunWithLooper
 public class PipTouchStateTest extends SysuiTestCase {
 
-    private Handler mHandler;
-    private HandlerThread mHandlerThread;
     private PipTouchState mTouchState;
     private CountDownLatch mDoubleTapCallbackTriggeredLatch;
 
     @Before
     public void setUp() throws Exception {
-        mHandlerThread = new HandlerThread("PipTouchStateTestThread");
-        mHandlerThread.start();
-        mHandler = new Handler(mHandlerThread.getLooper());
-
         mDoubleTapCallbackTriggeredLatch = new CountDownLatch(1);
         mTouchState = new PipTouchState(ViewConfiguration.get(getContext()),
-                mHandler, () -> {
+                Handler.createAsync(Looper.myLooper()), () -> {
             mDoubleTapCallbackTriggeredLatch.countDown();
         });
         assertFalse(mTouchState.isDoubleTap());
@@ -91,7 +84,10 @@ public class PipTouchStateTest extends SysuiTestCase {
 
         assertTrue(mTouchState.getDoubleTapTimeoutCallbackDelay() == 10);
         mTouchState.scheduleDoubleTapTimeoutCallback();
-        mDoubleTapCallbackTriggeredLatch.await(1, TimeUnit.SECONDS);
+
+        // TODO: Remove this sleep. Its only being added because it speeds up this test a bit.
+        Thread.sleep(15);
+        TestableLooper.get(this).processAllMessages();
         assertTrue(mDoubleTapCallbackTriggeredLatch.getCount() == 0);
     }
 

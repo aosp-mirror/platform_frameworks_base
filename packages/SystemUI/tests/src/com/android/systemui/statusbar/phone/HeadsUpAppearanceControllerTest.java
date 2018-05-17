@@ -26,6 +26,8 @@ import static org.mockito.Mockito.when;
 
 import android.support.test.filters.SmallTest;
 import android.support.test.runner.AndroidJUnit4;
+import android.testing.AndroidTestingRunner;
+import android.testing.TestableLooper.RunWithLooper;
 import android.view.View;
 import android.widget.TextView;
 
@@ -47,7 +49,8 @@ import org.junit.runner.RunWith;
 import java.util.HashSet;
 
 @SmallTest
-@RunWith(AndroidJUnit4.class)
+@RunWith(AndroidTestingRunner.class)
+@RunWithLooper(setAsMainLooper = true)
 public class HeadsUpAppearanceControllerTest extends SysuiTestCase {
 
     private final NotificationStackScrollLayout mStackScroller =

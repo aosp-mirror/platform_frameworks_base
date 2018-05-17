@@ -143,12 +143,10 @@ public class NotificationTestHelper {
             throws Exception {
         LayoutInflater inflater = (LayoutInflater) mContext.getSystemService(
                 mContext.LAYOUT_INFLATER_SERVICE);
-        mInstrumentation.runOnMainSync(() ->
-                mRow = (ExpandableNotificationRow) inflater.inflate(
-                        R.layout.status_bar_notification_row,
-                        null /* root */,
-                        false /* attachToRoot */)
-        );
+        mRow = (ExpandableNotificationRow) inflater.inflate(
+                R.layout.status_bar_notification_row,
+                null /* root */,
+                false /* attachToRoot */);
         ExpandableNotificationRow row = mRow;
         row.setGroupManager(mGroupManager);
         row.setHeadsUpManager(mHeadsUpManager);

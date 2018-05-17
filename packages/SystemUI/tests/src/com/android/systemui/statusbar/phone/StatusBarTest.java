@@ -48,6 +48,7 @@ import android.os.Binder;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.IPowerManager;
+import android.os.Looper;
 import android.os.PowerManager;
 import android.os.RemoteException;
 import android.os.UserHandle;
@@ -173,10 +174,8 @@ public class StatusBarTest extends SysuiTestCase {
         mNotificationLogger = new NotificationLogger();
 
         IPowerManager powerManagerService = mock(IPowerManager.class);
-        HandlerThread handlerThread = new HandlerThread("TestThread");
-        handlerThread.start();
         mPowerManager = new PowerManager(mContext, powerManagerService,
-                new Handler(handlerThread.getLooper()));
+                Handler.createAsync(Looper.myLooper()));
 
         CommandQueue commandQueue = mock(CommandQueue.class);
         when(commandQueue.asBinder()).thenReturn(new Binder());
