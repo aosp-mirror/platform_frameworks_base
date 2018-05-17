@@ -22,13 +22,12 @@
 #include <SkPicture.h>
 #include <SkRefCnt.h>
 #include <SkTLazy.h>
-#include <SkTime.h>
 
 namespace android {
 
 AnimatedImageDrawable::AnimatedImageDrawable(sk_sp<SkAnimatedImage> animatedImage, size_t bytesUsed)
         : mSkAnimatedImage(std::move(animatedImage)), mBytesUsed(bytesUsed) {
-    mTimeToShowNextSnapshot = mSkAnimatedImage->currentFrameDuration();
+    mTimeToShowNextSnapshot = ms2ns(mSkAnimatedImage->currentFrameDuration());
 }
 
 void AnimatedImageDrawable::syncProperties() {
@@ -62,28 +61,42 @@ bool AnimatedImageDrawable::nextSnapshotReady() const {
 }
 
 // Only called on the RenderThread while UI thread is locked.
-bool AnimatedImageDrawable::isDirty() {
-    const double currentTime = SkTime::GetMSecs();
-    const double lastWallTime = mLastWallTime;
+bool AnimatedImageDrawable::isDirty(nsecs_t* outDelay) {
+    *outDelay = 0;
+    const nsecs_t currentTime = systemTime(CLOCK_MONOTONIC);
+    const nsecs_t lastWallTime = mLastWallTime;
 
     mLastWallTime = currentTime;
     if (!mRunning) {
-        mDidDraw = false;
         return false;
     }
 
     std::unique_lock lock{mSwapLock};
-    if (mDidDraw) {
-        mCurrentTime += currentTime - lastWallTime;
-        mDidDraw = false;
-    }
+    mCurrentTime += currentTime - lastWallTime;
 
     if (!mNextSnapshot.valid()) {
         // Need to trigger onDraw in order to start decoding the next frame.
+        *outDelay = mTimeToShowNextSnapshot - mCurrentTime;
         return true;
     }
 
-    return nextSnapshotReady() && mCurrentTime >= mTimeToShowNextSnapshot;
+    if (mTimeToShowNextSnapshot > mCurrentTime) {
+        *outDelay = mTimeToShowNextSnapshot - mCurrentTime;
+    } else if (nextSnapshotReady()) {
+        // We have not yet updated mTimeToShowNextSnapshot. Read frame duration
+        // directly from mSkAnimatedImage.
+        lock.unlock();
+        std::unique_lock imageLock{mImageLock};
+        *outDelay = ms2ns(mSkAnimatedImage->currentFrameDuration());
+        return true;
+    } else {
+        // The next snapshot has not yet been decoded, but we've already passed
+        // time to draw it. There's not a good way to know when decoding will
+        // finish, so request an update immediately.
+        *outDelay = 0;
+    }
+
+    return false;
 }
 
 // Only called on the AnimatedImageThread.
@@ -91,7 +104,7 @@ AnimatedImageDrawable::Snapshot AnimatedImageDrawable::decodeNextFrame() {
     Snapshot snap;
     {
         std::unique_lock lock{mImageLock};
-        snap.mDuration = mSkAnimatedImage->decodeNextFrame();
+        snap.mDurationMS = mSkAnimatedImage->decodeNextFrame();
         snap.mPic.reset(mSkAnimatedImage->newPictureSnapshot());
     }
 
@@ -105,7 +118,7 @@ AnimatedImageDrawable::Snapshot AnimatedImageDrawable::reset() {
         std::unique_lock lock{mImageLock};
         mSkAnimatedImage->reset();
         snap.mPic.reset(mSkAnimatedImage->newPictureSnapshot());
-        snap.mDuration = mSkAnimatedImage->currentFrameDuration();
+        snap.mDurationMS = mSkAnimatedImage->currentFrameDuration();
     }
 
     return snap;
@@ -126,8 +139,6 @@ void AnimatedImageDrawable::onDraw(SkCanvas* canvas) {
         canvas->translate(mSkAnimatedImage->getBounds().width(), 0);
         canvas->scale(-1, 1);
     }
-
-    mDidDraw = true;
 
     const bool starting = mStarting;
     mStarting = false;
@@ -157,12 +168,12 @@ void AnimatedImageDrawable::onDraw(SkCanvas* canvas) {
         std::unique_lock lock{mSwapLock};
         if (mCurrentTime >= mTimeToShowNextSnapshot) {
             mSnapshot = mNextSnapshot.get();
-            const double timeToShowCurrentSnap = mTimeToShowNextSnapshot;
-            if (mSnapshot.mDuration == SkAnimatedImage::kFinished) {
+            const nsecs_t timeToShowCurrentSnap = mTimeToShowNextSnapshot;
+            if (mSnapshot.mDurationMS == SkAnimatedImage::kFinished) {
                 finalFrame = true;
                 mRunning = false;
             } else {
-                mTimeToShowNextSnapshot += mSnapshot.mDuration;
+                mTimeToShowNextSnapshot += ms2ns(mSnapshot.mDurationMS);
                 if (mCurrentTime >= mTimeToShowNextSnapshot) {
                     // This would mean showing the current frame very briefly. It's
                     // possible that not being displayed for a time resulted in
@@ -192,7 +203,7 @@ void AnimatedImageDrawable::onDraw(SkCanvas* canvas) {
     }
 }
 
-double AnimatedImageDrawable::drawStaging(SkCanvas* canvas) {
+int AnimatedImageDrawable::drawStaging(SkCanvas* canvas) {
     SkAutoCanvasRestore acr(canvas, false);
     if (mStagingProperties.mAlpha != SK_AlphaOPAQUE || mStagingProperties.mColorFilter.get()) {
         SkPaint paint;
@@ -211,69 +222,69 @@ double AnimatedImageDrawable::drawStaging(SkCanvas* canvas) {
         // to redraw.
         std::unique_lock lock{mImageLock};
         canvas->drawDrawable(mSkAnimatedImage.get());
-        return 0.0;
+        return 0;
     }
 
     if (mStarting) {
         mStarting = false;
-        double duration = 0.0;
+        int durationMS = 0;
         {
             std::unique_lock lock{mImageLock};
             mSkAnimatedImage->reset();
-            duration = mSkAnimatedImage->currentFrameDuration();
+            durationMS = mSkAnimatedImage->currentFrameDuration();
         }
         {
             std::unique_lock lock{mSwapLock};
-            mLastWallTime = 0.0;
-            mTimeToShowNextSnapshot = duration;
+            mLastWallTime = 0;
+            // The current time will be added later, below.
+            mTimeToShowNextSnapshot = ms2ns(durationMS);
         }
     }
 
     bool update = false;
     {
-        const double currentTime = SkTime::GetMSecs();
+        const nsecs_t currentTime = systemTime(CLOCK_MONOTONIC);
         std::unique_lock lock{mSwapLock};
         // mLastWallTime starts off at 0. If it is still 0, just update it to
         // the current time and avoid updating
-        if (mLastWallTime == 0.0) {
+        if (mLastWallTime == 0) {
             mCurrentTime = currentTime;
             // mTimeToShowNextSnapshot is already set to the duration of the
             // first frame.
             mTimeToShowNextSnapshot += currentTime;
-        } else if (mRunning && mDidDraw) {
+        } else if (mRunning) {
             mCurrentTime += currentTime - mLastWallTime;
             update = mCurrentTime >= mTimeToShowNextSnapshot;
         }
         mLastWallTime = currentTime;
     }
 
-    double duration = 0.0;
+    int durationMS = 0;
     {
         std::unique_lock lock{mImageLock};
         if (update) {
-            duration = mSkAnimatedImage->decodeNextFrame();
+            durationMS = mSkAnimatedImage->decodeNextFrame();
         }
 
         canvas->drawDrawable(mSkAnimatedImage.get());
     }
 
-    mDidDraw = true;
-
     std::unique_lock lock{mSwapLock};
     if (update) {
-        if (duration == SkAnimatedImage::kFinished) {
+        if (durationMS == SkAnimatedImage::kFinished) {
             mRunning = false;
-            return duration;
+            return SkAnimatedImage::kFinished;
         }
 
-        const double timeToShowCurrentSnapshot = mTimeToShowNextSnapshot;
-        mTimeToShowNextSnapshot += duration;
+        const nsecs_t timeToShowCurrentSnapshot = mTimeToShowNextSnapshot;
+        mTimeToShowNextSnapshot += ms2ns(durationMS);
         if (mCurrentTime >= mTimeToShowNextSnapshot) {
             // As in onDraw, prevent speedy catch-up behavior.
             mCurrentTime = timeToShowCurrentSnapshot;
         }
     }
-    return mTimeToShowNextSnapshot;
+
+    return ns2ms(mTimeToShowNextSnapshot - mCurrentTime);
 }
 
 }  // namespace android
