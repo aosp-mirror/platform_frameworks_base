@@ -135,7 +135,7 @@
     <string name="accessibility_signal_full" msgid="9122922886519676839">"ဒေတာထုတ်လွှင့်မှုအပြည့်ဖမ်းမိခြင်း"</string>
     <string name="accessibility_desc_on" msgid="2385254693624345265">"ဖွင့်ထားသည်"</string>
     <string name="accessibility_desc_off" msgid="6475508157786853157">"ပိတ်ထားသည်"</string>
-    <string name="accessibility_desc_connected" msgid="8366256693719499665">"ဆက်သွယ်ထားပြီး"</string>
+    <string name="accessibility_desc_connected" msgid="8366256693719499665">"ချိတ်ဆက်ထားသည်"</string>
     <string name="accessibility_desc_connecting" msgid="3812924520316280149">"ချိတ်ဆက်နေ။"</string>
     <string name="accessibility_data_connection_gprs" msgid="1606477224486747751">"GPRS"</string>
     <string name="accessibility_data_connection_1x" msgid="994133468120244018">"၁ အိတ်ဇ်"</string>
@@ -156,7 +156,7 @@
     <string name="accessibility_cell_data_off" msgid="8000803571751407635">"ဆဲလ်လူလာဒေတာပိတ်ထားသည်"</string>
     <string name="accessibility_bluetooth_tether" msgid="4102784498140271969">"ဘလူးတုသ်သုံး၍ ချိတ်ဆက်ခြင်း"</string>
     <string name="accessibility_airplane_mode" msgid="834748999790763092">"လေယာဥ်ပျံပေါ်အသုံးပြုသောစနစ်။"</string>
-    <string name="accessibility_no_sims" msgid="3957997018324995781">"SIM ကဒ် မရှိပါ"</string>
+    <string name="accessibility_no_sims" msgid="3957997018324995781">"SIM ကတ် မရှိပါ"</string>
     <string name="accessibility_carrier_network_change_mode" msgid="4017301580441304305">"ဝန်ဆောင်မှုဌာန ကွန်ရက် ပြောင်းလဲနေစဉ်။"</string>
     <string name="accessibility_battery_details" msgid="7645516654955025422">"ဘက်ထရီ အသေးစိတ် အချက်အလက်များကို ဖွင့်ပါ"</string>
     <string name="accessibility_battery_level" msgid="7451474187113371965">"ဘတ္တရီ <xliff:g id="NUMBER">%d</xliff:g> ရာခိုင်နှုန်း။"</string>
@@ -525,7 +525,7 @@
     <string name="notification_gear_accessibility" msgid="94429150213089611">"<xliff:g id="APP_NAME">%1$s</xliff:g> အကြောင်းကြားချက် ထိန်းချုပ်မှုများ"</string>
     <string name="battery_panel_title" msgid="7944156115535366613">"ဘက်ထရီ အသုံးပြုမှု"</string>
     <string name="battery_detail_charging_summary" msgid="1279095653533044008">"အားသွင်းနေချိန်မှာ Battery Saver ကို သုံးမရပါ"</string>
-    <string name="battery_detail_switch_title" msgid="6285872470260795421">"Battery Saver"</string>
+    <string name="battery_detail_switch_title" msgid="6285872470260795421">"ဘက်ထရီ အားထိန်း"</string>
     <string name="battery_detail_switch_summary" msgid="9049111149407626804">"လုပ်ဆောင်မှု နှင့် နောက်ခံ ​ဒေတာကို လျော့နည်းစေပါသည်"</string>
     <string name="keyboard_key_button_template" msgid="6230056639734377300">"ခလုတ် <xliff:g id="NAME">%1$s</xliff:g>"</string>
     <string name="keyboard_key_home" msgid="2243500072071305073">"ပင်မ"</string>
@@ -559,7 +559,7 @@
     <string name="keyboard_shortcut_group_system_back" msgid="2207004531216446378">"နောက်သို့"</string>
     <string name="keyboard_shortcut_group_system_notifications" msgid="8366964080041773224">"အကြောင်းကြားချက်များ"</string>
     <string name="keyboard_shortcut_group_system_shortcuts_helper" msgid="4892255911160332762">"ကီးဘုတ် ဖြတ်လမ်းများ"</string>
-    <string name="keyboard_shortcut_group_system_switch_input" msgid="2334164096341310324">"ထည့်သွင်းမှုနည်းလမ်းကို ပြောင်းလဲပါ"</string>
+    <string name="keyboard_shortcut_group_system_switch_input" msgid="2334164096341310324">"စာရိုက်စနစ် ပြောင်းခြင်း"</string>
     <string name="keyboard_shortcut_group_applications" msgid="9129465955073449206">"အက်ပ်များ"</string>
     <string name="keyboard_shortcut_group_applications_assist" msgid="9095441910537146013">"အထောက်အကူ"</string>
     <string name="keyboard_shortcut_group_applications_browser" msgid="6465985474000766533">"ဘရောင်ဇာ"</string>

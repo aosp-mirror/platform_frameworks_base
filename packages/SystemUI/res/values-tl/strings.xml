@@ -322,7 +322,7 @@
     <string name="quick_settings_night_display_label" msgid="3577098011487644395">"Night Light"</string>
     <string name="quick_settings_night_display_summary_on" msgid="1814901757887526769">"Naka-on ang Night Light, i-tap upang i-off"</string>
     <string name="quick_settings_night_display_summary_off" msgid="7892102914128777905">"Naka-off ang Night Light, i-tap upang i-on"</string>
-    <string name="recents_empty_message" msgid="808480104164008572">"Walang mga kamakailang item"</string>
+    <string name="recents_empty_message" msgid="808480104164008572">"Walang kamakailang item"</string>
     <string name="recents_empty_message_dismissed_all" msgid="2791312568666558651">"Na-clear mo ang lahat"</string>
     <string name="recents_app_info_button_label" msgid="2890317189376000030">"Impormasyon ng Application"</string>
     <string name="recents_lock_to_app_button_label" msgid="6942899049072506044">"pagpi-pin sa screen"</string>
@@ -345,7 +345,7 @@
     <string name="description_target_search" msgid="3091587249776033139">"Maghanap"</string>
     <string name="description_direction_up" msgid="7169032478259485180">"Mag-slide pataas para sa <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>."</string>
     <string name="description_direction_left" msgid="7207478719805562165">"Mag-slide pakaliwa para sa <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>."</string>
-    <string name="zen_priority_introduction" msgid="3070506961866919502">"Hindi ka magagambala ng mga tunog at pag-vibrate, maliban mula sa mga alarm, paalala, kaganapan at mga tinukoy mong tumatawag."</string>
+    <string name="zen_priority_introduction" msgid="3070506961866919502">"Hindi ka magagambala ng mga tunog at pag-vibrate, maliban mula sa mga alarm, paalala, event at mga tinukoy mong tumatawag."</string>
     <string name="zen_priority_customize_button" msgid="7948043278226955063">"I-customize"</string>
     <string name="zen_silence_introduction_voice" msgid="2284540992298200729">"Bina-block nito ang LAHAT ng tunog at pag-vibrate, kabilang ang mula sa mga alarm, musika, video at laro. Magagawa mo pa ring tumawag."</string>
     <string name="zen_silence_introduction" msgid="3137882381093271568">"Bina-block nito ang LAHAT ng tunog at pag-vibrate, kabilang ang mula sa mga alarm, musika, video at laro."</string>

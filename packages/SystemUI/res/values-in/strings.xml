@@ -29,7 +29,7 @@
       <item quantity="other">%d layar dalam Ringkasan</item>
       <item quantity="one">1 layar dalam Ringkasan</item>
     </plurals>
-    <string name="status_bar_no_notifications_title" msgid="4755261167193833213">"Tidak ada pemberitahuan"</string>
+    <string name="status_bar_no_notifications_title" msgid="4755261167193833213">"Tidak ada notifikasi"</string>
     <string name="status_bar_ongoing_events_title" msgid="1682504513316879202">"Berkelanjutan"</string>
     <string name="status_bar_latest_events_title" msgid="6594767438577593172">"Notifikasi"</string>
     <string name="battery_low_title" msgid="6456385927409742437">"Baterai lemah"</string>
@@ -71,7 +71,7 @@
     <string name="screenshot_saving_title" msgid="8242282144535555697">"Menyimpan screenshot..."</string>
     <string name="screenshot_saving_text" msgid="2419718443411738818">"Screenshot sedang disimpan."</string>
     <string name="screenshot_saved_title" msgid="6461865960961414961">"Screenshot diambil."</string>
-    <string name="screenshot_saved_text" msgid="2685605830386712477">"Ketuk untuk melihat screenshot."</string>
+    <string name="screenshot_saved_text" msgid="2685605830386712477">"Tap untuk melihat screenshot."</string>
     <string name="screenshot_failed_title" msgid="705781116746922771">"Tidak dapat mengambil screenshot."</string>
     <string name="screenshot_failed_to_save_unknown_text" msgid="7887826345701753830">"Terjadi masalah saat menyimpan screenshot."</string>
     <string name="screenshot_failed_to_save_text" msgid="2592658083866306296">"Tidak dapat menyimpan screenshot karena ruang penyimpanan terbatas."</string>
@@ -231,8 +231,8 @@
     <string name="accessibility_quick_settings_work_mode_on" msgid="7650588553988014341">"Mode kerja aktif."</string>
     <string name="accessibility_quick_settings_work_mode_changed_off" msgid="5605534876107300711">"Mode kerja dinonaktifkan."</string>
     <string name="accessibility_quick_settings_work_mode_changed_on" msgid="249840330756998612">"Mode kerja diaktifkan."</string>
-    <string name="accessibility_quick_settings_data_saver_changed_off" msgid="650231949881093289">"Penghemat Kuota Internet nonaktif."</string>
-    <string name="accessibility_quick_settings_data_saver_changed_on" msgid="4218725402373934151">"Penghemat Kuota Internet diaktifkan."</string>
+    <string name="accessibility_quick_settings_data_saver_changed_off" msgid="650231949881093289">"Penghemat Kuota nonaktif."</string>
+    <string name="accessibility_quick_settings_data_saver_changed_on" msgid="4218725402373934151">"Penghemat Kuota diaktifkan."</string>
     <string name="accessibility_brightness" msgid="8003681285547803095">"Kecerahan tampilan"</string>
     <string name="data_usage_disabled_dialog_3g_title" msgid="5281770593459841889">"Data 2G-3G dijeda"</string>
     <string name="data_usage_disabled_dialog_4g_title" msgid="1601769736881078016">"Data 4G dijeda"</string>
@@ -320,8 +320,8 @@
     <string name="quick_settings_cellular_detail_data_warning" msgid="2440098045692399009">"Peringatan <xliff:g id="DATA_LIMIT">%s</xliff:g>"</string>
     <string name="quick_settings_work_mode_label" msgid="6244915274350490429">"Mode kerja"</string>
     <string name="quick_settings_night_display_label" msgid="3577098011487644395">"Cahaya Malam"</string>
-    <string name="quick_settings_night_display_summary_on" msgid="1814901757887526769">"Cahaya Malam hidup, ketuk untuk mematikan"</string>
-    <string name="quick_settings_night_display_summary_off" msgid="7892102914128777905">"Cahaya Malam mati, ketuk untuk menyalakan"</string>
+    <string name="quick_settings_night_display_summary_on" msgid="1814901757887526769">"Cahaya Malam hidup, tap untuk mematikan"</string>
+    <string name="quick_settings_night_display_summary_off" msgid="7892102914128777905">"Cahaya Malam mati, tap untuk menyalakan"</string>
     <string name="recents_empty_message" msgid="808480104164008572">"Tidak ada item baru-baru ini"</string>
     <string name="recents_empty_message_dismissed_all" msgid="2791312568666558651">"Anda sudah menghapus semua"</string>
     <string name="recents_app_info_button_label" msgid="2890317189376000030">"Info Aplikasi"</string>
@@ -380,7 +380,7 @@
     <string name="guest_exit_guest_dialog_remove" msgid="7402231963862520531">"Hapus"</string>
     <string name="guest_wipe_session_title" msgid="6419439912885956132">"Selamat datang kembali, tamu!"</string>
     <string name="guest_wipe_session_message" msgid="8476238178270112811">"Lanjutkan sesi Anda?"</string>
-    <string name="guest_wipe_session_wipe" msgid="5065558566939858884">"Mulai"</string>
+    <string name="guest_wipe_session_wipe" msgid="5065558566939858884">"Mulai ulang"</string>
     <string name="guest_wipe_session_dontwipe" msgid="1401113462524894716">"Ya, lanjutkan"</string>
     <string name="guest_notification_title" msgid="1585278533840603063">"Pengguna tamu"</string>
     <string name="guest_notification_text" msgid="335747957734796689">"Untuk menghapus aplikasi dan data, hapus pengguna tamu"</string>
@@ -389,7 +389,7 @@
     <string name="user_logout_notification_text" msgid="3350262809611876284">"Keluarkan pengguna saat ini"</string>
     <string name="user_logout_notification_action" msgid="1195428991423425062">"KELUARKAN PENGGUNA"</string>
     <string name="user_add_user_title" msgid="4553596395824132638">"Tambahkan pengguna baru?"</string>
-    <string name="user_add_user_message_short" msgid="2161624834066214559">"Saat Anda menambahkan pengguna baru, orang tersebut perlu menyiapkan ruangnya sendiri.\n\nPengguna mana pun dapat memperbarui aplikasi untuk semua pengguna lain."</string>
+    <string name="user_add_user_message_short" msgid="2161624834066214559">"Saat Anda menambahkan pengguna baru, orang tersebut perlu menyiapkan ruangnya sendiri.\n\nPengguna mana pun dapat mengupdate aplikasi untuk semua pengguna lain."</string>
     <string name="user_remove_user_title" msgid="4681256956076895559">"Hapus pengguna?"</string>
     <string name="user_remove_user_message" msgid="1453218013959498039">"Semua aplikasi dan data pengguna ini akan dihapus."</string>
     <string name="user_remove_user_remove" msgid="7479275741742178297">"Hapus"</string>
@@ -400,7 +400,7 @@
     <string name="media_projection_remember_text" msgid="3103510882172746752">"Jangan tampilkan lagi"</string>
     <string name="clear_all_notifications_text" msgid="814192889771462828">"Hapus semua"</string>
     <string name="media_projection_action_text" msgid="8470872969457985954">"Mulai sekarang"</string>
-    <string name="empty_shade_text" msgid="708135716272867002">"Tidak ada pemberitahuan"</string>
+    <string name="empty_shade_text" msgid="708135716272867002">"Tidak ada notifikasi"</string>
     <string name="device_owned_footer" msgid="3802752663326030053">"Perangkat mungkin dipantau"</string>
     <string name="profile_owned_footer" msgid="8021888108553696069">"Profil dapat dipantau"</string>
     <string name="vpn_footer" msgid="2388611096129106812">"Jaringan mungkin dipantau"</string>
@@ -441,7 +441,7 @@
     <string name="volumeui_prompt_allow" msgid="7954396902482228786">"Izinkan"</string>
     <string name="volumeui_prompt_deny" msgid="5720663643411696731">"Tolak"</string>
     <string name="volumeui_notification_title" msgid="4906770126345910955">"<xliff:g id="APP_NAME">%1$s</xliff:g> adalah dialog volume"</string>
-    <string name="volumeui_notification_text" msgid="8819536904234337445">"Ketuk untuk memulihkan aslinya."</string>
+    <string name="volumeui_notification_text" msgid="8819536904234337445">"Tap untuk memulihkan aslinya."</string>
     <string name="managed_profile_foreground_toast" msgid="5421487114739245972">"Anda menggunakan profil kerja"</string>
   <string-array name="volume_stream_titles">
     <item msgid="5841843895402729630">"Telepon"</item>
@@ -455,9 +455,9 @@
     <item msgid="150349973435223405"></item>
     <item msgid="6761963760295549099"></item>
   </string-array>
-    <string name="volume_stream_content_description_unmute" msgid="4436631538779230857">"%1$s. Ketuk untuk menyuarakan."</string>
-    <string name="volume_stream_content_description_vibrate" msgid="1187944970457807498">"%1$s. Ketuk untuk menyetel agar bergetar. Layanan aksesibilitas mungkin dibisukan."</string>
-    <string name="volume_stream_content_description_mute" msgid="3625049841390467354">"%1$s. Ketuk untuk membisukan. Layanan aksesibilitas mungkin dibisukan."</string>
+    <string name="volume_stream_content_description_unmute" msgid="4436631538779230857">"%1$s. Tap untuk menyuarakan."</string>
+    <string name="volume_stream_content_description_vibrate" msgid="1187944970457807498">"%1$s. Tap untuk menyetel agar bergetar. Layanan aksesibilitas mungkin dibisukan."</string>
+    <string name="volume_stream_content_description_mute" msgid="3625049841390467354">"%1$s. Tap untuk membisukan. Layanan aksesibilitas mungkin dibisukan."</string>
     <string name="volume_dialog_accessibility_shown_message" msgid="1834631467074259998">"Kontrol volume %s ditampilkan. Geser ke atas untuk menutup."</string>
     <string name="volume_dialog_accessibility_dismissed_message" msgid="51543526013711399">"Kontrol volume disembunyikan"</string>
     <string name="system_ui_tuner" msgid="708224127392452018">"Penyetel Antarmuka Pengguna Sistem"</string>
@@ -578,9 +578,9 @@
     <string name="headset" msgid="4534219457597457353">"Headset"</string>
     <string name="accessibility_status_bar_headphones" msgid="9156307120060559989">"Headphone terhubung"</string>
     <string name="accessibility_status_bar_headset" msgid="8666419213072449202">"Headset terhubung"</string>
-    <string name="data_saver" msgid="5037565123367048522">"Penghemat Kuota Internet"</string>
-    <string name="accessibility_data_saver_on" msgid="8454111686783887148">"Penghemat Kuota Internet aktif"</string>
-    <string name="accessibility_data_saver_off" msgid="8841582529453005337">"Penghemat Kuota Internet nonaktif"</string>
+    <string name="data_saver" msgid="5037565123367048522">"Penghemat Kuota"</string>
+    <string name="accessibility_data_saver_on" msgid="8454111686783887148">"Penghemat Kuota aktif"</string>
+    <string name="accessibility_data_saver_off" msgid="8841582529453005337">"Penghemat Kuota nonaktif"</string>
     <string name="switch_bar_on" msgid="1142437840752794229">"Aktif"</string>
     <string name="switch_bar_off" msgid="8803270596930432874">"Nonaktif"</string>
     <string name="nav_bar" msgid="1993221402773877607">"Bilah navigasi"</string>
@@ -629,9 +629,9 @@
     <string name="accessibility_action_divider_top_50" msgid="6385859741925078668">"Atas 50%"</string>
     <string name="accessibility_action_divider_top_30" msgid="6201455163864841205">"Atas 30%"</string>
     <string name="accessibility_action_divider_bottom_full" msgid="301433196679548001">"Layar penuh di bawah"</string>
-    <string name="accessibility_qs_edit_tile_label" msgid="8374924053307764245">"Posisi <xliff:g id="POSITION">%1$d</xliff:g>, <xliff:g id="TILE_NAME">%2$s</xliff:g>. Ketuk dua kali untuk mengedit."</string>
-    <string name="accessibility_qs_edit_add_tile_label" msgid="8133209638023882667">"<xliff:g id="TILE_NAME">%1$s</xliff:g>. Ketuk dua kali untuk menambahkan."</string>
-    <string name="accessibility_qs_edit_position_label" msgid="5055306305919289819">"Posisi <xliff:g id="POSITION">%1$d</xliff:g>. Ketuk dua kali untuk memilih."</string>
+    <string name="accessibility_qs_edit_tile_label" msgid="8374924053307764245">"Posisi <xliff:g id="POSITION">%1$d</xliff:g>, <xliff:g id="TILE_NAME">%2$s</xliff:g>. Tap dua kali untuk mengedit."</string>
+    <string name="accessibility_qs_edit_add_tile_label" msgid="8133209638023882667">"<xliff:g id="TILE_NAME">%1$s</xliff:g>. Tap dua kali untuk menambahkan."</string>
+    <string name="accessibility_qs_edit_position_label" msgid="5055306305919289819">"Posisi <xliff:g id="POSITION">%1$d</xliff:g>. Tap dua kali untuk memilih."</string>
     <string name="accessibility_qs_edit_move_tile" msgid="2461819993780159542">"Pindahkan <xliff:g id="TILE_NAME">%1$s</xliff:g>"</string>
     <string name="accessibility_qs_edit_remove_tile" msgid="7484493384665907197">"Hapus <xliff:g id="TILE_NAME">%1$s</xliff:g>"</string>
     <string name="accessibility_qs_edit_tile_added" msgid="8050200862063548309">"<xliff:g id="TILE_NAME">%1$s</xliff:g> ditambahkan ke posisi <xliff:g id="POSITION">%2$d</xliff:g>"</string>
@@ -645,7 +645,7 @@
     <string name="accessibility_quick_settings_expand" msgid="2375165227880477530">"Buka setelan cepat."</string>
     <string name="accessibility_quick_settings_collapse" msgid="1792625797142648105">"Tutup setelan cepat."</string>
     <string name="accessibility_quick_settings_alarm_set" msgid="1863000242431528676">"Alarm disetel."</string>
-    <string name="accessibility_quick_settings_user" msgid="1567445362870421770">"Masuk sebagai <xliff:g id="ID_1">%s</xliff:g>"</string>
+    <string name="accessibility_quick_settings_user" msgid="1567445362870421770">"Login sebagai <xliff:g id="ID_1">%s</xliff:g>"</string>
     <string name="accessibility_quick_settings_no_internet" msgid="31890692343084075">"Tidak ada internet."</string>
     <string name="accessibility_quick_settings_open_details" msgid="4230931801728005194">"Buka detail."</string>
     <string name="accessibility_quick_settings_open_settings" msgid="7806613775728380737">"Buka setelan <xliff:g id="ID_1">%s</xliff:g>."</string>

@@ -34,14 +34,14 @@
     <string name="status_bar_latest_events_title" msgid="6594767438577593172">"Jakinarazpenak"</string>
     <string name="battery_low_title" msgid="6456385927409742437">"Bateria agortzen ari da"</string>
     <string name="battery_low_percent_format" msgid="2900940511201380775">"<xliff:g id="PERCENTAGE">%s</xliff:g> gelditzen da"</string>
-    <string name="battery_low_percent_format_saver_started" msgid="6859235584035338833">"<xliff:g id="PERCENTAGE">%s</xliff:g> gelditzen da. Bateria-aurrezteko aukera aktibatuta dago."</string>
+    <string name="battery_low_percent_format_saver_started" msgid="6859235584035338833">"<xliff:g id="PERCENTAGE">%s</xliff:g> gelditzen da. Bateria-aurrezlea aktibatuta dago."</string>
     <string name="invalid_charger" msgid="4549105996740522523">"Ez da USB bidez kargatzea onartzen.\nErabili hornitu zaizun kargagailua soilik."</string>
     <string name="invalid_charger_title" msgid="3515740382572798460">"Ez da USB bidez kargatzea onartzen."</string>
     <string name="invalid_charger_text" msgid="5474997287953892710">"Erabili jatorrizko kargagailua soilik."</string>
     <string name="battery_low_why" msgid="4553600287639198111">"Ezarpenak"</string>
-    <string name="battery_saver_confirmation_title" msgid="5299585433050361634">"Bateria aurrezteko aukera aktibatu nahi duzu?"</string>
+    <string name="battery_saver_confirmation_title" msgid="5299585433050361634">"Bateria-aurrezlea aktibatu nahi duzu?"</string>
     <string name="battery_saver_confirmation_ok" msgid="7507968430447930257">"Aktibatu"</string>
-    <string name="battery_saver_start_action" msgid="5576697451677486320">"Aktibatu bateria aurrezteko aukera"</string>
+    <string name="battery_saver_start_action" msgid="5576697451677486320">"Aktibatu bateria-aurrezlea"</string>
     <string name="status_bar_settings_settings_button" msgid="3023889916699270224">"Ezarpenak"</string>
     <string name="status_bar_settings_wifi_button" msgid="1733928151698311923">"Wi-Fi"</string>
     <string name="status_bar_settings_auto_rotation" msgid="3790482541357798421">"Biratu pantaila automatikoki"</string>
@@ -61,7 +61,7 @@
     <string name="always_use_device" msgid="1450287437017315906">"Erabili lehenetsi gisa USB gailu honetarako"</string>
     <string name="always_use_accessory" msgid="1210954576979621596">"Erabili modu lehenetsian USB osagarri honetarako"</string>
     <string name="usb_debugging_title" msgid="4513918393387141949">"USB arazketa onartu?"</string>
-    <string name="usb_debugging_message" msgid="2220143855912376496">"Ordenagailuaren RSA gakoaren hatz-marka hau da:\n<xliff:g id="FINGERPRINT">%1$s</xliff:g>"</string>
+    <string name="usb_debugging_message" msgid="2220143855912376496">"Ordenagailuaren RSA gakoaren erreferentzia-gako digitala hau da:\n<xliff:g id="FINGERPRINT">%1$s</xliff:g>"</string>
     <string name="usb_debugging_always" msgid="303335496705863070">"Onartu beti ordenagailu honetatik"</string>
     <string name="usb_debugging_secondary_user_title" msgid="6353808721761220421">"Ez da onartzen USB arazketa"</string>
     <string name="usb_debugging_secondary_user_message" msgid="8572228137833020196">"Gailu honetan saioa hasita duen erabiltzaileak ezin du USB arazketa aktibatu. Eginbide hori erabiltzeko, aldatu administratzaile-erabiltzailera."</string>
@@ -191,7 +191,7 @@
     <string name="accessibility_quick_settings_wifi" msgid="5518210213118181692">"<xliff:g id="SIGNAL">%1$s</xliff:g>."</string>
     <string name="accessibility_quick_settings_wifi_changed_off" msgid="8716484460897819400">"Wi-Fi konexioa desaktibatu egin da."</string>
     <string name="accessibility_quick_settings_wifi_changed_on" msgid="6440117170789528622">"Wi-Fi konexioa aktibatu egin da."</string>
-    <string name="accessibility_quick_settings_mobile" msgid="4876806564086241341">"Datu mugikorrak: <xliff:g id="SIGNAL">%1$s</xliff:g>. <xliff:g id="TYPE">%2$s</xliff:g>. <xliff:g id="NETWORK">%3$s</xliff:g>."</string>
+    <string name="accessibility_quick_settings_mobile" msgid="4876806564086241341">"Datu-konexioa: <xliff:g id="SIGNAL">%1$s</xliff:g>. <xliff:g id="TYPE">%2$s</xliff:g>. <xliff:g id="NETWORK">%3$s</xliff:g>."</string>
     <string name="accessibility_quick_settings_battery" msgid="1480931583381408972">"Bateria <xliff:g id="STATE">%s</xliff:g>."</string>
     <string name="accessibility_quick_settings_airplane_off" msgid="7786329360056634412">"Hegaldi modua desaktibatuta dago."</string>
     <string name="accessibility_quick_settings_airplane_on" msgid="6406141469157599296">"Hegaldi modua aktibatuta dago."</string>
@@ -238,7 +238,7 @@
     <string name="accessibility_brightness" msgid="8003681285547803095">"Bistaratu distira"</string>
     <string name="data_usage_disabled_dialog_3g_title" msgid="5281770593459841889">"2G-3G datuen erabilera eten da"</string>
     <string name="data_usage_disabled_dialog_4g_title" msgid="1601769736881078016">"4G datuen erabilera eten da"</string>
-    <string name="data_usage_disabled_dialog_mobile_title" msgid="4651001290947318931">"Sare mugikorreko datuen erabilera eten da"</string>
+    <string name="data_usage_disabled_dialog_mobile_title" msgid="4651001290947318931">"Datu-konexioa pausatu egin da"</string>
     <string name="data_usage_disabled_dialog_title" msgid="3932437232199671967">"Datuen erabilera eten da"</string>
     <string name="data_usage_disabled_dialog" msgid="1841738975235283398">"Gainditu egin da ezarri duzun datu-muga. Datu-konexioa erabiltzeari utzi diozu.\n\nBerriro hasten bazara erabiltzen, baliteke datuen erabileraren kostua ordaindu behar izatea."</string>
     <string name="data_usage_disabled_dialog_enable" msgid="1412395410306390593">"Jarraitu erabiltzen"</string>
@@ -296,7 +296,7 @@
     <string name="quick_settings_wifi_off_label" msgid="7558778100843885864">"Wi-Fi konexioa desaktibatuta"</string>
     <string name="quick_settings_wifi_on_label" msgid="7607810331387031235">"Aktibatuta dago Wi-Fi konexioa"</string>
     <string name="quick_settings_wifi_detail_empty_text" msgid="269990350383909226">"Ez dago Wi-Fi sarerik erabilgarri"</string>
-    <string name="quick_settings_cast_title" msgid="7709016546426454729">"Cast"</string>
+    <string name="quick_settings_cast_title" msgid="7709016546426454729">"Igorri"</string>
     <string name="quick_settings_casting" msgid="6601710681033353316">"Igortzen"</string>
     <string name="quick_settings_cast_device_default_name" msgid="5367253104742382945">"Izenik gabeko gailua"</string>
     <string name="quick_settings_cast_device_default_description" msgid="2484573682378634413">"Igortzeko prest"</string>
@@ -313,7 +313,7 @@
     <string name="quick_settings_hotspot_label" msgid="6046917934974004879">"Sare publikoa"</string>
     <string name="quick_settings_notifications_label" msgid="4818156442169154523">"Jakinarazpenak"</string>
     <string name="quick_settings_flashlight_label" msgid="2133093497691661546">"Linterna"</string>
-    <string name="quick_settings_cellular_detail_title" msgid="8575062783675171695">"Datu mugikorrak"</string>
+    <string name="quick_settings_cellular_detail_title" msgid="8575062783675171695">"Datu-konexioa"</string>
     <string name="quick_settings_cellular_detail_data_usage" msgid="1964260360259312002">"Datuen erabilera"</string>
     <string name="quick_settings_cellular_detail_remaining_data" msgid="722715415543541249">"Geratzen diren datuak"</string>
     <string name="quick_settings_cellular_detail_over_limit" msgid="967669665390990427">"Mugaren gainetik"</string>
@@ -354,7 +354,7 @@
     <string name="keyguard_more_overflow_text" msgid="9195222469041601365">"+<xliff:g id="NUMBER_OF_NOTIFICATIONS">%d</xliff:g>"</string>
     <string name="speed_bump_explanation" msgid="1288875699658819755">"Horren premiazkoak ez diren jakinarazpenak daude behean"</string>
     <string name="notification_tap_again" msgid="7590196980943943842">"Irekitzeko, ukitu berriro"</string>
-    <string name="keyguard_unlock" msgid="8043466894212841998">"Desblokeatzeko, pasatu hatza gorantz"</string>
+    <string name="keyguard_unlock" msgid="8043466894212841998">"Desblokeatzeko, pasatu hatza gora"</string>
     <string name="phone_hint" msgid="4872890986869209950">"Pasatu hatza ikonotik, telefonoa irekitzeko"</string>
     <string name="voice_hint" msgid="8939888732119726665">"Pasatu hatza ikonotik, ahots-laguntza irekitzeko"</string>
     <string name="camera_hint" msgid="7939688436797157483">"Pasatu hatza ikonotik, kamera irekitzeko"</string>
@@ -397,7 +397,7 @@
     <string name="user_remove_user_remove" msgid="7479275741742178297">"Kendu"</string>
     <string name="battery_saver_notification_title" msgid="237918726750955859">"Bateria-aurrezlea aktibatuta dago"</string>
     <string name="battery_saver_notification_text" msgid="820318788126672692">"Errendimendua eta atzeko planoko datuak murrizten ditu"</string>
-    <string name="battery_saver_notification_action_text" msgid="109158658238110382">"Desaktibatu bateria aurrezteko aukera"</string>
+    <string name="battery_saver_notification_action_text" msgid="109158658238110382">"Desaktibatu bateria-aurrezlea"</string>
     <string name="media_projection_dialog_text" msgid="3071431025448218928">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> aplikazioak pantailan bistaratzen den guztia grabatuko du."</string>
     <string name="media_projection_remember_text" msgid="3103510882172746752">"Ez erakutsi berriro"</string>
     <string name="clear_all_notifications_text" msgid="814192889771462828">"Garbitu guztiak"</string>

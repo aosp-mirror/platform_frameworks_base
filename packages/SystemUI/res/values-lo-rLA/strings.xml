@@ -231,8 +231,8 @@
     <string name="accessibility_quick_settings_work_mode_on" msgid="7650588553988014341">"ໂໝດການເຮັດວຽກເປີດຢູ່."</string>
     <string name="accessibility_quick_settings_work_mode_changed_off" msgid="5605534876107300711">"ໂໝດການເຮັດວຽກປິດຢູ່."</string>
     <string name="accessibility_quick_settings_work_mode_changed_on" msgid="249840330756998612">"ໂໝດການເຮັດວຽກເປີດຢູ່."</string>
-    <string name="accessibility_quick_settings_data_saver_changed_off" msgid="650231949881093289">"ປິດຕົວປະຢັດຂໍ້ມູນແລ້ວ."</string>
-    <string name="accessibility_quick_settings_data_saver_changed_on" msgid="4218725402373934151">"ເປີດຕົວປະຢັດຂໍ້ມູນແລ້ວ."</string>
+    <string name="accessibility_quick_settings_data_saver_changed_off" msgid="650231949881093289">"ປິດຕົວປະຢັດອິນເຕີເນັດແລ້ວ."</string>
+    <string name="accessibility_quick_settings_data_saver_changed_on" msgid="4218725402373934151">"ເປີດຕົວປະຢັດອິນເຕີເນັດແລ້ວ."</string>
     <string name="accessibility_brightness" msgid="8003681285547803095">"​ຄວາມ​ແຈ້ງ​​ຂອງ​ຈໍ"</string>
     <string name="data_usage_disabled_dialog_3g_title" msgid="5281770593459841889">"ຂໍ້​ມູນ 2G​-3G ຢຸດ​ຊົ່ວ​ຄາວແລ້ວ"</string>
     <string name="data_usage_disabled_dialog_4g_title" msgid="1601769736881078016">"ຂໍ້​ມູນ 4G ຢຸດ​ຊົ່ວ​ຄາວແລ້ວ"</string>
@@ -286,7 +286,7 @@
     <string name="quick_settings_settings_label" msgid="5326556592578065401">"ການຕັ້ງຄ່າ"</string>
     <string name="quick_settings_time_label" msgid="4635969182239736408">"ເວລາ"</string>
     <string name="quick_settings_user_label" msgid="5238995632130897840">"ຂ້ອຍ"</string>
-    <string name="quick_settings_user_title" msgid="4467690427642392403">"ຜູ່ໃຊ້"</string>
+    <string name="quick_settings_user_title" msgid="4467690427642392403">"ຜູ້ໃຊ້"</string>
     <string name="quick_settings_user_new_user" msgid="9030521362023479778">"ຜູ່ໃຊ້ໃໝ່"</string>
     <string name="quick_settings_wifi_label" msgid="9135344704899546041">"Wi​-Fi"</string>
     <string name="quick_settings_wifi_not_connected" msgid="7171904845345573431">"ບໍ່ໄດ້ເຊື່ອມຕໍ່"</string>
@@ -366,7 +366,7 @@
     <string name="keyguard_indication_charging_time" msgid="1757251776872835768">"ກຳ​ລັງ​ສາກ​ໄຟ (<xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g> ກວ່າ​ຈ​ະ​ເຕັມ)"</string>
     <string name="keyguard_indication_charging_time_fast" msgid="9018981952053914986">"ກຳ​ລັງ​ສາກ​ໄຟ (<xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g> ກວ່າ​ຈ​ະ​ເຕັມ)"</string>
     <string name="keyguard_indication_charging_time_slowly" msgid="955252797961724952">"ກຳ​ລັງ​ສາກ​ໄຟ (<xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g> ກວ່າ​ຈ​ະ​ເຕັມ)"</string>
-    <string name="accessibility_multi_user_switch_switcher" msgid="7305948938141024937">"ສະ​ລັບ​ຜູ່ໃຊ້"</string>
+    <string name="accessibility_multi_user_switch_switcher" msgid="7305948938141024937">"ສະຫຼັບຜູ້ໃຊ້"</string>
     <string name="accessibility_multi_user_switch_switcher_with_current" msgid="8434880595284601601">"ປ່ຽນຜູ່ໃຊ້, ຜູ່ໃຊ້ປະຈຸບັນ <xliff:g id="CURRENT_USER_NAME">%s</xliff:g>"</string>
     <string name="accessibility_multi_user_switch_inactive" msgid="1424081831468083402">"ຜູ້ໃຊ້ປະຈຸບັນ <xliff:g id="CURRENT_USER_NAME">%s</xliff:g>"</string>
     <string name="accessibility_multi_user_switch_quick_contact" msgid="3020367729287990475">"​ສະ​ແດງ​ໂປຣ​ໄຟລ໌"</string>
@@ -578,9 +578,9 @@
     <string name="headset" msgid="4534219457597457353">"​ຊຸດ​ຫູ​ຟັງ"</string>
     <string name="accessibility_status_bar_headphones" msgid="9156307120060559989">"ເຊື່ອມຕໍ່ຊຸດຫູຟັງແລ້ວ"</string>
     <string name="accessibility_status_bar_headset" msgid="8666419213072449202">"ເຊື່ອມ​ຕໍ່ຊຸດ​ຫູ​ຟັງແລ້ວ"</string>
-    <string name="data_saver" msgid="5037565123367048522">"ຕົວປະຢັດຂໍ້ມູນ"</string>
-    <string name="accessibility_data_saver_on" msgid="8454111686783887148">"ຕົວປະຢັດຂໍ້ມູນເປີດຢູ່"</string>
-    <string name="accessibility_data_saver_off" msgid="8841582529453005337">"ຕົວປະຢັດຂໍ້ມູນປິດຢູ່"</string>
+    <string name="data_saver" msgid="5037565123367048522">"ຕົວປະຢັດອິນເຕີເນັດ"</string>
+    <string name="accessibility_data_saver_on" msgid="8454111686783887148">"ເປີດຕົວປະຢັດອິນເຕີເນັດຢູ່"</string>
+    <string name="accessibility_data_saver_off" msgid="8841582529453005337">"ປິດຕົວປະຢັດອິນເຕີເນັດຢູ່"</string>
     <string name="switch_bar_on" msgid="1142437840752794229">"ເປີດ"</string>
     <string name="switch_bar_off" msgid="8803270596930432874">"ປິດ"</string>
     <string name="nav_bar" msgid="1993221402773877607">"ແຖບນຳທາງ"</string>

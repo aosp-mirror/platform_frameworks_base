@@ -395,7 +395,7 @@
     <string name="user_logout_notification_text" msgid="3350262809611876284">"Odhlásiť aktuálneho používateľa"</string>
     <string name="user_logout_notification_action" msgid="1195428991423425062">"ODHLÁSIŤ POUŽÍVATEĽA"</string>
     <string name="user_add_user_title" msgid="4553596395824132638">"Pridať nového používateľa?"</string>
-    <string name="user_add_user_message_short" msgid="2161624834066214559">"Keď pridáte nového používateľa, musí si nastaviť vlastný priestor.\n\nAkýkoľvek používateľ môže aktualizovať aplikácie všetkých ostatných používateľov."</string>
+    <string name="user_add_user_message_short" msgid="2161624834066214559">"Keď pridáte nového používateľa, musí si nastaviť vlastný priestor.\n\nKtorýkoľvek používateľ môže aktualizovať aplikácie všetkých ostatných používateľov."</string>
     <string name="user_remove_user_title" msgid="4681256956076895559">"Odstrániť používateľa?"</string>
     <string name="user_remove_user_message" msgid="1453218013959498039">"Všetky aplikácie a údaje tohto používateľa budú odstránené."</string>
     <string name="user_remove_user_remove" msgid="7479275741742178297">"Odstrániť"</string>
@@ -498,8 +498,8 @@
     <string name="activity_not_found" msgid="348423244327799974">"Aplikácia nie je nainštalovaná na zariadení"</string>
     <string name="clock_seconds" msgid="7689554147579179507">"Zobraziť sekundy"</string>
     <string name="clock_seconds_desc" msgid="6282693067130470675">"Zobrazí sekundy v stavovom riadku. Môže to ovplyvňovať výdrž batérie."</string>
-    <string name="qs_rearrange" msgid="8060918697551068765">"Zmeniť usporiadanie Rýchlych nastavení"</string>
-    <string name="show_brightness" msgid="6613930842805942519">"Zobraziť jas v Rýchlych nastaveniach"</string>
+    <string name="qs_rearrange" msgid="8060918697551068765">"Zmeniť usporiadanie rýchlych nastavení"</string>
+    <string name="show_brightness" msgid="6613930842805942519">"Zobraziť jas v rýchlych nastaveniach"</string>
     <string name="experimental" msgid="6198182315536726162">"Experimentálne"</string>
     <string name="enable_bluetooth_title" msgid="5027037706500635269">"Zapnúť Bluetooth?"</string>
     <string name="enable_bluetooth_message" msgid="9106595990708985385">"Ak chcete klávesnicu pripojiť k tabletu, najprv musíte zapnúť Bluetooth."</string>

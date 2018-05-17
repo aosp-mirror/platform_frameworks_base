@@ -81,7 +81,7 @@
     <string name="use_ptp_button_title" msgid="7517127540301625751">"Koppelen als camera (PTP)"</string>
     <string name="installer_cd_button_title" msgid="2312667578562201583">"AFT-app voor Mac installeren"</string>
     <string name="accessibility_back" msgid="567011538994429120">"Terug"</string>
-    <string name="accessibility_home" msgid="8217216074895377641">"Homepage"</string>
+    <string name="accessibility_home" msgid="8217216074895377641">"Startscherm"</string>
     <string name="accessibility_menu" msgid="316839303324695949">"Menu"</string>
     <string name="accessibility_recent" msgid="5208608566793607626">"Overzicht"</string>
     <string name="accessibility_search_light" msgid="1103867596330271848">"Zoeken"</string>
@@ -554,7 +554,7 @@
     <string name="keyboard_key_num_lock" msgid="5052537581246772117">"Num Lock"</string>
     <string name="keyboard_key_numpad_template" msgid="8729216555174634026">"<xliff:g id="NAME">%1$s</xliff:g> op numeriek toetsenblok"</string>
     <string name="keyboard_shortcut_group_system" msgid="6472647649616541064">"Systeem"</string>
-    <string name="keyboard_shortcut_group_system_home" msgid="3054369431319891965">"Homepage"</string>
+    <string name="keyboard_shortcut_group_system_home" msgid="3054369431319891965">"Startscherm"</string>
     <string name="keyboard_shortcut_group_system_recents" msgid="3154851905021926744">"Recent"</string>
     <string name="keyboard_shortcut_group_system_back" msgid="2207004531216446378">"Terug"</string>
     <string name="keyboard_shortcut_group_system_notifications" msgid="8366964080041773224">"Meldingen"</string>

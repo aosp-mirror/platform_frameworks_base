@@ -529,7 +529,7 @@
     <string name="notification_gear_accessibility" msgid="94429150213089611">"„<xliff:g id="APP_NAME">%1$s</xliff:g>“ pranešimų valdikliai"</string>
     <string name="battery_panel_title" msgid="7944156115535366613">"Akum. energ. vartoj."</string>
     <string name="battery_detail_charging_summary" msgid="1279095653533044008">"Akumuliatoriaus tausojimo priemonė nepasiekiama įkraunant"</string>
-    <string name="battery_detail_switch_title" msgid="6285872470260795421">"Akumuliatoriaus tausojimo priemonė"</string>
+    <string name="battery_detail_switch_title" msgid="6285872470260795421">"Akumuliat. taus. pr."</string>
     <string name="battery_detail_switch_summary" msgid="9049111149407626804">"Sumažinamas našumas ir foninių duomenų naudojimas"</string>
     <string name="keyboard_key_button_template" msgid="6230056639734377300">"Mygtukas <xliff:g id="NAME">%1$s</xliff:g>"</string>
     <string name="keyboard_key_home" msgid="2243500072071305073">"Pagrindinis"</string>
@@ -582,7 +582,7 @@
     <string name="headset" msgid="4534219457597457353">"Ausinės"</string>
     <string name="accessibility_status_bar_headphones" msgid="9156307120060559989">"Ausinės prijungtos"</string>
     <string name="accessibility_status_bar_headset" msgid="8666419213072449202">"Ausinės prijungtos"</string>
-    <string name="data_saver" msgid="5037565123367048522">"Duomenų taupymo priemonė"</string>
+    <string name="data_saver" msgid="5037565123367048522">"Duomenų taupymo pr."</string>
     <string name="accessibility_data_saver_on" msgid="8454111686783887148">"Duomenų taupymo priemonė įjungta"</string>
     <string name="accessibility_data_saver_off" msgid="8841582529453005337">"Duomenų taupymo priemonė išjungta"</string>
     <string name="switch_bar_on" msgid="1142437840752794229">"Įjungta"</string>

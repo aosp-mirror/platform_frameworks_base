@@ -350,7 +350,7 @@
     <string name="zen_priority_introduction" msgid="3070506961866919502">"Teid segatakse helide ja värinaga vaid teie määratud alarmide, meeldetuletuste, sündmuste ning helistajate puhul."</string>
     <string name="zen_priority_customize_button" msgid="7948043278226955063">"Kohanda"</string>
     <string name="zen_silence_introduction_voice" msgid="2284540992298200729">"See blokeerib KÕIK – sealhulgas alarmide, muusika, videote ja mängude – helid ja värinad. Saate siiski helistada."</string>
-    <string name="zen_silence_introduction" msgid="3137882381093271568">"See blokeerib KÕIK – sealhulgas alarmide, muusika, videote ja mängude – helid ja vibratsioonid."</string>
+    <string name="zen_silence_introduction" msgid="3137882381093271568">"See blokeerib KÕIK – sealhulgas alarmide, muusika, videote ja mängude – helid ja värinad."</string>
     <string name="keyguard_more_overflow_text" msgid="9195222469041601365">"+<xliff:g id="NUMBER_OF_NOTIFICATIONS">%d</xliff:g>"</string>
     <string name="speed_bump_explanation" msgid="1288875699658819755">"Vähem kiireloomulised märguanded on allpool"</string>
     <string name="notification_tap_again" msgid="7590196980943943842">"Avamiseks puudutage uuesti"</string>

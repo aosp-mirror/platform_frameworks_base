@@ -19,10 +19,10 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="app_label" msgid="7164937344850004466">"IU do sist."</string>
+    <string name="app_label" msgid="7164937344850004466">"IU do sistema"</string>
     <string name="status_bar_clear_all_button" msgid="7774721344716731603">"Limpar"</string>
     <string name="status_bar_recent_remove_item_title" msgid="6026395868129852968">"Remover da lista"</string>
-    <string name="status_bar_recent_inspect_item_title" msgid="7793624864528818569">"Informações da aplicação"</string>
+    <string name="status_bar_recent_inspect_item_title" msgid="7793624864528818569">"Info. da aplicação"</string>
     <string name="status_bar_no_recent_apps" msgid="7374907845131203189">"Os ecrãs recentes aparecem aqui"</string>
     <string name="status_bar_accessibility_dismiss_recents" msgid="4576076075226540105">"Ignorar aplicações recentes"</string>
     <plurals name="status_bar_accessibility_recent_apps" formatted="false" msgid="9138535907802238759">
@@ -315,7 +315,7 @@
     <string name="quick_settings_cellular_detail_data_usage" msgid="1964260360259312002">"Utilização de dados"</string>
     <string name="quick_settings_cellular_detail_remaining_data" msgid="722715415543541249">"Dados restantes"</string>
     <string name="quick_settings_cellular_detail_over_limit" msgid="967669665390990427">"Acima do limite"</string>
-    <string name="quick_settings_cellular_detail_data_used" msgid="1476810587475761478">"<xliff:g id="DATA_USED">%s</xliff:g> utilizado(s)"</string>
+    <string name="quick_settings_cellular_detail_data_used" msgid="1476810587475761478">"<xliff:g id="DATA_USED">%s</xliff:g> MB utiliz."</string>
     <string name="quick_settings_cellular_detail_data_limit" msgid="56011158504994128">"Limite de <xliff:g id="DATA_LIMIT">%s</xliff:g>"</string>
     <string name="quick_settings_cellular_detail_data_warning" msgid="2440098045692399009">"Aviso de <xliff:g id="DATA_LIMIT">%s</xliff:g>"</string>
     <string name="quick_settings_work_mode_label" msgid="6244915274350490429">"Modo de trabalho"</string>

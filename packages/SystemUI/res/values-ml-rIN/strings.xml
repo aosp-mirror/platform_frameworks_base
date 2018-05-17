@@ -44,13 +44,13 @@
     <string name="battery_saver_start_action" msgid="5576697451677486320">"ബാറ്ററി ലാഭിക്കൽ ഓണാക്കുക"</string>
     <string name="status_bar_settings_settings_button" msgid="3023889916699270224">"ക്രമീകരണം"</string>
     <string name="status_bar_settings_wifi_button" msgid="1733928151698311923">"വൈഫൈ"</string>
-    <string name="status_bar_settings_auto_rotation" msgid="3790482541357798421">"സ്‌ക്രീൻ സ്വയമേ തിരിക്കുക"</string>
+    <string name="status_bar_settings_auto_rotation" msgid="3790482541357798421">"സ്‌ക്രീൻ സ്വയമേ തിരിയുക"</string>
     <string name="status_bar_settings_mute_label" msgid="554682549917429396">"മ്യൂട്ടുചെയ്യുക"</string>
     <string name="status_bar_settings_auto_brightness_label" msgid="511453614962324674">"യാന്ത്രികം"</string>
     <string name="status_bar_settings_notifications" msgid="397146176280905137">"അറിയിപ്പുകൾ"</string>
     <string name="bluetooth_tethered" msgid="7094101612161133267">"ബ്ലൂടൂത്ത് ടെതർ ചെയ്‌തു"</string>
     <string name="status_bar_input_method_settings_configure_input_methods" msgid="3504292471512317827">"ടൈപ്പുചെയ്യൽ രീതികൾ സജ്ജീകരിക്കുക"</string>
-    <string name="status_bar_use_physical_keyboard" msgid="7551903084416057810">"ഫിസിക്കൽ കീബോർഡ്"</string>
+    <string name="status_bar_use_physical_keyboard" msgid="7551903084416057810">"ഫിസിക്കൽ കീബോഡ്"</string>
     <string name="usb_device_permission_prompt" msgid="834698001271562057">"USB ഉപകരണം ആക്‌സസ്സ് ചെയ്യാൻ <xliff:g id="APPLICATION">%1$s</xliff:g> എന്ന അപ്‌ളിക്കേഷനെ അനുവദിക്കണോ?"</string>
     <string name="usb_accessory_permission_prompt" msgid="5171775411178865750">"USB ആക്‌സസ്സറി ആക്‌സസ്സുചെയ്യാൻ <xliff:g id="APPLICATION">%1$s</xliff:g> എന്ന അപ്ലിക്കേഷനെ അനുവദിക്കണോ?"</string>
     <string name="usb_device_confirm_prompt" msgid="5161205258635253206">"ഈ USB ഉപകരണം കണക്റ്റുചെയ്‌തിരിക്കുമ്പോൾ <xliff:g id="ACTIVITY">%1$s</xliff:g> തുറക്കണോ?"</string>
@@ -271,7 +271,7 @@
     <string name="quick_settings_bluetooth_off_label" msgid="8159652146149219937">"ബ്ലൂടൂത്ത് ഓഫുചെയ്യുക"</string>
     <string name="quick_settings_bluetooth_detail_empty_text" msgid="4910015762433302860">"ജോടിയാക്കിയ ഉപകരണങ്ങളൊന്നും ലഭ്യമല്ല"</string>
     <string name="quick_settings_brightness_label" msgid="6968372297018755815">"തെളിച്ചം"</string>
-    <string name="quick_settings_rotation_unlocked_label" msgid="7305323031808150099">"ആവശ്യാനുസരണം തിരിയുക"</string>
+    <string name="quick_settings_rotation_unlocked_label" msgid="7305323031808150099">"സ്‌ക്രീൻ സ്വമേധയാ തിരിയുക"</string>
     <string name="accessibility_quick_settings_rotation" msgid="4231661040698488779">"സ്‌ക്രീൻ സ്വയമേ തിരിക്കുക"</string>
     <string name="accessibility_quick_settings_rotation_value" msgid="1428962304214992318">"<xliff:g id="ID_1">%s</xliff:g> എന്നതിലേക്ക് സജ്ജമാക്കുക"</string>
     <string name="quick_settings_rotation_locked_label" msgid="6359205706154282377">"റൊട്ടേഷൻ ലോക്കുചെയ്‌തു"</string>
@@ -389,7 +389,7 @@
     <string name="user_logout_notification_text" msgid="3350262809611876284">"നിലവിലെ ഉപയോക്താവിനെ ലോഗൗട്ട് ചെയ്യുക"</string>
     <string name="user_logout_notification_action" msgid="1195428991423425062">"ഉപയോക്താവിനെ ലോഗൗട്ട് ചെയ്യുക"</string>
     <string name="user_add_user_title" msgid="4553596395824132638">"പുതിയ ഉപയോക്താവിനെ ചേർക്കണോ?"</string>
-    <string name="user_add_user_message_short" msgid="2161624834066214559">"നിങ്ങൾ ഒരു പുതിയ ഉപയോക്താവിനെ ചേർക്കുമ്പോൾ, ആ വ്യക്തിയ്‌ക്ക് അവരുടെ ഇടം സജ്ജീകരിക്കേണ്ടതുണ്ട്.\n\nമറ്റ് എല്ലാ ഉപയോക്താക്കൾക്കുമായി ഏതൊരു ഉപയോക്താവിനും അപ്ലിക്കേഷനുകൾ അപ്‌ഡേറ്റുചെയ്യാനാവും."</string>
+    <string name="user_add_user_message_short" msgid="2161624834066214559">"നിങ്ങൾ ഒരു പുതിയ ഉപയോക്താവിനെ ചേർക്കുമ്പോൾ, ആ വ്യക്തിക്ക് അവരുടെ ഇടം സജ്ജീകരിക്കേണ്ടതുണ്ട്.\n\nമറ്റ് എല്ലാ ഉപയോക്താക്കൾക്കുമായി ഏതൊരു ഉപയോക്താവിനും അപ്ലിക്കേഷനുകൾ അപ്‌ഡേറ്റ് ചെയ്യാനാവും."</string>
     <string name="user_remove_user_title" msgid="4681256956076895559">"ഉപയോക്താവിനെ ഇല്ലാതാക്കണോ?"</string>
     <string name="user_remove_user_message" msgid="1453218013959498039">"ഈ ഉപയോക്താവിന്റെ എല്ലാ ആപ്സും ഡാറ്റയും ഇല്ലാതാക്കും."</string>
     <string name="user_remove_user_remove" msgid="7479275741742178297">"നീക്കംചെയ്യുക"</string>
@@ -558,7 +558,7 @@
     <string name="keyboard_shortcut_group_system_recents" msgid="3154851905021926744">"പുതിയവ"</string>
     <string name="keyboard_shortcut_group_system_back" msgid="2207004531216446378">"മടങ്ങുക"</string>
     <string name="keyboard_shortcut_group_system_notifications" msgid="8366964080041773224">"അറിയിപ്പുകൾ"</string>
-    <string name="keyboard_shortcut_group_system_shortcuts_helper" msgid="4892255911160332762">"കീബോർഡ് കുറുക്കുവഴികൾ"</string>
+    <string name="keyboard_shortcut_group_system_shortcuts_helper" msgid="4892255911160332762">"കീബോഡ് കുറുക്കുവഴികൾ"</string>
     <string name="keyboard_shortcut_group_system_switch_input" msgid="2334164096341310324">"ടൈപ്പിംഗ് രീതി മാറുക"</string>
     <string name="keyboard_shortcut_group_applications" msgid="9129465955073449206">"അപ്ലിക്കേഷനുകൾ"</string>
     <string name="keyboard_shortcut_group_applications_assist" msgid="9095441910537146013">"അസിസ്റ്റ്"</string>
@@ -602,7 +602,7 @@
     <string name="keycode" msgid="7335281375728356499">"കീകോഡ്"</string>
     <string name="keycode_description" msgid="1403795192716828949">"നാവിഗേഷൻ ബാറിലേക്ക് കീബോർഡ് കീകൾ ചേർക്കുന്നതിനെ കീകോഡ് ബട്ടണുകൾ അനുവദിക്കുന്നു. അമർത്തുമ്പോൾ, തിരഞ്ഞെടുത്ത കീയെ അവ അനുകരിക്കുന്നു. ആദ്യം ബട്ടണിനായി കീ തിരഞ്ഞെടുക്കണം, തുടർന്ന് ബട്ടണിൽ കാണിക്കാനുള്ള ചിത്രം തിരഞ്ഞെടുക്കണം."</string>
     <string name="select_keycode" msgid="7413765103381924584">"കീബോർഡ് ബട്ടൺ തിരഞ്ഞെടുക്കൂ"</string>
-    <string name="preview" msgid="9077832302472282938">"പ്രിവ്യു നടത്തുക"</string>
+    <string name="preview" msgid="9077832302472282938">"പ്രിവ്യൂ ചെയ്യുക"</string>
     <string name="drag_to_add_tiles" msgid="7058945779098711293">"ടൈലുകൾ ചേർക്കുന്നതിന് വലിച്ചിടുക"</string>
     <string name="drag_to_remove_tiles" msgid="3361212377437088062">"നീക്കംചെയ്യുന്നതിന് ഇവിടെ വലിച്ചിടുക"</string>
     <string name="qs_edit" msgid="2232596095725105230">"എഡിറ്റുചെയ്യുക"</string>

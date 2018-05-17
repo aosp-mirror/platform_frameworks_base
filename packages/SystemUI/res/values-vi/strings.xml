@@ -319,9 +319,9 @@
     <string name="quick_settings_cellular_detail_data_limit" msgid="56011158504994128">"Giới hạn <xliff:g id="DATA_LIMIT">%s</xliff:g>"</string>
     <string name="quick_settings_cellular_detail_data_warning" msgid="2440098045692399009">"Cảnh báo <xliff:g id="DATA_LIMIT">%s</xliff:g>"</string>
     <string name="quick_settings_work_mode_label" msgid="6244915274350490429">"Chế độ làm việc"</string>
-    <string name="quick_settings_night_display_label" msgid="3577098011487644395">"Đèn đọc sách"</string>
-    <string name="quick_settings_night_display_summary_on" msgid="1814901757887526769">"Đèn đọc sách được bật, nhấn để tắt"</string>
-    <string name="quick_settings_night_display_summary_off" msgid="7892102914128777905">"Đèn đọc sách bị tắt, nhấn để bật"</string>
+    <string name="quick_settings_night_display_label" msgid="3577098011487644395">"Chế độ ánh sáng ban đêm"</string>
+    <string name="quick_settings_night_display_summary_on" msgid="1814901757887526769">"Chế độ ánh sáng ban đêm đang bật, nhấn để tắt"</string>
+    <string name="quick_settings_night_display_summary_off" msgid="7892102914128777905">"Chế độ ánh sáng ban đêm đang tắt, nhấn để bật"</string>
     <string name="recents_empty_message" msgid="808480104164008572">"Không có mục gần đây nào"</string>
     <string name="recents_empty_message_dismissed_all" msgid="2791312568666558651">"Bạn đã xóa mọi nội dung"</string>
     <string name="recents_app_info_button_label" msgid="2890317189376000030">"Thông tin ứng dụng"</string>
@@ -474,7 +474,7 @@
     <string name="status_bar_ethernet" msgid="5044290963549500128">"Ethernet"</string>
     <string name="status_bar_alarm" msgid="8536256753575881818">"Báo thức"</string>
     <string name="status_bar_work" msgid="6022553324802866373">"Hồ sơ công việc"</string>
-    <string name="status_bar_airplane" msgid="7057575501472249002">"Chế độ trên máy bay"</string>
+    <string name="status_bar_airplane" msgid="7057575501472249002">"Chế độ máy bay"</string>
     <string name="add_tile" msgid="2995389510240786221">"Thêm ô"</string>
     <string name="broadcast_tile" msgid="3894036511763289383">"Ô chương trình phát"</string>
     <string name="zen_alarm_warning_indef" msgid="3482966345578319605">"Bạn sẽ không nghe thấy báo thức tiếp theo lúc <xliff:g id="WHEN">%1$s</xliff:g> của mình trừ khi bạn tắt chức năng này trước"</string>
