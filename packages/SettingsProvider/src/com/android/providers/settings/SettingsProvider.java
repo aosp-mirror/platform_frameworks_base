@@ -3522,14 +3522,7 @@ public class SettingsProvider extends ContentProvider {
                 }
 
                 if (currentVersion == 150) {
-                    // Version 151: Reset rotate locked setting for upgrading users
-                    final SettingsState systemSettings = getSystemSettingsLocked(userId);
-                    systemSettings.insertSettingLocked(
-                            Settings.System.ACCELEROMETER_ROTATION,
-                            getContext().getResources().getBoolean(
-                                    R.bool.def_accelerometer_rotation) ? "1" : "0",
-                            null, true, SettingsState.SYSTEM_PACKAGE_NAME);
-
+                    // Version 151: Removed.
                     currentVersion = 151;
                 }
 
