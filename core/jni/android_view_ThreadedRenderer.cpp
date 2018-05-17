@@ -15,9 +15,11 @@
  */
 
 #define LOG_TAG "ThreadedRenderer"
+#define ATRACE_TAG ATRACE_TAG_VIEW
 
 #include <algorithm>
 #include <atomic>
+#include <inttypes.h>
 
 #include "jni.h"
 #include <nativehelper/JNIHelp.h>
@@ -37,6 +39,7 @@
 #include <utils/RefBase.h>
 #include <utils/StrongPointer.h>
 #include <utils/Timers.h>
+#include <utils/TraceUtils.h>
 #include <android_runtime/android_view_Surface.h>
 #include <system/window.h>
 
@@ -71,6 +74,10 @@ struct {
 struct {
     jmethodID onFrameDraw;
 } gFrameDrawingCallback;
+
+struct {
+    jmethodID onFrameComplete;
+} gFrameCompleteCallback;
 
 static JNIEnv* getenv(JavaVM* vm) {
     JNIEnv* env;
@@ -151,6 +158,49 @@ public:
 private:
     JavaVM* mVm;
     std::string mMessage;
+};
+
+class FrameCompleteWrapper : public MessageHandler {
+public:
+    FrameCompleteWrapper(JNIEnv* env, jobject jobject) {
+        mLooper = Looper::getForThread();
+        LOG_ALWAYS_FATAL_IF(!mLooper.get(), "Must create runnable on a Looper thread!");
+        env->GetJavaVM(&mVm);
+        mObject = env->NewGlobalRef(jobject);
+        LOG_ALWAYS_FATAL_IF(!mObject, "Failed to make global ref");
+    }
+
+    virtual ~FrameCompleteWrapper() {
+        releaseObject();
+    }
+
+    void postFrameComplete(int64_t frameNr) {
+        if (mObject) {
+            mFrameNr = frameNr;
+            mLooper->sendMessage(this, 0);
+        }
+    }
+
+    virtual void handleMessage(const Message&) {
+        if (mObject) {
+            ATRACE_FORMAT("frameComplete %" PRId64, mFrameNr);
+            getenv(mVm)->CallVoidMethod(mObject, gFrameCompleteCallback.onFrameComplete, mFrameNr);
+            releaseObject();
+        }
+    }
+
+private:
+    JavaVM* mVm;
+    jobject mObject;
+    sp<Looper> mLooper;
+    int64_t mFrameNr = -1;
+
+    void releaseObject() {
+        if (mObject) {
+            getenv(mVm)->DeleteGlobalRef(mObject);
+            mObject = nullptr;
+        }
+    }
 };
 
 class RootRenderNode : public RenderNode, ErrorHandler {
@@ -891,6 +941,19 @@ static void android_view_ThreadedRenderer_setFrameCallback(JNIEnv* env,
     }
 }
 
+static void android_view_ThreadedRenderer_setFrameCompleteCallback(JNIEnv* env,
+        jobject clazz, jlong proxyPtr, jobject callback) {
+    RenderProxy* proxy = reinterpret_cast<RenderProxy*>(proxyPtr);
+    if (!callback) {
+        proxy->setFrameCompleteCallback(nullptr);
+    } else {
+        sp<FrameCompleteWrapper> wrapper = new FrameCompleteWrapper{env, callback};
+        proxy->setFrameCompleteCallback([wrapper](int64_t frameNr) {
+            wrapper->postFrameComplete(frameNr);
+        });
+    }
+}
+
 static jint android_view_ThreadedRenderer_copySurfaceInto(JNIEnv* env,
         jobject clazz, jobject jsurface, jint left, jint top,
         jint right, jint bottom, jobject jbitmap) {
@@ -1091,6 +1154,8 @@ static const JNINativeMethod gMethods[] = {
     { "nSetContentDrawBounds", "(JIIII)V", (void*)android_view_ThreadedRenderer_setContentDrawBounds},
     { "nSetFrameCallback", "(JLandroid/view/ThreadedRenderer$FrameDrawingCallback;)V",
             (void*)android_view_ThreadedRenderer_setFrameCallback},
+    { "nSetFrameCompleteCallback", "(JLandroid/view/ThreadedRenderer$FrameCompleteCallback;)V",
+            (void*)android_view_ThreadedRenderer_setFrameCompleteCallback },
     { "nAddFrameMetricsObserver",
             "(JLandroid/view/FrameMetricsObserver;)J",
             (void*)android_view_ThreadedRenderer_addFrameMetricsObserver },
@@ -1142,6 +1207,11 @@ int register_android_view_ThreadedRenderer(JNIEnv* env) {
             "android/view/ThreadedRenderer$FrameDrawingCallback");
     gFrameDrawingCallback.onFrameDraw = GetMethodIDOrDie(env, frameCallbackClass,
             "onFrameDraw", "(J)V");
+
+    jclass frameCompleteClass = FindClassOrDie(env,
+            "android/view/ThreadedRenderer$FrameCompleteCallback");
+    gFrameCompleteCallback.onFrameComplete = GetMethodIDOrDie(env, frameCompleteClass,
+            "onFrameComplete", "(J)V");
 
     return RegisterMethodsOrDie(env, kClassPathName, gMethods, NELEM(gMethods));
 }
