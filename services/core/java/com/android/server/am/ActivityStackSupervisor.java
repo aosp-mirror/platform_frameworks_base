@@ -445,6 +445,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
     private boolean mTaskLayersChanged = true;
 
     private ActivityMetricsLogger mActivityMetricsLogger;
+    private LaunchTimeTracker mLaunchTimeTracker = new LaunchTimeTracker();
 
     private final ArrayList<ActivityRecord> mTmpActivityList = new ArrayList<>();
 
@@ -627,6 +628,10 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
 
     public ActivityMetricsLogger getActivityMetricsLogger() {
         return mActivityMetricsLogger;
+    }
+
+    LaunchTimeTracker getLaunchTimeTracker() {
+        return mLaunchTimeTracker;
     }
 
     public KeyguardController getKeyguardController() {
@@ -1646,7 +1651,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
         ProcessRecord app = mService.getProcessRecordLocked(r.processName,
                 r.info.applicationInfo.uid, true);
 
-        r.getStack().setLaunchTime(r);
+        getLaunchTimeTracker().setLaunchTime(r);
 
         if (app != null && app.thread != null) {
             try {
