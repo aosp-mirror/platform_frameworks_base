@@ -21,13 +21,13 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_name" msgid="719438068451601849">"Tastaturlås"</string>
-    <string name="keyguard_password_enter_pin_code" msgid="3037685796058495017">"Indtast pinkode"</string>
-    <string name="keyguard_password_enter_puk_code" msgid="3035856550289724338">"Indtast PUK-koden til SIM-kortet og den nye pinkode"</string>
+    <string name="keyguard_password_enter_pin_code" msgid="3037685796058495017">"Angiv pinkode"</string>
+    <string name="keyguard_password_enter_puk_code" msgid="3035856550289724338">"Angiv PUK-koden til SIM-kortet og den nye pinkode"</string>
     <string name="keyguard_password_enter_puk_prompt" msgid="1801941051094974609">"PUK-kode til SIM-kort"</string>
     <string name="keyguard_password_enter_pin_prompt" msgid="3201151840570492538">"Ny pinkode til SIM-kortet"</string>
     <string name="keyguard_password_entry_touch_hint" msgid="7858547464982981384"><font size="17">"Tryk for at angive adgangskode"</font></string>
-    <string name="keyguard_password_enter_password_code" msgid="1054721668279049780">"Indtast adgangskoden for at låse op"</string>
-    <string name="keyguard_password_enter_pin_password_code" msgid="6391755146112503443">"Indtast pinkode for at låse op"</string>
+    <string name="keyguard_password_enter_password_code" msgid="1054721668279049780">"Angiv adgangskoden for at låse op"</string>
+    <string name="keyguard_password_enter_pin_password_code" msgid="6391755146112503443">"Angiv pinkode for at låse op"</string>
     <string name="keyguard_password_wrong_pin_code" msgid="2422225591006134936">"Forkert pinkode."</string>
     <string name="keyguard_charged" msgid="3272223906073492454">"Opladet"</string>
     <string name="keyguard_plugged_in" msgid="9087497435553252863">"Oplader"</string>
@@ -58,18 +58,18 @@
     <string name="kg_wrong_pin" msgid="1131306510833563801">"Forkert pinkode"</string>
     <string name="kg_too_many_failed_attempts_countdown" msgid="6358110221603297548">"Prøv igen om <xliff:g id="NUMBER">%d</xliff:g> sekunder."</string>
     <string name="kg_pattern_instructions" msgid="398978611683075868">"Tegn dit mønster"</string>
-    <string name="kg_sim_pin_instructions" msgid="2319508550934557331">"Indtast pinkode til SIM-kort"</string>
-    <string name="kg_sim_pin_instructions_multi" msgid="7818515973197201434">"Indtast SIM-pinkoden for \"<xliff:g id="CARRIER">%1$s</xliff:g>\""</string>
-    <string name="kg_pin_instructions" msgid="2377242233495111557">"Indtast pinkode"</string>
+    <string name="kg_sim_pin_instructions" msgid="2319508550934557331">"Angiv pinkode til SIM-kort"</string>
+    <string name="kg_sim_pin_instructions_multi" msgid="7818515973197201434">"Angiv SIM-pinkoden for \"<xliff:g id="CARRIER">%1$s</xliff:g>\""</string>
+    <string name="kg_pin_instructions" msgid="2377242233495111557">"Angiv pinkode"</string>
     <string name="kg_password_instructions" msgid="5753646556186936819">"Angiv adgangskode"</string>
-    <string name="kg_puk_enter_puk_hint" msgid="453227143861735537">"SIM-kortet er nu deaktiveret. Indtast PUK-koden for at fortsætte. Kontakt mobilselskabet for at få flere oplysninger."</string>
-    <string name="kg_puk_enter_puk_hint_multi" msgid="363822494559783025">"SIM-kortet fra \"<xliff:g id="CARRIER">%1$s</xliff:g>\" er nu deaktiveret. Indtast PUK-koden for at fortsætte. Kontakt mobilselskabet for at få flere oplysninger."</string>
-    <string name="kg_puk_enter_pin_hint" msgid="7871604527429602024">"Indtast den ønskede pinkode"</string>
+    <string name="kg_puk_enter_puk_hint" msgid="453227143861735537">"SIM-kortet er nu deaktiveret. Angiv PUK-koden for at fortsætte. Kontakt mobilselskabet for at få flere oplysninger."</string>
+    <string name="kg_puk_enter_puk_hint_multi" msgid="363822494559783025">"SIM-kortet fra \"<xliff:g id="CARRIER">%1$s</xliff:g>\" er nu deaktiveret. Angiv PUK-koden for at fortsætte. Kontakt mobilselskabet for at få flere oplysninger."</string>
+    <string name="kg_puk_enter_pin_hint" msgid="7871604527429602024">"Angiv den ønskede pinkode"</string>
     <string name="kg_enter_confirm_pin_hint" msgid="325676184762529976">"Bekræft den ønskede pinkode"</string>
     <string name="kg_sim_unlock_progress_dialog_message" msgid="8950398016976865762">"SIM-kortet låses op…"</string>
-    <string name="kg_invalid_sim_pin_hint" msgid="8795159358110620001">"Indtast en pinkode på mellem 4 og 8 tal."</string>
+    <string name="kg_invalid_sim_pin_hint" msgid="8795159358110620001">"Angiv en pinkode på mellem 4 og 8 tal."</string>
     <string name="kg_invalid_sim_puk_hint" msgid="7553388325654369575">"PUK-koden skal være på 8 tal eller mere."</string>
-    <string name="kg_invalid_puk" msgid="3638289409676051243">"Indtast den korrekte PUK-kode. Gentagne forsøg vil permanent deaktivere SIM-kortet."</string>
+    <string name="kg_invalid_puk" msgid="3638289409676051243">"Angiv den korrekte PUK-kode. Gentagne forsøg vil permanent deaktivere SIM-kortet."</string>
     <string name="kg_invalid_confirm_pin_hint" product="default" msgid="7003469261464593516">"Pinkoderne stemmer ikke overens"</string>
     <string name="kg_login_too_many_attempts" msgid="6486842094005698475">"For mange forsøg på at tegne mønstret korrekt"</string>
     <string name="kg_too_many_failed_pin_attempts_dialog_message" msgid="8276745642049502550">"Du har indtastet en forkert pinkode <xliff:g id="NUMBER_0">%1$d</xliff:g> gange. \n\nPrøv igen om <xliff:g id="NUMBER_1">%2$d</xliff:g> sekunder."</string>

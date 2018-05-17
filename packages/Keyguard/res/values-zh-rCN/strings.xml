@@ -22,9 +22,9 @@
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_name" msgid="719438068451601849">"Keyguard"</string>
     <string name="keyguard_password_enter_pin_code" msgid="3037685796058495017">"输入PIN码"</string>
-    <string name="keyguard_password_enter_puk_code" msgid="3035856550289724338">"请输入SIM卡PUK码和新的PIN码"</string>
+    <string name="keyguard_password_enter_puk_code" msgid="3035856550289724338">"请输入 SIM 卡 PUK 码和新的 PIN 码"</string>
     <string name="keyguard_password_enter_puk_prompt" msgid="1801941051094974609">"SIM卡PUK码"</string>
-    <string name="keyguard_password_enter_pin_prompt" msgid="3201151840570492538">"新SIM卡PIN码"</string>
+    <string name="keyguard_password_enter_pin_prompt" msgid="3201151840570492538">"新 SIM 卡 PIN 码"</string>
     <string name="keyguard_password_entry_touch_hint" msgid="7858547464982981384"><font size="17">"触摸可输入密码"</font></string>
     <string name="keyguard_password_enter_password_code" msgid="1054721668279049780">"输入密码以解锁"</string>
     <string name="keyguard_password_enter_pin_password_code" msgid="6391755146112503443">"输入PIN码进行解锁"</string>
@@ -43,8 +43,8 @@
     <string name="keyguard_missing_sim_instructions_long" msgid="5968985489463870358">"SIM卡缺失或无法读取，请插入SIM卡。"</string>
     <string name="keyguard_permanent_disabled_sim_message_short" msgid="8340813989586622356">"SIM卡无法使用。"</string>
     <string name="keyguard_permanent_disabled_sim_instructions" msgid="5892940909699723544">"您的SIM卡已永久停用。\n请与您的无线服务提供商联系，以便重新获取一张SIM卡。"</string>
-    <string name="keyguard_sim_locked_message" msgid="6875773413306380902">"SIM卡已被锁定。"</string>
-    <string name="keyguard_sim_puk_locked_message" msgid="3747232467471801633">"SIM卡已被PUK码锁定。"</string>
+    <string name="keyguard_sim_locked_message" msgid="6875773413306380902">"SIM 卡已被锁定。"</string>
+    <string name="keyguard_sim_puk_locked_message" msgid="3747232467471801633">"SIM 卡已用 PUK 码锁定。"</string>
     <string name="keyguard_sim_unlock_progress_dialog_message" msgid="7975221805033614426">"正在解锁SIM卡..."</string>
     <string name="keyguard_accessibility_pin_area" msgid="7903959476607833485">"PIN 码区域"</string>
     <string name="keyguard_accessibility_sim_pin_area" msgid="3887780775111719336">"SIM 卡 PIN 码区域"</string>
@@ -58,7 +58,7 @@
     <string name="kg_wrong_pin" msgid="1131306510833563801">"PIN码有误"</string>
     <string name="kg_too_many_failed_attempts_countdown" msgid="6358110221603297548">"请在 <xliff:g id="NUMBER">%d</xliff:g> 秒后重试。"</string>
     <string name="kg_pattern_instructions" msgid="398978611683075868">"绘制您的图案"</string>
-    <string name="kg_sim_pin_instructions" msgid="2319508550934557331">"输入SIM卡PIN码"</string>
+    <string name="kg_sim_pin_instructions" msgid="2319508550934557331">"输入 SIM 卡 PIN 码"</string>
     <string name="kg_sim_pin_instructions_multi" msgid="7818515973197201434">"输入“<xliff:g id="CARRIER">%1$s</xliff:g>”的 SIM 卡 PIN 码"</string>
     <string name="kg_pin_instructions" msgid="2377242233495111557">"输入PIN码"</string>
     <string name="kg_password_instructions" msgid="5753646556186936819">"输入密码"</string>
@@ -89,7 +89,7 @@
     <string name="kg_failed_attempts_now_erasing_profile" product="default" msgid="4951507352869831265">"您已经 <xliff:g id="NUMBER">%d</xliff:g> 次错误地尝试解锁手机。系统将移除此工作资料，这会删除所有的工作资料数据。"</string>
     <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"您已连续 <xliff:g id="NUMBER_0">%1$d</xliff:g> 次画错解锁图案。如果再尝试 <xliff:g id="NUMBER_1">%2$d</xliff:g> 次后仍不成功，系统就会要求您使用自己的电子邮件帐号解锁平板电脑。\n\n请在 <xliff:g id="NUMBER_2">%3$d</xliff:g> 秒后重试。"</string>
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"您已连续 <xliff:g id="NUMBER_0">%1$d</xliff:g> 次画错解锁图案。如果再尝试 <xliff:g id="NUMBER_1">%2$d</xliff:g> 次后仍不成功，系统就会要求您使用自己的电子邮件帐号解锁手机。\n\n请在 <xliff:g id="NUMBER_2">%3$d</xliff:g> 秒后重试。"</string>
-    <string name="kg_password_wrong_pin_code_pukked" msgid="30531039455764924">"SIM卡PIN码不正确，您现在必须联系运营商为您解锁设备。"</string>
+    <string name="kg_password_wrong_pin_code_pukked" msgid="30531039455764924">"SIM 卡 PIN 码不正确，您现在必须联系运营商为您解锁设备。"</string>
     <plurals name="kg_password_wrong_pin_code" formatted="false" msgid="6721575017538162249">
       <item quantity="other">SIM 卡 PIN 码不正确，您还可尝试 <xliff:g id="NUMBER_1">%d</xliff:g> 次。</item>
       <item quantity="one">SIM 卡 PIN 码不正确，您还可尝试 <xliff:g id="NUMBER_0">%d</xliff:g> 次。如果仍不正确，则需要联系运营商帮您解锁设备。</item>
@@ -99,7 +99,7 @@
       <item quantity="other">SIM 卡 PUK 码不正确，您还可尝试 <xliff:g id="NUMBER_1">%d</xliff:g> 次。如果仍不正确，SIM 卡将永远无法使用。</item>
       <item quantity="one">SIM 卡 PUK 码不正确，您还可尝试 <xliff:g id="NUMBER_0">%d</xliff:g> 次。如果仍不正确，SIM 卡将永远无法使用。</item>
     </plurals>
-    <string name="kg_password_pin_failed" msgid="6268288093558031564">"SIM卡PIN码操作失败！"</string>
+    <string name="kg_password_pin_failed" msgid="6268288093558031564">"SIM 卡 PIN 码操作失败！"</string>
     <string name="kg_password_puk_failed" msgid="2838824369502455984">"SIM卡PUK码操作失败！"</string>
     <string name="kg_pin_accepted" msgid="1448241673570020097">"代码正确！"</string>
     <string name="keyguard_carrier_default" msgid="8700650403054042153">"无服务。"</string>
