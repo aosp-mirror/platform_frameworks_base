@@ -84,8 +84,7 @@ public class EmptyShadeView extends StackScrollerDecorView {
             if (view instanceof EmptyShadeView) {
                 EmptyShadeView emptyShadeView = (EmptyShadeView) view;
                 boolean visible = this.clipTopAmount <= mEmptyText.getPaddingTop() * 0.6f;
-                emptyShadeView.performVisibilityAnimation(
-                        visible && !emptyShadeView.willBeGone());
+                emptyShadeView.setContentVisible(visible && emptyShadeView.isVisible());
             }
         }
     }

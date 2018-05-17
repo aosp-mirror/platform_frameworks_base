@@ -1453,11 +1453,11 @@ public class StatusBar extends SystemUI implements DemoMode,
 
     @VisibleForTesting
     protected void updateFooter() {
-        boolean showFooterView = mState != StatusBarState.KEYGUARD
-                && mEntryManager.getNotificationData().getActiveNotifications().size() != 0
+        boolean showDismissView = mClearAllEnabled && hasActiveClearableNotifications();
+        boolean showFooterView = (showDismissView ||
+                        mEntryManager.getNotificationData().getActiveNotifications().size() != 0)
+                && mState != StatusBarState.KEYGUARD
                 && !mRemoteInputManager.getController().isRemoteInputActive();
-        boolean showDismissView = mClearAllEnabled && mState != StatusBarState.KEYGUARD
-                && hasActiveClearableNotifications();
 
         mStackScroller.updateFooterView(showFooterView, showDismissView);
     }

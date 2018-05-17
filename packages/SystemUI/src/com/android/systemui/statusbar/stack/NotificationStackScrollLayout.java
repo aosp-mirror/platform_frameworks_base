@@ -3922,10 +3922,6 @@ public class NotificationStackScrollLayout extends ViewGroup
     }
 
     public void goToFullShade(long delay) {
-        if (mFooterView != null) {
-            mFooterView.setInvisible();
-        }
-        mEmptyShadeView.setInvisible();
         mGoToFullShadeNeedsAnimation = true;
         mGoToFullShadeDelay = delay;
         mNeedsAnimation = true;
@@ -4073,17 +4069,7 @@ public class NotificationStackScrollLayout extends ViewGroup
     }
 
     public void updateEmptyShadeView(boolean visible) {
-        int oldVisibility = mEmptyShadeView.willBeGone() ? GONE : mEmptyShadeView.getVisibility();
-        int newVisibility = visible ? VISIBLE : GONE;
-
-        boolean changedVisibility = oldVisibility != newVisibility;
-        if (changedVisibility) {
-            if (newVisibility != GONE) {
-                showFooterView(mEmptyShadeView);
-            } else {
-                hideFooterView(mEmptyShadeView, true);
-            }
-        }
+        mEmptyShadeView.setVisible(visible, mIsExpanded && mAnimationsEnabled);
 
         int oldTextRes = mEmptyShadeView.getTextResource();
         int newTextRes = mStatusBar.areNotificationsHidden()
@@ -4097,48 +4083,9 @@ public class NotificationStackScrollLayout extends ViewGroup
         if (mFooterView == null) {
             return;
         }
-        int oldVisibility = mFooterView.willBeGone() ? GONE : mFooterView.getVisibility();
-        int newVisibility = visible ? VISIBLE : GONE;
-        if (oldVisibility != newVisibility) {
-            if (newVisibility != GONE) {
-                showFooterView(mFooterView);
-            } else {
-                hideFooterView(mFooterView, mFooterView.isButtonVisible());
-            }
-        }
-        if (mFooterView.isSecondaryVisible() != showDismissView) {
-            mFooterView.performSecondaryVisibilityAnimation(showDismissView);
-        }
-    }
-
-    private void showFooterView(StackScrollerDecorView footerView) {
-        if (footerView.willBeGone()) {
-            footerView.cancelAnimation();
-        } else {
-            footerView.setInvisible();
-        }
-        footerView.setVisibility(VISIBLE);
-        footerView.setWillBeGone(false);
-        updateContentHeight();
-        notifyHeightChangeListener(footerView);
-    }
-
-    private void hideFooterView(StackScrollerDecorView footerView, boolean isButtonVisible) {
-        Runnable onHideFinishRunnable = new Runnable() {
-            @Override
-            public void run() {
-                footerView.setVisibility(GONE);
-                footerView.setWillBeGone(false);
-                updateContentHeight();
-                notifyHeightChangeListener(footerView);
-            }
-        };
-        if (isButtonVisible && mIsExpanded && mAnimationsEnabled) {
-            footerView.setWillBeGone(true);
-            footerView.performVisibilityAnimation(false, onHideFinishRunnable);
-        } else {
-            onHideFinishRunnable.run();
-        }
+        boolean animate = mIsExpanded && mAnimationsEnabled;
+        mFooterView.setVisible(visible, animate);
+        mFooterView.setSecondaryVisible(showDismissView, animate);
     }
 
     public void setDismissAllInProgress(boolean dismissAllInProgress) {
