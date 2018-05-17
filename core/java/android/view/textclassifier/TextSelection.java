@@ -154,8 +154,8 @@ public final class TextSelection implements Parcelable {
          * Sets an id for the TextSelection object.
          */
         @NonNull
-        public Builder setId(@NonNull String id) {
-            mId = Preconditions.checkNotNull(id);
+        public Builder setId(@Nullable String id) {
+            mId = id;
             return this;
         }
 
