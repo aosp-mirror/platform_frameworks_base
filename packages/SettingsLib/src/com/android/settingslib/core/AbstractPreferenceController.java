@@ -37,6 +37,13 @@ public abstract class AbstractPreferenceController {
      * Updates the current status of preference (summary, switch state, etc)
      */
     public void updateState(Preference preference) {
+        refreshSummary(preference);
+    }
+
+    /**
+     * Refresh preference summary with getSummary()
+     */
+    protected void refreshSummary(Preference preference) {
         if (preference == null) {
             return;
         }
