@@ -5743,7 +5743,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     mStatusBarController.updateVisibilityLw(false /*transientAllowed*/,
                             mLastSystemUiFlags, mLastSystemUiFlags);
                 }
-                if (statusBarExpanded && mNavigationBar != null) {
+                final boolean isKeyguardShowing = isStatusBarKeyguard() && !mKeyguardOccluded;
+                if (statusBarExpanded && !isKeyguardShowing && mNavigationBar != null) {
                     if (mNavigationBarController.setBarShowingLw(true)) {
                         changes |= FINISH_LAYOUT_REDO_LAYOUT;
                     }
