@@ -57,15 +57,15 @@ import static org.junit.Assert.assertNotEquals;
 @Presubmit
 @RunWith(AndroidJUnit4.class)
 public class LaunchParamsControllerTests extends ActivityTestsBase {
-    private ActivityManagerService mService;
+    private ActivityTaskManagerService mService;
     private LaunchParamsController mController;
 
     @Before
     @Override
     public void setUp() throws Exception {
         super.setUp();
-        mService = createActivityManagerService();
-        mController = new LaunchParamsController(mService.mActivityTaskManager);
+        mService = createActivityTaskManagerService();
+        mController = new LaunchParamsController(mService);
     }
 
     /**
@@ -200,9 +200,9 @@ public class LaunchParamsControllerTests extends ActivityTestsBase {
 
         mController.registerModifier(positioner);
 
-        doNothing().when(mService.mActivityTaskManager).moveStackToDisplay(anyInt(), anyInt());
+        doNothing().when(mService).moveStackToDisplay(anyInt(), anyInt());
         mController.layoutTask(task, null /* windowLayout */);
-        verify(mService.mActivityTaskManager, times(1)).moveStackToDisplay(eq(task.getStackId()),
+        verify(mService, times(1)).moveStackToDisplay(eq(task.getStackId()),
                 eq(params.mPreferredDisplayId));
     }
 

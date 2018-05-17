@@ -21,7 +21,6 @@ import static android.content.pm.PackageManager.MATCH_DIRECT_BOOT_UNAWARE;
 import android.annotation.UserIdInt;
 import android.app.ActivityManagerInternal;
 import android.app.ActivityOptions;
-import android.app.ActivityTaskManagerInternal;
 import android.app.AppOpsManager;
 import android.app.IApplicationThread;
 import android.content.ComponentName;
@@ -42,6 +41,7 @@ import android.text.TextUtils;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.Preconditions;
 import com.android.server.LocalServices;
+import com.android.server.wm.ActivityTaskManagerInternal;
 
 import java.util.ArrayList;
 import java.util.List;

@@ -28,7 +28,6 @@ import android.annotation.Nullable;
 import android.app.ActivityManager;
 import android.app.ActivityTaskManager;
 import android.app.ActivityManagerInternal;
-import android.app.ActivityTaskManagerInternal;
 import android.app.AppGlobals;
 import android.app.IActivityManager;
 import android.app.IActivityTaskManager;
@@ -83,6 +82,7 @@ import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.server.LocalServices;
 import com.android.server.autofill.AutofillManagerService.AutofillCompatState;
 import com.android.server.autofill.ui.AutoFillUI;
+import com.android.server.wm.ActivityTaskManagerInternal;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -534,7 +534,7 @@ final class AutofillManagerServiceImpl {
         } catch (NameNotFoundException e) {
             throw new SecurityException("Could not verify UID for " + componentName);
         }
-        if (callingUid != packageUid && !LocalServices.getService(ActivityTaskManagerInternal.class)
+        if (callingUid != packageUid && !LocalServices.getService(ActivityManagerInternal.class)
                 .hasRunningActivity(callingUid, packageName)) {
             final String[] packages = pm.getPackagesForUid(callingUid);
             final String callingPackage = packages != null ? packages[0] : "uid-" + callingUid;

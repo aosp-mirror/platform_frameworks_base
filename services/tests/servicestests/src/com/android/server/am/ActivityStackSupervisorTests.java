@@ -68,7 +68,7 @@ import java.util.ArrayList;
 @Presubmit
 @RunWith(AndroidJUnit4.class)
 public class ActivityStackSupervisorTests extends ActivityTestsBase {
-    private ActivityManagerService mService;
+    private ActivityTaskManagerService mService;
     private ActivityStackSupervisor mSupervisor;
     private ActivityStack mFullscreenStack;
 
@@ -77,7 +77,7 @@ public class ActivityStackSupervisorTests extends ActivityTestsBase {
     public void setUp() throws Exception {
         super.setUp();
 
-        mService = createActivityManagerService();
+        mService = createActivityTaskManagerService();
         mSupervisor = mService.mStackSupervisor;
         mFullscreenStack = mService.mStackSupervisor.getDefaultDisplay().createStack(
                 WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD, true /* onTop */);
@@ -278,7 +278,7 @@ public class ActivityStackSupervisorTests extends ActivityTestsBase {
         assertEquals(originalStackCount + 1, defaultDisplay.getChildCount());
 
         // Let's pretend that the app has crashed.
-        firstActivity.app.thread = null;
+        firstActivity.app.setThread(null);
         mService.mStackSupervisor.finishTopCrashedActivitiesLocked(firstActivity.app, "test");
 
         // Verify that the stack was removed.

@@ -562,11 +562,10 @@ public final class SystemServer {
         // TODO: Might need to move after migration to WM.
         ActivityTaskManagerService atm = mSystemServiceManager.startService(
                 ActivityTaskManagerService.Lifecycle.class).getService();
-        mActivityManagerService = mSystemServiceManager.startService(
-                ActivityManagerService.Lifecycle.class).getService();
+        mActivityManagerService = ActivityManagerService.Lifecycle.startService(
+                mSystemServiceManager, atm);
         mActivityManagerService.setSystemServiceManager(mSystemServiceManager);
         mActivityManagerService.setInstaller(installer);
-        mActivityManagerService.setActivityTaskManager(atm);
         traceEnd();
 
         // Power manager needs to be started early because other services need it.

@@ -32,6 +32,7 @@ import android.view.RemoteAnimationAdapter;
 
 import com.android.internal.app.IVoiceInteractor;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -204,4 +205,12 @@ public abstract class ActivityManagerInternal {
 
     /** Closes all system dialogs. */
     public abstract void closeSystemDialogs(String reason);
+
+    /** Kill the processes in the list due to their tasks been removed. */
+    public abstract void killProcessesForRemovedTask(ArrayList<Object> procsToKill);
+
+    /**
+     * Returns {@code true} if {@code uid} is running an activity from {@code packageName}.
+     */
+    public abstract boolean hasRunningActivity(int uid, @Nullable String packageName);
 }

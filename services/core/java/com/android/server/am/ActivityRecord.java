@@ -288,7 +288,7 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
     AppTimeTracker appTimeTracker; // set if we are tracking the time in this app/task/activity
     HashSet<ConnectionRecord> connections; // All ConnectionRecord we hold
     UriPermissionOwner uriPermissions; // current special URI access perms.
-    ProcessRecord app;      // if non-null, hosting application
+    WindowProcessController app;      // if non-null, hosting application
     private ActivityState mState;    // current state we are in
     Bundle  icicle;         // last saved activity state
     PersistableBundle persistentState; // last persistently saved activity state
@@ -622,7 +622,7 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
     }
 
     private void scheduleActivityMovedToDisplay(int displayId, Configuration config) {
-        if (app == null || app.thread == null) {
+        if (!attachedToProcess()) {
             if (DEBUG_SWITCH || DEBUG_CONFIGURATION) Slog.w(TAG,
                     "Can't report activity moved to display - client not running, activityRecord="
                             + this + ", displayId=" + displayId);
@@ -633,7 +633,7 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
                     "Reporting activity moved to display" + ", activityRecord=" + this
                             + ", displayId=" + displayId + ", config=" + config);
 
-            service.getLifecycleManager().scheduleTransaction(app.thread, appToken,
+            service.getLifecycleManager().scheduleTransaction(app.getThread(), appToken,
                     MoveToDisplayItem.obtain(displayId, config));
         } catch (RemoteException e) {
             // If process died, whatever.
@@ -641,7 +641,7 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
     }
 
     private void scheduleConfigurationChanged(Configuration config) {
-        if (app == null || app.thread == null) {
+        if (attachedToProcess()) {
             if (DEBUG_CONFIGURATION) Slog.w(TAG,
                     "Can't report activity configuration update - client not running"
                             + ", activityRecord=" + this);
@@ -651,7 +651,7 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
             if (DEBUG_CONFIGURATION) Slog.v(TAG, "Sending new config to " + this + ", config: "
                     + config);
 
-            service.getLifecycleManager().scheduleTransaction(app.thread, appToken,
+            service.getLifecycleManager().scheduleTransaction(app.getThread(), appToken,
                     ActivityConfigurationChangeItem.obtain(config));
         } catch (RemoteException e) {
             // If process died, whatever.
@@ -659,7 +659,7 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
     }
 
     void updateMultiWindowMode() {
-        if (task == null || task.getStack() == null || app == null || app.thread == null) {
+        if (task == null || task.getStack() == null || !attachedToProcess()) {
             return;
         }
 
@@ -678,7 +678,7 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
 
     private void scheduleMultiWindowModeChanged(Configuration overrideConfig) {
         try {
-            service.getLifecycleManager().scheduleTransaction(app.thread, appToken,
+            service.getLifecycleManager().scheduleTransaction(app.getThread(), appToken,
                     MultiWindowModeChangeItem.obtain(mLastReportedMultiWindowMode, overrideConfig));
         } catch (Exception e) {
             // If process died, I don't care.
@@ -686,7 +686,7 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
     }
 
     void updatePictureInPictureMode(Rect targetStackBounds, boolean forceUpdate) {
-        if (task == null || task.getStack() == null || app == null || app.thread == null) {
+        if (task == null || task.getStack() == null || !attachedToProcess()) {
             return;
         }
 
@@ -705,7 +705,7 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
 
     private void schedulePictureInPictureModeChanged(Configuration overrideConfig) {
         try {
-            service.getLifecycleManager().scheduleTransaction(app.thread, appToken,
+            service.getLifecycleManager().scheduleTransaction(app.getThread(), appToken,
                     PipModeChangeItem.obtain(mLastReportedPictureInPictureMode,
                             overrideConfig));
         } catch (Exception e) {
@@ -984,12 +984,20 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
         }
     }
 
-    void setProcess(ProcessRecord proc) {
+    void setProcess(WindowProcessController proc) {
         app = proc;
         final ActivityRecord root = task != null ? task.getRootActivity() : null;
         if (root == this) {
             task.setRootProcess(proc);
         }
+    }
+
+    boolean hasProcess() {
+        return app != null;
+    }
+
+    boolean attachedToProcess() {
+        return hasProcess() && app.hasThread();
     }
 
     AppWindowContainerController getWindowContainerController() {
@@ -1366,7 +1374,7 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
             clearOptionsLocked();
         }
 
-        if (service.mAm != null) {
+        if (service != null) {
             service.getTaskChangeNotificationController().notifyTaskStackChanged();
         }
     }
@@ -1435,13 +1443,13 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
         // - It is currently resumed or paused. i.e. it is currently visible to the user and we want
         //   the user to see the visual effects caused by the intent delivery now.
         // - The device is sleeping and it is the top activity behind the lock screen (b/6700897).
-        if ((mState == RESUMED || mState == PAUSED
-                || isTopActivityWhileSleeping) && app != null && app.thread != null) {
+        if ((mState == RESUMED || mState == PAUSED || isTopActivityWhileSleeping)
+                && attachedToProcess()) {
             try {
                 ArrayList<ReferrerIntent> ar = new ArrayList<>(1);
                 ar.add(rintent);
                 service.getLifecycleManager().scheduleTransaction(
-                        app.thread, appToken, NewIntentItem.obtain(ar, mState == PAUSED));
+                        app.getThread(), appToken, NewIntentItem.obtain(ar, mState == PAUSED));
                 unsent = false;
             } catch (RemoteException e) {
                 Slog.w(TAG, "Exception thrown sending new intent to " + this, e);
@@ -1744,7 +1752,7 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
             }
             setVisible(true);
             sleeping = false;
-            app.pendingUiClean = true;
+            app.setPendingUiClean(true);
             if (reportToClient) {
                 makeClientVisible();
             } else {
@@ -1764,13 +1772,13 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
     void makeClientVisible() {
         mClientVisibilityDeferred = false;
         try {
-            service.getLifecycleManager().scheduleTransaction(app.thread, appToken,
+            service.getLifecycleManager().scheduleTransaction(app.getThread(), appToken,
                     WindowVisibilityItem.obtain(true /* showWindow */));
             if (shouldPauseWhenBecomingVisible()) {
                 // An activity must be in the {@link PAUSING} state for the system to validate
                 // the move to {@link PAUSED}.
                 setState(PAUSING, "makeVisibleIfNeeded");
-                service.getLifecycleManager().scheduleTransaction(app.thread, appToken,
+                service.getLifecycleManager().scheduleTransaction(app.getThread(), appToken,
                         PauseActivityItem.obtain(finishing, false /* userLeaving */,
                                 configChangeFlags, false /* dontReport */));
             }
@@ -1816,7 +1824,7 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
         stopFreezingScreenLocked(false);
         try {
             if (returningOptions != null) {
-                app.thread.scheduleOnNewActivityOptions(appToken, returningOptions.toBundle());
+                app.getThread().scheduleOnNewActivityOptions(appToken, returningOptions.toBundle());
             }
         } catch(RemoteException e) {
         }
@@ -1850,9 +1858,9 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
         stopped = false;
 
         if (isActivityTypeHome()) {
-            ProcessRecord app = task.mActivities.get(0).app;
-            if (app != null && app != service.mAm.mHomeProcess) {
-                service.mAm.mHomeProcess = app;
+            WindowProcessController app = task.mActivities.get(0).app;
+            if (hasProcess() && app != service.mHomeProcess) {
+                service.mHomeProcess = app;
             }
         }
 
@@ -1873,8 +1881,8 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
         // Mark the point when the activity is resuming
         // TODO: To be more accurate, the mark should be before the onCreate,
         //       not after the onResume. But for subsequent starts, onResume is fine.
-        if (app != null) {
-            cpuTimeAtResume = service.mAm.mProcessCpuTracker.getCpuTimeForPid(app.pid);
+        if (hasProcess()) {
+            cpuTimeAtResume = service.mAm.mProcessCpuTracker.getCpuTimeForPid(app.getPid());
         } else {
             cpuTimeAtResume = 0; // Couldn't get the cpu time of process
         }
@@ -1970,15 +1978,15 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
 
     // IApplicationToken
 
-    public boolean mayFreezeScreenLocked(ProcessRecord app) {
+    public boolean mayFreezeScreenLocked(WindowProcessController app) {
         // Only freeze the screen if this activity is currently attached to
         // an application, and that application is not blocked or unresponding.
         // In any other case, we can't count on getting the screen unfrozen,
         // so it is best to leave as-is.
-        return app != null && !app.crashing && !app.notResponding;
+        return hasProcess() && !app.isCrashing() && !app.isNotResponding();
     }
 
-    public void startFreezingScreenLocked(ProcessRecord app, int configChanges) {
+    public void startFreezingScreenLocked(WindowProcessController app, int configChanges) {
         if (mayFreezeScreenLocked(app)) {
             mWindowContainerController.startFreezingScreen(configChanges);
         }
@@ -2135,17 +2143,17 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
     @Override
     public boolean keyDispatchingTimedOut(String reason, int windowPid) {
         ActivityRecord anrActivity;
-        ProcessRecord anrApp;
+        WindowProcessController anrApp;
         boolean windowFromSameProcessAsActivity;
         synchronized (service.mGlobalLock) {
             anrActivity = getWaitingHistoryRecordLocked();
             anrApp = app;
             windowFromSameProcessAsActivity =
-                    app == null || app.pid == windowPid || windowPid == -1;
+                    !hasProcess() || app.getPid() == windowPid || windowPid == -1;
         }
         if (windowFromSameProcessAsActivity) {
             return service.mAm.inputDispatchingTimedOut(
-                    anrApp, anrActivity, this, false, reason);
+                    (ProcessRecord) anrApp.mOwner, anrActivity, this, false, reason);
         } else {
             // In this case another process added windows using this activity token. So, we call the
             // generic service input dispatch timed out method so that the right process is blamed.
@@ -2202,9 +2210,9 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
         if (!force && sleeping == _sleeping) {
             return;
         }
-        if (app != null && app.thread != null) {
+        if (attachedToProcess()) {
             try {
-                app.thread.scheduleSleeping(appToken, _sleeping);
+                app.getThread().scheduleSleeping(appToken, _sleeping);
                 if (_sleeping && !mStackSupervisor.mGoingToSleepActivities.contains(this)) {
                     mStackSupervisor.mGoingToSleepActivities.add(this);
                 }
@@ -2253,7 +2261,7 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
     }
 
     final boolean isDestroyable() {
-        if (finishing || app == null) {
+        if (finishing || !hasProcess()) {
             // This would be redundant.
             return false;
         }
@@ -2593,7 +2601,7 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
 
         // If the activity isn't currently running, just leave the new configuration and it will
         // pick that up next time it starts.
-        if (app == null || app.thread == null) {
+        if (!attachedToProcess()) {
             if (DEBUG_SWITCH || DEBUG_CONFIGURATION) Slog.v(TAG_CONFIGURATION,
                     "Configuration doesn't matter not running " + this);
             stopFreezingScreenLocked(false);
@@ -2614,7 +2622,7 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
             startFreezingScreenLocked(app, globalChanges);
             forceNewConfig = false;
             preserveWindow &= isResizeOnlyChange(changes);
-            if (app == null || app.thread == null) {
+            if (!attachedToProcess()) {
                 if (DEBUG_SWITCH || DEBUG_CONFIGURATION) Slog.v(TAG_CONFIGURATION,
                         "Config is destroying non-running " + this);
                 stack.destroyActivityLocked(this, true, "config");
@@ -2774,7 +2782,7 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
             } else {
                 lifecycleItem = PauseActivityItem.obtain();
             }
-            final ClientTransaction transaction = ClientTransaction.obtain(app.thread, appToken);
+            final ClientTransaction transaction = ClientTransaction.obtain(app.getThread(), appToken);
             transaction.addCallback(callbackItem);
             transaction.setLifecycleStateRequest(lifecycleItem);
             service.getLifecycleManager().scheduleTransaction(transaction);
@@ -2804,11 +2812,11 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
     }
 
     private boolean isProcessRunning() {
-        ProcessRecord proc = app;
+        WindowProcessController proc = app;
         if (proc == null) {
-            proc = service.mAm.mProcessNames.get(processName, info.applicationInfo.uid);
+            proc = service.mProcessNames.get(processName, info.applicationInfo.uid);
         }
-        return proc != null && proc.thread != null;
+        return proc != null && proc.hasThread();
     }
 
     /**
@@ -3037,8 +3045,8 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
         proto.write(STATE, mState.toString());
         proto.write(VISIBLE, visible);
         proto.write(FRONT_OF_TASK, frontOfTask);
-        if (app != null) {
-            proto.write(PROC_ID, app.pid);
+        if (hasProcess()) {
+            proto.write(PROC_ID, app.getPid());
         }
         proto.write(TRANSLUCENT, !fullscreen);
         proto.end(token);

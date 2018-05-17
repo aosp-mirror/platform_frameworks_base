@@ -27,7 +27,6 @@ import android.app.Activity;
 import android.app.ActivityManager;
 import android.app.ActivityManagerInternal;
 import android.app.ActivityManagerNative;
-import android.app.ActivityTaskManagerInternal;
 import android.app.IActivityManager;
 import android.app.IStopUserCallback;
 import android.app.KeyguardManager;
@@ -99,8 +98,7 @@ import com.android.server.LockGuard;
 import com.android.server.SystemService;
 import com.android.server.am.UserState;
 import com.android.server.storage.DeviceStorageMonitorInternal;
-
-import libcore.io.IoUtils;
+import com.android.server.wm.ActivityTaskManagerInternal;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
@@ -122,6 +120,8 @@ import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
+
+import libcore.io.IoUtils;
 
 /**
  * Service for {@link UserManager}.

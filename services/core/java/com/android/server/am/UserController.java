@@ -41,7 +41,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
 import android.app.ActivityManager;
-import android.app.ActivityTaskManagerInternal;
+import com.android.server.wm.ActivityTaskManagerInternal;
 import android.app.AppGlobals;
 import android.app.AppOpsManager;
 import android.app.Dialog;

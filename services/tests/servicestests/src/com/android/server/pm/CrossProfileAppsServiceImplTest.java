@@ -14,7 +14,6 @@ import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertThrows;
 
 import android.app.ActivityManagerInternal;
-import android.app.ActivityTaskManagerInternal;
 import android.app.AppOpsManager;
 import android.app.IApplicationThread;
 import android.content.ComponentName;
@@ -31,6 +30,8 @@ import android.os.UserHandle;
 import android.os.UserManager;
 import android.platform.test.annotations.Presubmit;
 import android.util.SparseArray;
+
+import com.android.server.wm.ActivityTaskManagerInternal;
 
 import org.junit.Before;
 import org.junit.Test;

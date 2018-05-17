@@ -30,28 +30,29 @@ import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.Display.FLAG_PRIVATE;
 import static android.view.Display.REMOVE_MODE_DESTROY_CONTENT;
+import static com.android.server.am.ActivityDisplayProto.CONFIGURATION_CONTAINER;
+import static com.android.server.am.ActivityDisplayProto.ID;
+import static com.android.server.am.ActivityDisplayProto.STACKS;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_STACK;
 import static com.android.server.am.ActivityManagerDebugConfig.POSTFIX_STACK;
 import static com.android.server.am.ActivityManagerDebugConfig.TAG_AM;
 import static com.android.server.am.ActivityManagerDebugConfig.TAG_WITH_CLASS_NAME;
-import static com.android.server.am.ActivityDisplayProto.CONFIGURATION_CONTAINER;
-import static com.android.server.am.ActivityDisplayProto.STACKS;
-import static com.android.server.am.ActivityDisplayProto.ID;
 
 import android.annotation.Nullable;
 import android.app.ActivityOptions;
-import android.app.ActivityTaskManagerInternal;
 import android.app.WindowConfiguration;
 import android.graphics.Point;
 import android.util.IntArray;
 import android.util.Slog;
 import android.util.proto.ProtoOutputStream;
 import android.view.Display;
+
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.server.wm.ActivityTaskManagerInternal;
 import com.android.server.wm.ConfigurationContainer;
 import com.android.server.wm.DisplayWindowController;
-
 import com.android.server.wm.WindowContainerListener;
+
 import java.io.PrintWriter;
 import java.util.ArrayList;
 

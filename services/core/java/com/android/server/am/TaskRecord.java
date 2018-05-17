@@ -264,7 +264,7 @@ class TaskRecord extends ConfigurationContainer implements TaskWindowContainerLi
     /** The process that had previously hosted the root activity of this task.
      * Used to know that we should try harder to keep this process around, in case the
      * user wants to return to it. */
-    private ProcessRecord mRootProcess;
+    private WindowProcessController mRootProcess;
 
     /** Takes on same value as first root activity */
     boolean isPersistable = false;
@@ -1131,7 +1131,7 @@ class TaskRecord extends ConfigurationContainer implements TaskWindowContainerLi
                 // activity
                 reportOut.numRunning = 0;
             }
-            if (r.app != null && r.app.thread != null) {
+            if (r.attachedToProcess()) {
                 // Increment the number of actually running activities
                 reportOut.numRunning++;
             }
@@ -1909,18 +1909,18 @@ class TaskRecord extends ConfigurationContainer implements TaskWindowContainerLi
         }
     }
 
-    void setRootProcess(ProcessRecord proc) {
+    void setRootProcess(WindowProcessController proc) {
         clearRootProcess();
         if (intent != null &&
                 (intent.getFlags() & Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS) == 0) {
             mRootProcess = proc;
-            proc.recentTasks.add(this);
+            mRootProcess.addRecentTask(this);
         }
     }
 
     void clearRootProcess() {
         if (mRootProcess != null) {
-            mRootProcess.recentTasks.remove(this);
+            mRootProcess.removeRecentTask(this);
             mRootProcess = null;
         }
     }

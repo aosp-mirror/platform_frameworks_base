@@ -19,7 +19,9 @@ package com.android.server.am;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 
+import android.app.IApplicationThread;
 import android.content.Intent;
+import android.os.UserHandle;
 import android.platform.test.annotations.Presubmit;
 import android.support.test.filters.SmallTest;
 import android.support.test.runner.AndroidJUnit4;
@@ -49,7 +51,7 @@ import java.util.Random;
 @Presubmit
 @RunWith(AndroidJUnit4.class)
 public class ActivityStartControllerTests extends ActivityTestsBase {
-    private ActivityManagerService mService;
+    private ActivityTaskManagerService mService;
     private ActivityStartController mController;
     private Factory mFactory;
     private ActivityStarter mStarter;
@@ -57,10 +59,10 @@ public class ActivityStartControllerTests extends ActivityTestsBase {
     @Override
     public void setUp() throws Exception {
         super.setUp();
-        mService = createActivityManagerService();
+        mService = createActivityTaskManagerService();
         mFactory = mock(Factory.class);
-        mController = new ActivityStartController(mService.mActivityTaskManager, mService.mStackSupervisor, mFactory);
-        mStarter = spy(new ActivityStarter(mController, mService.mActivityTaskManager,
+        mController = new ActivityStartController(mService, mService.mStackSupervisor, mFactory);
+        mStarter = spy(new ActivityStarter(mController, mService,
                 mService.mStackSupervisor, mock(ActivityStartInterceptor.class)));
         doReturn(mStarter).when(mFactory).obtain();
     }
@@ -77,11 +79,14 @@ public class ActivityStartControllerTests extends ActivityTestsBase {
         final int startFlags = random.nextInt();
         final ActivityStack stack = mService.mStackSupervisor.getDefaultDisplay().createStack(
                 WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD, true /* onTop */);
-        final ProcessRecord process= new ProcessRecord(null, null,
-                mService.mContext.getApplicationInfo(), "name", 12345);
+        final WindowProcessController wpc = new WindowProcessController(mService,
+                mService.mContext.getApplicationInfo(), "name", 12345,
+                UserHandle.getUserId(12345), mock(Object.class),
+                mock(WindowProcessListener.class));
+        wpc.setThread(mock(IApplicationThread.class));
 
         mController.addPendingActivityLaunch(
-                new PendingActivityLaunch(activity, source, startFlags, stack, process));
+                new PendingActivityLaunch(activity, source, startFlags, stack, wpc));
         final boolean resume = random.nextBoolean();
         mController.doPendingActivityLaunches(resume);
 
@@ -96,7 +101,7 @@ public class ActivityStartControllerTests extends ActivityTestsBase {
     @Test
     public void testRecycling() throws Exception {
         final Intent intent = new Intent();
-        final ActivityStarter optionStarter = new ActivityStarter(mController, mService.mActivityTaskManager,
+        final ActivityStarter optionStarter = new ActivityStarter(mController, mService,
                 mService.mStackSupervisor, mock(ActivityStartInterceptor.class));
         optionStarter
                 .setIntent(intent)

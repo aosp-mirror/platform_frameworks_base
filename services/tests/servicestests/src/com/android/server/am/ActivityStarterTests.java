@@ -88,7 +88,7 @@ import java.util.ArrayList;
 @Presubmit
 @RunWith(AndroidJUnit4.class)
 public class ActivityStarterTests extends ActivityTestsBase {
-    private ActivityManagerService mService;
+    private ActivityTaskManagerService mService;
     private ActivityStarter mStarter;
     private ActivityStartController mController;
 
@@ -107,9 +107,9 @@ public class ActivityStarterTests extends ActivityTestsBase {
     @Override
     public void setUp() throws Exception {
         super.setUp();
-        mService = createActivityManagerService();
+        mService = createActivityTaskManagerService();
         mController = mock(ActivityStartController.class);
-        mStarter = new ActivityStarter(mController, mService.mActivityTaskManager, mService.mStackSupervisor,
+        mStarter = new ActivityStarter(mController, mService, mService.mStackSupervisor,
                 mock(ActivityStartInterceptor.class));
     }
 
@@ -134,7 +134,7 @@ public class ActivityStarterTests extends ActivityTestsBase {
         assertTrue(task2.getStack() instanceof PinnedActivityStack);
         mStarter.updateBounds(task2, bounds);
 
-        verify(mService.mActivityTaskManager, times(1)).resizeStack(eq(task2.getStack().mStackId),
+        verify(mService, times(1)).resizeStack(eq(task2.getStack().mStackId),
                 eq(bounds), anyBoolean(), anyBoolean(), anyBoolean(), anyInt());
 
         // In the case of no animation, the stack and task bounds should be set immediately.
@@ -189,20 +189,21 @@ public class ActivityStarterTests extends ActivityTestsBase {
      */
     private void verifyStartActivityPreconditions(int preconditions, int launchFlags,
             int expectedResult) {
-        final ActivityManagerService service = createActivityManagerService();
+        final ActivityTaskManagerService service = mService;
         final IPackageManager packageManager = mock(IPackageManager.class);
         final ActivityStartController controller = mock(ActivityStartController.class);
 
-        final ActivityStarter starter = new ActivityStarter(controller, service.mActivityTaskManager,
+        final ActivityStarter starter = new ActivityStarter(controller, service,
                 service.mStackSupervisor, mock(ActivityStartInterceptor.class));
+        prepareStarter(launchFlags);
         final IApplicationThread caller = mock(IApplicationThread.class);
 
         // If no caller app, return {@code null} {@link ProcessRecord}.
         final ProcessRecord record = containsConditions(preconditions, PRECONDITION_NO_CALLER_APP)
-                ? null : new ProcessRecord(null, mock(BatteryStatsImpl.class),
+                ? null : new ProcessRecord(service.mAm, mock(BatteryStatsImpl.class),
                 mock(ApplicationInfo.class), null, 0);
 
-        doReturn(record).when(service).getRecordForAppLocked(anyObject());
+        doReturn(record).when(service.mAm).getRecordForAppLocked(anyObject());
 
         final Intent intent = new Intent();
         intent.setFlags(launchFlags);
@@ -236,7 +237,7 @@ public class ActivityStarterTests extends ActivityTestsBase {
         }
 
         if (containsConditions(preconditions, PRECONDITION_DISALLOW_APP_SWITCHING)) {
-            doReturn(false).when(service.mActivityTaskManager).checkAppSwitchAllowedLocked(
+            doReturn(false).when(service).checkAppSwitchAllowedLocked(
                     anyInt(), anyInt(), anyInt(), anyInt(), any());
         }
 
@@ -282,7 +283,7 @@ public class ActivityStarterTests extends ActivityTestsBase {
 
         // Ensure that {@link ActivityOptions} are aborted with unsuccessful result.
         if (expectedResult != START_SUCCESS) {
-            final ActivityStarter optionStarter = new ActivityStarter(mController, mService.mActivityTaskManager,
+            final ActivityStarter optionStarter = new ActivityStarter(mController, mService,
                     mService.mStackSupervisor, mock(ActivityStartInterceptor.class));
             final ActivityOptions options = spy(ActivityOptions.makeBasic());
 
@@ -336,7 +337,7 @@ public class ActivityStarterTests extends ActivityTestsBase {
         info.applicationInfo = new ApplicationInfo();
         info.applicationInfo.packageName = ActivityBuilder.getDefaultComponent().getPackageName();
 
-        return new ActivityStarter(mController, mService.mActivityTaskManager,
+        return new ActivityStarter(mController, mService,
                 mService.mStackSupervisor, mock(ActivityStartInterceptor.class))
                 .setIntent(intent)
                 .setActivityInfo(info);
@@ -456,7 +457,7 @@ public class ActivityStarterTests extends ActivityTestsBase {
 
         final ActivityStarter starter = prepareStarter(0);
 
-        final LockTaskController lockTaskController = mService.mActivityTaskManager.getLockTaskController();
+        final LockTaskController lockTaskController = mService.getLockTaskController();
         doReturn(true).when(lockTaskController).isLockTaskModeViolation(any());
 
         final int result = starter.setReason("testTaskModeViolation").execute();

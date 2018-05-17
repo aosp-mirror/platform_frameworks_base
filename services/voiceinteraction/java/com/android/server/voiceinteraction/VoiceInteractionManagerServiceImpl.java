@@ -23,10 +23,9 @@ import static android.app.ActivityManager.START_VOICE_NOT_ACTIVE_SESSION;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_ASSISTANT;
 
 import android.app.ActivityManager;
-import android.app.ActivityManagerInternal;
 import android.app.ActivityOptions;
 import android.app.ActivityTaskManager;
-import android.app.ActivityTaskManagerInternal;
+import com.android.server.wm.ActivityTaskManagerInternal;
 import android.app.IActivityManager;
 import android.app.IActivityTaskManager;
 import android.content.BroadcastReceiver;
@@ -50,7 +49,6 @@ import android.util.PrintWriterPrinter;
 import android.util.Slog;
 import android.view.IWindowManager;
 
-import com.android.internal.app.IVoiceInteractionSessionListener;
 import com.android.internal.app.IVoiceInteractionSessionShowCallback;
 import com.android.internal.app.IVoiceInteractor;
 import com.android.server.LocalServices;

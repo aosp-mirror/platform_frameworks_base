@@ -14,10 +14,13 @@
  * limitations under the License
  */
 
-package android.app;
+package com.android.server.wm;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.app.AppProtoEnums;
+import android.app.IActivityManager;
+import android.app.IApplicationThread;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.os.Bundle;
@@ -28,6 +31,7 @@ import android.util.SparseIntArray;
 import android.view.RemoteAnimationAdapter;
 
 import com.android.internal.app.IVoiceInteractor;
+import com.android.server.am.WindowProcessController;
 
 import java.util.List;
 
@@ -210,11 +214,6 @@ public abstract class ActivityTaskManagerInternal {
      */
     public abstract void setFocusedActivity(IBinder token);
 
-    /**
-     * Returns {@code true} if {@code uid} is running an activity from {@code packageName}.
-     */
-    public abstract boolean hasRunningActivity(int uid, @Nullable String packageName);
-
     public abstract void registerScreenObserver(ScreenObserver observer);
 
     /**
@@ -263,4 +262,8 @@ public abstract class ActivityTaskManagerInternal {
      */
     public abstract void onUserStopped(int userId);
     public abstract boolean isGetTasksAllowed(String caller, int callingPid, int callingUid);
+
+    public abstract void onProcessAdded(WindowProcessController proc);
+    public abstract void onProcessRemoved(String name, int uid);
+    public abstract void onCleanUpApplicationRecord(WindowProcessController proc);
 }

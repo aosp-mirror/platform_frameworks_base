@@ -1389,7 +1389,7 @@ public final class ActiveServices {
     private boolean updateServiceClientActivitiesLocked(ProcessRecord proc,
             ConnectionRecord modCr, boolean updateLru) {
         if (modCr != null && modCr.binding.client != null) {
-            if (modCr.binding.client.activities.size() <= 0) {
+            if (!modCr.binding.client.hasActivities()) {
                 // This connection is from a client without activities, so adding
                 // and removing is not interesting.
                 return false;
@@ -1407,7 +1407,7 @@ public final class ActiveServices {
                         // Binding to ourself is not interesting.
                         continue;
                     }
-                    if (cr.binding.client.activities.size() > 0) {
+                    if (cr.binding.client.hasActivities()) {
                         anyClientActivities = true;
                         break;
                     }
@@ -2081,7 +2081,7 @@ public final class ActiveServices {
                 bumpServiceExecutingLocked(r, execInFg, "bind");
                 r.app.forceProcessStateUpTo(ActivityManager.PROCESS_STATE_SERVICE);
                 r.app.thread.scheduleBindService(r, i.intent.getIntent(), rebind,
-                        r.app.repProcState);
+                        r.app.getReportedProcState());
                 if (!rebind) {
                     i.requested = true;
                 }
@@ -2463,7 +2463,7 @@ public final class ActiveServices {
             app.forceProcessStateUpTo(ActivityManager.PROCESS_STATE_SERVICE);
             app.thread.scheduleCreateService(r, r.serviceInfo,
                     mAm.compatibilityInfoForPackageLocked(r.serviceInfo.applicationInfo),
-                    app.repProcState);
+                    app.getReportedProcState());
             r.postNotification();
             created = true;
         } catch (DeadObjectException e) {
@@ -3050,7 +3050,7 @@ public final class ActiveServices {
                 }
             }
             if (finishing) {
-                if (r.app != null && !r.app.persistent) {
+                if (r.app != null && !r.app.isPersistent()) {
                     r.app.services.remove(r);
                     if (r.whitelistManager) {
                         updateWhitelistManagerLocked(r.app);
@@ -3140,7 +3140,7 @@ public final class ActiveServices {
                         && (filterByClasses == null
                             || filterByClasses.contains(service.name.getClassName())));
             if (sameComponent
-                    && (service.app == null || evenPersistent || !service.app.persistent)) {
+                    && (service.app == null || evenPersistent || !service.app.isPersistent())) {
                 if (!doit) {
                     return true;
                 }
@@ -3148,7 +3148,7 @@ public final class ActiveServices {
                 Slog.i(TAG, "  Force stopping service " + service);
                 if (service.app != null) {
                     service.app.removed = killProcess;
-                    if (!service.app.persistent) {
+                    if (!service.app.isPersistent()) {
                         service.app.services.remove(service);
                         if (service.whitelistManager) {
                             updateWhitelistManagerLocked(service.app);
@@ -3302,7 +3302,7 @@ public final class ActiveServices {
             synchronized (sr.stats.getBatteryStats()) {
                 sr.stats.stopLaunchedLocked();
             }
-            if (sr.app != app && sr.app != null && !sr.app.persistent) {
+            if (sr.app != app && sr.app != null && !sr.app.isPersistent()) {
                 sr.app.services.remove(sr);
             }
             sr.app = null;
@@ -3347,7 +3347,7 @@ public final class ActiveServices {
                         continue;
                     }
                     // XXX turned off for now until we have more time to get a better policy.
-                    if (false && proc != null && !proc.persistent && proc.thread != null
+                    if (false && proc != null && !proc.isPersistent() && proc.thread != null
                             && proc.pid != 0 && proc.pid != ActivityManagerService.MY_PID
                             && proc.setProcState >= ActivityManager.PROCESS_STATE_LAST_ACTIVITY) {
                         proc.kill("bound to service " + sr.name.flattenToShortString()
@@ -3365,7 +3365,7 @@ public final class ActiveServices {
 
             // Unless the process is persistent, this process record is going away,
             // so make sure the service is cleaned out of it.
-            if (!app.persistent) {
+            if (!app.isPersistent()) {
                 app.services.removeAt(i);
             }
 
@@ -3475,7 +3475,7 @@ public final class ActiveServices {
         if (r.app != null && r.app.pid == ActivityManagerService.MY_PID) {
             info.flags |= ActivityManager.RunningServiceInfo.FLAG_SYSTEM_PROCESS;
         }
-        if (r.app != null && r.app.persistent) {
+        if (r.app != null && r.app.isPersistent()) {
             info.flags |= ActivityManager.RunningServiceInfo.FLAG_PERSISTENT_PROCESS;
         }
 

@@ -16,9 +16,9 @@
 
 package com.android.server.voiceinteraction;
 
-import static android.app.ActivityTaskManagerInternal.ASSIST_KEY_CONTENT;
-import static android.app.ActivityTaskManagerInternal.ASSIST_KEY_DATA;
-import static android.app.ActivityTaskManagerInternal.ASSIST_KEY_STRUCTURE;
+import static com.android.server.wm.ActivityTaskManagerInternal.ASSIST_KEY_CONTENT;
+import static com.android.server.wm.ActivityTaskManagerInternal.ASSIST_KEY_DATA;
+import static com.android.server.wm.ActivityTaskManagerInternal.ASSIST_KEY_STRUCTURE;
 import static android.app.AppOpsManager.OP_ASSIST_SCREENSHOT;
 import static android.app.AppOpsManager.OP_ASSIST_STRUCTURE;
 import static android.content.Intent.FLAG_GRANT_READ_URI_PERMISSION;

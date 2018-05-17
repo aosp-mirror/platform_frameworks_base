@@ -73,7 +73,7 @@ import org.mockito.invocation.InvocationOnMock;
 @Presubmit
 @RunWith(AndroidJUnit4.class)
 public class ActivityRecordTests extends ActivityTestsBase {
-    private ActivityManagerService mService;
+    private ActivityTaskManagerService mService;
     private TestActivityStack mStack;
     private TaskRecord mTask;
     private ActivityRecord mActivity;
@@ -83,7 +83,7 @@ public class ActivityRecordTests extends ActivityTestsBase {
     public void setUp() throws Exception {
         super.setUp();
 
-        mService = createActivityManagerService();
+        mService = createActivityTaskManagerService();
         mStack = mService.mStackSupervisor.getDefaultDisplay().createStack(
                 WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD, true /* onTop */);
         mTask = new TaskBuilder(mService.mStackSupervisor).setStack(mStack).build();
@@ -126,7 +126,7 @@ public class ActivityRecordTests extends ActivityTestsBase {
                 pauseFound.value = true;
             }
             return null;
-        }).when(mActivity.app.thread).scheduleTransaction(any());
+        }).when(mActivity.app.getThread()).scheduleTransaction(any());
 
         mActivity.setState(STOPPED, "testPausingWhenVisibleFromStopped");
 
@@ -236,7 +236,7 @@ public class ActivityRecordTests extends ActivityTestsBase {
 
     private void testSupportsLaunchingResizeable(boolean taskPresent, boolean taskResizeable,
             boolean activityResizeable, boolean expected) {
-        mService.mActivityTaskManager.mSupportsMultiWindow = true;
+        mService.mSupportsMultiWindow = true;
 
         final TaskRecord task = taskPresent
                 ? new TaskBuilder(mService.mStackSupervisor).setStack(mStack).build() : null;
