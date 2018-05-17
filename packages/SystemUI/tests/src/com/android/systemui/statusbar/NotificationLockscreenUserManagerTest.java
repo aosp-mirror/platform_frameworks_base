@@ -63,7 +63,6 @@ public class NotificationLockscreenUserManagerTest extends SysuiTestCase {
     @Mock private DeviceProvisionedController mDeviceProvisionedController;
 
     private int mCurrentUserId;
-    private Handler mHandler;
     private TestNotificationLockscreenUserManager mLockscreenUserManager;
 
     @Before
@@ -73,13 +72,12 @@ public class NotificationLockscreenUserManagerTest extends SysuiTestCase {
         mDependency.injectTestDependency(DeviceProvisionedController.class,
                 mDeviceProvisionedController);
 
-        mHandler = new Handler(Looper.getMainLooper());
         mContext.addMockSystemService(UserManager.class, mUserManager);
         mCurrentUserId = ActivityManager.getCurrentUser();
 
         when(mUserManager.getProfiles(mCurrentUserId)).thenReturn(Lists.newArrayList(
                 new UserInfo(mCurrentUserId, "", 0), new UserInfo(mCurrentUserId + 1, "", 0)));
-        when(mPresenter.getHandler()).thenReturn(mHandler);
+        when(mPresenter.getHandler()).thenReturn(Handler.createAsync(Looper.myLooper()));
 
         mLockscreenUserManager = new TestNotificationLockscreenUserManager(mContext);
         mLockscreenUserManager.setUpWithPresenter(mPresenter, mEntryManager);

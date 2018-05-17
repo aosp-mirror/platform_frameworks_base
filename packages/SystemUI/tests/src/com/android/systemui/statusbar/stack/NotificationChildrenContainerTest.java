@@ -18,6 +18,8 @@ package com.android.systemui.statusbar.stack;
 
 import android.support.test.filters.SmallTest;
 import android.support.test.runner.AndroidJUnit4;
+import android.testing.AndroidTestingRunner;
+import android.testing.TestableLooper.RunWithLooper;
 import android.view.NotificationHeaderView;
 import android.view.View;
 
@@ -31,7 +33,8 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 @SmallTest
-@RunWith(AndroidJUnit4.class)
+@RunWith(AndroidTestingRunner.class)
+@RunWithLooper(setAsMainLooper = true)
 public class NotificationChildrenContainerTest extends SysuiTestCase {
 
     private ExpandableNotificationRow mGroup;

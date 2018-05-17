@@ -52,7 +52,7 @@ import static org.mockito.Mockito.when;
 @SmallTest
 @FlakyTest
 @org.junit.runner.RunWith(AndroidTestingRunner.class)
-@TestableLooper.RunWithLooper
+@TestableLooper.RunWithLooper(setAsMainLooper = true)
 public class NotificationBlockingHelperManagerTest extends SysuiTestCase {
 
     private NotificationBlockingHelperManager mBlockingHelperManager;
