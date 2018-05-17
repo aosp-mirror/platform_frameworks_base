@@ -42,7 +42,7 @@ public final class IdleController extends StateController {
             || Log.isLoggable(TAG, Log.DEBUG);
 
     // Policy: we decide that we're "idle" if the device has been unused /
-    // screen off or dreaming for at least this long
+    // screen off or dreaming or wireless charging dock idle for at least this long
     private long mInactivityIdleThreshold;
     private long mIdleWindowSlop;
     final ArraySet<JobStatus> mTrackedTasks = new ArraySet<>();
@@ -105,6 +105,7 @@ public final class IdleController extends StateController {
         // on the main looper thread, either in onReceive() or in an alarm callback.
         private boolean mIdle;
         private boolean mScreenOn;
+        private boolean mDockIdle;
 
         private AlarmManager.OnAlarmListener mIdleAlarmListener = () -> {
             handleIdleTrigger();
@@ -117,6 +118,7 @@ public final class IdleController extends StateController {
             // device in some meaningful way.
             mIdle = false;
             mScreenOn = true;
+            mDockIdle = false;
         }
 
         public boolean isIdle() {
@@ -137,6 +139,10 @@ public final class IdleController extends StateController {
             // Debugging/instrumentation
             filter.addAction(ActivityManagerService.ACTION_TRIGGER_IDLE);
 
+            // Wireless charging dock state
+            filter.addAction(Intent.ACTION_DOCK_IDLE);
+            filter.addAction(Intent.ACTION_DOCK_ACTIVE);
+
             mContext.registerReceiver(this, filter);
         }
 
@@ -144,11 +150,22 @@ public final class IdleController extends StateController {
         public void onReceive(Context context, Intent intent) {
             final String action = intent.getAction();
             if (action.equals(Intent.ACTION_SCREEN_ON)
-                    || action.equals(Intent.ACTION_DREAMING_STOPPED)) {
+                    || action.equals(Intent.ACTION_DREAMING_STOPPED)
+                    || action.equals(Intent.ACTION_DOCK_ACTIVE)) {
+                if (action.equals(Intent.ACTION_DOCK_ACTIVE)) {
+                    if (!mScreenOn) {
+                        // Ignore this intent during screen off
+                        return;
+                    } else {
+                        mDockIdle = false;
+                    }
+                } else {
+                    mScreenOn = true;
+                    mDockIdle = false;
+                }
                 if (DEBUG) {
                     Slog.v(TAG,"exiting idle : " + action);
                 }
-                mScreenOn = true;
                 //cancel the alarm
                 mAlarm.cancel(mIdleAlarmListener);
                 if (mIdle) {
@@ -157,17 +174,28 @@ public final class IdleController extends StateController {
                     reportNewIdleState(mIdle);
                 }
             } else if (action.equals(Intent.ACTION_SCREEN_OFF)
-                    || action.equals(Intent.ACTION_DREAMING_STARTED)) {
-                // when the screen goes off or dreaming starts, we schedule the
-                // alarm that will tell us when we have decided the device is
+                    || action.equals(Intent.ACTION_DREAMING_STARTED)
+                    || action.equals(Intent.ACTION_DOCK_IDLE)) {
+                // when the screen goes off or dreaming starts or wireless charging dock in idle,
+                // we schedule the alarm that will tell us when we have decided the device is
                 // truly idle.
+                if (action.equals(Intent.ACTION_DOCK_IDLE)) {
+                    if (!mScreenOn) {
+                        // Ignore this intent during screen off
+                        return;
+                    } else {
+                        mDockIdle = true;
+                    }
+                } else {
+                    mScreenOn = false;
+                    mDockIdle = false;
+                }
                 final long nowElapsed = sElapsedRealtimeClock.millis();
                 final long when = nowElapsed + mInactivityIdleThreshold;
                 if (DEBUG) {
                     Slog.v(TAG, "Scheduling idle : " + action + " now:" + nowElapsed + " when="
                             + when);
                 }
-                mScreenOn = false;
                 mAlarm.setWindow(AlarmManager.ELAPSED_REALTIME_WAKEUP,
                         when, mIdleWindowSlop, "JS idleness", mIdleAlarmListener, null);
             } else if (action.equals(ActivityManagerService.ACTION_TRIGGER_IDLE)) {
@@ -177,7 +205,7 @@ public final class IdleController extends StateController {
 
         private void handleIdleTrigger() {
             // idle time starts now. Do not set mIdle if screen is on.
-            if (!mIdle && !mScreenOn) {
+            if (!mIdle && (!mScreenOn || mDockIdle)) {
                 if (DEBUG) {
                     Slog.v(TAG, "Idle trigger fired @ " + sElapsedRealtimeClock.millis());
                 }
