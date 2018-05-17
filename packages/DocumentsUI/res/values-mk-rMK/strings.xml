@@ -36,7 +36,7 @@
     <string name="menu_new_window" msgid="1226032889278727538">"Нов прозорец"</string>
     <string name="menu_copy_to_clipboard" msgid="489311381979634291">"Копирај"</string>
     <string name="menu_paste_from_clipboard" msgid="2071583031180257091">"Залепи"</string>
-    <string name="menu_advanced_show" msgid="4693652895715631401">"Прикажи внатрешна мемор."</string>
+    <string name="menu_advanced_show" msgid="4693652895715631401">"Прикажи внатр. капацитет"</string>
     <string name="menu_advanced_hide" msgid="4218809952721972589">"Скриј внатрешен капацитет"</string>
     <string name="menu_file_size_show" msgid="3240323619260823076">"Прикажи ја големината"</string>
     <string name="menu_file_size_hide" msgid="8881975928502581042">"Сокриј ја големината"</string>
