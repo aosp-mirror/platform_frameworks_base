@@ -31,6 +31,7 @@ public class AnimationProperties {
     public long duration;
     public long delay;
     private ArrayMap<Property, Interpolator> mInterpolatorMap;
+    private AnimatorListenerAdapter mAnimatorListenerAdapter;
 
     /**
      * @return an animation filter for this animation.
@@ -48,7 +49,12 @@ public class AnimationProperties {
      * @return a listener that should be run whenever any property finished its animation
      */
     public AnimatorListenerAdapter getAnimationFinishListener() {
-        return null;
+        return mAnimatorListenerAdapter;
+    }
+
+    public AnimationProperties setAnimationFinishListener(AnimatorListenerAdapter listener) {
+        mAnimatorListenerAdapter = listener;
+        return this;
     }
 
     public boolean wasAdded(View view) {

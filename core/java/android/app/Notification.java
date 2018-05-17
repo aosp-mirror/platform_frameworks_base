@@ -6374,6 +6374,8 @@ public class Notification implements Parcelable
 
         /**
          * @hide
+         * Note that we aren't actually comparing the contents of the bitmaps here, so this
+         * is only doing a cursory inspection. Bitmaps of equal size will appear the same.
          */
         @Override
         public boolean areNotificationsVisiblyDifferent(Style other) {
@@ -6381,7 +6383,20 @@ public class Notification implements Parcelable
                 return true;
             }
             BigPictureStyle otherS = (BigPictureStyle) other;
-            return !Objects.equals(getBigPicture(), otherS.getBigPicture());
+            return areBitmapsObviouslyDifferent(getBigPicture(), otherS.getBigPicture());
+        }
+
+        private static boolean areBitmapsObviouslyDifferent(Bitmap a, Bitmap b) {
+            if (a == b) {
+                return false;
+            }
+            if (a == null || b == null) {
+                return true;
+            }
+            return a.getWidth() != b.getWidth()
+                    || a.getHeight() != b.getHeight()
+                    || a.getConfig() != b.getConfig()
+                    || a.getGenerationId() != b.getGenerationId();
         }
     }
 
@@ -6526,6 +6541,7 @@ public class Notification implements Parcelable
 
         /**
          * @hide
+         * Spans are ignored when comparing text for visual difference.
          */
         @Override
         public boolean areNotificationsVisiblyDifferent(Style other) {
@@ -6533,7 +6549,7 @@ public class Notification implements Parcelable
                 return true;
             }
             BigTextStyle newS = (BigTextStyle) other;
-            return !Objects.equals(getBigText(), newS.getBigText());
+            return !Objects.equals(String.valueOf(getBigText()), String.valueOf(newS.getBigText()));
         }
 
         static void applyBigTextContentView(Builder builder,
@@ -6900,6 +6916,7 @@ public class Notification implements Parcelable
 
         /**
          * @hide
+         * Spans are ignored when comparing text for visual difference.
          */
         @Override
         public boolean areNotificationsVisiblyDifferent(Style other) {
@@ -6910,10 +6927,7 @@ public class Notification implements Parcelable
             List<MessagingStyle.Message> oldMs = getMessages();
             List<MessagingStyle.Message> newMs = newS.getMessages();
 
-            if (oldMs == null) {
-                oldMs = new ArrayList<>();
-            }
-            if (newMs == null) {
+            if (oldMs == null || newMs == null) {
                 newMs = new ArrayList<>();
             }
 
@@ -6924,16 +6938,20 @@ public class Notification implements Parcelable
             for (int i = 0; i < n; i++) {
                 MessagingStyle.Message oldM = oldMs.get(i);
                 MessagingStyle.Message newM = newMs.get(i);
-                if (!Objects.equals(oldM.getText(), newM.getText())) {
+                if (!Objects.equals(
+                        String.valueOf(oldM.getText()),
+                        String.valueOf(newM.getText()))) {
                     return true;
                 }
                 if (!Objects.equals(oldM.getDataUri(), newM.getDataUri())) {
                     return true;
                 }
-                CharSequence oldSender = oldM.getSenderPerson() == null ? oldM.getSender()
-                        : oldM.getSenderPerson().getName();
-                CharSequence newSender = newM.getSenderPerson() == null ? newM.getSender()
-                        : newM.getSenderPerson().getName();
+                String oldSender = String.valueOf(oldM.getSenderPerson() == null
+                        ? oldM.getSender()
+                        : oldM.getSenderPerson().getName());
+                String newSender = String.valueOf(newM.getSenderPerson() == null
+                        ? newM.getSender()
+                        : newM.getSenderPerson().getName());
                 if (!Objects.equals(oldSender, newSender)) {
                     return true;
                 }
@@ -7533,7 +7551,22 @@ public class Notification implements Parcelable
                 return true;
             }
             InboxStyle newS = (InboxStyle) other;
-            return !Objects.equals(getLines(), newS.getLines());
+
+            final ArrayList<CharSequence> myLines = getLines();
+            final ArrayList<CharSequence> newLines = newS.getLines();
+            final int n = myLines.size();
+            if (n != newLines.size()) {
+                return true;
+            }
+
+            for (int i = 0; i < n; i++) {
+                if (!Objects.equals(
+                        String.valueOf(myLines.get(i)),
+                        String.valueOf(newLines.get(i)))) {
+                    return true;
+                }
+            }
+            return false;
         }
 
         private void handleInboxImageMargin(RemoteViews contentView, int id, boolean first,

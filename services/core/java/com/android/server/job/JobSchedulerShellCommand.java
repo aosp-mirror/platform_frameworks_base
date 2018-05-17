@@ -66,6 +66,8 @@ public final class JobSchedulerShellCommand extends ShellCommand {
                     return getJobState(pw);
                 case "heartbeat":
                     return doHeartbeat(pw);
+                case "trigger-dock-state":
+                    return triggerDockState(pw);
                 default:
                     return handleDefaultCommands(cmd);
             }
@@ -349,6 +351,29 @@ public final class JobSchedulerShellCommand extends ShellCommand {
         }
     }
 
+    private int triggerDockState(PrintWriter pw) throws Exception {
+        checkPermission("trigger wireless charging dock state");
+
+        final String opt = getNextArgRequired();
+        boolean idleState;
+        if ("idle".equals(opt)) {
+            idleState = true;
+        } else if ("active".equals(opt)) {
+            idleState = false;
+        } else {
+            getErrPrintWriter().println("Error: unknown option " + opt);
+            return 1;
+        }
+
+        final long ident = Binder.clearCallingIdentity();
+        try {
+            mInternal.triggerDockState(idleState);
+        } finally {
+            Binder.restoreCallingIdentity(ident);
+        }
+        return 0;
+    }
+
     @Override
     public void onHelp() {
         final PrintWriter pw = getOutPrintWriter();
@@ -403,6 +428,8 @@ public final class JobSchedulerShellCommand extends ShellCommand {
         pw.println("    Options:");
         pw.println("      -u or --user: specify which user's job is to be run; the default is");
         pw.println("         the primary or system user");
+        pw.println("  trigger-dock-state [idle|active]");
+        pw.println("    Trigger wireless charging dock state.  Active by default.");
         pw.println();
     }
 

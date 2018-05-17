@@ -156,6 +156,12 @@ public class AppOpsManager {
     public static final int UID_STATE_FOREGROUND_SERVICE = 2;
 
     /**
+     * Last UID state in which we don't restrict what an op can do.
+     * @hide
+     */
+    public static final int UID_STATE_LAST_NON_RESTRICTED = UID_STATE_FOREGROUND_SERVICE;
+
+    /**
      * Metrics about an op when its uid is in the foreground for any other reasons.
      * @hide
      */
@@ -1594,11 +1600,11 @@ public class AppOpsManager {
         }
 
         public long getLastAccessForegroundTime() {
-            return maxTime(mTimes, UID_STATE_PERSISTENT, UID_STATE_FOREGROUND_SERVICE + 1);
+            return maxTime(mTimes, UID_STATE_PERSISTENT, UID_STATE_LAST_NON_RESTRICTED + 1);
         }
 
         public long getLastAccessBackgroundTime() {
-            return maxTime(mTimes, UID_STATE_FOREGROUND_SERVICE + 1, _NUM_UID_STATE);
+            return maxTime(mTimes, UID_STATE_LAST_NON_RESTRICTED + 1, _NUM_UID_STATE);
         }
 
         public long getLastTimeFor(int uidState) {
@@ -1614,11 +1620,11 @@ public class AppOpsManager {
         }
 
         public long getLastRejectForegroundTime() {
-            return maxTime(mRejectTimes, UID_STATE_PERSISTENT, UID_STATE_FOREGROUND_SERVICE + 1);
+            return maxTime(mRejectTimes, UID_STATE_PERSISTENT, UID_STATE_LAST_NON_RESTRICTED + 1);
         }
 
         public long getLastRejectBackgroundTime() {
-            return maxTime(mRejectTimes, UID_STATE_FOREGROUND_SERVICE + 1, _NUM_UID_STATE);
+            return maxTime(mRejectTimes, UID_STATE_LAST_NON_RESTRICTED + 1, _NUM_UID_STATE);
         }
 
         public long getLastRejectTimeFor(int uidState) {

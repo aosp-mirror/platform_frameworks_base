@@ -52,6 +52,7 @@ import android.provider.Settings.Global;
 import android.service.notification.StatusBarNotification;
 import android.service.notification.ZenModeConfig;
 import android.telecom.TelecomManager;
+import android.text.format.DateFormat;
 import android.util.ArraySet;
 import android.util.Log;
 import android.util.Pair;
@@ -89,6 +90,7 @@ import com.android.systemui.statusbar.policy.ZenModeController;
 import com.android.systemui.util.NotificationChannels;
 
 import java.util.List;
+import java.util.Locale;
 
 /**
  * This class contains all of the policy about which icons are installed in the status
@@ -121,7 +123,7 @@ public class PhoneStatusBarPolicy implements Callback, Callbacks,
     private final Handler mHandler = new Handler();
     private final CastController mCast;
     private final HotspotController mHotspot;
-    private final NextAlarmController mNextAlarm;
+    private final NextAlarmController mNextAlarmController;
     private final AlarmManager mAlarmManager;
     private final UserInfoController mUserInfoController;
     private final UserManager mUserManager;
@@ -147,6 +149,7 @@ public class PhoneStatusBarPolicy implements Callback, Callbacks,
     private boolean mManagedProfileIconVisible = false;
 
     private BluetoothController mBluetooth;
+    private AlarmManager.AlarmClockInfo mNextAlarm;
 
     public PhoneStatusBarPolicy(Context context, StatusBarIconController iconController) {
         mContext = context;
@@ -154,7 +157,7 @@ public class PhoneStatusBarPolicy implements Callback, Callbacks,
         mCast = Dependency.get(CastController.class);
         mHotspot = Dependency.get(HotspotController.class);
         mBluetooth = Dependency.get(BluetoothController.class);
-        mNextAlarm = Dependency.get(NextAlarmController.class);
+        mNextAlarmController = Dependency.get(NextAlarmController.class);
         mAlarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
         mUserInfoController = Dependency.get(UserInfoController.class);
         mUserManager = (UserManager) mContext.getSystemService(Context.USER_SERVICE);
@@ -242,7 +245,7 @@ public class PhoneStatusBarPolicy implements Callback, Callbacks,
         mZenController.addCallback(this);
         mCast.addCallback(mCastCallback);
         mHotspot.addCallback(mHotspotCallback);
-        mNextAlarm.addCallback(mNextAlarmCallback);
+        mNextAlarmController.addCallback(mNextAlarmCallback);
         mDataSaver.addCallback(this);
         mKeyguardMonitor.addCallback(this);
         mLocationController.addCallback(this);
@@ -270,7 +273,7 @@ public class PhoneStatusBarPolicy implements Callback, Callbacks,
         mZenController.removeCallback(this);
         mCast.removeCallback(mCastCallback);
         mHotspot.removeCallback(mHotspotCallback);
-        mNextAlarm.removeCallback(mNextAlarmCallback);
+        mNextAlarmController.removeCallback(mNextAlarmCallback);
         mDataSaver.removeCallback(this);
         mKeyguardMonitor.removeCallback(this);
         mLocationController.removeCallback(this);
@@ -313,8 +316,27 @@ public class PhoneStatusBarPolicy implements Callback, Callbacks,
         int zen = mZenController.getZen();
         final boolean zenNone = zen == Global.ZEN_MODE_NO_INTERRUPTIONS;
         mIconController.setIcon(mSlotAlarmClock, zenNone ? R.drawable.stat_sys_alarm_dim
-                : R.drawable.stat_sys_alarm, null);
+                : R.drawable.stat_sys_alarm, buildAlarmContentDescription());
         mIconController.setIconVisibility(mSlotAlarmClock, mCurrentUserSetup && hasAlarm);
+    }
+
+    private String buildAlarmContentDescription() {
+        if (mNextAlarm == null) {
+            return mContext.getString(R.string.status_bar_alarm);
+        }
+        return formatNextAlarm(mNextAlarm, mContext);
+    }
+
+    private static String formatNextAlarm(AlarmManager.AlarmClockInfo info, Context context) {
+        if (info == null) {
+            return "";
+        }
+        String skeleton = DateFormat.is24HourFormat(
+                context, ActivityManager.getCurrentUser()) ? "EHm" : "Ehma";
+        String pattern = DateFormat.getBestDateTimePattern(Locale.getDefault(), skeleton);
+        String dateString = DateFormat.format(pattern, info.getTriggerTime()).toString();
+
+        return context.getString(R.string.accessibility_quick_settings_alarm, dateString);
     }
 
     private final void updateSimState(Intent intent) {
@@ -356,8 +378,7 @@ public class PhoneStatusBarPolicy implements Callback, Callbacks,
 
         if (DndTile.isVisible(mContext) || DndTile.isCombinedIcon(mContext)) {
             zenVisible = zen != Global.ZEN_MODE_OFF;
-            zenIconId = zen == Global.ZEN_MODE_NO_INTERRUPTIONS
-                    ? R.drawable.stat_sys_dnd_total_silence : R.drawable.stat_sys_dnd;
+            zenIconId = R.drawable.stat_sys_dnd;
             zenDescription = mContext.getString(R.string.quick_settings_dnd_label);
         } else if (zen == Global.ZEN_MODE_NO_INTERRUPTIONS) {
             zenVisible = true;
@@ -688,6 +709,7 @@ public class PhoneStatusBarPolicy implements Callback, Callbacks,
             new NextAlarmController.NextAlarmChangeCallback() {
                 @Override
                 public void onNextAlarmChanged(AlarmManager.AlarmClockInfo nextAlarm) {
+                    mNextAlarm = nextAlarm;
                     updateAlarm();
                 }
             };

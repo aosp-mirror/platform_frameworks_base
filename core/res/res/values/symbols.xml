@@ -1836,6 +1836,7 @@
   <java-symbol type="bool" name="config_useAttentionLight" />
   <java-symbol type="bool" name="config_animateScreenLights" />
   <java-symbol type="bool" name="config_automatic_brightness_available" />
+  <java-symbol type="bool" name="config_smart_battery_available" />
   <java-symbol type="bool" name="config_autoBrightnessResetAmbientLuxAfterWarmUp" />
   <java-symbol type="bool" name="config_notificationHeaderClickableForExpand" />
   <java-symbol type="bool" name="config_enableNightMode" />
@@ -3301,6 +3302,7 @@
   <java-symbol type="string" name="shortcut_restore_unknown_issue" />
 
   <java-symbol type="bool" name="config_swipe_up_gesture_default" />
+  <java-symbol type="bool" name="config_swipe_up_gesture_setting_available" />
 
   <!-- From media projection -->
   <java-symbol type="string" name="config_mediaProjectionPermissionDialogComponent" />

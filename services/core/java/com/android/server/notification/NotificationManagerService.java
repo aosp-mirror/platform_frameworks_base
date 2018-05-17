@@ -243,6 +243,9 @@ public class NotificationManagerService extends SystemService {
     public static final boolean ENABLE_CHILD_NOTIFICATIONS
             = SystemProperties.getBoolean("debug.child_notifs", true);
 
+    static final boolean DEBUG_INTERRUPTIVENESS = SystemProperties.getBoolean(
+            "debug.notification.interruptiveness", false);
+
     static final int MAX_PACKAGE_NOTIFICATIONS = 50;
     static final float DEFAULT_MAX_NOTIFICATION_ENQUEUE_RATE = 5f;
 
@@ -4437,7 +4440,7 @@ public class NotificationManagerService extends SystemService {
                     if (index < 0) {
                         mNotificationList.add(r);
                         mUsageStats.registerPostedByApp(r);
-                        r.setInterruptive(true);
+                        r.setInterruptive(isVisuallyInterruptive(null, r));
                     } else {
                         old = mNotificationList.get(index);
                         mNotificationList.set(index, r);
@@ -4516,31 +4519,75 @@ public class NotificationManagerService extends SystemService {
     @GuardedBy("mNotificationLock")
     @VisibleForTesting
     protected boolean isVisuallyInterruptive(NotificationRecord old, NotificationRecord r) {
+        if (old == null) {
+            if (DEBUG_INTERRUPTIVENESS) {
+                Log.v(TAG, "INTERRUPTIVENESS: "
+                        +  r.getKey() + " is interruptive: new notification");
+            }
+            return true;
+        }
+
         Notification oldN = old.sbn.getNotification();
         Notification newN = r.sbn.getNotification();
+
         if (oldN.extras == null || newN.extras == null) {
+            if (DEBUG_INTERRUPTIVENESS) {
+                Log.v(TAG, "INTERRUPTIVENESS: "
+                        +  r.getKey() + " is not interruptive: no extras");
+            }
             return false;
         }
 
         // Ignore visual interruptions from foreground services because users
         // consider them one 'session'. Count them for everything else.
         if (r != null && (r.sbn.getNotification().flags & FLAG_FOREGROUND_SERVICE) != 0) {
+            if (DEBUG_INTERRUPTIVENESS) {
+                Log.v(TAG, "INTERRUPTIVENESS: "
+                        +  r.getKey() + " is not interruptive: foreground service");
+            }
             return false;
         }
 
-        if (!Objects.equals(oldN.extras.get(Notification.EXTRA_TITLE),
-                newN.extras.get(Notification.EXTRA_TITLE))) {
+        final String oldTitle = String.valueOf(oldN.extras.get(Notification.EXTRA_TITLE));
+        final String newTitle = String.valueOf(newN.extras.get(Notification.EXTRA_TITLE));
+        if (!Objects.equals(oldTitle, newTitle)) {
+            if (DEBUG_INTERRUPTIVENESS) {
+                Log.v(TAG, "INTERRUPTIVENESS: "
+                        +  r.getKey() + " is interruptive: changed title");
+                Log.v(TAG, "INTERRUPTIVENESS: " + String.format("   old title: %s (%s@0x%08x)",
+                        oldTitle, oldTitle.getClass(), oldTitle.hashCode()));
+                Log.v(TAG, "INTERRUPTIVENESS: " + String.format("   new title: %s (%s@0x%08x)",
+                        newTitle, newTitle.getClass(), newTitle.hashCode()));
+            }
             return true;
         }
-        if (!Objects.equals(oldN.extras.get(Notification.EXTRA_TEXT),
-                newN.extras.get(Notification.EXTRA_TEXT))) {
+        // Do not compare Spannables (will always return false); compare unstyled Strings
+        final String oldText = String.valueOf(oldN.extras.get(Notification.EXTRA_TEXT));
+        final String newText = String.valueOf(newN.extras.get(Notification.EXTRA_TEXT));
+        if (!Objects.equals(oldText, newText)) {
+            if (DEBUG_INTERRUPTIVENESS) {
+                Log.v(TAG, "INTERRUPTIVENESS: "
+                        + r.getKey() + " is interruptive: changed text");
+                Log.v(TAG, "INTERRUPTIVENESS: " + String.format("   old text: %s (%s@0x%08x)",
+                        oldText, oldText.getClass(), oldText.hashCode()));
+                Log.v(TAG, "INTERRUPTIVENESS: " + String.format("   new text: %s (%s@0x%08x)",
+                        newText, newText.getClass(), newText.hashCode()));
+            }
             return true;
         }
-        if (oldN.extras.containsKey(Notification.EXTRA_PROGRESS) && newN.hasCompletedProgress()) {
+        if (oldN.hasCompletedProgress() != newN.hasCompletedProgress()) {
+            if (DEBUG_INTERRUPTIVENESS) {
+                Log.v(TAG, "INTERRUPTIVENESS: "
+                    +  r.getKey() + " is interruptive: completed progress");
+            }
             return true;
         }
         // Actions
         if (Notification.areActionsVisiblyDifferent(oldN, newN)) {
+            if (DEBUG_INTERRUPTIVENESS) {
+                Log.v(TAG, "INTERRUPTIVENESS: "
+                        +  r.getKey() + " is interruptive: changed actions");
+            }
             return true;
         }
 
@@ -4550,16 +4597,25 @@ public class NotificationManagerService extends SystemService {
 
             // Style based comparisons
             if (Notification.areStyledNotificationsVisiblyDifferent(oldB, newB)) {
+                if (DEBUG_INTERRUPTIVENESS) {
+                    Log.v(TAG, "INTERRUPTIVENESS: "
+                            +  r.getKey() + " is interruptive: styles differ");
+                }
                 return true;
             }
 
             // Remote views
             if (Notification.areRemoteViewsChanged(oldB, newB)) {
+                if (DEBUG_INTERRUPTIVENESS) {
+                    Log.v(TAG, "INTERRUPTIVENESS: "
+                            +  r.getKey() + " is interruptive: remoteviews differ");
+                }
                 return true;
             }
         } catch (Exception e) {
             Slog.w(TAG, "error recovering builder", e);
         }
+
         return false;
     }
 

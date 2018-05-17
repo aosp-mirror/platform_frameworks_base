@@ -2081,7 +2081,7 @@ public class StatusBar extends SystemUI implements DemoMode,
      * @param animate should the change of the icons be animated.
      */
     private void updateHideIconsForBouncer(boolean animate) {
-        boolean hideBecauseApp = mTopHidesStatusBar && mIsOccluded;
+        boolean hideBecauseApp = mTopHidesStatusBar && mIsOccluded && mStatusBarWindowHidden;
         boolean hideBecauseKeyguard = !mPanelExpanded && !mIsOccluded && mBouncerShowing;
         boolean shouldHideIconsForBouncer = hideBecauseApp || hideBecauseKeyguard;
         if (mHideIconsForBouncer != shouldHideIconsForBouncer) {
@@ -5160,7 +5160,9 @@ public class StatusBar extends SystemUI implements DemoMode,
                 if (parentToCancelFinal != null) {
                     removeNotification(parentToCancelFinal);
                 }
-                if (shouldAutoCancel(sbn)) {
+                if (shouldAutoCancel(sbn)
+                        || mRemoteInputManager.getKeysKeptForRemoteInput().contains(
+                                notificationKey)) {
                     // Automatically remove all notifications that we may have kept around longer
                     removeNotification(sbn);
                 }

@@ -2961,6 +2961,18 @@ public class JobSchedulerService extends com.android.server.SystemService
         return 0;
     }
 
+    void triggerDockState(boolean idleState) {
+        final Intent dockIntent;
+        if (idleState) {
+            dockIntent = new Intent(Intent.ACTION_DOCK_IDLE);
+        } else {
+            dockIntent = new Intent(Intent.ACTION_DOCK_ACTIVE);
+        }
+        dockIntent.setPackage("android");
+        dockIntent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY | Intent.FLAG_RECEIVER_FOREGROUND);
+        getContext().sendBroadcastAsUser(dockIntent, UserHandle.ALL);
+    }
+
     private String printContextIdToJobMap(JobStatus[] map, String initial) {
         StringBuilder s = new StringBuilder(initial + ": ");
         for (int i=0; i<map.length; i++) {
