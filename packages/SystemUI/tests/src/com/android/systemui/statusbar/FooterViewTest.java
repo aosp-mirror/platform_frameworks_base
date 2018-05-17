@@ -23,39 +23,22 @@ import static junit.framework.Assert.assertNull;
 import static junit.framework.Assert.assertTrue;
 
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyInt;
-import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.when;
 
-import android.content.Context;
-import android.content.ContextWrapper;
-import android.content.pm.ApplicationInfo;
-import android.content.pm.PackageManager;
-import android.content.res.Resources;
-import android.graphics.Color;
-import android.graphics.drawable.Icon;
-import android.os.UserHandle;
 import android.support.test.filters.SmallTest;
 import android.support.test.runner.AndroidJUnit4;
-import android.util.AttributeSet;
 import android.view.LayoutInflater;
 import android.view.View;
 
-import com.android.internal.statusbar.StatusBarIcon;
-import com.android.internal.util.NotificationColorUtil;
 import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
 
 import org.junit.Before;
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
-import org.mockito.ArgumentMatcher;
 
 @SmallTest
 @RunWith(AndroidJUnit4.class)
@@ -90,34 +73,18 @@ public class FooterViewTest extends SysuiTestCase {
 
     @Test
     public void testPerformVisibilityAnimation() {
-        mView.setInvisible();
+        mView.setVisible(false /* visible */, false /* animate */);
         assertFalse(mView.isVisible());
 
-        Runnable test = new Runnable() {
-            @Override
-            public void run() {
-                assertEquals(1.0f, mView.findContentView().getAlpha());
-                assertEquals(0.0f, mView.findSecondaryView().getAlpha());
-                assertTrue(mView.isVisible());
-            }
-        };
-        mView.performVisibilityAnimation(true, test);
+        mView.setVisible(true /* visible */, true /* animate */);
     }
 
     @Test
     public void testPerformSecondaryVisibilityAnimation() {
-        mView.setInvisible();
+        mView.setSecondaryVisible(false /* visible */, false /* animate */);
         assertFalse(mView.isSecondaryVisible());
 
-        Runnable test = new Runnable() {
-            @Override
-            public void run() {
-                assertEquals(0.0f, mView.findContentView().getAlpha());
-                assertEquals(1.0f, mView.findSecondaryView().getAlpha());
-                assertTrue(mView.isSecondaryVisible());
-            }
-        };
-        mView.performSecondaryVisibilityAnimation(true, test);
+        mView.setSecondaryVisible(true /* visible */, true /* animate */);
     }
 }
 
