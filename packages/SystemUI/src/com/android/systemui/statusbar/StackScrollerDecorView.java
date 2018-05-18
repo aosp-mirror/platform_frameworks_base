@@ -94,6 +94,10 @@ public abstract class StackScrollerDecorView extends ExpandableView {
         }
     }
 
+    public boolean isContentVisible() {
+        return mContentVisible;
+    }
+
     /**
      * Make this view visible. If {@code false} is passed, the view will fade out it's content
      * and set the view Visibility to GONE. If only the content should be changed
