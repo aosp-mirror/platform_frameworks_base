@@ -45,6 +45,7 @@ interface IUserManager {
             in String[] disallowedPackages);
     UserInfo createRestrictedProfile(String name, int parentUserHandle);
     void setUserEnabled(int userHandle);
+    void setUserAdmin(int userId);
     void evictCredentialEncryptionKey(int userHandle);
     boolean removeUser(int userHandle);
     boolean removeUserEvenWhenDisallowed(int userHandle);
