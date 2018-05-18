@@ -2199,7 +2199,7 @@ public class NotificationPanelView extends PanelView implements
 
     @Override
     protected boolean isClearAllVisible() {
-        return mNotificationStackScroller.isFooterViewVisible();
+        return mNotificationStackScroller.isFooterViewContentVisible();
     }
 
     @Override
