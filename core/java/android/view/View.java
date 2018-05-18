@@ -9829,26 +9829,20 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     /**
      * @hide Compute the insets that should be consumed by this view and the ones
      * that should propagate to those under it.
+     *
+     * Note: This is used by appcompat's ActionBarOverlayLayout through reflection.
+     *
+     * @param inoutInsets the insets given to this view
+     * @param outLocalInsets the insets that should be applied to this view
+     * @deprecated use {@link #computeSystemWindowInsets}
+     * @return
      */
+    @Deprecated
     protected boolean computeFitSystemWindows(Rect inoutInsets, Rect outLocalInsets) {
-        if ((mViewFlags & OPTIONAL_FITS_SYSTEM_WINDOWS) == 0
-                || mAttachInfo == null
-                || ((mAttachInfo.mSystemUiVisibility & SYSTEM_UI_LAYOUT_FLAGS) == 0
-                        && !mAttachInfo.mOverscanRequested)) {
-            outLocalInsets.set(inoutInsets);
-            inoutInsets.set(0, 0, 0, 0);
-            return true;
-        } else {
-            // The application wants to take care of fitting system window for
-            // the content...  however we still need to take care of any overscan here.
-            final Rect overscan = mAttachInfo.mOverscanInsets;
-            outLocalInsets.set(overscan);
-            inoutInsets.left -= overscan.left;
-            inoutInsets.top -= overscan.top;
-            inoutInsets.right -= overscan.right;
-            inoutInsets.bottom -= overscan.bottom;
-            return false;
-        }
+        WindowInsets innerInsets = computeSystemWindowInsets(new WindowInsets(inoutInsets),
+                outLocalInsets);
+        inoutInsets.set(innerInsets.getSystemWindowInsets());
+        return innerInsets.isSystemWindowInsetsConsumed();
     }
 
     /**
@@ -9864,12 +9858,16 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     public WindowInsets computeSystemWindowInsets(WindowInsets in, Rect outLocalInsets) {
         if ((mViewFlags & OPTIONAL_FITS_SYSTEM_WINDOWS) == 0
                 || mAttachInfo == null
-                || (mAttachInfo.mSystemUiVisibility & SYSTEM_UI_LAYOUT_FLAGS) == 0) {
+                || ((mAttachInfo.mSystemUiVisibility & SYSTEM_UI_LAYOUT_FLAGS) == 0
+                && !mAttachInfo.mOverscanRequested)) {
             outLocalInsets.set(in.getSystemWindowInsets());
-            return in.consumeSystemWindowInsets();
+            return in.consumeSystemWindowInsets().inset(outLocalInsets);
         } else {
-            outLocalInsets.set(0, 0, 0, 0);
-            return in;
+            // The application wants to take care of fitting system window for
+            // the content...  however we still need to take care of any overscan here.
+            final Rect overscan = mAttachInfo.mOverscanInsets;
+            outLocalInsets.set(overscan);
+            return in.inset(outLocalInsets);
         }
     }
 

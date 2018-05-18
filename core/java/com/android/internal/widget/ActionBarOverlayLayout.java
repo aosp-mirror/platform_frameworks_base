@@ -75,10 +75,10 @@ public class ActionBarOverlayLayout extends ViewGroup implements DecorContentPar
     private final Rect mBaseContentInsets = new Rect();
     private final Rect mLastBaseContentInsets = new Rect();
     private final Rect mContentInsets = new Rect();
-    private final Rect mBaseInnerInsets = new Rect();
-    private final Rect mLastBaseInnerInsets = new Rect();
-    private final Rect mInnerInsets = new Rect();
-    private final Rect mLastInnerInsets = new Rect();
+    private WindowInsets mBaseInnerInsets = WindowInsets.CONSUMED;
+    private WindowInsets mLastBaseInnerInsets = WindowInsets.CONSUMED;
+    private WindowInsets mInnerInsets = WindowInsets.CONSUMED;
+    private WindowInsets mLastInnerInsets = WindowInsets.CONSUMED;
 
     private ActionBarVisibilityCallback mActionBarVisibilityCallback;
 
@@ -322,11 +322,14 @@ public class ActionBarOverlayLayout extends ViewGroup implements DecorContentPar
             changed |= applyInsets(mActionBarBottom, systemInsets, true, false, true, true);
         }
 
-        mBaseInnerInsets.set(systemInsets);
-        computeFitSystemWindows(mBaseInnerInsets, mBaseContentInsets);
+        // Cannot use the result of computeSystemWindowInsets, because that consumes the
+        // systemWindowInsets. Instead, we do the insetting by the local insets ourselves.
+        computeSystemWindowInsets(insets, mBaseContentInsets);
+        mBaseInnerInsets = insets.inset(mBaseContentInsets);
+
         if (!mLastBaseInnerInsets.equals(mBaseInnerInsets)) {
             changed = true;
-            mLastBaseContentInsets.set(mBaseContentInsets);
+            mLastBaseInnerInsets = mBaseInnerInsets;
         }
         if (!mLastBaseContentInsets.equals(mBaseContentInsets)) {
             changed = true;
@@ -430,22 +433,29 @@ public class ActionBarOverlayLayout extends ViewGroup implements DecorContentPar
         // will still be covered by the action bar if they have requested it to
         // overlay.
         mContentInsets.set(mBaseContentInsets);
-        mInnerInsets.set(mBaseInnerInsets);
+        mInnerInsets = mBaseInnerInsets;
         if (!mOverlayMode && !stable) {
             mContentInsets.top += topInset;
             mContentInsets.bottom += bottomInset;
+            // Content view has been shrunk, shrink all insets to match.
+            mInnerInsets = mInnerInsets.inset(0 /* left */, topInset, 0 /* right */, bottomInset);
         } else {
-            mInnerInsets.top += topInset;
-            mInnerInsets.bottom += bottomInset;
+            // Add ActionBar to system window inset, but leave other insets untouched.
+            mInnerInsets = mInnerInsets.replaceSystemWindowInsets(
+                    mInnerInsets.getSystemWindowInsetLeft(),
+                    mInnerInsets.getSystemWindowInsetTop() + topInset,
+                    mInnerInsets.getSystemWindowInsetRight(),
+                    mInnerInsets.getSystemWindowInsetBottom() + bottomInset
+            );
         }
         applyInsets(mContent, mContentInsets, true, true, true, true);
 
         if (!mLastInnerInsets.equals(mInnerInsets)) {
             // If the inner insets have changed, we need to dispatch this down to
-            // the app's fitSystemWindows().  We do this before measuring the content
+            // the app's onApplyWindowInsets().  We do this before measuring the content
             // view to keep the same semantics as the normal fitSystemWindows() call.
-            mLastInnerInsets.set(mInnerInsets);
-            mContent.dispatchApplyWindowInsets(new WindowInsets(mInnerInsets));
+            mLastInnerInsets = mInnerInsets;
+            mContent.dispatchApplyWindowInsets(mInnerInsets);
         }
 
         measureChildWithMargins(mContent, widthMeasureSpec, 0, heightMeasureSpec, 0);
