@@ -1004,7 +1004,9 @@ public abstract class Layout {
         return TextUtils.packRangeInLong(0, getLineEnd(line));
     }
 
-    private boolean primaryIsTrailingPrevious(int offset) {
+    /** @hide */
+    @VisibleForTesting
+    public boolean primaryIsTrailingPrevious(int offset) {
         int line = getLineForOffset(offset);
         int lineStart = getLineStart(line);
         int lineEnd = getLineEnd(line);
@@ -1966,12 +1968,13 @@ public abstract class Layout {
     /**
      * @hide
      */
-    /* package */ static class TabStops {
+    @VisibleForTesting(visibility = VisibleForTesting.Visibility.PACKAGE)
+    public static class TabStops {
         private int[] mStops;
         private int mNumStops;
         private int mIncrement;
 
-        TabStops(int increment, Object[] spans) {
+        public TabStops(int increment, Object[] spans) {
             reset(increment, spans);
         }
 

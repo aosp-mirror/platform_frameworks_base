@@ -79,9 +79,6 @@ class SafeActivityOptions {
         mOriginalCallingPid = Binder.getCallingPid();
         mOriginalCallingUid = Binder.getCallingUid();
         mOriginalOptions = options;
-        if (mOriginalCallingPid == Process.myPid()) {
-            Slog.wtf(TAG, "Safe activity options constructed after clearing calling id");
-        }
     }
 
     /**
@@ -93,9 +90,6 @@ class SafeActivityOptions {
         mRealCallingPid = Binder.getCallingPid();
         mRealCallingUid = Binder.getCallingUid();
         mCallerOptions = options;
-        if (mRealCallingPid == Process.myPid()) {
-            Slog.wtf(TAG, "setCallerOptions called after clearing calling id");
-        }
     }
 
     /**
@@ -128,18 +122,26 @@ class SafeActivityOptions {
         if (mOriginalOptions != null) {
             checkPermissions(intent, aInfo, callerApp, supervisor, mOriginalOptions,
                     mOriginalCallingPid, mOriginalCallingUid);
-            if (mOriginalOptions.getRemoteAnimationAdapter() != null) {
-                mOriginalOptions.getRemoteAnimationAdapter().setCallingPid(mOriginalCallingPid);
-            }
+            setCallingPidForRemoteAnimationAdapter(mOriginalOptions, mOriginalCallingPid);
         }
         if (mCallerOptions != null) {
             checkPermissions(intent, aInfo, callerApp, supervisor, mCallerOptions,
                     mRealCallingPid, mRealCallingUid);
-            if (mCallerOptions.getRemoteAnimationAdapter() != null) {
-                mCallerOptions.getRemoteAnimationAdapter().setCallingPid(mRealCallingPid);
-            }
+            setCallingPidForRemoteAnimationAdapter(mCallerOptions, mRealCallingPid);
         }
         return mergeActivityOptions(mOriginalOptions, mCallerOptions);
+    }
+
+    private void setCallingPidForRemoteAnimationAdapter(ActivityOptions options, int callingPid) {
+        final RemoteAnimationAdapter adapter = options.getRemoteAnimationAdapter();
+        if (adapter == null) {
+            return;
+        }
+        if (callingPid == Process.myPid()) {
+            Slog.wtf(TAG, "Safe activity options constructed after clearing calling id");
+            return;
+        }
+        adapter.setCallingPid(callingPid);
     }
 
     /**

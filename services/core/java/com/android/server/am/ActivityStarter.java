@@ -713,7 +713,7 @@ class ActivityStarter {
 
         boolean abort = !mSupervisor.checkStartAnyActivityPermission(intent, aInfo, resultWho,
                 requestCode, callingPid, callingUid, callingPackage, ignoreTargetSecurity,
-                callerApp, resultRecord, resultStack);
+                inTask != null, callerApp, resultRecord, resultStack);
         abort |= !mService.mIntentFirewall.checkStartActivity(intent, callingUid,
                 callingPid, resolvedType, aInfo.applicationInfo);
 
@@ -1587,6 +1587,7 @@ class ActivityStarter {
                     }
                 }
             } else if (mOptions.getAvoidMoveToFront()) {
+                mDoResume = false;
                 mAvoidMoveToFront = true;
             }
         }
@@ -1929,7 +1930,7 @@ class ActivityStarter {
         // Need to update mTargetStack because if task was moved out of it, the original stack may
         // be destroyed.
         mTargetStack = intentActivity.getStack();
-        if (!mAvoidMoveToFront && !mMovedToFront && mDoResume) {
+        if (!mMovedToFront && mDoResume) {
             if (DEBUG_TASKS) Slog.d(TAG_TASKS, "Bring to front target: " + mTargetStack
                     + " from " + intentActivity);
             mTargetStack.moveToFront("intentActivityFound");

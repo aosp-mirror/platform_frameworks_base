@@ -239,11 +239,6 @@ static jlong AnimatedImageDrawable_nNativeByteSize(JNIEnv* env, jobject /*clazz*
     return drawable->byteSize();
 }
 
-static void AnimatedImageDrawable_nMarkInvisible(JNIEnv* env, jobject /*clazz*/, jlong nativePtr) {
-    auto* drawable = reinterpret_cast<AnimatedImageDrawable*>(nativePtr);
-    drawable->markInvisible();
-}
-
 static void AnimatedImageDrawable_nSetMirrored(JNIEnv* env, jobject /*clazz*/, jlong nativePtr,
                                                jboolean mirrored) {
     auto* drawable = reinterpret_cast<AnimatedImageDrawable*>(nativePtr);
@@ -264,7 +259,6 @@ static const JNINativeMethod gAnimatedImageDrawableMethods[] = {
     { "nSetRepeatCount",     "(JI)V",                                                        (void*) AnimatedImageDrawable_nSetRepeatCount },
     { "nSetOnAnimationEndListener", "(JLandroid/graphics/drawable/AnimatedImageDrawable;)V", (void*) AnimatedImageDrawable_nSetOnAnimationEndListener },
     { "nNativeByteSize",     "(J)J",                                                         (void*) AnimatedImageDrawable_nNativeByteSize },
-    { "nMarkInvisible",      "(J)V",                                                         (void*) AnimatedImageDrawable_nMarkInvisible },
     { "nSetMirrored",        "(JZ)V",                                                        (void*) AnimatedImageDrawable_nSetMirrored },
 };
 

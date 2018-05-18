@@ -16,9 +16,9 @@
 
 package android.provider;
 
-import static org.junit.Assert.fail;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import android.platform.test.annotations.Presubmit;
 import android.provider.SettingsValidators.Validator;
@@ -60,6 +60,11 @@ public class SettingsValidatorsTest {
         assertTrue(SettingsValidators.COMPONENT_NAME_VALIDATOR.validate(
                 "android/com.android.internal.backup.LocalTransport"));
         assertFalse(SettingsValidators.COMPONENT_NAME_VALIDATOR.validate("rectangle"));
+    }
+
+    @Test
+    public void testComponentNameValidator_onNullValue_doesNotThrow() {
+        assertFalse(SettingsValidators.COMPONENT_NAME_VALIDATOR.validate(null));
     }
 
     @Test

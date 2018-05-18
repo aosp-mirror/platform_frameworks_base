@@ -17,6 +17,7 @@
 package com.android.server.am;
 
 import static android.app.ITaskStackListener.FORCED_RESIZEABLE_REASON_SPLIT_SCREEN;
+import static android.app.WindowConfiguration.ACTIVITY_TYPE_ASSISTANT;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_HOME;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_RECENTS;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
@@ -338,9 +339,6 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
     private final Rect mDeferredBounds = new Rect();
     private final Rect mDeferredTaskBounds = new Rect();
     private final Rect mDeferredTaskInsetBounds = new Rect();
-
-    long mLaunchStartTime = 0;
-    long mFullyDrawnStartTime = 0;
 
     int mCurrentUser;
 
@@ -1257,37 +1255,9 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
                 + " callers=" + Debug.getCallers(5));
         r.setState(RESUMED, "minimalResumeActivityLocked");
         r.completeResumeLocked();
-        setLaunchTime(r);
+        mStackSupervisor.getLaunchTimeTracker().setLaunchTime(r);
         if (DEBUG_SAVED_STATE) Slog.i(TAG_SAVED_STATE,
                 "Launch completed; removing icicle of " + r.icicle);
-    }
-
-    private void startLaunchTraces(String packageName) {
-        if (mFullyDrawnStartTime != 0)  {
-            Trace.asyncTraceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER, "drawing", 0);
-        }
-        Trace.asyncTraceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, "launching: " + packageName, 0);
-        Trace.asyncTraceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, "drawing", 0);
-    }
-
-    private void stopFullyDrawnTraceIfNeeded() {
-        if (mFullyDrawnStartTime != 0 && mLaunchStartTime == 0) {
-            Trace.asyncTraceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER, "drawing", 0);
-            mFullyDrawnStartTime = 0;
-        }
-    }
-
-    void setLaunchTime(ActivityRecord r) {
-        if (r.displayStartTime == 0) {
-            r.fullyDrawnStartTime = r.displayStartTime = SystemClock.uptimeMillis();
-            if (mLaunchStartTime == 0) {
-                startLaunchTraces(r.packageName);
-                mLaunchStartTime = mFullyDrawnStartTime = r.displayStartTime;
-            }
-        } else if (mLaunchStartTime == 0) {
-            startLaunchTraces(r.packageName);
-            mLaunchStartTime = mFullyDrawnStartTime = SystemClock.uptimeMillis();
-        }
     }
 
     private void clearLaunchTime(ActivityRecord r) {
@@ -1477,9 +1447,8 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
         prev.setState(PAUSING, "startPausingLocked");
         prev.getTask().touchActiveTime();
         clearLaunchTime(prev);
-        final ActivityRecord next = mStackSupervisor.topRunningActivityLocked();
 
-        stopFullyDrawnTraceIfNeeded();
+        mStackSupervisor.getLaunchTimeTracker().stopFullyDrawnTraceIfNeeded(getWindowingMode());
 
         mService.updateCpuStats();
 
@@ -1791,10 +1760,16 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
                 // In this case the home stack isn't resizeable even though we are in split-screen
                 // mode. We still want the primary splitscreen stack to be visible as there will be
                 // a slight hint of it in the status bar area above the non-resizeable home
-                // activity.
-                if (windowingMode == WINDOWING_MODE_SPLIT_SCREEN_PRIMARY
-                        && other.getActivityType() == ACTIVITY_TYPE_HOME) {
-                    return true;
+                // activity. In addition, if the fullscreen assistant is over primary splitscreen
+                // stack, the stack should still be visible in the background as long as the recents
+                // animation is running.
+                final int activityType = other.getActivityType();
+                if (windowingMode == WINDOWING_MODE_SPLIT_SCREEN_PRIMARY) {
+                    if (activityType == ACTIVITY_TYPE_HOME
+                            || (activityType == ACTIVITY_TYPE_ASSISTANT
+                                    && mWindowManager.getRecentsAnimationController() != null)) {
+                       return true;
+                    }
                 }
                 if (other.isStackTranslucent(starting)) {
                     // Can be visible behind a translucent fullscreen stack.

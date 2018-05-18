@@ -17,6 +17,7 @@
 package com.android.systemui.statusbar;
 
 import static android.app.NotificationManager.IMPORTANCE_DEFAULT;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -33,7 +34,8 @@ import static org.mockito.Mockito.when;
 import android.app.AppOpsManager;
 import android.app.NotificationChannel;
 import android.support.test.filters.SmallTest;
-import android.support.test.runner.AndroidJUnit4;
+import android.testing.AndroidTestingRunner;
+import android.testing.TestableLooper.RunWithLooper;
 import android.util.ArraySet;
 import android.view.NotificationHeaderView;
 import android.view.View;
@@ -49,15 +51,14 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.Spy;
 import org.mockito.junit.MockitoJUnit;
 import org.mockito.junit.MockitoRule;
 
 import java.util.List;
-import java.util.function.Consumer;
 
 @SmallTest
-@RunWith(AndroidJUnit4.class)
+@RunWith(AndroidTestingRunner.class)
+@RunWithLooper(setAsMainLooper = true)
 public class ExpandableNotificationRowTest extends SysuiTestCase {
 
     private ExpandableNotificationRow mGroupRow;

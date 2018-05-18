@@ -313,7 +313,7 @@ public class TextLine {
      * @return the signed offset from the leading margin to the requested
      * character edge.
      */
-    float measure(int offset, boolean trailing, FontMetricsInt fmi) {
+    public float measure(int offset, boolean trailing, FontMetricsInt fmi) {
         int target = trailing ? offset - 1 : offset;
         if (target < 0) {
             return 0;

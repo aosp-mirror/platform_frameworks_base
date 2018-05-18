@@ -16,13 +16,13 @@
 
 package android.os;
 
+import android.util.ArrayMap;
 import android.util.Log;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.os.BinderInternal;
 import com.android.internal.util.StatLogger;
 
-import java.util.HashMap;
 import java.util.Map;
 
 /** @hide */
@@ -35,7 +35,7 @@ public final class ServiceManager {
     /**
      * Cache for the "well known" services, such as WM and AM.
      */
-    private static HashMap<String, IBinder> sCache = new HashMap<String, IBinder>();
+    private static Map<String, IBinder> sCache = new ArrayMap<String, IBinder>();
 
     /**
      * We do the "slow log" at most once every this interval.

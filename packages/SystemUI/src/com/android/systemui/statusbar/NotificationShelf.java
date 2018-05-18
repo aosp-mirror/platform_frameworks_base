@@ -33,10 +33,8 @@ import android.view.accessibility.AccessibilityNodeInfo;
 
 import com.android.systemui.Interpolators;
 import com.android.systemui.R;
-import com.android.systemui.ViewInvertHelper;
 import com.android.systemui.statusbar.notification.NotificationUtils;
 import com.android.systemui.statusbar.phone.NotificationIconContainer;
-import com.android.systemui.statusbar.phone.NotificationPanelView;
 import com.android.systemui.statusbar.stack.AmbientState;
 import com.android.systemui.statusbar.stack.AnimationProperties;
 import com.android.systemui.statusbar.stack.ExpandableViewState;
@@ -60,7 +58,6 @@ public class NotificationShelf extends ActivatableNotificationView implements
     private static final String TAG = "NotificationShelf";
     private static final long SHELF_IN_TRANSLATION_DURATION = 200;
 
-    private ViewInvertHelper mViewInvertHelper;
     private boolean mDark;
     private NotificationIconContainer mShelfIcons;
     private ShelfState mShelfState;
@@ -105,8 +102,6 @@ public class NotificationShelf extends ActivatableNotificationView implements
         setClipChildren(false);
         setClipToPadding(false);
         mShelfIcons.setIsStaticLayout(false);
-        mViewInvertHelper = new ViewInvertHelper(mShelfIcons,
-                NotificationPanelView.DOZE_ANIMATION_DURATION);
         mShelfState = new ShelfState();
         setBottomRoundness(1.0f, false /* animate */);
         initDimens();

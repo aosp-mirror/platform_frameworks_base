@@ -422,7 +422,6 @@ public class NotificationContentView extends FrameLayout {
         mContractedChild = child;
         mContractedWrapper = NotificationViewWrapper.wrap(getContext(), child,
                 mContainingNotification);
-        mContractedWrapper.setDark(mDark, false /* animate */, 0 /* delay */);
     }
 
     private NotificationViewWrapper getWrapperForView(View child) {
@@ -1106,18 +1105,6 @@ public class NotificationContentView extends FrameLayout {
             return;
         }
         mDark = dark;
-        if (mVisibleType == VISIBLE_TYPE_CONTRACTED || !dark) {
-            mContractedWrapper.setDark(dark, fade, delay);
-        }
-        if (mVisibleType == VISIBLE_TYPE_EXPANDED || (mExpandedChild != null && !dark)) {
-            mExpandedWrapper.setDark(dark, fade, delay);
-        }
-        if (mVisibleType == VISIBLE_TYPE_HEADSUP || (mHeadsUpChild != null && !dark)) {
-            mHeadsUpWrapper.setDark(dark, fade, delay);
-        }
-        if (mSingleLineView != null && (mVisibleType == VISIBLE_TYPE_SINGLELINE || !dark)) {
-            mSingleLineView.setDark(dark, fade, delay);
-        }
         selectLayout(!dark && fade /* animate */, false /* force */);
     }
 
@@ -1199,8 +1186,13 @@ public class NotificationContentView extends FrameLayout {
     }
     private void updateSingleLineView() {
         if (mIsChildInGroup) {
+            boolean isNewView = mSingleLineView == null;
             mSingleLineView = mHybridGroupManager.bindFromNotification(
                     mSingleLineView, mStatusBarNotification.getNotification());
+            if (isNewView) {
+                updateViewVisibility(mVisibleType, VISIBLE_TYPE_SINGLELINE,
+                        mSingleLineView, mSingleLineView);
+            }
         } else if (mSingleLineView != null) {
             removeView(mSingleLineView);
             mSingleLineView = null;
@@ -1209,8 +1201,13 @@ public class NotificationContentView extends FrameLayout {
 
     private void updateAmbientSingleLineView() {
         if (mIsChildInGroup) {
+            boolean isNewView = mAmbientSingleLineChild == null;
             mAmbientSingleLineChild = mHybridGroupManager.bindAmbientFromNotification(
                     mAmbientSingleLineChild, mStatusBarNotification.getNotification());
+            if (isNewView) {
+                updateViewVisibility(mVisibleType, VISIBLE_TYPE_AMBIENT_SINGLELINE,
+                        mAmbientSingleLineChild, mAmbientSingleLineChild);
+            }
         } else if (mAmbientSingleLineChild != null) {
             removeView(mAmbientSingleLineChild);
             mAmbientSingleLineChild = null;

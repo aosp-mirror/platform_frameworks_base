@@ -690,7 +690,7 @@ class GlobalActionsDialog implements DialogInterface.OnDismissListener,
     }
 
     private Action getLockdownAction() {
-        return new SinglePressAction(com.android.systemui.R.drawable.ic_lock_lockdown,
+        return new SinglePressAction(R.drawable.ic_lock_lockdown,
                 R.string.global_action_lockdown) {
 
             @Override

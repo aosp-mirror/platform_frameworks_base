@@ -186,6 +186,11 @@ public class AppOpsInfo extends LinearLayout implements NotificationGuts.GutsCon
     }
 
     @Override
+    public boolean shouldBeSaved() {
+        return false;
+    }
+
+    @Override
     public View getContentView() {
         return this;
     }

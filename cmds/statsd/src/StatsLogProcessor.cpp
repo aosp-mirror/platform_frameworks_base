@@ -83,6 +83,7 @@ StatsLogProcessor::StatsLogProcessor(const sp<UidMap>& uidMap,
       mTimeBaseNs(timeBaseNs),
       mLargestTimestampSeen(0),
       mLastTimestampSeen(0) {
+    mStatsPullerManager.ForceClearPullerCache();
 }
 
 StatsLogProcessor::~StatsLogProcessor() {

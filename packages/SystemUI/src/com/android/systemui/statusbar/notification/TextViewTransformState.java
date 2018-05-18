@@ -35,9 +35,7 @@ public class TextViewTransformState extends TransformState {
     @Override
     public void initFrom(View view, TransformInfo transformInfo) {
         super.initFrom(view, transformInfo);
-        if (view instanceof TextView) {
-            mText = (TextView) view;
-        }
+        mText = (TextView) view;
     }
 
     @Override
@@ -94,6 +92,9 @@ public class TextViewTransformState extends TransformState {
             return false;
         }
         TextViewTransformState otherTvs = (TextViewTransformState) otherState;
+        if (!TextUtils.equals(mText.getText(), otherTvs.mText.getText())) {
+            return false;
+        }
         int lineCount = mText.getLineCount();
         return lineCount == 1 && lineCount == otherTvs.mText.getLineCount()
                 && getEllipsisCount() == otherTvs.getEllipsisCount()

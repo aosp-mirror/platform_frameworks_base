@@ -58,14 +58,17 @@ public final class JobPackageTracker {
     private final int[] mEventUids = new int[EVENT_BUFFER_SIZE];
     private final String[] mEventTags = new String[EVENT_BUFFER_SIZE];
     private final int[] mEventJobIds = new int[EVENT_BUFFER_SIZE];
+    private final String[] mEventReasons = new String[EVENT_BUFFER_SIZE];
 
-    public void addEvent(int cmd, int uid, String tag, int jobId, int stopReason) {
+    public void addEvent(int cmd, int uid, String tag, int jobId, int stopReason,
+            String debugReason) {
         int index = mEventIndices.add();
         mEventCmds[index] = cmd | ((stopReason<<EVENT_STOP_REASON_SHIFT) & EVENT_STOP_REASON_MASK);
         mEventTimes[index] = sElapsedRealtimeClock.millis();
         mEventUids[index] = uid;
         mEventTags[index] = tag;
         mEventJobIds[index] = jobId;
+        mEventReasons[index] = debugReason;
     }
 
     DataSet mCurDataSet = new DataSet();
@@ -470,10 +473,10 @@ public final class JobPackageTracker {
             mCurDataSet.incActive(job.getSourceUid(), job.getSourcePackageName(), now);
         }
         addEvent(job.getJob().isPeriodic() ? EVENT_START_PERIODIC_JOB :  EVENT_START_JOB,
-                job.getSourceUid(), job.getBatteryName(), job.getJobId(), 0);
+                job.getSourceUid(), job.getBatteryName(), job.getJobId(), 0, null);
     }
 
-    public void noteInactive(JobStatus job, int stopReason) {
+    public void noteInactive(JobStatus job, int stopReason, String debugReason) {
         final long now = sUptimeMillisClock.millis();
         if (job.lastEvaluatedPriority >= JobInfo.PRIORITY_TOP_APP) {
             mCurDataSet.decActiveTop(job.getSourceUid(), job.getSourcePackageName(), now,
@@ -483,7 +486,7 @@ public final class JobPackageTracker {
         }
         rebatchIfNeeded(now);
         addEvent(job.getJob().isPeriodic() ? EVENT_STOP_JOB :  EVENT_STOP_PERIODIC_JOB,
-                job.getSourceUid(), job.getBatteryName(), job.getJobId(), stopReason);
+                job.getSourceUid(), job.getBatteryName(), job.getJobId(), stopReason, debugReason);
     }
 
     public void noteConcurrency(int totalActive, int fgActive) {
@@ -599,8 +602,13 @@ public final class JobPackageTracker {
             pw.print(mEventTags[index]);
             if (cmd == EVENT_STOP_JOB || cmd == EVENT_STOP_PERIODIC_JOB) {
                 pw.print(" ");
-                pw.print(JobParameters.getReasonName((mEventCmds[index] & EVENT_STOP_REASON_MASK)
-                        >> EVENT_STOP_REASON_SHIFT));
+                final String reason = mEventReasons[index];
+                if (reason != null) {
+                    pw.print(mEventReasons[index]);
+                } else {
+                    pw.print(JobParameters.getReasonName((mEventCmds[index] & EVENT_STOP_REASON_MASK)
+                            >> EVENT_STOP_REASON_SHIFT));
+                }
             }
             pw.println();
         }

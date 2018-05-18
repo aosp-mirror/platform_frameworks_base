@@ -35,6 +35,9 @@ import android.provider.MediaStore;
 import android.provider.MediaStore.Audio;
 import android.provider.MediaStore.Files;
 import android.provider.MediaStore.MediaColumns;
+import android.system.ErrnoException;
+import android.system.Os;
+import android.system.OsConstants;
 import android.util.Log;
 import android.view.Display;
 import android.view.WindowManager;
@@ -560,6 +563,13 @@ public class MtpDatabase implements AutoCloseable {
             return MtpConstants.RESPONSE_GENERAL_ERROR;
         Path newPath = obj.getPath();
         boolean success = oldPath.toFile().renameTo(newPath.toFile());
+        try {
+            Os.access(oldPath.toString(), OsConstants.F_OK);
+            Os.access(newPath.toString(), OsConstants.F_OK);
+        } catch (ErrnoException e) {
+            // Ignore. Could fail if the metadata was already updated.
+        }
+
         if (!mManager.endRenameObject(obj, oldPath.getFileName().toString(), success)) {
             Log.e(TAG, "Failed to end rename object");
         }

@@ -696,7 +696,7 @@ public class ConnectivityManager {
      *
      * @hide
      */
-    public static final String PRIVATE_DNS_DEFAULT_MODE = PRIVATE_DNS_MODE_OPPORTUNISTIC;
+    public static final String PRIVATE_DNS_DEFAULT_MODE_FALLBACK = PRIVATE_DNS_MODE_OPPORTUNISTIC;
 
     private final IConnectivityManager mService;
     /**

@@ -5547,11 +5547,6 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      * PrecomputedText mismatches with this TextView, IllegalArgumentException is thrown. To ensure
      * the parameters match, you can call {@link TextView#setTextMetricsParams} before calling this.
      *
-     * Subclasses overriding this method should ensure that the following post condition holds,
-     * in order to guarantee the safety of the view's measurement and layout operations:
-     * regardless of the input, after calling #setText both {@code mText} and {@code mTransformed}
-     * will be different from {@code null}.
-     *
      * @param text text to be displayed
      *
      * @attr ref android.R.styleable#TextView_text
@@ -5574,11 +5569,6 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      * {@link android.text.Editable.Factory} to create final or intermediate
      * {@link Editable Editables}.
      *
-     * Subclasses overriding this method should ensure that the following post condition holds,
-     * in order to guarantee the safety of the view's measurement and layout operations:
-     * regardless of the input, after calling #setText both {@code mText} and {@code mTransformed}
-     * will be different from {@code null}.
-     *
      * @param text text to be displayed
      *
      * @see #setText(CharSequence)
@@ -5595,6 +5585,11 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      * intermediate {@link Spannable Spannables}. Likewise it will use
      * {@link android.text.Editable.Factory} to create final or intermediate
      * {@link Editable Editables}.
+     *
+     * Subclasses overriding this method should ensure that the following post condition holds,
+     * in order to guarantee the safety of the view's measurement and layout operations:
+     * regardless of the input, after calling #setText both {@code mText} and {@code mTransformed}
+     * will be different from {@code null}.
      *
      * @param text text to be displayed
      * @param type a {@link android.widget.TextView.BufferType} which defines whether the text is

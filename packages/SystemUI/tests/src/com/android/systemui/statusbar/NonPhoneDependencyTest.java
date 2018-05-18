@@ -55,13 +55,10 @@ public class NonPhoneDependencyTest extends SysuiTestCase {
     @Mock private NotificationGutsManager.OnSettingsClickListener mOnClickListener;
     @Mock private NotificationRemoteInputManager.Callback mRemoteInputManagerCallback;
 
-    private Handler mHandler;
-
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
-        mHandler = new Handler(Looper.getMainLooper());
-        when(mPresenter.getHandler()).thenReturn(mHandler);
+        when(mPresenter.getHandler()).thenReturn(Handler.createAsync(Looper.myLooper()));
     }
 
     @Test

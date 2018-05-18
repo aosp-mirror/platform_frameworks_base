@@ -42,7 +42,7 @@ import java.util.Arrays;
  */
 public abstract class BrightnessMappingStrategy {
     private static final String TAG = "BrightnessMappingStrategy";
-    private static final boolean DEBUG = true;
+    private static final boolean DEBUG = false;
 
     private static final float LUX_GRAD_SMOOTHING = 0.25f;
     private static final float MAX_GRAD = 1.0f;

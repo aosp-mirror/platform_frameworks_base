@@ -5313,11 +5313,11 @@ message MetricsEvent {
     // OS: P
     FIELD_DURATION_MILLIS = 1304;
 
-    // Battery level in uA (0 - ~3,000,000 depending on device) when the current "mode" started.
+    // Battery level in uAh (0 - ~3,000,000 depending on device) when the current "mode" started.
     // OS: P
     FIELD_START_BATTERY_UA = 1305;
 
-    // Battery level in uA (0 - ~3,000,000 depending on device) when this event was created.
+    // Battery level in uAh (0 - ~3,000,000 depending on device) when this event was created.
     // OS: P
     FIELD_END_BATTERY_UA = 1306;
 
@@ -5345,7 +5345,6 @@ message MetricsEvent {
     // CATEGORY: QUICK SETTINGS
     // OS: P
     FIELD_QS_MODE = 1311;
-
 
     // OPEN: Settings->Developer Options->Default USB
     // CATEGORY: SETTINGS
@@ -5750,8 +5749,8 @@ message MetricsEvent {
     // OS: P
     FIELD_HIDDEN_API_SIGNATURE = 1394;
 
-    // This value should never appear in log outputs - it is reserved for
-    // internal platform metrics use.
+    // The number of items in the shade when this notification event was logged.
+    // OS: P
     NOTIFICATION_SHADE_COUNT = 1395;
 
     // ACTION: DND Settings > What to block
@@ -5969,6 +5968,11 @@ message MetricsEvent {
     // CATEGORY: OTHER
     // OS: P
     FIELD_BATTERY_CHARGE_CYCLES = 1439;
+
+    // ACTION: Hush gesture - volume up + power button
+    // CATEGORY: GLOBAL_SYSTEM_UI
+    // OS: P
+    ACTION_HUSH_GESTURE = 1440;
 
     // ---- End P Constants, all P constants go above this line ----
 

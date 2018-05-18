@@ -229,6 +229,7 @@ public class NotificationEntryManager implements Dumpable, NotificationInflater.
                 ServiceManager.getService(Context.STATUS_BAR_SERVICE));
         mMessagingUtil = new NotificationMessagingUtil(context);
         mSystemServicesProxy = SystemServicesProxy.getInstance(mContext);
+        mGroupManager.setPendingEntries(mPendingNotifications);
     }
 
     public void setUpWithPresenter(NotificationPresenter presenter,
@@ -739,6 +740,7 @@ public class NotificationEntryManager implements Dumpable, NotificationInflater.
                 mNotificationData.getImportance(key));
 
         mPendingNotifications.put(key, shadeEntry);
+        mGroupManager.onPendingEntryAdded(shadeEntry);
     }
 
     @VisibleForTesting

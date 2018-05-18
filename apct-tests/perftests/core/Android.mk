@@ -27,5 +27,3 @@ LOCAL_ASSET_DIR := $(TOP)/external/google-fonts/dancing-script
 LOCAL_COMPATIBILITY_SUITE += device-tests
 
 include $(BUILD_PACKAGE)
-
-include $(call all-makefiles-under, $(LOCAL_PATH))

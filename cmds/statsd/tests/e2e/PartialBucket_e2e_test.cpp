@@ -84,6 +84,7 @@ StatsdConfig MakeValueMetricConfig(int64_t minTime) {
             CreateDimensions(android::util::TEMPERATURE, {2 /* sensor name field */});
     valueMetric->set_bucket(FIVE_MINUTES);
     valueMetric->set_min_bucket_size_nanos(minTime);
+    valueMetric->set_use_absolute_value_on_reset(true);
     return config;
 }
 

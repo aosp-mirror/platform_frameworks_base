@@ -52,8 +52,7 @@ import com.android.server.wm.WindowManagerService;
 class RecentsAnimation implements RecentsAnimationCallbacks,
         ActivityDisplay.OnStackOrderChangedListener {
     private static final String TAG = RecentsAnimation.class.getSimpleName();
-    // TODO (b/73188263): Reset debugging flags
-    private static final boolean DEBUG = true;
+    private static final boolean DEBUG = false;
 
     private final ActivityManagerService mService;
     private final ActivityStackSupervisor mStackSupervisor;
@@ -169,6 +168,7 @@ class RecentsAnimation implements RecentsAnimationCallbacks,
                         .setMayWait(mUserController.getCurrentUserId())
                         .execute();
                 mWindowManager.prepareAppTransition(TRANSIT_NONE, false);
+                mWindowManager.executeAppTransition();
 
                 targetActivity = mDefaultDisplay.getStack(WINDOWING_MODE_UNDEFINED,
                         mTargetActivityType).getTopActivity();

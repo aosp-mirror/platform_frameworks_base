@@ -51,7 +51,7 @@ public class SmartReplyConstantsTest extends SysuiTestCase {
         resources.addOverride(R.bool.config_smart_replies_in_notifications_enabled, true);
         resources.addOverride(
                 R.integer.config_smart_replies_in_notifications_max_squeeze_remeasure_attempts, 7);
-        mConstants = new SmartReplyConstants(new Handler(Looper.getMainLooper()), mContext);
+        mConstants = new SmartReplyConstants(Handler.createAsync(Looper.myLooper()), mContext);
     }
 
     @Test
