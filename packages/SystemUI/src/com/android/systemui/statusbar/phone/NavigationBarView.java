@@ -1177,6 +1177,8 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
         dumpButton(pw, "menu", getMenuButton());
         dumpButton(pw, "a11y", getAccessibilityButton());
 
+        mRecentsOnboarding.dump(pw);
+
         pw.println("    }");
     }
 
