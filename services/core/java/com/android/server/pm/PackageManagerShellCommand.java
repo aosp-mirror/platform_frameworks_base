@@ -78,6 +78,8 @@ import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.os.storage.StorageManager;
+import android.system.ErrnoException;
+import android.system.Os;
 import android.text.TextUtils;
 import android.text.format.DateUtils;
 import android.util.ArraySet;
@@ -1373,7 +1375,9 @@ class PackageManagerShellCommand extends ShellCommand {
             try (OutputStream outStream = new FileOutputStream(outputProfilePath)) {
                 Streams.copy(inStream, outStream);
             }
-        } catch (IOException e) {
+            // Give read permissions to the other group.
+            Os.chmod(outputProfilePath, /*mode*/ 0644 );
+        } catch (IOException | ErrnoException e) {
             pw.println("Error when reading the profile fd: " + e.getMessage());
             e.printStackTrace(pw);
             return -1;
