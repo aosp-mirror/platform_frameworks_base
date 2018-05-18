@@ -228,8 +228,8 @@ final class FillUi {
                 mWindow = null;
                 return;
             }
-            decor.setFocusable(true);
-            decor.setOnClickListener(v -> mCallback.onResponsePicked(response));
+            container.setFocusable(true);
+            container.setOnClickListener(v -> mCallback.onResponsePicked(response));
 
             if (!mFullScreen) {
                 final Point maxSize = mTempPoint;
