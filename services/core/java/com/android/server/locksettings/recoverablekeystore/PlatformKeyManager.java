@@ -157,11 +157,13 @@ public class PlatformKeyManager {
      * @throws NoSuchAlgorithmException if AES is unavailable - should never happen.
      * @throws KeyStoreException if there is an error in AndroidKeyStore.
      * @throws InsecureUserException if the user does not have a lock screen set.
+     * @throws IOException if there was an issue with local database update.
      *
      * @hide
      */
-    public void regenerate(int userId)
-            throws NoSuchAlgorithmException, KeyStoreException, InsecureUserException {
+    @VisibleForTesting
+    void regenerate(int userId)
+            throws NoSuchAlgorithmException, KeyStoreException, InsecureUserException, IOException {
         if (!isAvailable(userId)) {
             throw new InsecureUserException(String.format(
                     Locale.US, "%d does not have a lock screen set.", userId));
@@ -187,11 +189,12 @@ public class PlatformKeyManager {
      * @throws UnrecoverableKeyException if the key could not be recovered.
      * @throws NoSuchAlgorithmException if AES is unavailable - should never occur.
      * @throws InsecureUserException if the user does not have a lock screen set.
+     * @throws IOException if there was an issue with local database update.
      *
      * @hide
      */
     public PlatformEncryptionKey getEncryptKey(int userId) throws KeyStoreException,
-           UnrecoverableKeyException, NoSuchAlgorithmException, InsecureUserException {
+           UnrecoverableKeyException, NoSuchAlgorithmException, InsecureUserException, IOException {
         init(userId);
         try {
             // Try to see if the decryption key is still accessible before using the encryption key.
@@ -239,11 +242,12 @@ public class PlatformKeyManager {
      * @throws UnrecoverableKeyException if the key could not be recovered.
      * @throws NoSuchAlgorithmException if AES is unavailable - should never occur.
      * @throws InsecureUserException if the user does not have a lock screen set.
+     * @throws IOException if there was an issue with local database update.
      *
      * @hide
      */
     public PlatformDecryptionKey getDecryptKey(int userId) throws KeyStoreException,
-           UnrecoverableKeyException, NoSuchAlgorithmException, InsecureUserException {
+           UnrecoverableKeyException, NoSuchAlgorithmException, InsecureUserException, IOException {
         init(userId);
         try {
             return getDecryptKeyInternal(userId);
@@ -286,11 +290,12 @@ public class PlatformKeyManager {
      * @param userId The ID of the user to whose lock screen the platform key must be bound.
      * @throws KeyStoreException if there was an error in AndroidKeyStore.
      * @throws NoSuchAlgorithmException if AES is unavailable - should never happen.
+     * @throws IOException if there was an issue with local database update.
      *
      * @hide
      */
     void init(int userId)
-            throws KeyStoreException, NoSuchAlgorithmException, InsecureUserException {
+            throws KeyStoreException, NoSuchAlgorithmException, InsecureUserException, IOException {
         if (!isAvailable(userId)) {
             throw new InsecureUserException(String.format(
                     Locale.US, "%d does not have a lock screen set.", userId));
@@ -347,9 +352,13 @@ public class PlatformKeyManager {
 
     /**
      * Sets the current generation ID to {@code generationId}.
+     * @throws IOException if there was an issue with local database update.
      */
-    private void setGenerationId(int userId, int generationId) {
-        mDatabase.setPlatformKeyGenerationId(userId, generationId);
+    private void setGenerationId(int userId, int generationId) throws IOException {
+        long updatedRows = mDatabase.setPlatformKeyGenerationId(userId, generationId);
+        if (updatedRows < 0) {
+            throw new IOException("Failed to set the platform key in the local DB.");
+        }
     }
 
     /**
@@ -370,9 +379,10 @@ public class PlatformKeyManager {
      * @throws NoSuchAlgorithmException if AES is unavailable. This should never happen, as it is
      *     available since API version 1.
      * @throws KeyStoreException if there was an issue loading the keys into AndroidKeyStore.
+     * @throws IOException if there was an issue with local database update.
      */
     private void generateAndLoadKey(int userId, int generationId)
-            throws NoSuchAlgorithmException, KeyStoreException {
+            throws NoSuchAlgorithmException, KeyStoreException, IOException {
         String encryptAlias = getEncryptAlias(userId, generationId);
         String decryptAlias = getDecryptAlias(userId, generationId);
         // SecretKey implementation doesn't provide reliable way to destroy the secret
