@@ -64,6 +64,7 @@ import com.android.internal.util.DumpUtils;
 import com.android.internal.util.FastPrintWriter;
 import com.android.server.AppStateTracker;
 import com.android.server.LocalServices;
+import com.android.server.SystemService;
 import com.android.server.am.ActivityManagerService.ItemMatcher;
 import com.android.server.am.ActivityManagerService.NeededUriGrants;
 
@@ -2012,6 +2013,25 @@ public final class ActiveServices {
                 + why + " of " + r + " in app " + r.app);
         else if (DEBUG_SERVICE_EXECUTING) Slog.v(TAG_SERVICE_EXECUTING, ">>> EXECUTING "
                 + why + " of " + r.shortName);
+
+        // For b/34123235: Services within the system server won't start until SystemServer
+        // does Looper.loop(), so we shouldn't try to start/bind to them too early in the boot
+        // process. However, since there's a little point of showing the ANR dialog in that case,
+        // let's suppress the timeout until PHASE_THIRD_PARTY_APPS_CAN_START.
+        //
+        // (Note there are multiple services start at PHASE_THIRD_PARTY_APPS_CAN_START too,
+        // which technically could also trigger this timeout if there's a system server
+        // that takes a long time to handle PHASE_THIRD_PARTY_APPS_CAN_START, but that shouldn't
+        // happen.)
+        boolean timeoutNeeded = true;
+        if ((mAm.mBootPhase < SystemService.PHASE_THIRD_PARTY_APPS_CAN_START)
+                && (r.app != null) && (r.app.pid == android.os.Process.myPid())) {
+
+            Slog.w(TAG, "Too early to start/bind service in system_server: Phase=" + mAm.mBootPhase
+                    + " " + r.getComponentName());
+            timeoutNeeded = false;
+        }
+
         long now = SystemClock.uptimeMillis();
         if (r.executeNesting == 0) {
             r.executeFg = fg;
@@ -2022,13 +2042,15 @@ public final class ActiveServices {
             if (r.app != null) {
                 r.app.executingServices.add(r);
                 r.app.execServicesFg |= fg;
-                if (r.app.executingServices.size() == 1) {
+                if (timeoutNeeded && r.app.executingServices.size() == 1) {
                     scheduleServiceTimeoutLocked(r.app);
                 }
             }
         } else if (r.app != null && fg && !r.app.execServicesFg) {
             r.app.execServicesFg = true;
-            scheduleServiceTimeoutLocked(r.app);
+            if (timeoutNeeded) {
+                scheduleServiceTimeoutLocked(r.app);
+            }
         }
         r.executeFg |= fg;
         r.executeNesting++;
