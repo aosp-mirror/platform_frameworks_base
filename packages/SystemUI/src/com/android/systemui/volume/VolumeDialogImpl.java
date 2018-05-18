@@ -36,6 +36,7 @@ import android.animation.ObjectAnimator;
 import android.annotation.SuppressLint;
 import android.app.Dialog;
 import android.app.KeyguardManager;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -445,6 +446,7 @@ public class VolumeDialogImpl implements VolumeDialog {
                 }
             }
             Events.writeEvent(mContext, Events.EVENT_RINGER_TOGGLE, newRingerMode);
+            incrementManualToggleCount();
             updateRingerH();
             provideTouchFeedbackH(newRingerMode);
             mController.setRingerMode(newRingerMode, false);
@@ -453,6 +455,11 @@ public class VolumeDialogImpl implements VolumeDialog {
         updateRingerH();
     }
 
+    private void incrementManualToggleCount() {
+        ContentResolver cr = mContext.getContentResolver();
+        int ringerCount = Settings.Secure.getInt(cr, Settings.Secure.MANUAL_RINGER_TOGGLE_COUNT, 0);
+        Settings.Secure.putInt(cr, Settings.Secure.MANUAL_RINGER_TOGGLE_COUNT, ringerCount + 1);
+    }
 
     private void provideTouchFeedbackH(int newRingerMode) {
         VibrationEffect effect = null;
