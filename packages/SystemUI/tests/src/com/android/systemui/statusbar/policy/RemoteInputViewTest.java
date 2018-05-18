@@ -52,12 +52,16 @@ public class RemoteInputViewTest extends SysuiTestCase {
 
     @Mock private RemoteInputController mController;
     @Mock private ShortcutManager mShortcutManager;
+    @Mock private RemoteInputQuickSettingsDisabler mRemoteInputQuickSettingsDisabler;
     private BlockingQueueIntentReceiver mReceiver;
     private RemoteInputView mView;
 
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
+
+        mDependency.injectTestDependency(RemoteInputQuickSettingsDisabler.class,
+                mRemoteInputQuickSettingsDisabler);
 
         mReceiver = new BlockingQueueIntentReceiver();
         mContext.registerReceiver(mReceiver, new IntentFilter(TEST_ACTION));

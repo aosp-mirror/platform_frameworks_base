@@ -35,6 +35,7 @@ import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
 import android.widget.FrameLayout.LayoutParams;
 
+import com.android.systemui.Dependency;
 import com.android.systemui.Interpolators;
 import com.android.systemui.R;
 import com.android.systemui.R.id;
@@ -43,6 +44,7 @@ import com.android.systemui.plugins.qs.QS;
 import com.android.systemui.qs.customize.QSCustomizer;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.phone.NotificationsQuickSettingsContainer;
+import com.android.systemui.statusbar.policy.RemoteInputQuickSettingsDisabler;
 import com.android.systemui.statusbar.stack.StackStateAnimator;
 
 public class QSFragment extends Fragment implements QS, CommandQueue.Callbacks {
@@ -71,6 +73,9 @@ public class QSFragment extends Fragment implements QS, CommandQueue.Callbacks {
     private QSFooter mFooter;
     private float mLastQSExpansion = -1;
     private boolean mQsDisabled;
+
+    private RemoteInputQuickSettingsDisabler mRemoteInputQuickSettingsDisabler =
+            Dependency.get(RemoteInputQuickSettingsDisabler.class);
 
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container,
@@ -191,6 +196,8 @@ public class QSFragment extends Fragment implements QS, CommandQueue.Callbacks {
 
     @Override
     public void disable(int state1, int state2, boolean animate) {
+        state2 = mRemoteInputQuickSettingsDisabler.adjustDisableFlags(state2);
+
         final boolean disabled = (state2 & DISABLE2_QUICK_SETTINGS) != 0;
         if (disabled == mQsDisabled) return;
         mQsDisabled = disabled;
