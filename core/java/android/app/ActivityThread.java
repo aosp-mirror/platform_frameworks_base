@@ -124,6 +124,7 @@ import android.util.Slog;
 import android.util.SparseIntArray;
 import android.util.SuperNotCalledException;
 import android.util.proto.ProtoOutputStream;
+import android.view.Choreographer;
 import android.view.ContextThemeWrapper;
 import android.view.Display;
 import android.view.ThreadedRenderer;
@@ -145,6 +146,7 @@ import com.android.internal.os.RuntimeInit;
 import com.android.internal.os.SomeArgs;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.FastPrintWriter;
+import com.android.internal.util.function.pooled.PooledLambda;
 import com.android.org.conscrypt.OpenSSLSocketImpl;
 import com.android.org.conscrypt.TrustedCertificateStore;
 import com.android.server.am.MemInfoDumpProto;
@@ -1406,7 +1408,15 @@ public final class ActivityThread extends ClientTransactionHandler {
         }
 
         public void scheduleTrimMemory(int level) {
-            sendMessage(H.TRIM_MEMORY, null, level);
+            final Runnable r = PooledLambda.obtainRunnable(ActivityThread::handleTrimMemory,
+                    ActivityThread.this, level);
+            // Schedule trimming memory after drawing the frame to minimize jank-risk.
+            Choreographer choreographer = Choreographer.getMainThreadInstance();
+            if (choreographer != null) {
+                choreographer.postCallback(Choreographer.CALLBACK_COMMIT, r, null);
+            } else {
+                mH.post(r);
+            }
         }
 
         public void scheduleTranslucentConversionComplete(IBinder token, boolean drawComplete) {
@@ -1561,7 +1571,6 @@ public final class ActivityThread extends ClientTransactionHandler {
         public static final int SLEEPING                = 137;
         public static final int SET_CORE_SETTINGS       = 138;
         public static final int UPDATE_PACKAGE_COMPATIBILITY_INFO = 139;
-        public static final int TRIM_MEMORY             = 140;
         public static final int DUMP_PROVIDER           = 141;
         public static final int UNSTABLE_PROVIDER_DIED  = 142;
         public static final int REQUEST_ASSIST_CONTEXT_EXTRAS = 143;
@@ -1607,7 +1616,6 @@ public final class ActivityThread extends ClientTransactionHandler {
                     case SLEEPING: return "SLEEPING";
                     case SET_CORE_SETTINGS: return "SET_CORE_SETTINGS";
                     case UPDATE_PACKAGE_COMPATIBILITY_INFO: return "UPDATE_PACKAGE_COMPATIBILITY_INFO";
-                    case TRIM_MEMORY: return "TRIM_MEMORY";
                     case DUMP_PROVIDER: return "DUMP_PROVIDER";
                     case UNSTABLE_PROVIDER_DIED: return "UNSTABLE_PROVIDER_DIED";
                     case REQUEST_ASSIST_CONTEXT_EXTRAS: return "REQUEST_ASSIST_CONTEXT_EXTRAS";
@@ -1740,11 +1748,6 @@ public final class ActivityThread extends ClientTransactionHandler {
                     break;
                 case UPDATE_PACKAGE_COMPATIBILITY_INFO:
                     handleUpdatePackageCompatibilityInfo((UpdateCompatibilityData)msg.obj);
-                    break;
-                case TRIM_MEMORY:
-                    Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, "trimMemory");
-                    handleTrimMemory(msg.arg1);
-                    Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
                     break;
                 case UNSTABLE_PROVIDER_DIED:
                     handleUnstableProviderDied((IBinder)msg.obj, false);
@@ -5409,7 +5412,8 @@ public final class ActivityThread extends ClientTransactionHandler {
         BinderInternal.forceGc("mem");
     }
 
-    final void handleTrimMemory(int level) {
+    private void handleTrimMemory(int level) {
+        Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, "trimMemory");
         if (DEBUG_MEMORY_TRIM) Slog.v(TAG, "Trimming memory to level: " + level);
 
         ArrayList<ComponentCallbacks2> callbacks = collectComponentCallbacks(true, null);
@@ -5420,6 +5424,7 @@ public final class ActivityThread extends ClientTransactionHandler {
         }
 
         WindowManagerGlobal.getInstance().trimMemory(level);
+        Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
     }
 
     private void setupGraphicsSupport(Context context) {
