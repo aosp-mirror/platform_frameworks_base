@@ -53,6 +53,9 @@ public class NotificationBackgroundView extends View {
     private int mDrawableAlpha = 255;
     private boolean mIsPressedAllowed;
 
+    private boolean mTopAmountRounded;
+    private float mDistanceToTopRoundness;
+
     public NotificationBackgroundView(Context context, AttributeSet attrs) {
         super(context, attrs);
         mDontModifyCorners = getResources().getBoolean(
@@ -74,6 +77,7 @@ public class NotificationBackgroundView extends View {
 
     private void draw(Canvas canvas, Drawable drawable) {
         if (drawable != null) {
+            int top = mBackgroundTop;
             int bottom = mActualHeight;
             if (mBottomIsRounded && mBottomAmountClips && !mExpandAnimationRunning) {
                 bottom -= mClipBottomAmount;
@@ -84,7 +88,14 @@ public class NotificationBackgroundView extends View {
                 left = (int) ((getWidth() - mActualWidth) / 2.0f);
                 right = (int) (left + mActualWidth);
             }
-            drawable.setBounds(left, mBackgroundTop, right, bottom);
+            if (mTopAmountRounded) {
+                int clipTop = (int) (mClipTopAmount - mDistanceToTopRoundness);
+                top += clipTop;
+                if (clipTop >= 0) {
+                    bottom += clipTop;
+                }
+            }
+            drawable.setBounds(left, top, right, bottom);
             drawable.draw(canvas);
         }
     }
@@ -165,6 +176,14 @@ public class NotificationBackgroundView extends View {
         invalidate();
     }
 
+    public void setDistanceToTopRoundness(float distanceToTopRoundness) {
+        if (distanceToTopRoundness != mDistanceToTopRoundness) {
+            mTopAmountRounded = distanceToTopRoundness >= 0;
+            mDistanceToTopRoundness = distanceToTopRoundness;
+            invalidate();
+        }
+    }
+
     @Override
     public boolean hasOverlappingRendering() {
 
@@ -198,6 +217,9 @@ public class NotificationBackgroundView extends View {
     }
 
     public void setRoundness(float topRoundness, float bottomRoundNess) {
+        if (topRoundness == mCornerRadii[0] && bottomRoundNess == mCornerRadii[4]) {
+            return;
+        }
         mBottomIsRounded = bottomRoundNess != 0.0f;
         mCornerRadii[0] = topRoundness;
         mCornerRadii[1] = topRoundness;
