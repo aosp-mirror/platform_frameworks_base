@@ -60,7 +60,6 @@ public class NotificationListenerTest extends SysuiTestCase {
 
     private NotificationListener mListener;
     private StatusBarNotification mSbn;
-    private Set<String> mKeysKeptForRemoteInput;
 
     @Before
     public void setUp() {
@@ -69,11 +68,8 @@ public class NotificationListenerTest extends SysuiTestCase {
         mDependency.injectTestDependency(NotificationRemoteInputManager.class,
                 mRemoteInputManager);
 
-        mKeysKeptForRemoteInput = new HashSet<>();
-
         when(mPresenter.getHandler()).thenReturn(Handler.createAsync(Looper.myLooper()));
         when(mEntryManager.getNotificationData()).thenReturn(mNotificationData);
-        when(mRemoteInputManager.getKeysKeptForRemoteInput()).thenReturn(mKeysKeptForRemoteInput);
 
         mListener = new NotificationListener(mContext);
         mSbn = new StatusBarNotification(TEST_PACKAGE_NAME, TEST_PACKAGE_NAME, 0, null, TEST_UID, 0,
@@ -91,10 +87,9 @@ public class NotificationListenerTest extends SysuiTestCase {
 
     @Test
     public void testPostNotificationRemovesKeyKeptForRemoteInput() {
-        mKeysKeptForRemoteInput.add(mSbn.getKey());
         mListener.onNotificationPosted(mSbn, mRanking);
         TestableLooper.get(this).processAllMessages();
-        assertTrue(mKeysKeptForRemoteInput.isEmpty());
+        verify(mEntryManager).removeKeyKeptForRemoteInput(mSbn.getKey());
     }
 
     @Test
