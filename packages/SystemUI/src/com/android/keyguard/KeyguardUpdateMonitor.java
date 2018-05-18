@@ -708,6 +708,11 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
         return mStrongAuthTracker.isUnlockingWithFingerprintAllowed();
     }
 
+    public boolean isUserInLockdown(int userId) {
+        return mStrongAuthTracker.getStrongAuthForUser(userId)
+                == LockPatternUtils.StrongAuthTracker.STRONG_AUTH_REQUIRED_AFTER_USER_LOCKDOWN;
+    }
+
     public boolean needsSlowUnlockTransition() {
         return mNeedsSlowUnlockTransition;
     }

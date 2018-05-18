@@ -39,7 +39,7 @@ import android.widget.Toast;
 
 import com.android.internal.statusbar.IStatusBarService;
 import com.android.internal.statusbar.NotificationVisibility;
-import com.android.internal.widget.LockPatternUtils;
+import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.systemui.Dependency;
 import com.android.systemui.Dumpable;
 import com.android.systemui.OverviewProxyService;
@@ -68,7 +68,6 @@ public class NotificationLockscreenUserManager implements Dumpable {
             Dependency.get(DeviceProvisionedController.class);
     private final UserManager mUserManager;
     private final IStatusBarService mBarService;
-    private final LockPatternUtils mLockPatternUtils;
 
     private boolean mShowLockscreenNotifications;
     private boolean mAllowLockscreenRemoteInput;
@@ -162,7 +161,6 @@ public class NotificationLockscreenUserManager implements Dumpable {
         mCurrentUserId = ActivityManager.getCurrentUser();
         mBarService = IStatusBarService.Stub.asInterface(
                 ServiceManager.getService(Context.STATUS_BAR_SERVICE));
-        mLockPatternUtils = new LockPatternUtils(mContext);
     }
 
     public void setUpWithPresenter(NotificationPresenter presenter,
@@ -274,7 +272,7 @@ public class NotificationLockscreenUserManager implements Dumpable {
         if (userId == UserHandle.USER_ALL) {
             userId = mCurrentUserId;
         }
-        return mLockPatternUtils.isUserInLockdown(userId);
+        return KeyguardUpdateMonitor.getInstance(mContext).isUserInLockdown(userId);
     }
 
     /**
