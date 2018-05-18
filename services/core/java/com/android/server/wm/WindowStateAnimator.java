@@ -1298,6 +1298,7 @@ class WindowStateAnimator {
         // if we are transparent.
         if (mPendingDestroySurface != null && mDestroyPreservedSurfaceUponRedraw) {
             mPendingDestroySurface.mSurfaceControl.hide();
+            mPendingDestroySurface.reparentChildrenInTransaction(mSurfaceController);
         }
 
         return true;
