@@ -1499,8 +1499,10 @@ public class FingerprintService extends SystemService implements IHwBinder.Death
             try {
                 userId = getUserOrWorkProfileId(clientPackage, userId);
                 if (userId != mCurrentUserId) {
+                    int firstSdkInt = Build.VERSION.FIRST_SDK_INT;
+                    if (firstSdkInt == 0) firstSdkInt = Build.VERSION.SDK_INT;
                     File baseDir;
-                    if (Build.VERSION.FIRST_SDK_INT <= Build.VERSION_CODES.O_MR1) {
+                    if (firstSdkInt <= Build.VERSION_CODES.O_MR1) {
                         baseDir = Environment.getUserSystemDirectory(userId);
                     } else {
                         baseDir = Environment.getDataVendorDeDirectory(userId);
