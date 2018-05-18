@@ -205,6 +205,14 @@ message MetricsEvent {
         HARDWARE_FAILURE_FINGERPRINT_TOO_MANY_DEAD_PIXELS = 5;
     }
 
+    enum IoOperation {
+        IOOP_UNKNOWN = 0;
+        IOOP_READ = 1;
+        IOOP_WRITE = 2;
+        IOOP_UNMAP = 3;
+        IOOP_SYNC = 4;
+    }
+
   // Known visual elements: views or controls.
   enum View {
     // Unknown view
@@ -5931,8 +5939,7 @@ message MetricsEvent {
     // ACTION: Battery health snapshot
     // CATEGORY: OTHER
     // OS: P
-    // uses FIELD_END_BATTERY_PERCENT for batt %
-    // uses FIELD_END_BATTERY_UA for instantaneous current load
+    // uses FIELD_END_BATTERY_PERCENT for instantaneous batt %
     ACTION_BATTERY_HEALTH = 1433;
 
     // FIELD: Battery health snapshot type - min daily voltage, resistance, etc.
@@ -5940,31 +5947,33 @@ message MetricsEvent {
     // OS: P
     FIELD_BATTERY_HEALTH_SNAPSHOT_TYPE = 1434;
 
-    // FIELD: Battery temperature at snapshop.
+    // FIELD: Battery temperature at snapshot, in 1/10 deg C.
     // CATEGORY: OTHER
     // OS: P
-    FIELD_BATTERY_TEMPERATURE = 1435;
+    FIELD_BATTERY_TEMPERATURE_DECI_C = 1435;
 
-    // FIELD: Battery voltage at snapshot.
+    // FIELD: Battery voltage at snapshot, in microVolts.
     // CATEGORY: OTHER
     // OS: P
-    FIELD_BATTERY_VOLTAGE = 1436;
+    FIELD_BATTERY_VOLTAGE_UV = 1436;
 
-    // FIELD: Battery open circuit voltage at snapshot.
+    // FIELD: Battery open circuit voltage at snapshot, in microVolts.
     // CATEGORY: OTHER
     // OS: P
-    FIELD_BATTERY_OPEN_CIRCUIT_VOLTAGE = 1437;
+    FIELD_BATTERY_OPEN_CIRCUIT_VOLTAGE_UV = 1437;
 
-    // ACTION: Battery charge cycles
-    //         Number of times the battery has charged beyond a
+    // ACTION: Number of times the battery has charged beyond a
     //         fractional threshold of full capacity.
     // CATEGORY: OTHER
     // OS: P
     ACTION_BATTERY_CHARGE_CYCLES = 1438;
 
-    // FIELD: Battery charge cycles
-    //        Number of times the battery has charged beyond a
-    //        fractional threshold of full capacity.
+    // FIELD: BATTERY_CHARGE_CYCLES - Number of times the battery has charged
+    //                                beyond a fractional threshold of full
+    //                                capacity.  A comma-separated string of
+    //                                buckets.  If there are eight buckets,
+    //                                each bucket represents charging to n/8
+    //                                percent full.
     // CATEGORY: OTHER
     // OS: P
     FIELD_BATTERY_CHARGE_CYCLES = 1439;
@@ -5979,6 +5988,62 @@ message MetricsEvent {
     // CATEGORY: SETTINGS
     // OS: P
     DIALOG_BLUETOOTH_DISABLE_A2DP_HW_OFFLOAD = 1441;
+
+    // ACTION: SLOW_IO - I/O operation took longer than threshold,
+    //                   reported aggregated per day when > 0.
+    // CATEGORY: OTHER
+    // OS: P
+    ACTION_SLOW_IO = 1442;
+
+    // FIELD: IO_OPERATION_TYPE - The IO Operation that caused the high latency.
+    //        The value is an integer from the enum IoOperation.
+    // CATEGORY: OTHER
+    // OS: P
+    FIELD_IO_OPERATION_TYPE = 1443;
+
+    // FIELD: IO_OPERATION_COUNT - Count of how many times this slow IO operation happened
+    //                over the past 24hr (reported only if > 0).
+    // CATEGORY: OTHER
+    // OS: P
+    FIELD_IO_OPERATION_COUNT = 1444;
+
+    // ACTION: Speaker Imedance - last recorded speaker impedance.
+    //                            reported max once per 24hr.
+    // CATEGORY: OTHER
+    // OS: P
+    ACTION_SPEAKER_IMPEDANCE = 1445;
+
+    // FIELD: Speaker Impedance in milliohms.
+    // CATEGORY: OTHER
+    // OS: P
+    FIELD_SPEAKER_IMPEDANCE_MILLIOHMS = 1446;
+
+    // FIELD: Speaker Location - identifies one of several speakers on a device.
+    // CATEGORY: OTHER
+    // OS: P
+    FIELD_SPEAKER_LOCATION = 1447;
+
+    // FIELD: Instantaneous battery resistance in microohms.
+    // CATEGORY: OTHER
+    // OS: P
+    FIELD_BATTERY_RESISTANCE_UOHMS = 1448;
+
+    // FIELD: Instantaneous battery current - in microamps.
+    // CATEGORY: OTHER
+    // OS: P
+    FIELD_BATTERY_CURRENT_UA = 1449;
+
+    // FIELD: HARDWARE_LOCATION - Identifier for instance of a hardware type on a
+    //                            board.
+    // CATEGORY: OTHER
+    // OS: P
+    FIELD_HARDWARE_LOCATION = 1450;
+
+    // ACTION: BATTERY_CAUSED_SHUTDOWN - shutdown due to low battery, the
+    //                  action is logged after the subsequent boot.
+    // CATEGORY: OTHER
+    // OS: P
+    ACTION_BATTERY_CAUSED_SHUTDOWN = 1451;
 
     // ---- End P Constants, all P constants go above this line ----
     // Add new aosp constants above this line.
