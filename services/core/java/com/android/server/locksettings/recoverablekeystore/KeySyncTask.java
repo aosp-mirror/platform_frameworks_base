@@ -33,6 +33,7 @@ import com.android.internal.widget.LockPatternUtils;
 import com.android.server.locksettings.recoverablekeystore.storage.RecoverableKeyStoreDb;
 import com.android.server.locksettings.recoverablekeystore.storage.RecoverySnapshotStorage;
 
+import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.charset.StandardCharsets;
@@ -176,7 +177,11 @@ public class KeySyncTask implements Runnable {
 
         List<Integer> recoveryAgents = mRecoverableKeyStoreDb.getRecoveryAgents(mUserId);
         for (int uid : recoveryAgents) {
-            syncKeysForAgent(uid);
+            try {
+              syncKeysForAgent(uid);
+            } catch (IOException e) {
+                Log.e(TAG, "IOException during sync for agent " + uid, e);
+            }
         }
         if (recoveryAgents.isEmpty()) {
             Log.w(TAG, "No recovery agent initialized for user " + mUserId);
@@ -189,13 +194,13 @@ public class KeySyncTask implements Runnable {
             && mCredentialType != LockPatternUtils.CREDENTIAL_TYPE_PASSWORD;
     }
 
-    private void syncKeysForAgent(int recoveryAgentUid) {
-        boolean recreateCurrentVersion = false;
+    private void syncKeysForAgent(int recoveryAgentUid) throws IOException {
+        boolean shouldRecreateCurrentVersion = false;
         if (!shouldCreateSnapshot(recoveryAgentUid)) {
-            recreateCurrentVersion =
+            shouldRecreateCurrentVersion =
                     (mRecoverableKeyStoreDb.getSnapshotVersion(mUserId, recoveryAgentUid) != null)
                     && (mRecoverySnapshotStorage.get(recoveryAgentUid) == null);
-            if (recreateCurrentVersion) {
+            if (shouldRecreateCurrentVersion) {
                 Log.d(TAG, "Recreating most recent snapshot");
             } else {
                 Log.d(TAG, "Key sync not needed.");
@@ -203,12 +208,12 @@ public class KeySyncTask implements Runnable {
             }
         }
 
-        PublicKey publicKey;
         String rootCertAlias =
                 mRecoverableKeyStoreDb.getActiveRootOfTrust(mUserId, recoveryAgentUid);
         rootCertAlias = mTestOnlyInsecureCertificateHelper
                 .getDefaultCertificateAliasIfEmpty(rootCertAlias);
 
+        PublicKey publicKey;
         CertPath certPath = mRecoverableKeyStoreDb.getRecoveryServiceCertPath(mUserId,
                 recoveryAgentUid, rootCertAlias);
         if (certPath != null) {
@@ -260,19 +265,22 @@ public class KeySyncTask implements Runnable {
             Log.e(TAG, "Failed to load recoverable keys for sync", e);
             return;
         } catch (InsecureUserException e) {
-            Log.wtf(TAG, "A screen unlock triggered the key sync flow, so user must have "
+            Log.e(TAG, "A screen unlock triggered the key sync flow, so user must have "
                     + "lock screen. This should be impossible.", e);
             return;
         } catch (BadPlatformKeyException e) {
-            Log.wtf(TAG, "Loaded keys for same generation ID as platform key, so "
+            Log.e(TAG, "Loaded keys for same generation ID as platform key, so "
                     + "BadPlatformKeyException should be impossible.", e);
             return;
+        } catch (IOException e) {
+            Log.e(TAG, "Local database error.", e);
+            return;
         }
-
         // Only include insecure key material for test
         if (mTestOnlyInsecureCertificateHelper.isTestOnlyCertificateAlias(rootCertAlias)) {
             rawKeys = mTestOnlyInsecureCertificateHelper.keepOnlyWhitelistedInsecureKeys(rawKeys);
         }
+
         SecretKey recoveryKey;
         try {
             recoveryKey = generateRecoveryKey();
@@ -323,6 +331,7 @@ public class KeySyncTask implements Runnable {
             Log.e(TAG,"Could not encrypt with recovery key", e);
             return;
         }
+
         KeyDerivationParams keyDerivationParams;
         if (useScryptToHashCredential) {
             keyDerivationParams = KeyDerivationParams.createScryptParams(
@@ -330,7 +339,7 @@ public class KeySyncTask implements Runnable {
         } else {
             keyDerivationParams = KeyDerivationParams.createSha256Params(salt);
         }
-        KeyChainProtectionParams metadata = new KeyChainProtectionParams.Builder()
+        KeyChainProtectionParams keyChainProtectionParams = new KeyChainProtectionParams.Builder()
                 .setUserSecretType(TYPE_LOCKSCREEN)
                 .setLockScreenUiFormat(getUiFormat(mCredentialType, mCredential))
                 .setKeyDerivationParams(keyDerivationParams)
@@ -338,13 +347,11 @@ public class KeySyncTask implements Runnable {
                 .build();
 
         ArrayList<KeyChainProtectionParams> metadataList = new ArrayList<>();
-        metadataList.add(metadata);
-
-        // If application keys are not updated, snapshot will not be created on next unlock.
-        mRecoverableKeyStoreDb.setShouldCreateSnapshot(mUserId, recoveryAgentUid, false);
+        metadataList.add(keyChainProtectionParams);
 
         KeyChainSnapshot.Builder keyChainSnapshotBuilder = new KeyChainSnapshot.Builder()
-                .setSnapshotVersion(getSnapshotVersion(recoveryAgentUid, recreateCurrentVersion))
+                .setSnapshotVersion(
+                        getSnapshotVersion(recoveryAgentUid, shouldRecreateCurrentVersion))
                 .setMaxAttempts(TRUSTED_HARDWARE_MAX_ATTEMPTS)
                 .setCounterId(counterId)
                 .setServerParams(vaultHandle)
@@ -360,25 +367,38 @@ public class KeySyncTask implements Runnable {
         }
         mRecoverySnapshotStorage.put(recoveryAgentUid, keyChainSnapshotBuilder.build());
         mSnapshotListenersStorage.recoverySnapshotAvailable(recoveryAgentUid);
+
+        mRecoverableKeyStoreDb.setShouldCreateSnapshot(mUserId, recoveryAgentUid, false);
     }
 
     @VisibleForTesting
-    int getSnapshotVersion(int recoveryAgentUid, boolean recreateCurrentVersion) {
+    int getSnapshotVersion(int recoveryAgentUid, boolean shouldRecreateCurrentVersion)
+            throws IOException {
         Long snapshotVersion = mRecoverableKeyStoreDb.getSnapshotVersion(mUserId, recoveryAgentUid);
-        if (recreateCurrentVersion) {
+        if (shouldRecreateCurrentVersion) {
             // version shouldn't be null at this moment.
             snapshotVersion = snapshotVersion == null ? 1 : snapshotVersion;
         } else {
             snapshotVersion = snapshotVersion == null ? 1 : snapshotVersion + 1;
         }
-        mRecoverableKeyStoreDb.setSnapshotVersion(mUserId, recoveryAgentUid, snapshotVersion);
+
+        long updatedRows = mRecoverableKeyStoreDb.setSnapshotVersion(mUserId, recoveryAgentUid,
+                snapshotVersion);
+        if (updatedRows < 0) {
+            Log.e(TAG, "Failed to set the snapshot version in the local DB.");
+            throw new IOException("Failed to set the snapshot version in the local DB.");
+        }
 
         return snapshotVersion.intValue();
     }
 
-    private long generateAndStoreCounterId(int recoveryAgentUid) {
+    private long generateAndStoreCounterId(int recoveryAgentUid) throws IOException {
         long counter = new SecureRandom().nextLong();
-        mRecoverableKeyStoreDb.setCounterId(mUserId, recoveryAgentUid, counter);
+        long updatedRows = mRecoverableKeyStoreDb.setCounterId(mUserId, recoveryAgentUid, counter);
+        if (updatedRows < 0) {
+            Log.e(TAG, "Failed to set the snapshot version in the local DB.");
+            throw new IOException("Failed to set counterId in the local DB.");
+        }
         return counter;
     }
 
@@ -388,7 +408,7 @@ public class KeySyncTask implements Runnable {
     private Map<String, SecretKey> getKeysToSync(int recoveryAgentUid)
             throws InsecureUserException, KeyStoreException, UnrecoverableKeyException,
             NoSuchAlgorithmException, NoSuchPaddingException, BadPlatformKeyException,
-            InvalidKeyException, InvalidAlgorithmParameterException {
+            InvalidKeyException, InvalidAlgorithmParameterException, IOException {
         PlatformDecryptionKey decryptKey = mPlatformKeyManager.getDecryptKey(mUserId);;
         Map<String, WrappedKey> wrappedKeys = mRecoverableKeyStoreDb.getAllKeys(
                 mUserId, recoveryAgentUid, decryptKey.getGenerationId());
@@ -440,7 +460,7 @@ public class KeySyncTask implements Runnable {
      *
      * @return The salt.
      */
-    private byte[] generateSalt() {
+    private static byte[] generateSalt() {
         byte[] salt = new byte[SALT_LENGTH_BYTES];
         new SecureRandom().nextBytes(salt);
         return salt;
