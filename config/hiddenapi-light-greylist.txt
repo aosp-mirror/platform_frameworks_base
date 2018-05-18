@@ -6449,6 +6449,7 @@ Landroid/view/WindowContentFrameStats;->init(J[J[J[J)V
 Landroid/view/WindowInsets;-><init>(Landroid/graphics/Rect;)V
 Landroid/view/WindowInsets;->CONSUMED:Landroid/view/WindowInsets;
 Landroid/view/WindowInsets;->getSystemWindowInsets()Landroid/graphics/Rect;
+Landroid/view/WindowInsets;->inset(IIII)Landroid/view/WindowInsets;
 Landroid/view/WindowLeaked;-><init>(Ljava/lang/String;)V
 Landroid/view/WindowManager$LayoutParams;->backup()V
 Landroid/view/WindowManager$LayoutParams;->FLAG_SLIPPERY:I
