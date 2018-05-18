@@ -16,6 +16,8 @@
 
 package com.android.systemui.statusbar.phone;
 
+import static com.google.common.truth.Truth.assertThat;
+
 import static org.mockito.ArgumentMatchers.anyFloat;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
@@ -323,6 +325,14 @@ public class KeyguardBouncerTest extends SysuiTestCase {
             Assert.assertEquals("Security doesn't match for mode: " + mode,
                     mBouncer.isSecure(), mode != KeyguardSecurityModel.SecurityMode.None);
         }
+    }
+
+    @Test
+    public void testIsShowingScrimmed() {
+        mBouncer.show(false /* resetSecuritySelection */, true /* animate */);
+        assertThat(mBouncer.isShowingScrimmed()).isTrue();
+        mBouncer.show(false /* resetSecuritySelection */, false /* animate */);
+        assertThat(mBouncer.isShowingScrimmed()).isFalse();
     }
 
     @Test

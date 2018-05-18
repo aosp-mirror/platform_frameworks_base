@@ -3977,12 +3977,12 @@ public class StatusBar extends SystemUI implements DemoMode,
     private void showBouncerIfKeyguard() {
         if ((mState == StatusBarState.KEYGUARD || mState == StatusBarState.SHADE_LOCKED)
                 && !mKeyguardViewMediator.isHiding()) {
-            showBouncer(true /* animated */);
+            showBouncer(true /* scrimmed */);
         }
     }
 
-    protected void showBouncer(boolean animated) {
-        mStatusBarKeyguardViewManager.showBouncer(animated);
+    protected void showBouncer(boolean scrimmed) {
+        mStatusBarKeyguardViewManager.showBouncer(scrimmed);
     }
 
     private void instantExpandNotificationsPanel() {
@@ -4096,7 +4096,7 @@ public class StatusBar extends SystemUI implements DemoMode,
     public void onTrackingStopped(boolean expand) {
         if (mState == StatusBarState.KEYGUARD || mState == StatusBarState.SHADE_LOCKED) {
             if (!expand && !mUnlockMethodCache.canSkipBouncer()) {
-                showBouncer(false /* animated */);
+                showBouncer(false /* scrimmed */);
             }
         }
     }
@@ -4235,7 +4235,7 @@ public class StatusBar extends SystemUI implements DemoMode,
     @Override
     public void onLockedRemoteInput(ExpandableNotificationRow row, View clicked) {
         mLeaveOpenOnKeyguardHide = true;
-        showBouncer(true /* animated */);
+        showBouncer(true /* scrimmed */);
         mPendingRemoteInputView = clicked;
     }
 
@@ -4705,7 +4705,7 @@ public class StatusBar extends SystemUI implements DemoMode,
             // Bouncer needs the front scrim when it's on top of an activity,
             // tapping on a notification, editing QS or being dismissed by
             // FLAG_DISMISS_KEYGUARD_ACTIVITY.
-            ScrimState state = mIsOccluded || mNotificationPanel.needsScrimming()
+            ScrimState state = mStatusBarKeyguardViewManager.bouncerNeedsScrimming()
                     || mStatusBarKeyguardViewManager.willDismissWithAction()
                     || mStatusBarKeyguardViewManager.isFullscreenBouncer() ?
                     ScrimState.BOUNCER_SCRIMMED : ScrimState.BOUNCER;
