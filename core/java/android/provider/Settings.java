@@ -6009,6 +6009,23 @@ public final class Settings {
                 new SettingsValidators.ComponentNameListValidator(":");
 
         /**
+         * Whether the hush gesture has ever been used // TODO: beverlyt
+         * @hide
+         */
+        public static final String HUSH_GESTURE_USED = "hush_gesture_used";
+
+        private static final Validator HUSH_GESTURE_USED_VALIDATOR = BOOLEAN_VALIDATOR;
+
+        /**
+         * Number of times the user has manually clicked the ringer toggle
+         * @hide
+         */
+        public static final String MANUAL_RINGER_TOGGLE_COUNT = "manual_ringer_toggle_count";
+
+        private static final Validator MANUAL_RINGER_TOGGLE_COUNT_VALIDATOR =
+                NON_NEGATIVE_INTEGER_VALIDATOR;
+
+        /**
          * Uri of the slice that's presented on the keyguard.
          * Defaults to a slice with the date and next alarm.
          *
@@ -7991,7 +8008,9 @@ public final class Settings {
             SCREENSAVER_ACTIVATE_ON_SLEEP,
             LOCKDOWN_IN_POWER_MENU,
             SHOW_FIRST_CRASH_DIALOG_DEV_OPTION,
-            VOLUME_HUSH_GESTURE
+            VOLUME_HUSH_GESTURE,
+            MANUAL_RINGER_TOGGLE_COUNT,
+            HUSH_GESTURE_USED,
         };
 
         /**
@@ -8138,6 +8157,8 @@ public final class Settings {
                     ENABLED_NOTIFICATION_ASSISTANT_VALIDATOR); //legacy restore setting
             VALIDATORS.put(ENABLED_NOTIFICATION_POLICY_ACCESS_PACKAGES,
                     ENABLED_NOTIFICATION_POLICY_ACCESS_PACKAGES_VALIDATOR); //legacy restore setting
+            VALIDATORS.put(HUSH_GESTURE_USED, HUSH_GESTURE_USED_VALIDATOR);
+            VALIDATORS.put(MANUAL_RINGER_TOGGLE_COUNT, MANUAL_RINGER_TOGGLE_COUNT_VALIDATOR);
         }
 
         /**

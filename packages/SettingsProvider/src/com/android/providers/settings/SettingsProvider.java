@@ -2935,7 +2935,7 @@ public class SettingsProvider extends ContentProvider {
         }
 
         private final class UpgradeController {
-            private static final int SETTINGS_VERSION = 166;
+            private static final int SETTINGS_VERSION = 167;
 
             private final int mUserId;
 
@@ -3768,6 +3768,28 @@ public class SettingsProvider extends ContentProvider {
                     }
 
                     currentVersion = 166;
+                }
+
+                if (currentVersion == 166) {
+                    // Version 166: add default values for hush gesture used and manual ringer
+                    // toggle
+                    final SettingsState secureSettings = getSecureSettingsLocked(userId);
+                    Setting currentHushUsedSetting = secureSettings.getSettingLocked(
+                            Secure.HUSH_GESTURE_USED);
+                    if (currentHushUsedSetting.isNull()) {
+                        secureSettings.insertSettingLocked(
+                                Settings.Secure.HUSH_GESTURE_USED, "0", null, true,
+                                SettingsState.SYSTEM_PACKAGE_NAME);
+                    }
+
+                    Setting currentRingerToggleCountSetting = secureSettings.getSettingLocked(
+                            Secure.MANUAL_RINGER_TOGGLE_COUNT);
+                    if (currentRingerToggleCountSetting.isNull()) {
+                        secureSettings.insertSettingLocked(
+                                Settings.Secure.MANUAL_RINGER_TOGGLE_COUNT, "0", null, true,
+                                SettingsState.SYSTEM_PACKAGE_NAME);
+                    }
+                    currentVersion = 167;
                 }
 
                 // vXXX: Add new settings above this point.
