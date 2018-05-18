@@ -431,6 +431,11 @@ public class NotificationSnooze extends LinearLayout
         return true;
     }
 
+    @Override
+    public boolean shouldBeSaved() {
+        return true;
+    }
+
     public class NotificationSnoozeOption implements SnoozeOption {
         private SnoozeCriterion mCriterion;
         private int mMinutesToSnoozeFor;

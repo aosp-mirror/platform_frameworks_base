@@ -63,12 +63,12 @@ public class NotificationGuts extends FrameLayout {
         public void setGutsParent(NotificationGuts listener);
 
         /**
-         * @return the view to be shown in the notification guts.
+         * Return the view to be shown in the notification guts.
          */
         public View getContentView();
 
         /**
-         * @return the actual height of the content.
+         * Return the actual height of the content.
          */
         public int getActualHeight();
 
@@ -83,16 +83,21 @@ public class NotificationGuts extends FrameLayout {
         public boolean handleCloseControls(boolean save, boolean force);
 
         /**
-         * @return whether the notification associated with these guts is set to be removed.
+         * Return whether the notification associated with these guts is set to be removed.
          */
         public boolean willBeRemoved();
 
         /**
-         * @return whether these guts are a leavebehind (e.g. {@link NotificationSnooze}).
+         * Return whether these guts are a leavebehind (e.g. {@link NotificationSnooze}).
          */
         public default boolean isLeavebehind() {
             return false;
         }
+
+        /**
+         * Return whether something changed and needs to be saved, possibly requiring a bouncer.
+         */
+        boolean shouldBeSaved();
     }
 
     public interface OnGutsClosedListener {
@@ -201,12 +206,19 @@ public class NotificationGuts extends FrameLayout {
         setExposed(true /* exposed */, needsFalsingProtection);
     }
 
+    /**
+     * Hide controls if they are visible
+     * @param leavebehinds true if leavebehinds should be closed
+     * @param controls true if controls should be closed
+     * @param x x coordinate to animate the close circular reveal with
+     * @param y y coordinate to animate the close circular reveal with
+     * @param force whether the guts should be force-closed regardless of state.
+     */
     public void closeControls(boolean leavebehinds, boolean controls, int x, int y, boolean force) {
         if (mGutsContent != null) {
-            if (mGutsContent.isLeavebehind() && leavebehinds) {
-                closeControls(x, y, true /* save */, force);
-            } else if (!mGutsContent.isLeavebehind() && controls) {
-                closeControls(x, y, true /* save */, force);
+            if ((mGutsContent.isLeavebehind() && leavebehinds)
+                    || (!mGutsContent.isLeavebehind() && controls)) {
+                closeControls(x, y, mGutsContent.shouldBeSaved(), force);
             }
         }
     }
