@@ -4401,24 +4401,22 @@ public class ConnectivityServiceTest {
                 && !caps.hasCapability(NET_CAPABILITY_NOT_METERED),
                 vpnNetworkAgent);
 
-        if (false) { // TODO : reactivate this ; in the current state, the below fail.
-            // Disconnect cell. Receive update without even removing the dead network from the
-            // underlying networks – it's dead anyway. Not metered any more.
-            mCellNetworkAgent.disconnect();
-            vpnNetworkCallback.expectCapabilitiesLike((caps) -> caps.hasTransport(TRANSPORT_VPN)
-                    && !caps.hasTransport(TRANSPORT_CELLULAR) && caps.hasTransport(TRANSPORT_WIFI)
-                    && caps.hasCapability(NET_CAPABILITY_NOT_METERED),
-                    vpnNetworkAgent);
+        // Disconnect cell. Receive update without even removing the dead network from the
+        // underlying networks – it's dead anyway. Not metered any more.
+        mCellNetworkAgent.disconnect();
+        vpnNetworkCallback.expectCapabilitiesLike((caps) -> caps.hasTransport(TRANSPORT_VPN)
+                && !caps.hasTransport(TRANSPORT_CELLULAR) && caps.hasTransport(TRANSPORT_WIFI)
+                && caps.hasCapability(NET_CAPABILITY_NOT_METERED),
+                vpnNetworkAgent);
 
-            // Disconnect wifi too. No underlying networks should mean this is now metered,
-            // unfortunately a discrepancy in the current implementation has this unmetered.
-            // TODO : fix this.
-            mWiFiNetworkAgent.disconnect();
-            vpnNetworkCallback.expectCapabilitiesLike((caps) -> caps.hasTransport(TRANSPORT_VPN)
-                    && !caps.hasTransport(TRANSPORT_CELLULAR) && !caps.hasTransport(TRANSPORT_WIFI)
-                    && caps.hasCapability(NET_CAPABILITY_NOT_METERED),
-                    vpnNetworkAgent);
-        }
+        // Disconnect wifi too. No underlying networks should mean this is now metered,
+        // unfortunately a discrepancy in the current implementation has this unmetered.
+        // TODO : fix this.
+        mWiFiNetworkAgent.disconnect();
+        vpnNetworkCallback.expectCapabilitiesLike((caps) -> caps.hasTransport(TRANSPORT_VPN)
+                && !caps.hasTransport(TRANSPORT_CELLULAR) && !caps.hasTransport(TRANSPORT_WIFI)
+                && caps.hasCapability(NET_CAPABILITY_NOT_METERED),
+                vpnNetworkAgent);
 
         mMockVpn.disconnect();
     }
