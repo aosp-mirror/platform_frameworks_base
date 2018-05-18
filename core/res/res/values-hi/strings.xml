@@ -61,7 +61,7 @@
     <string name="ColpMmi" msgid="3065121483740183974">"कनेक्ट किया गया लाइन आईडी"</string>
     <string name="ColrMmi" msgid="4996540314421889589">"कनेक्ट किया गया लाइन आईडी प्रतिबंध"</string>
     <string name="CfMmi" msgid="5123218989141573515">"कॉल आगे भेजना"</string>
-    <string name="CwMmi" msgid="9129678056795016867">"कॉल प्रतीक्षा"</string>
+    <string name="CwMmi" msgid="9129678056795016867">"कॉल वेटिंग"</string>
     <string name="BaMmi" msgid="455193067926770581">"कॉल बाधित करना"</string>
     <string name="PwdMmi" msgid="7043715687905254199">"पासवर्ड बदलें"</string>
     <string name="PinMmi" msgid="3113117780361190304">"पिन परिवर्तन"</string>
@@ -198,9 +198,9 @@
     <string name="reboot_to_update_title" msgid="6212636802536823850">"Android सिस्टम उपडेट हो रहा है"</string>
     <string name="reboot_to_update_prepare" msgid="6305853831955310890">"अपडेट करने के लिए तैयार हो रहा है…"</string>
     <string name="reboot_to_update_package" msgid="3871302324500927291">"अपडेट पैकेज को संसाधित कर रहा है…"</string>
-    <string name="reboot_to_update_reboot" msgid="6428441000951565185">"पुन: प्रारंभ हो रहा है…"</string>
+    <string name="reboot_to_update_reboot" msgid="6428441000951565185">"फिर चालू हो रहा है…"</string>
     <string name="reboot_to_reset_title" msgid="4142355915340627490">"फ़ैक्टरी डेटा रीसेट"</string>
-    <string name="reboot_to_reset_message" msgid="2432077491101416345">"पुन: प्रारंभ हो रहा है…"</string>
+    <string name="reboot_to_reset_message" msgid="2432077491101416345">"फिर चालू हो रहा है…"</string>
     <string name="shutdown_progress" msgid="2281079257329981203">"शट डाउन हो रहा है..."</string>
     <string name="shutdown_confirm" product="tablet" msgid="3385745179555731470">"आपकी टैबलेट शट डाउन हो जाएगी."</string>
     <string name="shutdown_confirm" product="tv" msgid="476672373995075359">"आपका टीवी बंद हो जाएगा."</string>
@@ -291,12 +291,9 @@
     <string name="permgrouplab_camera" msgid="4820372495894586615">"कैमरा"</string>
     <string name="permgroupdesc_camera" msgid="3250611594678347720">"चित्र लेने और वीडियो रिकॉर्ड करने"</string>
     <string name="permgrouprequest_camera" msgid="1299833592069671756">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; को फ़ोटो खींचने और वीडियो रिकॉर्ड करने की अनुमति देना चाहते हैं?"</string>
-    <!-- no translation found for permgrouplab_calllog (8798646184930388160) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_calllog (3006237336748283775) -->
-    <skip />
-    <!-- no translation found for permgrouprequest_calllog (8487355309583773267) -->
-    <skip />
+    <string name="permgrouplab_calllog" msgid="8798646184930388160">"कॉल लॉग"</string>
+    <string name="permgroupdesc_calllog" msgid="3006237336748283775">"कॉल लॉग की जानकारी देखना और उसमें बदलाव करना"</string>
+    <string name="permgrouprequest_calllog" msgid="8487355309583773267">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; को अपने काॅल लाॅग एक्सेस करने की मंज़ूरी देना चाहते हैं?"</string>
     <string name="permgrouplab_phone" msgid="5229115638567440675">"फ़ोन"</string>
     <string name="permgroupdesc_phone" msgid="6234224354060641055">"फ़ोन कॉल करें और प्रबंधित करें"</string>
     <string name="permgrouprequest_phone" msgid="9166979577750581037">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; को फ़ोन कॉल करने और उन्हें प्रबंधित करने की अनुमति देना चाहते हैं?"</string>
@@ -709,12 +706,12 @@
     <string name="relationTypeChild" msgid="1890746277276881626">"बच्चा"</string>
     <string name="relationTypeDomesticPartner" msgid="6904807112121122133">"हमसफ़र"</string>
     <string name="relationTypeFather" msgid="5228034687082050725">"पिता"</string>
-    <string name="relationTypeFriend" msgid="7313106762483391262">"मित्र"</string>
+    <string name="relationTypeFriend" msgid="7313106762483391262">"दोस्त"</string>
     <string name="relationTypeManager" msgid="6365677861610137895">"प्रबंधक"</string>
     <string name="relationTypeMother" msgid="4578571352962758304">"मां"</string>
     <string name="relationTypeParent" msgid="4755635567562925226">"अभिभावक"</string>
     <string name="relationTypePartner" msgid="7266490285120262781">"सहयोगी"</string>
-    <string name="relationTypeReferredBy" msgid="101573059844135524">"इसके द्वारा संदर्भित"</string>
+    <string name="relationTypeReferredBy" msgid="101573059844135524">"इन्होंने बताया"</string>
     <string name="relationTypeRelative" msgid="1799819930085610271">"संबंधी"</string>
     <string name="relationTypeSister" msgid="1735983554479076481">"बहन"</string>
     <string name="relationTypeSpouse" msgid="394136939428698117">"पति/पत्नी"</string>
@@ -1214,7 +1211,7 @@
     <string name="sms_control_title" msgid="7296612781128917719">"मैसेज (एसएमएस) भेज रहा है"</string>
     <string name="sms_control_message" msgid="3867899169651496433">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; बड़ी संख्या में मैसेज (एसएमएस) भेज रहा है. क्या आप इस ऐप को मैसेज भेजना जारी रखने देना चाहते हैं?"</string>
     <string name="sms_control_yes" msgid="3663725993855816807">"अनुमति दें"</string>
-    <string name="sms_control_no" msgid="625438561395534982">"अस्वीकार करें"</string>
+    <string name="sms_control_no" msgid="625438561395534982">"नामंजूर करें"</string>
     <string name="sms_short_code_confirm_message" msgid="1645436466285310855">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;, &lt;b&gt;<xliff:g id="DEST_ADDRESS">%2$s</xliff:g>&lt;/b&gt; पर संदेश भेजना चाहता है."</string>
     <string name="sms_short_code_details" msgid="5873295990846059400">"इससे आपके मोबाइल खाते पर "<b>"शुल्क लग सकता है"</b>"."</string>
     <string name="sms_premium_short_code_details" msgid="7869234868023975"><b>"इससे आपके मोबाइल खाते पर शुल्क लगेगा."</b></string>
@@ -1784,8 +1781,8 @@
     <string name="language_picker_section_all" msgid="3097279199511617537">"सभी भाषाएं"</string>
     <string name="region_picker_section_all" msgid="8966316787153001779">"सभी क्षेत्र"</string>
     <string name="locale_search_menu" msgid="2560710726687249178">"खोजें"</string>
-    <string name="app_suspended_title" msgid="1919029799438164552">"यह ऐप्लिकेशन खोला नहीं जा सकता"</string>
-    <string name="app_suspended_default_message" msgid="7875306315686531621">"<xliff:g id="APP_NAME_0">%1$s</xliff:g> ऐप्लिकेशन फ़िलहाल मौजूद नहीं है. <xliff:g id="APP_NAME_1">%2$s</xliff:g> इसे प्रबंधित करता है."</string>
+    <string name="app_suspended_title" msgid="2075071241147969611">"यह ऐप्लिकेशन उपलब्ध नहीं है"</string>
+    <string name="app_suspended_default_message" msgid="123166680425711887">"फ़िलहाल <xliff:g id="APP_NAME_0">%1$s</xliff:g> उपलब्ध नहीं है. इसे <xliff:g id="APP_NAME_1">%2$s</xliff:g> के ज़रिए प्रबंधित किया जाता है."</string>
     <string name="app_suspended_more_details" msgid="1131804827776778187">"ज़्यादा जानें"</string>
     <string name="work_mode_off_title" msgid="1118691887588435530">"कार्य प्रोफ़ाइल चालू करें?"</string>
     <string name="work_mode_off_message" msgid="5130856710614337649">"आपके काम से जुड़े ऐप्लिकेशन, सूचनाएं, डेटा और कार्य प्रोफ़ाइल से जुड़ी दूसरी सुविधाएं चालू हो जाएंगी"</string>
@@ -1822,7 +1819,7 @@
     <string name="adb_debugging_notification_channel_tv" msgid="5537766997350092316">"USB डीबग करना"</string>
     <string name="time_picker_hour_label" msgid="2979075098868106450">"घंटा"</string>
     <string name="time_picker_minute_label" msgid="5168864173796598399">"मिनट"</string>
-    <string name="time_picker_header_text" msgid="143536825321922567">"समय सेट अप करें"</string>
+    <string name="time_picker_header_text" msgid="143536825321922567">"समय सेट करें"</string>
     <string name="time_picker_input_error" msgid="7574999942502513765">"मान्य समय डालें"</string>
     <string name="time_picker_prompt_label" msgid="7588093983899966783">"समय लिखें"</string>
     <string name="time_picker_text_input_mode_description" msgid="4148166758173708199">"समय इनपुट के लिए लेख इनपुट मोड पर जाएं."</string>
@@ -1882,5 +1879,8 @@
     <string name="zen_upgrade_notification_content" msgid="1794994264692424562">"टैप करके देखें कि किन चीज़ों पर रोक लगाई गई है."</string>
     <string name="notification_app_name_system" msgid="4205032194610042794">"सिस्टम"</string>
     <string name="notification_app_name_settings" msgid="7751445616365753381">"सेटिंग"</string>
+    <string name="notification_appops_camera_active" msgid="5050283058419699771">"कैमरा"</string>
+    <string name="notification_appops_microphone_active" msgid="4335305527588191730">"माइक्रोफ़ोन"</string>
+    <string name="notification_appops_overlay_active" msgid="633813008357934729">"आपकी स्क्रीन पर, इस्तेमाल हो रहे दूसरे ऐप्लिकेशन के ऊपर दिखाया जा रहा है"</string>
     <string name="car_loading_profile" msgid="3545132581795684027">"प्राेफ़ाइल लोड हो रही है"</string>
 </resources>

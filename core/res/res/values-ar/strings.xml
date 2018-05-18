@@ -875,7 +875,7 @@
     <string name="permdesc_writeHistoryBookmarks" product="tv" msgid="7007393823197766548">"يتيح للتطبيق تعديل سجل المتصفح أو الإشارات المرجعية المخزنة على التلفزيون. وقد يتيح هذا للتطبيق محو بيانات المتصفح أو تعديلها. ملاحظة: لا يجوز فرض هذا الإذن بواسطة متصفحات جهات خارجية أو تطبيقات أخرى بإمكانيات تصفح الويب."</string>
     <string name="permdesc_writeHistoryBookmarks" product="default" msgid="8497389531014185509">"للسماح للتطبيق بتعديل سجل المتصفح أو الإشارات المرجعية المخزنة على هاتفك. وقد يتيح هذا للتطبيق محو بيانات المتصفح أو تعديلها. ملاحظة: لا يجوز فرض هذا الإذن من قِبل متصفحات جهات خارجية أو تطبيقات أخرى بها إمكانيات تصفح الويب."</string>
     <string name="permlab_setAlarm" msgid="1379294556362091814">"تعيين منبه"</string>
-    <string name="permdesc_setAlarm" msgid="316392039157473848">"للسماح للتطبيق بضبط المنبه في تطبيق المنبه المثبّت. ربما لا تنفذ بعض تطبيقات المنبه هذه الميزة."</string>
+    <string name="permdesc_setAlarm" msgid="316392039157473848">"للسماح للتطبيق بضبط المنبّه في تطبيق المنبّه المثبّت. ربما لا تنفذ بعض تطبيقات المنبّه هذه الميزة."</string>
     <string name="permlab_addVoicemail" msgid="5525660026090959044">"إضافة بريد صوتي"</string>
     <string name="permdesc_addVoicemail" msgid="6604508651428252437">"للسماح للتطبيق بإضافة رسائل إلى صندوق البريد الصوتي."</string>
     <string name="permlab_writeGeolocationPermissions" msgid="5962224158955273932">"تعديل أذونات الموقع الجغرافي للمتصفح"</string>
@@ -920,7 +920,7 @@
     <string name="last_month" msgid="3959346739979055432">"الشهر الماضي"</string>
     <string name="older" msgid="5211975022815554840">"أقدم"</string>
     <string name="preposition_for_date" msgid="9093949757757445117">"في <xliff:g id="DATE">%s</xliff:g>"</string>
-    <string name="preposition_for_time" msgid="5506831244263083793">"في الساعة <xliff:g id="TIME">%s</xliff:g>"</string>
+    <string name="preposition_for_time" msgid="5506831244263083793">"عند الساعة <xliff:g id="TIME">%s</xliff:g>"</string>
     <string name="preposition_for_year" msgid="5040395640711867177">"في <xliff:g id="YEAR">%s</xliff:g>"</string>
     <string name="day" msgid="8144195776058119424">"يوم"</string>
     <string name="days" msgid="4774547661021344602">"أيام"</string>
@@ -1917,8 +1917,8 @@
     <string name="language_picker_section_all" msgid="3097279199511617537">"جميع اللغات"</string>
     <string name="region_picker_section_all" msgid="8966316787153001779">"كل المناطق"</string>
     <string name="locale_search_menu" msgid="2560710726687249178">"البحث"</string>
-    <string name="app_suspended_title" msgid="1919029799438164552">"يتعذّر فتح التطبيق"</string>
-    <string name="app_suspended_default_message" msgid="7875306315686531621">"التطبيق <xliff:g id="APP_NAME_0">%1$s</xliff:g> غير متاح الآن، وهو مُدار بواسطة <xliff:g id="APP_NAME_1">%2$s</xliff:g>."</string>
+    <string name="app_suspended_title" msgid="2075071241147969611">"التطبيق غير متاح"</string>
+    <string name="app_suspended_default_message" msgid="123166680425711887">"التطبيق <xliff:g id="APP_NAME_0">%1$s</xliff:g> غير متاح الآن، وهو مُدار بواسطة <xliff:g id="APP_NAME_1">%2$s</xliff:g>."</string>
     <string name="app_suspended_more_details" msgid="1131804827776778187">"مزيد من المعلومات"</string>
     <string name="work_mode_off_title" msgid="1118691887588435530">"تفعيل الملف الشخصي للعمل؟"</string>
     <string name="work_mode_off_message" msgid="5130856710614337649">"سيتم تفعيل تطبيقات العمل التي تستخدمها والإشعارات والبيانات وغيرها من ميزات الملف الشخصي للعمل"</string>
@@ -2019,5 +2019,8 @@
     <string name="zen_upgrade_notification_content" msgid="1794994264692424562">"انقر للاطّلاع على ما تم حظره."</string>
     <string name="notification_app_name_system" msgid="4205032194610042794">"النظام"</string>
     <string name="notification_app_name_settings" msgid="7751445616365753381">"الإعدادات"</string>
+    <string name="notification_appops_camera_active" msgid="5050283058419699771">"كاميرا"</string>
+    <string name="notification_appops_microphone_active" msgid="4335305527588191730">"ميكروفون"</string>
+    <string name="notification_appops_overlay_active" msgid="633813008357934729">"العرض فوق التطبيقات الأخرى على شاشتك"</string>
     <string name="car_loading_profile" msgid="3545132581795684027">"جارٍ التحميل"</string>
 </resources>

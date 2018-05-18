@@ -1781,8 +1781,8 @@
     <string name="language_picker_section_all" msgid="3097279199511617537">"Tất cả ngôn ngữ"</string>
     <string name="region_picker_section_all" msgid="8966316787153001779">"Tất cả khu vực"</string>
     <string name="locale_search_menu" msgid="2560710726687249178">"Tìm kiếm"</string>
-    <string name="app_suspended_title" msgid="1919029799438164552">"Không thể mở ứng dụng"</string>
-    <string name="app_suspended_default_message" msgid="7875306315686531621">"Ứng dụng <xliff:g id="APP_NAME_0">%1$s</xliff:g> hiện không hoạt động. Chính sách tạm ngưng này do <xliff:g id="APP_NAME_1">%2$s</xliff:g> quản lý."</string>
+    <string name="app_suspended_title" msgid="2075071241147969611">"Ứng dụng không sử dụng được"</string>
+    <string name="app_suspended_default_message" msgid="123166680425711887">"<xliff:g id="APP_NAME_0">%1$s</xliff:g> hiện không sử dụng được. Chính sách này do <xliff:g id="APP_NAME_1">%2$s</xliff:g> quản lý."</string>
     <string name="app_suspended_more_details" msgid="1131804827776778187">"Tìm hiểu thêm"</string>
     <string name="work_mode_off_title" msgid="1118691887588435530">"Bạn muốn bật hồ sơ công việc?"</string>
     <string name="work_mode_off_message" msgid="5130856710614337649">"Ứng dụng công việc, thông báo, dữ liệu và các tính năng khác của hồ sơ công việc sẽ được bật"</string>
@@ -1879,5 +1879,8 @@
     <string name="zen_upgrade_notification_content" msgid="1794994264692424562">"Nhấn để xem những thông báo bị chặn."</string>
     <string name="notification_app_name_system" msgid="4205032194610042794">"Hệ thống"</string>
     <string name="notification_app_name_settings" msgid="7751445616365753381">"Cài đặt"</string>
+    <string name="notification_appops_camera_active" msgid="5050283058419699771">"Máy ảnh"</string>
+    <string name="notification_appops_microphone_active" msgid="4335305527588191730">"Micrô"</string>
+    <string name="notification_appops_overlay_active" msgid="633813008357934729">"hiển thị qua các ứng dụng khác trên màn hình của bạn"</string>
     <string name="car_loading_profile" msgid="3545132581795684027">"Đang tải"</string>
 </resources>
