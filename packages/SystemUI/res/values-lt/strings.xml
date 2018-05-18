@@ -259,6 +259,7 @@
     <string name="accessibility_location_active" msgid="2427290146138169014">"Vietovės užklausos aktyvios"</string>
     <string name="accessibility_clear_all" msgid="5235938559247164925">"Išvalyti visus pranešimus."</string>
     <string name="notification_group_overflow_indicator" msgid="1863231301642314183">"Dar <xliff:g id="NUMBER">%s</xliff:g>"</string>
+    <string name="notification_group_overflow_indicator_ambient" msgid="879560382990377886">"<xliff:g id="NOTIFICATION_TITLE">%s</xliff:g>, +<xliff:g id="OVERFLOW">%s</xliff:g>"</string>
     <plurals name="notification_group_overflow_description" formatted="false" msgid="4579313201268495404">
       <item quantity="one">Grupėje yra dar <xliff:g id="NUMBER_1">%s</xliff:g> pranešimas.</item>
       <item quantity="few">Grupėje yra dar <xliff:g id="NUMBER_1">%s</xliff:g> pranešimai.</item>
@@ -374,8 +375,7 @@
     <string name="recents_accessibility_split_screen_top" msgid="9056056469282256287">"Skaidyti ekraną į viršų"</string>
     <string name="recents_accessibility_split_screen_left" msgid="8987144699630620019">"Skaidyti ekraną į kairę"</string>
     <string name="recents_accessibility_split_screen_right" msgid="275069779299592867">"Skaidyti ekraną į dešinę"</string>
-    <!-- no translation found for quick_step_accessibility_toggle_overview (7171470775439860480) -->
-    <skip />
+    <string name="quick_step_accessibility_toggle_overview" msgid="7171470775439860480">"Perjungti apžvalgą"</string>
     <string name="expanded_header_battery_charged" msgid="5945855970267657951">"Įkrautas"</string>
     <string name="expanded_header_battery_charging" msgid="205623198487189724">"Kraunamas"</string>
     <string name="expanded_header_battery_charging_with_time" msgid="457559884275395376">"<xliff:g id="CHARGING_TIME">%s</xliff:g> iki visiško įkrovimo"</string>
@@ -549,12 +549,9 @@
     <string name="volume_stream_content_description_mute" msgid="3625049841390467354">"%1$s. Palieskite, kad nutildytumėte. Gali būti nutildytos pritaikymo neįgaliesiems paslaugos."</string>
     <string name="volume_stream_content_description_vibrate_a11y" msgid="6427727603978431301">"%1$s. Palieskite, kad nustatytumėte vibravimą."</string>
     <string name="volume_stream_content_description_mute_a11y" msgid="8995013018414535494">"%1$s. Palieskite, kad nutildytumėte."</string>
-    <!-- no translation found for volume_ringer_hint_mute (9199811307292269601) -->
-    <skip />
-    <!-- no translation found for volume_ringer_hint_unmute (6602880133293060368) -->
-    <skip />
-    <!-- no translation found for volume_ringer_hint_vibrate (4036802135666515202) -->
-    <skip />
+    <string name="volume_ringer_hint_mute" msgid="9199811307292269601">"nutildyti"</string>
+    <string name="volume_ringer_hint_unmute" msgid="6602880133293060368">"įjungti garsą"</string>
+    <string name="volume_ringer_hint_vibrate" msgid="4036802135666515202">"vibruoti"</string>
     <string name="volume_dialog_title" msgid="7272969888820035876">"Garsumo valdikliai: %s"</string>
     <string name="volume_dialog_ringer_guidance_ring" msgid="3360373718388509040">"Skambučiai ir pranešimai skambės (<xliff:g id="VOLUME_LEVEL">%1$s</xliff:g>)"</string>
     <string name="output_title" msgid="5355078100792942802">"Medijos išvestis"</string>
@@ -620,20 +617,13 @@
     <string name="inline_minimize_button" msgid="966233327974702195">"Sumažinti"</string>
     <string name="inline_keep_showing_app" msgid="1723113469580031041">"Toliau rodyti iš šios programos gautus pranešimus?"</string>
     <string name="notification_unblockable_desc" msgid="1037434112919403708">"Šių pranešimų negalima išjungti"</string>
-    <!-- no translation found for appops_camera (8100147441602585776) -->
-    <skip />
-    <!-- no translation found for appops_microphone (741508267659494555) -->
-    <skip />
-    <!-- no translation found for appops_overlay (6165912637560323464) -->
-    <skip />
-    <!-- no translation found for appops_camera_mic (1576901651150187433) -->
-    <skip />
-    <!-- no translation found for appops_camera_overlay (8869400080809298814) -->
-    <skip />
-    <!-- no translation found for appops_mic_overlay (4835157962857919804) -->
-    <skip />
-    <!-- no translation found for appops_camera_mic_overlay (6718768197048030993) -->
-    <skip />
+    <string name="appops_camera" msgid="8100147441602585776">"Ši programa naudoja fotoaparatą."</string>
+    <string name="appops_microphone" msgid="741508267659494555">"Ši programa naudoja mikrofoną."</string>
+    <string name="appops_overlay" msgid="6165912637560323464">"Ši programa rodoma ekrane virš kitų programų."</string>
+    <string name="appops_camera_mic" msgid="1576901651150187433">"Ši programa naudoja mikrofoną ir fotoaparatą."</string>
+    <string name="appops_camera_overlay" msgid="8869400080809298814">"Ši programa rodoma ekrane virš kitų programų, ji naudoja fotoaparatą."</string>
+    <string name="appops_mic_overlay" msgid="4835157962857919804">"Ši programa rodoma ekrane virš kitų programų, ji naudoja mikrofoną."</string>
+    <string name="appops_camera_mic_overlay" msgid="6718768197048030993">"Ši programa rodoma ekrane virš kitų programų, ji naudoja mikrofoną ir fotoaparatą."</string>
     <string name="notification_appops_settings" msgid="1028328314935908050">"Nustatymai"</string>
     <string name="notification_appops_ok" msgid="1156966426011011434">"Gerai"</string>
     <string name="notification_channel_controls_opened_accessibility" msgid="6553950422055908113">"„<xliff:g id="APP_NAME">%1$s</xliff:g>“ pranešimų valdikliai atidaryti"</string>
@@ -697,7 +687,7 @@
     <string name="keyboard_shortcut_group_system_back" msgid="2207004531216446378">"Atgal"</string>
     <string name="keyboard_shortcut_group_system_notifications" msgid="8366964080041773224">"Pranešimai"</string>
     <string name="keyboard_shortcut_group_system_shortcuts_helper" msgid="4892255911160332762">"Spartieji klavišai"</string>
-    <string name="keyboard_shortcut_group_system_switch_input" msgid="2334164096341310324">"Perjungti įvesties metodą"</string>
+    <string name="keyboard_shortcut_group_system_switch_input" msgid="8413348767825486492">"Perjungti klaviat. išdėstymą"</string>
     <string name="keyboard_shortcut_group_applications" msgid="9129465955073449206">"Programos"</string>
     <string name="keyboard_shortcut_group_applications_assist" msgid="9095441910537146013">"Pagalbinė programa"</string>
     <string name="keyboard_shortcut_group_applications_browser" msgid="6465985474000766533">"Naršyklė"</string>

@@ -95,8 +95,7 @@
     <string name="accessibility_unlock_button" msgid="128158454631118828">"అన్‌లాక్ చేయి"</string>
     <string name="accessibility_waiting_for_fingerprint" msgid="4808860050517462885">"వేలిముద్ర కోసం వేచి ఉంది"</string>
     <string name="accessibility_unlock_without_fingerprint" msgid="7541705575183694446">"మీ వేలిముద్రను ఉపయోగించకుండా అన్‌లాక్ చేయండి"</string>
-    <!-- no translation found for accessibility_scanning_face (769545173211758586) -->
-    <skip />
+    <string name="accessibility_scanning_face" msgid="769545173211758586">"ముఖాన్ని స్కాన్ చేస్తోంది"</string>
     <string name="accessibility_send_smart_reply" msgid="7766727839703044493">"పంపు"</string>
     <string name="unlock_label" msgid="8779712358041029439">"అన్‌లాక్ చేయి"</string>
     <string name="phone_label" msgid="2320074140205331708">"ఫోన్‌ను తెరువు"</string>
@@ -258,6 +257,7 @@
     <string name="accessibility_location_active" msgid="2427290146138169014">"స్థాన అభ్యర్థనలు సక్రియంగా ఉన్నాయి"</string>
     <string name="accessibility_clear_all" msgid="5235938559247164925">"అన్ని నోటిఫికేషన్‌లను క్లియర్ చేయండి."</string>
     <string name="notification_group_overflow_indicator" msgid="1863231301642314183">"+ <xliff:g id="NUMBER">%s</xliff:g>"</string>
+    <string name="notification_group_overflow_indicator_ambient" msgid="879560382990377886">"<xliff:g id="NOTIFICATION_TITLE">%s</xliff:g>, +<xliff:g id="OVERFLOW">%s</xliff:g>"</string>
     <plurals name="notification_group_overflow_description" formatted="false" msgid="4579313201268495404">
       <item quantity="other">లోపల మరో <xliff:g id="NUMBER_1">%s</xliff:g> నోటిఫికేషన్‌లు ఉన్నాయి.</item>
       <item quantity="one">లోపల మరో <xliff:g id="NUMBER_0">%s</xliff:g> నోటిఫికేషన్ ఉంది.</item>
@@ -369,8 +369,7 @@
     <string name="recents_accessibility_split_screen_top" msgid="9056056469282256287">"స్క్రీన్‌ని ఎగువకు విభజించు"</string>
     <string name="recents_accessibility_split_screen_left" msgid="8987144699630620019">"స్క్రీన్‌ని ఎడమ వైపుకి విభజించు"</string>
     <string name="recents_accessibility_split_screen_right" msgid="275069779299592867">"స్క్రీన్‌ని కుడి వైపుకి విభజించు"</string>
-    <!-- no translation found for quick_step_accessibility_toggle_overview (7171470775439860480) -->
-    <skip />
+    <string name="quick_step_accessibility_toggle_overview" msgid="7171470775439860480">"స్థూలదృష్టిని టోగుల్ చేయి"</string>
     <string name="expanded_header_battery_charged" msgid="5945855970267657951">"ఛార్జ్ చేయబడింది"</string>
     <string name="expanded_header_battery_charging" msgid="205623198487189724">"ఛార్జ్ అవుతోంది"</string>
     <string name="expanded_header_battery_charging_with_time" msgid="457559884275395376">"పూర్తిగా నిండటానికి <xliff:g id="CHARGING_TIME">%s</xliff:g>"</string>
@@ -544,12 +543,9 @@
     <string name="volume_stream_content_description_mute" msgid="3625049841390467354">"%1$s. మ్యూట్ చేయడానికి నొక్కండి. యాక్సెస్ సామర్థ్య సేవలు మ్యూట్ చేయబడవచ్చు."</string>
     <string name="volume_stream_content_description_vibrate_a11y" msgid="6427727603978431301">"%1$s. వైబ్రేట్ అయ్యేలా సెట్ చేయడం కోసం నొక్కండి."</string>
     <string name="volume_stream_content_description_mute_a11y" msgid="8995013018414535494">"%1$s. మ్యూట్ చేయడానికి నొక్కండి."</string>
-    <!-- no translation found for volume_ringer_hint_mute (9199811307292269601) -->
-    <skip />
-    <!-- no translation found for volume_ringer_hint_unmute (6602880133293060368) -->
-    <skip />
-    <!-- no translation found for volume_ringer_hint_vibrate (4036802135666515202) -->
-    <skip />
+    <string name="volume_ringer_hint_mute" msgid="9199811307292269601">"మ్యూట్ చేయి"</string>
+    <string name="volume_ringer_hint_unmute" msgid="6602880133293060368">"అన్‌మ్యూట్ చేయి"</string>
+    <string name="volume_ringer_hint_vibrate" msgid="4036802135666515202">"వైబ్రేట్"</string>
     <string name="volume_dialog_title" msgid="7272969888820035876">"%s వాల్యూమ్ నియంత్రణలు"</string>
     <string name="volume_dialog_ringer_guidance_ring" msgid="3360373718388509040">"కాల్‌లు మరియు నోటిఫికేషన్‌లు రింగ్ అవుతాయి (<xliff:g id="VOLUME_LEVEL">%1$s</xliff:g>)"</string>
     <string name="output_title" msgid="5355078100792942802">"మీడియా అవుట్‌పుట్"</string>
@@ -615,20 +611,13 @@
     <string name="inline_minimize_button" msgid="966233327974702195">"కుదించు"</string>
     <string name="inline_keep_showing_app" msgid="1723113469580031041">"ఈ యాప్ నుండి నోటిఫికేషన్‌లను చూపిస్తూ ఉండాలా?"</string>
     <string name="notification_unblockable_desc" msgid="1037434112919403708">"ఈ నోటిఫికేషన్‌లను ఆఫ్ చేయలేరు"</string>
-    <!-- no translation found for appops_camera (8100147441602585776) -->
-    <skip />
-    <!-- no translation found for appops_microphone (741508267659494555) -->
-    <skip />
-    <!-- no translation found for appops_overlay (6165912637560323464) -->
-    <skip />
-    <!-- no translation found for appops_camera_mic (1576901651150187433) -->
-    <skip />
-    <!-- no translation found for appops_camera_overlay (8869400080809298814) -->
-    <skip />
-    <!-- no translation found for appops_mic_overlay (4835157962857919804) -->
-    <skip />
-    <!-- no translation found for appops_camera_mic_overlay (6718768197048030993) -->
-    <skip />
+    <string name="appops_camera" msgid="8100147441602585776">"ఈ యాప్ ఈ కెమెరాను ఉపయోగిస్తోంది."</string>
+    <string name="appops_microphone" msgid="741508267659494555">"ఈ యాప్ మైక్రోఫోన్‌ను ఉపయోగిస్తుంది."</string>
+    <string name="appops_overlay" msgid="6165912637560323464">"ఈ యాప్ మీ స్క్రీన్‌లోని ఇతర యాప్‌లపై ప్రదర్శించబడుతోంది."</string>
+    <string name="appops_camera_mic" msgid="1576901651150187433">"ఈ యాప్ మైక్రోఫోన్ మరియు కెమెరాను ఉపయోగిస్తుంది."</string>
+    <string name="appops_camera_overlay" msgid="8869400080809298814">"ఈ యాప్ మీ స్క్రీన్‌లోని ఇతర యాప్‌లపై ప్రదర్శించబడుతోంది మరియు కెమెరాను ఉపయోగిస్తుంది."</string>
+    <string name="appops_mic_overlay" msgid="4835157962857919804">"ఈ యాప్ మీ స్క్రీన్‌లోని ఇతర యాప్‌లపై ప్రదర్శించబడుతోంది మరియు మైక్రోఫోన్‌ను ఉపయోగిస్తుంది."</string>
+    <string name="appops_camera_mic_overlay" msgid="6718768197048030993">"ఈ యాప్ మీ స్క్రీన్‌లోని ఇతర యాప్‌లపై ప్రదర్శించబడుతోంది మరియు మైక్రోఫోన్, కెమెరాను ఉపయోగిస్తుంది."</string>
     <string name="notification_appops_settings" msgid="1028328314935908050">"సెట్టింగ్‌లు"</string>
     <string name="notification_appops_ok" msgid="1156966426011011434">"సరే"</string>
     <string name="notification_channel_controls_opened_accessibility" msgid="6553950422055908113">"<xliff:g id="APP_NAME">%1$s</xliff:g> యొక్క నోటిఫికేషన్ నియంత్రణలు తెరవబడ్డాయి"</string>
@@ -688,7 +677,7 @@
     <string name="keyboard_shortcut_group_system_back" msgid="2207004531216446378">"వెనుకకు"</string>
     <string name="keyboard_shortcut_group_system_notifications" msgid="8366964080041773224">"నోటిఫికేషన్‌లు"</string>
     <string name="keyboard_shortcut_group_system_shortcuts_helper" msgid="4892255911160332762">"కీబోర్డ్ షార్ట్‌కట్‌లు"</string>
-    <string name="keyboard_shortcut_group_system_switch_input" msgid="2334164096341310324">"ఇన్‌పుట్ పద్ధతిని మార్చండి"</string>
+    <string name="keyboard_shortcut_group_system_switch_input" msgid="8413348767825486492">"కీబోర్డ్ లేఅవుట్‌ను మార్చండి"</string>
     <string name="keyboard_shortcut_group_applications" msgid="9129465955073449206">"అప్లికేషన్‌లు"</string>
     <string name="keyboard_shortcut_group_applications_assist" msgid="9095441910537146013">"సహాయకం"</string>
     <string name="keyboard_shortcut_group_applications_browser" msgid="6465985474000766533">"బ్రౌజర్"</string>
@@ -864,6 +853,5 @@
     <string name="auto_saver_enabled_text" msgid="874711029884777579">"బ్యాటరీ <xliff:g id="PERCENTAGE">%d</xliff:g>%% కంటే తగ్గినప్పుడు బ్యాటరీ సేవర్ ఆటోమేటిక్‌గా ఆన్ అవుతుంది."</string>
     <string name="open_saver_setting_action" msgid="8314624730997322529">"సెట్టింగ్‌లు"</string>
     <string name="auto_saver_okay_action" msgid="2701221740227683650">"అర్థమైంది"</string>
-    <!-- no translation found for heap_dump_tile_name (9141031328971226374) -->
-    <skip />
+    <string name="heap_dump_tile_name" msgid="9141031328971226374">"డంప్ SysUI హీప్"</string>
 </resources>
