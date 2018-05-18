@@ -104,7 +104,7 @@ public class HearingAidProfile implements LocalBluetoothProfile {
     }
 
     public boolean isConnectable() {
-        return true;
+        return false;
     }
 
     public boolean isAutoConnectable() {
