@@ -70,6 +70,9 @@ public class SyncRtSurfaceTransactionApplier {
                 t.setEarlyWakeup();
                 t.apply();
         });
+
+        // Make sure a frame gets scheduled.
+        mTargetViewRootImpl.getView().invalidate();
     }
 
     public static class SurfaceParams {
@@ -83,9 +86,9 @@ public class SyncRtSurfaceTransactionApplier {
          * @param matrix Matrix to apply.
          * @param windowCrop Crop to apply.
          */
-        public SurfaceParams(SurfaceControl surface, float alpha, Matrix matrix, Rect windowCrop,
-                int layer) {
-            this.surface = surface;
+        public SurfaceParams(SurfaceControlCompat surface, float alpha, Matrix matrix,
+                Rect windowCrop, int layer) {
+            this.surface = surface.mSurfaceControl;
             this.alpha = alpha;
             this.matrix = new Matrix(matrix);
             this.windowCrop = new Rect(windowCrop);
