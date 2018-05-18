@@ -798,8 +798,6 @@ public class Handler {
     /**
      * Check if there are any pending posts of messages with callback r in
      * the message queue.
-     * 
-     * @hide
      */
     public final boolean hasCallbacks(Runnable r) {
         return mQueue.hasMessages(this, r, null);
