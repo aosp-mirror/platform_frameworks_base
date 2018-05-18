@@ -16,7 +16,7 @@
 
 package com.android.server.connectivity;
 
-import static android.net.ConnectivityManager.PRIVATE_DNS_DEFAULT_MODE;
+import static android.net.ConnectivityManager.PRIVATE_DNS_DEFAULT_MODE_FALLBACK;
 import static android.net.ConnectivityManager.PRIVATE_DNS_MODE_OFF;
 import static android.net.ConnectivityManager.PRIVATE_DNS_MODE_OPPORTUNISTIC;
 import static android.net.ConnectivityManager.PRIVATE_DNS_MODE_PROVIDER_HOSTNAME;
@@ -24,6 +24,7 @@ import static android.provider.Settings.Global.DNS_RESOLVER_MIN_SAMPLES;
 import static android.provider.Settings.Global.DNS_RESOLVER_MAX_SAMPLES;
 import static android.provider.Settings.Global.DNS_RESOLVER_SAMPLE_VALIDITY_SECONDS;
 import static android.provider.Settings.Global.DNS_RESOLVER_SUCCESS_THRESHOLD_PERCENT;
+import static android.provider.Settings.Global.PRIVATE_DNS_DEFAULT_MODE;
 import static android.provider.Settings.Global.PRIVATE_DNS_MODE;
 import static android.provider.Settings.Global.PRIVATE_DNS_SPECIFIER;
 
@@ -184,6 +185,7 @@ public class DnsManager {
 
     public static Uri[] getPrivateDnsSettingsUris() {
         return new Uri[]{
+            Settings.Global.getUriFor(PRIVATE_DNS_DEFAULT_MODE),
             Settings.Global.getUriFor(PRIVATE_DNS_MODE),
             Settings.Global.getUriFor(PRIVATE_DNS_SPECIFIER),
         };
@@ -485,8 +487,10 @@ public class DnsManager {
     }
 
     private static String getPrivateDnsMode(ContentResolver cr) {
-        final String mode = getStringSetting(cr, PRIVATE_DNS_MODE);
-        return !TextUtils.isEmpty(mode) ? mode : PRIVATE_DNS_DEFAULT_MODE;
+        String mode = getStringSetting(cr, PRIVATE_DNS_MODE);
+        if (TextUtils.isEmpty(mode)) mode = getStringSetting(cr, PRIVATE_DNS_DEFAULT_MODE);
+        if (TextUtils.isEmpty(mode)) mode = PRIVATE_DNS_DEFAULT_MODE_FALLBACK;
+        return mode;
     }
 
     private static String getStringSetting(ContentResolver cr, String which) {
