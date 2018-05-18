@@ -9305,7 +9305,7 @@ public final class Settings {
         * values.
         * Consists of a comma seperated list of strings:
         * "name,apn,proxy,port,username,password,server,mmsc,mmsproxy,mmsport,mcc,mnc,auth,type"
-        * note that empty fields can be ommitted: "name,apn,,,,,,,,,310,260,,DUN"
+        * note that empty fields can be omitted: "name,apn,,,,,,,,,310,260,,DUN"
         * @hide
         */
        public static final String TETHER_DUN_APN = "tether_dun_apn";
@@ -10365,6 +10365,17 @@ public final class Settings {
         public static final String PRIVATE_DNS_SPECIFIER = "private_dns_specifier";
 
         private static final Validator PRIVATE_DNS_SPECIFIER_VALIDATOR = ANY_STRING_VALIDATOR;
+
+        /**
+          * Forced override of the default mode (hardcoded as "automatic", nee "opportunistic").
+          * This allows changing the default mode without effectively disabling other modes,
+          * all of which require explicit user action to enable/configure. See also b/79719289.
+          *
+          * Value is a string, suitable for assignment to PRIVATE_DNS_MODE above.
+          *
+          * {@hide}
+          */
+        public static final String PRIVATE_DNS_DEFAULT_MODE = "private_dns_default_mode";
 
         /** {@hide} */
         public static final String
