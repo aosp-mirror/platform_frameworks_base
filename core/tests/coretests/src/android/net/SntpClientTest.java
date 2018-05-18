@@ -16,10 +16,18 @@
 
 package android.net;
 
-import android.content.Context;
-import android.test.AndroidTestCase;
+import static junit.framework.Assert.assertEquals;
+import static junit.framework.Assert.assertFalse;
+import static junit.framework.Assert.assertTrue;
+
+import android.support.test.runner.AndroidJUnit4;
 import android.util.Log;
+
 import libcore.util.HexEncoding;
+
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
 
 import java.io.IOException;
 import java.net.DatagramPacket;
@@ -28,8 +36,8 @@ import java.net.InetAddress;
 import java.net.SocketException;
 import java.util.Arrays;
 
-
-public class SntpClientTest extends AndroidTestCase {
+@RunWith(AndroidJUnit4.class)
+public class SntpClientTest {
     private static final String TAG = "SntpClientTest";
 
     private static final int ORIGINATE_TIME_OFFSET = 24;
@@ -58,18 +66,19 @@ public class SntpClientTest extends AndroidTestCase {
             "d9ca945194bd3fff" +
             "d9ca945194bd4001";
 
-    private final SntpTestServer mServer = new SntpTestServer();
-    private final SntpClient mClient = new SntpClient();
-
+    private SntpTestServer mServer;
+    private SntpClient mClient;
     private Network mNetwork;
 
-    @Override
-    protected void setUp() throws Exception {
-        super.setUp();
-        ConnectivityManager mCM = getContext().getSystemService(ConnectivityManager.class);
-        mNetwork = mCM.getActiveNetwork();
+    @Before
+    public void setUp() throws Exception {
+        // NETID_UNSET allows the test to run, with a loopback server, even w/o external networking
+        mNetwork = new Network(ConnectivityManager.NETID_UNSET);
+        mServer = new SntpTestServer();
+        mClient = new SntpClient();
     }
 
+    @Test
     public void testBasicWorkingSntpClientQuery() throws Exception {
         mServer.setServerReply(HexEncoding.decode(WORKING_VERSION4.toCharArray(), false));
         assertTrue(mClient.requestTime(mServer.getAddress(), mServer.getPort(), 500, mNetwork));
@@ -77,10 +86,12 @@ public class SntpClientTest extends AndroidTestCase {
         assertEquals(1, mServer.numRepliesSent());
     }
 
+    @Test
     public void testDnsResolutionFailure() throws Exception {
         assertFalse(mClient.requestTime("ntp.server.doesnotexist.example", 5000, mNetwork));
     }
 
+    @Test
     public void testTimeoutFailure() throws Exception {
         mServer.clearServerReply();
         assertFalse(mClient.requestTime(mServer.getAddress(), mServer.getPort(), 500, mNetwork));
@@ -88,6 +99,7 @@ public class SntpClientTest extends AndroidTestCase {
         assertEquals(0, mServer.numRepliesSent());
     }
 
+    @Test
     public void testIgnoreLeapNoSync() throws Exception {
         final byte[] reply = HexEncoding.decode(WORKING_VERSION4.toCharArray(), false);
         reply[0] |= (byte) 0xc0;
@@ -97,6 +109,7 @@ public class SntpClientTest extends AndroidTestCase {
         assertEquals(1, mServer.numRepliesSent());
     }
 
+    @Test
     public void testAcceptOnlyServerAndBroadcastModes() throws Exception {
         final byte[] reply = HexEncoding.decode(WORKING_VERSION4.toCharArray(), false);
         for (int i = 0; i <= 7; i++) {
@@ -120,6 +133,7 @@ public class SntpClientTest extends AndroidTestCase {
         }
     }
 
+    @Test
     public void testAcceptableStrataOnly() throws Exception {
         final int STRATUM_MIN = 1;
         final int STRATUM_MAX = 15;
@@ -141,6 +155,7 @@ public class SntpClientTest extends AndroidTestCase {
         }
     }
 
+    @Test
     public void testZeroTransmitTime() throws Exception {
         final byte[] reply = HexEncoding.decode(WORKING_VERSION4.toCharArray(), false);
         Arrays.fill(reply, TRANSMIT_TIME_OFFSET, TRANSMIT_TIME_OFFSET + 8, (byte) 0x00);
