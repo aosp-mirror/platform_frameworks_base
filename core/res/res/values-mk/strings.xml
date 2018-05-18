@@ -1044,7 +1044,7 @@
     <string name="capital_on" msgid="1544682755514494298">"ВКЛУЧЕНО"</string>
     <string name="capital_off" msgid="6815870386972805832">"ИСКЛУЧЕНО"</string>
     <string name="whichApplication" msgid="4533185947064773386">"Заврши дејство со"</string>
-    <string name="whichApplicationNamed" msgid="8260158865936942783">"Завршете го дејството со користење %1$s"</string>
+    <string name="whichApplicationNamed" msgid="8260158865936942783">"Остварете го дејството со %1$s"</string>
     <string name="whichApplicationLabel" msgid="7425855495383818784">"Заврши го дејството"</string>
     <string name="whichViewApplication" msgid="3272778576700572102">"Отвори со"</string>
     <string name="whichViewApplicationNamed" msgid="2286418824011249620">"Отвори со %1$s"</string>
@@ -1784,8 +1784,8 @@
     <string name="language_picker_section_all" msgid="3097279199511617537">"Сите јазици"</string>
     <string name="region_picker_section_all" msgid="8966316787153001779">"Сите региони"</string>
     <string name="locale_search_menu" msgid="2560710726687249178">"Пребарај"</string>
-    <string name="app_suspended_title" msgid="1919029799438164552">"Не се отвора апликацијата"</string>
-    <string name="app_suspended_default_message" msgid="7875306315686531621">"Апликацијата <xliff:g id="APP_NAME_0">%1$s</xliff:g> не е достапна во моментов. Со ова управува <xliff:g id="APP_NAME_1">%2$s</xliff:g>."</string>
+    <string name="app_suspended_title" msgid="2075071241147969611">"Апликацијата не е достапна"</string>
+    <string name="app_suspended_default_message" msgid="123166680425711887">"Апликацијата <xliff:g id="APP_NAME_0">%1$s</xliff:g> не е достапна во моментов. Со ова управува <xliff:g id="APP_NAME_1">%2$s</xliff:g>."</string>
     <string name="app_suspended_more_details" msgid="1131804827776778187">"Дознај повеќе"</string>
     <string name="work_mode_off_title" msgid="1118691887588435530">"Да се вклучи работниот профил?"</string>
     <string name="work_mode_off_message" msgid="5130856710614337649">"Вашите работни апликации, известувања, податоци и други функции на работниот профил ќе бидат вклучени"</string>
@@ -1882,5 +1882,8 @@
     <string name="zen_upgrade_notification_content" msgid="1794994264692424562">"Допрете за да проверите што е блокирано."</string>
     <string name="notification_app_name_system" msgid="4205032194610042794">"Систем"</string>
     <string name="notification_app_name_settings" msgid="7751445616365753381">"Поставки"</string>
+    <string name="notification_appops_camera_active" msgid="5050283058419699771">"Камера"</string>
+    <string name="notification_appops_microphone_active" msgid="4335305527588191730">"Микрофон"</string>
+    <string name="notification_appops_overlay_active" msgid="633813008357934729">"се прикажува преку други апликации на вашиот екран"</string>
     <string name="car_loading_profile" msgid="3545132581795684027">"Се вчитува"</string>
 </resources>

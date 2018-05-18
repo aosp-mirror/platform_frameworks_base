@@ -291,9 +291,9 @@
     <string name="permgrouplab_camera" msgid="4820372495894586615">"Kamera"</string>
     <string name="permgroupdesc_camera" msgid="3250611594678347720">"bëj fotografi dhe regjistro video"</string>
     <string name="permgrouprequest_camera" msgid="1299833592069671756">"Të lejohet që &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; të nxjerrë fotografi dhe të regjistrojë video?"</string>
-    <string name="permgrouplab_calllog" msgid="8798646184930388160">"Ditarët e telefonatave"</string>
-    <string name="permgroupdesc_calllog" msgid="3006237336748283775">"lexo dhe shkruaj ditarin e telefonatave"</string>
-    <string name="permgrouprequest_calllog" msgid="8487355309583773267">"Dëshiron të lejosh që &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; të ketë qasje në ditarët e tu të telefonatave?"</string>
+    <string name="permgrouplab_calllog" msgid="8798646184930388160">"Evidencat e telefonatave"</string>
+    <string name="permgroupdesc_calllog" msgid="3006237336748283775">"lexo dhe shkruaj evidencën e telefonatave"</string>
+    <string name="permgrouprequest_calllog" msgid="8487355309583773267">"Dëshiron të lejosh që &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; të ketë qasje në evidencat e tua të telefonatave?"</string>
     <string name="permgrouplab_phone" msgid="5229115638567440675">"Telefoni"</string>
     <string name="permgroupdesc_phone" msgid="6234224354060641055">"kryej dhe menaxho telefonata"</string>
     <string name="permgrouprequest_phone" msgid="9166979577750581037">"Të lejohet që &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; të kryejë dhe të menaxhojë telefonata?"</string>
@@ -1261,7 +1261,7 @@
     <string name="share_remote_bugreport_notification_title" msgid="4987095013583691873">"Të ndahet raporti i defektit në kod?"</string>
     <string name="sharing_remote_bugreport_notification_title" msgid="7572089031496651372">"Po ndan raportin e defekteve në kod..."</string>
     <string name="share_remote_bugreport_notification_message_finished" msgid="6029609949340992866">"Administratori kërkoi një raport të defekteve në kod për të ndihmuar me zgjidhjen e problemeve. Aplikacioni dhe të dhënat mund të ndahen."</string>
-    <string name="share_remote_bugreport_action" msgid="6249476773913384948">"SHPËRNDA"</string>
+    <string name="share_remote_bugreport_action" msgid="6249476773913384948">"SHPËRNDAJ"</string>
     <string name="decline_remote_bugreport_action" msgid="6230987241608770062">"REFUZO"</string>
     <string name="select_input_method" msgid="8547250819326693584">"Ndërro tastierë"</string>
     <string name="show_ime" msgid="2506087537466597099">"Mbaje në ekran ndërsa tastiera fizike është aktive"</string>
@@ -1385,7 +1385,7 @@
     <string name="action_mode_done" msgid="7217581640461922289">"U krye!"</string>
     <string name="progress_erasing" product="nosdcard" msgid="4521573321524340058">"Po fshin USB-në..."</string>
     <string name="progress_erasing" product="default" msgid="6596988875507043042">"Po fshin kartën SD…"</string>
-    <string name="share" msgid="1778686618230011964">"Shpërnda"</string>
+    <string name="share" msgid="1778686618230011964">"Shpërndaj"</string>
     <string name="find" msgid="4808270900322985960">"Gjej"</string>
     <string name="websearch" msgid="4337157977400211589">"Kërkim në internet"</string>
     <string name="find_next" msgid="5742124618942193978">"Gjej tjetrën"</string>
@@ -1782,8 +1782,8 @@
     <string name="language_picker_section_all" msgid="3097279199511617537">"Të gjitha gjuhët"</string>
     <string name="region_picker_section_all" msgid="8966316787153001779">"Të gjitha rajonet"</string>
     <string name="locale_search_menu" msgid="2560710726687249178">"Kërko"</string>
-    <string name="app_suspended_title" msgid="1919029799438164552">"Aplikacioni nuk mund të hapet"</string>
-    <string name="app_suspended_default_message" msgid="7875306315686531621">"Aplikacioni <xliff:g id="APP_NAME_0">%1$s</xliff:g> nuk ofrohet në këtë moment. Kjo menaxhohet nga <xliff:g id="APP_NAME_1">%2$s</xliff:g>."</string>
+    <string name="app_suspended_title" msgid="2075071241147969611">"Aplikacioni nuk ofrohet"</string>
+    <string name="app_suspended_default_message" msgid="123166680425711887">"<xliff:g id="APP_NAME_0">%1$s</xliff:g> nuk ofrohet në këtë moment. Kjo menaxhohet nga <xliff:g id="APP_NAME_1">%2$s</xliff:g>."</string>
     <string name="app_suspended_more_details" msgid="1131804827776778187">"Mëso më shumë"</string>
     <string name="work_mode_off_title" msgid="1118691887588435530">"Të aktivizohet profili i punës?"</string>
     <string name="work_mode_off_message" msgid="5130856710614337649">"Aplikacionet e punës, njoftimet, të dhënat e tua dhe funksionet e tjera të profilit të punës do të aktivizohen"</string>
@@ -1880,5 +1880,8 @@
     <string name="zen_upgrade_notification_content" msgid="1794994264692424562">"Trokit për të shënuar atë që është bllokuar"</string>
     <string name="notification_app_name_system" msgid="4205032194610042794">"Sistemi"</string>
     <string name="notification_app_name_settings" msgid="7751445616365753381">"Cilësimet"</string>
+    <string name="notification_appops_camera_active" msgid="5050283058419699771">"Kamera"</string>
+    <string name="notification_appops_microphone_active" msgid="4335305527588191730">"Mikrofoni"</string>
+    <string name="notification_appops_overlay_active" msgid="633813008357934729">"po shfaqet mbi aplikacionet e tjera në ekranin tënd"</string>
     <string name="car_loading_profile" msgid="3545132581795684027">"Po ngarkohet"</string>
 </resources>

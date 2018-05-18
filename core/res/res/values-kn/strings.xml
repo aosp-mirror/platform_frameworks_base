@@ -291,12 +291,9 @@
     <string name="permgrouplab_camera" msgid="4820372495894586615">"ಕ್ಯಾಮರಾ"</string>
     <string name="permgroupdesc_camera" msgid="3250611594678347720">"ಚಿತ್ರಗಳನ್ನು ತೆಗೆಯಲು, ವೀಡಿಯೊ ರೆಕಾರ್ಡ್ ಮಾಡಲು"</string>
     <string name="permgrouprequest_camera" msgid="1299833592069671756">"ಚಿತ್ರಗಳನ್ನು ಸೆರೆಹಿಡಿಯಲು ಮತ್ತು ವೀಡಿಯೊ ರೆಕಾರ್ಡ್‌ ಮಾಡಲು &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ಗೆ ಅನುಮತಿಸಬೇಕೇ?"</string>
-    <!-- no translation found for permgrouplab_calllog (8798646184930388160) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_calllog (3006237336748283775) -->
-    <skip />
-    <!-- no translation found for permgrouprequest_calllog (8487355309583773267) -->
-    <skip />
+    <string name="permgrouplab_calllog" msgid="8798646184930388160">"ಕರೆಯ ಲಾಗ್‌ಗಳು"</string>
+    <string name="permgroupdesc_calllog" msgid="3006237336748283775">"ಪೋನ್‌ ಕರೆಯ ಲಾಗ್‌ ಅನ್ನು ಓದಿ ಮತ್ತು ಬರೆಯಿರಿ"</string>
+    <string name="permgrouprequest_calllog" msgid="8487355309583773267">"ನಿಮ್ಮ ಫೋನ್‌ ಕರೆಯ ಲಾಗ್‌ಗಳಿಗೆ ಪ್ರವೇಶ ಪಡೆಯಲು &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ಗೆ ಅನುಮತಿಸಬೇಕೇ?"</string>
     <string name="permgrouplab_phone" msgid="5229115638567440675">"ಫೋನ್"</string>
     <string name="permgroupdesc_phone" msgid="6234224354060641055">"ಫೋನ್ ಕರೆ ಮಾಡಲು ಹಾಗೂ ನಿರ್ವಹಿಸಲು"</string>
     <string name="permgrouprequest_phone" msgid="9166979577750581037">"ಫೋನ್ ಕರೆಗಳನ್ನು ಮಾಡಲು ಮತ್ತು ನಿರ್ವಹಿಸಲು &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ಗೆ ಅನುಮತಿಸಬೇಕೇ?"</string>
@@ -1785,8 +1782,8 @@
     <string name="language_picker_section_all" msgid="3097279199511617537">"ಎಲ್ಲಾ ಭಾಷೆಗಳು"</string>
     <string name="region_picker_section_all" msgid="8966316787153001779">"ಎಲ್ಲಾ ಪ್ರದೇಶಗಳು"</string>
     <string name="locale_search_menu" msgid="2560710726687249178">"ಹುಡುಕಿ"</string>
-    <string name="app_suspended_title" msgid="1919029799438164552">"ಅಪ್ಲಿಕೇಶನ್ ತೆರೆಯಲು ಸಾಧ್ಯವಿಲ್ಲ"</string>
-    <string name="app_suspended_default_message" msgid="7875306315686531621">"<xliff:g id="APP_NAME_0">%1$s</xliff:g> ಅಪ್ಲಿಕೇಶನ್‌ ಸದ್ಯಕ್ಕೆ ಲಭ್ಯವಿಲ್ಲ. ಇದನ್ನು <xliff:g id="APP_NAME_1">%2$s</xliff:g> ನಲ್ಲಿ ನಿರ್ವಹಿಸಲಾಗುತ್ತಿದೆ."</string>
+    <string name="app_suspended_title" msgid="2075071241147969611">"ಅಪ್ಲಿಕೇಶನ್ ಲಭ್ಯವಿಲ್ಲ"</string>
+    <string name="app_suspended_default_message" msgid="123166680425711887">"<xliff:g id="APP_NAME_0">%1$s</xliff:g> ಅಪ್ಲಿಕೇಶನ್‌ ಸದ್ಯಕ್ಕೆ ಲಭ್ಯವಿಲ್ಲ. ಇದನ್ನು <xliff:g id="APP_NAME_1">%2$s</xliff:g> ನಲ್ಲಿ ನಿರ್ವಹಿಸಲಾಗುತ್ತಿದೆ."</string>
     <string name="app_suspended_more_details" msgid="1131804827776778187">"ಇನ್ನಷ್ಟು ತಿಳಿಯಿರಿ"</string>
     <string name="work_mode_off_title" msgid="1118691887588435530">"ಉದ್ಯೋಗ ಪ್ರೊಫೈಲ್‌ ಆನ್ ಮಾಡುವುದೇ?"</string>
     <string name="work_mode_off_message" msgid="5130856710614337649">"ನಿಮ್ಮ ಕೆಲಸದ ಅಪ್ಲಿಕೇಶನ್‌ಗಳು, ಅಧಿಸೂಚನೆಗಳು, ಡೇಟಾ ಮತ್ತು ಉದ್ಯೋಗ ಪ್ರೊಫೈಲ್‌ನ ಇತರ ವೈಶಿಷ್ಟ್ಯಗಳನ್ನು ಆನ್ ಮಾಡಲಾಗುತ್ತದೆ"</string>
@@ -1825,7 +1822,7 @@
     <string name="time_picker_minute_label" msgid="5168864173796598399">"ನಿಮಿಷ"</string>
     <string name="time_picker_header_text" msgid="143536825321922567">"ಸಮಯವನ್ನು ಹೊಂದಿಸಿ"</string>
     <string name="time_picker_input_error" msgid="7574999942502513765">"ಮಾನ್ಯವಾದ ಸಮಯವನ್ನು ನಮೂದಿಸಿ"</string>
-    <string name="time_picker_prompt_label" msgid="7588093983899966783">"ಸಮಯದಲ್ಲಿ ಟೈಪ್ ಮಾಡಿ"</string>
+    <string name="time_picker_prompt_label" msgid="7588093983899966783">"ಸಮಯ ಟೈಪ್ ಮಾಡಿ"</string>
     <string name="time_picker_text_input_mode_description" msgid="4148166758173708199">"ಸಮಯವನ್ನು ನಮೂದಿಸಲು ಪಠ್ಯದ ನಮೂನೆಗೆ ಬದಲಿಸಿ."</string>
     <string name="time_picker_radial_mode_description" msgid="4953403779779557198">"ಸಮಯವನ್ನು ನಮೂದಿಸಲು ಗಡಿಯಾರದ ನಮೂನೆಗೆ ಬದಲಿಸಿ."</string>
     <string name="autofill_picker_accessibility_title" msgid="8469043291648711535">"ಸ್ವಯಂತುಂಬುವಿಕೆ ಆಯ್ಕೆಗಳು"</string>
@@ -1883,5 +1880,8 @@
     <string name="zen_upgrade_notification_content" msgid="1794994264692424562">"ಏನನ್ನು ನಿರ್ಬಂಧಿಸಲಾಗಿದೆ ಎಂಬುದನ್ನು ಪರೀಕ್ಷಿಸಲು ಟ್ಯಾಪ್ ಮಾಡಿ."</string>
     <string name="notification_app_name_system" msgid="4205032194610042794">"ಸಿಸ್ಟಂ"</string>
     <string name="notification_app_name_settings" msgid="7751445616365753381">"ಸೆಟ್ಟಿಂಗ್‌ಗಳು"</string>
+    <string name="notification_appops_camera_active" msgid="5050283058419699771">"ಕ್ಯಾಮರಾ"</string>
+    <string name="notification_appops_microphone_active" msgid="4335305527588191730">"ಮೈಕ್ರೋಫೋನ್‌"</string>
+    <string name="notification_appops_overlay_active" msgid="633813008357934729">"ನಿಮ್ಮ ಸ್ಕ್ರೀನ್‌ನಲ್ಲಿ ಇತರ ಅಪ್ಲಿಕೇಶನ್‌ಗಳ ಮೂಲಕ ಪ್ರದರ್ಶಿಸಲಾಗುತ್ತಿದೆ"</string>
     <string name="car_loading_profile" msgid="3545132581795684027">"ಲೋಡ್ ಆಗುತ್ತಿದೆ"</string>
 </resources>

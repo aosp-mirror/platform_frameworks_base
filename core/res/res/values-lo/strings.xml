@@ -1674,7 +1674,7 @@
     </plurals>
     <string name="restr_pin_try_later" msgid="973144472490532377">"ລອງໃໝ່ອີກຄັ້ງໃນພາຍຫລັງ."</string>
     <string name="immersive_cling_title" msgid="8394201622932303336">"ການ​ເບິ່ງ​ເຕັມ​ໜ້າ​ຈໍ"</string>
-    <string name="immersive_cling_description" msgid="3482371193207536040">"ເພື່ອ​ອອກ, ຮູດ​ລົງ​ລຸ່ມ​ຈາກ​ດ້ານ​ເທິງ."</string>
+    <string name="immersive_cling_description" msgid="3482371193207536040">"ຫາກຕ້ອງການອອກ, ໃຫ້ຮູດຈາກທາງເທິງລົງມາທາງລຸ່ມ."</string>
     <string name="immersive_cling_positive" msgid="5016839404568297683">"ໄດ້​ແລ້ວ"</string>
     <string name="done_label" msgid="2093726099505892398">"ແລ້ວໆ"</string>
     <string name="hour_picker_description" msgid="6698199186859736512">"ໂຕໝຸນປັບຊົ່ວໂມງ"</string>
@@ -1781,8 +1781,8 @@
     <string name="language_picker_section_all" msgid="3097279199511617537">"ທຸກພາ​ສາ​"</string>
     <string name="region_picker_section_all" msgid="8966316787153001779">"ທຸກຂົງເຂດ"</string>
     <string name="locale_search_menu" msgid="2560710726687249178">"ຄົ້ນຫາ"</string>
-    <string name="app_suspended_title" msgid="1919029799438164552">"ບໍ່ສາມາດເປີດແອັບໄດ້"</string>
-    <string name="app_suspended_default_message" msgid="7875306315686531621">"ບໍ່ສາມາດໃຊ້ແອັບ <xliff:g id="APP_NAME_0">%1$s</xliff:g> ໄດ້ໃນຕອນນີ້. ນີ້ຖືກຈັດການໂດຍ <xliff:g id="APP_NAME_1">%2$s</xliff:g>."</string>
+    <string name="app_suspended_title" msgid="2075071241147969611">"ບໍ່ສາມາດໃຊ້ແອັບໄດ້"</string>
+    <string name="app_suspended_default_message" msgid="123166680425711887">"<xliff:g id="APP_NAME_0">%1$s</xliff:g> ບໍ່ສາມາດໃຊ້ໄດ້ໃນຕອນນີ້. ມັນຖືກຈັດການໂດຍ <xliff:g id="APP_NAME_1">%2$s</xliff:g>."</string>
     <string name="app_suspended_more_details" msgid="1131804827776778187">"ສຶກສາເພີ່ມເຕີມ"</string>
     <string name="work_mode_off_title" msgid="1118691887588435530">"ເປີດໃຊ້ໂປຣໄຟລ໌ບ່ອນເຮັດວຽກບໍ?"</string>
     <string name="work_mode_off_message" msgid="5130856710614337649">"ແອັບວຽກຂອງທ່ານ, ການແຈ້ງເຕືອນ, ຂໍ້ມູນ ແລະ ຄຸນສົມບັດໂປຣໄຟລ໌ວຽກຈະຖືກເປີດໃຊ້"</string>
@@ -1879,5 +1879,8 @@
     <string name="zen_upgrade_notification_content" msgid="1794994264692424562">"ແຕະເພື່ອກວດສອບວ່າມີຫຍັງຖືກບລັອກໄວ້ແດ່."</string>
     <string name="notification_app_name_system" msgid="4205032194610042794">"ລະບົບ"</string>
     <string name="notification_app_name_settings" msgid="7751445616365753381">"ການຕັ້ງຄ່າ"</string>
+    <string name="notification_appops_camera_active" msgid="5050283058419699771">"ກ້ອງ"</string>
+    <string name="notification_appops_microphone_active" msgid="4335305527588191730">"ໄມໂຄຣໂຟນ"</string>
+    <string name="notification_appops_overlay_active" msgid="633813008357934729">"ສະແດງຜົນບັງແອັບອື່ນຢູ່ໜ້າຈໍຂອງທ່ານ"</string>
     <string name="car_loading_profile" msgid="3545132581795684027">"ກຳລັງໂຫລດ"</string>
 </resources>

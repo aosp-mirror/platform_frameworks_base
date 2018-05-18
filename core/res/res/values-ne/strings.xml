@@ -227,8 +227,8 @@
     <string name="bugreport_option_full_title" msgid="6354382025840076439">"पूर्ण रिपोर्ट"</string>
     <string name="bugreport_option_full_summary" msgid="7210859858969115745">"तपाईँको यन्त्रले प्रतिक्रिया नदिँदा वा धेरै सुस्त चल्दा वा तपाईँलाई सबै रिपोर्ट सम्बन्धी खण्डहरूको आवश्यकता पर्दा प्रणालीमा न्यूनतम हस्तक्षेपका लागि यस विकल्पको प्रयोग गर्नुहोस्। यसले तपाईँलाई थप विवरणहरू प्रविष्ट गर्न वा स्क्रिनसटहरू लिन अनुमति दिँदैन।"</string>
     <plurals name="bugreport_countdown" formatted="false" msgid="6878900193900090368">
-      <item quantity="other"> बग रिपोर्टको लागि <xliff:g id="NUMBER_1">%d</xliff:g> सेकेन्डमा स्क्रिनशट लिँदै।</item>
-      <item quantity="one"> बग रिपोर्टको लागि <xliff:g id="NUMBER_0">%d</xliff:g> सेकेन्डमा स्क्रिनशट लिँदै।</item>
+      <item quantity="other"> बग रिपोर्टको लागि <xliff:g id="NUMBER_1">%d</xliff:g> सेकेन्डमा स्क्रिसट लिँदै।</item>
+      <item quantity="one"> बग रिपोर्टको लागि <xliff:g id="NUMBER_0">%d</xliff:g> सेकेन्डमा स्क्रिसट लिँदै।</item>
     </plurals>
     <string name="global_action_toggle_silent_mode" msgid="8219525344246810925">"मौन मोड"</string>
     <string name="global_action_silent_mode_on_status" msgid="3289841937003758806">"आवाज बन्द छ"</string>
@@ -291,12 +291,9 @@
     <string name="permgrouplab_camera" msgid="4820372495894586615">"क्यामेरा"</string>
     <string name="permgroupdesc_camera" msgid="3250611594678347720">"तस्बिर खिच्नुका साथै भिडियो रेकर्ड गर्नुहोस्"</string>
     <string name="permgrouprequest_camera" msgid="1299833592069671756">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; लाई तस्बिरहरू खिच्न र भिडियो रेकर्ड गर्न दिने हो?"</string>
-    <!-- no translation found for permgrouplab_calllog (8798646184930388160) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_calllog (3006237336748283775) -->
-    <skip />
-    <!-- no translation found for permgrouprequest_calllog (8487355309583773267) -->
-    <skip />
+    <string name="permgrouplab_calllog" msgid="8798646184930388160">"कलका लगहरू"</string>
+    <string name="permgroupdesc_calllog" msgid="3006237336748283775">"फोन कलको लग पढ्नुहोस् र लेख्नुहोस्"</string>
+    <string name="permgrouprequest_calllog" msgid="8487355309583773267">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; लाई तपाईंको फोन कलका लगहरूमाथि पहुँच राख्न अनुमति दिने हो?"</string>
     <string name="permgrouplab_phone" msgid="5229115638567440675">"फोन"</string>
     <string name="permgroupdesc_phone" msgid="6234224354060641055">"फोन कलहरू गर्नुहोस् र व्यवस्थापन गर्नुहोस्"</string>
     <string name="permgrouprequest_phone" msgid="9166979577750581037">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; लाई फोन कलहरू गर्न र तिनीहरूको व्यवस्थापन गर्न दिने हो?"</string>
@@ -1790,8 +1787,8 @@
     <string name="language_picker_section_all" msgid="3097279199511617537">"सम्पूर्ण भाषाहरू"</string>
     <string name="region_picker_section_all" msgid="8966316787153001779">"सबै क्षेत्रहरू"</string>
     <string name="locale_search_menu" msgid="2560710726687249178">"खोज"</string>
-    <string name="app_suspended_title" msgid="1919029799438164552">"अनुप्रयोग खोल्न सकिँदैन"</string>
-    <string name="app_suspended_default_message" msgid="7875306315686531621">"<xliff:g id="APP_NAME_0">%1$s</xliff:g> अनुप्रयोग अहिले उपलब्ध छैन। यो <xliff:g id="APP_NAME_1">%2$s</xliff:g> द्वारा व्यवस्थित छ।"</string>
+    <string name="app_suspended_title" msgid="2075071241147969611">"अनुप्रयोग उपलब्ध छैन"</string>
+    <string name="app_suspended_default_message" msgid="123166680425711887">"<xliff:g id="APP_NAME_0">%1$s</xliff:g> अहिले उपलब्ध छैन। यो <xliff:g id="APP_NAME_1">%2$s</xliff:g> द्वारा व्यवस्थित छ।"</string>
     <string name="app_suspended_more_details" msgid="1131804827776778187">"थप जान्नुहोस्"</string>
     <string name="work_mode_off_title" msgid="1118691887588435530">"कार्य प्रोफाइल सक्रिय गर्ने?"</string>
     <string name="work_mode_off_message" msgid="5130856710614337649">"तपाईंका कार्यसम्बन्धी अनुप्रयोग, सूचना, डेटा र कार्य प्रोफाइलका अन्य सुविधाहरू सक्रिय गरिने छन्‌"</string>
@@ -1888,5 +1885,8 @@
     <string name="zen_upgrade_notification_content" msgid="1794994264692424562">"रोक लगाइएका कुराहरू जाँच गर्न ट्याप गर्नुहोस्‌।"</string>
     <string name="notification_app_name_system" msgid="4205032194610042794">"प्रणाली"</string>
     <string name="notification_app_name_settings" msgid="7751445616365753381">"सेटिङहरू"</string>
+    <string name="notification_appops_camera_active" msgid="5050283058419699771">"क्यामेरा"</string>
+    <string name="notification_appops_microphone_active" msgid="4335305527588191730">"माइक्रोफोन"</string>
+    <string name="notification_appops_overlay_active" msgid="633813008357934729">"तपाईंको स्क्रिनका अन्य अनुप्रयोगहरूमा प्रदर्शन गरिँदै छ"</string>
     <string name="car_loading_profile" msgid="3545132581795684027">"लोड गर्दै"</string>
 </resources>
