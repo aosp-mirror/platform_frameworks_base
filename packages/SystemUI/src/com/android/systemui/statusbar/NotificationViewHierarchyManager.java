@@ -18,6 +18,7 @@ package com.android.systemui.statusbar;
 
 import android.content.Context;
 import android.content.res.Resources;
+import android.os.Trace;
 import android.service.notification.NotificationListenerService;
 import android.util.Log;
 import android.view.View;
@@ -283,6 +284,7 @@ public class NotificationViewHierarchyManager {
      * Updates expanded, dimmed and locked states of notification rows.
      */
     public void updateRowStates() {
+        Trace.beginSection("NotificationViewHierarchyManager#updateRowStates");
         final int N = mListContainer.getContainerChildCount();
 
         int visibleNotifications = 0;
@@ -352,6 +354,9 @@ public class NotificationViewHierarchyManager {
             row.showAppOpsIcons(entry.mActiveAppOps);
         }
 
+        Trace.beginSection("NotificationPresenter#onUpdateRowStates");
         mPresenter.onUpdateRowStates();
+        Trace.endSection();
+        Trace.endSection();
     }
 }
