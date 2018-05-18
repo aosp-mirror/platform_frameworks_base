@@ -172,10 +172,13 @@ public class Vpn {
     private PendingIntent mStatusIntent;
     private volatile boolean mEnableTeardown = true;
     private final INetworkManagementService mNetd;
-    private VpnConfig mConfig;
-    private NetworkAgent mNetworkAgent;
+    @VisibleForTesting
+    protected VpnConfig mConfig;
+    @VisibleForTesting
+    protected NetworkAgent mNetworkAgent;
     private final Looper mLooper;
-    private final NetworkCapabilities mNetworkCapabilities;
+    @VisibleForTesting
+    protected final NetworkCapabilities mNetworkCapabilities;
     private final SystemServices mSystemServices;
 
     /**
@@ -1071,7 +1074,8 @@ public class Vpn {
 
     // Returns true if the VPN has been established and the calling UID is its owner. Used to check
     // that a call to mutate VPN state is admissible.
-    private boolean isCallerEstablishedOwnerLocked() {
+    @VisibleForTesting
+    protected boolean isCallerEstablishedOwnerLocked() {
         return isRunningLocked() && Binder.getCallingUid() == mOwnerUID;
     }
 
