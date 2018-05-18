@@ -5161,8 +5161,7 @@ public class StatusBar extends SystemUI implements DemoMode,
                     removeNotification(parentToCancelFinal);
                 }
                 if (shouldAutoCancel(sbn)
-                        || mRemoteInputManager.getKeysKeptForRemoteInput().contains(
-                                notificationKey)) {
+                        || mEntryManager.isNotificationKeptForRemoteInput(notificationKey)) {
                     // Automatically remove all notifications that we may have kept around longer
                     removeNotification(sbn);
                 }
