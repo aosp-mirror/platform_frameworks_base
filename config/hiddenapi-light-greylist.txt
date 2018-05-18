@@ -896,6 +896,9 @@ Landroid/app/SearchManager;->isVisible()Z
 Landroid/app/SearchManager;->launchAssist(Landroid/os/Bundle;)V
 Landroid/app/SearchManager;->mSearchDialog:Landroid/app/SearchDialog;
 Landroid/app/SearchManager;->startSearch(Ljava/lang/String;ZLandroid/content/ComponentName;Landroid/os/Bundle;ZLandroid/graphics/Rect;)V
+Landroid/app/servertransaction/ClientTransaction;->mActivityCallbacks:Ljava/util/List;
+Landroid/app/servertransaction/LaunchActivityItem;->mInfo:Landroid/content/pm/ActivityInfo;
+Landroid/app/servertransaction/LaunchActivityItem;->mIntent:Landroid/content/Intent;
 Landroid/app/Service;->attach(Landroid/content/Context;Landroid/app/ActivityThread;Ljava/lang/String;Landroid/os/IBinder;Landroid/app/Application;Ljava/lang/Object;)V
 Landroid/app/Service;->mActivityManager:Landroid/app/IActivityManager;
 Landroid/app/Service;->mApplication:Landroid/app/Application;
