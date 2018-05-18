@@ -4117,8 +4117,8 @@ public class NotificationStackScrollLayout extends ViewGroup
                 && !mFooterView.willBeGone();
     }
 
-    public boolean isFooterViewVisible() {
-        return mFooterView != null && mFooterView.isVisible();
+    public boolean isFooterViewContentVisible() {
+        return mFooterView != null && mFooterView.isContentVisible();
     }
 
     public int getFooterViewHeight() {
