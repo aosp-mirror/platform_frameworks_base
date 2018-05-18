@@ -87,7 +87,7 @@ import java.util.Map;
  * <tr><td>{@link #KEY_AAC_DRC_ATTENUATION_FACTOR}</td><td>Integer</td><td><b>decoder-only</b>, optional, if content is AAC audio, specifies the DRC attenuation factor.</td></tr>
  * <tr><td>{@link #KEY_AAC_DRC_HEAVY_COMPRESSION}</td><td>Integer</td><td><b>decoder-only</b>, optional, if content is AAC audio, specifies whether to use heavy compression.</td></tr>
  * <tr><td>{@link #KEY_AAC_MAX_OUTPUT_CHANNEL_COUNT}</td><td>Integer</td><td><b>decoder-only</b>, optional, if content is AAC audio, specifies the maximum number of channels the decoder outputs.</td></tr>
- * <tr><td>{@link #KEY_AAC_DRC_EFFECT_TYPE}</td><td>Integer</td><td><b>decoder-only</b>, optional, if content is AAC audio, specifies the DRC effect type to use.</td></tr>
+ * <tr><td>{@link #KEY_AAC_DRC_EFFECT_TYPE}</td><td>Integer</td><td><b>decoder-only</b>, optional, if content is AAC audio, specifies the MPEG-D DRC effect type to use.</td></tr>
  * <tr><td>{@link #KEY_CHANNEL_MASK}</td><td>Integer</td><td>optional, a mask of audio channel assignments</td></tr>
  * <tr><td>{@link #KEY_FLAC_COMPRESSION_LEVEL}</td><td>Integer</td><td><b>encoder-only</b>, optional, if content is FLAC audio, specifies the desired compression level.</td></tr>
  * </table>
@@ -515,9 +515,12 @@ public final class MediaFormat {
      * The gain is derived as the difference between the Target Reference Level and the
      * Program Reference Level. The latter can be given in the bitstream and indicates the actual
      * loudness value of the program item.
+     * <p>The Target Reference Level controls loudness normalization for both MPEG-4 DRC and
+     * MPEG-D DRC.
      * <p>The value is given as an integer value between
-     * 0 and 127, and is calculated as -0.25 * Target Reference Level in dBFS.
-     * Therefore, it represents the range of Full Scale (0 dBFS) to -31.75 dBFS.
+     * 40 and 127, and is calculated as -4 * Target Reference Level in LKFS.
+     * Therefore, it represents the range of -10 to -31.75 LKFS.
+     * <p>The default value on mobile devices is 64 (-16 LKFS).
      * <p>This key is only used during decoding.
      */
     public static final String KEY_AAC_DRC_TARGET_REFERENCE_LEVEL = "aac-target-ref-level";
@@ -542,19 +545,18 @@ public final class MediaFormat {
      * clipping<br>
      * The value 6 (General compression) can be used for enabling MPEG-D DRC without particular
      * DRC effect type request.<br>
-     * The default is DRC effect type "None".
+     * The default DRC effect type is 3 ("Limited playback range") on mobile devices.
      * <p>This key is only used during decoding.
      */
     public static final String KEY_AAC_DRC_EFFECT_TYPE = "aac-drc-effect-type";
 
     /**
      * A key describing the target reference level that was assumed at the encoder for
-     * calculation of attenuation gains for clipping prevention. This information can be provided
-     * if it is known, otherwise a worst-case assumption is used.
-     * <p>The value is given as an integer value between
-     * 0 and 127, and is calculated as -0.25 * Target Reference Level in dBFS.
-     * Therefore, it represents the range of Full Scale (0 dBFS) to -31.75 dBFS.
-     * The default value is the worst-case assumption of 127.
+     * calculation of attenuation gains for clipping prevention.
+     * <p>If it is known, this information can be provided as an integer value between
+     * 0 and 127, which is calculated as -4 * Encoded Target Level in LKFS.
+     * If the Encoded Target Level is unknown, the value can be set to -1.
+     * <p>The default value is -1 (unknown).
      * <p>The value is ignored when heavy compression is used (see
      * {@link #KEY_AAC_DRC_HEAVY_COMPRESSION}).
      * <p>This key is only used during decoding.
@@ -576,11 +578,12 @@ public final class MediaFormat {
      * factor is used to enable the negative gains, to prevent loud signal from surprising
      * the listener. In applications which generally need a low dynamic range, both the boost factor
      * and the attenuation factor are used in order to enable all DRC gains.
-     * <p>In order to prevent clipping, it is also recommended to apply the attenuation factors
+     * <p>In order to prevent clipping, it is also recommended to apply the attenuation gains
      * in case of a downmix and/or loudness normalization to high target reference levels.
      * <p>Both the boost and the attenuation factor parameters are given as integer values
      * between 0 and 127, representing the range of the factor of 0 (i.e. don't apply)
-     * to 1 (i.e. fully apply boost/attenuation factors respectively).
+     * to 1 (i.e. fully apply boost/attenuation gains respectively).
+     * <p>The default value is 127 (fully apply boost DRC gains).
      * <p>This key is only used during decoding.
      */
     public static final String KEY_AAC_DRC_BOOST_FACTOR = "aac-drc-boost-level";
@@ -590,6 +593,7 @@ public final class MediaFormat {
      * actual listening requirements.
      * See {@link #KEY_AAC_DRC_BOOST_FACTOR} for a description of the role of this attenuation
      * factor and the value range.
+     * <p>The default value is 127 (fully apply attenuation DRC gains).
      * <p>This key is only used during decoding.
      */
     public static final String KEY_AAC_DRC_ATTENUATION_FACTOR = "aac-drc-cut-level";
@@ -609,7 +613,7 @@ public final class MediaFormat {
      * Light compression usually contains clipping prevention for stereo downmixing while heavy
      * compression, if additionally provided in the bitstream, is usually stronger, and contains
      * clipping prevention for stereo and mono downmixing.
-     * <p>The default is light compression.
+     * <p>The default is 1 (heavy compression).
      * <p>This key is only used during decoding.
      */
     public static final String KEY_AAC_DRC_HEAVY_COMPRESSION = "aac-drc-heavy-compression";
