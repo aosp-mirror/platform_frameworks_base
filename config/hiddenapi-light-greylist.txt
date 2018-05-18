@@ -164,6 +164,7 @@ Landroid/app/ActivityManager;->PROCESS_STATE_SERVICE:I
 Landroid/app/ActivityManager;->PROCESS_STATE_TOP:I
 Landroid/app/ActivityManager;->setPersistentVrThread(I)V
 Landroid/app/ActivityManager;->staticGetMemoryClass()I
+Landroid/app/ActivityManager;->switchUser(I)Z
 Landroid/app/ActivityManagerNative;-><init>()V
 Landroid/app/ActivityManagerNative;->asInterface(Landroid/os/IBinder;)Landroid/app/IActivityManager;
 Landroid/app/ActivityManagerNative;->getDefault()Landroid/app/IActivityManager;
@@ -2207,6 +2208,7 @@ Landroid/graphics/GraphicBuffer;->createFromExisting(IIIIJ)Landroid/graphics/Gra
 Landroid/graphics/GraphicBuffer;->CREATOR:Landroid/os/Parcelable$Creator;
 Landroid/graphics/GraphicBuffer;->mNativeObject:J
 Landroid/graphics/ImageDecoder;->postProcessAndRelease(Landroid/graphics/Canvas;)I
+Landroid/graphics/ImageFormat;->Y8:I
 Landroid/graphics/Insets;->bottom:I
 Landroid/graphics/Insets;->left:I
 Landroid/graphics/Insets;->NONE:Landroid/graphics/Insets;
@@ -4215,6 +4217,7 @@ Landroid/os/Trace;->TRACE_TAG_VIEW:J
 Landroid/os/UEventObserver$UEvent;->get(Ljava/lang/String;)Ljava/lang/String;
 Landroid/os/UEventObserver$UEvent;->get(Ljava/lang/String;Ljava/lang/String;)Ljava/lang/String;
 Landroid/os/UEventObserver;-><init>()V
+Landroid/os/UEventObserver;->onUEvent(Landroid/os/UEventObserver$UEvent;)V
 Landroid/os/UEventObserver;->startObserving(Ljava/lang/String;)V
 Landroid/os/UEventObserver;->stopObserving()V
 Landroid/os/UpdateLock;->acquire()V
@@ -4443,9 +4446,11 @@ Landroid/provider/Downloads$Impl;->isStatusError(I)Z
 Landroid/provider/Downloads$Impl;->isStatusSuccess(I)Z
 Landroid/provider/Downloads$Impl;->PUBLICLY_ACCESSIBLE_DOWNLOADS_URI:Landroid/net/Uri;
 Landroid/provider/MediaStore$Files$FileColumns;->FORMAT:Ljava/lang/String;
+Landroid/provider/MediaStore$Files$FileColumns;->STORAGE_ID:Ljava/lang/String;
 Landroid/provider/MediaStore$Files;->getMtpObjectsUri(Ljava/lang/String;)Landroid/net/Uri;
 Landroid/provider/MediaStore$Files;->getMtpObjectsUri(Ljava/lang/String;J)Landroid/net/Uri;
 Landroid/provider/MediaStore$Files;->getMtpReferencesUri(Ljava/lang/String;J)Landroid/net/Uri;
+Landroid/provider/MediaStore$MediaColumns;->IS_DRM:Ljava/lang/String;
 Landroid/provider/Settings$Bookmarks;->add(Landroid/content/ContentResolver;Landroid/content/Intent;Ljava/lang/String;Ljava/lang/String;CI)Landroid/net/Uri;
 Landroid/provider/Settings$Bookmarks;->CONTENT_URI:Landroid/net/Uri;
 Landroid/provider/Settings$ContentProviderHolder;->mContentProvider:Landroid/content/IContentProvider;
