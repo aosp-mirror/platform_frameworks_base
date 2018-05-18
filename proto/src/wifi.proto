@@ -450,6 +450,9 @@ message WifiLog {
 
   // Number of radio mode changes to DBS (Dual band simultaneous).
   optional int32 num_radio_mode_change_to_dbs = 115;
+
+  // Number of times the firmware picked a SoftAp channel not satisfying user band preference.
+  optional int32 num_soft_ap_user_band_preference_unsatisfied = 116;
 }
 
 // Information that gets logged for every WiFi connection.
