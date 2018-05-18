@@ -364,7 +364,7 @@ public class StackStateAnimator {
                 // This item is added, initialize it's properties.
                 ExpandableViewState viewState = finalState
                         .getViewStateForView(changingView);
-                if (viewState == null) {
+                if (viewState == null || viewState.gone) {
                     // The position for this child was never generated, let's continue.
                     continue;
                 }
