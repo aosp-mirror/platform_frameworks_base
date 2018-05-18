@@ -110,9 +110,12 @@ final class HdmiCecController {
     private final ArrayBlockingQueue<MessageHistoryRecord> mMessageHistory =
             new ArrayBlockingQueue<>(MAX_CEC_MESSAGE_HISTORY);
 
+    private final NativeWrapper mNativeWrapperImpl;
+
     // Private constructor.  Use HdmiCecController.create().
-    private HdmiCecController(HdmiControlService service) {
+    private HdmiCecController(HdmiControlService service, NativeWrapper nativeWrapper) {
         mService = service;
+        mNativeWrapperImpl = nativeWrapper;
     }
 
     /**
@@ -126,15 +129,24 @@ final class HdmiCecController {
      *         returns {@code null}.
      */
     static HdmiCecController create(HdmiControlService service) {
-        HdmiCecController controller = new HdmiCecController(service);
-        long nativePtr = nativeInit(controller, service.getServiceLooper().getQueue());
-        if (nativePtr == 0L) {
-            controller = null;
-            return null;
-        }
+        return createWithNativeWrapper(service, new NativeWrapperImpl());
+    }
 
-        controller.init(nativePtr);
-        return controller;
+    /**
+     * A factory method with injection of native methods for testing.
+     */
+    static HdmiCecController createWithNativeWrapper(
+        HdmiControlService service, NativeWrapper nativeWrapper) {
+            HdmiCecController controller = new HdmiCecController(service, nativeWrapper);
+            long nativePtr = nativeWrapper
+                .nativeInit(controller, service.getServiceLooper().getQueue());
+            if (nativePtr == 0L) {
+                controller = null;
+                return null;
+            }
+
+            controller.init(nativePtr);
+            return controller;
     }
 
     private void init(long nativePtr) {
@@ -235,7 +247,7 @@ final class HdmiCecController {
 
 
     HdmiPortInfo[] getPortInfos() {
-        return nativeGetPortInfos(mNativePtr);
+        return mNativeWrapperImpl.nativeGetPortInfos(mNativePtr);
     }
 
     /**
@@ -263,7 +275,7 @@ final class HdmiCecController {
     int addLogicalAddress(int newLogicalAddress) {
         assertRunOnServiceThread();
         if (HdmiUtils.isValidAddress(newLogicalAddress)) {
-            return nativeAddLogicalAddress(mNativePtr, newLogicalAddress);
+            return mNativeWrapperImpl.nativeAddLogicalAddress(mNativePtr, newLogicalAddress);
         } else {
             return Result.FAILURE_INVALID_ARGS;
         }
@@ -280,7 +292,7 @@ final class HdmiCecController {
         for (int i = 0; i < mLocalDevices.size(); ++i) {
             mLocalDevices.valueAt(i).clearAddress();
         }
-        nativeClearLogicalAddress(mNativePtr);
+        mNativeWrapperImpl.nativeClearLogicalAddress(mNativePtr);
     }
 
     @ServiceThreadOnly
@@ -300,7 +312,7 @@ final class HdmiCecController {
     @ServiceThreadOnly
     int getPhysicalAddress() {
         assertRunOnServiceThread();
-        return nativeGetPhysicalAddress(mNativePtr);
+        return mNativeWrapperImpl.nativeGetPhysicalAddress(mNativePtr);
     }
 
     /**
@@ -311,7 +323,7 @@ final class HdmiCecController {
     @ServiceThreadOnly
     int getVersion() {
         assertRunOnServiceThread();
-        return nativeGetVersion(mNativePtr);
+        return mNativeWrapperImpl.nativeGetVersion(mNativePtr);
     }
 
     /**
@@ -322,7 +334,7 @@ final class HdmiCecController {
     @ServiceThreadOnly
     int getVendorId() {
         assertRunOnServiceThread();
-        return nativeGetVendorId(mNativePtr);
+        return mNativeWrapperImpl.nativeGetVendorId(mNativePtr);
     }
 
     /**
@@ -335,7 +347,7 @@ final class HdmiCecController {
     void setOption(int flag, boolean enabled) {
         assertRunOnServiceThread();
         HdmiLogger.debug("setOption: [flag:%d, enabled:%b]", flag, enabled);
-        nativeSetOption(mNativePtr, flag, enabled);
+        mNativeWrapperImpl.nativeSetOption(mNativePtr, flag, enabled);
     }
 
     /**
@@ -349,7 +361,7 @@ final class HdmiCecController {
         if (!LanguageTag.isLanguage(language)) {
             return;
         }
-        nativeSetLanguage(mNativePtr, language);
+        mNativeWrapperImpl.nativeSetLanguage(mNativePtr, language);
     }
 
     /**
@@ -361,7 +373,7 @@ final class HdmiCecController {
     @ServiceThreadOnly
     void enableAudioReturnChannel(int port, boolean enabled) {
         assertRunOnServiceThread();
-        nativeEnableAudioReturnChannel(mNativePtr, port, enabled);
+        mNativeWrapperImpl.nativeEnableAudioReturnChannel(mNativePtr, port, enabled);
     }
 
     /**
@@ -373,7 +385,7 @@ final class HdmiCecController {
     @ServiceThreadOnly
     boolean isConnected(int port) {
         assertRunOnServiceThread();
-        return nativeIsConnected(mNativePtr, port);
+        return mNativeWrapperImpl.nativeIsConnected(mNativePtr, port);
     }
 
     /**
@@ -494,7 +506,8 @@ final class HdmiCecController {
         for (int i = 0; i < retryCount; ++i) {
             // <Polling Message> is a message which has empty body.
             int ret =
-                    nativeSendCecCommand(mNativePtr, sourceAddress, destinationAddress, EMPTY_BODY);
+                    mNativeWrapperImpl.nativeSendCecCommand(
+                        mNativePtr, sourceAddress, destinationAddress, EMPTY_BODY);
             if (ret == SendMessageResult.SUCCESS) {
                 return true;
             } else if (ret != SendMessageResult.NACK) {
@@ -598,8 +611,8 @@ final class HdmiCecController {
                 int i = 0;
                 int errorCode = SendMessageResult.SUCCESS;
                 do {
-                    errorCode = nativeSendCecCommand(mNativePtr, cecMessage.getSource(),
-                            cecMessage.getDestination(), body);
+                    errorCode = mNativeWrapperImpl.nativeSendCecCommand(mNativePtr,
+                        cecMessage.getSource(), cecMessage.getDestination(), body);
                     if (errorCode == SendMessageResult.SUCCESS) {
                         break;
                     }
@@ -669,9 +682,24 @@ final class HdmiCecController {
         pw.decreaseIndent();
     }
 
+    protected interface NativeWrapper {
+        long nativeInit(HdmiCecController handler, MessageQueue messageQueue);
+        int nativeSendCecCommand(long controllerPtr, int srcAddress, int dstAddress, byte[] body);
+        int nativeAddLogicalAddress(long controllerPtr, int logicalAddress);
+        void nativeClearLogicalAddress(long controllerPtr);
+        int nativeGetPhysicalAddress(long controllerPtr);
+        int nativeGetVersion(long controllerPtr);
+        int nativeGetVendorId(long controllerPtr);
+        HdmiPortInfo[] nativeGetPortInfos(long controllerPtr);
+        void nativeSetOption(long controllerPtr, int flag, boolean enabled);
+        void nativeSetLanguage(long controllerPtr, String language);
+        void nativeEnableAudioReturnChannel(long controllerPtr, int port, boolean flag);
+        boolean nativeIsConnected(long controllerPtr, int port);
+    }
+
     private static native long nativeInit(HdmiCecController handler, MessageQueue messageQueue);
     private static native int nativeSendCecCommand(long controllerPtr, int srcAddress,
-            int dstAddress, byte[] body);
+        int dstAddress, byte[] body);
     private static native int nativeAddLogicalAddress(long controllerPtr, int logicalAddress);
     private static native void nativeClearLogicalAddress(long controllerPtr);
     private static native int nativeGetPhysicalAddress(long controllerPtr);
@@ -680,8 +708,73 @@ final class HdmiCecController {
     private static native HdmiPortInfo[] nativeGetPortInfos(long controllerPtr);
     private static native void nativeSetOption(long controllerPtr, int flag, boolean enabled);
     private static native void nativeSetLanguage(long controllerPtr, String language);
-    private static native void nativeEnableAudioReturnChannel(long controllerPtr, int port, boolean flag);
+    private static native void nativeEnableAudioReturnChannel(long controllerPtr,
+        int port, boolean flag);
     private static native boolean nativeIsConnected(long controllerPtr, int port);
+
+    private static final class NativeWrapperImpl implements NativeWrapper {
+
+        @Override
+        public long nativeInit(HdmiCecController handler, MessageQueue messageQueue) {
+            return HdmiCecController.nativeInit(handler, messageQueue);
+        }
+
+        @Override
+        public int nativeSendCecCommand(long controllerPtr, int srcAddress, int dstAddress,
+            byte[] body) {
+            return HdmiCecController.nativeSendCecCommand(controllerPtr, srcAddress, dstAddress, body);
+        }
+
+        @Override
+        public int nativeAddLogicalAddress(long controllerPtr, int logicalAddress) {
+            return HdmiCecController.nativeAddLogicalAddress(controllerPtr, logicalAddress);
+        }
+
+        @Override
+        public void nativeClearLogicalAddress(long controllerPtr) {
+            HdmiCecController.nativeClearLogicalAddress(controllerPtr);
+        }
+
+        @Override
+        public int nativeGetPhysicalAddress(long controllerPtr) {
+            return HdmiCecController.nativeGetPhysicalAddress(controllerPtr);
+        }
+
+        @Override
+        public int nativeGetVersion(long controllerPtr) {
+            return HdmiCecController.nativeGetVersion(controllerPtr);
+        }
+
+        @Override
+        public int nativeGetVendorId(long controllerPtr) {
+            return HdmiCecController.nativeGetVendorId(controllerPtr);
+        }
+
+        @Override
+        public HdmiPortInfo[] nativeGetPortInfos(long controllerPtr) {
+            return HdmiCecController.nativeGetPortInfos(controllerPtr);
+        }
+
+        @Override
+        public void nativeSetOption(long controllerPtr, int flag, boolean enabled) {
+            HdmiCecController.nativeSetOption(controllerPtr, flag, enabled);
+        }
+
+        @Override
+        public void nativeSetLanguage(long controllerPtr, String language) {
+            HdmiCecController.nativeSetLanguage(controllerPtr, language);
+        }
+
+        @Override
+        public void nativeEnableAudioReturnChannel(long controllerPtr, int port, boolean flag) {
+            HdmiCecController.nativeEnableAudioReturnChannel(controllerPtr, port, flag);
+        }
+
+        @Override
+        public boolean nativeIsConnected(long controllerPtr, int port) {
+            return HdmiCecController.nativeIsConnected(controllerPtr, port);
+        }
+    }
 
     private final class MessageHistoryRecord {
         private final long mTime;
