@@ -368,7 +368,10 @@ public class WindowManagerService extends IWindowManager.Stub
     final WindowTracing mWindowTracing;
 
     final private KeyguardDisableHandler mKeyguardDisableHandler;
+    // TODO: eventually unify all keyguard state in a common place instead of having it spread over
+    // AM's KeyguardController and the policy's KeyguardServiceDelegate.
     boolean mKeyguardGoingAway;
+    boolean mKeyguardOrAodShowingOnDefaultDisplay;
     // VR Vr2d Display Id.
     int mVr2dDisplayId = INVALID_DISPLAY;
 
@@ -2905,6 +2908,12 @@ public class WindowManagerService extends IWindowManager.Stub
     public void setKeyguardGoingAway(boolean keyguardGoingAway) {
         synchronized (mWindowMap) {
             mKeyguardGoingAway = keyguardGoingAway;
+        }
+    }
+
+    public void setKeyguardOrAodShowingOnDefaultDisplay(boolean showing) {
+        synchronized (mWindowMap) {
+            mKeyguardOrAodShowingOnDefaultDisplay = showing;
         }
     }
 

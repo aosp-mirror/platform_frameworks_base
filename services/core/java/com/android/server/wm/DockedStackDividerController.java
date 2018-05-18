@@ -692,7 +692,7 @@ public class DockedStackDividerController {
 
         // Do not minimize when dock is already minimized while keyguard is showing and not
         // occluded such as unlocking the screen
-        if (mMinimizedDock && mService.mPolicy.isKeyguardShowingAndNotOccluded()) {
+        if (mMinimizedDock && mService.mKeyguardOrAodShowingOnDefaultDisplay) {
             return;
         }
         final TaskStack topSecondaryStack = mDisplayContent.getTopStackInWindowingMode(
