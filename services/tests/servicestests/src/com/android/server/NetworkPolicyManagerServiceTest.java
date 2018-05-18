@@ -1628,6 +1628,20 @@ public class NetworkPolicyManagerServiceTest {
         }
     }
 
+    /**
+     * Test that policy set of {null, NetworkPolicy, null} does not crash and restores the valid
+     * NetworkPolicy.
+     */
+    @Test
+    public void testSetNetworkPolicies_withNullPolicies_doesNotThrow() {
+        NetworkPolicy[] policies = new NetworkPolicy[3];
+        policies[1] = buildDefaultFakeMobilePolicy();
+        setNetworkPolicies(policies);
+
+        assertNetworkPolicyEquals(DEFAULT_CYCLE_DAY, mDefaultWarningBytes, mDefaultLimitBytes,
+                true);
+    }
+
     private SubscriptionPlan buildMonthlyDataPlan(ZonedDateTime start, long limitBytes) {
         return SubscriptionPlan.Builder
                 .createRecurringMonthly(start)
