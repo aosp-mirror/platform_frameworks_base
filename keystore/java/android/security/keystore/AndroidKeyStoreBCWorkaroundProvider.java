@@ -48,6 +48,8 @@ class AndroidKeyStoreBCWorkaroundProvider extends Provider {
     private static final String KEYSTORE_PUBLIC_KEY_CLASS_NAME =
             PACKAGE_NAME + ".AndroidKeyStorePublicKey";
 
+    private static final String DESEDE_SYSTEM_PROPERTY = "ro.hardware.keystore_desede";
+
     AndroidKeyStoreBCWorkaroundProvider() {
         super("AndroidKeyStoreBCWorkaround",
                 1.0,
@@ -93,7 +95,7 @@ class AndroidKeyStoreBCWorkaroundProvider extends Provider {
         putSymmetricCipherImpl("AES/CTR/NoPadding",
                 PACKAGE_NAME + ".AndroidKeyStoreUnauthenticatedAESCipherSpi$CTR$NoPadding");
 
-        if ("true".equals(System.getProperty("supports3DES"))) {
+        if ("true".equals(android.os.SystemProperties.get(DESEDE_SYSTEM_PROPERTY))) {
             putSymmetricCipherImpl("DESede/CBC/NoPadding",
                 PACKAGE_NAME + ".AndroidKeyStore3DESCipherSpi$CBC$NoPadding");
             putSymmetricCipherImpl("DESede/CBC/PKCS7Padding",

@@ -353,6 +353,10 @@ public class AndroidKeyStoreSpi extends KeyStoreSpi {
             if (spec.isCriticalToDeviceEncryption()) {
                 flags |= KeyStore.FLAG_CRITICAL_TO_DEVICE_ENCRYPTION;
             }
+
+            if (spec.isStrongBoxBacked()) {
+                flags |= KeyStore.FLAG_STRONGBOX;
+            }
         } else {
             throw new KeyStoreException(
                     "Unsupported protection parameter class:" + param.getClass().getName()
@@ -720,6 +724,9 @@ public class AndroidKeyStoreSpi extends KeyStoreSpi {
         if (params.isCriticalToDeviceEncryption()) {
             flags |= KeyStore.FLAG_CRITICAL_TO_DEVICE_ENCRYPTION;
         }
+        if (params.isStrongBoxBacked()) {
+            flags |= KeyStore.FLAG_STRONGBOX;
+        }
 
         Credentials.deleteAllTypesForAlias(mKeyStore, entryAlias, mUid);
         String keyAliasInKeystore = Credentials.USER_PRIVATE_KEY + entryAlias;
@@ -737,19 +744,76 @@ public class AndroidKeyStoreSpi extends KeyStoreSpi {
         }
     }
 
-    private void setWrappedKeyEntry(String alias, byte[] wrappedKeyBytes, String wrappingKeyAlias,
+    private void setWrappedKeyEntry(String alias, WrappedKeyEntry entry,
             java.security.KeyStore.ProtectionParameter param) throws KeyStoreException {
         if (param != null) {
             throw new KeyStoreException("Protection parameters are specified inside wrapped keys");
         }
 
         byte[] maskingKey = new byte[32];
-        KeymasterArguments args = new KeymasterArguments(); // TODO: populate wrapping key args.
+
+
+        KeymasterArguments args = new KeymasterArguments();
+        String[] parts = entry.getTransformation().split("/");
+
+        String algorithm = parts[0];
+        if (KeyProperties.KEY_ALGORITHM_RSA.equalsIgnoreCase(algorithm)) {
+            args.addEnum(KeymasterDefs.KM_TAG_ALGORITHM, KeymasterDefs.KM_ALGORITHM_RSA);
+        } else if (KeyProperties.KEY_ALGORITHM_EC.equalsIgnoreCase(algorithm)) {
+            args.addEnum(KeymasterDefs.KM_TAG_ALGORITHM, KeymasterDefs.KM_ALGORITHM_RSA);
+        }
+
+        if (parts.length > 1) {
+            String mode = parts[1];
+            if (KeyProperties.BLOCK_MODE_ECB.equalsIgnoreCase(mode)) {
+                args.addEnums(KeymasterDefs.KM_TAG_BLOCK_MODE, KeymasterDefs.KM_MODE_ECB);
+            } else if (KeyProperties.BLOCK_MODE_CBC.equalsIgnoreCase(mode)) {
+                args.addEnums(KeymasterDefs.KM_TAG_BLOCK_MODE, KeymasterDefs.KM_MODE_CBC);
+            } else if (KeyProperties.BLOCK_MODE_CTR.equalsIgnoreCase(mode)) {
+                args.addEnums(KeymasterDefs.KM_TAG_BLOCK_MODE, KeymasterDefs.KM_MODE_CTR);
+            } else if (KeyProperties.BLOCK_MODE_GCM.equalsIgnoreCase(mode)) {
+                args.addEnums(KeymasterDefs.KM_TAG_BLOCK_MODE, KeymasterDefs.KM_MODE_GCM);
+            }
+        }
+
+        if (parts.length > 2) {
+            String padding = parts[2];
+            if (KeyProperties.ENCRYPTION_PADDING_NONE.equalsIgnoreCase(padding)) {
+                // Noop
+            } else if (KeyProperties.ENCRYPTION_PADDING_PKCS7.equalsIgnoreCase(padding)) {
+                args.addEnums(KeymasterDefs.KM_TAG_PADDING, KeymasterDefs.KM_PAD_PKCS7);
+            } else if (KeyProperties.ENCRYPTION_PADDING_RSA_PKCS1.equalsIgnoreCase(padding)) {
+                args.addEnums(KeymasterDefs.KM_TAG_PADDING,
+                    KeymasterDefs.KM_PAD_RSA_PKCS1_1_5_ENCRYPT);
+            } else if (KeyProperties.ENCRYPTION_PADDING_RSA_OAEP.equalsIgnoreCase(padding)) {
+                args.addEnums(KeymasterDefs.KM_TAG_PADDING, KeymasterDefs.KM_PAD_RSA_OAEP);
+            }
+        }
+
+        KeyGenParameterSpec spec = (KeyGenParameterSpec) entry.getAlgorithmParameterSpec();
+        if (spec.isDigestsSpecified()) {
+            String digest = spec.getDigests()[0];
+            if (KeyProperties.DIGEST_NONE.equalsIgnoreCase(digest)) {
+                // Noop
+            } else if (KeyProperties.DIGEST_MD5.equalsIgnoreCase(digest)) {
+                args.addEnums(KeymasterDefs.KM_TAG_DIGEST, KeymasterDefs.KM_DIGEST_MD5);
+            } else if (KeyProperties.DIGEST_SHA1.equalsIgnoreCase(digest)) {
+                args.addEnums(KeymasterDefs.KM_TAG_DIGEST, KeymasterDefs.KM_DIGEST_SHA1);
+            } else if (KeyProperties.DIGEST_SHA224.equalsIgnoreCase(digest)) {
+                args.addEnums(KeymasterDefs.KM_TAG_DIGEST, KeymasterDefs.KM_DIGEST_SHA_2_224);
+            } else if (KeyProperties.DIGEST_SHA256.equalsIgnoreCase(digest)) {
+                args.addEnums(KeymasterDefs.KM_TAG_DIGEST, KeymasterDefs.KM_DIGEST_SHA_2_256);
+            } else if (KeyProperties.DIGEST_SHA384.equalsIgnoreCase(digest)) {
+                args.addEnums(KeymasterDefs.KM_TAG_DIGEST, KeymasterDefs.KM_DIGEST_SHA_2_384);
+            } else if (KeyProperties.DIGEST_SHA512.equalsIgnoreCase(digest)) {
+                args.addEnums(KeymasterDefs.KM_TAG_DIGEST, KeymasterDefs.KM_DIGEST_SHA_2_512);
+            }
+        }
 
         int errorCode = mKeyStore.importWrappedKey(
             Credentials.USER_SECRET_KEY + alias,
-            wrappedKeyBytes,
-            Credentials.USER_PRIVATE_KEY + wrappingKeyAlias,
+            entry.getWrappedKeyBytes(),
+            Credentials.USER_PRIVATE_KEY + entry.getWrappingKeyAlias(),
             maskingKey,
             args,
             GateKeeper.getSecureUserId(),
@@ -996,7 +1060,7 @@ public class AndroidKeyStoreSpi extends KeyStoreSpi {
             setSecretKeyEntry(alias, secE.getSecretKey(), param);
         } else if (entry instanceof WrappedKeyEntry) {
             WrappedKeyEntry wke = (WrappedKeyEntry) entry;
-            setWrappedKeyEntry(alias, wke.getWrappedKeyBytes(), wke.getWrappingKeyAlias(), param);
+            setWrappedKeyEntry(alias, wke, param);
         } else {
             throw new KeyStoreException(
                     "Entry must be a PrivateKeyEntry, SecretKeyEntry or TrustedCertificateEntry"
