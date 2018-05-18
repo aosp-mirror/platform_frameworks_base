@@ -3888,7 +3888,6 @@ public class StatusBar extends SystemUI implements DemoMode,
         mKeyguardIndicationController.setDozing(mDozing);
         mNotificationPanel.setDozing(mDozing, animate);
         updateQsExpansionEnabled();
-        mViewHierarchyManager.updateRowStates();
         Trace.endSection();
     }
 
@@ -4676,16 +4675,18 @@ public class StatusBar extends SystemUI implements DemoMode,
                 FingerprintUnlockController.MODE_WAKE_AND_UNLOCK) {
             dozing = false;
         }
-        mDozing = dozing;
-        mKeyguardViewMediator.setAodShowing(mDozing && alwaysOn);
-        mStatusBarWindowManager.setDozing(mDozing);
-        mStatusBarKeyguardViewManager.setDozing(mDozing);
-        if (mAmbientIndicationContainer instanceof DozeReceiver) {
-            ((DozeReceiver) mAmbientIndicationContainer).setDozing(mDozing);
+        if (mDozing != dozing) {
+            mDozing = dozing;
+            mKeyguardViewMediator.setAodShowing(mDozing && alwaysOn);
+            mStatusBarWindowManager.setDozing(mDozing);
+            mStatusBarKeyguardViewManager.setDozing(mDozing);
+            if (mAmbientIndicationContainer instanceof DozeReceiver) {
+                ((DozeReceiver) mAmbientIndicationContainer).setDozing(mDozing);
+            }
+            mEntryManager.updateNotifications();
+            updateDozingState();
+            updateReportRejectedTouchVisibility();
         }
-        mEntryManager.updateNotifications();
-        updateDozingState();
-        updateReportRejectedTouchVisibility();
         Trace.endSection();
     }
 
