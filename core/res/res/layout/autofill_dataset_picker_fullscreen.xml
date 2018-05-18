@@ -60,12 +60,13 @@
 
     </LinearLayout>
 
-    <!-- autofill_container is the common parent for inserting authentication item or
-         autofill_dataset_list, autofill_dataset_foolter-->
+    <!-- autofill_dataset_picker is the common parent for inserting authentication item or
+         autofill_dataset_list, autofill_dataset_footer-->
     <LinearLayout
         android:layout_width="304dp"
         android:layout_height="wrap_content"
         android:id="@+id/autofill_dataset_picker"
+        android:foreground="?attr/listChoiceBackgroundIndicator"
         android:orientation="vertical">
         <ListView
             android:id="@+id/autofill_dataset_list"

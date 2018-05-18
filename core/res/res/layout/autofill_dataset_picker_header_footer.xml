@@ -18,6 +18,7 @@
     android:id="@+id/autofill_dataset_picker"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
+    android:foreground="?attr/listChoiceBackgroundIndicator"
     style="@style/AutofillDatasetPicker">
 
     <LinearLayout
