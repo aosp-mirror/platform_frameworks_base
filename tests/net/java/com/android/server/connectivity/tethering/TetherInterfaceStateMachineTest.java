@@ -173,6 +173,7 @@ public class TetherInterfaceStateMachineTest {
         dispatchCommand(TetherInterfaceStateMachine.CMD_TETHER_UNREQUESTED);
         InOrder inOrder = inOrder(mNMService, mStatsService, mTetherHelper);
         inOrder.verify(mNMService).untetherInterface(IFACE_NAME);
+        inOrder.verify(mNMService).setInterfaceConfig(eq(IFACE_NAME), any());
         inOrder.verify(mTetherHelper).updateInterfaceState(
                 mTestedSm, STATE_AVAILABLE, TETHER_ERROR_NO_ERROR);
         inOrder.verify(mTetherHelper).updateLinkProperties(
@@ -270,6 +271,7 @@ public class TetherInterfaceStateMachineTest {
         inOrder.verify(mNMService).stopInterfaceForwarding(IFACE_NAME, UPSTREAM_IFACE);
         inOrder.verify(mNMService).disableNat(IFACE_NAME, UPSTREAM_IFACE);
         inOrder.verify(mNMService).untetherInterface(IFACE_NAME);
+        inOrder.verify(mNMService).setInterfaceConfig(eq(IFACE_NAME), any());
         inOrder.verify(mTetherHelper).updateInterfaceState(
                 mTestedSm, STATE_AVAILABLE, TETHER_ERROR_NO_ERROR);
         inOrder.verify(mTetherHelper).updateLinkProperties(
