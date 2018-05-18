@@ -13,7 +13,7 @@ import com.android.settingslib.graph.BluetoothDeviceLayerDrawable;
 
 import java.util.List;
 
-public class Utils {
+public class BluetoothUtils {
     public static final boolean V = false; // verbose logging
     public static final boolean D = true;  // regular logging
 
@@ -21,16 +21,16 @@ public class Utils {
 
     public static int getConnectionStateSummary(int connectionState) {
         switch (connectionState) {
-        case BluetoothProfile.STATE_CONNECTED:
-            return R.string.bluetooth_connected;
-        case BluetoothProfile.STATE_CONNECTING:
-            return R.string.bluetooth_connecting;
-        case BluetoothProfile.STATE_DISCONNECTED:
-            return R.string.bluetooth_disconnected;
-        case BluetoothProfile.STATE_DISCONNECTING:
-            return R.string.bluetooth_disconnecting;
-        default:
-            return 0;
+            case BluetoothProfile.STATE_CONNECTED:
+                return R.string.bluetooth_connected;
+            case BluetoothProfile.STATE_CONNECTING:
+                return R.string.bluetooth_connecting;
+            case BluetoothProfile.STATE_DISCONNECTED:
+                return R.string.bluetooth_disconnected;
+            case BluetoothProfile.STATE_DISCONNECTING:
+                return R.string.bluetooth_disconnecting;
+            default:
+                return 0;
         }
     }
 

@@ -202,7 +202,7 @@ final class A2dpSinkProfile implements LocalBluetoothProfile {
                 return R.string.bluetooth_a2dp_profile_summary_connected;
 
             default:
-                return Utils.getConnectionStateSummary(state);
+                return BluetoothUtils.getConnectionStateSummary(state);
         }
     }
 

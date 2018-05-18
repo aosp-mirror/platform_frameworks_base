@@ -229,7 +229,7 @@ public class HeadsetProfile implements LocalBluetoothProfile {
                 return R.string.bluetooth_headset_profile_summary_connected;
 
             default:
-                return Utils.getConnectionStateSummary(state);
+                return BluetoothUtils.getConnectionStateSummary(state);
         }
     }
 

@@ -379,7 +379,7 @@ public class BluetoothEventManager {
                 Log.w(TAG, "showUnbondMessage: Not displaying any message for reason: " + reason);
                 return;
             }
-            Utils.showError(context, name, errorMsg);
+            BluetoothUtils.showError(context, name, errorMsg);
         }
     }
 

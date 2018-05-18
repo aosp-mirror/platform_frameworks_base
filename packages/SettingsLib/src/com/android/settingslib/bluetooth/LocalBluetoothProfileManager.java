@@ -50,7 +50,7 @@ import java.util.Map;
  */
 public class LocalBluetoothProfileManager {
     private static final String TAG = "LocalBluetoothProfileManager";
-    private static final boolean DEBUG = Utils.D;
+    private static final boolean DEBUG = BluetoothUtils.D;
     /** Singleton instance. */
     private static LocalBluetoothProfileManager sInstance;
 
