@@ -409,7 +409,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
 
     final Rect mContainingFrame = new Rect();
 
-    private final Rect mParentFrame = new Rect();
+    final Rect mParentFrame = new Rect();
 
     /** Whether the parent frame would have been different if there was no display cutout. */
     private boolean mParentFrameWasClippedByDisplayCutout;
@@ -931,6 +931,17 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
                     mContainingFrame.set(contentFrame);
                 }
             }
+
+            final TaskStack stack = getStack();
+            if (inPinnedWindowingMode() && stack != null
+                    && stack.lastAnimatingBoundsWasToFullscreen()) {
+                // PIP edge case: When going from pinned to fullscreen, we apply a
+                // tempInsetFrame for the full task - but we're still at the start of the animation.
+                // To prevent a jump if there's a letterbox, restrict to the parent frame.
+                mInsetFrame.intersectUnchecked(parentFrame);
+                mContainingFrame.intersectUnchecked(parentFrame);
+            }
+
             mDisplayFrame.set(mContainingFrame);
             layoutXDiff = !mInsetFrame.isEmpty() ? mInsetFrame.left - mContainingFrame.left : 0;
             layoutYDiff = !mInsetFrame.isEmpty() ? mInsetFrame.top - mContainingFrame.top : 0;
