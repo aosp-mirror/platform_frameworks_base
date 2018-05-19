@@ -85,7 +85,6 @@ import java.io.PrintWriter;
 import java.util.function.Consumer;
 
 import static com.android.systemui.shared.system.NavigationBarCompat.FLAG_DISABLE_QUICK_SCRUB;
-import static com.android.systemui.shared.system.NavigationBarCompat.FLAG_HIDE_BACK_BUTTON;
 import static com.android.systemui.shared.system.NavigationBarCompat.FLAG_SHOW_OVERVIEW_BUTTON;
 import static com.android.systemui.shared.system.NavigationBarCompat.HIT_TARGET_OVERVIEW;
 import static com.android.systemui.shared.system.NavigationBarCompat.HIT_TARGET_ROTATION;
@@ -655,8 +654,6 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
             disableRecent |= (flags & FLAG_SHOW_OVERVIEW_BUTTON) == 0;
             if (pinningActive) {
                 disableBack = disableHome = false;
-            } else {
-                disableBack |= (flags & FLAG_HIDE_BACK_BUTTON) != 0;
             }
         } else if (pinningActive) {
             disableBack = disableRecent = false;
@@ -863,7 +860,7 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
     public boolean isRotateButtonVisible() { return mShowRotateButton; }
 
     public void setMenuContainerVisibility(boolean visible) {
-        getMenuContainer().animateFade(visible);
+        getMenuContainer().setAlpha(visible ? 1 : 0, true /* animate */);
     }
 
     @Override

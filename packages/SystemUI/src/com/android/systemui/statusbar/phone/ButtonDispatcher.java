@@ -14,13 +14,15 @@
 
 package com.android.systemui.statusbar.phone;
 
+import static com.android.systemui.Interpolators.ALPHA_IN;
+import static com.android.systemui.Interpolators.ALPHA_OUT;
+
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.ValueAnimator;
 import android.view.View;
 
 import android.view.View.AccessibilityDelegate;
-import com.android.systemui.Interpolators;
 import com.android.systemui.plugins.statusbar.phone.NavBarButtonProvider.ButtonInterface;
 import com.android.systemui.statusbar.policy.KeyButtonDrawable;
 
@@ -150,10 +152,27 @@ public class ButtonDispatcher {
     }
 
     public void setAlpha(float alpha) {
-        mAlpha = alpha;
-        final int N = mViews.size();
-        for (int i = 0; i < N; i++) {
-            mViews.get(i).setAlpha(alpha);
+        setAlpha(alpha, false /* animate */);
+    }
+
+    public void setAlpha(float alpha, boolean animate) {
+        if (animate) {
+            if (mFadeAnimator != null) {
+                mFadeAnimator.cancel();
+            }
+            mFadeAnimator = ValueAnimator.ofFloat(getAlpha(), alpha);
+            mFadeAnimator.setDuration(getAlpha() < alpha? FADE_DURATION_IN : FADE_DURATION_OUT);
+            mFadeAnimator.setInterpolator(getAlpha() < alpha ? ALPHA_IN : ALPHA_OUT);
+            mFadeAnimator.addListener(mFadeListener);
+            mFadeAnimator.addUpdateListener(mAlphaListener);
+            mFadeAnimator.start();
+            setVisibility(View.VISIBLE);
+        } else {
+            mAlpha = alpha;
+            final int N = mViews.size();
+            for (int i = 0; i < N; i++) {
+                mViews.get(i).setAlpha(alpha);
+            }
         }
     }
 
@@ -231,19 +250,6 @@ public class ButtonDispatcher {
         for (int i = 0; i < N; i++) {
             mViews.get(i).setClickable(clickable);
         }
-    }
-
-    public void animateFade(boolean in) {
-        if (mFadeAnimator != null) {
-            mFadeAnimator.cancel();
-        }
-        mFadeAnimator = ValueAnimator.ofFloat(getAlpha(), in ? 1 : 0);
-        mFadeAnimator.setDuration(in? FADE_DURATION_IN : FADE_DURATION_OUT);
-        mFadeAnimator.setInterpolator(in ? Interpolators.ALPHA_IN : Interpolators.ALPHA_OUT);
-        mFadeAnimator.addListener(mFadeListener);
-        mFadeAnimator.addUpdateListener(mAlphaListener);
-        mFadeAnimator.start();
-        setVisibility(View.VISIBLE);
     }
 
     public ArrayList<View> getViews() {
