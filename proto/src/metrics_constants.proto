@@ -5974,6 +5974,12 @@ message MetricsEvent {
     // OS: P
     ACTION_HUSH_GESTURE = 1440;
 
+    // OPEN: Settings -> Developer Options -> Disable Bluetooth A2DP hardware
+    // offload
+    // CATEGORY: SETTINGS
+    // OS: P
+    DIALOG_BLUETOOTH_DISABLE_A2DP_HW_OFFLOAD = 1441;
+
     // ---- End P Constants, all P constants go above this line ----
 
     // First Q constant in master goes here:
