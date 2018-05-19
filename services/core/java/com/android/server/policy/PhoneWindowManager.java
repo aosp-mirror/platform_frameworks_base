@@ -1138,6 +1138,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         }
         getAudioManagerInternal();
         mAudioManagerInternal.silenceRingerModeInternal("volume_hush");
+        Settings.Secure.putInt(mContext.getContentResolver(), Settings.Secure.HUSH_GESTURE_USED, 1);
         mLogger.action(MetricsProto.MetricsEvent.ACTION_HUSH_GESTURE, mRingerToggleChord);
     }
 
