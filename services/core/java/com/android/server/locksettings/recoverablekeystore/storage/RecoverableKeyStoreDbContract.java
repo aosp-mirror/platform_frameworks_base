@@ -64,7 +64,7 @@ class RecoverableKeyStoreDbContract {
         static final String COLUMN_NAME_LAST_SYNCED_AT = "last_synced_at";
 
         /**
-         * Status of the key sync {@code RecoveryManager#setRecoveryStatus}
+         * Status of the key sync {@code RecoveryController#setRecoveryStatus}
          */
         static final String COLUMN_NAME_RECOVERY_STATUS = "recovery_status";
     }

@@ -64,10 +64,13 @@ public class AndroidKeyStoreProvider extends Provider {
 
     private static final String PACKAGE_NAME = "android.security.keystore";
 
+    private static final String DESEDE_SYSTEM_PROPERTY =
+            "ro.hardware.keystore_desede";
+
     public AndroidKeyStoreProvider() {
         super(PROVIDER_NAME, 1.0, "Android KeyStore security provider");
 
-        boolean supports3DES = "true".equals(System.getProperty("supports3DES"));
+        boolean supports3DES = "true".equals(android.os.SystemProperties.get(DESEDE_SYSTEM_PROPERTY));
 
         // java.security.KeyStore
         put("KeyStore.AndroidKeyStore", PACKAGE_NAME + ".AndroidKeyStoreSpi");

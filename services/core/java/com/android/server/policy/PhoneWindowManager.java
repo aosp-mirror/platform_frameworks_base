@@ -1138,6 +1138,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         }
         getAudioManagerInternal();
         mAudioManagerInternal.silenceRingerModeInternal("volume_hush");
+        Settings.Secure.putInt(mContext.getContentResolver(), Settings.Secure.HUSH_GESTURE_USED, 1);
         mLogger.action(MetricsProto.MetricsEvent.ACTION_HUSH_GESTURE, mRingerToggleChord);
     }
 
@@ -5073,7 +5074,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         final int fl = PolicyControl.getWindowFlags(win, attrs);
         final int pfl = attrs.privateFlags;
         final int sim = attrs.softInputMode;
-        final int requestedSysUiFl = PolicyControl.getSystemUiVisibility(win, null);
+        final int requestedSysUiFl = PolicyControl.getSystemUiVisibility(null, attrs);
         final int sysUiFl = requestedSysUiFl | getImpliedSysUiFlagsForLayout(attrs);
 
         final Rect pf = mTmpParentFrame;

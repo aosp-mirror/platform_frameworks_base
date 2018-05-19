@@ -1781,8 +1781,8 @@
     <string name="language_picker_section_all" msgid="3097279199511617537">"Alle talen"</string>
     <string name="region_picker_section_all" msgid="8966316787153001779">"Alle regio\'s"</string>
     <string name="locale_search_menu" msgid="2560710726687249178">"Zoeken"</string>
-    <string name="app_suspended_title" msgid="1919029799438164552">"App kan niet worden geopend"</string>
-    <string name="app_suspended_default_message" msgid="7875306315686531621">"De app <xliff:g id="APP_NAME_0">%1$s</xliff:g> is nu niet beschikbaar. Dit wordt beheerd door <xliff:g id="APP_NAME_1">%2$s</xliff:g>."</string>
+    <string name="app_suspended_title" msgid="2075071241147969611">"App is niet beschikbaar"</string>
+    <string name="app_suspended_default_message" msgid="123166680425711887">"<xliff:g id="APP_NAME_0">%1$s</xliff:g> is nu niet beschikbaar. Dit wordt beheerd door <xliff:g id="APP_NAME_1">%2$s</xliff:g>."</string>
     <string name="app_suspended_more_details" msgid="1131804827776778187">"Meer info"</string>
     <string name="work_mode_off_title" msgid="1118691887588435530">"Werkprofiel inschakelen?"</string>
     <string name="work_mode_off_message" msgid="5130856710614337649">"Je werk-apps, meldingen, gegevens en andere functies van je werkprofiel worden uitgeschakeld"</string>
@@ -1818,7 +1818,7 @@
     <string name="device_storage_monitor_notification_channel" msgid="3295871267414816228">"Apparaatopslag"</string>
     <string name="adb_debugging_notification_channel_tv" msgid="5537766997350092316">"USB-foutopsporing"</string>
     <string name="time_picker_hour_label" msgid="2979075098868106450">"uur"</string>
-    <string name="time_picker_minute_label" msgid="5168864173796598399">"minuut"</string>
+    <string name="time_picker_minute_label" msgid="5168864173796598399">"minuten"</string>
     <string name="time_picker_header_text" msgid="143536825321922567">"Tijd instellen"</string>
     <string name="time_picker_input_error" msgid="7574999942502513765">"Geef een geldige tijd op"</string>
     <string name="time_picker_prompt_label" msgid="7588093983899966783">"Typ een tijd"</string>
@@ -1879,5 +1879,8 @@
     <string name="zen_upgrade_notification_content" msgid="1794994264692424562">"Tik om te controleren wat er is geblokkeerd."</string>
     <string name="notification_app_name_system" msgid="4205032194610042794">"Systeem"</string>
     <string name="notification_app_name_settings" msgid="7751445616365753381">"Instellingen"</string>
+    <string name="notification_appops_camera_active" msgid="5050283058419699771">"Camera"</string>
+    <string name="notification_appops_microphone_active" msgid="4335305527588191730">"Microfoon"</string>
+    <string name="notification_appops_overlay_active" msgid="633813008357934729">"wordt weergegeven vóór andere apps op je scherm"</string>
     <string name="car_loading_profile" msgid="3545132581795684027">"Laden"</string>
 </resources>

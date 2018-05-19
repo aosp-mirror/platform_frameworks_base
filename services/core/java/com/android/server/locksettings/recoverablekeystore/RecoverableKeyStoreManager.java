@@ -57,6 +57,7 @@ import com.android.server.locksettings.recoverablekeystore.storage.RecoverableKe
 import com.android.server.locksettings.recoverablekeystore.storage.RecoverySessionStorage;
 import com.android.server.locksettings.recoverablekeystore.storage.RecoverySnapshotStorage;
 
+import java.io.IOException;
 import java.security.InvalidKeyException;
 import java.security.KeyFactory;
 import java.security.KeyStoreException;
@@ -189,11 +190,14 @@ public class RecoverableKeyStoreManager {
         if (activeRootAlias == null) {
             Log.d(TAG, "Root of trust for recovery agent + " + uid
                 + " is assigned for the first time to " + rootCertificateAlias);
-            mDatabase.setActiveRootOfTrust(userId, uid, rootCertificateAlias);
         } else if (!activeRootAlias.equals(rootCertificateAlias)) {
             Log.i(TAG, "Root of trust for recovery agent " + uid + " is changed to "
                     + rootCertificateAlias + " from  " + activeRootAlias);
-            mDatabase.setActiveRootOfTrust(userId, uid, rootCertificateAlias);
+        }
+        long updatedRows = mDatabase.setActiveRootOfTrust(userId, uid, rootCertificateAlias);
+        if (updatedRows < 0) {
+            throw new ServiceSpecificException(ERROR_SERVICE_INTERNAL_ERROR,
+                    "Failed to set the root of trust in the local DB.");
         }
 
         CertXml certXml;
@@ -236,17 +240,32 @@ public class RecoverableKeyStoreManager {
         // Save the chosen and validated certificate into database
         try {
             Log.d(TAG, "Saving the randomly chosen endpoint certificate to database");
-            if (mDatabase.setRecoveryServiceCertPath(userId, uid, rootCertificateAlias,
-                    certPath) > 0) {
-                mDatabase.setRecoveryServiceCertSerial(userId, uid, rootCertificateAlias,
-                        newSerial);
+            long updatedCertPathRows = mDatabase.setRecoveryServiceCertPath(userId, uid,
+                    rootCertificateAlias, certPath);
+            if (updatedCertPathRows > 0) {
+                long updatedCertSerialRows = mDatabase.setRecoveryServiceCertSerial(userId, uid,
+                        rootCertificateAlias, newSerial);
+                if (updatedCertSerialRows < 0) {
+                    // Ideally CertPath and CertSerial should be updated together in single
+                    // transaction, but since their mismatch doesn't create many problems
+                    // extra complexity is unnecessary.
+                    throw new ServiceSpecificException(ERROR_SERVICE_INTERNAL_ERROR,
+                        "Failed to set the certificate serial number in the local DB.");
+                }
                 if (mDatabase.getSnapshotVersion(userId, uid) != null) {
                     mDatabase.setShouldCreateSnapshot(userId, uid, true);
                     Log.i(TAG, "This is a certificate change. Snapshot must be updated");
                 } else {
                     Log.i(TAG, "This is a certificate change. Snapshot didn't exist");
                 }
-                mDatabase.setCounterId(userId, uid, new SecureRandom().nextLong());
+                long updatedCounterIdRows =
+                        mDatabase.setCounterId(userId, uid, new SecureRandom().nextLong());
+                if (updatedCounterIdRows < 0) {
+                    Log.e(TAG, "Failed to set the counter id in the local DB.");
+                }
+            } else if (updatedCertPathRows < 0) {
+                throw new ServiceSpecificException(ERROR_SERVICE_INTERNAL_ERROR,
+                        "Failed to set the certificate path in the local DB.");
             }
         } catch (CertificateEncodingException e) {
             Log.e(TAG, "Failed to encode CertPath", e);
@@ -340,7 +359,7 @@ public class RecoverableKeyStoreManager {
         }
 
         long updatedRows = mDatabase.setServerParams(userId, uid, serverParams);
-        if (updatedRows < 1) {
+        if (updatedRows < 0) {
             throw new ServiceSpecificException(
                     ERROR_SERVICE_INTERNAL_ERROR, "Database failure trying to set server params.");
         }
@@ -364,7 +383,12 @@ public class RecoverableKeyStoreManager {
     public void setRecoveryStatus(@NonNull String alias, int status) throws RemoteException {
         checkRecoverKeyStorePermission();
         Preconditions.checkNotNull(alias, "alias is null");
-        mDatabase.setRecoveryStatus(Binder.getCallingUid(), alias, status);
+        long updatedRows = mDatabase.setRecoveryStatus(Binder.getCallingUid(), alias, status);
+        if (updatedRows < 0) {
+            throw new ServiceSpecificException(
+                    ERROR_SERVICE_INTERNAL_ERROR,
+                    "Failed to set the key recovery status in the local DB.");
+        }
     }
 
     /**
@@ -400,7 +424,7 @@ public class RecoverableKeyStoreManager {
         }
 
         long updatedRows = mDatabase.setRecoverySecretTypes(userId, uid, secretTypes);
-        if (updatedRows < 1) {
+        if (updatedRows < 0) {
             throw new ServiceSpecificException(ERROR_SERVICE_INTERNAL_ERROR,
                     "Database error trying to set secret types.");
         }
@@ -664,7 +688,7 @@ public class RecoverableKeyStoreManager {
         } catch (NoSuchAlgorithmException e) {
             // Impossible: all algorithms must be supported by AOSP
             throw new RuntimeException(e);
-        } catch (KeyStoreException | UnrecoverableKeyException e) {
+        } catch (KeyStoreException | UnrecoverableKeyException | IOException e) {
             throw new ServiceSpecificException(ERROR_SERVICE_INTERNAL_ERROR, e.getMessage());
         } catch (InsecureUserException e) {
             throw new ServiceSpecificException(ERROR_INSECURE_USER, e.getMessage());
@@ -713,7 +737,7 @@ public class RecoverableKeyStoreManager {
         } catch (NoSuchAlgorithmException e) {
             // Impossible: all algorithms must be supported by AOSP
             throw new RuntimeException(e);
-        } catch (KeyStoreException | UnrecoverableKeyException e) {
+        } catch (KeyStoreException | UnrecoverableKeyException | IOException e) {
             throw new ServiceSpecificException(ERROR_SERVICE_INTERNAL_ERROR, e.getMessage());
         } catch (InsecureUserException e) {
             throw new ServiceSpecificException(ERROR_INSECURE_USER, e.getMessage());

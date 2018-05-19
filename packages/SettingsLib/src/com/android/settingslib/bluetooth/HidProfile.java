@@ -168,7 +168,7 @@ public class HidProfile implements LocalBluetoothProfile {
                 return R.string.bluetooth_hid_profile_summary_connected;
 
             default:
-                return Utils.getConnectionStateSummary(state);
+                return BluetoothUtils.getConnectionStateSummary(state);
         }
     }
 

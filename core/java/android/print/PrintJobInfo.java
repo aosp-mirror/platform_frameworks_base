@@ -587,6 +587,15 @@ public final class PrintJobInfo implements Parcelable {
     }
 
     /**
+     * If the print job is actively processed, i.e. the device needs to stay on.
+     *
+     * @hide
+     */
+    public boolean shouldStayAwake() {
+        return mCanceling || mState == STATE_STARTED || mState == STATE_QUEUED;
+    }
+
+    /**
      * Gets whether this job has a given advanced (printer specific) print
      * option.
      *

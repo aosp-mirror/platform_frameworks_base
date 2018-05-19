@@ -16,6 +16,8 @@
 
 package com.android.printspooler.model;
 
+import static android.os.PowerManager.PARTIAL_WAKE_LOCK;
+
 import static com.android.internal.print.DumpUtils.writePrintJobInfo;
 import static com.android.internal.util.dump.DumpUtils.writeComponentName;
 
@@ -35,6 +37,7 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
 import android.os.ParcelFileDescriptor;
+import android.os.PowerManager;
 import android.os.RemoteException;
 import android.print.IPrintSpooler;
 import android.print.IPrintSpoolerCallbacks;
@@ -124,6 +127,9 @@ public final class PrintSpoolerService extends Service {
     /** Cache for custom printer icons loaded from the print service */
     private CustomPrinterIconCache mCustomIconCache;
 
+    /** If the system should be kept awake to process print jobs */
+    private PowerManager.WakeLock mKeepAwake;
+
     public static PrintSpoolerService peekInstance() {
         synchronized (sLock) {
             return sInstance;
@@ -137,6 +143,8 @@ public final class PrintSpoolerService extends Service {
         mPersistanceManager = new PersistenceManager();
         mNotificationController = new NotificationController(PrintSpoolerService.this);
         mCustomIconCache = new CustomPrinterIconCache(getCacheDir());
+        mKeepAwake = getSystemService(PowerManager.class).newWakeLock(PARTIAL_WAKE_LOCK,
+                "Active Print Job");
 
         synchronized (mLock) {
             mPersistanceManager.readStateLocked();
@@ -480,6 +488,11 @@ public final class PrintSpoolerService extends Service {
 
     private void addPrintJobLocked(PrintJobInfo printJob) {
         mPrintJobs.add(printJob);
+
+        if (printJob.shouldStayAwake()) {
+            keepAwakeLocked();
+        }
+
         if (DEBUG_PRINT_JOB_LIFECYCLE) {
             Slog.i(LOG_TAG, "[ADD] " + printJob);
         }
@@ -500,6 +513,9 @@ public final class PrintSpoolerService extends Service {
                     persistState = true;
                 }
             }
+
+            checkIfStillKeepAwakeLocked();
+
             if (persistState) {
                 mPersistanceManager.writeStateLocked();
             }
@@ -545,6 +561,12 @@ public final class PrintSpoolerService extends Service {
                 printJob.setState(state);
                 printJob.setStatus(error);
                 printJob.setCancelling(false);
+
+                if (printJob.shouldStayAwake()) {
+                    keepAwakeLocked();
+                } else {
+                    checkIfStillKeepAwakeLocked();
+                }
 
                 if (DEBUG_PRINT_JOB_LIFECYCLE) {
                     Slog.i(LOG_TAG, "[STATE CHANGED] " + printJob);
@@ -716,6 +738,12 @@ public final class PrintSpoolerService extends Service {
                     mPersistanceManager.writeStateLocked();
                 }
                 mNotificationController.onUpdateNotifications(mPrintJobs);
+
+                if (printJob.shouldStayAwake()) {
+                    keepAwakeLocked();
+                } else {
+                    checkIfStillKeepAwakeLocked();
+                }
 
                 Message message = PooledLambda.obtainMessage(
                         PrintSpoolerService::onPrintJobStateChanged, this, printJob);
@@ -1098,7 +1126,7 @@ public final class PrintSpoolerService extends Service {
             try {
                 XmlPullParser parser = Xml.newPullParser();
                 parser.setInput(in, StandardCharsets.UTF_8.name());
-                parseState(parser);
+                parseStateLocked(parser);
             } catch (IllegalStateException ise) {
                 Slog.w(LOG_TAG, "Failed parsing ", ise);
             } catch (NullPointerException npe) {
@@ -1116,14 +1144,14 @@ public final class PrintSpoolerService extends Service {
             }
         }
 
-        private void parseState(XmlPullParser parser)
+        private void parseStateLocked(XmlPullParser parser)
                 throws IOException, XmlPullParserException {
             parser.next();
             skipEmptyTextTags(parser);
             expect(parser, XmlPullParser.START_TAG, TAG_SPOOLER);
             parser.next();
 
-            while (parsePrintJob(parser)) {
+            while (parsePrintJobLocked(parser)) {
                 parser.next();
             }
 
@@ -1131,7 +1159,7 @@ public final class PrintSpoolerService extends Service {
             expect(parser, XmlPullParser.END_TAG, TAG_SPOOLER);
         }
 
-        private boolean parsePrintJob(XmlPullParser parser)
+        private boolean parsePrintJobLocked(XmlPullParser parser)
                 throws IOException, XmlPullParserException {
             skipEmptyTextTags(parser);
             if (!accept(parser, XmlPullParser.START_TAG, TAG_JOB)) {
@@ -1343,6 +1371,10 @@ public final class PrintSpoolerService extends Service {
 
             mPrintJobs.add(printJob);
 
+            if (printJob.shouldStayAwake()) {
+                keepAwakeLocked();
+            }
+
             if (DEBUG_PERSISTENCE) {
                 Log.i(LOG_TAG, "[RESTORED] " + printJob);
             }
@@ -1383,6 +1415,33 @@ public final class PrintSpoolerService extends Service {
                 return false;
             }
             return true;
+        }
+    }
+
+    /**
+     * Keep the system awake as a print job needs to be processed.
+     */
+    private void keepAwakeLocked() {
+        if (!mKeepAwake.isHeld()) {
+            mKeepAwake.acquire();
+        }
+    }
+
+    /**
+     * Check if we still need to keep the system awake.
+     *
+     * @see #keepAwakeLocked
+     */
+    private void checkIfStillKeepAwakeLocked() {
+        if (mKeepAwake.isHeld()) {
+            int numPrintJobs = mPrintJobs.size();
+            for (int i = 0; i < numPrintJobs; i++) {
+                if (mPrintJobs.get(i).shouldStayAwake()) {
+                    return;
+                }
+            }
+
+            mKeepAwake.release();
         }
     }
 

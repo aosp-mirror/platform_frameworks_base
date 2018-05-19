@@ -132,6 +132,8 @@ class KeyguardController {
         if (showingChanged) {
             dismissDockedStackIfNeeded();
             setKeyguardGoingAway(false);
+            mWindowManager.setKeyguardOrAodShowingOnDefaultDisplay(
+                    isKeyguardOrAodShowing(DEFAULT_DISPLAY));
             if (keyguardShowing) {
                 mDismissalRequested = false;
             }

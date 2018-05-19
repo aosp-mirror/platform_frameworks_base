@@ -569,6 +569,7 @@ Landroid/app/IActivityManager$Stub$Proxy;->getProcessLimit()I
 Landroid/app/IActivityManager$Stub$Proxy;->getProcessPss([I)[J
 Landroid/app/IActivityManager$Stub$Proxy;->isAppForeground(I)Z
 Landroid/app/IActivityManager$Stub$Proxy;->mRemote:Landroid/os/IBinder;
+Landroid/app/IActivityManager$Stub$Proxy;->setActivityController(Landroid/app/IActivityController;Z)V
 Landroid/app/IActivityManager$Stub;->asInterface(Landroid/os/IBinder;)Landroid/app/IActivityManager;
 Landroid/app/IActivityManager;->bindService(Landroid/app/IApplicationThread;Landroid/os/IBinder;Landroid/content/Intent;Ljava/lang/String;Landroid/app/IServiceConnection;ILjava/lang/String;I)I
 Landroid/app/IActivityManager;->broadcastIntent(Landroid/app/IApplicationThread;Landroid/content/Intent;Ljava/lang/String;Landroid/content/IIntentReceiver;ILjava/lang/String;Landroid/os/Bundle;[Ljava/lang/String;ILandroid/os/Bundle;ZZI)I
@@ -892,6 +893,9 @@ Landroid/app/SearchManager;->isVisible()Z
 Landroid/app/SearchManager;->launchAssist(Landroid/os/Bundle;)V
 Landroid/app/SearchManager;->mSearchDialog:Landroid/app/SearchDialog;
 Landroid/app/SearchManager;->startSearch(Ljava/lang/String;ZLandroid/content/ComponentName;Landroid/os/Bundle;ZLandroid/graphics/Rect;)V
+Landroid/app/servertransaction/ClientTransaction;->mActivityCallbacks:Ljava/util/List;
+Landroid/app/servertransaction/LaunchActivityItem;->mInfo:Landroid/content/pm/ActivityInfo;
+Landroid/app/servertransaction/LaunchActivityItem;->mIntent:Landroid/content/Intent;
 Landroid/app/Service;->attach(Landroid/content/Context;Landroid/app/ActivityThread;Ljava/lang/String;Landroid/os/IBinder;Landroid/app/Application;Ljava/lang/Object;)V
 Landroid/app/Service;->mActivityManager:Landroid/app/IActivityManager;
 Landroid/app/Service;->mApplication:Landroid/app/Application;
@@ -3838,7 +3842,6 @@ Landroid/os/FileUtils;->sync(Ljava/io/FileOutputStream;)Z
 Landroid/os/Handler;-><init>(Z)V
 Landroid/os/Handler;->getIMessenger()Landroid/os/IMessenger;
 Landroid/os/Handler;->getPostMessage(Ljava/lang/Runnable;Ljava/lang/Object;)Landroid/os/Message;
-Landroid/os/Handler;->hasCallbacks(Ljava/lang/Runnable;)Z
 Landroid/os/Handler;->mCallback:Landroid/os/Handler$Callback;
 Landroid/os/Handler;->mLooper:Landroid/os/Looper;
 Landroid/os/Handler;->mMessenger:Landroid/os/IMessenger;
@@ -4449,6 +4452,7 @@ Landroid/provider/Settings$Secure;->ENABLED_NOTIFICATION_LISTENERS:Ljava/lang/St
 Landroid/provider/Settings$Secure;->ENABLED_PRINT_SERVICES:Ljava/lang/String;
 Landroid/provider/Settings$Secure;->getIntForUser(Landroid/content/ContentResolver;Ljava/lang/String;II)I
 Landroid/provider/Settings$Secure;->getLongForUser(Landroid/content/ContentResolver;Ljava/lang/String;JI)J
+Landroid/provider/Settings$Secure;->IMMERSIVE_MODE_CONFIRMATIONS:Ljava/lang/String;
 Landroid/provider/Settings$Secure;->INCALL_POWER_BUTTON_BEHAVIOR:Ljava/lang/String;
 Landroid/provider/Settings$Secure;->LOCK_SCREEN_ALLOW_PRIVATE_NOTIFICATIONS:Ljava/lang/String;
 Landroid/provider/Settings$Secure;->LOCK_SCREEN_LOCK_AFTER_TIMEOUT:Ljava/lang/String;
@@ -6399,6 +6403,7 @@ Landroid/view/WindowContentFrameStats;->init(J[J[J[J)V
 Landroid/view/WindowInsets;-><init>(Landroid/graphics/Rect;)V
 Landroid/view/WindowInsets;->CONSUMED:Landroid/view/WindowInsets;
 Landroid/view/WindowInsets;->getSystemWindowInsets()Landroid/graphics/Rect;
+Landroid/view/WindowInsets;->inset(IIII)Landroid/view/WindowInsets;
 Landroid/view/WindowLeaked;-><init>(Ljava/lang/String;)V
 Landroid/view/WindowManager$LayoutParams;->backup()V
 Landroid/view/WindowManager$LayoutParams;->FLAG_SLIPPERY:I

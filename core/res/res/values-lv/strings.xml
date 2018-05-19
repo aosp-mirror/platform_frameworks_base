@@ -1063,7 +1063,7 @@
     <string name="loading" msgid="7933681260296021180">"Notiek ielāde..."</string>
     <string name="capital_on" msgid="1544682755514494298">"IESLĒGT"</string>
     <string name="capital_off" msgid="6815870386972805832">"IZSL."</string>
-    <string name="whichApplication" msgid="4533185947064773386">"Pabeigt darbību, izmantojot"</string>
+    <string name="whichApplication" msgid="4533185947064773386">"Izvēlieties lietotni"</string>
     <string name="whichApplicationNamed" msgid="8260158865936942783">"Pabeigt darbību, izmantojot %1$s"</string>
     <string name="whichApplicationLabel" msgid="7425855495383818784">"Pabeigt darbību"</string>
     <string name="whichViewApplication" msgid="3272778576700572102">"Atvērt, izmantojot"</string>
@@ -1815,8 +1815,8 @@
     <string name="language_picker_section_all" msgid="3097279199511617537">"Visas valodas"</string>
     <string name="region_picker_section_all" msgid="8966316787153001779">"Visi reģioni"</string>
     <string name="locale_search_menu" msgid="2560710726687249178">"Meklēt"</string>
-    <string name="app_suspended_title" msgid="1919029799438164552">"Neatverama lietotne"</string>
-    <string name="app_suspended_default_message" msgid="7875306315686531621">"Lietotne <xliff:g id="APP_NAME_0">%1$s</xliff:g> pašlaik nav pieejama. Šo darbību pārvalda <xliff:g id="APP_NAME_1">%2$s</xliff:g>."</string>
+    <string name="app_suspended_title" msgid="2075071241147969611">"Lietotne nav pieejama"</string>
+    <string name="app_suspended_default_message" msgid="123166680425711887">"<xliff:g id="APP_NAME_0">%1$s</xliff:g> pašlaik nav pieejama. Šo darbību pārvalda <xliff:g id="APP_NAME_1">%2$s</xliff:g>."</string>
     <string name="app_suspended_more_details" msgid="1131804827776778187">"Uzzināt vairāk"</string>
     <string name="work_mode_off_title" msgid="1118691887588435530">"Vai ieslēgt darba profilu?"</string>
     <string name="work_mode_off_message" msgid="5130856710614337649">"Tiks ieslēgtas jūsu darba lietotnes, paziņojumi, dati un citas darba profila funkcijas."</string>
@@ -1914,5 +1914,8 @@
     <string name="zen_upgrade_notification_content" msgid="1794994264692424562">"Pieskarieties, lai uzzinātu, kas tiek bloķēts."</string>
     <string name="notification_app_name_system" msgid="4205032194610042794">"Sistēma"</string>
     <string name="notification_app_name_settings" msgid="7751445616365753381">"Iestatījumi"</string>
+    <string name="notification_appops_camera_active" msgid="5050283058419699771">"Kamera"</string>
+    <string name="notification_appops_microphone_active" msgid="4335305527588191730">"Mikrofons"</string>
+    <string name="notification_appops_overlay_active" msgid="633813008357934729">"rāda pāri citām lietotnēm jūsu ekrānā"</string>
     <string name="car_loading_profile" msgid="3545132581795684027">"Ielāde"</string>
 </resources>

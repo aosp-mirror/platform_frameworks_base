@@ -232,7 +232,7 @@ public class LocalBluetoothAdapter {
                 ? BluetoothAdapter.STATE_TURNING_ON
                 : BluetoothAdapter.STATE_TURNING_OFF);
         } else {
-            if (Utils.V) {
+            if (BluetoothUtils.V) {
                 Log.v(TAG, "setBluetoothEnabled call, manager didn't return " +
                         "success for enabled: " + enabled);
             }

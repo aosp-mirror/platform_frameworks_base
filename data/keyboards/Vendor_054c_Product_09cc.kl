@@ -62,6 +62,10 @@ key 0x138    BUTTON_SELECT
 key 0x139    BUTTON_START
 
 # PS key
-key 0x13c    HOME
+key 0x13c    BUTTON_MODE
+
 # Touchpad press
-key 0x13d   BUTTON_MODE
+# The touchpad for this joystick will become a separate input device in future releases
+# and this button will be equivalent to left mouse button
+# Therefore, map it to KEYCODE_BUTTON_1 here to allow apps to still handle this on earlier versions
+key 0x13d   BUTTON_1

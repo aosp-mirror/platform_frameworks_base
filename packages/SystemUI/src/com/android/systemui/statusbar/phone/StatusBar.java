@@ -45,6 +45,7 @@ import android.annotation.Nullable;
 import android.app.ActivityManager;
 import android.app.ActivityOptions;
 import android.app.AlarmManager;
+import android.app.IWallpaperManager;
 import android.app.KeyguardManager;
 import android.app.Notification;
 import android.app.NotificationManager;
@@ -745,6 +746,14 @@ public class StatusBar extends SystemUI implements DemoMode,
             vrManager.registerListener(mVrStateCallbacks);
         } catch (RemoteException e) {
             Slog.e(TAG, "Failed to register VR mode state listener: " + e);
+        }
+
+        IWallpaperManager wallpaperManager = IWallpaperManager.Stub.asInterface(
+                ServiceManager.getService(Context.WALLPAPER_SERVICE));
+        try {
+            wallpaperManager.setInAmbientMode(false /* ambientMode */, false /* animated */);
+        } catch (RemoteException e) {
+            // Just pass, nothing critical.
         }
 
         // end old BaseStatusBar.start().
@@ -3888,7 +3897,6 @@ public class StatusBar extends SystemUI implements DemoMode,
         mKeyguardIndicationController.setDozing(mDozing);
         mNotificationPanel.setDozing(mDozing, animate);
         updateQsExpansionEnabled();
-        mViewHierarchyManager.updateRowStates();
         Trace.endSection();
     }
 
@@ -4676,16 +4684,18 @@ public class StatusBar extends SystemUI implements DemoMode,
                 FingerprintUnlockController.MODE_WAKE_AND_UNLOCK) {
             dozing = false;
         }
-        mDozing = dozing;
-        mKeyguardViewMediator.setAodShowing(mDozing && alwaysOn);
-        mStatusBarWindowManager.setDozing(mDozing);
-        mStatusBarKeyguardViewManager.setDozing(mDozing);
-        if (mAmbientIndicationContainer instanceof DozeReceiver) {
-            ((DozeReceiver) mAmbientIndicationContainer).setDozing(mDozing);
+        if (mDozing != dozing) {
+            mDozing = dozing;
+            mKeyguardViewMediator.setAodShowing(mDozing && alwaysOn);
+            mStatusBarWindowManager.setDozing(mDozing);
+            mStatusBarKeyguardViewManager.setDozing(mDozing);
+            if (mAmbientIndicationContainer instanceof DozeReceiver) {
+                ((DozeReceiver) mAmbientIndicationContainer).setDozing(mDozing);
+            }
+            mEntryManager.updateNotifications();
+            updateDozingState();
+            updateReportRejectedTouchVisibility();
         }
-        mEntryManager.updateNotifications();
-        updateDozingState();
-        updateReportRejectedTouchVisibility();
         Trace.endSection();
     }
 
@@ -5161,8 +5171,7 @@ public class StatusBar extends SystemUI implements DemoMode,
                     removeNotification(parentToCancelFinal);
                 }
                 if (shouldAutoCancel(sbn)
-                        || mRemoteInputManager.getKeysKeptForRemoteInput().contains(
-                                notificationKey)) {
+                        || mEntryManager.isNotificationKeptForRemoteInput(notificationKey)) {
                     // Automatically remove all notifications that we may have kept around longer
                     removeNotification(sbn);
                 }

@@ -14,6 +14,8 @@
 
 package com.android.systemui.statusbar;
 
+import static junit.framework.Assert.assertFalse;
+import static junit.framework.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isNull;
@@ -74,7 +76,7 @@ public class SmartReplyControllerTest extends SysuiTestCase {
     }
 
     @Test
-    public void testSendSmartReply_updatesRemoteInput() throws RemoteException {
+    public void testSendSmartReply_updatesRemoteInput() {
         StatusBarNotification sbn = mock(StatusBarNotification.class);
         when(sbn.getKey()).thenReturn(TEST_NOTIFICATION_KEY);
         when(mNotificationEntryManager.rebuildNotificationWithRemoteInput(
@@ -117,5 +119,22 @@ public class SmartReplyControllerTest extends SysuiTestCase {
         // Check we log the result to the status bar service.
         verify(mIStatusBarService).onNotificationSmartRepliesAdded(TEST_NOTIFICATION_KEY,
                 TEST_CHOICE_COUNT);
+    }
+
+    @Test
+    public void testSendSmartReply_reportsSending() {
+        SmartReplyController controller = new SmartReplyController();
+        controller.smartReplySent(mEntry, TEST_CHOICE_INDEX, TEST_CHOICE_TEXT);
+
+        assertTrue(controller.isSendingSmartReply(TEST_NOTIFICATION_KEY));
+    }
+
+    @Test
+    public void testSendingSmartReply_afterRemove_shouldReturnFalse() {
+        SmartReplyController controller = new SmartReplyController();
+        controller.isSendingSmartReply(TEST_NOTIFICATION_KEY);
+        controller.stopSending(mEntry);
+
+        assertFalse(controller.isSendingSmartReply(TEST_NOTIFICATION_KEY));
     }
 }

@@ -35,9 +35,9 @@
     <string name="bugreport_add_details_to_zip_failed" msgid="1302931926486712371">"बग रिपोर्ट सम्बन्धी विवरणहरूलाई जिप फाइलमा थप्न सकिएन"</string>
     <string name="bugreport_unnamed" msgid="2800582406842092709">"(नामविहीन)"</string>
     <string name="bugreport_info_action" msgid="2158204228510576227">"विवरण"</string>
-    <string name="bugreport_screenshot_action" msgid="8677781721940614995">"स्क्रिनशट"</string>
-    <string name="bugreport_screenshot_taken" msgid="5684211273096253120">"स्क्रिनशट सफलतापूर्वक लिइयो।"</string>
-    <string name="bugreport_screenshot_failed" msgid="5853049140806834601">"स्क्रिनशट लिन सकिएन।"</string>
+    <string name="bugreport_screenshot_action" msgid="8677781721940614995">"स्क्रिसट"</string>
+    <string name="bugreport_screenshot_taken" msgid="5684211273096253120">"स्क्रिसट सफलतापूर्वक लिइयो।"</string>
+    <string name="bugreport_screenshot_failed" msgid="5853049140806834601">"स्क्रिसट लिन सकिएन।"</string>
     <string name="bugreport_info_dialog_title" msgid="1355948594292983332">"बग रिपोर्ट <xliff:g id="ID">#%d</xliff:g>का विवरणहरू"</string>
     <string name="bugreport_info_name" msgid="4414036021935139527">"फाइलको नाम"</string>
     <string name="bugreport_info_title" msgid="2306030793918239804">"बगको शीर्षक"</string>

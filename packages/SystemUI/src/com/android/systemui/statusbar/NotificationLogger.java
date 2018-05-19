@@ -176,10 +176,9 @@ public class NotificationLogger {
         if (newlyVisible.isEmpty() && noLongerVisible.isEmpty()) {
             return;
         }
-        NotificationVisibility[] newlyVisibleAr =
-                newlyVisible.toArray(new NotificationVisibility[newlyVisible.size()]);
-        NotificationVisibility[] noLongerVisibleAr =
-                noLongerVisible.toArray(new NotificationVisibility[noLongerVisible.size()]);
+        final NotificationVisibility[] newlyVisibleAr = cloneVisibilitiesAsArr(newlyVisible);
+        final NotificationVisibility[] noLongerVisibleAr = cloneVisibilitiesAsArr(noLongerVisible);
+
         mUiOffloadThread.submit(() -> {
             try {
                 mBarService.onNotificationVisibilityChanged(newlyVisibleAr, noLongerVisibleAr);
@@ -202,6 +201,8 @@ public class NotificationLogger {
                     Log.d(TAG, "failed setNotificationsShown: ", e);
                 }
             }
+            recycleAllVisibilityObjects(newlyVisibleAr);
+            recycleAllVisibilityObjects(noLongerVisibleAr);
         });
     }
 
@@ -211,6 +212,28 @@ public class NotificationLogger {
             array.valueAt(i).recycle();
         }
         array.clear();
+    }
+
+    private void recycleAllVisibilityObjects(NotificationVisibility[] array) {
+        final int N = array.length;
+        for (int i = 0 ; i < N; i++) {
+            if (array[i] != null) {
+                array[i].recycle();
+            }
+        }
+    }
+
+    private NotificationVisibility[] cloneVisibilitiesAsArr(Collection<NotificationVisibility> c) {
+
+        final NotificationVisibility[] array = new NotificationVisibility[c.size()];
+        int i = 0;
+        for(NotificationVisibility nv: c) {
+            if (nv != null) {
+                array[i] = nv.clone();
+            }
+            i++;
+        }
+        return array;
     }
 
     @VisibleForTesting

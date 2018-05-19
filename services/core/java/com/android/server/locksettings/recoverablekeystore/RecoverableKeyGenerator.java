@@ -24,6 +24,7 @@ import java.security.InvalidKeyException;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.util.Locale;
+import android.util.Log;
 
 import javax.crypto.KeyGenerator;
 import javax.crypto.SecretKey;
@@ -40,6 +41,7 @@ import javax.crypto.spec.SecretKeySpec;
  */
 public class RecoverableKeyGenerator {
 
+    private static final String TAG = "PlatformKeyGen";
     private static final int RESULT_CANNOT_INSERT_ROW = -1;
     private static final String SECRET_KEY_ALGORITHM = "AES";
 
@@ -104,7 +106,11 @@ public class RecoverableKeyGenerator {
                             Locale.US, "Failed writing (%d, %s) to database.", uid, alias));
         }
 
-        mDatabase.setShouldCreateSnapshot(userId, uid, true);
+        long updatedRows = mDatabase.setShouldCreateSnapshot(userId, uid, true);
+        if (updatedRows < 0) {
+            Log.e(TAG, "Failed to set the shoudCreateSnapshot flag in the local DB.");
+        }
+
         return key.getEncoded();
     }
 

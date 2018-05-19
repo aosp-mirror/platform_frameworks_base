@@ -30,6 +30,7 @@ import android.view.RemoteAnimationAdapter;
 import android.view.RemoteAnimationTarget;
 
 import com.android.systemui.Interpolators;
+import com.android.systemui.shared.system.SurfaceControlCompat;
 import com.android.systemui.shared.system.SyncRtSurfaceTransactionApplier;
 import com.android.systemui.shared.system.SyncRtSurfaceTransactionApplier.SurfaceParams;
 import com.android.systemui.statusbar.ExpandableNotificationRow;
@@ -245,8 +246,8 @@ public class ActivityLaunchAnimator {
             Matrix m = new Matrix();
             m.postTranslate(0, (float) (mParams.top - app.position.y));
             mWindowCrop.set(mParams.left, 0, mParams.right, mParams.getHeight());
-            SurfaceParams params = new SurfaceParams(app.leash, 1f /* alpha */, m, mWindowCrop,
-                    app.prefixOrderIndex);
+            SurfaceParams params = new SurfaceParams(new SurfaceControlCompat(app.leash),
+                    1f /* alpha */, m, mWindowCrop, app.prefixOrderIndex);
             mSyncRtTransactionApplier.scheduleApply(params);
         }
 
