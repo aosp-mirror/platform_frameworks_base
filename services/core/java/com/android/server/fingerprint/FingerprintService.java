@@ -21,7 +21,7 @@ import static android.Manifest.permission.MANAGE_FINGERPRINT;
 import static android.Manifest.permission.RESET_FINGERPRINT_LOCKOUT;
 import static android.Manifest.permission.USE_BIOMETRIC;
 import static android.Manifest.permission.USE_FINGERPRINT;
-import static android.app.ActivityManager.RunningAppProcessInfo.IMPORTANCE_FOREGROUND;
+import static android.app.ActivityManager.RunningAppProcessInfo.IMPORTANCE_FOREGROUND_SERVICE;
 
 import android.app.ActivityManager;
 import android.app.ActivityManager.RunningAppProcessInfo;
@@ -772,7 +772,7 @@ public class FingerprintService extends SystemService implements IHwBinder.Death
             for (int i = 0; i < N; i++) {
                 RunningAppProcessInfo proc = procs.get(i);
                 if (proc.pid == pid && proc.uid == uid
-                        && proc.importance == IMPORTANCE_FOREGROUND) {
+                        && proc.importance <= IMPORTANCE_FOREGROUND_SERVICE) {
                     return true;
                 }
             }
