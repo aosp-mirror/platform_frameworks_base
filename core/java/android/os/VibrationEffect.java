@@ -18,6 +18,7 @@ package android.os;
 
 import android.annotation.Nullable;
 import android.annotation.TestApi;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.hardware.vibrator.V1_0.EffectStrength;
 import android.hardware.vibrator.V1_2.Effect;
@@ -277,7 +278,12 @@ public abstract class VibrationEffect implements Parcelable {
             if (uris[i] == null) {
                 continue;
             }
-            if (Uri.parse(uris[i]).equals(uri)) {
+            ContentResolver cr = context.getContentResolver();
+            Uri mappedUri = cr.uncanonicalize(Uri.parse(uris[i]));
+            if (mappedUri == null) {
+                continue;
+            }
+            if (mappedUri.equals(uri)) {
                 return get(RINGTONES[i]);
             }
         }
