@@ -16,7 +16,9 @@
 
 package com.android.systemui.statusbar;
 
+import static org.junit.Assert.assertArrayEquals;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -25,6 +27,7 @@ import static org.mockito.Mockito.when;
 import android.app.Notification;
 import android.os.Handler;
 import android.os.Looper;
+import android.os.RemoteException;
 import android.os.UserHandle;
 import android.service.notification.StatusBarNotification;
 import android.support.test.filters.SmallTest;
@@ -43,6 +46,9 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
+import org.mockito.stubbing.Answer;
+
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 @SmallTest
 @RunWith(AndroidTestingRunner.class)
@@ -64,9 +70,10 @@ public class NotificationLoggerTest extends SysuiTestCase {
     private NotificationData.Entry mEntry;
     private StatusBarNotification mSbn;
     private TestableNotificationLogger mLogger;
+    private ConcurrentLinkedQueue<AssertionError> mErrorQueue = new ConcurrentLinkedQueue<>();
 
     @Before
-    public void setUp() {
+    public void setUp() throws RemoteException {
         MockitoAnnotations.initMocks(this);
         mDependency.injectTestDependency(NotificationEntryManager.class, mEntryManager);
         mDependency.injectTestDependency(NotificationListener.class, mListener);
@@ -84,17 +91,33 @@ public class NotificationLoggerTest extends SysuiTestCase {
 
     @Test
     public void testOnChildLocationsChangedReportsVisibilityChanged() throws Exception {
+        NotificationVisibility[] newlyVisibleKeys = {
+                NotificationVisibility.obtain(mEntry.key, 0, 1, true)
+        };
+        NotificationVisibility[] noLongerVisibleKeys = {};
+        doAnswer((Answer) invocation -> {
+                    try {
+                        assertArrayEquals(newlyVisibleKeys,
+                                (NotificationVisibility[]) invocation.getArguments()[0]);
+                        assertArrayEquals(noLongerVisibleKeys,
+                                (NotificationVisibility[]) invocation.getArguments()[1]);
+                    } catch (AssertionError error) {
+                        mErrorQueue.offer(error);
+                    }
+                    return null;
+                }
+        ).when(mBarService).onNotificationVisibilityChanged(any(NotificationVisibility[].class),
+                any(NotificationVisibility[].class));
+
         when(mListContainer.isInVisibleLocation(any())).thenReturn(true);
         when(mNotificationData.getActiveNotifications()).thenReturn(Lists.newArrayList(mEntry));
         mLogger.getChildLocationsChangedListenerForTest().onChildLocationsChanged();
         TestableLooper.get(this).processAllMessages();
         waitForUiOffloadThread();
 
-        NotificationVisibility[] newlyVisibleKeys = {
-                NotificationVisibility.obtain(mEntry.key, 0, 1, true)
-        };
-        NotificationVisibility[] noLongerVisibleKeys = {};
-        verify(mBarService).onNotificationVisibilityChanged(newlyVisibleKeys, noLongerVisibleKeys);
+        if(!mErrorQueue.isEmpty()) {
+            throw mErrorQueue.poll();
+        }
 
         // |mEntry| won't change visibility, so it shouldn't be reported again:
         Mockito.reset(mBarService);
