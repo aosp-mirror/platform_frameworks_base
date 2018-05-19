@@ -117,10 +117,10 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
             return (onSubscriptionsChangedListenerCallback != null);
         }
 
-        boolean canReadPhoneState() {
+        boolean canReadCallLog() {
             try {
-                return TelephonyPermissions.checkReadPhoneState(
-                        context, subId, callerPid, callerUid, callingPackage, "listen");
+                return TelephonyPermissions.checkReadCallLog(
+                        context, subId, callerPid, callerUid, callingPackage);
             } catch (SecurityException e) {
                 return false;
             }
@@ -667,8 +667,8 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
     }
 
     private String getCallIncomingNumber(Record record, int phoneId) {
-        // Hide the number if record's process can't currently read phone state.
-        return record.canReadPhoneState() ? mCallIncomingNumber[phoneId] : "";
+        // Only reveal the incoming number if the record has read call log permission.
+        return record.canReadCallLog() ? mCallIncomingNumber[phoneId] : "";
     }
 
     private Record add(IBinder binder) {
@@ -729,13 +729,13 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
         }
     }
 
-    public void notifyCallState(int state, String incomingNumber) {
+    public void notifyCallState(int state, String phoneNumber) {
         if (!checkNotifyPermission("notifyCallState()")) {
             return;
         }
 
         if (VDBG) {
-            log("notifyCallState: state=" + state + " incomingNumber=" + incomingNumber);
+            log("notifyCallState: state=" + state + " phoneNumber=" + phoneNumber);
         }
 
         synchronized (mRecords) {
@@ -743,8 +743,10 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
                 if (r.matchPhoneStateListenerEvent(PhoneStateListener.LISTEN_CALL_STATE) &&
                         (r.subId == SubscriptionManager.DEFAULT_SUBSCRIPTION_ID)) {
                     try {
-                        String incomingNumberOrEmpty = r.canReadPhoneState() ? incomingNumber : "";
-                        r.callback.onCallStateChanged(state, incomingNumberOrEmpty);
+                        // Ensure the listener has read call log permission; if they do not return
+                        // an empty phone number.
+                        String phoneNumberOrEmpty = r.canReadCallLog() ? phoneNumber : "";
+                        r.callback.onCallStateChanged(state, phoneNumberOrEmpty);
                     } catch (RemoteException ex) {
                         mRemoveList.add(r.binder);
                     }
@@ -755,7 +757,7 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
 
         // Called only by Telecomm to communicate call state across different phone accounts. So
         // there is no need to add a valid subId or slotId.
-        broadcastCallStateChanged(state, incomingNumber,
+        broadcastCallStateChanged(state, phoneNumber,
                 SubscriptionManager.INVALID_PHONE_INDEX,
                 SubscriptionManager.INVALID_SUBSCRIPTION_ID);
     }
@@ -1571,9 +1573,6 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
         Intent intent = new Intent(TelephonyManager.ACTION_PHONE_STATE_CHANGED);
         intent.putExtra(PhoneConstants.STATE_KEY,
                 PhoneConstantConversions.convertCallState(state).toString());
-        if (!TextUtils.isEmpty(incomingNumber)) {
-            intent.putExtra(TelephonyManager.EXTRA_INCOMING_NUMBER, incomingNumber);
-        }
 
         // If a valid subId was specified, we should fire off a subId-specific state
         // change intent and include the subId.
@@ -1589,13 +1588,20 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
         // Wakeup apps for the (SUBSCRIPTION_)PHONE_STATE broadcast.
         intent.addFlags(Intent.FLAG_RECEIVER_INCLUDE_BACKGROUND);
 
+        Intent intentWithPhoneNumber = new Intent(intent);
+        if (!TextUtils.isEmpty(incomingNumber)) {
+            intentWithPhoneNumber.putExtra(TelephonyManager.EXTRA_INCOMING_NUMBER, incomingNumber);
+        }
         // Send broadcast twice, once for apps that have PRIVILEGED permission and once for those
         // that have the runtime one
-        mContext.sendBroadcastAsUser(intent, UserHandle.ALL,
+        mContext.sendBroadcastAsUser(intentWithPhoneNumber, UserHandle.ALL,
                 android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE);
         mContext.sendBroadcastAsUser(intent, UserHandle.ALL,
                 android.Manifest.permission.READ_PHONE_STATE,
                 AppOpsManager.OP_READ_PHONE_STATE);
+        mContext.sendBroadcastAsUserMultiplePermissions(intentWithPhoneNumber, UserHandle.ALL,
+                new String[] { android.Manifest.permission.READ_PHONE_STATE,
+                        android.Manifest.permission.READ_CALL_LOG});
     }
 
     private void broadcastDataConnectionStateChanged(int state,
