@@ -653,7 +653,7 @@
     <string name="phoneTypeHome" msgid="2570923463033985887">"Home"</string>
     <string name="phoneTypeMobile" msgid="6501463557754751037">"Mobile"</string>
     <string name="phoneTypeWork" msgid="8863939667059911633">"Work"</string>
-    <string name="phoneTypeFaxWork" msgid="3517792160008890912">"Work Fax"</string>
+    <string name="phoneTypeFaxWork" msgid="3517792160008890912">"Work fax"</string>
     <string name="phoneTypeFaxHome" msgid="2067265972322971467">"Home fax"</string>
     <string name="phoneTypePager" msgid="7582359955394921732">"Pager"</string>
     <string name="phoneTypeOther" msgid="1544425847868765990">"Other"</string>
@@ -1781,8 +1781,8 @@
     <string name="language_picker_section_all" msgid="3097279199511617537">"All languages"</string>
     <string name="region_picker_section_all" msgid="8966316787153001779">"All regions"</string>
     <string name="locale_search_menu" msgid="2560710726687249178">"Search"</string>
-    <string name="app_suspended_title" msgid="1919029799438164552">"Can’t open app"</string>
-    <string name="app_suspended_default_message" msgid="7875306315686531621">"The app <xliff:g id="APP_NAME_0">%1$s</xliff:g> isn’t available at the moment. This is managed by <xliff:g id="APP_NAME_1">%2$s</xliff:g>."</string>
+    <string name="app_suspended_title" msgid="2075071241147969611">"App isn’t available"</string>
+    <string name="app_suspended_default_message" msgid="123166680425711887">"<xliff:g id="APP_NAME_0">%1$s</xliff:g> isn’t available at the moment. This is managed by <xliff:g id="APP_NAME_1">%2$s</xliff:g>."</string>
     <string name="app_suspended_more_details" msgid="1131804827776778187">"Learn more"</string>
     <string name="work_mode_off_title" msgid="1118691887588435530">"Turn on work profile?"</string>
     <string name="work_mode_off_message" msgid="5130856710614337649">"Your work apps, notifications, data and other work profile features will be turned on"</string>
@@ -1879,5 +1879,8 @@
     <string name="zen_upgrade_notification_content" msgid="1794994264692424562">"Tap to check what\'s blocked."</string>
     <string name="notification_app_name_system" msgid="4205032194610042794">"System"</string>
     <string name="notification_app_name_settings" msgid="7751445616365753381">"Settings"</string>
+    <string name="notification_appops_camera_active" msgid="5050283058419699771">"Camera"</string>
+    <string name="notification_appops_microphone_active" msgid="4335305527588191730">"Microphone"</string>
+    <string name="notification_appops_overlay_active" msgid="633813008357934729">"displaying over other apps on your screen"</string>
     <string name="car_loading_profile" msgid="3545132581795684027">"Loading"</string>
 </resources>

@@ -1255,7 +1255,7 @@
     <string name="install_carrier_app_notification_button" msgid="3094206295081900849">"Преузмите апликацију"</string>
     <string name="carrier_app_notification_title" msgid="8921767385872554621">"Нова SIM картица је уметнута"</string>
     <string name="carrier_app_notification_text" msgid="1132487343346050225">"Додирните за подешавање"</string>
-    <string name="time_picker_dialog_title" msgid="8349362623068819295">"Подешавање времена"</string>
+    <string name="time_picker_dialog_title" msgid="8349362623068819295">"Подесите време"</string>
     <string name="date_picker_dialog_title" msgid="5879450659453782278">"Подешавање датума"</string>
     <string name="date_time_set" msgid="5777075614321087758">"Подеси"</string>
     <string name="date_time_done" msgid="2507683751759308828">"Готово"</string>
@@ -1815,8 +1815,8 @@
     <string name="language_picker_section_all" msgid="3097279199511617537">"Сви језици"</string>
     <string name="region_picker_section_all" msgid="8966316787153001779">"Сви региони"</string>
     <string name="locale_search_menu" msgid="2560710726687249178">"Претражи"</string>
-    <string name="app_suspended_title" msgid="1919029799438164552">"Отварање апликације није успело"</string>
-    <string name="app_suspended_default_message" msgid="7875306315686531621">"Апликација <xliff:g id="APP_NAME_0">%1$s</xliff:g> тренутно није доступна. <xliff:g id="APP_NAME_1">%2$s</xliff:g> управља доступношћу."</string>
+    <string name="app_suspended_title" msgid="2075071241147969611">"Апликација није доступна"</string>
+    <string name="app_suspended_default_message" msgid="123166680425711887">"Апликација <xliff:g id="APP_NAME_0">%1$s</xliff:g> тренутно није доступна. <xliff:g id="APP_NAME_1">%2$s</xliff:g> управља доступношћу."</string>
     <string name="app_suspended_more_details" msgid="1131804827776778187">"Сазнајте више"</string>
     <string name="work_mode_off_title" msgid="1118691887588435530">"Да укључимо профил за Work?"</string>
     <string name="work_mode_off_message" msgid="5130856710614337649">"Укључиће се пословне апликације, обавештења, подаци и друге функције профила за Work"</string>
@@ -1853,7 +1853,7 @@
     <string name="adb_debugging_notification_channel_tv" msgid="5537766997350092316">"Отклањање грешака са USB-а"</string>
     <string name="time_picker_hour_label" msgid="2979075098868106450">"сат"</string>
     <string name="time_picker_minute_label" msgid="5168864173796598399">"минут"</string>
-    <string name="time_picker_header_text" msgid="143536825321922567">"Подешавање времена"</string>
+    <string name="time_picker_header_text" msgid="143536825321922567">"Подесите време"</string>
     <string name="time_picker_input_error" msgid="7574999942502513765">"Унесите важеће време"</string>
     <string name="time_picker_prompt_label" msgid="7588093983899966783">"Унесите време"</string>
     <string name="time_picker_text_input_mode_description" msgid="4148166758173708199">"Пређите у режим уноса текста ради уноса времена."</string>
@@ -1914,5 +1914,8 @@
     <string name="zen_upgrade_notification_content" msgid="1794994264692424562">"Додирните да бисте проверили шта је блокирано."</string>
     <string name="notification_app_name_system" msgid="4205032194610042794">"Систем"</string>
     <string name="notification_app_name_settings" msgid="7751445616365753381">"Подешавања"</string>
+    <string name="notification_appops_camera_active" msgid="5050283058419699771">"Камера"</string>
+    <string name="notification_appops_microphone_active" msgid="4335305527588191730">"Микрофон"</string>
+    <string name="notification_appops_overlay_active" msgid="633813008357934729">"приказује се на екрану док користите друге апликације"</string>
     <string name="car_loading_profile" msgid="3545132581795684027">"Учитава се"</string>
 </resources>

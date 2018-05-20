@@ -275,7 +275,7 @@
     <string name="permgrouprequest_contacts" msgid="6032805601881764300">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; колдонмосуна байланыштарыңызды пайдаланууга уруксат берилсинби?"</string>
     <string name="permgrouplab_location" msgid="7275582855722310164">"Жайгашкан жер"</string>
     <string name="permgroupdesc_location" msgid="1346617465127855033">"түзмөктүн жайгашкан жерин аныктоого"</string>
-    <string name="permgrouprequest_location" msgid="3788275734953323491">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; колдонмосуна бул түзмөктүн жайгашкан жерин пайдаланууга уруксат берилсинби?"</string>
+    <string name="permgrouprequest_location" msgid="3788275734953323491">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; колдонмосу бул түзмөктүн кайда жүргөнүн көрүп турганга уруксат бересизби?"</string>
     <string name="permgrouplab_calendar" msgid="5863508437783683902">"Жылнаама"</string>
     <string name="permgroupdesc_calendar" msgid="3889615280211184106">"жылнаамаңызды пайдалануу"</string>
     <string name="permgrouprequest_calendar" msgid="289900767793189421">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; колдонмосуна жылнаамаңызды пайдаланууга уруксат берилсинби?"</string>
@@ -1783,8 +1783,8 @@
     <string name="language_picker_section_all" msgid="3097279199511617537">"Бардык тилдер"</string>
     <string name="region_picker_section_all" msgid="8966316787153001779">"Бардык аймактар"</string>
     <string name="locale_search_menu" msgid="2560710726687249178">"Издөө"</string>
-    <string name="app_suspended_title" msgid="1919029799438164552">"Колдонмо ачылбайт"</string>
-    <string name="app_suspended_default_message" msgid="7875306315686531621">"<xliff:g id="APP_NAME_0">%1$s</xliff:g> колдонмосу учурда жеткиликсиз. Саясат <xliff:g id="APP_NAME_1">%2$s</xliff:g> колдонмосу тарабынан башкарылат."</string>
+    <string name="app_suspended_title" msgid="2075071241147969611">"Колдонмо жеткиликтсиз"</string>
+    <string name="app_suspended_default_message" msgid="123166680425711887">"<xliff:g id="APP_NAME_0">%1$s</xliff:g> колдонмосу учурда жеткиликсиз. Анын жеткиликтүүлүгү <xliff:g id="APP_NAME_1">%2$s</xliff:g> тарабынан башкарылат."</string>
     <string name="app_suspended_more_details" msgid="1131804827776778187">"Кеңири маалымат"</string>
     <string name="work_mode_off_title" msgid="1118691887588435530">"Жумуш профили күйгүзүлсүнбү?"</string>
     <string name="work_mode_off_message" msgid="5130856710614337649">"Жумуш колдонмолоруңуз, эскертмелериңиз, дайындарыңыз жана жумуш профилинин башка функциялары күйгүзүлөт."</string>
@@ -1881,5 +1881,8 @@
     <string name="zen_upgrade_notification_content" msgid="1794994264692424562">"Бөгөттөлгөн нерселерди көрүү үчүн таптаңыз."</string>
     <string name="notification_app_name_system" msgid="4205032194610042794">"Тутум"</string>
     <string name="notification_app_name_settings" msgid="7751445616365753381">"Жөндөөлөр"</string>
+    <string name="notification_appops_camera_active" msgid="5050283058419699771">"Камера"</string>
+    <string name="notification_appops_microphone_active" msgid="4335305527588191730">"Микрофон"</string>
+    <string name="notification_appops_overlay_active" msgid="633813008357934729">"экрандагы башка терезелердин үстүнөн көрсөтүлүүдө"</string>
     <string name="car_loading_profile" msgid="3545132581795684027">"Жүктөлүүдө"</string>
 </resources>
