@@ -257,6 +257,7 @@
     <string name="accessibility_location_active" msgid="2427290146138169014">"တည်နေရာပြ တောင်းဆိုချက်များ အသက်ဝင်ရန်"</string>
     <string name="accessibility_clear_all" msgid="5235938559247164925">"သတိပေးချက်အားလုံးအား ဖယ်ရှားခြင်း။"</string>
     <string name="notification_group_overflow_indicator" msgid="1863231301642314183">"+ <xliff:g id="NUMBER">%s</xliff:g>"</string>
+    <string name="notification_group_overflow_indicator_ambient" msgid="879560382990377886">"<xliff:g id="NOTIFICATION_TITLE">%s</xliff:g>၊ +<xliff:g id="OVERFLOW">%s</xliff:g> ခု"</string>
     <plurals name="notification_group_overflow_description" formatted="false" msgid="4579313201268495404">
       <item quantity="other">အတွင်းတွင် အကြောင်းကြားချက် နောက်ထပ် <xliff:g id="NUMBER_1">%s</xliff:g> ခုရှိပါသည်။</item>
       <item quantity="one">အတွင်းတွင် အကြောင်းကြားချက် နောက်ထပ် <xliff:g id="NUMBER_0">%s</xliff:g> ခုရှိပါသည်။</item>
@@ -368,8 +369,7 @@
     <string name="recents_accessibility_split_screen_top" msgid="9056056469282256287">"မျက်နှာပြင်ကို အပေါ်သို့ ခွဲရန်"</string>
     <string name="recents_accessibility_split_screen_left" msgid="8987144699630620019">"မျက်နှာပြင်ကို ဘယ်ဘက်သို့ ခွဲရန်"</string>
     <string name="recents_accessibility_split_screen_right" msgid="275069779299592867">"မျက်နှာပြင်ကို ညာဘက်သို့ ခွဲရန်"</string>
-    <!-- no translation found for quick_step_accessibility_toggle_overview (7171470775439860480) -->
-    <skip />
+    <string name="quick_step_accessibility_toggle_overview" msgid="7171470775439860480">"ဖွင့်၊ ပိတ် အနှစ်ချုပ်"</string>
     <string name="expanded_header_battery_charged" msgid="5945855970267657951">"အားသွင်းပြီး"</string>
     <string name="expanded_header_battery_charging" msgid="205623198487189724">"အားသွင်းနေ"</string>
     <string name="expanded_header_battery_charging_with_time" msgid="457559884275395376">"<xliff:g id="CHARGING_TIME">%s</xliff:g> ပြည်သည့် အထိ"</string>
@@ -543,12 +543,9 @@
     <string name="volume_stream_content_description_mute" msgid="3625049841390467354">"%1$s။ အသံပိတ်ရန် တို့ပါ။ အများသုံးစွဲနိုင်မှု ဝန်ဆောင်မှုများကို အသံပိတ်ထားနိုင်ပါသည်။"</string>
     <string name="volume_stream_content_description_vibrate_a11y" msgid="6427727603978431301">"%1$s။ တုန်ခါခြင်းသို့ သတ်မှတ်ရန်တို့ပါ။"</string>
     <string name="volume_stream_content_description_mute_a11y" msgid="8995013018414535494">"%1$s။ အသံတိတ်ရန် တို့ပါ။"</string>
-    <!-- no translation found for volume_ringer_hint_mute (9199811307292269601) -->
-    <skip />
-    <!-- no translation found for volume_ringer_hint_unmute (6602880133293060368) -->
-    <skip />
-    <!-- no translation found for volume_ringer_hint_vibrate (4036802135666515202) -->
-    <skip />
+    <string name="volume_ringer_hint_mute" msgid="9199811307292269601">"အသံတိတ်ရန်"</string>
+    <string name="volume_ringer_hint_unmute" msgid="6602880133293060368">"အသံဖွင့်ရန်"</string>
+    <string name="volume_ringer_hint_vibrate" msgid="4036802135666515202">"တုန်ခါမှု"</string>
     <string name="volume_dialog_title" msgid="7272969888820035876">"%s အသံအတိုးအလျှော့ ခလုတ်များ"</string>
     <string name="volume_dialog_ringer_guidance_ring" msgid="3360373718388509040">"ခေါ်ဆိုမှုများနှင့် အကြောင်းကြားချက်များအတွက် အသံမြည်နှုန်း (<xliff:g id="VOLUME_LEVEL">%1$s</xliff:g>) ဖြစ်သည်"</string>
     <string name="output_title" msgid="5355078100792942802">"မီဒီယာ အထွက်"</string>
@@ -614,20 +611,13 @@
     <string name="inline_minimize_button" msgid="966233327974702195">"ချုံ့ရန်"</string>
     <string name="inline_keep_showing_app" msgid="1723113469580031041">"ဤအက်ပ်ထံမှ အကြောင်းကြားချက်များကို ဆက်ပြလိုပါသလား။"</string>
     <string name="notification_unblockable_desc" msgid="1037434112919403708">"ဤအကြောင်းကြားချက်များကို ပိတ်၍မရပါ"</string>
-    <!-- no translation found for appops_camera (8100147441602585776) -->
-    <skip />
-    <!-- no translation found for appops_microphone (741508267659494555) -->
-    <skip />
-    <!-- no translation found for appops_overlay (6165912637560323464) -->
-    <skip />
-    <!-- no translation found for appops_camera_mic (1576901651150187433) -->
-    <skip />
-    <!-- no translation found for appops_camera_overlay (8869400080809298814) -->
-    <skip />
-    <!-- no translation found for appops_mic_overlay (4835157962857919804) -->
-    <skip />
-    <!-- no translation found for appops_camera_mic_overlay (6718768197048030993) -->
-    <skip />
+    <string name="appops_camera" msgid="8100147441602585776">"ဤအက်ပ်က ကင်မရာကို အသုံးပြုနေသည်။"</string>
+    <string name="appops_microphone" msgid="741508267659494555">"ဤအက်ပ်က မိုက်ခရိုဖုန်းကို အသုံးပြုနေသည်။"</string>
+    <string name="appops_overlay" msgid="6165912637560323464">"ဤအက်ပ်က ဖန်သားမျက်နှာပြင်ပေါ်ရှိ အခြားအက်ပ်များ အပေါ်မှ ထပ်ပြီး ပြသနေပါသည်။"</string>
+    <string name="appops_camera_mic" msgid="1576901651150187433">"ဤအက်ပ်က မိုက်ခရိုဖုန်းနှင့် ကင်မရာကို အသုံးပြုနေသည်။"</string>
+    <string name="appops_camera_overlay" msgid="8869400080809298814">"ဤအက်ပ်က ကင်မရာကို အသုံးပြုပြီး ဖန်သားမျက်နှာပြင်ပေါ်ရှိ အခြားအက်ပ်များ အပေါ်မှ ထပ်ပြီး ပြသနေပါသည်။"</string>
+    <string name="appops_mic_overlay" msgid="4835157962857919804">"ဤအက်ပ်က မိုက်ခရိုဖုန်းကို အသုံးပြုပြီး ဖန်သားမျက်နှာပြင်ပေါ်ရှိ အခြားအက်ပ်များ အပေါ်မှ ထပ်ပြီး ပြသနေပါသည်။"</string>
+    <string name="appops_camera_mic_overlay" msgid="6718768197048030993">"ဤအက်ပ်က မိုက်ခရိုဖုန်းနှင့် ကင်မရာကို အသုံးပြု၍ ဖန်သားမျက်နှာပြင်ပေါ်ရှိ အခြားအက်ပ်များ အပေါ်မှ ထပ်ပြီး ပြသနေပါသည်။"</string>
     <string name="notification_appops_settings" msgid="1028328314935908050">"ဆက်တင်များ"</string>
     <string name="notification_appops_ok" msgid="1156966426011011434">"OK"</string>
     <string name="notification_channel_controls_opened_accessibility" msgid="6553950422055908113">"<xliff:g id="APP_NAME">%1$s</xliff:g> အတွက် အကြောင်းကြားချက်ထိန်းချုပ်မှုများကို ဖွင့်ထားသည်"</string>
@@ -687,7 +677,7 @@
     <string name="keyboard_shortcut_group_system_back" msgid="2207004531216446378">"နောက်သို့"</string>
     <string name="keyboard_shortcut_group_system_notifications" msgid="8366964080041773224">"အကြောင်းကြားချက်များ"</string>
     <string name="keyboard_shortcut_group_system_shortcuts_helper" msgid="4892255911160332762">"ကီးဘုတ် ဖြတ်လမ်းများ"</string>
-    <string name="keyboard_shortcut_group_system_switch_input" msgid="2334164096341310324">"စာရိုက်စနစ် ပြောင်းခြင်း"</string>
+    <string name="keyboard_shortcut_group_system_switch_input" msgid="8413348767825486492">"ကီးဘုတ်အပြင်အဆင် ပြောင်းခြင်း"</string>
     <string name="keyboard_shortcut_group_applications" msgid="9129465955073449206">"အက်ပ်များ"</string>
     <string name="keyboard_shortcut_group_applications_assist" msgid="9095441910537146013">"အထောက်အကူ"</string>
     <string name="keyboard_shortcut_group_applications_browser" msgid="6465985474000766533">"ဘရောင်ဇာ"</string>

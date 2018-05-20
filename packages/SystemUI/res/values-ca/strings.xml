@@ -170,7 +170,7 @@
     <string name="accessibility_vpn_on" msgid="5993385083262856059">"VPN activada"</string>
     <string name="accessibility_no_sims" msgid="3957997018324995781">"No hi ha cap targeta SIM."</string>
     <string name="carrier_network_change_mode" msgid="8149202439957837762">"S\'està canviant la xarxa de l\'operador de telefonia mòbil"</string>
-    <string name="accessibility_battery_details" msgid="7645516654955025422">"Obre la informació detallada de la bateria"</string>
+    <string name="accessibility_battery_details" msgid="7645516654955025422">"Obre els detalls de la bateria"</string>
     <string name="accessibility_battery_level" msgid="7451474187113371965">"<xliff:g id="NUMBER">%d</xliff:g> per cent de bateria."</string>
     <string name="accessibility_battery_level_charging" msgid="1147587904439319646">"La bateria s\'està carregant, <xliff:g id="BATTERY_PERCENTAGE">%d</xliff:g>%%."</string>
     <string name="accessibility_settings_button" msgid="799583911231893380">"Configuració del sistema."</string>
@@ -257,6 +257,7 @@
     <string name="accessibility_location_active" msgid="2427290146138169014">"Sol·licituds d\'ubicació actives"</string>
     <string name="accessibility_clear_all" msgid="5235938559247164925">"Esborra totes les notificacions."</string>
     <string name="notification_group_overflow_indicator" msgid="1863231301642314183">"+ <xliff:g id="NUMBER">%s</xliff:g>"</string>
+    <string name="notification_group_overflow_indicator_ambient" msgid="879560382990377886">"<xliff:g id="NOTIFICATION_TITLE">%s</xliff:g> i <xliff:g id="OVERFLOW">%s</xliff:g> més"</string>
     <plurals name="notification_group_overflow_description" formatted="false" msgid="4579313201268495404">
       <item quantity="other"><xliff:g id="NUMBER_1">%s</xliff:g> notificacions més a l\'interior.</item>
       <item quantity="one"><xliff:g id="NUMBER_0">%s</xliff:g> notificació més a l\'interior.</item>
@@ -368,8 +369,7 @@
     <string name="recents_accessibility_split_screen_top" msgid="9056056469282256287">"Divideix la pantalla cap amunt"</string>
     <string name="recents_accessibility_split_screen_left" msgid="8987144699630620019">"Divideix la pantalla cap a l\'esquerra"</string>
     <string name="recents_accessibility_split_screen_right" msgid="275069779299592867">"Divideix la pantalla cap a la dreta"</string>
-    <!-- no translation found for quick_step_accessibility_toggle_overview (7171470775439860480) -->
-    <skip />
+    <string name="quick_step_accessibility_toggle_overview" msgid="7171470775439860480">"Activa o desactiva Aplicacions recents"</string>
     <string name="expanded_header_battery_charged" msgid="5945855970267657951">"Carregada"</string>
     <string name="expanded_header_battery_charging" msgid="205623198487189724">"S\'està carregant"</string>
     <string name="expanded_header_battery_charging_with_time" msgid="457559884275395376">"<xliff:g id="CHARGING_TIME">%s</xliff:g> per completar la càrrega"</string>
@@ -543,12 +543,9 @@
     <string name="volume_stream_content_description_mute" msgid="3625049841390467354">"%1$s. Toca per silenciar el so. Pot ser que els serveis d\'accessibilitat se silenciïn."</string>
     <string name="volume_stream_content_description_vibrate_a11y" msgid="6427727603978431301">"%1$s. Toca per activar la vibració."</string>
     <string name="volume_stream_content_description_mute_a11y" msgid="8995013018414535494">"%1$s. Toca per silenciar."</string>
-    <!-- no translation found for volume_ringer_hint_mute (9199811307292269601) -->
-    <skip />
-    <!-- no translation found for volume_ringer_hint_unmute (6602880133293060368) -->
-    <skip />
-    <!-- no translation found for volume_ringer_hint_vibrate (4036802135666515202) -->
-    <skip />
+    <string name="volume_ringer_hint_mute" msgid="9199811307292269601">"silenciar"</string>
+    <string name="volume_ringer_hint_unmute" msgid="6602880133293060368">"deixar de silenciar"</string>
+    <string name="volume_ringer_hint_vibrate" msgid="4036802135666515202">"vibrar"</string>
     <string name="volume_dialog_title" msgid="7272969888820035876">"Controls de volum %s"</string>
     <string name="volume_dialog_ringer_guidance_ring" msgid="3360373718388509040">"Les trucades i les notificacions sonaran (<xliff:g id="VOLUME_LEVEL">%1$s</xliff:g>)"</string>
     <string name="output_title" msgid="5355078100792942802">"Sortida de contingut multimèdia"</string>
@@ -614,20 +611,13 @@
     <string name="inline_minimize_button" msgid="966233327974702195">"Minimitza"</string>
     <string name="inline_keep_showing_app" msgid="1723113469580031041">"Vols continuar rebent notificacions d\'aquesta aplicació?"</string>
     <string name="notification_unblockable_desc" msgid="1037434112919403708">"Aquestes notificacions no es poden desactivar"</string>
-    <!-- no translation found for appops_camera (8100147441602585776) -->
-    <skip />
-    <!-- no translation found for appops_microphone (741508267659494555) -->
-    <skip />
-    <!-- no translation found for appops_overlay (6165912637560323464) -->
-    <skip />
-    <!-- no translation found for appops_camera_mic (1576901651150187433) -->
-    <skip />
-    <!-- no translation found for appops_camera_overlay (8869400080809298814) -->
-    <skip />
-    <!-- no translation found for appops_mic_overlay (4835157962857919804) -->
-    <skip />
-    <!-- no translation found for appops_camera_mic_overlay (6718768197048030993) -->
-    <skip />
+    <string name="appops_camera" msgid="8100147441602585776">"Aquesta aplicació utilitza la càmera."</string>
+    <string name="appops_microphone" msgid="741508267659494555">"Aquesta aplicació utilitza el micròfon."</string>
+    <string name="appops_overlay" msgid="6165912637560323464">"Aquesta aplicació es mostra sobre altres aplicacions a la pantalla."</string>
+    <string name="appops_camera_mic" msgid="1576901651150187433">"Aquesta aplicació utilitza el micròfon i la càmera."</string>
+    <string name="appops_camera_overlay" msgid="8869400080809298814">"Aquesta aplicació es mostra sobre altres aplicacions a la pantalla i utilitza la càmera."</string>
+    <string name="appops_mic_overlay" msgid="4835157962857919804">"Aquesta aplicació es mostra sobre altres aplicacions a la pantalla i utilitza el micròfon."</string>
+    <string name="appops_camera_mic_overlay" msgid="6718768197048030993">"Aquesta aplicació es mostra sobre altres aplicacions a la pantalla i utilitza el micròfon i la càmera."</string>
     <string name="notification_appops_settings" msgid="1028328314935908050">"Configuració"</string>
     <string name="notification_appops_ok" msgid="1156966426011011434">"D\'acord"</string>
     <string name="notification_channel_controls_opened_accessibility" msgid="6553950422055908113">"S\'han obert els controls de notificació per a <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
@@ -687,7 +677,7 @@
     <string name="keyboard_shortcut_group_system_back" msgid="2207004531216446378">"Enrere"</string>
     <string name="keyboard_shortcut_group_system_notifications" msgid="8366964080041773224">"Notificacions"</string>
     <string name="keyboard_shortcut_group_system_shortcuts_helper" msgid="4892255911160332762">"Tecles de drecera"</string>
-    <string name="keyboard_shortcut_group_system_switch_input" msgid="2334164096341310324">"Canvia el mètode d\'introducció"</string>
+    <string name="keyboard_shortcut_group_system_switch_input" msgid="8413348767825486492">"Canvia la disposició de teclat"</string>
     <string name="keyboard_shortcut_group_applications" msgid="9129465955073449206">"Aplicacions"</string>
     <string name="keyboard_shortcut_group_applications_assist" msgid="9095441910537146013">"Assistència"</string>
     <string name="keyboard_shortcut_group_applications_browser" msgid="6465985474000766533">"Navegador"</string>

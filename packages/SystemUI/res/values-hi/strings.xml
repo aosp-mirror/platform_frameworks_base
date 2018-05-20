@@ -95,8 +95,7 @@
     <string name="accessibility_unlock_button" msgid="128158454631118828">"अनलॉक करें"</string>
     <string name="accessibility_waiting_for_fingerprint" msgid="4808860050517462885">"फ़िंगरप्रिंट का इंतज़ार हो रहा है"</string>
     <string name="accessibility_unlock_without_fingerprint" msgid="7541705575183694446">"अपने फ़िंगरप्रिंट का इस्तेमाल किए बिना अनलॉक करें"</string>
-    <!-- no translation found for accessibility_scanning_face (769545173211758586) -->
-    <skip />
+    <string name="accessibility_scanning_face" msgid="769545173211758586">"डिवाइस अनलॉक करने के लिए चेहरा स्कैन किया जाता है"</string>
     <string name="accessibility_send_smart_reply" msgid="7766727839703044493">"भेजें"</string>
     <string name="unlock_label" msgid="8779712358041029439">"अनलॉक करें"</string>
     <string name="phone_label" msgid="2320074140205331708">"फ़ोन खोलें"</string>
@@ -258,6 +257,7 @@
     <string name="accessibility_location_active" msgid="2427290146138169014">"जगह का अनुरोध किया जा रहा है"</string>
     <string name="accessibility_clear_all" msgid="5235938559247164925">"सभी सूचनाएं साफ़ करें."</string>
     <string name="notification_group_overflow_indicator" msgid="1863231301642314183">"+ <xliff:g id="NUMBER">%s</xliff:g>"</string>
+    <string name="notification_group_overflow_indicator_ambient" msgid="879560382990377886">"<xliff:g id="NOTIFICATION_TITLE">%s</xliff:g>, +<xliff:g id="OVERFLOW">%s</xliff:g>"</string>
     <plurals name="notification_group_overflow_description" formatted="false" msgid="4579313201268495404">
       <item quantity="one">इसमें <xliff:g id="NUMBER_1">%s</xliff:g> और सूचनाएं हैं.</item>
       <item quantity="other">इसमें <xliff:g id="NUMBER_1">%s</xliff:g> और सूचनाएं हैं.</item>
@@ -369,8 +369,7 @@
     <string name="recents_accessibility_split_screen_top" msgid="9056056469282256287">"ऊपर की ओर दो स्क्रीन बनाएं"</string>
     <string name="recents_accessibility_split_screen_left" msgid="8987144699630620019">"बाईं ओर दो स्क्रीन बनाएं"</string>
     <string name="recents_accessibility_split_screen_right" msgid="275069779299592867">"दाईं ओर दो स्क्रीन बनाएं"</string>
-    <!-- no translation found for quick_step_accessibility_toggle_overview (7171470775439860480) -->
-    <skip />
+    <string name="quick_step_accessibility_toggle_overview" msgid="7171470775439860480">"खास जानकारी टॉगल करें"</string>
     <string name="expanded_header_battery_charged" msgid="5945855970267657951">"चार्ज हो गई है"</string>
     <string name="expanded_header_battery_charging" msgid="205623198487189724">"चार्ज हो रही है"</string>
     <string name="expanded_header_battery_charging_with_time" msgid="457559884275395376">"पूर्ण होने में <xliff:g id="CHARGING_TIME">%s</xliff:g> शेष"</string>
@@ -535,7 +534,7 @@
     <string name="stream_accessibility" msgid="301136219144385106">"सुलभता"</string>
     <string name="ring_toggle_title" msgid="3281244519428819576">"कॉल"</string>
     <string name="volume_ringer_status_normal" msgid="4273142424125855384">"आवाज़ चालू है"</string>
-    <string name="volume_ringer_status_vibrate" msgid="1825615171021346557">"कंपन (वाइब्रेशन)"</string>
+    <string name="volume_ringer_status_vibrate" msgid="1825615171021346557">"वाइब्रेशन"</string>
     <string name="volume_ringer_status_silent" msgid="6896394161022916369">"आवाज़ बंद है"</string>
     <string name="qs_status_phone_vibrate" msgid="204362991135761679">"फ़ोन के वाइब्रेट होने की सेटिंग चालू है"</string>
     <string name="qs_status_phone_muted" msgid="5437668875879171548">"फ़ोन म्यूट किया गया है"</string>
@@ -544,12 +543,9 @@
     <string name="volume_stream_content_description_mute" msgid="3625049841390467354">"%1$s. म्यूट करने के लिए टैप करें. सुलभता सेवाएं म्यूट हो सकती हैं."</string>
     <string name="volume_stream_content_description_vibrate_a11y" msgid="6427727603978431301">"%1$s. कंपन (वाइब्रेशन) पर सेट करने के लिए छूएं."</string>
     <string name="volume_stream_content_description_mute_a11y" msgid="8995013018414535494">"%1$s. म्यूट करने के लिए टैप करें."</string>
-    <!-- no translation found for volume_ringer_hint_mute (9199811307292269601) -->
-    <skip />
-    <!-- no translation found for volume_ringer_hint_unmute (6602880133293060368) -->
-    <skip />
-    <!-- no translation found for volume_ringer_hint_vibrate (4036802135666515202) -->
-    <skip />
+    <string name="volume_ringer_hint_mute" msgid="9199811307292269601">"म्यूट करें"</string>
+    <string name="volume_ringer_hint_unmute" msgid="6602880133293060368">"अनम्यूट करें"</string>
+    <string name="volume_ringer_hint_vibrate" msgid="4036802135666515202">"वाइब्रेशन की सुविधा चालू करें"</string>
     <string name="volume_dialog_title" msgid="7272969888820035876">"%s की आवाज़ कम या ज़्यादा करने की सुविधा"</string>
     <string name="volume_dialog_ringer_guidance_ring" msgid="3360373718388509040">"कॉल और सूचनाएं आने पर घंटी बजेगी (<xliff:g id="VOLUME_LEVEL">%1$s</xliff:g>)"</string>
     <string name="output_title" msgid="5355078100792942802">"मीडिया आउटपुट"</string>
@@ -615,20 +611,13 @@
     <string name="inline_minimize_button" msgid="966233327974702195">"सूचनाएं छोटी करें"</string>
     <string name="inline_keep_showing_app" msgid="1723113469580031041">"इस ऐप्लिकेशन से जुड़ी सूचनाएं दिखाना जारी रखें?"</string>
     <string name="notification_unblockable_desc" msgid="1037434112919403708">"ये सूचनाएं दिखाया जाना बंद नहीं किया जा सकता"</string>
-    <!-- no translation found for appops_camera (8100147441602585776) -->
-    <skip />
-    <!-- no translation found for appops_microphone (741508267659494555) -->
-    <skip />
-    <!-- no translation found for appops_overlay (6165912637560323464) -->
-    <skip />
-    <!-- no translation found for appops_camera_mic (1576901651150187433) -->
-    <skip />
-    <!-- no translation found for appops_camera_overlay (8869400080809298814) -->
-    <skip />
-    <!-- no translation found for appops_mic_overlay (4835157962857919804) -->
-    <skip />
-    <!-- no translation found for appops_camera_mic_overlay (6718768197048030993) -->
-    <skip />
+    <string name="appops_camera" msgid="8100147441602585776">"यह ऐप्लिकेशन कैमरे का इस्तेमाल कर रहा है."</string>
+    <string name="appops_microphone" msgid="741508267659494555">"यह ऐप्लिकेशन माइक्रोफ़ोन का इस्तेमाल कर रहा है."</string>
+    <string name="appops_overlay" msgid="6165912637560323464">"यह ऐप्लिकेशन आपकी स्क्रीन पर इस्तेमाल हो रहे दूसरे ऐप्लिकेशन के ऊपर दिखाया जा रहा है."</string>
+    <string name="appops_camera_mic" msgid="1576901651150187433">"यह ऐप्किलेशन माइक्रोफ़ोन और कैमरे का इस्तेमाल कर रहा है."</string>
+    <string name="appops_camera_overlay" msgid="8869400080809298814">"यह ऐप्लिकेशन आपकी स्क्रीन पर इस्तेमाल हो रहे दूसरे ऐप्लिकेशन के ऊपर दिखाया जा रहा है और कैमरे का इस्तेमाल कर रहा है."</string>
+    <string name="appops_mic_overlay" msgid="4835157962857919804">"यह ऐप्लिकेशन आपकी स्क्रीन पर इस्तेमाल हो रहे दूसरे ऐप्लिकेशन के ऊपर दिखाया जा रहा है और माइक्रोफ़ोन का इस्तेमाल कर रहा है."</string>
+    <string name="appops_camera_mic_overlay" msgid="6718768197048030993">"यह ऐप्लिकेशन आपकी स्क्रीन पर इस्तेमाल हो रहे दूसरे ऐप्लिकेशन के ऊपर दिखाया जा रहा है. इसके साथ ही यह माइक्रोफ़ोन और कैमरे का भी इस्तेमाल कर रहा है."</string>
     <string name="notification_appops_settings" msgid="1028328314935908050">"सेटिंग"</string>
     <string name="notification_appops_ok" msgid="1156966426011011434">"ठीक है"</string>
     <string name="notification_channel_controls_opened_accessibility" msgid="6553950422055908113">"<xliff:g id="APP_NAME">%1$s</xliff:g> के लिए सूचना नियंत्रण चालू हैं"</string>
@@ -688,7 +677,7 @@
     <string name="keyboard_shortcut_group_system_back" msgid="2207004531216446378">"वापस जाएं"</string>
     <string name="keyboard_shortcut_group_system_notifications" msgid="8366964080041773224">"सूचनाएं"</string>
     <string name="keyboard_shortcut_group_system_shortcuts_helper" msgid="4892255911160332762">"कीबोर्ड शॉर्टकट"</string>
-    <string name="keyboard_shortcut_group_system_switch_input" msgid="2334164096341310324">"इनपुट का तरीका बदलें"</string>
+    <string name="keyboard_shortcut_group_system_switch_input" msgid="8413348767825486492">"कीबोर्ड लेआउट बदलें"</string>
     <string name="keyboard_shortcut_group_applications" msgid="9129465955073449206">"ऐप्लिकेशन"</string>
     <string name="keyboard_shortcut_group_applications_assist" msgid="9095441910537146013">"सहायक"</string>
     <string name="keyboard_shortcut_group_applications_browser" msgid="6465985474000766533">"ब्राउज़र"</string>
@@ -864,6 +853,5 @@
     <string name="auto_saver_enabled_text" msgid="874711029884777579">"बैटरी के <xliff:g id="PERCENTAGE">%d</xliff:g>%% से कम होने पर बैटरी सेवर अपने आप चालू हो जाएगा."</string>
     <string name="open_saver_setting_action" msgid="8314624730997322529">"सेटिंग"</string>
     <string name="auto_saver_okay_action" msgid="2701221740227683650">"ठीक है"</string>
-    <!-- no translation found for heap_dump_tile_name (9141031328971226374) -->
-    <skip />
+    <string name="heap_dump_tile_name" msgid="9141031328971226374">"Dump SysUI Heap"</string>
 </resources>

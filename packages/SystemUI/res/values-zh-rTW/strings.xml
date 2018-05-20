@@ -257,6 +257,7 @@
     <string name="accessibility_location_active" msgid="2427290146138169014">"有位置資訊要求"</string>
     <string name="accessibility_clear_all" msgid="5235938559247164925">"清除所有通知。"</string>
     <string name="notification_group_overflow_indicator" msgid="1863231301642314183">"+ <xliff:g id="NUMBER">%s</xliff:g>"</string>
+    <string name="notification_group_overflow_indicator_ambient" msgid="879560382990377886">"<xliff:g id="NOTIFICATION_TITLE">%s</xliff:g> (+<xliff:g id="OVERFLOW">%s</xliff:g>)"</string>
     <plurals name="notification_group_overflow_description" formatted="false" msgid="4579313201268495404">
       <item quantity="other">群組中還有 <xliff:g id="NUMBER_1">%s</xliff:g> 則通知。</item>
       <item quantity="one">群組中還有 <xliff:g id="NUMBER_0">%s</xliff:g> 則通知。</item>
@@ -342,7 +343,7 @@
     <string name="quick_settings_cellular_detail_data_used" msgid="1476810587475761478">"已使用 <xliff:g id="DATA_USED">%s</xliff:g>"</string>
     <string name="quick_settings_cellular_detail_data_limit" msgid="56011158504994128">"上限為 <xliff:g id="DATA_LIMIT">%s</xliff:g>"</string>
     <string name="quick_settings_cellular_detail_data_warning" msgid="2440098045692399009">"<xliff:g id="DATA_LIMIT">%s</xliff:g> 警告"</string>
-    <string name="quick_settings_work_mode_label" msgid="7608026833638817218">"Work 設定檔"</string>
+    <string name="quick_settings_work_mode_label" msgid="7608026833638817218">"工作資料夾"</string>
     <string name="quick_settings_night_display_label" msgid="3577098011487644395">"夜燈"</string>
     <string name="quick_settings_night_secondary_label_on_at_sunset" msgid="8483259341596943314">"於日落時開啟"</string>
     <string name="quick_settings_night_secondary_label_until_sunrise" msgid="4453017157391574402">"於日出時關閉"</string>
@@ -368,8 +369,7 @@
     <string name="recents_accessibility_split_screen_top" msgid="9056056469282256287">"將分割畫面顯示在頂端"</string>
     <string name="recents_accessibility_split_screen_left" msgid="8987144699630620019">"將分割畫面顯示在左邊"</string>
     <string name="recents_accessibility_split_screen_right" msgid="275069779299592867">"將分割畫面顯示在右邊"</string>
-    <!-- no translation found for quick_step_accessibility_toggle_overview (7171470775439860480) -->
-    <skip />
+    <string name="quick_step_accessibility_toggle_overview" msgid="7171470775439860480">"切換總覽"</string>
     <string name="expanded_header_battery_charged" msgid="5945855970267657951">"已充飽"</string>
     <string name="expanded_header_battery_charging" msgid="205623198487189724">"充電中"</string>
     <string name="expanded_header_battery_charging_with_time" msgid="457559884275395376">"<xliff:g id="CHARGING_TIME">%s</xliff:g>後充飽"</string>
@@ -450,11 +450,11 @@
     <string name="quick_settings_disclosure_named_management" msgid="1059403025094542908">"裝置是由「<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g>」所管理"</string>
     <string name="quick_settings_disclosure_management_vpns" msgid="3698767349925266482">"裝置是由貴機構所管理，並已連結至兩個 VPN"</string>
     <string name="quick_settings_disclosure_named_management_vpns" msgid="7777821385318891527">"裝置是由「<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g>」所管理，並已連結至兩個 VPN"</string>
-    <string name="quick_settings_disclosure_managed_profile_monitoring" msgid="5125463987558278215">"貴機構可能會監控你 Work 設定檔的網路流量"</string>
-    <string name="quick_settings_disclosure_named_managed_profile_monitoring" msgid="8973606847896650284">"「<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g>」可能會監控你 Work 設定檔的網路流量"</string>
+    <string name="quick_settings_disclosure_managed_profile_monitoring" msgid="5125463987558278215">"貴機構可能會監控你工作資料夾的網路流量"</string>
+    <string name="quick_settings_disclosure_named_managed_profile_monitoring" msgid="8973606847896650284">"「<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g>」可能會監控你工作資料夾的網路流量"</string>
     <string name="quick_settings_disclosure_monitoring" msgid="679658227269205728">"網路可能會受到監控"</string>
     <string name="quick_settings_disclosure_vpns" msgid="8170318392053156330">"裝置已連結至兩個 VPN"</string>
-    <string name="quick_settings_disclosure_managed_profile_named_vpn" msgid="3494535754792751741">"Work 設定檔已連結至「<xliff:g id="VPN_APP">%1$s</xliff:g>」"</string>
+    <string name="quick_settings_disclosure_managed_profile_named_vpn" msgid="3494535754792751741">"工作資料夾已連結至「<xliff:g id="VPN_APP">%1$s</xliff:g>」"</string>
     <string name="quick_settings_disclosure_personal_profile_named_vpn" msgid="4467456202486569906">"個人設定檔已連結至「<xliff:g id="VPN_APP">%1$s</xliff:g>」"</string>
     <string name="quick_settings_disclosure_named_vpn" msgid="6943724064780847080">"裝置已連結至「<xliff:g id="VPN_APP">%1$s</xliff:g>」"</string>
     <string name="monitoring_title_device_owned" msgid="1652495295941959815">"裝置管理"</string>
@@ -469,12 +469,12 @@
     <string name="monitoring_description_named_management" msgid="5281789135578986303">"你的裝置是由「<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g>」所管理。\n\n你的管理員可以監控及管理與裝置相關聯的設定、公司系統權限、應用程式和資料，以及裝置的位置資訊。\n\n如要瞭解詳情，請與你的管理員聯絡。"</string>
     <string name="monitoring_description_management" msgid="4573721970278370790">"你的裝置是由貴機構所管理。\n\n你的管理員可以監控及管理與裝置相關聯的設定、公司系統權限、應用程式和資料，以及裝置的位置資訊。\n\n如要瞭解詳情，請與你的管理員聯絡。"</string>
     <string name="monitoring_description_management_ca_certificate" msgid="5202023784131001751">"貴機構已為這個裝置安裝憑證授權單位憑證。你的安全網路流量可能會受到監控或修改。"</string>
-    <string name="monitoring_description_managed_profile_ca_certificate" msgid="4683248196789897964">"貴機構已為你的 Work 設定檔安裝憑證授權單位憑證。你的安全網路流量可能會受到監控或修改。"</string>
+    <string name="monitoring_description_managed_profile_ca_certificate" msgid="4683248196789897964">"貴機構已為你的工作資料夾安裝憑證授權單位憑證。你的安全網路流量可能會受到監控或修改。"</string>
     <string name="monitoring_description_ca_certificate" msgid="7886985418413598352">"這個裝置已安裝憑證授權單位憑證。你的安全網路流量可能會受到監控或修改。"</string>
     <string name="monitoring_description_management_network_logging" msgid="7184005419733060736">"你的管理員已啟用網路記錄功能，可監控你裝置的流量。"</string>
     <string name="monitoring_description_named_vpn" msgid="7403457334088909254">"由於你已連結至「<xliff:g id="VPN_APP">%1$s</xliff:g>」，因此你的網路活動 (包括收發電子郵件、使用應用程式及瀏覽網站) 可能會受到這個應用程式監控。"</string>
     <string name="monitoring_description_two_named_vpns" msgid="4198511413729213802">"由於你已連結至「<xliff:g id="VPN_APP_0">%1$s</xliff:g>」和「<xliff:g id="VPN_APP_1">%2$s</xliff:g>」，因此你的網路活動 (包括收發電子郵件、使用應用程式及瀏覽網站) 可能會受到這兩個應用程式監控。"</string>
-    <string name="monitoring_description_managed_profile_named_vpn" msgid="1427905889862420559">"由於你的 Work 設定檔已連結至「<xliff:g id="VPN_APP">%1$s</xliff:g>」，因此你的網路活動 (包括收發電子郵件、使用應用程式及瀏覽網站) 可能會受到這個應用程式監控。"</string>
+    <string name="monitoring_description_managed_profile_named_vpn" msgid="1427905889862420559">"由於你的工作資料夾已連結至「<xliff:g id="VPN_APP">%1$s</xliff:g>」，因此你的網路活動 (包括收發電子郵件、使用應用程式及瀏覽網站) 可能會受到這個應用程式監控。"</string>
     <string name="monitoring_description_personal_profile_named_vpn" msgid="3133980926929069283">"由於你的個人設定檔已連結至「<xliff:g id="VPN_APP">%1$s</xliff:g>」，因此你的網路活動 (包括收發電子郵件、使用應用程式及瀏覽網站) 可能會受到這個應用程式監控。"</string>
     <string name="monitoring_description_do_header_generic" msgid="96588491028288691">"你的裝置是由「<xliff:g id="DEVICE_OWNER_APP">%1$s</xliff:g>」所管理。"</string>
     <string name="monitoring_description_do_header_with_name" msgid="5511133708978206460">"<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> 使用「<xliff:g id="DEVICE_OWNER_APP">%2$s</xliff:g>」管理你的裝置。"</string>
@@ -488,13 +488,13 @@
     <string name="monitoring_description_ca_cert_settings" msgid="5489969458872997092">"開啟信任的憑證"</string>
     <string name="monitoring_description_network_logging" msgid="7223505523384076027">"你的管理員已啟用網路記錄功能，可監控你裝置的流量。\n\n如需詳細資訊，請與你的管理員聯絡。"</string>
     <string name="monitoring_description_vpn" msgid="4445150119515393526">"你已授權一個應用程式設定 VPN 連線。\n\n這個應用程式可以監控你的裝置和網路活動，包括收發電子郵件、使用應用程式和瀏覽網站。"</string>
-    <string name="monitoring_description_vpn_profile_owned" msgid="2958019119161161530">"你的 Work 設定檔是由下列機構管理：<xliff:g id="ORGANIZATION">%1$s</xliff:g>。\n\n你的管理員可以監控你的網路活動，包括收發電子郵件、使用應用程式及瀏覽網站。\n\n如需詳細資訊，請與你的管理員聯絡。\n\n此外，由於你已連線至 VPN，因此你的網路活動也會受到 VPN 監控。"</string>
+    <string name="monitoring_description_vpn_profile_owned" msgid="2958019119161161530">"你的工作資料夾是由下列機構管理：<xliff:g id="ORGANIZATION">%1$s</xliff:g>。\n\n你的管理員可以監控你的網路活動，包括收發電子郵件、使用應用程式及瀏覽網站。\n\n如需詳細資訊，請與你的管理員聯絡。\n\n此外，由於你已連線至 VPN，因此你的網路活動也會受到 VPN 監控。"</string>
     <string name="legacy_vpn_name" msgid="6604123105765737830">"VPN"</string>
     <string name="monitoring_description_app" msgid="1828472472674709532">"由於你已連結至「<xliff:g id="APPLICATION">%1$s</xliff:g>」，因此你的網路活動 (包括收發電子郵件、使用應用程式和瀏覽網站) 可能會受到這個應用程式監控。"</string>
     <string name="monitoring_description_app_personal" msgid="484599052118316268">"由於你已連線至 <xliff:g id="APPLICATION">%1$s</xliff:g>，你的個人網路活動也會受到這個應用程式監控，包括收發電子郵件、使用應用程式和瀏覽網站。"</string>
     <string name="branded_monitoring_description_app_personal" msgid="2669518213949202599">"由於你已連結至「<xliff:g id="APPLICATION">%1$s</xliff:g>」，你的個人網路活動 (包括收發電子郵件、使用應用程式及瀏覽網站) 可能會受到這個應用程式監控。"</string>
-    <string name="monitoring_description_app_work" msgid="4612997849787922906">"你的 Work 設定檔是由「<xliff:g id="ORGANIZATION">%1$s</xliff:g>」所管理。由於該設定檔已連結至「<xliff:g id="APPLICATION">%2$s</xliff:g>」，因此你的網路活動 (包括收發電子郵件、使用應用程式和瀏覽網站) 可能會受到這個應用程式監控。\n\n如要瞭解詳情，請與你的管理員聯絡。"</string>
-    <string name="monitoring_description_app_personal_work" msgid="5664165460056859391">"你的 Work 設定檔是由「<xliff:g id="ORGANIZATION">%1$s</xliff:g>」所管理。由於該設定檔已連結至「<xliff:g id="APPLICATION_WORK">%2$s</xliff:g>」，因此你的網路活動 (包括收發電子郵件、使用應用程式和瀏覽網站) 可能會受到這個應用程式監控。\n\n此外，你還與「<xliff:g id="APPLICATION_PERSONAL">%3$s</xliff:g>」建立了連結，因此你的個人網路活動也可能會受到該應用程式監控。"</string>
+    <string name="monitoring_description_app_work" msgid="4612997849787922906">"你的工作資料夾是由「<xliff:g id="ORGANIZATION">%1$s</xliff:g>」所管理。由於該設定檔已連結至「<xliff:g id="APPLICATION">%2$s</xliff:g>」，因此你的網路活動 (包括收發電子郵件、使用應用程式和瀏覽網站) 可能會受到這個應用程式監控。\n\n如要瞭解詳情，請與你的管理員聯絡。"</string>
+    <string name="monitoring_description_app_personal_work" msgid="5664165460056859391">"你的工作資料夾是由「<xliff:g id="ORGANIZATION">%1$s</xliff:g>」所管理。由於該設定檔已連結至「<xliff:g id="APPLICATION_WORK">%2$s</xliff:g>」，因此你的網路活動 (包括收發電子郵件、使用應用程式和瀏覽網站) 可能會受到這個應用程式監控。\n\n此外，你還與「<xliff:g id="APPLICATION_PERSONAL">%3$s</xliff:g>」建立了連結，因此你的個人網路活動也可能會受到該應用程式監控。"</string>
     <string name="keyguard_indication_trust_granted" msgid="4985003749105182372">"已為<xliff:g id="USER_NAME">%1$s</xliff:g>解鎖"</string>
     <string name="keyguard_indication_trust_managed" msgid="8319646760022357585">"「<xliff:g id="TRUST_AGENT">%1$s</xliff:g>」執行中"</string>
     <string name="keyguard_indication_trust_disabled" msgid="7412534203633528135">"在你手動解鎖前，裝置將保持鎖定狀態"</string>
@@ -522,7 +522,7 @@
     <string name="quick_settings_reset_confirmation_title" msgid="748792586749897883">"隱藏<xliff:g id="TILE_LABEL">%1$s</xliff:g>？"</string>
     <string name="quick_settings_reset_confirmation_message" msgid="2235970126803317374">"只要在設定頁面中重新啟用，就能再次看到快捷設定選項。"</string>
     <string name="quick_settings_reset_confirmation_button" msgid="2660339101868367515">"隱藏"</string>
-    <string name="managed_profile_foreground_toast" msgid="5421487114739245972">"你正在使用 Work 設定檔"</string>
+    <string name="managed_profile_foreground_toast" msgid="5421487114739245972">"你正在使用工作資料夾"</string>
     <string name="stream_voice_call" msgid="4410002696470423714">"通話"</string>
     <string name="stream_system" msgid="7493299064422163147">"系統"</string>
     <string name="stream_ring" msgid="8213049469184048338">"鈴響"</string>
@@ -543,12 +543,9 @@
     <string name="volume_stream_content_description_mute" msgid="3625049841390467354">"%1$s。輕觸即可設為靜音，但系統可能會將無障礙服務一併設為靜音。"</string>
     <string name="volume_stream_content_description_vibrate_a11y" msgid="6427727603978431301">"%1$s。輕觸即可設為震動。"</string>
     <string name="volume_stream_content_description_mute_a11y" msgid="8995013018414535494">"%1$s。輕觸即可設為靜音。"</string>
-    <!-- no translation found for volume_ringer_hint_mute (9199811307292269601) -->
-    <skip />
-    <!-- no translation found for volume_ringer_hint_unmute (6602880133293060368) -->
-    <skip />
-    <!-- no translation found for volume_ringer_hint_vibrate (4036802135666515202) -->
-    <skip />
+    <string name="volume_ringer_hint_mute" msgid="9199811307292269601">"靜音"</string>
+    <string name="volume_ringer_hint_unmute" msgid="6602880133293060368">"取消靜音"</string>
+    <string name="volume_ringer_hint_vibrate" msgid="4036802135666515202">"震動"</string>
     <string name="volume_dialog_title" msgid="7272969888820035876">"「%s」音量控制項"</string>
     <string name="volume_dialog_ringer_guidance_ring" msgid="3360373718388509040">"有來電和通知時會響鈴 (<xliff:g id="VOLUME_LEVEL">%1$s</xliff:g>)"</string>
     <string name="output_title" msgid="5355078100792942802">"媒體輸出"</string>
@@ -569,7 +566,7 @@
     <string name="show_demo_mode" msgid="2018336697782464029">"顯示示範模式"</string>
     <string name="status_bar_ethernet" msgid="5044290963549500128">"乙太網路"</string>
     <string name="status_bar_alarm" msgid="8536256753575881818">"鬧鐘"</string>
-    <string name="status_bar_work" msgid="6022553324802866373">"Work 設定檔"</string>
+    <string name="status_bar_work" msgid="6022553324802866373">"工作資料夾"</string>
     <string name="status_bar_airplane" msgid="7057575501472249002">"飛航模式"</string>
     <string name="add_tile" msgid="2995389510240786221">"新增圖塊"</string>
     <string name="broadcast_tile" msgid="3894036511763289383">"播送圖塊"</string>
@@ -579,7 +576,7 @@
     <string name="alarm_template_far" msgid="4242179982586714810">"於<xliff:g id="WHEN">%1$s</xliff:g>"</string>
     <string name="accessibility_quick_settings_detail" msgid="2579369091672902101">"快速設定，<xliff:g id="TITLE">%s</xliff:g>。"</string>
     <string name="accessibility_status_bar_hotspot" msgid="4099381329956402865">"無線基地台"</string>
-    <string name="accessibility_managed_profile" msgid="6613641363112584120">"Work 設定檔"</string>
+    <string name="accessibility_managed_profile" msgid="6613641363112584120">"工作資料夾"</string>
     <string name="tuner_warning_title" msgid="7094689930793031682">"有趣與否，見仁見智"</string>
     <string name="tuner_warning" msgid="8730648121973575701">"系統使用者介面調整精靈可讓你透過其他方式，調整及自訂 Android 使用者介面。這些實驗性功能隨著版本更新可能會變更、損壞或消失，執行時請務必謹慎。"</string>
     <string name="tuner_persistent_warning" msgid="8597333795565621795">"這些實驗性功能隨著版本更新可能會變更、損壞或消失，執行時請務必謹慎。"</string>
@@ -614,20 +611,13 @@
     <string name="inline_minimize_button" msgid="966233327974702195">"最小化"</string>
     <string name="inline_keep_showing_app" msgid="1723113469580031041">"要繼續顯示這個應用程式的通知嗎？"</string>
     <string name="notification_unblockable_desc" msgid="1037434112919403708">"無法關閉這些通知"</string>
-    <!-- no translation found for appops_camera (8100147441602585776) -->
-    <skip />
-    <!-- no translation found for appops_microphone (741508267659494555) -->
-    <skip />
-    <!-- no translation found for appops_overlay (6165912637560323464) -->
-    <skip />
-    <!-- no translation found for appops_camera_mic (1576901651150187433) -->
-    <skip />
-    <!-- no translation found for appops_camera_overlay (8869400080809298814) -->
-    <skip />
-    <!-- no translation found for appops_mic_overlay (4835157962857919804) -->
-    <skip />
-    <!-- no translation found for appops_camera_mic_overlay (6718768197048030993) -->
-    <skip />
+    <string name="appops_camera" msgid="8100147441602585776">"這個應用程式正在使用相機。"</string>
+    <string name="appops_microphone" msgid="741508267659494555">"這個應用程式正在使用麥克風。"</string>
+    <string name="appops_overlay" msgid="6165912637560323464">"這個應用程式顯示在畫面上其他應用程式的上層。"</string>
+    <string name="appops_camera_mic" msgid="1576901651150187433">"這個應用程式正在使用麥克風和相機。"</string>
+    <string name="appops_camera_overlay" msgid="8869400080809298814">"這個應用程式顯示在畫面上其他應用程式的上層，且正在使用相機。"</string>
+    <string name="appops_mic_overlay" msgid="4835157962857919804">"這個應用程式顯示在畫面上其他應用程式的上層，且正在使用麥克風。"</string>
+    <string name="appops_camera_mic_overlay" msgid="6718768197048030993">"這個應用程式顯示在畫面上其他應用程式的上層，且正在使用麥克風和相機。"</string>
     <string name="notification_appops_settings" msgid="1028328314935908050">"設定"</string>
     <string name="notification_appops_ok" msgid="1156966426011011434">"確定"</string>
     <string name="notification_channel_controls_opened_accessibility" msgid="6553950422055908113">"「<xliff:g id="APP_NAME">%1$s</xliff:g>」的通知控制項已開啟"</string>
@@ -687,7 +677,7 @@
     <string name="keyboard_shortcut_group_system_back" msgid="2207004531216446378">"返回"</string>
     <string name="keyboard_shortcut_group_system_notifications" msgid="8366964080041773224">"通知"</string>
     <string name="keyboard_shortcut_group_system_shortcuts_helper" msgid="4892255911160332762">"鍵盤快速鍵"</string>
-    <string name="keyboard_shortcut_group_system_switch_input" msgid="2334164096341310324">"切換輸入法"</string>
+    <string name="keyboard_shortcut_group_system_switch_input" msgid="8413348767825486492">"切換鍵盤配置"</string>
     <string name="keyboard_shortcut_group_applications" msgid="9129465955073449206">"應用程式"</string>
     <string name="keyboard_shortcut_group_applications_assist" msgid="9095441910537146013">"小幫手"</string>
     <string name="keyboard_shortcut_group_applications_browser" msgid="6465985474000766533">"瀏覽器"</string>
