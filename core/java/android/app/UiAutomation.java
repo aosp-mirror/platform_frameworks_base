@@ -28,6 +28,8 @@ import android.graphics.Point;
 import android.graphics.Rect;
 import android.graphics.Region;
 import android.hardware.display.DisplayManagerGlobal;
+import android.os.Handler;
+import android.os.HandlerThread;
 import android.os.IBinder;
 import android.os.Looper;
 import android.os.ParcelFileDescriptor;
@@ -47,6 +49,7 @@ import android.view.accessibility.AccessibilityNodeInfo;
 import android.view.accessibility.AccessibilityWindowInfo;
 import android.view.accessibility.IAccessibilityInteractionConnection;
 
+import com.android.internal.util.function.pooled.PooledLambda;
 import libcore.io.IoUtils;
 
 import java.io.IOException;
@@ -118,9 +121,13 @@ public final class UiAutomation {
 
     private final ArrayList<AccessibilityEvent> mEventQueue = new ArrayList<AccessibilityEvent>();
 
-    private final IAccessibilityServiceClient mClient;
+    private final Handler mLocalCallbackHandler;
 
     private final IUiAutomationConnection mUiAutomationConnection;
+
+    private HandlerThread mRemoteCallbackThread;
+
+    private IAccessibilityServiceClient mClient;
 
     private int mConnectionId = CONNECTION_ID_UNDEFINED;
 
@@ -190,8 +197,8 @@ public final class UiAutomation {
         if (connection == null) {
             throw new IllegalArgumentException("Connection cannot be null!");
         }
+        mLocalCallbackHandler = new Handler(looper);
         mUiAutomationConnection = connection;
-        mClient = new IAccessibilityServiceClientImpl(looper);
     }
 
     /**
@@ -217,6 +224,9 @@ public final class UiAutomation {
                 return;
             }
             mIsConnecting = true;
+            mRemoteCallbackThread = new HandlerThread("UiAutomation");
+            mRemoteCallbackThread.start();
+            mClient = new IAccessibilityServiceClientImpl(mRemoteCallbackThread.getLooper());
         }
 
         try {
@@ -281,6 +291,9 @@ public final class UiAutomation {
             mUiAutomationConnection.disconnect();
         } catch (RemoteException re) {
             throw new RuntimeException("Error while disconnecting UiAutomation", re);
+        } finally {
+            mRemoteCallbackThread.quit();
+            mRemoteCallbackThread = null;
         }
     }
 
@@ -311,6 +324,7 @@ public final class UiAutomation {
 
     /**
      * Sets a callback for observing the stream of {@link AccessibilityEvent}s.
+     * The callbacks are delivered on the main application thread.
      *
      * @param listener The callback.
      */
@@ -1139,17 +1153,21 @@ public final class UiAutomation {
 
                 @Override
                 public void onAccessibilityEvent(AccessibilityEvent event) {
+                    final OnAccessibilityEventListener listener;
                     synchronized (mLock) {
                         mLastEventTimeMillis = event.getEventTime();
                         if (mWaitingForEventDelivery) {
                             mEventQueue.add(AccessibilityEvent.obtain(event));
                         }
                         mLock.notifyAll();
+                        listener = mOnAccessibilityEventListener;
                     }
-                    // Calling out only without a lock held.
-                    final OnAccessibilityEventListener listener = mOnAccessibilityEventListener;
                     if (listener != null) {
-                        listener.onAccessibilityEvent(AccessibilityEvent.obtain(event));
+                        // Calling out only without a lock held.
+                        mLocalCallbackHandler.post(PooledLambda.obtainRunnable(
+                                OnAccessibilityEventListener::onAccessibilityEvent,
+                                listener, AccessibilityEvent.obtain(event))
+                                .recycleOnUse());
                     }
                 }
 
