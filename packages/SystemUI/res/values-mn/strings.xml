@@ -255,6 +255,7 @@
     <string name="accessibility_location_active" msgid="2427290146138169014">"Байршлын хүсэлтүүд идэвхтэй"</string>
     <string name="accessibility_clear_all" msgid="5235938559247164925">"Бүх мэдэгдлийг цэвэрлэх."</string>
     <string name="notification_group_overflow_indicator" msgid="1863231301642314183">"+ <xliff:g id="NUMBER">%s</xliff:g>"</string>
+    <string name="notification_group_overflow_indicator_ambient" msgid="879560382990377886">"<xliff:g id="NOTIFICATION_TITLE">%s</xliff:g>, +<xliff:g id="OVERFLOW">%s</xliff:g>"</string>
     <plurals name="notification_group_overflow_description" formatted="false" msgid="4579313201268495404">
       <item quantity="other">дотор бусад <xliff:g id="NUMBER_1">%s</xliff:g> мэдэгдэл байна.</item>
       <item quantity="one">дотор бусад <xliff:g id="NUMBER_0">%s</xliff:g> мэдэгдэл байна.</item>
@@ -366,8 +367,7 @@
     <string name="recents_accessibility_split_screen_top" msgid="9056056469282256287">"Дэлгэцийг дээд хэсэгт хуваах"</string>
     <string name="recents_accessibility_split_screen_left" msgid="8987144699630620019">"Дэлгэцийг зүүн хэсэгт хуваах"</string>
     <string name="recents_accessibility_split_screen_right" msgid="275069779299592867">"Дэлгэцийг баруун хэсэгт хуваах"</string>
-    <!-- no translation found for quick_step_accessibility_toggle_overview (7171470775439860480) -->
-    <skip />
+    <string name="quick_step_accessibility_toggle_overview" msgid="7171470775439860480">"Тоймыг унтраах/асаах"</string>
     <string name="expanded_header_battery_charged" msgid="5945855970267657951">"Цэнэглэгдсэн"</string>
     <string name="expanded_header_battery_charging" msgid="205623198487189724">"Цэнэглэж байна"</string>
     <string name="expanded_header_battery_charging_with_time" msgid="457559884275395376">"дүүргэхэд <xliff:g id="CHARGING_TIME">%s</xliff:g>"</string>
@@ -541,12 +541,9 @@
     <string name="volume_stream_content_description_mute" msgid="3625049841390467354">"%1$s. Дууг нь хаахын тулд товшино уу. Хүртээмжийн үйлчилгээний дууг хаасан."</string>
     <string name="volume_stream_content_description_vibrate_a11y" msgid="6427727603978431301">"%1$s. Чичиргээнд тохируулахын тулд товшино уу."</string>
     <string name="volume_stream_content_description_mute_a11y" msgid="8995013018414535494">"%1$s. Дууг хаахын тулд товшино уу."</string>
-    <!-- no translation found for volume_ringer_hint_mute (9199811307292269601) -->
-    <skip />
-    <!-- no translation found for volume_ringer_hint_unmute (6602880133293060368) -->
-    <skip />
-    <!-- no translation found for volume_ringer_hint_vibrate (4036802135666515202) -->
-    <skip />
+    <string name="volume_ringer_hint_mute" msgid="9199811307292269601">"дууг хаах"</string>
+    <string name="volume_ringer_hint_unmute" msgid="6602880133293060368">"дууг нээх"</string>
+    <string name="volume_ringer_hint_vibrate" msgid="4036802135666515202">"чичрэх"</string>
     <string name="volume_dialog_title" msgid="7272969888820035876">"%s түвшний хяналт"</string>
     <string name="volume_dialog_ringer_guidance_ring" msgid="3360373718388509040">"Дуудлага болон мэдэгдлийн хонх дуугарна (<xliff:g id="VOLUME_LEVEL">%1$s</xliff:g>)"</string>
     <string name="output_title" msgid="5355078100792942802">"Медиа гаралт"</string>
@@ -612,20 +609,13 @@
     <string name="inline_minimize_button" msgid="966233327974702195">"Багасгах"</string>
     <string name="inline_keep_showing_app" msgid="1723113469580031041">"Энэ аппаас мэдэгдэл харуулсан хэвээр байх уу?"</string>
     <string name="notification_unblockable_desc" msgid="1037434112919403708">"Эдгээр мэдэгдлийг унтраах боломжгүй"</string>
-    <!-- no translation found for appops_camera (8100147441602585776) -->
-    <skip />
-    <!-- no translation found for appops_microphone (741508267659494555) -->
-    <skip />
-    <!-- no translation found for appops_overlay (6165912637560323464) -->
-    <skip />
-    <!-- no translation found for appops_camera_mic (1576901651150187433) -->
-    <skip />
-    <!-- no translation found for appops_camera_overlay (8869400080809298814) -->
-    <skip />
-    <!-- no translation found for appops_mic_overlay (4835157962857919804) -->
-    <skip />
-    <!-- no translation found for appops_camera_mic_overlay (6718768197048030993) -->
-    <skip />
+    <string name="appops_camera" msgid="8100147441602585776">"Энэ апп камерыг ашиглаж байна."</string>
+    <string name="appops_microphone" msgid="741508267659494555">"Энэ апп микрофоныг ашиглаж байна."</string>
+    <string name="appops_overlay" msgid="6165912637560323464">"Энэ аппыг таны дэлгэцэд бусад аппын дээр харуулж байна."</string>
+    <string name="appops_camera_mic" msgid="1576901651150187433">"Энэ апп микрофон болон камерыг ашиглаж байна."</string>
+    <string name="appops_camera_overlay" msgid="8869400080809298814">"Энэ аппыг таны дэлгэцэд бусад аппын дээр харуулж байгаа бөгөөд камерыг ашиглаж байна."</string>
+    <string name="appops_mic_overlay" msgid="4835157962857919804">"Энэ аппыг таны дэлгэцэд бусад аппын дээр харуулж байгаа бөгөөд микрофоныг ашиглаж байна."</string>
+    <string name="appops_camera_mic_overlay" msgid="6718768197048030993">"Энэ аппыг таны дэлгэцэд бусад аппын дээр харуулж байгаа бөгөөд микрофон болон камерыг ашиглаж байна."</string>
     <string name="notification_appops_settings" msgid="1028328314935908050">"Тохиргоо"</string>
     <string name="notification_appops_ok" msgid="1156966426011011434">"ОК"</string>
     <string name="notification_channel_controls_opened_accessibility" msgid="6553950422055908113">"<xliff:g id="APP_NAME">%1$s</xliff:g>-н мэдэгдлийн хяналтыг нээсэн"</string>
@@ -685,7 +675,7 @@
     <string name="keyboard_shortcut_group_system_back" msgid="2207004531216446378">"Буцах"</string>
     <string name="keyboard_shortcut_group_system_notifications" msgid="8366964080041773224">"Мэдэгдэл"</string>
     <string name="keyboard_shortcut_group_system_shortcuts_helper" msgid="4892255911160332762">"Гарын товчлол"</string>
-    <string name="keyboard_shortcut_group_system_switch_input" msgid="2334164096341310324">"Оролтын аргыг солих"</string>
+    <string name="keyboard_shortcut_group_system_switch_input" msgid="8413348767825486492">"Гарын бүдүүвч рүү сэлгэх"</string>
     <string name="keyboard_shortcut_group_applications" msgid="9129465955073449206">"Апп"</string>
     <string name="keyboard_shortcut_group_applications_assist" msgid="9095441910537146013">"Дэмжлэг"</string>
     <string name="keyboard_shortcut_group_applications_browser" msgid="6465985474000766533">"Хөтөч"</string>
@@ -697,7 +687,7 @@
     <string name="keyboard_shortcut_group_applications_calendar" msgid="9043614299194991263">"Хуанли"</string>
     <string name="tuner_full_zen_title" msgid="4540823317772234308">"Түвшний хяналттай харуулах"</string>
     <string name="volume_and_do_not_disturb" msgid="3373784330208603030">"Бүү саад бол"</string>
-    <string name="volume_dnd_silent" msgid="4363882330723050727">"Түвшний товчлуурын товчлол"</string>
+    <string name="volume_dnd_silent" msgid="4363882330723050727">"Дууны түвшний товчлуурын товчлол"</string>
     <string name="volume_up_silent" msgid="7141255269783588286">"Бүү саад бол тохиргооноос гарахын тулд дууны түвшинг нэмэх"</string>
     <string name="battery" msgid="7498329822413202973">"Батарей"</string>
     <string name="clock" msgid="7416090374234785905">"Цаг"</string>

@@ -257,6 +257,7 @@
     <string name="accessibility_location_active" msgid="2427290146138169014">"Məkan sorğuları arxivi"</string>
     <string name="accessibility_clear_all" msgid="5235938559247164925">"Bütün bildirişləri sil."</string>
     <string name="notification_group_overflow_indicator" msgid="1863231301642314183">"+ <xliff:g id="NUMBER">%s</xliff:g>"</string>
+    <string name="notification_group_overflow_indicator_ambient" msgid="879560382990377886">"<xliff:g id="NOTIFICATION_TITLE">%s</xliff:g>, +<xliff:g id="OVERFLOW">%s</xliff:g>"</string>
     <plurals name="notification_group_overflow_description" formatted="false" msgid="4579313201268495404">
       <item quantity="other">Daxilində daha <xliff:g id="NUMBER_1">%s</xliff:g> bildiriş.</item>
       <item quantity="one">Daxilində daha <xliff:g id="NUMBER_0">%s</xliff:g> bildiriş.</item>
@@ -368,8 +369,7 @@
     <string name="recents_accessibility_split_screen_top" msgid="9056056469282256287">"Ekranı yuxarıdan ayırın"</string>
     <string name="recents_accessibility_split_screen_left" msgid="8987144699630620019">"Ekranı soldan ayırın"</string>
     <string name="recents_accessibility_split_screen_right" msgid="275069779299592867">"Ekranı sağdan ayırın"</string>
-    <!-- no translation found for quick_step_accessibility_toggle_overview (7171470775439860480) -->
-    <skip />
+    <string name="quick_step_accessibility_toggle_overview" msgid="7171470775439860480">"İcmala Keçin"</string>
     <string name="expanded_header_battery_charged" msgid="5945855970267657951">"Dolub"</string>
     <string name="expanded_header_battery_charging" msgid="205623198487189724">"Enerji doldurulur"</string>
     <string name="expanded_header_battery_charging_with_time" msgid="457559884275395376">"<xliff:g id="CHARGING_TIME">%s</xliff:g> dolana kimi"</string>
@@ -543,12 +543,9 @@
     <string name="volume_stream_content_description_mute" msgid="3625049841390467354">"%1$s. Səssiz etmək üçün tıklayın. Əlçatımlılıq xidmətləri səssiz edilmiş ola bilər."</string>
     <string name="volume_stream_content_description_vibrate_a11y" msgid="6427727603978431301">"%1$s. Vibrasiyanı ayarlamaq üçün klikləyin."</string>
     <string name="volume_stream_content_description_mute_a11y" msgid="8995013018414535494">"%1$s. Səssiz etmək üçün klikləyin."</string>
-    <!-- no translation found for volume_ringer_hint_mute (9199811307292269601) -->
-    <skip />
-    <!-- no translation found for volume_ringer_hint_unmute (6602880133293060368) -->
-    <skip />
-    <!-- no translation found for volume_ringer_hint_vibrate (4036802135666515202) -->
-    <skip />
+    <string name="volume_ringer_hint_mute" msgid="9199811307292269601">"susdurun"</string>
+    <string name="volume_ringer_hint_unmute" msgid="6602880133293060368">"səssiz rejimdən çıxarın"</string>
+    <string name="volume_ringer_hint_vibrate" msgid="4036802135666515202">"vibrasiya"</string>
     <string name="volume_dialog_title" msgid="7272969888820035876">"%s səs nəzarətləri"</string>
     <string name="volume_dialog_ringer_guidance_ring" msgid="3360373718388509040">"Çağrı və bildirişlər zəng çalacaq (<xliff:g id="VOLUME_LEVEL">%1$s</xliff:g>)"</string>
     <string name="output_title" msgid="5355078100792942802">"Media çıxışı"</string>
@@ -614,20 +611,13 @@
     <string name="inline_minimize_button" msgid="966233327974702195">"Kiçildin"</string>
     <string name="inline_keep_showing_app" msgid="1723113469580031041">"Bu tətbiqin bildirişləri göstərilməyə davam edilsin?"</string>
     <string name="notification_unblockable_desc" msgid="1037434112919403708">"Bu bildirişlər deaktiv edilə bilməz"</string>
-    <!-- no translation found for appops_camera (8100147441602585776) -->
-    <skip />
-    <!-- no translation found for appops_microphone (741508267659494555) -->
-    <skip />
-    <!-- no translation found for appops_overlay (6165912637560323464) -->
-    <skip />
-    <!-- no translation found for appops_camera_mic (1576901651150187433) -->
-    <skip />
-    <!-- no translation found for appops_camera_overlay (8869400080809298814) -->
-    <skip />
-    <!-- no translation found for appops_mic_overlay (4835157962857919804) -->
-    <skip />
-    <!-- no translation found for appops_camera_mic_overlay (6718768197048030993) -->
-    <skip />
+    <string name="appops_camera" msgid="8100147441602585776">"Bu tətbiq kameradan istifadə edir."</string>
+    <string name="appops_microphone" msgid="741508267659494555">"Bu tətbiq mikrofondan istifadə edir."</string>
+    <string name="appops_overlay" msgid="6165912637560323464">"Bu tətbiqdə ekranda digər tətbiqlərin üzərində göstərilir."</string>
+    <string name="appops_camera_mic" msgid="1576901651150187433">"Bu tətbiq mikrofon və kameradan istifadə edir."</string>
+    <string name="appops_camera_overlay" msgid="8869400080809298814">"Bu tətbiq ekranda digər tətbiqlərin üzərində göstərilir və kameradan istifadə edir."</string>
+    <string name="appops_mic_overlay" msgid="4835157962857919804">"Bu tətbiq ekranda digər tətbiqlərin üzərində göstərilir və mikrofondan istifadə edir."</string>
+    <string name="appops_camera_mic_overlay" msgid="6718768197048030993">"Bu tətbiq ekranda digər tətbiqlərin üzərində göstərilir və mikrofon ilə kameradan istifadə edir."</string>
     <string name="notification_appops_settings" msgid="1028328314935908050">"Ayarlar"</string>
     <string name="notification_appops_ok" msgid="1156966426011011434">"OK"</string>
     <string name="notification_channel_controls_opened_accessibility" msgid="6553950422055908113">"<xliff:g id="APP_NAME">%1$s</xliff:g> üçün bildiriş kontrolları açıqdır"</string>
@@ -687,7 +677,7 @@
     <string name="keyboard_shortcut_group_system_back" msgid="2207004531216446378">"Geri"</string>
     <string name="keyboard_shortcut_group_system_notifications" msgid="8366964080041773224">"Bildirişlər"</string>
     <string name="keyboard_shortcut_group_system_shortcuts_helper" msgid="4892255911160332762">"Klaviatura qısa yolları"</string>
-    <string name="keyboard_shortcut_group_system_switch_input" msgid="2334164096341310324">"Daxiletmə metoduna keçin"</string>
+    <string name="keyboard_shortcut_group_system_switch_input" msgid="8413348767825486492">"Klaviatura düzümünü dəyişin"</string>
     <string name="keyboard_shortcut_group_applications" msgid="9129465955073449206">"Tətbiqlər"</string>
     <string name="keyboard_shortcut_group_applications_assist" msgid="9095441910537146013">"Yardım"</string>
     <string name="keyboard_shortcut_group_applications_browser" msgid="6465985474000766533">"Brauzer"</string>

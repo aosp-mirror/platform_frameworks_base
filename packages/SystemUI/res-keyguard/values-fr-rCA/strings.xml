@@ -51,8 +51,7 @@
     <string name="keyguard_sim_puk_locked_message" msgid="1772789643694942073">"La carte SIM est verrouillée par un code PUK."</string>
     <string name="keyguard_sim_unlock_progress_dialog_message" msgid="3586601150825821675">"Déblocage de la carte SIM en cours…"</string>
     <string name="keyguard_accessibility_pin_area" msgid="703175752097279029">"Zone du NIP"</string>
-    <!-- no translation found for keyguard_accessibility_password (7695303207740941101) -->
-    <skip />
+    <string name="keyguard_accessibility_password" msgid="7695303207740941101">"Mot de passe de l\'appareil"</string>
     <string name="keyguard_accessibility_sim_pin_area" msgid="912702510825058921">"Zone du NIP de la carte SIM"</string>
     <string name="keyguard_accessibility_sim_puk_area" msgid="136979425761438705">"Zone du code PUK de la carte SIM"</string>
     <string name="keyguard_accessibility_next_alarm" msgid="5835196989158584991">"Heure de la prochaine alarme : <xliff:g id="ALARM">%1$s</xliff:g>"</string>

@@ -259,6 +259,7 @@
     <string name="accessibility_location_active" msgid="2427290146138169014">"Richieste di accesso alla posizione attive"</string>
     <string name="accessibility_clear_all" msgid="5235938559247164925">"Cancella tutte le notifiche."</string>
     <string name="notification_group_overflow_indicator" msgid="1863231301642314183">"+ <xliff:g id="NUMBER">%s</xliff:g>"</string>
+    <string name="notification_group_overflow_indicator_ambient" msgid="879560382990377886">"<xliff:g id="NOTIFICATION_TITLE">%s</xliff:g>, +<xliff:g id="OVERFLOW">%s</xliff:g>"</string>
     <plurals name="notification_group_overflow_description" formatted="false" msgid="4579313201268495404">
       <item quantity="other">Altre <xliff:g id="NUMBER_1">%s</xliff:g> notifiche nel gruppo.</item>
       <item quantity="one"><xliff:g id="NUMBER_0">%s</xliff:g> altra notifica nel gruppo.</item>
@@ -370,8 +371,7 @@
     <string name="recents_accessibility_split_screen_top" msgid="9056056469282256287">"Schermo diviso in alto"</string>
     <string name="recents_accessibility_split_screen_left" msgid="8987144699630620019">"Schermo diviso a sinistra"</string>
     <string name="recents_accessibility_split_screen_right" msgid="275069779299592867">"Schermo diviso a destra"</string>
-    <!-- no translation found for quick_step_accessibility_toggle_overview (7171470775439860480) -->
-    <skip />
+    <string name="quick_step_accessibility_toggle_overview" msgid="7171470775439860480">"Attiva/disattiva la panoramica"</string>
     <string name="expanded_header_battery_charged" msgid="5945855970267657951">"Carica"</string>
     <string name="expanded_header_battery_charging" msgid="205623198487189724">"In carica"</string>
     <string name="expanded_header_battery_charging_with_time" msgid="457559884275395376">"<xliff:g id="CHARGING_TIME">%s</xliff:g> al termine della carica"</string>
@@ -545,12 +545,9 @@
     <string name="volume_stream_content_description_mute" msgid="3625049841390467354">"%1$s. Tocca per disattivare l\'audio. L\'audio dei servizi di accessibilità può essere disattivato."</string>
     <string name="volume_stream_content_description_vibrate_a11y" msgid="6427727603978431301">"%1$s. Tocca per attivare la vibrazione."</string>
     <string name="volume_stream_content_description_mute_a11y" msgid="8995013018414535494">"%1$s. Tocca per disattivare l\'audio."</string>
-    <!-- no translation found for volume_ringer_hint_mute (9199811307292269601) -->
-    <skip />
-    <!-- no translation found for volume_ringer_hint_unmute (6602880133293060368) -->
-    <skip />
-    <!-- no translation found for volume_ringer_hint_vibrate (4036802135666515202) -->
-    <skip />
+    <string name="volume_ringer_hint_mute" msgid="9199811307292269601">"disattiva l\'audio"</string>
+    <string name="volume_ringer_hint_unmute" msgid="6602880133293060368">"riattiva l\'audio"</string>
+    <string name="volume_ringer_hint_vibrate" msgid="4036802135666515202">"vibrazione"</string>
     <string name="volume_dialog_title" msgid="7272969888820035876">"Controlli del volume %s"</string>
     <string name="volume_dialog_ringer_guidance_ring" msgid="3360373718388509040">"Chiamate e notifiche faranno suonare il dispositivo (<xliff:g id="VOLUME_LEVEL">%1$s</xliff:g>)"</string>
     <string name="output_title" msgid="5355078100792942802">"Uscita contenuti multimediali"</string>
@@ -598,7 +595,7 @@
     <string name="enable_bluetooth_title" msgid="5027037706500635269">"Attivare il Bluetooth?"</string>
     <string name="enable_bluetooth_message" msgid="9106595990708985385">"Per connettere la tastiera al tablet, devi prima attivare il Bluetooth."</string>
     <string name="enable_bluetooth_confirmation_ok" msgid="6258074250948309715">"Attiva"</string>
-    <string name="show_silently" msgid="6841966539811264192">"Mostra le notifiche silenziosamente"</string>
+    <string name="show_silently" msgid="6841966539811264192">"Mostra notifiche in modalità silenziosa"</string>
     <string name="block" msgid="2734508760962682611">"Blocca tutte le notifiche"</string>
     <string name="do_not_silence" msgid="6878060322594892441">"Non silenziare"</string>
     <string name="do_not_silence_block" msgid="4070647971382232311">"Non silenziare e non bloccare"</string>
@@ -616,20 +613,13 @@
     <string name="inline_minimize_button" msgid="966233327974702195">"Riduci a icona"</string>
     <string name="inline_keep_showing_app" msgid="1723113469580031041">"Continuare a ricevere notifiche da questa app?"</string>
     <string name="notification_unblockable_desc" msgid="1037434112919403708">"Queste notifiche non possono essere disattivate"</string>
-    <!-- no translation found for appops_camera (8100147441602585776) -->
-    <skip />
-    <!-- no translation found for appops_microphone (741508267659494555) -->
-    <skip />
-    <!-- no translation found for appops_overlay (6165912637560323464) -->
-    <skip />
-    <!-- no translation found for appops_camera_mic (1576901651150187433) -->
-    <skip />
-    <!-- no translation found for appops_camera_overlay (8869400080809298814) -->
-    <skip />
-    <!-- no translation found for appops_mic_overlay (4835157962857919804) -->
-    <skip />
-    <!-- no translation found for appops_camera_mic_overlay (6718768197048030993) -->
-    <skip />
+    <string name="appops_camera" msgid="8100147441602585776">"Questa app sta utilizzando la fotocamera."</string>
+    <string name="appops_microphone" msgid="741508267659494555">"Questa app sta utilizzando il microfono."</string>
+    <string name="appops_overlay" msgid="6165912637560323464">"Questa app è visualizzata sopra altre app sullo schermo."</string>
+    <string name="appops_camera_mic" msgid="1576901651150187433">"Questa app sta utilizzando il microfono e la fotocamera."</string>
+    <string name="appops_camera_overlay" msgid="8869400080809298814">"Questa app è visualizzata sopra altre app sullo schermo e sta utilizzando la fotocamera."</string>
+    <string name="appops_mic_overlay" msgid="4835157962857919804">"Questa app è visualizzata sopra altre app sullo schermo e sta utilizzando il microfono."</string>
+    <string name="appops_camera_mic_overlay" msgid="6718768197048030993">"Questa app è visualizzata sopra altre app sullo schermo e sta utilizzando il microfono e la fotocamera."</string>
     <string name="notification_appops_settings" msgid="1028328314935908050">"Impostazioni"</string>
     <string name="notification_appops_ok" msgid="1156966426011011434">"Ok"</string>
     <string name="notification_channel_controls_opened_accessibility" msgid="6553950422055908113">"Controlli di gestione delle notifiche per <xliff:g id="APP_NAME">%1$s</xliff:g> aperti"</string>
@@ -689,7 +679,7 @@
     <string name="keyboard_shortcut_group_system_back" msgid="2207004531216446378">"Indietro"</string>
     <string name="keyboard_shortcut_group_system_notifications" msgid="8366964080041773224">"Notifiche"</string>
     <string name="keyboard_shortcut_group_system_shortcuts_helper" msgid="4892255911160332762">"Scorciatoie da tastiera"</string>
-    <string name="keyboard_shortcut_group_system_switch_input" msgid="2334164096341310324">"Cambia metodo di immissione"</string>
+    <string name="keyboard_shortcut_group_system_switch_input" msgid="8413348767825486492">"Cambia layout della tastiera"</string>
     <string name="keyboard_shortcut_group_applications" msgid="9129465955073449206">"Applicazioni"</string>
     <string name="keyboard_shortcut_group_applications_assist" msgid="9095441910537146013">"Assistenza"</string>
     <string name="keyboard_shortcut_group_applications_browser" msgid="6465985474000766533">"Browser"</string>

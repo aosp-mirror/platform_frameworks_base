@@ -257,6 +257,7 @@
     <string name="accessibility_location_active" msgid="2427290146138169014">"მდებარეობის მოთხოვნები აქტიურია"</string>
     <string name="accessibility_clear_all" msgid="5235938559247164925">"ყველა შეტყობინების წაშლა"</string>
     <string name="notification_group_overflow_indicator" msgid="1863231301642314183">"+ <xliff:g id="NUMBER">%s</xliff:g>"</string>
+    <string name="notification_group_overflow_indicator_ambient" msgid="879560382990377886">"<xliff:g id="NOTIFICATION_TITLE">%s</xliff:g>, +<xliff:g id="OVERFLOW">%s</xliff:g>"</string>
     <plurals name="notification_group_overflow_description" formatted="false" msgid="4579313201268495404">
       <item quantity="other">კიდევ <xliff:g id="NUMBER_1">%s</xliff:g> შეტყობინება ჯგუფში.</item>
       <item quantity="one">კიდევ <xliff:g id="NUMBER_0">%s</xliff:g> შეტყობინება ჯგუფში.</item>
@@ -368,8 +369,7 @@
     <string name="recents_accessibility_split_screen_top" msgid="9056056469282256287">"ეკრანის გაყოფა ზემოთ"</string>
     <string name="recents_accessibility_split_screen_left" msgid="8987144699630620019">"ეკრანის გაყოფა მარცხნივ"</string>
     <string name="recents_accessibility_split_screen_right" msgid="275069779299592867">"ეკრანის გაყოფა მარჯვნივ"</string>
-    <!-- no translation found for quick_step_accessibility_toggle_overview (7171470775439860480) -->
-    <skip />
+    <string name="quick_step_accessibility_toggle_overview" msgid="7171470775439860480">"მიმოხილვის გადართვა"</string>
     <string name="expanded_header_battery_charged" msgid="5945855970267657951">"დატენილია"</string>
     <string name="expanded_header_battery_charging" msgid="205623198487189724">"მიმდინარეობს დატენვა"</string>
     <string name="expanded_header_battery_charging_with_time" msgid="457559884275395376">"<xliff:g id="CHARGING_TIME">%s</xliff:g> სრულად დატენვამდე"</string>
@@ -543,12 +543,9 @@
     <string name="volume_stream_content_description_mute" msgid="3625049841390467354">"%1$s. შეეხეთ დასადუმებლად. შეიძლება დადუმდეს მარტივი წვდომის სერვისებიც."</string>
     <string name="volume_stream_content_description_vibrate_a11y" msgid="6427727603978431301">"%1$s. შეეხეთ ვიბრაციაზე დასაყენებლად."</string>
     <string name="volume_stream_content_description_mute_a11y" msgid="8995013018414535494">"%1$s. შეეხეთ დასადუმებლად."</string>
-    <!-- no translation found for volume_ringer_hint_mute (9199811307292269601) -->
-    <skip />
-    <!-- no translation found for volume_ringer_hint_unmute (6602880133293060368) -->
-    <skip />
-    <!-- no translation found for volume_ringer_hint_vibrate (4036802135666515202) -->
-    <skip />
+    <string name="volume_ringer_hint_mute" msgid="9199811307292269601">"დადუმება"</string>
+    <string name="volume_ringer_hint_unmute" msgid="6602880133293060368">"დადუმების მოხსნა"</string>
+    <string name="volume_ringer_hint_vibrate" msgid="4036802135666515202">"ვიბრაცია"</string>
     <string name="volume_dialog_title" msgid="7272969888820035876">"%s-ის ხმის მართვის საშუალებები"</string>
     <string name="volume_dialog_ringer_guidance_ring" msgid="3360373718388509040">"ზარებისა და შეტყობინებების მიღებისას დაირეკება (<xliff:g id="VOLUME_LEVEL">%1$s</xliff:g>)"</string>
     <string name="output_title" msgid="5355078100792942802">"მედია გამომავალი"</string>
@@ -614,20 +611,13 @@
     <string name="inline_minimize_button" msgid="966233327974702195">"ჩაკეცვა"</string>
     <string name="inline_keep_showing_app" msgid="1723113469580031041">"გაგრძელდეს შეტყობინებათა ჩვენება ამ აპიდან?"</string>
     <string name="notification_unblockable_desc" msgid="1037434112919403708">"ამ შეტყობინებათა გამორთვა ვერ მოხერხდება"</string>
-    <!-- no translation found for appops_camera (8100147441602585776) -->
-    <skip />
-    <!-- no translation found for appops_microphone (741508267659494555) -->
-    <skip />
-    <!-- no translation found for appops_overlay (6165912637560323464) -->
-    <skip />
-    <!-- no translation found for appops_camera_mic (1576901651150187433) -->
-    <skip />
-    <!-- no translation found for appops_camera_overlay (8869400080809298814) -->
-    <skip />
-    <!-- no translation found for appops_mic_overlay (4835157962857919804) -->
-    <skip />
-    <!-- no translation found for appops_camera_mic_overlay (6718768197048030993) -->
-    <skip />
+    <string name="appops_camera" msgid="8100147441602585776">"ეს აპი იყენებს კამერას."</string>
+    <string name="appops_microphone" msgid="741508267659494555">"ეს აპი იყენებს მიკროფონს."</string>
+    <string name="appops_overlay" msgid="6165912637560323464">"ეს აპი თქვენს ეკრანზე ფარავს სხვა აპებს."</string>
+    <string name="appops_camera_mic" msgid="1576901651150187433">"ეს აპი იყენებს მიკროფონსა და კამერას."</string>
+    <string name="appops_camera_overlay" msgid="8869400080809298814">"ეს აპი თქვენს ეკრანზე ფარავს სხვა აპებს და იყენებს კამერას."</string>
+    <string name="appops_mic_overlay" msgid="4835157962857919804">"ეს აპი თქვენს ეკრანზე ფარავს სხვა აპებს და იყენებს მიკროფონს."</string>
+    <string name="appops_camera_mic_overlay" msgid="6718768197048030993">"ეს აპი თქვენს ეკრანზე ფარავს სხვა აპებს და იყენებს მიკროფონსა და კამერას."</string>
     <string name="notification_appops_settings" msgid="1028328314935908050">"პარამეტრები"</string>
     <string name="notification_appops_ok" msgid="1156966426011011434">"კარგი"</string>
     <string name="notification_channel_controls_opened_accessibility" msgid="6553950422055908113">"შეტყობინებების მართვა „<xliff:g id="APP_NAME">%1$s</xliff:g>“-ისთვის გახსნილია"</string>
@@ -687,7 +677,7 @@
     <string name="keyboard_shortcut_group_system_back" msgid="2207004531216446378">"უკან"</string>
     <string name="keyboard_shortcut_group_system_notifications" msgid="8366964080041773224">"შეტყობინებები"</string>
     <string name="keyboard_shortcut_group_system_shortcuts_helper" msgid="4892255911160332762">"კლავიატურის მალსახმობები"</string>
-    <string name="keyboard_shortcut_group_system_switch_input" msgid="2334164096341310324">"შეყვანის მეთოდის გადართვა"</string>
+    <string name="keyboard_shortcut_group_system_switch_input" msgid="8413348767825486492">"კლავიატურის განლაგების გადართვა"</string>
     <string name="keyboard_shortcut_group_applications" msgid="9129465955073449206">"აპლიკაციები"</string>
     <string name="keyboard_shortcut_group_applications_assist" msgid="9095441910537146013">"დახმარება"</string>
     <string name="keyboard_shortcut_group_applications_browser" msgid="6465985474000766533">"ბრაუზერი"</string>

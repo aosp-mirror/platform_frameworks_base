@@ -51,8 +51,7 @@
     <string name="keyguard_sim_puk_locked_message" msgid="1772789643694942073">"ছিম কার্ডখন PUKৰ দ্বাৰা লক কৰা হৈছে।"</string>
     <string name="keyguard_sim_unlock_progress_dialog_message" msgid="3586601150825821675">"ছিম কার্ড আনলক কৰি থকা হৈছে…"</string>
     <string name="keyguard_accessibility_pin_area" msgid="703175752097279029">"পিনৰ ক্ষেত্ৰ"</string>
-    <!-- no translation found for keyguard_accessibility_password (7695303207740941101) -->
-    <skip />
+    <string name="keyguard_accessibility_password" msgid="7695303207740941101">"ডিভাইচৰ পাছৱৰ্ড"</string>
     <string name="keyguard_accessibility_sim_pin_area" msgid="912702510825058921">"ছিম পিনৰ ক্ষেত্ৰ"</string>
     <string name="keyguard_accessibility_sim_puk_area" msgid="136979425761438705">"ছিমৰ PUK ক্ষেত্ৰ"</string>
     <string name="keyguard_accessibility_next_alarm" msgid="5835196989158584991">"পৰৱৰ্তী এলাৰ্ম <xliff:g id="ALARM">%1$s</xliff:g> বজাত ছেট কৰা হৈছে"</string>
