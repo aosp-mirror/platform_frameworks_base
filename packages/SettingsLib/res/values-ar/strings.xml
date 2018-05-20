@@ -373,10 +373,10 @@
     <string name="power_remaining_duration_only_enhanced" msgid="4189311599812296592">"يتبقى <xliff:g id="TIME_REMAINING">%1$s</xliff:g> تقريبًا، بناءً على استخدامك"</string>
     <string name="power_discharging_duration_enhanced" msgid="1992003260664804080">"يتبقى <xliff:g id="TIME_REMAINING">%1$s</xliff:g> تقريبًا، بناءً على استخدامك (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
     <string name="power_remaining_duration_only_short" msgid="3463575350656389957">"الوقت المتبقي: <xliff:g id="TIME_REMAINING">%1$s</xliff:g>"</string>
-    <string name="power_discharge_by_enhanced" msgid="2095821536747992464">"من المفترض أن يستمر شحن البطارية حوالي <xliff:g id="TIME">%1$s</xliff:g> حسب استخدامك (<xliff:g id="LEVEL">%2$s</xliff:g>)."</string>
-    <string name="power_discharge_by_only_enhanced" msgid="2175151772952365149">"من المفترض أن يستمر شحن البطارية حوالي <xliff:g id="TIME">%1$s</xliff:g> حسب استخدامك."</string>
-    <string name="power_discharge_by" msgid="6453537733650125582">"من المفترض أن يستمر شحن البطارية حوالي <xliff:g id="TIME">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)."</string>
-    <string name="power_discharge_by_only" msgid="107616694963545745">"من المفترض أن يستمر شحن البطارية حوالي <xliff:g id="TIME">%1$s</xliff:g>."</string>
+    <string name="power_discharge_by_enhanced" msgid="2095821536747992464">"من المفترض أن يستمر شحن البطارية حتى حوالي الساعة <xliff:g id="TIME">%1$s</xliff:g> حسب استخدامك (<xliff:g id="LEVEL">%2$s</xliff:g>)."</string>
+    <string name="power_discharge_by_only_enhanced" msgid="2175151772952365149">"من المفترض أن يستمر شحن البطارية حتى حوالي الساعة <xliff:g id="TIME">%1$s</xliff:g> حسب استخدامك."</string>
+    <string name="power_discharge_by" msgid="6453537733650125582">"من المفترض أن يستمر شحن البطارية حتى حوالي الساعة <xliff:g id="TIME">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)."</string>
+    <string name="power_discharge_by_only" msgid="107616694963545745">"من المفترض أن يستمر شحن البطارية حتى حوالي الساعة <xliff:g id="TIME">%1$s</xliff:g>."</string>
     <string name="power_remaining_less_than_duration_only" msgid="5996752448813295329">"يتبقى أقل من <xliff:g id="THRESHOLD">%1$s</xliff:g>."</string>
     <string name="power_remaining_less_than_duration" msgid="5751885147712659423">"يتبقى أقل من <xliff:g id="THRESHOLD">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)."</string>
     <string name="power_remaining_more_than_subtext" msgid="3176771815132876675">"يتبقى أكثر من <xliff:g id="TIME_REMAINING">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)."</string>
@@ -449,8 +449,8 @@
     <string name="zen_mode_settings_summary_off" msgid="6119891445378113334">"مطلقًا"</string>
     <string name="zen_interruption_level_priority" msgid="2078370238113347720">"الأولوية فقط"</string>
     <string name="zen_mode_and_condition" msgid="4927230238450354412">"<xliff:g id="ZEN_MODE">%1$s</xliff:g>. <xliff:g id="EXIT_CONDITION">%2$s</xliff:g>"</string>
-    <string name="zen_alarm_warning_indef" msgid="3007988140196673193">"لن تسمع المنبه القادم في <xliff:g id="WHEN">%1$s</xliff:g> إلا إذا أوقفت هذا قبل الموعد."</string>
-    <string name="zen_alarm_warning" msgid="6236690803924413088">"لن تسمع المنبه القادم في <xliff:g id="WHEN">%1$s</xliff:g>"</string>
+    <string name="zen_alarm_warning_indef" msgid="3007988140196673193">"لن تسمع المنبّه القادم في <xliff:g id="WHEN">%1$s</xliff:g> إلا إذا أوقفت هذا قبل الموعد."</string>
+    <string name="zen_alarm_warning" msgid="6236690803924413088">"لن تسمع المنبّه القادم في <xliff:g id="WHEN">%1$s</xliff:g>"</string>
     <string name="alarm_template" msgid="4996153414057676512">"الساعة <xliff:g id="WHEN">%1$s</xliff:g>"</string>
     <string name="alarm_template_far" msgid="3779172822607461675">"يوم <xliff:g id="WHEN">%1$s</xliff:g>"</string>
     <string name="zen_mode_duration_settings_title" msgid="229547412251222757">"المدة"</string>

@@ -138,6 +138,12 @@
     <item msgid="4681409244565426925">"இணைப்புத் தரத்திற்காக மேம்படுத்தியது"</item>
     <item msgid="364670732877872677">"சிறந்த முறை (அடாப்டிவ் பிட் வீதம்)"</item>
   </string-array>
+  <string-array name="bluetooth_audio_active_device_summaries">
+    <item msgid="4862957058729193940"></item>
+    <item msgid="6481691720774549651">", செயலில் உள்ளது"</item>
+    <item msgid="8962366465966010158">", செயலில் உள்ளது (மீடியா)"</item>
+    <item msgid="4046665544396189228">", செயலில் உள்ளது (மொபைல்)"</item>
+  </string-array>
   <string-array name="select_logd_size_titles">
     <item msgid="8665206199209698501">"ஆஃப்"</item>
     <item msgid="1593289376502312923">"64K"</item>

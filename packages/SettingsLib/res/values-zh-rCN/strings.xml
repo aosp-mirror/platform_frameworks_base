@@ -310,7 +310,7 @@
     <string name="enable_gpu_debug_layers_summary" msgid="8009136940671194940">"允许为调试应用加载 GPU 调试层"</string>
     <string name="window_animation_scale_title" msgid="6162587588166114700">"窗口动画缩放"</string>
     <string name="transition_animation_scale_title" msgid="387527540523595875">"过渡动画缩放"</string>
-    <string name="animator_duration_scale_title" msgid="3406722410819934083">"动画程序时长缩放"</string>
+    <string name="animator_duration_scale_title" msgid="3406722410819934083">"Animator 时长缩放"</string>
     <string name="overlay_display_devices_title" msgid="5364176287998398539">"模拟辅助显示设备"</string>
     <string name="debug_applications_category" msgid="4206913653849771549">"应用"</string>
     <string name="immediately_destroy_activities" msgid="1579659389568133959">"不保留活动"</string>
