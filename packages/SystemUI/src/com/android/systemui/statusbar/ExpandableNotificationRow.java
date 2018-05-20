@@ -2286,6 +2286,11 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
     @Override
     public void setHideSensitive(boolean hideSensitive, boolean animated, long delay,
             long duration) {
+        if (getVisibility() == GONE) {
+            // If we are GONE, the hideSensitive parameter will not be calculated and always be
+            // false, which is incorrect, let's wait until a real call comes in later.
+            return;
+        }
         boolean oldShowingPublic = mShowingPublic;
         mShowingPublic = mSensitive && hideSensitive;
         if (mShowingPublicInitialized && mShowingPublic == oldShowingPublic) {

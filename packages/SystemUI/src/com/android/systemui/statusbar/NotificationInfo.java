@@ -486,6 +486,11 @@ public class NotificationInfo extends LinearLayout implements NotificationGuts.G
     }
 
     @Override
+    public boolean shouldBeSaved() {
+        return hasImportanceChanged();
+    }
+
+    @Override
     public View getContentView() {
         return this;
     }

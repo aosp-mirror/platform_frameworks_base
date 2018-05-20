@@ -48,7 +48,7 @@ StatsdConfig CreateStatsdConfig() {
     *valueMetric->mutable_dimensions_in_what() =
         CreateDimensions(android::util::TEMPERATURE, {2/* sensor name field */ });
     valueMetric->set_bucket(FIVE_MINUTES);
-
+    valueMetric->set_use_absolute_value_on_reset(true);
     return config;
 }
 

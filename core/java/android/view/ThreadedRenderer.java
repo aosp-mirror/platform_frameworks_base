@@ -790,7 +790,8 @@ public final class ThreadedRenderer {
      * @param attachInfo AttachInfo tied to the specified view.
      * @param callbacks Callbacks invoked when drawing happens.
      */
-    void draw(View view, AttachInfo attachInfo, DrawCallbacks callbacks) {
+    void draw(View view, AttachInfo attachInfo, DrawCallbacks callbacks,
+            FrameDrawingCallback frameDrawingCallback) {
         attachInfo.mIgnoreDirtyState = true;
 
         final Choreographer choreographer = attachInfo.mViewRootImpl.mChoreographer;
@@ -815,6 +816,9 @@ public final class ThreadedRenderer {
         }
 
         final long[] frameInfo = choreographer.mFrameInfo.mFrameInfo;
+        if (frameDrawingCallback != null) {
+            nSetFrameCallback(mNativeProxy, frameDrawingCallback);
+        }
         int syncResult = nSyncAndDrawFrame(mNativeProxy, frameInfo, frameInfo.length);
         if ((syncResult & SYNC_LOST_SURFACE_REWARD_IF_FOUND) != 0) {
             setEnabled(false);

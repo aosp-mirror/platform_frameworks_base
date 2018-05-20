@@ -17,10 +17,12 @@ package com.android.systemui.statusbar;
 
 import android.os.RemoteException;
 import android.service.notification.StatusBarNotification;
+import android.util.ArraySet;
 
 import com.android.internal.statusbar.IStatusBarService;
 import com.android.systemui.Dependency;
 
+import java.util.Set;
 
 /**
  * Handles when smart replies are added to a notification
@@ -28,18 +30,20 @@ import com.android.systemui.Dependency;
  */
 public class SmartReplyController {
     private IStatusBarService mBarService;
-    private NotificationEntryManager mNotificationEntryManager;
+    private Set<String> mSendingKeys = new ArraySet<>();
 
     public SmartReplyController() {
         mBarService = Dependency.get(IStatusBarService.class);
-        mNotificationEntryManager = Dependency.get(NotificationEntryManager.class);
     }
 
     public void smartReplySent(NotificationData.Entry entry, int replyIndex, CharSequence reply) {
+        NotificationEntryManager notificationEntryManager
+                = Dependency.get(NotificationEntryManager.class);
         StatusBarNotification newSbn =
-                mNotificationEntryManager.rebuildNotificationWithRemoteInput(entry, reply,
+                notificationEntryManager.rebuildNotificationWithRemoteInput(entry, reply,
                         true /* showSpinner */);
-        mNotificationEntryManager.updateNotification(newSbn, null /* ranking */);
+        notificationEntryManager.updateNotification(newSbn, null /* ranking */);
+        mSendingKeys.add(entry.key);
 
         try {
             mBarService.onNotificationSmartReplySent(entry.notification.getKey(),
@@ -49,12 +53,26 @@ public class SmartReplyController {
         }
     }
 
+    /**
+     * Have we posted an intent to an app about sending a smart reply from the
+     * notification with this key.
+     */
+    public boolean isSendingSmartReply(String key) {
+        return mSendingKeys.contains(key);
+    }
+
     public void smartRepliesAdded(final NotificationData.Entry entry, int replyCount) {
         try {
             mBarService.onNotificationSmartRepliesAdded(entry.notification.getKey(),
                     replyCount);
         } catch (RemoteException e) {
             // Nothing to do, system going down
+        }
+    }
+
+    public void stopSending(final NotificationData.Entry entry) {
+        if (entry != null) {
+            mSendingKeys.remove(entry.notification.getKey());
         }
     }
 }

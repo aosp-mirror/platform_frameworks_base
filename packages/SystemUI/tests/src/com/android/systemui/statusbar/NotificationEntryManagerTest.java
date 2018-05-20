@@ -19,6 +19,7 @@ package com.android.systemui.statusbar;
 import static junit.framework.Assert.assertNotNull;
 import static junit.framework.Assert.assertNull;
 import static junit.framework.Assert.assertTrue;
+import static junit.framework.Assert.assertFalse;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
@@ -97,10 +98,10 @@ public class NotificationEntryManagerTest extends SysuiTestCase {
     @Mock private DeviceProvisionedController mDeviceProvisionedController;
     @Mock private VisualStabilityManager mVisualStabilityManager;
     @Mock private MetricsLogger mMetricsLogger;
+    @Mock private SmartReplyController mSmartReplyController;
 
     private NotificationData.Entry mEntry;
     private StatusBarNotification mSbn;
-    private Handler mHandler;
     private TestableNotificationEntryManager mEntryManager;
     private CountDownLatch mCountDownLatch;
 
@@ -159,11 +160,11 @@ public class NotificationEntryManagerTest extends SysuiTestCase {
                 mDeviceProvisionedController);
         mDependency.injectTestDependency(VisualStabilityManager.class, mVisualStabilityManager);
         mDependency.injectTestDependency(MetricsLogger.class, mMetricsLogger);
+        mDependency.injectTestDependency(SmartReplyController.class, mSmartReplyController);
 
-        mHandler = new Handler(Looper.getMainLooper());
         mCountDownLatch = new CountDownLatch(1);
 
-        when(mPresenter.getHandler()).thenReturn(mHandler);
+        when(mPresenter.getHandler()).thenReturn(Handler.createAsync(Looper.myLooper()));
         when(mPresenter.getNotificationLockscreenUserManager()).thenReturn(mLockscreenUserManager);
         when(mPresenter.getGroupManager()).thenReturn(mGroupManager);
         when(mRemoteInputManager.getController()).thenReturn(mRemoteInputController);
@@ -188,6 +189,7 @@ public class NotificationEntryManagerTest extends SysuiTestCase {
     @Test
     public void testAddNotification() throws Exception {
         com.android.systemui.util.Assert.isNotMainThread();
+        TestableLooper.get(this).processAllMessages();
 
         doAnswer(invocation -> {
             mCountDownLatch.countDown();
@@ -196,12 +198,10 @@ public class NotificationEntryManagerTest extends SysuiTestCase {
 
         // Post on main thread, otherwise we will be stuck waiting here for the inflation finished
         // callback forever, since it won't execute until the tests ends.
-        mHandler.post(() -> {
-            mEntryManager.addNotification(mSbn, mRankingMap);
-        });
-        assertTrue(mCountDownLatch.await(1, TimeUnit.MINUTES));
-        assertTrue(mEntryManager.getCountDownLatch().await(1, TimeUnit.MINUTES));
-        waitForIdleSync(mHandler);
+        mEntryManager.addNotification(mSbn, mRankingMap);
+        TestableLooper.get(this).processMessages(1);
+        assertTrue(mCountDownLatch.await(10, TimeUnit.SECONDS));
+        assertTrue(mEntryManager.getCountDownLatch().await(10, TimeUnit.SECONDS));
 
         // Check that no inflation error occurred.
         verify(mBarService, never()).onNotificationError(any(), any(), anyInt(), anyInt(), anyInt(),
@@ -228,17 +228,16 @@ public class NotificationEntryManagerTest extends SysuiTestCase {
     @Test
     public void testUpdateNotification() throws Exception {
         com.android.systemui.util.Assert.isNotMainThread();
+        TestableLooper.get(this).processAllMessages();
 
         mEntryManager.getNotificationData().add(mEntry);
 
         setUserSentiment(mEntry.key, NotificationListenerService.Ranking.USER_SENTIMENT_NEGATIVE);
 
-        mHandler.post(() -> {
-            mEntryManager.updateNotification(mSbn, mRankingMap);
-        });
+        mEntryManager.updateNotification(mSbn, mRankingMap);
+        TestableLooper.get(this).processMessages(1);
         // Wait for content update.
-        mEntryManager.getCountDownLatch().await(1, TimeUnit.MINUTES);
-        waitForIdleSync(mHandler);
+        assertTrue(mEntryManager.getCountDownLatch().await(10, TimeUnit.SECONDS));
 
         verify(mBarService, never()).onNotificationError(any(), any(), anyInt(), anyInt(), anyInt(),
                 any(), anyInt());
@@ -259,16 +258,14 @@ public class NotificationEntryManagerTest extends SysuiTestCase {
         mEntry.row = mRow;
         mEntryManager.getNotificationData().add(mEntry);
 
-        mHandler.post(() -> {
-            mEntryManager.removeNotification(mSbn.getKey(), mRankingMap);
-        });
-        waitForIdleSync(mHandler);
+        mEntryManager.removeNotification(mSbn.getKey(), mRankingMap);
 
         verify(mBarService, never()).onNotificationError(any(), any(), anyInt(), anyInt(), anyInt(),
                 any(), anyInt());
 
         verify(mMediaManager).onNotificationRemoved(mSbn.getKey());
         verify(mRemoteInputManager).onRemoveNotification(mEntry);
+        verify(mSmartReplyController).stopSending(mEntry);
         verify(mForegroundServiceController).removeNotification(mSbn);
         verify(mListContainer).cleanUpViewState(mRow);
         verify(mPresenter).updateNotificationViews();
@@ -276,6 +273,20 @@ public class NotificationEntryManagerTest extends SysuiTestCase {
         verify(mRow).setRemoved();
 
         assertNull(mEntryManager.getNotificationData().get(mSbn.getKey()));
+    }
+
+    @Test
+    public void testRemoveNotification_blockedBySendingSmartReply() throws Exception {
+        com.android.systemui.util.Assert.isNotMainThread();
+
+        mEntry.row = mRow;
+        mEntryManager.getNotificationData().add(mEntry);
+        when(mSmartReplyController.isSendingSmartReply(mEntry.key)).thenReturn(true);
+
+        mEntryManager.removeNotification(mSbn.getKey(), mRankingMap);
+
+        assertNotNull(mEntryManager.getNotificationData().get(mSbn.getKey()));
+        assertTrue(mEntryManager.isNotificationKeptForRemoteInput(mEntry.key));
     }
 
     @Test
@@ -287,12 +298,9 @@ public class NotificationEntryManagerTest extends SysuiTestCase {
         mEntry.row = mRow;
         mEntryManager.getNotificationData().add(mEntry);
 
-        mHandler.post(() -> {
-            mEntryManager.updateNotificationsForAppOp(
-                    AppOpsManager.OP_CAMERA, mEntry.notification.getUid(),
-                    mEntry.notification.getPackageName(), true);
-        });
-        waitForIdleSync(mHandler);
+        mEntryManager.updateNotificationsForAppOp(
+                AppOpsManager.OP_CAMERA, mEntry.notification.getUid(),
+                mEntry.notification.getPackageName(), true);
 
         verify(mPresenter, times(1)).updateNotificationViews();
         assertTrue(mEntryManager.getNotificationData().get(mEntry.key).mActiveAppOps.contains(
@@ -305,10 +313,7 @@ public class NotificationEntryManagerTest extends SysuiTestCase {
 
         when(mForegroundServiceController.getStandardLayoutKey(anyInt(), anyString()))
                 .thenReturn(null);
-        mHandler.post(() -> {
-            mEntryManager.updateNotificationsForAppOp(AppOpsManager.OP_CAMERA, 1000, "pkg", true);
-        });
-        waitForIdleSync(mHandler);
+        mEntryManager.updateNotificationsForAppOp(AppOpsManager.OP_CAMERA, 1000, "pkg", true);
 
         verify(mPresenter, never()).updateNotificationViews();
     }
@@ -378,6 +383,8 @@ public class NotificationEntryManagerTest extends SysuiTestCase {
         Assert.assertEquals("A Reply", messages[0]);
         Assert.assertFalse(newSbn.getNotification().extras
                 .getBoolean(Notification.EXTRA_SHOW_REMOTE_INPUT_SPINNER, false));
+        Assert.assertTrue(newSbn.getNotification().extras
+                .getBoolean(Notification.EXTRA_HIDE_SMART_REPLIES, false));
     }
 
     @Test
@@ -390,6 +397,8 @@ public class NotificationEntryManagerTest extends SysuiTestCase {
         Assert.assertEquals("A Reply", messages[0]);
         Assert.assertTrue(newSbn.getNotification().extras
                 .getBoolean(Notification.EXTRA_SHOW_REMOTE_INPUT_SPINNER, false));
+        Assert.assertTrue(newSbn.getNotification().extras
+                .getBoolean(Notification.EXTRA_HIDE_SMART_REPLIES, false));
     }
 
     @Test
@@ -406,5 +415,16 @@ public class NotificationEntryManagerTest extends SysuiTestCase {
         Assert.assertEquals(2, messages.length);
         Assert.assertEquals("Reply 2", messages[0]);
         Assert.assertEquals("A Reply", messages[1]);
+    }
+
+    @Test
+    public void testRebuildNotificationForCanceledSmartReplies() {
+        // Try rebuilding to remove spinner and hide buttons.
+        StatusBarNotification newSbn =
+                mEntryManager.rebuildNotificationForCanceledSmartReplies(mEntry);
+        Assert.assertFalse(newSbn.getNotification().extras
+                .getBoolean(Notification.EXTRA_SHOW_REMOTE_INPUT_SPINNER, false));
+        Assert.assertTrue(newSbn.getNotification().extras
+                .getBoolean(Notification.EXTRA_HIDE_SMART_REPLIES, false));
     }
 }

@@ -6001,6 +6001,23 @@ public final class Settings {
                 new SettingsValidators.ComponentNameListValidator(":");
 
         /**
+         * Whether the hush gesture has ever been used // TODO: beverlyt
+         * @hide
+         */
+        public static final String HUSH_GESTURE_USED = "hush_gesture_used";
+
+        private static final Validator HUSH_GESTURE_USED_VALIDATOR = BOOLEAN_VALIDATOR;
+
+        /**
+         * Number of times the user has manually clicked the ringer toggle
+         * @hide
+         */
+        public static final String MANUAL_RINGER_TOGGLE_COUNT = "manual_ringer_toggle_count";
+
+        private static final Validator MANUAL_RINGER_TOGGLE_COUNT_VALIDATOR =
+                NON_NEGATIVE_INTEGER_VALIDATOR;
+
+        /**
          * Uri of the slice that's presented on the keyguard.
          * Defaults to a slice with the date and next alarm.
          *
@@ -7983,7 +8000,9 @@ public final class Settings {
             SCREENSAVER_ACTIVATE_ON_SLEEP,
             LOCKDOWN_IN_POWER_MENU,
             SHOW_FIRST_CRASH_DIALOG_DEV_OPTION,
-            VOLUME_HUSH_GESTURE
+            VOLUME_HUSH_GESTURE,
+            MANUAL_RINGER_TOGGLE_COUNT,
+            HUSH_GESTURE_USED,
         };
 
         /**
@@ -8130,6 +8149,8 @@ public final class Settings {
                     ENABLED_NOTIFICATION_ASSISTANT_VALIDATOR); //legacy restore setting
             VALIDATORS.put(ENABLED_NOTIFICATION_POLICY_ACCESS_PACKAGES,
                     ENABLED_NOTIFICATION_POLICY_ACCESS_PACKAGES_VALIDATOR); //legacy restore setting
+            VALIDATORS.put(HUSH_GESTURE_USED, HUSH_GESTURE_USED_VALIDATOR);
+            VALIDATORS.put(MANUAL_RINGER_TOGGLE_COUNT, MANUAL_RINGER_TOGGLE_COUNT_VALIDATOR);
         }
 
         /**
@@ -8608,6 +8629,14 @@ public final class Settings {
         public static final String CHARGING_SOUNDS_ENABLED = "charging_sounds_enabled";
 
         private static final Validator CHARGING_SOUNDS_ENABLED_VALIDATOR = BOOLEAN_VALIDATOR;
+
+        /**
+         * Whether to vibrate for wireless charging events.
+         * @hide
+         */
+        public static final String CHARGING_VIBRATION_ENABLED = "charging_vibration_enabled";
+
+        private static final Validator CHARGING_VIBRATION_ENABLED_VALIDATOR = BOOLEAN_VALIDATOR;
 
         /**
          * Whether we keep the device on while the device is plugged in.
@@ -9297,7 +9326,7 @@ public final class Settings {
         * values.
         * Consists of a comma seperated list of strings:
         * "name,apn,proxy,port,username,password,server,mmsc,mmsproxy,mmsport,mcc,mnc,auth,type"
-        * note that empty fields can be ommitted: "name,apn,,,,,,,,,310,260,,DUN"
+        * note that empty fields can be omitted: "name,apn,,,,,,,,,310,260,,DUN"
         * @hide
         */
        public static final String TETHER_DUN_APN = "tether_dun_apn";
@@ -10357,6 +10386,17 @@ public final class Settings {
         public static final String PRIVATE_DNS_SPECIFIER = "private_dns_specifier";
 
         private static final Validator PRIVATE_DNS_SPECIFIER_VALIDATOR = ANY_STRING_VALIDATOR;
+
+        /**
+          * Forced override of the default mode (hardcoded as "automatic", nee "opportunistic").
+          * This allows changing the default mode without effectively disabling other modes,
+          * all of which require explicit user action to enable/configure. See also b/79719289.
+          *
+          * Value is a string, suitable for assignment to PRIVATE_DNS_MODE above.
+          *
+          * {@hide}
+          */
+        public static final String PRIVATE_DNS_DEFAULT_MODE = "private_dns_default_mode";
 
         /** {@hide} */
         public static final String
@@ -12017,6 +12057,7 @@ public final class Settings {
             PRIVATE_DNS_SPECIFIER,
             SOFT_AP_TIMEOUT_ENABLED,
             ZEN_DURATION,
+            CHARGING_VIBRATION_ENABLED,
         };
 
         /**
@@ -12060,6 +12101,7 @@ public final class Settings {
                     WIFI_CARRIER_NETWORKS_AVAILABLE_NOTIFICATION_ON_VALIDATOR);
             VALIDATORS.put(APP_AUTO_RESTRICTION_ENABLED, APP_AUTO_RESTRICTION_ENABLED_VALIDATOR);
             VALIDATORS.put(ZEN_DURATION, ZEN_DURATION_VALIDATOR);
+            VALIDATORS.put(CHARGING_VIBRATION_ENABLED, CHARGING_VIBRATION_ENABLED_VALIDATOR);
         }
 
         /**

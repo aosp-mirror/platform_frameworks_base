@@ -778,10 +778,19 @@ public class DividerView extends FrameLayout implements OnTouchListener,
             mHandle.setAlpha(minimized ? 0f : 1f);
             mDockedStackMinimized = minimized;
         } else if (mDockedStackMinimized != minimized) {
-            mMinimizedSnapAlgorithm = null;
             mDockedStackMinimized = minimized;
-            initializeSnapAlgorithm();
-            if (mIsInMinimizeInteraction != minimized) {
+            if (mDisplayRotation != mDefaultDisplay.getRotation()) {
+                // Splitscreen to minimize is about to starts after rotating landscape to seascape,
+                // update insets, display info and snap algorithm targets
+                SystemServicesProxy.getInstance(mContext).getStableInsets(mStableInsets);
+                repositionSnapTargetBeforeMinimized();
+                updateDisplayInfo();
+            } else {
+                mMinimizedSnapAlgorithm = null;
+                initializeSnapAlgorithm();
+            }
+            if (mIsInMinimizeInteraction != minimized || mCurrentAnimator != null) {
+                cancelFlingAnimation();
                 if (minimized) {
                     // Relayout to recalculate the divider shadow when minimizing
                     requestLayout();
@@ -1017,7 +1026,6 @@ public class DividerView extends FrameLayout implements OnTouchListener,
             if (mDockSide == DOCKED_RIGHT) {
                 mDockedTaskRect.offset(Math.max(position, mStableInsets.left - mDividerSize)
                         - mDockedTaskRect.left + mDividerSize, 0);
-                mOtherTaskRect.offset(mStableInsets.left, 0);
             }
             mWindowManagerProxy.resizeDockedStack(mDockedRect, mDockedTaskRect, mDockedTaskRect,
                     mOtherTaskRect, null);
@@ -1031,7 +1039,6 @@ public class DividerView extends FrameLayout implements OnTouchListener,
             if (mDockSide == DOCKED_RIGHT) {
                 mDockedTaskRect.offset(Math.max(position, mStableInsets.left - mDividerSize)
                         - mDockedTaskRect.left + mDividerSize, 0);
-                mOtherTaskRect.offset(mStableInsets.left, 0);
             }
             calculateBoundsForPosition(taskPosition, DockedDividerUtils.invertDockSide(mDockSide),
                     mOtherTaskRect);
@@ -1048,7 +1055,6 @@ public class DividerView extends FrameLayout implements OnTouchListener,
             // Move a right-docked-app to line up with the divider while dragging it
             if (mDockSide == DOCKED_RIGHT) {
                 mDockedTaskRect.offset(position - mStableInsets.left + mDividerSize, 0);
-                mOtherTaskRect.offset(mStableInsets.left, 0);
             }
             mWindowManagerProxy.resizeDockedStack(mDockedRect, mDockedTaskRect, mDockedInsetRect,
                     mOtherTaskRect, mOtherInsetRect);

@@ -77,12 +77,6 @@ public class NotificationRemoteInputManager implements Dumpable {
     protected final NotificationLockscreenUserManager mLockscreenUserManager =
             Dependency.get(NotificationLockscreenUserManager.class);
 
-    /**
-     * Notifications with keys in this set are not actually around anymore. We kept them around
-     * when they were canceled in response to a remote input interaction. This allows us to show
-     * what you replied and allows you to continue typing into it.
-     */
-    protected final ArraySet<String> mKeysKeptForRemoteInput = new ArraySet<>();
     protected final Context mContext;
     private final UserManager mUserManager;
 
@@ -290,7 +284,8 @@ public class NotificationRemoteInputManager implements Dumpable {
         mRemoteInputController.addCallback(new RemoteInputController.Callback() {
             @Override
             public void onRemoteInputSent(NotificationData.Entry entry) {
-                if (FORCE_REMOTE_INPUT_HISTORY && mKeysKeptForRemoteInput.contains(entry.key)) {
+                if (FORCE_REMOTE_INPUT_HISTORY
+                        && mEntryManager.isNotificationKeptForRemoteInput(entry.key)) {
                     mEntryManager.removeNotification(entry.key, null);
                 } else if (mRemoteInputEntriesToRemoveOnCollapse.contains(entry)) {
                     // We're currently holding onto this notification, but from the apps point of
@@ -340,10 +335,6 @@ public class NotificationRemoteInputManager implements Dumpable {
         if (mRemoteInputController.isRemoteInputActive(entry)) {
             mRemoteInputController.removeRemoteInput(entry, null);
         }
-        if (FORCE_REMOTE_INPUT_HISTORY
-                && mKeysKeptForRemoteInput.contains(n.getKey())) {
-            mKeysKeptForRemoteInput.remove(n.getKey());
-        }
     }
 
     public void removeRemoteInputEntriesKeptUntilCollapsed() {
@@ -368,17 +359,11 @@ public class NotificationRemoteInputManager implements Dumpable {
         pw.println("NotificationRemoteInputManager state:");
         pw.print("  mRemoteInputEntriesToRemoveOnCollapse: ");
         pw.println(mRemoteInputEntriesToRemoveOnCollapse);
-        pw.print("  mKeysKeptForRemoteInput: ");
-        pw.println(mKeysKeptForRemoteInput);
     }
 
     public void bindRow(ExpandableNotificationRow row) {
         row.setRemoteInputController(mRemoteInputController);
         row.setRemoteViewClickHandler(mOnClickHandler);
-    }
-
-    public Set<String> getKeysKeptForRemoteInput() {
-        return mKeysKeptForRemoteInput;
     }
 
     @VisibleForTesting

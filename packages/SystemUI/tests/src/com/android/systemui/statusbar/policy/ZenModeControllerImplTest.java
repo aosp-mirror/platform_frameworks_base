@@ -24,6 +24,7 @@ import static org.mockito.Mockito.when;
 
 import android.app.NotificationManager;
 import android.os.Handler;
+import android.os.Looper;
 import android.provider.Settings;
 import android.service.notification.ZenModeConfig;
 import android.support.test.filters.SmallTest;
@@ -58,7 +59,7 @@ public class ZenModeControllerImplTest extends SysuiTestCase {
         mContext.addMockSystemService(NotificationManager.class, mNm);
         when(mNm.getZenModeConfig()).thenReturn(mConfig);
 
-        mController = new ZenModeControllerImpl(mContext, new Handler());
+        mController = new ZenModeControllerImpl(mContext, Handler.createAsync(Looper.myLooper()));
     }
 
     @Test

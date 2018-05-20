@@ -108,6 +108,12 @@ public:
         // *OR* will post itself for the next vsync automatically, use this
         // only to avoid calling draw()
         bool canDrawThisFrame = true;
+        // Sentinel for animatedImageDelay meaning there is no need to post such
+        // a message.
+        static constexpr nsecs_t kNoAnimatedImageDelay = -1;
+        // This is used to post a message to redraw when it is time to draw the
+        // next frame of an AnimatedImageDrawable.
+        nsecs_t animatedImageDelay = kNoAnimatedImageDelay;
     } out;
 
     // This flag helps to disable projection for receiver nodes that do not have any backward

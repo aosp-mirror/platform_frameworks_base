@@ -54,8 +54,8 @@ public class KeyguardBouncer {
 
     private static final String TAG = "KeyguardBouncer";
     static final float ALPHA_EXPANSION_THRESHOLD = 0.95f;
-    private static final float EXPANSION_HIDDEN = 1f;
-    private static final float EXPANSION_VISIBLE = 0f;
+    static final float EXPANSION_HIDDEN = 1f;
+    static final float EXPANSION_VISIBLE = 0f;
 
     protected final Context mContext;
     protected final ViewMediatorCallback mCallback;
@@ -86,6 +86,7 @@ public class KeyguardBouncer {
     private boolean mShowingSoon;
     private int mBouncerPromptReason;
     private boolean mIsAnimatingAway;
+    private boolean mIsScrimmed;
 
     public KeyguardBouncer(Context context, ViewMediatorCallback callback,
             LockPatternUtils lockPatternUtils, ViewGroup container,
@@ -103,17 +104,17 @@ public class KeyguardBouncer {
     }
 
     public void show(boolean resetSecuritySelection) {
-        show(resetSecuritySelection, true /* animated */);
+        show(resetSecuritySelection, true /* scrimmed */);
     }
 
     /**
      * Shows the bouncer.
      *
      * @param resetSecuritySelection Cleans keyguard view
-     * @param animated true when the bouncer show show animated, false when the user will be
-     *                 dragging it and animation should be deferred.
+     * @param isScrimmed true when the bouncer show show scrimmed, false when the user will be
+     *                 dragging it and translation should be deferred.
      */
-    public void show(boolean resetSecuritySelection, boolean animated) {
+    public void show(boolean resetSecuritySelection, boolean isScrimmed) {
         final int keyguardUserId = KeyguardUpdateMonitor.getCurrentUser();
         if (keyguardUserId == UserHandle.USER_SYSTEM && UserManager.isSplitSystemUser()) {
             // In split system user mode, we never unlock system user.
@@ -126,9 +127,10 @@ public class KeyguardBouncer {
         // are valid.
         // Later, at the end of the animation, when the bouncer is at the top of the screen,
         // onFullyShown() will be called and FalsingManager will stop recording touches.
-        if (animated) {
+        if (isScrimmed) {
             setExpansion(EXPANSION_VISIBLE);
         }
+        mIsScrimmed = isScrimmed;
 
         if (resetSecuritySelection) {
             // showPrimarySecurityScreen() updates the current security method. This is needed in
@@ -162,6 +164,10 @@ public class KeyguardBouncer {
         DejankUtils.postAfterTraversal(mShowRunnable);
 
         mCallback.onBouncerVisiblityChanged(true /* shown */);
+    }
+
+    public boolean isShowingScrimmed() {
+        return isShowing() && mIsScrimmed;
     }
 
     /**

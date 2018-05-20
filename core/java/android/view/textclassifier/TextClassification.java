@@ -288,11 +288,12 @@ public final class TextClassification implements Parcelable {
     @Nullable
     public static PendingIntent createPendingIntent(
             @NonNull final Context context, @NonNull final Intent intent, int requestCode) {
+        final int flags = PendingIntent.FLAG_UPDATE_CURRENT;
         switch (getIntentType(intent, context)) {
             case IntentType.ACTIVITY:
-                return PendingIntent.getActivity(context, requestCode, intent, 0);
+                return PendingIntent.getActivity(context, requestCode, intent, flags);
             case IntentType.SERVICE:
-                return PendingIntent.getService(context, requestCode, intent, 0);
+                return PendingIntent.getService(context, requestCode, intent, flags);
             default:
                 return null;
         }

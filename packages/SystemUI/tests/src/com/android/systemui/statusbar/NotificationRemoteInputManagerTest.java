@@ -45,7 +45,6 @@ public class NotificationRemoteInputManagerTest extends SysuiTestCase {
     @Mock private NotificationEntryManager mEntryManager;
     @Mock private NotificationLockscreenUserManager mLockscreenUserManager;
 
-    private Handler mHandler;
     private TestableNotificationRemoteInputManager mRemoteInputManager;
     private StatusBarNotification mSbn;
     private NotificationData.Entry mEntry;
@@ -56,9 +55,8 @@ public class NotificationRemoteInputManagerTest extends SysuiTestCase {
         mDependency.injectTestDependency(NotificationEntryManager.class, mEntryManager);
         mDependency.injectTestDependency(NotificationLockscreenUserManager.class,
                 mLockscreenUserManager);
-        mHandler = new Handler(Looper.getMainLooper());
 
-        when(mPresenter.getHandler()).thenReturn(mHandler);
+        when(mPresenter.getHandler()).thenReturn(Handler.createAsync(Looper.myLooper()));
         when(mEntryManager.getLatestRankingMap()).thenReturn(mRanking);
 
         mRemoteInputManager = new TestableNotificationRemoteInputManager(mContext);
@@ -88,11 +86,9 @@ public class NotificationRemoteInputManagerTest extends SysuiTestCase {
     @Test
     public void testPerformOnRemoveNotification() {
         when(mController.isRemoteInputActive(mEntry)).thenReturn(true);
-        mRemoteInputManager.getKeysKeptForRemoteInput().add(mEntry.key);
         mRemoteInputManager.onPerformRemoveNotification(mSbn, mEntry);
 
         verify(mController).removeRemoteInput(mEntry, null);
-        assertTrue(mRemoteInputManager.getKeysKeptForRemoteInput().isEmpty());
     }
 
     @Test

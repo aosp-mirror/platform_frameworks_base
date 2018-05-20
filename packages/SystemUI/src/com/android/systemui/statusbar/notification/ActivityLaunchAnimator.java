@@ -28,11 +28,11 @@ import android.view.IRemoteAnimationFinishedCallback;
 import android.view.IRemoteAnimationRunner;
 import android.view.RemoteAnimationAdapter;
 import android.view.RemoteAnimationTarget;
-import android.view.Surface;
-import android.view.SurfaceControl;
-import android.view.ViewRootImpl;
 
 import com.android.systemui.Interpolators;
+import com.android.systemui.shared.system.SurfaceControlCompat;
+import com.android.systemui.shared.system.SyncRtSurfaceTransactionApplier;
+import com.android.systemui.shared.system.SyncRtSurfaceTransactionApplier.SurfaceParams;
 import com.android.systemui.statusbar.ExpandableNotificationRow;
 import com.android.systemui.statusbar.NotificationListContainer;
 import com.android.systemui.statusbar.StatusBarState;
@@ -40,6 +40,8 @@ import com.android.systemui.statusbar.phone.CollapsedStatusBarFragment;
 import com.android.systemui.statusbar.phone.NotificationPanelView;
 import com.android.systemui.statusbar.phone.StatusBar;
 import com.android.systemui.statusbar.phone.StatusBarWindowView;
+
+import java.util.ArrayList;
 
 /**
  * A class that allows activities to be launched in a seamless way where the notification
@@ -81,7 +83,7 @@ public class ActivityLaunchAnimator {
         }
         AnimationRunner animationRunner = new AnimationRunner(sourceNotification);
         return new RemoteAnimationAdapter(animationRunner, ANIMATION_DURATION,
-                0 /* statusBarTransitionDelay */);
+                ANIMATION_DURATION - 150 /* statusBarTransitionDelay */);
     }
 
     public boolean isAnimationPending() {
@@ -109,12 +111,13 @@ public class ActivityLaunchAnimator {
         private final ExpandableNotificationRow mSourceNotification;
         private final ExpandAnimationParameters mParams;
         private final Rect mWindowCrop = new Rect();
-        private boolean mLeashShown;
         private boolean mInstantCollapsePanel = true;
+        private final SyncRtSurfaceTransactionApplier mSyncRtTransactionApplier;
 
         public AnimationRunner(ExpandableNotificationRow sourceNofitication) {
             mSourceNotification = sourceNofitication;
             mParams = new ExpandAnimationParameters();
+            mSyncRtTransactionApplier = new SyncRtSurfaceTransactionApplier(mSourceNotification);
         }
 
         @Override
@@ -240,24 +243,12 @@ public class ActivityLaunchAnimator {
         }
 
         private void applyParamsToWindow(RemoteAnimationTarget app) {
-            SurfaceControl.Transaction t = new SurfaceControl.Transaction();
-            if (!mLeashShown) {
-                t.show(app.leash);
-                mLeashShown = true;
-            }
             Matrix m = new Matrix();
             m.postTranslate(0, (float) (mParams.top - app.position.y));
-            t.setMatrix(app.leash, m, new float[9]);
             mWindowCrop.set(mParams.left, 0, mParams.right, mParams.getHeight());
-            t.setWindowCrop(app.leash, mWindowCrop);
-            ViewRootImpl viewRootImpl = mSourceNotification.getViewRootImpl();
-            if (viewRootImpl != null) {
-                Surface systemUiSurface = viewRootImpl.mSurface;
-                t.deferTransactionUntilSurface(app.leash, systemUiSurface,
-                        systemUiSurface.getNextFrameNumber());
-            }
-            t.setEarlyWakeup();
-            t.apply();
+            SurfaceParams params = new SurfaceParams(new SurfaceControlCompat(app.leash),
+                    1f /* alpha */, m, mWindowCrop, app.prefixOrderIndex);
+            mSyncRtTransactionApplier.scheduleApply(params);
         }
 
         @Override

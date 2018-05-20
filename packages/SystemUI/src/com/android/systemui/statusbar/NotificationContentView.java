@@ -1384,6 +1384,13 @@ public class NotificationContentView extends FrameLayout {
             smartReplyContainer.setVisibility(View.GONE);
             return null;
         }
+        // If we are keeping the notification around while sending we don't want to add the buttons.
+        boolean hideSmartReplies = entry.notification.getNotification()
+                .extras.getBoolean(Notification.EXTRA_HIDE_SMART_REPLIES, false);
+        if (hideSmartReplies) {
+            smartReplyContainer.setVisibility(View.GONE);
+            return null;
+        }
         SmartReplyView smartReplyView = null;
         if (smartReplyContainer.getChildCount() == 0) {
             smartReplyView = SmartReplyView.inflate(mContext, smartReplyContainer);

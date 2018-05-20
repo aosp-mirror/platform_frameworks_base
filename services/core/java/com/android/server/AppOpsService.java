@@ -287,8 +287,10 @@ public class AppOpsService extends IAppOpsService.Stub {
 
             pw.print("    "); pw.print(KEY_TOP_STATE_SETTLE_TIME); pw.print("=");
             TimeUtils.formatDuration(TOP_STATE_SETTLE_TIME, pw);
+            pw.println();
             pw.print("    "); pw.print(KEY_FG_SERVICE_STATE_SETTLE_TIME); pw.print("=");
             TimeUtils.formatDuration(FG_SERVICE_STATE_SETTLE_TIME, pw);
+            pw.println();
             pw.print("    "); pw.print(KEY_BG_STATE_SETTLE_TIME); pw.print("=");
             TimeUtils.formatDuration(BG_STATE_SETTLE_TIME, pw);
             pw.println();

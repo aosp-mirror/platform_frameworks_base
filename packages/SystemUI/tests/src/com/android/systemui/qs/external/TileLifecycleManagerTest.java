@@ -81,7 +81,7 @@ public class TileLifecycleManagerTest extends SysuiTestCase {
         mUser = new UserHandle(UserHandle.myUserId());
         mThread = new HandlerThread("TestThread");
         mThread.start();
-        mHandler = new Handler(mThread.getLooper());
+        mHandler = Handler.createAsync(mThread.getLooper());
         mStateManager = new TileLifecycleManager(mHandler, mContext,
                 Mockito.mock(IQSService.class), new Tile(),
                 mTileServiceIntent,

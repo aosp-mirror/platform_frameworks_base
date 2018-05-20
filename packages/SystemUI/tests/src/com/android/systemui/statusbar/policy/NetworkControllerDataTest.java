@@ -118,7 +118,7 @@ public class NetworkControllerDataTest extends NetworkControllerBaseTest {
         when(mMockTm.getDataEnabled(mSubId)).thenReturn(false);
         setupDefaultSignal();
         updateDataConnectionState(TelephonyManager.DATA_CONNECTED, 0);
-        setConnectivity(NetworkCapabilities.TRANSPORT_CELLULAR, false, false);
+        setConnectivityViaBroadcast(NetworkCapabilities.TRANSPORT_CELLULAR, false, false);
 
         // Verify that a SignalDrawable with a cut out is used to display data disabled.
         verifyLastMobileDataIndicators(true, DEFAULT_SIGNAL_STRENGTH, 0,
@@ -132,7 +132,7 @@ public class NetworkControllerDataTest extends NetworkControllerBaseTest {
         when(mMockTm.getDataEnabled(mSubId)).thenReturn(false);
         setupDefaultSignal();
         updateDataConnectionState(TelephonyManager.DATA_DISCONNECTED, 0);
-        setConnectivity(NetworkCapabilities.TRANSPORT_CELLULAR, false, false);
+        setConnectivityViaBroadcast(NetworkCapabilities.TRANSPORT_CELLULAR, false, false);
 
         // Verify that a SignalDrawable with a cut out is used to display data disabled.
         verifyLastMobileDataIndicators(true, DEFAULT_SIGNAL_STRENGTH, 0,
@@ -146,7 +146,7 @@ public class NetworkControllerDataTest extends NetworkControllerBaseTest {
         when(mMockTm.getDataEnabled(mSubId)).thenReturn(false);
         setupDefaultSignal();
         updateDataConnectionState(TelephonyManager.DATA_DISCONNECTED, 0);
-        setConnectivity(NetworkCapabilities.TRANSPORT_CELLULAR, false, false);
+        setConnectivityViaBroadcast(NetworkCapabilities.TRANSPORT_CELLULAR, false, false);
         when(mMockProvisionController.isUserSetup(anyInt())).thenReturn(false);
         mUserCallback.onUserSetupChanged();
         TestableLooper.get(this).processAllMessages();

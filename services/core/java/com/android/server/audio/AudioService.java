@@ -1320,6 +1320,11 @@ public class AudioService extends IAudioService.Stub
         }
         String enabledSurroundFormats = Settings.Global.getString(
                 cr, Settings.Global.ENCODED_SURROUND_OUTPUT_ENABLED_FORMATS);
+        if (enabledSurroundFormats == null) {
+            // Never allow enabledSurroundFormats as a null, which could happen when
+            // ENCODED_SURROUND_OUTPUT_ENABLED_FORMATS is not appear in settings DB.
+            enabledSurroundFormats = "";
+        }
         if (!forceUpdate && TextUtils.equals(enabledSurroundFormats, mEnabledSurroundFormats)) {
             // Update enabled surround formats to AudioPolicyManager only when forceUpdate
             // is true or enabled surround formats changed.

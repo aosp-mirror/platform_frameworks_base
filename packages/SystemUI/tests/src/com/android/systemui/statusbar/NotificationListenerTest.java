@@ -59,9 +59,7 @@ public class NotificationListenerTest extends SysuiTestCase {
     @Mock private NotificationRemoteInputManager mRemoteInputManager;
 
     private NotificationListener mListener;
-    private Handler mHandler;
     private StatusBarNotification mSbn;
-    private Set<String> mKeysKeptForRemoteInput;
 
     @Before
     public void setUp() {
@@ -70,12 +68,8 @@ public class NotificationListenerTest extends SysuiTestCase {
         mDependency.injectTestDependency(NotificationRemoteInputManager.class,
                 mRemoteInputManager);
 
-        mHandler = new Handler(Looper.getMainLooper());
-        mKeysKeptForRemoteInput = new HashSet<>();
-
-        when(mPresenter.getHandler()).thenReturn(mHandler);
+        when(mPresenter.getHandler()).thenReturn(Handler.createAsync(Looper.myLooper()));
         when(mEntryManager.getNotificationData()).thenReturn(mNotificationData);
-        when(mRemoteInputManager.getKeysKeptForRemoteInput()).thenReturn(mKeysKeptForRemoteInput);
 
         mListener = new NotificationListener(mContext);
         mSbn = new StatusBarNotification(TEST_PACKAGE_NAME, TEST_PACKAGE_NAME, 0, null, TEST_UID, 0,
@@ -87,37 +81,36 @@ public class NotificationListenerTest extends SysuiTestCase {
     @Test
     public void testNotificationAddCallsAddNotification() {
         mListener.onNotificationPosted(mSbn, mRanking);
-        waitForIdleSync(mHandler);
+        TestableLooper.get(this).processAllMessages();
         verify(mEntryManager).addNotification(mSbn, mRanking);
     }
 
     @Test
     public void testPostNotificationRemovesKeyKeptForRemoteInput() {
-        mKeysKeptForRemoteInput.add(mSbn.getKey());
         mListener.onNotificationPosted(mSbn, mRanking);
-        waitForIdleSync(mHandler);
-        assertTrue(mKeysKeptForRemoteInput.isEmpty());
+        TestableLooper.get(this).processAllMessages();
+        verify(mEntryManager).removeKeyKeptForRemoteInput(mSbn.getKey());
     }
 
     @Test
     public void testNotificationUpdateCallsUpdateNotification() {
         when(mNotificationData.get(mSbn.getKey())).thenReturn(new NotificationData.Entry(mSbn));
         mListener.onNotificationPosted(mSbn, mRanking);
-        waitForIdleSync(mHandler);
+        TestableLooper.get(this).processAllMessages();
         verify(mEntryManager).updateNotification(mSbn, mRanking);
     }
 
     @Test
     public void testNotificationRemovalCallsRemoveNotification() {
         mListener.onNotificationRemoved(mSbn, mRanking);
-        waitForIdleSync(mHandler);
+        TestableLooper.get(this).processAllMessages();
         verify(mEntryManager).removeNotification(mSbn.getKey(), mRanking);
     }
 
     @Test
     public void testRankingUpdateCallsNotificationRankingUpdate() {
         mListener.onNotificationRankingUpdate(mRanking);
-        waitForIdleSync(mHandler);
+        TestableLooper.get(this).processAllMessages();
         // RankingMap may be modified by plugins.
         verify(mEntryManager).updateNotificationRanking(any());
     }

@@ -23,6 +23,7 @@ import android.content.IntentFilter;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.net.ConnectivityManager;
+import android.net.Network;
 import android.net.NetworkCapabilities;
 import android.net.wifi.WifiManager;
 import android.os.AsyncTask;
@@ -219,6 +220,38 @@ public class NetworkControllerImpl extends BroadcastReceiver
                         deviceProvisionedController.getCurrentUser()));
             }
         });
+
+        ConnectivityManager.NetworkCallback callback = new ConnectivityManager.NetworkCallback(){
+            private Network mLastNetwork;
+            private NetworkCapabilities mLastNetworkCapabilities;
+
+            @Override
+            public void onCapabilitiesChanged(
+                Network network, NetworkCapabilities networkCapabilities) {
+                boolean lastValidated = (mLastNetworkCapabilities != null) &&
+                    mLastNetworkCapabilities.hasCapability(NET_CAPABILITY_VALIDATED);
+                boolean validated =
+                    networkCapabilities.hasCapability(NET_CAPABILITY_VALIDATED);
+
+                // This callback is invoked a lot (i.e. when RSSI changes), so avoid updating
+                // icons when connectivity state has remained the same.
+                if (network.equals(mLastNetwork) &&
+                    networkCapabilities.equalsTransportTypes(mLastNetworkCapabilities) &&
+                    validated == lastValidated) {
+                    return;
+                }
+                mLastNetwork = network;
+                mLastNetworkCapabilities = networkCapabilities;
+                updateConnectivity();
+            }
+        };
+        // Even though this callback runs on the receiver handler thread which also processes the
+        // CONNECTIVITY_ACTION broadcasts, the broadcast and callback might come in at different
+        // times. This is safe since updateConnectivity() builds the list of transports from
+        // scratch.
+        // TODO: Move off of the deprecated CONNECTIVITY_ACTION broadcast and rely on callbacks
+        // exclusively for status bar icons.
+        mConnectivityManager.registerDefaultNetworkCallback(callback, mReceiverHandler);
     }
 
     public DataSaverController getDataSaverController() {

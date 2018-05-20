@@ -25,6 +25,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.hardware.input.InputManagerInternal;
+import android.media.AudioAttributes;
 import android.media.AudioManager;
 import android.media.Ringtone;
 import android.media.RingtoneManager;
@@ -40,20 +41,21 @@ import android.os.Process;
 import android.os.RemoteException;
 import android.os.SystemClock;
 import android.os.UserHandle;
+import android.os.VibrationEffect;
+import android.os.Vibrator;
 import android.os.WorkSource;
 import android.provider.Settings;
 import android.util.EventLog;
 import android.util.Slog;
 import android.view.inputmethod.InputMethodManagerInternal;
 
-import com.android.internal.app.IAppOpsService;
 import com.android.internal.app.IBatteryStats;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.server.EventLogTags;
 import com.android.server.LocalServices;
-import com.android.server.statusbar.StatusBarManagerInternal;
 import com.android.server.policy.WindowManagerPolicy;
+import com.android.server.statusbar.StatusBarManagerInternal;
 
 /**
  * Sends broadcasts about important power state changes.
@@ -88,6 +90,21 @@ final class Notifier {
     private static final int MSG_PROFILE_TIMED_OUT = 5;
     private static final int MSG_WIRED_CHARGING_STARTED = 6;
 
+    private static final long[] WIRELESS_VIBRATION_TIME = {
+            40, 40, 40, 40, 40, 40, 40, 40, 40, // ramp-up sampling rate = 40ms
+            40, 40, 40, 40, 40, 40, 40 // ramp-down sampling rate = 40ms
+    };
+    private static final int[] WIRELESS_VIBRATION_AMPLITUDE = {
+            1, 4, 11, 25, 44, 67, 91, 114, 123, // ramp-up amplitude (from 0 to 50%)
+            103, 79, 55, 34, 17, 7, 2 // ramp-up amplitude
+    };
+    private static final VibrationEffect WIRELESS_CHARGING_VIBRATION_EFFECT =
+            VibrationEffect.createWaveform(WIRELESS_VIBRATION_TIME, WIRELESS_VIBRATION_AMPLITUDE,
+                    -1);
+    private static final AudioAttributes VIBRATION_ATTRIBUTES = new AudioAttributes.Builder()
+            .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
+            .build();
+
     private final Object mLock = new Object();
 
     private final Context mContext;
@@ -100,6 +117,7 @@ final class Notifier {
     private final InputMethodManagerInternal mInputMethodManagerInternal;
     @Nullable private final StatusBarManagerInternal mStatusBarManagerInternal;
     private final TrustManager mTrustManager;
+    private final Vibrator mVibrator;
 
     private final NotifierHandler mHandler;
     private final Intent mScreenOnIntent;
@@ -146,6 +164,7 @@ final class Notifier {
         mInputMethodManagerInternal = LocalServices.getService(InputMethodManagerInternal.class);
         mStatusBarManagerInternal = LocalServices.getService(StatusBarManagerInternal.class);
         mTrustManager = mContext.getSystemService(TrustManager.class);
+        mVibrator = mContext.getSystemService(Vibrator.class);
 
         mHandler = new NotifierHandler(looper);
         mScreenOnIntent = new Intent(Intent.ACTION_SCREEN_ON);
@@ -719,14 +738,9 @@ final class Notifier {
      * Plays the wireless charging sound for both wireless and non-wireless charging
      */
     private void playChargingStartedSound() {
-        final boolean enabled = Settings.Global.getInt(mContext.getContentResolver(),
-                Settings.Global.CHARGING_SOUNDS_ENABLED, 1) != 0;
-        final boolean dndOff = Settings.Global.getInt(mContext.getContentResolver(),
-                Settings.Global.ZEN_MODE, Settings.Global.ZEN_MODE_IMPORTANT_INTERRUPTIONS)
-                == Settings.Global.ZEN_MODE_OFF;
         final String soundPath = Settings.Global.getString(mContext.getContentResolver(),
                 Settings.Global.CHARGING_STARTED_SOUND);
-        if (enabled && dndOff && soundPath != null) {
+        if (isChargingFeedbackEnabled() && soundPath != null) {
             final Uri soundUri = Uri.parse("file://" + soundPath);
             if (soundUri != null) {
                 final Ringtone sfx = RingtoneManager.getRingtone(mContext, soundUri);
@@ -739,6 +753,7 @@ final class Notifier {
     }
 
     private void showWirelessChargingStarted(int batteryLevel) {
+        playWirelessChargingVibration();
         playChargingStartedSound();
         if (mStatusBarManagerInternal != null) {
             mStatusBarManagerInternal.showChargingAnimation(batteryLevel);
@@ -753,6 +768,23 @@ final class Notifier {
 
     private void lockProfile(@UserIdInt int userId) {
         mTrustManager.setDeviceLockedForUser(userId, true /*locked*/);
+    }
+
+    private void playWirelessChargingVibration() {
+        final boolean vibrateEnabled = Settings.Global.getInt(mContext.getContentResolver(),
+                Settings.Global.CHARGING_VIBRATION_ENABLED, 0) != 0;
+        if (vibrateEnabled && isChargingFeedbackEnabled()) {
+            mVibrator.vibrate(WIRELESS_CHARGING_VIBRATION_EFFECT, VIBRATION_ATTRIBUTES);
+        }
+    }
+
+    private boolean isChargingFeedbackEnabled() {
+        final boolean enabled = Settings.Global.getInt(mContext.getContentResolver(),
+                Settings.Global.CHARGING_SOUNDS_ENABLED, 1) != 0;
+        final boolean dndOff = Settings.Global.getInt(mContext.getContentResolver(),
+                Settings.Global.ZEN_MODE, Settings.Global.ZEN_MODE_IMPORTANT_INTERRUPTIONS)
+                == Settings.Global.ZEN_MODE_OFF;
+        return enabled && dndOff;
     }
 
     private final class NotifierHandler extends Handler {
@@ -780,6 +812,7 @@ final class Notifier {
                     break;
                 case MSG_WIRED_CHARGING_STARTED:
                     showWiredChargingStarted();
+                    break;
             }
         }
     }

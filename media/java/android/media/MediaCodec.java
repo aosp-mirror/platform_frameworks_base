@@ -1584,6 +1584,20 @@ final public class MediaCodec {
      */
     public static final int BUFFER_FLAG_PARTIAL_FRAME = 8;
 
+    /**
+     * This indicates that the buffer contains non-media data for the
+     * muxer to process.
+     *
+     * All muxer data should start with a FOURCC header that determines the type of data.
+     *
+     * For example, when it contains Exif data sent to a MediaMuxer track of
+     * {@link MediaFormat#MIMETYPE_IMAGE_ANDROID_HEIC} type, the data must start with
+     * Exif header ("Exif\0\0"), followed by the TIFF header (See JEITA CP-3451C Section 4.5.2.)
+     *
+     * @hide
+     */
+    public static final int BUFFER_FLAG_MUXER_DATA = 16;
+
     /** @hide */
     @IntDef(
         flag = true,
@@ -1593,6 +1607,7 @@ final public class MediaCodec {
             BUFFER_FLAG_CODEC_CONFIG,
             BUFFER_FLAG_END_OF_STREAM,
             BUFFER_FLAG_PARTIAL_FRAME,
+            BUFFER_FLAG_MUXER_DATA,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface BufferFlag {}

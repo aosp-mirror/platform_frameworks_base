@@ -51,7 +51,7 @@ public class NotificationVisibility implements Parcelable {
     @Override
     public String toString() {
         return "NotificationVisibility(id=" + id
-                + "key=" + key
+                + " key=" + key
                 + " rank=" + rank
                 + " count=" + count
                 + (visible?" visible":"")

@@ -995,6 +995,10 @@ public class RttManager {
                                     result.getDistanceStdDevMm() / 10;
                             legacyResults[i].rssi = result.getRssi() * -2;
                             legacyResults[i].ts = result.getRangingTimestampMillis() * 1000;
+                            legacyResults[i].measurementFrameNumber =
+                                    result.getNumAttemptedMeasurements();
+                            legacyResults[i].successMeasurementFrameNumber =
+                                    result.getNumSuccessfulMeasurements();
                         } else {
                             // just in case legacy API needed some relatively real timestamp
                             legacyResults[i].ts = SystemClock.elapsedRealtime() * 1000;
