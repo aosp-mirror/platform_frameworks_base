@@ -47,7 +47,7 @@
     <string name="status_bar_settings_settings_button" msgid="3023889916699270224">"सेटिंग्ज"</string>
     <string name="status_bar_settings_wifi_button" msgid="1733928151698311923">"वाय-फाय"</string>
     <string name="status_bar_settings_auto_rotation" msgid="3790482541357798421">"ऑटो-रोटेट स्क्रीन"</string>
-    <string name="status_bar_settings_mute_label" msgid="554682549917429396">"म्युट करा"</string>
+    <string name="status_bar_settings_mute_label" msgid="554682549917429396">"म्यूट करा"</string>
     <string name="status_bar_settings_auto_brightness_label" msgid="511453614962324674">"स्वयं"</string>
     <string name="status_bar_settings_notifications" msgid="397146176280905137">"सूचना"</string>
     <string name="bluetooth_tethered" msgid="7094101612161133267">"ब्लूटूथ टेदर केले"</string>
@@ -106,7 +106,7 @@
     <string name="fingerprint_dialog_touch_sensor" msgid="8511557690663181761">"फिंगरप्रिंट सेन्सरला स्पर्श करा"</string>
     <string name="accessibility_fingerprint_dialog_fingerprint_icon" msgid="3125122495414253226">"फिंगरप्रिंट आयकन"</string>
     <string name="accessibility_fingerprint_dialog_app_icon" msgid="3228052542929174609">"अॅप्लिकेशन आयकन"</string>
-    <string name="accessibility_fingerprint_dialog_help_area" msgid="5730471601819225159">"मदत संदेश क्षेत्र"</string>
+    <string name="accessibility_fingerprint_dialog_help_area" msgid="5730471601819225159">"मदत मेसेज क्षेत्र"</string>
     <string name="accessibility_compatibility_zoom_button" msgid="8461115318742350699">"सुसंगतता झूम बटण."</string>
     <string name="accessibility_compatibility_zoom_example" msgid="4220687294564945780">"लहानपासून मोठ्‍या स्‍क्रीनवर झूम करा."</string>
     <string name="accessibility_bluetooth_connected" msgid="2707027633242983370">"ब्लूटूथ कनेक्‍ट केले."</string>
@@ -257,6 +257,7 @@
     <string name="accessibility_location_active" msgid="2427290146138169014">"स्थान विनंत्या सक्रिय"</string>
     <string name="accessibility_clear_all" msgid="5235938559247164925">"सर्व सूचना साफ करा."</string>
     <string name="notification_group_overflow_indicator" msgid="1863231301642314183">"+ <xliff:g id="NUMBER">%s</xliff:g>"</string>
+    <string name="notification_group_overflow_indicator_ambient" msgid="879560382990377886">"<xliff:g id="NOTIFICATION_TITLE">%s</xliff:g>, +<xliff:g id="OVERFLOW">%s</xliff:g>"</string>
     <plurals name="notification_group_overflow_description" formatted="false" msgid="4579313201268495404">
       <item quantity="one">आत आणखी <xliff:g id="NUMBER_1">%s</xliff:g> सूचना.</item>
       <item quantity="other">आत आणखी <xliff:g id="NUMBER_1">%s</xliff:g> सूचना.</item>
@@ -368,8 +369,7 @@
     <string name="recents_accessibility_split_screen_top" msgid="9056056469282256287">"स्क्रीन शीर्षस्थानी विभाजित करा"</string>
     <string name="recents_accessibility_split_screen_left" msgid="8987144699630620019">"स्क्रीन डावीकडे विभाजित करा"</string>
     <string name="recents_accessibility_split_screen_right" msgid="275069779299592867">"स्क्रीन उजवीकडे विभाजित करा"</string>
-    <!-- no translation found for quick_step_accessibility_toggle_overview (7171470775439860480) -->
-    <skip />
+    <string name="quick_step_accessibility_toggle_overview" msgid="7171470775439860480">"अवलोकन टॉगल करा."</string>
     <string name="expanded_header_battery_charged" msgid="5945855970267657951">"चार्ज झाली"</string>
     <string name="expanded_header_battery_charging" msgid="205623198487189724">"चार्ज होत आहे"</string>
     <string name="expanded_header_battery_charging_with_time" msgid="457559884275395376">"<xliff:g id="CHARGING_TIME">%s</xliff:g> पूर्ण होईपर्यंत"</string>
@@ -412,7 +412,7 @@
     <string name="guest_new_guest" msgid="600537543078847803">"अतिथी जोडा"</string>
     <string name="guest_exit_guest" msgid="7187359342030096885">"अतिथी काढा"</string>
     <string name="guest_exit_guest_dialog_title" msgid="8480693520521766688">"अतिथी काढायचे?"</string>
-    <string name="guest_exit_guest_dialog_message" msgid="4155503224769676625">"या सत्रातील सर्व अ‍ॅप्स आणि डेटा हटविला जाईल."</string>
+    <string name="guest_exit_guest_dialog_message" msgid="4155503224769676625">"या सत्रातील सर्व अ‍ॅप्स आणि डेटा हटवला जाईल."</string>
     <string name="guest_exit_guest_dialog_remove" msgid="7402231963862520531">"काढा"</string>
     <string name="guest_wipe_session_title" msgid="6419439912885956132">"अतिथी, तुमचे पुन्‍हा स्‍वागत आहे!"</string>
     <string name="guest_wipe_session_message" msgid="8476238178270112811">"तुम्ही तुमचे सत्र सुरु ठेवू इच्छिता?"</string>
@@ -436,7 +436,8 @@
     <string name="media_projection_remember_text" msgid="3103510882172746752">"पुन्हा दर्शवू नका"</string>
     <string name="clear_all_notifications_text" msgid="814192889771462828">"सर्व साफ करा"</string>
     <string name="manage_notifications_text" msgid="8035284146227267681">"सूचना व्यवस्थापित करा"</string>
-    <string name="dnd_suppressing_shade_text" msgid="5179021215370153526">"व्यत्यय आणू नका सूचना लपवत आहे"</string>
+    <!-- no translation found for dnd_suppressing_shade_text (1904574852846769301) -->
+    <skip />
     <string name="media_projection_action_text" msgid="8470872969457985954">"आता सुरू करा"</string>
     <string name="empty_shade_text" msgid="708135716272867002">"सूचना नाहीत"</string>
     <string name="profile_owned_footer" msgid="8021888108553696069">"प्रोफाईलचे परीक्षण केले जाऊ शकते"</string>
@@ -535,7 +536,7 @@
     <string name="ring_toggle_title" msgid="3281244519428819576">"कॉल"</string>
     <string name="volume_ringer_status_normal" msgid="4273142424125855384">"रिंग करा"</string>
     <string name="volume_ringer_status_vibrate" msgid="1825615171021346557">"व्हायब्रेट"</string>
-    <string name="volume_ringer_status_silent" msgid="6896394161022916369">"म्युट करा"</string>
+    <string name="volume_ringer_status_silent" msgid="6896394161022916369">"म्यूट करा"</string>
     <string name="qs_status_phone_vibrate" msgid="204362991135761679">"फोन व्हायब्रेटवर आहे"</string>
     <string name="qs_status_phone_muted" msgid="5437668875879171548">"फोन म्यूट केला"</string>
     <string name="volume_stream_content_description_unmute" msgid="4436631538779230857">"%1$s. सशब्द करण्यासाठी टॅप करा."</string>
@@ -543,12 +544,9 @@
     <string name="volume_stream_content_description_mute" msgid="3625049841390467354">"%1$s. नि:शब्द करण्यासाठी टॅप करा. प्रवेशक्षमता सेवा नि:शब्द केल्या जाऊ शकतात."</string>
     <string name="volume_stream_content_description_vibrate_a11y" msgid="6427727603978431301">"%1$s. व्हायब्रेट सेट करण्यासाठी टॅप करा."</string>
     <string name="volume_stream_content_description_mute_a11y" msgid="8995013018414535494">"%1$s. नि:शब्द करण्यासाठी टॅप करा."</string>
-    <!-- no translation found for volume_ringer_hint_mute (9199811307292269601) -->
-    <skip />
-    <!-- no translation found for volume_ringer_hint_unmute (6602880133293060368) -->
-    <skip />
-    <!-- no translation found for volume_ringer_hint_vibrate (4036802135666515202) -->
-    <skip />
+    <string name="volume_ringer_hint_mute" msgid="9199811307292269601">"म्यूट करा"</string>
+    <string name="volume_ringer_hint_unmute" msgid="6602880133293060368">"म्यूट काढून टाका"</string>
+    <string name="volume_ringer_hint_vibrate" msgid="4036802135666515202">"व्हायब्रेट करा"</string>
     <string name="volume_dialog_title" msgid="7272969888820035876">"%s व्हॉल्यूम नियंत्रण"</string>
     <string name="volume_dialog_ringer_guidance_ring" msgid="3360373718388509040">"कॉल आणि सूचना वाजतील (<xliff:g id="VOLUME_LEVEL">%1$s</xliff:g>)"</string>
     <string name="output_title" msgid="5355078100792942802">"मीडिया आउटपुट"</string>
@@ -614,20 +612,13 @@
     <string name="inline_minimize_button" msgid="966233327974702195">"लहान करा"</string>
     <string name="inline_keep_showing_app" msgid="1723113469580031041">"या अ‍ॅपकडील सूचना दाखवणे सुरू ठेवायचे?"</string>
     <string name="notification_unblockable_desc" msgid="1037434112919403708">"या सूचना बंद करता येत नाहीत"</string>
-    <!-- no translation found for appops_camera (8100147441602585776) -->
-    <skip />
-    <!-- no translation found for appops_microphone (741508267659494555) -->
-    <skip />
-    <!-- no translation found for appops_overlay (6165912637560323464) -->
-    <skip />
-    <!-- no translation found for appops_camera_mic (1576901651150187433) -->
-    <skip />
-    <!-- no translation found for appops_camera_overlay (8869400080809298814) -->
-    <skip />
-    <!-- no translation found for appops_mic_overlay (4835157962857919804) -->
-    <skip />
-    <!-- no translation found for appops_camera_mic_overlay (6718768197048030993) -->
-    <skip />
+    <string name="appops_camera" msgid="8100147441602585776">"हे अॅप कॅमेरा वापरत आहे."</string>
+    <string name="appops_microphone" msgid="741508267659494555">"हे अॅप मायक्रोफोन वापरत आहे."</string>
+    <string name="appops_overlay" msgid="6165912637560323464">"हे अॅप स्क्रीनवरील इतर अॅप्स वर प्रदर्शित होत आहे."</string>
+    <string name="appops_camera_mic" msgid="1576901651150187433">"हे अॅप मायक्रोफोन आणि कॅमेरा वापरत आहे."</string>
+    <string name="appops_camera_overlay" msgid="8869400080809298814">"हे अॅप तुमच्या स्क्रीनवरील इतर अॅप्स वर प्रदर्शित होत आहे आणि कॅमेरा वापरत आहे."</string>
+    <string name="appops_mic_overlay" msgid="4835157962857919804">"हे अॅप तुमच्या स्क्रीनवरील इतर अॅप्स वर प्रदर्शित होत आहे आणि मायक्रोफोन वापरत आहे."</string>
+    <string name="appops_camera_mic_overlay" msgid="6718768197048030993">"हे अॅप तुमच्या स्क्रीनवरील इतर अॅप्स वर प्रदर्शित होत आहे आणि मायक्रोफोन आणि कॅमेरा वापरत आहे."</string>
     <string name="notification_appops_settings" msgid="1028328314935908050">"सेटिंग्ज"</string>
     <string name="notification_appops_ok" msgid="1156966426011011434">"ओके"</string>
     <string name="notification_channel_controls_opened_accessibility" msgid="6553950422055908113">"<xliff:g id="APP_NAME">%1$s</xliff:g> साठी सूचना नियंत्रणे खुली आहेत"</string>
@@ -826,7 +817,7 @@
     <string name="notification_channel_alerts" msgid="4496839309318519037">"सूचना"</string>
     <string name="notification_channel_battery" msgid="5786118169182888462">"बॅटरी"</string>
     <string name="notification_channel_screenshot" msgid="6314080179230000938">"स्क्रीनशॉट"</string>
-    <string name="notification_channel_general" msgid="4525309436693914482">"सर्वसाधारण संदेश"</string>
+    <string name="notification_channel_general" msgid="4525309436693914482">"सर्वसाधारण मेसेज"</string>
     <string name="notification_channel_storage" msgid="3077205683020695313">"संचय"</string>
     <string name="notification_channel_hints" msgid="7323870212489152689">"सूचना"</string>
     <string name="instant_apps" msgid="6647570248119804907">"इन्सटंट अ‍ॅप्स"</string>
