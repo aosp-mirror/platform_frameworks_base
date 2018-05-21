@@ -228,7 +228,7 @@
     <string name="accessibility_quick_settings_location_on" msgid="5809937096590102036">"تشغيل الإبلاغ عن الموقع."</string>
     <string name="accessibility_quick_settings_location_changed_off" msgid="8526845571503387376">"تم إيقاف الإبلاغ عن الموقع."</string>
     <string name="accessibility_quick_settings_location_changed_on" msgid="339403053079338468">"تم تشغيل الإبلاغ عن الموقع."</string>
-    <string name="accessibility_quick_settings_alarm" msgid="3959908972897295660">"تم ضبط المنبه على <xliff:g id="TIME">%s</xliff:g>."</string>
+    <string name="accessibility_quick_settings_alarm" msgid="3959908972897295660">"تم ضبط المنبّه على <xliff:g id="TIME">%s</xliff:g>."</string>
     <string name="accessibility_quick_settings_close" msgid="3115847794692516306">"إغلاق اللوحة."</string>
     <string name="accessibility_quick_settings_more_time" msgid="3659274935356197708">"وقت أكثر."</string>
     <string name="accessibility_quick_settings_less_time" msgid="2404728746293515623">"وقت أقل."</string>
@@ -261,6 +261,7 @@
     <string name="accessibility_location_active" msgid="2427290146138169014">"طلبات الموقع نشطة"</string>
     <string name="accessibility_clear_all" msgid="5235938559247164925">"محو جميع الإشعارات."</string>
     <string name="notification_group_overflow_indicator" msgid="1863231301642314183">"+ <xliff:g id="NUMBER">%s</xliff:g>"</string>
+    <string name="notification_group_overflow_indicator_ambient" msgid="879560382990377886">"<xliff:g id="NOTIFICATION_TITLE">%s</xliff:g>، + <xliff:g id="OVERFLOW">%s</xliff:g>"</string>
     <plurals name="notification_group_overflow_description" formatted="false" msgid="4579313201268495404">
       <item quantity="zero"><xliff:g id="NUMBER_1">%s</xliff:g> إشعار آخر بداخل المجموعة.</item>
       <item quantity="two">إشعاران (<xliff:g id="NUMBER_1">%s</xliff:g>) آخران بداخل المجموعة.</item>
@@ -380,8 +381,7 @@
     <string name="recents_accessibility_split_screen_top" msgid="9056056469282256287">"تقسيم الشاشة بمحاذاة الجزء العلوي"</string>
     <string name="recents_accessibility_split_screen_left" msgid="8987144699630620019">"تقسيم الشاشة بمحاذاة اليسار"</string>
     <string name="recents_accessibility_split_screen_right" msgid="275069779299592867">"تقسيم الشاشة بمحاذاة اليمين"</string>
-    <!-- no translation found for quick_step_accessibility_toggle_overview (7171470775439860480) -->
-    <skip />
+    <string name="quick_step_accessibility_toggle_overview" msgid="7171470775439860480">"تبديل \"النظرة العامة\""</string>
     <string name="expanded_header_battery_charged" msgid="5945855970267657951">"تم الشحن"</string>
     <string name="expanded_header_battery_charging" msgid="205623198487189724">"جارٍ الشحن"</string>
     <string name="expanded_header_battery_charging_with_time" msgid="457559884275395376">"<xliff:g id="CHARGING_TIME">%s</xliff:g> حتى الاكتمال"</string>
@@ -448,7 +448,8 @@
     <string name="media_projection_remember_text" msgid="3103510882172746752">"عدم الإظهار مرة أخرى"</string>
     <string name="clear_all_notifications_text" msgid="814192889771462828">"محو الكل"</string>
     <string name="manage_notifications_text" msgid="8035284146227267681">"إدارة الإشعارات"</string>
-    <string name="dnd_suppressing_shade_text" msgid="5179021215370153526">"يؤدي تفعيل وضع \"الرجاء عدم الإزعاج\" إلى إخفاء الإشعارات."</string>
+    <!-- no translation found for dnd_suppressing_shade_text (1904574852846769301) -->
+    <skip />
     <string name="media_projection_action_text" msgid="8470872969457985954">"البدء الآن"</string>
     <string name="empty_shade_text" msgid="708135716272867002">"ليس هناك أي اشعارات"</string>
     <string name="profile_owned_footer" msgid="8021888108553696069">"ربما تتم مراقبة الملف الشخصي"</string>
@@ -539,7 +540,7 @@
     <string name="stream_system" msgid="7493299064422163147">"النظام"</string>
     <string name="stream_ring" msgid="8213049469184048338">"الرنين"</string>
     <string name="stream_music" msgid="9086982948697544342">"الوسائط"</string>
-    <string name="stream_alarm" msgid="5209444229227197703">"المنبه"</string>
+    <string name="stream_alarm" msgid="5209444229227197703">"المنبّه"</string>
     <string name="stream_notification" msgid="2563720670905665031">"الإشعار"</string>
     <string name="stream_bluetooth_sco" msgid="2055645746402746292">"بلوتوث"</string>
     <string name="stream_dtmf" msgid="2447177903892477915">"تردد ثنائي متعدد النغمات"</string>
@@ -555,12 +556,9 @@
     <string name="volume_stream_content_description_mute" msgid="3625049841390467354">"‏%1$s. انقر للتجاهل. قد يتم تجاهل خدمات إمكانية الوصول."</string>
     <string name="volume_stream_content_description_vibrate_a11y" msgid="6427727603978431301">"‏%1$s. انقر للتعيين على الاهتزاز."</string>
     <string name="volume_stream_content_description_mute_a11y" msgid="8995013018414535494">"‏%1$s. انقر لكتم الصوت."</string>
-    <!-- no translation found for volume_ringer_hint_mute (9199811307292269601) -->
-    <skip />
-    <!-- no translation found for volume_ringer_hint_unmute (6602880133293060368) -->
-    <skip />
-    <!-- no translation found for volume_ringer_hint_vibrate (4036802135666515202) -->
-    <skip />
+    <string name="volume_ringer_hint_mute" msgid="9199811307292269601">"كتم الصوت"</string>
+    <string name="volume_ringer_hint_unmute" msgid="6602880133293060368">"إعادة الصوت"</string>
+    <string name="volume_ringer_hint_vibrate" msgid="4036802135666515202">"اهتزاز"</string>
     <string name="volume_dialog_title" msgid="7272969888820035876">"‏%s عنصر للتحكم في مستوى الصوت"</string>
     <string name="volume_dialog_ringer_guidance_ring" msgid="3360373718388509040">"سيصدر الهاتف رنينًا عند تلقي المكالمات والإشعارات (<xliff:g id="VOLUME_LEVEL">%1$s</xliff:g>)."</string>
     <string name="output_title" msgid="5355078100792942802">"إخراج الوسائط"</string>
@@ -580,13 +578,13 @@
     <string name="enable_demo_mode" msgid="4844205668718636518">"تفعيل الوضع التجريبي"</string>
     <string name="show_demo_mode" msgid="2018336697782464029">"عرض الوضع التجريبي"</string>
     <string name="status_bar_ethernet" msgid="5044290963549500128">"إيثرنت"</string>
-    <string name="status_bar_alarm" msgid="8536256753575881818">"المنبه"</string>
+    <string name="status_bar_alarm" msgid="8536256753575881818">"المنبّه"</string>
     <string name="status_bar_work" msgid="6022553324802866373">"الملف الشخصي للعمل"</string>
     <string name="status_bar_airplane" msgid="7057575501472249002">"وضع الطائرة"</string>
     <string name="add_tile" msgid="2995389510240786221">"إضافة فئة"</string>
     <string name="broadcast_tile" msgid="3894036511763289383">"إرسال فئة"</string>
-    <string name="zen_alarm_warning_indef" msgid="3482966345578319605">"لن تسمع المنبه القادم في <xliff:g id="WHEN">%1$s</xliff:g> إلا إذا أوقفت هذا قبل الموعد"</string>
-    <string name="zen_alarm_warning" msgid="444533119582244293">"لن تسمع المنبه القادم في <xliff:g id="WHEN">%1$s</xliff:g>"</string>
+    <string name="zen_alarm_warning_indef" msgid="3482966345578319605">"لن تسمع المنبّه القادم في <xliff:g id="WHEN">%1$s</xliff:g> إلا إذا أوقفت هذا قبل الموعد"</string>
+    <string name="zen_alarm_warning" msgid="444533119582244293">"لن تسمع المنبّه القادم في <xliff:g id="WHEN">%1$s</xliff:g>"</string>
     <string name="alarm_template" msgid="3980063409350522735">"في <xliff:g id="WHEN">%1$s</xliff:g>"</string>
     <string name="alarm_template_far" msgid="4242179982586714810">"يوم <xliff:g id="WHEN">%1$s</xliff:g>"</string>
     <string name="accessibility_quick_settings_detail" msgid="2579369091672902101">"الإعدادات السريعة، <xliff:g id="TITLE">%s</xliff:g>."</string>
@@ -626,20 +624,13 @@
     <string name="inline_minimize_button" msgid="966233327974702195">"تصغير"</string>
     <string name="inline_keep_showing_app" msgid="1723113469580031041">"هل تريد الاستمرار في تلقي إشعارات من هذا التطبيق؟"</string>
     <string name="notification_unblockable_desc" msgid="1037434112919403708">"يتعذَّر إيقاف هذه الإشعارات."</string>
-    <!-- no translation found for appops_camera (8100147441602585776) -->
-    <skip />
-    <!-- no translation found for appops_microphone (741508267659494555) -->
-    <skip />
-    <!-- no translation found for appops_overlay (6165912637560323464) -->
-    <skip />
-    <!-- no translation found for appops_camera_mic (1576901651150187433) -->
-    <skip />
-    <!-- no translation found for appops_camera_overlay (8869400080809298814) -->
-    <skip />
-    <!-- no translation found for appops_mic_overlay (4835157962857919804) -->
-    <skip />
-    <!-- no translation found for appops_camera_mic_overlay (6718768197048030993) -->
-    <skip />
+    <string name="appops_camera" msgid="8100147441602585776">"يستخدم هذا التطبيق الكاميرا."</string>
+    <string name="appops_microphone" msgid="741508267659494555">"يستخدم هذا التطبيق الميكروفون."</string>
+    <string name="appops_overlay" msgid="6165912637560323464">"يتم عرض هذا التطبيق فوق التطبيقات الأخرى على شاشتك."</string>
+    <string name="appops_camera_mic" msgid="1576901651150187433">"يستخدم هذا التطبيق الميكروفون والكاميرا."</string>
+    <string name="appops_camera_overlay" msgid="8869400080809298814">"يتم عرض هذا التطبيق فوق التطبيقات الأخرى على شاشتك ويستخدم الكاميرا."</string>
+    <string name="appops_mic_overlay" msgid="4835157962857919804">"يتم عرض هذا التطبيق فوق التطبيقات الأخرى على شاشتك ويستخدم الميكروفون."</string>
+    <string name="appops_camera_mic_overlay" msgid="6718768197048030993">"يتم عرض هذا التطبيق فوق التطبيقات الأخرى على شاشتك ويستخدم الميكروفون والكاميرا."</string>
     <string name="notification_appops_settings" msgid="1028328314935908050">"الإعدادات"</string>
     <string name="notification_appops_ok" msgid="1156966426011011434">"حسنًا"</string>
     <string name="notification_channel_controls_opened_accessibility" msgid="6553950422055908113">"تم فتح عناصر التحكم في الإشعارات لتطبيق <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
@@ -803,7 +794,7 @@
     <string name="accessibility_quick_settings_settings" msgid="6132460890024942157">"فتح الإعدادات."</string>
     <string name="accessibility_quick_settings_expand" msgid="2375165227880477530">"فتح الإعدادات السريعة."</string>
     <string name="accessibility_quick_settings_collapse" msgid="1792625797142648105">"إغلاق الإعدادات السريعة."</string>
-    <string name="accessibility_quick_settings_alarm_set" msgid="1863000242431528676">"تم ضبط المنبه."</string>
+    <string name="accessibility_quick_settings_alarm_set" msgid="1863000242431528676">"تم ضبط المنبّه."</string>
     <string name="accessibility_quick_settings_user" msgid="1567445362870421770">"تم تسجيل الدخول باعتبارك <xliff:g id="ID_1">%s</xliff:g>"</string>
     <string name="data_connection_no_internet" msgid="4503302451650972989">"لا يتوفر اتصال إنترنت."</string>
     <string name="accessibility_quick_settings_open_details" msgid="4230931801728005194">"فتح التفاصيل."</string>

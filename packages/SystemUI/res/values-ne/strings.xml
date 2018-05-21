@@ -257,6 +257,7 @@
     <string name="accessibility_location_active" msgid="2427290146138169014">"स्थान अनुरोधहरू सक्रिय"</string>
     <string name="accessibility_clear_all" msgid="5235938559247164925">"सबै सूचनाहरू हटाउनुहोस्।"</string>
     <string name="notification_group_overflow_indicator" msgid="1863231301642314183">"+ <xliff:g id="NUMBER">%s</xliff:g>"</string>
+    <string name="notification_group_overflow_indicator_ambient" msgid="879560382990377886">"<xliff:g id="NOTIFICATION_TITLE">%s</xliff:g>, +<xliff:g id="OVERFLOW">%s</xliff:g>"</string>
     <plurals name="notification_group_overflow_description" formatted="false" msgid="4579313201268495404">
       <item quantity="other">भित्र थप <xliff:g id="NUMBER_1">%s</xliff:g> सूचनाहरू छन्।</item>
       <item quantity="one">भित्र थप <xliff:g id="NUMBER_0">%s</xliff:g> सूचना छ।</item>
@@ -368,8 +369,7 @@
     <string name="recents_accessibility_split_screen_top" msgid="9056056469282256287">"विभाजित-स्क्रिनलाई शीर्ष स्थानमा राख्नुहोस्‌"</string>
     <string name="recents_accessibility_split_screen_left" msgid="8987144699630620019">"विभाजित-स्क्रिनलाई बायाँतर्फ राख्नुहोस्‌"</string>
     <string name="recents_accessibility_split_screen_right" msgid="275069779299592867">"विभाजित-स्क्रिनलाई दायाँतर्फ राख्नुहोस्‌"</string>
-    <!-- no translation found for quick_step_accessibility_toggle_overview (7171470775439860480) -->
-    <skip />
+    <string name="quick_step_accessibility_toggle_overview" msgid="7171470775439860480">"परिदृश्य टगल गर्नुहोस्"</string>
     <string name="expanded_header_battery_charged" msgid="5945855970267657951">"चार्ज भयो"</string>
     <string name="expanded_header_battery_charging" msgid="205623198487189724">"चार्ज हुँदै"</string>
     <string name="expanded_header_battery_charging_with_time" msgid="457559884275395376">"<xliff:g id="CHARGING_TIME">%s</xliff:g> पूर्ण नभएसम्म"</string>
@@ -436,7 +436,8 @@
     <string name="media_projection_remember_text" msgid="3103510882172746752">"फेरि नदेखाउनुहोस्"</string>
     <string name="clear_all_notifications_text" msgid="814192889771462828">"सबै हटाउनुहोस्"</string>
     <string name="manage_notifications_text" msgid="8035284146227267681">"सूचनाहरू व्यवस्थापन गर्नुहोस्"</string>
-    <string name="dnd_suppressing_shade_text" msgid="5179021215370153526">"बाधा नपुर्‍याउनुहोस् नामक मोडले सूचनाहरू लुकाइरहेको छ"</string>
+    <!-- no translation found for dnd_suppressing_shade_text (1904574852846769301) -->
+    <skip />
     <string name="media_projection_action_text" msgid="8470872969457985954">"अहिले सुरु गर्नुहोस्"</string>
     <string name="empty_shade_text" msgid="708135716272867002">"कुनै सूचनाहरू छैनन्"</string>
     <string name="profile_owned_footer" msgid="8021888108553696069">"प्रोफाइल अनुगमन हुन सक्छ"</string>
@@ -543,12 +544,9 @@
     <string name="volume_stream_content_description_mute" msgid="3625049841390467354">"%1$s। म्यूट गर्नाका लागि ट्याप गर्नुहोस्। पहुँच सम्बन्धी सेवाहरू म्यूट हुन सक्छन्।"</string>
     <string name="volume_stream_content_description_vibrate_a11y" msgid="6427727603978431301">"%1$s। कम्पन मोडमा सेट गर्न ट्याप गर्नुहोस्।"</string>
     <string name="volume_stream_content_description_mute_a11y" msgid="8995013018414535494">"%1$s। म्यूट गर्न ट्याप गर्नुहोस्।"</string>
-    <!-- no translation found for volume_ringer_hint_mute (9199811307292269601) -->
-    <skip />
-    <!-- no translation found for volume_ringer_hint_unmute (6602880133293060368) -->
-    <skip />
-    <!-- no translation found for volume_ringer_hint_vibrate (4036802135666515202) -->
-    <skip />
+    <string name="volume_ringer_hint_mute" msgid="9199811307292269601">"म्युट गर्नुहोस्"</string>
+    <string name="volume_ringer_hint_unmute" msgid="6602880133293060368">"अनम्युट गर्नुहोस्"</string>
+    <string name="volume_ringer_hint_vibrate" msgid="4036802135666515202">"कम्पन गर्नुहोस्"</string>
     <string name="volume_dialog_title" msgid="7272969888820035876">"%s भोल्युमका नियन्त्रणहरू"</string>
     <string name="volume_dialog_ringer_guidance_ring" msgid="3360373718388509040">"कल तथा सूचनाहरू आउँदा घन्टी बज्ने छ (<xliff:g id="VOLUME_LEVEL">%1$s</xliff:g>)"</string>
     <string name="output_title" msgid="5355078100792942802">"मिडियाको आउटपुट"</string>
@@ -614,20 +612,13 @@
     <string name="inline_minimize_button" msgid="966233327974702195">"सानो बनाउनुहोस्"</string>
     <string name="inline_keep_showing_app" msgid="1723113469580031041">"यो अनुप्रयोगका सूचनाहरू देखाउने क्रम जारी राख्ने हो?"</string>
     <string name="notification_unblockable_desc" msgid="1037434112919403708">"यी सूचनाहरूलाई निष्क्रिय पार्न सकिँदैन"</string>
-    <!-- no translation found for appops_camera (8100147441602585776) -->
-    <skip />
-    <!-- no translation found for appops_microphone (741508267659494555) -->
-    <skip />
-    <!-- no translation found for appops_overlay (6165912637560323464) -->
-    <skip />
-    <!-- no translation found for appops_camera_mic (1576901651150187433) -->
-    <skip />
-    <!-- no translation found for appops_camera_overlay (8869400080809298814) -->
-    <skip />
-    <!-- no translation found for appops_mic_overlay (4835157962857919804) -->
-    <skip />
-    <!-- no translation found for appops_camera_mic_overlay (6718768197048030993) -->
-    <skip />
+    <string name="appops_camera" msgid="8100147441602585776">"यो अनुप्रयोगले क्यामेराको प्रयोग गर्दै छ।"</string>
+    <string name="appops_microphone" msgid="741508267659494555">"यो अनुप्रयोगले माइक्रोफोनको प्रयोग गर्दै छ।"</string>
+    <string name="appops_overlay" msgid="6165912637560323464">"यो अनुप्रयोगले तपाईंको स्क्रिनका अन्य अनुप्रयोगहरूमाथि प्रदर्शन गर्दै छ।"</string>
+    <string name="appops_camera_mic" msgid="1576901651150187433">"यो अनुप्रयोगले माइक्रोफोन र क्यामेराको प्रयोग गर्दै छ।"</string>
+    <string name="appops_camera_overlay" msgid="8869400080809298814">"यो अनुप्रयोगले तपाईंको स्क्रिनका अन्य अनुप्रयोगहरूमाथि प्रदर्शन गर्नुका साथै क्यामेराको प्रयोग गर्दै छ।"</string>
+    <string name="appops_mic_overlay" msgid="4835157962857919804">"यो अनुप्रयोगले तपाईंको स्क्रिनका अन्य अनुप्रयोगहरूमाथि प्रदर्शन गर्नुका साथै माइक्रोफोनको प्रयोग गर्दै छ।"</string>
+    <string name="appops_camera_mic_overlay" msgid="6718768197048030993">"यो अनुप्रयोगले तपाईंको स्क्रिनका अन्य अनुप्रयोगहरूमाथि प्रदर्शन गर्नुका साथै माइक्रोफोन र क्यामेराको प्रयोग गर्दै छ।"</string>
     <string name="notification_appops_settings" msgid="1028328314935908050">"सेटिङहरू"</string>
     <string name="notification_appops_ok" msgid="1156966426011011434">"ठिक छ"</string>
     <string name="notification_channel_controls_opened_accessibility" msgid="6553950422055908113">"<xliff:g id="APP_NAME">%1$s</xliff:g> का सूचना सम्बन्धी नियन्त्रणहरूलाई खोलियो"</string>

@@ -51,8 +51,7 @@
     <string name="keyguard_sim_puk_locked_message" msgid="1772789643694942073">"SIM कार्ड को PUK के ज़रिए लॉक किया हुआ है."</string>
     <string name="keyguard_sim_unlock_progress_dialog_message" msgid="3586601150825821675">"SIM कार्ड अनलॉक हो रहा है…"</string>
     <string name="keyguard_accessibility_pin_area" msgid="703175752097279029">"पिन क्षेत्र"</string>
-    <!-- no translation found for keyguard_accessibility_password (7695303207740941101) -->
-    <skip />
+    <string name="keyguard_accessibility_password" msgid="7695303207740941101">"डिवाइस का पासवर्ड"</string>
     <string name="keyguard_accessibility_sim_pin_area" msgid="912702510825058921">"SIM पिन क्षेत्र"</string>
     <string name="keyguard_accessibility_sim_puk_area" msgid="136979425761438705">"SIM PUK क्षेत्र"</string>
     <string name="keyguard_accessibility_next_alarm" msgid="5835196989158584991">"अगला अलार्म <xliff:g id="ALARM">%1$s</xliff:g> बजे के लिए सेट किया गया है"</string>
