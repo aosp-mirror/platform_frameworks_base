@@ -745,6 +745,12 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
 
     public void updateStates() {
         final boolean showSwipeUpUI = mOverviewProxyService.shouldShowSwipeUpUI();
+
+        if (mNavigationInflaterView != null) {
+            // Reinflate the navbar if needed, no-op unless the swipe up state changes
+            mNavigationInflaterView.onLikelyDefaultLayoutChange();
+        }
+
         updateSlippery();
         reloadNavIcons();
         updateNavButtonIcons();
