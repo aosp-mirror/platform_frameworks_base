@@ -662,6 +662,19 @@ package android.os {
     method public static final int getThreadScheduler(int) throws java.lang.IllegalArgumentException;
   }
 
+  public final class RemoteCallback implements android.os.Parcelable {
+    ctor public RemoteCallback(android.os.RemoteCallback.OnResultListener);
+    ctor public RemoteCallback(android.os.RemoteCallback.OnResultListener, android.os.Handler);
+    method public int describeContents();
+    method public void sendResult(android.os.Bundle);
+    method public void writeToParcel(android.os.Parcel, int);
+    field public static final android.os.Parcelable.Creator<android.os.RemoteCallback> CREATOR;
+  }
+
+  public static abstract interface RemoteCallback.OnResultListener {
+    method public abstract void onResult(android.os.Bundle);
+  }
+
   public final class StrictMode {
     method public static void setViolationLogger(android.os.StrictMode.ViolationLogger);
     field public static final int DETECT_CUSTOM = 8; // 0x8
