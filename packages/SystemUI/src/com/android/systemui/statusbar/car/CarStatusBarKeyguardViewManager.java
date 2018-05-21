@@ -28,4 +28,15 @@ public class CarStatusBarKeyguardViewManager extends StatusBarKeyguardViewManage
         CarStatusBar statusBar = (CarStatusBar) mStatusBar;
         statusBar.setNavBarVisibility(navBarVisible ? View.VISIBLE : View.GONE);
     }
+
+    /**
+     * Car is a multi-user system.  There's a cancel button on the bouncer that allows the user to
+     * go back to the user switcher and select another user.  Different user may have different
+     * security mode which requires bouncer container to be resized.  For this reason, the bouncer
+     * view is destroyed on cancel.
+     */
+    @Override
+    protected boolean shouldDestroyViewOnReset() {
+        return true;
+    }
 }
