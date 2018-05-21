@@ -48,11 +48,26 @@ public class SettingsValidatorsTest {
     }
 
     @Test
+    public void testNonNegativeIntegerValidator_onNullValue_returnsFalse() {
+        assertFalse(SettingsValidators.NON_NEGATIVE_INTEGER_VALIDATOR.validate(null));
+    }
+
+    @Test
     public void testAnyIntegerValidator() {
         assertTrue(SettingsValidators.ANY_INTEGER_VALIDATOR.validate("1"));
         assertTrue(SettingsValidators.ANY_INTEGER_VALIDATOR.validate("0"));
         assertTrue(SettingsValidators.ANY_INTEGER_VALIDATOR.validate("-1"));
         assertFalse(SettingsValidators.ANY_INTEGER_VALIDATOR.validate("rectangle"));
+    }
+
+    @Test
+    public void testAnyIntegerValidator_onNullValue_returnsFalse() {
+        assertFalse(SettingsValidators.ANY_INTEGER_VALIDATOR.validate(null));
+    }
+
+    @Test
+    public void testUriValidator_onNullValue_returnsTrue() {
+        assertTrue(SettingsValidators.URI_VALIDATOR.validate(null));
     }
 
     @Test
@@ -63,8 +78,13 @@ public class SettingsValidatorsTest {
     }
 
     @Test
-    public void testComponentNameValidator_onNullValue_doesNotThrow() {
+    public void testComponentNameValidator_onNullValue_returnsFalse() {
         assertFalse(SettingsValidators.COMPONENT_NAME_VALIDATOR.validate(null));
+    }
+
+    @Test
+    public void testLenientIpAddressValidator_onNullValue_returnsFalse() {
+        assertFalse(SettingsValidators.LENIENT_IP_ADDRESS_VALIDATOR.validate(null));
     }
 
     @Test
@@ -75,12 +95,22 @@ public class SettingsValidatorsTest {
     }
 
     @Test
+    public void testLocaleValidator_onNullValue_returnsFalse() {
+        assertFalse(SettingsValidators.LOCALE_VALIDATOR.validate(null));
+    }
+
+    @Test
     public void testPackageNameValidator() {
         assertTrue(SettingsValidators.PACKAGE_NAME_VALIDATOR.validate(
                 "com.google.android"));
         assertFalse(SettingsValidators.PACKAGE_NAME_VALIDATOR.validate("com.google.@android"));
         assertFalse(SettingsValidators.PACKAGE_NAME_VALIDATOR.validate(".com.google.android"));
         assertFalse(SettingsValidators.PACKAGE_NAME_VALIDATOR.validate(".com.google.5android"));
+    }
+
+    @Test
+    public void testPackageNameValidator_onNullValue_returnsFalse() {
+        assertFalse(SettingsValidators.PACKAGE_NAME_VALIDATOR.validate(null));
     }
 
     @Test
@@ -94,6 +124,14 @@ public class SettingsValidatorsTest {
     }
 
     @Test
+    public void testDiscreteValueValidator_onNullValue_returnsFalse() {
+        String[] discreteTypes = new String[]{"Type1", "Type2"};
+        Validator v = new SettingsValidators.DiscreteValueValidator(discreteTypes);
+
+        assertFalse(v.validate(null));
+    }
+
+    @Test
     public void testInclusiveIntegerRangeValidator() {
         Validator v = new SettingsValidators.InclusiveIntegerRangeValidator(0, 5);
         assertTrue(v.validate("0"));
@@ -101,6 +139,13 @@ public class SettingsValidatorsTest {
         assertTrue(v.validate("5"));
         assertFalse(v.validate("-1"));
         assertFalse(v.validate("6"));
+    }
+
+    @Test
+    public void testInclusiveIntegerRangeValidator_onNullValue_returnsFalse() {
+        Validator v = new SettingsValidators.InclusiveIntegerRangeValidator(0, 5);
+
+        assertFalse(v.validate(null));
     }
 
     @Test
@@ -114,11 +159,25 @@ public class SettingsValidatorsTest {
     }
 
     @Test
+    public void testInclusiveFloatRangeValidator_onNullValue_returnsFalse() {
+        Validator v = new SettingsValidators.InclusiveFloatRangeValidator(0.0f, 5.0f);
+
+        assertFalse(v.validate(null));
+    }
+
+    @Test
     public void testComponentNameListValidator() {
         Validator v = new SettingsValidators.ComponentNameListValidator(",");
         assertTrue(v.validate("android/com.android.internal.backup.LocalTransport,"
                 + "com.google.android.gms/.backup.migrate.service.D2dTransport"));
         assertFalse(v.validate("com.google.5android,android"));
+    }
+
+    @Test
+    public void testComponentNameListValidator_onNullValue_returnsFalse() {
+        Validator v = new SettingsValidators.ComponentNameListValidator(",");
+
+        assertFalse(v.validate(null));
     }
 
     @Test
@@ -128,6 +187,17 @@ public class SettingsValidatorsTest {
         assertFalse(v.validate("5com.android.internal.backup.LocalTransport,android"));
     }
 
+    @Test
+    public void testPackageNameListValidator_onNullValue_returnsFalse() {
+        Validator v = new SettingsValidators.PackageNameListValidator(",");
+
+        assertFalse(v.validate(null));
+    }
+
+    @Test
+    public void dateFormatValidator_onNullValue_returnsFalse() {
+        assertFalse(Settings.System.DATE_FORMAT_VALIDATOR.validate(null));
+    }
 
     @Test
     public void ensureAllBackedUpSystemSettingsHaveValidators() {
