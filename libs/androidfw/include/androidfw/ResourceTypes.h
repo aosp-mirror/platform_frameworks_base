@@ -799,6 +799,11 @@ class DynamicRefTable;
 class ResXMLTree : public ResXMLParser
 {
 public:
+    /**
+     * Creates a ResXMLTree with the specified DynamicRefTable for run-time package id translation.
+     * The tree stores a clone of the specified DynamicRefTable, so any changes to the original
+     * DynamicRefTable will not affect this tree after instantiation.
+     **/
     ResXMLTree(const DynamicRefTable* dynamicRefTable);
     ResXMLTree();
     ~ResXMLTree();
@@ -814,7 +819,7 @@ private:
 
     status_t validateNode(const ResXMLTree_node* node) const;
 
-    const DynamicRefTable* const mDynamicRefTable;
+    std::unique_ptr<const DynamicRefTable> mDynamicRefTable;
 
     status_t                    mError;
     void*                       mOwnedData;
@@ -1654,6 +1659,9 @@ public:
     status_t addMapping(const String16& packageName, uint8_t packageId);
 
     void addMapping(uint8_t buildPackageId, uint8_t runtimePackageId);
+
+    // Creates a new clone of the reference table
+    std::unique_ptr<DynamicRefTable> clone() const;
 
     // Performs the actual conversion of build-time resource ID to run-time
     // resource ID.
