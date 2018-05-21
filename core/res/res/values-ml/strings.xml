@@ -291,12 +291,9 @@
     <string name="permgrouplab_camera" msgid="4820372495894586615">"ക്യാമറ"</string>
     <string name="permgroupdesc_camera" msgid="3250611594678347720">"ചിത്രങ്ങളെടുത്ത് വീഡിയോ റെക്കോർഡുചെയ്യുക"</string>
     <string name="permgrouprequest_camera" msgid="1299833592069671756">"ചിത്രം എടുക്കാനും വീഡിയോ റെക്കോർഡ് ചെയ്യാനും &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ആപ്പിനെ അനുവദിക്കണോ?"</string>
-    <!-- no translation found for permgrouplab_calllog (8798646184930388160) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_calllog (3006237336748283775) -->
-    <skip />
-    <!-- no translation found for permgrouprequest_calllog (8487355309583773267) -->
-    <skip />
+    <string name="permgrouplab_calllog" msgid="8798646184930388160">"കോൾ ലോഗുകൾ"</string>
+    <string name="permgroupdesc_calllog" msgid="3006237336748283775">"ഫോൺ കോൾ ലോഗ് വായിക്കുകയും എഴുതുകയും ചെയ്യുക"</string>
+    <string name="permgrouprequest_calllog" msgid="8487355309583773267">"നിങ്ങളുടെ ഫോൺ കോൾ ലോഗുകൾ ആക്സസ് ചെയ്യാൻ &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ആപ്പിനെ അനുവദിക്കണോ?"</string>
     <string name="permgrouplab_phone" msgid="5229115638567440675">"ഫോണ്‍"</string>
     <string name="permgroupdesc_phone" msgid="6234224354060641055">"ഫോൺ വിളിക്കുകയും നിയന്ത്രിക്കുകയും ചെയ്യുക"</string>
     <string name="permgrouprequest_phone" msgid="9166979577750581037">"ഫോൺ കോളുകൾ ചെയ്യാനും അവ നിയന്ത്രിക്കാനും &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ആപ്പിനെ അനുവദിക്കണോ?"</string>
@@ -1678,7 +1675,7 @@
     </plurals>
     <string name="restr_pin_try_later" msgid="973144472490532377">"പിന്നീട് വീണ്ടും ശ്രമിക്കുക"</string>
     <string name="immersive_cling_title" msgid="8394201622932303336">"പൂർണ്ണ സ്‌ക്രീനിൽ കാണുന്നു"</string>
-    <string name="immersive_cling_description" msgid="3482371193207536040">"അവസാനിപ്പിക്കാൻ, മുകളിൽ നിന്ന് താഴോട്ട് സ്വൈപ്പുചെയ്യുക."</string>
+    <string name="immersive_cling_description" msgid="3482371193207536040">"അവസാനിപ്പിക്കാൻ, മുകളിൽ നിന്ന് താഴോട്ട് സ്വൈപ്പ് ചെയ്യുക."</string>
     <string name="immersive_cling_positive" msgid="5016839404568297683">"മനസ്സിലായി"</string>
     <string name="done_label" msgid="2093726099505892398">"പൂർത്തിയാക്കി"</string>
     <string name="hour_picker_description" msgid="6698199186859736512">"ചാക്രികമായി മണിക്കൂറുകൾ ദൃശ്യമാകുന്ന സ്ലൈഡർ"</string>
@@ -1785,8 +1782,8 @@
     <string name="language_picker_section_all" msgid="3097279199511617537">"എല്ലാ ഭാഷകളും"</string>
     <string name="region_picker_section_all" msgid="8966316787153001779">"എല്ലാ പ്രദേശങ്ങളും"</string>
     <string name="locale_search_menu" msgid="2560710726687249178">"തിരയുക"</string>
-    <string name="app_suspended_title" msgid="1919029799438164552">"ആപ്പ് തുറക്കാനാവില്ല"</string>
-    <string name="app_suspended_default_message" msgid="7875306315686531621">"ആപ്പ് <xliff:g id="APP_NAME_0">%1$s</xliff:g> ഇപ്പോൾ ലഭ്യമല്ല. <xliff:g id="APP_NAME_1">%2$s</xliff:g> ആണിത് നിയന്ത്രിക്കുന്നത്."</string>
+    <string name="app_suspended_title" msgid="2075071241147969611">"ആപ്പ് ലഭ്യമല്ല"</string>
+    <string name="app_suspended_default_message" msgid="123166680425711887">"<xliff:g id="APP_NAME_0">%1$s</xliff:g> ഇപ്പോൾ ലഭ്യമല്ല. <xliff:g id="APP_NAME_1">%2$s</xliff:g> ആണ് ഇത് മാനേജ് ചെയ്യുന്നത്."</string>
     <string name="app_suspended_more_details" msgid="1131804827776778187">"കൂടുതലറിയുക"</string>
     <string name="work_mode_off_title" msgid="1118691887588435530">"ഔദ്യോഗിക പ്രൊഫൈൽ ഓണാക്കണോ?"</string>
     <string name="work_mode_off_message" msgid="5130856710614337649">"നിങ്ങളുടെ ഔദ്യോഗിക ആപ്പുകൾ, അറിയിപ്പുകൾ, ഡാറ്റ, മറ്റ് ഔദ്യോഗിക പ്രൊഫൈൽ ഫീച്ചറുകൾ എന്നിവ ഓണാക്കും"</string>
@@ -1825,7 +1822,7 @@
     <string name="time_picker_minute_label" msgid="5168864173796598399">"മിനിറ്റ്"</string>
     <string name="time_picker_header_text" msgid="143536825321922567">"സമയം സജ്ജീകരിക്കുക"</string>
     <string name="time_picker_input_error" msgid="7574999942502513765">"ശരിയായ സമയം ‌നൽകുക"</string>
-    <string name="time_picker_prompt_label" msgid="7588093983899966783">"സമയത്തിൽ ടൈപ്പുചെയ്യുക"</string>
+    <string name="time_picker_prompt_label" msgid="7588093983899966783">"സമയപ്രകാരം ടൈപ്പ് ചെയ്യുക"</string>
     <string name="time_picker_text_input_mode_description" msgid="4148166758173708199">"സമയം നൽകുന്നതിന് ടെക്സ്റ്റ് ഇൻപുട്ട് ‌മോ‌ഡിലേക്ക് ‌മാറുക."</string>
     <string name="time_picker_radial_mode_description" msgid="4953403779779557198">"‌സമയം നൽകുന്നതിന് ക്ലോക്ക് മോഡിലേക്ക് ‌മാറുക."</string>
     <string name="autofill_picker_accessibility_title" msgid="8469043291648711535">"സ്വയമേവ പൂരിപ്പിക്കൽ ഓപ്ഷനുകൾ"</string>
@@ -1883,5 +1880,8 @@
     <string name="zen_upgrade_notification_content" msgid="1794994264692424562">"എന്തിനെയാണ് ബ്ലോക്ക് ചെയ്‌തതെന്ന് പരിശോധിക്കാൻ ടാപ്പ് ചെയ്യുക."</string>
     <string name="notification_app_name_system" msgid="4205032194610042794">"സിസ്റ്റം"</string>
     <string name="notification_app_name_settings" msgid="7751445616365753381">"ക്രമീകരണം"</string>
+    <string name="notification_appops_camera_active" msgid="5050283058419699771">"ക്യാമറ"</string>
+    <string name="notification_appops_microphone_active" msgid="4335305527588191730">"മൈക്രോഫോൺ"</string>
+    <string name="notification_appops_overlay_active" msgid="633813008357934729">"നിങ്ങളുടെ സ്‌ക്രീനിലെ മറ്റ് ആപ്പുകൾക്ക് മുകളിൽ പ്രദർശിപ്പിക്കുന്നു"</string>
     <string name="car_loading_profile" msgid="3545132581795684027">"ലോഡ് ചെയ്യുന്നു"</string>
 </resources>

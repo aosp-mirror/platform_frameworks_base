@@ -275,7 +275,7 @@
     <string name="permgrouprequest_contacts" msgid="6032805601881764300">"Autoriser « <xliff:g id="APP_NAME">%1$s</xliff:g> » à accéder à vos contacts?"</string>
     <string name="permgrouplab_location" msgid="7275582855722310164">"Localisation"</string>
     <string name="permgroupdesc_location" msgid="1346617465127855033">"accéder à la position de cet appareil"</string>
-    <string name="permgrouprequest_location" msgid="3788275734953323491">"Autoriser « <xliff:g id="APP_NAME">%1$s</xliff:g> » à accéder à la position de cet appareil?"</string>
+    <string name="permgrouprequest_location" msgid="3788275734953323491">"Autoriser &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; à accéder à la position de cet appareil?"</string>
     <string name="permgrouplab_calendar" msgid="5863508437783683902">"Agenda"</string>
     <string name="permgroupdesc_calendar" msgid="3889615280211184106">"accéder à votre agenda"</string>
     <string name="permgrouprequest_calendar" msgid="289900767793189421">"Autoriser « <xliff:g id="APP_NAME">%1$s</xliff:g> » à accéder à votre agenda?"</string>
@@ -886,7 +886,7 @@
     <string name="menu_enter_shortcut_label" msgid="2743362785111309668">"entrée"</string>
     <string name="menu_delete_shortcut_label" msgid="3658178007202748164">"suppr"</string>
     <string name="search_go" msgid="8298016669822141719">"Rechercher"</string>
-    <string name="search_hint" msgid="1733947260773056054">"Recherche en cours..."</string>
+    <string name="search_hint" msgid="1733947260773056054">"Rechercher…"</string>
     <string name="searchview_description_search" msgid="6749826639098512120">"Rechercher"</string>
     <string name="searchview_description_query" msgid="5911778593125355124">"Requête de recherche"</string>
     <string name="searchview_description_clear" msgid="1330281990951833033">"Effacer la requête"</string>
@@ -1781,8 +1781,8 @@
     <string name="language_picker_section_all" msgid="3097279199511617537">"Toutes les langues"</string>
     <string name="region_picker_section_all" msgid="8966316787153001779">"Toutes les régions"</string>
     <string name="locale_search_menu" msgid="2560710726687249178">"Rechercher"</string>
-    <string name="app_suspended_title" msgid="1919029799438164552">"Impossible d\'ouvrir l\'application"</string>
-    <string name="app_suspended_default_message" msgid="7875306315686531621">"L\'application <xliff:g id="APP_NAME_0">%1$s</xliff:g> n\'est pas accessible pour le moment. Ceci est géré par <xliff:g id="APP_NAME_1">%2$s</xliff:g>."</string>
+    <string name="app_suspended_title" msgid="2075071241147969611">"L\'application n\'est pas accessible"</string>
+    <string name="app_suspended_default_message" msgid="123166680425711887">"L\'application <xliff:g id="APP_NAME_0">%1$s</xliff:g> n\'est pas accessible pour le moment. Ceci est géré par <xliff:g id="APP_NAME_1">%2$s</xliff:g>."</string>
     <string name="app_suspended_more_details" msgid="1131804827776778187">"En savoir plus"</string>
     <string name="work_mode_off_title" msgid="1118691887588435530">"Activer le profil professionnel?"</string>
     <string name="work_mode_off_message" msgid="5130856710614337649">"Vos applications professionnelles, vos notifications, vos données et les autres fonctionnalités de profil professionnel seront activées"</string>
@@ -1879,5 +1879,8 @@
     <string name="zen_upgrade_notification_content" msgid="1794994264692424562">"Touchez l\'écran pour vérifier ce qui est bloqué."</string>
     <string name="notification_app_name_system" msgid="4205032194610042794">"Système"</string>
     <string name="notification_app_name_settings" msgid="7751445616365753381">"Paramètres"</string>
+    <string name="notification_appops_camera_active" msgid="5050283058419699771">"Appareil photo"</string>
+    <string name="notification_appops_microphone_active" msgid="4335305527588191730">"Microphone"</string>
+    <string name="notification_appops_overlay_active" msgid="633813008357934729">"superpose du contenu par-dessus d\'autres applications à l\'écran"</string>
     <string name="car_loading_profile" msgid="3545132581795684027">"Chargement en cours…"</string>
 </resources>

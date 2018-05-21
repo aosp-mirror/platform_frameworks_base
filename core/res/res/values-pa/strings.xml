@@ -291,12 +291,9 @@
     <string name="permgrouplab_camera" msgid="4820372495894586615">"ਕੈਮਰਾ"</string>
     <string name="permgroupdesc_camera" msgid="3250611594678347720">"ਤਸਵੀਰਾਂ ਲੈਣ ਅਤੇ ਵੀਡੀਓ ਰਿਕਾਰਡ ਕਰਨ"</string>
     <string name="permgrouprequest_camera" msgid="1299833592069671756">"ਕੀ &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ਨੂੰ ਤਸਵੀਰਾਂ ਖਿੱਚਣ ਅਤੇ ਵੀਡੀਓ ਰਿਕਾਰਡ ਕਰਨ ਦੇਣਾ ਹੈ?"</string>
-    <!-- no translation found for permgrouplab_calllog (8798646184930388160) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_calllog (3006237336748283775) -->
-    <skip />
-    <!-- no translation found for permgrouprequest_calllog (8487355309583773267) -->
-    <skip />
+    <string name="permgrouplab_calllog" msgid="8798646184930388160">"ਕਾਲ ਲੌਗ"</string>
+    <string name="permgroupdesc_calllog" msgid="3006237336748283775">"ਫ਼ੋਨ ਦੇ ਕਾਲ ਲੌਗ ਨੂੰ ਪੜ੍ਹੋ ਅਤੇ ਲਿਖੋ"</string>
+    <string name="permgrouprequest_calllog" msgid="8487355309583773267">"ਕੀ &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ਨੂੰ ਤੁਹਾਡੇ ਫ਼ੋਨ ਦੇ ਕਾਲ ਲੌਗਾਂ ਤੱਕ ਪਹੁੰਚ ਕਰਨ ਦੇਣੀ ਹੈ?"</string>
     <string name="permgrouplab_phone" msgid="5229115638567440675">"ਫ਼ੋਨ ਕਰੋ"</string>
     <string name="permgroupdesc_phone" msgid="6234224354060641055">"ਫ਼ੋਨ ਕਾਲਾਂ ਕਰਨ ਅਤੇ ਉਹਨਾਂ ਦਾ ਪ੍ਰਬੰਧਨ ਕਰਨ"</string>
     <string name="permgrouprequest_phone" msgid="9166979577750581037">"ਕੀ &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ਨੂੰ ਫ਼ੋਨ ਕਾਲਾਂ ਕਰਨ ਅਤੇ ਉਹਨਾਂ ਦਾ ਪ੍ਰਬੰਧਨ ਕਰਨ ਦੇਣਾ ਹੈ?"</string>
@@ -1078,7 +1075,7 @@
     <string name="aerr_application_repeated" msgid="3146328699537439573">"<xliff:g id="APPLICATION">%1$s</xliff:g> ਵਾਰ-ਵਾਰ ਰੁਕ ਰਹੀ ਹੈ"</string>
     <string name="aerr_process_repeated" msgid="6235302956890402259">"<xliff:g id="PROCESS">%1$s</xliff:g> ਵਾਰ-ਵਾਰ ਰੁਕ ਰਹੀ ਹੈ"</string>
     <string name="aerr_restart" msgid="7581308074153624475">"ਦੁਬਾਰਾ ਐਪ ਖੋਲ੍ਹੋ"</string>
-    <string name="aerr_report" msgid="5371800241488400617">"ਪ੍ਰਤੀਕਰਮ ਭੇਜੋ"</string>
+    <string name="aerr_report" msgid="5371800241488400617">"ਵਿਚਾਰ ਭੇਜੋ"</string>
     <string name="aerr_close" msgid="2991640326563991340">"ਬੰਦ ਕਰੋ"</string>
     <string name="aerr_mute" msgid="1974781923723235953">"ਡੀਵਾਈਸ ਦੇ ਮੁੜ-ਚਾਲੂ ਹੋਣ ਤੱਕ ਮਿਊਟ ਕਰੋ"</string>
     <string name="aerr_wait" msgid="3199956902437040261">"ਉਡੀਕ ਕਰੋ"</string>
@@ -1785,8 +1782,8 @@
     <string name="language_picker_section_all" msgid="3097279199511617537">"ਸਾਰੀਆਂ ਭਾਸ਼ਾਵਾਂ"</string>
     <string name="region_picker_section_all" msgid="8966316787153001779">"ਸਾਰੇ ਖੇਤਰ"</string>
     <string name="locale_search_menu" msgid="2560710726687249178">"ਖੋਜੋ"</string>
-    <string name="app_suspended_title" msgid="1919029799438164552">"ਐਪ ਖੋਲ੍ਹੀ ਨਹੀਂ ਜਾ ਸਕਦੀ"</string>
-    <string name="app_suspended_default_message" msgid="7875306315686531621">"ਐਪ <xliff:g id="APP_NAME_0">%1$s</xliff:g> ਫਿਲਹਾਲ ਉਪਲਬਧ ਨਹੀਂ ਹੈ। ਇਸਦਾ ਪ੍ਰਬੰਧਨ <xliff:g id="APP_NAME_1">%2$s</xliff:g> ਵੱਲੋਂ ਕੀਤਾ ਜਾਂਦਾ ਹੈ।"</string>
+    <string name="app_suspended_title" msgid="2075071241147969611">"ਐਪ ਉਪਲਬਧ ਨਹੀਂ ਹੈ"</string>
+    <string name="app_suspended_default_message" msgid="123166680425711887">"<xliff:g id="APP_NAME_0">%1$s</xliff:g> ਐਪ ਫਿਲਹਾਲ ਉਪਲਬਧ ਨਹੀਂ ਹੈ। ਇਸਦਾ ਪ੍ਰਬੰਧਨ <xliff:g id="APP_NAME_1">%2$s</xliff:g> ਵੱਲੋਂ ਕੀਤਾ ਜਾਂਦਾ ਹੈ।"</string>
     <string name="app_suspended_more_details" msgid="1131804827776778187">"ਹੋਰ ਜਾਣੋ"</string>
     <string name="work_mode_off_title" msgid="1118691887588435530">"ਕੀ ਕਾਰਜ ਪ੍ਰੋਫਾਈਲ ਚਾਲੂ ਕਰਨੀ ਹੈ?"</string>
     <string name="work_mode_off_message" msgid="5130856710614337649">"ਤੁਹਾਡੀਆਂ ਕਾਰਜ-ਸਥਾਨ ਐਪਾਂ, ਸੂਚਨਾਵਾਂ, ਡਾਟਾ ਅਤੇ ਹੋਰ ਕਾਰਜ ਪ੍ਰੋਫਾਈਲ ਵਿਸ਼ੇਸ਼ਤਾਵਾਂ ਚਾਲੂ ਕੀਤੀਆਂ ਜਾਣਗੀਆਂ"</string>
@@ -1883,5 +1880,8 @@
     <string name="zen_upgrade_notification_content" msgid="1794994264692424562">"ਟੈਪ ਕਰਕੇ ਦੋਖੋ ਕਿ ਕਿਹੜੀਆਂ ਚੀਜ਼ਾਂ ਬਲਾਕ ਕੀਤੀਆਂ ਗਈਆਂ ਹਨ।"</string>
     <string name="notification_app_name_system" msgid="4205032194610042794">"ਸਿਸਟਮ"</string>
     <string name="notification_app_name_settings" msgid="7751445616365753381">"ਸੈਟਿੰਗਾਂ"</string>
+    <string name="notification_appops_camera_active" msgid="5050283058419699771">"ਕੈਮਰਾ"</string>
+    <string name="notification_appops_microphone_active" msgid="4335305527588191730">"ਮਾਈਕ੍ਰੋਫ਼ੋਨ"</string>
+    <string name="notification_appops_overlay_active" msgid="633813008357934729">"ਤੁਹਾਡੀ ਸਕ੍ਰੀਨ \'ਤੇ ਹੋਰਾਂ ਐਪਾਂ ਉੱਪਰ ਦਿਖਾਇਆ ਜਾ ਰਿਹਾ ਹੈ"</string>
     <string name="car_loading_profile" msgid="3545132581795684027">"ਲੋਡ ਕੀਤਾ ਜਾ ਰਿਹਾ ਹੈ"</string>
 </resources>

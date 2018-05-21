@@ -1785,8 +1785,8 @@
     <string name="language_picker_section_all" msgid="3097279199511617537">"ସମସ୍ତ ଭାଷା"</string>
     <string name="region_picker_section_all" msgid="8966316787153001779">"ସମସ୍ତ ଅଞ୍ଚଳ"</string>
     <string name="locale_search_menu" msgid="2560710726687249178">"ସର୍ଚ୍ଚ କରନ୍ତୁ"</string>
-    <string name="app_suspended_title" msgid="1919029799438164552">"ଆପ୍ ଖୋଲିହେଉନାହିଁ"</string>
-    <string name="app_suspended_default_message" msgid="7875306315686531621">"ବର୍ତ୍ତମାନ <xliff:g id="APP_NAME_0">%1$s</xliff:g> ଆପ୍ ଉପଲବ୍ଧ ନାହିଁ। ଏହା <xliff:g id="APP_NAME_1">%2$s</xliff:g> ଦ୍ଵାରା ପରିଚାଳିତ କରାଯାଉଛି।"</string>
+    <string name="app_suspended_title" msgid="2075071241147969611">"ଆପ୍‌ ଉପଲବ୍ଧ ନାହିଁ"</string>
+    <string name="app_suspended_default_message" msgid="123166680425711887">"ବର୍ତ୍ତମାନ <xliff:g id="APP_NAME_0">%1$s</xliff:g> ଉପଲବ୍ଧ ନାହିଁ। ଏହା <xliff:g id="APP_NAME_1">%2$s</xliff:g> ଦ୍ଵାରା ପରିଚାଳିତ ହେଉଛି।"</string>
     <string name="app_suspended_more_details" msgid="1131804827776778187">"ଅଧିକ ଜାଣନ୍ତୁ"</string>
     <string name="work_mode_off_title" msgid="1118691887588435530">"ୱର୍କ ପ୍ରୋଫାଇଲ୍‌କୁ ଚାଲୁ କରିବେ?"</string>
     <string name="work_mode_off_message" msgid="5130856710614337649">"ଆପଣଙ୍କର କାର୍ଯ୍ୟକାରୀ ଆପ୍‌, ବିଜ୍ଞପ୍ତି, ଡାଟା ଓ ଅନ୍ୟ ୱର୍କ ପ୍ରୋଫାଇଲ୍‌ଗୁଡ଼ିକ ଚାଲୁ ହୋଇଯିବ"</string>
@@ -1885,5 +1885,8 @@
     <string name="zen_upgrade_notification_content" msgid="1794994264692424562">"କ’ଣ ଅବରୋଧ ହୋଇଛି ଯାଞ୍ଚ କରିବା ପାଇଁ ଟାପ୍ କରନ୍ତୁ।"</string>
     <string name="notification_app_name_system" msgid="4205032194610042794">"ସିଷ୍ଟମ୍‌"</string>
     <string name="notification_app_name_settings" msgid="7751445616365753381">"ସେଟିଙ୍ଗ"</string>
+    <string name="notification_appops_camera_active" msgid="5050283058419699771">"କ୍ୟାମେରା"</string>
+    <string name="notification_appops_microphone_active" msgid="4335305527588191730">"ମାଇକ୍ରୋଫୋନ୍"</string>
+    <string name="notification_appops_overlay_active" msgid="633813008357934729">"ଆପଣଙ୍କ ସ୍କ୍ରୀନ୍ ଉପରେ ଥିବା ଅନ୍ୟ ଆପ୍‌ ଉପରେ ଦେଖାଦେବ"</string>
     <string name="car_loading_profile" msgid="3545132581795684027">"ଲୋଡ୍ ହେଉଛି"</string>
 </resources>

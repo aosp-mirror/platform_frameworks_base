@@ -291,12 +291,9 @@
     <string name="permgrouplab_camera" msgid="4820372495894586615">"కెమెరా"</string>
     <string name="permgroupdesc_camera" msgid="3250611594678347720">"చిత్రాలను తీయడానికి మరియు వీడియోను రికార్డ్ చేయడానికి"</string>
     <string name="permgrouprequest_camera" msgid="1299833592069671756">"చిత్రాలు తీయడానికి మరియు వీడియో రికార్డ్ చేయడానికి &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;ని అనుమతించాలా?"</string>
-    <!-- no translation found for permgrouplab_calllog (8798646184930388160) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_calllog (3006237336748283775) -->
-    <skip />
-    <!-- no translation found for permgrouprequest_calllog (8487355309583773267) -->
-    <skip />
+    <string name="permgrouplab_calllog" msgid="8798646184930388160">"కాల్ లాగ్‌లు"</string>
+    <string name="permgroupdesc_calllog" msgid="3006237336748283775">"ఫోన్ కాల్ లాగ్‌ని చదవండి మరియు రాయండి"</string>
+    <string name="permgrouprequest_calllog" msgid="8487355309583773267">"మీ ఫోన్ కాల్ లాగ్‌లను యాక్సెస్ చేయడానికి &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;ని అనుమతించాలా?"</string>
     <string name="permgrouplab_phone" msgid="5229115638567440675">"ఫోన్"</string>
     <string name="permgroupdesc_phone" msgid="6234224354060641055">"ఫోన్ కాల్‌లు చేయడం మరియు నిర్వహించడం"</string>
     <string name="permgrouprequest_phone" msgid="9166979577750581037">"ఫోన్ కాల్‌లు చేయడానికి మరియు నిర్వహించడానికి &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;ని అనుమతించాలా?"</string>
@@ -1785,8 +1782,8 @@
     <string name="language_picker_section_all" msgid="3097279199511617537">"అన్ని భాషలు"</string>
     <string name="region_picker_section_all" msgid="8966316787153001779">"అన్ని ప్రాంతాలు"</string>
     <string name="locale_search_menu" msgid="2560710726687249178">"వెతుకు"</string>
-    <string name="app_suspended_title" msgid="1919029799438164552">"యాప్‌ను తెరవడం సాధ్యపడ లేదు"</string>
-    <string name="app_suspended_default_message" msgid="7875306315686531621">"యాప్ <xliff:g id="APP_NAME_0">%1$s</xliff:g> ప్రస్తుతం అందుబాటులో లేదు. ఇది <xliff:g id="APP_NAME_1">%2$s</xliff:g> ద్వారా నిర్వహించబడుతుంది."</string>
+    <string name="app_suspended_title" msgid="2075071241147969611">"యాప్ అందుబాటులో లేదు"</string>
+    <string name="app_suspended_default_message" msgid="123166680425711887">"<xliff:g id="APP_NAME_0">%1$s</xliff:g> ప్రస్తుతం అందుబాటులో లేదు. ఇది <xliff:g id="APP_NAME_1">%2$s</xliff:g> ద్వారా నిర్వహించబడుతుంది."</string>
     <string name="app_suspended_more_details" msgid="1131804827776778187">"మరింత తెలుసుకోండి"</string>
     <string name="work_mode_off_title" msgid="1118691887588435530">"కార్యాలయ ప్రొఫైల్‌ని ఆన్ చేయాలా?"</string>
     <string name="work_mode_off_message" msgid="5130856710614337649">"మీ కార్యాలయ యాప్‌లు, నోటిఫికేషన్‌లు, డేటా మరియు ఇతర కార్యాలయ ప్రొఫైల్ ఫీచర్‌లు ఆన్ చేయబడతాయి"</string>
@@ -1883,5 +1880,8 @@
     <string name="zen_upgrade_notification_content" msgid="1794994264692424562">"బ్లాక్ చేయబడిన దాన్ని తనిఖీ చేయడానికి నొక్కండి."</string>
     <string name="notification_app_name_system" msgid="4205032194610042794">"సిస్టమ్"</string>
     <string name="notification_app_name_settings" msgid="7751445616365753381">"సెట్టింగ్‌లు"</string>
+    <string name="notification_appops_camera_active" msgid="5050283058419699771">"కెమెరా"</string>
+    <string name="notification_appops_microphone_active" msgid="4335305527588191730">"మైక్రోఫోన్"</string>
+    <string name="notification_appops_overlay_active" msgid="633813008357934729">"మీ స్క్రీన్‌పై ఇతర యాప్‌ల ద్వారా ప్రదర్శించబడుతోంది"</string>
     <string name="car_loading_profile" msgid="3545132581795684027">"లోడవుతోంది"</string>
 </resources>

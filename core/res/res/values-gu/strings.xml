@@ -291,12 +291,9 @@
     <string name="permgrouplab_camera" msgid="4820372495894586615">"કૅમેરો"</string>
     <string name="permgroupdesc_camera" msgid="3250611594678347720">"ચિત્રો લેવાની અને વીડિઓ રેકોર્ડ કરવાની"</string>
     <string name="permgrouprequest_camera" msgid="1299833592069671756">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;ને ચિત્રો લેવાની અને વીડિઓ રેકૉર્ડ કરવાની મંજૂરી આપીએ?"</string>
-    <!-- no translation found for permgrouplab_calllog (8798646184930388160) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_calllog (3006237336748283775) -->
-    <skip />
-    <!-- no translation found for permgrouprequest_calllog (8487355309583773267) -->
-    <skip />
+    <string name="permgrouplab_calllog" msgid="8798646184930388160">"કૉલ લૉગ"</string>
+    <string name="permgroupdesc_calllog" msgid="3006237336748283775">"ફોન કૉલ લૉગ વાંચો અને લખો"</string>
+    <string name="permgrouprequest_calllog" msgid="8487355309583773267">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;ને તમારા ફોનના કૉલ લૉગ ઍક્સેસ કરવાની મંજૂરી આપીએ?"</string>
     <string name="permgrouplab_phone" msgid="5229115638567440675">"ફોન"</string>
     <string name="permgroupdesc_phone" msgid="6234224354060641055">"ફોન કૉલ કરો અને સંચાલિત કરો"</string>
     <string name="permgrouprequest_phone" msgid="9166979577750581037">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;ને ફોન કૉલ કરવાની અને તેને મેનેજ કરવાની મંજૂરી આપીએ?"</string>
@@ -887,7 +884,7 @@
     <string name="menu_function_shortcut_label" msgid="1984053777418162618">"Function+"</string>
     <string name="menu_space_shortcut_label" msgid="2410328639272162537">"space"</string>
     <string name="menu_enter_shortcut_label" msgid="2743362785111309668">"enter"</string>
-    <string name="menu_delete_shortcut_label" msgid="3658178007202748164">"કાઢી નાખો"</string>
+    <string name="menu_delete_shortcut_label" msgid="3658178007202748164">"ડિલીટ કરો"</string>
     <string name="search_go" msgid="8298016669822141719">"શોધો"</string>
     <string name="search_hint" msgid="1733947260773056054">"શોધો…"</string>
     <string name="searchview_description_search" msgid="6749826639098512120">"શોધ"</string>
@@ -1004,7 +1001,7 @@
     <string name="paste" msgid="5629880836805036433">"પેસ્ટ કરો"</string>
     <string name="paste_as_plain_text" msgid="5427792741908010675">"સાદી ટેક્સ્ટ તરીકે પેસ્ટ કરો"</string>
     <string name="replace" msgid="5781686059063148930">"બદલો…"</string>
-    <string name="delete" msgid="6098684844021697789">"કાઢી નાખો"</string>
+    <string name="delete" msgid="6098684844021697789">"ડિલીટ કરો"</string>
     <string name="copyUrl" msgid="2538211579596067402">"URL ની કૉપિ કરો"</string>
     <string name="selectTextMode" msgid="1018691815143165326">"ટેક્સ્ટ પસંદ કરો"</string>
     <string name="undo" msgid="7905788502491742328">"પૂર્વવત્ કરો"</string>
@@ -1012,7 +1009,7 @@
     <string name="autofill" msgid="3035779615680565188">"સ્વતઃભરણ"</string>
     <string name="textSelectionCABTitle" msgid="5236850394370820357">"ટેક્સ્ટ પસંદગી"</string>
     <string name="addToDictionary" msgid="4352161534510057874">"શબ્દકોશમાં ઉમેરો"</string>
-    <string name="deleteText" msgid="6979668428458199034">"કાઢી નાખો"</string>
+    <string name="deleteText" msgid="6979668428458199034">"ડિલીટ કરો"</string>
     <string name="inputMethod" msgid="1653630062304567879">"ઇનપુટ પદ્ધતિ"</string>
     <string name="editTextMenuTitle" msgid="4909135564941815494">"ટેક્સ્ટ ક્રિયાઓ"</string>
     <string name="email" msgid="4560673117055050403">"ઇમેઇલ"</string>
@@ -1204,7 +1201,7 @@
     <string name="decline" msgid="2112225451706137894">"નકારો"</string>
     <string name="wifi_p2p_invitation_sent_title" msgid="1318975185112070734">"આમંત્રણ મોકલ્યું"</string>
     <string name="wifi_p2p_invitation_to_connect_title" msgid="4958803948658533637">"કનેક્ટ થવા માટે આમંત્રણ"</string>
-    <string name="wifi_p2p_from_message" msgid="570389174731951769">"પ્રેષક:"</string>
+    <string name="wifi_p2p_from_message" msgid="570389174731951769">"મોકલનાર:"</string>
     <string name="wifi_p2p_to_message" msgid="248968974522044099">"પ્રતિ:"</string>
     <string name="wifi_p2p_enter_pin_message" msgid="5920929550367828970">"આવશ્યક પિન લખો:"</string>
     <string name="wifi_p2p_show_pin_message" msgid="8530563323880921094">"પિન:"</string>
@@ -1426,7 +1423,7 @@
     <string name="date_picker_next_month_button" msgid="5559507736887605055">"આગલો મહિનો"</string>
     <string name="keyboardview_keycode_alt" msgid="4856868820040051939">"ALT"</string>
     <string name="keyboardview_keycode_cancel" msgid="1203984017245783244">"રદ કરો"</string>
-    <string name="keyboardview_keycode_delete" msgid="3337914833206635744">"કાઢી નાખો"</string>
+    <string name="keyboardview_keycode_delete" msgid="3337914833206635744">"ડિલીટ કરો"</string>
     <string name="keyboardview_keycode_done" msgid="1992571118466679775">"થઈ ગયું"</string>
     <string name="keyboardview_keycode_mode_change" msgid="4547387741906537519">"મોડ ફેરફાર"</string>
     <string name="keyboardview_keycode_shift" msgid="2270748814315147690">"Shift"</string>
@@ -1677,7 +1674,7 @@
       <item quantity="other"><xliff:g id="COUNT">%d</xliff:g> સેકંડમાં ફરીથી પ્રયાસ કરો</item>
     </plurals>
     <string name="restr_pin_try_later" msgid="973144472490532377">"પછી ફરી પ્રયાસ કરો"</string>
-    <string name="immersive_cling_title" msgid="8394201622932303336">"પૂર્ણ સ્ક્રીન પર જુવો"</string>
+    <string name="immersive_cling_title" msgid="8394201622932303336">"પૂર્ણ સ્ક્રીન પર જુઓ"</string>
     <string name="immersive_cling_description" msgid="3482371193207536040">"બહાર નીકળવા માટે, ટોચ પરથી નીચે સ્વાઇપ કરો."</string>
     <string name="immersive_cling_positive" msgid="5016839404568297683">"સમજાઈ ગયું"</string>
     <string name="done_label" msgid="2093726099505892398">"થઈ ગયું"</string>
@@ -1785,8 +1782,8 @@
     <string name="language_picker_section_all" msgid="3097279199511617537">"બધી ભાષાઓ"</string>
     <string name="region_picker_section_all" msgid="8966316787153001779">"તમામ પ્રદેશ"</string>
     <string name="locale_search_menu" msgid="2560710726687249178">"શોધ"</string>
-    <string name="app_suspended_title" msgid="1919029799438164552">"ઍપ ખોલી શકાતી નથી"</string>
-    <string name="app_suspended_default_message" msgid="7875306315686531621">"<xliff:g id="APP_NAME_0">%1$s</xliff:g> ઍપ હાલમાં ઉપલબ્ધ નથી. આને <xliff:g id="APP_NAME_1">%2$s</xliff:g> દ્વારા મેનેજ કરવામાં આવે છે."</string>
+    <string name="app_suspended_title" msgid="2075071241147969611">"ઍપ ઉપલબ્ધ નથી"</string>
+    <string name="app_suspended_default_message" msgid="123166680425711887">"<xliff:g id="APP_NAME_0">%1$s</xliff:g> હમણાં ઉપલબ્ધ નથી. આને <xliff:g id="APP_NAME_1">%2$s</xliff:g> દ્વારા મેનેજ કરવામાં આવે છે."</string>
     <string name="app_suspended_more_details" msgid="1131804827776778187">"વધુ જાણો"</string>
     <string name="work_mode_off_title" msgid="1118691887588435530">"કાર્યાલયની પ્રોફાઇલ ચાલુ કરીએ?"</string>
     <string name="work_mode_off_message" msgid="5130856710614337649">"તમારી કાર્યાલયની ઍપ, નોટિફિકેશન, ડેટા અને અન્ય કાર્યાલયની પ્રોફાઇલ સુવિધાઓ ચાલુ કરવામાં આવશે"</string>
@@ -1883,5 +1880,8 @@
     <string name="zen_upgrade_notification_content" msgid="1794994264692424562">"શું બ્લૉક કરેલ છે તે તપાસવા માટે ટૅપ કરો."</string>
     <string name="notification_app_name_system" msgid="4205032194610042794">"સિસ્ટમ"</string>
     <string name="notification_app_name_settings" msgid="7751445616365753381">"સેટિંગ"</string>
+    <string name="notification_appops_camera_active" msgid="5050283058419699771">"કૅમેરા"</string>
+    <string name="notification_appops_microphone_active" msgid="4335305527588191730">"માઇક્રોફોન"</string>
+    <string name="notification_appops_overlay_active" msgid="633813008357934729">"આ તમારી સ્ક્રીન પર અન્ય ઍપની ઉપર દેખાશે"</string>
     <string name="car_loading_profile" msgid="3545132581795684027">"લોડિંગ"</string>
 </resources>

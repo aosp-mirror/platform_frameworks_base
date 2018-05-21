@@ -711,7 +711,7 @@
     <string name="relationTypeMother" msgid="4578571352962758304">"Madre"</string>
     <string name="relationTypeParent" msgid="4755635567562925226">"Genitore"</string>
     <string name="relationTypePartner" msgid="7266490285120262781">"Partner"</string>
-    <string name="relationTypeReferredBy" msgid="101573059844135524">"Riferito da"</string>
+    <string name="relationTypeReferredBy" msgid="101573059844135524">"Suggerito da"</string>
     <string name="relationTypeRelative" msgid="1799819930085610271">"Parente"</string>
     <string name="relationTypeSister" msgid="1735983554479076481">"Sorella"</string>
     <string name="relationTypeSpouse" msgid="394136939428698117">"Coniuge"</string>
@@ -1781,8 +1781,8 @@
     <string name="language_picker_section_all" msgid="3097279199511617537">"Tutte le lingue"</string>
     <string name="region_picker_section_all" msgid="8966316787153001779">"Tutte le aree geografiche"</string>
     <string name="locale_search_menu" msgid="2560710726687249178">"Cerca"</string>
-    <string name="app_suspended_title" msgid="1919029799438164552">"Impossibile aprire l\'app"</string>
-    <string name="app_suspended_default_message" msgid="7875306315686531621">"L\'app <xliff:g id="APP_NAME_0">%1$s</xliff:g> non è al momento disponibile. Viene gestita tramite <xliff:g id="APP_NAME_1">%2$s</xliff:g>."</string>
+    <string name="app_suspended_title" msgid="2075071241147969611">"App non disponibile"</string>
+    <string name="app_suspended_default_message" msgid="123166680425711887">"<xliff:g id="APP_NAME_0">%1$s</xliff:g> non è al momento disponibile. Viene gestita tramite <xliff:g id="APP_NAME_1">%2$s</xliff:g>."</string>
     <string name="app_suspended_more_details" msgid="1131804827776778187">"Ulteriori informazioni"</string>
     <string name="work_mode_off_title" msgid="1118691887588435530">"Attivare il profilo di lavoro?"</string>
     <string name="work_mode_off_message" msgid="5130856710614337649">"Le tue app di lavoro, le notifiche, i dati e altri elementi del profilo di lavoro saranno attivati."</string>
@@ -1879,5 +1879,8 @@
     <string name="zen_upgrade_notification_content" msgid="1794994264692424562">"Tocca per controllare le notifiche bloccate."</string>
     <string name="notification_app_name_system" msgid="4205032194610042794">"Sistema"</string>
     <string name="notification_app_name_settings" msgid="7751445616365753381">"Impostazioni"</string>
+    <string name="notification_appops_camera_active" msgid="5050283058419699771">"Fotocamera"</string>
+    <string name="notification_appops_microphone_active" msgid="4335305527588191730">"Microfono"</string>
+    <string name="notification_appops_overlay_active" msgid="633813008357934729">"si sovrappone ad altre app sullo schermo"</string>
     <string name="car_loading_profile" msgid="3545132581795684027">"Caricamento"</string>
 </resources>
