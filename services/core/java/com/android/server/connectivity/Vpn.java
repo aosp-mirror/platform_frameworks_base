@@ -319,15 +319,12 @@ public class Vpn {
         boolean roaming = false;
         boolean congested = false;
 
-        if (ArrayUtils.isEmpty(underlyingNetworks)) {
-            // No idea what the underlying networks are; assume sane defaults
-            metered = true;
-            roaming = false;
-            congested = false;
-        } else {
+        boolean hadUnderlyingNetworks = false;
+        if (null != underlyingNetworks) {
             for (Network underlying : underlyingNetworks) {
                 final NetworkCapabilities underlyingCaps = cm.getNetworkCapabilities(underlying);
                 if (underlyingCaps == null) continue;
+                hadUnderlyingNetworks = true;
                 for (int underlyingType : underlyingCaps.getTransportTypes()) {
                     transportTypes = ArrayUtils.appendInt(transportTypes, underlyingType);
                 }
@@ -342,6 +339,12 @@ public class Vpn {
                 roaming |= !underlyingCaps.hasCapability(NET_CAPABILITY_NOT_ROAMING);
                 congested |= !underlyingCaps.hasCapability(NET_CAPABILITY_NOT_CONGESTED);
             }
+        }
+        if (!hadUnderlyingNetworks) {
+            // No idea what the underlying networks are; assume sane defaults
+            metered = true;
+            roaming = false;
+            congested = false;
         }
 
         caps.setTransportTypes(transportTypes);

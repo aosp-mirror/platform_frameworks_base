@@ -4409,13 +4409,11 @@ public class ConnectivityServiceTest {
                 && caps.hasCapability(NET_CAPABILITY_NOT_METERED),
                 vpnNetworkAgent);
 
-        // Disconnect wifi too. No underlying networks should mean this is now metered,
-        // unfortunately a discrepancy in the current implementation has this unmetered.
-        // TODO : fix this.
+        // Disconnect wifi too. No underlying networks means this is now metered.
         mWiFiNetworkAgent.disconnect();
         vpnNetworkCallback.expectCapabilitiesLike((caps) -> caps.hasTransport(TRANSPORT_VPN)
                 && !caps.hasTransport(TRANSPORT_CELLULAR) && !caps.hasTransport(TRANSPORT_WIFI)
-                && caps.hasCapability(NET_CAPABILITY_NOT_METERED),
+                && !caps.hasCapability(NET_CAPABILITY_NOT_METERED),
                 vpnNetworkAgent);
 
         mMockVpn.disconnect();
