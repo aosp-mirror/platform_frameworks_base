@@ -20,6 +20,7 @@ import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_UNDEFINED;
 
 import static com.android.systemui.Prefs.Key.HAS_DISMISSED_RECENTS_QUICK_SCRUB_ONBOARDING_ONCE;
+import static com.android.systemui.Prefs.Key.DISMISSED_RECENTS_SWIPE_UP_ONBOARDING_COUNT;
 import static com.android.systemui.Prefs.Key.HAS_SEEN_RECENTS_QUICK_SCRUB_ONBOARDING;
 import static com.android.systemui.Prefs.Key.HAS_SEEN_RECENTS_SWIPE_UP_ONBOARDING;
 import static com.android.systemui.Prefs.Key.OVERVIEW_OPENED_COUNT;
@@ -87,9 +88,17 @@ public class RecentsOnboarding {
     private static final int SWIPE_UP_SHOW_ON_OVERVIEW_OPENED_FROM_HOME_COUNT = 3;
     // Show quick scrub tips after opening overview this number of times.
     private static final int QUICK_SCRUB_SHOW_ON_OVERVIEW_OPENED_COUNT = 10;
-    // After explicitly dismissing, show again after launching this number of apps for swipe-up
-    // tips.
+    // Maximum number of dismissals while still showing swipe-up tips.
+    private static final int MAX_DISMISSAL_ON_SWIPE_UP_SHOW = 4;
+    // Number of dismissals for swipe-up tips when exponential backoff starts.
+    private static final int BACKOFF_DISMISSAL_COUNT_ON_SWIPE_UP_SHOW = 2;
+    // After explicitly dismissing for <= BACKOFF_DISMISSAL_COUNT_ON_SWIPE_UP_SHOW times, show again
+    // after launching this number of apps for swipe-up tips.
     private static final int SWIPE_UP_SHOW_ON_APP_LAUNCH_AFTER_DISMISS = 5;
+    // After explicitly dismissing for > BACKOFF_DISMISSAL_COUNT_ON_SWIPE_UP_SHOW but
+    // <= MAX_DISMISSAL_ON_SWIPE_UP_SHOW times, show again after launching this number of apps for
+    // swipe-up tips.
+    private static final int SWIPE_UP_SHOW_ON_APP_LAUNCH_AFTER_DISMISS_BACK_OFF = 10;
 
     private final Context mContext;
     private final WindowManager mWindowManager;
@@ -152,9 +161,20 @@ public class RecentsOnboarding {
                     if (getOpenedOverviewFromHomeCount()
                             >= SWIPE_UP_SHOW_ON_OVERVIEW_OPENED_FROM_HOME_COUNT) {
                         if (mHasDismissedSwipeUpTip) {
+                            int hasDimissedSwipeUpOnboardingCount =
+                                    getDismissedSwipeUpOnboardingCount();
+                            if (hasDimissedSwipeUpOnboardingCount > MAX_DISMISSAL_ON_SWIPE_UP_SHOW) {
+                                Log.d(TAG, "Should not be reached");
+                                return;
+                            }
+                            final int swipeUpShowOnAppLauncherAfterDismiss =
+                                    hasDimissedSwipeUpOnboardingCount
+                                            <= BACKOFF_DISMISSAL_COUNT_ON_SWIPE_UP_SHOW
+                                            ? SWIPE_UP_SHOW_ON_APP_LAUNCH_AFTER_DISMISS
+                                            : SWIPE_UP_SHOW_ON_APP_LAUNCH_AFTER_DISMISS_BACK_OFF;
                             mNumAppsLaunchedSinceSwipeUpTipDismiss++;
                             if (mNumAppsLaunchedSinceSwipeUpTipDismiss
-                                    == SWIPE_UP_SHOW_ON_APP_LAUNCH_AFTER_DISMISS) {
+                                    == swipeUpShowOnAppLauncherAfterDismiss) {
                                 mNumAppsLaunchedSinceSwipeUpTipDismiss = 0;
                                 shouldLog = show(R.string.recents_swipe_up_onboarding);
                             }
@@ -286,6 +306,10 @@ public class RecentsOnboarding {
             if (v.getTag().equals(R.string.recents_swipe_up_onboarding)) {
                 mHasDismissedSwipeUpTip = true;
                 mNumAppsLaunchedSinceSwipeUpTipDismiss = 0;
+                setDismissedSwipeUpOnboardingCount(getDismissedSwipeUpOnboardingCount() + 1);
+                if (getDismissedSwipeUpOnboardingCount() > MAX_DISMISSAL_ON_SWIPE_UP_SHOW) {
+                    setHasSeenSwipeUpOnboarding(true);
+                }
                 notifyOnTip(DISMISS, RECENTS_SWIPE_UP_ONBOARDING_TIP);
             } else {
                 notifyOnTip(DISMISS, RECENTS_QUICK_SCRUB_ONBOARDING_TIP);
@@ -304,6 +328,7 @@ public class RecentsOnboarding {
         if (RESET_PREFS_FOR_DEBUG) {
             setHasSeenSwipeUpOnboarding(false);
             setHasSeenQuickScrubOnboarding(false);
+            setDismissedSwipeUpOnboardingCount(0);
             setHasDismissedQuickScrubOnboardingOnce(false);
             setOpenedOverviewCount(0);
             setOpenedOverviewFromHomeCount(0);
@@ -440,6 +465,8 @@ public class RecentsOnboarding {
                 + mNumAppsLaunchedSinceSwipeUpTipDismiss);
         pw.println("      hasSeenSwipeUpOnboarding: " + hasSeenSwipeUpOnboarding());
         pw.println("      hasSeenQuickScrubOnboarding: " + hasSeenQuickScrubOnboarding());
+        pw.println("      getDismissedSwipeUpOnboardingCount: "
+                + getDismissedSwipeUpOnboardingCount());
         pw.println("      hasDismissedQuickScrubOnboardingOnce: "
                 + hasDismissedQuickScrubOnboardingOnce());
         pw.println("      getOpenedOverviewCount: " + getOpenedOverviewCount());
@@ -486,6 +513,16 @@ public class RecentsOnboarding {
         if (hasSeenQuickScrubOnboarding && hasSeenSwipeUpOnboarding()) {
             onDisconnectedFromLauncher();
         }
+    }
+
+    private int getDismissedSwipeUpOnboardingCount() {
+        return Prefs.getInt(mContext, DISMISSED_RECENTS_SWIPE_UP_ONBOARDING_COUNT, 0);
+    }
+
+    private void setDismissedSwipeUpOnboardingCount(int dismissedSwipeUpOnboardingCount) {
+        Log.d(TAG, "setDismissedSwipeUpOnboardingCount: " + dismissedSwipeUpOnboardingCount);
+        Prefs.putInt(mContext, DISMISSED_RECENTS_SWIPE_UP_ONBOARDING_COUNT,
+                dismissedSwipeUpOnboardingCount);
     }
 
     private boolean hasDismissedQuickScrubOnboardingOnce() {
