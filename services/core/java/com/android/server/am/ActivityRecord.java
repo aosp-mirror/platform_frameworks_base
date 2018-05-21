@@ -826,6 +826,18 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
         return ResolverActivity.class.getName().equals(realActivity.getClassName());
     }
 
+    boolean isResolverOrChildActivity() {
+        if (!"android".equals(packageName)) {
+            return false;
+        }
+        try {
+            return ResolverActivity.class.isAssignableFrom(
+                    Object.class.getClassLoader().loadClass(realActivity.getClassName()));
+        } catch (ClassNotFoundException e) {
+            return false;
+        }
+    }
+
     ActivityRecord(ActivityManagerService _service, ProcessRecord _caller, int _launchedFromPid,
             int _launchedFromUid, String _launchedFromPackage, Intent _intent, String _resolvedType,
             ActivityInfo aInfo, Configuration _configuration,
