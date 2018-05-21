@@ -235,7 +235,7 @@ public class CachedBluetoothDeviceManagerTest {
      * Test to verify onHiSyncIdChanged() for hearing aid devices with same HiSyncId.
      */
     @Test
-    public void testOnDeviceAdded_sameHiSyncId_populateInDifferentLists() {
+    public void testOnHiSyncIdChanged_sameHiSyncId_populateInDifferentLists() {
         CachedBluetoothDevice cachedDevice1 = mCachedDeviceManager.addDevice(mLocalAdapter,
             mLocalProfileManager, mDevice1);
         assertThat(cachedDevice1).isNotNull();
@@ -261,16 +261,53 @@ public class CachedBluetoothDeviceManagerTest {
         assertThat(mCachedDeviceManager.mCachedDevicesMapForHearingAids).hasSize(1);
         Collection<CachedBluetoothDevice> devices = mCachedDeviceManager.getCachedDevicesCopy();
         assertThat(devices).contains(cachedDevice2);
-        assertThat(mCachedDeviceManager.mCachedDevicesMapForHearingAids.values())
-            .contains(cachedDevice2);
-        assertThat(mCachedDeviceManager.mHearingAidDevicesNotAddedInCache).contains(cachedDevice1);
+        assertThat(mCachedDeviceManager.mCachedDevicesMapForHearingAids)
+            .containsKey(HISYNCID1);
+    }
+
+    /**
+     * Test to verify onHiSyncIdChanged() for 2 hearing aid devices with same HiSyncId but one
+     * device is connected and other is disconnected. The connected device should be chosen.
+     */
+    @Test
+    public void testOnHiSyncIdChanged_sameHiSyncIdAndOneConnected_chooseConnectedDevice() {
+        CachedBluetoothDevice cachedDevice1 = mCachedDeviceManager.addDevice(mLocalAdapter,
+            mLocalProfileManager, mDevice1);
+        assertThat(cachedDevice1).isNotNull();
+        CachedBluetoothDevice cachedDevice2 = mCachedDeviceManager.addDevice(mLocalAdapter,
+            mLocalProfileManager, mDevice2);
+        assertThat(cachedDevice2).isNotNull();
+        cachedDevice1.onProfileStateChanged(mHearingAidProfile, BluetoothProfile.STATE_CONNECTED);
+        cachedDevice2.onProfileStateChanged(mHearingAidProfile, BluetoothProfile.STATE_CONNECTED);
+
+        /* Device 1 is connected and Device 2 is disconnected */
+        when(mHearingAidProfile.getConnectionStatus(mDevice1)).
+            thenReturn(BluetoothProfile.STATE_CONNECTED);
+        when(mHearingAidProfile.getConnectionStatus(mDevice2)).
+            thenReturn(BluetoothProfile.STATE_DISCONNECTED);
+
+        // Since both devices do not have hiSyncId, they should be added in mCachedDevices.
+        assertThat(mCachedDeviceManager.getCachedDevicesCopy()).hasSize(2);
+        assertThat(mCachedDeviceManager.mHearingAidDevicesNotAddedInCache).isEmpty();
+        assertThat(mCachedDeviceManager.mCachedDevicesMapForHearingAids).isEmpty();
+
+        cachedDevice1.setHiSyncId(HISYNCID1);
+        cachedDevice2.setHiSyncId(HISYNCID1);
+        mCachedDeviceManager.onHiSyncIdChanged(HISYNCID1);
+
+        // Only the connected device, device 1, should be visible to UI.
+        assertThat(mCachedDeviceManager.getCachedDevicesCopy()).containsExactly(cachedDevice1);
+        assertThat(mCachedDeviceManager.mCachedDevicesMapForHearingAids).
+            containsExactly(HISYNCID1, cachedDevice1);
+        assertThat(mCachedDeviceManager.mHearingAidDevicesNotAddedInCache).
+            containsExactly(cachedDevice2);
     }
 
     /**
      * Test to verify onHiSyncIdChanged() for hearing aid devices with different HiSyncId.
      */
     @Test
-    public void testOnDeviceAdded_differentHiSyncId_populateInSameList() {
+    public void testOnHiSyncIdChanged_differentHiSyncId_populateInSameList() {
         CachedBluetoothDevice cachedDevice1 = mCachedDeviceManager.addDevice(mLocalAdapter,
             mLocalProfileManager, mDevice1);
         assertThat(cachedDevice1).isNotNull();
@@ -300,6 +337,153 @@ public class CachedBluetoothDeviceManagerTest {
             .contains(cachedDevice1);
         assertThat(mCachedDeviceManager.mCachedDevicesMapForHearingAids.values())
             .contains(cachedDevice2);
+    }
+
+    /**
+     * Test to verify onProfileConnectionStateChanged() for single hearing aid device connection.
+     */
+    @Test
+    public void testOnProfileConnectionStateChanged_singleDeviceConnected_visible() {
+        CachedBluetoothDevice cachedDevice1 = mCachedDeviceManager.addDevice(mLocalAdapter,
+            mLocalProfileManager, mDevice1);
+        assertThat(cachedDevice1).isNotNull();
+        cachedDevice1.onProfileStateChanged(mHearingAidProfile, BluetoothProfile.STATE_CONNECTED);
+
+        // Since both devices do not have hiSyncId, they should be added in mCachedDevices.
+        assertThat(mCachedDeviceManager.getCachedDevicesCopy()).containsExactly(cachedDevice1);
+        assertThat(mCachedDeviceManager.mHearingAidDevicesNotAddedInCache).isEmpty();
+        assertThat(mCachedDeviceManager.mCachedDevicesMapForHearingAids).isEmpty();
+
+        cachedDevice1.setHiSyncId(HISYNCID1);
+        mCachedDeviceManager.onHiSyncIdChanged(HISYNCID1);
+
+        // Connect the Device 1
+        mCachedDeviceManager.onProfileConnectionStateChanged(cachedDevice1,
+            BluetoothProfile.STATE_CONNECTED, BluetoothProfile.HEARING_AID);
+
+        assertThat(mCachedDeviceManager.getCachedDevicesCopy()).containsExactly(cachedDevice1);
+        assertThat(mCachedDeviceManager.mCachedDevicesMapForHearingAids).
+            containsExactly(HISYNCID1, cachedDevice1);
+        assertThat(mCachedDeviceManager.mHearingAidDevicesNotAddedInCache).isEmpty();
+
+        // Disconnect the Device 1
+        mCachedDeviceManager.onProfileConnectionStateChanged(cachedDevice1,
+            BluetoothProfile.STATE_DISCONNECTED, BluetoothProfile.HEARING_AID);
+
+        assertThat(mCachedDeviceManager.getCachedDevicesCopy()).containsExactly(cachedDevice1);
+        assertThat(mCachedDeviceManager.mCachedDevicesMapForHearingAids).
+            containsExactly(HISYNCID1, cachedDevice1);
+        assertThat(mCachedDeviceManager.mHearingAidDevicesNotAddedInCache).isEmpty();
+    }
+
+    /**
+     * Test to verify onProfileConnectionStateChanged() for two hearing aid devices where both
+     * devices are disconnected and they get connected.
+     */
+    @Test
+    public void testOnProfileConnectionStateChanged_twoDevicesConnected_oneDeviceVisible() {
+        CachedBluetoothDevice cachedDevice1 = mCachedDeviceManager.addDevice(mLocalAdapter,
+            mLocalProfileManager, mDevice1);
+        assertThat(cachedDevice1).isNotNull();
+        CachedBluetoothDevice cachedDevice2 = mCachedDeviceManager.addDevice(mLocalAdapter,
+            mLocalProfileManager, mDevice2);
+        assertThat(cachedDevice2).isNotNull();
+        cachedDevice1.onProfileStateChanged(mHearingAidProfile, BluetoothProfile.STATE_CONNECTED);
+        cachedDevice2.onProfileStateChanged(mHearingAidProfile, BluetoothProfile.STATE_CONNECTED);
+        when(mDevice1.getBondState()).thenReturn(BluetoothDevice.BOND_BONDED);
+        when(mDevice2.getBondState()).thenReturn(BluetoothDevice.BOND_BONDED);
+
+        // Since both devices do not have hiSyncId, they should be added in mCachedDevices.
+        assertThat(mCachedDeviceManager.getCachedDevicesCopy()).hasSize(2);
+        assertThat(mCachedDeviceManager.mHearingAidDevicesNotAddedInCache).isEmpty();
+        assertThat(mCachedDeviceManager.mCachedDevicesMapForHearingAids).isEmpty();
+
+        cachedDevice1.setHiSyncId(HISYNCID1);
+        cachedDevice2.setHiSyncId(HISYNCID1);
+        mCachedDeviceManager.onHiSyncIdChanged(HISYNCID1);
+
+        // There should be one cached device but can be either one.
+        assertThat(mCachedDeviceManager.getCachedDevicesCopy()).hasSize(1);
+
+        // Connect the Device 1
+        mCachedDeviceManager.onProfileConnectionStateChanged(cachedDevice1,
+            BluetoothProfile.STATE_CONNECTED, BluetoothProfile.HEARING_AID);
+
+        assertThat(mCachedDeviceManager.getCachedDevicesCopy()).containsExactly(cachedDevice1);
+        assertThat(mCachedDeviceManager.mCachedDevicesMapForHearingAids).
+            containsExactly(HISYNCID1, cachedDevice1);
+        assertThat(mCachedDeviceManager.mHearingAidDevicesNotAddedInCache).contains(cachedDevice2);
+        assertThat(mCachedDeviceManager.mCachedDevices).contains(cachedDevice1);
+
+        when(mHearingAidProfile.getConnectionStatus(mDevice1)).
+            thenReturn(BluetoothProfile.STATE_CONNECTED);
+        when(mHearingAidProfile.getConnectionStatus(mDevice2)).
+            thenReturn(BluetoothProfile.STATE_DISCONNECTED);
+
+        // Connect the Device 2
+        mCachedDeviceManager.onProfileConnectionStateChanged(cachedDevice2,
+            BluetoothProfile.STATE_CONNECTED, BluetoothProfile.HEARING_AID);
+
+        assertThat(mCachedDeviceManager.getCachedDevicesCopy()).hasSize(1);
+        assertThat(mCachedDeviceManager.mHearingAidDevicesNotAddedInCache).hasSize(1);
+        assertThat(mCachedDeviceManager.mCachedDevices).hasSize(1);
+        assertThat(mCachedDeviceManager.mCachedDevicesMapForHearingAids).hasSize(1);
+    }
+
+    /**
+     * Test to verify onProfileConnectionStateChanged() for two hearing aid devices where both
+     * devices are connected and they get disconnected.
+     */
+    @Test
+    public void testOnProfileConnectionStateChanged_twoDevicesDisconnected_oneDeviceVisible() {
+        CachedBluetoothDevice cachedDevice1 = mCachedDeviceManager.addDevice(mLocalAdapter,
+            mLocalProfileManager, mDevice1);
+        assertThat(cachedDevice1).isNotNull();
+        CachedBluetoothDevice cachedDevice2 = mCachedDeviceManager.addDevice(mLocalAdapter,
+            mLocalProfileManager, mDevice2);
+        assertThat(cachedDevice2).isNotNull();
+        cachedDevice1.onProfileStateChanged(mHearingAidProfile, BluetoothProfile.STATE_CONNECTED);
+        cachedDevice2.onProfileStateChanged(mHearingAidProfile, BluetoothProfile.STATE_CONNECTED);
+
+        when(mDevice1.getBondState()).thenReturn(BluetoothDevice.BOND_BONDED);
+        when(mDevice2.getBondState()).thenReturn(BluetoothDevice.BOND_BONDED);
+        when(mHearingAidProfile.getConnectionStatus(mDevice1)).
+            thenReturn(BluetoothProfile.STATE_CONNECTED);
+        when(mHearingAidProfile.getConnectionStatus(mDevice2)).
+            thenReturn(BluetoothProfile.STATE_CONNECTED);
+
+        // Since both devices do not have hiSyncId, they should be added in mCachedDevices.
+        assertThat(mCachedDeviceManager.getCachedDevicesCopy()).hasSize(2);
+        assertThat(mCachedDeviceManager.mHearingAidDevicesNotAddedInCache).isEmpty();
+        assertThat(mCachedDeviceManager.mCachedDevicesMapForHearingAids).isEmpty();
+
+        cachedDevice1.setHiSyncId(HISYNCID1);
+        cachedDevice2.setHiSyncId(HISYNCID1);
+        mCachedDeviceManager.onHiSyncIdChanged(HISYNCID1);
+
+        /* Disconnect the Device 1 */
+        mCachedDeviceManager.onProfileConnectionStateChanged(cachedDevice1,
+            BluetoothProfile.STATE_DISCONNECTED, BluetoothProfile.HEARING_AID);
+
+        assertThat(mCachedDeviceManager.getCachedDevicesCopy()).containsExactly(cachedDevice2);
+        assertThat(mCachedDeviceManager.mHearingAidDevicesNotAddedInCache).contains(cachedDevice1);
+        assertThat(mCachedDeviceManager.mCachedDevices).contains(cachedDevice2);
+        assertThat(mCachedDeviceManager.mCachedDevicesMapForHearingAids)
+            .containsExactly(HISYNCID1, cachedDevice2);
+
+        when(mHearingAidProfile.getConnectionStatus(mDevice1)).
+            thenReturn(BluetoothProfile.STATE_DISCONNECTED);
+        when(mHearingAidProfile.getConnectionStatus(mDevice2)).
+            thenReturn(BluetoothProfile.STATE_CONNECTED);
+
+        /* Disconnect the Device 2 */
+        mCachedDeviceManager.onProfileConnectionStateChanged(cachedDevice2,
+            BluetoothProfile.STATE_DISCONNECTED, BluetoothProfile.HEARING_AID);
+
+        assertThat(mCachedDeviceManager.getCachedDevicesCopy()).hasSize(1);
+        assertThat(mCachedDeviceManager.mHearingAidDevicesNotAddedInCache).hasSize(1);
+        assertThat(mCachedDeviceManager.mCachedDevices).hasSize(1);
+        assertThat(mCachedDeviceManager.mCachedDevicesMapForHearingAids).hasSize(1);
     }
 
     /**

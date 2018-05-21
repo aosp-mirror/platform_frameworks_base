@@ -19,6 +19,7 @@ package com.android.settingslib.bluetooth;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothHearingAid;
+import android.bluetooth.BluetoothProfile;
 import android.content.Context;
 import android.util.Log;
 
@@ -323,20 +324,101 @@ public class CachedBluetoothDeviceManager {
             if (cachedDevice.getHiSyncId() == hiSyncId) {
                 if (firstMatchedIndex != -1) {
                     /* Found the second one */
-                    mCachedDevices.remove(i);
-                    mHearingAidDevicesNotAddedInCache.add(cachedDevice);
+                    int indexToRemoveFromUi;
+                    CachedBluetoothDevice deviceToRemoveFromUi;
+
                     // Since the hiSyncIds have been updated for a connected pair of hearing aids,
                     // we remove the entry of one the hearing aids from the UI. Unless the
-                    // hiSyncId get updated, the system does not know its a hearing aid, so we add
+                    // hiSyncId get updated, the system does not know it is a hearing aid, so we add
                     // both the hearing aids as separate entries in the UI first, then remove one
-                    // of them after the hiSyncId is populated.
-                    log("onHiSyncIdChanged: removed device=" + cachedDevice + ", with hiSyncId="
-                        + hiSyncId);
-                    mBtManager.getEventManager().dispatchDeviceRemoved(cachedDevice);
+                    // of them after the hiSyncId is populated. We will choose the device that
+                    // is not connected to be removed.
+                    if (cachedDevice.isConnected()) {
+                        indexToRemoveFromUi = firstMatchedIndex;
+                        deviceToRemoveFromUi = mCachedDevices.get(firstMatchedIndex);
+                        mCachedDevicesMapForHearingAids.put(hiSyncId, cachedDevice);
+                    } else {
+                        indexToRemoveFromUi = i;
+                        deviceToRemoveFromUi = cachedDevice;
+                        mCachedDevicesMapForHearingAids.put(hiSyncId,
+                                                            mCachedDevices.get(firstMatchedIndex));
+                    }
+
+                    mCachedDevices.remove(indexToRemoveFromUi);
+                    mHearingAidDevicesNotAddedInCache.add(deviceToRemoveFromUi);
+                    log("onHiSyncIdChanged: removed from UI device=" + deviceToRemoveFromUi
+                        + ", with hiSyncId=" + hiSyncId);
+                    mBtManager.getEventManager().dispatchDeviceRemoved(deviceToRemoveFromUi);
                     break;
                 } else {
                     mCachedDevicesMapForHearingAids.put(hiSyncId, cachedDevice);
                     firstMatchedIndex = i;
+                }
+            }
+        }
+    }
+
+    private CachedBluetoothDevice getHearingAidOtherDevice(CachedBluetoothDevice thisDevice,
+                                                           long hiSyncId) {
+        if (hiSyncId == BluetoothHearingAid.HI_SYNC_ID_INVALID) {
+            return null;
+        }
+
+        // Searched the lists for the other side device with the matching hiSyncId.
+        for (CachedBluetoothDevice notCachedDevice : mHearingAidDevicesNotAddedInCache) {
+            if ((hiSyncId == notCachedDevice.getHiSyncId()) &&
+                (!Objects.equals(notCachedDevice, thisDevice))) {
+                return notCachedDevice;
+            }
+        }
+
+        CachedBluetoothDevice cachedDevice = mCachedDevicesMapForHearingAids.get(hiSyncId);
+        if (!Objects.equals(cachedDevice, thisDevice)) {
+            return cachedDevice;
+        }
+        return null;
+    }
+
+    private void hearingAidSwitchDisplayDevice(CachedBluetoothDevice toDisplayDevice,
+                                           CachedBluetoothDevice toHideDevice, long hiSyncId)
+    {
+        log("hearingAidSwitchDisplayDevice: toDisplayDevice=" + toDisplayDevice
+            + ", toHideDevice=" + toHideDevice);
+
+        // Remove the "toHideDevice" device from the UI.
+        mHearingAidDevicesNotAddedInCache.add(toHideDevice);
+        mCachedDevices.remove(toHideDevice);
+        mBtManager.getEventManager().dispatchDeviceRemoved(toHideDevice);
+
+        // Add the "toDisplayDevice" device to the UI.
+        mHearingAidDevicesNotAddedInCache.remove(toDisplayDevice);
+        mCachedDevices.add(toDisplayDevice);
+        mCachedDevicesMapForHearingAids.put(hiSyncId, toDisplayDevice);
+        mBtManager.getEventManager().dispatchDeviceAdded(toDisplayDevice);
+    }
+
+    public synchronized void onProfileConnectionStateChanged(CachedBluetoothDevice cachedDevice,
+                                                             int state, int bluetoothProfile) {
+        if (bluetoothProfile == BluetoothProfile.HEARING_AID
+            && cachedDevice.getHiSyncId() != BluetoothHearingAid.HI_SYNC_ID_INVALID
+            && cachedDevice.getBondState() == BluetoothDevice.BOND_BONDED) {
+
+            long hiSyncId = cachedDevice.getHiSyncId();
+
+            CachedBluetoothDevice otherDevice = getHearingAidOtherDevice(cachedDevice, hiSyncId);
+            if (otherDevice == null) {
+                // no other side device. Nothing to do.
+                return;
+            }
+
+            if (state == BluetoothProfile.STATE_CONNECTED &&
+                mHearingAidDevicesNotAddedInCache.contains(cachedDevice)) {
+                hearingAidSwitchDisplayDevice(cachedDevice, otherDevice, hiSyncId);
+            } else if (state == BluetoothProfile.STATE_DISCONNECTED
+                       && otherDevice.isConnected()) {
+                CachedBluetoothDevice mapDevice = mCachedDevicesMapForHearingAids.get(hiSyncId);
+                if ((mapDevice != null) && (Objects.equals(cachedDevice, mapDevice))) {
+                    hearingAidSwitchDisplayDevice(otherDevice, cachedDevice, hiSyncId);
                 }
             }
         }
@@ -353,8 +435,15 @@ public class CachedBluetoothDeviceManager {
                 // TODO: Look for more cleanups on unpairing the device.
                 mHearingAidDevicesNotAddedInCache.remove(i);
                 if (device == cachedDevice) continue;
+                log("onDeviceUnpaired: Unpair device=" + cachedDevice);
                 cachedDevice.unpair();
             }
+        }
+
+        CachedBluetoothDevice mappedDevice = mCachedDevicesMapForHearingAids.get(hiSyncId);
+        if ((mappedDevice != null) && (!Objects.equals(device, mappedDevice))) {
+            log("onDeviceUnpaired: Unpair mapped device=" + mappedDevice);
+            mappedDevice.unpair();
         }
     }
 
