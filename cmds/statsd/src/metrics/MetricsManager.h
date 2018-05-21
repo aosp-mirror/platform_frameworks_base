@@ -77,6 +77,10 @@ public:
         return mTtlNs <= 0 || timestampNs < mTtlEndNs;
     };
 
+    inline bool hashStringInReport() const {
+        return mHashStringsInReport;
+    };
+
     void refreshTtl(const int64_t currentTimestampNs) {
         if (mTtlNs > 0) {
             mTtlEndNs = currentTimestampNs + mTtlNs;
@@ -117,6 +121,8 @@ private:
     sp<UidMap> mUidMap;
 
     bool mConfigValid = false;
+
+    bool mHashStringsInReport = false;
 
     const int64_t mTtlNs;
     int64_t mTtlEndNs;
