@@ -247,6 +247,7 @@ $(call add-clean-step, rm -rf $(OUT_DIR)/target/common/obj/JAVA_LIBRARIES/statsd
 $(call add-clean-step, rm -rf $(PRODUCT_OUT)/system/framework/com.android.mediadrm.signer.jar)
 $(call add-clean-step, rm -rf $(PRODUCT_OUT)/system/framework/com.android.location.provider.jar)
 $(call add-clean-step, rm -rf $(PRODUCT_OUT)/system/framework/com.android.future.usb.accessory.jar)
+$(call add-clean-step, rm -rf $(PRODUCT_OUT)/system/framework/com.android.media.remotedisplay.jar)
 # ******************************************************************
 # NEWER CLEAN STEPS MUST BE AT THE END OF THE LIST ABOVE THIS BANNER
 # ******************************************************************
