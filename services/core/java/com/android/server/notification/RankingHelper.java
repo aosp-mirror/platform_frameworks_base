@@ -25,22 +25,18 @@ import android.app.NotificationChannelGroup;
 import android.app.NotificationManager;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
-import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.ParceledListSlice;
-import android.content.pm.Signature;
 import android.metrics.LogMaker;
 import android.os.Build;
 import android.os.UserHandle;
-import android.print.PrintManager;
 import android.provider.Settings.Secure;
 import android.service.notification.NotificationListenerService.Ranking;
 import android.service.notification.RankingHelperProto;
 import android.service.notification.RankingHelperProto.RecordProto;
 import android.text.TextUtils;
 import android.util.ArrayMap;
-import android.util.Pair;
 import android.util.Slog;
 import android.util.SparseBooleanArray;
 import android.util.proto.ProtoOutputStream;
@@ -156,6 +152,8 @@ public class RankingHelper implements RankingConfig {
             }
         }
 
+        mAreChannelsBypassingDnd = (mZenModeHelper.getNotificationPolicy().state &
+                NotificationManager.Policy.STATE_CHANNELS_BYPASSING_DND) == 1;
         updateChannelsBypassingDnd();
     }
 
