@@ -279,25 +279,24 @@ public final class DynamicsProcessing extends AudioEffect {
     private static final boolean PREEQ_DEFAULT_ENABLED = true;
     private static final boolean POSTEQ_DEFAULT_ENABLED = true;
 
-
     private static final boolean MBC_DEFAULT_ENABLED = true;
-    private static final float MBC_DEFAULT_ATTACK_TIME = 50; // ms
-    private static final float MBC_DEFAULT_RELEASE_TIME = 120; // ms
-    private static final float MBC_DEFAULT_RATIO = 2; // 1:N
-    private static final float MBC_DEFAULT_THRESHOLD = -30; // dB
+    private static final float MBC_DEFAULT_ATTACK_TIME = 3; // ms
+    private static final float MBC_DEFAULT_RELEASE_TIME = 80; // ms
+    private static final float MBC_DEFAULT_RATIO = 1; // N:1
+    private static final float MBC_DEFAULT_THRESHOLD = -45; // dB
     private static final float MBC_DEFAULT_KNEE_WIDTH = 0; // dB
-    private static final float MBC_DEFAULT_NOISE_GATE_THRESHOLD = -80; // dB
-    private static final float MBC_DEFAULT_EXPANDER_RATIO = 1.5f; // N:1
+    private static final float MBC_DEFAULT_NOISE_GATE_THRESHOLD = -90; // dB
+    private static final float MBC_DEFAULT_EXPANDER_RATIO = 1; // 1:N
     private static final float MBC_DEFAULT_PRE_GAIN = 0; // dB
-    private static final float MBC_DEFAULT_POST_GAIN = 10; // dB
+    private static final float MBC_DEFAULT_POST_GAIN = 0; // dB
 
     private static final boolean LIMITER_DEFAULT_ENABLED = true;
     private static final int LIMITER_DEFAULT_LINK_GROUP = 0;//;
-    private static final float LIMITER_DEFAULT_ATTACK_TIME = 50; // ms
-    private static final float LIMITER_DEFAULT_RELEASE_TIME = 120; // ms
-    private static final float LIMITER_DEFAULT_RATIO = 2; // 1:N
-    private static final float LIMITER_DEFAULT_THRESHOLD = -30; // dB
-    private static final float LIMITER_DEFAULT_POST_GAIN = 10; // dB
+    private static final float LIMITER_DEFAULT_ATTACK_TIME = 1; // ms
+    private static final float LIMITER_DEFAULT_RELEASE_TIME = 60; // ms
+    private static final float LIMITER_DEFAULT_RATIO = 10; // N:1
+    private static final float LIMITER_DEFAULT_THRESHOLD = -2; // dB
+    private static final float LIMITER_DEFAULT_POST_GAIN = 0; // dB
 
     private static final float DEFAULT_MIN_FREQUENCY = 220; // Hz
     private static final float DEFAULT_MAX_FREQUENCY = 20000; // Hz
@@ -540,13 +539,14 @@ public final class DynamicsProcessing extends AudioEffect {
          * band number, thus band 0 cutoffFrequency <= band 1 cutoffFrequency, and so on.
          * @param attackTime Attack Time for compressor in milliseconds (ms)
          * @param releaseTime Release Time for compressor in milliseconds (ms)
-         * @param ratio Compressor ratio (1:N)
+         * @param ratio Compressor ratio (N:1) (input:output)
          * @param threshold Compressor threshold measured in decibels (dB) from 0 dB Full Scale
          * (dBFS).
          * @param kneeWidth Width in decibels (dB) around compressor threshold point.
          * @param noiseGateThreshold Noise gate threshold in decibels (dB) from 0 dB Full Scale
          * (dBFS).
-         * @param expanderRatio Expander ratio (N:1) for signals below the Noise Gate Threshold.
+         * @param expanderRatio Expander ratio (1:N) (input:output) for signals below the Noise Gate
+         * Threshold.
          * @param preGain Gain applied to the signal BEFORE the compression.
          * @param postGain Gain applied to the signal AFTER compression.
          */
@@ -618,13 +618,13 @@ public final class DynamicsProcessing extends AudioEffect {
          */
         public void setReleaseTime(float releaseTime) { mReleaseTime = releaseTime; }
         /**
-         * gets the compressor ratio (1:N)
-         * @return compressor ratio (1:N)
+         * gets the compressor ratio (N:1)
+         * @return compressor ratio (N:1)
          */
         public float getRatio() { return mRatio; }
         /**
-         * sets compressor ratio (1:N)
-         * @param ratio desired for the compressor (1:N)
+         * sets compressor ratio (N:1)
+         * @param ratio desired for the compressor (N:1)
          */
         public void setRatio(float ratio) { mRatio = ratio; }
         /**
@@ -670,13 +670,13 @@ public final class DynamicsProcessing extends AudioEffect {
         public void setNoiseGateThreshold(float noiseGateThreshold) {
             mNoiseGateThreshold = noiseGateThreshold; }
         /**
-         * gets Expander ratio (N:1) for signals below the Noise Gate Threshold.
-         * @return Expander ratio (N:1)
+         * gets Expander ratio (1:N) for signals below the Noise Gate Threshold.
+         * @return Expander ratio (1:N)
          */
         public float getExpanderRatio() { return mExpanderRatio; }
         /**
-         * sets Expander ratio (N:1) for signals below the Noise Gate Threshold.
-         * @param expanderRatio desired expander ratio (N:1)
+         * sets Expander ratio (1:N) for signals below the Noise Gate Threshold.
+         * @param expanderRatio desired expander ratio (1:N)
          */
         public void setExpanderRatio(float expanderRatio) { mExpanderRatio = expanderRatio; }
         /**
@@ -909,7 +909,7 @@ public final class DynamicsProcessing extends AudioEffect {
          * same linkGroup index will react together.
          * @param attackTime Attack Time for limiter compressor in milliseconds (ms)
          * @param releaseTime Release Time for limiter compressor in milliseconds (ms)
-         * @param ratio Limiter Compressor ratio (1:N)
+         * @param ratio Limiter Compressor ratio (N:1) (input:output)
          * @param threshold Limiter Compressor threshold measured in decibels (dB) from 0 dB Full
          * Scale (dBFS).
          * @param postGain Gain applied to the signal AFTER compression.
@@ -985,13 +985,13 @@ public final class DynamicsProcessing extends AudioEffect {
          */
         public void setReleaseTime(float releaseTime) { mReleaseTime = releaseTime; }
         /**
-         * gets the limiter compressor ratio (1:N)
-         * @return limiter compressor ratio (1:N)
+         * gets the limiter compressor ratio (N:1)
+         * @return limiter compressor ratio (N:1)
          */
         public float getRatio() { return mRatio; }
         /**
-         * sets limiter compressor ratio (1:N)
-         * @param ratio desired for the limiter compressor (1:N)
+         * sets limiter compressor ratio (N:1)
+         * @param ratio desired for the limiter compressor (N:1)
          */
         public void setRatio(float ratio) { mRatio = ratio; }
         /**
