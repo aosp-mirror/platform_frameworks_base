@@ -24,6 +24,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.res.Resources;
+import android.content.res.ColorStateList;
 import android.graphics.Color;
 import android.hardware.fingerprint.FingerprintManager;
 import android.os.BatteryManager;
@@ -87,8 +88,8 @@ public class KeyguardIndicationController {
 
     private String mRestingIndication;
     private CharSequence mTransientIndication;
-    private int mTransientTextColor;
-    private int mInitialTextColor;
+    private ColorStateList mTransientTextColorState;
+    private ColorStateList mInitialTextColorState;
     private boolean mVisible;
 
     private boolean mPowerPluggedIn;
@@ -124,7 +125,8 @@ public class KeyguardIndicationController {
         mContext = context;
         mIndicationArea = indicationArea;
         mTextView = indicationArea.findViewById(R.id.keyguard_indication_text);
-        mInitialTextColor = mTextView != null ? mTextView.getCurrentTextColor() : Color.WHITE;
+        mInitialTextColorState = mTextView != null ?
+                mTextView.getTextColors() : ColorStateList.valueOf(Color.WHITE);
         mDisclosure = indicationArea.findViewById(R.id.keyguard_indication_enterprise_disclosure);
         mLockIcon = lockIcon;
         mWakeLock = new SettableWakeLock(wakeLock);
@@ -255,15 +257,16 @@ public class KeyguardIndicationController {
      * Shows {@param transientIndication} until it is hidden by {@link #hideTransientIndication}.
      */
     public void showTransientIndication(CharSequence transientIndication) {
-        showTransientIndication(transientIndication, mInitialTextColor);
+        showTransientIndication(transientIndication, mInitialTextColorState);
     }
 
     /**
      * Shows {@param transientIndication} until it is hidden by {@link #hideTransientIndication}.
      */
-    public void showTransientIndication(CharSequence transientIndication, int textColor) {
+    public void showTransientIndication(CharSequence transientIndication,
+            ColorStateList textColorState) {
         mTransientIndication = transientIndication;
-        mTransientTextColor = textColor;
+        mTransientTextColorState = textColorState;
         mHandler.removeMessages(MSG_HIDE_TRANSIENT);
         if (mDozing && !TextUtils.isEmpty(mTransientIndication)) {
             // Make sure this doesn't get stuck and burns in. Acquire wakelock until its cleared.
@@ -320,20 +323,20 @@ public class KeyguardIndicationController {
             String trustManagedIndication = getTrustManagedIndication();
             if (!mUserManager.isUserUnlocked(userId)) {
                 mTextView.switchIndication(com.android.internal.R.string.lockscreen_storage_locked);
-                mTextView.setTextColor(mInitialTextColor);
+                mTextView.setTextColor(mInitialTextColorState);
             } else if (!TextUtils.isEmpty(mTransientIndication)) {
                 mTextView.switchIndication(mTransientIndication);
-                mTextView.setTextColor(mTransientTextColor);
+                mTextView.setTextColor(mTransientTextColorState);
             } else if (!TextUtils.isEmpty(trustGrantedIndication)
                     && updateMonitor.getUserHasTrust(userId)) {
                 mTextView.switchIndication(trustGrantedIndication);
-                mTextView.setTextColor(mInitialTextColor);
+                mTextView.setTextColor(mInitialTextColorState);
             } else if (mPowerPluggedIn) {
                 String indication = computePowerIndication();
                 if (DEBUG_CHARGING_SPEED) {
                     indication += ",  " + (mChargingWattage / 1000) + " mW";
                 }
-                mTextView.setTextColor(mInitialTextColor);
+                mTextView.setTextColor(mInitialTextColorState);
                 if (animate) {
                     animateText(mTextView, indication);
                 } else {
@@ -343,10 +346,10 @@ public class KeyguardIndicationController {
                     && updateMonitor.getUserTrustIsManaged(userId)
                     && !updateMonitor.getUserHasTrust(userId)) {
                 mTextView.switchIndication(trustManagedIndication);
-                mTextView.setTextColor(mInitialTextColor);
+                mTextView.setTextColor(mInitialTextColorState);
             } else {
                 mTextView.switchIndication(mRestingIndication);
-                mTextView.setTextColor(mInitialTextColor);
+                mTextView.setTextColor(mInitialTextColorState);
             }
         }
     }
@@ -475,8 +478,8 @@ public class KeyguardIndicationController {
 
     public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
         pw.println("KeyguardIndicationController:");
-        pw.println("  mTransientTextColor: " + Integer.toHexString(mTransientTextColor));
-        pw.println("  mInitialTextColor: " + Integer.toHexString(mInitialTextColor));
+        pw.println("  mTransientTextColorState: " + mTransientTextColorState);
+        pw.println("  mInitialTextColorState: " + mInitialTextColorState);
         pw.println("  mPowerPluggedInWired: " + mPowerPluggedInWired);
         pw.println("  mPowerPluggedIn: " + mPowerPluggedIn);
         pw.println("  mPowerCharged: " + mPowerCharged);
@@ -528,12 +531,13 @@ public class KeyguardIndicationController {
             if (!updateMonitor.isUnlockingWithFingerprintAllowed()) {
                 return;
             }
-            int errorColor = Utils.getColorError(mContext);
+            ColorStateList errorColorState = Utils.getColorError(mContext);
             if (mStatusBarKeyguardViewManager.isBouncerShowing()) {
-                mStatusBarKeyguardViewManager.showBouncerMessage(helpString, errorColor);
+                mStatusBarKeyguardViewManager.showBouncerMessage(helpString,
+                        errorColorState.getDefaultColor());
             } else if (updateMonitor.isScreenOn()) {
                 mLockIcon.setTransientFpError(true);
-                showTransientIndication(helpString, errorColor);
+                showTransientIndication(helpString, errorColorState);
                 hideTransientIndicationDelayed(TRANSIENT_FP_ERROR_TIMEOUT);
                 mHandler.removeMessages(MSG_CLEAR_FP_MSG);
                 mHandler.sendMessageDelayed(mHandler.obtainMessage(MSG_CLEAR_FP_MSG),
@@ -552,17 +556,18 @@ public class KeyguardIndicationController {
                     || msgId == FingerprintManager.FINGERPRINT_ERROR_CANCELED) {
                 return;
             }
-            int errorColor = Utils.getColorError(mContext);
+            ColorStateList errorColorState = Utils.getColorError(mContext);
             if (mStatusBarKeyguardViewManager.isBouncerShowing()) {
                 // When swiping up right after receiving a fingerprint error, the bouncer calls
                 // authenticate leading to the same message being shown again on the bouncer.
                 // We want to avoid this, as it may confuse the user when the message is too
                 // generic.
                 if (mLastSuccessiveErrorMessage != msgId) {
-                    mStatusBarKeyguardViewManager.showBouncerMessage(errString, errorColor);
+                    mStatusBarKeyguardViewManager.showBouncerMessage(errString,
+                            errorColorState.getDefaultColor());
                 }
             } else if (updateMonitor.isScreenOn()) {
-                showTransientIndication(errString, errorColor);
+                showTransientIndication(errString, errorColorState);
                 // We want to keep this message around in case the screen was off
                 hideTransientIndicationDelayed(HIDE_DELAY_MS);
             } else {
@@ -573,15 +578,13 @@ public class KeyguardIndicationController {
 
         @Override
         public void onTrustAgentErrorMessage(CharSequence message) {
-            int errorColor = Utils.getColorError(mContext);
-            showTransientIndication(message, errorColor);
+            showTransientIndication(message, Utils.getColorError(mContext));
         }
 
         @Override
         public void onScreenTurnedOn() {
             if (mMessageToShowOnScreenOn != null) {
-                int errorColor = Utils.getColorError(mContext);
-                showTransientIndication(mMessageToShowOnScreenOn, errorColor);
+                showTransientIndication(mMessageToShowOnScreenOn, Utils.getColorError(mContext));
                 // We want to keep this message around in case the screen was off
                 hideTransientIndicationDelayed(HIDE_DELAY_MS);
                 mMessageToShowOnScreenOn = null;
