@@ -18,13 +18,13 @@ package com.android.systemui.statusbar.car;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
+import android.car.user.CarUserManagerHelper;
 import android.content.Context;
 import android.view.View;
 import android.view.ViewStub;
 
 import android.support.v7.widget.GridLayoutManager;
 
-import com.android.settingslib.users.UserManagerHelper;
 import com.android.systemui.R;
 import com.android.systemui.statusbar.phone.StatusBar;
 
@@ -37,7 +37,7 @@ public class FullscreenUserSwitcher {
     private final UserGridRecyclerView mUserGridView;
     private final int mShortAnimDuration;
     private final StatusBar mStatusBar;
-    private final UserManagerHelper mUserManagerHelper;
+    private final CarUserManagerHelper mCarUserManagerHelper;
     private int mCurrentForegroundUserId;
     private boolean mShowing;
 
@@ -52,7 +52,7 @@ public class FullscreenUserSwitcher {
         mUserGridView.buildAdapter();
         mUserGridView.setUserSelectionListener(this::onUserSelected);
 
-        mUserManagerHelper = new UserManagerHelper(context);
+        mCarUserManagerHelper = new CarUserManagerHelper(context);
         updateCurrentForegroundUser();
 
         mShortAnimDuration = mContainer.getResources()
@@ -84,11 +84,11 @@ public class FullscreenUserSwitcher {
     }
 
     private boolean foregroundUserChanged() {
-        return mCurrentForegroundUserId != mUserManagerHelper.getForegroundUserId();
+        return mCurrentForegroundUserId != mCarUserManagerHelper.getCurrentForegroundUserId();
     }
 
     private void updateCurrentForegroundUser() {
-        mCurrentForegroundUserId = mUserManagerHelper.getForegroundUserId();
+        mCurrentForegroundUserId = mCarUserManagerHelper.getCurrentForegroundUserId();
     }
 
     private void onUserSelected(UserGridRecyclerView.UserRecord record) {
