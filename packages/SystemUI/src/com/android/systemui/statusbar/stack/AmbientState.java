@@ -30,7 +30,6 @@ import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.policy.HeadsUpManager;
 
 import java.util.ArrayList;
-import java.util.Collection;
 
 /**
  * A global state to track all input states for the algorithm.
@@ -72,6 +71,7 @@ public class AmbientState {
     private ExpandableNotificationRow mExpandingNotification;
     private int mDarkTopPadding;
     private float mDarkAmount;
+    private boolean mAppearing;
 
     public AmbientState(Context context) {
         reload(context);
@@ -435,5 +435,13 @@ public class AmbientState {
 
     public int getDarkTopPadding() {
         return mDarkTopPadding;
+    }
+
+    public void setAppearing(boolean appearing) {
+        mAppearing = appearing;
+    }
+
+    public boolean isAppearing() {
+        return mAppearing;
     }
 }
