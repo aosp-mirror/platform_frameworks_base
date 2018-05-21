@@ -184,6 +184,16 @@ public class ScrimControllerTest extends SysuiTestCase {
         mScrimController.finishAnimationsImmediately();
         assertScrimVisibility(VISIBILITY_FULLY_OPAQUE, VISIBILITY_FULLY_OPAQUE);
 
+        // ... and alpha updates should be completely ignored if always_on is off.
+        // Passing it forward would mess up the wake-up transition.
+        mAlwaysOnEnabled = false;
+        mScrimController.transitionTo(ScrimState.UNLOCKED);
+        mScrimController.transitionTo(ScrimState.AOD);
+        mScrimController.finishAnimationsImmediately();
+        mScrimController.setAodFrontScrimAlpha(0.3f);
+        Assert.assertEquals(ScrimState.AOD.getFrontAlpha(), mScrimInFront.getViewAlpha(), 0.001f);
+        Assert.assertNotEquals(0.3f, mScrimInFront.getViewAlpha(), 0.001f);
+
         // Reset value since enums are static.
         mScrimController.setAodFrontScrimAlpha(0f);
     }
