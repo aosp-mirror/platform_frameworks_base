@@ -1388,7 +1388,19 @@ class AlarmManagerService extends SystemService {
         }
 
         synchronized (mLock) {
-            return setKernelTime(mNativeData, millis) == 0;
+            final long currentTimeMillis = System.currentTimeMillis();
+            setKernelTime(mNativeData, millis);
+            final TimeZone timeZone = TimeZone.getDefault();
+            final int currentTzOffset = timeZone.getOffset(currentTimeMillis);
+            final int newTzOffset = timeZone.getOffset(millis);
+            if (currentTzOffset != newTzOffset) {
+                Slog.i(TAG, "Timezone offset has changed, updating kernel timezone");
+                setKernelTimezone(mNativeData, -(newTzOffset / 60000));
+            }
+            // The native implementation of setKernelTime can return -1 even when the kernel
+            // time was set correctly, so assume setting kernel time was successful and always
+            // return true.
+            return true;
         }
     }
 
