@@ -3986,27 +3986,40 @@ message MetricsEvent {
     // OS: O
     APP_TRANSITION_IS_EPHEMERAL = 905;
 
-    // An autofill session was started
+    // An autofill session was started.
+    // OS: O
     // Package: Package of app that is autofilled
     // NOTE: starting on OS MR1, it also added the following field:
     // Tag FIELD_AUTOFILL_SERVICE: Package of service that processed the request
     // NOTE: starting on OS P, it also added the following field:
-    // Tag FIELD_FLAGS - Flags used to start the session
+    // Tag FIELD_AUTOFIL_FLAGS - Flags used to start the session
     // Type FIELD_AUTOFILL_COMPAT_MODE: package is being autofilled on compatibility mode.
     AUTOFILL_SESSION_STARTED = 906;
 
     // An autofill request was processed by a service
-    // Type TYPE_SUCCESS: The request succeeded
-    // Type TYPE_FAILURE: The request failed
+    // Type TYPE_SUCCESS: service called FillCalback.onSuccess()
+    // Type TYPE_FAILURE: service called FillCallback.onFailure()
     // Package: Package of app that is autofilled
     // Tag FIELD_AUTOFILL_SERVICE: Package of service that processed the request
     // Tag FIELD_AUTOFILL_NUM_DATASETS: The number of datasets returned in the response, or -1 if
-    // the service returned a null response.
-    // NOTE: starting on OS P, it also added:
-    // Type TYPE_CLOSE: Service returned a null response.
+    // the service returned a null response
+    // NOTE: starting on OS P, it also added the following fields:
+    // TYPE_CLOSE: request timed out before service called a FillCallback method
+    // Tag FIELD_AUTOFILL_REQUEST_ORDINAL: sequence number of the request inside a session; starts
+    //     with 1.
+    // Tag FIELD_AUTOFILL_FLAGS: flags used to request autofill
+    // Tag FIELD_AUTOFILL_DURATION: how long it took (in ms) to show the autofill UI after a field
+    //     was focused.
+    // Tag FIELD_AUTOFILL_AUTHENTICATION_STATUS: status of authenticated datasets or responses.
     // Tag FIELD_AUTOFILL_NUM_FIELD_CLASSIFICATION_IDS: if service requested field classification,
-    // number of entries field ids in the request.
-    // Type FIELD_AUTOFILL_COMPAT_MODE: package is being autofilled on compatibility mode.
+    //     number of entries field ids in the request.
+    // Tag FIELD_AUTOFILL_COMPAT_MODE: package is being autofilled on compatibility mode.
+    // NOTE: Prior to P, some of the fields above were logged by 5 different metrics:
+    // - AUTOFILL_UI_LATENCY
+    // - AUTOFILL_AUTHENTICATED;
+    // - AUTOFILL_DATASET_AUTHENTICATED
+    // - AUTOFILL_INVALID_AUTHENTICATION
+    // - AUTOFILL_INVALID_DATASET_AUTHENTICATION
     AUTOFILL_REQUEST = 907;
 
     // Tag of a field for a package of an autofill service
@@ -4025,7 +4038,7 @@ message MetricsEvent {
     // Tag FIELD_AUTOFILL_NUM_DATASETS: The number of datasets shown
     // NOTE: starting on OS P, it also added the following field:
     // Tag FIELD_AUTOFILL_SERVICE: Package of service that processed the request
-    // Type FIELD_AUTOFILL_COMPAT_MODE: package is being autofilled on compatibility mode.
+    // Tag FIELD_AUTOFILL_COMPAT_MODE: package is being autofilled on compatibility mode.
     AUTOFILL_FILL_UI = 910;
 
     // Tag of a field for the length of the filter text
@@ -4034,8 +4047,7 @@ message MetricsEvent {
     // An autofill authentication succeeded
     // Package: Package of app that was autofilled
     // Tag FIELD_AUTOFILL_SERVICE: Package of service that processed the request
-    // NOTE: starting on OS P, it also added the following field:
-    // Type FIELD_AUTOFILL_COMPAT_MODE: package is being autofilled on compatibility mode.
+    // NOTE: starting on OS P, this metric became a value for FIELD_AUTOFILL_AUTHENTICATION_STATUS
     AUTOFILL_AUTHENTICATED = 912;
 
     // An activity was autofilled and all values could be applied
@@ -4043,7 +4055,7 @@ message MetricsEvent {
     // Tag FIELD_AUTOFILL_NUM_VALUES: Number of values that were suggested to be autofilled
     // Tag FIELD_AUTOFILL_NUM_VIEWS_FILLED: Number of views that could be filled
     // NOTE: starting on OS P, it also added the following field:
-    // Type FIELD_AUTOFILL_COMPAT_MODE: package is being autofilled on compatibility mode.
+    // Tag FIELD_AUTOFILL_COMPAT_MODE: package is being autofilled on compatibility mode.
     AUTOFILL_DATASET_APPLIED = 913;
 
     // Tag of a field for the number values to be filled in
@@ -4060,26 +4072,30 @@ message MetricsEvent {
     // Tag FIELD_AUTOFILL_NUM_IDS: The number of ids that are saved
     // NOTE: starting on OS P, it also added the following field:
     // Tag FIELD_AUTOFILL_SERVICE: Package of service that processed the request
-    // Type FIELD_AUTOFILL_COMPAT_MODE: package is being autofilled on compatibility mode.
+    // Tag FIELD_AUTOFILL_COMPAT_MODE: package is being autofilled on compatibility mode.
     AUTOFILL_SAVE_UI = 916;
 
     // Tag of a field for the number of saveable ids
     FIELD_AUTOFILL_NUM_IDS = 917;
 
-    // ACTION: An autofill service was reqiested to save data
+    // ACTION: An autofill service was requested to save data
     // Type TYPE_SUCCESS: The request succeeded right away
     // Type TYPE_OPEN: The request succeeded but the service launched an IntentSender
     // Type TYPE_FAILURE: The request failed
     // Package: Package of app that was autofilled
     // Tag FIELD_AUTOFILL_SERVICE: Package of service that processed the request
     // NOTE: starting on OS P, it also added the following field:
-    // Type FIELD_AUTOFILL_COMPAT_MODE: package is being autofilled on compatibility mode.
+    // Tag FIELD_AUTOFILL_COMPAT_MODE: package is being autofilled on compatibility mode.
     AUTOFILL_DATA_SAVE_REQUEST = 918;
 
     // An auto-fill session was finished
+    // OS: O
     // Package: Package of app that was autofilled
-    // NOTE: starting on OS P, it also added the following field:
-    // Type FIELD_AUTOFILL_COMPAT_MODE: package is being autofilled on compatibility mode.
+    // NOTE: starting on OS P, it also added the following fields:
+    // Tag FIELD_AUTOFILL_SERVICE: Package of service that processed the request
+    // Tag FIELD_AUTOFILL_COMPAT_MODE: package is being autofilled on compatibility mode.
+    // Tag FIELD_AUTOFILL_NUMBER_REQUESTS: number of requests made to the service (each request
+    //     is logged by a separate AUTOFILL_REQUEST metric)
     AUTOFILL_SESSION_FINISHED = 919;
 
     // meta-event: a reader has checkpointed the log here.
@@ -4206,7 +4222,7 @@ message MetricsEvent {
     // Tag FIELD_AUTOFILL_SERVICE: Package of the autofill service that processed the request
     // TAG FIELD_AUTOFILL_FORGED_COMPONENT_NAME: Component name being forged
     // NOTE: starting on OS P, it also added the following field:
-    // Type FIELD_AUTOFILL_COMPAT_MODE: package is being autofilled on compatibility mode.
+    // Tag FIELD_AUTOFILL_COMPAT_MODE: package is being autofilled on compatibility mode.
     AUTOFILL_FORGED_COMPONENT_ATTEMPT = 948;
 
     // FIELD - The component that an app tried tro forged.
@@ -4665,7 +4681,7 @@ message MetricsEvent {
     // Tag FIELD_AUTOFILL_SERVICE: Package of service that processed the request
     // Tag FIELD_AUTOFILL_PREVIOUS_LENGTH: the previous length of the value
     // NOTE: starting on OS P, it also added the following field:
-    // Type FIELD_AUTOFILL_COMPAT_MODE: package is being autofilled on compatibility mode.
+    // Tag FIELD_AUTOFILL_COMPAT_MODE: package is being autofilled on compatibility mode.
     AUTOFILL_VALUE_RESET = 1124;
 
     // Tag of AUTOFILL_VALUE_RESET
@@ -4675,25 +4691,21 @@ message MetricsEvent {
     // An autofill dataset authentication succeeded
     // Package: Package of app that was autofilled
     // OS: O MR
-    // Tag FIELD_AUTOFILL_SERVICE: Package of service that processed the request
-    // NOTE: starting on OS P, it also added the following field:
-    // Type FIELD_AUTOFILL_COMPAT_MODE: package is being autofilled on compatibility mode.
+    // NOTE: starting on OS P, this metric became a value for FIELD_AUTOFILL_AUTHENTICATION_STATUS
     AUTOFILL_DATASET_AUTHENTICATED = 1126;
 
     // An autofill service provided an invalid dataset authentication
     // Package: Package of app that was autofilled
     // OS: O MR
     // Tag FIELD_AUTOFILL_SERVICE: Package of service that processed the request
-    // NOTE: starting on OS P, it also added the following field:
-    // Type FIELD_AUTOFILL_COMPAT_MODE: package is being autofilled on compatibility mode.
+    // NOTE: starting on OS P, this metric became a value for FIELD_AUTOFILL_AUTHENTICATION_STATUS
     AUTOFILL_INVALID_DATASET_AUTHENTICATION = 1127;
 
     // An autofill service provided an invalid authentication extra
     // Package: Package of app that was autofilled
     // OS: O MR
     // Tag FIELD_AUTOFILL_SERVICE: Package of service that processed the request
-    // NOTE: starting on OS P, it also added the following field:
-    // Type FIELD_AUTOFILL_COMPAT_MODE: package is being autofilled on compatibility mode.
+    // NOTE: starting on OS P, this metric became a value for FIELD_AUTOFILL_AUTHENTICATION_STATUS
     AUTOFILL_INVALID_AUTHENTICATION = 1128;
 
     // An autofill service used a custom description (using RemoteViews) in the autofill save UI
@@ -4702,7 +4714,7 @@ message MetricsEvent {
     // Tag FIELD_AUTOFILL_SERVICE: Package of service that processed the request
     // Tag FIELD_AUTOFILL_SAVE_TYPE: Type of save object passed by the service
     // NOTE: starting on OS P, it also added the following field:
-    // Type FIELD_AUTOFILL_COMPAT_MODE: package is being autofilled on compatibility mode.
+    // Tag FIELD_AUTOFILL_COMPAT_MODE: package is being autofilled on compatibility mode.
     AUTOFILL_SAVE_CUSTOM_DESCRIPTION = 1129;
 
     // FIELD - Type of save object passed by the service when the Save UI is shown
@@ -4715,7 +4727,7 @@ message MetricsEvent {
     // Tag FIELD_AUTOFILL_SERVICE: Package of service that processed the request
     // Tag FIELD_AUTOFILL_SAVE_TYPE: Type of save object passed by the service
     // NOTE: starting on OS P, it also added the following field:
-    // Type FIELD_AUTOFILL_COMPAT_MODE: package is being autofilled on compatibility mode.
+    // Tag FIELD_AUTOFILL_COMPAT_MODE: package is being autofilled on compatibility mode.
     AUTOFILL_SAVE_CUSTOM_SUBTITLE = 1131;
 
     // User tapped a link in the custom description of the autofill save UI provided by an autofill service
@@ -4727,7 +4739,7 @@ message MetricsEvent {
     // Tag FIELD_AUTOFILL_SERVICE: Package of service that processed the request
     // Tag FIELD_AUTOFILL_SAVE_TYPE: Type of save object passed by the service
     // NOTE: starting on OS P, it also added the following field:
-    // Type FIELD_AUTOFILL_COMPAT_MODE: package is being autofilled on compatibility mode.
+    // Tag FIELD_AUTOFILL_COMPAT_MODE: package is being autofilled on compatibility mode.
     AUTOFILL_SAVE_LINK_TAPPED = 1132;
 
     // Result of the validation on save when an autofill service provided a validator
@@ -4739,7 +4751,7 @@ message MetricsEvent {
     // Tag FIELD_AUTOFILL_SERVICE: Package of service that processed the request
     // Tag FIELD_AUTOFILL_SAVE_TYPE: Type of save object passed by the service
     // NOTE: starting on OS P, it also added the following field:
-    // Type FIELD_AUTOFILL_COMPAT_MODE: package is being autofilled on compatibility mode.
+    // Tag FIELD_AUTOFILL_COMPAT_MODE: package is being autofilled on compatibility mode.
     AUTOFILL_SAVE_VALIDATION = 1133;
 
     // Result of an operation in the autofill save UI after the user tapped a link in the custom description
@@ -4750,7 +4762,7 @@ message MetricsEvent {
     // Type TYPE_DISMISS: The autofill save UI was destroyed
     // Type TYPE_FAILURE: An invalid opperation was reported by the app's AutofillManager
     // NOTE: starting on OS P, it also added the following field:
-    // Type FIELD_AUTOFILL_COMPAT_MODE: package is being autofilled on compatibility mode.
+    // Tag FIELD_AUTOFILL_COMPAT_MODE: package is being autofilled on compatibility mode.
     AUTOFILL_PENDING_SAVE_UI_OPERATION = 1134;
 
     // Autofill service called API that disables itself
@@ -4758,13 +4770,12 @@ message MetricsEvent {
     // OS: O MR
     AUTOFILL_SERVICE_DISABLED_SELF = 1135;
 
+    // DEPRECATED - on P it was merged with AUTOFILL_REQUEST
     // Reports how long it took to show the autofill UI after a field was focused
     // Tag FIELD_AUTOFILL_DURATION: Duration in ms
     // Tag FIELD_AUTOFILL_SERVICE: Package of service that processed the request
     // Package: Package of the autofill service
     // OS: O MR
-    // NOTE: starting on OS P, it also added the following field:
-    // Type FIELD_AUTOFILL_COMPAT_MODE: package is being autofilled on compatibility mode.
     AUTOFILL_UI_LATENCY = 1136;
 
     // Action: the snooze leave-behind was shown after the user clicked the snooze icon
@@ -4932,14 +4943,14 @@ message MetricsEvent {
     // Package: Package of app that is autofilled
     // OS: P
     // Tag FIELD_AUTOFILL_SERVICE: Package of service that processed the request
-    // Type FIELD_AUTOFILL_COMPAT_MODE: package is being autofilled on compatibility mode.
+    // Tag FIELD_AUTOFILL_COMPAT_MODE: package is being autofilled on compatibility mode.
     AUTOFILL_EXPLICIT_SAVE_TRIGGER_DEFINITION = 1228;
 
     // The autofill context was commited when the user clicked a view explicitly marked by the
     // service as committing it
     // Package: Package of app that is autofilled
     // OS: P
-    // Type FIELD_AUTOFILL_COMPAT_MODE: package is being autofilled on compatibility mode.
+    // Tag FIELD_AUTOFILL_COMPAT_MODE: package is being autofilled on compatibility mode.
     AUTOFILL_SAVE_EXPLICITLY_TRIGGERED = 1229;
 
     // OPEN: Settings > Network & Internet > Mobile network > Wi-Fi calling
@@ -4952,7 +4963,7 @@ message MetricsEvent {
     // OS: P
     // Tag FIELD_AUTOFILL_SERVICE: Package of service that processed the request
     // Tag FIELD_AUTOFILL_DURATION: duration (in ms) that autofill will be disabled
-    // Type FIELD_AUTOFILL_COMPAT_MODE: package is being autofilled on compatibility mode.
+    // Tag FIELD_AUTOFILL_COMPAT_MODE: package is being autofilled on compatibility mode.
     AUTOFILL_SERVICE_DISABLED_APP = 1231;
 
     // An autofill service asked to disable autofill for a given activity.
@@ -4961,7 +4972,7 @@ message MetricsEvent {
     // Tag FIELD_AUTOFILL_SERVICE: Package of service that processed the request
     // Tag FIELD_CLASS_NAME: Class name of the activity that is being disabled for autofill
     // Tag FIELD_AUTOFILL_DURATION: duration (in ms) that autofill will be disabled
-    // Type FIELD_AUTOFILL_COMPAT_MODE: package is being autofilled on compatibility mode.
+    // Tag FIELD_AUTOFILL_COMPAT_MODE: package is being autofilled on compatibility mode.
     AUTOFILL_SERVICE_DISABLED_ACTIVITY = 1232;
 
     // ACTION: Stop an app and turn on background check
@@ -5173,7 +5184,7 @@ message MetricsEvent {
     // OS: P
     // Tag FIELD_AUTOFILL_SERVICE: Package of service that processed the request
     // Tag FIELD_AUTOFILL_MATCH_SCORE: Average score of the matches, in the range of 0 to 100
-    // Type FIELD_AUTOFILL_COMPAT_MODE: package is being autofilled on compatibility mode.
+    // Tag FIELD_AUTOFILL_COMPAT_MODE: package is being autofilled on compatibility mode.
     AUTOFILL_FIELD_CLASSIFICATION_MATCHES = 1273;
 
     // Tag used to report autofill field classification scores
@@ -5840,6 +5851,7 @@ message MetricsEvent {
     ACTION_STORAGE_MIGRATE_LATER = 1413;
 
     // Tag used to report whether an activity is being autofilled  on compatibility mode.
+    // OS: P
     FIELD_AUTOFILL_COMPAT_MODE = 1414;
 
     // OPEN: Settings > Sound > Switch a2dp devices dialog
@@ -6044,6 +6056,28 @@ message MetricsEvent {
     // CATEGORY: OTHER
     // OS: P
     ACTION_BATTERY_CAUSED_SHUTDOWN = 1451;
+
+    // FIELD: Flags used on autofill-related metrics
+    // OS: P
+    FIELD_AUTOFILL_FLAGS = 1452;
+
+    // Tag used when the service returned an authenticated dataset or response.
+    // Used to replace the following individual metrics, which now are logged as the value of this
+    // field in the AUTOFILL_REQUEST metric:
+    // - AUTOFILL_AUTHENTICATED;
+    // - AUTOFILL_DATASET_AUTHENTICATED
+    // - AUTOFILL_INVALID_AUTHENTICATION
+    // - AUTOFILL_INVALID_DATASET_AUTHENTICATION
+    // OS: P
+    FIELD_AUTOFILL_AUTHENTICATION_STATUS = 1453;
+
+    // FIELD: Index of the autofill request inside of a session.
+    // OS: P
+    FIELD_AUTOFILL_REQUEST_ORDINAL = 1454;
+
+    // FIELD: Number of requests made to an autofill service during a session.
+    // OS: P
+    FIELD_AUTOFILL_NUMBER_REQUESTS = 1455;
 
     // ---- End P Constants, all P constants go above this line ----
 

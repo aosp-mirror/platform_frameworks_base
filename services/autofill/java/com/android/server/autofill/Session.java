@@ -27,6 +27,7 @@ import static android.view.autofill.AutofillManager.ACTION_VIEW_ENTERED;
 import static android.view.autofill.AutofillManager.ACTION_VIEW_EXITED;
 
 import static com.android.internal.util.function.pooled.PooledLambda.obtainMessage;
+import static com.android.server.autofill.Helper.getNumericValue;
 import static com.android.server.autofill.Helper.sDebug;
 import static com.android.server.autofill.Helper.sPartitionMaxCount;
 import static com.android.server.autofill.Helper.sVerbose;
@@ -93,6 +94,7 @@ import com.android.server.autofill.ui.AutoFillUI;
 import com.android.server.autofill.ui.PendingUi;
 
 import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -176,7 +178,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
 
     /**
      * Contexts read from the app; they will be updated (sanitized, change values for save) before
-     * sent to {@link AutofillService}. Ordered by the time they we read.
+     * sent to {@link AutofillService}. Ordered by the time they were read.
      */
     @GuardedBy("mLock")
     private ArrayList<FillContext> mContexts;
@@ -229,6 +231,12 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
 
     @GuardedBy("mLock")
     private final LocalLog mWtfHistory;
+
+    /**
+     * Map of {@link MetricsEvent#AUTOFILL_REQUEST} metrics, keyed by fill request id.
+     */
+    @GuardedBy("mLock")
+    private final SparseArray<LogMaker> mRequestLogs = new SparseArray<>(1);
 
     /**
      * Receiver of assist data from the app's {@link Activity}.
@@ -483,8 +491,18 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
             requestId = sIdCounter.getAndIncrement();
         } while (requestId == INVALID_REQUEST_ID);
 
+        // Create a metrics log for the request
+        final int ordinal = mRequestLogs.size() + 1;
+        final LogMaker log = newLogMaker(MetricsEvent.AUTOFILL_REQUEST)
+                .addTaggedData(MetricsEvent.FIELD_AUTOFILL_REQUEST_ORDINAL, ordinal);
+        if (flags != 0) {
+            log.addTaggedData(MetricsEvent.FIELD_AUTOFILL_FLAGS, flags);
+        }
+        mRequestLogs.put(requestId, log);
+
         if (sVerbose) {
-            Slog.v(TAG, "Requesting structure for requestId=" + requestId + ", flags=" + flags);
+            Slog.v(TAG, "Requesting structure for request #" + ordinal + " ,requestId="
+                    + requestId + ", flags=" + flags);
         }
 
         // If the focus changes very quickly before the first request is returned each focus change
@@ -537,7 +555,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
         setClientLocked(client);
 
         mMetricsLogger.write(newLogMaker(MetricsEvent.AUTOFILL_SESSION_STARTED)
-                .addTaggedData(MetricsEvent.FIELD_FLAGS, flags));
+                .addTaggedData(MetricsEvent.FIELD_AUTOFILL_FLAGS, flags));
     }
 
     /**
@@ -604,9 +622,11 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
 
     // FillServiceCallbacks
     @Override
-    public void onFillRequestSuccess(int requestFlags, @Nullable FillResponse response,
-            @NonNull String servicePackageName) {
+    public void onFillRequestSuccess(int requestId, @Nullable FillResponse response,
+            @NonNull String servicePackageName, int requestFlags) {
         final AutofillId[] fieldClassificationIds;
+
+        final LogMaker requestLog;
 
         synchronized (mLock) {
             if (mDestroyed) {
@@ -614,11 +634,18 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                         + id + " destroyed");
                 return;
             }
+
+            requestLog = mRequestLogs.get(requestId);
+            if (requestLog != null) {
+                requestLog.setType(MetricsEvent.TYPE_SUCCESS);
+            } else {
+                Slog.w(TAG, "onFillRequestSuccess(): no request log for id " + requestId);
+            }
             if (response == null) {
+                if (requestLog != null) {
+                    requestLog.addTaggedData(MetricsEvent.FIELD_AUTOFILL_NUM_DATASETS, -1);
+                }
                 processNullResponseLocked(requestFlags);
-                mMetricsLogger.write(newLogMaker(MetricsEvent.AUTOFILL_REQUEST, servicePackageName)
-                        .setType(MetricsEvent.TYPE_SUCCESS)
-                        .addTaggedData(MetricsEvent.FIELD_AUTOFILL_NUM_DATASETS, -1));
                 return;
             }
 
@@ -659,38 +686,54 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
             // Response is "empty" from an UI point of view, need to notify client.
             notifyUnavailableToClient(sessionFinishedState);
         }
+
+        if (requestLog != null) {
+            requestLog.addTaggedData(MetricsEvent.FIELD_AUTOFILL_NUM_DATASETS,
+                            response.getDatasets() == null ? 0 : response.getDatasets().size());
+            if (fieldClassificationIds != null) {
+                requestLog.addTaggedData(
+                        MetricsEvent.FIELD_AUTOFILL_NUM_FIELD_CLASSIFICATION_IDS,
+                        fieldClassificationIds.length);
+            }
+        }
+
         synchronized (mLock) {
             processResponseLocked(response, null, requestFlags);
         }
-
-        final LogMaker log = newLogMaker(MetricsEvent.AUTOFILL_REQUEST, servicePackageName)
-                .setType(MetricsEvent.TYPE_SUCCESS)
-                .addTaggedData(MetricsEvent.FIELD_AUTOFILL_NUM_DATASETS,
-                        response.getDatasets() == null ? 0 : response.getDatasets().size());
-        if (fieldClassificationIds != null) {
-            log.addTaggedData(MetricsEvent.FIELD_AUTOFILL_NUM_FIELD_CLASSIFICATION_IDS,
-                    fieldClassificationIds.length);
-        }
-        mMetricsLogger.write(log);
     }
 
     // FillServiceCallbacks
     @Override
-    public void onFillRequestFailure(@Nullable CharSequence message,
+    public void onFillRequestFailure(int requestId, @Nullable CharSequence message,
             @NonNull String servicePackageName) {
+        onFillRequestFailureOrTimeout(requestId, false, message, servicePackageName);
+    }
+
+    // FillServiceCallbacks
+    @Override
+    public void onFillRequestTimeout(int requestId, @NonNull String servicePackageName) {
+        onFillRequestFailureOrTimeout(requestId, true, null, servicePackageName);
+    }
+
+    private void onFillRequestFailureOrTimeout(int requestId, boolean timedOut,
+            @Nullable CharSequence message, @NonNull String servicePackageName) {
         synchronized (mLock) {
             if (mDestroyed) {
-                Slog.w(TAG, "Call to Session#onFillRequestFailure() rejected - session: "
-                        + id + " destroyed");
+                Slog.w(TAG, "Call to Session#onFillRequestFailureOrTimeout(req=" + requestId
+                        + ") rejected - session: " + id + " destroyed");
                 return;
             }
             mService.resetLastResponse();
+            final LogMaker requestLog = mRequestLogs.get(requestId);
+            if (requestLog == null) {
+                Slog.w(TAG, "onFillRequestFailureOrTimeout(): no log for id " + requestId);
+            } else {
+                requestLog.setType(timedOut ? MetricsEvent.TYPE_CLOSE : MetricsEvent.TYPE_FAILURE);
+            }
         }
-        LogMaker log = newLogMaker(MetricsEvent.AUTOFILL_REQUEST, servicePackageName)
-                .setType(MetricsEvent.TYPE_FAILURE);
-        mMetricsLogger.write(log);
-
-        getUiForShowing().showError(message, this);
+        if (message != null) {
+            getUiForShowing().showError(message, this);
+        }
         removeSelf();
     }
 
@@ -973,11 +1016,12 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                     + ", clientState=" + newClientState);
         }
         if (result instanceof FillResponse) {
-            writeLog(MetricsEvent.AUTOFILL_AUTHENTICATED);
+            logAuthenticationStatusLocked(requestId, MetricsEvent.AUTOFILL_AUTHENTICATED);
             replaceResponseLocked(authenticatedResponse, (FillResponse) result, newClientState);
         } else if (result instanceof Dataset) {
             if (datasetIdx != AutofillManager.AUTHENTICATION_ID_DATASET_ID_UNDEFINED) {
-                writeLog(MetricsEvent.AUTOFILL_DATASET_AUTHENTICATED);
+                logAuthenticationStatusLocked(requestId,
+                        MetricsEvent.AUTOFILL_DATASET_AUTHENTICATED);
                 if (newClientState != null) {
                     if (sDebug) Slog.d(TAG,  "Updating client state from auth dataset");
                     mClientState = newClientState;
@@ -986,13 +1030,15 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                 authenticatedResponse.getDatasets().set(datasetIdx, dataset);
                 autoFill(requestId, datasetIdx, dataset, false);
             } else {
-                writeLog(MetricsEvent.AUTOFILL_INVALID_DATASET_AUTHENTICATION);
+                logAuthenticationStatusLocked(requestId,
+                        MetricsEvent.AUTOFILL_INVALID_DATASET_AUTHENTICATION);
             }
         } else {
             if (result != null) {
                 Slog.w(TAG, "service returned invalid auth type: " + result);
             }
-            writeLog(MetricsEvent.AUTOFILL_INVALID_AUTHENTICATION);
+            logAuthenticationStatusLocked(requestId,
+                    MetricsEvent.AUTOFILL_INVALID_AUTHENTICATION);
             processNullResponseLocked(0);
         }
     }
@@ -1404,7 +1450,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
          *   the current values of all fields in the screen.
          */
         if (saveInfo == null) {
-            if (sVerbose) Slog.w(TAG, "showSaveLocked(): no saveInfo from service");
+            if (sVerbose) Slog.v(TAG, "showSaveLocked(): no saveInfo from service");
             return true;
         }
 
@@ -2065,7 +2111,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
     }
 
     @Override
-    public void onFillReady(FillResponse response, AutofillId filledId,
+    public void onFillReady(@NonNull FillResponse response, @NonNull AutofillId filledId,
             @Nullable AutofillValue value) {
         synchronized (mLock) {
             if (mDestroyed) {
@@ -2103,9 +2149,8 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                 TimeUtils.formatDuration(duration, historyLog);
                 mUiLatencyHistory.log(historyLog.toString());
 
-                final LogMaker metricsLog = newLogMaker(MetricsEvent.AUTOFILL_UI_LATENCY)
-                        .addTaggedData(MetricsEvent.FIELD_AUTOFILL_DURATION, duration);
-                mMetricsLogger.write(metricsLog);
+                addTaggedDataToRequestLogLocked(response.getRequestId(),
+                        MetricsEvent.FIELD_AUTOFILL_DURATION, duration);
             }
         }
     }
@@ -2474,6 +2519,14 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
             TimeUtils.formatDuration(mUiShownTime - mStartTime, pw);
             pw.println();
         }
+        final int requestLogsSizes = mRequestLogs.size();
+        pw.print(prefix); pw.print("mSessionLogs: "); pw.println(requestLogsSizes);
+        for (int i = 0; i < requestLogsSizes; i++) {
+            final int requestId = mRequestLogs.keyAt(i);
+            final LogMaker log = mRequestLogs.valueAt(i);
+            pw.print(prefix2); pw.print('#'); pw.print(i); pw.print(": req=");
+            pw.print(requestId); pw.print(", log=" ); dumpRequestLog(pw, log); pw.println();
+        }
         pw.print(prefix); pw.print("mResponses: ");
         if (mResponses == null) {
             pw.println("null");
@@ -2530,6 +2583,56 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                 mSaveOnAllViewsInvisible);
         pw.print(prefix); pw.print("mSelectedDatasetIds: "); pw.println(mSelectedDatasetIds);
         mRemoteFillService.dump(prefix, pw);
+    }
+
+    private static void dumpRequestLog(@NonNull PrintWriter pw, @NonNull LogMaker log) {
+        pw.print("CAT="); pw.print(log.getCategory());
+        pw.print(", TYPE=");
+        final int type = log.getType();
+        switch (type) {
+            case MetricsEvent.TYPE_SUCCESS: pw.print("SUCCESS"); break;
+            case MetricsEvent.TYPE_FAILURE: pw.print("FAILURE"); break;
+            case MetricsEvent.TYPE_CLOSE: pw.print("CLOSE"); break;
+            default: pw.print("UNSUPPORTED");
+        }
+        pw.print('('); pw.print(type); pw.print(')');
+        pw.print(", PKG="); pw.print(log.getPackageName());
+        pw.print(", SERVICE="); pw.print(log
+                .getTaggedData(MetricsEvent.FIELD_AUTOFILL_SERVICE));
+        pw.print(", ORDINAL="); pw.print(log
+                .getTaggedData(MetricsEvent.FIELD_AUTOFILL_REQUEST_ORDINAL));
+        dumpNumericValue(pw, log, "FLAGS", MetricsEvent.FIELD_AUTOFILL_FLAGS);
+        dumpNumericValue(pw, log, "NUM_DATASETS", MetricsEvent.FIELD_AUTOFILL_NUM_DATASETS);
+        dumpNumericValue(pw, log, "UI_LATENCY", MetricsEvent.FIELD_AUTOFILL_DURATION);
+        final int authStatus =
+                getNumericValue(log, MetricsEvent.FIELD_AUTOFILL_AUTHENTICATION_STATUS);
+        if (authStatus != 0) {
+            pw.print(", AUTH_STATUS=");
+            switch (authStatus) {
+                case MetricsEvent.AUTOFILL_AUTHENTICATED:
+                    pw.print("AUTHENTICATED"); break;
+                case MetricsEvent.AUTOFILL_DATASET_AUTHENTICATED:
+                    pw.print("DATASET_AUTHENTICATED"); break;
+                case MetricsEvent.AUTOFILL_INVALID_AUTHENTICATION:
+                    pw.print("INVALID_AUTHENTICATION"); break;
+                case MetricsEvent.AUTOFILL_INVALID_DATASET_AUTHENTICATION:
+                    pw.print("INVALID_DATASET_AUTHENTICATION"); break;
+                default: pw.print("UNSUPPORTED");
+            }
+            pw.print('('); pw.print(authStatus); pw.print(')');
+        }
+        dumpNumericValue(pw, log, "FC_IDS",
+                MetricsEvent.FIELD_AUTOFILL_NUM_FIELD_CLASSIFICATION_IDS);
+        dumpNumericValue(pw, log, "COMPAT_MODE",
+                MetricsEvent.FIELD_AUTOFILL_COMPAT_MODE);
+    }
+
+    private static void dumpNumericValue(@NonNull PrintWriter pw, @NonNull LogMaker log,
+            @NonNull String field, int tag) {
+        final int value = getNumericValue(log, tag);
+        if (value != 0) {
+            pw.print(", "); pw.print(field); pw.print('='); pw.print(value);
+        }
     }
 
     void autoFillApp(Dataset dataset) {
@@ -2610,7 +2713,19 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
         mUi.destroyAll(mPendingSaveUi, this, true);
         mUi.clearCallback(this);
         mDestroyed = true;
-        writeLog(MetricsEvent.AUTOFILL_SESSION_FINISHED);
+
+        // Log metrics
+        final int totalRequests = mRequestLogs.size();
+        if (totalRequests > 0) {
+            if (sVerbose) Slog.v(TAG, "destroyLocked(): logging " + totalRequests + " requests");
+            for (int i = 0; i < totalRequests; i++) {
+                final LogMaker log = mRequestLogs.valueAt(i);
+                mMetricsLogger.write(log);
+            }
+        }
+        mMetricsLogger.write(newLogMaker(MetricsEvent.AUTOFILL_SESSION_FINISHED)
+                .addTaggedData(MetricsEvent.FIELD_AUTOFILL_NUMBER_REQUESTS, totalRequests));
+
         return mRemoteFillService;
     }
 
@@ -2725,6 +2840,29 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
 
     private void writeLog(int category) {
         mMetricsLogger.write(newLogMaker(category));
+    }
+
+    private void logAuthenticationStatusLocked(int requestId, int status) {
+        addTaggedDataToRequestLogLocked(requestId,
+                MetricsEvent.FIELD_AUTOFILL_AUTHENTICATION_STATUS, status);
+    }
+
+    private void addTaggedDataToRequestLogLocked(int requestId, int tag, @Nullable Object value) {
+        final LogMaker requestLog = mRequestLogs.get(requestId);
+        if (requestLog == null) {
+            Slog.w(TAG,
+                    "addTaggedDataToRequestLogLocked(tag=" + tag + "): no log for id " + requestId);
+            return;
+        }
+        requestLog.addTaggedData(tag, value);
+    }
+
+    private static String requestLogToString(@NonNull LogMaker log) {
+        final StringWriter sw = new StringWriter();
+        final PrintWriter pw = new PrintWriter(sw);
+        dumpRequestLog(pw, log);
+        pw.flush();
+        return sw.toString();
     }
 
     private void wtf(@Nullable Exception e, String fmt, Object...args) {
