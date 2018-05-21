@@ -74,6 +74,8 @@ MetricsManager::MetricsManager(const ConfigKey& key, const StatsdConfig& config,
                              mAllPeriodicAlarmTrackers, mConditionToMetricMap, mTrackerToMetricMap,
                              mTrackerToConditionMap, mNoReportMetricIds);
 
+    mHashStringsInReport = config.hash_strings_in_metric_report();
+
     if (config.allowed_log_source_size() == 0) {
         mConfigValid = false;
         ALOGE("Log source whitelist is empty! This config won't get any data. Suggest adding at "
@@ -201,8 +203,13 @@ void MetricsManager::onDumpReport(const int64_t dumpTimeStampNs,
         if (mNoReportMetricIds.find(producer->getMetricId()) == mNoReportMetricIds.end()) {
             uint64_t token = protoOutput->start(
                     FIELD_TYPE_MESSAGE | FIELD_COUNT_REPEATED | FIELD_ID_METRICS);
-            producer->onDumpReport(dumpTimeStampNs, include_current_partial_bucket, str_set,
-                                   protoOutput);
+            if (mHashStringsInReport) {
+                producer->onDumpReport(dumpTimeStampNs, include_current_partial_bucket, str_set,
+                                       protoOutput);
+            } else {
+                producer->onDumpReport(dumpTimeStampNs, include_current_partial_bucket, nullptr,
+                                       protoOutput);
+            }
             protoOutput->end(token);
         } else {
             producer->clearPastBuckets(dumpTimeStampNs);
