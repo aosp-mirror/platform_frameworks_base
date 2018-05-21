@@ -5574,8 +5574,7 @@ public abstract class PackageManager {
      * @hide
      */
     @SystemApi
-    @RequiresPermission(anyOf = {Manifest.permission.SUSPEND_APPS,
-            Manifest.permission.MANAGE_USERS})
+    @RequiresPermission(Manifest.permission.SUSPEND_APPS)
     public String[] setPackagesSuspended(String[] packageNames, boolean suspended,
             @Nullable PersistableBundle appExtras, @Nullable PersistableBundle launcherExtras,
             String dialogMessage) {
