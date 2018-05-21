@@ -399,16 +399,20 @@ public final class UsageEvents implements Parcelable {
      * {@hide}
      */
     public UsageEvents(Parcel in) {
-        mEventCount = in.readInt();
-        mIndex = in.readInt();
+        byte[] bytes = in.readBlob();
+        Parcel data = Parcel.obtain();
+        data.unmarshall(bytes, 0, bytes.length);
+        data.setDataPosition(0);
+        mEventCount = data.readInt();
+        mIndex = data.readInt();
         if (mEventCount > 0) {
-            mStringPool = in.createStringArray();
+            mStringPool = data.createStringArray();
 
-            final int listByteLength = in.readInt();
-            final int positionInParcel = in.readInt();
+            final int listByteLength = data.readInt();
+            final int positionInParcel = data.readInt();
             mParcel = Parcel.obtain();
             mParcel.setDataPosition(0);
-            mParcel.appendFrom(in, in.dataPosition(), listByteLength);
+            mParcel.appendFrom(data, data.dataPosition(), listByteLength);
             mParcel.setDataSize(mParcel.dataPosition());
             mParcel.setDataPosition(positionInParcel);
         }
@@ -586,10 +590,11 @@ public final class UsageEvents implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
-        dest.writeInt(mEventCount);
-        dest.writeInt(mIndex);
+        Parcel data = Parcel.obtain();
+        data.writeInt(mEventCount);
+        data.writeInt(mIndex);
         if (mEventCount > 0) {
-            dest.writeStringArray(mStringPool);
+            data.writeStringArray(mStringPool);
 
             if (mEventsToWrite != null) {
                 // Write out the events
@@ -604,31 +609,34 @@ public final class UsageEvents implements Parcelable {
                     final int listByteLength = p.dataPosition();
 
                     // Write the total length of the data.
-                    dest.writeInt(listByteLength);
+                    data.writeInt(listByteLength);
 
                     // Write our current position into the data.
-                    dest.writeInt(0);
+                    data.writeInt(0);
 
                     // Write the data.
-                    dest.appendFrom(p, 0, listByteLength);
+                    data.appendFrom(p, 0, listByteLength);
                 } finally {
                     p.recycle();
                 }
 
             } else if (mParcel != null) {
                 // Write the total length of the data.
-                dest.writeInt(mParcel.dataSize());
+                data.writeInt(mParcel.dataSize());
 
                 // Write out current position into the data.
-                dest.writeInt(mParcel.dataPosition());
+                data.writeInt(mParcel.dataPosition());
 
                 // Write the data.
-                dest.appendFrom(mParcel, 0, mParcel.dataSize());
+                data.appendFrom(mParcel, 0, mParcel.dataSize());
             } else {
                 throw new IllegalStateException(
                         "Either mParcel or mEventsToWrite must not be null");
             }
         }
+        // Data can be too large for a transact. Write the data as a Blob, which will be written to
+        // ashmem if too large.
+        dest.writeBlob(data.marshall());
     }
 
     public static final Creator<UsageEvents> CREATOR = new Creator<UsageEvents>() {
