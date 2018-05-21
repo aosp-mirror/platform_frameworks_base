@@ -364,6 +364,8 @@ message StatsdConfig {
 
   optional int64 ttl_in_seconds = 15;
 
+  optional bool hash_strings_in_metric_report = 16 [default = true];
+
   // Field number 1000 is reserved for later use.
   reserved 1000;
 }
