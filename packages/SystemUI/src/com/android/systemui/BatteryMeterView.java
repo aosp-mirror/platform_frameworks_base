@@ -141,6 +141,9 @@ public class BatteryMeterView extends LinearLayout implements
                         newUserId);
             }
         };
+
+        setClipChildren(false);
+        setClipToPadding(false);
     }
 
     public void setForceShowPercent(boolean show) {
