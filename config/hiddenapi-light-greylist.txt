@@ -5218,6 +5218,7 @@ Landroid/telephony/PhoneNumberUtils;->getUsernameFromUriNumber(Ljava/lang/String
 Landroid/telephony/PhoneNumberUtils;->isEmergencyNumber(Ljava/lang/String;Ljava/lang/String;)Z
 Landroid/telephony/PhoneNumberUtils;->isLocalEmergencyNumber(Landroid/content/Context;ILjava/lang/String;)Z
 Landroid/telephony/PhoneNumberUtils;->isNanp(Ljava/lang/String;)Z
+Landroid/telephony/PhoneNumberUtils;->isPotentialLocalEmergencyNumber(Landroid/content/Context;Ljava/lang/String;)Z
 Landroid/telephony/PhoneNumberUtils;->isUriNumber(Ljava/lang/String;)Z
 Landroid/telephony/PhoneNumberUtils;->isVoiceMailNumber(Landroid/content/Context;ILjava/lang/String;)Z
 Landroid/telephony/PhoneNumberUtils;->MIN_MATCH:I
@@ -8435,6 +8436,7 @@ Ldalvik/system/DexFile;->openDexFileNative(Ljava/lang/String;Ljava/lang/String;I
 Ldalvik/system/DexPathList$Element;-><init>(Ldalvik/system/DexFile;Ljava/io/File;)V
 Ldalvik/system/DexPathList$Element;-><init>(Ljava/io/File;ZLjava/io/File;Ldalvik/system/DexFile;)V
 Ldalvik/system/DexPathList$Element;->dexFile:Ldalvik/system/DexFile;
+Ldalvik/system/DexPathList$Element;->path:Ljava/io/File;
 Ldalvik/system/DexPathList$NativeLibraryElement;-><init>(Ljava/io/File;)V
 Ldalvik/system/DexPathList$NativeLibraryElement;->path:Ljava/io/File;
 Ldalvik/system/DexPathList;-><init>(Ljava/lang/ClassLoader;Ljava/lang/String;Ljava/lang/String;Ljava/io/File;)V
