@@ -115,8 +115,9 @@ public final class StatsManager {
         }
     }
 
+    // TODO: Temporary for backwards compatibility. Remove.
     /**
-     * TODO: Temporary for backwards compatibility. Remove.
+     * @deprecated Use {@link #addConfig(long, byte[])}
      */
     @RequiresPermission(allOf = { DUMP, PACKAGE_USAGE_STATS })
     public boolean addConfiguration(long configKey, byte[] config) {
@@ -149,8 +150,9 @@ public final class StatsManager {
         }
     }
 
+    // TODO: Temporary for backwards compatibility. Remove.
     /**
-     * TODO: Temporary for backwards compatibility. Remove.
+     * @deprecated Use {@link #removeConfig(long)}
      */
     @RequiresPermission(allOf = { DUMP, PACKAGE_USAGE_STATS })
     public boolean removeConfiguration(long configKey) {
@@ -216,8 +218,9 @@ public final class StatsManager {
         }
     }
 
+    // TODO: Temporary for backwards compatibility. Remove.
     /**
-     * TODO: Temporary for backwards compatibility. Remove.
+     * @deprecated Use {@link #setBroadcastSubscriber(PendingIntent, long, long)}
      */
     @RequiresPermission(allOf = { DUMP, PACKAGE_USAGE_STATS })
     public boolean setBroadcastSubscriber(
@@ -268,8 +271,9 @@ public final class StatsManager {
         }
     }
 
+    // TODO: Temporary for backwards compatibility. Remove.
     /**
-     * TODO: Temporary for backwards compatibility. Remove.
+     * @deprecated Use {@link #setFetchReportsOperation(PendingIntent, long)}
      */
     @RequiresPermission(allOf = { DUMP, PACKAGE_USAGE_STATS })
     public boolean setDataFetchOperation(long configKey, PendingIntent pendingIntent) {
@@ -304,8 +308,9 @@ public final class StatsManager {
         }
     }
 
+    // TODO: Temporary for backwards compatibility. Remove.
     /**
-     * TODO: Temporary for backwards compatibility. Remove.
+     * @deprecated Use {@link #getReports(long)}
      */
     @RequiresPermission(allOf = { DUMP, PACKAGE_USAGE_STATS })
     public @Nullable byte[] getData(long configKey) {
@@ -339,12 +344,9 @@ public final class StatsManager {
         }
     }
 
+    // TODO: Temporary for backwards compatibility. Remove.
     /**
-     * Clients can request metadata for statsd. Will contain stats across all configurations but not
-     * the actual metrics themselves (metrics must be collected via {@link #getReports(long)}.
-     * This getter is not destructive and will not reset any metrics/counters.
-     *
-     * @return Serialized StatsdStatsReport proto. Returns null on failure (eg, if statsd crashed).
+     * @deprecated Use {@link #getStatsMetadata()}
      */
     @RequiresPermission(allOf = { DUMP, PACKAGE_USAGE_STATS })
     public @Nullable byte[] getMetadata() {
