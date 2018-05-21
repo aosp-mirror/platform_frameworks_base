@@ -13,6 +13,7 @@
 #include <sys/stat.h>
 #include <unistd.h>
 
+#include <android-base/macros.h>
 #include <binder/IPCThreadState.h>
 #include <hwbinder/IPCThreadState.h>
 #include <utils/Log.h>
@@ -137,27 +138,12 @@ static size_t computeArgBlockSize(int argc, char* const argv[]) {
 }
 
 static void maybeCreateDalvikCache() {
-#if defined(__aarch64__)
-    static const char kInstructionSet[] = "arm64";
-#elif defined(__x86_64__)
-    static const char kInstructionSet[] = "x86_64";
-#elif defined(__arm__)
-    static const char kInstructionSet[] = "arm";
-#elif defined(__i386__)
-    static const char kInstructionSet[] = "x86";
-#elif defined (__mips__) && !defined(__LP64__)
-    static const char kInstructionSet[] = "mips";
-#elif defined (__mips__) && defined(__LP64__)
-    static const char kInstructionSet[] = "mips64";
-#else
-#error "Unknown instruction set"
-#endif
     const char* androidRoot = getenv("ANDROID_DATA");
     LOG_ALWAYS_FATAL_IF(androidRoot == NULL, "ANDROID_DATA environment variable unset");
 
     char dalvikCacheDir[PATH_MAX];
     const int numChars = snprintf(dalvikCacheDir, PATH_MAX,
-            "%s/dalvik-cache/%s", androidRoot, kInstructionSet);
+            "%s/dalvik-cache/" ABI_STRING, androidRoot);
     LOG_ALWAYS_FATAL_IF((numChars >= PATH_MAX || numChars < 0),
             "Error constructing dalvik cache : %s", strerror(errno));
 

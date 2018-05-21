@@ -42,6 +42,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.IntentSender;
 import android.content.pm.PackageParser.PackageParserException;
+import android.content.pm.dex.ArtManager;
 import android.content.res.Resources;
 import android.content.res.XmlResourceParser;
 import android.graphics.Rect;
@@ -1316,6 +1317,15 @@ public abstract class PackageManager {
      */
     public static final int INSTALL_FAILED_INSTANT_APP_INVALID = -116;
 
+    /**
+     * Installation parse return code: this is passed in the
+     * {@link PackageInstaller#EXTRA_LEGACY_STATUS} if the dex metadata file is invalid or
+     * if there was no matching apk file for a dex metadata file.
+     *
+     * @hide
+     */
+    public static final int INSTALL_FAILED_BAD_DEX_METADATA = -117;
+
     /** @hide */
     @IntDef(flag = true, prefix = { "DELETE_" }, value = {
             DELETE_KEEP_DATA,
@@ -2078,11 +2088,16 @@ public abstract class PackageManager {
     /**
      * Feature for {@link #getSystemAvailableFeatures} and {@link #hasSystemFeature}: The device
      * supports embedded subscriptions on eUICCs.
-     * TODO(b/35851809): Make this public.
-     * @hide
      */
     @SdkConstant(SdkConstantType.FEATURE)
     public static final String FEATURE_TELEPHONY_EUICC = "android.hardware.telephony.euicc";
+
+    /**
+     * Feature for {@link #getSystemAvailableFeatures} and {@link #hasSystemFeature}: The device
+     * supports cell-broadcast reception using the MBMS APIs.
+     */
+    @SdkConstant(SdkConstantType.FEATURE)
+    public static final String FEATURE_TELEPHONY_MBMS = "android.hardware.telephony.mbms";
 
     /**
      * Feature for {@link #getSystemAvailableFeatures} and
@@ -5627,6 +5642,8 @@ public abstract class PackageManager {
             case INSTALL_FAILED_DUPLICATE_PERMISSION: return "INSTALL_FAILED_DUPLICATE_PERMISSION";
             case INSTALL_FAILED_NO_MATCHING_ABIS: return "INSTALL_FAILED_NO_MATCHING_ABIS";
             case INSTALL_FAILED_ABORTED: return "INSTALL_FAILED_ABORTED";
+            case INSTALL_FAILED_BAD_DEX_METADATA:
+                return "INSTALL_FAILED_BAD_DEX_METADATA";
             default: return Integer.toString(status);
         }
     }
@@ -5671,6 +5688,7 @@ public abstract class PackageManager {
             case INSTALL_PARSE_FAILED_BAD_SHARED_USER_ID: return PackageInstaller.STATUS_FAILURE_INVALID;
             case INSTALL_PARSE_FAILED_MANIFEST_MALFORMED: return PackageInstaller.STATUS_FAILURE_INVALID;
             case INSTALL_PARSE_FAILED_MANIFEST_EMPTY: return PackageInstaller.STATUS_FAILURE_INVALID;
+            case INSTALL_FAILED_BAD_DEX_METADATA: return PackageInstaller.STATUS_FAILURE_INVALID;
             case INSTALL_FAILED_INTERNAL_ERROR: return PackageInstaller.STATUS_FAILURE;
             case INSTALL_FAILED_USER_RESTRICTED: return PackageInstaller.STATUS_FAILURE_INCOMPATIBLE;
             case INSTALL_FAILED_DUPLICATE_PERMISSION: return PackageInstaller.STATUS_FAILURE_CONFLICT;
@@ -5872,4 +5890,14 @@ public abstract class PackageManager {
     @SystemApi
     public abstract void registerDexModule(String dexModulePath,
             @Nullable DexModuleRegisterCallback callback);
+
+    /**
+     * Returns the {@link ArtManager} associated with this package manager.
+     *
+     * @hide
+     */
+    @SystemApi
+    public @NonNull ArtManager getArtManager() {
+        throw new UnsupportedOperationException("getArtManager not implemented in subclass");
+    }
 }

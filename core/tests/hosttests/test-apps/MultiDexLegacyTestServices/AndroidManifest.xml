@@ -7,6 +7,8 @@
     <uses-sdk
         android:minSdkVersion="9"
         android:targetSdkVersion="19" />
+    <!-- Required for com.android.framework.multidexlegacytestservices.test2 -->
+    <uses-permission android:name="android.permission.KILL_BACKGROUND_PROCESSES"/>
 
     <application
         android:label="MultiDexLegacyTestServices">
@@ -124,6 +126,6 @@
                 <action android:name="com.android.framework.multidexlegacytestservices.action.Service19" />
             </intent-filter>
         </service>
-        </application>
+    </application>
 
 </manifest>

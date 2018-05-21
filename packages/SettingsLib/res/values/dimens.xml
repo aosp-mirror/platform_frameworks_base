@@ -73,4 +73,9 @@
          fraction of a pixel.-->
     <fraction name="battery_subpixel_smoothing_left">0%</fraction>
     <fraction name="battery_subpixel_smoothing_right">0%</fraction>
+
+    <!-- SignalDrawable -->
+    <dimen name="signal_icon_size">17dp</dimen>
+    <!-- How far to inset the rounded edges -->
+    <dimen name="stat_sys_mobile_signal_circle_inset">0.9dp</dimen>
 </resources>

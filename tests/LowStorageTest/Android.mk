@@ -21,5 +21,6 @@ LOCAL_CERTIFICATE := platform
 LOCAL_SRC_FILES := $(call all-subdir-java-files)
 
 LOCAL_PACKAGE_NAME := lowstoragetest
+LOCAL_SDK_VERSION := current
 
 include $(BUILD_PACKAGE)

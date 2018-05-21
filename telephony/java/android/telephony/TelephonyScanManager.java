@@ -33,12 +33,12 @@ import android.util.Log;
 import android.util.SparseArray;
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.Executor;
 
 import com.android.internal.telephony.ITelephony;
 
 /**
  * Manages the radio access network scan requests and callbacks.
- * @hide
  */
 public final class TelephonyScanManager {
 
@@ -55,8 +55,11 @@ public final class TelephonyScanManager {
     public static final int CALLBACK_SCAN_COMPLETE = 3;
 
     /**
-     * The caller of {@link #requestNetworkScan(NetworkScanRequest, NetworkScanCallback)} should
-     * implement and provide this callback so that the scan results or errors can be returned.
+     * The caller of
+     * {@link
+     * TelephonyManager#requestNetworkScan(NetworkScanRequest, Executor, NetworkScanCallback)}
+     * should implement and provide this callback so that the scan results or errors can be
+     * returned.
      */
     public static abstract class NetworkScanCallback {
         /** Returns the scan results to the user, this callback will be called multiple times. */
@@ -75,16 +78,21 @@ public final class TelephonyScanManager {
          *
          * This callback will be called whenever there is any error about the scan, and the scan
          * will be terminated. onComplete() will NOT be called.
+         *
+         * @param error Error code when the scan is failed, as defined in {@link NetworkScan}.
          */
-        public void onError(int error) {}
+        public void onError(@NetworkScan.ScanErrorCode int error) {}
     }
 
     private static class NetworkScanInfo {
         private final NetworkScanRequest mRequest;
+        private final Executor mExecutor;
         private final NetworkScanCallback mCallback;
 
-        NetworkScanInfo(NetworkScanRequest request, NetworkScanCallback callback) {
+        NetworkScanInfo(
+                NetworkScanRequest request, Executor executor, NetworkScanCallback callback) {
             mRequest = request;
+            mExecutor = executor;
             mCallback = callback;
         }
     }
@@ -110,9 +118,14 @@ public final class TelephonyScanManager {
                         "Failed to find NetworkScanInfo with id " + message.arg2);
                 }
                 NetworkScanCallback callback = nsi.mCallback;
+                Executor executor = nsi.mExecutor;
                 if (callback == null) {
                     throw new RuntimeException(
                         "Failed to find NetworkScanCallback with id " + message.arg2);
+                }
+                if (executor == null) {
+                    throw new RuntimeException(
+                        "Failed to find Executor with id " + message.arg2);
                 }
 
                 switch (message.what) {
@@ -124,21 +137,31 @@ public final class TelephonyScanManager {
                             for (int i = 0; i < parcelables.length; i++) {
                                 ci[i] = (CellInfo) parcelables[i];
                             }
-                            callback.onResults((List<CellInfo>) Arrays.asList(ci));
+                            executor.execute(() ->{
+                                Rlog.d(TAG, "onResults: " + ci.toString());
+                                callback.onResults((List<CellInfo>) Arrays.asList(ci));
+                            });
                         } catch (Exception e) {
                             Rlog.e(TAG, "Exception in networkscan callback onResults", e);
                         }
                         break;
                     case CALLBACK_SCAN_ERROR:
                         try {
-                            callback.onError(message.arg1);
+                            final int errorCode = message.arg1;
+                            executor.execute(() -> {
+                                Rlog.d(TAG, "onError: " + errorCode);
+                                callback.onError(errorCode);
+                            });
                         } catch (Exception e) {
                             Rlog.e(TAG, "Exception in networkscan callback onError", e);
                         }
                         break;
                     case CALLBACK_SCAN_COMPLETE:
                         try {
-                            callback.onComplete();
+                            executor.execute(() -> {
+                                Rlog.d(TAG, "onComplete");
+                                callback.onComplete();
+                            });
                             mScanInfo.remove(message.arg2);
                         } catch (Exception e) {
                             Rlog.e(TAG, "Exception in networkscan callback onComplete", e);
@@ -169,12 +192,12 @@ public final class TelephonyScanManager {
      * @hide
      */
     public NetworkScan requestNetworkScan(int subId,
-            NetworkScanRequest request, NetworkScanCallback callback) {
+            NetworkScanRequest request, Executor executor, NetworkScanCallback callback) {
         try {
             ITelephony telephony = getITelephony();
             if (telephony != null) {
                 int scanId = telephony.requestNetworkScan(subId, request, mMessenger, new Binder());
-                saveScanInfo(scanId, request, callback);
+                saveScanInfo(scanId, request, executor, callback);
                 return new NetworkScan(scanId, subId);
             }
         } catch (RemoteException ex) {
@@ -185,9 +208,10 @@ public final class TelephonyScanManager {
         return null;
     }
 
-    private void saveScanInfo(int id, NetworkScanRequest request, NetworkScanCallback callback) {
+    private void saveScanInfo(
+            int id, NetworkScanRequest request, Executor executor, NetworkScanCallback callback) {
         synchronized (mScanInfo) {
-            mScanInfo.put(id, new NetworkScanInfo(request, callback));
+            mScanInfo.put(id, new NetworkScanInfo(request, executor, callback));
         }
     }
 

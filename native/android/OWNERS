@@ -1,0 +1,11 @@
+set noparent
+
+per-file libandroid_net.map.txt=ek@google.com
+per-file libandroid_net.map.txt=jchalard@google.com
+per-file libandroid_net.map.txt=lorenzo@google.com
+per-file libandroid_net.map.txt=satk@google.com
+
+per-file net.c=ek@google.com
+per-file net.c=jchalard@google.com
+per-file net.c=lorenzo@google.com
+per-file net.c=satk@google.com

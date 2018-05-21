@@ -27,6 +27,7 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.anyString;
+import static org.mockito.Matchers.argThat;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -34,16 +35,22 @@ import static org.mockito.Mockito.when;
 
 import android.content.Context;
 import android.net.INetd;
+import android.net.IpSecAlgorithm;
+import android.net.IpSecConfig;
 import android.net.IpSecManager;
 import android.net.IpSecSpiResponse;
 import android.net.IpSecTransform;
 import android.net.IpSecUdpEncapResponse;
 import android.os.Binder;
 import android.os.ParcelFileDescriptor;
+import android.os.Process;
 import android.support.test.filters.SmallTest;
 import android.support.test.runner.AndroidJUnit4;
 import android.system.ErrnoException;
 import android.system.Os;
+import android.system.StructStat;
+
+import dalvik.system.SocketTagger;
 
 import java.io.FileDescriptor;
 import java.net.InetAddress;
@@ -56,6 +63,7 @@ import java.util.List;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentMatcher;
 
 /** Unit tests for {@link IpSecService}. */
 @SmallTest
@@ -69,6 +77,33 @@ public class IpSecServiceTest {
     private static final int TEST_UDP_ENCAP_PORT_OUT_RANGE = 100000;
 
     private static final InetAddress INADDR_ANY;
+
+    private static final byte[] AEAD_KEY = {
+        0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07,
+        0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F,
+        0x10, 0x11, 0x12, 0x13, 0x14, 0x15, 0x16, 0x17,
+        0x18, 0x19, 0x1A, 0x1B, 0x1C, 0x1D, 0x1E, 0x1F,
+        0x73, 0x61, 0x6C, 0x74
+    };
+    private static final byte[] CRYPT_KEY = {
+        0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07,
+        0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F,
+        0x10, 0x11, 0x12, 0x13, 0x14, 0x15, 0x16, 0x17,
+        0x18, 0x19, 0x1A, 0x1B, 0x1C, 0x1D, 0x1E, 0x1F
+    };
+    private static final byte[] AUTH_KEY = {
+        0x7A, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+        0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x7F,
+        0x7A, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+        0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x7F
+    };
+
+    private static final IpSecAlgorithm AUTH_ALGO =
+            new IpSecAlgorithm(IpSecAlgorithm.AUTH_HMAC_SHA256, AUTH_KEY, AUTH_KEY.length * 4);
+    private static final IpSecAlgorithm CRYPT_ALGO =
+            new IpSecAlgorithm(IpSecAlgorithm.CRYPT_AES_CBC, CRYPT_KEY);
+    private static final IpSecAlgorithm AEAD_ALGO =
+            new IpSecAlgorithm(IpSecAlgorithm.AUTH_CRYPT_AES_GCM, AEAD_KEY, 128);
 
     static {
         try {
@@ -131,7 +166,39 @@ public class IpSecServiceTest {
         mIpSecService.closeUdpEncapsulationSocket(udpEncapResp.resourceId);
         udpEncapResp.fileDescriptor.close();
 
-        // TODO: Added check for the resource tracker
+        // Verify quota and RefcountedResource objects cleaned up
+        IpSecService.UserRecord userRecord =
+                mIpSecService.mUserResourceTracker.getUserRecord(Os.getuid());
+        assertEquals(0, userRecord.mSocketQuotaTracker.mCurrent);
+        try {
+            userRecord.mEncapSocketRecords.getRefcountedResourceOrThrow(udpEncapResp.resourceId);
+            fail("Expected IllegalArgumentException on attempt to access deleted resource");
+        } catch (IllegalArgumentException expected) {
+
+        }
+    }
+
+    @Test
+    public void testUdpEncapsulationSocketBinderDeath() throws Exception {
+        IpSecUdpEncapResponse udpEncapResp =
+                mIpSecService.openUdpEncapsulationSocket(0, new Binder());
+
+        IpSecService.UserRecord userRecord =
+                mIpSecService.mUserResourceTracker.getUserRecord(Os.getuid());
+        IpSecService.RefcountedResource refcountedRecord =
+                userRecord.mEncapSocketRecords.getRefcountedResourceOrThrow(
+                        udpEncapResp.resourceId);
+
+        refcountedRecord.binderDied();
+
+        // Verify quota and RefcountedResource objects cleaned up
+        assertEquals(0, userRecord.mSocketQuotaTracker.mCurrent);
+        try {
+            userRecord.mEncapSocketRecords.getRefcountedResourceOrThrow(udpEncapResp.resourceId);
+            fail("Expected IllegalArgumentException on attempt to access deleted resource");
+        } catch (IllegalArgumentException expected) {
+
+        }
     }
 
     @Test
@@ -232,9 +299,122 @@ public class IpSecServiceTest {
     }
 
     @Test
-    public void testDeleteInvalidTransportModeTransform() throws Exception {
+    public void testValidateAlgorithmsAuth() {
+        // Validate that correct algorithm type succeeds
+        IpSecConfig config = new IpSecConfig();
+        config.setAuthentication(AUTH_ALGO);
+        mIpSecService.validateAlgorithms(config);
+
+        // Validate that incorrect algorithm types fails
+        for (IpSecAlgorithm algo : new IpSecAlgorithm[] {CRYPT_ALGO, AEAD_ALGO}) {
+            try {
+                config = new IpSecConfig();
+                config.setAuthentication(algo);
+                mIpSecService.validateAlgorithms(config);
+                fail("Did not throw exception on invalid algorithm type");
+            } catch (IllegalArgumentException expected) {
+            }
+        }
+    }
+
+    @Test
+    public void testValidateAlgorithmsCrypt() {
+        // Validate that correct algorithm type succeeds
+        IpSecConfig config = new IpSecConfig();
+        config.setEncryption(CRYPT_ALGO);
+        mIpSecService.validateAlgorithms(config);
+
+        // Validate that incorrect algorithm types fails
+        for (IpSecAlgorithm algo : new IpSecAlgorithm[] {AUTH_ALGO, AEAD_ALGO}) {
+            try {
+                config = new IpSecConfig();
+                config.setEncryption(algo);
+                mIpSecService.validateAlgorithms(config);
+                fail("Did not throw exception on invalid algorithm type");
+            } catch (IllegalArgumentException expected) {
+            }
+        }
+    }
+
+    @Test
+    public void testValidateAlgorithmsAead() {
+        // Validate that correct algorithm type succeeds
+        IpSecConfig config = new IpSecConfig();
+        config.setAuthenticatedEncryption(AEAD_ALGO);
+        mIpSecService.validateAlgorithms(config);
+
+        // Validate that incorrect algorithm types fails
+        for (IpSecAlgorithm algo : new IpSecAlgorithm[] {AUTH_ALGO, CRYPT_ALGO}) {
+            try {
+                config = new IpSecConfig();
+                config.setAuthenticatedEncryption(algo);
+                mIpSecService.validateAlgorithms(config);
+                fail("Did not throw exception on invalid algorithm type");
+            } catch (IllegalArgumentException expected) {
+            }
+        }
+    }
+
+    @Test
+    public void testValidateAlgorithmsAuthCrypt() {
+        // Validate that correct algorithm type succeeds
+        IpSecConfig config = new IpSecConfig();
+        config.setAuthentication(AUTH_ALGO);
+        config.setEncryption(CRYPT_ALGO);
+        mIpSecService.validateAlgorithms(config);
+    }
+
+    @Test
+    public void testValidateAlgorithmsNoAlgorithms() {
+        IpSecConfig config = new IpSecConfig();
         try {
-            mIpSecService.deleteTransportModeTransform(1);
+            mIpSecService.validateAlgorithms(config);
+            fail("Expected exception; no algorithms specified");
+        } catch (IllegalArgumentException expected) {
+        }
+    }
+
+    @Test
+    public void testValidateAlgorithmsAeadWithAuth() {
+        IpSecConfig config = new IpSecConfig();
+        config.setAuthenticatedEncryption(AEAD_ALGO);
+        config.setAuthentication(AUTH_ALGO);
+        try {
+            mIpSecService.validateAlgorithms(config);
+            fail("Expected exception; both AEAD and auth algorithm specified");
+        } catch (IllegalArgumentException expected) {
+        }
+    }
+
+    @Test
+    public void testValidateAlgorithmsAeadWithCrypt() {
+        IpSecConfig config = new IpSecConfig();
+        config.setAuthenticatedEncryption(AEAD_ALGO);
+        config.setEncryption(CRYPT_ALGO);
+        try {
+            mIpSecService.validateAlgorithms(config);
+            fail("Expected exception; both AEAD and crypt algorithm specified");
+        } catch (IllegalArgumentException expected) {
+        }
+    }
+
+    @Test
+    public void testValidateAlgorithmsAeadWithAuthAndCrypt() {
+        IpSecConfig config = new IpSecConfig();
+        config.setAuthenticatedEncryption(AEAD_ALGO);
+        config.setAuthentication(AUTH_ALGO);
+        config.setEncryption(CRYPT_ALGO);
+        try {
+            mIpSecService.validateAlgorithms(config);
+            fail("Expected exception; AEAD, auth and crypt algorithm specified");
+        } catch (IllegalArgumentException expected) {
+        }
+    }
+
+    @Test
+    public void testDeleteInvalidTransform() throws Exception {
+        try {
+            mIpSecService.deleteTransform(1);
             fail("IllegalArgumentException not thrown");
         } catch (IllegalArgumentException e) {
         }
@@ -243,7 +423,7 @@ public class IpSecServiceTest {
     @Test
     public void testRemoveTransportModeTransform() throws Exception {
         ParcelFileDescriptor pfd = ParcelFileDescriptor.fromSocket(new Socket());
-        mIpSecService.removeTransportModeTransform(pfd, 1);
+        mIpSecService.removeTransportModeTransforms(pfd);
 
         verify(mMockNetd).ipSecRemoveTransportModeTransform(pfd.getFileDescriptor());
     }
@@ -255,8 +435,8 @@ public class IpSecServiceTest {
         for (String address : invalidAddresses) {
             try {
                 IpSecSpiResponse spiResp =
-                        mIpSecService.reserveSecurityParameterIndex(
-                                IpSecTransform.DIRECTION_OUT, address, DROID_SPI, new Binder());
+                        mIpSecService.allocateSecurityParameterIndex(
+                                address, DROID_SPI, new Binder());
                 fail("Invalid address was passed through IpSecService validation: " + address);
             } catch (IllegalArgumentException e) {
             } catch (Exception e) {
@@ -328,7 +508,6 @@ public class IpSecServiceTest {
         // tracks the resource ID.
         when(mMockNetd.ipSecAllocateSpi(
                         anyInt(),
-                        eq(IpSecTransform.DIRECTION_OUT),
                         anyString(),
                         eq(InetAddress.getLoopbackAddress().getHostAddress()),
                         anyInt()))
@@ -336,8 +515,7 @@ public class IpSecServiceTest {
         // Reserve spis until it fails.
         for (int i = 0; i < MAX_NUM_SPIS; i++) {
             IpSecSpiResponse newSpi =
-                    mIpSecService.reserveSecurityParameterIndex(
-                            0x1,
+                    mIpSecService.allocateSecurityParameterIndex(
                             InetAddress.getLoopbackAddress().getHostAddress(),
                             DROID_SPI + i,
                             new Binder());
@@ -352,8 +530,7 @@ public class IpSecServiceTest {
 
         // Try to reserve one more SPI, and should fail.
         IpSecSpiResponse extraSpi =
-                mIpSecService.reserveSecurityParameterIndex(
-                        0x1,
+                mIpSecService.allocateSecurityParameterIndex(
                         InetAddress.getLoopbackAddress().getHostAddress(),
                         DROID_SPI + MAX_NUM_SPIS,
                         new Binder());
@@ -366,8 +543,7 @@ public class IpSecServiceTest {
 
         // Should successfully reserve one more spi.
         extraSpi =
-                mIpSecService.reserveSecurityParameterIndex(
-                        0x1,
+                mIpSecService.allocateSecurityParameterIndex(
                         InetAddress.getLoopbackAddress().getHostAddress(),
                         DROID_SPI + MAX_NUM_SPIS,
                         new Binder());
@@ -378,5 +554,106 @@ public class IpSecServiceTest {
         for (IpSecSpiResponse spiResp : reservedSpis) {
             mIpSecService.releaseSecurityParameterIndex(spiResp.resourceId);
         }
+    }
+
+    @Test
+    public void testUidFdtagger() throws Exception {
+        SocketTagger actualSocketTagger = SocketTagger.get();
+
+        try {
+            FileDescriptor sockFd = Os.socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
+
+            // Has to be done after socket creation because BlockGuardOS calls tag on new sockets
+            SocketTagger mockSocketTagger = mock(SocketTagger.class);
+            SocketTagger.set(mockSocketTagger);
+
+            mIpSecService.mUidFdTagger.tag(sockFd, Process.LAST_APPLICATION_UID);
+            verify(mockSocketTagger).tag(eq(sockFd));
+        } finally {
+            SocketTagger.set(actualSocketTagger);
+        }
+    }
+
+    /**
+     * Checks if two file descriptors point to the same file.
+     *
+     * <p>According to stat.h documentation, the correct way to check for equivalent or duplicated
+     * file descriptors is to check their inode and device. These two entries uniquely identify any
+     * file.
+     */
+    private boolean fileDescriptorsEqual(FileDescriptor fd1, FileDescriptor fd2) {
+        try {
+            StructStat fd1Stat = Os.fstat(fd1);
+            StructStat fd2Stat = Os.fstat(fd2);
+
+            return fd1Stat.st_ino == fd2Stat.st_ino && fd1Stat.st_dev == fd2Stat.st_dev;
+        } catch (ErrnoException e) {
+            return false;
+        }
+    }
+
+    @Test
+    public void testOpenUdpEncapSocketTagsSocket() throws Exception {
+        IpSecService.UidFdTagger mockTagger = mock(IpSecService.UidFdTagger.class);
+        IpSecService testIpSecService =
+                new IpSecService(mMockContext, mMockIpSecSrvConfig, mockTagger);
+
+        IpSecUdpEncapResponse udpEncapResp =
+                testIpSecService.openUdpEncapsulationSocket(0, new Binder());
+        assertNotNull(udpEncapResp);
+        assertEquals(IpSecManager.Status.OK, udpEncapResp.status);
+
+        FileDescriptor sockFd = udpEncapResp.fileDescriptor.getFileDescriptor();
+        ArgumentMatcher<FileDescriptor> fdMatcher =
+                (argFd) -> {
+                    return fileDescriptorsEqual(sockFd, argFd);
+                };
+        verify(mockTagger).tag(argThat(fdMatcher), eq(Os.getuid()));
+
+        testIpSecService.closeUdpEncapsulationSocket(udpEncapResp.resourceId);
+        udpEncapResp.fileDescriptor.close();
+    }
+
+    @Test
+    public void testOpenUdpEncapsulationSocketCallsSetEncapSocketOwner() throws Exception {
+        IpSecUdpEncapResponse udpEncapResp =
+                mIpSecService.openUdpEncapsulationSocket(0, new Binder());
+
+        FileDescriptor sockFd = udpEncapResp.fileDescriptor.getFileDescriptor();
+        ArgumentMatcher<FileDescriptor> fdMatcher = (arg) -> {
+                    try {
+                        StructStat sockStat = Os.fstat(sockFd);
+                        StructStat argStat = Os.fstat(arg);
+
+                        return sockStat.st_ino == argStat.st_ino
+                                && sockStat.st_dev == argStat.st_dev;
+                    } catch (ErrnoException e) {
+                        return false;
+                    }
+                };
+
+        verify(mMockNetd).ipSecSetEncapSocketOwner(argThat(fdMatcher), eq(Os.getuid()));
+        mIpSecService.closeUdpEncapsulationSocket(udpEncapResp.resourceId);
+    }
+
+    @Test
+    public void testReserveNetId() {
+        int start = mIpSecService.TUN_INTF_NETID_START;
+        for (int i = 0; i < mIpSecService.TUN_INTF_NETID_RANGE; i++) {
+            assertEquals(start + i, mIpSecService.reserveNetId());
+        }
+
+        // Check that resource exhaustion triggers an exception
+        try {
+            mIpSecService.reserveNetId();
+            fail("Did not throw error for all netIds reserved");
+        } catch (IllegalStateException expected) {
+        }
+
+        // Now release one and try again
+        int releasedNetId =
+                mIpSecService.TUN_INTF_NETID_START + mIpSecService.TUN_INTF_NETID_RANGE / 2;
+        mIpSecService.releaseNetId(releasedNetId);
+        assertEquals(releasedNetId, mIpSecService.reserveNetId());
     }
 }

@@ -17,7 +17,7 @@
 
 set -e
 
-PATH_TO_FRAMEWORK_RES=${ANDROID_BUILD_TOP}/prebuilts/sdk/current/android.jar
+PATH_TO_FRAMEWORK_RES=${ANDROID_BUILD_TOP}/prebuilts/sdk/current/public/android.jar
 
 aapt2 compile --dir res -o compiled.flata
 aapt2 link --manifest AndroidManifest.xml -I $PATH_TO_FRAMEWORK_RES -o sparse.apk --enable-sparse-encoding compiled.flata

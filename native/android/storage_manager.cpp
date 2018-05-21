@@ -21,7 +21,7 @@
 
 #include <binder/Binder.h>
 #include <binder/IServiceManager.h>
-#include <utils/Atomic.h>
+#include <cutils/atomic.h>
 #include <utils/Log.h>
 #include <utils/RefBase.h>
 #include <utils/String8.h>

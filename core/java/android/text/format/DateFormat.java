@@ -158,9 +158,9 @@ public class DateFormat {
     private static Locale sIs24HourLocale;
     private static boolean sIs24Hour;
 
-
     /**
-     * Returns true if user preference is set to 24-hour format.
+     * Returns true if times should be formatted as 24 hour times, false if times should be
+     * formatted as 12 hour (AM/PM) times. Based on the user's chosen locale and other preferences.
      * @param context the context to use for the content resolver
      * @return true if 24 hour time format is selected, false otherwise.
      */
@@ -169,7 +169,8 @@ public class DateFormat {
     }
 
     /**
-     * Returns true if user preference with the given user handle is set to 24-hour format.
+     * Returns true if times should be formatted as 24 hour times, false if times should be
+     * formatted as 12 hour (AM/PM) times. Based on the user's chosen locale and other preferences.
      * @param context the context to use for the content resolver
      * @param userHandle the user handle of the user to query.
      * @return true if 24 hour time format is selected, false otherwise.

@@ -106,8 +106,6 @@ import static com.android.server.pm.PermissionsState.PERMISSION_OPERATION_FAILUR
 import static com.android.server.pm.PermissionsState.PERMISSION_OPERATION_SUCCESS;
 import static com.android.server.pm.PermissionsState.PERMISSION_OPERATION_SUCCESS_GIDS_CHANGED;
 
-import static dalvik.system.DexFile.getNonProfileGuidedCompilerFilter;
-
 import android.Manifest;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
@@ -179,6 +177,9 @@ import android.content.pm.UserInfo;
 import android.content.pm.VerifierDeviceIdentity;
 import android.content.pm.VerifierInfo;
 import android.content.pm.VersionedPackage;
+import android.content.pm.dex.ArtManager;
+import android.content.pm.dex.DexMetadataHelper;
+import android.content.pm.dex.IArtManager;
 import android.content.res.Resources;
 import android.database.ContentObserver;
 import android.graphics.Bitmap;
@@ -285,13 +286,14 @@ import com.android.server.pm.Installer.InstallerException;
 import com.android.server.pm.PermissionsState.PermissionState;
 import com.android.server.pm.Settings.DatabaseVersion;
 import com.android.server.pm.Settings.VersionInfo;
+import com.android.server.pm.dex.ArtManagerService;
+import com.android.server.pm.dex.DexLogger;
 import com.android.server.pm.dex.DexManager;
 import com.android.server.pm.dex.DexoptOptions;
 import com.android.server.pm.dex.PackageDexUsage;
 import com.android.server.storage.DeviceStorageMonitorInternal;
 
 import dalvik.system.CloseGuard;
-import dalvik.system.DexFile;
 import dalvik.system.VMRuntime;
 
 import libcore.io.IoUtils;
@@ -426,6 +428,7 @@ public class PackageManagerService extends IPackageManager.Stub
     private static final int NFC_UID = Process.NFC_UID;
     private static final int BLUETOOTH_UID = Process.BLUETOOTH_UID;
     private static final int SHELL_UID = Process.SHELL_UID;
+    private static final int SE_UID = Process.SE_UID;
 
     // Cap the size of permission trees that 3rd party apps can define
     private static final int MAX_PERMISSION_TREE_FOOTPRINT = 32768;     // characters of text
@@ -572,6 +575,7 @@ public class PackageManagerService extends IPackageManager.Stub
     }
 
     // Compilation reasons.
+    public static final int REASON_UNKNOWN = -1;
     public static final int REASON_FIRST_BOOT = 0;
     public static final int REASON_BOOT = 1;
     public static final int REASON_INSTALL = 2;
@@ -610,7 +614,8 @@ public class PackageManagerService extends IPackageManager.Stub
             Manifest.permission.READ_EXTERNAL_STORAGE,
             Manifest.permission.WRITE_EXTERNAL_STORAGE,
             Manifest.permission.READ_PHONE_NUMBERS,
-            Manifest.permission.ANSWER_PHONE_CALLS);
+            Manifest.permission.ANSWER_PHONE_CALLS,
+            Manifest.permission.ACCEPT_HANDOVER);
 
 
     /**
@@ -957,6 +962,8 @@ public class PackageManagerService extends IPackageManager.Stub
     final ArrayMap<String, ArraySet<String>> mAppOpPermissionPackages = new ArrayMap<>();
 
     final PackageInstallerService mInstallerService;
+
+    final ArtManagerService mArtManagerService;
 
     private final PackageDexOptimizer mPackageDexOptimizer;
     // DexManager handles the usage of dex files (e.g. secondary files, whether or not a package
@@ -2436,6 +2443,8 @@ public class PackageManagerService extends IPackageManager.Stub
                 ApplicationInfo.FLAG_SYSTEM, ApplicationInfo.PRIVATE_FLAG_PRIVILEGED);
         mSettings.addSharedUserLPw("android.uid.shell", SHELL_UID,
                 ApplicationInfo.FLAG_SYSTEM, ApplicationInfo.PRIVATE_FLAG_PRIVILEGED);
+        mSettings.addSharedUserLPw("android.uid.se", SE_UID,
+                ApplicationInfo.FLAG_SYSTEM, ApplicationInfo.PRIVATE_FLAG_PRIVILEGED);
 
         String separateProcesses = SystemProperties.get("debug.separate_processes");
         if (separateProcesses != null && separateProcesses.length() > 0) {
@@ -2457,7 +2466,11 @@ public class PackageManagerService extends IPackageManager.Stub
         mInstaller = installer;
         mPackageDexOptimizer = new PackageDexOptimizer(installer, mInstallLock, context,
                 "*dexopt*");
-        mDexManager = new DexManager(this, mPackageDexOptimizer, installer, mInstallLock);
+        DexManager.Listener dexManagerListener = DexLogger.getListener(this,
+                installer, mInstallLock);
+        mDexManager = new DexManager(this, mPackageDexOptimizer, installer, mInstallLock,
+                dexManagerListener);
+        mArtManagerService = new ArtManagerService(this, installer, mInstallLock);
         mMoveCallbacks = new MoveCallbacks(FgThread.get().getLooper());
 
         mOnPermissionChangeListeners = new OnPermissionChangeListeners(
@@ -3361,6 +3374,13 @@ public class PackageManagerService extends IPackageManager.Stub
         // Return the versioned package cache directory. This is something like
         // "/data/system/package_cache/1"
         File cacheDir = FileUtils.createDir(cacheBaseDir, PACKAGE_PARSER_CACHE_VERSION);
+
+        if (cacheDir == null) {
+            // Something went wrong. Attempt to delete everything and return.
+            Slog.wtf(TAG, "Cache directory cannot be created - wiping base dir " + cacheBaseDir);
+            FileUtils.deleteContentsAndDir(cacheBaseDir);
+            return null;
+        }
 
         // The following is a workaround to aid development on non-numbered userdebug
         // builds or cases where "adb sync" is used on userdebug builds. If we detect that
@@ -9698,7 +9718,7 @@ public class PackageManagerService extends IPackageManager.Stub
 
         final long startTime = System.nanoTime();
         final int[] stats = performDexOptUpgrade(pkgs, mIsPreNUpgrade /* showDialog */,
-                    getCompilerFilterForReason(causeFirstBoot ? REASON_FIRST_BOOT : REASON_BOOT),
+                    causeFirstBoot ? REASON_FIRST_BOOT : REASON_BOOT,
                     false /* bootComplete */);
 
         final int elapsedTimeSeconds =
@@ -9725,7 +9745,7 @@ public class PackageManagerService extends IPackageManager.Stub
      * and {@code numberOfPackagesFailed}.
      */
     private int[] performDexOptUpgrade(List<PackageParser.Package> pkgs, boolean showDialog,
-            final String compilerFilter, boolean bootComplete) {
+            final int compilationReason, boolean bootComplete) {
 
         int numberOfPackagesVisited = 0;
         int numberOfPackagesOptimized = 0;
@@ -9749,7 +9769,8 @@ public class PackageManagerService extends IPackageManager.Stub
                         // PackageDexOptimizer to prevent this happening on first boot. The issue
                         // is that we don't have a good way to say "do this only once".
                         if (!mInstaller.copySystemProfile(profileFile.getAbsolutePath(),
-                                pkg.applicationInfo.uid, pkg.packageName)) {
+                                pkg.applicationInfo.uid, pkg.packageName,
+                                ArtManager.getProfileName(null))) {
                             Log.e(TAG, "Installer failed to copy system profile!");
                         } else {
                             // Disabled as this causes speed-profile compilation during first boot
@@ -9784,7 +9805,8 @@ public class PackageManagerService extends IPackageManager.Stub
                                 // issue is that we don't have a good way to say "do this only
                                 // once".
                                 if (!mInstaller.copySystemProfile(profileFile.getAbsolutePath(),
-                                        pkg.applicationInfo.uid, pkg.packageName)) {
+                                        pkg.applicationInfo.uid, pkg.packageName,
+                                        ArtManager.getProfileName(null))) {
                                     Log.e(TAG, "Failed to copy system profile for stub package!");
                                 } else {
                                     useProfileForDexopt = true;
@@ -9823,13 +9845,11 @@ public class PackageManagerService extends IPackageManager.Stub
                 }
             }
 
-            String pkgCompilerFilter = compilerFilter;
+            int pkgCompilationReason = compilationReason;
             if (useProfileForDexopt) {
                 // Use background dexopt mode to try and use the profile. Note that this does not
                 // guarantee usage of the profile.
-                pkgCompilerFilter =
-                        PackageManagerServiceCompilerMapping.getCompilerFilterForReason(
-                                PackageManagerService.REASON_BACKGROUND_DEXOPT);
+                pkgCompilationReason = PackageManagerService.REASON_BACKGROUND_DEXOPT;
             }
 
             // checkProfiles is false to avoid merging profiles during boot which
@@ -9838,9 +9858,13 @@ public class PackageManagerService extends IPackageManager.Stub
             // behave differently than "pm.dexopt.bg-dexopt=speed-profile" but that's a
             // trade-off worth doing to save boot time work.
             int dexoptFlags = bootComplete ? DexoptOptions.DEXOPT_BOOT_COMPLETE : 0;
+            if (compilationReason == REASON_FIRST_BOOT) {
+                // TODO: This doesn't cover the upgrade case, we should check for this too.
+                dexoptFlags |= DexoptOptions.DEXOPT_INSTALL_WITH_DEX_METADATA_FILE;
+            }
             int primaryDexOptStaus = performDexOptTraced(new DexoptOptions(
                     pkg.packageName,
-                    pkgCompilerFilter,
+                    pkgCompilationReason,
                     dexoptFlags));
 
             switch (primaryDexOptStaus) {
@@ -9940,8 +9964,8 @@ public class PackageManagerService extends IPackageManager.Stub
         int flags = (checkProfiles ? DexoptOptions.DEXOPT_CHECK_FOR_PROFILES_UPDATES : 0) |
                 (force ? DexoptOptions.DEXOPT_FORCE : 0) |
                 (bootComplete ? DexoptOptions.DEXOPT_BOOT_COMPLETE : 0);
-        return performDexOpt(new DexoptOptions(packageName, targetCompilerFilter,
-                splitName, flags));
+        return performDexOpt(new DexoptOptions(packageName, REASON_UNKNOWN,
+                targetCompilerFilter, splitName, flags));
     }
 
     /**
@@ -10050,7 +10074,8 @@ public class PackageManagerService extends IPackageManager.Stub
         final String[] instructionSets = getAppDexInstructionSets(p.applicationInfo);
         if (!deps.isEmpty()) {
             DexoptOptions libraryOptions = new DexoptOptions(options.getPackageName(),
-                    options.getCompilerFilter(), options.getSplitName(),
+                    options.getCompilationReason(), options.getCompilerFilter(),
+                    options.getSplitName(),
                     options.getFlags() | DexoptOptions.DEXOPT_AS_SHARED_LIBRARY);
             for (PackageParser.Package depPackage : deps) {
                 // TODO: Analyze and investigate if we (should) profile libraries.
@@ -10188,6 +10213,17 @@ public class PackageManagerService extends IPackageManager.Stub
         mPackageUsage.writeNow(mPackages);
         mCompilerStats.writeNow();
         mDexManager.writePackageDexUsageNow();
+
+        // This is the last chance to write out pending restriction settings
+        synchronized (mPackages) {
+            if (mHandler.hasMessages(WRITE_PACKAGE_RESTRICTIONS)) {
+                mHandler.removeMessages(WRITE_PACKAGE_RESTRICTIONS);
+                for (int userId : mDirtyUsers) {
+                    mSettings.writePackageRestrictionsLPr(userId);
+                }
+                mDirtyUsers.clear();
+            }
+        }
     }
 
     @Override
@@ -10209,14 +10245,7 @@ public class PackageManagerService extends IPackageManager.Stub
 
         synchronized (mInstallLock) {
             Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "dump profiles");
-            final int sharedGid = UserHandle.getSharedAppGid(pkg.applicationInfo.uid);
-            try {
-                List<String> allCodePaths = pkg.getAllCodePathsExcludingResourceOnly();
-                String codePaths = TextUtils.join(";", allCodePaths);
-                mInstaller.dumpProfiles(sharedGid, packageName, codePaths);
-            } catch (InstallerException e) {
-                Slog.w(TAG, "Failed to dump profiles", e);
-            }
+            mArtManagerService.dumpProfiles(pkg);
             Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
         }
     }
@@ -10292,6 +10321,8 @@ public class PackageManagerService extends IPackageManager.Stub
         for (int i = 0; i < childCount; i++) {
             clearAppDataLeafLIF(pkg.childPackages.get(i), userId, flags);
         }
+
+        clearAppProfilesLIF(pkg, UserHandle.USER_ALL);
     }
 
     private void clearAppDataLeafLIF(PackageParser.Package pkg, int userId, int flags) {
@@ -10364,18 +10395,10 @@ public class PackageManagerService extends IPackageManager.Stub
             Slog.wtf(TAG, "Package was null!", new Throwable());
             return;
         }
-        clearAppProfilesLeafLIF(pkg);
+        mArtManagerService.clearAppProfiles(pkg);
         final int childCount = (pkg.childPackages != null) ? pkg.childPackages.size() : 0;
         for (int i = 0; i < childCount; i++) {
-            clearAppProfilesLeafLIF(pkg.childPackages.get(i));
-        }
-    }
-
-    private void clearAppProfilesLeafLIF(PackageParser.Package pkg) {
-        try {
-            mInstaller.clearAppProfiles(pkg.packageName);
-        } catch (InstallerException e) {
-            Slog.w(TAG, String.valueOf(e));
+            mArtManagerService.clearAppProfiles(pkg.childPackages.get(i));
         }
     }
 
@@ -17897,7 +17920,6 @@ public class PackageManagerService extends IPackageManager.Stub
 
             clearAppDataLIF(pkg, UserHandle.USER_ALL, StorageManager.FLAG_STORAGE_DE
                     | StorageManager.FLAG_STORAGE_CE | Installer.FLAG_CLEAR_CODE_CACHE_ONLY);
-            clearAppProfilesLIF(deletedPackage, UserHandle.USER_ALL);
 
             try {
                 final PackageParser.Package newPackage = scanPackageTracedLI(pkg, policyFlags,
@@ -18033,7 +18055,6 @@ public class PackageManagerService extends IPackageManager.Stub
         // Successfully disabled the old package. Now proceed with re-installation
         clearAppDataLIF(pkg, UserHandle.USER_ALL, StorageManager.FLAG_STORAGE_DE
                 | StorageManager.FLAG_STORAGE_CE | Installer.FLAG_CLEAR_CODE_CACHE_ONLY);
-        clearAppProfilesLIF(deletedPackage, UserHandle.USER_ALL);
 
         res.setReturnCode(PackageManager.INSTALL_SUCCEEDED);
         pkg.setApplicationInfoFlags(ApplicationInfo.FLAG_UPDATED_SYSTEM_APP,
@@ -18459,6 +18480,7 @@ public class PackageManagerService extends IPackageManager.Stub
         final PackageParser.Package pkg;
         try {
             pkg = pp.parsePackage(tmpPackageFile, parseFlags);
+            DexMetadataHelper.validatePackageDexMetadata(pkg);
         } catch (PackageParserException e) {
             res.setError("Failed parse during installPackageLI", e);
             return;
@@ -18833,6 +18855,11 @@ public class PackageManagerService extends IPackageManager.Stub
             }
         }
 
+        // Prepare the application profiles for the new code paths.
+        // This needs to be done before invoking dexopt so that any install-time profile
+        // can be used for optimizations.
+        mArtManagerService.prepareAppProfiles(pkg, resolveUserIds(args.user.getIdentifier()));
+
         // Check whether we need to dexopt the app.
         //
         // NOTE: it is IMPORTANT to call dexopt:
@@ -18846,6 +18873,7 @@ public class PackageManagerService extends IPackageManager.Stub
         //   1) it is not forward locked.
         //   2) it is not on on an external ASEC container.
         //   3) it is not an instant app or if it is then dexopt is enabled via gservices.
+        //   4) it is not debuggable.
         //
         // Note that we do not dexopt instant apps by default. dexopt can take some time to
         // complete, so we skip this step during installation. Instead, we'll take extra time
@@ -18857,7 +18885,8 @@ public class PackageManagerService extends IPackageManager.Stub
                 && !forwardLocked
                 && !pkg.applicationInfo.isExternalAsec()
                 && (!instantApp || Global.getInt(mContext.getContentResolver(),
-                Global.INSTANT_APP_DEXOPT_ENABLED, 0) != 0);
+                Global.INSTANT_APP_DEXOPT_ENABLED, 0) != 0)
+                && ((pkg.applicationInfo.flags & ApplicationInfo.FLAG_DEBUGGABLE) == 0);
 
         if (performDexopt) {
             Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "dexopt");
@@ -18867,7 +18896,8 @@ public class PackageManagerService extends IPackageManager.Stub
             // Also, don't fail application installs if the dexopt step fails.
             DexoptOptions dexoptOptions = new DexoptOptions(pkg.packageName,
                     REASON_INSTALL,
-                    DexoptOptions.DEXOPT_BOOT_COMPLETE);
+                    DexoptOptions.DEXOPT_BOOT_COMPLETE |
+                    DexoptOptions.DEXOPT_INSTALL_WITH_DEX_METADATA_FILE);
             mPackageDexOptimizer.performDexOpt(pkg, pkg.usesLibraryFiles,
                     null /* instructionSets */,
                     getOrCreateCompilerPackageStats(pkg),
@@ -22047,7 +22077,6 @@ Slog.v(TAG, ":: stepped forward, applying functor at tag " + parser.getName());
                     }
                     clearAppDataLIF(newPkg, UserHandle.USER_ALL, FLAG_STORAGE_DE
                             | FLAG_STORAGE_CE | Installer.FLAG_CLEAR_CODE_CACHE_ONLY);
-                    clearAppProfilesLIF(newPkg, UserHandle.USER_ALL);
                     mDexManager.notifyPackageUpdated(newPkg.packageName,
                             newPkg.baseCodePath, newPkg.splitCodePaths);
                 }
@@ -24207,6 +24236,8 @@ Slog.v(TAG, ":: stepped forward, applying functor at tag " + parser.getName());
                 Slog.e(TAG, "Failed to create app data for " + packageName + ": " + e);
             }
         }
+        // Prepare the application profiles.
+        mArtManagerService.prepareAppProfiles(pkg, userId);
 
         if ((flags & StorageManager.FLAG_STORAGE_CE) != 0 && ceDataInode != -1) {
             // TODO: mark this structure as dirty so we persist it!
@@ -24901,6 +24932,11 @@ Slog.v(TAG, ":: stepped forward, applying functor at tag " + parser.getName());
             return null;
         }
         return mInstallerService;
+    }
+
+    @Override
+    public IArtManager getArtManager() {
+        return mArtManagerService;
     }
 
     private boolean userNeedsBadging(int userId) {

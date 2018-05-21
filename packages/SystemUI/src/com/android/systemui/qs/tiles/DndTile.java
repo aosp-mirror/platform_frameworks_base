@@ -174,6 +174,7 @@ public class DndTile extends QSTileImpl<BooleanState> {
 
     @Override
     protected void handleUpdateState(BooleanState state, Object arg) {
+        if (mController == null) return;
         final int zen = arg instanceof Integer ? (Integer) arg : mController.getZen();
         final boolean newValue = zen != ZEN_MODE_OFF;
         final boolean valueChanged = state.value != newValue;
@@ -235,6 +236,7 @@ public class DndTile extends QSTileImpl<BooleanState> {
     public void handleSetListening(boolean listening) {
         if (mListening == listening) return;
         mListening = listening;
+        if (mController == null) return;
         if (mListening) {
             mController.addCallback(mZenCallback);
             Prefs.registerListener(mContext, mPrefListener);

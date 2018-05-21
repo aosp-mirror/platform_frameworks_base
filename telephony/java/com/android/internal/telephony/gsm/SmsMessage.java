@@ -89,6 +89,18 @@ public class SmsMessage extends SmsMessageBase {
 
     private int mVoiceMailCount = 0;
 
+    private static final int VALIDITY_PERIOD_FORMAT_NONE = 0x00;
+    private static final int VALIDITY_PERIOD_FORMAT_ENHANCED = 0x01;
+    private static final int VALIDITY_PERIOD_FORMAT_RELATIVE = 0x02;
+    private static final int VALIDITY_PERIOD_FORMAT_ABSOLUTE = 0x03;
+
+    //Validity Period min - 5 mins
+    private static final int VALIDITY_PERIOD_MIN = 5;
+    //Validity Period max - 63 weeks
+    private static final int VALIDITY_PERIOD_MAX = 635040;
+
+    private static final int INVALID_VALIDITY_PERIOD = -1;
+
     public static class SubmitPdu extends SubmitPduBase {
     }
 
@@ -202,6 +214,45 @@ public class SmsMessage extends SmsMessageBase {
     }
 
     /**
+     * Get Encoded Relative Validty Period Value from Validity period in mins.
+     *
+     * @param validityPeriod Validity period in mins.
+     *
+     * Refer specification 3GPP TS 23.040 V6.8.1 section 9.2.3.12.1.
+     * ||relValidityPeriod (TP-VP)  ||                 ||  validityPeriod   ||
+     *
+     *      0 to 143                            --->       (TP-VP + 1) x 5 minutes
+     *
+     *      144 to 167                         --->        12 hours + ((TP-VP -143) x 30 minutes)
+     *
+     *      168 to 196                         --->        (TP-VP - 166) x 1 day
+     *
+     *      197 to 255                         --->        (TP-VP - 192) x 1 week
+     *
+     * @return relValidityPeriod Encoded Relative Validity Period Value.
+     * @hide
+     */
+    public static int getRelativeValidityPeriod(int validityPeriod) {
+        int relValidityPeriod = INVALID_VALIDITY_PERIOD;
+
+        if (validityPeriod < VALIDITY_PERIOD_MIN  || validityPeriod > VALIDITY_PERIOD_MAX) {
+            Rlog.e(LOG_TAG,"Invalid Validity Period" + validityPeriod);
+            return relValidityPeriod;
+        }
+
+        if (validityPeriod <= 720) {
+            relValidityPeriod = (validityPeriod  / 5) - 1;
+        } else if (validityPeriod <= 1440) {
+            relValidityPeriod = ((validityPeriod - 720) / 30) + 143;
+        } else if (validityPeriod <= 43200) {
+            relValidityPeriod = (validityPeriod  / 1440) + 166;
+        } else if (validityPeriod <= 635040) {
+            relValidityPeriod = (validityPeriod  / 10080) + 192;
+        }
+        return relValidityPeriod;
+    }
+
+    /**
      * Get an SMS-SUBMIT PDU for a destination address and a message
      *
      * @param scAddress Service Centre address.  Null means use default.
@@ -236,6 +287,29 @@ public class SmsMessage extends SmsMessageBase {
             String destinationAddress, String message,
             boolean statusReportRequested, byte[] header, int encoding,
             int languageTable, int languageShiftTable) {
+        return getSubmitPdu(scAddress, destinationAddress, message, statusReportRequested,
+            header, encoding, languageTable, languageShiftTable, -1);
+    }
+
+    /**
+     * Get an SMS-SUBMIT PDU for a destination address and a message using the
+     * specified encoding.
+     *
+     * @param scAddress Service Centre address.  Null means use default.
+     * @param encoding Encoding defined by constants in
+     *        com.android.internal.telephony.SmsConstants.ENCODING_*
+     * @param languageTable
+     * @param languageShiftTable
+     * @param validityPeriod Validity Period of the message in Minutes.
+     * @return a <code>SubmitPdu</code> containing the encoded SC
+     *         address, if applicable, and the encoded message.
+     *         Returns null on encode error.
+     * @hide
+     */
+    public static SubmitPdu getSubmitPdu(String scAddress,
+            String destinationAddress, String message,
+            boolean statusReportRequested, byte[] header, int encoding,
+            int languageTable, int languageShiftTable, int validityPeriod) {
 
         // Perform null parameter checks.
         if (message == null || destinationAddress == null) {
@@ -272,8 +346,19 @@ public class SmsMessage extends SmsMessageBase {
         }
 
         SubmitPdu ret = new SubmitPdu();
-        // MTI = SMS-SUBMIT, UDHI = header != null
-        byte mtiByte = (byte)(0x01 | (header != null ? 0x40 : 0x00));
+
+        int validityPeriodFormat = VALIDITY_PERIOD_FORMAT_NONE;
+        int relativeValidityPeriod = INVALID_VALIDITY_PERIOD;
+
+        // TP-Validity-Period-Format (TP-VPF) in 3GPP TS 23.040 V6.8.1 section 9.2.3.3
+        //bit 4:3 = 10 - TP-VP field present - relative format
+        if((relativeValidityPeriod = getRelativeValidityPeriod(validityPeriod)) >= 0) {
+            validityPeriodFormat = VALIDITY_PERIOD_FORMAT_RELATIVE;
+        }
+
+        byte mtiByte = (byte)(0x01 | (validityPeriodFormat << 0x03) |
+                (header != null ? 0x40 : 0x00));
+
         ByteArrayOutputStream bo = getSubmitPduHead(
                 scAddress, destinationAddress, mtiByte,
                 statusReportRequested, ret);
@@ -338,7 +423,11 @@ public class SmsMessage extends SmsMessageBase {
             bo.write(0x08);
         }
 
-        // (no TP-Validity-Period)
+        if (validityPeriodFormat == VALIDITY_PERIOD_FORMAT_RELATIVE) {
+            // ( TP-Validity-Period - relative format)
+            bo.write(relativeValidityPeriod);
+        }
+
         bo.write(userData, 0, userData.length);
         ret.encodedMessage = bo.toByteArray();
         return ret;
@@ -385,6 +474,24 @@ public class SmsMessage extends SmsMessageBase {
             boolean statusReportRequested) {
 
         return getSubmitPdu(scAddress, destinationAddress, message, statusReportRequested, null);
+    }
+
+    /**
+     * Get an SMS-SUBMIT PDU for a destination address and a message
+     *
+     * @param scAddress Service Centre address.  Null means use default.
+     * @param destinationAddress the address of the destination for the message
+     * @param statusReportRequested staus report of the message Requested
+     * @param validityPeriod Validity Period of the message in Minutes.
+     * @return a <code>SubmitPdu</code> containing the encoded SC
+     *         address, if applicable, and the encoded message.
+     *         Returns null on encode error.
+     */
+    public static SubmitPdu getSubmitPdu(String scAddress,
+            String destinationAddress, String message,
+            boolean statusReportRequested, int validityPeriod) {
+        return getSubmitPdu(scAddress, destinationAddress, message, statusReportRequested,
+                null, ENCODING_UNKNOWN, 0, 0, validityPeriod);
     }
 
     /**

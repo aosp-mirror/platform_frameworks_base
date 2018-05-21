@@ -20,7 +20,7 @@ import android.os.Parcel;
 import android.os.Parcelable;
 
 /**
- * An event logged for an interface with APF capabilities when its IpManager state machine exits.
+ * An event logged for an interface with APF capabilities when its IpClient state machine exits.
  * {@hide}
  */
 public final class ApfStats implements Parcelable {

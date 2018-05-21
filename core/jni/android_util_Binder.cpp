@@ -34,8 +34,8 @@
 #include <binder/IPCThreadState.h>
 #include <binder/Parcel.h>
 #include <binder/ProcessState.h>
+#include <cutils/atomic.h>
 #include <log/log.h>
-#include <utils/Atomic.h>
 #include <utils/KeyedVector.h>
 #include <utils/List.h>
 #include <utils/Log.h>
@@ -664,7 +664,7 @@ jobject javaObjectForIBinder(JNIEnv* env, const sp<IBinder>& val)
         nativeData->mObject = val;
         gNativeDataCache = nullptr;
         ++gNumProxies;
-        if (++gNumProxies >= gProxiesWarned + PROXY_WARN_INTERVAL) {
+        if (gNumProxies >= gProxiesWarned + PROXY_WARN_INTERVAL) {
             ALOGW("Unexpectedly many live BinderProxies: %d\n", gNumProxies);
             gProxiesWarned = gNumProxies;
         }

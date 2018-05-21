@@ -260,12 +260,14 @@ public class OtaDexoptService extends IOtaDexopt.Stub {
             public void dexopt(String apkPath, int uid, @Nullable String pkgName,
                     String instructionSet, int dexoptNeeded, @Nullable String outputPath,
                     int dexFlags, String compilerFilter, @Nullable String volumeUuid,
-                    @Nullable String sharedLibraries, @Nullable String seInfo, boolean downgrade)
+                    @Nullable String sharedLibraries, @Nullable String seInfo, boolean downgrade,
+                    int targetSdkVersion, @Nullable String profileName,
+                    @Nullable String dexMetadataPath, @Nullable String dexoptCompilationReason)
                     throws InstallerException {
                 final StringBuilder builder = new StringBuilder();
 
-                // The version. Right now it's 3.
-                builder.append("3 ");
+                // The current version.
+                builder.append("9 ");
 
                 builder.append("dexopt");
 
@@ -281,6 +283,10 @@ public class OtaDexoptService extends IOtaDexopt.Stub {
                 encodeParameter(builder, sharedLibraries);
                 encodeParameter(builder, seInfo);
                 encodeParameter(builder, downgrade);
+                encodeParameter(builder, targetSdkVersion);
+                encodeParameter(builder, profileName);
+                encodeParameter(builder, dexMetadataPath);
+                encodeParameter(builder, dexoptCompilationReason);
 
                 commands.add(builder.toString());
             }

@@ -122,7 +122,7 @@ public class A2dpProfileTest {
         when(mBluetoothA2dp.getConnectionState(any())).thenReturn(
                 BluetoothProfile.STATE_CONNECTED);
         BluetoothCodecStatus status = mock(BluetoothCodecStatus.class);
-        when(mBluetoothA2dpWrapper.getCodecStatus()).thenReturn(status);
+        when(mBluetoothA2dpWrapper.getCodecStatus(mDevice)).thenReturn(status);
         BluetoothCodecConfig config = mock(BluetoothCodecConfig.class);
         when(status.getCodecConfig()).thenReturn(config);
         when(config.isMandatoryCodec()).thenReturn(false);
@@ -185,7 +185,7 @@ public class A2dpProfileTest {
         BluetoothCodecStatus status = mock(BluetoothCodecStatus.class);
         BluetoothCodecConfig config = mock(BluetoothCodecConfig.class);
         BluetoothCodecConfig[] configs = {config};
-        when(mBluetoothA2dpWrapper.getCodecStatus()).thenReturn(status);
+        when(mBluetoothA2dpWrapper.getCodecStatus(mDevice)).thenReturn(status);
         when(status.getCodecsSelectableCapabilities()).thenReturn(configs);
 
         when(config.isMandatoryCodec()).thenReturn(true);
@@ -200,7 +200,7 @@ public class A2dpProfileTest {
         BluetoothCodecStatus status = mock(BluetoothCodecStatus.class);
         BluetoothCodecConfig config = mock(BluetoothCodecConfig.class);
         BluetoothCodecConfig[] configs = {config};
-        when(mBluetoothA2dpWrapper.getCodecStatus()).thenReturn(status);
+        when(mBluetoothA2dpWrapper.getCodecStatus(mDevice)).thenReturn(status);
         when(status.getCodecsSelectableCapabilities()).thenReturn(configs);
 
         when(config.isMandatoryCodec()).thenReturn(false);

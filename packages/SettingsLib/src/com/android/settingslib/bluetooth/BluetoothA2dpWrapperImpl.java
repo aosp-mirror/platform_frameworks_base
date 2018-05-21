@@ -41,8 +41,8 @@ public class BluetoothA2dpWrapperImpl implements BluetoothA2dpWrapper {
     }
 
     @Override
-    public BluetoothCodecStatus getCodecStatus() {
-        return mService.getCodecStatus();
+    public BluetoothCodecStatus getCodecStatus(BluetoothDevice device) {
+        return mService.getCodecStatus(device);
     }
 
     @Override

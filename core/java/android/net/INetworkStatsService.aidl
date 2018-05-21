@@ -18,6 +18,7 @@ package android.net;
 
 import android.net.DataUsageRequest;
 import android.net.INetworkStatsSession;
+import android.net.Network;
 import android.net.NetworkStats;
 import android.net.NetworkStatsHistory;
 import android.net.NetworkTemplate;
@@ -43,6 +44,16 @@ interface INetworkStatsService {
 
     /** Return data layer snapshot of UID network usage. */
     NetworkStats getDataLayerSnapshotForUid(int uid);
+
+    /** Get a detailed snapshot of stats since boot for all UIDs.
+    *
+    * <p>Results will not always be limited to stats on requiredIfaces when specified: stats for
+    * interfaces stacked on the specified interfaces, or for interfaces on which the specified
+    * interfaces are stacked on, will also be included.
+    * @param requiredIfaces Interface names to get data for, or {@link NetworkStats#INTERFACES_ALL}.
+    */
+    NetworkStats getDetailedUidStats(in String[] requiredIfaces);
+
     /** Return set of any ifaces associated with mobile networks since boot. */
     String[] getMobileIfaces();
 
@@ -53,7 +64,7 @@ interface INetworkStatsService {
     void setUidForeground(int uid, boolean uidForeground);
 
     /** Force update of ifaces. */
-    void forceUpdateIfaces();
+    void forceUpdateIfaces(in Network[] defaultNetworks);
     /** Force update of statistics. */
     void forceUpdate();
 
@@ -66,5 +77,14 @@ interface INetworkStatsService {
 
     /** Unregisters a callback on data usage. */
     void unregisterUsageRequest(in DataUsageRequest request);
+
+    /** Get the uid stats information since boot */
+    long getUidStats(int uid, int type);
+
+    /** Get the iface stats information since boot */
+    long getIfaceStats(String iface, int type);
+
+    /** Get the total network stats information since boot */
+    long getTotalStats(int type);
 
 }

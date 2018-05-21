@@ -264,6 +264,10 @@
   <java-symbol type="bool" name="config_mms_content_disposition_support" />
   <java-symbol type="string" name="config_ims_package" />
   <java-symbol type="bool" name="config_dynamic_bind_ims" />
+  <java-symbol type="string" name="config_wwan_data_service_package" />
+  <java-symbol type="string" name="config_wlan_data_service_package" />
+  <java-symbol type="string" name="config_wwan_network_service_package" />
+  <java-symbol type="string" name="config_wlan_network_service_package" />
   <java-symbol type="bool" name="config_networkSamplingWakesDevice" />
   <java-symbol type="bool" name="config_showMenuShortcutsWhenKeyboardPresent" />
   <java-symbol type="bool" name="config_sip_wifi_only" />
@@ -272,7 +276,6 @@
   <java-symbol type="bool" name="config_suspendWhenScreenOffDueToProximity" />
   <java-symbol type="bool" name="config_swipeDisambiguation" />
   <java-symbol type="bool" name="config_syncstorageengine_masterSyncAutomatically" />
-  <java-symbol type="bool" name="config_telephony_use_own_number_for_voicemail" />
   <java-symbol type="bool" name="config_ui_enableFadingMarquee" />
   <java-symbol type="bool" name="config_enableHapticTextHandle" />
   <java-symbol type="bool" name="config_use_strict_phone_number_comparation" />
@@ -308,6 +311,7 @@
   <java-symbol type="bool" name="config_forceDefaultOrientation" />
   <java-symbol type="bool" name="config_wifi_batched_scan_supported" />
   <java-symbol type="bool" name="config_enableMultiUserUI"/>
+  <java-symbol type="bool" name="config_enableNewAutoSelectNetworkUI"/>
   <java-symbol type="bool" name="config_disableUsbPermissionDialogs"/>
   <java-symbol type="bool" name="config_hasRecents" />
   <java-symbol type="bool" name="config_windowShowCircularMask" />
@@ -392,6 +396,7 @@
   <java-symbol type="integer" name="config_wifi_framework_current_network_boost" />
   <java-symbol type="integer" name="config_bluetooth_max_advertisers" />
   <java-symbol type="integer" name="config_bluetooth_max_scan_filters" />
+  <java-symbol type="integer" name="config_bluetooth_max_connected_audio_devices" />
   <java-symbol type="integer" name="config_burnInProtectionMinHorizontalOffset" />
   <java-symbol type="integer" name="config_burnInProtectionMaxHorizontalOffset" />
   <java-symbol type="integer" name="config_burnInProtectionMinVerticalOffset" />
@@ -446,6 +451,7 @@
   <java-symbol type="integer" name="config_keepPreloadsMinDays" />
   <java-symbol type="bool" name="config_hasPermanentDpad" />
   <java-symbol type="bool" name="config_useDefaultFocusHighlight" />
+  <java-symbol type="integer" name="config_num_physical_slots" />
 
   <java-symbol type="color" name="tab_indicator_text_v4" />
 
@@ -541,6 +547,7 @@
   <java-symbol type="string" name="RestrictedOnEmergencyTitle" />
   <java-symbol type="string" name="RestrictedOnNormalTitle" />
   <java-symbol type="string" name="RestrictedStateContent" />
+  <java-symbol type="string" name="RestrictedStateContentMsimTemplate" />
   <java-symbol type="string" name="notification_channel_network_alert" />
   <java-symbol type="string" name="notification_channel_call_forward" />
   <java-symbol type="string" name="notification_channel_emergency_callback" />
@@ -634,6 +641,7 @@
   <java-symbol type="string" name="chooseActivity" />
   <java-symbol type="string" name="config_default_dns_server" />
   <java-symbol type="string" name="config_ethernet_iface_regex" />
+  <java-symbol type="array" name="config_ethernet_interfaces" />
   <java-symbol type="string" name="config_forceVoiceInteractionServicePackage" />
   <java-symbol type="string" name="config_mms_user_agent" />
   <java-symbol type="string" name="config_mms_user_agent_profile_url" />
@@ -1190,6 +1198,7 @@
   <java-symbol type="array" name="config_disabledUntilUsedPreinstalledCarrierApps" />
   <java-symbol type="array" name="config_callBarringMMI" />
   <java-symbol type="array" name="config_globalActionsList" />
+  <java-symbol type="array" name="config_telephonyEuiccDeviceCapabilities" />
   <java-symbol type="array" name="config_telephonyHardware" />
   <java-symbol type="array" name="config_keySystemUuidMapping" />
   <java-symbol type="array" name="config_gpsParameters" />
@@ -1948,6 +1957,10 @@
   <java-symbol type="string" name="mmcc_imsi_unknown_in_hlr" />
   <java-symbol type="string" name="mmcc_illegal_ms" />
   <java-symbol type="string" name="mmcc_illegal_me" />
+  <java-symbol type="string" name="mmcc_authentication_reject_msim_template" />
+  <java-symbol type="string" name="mmcc_imsi_unknown_in_hlr_msim_template" />
+  <java-symbol type="string" name="mmcc_illegal_ms_msim_template" />
+  <java-symbol type="string" name="mmcc_illegal_me_msim_template" />
   <java-symbol type="string" name="notification_listener_binding_label" />
   <java-symbol type="string" name="vr_listener_binding_label" />
   <java-symbol type="string" name="condition_provider_service_binding_label" />
@@ -1960,6 +1973,8 @@
   <java-symbol type="string" name="smv_process" />
   <java-symbol type="string" name="tethered_notification_message" />
   <java-symbol type="string" name="tethered_notification_title" />
+  <java-symbol type="string" name="disable_tether_notification_message" />
+  <java-symbol type="string" name="disable_tether_notification_title" />
   <java-symbol type="string" name="adb_debugging_notification_channel_tv" />
   <java-symbol type="string" name="usb_accessory_notification_title" />
   <java-symbol type="string" name="usb_mtp_notification_title" />
@@ -2383,9 +2398,6 @@
 
   <!-- Cascading submenus -->
   <java-symbol type="dimen" name="cascading_menus_min_smallest_width" />
-
-  <!-- From SignalStrength -->
-  <java-symbol type="array" name="config_lteDbmThresholds" />
 
   <java-symbol type="string" name="android_system_label" />
   <java-symbol type="string" name="system_error_wipe_data" />
@@ -3082,4 +3094,6 @@
   <java-symbol type="integer" name="config_stableDeviceDisplayWidth" />
   <java-symbol type="integer" name="config_stableDeviceDisplayHeight" />
   <java-symbol type="bool" name="config_display_no_service_when_sim_unready" />
+
+  <java-symbol type="bool" name="config_supportBluetoothPersistedState" />
 </resources>

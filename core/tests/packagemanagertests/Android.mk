@@ -10,10 +10,12 @@ LOCAL_SRC_FILES := \
 
 LOCAL_STATIC_JAVA_LIBRARIES := \
     android-support-test \
-    frameworks-base-testutils
+    frameworks-base-testutils \
+    mockito-target-minus-junit4
 
 LOCAL_JAVA_LIBRARIES := android.test.runner
 LOCAL_PACKAGE_NAME := FrameworksCorePackageManagerTests
+LOCAL_PRIVATE_PLATFORM_APIS := true
 
 LOCAL_CERTIFICATE := platform
 

@@ -28,9 +28,9 @@
 #include <sys/types.h>
 #include <unistd.h>
 
-#include <utils/Atomic.h>
 #include <binder/IInterface.h>
 #include <binder/IPCThreadState.h>
+#include <cutils/atomic.h>
 #include <utils/Log.h>
 #include <utils/SystemClock.h>
 #include <utils/List.h>

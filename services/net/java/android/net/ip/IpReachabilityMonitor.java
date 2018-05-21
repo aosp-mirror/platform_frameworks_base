@@ -26,6 +26,7 @@ import android.net.ip.IpNeighborMonitor.NeighborEvent;
 import android.net.metrics.IpConnectivityLog;
 import android.net.metrics.IpReachabilityEvent;
 import android.net.netlink.StructNdMsg;
+import android.net.util.InterfaceParams;
 import android.net.util.MultinetworkPolicyTracker;
 import android.net.util.SharedLog;
 import android.os.Handler;
@@ -46,9 +47,7 @@ import java.io.PrintWriter;
 import java.net.Inet6Address;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
-import java.net.NetworkInterface;
 import java.net.SocketAddress;
-import java.net.SocketException;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -168,8 +167,7 @@ public class IpReachabilityMonitor {
         }
     }
 
-    private final String mInterfaceName;
-    private final int mInterfaceIndex;
+    private final InterfaceParams mInterfaceParams;
     private final IpNeighborMonitor mIpNeighborMonitor;
     private final SharedLog mLog;
     private final Callback mCallback;
@@ -182,30 +180,25 @@ public class IpReachabilityMonitor {
     private volatile long mLastProbeTimeMs;
 
     public IpReachabilityMonitor(
-            Context context, String ifName, Handler h, SharedLog log, Callback callback) {
-        this(context, ifName, h, log, callback, null);
-    }
-
-    public IpReachabilityMonitor(
-            Context context, String ifName, Handler h, SharedLog log, Callback callback,
+            Context context, InterfaceParams ifParams, Handler h, SharedLog log, Callback callback,
             MultinetworkPolicyTracker tracker) {
-        this(ifName, getInterfaceIndex(ifName), h, log, callback, tracker,
-                Dependencies.makeDefault(context, ifName));
+        this(ifParams, h, log, callback, tracker, Dependencies.makeDefault(context, ifParams.name));
     }
 
     @VisibleForTesting
-    IpReachabilityMonitor(String ifName, int ifIndex, Handler h, SharedLog log, Callback callback,
+    IpReachabilityMonitor(InterfaceParams ifParams, Handler h, SharedLog log, Callback callback,
             MultinetworkPolicyTracker tracker, Dependencies dependencies) {
-        mInterfaceName = ifName;
+        if (ifParams == null) throw new IllegalArgumentException("null InterfaceParams");
+
+        mInterfaceParams = ifParams;
         mLog = log.forSubComponent(TAG);
         mCallback = callback;
         mMultinetworkPolicyTracker = tracker;
-        mInterfaceIndex = ifIndex;
         mDependencies = dependencies;
 
         mIpNeighborMonitor = new IpNeighborMonitor(h, mLog,
                 (NeighborEvent event) -> {
-                    if (mInterfaceIndex != event.ifindex) return;
+                    if (mInterfaceParams.index != event.ifindex) return;
                     if (!mNeighborWatchList.containsKey(event.ip)) return;
 
                     final NeighborEvent prev = mNeighborWatchList.put(event.ip, event);
@@ -241,7 +234,7 @@ public class IpReachabilityMonitor {
 
     private String describeWatchList(String sep) {
         final StringBuilder sb = new StringBuilder();
-        sb.append("iface{" + mInterfaceName + "/" + mInterfaceIndex + "}," + sep);
+        sb.append("iface{" + mInterfaceParams + "}," + sep);
         sb.append("ntable=[" + sep);
         String delimiter = "";
         for (Map.Entry<InetAddress, NeighborEvent> entry : mNeighborWatchList.entrySet()) {
@@ -262,10 +255,10 @@ public class IpReachabilityMonitor {
     }
 
     public void updateLinkProperties(LinkProperties lp) {
-        if (!mInterfaceName.equals(lp.getInterfaceName())) {
+        if (!mInterfaceParams.name.equals(lp.getInterfaceName())) {
             // TODO: figure out whether / how to cope with interface changes.
             Log.wtf(TAG, "requested LinkProperties interface '" + lp.getInterfaceName() +
-                    "' does not match: " + mInterfaceName);
+                    "' does not match: " + mInterfaceParams.name);
             return;
         }
 
@@ -353,10 +346,10 @@ public class IpReachabilityMonitor {
             mDependencies.acquireWakeLock(getProbeWakeLockDuration());
         }
 
-        for (InetAddress target : ipProbeList) {
-            final int rval = IpNeighborMonitor.startKernelNeighborProbe(mInterfaceIndex, target);
+        for (InetAddress ip : ipProbeList) {
+            final int rval = IpNeighborMonitor.startKernelNeighborProbe(mInterfaceParams.index, ip);
             mLog.log(String.format("put neighbor %s into NUD_PROBE state (rval=%d)",
-                     target.getHostAddress(), rval));
+                     ip.getHostAddress(), rval));
             logEvent(IpReachabilityEvent.PROBE, rval);
         }
         mLastProbeTimeMs = SystemClock.elapsedRealtime();
@@ -378,22 +371,9 @@ public class IpReachabilityMonitor {
         return (numUnicastProbes * retransTimeMs) + gracePeriodMs;
     }
 
-    private static int getInterfaceIndex(String ifname) {
-        final NetworkInterface iface;
-        try {
-            iface = NetworkInterface.getByName(ifname);
-        } catch (SocketException e) {
-            throw new IllegalArgumentException("invalid interface '" + ifname + "': ", e);
-        }
-        if (iface == null) {
-            throw new IllegalArgumentException("NetworkInterface was null for " + ifname);
-        }
-        return iface.getIndex();
-    }
-
     private void logEvent(int probeType, int errorCode) {
         int eventType = probeType | (errorCode & 0xff);
-        mMetricsLog.log(mInterfaceName, new IpReachabilityEvent(eventType));
+        mMetricsLog.log(mInterfaceParams.name, new IpReachabilityEvent(eventType));
     }
 
     private void logNudFailed(ProvisioningChange delta) {
@@ -401,6 +381,6 @@ public class IpReachabilityMonitor {
         boolean isFromProbe = (duration < getProbeWakeLockDuration());
         boolean isProvisioningLost = (delta == ProvisioningChange.LOST_PROVISIONING);
         int eventType = IpReachabilityEvent.nudFailureEventType(isFromProbe, isProvisioningLost);
-        mMetricsLog.log(mInterfaceName, new IpReachabilityEvent(eventType));
+        mMetricsLog.log(mInterfaceParams.name, new IpReachabilityEvent(eventType));
     }
 }

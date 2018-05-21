@@ -11,5 +11,6 @@ LOCAL_STATIC_JAVA_LIBRARIES := android-support-v4
 LOCAL_CERTIFICATE := platform
 
 LOCAL_PACKAGE_NAME := UsageStatsTest
+LOCAL_PRIVATE_PLATFORM_APIS := true
 
 include $(BUILD_PACKAGE)

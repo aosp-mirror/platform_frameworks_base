@@ -17,24 +17,23 @@
 #include "tests/common/LeakChecker.h"
 #include "tests/common/TestScene.h"
 
+#include "Properties.h"
 #include "hwui/Typeface.h"
 #include "protos/hwui.pb.h"
-#include "Properties.h"
 
 #include <benchmark/benchmark.h>
-#include <../src/sysinfo.h>
 #include <getopt.h>
+#include <pthread.h>
 #include <stdio.h>
-#include <string>
 #include <unistd.h>
+#include <string>
 #include <unordered_map>
 #include <vector>
-#include <pthread.h>
 
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <fcntl.h>
 #include <errno.h>
+#include <fcntl.h>
+#include <sys/stat.h>
+#include <sys/types.h>
 
 using namespace android;
 using namespace android::uirenderer;
@@ -320,9 +319,6 @@ int main(int argc, char* argv[]) {
         name_field_width += 5;
 
         benchmark::BenchmarkReporter::Context context;
-        context.num_cpus = benchmark::NumCPUs();
-        context.mhz_per_cpu = benchmark::CyclesPerSecond() / 1000000.0f;
-        context.cpu_scaling_enabled = benchmark::CpuScalingEnabled();
         context.name_field_width = name_field_width;
         gBenchmarkReporter->ReportContext(context);
     }

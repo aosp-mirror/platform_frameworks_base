@@ -25,6 +25,8 @@ import android.system.OsConstants;
 import com.android.okhttp.internalandroidapi.Dns;
 import com.android.okhttp.internalandroidapi.HttpURLConnectionFactory;
 
+import libcore.io.IoUtils;
+
 import java.io.FileDescriptor;
 import java.io.IOException;
 import java.net.DatagramSocket;
@@ -136,9 +138,15 @@ public class Network implements Parcelable {
             for (int i = 0; i < hostAddresses.length; i++) {
                 try {
                     Socket socket = createSocket();
-                    if (localAddress != null) socket.bind(localAddress);
-                    socket.connect(new InetSocketAddress(hostAddresses[i], port));
-                    return socket;
+                    boolean failed = true;
+                    try {
+                        if (localAddress != null) socket.bind(localAddress);
+                        socket.connect(new InetSocketAddress(hostAddresses[i], port));
+                        failed = false;
+                        return socket;
+                    } finally {
+                        if (failed) IoUtils.closeQuietly(socket);
+                    }
                 } catch (IOException e) {
                     if (i == (hostAddresses.length - 1)) throw e;
                 }
@@ -155,15 +163,27 @@ public class Network implements Parcelable {
         public Socket createSocket(InetAddress address, int port, InetAddress localAddress,
                 int localPort) throws IOException {
             Socket socket = createSocket();
-            socket.bind(new InetSocketAddress(localAddress, localPort));
-            socket.connect(new InetSocketAddress(address, port));
+            boolean failed = true;
+            try {
+                socket.bind(new InetSocketAddress(localAddress, localPort));
+                socket.connect(new InetSocketAddress(address, port));
+                failed = false;
+            } finally {
+                if (failed) IoUtils.closeQuietly(socket);
+            }
             return socket;
         }
 
         @Override
         public Socket createSocket(InetAddress host, int port) throws IOException {
             Socket socket = createSocket();
-            socket.connect(new InetSocketAddress(host, port));
+            boolean failed = true;
+            try {
+                socket.connect(new InetSocketAddress(host, port));
+                failed = false;
+            } finally {
+                if (failed) IoUtils.closeQuietly(socket);
+            }
             return socket;
         }
 
@@ -175,7 +195,13 @@ public class Network implements Parcelable {
         @Override
         public Socket createSocket() throws IOException {
             Socket socket = new Socket();
-            bindSocket(socket);
+            boolean failed = true;
+            try {
+                bindSocket(socket);
+                failed = false;
+            } finally {
+                if (failed) IoUtils.closeQuietly(socket);
+            }
             return socket;
         }
     }
@@ -356,13 +382,13 @@ public class Network implements Parcelable {
         // Multiple Provisioning Domains API recommendations, as made by the
         // IETF mif working group.
         //
-        // The HANDLE_MAGIC value MUST be kept in sync with the corresponding
+        // The handleMagic value MUST be kept in sync with the corresponding
         // value in the native/android/net.c NDK implementation.
         if (netId == 0) {
             return 0L;  // make this zero condition obvious for debugging
         }
-        final long HANDLE_MAGIC = 0xfacade;
-        return (((long) netId) << 32) | HANDLE_MAGIC;
+        final long handleMagic = 0xcafed00dL;
+        return (((long) netId) << 32) | handleMagic;
     }
 
     // implement the Parcelable interface

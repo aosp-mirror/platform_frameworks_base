@@ -152,7 +152,6 @@ LIBANDROID {
     AHardwareBuffer_unlock; # introduced=26
     ANativeWindow_acquire;
     ANativeWindow_fromSurface;
-    ANativeWindow_fromSurfaceTexture; # introduced-arm=13 introduced-mips=13 introduced-x86=13
     ANativeWindow_toSurface; # introduced=26
     ANativeWindow_getFormat;
     ANativeWindow_getHeight;

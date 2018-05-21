@@ -65,6 +65,7 @@ import android.os.ResultReceiver;
 import android.os.ServiceManager;
 import android.os.UserHandle;
 import android.speech.tts.TextToSpeech;
+import android.telephony.SubscriptionManager;
 import android.text.TextUtils;
 import android.util.AndroidException;
 import android.util.ArrayMap;
@@ -3620,6 +3621,14 @@ public final class Settings {
         public static final Validator VIBRATE_WHEN_RINGING_VALIDATOR = sBooleanValidator;
 
         /**
+         * When {@code 1}, Telecom enhanced call blocking functionality is enabled.  When
+         * {@code 0}, enhanced call blocking functionality is disabled.
+         * @hide
+         */
+        public static final String DEBUG_ENABLE_ENHANCED_CALL_BLOCKING =
+                "debug.enable_enhanced_calling";
+
+        /**
          * Whether the audible DTMF tones are played by the dialer when dialing. The value is
          * boolean (1 or 0).
          */
@@ -6240,6 +6249,15 @@ public final class Settings {
         public static final String TTY_MODE_ENABLED = "tty_mode_enabled";
 
         /**
+         * User-selected RTT mode. When on, outgoing and incoming calls will be answered as RTT
+         * calls when supported by the device and carrier. Boolean value.
+         * 0 = OFF
+         * 1 = ON
+         */
+        public static final String RTT_CALLING_MODE = "rtt_calling_mode";
+
+        /**
+        /**
          * Controls whether settings backup is enabled.
          * Type: int ( 0 = disabled, 1 = enabled )
          * @hide
@@ -7196,6 +7214,7 @@ public final class Settings {
             PREFERRED_TTY_MODE,
             ENHANCED_VOICE_PRIVACY_ENABLED,
             TTY_MODE_ENABLED,
+            RTT_CALLING_MODE,
             INCALL_POWER_BUTTON_BEHAVIOR,
             NIGHT_DISPLAY_CUSTOM_START_TIME,
             NIGHT_DISPLAY_CUSTOM_END_TIME,
@@ -7837,9 +7856,8 @@ public final class Settings {
          *
          * @see android.service.euicc.EuiccService
          * @hide
-         *
-         * TODO(b/35851809): Make this a SystemApi.
          */
+        @SystemApi
         public static final String DEFAULT_SM_DP_PLUS = "default_sm_dp_plus";
 
         /**
@@ -7850,6 +7868,7 @@ public final class Settings {
          * (0 = false, 1 = true)
          * @hide
          */
+        @SystemApi
         public static final String EUICC_PROVISIONED = "euicc_provisioned";
 
         /**
@@ -8645,13 +8664,58 @@ public final class Settings {
         public static final String RECOMMENDED_NETWORK_EVALUATOR_CACHE_EXPIRY_MS =
                 "recommended_network_evaluator_cache_expiry_ms";
 
-       /**
+        /**
         * Settings to allow BLE scans to be enabled even when Bluetooth is turned off for
         * connectivity.
         * @hide
         */
-       public static final String BLE_SCAN_ALWAYS_AVAILABLE =
-               "ble_scan_always_enabled";
+        public static final String BLE_SCAN_ALWAYS_AVAILABLE = "ble_scan_always_enabled";
+
+        /**
+         * The length in milliseconds of a BLE scan window in a low-power scan mode.
+         * @hide
+         */
+        public static final String BLE_SCAN_LOW_POWER_WINDOW_MS = "ble_scan_low_power_window_ms";
+
+        /**
+         * The length in milliseconds of a BLE scan window in a balanced scan mode.
+         * @hide
+         */
+        public static final String BLE_SCAN_BALANCED_WINDOW_MS = "ble_scan_balanced_window_ms";
+
+        /**
+         * The length in milliseconds of a BLE scan window in a low-latency scan mode.
+         * @hide
+         */
+        public static final String BLE_SCAN_LOW_LATENCY_WINDOW_MS =
+                "ble_scan_low_latency_window_ms";
+
+        /**
+         * The length in milliseconds of a BLE scan interval in a low-power scan mode.
+         * @hide
+         */
+        public static final String BLE_SCAN_LOW_POWER_INTERVAL_MS =
+                "ble_scan_low_power_interval_ms";
+
+        /**
+         * The length in milliseconds of a BLE scan interval in a balanced scan mode.
+         * @hide
+         */
+        public static final String BLE_SCAN_BALANCED_INTERVAL_MS =
+                "ble_scan_balanced_interval_ms";
+
+        /**
+         * The length in milliseconds of a BLE scan interval in a low-latency scan mode.
+         * @hide
+         */
+        public static final String BLE_SCAN_LOW_LATENCY_INTERVAL_MS =
+                "ble_scan_low_latency_interval_ms";
+
+        /**
+         * The mode that BLE scanning clients will be moved to when in the background.
+         * @hide
+         */
+        public static final String BLE_SCAN_BACKGROUND_MODE = "ble_scan_background_mode";
 
        /**
         * Used to save the Wifi_ON state prior to tethering.
@@ -10077,8 +10141,12 @@ public final class Settings {
          * <p>
          * Type: int (0 for false, 1 for true)
          * @hide
+         * @deprecated Use {@link android.telephony.SubscriptionManager#ENHANCED_4G_MODE_ENABLED}
+         * instead.
          */
-        public static final String ENHANCED_4G_MODE_ENABLED = "volte_vt_enabled";
+        @Deprecated
+        public static final String ENHANCED_4G_MODE_ENABLED =
+                SubscriptionManager.ENHANCED_4G_MODE_ENABLED;
 
         /**
          * Whether VT (Video Telephony over IMS) is enabled
@@ -10086,8 +10154,10 @@ public final class Settings {
          * Type: int (0 for false, 1 for true)
          *
          * @hide
+         * @deprecated Use {@link android.telephony.SubscriptionManager#VT_IMS_ENABLED} instead.
          */
-        public static final String VT_IMS_ENABLED = "vt_ims_enabled";
+        @Deprecated
+        public static final String VT_IMS_ENABLED = SubscriptionManager.VT_IMS_ENABLED;
 
         /**
          * Whether WFC is enabled
@@ -10095,8 +10165,10 @@ public final class Settings {
          * Type: int (0 for false, 1 for true)
          *
          * @hide
+         * @deprecated Use {@link android.telephony.SubscriptionManager#WFC_IMS_ENABLED} instead.
          */
-        public static final String WFC_IMS_ENABLED = "wfc_ims_enabled";
+        @Deprecated
+        public static final String WFC_IMS_ENABLED = SubscriptionManager.WFC_IMS_ENABLED;
 
         /**
          * WFC mode on home/non-roaming network.
@@ -10104,8 +10176,10 @@ public final class Settings {
          * Type: int - 2=Wi-Fi preferred, 1=Cellular preferred, 0=Wi-Fi only
          *
          * @hide
+         * @deprecated Use {@link android.telephony.SubscriptionManager#WFC_IMS_MODE} instead.
          */
-        public static final String WFC_IMS_MODE = "wfc_ims_mode";
+        @Deprecated
+        public static final String WFC_IMS_MODE = SubscriptionManager.WFC_IMS_MODE;
 
         /**
          * WFC mode on roaming network.
@@ -10113,8 +10187,11 @@ public final class Settings {
          * Type: int - see {@link #WFC_IMS_MODE} for values
          *
          * @hide
+         * @deprecated Use {@link android.telephony.SubscriptionManager#WFC_IMS_ROAMING_MODE}
+         * instead.
          */
-        public static final String WFC_IMS_ROAMING_MODE = "wfc_ims_roaming_mode";
+        @Deprecated
+        public static final String WFC_IMS_ROAMING_MODE = SubscriptionManager.WFC_IMS_ROAMING_MODE;
 
         /**
          * Whether WFC roaming is enabled
@@ -10122,8 +10199,12 @@ public final class Settings {
          * Type: int (0 for false, 1 for true)
          *
          * @hide
+         * @deprecated Use {@link android.telephony.SubscriptionManager#WFC_IMS_ROAMING_ENABLED}
+         * instead
          */
-        public static final String WFC_IMS_ROAMING_ENABLED = "wfc_ims_roaming_enabled";
+        @Deprecated
+        public static final String WFC_IMS_ROAMING_ENABLED =
+                SubscriptionManager.WFC_IMS_ROAMING_ENABLED;
 
         /**
          * Whether user can enable/disable LTE as a preferred network. A carrier might control
@@ -10313,6 +10394,14 @@ public final class Settings {
          */
         public static final String STORAGE_SETTINGS_CLOBBER_THRESHOLD =
                 "storage_settings_clobber_threshold";
+
+        /**
+         * Exemptions to the hidden API blacklist.
+         *
+         * @hide
+         */
+        public static final String HIDDEN_API_BLACKLIST_EXEMPTIONS =
+                "hidden_api_blacklist_exemptions";
 
         /**
          * Settings to backup. This is here so that it's in the same place as the settings

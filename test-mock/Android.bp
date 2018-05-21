@@ -1,0 +1,88 @@
+//
+// Copyright (C) 2008 The Android Open Source Project
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//      http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//
+
+// Build the android.test.mock library
+// ===================================
+java_library {
+    name: "android.test.mock",
+
+    // Needs to be consistent with the repackaged version of this make target.
+    java_version: "1.8",
+    srcs: ["src/**/*.java"],
+
+    no_framework_libs: true,
+    libs: [
+        "framework",
+    ],
+}
+
+// Build the repackaged.android.test.mock library
+// ==============================================
+java_library_static {
+    name: "repackaged.android.test.mock",
+
+    static_libs: ["android.test.mock"],
+
+    jarjar_rules: "jarjar-rules.txt",
+    // Pin java_version until jarjar is certified to support later versions. http://b/72703434
+    java_version: "1.8",
+}
+
+doc_defaults {
+    name:"android.test.mock.docs-defaults",
+    srcs: ["src/android/test/mock/**/*.java"],
+
+    // Includes the main framework source to ensure that doclava has access to the
+    // visibility information for the base classes of the mock classes. Without it
+    // otherwise hidden methods could be visible.
+    srcs_lib: "framework",
+    srcs_lib_whitelist_dirs: ["core/java"],
+    srcs_lib_whitelist_pkgs: ["android"],
+    libs: [
+        "core-oj",
+        "core-libart",
+        "framework",
+        "conscrypt",
+        "okhttp",
+        "bouncycastle",
+        "ext",
+    ],
+    local_sourcepaths: ["src/android/test/mock"],
+    custom_template: "droiddoc-templates-sdk",
+    installable: false,
+}
+
+android_test_mock_docs_args =
+    "-hide 110 -hide 111 -hide 113 -hide 121 -hide 125 -hide 126 -hide 127 -hide 128 " +
+    "-stubpackages android.test.mock " +
+    "-nodocs "
+
+droiddoc {
+    name: "android.test.mock.docs",
+    defaults: ["android.test.mock.docs-defaults"],
+
+    api_tag_name: "ANDROID_TEST_MOCK",
+    api_filename: "api/android-test-mock-current.txt",
+    removed_api_filename: "api/android-test-mock-removed.txt",
+
+    args: android_test_mock_docs_args,
+}
+
+java_library_static {
+    name: "android.test.mock.stubs",
+    srcs: [":android.test.mock.docs"],
+    sdk_version: "current",
+}

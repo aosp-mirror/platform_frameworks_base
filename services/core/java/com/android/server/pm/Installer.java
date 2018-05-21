@@ -16,7 +16,9 @@
 
 package com.android.server.pm;
 
+import android.annotation.AppIdInt;
 import android.annotation.Nullable;
+import android.annotation.UserIdInt;
 import android.content.Context;
 import android.content.pm.PackageStats;
 import android.os.Build;
@@ -38,7 +40,7 @@ public class Installer extends SystemService {
 
     /* ***************************************************************************
      * IMPORTANT: These values are passed to native code. Keep them in sync with
-     * frameworks/native/cmds/installd/installd.h
+     * frameworks/native/cmds/installd/installd_constants.h
      * **************************************************************************/
     /** Application should be visible to everyone */
     public static final int DEXOPT_PUBLIC         = 1 << 1;
@@ -58,6 +60,12 @@ public class Installer extends SystemService {
     public static final int DEXOPT_STORAGE_DE     = 1 << 8;
     /** Indicates that dexopt is invoked from the background service. */
     public static final int DEXOPT_IDLE_BACKGROUND_JOB = 1 << 9;
+    /** Indicates that dexopt should restrict access to private APIs. */
+    public static final int DEXOPT_ENABLE_HIDDEN_API_CHECKS = 1 << 10;
+    /** Indicates that dexopt should convert to CompactDex. */
+    public static final int DEXOPT_GENERATE_COMPACT_DEX = 1 << 11;
+    /** Indicates that dexopt should generate an app image */
+    public static final int DEXOPT_GENERATE_APP_IMAGE = 1 << 12;
 
     // NOTE: keep in sync with installd
     public static final int FLAG_CLEAR_CACHE_ONLY = 1 << 8;
@@ -281,42 +289,45 @@ public class Installer extends SystemService {
     public void dexopt(String apkPath, int uid, @Nullable String pkgName, String instructionSet,
             int dexoptNeeded, @Nullable String outputPath, int dexFlags,
             String compilerFilter, @Nullable String volumeUuid, @Nullable String sharedLibraries,
-            @Nullable String seInfo, boolean downgrade)
-            throws InstallerException {
+            @Nullable String seInfo, boolean downgrade, int targetSdkVersion,
+            @Nullable String profileName, @Nullable String dexMetadataPath,
+            @Nullable String compilationReason) throws InstallerException {
         assertValidInstructionSet(instructionSet);
         if (!checkBeforeRemote()) return;
         try {
             mInstalld.dexopt(apkPath, uid, pkgName, instructionSet, dexoptNeeded, outputPath,
-                    dexFlags, compilerFilter, volumeUuid, sharedLibraries, seInfo, downgrade);
+                    dexFlags, compilerFilter, volumeUuid, sharedLibraries, seInfo, downgrade,
+                    targetSdkVersion, profileName, dexMetadataPath, compilationReason);
         } catch (Exception e) {
             throw InstallerException.from(e);
         }
     }
 
-    public boolean mergeProfiles(int uid, String packageName) throws InstallerException {
-        if (!checkBeforeRemote()) return false;
-        try {
-            return mInstalld.mergeProfiles(uid, packageName);
-        } catch (Exception e) {
-            throw InstallerException.from(e);
-        }
-    }
-
-    public boolean dumpProfiles(int uid, String packageName, String codePaths)
+    public boolean mergeProfiles(int uid, String packageName, String profileName)
             throws InstallerException {
         if (!checkBeforeRemote()) return false;
         try {
-            return mInstalld.dumpProfiles(uid, packageName, codePaths);
+            return mInstalld.mergeProfiles(uid, packageName, profileName);
         } catch (Exception e) {
             throw InstallerException.from(e);
         }
     }
 
-    public boolean copySystemProfile(String systemProfile, int uid, String packageName)
+    public boolean dumpProfiles(int uid, String packageName, String profileName, String codePath)
             throws InstallerException {
         if (!checkBeforeRemote()) return false;
         try {
-            return mInstalld.copySystemProfile(systemProfile, uid, packageName);
+            return mInstalld.dumpProfiles(uid, packageName, profileName, codePath);
+        } catch (Exception e) {
+            throw InstallerException.from(e);
+        }
+    }
+
+    public boolean copySystemProfile(String systemProfile, int uid, String packageName,
+                String profileName) throws InstallerException {
+        if (!checkBeforeRemote()) return false;
+        try {
+            return mInstalld.copySystemProfile(systemProfile, uid, packageName, profileName);
         } catch (Exception e) {
             throw InstallerException.from(e);
         }
@@ -360,10 +371,10 @@ public class Installer extends SystemService {
         }
     }
 
-    public void clearAppProfiles(String packageName) throws InstallerException {
+    public void clearAppProfiles(String packageName, String profileName) throws InstallerException {
         if (!checkBeforeRemote()) return;
         try {
-            mInstalld.clearAppProfiles(packageName);
+            mInstalld.clearAppProfiles(packageName, profileName);
         } catch (Exception e) {
             throw InstallerException.from(e);
         }
@@ -486,6 +497,36 @@ public class Installer extends SystemService {
         }
     }
 
+    public byte[] hashSecondaryDexFile(String dexPath, String packageName, int uid,
+            @Nullable String volumeUuid, int flags) throws InstallerException {
+        if (!checkBeforeRemote()) return new byte[0];
+        try {
+            return mInstalld.hashSecondaryDexFile(dexPath, packageName, uid, volumeUuid, flags);
+        } catch (Exception e) {
+            throw InstallerException.from(e);
+        }
+    }
+
+    public boolean createProfileSnapshot(int appId, String packageName, String profileName,
+            String classpath) throws InstallerException {
+        if (!checkBeforeRemote()) return false;
+        try {
+            return mInstalld.createProfileSnapshot(appId, packageName, profileName, classpath);
+        } catch (Exception e) {
+            throw InstallerException.from(e);
+        }
+    }
+
+    public void destroyProfileSnapshot(String packageName, String profileName)
+            throws InstallerException {
+        if (!checkBeforeRemote()) return;
+        try {
+            mInstalld.destroyProfileSnapshot(packageName, profileName);
+        } catch (Exception e) {
+            throw InstallerException.from(e);
+        }
+    }
+
     public void invalidateMounts() throws InstallerException {
         if (!checkBeforeRemote()) return;
         try {
@@ -499,6 +540,17 @@ public class Installer extends SystemService {
         if (!checkBeforeRemote()) return false;
         try {
             return mInstalld.isQuotaSupported(volumeUuid);
+        } catch (Exception e) {
+            throw InstallerException.from(e);
+        }
+    }
+
+    public boolean prepareAppProfile(String pkg, @UserIdInt int userId, @AppIdInt int appId,
+            String profileName, String codePath, String dexMetadataPath) throws InstallerException {
+        if (!checkBeforeRemote()) return false;
+        try {
+            return mInstalld.prepareAppProfile(pkg, userId, appId, profileName, codePath,
+                    dexMetadataPath);
         } catch (Exception e) {
             throw InstallerException.from(e);
         }

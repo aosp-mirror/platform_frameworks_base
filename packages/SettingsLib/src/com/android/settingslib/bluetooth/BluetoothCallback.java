@@ -28,4 +28,5 @@ public interface BluetoothCallback {
     void onDeviceDeleted(CachedBluetoothDevice cachedDevice);
     void onDeviceBondStateChanged(CachedBluetoothDevice cachedDevice, int bondState);
     void onConnectionStateChanged(CachedBluetoothDevice cachedDevice, int state);
+    void onActiveDeviceChanged(CachedBluetoothDevice activeDevice, int bluetoothProfile);
 }

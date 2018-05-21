@@ -486,4 +486,10 @@ public class TelephonyIntents {
     */
     public static final String ACTION_REQUEST_OMADM_CONFIGURATION_UPDATE =
             "com.android.omadm.service.CONFIGURATION_UPDATE";
+
+    /**
+     * Broadcast action to trigger the Carrier Certificate download.
+     */
+    public static final String ACTION_CARRIER_CERTIFICATE_DOWNLOAD =
+            "com.android.internal.telephony.ACTION_CARRIER_CERTIFICATE_DOWNLOAD";
 }

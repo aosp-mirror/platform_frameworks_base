@@ -31,6 +31,7 @@ import java.io.CharArrayWriter;
 import java.io.PrintWriter;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Objects;
 
 /**
@@ -64,6 +65,9 @@ public class NetworkStats implements Parcelable {
     /** Debug {@link #set} value when the VPN stats are moved out of a vpn UID. */
     public static final int SET_DBG_VPN_OUT = 1002;
 
+    /** Include all interfaces when filtering */
+    public static final String[] INTERFACES_ALL = null;
+
     /** {@link #tag} value for total data across all tags. */
     // TODO: Rename TAG_NONE to TAG_ALL.
     public static final int TAG_NONE = 0;
@@ -82,10 +86,22 @@ public class NetworkStats implements Parcelable {
     /** {@link #roaming} value where roaming data is accounted. */
     public static final int ROAMING_YES = 1;
 
+    /** {@link #onDefaultNetwork} value to account for all default network states. */
+    public static final int DEFAULT_NETWORK_ALL = -1;
+    /** {@link #onDefaultNetwork} value to account for usage while not the default network. */
+    public static final int DEFAULT_NETWORK_NO = 0;
+    /** {@link #onDefaultNetwork} value to account for usage while the default network. */
+    public static final int DEFAULT_NETWORK_YES = 1;
+
     /** Denotes a request for stats at the interface level. */
     public static final int STATS_PER_IFACE = 0;
     /** Denotes a request for stats at the interface and UID level. */
     public static final int STATS_PER_UID = 1;
+
+    private static final String CLATD_INTERFACE_PREFIX = "v4-";
+    // Delta between IPv4 header (20b) and IPv6 header (40b).
+    // Used for correct stats accounting on clatd interfaces.
+    private static final int IPV4V6_HEADER_DELTA = 20;
 
     // TODO: move fields to "mVariable" notation
 
@@ -102,6 +118,7 @@ public class NetworkStats implements Parcelable {
     private int[] tag;
     private int[] metered;
     private int[] roaming;
+    private int[] defaultNetwork;
     private long[] rxBytes;
     private long[] rxPackets;
     private long[] txBytes;
@@ -125,6 +142,12 @@ public class NetworkStats implements Parcelable {
          * getSummary().
          */
         public int roaming;
+        /**
+         * Note that this is only populated w/ the default value when read from /proc or written
+         * to disk. We merge in the correct value when reporting this value to clients of
+         * getSummary().
+         */
+        public int defaultNetwork;
         public long rxBytes;
         public long rxPackets;
         public long txBytes;
@@ -142,18 +165,20 @@ public class NetworkStats implements Parcelable {
 
         public Entry(String iface, int uid, int set, int tag, long rxBytes, long rxPackets,
                 long txBytes, long txPackets, long operations) {
-            this(iface, uid, set, tag, METERED_NO, ROAMING_NO, rxBytes, rxPackets, txBytes,
-                    txPackets, operations);
+            this(iface, uid, set, tag, METERED_NO, ROAMING_NO, DEFAULT_NETWORK_NO,
+                    rxBytes, rxPackets, txBytes, txPackets, operations);
         }
 
         public Entry(String iface, int uid, int set, int tag, int metered, int roaming,
-                 long rxBytes, long rxPackets, long txBytes, long txPackets, long operations) {
+                 int defaultNetwork, long rxBytes, long rxPackets, long txBytes, long txPackets,
+                 long operations) {
             this.iface = iface;
             this.uid = uid;
             this.set = set;
             this.tag = tag;
             this.metered = metered;
             this.roaming = roaming;
+            this.defaultNetwork = defaultNetwork;
             this.rxBytes = rxBytes;
             this.rxPackets = rxPackets;
             this.txBytes = txBytes;
@@ -187,6 +212,7 @@ public class NetworkStats implements Parcelable {
             builder.append(" tag=").append(tagToString(tag));
             builder.append(" metered=").append(meteredToString(metered));
             builder.append(" roaming=").append(roamingToString(roaming));
+            builder.append(" defaultNetwork=").append(defaultNetworkToString(defaultNetwork));
             builder.append(" rxBytes=").append(rxBytes);
             builder.append(" rxPackets=").append(rxPackets);
             builder.append(" txBytes=").append(txBytes);
@@ -200,7 +226,8 @@ public class NetworkStats implements Parcelable {
             if (o instanceof Entry) {
                 final Entry e = (Entry) o;
                 return uid == e.uid && set == e.set && tag == e.tag && metered == e.metered
-                        && roaming == e.roaming && rxBytes == e.rxBytes && rxPackets == e.rxPackets
+                        && roaming == e.roaming && defaultNetwork == e.defaultNetwork
+                        && rxBytes == e.rxBytes && rxPackets == e.rxPackets
                         && txBytes == e.txBytes && txPackets == e.txPackets
                         && operations == e.operations && iface.equals(e.iface);
             }
@@ -209,7 +236,7 @@ public class NetworkStats implements Parcelable {
 
         @Override
         public int hashCode() {
-            return Objects.hash(uid, set, tag, metered, roaming, iface);
+            return Objects.hash(uid, set, tag, metered, roaming, defaultNetwork, iface);
         }
     }
 
@@ -224,6 +251,7 @@ public class NetworkStats implements Parcelable {
             this.tag = new int[initialSize];
             this.metered = new int[initialSize];
             this.roaming = new int[initialSize];
+            this.defaultNetwork = new int[initialSize];
             this.rxBytes = new long[initialSize];
             this.rxPackets = new long[initialSize];
             this.txBytes = new long[initialSize];
@@ -238,6 +266,7 @@ public class NetworkStats implements Parcelable {
             this.tag = EmptyArray.INT;
             this.metered = EmptyArray.INT;
             this.roaming = EmptyArray.INT;
+            this.defaultNetwork = EmptyArray.INT;
             this.rxBytes = EmptyArray.LONG;
             this.rxPackets = EmptyArray.LONG;
             this.txBytes = EmptyArray.LONG;
@@ -256,6 +285,7 @@ public class NetworkStats implements Parcelable {
         tag = parcel.createIntArray();
         metered = parcel.createIntArray();
         roaming = parcel.createIntArray();
+        defaultNetwork = parcel.createIntArray();
         rxBytes = parcel.createLongArray();
         rxPackets = parcel.createLongArray();
         txBytes = parcel.createLongArray();
@@ -274,6 +304,7 @@ public class NetworkStats implements Parcelable {
         dest.writeIntArray(tag);
         dest.writeIntArray(metered);
         dest.writeIntArray(roaming);
+        dest.writeIntArray(defaultNetwork);
         dest.writeLongArray(rxBytes);
         dest.writeLongArray(rxPackets);
         dest.writeLongArray(txBytes);
@@ -308,10 +339,11 @@ public class NetworkStats implements Parcelable {
 
     @VisibleForTesting
     public NetworkStats addValues(String iface, int uid, int set, int tag, int metered, int roaming,
-            long rxBytes, long rxPackets, long txBytes, long txPackets, long operations) {
+            int defaultNetwork, long rxBytes, long rxPackets, long txBytes, long txPackets,
+            long operations) {
         return addValues(new Entry(
-                iface, uid, set, tag, metered, roaming, rxBytes, rxPackets, txBytes, txPackets,
-                operations));
+                iface, uid, set, tag, metered, roaming, defaultNetwork, rxBytes, rxPackets,
+                txBytes, txPackets, operations));
     }
 
     /**
@@ -327,6 +359,7 @@ public class NetworkStats implements Parcelable {
             tag = Arrays.copyOf(tag, newLength);
             metered = Arrays.copyOf(metered, newLength);
             roaming = Arrays.copyOf(roaming, newLength);
+            defaultNetwork = Arrays.copyOf(defaultNetwork, newLength);
             rxBytes = Arrays.copyOf(rxBytes, newLength);
             rxPackets = Arrays.copyOf(rxPackets, newLength);
             txBytes = Arrays.copyOf(txBytes, newLength);
@@ -335,20 +368,25 @@ public class NetworkStats implements Parcelable {
             capacity = newLength;
         }
 
-        iface[size] = entry.iface;
-        uid[size] = entry.uid;
-        set[size] = entry.set;
-        tag[size] = entry.tag;
-        metered[size] = entry.metered;
-        roaming[size] = entry.roaming;
-        rxBytes[size] = entry.rxBytes;
-        rxPackets[size] = entry.rxPackets;
-        txBytes[size] = entry.txBytes;
-        txPackets[size] = entry.txPackets;
-        operations[size] = entry.operations;
+        setValues(size, entry);
         size++;
 
         return this;
+    }
+
+    private void setValues(int i, Entry entry) {
+        iface[i] = entry.iface;
+        uid[i] = entry.uid;
+        set[i] = entry.set;
+        tag[i] = entry.tag;
+        metered[i] = entry.metered;
+        roaming[i] = entry.roaming;
+        defaultNetwork[i] = entry.defaultNetwork;
+        rxBytes[i] = entry.rxBytes;
+        rxPackets[i] = entry.rxPackets;
+        txBytes[i] = entry.txBytes;
+        txPackets[i] = entry.txPackets;
+        operations[i] = entry.operations;
     }
 
     /**
@@ -362,6 +400,7 @@ public class NetworkStats implements Parcelable {
         entry.tag = tag[i];
         entry.metered = metered[i];
         entry.roaming = roaming[i];
+        entry.defaultNetwork = defaultNetwork[i];
         entry.rxBytes = rxBytes[i];
         entry.rxPackets = rxPackets[i];
         entry.txBytes = txBytes[i];
@@ -416,7 +455,7 @@ public class NetworkStats implements Parcelable {
      */
     public NetworkStats combineValues(Entry entry) {
         final int i = findIndex(entry.iface, entry.uid, entry.set, entry.tag, entry.metered,
-                entry.roaming);
+                entry.roaming, entry.defaultNetwork);
         if (i == -1) {
             // only create new entry when positive contribution
             addValues(entry);
@@ -444,10 +483,12 @@ public class NetworkStats implements Parcelable {
     /**
      * Find first stats index that matches the requested parameters.
      */
-    public int findIndex(String iface, int uid, int set, int tag, int metered, int roaming) {
+    public int findIndex(String iface, int uid, int set, int tag, int metered, int roaming,
+            int defaultNetwork) {
         for (int i = 0; i < size; i++) {
             if (uid == this.uid[i] && set == this.set[i] && tag == this.tag[i]
                     && metered == this.metered[i] && roaming == this.roaming[i]
+                    && defaultNetwork == this.defaultNetwork[i]
                     && Objects.equals(iface, this.iface[i])) {
                 return i;
             }
@@ -461,7 +502,7 @@ public class NetworkStats implements Parcelable {
      */
     @VisibleForTesting
     public int findIndexHinted(String iface, int uid, int set, int tag, int metered, int roaming,
-            int hintIndex) {
+            int defaultNetwork, int hintIndex) {
         for (int offset = 0; offset < size; offset++) {
             final int halfOffset = offset / 2;
 
@@ -475,6 +516,7 @@ public class NetworkStats implements Parcelable {
 
             if (uid == this.uid[i] && set == this.set[i] && tag == this.tag[i]
                     && metered == this.metered[i] && roaming == this.roaming[i]
+                    && defaultNetwork == this.defaultNetwork[i]
                     && Objects.equals(iface, this.iface[i])) {
                 return i;
             }
@@ -489,7 +531,8 @@ public class NetworkStats implements Parcelable {
      */
     public void spliceOperationsFrom(NetworkStats stats) {
         for (int i = 0; i < size; i++) {
-            final int j = stats.findIndex(iface[i], uid[i], set[i], tag[i], metered[i], roaming[i]);
+            final int j = stats.findIndex(iface[i], uid[i], set[i], tag[i], metered[i], roaming[i],
+                    defaultNetwork[i]);
             if (j == -1) {
                 operations[i] = 0;
             } else {
@@ -581,6 +624,7 @@ public class NetworkStats implements Parcelable {
         entry.tag = TAG_NONE;
         entry.metered = METERED_ALL;
         entry.roaming = ROAMING_ALL;
+        entry.defaultNetwork = DEFAULT_NETWORK_ALL;
         entry.rxBytes = 0;
         entry.rxPackets = 0;
         entry.txBytes = 0;
@@ -677,6 +721,7 @@ public class NetworkStats implements Parcelable {
             entry.tag = left.tag[i];
             entry.metered = left.metered[i];
             entry.roaming = left.roaming[i];
+            entry.defaultNetwork = left.defaultNetwork[i];
             entry.rxBytes = left.rxBytes[i];
             entry.rxPackets = left.rxPackets[i];
             entry.txBytes = left.txBytes[i];
@@ -685,7 +730,7 @@ public class NetworkStats implements Parcelable {
 
             // find remote row that matches, and subtract
             final int j = right.findIndexHinted(entry.iface, entry.uid, entry.set, entry.tag,
-                    entry.metered, entry.roaming, i);
+                    entry.metered, entry.roaming, entry.defaultNetwork, i);
             if (j != -1) {
                 // Found matching row, subtract remote value.
                 entry.rxBytes -= right.rxBytes[j];
@@ -713,6 +758,75 @@ public class NetworkStats implements Parcelable {
     }
 
     /**
+     * Calculate and apply adjustments to captured statistics for 464xlat traffic counted twice.
+     *
+     * <p>This mutates both base and stacked traffic stats, to account respectively for
+     * double-counted traffic and IPv4/IPv6 header size difference.
+     *
+     * <p>For 464xlat traffic, xt_qtaguid sees every IPv4 packet twice, once as a native IPv4
+     * packet on the stacked interface, and once as translated to an IPv6 packet on the
+     * base interface. For correct stats accounting on the base interface, every 464xlat
+     * packet needs to be subtracted from the root UID on the base interface both for tx
+     * and rx traffic (http://b/12249687, http:/b/33681750).
+     *
+     * <p>This method will behave fine if {@code stackedIfaces} is an non-synchronized but add-only
+     * {@code ConcurrentHashMap}
+     * @param baseTraffic Traffic on the base interfaces. Will be mutated.
+     * @param stackedTraffic Stats with traffic stacked on top of our ifaces. Will also be mutated.
+     * @param stackedIfaces Mapping ipv6if -> ipv4if interface where traffic is counted on both.
+     */
+    public static void apply464xlatAdjustments(NetworkStats baseTraffic,
+            NetworkStats stackedTraffic, Map<String, String> stackedIfaces) {
+        // Total 464xlat traffic to subtract from uid 0 on all base interfaces.
+        // stackedIfaces may grow afterwards, but NetworkStats will just be resized automatically.
+        final NetworkStats adjustments = new NetworkStats(0, stackedIfaces.size());
+
+        // For recycling
+        Entry entry = null;
+        Entry adjust = new NetworkStats.Entry(IFACE_ALL, 0, 0, 0, 0, 0, 0, 0L, 0L, 0L, 0L, 0L);
+
+        for (int i = 0; i < stackedTraffic.size; i++) {
+            entry = stackedTraffic.getValues(i, entry);
+            if (entry.iface == null || !entry.iface.startsWith(CLATD_INTERFACE_PREFIX)) {
+                continue;
+            }
+            final String baseIface = stackedIfaces.get(entry.iface);
+            if (baseIface == null) {
+                continue;
+            }
+            // Subtract any 464lat traffic seen for the root UID on the current base interface.
+            adjust.iface = baseIface;
+            adjust.rxBytes = -(entry.rxBytes + entry.rxPackets * IPV4V6_HEADER_DELTA);
+            adjust.txBytes = -(entry.txBytes + entry.txPackets * IPV4V6_HEADER_DELTA);
+            adjust.rxPackets = -entry.rxPackets;
+            adjust.txPackets = -entry.txPackets;
+            adjustments.combineValues(adjust);
+
+            // For 464xlat traffic, xt_qtaguid only counts the bytes of the native IPv4 packet sent
+            // on the stacked interface with prefix "v4-" and drops the IPv6 header size after
+            // unwrapping. To account correctly for on-the-wire traffic, add the 20 additional bytes
+            // difference for all packets (http://b/12249687, http:/b/33681750).
+            entry.rxBytes += entry.rxPackets * IPV4V6_HEADER_DELTA;
+            entry.txBytes += entry.txPackets * IPV4V6_HEADER_DELTA;
+            stackedTraffic.setValues(i, entry);
+        }
+
+        baseTraffic.combineAllValues(adjustments);
+    }
+
+    /**
+     * Calculate and apply adjustments to captured statistics for 464xlat traffic counted twice.
+     *
+     * <p>This mutates the object this method is called on. Equivalent to calling
+     * {@link #apply464xlatAdjustments(NetworkStats, NetworkStats, Map)} with {@code this} as
+     * base and stacked traffic.
+     * @param stackedIfaces Mapping ipv6if -> ipv4if interface where traffic is counted on both.
+     */
+    public void apply464xlatAdjustments(Map<String, String> stackedIfaces) {
+        apply464xlatAdjustments(this, this, stackedIfaces);
+    }
+
+    /**
      * Return total statistics grouped by {@link #iface}; doesn't mutate the
      * original structure.
      */
@@ -725,6 +839,7 @@ public class NetworkStats implements Parcelable {
         entry.tag = TAG_NONE;
         entry.metered = METERED_ALL;
         entry.roaming = ROAMING_ALL;
+        entry.defaultNetwork = DEFAULT_NETWORK_ALL;
         entry.operations = 0L;
 
         for (int i = 0; i < size; i++) {
@@ -755,6 +870,7 @@ public class NetworkStats implements Parcelable {
         entry.tag = TAG_NONE;
         entry.metered = METERED_ALL;
         entry.roaming = ROAMING_ALL;
+        entry.defaultNetwork = DEFAULT_NETWORK_ALL;
 
         for (int i = 0; i < size; i++) {
             // skip specific tags, since already counted in TAG_NONE
@@ -790,6 +906,39 @@ public class NetworkStats implements Parcelable {
         return stats;
     }
 
+    /**
+     * Only keep entries that match all specified filters.
+     *
+     * <p>This mutates the original structure in place. After this method is called,
+     * size is the number of matching entries, and capacity is the previous capacity.
+     * @param limitUid UID to filter for, or {@link #UID_ALL}.
+     * @param limitIfaces Interfaces to filter for, or {@link #INTERFACES_ALL}.
+     * @param limitTag Tag to filter for, or {@link #TAG_ALL}.
+     */
+    public void filter(int limitUid, String[] limitIfaces, int limitTag) {
+        if (limitUid == UID_ALL && limitTag == TAG_ALL && limitIfaces == INTERFACES_ALL) {
+            return;
+        }
+
+        Entry entry = new Entry();
+        int nextOutputEntry = 0;
+        for (int i = 0; i < size; i++) {
+            entry = getValues(i, entry);
+            final boolean matches =
+                    (limitUid == UID_ALL || limitUid == entry.uid)
+                    && (limitTag == TAG_ALL || limitTag == entry.tag)
+                    && (limitIfaces == INTERFACES_ALL
+                            || ArrayUtils.contains(limitIfaces, entry.iface));
+
+            if (matches) {
+                setValues(nextOutputEntry, entry);
+                nextOutputEntry++;
+            }
+        }
+
+        size = nextOutputEntry;
+    }
+
     public void dump(String prefix, PrintWriter pw) {
         pw.print(prefix);
         pw.print("NetworkStats: elapsedRealtime="); pw.println(elapsedRealtime);
@@ -802,6 +951,7 @@ public class NetworkStats implements Parcelable {
             pw.print(" tag="); pw.print(tagToString(tag[i]));
             pw.print(" metered="); pw.print(meteredToString(metered[i]));
             pw.print(" roaming="); pw.print(roamingToString(roaming[i]));
+            pw.print(" defaultNetwork="); pw.print(defaultNetworkToString(defaultNetwork[i]));
             pw.print(" rxBytes="); pw.print(rxBytes[i]);
             pw.print(" rxPackets="); pw.print(rxPackets[i]);
             pw.print(" txBytes="); pw.print(txBytes[i]);
@@ -894,6 +1044,22 @@ public class NetworkStats implements Parcelable {
             case ROAMING_NO:
                 return "NO";
             case ROAMING_YES:
+                return "YES";
+            default:
+                return "UNKNOWN";
+        }
+    }
+
+    /**
+     * Return text description of {@link #defaultNetwork} value.
+     */
+    public static String defaultNetworkToString(int defaultNetwork) {
+        switch (defaultNetwork) {
+            case DEFAULT_NETWORK_ALL:
+                return "ALL";
+            case DEFAULT_NETWORK_NO:
+                return "NO";
+            case DEFAULT_NETWORK_YES:
                 return "YES";
             default:
                 return "UNKNOWN";
@@ -1055,6 +1221,7 @@ public class NetworkStats implements Parcelable {
                 tmpEntry.set = set[i];
                 tmpEntry.metered = metered[i];
                 tmpEntry.roaming = roaming[i];
+                tmpEntry.defaultNetwork = defaultNetwork[i];
                 combineValues(tmpEntry);
                 if (tag[i] == TAG_NONE) {
                     moved.add(tmpEntry);
@@ -1075,6 +1242,7 @@ public class NetworkStats implements Parcelable {
         moved.iface = underlyingIface;
         moved.metered = METERED_ALL;
         moved.roaming = ROAMING_ALL;
+        moved.defaultNetwork = DEFAULT_NETWORK_ALL;
         combineValues(moved);
 
         // Caveat: if the vpn software uses tag, the total tagged traffic may be greater than
@@ -1085,13 +1253,13 @@ public class NetworkStats implements Parcelable {
         // roaming data after applying these adjustments, by checking the NetworkIdentity of the
         // underlying iface.
         int idxVpnBackground = findIndex(underlyingIface, tunUid, SET_DEFAULT, TAG_NONE,
-                METERED_NO, ROAMING_NO);
+                METERED_NO, ROAMING_NO, DEFAULT_NETWORK_NO);
         if (idxVpnBackground != -1) {
             tunSubtract(idxVpnBackground, this, moved);
         }
 
         int idxVpnForeground = findIndex(underlyingIface, tunUid, SET_FOREGROUND, TAG_NONE,
-                METERED_NO, ROAMING_NO);
+                METERED_NO, ROAMING_NO, DEFAULT_NETWORK_NO);
         if (idxVpnForeground != -1) {
             tunSubtract(idxVpnForeground, this, moved);
         }

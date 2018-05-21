@@ -360,6 +360,23 @@
     <!-- Regex of wired ethernet ifaces -->
     <string translatable="false" name="config_ethernet_iface_regex">eth\\d</string>
 
+
+
+    <!-- Configuration of Ethernet interfaces in the following format:
+         <interface name|mac address>;[Network Capabilities];[IP config]
+         Where
+               [Network Capabilities] Optional. A comma seprated list of network capabilities.
+                   Values must be from NetworkCapabilities#NET_CAPABILITIES_* constants.
+               [IP config] Optional. If empty or not specified - DHCP will be used, otherwise
+                    static IP address with the mask.
+         -->
+    <string-array translatable="false" name="config_ethernet_interfaces">
+        <!--
+        <item>eth1;12,13,14,15;192.168.0.10/24</item>
+        <item>eth2;;192.168.0.11/24</item>
+        -->
+    </string-array>
+
     <!-- If the mobile hotspot feature requires provisioning, a package name and class name
         can be provided to launch a supported application that provisions the devices.
 
@@ -486,11 +503,11 @@
     <!-- String containing the apn value for tethering.  May be overriden by secure settings
          TETHER_DUN_APN.  Value is a comma separated series of strings:
          "name,apn,proxy,port,username,password,server,mmsc,mmsproxy,mmsport,mcc,mnc,auth,type",
-         Or string format of ApnSettingV3.
+         Or string format of ApnSettingV3 or higher.
          note that empty fields can be ommitted: "name,apn,,,,,,,,,310,260,,DUN"
          Multiple entries are separated by using string-array:
          "<item>[ApnSettingV3]Name,apn,,,,,,,,,123,45,,mms|*,IPV6,IP,true,14,,,,,,,spn,testspn</item>
-          <item>[ApnSettingV3]Name1,apn2,,,,,,,,,123,46,,mms|*,IPV6,IP,true,12,,,,,,,,</item>" -->
+          <item>[ApnSettingV5]Name1,apn2,,,,,,,,,123,46,,mms|*,IPV6,IP,true,12,,,,,,,,,,</item>" -->
     <string-array translatable="false" name="config_tether_apndata">
     </string-array>
 
@@ -1561,6 +1578,9 @@
     <!-- Operating volatage for bluetooth controller. 0 by default-->
     <integer translatable="false" name="config_bluetooth_operating_voltage_mv">0</integer>
 
+    <!-- Max number of connected audio devices supported by Bluetooth stack -->
+    <integer name="config_bluetooth_max_connected_audio_devices">5</integer>
+
     <!-- Whether supported profiles should be reloaded upon enabling bluetooth -->
     <bool name="config_bluetooth_reload_supported_profiles_when_enabled">false</bool>
 
@@ -1752,9 +1772,6 @@
     <!-- Do not translate. Defines the slots is Two Digit Number for dialing normally not USSD -->
     <string-array name="config_twoDigitNumberPattern" translatable="false">
     </string-array>
-
-    <!-- The VoiceMail default value is displayed to my own number if it is true -->
-    <bool name="config_telephony_use_own_number_for_voicemail">false</bool>
 
     <!-- If this value is true, Sms encoded as octet is decoded by utf8 decoder.
          If false, decoded by Latin decoder. -->
@@ -2076,6 +2093,9 @@
     <!-- Whether UI for multi user should be shown -->
     <bool name="config_enableMultiUserUI">false</bool>
 
+    <!-- Whether the new Auto Selection Network UI should be shown -->
+    <bool name="config_enableNewAutoSelectNetworkUI">false</bool>
+
     <!-- If true, then we do not ask user for permission for apps to connect to USB devices.
          Do not set this to true for production devices. Doing so will cause you to fail CTS. -->
     <bool name="config_disableUsbPermissionDialogs">false</bool>
@@ -2386,6 +2406,32 @@
          in the display pipeline plus some slack just to be sure. -->
     <integer name="config_drawLockTimeoutMillis">120</integer>
 
+    <!-- An array of device capabilities defined by GSMA SGP.22 v2.0.
+         The first item is the capability name that the device supports. The second item is the
+         major version. The minor and revision versions are default to 0s.
+         The device capabilities and their definition in the spec are:
+             gsm : gsmSupportedRelease
+             utran : utranSupportedRelease
+             cdma1x : cdma2000onexSupportedRelease
+             hrpd : cdma2000hrpdSupportedRelease
+             ehrpd : cdma2000ehrpdSupportedRelease
+             eutran : eutranSupportedRelease
+             nfc : contactlessSupportedRelease
+             crl : rspCrlSupportedVersion
+    -->
+    <string-array translatable="false" name="config_telephonyEuiccDeviceCapabilities">
+        <!-- Example:
+        <item>"gsm,11"</item>
+        <item>"utran,11"</item>
+        <item>"cdma1x,1"</item>
+        <item>"hrpd,3"</item>
+        <item>"ehrpd,12"</item>
+        <item>"eutran,11"</item>
+        <item>"nfc,1"</item>
+        <item>"crl,1"</item>
+        -->
+    </string-array>
+
     <!-- default telephony hardware configuration for this platform.
     -->
     <!-- this string array should be overridden by the device to present a list
@@ -2470,6 +2516,14 @@
 
     <!-- Flag specifying whether or not IMS will use the dynamic ImsResolver -->
     <bool name="config_dynamic_bind_ims">false</bool>
+
+    <!-- Cellular data service package name to bind to by default. If none is specified in an overlay, an
+         empty string is passed in -->
+    <string name="config_wwan_data_service_package" translatable="false">com.android.phone</string>
+
+    <!-- IWLAN data service package name to bind to by default. If none is specified in an overlay, an
+         empty string is passed in -->
+    <string name="config_wlan_data_service_package" translatable="false"></string>
 
     <bool name="config_networkSamplingWakesDevice">true</bool>
 
@@ -2560,15 +2614,13 @@
 
     <bool name="config_sms_force_7bit_encoding">false</bool>
 
-    <!--Thresholds for LTE dbm in status bar-->
-    <integer-array translatable="false" name="config_lteDbmThresholds">
-        <item>-140</item>    <!-- SIGNAL_STRENGTH_NONE_OR_UNKNOWN -->
-        <item>-128</item>    <!-- SIGNAL_STRENGTH_POOR -->
-        <item>-118</item>    <!-- SIGNAL_STRENGTH_MODERATE -->
-        <item>-108</item>    <!-- SIGNAL_STRENGTH_GOOD -->
-        <item>-98</item>     <!-- SIGNAL_STRENGTH_GREAT -->
-        <item>-44</item>
-    </integer-array>
+
+    <!-- Number of physical SIM slots on the device. This includes both eSIM and pSIM slots, and
+         is not necessarily the same as the number of phones/logical modems supported by the device.
+         For example, a multi-sim device can have 2 phones/logical modems, but 3 physical slots,
+         or a single SIM device can have 1 phones/logical modems, but 2 physical slots (one eSIM
+         and one pSIM) -->
+    <integer name="config_num_physical_slots">1</integer>
 
     <!-- Enabled built-in zen mode condition providers -->
     <string-array translatable="false" name="config_system_condition_providers">
@@ -3100,4 +3152,13 @@
     <!-- Decide whether to display 'No service' on status bar instead of 'Emergency calls only'
          when SIM is unready. -->
     <bool name="config_display_no_service_when_sim_unready">false</bool>
+
+    <bool name="config_supportBluetoothPersistedState">true</bool>
+
+    <!-- Cellular network service package name to bind to by default. -->
+    <string name="config_wwan_network_service_package" translatable="false">com.android.phone</string>
+
+    <!-- IWLAN network service package name to bind to by default. If none is specified in an overlay, an
+         empty string is passed in -->
+    <string name="config_wlan_network_service_package" translatable="false"></string>
 </resources>

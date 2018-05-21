@@ -7,6 +7,7 @@ LOCAL_SRC_FILES := $(call all-subdir-java-files) \
         $(call all-Iaidl-files-under, src)
 
 LOCAL_PACKAGE_NAME := OneMedia
+LOCAL_PRIVATE_PLATFORM_APIS := true
 LOCAL_CERTIFICATE := platform
 
 LOCAL_JAVA_LIBRARIES += org.apache.http.legacy

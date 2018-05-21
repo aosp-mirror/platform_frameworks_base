@@ -40,6 +40,7 @@ LOCAL_MODULE_PATH := $(TARGET_OUT_DATA_APPS)
 LOCAL_SRC_FILES := $(call all-subdir-java-files)
 
 LOCAL_PACKAGE_NAME := BackupTest
+LOCAL_PRIVATE_PLATFORM_APIS := true
 
 LOCAL_PROGUARD_ENABLED := disabled
 

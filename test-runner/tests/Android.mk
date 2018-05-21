@@ -32,6 +32,8 @@ LOCAL_STATIC_JAVA_LIBRARIES := junit legacy-android-test
 LOCAL_SRC_FILES := $(call all-java-files-under, src)
 
 LOCAL_PACKAGE_NAME := FrameworkTestRunnerTests
+# Because of android.test.mock.
+LOCAL_PRIVATE_PLATFORM_APIS := true
 
 include $(BUILD_PACKAGE)
 

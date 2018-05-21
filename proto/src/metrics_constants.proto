@@ -4564,6 +4564,73 @@ message MetricsEvent {
 
     // ---- End O-MR1 Constants, all O-MR1 constants go above this line ----
 
+    // OPEN: Settings > Network & Internet > Mobile network
+    // CATEGORY: SETTINGS
+    SETTINGS_MOBILE_NETWORK_CATEGORY = 1200;
+
+    // ACTION: Settings > Network & Internet > Mobile network > Roaming
+    // CATEGORY: SETTINGS
+    ACTION_MOBILE_NETWORK_DATA_ROAMING_TOGGLE = 1201;
+
+    // ACTION: Settings > Network & Internet > Mobile network > Advanced
+    // CATEGORY: SETTINGS
+    ACTION_MOBILE_NETWORK_EXPAND_ADVANCED_FIELDS = 1202;
+
+    // ACTION: Settings > Network & Internet > Mobile network > Enhanced 4G LTE Mode
+    // CATEGORY: SETTINGS
+    ACTION_MOBILE_ENHANCED_4G_LTE_MODE_TOGGLE = 1203;
+
+    // ACTION: Settings > Network & Internet > Mobile network > Preferred network type
+    // CATEGORY: SETTINGS
+    ACTION_MOBILE_NETWORK_SELECT_PREFERRED_NETWORK = 1204;
+
+    // ACTION: Settings > Network & Internet > Mobile network > Preferred network type (enabled networks)
+    // CATEGORY: SETTINGS
+    ACTION_MOBILE_NETWORK_SELECT_ENABLED_NETWORK = 1205;
+
+    // OPEN: Settings > Network & Internet > Mobile network > Carrier
+    // CATEGORY: SETTINGS
+    ACTION_MOBILE_NETWORK_EUICC_SETTING = 1206;
+
+    // OPEN: Settings > Network & Internet > Mobile network > Wi-Fi calling
+    // CATEGORY: SETTINGS
+    ACTION_MOBILE_NETWORK_WIFI_CALLING = 1207;
+
+    // ACTION: Settings > Network & Internet > Mobile network > Carrier video calling
+    // CATEGORY: SETTINGS
+    ACTION_MOBILE_NETWORK_VIDEO_CALLING_TOGGLE = 1208;
+
+    // ACTION: Settings > Network & Internet > Mobile network > Automatically select network
+    // CATEGORY: SETTINGS
+    ACTION_MOBILE_NETWORK_AUTO_SELECT_NETWORK_TOGGLE = 1209;
+
+    // ACTION: Settings > Network & Internet > Mobile network > Network
+    // CATEGORY: SETTINGS
+    ACTION_MOBILE_NETWORK_MANUAL_SELECT_NETWORK = 1210;
+
+    // FIELD - Manually selected mobile network
+    FIELD_MOBILE_NETWORK = 1211;
+
+    // OPEN: Settings > Network & Internet > Mobile network > Access Point Names
+    // CATEGORY: SETTINGS
+    ACTION_MOBILE_NETWORK_APN_SETTINGS = 1212;
+
+    // OPEN: Settings > Network & Internet > Mobile network > Carrier settings
+    // CATEGORY: SETTINGS
+    ACTION_MOBILE_NETWORK_CARRIER_SETTINGS = 1213;
+
+    // OPEN: Settings > Network & Internet > Mobile network > System select
+    // CATEGORY: SETTINGS
+    ACTION_MOBILE_NETWORK_CDMA_SYSTEM_SELECT = 1214;
+
+    // OPEN: Settings > Network & Internet > Mobile network > CDMA subscription
+    // CATEGORY: SETTINGS
+    ACTION_MOBILE_NETWORK_CDMA_SUBSCRIPTION_SELECT = 1215;
+
+    // ACTION: Settings > Network & Internet > Mobile network > Set up data service
+    // CATEGORY: SETTINGS
+    ACTION_MOBILE_NETWORK_SET_UP_DATA_SERVICE = 1216;
+
     // Add new aosp constants above this line.
     // END OF AOSP CONSTANTS
   }

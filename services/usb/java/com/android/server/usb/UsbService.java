@@ -87,6 +87,11 @@ public class UsbService extends IUsbManager.Stub {
         public void onStopUser(int userHandle) {
             mUsbService.onStopUser(UserHandle.of(userHandle));
         }
+
+        @Override
+        public void onUnlockUser(int userHandle) {
+            mUsbService.onUnlockUser(userHandle);
+        }
     }
 
     private static final String TAG = "UsbService";
@@ -202,6 +207,13 @@ public class UsbService extends IUsbManager.Stub {
     public void bootCompleted() {
         if (mDeviceManager != null) {
             mDeviceManager.bootCompleted();
+        }
+    }
+
+    /** Called when a user is unlocked. */
+    public void onUnlockUser(int user) {
+        if (mDeviceManager != null) {
+            mDeviceManager.onUnlockUser(user);
         }
     }
 
@@ -384,6 +396,23 @@ public class UsbService extends IUsbManager.Stub {
 
         if (mDeviceManager != null) {
             mDeviceManager.setCurrentFunctions(function, usbDataUnlocked);
+        } else {
+            throw new IllegalStateException("USB device mode not supported");
+        }
+    }
+
+    @Override
+    public void setScreenUnlockedFunctions(String function) {
+        mContext.enforceCallingOrSelfPermission(android.Manifest.permission.MANAGE_USB, null);
+
+        if (!isSupportedCurrentFunction(function)) {
+            Slog.w(TAG, "Caller of setScreenUnlockedFunctions() requested unsupported USB function:"
+                    + function);
+            function = UsbManager.USB_FUNCTION_NONE;
+        }
+
+        if (mDeviceManager != null) {
+            mDeviceManager.setScreenUnlockedFunctions(function);
         } else {
             throw new IllegalStateException("USB device mode not supported");
         }

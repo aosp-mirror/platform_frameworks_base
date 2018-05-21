@@ -1,0 +1,20 @@
+// Copyright 2009 The Android Open Source Project
+
+cc_binary {
+    name: "btool",
+
+    srcs: ["backup.cpp"],
+
+    shared_libs: [
+        "libcutils",
+        "libutils",
+        "libandroidfw",
+    ],
+
+    cflags: [
+        "-Wall",
+        "-Werror",
+        "-Wunused",
+        "-Wunreachable-code",
+    ],
+}

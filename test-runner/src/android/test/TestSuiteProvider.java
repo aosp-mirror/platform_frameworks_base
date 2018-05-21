@@ -20,6 +20,11 @@ import junit.framework.TestSuite;
 
 /**
  * Implementors will know how to get a test suite.
+ *
+ * @deprecated Use
+ * <a href="{@docRoot}reference/android/support/test/runner/AndroidJUnitRunner.html">
+ * AndroidJUnitRunner</a> instead. New tests should be written using the
+ * <a href="{@docRoot}tools/testing-support-library/index.html">Android Testing Support Library</a>.
  */
 @Deprecated
 public interface TestSuiteProvider {

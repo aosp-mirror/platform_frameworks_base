@@ -25,6 +25,7 @@ import java.net.Inet6Address;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.Arrays;
+import java.util.Comparator;
 
 /**
  * This class represents an IP prefix, i.e., a contiguous block of IP addresses aligned on a
@@ -187,6 +188,20 @@ public final class IpPrefix implements Parcelable {
     }
 
     /**
+     * Returns whether the specified prefix is entirely contained in this prefix.
+     *
+     * Note this is mathematical inclusion, so a prefix is always contained within itself.
+     * @param otherPrefix the prefix to test
+     * @hide
+     */
+    public boolean containsPrefix(IpPrefix otherPrefix) {
+        if (otherPrefix.getPrefixLength() < prefixLength) return false;
+        final byte[] otherAddress = otherPrefix.getRawAddress();
+        NetworkUtils.maskRawAddress(otherAddress, prefixLength);
+        return Arrays.equals(otherAddress, address);
+    }
+
+    /**
      * @hide
      */
     public boolean isIPv6() {
@@ -227,6 +242,38 @@ public final class IpPrefix implements Parcelable {
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeByteArray(address);
         dest.writeInt(prefixLength);
+    }
+
+    /**
+     * Returns a comparator ordering IpPrefixes by length, shorter to longer.
+     * Contents of the address will break ties.
+     * @hide
+     */
+    public static Comparator<IpPrefix> lengthComparator() {
+        return new Comparator<IpPrefix>() {
+            @Override
+            public int compare(IpPrefix prefix1, IpPrefix prefix2) {
+                if (prefix1.isIPv4()) {
+                    if (prefix2.isIPv6()) return -1;
+                } else {
+                    if (prefix2.isIPv4()) return 1;
+                }
+                final int p1len = prefix1.getPrefixLength();
+                final int p2len = prefix2.getPrefixLength();
+                if (p1len < p2len) return -1;
+                if (p2len < p1len) return 1;
+                final byte[] a1 = prefix1.address;
+                final byte[] a2 = prefix2.address;
+                final int len = a1.length < a2.length ? a1.length : a2.length;
+                for (int i = 0; i < len; ++i) {
+                    if (a1[i] < a2[i]) return -1;
+                    if (a1[i] > a2[i]) return 1;
+                }
+                if (a2.length < len) return 1;
+                if (a1.length < len) return -1;
+                return 0;
+            }
+        };
     }
 
     /**

@@ -16,8 +16,12 @@
 
 package android.bluetooth;
 
+import android.Manifest;
+import android.annotation.Nullable;
+import android.annotation.RequiresPermission;
 import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
+import android.annotation.SystemApi;
 import android.content.ComponentName;
 import android.content.Context;
 import android.os.Binder;
@@ -91,6 +95,23 @@ public final class BluetoothHeadset implements BluetoothProfile {
     public static final String ACTION_AUDIO_STATE_CHANGED =
             "android.bluetooth.headset.profile.action.AUDIO_STATE_CHANGED";
 
+    /**
+     * Intent used to broadcast the selection of a connected device as active.
+     *
+     * <p>This intent will have one extra:
+     * <ul>
+     * <li> {@link BluetoothDevice#EXTRA_DEVICE} - The remote device. It can
+     * be null if no device is active. </li>
+     * </ul>
+     *
+     * <p>Requires {@link android.Manifest.permission#BLUETOOTH} permission to
+     * receive.
+     *
+     * @hide
+     */
+    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+    public static final String ACTION_ACTIVE_DEVICE_CHANGED =
+            "android.bluetooth.headset.profile.action.ACTIVE_DEVICE_CHANGED";
 
     /**
      * Intent used to broadcast that the headset has posted a
@@ -416,6 +437,8 @@ public final class BluetoothHeadset implements BluetoothProfile {
      * @return false on immediate error, true otherwise
      * @hide
      */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.BLUETOOTH_ADMIN)
     public boolean connect(BluetoothDevice device) {
         if (DBG) log("connect(" + device + ")");
         final IBluetoothHeadset service = mService;
@@ -456,6 +479,8 @@ public final class BluetoothHeadset implements BluetoothProfile {
      * @return false on immediate error, true otherwise
      * @hide
      */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.BLUETOOTH_ADMIN)
     public boolean disconnect(BluetoothDevice device) {
         if (DBG) log("disconnect(" + device + ")");
         final IBluetoothHeadset service = mService;
@@ -532,8 +557,8 @@ public final class BluetoothHeadset implements BluetoothProfile {
      * Set priority of the profile
      *
      * <p> The device should already be paired.
-     * Priority can be one of {@link #PRIORITY_ON} or
-     * {@link #PRIORITY_OFF},
+     * Priority can be one of {@link BluetoothProfile#PRIORITY_ON} or
+     * {@link BluetoothProfile#PRIORITY_OFF},
      *
      * <p>Requires {@link android.Manifest.permission#BLUETOOTH_ADMIN}
      * permission.
@@ -543,6 +568,8 @@ public final class BluetoothHeadset implements BluetoothProfile {
      * @return true if priority is set, false on error
      * @hide
      */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.BLUETOOTH_ADMIN)
     public boolean setPriority(BluetoothDevice device, int priority) {
         if (DBG) log("setPriority(" + device + ", " + priority + ")");
         final IBluetoothHeadset service = mService;
@@ -607,8 +634,9 @@ public final class BluetoothHeadset implements BluetoothProfile {
      * <p>Requires {@link android.Manifest.permission#BLUETOOTH} permission.
      *
      * @param device Bluetooth headset
-     * @return false if there is no headset connected of if the connected headset doesn't support
-     * voice recognition or on error, true otherwise
+     * @return false if there is no headset connected, or the connected headset doesn't support
+     * voice recognition, or voice recognition is already started, or audio channel is occupied,
+     * or on error, true otherwise
      */
     public boolean startVoiceRecognition(BluetoothDevice device) {
         if (DBG) log("startVoiceRecognition()");
@@ -628,10 +656,15 @@ public final class BluetoothHeadset implements BluetoothProfile {
      * Stop Bluetooth Voice Recognition mode, and shut down the
      * Bluetooth audio path.
      *
+     * <p> Users can listen to {@link #ACTION_AUDIO_STATE_CHANGED}.
+     * If this function returns true, this intent will be broadcasted with
+     * {@link #EXTRA_STATE} set to {@link #STATE_AUDIO_DISCONNECTED}.
+     *
      * <p>Requires {@link android.Manifest.permission#BLUETOOTH} permission.
      *
      * @param device Bluetooth headset
-     * @return false if there is no headset connected or on error, true otherwise
+     * @return false if there is no headset connected, or voice recognition has not started,
+     * or voice recognition has ended on this headset, or on error, true otherwise
      */
     public boolean stopVoiceRecognition(BluetoothDevice device) {
         if (DBG) log("stopVoiceRecognition()");
@@ -772,11 +805,12 @@ public final class BluetoothHeadset implements BluetoothProfile {
     }
 
     /**
-     * Check if Bluetooth SCO audio is connected.
+     * Check if at least one headset's SCO audio is connected or connecting
      *
      * <p>Requires {@link android.Manifest.permission#BLUETOOTH} permission.
      *
-     * @return true if SCO is connected, false otherwise or on error
+     * @return true if at least one device's SCO audio is connected or connecting, false otherwise
+     * or on error
      * @hide
      */
     public boolean isAudioOn() {
@@ -795,11 +829,21 @@ public final class BluetoothHeadset implements BluetoothProfile {
     }
 
     /**
-     * Initiates a connection of headset audio.
-     * It setup SCO channel with remote connected headset device.
+     * Initiates a connection of headset audio to the current active device
      *
-     * @return true if successful false if there was some error such as there is no connected
-     * headset
+     * <p> Users can listen to {@link #ACTION_AUDIO_STATE_CHANGED}.
+     * If this function returns true, this intent will be broadcasted with
+     * {@link #EXTRA_STATE} set to {@link #STATE_AUDIO_CONNECTING}.
+     *
+     * <p> {@link #EXTRA_STATE} will transition from
+     * {@link #STATE_AUDIO_CONNECTING} to {@link #STATE_AUDIO_CONNECTED} when
+     * audio connection is established and to {@link #STATE_AUDIO_DISCONNECTED}
+     * in case of failure to establish the audio connection.
+     *
+     * Note that this intent will not be sent if {@link BluetoothHeadset#isAudioOn()} is true
+     * before calling this method
+     *
+     * @return false if there was some error such as there is no active headset
      * @hide
      */
     public boolean connectAudio() {
@@ -818,11 +862,14 @@ public final class BluetoothHeadset implements BluetoothProfile {
     }
 
     /**
-     * Initiates a disconnection of headset audio.
-     * It tears down the SCO channel from remote headset device.
+     * Initiates a disconnection of HFP SCO audio.
+     * Tear down voice recognition or virtual voice call if any.
      *
-     * @return true if successful false if there was some error such as there is no connected SCO
-     * channel
+     * <p> Users can listen to {@link #ACTION_AUDIO_STATE_CHANGED}.
+     * If this function returns true, this intent will be broadcasted with
+     * {@link #EXTRA_STATE} set to {@link #STATE_AUDIO_DISCONNECTED}.
+     *
+     * @return false if audio is not connected, or on error, true otherwise
      * @hide
      */
     public boolean disconnectAudio() {
@@ -841,22 +888,33 @@ public final class BluetoothHeadset implements BluetoothProfile {
     }
 
     /**
-     * Initiates a SCO channel connection with the headset (if connected).
-     * Also initiates a virtual voice call for Handsfree devices as many devices
-     * do not accept SCO audio without a call.
-     * This API allows the handsfree device to be used for routing non-cellular
-     * call audio.
+     * Initiates a SCO channel connection as a virtual voice call to the current active device
+     * Active handsfree device will be notified of incoming call and connected call.
      *
-     * @param device Remote Bluetooth Device
-     * @return true if successful, false if there was some error.
+     * <p> Users can listen to {@link #ACTION_AUDIO_STATE_CHANGED}.
+     * If this function returns true, this intent will be broadcasted with
+     * {@link #EXTRA_STATE} set to {@link #STATE_AUDIO_CONNECTING}.
+     *
+     * <p> {@link #EXTRA_STATE} will transition from
+     * {@link #STATE_AUDIO_CONNECTING} to {@link #STATE_AUDIO_CONNECTED} when
+     * audio connection is established and to {@link #STATE_AUDIO_DISCONNECTED}
+     * in case of failure to establish the audio connection.
+     *
+     * @return true if successful, false if one of the following case applies
+     *  - SCO audio is not idle (connecting or connected)
+     *  - virtual call has already started
+     *  - there is no active device
+     *  - a Telecom managed call is going on
+     *  - binder is dead or Bluetooth is disabled or other error
      * @hide
      */
-    public boolean startScoUsingVirtualVoiceCall(BluetoothDevice device) {
+    @RequiresPermission(Manifest.permission.BLUETOOTH_ADMIN)
+    public boolean startScoUsingVirtualVoiceCall() {
         if (DBG) log("startScoUsingVirtualVoiceCall()");
         final IBluetoothHeadset service = mService;
-        if (service != null && isEnabled() && isValidDevice(device)) {
+        if (service != null && isEnabled()) {
             try {
-                return service.startScoUsingVirtualVoiceCall(device);
+                return service.startScoUsingVirtualVoiceCall();
             } catch (RemoteException e) {
                 Log.e(TAG, e.toString());
             }
@@ -868,19 +926,24 @@ public final class BluetoothHeadset implements BluetoothProfile {
     }
 
     /**
-     * Terminates an ongoing SCO connection and the associated virtual
-     * call.
+     * Terminates an ongoing SCO connection and the associated virtual call.
      *
-     * @param device Remote Bluetooth Device
-     * @return true if successful, false if there was some error.
+     * <p> Users can listen to {@link #ACTION_AUDIO_STATE_CHANGED}.
+     * If this function returns true, this intent will be broadcasted with
+     * {@link #EXTRA_STATE} set to {@link #STATE_AUDIO_DISCONNECTED}.
+     *
+     * @return true if successful, false if one of the following case applies
+     *  - virtual voice call is not started or has ended
+     *  - binder is dead or Bluetooth is disabled or other error
      * @hide
      */
-    public boolean stopScoUsingVirtualVoiceCall(BluetoothDevice device) {
+    @RequiresPermission(Manifest.permission.BLUETOOTH_ADMIN)
+    public boolean stopScoUsingVirtualVoiceCall() {
         if (DBG) log("stopScoUsingVirtualVoiceCall()");
         final IBluetoothHeadset service = mService;
-        if (service != null && isEnabled() && isValidDevice(device)) {
+        if (service != null && isEnabled()) {
             try {
-                return service.stopScoUsingVirtualVoiceCall(device);
+                return service.stopScoUsingVirtualVoiceCall();
             } catch (RemoteException e) {
                 Log.e(TAG, e.toString());
             }
@@ -975,9 +1038,105 @@ public final class BluetoothHeadset implements BluetoothProfile {
     }
 
     /**
-     * check if in-band ringing is supported for this platform.
+     * Select a connected device as active.
      *
-     * @return true if in-band ringing is supported false if in-band ringing is not supported
+     * The active device selection is per profile. An active device's
+     * purpose is profile-specific. For example, in HFP and HSP profiles,
+     * it is the device used for phone call audio. If a remote device is not
+     * connected, it cannot be selected as active.
+     *
+     * <p> This API returns false in scenarios like the profile on the
+     * device is not connected or Bluetooth is not turned on.
+     * When this API returns true, it is guaranteed that the
+     * {@link #ACTION_ACTIVE_DEVICE_CHANGED} intent will be broadcasted
+     * with the active device.
+     *
+     * <p>Requires {@link android.Manifest.permission#BLUETOOTH_ADMIN}
+     * permission.
+     *
+     * @param device Remote Bluetooth Device, could be null if phone call audio should not be
+     * streamed to a headset
+     * @return false on immediate error, true otherwise
+     * @hide
+     */
+    @RequiresPermission(android.Manifest.permission.BLUETOOTH_ADMIN)
+    public boolean setActiveDevice(@Nullable BluetoothDevice device) {
+        if (DBG) {
+            Log.d(TAG, "setActiveDevice: " + device);
+        }
+        final IBluetoothHeadset service = mService;
+        if (service != null && isEnabled() && (device == null || isValidDevice(device))) {
+            try {
+                return service.setActiveDevice(device);
+            } catch (RemoteException e) {
+                Log.e(TAG, Log.getStackTraceString(new Throwable()));
+            }
+        }
+        if (service == null) {
+            Log.w(TAG, "Proxy not attached to service");
+        }
+        return false;
+    }
+
+    /**
+     * Get the connected device that is active.
+     *
+     * <p>Requires {@link android.Manifest.permission#BLUETOOTH}
+     * permission.
+     *
+     * @return the connected device that is active or null if no device
+     * is active.
+     * @hide
+     */
+    @RequiresPermission(android.Manifest.permission.BLUETOOTH)
+    public BluetoothDevice getActiveDevice() {
+        if (VDBG) {
+            Log.d(TAG, "getActiveDevice");
+        }
+        final IBluetoothHeadset service = mService;
+        if (service != null && isEnabled()) {
+            try {
+                return service.getActiveDevice();
+            } catch (RemoteException e) {
+                Log.e(TAG, Log.getStackTraceString(new Throwable()));
+            }
+        }
+        if (service == null) {
+            Log.w(TAG, "Proxy not attached to service");
+        }
+        return null;
+    }
+
+    /**
+     * Check if in-band ringing is currently enabled. In-band ringing could be disabled during an
+     * active connection.
+     *
+     * @return true if in-band ringing is enabled, false if in-band ringing is disabled
+     * @hide
+     */
+    @RequiresPermission(android.Manifest.permission.BLUETOOTH)
+    public boolean isInbandRingingEnabled() {
+        if (DBG) {
+            log("isInbandRingingEnabled()");
+        }
+        final IBluetoothHeadset service = mService;
+        if (service != null && isEnabled()) {
+            try {
+                return service.isInbandRingingEnabled();
+            } catch (RemoteException e) {
+                Log.e(TAG, Log.getStackTraceString(new Throwable()));
+            }
+        }
+        if (service == null) {
+            Log.w(TAG, "Proxy not attached to service");
+        }
+        return false;
+    }
+
+    /**
+     * Check if in-band ringing is supported for this platform.
+     *
+     * @return true if in-band ringing is supported, false if in-band ringing is not supported
      * @hide
      */
     public static boolean isInbandRingingSupported(Context context) {

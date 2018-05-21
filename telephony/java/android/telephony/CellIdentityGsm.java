@@ -17,8 +17,6 @@
 package android.telephony;
 
 import android.os.Parcel;
-import android.os.Parcelable;
-import android.telephony.Rlog;
 import android.text.TextUtils;
 
 import java.util.Objects;
@@ -26,9 +24,8 @@ import java.util.Objects;
 /**
  * CellIdentity to represent a unique GSM cell
  */
-public final class CellIdentityGsm implements Parcelable {
-
-    private static final String LOG_TAG = "CellIdentityGsm";
+public final class CellIdentityGsm extends CellIdentity {
+    private static final String TAG = CellIdentityGsm.class.getSimpleName();
     private static final boolean DBG = false;
 
     // 16-bit Location Area Code, 0..65535
@@ -39,27 +36,16 @@ public final class CellIdentityGsm implements Parcelable {
     private final int mArfcn;
     // 6-bit Base Station Identity Code
     private final int mBsic;
-    // 3-digit Mobile Country Code in string format
-    private final String mMccStr;
-    // 2 or 3-digit Mobile Network Code in string format
-    private final String mMncStr;
-    // long alpha Operator Name String or Enhanced Operator Name String
-    private final String mAlphaLong;
-    // short alpha Operator Name String or Enhanced Operator Name String
-    private final String mAlphaShort;
 
     /**
      * @hide
      */
     public CellIdentityGsm() {
+        super(TAG, TYPE_GSM, null, null, null, null);
         mLac = Integer.MAX_VALUE;
         mCid = Integer.MAX_VALUE;
         mArfcn = Integer.MAX_VALUE;
         mBsic = Integer.MAX_VALUE;
-        mMccStr = null;
-        mMncStr = null;
-        mAlphaLong = null;
-        mAlphaShort = null;
     }
     /**
      * public constructor
@@ -70,7 +56,7 @@ public final class CellIdentityGsm implements Parcelable {
      *
      * @hide
      */
-    public CellIdentityGsm (int mcc, int mnc, int lac, int cid) {
+    public CellIdentityGsm(int mcc, int mnc, int lac, int cid) {
         this(lac, cid, Integer.MAX_VALUE, Integer.MAX_VALUE,
                 String.valueOf(mcc), String.valueOf(mnc), null, null);
     }
@@ -86,7 +72,7 @@ public final class CellIdentityGsm implements Parcelable {
      *
      * @hide
      */
-    public CellIdentityGsm (int mcc, int mnc, int lac, int cid, int arfcn, int bsic) {
+    public CellIdentityGsm(int mcc, int mnc, int lac, int cid, int arfcn, int bsic) {
         this(lac, cid, arfcn, bsic, String.valueOf(mcc), String.valueOf(mnc), null, null);
     }
 
@@ -103,42 +89,15 @@ public final class CellIdentityGsm implements Parcelable {
      *
      * @hide
      */
-    public CellIdentityGsm (int lac, int cid, int arfcn, int bsic, String mccStr,
+    public CellIdentityGsm(int lac, int cid, int arfcn, int bsic, String mccStr,
                             String mncStr, String alphal, String alphas) {
+        super(TAG, TYPE_GSM, mccStr, mncStr, alphal, alphas);
         mLac = lac;
         mCid = cid;
         mArfcn = arfcn;
         // In RIL BSIC is a UINT8, so 0xFF is the 'INVALID' designator
         // for inbound parcels
         mBsic = (bsic == 0xFF) ? Integer.MAX_VALUE : bsic;
-
-        // Only allow INT_MAX if unknown string mcc/mnc
-        if (mccStr == null || mccStr.matches("^[0-9]{3}$")) {
-            mMccStr = mccStr;
-        } else if (mccStr.isEmpty() || mccStr.equals(String.valueOf(Integer.MAX_VALUE))) {
-            // If the mccStr is empty or unknown, set it as null.
-            mMccStr = null;
-        } else {
-            // TODO: b/69384059 Should throw IllegalArgumentException for the invalid MCC format
-            // after the bug got fixed.
-            mMccStr = null;
-            log("invalid MCC format: " + mccStr);
-        }
-
-        if (mncStr == null || mncStr.matches("^[0-9]{2,3}$")) {
-            mMncStr = mncStr;
-        } else if (mncStr.isEmpty() || mncStr.equals(String.valueOf(Integer.MAX_VALUE))) {
-            // If the mncStr is empty or unknown, set it as null.
-            mMncStr = null;
-        } else {
-            // TODO: b/69384059 Should throw IllegalArgumentException for the invalid MNC format
-            // after the bug got fixed.
-            mMncStr = null;
-            log("invalid MNC format: " + mncStr);
-        }
-
-        mAlphaLong = alphal;
-        mAlphaShort = alphas;
     }
 
     private CellIdentityGsm(CellIdentityGsm cid) {
@@ -152,7 +111,7 @@ public final class CellIdentityGsm implements Parcelable {
 
     /**
      * @return 3-digit Mobile Country Code, 0..999, Integer.MAX_VALUE if unknown
-     * @deprecated Use {@link #getMccStr} instead.
+     * @deprecated Use {@link #getMccString} instead.
      */
     @Deprecated
     public int getMcc() {
@@ -161,7 +120,7 @@ public final class CellIdentityGsm implements Parcelable {
 
     /**
      * @return 2 or 3-digit Mobile Network Code, 0..999, Integer.MAX_VALUE if unknown
-     * @deprecated Use {@link #getMncStr} instead.
+     * @deprecated Use {@link #getMncString} instead.
      */
     @Deprecated
     public int getMnc() {
@@ -208,35 +167,25 @@ public final class CellIdentityGsm implements Parcelable {
     /**
      * @return Mobile Country Code in string format, null if unknown
      */
-    public String getMccStr() {
+    public String getMccString() {
         return mMccStr;
     }
 
     /**
      * @return Mobile Network Code in string format, null if unknown
      */
-    public String getMncStr() {
+    public String getMncString() {
         return mMncStr;
     }
 
-    /**
-     * @return The long alpha tag associated with the current scan result (may be the operator
-     * name string or extended operator name string). May be null if unknown.
-     */
-    public CharSequence getOperatorAlphaLong() {
-        return mAlphaLong;
+    /** @hide */
+    @Override
+    public int getChannelNumber() {
+        return mArfcn;
     }
 
     /**
-     * @return The short alpha tag associated with the current scan result (may be the operator
-     * name string or extended operator name string).  May be null if unknown.
-     */
-    public CharSequence getOperatorAlphaShort() {
-        return mAlphaShort;
-    }
-
-
-    /**
+     * @deprecated Primary Scrambling Code is not applicable to GSM.
      * @return Integer.MAX_VALUE, undefined for GSM
      */
     @Deprecated
@@ -246,7 +195,7 @@ public final class CellIdentityGsm implements Parcelable {
 
     @Override
     public int hashCode() {
-        return Objects.hash(mMccStr, mMncStr, mLac, mCid, mAlphaLong, mAlphaShort);
+        return Objects.hash(mLac, mCid, super.hashCode());
     }
 
     @Override
@@ -260,58 +209,49 @@ public final class CellIdentityGsm implements Parcelable {
         }
 
         CellIdentityGsm o = (CellIdentityGsm) other;
-        return mLac == o.mLac &&
-                mCid == o.mCid &&
-                mArfcn == o.mArfcn &&
-                mBsic == o.mBsic &&
-                TextUtils.equals(mMccStr, o.mMccStr) &&
-                TextUtils.equals(mMncStr, o.mMncStr) &&
-                TextUtils.equals(mAlphaLong, o.mAlphaLong) &&
-                TextUtils.equals(mAlphaShort, o.mAlphaShort);
+        return mLac == o.mLac
+                && mCid == o.mCid
+                && mArfcn == o.mArfcn
+                && mBsic == o.mBsic
+                && TextUtils.equals(mMccStr, o.mMccStr)
+                && TextUtils.equals(mMncStr, o.mMncStr)
+                && super.equals(other);
     }
 
     @Override
     public String toString() {
-        StringBuilder sb = new StringBuilder("CellIdentityGsm:{");
-        sb.append(" mLac=").append(mLac);
-        sb.append(" mCid=").append(mCid);
-        sb.append(" mArfcn=").append(mArfcn);
-        sb.append(" mBsic=").append("0x").append(Integer.toHexString(mBsic));
-        sb.append(" mMcc=").append(mMccStr);
-        sb.append(" mMnc=").append(mMncStr);
-        sb.append(" mAlphaLong=").append(mAlphaLong);
-        sb.append(" mAlphaShort=").append(mAlphaShort);
-        sb.append("}");
-
-        return sb.toString();
-    }
-
-    /** Implement the Parcelable interface */
-    @Override
-    public int describeContents() {
-        return 0;
+        return new StringBuilder(TAG)
+        .append(":{ mLac=").append(mLac)
+        .append(" mCid=").append(mCid)
+        .append(" mArfcn=").append(mArfcn)
+        .append(" mBsic=").append("0x").append(Integer.toHexString(mBsic))
+        .append(" mMcc=").append(mMccStr)
+        .append(" mMnc=").append(mMncStr)
+        .append(" mAlphaLong=").append(mAlphaLong)
+        .append(" mAlphaShort=").append(mAlphaShort)
+        .append("}").toString();
     }
 
     /** Implement the Parcelable interface */
     @Override
     public void writeToParcel(Parcel dest, int flags) {
         if (DBG) log("writeToParcel(Parcel, int): " + toString());
+        super.writeToParcel(dest, TYPE_GSM);
         dest.writeInt(mLac);
         dest.writeInt(mCid);
         dest.writeInt(mArfcn);
         dest.writeInt(mBsic);
-        dest.writeString(mMccStr);
-        dest.writeString(mMncStr);
-        dest.writeString(mAlphaLong);
-        dest.writeString(mAlphaShort);
     }
 
     /** Construct from Parcel, type has already been processed */
     private CellIdentityGsm(Parcel in) {
-        this(in.readInt(), in.readInt(), in.readInt(), in.readInt(), in.readString(),
-                in.readString(), in.readString(), in.readString());
+        super(TAG, TYPE_GSM, in);
+        mLac = in.readInt();
+        mCid = in.readInt();
+        mArfcn = in.readInt();
+        mBsic = in.readInt();
 
-        if (DBG) log("CellIdentityGsm(Parcel): " + toString());
+        if (DBG) log(toString());
     }
 
     /** Implement the Parcelable interface */
@@ -320,7 +260,8 @@ public final class CellIdentityGsm implements Parcelable {
             new Creator<CellIdentityGsm>() {
                 @Override
                 public CellIdentityGsm createFromParcel(Parcel in) {
-                    return new CellIdentityGsm(in);
+                    in.readInt();   // skip
+                    return createFromParcelBody(in);
                 }
 
                 @Override
@@ -329,10 +270,8 @@ public final class CellIdentityGsm implements Parcelable {
                 }
             };
 
-    /**
-     * log
-     */
-    private static void log(String s) {
-        Rlog.w(LOG_TAG, s);
+    /** @hide */
+    protected static CellIdentityGsm createFromParcelBody(Parcel in) {
+        return new CellIdentityGsm(in);
     }
 }

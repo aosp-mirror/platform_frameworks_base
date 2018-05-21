@@ -1,0 +1,111 @@
+//
+// Copyright (C) 2008 The Android Open Source Project
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//      http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//
+
+// Build the android.test.runner library
+// =====================================
+java_library {
+    name: "android.test.runner",
+
+    // Needs to be consistent with the repackaged version of this make target.
+    java_version: "1.8",
+    srcs: ["src/**/*.java"],
+
+    errorprone: {
+      javacflags: ["-Xep:DepAnn:ERROR"],
+    },
+
+    no_framework_libs: true,
+    libs: [
+        "framework",
+        "android.test.base",
+        "android.test.mock.stubs",
+    ],
+}
+
+// Build the android.test.runner-minus-junit library
+// =================================================
+// This is only intended for inclusion in the legacy-android-test static
+// library and must not be used elsewhere.
+java_library {
+    name: "android.test.runner-minus-junit",
+
+    srcs: ["src/android/**/*.java"],
+
+    no_framework_libs: true,
+    libs: [
+        "framework",
+        "android.test.base",
+        "android.test.mock.stubs",
+        "junit",
+    ],
+}
+
+// Build the repackaged.android.test.runner library
+// ================================================
+java_library_static {
+    name: "repackaged.android.test.runner",
+
+    static_libs: ["android.test.runner"],
+
+    jarjar_rules: "jarjar-rules.txt",
+    // Pin java_version until jarjar is certified to support later versions. http://b/72703434
+    java_version: "1.8",
+}
+
+droiddoc {
+    name: "android-test-runner-api-stubs-gen-docs",
+    srcs: [
+        "src/**/*.java",
+    ],
+    libs: [
+        "core-oj",
+        "core-libart",
+        "framework",
+        "android.test.base",
+        "android.test.mock",
+    ],
+    custom_template: "droiddoc-templates-sdk",
+    installable: false,
+    args: "-stubpackages android.test:" +
+          "android.test.suitebuilder:" +
+          "junit.runner:" +
+          "junit.textui -stubsourceonly -nodocs",
+    api_tag_name: "ANDROID_TEST_RUNNER",
+    api_filename: "android-test-runner-current.txt",
+    removed_api_filename: "android-test-runner-removed.txt",
+}
+
+// Build the android.test.runner.stubs library
+// =========================================
+java_library_static {
+    name: "android.test.runner.stubs",
+    srcs: [
+        ":android-test-runner-api-stubs-gen-docs",
+    ],
+    libs: [
+        "android.test.base.stubs",
+        "android.test.mock.stubs",
+    ],
+    product_variables: {
+        pdk: {
+            enabled: false,
+        },
+        unbundled_build: {
+            enabled: false,
+        },
+    },
+    sdk_version: "current",
+}

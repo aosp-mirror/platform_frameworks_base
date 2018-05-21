@@ -114,50 +114,8 @@ public class IpManager extends IpClient {
     public static class Callback extends IpClient.Callback {
     }
 
-    public static class WaitForProvisioningCallback extends Callback {
-        private LinkProperties mCallbackLinkProperties;
-
-        public LinkProperties waitForProvisioning() {
-            synchronized (this) {
-                try {
-                    wait();
-                } catch (InterruptedException e) {}
-                return mCallbackLinkProperties;
-            }
-        }
-
-        @Override
-        public void onProvisioningSuccess(LinkProperties newLp) {
-            synchronized (this) {
-                mCallbackLinkProperties = newLp;
-                notify();
-            }
-        }
-
-        @Override
-        public void onProvisioningFailure(LinkProperties newLp) {
-            synchronized (this) {
-                mCallbackLinkProperties = null;
-                notify();
-            }
-        }
-    }
-
     public IpManager(Context context, String ifName, Callback callback) {
-        this(context, ifName, callback, INetworkManagementService.Stub.asInterface(
-                ServiceManager.getService(Context.NETWORKMANAGEMENT_SERVICE)),
-                NetdService.getInstance());
-    }
-
-    public IpManager(Context context, String ifName, Callback callback,
-            INetworkManagementService nwService) {
-        this(context, ifName, callback, nwService, NetdService.getInstance());
-    }
-
-    @VisibleForTesting
-    public IpManager(Context context, String ifName, Callback callback,
-            INetworkManagementService nwService, INetd netd) {
-        super(context, ifName, callback, nwService, netd);
+        super(context, ifName, callback);
     }
 
     public void startProvisioning(ProvisioningConfiguration req) {

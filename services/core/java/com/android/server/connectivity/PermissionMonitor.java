@@ -19,6 +19,7 @@ package com.android.server.connectivity;
 import static android.Manifest.permission.CHANGE_NETWORK_STATE;
 import static android.Manifest.permission.CONNECTIVITY_INTERNAL;
 import static android.Manifest.permission.CONNECTIVITY_USE_RESTRICTED_NETWORKS;
+import static android.Manifest.permission.NETWORK_STACK;
 import static android.content.pm.ApplicationInfo.FLAG_SYSTEM;
 import static android.content.pm.ApplicationInfo.FLAG_UPDATED_SYSTEM_APP;
 import static android.content.pm.PackageManager.GET_PERMISSIONS;
@@ -27,6 +28,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
@@ -38,6 +40,8 @@ import android.os.UserHandle;
 import android.os.UserManager;
 import android.text.TextUtils;
 import android.util.Log;
+
+import com.android.internal.annotations.VisibleForTesting;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -150,7 +154,14 @@ public class PermissionMonitor {
         update(mUsers, mApps, true);
     }
 
-    private boolean hasPermission(PackageInfo app, String permission) {
+    @VisibleForTesting
+    boolean isPreinstalledSystemApp(PackageInfo app) {
+        int flags = app.applicationInfo != null ? app.applicationInfo.flags : 0;
+        return (flags & (FLAG_SYSTEM | FLAG_UPDATED_SYSTEM_APP)) != 0;
+    }
+
+    @VisibleForTesting
+    boolean hasPermission(PackageInfo app, String permission) {
         if (app.requestedPermissions != null) {
             for (String p : app.requestedPermissions) {
                 if (permission.equals(p)) {
@@ -166,12 +177,38 @@ public class PermissionMonitor {
     }
 
     private boolean hasRestrictedNetworkPermission(PackageInfo app) {
-        int flags = app.applicationInfo != null ? app.applicationInfo.flags : 0;
-        if ((flags & FLAG_SYSTEM) != 0 || (flags & FLAG_UPDATED_SYSTEM_APP) != 0) {
-            return true;
-        }
+        if (isPreinstalledSystemApp(app)) return true;
         return hasPermission(app, CONNECTIVITY_INTERNAL)
                 || hasPermission(app, CONNECTIVITY_USE_RESTRICTED_NETWORKS);
+    }
+
+    private boolean hasUseBackgroundNetworksPermission(PackageInfo app) {
+        // This function defines what it means to hold the permission to use
+        // background networks.
+        return hasPermission(app, CHANGE_NETWORK_STATE)
+                || hasPermission(app, CONNECTIVITY_USE_RESTRICTED_NETWORKS)
+                || hasPermission(app, CONNECTIVITY_INTERNAL)
+                || hasPermission(app, NETWORK_STACK)
+                // TODO : remove this check (b/31479477). Not all preinstalled apps should
+                // have access to background networks, they should just request the appropriate
+                // permission for their use case from the list above.
+                || isPreinstalledSystemApp(app);
+    }
+
+    public boolean hasUseBackgroundNetworksPermission(int uid) {
+        final String[] names = mPackageManager.getPackagesForUid(uid);
+        if (null == names || names.length == 0) return false;
+        try {
+            // Only using the first package name. There may be multiple names if multiple
+            // apps share the same UID, but in that case they also share permissions so
+            // querying with any of the names will return the same results.
+            final PackageInfo app = mPackageManager.getPackageInfo(names[0], GET_PERMISSIONS);
+            return hasUseBackgroundNetworksPermission(app);
+        } catch (NameNotFoundException e) {
+            // App not found.
+            loge("NameNotFoundException " + names[0], e);
+            return false;
+        }
     }
 
     private int[] toIntArray(List<Integer> list) {
@@ -307,5 +344,9 @@ public class PermissionMonitor {
 
     private static void loge(String s) {
         Log.e(TAG, s);
+    }
+
+    private static void loge(String s, Throwable e) {
+        Log.e(TAG, s, e);
     }
 }

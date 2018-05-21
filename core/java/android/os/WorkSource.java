@@ -4,6 +4,9 @@ import android.os.WorkSourceProto;
 import android.util.Log;
 import android.util.proto.ProtoOutputStream;
 
+import com.android.internal.annotations.VisibleForTesting;
+
+import java.util.ArrayList;
 import java.util.Arrays;
 
 /**
@@ -356,6 +359,15 @@ public class WorkSource implements Parcelable {
         return result;
     }
 
+    /**
+     * Temporary dummy function.
+     * @hide
+     */
+    public ArrayList<WorkChain> getWorkChains() {
+        return null;
+    }
+
+
     private boolean removeUids(WorkSource other) {
         int N1 = mNum;
         final int[] uids1 = mUids;
@@ -662,6 +674,52 @@ public class WorkSource implements Parcelable {
             mNames[index] = name;
             mNum++;
         }
+    }
+
+    /**
+     * Temporary dummy class for WorkChain. Will be removed.
+     * @hide
+     */
+    public static final class WorkChain implements Parcelable {
+        // @VisibleForTesting
+        public WorkChain() {
+        }
+
+        private WorkChain(Parcel in) {
+            in.readInt();
+        }
+
+        /** @hide */
+        @VisibleForTesting
+        public int[] getUids() {
+            return null;
+        }
+
+        /** @hide */
+        @VisibleForTesting
+        public String[] getTags() {
+            return null;
+        }
+
+        @Override
+        public int describeContents() {
+            return 0;
+        }
+
+        @Override
+        public void writeToParcel(Parcel dest, int flags) {
+            dest.writeInt(0);
+        }
+
+        public static final Parcelable.Creator<WorkChain> CREATOR =
+                new Parcelable.Creator<WorkChain>() {
+                    public WorkChain createFromParcel(Parcel in) {
+                        return new WorkChain(in);
+                    }
+                    public WorkChain[] newArray(int size) {
+                        return new WorkChain[size];
+                    }
+                };
     }
 
     @Override

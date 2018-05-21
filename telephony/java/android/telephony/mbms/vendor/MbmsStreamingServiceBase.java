@@ -77,6 +77,10 @@ public class MbmsStreamingServiceBase extends IMbmsStreamingService.Stub {
             @Override
             public void onError(final int errorCode, final String message) {
                 try {
+                    if (errorCode == MbmsErrors.UNKNOWN) {
+                        throw new IllegalArgumentException(
+                                "Middleware cannot send an unknown error.");
+                    }
                     callback.onError(errorCode, message);
                 } catch (RemoteException e) {
                     onAppCallbackDied(uid, subscriptionId);
@@ -173,6 +177,10 @@ public class MbmsStreamingServiceBase extends IMbmsStreamingService.Stub {
             @Override
             public void onError(final int errorCode, final String message) {
                 try {
+                    if (errorCode == MbmsErrors.UNKNOWN) {
+                        throw new IllegalArgumentException(
+                                "Middleware cannot send an unknown error.");
+                    }
                     callback.onError(errorCode, message);
                 } catch (RemoteException e) {
                     onAppCallbackDied(uid, subscriptionId);

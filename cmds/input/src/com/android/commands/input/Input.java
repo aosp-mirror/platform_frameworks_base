@@ -88,8 +88,8 @@ public class Input {
                     final boolean longpress = "--longpress".equals(args[index + 1]);
                     final int start = longpress ? index + 2 : index + 1;
                     inputSource = getSource(inputSource, InputDevice.SOURCE_KEYBOARD);
-                    if (length > start) {
-                        for (int i = start; i < length; i++) {
+                    if (args.length > start) {
+                        for (int i = start; i < args.length; i++) {
                             int keyCode = KeyEvent.keyCodeFromString(args[i]);
                             if (keyCode == KeyEvent.KEYCODE_UNKNOWN) {
                                 keyCode = KeyEvent.keyCodeFromString("KEYCODE_" + args[i]);

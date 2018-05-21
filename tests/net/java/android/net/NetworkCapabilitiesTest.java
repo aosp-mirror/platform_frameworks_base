@@ -17,29 +17,39 @@
 package android.net;
 
 import static android.net.NetworkCapabilities.LINK_BANDWIDTH_UNSPECIFIED;
+import static android.net.NetworkCapabilities.NET_CAPABILITY_CAPTIVE_PORTAL;
 import static android.net.NetworkCapabilities.NET_CAPABILITY_CBS;
 import static android.net.NetworkCapabilities.NET_CAPABILITY_DUN;
 import static android.net.NetworkCapabilities.NET_CAPABILITY_EIMS;
 import static android.net.NetworkCapabilities.NET_CAPABILITY_INTERNET;
+import static android.net.NetworkCapabilities.NET_CAPABILITY_MMS;
 import static android.net.NetworkCapabilities.NET_CAPABILITY_NOT_METERED;
 import static android.net.NetworkCapabilities.NET_CAPABILITY_NOT_RESTRICTED;
+import static android.net.NetworkCapabilities.NET_CAPABILITY_OEM_PAID;
+import static android.net.NetworkCapabilities.NET_CAPABILITY_NOT_ROAMING;
+import static android.net.NetworkCapabilities.NET_CAPABILITY_NOT_VPN;
 import static android.net.NetworkCapabilities.NET_CAPABILITY_VALIDATED;
+import static android.net.NetworkCapabilities.NET_CAPABILITY_WIFI_P2P;
 import static android.net.NetworkCapabilities.RESTRICTED_CAPABILITIES;
 import static android.net.NetworkCapabilities.TRANSPORT_CELLULAR;
 import static android.net.NetworkCapabilities.TRANSPORT_WIFI;
 import static android.net.NetworkCapabilities.UNRESTRICTED_CAPABILITIES;
 
+import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertTrue;
 
+import android.os.Parcel;
 import android.support.test.runner.AndroidJUnit4;
 import android.test.suitebuilder.annotation.SmallTest;
+import android.util.ArraySet;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+import java.util.Set;
 
 @RunWith(AndroidJUnit4.class)
 @SmallTest
@@ -188,5 +198,226 @@ public class NetworkCapabilitiesTest {
                 .maxBandwidth(10, LINK_BANDWIDTH_UNSPECIFIED));
         assertEquals(20, NetworkCapabilities
                 .maxBandwidth(10, 20));
+    }
+
+    @Test
+    public void testSetUids() {
+        final NetworkCapabilities netCap = new NetworkCapabilities();
+        final Set<UidRange> uids = new ArraySet<>();
+        uids.add(new UidRange(50, 100));
+        uids.add(new UidRange(3000, 4000));
+        netCap.setUids(uids);
+        assertTrue(netCap.appliesToUid(50));
+        assertTrue(netCap.appliesToUid(80));
+        assertTrue(netCap.appliesToUid(100));
+        assertTrue(netCap.appliesToUid(3000));
+        assertTrue(netCap.appliesToUid(3001));
+        assertFalse(netCap.appliesToUid(10));
+        assertFalse(netCap.appliesToUid(25));
+        assertFalse(netCap.appliesToUid(49));
+        assertFalse(netCap.appliesToUid(101));
+        assertFalse(netCap.appliesToUid(2000));
+        assertFalse(netCap.appliesToUid(100000));
+
+        assertTrue(netCap.appliesToUidRange(new UidRange(50, 100)));
+        assertTrue(netCap.appliesToUidRange(new UidRange(70, 72)));
+        assertTrue(netCap.appliesToUidRange(new UidRange(3500, 3912)));
+        assertFalse(netCap.appliesToUidRange(new UidRange(1, 100)));
+        assertFalse(netCap.appliesToUidRange(new UidRange(49, 100)));
+        assertFalse(netCap.appliesToUidRange(new UidRange(1, 10)));
+        assertFalse(netCap.appliesToUidRange(new UidRange(60, 101)));
+        assertFalse(netCap.appliesToUidRange(new UidRange(60, 3400)));
+
+        NetworkCapabilities netCap2 = new NetworkCapabilities();
+        // A new netcap object has null UIDs, so anything will satisfy it.
+        assertTrue(netCap2.satisfiedByUids(netCap));
+        // Still not equal though.
+        assertFalse(netCap2.equalsUids(netCap));
+        netCap2.setUids(uids);
+        assertTrue(netCap2.satisfiedByUids(netCap));
+        assertTrue(netCap.equalsUids(netCap2));
+        assertTrue(netCap2.equalsUids(netCap));
+
+        uids.add(new UidRange(600, 700));
+        netCap2.setUids(uids);
+        assertFalse(netCap2.satisfiedByUids(netCap));
+        assertFalse(netCap.appliesToUid(650));
+        assertTrue(netCap2.appliesToUid(650));
+        netCap.combineCapabilities(netCap2);
+        assertTrue(netCap2.satisfiedByUids(netCap));
+        assertTrue(netCap.appliesToUid(650));
+        assertFalse(netCap.appliesToUid(500));
+
+        assertTrue(new NetworkCapabilities().satisfiedByUids(netCap));
+        netCap.combineCapabilities(new NetworkCapabilities());
+        assertTrue(netCap.appliesToUid(500));
+        assertTrue(netCap.appliesToUidRange(new UidRange(1, 100000)));
+        assertFalse(netCap2.appliesToUid(500));
+        assertFalse(netCap2.appliesToUidRange(new UidRange(1, 100000)));
+        assertTrue(new NetworkCapabilities().satisfiedByUids(netCap));
+    }
+
+    @Test
+    public void testParcelNetworkCapabilities() {
+        final Set<UidRange> uids = new ArraySet<>();
+        uids.add(new UidRange(50, 100));
+        uids.add(new UidRange(3000, 4000));
+        final NetworkCapabilities netCap = new NetworkCapabilities()
+            .addCapability(NET_CAPABILITY_INTERNET)
+            .setUids(uids)
+            .addCapability(NET_CAPABILITY_EIMS)
+            .addCapability(NET_CAPABILITY_NOT_METERED);
+        assertEqualsThroughMarshalling(netCap);
+    }
+
+    @Test
+    public void testOemPaid() {
+        NetworkCapabilities nc = new NetworkCapabilities();
+        // By default OEM_PAID is neither in the unwanted or required lists and the network is not
+        // restricted.
+        assertFalse(nc.hasUnwantedCapability(NET_CAPABILITY_OEM_PAID));
+        assertFalse(nc.hasCapability(NET_CAPABILITY_OEM_PAID));
+        nc.maybeMarkCapabilitiesRestricted();
+        assertTrue(nc.hasCapability(NET_CAPABILITY_NOT_RESTRICTED));
+
+        // Adding OEM_PAID to capability list should make network restricted.
+        nc.addCapability(NET_CAPABILITY_OEM_PAID);
+        nc.addCapability(NET_CAPABILITY_INTERNET);  // Combine with unrestricted capability.
+        nc.maybeMarkCapabilitiesRestricted();
+        assertTrue(nc.hasCapability(NET_CAPABILITY_OEM_PAID));
+        assertFalse(nc.hasCapability(NET_CAPABILITY_NOT_RESTRICTED));
+
+        // Now let's make request for OEM_PAID network.
+        NetworkCapabilities nr = new NetworkCapabilities();
+        nr.addCapability(NET_CAPABILITY_OEM_PAID);
+        nr.maybeMarkCapabilitiesRestricted();
+        assertTrue(nr.satisfiedByNetworkCapabilities(nc));
+
+        // Request fails for network with the default capabilities.
+        assertFalse(nr.satisfiedByNetworkCapabilities(new NetworkCapabilities()));
+    }
+
+    @Test
+    public void testUnwantedCapabilities() {
+        NetworkCapabilities network = new NetworkCapabilities();
+
+        NetworkCapabilities request = new NetworkCapabilities();
+        assertTrue("Request: " + request + ", Network:" + network,
+                request.satisfiedByNetworkCapabilities(network));
+
+        // Requesting absence of capabilities that network doesn't have. Request should satisfy.
+        request.addUnwantedCapability(NET_CAPABILITY_WIFI_P2P);
+        request.addUnwantedCapability(NET_CAPABILITY_NOT_METERED);
+        assertTrue(request.satisfiedByNetworkCapabilities(network));
+        assertArrayEquals(new int[] {NET_CAPABILITY_WIFI_P2P,
+                        NET_CAPABILITY_NOT_METERED},
+                request.getUnwantedCapabilities());
+
+        // This is a default capability, just want to make sure its there because we use it below.
+        assertTrue(network.hasCapability(NET_CAPABILITY_NOT_RESTRICTED));
+
+        // Verify that adding unwanted capability will effectively remove it from capability list.
+        request.addUnwantedCapability(NET_CAPABILITY_NOT_RESTRICTED);
+        assertTrue(request.hasUnwantedCapability(NET_CAPABILITY_NOT_RESTRICTED));
+        assertFalse(request.hasCapability(NET_CAPABILITY_NOT_RESTRICTED));
+
+        // Now this request won't be satisfied because network contains NOT_RESTRICTED.
+        assertFalse(request.satisfiedByNetworkCapabilities(network));
+        network.removeCapability(NET_CAPABILITY_NOT_RESTRICTED);
+        assertTrue(request.satisfiedByNetworkCapabilities(network));
+
+        // Verify that adding capability will effectively remove it from unwanted list
+        request.addCapability(NET_CAPABILITY_NOT_RESTRICTED);
+        assertTrue(request.hasCapability(NET_CAPABILITY_NOT_RESTRICTED));
+        assertFalse(request.hasUnwantedCapability(NET_CAPABILITY_NOT_RESTRICTED));
+
+        assertFalse(request.satisfiedByNetworkCapabilities(network));
+        network.addCapability(NET_CAPABILITY_NOT_RESTRICTED);
+        assertTrue(request.satisfiedByNetworkCapabilities(network));
+    }
+
+    @Test
+    public void testEqualsNetCapabilities() {
+        NetworkCapabilities nc1 = new NetworkCapabilities();
+        NetworkCapabilities nc2 = new NetworkCapabilities();
+        assertTrue(nc1.equalsNetCapabilities(nc2));
+        assertEquals(nc1, nc2);
+
+        nc1.addCapability(NET_CAPABILITY_MMS);
+        assertFalse(nc1.equalsNetCapabilities(nc2));
+        assertNotEquals(nc1, nc2);
+        nc2.addCapability(NET_CAPABILITY_MMS);
+        assertTrue(nc1.equalsNetCapabilities(nc2));
+        assertEquals(nc1, nc2);
+
+        nc1.addUnwantedCapability(NET_CAPABILITY_INTERNET);
+        assertFalse(nc1.equalsNetCapabilities(nc2));
+        nc2.addUnwantedCapability(NET_CAPABILITY_INTERNET);
+        assertTrue(nc1.equalsNetCapabilities(nc2));
+
+        nc1.removeCapability(NET_CAPABILITY_INTERNET);
+        assertFalse(nc1.equalsNetCapabilities(nc2));
+        nc2.removeCapability(NET_CAPABILITY_INTERNET);
+        assertTrue(nc1.equalsNetCapabilities(nc2));
+    }
+
+    @Test
+    public void testCombineCapabilities() {
+        NetworkCapabilities nc1 = new NetworkCapabilities();
+        NetworkCapabilities nc2 = new NetworkCapabilities();
+
+        nc1.addUnwantedCapability(NET_CAPABILITY_CAPTIVE_PORTAL);
+        nc1.addCapability(NET_CAPABILITY_NOT_ROAMING);
+        assertNotEquals(nc1, nc2);
+        nc2.combineCapabilities(nc1);
+        assertEquals(nc1, nc2);
+        assertTrue(nc2.hasCapability(NET_CAPABILITY_NOT_ROAMING));
+        assertTrue(nc2.hasUnwantedCapability(NET_CAPABILITY_CAPTIVE_PORTAL));
+
+        // This will effectively move NOT_ROAMING capability from required to unwanted for nc1.
+        nc1.addUnwantedCapability(NET_CAPABILITY_NOT_ROAMING);
+
+        nc2.combineCapabilities(nc1);
+        // We will get this capability in both requested and unwanted lists thus this request
+        // will never be satisfied.
+        assertTrue(nc2.hasCapability(NET_CAPABILITY_NOT_ROAMING));
+        assertTrue(nc2.hasUnwantedCapability(NET_CAPABILITY_NOT_ROAMING));
+    }
+
+    @Test
+    public void testSetCapabilities() {
+        final int[] REQUIRED_CAPABILITIES = new int[] {
+                NET_CAPABILITY_INTERNET, NET_CAPABILITY_NOT_VPN };
+        final int[] UNWANTED_CAPABILITIES = new int[] {
+                NET_CAPABILITY_NOT_RESTRICTED, NET_CAPABILITY_NOT_METERED
+        };
+
+        NetworkCapabilities nc1 = new NetworkCapabilities();
+        NetworkCapabilities nc2 = new NetworkCapabilities();
+
+        nc1.setCapabilities(REQUIRED_CAPABILITIES, UNWANTED_CAPABILITIES);
+        assertArrayEquals(REQUIRED_CAPABILITIES, nc1.getCapabilities());
+
+        // Verify that setting and adding capabilities leads to the same object state.
+        nc2.clearAll();
+        for (int cap : REQUIRED_CAPABILITIES) {
+            nc2.addCapability(cap);
+        }
+        for (int cap : UNWANTED_CAPABILITIES) {
+            nc2.addUnwantedCapability(cap);
+        }
+        assertEquals(nc1, nc2);
+    }
+
+    private void assertEqualsThroughMarshalling(NetworkCapabilities netCap) {
+        Parcel p = Parcel.obtain();
+        netCap.writeToParcel(p, /* flags */ 0);
+        p.setDataPosition(0);
+        byte[] marshalledData = p.marshall();
+
+        p = Parcel.obtain();
+        p.unmarshall(marshalledData, 0, marshalledData.length);
+        p.setDataPosition(0);
+        assertEquals(NetworkCapabilities.CREATOR.createFromParcel(p), netCap);
     }
 }

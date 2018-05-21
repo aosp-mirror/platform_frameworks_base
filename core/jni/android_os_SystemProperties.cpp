@@ -124,6 +124,12 @@ void do_report_sysprop_change() {
         if (sVM->GetEnv((void **)&env, JNI_VERSION_1_4) >= 0) {
             //ALOGI("Java SystemProperties: calling %p", sCallChangeCallbacks);
             env->CallStaticVoidMethod(sClazz, sCallChangeCallbacks);
+            // There should not be any exceptions. But we must guarantee
+            // there are none on return.
+            if (env->ExceptionCheck()) {
+                env->ExceptionClear();
+                LOG(ERROR) << "Exception pending after sysprop_change!";
+            }
         }
     }
 }

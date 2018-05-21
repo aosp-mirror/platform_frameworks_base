@@ -21,12 +21,15 @@ LOCAL_PATH := $(call my-dir)
 include $(CLEAR_VARS)
 
 LOCAL_PACKAGE_NAME := SettingsLibShell
+LOCAL_PRIVATE_PLATFORM_APIS := true
 LOCAL_MODULE_TAGS := optional
 
 LOCAL_PRIVILEGED_MODULE := true
 
 LOCAL_RESOURCE_DIR := \
     $(LOCAL_PATH)/res
+
+LOCAL_USE_AAPT2 := true
 
 include frameworks/base/packages/SettingsLib/common.mk
 

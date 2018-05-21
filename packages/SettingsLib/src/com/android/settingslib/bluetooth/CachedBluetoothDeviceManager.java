@@ -24,6 +24,7 @@ import android.util.Log;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * CachedBluetoothDeviceManager manages the set of remote Bluetooth devices.
@@ -167,6 +168,15 @@ public class CachedBluetoothDeviceManager {
             }
         }
     }
+
+    public synchronized void onActiveDeviceChanged(CachedBluetoothDevice activeDevice,
+                                                   int bluetoothProfile) {
+        for (CachedBluetoothDevice cachedDevice : mCachedDevices) {
+            boolean isActive = Objects.equals(cachedDevice, activeDevice);
+            cachedDevice.onActiveDeviceChanged(isActive, bluetoothProfile);
+        }
+    }
+
     private void log(String msg) {
         if (DEBUG) {
             Log.d(TAG, msg);

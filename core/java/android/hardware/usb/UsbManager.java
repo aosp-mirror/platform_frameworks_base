@@ -590,6 +590,32 @@ public class UsbManager {
     }
 
     /**
+     * Sets the screen unlocked functions, which are persisted and set as the current functions
+     * whenever the screen is unlocked.
+     * <p>
+     * The allowed values are: {@link #USB_FUNCTION_NONE},
+     * {@link #USB_FUNCTION_MIDI}, {@link #USB_FUNCTION_MTP}, {@link #USB_FUNCTION_PTP},
+     * or {@link #USB_FUNCTION_RNDIS}.
+     * {@link #USB_FUNCTION_NONE} has the effect of switching off this feature, so functions
+     * no longer change on screen unlock.
+     * </p><p>
+     * Note: When the screen is on, this method will apply given functions as current functions,
+     * which is asynchronous and may fail silently without applying the requested changes.
+     * </p>
+     *
+     * @param function function to set as default
+     *
+     * {@hide}
+     */
+    public void setScreenUnlockedFunctions(String function) {
+        try {
+            mService.setScreenUnlockedFunctions(function);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
      * Returns a list of physical USB ports on the device.
      * <p>
      * This list is guaranteed to contain all dual-role USB Type C ports but it might

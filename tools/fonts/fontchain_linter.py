@@ -13,6 +13,7 @@ EMOJI_VS = 0xFE0F
 
 LANG_TO_SCRIPT = {
     'as': 'Beng',
+    'be': 'Cyrl',
     'bg': 'Cyrl',
     'bn': 'Beng',
     'cu': 'Cyrl',
@@ -33,6 +34,7 @@ LANG_TO_SCRIPT = {
     'ja': 'Jpan',
     'kn': 'Knda',
     'ko': 'Kore',
+    'la': 'Latn',
     'ml': 'Mlym',
     'mn': 'Cyrl',
     'mr': 'Deva',

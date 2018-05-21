@@ -19,6 +19,7 @@ include $(CLEAR_VARS)
 
 LOCAL_SRC_FILES := $(call all-subdir-java-files)
 LOCAL_PACKAGE_NAME := FeatureSplitBase
+LOCAL_SDK_VERSION := current
 LOCAL_EXPORT_PACKAGE_RESOURCES := true
 
 LOCAL_MODULE_TAGS := tests

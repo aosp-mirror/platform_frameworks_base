@@ -924,6 +924,9 @@ class SettingsProtoDumpUtil {
                 Settings.Global.CONTACTS_DATABASE_WAL_ENABLED,
                 GlobalSettingsProto.CONTACTS_DATABASE_WAL_ENABLED);
         dumpSetting(s, p,
+                Settings.Global.HIDDEN_API_BLACKLIST_EXEMPTIONS,
+                GlobalSettingsProto.HIDDEN_API_BLACKLIST_EXEMPTIONS);
+        dumpSetting(s, p,
                 Settings.Global.MULTI_SIM_VOICE_CALL_SUBSCRIPTION,
                 GlobalSettingsProto.MULTI_SIM_VOICE_CALL_SUBSCRIPTION);
         dumpSetting(s, p,

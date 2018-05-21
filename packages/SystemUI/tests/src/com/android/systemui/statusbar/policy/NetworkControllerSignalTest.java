@@ -28,9 +28,9 @@ import android.test.suitebuilder.annotation.SmallTest;
 
 import com.android.internal.telephony.PhoneConstants;
 import com.android.internal.telephony.TelephonyIntents;
+import com.android.settingslib.graph.SignalDrawable;
 import com.android.settingslib.net.DataUsageController;
 import com.android.systemui.R;
-import com.android.systemui.statusbar.phone.SignalDrawable;
 
 import org.junit.Ignore;
 import org.junit.Test;

@@ -16,17 +16,24 @@
 package android.telephony.euicc;
 
 import android.annotation.Nullable;
+import android.annotation.SystemApi;
+import android.app.PendingIntent;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.telephony.UiccAccessRule;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 import com.android.internal.util.Preconditions;
 
 /**
- * Information about a subscription which is available for download.
+ * Information about a subscription which is downloadable to an eUICC using
+ * {@link EuiccManager#downloadSubscription(DownloadableSubscription, boolean, PendingIntent).
  *
- * TODO(b/35851809): Make this public.
- * @hide
+ * <p>For example, a DownloadableSubscription can be created through an activation code parsed from
+ * a QR code. A server address can be parsed from the activation code to download more information
+ * about the profile, such as carrier name, access rules, etc.
  */
 public final class DownloadableSubscription implements Parcelable {
 
@@ -46,11 +53,12 @@ public final class DownloadableSubscription implements Parcelable {
     /**
      * Activation code. May be null for subscriptions which are not based on activation codes, e.g.
      * to download a default subscription assigned to this device.
+     * Should use getEncodedActivationCode() instead.
      * @hide
-     *
-     * TODO(b/35851809): Make this a SystemApi.
+     * @deprecated - Do not use. This will be private. Use getEncodedActivationCode() instead.
      */
     @Nullable
+    @Deprecated
     public final String encodedActivationCode;
 
     @Nullable private String confirmationCode;
@@ -58,8 +66,16 @@ public final class DownloadableSubscription implements Parcelable {
     // see getCarrierName and setCarrierName
     @Nullable
     private String carrierName;
+
     // see getAccessRules and setAccessRules
-    private UiccAccessRule[] accessRules;
+    @Nullable
+    private List<UiccAccessRule> accessRules;
+
+    /** Gets the activation code. */
+    @Nullable
+    public String getEncodedActivationCode() {
+        return encodedActivationCode;
+    }
 
     /** @hide */
     private DownloadableSubscription(String encodedActivationCode) {
@@ -70,13 +86,73 @@ public final class DownloadableSubscription implements Parcelable {
         encodedActivationCode = in.readString();
         confirmationCode = in.readString();
         carrierName = in.readString();
-        accessRules = in.createTypedArray(UiccAccessRule.CREATOR);
+        accessRules = new ArrayList<UiccAccessRule>();
+        in.readTypedList(accessRules, UiccAccessRule.CREATOR);
+    }
+
+    private DownloadableSubscription(String encodedActivationCode, String confirmationCode,
+            String carrierName, List<UiccAccessRule> accessRules) {
+        this.encodedActivationCode = encodedActivationCode;
+        this.confirmationCode = confirmationCode;
+        this.carrierName = carrierName;
+        this.accessRules = accessRules;
+    }
+
+    /** @hide */
+    @SystemApi
+    public static final class Builder {
+        @Nullable private String encodedActivationCode;
+        @Nullable private String confirmationCode;
+        @Nullable private String carrierName;
+        List<UiccAccessRule> accessRules;
+
+        public Builder() {}
+
+        public Builder(DownloadableSubscription baseSubscription) {
+            encodedActivationCode = baseSubscription.getEncodedActivationCode();
+            confirmationCode = baseSubscription.getConfirmationCode();
+            carrierName = baseSubscription.getCarrierName();
+            accessRules = baseSubscription.getAccessRules();
+        }
+
+        public DownloadableSubscription build() {
+            return new DownloadableSubscription(encodedActivationCode, confirmationCode,
+                    carrierName, accessRules);
+        }
+
+        public Builder setEncodedActivationCode(String value) {
+            encodedActivationCode = value;
+            return this;
+        }
+
+        public Builder setConfirmationCode(String value) {
+            confirmationCode = value;
+            return this;
+        }
+
+        public Builder setCarrierName(String value) {
+            carrierName = value;
+            return this;
+        }
+
+        public Builder setAccessRules(List<UiccAccessRule> value) {
+            accessRules = value;
+            return this;
+        }
     }
 
     /**
      * Create a DownloadableSubscription for the given activation code.
      *
-     * @param encodedActivationCode the activation code to use. Must not be null.
+     * <p>This fills the encodedActivationCode field. Other fields like confirmationCode,
+     * carrierName and accessRules may be filled in the implementation of
+     * {@code android.service.euicc.EuiccService} if exists.
+     *
+     * @param encodedActivationCode the activation code to use. An activation code can be parsed
+     *         from a user scanned QR code. The format of activation code is defined in SGP.22. For
+     *         example, "1$SMDP.GSMA.COM$04386-AGYFT-A74Y8-3F815$1.3.6.1.4.1.31746". For detail, see
+     *         {@code com.android.euicc.data.ActivationCode}. Must not be null.
+     *
      * @return the {@link DownloadableSubscription} which may be passed to
      *     {@link EuiccManager#downloadSubscription}.
      */
@@ -87,13 +163,19 @@ public final class DownloadableSubscription implements Parcelable {
 
     /**
      * Sets the confirmation code.
+     * @hide
+     * @deprecated - Do not use.
      */
+    @Deprecated
     public void setConfirmationCode(String confirmationCode) {
         this.confirmationCode = confirmationCode;
     }
 
     /**
      * Returns the confirmation code.
+     *
+     * <p>As an example, the confirmation code can be input by the user through a carrier app or the
+     * UI component of the eUICC local profile assistant (LPA) application.
      */
     @Nullable
     public String getConfirmationCode() {
@@ -103,9 +185,9 @@ public final class DownloadableSubscription implements Parcelable {
     /**
      * Set the user-visible carrier name.
      * @hide
-     *
-     * TODO(b/35851809): Make this a SystemApi.
+     * @deprecated - Do not use.
      */
+    @Deprecated
     public void setCarrierName(String carrierName) {
         this.carrierName = carrierName;
     }
@@ -117,36 +199,43 @@ public final class DownloadableSubscription implements Parcelable {
      * those created with {@link #forActivationCode}). May be populated with
      * {@link EuiccManager#getDownloadableSubscriptionMetadata}.
      * @hide
-     *
-     * TODO(b/35851809): Make this a SystemApi.
      */
+    @SystemApi
     @Nullable
     public String getCarrierName() {
         return carrierName;
     }
 
     /**
-     * Returns the {@link UiccAccessRule}s dictating access to this subscription.
+     * Returns the {@link UiccAccessRule}s in list dictating access to this subscription.
      *
      * <p>Only present for downloadable subscriptions that were queried from a server (as opposed to
      * those created with {@link #forActivationCode}). May be populated with
      * {@link EuiccManager#getDownloadableSubscriptionMetadata}.
      * @hide
-     *
-     * TODO(b/35851809): Make this a SystemApi.
      */
-    public UiccAccessRule[] getAccessRules() {
+    @SystemApi
+    public List<UiccAccessRule> getAccessRules() {
         return accessRules;
     }
 
     /**
      * Set the {@link UiccAccessRule}s dictating access to this subscription.
      * @hide
-     *
-     * TODO(b/35851809): Make this a SystemApi.
+     * @deprecated - Do not use.
      */
-    public void setAccessRules(UiccAccessRule[] accessRules) {
+    @Deprecated
+    public void setAccessRules(List<UiccAccessRule> accessRules) {
         this.accessRules = accessRules;
+    }
+
+    /**
+     * @hide
+     * @deprecated - Do not use.
+     */
+    @Deprecated
+    public void setAccessRules(UiccAccessRule[] accessRules) {
+        this.accessRules = Arrays.asList(accessRules);
     }
 
     @Override
@@ -154,7 +243,7 @@ public final class DownloadableSubscription implements Parcelable {
         dest.writeString(encodedActivationCode);
         dest.writeString(confirmationCode);
         dest.writeString(carrierName);
-        dest.writeTypedArray(accessRules, flags);
+        dest.writeTypedList(accessRules);
     }
 
     @Override

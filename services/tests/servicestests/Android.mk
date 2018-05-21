@@ -35,6 +35,7 @@ LOCAL_SRC_FILES += aidl/com/android/servicestests/aidl/INetworkStateObserver.aid
 LOCAL_JAVA_LIBRARIES := android.test.mock legacy-android-test
 
 LOCAL_PACKAGE_NAME := FrameworksServicesTests
+LOCAL_PRIVATE_PLATFORM_APIS := true
 LOCAL_COMPATIBILITY_SUITE := device-tests
 
 LOCAL_CERTIFICATE := platform

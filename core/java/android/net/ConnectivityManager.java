@@ -112,8 +112,14 @@ public class ConnectivityManager {
      * <p/>
      * For a disconnect event, the boolean extra EXTRA_NO_CONNECTIVITY
      * is set to {@code true} if there are no connected networks at all.
+     *
+     * @deprecated apps should use the more versatile {@link #requestNetwork},
+     *             {@link #registerNetworkCallback} or {@link #registerDefaultNetworkCallback}
+     *             functions instead for faster and more detailed updates about the network
+     *             changes they care about.
      */
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+    @Deprecated
     public static final String CONNECTIVITY_ACTION = "android.net.conn.CONNECTIVITY_CHANGE";
 
     /**
@@ -447,133 +453,177 @@ public class ConnectivityManager {
     public static final int TYPE_NONE        = -1;
 
     /**
-     * The Mobile data connection.  When active, all data traffic
-     * will use this network type's interface by default
-     * (it has a default route)
+     * A Mobile data connection. Devices may support more than one.
+     *
+     * @deprecated Applications should instead use {@link NetworkCapabilities#hasTransport} or
+     *         {@link #requestNetwork(NetworkRequest, NetworkCallback)} to request an
+     *         appropriate network. {@see NetworkCapabilities} for supported transports.
      */
+    @Deprecated
     public static final int TYPE_MOBILE      = 0;
+
     /**
-     * The WIFI data connection.  When active, all data traffic
-     * will use this network type's interface by default
-     * (it has a default route).
+     * A WIFI data connection. Devices may support more than one.
+     *
+     * @deprecated Applications should instead use {@link NetworkCapabilities#hasTransport} or
+     *         {@link #requestNetwork(NetworkRequest, NetworkCallback)} to request an
+     *         appropriate network. {@see NetworkCapabilities} for supported transports.
      */
+    @Deprecated
     public static final int TYPE_WIFI        = 1;
+
     /**
      * An MMS-specific Mobile data connection.  This network type may use the
      * same network interface as {@link #TYPE_MOBILE} or it may use a different
      * one.  This is used by applications needing to talk to the carrier's
      * Multimedia Messaging Service servers.
      *
-     * @deprecated Applications should instead use
+     * @deprecated Applications should instead use {@link NetworkCapabilities#hasCapability} or
      *         {@link #requestNetwork(NetworkRequest, NetworkCallback)} to request a network that
      *         provides the {@link NetworkCapabilities#NET_CAPABILITY_MMS} capability.
      */
     @Deprecated
     public static final int TYPE_MOBILE_MMS  = 2;
+
     /**
      * A SUPL-specific Mobile data connection.  This network type may use the
      * same network interface as {@link #TYPE_MOBILE} or it may use a different
      * one.  This is used by applications needing to talk to the carrier's
      * Secure User Plane Location servers for help locating the device.
      *
-     * @deprecated Applications should instead use
+     * @deprecated Applications should instead use {@link NetworkCapabilities#hasCapability} or
      *         {@link #requestNetwork(NetworkRequest, NetworkCallback)} to request a network that
      *         provides the {@link NetworkCapabilities#NET_CAPABILITY_SUPL} capability.
      */
     @Deprecated
     public static final int TYPE_MOBILE_SUPL = 3;
+
     /**
      * A DUN-specific Mobile data connection.  This network type may use the
      * same network interface as {@link #TYPE_MOBILE} or it may use a different
      * one.  This is sometimes by the system when setting up an upstream connection
      * for tethering so that the carrier is aware of DUN traffic.
+     *
+     * @deprecated Applications should instead use {@link NetworkCapabilities#hasCapability} or
+     *         {@link #requestNetwork(NetworkRequest, NetworkCallback)} to request a network that
+     *         provides the {@link NetworkCapabilities#NET_CAPABILITY_DUN} capability.
      */
+    @Deprecated
     public static final int TYPE_MOBILE_DUN  = 4;
+
     /**
      * A High Priority Mobile data connection.  This network type uses the
      * same network interface as {@link #TYPE_MOBILE} but the routing setup
      * is different.
      *
-     * @deprecated Applications should instead use
-     *         {@link #requestNetwork(NetworkRequest, NetworkCallback)} to request a network that
-     *         uses the {@link NetworkCapabilities#TRANSPORT_CELLULAR} transport.
+     * @deprecated Applications should instead use {@link NetworkCapabilities#hasTransport} or
+     *         {@link #requestNetwork(NetworkRequest, NetworkCallback)} to request an
+     *         appropriate network. {@see NetworkCapabilities} for supported transports.
      */
     @Deprecated
     public static final int TYPE_MOBILE_HIPRI = 5;
+
     /**
-     * The WiMAX data connection.  When active, all data traffic
-     * will use this network type's interface by default
-     * (it has a default route).
+     * A WiMAX data connection.
+     *
+     * @deprecated Applications should instead use {@link NetworkCapabilities#hasTransport} or
+     *         {@link #requestNetwork(NetworkRequest, NetworkCallback)} to request an
+     *         appropriate network. {@see NetworkCapabilities} for supported transports.
      */
+    @Deprecated
     public static final int TYPE_WIMAX       = 6;
 
     /**
-     * The Bluetooth data connection.  When active, all data traffic
-     * will use this network type's interface by default
-     * (it has a default route).
+     * A Bluetooth data connection.
+     *
+     * @deprecated Applications should instead use {@link NetworkCapabilities#hasTransport} or
+     *         {@link #requestNetwork(NetworkRequest, NetworkCallback)} to request an
+     *         appropriate network. {@see NetworkCapabilities} for supported transports.
      */
+    @Deprecated
     public static final int TYPE_BLUETOOTH   = 7;
 
     /**
      * Dummy data connection.  This should not be used on shipping devices.
+     * @deprecated This is not used any more.
      */
+    @Deprecated
     public static final int TYPE_DUMMY       = 8;
 
     /**
-     * The Ethernet data connection.  When active, all data traffic
-     * will use this network type's interface by default
-     * (it has a default route).
+     * An Ethernet data connection.
+     *
+     * @deprecated Applications should instead use {@link NetworkCapabilities#hasTransport} or
+     *         {@link #requestNetwork(NetworkRequest, NetworkCallback)} to request an
+     *         appropriate network. {@see NetworkCapabilities} for supported transports.
      */
+    @Deprecated
     public static final int TYPE_ETHERNET    = 9;
 
     /**
      * Over the air Administration.
+     * @deprecated Use {@link NetworkCapabilities} instead.
      * {@hide}
      */
+    @Deprecated
     public static final int TYPE_MOBILE_FOTA = 10;
 
     /**
      * IP Multimedia Subsystem.
+     * @deprecated Use {@link NetworkCapabilities#NET_CAPABILITY_IMS} instead.
      * {@hide}
      */
+    @Deprecated
     public static final int TYPE_MOBILE_IMS  = 11;
 
     /**
      * Carrier Branded Services.
+     * @deprecated Use {@link NetworkCapabilities#NET_CAPABILITY_CBS} instead.
      * {@hide}
      */
+    @Deprecated
     public static final int TYPE_MOBILE_CBS  = 12;
 
     /**
      * A Wi-Fi p2p connection. Only requesting processes will have access to
      * the peers connected.
+     * @deprecated Use {@link NetworkCapabilities#NET_CAPABILITY_WIFI_P2P} instead.
      * {@hide}
      */
+    @Deprecated
     public static final int TYPE_WIFI_P2P    = 13;
 
     /**
      * The network to use for initially attaching to the network
+     * @deprecated Use {@link NetworkCapabilities#NET_CAPABILITY_IA} instead.
      * {@hide}
      */
+    @Deprecated
     public static final int TYPE_MOBILE_IA = 14;
 
     /**
      * Emergency PDN connection for emergency services.  This
      * may include IMS and MMS in emergency situations.
+     * @deprecated Use {@link NetworkCapabilities#NET_CAPABILITY_EIMS} instead.
      * {@hide}
      */
+    @Deprecated
     public static final int TYPE_MOBILE_EMERGENCY = 15;
 
     /**
      * The network that uses proxy to achieve connectivity.
+     * @deprecated Use {@link NetworkCapabilities} instead.
      * {@hide}
      */
+    @Deprecated
     public static final int TYPE_PROXY = 16;
 
     /**
      * A virtual network using one or more native bearers.
      * It may or may not be providing security services.
+     * @deprecated Applications should use {@link NetworkCapabilities#TRANSPORT_VPN} instead.
      */
+    @Deprecated
     public static final int TYPE_VPN = 17;
 
     /** {@hide} */
@@ -680,8 +730,10 @@ public class ConnectivityManager {
      * @param type the type needing naming
      * @return a String for the given type, or a string version of the type ("87")
      * if no name is known.
+     * @deprecated Types are deprecated. Use {@link NetworkCapabilities} instead.
      * {@hide}
      */
+    @Deprecated
     public static String getNetworkTypeName(int type) {
         switch (type) {
           case TYPE_NONE:
@@ -732,8 +784,10 @@ public class ConnectivityManager {
      * This should be replaced in the future by a network property.
      * @param networkType the type to check
      * @return a boolean - {@code true} if uses cellular network, else {@code false}
+     * @deprecated Types are deprecated. Use {@link NetworkCapabilities} instead.
      * {@hide}
      */
+    @Deprecated
     public static boolean isNetworkTypeMobile(int networkType) {
         switch (networkType) {
             case TYPE_MOBILE:
@@ -755,8 +809,10 @@ public class ConnectivityManager {
     /**
      * Checks if the given network type is backed by a Wi-Fi radio.
      *
+     * @deprecated Types are deprecated. Use {@link NetworkCapabilities} instead.
      * @hide
      */
+    @Deprecated
     public static boolean isNetworkTypeWifi(int networkType) {
         switch (networkType) {
             case TYPE_WIFI:
@@ -805,6 +861,10 @@ public class ConnectivityManager {
      * You should always check {@link NetworkInfo#isConnected()} before initiating
      * network traffic. This may return {@code null} when there is no default
      * network.
+     * Note that if the default network is a VPN, this method will return the
+     * NetworkInfo for one of its underlying networks instead, or null if the
+     * VPN agent did not specify any. Apps interested in learning about VPNs
+     * should use {@link #getNetworkInfo(android.net.Network)} instead.
      *
      * @return a {@link NetworkInfo} object for the current default network
      *        or {@code null} if no default network is currently active
@@ -962,7 +1022,11 @@ public class ConnectivityManager {
      *        which you're interested.
      * @return a {@link NetworkInfo} object for the requested
      *        network type or {@code null} if the type is not
-     *        supported by the device.
+     *        supported by the device. If {@code networkType} is
+     *        TYPE_VPN and a VPN is active for the calling app,
+     *        then this method will try to return one of the
+     *        underlying networks for the VPN or null if the
+     *        VPN agent didn't specify any.
      *
      * @deprecated This method does not support multiple connected networks
      *             of the same type. Use {@link #getAllNetworks} and
@@ -1523,6 +1587,8 @@ public class ConnectivityManager {
      * IllegalArgumentException if no mapping from the legacy type to
      * NetworkCapabilities is known.
      *
+     * @deprecated Types are deprecated. Use {@link NetworkCallback} or {@link NetworkRequest}
+     *     to find the network instead.
      * @hide
      */
     public static NetworkCapabilities networkCapabilitiesForType(int type) {
@@ -1596,7 +1662,11 @@ public class ConnectivityManager {
         /** The hardware returned an error. */
         public static final int ERROR_HARDWARE_ERROR = -31;
 
+        /** The NAT-T destination port for IPsec */
         public static final int NATT_PORT = 4500;
+
+        /** The minimum interval in seconds between keepalive packet transmissions */
+        public static final int MIN_INTERVAL = 10;
 
         private final Network mNetwork;
         private final PacketKeepaliveCallback mCallback;
@@ -1794,7 +1864,7 @@ public class ConnectivityManager {
                 ITelephony it = ITelephony.Stub.asInterface(b);
                 int subId = SubscriptionManager.getDefaultDataSubscriptionId();
                 Log.d("ConnectivityManager", "getMobileDataEnabled()+ subId=" + subId);
-                boolean retVal = it.getDataEnabled(subId);
+                boolean retVal = it.isUserDataEnabled(subId);
                 Log.d("ConnectivityManager", "getMobileDataEnabled()- subId=" + subId
                         + " retVal=" + retVal);
                 return retVal;
@@ -1913,13 +1983,6 @@ public class ConnectivityManager {
 
     /* TODO: These permissions checks don't belong in client-side code. Move them to
      * services.jar, possibly in com.android.server.net. */
-
-    /** {@hide} */
-    public static final boolean checkChangePermission(Context context) {
-        int uid = Binder.getCallingUid();
-        return Settings.checkAndNoteChangeNetworkStateOperation(context, uid, Settings
-                .getPackageNameForUid(context, uid), false /* throwException */);
-    }
 
     /** {@hide} */
     public static final void enforceChangePermission(Context context) {
@@ -2370,6 +2433,7 @@ public class ConnectivityManager {
      *
      * @param networkType The type of network you want to report on
      * @param percentage The quality of the connection 0 is bad, 100 is good
+     * @deprecated Types are deprecated. Use {@link #reportNetworkConnectivity} instead.
      * {@hide}
      */
     public void reportInetCondition(int networkType, int percentage) {
@@ -2501,9 +2565,10 @@ public class ConnectivityManager {
      *
      * @param networkType The network type we'd like to check
      * @return {@code true} if supported, else {@code false}
-     *
+     * @deprecated Types are deprecated. Use {@link NetworkCapabilities} instead.
      * @hide
      */
+    @Deprecated
     @RequiresPermission(android.Manifest.permission.ACCESS_NETWORK_STATE)
     public boolean isNetworkSupported(int networkType) {
         try {
@@ -2656,7 +2721,7 @@ public class ConnectivityManager {
      * A {@code NetworkCallback} is registered by calling
      * {@link #requestNetwork(NetworkRequest, NetworkCallback)},
      * {@link #registerNetworkCallback(NetworkRequest, NetworkCallback)},
-     * or {@link #registerDefaultNetworkCallback(NetworkCallback). A {@code NetworkCallback} is
+     * or {@link #registerDefaultNetworkCallback(NetworkCallback)}. A {@code NetworkCallback} is
      * unregistered by calling {@link #unregisterNetworkCallback(NetworkCallback)}.
      * A {@code NetworkCallback} should be registered at most once at any time.
      * A {@code NetworkCallback} that has been unregistered can be registered again.
@@ -2683,6 +2748,32 @@ public class ConnectivityManager {
          * Called when the framework connects and has declared a new network ready for use.
          * This callback may be called more than once if the {@link Network} that is
          * satisfying the request changes.
+         *
+         * @param network The {@link Network} of the satisfying network.
+         * @param networkCapabilities The {@link NetworkCapabilities} of the satisfying network.
+         * @param linkProperties The {@link LinkProperties} of the satisfying network.
+         * @hide
+         */
+        public void onAvailable(Network network, NetworkCapabilities networkCapabilities,
+                LinkProperties linkProperties) {
+            // Internally only this method is called when a new network is available, and
+            // it calls the callback in the same way and order that older versions used
+            // to call so as not to change the behavior.
+            onAvailable(network);
+            if (!networkCapabilities.hasCapability(
+                    NetworkCapabilities.NET_CAPABILITY_NOT_SUSPENDED)) {
+                onNetworkSuspended(network);
+            }
+            onCapabilitiesChanged(network, networkCapabilities);
+            onLinkPropertiesChanged(network, linkProperties);
+        }
+
+        /**
+         * Called when the framework connects and has declared a new network ready for use.
+         * This callback may be called more than once if the {@link Network} that is
+         * satisfying the request changes. This will always immediately be followed by a
+         * call to {@link #onCapabilitiesChanged(Network, NetworkCapabilities)} then by a
+         * call to {@link #onLinkPropertiesChanged(Network, LinkProperties)}.
          *
          * @param network The {@link Network} of the satisfying network.
          */
@@ -2727,7 +2818,8 @@ public class ConnectivityManager {
          * changes capabilities but still satisfies the stated need.
          *
          * @param network The {@link Network} whose capabilities have changed.
-         * @param networkCapabilities The new {@link android.net.NetworkCapabilities} for this network.
+         * @param networkCapabilities The new {@link android.net.NetworkCapabilities} for this
+         *                            network.
          */
         public void onCapabilitiesChanged(Network network,
                 NetworkCapabilities networkCapabilities) {}
@@ -2743,7 +2835,7 @@ public class ConnectivityManager {
 
         /**
          * Called when the network the framework connected to for this request
-         * goes into {@link NetworkInfo.DetailedState.SUSPENDED}.
+         * goes into {@link NetworkInfo.State#SUSPENDED}.
          * This generally means that while the TCP connections are still live,
          * temporarily network data fails to transfer.  Specifically this is used
          * on cellular networks to mask temporary outages when driving through
@@ -2754,9 +2846,8 @@ public class ConnectivityManager {
 
         /**
          * Called when the network the framework connected to for this request
-         * returns from a {@link NetworkInfo.DetailedState.SUSPENDED} state.
-         * This should always be preceeded by a matching {@code onNetworkSuspended}
-         * call.
+         * returns from a {@link NetworkInfo.State#SUSPENDED} state. This should always be
+         * preceded by a matching {@link NetworkCallback#onNetworkSuspended} call.
          * @hide
          */
         public void onNetworkResumed(Network network) {}
@@ -2865,7 +2956,9 @@ public class ConnectivityManager {
                     break;
                 }
                 case CALLBACK_AVAILABLE: {
-                    callback.onAvailable(network);
+                    NetworkCapabilities cap = getObject(message, NetworkCapabilities.class);
+                    LinkProperties lp = getObject(message, LinkProperties.class);
+                    callback.onAvailable(network, cap, lp);
                     break;
                 }
                 case CALLBACK_LOSING: {

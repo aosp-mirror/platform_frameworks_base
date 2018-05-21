@@ -30,7 +30,14 @@
 
 #include <utils/Log.h>
 #include <utils/misc.h>
-#include <utils/Vector.h>
+
+#include "android-base/unique_fd.h"
+#include "bpf/BpfNetworkStats.h"
+#include "bpf/BpfUtils.h"
+
+using android::bpf::hasBpfSupport;
+using android::bpf::parseBpfNetworkStatsDetail;
+using android::bpf::stats_line;
 
 namespace android {
 
@@ -45,23 +52,13 @@ static struct {
     jfieldID tag;
     jfieldID metered;
     jfieldID roaming;
+    jfieldID defaultNetwork;
     jfieldID rxBytes;
     jfieldID rxPackets;
     jfieldID txBytes;
     jfieldID txPackets;
     jfieldID operations;
 } gNetworkStatsClassInfo;
-
-struct stats_line {
-    char iface[32];
-    int32_t uid;
-    int32_t set;
-    int32_t tag;
-    int64_t rxBytes;
-    int64_t rxPackets;
-    int64_t txBytes;
-    int64_t txPackets;
-};
 
 static jobjectArray get_string_array(JNIEnv* env, jobject obj, jfieldID field, int size, bool grow)
 {
@@ -96,32 +93,13 @@ static jlongArray get_long_array(JNIEnv* env, jobject obj, jfieldID field, int s
     return env->NewLongArray(size);
 }
 
-static int readNetworkStatsDetail(JNIEnv* env, jclass clazz, jobject stats,
-        jstring path, jint limitUid, jobjectArray limitIfacesObj, jint limitTag) {
-    ScopedUtfChars path8(env, path);
-    if (path8.c_str() == NULL) {
-        return -1;
-    }
-
-    FILE *fp = fopen(path8.c_str(), "r");
+static int legacyReadNetworkStatsDetail(std::vector<stats_line>* lines,
+                                        const std::vector<std::string>& limitIfaces,
+                                        int limitTag, int limitUid, const char* path) {
+    FILE* fp = fopen(path, "r");
     if (fp == NULL) {
         return -1;
     }
-
-    Vector<String8> limitIfaces;
-    if (limitIfacesObj != NULL && env->GetArrayLength(limitIfacesObj) > 0) {
-        int num = env->GetArrayLength(limitIfacesObj);
-        limitIfaces.setCapacity(num);
-        for (int i=0; i<num; i++) {
-            jstring string = (jstring)env->GetObjectArrayElement(limitIfacesObj, i);
-            ScopedUtfChars string8(env, string);
-            if (string8.c_str() != NULL) {
-                limitIfaces.add(String8(string8.c_str()));
-            }
-        }
-    }
-
-    Vector<stats_line> lines;
 
     int lastIdx = 1;
     int idx;
@@ -214,7 +192,7 @@ static int readNetworkStatsDetail(JNIEnv* env, jclass clazz, jobject stats,
                 //ALOGI("skipping due to uid: %s", buffer);
                 continue;
             }
-            lines.push_back(s);
+            lines->push_back(s);
         } else {
             //ALOGI("skipping due to bad remaining fields: %s", pos);
         }
@@ -224,8 +202,13 @@ static int readNetworkStatsDetail(JNIEnv* env, jclass clazz, jobject stats,
         ALOGE("Failed to close netstats file");
         return -1;
     }
+    return 0;
+}
 
+static int statsLinesToNetworkStats(JNIEnv* env, jclass clazz, jobject stats,
+                            std::vector<stats_line>& lines) {
     int size = lines.size();
+
     bool grow = size > env->GetIntField(stats, gNetworkStatsClassInfo.capacity);
 
     ScopedLocalRef<jobjectArray> iface(env, get_string_array(env, stats,
@@ -246,6 +229,9 @@ static int readNetworkStatsDetail(JNIEnv* env, jclass clazz, jobject stats,
     ScopedIntArrayRW roaming(env, get_int_array(env, stats,
             gNetworkStatsClassInfo.roaming, size, grow));
     if (roaming.get() == NULL) return -1;
+    ScopedIntArrayRW defaultNetwork(env, get_int_array(env, stats,
+            gNetworkStatsClassInfo.defaultNetwork, size, grow));
+    if (defaultNetwork.get() == NULL) return -1;
     ScopedLongArrayRW rxBytes(env, get_long_array(env, stats,
             gNetworkStatsClassInfo.rxBytes, size, grow));
     if (rxBytes.get() == NULL) return -1;
@@ -269,7 +255,7 @@ static int readNetworkStatsDetail(JNIEnv* env, jclass clazz, jobject stats,
         uid[i] = lines[i].uid;
         set[i] = lines[i].set;
         tag[i] = lines[i].tag;
-        // Metered and Roaming are populated in Java-land by inspecting the iface properties.
+        // Metered, roaming and defaultNetwork are populated in Java-land.
         rxBytes[i] = lines[i].rxBytes;
         rxPackets[i] = lines[i].rxPackets;
         txBytes[i] = lines[i].txBytes;
@@ -285,20 +271,66 @@ static int readNetworkStatsDetail(JNIEnv* env, jclass clazz, jobject stats,
         env->SetObjectField(stats, gNetworkStatsClassInfo.tag, tag.getJavaArray());
         env->SetObjectField(stats, gNetworkStatsClassInfo.metered, metered.getJavaArray());
         env->SetObjectField(stats, gNetworkStatsClassInfo.roaming, roaming.getJavaArray());
+        env->SetObjectField(stats, gNetworkStatsClassInfo.defaultNetwork,
+                defaultNetwork.getJavaArray());
         env->SetObjectField(stats, gNetworkStatsClassInfo.rxBytes, rxBytes.getJavaArray());
         env->SetObjectField(stats, gNetworkStatsClassInfo.rxPackets, rxPackets.getJavaArray());
         env->SetObjectField(stats, gNetworkStatsClassInfo.txBytes, txBytes.getJavaArray());
         env->SetObjectField(stats, gNetworkStatsClassInfo.txPackets, txPackets.getJavaArray());
         env->SetObjectField(stats, gNetworkStatsClassInfo.operations, operations.getJavaArray());
     }
-
     return 0;
+}
+
+static int readNetworkStatsDetail(JNIEnv* env, jclass clazz, jobject stats, jstring path,
+                                  jint limitUid, jobjectArray limitIfacesObj, jint limitTag,
+                                  jboolean useBpfStats) {
+    ScopedUtfChars path8(env, path);
+    if (path8.c_str() == NULL) {
+        return -1;
+    }
+
+    std::vector<std::string> limitIfaces;
+    if (limitIfacesObj != NULL && env->GetArrayLength(limitIfacesObj) > 0) {
+        int num = env->GetArrayLength(limitIfacesObj);
+        for (int i = 0; i < num; i++) {
+            jstring string = (jstring)env->GetObjectArrayElement(limitIfacesObj, i);
+            ScopedUtfChars string8(env, string);
+            if (string8.c_str() != NULL) {
+                limitIfaces.push_back(std::string(string8.c_str()));
+            }
+        }
+    }
+    std::vector<stats_line> lines;
+
+
+    if (useBpfStats) {
+        if (parseBpfNetworkStatsDetail(&lines, limitIfaces, limitTag, limitUid) < 0)
+            return -1;
+    } else {
+        if (legacyReadNetworkStatsDetail(&lines, limitIfaces, limitTag,
+                                         limitUid, path8.c_str()) < 0)
+            return -1;
+    }
+
+    return statsLinesToNetworkStats(env, clazz, stats, lines);
+}
+
+static int readNetworkStatsDev(JNIEnv* env, jclass clazz, jobject stats) {
+    std::vector<stats_line> lines;
+
+    if (parseBpfNetworkStatsDev(&lines) < 0)
+            return -1;
+
+    return statsLinesToNetworkStats(env, clazz, stats, lines);
 }
 
 static const JNINativeMethod gMethods[] = {
         { "nativeReadNetworkStatsDetail",
-                "(Landroid/net/NetworkStats;Ljava/lang/String;I[Ljava/lang/String;I)I",
-                (void*) readNetworkStatsDetail }
+                "(Landroid/net/NetworkStats;Ljava/lang/String;I[Ljava/lang/String;IZ)I",
+                (void*) readNetworkStatsDetail },
+        { "nativeReadNetworkStatsDev", "(Landroid/net/NetworkStats;)I",
+                (void*) readNetworkStatsDev },
 };
 
 int register_com_android_internal_net_NetworkStatsFactory(JNIEnv* env) {
@@ -318,6 +350,7 @@ int register_com_android_internal_net_NetworkStatsFactory(JNIEnv* env) {
     gNetworkStatsClassInfo.tag = GetFieldIDOrDie(env, clazz, "tag", "[I");
     gNetworkStatsClassInfo.metered = GetFieldIDOrDie(env, clazz, "metered", "[I");
     gNetworkStatsClassInfo.roaming = GetFieldIDOrDie(env, clazz, "roaming", "[I");
+    gNetworkStatsClassInfo.defaultNetwork = GetFieldIDOrDie(env, clazz, "defaultNetwork", "[I");
     gNetworkStatsClassInfo.rxBytes = GetFieldIDOrDie(env, clazz, "rxBytes", "[J");
     gNetworkStatsClassInfo.rxPackets = GetFieldIDOrDie(env, clazz, "rxPackets", "[J");
     gNetworkStatsClassInfo.txBytes = GetFieldIDOrDie(env, clazz, "txBytes", "[J");

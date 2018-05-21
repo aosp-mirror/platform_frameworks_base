@@ -228,10 +228,18 @@ final class DeviceDiscoveryAction extends HdmiCecFeatureAction {
                 if (cmd.getOpcode() == Constants.MESSAGE_SET_OSD_NAME) {
                     handleSetOsdName(cmd);
                     return true;
+                } else if ((cmd.getOpcode() == Constants.MESSAGE_FEATURE_ABORT) &&
+                        ((cmd.getParams()[0] & 0xFF) == Constants.MESSAGE_GIVE_OSD_NAME)) {
+                    handleSetOsdName(cmd);
+                    return true;
                 }
                 return false;
             case STATE_WAITING_FOR_VENDOR_ID:
                 if (cmd.getOpcode() == Constants.MESSAGE_DEVICE_VENDOR_ID) {
+                    handleVendorId(cmd);
+                    return true;
+                } else if ((cmd.getOpcode() == Constants.MESSAGE_FEATURE_ABORT) &&
+                        ((cmd.getParams()[0] & 0xFF) == Constants.MESSAGE_GIVE_DEVICE_VENDOR_ID)) {
                     handleVendorId(cmd);
                     return true;
                 }
@@ -281,7 +289,11 @@ final class DeviceDiscoveryAction extends HdmiCecFeatureAction {
 
         String displayName = null;
         try {
-            displayName = new String(cmd.getParams(), "US-ASCII");
+            if (cmd.getOpcode() == Constants.MESSAGE_FEATURE_ABORT) {
+                displayName = HdmiUtils.getDefaultDeviceName(current.mLogicalAddress);
+            } else {
+                displayName = new String(cmd.getParams(), "US-ASCII");
+            }
         } catch (UnsupportedEncodingException e) {
             Slog.w(TAG, "Failed to decode display name: " + cmd.toString());
             // If failed to get display name, use the default name of device.
@@ -302,9 +314,12 @@ final class DeviceDiscoveryAction extends HdmiCecFeatureAction {
             return;
         }
 
-        byte[] params = cmd.getParams();
-        int vendorId = HdmiUtils.threeBytesToInt(params);
-        current.mVendorId = vendorId;
+        if (cmd.getOpcode() != Constants.MESSAGE_FEATURE_ABORT) {
+            byte[] params = cmd.getParams();
+            int vendorId = HdmiUtils.threeBytesToInt(params);
+            current.mVendorId = vendorId;
+        }
+
         increaseProcessedDeviceCount();
         checkAndProceedStage();
     }

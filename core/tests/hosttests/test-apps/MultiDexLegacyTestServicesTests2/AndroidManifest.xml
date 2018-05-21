@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.android.framework.multidexlegacytestservices.test2"
+    android:versionCode="1"
+    android:versionName="1.0" >
+
+    <uses-sdk android:minSdkVersion="9" />
+    <uses-permission android:name="android.permission.KILL_BACKGROUND_PROCESSES"/>
+    <instrumentation
+        android:name="android.support.test.runner.AndroidJUnitRunner"
+        android:targetPackage="com.android.framework.multidexlegacytestservices" />
+
+    <application
+        android:label="multidexlegacytestservices.test2" >
+        <uses-library android:name="android.test.runner" />
+    </application>
+
+</manifest>

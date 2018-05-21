@@ -139,8 +139,8 @@ final class VolumeControlAction extends HdmiCecFeatureAction {
 
     private boolean handleReportAudioStatus(HdmiCecMessage cmd) {
         byte params[] = cmd.getParams();
-        boolean mute = (params[0] & 0x80) == 0x80;
-        int volume = params[0] & 0x7F;
+        boolean mute = HdmiUtils.isAudioStatusMute(cmd);
+        int volume = HdmiUtils.getAudioStatusVolume(cmd);
         mLastAvrVolume = volume;
         mLastAvrMute = mute;
         if (shouldUpdateAudioVolume(mute)) {

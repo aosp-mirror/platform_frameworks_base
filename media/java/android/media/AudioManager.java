@@ -1552,6 +1552,21 @@ public class AudioManager {
     }
 
     /**
+     * Broadcast Action: microphone muting state changed.
+     *
+     * You <em>cannot</em> receive this through components declared
+     * in manifests, only by explicitly registering for it with
+     * {@link Context#registerReceiver(BroadcastReceiver, IntentFilter)
+     * Context.registerReceiver()}.
+     *
+     * <p>The intent has no extra values, use {@link #isMicrophoneMute} to check whether the
+     * microphone is muted.
+     */
+    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+    public static final String ACTION_MICROPHONE_MUTE_CHANGED =
+            "android.media.action.MICROPHONE_MUTE_CHANGED";
+
+    /**
      * Sets the audio mode.
      * <p>
      * The audio mode encompasses audio routing AND the behavior of
@@ -3606,6 +3621,21 @@ public class AudioManager {
     }
 
      /**
+     * Indicate Hearing Aid connection state change.
+     * @param device Bluetooth device connected/disconnected
+     * @param state new connection state (BluetoothProfile.STATE_xxx)
+     * {@hide}
+     */
+    public void setHearingAidDeviceConnectionState(BluetoothDevice device, int state) {
+        final IAudioService service = getService();
+        try {
+            service.setHearingAidDeviceConnectionState(device, state);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+     /**
      * Indicate A2DP source or sink connection state change.
      * @param device Bluetooth device connected/disconnected
      * @param state  new connection state (BluetoothProfile.STATE_xxx)
@@ -3622,6 +3652,33 @@ public class AudioManager {
         int delay = 0;
         try {
             delay = service.setBluetoothA2dpDeviceConnectionState(device, state, profile);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+        return delay;
+    }
+
+     /**
+     * Indicate A2DP source or sink connection state change and eventually suppress
+     * the {@link AudioManager.ACTION_AUDIO_BECOMING_NOISY} intent.
+     * @param device Bluetooth device connected/disconnected
+     * @param state  new connection state (BluetoothProfile.STATE_xxx)
+     * @param profile profile for the A2DP device
+     * (either {@link android.bluetooth.BluetoothProfile.A2DP} or
+     * {@link android.bluetooth.BluetoothProfile.A2DP_SINK})
+     * @param suppressNoisyIntent if true the
+     * {@link AudioManager.ACTION_AUDIO_BECOMING_NOISY} intent will not be sent.
+     * @return a delay in ms that the caller should wait before broadcasting
+     * BluetoothA2dp.ACTION_CONNECTION_STATE_CHANGED intent.
+     * {@hide}
+     */
+    public int setBluetoothA2dpDeviceConnectionStateSuppressNoisyIntent(
+                BluetoothDevice device, int state, int profile, boolean suppressNoisyIntent) {
+        final IAudioService service = getService();
+        int delay = 0;
+        try {
+            delay = service.setBluetoothA2dpDeviceConnectionStateSuppressNoisyIntent(device,
+                state, profile, suppressNoisyIntent);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -4219,8 +4276,7 @@ public class AudioManager {
     /**
      * The list of {@link AudioDeviceCallback} objects to receive add/remove notifications.
      */
-    private ArrayMap<AudioDeviceCallback, NativeEventHandlerDelegate>
-        mDeviceCallbacks =
+    private final ArrayMap<AudioDeviceCallback, NativeEventHandlerDelegate> mDeviceCallbacks =
             new ArrayMap<AudioDeviceCallback, NativeEventHandlerDelegate>();
 
     /**
@@ -4431,21 +4487,20 @@ public class AudioManager {
                     calcListDeltas(mPreviousPorts, current_ports, GET_DEVICES_ALL);
             AudioDeviceInfo[] removed_devices =
                     calcListDeltas(current_ports, mPreviousPorts, GET_DEVICES_ALL);
-
             if (added_devices.length != 0 || removed_devices.length != 0) {
                 synchronized (mDeviceCallbacks) {
                     for (int i = 0; i < mDeviceCallbacks.size(); i++) {
                         handler = mDeviceCallbacks.valueAt(i).getHandler();
                         if (handler != null) {
-                            if (added_devices.length != 0) {
-                                handler.sendMessage(Message.obtain(handler,
-                                                                   MSG_DEVICES_DEVICES_ADDED,
-                                                                   added_devices));
-                            }
                             if (removed_devices.length != 0) {
                                 handler.sendMessage(Message.obtain(handler,
                                                                    MSG_DEVICES_DEVICES_REMOVED,
                                                                    removed_devices));
+                            }
+                            if (added_devices.length != 0) {
+                                handler.sendMessage(Message.obtain(handler,
+                                                                   MSG_DEVICES_DEVICES_ADDED,
+                                                                   added_devices));
                             }
                         }
                     }

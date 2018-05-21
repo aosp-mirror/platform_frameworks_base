@@ -46,6 +46,11 @@ public class Log {
     private static final int EVENTS_TO_CACHE = 10;
     private static final int EVENTS_TO_CACHE_DEBUG = 20;
 
+    /**
+     * When generating a bug report, include the last X dialable digits when logging phone numbers.
+     */
+    private static final int NUM_DIALABLE_DIGITS_TO_LOG = Build.IS_USER ? 0 : 2;
+
     // Generic tag for all Telecom logging
     @VisibleForTesting
     public static String TAG = "TelecomFramework";
@@ -340,24 +345,6 @@ public class Log {
         return sSessionManager;
     }
 
-    private static MessageDigest sMessageDigest;
-
-    public static void initMd5Sum() {
-        new AsyncTask<Void, Void, Void>() {
-            @Override
-            public Void doInBackground(Void... args) {
-                MessageDigest md;
-                try {
-                    md = MessageDigest.getInstance("SHA-1");
-                } catch (NoSuchAlgorithmException e) {
-                    md = null;
-                }
-                sMessageDigest = md;
-                return null;
-            }
-        }.execute();
-    }
-
     public static void setTag(String tag) {
         TAG = tag;
         DEBUG = isLoggable(android.util.Log.DEBUG);
@@ -402,9 +389,15 @@ public class Log {
 
             String textToObfuscate = uri.getSchemeSpecificPart();
             if (PhoneAccount.SCHEME_TEL.equals(scheme)) {
+                int numDigitsToObfuscate = getDialableCount(textToObfuscate)
+                        - NUM_DIALABLE_DIGITS_TO_LOG;
                 for (int i = 0; i < textToObfuscate.length(); i++) {
                     char c = textToObfuscate.charAt(i);
-                    sb.append(PhoneNumberUtils.isDialable(c) ? "*" : c);
+                    boolean isDialable = PhoneNumberUtils.isDialable(c);
+                    if (isDialable) {
+                        numDigitsToObfuscate--;
+                    }
+                    sb.append(isDialable && numDigitsToObfuscate >= 0 ? "*" : c);
                 }
             } else if (PhoneAccount.SCHEME_SIP.equals(scheme)) {
                 for (int i = 0; i < textToObfuscate.length(); i++) {
@@ -423,46 +416,30 @@ public class Log {
     }
 
     /**
+     * Determines the number of dialable characters in a string.
+     * @param toCount The string to count dialable characters in.
+     * @return The count of dialable characters.
+     */
+    private static int getDialableCount(String toCount) {
+        int numDialable = 0;
+        for (char c : toCount.toCharArray()) {
+            if (PhoneNumberUtils.isDialable(c)) {
+                numDialable++;
+            }
+        }
+        return numDialable;
+    }
+
+    /**
      * Redact personally identifiable information for production users.
      * If we are running in verbose mode, return the original string,
-     * and return "****" if we are running on the user build, otherwise
-     * return a SHA-1 hash of the input string.
+     * and return "***" otherwise.
      */
     public static String pii(Object pii) {
         if (pii == null || VERBOSE) {
             return String.valueOf(pii);
         }
-        return "[" + secureHash(String.valueOf(pii).getBytes()) + "]";
-    }
-
-    private static String secureHash(byte[] input) {
-        // Refrain from logging user personal information in user build.
-        if (USER_BUILD) {
-            return "****";
-        }
-
-        if (sMessageDigest != null) {
-            sMessageDigest.reset();
-            sMessageDigest.update(input);
-            byte[] result = sMessageDigest.digest();
-            return encodeHex(result);
-        } else {
-            return "Uninitialized SHA1";
-        }
-    }
-
-    private static String encodeHex(byte[] bytes) {
-        StringBuffer hex = new StringBuffer(bytes.length * 2);
-
-        for (int i = 0; i < bytes.length; i++) {
-            int byteIntValue = bytes[i] & 0xff;
-            if (byteIntValue < 0x10) {
-                hex.append("0");
-            }
-            hex.append(Integer.toString(byteIntValue, 16));
-        }
-
-        return hex.toString();
+        return "***";
     }
 
     private static String getPrefixFromObject(Object obj) {

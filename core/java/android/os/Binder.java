@@ -22,6 +22,7 @@ import android.util.ExceptionUtils;
 import android.util.Log;
 import android.util.Slog;
 
+import com.android.internal.os.BinderInternal;
 import com.android.internal.util.FastPrintWriter;
 import com.android.internal.util.FunctionalUtils.ThrowingRunnable;
 import com.android.internal.util.FunctionalUtils.ThrowingSupplier;
@@ -35,6 +36,9 @@ import java.io.PrintWriter;
 import java.lang.ref.WeakReference;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Base class for a remotable object, the core part of a lightweight
@@ -358,7 +362,9 @@ public class Binder implements IBinder {
      * Add the calling thread to the IPC thread pool.  This function does
      * not return until the current process is exiting.
      */
-    public static final native void joinThreadPool();
+    public static final void joinThreadPool() {
+        BinderInternal.joinThreadPool();
+    }
 
     /**
      * Returns true if the specified interface is a proxy.
@@ -789,11 +795,29 @@ final class BinderProxy implements IBinder {
         /**
          * Return the total number of pairs in the map.
          */
-        int size() {
+        private int size() {
             int size = 0;
             for (ArrayList<WeakReference<BinderProxy>> a : mMainIndexValues) {
                 if (a != null) {
                     size += a.size();
+                }
+            }
+            return size;
+        }
+
+        /**
+         * Return the total number of pairs in the map containing values that have
+         * not been cleared. More expensive than the above size function.
+         */
+        private int unclearedSize() {
+            int size = 0;
+            for (ArrayList<WeakReference<BinderProxy>> a : mMainIndexValues) {
+                if (a != null) {
+                    for (WeakReference<BinderProxy> ref : a) {
+                        if (ref.get() != null) {
+                            ++size;
+                        }
+                    }
                 }
             }
             return size;
@@ -888,14 +912,68 @@ final class BinderProxy implements IBinder {
                 keyArray[size] = key;
             }
             if (size >= mWarnBucketSize) {
-                final int total_size = size();
+                final int totalSize = size();
                 Log.v(Binder.TAG, "BinderProxy map growth! bucket size = " + size
-                        + " total = " + total_size);
+                        + " total = " + totalSize);
                 mWarnBucketSize += WARN_INCREMENT;
-                if (Build.IS_DEBUGGABLE && total_size > CRASH_AT_SIZE) {
-                    throw new AssertionError("Binder ProxyMap has too many entries. "
-                            + "BinderProxy leak?");
+                if (Build.IS_DEBUGGABLE && totalSize >= CRASH_AT_SIZE) {
+                    // Use the number of uncleared entries to determine whether we should
+                    // really report a histogram and crash. We don't want to fundamentally
+                    // change behavior for a debuggable process, so we GC only if we are
+                    // about to crash.
+                    final int totalUnclearedSize = unclearedSize();
+                    if (totalUnclearedSize >= CRASH_AT_SIZE) {
+                        dumpProxyInterfaceCounts();
+                        Runtime.getRuntime().gc();
+                        throw new AssertionError("Binder ProxyMap has too many entries: "
+                                + totalSize + " (total), " + totalUnclearedSize + " (uncleared), "
+                                + unclearedSize() + " (uncleared after GC). BinderProxy leak?");
+                    } else if (totalSize > 3 * totalUnclearedSize / 2) {
+                        Log.v(Binder.TAG, "BinderProxy map has many cleared entries: "
+                                + (totalSize - totalUnclearedSize) + " of " + totalSize
+                                + " are cleared");
+                    }
                 }
+            }
+        }
+
+        /**
+         * Dump a histogram to the logcat. Used to diagnose abnormally large proxy maps.
+         */
+        private void dumpProxyInterfaceCounts() {
+            Map<String, Integer> counts = new HashMap<>();
+            for (ArrayList<WeakReference<BinderProxy>> a : mMainIndexValues) {
+                if (a != null) {
+                    for (WeakReference<BinderProxy> weakRef : a) {
+                        BinderProxy bp = weakRef.get();
+                        String key;
+                        if (bp == null) {
+                            key = "<cleared weak-ref>";
+                        } else {
+                            try {
+                                key = bp.getInterfaceDescriptor();
+                            } catch (Throwable t) {
+                                key = "<exception during getDescriptor>";
+                            }
+                        }
+                        Integer i = counts.get(key);
+                        if (i == null) {
+                            counts.put(key, 1);
+                        } else {
+                            counts.put(key, i + 1);
+                        }
+                    }
+                }
+            }
+            Map.Entry<String, Integer>[] sorted = counts.entrySet().toArray(
+                    new Map.Entry[counts.size()]);
+            Arrays.sort(sorted, (Map.Entry<String, Integer> a, Map.Entry<String, Integer> b)
+                    -> b.getValue().compareTo(a.getValue()));
+            Log.v(Binder.TAG, "BinderProxy descriptor histogram (top ten):");
+            int printLength = Math.min(10, sorted.length);
+            for (int i = 0; i < printLength; i++) {
+                Log.v(Binder.TAG, " #" + (i + 1) + ": " + sorted[i].getKey() + " x"
+                        + sorted[i].getValue());
             }
         }
 

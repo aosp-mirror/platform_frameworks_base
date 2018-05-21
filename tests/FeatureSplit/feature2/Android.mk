@@ -20,6 +20,7 @@ include $(CLEAR_VARS)
 LOCAL_USE_AAPT2 := true
 LOCAL_SRC_FILES := $(call all-subdir-java-files)
 LOCAL_PACKAGE_NAME := FeatureSplit2
+LOCAL_SDK_VERSION := current
 LOCAL_MODULE_TAGS := tests
 
 LOCAL_APK_LIBRARIES := FeatureSplitBase

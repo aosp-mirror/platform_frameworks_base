@@ -28,6 +28,8 @@
 
 #include <android-base/macros.h>
 
+class FileDescriptorInfo;
+
 // Whitelist of open paths that the zygote is allowed to keep open.
 //
 // In addition to the paths listed in kPathWhitelist in file_utils.cpp, and
@@ -66,49 +68,6 @@ class FileDescriptorWhitelist {
   DISALLOW_COPY_AND_ASSIGN(FileDescriptorWhitelist);
 };
 
-// Keeps track of all relevant information (flags, offset etc.) of an
-// open zygote file descriptor.
-class FileDescriptorInfo {
- public:
-  // Create a FileDescriptorInfo for a given file descriptor. Returns
-  // |NULL| if an error occurred.
-  static FileDescriptorInfo* CreateFromFd(int fd);
-
-  // Checks whether the file descriptor associated with this object
-  // refers to the same description.
-  bool Restat() const;
-
-  bool ReopenOrDetach() const;
-
-  const int fd;
-  const struct stat stat;
-  const std::string file_path;
-  const int open_flags;
-  const int fd_flags;
-  const int fs_flags;
-  const off_t offset;
-  const bool is_sock;
-
- private:
-  FileDescriptorInfo(int fd);
-
-  FileDescriptorInfo(struct stat stat, const std::string& file_path, int fd, int open_flags,
-                     int fd_flags, int fs_flags, off_t offset);
-
-  // Returns the locally-bound name of the socket |fd|. Returns true
-  // iff. all of the following hold :
-  //
-  // - the socket's sa_family is AF_UNIX.
-  // - the length of the path is greater than zero (i.e, not an unnamed socket).
-  // - the first byte of the path isn't zero (i.e, not a socket with an abstract
-  //   address).
-  static bool GetSocketName(const int fd, std::string* result);
-
-  bool DetachSocket() const;
-
-  DISALLOW_COPY_AND_ASSIGN(FileDescriptorInfo);
-};
-
 // A FileDescriptorTable is a collection of FileDescriptorInfo objects
 // keyed by their FDs.
 class FileDescriptorTable {
@@ -116,19 +75,20 @@ class FileDescriptorTable {
   // Creates a new FileDescriptorTable. This function scans
   // /proc/self/fd for the list of open file descriptors and collects
   // information about them. Returns NULL if an error occurs.
-  static FileDescriptorTable* Create(const std::vector<int>& fds_to_ignore);
+  static FileDescriptorTable* Create(const std::vector<int>& fds_to_ignore,
+                                     std::string* error_msg);
 
-  bool Restat(const std::vector<int>& fds_to_ignore);
+  bool Restat(const std::vector<int>& fds_to_ignore, std::string* error_msg);
 
   // Reopens all file descriptors that are contained in the table. Returns true
   // if all descriptors were successfully re-opened or detached, and false if an
   // error occurred.
-  bool ReopenOrDetach();
+  bool ReopenOrDetach(std::string* error_msg);
 
  private:
   FileDescriptorTable(const std::unordered_map<int, FileDescriptorInfo*>& map);
 
-  bool RestatInternal(std::set<int>& open_fds);
+  bool RestatInternal(std::set<int>& open_fds, std::string* error_msg);
 
   static int ParseFd(dirent* e, int dir_fd);
 

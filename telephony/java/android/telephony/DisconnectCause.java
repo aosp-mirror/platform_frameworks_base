@@ -310,6 +310,13 @@ public class DisconnectCause {
      * {@hide}
      */
     public static final int DIAL_VIDEO_MODIFIED_TO_DIAL_VIDEO = 70;
+
+    /**
+     * The network has reported that an alternative emergency number has been dialed, but the user
+     * must exit airplane mode to place the call.
+     */
+    public static final int IMS_SIP_ALTERNATE_EMERGENCY_CALL = 71;
+
     //*********************************************************************************************
     // When adding a disconnect type:
     // 1) Update toString() with the newly added disconnect type.
@@ -462,6 +469,8 @@ public class DisconnectCause {
             return "EMERGENCY_PERM_FAILURE";
         case NORMAL_UNSPECIFIED:
             return "NORMAL_UNSPECIFIED";
+        case IMS_SIP_ALTERNATE_EMERGENCY_CALL:
+            return "IMS_SIP_ALTERNATE_EMERGENCY_CALL";
         default:
             return "INVALID: " + cause;
         }

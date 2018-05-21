@@ -42,6 +42,7 @@ import android.content.pm.PackageInstaller.SessionParams;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.ResolveInfo;
 import android.content.pm.VersionedPackage;
+import android.content.pm.dex.DexMetadataHelper;
 import android.content.res.AssetManager;
 import android.content.res.Resources;
 import android.net.Uri;
@@ -76,7 +77,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.WeakHashMap;
-import java.util.concurrent.SynchronousQueue;
+import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 
 class PackageManagerShellCommand extends ShellCommand {
@@ -1480,6 +1481,14 @@ class PackageManagerShellCommand extends ShellCommand {
             session = new PackageInstaller.Session(
                     mInterface.getPackageInstaller().openSession(sessionId));
 
+            // Sanity check that all .dm files match an apk.
+            // (The installer does not support standalone .dm files and will not process them.)
+            try {
+                DexMetadataHelper.validateDexPaths(session.getNames());
+            } catch (IllegalStateException | IOException e) {
+                pw.println("Warning [Could not validate the dex paths: " + e.getMessage() + "]");
+            }
+
             final LocalIntentReceiver receiver = new LocalIntentReceiver();
             session.commit(receiver.getIntentSender());
 
@@ -1741,7 +1750,7 @@ class PackageManagerShellCommand extends ShellCommand {
     }
 
     private static class LocalIntentReceiver {
-        private final SynchronousQueue<Intent> mResult = new SynchronousQueue<>();
+        private final LinkedBlockingQueue<Intent> mResult = new LinkedBlockingQueue<>();
 
         private IIntentSender.Stub mLocalSender = new IIntentSender.Stub() {
             @Override

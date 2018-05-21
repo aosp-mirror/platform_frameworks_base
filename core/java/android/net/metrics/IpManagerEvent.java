@@ -40,11 +40,12 @@ public final class IpManagerEvent implements Parcelable {
     public static final int ERROR_STARTING_IPV6                   = 5;
     public static final int ERROR_STARTING_IPREACHABILITYMONITOR  = 6;
     public static final int ERROR_INVALID_PROVISIONING            = 7;
+    public static final int ERROR_INTERFACE_NOT_FOUND             = 8;
 
     @IntDef(value = {
             PROVISIONING_OK, PROVISIONING_FAIL, COMPLETE_LIFECYCLE,
             ERROR_STARTING_IPV4, ERROR_STARTING_IPV6, ERROR_STARTING_IPREACHABILITYMONITOR,
-            ERROR_INVALID_PROVISIONING,
+            ERROR_INVALID_PROVISIONING, ERROR_INTERFACE_NOT_FOUND,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface EventType {}

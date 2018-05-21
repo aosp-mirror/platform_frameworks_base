@@ -129,14 +129,18 @@ public class A2dpProfile implements LocalBluetoothProfile {
 
     public boolean connect(BluetoothDevice device) {
         if (mService == null) return false;
-        List<BluetoothDevice> sinks = getConnectedDevices();
-        if (sinks != null) {
-            for (BluetoothDevice sink : sinks) {
-                if (sink.equals(device)) {
-                    Log.w(TAG, "Connecting to device " + device + " : disconnect skipped");
-                    continue;
+        int max_connected_devices = mLocalAdapter.getMaxConnectedAudioDevices();
+        if (max_connected_devices == 1) {
+            // Original behavior: disconnect currently connected device
+            List<BluetoothDevice> sinks = getConnectedDevices();
+            if (sinks != null) {
+                for (BluetoothDevice sink : sinks) {
+                    if (sink.equals(device)) {
+                        Log.w(TAG, "Connecting to device " + device + " : disconnect skipped");
+                        continue;
+                    }
+                    mService.disconnect(sink);
                 }
-                mService.disconnect(sink);
             }
         }
         return mService.connect(device);
@@ -156,6 +160,16 @@ public class A2dpProfile implements LocalBluetoothProfile {
             return BluetoothProfile.STATE_DISCONNECTED;
         }
         return mService.getConnectionState(device);
+    }
+
+    public boolean setActiveDevice(BluetoothDevice device) {
+        if (mService == null) return false;
+        return mService.setActiveDevice(device);
+    }
+
+    public BluetoothDevice getActiveDevice() {
+        if (mService == null) return null;
+        return mService.getActiveDevice();
     }
 
     public boolean isPreferred(BluetoothDevice device) {
@@ -181,8 +195,8 @@ public class A2dpProfile implements LocalBluetoothProfile {
     boolean isA2dpPlaying() {
         if (mService == null) return false;
         List<BluetoothDevice> sinks = mService.getConnectedDevices();
-        if (!sinks.isEmpty()) {
-            if (mService.isA2dpPlaying(sinks.get(0))) {
+        for (BluetoothDevice device : sinks) {
+            if (mService.isA2dpPlaying(device)) {
                 return true;
             }
         }
@@ -206,8 +220,8 @@ public class A2dpProfile implements LocalBluetoothProfile {
             return true;
         }
         BluetoothCodecConfig codecConfig = null;
-        if (mServiceWrapper.getCodecStatus() != null) {
-            codecConfig = mServiceWrapper.getCodecStatus().getCodecConfig();
+        if (mServiceWrapper.getCodecStatus(device) != null) {
+            codecConfig = mServiceWrapper.getCodecStatus(device).getCodecConfig();
         }
         if (codecConfig != null)  {
             return !codecConfig.isMandatoryCodec();
@@ -225,9 +239,9 @@ public class A2dpProfile implements LocalBluetoothProfile {
             return;
         }
         if (enabled) {
-            mService.enableOptionalCodecs();
+            mService.enableOptionalCodecs(device);
         } else {
-            mService.disableOptionalCodecs();
+            mService.disableOptionalCodecs(device);
         }
     }
 
@@ -240,8 +254,8 @@ public class A2dpProfile implements LocalBluetoothProfile {
         // We want to get the highest priority codec, since that's the one that will be used with
         // this device, and see if it is high-quality (ie non-mandatory).
         BluetoothCodecConfig[] selectable = null;
-        if (mServiceWrapper.getCodecStatus() != null) {
-            selectable = mServiceWrapper.getCodecStatus().getCodecsSelectableCapabilities();
+        if (mServiceWrapper.getCodecStatus(device) != null) {
+            selectable = mServiceWrapper.getCodecStatus(device).getCodecsSelectableCapabilities();
             // To get the highest priority, we sort in reverse.
             Arrays.sort(selectable,
                     (a, b) -> {

@@ -253,6 +253,13 @@ package android.net {
     field public static final int INVALID_SECURITY_PARAMETER_INDEX = 0; // 0x0
   }
 
+  public class TrafficStats {
+    method public static long getLoopbackRxBytes();
+    method public static long getLoopbackRxPackets();
+    method public static long getLoopbackTxBytes();
+    method public static long getLoopbackTxPackets();
+  }
+
 }
 
 package android.os {
@@ -419,32 +426,6 @@ package android.service.quicksettings {
 
 }
 
-package android.telecom {
-
-  public abstract class Connection extends android.telecom.Conferenceable {
-    method public void handleRttUpgradeResponse(android.telecom.Connection.RttTextStream);
-    method public void onStartRtt(android.telecom.Connection.RttTextStream);
-    method public void onStopRtt();
-    method public final void sendRemoteRttRequest();
-    method public final void sendRttInitiationFailure(int);
-    method public final void sendRttInitiationSuccess();
-    method public final void sendRttSessionRemotelyTerminated();
-    field public static final int PROPERTY_IS_RTT = 256; // 0x100
-  }
-
-  public static final class Connection.RttTextStream {
-    method public java.lang.String read() throws java.io.IOException;
-    method public java.lang.String readImmediately() throws java.io.IOException;
-    method public void write(java.lang.String) throws java.io.IOException;
-  }
-
-  public final class ConnectionRequest implements android.os.Parcelable {
-    method public android.telecom.Connection.RttTextStream getRttTextStream();
-    method public boolean isRequestingRtt();
-  }
-
-}
-
 package android.telephony {
 
   public class MbmsDownloadSession implements java.lang.AutoCloseable {
@@ -455,9 +436,23 @@ package android.telephony {
     field public static final java.lang.String MBMS_STREAMING_SERVICE_OVERRIDE_METADATA = "mbms-streaming-service-override";
   }
 
+  public class ServiceState implements android.os.Parcelable {
+    method public void setCdmaSystemAndNetworkId(int, int);
+  }
+
+  public class TelephonyManager {
+    method public int getCarrierIdListVersion();
+    method public void setCarrierTestOverride(java.lang.String, java.lang.String, java.lang.String, java.lang.String, java.lang.String, java.lang.String, java.lang.String);
+    field public static final int UNKNOWN_CARRIER_ID_LIST_VERSION = -1; // 0xffffffff
+  }
+
 }
 
 package android.telephony.mbms {
+
+  public static class DownloadRequest.Builder {
+    method public android.telephony.mbms.DownloadRequest.Builder setServiceId(java.lang.String);
+  }
 
   public final class FileInfo implements android.os.Parcelable {
     ctor public FileInfo(android.net.Uri, java.lang.String);
@@ -485,18 +480,20 @@ package android.telephony.mbms.vendor {
 
   public class MbmsDownloadServiceBase extends android.os.Binder {
     ctor public MbmsDownloadServiceBase();
+    method public int addProgressListener(android.telephony.mbms.DownloadRequest, android.telephony.mbms.DownloadProgressListener) throws android.os.RemoteException;
+    method public int addStatusListener(android.telephony.mbms.DownloadRequest, android.telephony.mbms.DownloadStatusListener) throws android.os.RemoteException;
     method public int cancelDownload(android.telephony.mbms.DownloadRequest) throws android.os.RemoteException;
     method public void dispose(int) throws android.os.RemoteException;
     method public int download(android.telephony.mbms.DownloadRequest) throws android.os.RemoteException;
-    method public int getDownloadStatus(android.telephony.mbms.DownloadRequest, android.telephony.mbms.FileInfo) throws android.os.RemoteException;
     method public int initialize(int, android.telephony.mbms.MbmsDownloadSessionCallback) throws android.os.RemoteException;
     method public java.util.List<android.telephony.mbms.DownloadRequest> listPendingDownloads(int) throws android.os.RemoteException;
     method public void onAppCallbackDied(int, int);
-    method public int registerStateCallback(android.telephony.mbms.DownloadRequest, android.telephony.mbms.DownloadStateCallback) throws android.os.RemoteException;
+    method public int removeProgressListener(android.telephony.mbms.DownloadRequest, android.telephony.mbms.DownloadProgressListener) throws android.os.RemoteException;
+    method public int removeStatusListener(android.telephony.mbms.DownloadRequest, android.telephony.mbms.DownloadStatusListener) throws android.os.RemoteException;
+    method public int requestDownloadState(android.telephony.mbms.DownloadRequest, android.telephony.mbms.FileInfo) throws android.os.RemoteException;
     method public int requestUpdateFileServices(int, java.util.List<java.lang.String>) throws android.os.RemoteException;
     method public int resetDownloadKnowledge(android.telephony.mbms.DownloadRequest) throws android.os.RemoteException;
     method public int setTempFileRootDirectory(int, java.lang.String) throws android.os.RemoteException;
-    method public int unregisterStateCallback(android.telephony.mbms.DownloadRequest, android.telephony.mbms.DownloadStateCallback) throws android.os.RemoteException;
   }
 
   public class MbmsStreamingServiceBase extends android.os.Binder {
@@ -738,8 +735,8 @@ package android.view {
   }
 
   public final class MotionEvent extends android.view.InputEvent implements android.os.Parcelable {
-    method public final void setActionButton(int);
-    method public final void setButtonState(int);
+    method public void setActionButton(int);
+    method public void setButtonState(int);
   }
 
   public class View implements android.view.accessibility.AccessibilityEventSource android.graphics.drawable.Drawable.Callback android.view.KeyEvent.Callback {

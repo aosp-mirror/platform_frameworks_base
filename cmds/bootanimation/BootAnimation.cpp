@@ -29,11 +29,11 @@
 #include <signal.h>
 #include <time.h>
 
+#include <cutils/atomic.h>
 #include <cutils/properties.h>
 
 #include <androidfw/AssetManager.h>
 #include <binder/IPCThreadState.h>
-#include <utils/Atomic.h>
 #include <utils/Errors.h>
 #include <utils/Log.h>
 #include <utils/SystemClock.h>

@@ -14,6 +14,7 @@ LOCAL_SRC_FILES += \
 LOCAL_JAVA_LIBRARIES := telephony-common ims-common bouncycastle conscrypt
 
 LOCAL_PACKAGE_NAME := Osu
+LOCAL_PRIVATE_PLATFORM_APIS := true
 LOCAL_CERTIFICATE := platform
 LOCAL_PRIVILEGED_MODULE := true
 

@@ -16,7 +16,11 @@
 
 package android.net.ip;
 
-import android.net.netlink.NetlinkConstants;
+import static android.net.netlink.NetlinkConstants.hexify;
+import static android.net.netlink.NetlinkConstants.RTM_DELNEIGH;
+import static android.net.netlink.NetlinkConstants.stringForNlMsgType;
+
+import android.net.MacAddress;
 import android.net.netlink.NetlinkErrorMessage;
 import android.net.netlink.NetlinkMessage;
 import android.net.netlink.NetlinkSocket;
@@ -92,37 +96,35 @@ public class IpNeighborMonitor extends PacketReader {
         final int ifindex;
         final InetAddress ip;
         final short nudState;
-        final byte[] linkLayerAddr;
+        final MacAddress macAddr;
 
         public NeighborEvent(long elapsedMs, short msgType, int ifindex, InetAddress ip,
-                short nudState, byte[] linkLayerAddr) {
+                short nudState, MacAddress macAddr) {
             this.elapsedMs = elapsedMs;
             this.msgType = msgType;
             this.ifindex = ifindex;
             this.ip = ip;
             this.nudState = nudState;
-            this.linkLayerAddr = linkLayerAddr;
+            this.macAddr = macAddr;
         }
 
         boolean isConnected() {
-            return (msgType != NetlinkConstants.RTM_DELNEIGH) &&
-                   StructNdMsg.isNudStateConnected(nudState);
+            return (msgType != RTM_DELNEIGH) && StructNdMsg.isNudStateConnected(nudState);
         }
 
         boolean isValid() {
-            return (msgType != NetlinkConstants.RTM_DELNEIGH) &&
-                   StructNdMsg.isNudStateValid(nudState);
+            return (msgType != RTM_DELNEIGH) && StructNdMsg.isNudStateValid(nudState);
         }
 
         @Override
         public String toString() {
             final StringJoiner j = new StringJoiner(",", "NeighborEvent{", "}");
             return j.add("@" + elapsedMs)
-                    .add(NetlinkConstants.stringForNlMsgType(msgType))
+                    .add(stringForNlMsgType(msgType))
                     .add("if=" + ifindex)
                     .add(ip.getHostAddress())
                     .add(StructNdMsg.stringForNudState(nudState))
-                    .add("[" + NetlinkConstants.hexify(linkLayerAddr) + "]")
+                    .add("[" + macAddr + "]")
                     .toString();
         }
     }
@@ -183,7 +185,7 @@ public class IpNeighborMonitor extends PacketReader {
             final NetlinkMessage nlMsg = NetlinkMessage.parse(byteBuffer);
             if (nlMsg == null || nlMsg.getHeader() == null) {
                 byteBuffer.position(position);
-                mLog.e("unparsable netlink msg: " + NetlinkConstants.hexify(byteBuffer));
+                mLog.e("unparsable netlink msg: " + hexify(byteBuffer));
                 break;
             }
 
@@ -217,12 +219,13 @@ public class IpNeighborMonitor extends PacketReader {
         final int ifindex = ndMsg.ndm_ifindex;
         final InetAddress destination = neighMsg.getDestination();
         final short nudState =
-                (msgType == NetlinkConstants.RTM_DELNEIGH)
+                (msgType == RTM_DELNEIGH)
                 ? StructNdMsg.NUD_NONE
                 : ndMsg.ndm_state;
 
         final NeighborEvent event = new NeighborEvent(
-                whenMs, msgType, ifindex, destination, nudState, neighMsg.getLinkLayerAddress());
+                whenMs, msgType, ifindex, destination, nudState,
+                getMacAddress(neighMsg.getLinkLayerAddress()));
 
         if (VDBG) {
             Log.d(TAG, neighMsg.toString());
@@ -232,5 +235,17 @@ public class IpNeighborMonitor extends PacketReader {
         }
 
         mConsumer.accept(event);
+    }
+
+    private static MacAddress getMacAddress(byte[] linkLayerAddress) {
+        if (linkLayerAddress != null) {
+            try {
+                return MacAddress.fromBytes(linkLayerAddress);
+            } catch (IllegalArgumentException e) {
+                Log.e(TAG, "Failed to parse link-layer address: " + hexify(linkLayerAddress));
+            }
+        }
+
+        return null;
     }
 }

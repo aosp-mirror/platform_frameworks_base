@@ -16,6 +16,7 @@
 
 package android.telephony;
 
+import android.annotation.Nullable;
 import android.os.Binder;
 import android.os.Parcel;
 import android.content.res.Resources;
@@ -197,7 +198,10 @@ public class SmsMessage {
      */
     public static SmsMessage createFromPdu(byte[] pdu, String format) {
         SmsMessageBase wrappedMessage;
-
+        if (pdu == null) {
+            Rlog.i(LOG_TAG, "createFromPdu(): pdu is null");
+            return null;
+        }
         if (SmsConstants.FORMAT_3GPP2.equals(format)) {
             wrappedMessage = com.android.internal.telephony.cdma.SmsMessage.createFromPdu(pdu);
         } else if (SmsConstants.FORMAT_3GPP.equals(format)) {
@@ -264,6 +268,31 @@ public class SmsMessage {
             Rlog.e(LOG_TAG, "createFromEfRecord(): wrappedMessage is null");
             return null;
         }
+    }
+
+    /**
+     * Create an SmsMessage from an SMS EF record.
+     *
+     * @param index Index of SMS record. This should be index in ArrayList
+     *              returned by SmsManager.getAllMessagesFromSim + 1.
+     * @param data Record data.
+     * @param subId Subscription Id of the SMS
+     * @return An SmsMessage representing the record.
+     *
+     * @hide
+     */
+    public static SmsMessage createFromEfRecord(int index, byte[] data, int subId) {
+        SmsMessageBase wrappedMessage;
+
+        if (isCdmaVoice(subId)) {
+            wrappedMessage = com.android.internal.telephony.cdma.SmsMessage.createFromEfRecord(
+                    index, data);
+        } else {
+            wrappedMessage = com.android.internal.telephony.gsm.SmsMessage.createFromEfRecord(
+                    index, data);
+        }
+
+        return wrappedMessage != null ? new SmsMessage(wrappedMessage) : null;
     }
 
     /**
@@ -534,8 +563,16 @@ public class SmsMessage {
 
     /**
      * Returns the originating address (sender) of this SMS message in String
-     * form or null if unavailable
+     * form or null if unavailable.
+     *
+     * <p>If the address is a GSM-formatted address, it will be in a format specified by 3GPP
+     * 23.040 Sec 9.1.2.5. If it is a CDMA address, it will be a format specified by 3GPP2
+     * C.S005-D Table 2.7.1.3.2.4-2. The choice of format is carrier-specific, so callers of the
+     * should be careful to avoid assumptions about the returned content.
+     *
+     * @return a String representation of the address; null if unavailable.
      */
+    @Nullable
     public String getOriginatingAddress() {
         return mWrappedSmsMessage.getOriginatingAddress();
     }
@@ -818,6 +855,7 @@ public class SmsMessage {
          int activePhone = TelephonyManager.getDefault().getCurrentPhoneType(subId);
          return (PHONE_TYPE_CDMA == activePhone);
    }
+
     /**
      * Decide if the carrier supports long SMS.
      * {@hide}

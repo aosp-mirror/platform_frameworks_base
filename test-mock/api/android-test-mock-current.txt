@@ -1,0 +1,302 @@
+package android.test.mock {
+
+  public deprecated class MockAccountManager {
+    method public static android.accounts.AccountManager newMockAccountManager(android.content.Context);
+  }
+
+  public deprecated class MockApplication extends android.app.Application {
+    ctor public MockApplication();
+  }
+
+  public class MockContentProvider extends android.content.ContentProvider {
+    ctor protected MockContentProvider();
+    ctor public MockContentProvider(android.content.Context);
+    ctor public MockContentProvider(android.content.Context, java.lang.String, java.lang.String, android.content.pm.PathPermission[]);
+    method public android.content.ContentProviderResult[] applyBatch(java.util.ArrayList<android.content.ContentProviderOperation>);
+    method public static deprecated void attachInfoForTesting(android.content.ContentProvider, android.content.Context, android.content.pm.ProviderInfo);
+    method public int delete(android.net.Uri, java.lang.String, java.lang.String[]);
+    method public java.lang.String getType(android.net.Uri);
+    method public android.net.Uri insert(android.net.Uri, android.content.ContentValues);
+    method public boolean onCreate();
+    method public android.content.res.AssetFileDescriptor openTypedAssetFile(android.net.Uri, java.lang.String, android.os.Bundle);
+    method public android.database.Cursor query(android.net.Uri, java.lang.String[], java.lang.String, java.lang.String[], java.lang.String);
+    method public int update(android.net.Uri, android.content.ContentValues, java.lang.String, java.lang.String[]);
+  }
+
+  public class MockContentResolver extends android.content.ContentResolver {
+    ctor public MockContentResolver();
+    ctor public MockContentResolver(android.content.Context);
+    method public void addProvider(java.lang.String, android.content.ContentProvider);
+  }
+
+  public class MockContext extends android.content.Context {
+    ctor public MockContext();
+    method public boolean bindService(android.content.Intent, android.content.ServiceConnection, int);
+    method public int checkCallingOrSelfPermission(java.lang.String);
+    method public int checkCallingOrSelfUriPermission(android.net.Uri, int);
+    method public int checkCallingPermission(java.lang.String);
+    method public int checkCallingUriPermission(android.net.Uri, int);
+    method public int checkPermission(java.lang.String, int, int);
+    method public int checkSelfPermission(java.lang.String);
+    method public int checkUriPermission(android.net.Uri, int, int, int);
+    method public int checkUriPermission(android.net.Uri, java.lang.String, java.lang.String, int, int, int);
+    method public void clearWallpaper();
+    method public android.content.Context createConfigurationContext(android.content.res.Configuration);
+    method public android.content.Context createContextForSplit(java.lang.String) throws android.content.pm.PackageManager.NameNotFoundException;
+    method public android.content.Context createDeviceProtectedStorageContext();
+    method public android.content.Context createDisplayContext(android.view.Display);
+    method public android.content.Context createPackageContext(java.lang.String, int) throws android.content.pm.PackageManager.NameNotFoundException;
+    method public java.lang.String[] databaseList();
+    method public boolean deleteDatabase(java.lang.String);
+    method public boolean deleteFile(java.lang.String);
+    method public boolean deleteSharedPreferences(java.lang.String);
+    method public void enforceCallingOrSelfPermission(java.lang.String, java.lang.String);
+    method public void enforceCallingOrSelfUriPermission(android.net.Uri, int, java.lang.String);
+    method public void enforceCallingPermission(java.lang.String, java.lang.String);
+    method public void enforceCallingUriPermission(android.net.Uri, int, java.lang.String);
+    method public void enforcePermission(java.lang.String, int, int, java.lang.String);
+    method public void enforceUriPermission(android.net.Uri, int, int, int, java.lang.String);
+    method public void enforceUriPermission(android.net.Uri, java.lang.String, java.lang.String, int, int, int, java.lang.String);
+    method public java.lang.String[] fileList();
+    method public android.content.Context getApplicationContext();
+    method public android.content.pm.ApplicationInfo getApplicationInfo();
+    method public android.content.res.AssetManager getAssets();
+    method public java.io.File getCacheDir();
+    method public java.lang.ClassLoader getClassLoader();
+    method public java.io.File getCodeCacheDir();
+    method public android.content.ContentResolver getContentResolver();
+    method public java.io.File getDataDir();
+    method public java.io.File getDatabasePath(java.lang.String);
+    method public java.io.File getDir(java.lang.String, int);
+    method public java.io.File getExternalCacheDir();
+    method public java.io.File[] getExternalCacheDirs();
+    method public java.io.File getExternalFilesDir(java.lang.String);
+    method public java.io.File[] getExternalFilesDirs(java.lang.String);
+    method public java.io.File[] getExternalMediaDirs();
+    method public java.io.File getFileStreamPath(java.lang.String);
+    method public java.io.File getFilesDir();
+    method public android.os.Looper getMainLooper();
+    method public java.io.File getNoBackupFilesDir();
+    method public java.io.File getObbDir();
+    method public java.io.File[] getObbDirs();
+    method public java.lang.String getPackageCodePath();
+    method public android.content.pm.PackageManager getPackageManager();
+    method public java.lang.String getPackageName();
+    method public java.lang.String getPackageResourcePath();
+    method public android.content.res.Resources getResources();
+    method public android.content.SharedPreferences getSharedPreferences(java.lang.String, int);
+    method public java.lang.Object getSystemService(java.lang.String);
+    method public java.lang.String getSystemServiceName(java.lang.Class<?>);
+    method public android.content.res.Resources.Theme getTheme();
+    method public android.graphics.drawable.Drawable getWallpaper();
+    method public int getWallpaperDesiredMinimumHeight();
+    method public int getWallpaperDesiredMinimumWidth();
+    method public void grantUriPermission(java.lang.String, android.net.Uri, int);
+    method public boolean isDeviceProtectedStorage();
+    method public boolean moveDatabaseFrom(android.content.Context, java.lang.String);
+    method public boolean moveSharedPreferencesFrom(android.content.Context, java.lang.String);
+    method public java.io.FileInputStream openFileInput(java.lang.String) throws java.io.FileNotFoundException;
+    method public java.io.FileOutputStream openFileOutput(java.lang.String, int) throws java.io.FileNotFoundException;
+    method public android.database.sqlite.SQLiteDatabase openOrCreateDatabase(java.lang.String, int, android.database.sqlite.SQLiteDatabase.CursorFactory);
+    method public android.database.sqlite.SQLiteDatabase openOrCreateDatabase(java.lang.String, int, android.database.sqlite.SQLiteDatabase.CursorFactory, android.database.DatabaseErrorHandler);
+    method public android.graphics.drawable.Drawable peekWallpaper();
+    method public android.content.Intent registerReceiver(android.content.BroadcastReceiver, android.content.IntentFilter);
+    method public android.content.Intent registerReceiver(android.content.BroadcastReceiver, android.content.IntentFilter, int);
+    method public android.content.Intent registerReceiver(android.content.BroadcastReceiver, android.content.IntentFilter, java.lang.String, android.os.Handler);
+    method public android.content.Intent registerReceiver(android.content.BroadcastReceiver, android.content.IntentFilter, java.lang.String, android.os.Handler, int);
+    method public void removeStickyBroadcast(android.content.Intent);
+    method public void removeStickyBroadcastAsUser(android.content.Intent, android.os.UserHandle);
+    method public void revokeUriPermission(android.net.Uri, int);
+    method public void revokeUriPermission(java.lang.String, android.net.Uri, int);
+    method public void sendBroadcast(android.content.Intent);
+    method public void sendBroadcast(android.content.Intent, java.lang.String);
+    method public void sendBroadcastAsUser(android.content.Intent, android.os.UserHandle);
+    method public void sendBroadcastAsUser(android.content.Intent, android.os.UserHandle, java.lang.String);
+    method public void sendOrderedBroadcast(android.content.Intent, java.lang.String);
+    method public void sendOrderedBroadcast(android.content.Intent, java.lang.String, android.content.BroadcastReceiver, android.os.Handler, int, java.lang.String, android.os.Bundle);
+    method public void sendOrderedBroadcastAsUser(android.content.Intent, android.os.UserHandle, java.lang.String, android.content.BroadcastReceiver, android.os.Handler, int, java.lang.String, android.os.Bundle);
+    method public void sendStickyBroadcast(android.content.Intent);
+    method public void sendStickyBroadcastAsUser(android.content.Intent, android.os.UserHandle);
+    method public void sendStickyOrderedBroadcast(android.content.Intent, android.content.BroadcastReceiver, android.os.Handler, int, java.lang.String, android.os.Bundle);
+    method public void sendStickyOrderedBroadcastAsUser(android.content.Intent, android.os.UserHandle, android.content.BroadcastReceiver, android.os.Handler, int, java.lang.String, android.os.Bundle);
+    method public void setTheme(int);
+    method public void setWallpaper(android.graphics.Bitmap) throws java.io.IOException;
+    method public void setWallpaper(java.io.InputStream) throws java.io.IOException;
+    method public void startActivities(android.content.Intent[]);
+    method public void startActivities(android.content.Intent[], android.os.Bundle);
+    method public void startActivity(android.content.Intent);
+    method public void startActivity(android.content.Intent, android.os.Bundle);
+    method public android.content.ComponentName startForegroundService(android.content.Intent);
+    method public boolean startInstrumentation(android.content.ComponentName, java.lang.String, android.os.Bundle);
+    method public void startIntentSender(android.content.IntentSender, android.content.Intent, int, int, int) throws android.content.IntentSender.SendIntentException;
+    method public void startIntentSender(android.content.IntentSender, android.content.Intent, int, int, int, android.os.Bundle) throws android.content.IntentSender.SendIntentException;
+    method public android.content.ComponentName startService(android.content.Intent);
+    method public boolean stopService(android.content.Intent);
+    method public void unbindService(android.content.ServiceConnection);
+    method public void unregisterReceiver(android.content.BroadcastReceiver);
+  }
+
+  public deprecated class MockCursor implements android.database.Cursor {
+    ctor public MockCursor();
+    method public void close();
+    method public void copyStringToBuffer(int, android.database.CharArrayBuffer);
+    method public deprecated void deactivate();
+    method public byte[] getBlob(int);
+    method public int getColumnCount();
+    method public int getColumnIndex(java.lang.String);
+    method public int getColumnIndexOrThrow(java.lang.String);
+    method public java.lang.String getColumnName(int);
+    method public java.lang.String[] getColumnNames();
+    method public int getCount();
+    method public double getDouble(int);
+    method public android.os.Bundle getExtras();
+    method public float getFloat(int);
+    method public int getInt(int);
+    method public long getLong(int);
+    method public android.net.Uri getNotificationUri();
+    method public int getPosition();
+    method public short getShort(int);
+    method public java.lang.String getString(int);
+    method public int getType(int);
+    method public boolean getWantsAllOnMoveCalls();
+    method public boolean isAfterLast();
+    method public boolean isBeforeFirst();
+    method public boolean isClosed();
+    method public boolean isFirst();
+    method public boolean isLast();
+    method public boolean isNull(int);
+    method public boolean move(int);
+    method public boolean moveToFirst();
+    method public boolean moveToLast();
+    method public boolean moveToNext();
+    method public boolean moveToPosition(int);
+    method public boolean moveToPrevious();
+    method public void registerContentObserver(android.database.ContentObserver);
+    method public void registerDataSetObserver(android.database.DataSetObserver);
+    method public deprecated boolean requery();
+    method public android.os.Bundle respond(android.os.Bundle);
+    method public void setExtras(android.os.Bundle);
+    method public void setNotificationUri(android.content.ContentResolver, android.net.Uri);
+    method public void unregisterContentObserver(android.database.ContentObserver);
+    method public void unregisterDataSetObserver(android.database.DataSetObserver);
+  }
+
+  public deprecated class MockDialogInterface implements android.content.DialogInterface {
+    ctor public MockDialogInterface();
+    method public void cancel();
+    method public void dismiss();
+  }
+
+  public deprecated class MockPackageManager extends android.content.pm.PackageManager {
+    ctor public MockPackageManager();
+    method public void addPackageToPreferred(java.lang.String);
+    method public boolean addPermission(android.content.pm.PermissionInfo);
+    method public boolean addPermissionAsync(android.content.pm.PermissionInfo);
+    method public void addPreferredActivity(android.content.IntentFilter, int, android.content.ComponentName[], android.content.ComponentName);
+    method public boolean canRequestPackageInstalls();
+    method public java.lang.String[] canonicalToCurrentPackageNames(java.lang.String[]);
+    method public int checkPermission(java.lang.String, java.lang.String);
+    method public int checkSignatures(java.lang.String, java.lang.String);
+    method public int checkSignatures(int, int);
+    method public void clearInstantAppCookie();
+    method public void clearPackagePreferredActivities(java.lang.String);
+    method public java.lang.String[] currentToCanonicalPackageNames(java.lang.String[]);
+    method public void extendVerificationTimeout(int, int, long);
+    method public android.graphics.drawable.Drawable getActivityBanner(android.content.ComponentName) throws android.content.pm.PackageManager.NameNotFoundException;
+    method public android.graphics.drawable.Drawable getActivityBanner(android.content.Intent) throws android.content.pm.PackageManager.NameNotFoundException;
+    method public android.graphics.drawable.Drawable getActivityIcon(android.content.ComponentName) throws android.content.pm.PackageManager.NameNotFoundException;
+    method public android.graphics.drawable.Drawable getActivityIcon(android.content.Intent) throws android.content.pm.PackageManager.NameNotFoundException;
+    method public android.content.pm.ActivityInfo getActivityInfo(android.content.ComponentName, int) throws android.content.pm.PackageManager.NameNotFoundException;
+    method public android.graphics.drawable.Drawable getActivityLogo(android.content.ComponentName) throws android.content.pm.PackageManager.NameNotFoundException;
+    method public android.graphics.drawable.Drawable getActivityLogo(android.content.Intent) throws android.content.pm.PackageManager.NameNotFoundException;
+    method public java.util.List<android.content.IntentFilter> getAllIntentFilters(java.lang.String);
+    method public java.util.List<android.content.pm.PermissionGroupInfo> getAllPermissionGroups(int);
+    method public android.graphics.drawable.Drawable getApplicationBanner(android.content.pm.ApplicationInfo);
+    method public android.graphics.drawable.Drawable getApplicationBanner(java.lang.String) throws android.content.pm.PackageManager.NameNotFoundException;
+    method public int getApplicationEnabledSetting(java.lang.String);
+    method public android.graphics.drawable.Drawable getApplicationIcon(android.content.pm.ApplicationInfo);
+    method public android.graphics.drawable.Drawable getApplicationIcon(java.lang.String) throws android.content.pm.PackageManager.NameNotFoundException;
+    method public android.content.pm.ApplicationInfo getApplicationInfo(java.lang.String, int) throws android.content.pm.PackageManager.NameNotFoundException;
+    method public java.lang.CharSequence getApplicationLabel(android.content.pm.ApplicationInfo);
+    method public android.graphics.drawable.Drawable getApplicationLogo(android.content.pm.ApplicationInfo);
+    method public android.graphics.drawable.Drawable getApplicationLogo(java.lang.String) throws android.content.pm.PackageManager.NameNotFoundException;
+    method public android.content.pm.ChangedPackages getChangedPackages(int);
+    method public int getComponentEnabledSetting(android.content.ComponentName);
+    method public android.graphics.drawable.Drawable getDefaultActivityIcon();
+    method public android.graphics.drawable.Drawable getDrawable(java.lang.String, int, android.content.pm.ApplicationInfo);
+    method public java.util.List<android.content.pm.ApplicationInfo> getInstalledApplications(int);
+    method public java.util.List<android.content.pm.PackageInfo> getInstalledPackages(int);
+    method public java.lang.String getInstallerPackageName(java.lang.String);
+    method public byte[] getInstantAppCookie();
+    method public int getInstantAppCookieMaxBytes();
+    method public android.content.pm.InstrumentationInfo getInstrumentationInfo(android.content.ComponentName, int) throws android.content.pm.PackageManager.NameNotFoundException;
+    method public android.content.Intent getLaunchIntentForPackage(java.lang.String);
+    method public android.content.Intent getLeanbackLaunchIntentForPackage(java.lang.String);
+    method public java.lang.String getNameForUid(int);
+    method public int[] getPackageGids(java.lang.String) throws android.content.pm.PackageManager.NameNotFoundException;
+    method public int[] getPackageGids(java.lang.String, int) throws android.content.pm.PackageManager.NameNotFoundException;
+    method public android.content.pm.PackageInfo getPackageInfo(java.lang.String, int) throws android.content.pm.PackageManager.NameNotFoundException;
+    method public android.content.pm.PackageInfo getPackageInfo(android.content.pm.VersionedPackage, int) throws android.content.pm.PackageManager.NameNotFoundException;
+    method public android.content.pm.PackageInstaller getPackageInstaller();
+    method public int getPackageUid(java.lang.String, int) throws android.content.pm.PackageManager.NameNotFoundException;
+    method public java.lang.String[] getPackagesForUid(int);
+    method public java.util.List<android.content.pm.PackageInfo> getPackagesHoldingPermissions(java.lang.String[], int);
+    method public android.content.pm.PermissionGroupInfo getPermissionGroupInfo(java.lang.String, int) throws android.content.pm.PackageManager.NameNotFoundException;
+    method public android.content.pm.PermissionInfo getPermissionInfo(java.lang.String, int) throws android.content.pm.PackageManager.NameNotFoundException;
+    method public int getPreferredActivities(java.util.List<android.content.IntentFilter>, java.util.List<android.content.ComponentName>, java.lang.String);
+    method public java.util.List<android.content.pm.PackageInfo> getPreferredPackages(int);
+    method public android.content.pm.ProviderInfo getProviderInfo(android.content.ComponentName, int) throws android.content.pm.PackageManager.NameNotFoundException;
+    method public android.content.pm.ActivityInfo getReceiverInfo(android.content.ComponentName, int) throws android.content.pm.PackageManager.NameNotFoundException;
+    method public android.content.res.Resources getResourcesForActivity(android.content.ComponentName) throws android.content.pm.PackageManager.NameNotFoundException;
+    method public android.content.res.Resources getResourcesForApplication(android.content.pm.ApplicationInfo);
+    method public android.content.res.Resources getResourcesForApplication(java.lang.String) throws android.content.pm.PackageManager.NameNotFoundException;
+    method public android.content.pm.ServiceInfo getServiceInfo(android.content.ComponentName, int) throws android.content.pm.PackageManager.NameNotFoundException;
+    method public java.util.List<android.content.pm.SharedLibraryInfo> getSharedLibraries(int);
+    method public android.content.pm.FeatureInfo[] getSystemAvailableFeatures();
+    method public java.lang.String[] getSystemSharedLibraryNames();
+    method public java.lang.CharSequence getText(java.lang.String, int, android.content.pm.ApplicationInfo);
+    method public android.graphics.drawable.Drawable getUserBadgedDrawableForDensity(android.graphics.drawable.Drawable, android.os.UserHandle, android.graphics.Rect, int);
+    method public android.graphics.drawable.Drawable getUserBadgedIcon(android.graphics.drawable.Drawable, android.os.UserHandle);
+    method public java.lang.CharSequence getUserBadgedLabel(java.lang.CharSequence, android.os.UserHandle);
+    method public android.content.res.XmlResourceParser getXml(java.lang.String, int, android.content.pm.ApplicationInfo);
+    method public boolean hasSystemFeature(java.lang.String);
+    method public boolean hasSystemFeature(java.lang.String, int);
+    method public boolean isInstantApp();
+    method public boolean isInstantApp(java.lang.String);
+    method public boolean isPermissionRevokedByPolicy(java.lang.String, java.lang.String);
+    method public boolean isSafeMode();
+    method public java.util.List<android.content.pm.ResolveInfo> queryBroadcastReceivers(android.content.Intent, int);
+    method public java.util.List<android.content.pm.ProviderInfo> queryContentProviders(java.lang.String, int, int);
+    method public java.util.List<android.content.pm.InstrumentationInfo> queryInstrumentation(java.lang.String, int);
+    method public java.util.List<android.content.pm.ResolveInfo> queryIntentActivities(android.content.Intent, int);
+    method public java.util.List<android.content.pm.ResolveInfo> queryIntentActivityOptions(android.content.ComponentName, android.content.Intent[], android.content.Intent, int);
+    method public java.util.List<android.content.pm.ResolveInfo> queryIntentContentProviders(android.content.Intent, int);
+    method public java.util.List<android.content.pm.ResolveInfo> queryIntentServices(android.content.Intent, int);
+    method public java.util.List<android.content.pm.PermissionInfo> queryPermissionsByGroup(java.lang.String, int) throws android.content.pm.PackageManager.NameNotFoundException;
+    method public void removePackageFromPreferred(java.lang.String);
+    method public void removePermission(java.lang.String);
+    method public android.content.pm.ResolveInfo resolveActivity(android.content.Intent, int);
+    method public android.content.pm.ProviderInfo resolveContentProvider(java.lang.String, int);
+    method public android.content.pm.ResolveInfo resolveService(android.content.Intent, int);
+    method public void setApplicationCategoryHint(java.lang.String, int);
+    method public void setApplicationEnabledSetting(java.lang.String, int, int);
+    method public void setComponentEnabledSetting(android.content.ComponentName, int, int);
+    method public void setInstallerPackageName(java.lang.String, java.lang.String);
+    method public void updateInstantAppCookie(byte[]);
+    method public void verifyPendingInstall(int, int);
+  }
+
+  public deprecated class MockResources extends android.content.res.Resources {
+    ctor public MockResources();
+    method public int getColor(int) throws android.content.res.Resources.NotFoundException;
+    method public android.content.res.ColorStateList getColorStateList(int) throws android.content.res.Resources.NotFoundException;
+    method public android.graphics.drawable.Drawable getDrawable(int) throws android.content.res.Resources.NotFoundException;
+    method public void updateConfiguration(android.content.res.Configuration, android.util.DisplayMetrics);
+  }
+
+  public deprecated class MockService {
+    method public static <T extends android.app.Service> void attachForTesting(android.app.Service, android.content.Context, java.lang.String, android.app.Application);
+  }
+
+}
+

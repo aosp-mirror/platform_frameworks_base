@@ -64,6 +64,8 @@ message NetworkIdentityProto {
     bool roaming = 4;
 
     bool metered = 5;
+
+    bool default_network = 6;
 }
 
 // Corresponds to NetworkStatsRecorder.

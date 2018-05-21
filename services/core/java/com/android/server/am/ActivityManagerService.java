@@ -63,6 +63,7 @@ import static android.os.Process.ROOT_UID;
 import static android.os.Process.SCHED_FIFO;
 import static android.os.Process.SCHED_OTHER;
 import static android.os.Process.SCHED_RESET_ON_FORK;
+import static android.os.Process.SE_UID;
 import static android.os.Process.SHELL_UID;
 import static android.os.Process.SIGNAL_QUIT;
 import static android.os.Process.SIGNAL_USR1;
@@ -200,6 +201,7 @@ import android.app.ActivityManager.StackInfo;
 import android.app.ActivityManager.TaskSnapshot;
 import android.app.ActivityManager.TaskThumbnailInfo;
 import android.app.ActivityManagerInternal;
+import android.app.ActivityManagerInternal.ScreenObserver;
 import android.app.ActivityManagerInternal.SleepToken;
 import android.app.ActivityOptions;
 import android.app.ActivityThread;
@@ -255,6 +257,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
+import android.content.pm.ApplicationInfo.HiddenApiEnforcementPolicy;
 import android.content.pm.ConfigurationInfo;
 import android.content.pm.IPackageDataObserver;
 import android.content.pm.IPackageManager;
@@ -530,6 +533,10 @@ public class ActivityManagerService extends IActivityManager.Stub
 
     // How long we wait until we timeout on key dispatching during instrumentation.
     static final int INSTRUMENTATION_KEY_DISPATCHING_TIMEOUT = 60*1000;
+
+    // Disable hidden API checks for the newly started instrumentation.
+    // Must be kept in sync with Am.
+    private static final int INSTRUMENTATION_FLAG_DISABLE_HIDDEN_API_CHECKS = 1 << 0;
 
     // How long to wait in getAssistContextExtras for the activity and foreground services
     // to respond with the result.
@@ -1492,6 +1499,14 @@ public class ActivityManagerService extends IActivityManager.Stub
     String mProfileApp = null;
     ProcessRecord mProfileProc = null;
     ProfilerInfo mProfilerInfo = null;
+
+    /**
+     * Stores a map of process name -> agent string. When a process is started and mAgentAppMap
+     * is not null, this map is checked and the mapped agent installed during bind-time. Note:
+     * A non-null agent in mProfileInfo overrides this.
+     */
+    private @Nullable Map<String, String> mAppAgentMap = null;
+
     int mProfileType = 0;
     final ProcessMap<Pair<Long, String>> mMemWatchProcesses = new ProcessMap<>();
     String mMemWatchDumpProcName;
@@ -1547,6 +1562,8 @@ public class ActivityManagerService extends IActivityManager.Stub
             }
         }
     }
+
+    final List<ScreenObserver> mScreenObservers = new ArrayList<>();
 
     final RemoteCallbackList<IProcessObserver> mProcessObservers = new RemoteCallbackList<>();
     ProcessChangeItem[] mActiveProcessChanges = new ProcessChangeItem[5];
@@ -1689,6 +1706,8 @@ public class ActivityManagerService extends IActivityManager.Stub
     static final int PUSH_TEMP_WHITELIST_UI_MSG = 68;
     static final int SERVICE_FOREGROUND_CRASH_MSG = 69;
     static final int DISPATCH_OOM_ADJ_OBSERVER_MSG = 70;
+    static final int DISPATCH_SCREEN_AWAKE_MSG = 71;
+    static final int DISPATCH_SCREEN_KEYGUARD_MSG = 72;
     static final int START_USER_SWITCH_FG_MSG = 712;
     static final int NOTIFY_VR_KEYGUARD_MSG = 74;
 
@@ -1723,6 +1742,9 @@ public class ActivityManagerService extends IActivityManager.Stub
     final Handler mUiHandler;
 
     final ActivityManagerConstants mConstants;
+
+    // Encapsulates the global setting "hidden_api_blacklist_exemptions"
+    final HiddenApiBlacklist mHiddenApiBlacklist;
 
     PackageManagerInternal mPackageManagerInt;
 
@@ -2412,11 +2434,17 @@ public class ActivityManagerService extends IActivityManager.Stub
                     }
                 }
             } break;
-            case NOTIFY_VR_SLEEPING_MSG: {
-                notifyVrManagerOfSleepState(msg.arg1 != 0);
+            case DISPATCH_SCREEN_AWAKE_MSG: {
+                final boolean isAwake = msg.arg1 != 0;
+                for (int i = mScreenObservers.size() - 1; i >= 0; i--) {
+                    mScreenObservers.get(i).onAwakeStateChanged(isAwake);
+                }
             } break;
-            case NOTIFY_VR_KEYGUARD_MSG: {
-                notifyVrManagerOfKeyguardState(msg.arg1 != 0);
+            case DISPATCH_SCREEN_KEYGUARD_MSG: {
+                final boolean isShowing = msg.arg1 != 0;
+                for (int i = mScreenObservers.size() - 1; i >= 0; i--) {
+                    mScreenObservers.get(i).onKeyguardStateChanged(isShowing);
+                }
             } break;
             case HANDLE_TRUST_STORAGE_UPDATE_MSG: {
                 synchronized (ActivityManagerService.this) {
@@ -2667,6 +2695,58 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
     }
 
+    /**
+     * Encapsulates the global setting "hidden_api_blacklist_exemptions", including tracking the
+     * latest value via a content observer.
+     */
+    static class HiddenApiBlacklist extends ContentObserver {
+
+        private final Context mContext;
+        private boolean mBlacklistDisabled;
+        private String mExemptionsStr;
+        private List<String> mExemptions = Collections.emptyList();
+
+        public HiddenApiBlacklist(Handler handler, Context context) {
+            super(handler);
+            mContext = context;
+        }
+
+        public void registerObserver() {
+            mContext.getContentResolver().registerContentObserver(
+                    Settings.Global.getUriFor(Settings.Global.HIDDEN_API_BLACKLIST_EXEMPTIONS),
+                    false,
+                    this);
+            update();
+        }
+
+        private void update() {
+            String exemptions = Settings.Global.getString(mContext.getContentResolver(),
+                    Settings.Global.HIDDEN_API_BLACKLIST_EXEMPTIONS);
+            if (!TextUtils.equals(exemptions, mExemptionsStr)) {
+                mExemptionsStr = exemptions;
+                if ("*".equals(exemptions)) {
+                    mBlacklistDisabled = true;
+                    mExemptions = Collections.emptyList();
+                } else {
+                    mBlacklistDisabled = false;
+                    mExemptions = TextUtils.isEmpty(exemptions)
+                            ? Collections.emptyList()
+                            : Arrays.asList(exemptions.split(","));
+                }
+                zygoteProcess.setApiBlacklistExemptions(mExemptions);
+            }
+
+        }
+
+        boolean isDisabled() {
+            return mBlacklistDisabled;
+        }
+
+        public void onChange(boolean selfChange) {
+            update();
+        }
+    }
+
     @VisibleForTesting
     public ActivityManagerService(Injector injector) {
         mInjector = injector;
@@ -2696,6 +2776,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         mUiHandler = injector.getUiHandler(null);
         mUserController = null;
         mVrController = null;
+        mHiddenApiBlacklist = null;
     }
 
     // Note: This method is invoked on the main thread but may need to attach various
@@ -2827,6 +2908,8 @@ public class ActivityManagerService extends IActivityManager.Stub
                 }
             }
         };
+
+        mHiddenApiBlacklist = new HiddenApiBlacklist(mHandler, mContext);
 
         Watchdog.getInstance().addMonitor(this);
         Watchdog.getInstance().addThread(mHandler);
@@ -3260,32 +3343,6 @@ public class ActivityManagerService extends IActivityManager.Stub
                 mHandler.obtainMessage(VR_MODE_CHANGE_MSG, 0, 0, r));
     }
 
-    private void sendNotifyVrManagerOfSleepState(boolean isSleeping) {
-        mHandler.sendMessage(
-                mHandler.obtainMessage(NOTIFY_VR_SLEEPING_MSG, isSleeping ? 1 : 0, 0));
-    }
-
-    private void notifyVrManagerOfSleepState(boolean isSleeping) {
-        final VrManagerInternal vrService = LocalServices.getService(VrManagerInternal.class);
-        if (vrService == null) {
-            return;
-        }
-        vrService.onSleepStateChanged(isSleeping);
-    }
-
-    private void sendNotifyVrManagerOfKeyguardState(boolean isShowing) {
-        mHandler.sendMessage(
-                mHandler.obtainMessage(NOTIFY_VR_KEYGUARD_MSG, isShowing ? 1 : 0, 0));
-    }
-
-    private void notifyVrManagerOfKeyguardState(boolean isShowing) {
-        final VrManagerInternal vrService = LocalServices.getService(VrManagerInternal.class);
-        if (vrService == null) {
-            return;
-        }
-        vrService.onKeyguardStateChanged(isShowing);
-    }
-
     final void showAskCompatModeDialogLocked(ActivityRecord r) {
         Message msg = Message.obtain();
         msg.what = SHOW_COMPAT_MODE_DIALOG_UI_MSG;
@@ -3634,6 +3691,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             info.className = entryPoint;
             info.packageName = "android";
             info.seInfoUser = SELinuxUtil.COMPLETE_STR;
+            info.targetSdkVersion = Build.VERSION.SDK_INT;
             ProcessRecord proc = startProcessLocked(processName, info /* info */,
                     false /* knownToBeDead */, 0 /* intentFlags */, ""  /* hostingType */,
                     null /* hostingName */, true /* allowWhileBooting */, true /* isolated */,
@@ -3776,6 +3834,13 @@ public class ActivityManagerService extends IActivityManager.Stub
 
     private final void startProcessLocked(ProcessRecord app, String hostingType,
             String hostingNameStr, String abiOverride, String entryPoint, String[] entryPointArgs) {
+        startProcessLocked(app, hostingType, hostingNameStr, false /* disableHiddenApiChecks */,
+                null /* abiOverride */, null /* entryPoint */, null /* entryPointArgs */);
+    }
+
+    private final void startProcessLocked(ProcessRecord app, String hostingType,
+            String hostingNameStr, boolean disableHiddenApiChecks, String abiOverride,
+            String entryPoint, String[] entryPointArgs) {
         long startTime = SystemClock.elapsedRealtime();
         if (app.pid > 0 && app.pid != MY_PID) {
             checkTime(startTime, "startProcess: removing from pids map");
@@ -3869,8 +3934,12 @@ public class ActivityManagerService extends IActivityManager.Stub
                 runtimeFlags |= Zygote.DEBUG_ENABLE_CHECKJNI;
             }
             String genDebugInfoProperty = SystemProperties.get("debug.generate-debug-info");
-            if ("true".equals(genDebugInfoProperty)) {
+            if ("1".equals(genDebugInfoProperty) || "true".equals(genDebugInfoProperty)) {
                 runtimeFlags |= Zygote.DEBUG_GENERATE_DEBUG_INFO;
+            }
+            String genMiniDebugInfoProperty = SystemProperties.get("dalvik.vm.minidebuginfo");
+            if ("1".equals(genMiniDebugInfoProperty) || "true".equals(genMiniDebugInfoProperty)) {
+                runtimeFlags |= Zygote.DEBUG_GENERATE_MINI_DEBUG_INFO;
             }
             if ("1".equals(SystemProperties.get("debug.jni.logging"))) {
                 runtimeFlags |= Zygote.DEBUG_ENABLE_JNI_LOGGING;
@@ -3890,6 +3959,16 @@ public class ActivityManagerService extends IActivityManager.Stub
                     !SystemProperties.getBoolean("pm.dexopt.priv-apps", true)) {
                 runtimeFlags |= Zygote.DISABLE_VERIFIER;
                 runtimeFlags |= Zygote.ONLY_USE_SYSTEM_OAT_FILES;
+            }
+
+            if (!disableHiddenApiChecks && !mHiddenApiBlacklist.isDisabled()) {
+                @HiddenApiEnforcementPolicy int policy =
+                        app.info.getHiddenApiEnforcementPolicy();
+                int policyBits = (policy << Zygote.API_ENFORCEMENT_POLICY_SHIFT);
+                if ((policyBits & Zygote.API_ENFORCEMENT_POLICY_MASK) != policyBits) {
+                    throw new IllegalStateException("Invalid API policy: " + policy);
+                }
+                runtimeFlags |= policyBits;
             }
 
             String invokeWith = null;
@@ -5531,57 +5610,20 @@ public class ActivityManagerService extends IActivityManager.Stub
             }
         }
 
-        boolean useTombstonedForJavaTraces = false;
-        File tracesFile;
+        final File tracesDir = new File("/data/anr");
+        // Each set of ANR traces is written to a separate file and dumpstate will process
+        // all such files and add them to a captured bug report if they're recent enough.
+        maybePruneOldTraces(tracesDir);
 
-        final String tracesDirProp = SystemProperties.get("dalvik.vm.stack-trace-dir", "");
-        if (tracesDirProp.isEmpty()) {
-            // When dalvik.vm.stack-trace-dir is not set, we are using the "old" trace
-            // dumping scheme. All traces are written to a global trace file (usually
-            // "/data/anr/traces.txt") so the code below must take care to unlink and recreate
-            // the file if requested.
-            //
-            // This mode of operation will be removed in the near future.
-
-
-            String globalTracesPath = SystemProperties.get("dalvik.vm.stack-trace-file", null);
-            if (globalTracesPath.isEmpty()) {
-                Slog.w(TAG, "dumpStackTraces: no trace path configured");
-                return null;
-            }
-
-            tracesFile = new File(globalTracesPath);
-            try {
-                if (clearTraces && tracesFile.exists()) {
-                    tracesFile.delete();
-                }
-
-                tracesFile.createNewFile();
-                FileUtils.setPermissions(globalTracesPath, 0666, -1, -1); // -rw-rw-rw-
-            } catch (IOException e) {
-                Slog.w(TAG, "Unable to prepare ANR traces file: " + tracesFile, e);
-                return null;
-            }
-        } else {
-            File tracesDir = new File(tracesDirProp);
-            // When dalvik.vm.stack-trace-dir is set, we use the "new" trace dumping scheme.
-            // Each set of ANR traces is written to a separate file and dumpstate will process
-            // all such files and add them to a captured bug report if they're recent enough.
-            maybePruneOldTraces(tracesDir);
-
-            // NOTE: We should consider creating the file in native code atomically once we've
-            // gotten rid of the old scheme of dumping and lot of the code that deals with paths
-            // can be removed.
-            tracesFile = createAnrDumpFile(tracesDir);
-            if (tracesFile == null) {
-                return null;
-            }
-
-            useTombstonedForJavaTraces = true;
+        // NOTE: We should consider creating the file in native code atomically once we've
+        // gotten rid of the old scheme of dumping and lot of the code that deals with paths
+        // can be removed.
+        File tracesFile = createAnrDumpFile(tracesDir);
+        if (tracesFile == null) {
+            return null;
         }
 
-        dumpStackTraces(tracesFile.getAbsolutePath(), firstPids, nativePids, extraPids,
-                useTombstonedForJavaTraces);
+        dumpStackTraces(tracesFile.getAbsolutePath(), firstPids, nativePids, extraPids);
         return tracesFile;
     }
 
@@ -5618,79 +5660,18 @@ public class ActivityManagerService extends IActivityManager.Stub
      * since it's the system_server that creates trace files for most ANRs.
      */
     private static void maybePruneOldTraces(File tracesDir) {
+        final File[] files = tracesDir.listFiles();
+        if (files == null) return;
+
+        final int max = SystemProperties.getInt("tombstoned.max_anr_count", 64);
         final long now = System.currentTimeMillis();
-        final File[] traceFiles = tracesDir.listFiles();
-
-        if (traceFiles != null) {
-            for (File file : traceFiles) {
-                if ((now - file.lastModified()) > DAY_IN_MILLIS)  {
-                    if (!file.delete()) {
-                        Slog.w(TAG, "Unable to prune stale trace file: " + file);
-                    }
+        Arrays.sort(files, Comparator.comparingLong(File::lastModified).reversed());
+        for (int i = 0; i < files.length; ++i) {
+            if (i > max || (now - files[i].lastModified()) > DAY_IN_MILLIS) {
+                if (!files[i].delete()) {
+                    Slog.w(TAG, "Unable to prune stale trace file: " + files[i]);
                 }
             }
-        }
-    }
-
-    /**
-     * Legacy code, do not use. Existing users will be deleted.
-     *
-     * @deprecated
-     */
-    @Deprecated
-    public static class DumpStackFileObserver extends FileObserver {
-        // Keep in sync with frameworks/native/cmds/dumpstate/utils.cpp
-        private static final int TRACE_DUMP_TIMEOUT_MS = 10000; // 10 seconds
-
-        private final String mTracesPath;
-        private boolean mClosed;
-
-        public DumpStackFileObserver(String tracesPath) {
-            super(tracesPath, FileObserver.CLOSE_WRITE);
-            mTracesPath = tracesPath;
-        }
-
-        @Override
-        public synchronized void onEvent(int event, String path) {
-            mClosed = true;
-            notify();
-        }
-
-        public long dumpWithTimeout(int pid, long timeout) {
-            sendSignal(pid, SIGNAL_QUIT);
-            final long start = SystemClock.elapsedRealtime();
-
-            final long waitTime = Math.min(timeout, TRACE_DUMP_TIMEOUT_MS);
-            synchronized (this) {
-                try {
-                    wait(waitTime); // Wait for traces file to be closed.
-                } catch (InterruptedException e) {
-                    Slog.wtf(TAG, e);
-                }
-            }
-
-            // This avoids a corner case of passing a negative time to the native
-            // trace in case we've already hit the overall timeout.
-            final long timeWaited = SystemClock.elapsedRealtime() - start;
-            if (timeWaited >= timeout) {
-                return timeWaited;
-            }
-
-            if (!mClosed) {
-                Slog.w(TAG, "Didn't see close of " + mTracesPath + " for pid " + pid +
-                       ". Attempting native stack collection.");
-
-                final long nativeDumpTimeoutMs = Math.min(
-                        NATIVE_DUMP_TIMEOUT_MS, timeout - timeWaited);
-
-                Debug.dumpNativeBacktraceToFileTimeout(pid, mTracesPath,
-                        (int) (nativeDumpTimeoutMs / 1000));
-            }
-
-            final long end = SystemClock.elapsedRealtime();
-            mClosed = false;
-
-            return (end - start);
         }
     }
 
@@ -5712,105 +5693,77 @@ public class ActivityManagerService extends IActivityManager.Stub
     }
 
     private static void dumpStackTraces(String tracesFile, ArrayList<Integer> firstPids,
-            ArrayList<Integer> nativePids, ArrayList<Integer> extraPids,
-            boolean useTombstonedForJavaTraces) {
+            ArrayList<Integer> nativePids, ArrayList<Integer> extraPids) {
 
         // We don't need any sort of inotify based monitoring when we're dumping traces via
         // tombstoned. Data is piped to an "intercept" FD installed in tombstoned so we're in full
         // control of all writes to the file in question.
-        final DumpStackFileObserver observer;
-        if (useTombstonedForJavaTraces) {
-            observer = null;
-        } else {
-            // Use a FileObserver to detect when traces finish writing.
-            // The order of traces is considered important to maintain for legibility.
-            observer = new DumpStackFileObserver(tracesFile);
-        }
 
         // We must complete all stack dumps within 20 seconds.
         long remainingTime = 20 * 1000;
-        try {
-            if (observer != null) {
-                observer.startWatching();
+
+        // First collect all of the stacks of the most important pids.
+        if (firstPids != null) {
+            int num = firstPids.size();
+            for (int i = 0; i < num; i++) {
+                if (DEBUG_ANR) Slog.d(TAG, "Collecting stacks for pid " + firstPids.get(i));
+                final long timeTaken = dumpJavaTracesTombstoned(firstPids.get(i), tracesFile,
+                                                                remainingTime);
+
+                remainingTime -= timeTaken;
+                if (remainingTime <= 0) {
+                    Slog.e(TAG, "Aborting stack trace dump (current firstPid=" + firstPids.get(i) +
+                           "); deadline exceeded.");
+                    return;
+                }
+
+                if (DEBUG_ANR) {
+                    Slog.d(TAG, "Done with pid " + firstPids.get(i) + " in " + timeTaken + "ms");
+                }
             }
+        }
 
-            // First collect all of the stacks of the most important pids.
-            if (firstPids != null) {
-                int num = firstPids.size();
-                for (int i = 0; i < num; i++) {
-                    if (DEBUG_ANR) Slog.d(TAG, "Collecting stacks for pid "
-                            + firstPids.get(i));
-                    final long timeTaken;
-                    if (useTombstonedForJavaTraces) {
-                        timeTaken = dumpJavaTracesTombstoned(firstPids.get(i), tracesFile, remainingTime);
-                    } else {
-                        timeTaken = observer.dumpWithTimeout(firstPids.get(i), remainingTime);
-                    }
+        // Next collect the stacks of the native pids
+        if (nativePids != null) {
+            for (int pid : nativePids) {
+                if (DEBUG_ANR) Slog.d(TAG, "Collecting stacks for native pid " + pid);
+                final long nativeDumpTimeoutMs = Math.min(NATIVE_DUMP_TIMEOUT_MS, remainingTime);
 
-                    remainingTime -= timeTaken;
-                    if (remainingTime <= 0) {
-                        Slog.e(TAG, "Aborting stack trace dump (current firstPid=" + firstPids.get(i) +
+                final long start = SystemClock.elapsedRealtime();
+                Debug.dumpNativeBacktraceToFileTimeout(
+                        pid, tracesFile, (int) (nativeDumpTimeoutMs / 1000));
+                final long timeTaken = SystemClock.elapsedRealtime() - start;
+
+                remainingTime -= timeTaken;
+                if (remainingTime <= 0) {
+                    Slog.e(TAG, "Aborting stack trace dump (current native pid=" + pid +
+                        "); deadline exceeded.");
+                    return;
+                }
+
+                if (DEBUG_ANR) {
+                    Slog.d(TAG, "Done with native pid " + pid + " in " + timeTaken + "ms");
+                }
+            }
+        }
+
+        // Lastly, dump stacks for all extra PIDs from the CPU tracker.
+        if (extraPids != null) {
+            for (int pid : extraPids) {
+                if (DEBUG_ANR) Slog.d(TAG, "Collecting stacks for extra pid " + pid);
+
+                final long timeTaken = dumpJavaTracesTombstoned(pid, tracesFile, remainingTime);
+
+                remainingTime -= timeTaken;
+                if (remainingTime <= 0) {
+                    Slog.e(TAG, "Aborting stack trace dump (current extra pid=" + pid +
                             "); deadline exceeded.");
-                        return;
-                    }
-
-                    if (DEBUG_ANR) {
-                        Slog.d(TAG, "Done with pid " + firstPids.get(i) + " in " + timeTaken + "ms");
-                    }
+                    return;
                 }
-            }
 
-            // Next collect the stacks of the native pids
-            if (nativePids != null) {
-                for (int pid : nativePids) {
-                    if (DEBUG_ANR) Slog.d(TAG, "Collecting stacks for native pid " + pid);
-                    final long nativeDumpTimeoutMs = Math.min(NATIVE_DUMP_TIMEOUT_MS, remainingTime);
-
-                    final long start = SystemClock.elapsedRealtime();
-                    Debug.dumpNativeBacktraceToFileTimeout(
-                            pid, tracesFile, (int) (nativeDumpTimeoutMs / 1000));
-                    final long timeTaken = SystemClock.elapsedRealtime() - start;
-
-                    remainingTime -= timeTaken;
-                    if (remainingTime <= 0) {
-                        Slog.e(TAG, "Aborting stack trace dump (current native pid=" + pid +
-                            "); deadline exceeded.");
-                        return;
-                    }
-
-                    if (DEBUG_ANR) {
-                        Slog.d(TAG, "Done with native pid " + pid + " in " + timeTaken + "ms");
-                    }
+                if (DEBUG_ANR) {
+                    Slog.d(TAG, "Done with extra pid " + pid + " in " + timeTaken + "ms");
                 }
-            }
-
-            // Lastly, dump stacks for all extra PIDs from the CPU tracker.
-            if (extraPids != null) {
-                for (int pid : extraPids) {
-                    if (DEBUG_ANR) Slog.d(TAG, "Collecting stacks for extra pid " + pid);
-
-                    final long timeTaken;
-                    if (useTombstonedForJavaTraces) {
-                        timeTaken = dumpJavaTracesTombstoned(pid, tracesFile, remainingTime);
-                    } else {
-                        timeTaken = observer.dumpWithTimeout(pid, remainingTime);
-                    }
-
-                    remainingTime -= timeTaken;
-                    if (remainingTime <= 0) {
-                        Slog.e(TAG, "Aborting stack trace dump (current extra pid=" + pid +
-                                "); deadline exceeded.");
-                        return;
-                    }
-
-                    if (DEBUG_ANR) {
-                        Slog.d(TAG, "Done with extra pid " + pid + " in " + timeTaken + "ms");
-                    }
-                }
-            }
-        } finally {
-            if (observer != null) {
-                observer.stopWatching();
             }
         }
     }
@@ -5819,22 +5772,15 @@ public class ActivityManagerService extends IActivityManager.Stub
         if (true || Build.IS_USER) {
             return;
         }
-        String tracesPath = SystemProperties.get("dalvik.vm.stack-trace-file", null);
-        if (tracesPath == null || tracesPath.length() == 0) {
-            return;
-        }
 
         StrictMode.ThreadPolicy oldPolicy = StrictMode.allowThreadDiskReads();
         StrictMode.allowThreadDiskWrites();
         try {
-            final File tracesFile = new File(tracesPath);
-            final File tracesDir = tracesFile.getParentFile();
-            final File tracesTmp = new File(tracesDir, "__tmp__");
+            File tracesDir = new File("/data/anr");
+            File tracesFile = null;
             try {
-                if (tracesFile.exists()) {
-                    tracesTmp.delete();
-                    tracesFile.renameTo(tracesTmp);
-                }
+                tracesFile = File.createTempFile("app_slow", null, tracesDir);
+
                 StringBuilder sb = new StringBuilder();
                 Time tobj = new Time();
                 tobj.set(System.currentTimeMillis());
@@ -5851,14 +5797,14 @@ public class ActivityManagerService extends IActivityManager.Stub
                 fos.close();
                 FileUtils.setPermissions(tracesFile.getPath(), 0666, -1, -1); // -rw-rw-rw-
             } catch (IOException e) {
-                Slog.w(TAG, "Unable to prepare slow app traces file: " + tracesPath, e);
+                Slog.w(TAG, "Unable to prepare slow app traces file: " + tracesFile, e);
                 return;
             }
 
             if (app != null) {
                 ArrayList<Integer> firstPids = new ArrayList<Integer>();
                 firstPids.add(app.pid);
-                dumpStackTraces(tracesPath, firstPids, null, null, true /* useTombstoned */);
+                dumpStackTraces(tracesFile.getAbsolutePath(), firstPids, null, null);
             }
 
             File lastTracesFile = null;
@@ -5876,9 +5822,6 @@ public class ActivityManagerService extends IActivityManager.Stub
                 lastTracesFile = curTracesFile;
             }
             tracesFile.renameTo(curTracesFile);
-            if (tracesTmp.exists()) {
-                tracesTmp.renameTo(tracesFile);
-            }
         } finally {
             StrictMode.setThreadPolicy(oldPolicy);
         }
@@ -7026,18 +6969,6 @@ public class ActivityManagerService extends IActivityManager.Stub
                 }
             }
 
-            ProfilerInfo profilerInfo = null;
-            String agent = null;
-            if (mProfileApp != null && mProfileApp.equals(processName)) {
-                mProfileProc = app;
-                profilerInfo = (mProfilerInfo != null && mProfilerInfo.profileFile != null) ?
-                        new ProfilerInfo(mProfilerInfo) : null;
-                agent = mProfilerInfo != null ? mProfilerInfo.agent : null;
-            } else if (app.instr != null && app.instr.mProfileFile != null) {
-                profilerInfo = new ProfilerInfo(app.instr.mProfileFile, null, 0, false, false,
-                        null);
-            }
-
             boolean enableTrackAllocation = false;
             if (mTrackAllocationApp != null && mTrackAllocationApp.equals(processName)) {
                 enableTrackAllocation = true;
@@ -7062,8 +6993,44 @@ public class ActivityManagerService extends IActivityManager.Stub
             ApplicationInfo appInfo = app.instr != null ? app.instr.mTargetInfo : app.info;
             app.compat = compatibilityInfoForPackageLocked(appInfo);
 
+            ProfilerInfo profilerInfo = null;
+            String preBindAgent = null;
+            if (mProfileApp != null && mProfileApp.equals(processName)) {
+                mProfileProc = app;
+                if (mProfilerInfo != null) {
+                    // Send a profiler info object to the app if either a file is given, or
+                    // an agent should be loaded at bind-time.
+                    boolean needsInfo = mProfilerInfo.profileFile != null
+                            || mProfilerInfo.attachAgentDuringBind;
+                    profilerInfo = needsInfo ? new ProfilerInfo(mProfilerInfo) : null;
+                    if (mProfilerInfo.agent != null) {
+                        preBindAgent = mProfilerInfo.agent;
+                    }
+                }
+            } else if (app.instr != null && app.instr.mProfileFile != null) {
+                profilerInfo = new ProfilerInfo(app.instr.mProfileFile, null, 0, false, false,
+                        null, false);
+            }
+            if (mAppAgentMap != null && mAppAgentMap.containsKey(processName)) {
+                // We need to do a debuggable check here. See setAgentApp for why the check is
+                // postponed to here.
+                if ((app.info.flags & ApplicationInfo.FLAG_DEBUGGABLE) != 0) {
+                    String agent = mAppAgentMap.get(processName);
+                    // Do not overwrite already requested agent.
+                    if (profilerInfo == null) {
+                        profilerInfo = new ProfilerInfo(null, null, 0, false, false,
+                                mAppAgentMap.get(processName), true);
+                    } else if (profilerInfo.agent == null) {
+                        profilerInfo = profilerInfo.setAgent(mAppAgentMap.get(processName), true);
+                    }
+                }
+            }
+
             if (profilerInfo != null && profilerInfo.profileFd != null) {
                 profilerInfo.profileFd = profilerInfo.profileFd.dup();
+                if (TextUtils.equals(mProfileApp, processName) && mProfilerInfo != null) {
+                    clearProfilerLocked();
+                }
             }
 
             // We deprecated Build.SERIAL and it is not accessible to
@@ -7102,8 +7069,8 @@ public class ActivityManagerService extends IActivityManager.Stub
 
             // If we were asked to attach an agent on startup, do so now, before we're binding
             // application code.
-            if (agent != null) {
-                thread.attachAgent(agent);
+            if (preBindAgent != null) {
+                thread.attachAgent(preBindAgent);
             }
 
             checkTime(startTime, "attachApplicationLocked: immediately before bindApplication");
@@ -7130,7 +7097,10 @@ public class ActivityManagerService extends IActivityManager.Stub
                         mCoreSettingsObserver.getCoreSettingsLocked(),
                         buildSerial);
             }
-
+            if (profilerInfo != null) {
+                profilerInfo.closeFd();
+                profilerInfo = null;
+            }
             checkTime(startTime, "attachApplicationLocked: immediately after bindApplication");
             updateLruProcessLocked(app, false, null);
             checkTime(startTime, "attachApplicationLocked: after updateLruProcessLocked");
@@ -7310,8 +7280,13 @@ public class ActivityManagerService extends IActivityManager.Stub
                 try {
                     mInstaller.markBootComplete(VMRuntime.getInstructionSet(abi));
                 } catch (InstallerException e) {
-                    Slog.w(TAG, "Unable to mark boot complete for abi: " + abi + " (" +
-                            e.getMessage() +")");
+                    if (!VMRuntime.didPruneDalvikCache()) {
+                        // This is technically not the right filter, as different zygotes may
+                        // have made different pruning decisions. But the log is best effort,
+                        // anyways.
+                        Slog.w(TAG, "Unable to mark boot complete for abi: " + abi + " (" +
+                                e.getMessage() +")");
+                    }
                 }
                 completedIsas.add(instructionSet);
             }
@@ -12388,6 +12363,12 @@ public class ActivityManagerService extends IActivityManager.Stub
 
     final ProcessRecord addAppLocked(ApplicationInfo info, String customProcess, boolean isolated,
             String abiOverride) {
+        return addAppLocked(info, customProcess, isolated, false /* disableHiddenApiChecks */,
+                abiOverride);
+    }
+
+    final ProcessRecord addAppLocked(ApplicationInfo info, String customProcess, boolean isolated,
+            boolean disableHiddenApiChecks, String abiOverride) {
         ProcessRecord app;
         if (!isolated) {
             app = getProcessRecordLocked(customProcess != null ? customProcess : info.processName,
@@ -12419,8 +12400,8 @@ public class ActivityManagerService extends IActivityManager.Stub
         if (app.thread == null && mPersistentStartingProcesses.indexOf(app) < 0) {
             mPersistentStartingProcesses.add(app);
             startProcessLocked(app, "added application",
-                    customProcess != null ? customProcess : app.processName, abiOverride,
-                    null /* entryPoint */, null /* entryPointArgs */);
+                    customProcess != null ? customProcess : app.processName, disableHiddenApiChecks,
+                    abiOverride, null /* entryPoint */, null /* entryPointArgs */);
         }
 
         return app;
@@ -12497,7 +12478,8 @@ public class ActivityManagerService extends IActivityManager.Stub
             if (wasAwake != isAwake) {
                 // Also update state in a special way for running foreground services UI.
                 mServices.updateScreenStateLocked(isAwake);
-                sendNotifyVrManagerOfSleepState(!isAwake);
+                mHandler.obtainMessage(DISPATCH_SCREEN_AWAKE_MSG, isAwake ? 1 : 0, 0)
+                        .sendToTarget();
             }
         }
     }
@@ -12650,7 +12632,9 @@ public class ActivityManagerService extends IActivityManager.Stub
                 Binder.restoreCallingIdentity(ident);
             }
         }
-        sendNotifyVrManagerOfKeyguardState(showing);
+
+        mHandler.obtainMessage(DISPATCH_SCREEN_KEYGUARD_MSG, showing ? 1 : 0, 0)
+                .sendToTarget();
     }
 
     @Override
@@ -12789,6 +12773,52 @@ public class ActivityManagerService extends IActivityManager.Stub
             }
         } finally {
             Binder.restoreCallingIdentity(ident);
+        }
+    }
+
+    /**
+     * Set or remove an agent to be run whenever an app with the given process name starts.
+     *
+     * This method will not check whether the given process name matches a debuggable app. That
+     * would require scanning all current packages, and a rescan when new packages are installed
+     * or updated.
+     *
+     * Instead, do the check when an application is started and matched to a stored agent.
+     *
+     * @param packageName the process name of the app.
+     * @param agent the agent string to be used, or null to remove any previously set agent.
+     */
+    @Override
+    public void setAgentApp(@NonNull String packageName, @Nullable String agent) {
+        synchronized (this) {
+            // note: hijacking SET_ACTIVITY_WATCHER, but should be changed to
+            // its own permission.
+            if (checkCallingPermission(
+                    android.Manifest.permission.SET_ACTIVITY_WATCHER) !=
+                        PackageManager.PERMISSION_GRANTED) {
+                throw new SecurityException(
+                        "Requires permission " + android.Manifest.permission.SET_ACTIVITY_WATCHER);
+            }
+
+            if (agent == null) {
+                if (mAppAgentMap != null) {
+                    mAppAgentMap.remove(packageName);
+                    if (mAppAgentMap.isEmpty()) {
+                        mAppAgentMap = null;
+                    }
+                }
+            } else {
+                if (mAppAgentMap == null) {
+                    mAppAgentMap = new HashMap<>();
+                }
+                if (mAppAgentMap.size() >= 100) {
+                    // Limit the size of the map, to avoid OOMEs.
+                    Slog.e(TAG, "App agent map has too many entries, cannot add " + packageName
+                            + "/" + agent);
+                    return;
+                }
+                mAppAgentMap.put(packageName, agent);
+            }
         }
     }
 
@@ -14090,6 +14120,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                 NETWORK_ACCESS_TIMEOUT_MS, NETWORK_ACCESS_TIMEOUT_DEFAULT_MS);
         final boolean supportsLeanbackOnly =
                 mContext.getPackageManager().hasSystemFeature(FEATURE_LEANBACK_ONLY);
+        mHiddenApiBlacklist.registerObserver();
 
         // Transfer any global setting for forcing RTL layout, into a System Property
         SystemProperties.set(DEVELOPMENT_FORCE_RTL, forceRtl ? "1":"0");
@@ -17406,6 +17437,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                         final long myTotalPss = mi.getTotalPss();
                         final long myTotalSwapPss = mi.getTotalSwappedOutPss();
                         totalPss += myTotalPss;
+                        totalSwapPss += myTotalSwapPss;
                         nativeProcTotalPss += myTotalPss;
 
                         MemItem pssItem = new MemItem(st.name + " (pid " + st.pid + ")",
@@ -19189,6 +19221,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             case PHONE_UID:
             case BLUETOOTH_UID:
             case NFC_UID:
+            case SE_UID:
                 isCallerSystem = true;
                 break;
             default:
@@ -20033,7 +20066,10 @@ public class ActivityManagerService extends IActivityManager.Stub
             // Instrumentation can kill and relaunch even persistent processes
             forceStopPackageLocked(ii.targetPackage, -1, true, false, true, true, false, userId,
                     "start instr");
-            ProcessRecord app = addAppLocked(ai, defProcess, false, abiOverride);
+            boolean disableHiddenApiChecks =
+                    (flags & INSTRUMENTATION_FLAG_DISABLE_HIDDEN_API_CHECKS) != 0;
+            ProcessRecord app = addAppLocked(ai, defProcess, false, disableHiddenApiChecks,
+                    abiOverride);
             app.instr = activeInstr;
             activeInstr.mFinished = false;
             activeInstr.mRunningProcesses.add(app);
@@ -23461,6 +23497,14 @@ public class ActivityManagerService extends IActivityManager.Stub
                     } catch (IOException e) {
                     }
                     mProfilerInfo.profileFd = null;
+
+                    if (proc.pid == MY_PID) {
+                        // When profiling the system server itself, avoid closing the file
+                        // descriptor, as profilerControl will not create a copy.
+                        // Note: it is also not correct to just set profileFd to null, as the
+                        //       whole ProfilerInfo instance is passed down!
+                        profilerInfo = null;
+                    }
                 } else {
                     stopProfilerLocked(proc, profileType);
                     if (profilerInfo != null && profilerInfo.profileFd != null) {
@@ -24257,6 +24301,11 @@ public class ActivityManagerService extends IActivityManager.Stub
                     mStackSupervisor.resumeFocusedStackTopActivityLocked();
                 }
             }
+        }
+
+        @Override
+        public void registerScreenObserver(ScreenObserver observer) {
+            mScreenObservers.add(observer);
         }
     }
 

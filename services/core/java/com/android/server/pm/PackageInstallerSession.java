@@ -17,10 +17,12 @@
 package com.android.server.pm;
 
 import static android.content.pm.PackageManager.INSTALL_FAILED_ABORTED;
+import static android.content.pm.PackageManager.INSTALL_FAILED_BAD_DEX_METADATA;
 import static android.content.pm.PackageManager.INSTALL_FAILED_CONTAINER_ERROR;
 import static android.content.pm.PackageManager.INSTALL_FAILED_INSUFFICIENT_STORAGE;
 import static android.content.pm.PackageManager.INSTALL_FAILED_INTERNAL_ERROR;
 import static android.content.pm.PackageManager.INSTALL_FAILED_INVALID_APK;
+import static android.content.pm.PackageParser.APK_FILE_EXTENSION;
 import static android.system.OsConstants.O_CREAT;
 import static android.system.OsConstants.O_RDONLY;
 import static android.system.OsConstants.O_WRONLY;
@@ -94,6 +96,7 @@ import com.android.internal.util.Preconditions;
 import com.android.server.pm.Installer.InstallerException;
 import com.android.server.pm.PackageInstallerService.PackageInstallObserverAdapter;
 
+import android.content.pm.dex.DexMetadataHelper;
 import libcore.io.IoUtils;
 
 import org.xmlpull.v1.XmlPullParser;
@@ -259,6 +262,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             // entries like "lost+found".
             if (file.isDirectory()) return false;
             if (file.getName().endsWith(REMOVE_SPLIT_MARKER_EXTENSION)) return false;
+            if (DexMetadataHelper.isDexMetadataFile(file)) return false;
             return true;
         }
     };
@@ -944,6 +948,15 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                 mInstallerPackageName, mInstallerUid, user, mCertificates);
     }
 
+    private static void maybeRenameFile(File from, File to) throws PackageManagerException {
+        if (!from.equals(to)) {
+            if (!from.renameTo(to)) {
+                throw new PackageManagerException(INSTALL_FAILED_INTERNAL_ERROR,
+                        "Could not rename file " + from + " to " + to);
+            }
+        }
+    }
+
     /**
      * Validate install by confirming that all application packages are have
      * consistent package name, version code, and signing certificates.
@@ -988,6 +1001,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         if (ArrayUtils.isEmpty(addedFiles) && removeSplitList.size() == 0) {
             throw new PackageManagerException(INSTALL_FAILED_INVALID_APK, "No packages staged");
         }
+
         // Verify that all staged packages are internally consistent
         final ArraySet<String> stagedSplits = new ArraySet<>();
         for (File addedFile : addedFiles) {
@@ -1022,9 +1036,9 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             // Take this opportunity to enforce uniform naming
             final String targetName;
             if (apk.splitName == null) {
-                targetName = "base.apk";
+                targetName = "base" + APK_FILE_EXTENSION;
             } else {
-                targetName = "split_" + apk.splitName + ".apk";
+                targetName = "split_" + apk.splitName + APK_FILE_EXTENSION;
             }
             if (!FileUtils.isValidExtFilename(targetName)) {
                 throw new PackageManagerException(INSTALL_FAILED_INVALID_APK,
@@ -1032,9 +1046,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             }
 
             final File targetFile = new File(mResolvedStageDir, targetName);
-            if (!addedFile.equals(targetFile)) {
-                addedFile.renameTo(targetFile);
-            }
+            maybeRenameFile(addedFile, targetFile);
 
             // Base is coming from session
             if (apk.splitName == null) {
@@ -1042,6 +1054,18 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             }
 
             mResolvedStagedFiles.add(targetFile);
+
+            final File dexMetadataFile = DexMetadataHelper.findDexMetadataForFile(addedFile);
+            if (dexMetadataFile != null) {
+                if (!FileUtils.isValidExtFilename(dexMetadataFile.getName())) {
+                    throw new PackageManagerException(INSTALL_FAILED_INVALID_APK,
+                            "Invalid filename: " + dexMetadataFile);
+                }
+                final File targetDexMetadataFile = new File(mResolvedStageDir,
+                        DexMetadataHelper.buildDexMetadataPathForApk(targetName));
+                mResolvedStagedFiles.add(targetDexMetadataFile);
+                maybeRenameFile(dexMetadataFile, targetDexMetadataFile);
+            }
         }
 
         if (removeSplitList.size() > 0) {
@@ -1099,6 +1123,12 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             if (mResolvedBaseFile == null) {
                 mResolvedBaseFile = new File(appInfo.getBaseCodePath());
                 mResolvedInheritedFiles.add(mResolvedBaseFile);
+                // Inherit the dex metadata if present.
+                final File baseDexMetadataFile =
+                        DexMetadataHelper.findDexMetadataForFile(mResolvedBaseFile);
+                if (baseDexMetadataFile != null) {
+                    mResolvedInheritedFiles.add(baseDexMetadataFile);
+                }
             }
 
             // Inherit splits if not overridden
@@ -1109,6 +1139,12 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                     final boolean splitRemoved = removeSplitList.contains(splitName);
                     if (!stagedSplits.contains(splitName) && !splitRemoved) {
                         mResolvedInheritedFiles.add(splitFile);
+                        // Inherit the dex metadata if present.
+                        final File splitDexMetadataFile =
+                                DexMetadataHelper.findDexMetadataForFile(splitFile);
+                        if (splitDexMetadataFile != null) {
+                            mResolvedInheritedFiles.add(splitDexMetadataFile);
+                        }
                     }
                 }
             }
@@ -1167,7 +1203,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
     /**
      * Calculate the final install footprint size, combining both staged and
      * existing APKs together and including unpacked native code from both.
-     */
+    */
     private long calculateInstalledSize() throws PackageManagerException {
         Preconditions.checkNotNull(mResolvedBaseFile);
 

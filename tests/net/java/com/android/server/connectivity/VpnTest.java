@@ -22,6 +22,7 @@ import static android.content.pm.UserInfo.FLAG_PRIMARY;
 import static android.content.pm.UserInfo.FLAG_RESTRICTED;
 import static android.net.NetworkCapabilities.LINK_BANDWIDTH_UNSPECIFIED;
 import static android.net.NetworkCapabilities.NET_CAPABILITY_INTERNET;
+import static android.net.NetworkCapabilities.NET_CAPABILITY_NOT_CONGESTED;
 import static android.net.NetworkCapabilities.NET_CAPABILITY_NOT_METERED;
 import static android.net.NetworkCapabilities.NET_CAPABILITY_NOT_ROAMING;
 import static android.net.NetworkCapabilities.TRANSPORT_CELLULAR;
@@ -56,15 +57,20 @@ import android.content.pm.ServiceInfo;
 import android.content.pm.UserInfo;
 import android.content.res.Resources;
 import android.net.ConnectivityManager;
+import android.net.IConnectivityManager;
+import android.net.IpPrefix;
+import android.net.LinkProperties;
 import android.net.Network;
 import android.net.NetworkCapabilities;
 import android.net.NetworkInfo.DetailedState;
+import android.net.RouteInfo;
 import android.net.UidRange;
 import android.net.VpnService;
 import android.os.Build.VERSION_CODES;
 import android.os.Bundle;
 import android.os.INetworkManagementService;
 import android.os.Looper;
+import android.os.SystemClock;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.support.test.filters.SmallTest;
@@ -83,13 +89,16 @@ import org.mockito.InOrder;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
+import java.net.Inet4Address;
+import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
-
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * Tests for {@link Vpn}.
@@ -436,11 +445,13 @@ public class VpnTest {
                 .addTransportType(TRANSPORT_CELLULAR)
                 .addCapability(NET_CAPABILITY_INTERNET)
                 .addCapability(NET_CAPABILITY_NOT_METERED)
+                .addCapability(NET_CAPABILITY_NOT_CONGESTED)
                 .setLinkDownstreamBandwidthKbps(10));
         networks.put(wifi, new NetworkCapabilities()
                 .addTransportType(TRANSPORT_WIFI)
                 .addCapability(NET_CAPABILITY_INTERNET)
                 .addCapability(NET_CAPABILITY_NOT_ROAMING)
+                .addCapability(NET_CAPABILITY_NOT_CONGESTED)
                 .setLinkUpstreamBandwidthKbps(20));
         setMockedNetworks(networks);
 
@@ -454,6 +465,7 @@ public class VpnTest {
         assertEquals(LINK_BANDWIDTH_UNSPECIFIED, caps.getLinkUpstreamBandwidthKbps());
         assertFalse(caps.hasCapability(NET_CAPABILITY_NOT_METERED));
         assertTrue(caps.hasCapability(NET_CAPABILITY_NOT_ROAMING));
+        assertTrue(caps.hasCapability(NET_CAPABILITY_NOT_CONGESTED));
 
         Vpn.updateCapabilities(mConnectivityManager, new Network[] { mobile }, caps);
         assertTrue(caps.hasTransport(TRANSPORT_VPN));
@@ -463,6 +475,7 @@ public class VpnTest {
         assertEquals(LINK_BANDWIDTH_UNSPECIFIED, caps.getLinkUpstreamBandwidthKbps());
         assertTrue(caps.hasCapability(NET_CAPABILITY_NOT_METERED));
         assertFalse(caps.hasCapability(NET_CAPABILITY_NOT_ROAMING));
+        assertTrue(caps.hasCapability(NET_CAPABILITY_NOT_CONGESTED));
 
         Vpn.updateCapabilities(mConnectivityManager, new Network[] { wifi }, caps);
         assertTrue(caps.hasTransport(TRANSPORT_VPN));
@@ -472,6 +485,7 @@ public class VpnTest {
         assertEquals(20, caps.getLinkUpstreamBandwidthKbps());
         assertFalse(caps.hasCapability(NET_CAPABILITY_NOT_METERED));
         assertTrue(caps.hasCapability(NET_CAPABILITY_NOT_ROAMING));
+        assertTrue(caps.hasCapability(NET_CAPABILITY_NOT_CONGESTED));
 
         Vpn.updateCapabilities(mConnectivityManager, new Network[] { mobile, wifi }, caps);
         assertTrue(caps.hasTransport(TRANSPORT_VPN));
@@ -481,6 +495,7 @@ public class VpnTest {
         assertEquals(20, caps.getLinkUpstreamBandwidthKbps());
         assertFalse(caps.hasCapability(NET_CAPABILITY_NOT_METERED));
         assertFalse(caps.hasCapability(NET_CAPABILITY_NOT_ROAMING));
+        assertTrue(caps.hasCapability(NET_CAPABILITY_NOT_CONGESTED));
     }
 
     /**
@@ -555,5 +570,104 @@ public class VpnTest {
             final Network network = (Network) invocation.getArguments()[0];
             return networks.get(network);
         }).when(mConnectivityManager).getNetworkCapabilities(any());
+    }
+
+    // Need multiple copies of this, but Java's Stream objects can't be reused or
+    // duplicated.
+    private Stream<String> publicIpV4Routes() {
+        return Stream.of(
+                "0.0.0.0/5", "8.0.0.0/7", "11.0.0.0/8", "12.0.0.0/6", "16.0.0.0/4",
+                "32.0.0.0/3", "64.0.0.0/2", "128.0.0.0/3", "160.0.0.0/5", "168.0.0.0/6",
+                "172.0.0.0/12", "172.32.0.0/11", "172.64.0.0/10", "172.128.0.0/9",
+                "173.0.0.0/8", "174.0.0.0/7", "176.0.0.0/4", "192.0.0.0/9", "192.128.0.0/11",
+                "192.160.0.0/13", "192.169.0.0/16", "192.170.0.0/15", "192.172.0.0/14",
+                "192.176.0.0/12", "192.192.0.0/10", "193.0.0.0/8", "194.0.0.0/7",
+                "196.0.0.0/6", "200.0.0.0/5", "208.0.0.0/4");
+    }
+
+    private Stream<String> publicIpV6Routes() {
+        return Stream.of(
+                "::/1", "8000::/2", "c000::/3", "e000::/4", "f000::/5", "f800::/6",
+                "fe00::/8", "2605:ef80:e:af1d::/64");
+    }
+
+    @Test
+    public void testProvidesRoutesToMostDestinations() {
+        final LinkProperties lp = new LinkProperties();
+
+        // Default route provides routes to all IPv4 destinations.
+        lp.addRoute(new RouteInfo(new IpPrefix("0.0.0.0/0")));
+        assertTrue(Vpn.providesRoutesToMostDestinations(lp));
+
+        // Empty LP provides routes to no destination
+        lp.clear();
+        assertFalse(Vpn.providesRoutesToMostDestinations(lp));
+
+        // All IPv4 routes except for local networks. This is the case most relevant
+        // to this function. It provides routes to almost the entire space.
+        // (clone the stream so that we can reuse it later)
+        publicIpV4Routes().forEach(s -> lp.addRoute(new RouteInfo(new IpPrefix(s))));
+        assertTrue(Vpn.providesRoutesToMostDestinations(lp));
+
+        // Removing a 16-bit prefix, which is 65536 addresses. This is still enough to
+        // provide routes to "most" destinations.
+        lp.removeRoute(new RouteInfo(new IpPrefix("192.169.0.0/16")));
+        assertTrue(Vpn.providesRoutesToMostDestinations(lp));
+
+        // Remove the /2 route, which represent a quarter of the available routing space.
+        // This LP does not provides routes to "most" destinations any more.
+        lp.removeRoute(new RouteInfo(new IpPrefix("64.0.0.0/2")));
+        assertFalse(Vpn.providesRoutesToMostDestinations(lp));
+
+        lp.clear();
+        publicIpV6Routes().forEach(s -> lp.addRoute(new RouteInfo(new IpPrefix(s))));
+        assertTrue(Vpn.providesRoutesToMostDestinations(lp));
+
+        lp.removeRoute(new RouteInfo(new IpPrefix("::/1")));
+        assertFalse(Vpn.providesRoutesToMostDestinations(lp));
+
+        // V6 does not provide sufficient coverage but v4 does
+        publicIpV4Routes().forEach(s -> lp.addRoute(new RouteInfo(new IpPrefix(s))));
+        assertTrue(Vpn.providesRoutesToMostDestinations(lp));
+
+        // V4 still does
+        lp.removeRoute(new RouteInfo(new IpPrefix("192.169.0.0/16")));
+        assertTrue(Vpn.providesRoutesToMostDestinations(lp));
+
+        // V4 does not any more
+        lp.removeRoute(new RouteInfo(new IpPrefix("64.0.0.0/2")));
+        assertFalse(Vpn.providesRoutesToMostDestinations(lp));
+
+        // V4 does not, but V6 has sufficient coverage again
+        lp.addRoute(new RouteInfo(new IpPrefix("::/1")));
+        assertTrue(Vpn.providesRoutesToMostDestinations(lp));
+    }
+
+    @Test
+    public void testDoesNotLockUpWithTooManyRoutes() {
+        final LinkProperties lp = new LinkProperties();
+        final byte[] ad = new byte[4];
+        // Actually evaluating this many routes under 1500ms is impossible on
+        // current hardware and for some time, as the algorithm is O(n²).
+        // Make sure the system has a safeguard against this and does not
+        // lock up.
+        final int MAX_ROUTES = 4000;
+        final long MAX_ALLOWED_TIME_MS = 1500;
+        for (int i = 0; i < MAX_ROUTES; ++i) {
+            ad[0] = (byte)((i >> 24) & 0xFF);
+            ad[1] = (byte)((i >> 16) & 0xFF);
+            ad[2] = (byte)((i >> 8) & 0xFF);
+            ad[3] = (byte)(i & 0xFF);
+            try {
+                lp.addRoute(new RouteInfo(new IpPrefix(Inet4Address.getByAddress(ad), 32)));
+            } catch (UnknownHostException e) {
+                // UnknownHostException is only thrown for an address of illegal length,
+                // which can't happen in the case above.
+            }
+        }
+        final long start = SystemClock.currentThreadTimeMillis();
+        assertTrue(Vpn.providesRoutesToMostDestinations(lp));
+        final long end = SystemClock.currentThreadTimeMillis();
+        assertTrue(end - start < MAX_ALLOWED_TIME_MS);
     }
 }

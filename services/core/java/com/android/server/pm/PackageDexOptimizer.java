@@ -20,6 +20,8 @@ import android.annotation.Nullable;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageParser;
+import android.content.pm.dex.ArtManager;
+import android.content.pm.dex.DexMetadataHelper;
 import android.os.FileUtils;
 import android.os.PowerManager;
 import android.os.SystemClock;
@@ -32,7 +34,6 @@ import android.util.Slog;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.util.IndentingPrintWriter;
 import com.android.server.pm.Installer.InstallerException;
-import com.android.server.pm.dex.DexManager;
 import com.android.server.pm.dex.DexoptOptions;
 import com.android.server.pm.dex.DexoptUtils;
 import com.android.server.pm.dex.PackageDexUsage;
@@ -46,6 +47,8 @@ import java.util.Map;
 
 import dalvik.system.DexFile;
 
+import static android.content.pm.ApplicationInfo.HIDDEN_API_ENFORCEMENT_NONE;
+
 import static com.android.server.pm.Installer.DEXOPT_BOOTCOMPLETE;
 import static com.android.server.pm.Installer.DEXOPT_DEBUGGABLE;
 import static com.android.server.pm.Installer.DEXOPT_PROFILE_GUIDED;
@@ -55,12 +58,16 @@ import static com.android.server.pm.Installer.DEXOPT_FORCE;
 import static com.android.server.pm.Installer.DEXOPT_STORAGE_CE;
 import static com.android.server.pm.Installer.DEXOPT_STORAGE_DE;
 import static com.android.server.pm.Installer.DEXOPT_IDLE_BACKGROUND_JOB;
+import static com.android.server.pm.Installer.DEXOPT_ENABLE_HIDDEN_API_CHECKS;
+import static com.android.server.pm.Installer.DEXOPT_GENERATE_COMPACT_DEX;
+import static com.android.server.pm.Installer.DEXOPT_GENERATE_APP_IMAGE;
 import static com.android.server.pm.InstructionSets.getAppDexInstructionSets;
 import static com.android.server.pm.InstructionSets.getDexCodeInstructionSets;
 
 import static com.android.server.pm.PackageManagerService.WATCHDOG_TIMEOUT;
 
-import static dalvik.system.DexFile.getNonProfileGuidedCompilerFilter;
+import static com.android.server.pm.PackageManagerServiceCompilerMapping.getReasonName;
+
 import static dalvik.system.DexFile.getSafeModeCompilerFilter;
 import static dalvik.system.DexFile.isProfileGuidedCompilerFilter;
 
@@ -210,12 +217,21 @@ public class PackageDexOptimizer {
                 }
             }
 
+            String profileName = ArtManager.getProfileName(i == 0 ? null : pkg.splitNames[i - 1]);
+
+            String dexMetadataPath = null;
+            if (options.isDexoptInstallWithDexMetadata()) {
+                File dexMetadataFile = DexMetadataHelper.findDexMetadataForFile(new File(path));
+                dexMetadataPath = dexMetadataFile == null
+                        ? null : dexMetadataFile.getAbsolutePath();
+            }
+
             final boolean isUsedByOtherApps = options.isDexoptAsSharedLibrary()
                     || packageUseInfo.isUsedByOtherApps(path);
             final String compilerFilter = getRealCompilerFilter(pkg.applicationInfo,
                 options.getCompilerFilter(), isUsedByOtherApps);
             final boolean profileUpdated = options.isCheckForProfileUpdates() &&
-                isProfileUpdated(pkg, sharedGid, compilerFilter);
+                isProfileUpdated(pkg, sharedGid, profileName, compilerFilter);
 
             // Get the dexopt flags after getRealCompilerFilter to make sure we get the correct
             // flags.
@@ -224,7 +240,8 @@ public class PackageDexOptimizer {
             for (String dexCodeIsa : dexCodeInstructionSets) {
                 int newResult = dexOptPath(pkg, path, dexCodeIsa, compilerFilter,
                         profileUpdated, classLoaderContexts[i], dexoptFlags, sharedGid,
-                        packageStats, options.isDowngrade());
+                        packageStats, options.isDowngrade(), profileName, dexMetadataPath,
+                        options.getCompilationReason());
                 // The end result is:
                 //  - FAILED if any path failed,
                 //  - PERFORMED if at least one path needed compilation,
@@ -248,7 +265,8 @@ public class PackageDexOptimizer {
     @GuardedBy("mInstallLock")
     private int dexOptPath(PackageParser.Package pkg, String path, String isa,
             String compilerFilter, boolean profileUpdated, String classLoaderContext,
-            int dexoptFlags, int uid, CompilerStats.PackageStats packageStats, boolean downgrade) {
+            int dexoptFlags, int uid, CompilerStats.PackageStats packageStats, boolean downgrade,
+            String profileName, String dexMetadataPath, int compilationReason) {
         int dexoptNeeded = getDexoptNeeded(path, isa, compilerFilter, classLoaderContext,
                 profileUpdated, downgrade);
         if (Math.abs(dexoptNeeded) == DexFile.NO_DEXOPT_NEEDED) {
@@ -274,7 +292,8 @@ public class PackageDexOptimizer {
             // primary dex files.
             mInstaller.dexopt(path, uid, pkg.packageName, isa, dexoptNeeded, oatDir, dexoptFlags,
                     compilerFilter, pkg.volumeUuid, classLoaderContext, pkg.applicationInfo.seInfo,
-                    false /* downgrade*/);
+                    false /* downgrade*/, pkg.applicationInfo.targetSdkVersion,
+                    profileName, dexMetadataPath, getReasonName(compilationReason));
 
             if (packageStats != null) {
                 long endTime = System.currentTimeMillis();
@@ -385,7 +404,7 @@ public class PackageDexOptimizer {
         // Note this trades correctness for performance since the resulting slow down is
         // unacceptable in some cases until b/64530081 is fixed.
         String classLoaderContext = SKIP_SHARED_LIBRARY_CHECK;
-
+        int reason = options.getCompilationReason();
         try {
             for (String isa : dexUseInfo.getLoaderIsas()) {
                 // Reuse the same dexopt path as for the primary apks. We don't need all the
@@ -395,7 +414,8 @@ public class PackageDexOptimizer {
                 mInstaller.dexopt(path, info.uid, info.packageName, isa, /*dexoptNeeded*/ 0,
                         /*oatDir*/ null, dexoptFlags,
                         compilerFilter, info.volumeUuid, classLoaderContext, info.seInfoUser,
-                        options.isDowngrade());
+                        options.isDowngrade(), info.targetSdkVersion, /*profileName*/ null,
+                        /*dexMetadataPath*/ null, getReasonName(reason));
             }
 
             return DEX_OPT_PERFORMED;
@@ -435,13 +455,15 @@ public class PackageDexOptimizer {
             pw.increaseIndent();
 
             for (String isa : dexCodeInstructionSets) {
-                String status = null;
                 try {
-                    status = DexFile.getDexFileStatus(path, isa);
+                    String[] status = DexFile.getDexFileOptimizationStatus(path, isa);
+                    String compilationStatus = status[0];
+                    String compilationReason = status[1];
+                    pw.println(isa + ": [status=" + compilationStatus
+                            +"] reason=[" + compilationReason + "]");
                 } catch (IOException ioe) {
-                     status = "[Exception]: " + ioe.getMessage();
+                    pw.println(isa + ": [Exception]: " + ioe.getMessage());
                 }
-                pw.println(isa + ": " + status);
             }
 
             if (useInfo.isUsedByOtherApps(path)) {
@@ -502,19 +524,53 @@ public class PackageDexOptimizer {
         return getDexFlags(pkg.applicationInfo, compilerFilter, options);
     }
 
+    private boolean isAppImageEnabled() {
+        return SystemProperties.get("dalvik.vm.appimageformat", "").length() > 0;
+    }
+
     private int getDexFlags(ApplicationInfo info, String compilerFilter, DexoptOptions options) {
         int flags = info.flags;
         boolean debuggable = (flags & ApplicationInfo.FLAG_DEBUGGABLE) != 0;
-        // Profile guide compiled oat files should not be public.
+        // Profile guide compiled oat files should not be public unles they are based
+        // on profiles from dex metadata archives.
+        // The flag isDexoptInstallWithDexMetadata applies only on installs when we know that
+        // the user does not have an existing profile.
         boolean isProfileGuidedFilter = isProfileGuidedCompilerFilter(compilerFilter);
-        boolean isPublic = !info.isForwardLocked() && !isProfileGuidedFilter;
+        boolean isPublic = !info.isForwardLocked() &&
+                (!isProfileGuidedFilter || options.isDexoptInstallWithDexMetadata());
         int profileFlag = isProfileGuidedFilter ? DEXOPT_PROFILE_GUIDED : 0;
+        // Some apps are executed with restrictions on hidden API usage. If this app is one
+        // of them, pass a flag to dexopt to enable the same restrictions during compilation.
+        // TODO we should pass the actual flag value to dexopt, rather than assuming blacklist
+        int hiddenApiFlag = info.getHiddenApiEnforcementPolicy() == HIDDEN_API_ENFORCEMENT_NONE
+                ? 0
+                : DEXOPT_ENABLE_HIDDEN_API_CHECKS;
+        // Avoid generating CompactDex for modes that are latency critical.
+        final int compilationReason = options.getCompilationReason();
+        boolean generateCompactDex = true;
+        switch (compilationReason) {
+            case PackageManagerService.REASON_FIRST_BOOT:
+            case PackageManagerService.REASON_BOOT:
+            case PackageManagerService.REASON_INSTALL:
+                 generateCompactDex = false;
+        }
+        // Use app images only if it is enabled and we are compiling
+        // profile-guided (so the app image doesn't conservatively contain all classes).
+        // If the app didn't request for the splits to be loaded in isolation or if it does not
+        // declare inter-split dependencies, then all the splits will be loaded in the base
+        // apk class loader (in the order of their definition, otherwise disable app images
+        // because they are unsupported for multiple class loaders. b/7269679
+        boolean generateAppImage = isProfileGuidedFilter && (info.splitDependencies == null ||
+                !info.requestsIsolatedSplitLoading()) && isAppImageEnabled();
         int dexFlags =
                 (isPublic ? DEXOPT_PUBLIC : 0)
                 | (debuggable ? DEXOPT_DEBUGGABLE : 0)
                 | profileFlag
                 | (options.isBootComplete() ? DEXOPT_BOOTCOMPLETE : 0)
-                | (options.isDexoptIdleBackgroundJob() ? DEXOPT_IDLE_BACKGROUND_JOB : 0);
+                | (options.isDexoptIdleBackgroundJob() ? DEXOPT_IDLE_BACKGROUND_JOB : 0)
+                | (generateCompactDex ? DEXOPT_GENERATE_COMPACT_DEX : 0)
+                | (generateAppImage ? DEXOPT_GENERATE_APP_IMAGE : 0)
+                | hiddenApiFlag;
         return adjustDexoptFlags(dexFlags);
     }
 
@@ -543,14 +599,15 @@ public class PackageDexOptimizer {
      * current profile and the reference profile will be merged and subsequent calls
      * may return a different result.
      */
-    private boolean isProfileUpdated(PackageParser.Package pkg, int uid, String compilerFilter) {
+    private boolean isProfileUpdated(PackageParser.Package pkg, int uid, String profileName,
+            String compilerFilter) {
         // Check if we are allowed to merge and if the compiler filter is profile guided.
         if (!isProfileGuidedCompilerFilter(compilerFilter)) {
             return false;
         }
         // Merge profiles. It returns whether or not there was an updated in the profile info.
         try {
-            return mInstaller.mergeProfiles(uid, pkg.packageName);
+            return mInstaller.mergeProfiles(uid, pkg.packageName, profileName);
         } catch (InstallerException e) {
             Slog.w(TAG, "Failed to merge profiles", e);
         }
@@ -628,6 +685,9 @@ public class PackageDexOptimizer {
         }
         if ((flags & DEXOPT_IDLE_BACKGROUND_JOB) == DEXOPT_IDLE_BACKGROUND_JOB) {
             flagsList.add("idle_background_job");
+        }
+        if ((flags & DEXOPT_ENABLE_HIDDEN_API_CHECKS) == DEXOPT_ENABLE_HIDDEN_API_CHECKS) {
+            flagsList.add("enable_hidden_api_checks");
         }
 
         return String.join(",", flagsList);

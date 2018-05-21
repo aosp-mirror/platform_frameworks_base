@@ -20,6 +20,7 @@
 
 #include <android_runtime/AndroidRuntime.h>
 
+#include <android-base/macros.h>
 #include <android-base/properties.h>
 #include <binder/IBinder.h>
 #include <binder/IPCThreadState.h>
@@ -163,7 +164,6 @@ extern int register_android_os_Parcel(JNIEnv* env);
 extern int register_android_os_SELinux(JNIEnv* env);
 extern int register_android_os_VintfObject(JNIEnv *env);
 extern int register_android_os_VintfRuntimeInfo(JNIEnv *env);
-extern int register_android_os_seccomp(JNIEnv* env);
 extern int register_android_os_SystemProperties(JNIEnv *env);
 extern int register_android_os_SystemClock(JNIEnv* env);
 extern int register_android_os_Trace(JNIEnv* env);
@@ -173,7 +173,6 @@ extern int register_android_os_MemoryFile(JNIEnv* env);
 extern int register_android_os_SharedMemory(JNIEnv* env);
 extern int register_android_net_LocalSocketImpl(JNIEnv* env);
 extern int register_android_net_NetworkUtils(JNIEnv* env);
-extern int register_android_net_TrafficStats(JNIEnv* env);
 extern int register_android_text_AndroidCharacter(JNIEnv *env);
 extern int register_android_text_StaticLayout(JNIEnv *env);
 extern int register_android_text_AndroidBidi(JNIEnv *env);
@@ -592,7 +591,6 @@ int AndroidRuntime::startVm(JavaVM** pJavaVM, JNIEnv** pEnv, bool zygote)
 {
     JavaVMInitArgs initArgs;
     char propBuf[PROPERTY_VALUE_MAX];
-    char stackTraceFileBuf[sizeof("-Xstacktracefile:")-1 + PROPERTY_VALUE_MAX];
     char jniOptsBuf[sizeof("-Xjniopts:")-1 + PROPERTY_VALUE_MAX];
     char heapstartsizeOptsBuf[sizeof("-Xms")-1 + PROPERTY_VALUE_MAX];
     char heapsizeOptsBuf[sizeof("-Xmx")-1 + PROPERTY_VALUE_MAX];
@@ -600,6 +598,7 @@ int AndroidRuntime::startVm(JavaVM** pJavaVM, JNIEnv** pEnv, bool zygote)
     char heapminfreeOptsBuf[sizeof("-XX:HeapMinFree=")-1 + PROPERTY_VALUE_MAX];
     char heapmaxfreeOptsBuf[sizeof("-XX:HeapMaxFree=")-1 + PROPERTY_VALUE_MAX];
     char usejitOptsBuf[sizeof("-Xusejit:")-1 + PROPERTY_VALUE_MAX];
+    char jitpthreadpriorityOptsBuf[sizeof("-Xjitpthreadpriority:")-1 + PROPERTY_VALUE_MAX];
     char jitmaxsizeOptsBuf[sizeof("-Xjitmaxsize:")-1 + PROPERTY_VALUE_MAX];
     char jitinitialsizeOptsBuf[sizeof("-Xjitinitialsize:")-1 + PROPERTY_VALUE_MAX];
     char jitthresholdOptsBuf[sizeof("-Xjitthreshold:")-1 + PROPERTY_VALUE_MAX];
@@ -643,6 +642,7 @@ int AndroidRuntime::startVm(JavaVM** pJavaVM, JNIEnv** pEnv, bool zygote)
     char methodTraceFileBuf[sizeof("-Xmethod-trace-file:") + PROPERTY_VALUE_MAX];
     char methodTraceFileSizeBuf[sizeof("-Xmethod-trace-file-size:") + PROPERTY_VALUE_MAX];
     std::string fingerprintBuf;
+    char jdwpProviderBuf[sizeof("-XjdwpProvider:") - 1 + PROPERTY_VALUE_MAX];
 
     bool checkJni = false;
     property_get("dalvik.vm.checkjni", propBuf, "");
@@ -671,16 +671,6 @@ int AndroidRuntime::startVm(JavaVM** pJavaVM, JNIEnv** pEnv, bool zygote)
         executionMode = kEMIntFast;
     } else if (strcmp(propBuf, "int:jit") == 0) {
         executionMode = kEMJitCompiler;
-    }
-
-    // If dalvik.vm.stack-trace-dir is set, it enables the "new" stack trace
-    // dump scheme and a new file is created for each stack dump. If it isn't set,
-    // the old scheme is enabled.
-    property_get("dalvik.vm.stack-trace-dir", propBuf, "");
-    if (strlen(propBuf) > 0) {
-        addOption("-Xusetombstonedtraces");
-    } else {
-        parseRuntimeOption("dalvik.vm.stack-trace-file", stackTraceFileBuf, "-Xstacktracefile:");
     }
 
     strcpy(jniOptsBuf, "-Xjniopts:");
@@ -728,6 +718,9 @@ int AndroidRuntime::startVm(JavaVM** pJavaVM, JNIEnv** pEnv, bool zygote)
     parseRuntimeOption("dalvik.vm.jitmaxsize", jitmaxsizeOptsBuf, "-Xjitmaxsize:");
     parseRuntimeOption("dalvik.vm.jitinitialsize", jitinitialsizeOptsBuf, "-Xjitinitialsize:");
     parseRuntimeOption("dalvik.vm.jitthreshold", jitthresholdOptsBuf, "-Xjitthreshold:");
+    parseRuntimeOption("dalvik.vm.jitpthreadpriority",
+                       jitpthreadpriorityOptsBuf,
+                       "-Xjitpthreadpriority:");
     property_get("dalvik.vm.usejitprofiles", useJitProfilesOptsBuf, "");
     if (strcmp(useJitProfilesOptsBuf, "true") == 0) {
         addOption("-Xjitsaveprofilinginfo");
@@ -740,6 +733,12 @@ int AndroidRuntime::startVm(JavaVM** pJavaVM, JNIEnv** pEnv, bool zygote)
     parseRuntimeOption("dalvik.vm.jittransitionweight",
                        jittransitionweightOptBuf,
                        "-Xjittransitionweight:");
+
+    property_get("dalvik.vm.profilebootimage", propBuf, "");
+    if (strcmp(propBuf, "true") == 0) {
+        addOption("-Xps-profile-boot-class-path");
+        addOption("-Xps-profile-aot-code");
+    }
 
     /*
      * Madvise related options.
@@ -762,10 +761,15 @@ int AndroidRuntime::startVm(JavaVM** pJavaVM, JNIEnv** pEnv, bool zygote)
 
     /*
      * Enable debugging only for apps forked from zygote.
-     * Set suspend=y to pause during VM init and use android ADB transport.
      */
     if (zygote) {
-      addOption("-agentlib:jdwp=transport=dt_android_adb,suspend=n,server=y");
+      // Set the JDWP provider and required arguments. By default let the runtime choose how JDWP is
+      // implemented. When this is not set the runtime defaults to not allowing JDWP.
+      addOption("-XjdwpOptions:suspend=n,server=y");
+      parseRuntimeOption("dalvik.vm.jdwp-provider",
+                         jdwpProviderBuf,
+                         "-XjdwpProvider:",
+                         "default");
     }
 
     parseRuntimeOption("dalvik.vm.lockprof.threshold",
@@ -814,12 +818,6 @@ int AndroidRuntime::startVm(JavaVM** pJavaVM, JNIEnv** pEnv, bool zygote)
         addOption("-Ximage-compiler-option");
         addOption("--image-classes=/system/etc/preloaded-classes");
 
-        // If there is a compiled-classes file, push it.
-        if (hasFile("/system/etc/compiled-classes")) {
-            addOption("-Ximage-compiler-option");
-            addOption("--compiled-classes=/system/etc/compiled-classes");
-        }
-
         // If there is a dirty-image-objects file, push it.
         if (hasFile("/system/etc/dirty-image-objects")) {
             addOption("-Ximage-compiler-option");
@@ -856,34 +854,18 @@ int AndroidRuntime::startVm(JavaVM** pJavaVM, JNIEnv** pEnv, bool zygote)
 
     // The runtime will compile a boot image, when necessary, not using installd. Thus, we need to
     // pass the instruction-set-features/variant as an image-compiler-option.
-    // TODO: Find a better way for the instruction-set.
-#if defined(__arm__)
-    constexpr const char* instruction_set = "arm";
-#elif defined(__aarch64__)
-    constexpr const char* instruction_set = "arm64";
-#elif defined(__mips__) && !defined(__LP64__)
-    constexpr const char* instruction_set = "mips";
-#elif defined(__mips__) && defined(__LP64__)
-    constexpr const char* instruction_set = "mips64";
-#elif defined(__i386__)
-    constexpr const char* instruction_set = "x86";
-#elif defined(__x86_64__)
-    constexpr const char* instruction_set = "x86_64";
-#else
-    constexpr const char* instruction_set = "unknown";
-#endif
     // Note: it is OK to reuse the buffer, as the values are exactly the same between
     //       * compiler-option, used for runtime compilation (DexClassLoader)
     //       * image-compiler-option, used for boot-image compilation on device
 
     // Copy the variant.
-    sprintf(dex2oat_isa_variant_key, "dalvik.vm.isa.%s.variant", instruction_set);
+    sprintf(dex2oat_isa_variant_key, "dalvik.vm.isa.%s.variant", ABI_STRING);
     parseCompilerOption(dex2oat_isa_variant_key, dex2oat_isa_variant,
                         "--instruction-set-variant=", "-Ximage-compiler-option");
     parseCompilerOption(dex2oat_isa_variant_key, dex2oat_isa_variant,
                         "--instruction-set-variant=", "-Xcompiler-option");
     // Copy the features.
-    sprintf(dex2oat_isa_features_key, "dalvik.vm.isa.%s.features", instruction_set);
+    sprintf(dex2oat_isa_features_key, "dalvik.vm.isa.%s.features", ABI_STRING);
     parseCompilerOption(dex2oat_isa_features_key, dex2oat_isa_features,
                         "--instruction-set-features=", "-Ximage-compiler-option");
     parseCompilerOption(dex2oat_isa_features_key, dex2oat_isa_features,
@@ -962,6 +944,12 @@ int AndroidRuntime::startVm(JavaVM** pJavaVM, JNIEnv** pEnv, bool zygote)
         addOption("--generate-debug-info");
         addOption("-Ximage-compiler-option");
         addOption("--generate-debug-info");
+    }
+
+    // The mini-debug-info makes it possible to backtrace through JIT code.
+    if (property_get_bool("dalvik.vm.minidebuginfo", 0)) {
+        addOption("-Xcompiler-option");
+        addOption("--generate-mini-debug-info");
     }
 
     /*
@@ -1414,12 +1402,10 @@ static const RegJNIRec gRegJNI[] = {
     REG_JNI(register_android_os_GraphicsEnvironment),
     REG_JNI(register_android_os_MessageQueue),
     REG_JNI(register_android_os_SELinux),
-    REG_JNI(register_android_os_seccomp),
     REG_JNI(register_android_os_Trace),
     REG_JNI(register_android_os_UEventObserver),
     REG_JNI(register_android_net_LocalSocketImpl),
     REG_JNI(register_android_net_NetworkUtils),
-    REG_JNI(register_android_net_TrafficStats),
     REG_JNI(register_android_os_MemoryFile),
     REG_JNI(register_android_os_SharedMemory),
     REG_JNI(register_com_android_internal_os_ClassLoaderFactory),

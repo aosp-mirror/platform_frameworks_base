@@ -6,5 +6,6 @@ LOCAL_MODULE_TAGS := tests
 LOCAL_SRC_FILES := $(call all-subdir-java-files)
 
 LOCAL_PACKAGE_NAME := DemoModeController
+LOCAL_SDK_VERSION := current
 
 include $(BUILD_PACKAGE)

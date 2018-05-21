@@ -1,9 +1,10 @@
 package android.content.pm;
 
+import libcore.util.ArrayUtils;
+
 import java.io.FilterInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Arrays;
 
 /**
  * A class that limits the amount of data that is read from an InputStream. When
@@ -71,7 +72,7 @@ public class LimitedLengthInputStream extends FilterInputStream {
         }
 
         final int arrayLength = buffer.length;
-        Arrays.checkOffsetAndCount(arrayLength, offset, byteCount);
+        ArrayUtils.throwsIfOutOfBounds(arrayLength, offset, byteCount);
 
         if (mOffset > Long.MAX_VALUE - byteCount) {
             throw new IOException("offset out of bounds: " + mOffset + " + " + byteCount);

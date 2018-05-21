@@ -32,7 +32,7 @@
 #include <androidfw/ByteBucketArray.h>
 #include <androidfw/ResourceTypes.h>
 #include <androidfw/TypeWrappers.h>
-#include <utils/Atomic.h>
+#include <cutils/atomic.h>
 #include <utils/ByteOrder.h>
 #include <utils/Debug.h>
 #include <utils/Log.h>

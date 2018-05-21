@@ -3134,9 +3134,6 @@ public class DevicePolicyManager {
 
     /**
      * Flag for {@link #wipeData(int)}: also erase the device's eUICC data.
-     *
-     * TODO(b/35851809): make this public.
-     * @hide
      */
     public static final int WIPE_EUICC = 0x0004;
 

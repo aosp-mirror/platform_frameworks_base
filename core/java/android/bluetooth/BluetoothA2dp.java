@@ -17,6 +17,7 @@
 package android.bluetooth;
 
 import android.Manifest;
+import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
@@ -24,7 +25,6 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
-import android.media.AudioManager;
 import android.os.Binder;
 import android.os.IBinder;
 import android.os.ParcelUuid;
@@ -101,6 +101,24 @@ public final class BluetoothA2dp implements BluetoothProfile {
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
     public static final String ACTION_AVRCP_CONNECTION_STATE_CHANGED =
             "android.bluetooth.a2dp.profile.action.AVRCP_CONNECTION_STATE_CHANGED";
+
+    /**
+     * Intent used to broadcast the selection of a connected device as active.
+     *
+     * <p>This intent will have one extra:
+     * <ul>
+     * <li> {@link BluetoothDevice#EXTRA_DEVICE} - The remote device. It can
+     * be null if no device is active. </li>
+     * </ul>
+     *
+     * <p>Requires {@link android.Manifest.permission#BLUETOOTH} permission to
+     * receive.
+     *
+     * @hide
+     */
+    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+    public static final String ACTION_ACTIVE_DEVICE_CHANGED =
+            "android.bluetooth.a2dp.profile.action.ACTIVE_DEVICE_CHANGED";
 
     /**
      * Intent used to broadcast the change in the Audio Codec state of the
@@ -281,11 +299,7 @@ public final class BluetoothA2dp implements BluetoothProfile {
     }
 
     /**
-     * Initiate connection to a profile of the remote bluetooth device.
-     *
-     * <p> Currently, the system supports only 1 connection to the
-     * A2DP profile. The API will automatically disconnect connected
-     * devices before connecting.
+     * Initiate connection to a profile of the remote Bluetooth device.
      *
      * <p> This API returns false in scenarios like the profile on the
      * device is already connected or Bluetooth is not turned on.
@@ -425,6 +439,75 @@ public final class BluetoothA2dp implements BluetoothProfile {
     }
 
     /**
+     * Select a connected device as active.
+     *
+     * The active device selection is per profile. An active device's
+     * purpose is profile-specific. For example, A2DP audio streaming
+     * is to the active A2DP Sink device. If a remote device is not
+     * connected, it cannot be selected as active.
+     *
+     * <p> This API returns false in scenarios like the profile on the
+     * device is not connected or Bluetooth is not turned on.
+     * When this API returns true, it is guaranteed that the
+     * {@link #ACTION_ACTIVE_DEVICE_CHANGED} intent will be broadcasted
+     * with the active device.
+     *
+     * <p>Requires {@link android.Manifest.permission#BLUETOOTH_ADMIN}
+     * permission.
+     *
+     * @param device the remote Bluetooth device. Could be null to clear
+     * the active device and stop streaming audio to a Bluetooth device.
+     * @return false on immediate error, true otherwise
+     * @hide
+     */
+    public boolean setActiveDevice(@Nullable BluetoothDevice device) {
+        if (DBG) log("setActiveDevice(" + device + ")");
+        try {
+            mServiceLock.readLock().lock();
+            if (mService != null && isEnabled()
+                    && ((device == null) || isValidDevice(device))) {
+                return mService.setActiveDevice(device);
+            }
+            if (mService == null) Log.w(TAG, "Proxy not attached to service");
+            return false;
+        } catch (RemoteException e) {
+            Log.e(TAG, "Stack:" + Log.getStackTraceString(new Throwable()));
+            return false;
+        } finally {
+            mServiceLock.readLock().unlock();
+        }
+    }
+
+    /**
+     * Get the connected device that is active.
+     *
+     * <p>Requires {@link android.Manifest.permission#BLUETOOTH}
+     * permission.
+     *
+     * @return the connected device that is active or null if no device
+     * is active
+     * @hide
+     */
+    @RequiresPermission(Manifest.permission.BLUETOOTH)
+    @Nullable
+    public BluetoothDevice getActiveDevice() {
+        if (VDBG) log("getActiveDevice()");
+        try {
+            mServiceLock.readLock().lock();
+            if (mService != null && isEnabled()) {
+                return mService.getActiveDevice();
+            }
+            if (mService == null) Log.w(TAG, "Proxy not attached to service");
+            return null;
+        } catch (RemoteException e) {
+            Log.e(TAG, "Stack:" + Log.getStackTraceString(new Throwable()));
+            return null;
+        } finally {
+            mServiceLock.readLock().unlock();
+        }
+    }
+
+    /**
      * Set priority of the profile
      *
      * <p> The device should already be paired.
@@ -515,34 +598,6 @@ public final class BluetoothA2dp implements BluetoothProfile {
     }
 
     /**
-     * Tells remote device to adjust volume. Only if absolute volume is
-     * supported. Uses the following values:
-     * <ul>
-     * <li>{@link AudioManager#ADJUST_LOWER}</li>
-     * <li>{@link AudioManager#ADJUST_RAISE}</li>
-     * <li>{@link AudioManager#ADJUST_MUTE}</li>
-     * <li>{@link AudioManager#ADJUST_UNMUTE}</li>
-     * </ul>
-     *
-     * @param direction One of the supported adjust values.
-     * @hide
-     */
-    public void adjustAvrcpAbsoluteVolume(int direction) {
-        if (DBG) Log.d(TAG, "adjustAvrcpAbsoluteVolume");
-        try {
-            mServiceLock.readLock().lock();
-            if (mService != null && isEnabled()) {
-                mService.adjustAvrcpAbsoluteVolume(direction);
-            }
-            if (mService == null) Log.w(TAG, "Proxy not attached to service");
-        } catch (RemoteException e) {
-            Log.e(TAG, "Error talking to BT service in adjustAvrcpAbsoluteVolume()", e);
-        } finally {
-            mServiceLock.readLock().unlock();
-        }
-    }
-
-    /**
      * Tells remote device to set an absolute volume. Only if absolute volume is supported
      *
      * @param volume Absolute volume to be set on AVRCP side
@@ -611,15 +666,17 @@ public final class BluetoothA2dp implements BluetoothProfile {
     /**
      * Gets the current codec status (configuration and capability).
      *
+     * @param device the remote Bluetooth device. If null, use the current
+     * active A2DP Bluetooth device.
      * @return the current codec status
      * @hide
      */
-    public BluetoothCodecStatus getCodecStatus() {
-        if (DBG) Log.d(TAG, "getCodecStatus");
+    public BluetoothCodecStatus getCodecStatus(BluetoothDevice device) {
+        if (DBG) Log.d(TAG, "getCodecStatus(" + device + ")");
         try {
             mServiceLock.readLock().lock();
             if (mService != null && isEnabled()) {
-                return mService.getCodecStatus();
+                return mService.getCodecStatus(device);
             }
             if (mService == null) {
                 Log.w(TAG, "Proxy not attached to service");
@@ -636,15 +693,18 @@ public final class BluetoothA2dp implements BluetoothProfile {
     /**
      * Sets the codec configuration preference.
      *
+     * @param device the remote Bluetooth device. If null, use the current
+     * active A2DP Bluetooth device.
      * @param codecConfig the codec configuration preference
      * @hide
      */
-    public void setCodecConfigPreference(BluetoothCodecConfig codecConfig) {
-        if (DBG) Log.d(TAG, "setCodecConfigPreference");
+    public void setCodecConfigPreference(BluetoothDevice device,
+                                         BluetoothCodecConfig codecConfig) {
+        if (DBG) Log.d(TAG, "setCodecConfigPreference(" + device + ")");
         try {
             mServiceLock.readLock().lock();
             if (mService != null && isEnabled()) {
-                mService.setCodecConfigPreference(codecConfig);
+                mService.setCodecConfigPreference(device, codecConfig);
             }
             if (mService == null) Log.w(TAG, "Proxy not attached to service");
             return;
@@ -659,36 +719,42 @@ public final class BluetoothA2dp implements BluetoothProfile {
     /**
      * Enables the optional codecs.
      *
+     * @param device the remote Bluetooth device. If null, use the currect
+     * active A2DP Bluetooth device.
      * @hide
      */
-    public void enableOptionalCodecs() {
-        if (DBG) Log.d(TAG, "enableOptionalCodecs");
-        enableDisableOptionalCodecs(true);
+    public void enableOptionalCodecs(BluetoothDevice device) {
+        if (DBG) Log.d(TAG, "enableOptionalCodecs(" + device + ")");
+        enableDisableOptionalCodecs(device, true);
     }
 
     /**
      * Disables the optional codecs.
      *
+     * @param device the remote Bluetooth device. If null, use the currect
+     * active A2DP Bluetooth device.
      * @hide
      */
-    public void disableOptionalCodecs() {
-        if (DBG) Log.d(TAG, "disableOptionalCodecs");
-        enableDisableOptionalCodecs(false);
+    public void disableOptionalCodecs(BluetoothDevice device) {
+        if (DBG) Log.d(TAG, "disableOptionalCodecs(" + device + ")");
+        enableDisableOptionalCodecs(device, false);
     }
 
     /**
      * Enables or disables the optional codecs.
      *
+     * @param device the remote Bluetooth device. If null, use the currect
+     * active A2DP Bluetooth device.
      * @param enable if true, enable the optional codecs, other disable them
      */
-    private void enableDisableOptionalCodecs(boolean enable) {
+    private void enableDisableOptionalCodecs(BluetoothDevice device, boolean enable) {
         try {
             mServiceLock.readLock().lock();
             if (mService != null && isEnabled()) {
                 if (enable) {
-                    mService.enableOptionalCodecs();
+                    mService.enableOptionalCodecs(device);
                 } else {
-                    mService.disableOptionalCodecs();
+                    mService.disableOptionalCodecs(device);
                 }
             }
             if (mService == null) Log.w(TAG, "Proxy not attached to service");

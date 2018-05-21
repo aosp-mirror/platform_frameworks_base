@@ -17,11 +17,15 @@ package android.net;
 
 import static android.net.IpSecManager.INVALID_RESOURCE_ID;
 
+import static com.android.internal.util.Preconditions.checkNotNull;
+
 import android.annotation.IntDef;
 import android.annotation.NonNull;
+import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
 import android.content.Context;
 import android.os.Binder;
+import android.os.Handler;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.ServiceManager;
@@ -38,36 +42,17 @@ import java.lang.annotation.RetentionPolicy;
 import java.net.InetAddress;
 
 /**
- * This class represents an IPsec transform, which comprises security associations in one or both
- * directions.
+ * This class represents a transform, which roughly corresponds to an IPsec Security Association.
  *
  * <p>Transforms are created using {@link IpSecTransform.Builder}. Each {@code IpSecTransform}
- * object encapsulates the properties and state of an inbound and outbound IPsec security
- * association. That includes, but is not limited to, algorithm choice, key material, and allocated
- * system resources.
+ * object encapsulates the properties and state of an IPsec security association. That includes,
+ * but is not limited to, algorithm choice, key material, and allocated system resources.
  *
  * @see <a href="https://tools.ietf.org/html/rfc4301">RFC 4301, Security Architecture for the
- * Internet Protocol</a>
+ *     Internet Protocol</a>
  */
 public final class IpSecTransform implements AutoCloseable {
     private static final String TAG = "IpSecTransform";
-
-    /**
-     * For direction-specific attributes of an {@link IpSecTransform}, indicates that an attribute
-     * applies to traffic towards the host.
-     */
-    public static final int DIRECTION_IN = 0;
-
-    /**
-     * For direction-specific attributes of an {@link IpSecTransform}, indicates that an attribute
-     * applies to traffic from the host.
-     */
-    public static final int DIRECTION_OUT = 1;
-
-    /** @hide */
-    @IntDef(value = {DIRECTION_IN, DIRECTION_OUT})
-    @Retention(RetentionPolicy.SOURCE)
-    public @interface TransformDirection {}
 
     /** @hide */
     public static final int MODE_TRANSPORT = 0;
@@ -99,9 +84,11 @@ public final class IpSecTransform implements AutoCloseable {
     @Retention(RetentionPolicy.SOURCE)
     public @interface EncapType {}
 
-    private IpSecTransform(Context context, IpSecConfig config) {
+    /** @hide */
+    @VisibleForTesting
+    public IpSecTransform(Context context, IpSecConfig config) {
         mContext = context;
-        mConfig = config;
+        mConfig = new IpSecConfig(config);
         mResourceId = INVALID_RESOURCE_ID;
     }
 
@@ -116,8 +103,7 @@ public final class IpSecTransform implements AutoCloseable {
     }
 
     /**
-     * Checks the result status and throws an appropriate exception if
-     * the status is not Status.OK.
+     * Checks the result status and throws an appropriate exception if the status is not Status.OK.
      */
     private void checkResultStatus(int status)
             throws IOException, IpSecManager.ResourceUnavailableException,
@@ -144,18 +130,10 @@ public final class IpSecTransform implements AutoCloseable {
         synchronized (this) {
             try {
                 IIpSecService svc = getIpSecService();
-                IpSecTransformResponse result =
-                        svc.createTransportModeTransform(mConfig, new Binder());
+                IpSecTransformResponse result = svc.createTransform(mConfig, new Binder());
                 int status = result.status;
                 checkResultStatus(status);
                 mResourceId = result.resourceId;
-
-                /* Keepalive will silently fail if not needed by the config; but, if needed and
-                 * it fails to start, we need to bail because a transform will not be reliable
-                 * to use if keepalive is expected to offload and fails.
-                 */
-                // FIXME: if keepalive fails, we need to fail spectacularly
-                startKeepalive(mContext);
                 Log.d(TAG, "Added Transform with Id " + mResourceId);
                 mCloseGuard.open("build");
             } catch (RemoteException e) {
@@ -167,11 +145,23 @@ public final class IpSecTransform implements AutoCloseable {
     }
 
     /**
+     * Equals method used for testing
+     *
+     * @hide
+     */
+    @VisibleForTesting
+    public static boolean equals(IpSecTransform lhs, IpSecTransform rhs) {
+        if (lhs == null || rhs == null) return (lhs == rhs);
+        return IpSecConfig.equals(lhs.getConfig(), rhs.getConfig())
+                && lhs.mResourceId == rhs.mResourceId;
+    }
+
+    /**
      * Deactivate this {@code IpSecTransform} and free allocated resources.
      *
      * <p>Deactivating a transform while it is still applied to a socket will result in errors on
      * that socket. Make sure to remove transforms by calling {@link
-     * IpSecManager#removeTransportModeTransform}. Note, removing an {@code IpSecTransform} from a
+     * IpSecManager#removeTransportModeTransforms}. Note, removing an {@code IpSecTransform} from a
      * socket will not deactivate it (because one transform may be applied to multiple sockets).
      *
      * <p>It is safe to call this method on a transform that has already been deactivated.
@@ -185,13 +175,9 @@ public final class IpSecTransform implements AutoCloseable {
             return;
         }
         try {
-            /* Order matters here because the keepalive is best-effort but could fail in some
-             * horrible way to be removed if the wifi (or cell) subsystem has crashed, and we
-             * still want to clear out the transform.
-             */
             IIpSecService svc = getIpSecService();
-            svc.deleteTransportModeTransform(mResourceId);
-            stopKeepalive();
+            svc.deleteTransform(mResourceId);
+            stopNattKeepalive();
         } catch (RemoteException e) {
             throw e.rethrowAsRuntimeException();
         } finally {
@@ -219,42 +205,35 @@ public final class IpSecTransform implements AutoCloseable {
     private final Context mContext;
     private final CloseGuard mCloseGuard = CloseGuard.get();
     private ConnectivityManager.PacketKeepalive mKeepalive;
-    private int mKeepaliveStatus = ConnectivityManager.PacketKeepalive.NO_KEEPALIVE;
-    private Object mKeepaliveSyncLock = new Object();
-    private ConnectivityManager.PacketKeepaliveCallback mKeepaliveCallback =
+    private Handler mCallbackHandler;
+    private final ConnectivityManager.PacketKeepaliveCallback mKeepaliveCallback =
             new ConnectivityManager.PacketKeepaliveCallback() {
 
                 @Override
                 public void onStarted() {
-                    synchronized (mKeepaliveSyncLock) {
-                        mKeepaliveStatus = ConnectivityManager.PacketKeepalive.SUCCESS;
-                        mKeepaliveSyncLock.notifyAll();
+                    synchronized (this) {
+                        mCallbackHandler.post(() -> mUserKeepaliveCallback.onStarted());
                     }
                 }
 
                 @Override
                 public void onStopped() {
-                    synchronized (mKeepaliveSyncLock) {
-                        mKeepaliveStatus = ConnectivityManager.PacketKeepalive.NO_KEEPALIVE;
-                        mKeepaliveSyncLock.notifyAll();
+                    synchronized (this) {
+                        mKeepalive = null;
+                        mCallbackHandler.post(() -> mUserKeepaliveCallback.onStopped());
                     }
                 }
 
                 @Override
                 public void onError(int error) {
-                    synchronized (mKeepaliveSyncLock) {
-                        mKeepaliveStatus = error;
-                        mKeepaliveSyncLock.notifyAll();
+                    synchronized (this) {
+                        mKeepalive = null;
+                        mCallbackHandler.post(() -> mUserKeepaliveCallback.onError(error));
                     }
                 }
             };
 
-    /* Package */
-    void startKeepalive(Context c) {
-        if (mConfig.getNattKeepaliveInterval() != 0) {
-            Log.wtf(TAG, "Keepalive not yet supported.");
-        }
-    }
+    private NattKeepaliveCallback mUserKeepaliveCallback;
 
     /** @hide */
     @VisibleForTesting
@@ -262,109 +241,155 @@ public final class IpSecTransform implements AutoCloseable {
         return mResourceId;
     }
 
-    /* Package */
-    void stopKeepalive() {
-        return;
+    /**
+     * A callback class to provide status information regarding a NAT-T keepalive session
+     *
+     * <p>Use this callback to receive status information regarding a NAT-T keepalive session
+     * by registering it when calling {@link #startNattKeepalive}.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static class NattKeepaliveCallback {
+        /** The specified {@code Network} is not connected. */
+        public static final int ERROR_INVALID_NETWORK = 1;
+        /** The hardware does not support this request. */
+        public static final int ERROR_HARDWARE_UNSUPPORTED = 2;
+        /** The hardware returned an error. */
+        public static final int ERROR_HARDWARE_ERROR = 3;
+
+        /** The requested keepalive was successfully started. */
+        public void onStarted() {}
+        /** The keepalive was successfully stopped. */
+        public void onStopped() {}
+        /** An error occurred. */
+        public void onError(int error) {}
     }
 
     /**
-     * This class is used to build {@link IpSecTransform} objects.
+     * Start a NAT-T keepalive session for the current transform.
+     *
+     * For a transform that is using UDP encapsulated IPv4, NAT-T offloading provides
+     * a power efficient mechanism of sending NAT-T packets at a specified interval.
+     *
+     * @param userCallback a {@link #NattKeepaliveCallback} to receive asynchronous status
+     *      information about the requested NAT-T keepalive session.
+     * @param intervalSeconds the interval between NAT-T keepalives being sent. The
+     *      the allowed range is between 20 and 3600 seconds.
+     * @param handler a handler on which to post callbacks when received.
+     *
+     * @hide
      */
+    @SystemApi
+    @RequiresPermission(anyOf = {
+            android.Manifest.permission.NETWORK_STACK,
+            android.Manifest.permission.PACKET_KEEPALIVE_OFFLOAD
+    })
+    public void startNattKeepalive(@NonNull NattKeepaliveCallback userCallback,
+            int intervalSeconds, @NonNull Handler handler) throws IOException {
+        checkNotNull(userCallback);
+        if (intervalSeconds < 20 || intervalSeconds > 3600) {
+            throw new IllegalArgumentException("Invalid NAT-T keepalive interval");
+        }
+        checkNotNull(handler);
+        if (mResourceId == INVALID_RESOURCE_ID) {
+            throw new IllegalStateException(
+                    "Packet keepalive cannot be started for an inactive transform");
+        }
+
+        synchronized (mKeepaliveCallback) {
+            if (mKeepaliveCallback != null) {
+                throw new IllegalStateException("Keepalive already active");
+            }
+
+            mUserKeepaliveCallback = userCallback;
+            ConnectivityManager cm = (ConnectivityManager) mContext.getSystemService(
+                    Context.CONNECTIVITY_SERVICE);
+            mKeepalive = cm.startNattKeepalive(
+                    mConfig.getNetwork(), intervalSeconds, mKeepaliveCallback,
+                    NetworkUtils.numericToInetAddress(mConfig.getSourceAddress()),
+                    4500, // FIXME urgently, we need to get the port number from the Encap socket
+                    NetworkUtils.numericToInetAddress(mConfig.getDestinationAddress()));
+            mCallbackHandler = handler;
+        }
+    }
+
+    /**
+     * Stop an ongoing NAT-T keepalive session.
+     *
+     * Calling this API will request that an ongoing NAT-T keepalive session be terminated.
+     * If this API is not called when a Transform is closed, the underlying NAT-T session will
+     * be terminated automatically.
+     *
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(anyOf = {
+            android.Manifest.permission.NETWORK_STACK,
+            android.Manifest.permission.PACKET_KEEPALIVE_OFFLOAD
+    })
+    public void stopNattKeepalive() {
+        synchronized (mKeepaliveCallback) {
+            if (mKeepalive == null) {
+                Log.e(TAG, "No active keepalive to stop");
+                return;
+            }
+            mKeepalive.stop();
+        }
+    }
+
+    /** This class is used to build {@link IpSecTransform} objects. */
     public static class Builder {
         private Context mContext;
         private IpSecConfig mConfig;
 
         /**
-         * Set the encryption algorithm for the given direction.
-         *
-         * <p>If encryption is set for a direction without also providing an SPI for that direction,
-         * creation of an {@code IpSecTransform} will fail when attempting to build the transform.
+         * Set the encryption algorithm.
          *
          * <p>Encryption is mutually exclusive with authenticated encryption.
          *
-         * @param direction either {@link #DIRECTION_IN} or {@link #DIRECTION_OUT}
          * @param algo {@link IpSecAlgorithm} specifying the encryption to be applied.
          */
-        public IpSecTransform.Builder setEncryption(
-                @TransformDirection int direction, IpSecAlgorithm algo) {
+        @NonNull
+        public IpSecTransform.Builder setEncryption(@NonNull IpSecAlgorithm algo) {
             // TODO: throw IllegalArgumentException if algo is not an encryption algorithm.
-            mConfig.setEncryption(direction, algo);
+            Preconditions.checkNotNull(algo);
+            mConfig.setEncryption(algo);
             return this;
         }
 
         /**
-         * Set the authentication (integrity) algorithm for the given direction.
-         *
-         * <p>If authentication is set for a direction without also providing an SPI for that
-         * direction, creation of an {@code IpSecTransform} will fail when attempting to build the
-         * transform.
+         * Set the authentication (integrity) algorithm.
          *
          * <p>Authentication is mutually exclusive with authenticated encryption.
          *
-         * @param direction either {@link #DIRECTION_IN} or {@link #DIRECTION_OUT}
          * @param algo {@link IpSecAlgorithm} specifying the authentication to be applied.
          */
-        public IpSecTransform.Builder setAuthentication(
-                @TransformDirection int direction, IpSecAlgorithm algo) {
+        @NonNull
+        public IpSecTransform.Builder setAuthentication(@NonNull IpSecAlgorithm algo) {
             // TODO: throw IllegalArgumentException if algo is not an authentication algorithm.
-            mConfig.setAuthentication(direction, algo);
+            Preconditions.checkNotNull(algo);
+            mConfig.setAuthentication(algo);
             return this;
         }
 
         /**
-         * Set the authenticated encryption algorithm for the given direction.
+         * Set the authenticated encryption algorithm.
          *
-         * <p>If an authenticated encryption algorithm is set for a given direction without also
-         * providing an SPI for that direction, creation of an {@code IpSecTransform} will fail when
-         * attempting to build the transform.
-         *
-         * <p>The Authenticated Encryption (AE) class of algorithms are also known as Authenticated
-         * Encryption with Associated Data (AEAD) algorithms, or Combined mode algorithms (as
-         * referred to in <a href="https://tools.ietf.org/html/rfc4301">RFC 4301</a>).
+         * <p>The Authenticated Encryption (AE) class of algorithms are also known as
+         * Authenticated Encryption with Associated Data (AEAD) algorithms, or Combined mode
+         * algorithms (as referred to in
+         * <a href="https://tools.ietf.org/html/rfc4301">RFC 4301</a>).
          *
          * <p>Authenticated encryption is mutually exclusive with encryption and authentication.
          *
-         * @param direction either {@link #DIRECTION_IN} or {@link #DIRECTION_OUT}
          * @param algo {@link IpSecAlgorithm} specifying the authenticated encryption algorithm to
          *     be applied.
          */
-        public IpSecTransform.Builder setAuthenticatedEncryption(
-                @TransformDirection int direction, IpSecAlgorithm algo) {
-            mConfig.setAuthenticatedEncryption(direction, algo);
-            return this;
-        }
-
-        /**
-         * Set the SPI for the given direction.
-         *
-         * <p>Because IPsec operates at the IP layer, this 32-bit identifier uniquely identifies
-         * packets to a given destination address. To prevent SPI collisions, values should be
-         * reserved by calling {@link IpSecManager#reserveSecurityParameterIndex}.
-         *
-         * <p>If the SPI and algorithms are omitted for one direction, traffic in that direction
-         * will not be encrypted or authenticated.
-         *
-         * @param direction either {@link #DIRECTION_IN} or {@link #DIRECTION_OUT}
-         * @param spi a unique {@link IpSecManager.SecurityParameterIndex} to identify transformed
-         *     traffic
-         */
-        public IpSecTransform.Builder setSpi(
-                @TransformDirection int direction, IpSecManager.SecurityParameterIndex spi) {
-            mConfig.setSpiResourceId(direction, spi.getResourceId());
-            return this;
-        }
-
-        /**
-         * Set the {@link Network} which will carry tunneled traffic.
-         *
-         * <p>Restricts the transformed traffic to a particular {@link Network}. This is required
-         * for tunnel mode, otherwise tunneled traffic would be sent on the default network.
-         *
-         * @hide
-         */
-        @SystemApi
-        public IpSecTransform.Builder setUnderlyingNetwork(Network net) {
-            mConfig.setNetwork(net);
+        @NonNull
+        public IpSecTransform.Builder setAuthenticatedEncryption(@NonNull IpSecAlgorithm algo) {
+            Preconditions.checkNotNull(algo);
+            mConfig.setAuthenticatedEncryption(algo);
             return this;
         }
 
@@ -374,40 +399,23 @@ public final class IpSecTransform implements AutoCloseable {
          * <p>This allows IPsec traffic to pass through a NAT.
          *
          * @see <a href="https://tools.ietf.org/html/rfc3948">RFC 3948, UDP Encapsulation of IPsec
-         * ESP Packets</a>
+         *     ESP Packets</a>
          * @see <a href="https://tools.ietf.org/html/rfc7296#section-2.23">RFC 7296 section 2.23,
-         * NAT Traversal of IKEv2</a>
-         *
+         *     NAT Traversal of IKEv2</a>
          * @param localSocket a socket for sending and receiving encapsulated traffic
          * @param remotePort the UDP port number of the remote host that will send and receive
          *     encapsulated traffic. In the case of IKEv2, this should be port 4500.
          */
+        @NonNull
         public IpSecTransform.Builder setIpv4Encapsulation(
-                IpSecManager.UdpEncapsulationSocket localSocket, int remotePort) {
+                @NonNull IpSecManager.UdpEncapsulationSocket localSocket, int remotePort) {
+            Preconditions.checkNotNull(localSocket);
             mConfig.setEncapType(ENCAP_ESPINUDP);
+            if (localSocket.getResourceId() == INVALID_RESOURCE_ID) {
+                throw new IllegalArgumentException("Invalid UdpEncapsulationSocket");
+            }
             mConfig.setEncapSocketResourceId(localSocket.getResourceId());
             mConfig.setEncapRemotePort(remotePort);
-            return this;
-        }
-
-        // TODO: Decrease the minimum keepalive to maybe 10?
-        // TODO: Probably a better exception to throw for NATTKeepalive failure
-        // TODO: Specify the needed NATT keepalive permission.
-        /**
-         * Set NAT-T keepalives to be sent with a given interval.
-         *
-         * <p>This will set power-efficient keepalive packets to be sent by the system. If NAT-T
-         * keepalive is requested but cannot be activated, then creation of an {@link
-         * IpSecTransform} will fail when calling the build method.
-         *
-         * @param intervalSeconds the maximum number of seconds between keepalive packets. Must be
-         *     between 20s and 3600s.
-         *
-         * @hide
-         */
-        @SystemApi
-        public IpSecTransform.Builder setNattKeepalive(int intervalSeconds) {
-            mConfig.setNattKeepaliveInterval(intervalSeconds);
             return this;
         }
 
@@ -418,22 +426,34 @@ public final class IpSecTransform implements AutoCloseable {
          * will not affect any network traffic until it has been applied to one or more sockets.
          *
          * @see IpSecManager#applyTransportModeTransform
-         *
-         * @param remoteAddress the remote {@code InetAddress} of traffic on sockets that will use
-         *     this transform
+         * @param sourceAddress the source {@code InetAddress} of traffic on sockets that will use
+         *     this transform; this address must belong to the Network used by all sockets that
+         *     utilize this transform; if provided, then only traffic originating from the
+         *     specified source address will be processed.
+         * @param spi a unique {@link IpSecManager.SecurityParameterIndex} to identify transformed
+         *     traffic
          * @throws IllegalArgumentException indicating that a particular combination of transform
          *     properties is invalid
-         * @throws IpSecManager.ResourceUnavailableException indicating that too many transforms are
-         *     active
+         * @throws IpSecManager.ResourceUnavailableException indicating that too many transforms
+         *     are active
          * @throws IpSecManager.SpiUnavailableException indicating the rare case where an SPI
          *     collides with an existing transform
          * @throws IOException indicating other errors
          */
-        public IpSecTransform buildTransportModeTransform(InetAddress remoteAddress)
+        @NonNull
+        public IpSecTransform buildTransportModeTransform(
+                @NonNull InetAddress sourceAddress,
+                @NonNull IpSecManager.SecurityParameterIndex spi)
                 throws IpSecManager.ResourceUnavailableException,
                         IpSecManager.SpiUnavailableException, IOException {
+            Preconditions.checkNotNull(sourceAddress);
+            Preconditions.checkNotNull(spi);
+            if (spi.getResourceId() == INVALID_RESOURCE_ID) {
+                throw new IllegalArgumentException("Invalid SecurityParameterIndex");
+            }
             mConfig.setMode(MODE_TRANSPORT);
-            mConfig.setRemoteAddress(remoteAddress.getHostAddress());
+            mConfig.setSourceAddress(sourceAddress.getHostAddress());
+            mConfig.setSpiResourceId(spi.getResourceId());
             // FIXME: modifying a builder after calling build can change the built transform.
             return new IpSecTransform(mContext, mConfig).activate();
         }
@@ -442,23 +462,37 @@ public final class IpSecTransform implements AutoCloseable {
          * Build and return an {@link IpSecTransform} object as a Tunnel Mode Transform. Some
          * parameters have interdependencies that are checked at build time.
          *
-         * @param localAddress the {@link InetAddress} that provides the local endpoint for this
+         * @param sourceAddress the {@link InetAddress} that provides the source address for this
          *     IPsec tunnel. This is almost certainly an address belonging to the {@link Network}
          *     that will originate the traffic, which is set as the {@link #setUnderlyingNetwork}.
-         * @param remoteAddress the {@link InetAddress} representing the remote endpoint of this
-         *     IPsec tunnel.
+         * @param spi a unique {@link IpSecManager.SecurityParameterIndex} to identify transformed
+         *     traffic
          * @throws IllegalArgumentException indicating that a particular combination of transform
          *     properties is invalid.
+         * @throws IpSecManager.ResourceUnavailableException indicating that too many transforms
+         *     are active
+         * @throws IpSecManager.SpiUnavailableException indicating the rare case where an SPI
+         *     collides with an existing transform
+         * @throws IOException indicating other errors
          * @hide
          */
+        @SystemApi
+        @NonNull
+        @RequiresPermission(android.Manifest.permission.NETWORK_STACK)
         public IpSecTransform buildTunnelModeTransform(
-                InetAddress localAddress, InetAddress remoteAddress) {
-            //FIXME: argument validation here
-            //throw new IllegalArgumentException("Natt Keepalive requires UDP Encapsulation");
-            mConfig.setLocalAddress(localAddress.getHostAddress());
-            mConfig.setRemoteAddress(remoteAddress.getHostAddress());
+                @NonNull InetAddress sourceAddress,
+                @NonNull IpSecManager.SecurityParameterIndex spi)
+                throws IpSecManager.ResourceUnavailableException,
+                        IpSecManager.SpiUnavailableException, IOException {
+            Preconditions.checkNotNull(sourceAddress);
+            Preconditions.checkNotNull(spi);
+            if (spi.getResourceId() == INVALID_RESOURCE_ID) {
+                throw new IllegalArgumentException("Invalid SecurityParameterIndex");
+            }
             mConfig.setMode(MODE_TUNNEL);
-            return new IpSecTransform(mContext, mConfig);
+            mConfig.setSourceAddress(sourceAddress.getHostAddress());
+            mConfig.setSpiResourceId(spi.getResourceId());
+            return new IpSecTransform(mContext, mConfig).activate();
         }
 
         /**

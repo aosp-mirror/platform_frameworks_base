@@ -1950,6 +1950,33 @@ public abstract class Context {
 
     /**
      * Broadcast the given intent to all interested BroadcastReceivers, allowing
+     * an array of required permissions to be enforced.  This call is asynchronous; it returns
+     * immediately, and you will continue executing while the receivers are run.  No results are
+     * propagated from receivers and receivers can not abort the broadcast. If you want to allow
+     * receivers to propagate results or abort the broadcast, you must send an ordered broadcast
+     * using {@link #sendOrderedBroadcast(Intent, String)}.
+     *
+     * <p>See {@link BroadcastReceiver} for more information on Intent broadcasts.
+     *
+     * @param intent The Intent to broadcast; all receivers matching this
+     *               Intent will receive the broadcast.
+     * @param user The user to send the broadcast to.
+     * @param receiverPermissions Array of names of permissions that a receiver must hold
+     *                            in order to receive your broadcast.
+     *                            If null or empty, no permissions are required.
+     *
+     * @see android.content.BroadcastReceiver
+     * @see #registerReceiver
+     * @see #sendBroadcast(Intent)
+     * @see #sendOrderedBroadcast(Intent, String)
+     * @see #sendOrderedBroadcast(Intent, String, BroadcastReceiver, Handler, int, String, Bundle)
+     * @hide
+     */
+    public abstract void sendBroadcastAsUserMultiplePermissions(Intent intent, UserHandle user,
+            String[] receiverPermissions);
+
+    /**
+     * Broadcast the given intent to all interested BroadcastReceivers, allowing
      * an optional required permission to be enforced.  This
      * call is asynchronous; it returns immediately, and you will continue
      * executing while the receivers are run.  No results are propagated from
@@ -3583,14 +3610,22 @@ public abstract class Context {
      *
      * @see #getSystemService
      * @see android.telephony.euicc.EuiccManager
-     * TODO(b/35851809): Unhide this API.
-     * @hide
      */
-    public static final String EUICC_SERVICE = "euicc_service";
+    public static final String EUICC_SERVICE = "euicc";
 
     /**
-     * Use with {@link #getSystemService} to retrieve a
-     * {@link android.text.ClipboardManager} for accessing and modifying
+     * Use with {@link #getSystemService(String)} to retrieve a
+     * {@link android.telephony.euicc.EuiccCardManager} to access the device eUICC (embedded SIM).
+     *
+     * @see #getSystemService(String)
+     * @see android.telephony.euicc.EuiccCardManager
+     * @hide
+     */
+    @SystemApi
+    public static final String EUICC_CARD_SERVICE = "euicc_card";
+
+    /**
+     * Use with {@link #getSystemService(String)} to retrieve a
      * {@link android.content.ClipboardManager} for accessing and modifying
      * the contents of the global clipboard.
      *
@@ -4050,6 +4085,16 @@ public abstract class Context {
      * @see #getSystemService
      */
     public static final String TIME_ZONE_RULES_MANAGER_SERVICE = "timezone";
+
+    /**
+     * Use with {@link #getSystemService} to retrieve a
+     * {@link android.se.omapi.ISecureElementService}
+     * for accessing the SecureElementService.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final String SECURE_ELEMENT_SERVICE = "secure_element";
 
     /**
      * Determine whether the given permission is allowed for a particular

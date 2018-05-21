@@ -301,6 +301,9 @@ class TaskSnapshotSurface implements StartingSurface {
     }
 
     private void drawSizeMismatchSnapshot(GraphicBuffer buffer) {
+        if (!mSurface.isValid()) {
+            throw new IllegalStateException("mSurface does not hold a valid surface.");
+        }
         final SurfaceSession session = new SurfaceSession(mSurface);
 
         // Keep a reference to it such that it doesn't get destroyed when finalized.

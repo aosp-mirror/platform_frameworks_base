@@ -43,6 +43,8 @@ public final class AudioPlaybackConfiguration implements Parcelable {
     /** @hide */
     public static final int PLAYER_PIID_INVALID = -1;
     /** @hide */
+    public static final int PLAYER_PIID_UNASSIGNED = 0;
+    /** @hide */
     public static final int PLAYER_UPID_INVALID = -1;
 
     // information about the implementation

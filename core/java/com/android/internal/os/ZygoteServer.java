@@ -44,7 +44,19 @@ class ZygoteServer {
 
     private static final String ANDROID_SOCKET_PREFIX = "ANDROID_SOCKET_";
 
+    /**
+     * Listening socket that accepts new server connections.
+     */
     private LocalServerSocket mServerSocket;
+
+    /**
+     * Whether or not mServerSocket's underlying FD should be closed directly.
+     * If mServerSocket is created with an existing FD, closing the socket does
+     * not close the FD and it must be closed explicitly. If the socket is created
+     * with a name instead, then closing the socket will close the underlying FD
+     * and it should not be double-closed.
+     */
+    private boolean mCloseSocketFd;
 
     /**
      * Set by the child process, immediately after a call to {@code Zygote.forkAndSpecialize}.
@@ -59,11 +71,12 @@ class ZygoteServer {
     }
 
     /**
-     * Registers a server socket for zygote command connections
+     * Registers a server socket for zygote command connections. This locates the server socket
+     * file descriptor through an ANDROID_SOCKET_ environment variable.
      *
      * @throws RuntimeException when open fails
      */
-    void registerServerSocket(String socketName) {
+    void registerServerSocketFromEnv(String socketName) {
         if (mServerSocket == null) {
             int fileDesc;
             final String fullSocketName = ANDROID_SOCKET_PREFIX + socketName;
@@ -78,9 +91,26 @@ class ZygoteServer {
                 FileDescriptor fd = new FileDescriptor();
                 fd.setInt$(fileDesc);
                 mServerSocket = new LocalServerSocket(fd);
+                mCloseSocketFd = true;
             } catch (IOException ex) {
                 throw new RuntimeException(
                         "Error binding to local socket '" + fileDesc + "'", ex);
+            }
+        }
+    }
+
+    /**
+     * Registers a server socket for zygote command connections. This opens the server socket
+     * at the specified name in the abstract socket namespace.
+     */
+    void registerServerSocketAtAbstractName(String socketName) {
+        if (mServerSocket == null) {
+            try {
+                mServerSocket = new LocalServerSocket(socketName);
+                mCloseSocketFd = false;
+            } catch (IOException ex) {
+                throw new RuntimeException(
+                        "Error binding to abstract socket '" + socketName + "'", ex);
             }
         }
     }
@@ -112,7 +142,7 @@ class ZygoteServer {
             if (mServerSocket != null) {
                 FileDescriptor fd = mServerSocket.getFileDescriptor();
                 mServerSocket.close();
-                if (fd != null) {
+                if (fd != null && mCloseSocketFd) {
                     Os.close(fd);
                 }
             }
@@ -219,6 +249,11 @@ class ZygoteServer {
                             Log.e(TAG, "Caught post-fork exception in child process.", e);
                             throw e;
                         }
+                    } finally {
+                        // Reset the child flag, in the event that the child process is a child-
+                        // zygote. The flag will not be consulted this loop pass after the Runnable
+                        // is returned.
+                        mIsForkChild = false;
                     }
                 }
             }

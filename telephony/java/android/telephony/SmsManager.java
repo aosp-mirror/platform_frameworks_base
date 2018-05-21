@@ -17,6 +17,7 @@
 package android.telephony;
 
 import android.annotation.RequiresPermission;
+import android.annotation.SuppressAutoDoc;
 import android.annotation.SystemApi;
 import android.app.ActivityThread;
 import android.app.PendingIntent;
@@ -338,16 +339,21 @@ public final class SmsManager {
     /**
      * Send a text based SMS without writing it into the SMS Provider.
      *
-     * <p>Requires Permission:
-     * {@link android.Manifest.permission#MODIFY_PHONE_STATE} or the calling app has carrier
-     * privileges.
-     * </p>
+     * <p>Requires Permission: Both {@link android.Manifest.permission#SEND_SMS} and
+     * {@link android.Manifest.permission#MODIFY_PHONE_STATE}, or that the calling app has carrier
+     * privileges (see {@link TelephonyManager#hasCarrierPrivileges}), or that the calling app is
+     * the default IMS app (see
+     * {@link CarrierConfigManager#KEY_CONFIG_IMS_PACKAGE_OVERRIDE_STRING}).
      *
      * @see #sendTextMessage(String, String, String, PendingIntent, PendingIntent)
      * @hide
      */
     @SystemApi
-    @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE)
+    @SuppressAutoDoc // Blocked by b/72967236 - no support for carrier privileges
+    @RequiresPermission(allOf = {
+            android.Manifest.permission.MODIFY_PHONE_STATE,
+            android.Manifest.permission.SEND_SMS
+    })
     public void sendTextMessageWithoutPersisting(
             String destinationAddress, String scAddress, String text,
             PendingIntent sentIntent, PendingIntent deliveryIntent) {
@@ -387,6 +393,112 @@ public final class SmsManager {
     }
 
     /**
+     * Send a text based SMS with messaging options.
+     *
+     * @param destinationAddress the address to send the message to
+     * @param scAddress is the service center address or null to use
+     *  the current default SMSC
+     * @param text the body of the message to send
+     * @param sentIntent if not NULL this <code>PendingIntent</code> is
+     *  broadcast when the message is successfully sent, or failed.
+     *  The result code will be <code>Activity.RESULT_OK</code> for success,
+     *  or one of these errors:<br>
+     *  <code>RESULT_ERROR_GENERIC_FAILURE</code><br>
+     *  <code>RESULT_ERROR_RADIO_OFF</code><br>
+     *  <code>RESULT_ERROR_NULL_PDU</code><br>
+     *  For <code>RESULT_ERROR_GENERIC_FAILURE</code> the sentIntent may include
+     *  the extra "errorCode" containing a radio technology specific value,
+     *  generally only useful for troubleshooting.<br>
+     *  The per-application based SMS control checks sentIntent. If sentIntent
+     *  is NULL the caller will be checked against all unknown applications,
+     *  which cause smaller number of SMS to be sent in checking period.
+     * @param deliveryIntent if not NULL this <code>PendingIntent</code> is
+     *  broadcast when the message is delivered to the recipient.  The
+     *  raw pdu of the status report is in the extended data ("pdu").
+     * @param priority Priority level of the message
+     *  Refer specification See 3GPP2 C.S0015-B, v2.0, table 4.5.9-1
+     *  ---------------------------------
+     *  PRIORITY      | Level of Priority
+     *  ---------------------------------
+     *      '00'      |     Normal
+     *      '01'      |     Interactive
+     *      '10'      |     Urgent
+     *      '11'      |     Emergency
+     *  ----------------------------------
+     *  Any Other values included Negative considered as Invalid Priority Indicator of the message.
+     * @param expectMore is a boolean to indicate the sending messages through same link or not.
+     * @param validityPeriod Validity Period of the message in mins.
+     *  Refer specification 3GPP TS 23.040 V6.8.1 section 9.2.3.12.1.
+     *  Validity Period(Minimum) -> 5 mins
+     *  Validity Period(Maximum) -> 635040 mins(i.e.63 weeks).
+     *  Any Other values included Negative considered as Invalid Validity Period of the message.
+     *
+     * @throws IllegalArgumentException if destinationAddress or text are empty
+     * {@hide}
+     */
+    public void sendTextMessage(
+            String destinationAddress, String scAddress, String text,
+            PendingIntent sentIntent, PendingIntent deliveryIntent,
+            int priority, boolean expectMore, int validityPeriod) {
+        sendTextMessageInternal(destinationAddress, scAddress, text, sentIntent, deliveryIntent,
+                true /* persistMessage*/, priority, expectMore, validityPeriod);
+    }
+
+    private void sendTextMessageInternal(
+            String destinationAddress, String scAddress, String text,
+            PendingIntent sentIntent, PendingIntent deliveryIntent, boolean persistMessage,
+            int priority, boolean expectMore, int validityPeriod) {
+        if (TextUtils.isEmpty(destinationAddress)) {
+            throw new IllegalArgumentException("Invalid destinationAddress");
+        }
+
+        if (TextUtils.isEmpty(text)) {
+            throw new IllegalArgumentException("Invalid message body");
+        }
+
+        if (priority < 0x00 || priority > 0x03) {
+            throw new IllegalArgumentException("Invalid priority");
+        }
+
+        if (validityPeriod < 0x05 || validityPeriod > 0x09b0a0) {
+            throw new IllegalArgumentException("Invalid validity period");
+        }
+
+        try {
+             ISms iccISms = getISmsServiceOrThrow();
+            if (iccISms != null) {
+                iccISms.sendTextForSubscriberWithOptions(getSubscriptionId(),
+                        ActivityThread.currentPackageName(), destinationAddress, scAddress, text,
+                        sentIntent, deliveryIntent, persistMessage,  priority, expectMore,
+                        validityPeriod);
+            }
+        } catch (RemoteException ex) {
+            // ignore it
+        }
+    }
+
+    /**
+     * Send a text based SMS without writing it into the SMS Provider.
+     *
+     * <p>Requires Permission:
+     * {@link android.Manifest.permission#MODIFY_PHONE_STATE} or the calling app has carrier
+     * privileges.
+     * </p>
+     *
+     * @see #sendTextMessage(String, String, String, PendingIntent,
+     * PendingIntent, int, boolean, int)
+     * @hide
+     */
+    public void sendTextMessageWithoutPersisting(
+            String destinationAddress, String scAddress, String text,
+            PendingIntent sentIntent, PendingIntent deliveryIntent, int priority,
+            boolean expectMore, int validityPeriod) {
+        sendTextMessageInternal(destinationAddress, scAddress, text, sentIntent, deliveryIntent,
+                false /* persistMessage */, priority, expectMore, validityPeriod);
+    }
+
+    /**
+     *
      * Inject an SMS PDU into the android application framework.
      *
      * <p>Requires permission: {@link android.Manifest.permission#MODIFY_PHONE_STATE} or carrier
@@ -541,6 +653,140 @@ public final class SmsManager {
     }
 
     /**
+     * Send a multi-part text based SMS with messaging options. The callee should have already
+     * divided the message into correctly sized parts by calling
+     * <code>divideMessage</code>.
+     *
+     * <p class="note"><strong>Note:</strong> Using this method requires that your app has the
+     * {@link android.Manifest.permission#SEND_SMS} permission.</p>
+     *
+     * <p class="note"><strong>Note:</strong> Beginning with Android 4.4 (API level 19), if
+     * <em>and only if</em> an app is not selected as the default SMS app, the system automatically
+     * writes messages sent using this method to the SMS Provider (the default SMS app is always
+     * responsible for writing its sent messages to the SMS Provider). For information about
+     * how to behave as the default SMS app, see {@link android.provider.Telephony}.</p>
+     *
+     * @param destinationAddress the address to send the message to
+     * @param scAddress is the service center address or null to use
+     *   the current default SMSC
+     * @param parts an <code>ArrayList</code> of strings that, in order,
+     *   comprise the original message
+     * @param sentIntents if not null, an <code>ArrayList</code> of
+     *   <code>PendingIntent</code>s (one for each message part) that is
+     *   broadcast when the corresponding message part has been sent.
+     *   The result code will be <code>Activity.RESULT_OK</code> for success,
+     *   or one of these errors:<br>
+     *   <code>RESULT_ERROR_GENERIC_FAILURE</code><br>
+     *   <code>RESULT_ERROR_RADIO_OFF</code><br>
+     *   <code>RESULT_ERROR_NULL_PDU</code><br>
+     *   For <code>RESULT_ERROR_GENERIC_FAILURE</code> each sentIntent may include
+     *   the extra "errorCode" containing a radio technology specific value,
+     *   generally only useful for troubleshooting.<br>
+     *   The per-application based SMS control checks sentIntent. If sentIntent
+     *   is NULL the caller will be checked against all unknown applications,
+     *   which cause smaller number of SMS to be sent in checking period.
+     * @param deliveryIntents if not null, an <code>ArrayList</code> of
+     *   <code>PendingIntent</code>s (one for each message part) that is
+     *   broadcast when the corresponding message part has been delivered
+     *   to the recipient.  The raw pdu of the status report is in the
+     *   extended data ("pdu").
+     * @param priority Priority level of the message
+     *  Refer specification See 3GPP2 C.S0015-B, v2.0, table 4.5.9-1
+     *  ---------------------------------
+     *  PRIORITY      | Level of Priority
+     *  ---------------------------------
+     *      '00'      |     Normal
+     *      '01'      |     Interactive
+     *      '10'      |     Urgent
+     *      '11'      |     Emergency
+     *  ----------------------------------
+     *  Any Other values included Negative considered as Invalid Priority Indicator of the message.
+     * @param expectMore is a boolean to indicate the sending messages through same link or not.
+     * @param validityPeriod Validity Period of the message in mins.
+     *  Refer specification 3GPP TS 23.040 V6.8.1 section 9.2.3.12.1.
+     *  Validity Period(Minimum) -> 5 mins
+     *  Validity Period(Maximum) -> 635040 mins(i.e.63 weeks).
+     *  Any Other values included Negative considered as Invalid Validity Period of the message.
+     *
+     * @throws IllegalArgumentException if destinationAddress or data are empty
+     * {@hide}
+     */
+    public void sendMultipartTextMessage(
+            String destinationAddress, String scAddress, ArrayList<String> parts,
+            ArrayList<PendingIntent> sentIntents, ArrayList<PendingIntent> deliveryIntents,
+            int priority, boolean expectMore, int validityPeriod) {
+        sendMultipartTextMessageInternal(destinationAddress, scAddress, parts, sentIntents,
+                deliveryIntents, true /* persistMessage*/);
+    }
+
+    private void sendMultipartTextMessageInternal(
+            String destinationAddress, String scAddress, List<String> parts,
+            List<PendingIntent> sentIntents, List<PendingIntent> deliveryIntents,
+            boolean persistMessage, int priority, boolean expectMore, int validityPeriod) {
+        if (TextUtils.isEmpty(destinationAddress)) {
+            throw new IllegalArgumentException("Invalid destinationAddress");
+        }
+        if (parts == null || parts.size() < 1) {
+            throw new IllegalArgumentException("Invalid message body");
+        }
+
+        if (priority < 0x00 || priority > 0x03) {
+            throw new IllegalArgumentException("Invalid priority");
+        }
+
+        if (validityPeriod < 0x05 || validityPeriod > 0x09b0a0) {
+            throw new IllegalArgumentException("Invalid validity period");
+        }
+
+        if (parts.size() > 1) {
+            try {
+                 ISms iccISms = getISmsServiceOrThrow();
+                if (iccISms != null) {
+                    iccISms.sendMultipartTextForSubscriberWithOptions(getSubscriptionId(),
+                            ActivityThread.currentPackageName(), destinationAddress, scAddress,
+                            parts, sentIntents, deliveryIntents, persistMessage, priority,
+                            expectMore, validityPeriod);
+                }
+            } catch (RemoteException ex) {
+                // ignore it
+            }
+        } else {
+            PendingIntent sentIntent = null;
+            PendingIntent deliveryIntent = null;
+            if (sentIntents != null && sentIntents.size() > 0) {
+                sentIntent = sentIntents.get(0);
+            }
+            if (deliveryIntents != null && deliveryIntents.size() > 0) {
+                deliveryIntent = deliveryIntents.get(0);
+            }
+            sendTextMessageInternal(destinationAddress, scAddress, parts.get(0),
+                    sentIntent, deliveryIntent, persistMessage, priority, expectMore,
+                    validityPeriod);
+        }
+    }
+
+    /**
+     * Send a multi-part text based SMS without writing it into the SMS Provider.
+     *
+     * <p>Requires Permission:
+     * {@link android.Manifest.permission#MODIFY_PHONE_STATE} or the calling app has carrier
+     * privileges.
+     * </p>
+     *
+     * @see #sendMultipartTextMessage(String, String, ArrayList, ArrayList,
+     * ArrayList, int, boolean, int)
+     * @hide
+     **/
+    public void sendMultipartTextMessageWithoutPersisting(
+            String destinationAddress, String scAddress, List<String> parts,
+            List<PendingIntent> sentIntents, List<PendingIntent> deliveryIntents,
+            int priority, boolean expectMore, int validityPeriod) {
+        sendMultipartTextMessageInternal(destinationAddress, scAddress, parts, sentIntents,
+                deliveryIntents, false /* persistMessage*/, priority, expectMore,
+                validityPeriod);
+    }
+
+   /**
      * Send a data based SMS to a specific application port.
      *
      * <p class="note"><strong>Note:</strong> Using this method requires that your app has the
@@ -1003,7 +1249,7 @@ public final class SmsManager {
      *   <code>getAllMessagesFromIcc</code>
      * @return <code>ArrayList</code> of <code>SmsMessage</code> objects.
      */
-    private static ArrayList<SmsMessage> createMessageListFromRawRecords(List<SmsRawData> records) {
+    private ArrayList<SmsMessage> createMessageListFromRawRecords(List<SmsRawData> records) {
         ArrayList<SmsMessage> messages = new ArrayList<SmsMessage>();
         if (records != null) {
             int count = records.size();
@@ -1011,7 +1257,8 @@ public final class SmsManager {
                 SmsRawData data = records.get(i);
                 // List contains all records, including "free" records (null)
                 if (data != null) {
-                    SmsMessage sms = SmsMessage.createFromEfRecord(i+1, data.getBytes());
+                    SmsMessage sms = SmsMessage.createFromEfRecord(i+1, data.getBytes(),
+                            getSubscriptionId());
                     if (sms != null) {
                         messages.add(sms);
                     }
@@ -1123,6 +1370,12 @@ public final class SmsManager {
 
     // SMS send failure result codes
 
+    /**
+     * No error.
+     * @hide
+     */
+    @SystemApi
+    static public final int RESULT_ERROR_NONE    = 0;
     /** Generic failure cause */
     static public final int RESULT_ERROR_GENERIC_FAILURE    = 1;
     /** Failed because radio was explicitly turned off */
@@ -1133,12 +1386,113 @@ public final class SmsManager {
     static public final int RESULT_ERROR_NO_SERVICE         = 4;
     /** Failed because we reached the sending queue limit. */
     static public final int RESULT_ERROR_LIMIT_EXCEEDED     = 5;
-    /** Failed because FDN is enabled. {@hide} */
+    /**
+     * Failed because FDN is enabled.
+     * @hide
+     */
+    @SystemApi
     static public final int RESULT_ERROR_FDN_CHECK_FAILURE  = 6;
     /** Failed because user denied the sending of this short code. */
     static public final int RESULT_ERROR_SHORT_CODE_NOT_ALLOWED = 7;
     /** Failed because the user has denied this app ever send premium short codes. */
     static public final int RESULT_ERROR_SHORT_CODE_NEVER_ALLOWED = 8;
+    /**
+     * Failed because the radio was not available
+     * @hide
+     */
+    @SystemApi
+    static public final int RESULT_RADIO_NOT_AVAILABLE = 9;
+    /**
+     * Failed because of network rejection
+     * @hide
+     */
+    @SystemApi
+    static public final int RESULT_NETWORK_REJECT = 10;
+    /**
+     * Failed because of invalid arguments
+     * @hide
+     */
+    @SystemApi
+    static public final int RESULT_INVALID_ARGUMENTS = 11;
+    /**
+     * Failed because of an invalid state
+     * @hide
+     */
+    @SystemApi
+    static public final int RESULT_INVALID_STATE = 12;
+    /**
+     * Failed because there is no memory
+     * @hide
+     */
+    @SystemApi
+    static public final int RESULT_NO_MEMORY = 13;
+    /**
+     * Failed because the sms format is not valid
+     * @hide
+     */
+    @SystemApi
+    static public final int RESULT_INVALID_SMS_FORMAT = 14;
+    /**
+     * Failed because of a system error
+     * @hide
+     */
+    @SystemApi
+    static public final int RESULT_SYSTEM_ERROR = 15;
+    /**
+     * Failed because of a modem error
+     * @hide
+     */
+    @SystemApi
+    static public final int RESULT_MODEM_ERROR = 16;
+    /**
+     * Failed because of a network error
+     * @hide
+     */
+    @SystemApi
+    static public final int RESULT_NETWORK_ERROR = 17;
+    /**
+     * Failed because of an encoding error
+     * @hide
+     */
+    @SystemApi
+    static public final int RESULT_ENCODING_ERROR = 18;
+    /**
+     * Failed because of an invalid smsc address
+     * @hide
+     */
+    @SystemApi
+    static public final int RESULT_INVALID_SMSC_ADDRESS = 19;
+    /**
+     * Failed because the operation is not allowed
+     * @hide
+     */
+    @SystemApi
+    static public final int RESULT_OPERATION_NOT_ALLOWED = 20;
+    /**
+     * Failed because of an internal error
+     * @hide
+     */
+    @SystemApi
+    static public final int RESULT_INTERNAL_ERROR = 21;
+    /**
+     * Failed because there are no resources
+     * @hide
+     */
+    @SystemApi
+    static public final int RESULT_NO_RESOURCES = 22;
+    /**
+     * Failed because the operation was cancelled
+     * @hide
+     */
+    @SystemApi
+    static public final int RESULT_CANCELLED = 23;
+    /**
+     * Failed because the request is not supported
+     * @hide
+     */
+    @SystemApi
+    static public final int RESULT_REQUEST_NOT_SUPPORTED = 24;
+
 
     static private final String PHONE_PACKAGE_NAME = "com.android.phone";
 

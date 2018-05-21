@@ -58,21 +58,24 @@ public class NetworkIdentity implements Comparable<NetworkIdentity> {
     final String mNetworkId;
     final boolean mRoaming;
     final boolean mMetered;
+    final boolean mDefaultNetwork;
 
     public NetworkIdentity(
             int type, int subType, String subscriberId, String networkId, boolean roaming,
-            boolean metered) {
+            boolean metered, boolean defaultNetwork) {
         mType = type;
         mSubType = COMBINE_SUBTYPE_ENABLED ? SUBTYPE_COMBINED : subType;
         mSubscriberId = subscriberId;
         mNetworkId = networkId;
         mRoaming = roaming;
         mMetered = metered;
+        mDefaultNetwork = defaultNetwork;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(mType, mSubType, mSubscriberId, mNetworkId, mRoaming, mMetered);
+        return Objects.hash(mType, mSubType, mSubscriberId, mNetworkId, mRoaming, mMetered,
+                mDefaultNetwork);
     }
 
     @Override
@@ -82,7 +85,8 @@ public class NetworkIdentity implements Comparable<NetworkIdentity> {
             return mType == ident.mType && mSubType == ident.mSubType && mRoaming == ident.mRoaming
                     && Objects.equals(mSubscriberId, ident.mSubscriberId)
                     && Objects.equals(mNetworkId, ident.mNetworkId)
-                    && mMetered == ident.mMetered;
+                    && mMetered == ident.mMetered
+                    && mDefaultNetwork == ident.mDefaultNetwork;
         }
         return false;
     }
@@ -109,6 +113,7 @@ public class NetworkIdentity implements Comparable<NetworkIdentity> {
             builder.append(", ROAMING");
         }
         builder.append(", metered=").append(mMetered);
+        builder.append(", defaultNetwork=").append(mDefaultNetwork);
         return builder.append("}").toString();
     }
 
@@ -125,6 +130,7 @@ public class NetworkIdentity implements Comparable<NetworkIdentity> {
         proto.write(NetworkIdentityProto.NETWORK_ID, mNetworkId);
         proto.write(NetworkIdentityProto.ROAMING, mRoaming);
         proto.write(NetworkIdentityProto.METERED, mMetered);
+        proto.write(NetworkIdentityProto.DEFAULT_NETWORK, mDefaultNetwork);
 
         proto.end(start);
     }
@@ -151,6 +157,10 @@ public class NetworkIdentity implements Comparable<NetworkIdentity> {
 
     public boolean getMetered() {
         return mMetered;
+    }
+
+    public boolean getDefaultNetwork() {
+        return mDefaultNetwork;
     }
 
     /**
@@ -183,7 +193,8 @@ public class NetworkIdentity implements Comparable<NetworkIdentity> {
      * Build a {@link NetworkIdentity} from the given {@link NetworkState},
      * assuming that any mobile networks are using the current IMSI.
      */
-    public static NetworkIdentity buildNetworkIdentity(Context context, NetworkState state) {
+    public static NetworkIdentity buildNetworkIdentity(Context context, NetworkState state,
+            boolean defaultNetwork) {
         final int type = state.networkInfo.getType();
         final int subType = state.networkInfo.getSubtype();
 
@@ -216,7 +227,8 @@ public class NetworkIdentity implements Comparable<NetworkIdentity> {
             }
         }
 
-        return new NetworkIdentity(type, subType, subscriberId, networkId, roaming, metered);
+        return new NetworkIdentity(type, subType, subscriberId, networkId, roaming, metered,
+                defaultNetwork);
     }
 
     @Override
@@ -236,6 +248,9 @@ public class NetworkIdentity implements Comparable<NetworkIdentity> {
         }
         if (res == 0) {
             res = Boolean.compare(mMetered, another.mMetered);
+        }
+        if (res == 0) {
+            res = Boolean.compare(mDefaultNetwork, another.mDefaultNetwork);
         }
         return res;
     }

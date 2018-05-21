@@ -31,7 +31,6 @@ import static org.mockito.Mockito.when;
 import static android.net.ConnectivityManager.TETHER_ERROR_ENABLE_NAT_ERROR;
 import static android.net.ConnectivityManager.TETHER_ERROR_NO_ERROR;
 import static android.net.ConnectivityManager.TETHER_ERROR_TETHER_IFACE_ERROR;
-import static android.net.ConnectivityManager.TETHER_ERROR_UNTETHER_IFACE_ERROR;
 import static android.net.ConnectivityManager.TETHERING_BLUETOOTH;
 import static android.net.ConnectivityManager.TETHERING_USB;
 import static android.net.ConnectivityManager.TETHERING_WIFI;
@@ -39,12 +38,12 @@ import static com.android.server.connectivity.tethering.IControlsTethering.STATE
 import static com.android.server.connectivity.tethering.IControlsTethering.STATE_TETHERED;
 import static com.android.server.connectivity.tethering.IControlsTethering.STATE_UNAVAILABLE;
 
-import android.net.ConnectivityManager;
 import android.net.INetworkStatsService;
 import android.net.InterfaceConfiguration;
 import android.net.LinkAddress;
 import android.net.LinkProperties;
 import android.net.RouteInfo;
+import android.net.util.InterfaceSet;
 import android.net.util.SharedLog;
 import android.os.INetworkManagementService;
 import android.os.RemoteException;
@@ -75,6 +74,7 @@ public class TetherInterfaceStateMachineTest {
     @Mock private IControlsTethering mTetherHelper;
     @Mock private InterfaceConfiguration mInterfaceConfiguration;
     @Mock private SharedLog mSharedLog;
+    @Mock private TetheringDependencies mTetheringDependencies;
 
     private final TestLooper mLooper = new TestLooper();
     private final ArgumentCaptor<LinkProperties> mLinkPropertiesCaptor =
@@ -84,7 +84,7 @@ public class TetherInterfaceStateMachineTest {
     private void initStateMachine(int interfaceType) throws Exception {
         mTestedSm = new TetherInterfaceStateMachine(
                 IFACE_NAME, mLooper.getLooper(), interfaceType, mSharedLog,
-                mNMService, mStatsService, mTetherHelper);
+                mNMService, mStatsService, mTetherHelper, mTetheringDependencies);
         mTestedSm.start();
         // Starting the state machine always puts us in a consistent state and notifies
         // the rest of the world that we've changed from an unknown to available state.
@@ -111,7 +111,8 @@ public class TetherInterfaceStateMachineTest {
     @Test
     public void startsOutAvailable() {
         mTestedSm = new TetherInterfaceStateMachine(IFACE_NAME, mLooper.getLooper(),
-                TETHERING_BLUETOOTH, mSharedLog, mNMService, mStatsService, mTetherHelper);
+                TETHERING_BLUETOOTH, mSharedLog, mNMService, mStatsService, mTetherHelper,
+                mTetheringDependencies);
         mTestedSm.start();
         mLooper.dispatchAll();
         verify(mTetherHelper).updateInterfaceState(
@@ -346,7 +347,7 @@ public class TetherInterfaceStateMachineTest {
      * Send a command to the state machine under test, and run the event loop to idle.
      *
      * @param command One of the TetherInterfaceStateMachine.CMD_* constants.
-     * @param obj An additional argument to pass.
+     * @param arg1 An additional argument to pass.
      */
     private void dispatchCommand(int command, int arg1) {
         mTestedSm.sendMessage(command, arg1);
@@ -371,7 +372,7 @@ public class TetherInterfaceStateMachineTest {
      */
     private void dispatchTetherConnectionChanged(String upstreamIface) {
         mTestedSm.sendMessage(TetherInterfaceStateMachine.CMD_TETHER_CONNECTION_CHANGED,
-                upstreamIface);
+                new InterfaceSet(upstreamIface));
         mLooper.dispatchAll();
     }
 

@@ -20,8 +20,9 @@ package android.net;
 oneway interface INetdEventCallback {
 
     // Possible addNetdEventCallback callers.
-    const int CALLBACK_CALLER_DEVICE_POLICY = 0;
-    const int CALLBACK_CALLER_NETWORK_WATCHLIST = 1;
+    const int CALLBACK_CALLER_CONNECTIVITY_SERVICE = 0;
+    const int CALLBACK_CALLER_DEVICE_POLICY = 1;
+    const int CALLBACK_CALLER_NETWORK_WATCHLIST = 2;
 
     /**
      * Reports a single DNS lookup function call.
@@ -37,6 +38,18 @@ oneway interface INetdEventCallback {
      */
     void onDnsEvent(String hostname, in String[] ipAddresses, int ipAddressesCount, long timestamp,
             int uid);
+
+    /**
+     * Represents a private DNS validation success or failure.
+     * This method must not block or perform long-running operations.
+     *
+     * @param netId the ID of the network the validation was performed on.
+     * @param ipAddress the IP address for which validation was performed.
+     * @param hostname the hostname for which validation was performed.
+     * @param validated whether or not validation was successful.
+     */
+    void onPrivateDnsValidationEvent(int netId, String ipAddress, String hostname,
+            boolean validated);
 
     /**
      * Reports a single connect library call.
