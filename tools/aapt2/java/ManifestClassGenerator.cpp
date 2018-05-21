@@ -22,9 +22,11 @@
 #include "java/AnnotationProcessor.h"
 #include "java/ClassDefinition.h"
 #include "util/Maybe.h"
+#include "text/Unicode.h"
 #include "xml/XmlDom.h"
 
-using android::StringPiece;
+using ::android::StringPiece;
+using ::aapt::text::IsJavaIdentifier;
 
 namespace aapt {
 
@@ -46,11 +48,8 @@ static Maybe<StringPiece> ExtractJavaIdentifier(IDiagnostics* diag,
     return {};
   }
 
-  iter = util::FindNonAlphaNumericAndNotInSet(result, "_");
-  if (iter != result.end()) {
-    diag->Error(DiagMessage(source) << "invalid character '"
-                                    << StringPiece(iter, 1) << "' in '"
-                                    << result << "'");
+  if (!IsJavaIdentifier(result)) {
+    diag->Error(DiagMessage(source) << "invalid Java identifier '" << result << "'");
     return {};
   }
 

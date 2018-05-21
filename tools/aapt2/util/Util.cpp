@@ -24,6 +24,7 @@
 #include "androidfw/StringPiece.h"
 #include "utils/Unicode.h"
 
+#include "text/Unicode.h"
 #include "text/Utf8Iterator.h"
 #include "util/BigBuffer.h"
 #include "util/Maybe.h"
@@ -94,72 +95,55 @@ StringPiece TrimWhitespace(const StringPiece& str) {
   return StringPiece(start, end - start);
 }
 
-StringPiece::const_iterator FindNonAlphaNumericAndNotInSet(
-    const StringPiece& str, const StringPiece& allowed_chars) {
-  const auto end_iter = str.end();
-  for (auto iter = str.begin(); iter != end_iter; ++iter) {
-    char c = *iter;
-    if ((c >= u'a' && c <= u'z') || (c >= u'A' && c <= u'Z') ||
-        (c >= u'0' && c <= u'9')) {
-      continue;
-    }
-
-    bool match = false;
-    for (char i : allowed_chars) {
-      if (c == i) {
-        match = true;
-        break;
-      }
-    }
-
-    if (!match) {
-      return iter;
+static int IsJavaNameImpl(const StringPiece& str) {
+  int pieces = 0;
+  for (const StringPiece& piece : Tokenize(str, '.')) {
+    pieces++;
+    if (!text::IsJavaIdentifier(piece)) {
+      return -1;
     }
   }
-  return end_iter;
+  return pieces;
 }
 
 bool IsJavaClassName(const StringPiece& str) {
-  size_t pieces = 0;
-  for (const StringPiece& piece : Tokenize(str, '.')) {
-    pieces++;
-    if (piece.empty()) {
-      return false;
-    }
-
-    // Can't have starting or trailing $ character.
-    if (piece.data()[0] == '$' || piece.data()[piece.size() - 1] == '$') {
-      return false;
-    }
-
-    if (FindNonAlphaNumericAndNotInSet(piece, "$_") != piece.end()) {
-      return false;
-    }
-  }
-  return pieces >= 2;
+  return IsJavaNameImpl(str) >= 2;
 }
 
 bool IsJavaPackageName(const StringPiece& str) {
-  if (str.empty()) {
-    return false;
-  }
+  return IsJavaNameImpl(str) >= 1;
+}
 
-  size_t pieces = 0;
+static int IsAndroidNameImpl(const StringPiece& str) {
+  int pieces = 0;
   for (const StringPiece& piece : Tokenize(str, '.')) {
-    pieces++;
     if (piece.empty()) {
-      return false;
+      return -1;
     }
 
-    if (piece.data()[0] == '_' || piece.data()[piece.size() - 1] == '_') {
-      return false;
+    const char first_character = piece.data()[0];
+    if (!::isalpha(first_character)) {
+      return -1;
     }
 
-    if (FindNonAlphaNumericAndNotInSet(piece, "_") != piece.end()) {
-      return false;
+    bool valid = std::all_of(piece.begin() + 1, piece.end(), [](const char c) -> bool {
+      return ::isalnum(c) || c == '_';
+    });
+
+    if (!valid) {
+      return -1;
     }
+    pieces++;
   }
-  return pieces >= 1;
+  return pieces;
+}
+
+bool IsAndroidPackageName(const StringPiece& str) {
+  return IsAndroidNameImpl(str) > 1 || str == "android";
+}
+
+bool IsAndroidSplitName(const StringPiece& str) {
+  return IsAndroidNameImpl(str) > 0;
 }
 
 Maybe<std::string> GetFullyQualifiedClassName(const StringPiece& package,
@@ -176,7 +160,7 @@ Maybe<std::string> GetFullyQualifiedClassName(const StringPiece& package,
     return {};
   }
 
-  std::string result(package.data(), package.size());
+  std::string result = package.to_string();
   if (classname.data()[0] != '.') {
     result += '.';
   }

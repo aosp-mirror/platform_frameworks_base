@@ -127,9 +127,9 @@ static bool VerifyManifest(xml::Element* el, SourcePathDiagnostics* diag) {
     diag->Error(DiagMessage(el->line_number)
                 << "attribute 'package' in <manifest> tag must not be a reference");
     return false;
-  } else if (!util::IsJavaPackageName(attr->value)) {
+  } else if (!util::IsAndroidPackageName(attr->value)) {
     diag->Error(DiagMessage(el->line_number)
-                << "attribute 'package' in <manifest> tag is not a valid Java package name: '"
+                << "attribute 'package' in <manifest> tag is not a valid Android package name: '"
                 << attr->value << "'");
     return false;
   }
@@ -409,7 +409,10 @@ bool ManifestFixer::Consume(IAaptContext* context, xml::XmlResource* doc) {
     return false;
   }
 
-  if (!executor.Execute(xml::XmlActionExecutorPolicy::kWhitelist, context->GetDiagnostics(), doc)) {
+  xml::XmlActionExecutorPolicy policy = options_.warn_validation
+                                            ? xml::XmlActionExecutorPolicy::kWhitelistWarning
+                                            : xml::XmlActionExecutorPolicy::kWhitelist;
+  if (!executor.Execute(policy, context->GetDiagnostics(), doc)) {
     return false;
   }
 
