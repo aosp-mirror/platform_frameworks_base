@@ -138,25 +138,28 @@
     <string name="CLIRPermanent">You can\'t change the caller ID setting.</string>
 
     <!-- Notification title to tell the user that data service is blocked by access control. -->
-    <string name="RestrictedOnDataTitle">No data service</string>
+    <string name="RestrictedOnDataTitle">No mobile data service</string>
     <!-- Notification title to tell the user that emergency calling is blocked by access control. -->
-    <string name="RestrictedOnEmergencyTitle">No emergency calling</string>
+    <string name="RestrictedOnEmergencyTitle">Emergency calling unavailable</string>
     <!-- Notification title to tell the user that normal service is blocked by access control. -->
     <string name="RestrictedOnNormalTitle">No voice service</string>
     <!-- Notification title to tell the user that all emergency and normal voice services are blocked by access control. -->
-    <string name="RestrictedOnAllVoiceTitle">No voice/emergency service</string>
+    <string name="RestrictedOnAllVoiceTitle">No voice service or emergency calling</string>
 
     <!-- Notification content to tell the user that voice/data/emergency service is blocked by access control. -->
-    <string name="RestrictedStateContent">Temporarily not offered by the mobile network at your location</string>
+    <string name="RestrictedStateContent">Temporarily turned off by your carrier</string>
+
+    <!-- Notification content to tell the user that voice/data/emergency service is blocked by access control when multiple SIMs are active. -->
+    <string name="RestrictedStateContentMsimTemplate">Temporarily turned off by your carrier for SIM <xliff:g id="simNumber" example="1">%d</xliff:g></string>
 
     <!-- Displayed to tell the user that they should switch their network preference. -->
-    <string name="NetworkPreferenceSwitchTitle">Can\u2019t reach network</string>
+    <string name="NetworkPreferenceSwitchTitle">Can\u2019t reach mobile network</string>
     <!-- Displayed to tell the user that they should switch their network preference. -->
-    <string name="NetworkPreferenceSwitchSummary">To improve reception, try changing the type selected at Settings &gt; Network &amp; Internet &gt; Mobile networks &gt; Preferred network type."</string>
+    <string name="NetworkPreferenceSwitchSummary">Try changing preferred network. Tap to change.</string>
     <!-- Displayed to tell the user that emergency calls might not be available. -->
-    <string name="EmergencyCallWarningTitle">Wi\u2011Fi calling is active</string>
+    <string name="EmergencyCallWarningTitle">Emergency calling unavailable</string>
     <!-- Displayed to tell the user that emergency calls might not be available. -->
-    <string name="EmergencyCallWarningSummary">Emergency calls require a mobile network.</string>
+    <string name="EmergencyCallWarningSummary">Can\u2019t make emergency calls over Wi\u2011Fi</string>
 
     <!-- Telephony notification channel name for a channel containing network alert notifications. -->
     <string name="notification_channel_network_alert">Alerts</string>
@@ -215,14 +218,14 @@
     <string name="roamingTextSearching">Searching for Service</string>
 
     <!-- Displayed when WFC registration fails -->
-    <string name="wfcRegErrorTitle">Wi-Fi Calling</string>
+    <string name="wfcRegErrorTitle">Couldn\u2019t set up Wi\u2011Fi calling</string>
     <!-- WFC Operator Error Messages showed as alerts -->
     <string-array name="wfcOperatorErrorAlertMessages">
         <item>To make calls and send messages over Wi-Fi, first ask your carrier to set up this service. Then turn on Wi-Fi calling again from Settings. (Error code: <xliff:g id="code" example="REG09 - No 911 Address">%1$s</xliff:g>)</item>
     </string-array>
     <!-- WFC Operator Error Messages showed as notifications -->
     <string-array name="wfcOperatorErrorNotificationMessages">
-        <item>Register with your carrier (Error code: <xliff:g id="code" example="REG09 - No 911 Address">%1$s</xliff:g>)</item>
+        <item>Issue registering Wi\u2011Fi calling with your carrier: <xliff:g id="code" example="REG09 - No 911 Address">%1$s</xliff:g></item>
     </string-array>
     <!-- Template for showing mobile network operator name while WFC is active -->
     <string-array name="wfcSpnFormats">
@@ -1075,6 +1078,17 @@
          third party app to route its calls through the system. -->
     <string name="permdesc_manageOwnCalls">Allows the app to route its calls through the system in
         order to improve the calling experience.</string>
+
+    <!-- Title of an application permission.  When granted to a third party app, the user is giving
+         access to the app to continue a call which originated in another app.  For example, the
+         user could be in a voice call over their carrier's mobile network, and a third party video
+         calling app wants to continue that voice call as a video call. -->
+    <string name="permlab_acceptHandover">continue a call from another app</string>
+    <!-- Description of an application permission.  When granted to a third party app, the user is
+         giving access to the app to continue a call which originated in another app.  For example,
+         the user could be in a voice call over their carrier's mobile network, and a third party
+         video calling app wants to continue that voice call as a video call. -->
+    <string name="permdesc_acceptHandover">Allows the app to continue a call which was started in another app.</string>
 
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permlab_readPhoneNumbers">read phone numbers</string>
@@ -3451,6 +3465,13 @@
     <string name="tethered_notification_title">Tethering or hotspot active</string>
     <string name="tethered_notification_message">Tap to set up.</string>
 
+    <!-- Strings for tether disabling notification -->
+    <!-- This notification is shown when tethering has been disabled on a user's device.
+    The device is managed by the user's employer. Tethering can't be turned on unless the
+    IT administrator allows it. The noun "admin" is another reference for "IT administrator." -->
+    <string name="disable_tether_notification_title">Tethering is disabled</string>
+    <string name="disable_tether_notification_message">Contact your admin for details</string>
+
     <!--  Strings for possible PreferenceActivity Back/Next buttons -->
     <string name="back_button_label">Back</string>
     <string name="next_button_label">Next</string>
@@ -4419,14 +4440,14 @@
 
     <!-- Displayed when the USSD/SS request is modified by STK CC to a
     different request. This will be displayed in a toast. -->
-    <string name="stk_cc_ussd_to_dial">USSD request is modified to DIAL request.</string>
-    <string name="stk_cc_ussd_to_ss">USSD request is modified to SS request.</string>
-    <string name="stk_cc_ussd_to_ussd">USSD request is modified to new USSD request.</string>
-    <string name="stk_cc_ussd_to_dial_video">USSD request is modified to Video DIAL request.</string>
-    <string name="stk_cc_ss_to_dial">SS request is modified to DIAL request.</string>
-    <string name="stk_cc_ss_to_dial_video">SS request is modified to Video DIAL request.</string>
-    <string name="stk_cc_ss_to_ussd">SS request is modified to USSD request.</string>
-    <string name="stk_cc_ss_to_ss">SS request is modified to new SS request.</string>
+    <string name="stk_cc_ussd_to_dial">USSD request changed to regular call</string>
+    <string name="stk_cc_ussd_to_ss">USSD request changed to SS request</string>
+    <string name="stk_cc_ussd_to_ussd">Changed to new USSD request</string>
+    <string name="stk_cc_ussd_to_dial_video">USSD request changed to video call</string>
+    <string name="stk_cc_ss_to_dial">SS request changed to regular call</string>
+    <string name="stk_cc_ss_to_dial_video">SS request changed to video call</string>
+    <string name="stk_cc_ss_to_ussd">SS request changed to USSD request</string>
+    <string name="stk_cc_ss_to_ss">Changed to new SS request</string>
 
     <!-- Content description of the work profile icon in the notification. -->
     <string name="notification_work_profile_content_description">Work profile</string>
@@ -4664,11 +4685,17 @@
     <!-- Primary ETWS (Earthquake and Tsunami Warning System) default message for others -->
     <string name="etws_primary_default_message_others"></string>
 
-    <!-- Title of notification when UE fails to register network with MM reject cause code. -->
-    <string name="mmcc_authentication_reject">SIM not allowed</string>
-    <string name="mmcc_imsi_unknown_in_hlr">SIM not provisioned</string>
-    <string name="mmcc_illegal_ms">SIM not allowed</string>
-    <string name="mmcc_illegal_me">Phone not allowed</string>
+    <!-- Title of notification when UE fails CS registration network with MM reject cause code from network. -->
+    <string name="mmcc_authentication_reject">SIM not allowed for voice</string>
+    <string name="mmcc_imsi_unknown_in_hlr">SIM not provisioned for voice</string>
+    <string name="mmcc_illegal_ms">SIM not allowed for voice</string>
+    <string name="mmcc_illegal_me">Phone not allowed for voice</string>
+
+    <!-- Title of notification when UE fails to register network with MM reject cause code when multiple SIMs are active. -->
+    <string name="mmcc_authentication_reject_msim_template">SIM <xliff:g id="simNumber" example="1">%d</xliff:g> not allowed</string>
+    <string name="mmcc_imsi_unknown_in_hlr_msim_template">SIM <xliff:g id="simNumber" example="1">%d</xliff:g> not provisioned</string>
+    <string name="mmcc_illegal_ms_msim_template">SIM <xliff:g id="simNumber" example="1">%d</xliff:g> not allowed</string>
+    <string name="mmcc_illegal_me_msim_template">SIM <xliff:g id="simNumber" example="1">%d</xliff:g> not allowed</string>
 
     <!-- Popup window default title to be read by a screen reader-->
     <string name="popup_window_default_title">Popup Window</string>

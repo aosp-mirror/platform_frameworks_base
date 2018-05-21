@@ -20,6 +20,7 @@ import static android.net.util.NetworkConstants.*;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
+import android.net.MacAddress;
 import android.support.test.runner.AndroidJUnit4;
 import android.support.test.filters.SmallTest;
 
@@ -36,9 +37,7 @@ import libcore.util.HexEncoding;
 @RunWith(AndroidJUnit4.class)
 @SmallTest
 public class ConnectivityPacketSummaryTest {
-    private static final byte[] MYHWADDR = {
-        asByte(0x80), asByte(0x7a), asByte(0xbf), asByte(0x6f), asByte(0x48), asByte(0xf3)
-    };
+    private static final MacAddress MYHWADDR = MacAddress.fromString("80:7a:bf:6f:48:f3");
 
     private String getSummary(String hexBytes) {
         hexBytes = hexBytes.replaceAll("\\s+", "");

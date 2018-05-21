@@ -223,9 +223,9 @@ void EglManager::loadConfigs() {
         numConfigs = 1;
         if (!eglChooseConfig(mEglDisplay, attribs16F, &mEglConfigWideGamut, numConfigs, &numConfigs)
                 || numConfigs != 1) {
-            LOG_ALWAYS_FATAL(
-                    "Device claims wide gamut support, cannot find matching config, error = %s",
+            ALOGE("Device claims wide gamut support, cannot find matching config, error = %s",
                     eglErrorString());
+            EglExtensions.pixelFormatFloat = false;
         }
     }
 }

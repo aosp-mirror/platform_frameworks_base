@@ -391,6 +391,10 @@ static void JHwParcel_native_verifySuccess(JNIEnv *env, jobject thiz) {
     Status status;
     status_t err = ::android::hardware::readFromParcel(&status, *parcel);
     signalExceptionForError(env, err);
+
+    if (!status.isOk()) {
+        signalExceptionForError(env, UNKNOWN_ERROR, true /* canThrowRemoteException */);
+    }
 }
 
 static void JHwParcel_native_release(

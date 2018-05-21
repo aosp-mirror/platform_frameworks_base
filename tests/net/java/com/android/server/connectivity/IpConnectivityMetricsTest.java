@@ -632,6 +632,7 @@ public class IpConnectivityMetricsTest {
         when(nai.getCurrentScore()).thenReturn(score);
         nai.linkProperties = new LinkProperties();
         nai.networkCapabilities = new NetworkCapabilities();
+        nai.lastValidated = true;
         for (int t : BitUtils.unpackBits(transports)) {
             nai.networkCapabilities.addTransportType(t);
         }

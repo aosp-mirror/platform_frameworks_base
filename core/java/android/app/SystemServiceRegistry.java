@@ -81,10 +81,10 @@ import android.net.INetworkPolicyManager;
 import android.net.IpSecManager;
 import android.net.NetworkPolicyManager;
 import android.net.NetworkScoreManager;
-import android.net.nsd.INsdManager;
-import android.net.nsd.NsdManager;
 import android.net.lowpan.ILowpanManager;
 import android.net.lowpan.LowpanManager;
+import android.net.nsd.INsdManager;
+import android.net.nsd.NsdManager;
 import android.net.wifi.IRttManager;
 import android.net.wifi.IWifiManager;
 import android.net.wifi.IWifiScanner;
@@ -130,6 +130,7 @@ import android.telecom.TelecomManager;
 import android.telephony.CarrierConfigManager;
 import android.telephony.SubscriptionManager;
 import android.telephony.TelephonyManager;
+import android.telephony.euicc.EuiccCardManager;
 import android.telephony.euicc.EuiccManager;
 import android.util.Log;
 import android.view.ContextThemeWrapper;
@@ -503,6 +504,13 @@ final class SystemServiceRegistry {
             public EuiccManager createService(ContextImpl ctx) {
                 return new EuiccManager(ctx.getOuterContext());
             }});
+
+        registerService(Context.EUICC_CARD_SERVICE, EuiccCardManager.class,
+                new CachedServiceFetcher<EuiccCardManager>() {
+                    @Override
+                    public EuiccCardManager createService(ContextImpl ctx) {
+                        return new EuiccCardManager(ctx.getOuterContext());
+                    }});
 
         registerService(Context.UI_MODE_SERVICE, UiModeManager.class,
                 new CachedServiceFetcher<UiModeManager>() {

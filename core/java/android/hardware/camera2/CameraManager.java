@@ -996,7 +996,12 @@ public final class CameraManager {
                 return;
             }
 
-            Integer oldStatus = mDeviceStatus.put(id, status);
+            Integer oldStatus;
+            if (status == ICameraServiceListener.STATUS_NOT_PRESENT) {
+                oldStatus = mDeviceStatus.remove(id);
+            } else {
+                oldStatus = mDeviceStatus.put(id, status);
+            }
 
             if (oldStatus != null && oldStatus == status) {
                 if (DEBUG) {

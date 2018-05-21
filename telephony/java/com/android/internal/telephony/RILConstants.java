@@ -25,6 +25,7 @@ package com.android.internal.telephony;
  */
 
 import android.os.SystemProperties;
+import android.telephony.TelephonyManager;
 
 /**
  * {@hide}
@@ -105,6 +106,8 @@ public interface RILConstants {
     int DEVICE_IN_USE = 64;                   /* Operation cannot be performed because the device
                                                  is currently in use */
     int ABORTED = 65;                         /* Operation aborted */
+    int INVALID_RESPONSE = 66;                /* Invalid response sent by vendor code */
+
     // Below is list of OEM specific error codes which can by used by OEMs in case they don't want to
     // reveal particular replacement for Generic failure
     int OEM_ERROR_1 = 501;
@@ -160,8 +163,8 @@ public interface RILConstants {
     int NETWORK_MODE_LTE_TDSCDMA_GSM_WCDMA   = 20; /* TD-SCDMA, GSM/WCDMA and LTE */
     int NETWORK_MODE_TDSCDMA_CDMA_EVDO_GSM_WCDMA  = 21; /*TD-SCDMA,EvDo,CDMA,GSM/WCDMA*/
     int NETWORK_MODE_LTE_TDSCDMA_CDMA_EVDO_GSM_WCDMA = 22; /* TD-SCDMA/LTE/GSM/WCDMA, CDMA, and EvDo */
-    int PREFERRED_NETWORK_MODE      = SystemProperties.getInt("ro.telephony.default_network",
-            NETWORK_MODE_WCDMA_PREF);
+    int PREFERRED_NETWORK_MODE = Integer.parseInt(TelephonyManager.getTelephonyProperty(0,
+            "ro.telephony.default_network", Integer.toString(NETWORK_MODE_WCDMA_PREF)));
 
     int BAND_MODE_UNSPECIFIED = 0;      //"unspecified" (selected by baseband automatically)
     int BAND_MODE_EURO = 1;             //"EURO band" (GSM-900 / DCS-1800 / WCDMA-IMT-2000)
@@ -217,11 +220,6 @@ public interface RILConstants {
     String SETUP_DATA_PROTOCOL_IP     = "IP";
     String SETUP_DATA_PROTOCOL_IPV6   = "IPV6";
     String SETUP_DATA_PROTOCOL_IPV4V6 = "IPV4V6";
-
-    /* Deactivate data call reasons */
-    int DEACTIVATE_REASON_NONE = 0;
-    int DEACTIVATE_REASON_RADIO_OFF = 1;
-    int DEACTIVATE_REASON_PDP_RESET = 2;
 
     /* NV config radio reset types. */
     int NV_CONFIG_RELOAD_RESET = 1;
@@ -417,6 +415,12 @@ cat include/telephony/ril.h | \
     int RIL_REQUEST_SET_CARRIER_INFO_IMSI_ENCRYPTION = 141;
     int RIL_REQUEST_START_NETWORK_SCAN = 142;
     int RIL_REQUEST_STOP_NETWORK_SCAN = 143;
+    int RIL_REQUEST_GET_SLOT_STATUS = 144;
+    int RIL_REQUEST_SET_LOGICAL_TO_PHYSICAL_SLOT_MAPPING = 145;
+    int RIL_REQUEST_START_KEEPALIVE = 146;
+    int RIL_REQUEST_STOP_KEEPALIVE = 147;
+    int RIL_REQUEST_SET_SIGNAL_STRENGTH_REPORTING_CRITERIA = 148;
+    int RIL_REQUEST_SET_LINK_CAPACITY_REPORTING_CRITERIA = 149;
 
     int RIL_RESPONSE_ACKNOWLEDGEMENT = 800;
 
@@ -471,4 +475,7 @@ cat include/telephony/ril.h | \
     int RIL_UNSOL_MODEM_RESTART = 1047;
     int RIL_UNSOL_CARRIER_INFO_IMSI_ENCRYPTION = 1048;
     int RIL_UNSOL_NETWORK_SCAN_RESULT = 1049;
+    int RIL_UNSOL_ICC_SLOT_STATUS = 1050;
+    int RIL_UNSOL_KEEPALIVE_STATUS = 1051;
+    int RIL_UNSOL_PHYSICAL_CHANNEL_CONFIG = 1052;
 }

@@ -21,6 +21,7 @@ import android.telephony.ServiceState;
 import android.telephony.SignalStrength;
 import android.telephony.CellInfo;
 import android.telephony.DataConnectionRealTimeInfo;
+import android.telephony.PhysicalChannelConfig;
 import android.telephony.PreciseCallState;
 import android.telephony.PreciseDataConnectionState;
 import android.telephony.VoLteServiceState;
@@ -37,6 +38,7 @@ oneway interface IPhoneStateListener {
     void onDataConnectionStateChanged(int state, int networkType);
     void onDataActivity(int direction);
     void onSignalStrengthsChanged(in SignalStrength signalStrength);
+    void onPhysicalChannelConfigurationChanged(in List<PhysicalChannelConfig> configs);
     void onOtaspChanged(in int otaspMode);
     void onCellInfoChanged(in List<CellInfo> cellInfo);
     void onPreciseCallStateChanged(in PreciseCallState callState);
@@ -45,6 +47,8 @@ oneway interface IPhoneStateListener {
     void onVoLteServiceStateChanged(in VoLteServiceState lteState);
     void onVoiceActivationStateChanged(int activationState);
     void onDataActivationStateChanged(int activationState);
+    void onOemHookRawEvent(in byte[] rawData);
     void onCarrierNetworkChange(in boolean active);
+    void onUserMobileDataStateChanged(in boolean enabled);
 }
 

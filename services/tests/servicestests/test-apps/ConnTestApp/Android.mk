@@ -24,6 +24,7 @@ LOCAL_STATIC_JAVA_LIBRARIES := servicestests-aidl
 LOCAL_SRC_FILES := $(call all-subdir-java-files)
 
 LOCAL_PACKAGE_NAME := ConnTestApp
+LOCAL_PRIVATE_PLATFORM_APIS := true
 LOCAL_CERTIFICATE := platform
 LOCAL_DEX_PREOPT := false
 LOCAL_PROGUARD_ENABLED := disabled

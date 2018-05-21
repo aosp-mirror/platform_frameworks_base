@@ -15,6 +15,7 @@ LOCAL_AAPT_FLAGS := \
     --auto-add-overlay
 
 LOCAL_PACKAGE_NAME := TouchLatency
+LOCAL_SDK_VERSION := current
 
 LOCAL_COMPATIBILITY_SUITE := device-tests
 

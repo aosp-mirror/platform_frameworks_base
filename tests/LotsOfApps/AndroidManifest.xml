@@ -7,700 +7,700 @@
     <uses-permission android:name="android.permission.VIBRATE" />
 
     <application>
-        <activity android:name="00" android:icon="@drawable/ic_launcher_add_folder">
+        <activity android:name="com.android.lotsofapps.activity00" android:icon="@drawable/ic_launcher_add_folder">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name="01" android:icon="@drawable/ic_launcher_alarmclock">
+        <activity android:name="com.android.lotsofapps.activity01" android:icon="@drawable/ic_launcher_alarmclock">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name="02" android:icon="@drawable/ic_launcher_application">
+        <activity android:name="com.android.lotsofapps.activity02" android:icon="@drawable/ic_launcher_application">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name="03" android:icon="@drawable/ic_launcher_browser">
+        <activity android:name="com.android.lotsofapps.activity03" android:icon="@drawable/ic_launcher_browser">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name="04" android:icon="@drawable/ic_launcher_camera">
+        <activity android:name="com.android.lotsofapps.activity04" android:icon="@drawable/ic_launcher_camera">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name="05" android:icon="@drawable/ic_launcher_camera_record">
+        <activity android:name="com.android.lotsofapps.activity05" android:icon="@drawable/ic_launcher_camera_record">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name="06" android:icon="@drawable/ic_launcher_contacts">
+        <activity android:name="com.android.lotsofapps.activity06" android:icon="@drawable/ic_launcher_contacts">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name="07" android:icon="@drawable/ic_launcher_drm_file">
+        <activity android:name="com.android.lotsofapps.activity07" android:icon="@drawable/ic_launcher_drm_file">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name="08" android:icon="@drawable/ic_launcher_folder">
+        <activity android:name="com.android.lotsofapps.activity08" android:icon="@drawable/ic_launcher_folder">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name="09" android:icon="@drawable/ic_launcher_folder_bluetooth">
+        <activity android:name="com.android.lotsofapps.activity09" android:icon="@drawable/ic_launcher_folder_bluetooth">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name="10" android:icon="@drawable/ic_launcher_folder_live">
+        <activity android:name="com.android.lotsofapps.activity10" android:icon="@drawable/ic_launcher_folder_live">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name="11" android:icon="@drawable/ic_launcher_folder_live_contacts">
+        <activity android:name="com.android.lotsofapps.activity11" android:icon="@drawable/ic_launcher_folder_live_contacts">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name="12" android:icon="@drawable/ic_launcher_folder_live_contacts_phone">
+        <activity android:name="com.android.lotsofapps.activity12" android:icon="@drawable/ic_launcher_folder_live_contacts_phone">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name="13" android:icon="@drawable/ic_launcher_folder_live_contacts_starred">
+        <activity android:name="com.android.lotsofapps.activity13" android:icon="@drawable/ic_launcher_folder_live_contacts_starred">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name="14" android:icon="@drawable/ic_launcher_folder_open">
+        <activity android:name="com.android.lotsofapps.activity14" android:icon="@drawable/ic_launcher_folder_open">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name="15" android:icon="@drawable/ic_launcher_gallery">
+        <activity android:name="com.android.lotsofapps.activity15" android:icon="@drawable/ic_launcher_gallery">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name="16" android:icon="@drawable/ic_launcher_home">
+        <activity android:name="com.android.lotsofapps.activity16" android:icon="@drawable/ic_launcher_home">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name="17" android:icon="@drawable/ic_launcher_im">
+        <activity android:name="com.android.lotsofapps.activity17" android:icon="@drawable/ic_launcher_im">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name="18" android:icon="@drawable/ic_launcher_musicplayer_2">
+        <activity android:name="com.android.lotsofapps.activity18" android:icon="@drawable/ic_launcher_musicplayer_2">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name="19" android:icon="@drawable/ic_launcher_phone">
+        <activity android:name="com.android.lotsofapps.activity19" android:icon="@drawable/ic_launcher_phone">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name="20" android:icon="@drawable/ic_launcher_record_audio">
+        <activity android:name="com.android.lotsofapps.activity20" android:icon="@drawable/ic_launcher_record_audio">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name="21" android:icon="@drawable/ic_launcher_settings">
+        <activity android:name="com.android.lotsofapps.activity21" android:icon="@drawable/ic_launcher_settings">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name="22" android:icon="@drawable/ic_launcher_shortcut">
+        <activity android:name="com.android.lotsofapps.activity22" android:icon="@drawable/ic_launcher_shortcut">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name="23" android:icon="@drawable/ic_launcher_shortcut_browser_bookmark">
+        <activity android:name="com.android.lotsofapps.activity23" android:icon="@drawable/ic_launcher_shortcut_browser_bookmark">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name="24" android:icon="@drawable/ic_launcher_contacts">
+        <activity android:name="com.android.lotsofapps.activity24" android:icon="@drawable/ic_launcher_contacts">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name="25" android:icon="@drawable/ic_launcher_shortcut_directdial">
+        <activity android:name="com.android.lotsofapps.activity25" android:icon="@drawable/ic_launcher_shortcut_directdial">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name="26" android:icon="@drawable/ic_launcher_shortcut_directmessage">
+        <activity android:name="com.android.lotsofapps.activity26" android:icon="@drawable/ic_launcher_shortcut_directmessage">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name="27" android:icon="@drawable/ic_launcher_browser">
+        <activity android:name="com.android.lotsofapps.activity27" android:icon="@drawable/ic_launcher_browser">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name="28" android:icon="@drawable/ic_launcher_sim_toolkit">
+        <activity android:name="com.android.lotsofapps.activity28" android:icon="@drawable/ic_launcher_sim_toolkit">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name="29" android:icon="@drawable/ic_launcher_slideshow_add_sms">
+        <activity android:name="com.android.lotsofapps.activity29" android:icon="@drawable/ic_launcher_slideshow_add_sms">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name="20" android:icon="@drawable/ic_launcher_slideshow_default_sms">
+        <activity android:name="com.android.lotsofapps.activity20" android:icon="@drawable/ic_launcher_slideshow_default_sms">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name="31" android:icon="@drawable/ic_launcher_smsmms">
+        <activity android:name="com.android.lotsofapps.activity31" android:icon="@drawable/ic_launcher_smsmms">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name="32" android:icon="@drawable/ic_launcher_soundrecorder">
+        <activity android:name="com.android.lotsofapps.activity32" android:icon="@drawable/ic_launcher_soundrecorder">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name="33" android:icon="@drawable/ic_launcher_video_camera">
+        <activity android:name="com.android.lotsofapps.activity33" android:icon="@drawable/ic_launcher_video_camera">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name="34" android:icon="@drawable/ic_launcher_video_player">
+        <activity android:name="com.android.lotsofapps.activity34" android:icon="@drawable/ic_launcher_video_player">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name="35" android:icon="@drawable/ic_launcher_wallpaper">
+        <activity android:name="com.android.lotsofapps.activity35" android:icon="@drawable/ic_launcher_wallpaper">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name="36" android:icon="@drawable/ic_launcher_im">
+        <activity android:name="com.android.lotsofapps.activity36" android:icon="@drawable/ic_launcher_im">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name="37" android:icon="@drawable/ic_launcher_musicplayer_2">
+        <activity android:name="com.android.lotsofapps.activity37" android:icon="@drawable/ic_launcher_musicplayer_2">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name="38" android:icon="@drawable/ic_launcher_phone">
+        <activity android:name="com.android.lotsofapps.activity38" android:icon="@drawable/ic_launcher_phone">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name="39" android:icon="@drawable/ic_launcher_record_audio">
+        <activity android:name="com.android.lotsofapps.activity39" android:icon="@drawable/ic_launcher_record_audio">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name="40" android:icon="@drawable/ic_launcher_settings">
+        <activity android:name="com.android.lotsofapps.activity40" android:icon="@drawable/ic_launcher_settings">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name="41" android:icon="@drawable/ic_launcher_shortcut">
+        <activity android:name="com.android.lotsofapps.activity41" android:icon="@drawable/ic_launcher_shortcut">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name="42" android:icon="@drawable/ic_launcher_sim_toolkit">
+        <activity android:name="com.android.lotsofapps.activity42" android:icon="@drawable/ic_launcher_sim_toolkit">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name="43" android:icon="@drawable/ic_launcher_smsmms">
+        <activity android:name="com.android.lotsofapps.activity43" android:icon="@drawable/ic_launcher_smsmms">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name="44" android:icon="@drawable/ic_launcher_soundrecorder">
+        <activity android:name="com.android.lotsofapps.activity44" android:icon="@drawable/ic_launcher_soundrecorder">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name="45" android:icon="@drawable/ic_launcher_video_camera">
+        <activity android:name="com.android.lotsofapps.activity45" android:icon="@drawable/ic_launcher_video_camera">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name="46" android:icon="@drawable/ic_launcher_wallpaper">
+        <activity android:name="com.android.lotsofapps.activity46" android:icon="@drawable/ic_launcher_wallpaper">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name="47" android:icon="@drawable/ic_launcher_drm_file">
+        <activity android:name="com.android.lotsofapps.activity47" android:icon="@drawable/ic_launcher_drm_file">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name="48" android:icon="@drawable/ic_launcher_contacts">
+        <activity android:name="com.android.lotsofapps.activity48" android:icon="@drawable/ic_launcher_contacts">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name="49" android:icon="@drawable/ic_launcher_drm_file">
+        <activity android:name="com.android.lotsofapps.activity49" android:icon="@drawable/ic_launcher_drm_file">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name="50" android:icon="@drawable/ic_launcher_add_folder">
+        <activity android:name="com.android.lotsofapps.activity50" android:icon="@drawable/ic_launcher_add_folder">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name="51" android:icon="@drawable/ic_launcher_alarmclock">
+        <activity android:name="com.android.lotsofapps.activity51" android:icon="@drawable/ic_launcher_alarmclock">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name="52" android:icon="@drawable/ic_launcher_application">
+        <activity android:name="com.android.lotsofapps.activity52" android:icon="@drawable/ic_launcher_application">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name="53" android:icon="@drawable/ic_launcher_browser">
+        <activity android:name="com.android.lotsofapps.activity53" android:icon="@drawable/ic_launcher_browser">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name="54" android:icon="@drawable/ic_launcher_camera">
+        <activity android:name="com.android.lotsofapps.activity54" android:icon="@drawable/ic_launcher_camera">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name="55" android:icon="@drawable/ic_launcher_camera_record">
+        <activity android:name="com.android.lotsofapps.activity55" android:icon="@drawable/ic_launcher_camera_record">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name="56" android:icon="@drawable/ic_launcher_contacts">
+        <activity android:name="com.android.lotsofapps.activity56" android:icon="@drawable/ic_launcher_contacts">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name="57" android:icon="@drawable/ic_launcher_drm_file">
+        <activity android:name="com.android.lotsofapps.activity57" android:icon="@drawable/ic_launcher_drm_file">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name="58" android:icon="@drawable/ic_launcher_folder">
+        <activity android:name="com.android.lotsofapps.activity58" android:icon="@drawable/ic_launcher_folder">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name="59" android:icon="@drawable/ic_launcher_folder_bluetooth">
+        <activity android:name="com.android.lotsofapps.activity59" android:icon="@drawable/ic_launcher_folder_bluetooth">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name="60" android:icon="@drawable/ic_launcher_folder_live">
+        <activity android:name="com.android.lotsofapps.activity60" android:icon="@drawable/ic_launcher_folder_live">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name="61" android:icon="@drawable/ic_launcher_folder_live_contacts">
+        <activity android:name="com.android.lotsofapps.activity61" android:icon="@drawable/ic_launcher_folder_live_contacts">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name="62" android:icon="@drawable/ic_launcher_folder_live_contacts_phone">
+        <activity android:name="com.android.lotsofapps.activity62" android:icon="@drawable/ic_launcher_folder_live_contacts_phone">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name="63" android:icon="@drawable/ic_launcher_folder_live_contacts_starred">
+        <activity android:name="com.android.lotsofapps.activity63" android:icon="@drawable/ic_launcher_folder_live_contacts_starred">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name="64" android:icon="@drawable/ic_launcher_folder_open">
+        <activity android:name="com.android.lotsofapps.activity64" android:icon="@drawable/ic_launcher_folder_open">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name="65" android:icon="@drawable/ic_launcher_gallery">
+        <activity android:name="com.android.lotsofapps.activity65" android:icon="@drawable/ic_launcher_gallery">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name="66" android:icon="@drawable/ic_launcher_home">
+        <activity android:name="com.android.lotsofapps.activity66" android:icon="@drawable/ic_launcher_home">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name="67" android:icon="@drawable/ic_launcher_im">
+        <activity android:name="com.android.lotsofapps.activity67" android:icon="@drawable/ic_launcher_im">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name="68" android:icon="@drawable/ic_launcher_musicplayer_2">
+        <activity android:name="com.android.lotsofapps.activity68" android:icon="@drawable/ic_launcher_musicplayer_2">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name="69" android:icon="@drawable/ic_launcher_phone">
+        <activity android:name="com.android.lotsofapps.activity69" android:icon="@drawable/ic_launcher_phone">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name="70" android:icon="@drawable/ic_launcher_record_audio">
+        <activity android:name="com.android.lotsofapps.activity70" android:icon="@drawable/ic_launcher_record_audio">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name="71" android:icon="@drawable/ic_launcher_settings">
+        <activity android:name="com.android.lotsofapps.activity71" android:icon="@drawable/ic_launcher_settings">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name="72" android:icon="@drawable/ic_launcher_shortcut">
+        <activity android:name="com.android.lotsofapps.activity72" android:icon="@drawable/ic_launcher_shortcut">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name="73" android:icon="@drawable/ic_launcher_shortcut_browser_bookmark">
+        <activity android:name="com.android.lotsofapps.activity73" android:icon="@drawable/ic_launcher_shortcut_browser_bookmark">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name="74" android:icon="@drawable/ic_launcher_contacts">
+        <activity android:name="com.android.lotsofapps.activity74" android:icon="@drawable/ic_launcher_contacts">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name="75" android:icon="@drawable/ic_launcher_shortcut_directdial">
+        <activity android:name="com.android.lotsofapps.activity75" android:icon="@drawable/ic_launcher_shortcut_directdial">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name="76" android:icon="@drawable/ic_launcher_shortcut_directmessage">
+        <activity android:name="com.android.lotsofapps.activity76" android:icon="@drawable/ic_launcher_shortcut_directmessage">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name="77" android:icon="@drawable/ic_launcher_browser">
+        <activity android:name="com.android.lotsofapps.activity77" android:icon="@drawable/ic_launcher_browser">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name="78" android:icon="@drawable/ic_launcher_sim_toolkit">
+        <activity android:name="com.android.lotsofapps.activity78" android:icon="@drawable/ic_launcher_sim_toolkit">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name="79" android:icon="@drawable/ic_launcher_slideshow_add_sms">
+        <activity android:name="com.android.lotsofapps.activity79" android:icon="@drawable/ic_launcher_slideshow_add_sms">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name="80" android:icon="@drawable/ic_launcher_slideshow_default_sms">
+        <activity android:name="com.android.lotsofapps.activity80" android:icon="@drawable/ic_launcher_slideshow_default_sms">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name="81" android:icon="@drawable/ic_launcher_smsmms">
+        <activity android:name="com.android.lotsofapps.activity81" android:icon="@drawable/ic_launcher_smsmms">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name="82" android:icon="@drawable/ic_launcher_soundrecorder">
+        <activity android:name="com.android.lotsofapps.activity82" android:icon="@drawable/ic_launcher_soundrecorder">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name="83" android:icon="@drawable/ic_launcher_video_camera">
+        <activity android:name="com.android.lotsofapps.activity83" android:icon="@drawable/ic_launcher_video_camera">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name="84" android:icon="@drawable/ic_launcher_video_player">
+        <activity android:name="com.android.lotsofapps.activity84" android:icon="@drawable/ic_launcher_video_player">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name="85" android:icon="@drawable/ic_launcher_wallpaper">
+        <activity android:name="com.android.lotsofapps.activity85" android:icon="@drawable/ic_launcher_wallpaper">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name="86" android:icon="@drawable/ic_launcher_im">
+        <activity android:name="com.android.lotsofapps.activity86" android:icon="@drawable/ic_launcher_im">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name="87" android:icon="@drawable/ic_launcher_musicplayer_2">
+        <activity android:name="com.android.lotsofapps.activity87" android:icon="@drawable/ic_launcher_musicplayer_2">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name="88" android:icon="@drawable/ic_launcher_phone">
+        <activity android:name="com.android.lotsofapps.activity88" android:icon="@drawable/ic_launcher_phone">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name="89" android:icon="@drawable/ic_launcher_record_audio">
+        <activity android:name="com.android.lotsofapps.activity89" android:icon="@drawable/ic_launcher_record_audio">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name="90" android:icon="@drawable/ic_launcher_settings">
+        <activity android:name="com.android.lotsofapps.activity90" android:icon="@drawable/ic_launcher_settings">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name="91" android:icon="@drawable/ic_launcher_shortcut">
+        <activity android:name="com.android.lotsofapps.activity91" android:icon="@drawable/ic_launcher_shortcut">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name="92" android:icon="@drawable/ic_launcher_sim_toolkit">
+        <activity android:name="com.android.lotsofapps.activity92" android:icon="@drawable/ic_launcher_sim_toolkit">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name="93" android:icon="@drawable/ic_launcher_smsmms">
+        <activity android:name="com.android.lotsofapps.activity93" android:icon="@drawable/ic_launcher_smsmms">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name="94" android:icon="@drawable/ic_launcher_soundrecorder">
+        <activity android:name="com.android.lotsofapps.activity94" android:icon="@drawable/ic_launcher_soundrecorder">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name="95" android:icon="@drawable/ic_launcher_video_camera">
+        <activity android:name="com.android.lotsofapps.activity95" android:icon="@drawable/ic_launcher_video_camera">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name="96" android:icon="@drawable/ic_launcher_wallpaper">
+        <activity android:name="com.android.lotsofapps.activity96" android:icon="@drawable/ic_launcher_wallpaper">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name="97" android:icon="@drawable/ic_launcher_drm_file">
+        <activity android:name="com.android.lotsofapps.activity97" android:icon="@drawable/ic_launcher_drm_file">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name="98" android:icon="@drawable/ic_launcher_contacts">
+        <activity android:name="com.android.lotsofapps.activity98" android:icon="@drawable/ic_launcher_contacts">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name="99" android:icon="@drawable/ic_launcher_drm_file">
+        <activity android:name="com.android.lotsofapps.activity99" android:icon="@drawable/ic_launcher_drm_file">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.DEFAULT" />

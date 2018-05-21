@@ -64,6 +64,7 @@ public class SettingsBackupTest {
                     Settings.System.NOTIFICATION_LIGHT_PULSE, // candidate for backup?
                     Settings.System.NOTIFICATION_SOUND_CACHE, // internal cache
                     Settings.System.POINTER_LOCATION, // backup candidate?
+                    Settings.System.DEBUG_ENABLE_ENHANCED_CALL_BLOCKING, // used for testing only
                     Settings.System.RINGTONE_CACHE, // internal cache
                     Settings.System.SETUP_WIZARD_HAS_RUN, // Only used by SuW
                     Settings.System.SHOW_GTALK_SERVICE_STATUS, // candidate for backup?
@@ -111,6 +112,13 @@ public class SettingsBackupTest {
                     Settings.Global.BATTERY_DISCHARGE_DURATION_THRESHOLD,
                     Settings.Global.BATTERY_DISCHARGE_THRESHOLD,
                     Settings.Global.BLE_SCAN_ALWAYS_AVAILABLE,
+                    Settings.Global.BLE_SCAN_LOW_POWER_WINDOW_MS,
+                    Settings.Global.BLE_SCAN_LOW_POWER_INTERVAL_MS,
+                    Settings.Global.BLE_SCAN_BALANCED_WINDOW_MS,
+                    Settings.Global.BLE_SCAN_BALANCED_INTERVAL_MS,
+                    Settings.Global.BLE_SCAN_LOW_LATENCY_WINDOW_MS,
+                    Settings.Global.BLE_SCAN_LOW_LATENCY_INTERVAL_MS,
+                    Settings.Global.BLE_SCAN_BACKGROUND_MODE,
                     Settings.Global.BLUETOOTH_A2DP_SINK_PRIORITY_PREFIX,
                     Settings.Global.BLUETOOTH_A2DP_SRC_PRIORITY_PREFIX,
                     Settings.Global.BLUETOOTH_A2DP_SUPPORTS_OPTIONAL_CODECS_PREFIX,
@@ -407,7 +415,8 @@ public class SettingsBackupTest {
                     Settings.Global.WTF_IS_FATAL,
                     Settings.Global.ZEN_MODE,
                     Settings.Global.ZEN_MODE_CONFIG_ETAG,
-                    Settings.Global.ZEN_MODE_RINGER_LEVEL);
+                    Settings.Global.ZEN_MODE_RINGER_LEVEL,
+                    Settings.Global.HIDDEN_API_BLACKLIST_EXEMPTIONS);
 
     private static final Set<String> BACKUP_BLACKLISTED_SECURE_SETTINGS =
              newHashSet(

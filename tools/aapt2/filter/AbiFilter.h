@@ -33,6 +33,8 @@ namespace aapt {
  */
 class AbiFilter : public IPathFilter {
  public:
+  virtual ~AbiFilter() = default;
+
   /** Factory method to create a filter from a list of configuration::Abi. */
   static std::unique_ptr<AbiFilter> FromAbiList(const std::vector<configuration::Abi>& abi_list);
 

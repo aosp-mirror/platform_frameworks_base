@@ -147,6 +147,16 @@ public class UpstreamNetworkMonitorTest {
     }
 
     @Test
+    public void testCallbacksRegistered() {
+        mUNM.start();
+        verify(mCM, times(1)).registerNetworkCallback(any(), any(), any());
+        verify(mCM, times(1)).registerDefaultNetworkCallback(any(), any());
+
+        mUNM.stop();
+        verify(mCM, times(2)).unregisterNetworkCallback(any(NetworkCallback.class));
+    }
+
+    @Test
     public void testRequestsMobileNetwork() throws Exception {
         assertFalse(mUNM.mobileNetworkRequested());
         assertEquals(0, mCM.requested.size());

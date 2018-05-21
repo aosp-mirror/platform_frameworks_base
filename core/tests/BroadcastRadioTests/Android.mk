@@ -23,6 +23,7 @@ LOCAL_CERTIFICATE := platform
 LOCAL_MODULE_TAGS := tests
 # TODO(b/13282254): uncomment when b/13282254 is fixed
 # LOCAL_SDK_VERSION := current
+LOCAL_PRIVATE_PLATFORM_APIS := true
 
 LOCAL_STATIC_JAVA_LIBRARIES := compatibility-device-util android-support-test testng
 

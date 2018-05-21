@@ -24,6 +24,7 @@ LOCAL_SRC_FILES := \
 
 
 LOCAL_PACKAGE_NAME := AppCompatibilityTest
+LOCAL_PRIVATE_PLATFORM_APIS := true
 LOCAL_CERTIFICATE := platform
 include $(BUILD_PACKAGE)
 

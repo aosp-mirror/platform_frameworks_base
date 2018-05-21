@@ -18,6 +18,7 @@ package com.android.commands.svc;
 
 import android.content.Context;
 import android.hardware.usb.IUsbManager;
+import android.hardware.usb.UsbManager;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.SystemProperties;
@@ -38,6 +39,9 @@ public class UsbCommand extends Svc.Command {
                 + "\n"
                 + "usage: svc usb setFunction [function] [usbDataUnlocked=false]\n"
                 + "         Set the current usb function and optionally the data lock state.\n\n"
+                + "       svc usb setScreenUnlockedFunctions [function]\n"
+                + "         Sets the functions which, if the device was charging,"
+                    + " become current on screen unlock.\n"
                 + "       svc usb getFunction\n"
                 + "          Gets the list of currently enabled functions\n";
     }
@@ -61,6 +65,16 @@ public class UsbCommand extends Svc.Command {
                 return;
             } else if ("getFunction".equals(args[1])) {
                 System.err.println(SystemProperties.get("sys.usb.config"));
+                return;
+            } else if ("setScreenUnlockedFunctions".equals(args[1])) {
+                IUsbManager usbMgr = IUsbManager.Stub.asInterface(ServiceManager.getService(
+                        Context.USB_SERVICE));
+                try {
+                    usbMgr.setScreenUnlockedFunctions((args.length >= 3 ? args[2] :
+                            UsbManager.USB_FUNCTION_NONE));
+                } catch (RemoteException e) {
+                    System.err.println("Error communicating with UsbManager: " + e);
+                }
                 return;
             }
         }

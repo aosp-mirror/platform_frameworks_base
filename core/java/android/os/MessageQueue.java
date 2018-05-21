@@ -254,6 +254,7 @@ public final class MessageQueue {
         } else if (record != null) {
             record.mEvents = 0;
             mFileDescriptorRecords.removeAt(index);
+            nativeSetFileDescriptorEvents(mPtr, fdNum, 0);
         }
     }
 

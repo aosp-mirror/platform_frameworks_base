@@ -99,6 +99,16 @@ public final class BluetoothSocket implements Closeable {
     /** L2CAP socket */
     public static final int TYPE_L2CAP = 3;
 
+    /** L2CAP socket on BR/EDR transport
+     * @hide
+     */
+    public static final int TYPE_L2CAP_BREDR = TYPE_L2CAP;
+
+    /** L2CAP socket on LE transport
+     * @hide
+     */
+    public static final int TYPE_L2CAP_LE = 4;
+
     /*package*/ static final int EBADFD = 77;
     /*package*/ static final int EADDRINUSE = 98;
 
@@ -417,6 +427,7 @@ public final class BluetoothSocket implements Closeable {
             return -1;
         }
         try {
+            if (DBG) Log.d(TAG, "bindListen(): mPort=" + mPort + ", mType=" + mType);
             mPfd = bluetoothProxy.getSocketManager().createSocketChannel(mType, mServiceName,
                     mUuid, mPort, getSecurityFlags());
         } catch (RemoteException e) {
@@ -451,7 +462,7 @@ public final class BluetoothSocket implements Closeable {
                     mSocketState = SocketState.LISTENING;
                 }
             }
-            if (DBG) Log.d(TAG, "channel: " + channel);
+            if (DBG) Log.d(TAG, "bindListen(): channel=" + channel + ", mPort=" + mPort);
             if (mPort <= -1) {
                 mPort = channel;
             } // else ASSERT(mPort == channel)
@@ -515,7 +526,7 @@ public final class BluetoothSocket implements Closeable {
     /*package*/ int read(byte[] b, int offset, int length) throws IOException {
         int ret = 0;
         if (VDBG) Log.d(TAG, "read in:  " + mSocketIS + " len: " + length);
-        if (mType == TYPE_L2CAP) {
+        if ((mType == TYPE_L2CAP) || (mType == TYPE_L2CAP_LE)) {
             int bytesToRead = length;
             if (VDBG) {
                 Log.v(TAG, "l2cap: read(): offset: " + offset + " length:" + length
@@ -558,7 +569,7 @@ public final class BluetoothSocket implements Closeable {
         //      Rfcomm uses dynamic allocation, and should not have any bindings
         //      to the actual message length.
         if (VDBG) Log.d(TAG, "write: " + mSocketOS + " length: " + length);
-        if (mType == TYPE_L2CAP) {
+        if ((mType == TYPE_L2CAP) || (mType == TYPE_L2CAP_LE)) {
             if (length <= mMaxTxPacketSize) {
                 mSocketOS.write(b, offset, length);
             } else {
@@ -665,6 +676,35 @@ public final class BluetoothSocket implements Closeable {
         mExcludeSdp = excludeSdp;
     }
 
+    /**
+     * Set the LE Transmit Data Length to be the maximum that the BT Controller is capable of. This
+     * parameter is used by the BT Controller to set the maximum transmission packet size on this
+     * connection. This function is currently used for testing only.
+     * @hide
+     */
+    public void requestMaximumTxDataLength() throws IOException {
+        if (mDevice == null) {
+            throw new IOException("requestMaximumTxDataLength is called on null device");
+        }
+
+        try {
+            if (mSocketState == SocketState.CLOSED) {
+                throw new IOException("socket closed");
+            }
+            IBluetooth bluetoothProxy =
+                    BluetoothAdapter.getDefaultAdapter().getBluetoothService(null);
+            if (bluetoothProxy == null) {
+                throw new IOException("Bluetooth is off");
+            }
+
+            if (DBG) Log.d(TAG, "requestMaximumTxDataLength");
+            bluetoothProxy.getSocketManager().requestMaximumTxDataLength(mDevice);
+        } catch (RemoteException e) {
+            Log.e(TAG, Log.getStackTraceString(new Throwable()));
+            throw new IOException("unable to send RPC: " + e.getMessage());
+        }
+    }
+
     private String convertAddr(final byte[] addr) {
         return String.format(Locale.US, "%02X:%02X:%02X:%02X:%02X:%02X",
                 addr[0], addr[1], addr[2], addr[3], addr[4], addr[5]);
@@ -702,7 +742,7 @@ public final class BluetoothSocket implements Closeable {
     }
 
     private void createL2capRxBuffer() {
-        if (mType == TYPE_L2CAP) {
+        if ((mType == TYPE_L2CAP) || (mType == TYPE_L2CAP_LE)) {
             // Allocate the buffer to use for reads.
             if (VDBG) Log.v(TAG, "  Creating mL2capBuffer: mMaxPacketSize: " + mMaxRxPacketSize);
             mL2capBuffer = ByteBuffer.wrap(new byte[mMaxRxPacketSize]);

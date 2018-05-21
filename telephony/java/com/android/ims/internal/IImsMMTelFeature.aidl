@@ -18,9 +18,8 @@ package com.android.ims.internal;
 
 import android.app.PendingIntent;
 
-import com.android.ims.ImsCallProfile;
+import android.telephony.ims.ImsCallProfile;
 import com.android.ims.internal.IImsCallSession;
-import com.android.ims.internal.IImsCallSessionListener;
 import com.android.ims.internal.IImsConfig;
 import com.android.ims.internal.IImsEcbm;
 import com.android.ims.internal.IImsMultiEndpoint;
@@ -43,8 +42,7 @@ interface IImsMMTelFeature {
     void addRegistrationListener(in IImsRegistrationListener listener);
     void removeRegistrationListener(in IImsRegistrationListener listener);
     ImsCallProfile createCallProfile(int sessionId, int callSessionType, int callType);
-    IImsCallSession createCallSession(int sessionId, in ImsCallProfile profile,
-            IImsCallSessionListener listener);
+    IImsCallSession createCallSession(int sessionId, in ImsCallProfile profile);
     IImsCallSession getPendingCallSession(int sessionId, String callId);
     IImsUt getUtInterface();
     IImsConfig getConfigInterface();

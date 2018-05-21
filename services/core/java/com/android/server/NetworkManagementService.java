@@ -18,11 +18,9 @@ package com.android.server;
 
 import static android.Manifest.permission.CONNECTIVITY_INTERNAL;
 import static android.Manifest.permission.DUMP;
+import static android.Manifest.permission.NETWORK_SETTINGS;
 import static android.Manifest.permission.NETWORK_STACK;
 import static android.Manifest.permission.SHUTDOWN;
-import static android.net.ConnectivityManager.PRIVATE_DNS_DEFAULT_MODE;
-import static android.net.ConnectivityManager.PRIVATE_DNS_MODE_OPPORTUNISTIC;
-import static android.net.ConnectivityManager.PRIVATE_DNS_MODE_PROVIDER_HOSTNAME;
 import static android.net.NetworkPolicyManager.FIREWALL_CHAIN_DOZABLE;
 import static android.net.NetworkPolicyManager.FIREWALL_CHAIN_NAME_DOZABLE;
 import static android.net.NetworkPolicyManager.FIREWALL_CHAIN_NAME_NONE;
@@ -208,12 +206,6 @@ public class NetworkManagementService extends INetworkManagementService.Stub
         public static final int RouteChange               = 616;
         public static final int StrictCleartext           = 617;
     }
-
-    /* Defaults for resolver parameters. */
-    public static final int DNS_RESOLVER_DEFAULT_SAMPLE_VALIDITY_SECONDS = 1800;
-    public static final int DNS_RESOLVER_DEFAULT_SUCCESS_THRESHOLD_PERCENT = 25;
-    public static final int DNS_RESOLVER_DEFAULT_MIN_SAMPLES = 8;
-    public static final int DNS_RESOLVER_DEFAULT_MAX_SAMPLES = 64;
 
     /**
      * String indicating a softap command.
@@ -1768,6 +1760,8 @@ public class NetworkManagementService extends INetworkManagementService.Stub
 
     @Override
     public boolean setDataSaverModeEnabled(boolean enable) {
+        mContext.enforceCallingOrSelfPermission(NETWORK_SETTINGS, TAG);
+
         if (DBG) Log.d(TAG, "setDataSaverMode: " + enable);
         synchronized (mQuotaLock) {
             if (mDataSaverMode == enable) {
@@ -1873,10 +1867,10 @@ public class NetworkManagementService extends INetworkManagementService.Stub
     }
 
     @Override
-    public NetworkStats getNetworkStatsUidDetail(int uid) {
+    public NetworkStats getNetworkStatsUidDetail(int uid, String[] ifaces) {
         mContext.enforceCallingOrSelfPermission(CONNECTIVITY_INTERNAL, TAG);
         try {
-            return mStatsFactory.readNetworkStatsDetail(uid, null, TAG_ALL, null);
+            return mStatsFactory.readNetworkStatsDetail(uid, ifaces, TAG_ALL, null);
         } catch (IOException e) {
             throw new IllegalStateException(e);
         }
@@ -1947,78 +1941,17 @@ public class NetworkManagementService extends INetworkManagementService.Stub
     }
 
     @Override
-    public void setDnsConfigurationForNetwork(int netId, String[] servers, String domains) {
+    public void setDnsConfigurationForNetwork(int netId, String[] servers, String[] domains,
+                    int[] params, String tlsHostname, String[] tlsServers) {
         mContext.enforceCallingOrSelfPermission(CONNECTIVITY_INTERNAL, TAG);
 
-        final ContentResolver cr = mContext.getContentResolver();
-
-        int sampleValidity = Settings.Global.getInt(cr,
-                Settings.Global.DNS_RESOLVER_SAMPLE_VALIDITY_SECONDS,
-                DNS_RESOLVER_DEFAULT_SAMPLE_VALIDITY_SECONDS);
-        if (sampleValidity < 0 || sampleValidity > 65535) {
-            Slog.w(TAG, "Invalid sampleValidity=" + sampleValidity + ", using default=" +
-                    DNS_RESOLVER_DEFAULT_SAMPLE_VALIDITY_SECONDS);
-            sampleValidity = DNS_RESOLVER_DEFAULT_SAMPLE_VALIDITY_SECONDS;
-        }
-
-        int successThreshold = Settings.Global.getInt(cr,
-                Settings.Global.DNS_RESOLVER_SUCCESS_THRESHOLD_PERCENT,
-                DNS_RESOLVER_DEFAULT_SUCCESS_THRESHOLD_PERCENT);
-        if (successThreshold < 0 || successThreshold > 100) {
-            Slog.w(TAG, "Invalid successThreshold=" + successThreshold + ", using default=" +
-                    DNS_RESOLVER_DEFAULT_SUCCESS_THRESHOLD_PERCENT);
-            successThreshold = DNS_RESOLVER_DEFAULT_SUCCESS_THRESHOLD_PERCENT;
-        }
-
-        int minSamples = Settings.Global.getInt(cr,
-                Settings.Global.DNS_RESOLVER_MIN_SAMPLES, DNS_RESOLVER_DEFAULT_MIN_SAMPLES);
-        int maxSamples = Settings.Global.getInt(cr,
-                Settings.Global.DNS_RESOLVER_MAX_SAMPLES, DNS_RESOLVER_DEFAULT_MAX_SAMPLES);
-        if (minSamples < 0 || minSamples > maxSamples || maxSamples > 64) {
-            Slog.w(TAG, "Invalid sample count (min, max)=(" + minSamples + ", " + maxSamples +
-                    "), using default=(" + DNS_RESOLVER_DEFAULT_MIN_SAMPLES + ", " +
-                    DNS_RESOLVER_DEFAULT_MAX_SAMPLES + ")");
-            minSamples = DNS_RESOLVER_DEFAULT_MIN_SAMPLES;
-            maxSamples = DNS_RESOLVER_DEFAULT_MAX_SAMPLES;
-        }
-
-        final String[] domainStrs = domains == null ? new String[0] : domains.split(" ");
-        final int[] params = { sampleValidity, successThreshold, minSamples, maxSamples };
-        final boolean useTls = shouldUseTls(cr);
-        // TODO: Populate tlsHostname once it's decided how the hostname's IP
-        // addresses will be resolved:
-        //
-        //     [1] network-provided DNS servers are included here with the
-        //         hostname and netd will use the network-provided servers to
-        //         resolve the hostname and fix up its internal structures, or
-        //
-        //     [2] network-provided DNS servers are included here without the
-        //         hostname, the ConnectivityService layer resolves the given
-        //         hostname, and then reconfigures netd with this information.
-        //
-        // In practice, there will always be a need for ConnectivityService or
-        // the captive portal app to use the network-provided services to make
-        // some queries. This argues in favor of [1], in concert with another
-        // mechanism, perhaps setting a high bit in the netid, to indicate
-        // via existing DNS APIs which set of servers (network-provided or
-        // non-network-provided private DNS) should be queried.
-        final String tlsHostname = "";
         final String[] tlsFingerprints = new String[0];
         try {
-            mNetdService.setResolverConfiguration(netId, servers, domainStrs, params,
-                    useTls, tlsHostname, tlsFingerprints);
+            mNetdService.setResolverConfiguration(
+                    netId, servers, domains, params, tlsHostname, tlsServers, tlsFingerprints);
         } catch (RemoteException e) {
             throw new RuntimeException(e);
         }
-    }
-
-    private static boolean shouldUseTls(ContentResolver cr) {
-        String privateDns = Settings.Global.getString(cr, Settings.Global.PRIVATE_DNS_MODE);
-        if (TextUtils.isEmpty(privateDns)) {
-            privateDns = PRIVATE_DNS_DEFAULT_MODE;
-        }
-        return privateDns.equals(PRIVATE_DNS_MODE_OPPORTUNISTIC) ||
-               privateDns.startsWith(PRIVATE_DNS_MODE_PROVIDER_HOSTNAME);
     }
 
     @Override
@@ -2563,12 +2496,16 @@ public class NetworkManagementService extends INetworkManagementService.Stub
 
     @Override
     public void removeNetwork(int netId) {
-        mContext.enforceCallingOrSelfPermission(CONNECTIVITY_INTERNAL, TAG);
+        mContext.enforceCallingOrSelfPermission(NETWORK_STACK, TAG);
 
         try {
-            mConnector.execute("network", "destroy", netId);
-        } catch (NativeDaemonConnectorException e) {
-            throw e.rethrowAsParcelableException();
+            mNetdService.networkDestroy(netId);
+        } catch (ServiceSpecificException e) {
+            Log.w(TAG, "removeNetwork(" + netId + "): ", e);
+            throw e;
+        } catch (RemoteException e) {
+            Log.w(TAG, "removeNetwork(" + netId + "): ", e);
+            throw e.rethrowAsRuntimeException();
         }
     }
 

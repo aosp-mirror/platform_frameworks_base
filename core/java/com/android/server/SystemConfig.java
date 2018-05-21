@@ -60,6 +60,7 @@ public class SystemConfig {
     private static final int ALLOW_PERMISSIONS = 0x04;
     private static final int ALLOW_APP_CONFIGS = 0x08;
     private static final int ALLOW_PRIVAPP_PERMISSIONS = 0x10;
+    private static final int ALLOW_HIDDENAPI_WHITELISTING = 0x20;
     private static final int ALLOW_ALL = ~0;
 
     // Group-ids that are given to all packages as read from etc/permissions/*.xml.
@@ -134,6 +135,9 @@ public class SystemConfig {
     // These are the permitted backup transport service components
     final ArraySet<ComponentName> mBackupTransportWhitelist = new ArraySet<>();
 
+    // Package names that are exempted from private API blacklisting
+    final ArraySet<String> mHiddenApiPackageWhitelist = new ArraySet<>();
+
     // These are the packages of carrier-associated apps which should be disabled until used until
     // a SIM is inserted which grants carrier privileges to that carrier app.
     final ArrayMap<String, List<String>> mDisabledUntilUsedPreinstalledCarrierAssociatedApps =
@@ -202,6 +206,10 @@ public class SystemConfig {
 
     public ArraySet<String> getSystemUserBlacklistedApps() {
         return mSystemUserBlacklistedApps;
+    }
+
+    public ArraySet<String> getHiddenApiWhitelistedApps() {
+        return mHiddenApiPackageWhitelist;
     }
 
     public ArraySet<ComponentName> getDefaultVrComponents() {
@@ -327,6 +335,7 @@ public class SystemConfig {
             boolean allowPermissions = (permissionFlag & ALLOW_PERMISSIONS) != 0;
             boolean allowAppConfigs = (permissionFlag & ALLOW_APP_CONFIGS) != 0;
             boolean allowPrivappPermissions = (permissionFlag & ALLOW_PRIVAPP_PERMISSIONS) != 0;
+            boolean allowApiWhitelisting = (permissionFlag & ALLOW_HIDDENAPI_WHITELISTING) != 0;
             while (true) {
                 XmlUtils.nextElement(parser);
                 if (parser.getEventType() == XmlPullParser.END_DOCUMENT) {
@@ -569,6 +578,15 @@ public class SystemConfig {
                     XmlUtils.skipCurrentTag(parser);
                 } else if ("privapp-permissions".equals(name) && allowPrivappPermissions) {
                     readPrivAppPermissions(parser);
+                } else if ("hidden-api-whitelisted-app".equals(name) && allowApiWhitelisting) {
+                    String pkgname = parser.getAttributeValue(null, "package");
+                    if (pkgname == null) {
+                        Slog.w(TAG, "<hidden-api-whitelisted-app> without package in " + permFile
+                                + " at " + parser.getPositionDescription());
+                    } else {
+                        mHiddenApiPackageWhitelist.add(pkgname);
+                    }
+                    XmlUtils.skipCurrentTag(parser);
                 } else {
                     XmlUtils.skipCurrentTag(parser);
                     continue;

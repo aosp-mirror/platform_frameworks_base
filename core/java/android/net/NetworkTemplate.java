@@ -24,6 +24,15 @@ import static android.net.ConnectivityManager.TYPE_WIFI;
 import static android.net.ConnectivityManager.TYPE_WIFI_P2P;
 import static android.net.ConnectivityManager.TYPE_WIMAX;
 import static android.net.NetworkIdentity.COMBINE_SUBTYPE_ENABLED;
+import static android.net.NetworkStats.DEFAULT_NETWORK_ALL;
+import static android.net.NetworkStats.DEFAULT_NETWORK_NO;
+import static android.net.NetworkStats.DEFAULT_NETWORK_YES;
+import static android.net.NetworkStats.METERED_ALL;
+import static android.net.NetworkStats.METERED_NO;
+import static android.net.NetworkStats.METERED_YES;
+import static android.net.NetworkStats.ROAMING_ALL;
+import static android.net.NetworkStats.ROAMING_NO;
+import static android.net.NetworkStats.ROAMING_YES;
 import static android.net.wifi.WifiInfo.removeDoubleQuotes;
 import static android.telephony.TelephonyManager.NETWORK_CLASS_2_G;
 import static android.telephony.TelephonyManager.NETWORK_CLASS_3_G;
@@ -191,16 +200,30 @@ public class NetworkTemplate implements Parcelable {
 
     private final String mNetworkId;
 
+    // Matches for the NetworkStats constants METERED_*, ROAMING_* and DEFAULT_NETWORK_*.
+    private final int mMetered;
+    private final int mRoaming;
+    private final int mDefaultNetwork;
+
     public NetworkTemplate(int matchRule, String subscriberId, String networkId) {
         this(matchRule, subscriberId, new String[] { subscriberId }, networkId);
     }
 
     public NetworkTemplate(int matchRule, String subscriberId, String[] matchSubscriberIds,
             String networkId) {
+        this(matchRule, subscriberId, matchSubscriberIds, networkId, METERED_ALL, ROAMING_ALL,
+                DEFAULT_NETWORK_ALL);
+    }
+
+    public NetworkTemplate(int matchRule, String subscriberId, String[] matchSubscriberIds,
+            String networkId, int metered, int roaming, int defaultNetwork) {
         mMatchRule = matchRule;
         mSubscriberId = subscriberId;
         mMatchSubscriberIds = matchSubscriberIds;
         mNetworkId = networkId;
+        mMetered = metered;
+        mRoaming = roaming;
+        mDefaultNetwork = defaultNetwork;
 
         if (!isKnownMatchRule(matchRule)) {
             Log.e(TAG, "Unknown network template rule " + matchRule
@@ -213,6 +236,9 @@ public class NetworkTemplate implements Parcelable {
         mSubscriberId = in.readString();
         mMatchSubscriberIds = in.createStringArray();
         mNetworkId = in.readString();
+        mMetered = in.readInt();
+        mRoaming = in.readInt();
+        mDefaultNetwork = in.readInt();
     }
 
     @Override
@@ -221,6 +247,9 @@ public class NetworkTemplate implements Parcelable {
         dest.writeString(mSubscriberId);
         dest.writeStringArray(mMatchSubscriberIds);
         dest.writeString(mNetworkId);
+        dest.writeInt(mMetered);
+        dest.writeInt(mRoaming);
+        dest.writeInt(mDefaultNetwork);
     }
 
     @Override
@@ -243,12 +272,23 @@ public class NetworkTemplate implements Parcelable {
         if (mNetworkId != null) {
             builder.append(", networkId=").append(mNetworkId);
         }
+        if (mMetered != METERED_ALL) {
+            builder.append(", metered=").append(NetworkStats.meteredToString(mMetered));
+        }
+        if (mRoaming != ROAMING_ALL) {
+            builder.append(", roaming=").append(NetworkStats.roamingToString(mRoaming));
+        }
+        if (mDefaultNetwork != DEFAULT_NETWORK_ALL) {
+            builder.append(", defaultNetwork=").append(NetworkStats.defaultNetworkToString(
+                    mDefaultNetwork));
+        }
         return builder.toString();
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(mMatchRule, mSubscriberId, mNetworkId);
+        return Objects.hash(mMatchRule, mSubscriberId, mNetworkId, mMetered, mRoaming,
+                mDefaultNetwork);
     }
 
     @Override
@@ -257,7 +297,10 @@ public class NetworkTemplate implements Parcelable {
             final NetworkTemplate other = (NetworkTemplate) obj;
             return mMatchRule == other.mMatchRule
                     && Objects.equals(mSubscriberId, other.mSubscriberId)
-                    && Objects.equals(mNetworkId, other.mNetworkId);
+                    && Objects.equals(mNetworkId, other.mNetworkId)
+                    && mMetered == other.mMetered
+                    && mRoaming == other.mRoaming
+                    && mDefaultNetwork == other.mDefaultNetwork;
         }
         return false;
     }
@@ -300,6 +343,10 @@ public class NetworkTemplate implements Parcelable {
      * Test if given {@link NetworkIdentity} matches this template.
      */
     public boolean matches(NetworkIdentity ident) {
+        if (!matchesMetered(ident)) return false;
+        if (!matchesRoaming(ident)) return false;
+        if (!matchesDefaultNetwork(ident)) return false;
+
         switch (mMatchRule) {
             case MATCH_MOBILE_ALL:
                 return matchesMobile(ident);
@@ -324,6 +371,24 @@ public class NetworkTemplate implements Parcelable {
                 // just claim not to match anything.
                 return false;
         }
+    }
+
+    private boolean matchesMetered(NetworkIdentity ident) {
+        return (mMetered == METERED_ALL)
+            || (mMetered == METERED_YES && ident.mMetered)
+            || (mMetered == METERED_NO && !ident.mMetered);
+    }
+
+    private boolean matchesRoaming(NetworkIdentity ident) {
+        return (mRoaming == ROAMING_ALL)
+            || (mRoaming == ROAMING_YES && ident.mRoaming)
+            || (mRoaming == ROAMING_NO && !ident.mRoaming);
+    }
+
+    private boolean matchesDefaultNetwork(NetworkIdentity ident) {
+        return (mDefaultNetwork == DEFAULT_NETWORK_ALL)
+            || (mDefaultNetwork == DEFAULT_NETWORK_YES && ident.mDefaultNetwork)
+            || (mDefaultNetwork == DEFAULT_NETWORK_NO && !ident.mDefaultNetwork);
     }
 
     public boolean matchesSubscriberId(String subscriberId) {

@@ -20,6 +20,8 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.telephony.Rlog;
 
+import java.util.Objects;
+
 /**
  * LTE signal strength related information.
  */
@@ -35,50 +37,15 @@ public final class CellSignalStrengthLte extends CellSignalStrength implements P
     private int mCqi;
     private int mTimingAdvance;
 
-    /**
-     * Empty constructor
-     *
-     * @hide
-     */
+    /** @hide */
     public CellSignalStrengthLte() {
         setDefaultValues();
     }
 
-    /**
-     * Constructor
-     *
-     * @hide
-     */
+    /** @hide */
     public CellSignalStrengthLte(int signalStrength, int rsrp, int rsrq, int rssnr, int cqi,
             int timingAdvance) {
-        initialize(signalStrength, rsrp, rsrq, rssnr, cqi, timingAdvance);
-    }
-
-    /**
-     * Copy constructors
-     *
-     * @param s Source SignalStrength
-     *
-     * @hide
-     */
-    public CellSignalStrengthLte(CellSignalStrengthLte s) {
-        copyFrom(s);
-    }
-
-    /**
-     * Initialize all the values
-     *
-     * @param lteSignalStrength
-     * @param rsrp
-     * @param rsrq
-     * @param rssnr
-     * @param cqi
-     *
-     * @hide
-     */
-    public void initialize(int lteSignalStrength, int rsrp, int rsrq, int rssnr, int cqi,
-            int timingAdvance) {
-        mSignalStrength = lteSignalStrength;
+        mSignalStrength = signalStrength;
         mRsrp = rsrp;
         mRsrq = rsrq;
         mRssnr = rssnr;
@@ -86,25 +53,12 @@ public final class CellSignalStrengthLte extends CellSignalStrength implements P
         mTimingAdvance = timingAdvance;
     }
 
-    /**
-     * Initialize from the SignalStrength structure.
-     *
-     * @param ss
-     *
-     * @hide
-     */
-    public void initialize(SignalStrength ss, int timingAdvance) {
-        mSignalStrength = ss.getLteSignalStrength();
-        mRsrp = ss.getLteRsrp();
-        mRsrq = ss.getLteRsrq();
-        mRssnr = ss.getLteRssnr();
-        mCqi = ss.getLteCqi();
-        mTimingAdvance = timingAdvance;
+    /** @hide */
+    public CellSignalStrengthLte(CellSignalStrengthLte s) {
+        copyFrom(s);
     }
 
-    /**
-     * @hide
-     */
+    /** @hide */
     protected void copyFrom(CellSignalStrengthLte s) {
         mSignalStrength = s.mSignalStrength;
         mRsrp = s.mRsrp;
@@ -114,9 +68,7 @@ public final class CellSignalStrengthLte extends CellSignalStrength implements P
         mTimingAdvance = s.mTimingAdvance;
     }
 
-    /**
-     * @hide
-     */
+    /** @hide */
     @Override
     public CellSignalStrengthLte copy() {
         return new CellSignalStrengthLte(this);
@@ -220,7 +172,7 @@ public final class CellSignalStrengthLte extends CellSignalStrength implements P
     }
 
     /**
-     * Get the timing advance value for LTE, as a value between 0..63.
+     * Get the timing advance value for LTE, as a value in range of 0..1282.
      * Integer.MAX_VALUE is reported when there is no active RRC
      * connection. Refer to 3GPP 36.213 Sec 4.2.3
      * @return the LTE timing advance, if available.
@@ -231,10 +183,7 @@ public final class CellSignalStrengthLte extends CellSignalStrength implements P
 
     @Override
     public int hashCode() {
-        int primeNum = 31;
-        return (mSignalStrength * primeNum) + (mRsrp * primeNum)
-                + (mRsrq * primeNum) + (mRssnr * primeNum) + (mCqi * primeNum)
-                + (mTimingAdvance * primeNum);
+        return Objects.hash(mSignalStrength, mRsrp, mRsrq, mRssnr, mCqi, mTimingAdvance);
     }
 
     @Override

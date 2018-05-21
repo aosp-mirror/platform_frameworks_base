@@ -17,6 +17,7 @@
 package android.telephony.data;
 
 import android.annotation.SystemApi;
+import android.os.Build;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.text.TextUtils;
@@ -230,8 +231,10 @@ public final class DataProfile implements Parcelable {
 
     @Override
     public String toString() {
-        return "DataProfile=" + mProfileId + "/" + mApn + "/" + mProtocol + "/" + mAuthType
-                + "/" + mUserName + "/" + mPassword + "/" + mType + "/" + mMaxConnsTime
+        return "DataProfile=" + mProfileId + "/" + mProtocol + "/" + mAuthType
+                + "/" + (Build.IS_USER ? "***/***/***" :
+                         (mApn + "/" + mUserName + "/" + mPassword))
+                + "/" + mType + "/" + mMaxConnsTime
                 + "/" + mMaxConns + "/" + mWaitTime + "/" + mEnabled + "/"
                 + mSupportedApnTypesBitmap + "/" + mRoamingProtocol + "/" + mBearerBitmap + "/"
                 + mMtu + "/" + mMvnoType + "/" + mMvnoMatchData + "/" + mModemCognitive;

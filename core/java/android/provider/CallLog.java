@@ -212,16 +212,25 @@ public class CallLog {
         public static final String FEATURES = "features";
 
         /** Call had video. */
-        public static final int FEATURES_VIDEO = 0x1;
+        public static final int FEATURES_VIDEO = 1 << 0;
 
         /** Call was pulled externally. */
-        public static final int FEATURES_PULLED_EXTERNALLY = 0x2;
+        public static final int FEATURES_PULLED_EXTERNALLY = 1 << 1;
 
         /** Call was HD. */
-        public static final int FEATURES_HD_CALL = 0x4;
+        public static final int FEATURES_HD_CALL = 1 << 2;
 
         /** Call was WIFI call. */
-        public static final int FEATURES_WIFI = 0x8;
+        public static final int FEATURES_WIFI = 1 << 3;
+
+        /**
+         * Indicates the call underwent Assisted Dialing.
+         * @hide
+         */
+        public static final int FEATURES_ASSISTED_DIALING_USED = 1 << 4;
+
+        /** Call was on RTT at some point */
+        public static final int FEATURES_RTT = 1 << 5;
 
         /**
          * The phone number as the user entered it.

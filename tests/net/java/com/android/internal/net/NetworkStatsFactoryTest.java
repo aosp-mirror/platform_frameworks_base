@@ -16,6 +16,7 @@
 
 package com.android.internal.net;
 
+import static android.net.NetworkStats.DEFAULT_NETWORK_NO;
 import static android.net.NetworkStats.METERED_NO;
 import static android.net.NetworkStats.ROAMING_NO;
 import static android.net.NetworkStats.SET_ALL;
@@ -66,7 +67,7 @@ public class NetworkStatsFactoryTest {
             IoUtils.deleteContents(mTestProc);
         }
 
-        mFactory = new NetworkStatsFactory(mTestProc);
+        mFactory = new NetworkStatsFactory(mTestProc, false);
     }
 
     @After
@@ -169,7 +170,7 @@ public class NetworkStatsFactoryTest {
         assertStatsEntry(stats, "dummy0", 0, SET_DEFAULT, 0x0, 0L, 168L);
         assertStatsEntry(stats, "lo", 0, SET_DEFAULT, 0x0, 1288L, 1288L);
 
-        NetworkStatsFactory.noteStackedIface("v4-wlan0", null);
+        NetworkStatsFactory.clearStackedIfaces();
     }
 
     @Test
@@ -197,7 +198,7 @@ public class NetworkStatsFactoryTest {
         assertStatsEntry(stats, "v4-wlan0", 10106, SET_FOREGROUND, 0x0, appRxBytesAfter, 7867488L);
         assertStatsEntry(stats, "wlan0", 0, SET_DEFAULT, 0x0, rootRxBytesAfter, 647587L);
 
-        NetworkStatsFactory.noteStackedIface("v4-wlan0", null);
+        NetworkStatsFactory.clearStackedIfaces();
     }
 
     /**
@@ -240,7 +241,8 @@ public class NetworkStatsFactoryTest {
 
     private static void assertStatsEntry(NetworkStats stats, String iface, int uid, int set,
             int tag, long rxBytes, long txBytes) {
-        final int i = stats.findIndex(iface, uid, set, tag, METERED_NO, ROAMING_NO);
+        final int i = stats.findIndex(iface, uid, set, tag, METERED_NO, ROAMING_NO,
+                DEFAULT_NETWORK_NO);
         if (i < 0) {
             fail(String.format("no NetworkStats for (iface: %s, uid: %d, set: %d, tag: %d)",
                     iface, uid, set, tag));
@@ -252,7 +254,8 @@ public class NetworkStatsFactoryTest {
 
     private static void assertStatsEntry(NetworkStats stats, String iface, int uid, int set,
             int tag, long rxBytes, long rxPackets, long txBytes, long txPackets) {
-        final int i = stats.findIndex(iface, uid, set, tag, METERED_NO, ROAMING_NO);
+        final int i = stats.findIndex(iface, uid, set, tag, METERED_NO, ROAMING_NO,
+                DEFAULT_NETWORK_NO);
         if (i < 0) {
             fail(String.format("no NetworkStats for (iface: %s, uid: %d, set: %d, tag: %d)",
                     iface, uid, set, tag));

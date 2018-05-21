@@ -15,6 +15,7 @@ LOCAL_STATIC_JAVA_LIBRARIES := android-support-test
 LOCAL_JAVA_LIBRARIES := legacy-android-test
 
 LOCAL_PACKAGE_NAME := SettingsProviderTest
+LOCAL_PRIVATE_PLATFORM_APIS := true
 
 LOCAL_MODULE_TAGS := tests
 

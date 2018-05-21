@@ -16,6 +16,7 @@
 
 package com.android.internal.telecom;
 
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.ParcelFileDescriptor;
 import android.telecom.CallAudioState;
@@ -57,6 +58,8 @@ oneway interface IConnectionService {
     void answerVideo(String callId, int videoState, in Session.Info sessionInfo);
 
     void answer(String callId, in Session.Info sessionInfo);
+
+    void deflect(String callId, in Uri address, in Session.Info sessionInfo);
 
     void reject(String callId, in Session.Info sessionInfo);
 
@@ -100,4 +103,13 @@ oneway interface IConnectionService {
 
     void respondToRttUpgradeRequest(String callId, in ParcelFileDescriptor fromInCall,
     in ParcelFileDescriptor toInCall, in Session.Info sessionInfo);
+
+    void handoverFailed(String callId, in ConnectionRequest request,
+            int error, in Session.Info sessionInfo);
+
+    void handoverComplete(String callId, in Session.Info sessionInfo);
+
+    void connectionServiceFocusLost(in Session.Info sessionInfo);
+
+    void connectionServiceFocusGained(in Session.Info sessionInfo);
 }

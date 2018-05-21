@@ -304,6 +304,6 @@ public class SystemImpl implements SystemInterface {
 
     // flags declaring we want extra info from the package manager for webview providers
     private final static int PACKAGE_FLAGS = PackageManager.GET_META_DATA
-            | PackageManager.GET_SIGNATURES | PackageManager.MATCH_DEBUG_TRIAGED_MISSING
-            | PackageManager.MATCH_ANY_USER;
+            | PackageManager.GET_SIGNATURES | PackageManager.GET_SHARED_LIBRARY_FILES
+            | PackageManager.MATCH_DEBUG_TRIAGED_MISSING | PackageManager.MATCH_ANY_USER;
 }

@@ -22,11 +22,15 @@ import android.content.ComponentName;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
+import android.content.pm.PackageManager.NameNotFoundException;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.database.sqlite.SQLiteDatabase;
+import android.os.Build;
 import android.os.IBinder;
+import android.os.PowerManager;
 import android.os.RemoteException;
 import android.util.Log;
 
@@ -216,7 +220,27 @@ public class WapPushManager extends Service {
                 intent.setClassName(mContext, lastapp.className);
                 intent.setComponent(new ComponentName(lastapp.packageName,
                         lastapp.className));
-                if (mContext.startService(intent) == null) {
+                PackageManager pm = mContext.getPackageManager();
+                PowerManager powerManager =
+                        (PowerManager) mContext.getSystemService(Context.POWER_SERVICE);
+                try {
+                    ApplicationInfo appInfo = pm.getApplicationInfo(lastapp.packageName, 0);
+                    if (appInfo.targetSdkVersion < Build.VERSION_CODES.O ||
+                            powerManager.isIgnoringBatteryOptimizations(lastapp.packageName)) {
+                        if (mContext.startService(intent) == null) {
+                            Log.w(LOG_TAG, "invalid name " +
+                                    lastapp.packageName + "/" + lastapp.className);
+                            return WapPushManagerParams.INVALID_RECEIVER_NAME;
+                        }
+                    } else {
+                        if (mContext.startForegroundService(intent) == null) {
+                            Log.w(LOG_TAG, "invalid name " +
+                                    lastapp.packageName + "/" + lastapp.className);
+                            return WapPushManagerParams.INVALID_RECEIVER_NAME;
+                        }
+                    }
+
+                } catch (NameNotFoundException e) {
                     Log.w(LOG_TAG, "invalid name " +
                             lastapp.packageName + "/" + lastapp.className);
                     return WapPushManagerParams.INVALID_RECEIVER_NAME;

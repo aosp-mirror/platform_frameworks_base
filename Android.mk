@@ -32,224 +32,26 @@ ifneq ($(ANDROID_BUILD_EMBEDDED),true)
 # ============================================================
 include $(CLEAR_VARS)
 
-aidl_files := \
-        frameworks/base/telephony/java/android/telephony/mbms/DownloadRequest.aidl \
-        frameworks/base/telephony/java/android/telephony/mbms/FileInfo.aidl \
-        frameworks/base/telephony/java/android/telephony/mbms/FileServiceInfo.aidl \
-        frameworks/base/telephony/java/android/telephony/mbms/ServiceInfo.aidl \
-        frameworks/base/telephony/java/android/telephony/mbms/StreamingServiceInfo.aidl \
-	frameworks/base/telephony/java/android/telephony/ServiceState.aidl \
-	frameworks/base/telephony/java/android/telephony/SubscriptionInfo.aidl \
-	frameworks/base/telephony/java/android/telephony/CellInfo.aidl \
-	frameworks/base/telephony/java/android/telephony/SignalStrength.aidl \
-	frameworks/base/telephony/java/android/telephony/IccOpenLogicalChannelResponse.aidl \
-	frameworks/base/telephony/java/android/telephony/NeighboringCellInfo.aidl \
-	frameworks/base/telephony/java/android/telephony/ModemActivityInfo.aidl \
-	frameworks/base/telephony/java/android/telephony/UiccAccessRule.aidl \
-	frameworks/base/telephony/java/android/telephony/data/DataCallResponse.aidl \
-	frameworks/base/telephony/java/android/telephony/data/DataProfile.aidl \
-	frameworks/base/telephony/java/android/telephony/euicc/DownloadableSubscription.aidl \
-	frameworks/base/telephony/java/android/telephony/euicc/EuiccInfo.aidl \
-	frameworks/base/location/java/android/location/Location.aidl \
-	frameworks/base/location/java/android/location/Address.aidl \
-	frameworks/base/location/java/android/location/Criteria.aidl \
-	frameworks/base/media/java/android/media/MediaMetadata.aidl \
-	frameworks/base/media/java/android/media/MediaDescription.aidl \
-	frameworks/base/media/java/android/media/Rating.aidl \
-	frameworks/base/media/java/android/media/AudioAttributes.aidl \
-	frameworks/base/media/java/android/media/AudioFocusInfo.aidl \
-	frameworks/base/media/java/android/media/session/PlaybackState.aidl \
-	frameworks/base/media/java/android/media/session/MediaSession.aidl \
-	frameworks/base/media/java/android/media/tv/TvInputInfo.aidl \
-	frameworks/base/media/java/android/media/tv/TvTrackInfo.aidl \
-	frameworks/base/media/java/android/media/browse/MediaBrowser.aidl \
-	frameworks/base/wifi/java/android/net/wifi/ScanSettings.aidl \
-	frameworks/base/wifi/java/android/net/wifi/aware/ConfigRequest.aidl \
-	frameworks/base/wifi/java/android/net/wifi/aware/PublishConfig.aidl \
-	frameworks/base/wifi/java/android/net/wifi/aware/SubscribeConfig.aidl \
-	frameworks/base/wifi/java/android/net/wifi/p2p/WifiP2pInfo.aidl \
-	frameworks/base/wifi/java/android/net/wifi/p2p/WifiP2pDeviceList.aidl \
-	frameworks/base/wifi/java/android/net/wifi/p2p/WifiP2pConfig.aidl \
-	frameworks/base/wifi/java/android/net/wifi/p2p/WifiP2pDevice.aidl \
-	frameworks/base/wifi/java/android/net/wifi/p2p/WifiP2pGroup.aidl \
-	frameworks/base/wifi/java/android/net/wifi/p2p/nsd/WifiP2pServiceRequest.aidl \
-	frameworks/base/wifi/java/android/net/wifi/p2p/nsd/WifiP2pServiceInfo.aidl \
-	frameworks/base/wifi/java/android/net/wifi/WpsInfo.aidl \
-	frameworks/base/wifi/java/android/net/wifi/ScanResult.aidl \
-	frameworks/base/wifi/java/android/net/wifi/PasspointManagementObjectDefinition.aidl \
-	frameworks/base/wifi/java/android/net/wifi/WifiEnterpriseConfig.aidl \
-	frameworks/base/wifi/java/android/net/wifi/WifiConfiguration.aidl \
-	frameworks/base/wifi/java/android/net/wifi/WifiInfo.aidl \
-	frameworks/base/graphics/java/android/graphics/Region.aidl \
-	frameworks/base/graphics/java/android/graphics/Bitmap.aidl \
-	frameworks/base/graphics/java/android/graphics/Point.aidl \
-	frameworks/base/graphics/java/android/graphics/PointF.aidl \
-	frameworks/base/graphics/java/android/graphics/RectF.aidl \
-	frameworks/base/graphics/java/android/graphics/Rect.aidl \
-	frameworks/base/graphics/java/android/graphics/drawable/Icon.aidl \
-	frameworks/base/core/java/android/accounts/AuthenticatorDescription.aidl \
-	frameworks/base/core/java/android/accounts/Account.aidl \
-	frameworks/base/core/java/android/app/admin/ConnectEvent.aidl \
-	frameworks/base/core/java/android/app/admin/DnsEvent.aidl \
-	frameworks/base/core/java/android/app/admin/NetworkEvent.aidl \
-	frameworks/base/core/java/android/app/admin/SystemUpdatePolicy.aidl \
-	frameworks/base/core/java/android/app/admin/PasswordMetrics.aidl \
-	frameworks/base/core/java/android/print/PrintDocumentInfo.aidl \
-	frameworks/base/core/java/android/print/PageRange.aidl \
-	frameworks/base/core/java/android/print/PrintAttributes.aidl \
-	frameworks/base/core/java/android/print/PrinterCapabilitiesInfo.aidl \
-	frameworks/base/core/java/android/print/PrinterId.aidl \
-	frameworks/base/core/java/android/print/PrintJobInfo.aidl \
-	frameworks/base/core/java/android/print/PrinterInfo.aidl \
-	frameworks/base/core/java/android/print/PrintJobId.aidl \
-	frameworks/base/core/java/android/printservice/recommendation/RecommendationInfo.aidl \
-	frameworks/base/core/java/android/hardware/radio/ProgramSelector.aidl \
-	frameworks/base/core/java/android/hardware/radio/RadioManager.aidl \
-	frameworks/base/core/java/android/hardware/radio/RadioMetadata.aidl \
-	frameworks/base/core/java/android/hardware/usb/UsbDevice.aidl \
-	frameworks/base/core/java/android/hardware/usb/UsbInterface.aidl \
-	frameworks/base/core/java/android/hardware/usb/UsbEndpoint.aidl \
-	frameworks/base/core/java/android/hardware/usb/UsbAccessory.aidl \
-	frameworks/base/core/java/android/os/Messenger.aidl \
-	frameworks/base/core/java/android/os/PatternMatcher.aidl \
-	frameworks/base/core/java/android/os/Message.aidl \
-	frameworks/base/core/java/android/os/UserHandle.aidl \
-	frameworks/base/core/java/android/os/ParcelUuid.aidl \
-	frameworks/base/core/java/android/os/ParcelFileDescriptor.aidl \
-	frameworks/base/core/java/android/os/ResultReceiver.aidl \
-	frameworks/base/core/java/android/os/WorkSource.aidl \
-	frameworks/base/core/java/android/os/DropBoxManager.aidl \
-	frameworks/base/core/java/android/os/Bundle.aidl \
-	frameworks/base/core/java/android/os/Debug.aidl \
-	frameworks/base/core/java/android/os/SharedMemory.aidl \
-	frameworks/base/core/java/android/os/StrictMode.aidl \
-	frameworks/base/core/java/android/accessibilityservice/AccessibilityServiceInfo.aidl \
-	frameworks/base/core/java/android/net/Network.aidl \
-	frameworks/base/core/java/android/net/RouteInfo.aidl \
-	frameworks/base/core/java/android/net/NetworkInfo.aidl \
-	frameworks/base/core/java/android/net/IpPrefix.aidl \
-	frameworks/base/core/java/android/net/NetworkCapabilities.aidl \
-	frameworks/base/core/java/android/net/DhcpInfo.aidl \
-	frameworks/base/core/java/android/net/ProxyInfo.aidl \
-	frameworks/base/core/java/android/net/LinkProperties.aidl \
-	frameworks/base/core/java/android/net/Uri.aidl \
-	frameworks/base/core/java/android/net/NetworkRequest.aidl \
-	frameworks/base/core/java/android/net/LinkAddress.aidl \
-	frameworks/base/core/java/android/util/MemoryIntArray.aidl \
-	frameworks/base/core/java/android/view/Display.aidl \
-	frameworks/base/core/java/android/view/InputDevice.aidl \
-	frameworks/base/core/java/android/view/InputEvent.aidl \
-	frameworks/native/aidl/gui/android/view/Surface.aidl \
-	frameworks/base/core/java/android/view/WindowContentFrameStats.aidl \
-	frameworks/base/core/java/android/view/inputmethod/InputMethodSubtype.aidl \
-	frameworks/base/core/java/android/view/inputmethod/CursorAnchorInfo.aidl \
-	frameworks/base/core/java/android/view/inputmethod/CompletionInfo.aidl \
-	frameworks/base/core/java/android/view/inputmethod/ExtractedText.aidl \
-	frameworks/base/core/java/android/view/inputmethod/EditorInfo.aidl \
-	frameworks/base/core/java/android/view/inputmethod/InputMethodInfo.aidl \
-	frameworks/base/core/java/android/view/inputmethod/CorrectionInfo.aidl \
-	frameworks/base/core/java/android/view/inputmethod/InputBinding.aidl \
-	frameworks/base/core/java/android/view/inputmethod/ExtractedTextRequest.aidl \
-	frameworks/base/core/java/android/view/DragEvent.aidl \
-	frameworks/base/core/java/android/view/KeyEvent.aidl \
-	frameworks/base/core/java/android/view/WindowManager.aidl \
-	frameworks/base/core/java/android/view/WindowAnimationFrameStats.aidl \
-	frameworks/base/core/java/android/view/MotionEvent.aidl \
-	frameworks/base/core/java/android/view/accessibility/AccessibilityNodeInfo.aidl \
-	frameworks/base/core/java/android/view/accessibility/AccessibilityRecord.aidl \
-	frameworks/base/core/java/android/view/accessibility/AccessibilityWindowInfo.aidl \
-	frameworks/base/core/java/android/view/accessibility/AccessibilityEvent.aidl \
-	frameworks/base/core/java/android/view/textservice/SpellCheckerSubtype.aidl \
-	frameworks/base/core/java/android/view/textservice/TextInfo.aidl \
-	frameworks/base/core/java/android/view/textservice/SpellCheckerInfo.aidl \
-	frameworks/base/core/java/android/view/textservice/SentenceSuggestionsInfo.aidl \
-	frameworks/base/core/java/android/view/textservice/SuggestionsInfo.aidl \
-	frameworks/base/core/java/android/service/carrier/CarrierIdentifier.aidl \
-	frameworks/base/core/java/android/service/carrier/MessagePdu.aidl \
-	frameworks/base/core/java/android/service/euicc/GetDefaultDownloadableSubscriptionListResult.aidl \
-	frameworks/base/core/java/android/service/euicc/GetDownloadableSubscriptionMetadataResult.aidl \
-	frameworks/base/core/java/android/service/euicc/GetEuiccProfileInfoListResult.aidl \
-	frameworks/base/core/java/android/service/notification/Adjustment.aidl \
-	frameworks/base/core/java/android/service/notification/Condition.aidl \
-	frameworks/base/core/java/android/service/notification/SnoozeCriterion.aidl \
-	frameworks/base/core/java/android/service/notification/StatusBarNotification.aidl \
-	frameworks/base/core/java/android/service/chooser/ChooserTarget.aidl \
-	frameworks/base/core/java/android/service/resolver/ResolverTarget.aidl \
-	frameworks/base/core/java/android/speech/tts/Voice.aidl \
-	frameworks/base/core/java/android/app/usage/CacheQuotaHint.aidl \
-	frameworks/base/core/java/android/app/usage/ExternalStorageStats.aidl \
-	frameworks/base/core/java/android/app/usage/StorageStats.aidl \
-	frameworks/base/core/java/android/app/usage/UsageEvents.aidl \
-	frameworks/base/core/java/android/app/Notification.aidl \
-	frameworks/base/core/java/android/app/NotificationManager.aidl \
-	frameworks/base/core/java/android/app/WallpaperInfo.aidl \
-	frameworks/base/core/java/android/app/AppOpsManager.aidl \
-	frameworks/base/core/java/android/app/ActivityManager.aidl \
-	frameworks/base/core/java/android/app/PendingIntent.aidl \
-	frameworks/base/core/java/android/app/AlarmManager.aidl \
-	frameworks/base/core/java/android/app/SearchableInfo.aidl \
-	frameworks/base/core/java/android/app/VoiceInteractor.aidl \
-	frameworks/base/core/java/android/app/assist/AssistContent.aidl \
-	frameworks/base/core/java/android/app/assist/AssistStructure.aidl \
-	frameworks/base/core/java/android/app/job/JobParameters.aidl \
-	frameworks/base/core/java/android/app/job/JobInfo.aidl \
-	frameworks/base/core/java/android/appwidget/AppWidgetProviderInfo.aidl \
-	frameworks/base/core/java/android/content/ClipDescription.aidl \
-	frameworks/base/core/java/android/content/IntentFilter.aidl \
-	frameworks/base/core/java/android/content/Intent.aidl \
-	frameworks/base/core/java/android/content/res/Configuration.aidl \
-	frameworks/base/core/java/android/content/res/ObbInfo.aidl \
-	frameworks/base/core/java/android/content/RestrictionEntry.aidl \
-	frameworks/base/core/java/android/content/ClipData.aidl \
-	frameworks/base/core/java/android/content/SyncAdapterType.aidl \
-	frameworks/base/core/java/android/content/SyncRequest.aidl \
-	frameworks/base/core/java/android/content/PeriodicSync.aidl \
-	frameworks/base/core/java/android/content/SyncResult.aidl \
-	frameworks/base/core/java/android/content/pm/FeatureInfo.aidl \
-	frameworks/base/core/java/android/content/pm/InstrumentationInfo.aidl \
-	frameworks/base/core/java/android/content/pm/PackageInstaller.aidl \
-	frameworks/base/core/java/android/content/pm/ServiceInfo.aidl \
-	frameworks/base/core/java/android/content/pm/Signature.aidl \
-	frameworks/base/core/java/android/content/pm/ApplicationInfo.aidl \
-	frameworks/base/core/java/android/content/pm/PermissionInfo.aidl \
-	frameworks/base/core/java/android/content/pm/ActivityInfo.aidl \
-	frameworks/base/core/java/android/content/pm/ConfigurationInfo.aidl \
-	frameworks/base/core/java/android/content/pm/PackageInfo.aidl \
-	frameworks/base/core/java/android/content/pm/ResolveInfo.aidl \
-	frameworks/base/core/java/android/content/pm/ProviderInfo.aidl \
-	frameworks/base/core/java/android/content/pm/PackageStats.aidl \
-	frameworks/base/core/java/android/content/pm/PermissionGroupInfo.aidl \
-	frameworks/base/core/java/android/content/pm/ShortcutInfo.aidl \
-	frameworks/base/core/java/android/content/pm/LabeledIntent.aidl \
-	frameworks/base/core/java/android/content/ComponentName.aidl \
-	frameworks/base/core/java/android/content/SyncStats.aidl \
-	frameworks/base/core/java/android/content/ContentValues.aidl \
-	frameworks/base/core/java/android/content/SyncInfo.aidl \
-	frameworks/base/core/java/android/content/IntentSender.aidl \
-	frameworks/base/core/java/android/widget/RemoteViews.aidl \
-	frameworks/base/core/java/android/text/style/SuggestionSpan.aidl \
-	frameworks/base/core/java/android/nfc/Tag.aidl \
-	frameworks/base/core/java/android/nfc/NdefRecord.aidl \
-	frameworks/base/core/java/android/nfc/NdefMessage.aidl \
-	frameworks/base/core/java/android/database/CursorWindow.aidl \
-	frameworks/base/core/java/android/service/quicksettings/Tile.aidl \
-	frameworks/native/aidl/binder/android/os/PersistableBundle.aidl \
-	system/bt/binder/android/bluetooth/BluetoothHealthAppConfiguration.aidl \
-	system/bt/binder/android/bluetooth/le/AdvertiseSettings.aidl \
-	system/bt/binder/android/bluetooth/le/ScanSettings.aidl \
-	system/bt/binder/android/bluetooth/le/AdvertiseData.aidl \
-	system/bt/binder/android/bluetooth/le/ScanFilter.aidl \
-	system/bt/binder/android/bluetooth/le/ScanResult.aidl \
-	system/bt/binder/android/bluetooth/BluetoothDevice.aidl \
-	system/netd/server/binder/android/net/UidRange.aidl \
-	frameworks/base/telephony/java/android/telephony/PcoData.aidl \
+aidl_parcelables :=
+define stubs-to-aidl-parcelables
+  gen := $(TARGET_OUT_COMMON_INTERMEDIATES)/$1.aidl
+  aidl_parcelables += $$(gen)
+  $$(gen): $(call java-lib-header-files,$1) $(HOST_OUT_EXECUTABLES)/sdkparcelables
+	@echo Extract SDK parcelables: $$@
+	rm -f $$@
+	$(HOST_OUT_EXECUTABLES)/sdkparcelables $$< $$@
+endef
+
+$(foreach stubs,android_stubs_current android_test_stubs_current android_system_stubs_current,\
+  $(eval $(call stubs-to-aidl-parcelables,$(stubs))))
 
 gen := $(TARGET_OUT_COMMON_INTERMEDIATES)/framework.aidl
-$(gen): PRIVATE_SRC_FILES := $(aidl_files)
-ALL_SDK_FILES += $(gen)
-$(gen): $(aidl_files) | $(AIDL)
-		@echo Aidl Preprocess: $@
-		$(hide) $(AIDL) --preprocess $@ $(PRIVATE_SRC_FILES)
+.KATI_RESTAT: $(gen)
+$(gen): $(aidl_parcelables)
+	@echo Combining SDK parcelables: $@
+	rm -f $@.tmp
+	cat $^ | sort -u > $@.tmp
+	$(call commit-change-for-toc,$@)
 
 # the documentation
 # ============================================================
@@ -271,7 +73,7 @@ non_base_dirs := \
   ../opt/net/voip/src/java/android/net/sip \
 
 framework_base_android_test_mock_src_files := \
-  $(call all-java-files-under, test-runner/src/android/test/mock)
+  $(call all-java-files-under, test-mock/src/android/test/mock)
 
 framework_base_android_test_runner_excluding_mock_src_files := \
   $(filter-out $(framework_base_android_test_mock_src_files), $(call all-java-files-under, test-runner/src))
@@ -280,7 +82,7 @@ framework_base_android_test_runner_excluding_mock_src_files := \
 # to document and check apis
 files_to_check_apis := \
   $(call find-other-java-files, \
-    legacy-test/src \
+    test-base/src \
     $(non_base_dirs) \
   )
 
@@ -349,7 +151,6 @@ framework_docs_LOCAL_API_CHECK_JAVA_LIBRARIES := \
 	bouncycastle \
 	okhttp \
 	ext \
-	icu4j \
 	framework \
 	voip-common \
 	android.test.mock \
@@ -372,38 +173,29 @@ framework_docs_LOCAL_DROIDDOC_OPTIONS := \
     -knowntags ./frameworks/base/docs/knowntags.txt \
     -knowntags ./libcore/known_oj_tags.txt \
     -manifest ./frameworks/base/core/res/AndroidManifest.xml \
+    -hidePackage com.android.internal \
+    -hidePackage com.android.internal.util \
     -hidePackage com.android.okhttp \
     -hidePackage com.android.org.conscrypt \
-    -hidePackage com.android.server \
-    -since $(SRC_API_DIR)/1.xml 1 \
-    -since $(SRC_API_DIR)/2.xml 2 \
-    -since $(SRC_API_DIR)/3.xml 3 \
-    -since $(SRC_API_DIR)/4.xml 4 \
-    -since $(SRC_API_DIR)/5.xml 5 \
-    -since $(SRC_API_DIR)/6.xml 6 \
-    -since $(SRC_API_DIR)/7.xml 7 \
-    -since $(SRC_API_DIR)/8.xml 8 \
-    -since $(SRC_API_DIR)/9.xml 9 \
-    -since $(SRC_API_DIR)/10.xml 10 \
-    -since $(SRC_API_DIR)/11.xml 11 \
-    -since $(SRC_API_DIR)/12.xml 12 \
-    -since $(SRC_API_DIR)/13.xml 13 \
-    -since $(SRC_API_DIR)/14.txt 14 \
-    -since $(SRC_API_DIR)/15.txt 15 \
-    -since $(SRC_API_DIR)/16.txt 16 \
-    -since $(SRC_API_DIR)/17.txt 17 \
-    -since $(SRC_API_DIR)/18.txt 18 \
-    -since $(SRC_API_DIR)/19.txt 19 \
-    -since $(SRC_API_DIR)/20.txt 20 \
-    -since $(SRC_API_DIR)/21.txt 21 \
-    -since $(SRC_API_DIR)/22.txt 22 \
-    -since $(SRC_API_DIR)/23.txt 23 \
-    -since $(SRC_API_DIR)/24.txt 24 \
-    -since $(SRC_API_DIR)/25.txt 25 \
-    -since $(SRC_API_DIR)/26.txt 26 \
-    -since $(SRC_API_DIR)/27.txt 27 \
+    -hidePackage com.android.server
+
+# Convert an sdk level to a "since" argument.
+since-arg = -since $(wildcard $(HISTORICAL_SDK_VERSIONS_ROOT)/$(1)/public/api/android.*) $(1)
+
+finalized_sdks := $(patsubst $(HISTORICAL_SDK_VERSIONS_ROOT)/%/public/api/android.xml,%,\
+    $(wildcard $(HISTORICAL_SDK_VERSIONS_ROOT)/*/public/api/android.xml))
+finalized_sdks += $(patsubst $(HISTORICAL_SDK_VERSIONS_ROOT)/%/public/api/android.txt,%,\
+    $(wildcard $(HISTORICAL_SDK_VERSIONS_ROOT)/*/public/api/android.txt))
+finalized_sdks := $(call numerically_sort,$(finalized_sdks))
+
+framework_docs_LOCAL_DROIDDOC_OPTIONS += $(foreach sdk,$(finalized_sdks),$(call since-arg,$(sdk)))
+ifneq ($(PLATFORM_VERSION_CODENAME),REL)
+  framework_docs_LOCAL_DROIDDOC_OPTIONS += \
+      -since ./frameworks/base/api/current.txt $(PLATFORM_VERSION_CODENAME)
+endif
+framework_docs_LOCAL_DROIDDOC_OPTIONS += \
     -werror -lerror -hide 111 -hide 113 -hide 125 -hide 126 -hide 127 -hide 128 \
-    -overview $(LOCAL_PATH)/core/java/overview.html \
+    -overview $(LOCAL_PATH)/core/java/overview.html
 
 framework_docs_LOCAL_API_CHECK_ADDITIONAL_JAVA_DIR:= \
 	$(call intermediates-dir-for,JAVA_LIBRARIES,framework,,COMMON)
@@ -457,114 +249,9 @@ framework_docs_LOCAL_DROIDDOC_OPTIONS += \
 		-federate SupportLib https://developer.android.com \
 		-federationapi SupportLib prebuilts/sdk/current/support-api.txt
 
-# ====  the api stubs and current.xml ===========================
-include $(CLEAR_VARS)
 
-LOCAL_SRC_FILES:=$(framework_docs_LOCAL_API_CHECK_SRC_FILES)
-LOCAL_GENERATED_SOURCES:=$(framework_docs_LOCAL_GENERATED_SOURCES)
-LOCAL_SRCJARS:=$(framework_docs_LOCAL_SRCJARS)
-LOCAL_JAVA_LIBRARIES:=$(framework_docs_LOCAL_API_CHECK_JAVA_LIBRARIES)
-LOCAL_MODULE_CLASS:=$(framework_docs_LOCAL_MODULE_CLASS)
-LOCAL_DROIDDOC_SOURCE_PATH:=$(framework_docs_LOCAL_DROIDDOC_SOURCE_PATH)
-LOCAL_DROIDDOC_HTML_DIR:=$(framework_docs_LOCAL_DROIDDOC_HTML_DIR)
-LOCAL_ADDITIONAL_JAVA_DIR:=$(framework_docs_LOCAL_API_CHECK_ADDITIONAL_JAVA_DIR)
-LOCAL_ADDITIONAL_DEPENDENCIES:=$(framework_docs_LOCAL_ADDITIONAL_DEPENDENCIES)
-
-LOCAL_MODULE := api-stubs
-
-LOCAL_DROIDDOC_STUB_OUT_DIR := $(TARGET_OUT_COMMON_INTERMEDIATES)/JAVA_LIBRARIES/android_stubs_current_intermediates/src
-
-LOCAL_DROIDDOC_OPTIONS:=\
-		$(framework_docs_LOCAL_DROIDDOC_OPTIONS) \
-		-referenceonly \
-		-api $(INTERNAL_PLATFORM_API_FILE) \
-		-removedApi $(INTERNAL_PLATFORM_REMOVED_API_FILE) \
-		-nodocs
-
-LOCAL_DROIDDOC_CUSTOM_TEMPLATE_DIR:=external/doclava/res/assets/templates-sdk
-
-LOCAL_UNINSTALLABLE_MODULE := true
-
-include $(BUILD_DROIDDOC)
-
-# $(gen), i.e. framework.aidl, is also needed while building against the current stub.
-$(full_target): $(gen)
-$(INTERNAL_PLATFORM_API_FILE): $(full_target)
 $(call dist-for-goals,sdk,$(INTERNAL_PLATFORM_API_FILE))
-
-# ====  the system api stubs ===================================
-include $(CLEAR_VARS)
-
-LOCAL_SRC_FILES:=$(framework_docs_LOCAL_API_CHECK_SRC_FILES)
-LOCAL_GENERATED_SOURCES:=$(framework_docs_LOCAL_GENERATED_SOURCES)
-LOCAL_SRCJARS:=$(framework_docs_LOCAL_SRCJARS)
-LOCAL_JAVA_LIBRARIES:=$(framework_docs_LOCAL_API_CHECK_JAVA_LIBRARIES)
-LOCAL_MODULE_CLASS:=$(framework_docs_LOCAL_MODULE_CLASS)
-LOCAL_DROIDDOC_SOURCE_PATH:=$(framework_docs_LOCAL_DROIDDOC_SOURCE_PATH)
-LOCAL_DROIDDOC_HTML_DIR:=$(framework_docs_LOCAL_DROIDDOC_HTML_DIR)
-LOCAL_ADDITIONAL_JAVA_DIR:=$(framework_docs_LOCAL_API_CHECK_ADDITIONAL_JAVA_DIR)
-LOCAL_ADDITIONAL_DEPENDENCIES:=$(framework_docs_LOCAL_ADDITIONAL_DEPENDENCIES)
-
-LOCAL_MODULE := system-api-stubs
-
-LOCAL_DROIDDOC_STUB_OUT_DIR := $(TARGET_OUT_COMMON_INTERMEDIATES)/JAVA_LIBRARIES/android_system_stubs_current_intermediates/src
-
-LOCAL_DROIDDOC_OPTIONS:=\
-		$(framework_docs_LOCAL_DROIDDOC_OPTIONS) \
-		-referenceonly \
-		-showAnnotation android.annotation.SystemApi \
-		-api $(INTERNAL_PLATFORM_SYSTEM_API_FILE) \
-		-removedApi $(INTERNAL_PLATFORM_SYSTEM_REMOVED_API_FILE) \
-		-exactApi $(INTERNAL_PLATFORM_SYSTEM_EXACT_API_FILE) \
-		-nodocs
-
-LOCAL_DROIDDOC_CUSTOM_TEMPLATE_DIR:=external/doclava/res/assets/templates-sdk
-
-LOCAL_UNINSTALLABLE_MODULE := true
-
-include $(BUILD_DROIDDOC)
-
-# $(gen), i.e. framework.aidl, is also needed while building against the current stub.
-$(full_target): $(gen)
-$(INTERNAL_PLATFORM_SYSTEM_API_FILE): $(full_target)
 $(call dist-for-goals,sdk,$(INTERNAL_PLATFORM_SYSTEM_API_FILE))
-
-# ====  the test api stubs ===================================
-include $(CLEAR_VARS)
-
-LOCAL_SRC_FILES:=$(framework_docs_LOCAL_API_CHECK_SRC_FILES)
-LOCAL_GENERATED_SOURCES:=$(framework_docs_LOCAL_GENERATED_SOURCES)
-LOCAL_SRCJARS:=$(framework_docs_LOCAL_SRCJARS)
-LOCAL_JAVA_LIBRARIES:=$(framework_docs_LOCAL_API_CHECK_JAVA_LIBRARIES)
-LOCAL_MODULE_CLASS:=$(framework_docs_LOCAL_MODULE_CLASS)
-LOCAL_DROIDDOC_SOURCE_PATH:=$(framework_docs_LOCAL_DROIDDOC_SOURCE_PATH)
-LOCAL_DROIDDOC_HTML_DIR:=$(framework_docs_LOCAL_DROIDDOC_HTML_DIR)
-LOCAL_ADDITIONAL_JAVA_DIR:=$(framework_docs_LOCAL_API_CHECK_ADDITIONAL_JAVA_DIR)
-LOCAL_ADDITIONAL_DEPENDENCIES:=$(framework_docs_LOCAL_ADDITIONAL_DEPENDENCIES)
-
-LOCAL_MODULE := test-api-stubs
-
-LOCAL_DROIDDOC_STUB_OUT_DIR := $(TARGET_OUT_COMMON_INTERMEDIATES)/JAVA_LIBRARIES/android_test_stubs_current_intermediates/src
-
-LOCAL_DROIDDOC_OPTIONS:=\
-               $(framework_docs_LOCAL_DROIDDOC_OPTIONS) \
-               -referenceonly \
-               -stubs $(TARGET_OUT_COMMON_INTERMEDIATES)/JAVA_LIBRARIES/android_test_stubs_current_intermediates/src \
-               -showAnnotation android.annotation.TestApi \
-               -api $(INTERNAL_PLATFORM_TEST_API_FILE) \
-               -removedApi $(INTERNAL_PLATFORM_TEST_REMOVED_API_FILE) \
-               -exactApi $(INTERNAL_PLATFORM_TEST_EXACT_API_FILE) \
-               -nodocs
-
-LOCAL_DROIDDOC_CUSTOM_TEMPLATE_DIR:=external/doclava/res/assets/templates-sdk
-
-LOCAL_UNINSTALLABLE_MODULE := true
-
-include $(BUILD_DROIDDOC)
-
-# $(gen), i.e. framework.aidl, is also needed while building against the current stub.
-$(full_target): $(gen)
-$(INTERNAL_PLATFORM_TEST_API_FILE): $(full_target)
 $(call dist-for-goals,sdk,$(INTERNAL_PLATFORM_TEST_API_FILE))
 
 # ====  check javadoc comments but don't generate docs ========
@@ -592,9 +279,6 @@ LOCAL_DROIDDOC_CUSTOM_TEMPLATE_DIR:=external/doclava/res/assets/templates-sdk
 LOCAL_UNINSTALLABLE_MODULE := true
 
 include $(BUILD_DROIDDOC)
-
-# $(gen), i.e. framework.aidl, is also needed while building against the current stub.
-$(full_target): $(gen)
 
 # Run this for checkbuild
 checkbuild: doc-comment-check-docs
@@ -893,8 +577,136 @@ LOCAL_SOURCE_FILES_ALL_GENERATED := true
 LOCAL_SRC_FILES := \
     $(call all-proto-files-under, core/proto) \
     $(call all-proto-files-under, libs/incident/proto)
+# b/72714520
+LOCAL_ERROR_PRONE_FLAGS := -Xep:MissingOverride:OFF
 include $(BUILD_HOST_JAVA_LIBRARY)
 
+
+# ==== hiddenapi lists =======================================
+include $(CLEAR_VARS)
+
+# File names of final API lists
+LOCAL_LIGHT_GREYLIST := $(INTERNAL_PLATFORM_HIDDENAPI_LIGHT_GREYLIST)
+LOCAL_DARK_GREYLIST := $(INTERNAL_PLATFORM_HIDDENAPI_DARK_GREYLIST)
+LOCAL_BLACKLIST := $(INTERNAL_PLATFORM_HIDDENAPI_BLACKLIST)
+
+# File names of source files we will use to generate the final API lists.
+LOCAL_SRC_GREYLIST := frameworks/base/config/hiddenapi-light-greylist.txt
+LOCAL_SRC_VENDOR_LIST := frameworks/base/config/hiddenapi-vendor-list.txt
+LOCAL_SRC_FORCE_BLACKLIST := frameworks/base/config/hiddenapi-force-blacklist.txt
+LOCAL_SRC_PRIVATE_API := $(INTERNAL_PLATFORM_PRIVATE_DEX_API_FILE)
+LOCAL_SRC_REMOVED_API := $(INTERNAL_PLATFORM_REMOVED_DEX_API_FILE)
+
+LOCAL_SRC_ALL := \
+	$(LOCAL_SRC_GREYLIST) \
+	$(LOCAL_SRC_VENDOR_LIST) \
+	$(LOCAL_SRC_FORCE_BLACKLIST) \
+	$(LOCAL_SRC_PRIVATE_API) \
+	$(LOCAL_SRC_REMOVED_API)
+
+define assert-has-no-overlap
+if [ ! -z "`comm -12 <(sort $(1)) <(sort $(2))`" ]; then \
+	echo "$(1) and $(2) should not overlap" 1>&2; \
+	comm -12 <(sort $(1)) <(sort $(2)) 1>&2; \
+	exit 1; \
+fi
+endef
+
+define assert-is-subset
+if [ ! -z "`comm -23 <(sort $(1)) <(sort $(2))`" ]; then \
+	echo "$(1) must be a subset of $(2)" 1>&2; \
+	comm -23 <(sort $(1)) <(sort $(2)) 1>&2; \
+	exit 1; \
+fi
+endef
+
+define assert-has-no-duplicates
+if [ ! -z "`sort $(1) | uniq -D`" ]; then \
+	echo "$(1) has duplicate entries" 1>&2; \
+	sort $(1) | uniq -D 1>&2; \
+	exit 1; \
+fi
+endef
+
+# The following rules build API lists in the build folder.
+# By not using files from the source tree, ART buildbots can mock these lists
+# or have alternative rules for building them. Other rules in the build system
+# should depend on the files in the build folder.
+
+# Merge light greylist from multiple files:
+#  (1) manual greylist LOCAL_SRC_GREYLIST
+#  (2) list of usages from vendor apps LOCAL_SRC_VENDOR_LIST
+#  (3) list of removed APIs in LOCAL_SRC_REMOVED_API
+#      @removed does not imply private in Doclava. We must take the subset also
+#      in LOCAL_SRC_PRIVATE_API.
+#  (4) list of serialization APIs
+#      Automatically adds all methods which match the signatures in
+#      REGEX_SERIALIZATION. These are greylisted in order to allow applications
+#      to write their own serializers.
+$(LOCAL_LIGHT_GREYLIST): REGEX_SERIALIZATION := \
+    "readObject\(Ljava/io/ObjectInputStream;\)V" \
+    "readObjectNoData\(\)V" \
+    "readResolve\(\)Ljava/lang/Object;" \
+    "serialVersionUID:J" \
+    "serialPersistentFields:\[Ljava/io/ObjectStreamField;" \
+    "writeObject\(Ljava/io/ObjectOutputStream;\)V" \
+    "writeReplace\(\)Ljava/lang/Object;"
+$(LOCAL_LIGHT_GREYLIST): $(LOCAL_SRC_ALL)
+	sort $(LOCAL_SRC_GREYLIST) $(LOCAL_SRC_VENDOR_LIST) \
+	     <(grep -E "\->("$(subst $(space),"|",$(REGEX_SERIALIZATION))")$$" \
+	               $(LOCAL_SRC_PRIVATE_API)) \
+	     <(comm -12 <(sort $(LOCAL_SRC_REMOVED_API)) <(sort $(LOCAL_SRC_PRIVATE_API))) \
+	     > $@
+	$(call assert-has-no-duplicates,$@)
+	$(call assert-is-subset,$@,$(LOCAL_SRC_PRIVATE_API))
+	$(call assert-has-no-overlap,$@,$(LOCAL_SRC_FORCE_BLACKLIST))
+
+# Generate dark greylist as remaining classes and class members in the same
+# package as classes listed in the light greylist.
+# The algorithm is as follows:
+#   (1) extract the class descriptor from each entry in LOCAL_LIGHT_GREYLIST
+#   (2) strip everything after the last forward-slash,
+#       e.g. 'Lpackage/subpackage/class$inner;' turns into 'Lpackage/subpackage/'
+#   (3) insert all entries from LOCAL_SRC_PRIVATE_API which begin with the package
+#       name but do not contain another forward-slash in the class name, e.g.
+#       matching '^Lpackage/subpackage/[^/;]*;'
+#   (4) subtract entries shared with LOCAL_LIGHT_GREYLIST
+$(LOCAL_DARK_GREYLIST): $(LOCAL_SRC_ALL) $(LOCAL_LIGHT_GREYLIST)
+	comm -13 <(sort $(LOCAL_LIGHT_GREYLIST) $(LOCAL_SRC_FORCE_BLACKLIST)) \
+	         <(sed 's/\->.*//' $(LOCAL_LIGHT_GREYLIST) | sed 's/\(.*\/\).*/\1/' | sort | uniq | \
+	               while read PKG_NAME; do \
+	                   grep -E "^$${PKG_NAME}[^/;]*;" $(LOCAL_SRC_PRIVATE_API); \
+	               done | sort | uniq) \
+	         > $@
+	$(call assert-is-subset,$@,$(LOCAL_SRC_PRIVATE_API))
+	$(call assert-has-no-duplicates,$@)
+	$(call assert-has-no-overlap,$@,$(LOCAL_LIGHT_GREYLIST))
+	$(call assert-has-no-overlap,$@,$(LOCAL_SRC_FORCE_BLACKLIST))
+
+# Generate blacklist as private API minus (light greylist plus dark greylist).
+$(LOCAL_BLACKLIST): $(LOCAL_SRC_ALL) $(LOCAL_LIGHT_GREYLIST) $(LOCAL_DARK_GREYLIST)
+	comm -13 <(sort $(LOCAL_LIGHT_GREYLIST) $(LOCAL_DARK_GREYLIST)) \
+	         <(sort $(LOCAL_SRC_PRIVATE_API)) \
+	         > $@
+	$(call assert-is-subset,$@,$(LOCAL_SRC_PRIVATE_API))
+	$(call assert-has-no-duplicates,$@)
+	$(call assert-has-no-overlap,$@,$(LOCAL_LIGHT_GREYLIST))
+	$(call assert-has-no-overlap,$@,$(LOCAL_DARK_GREYLIST))
+	$(call assert-is-subset,$(LOCAL_SRC_FORCE_BLACKLIST),$@)
+
+# Build AOSP blacklist
+# ============================================================
+include $(CLEAR_VARS)
+
+LOCAL_LIGHT_GREYLIST_FILE := frameworks/base/config/hiddenapi-p-light-greylist.txt
+LOCAL_BLACKLIST_FILE := $(TARGET_OUT_COMMON_INTERMEDIATES)/PACKAGING/hiddenapi-aosp-blacklist.txt
+
+.PHONY: hiddenapi-aosp-blacklist
+hiddenapi-aosp-blacklist: $(LOCAL_BLACKLIST_FILE)
+
+$(LOCAL_BLACKLIST_FILE): $(LOCAL_LIGHT_GREYLIST_FILE) $(INTERNAL_PLATFORM_PRIVATE_DEX_API_FILE)
+	LC_COLLATE=C comm -13 <(sort $(LOCAL_LIGHT_GREYLIST_FILE)) \
+		   <(sort $(INTERNAL_PLATFORM_PRIVATE_DEX_API_FILE)) > $@
 
 # Include subdirectory makefiles
 # ============================================================

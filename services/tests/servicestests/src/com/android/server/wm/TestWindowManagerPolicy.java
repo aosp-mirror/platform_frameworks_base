@@ -670,4 +670,8 @@ class TestWindowManagerPolicy implements WindowManagerPolicy {
     public boolean canDismissBootAnimation() {
         return true;
     }
+
+    @Override
+    public void requestUserActivityNotification() {
+    }
 }

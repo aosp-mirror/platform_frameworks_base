@@ -54,4 +54,8 @@ oneway interface IInCallService {
     void onRttUpgradeRequest(String callId, int id);
 
     void onRttInitiationFailure(String callId, int reason);
+
+    void onHandoverFailed(String callId, int error);
+
+    void onHandoverComplete(String callId);
 }

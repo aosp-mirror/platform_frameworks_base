@@ -93,6 +93,10 @@ final class RemoteConnectionService {
                     // failure on the providing end, so immediately mark it destroyed
                     connection.setDestroyed();
                 }
+                connection.setStatusHints(parcel.getStatusHints());
+                connection.setIsVoipAudioMode(parcel.getIsVoipAudioMode());
+                connection.setRingbackRequested(parcel.isRingbackRequested());
+                connection.putExtras(parcel.getExtras());
             }
         }
 
@@ -211,6 +215,9 @@ final class RemoteConnectionService {
         public void onPhoneAccountChanged(String callId, PhoneAccountHandle pHandle,
                 Session.Info sessionInfo) {
         }
+
+        @Override
+        public void onConnectionServiceFocusReleased(Session.Info sessionInfo) {}
 
         @Override
         public void addConferenceCall(

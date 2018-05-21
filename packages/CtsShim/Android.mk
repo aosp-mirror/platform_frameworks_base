@@ -32,9 +32,10 @@ LOCAL_CERTIFICATE := PRESIGNED
 LOCAL_DEX_PREOPT := false
 LOCAL_MODULE_TARGET_ARCH := arm arm64 x86 x86_64
 
-my_archs := arm x86
-my_src_arch := $(call get-prebuilt-src-arch, $(my_archs))
-LOCAL_SRC_FILES := apk/$(my_src_arch)/CtsShimPriv.apk
+LOCAL_SRC_FILES_arm := apk/arm/CtsShimPriv.apk
+LOCAL_SRC_FILES_arm64 := apk/arm/CtsShimPriv.apk
+LOCAL_SRC_FILES_x86 := apk/x86/CtsShimPriv.apk
+LOCAL_SRC_FILES_x86_64 := apk/x86/CtsShimPriv.apk
 
 include $(BUILD_PREBUILT)
 
@@ -53,9 +54,10 @@ LOCAL_CERTIFICATE := PRESIGNED
 LOCAL_DEX_PREOPT := false
 LOCAL_MODULE_TARGET_ARCH := arm arm64 x86 x86_64
 
-my_archs := arm x86
-my_src_arch := $(call get-prebuilt-src-arch, $(my_archs))
-LOCAL_SRC_FILES := apk/$(my_src_arch)/CtsShim.apk
+LOCAL_SRC_FILES_arm := apk/arm/CtsShim.apk
+LOCAL_SRC_FILES_arm64 := apk/arm/CtsShim.apk
+LOCAL_SRC_FILES_x86 := apk/x86/CtsShim.apk
+LOCAL_SRC_FILES_x86_64 := apk/x86/CtsShim.apk
 
 include $(BUILD_PREBUILT)
 

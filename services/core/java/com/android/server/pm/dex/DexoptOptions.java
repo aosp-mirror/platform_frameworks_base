@@ -59,6 +59,10 @@ public final class DexoptOptions {
     // When set, indicates that dexopt is invoked from the background service.
     public static final int DEXOPT_IDLE_BACKGROUND_JOB = 1 << 9;
 
+    // When set, indicates that dexopt is invoked from the install time flow and
+    // should get the dex metdata file if present.
+    public static final int DEXOPT_INSTALL_WITH_DEX_METADATA_FILE = 1 << 10;
+
     // The name of package to optimize.
     private final String mPackageName;
 
@@ -73,15 +77,21 @@ public final class DexoptOptions {
     // It only applies for primary apk and it's always null if mOnlySecondaryDex is true.
     private final String mSplitName;
 
+    // The reason for invoking dexopt (see PackageManagerService.REASON_* constants).
+    // A -1 value denotes an unknown reason.
+    private final int mCompilationReason;
+
     public DexoptOptions(String packageName, String compilerFilter, int flags) {
-        this(packageName, compilerFilter, /*splitName*/ null, flags);
+        this(packageName, /*compilationReason*/ -1, compilerFilter, /*splitName*/ null, flags);
     }
 
-    public DexoptOptions(String packageName, int compilerReason, int flags) {
-        this(packageName, getCompilerFilterForReason(compilerReason), flags);
+    public DexoptOptions(String packageName, int compilationReason, int flags) {
+        this(packageName, compilationReason, getCompilerFilterForReason(compilationReason),
+                /*splitName*/ null, flags);
     }
 
-    public DexoptOptions(String packageName, String compilerFilter, String splitName, int flags) {
+    public DexoptOptions(String packageName, int compilationReason, String compilerFilter,
+                String splitName, int flags) {
         int validityMask =
                 DEXOPT_CHECK_FOR_PROFILES_UPDATES |
                 DEXOPT_FORCE |
@@ -90,7 +100,8 @@ public final class DexoptOptions {
                 DEXOPT_ONLY_SHARED_DEX |
                 DEXOPT_DOWNGRADE |
                 DEXOPT_AS_SHARED_LIBRARY |
-                DEXOPT_IDLE_BACKGROUND_JOB;
+                DEXOPT_IDLE_BACKGROUND_JOB |
+                DEXOPT_INSTALL_WITH_DEX_METADATA_FILE;
         if ((flags & (~validityMask)) != 0) {
             throw new IllegalArgumentException("Invalid flags : " + Integer.toHexString(flags));
         }
@@ -99,6 +110,7 @@ public final class DexoptOptions {
         mCompilerFilter = compilerFilter;
         mFlags = flags;
         mSplitName = splitName;
+        mCompilationReason = compilationReason;
     }
 
     public String getPackageName() {
@@ -141,11 +153,19 @@ public final class DexoptOptions {
         return (mFlags & DEXOPT_IDLE_BACKGROUND_JOB) != 0;
     }
 
+    public boolean isDexoptInstallWithDexMetadata() {
+        return (mFlags & DEXOPT_INSTALL_WITH_DEX_METADATA_FILE) != 0;
+    }
+
     public String getSplitName() {
         return mSplitName;
     }
 
     public int getFlags() {
         return mFlags;
+    }
+
+    public int getCompilationReason() {
+        return mCompilationReason;
     }
 }

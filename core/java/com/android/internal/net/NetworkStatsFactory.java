@@ -22,23 +22,27 @@ import static android.net.NetworkStats.TAG_NONE;
 import static android.net.NetworkStats.UID_ALL;
 import static com.android.server.NetworkManagementSocketTagger.kernelToTag;
 
+import android.annotation.Nullable;
 import android.net.NetworkStats;
 import android.os.StrictMode;
 import android.os.SystemClock;
-import android.util.ArrayMap;
 
-import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.ProcFileReader;
 
 import libcore.io.IoUtils;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileReader;
 import java.io.IOException;
 import java.net.ProtocolException;
-import java.util.Objects;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Creates {@link NetworkStats} instances by parsing various {@code /proc/}
@@ -50,11 +54,6 @@ public class NetworkStatsFactory {
     private static final boolean USE_NATIVE_PARSING = true;
     private static final boolean SANITY_CHECK_NATIVE = false;
 
-    private static final String CLATD_INTERFACE_PREFIX = "v4-";
-    // Delta between IPv4 header (20b) and IPv6 header (40b).
-    // Used for correct stats accounting on clatd interfaces.
-    private static final int IPV4V6_HEADER_DELTA = 20;
-
     /** Path to {@code /proc/net/xt_qtaguid/iface_stat_all}. */
     private final File mStatsXtIfaceAll;
     /** Path to {@code /proc/net/xt_qtaguid/iface_stat_fmt}. */
@@ -62,29 +61,86 @@ public class NetworkStatsFactory {
     /** Path to {@code /proc/net/xt_qtaguid/stats}. */
     private final File mStatsXtUid;
 
-    // TODO: to improve testability and avoid global state, do not use a static variable.
-    @GuardedBy("sStackedIfaces")
-    private static final ArrayMap<String, String> sStackedIfaces = new ArrayMap<>();
+    private boolean mUseBpfStats;
+
+    // TODO: only do adjustments in NetworkStatsService and remove this.
+    /**
+     * (Stacked interface) -> (base interface) association for all connected ifaces since boot.
+     *
+     * Because counters must never roll backwards, once a given interface is stacked on top of an
+     * underlying interface, the stacked interface can never be stacked on top of
+     * another interface. */
+    private static final ConcurrentHashMap<String, String> sStackedIfaces
+            = new ConcurrentHashMap<>();
 
     public static void noteStackedIface(String stackedIface, String baseIface) {
-        synchronized (sStackedIfaces) {
-            if (baseIface != null) {
-                sStackedIfaces.put(stackedIface, baseIface);
-            } else {
-                sStackedIfaces.remove(stackedIface);
-            }
+        if (stackedIface != null && baseIface != null) {
+            sStackedIfaces.put(stackedIface, baseIface);
         }
     }
 
-    public NetworkStatsFactory() {
-        this(new File("/proc/"));
+    /**
+     * Get a set of interfaces containing specified ifaces and stacked interfaces.
+     *
+     * <p>The added stacked interfaces are ifaces stacked on top of the specified ones, or ifaces
+     * on which the specified ones are stacked. Stacked interfaces are those noted with
+     * {@link #noteStackedIface(String, String)}, but only interfaces noted before this method
+     * is called are guaranteed to be included.
+     */
+    public static String[] augmentWithStackedInterfaces(@Nullable String[] requiredIfaces) {
+        if (requiredIfaces == NetworkStats.INTERFACES_ALL) {
+            return null;
+        }
+
+        HashSet<String> relatedIfaces = new HashSet<>(Arrays.asList(requiredIfaces));
+        // ConcurrentHashMap's EntrySet iterators are "guaranteed to traverse
+        // elements as they existed upon construction exactly once, and may
+        // (but are not guaranteed to) reflect any modifications subsequent to construction".
+        // This is enough here.
+        for (Map.Entry<String, String> entry : sStackedIfaces.entrySet()) {
+            if (relatedIfaces.contains(entry.getKey())) {
+                relatedIfaces.add(entry.getValue());
+            } else if (relatedIfaces.contains(entry.getValue())) {
+                relatedIfaces.add(entry.getKey());
+            }
+        }
+
+        String[] outArray = new String[relatedIfaces.size()];
+        return relatedIfaces.toArray(outArray);
+    }
+
+    /**
+     * Applies 464xlat adjustments with ifaces noted with {@link #noteStackedIface(String, String)}.
+     * @see NetworkStats#apply464xlatAdjustments(NetworkStats, NetworkStats, Map)
+     */
+    public static void apply464xlatAdjustments(NetworkStats baseTraffic,
+            NetworkStats stackedTraffic) {
+        NetworkStats.apply464xlatAdjustments(baseTraffic, stackedTraffic, sStackedIfaces);
     }
 
     @VisibleForTesting
-    public NetworkStatsFactory(File procRoot) {
+    public static void clearStackedIfaces() {
+        sStackedIfaces.clear();
+    }
+
+    public NetworkStatsFactory() {
+        this(new File("/proc/"), new File("/sys/fs/bpf/traffic_uid_stats_map").exists());
+    }
+
+    @VisibleForTesting
+    public NetworkStatsFactory(File procRoot, boolean useBpfStats) {
         mStatsXtIfaceAll = new File(procRoot, "net/xt_qtaguid/iface_stat_all");
         mStatsXtIfaceFmt = new File(procRoot, "net/xt_qtaguid/iface_stat_fmt");
         mStatsXtUid = new File(procRoot, "net/xt_qtaguid/stats");
+        mUseBpfStats = useBpfStats;
+    }
+
+    public NetworkStats readBpfNetworkStatsDev() throws IOException {
+        final NetworkStats stats = new NetworkStats(SystemClock.elapsedRealtime(), 6);
+        if (nativeReadNetworkStatsDev(stats) != 0) {
+            throw new IOException("Failed to parse bpf iface stats");
+        }
+        return stats;
     }
 
     /**
@@ -96,6 +152,11 @@ public class NetworkStatsFactory {
      * @throws IllegalStateException when problem parsing stats.
      */
     public NetworkStats readNetworkStatsSummaryDev() throws IOException {
+
+        // Return xt_bpf stats if switched to bpf module.
+        if (mUseBpfStats)
+            return readBpfNetworkStatsDev();
+
         final StrictMode.ThreadPolicy savedPolicy = StrictMode.allowThreadDiskReads();
 
         final NetworkStats stats = new NetworkStats(SystemClock.elapsedRealtime(), 6);
@@ -147,6 +208,11 @@ public class NetworkStatsFactory {
      * @throws IllegalStateException when problem parsing stats.
      */
     public NetworkStats readNetworkStatsSummaryXt() throws IOException {
+
+        // Return xt_bpf stats if qtaguid  module is replaced.
+        if (mUseBpfStats)
+            return readBpfNetworkStatsDev();
+
         final StrictMode.ThreadPolicy savedPolicy = StrictMode.allowThreadDiskReads();
 
         // return null when kernel doesn't support
@@ -192,51 +258,10 @@ public class NetworkStatsFactory {
             NetworkStats lastStats) throws IOException {
         final NetworkStats stats =
               readNetworkStatsDetailInternal(limitUid, limitIfaces, limitTag, lastStats);
-        final ArrayMap<String, String> stackedIfaces;
-        synchronized (sStackedIfaces) {
-            stackedIfaces = new ArrayMap<>(sStackedIfaces);
-        }
-        // Total 464xlat traffic to subtract from uid 0 on all base interfaces.
-        final NetworkStats adjustments = new NetworkStats(0, stackedIfaces.size());
 
-        NetworkStats.Entry entry = null; // For recycling
-
-        // For 464xlat traffic, xt_qtaguid sees every IPv4 packet twice, once as a native IPv4
-        // packet on the stacked interface, and once as translated to an IPv6 packet on the
-        // base interface. For correct stats accounting on the base interface, every 464xlat
-        // packet needs to be subtracted from the root UID on the base interface both for tx
-        // and rx traffic (http://b/12249687, http:/b/33681750).
-        for (int i = 0; i < stats.size(); i++) {
-            entry = stats.getValues(i, entry);
-            if (entry.iface == null || !entry.iface.startsWith(CLATD_INTERFACE_PREFIX)) {
-                continue;
-            }
-            final String baseIface = stackedIfaces.get(entry.iface);
-            if (baseIface == null) {
-                continue;
-            }
-
-            NetworkStats.Entry adjust =
-                    new NetworkStats.Entry(baseIface, 0, 0, 0, 0L, 0L, 0L, 0L, 0L);
-            // Subtract any 464lat traffic seen for the root UID on the current base interface.
-            adjust.rxBytes -= (entry.rxBytes + entry.rxPackets * IPV4V6_HEADER_DELTA);
-            adjust.txBytes -= (entry.txBytes + entry.txPackets * IPV4V6_HEADER_DELTA);
-            adjust.rxPackets -= entry.rxPackets;
-            adjust.txPackets -= entry.txPackets;
-            adjustments.combineValues(adjust);
-
-            // For 464xlat traffic, xt_qtaguid only counts the bytes of the native IPv4 packet sent
-            // on the stacked interface with prefix "v4-" and drops the IPv6 header size after
-            // unwrapping. To account correctly for on-the-wire traffic, add the 20 additional bytes
-            // difference for all packets (http://b/12249687, http:/b/33681750).
-            entry.rxBytes = entry.rxPackets * IPV4V6_HEADER_DELTA;
-            entry.txBytes = entry.txPackets * IPV4V6_HEADER_DELTA;
-            entry.rxPackets = 0;
-            entry.txPackets = 0;
-            stats.combineValues(entry);
-        }
-
-        stats.combineAllValues(adjustments);
+        // No locking here: apply464xlatAdjustments behaves fine with an add-only ConcurrentHashMap.
+        // TODO: remove this and only apply adjustments in NetworkStatsService.
+        stats.apply464xlatAdjustments(sStackedIfaces);
 
         return stats;
     }
@@ -252,7 +277,7 @@ public class NetworkStatsFactory {
                 stats = new NetworkStats(SystemClock.elapsedRealtime(), -1);
             }
             if (nativeReadNetworkStatsDetail(stats, mStatsXtUid.getAbsolutePath(), limitUid,
-                    limitIfaces, limitTag) != 0) {
+                    limitIfaces, limitTag, mUseBpfStats) != 0) {
                 throw new IOException("Failed to parse network stats");
             }
             if (SANITY_CHECK_NATIVE) {
@@ -346,6 +371,9 @@ public class NetworkStatsFactory {
      * are expected to monotonically increase since device boot.
      */
     @VisibleForTesting
-    public static native int nativeReadNetworkStatsDetail(
-            NetworkStats stats, String path, int limitUid, String[] limitIfaces, int limitTag);
+    public static native int nativeReadNetworkStatsDetail(NetworkStats stats, String path,
+        int limitUid, String[] limitIfaces, int limitTag, boolean useBpfStats);
+
+    @VisibleForTesting
+    public static native int nativeReadNetworkStatsDev(NetworkStats stats);
 }

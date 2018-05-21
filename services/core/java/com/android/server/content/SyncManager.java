@@ -323,7 +323,7 @@ public class SyncManager {
     private final BroadcastReceiver mAccountsUpdatedReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            EndPoint target = new EndPoint(null, null, context.getUserId());
+            EndPoint target = new EndPoint(null, null, getSendingUserId());
             updateRunningAccounts(target /* sync targets for user */);
         }
     };

@@ -53,6 +53,7 @@
 #include <private/android_filesystem_config.h>
 #include <utils/String8.h>
 #include <selinux/android.h>
+#include <seccomp_policy.h>
 #include <processgroup/processgroup.h>
 
 #include "core_jni_helpers.h"
@@ -70,11 +71,16 @@ using android::String8;
 using android::base::StringPrintf;
 using android::base::WriteStringToFile;
 
+#define CREATE_ERROR(...) StringPrintf("%s:%d: ", __FILE__, __LINE__). \
+                              append(StringPrintf(__VA_ARGS__))
+
 static pid_t gSystemServerPid = 0;
 
 static const char kZygoteClassName[] = "com/android/internal/os/Zygote";
 static jclass gZygoteClass;
 static jmethodID gCallPostForkChildHooks;
+
+static bool g_is_security_enforced = true;
 
 // Must match values in com.android.internal.os.Zygote.
 enum MountExternalKind {
@@ -138,62 +144,77 @@ static void SigChldHandler(int /*signal_number*/) {
   errno = saved_errno;
 }
 
-// Configures the SIGCHLD handler for the zygote process. This is configured
-// very late, because earlier in the runtime we may fork() and exec()
-// other processes, and we want to waitpid() for those rather than
+// Configures the SIGCHLD/SIGHUP handlers for the zygote process. This is
+// configured very late, because earlier in the runtime we may fork() and
+// exec() other processes, and we want to waitpid() for those rather than
 // have them be harvested immediately.
+//
+// Ignore SIGHUP because all processes forked by the zygote are in the same
+// process group as the zygote and we don't want to be notified if we become
+// an orphaned group and have one or more stopped processes. This is not a
+// theoretical concern :
+// - we can become an orphaned group if one of our direct descendants forks
+//   and is subsequently killed before its children.
+// - crash_dump routinely STOPs the process it's tracing.
+//
+// See issues b/71965619 and b/25567761 for further details.
 //
 // This ends up being called repeatedly before each fork(), but there's
 // no real harm in that.
-static void SetSigChldHandler() {
-  struct sigaction sa;
-  memset(&sa, 0, sizeof(sa));
-  sa.sa_handler = SigChldHandler;
+static void SetSignalHandlers() {
+  struct sigaction sig_chld = {};
+  sig_chld.sa_handler = SigChldHandler;
 
-  int err = sigaction(SIGCHLD, &sa, NULL);
-  if (err < 0) {
+  if (sigaction(SIGCHLD, &sig_chld, NULL) < 0) {
     ALOGW("Error setting SIGCHLD handler: %s", strerror(errno));
+  }
+
+  struct sigaction sig_hup = {};
+  sig_hup.sa_handler = SIG_IGN;
+  if (sigaction(SIGHUP, &sig_hup, NULL) < 0) {
+    ALOGW("Error setting SIGHUP handler: %s", strerror(errno));
   }
 }
 
 // Sets the SIGCHLD handler back to default behavior in zygote children.
-static void UnsetSigChldHandler() {
+static void UnsetChldSignalHandler() {
   struct sigaction sa;
   memset(&sa, 0, sizeof(sa));
   sa.sa_handler = SIG_DFL;
 
-  int err = sigaction(SIGCHLD, &sa, NULL);
-  if (err < 0) {
+  if (sigaction(SIGCHLD, &sa, NULL) < 0) {
     ALOGW("Error unsetting SIGCHLD handler: %s", strerror(errno));
   }
 }
 
 // Calls POSIX setgroups() using the int[] object as an argument.
 // A NULL argument is tolerated.
-static void SetGids(JNIEnv* env, jintArray javaGids) {
+static bool SetGids(JNIEnv* env, jintArray javaGids, std::string* error_msg) {
   if (javaGids == NULL) {
-    return;
+    return true;
   }
 
   ScopedIntArrayRO gids(env, javaGids);
   if (gids.get() == NULL) {
-    RuntimeAbort(env, __LINE__, "Getting gids int array failed");
+    *error_msg = CREATE_ERROR("Getting gids int array failed");
+    return false;
   }
   int rc = setgroups(gids.size(), reinterpret_cast<const gid_t*>(&gids[0]));
   if (rc == -1) {
-    std::ostringstream oss;
-    oss << "setgroups failed: " << strerror(errno) << ", gids.size=" << gids.size();
-    RuntimeAbort(env, __LINE__, oss.str().c_str());
+    *error_msg = CREATE_ERROR("setgroups failed: %s, gids.size=%zu", strerror(errno), gids.size());
+    return false;
   }
+
+  return true;
 }
 
 // Sets the resource limits via setrlimit(2) for the values in the
 // two-dimensional array of integers that's passed in. The second dimension
 // contains a tuple of length 3: (resource, rlim_cur, rlim_max). NULL is
 // treated as an empty array.
-static void SetRLimits(JNIEnv* env, jobjectArray javaRlimits) {
+static bool SetRLimits(JNIEnv* env, jobjectArray javaRlimits, std::string* error_msg) {
   if (javaRlimits == NULL) {
-    return;
+    return true;
   }
 
   rlimit rlim;
@@ -203,7 +224,8 @@ static void SetRLimits(JNIEnv* env, jobjectArray javaRlimits) {
     ScopedLocalRef<jobject> javaRlimitObject(env, env->GetObjectArrayElement(javaRlimits, i));
     ScopedIntArrayRO javaRlimit(env, reinterpret_cast<jintArray>(javaRlimitObject.get()));
     if (javaRlimit.size() != 3) {
-      RuntimeAbort(env, __LINE__, "rlimits array must have a second dimension of size 3");
+      *error_msg = CREATE_ERROR("rlimits array must have a second dimension of size 3");
+      return false;
     }
 
     rlim.rlim_cur = javaRlimit[1];
@@ -211,11 +233,13 @@ static void SetRLimits(JNIEnv* env, jobjectArray javaRlimits) {
 
     int rc = setrlimit(javaRlimit[0], &rlim);
     if (rc == -1) {
-      ALOGE("setrlimit(%d, {%ld, %ld}) failed", javaRlimit[0], rlim.rlim_cur,
+      *error_msg = CREATE_ERROR("setrlimit(%d, {%ld, %ld}) failed", javaRlimit[0], rlim.rlim_cur,
             rlim.rlim_max);
-      RuntimeAbort(env, __LINE__, "setrlimit failed");
+      return false;
     }
   }
+
+  return true;
 }
 
 // The debug malloc library needs to know whether it's the zygote or a child.
@@ -229,14 +253,30 @@ static void PreApplicationInit() {
   mallopt(M_DECAY_TIME, 1);
 }
 
-static void EnableKeepCapabilities(JNIEnv* env) {
-  int rc = prctl(PR_SET_KEEPCAPS, 1, 0, 0, 0);
-  if (rc == -1) {
-    RuntimeAbort(env, __LINE__, "prctl(PR_SET_KEEPCAPS) failed");
+static void SetUpSeccompFilter(uid_t uid) {
+  if (!g_is_security_enforced) {
+    ALOGI("seccomp disabled by setenforce 0");
+    return;
+  }
+
+  // Apply system or app filter based on uid.
+  if (uid >= AID_APP_START) {
+    set_app_seccomp_filter();
+  } else {
+    set_system_seccomp_filter();
   }
 }
 
-static void DropCapabilitiesBoundingSet(JNIEnv* env) {
+static bool EnableKeepCapabilities(std::string* error_msg) {
+  int rc = prctl(PR_SET_KEEPCAPS, 1, 0, 0, 0);
+  if (rc == -1) {
+    *error_msg = CREATE_ERROR("prctl(PR_SET_KEEPCAPS) failed: %s", strerror(errno));
+    return false;
+  }
+  return true;
+}
+
+static bool DropCapabilitiesBoundingSet(std::string* error_msg) {
   for (int i = 0; prctl(PR_CAPBSET_READ, i, 0, 0, 0) >= 0; i++) {
     int rc = prctl(PR_CAPBSET_DROP, i, 0, 0, 0);
     if (rc == -1) {
@@ -244,14 +284,15 @@ static void DropCapabilitiesBoundingSet(JNIEnv* env) {
         ALOGE("prctl(PR_CAPBSET_DROP) failed with EINVAL. Please verify "
               "your kernel is compiled with file capabilities support");
       } else {
-        ALOGE("prctl(PR_CAPBSET_DROP, %d) failed: %s", i, strerror(errno));
-        RuntimeAbort(env, __LINE__, "prctl(PR_CAPBSET_DROP) failed");
+        *error_msg = CREATE_ERROR("prctl(PR_CAPBSET_DROP, %d) failed: %s", i, strerror(errno));
+        return false;
       }
     }
   }
+  return true;
 }
 
-static void SetInheritable(JNIEnv* env, uint64_t inheritable) {
+static bool SetInheritable(uint64_t inheritable, std::string* error_msg) {
   __user_cap_header_struct capheader;
   memset(&capheader, 0, sizeof(capheader));
   capheader.version = _LINUX_CAPABILITY_VERSION_3;
@@ -259,21 +300,23 @@ static void SetInheritable(JNIEnv* env, uint64_t inheritable) {
 
   __user_cap_data_struct capdata[2];
   if (capget(&capheader, &capdata[0]) == -1) {
-    ALOGE("capget failed: %s", strerror(errno));
-    RuntimeAbort(env, __LINE__, "capget failed");
+    *error_msg = CREATE_ERROR("capget failed: %s", strerror(errno));
+    return false;
   }
 
   capdata[0].inheritable = inheritable;
   capdata[1].inheritable = inheritable >> 32;
 
   if (capset(&capheader, &capdata[0]) == -1) {
-    ALOGE("capset(inh=%" PRIx64 ") failed: %s", inheritable, strerror(errno));
-    RuntimeAbort(env, __LINE__, "capset failed");
+    *error_msg = CREATE_ERROR("capset(inh=%" PRIx64 ") failed: %s", inheritable, strerror(errno));
+    return false;
   }
+
+  return true;
 }
 
-static void SetCapabilities(JNIEnv* env, uint64_t permitted, uint64_t effective,
-                            uint64_t inheritable) {
+static bool SetCapabilities(uint64_t permitted, uint64_t effective, uint64_t inheritable,
+                            std::string* error_msg) {
   __user_cap_header_struct capheader;
   memset(&capheader, 0, sizeof(capheader));
   capheader.version = _LINUX_CAPABILITY_VERSION_3;
@@ -289,18 +332,20 @@ static void SetCapabilities(JNIEnv* env, uint64_t permitted, uint64_t effective,
   capdata[1].inheritable = inheritable >> 32;
 
   if (capset(&capheader, &capdata[0]) == -1) {
-    ALOGE("capset(perm=%" PRIx64 ", eff=%" PRIx64 ", inh=%" PRIx64 ") failed: %s", permitted,
-          effective, inheritable, strerror(errno));
-    RuntimeAbort(env, __LINE__, "capset failed");
+    *error_msg = CREATE_ERROR("capset(perm=%" PRIx64 ", eff=%" PRIx64 ", inh=%" PRIx64 ") "
+                              "failed: %s", permitted, effective, inheritable, strerror(errno));
+    return false;
   }
+  return true;
 }
 
-static void SetSchedulerPolicy(JNIEnv* env) {
+static bool SetSchedulerPolicy(std::string* error_msg) {
   errno = -set_sched_policy(0, SP_DEFAULT);
   if (errno != 0) {
-    ALOGE("set_sched_policy(0, SP_DEFAULT) failed");
-    RuntimeAbort(env, __LINE__, "set_sched_policy(0, SP_DEFAULT) failed");
+    *error_msg = CREATE_ERROR("set_sched_policy(0, SP_DEFAULT) failed: %s", strerror(errno));
+    return false;
   }
+  return true;
 }
 
 static int UnmountTree(const char* path) {
@@ -334,7 +379,7 @@ static int UnmountTree(const char* path) {
 // Create a private mount namespace and bind mount appropriate emulated
 // storage for the given user.
 static bool MountEmulatedStorage(uid_t uid, jint mount_mode,
-        bool force_mount_namespace) {
+        bool force_mount_namespace, std::string* error_msg) {
     // See storage config details at http://source.android.com/tech/storage/
 
     String8 storageSource;
@@ -351,7 +396,7 @@ static bool MountEmulatedStorage(uid_t uid, jint mount_mode,
 
     // Create a second private mount namespace for our process
     if (unshare(CLONE_NEWNS) == -1) {
-        ALOGW("Failed to unshare(): %s", strerror(errno));
+        *error_msg = CREATE_ERROR("Failed to unshare(): %s", strerror(errno));
         return false;
     }
 
@@ -362,7 +407,9 @@ static bool MountEmulatedStorage(uid_t uid, jint mount_mode,
 
     if (TEMP_FAILURE_RETRY(mount(storageSource.string(), "/storage",
             NULL, MS_BIND | MS_REC | MS_SLAVE, NULL)) == -1) {
-        ALOGW("Failed to mount %s to /storage: %s", storageSource.string(), strerror(errno));
+        *error_msg = CREATE_ERROR("Failed to mount %s to /storage: %s",
+                                  storageSource.string(),
+                                  strerror(errno));
         return false;
     }
 
@@ -370,11 +417,14 @@ static bool MountEmulatedStorage(uid_t uid, jint mount_mode,
     userid_t user_id = multiuser_get_user_id(uid);
     const String8 userSource(String8::format("/mnt/user/%d", user_id));
     if (fs_prepare_dir(userSource.string(), 0751, 0, 0) == -1) {
+        *error_msg = CREATE_ERROR("fs_prepare_dir failed on %s", userSource.string());
         return false;
     }
     if (TEMP_FAILURE_RETRY(mount(userSource.string(), "/storage/self",
             NULL, MS_BIND, NULL)) == -1) {
-        ALOGW("Failed to mount %s to /storage/self: %s", userSource.string(), strerror(errno));
+        *error_msg = CREATE_ERROR("Failed to mount %s to /storage/self: %s",
+                                  userSource.string(),
+                                  strerror(errno));
         return false;
     }
 
@@ -406,31 +456,32 @@ static bool NeedsNoRandomizeWorkaround() {
 // descriptor (if any) is closed via dup2(), replacing it with a valid
 // (open) descriptor to /dev/null.
 
-static void DetachDescriptors(JNIEnv* env, jintArray fdsToClose) {
+static bool DetachDescriptors(JNIEnv* env, jintArray fdsToClose, std::string* error_msg) {
   if (!fdsToClose) {
-    return;
+    return true;
   }
   jsize count = env->GetArrayLength(fdsToClose);
   ScopedIntArrayRO ar(env, fdsToClose);
   if (ar.get() == NULL) {
-      RuntimeAbort(env, __LINE__, "Bad fd array");
+    *error_msg = "Bad fd array";
+    return false;
   }
   jsize i;
   int devnull;
   for (i = 0; i < count; i++) {
     devnull = open("/dev/null", O_RDWR);
     if (devnull < 0) {
-      ALOGE("Failed to open /dev/null: %s", strerror(errno));
-      RuntimeAbort(env, __LINE__, "Failed to open /dev/null");
-      continue;
+      *error_msg = std::string("Failed to open /dev/null: ").append(strerror(errno));
+      return false;
     }
     ALOGV("Switching descriptor %d to /dev/null: %s", ar[i], strerror(errno));
     if (dup2(devnull, ar[i]) < 0) {
-      ALOGE("Failed dup2() on descriptor %d: %s", ar[i], strerror(errno));
-      RuntimeAbort(env, __LINE__, "Failed dup2()");
+      *error_msg = StringPrintf("Failed dup2() on descriptor %d: %s", ar[i], strerror(errno));
+      return false;
     }
     close(devnull);
   }
+  return true;
 }
 
 void SetThreadName(const char* thread_name) {
@@ -458,25 +509,30 @@ void SetThreadName(const char* thread_name) {
   if (errno != 0) {
     ALOGW("Unable to set the name of current thread to '%s': %s", buf, strerror(errno));
   }
+  // Update base::logging default tag.
+  android::base::SetDefaultTag(buf);
 }
 
 // The list of open zygote file descriptors.
 static FileDescriptorTable* gOpenFdTable = NULL;
 
-static void FillFileDescriptorVector(JNIEnv* env,
+static bool FillFileDescriptorVector(JNIEnv* env,
                                      jintArray java_fds,
-                                     std::vector<int>* fds) {
+                                     std::vector<int>* fds,
+                                     std::string* error_msg) {
   CHECK(fds != nullptr);
   if (java_fds != nullptr) {
     ScopedIntArrayRO ar(env, java_fds);
     if (ar.get() == nullptr) {
-      RuntimeAbort(env, __LINE__, "Bad fd array");
+      *error_msg = "Bad fd array";
+      return false;
     }
     fds->reserve(ar.size());
     for (size_t i = 0; i < ar.size(); ++i) {
       fds->push_back(ar[i]);
     }
   }
+  return true;
 }
 
 // Utility routine to fork zygote and specialize the child process.
@@ -486,13 +542,31 @@ static pid_t ForkAndSpecializeCommon(JNIEnv* env, uid_t uid, gid_t gid, jintArra
                                      jint mount_external,
                                      jstring java_se_info, jstring java_se_name,
                                      bool is_system_server, jintArray fdsToClose,
-                                     jintArray fdsToIgnore,
+                                     jintArray fdsToIgnore, bool is_child_zygote,
                                      jstring instructionSet, jstring dataDir) {
-  SetSigChldHandler();
+  SetSignalHandlers();
 
   sigset_t sigchld;
   sigemptyset(&sigchld);
   sigaddset(&sigchld, SIGCHLD);
+
+  auto fail_fn = [env, java_se_name, is_system_server](const std::string& msg)
+      __attribute__ ((noreturn)) {
+    const char* se_name_c_str = nullptr;
+    std::unique_ptr<ScopedUtfChars> se_name;
+    if (java_se_name != nullptr) {
+      se_name.reset(new ScopedUtfChars(env, java_se_name));
+      se_name_c_str = se_name->c_str();
+    }
+    if (se_name_c_str == nullptr && is_system_server) {
+      se_name_c_str = "system_server";
+    }
+    const std::string& error_msg = (se_name_c_str == nullptr)
+        ? msg
+        : StringPrintf("(%s) %s", se_name_c_str, msg.c_str());
+    env->FatalError(error_msg.c_str());
+    __builtin_unreachable();
+  };
 
   // Temporarily block SIGCHLD during forks. The SIGCHLD handler might
   // log, which would result in the logging FDs we close being reopened.
@@ -500,26 +574,29 @@ static pid_t ForkAndSpecializeCommon(JNIEnv* env, uid_t uid, gid_t gid, jintArra
   //
   // Note that the zygote process is single threaded at this point.
   if (sigprocmask(SIG_BLOCK, &sigchld, nullptr) == -1) {
-    ALOGE("sigprocmask(SIG_SETMASK, { SIGCHLD }) failed: %s", strerror(errno));
-    RuntimeAbort(env, __LINE__, "Call to sigprocmask(SIG_BLOCK, { SIGCHLD }) failed.");
+    fail_fn(CREATE_ERROR("sigprocmask(SIG_SETMASK, { SIGCHLD }) failed: %s", strerror(errno)));
   }
 
   // Close any logging related FDs before we start evaluating the list of
   // file descriptors.
   __android_log_close();
 
+  std::string error_msg;
+
   // If this is the first fork for this zygote, create the open FD table.
   // If it isn't, we just need to check whether the list of open files has
   // changed (and it shouldn't in the normal case).
   std::vector<int> fds_to_ignore;
-  FillFileDescriptorVector(env, fdsToIgnore, &fds_to_ignore);
+  if (!FillFileDescriptorVector(env, fdsToIgnore, &fds_to_ignore, &error_msg)) {
+    fail_fn(error_msg);
+  }
   if (gOpenFdTable == NULL) {
-    gOpenFdTable = FileDescriptorTable::Create(fds_to_ignore);
+    gOpenFdTable = FileDescriptorTable::Create(fds_to_ignore, &error_msg);
     if (gOpenFdTable == NULL) {
-      RuntimeAbort(env, __LINE__, "Unable to construct file descriptor table.");
+      fail_fn(error_msg);
     }
-  } else if (!gOpenFdTable->Restat(fds_to_ignore)) {
-    RuntimeAbort(env, __LINE__, "Unable to restat file descriptor table.");
+  } else if (!gOpenFdTable->Restat(fds_to_ignore, &error_msg)) {
+    fail_fn(error_msg);
   }
 
   pid_t pid = fork();
@@ -528,26 +605,33 @@ static pid_t ForkAndSpecializeCommon(JNIEnv* env, uid_t uid, gid_t gid, jintArra
     PreApplicationInit();
 
     // Clean up any descriptors which must be closed immediately
-    DetachDescriptors(env, fdsToClose);
+    if (!DetachDescriptors(env, fdsToClose, &error_msg)) {
+      fail_fn(error_msg);
+    }
 
     // Re-open all remaining open file descriptors so that they aren't shared
     // with the zygote across a fork.
-    if (!gOpenFdTable->ReopenOrDetach()) {
-      RuntimeAbort(env, __LINE__, "Unable to reopen whitelisted descriptors.");
+    if (!gOpenFdTable->ReopenOrDetach(&error_msg)) {
+      fail_fn(error_msg);
     }
 
     if (sigprocmask(SIG_UNBLOCK, &sigchld, nullptr) == -1) {
-      ALOGE("sigprocmask(SIG_SETMASK, { SIGCHLD }) failed: %s", strerror(errno));
-      RuntimeAbort(env, __LINE__, "Call to sigprocmask(SIG_UNBLOCK, { SIGCHLD }) failed.");
+      fail_fn(CREATE_ERROR("sigprocmask(SIG_SETMASK, { SIGCHLD }) failed: %s", strerror(errno)));
     }
 
     // Keep capabilities across UID change, unless we're staying root.
     if (uid != 0) {
-      EnableKeepCapabilities(env);
+      if (!EnableKeepCapabilities(&error_msg)) {
+        fail_fn(error_msg);
+      }
     }
 
-    SetInheritable(env, permittedCapabilities);
-    DropCapabilitiesBoundingSet(env);
+    if (!SetInheritable(permittedCapabilities, &error_msg)) {
+      fail_fn(error_msg);
+    }
+    if (!DropCapabilitiesBoundingSet(&error_msg)) {
+      fail_fn(error_msg);
+    }
 
     bool use_native_bridge = !is_system_server && (instructionSet != NULL)
         && android::NativeBridgeAvailable();
@@ -564,8 +648,8 @@ static pid_t ForkAndSpecializeCommon(JNIEnv* env, uid_t uid, gid_t gid, jintArra
       ALOGW("Native bridge will not be used because dataDir == NULL.");
     }
 
-    if (!MountEmulatedStorage(uid, mount_external, use_native_bridge)) {
-      ALOGW("Failed to mount emulated storage: %s", strerror(errno));
+    if (!MountEmulatedStorage(uid, mount_external, use_native_bridge, &error_msg)) {
+      ALOGW("Failed to mount emulated storage: %s (%s)", error_msg.c_str(), strerror(errno));
       if (errno == ENOTCONN || errno == EROFS) {
         // When device is actively encrypting, we get ENOTCONN here
         // since FUSE was mounted before the framework restarted.
@@ -573,7 +657,7 @@ static pid_t ForkAndSpecializeCommon(JNIEnv* env, uid_t uid, gid_t gid, jintArra
         // FUSE hasn't been created yet by init.
         // In either case, continue without external storage.
       } else {
-        RuntimeAbort(env, __LINE__, "Cannot continue without emulated storage");
+        fail_fn(error_msg);
       }
     }
 
@@ -588,9 +672,14 @@ static pid_t ForkAndSpecializeCommon(JNIEnv* env, uid_t uid, gid_t gid, jintArra
         }
     }
 
-    SetGids(env, javaGids);
+    std::string error_msg;
+    if (!SetGids(env, javaGids, &error_msg)) {
+      fail_fn(error_msg);
+    }
 
-    SetRLimits(env, javaRlimits);
+    if (!SetRLimits(env, javaRlimits, &error_msg)) {
+      fail_fn(error_msg);
+    }
 
     if (use_native_bridge) {
       ScopedUtfChars isa_string(env, instructionSet);
@@ -600,14 +689,39 @@ static pid_t ForkAndSpecializeCommon(JNIEnv* env, uid_t uid, gid_t gid, jintArra
 
     int rc = setresgid(gid, gid, gid);
     if (rc == -1) {
-      ALOGE("setresgid(%d) failed: %s", gid, strerror(errno));
-      RuntimeAbort(env, __LINE__, "setresgid failed");
+      fail_fn(CREATE_ERROR("setresgid(%d) failed: %s", gid, strerror(errno)));
     }
+
+    // Must be called when the new process still has CAP_SYS_ADMIN, in this case, before changing
+    // uid from 0, which clears capabilities.  The other alternative is to call
+    // prctl(PR_SET_NO_NEW_PRIVS, 1) afterward, but that breaks SELinux domain transition (see
+    // b/71859146).  As the result, privileged syscalls used below still need to be accessible in
+    // app process.
+    SetUpSeccompFilter(uid);
 
     rc = setresuid(uid, uid, uid);
     if (rc == -1) {
-      ALOGE("setresuid(%d) failed: %s", uid, strerror(errno));
-      RuntimeAbort(env, __LINE__, "setresuid failed");
+      fail_fn(CREATE_ERROR("setresuid(%d) failed: %s", uid, strerror(errno)));
+    }
+
+    // The "dumpable" flag of a process, which controls core dump generation, is
+    // overwritten by the value in /proc/sys/fs/suid_dumpable when the effective
+    // user or group ID changes. See proc(5) for possible values. In most cases,
+    // the value is 0, so core dumps are disabled for zygote children. However,
+    // when running in a Chrome OS container, the value is already set to 2,
+    // which allows the external crash reporter to collect all core dumps. Since
+    // only system crashes are interested, core dump is disabled for app
+    // processes. This also ensures compliance with CTS.
+    int dumpable = prctl(PR_GET_DUMPABLE);
+    if (dumpable == -1) {
+        ALOGE("prctl(PR_GET_DUMPABLE) failed: %s", strerror(errno));
+        RuntimeAbort(env, __LINE__, "prctl(PR_GET_DUMPABLE) failed");
+    }
+    if (dumpable == 2 && uid >= AID_APP) {
+      if (prctl(PR_SET_DUMPABLE, 0, 0, 0, 0) == -1) {
+        ALOGE("prctl(PR_SET_DUMPABLE, 0) failed: %s", strerror(errno));
+        RuntimeAbort(env, __LINE__, "prctl(PR_SET_DUMPABLE, 0) failed");
+      }
     }
 
     if (NeedsNoRandomizeWorkaround()) {
@@ -619,9 +733,14 @@ static pid_t ForkAndSpecializeCommon(JNIEnv* env, uid_t uid, gid_t gid, jintArra
         }
     }
 
-    SetCapabilities(env, permittedCapabilities, effectiveCapabilities, permittedCapabilities);
+    if (!SetCapabilities(permittedCapabilities, effectiveCapabilities, permittedCapabilities,
+                         &error_msg)) {
+      fail_fn(error_msg);
+    }
 
-    SetSchedulerPolicy(env);
+    if (!SetSchedulerPolicy(&error_msg)) {
+      fail_fn(error_msg);
+    }
 
     const char* se_info_c_str = NULL;
     ScopedUtfChars* se_info = NULL;
@@ -629,7 +748,7 @@ static pid_t ForkAndSpecializeCommon(JNIEnv* env, uid_t uid, gid_t gid, jintArra
         se_info = new ScopedUtfChars(env, java_se_info);
         se_info_c_str = se_info->c_str();
         if (se_info_c_str == NULL) {
-          RuntimeAbort(env, __LINE__, "se_info_c_str == NULL");
+          fail_fn("se_info_c_str == NULL");
         }
     }
     const char* se_name_c_str = NULL;
@@ -638,42 +757,41 @@ static pid_t ForkAndSpecializeCommon(JNIEnv* env, uid_t uid, gid_t gid, jintArra
         se_name = new ScopedUtfChars(env, java_se_name);
         se_name_c_str = se_name->c_str();
         if (se_name_c_str == NULL) {
-          RuntimeAbort(env, __LINE__, "se_name_c_str == NULL");
+          fail_fn("se_name_c_str == NULL");
         }
     }
     rc = selinux_android_setcontext(uid, is_system_server, se_info_c_str, se_name_c_str);
     if (rc == -1) {
-      ALOGE("selinux_android_setcontext(%d, %d, \"%s\", \"%s\") failed", uid,
-            is_system_server, se_info_c_str, se_name_c_str);
-      RuntimeAbort(env, __LINE__, "selinux_android_setcontext failed");
+      fail_fn(CREATE_ERROR("selinux_android_setcontext(%d, %d, \"%s\", \"%s\") failed", uid,
+            is_system_server, se_info_c_str, se_name_c_str));
     }
 
     // Make it easier to debug audit logs by setting the main thread's name to the
     // nice name rather than "app_process".
-    if (se_info_c_str == NULL && is_system_server) {
+    if (se_name_c_str == NULL && is_system_server) {
       se_name_c_str = "system_server";
     }
-    if (se_info_c_str != NULL) {
+    if (se_name_c_str != NULL) {
       SetThreadName(se_name_c_str);
     }
 
     delete se_info;
     delete se_name;
 
-    UnsetSigChldHandler();
+    // Unset the SIGCHLD handler, but keep ignoring SIGHUP (rationale in SetSignalHandlers).
+    UnsetChldSignalHandler();
 
     env->CallStaticVoidMethod(gZygoteClass, gCallPostForkChildHooks, runtime_flags,
-                              is_system_server, instructionSet);
+                              is_system_server, is_child_zygote, instructionSet);
     if (env->ExceptionCheck()) {
-      RuntimeAbort(env, __LINE__, "Error calling post fork hooks.");
+      fail_fn("Error calling post fork hooks.");
     }
   } else if (pid > 0) {
     // the parent process
 
     // We blocked SIGCHLD prior to a fork, we unblock it here.
     if (sigprocmask(SIG_UNBLOCK, &sigchld, nullptr) == -1) {
-      ALOGE("sigprocmask(SIG_SETMASK, { SIGCHLD }) failed: %s", strerror(errno));
-      RuntimeAbort(env, __LINE__, "Call to sigprocmask(SIG_UNBLOCK, { SIGCHLD }) failed.");
+      fail_fn(CREATE_ERROR("sigprocmask(SIG_SETMASK, { SIGCHLD }) failed: %s", strerror(errno)));
     }
   }
   return pid;
@@ -698,6 +816,12 @@ static uint64_t GetEffectiveCapabilityMask(JNIEnv* env) {
 
 namespace android {
 
+static void com_android_internal_os_Zygote_nativeSecurityInit(JNIEnv*, jclass) {
+  // security_getenforce is not allowed on app process. Initialize and cache the value before
+  // zygote forks.
+  g_is_security_enforced = security_getenforce();
+}
+
 static void com_android_internal_os_Zygote_nativePreApplicationInit(JNIEnv*, jclass) {
   PreApplicationInit();
 }
@@ -706,8 +830,7 @@ static jint com_android_internal_os_Zygote_nativeForkAndSpecialize(
         JNIEnv* env, jclass, jint uid, jint gid, jintArray gids,
         jint runtime_flags, jobjectArray rlimits,
         jint mount_external, jstring se_info, jstring se_name,
-        jintArray fdsToClose,
-        jintArray fdsToIgnore,
+        jintArray fdsToClose, jintArray fdsToIgnore, jboolean is_child_zygote,
         jstring instructionSet, jstring appDataDir) {
     jlong capabilities = 0;
 
@@ -744,13 +867,22 @@ static jint com_android_internal_os_Zygote_nativeForkAndSpecialize(
       capabilities |= (1LL << CAP_BLOCK_SUSPEND);
     }
 
+    // If forking a child zygote process, that zygote will need to be able to change
+    // the UID and GID of processes it forks, as well as drop those capabilities.
+    if (is_child_zygote) {
+      capabilities |= (1LL << CAP_SETUID);
+      capabilities |= (1LL << CAP_SETGID);
+      capabilities |= (1LL << CAP_SETPCAP);
+    }
+
     // Containers run without some capabilities, so drop any caps that are not
     // available.
     capabilities &= GetEffectiveCapabilityMask(env);
 
     return ForkAndSpecializeCommon(env, uid, gid, gids, runtime_flags,
             rlimits, capabilities, capabilities, mount_external, se_info,
-            se_name, false, fdsToClose, fdsToIgnore, instructionSet, appDataDir);
+            se_name, false, fdsToClose, fdsToIgnore, is_child_zygote == JNI_TRUE,
+            instructionSet, appDataDir);
 }
 
 static jint com_android_internal_os_Zygote_nativeForkSystemServer(
@@ -761,7 +893,7 @@ static jint com_android_internal_os_Zygote_nativeForkSystemServer(
                                       runtime_flags, rlimits,
                                       permittedCapabilities, effectiveCapabilities,
                                       MOUNT_EXTERNAL_DEFAULT, NULL, NULL, true, NULL,
-                                      NULL, NULL, NULL);
+                                      NULL, false, NULL, NULL);
   if (pid > 0) {
       // The zygote process checks whether the child process has died or not.
       ALOGI("System server process %d has been created", pid);
@@ -832,8 +964,10 @@ static void com_android_internal_os_Zygote_nativeUnmountStorageOnInit(JNIEnv* en
 }
 
 static const JNINativeMethod gMethods[] = {
+    { "nativeSecurityInit", "()V",
+      (void *) com_android_internal_os_Zygote_nativeSecurityInit },
     { "nativeForkAndSpecialize",
-      "(II[II[[IILjava/lang/String;Ljava/lang/String;[I[ILjava/lang/String;Ljava/lang/String;)I",
+      "(II[II[[IILjava/lang/String;Ljava/lang/String;[I[IZLjava/lang/String;Ljava/lang/String;)I",
       (void *) com_android_internal_os_Zygote_nativeForkAndSpecialize },
     { "nativeForkSystemServer", "(II[II[[IJJ)I",
       (void *) com_android_internal_os_Zygote_nativeForkSystemServer },
@@ -848,7 +982,7 @@ static const JNINativeMethod gMethods[] = {
 int register_com_android_internal_os_Zygote(JNIEnv* env) {
   gZygoteClass = MakeGlobalRefOrDie(env, FindClassOrDie(env, kZygoteClassName));
   gCallPostForkChildHooks = GetStaticMethodIDOrDie(env, gZygoteClass, "callPostForkChildHooks",
-                                                   "(IZLjava/lang/String;)V");
+                                                   "(IZZLjava/lang/String;)V");
 
   return RegisterMethodsOrDie(env, "com/android/internal/os/Zygote", gMethods, NELEM(gMethods));
 }

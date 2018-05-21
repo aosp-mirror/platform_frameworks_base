@@ -143,6 +143,8 @@ interface IAudioService {
     void setWiredDeviceConnectionState(int type, int state, String address, String name,
             String caller);
 
+    void setHearingAidDeviceConnectionState(in BluetoothDevice device, int state);
+
     int setBluetoothA2dpDeviceConnectionState(in BluetoothDevice device, int state, int profile);
 
     void handleBluetoothA2dpDeviceConfigChange(in BluetoothDevice device);
@@ -202,6 +204,9 @@ interface IAudioService {
             in IAudioPolicyCallback pcb);
 
     oneway void playerHasOpPlayAudio(in int piid, in boolean hasOpPlayAudio);
+
+    int setBluetoothA2dpDeviceConnectionStateSuppressNoisyIntent(in BluetoothDevice device,
+            int state, int profile, boolean suppressNoisyIntent);
 
     // WARNING: read warning at top of file, it is recommended to add new methods at the end
 }

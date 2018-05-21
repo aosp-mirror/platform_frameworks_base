@@ -125,4 +125,7 @@
 
     <!-- Azerbaijani keyboard layout label. [CHAR LIMIT=35] -->
     <string name="keyboard_layout_azerbaijani">Azerbaijani</string>
+
+    <!-- Polish keyboard layout label. [CHAR LIMIT=35] -->
+    <string name="keyboard_layout_polish">Polish</string>
 </resources>

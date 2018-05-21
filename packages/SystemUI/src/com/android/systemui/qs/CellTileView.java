@@ -19,12 +19,12 @@ import android.graphics.drawable.Drawable;
 import android.service.quicksettings.Tile;
 import android.widget.ImageView;
 
+import com.android.settingslib.graph.SignalDrawable;
 import com.android.settingslib.Utils;
 import com.android.systemui.R;
 import com.android.systemui.plugins.qs.QSTile.Icon;
 import com.android.systemui.plugins.qs.QSTile.State;
 import com.android.systemui.qs.tileimpl.QSTileImpl;
-import com.android.systemui.statusbar.phone.SignalDrawable;
 
 import java.util.Objects;
 

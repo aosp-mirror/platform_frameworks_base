@@ -16,6 +16,7 @@
 package android.telephony;
 
 import android.annotation.Nullable;
+import android.annotation.SystemApi;
 import android.content.pm.PackageInfo;
 import android.content.pm.Signature;
 import android.os.Parcel;
@@ -32,15 +33,15 @@ import java.io.IOException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
+import java.util.Objects;
 
 /**
  * Describes a single UICC access rule according to the GlobalPlatform Secure Element Access Control
  * specification.
  *
  * @hide
- *
- * TODO(b/35851809): Make this a SystemApi.
  */
+@SystemApi
 public final class UiccAccessRule implements Parcelable {
     private static final String TAG = "UiccAccessRule";
 
@@ -202,6 +203,30 @@ public final class UiccAccessRule implements Parcelable {
     private boolean matches(byte[] certHash, String packageName) {
         return certHash != null && Arrays.equals(this.mCertificateHash, certHash) &&
                 (TextUtils.isEmpty(this.mPackageName) || this.mPackageName.equals(packageName));
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null || getClass() != obj.getClass()) {
+            return false;
+        }
+
+        UiccAccessRule that = (UiccAccessRule) obj;
+        return Arrays.equals(mCertificateHash, that.mCertificateHash)
+                && Objects.equals(mPackageName, that.mPackageName)
+                && mAccessType == that.mAccessType;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = 1;
+        result = 31 * result + Arrays.hashCode(mCertificateHash);
+        result = 31 * result + Objects.hashCode(mPackageName);
+        result = 31 * result + Objects.hashCode(mAccessType);
+        return result;
     }
 
     @Override

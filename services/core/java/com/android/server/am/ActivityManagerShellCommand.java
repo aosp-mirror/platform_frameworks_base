@@ -114,6 +114,7 @@ final class ActivityManagerShellCommand extends ShellCommand {
     private boolean mAutoStop;
     private boolean mStreaming;   // Streaming the profiling output to a file.
     private String mAgent;  // Agent to attach on startup.
+    private boolean mAttachAgentDuringBind;  // Whether agent should be attached late.
     private int mDisplayId;
     private int mStackId;
     private int mTaskId;
@@ -163,6 +164,8 @@ final class ActivityManagerShellCommand extends ShellCommand {
                     return runDumpHeap(pw);
                 case "set-debug-app":
                     return runSetDebugApp(pw);
+                case "set-agent-app":
+                    return runSetAgentApp(pw);
                 case "clear-debug-app":
                     return runClearDebugApp(pw);
                 case "set-watch-heap":
@@ -295,7 +298,21 @@ final class ActivityManagerShellCommand extends ShellCommand {
                 } else if (opt.equals("--streaming")) {
                     mStreaming = true;
                 } else if (opt.equals("--attach-agent")) {
+                    if (mAgent != null) {
+                        cmd.getErrPrintWriter().println(
+                                "Multiple --attach-agent(-bind) not supported");
+                        return false;
+                    }
                     mAgent = getNextArgRequired();
+                    mAttachAgentDuringBind = false;
+                } else if (opt.equals("--attach-agent-bind")) {
+                    if (mAgent != null) {
+                        cmd.getErrPrintWriter().println(
+                                "Multiple --attach-agent(-bind) not supported");
+                        return false;
+                    }
+                    mAgent = getNextArgRequired();
+                    mAttachAgentDuringBind = true;
                 } else if (opt.equals("-R")) {
                     mRepeat = Integer.parseInt(getNextArgRequired());
                 } else if (opt.equals("-S")) {
@@ -381,7 +398,7 @@ final class ActivityManagerShellCommand extends ShellCommand {
                     }
                 }
                 profilerInfo = new ProfilerInfo(mProfileFile, fd, mSamplingInterval, mAutoStop,
-                        mStreaming, mAgent);
+                        mStreaming, mAgent, mAttachAgentDuringBind);
             }
 
             pw.println("Starting: " + intent);
@@ -755,7 +772,7 @@ final class ActivityManagerShellCommand extends ShellCommand {
                 return -1;
             }
             profilerInfo = new ProfilerInfo(profileFile, fd, mSamplingInterval, false, mStreaming,
-                    null);
+                    null, false);
         }
 
         try {
@@ -844,6 +861,13 @@ final class ActivityManagerShellCommand extends ShellCommand {
 
         String pkg = getNextArgRequired();
         mInterface.setDebugApp(pkg, wait, persistent);
+        return 0;
+    }
+
+    int runSetAgentApp(PrintWriter pw) throws RemoteException {
+        String pkg = getNextArgRequired();
+        String agent = getNextArg();
+        mInterface.setAgentApp(pkg, agent);
         return 0;
     }
 
@@ -2679,6 +2703,7 @@ final class ActivityManagerShellCommand extends ShellCommand {
             pw.println("          (use with --start-profiler)");
             pw.println("      -P <FILE>: like above, but profiling stops when app goes idle");
             pw.println("      --attach-agent <agent>: attach the given agent before binding");
+            pw.println("      --attach-agent-bind <agent>: attach the given agent during binding");
             pw.println("      -R: repeat the activity launch <COUNT> times.  Prior to each repeat,");
             pw.println("          the top activity will be finished.");
             pw.println("      -S: force stop the target app before starting the activity");
@@ -2704,7 +2729,7 @@ final class ActivityManagerShellCommand extends ShellCommand {
             pw.println("          specified then send to all users.");
             pw.println("      --receiver-permission <PERMISSION>: Require receiver to hold permission.");
             pw.println("  instrument [-r] [-e <NAME> <VALUE>] [-p <FILE>] [-w]");
-            pw.println("          [--user <USER_ID> | current]");
+            pw.println("          [--user <USER_ID> | current] [--no-hidden-api-checks]");
             pw.println("          [--no-window-animation] [--abi <ABI>] <COMPONENT>");
             pw.println("      Start an Instrumentation.  Typically this target <COMPONENT> is in the");
             pw.println("      form <TEST_PACKAGE>/<RUNNER_CLASS> or only <TEST_PACKAGE> if there");
@@ -2719,6 +2744,7 @@ final class ActivityManagerShellCommand extends ShellCommand {
             pw.println("          test runners.");
             pw.println("      --user <USER_ID> | current: Specify user instrumentation runs in;");
             pw.println("          current user if not specified.");
+            pw.println("      --no-hidden-api-checks: disable restrictions on use of hidden API.");
             pw.println("      --no-window-animation: turn off window animations while running.");
             pw.println("      --abi <ABI>: Launch the instrumented process with the selected ABI.");
             pw.println("          This assumes that the process supports the selected ABI.");

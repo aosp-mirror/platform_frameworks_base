@@ -252,8 +252,10 @@ public class AppOpsManager {
     public static final int OP_INSTANT_APP_START_FOREGROUND = 68;
     /** @hide Answer incoming phone calls */
     public static final int OP_ANSWER_PHONE_CALLS = 69;
+    /** @hide Continue handover of a call from another app */
+    public static final int OP_ACCEPT_HANDOVER = 70;
     /** @hide */
-    public static final int _NUM_OP = 70;
+    public static final int _NUM_OP = 71;
 
     /** Access to coarse location information. */
     public static final String OPSTR_COARSE_LOCATION = "android:coarse_location";
@@ -365,6 +367,12 @@ public class AppOpsManager {
     /** Answer incoming phone calls */
     public static final String OPSTR_ANSWER_PHONE_CALLS
             = "android:answer_phone_calls";
+    /***
+     * Accept call handover
+     * @hide
+     */
+    public static final String OPSTR_ACCEPT_HANDOVER
+            = "android:accept_handover";
 
     // Warning: If an permission is added here it also has to be added to
     // com.android.packageinstaller.permission.utils.EventLogger
@@ -400,6 +408,7 @@ public class AppOpsManager {
             OP_USE_SIP,
             OP_PROCESS_OUTGOING_CALLS,
             OP_ANSWER_PHONE_CALLS,
+            OP_ACCEPT_HANDOVER,
             // Microphone
             OP_RECORD_AUDIO,
             // Camera
@@ -492,7 +501,8 @@ public class AppOpsManager {
             OP_REQUEST_INSTALL_PACKAGES,
             OP_PICTURE_IN_PICTURE,
             OP_INSTANT_APP_START_FOREGROUND,
-            OP_ANSWER_PHONE_CALLS
+            OP_ANSWER_PHONE_CALLS,
+            OP_ACCEPT_HANDOVER
     };
 
     /**
@@ -570,6 +580,7 @@ public class AppOpsManager {
             OPSTR_PICTURE_IN_PICTURE,
             OPSTR_INSTANT_APP_START_FOREGROUND,
             OPSTR_ANSWER_PHONE_CALLS,
+            OPSTR_ACCEPT_HANDOVER
     };
 
     /**
@@ -647,6 +658,7 @@ public class AppOpsManager {
             "PICTURE_IN_PICTURE",
             "INSTANT_APP_START_FOREGROUND",
             "ANSWER_PHONE_CALLS",
+            "ACCEPT_HANDOVER"
     };
 
     /**
@@ -724,6 +736,7 @@ public class AppOpsManager {
             null, // no permission for entering picture-in-picture on hide
             Manifest.permission.INSTANT_APP_FOREGROUND_SERVICE,
             Manifest.permission.ANSWER_PHONE_CALLS,
+            Manifest.permission.ACCEPT_HANDOVER
     };
 
     /**
@@ -802,6 +815,7 @@ public class AppOpsManager {
             null, // ENTER_PICTURE_IN_PICTURE_ON_HIDE
             null, // INSTANT_APP_START_FOREGROUND
             null, // ANSWER_PHONE_CALLS
+            null, // ACCEPT_HANDOVER
     };
 
     /**
@@ -879,6 +893,7 @@ public class AppOpsManager {
             false, // ENTER_PICTURE_IN_PICTURE_ON_HIDE
             false, // INSTANT_APP_START_FOREGROUND
             false, // ANSWER_PHONE_CALLS
+            false, // ACCEPT_HANDOVER
     };
 
     /**
@@ -955,6 +970,7 @@ public class AppOpsManager {
             AppOpsManager.MODE_ALLOWED,  // OP_PICTURE_IN_PICTURE
             AppOpsManager.MODE_DEFAULT,  // OP_INSTANT_APP_START_FOREGROUND
             AppOpsManager.MODE_ALLOWED, // ANSWER_PHONE_CALLS
+            AppOpsManager.MODE_ALLOWED, // ACCEPT_HANDOVER
     };
 
     /**
@@ -1035,6 +1051,7 @@ public class AppOpsManager {
             false, // OP_PICTURE_IN_PICTURE
             false,
             false, // ANSWER_PHONE_CALLS
+            false, // ACCEPT_HANDOVER
     };
 
     /**

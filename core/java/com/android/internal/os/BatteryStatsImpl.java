@@ -30,6 +30,7 @@ import android.net.wifi.WifiManager;
 import android.os.BatteryManager;
 import android.os.BatteryStats;
 import android.os.Build;
+import android.os.connectivity.CellularBatteryStats;
 import android.os.FileUtils;
 import android.os.Handler;
 import android.os.IBatteryPropertiesRegistrar;
@@ -11260,6 +11261,51 @@ public class BatteryStatsImpl extends BatteryStats {
             return -1;
         }
         return (msPerLevel * (100-mCurrentBatteryLevel)) * 1000;
+    }
+
+    /*@hide */
+    public CellularBatteryStats getCellularBatteryStats() {
+        CellularBatteryStats s = new CellularBatteryStats();
+        final int which = STATS_SINCE_CHARGED;
+        final long rawRealTime = SystemClock.elapsedRealtime() * 1000;
+        final ControllerActivityCounter counter = getModemControllerActivity();
+        final long idleTimeMs = counter.getIdleTimeCounter().getCountLocked(which);
+        final long rxTimeMs = counter.getRxTimeCounter().getCountLocked(which);
+        final long energyConsumedMaMs = counter.getPowerCounter().getCountLocked(which);
+        long[] timeInRatMs = new long[BatteryStats.NUM_DATA_CONNECTION_TYPES];
+        for (int i = 0; i < timeInRatMs.length; i++) {
+           timeInRatMs[i] = getPhoneDataConnectionTime(i, rawRealTime, which) / 1000;
+        }
+        long[] timeInRxSignalStrengthLevelMs = new long[SignalStrength.NUM_SIGNAL_STRENGTH_BINS];
+        for (int i = 0; i < timeInRxSignalStrengthLevelMs.length; i++) {
+           timeInRxSignalStrengthLevelMs[i]
+               = getPhoneSignalStrengthTime(i, rawRealTime, which) / 1000;
+        }
+        long[] txTimeMs = new long[Math.min(ModemActivityInfo.TX_POWER_LEVELS,
+            counter.getTxTimeCounters().length)];
+        long totalTxTimeMs = 0;
+        for (int i = 0; i < txTimeMs.length; i++) {
+            txTimeMs[i] = counter.getTxTimeCounters()[i].getCountLocked(which);
+            totalTxTimeMs += txTimeMs[i];
+        }
+        final long totalControllerActivityTimeMs
+            = computeBatteryRealtime(SystemClock.elapsedRealtime() * 1000, which) / 1000;
+        final long sleepTimeMs
+            = totalControllerActivityTimeMs - (idleTimeMs + rxTimeMs + totalTxTimeMs);
+        s.setLoggingDurationMs(computeBatteryRealtime(rawRealTime, which) / 1000);
+        s.setKernelActiveTimeMs(getMobileRadioActiveTime(rawRealTime, which) / 1000);
+        s.setNumPacketsTx(getNetworkActivityPackets(NETWORK_MOBILE_TX_DATA, which));
+        s.setNumBytesTx(getNetworkActivityBytes(NETWORK_MOBILE_TX_DATA, which));
+        s.setNumPacketsRx(getNetworkActivityPackets(NETWORK_MOBILE_RX_DATA, which));
+        s.setNumBytesRx(getNetworkActivityBytes(NETWORK_MOBILE_RX_DATA, which));
+        s.setSleepTimeMs(sleepTimeMs);
+        s.setIdleTimeMs(idleTimeMs);
+        s.setRxTimeMs(rxTimeMs);
+        s.setEnergyConsumedMaMs(energyConsumedMaMs);
+        s.setTimeInRatMs(timeInRatMs);
+        s.setTimeInRxSignalStrengthLevelMs(timeInRxSignalStrengthLevelMs);
+        s.setTxTimeMs(txTimeMs);
+        return s;
     }
 
     @Override

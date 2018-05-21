@@ -99,8 +99,12 @@ public class NetworkManagementServiceTest {
 
     @After
     public void tearDown() throws Exception {
-        if (mSocket != null) mSocket.close();
-        if (mServerSocket != null) mServerSocket.close();
+        mNMService.shutdown();
+        // Once NetworkManagementService#shutdown() actually does something and shutdowns
+        // the underlying NativeDaemonConnector, the block below should be uncommented.
+        // if (mOutputStream != null) mOutputStream.close();
+        // if (mSocket != null) mSocket.close();
+        // if (mServerSocket != null) mServerSocket.close();
     }
 
     /**

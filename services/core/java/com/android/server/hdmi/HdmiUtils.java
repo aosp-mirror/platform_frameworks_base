@@ -152,6 +152,32 @@ final class HdmiUtils {
     }
 
     /**
+     * Parse the <Report Audio Status> message and check if it is mute
+     *
+     * @param cmd the CEC message to parse
+     * @return true if the given parameter has [MUTE]
+     */
+    static boolean isAudioStatusMute(HdmiCecMessage cmd) {
+        byte params[] = cmd.getParams();
+        return (params[0] & 0x80) == 0x80;
+    }
+
+    /**
+     * Parse the <Report Audio Status> message and extract the volume
+     *
+     * @param cmd the CEC message to parse
+     * @return device's volume. Constants.UNKNOWN_VOLUME in case it is out of range
+     */
+    static int getAudioStatusVolume(HdmiCecMessage cmd) {
+        byte params[] = cmd.getParams();
+        int volume = params[0] & 0x7F;
+        if (volume < 0x00 || 0x64 < volume) {
+            volume = Constants.UNKNOWN_VOLUME;
+        }
+        return volume;
+    }
+
+    /**
      * Convert integer array to list of {@link Integer}.
      *
      * <p>The result is immutable.

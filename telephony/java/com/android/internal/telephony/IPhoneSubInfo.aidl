@@ -68,11 +68,6 @@ interface IPhoneSubInfo {
     String getSubscriberIdForSubscriber(int subId, String callingPackage);
 
     /**
-     * Retrieves the Group Identifier Level1 for GSM phones.
-     */
-    String getGroupIdLevel1(String callingPackage);
-
-    /**
      * Retrieves the Group Identifier Level1 for GSM phones of a subId.
      */
     String getGroupIdLevel1ForSubscriber(int subId, String callingPackage);
@@ -152,6 +147,13 @@ interface IPhoneSubInfo {
     in ImsiEncryptionInfo imsiEncryptionInfo);
 
     /**
+     * Resets the Carrier Keys in the database. This involves 2 steps:
+     *  1. Delete the keys from the database.
+     *  2. Send an intent to download new Certificates.
+     */
+    void resetCarrierKeysForImsiEncryption(int subId, String callingPackage);
+
+    /**
      * Retrieves the alpha identifier associated with the voice mail number.
      */
     String getVoiceMailAlphaTag(String callingPackage);
@@ -193,14 +195,6 @@ interface IPhoneSubInfo {
      *      not present or not loaded
      */
     String[] getIsimPcscf(int subId);
-
-    /**
-     * TODO: Deprecate and remove this interface. Superceded by getIccsimChallengeResponse.
-     * Returns the response of ISIM Authetification through RIL.
-     * @return the response of ISIM Authetification, or null if
-     *     the Authentification hasn't been successed or isn't present iphonesubinfo.
-     */
-    String getIsimChallengeResponse(String nonce);
 
     /**
      * Returns the response of the SIM application on the UICC to authentication

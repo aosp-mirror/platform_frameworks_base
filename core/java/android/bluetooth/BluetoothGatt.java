@@ -98,22 +98,22 @@ public final class BluetoothGatt implements BluetoothProfile {
     public static final int GATT_FAILURE = 0x101;
 
     /**
-     * Connection paramter update - Use the connection paramters recommended by the
+     * Connection parameter update - Use the connection parameters recommended by the
      * Bluetooth SIG. This is the default value if no connection parameter update
      * is requested.
      */
     public static final int CONNECTION_PRIORITY_BALANCED = 0;
 
     /**
-     * Connection paramter update - Request a high priority, low latency connection.
-     * An application should only request high priority connection paramters to transfer
-     * large amounts of data over LE quickly. Once the transfer is complete, the application
-     * should request {@link BluetoothGatt#CONNECTION_PRIORITY_BALANCED} connectoin parameters
-     * to reduce energy use.
+     * Connection parameter update - Request a high priority, low latency connection.
+     * An application should only request high priority connection parameters to transfer large
+     * amounts of data over LE quickly. Once the transfer is complete, the application should
+     * request {@link BluetoothGatt#CONNECTION_PRIORITY_BALANCED} connection parameters to reduce
+     * energy use.
      */
     public static final int CONNECTION_PRIORITY_HIGH = 1;
 
-    /** Connection paramter update - Request low power, reduced data rate connection parameters. */
+    /** Connection parameter update - Request low power, reduced data rate connection parameters. */
     public static final int CONNECTION_PRIORITY_LOW_POWER = 2;
 
     /**
@@ -1498,6 +1498,40 @@ public final class BluetoothGatt implements BluetoothProfile {
 
         try {
             mService.connectionParameterUpdate(mClientIf, mDevice.getAddress(), connectionPriority);
+        } catch (RemoteException e) {
+            Log.e(TAG, "", e);
+            return false;
+        }
+
+        return true;
+    }
+
+    /**
+     * Request an LE connection parameter update.
+     *
+     * <p>This function will send an LE connection parameters update request to the remote device.
+     *
+     * @return true, if the request is send to the Bluetooth stack.
+     * @hide
+     */
+    public boolean requestLeConnectionUpdate(int minConnectionInterval, int maxConnectionInterval,
+                                             int slaveLatency, int supervisionTimeout,
+                                             int minConnectionEventLen, int maxConnectionEventLen) {
+        if (DBG) {
+            Log.d(TAG, "requestLeConnectionUpdate() - min=(" + minConnectionInterval
+                        + ")" + (1.25 * minConnectionInterval)
+                        + "msec, max=(" + maxConnectionInterval + ")"
+                        + (1.25 * maxConnectionInterval) + "msec, latency=" + slaveLatency
+                        + ", timeout=" + supervisionTimeout + "msec" + ", min_ce="
+                        + minConnectionEventLen + ", max_ce=" + maxConnectionEventLen);
+        }
+        if (mService == null || mClientIf == 0) return false;
+
+        try {
+            mService.leConnectionUpdate(mClientIf, mDevice.getAddress(),
+                                        minConnectionInterval, maxConnectionInterval,
+                                        slaveLatency, supervisionTimeout,
+                                        minConnectionEventLen, maxConnectionEventLen);
         } catch (RemoteException e) {
             Log.e(TAG, "", e);
             return false;

@@ -123,6 +123,7 @@ public abstract class ConnectionService extends Service {
     private static final String SESSION_ABORT = "CS.ab";
     private static final String SESSION_ANSWER = "CS.an";
     private static final String SESSION_ANSWER_VIDEO = "CS.anV";
+    private static final String SESSION_DEFLECT = "CS.def";
     private static final String SESSION_REJECT = "CS.r";
     private static final String SESSION_REJECT_MESSAGE = "CS.rWM";
     private static final String SESSION_SILENCE = "CS.s";
@@ -139,10 +140,15 @@ public abstract class ConnectionService extends Service {
     private static final String SESSION_POST_DIAL_CONT = "CS.oPDC";
     private static final String SESSION_PULL_EXTERNAL_CALL = "CS.pEC";
     private static final String SESSION_SEND_CALL_EVENT = "CS.sCE";
+    private static final String SESSION_HANDOVER_COMPLETE = "CS.hC";
     private static final String SESSION_EXTRAS_CHANGED = "CS.oEC";
     private static final String SESSION_START_RTT = "CS.+RTT";
+    private static final String SESSION_UPDATE_RTT_PIPES = "CS.uRTT";
     private static final String SESSION_STOP_RTT = "CS.-RTT";
     private static final String SESSION_RTT_UPGRADE_RESPONSE = "CS.rTRUR";
+    private static final String SESSION_HANDOVER_FAILED = "CS.haF";
+    private static final String SESSION_CONNECTION_SERVICE_FOCUS_LOST = "CS.cSFL";
+    private static final String SESSION_CONNECTION_SERVICE_FOCUS_GAINED = "CS.cSFG";
 
     private static final int MSG_ADD_CONNECTION_SERVICE_ADAPTER = 1;
     private static final int MSG_CREATE_CONNECTION = 2;
@@ -172,6 +178,11 @@ public abstract class ConnectionService extends Service {
     private static final int MSG_ON_STOP_RTT = 27;
     private static final int MSG_RTT_UPGRADE_RESPONSE = 28;
     private static final int MSG_CREATE_CONNECTION_COMPLETE = 29;
+    private static final int MSG_CONNECTION_SERVICE_FOCUS_LOST = 30;
+    private static final int MSG_CONNECTION_SERVICE_FOCUS_GAINED = 31;
+    private static final int MSG_HANDOVER_FAILED = 32;
+    private static final int MSG_HANDOVER_COMPLETE = 33;
+    private static final int MSG_DEFLECT = 34;
 
     private static Connection sNullConnection;
 
@@ -275,6 +286,35 @@ public abstract class ConnectionService extends Service {
         }
 
         @Override
+        public void handoverFailed(String callId, ConnectionRequest request, int reason,
+                                   Session.Info sessionInfo) {
+            Log.startSession(sessionInfo, SESSION_HANDOVER_FAILED);
+            try {
+                SomeArgs args = SomeArgs.obtain();
+                args.arg1 = callId;
+                args.arg2 = request;
+                args.arg3 = Log.createSubsession();
+                args.arg4 = reason;
+                mHandler.obtainMessage(MSG_HANDOVER_FAILED, args).sendToTarget();
+            } finally {
+                Log.endSession();
+            }
+        }
+
+        @Override
+        public void handoverComplete(String callId, Session.Info sessionInfo) {
+            Log.startSession(sessionInfo, SESSION_HANDOVER_COMPLETE);
+            try {
+                SomeArgs args = SomeArgs.obtain();
+                args.arg1 = callId;
+                args.arg2 = Log.createSubsession();
+                mHandler.obtainMessage(MSG_HANDOVER_COMPLETE, args).sendToTarget();
+            } finally {
+                Log.endSession();
+            }
+        }
+
+        @Override
         public void abort(String callId, Session.Info sessionInfo) {
             Log.startSession(sessionInfo, SESSION_ABORT);
             try {
@@ -309,6 +349,20 @@ public abstract class ConnectionService extends Service {
                 args.arg1 = callId;
                 args.arg2 = Log.createSubsession();
                 mHandler.obtainMessage(MSG_ANSWER, args).sendToTarget();
+            } finally {
+                Log.endSession();
+            }
+        }
+
+        @Override
+        public void deflect(String callId, Uri address, Session.Info sessionInfo) {
+            Log.startSession(sessionInfo, SESSION_DEFLECT);
+            try {
+                SomeArgs args = SomeArgs.obtain();
+                args.arg1 = callId;
+                args.arg2 = address;
+                args.arg3 = Log.createSubsession();
+                mHandler.obtainMessage(MSG_DEFLECT, args).sendToTarget();
             } finally {
                 Log.endSession();
             }
@@ -591,6 +645,26 @@ public abstract class ConnectionService extends Service {
                 Log.endSession();
             }
         }
+
+        @Override
+        public void connectionServiceFocusLost(Session.Info sessionInfo) throws RemoteException {
+            Log.startSession(sessionInfo, SESSION_CONNECTION_SERVICE_FOCUS_LOST);
+            try {
+                mHandler.obtainMessage(MSG_CONNECTION_SERVICE_FOCUS_LOST).sendToTarget();
+            } finally {
+                Log.endSession();
+            }
+        }
+
+        @Override
+        public void connectionServiceFocusGained(Session.Info sessionInfo) throws RemoteException {
+            Log.startSession(sessionInfo, SESSION_CONNECTION_SERVICE_FOCUS_GAINED);
+            try {
+                mHandler.obtainMessage(MSG_CONNECTION_SERVICE_FOCUS_GAINED).sendToTarget();
+            } finally {
+                Log.endSession();
+            }
+        }
     };
 
     private final Handler mHandler = new Handler(Looper.getMainLooper()) {
@@ -723,6 +797,36 @@ public abstract class ConnectionService extends Service {
                     }
                     break;
                 }
+                case MSG_HANDOVER_FAILED: {
+                    SomeArgs args = (SomeArgs) msg.obj;
+                    Log.continueSession((Session) args.arg3, SESSION_HANDLER +
+                            SESSION_HANDOVER_FAILED);
+                    try {
+                        final String id = (String) args.arg1;
+                        final ConnectionRequest request = (ConnectionRequest) args.arg2;
+                        final int reason = (int) args.arg4;
+                        if (!mAreAccountsInitialized) {
+                            Log.d(this, "Enqueueing pre-init request %s", id);
+                            mPreInitializationConnectionRequests.add(
+                                    new android.telecom.Logging.Runnable(
+                                            SESSION_HANDLER
+                                                    + SESSION_HANDOVER_FAILED + ".pICR",
+                                            null /*lock*/) {
+                                        @Override
+                                        public void loggedRun() {
+                                            handoverFailed(id, request, reason);
+                                        }
+                                    }.prepare());
+                        } else {
+                            Log.i(this, "createConnectionFailed %s", id);
+                            handoverFailed(id, request, reason);
+                        }
+                    } finally {
+                        args.recycle();
+                        Log.endSession();
+                    }
+                    break;
+                }
                 case MSG_ABORT: {
                     SomeArgs args = (SomeArgs) msg.obj;
                     Log.continueSession((Session) args.arg2, SESSION_HANDLER + SESSION_ABORT);
@@ -753,6 +857,17 @@ public abstract class ConnectionService extends Service {
                         String callId = (String) args.arg1;
                         int videoState = args.argi1;
                         answerVideo(callId, videoState);
+                    } finally {
+                        args.recycle();
+                        Log.endSession();
+                    }
+                    break;
+                }
+                case MSG_DEFLECT: {
+                    SomeArgs args = (SomeArgs) msg.obj;
+                    Log.continueSession((Session) args.arg3, SESSION_HANDLER + SESSION_DEFLECT);
+                    try {
+                        deflect((String) args.arg1, (Uri) args.arg2);
                     } finally {
                         args.recycle();
                         Log.endSession();
@@ -955,6 +1070,19 @@ public abstract class ConnectionService extends Service {
                     }
                     break;
                 }
+                case MSG_HANDOVER_COMPLETE: {
+                    SomeArgs args = (SomeArgs) msg.obj;
+                    try {
+                        Log.continueSession((Session) args.arg2,
+                                SESSION_HANDLER + SESSION_HANDOVER_COMPLETE);
+                        String callId = (String) args.arg1;
+                        notifyHandoverComplete(callId);
+                    } finally {
+                        args.recycle();
+                        Log.endSession();
+                    }
+                    break;
+                }
                 case MSG_ON_EXTRAS_CHANGED: {
                     SomeArgs args = (SomeArgs) msg.obj;
                     try {
@@ -1012,6 +1140,12 @@ public abstract class ConnectionService extends Service {
                     }
                     break;
                 }
+                case MSG_CONNECTION_SERVICE_FOCUS_GAINED:
+                    onConnectionServiceFocusGained();
+                    break;
+                case MSG_CONNECTION_SERVICE_FOCUS_LOST:
+                    onConnectionServiceFocusLost();
+                    break;
                 default:
                     break;
             }
@@ -1366,18 +1500,35 @@ public abstract class ConnectionService extends Service {
             final ConnectionRequest request,
             boolean isIncoming,
             boolean isUnknown) {
+        boolean isLegacyHandover = request.getExtras() != null &&
+                request.getExtras().getBoolean(TelecomManager.EXTRA_IS_HANDOVER, false);
+        boolean isHandover = request.getExtras() != null && request.getExtras().getBoolean(
+                TelecomManager.EXTRA_IS_HANDOVER_CONNECTION, false);
         Log.d(this, "createConnection, callManagerAccount: %s, callId: %s, request: %s, " +
-                        "isIncoming: %b, isUnknown: %b", callManagerAccount, callId, request,
-                isIncoming,
-                isUnknown);
+                        "isIncoming: %b, isUnknown: %b, isLegacyHandover: %b, isHandover: %b",
+                callManagerAccount, callId, request, isIncoming, isUnknown, isLegacyHandover,
+                isHandover);
 
-        Connection connection = isUnknown ? onCreateUnknownConnection(callManagerAccount, request)
-                : isIncoming ? onCreateIncomingConnection(callManagerAccount, request)
-                : onCreateOutgoingConnection(callManagerAccount, request);
+        Connection connection = null;
+        if (isHandover) {
+            PhoneAccountHandle fromPhoneAccountHandle = request.getExtras() != null
+                    ? (PhoneAccountHandle) request.getExtras().getParcelable(
+                    TelecomManager.EXTRA_HANDOVER_FROM_PHONE_ACCOUNT) : null;
+            if (!isIncoming) {
+                connection = onCreateOutgoingHandoverConnection(fromPhoneAccountHandle, request);
+            } else {
+                connection = onCreateIncomingHandoverConnection(fromPhoneAccountHandle, request);
+            }
+        } else {
+            connection = isUnknown ? onCreateUnknownConnection(callManagerAccount, request)
+                    : isIncoming ? onCreateIncomingConnection(callManagerAccount, request)
+                    : onCreateOutgoingConnection(callManagerAccount, request);
+        }
         Log.d(this, "createConnection, connection: %s", connection);
         if (connection == null) {
+            Log.i(this, "createConnection, implementation returned null connection.");
             connection = Connection.createFailedConnection(
-                    new DisconnectCause(DisconnectCause.ERROR));
+                    new DisconnectCause(DisconnectCause.ERROR, "IMPL_RETURNED_NULL_CONNECTION"));
         }
 
         connection.setTelecomCallId(callId);
@@ -1442,6 +1593,13 @@ public abstract class ConnectionService extends Service {
         }
     }
 
+    private void handoverFailed(final String callId, final ConnectionRequest request,
+                                        int reason) {
+
+        Log.i(this, "handoverFailed %s", callId);
+        onHandoverFailed(request, reason);
+    }
+
     /**
      * Called by Telecom when the creation of a new Connection has completed and it is now added
      * to Telecom.
@@ -1472,6 +1630,11 @@ public abstract class ConnectionService extends Service {
     private void answer(String callId) {
         Log.d(this, "answer %s", callId);
         findConnectionForAction(callId, "answer").onAnswer();
+    }
+
+    private void deflect(String callId, Uri address) {
+        Log.d(this, "deflect %s", callId);
+        findConnectionForAction(callId, "deflect").onDeflect(address);
     }
 
     private void reject(String callId) {
@@ -1656,6 +1819,19 @@ public abstract class ConnectionService extends Service {
     }
 
     /**
+     * Notifies a {@link Connection} that a handover has completed.
+     *
+     * @param callId The ID of the call which completed handover.
+     */
+    private void notifyHandoverComplete(String callId) {
+        Log.d(this, "notifyHandoverComplete(%s)", callId);
+        Connection connection = findConnectionForAction(callId, "notifyHandoverComplete");
+        if (connection != null) {
+            connection.onHandoverComplete();
+        }
+    }
+
+    /**
      * Notifies a {@link Connection} or {@link Conference} of a change to the extras from Telecom.
      * <p>
      * These extra changes can originate from Telecom itself, or from an {@link InCallService} via
@@ -1689,7 +1865,6 @@ public abstract class ConnectionService extends Service {
         Log.d(this, "stopRtt(%s)", callId);
         if (mConnectionById.containsKey(callId)) {
             findConnectionForAction(callId, "stopRtt").onStopRtt();
-            findConnectionForAction(callId, "stopRtt").unsetRttProperty();
         } else if (mConferenceById.containsKey(callId)) {
             Log.w(this, "stopRtt called on a conference.");
         }
@@ -1831,7 +2006,7 @@ public abstract class ConnectionService extends Service {
                             null : conference.getVideoProvider().getInterface(),
                     conference.getVideoState(),
                     conference.getConnectTimeMillis(),
-                    conference.getConnectElapsedTime(),
+                    conference.getConnectionStartElapsedRealTime(),
                     conference.getStatusHints(),
                     conference.getExtras());
 
@@ -1859,6 +2034,16 @@ public abstract class ConnectionService extends Service {
     public final void addExistingConnection(PhoneAccountHandle phoneAccountHandle,
             Connection connection) {
         addExistingConnection(phoneAccountHandle, connection, null /* conference */);
+    }
+
+    /**
+     * Call to inform Telecom that your {@link ConnectionService} has released call resources (e.g
+     * microphone, camera).
+     *
+     * @see ConnectionService#onConnectionServiceFocusLost()
+     */
+    public final void connectionServiceFocusReleased() {
+        mAdapter.onConnectionServiceFocusReleased();
     }
 
     /**
@@ -2033,12 +2218,50 @@ public abstract class ConnectionService extends Service {
     }
 
     /**
-     * Called by Telecom on the initiating side of the handover to create an instance of a
-     * handover connection.
+     * Called by Telecom to request that a {@link ConnectionService} creates an instance of an
+     * outgoing handover {@link Connection}.
+     * <p>
+     * A call handover is the process where an ongoing call is transferred from one app (i.e.
+     * {@link ConnectionService} to another app.  The user could, for example, choose to continue a
+     * mobile network call in a video calling app.  The mobile network call via the Telephony stack
+     * is referred to as the source of the handover, and the video calling app is referred to as the
+     * destination.
+     * <p>
+     * When considering a handover scenario the <em>initiating</em> device is where a user initiated
+     * the handover process (e.g. by calling {@link android.telecom.Call#handoverTo(
+     * PhoneAccountHandle, int, Bundle)}, and the other device is considered the <em>receiving</em>
+     * device.
+     * <p>
+     * This method is called on the destination {@link ConnectionService} on <em>initiating</em>
+     * device when the user initiates a handover request from one app to another.  The user request
+     * originates in the {@link InCallService} via
+     * {@link android.telecom.Call#handoverTo(PhoneAccountHandle, int, Bundle)}.
+     * <p>
+     * For a full discussion of the handover process and the APIs involved, see
+     * {@link android.telecom.Call#handoverTo(PhoneAccountHandle, int, Bundle)}.
+     * <p>
+     * Implementations of this method should return an instance of {@link Connection} which
+     * represents the handover.  If your app does not wish to accept a handover to it at this time,
+     * you can return {@code null}.  The code below shows an example of how this is done.
+     * <pre>
+     * {@code
+     * public Connection onCreateIncomingHandoverConnection(PhoneAccountHandle
+     *     fromPhoneAccountHandle, ConnectionRequest request) {
+     *   if (!isHandoverAvailable()) {
+     *       return null;
+     *   }
+     *   MyConnection connection = new MyConnection();
+     *   connection.setAddress(request.getAddress(), TelecomManager.PRESENTATION_ALLOWED);
+     *   connection.setVideoState(request.getVideoState());
+     *   return connection;
+     * }
+     * }
+     * </pre>
+     *
      * @param fromPhoneAccountHandle {@link PhoneAccountHandle} associated with the
      *                               ConnectionService which needs to handover the call.
-     * @param request Details about the call which needs to be handover.
-     * @return Connection object corresponding to the handover call.
+     * @param request Details about the call to handover.
+     * @return {@link Connection} instance corresponding to the handover call.
      */
     public Connection onCreateOutgoingHandoverConnection(PhoneAccountHandle fromPhoneAccountHandle,
                                                          ConnectionRequest request) {
@@ -2046,12 +2269,46 @@ public abstract class ConnectionService extends Service {
     }
 
     /**
-     * Called by Telecom on the receiving side of the handover to request the
-     * {@link ConnectionService} to create an instance of a handover connection.
+     * Called by Telecom to request that a {@link ConnectionService} creates an instance of an
+     * incoming handover {@link Connection}.
+     * <p>
+     * A call handover is the process where an ongoing call is transferred from one app (i.e.
+     * {@link ConnectionService} to another app.  The user could, for example, choose to continue a
+     * mobile network call in a video calling app.  The mobile network call via the Telephony stack
+     * is referred to as the source of the handover, and the video calling app is referred to as the
+     * destination.
+     * <p>
+     * When considering a handover scenario the <em>initiating</em> device is where a user initiated
+     * the handover process (e.g. by calling {@link android.telecom.Call#handoverTo(
+     * PhoneAccountHandle, int, Bundle)}, and the other device is considered the <em>receiving</em>
+     * device.
+     * <p>
+     * This method is called on the destination app on the <em>receiving</em> device when the
+     * destination app calls {@link TelecomManager#acceptHandover(Uri, int, PhoneAccountHandle)} to
+     * accept an incoming handover from the <em>initiating</em> device.
+     * <p>
+     * For a full discussion of the handover process and the APIs involved, see
+     * {@link android.telecom.Call#handoverTo(PhoneAccountHandle, int, Bundle)}.
+     * <p>
+     * Implementations of this method should return an instance of {@link Connection} which
+     * represents the handover.  The code below shows an example of how this is done.
+     * <pre>
+     * {@code
+     * public Connection onCreateIncomingHandoverConnection(PhoneAccountHandle
+     *     fromPhoneAccountHandle, ConnectionRequest request) {
+     *   // Given that your app requested to accept the handover, you should not return null here.
+     *   MyConnection connection = new MyConnection();
+     *   connection.setAddress(request.getAddress(), TelecomManager.PRESENTATION_ALLOWED);
+     *   connection.setVideoState(request.getVideoState());
+     *   return connection;
+     * }
+     * }
+     * </pre>
+     *
      * @param fromPhoneAccountHandle {@link PhoneAccountHandle} associated with the
      *                               ConnectionService which needs to handover the call.
      * @param request Details about the call which needs to be handover.
-     * @return {@link Connection} object corresponding to the handover call.
+     * @return {@link Connection} instance corresponding to the handover call.
      */
     public Connection onCreateIncomingHandoverConnection(PhoneAccountHandle fromPhoneAccountHandle,
                                                          ConnectionRequest request) {
@@ -2061,11 +2318,15 @@ public abstract class ConnectionService extends Service {
     /**
      * Called by Telecom in response to a {@code TelecomManager#acceptHandover()}
      * invocation which failed.
-     * @param request Details about the call which needs to be handover.
-     * @param error Reason for handover failure as defined in
-     *              {@link android.telecom.Call.Callback#HANDOVER_FAILURE_DEST_INVALID_PERM}
+     * <p>
+     * For a full discussion of the handover process and the APIs involved, see
+     * {@link android.telecom.Call#handoverTo(PhoneAccountHandle, int, Bundle)}
+     *
+     * @param request Details about the call which failed to handover.
+     * @param error Reason for handover failure.  Will be one of the
      */
-    public void onHandoverFailed(ConnectionRequest request, int error) {
+    public void onHandoverFailed(ConnectionRequest request,
+            @Call.Callback.HandoverFailureErrors int error) {
         return;
     }
 
@@ -2109,6 +2370,20 @@ public abstract class ConnectionService extends Service {
      * @param connection The existing connection which was added.
      */
     public void onRemoteExistingConnectionAdded(RemoteConnection connection) {}
+
+    /**
+     * Called when the {@link ConnectionService} has lost the call focus.
+     * The {@link ConnectionService} should release the call resources and invokes
+     * {@link ConnectionService#connectionServiceFocusReleased()} to inform telecom that it has
+     * released the call resources.
+     */
+    public void onConnectionServiceFocusLost() {}
+
+    /**
+     * Called when the {@link ConnectionService} has gained the call focus. The
+     * {@link ConnectionService} can acquire the call resources at this time.
+     */
+    public void onConnectionServiceFocusGained() {}
 
     /**
      * @hide

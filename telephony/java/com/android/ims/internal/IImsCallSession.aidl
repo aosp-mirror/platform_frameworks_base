@@ -17,9 +17,10 @@
 package com.android.ims.internal;
 
 import android.os.Message;
-import com.android.ims.ImsCallProfile;
-import com.android.ims.ImsStreamMediaProfile;
-import com.android.ims.internal.IImsCallSessionListener;
+import android.telephony.ims.aidl.IImsCallSessionListener;
+
+import android.telephony.ims.ImsCallProfile;
+import android.telephony.ims.ImsStreamMediaProfile;
 import com.android.ims.internal.IImsVideoCallProvider;
 
 /**
@@ -133,6 +134,13 @@ interface IImsCallSession {
      * @see Listener#callSessionStarted
      */
     void accept(int callType, in ImsStreamMediaProfile profile);
+
+    /**
+     * Deflects an incoming call.
+     *
+     * @param deflectNumber number to deflect the call
+     */
+    void deflect(String deflectNumber);
 
     /**
      * Rejects an incoming call or session update.

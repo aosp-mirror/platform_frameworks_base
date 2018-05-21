@@ -17,6 +17,8 @@
 package com.android.server.net;
 
 import static android.net.NetworkStats.IFACE_ALL;
+import static android.net.NetworkStats.DEFAULT_NETWORK_NO;
+import static android.net.NetworkStats.DEFAULT_NETWORK_YES;
 import static android.net.NetworkStats.METERED_NO;
 import static android.net.NetworkStats.METERED_YES;
 import static android.net.NetworkStats.ROAMING_NO;
@@ -364,6 +366,8 @@ public class NetworkStatsCollection implements FileRotator.Reader {
                 entry.uid = key.uid;
                 entry.set = key.set;
                 entry.tag = key.tag;
+                entry.defaultNetwork = key.ident.areAllMembersOnDefaultNetwork() ?
+                        DEFAULT_NETWORK_YES : DEFAULT_NETWORK_NO;
                 entry.metered = key.ident.isAnyMemberMetered() ? METERED_YES : METERED_NO;
                 entry.roaming = key.ident.isAnyMemberRoaming() ? ROAMING_YES : ROAMING_NO;
                 entry.rxBytes = historyEntry.rxBytes;

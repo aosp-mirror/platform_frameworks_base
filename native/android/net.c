@@ -27,7 +27,7 @@ static int getnetidfromhandle(net_handle_t handle, unsigned *netid) {
     static const uint32_t k32BitMask = 0xffffffff;
     // This value MUST be kept in sync with the corresponding value in
     // the android.net.Network#getNetworkHandle() implementation.
-    static const uint32_t kHandleMagic = 0xfacade;
+    static const uint32_t kHandleMagic = 0xcafed00d;
 
     // Check for minimum acceptable version of the API in the low bits.
     if (handle != NETWORK_UNSPECIFIED &&

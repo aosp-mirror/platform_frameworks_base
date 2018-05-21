@@ -134,6 +134,25 @@ public final class PhoneAccount implements Parcelable {
             "android.telecom.extra.LOG_SELF_MANAGED_CALLS";
 
     /**
+     * Boolean {@link PhoneAccount} extras key (see {@link PhoneAccount#getExtras()}) which
+     * indicates whether calls for a {@link PhoneAccount} should generate a "call recording tone"
+     * when the user is recording audio on the device.
+     * <p>
+     * The call recording tone is played over the telephony audio stream so that the remote party
+     * has an audible indication that it is possible their call is being recorded using a call
+     * recording app on the device.
+     * <p>
+     * This extra only has an effect for calls placed via Telephony (e.g.
+     * {@link #CAPABILITY_SIM_SUBSCRIPTION}).
+     * <p>
+     * The call recording tone is a 1400 hz tone which repeats every 15 seconds while recording is
+     * in progress.
+     * @hide
+     */
+    public static final String EXTRA_PLAY_CALL_RECORDING_TONE =
+            "android.telecom.extra.PLAY_CALL_RECORDING_TONE";
+
+    /**
      * Flag indicating that this {@code PhoneAccount} can act as a connection manager for
      * other connections. The {@link ConnectionService} associated with this {@code PhoneAccount}
      * will be allowed to manage phone calls including using its own proprietary phone-call

@@ -28,7 +28,7 @@
 #include <androidfw/misc.h>
 #include <androidfw/ResourceTypes.h>
 #include <androidfw/ZipFileRO.h>
-#include <utils/Atomic.h>
+#include <cutils/atomic.h>
 #include <utils/Log.h>
 #include <utils/String8.h>
 #include <utils/String8.h>

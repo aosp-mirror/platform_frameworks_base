@@ -55,6 +55,25 @@ public final class Zygote {
     public static final int DISABLE_VERIFIER = 1 << 9;
     /** Only use oat files located in /system. Otherwise use dex/jar/apk . */
     public static final int ONLY_USE_SYSTEM_OAT_FILES = 1 << 10;
+    /** Force generation of native debugging information for backtraces. */
+    public static final int DEBUG_GENERATE_MINI_DEBUG_INFO = 1 << 11;
+    /**
+     * Hidden API access restrictions. This is a mask for bits representing the API enforcement
+     * policy, defined by {@code @ApplicationInfo.HiddenApiEnforcementPolicy}.
+     */
+    public static final int API_ENFORCEMENT_POLICY_MASK = (1 << 12) | (1 << 13);
+    /**
+     * Bit shift for use with {@link #API_ENFORCEMENT_POLICY_MASK}.
+     *
+     * (flags & API_ENFORCEMENT_POLICY_MASK) >> API_ENFORCEMENT_POLICY_SHIFT gives
+     * @ApplicationInfo.ApiEnforcementPolicy values.
+     */
+    public static final int API_ENFORCEMENT_POLICY_SHIFT =
+            Integer.numberOfTrailingZeros(API_ENFORCEMENT_POLICY_MASK);
+    /**
+     * Enable system server ART profiling.
+     */
+    public static final int PROFILE_SYSTEM_SERVER = 1 << 14;
 
     /** No external storage should be mounted. */
     public static final int MOUNT_EXTERNAL_NONE = 0;
@@ -67,7 +86,17 @@ public final class Zygote {
 
     private static final ZygoteHooks VM_HOOKS = new ZygoteHooks();
 
+    /**
+     * An extraArg passed when a zygote process is forking a child-zygote, specifying a name
+     * in the abstract socket namespace. This socket name is what the new child zygote
+     * should listen for connections on.
+     */
+    public static final String CHILD_ZYGOTE_SOCKET_NAME_ARG = "--zygote-socket=";
+
     private Zygote() {}
+
+    /** Called for some security initialization before any fork. */
+    native static void nativeSecurityInit();
 
     /**
      * Forks a new VM instance.  The current VM must have been started
@@ -95,6 +124,8 @@ public final class Zygote {
      * @param fdsToIgnore null-ok an array of ints, either null or holding
      * one or more POSIX file descriptor numbers that are to be ignored
      * in the file descriptor table check.
+     * @param startChildZygote if true, the new child process will itself be a
+     * new zygote process.
      * @param instructionSet null-ok the instruction set to use.
      * @param appDataDir null-ok the data directory of the app.
      *
@@ -103,13 +134,13 @@ public final class Zygote {
      */
     public static int forkAndSpecialize(int uid, int gid, int[] gids, int runtimeFlags,
           int[][] rlimits, int mountExternal, String seInfo, String niceName, int[] fdsToClose,
-          int[] fdsToIgnore, String instructionSet, String appDataDir) {
+          int[] fdsToIgnore, boolean startChildZygote, String instructionSet, String appDataDir) {
         VM_HOOKS.preFork();
         // Resets nice priority for zygote process.
         resetNicePriority();
         int pid = nativeForkAndSpecialize(
                   uid, gid, gids, runtimeFlags, rlimits, mountExternal, seInfo, niceName, fdsToClose,
-                  fdsToIgnore, instructionSet, appDataDir);
+                  fdsToIgnore, startChildZygote, instructionSet, appDataDir);
         // Enable tracing as soon as possible for the child process.
         if (pid == 0) {
             Trace.setTracingEnabled(true, runtimeFlags);
@@ -123,7 +154,7 @@ public final class Zygote {
 
     native private static int nativeForkAndSpecialize(int uid, int gid, int[] gids,int runtimeFlags,
           int[][] rlimits, int mountExternal, String seInfo, String niceName, int[] fdsToClose,
-          int[] fdsToIgnore, String instructionSet, String appDataDir);
+          int[] fdsToIgnore, boolean startChildZygote, String instructionSet, String appDataDir);
 
     /**
      * Called to do any initialization before starting an application.
@@ -183,8 +214,8 @@ public final class Zygote {
     native protected static void nativeUnmountStorageOnInit();
 
     private static void callPostForkChildHooks(int runtimeFlags, boolean isSystemServer,
-            String instructionSet) {
-        VM_HOOKS.postForkChild(runtimeFlags, isSystemServer, instructionSet);
+            boolean isZygote, String instructionSet) {
+        VM_HOOKS.postForkChild(runtimeFlags, isSystemServer, isZygote, instructionSet);
     }
 
     /**

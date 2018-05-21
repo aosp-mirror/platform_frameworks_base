@@ -17,6 +17,7 @@
 package android.net;
 
 import android.content.Context;
+import android.net.ConnectivityManager.PacketKeepalive;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -26,7 +27,6 @@ import android.util.Log;
 
 import com.android.internal.util.AsyncChannel;
 import com.android.internal.util.Protocol;
-import android.net.ConnectivityManager.PacketKeepalive;
 
 import java.util.ArrayList;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -99,20 +99,6 @@ public abstract class NetworkAgent extends Handler {
      * obj = network score Integer
      */
     public static final int EVENT_NETWORK_SCORE_CHANGED = BASE + 4;
-
-    /**
-     * Sent by the NetworkAgent to ConnectivityService to add new UID ranges
-     * to be forced into this Network.  For VPNs only.
-     * obj = UidRange[] to forward
-     */
-    public static final int EVENT_UID_RANGES_ADDED = BASE + 5;
-
-    /**
-     * Sent by the NetworkAgent to ConnectivityService to remove UID ranges
-     * from being forced into this Network.  For VPNs only.
-     * obj = UidRange[] to stop forwarding
-     */
-    public static final int EVENT_UID_RANGES_REMOVED = BASE + 6;
 
     /**
      * Sent by ConnectivityService to the NetworkAgent to inform the agent of the
@@ -387,22 +373,6 @@ public abstract class NetworkAgent extends Handler {
             throw new IllegalArgumentException("Score must be >= 0");
         }
         queueOrSendMessage(EVENT_NETWORK_SCORE_CHANGED, new Integer(score));
-    }
-
-    /**
-     * Called by the VPN code when it wants to add ranges of UIDs to be routed
-     * through the VPN network.
-     */
-    public void addUidRanges(UidRange[] ranges) {
-        queueOrSendMessage(EVENT_UID_RANGES_ADDED, ranges);
-    }
-
-    /**
-     * Called by the VPN code when it wants to remove ranges of UIDs from being routed
-     * through the VPN network.
-     */
-    public void removeUidRanges(UidRange[] ranges) {
-        queueOrSendMessage(EVENT_UID_RANGES_REMOVED, ranges);
     }
 
     /**

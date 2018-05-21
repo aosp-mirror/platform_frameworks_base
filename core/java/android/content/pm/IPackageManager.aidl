@@ -48,6 +48,7 @@ import android.content.pm.ServiceInfo;
 import android.content.pm.UserInfo;
 import android.content.pm.VerifierDeviceIdentity;
 import android.content.pm.VersionedPackage;
+import android.content.pm.dex.IArtManager;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
@@ -664,4 +665,6 @@ interface IPackageManager {
     ComponentName getInstantAppInstallerComponent();
 
     String getInstantAppAndroidId(String packageName, int userId);
+
+    IArtManager getArtManager();
 }

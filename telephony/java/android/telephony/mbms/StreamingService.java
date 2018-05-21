@@ -29,11 +29,11 @@ import java.lang.annotation.RetentionPolicy;
 
 /**
  * Class used to represent a single MBMS stream. After a stream has been started with
- * {@link MbmsStreamingSession#startStreaming(StreamingServiceInfo,
- * StreamingServiceCallback, android.os.Handler)},
+ * {@link MbmsStreamingSession#startStreaming(StreamingServiceInfo, java.util.concurrent.Executor,
+ * StreamingServiceCallback)},
  * this class is used to hold information about the stream and control it.
  */
-public class StreamingService {
+public class StreamingService implements AutoCloseable {
     private static final String LOG_TAG = "MbmsStreamingService";
 
     /**
@@ -41,7 +41,7 @@ public class StreamingService {
      * @hide
      */
     @Retention(RetentionPolicy.SOURCE)
-    @IntDef({STATE_STOPPED, STATE_STARTED, STATE_STALLED})
+    @IntDef(prefix = { "STATE_" }, value = {STATE_STOPPED, STATE_STARTED, STATE_STALLED})
     public @interface StreamingState {}
     public final static int STATE_STOPPED = 1;
     public final static int STATE_STARTED = 2;
@@ -53,7 +53,8 @@ public class StreamingService {
      * @hide
      */
     @Retention(RetentionPolicy.SOURCE)
-    @IntDef({REASON_BY_USER_REQUEST, REASON_END_OF_SESSION, REASON_FREQUENCY_CONFLICT,
+    @IntDef(prefix = { "REASON_" },
+            value = {REASON_BY_USER_REQUEST, REASON_END_OF_SESSION, REASON_FREQUENCY_CONFLICT,
             REASON_OUT_OF_MEMORY, REASON_NOT_CONNECTED_TO_HOMECARRIER_LTE,
             REASON_LEFT_MBMS_BROADCAST_AREA, REASON_NONE})
     public @interface StreamingStateChangeReason {}
@@ -64,9 +65,9 @@ public class StreamingService {
     public static final int REASON_NONE = 0;
 
     /**
-     * State changed due to a call to {@link #stopStreaming()} or
+     * State changed due to a call to {@link #close()} or
      * {@link MbmsStreamingSession#startStreaming(StreamingServiceInfo,
-     * StreamingServiceCallback, android.os.Handler)}
+     * java.util.concurrent.Executor, StreamingServiceCallback)}
      */
     public static final int REASON_BY_USER_REQUEST = 1;
 
@@ -161,7 +162,8 @@ public class StreamingService {
      *
      * May throw an {@link IllegalArgumentException} or an {@link IllegalStateException}
      */
-    public void stopStreaming() {
+    @Override
+    public void close() {
         if (mService == null) {
             throw new IllegalStateException("No streaming service attached");
         }

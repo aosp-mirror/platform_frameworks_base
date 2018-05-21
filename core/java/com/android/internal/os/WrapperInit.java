@@ -115,6 +115,14 @@ public class WrapperInit {
         command.append(' ');
         command.append(appProcess);
 
+        // Generate bare minimum of debug information to be able to backtrace through JITed code.
+        // We assume that if the invoke wrapper is used, backtraces are desirable:
+        //  * The wrap.sh script can only be used by debuggable apps, which would enable this flag
+        //    without the script anyway (the fork-zygote path).  So this makes the two consistent.
+        //  * The wrap.* property can only be used on userdebug builds and is likely to be used by
+        //    developers (e.g. enable debug-malloc), in which case backtraces are also useful.
+        command.append(" -Xcompiler-option --generate-mini-debug-info");
+
         command.append(" /system/bin --application");
         if (niceName != null) {
             command.append(" '--nice-name=").append(niceName).append("'");

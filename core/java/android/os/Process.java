@@ -140,16 +140,28 @@ public class Process {
     public static final int CAMERASERVER_UID = 1047;
 
     /**
+     * Defines the UID/GID for the tethering DNS resolver (currently dnsmasq).
+     * @hide
+     */
+    public static final int DNS_TETHER_UID = 1052;
+
+    /**
      * Defines the UID/GID for the WebView zygote process.
      * @hide
      */
-    public static final int WEBVIEW_ZYGOTE_UID = 1051;
+    public static final int WEBVIEW_ZYGOTE_UID = 1053;
 
     /**
      * Defines the UID used for resource tracking for OTA updates.
      * @hide
      */
     public static final int OTA_UPDATE_UID = 1061;
+
+    /**
+     * Defines the UID/GID for the Secure Element service process.
+     * @hide
+     */
+    public static final int SE_UID = 1068;
 
     /** {@hide} */
     public static final int NOBODY_UID = 9999;

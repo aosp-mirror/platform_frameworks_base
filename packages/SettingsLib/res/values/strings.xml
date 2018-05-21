@@ -128,27 +128,27 @@
      <!-- Bluetooth settings.  Message when connecting to a device -->
     <string name="bluetooth_connecting">Connecting\u2026</string>
     <!-- Bluetooth settings.  Message when connected to a device. [CHAR LIMIT=40] -->
-    <string name="bluetooth_connected">Connected</string>
+    <string name="bluetooth_connected">Connected<xliff:g id="active_device">%1$s</xliff:g></string>
     <!--Bluetooth settings screen, summary text under individual Bluetooth devices when pairing -->
     <string name="bluetooth_pairing">Pairing\u2026</string>
 
     <!-- Bluetooth settings.  Message when connected to a device, except for phone audio. [CHAR LIMIT=40] -->
-    <string name="bluetooth_connected_no_headset">Connected (no phone)</string>
+    <string name="bluetooth_connected_no_headset">Connected (no phone)<xliff:g id="active_device">%1$s</xliff:g></string>
     <!-- Bluetooth settings.  Message when connected to a device, except for media audio. [CHAR LIMIT=40] -->
-    <string name="bluetooth_connected_no_a2dp">Connected (no media)</string>
+    <string name="bluetooth_connected_no_a2dp">Connected (no media)<xliff:g id="active_device">%1$s</xliff:g></string>
     <!-- Bluetooth settings.  Message when connected to a device, except for map. [CHAR LIMIT=40] -->
-    <string name="bluetooth_connected_no_map">Connected (no message access)</string>
+    <string name="bluetooth_connected_no_map">Connected (no message access)<xliff:g id="active_device">%1$s</xliff:g></string>
     <!-- Bluetooth settings.  Message when connected to a device, except for phone/media audio. [CHAR LIMIT=40] -->
-    <string name="bluetooth_connected_no_headset_no_a2dp">Connected (no phone or media)</string>
+    <string name="bluetooth_connected_no_headset_no_a2dp">Connected (no phone or media)<xliff:g id="active_device">%1$s</xliff:g></string>
 
     <!-- Bluetooth settings.  Message when connected to a device, showing remote device battery level. [CHAR LIMIT=NONE] -->
-    <string name="bluetooth_connected_battery_level">Connected, battery <xliff:g id="battery_level_as_percentage">%1$s</xliff:g></string>
+    <string name="bluetooth_connected_battery_level">Connected, battery <xliff:g id="battery_level_as_percentage">%1$s</xliff:g><xliff:g id="active_device">%2$s</xliff:g></string>
     <!-- Bluetooth settings.  Message when connected to a device, except for phone audio, showing remote device battery level. [CHAR LIMIT=NONE] -->
-    <string name="bluetooth_connected_no_headset_battery_level">Connected (no phone), battery <xliff:g id="battery_level_as_percentage">%1$s</xliff:g></string>
+    <string name="bluetooth_connected_no_headset_battery_level">Connected (no phone), battery <xliff:g id="battery_level_as_percentage">%1$s</xliff:g><xliff:g id="active_device">%2$s</xliff:g></string>
     <!-- Bluetooth settings.  Message when connected to a device, except for media audio, showing remote device battery level. [CHAR LIMIT=NONE] -->
-    <string name="bluetooth_connected_no_a2dp_battery_level">Connected (no media), battery <xliff:g id="battery_level_as_percentage">%1$s</xliff:g></string>
+    <string name="bluetooth_connected_no_a2dp_battery_level">Connected (no media), battery <xliff:g id="battery_level_as_percentage">%1$s</xliff:g><xliff:g id="active_device">%2$s</xliff:g></string>
     <!-- Bluetooth settings.  Message when connected to a device, except for phone/media audio, showing remote device battery level. [CHAR LIMIT=NONE] -->
-    <string name="bluetooth_connected_no_headset_no_a2dp_battery_level">Connected (no phone or media), battery <xliff:g id="battery_level_as_percentage">%1$s</xliff:g></string>
+    <string name="bluetooth_connected_no_headset_no_a2dp_battery_level">Connected (no phone or media), battery <xliff:g id="battery_level_as_percentage">%1$s</xliff:g><xliff:g id="active_device">%2$s</xliff:g></string>
 
     <!-- Bluetooth settings.  The user-visible string that is used whenever referring to the A2DP profile. -->
     <string name="bluetooth_profile_a2dp">Media audio</string>
@@ -176,6 +176,11 @@
 
     <!-- Bluetooth settings. Similar to bluetooth_profile_a2dp_high_quality, but used when the device supports high quality audio but we don't know which codec that will be used. -->
     <string name="bluetooth_profile_a2dp_high_quality_unknown_codec">HD audio</string>
+
+    <!-- Bluetooth settings.  The user-visible string that is used whenever referring to the Hearing Aid profile. -->
+    <string name="bluetooth_profile_hearing_aid">Hearing Aid</string>
+    <!-- Bluetooth settings.  Connection options screen.  The summary for the Hearing Aid checkbox preference when Hearing Aid is connected. -->
+    <string name="bluetooth_hearing_aid_profile_summary_connected">Connected to Hearing Aid</string>
 
     <!-- Bluetooth settings.  Connection options screen.  The summary for the A2DP checkbox preference when A2DP is connected. -->
     <string name="bluetooth_a2dp_profile_summary_connected">Connected to media audio</string>
@@ -214,6 +219,8 @@
          for the HID checkbox preference that describes how checking it
          will set the HID profile as preferred. -->
     <string name="bluetooth_hid_profile_summary_use_for">Use for input</string>
+    <!-- Bluetooth settings.  Connection options screen.  The summary for the Hearing Aid checkbox preference that describes how checking it will set the Hearing Aid profile as preferred. -->
+    <string name="bluetooth_hearing_aid_profile_summary_use_for">Use for Hearing Aid</string>
 
     <!-- Button text for accepting an incoming pairing request. [CHAR LIMIT=20] -->
     <string name="bluetooth_pairing_accept">Pair</string>
@@ -449,10 +456,10 @@
     <string name="keep_screen_on">Stay awake</string>
     <!-- setting Checkbox summary whether to keep the screen on when plugged in  -->
     <string name="keep_screen_on_summary">Screen will never sleep while charging</string>
-    <!-- Setting Checkbox title whether to enable bluetooth HCI snoop log -->
+    <!-- Setting Checkbox title whether to enable Bluetooth HCI snoop log -->
     <string name="bt_hci_snoop_log">Enable Bluetooth HCI snoop log</string>
-    <!-- setting Checkbox summary whether to capture all bluetooth HCI packets in a file -->
-    <string name="bt_hci_snoop_log_summary">Capture all bluetooth HCI packets in a file</string>
+    <!-- setting Checkbox summary whether to capture all Bluetooth HCI packets in a file -->
+    <string name="bt_hci_snoop_log_summary">Capture all Bluetooth HCI packets in a file (Toggle Bluetooth after changing this setting)</string>
     <!-- setting Checkbox title whether to enable OEM unlock [CHAR_LIMIT=35] -->
     <string name="oem_unlock_enable">OEM unlocking</string>
     <!-- setting Checkbox summary whether to enable OEM unlock [CHAR_LIMIT=50] -->
@@ -488,38 +495,36 @@
     <string name="bluetooth_show_devices_without_names">Show Bluetooth devices without names</string>
     <!-- Setting Checkbox title for disabling Bluetooth absolute volume -->
     <string name="bluetooth_disable_absolute_volume">Disable absolute volume</string>
-    <!-- Setting Checkbox title for enabling Bluetooth inband ringing -->
-    <string name="bluetooth_enable_inband_ringing">Enable in-band ringing</string>
 
     <!-- UI debug setting: Select Bluetooth AVRCP Version -->
     <string name="bluetooth_select_avrcp_version_string">Bluetooth AVRCP Version</string>
     <!-- UI debug setting: Select Bluetooth AVRCP Version -->
     <string name="bluetooth_select_avrcp_version_dialog_title">Select Bluetooth AVRCP Version</string>
 
-    <!-- UI debug setting: Select Bluetooth Audio Codec -->
+    <!-- UI debug setting: Trigger Bluetooth Audio Codec Selection -->
     <string name="bluetooth_select_a2dp_codec_type">Bluetooth Audio Codec</string>
-    <!-- UI debug setting: Select Bluetooth Audio Codec -->
-    <string name="bluetooth_select_a2dp_codec_type_dialog_title">Select Bluetooth Audio Codec</string>
+    <!-- UI debug setting: Trigger Bluetooth Audio Codec Selection -->
+    <string name="bluetooth_select_a2dp_codec_type_dialog_title">Trigger Bluetooth Audio Codec\u000ASelection</string>
 
-    <!-- UI debug setting: Select Bluetooth Audio Sample Rate -->
+    <!-- UI debug setting: Trigger Bluetooth Audio Sample Rate Selection -->
     <string name="bluetooth_select_a2dp_codec_sample_rate">Bluetooth Audio Sample Rate</string>
-    <!-- UI debug setting: Select Bluetooth Audio Codec: Sample Rate -->
-    <string name="bluetooth_select_a2dp_codec_sample_rate_dialog_title">Select Bluetooth Audio Codec:\u000ASample Rate</string>
+    <!-- UI debug setting: Trigger Bluetooth Audio Codec Selection: Sample Rate -->
+    <string name="bluetooth_select_a2dp_codec_sample_rate_dialog_title">Trigger Bluetooth Audio Codec\u000ASelection: Sample Rate</string>
 
-    <!-- UI debug setting: Select Bluetooth Audio Bits Per Sample -->
+    <!-- UI debug setting: Trigger Bluetooth Audio Bits Per Sample Selection -->
     <string name="bluetooth_select_a2dp_codec_bits_per_sample">Bluetooth Audio Bits Per Sample</string>
-    <!-- UI debug setting: Select Bluetooth Audio Codec: Bits Per Sample -->
-    <string name="bluetooth_select_a2dp_codec_bits_per_sample_dialog_title">Select Bluetooth Audio Codec:\u000ABits Per Sample</string>
+    <!-- UI debug setting: Trigger Bluetooth Audio Codec Selection: Bits Per Sample -->
+    <string name="bluetooth_select_a2dp_codec_bits_per_sample_dialog_title">Trigger Bluetooth Audio Codec\u000ASelection: Bits Per Sample</string>
 
-    <!-- UI debug setting: Select Bluetooth Audio Channel Mode -->
+    <!-- UI debug setting: Trigger Bluetooth Audio Channel Mode Selection -->
     <string name="bluetooth_select_a2dp_codec_channel_mode">Bluetooth Audio Channel Mode</string>
-    <!-- UI debug setting: Select Bluetooth Audio Codec: Channel Mode -->
-    <string name="bluetooth_select_a2dp_codec_channel_mode_dialog_title">Select Bluetooth Audio Codec:\u000AChannel Mode</string>
+    <!-- UI debug setting: Trigger Bluetooth Audio Codec Selection: Channel Mode -->
+    <string name="bluetooth_select_a2dp_codec_channel_mode_dialog_title">Trigger Bluetooth Audio Codec\u000ASelection: Channel Mode</string>
 
-    <!-- UI debug setting: Select Bluetooth Audio LDAC Playback Quality -->
+    <!-- UI debug setting: Trigger Bluetooth Audio LDAC Playback Quality Selection -->
     <string name="bluetooth_select_a2dp_codec_ldac_playback_quality">Bluetooth Audio LDAC Codec: Playback Quality</string>
     <!-- UI debug setting: Select Bluetooth Audio LDAC Codec: LDAC Playback Quality -->
-    <string name="bluetooth_select_a2dp_codec_ldac_playback_quality_dialog_title">Select Bluetooth Audio LDAC Codec:\u000APlayback Quality</string>
+    <string name="bluetooth_select_a2dp_codec_ldac_playback_quality_dialog_title">Trigger Bluetooth Audio LDAC Codec\u000ASelection: Playback Quality</string>
 
     <!-- [CHAR LIMIT=NONE] Label for displaying Bluetooth Audio Codec Parameters while streaming -->
     <string name="bluetooth_select_a2dp_codec_streaming_label">Streaming: <xliff:g id="streaming_parameter">%1$s</xliff:g></string>
@@ -582,8 +587,6 @@
     <string name="bluetooth_show_devices_without_names_summary">Bluetooth devices without names (MAC addresses only) will be displayed</string>
     <!-- Summary of checkbox for disabling Bluetooth absolute volume -->
     <string name="bluetooth_disable_absolute_volume_summary">Disables the Bluetooth absolute volume feature in case of volume issues with remote devices such as unacceptably loud volume or lack of control.</string>
-    <!-- Summary of checkbox for enabling Bluetooth inband ringing -->
-    <string name="bluetooth_enable_inband_ringing_summary">Allow ringtones on the phone to be played on Bluetooth headsets</string>
 
     <!-- Title of checkbox setting that enables the terminal app. [CHAR LIMIT=32] -->
     <string name="enable_terminal_title">Local terminal</string>

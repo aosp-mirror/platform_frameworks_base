@@ -11,6 +11,7 @@ LOCAL_JAVA_LIBRARIES := android.test.runner
 LOCAL_STATIC_JAVA_LIBRARIES := junit legacy-android-test
 
 LOCAL_PACKAGE_NAME := ImfTestTests
+LOCAL_PRIVATE_PLATFORM_APIS := true
 
 LOCAL_INSTRUMENTATION_FOR := ImfTest
 
