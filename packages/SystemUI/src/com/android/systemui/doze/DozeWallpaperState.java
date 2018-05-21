@@ -38,40 +38,33 @@ public class DozeWallpaperState implements DozeMachine.Part {
     private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
 
     private final IWallpaperManager mWallpaperManagerService;
-    private boolean mKeyguardVisible;
     private boolean mIsAmbientMode;
     private final DozeParameters mDozeParameters;
 
-    public DozeWallpaperState(Context context, DozeParameters dozeParameters) {
+    public DozeWallpaperState(Context context) {
         this(IWallpaperManager.Stub.asInterface(
                 ServiceManager.getService(Context.WALLPAPER_SERVICE)),
-                dozeParameters, KeyguardUpdateMonitor.getInstance(context));
+                DozeParameters.getInstance(context));
     }
 
     @VisibleForTesting
-    DozeWallpaperState(IWallpaperManager wallpaperManagerService, DozeParameters parameters,
-            KeyguardUpdateMonitor keyguardUpdateMonitor) {
+    DozeWallpaperState(IWallpaperManager wallpaperManagerService, DozeParameters parameters) {
         mWallpaperManagerService = wallpaperManagerService;
         mDozeParameters = parameters;
-        keyguardUpdateMonitor.registerCallback(new KeyguardUpdateMonitorCallback() {
-            @Override
-            public void onKeyguardVisibilityChanged(boolean showing) {
-                mKeyguardVisible = showing;
-            }
-        });
     }
 
     @Override
     public void transitionTo(DozeMachine.State oldState, DozeMachine.State newState) {
         final boolean isAmbientMode;
         switch (newState) {
+            case DOZE:
             case DOZE_AOD:
             case DOZE_AOD_PAUSING:
             case DOZE_AOD_PAUSED:
             case DOZE_REQUEST_PULSE:
             case DOZE_PULSING:
             case DOZE_PULSE_DONE:
-                isAmbientMode = mDozeParameters.getAlwaysOn();
+                isAmbientMode = true;
                 break;
             default:
                 isAmbientMode = false;
@@ -81,7 +74,9 @@ public class DozeWallpaperState implements DozeMachine.Part {
         if (isAmbientMode) {
             animated = mDozeParameters.shouldControlScreenOff();
         } else {
-            animated = !mDozeParameters.getDisplayNeedsBlanking();
+            boolean wakingUpFromPulse = oldState == DozeMachine.State.DOZE_PULSING
+                    && newState == DozeMachine.State.FINISH;
+            animated = !mDozeParameters.getDisplayNeedsBlanking() || wakingUpFromPulse;
         }
 
         if (isAmbientMode != mIsAmbientMode) {

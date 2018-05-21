@@ -45,13 +45,11 @@ public class DozeWallpaperStateTest extends SysuiTestCase {
     private DozeWallpaperState mDozeWallpaperState;
     @Mock IWallpaperManager mIWallpaperManager;
     @Mock DozeParameters mDozeParameters;
-    @Mock KeyguardUpdateMonitor mKeyguardUpdateMonitor;
 
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
-        mDozeWallpaperState = new DozeWallpaperState(mIWallpaperManager, mDozeParameters,
-                mKeyguardUpdateMonitor);
+        mDozeWallpaperState = new DozeWallpaperState(mIWallpaperManager, mDozeParameters);
     }
 
     @Test
@@ -99,5 +97,29 @@ public class DozeWallpaperStateTest extends SysuiTestCase {
 
         mDozeWallpaperState.transitionTo(DozeMachine.State.DOZE_AOD, DozeMachine.State.FINISH);
         verify(mIWallpaperManager).setInAmbientMode(eq(false), eq(false));
+    }
+
+    @Test
+    public void testTransitionTo_requestPulseIsAmbientMode() throws RemoteException {
+        mDozeWallpaperState.transitionTo(DozeMachine.State.DOZE,
+                DozeMachine.State.DOZE_REQUEST_PULSE);
+        verify(mIWallpaperManager).setInAmbientMode(eq(true), eq(false));
+    }
+
+    @Test
+    public void testTransitionTo_pulseIsAmbientMode() throws RemoteException {
+        mDozeWallpaperState.transitionTo(DozeMachine.State.DOZE_REQUEST_PULSE,
+                DozeMachine.State.DOZE_PULSING);
+        verify(mIWallpaperManager).setInAmbientMode(eq(true), eq(false));
+    }
+
+    @Test
+    public void testTransitionTo_animatesWhenWakingUpFromPulse() throws RemoteException {
+        mDozeWallpaperState.transitionTo(DozeMachine.State.DOZE_REQUEST_PULSE,
+                DozeMachine.State.DOZE_PULSING);
+        reset(mIWallpaperManager);
+        mDozeWallpaperState.transitionTo(DozeMachine.State.DOZE_PULSING,
+                DozeMachine.State.FINISH);
+        verify(mIWallpaperManager).setInAmbientMode(eq(false), eq(true));
     }
 }
