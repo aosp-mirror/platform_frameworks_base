@@ -123,7 +123,7 @@ public class HeadsUpAppearanceController implements OnHeadsUpChangedListener,
 
     public void updatePanelTranslation() {
         float newTranslation = mStackScroller.getLeft() + mStackScroller.getTranslationX();
-        mHeadsUpStatusBarView.setTranslationX(newTranslation);
+        mHeadsUpStatusBarView.setPanelTranslation(newTranslation);
     }
 
     private void updateTopEntry() {

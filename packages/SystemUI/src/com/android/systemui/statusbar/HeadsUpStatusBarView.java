@@ -44,6 +44,7 @@ public class HeadsUpStatusBarView extends AlphaOptimizedLinearLayout {
     private boolean mPublicMode;
     private int mMaxWidth;
     private View mRootView;
+    private int mLeftCutOutInset;
     private int mLeftInset;
     private Rect mIconDrawingRect = new Rect();
     private Runnable mOnDrawingRectChangedListener;
@@ -136,7 +137,7 @@ public class HeadsUpStatusBarView extends AlphaOptimizedLinearLayout {
         int bottom = top + mIconPlaceholder.getHeight();
         mLayoutedIconRect.set(left, top, right, bottom);
         updateDrawingRect();
-        int targetPadding = mAbsoluteStartPadding + mLeftInset;
+        int targetPadding = mAbsoluteStartPadding + mLeftInset + mLeftCutOutInset;
         if (left != targetPadding) {
             int newPadding = targetPadding - left + getPaddingStart();
             setPaddingRelative(newPadding, 0, mEndMargin, 0);
@@ -150,9 +151,8 @@ public class HeadsUpStatusBarView extends AlphaOptimizedLinearLayout {
         }
     }
 
-    @Override
-    public void setTranslationX(float translationX) {
-        super.setTranslationX(translationX);
+    public void setPanelTranslation(float translationX) {
+        setTranslationX(translationX - mLeftCutOutInset);
         updateDrawingRect();
     }
 
@@ -168,6 +168,16 @@ public class HeadsUpStatusBarView extends AlphaOptimizedLinearLayout {
     @Override
     protected boolean fitSystemWindows(Rect insets) {
         mLeftInset = insets.left;
+        mLeftCutOutInset = (getRootWindowInsets().getDisplayCutout() != null)
+                ? getRootWindowInsets().getDisplayCutout().getSafeInsetLeft() : 0;
+
+        // For Double Cut Out mode, the System window navigation bar is at the right
+        // hand side of the left cut out. In this condition, mLeftInset include the left cut
+        // out width so we set mLeftCutOutInset to be 0.
+        if (mLeftInset != 0) {
+            mLeftCutOutInset = 0;
+        }
+
         return super.fitSystemWindows(insets);
     }
 
