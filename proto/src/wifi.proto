@@ -453,6 +453,10 @@ message WifiLog {
 
   // Number of times the firmware picked a SoftAp channel not satisfying user band preference.
   optional int32 num_soft_ap_user_band_preference_unsatisfied = 116;
+
+  // Identifier for experimental scoring parameter settings.
+  optional string score_experiment_id = 117;
+
 }
 
 // Information that gets logged for every WiFi connection.
