@@ -85,6 +85,21 @@ public class Network implements Parcelable {
     private static final long HANDLE_MAGIC = 0xcafed00dL;
     private static final int HANDLE_MAGIC_SIZE = 32;
 
+    // A boolean to control how getAllByName()/getByName() behaves in the face
+    // of Private DNS.
+    //
+    // When true, these calls will request that DNS resolution bypass any
+    // Private DNS that might otherwise apply. Use of this feature is restricted
+    // and permission checks are made by netd (attempts to bypass Private DNS
+    // without appropriate permission are silently turned into vanilla DNS
+    // requests). This only affects DNS queries made using this network object.
+    //
+    // It it not parceled to receivers because (a) it can be set or cleared at
+    // anytime and (b) receivers should be explicit about attempts to bypass
+    // Private DNS so that the intent of the code is easily determined and
+    // code search audits are possible.
+    private boolean mPrivateDnsBypass = false;
+
     /**
      * @hide
      */
@@ -108,7 +123,7 @@ public class Network implements Parcelable {
      * @throws UnknownHostException if the address lookup fails.
      */
     public InetAddress[] getAllByName(String host) throws UnknownHostException {
-        return InetAddress.getAllByNameOnNet(host, netId);
+        return InetAddress.getAllByNameOnNet(host, getNetIdForResolv());
     }
 
     /**
@@ -122,7 +137,32 @@ public class Network implements Parcelable {
      *             if the address lookup fails.
      */
     public InetAddress getByName(String host) throws UnknownHostException {
-        return InetAddress.getByNameOnNet(host, netId);
+        return InetAddress.getByNameOnNet(host, getNetIdForResolv());
+    }
+
+    /**
+     * Specify whether or not Private DNS should be bypassed when attempting
+     * to use {@link getAllByName()}/{@link getByName()} methods on the given
+     * instance for hostname resolution.
+     *
+     * @hide
+     */
+    public void setPrivateDnsBypass(boolean bypass) {
+        mPrivateDnsBypass = bypass;
+    }
+
+    /**
+     * Returns a netid marked with the Private DNS bypass flag.
+     *
+     * This flag must be kept in sync with the NETID_USE_LOCAL_NAMESERVERS flag
+     * in system/netd/include/NetdClient.h.
+     *
+     * @hide
+     */
+    public int getNetIdForResolv() {
+        return mPrivateDnsBypass
+                ? (int) (0x80000000L | (long) netId)  // Non-portable DNS resolution flag.
+                : netId;
     }
 
     /**
