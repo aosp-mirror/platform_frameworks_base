@@ -1077,6 +1077,11 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
             // System process can launch home activity.
             return true;
         }
+        // Allow the recents component to launch the home activity.
+        final RecentTasks recentTasks = mStackSupervisor.mService.getRecentTasks();
+        if (recentTasks != null && recentTasks.isCallerRecents(uid)) {
+            return true;
+        }
         // Resolver activity can launch home activity.
         return sourceRecord != null && sourceRecord.isResolverActivity();
     }
