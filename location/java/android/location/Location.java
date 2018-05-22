@@ -1033,6 +1033,9 @@ public class Location implements Parcelable {
     /**
      * Sets the extra information associated with this fix to the
      * given Bundle.
+     *
+     * <p>Note this stores a copy of the given extras, so any changes to extras after calling this
+     * method won't be reflected in the location bundle.
      */
     public void setExtras(Bundle extras) {
         mExtras = (extras == null) ? null : new Bundle(extras);
