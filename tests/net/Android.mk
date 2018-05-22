@@ -52,7 +52,6 @@ LOCAL_JNI_SHARED_LIBRARIES := \
     libpcre2 \
     libselinux \
     libui \
-    libunwind \
     libutils \
     libvintf \
     libvndksupport \
