@@ -245,7 +245,8 @@ public class SliceManager {
         ContentResolver resolver = mContext.getContentResolver();
         try (ContentProviderClient provider = resolver.acquireContentProviderClient(uri)) {
             if (provider == null) {
-                throw new IllegalArgumentException("Unknown URI " + uri);
+                Log.w(TAG, String.format("Unknown URI: %s", uri));
+                return null;
             }
             Bundle extras = new Bundle();
             extras.putParcelable(SliceProvider.EXTRA_BIND_URI, uri);
@@ -306,7 +307,8 @@ public class SliceManager {
                 .authority(authority).build();
         try (ContentProviderClient provider = resolver.acquireContentProviderClient(uri)) {
             if (provider == null) {
-                throw new IllegalArgumentException("Unknown URI " + uri);
+                Log.w(TAG, String.format("Unknown URI: %s", uri));
+                return null;
             }
             Bundle extras = new Bundle();
             extras.putParcelable(SliceProvider.EXTRA_INTENT, intent);
@@ -383,7 +385,8 @@ public class SliceManager {
                 .authority(authority).build();
         try (ContentProviderClient provider = resolver.acquireContentProviderClient(uri)) {
             if (provider == null) {
-                throw new IllegalArgumentException("Unknown URI " + uri);
+                Log.w(TAG, String.format("Unknown URI: %s", uri));
+                return null;
             }
             Bundle extras = new Bundle();
             extras.putParcelable(SliceProvider.EXTRA_INTENT, intent);
