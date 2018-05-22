@@ -2090,7 +2090,8 @@ public class StatusBar extends SystemUI implements DemoMode,
      * @param animate should the change of the icons be animated.
      */
     private void updateHideIconsForBouncer(boolean animate) {
-        boolean hideBecauseApp = mTopHidesStatusBar && mIsOccluded && mStatusBarWindowHidden;
+        boolean hideBecauseApp = mTopHidesStatusBar && mIsOccluded
+                && (mStatusBarWindowHidden || mBouncerShowing);
         boolean hideBecauseKeyguard = !mPanelExpanded && !mIsOccluded && mBouncerShowing;
         boolean shouldHideIconsForBouncer = hideBecauseApp || hideBecauseKeyguard;
         if (mHideIconsForBouncer != shouldHideIconsForBouncer) {
