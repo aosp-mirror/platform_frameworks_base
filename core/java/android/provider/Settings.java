@@ -9176,6 +9176,15 @@ public final class Settings {
                 "captive_portal_other_fallback_urls";
 
         /**
+         * A list of captive portal detection specifications used in addition to the fallback URLs.
+         * Each spec has the format url@@/@@statusCodeRegex@@/@@contentRegex. Specs are separated
+         * by "@@,@@".
+         * @hide
+         */
+        public static final String CAPTIVE_PORTAL_FALLBACK_PROBE_SPECS =
+                "captive_portal_fallback_probe_specs";
+
+        /**
          * Whether to use HTTPS for network validation. This is enabled by default and the setting
          * needs to be set to 0 to disable it. This setting is a misnomer because captive portals
          * don't actually use HTTPS, but it's consistent with the other settings.
