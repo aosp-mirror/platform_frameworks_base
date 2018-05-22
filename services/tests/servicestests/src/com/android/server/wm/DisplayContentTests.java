@@ -313,6 +313,25 @@ public class DisplayContentTests extends WindowTestsBase {
         assertEquals(window1, sWm.mRoot.computeFocusedWindow());
     }
 
+    @Test
+    public void testKeyguard_preventsSecondaryDisplayFocus() throws Exception {
+        final WindowState keyguard = createWindow(null, TYPE_STATUS_BAR,
+                sWm.getDefaultDisplayContentLocked(), "keyguard");
+        assertEquals(keyguard, sWm.mRoot.computeFocusedWindow());
+
+        // Add a window to a second display, and it should be focused
+        final DisplayContent dc = createNewDisplay();
+        final WindowState win = createWindow(null, TYPE_BASE_APPLICATION, dc, "win");
+        assertEquals(win, sWm.mRoot.computeFocusedWindow());
+
+        ((TestWindowManagerPolicy)sWm.mPolicy).keyguardShowingAndNotOccluded = true;
+        try {
+            assertEquals(keyguard, sWm.mRoot.computeFocusedWindow());
+        } finally {
+            ((TestWindowManagerPolicy)sWm.mPolicy).keyguardShowingAndNotOccluded = false;
+        }
+    }
+
     /**
      * This tests setting the maximum ui width on a display.
      */
