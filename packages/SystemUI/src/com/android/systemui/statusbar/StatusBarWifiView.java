@@ -151,6 +151,17 @@ public class StatusBarWifiView extends FrameLayout implements DarkReceiver,
         return mVisibleState;
     }
 
+    @Override
+    public void getDrawingRect(Rect outRect) {
+        super.getDrawingRect(outRect);
+        float translationX = getTranslationX();
+        float translationY = getTranslationY();
+        outRect.left += translationX;
+        outRect.right += translationX;
+        outRect.top += translationY;
+        outRect.bottom += translationY;
+    }
+
     private void init() {
         int dualToneLightTheme = Utils.getThemeAttr(mContext, R.attr.lightIconTheme);
         int dualToneDarkTheme = Utils.getThemeAttr(mContext, R.attr.darkIconTheme);
