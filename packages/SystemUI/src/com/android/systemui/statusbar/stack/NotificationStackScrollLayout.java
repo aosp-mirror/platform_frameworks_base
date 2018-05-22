@@ -885,7 +885,9 @@ public class NotificationStackScrollLayout extends ViewGroup
         float appearEndPosition = getAppearEndPosition();
         float appearStartPosition = getAppearStartPosition();
         float appearFraction = 1.0f;
-        if (height >= appearEndPosition) {
+        boolean appearing = height < appearEndPosition;
+        mAmbientState.setAppearing(appearing);
+        if (!appearing) {
             translationY = 0;
             if (mShouldShowShelfOnly) {
                 stackHeight = mTopPadding + mShelf.getIntrinsicHeight();
