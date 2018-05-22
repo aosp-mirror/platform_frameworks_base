@@ -880,7 +880,7 @@ public class ConnectivityServiceTest {
                 NetworkAgentInfo networkAgentInfo, NetworkRequest defaultRequest,
                 IpConnectivityLog log) {
             super(context, handler, networkAgentInfo, defaultRequest, log,
-                    NetworkMonitor.NetworkMonitorSettings.DEFAULT);
+                    NetworkMonitor.Dependencies.DEFAULT);
             connectivityHandler = handler;
         }
 
