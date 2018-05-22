@@ -30,6 +30,7 @@ import android.media.ISessionTokensListener;
 import android.media.MediaSession2;
 import android.media.MediaSessionService2;
 import android.media.SessionToken2;
+import android.media.browse.MediaBrowser;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
@@ -818,19 +819,31 @@ public final class MediaSessionManager {
 
     /**
      * Information of a remote user of {@link MediaSession} or {@link MediaBrowserService}.
-     * This can be used to decide whether the remote user is trusted app.
+     * This can be used to decide whether the remote user is trusted app, and also differentiate
+     * caller of {@link MediaSession} and {@link MediaBrowserService} callbacks.
+     * <p>
+     * See {@link #equals(Object)} to take a look at how it differentiate media controller.
      *
      * @see #isTrustedForMediaControl(RemoteUserInfo)
      */
     public static final class RemoteUserInfo {
-        private String mPackageName;
-        private int mPid;
-        private int mUid;
+        private final String mPackageName;
+        private final int mPid;
+        private final int mUid;
+        private final IBinder mCallerBinder;
 
-        public RemoteUserInfo(String packageName, int pid, int uid) {
+        public RemoteUserInfo(@NonNull String packageName, int pid, int uid) {
+            this(packageName, pid, uid, null);
+        }
+
+        /**
+         * @hide
+         */
+        public RemoteUserInfo(String packageName, int pid, int uid, IBinder callerBinder) {
             mPackageName = packageName;
             mPid = pid;
             mUid = uid;
+            mCallerBinder = callerBinder;
         }
 
         /**
@@ -854,15 +867,29 @@ public final class MediaSessionManager {
             return mUid;
         }
 
+        /**
+         * Returns equality of two RemoteUserInfo. Two RemoteUserInfos are the same only if they're
+         * sent to the same controller (either {@link MediaController} or
+         * {@link MediaBrowser}. If it's not nor one of them is triggered by the key presses, they
+         * would be considered as different one.
+         * <p>
+         * If you only want to compare the caller's package, compare them with the
+         * {@link #getPackageName()}, {@link #getPid()}, and/or {@link #getUid()} directly.
+         *
+         * @param obj the reference object with which to compare.
+         * @return {@code true} if equals, {@code false} otherwise
+         */
         @Override
         public boolean equals(Object obj) {
             if (!(obj instanceof RemoteUserInfo)) {
                 return false;
             }
+            if (this == obj) {
+                return true;
+            }
             RemoteUserInfo otherUserInfo = (RemoteUserInfo) obj;
-            return TextUtils.equals(mPackageName, otherUserInfo.mPackageName)
-                    && mPid == otherUserInfo.mPid
-                    && mUid == otherUserInfo.mUid;
+            return (mCallerBinder == null || otherUserInfo.mCallerBinder == null) ? false
+                    : mCallerBinder.equals(otherUserInfo.mCallerBinder);
         }
 
         @Override
