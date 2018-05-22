@@ -112,6 +112,7 @@ import android.net.NetworkUtils;
 import android.net.RouteInfo;
 import android.net.StringNetworkSpecifier;
 import android.net.UidRange;
+import android.net.captiveportal.CaptivePortalProbeResult;
 import android.net.metrics.IpConnectivityLog;
 import android.net.util.MultinetworkPolicyTracker;
 import android.os.ConditionVariable;
