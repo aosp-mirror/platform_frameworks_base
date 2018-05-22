@@ -575,12 +575,14 @@
     <integer translatable="false" name="config_wifi_framework_min_rx_rate_for_staying_on_network">16</integer>
     <!-- Integer parameters of the wifi to cellular handover feature
          wifi should not stick to bad networks -->
-    <integer translatable="false" name="config_wifi_framework_wifi_score_bad_rssi_threshold_5GHz">-82</integer>
-    <integer translatable="false" name="config_wifi_framework_wifi_score_entry_rssi_threshold_5GHz">-82</integer>
+    <!-- Integer threshold for low network score, should be somewhat less than the entry threshhold -->
+    <integer translatable="false" name="config_wifi_framework_wifi_score_bad_rssi_threshold_5GHz">-80</integer>
+    <!-- Integer threshold, do not connect to APs with RSSI lower than the entry threshold -->
+    <integer translatable="false" name="config_wifi_framework_wifi_score_entry_rssi_threshold_5GHz">-77</integer>
     <integer translatable="false" name="config_wifi_framework_wifi_score_low_rssi_threshold_5GHz">-70</integer>
     <integer translatable="false" name="config_wifi_framework_wifi_score_good_rssi_threshold_5GHz">-57</integer>
-    <integer translatable="false" name="config_wifi_framework_wifi_score_bad_rssi_threshold_24GHz">-85</integer>
-    <integer translatable="false" name="config_wifi_framework_wifi_score_entry_rssi_threshold_24GHz">-85</integer>
+    <integer translatable="false" name="config_wifi_framework_wifi_score_bad_rssi_threshold_24GHz">-83</integer>
+    <integer translatable="false" name="config_wifi_framework_wifi_score_entry_rssi_threshold_24GHz">-80</integer>
     <integer translatable="false" name="config_wifi_framework_wifi_score_low_rssi_threshold_24GHz">-73</integer>
     <integer translatable="false" name="config_wifi_framework_wifi_score_good_rssi_threshold_24GHz">-60</integer>
     <integer translatable="false" name="config_wifi_framework_wifi_score_bad_link_speed_24">6</integer>
