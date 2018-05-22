@@ -4902,7 +4902,8 @@ public class Notification implements Parcelable
 
             CharSequence[] replyText = mN.extras.getCharSequenceArray(EXTRA_REMOTE_INPUT_HISTORY);
             if (!p.ambient && validRemoteInput && replyText != null
-                    && replyText.length > 0 && !TextUtils.isEmpty(replyText[0])) {
+                    && replyText.length > 0 && !TextUtils.isEmpty(replyText[0])
+                    && p.maxRemoteInputHistory > 0) {
                 boolean showSpinner = mN.extras.getBoolean(EXTRA_SHOW_REMOTE_INPUT_SPINNER);
                 big.setViewVisibility(R.id.notification_material_reply_container, View.VISIBLE);
                 big.setViewVisibility(R.id.notification_material_reply_text_1_container,
@@ -4917,13 +4918,15 @@ public class Notification implements Parcelable
                         ColorStateList.valueOf(
                                 isColorized() ? getPrimaryTextColor() : resolveContrastColor()));
 
-                if (replyText.length > 1 && !TextUtils.isEmpty(replyText[1])) {
+                if (replyText.length > 1 && !TextUtils.isEmpty(replyText[1])
+                        && p.maxRemoteInputHistory > 1) {
                     big.setViewVisibility(R.id.notification_material_reply_text_2, View.VISIBLE);
                     big.setTextViewText(R.id.notification_material_reply_text_2,
                             processTextSpans(replyText[1]));
                     setTextViewColorSecondary(big, R.id.notification_material_reply_text_2);
 
-                    if (replyText.length > 2 && !TextUtils.isEmpty(replyText[2])) {
+                    if (replyText.length > 2 && !TextUtils.isEmpty(replyText[2])
+                            && p.maxRemoteInputHistory > 2) {
                         big.setViewVisibility(
                                 R.id.notification_material_reply_text_3, View.VISIBLE);
                         big.setTextViewText(R.id.notification_material_reply_text_3,
@@ -5086,7 +5089,13 @@ public class Notification implements Parcelable
                 return null;
             }
 
-            return applyStandardTemplateWithActions(getBigBaseLayoutResource(), null /* result */);
+            // We only want at most a single remote input history to be shown here, otherwise
+            // the content would become squished.
+            StandardTemplateParams p = mParams.reset().fillTextsFrom(this)
+                    .setMaxRemoteInputHistory(1);
+            return applyStandardTemplateWithActions(getBigBaseLayoutResource(),
+                    p,
+                    null /* result */);
         }
 
         /**
@@ -5955,6 +5964,12 @@ public class Notification implements Parcelable
      * object.
      */
     public static abstract class Style {
+
+        /**
+         * The number of items allowed simulatanously in the remote input history.
+         * @hide
+         */
+        static final int MAX_REMOTE_INPUT_HISTORY_LINES = 3;
         private CharSequence mBigContentTitle;
 
         /**
@@ -7414,6 +7429,11 @@ public class Notification implements Parcelable
      * @see Notification#bigContentView
      */
     public static class InboxStyle extends Style {
+
+        /**
+         * The number of lines of remote input history allowed until we start reducing lines.
+         */
+        private static final int NUMBER_OF_HISTORY_ALLOWED_UNTIL_REDUCTION = 1;
         private ArrayList<CharSequence> mTexts = new ArrayList<CharSequence>(5);
 
         public InboxStyle() {
@@ -7512,6 +7532,28 @@ public class Notification implements Parcelable
             int maxRows = rowIds.length;
             if (mBuilder.mActions.size() > 0) {
                 maxRows--;
+            }
+            CharSequence[] remoteInputHistory = mBuilder.mN.extras.getCharSequenceArray(
+                    EXTRA_REMOTE_INPUT_HISTORY);
+            if (remoteInputHistory != null
+                    && remoteInputHistory.length > NUMBER_OF_HISTORY_ALLOWED_UNTIL_REDUCTION) {
+                // Let's remove some messages to make room for the remote input history.
+                // 1 is always able to fit, but let's remove them if they are 2 or 3
+                int numRemoteInputs = Math.min(remoteInputHistory.length,
+                        MAX_REMOTE_INPUT_HISTORY_LINES);
+                int totalNumRows = mTexts.size() + numRemoteInputs
+                        - NUMBER_OF_HISTORY_ALLOWED_UNTIL_REDUCTION;
+                if (totalNumRows > maxRows) {
+                    int overflow = totalNumRows - maxRows;
+                    if (mTexts.size() > maxRows) {
+                        // Heuristic: if the Texts don't fit anyway, we'll rather drop the last
+                        // few messages, even with the remote input
+                        maxRows -= overflow;
+                    } else  {
+                        // otherwise we drop the first messages
+                        i = overflow;
+                    }
+                }
             }
             while (i < mTexts.size() && i < maxRows) {
                 CharSequence str = mTexts.get(i);
@@ -9583,6 +9625,7 @@ public class Notification implements Parcelable
         CharSequence title;
         CharSequence text;
         CharSequence headerTextSecondary;
+        int maxRemoteInputHistory = Style.MAX_REMOTE_INPUT_HISTORY_LINES;
         boolean hideLargeIcon;
         boolean hideReplyIcon;
 
@@ -9592,6 +9635,7 @@ public class Notification implements Parcelable
             title = null;
             text = null;
             headerTextSecondary = null;
+            maxRemoteInputHistory = Style.MAX_REMOTE_INPUT_HISTORY_LINES;
             return this;
         }
 
@@ -9641,6 +9685,16 @@ public class Notification implements Parcelable
                 text = extras.getCharSequence(EXTRA_TEXT);
             }
             this.text = b.processLegacyText(text, ambient);
+            return this;
+        }
+
+        /**
+         * Set the maximum lines of remote input history lines allowed.
+         * @param maxRemoteInputHistory The number of lines.
+         * @return The builder for method chaining.
+         */
+        public StandardTemplateParams setMaxRemoteInputHistory(int maxRemoteInputHistory) {
+            this.maxRemoteInputHistory = maxRemoteInputHistory;
             return this;
         }
     }

@@ -189,6 +189,7 @@ public class NotificationContentView extends FrameLayout {
             if (mExpandedSmartReplyView != null) {
                 notificationMaxHeight += mExpandedSmartReplyView.getHeightUpperLimit();
             }
+            notificationMaxHeight += mExpandedWrapper.getExtraMeasureHeight();
             int size = notificationMaxHeight;
             ViewGroup.LayoutParams layoutParams = mExpandedChild.getLayoutParams();
             boolean useExactly = false;
