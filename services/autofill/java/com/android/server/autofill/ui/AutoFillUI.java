@@ -20,6 +20,7 @@ import static com.android.server.autofill.Helper.sVerbose;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.IntentSender;
 import android.graphics.drawable.Drawable;
@@ -162,21 +163,21 @@ public final class AutoFillUI {
      * @param response the current fill response
      * @param filterText text of the view to be filled
      * @param servicePackageName package name of the autofill service filling the activity
-     * @param packageName package name of the activity that is filled
+     * @param componentName component name of the activity that is filled
      * @param serviceLabel label of autofill service
      * @param serviceIcon icon of autofill service
      * @param callback Identifier for the caller
      */
     public void showFillUi(@NonNull AutofillId focusedId, @NonNull FillResponse response,
             @Nullable String filterText, @Nullable String servicePackageName,
-            @NonNull String packageName, @NonNull CharSequence serviceLabel,
+            @NonNull ComponentName componentName, @NonNull CharSequence serviceLabel,
             @NonNull Drawable serviceIcon, @NonNull AutoFillUiCallback callback, boolean compatMode) {
         if (sDebug) {
             final int size = filterText == null ? 0 : filterText.length();
             Slog.d(TAG, "showFillUi(): id=" + focusedId + ", filter=" + size + " chars");
         }
         final LogMaker log = Helper
-                .newLogMaker(MetricsEvent.AUTOFILL_FILL_UI, packageName, servicePackageName,
+                .newLogMaker(MetricsEvent.AUTOFILL_FILL_UI, componentName, servicePackageName,
                         compatMode)
                 .addTaggedData(MetricsEvent.FIELD_AUTOFILL_FILTERTEXT_LEN,
                         filterText == null ? 0 : filterText.length())
@@ -262,16 +263,18 @@ public final class AutoFillUI {
      */
     public void showSaveUi(@NonNull CharSequence serviceLabel, @NonNull Drawable serviceIcon,
             @Nullable String servicePackageName, @NonNull SaveInfo info,
-            @NonNull ValueFinder valueFinder, @NonNull String packageName,
+            @NonNull ValueFinder valueFinder, @NonNull ComponentName componentName,
             @NonNull AutoFillUiCallback callback, @NonNull PendingUi pendingSaveUi,
             boolean compatMode) {
-        if (sVerbose) Slog.v(TAG, "showSaveUi() for " + packageName + ": " + info);
+        if (sVerbose) {
+            Slog.v(TAG, "showSaveUi() for " + componentName.toShortString() + ": " + info);
+        }
         int numIds = 0;
         numIds += info.getRequiredIds() == null ? 0 : info.getRequiredIds().length;
         numIds += info.getOptionalIds() == null ? 0 : info.getOptionalIds().length;
 
         final LogMaker log = Helper
-                .newLogMaker(MetricsEvent.AUTOFILL_SAVE_UI, packageName, servicePackageName,
+                .newLogMaker(MetricsEvent.AUTOFILL_SAVE_UI, componentName, servicePackageName,
                         compatMode)
                 .addTaggedData(MetricsEvent.FIELD_AUTOFILL_NUM_IDS, numIds);
 
@@ -281,7 +284,7 @@ public final class AutoFillUI {
             }
             hideAllUiThread(callback);
             mSaveUi = new SaveUi(mContext, pendingSaveUi, serviceLabel, serviceIcon,
-                    servicePackageName, packageName, info, valueFinder, mOverlayControl,
+                    servicePackageName, componentName, info, valueFinder, mOverlayControl,
                     new SaveUi.OnSaveListener() {
                 @Override
                 public void onSave() {
