@@ -24384,6 +24384,9 @@ Slog.v(TAG, ":: stepped forward, applying functor at tag " + parser.getName());
         if (info.targetSdkVersion < Build.VERSION_CODES.O) {
             return false;
         }
+        if (isInstantApp(packageName, userId)) {
+            return false;
+        }
         String appOpPermission = Manifest.permission.REQUEST_INSTALL_PACKAGES;
         String[] packagesDeclaringPermission = getAppOpPermissionPackages(appOpPermission);
         if (!ArrayUtils.contains(packagesDeclaringPermission, packageName)) {
