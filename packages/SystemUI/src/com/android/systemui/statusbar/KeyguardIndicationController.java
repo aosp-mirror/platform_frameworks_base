@@ -534,7 +534,7 @@ public class KeyguardIndicationController {
             ColorStateList errorColorState = Utils.getColorError(mContext);
             if (mStatusBarKeyguardViewManager.isBouncerShowing()) {
                 mStatusBarKeyguardViewManager.showBouncerMessage(helpString,
-                        errorColorState.getDefaultColor());
+                        errorColorState);
             } else if (updateMonitor.isScreenOn()) {
                 mLockIcon.setTransientFpError(true);
                 showTransientIndication(helpString, errorColorState);
@@ -564,7 +564,7 @@ public class KeyguardIndicationController {
                 // generic.
                 if (mLastSuccessiveErrorMessage != msgId) {
                     mStatusBarKeyguardViewManager.showBouncerMessage(errString,
-                            errorColorState.getDefaultColor());
+                            errorColorState);
                 }
             } else if (updateMonitor.isScreenOn()) {
                 showTransientIndication(errString, errorColorState);
