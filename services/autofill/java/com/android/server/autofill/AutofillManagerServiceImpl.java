@@ -780,10 +780,10 @@ final class AutofillManagerServiceImpl {
             @Nullable ArrayList<String> changedDatasetIds,
             @Nullable ArrayList<AutofillId> manuallyFilledFieldIds,
             @Nullable ArrayList<ArrayList<String>> manuallyFilledDatasetIds,
-            @NonNull String appPackageName, boolean compatMode) {
+            @NonNull ComponentName appComponentName, boolean compatMode) {
         logContextCommittedLocked(sessionId, clientState, selectedDatasets, ignoredDatasets,
                 changedFieldIds, changedDatasetIds, manuallyFilledFieldIds,
-                manuallyFilledDatasetIds, null, null, appPackageName, compatMode);
+                manuallyFilledDatasetIds, null, null, appComponentName, compatMode);
     }
 
     @GuardedBy("mLock")
@@ -796,7 +796,7 @@ final class AutofillManagerServiceImpl {
             @Nullable ArrayList<ArrayList<String>> manuallyFilledDatasetIds,
             @Nullable ArrayList<AutofillId> detectedFieldIdsList,
             @Nullable ArrayList<FieldClassification> detectedFieldClassificationsList,
-            @NonNull String appPackageName, boolean compatMode) {
+            @NonNull ComponentName appComponentName, boolean compatMode) {
         if (isValidEventLocked("logDatasetNotSelected()", sessionId)) {
             if (sVerbose) {
                 Slog.v(TAG, "logContextCommitted() with FieldClassification: id=" + sessionId
@@ -807,6 +807,7 @@ final class AutofillManagerServiceImpl {
                         + ", manuallyFilledFieldIds=" + manuallyFilledFieldIds
                         + ", detectedFieldIds=" + detectedFieldIdsList
                         + ", detectedFieldClassifications=" + detectedFieldClassificationsList
+                        + ", appComponentName=" + appComponentName.toShortString()
                         + ", compatMode=" + compatMode);
             }
             AutofillId[] detectedFieldsIds = null;
@@ -834,7 +835,7 @@ final class AutofillManagerServiceImpl {
                 final int averageScore = (int) ((totalScore * 100) / totalSize);
                 mMetricsLogger.write(Helper
                         .newLogMaker(MetricsEvent.AUTOFILL_FIELD_CLASSIFICATION_MATCHES,
-                                appPackageName, getServicePackageName(), compatMode)
+                                appComponentName, getServicePackageName(), compatMode)
                         .setCounterValue(numberFields)
                         .addTaggedData(MetricsEvent.FIELD_AUTOFILL_MATCH_SCORE,
                                 averageScore));
@@ -889,9 +890,11 @@ final class AutofillManagerServiceImpl {
             }
             mUserData = userData;
             // Log it
-            int numberFields = mUserData == null ? 0: mUserData.getCategoryIds().length;
-            mMetricsLogger.write(Helper.newLogMaker(MetricsEvent.AUTOFILL_USERDATA_UPDATED,
-                    getServicePackageName(), null)
+            final int numberFields = mUserData == null ? 0: mUserData.getCategoryIds().length;
+            // NOTE: contrary to most metrics, the service name is logged as the main package name
+            // here, not as MetricsEvent.FIELD_AUTOFILL_SERVICE
+            mMetricsLogger.write(new LogMaker(MetricsEvent.AUTOFILL_USERDATA_UPDATED)
+                    .setPackageName(getServicePackageName())
                     .addTaggedData(MetricsEvent.FIELD_AUTOFILL_NUM_VALUES, numberFields));
         }
     }
