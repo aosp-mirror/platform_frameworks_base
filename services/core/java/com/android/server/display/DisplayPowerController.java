@@ -815,7 +815,7 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
             mAppliedTemporaryAutoBrightnessAdjustment = true;
         } else {
             autoBrightnessAdjustment = mAutoBrightnessAdjustment;
-            mAppliedTemporaryAutoBrightnessAdjustment = true;
+            mAppliedTemporaryAutoBrightnessAdjustment = false;
         }
 
         // Apply brightness boost.
