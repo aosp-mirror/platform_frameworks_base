@@ -132,6 +132,7 @@ public class SettingsBackupTest {
                     Settings.Global.BLE_SCAN_LOW_LATENCY_WINDOW_MS,
                     Settings.Global.BLE_SCAN_LOW_LATENCY_INTERVAL_MS,
                     Settings.Global.BLE_SCAN_BACKGROUND_MODE,
+                    Settings.Global.BLOCKED_SLICES,
                     Settings.Global.BLOCKING_HELPER_DISMISS_TO_VIEW_RATIO_LIMIT,
                     Settings.Global.BLOCKING_HELPER_STREAK_LIMIT,
                     Settings.Global.BLUETOOTH_A2DP_SINK_PRIORITY_PREFIX,
