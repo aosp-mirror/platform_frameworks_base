@@ -206,11 +206,15 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
         } else {
             mStatusBar.showKeyguard();
             if (hideBouncerWhenShowing) {
-                hideBouncer(false /* destroyView */);
+                hideBouncer(shouldDestroyViewOnReset() /* destroyView */);
                 mBouncer.prepare();
             }
         }
         updateStates();
+    }
+
+    protected boolean shouldDestroyViewOnReset() {
+        return false;
     }
 
     private void hideBouncer(boolean destroyView) {
