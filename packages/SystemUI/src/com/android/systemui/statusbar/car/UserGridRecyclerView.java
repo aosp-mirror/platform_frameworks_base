@@ -90,7 +90,7 @@ public class UserGridRecyclerView extends PagedListView implements
      */
     public void buildAdapter() {
         List<UserRecord> userRecords = createUserRecords(mUserManagerHelper
-                .getAllUsersExcludesSystemUser());
+                .getAllUsers());
         mAdapter = new UserAdapter(mContext, userRecords);
         super.setAdapter(mAdapter);
     }
@@ -149,7 +149,7 @@ public class UserGridRecyclerView extends PagedListView implements
     @Override
     public void onUsersUpdate() {
         mAdapter.clearUsers();
-        mAdapter.updateUsers(createUserRecords(mUserManagerHelper.getAllUsersExcludesSystemUser()));
+        mAdapter.updateUsers(createUserRecords(mUserManagerHelper.getAllUsers()));
         mAdapter.notifyDataSetChanged();
     }
 
