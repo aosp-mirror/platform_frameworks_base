@@ -1950,7 +1950,8 @@ public class LocationManagerService extends ILocationManager.Stub {
             return "UpdateRecord[" + mProvider + " " + mReceiver.mIdentity.mPackageName
                     + "(" + mReceiver.mIdentity.mUid + (mIsForegroundUid ? " foreground"
                     : " background")
-                    + ")" + " " + mRealRequest + "]";
+                    + ")" + " " + mRealRequest + " "
+                    + mReceiver.mWorkSource + "]";
         }
     }
 
