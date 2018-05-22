@@ -196,6 +196,7 @@ public class KeyguardSliceView extends LinearLayout implements View.OnClickListe
 
             final SliceItem titleItem = rc.getTitleItem();
             button.setText(titleItem == null ? null : titleItem.getText());
+            button.setContentDescription(rc.getContentDescription());
 
             Drawable iconDrawable = null;
             SliceItem icon = SliceQuery.find(item.getSlice(),
