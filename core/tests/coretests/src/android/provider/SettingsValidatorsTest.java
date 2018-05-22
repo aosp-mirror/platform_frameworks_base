@@ -88,6 +88,23 @@ public class SettingsValidatorsTest {
     }
 
     @Test
+    public void testNullableComponentNameValidator_onValidComponentName_returnsTrue() {
+        assertTrue(SettingsValidators.NULLABLE_COMPONENT_NAME_VALIDATOR.validate(
+                "android/com.android.internal.backup.LocalTransport"));
+    }
+
+    @Test
+    public void testNullableComponentNameValidator_onInvalidComponentName_returnsFalse() {
+        assertFalse(SettingsValidators.NULLABLE_COMPONENT_NAME_VALIDATOR.validate(
+                "rectangle"));
+    }
+
+    @Test
+    public void testNullableComponentNameValidator_onNullValue_returnsTrue() {
+        assertTrue(SettingsValidators.NULLABLE_COMPONENT_NAME_VALIDATOR.validate(null));
+    }
+
+    @Test
     public void testLocaleValidator() {
         assertTrue(SettingsValidators.LOCALE_VALIDATOR.validate("en_US"));
         assertTrue(SettingsValidators.LOCALE_VALIDATOR.validate("es"));
