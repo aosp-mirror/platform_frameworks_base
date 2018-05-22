@@ -151,6 +151,8 @@ public class KeyguardSliceProvider extends SliceProvider implements
             return;
         }
         RowBuilder dndBuilder = new RowBuilder(builder, mDndUri)
+                .setContentDescription(getContext().getResources()
+                        .getString(R.string.accessibility_quick_settings_dnd))
                 .addEndItem(Icon.createWithResource(getContext(), R.drawable.stat_sys_dnd));
         builder.addRow(dndBuilder);
     }
