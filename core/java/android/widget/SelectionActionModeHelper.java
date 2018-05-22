@@ -284,9 +284,9 @@ public final class SelectionActionModeHelper {
             @Nullable SelectionResult result) {
         final Layout layout = mTextView.getLayout();
 
-        final String originalText = getText(mTextView).toString();
         final Runnable onAnimationEndCallback = () -> {
-            if (TextUtils.equals(getText(mTextView), originalText)) {
+            if (result.mStart >= 0 && result.mEnd <= getText(mTextView).length()
+                    && result.mStart <= result.mEnd) {
                 startSelectionActionMode(result);
             }
         };
