@@ -113,6 +113,9 @@ import java.util.concurrent.CountDownLatch;
 
 /**
  * Manages the standby state of an app, listening to various events.
+ *
+ * Unit test:
+   atest ${ANDROID_BUILD_TOP}/frameworks/base/services/tests/servicestests/src/com/android/server/usage/AppStandbyControllerTests.java
  */
 public class AppStandbyController {
 
@@ -1106,6 +1109,11 @@ public class AppStandbyController {
 
     void setAppStandbyBucket(String packageName, int userId, @StandbyBuckets int newBucket,
             int reason, long elapsedRealtime) {
+        setAppStandbyBucket(packageName, userId, newBucket, reason, elapsedRealtime, false);
+    }
+
+    void setAppStandbyBucket(String packageName, int userId, @StandbyBuckets int newBucket,
+            int reason, long elapsedRealtime, boolean resetTimeout) {
         synchronized (mAppIdleLock) {
             AppIdleHistory.AppUsageHistory app = mAppIdleHistory.getAppUsageHistory(packageName,
                     userId, elapsedRealtime);
@@ -1155,7 +1163,7 @@ public class AppStandbyController {
             }
 
             mAppIdleHistory.setAppStandbyBucket(packageName, userId, elapsedRealtime, newBucket,
-                    reason);
+                    reason, resetTimeout);
         }
         maybeInformListeners(packageName, userId, elapsedRealtime, newBucket, reason, false);
     }
