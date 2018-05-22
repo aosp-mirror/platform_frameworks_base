@@ -21,6 +21,7 @@ import android.animation.AnimatorListenerAdapter;
 import android.animation.ObjectAnimator;
 import android.annotation.NonNull;
 import android.app.Activity;
+import android.app.ActivityManager;
 import android.app.usage.UsageStatsManager;
 import android.content.ComponentName;
 import android.content.Context;
@@ -1022,6 +1023,11 @@ public class ChooserActivity extends ResolverActivity {
 
         @Override
         public void onListRebuilt() {
+            // don't support direct share on low ram devices
+            if (ActivityManager.isLowRamDeviceStatic()) {
+                return;
+            }
+
             if (mServiceTargets != null) {
                 pruneServiceTargets();
             }
