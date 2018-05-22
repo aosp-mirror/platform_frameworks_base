@@ -28,7 +28,7 @@
     android:clipToPadding="false"
     android:orientation="vertical"
     android:layout_centerHorizontal="true">
-    <com.android.systemui.statusbar.AlphaOptimizedTextView
+    <view class="com.android.keyguard.KeyguardSliceView$TitleView"
               android:id="@+id/title"
               android:layout_width="match_parent"
               android:layout_height="wrap_content"
