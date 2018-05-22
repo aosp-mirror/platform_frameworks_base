@@ -824,6 +824,9 @@ public class TextLine {
                 wp.setColor(previousColor);
             }
 
+            drawTextRun(c, wp, start, end, contextStart, contextEnd, runIsRtl,
+                    leftX, y + wp.baselineShift);
+
             if (numDecorations != 0) {
                 for (int i = 0; i < numDecorations; i++) {
                     final DecorationInfo info = decorations.get(i);
@@ -866,8 +869,6 @@ public class TextLine {
                 }
             }
 
-            drawTextRun(c, wp, start, end, contextStart, contextEnd, runIsRtl,
-                    leftX, y + wp.baselineShift);
         }
 
         return runIsRtl ? -totalWidth : totalWidth;
