@@ -53,7 +53,6 @@ import android.view.WindowManager;
 import android.view.autofill.AutofillManager;
 import android.widget.ImageView;
 import android.widget.RemoteViews;
-import android.widget.ScrollView;
 import android.widget.TextView;
 
 import com.android.internal.R;
@@ -208,7 +207,7 @@ final class SaveUi {
             mSubTitle = info.getDescription();
             if (mSubTitle != null) {
                 writeLog(MetricsEvent.AUTOFILL_SAVE_CUSTOM_SUBTITLE, type);
-                final ScrollView subtitleContainer =
+                final ViewGroup subtitleContainer =
                         view.findViewById(R.id.autofill_save_custom_subtitle);
                 final TextView subtitleView = new TextView(context);
                 subtitleView.setText(mSubTitle);
@@ -361,7 +360,7 @@ final class SaveUi {
             }
 
             // Finally, add the custom description to the save UI.
-            final ScrollView subtitleContainer =
+            final ViewGroup subtitleContainer =
                     saveUiView.findViewById(R.id.autofill_save_custom_subtitle);
             subtitleContainer.addView(customSubtitleView);
             subtitleContainer.setVisibility(View.VISIBLE);
