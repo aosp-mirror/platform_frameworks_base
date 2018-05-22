@@ -407,8 +407,12 @@ public class VolumeInfo implements Parcelable {
      * {@link #TYPE_EMULATED} or {@link #TYPE_PUBLIC}.
      */
     public @Nullable Intent buildBrowseIntent() {
+        return buildBrowseIntentForUser(UserHandle.myUserId());
+    }
+
+    public @Nullable Intent buildBrowseIntentForUser(int userId) {
         final Uri uri;
-        if (type == VolumeInfo.TYPE_PUBLIC && mountUserId == UserHandle.myUserId()) {
+        if (type == VolumeInfo.TYPE_PUBLIC && mountUserId == userId) {
             uri = DocumentsContract.buildRootUri(DOCUMENT_AUTHORITY, fsUuid);
         } else if (type == VolumeInfo.TYPE_EMULATED && isPrimary()) {
             uri = DocumentsContract.buildRootUri(DOCUMENT_AUTHORITY,
