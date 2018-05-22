@@ -16,8 +16,10 @@
 
 package com.android.systemui.statusbar.phone;
 
+import android.graphics.Point;
 import android.graphics.Rect;
 import android.view.View;
+import android.view.WindowInsets;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.systemui.Dependency;
@@ -59,6 +61,7 @@ public class HeadsUpAppearanceController implements OnHeadsUpChangedListener,
     private final View.OnLayoutChangeListener mStackScrollLayoutChangeListener =
             (v, left, top, right, bottom, oldLeft, oldTop, oldRight, oldBottom)
                     -> updatePanelTranslation();
+    Point mPoint;
 
     public HeadsUpAppearanceController(
             NotificationIconAreaController notificationIconAreaController,
@@ -121,8 +124,54 @@ public class HeadsUpAppearanceController implements OnHeadsUpChangedListener,
         updateHeader(headsUp.getEntry());
     }
 
+    /** To count the distance from the window right boundary to scroller right boundary. The
+     * distance formula is the following:
+     *     Y = screenSize - (SystemWindow's width + Scroller.getRight())
+     * There are four modes MUST to be considered in Cut Out of RTL.
+     * No Cut Out:
+     *   Scroller + NB
+     *   NB + Scroller
+     *     => SystemWindow = NavigationBar's width
+     *     => Y = screenSize - (SystemWindow's width + Scroller.getRight())
+     * Corner Cut Out or Tall Cut Out:
+     *   cut out + Scroller + NB
+     *   NB + Scroller + cut out
+     *     => SystemWindow = NavigationBar's width
+     *     => Y = screenSize - (SystemWindow's width + Scroller.getRight())
+     * Double Cut Out:
+     *   cut out left + Scroller + (NB + cut out right)
+     *     SystemWindow = NavigationBar's width + cut out right width
+     *     => Y = screenSize - (SystemWindow's width + Scroller.getRight())
+     *   (cut out left + NB) + Scroller + cut out right
+     *     SystemWindow = NavigationBar's width + cut out left width
+     *     => Y = screenSize - (SystemWindow's width + Scroller.getRight())
+     * @return the translation X value for RTL. In theory, it should be negative. i.e. -Y
+     */
+    private int getRtlTranslation() {
+        // TODO: Corner Cut Out still need to handle.
+        if (mPoint == null) {
+            mPoint = new Point();
+        }
+
+        int realDisplaySize = 0;
+        if (mStackScroller.getDisplay() != null) {
+            mStackScroller.getDisplay().getRealSize(mPoint);
+            realDisplaySize = mPoint.x;
+        }
+
+        WindowInsets windowInset = mStackScroller.getRootWindowInsets();
+        return windowInset.getSystemWindowInsetLeft() + mStackScroller.getRight()
+                + windowInset.getSystemWindowInsetRight() - realDisplaySize;
+    }
+
     public void updatePanelTranslation() {
-        float newTranslation = mStackScroller.getLeft() + mStackScroller.getTranslationX();
+        float newTranslation;
+        if (mStackScroller.isLayoutRtl()) {
+            newTranslation = getRtlTranslation();
+        } else {
+            newTranslation = mStackScroller.getLeft();
+        }
+        newTranslation += mStackScroller.getTranslationX();
         mHeadsUpStatusBarView.setPanelTranslation(newTranslation);
     }
 
