@@ -63,16 +63,7 @@ public final class NetworkCapabilities implements Parcelable {
 
     public NetworkCapabilities(NetworkCapabilities nc) {
         if (nc != null) {
-            mNetworkCapabilities = nc.mNetworkCapabilities;
-            mTransportTypes = nc.mTransportTypes;
-            mLinkUpBandwidthKbps = nc.mLinkUpBandwidthKbps;
-            mLinkDownBandwidthKbps = nc.mLinkDownBandwidthKbps;
-            mNetworkSpecifier = nc.mNetworkSpecifier;
-            mSignalStrength = nc.mSignalStrength;
-            mUids = nc.mUids;
-            mEstablishingVpnAppUid = nc.mEstablishingVpnAppUid;
-            mUnwantedNetworkCapabilities = nc.mUnwantedNetworkCapabilities;
-            mSSID = nc.mSSID;
+            set(nc);
         }
     }
 
@@ -89,6 +80,23 @@ public final class NetworkCapabilities implements Parcelable {
         mUids = null;
         mEstablishingVpnAppUid = INVALID_UID;
         mSSID = null;
+    }
+
+    /**
+     * Set all contents of this object to the contents of a NetworkCapabilities.
+     * @hide
+     */
+    public void set(NetworkCapabilities nc) {
+        mNetworkCapabilities = nc.mNetworkCapabilities;
+        mTransportTypes = nc.mTransportTypes;
+        mLinkUpBandwidthKbps = nc.mLinkUpBandwidthKbps;
+        mLinkDownBandwidthKbps = nc.mLinkDownBandwidthKbps;
+        mNetworkSpecifier = nc.mNetworkSpecifier;
+        mSignalStrength = nc.mSignalStrength;
+        setUids(nc.mUids); // Will make the defensive copy
+        mEstablishingVpnAppUid = nc.mEstablishingVpnAppUid;
+        mUnwantedNetworkCapabilities = nc.mUnwantedNetworkCapabilities;
+        mSSID = nc.mSSID;
     }
 
     /**
