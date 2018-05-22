@@ -86,6 +86,8 @@ public class KeyguardStateMonitor extends IKeyguardStateCallback.Stub {
     @Override // Binder interface
     public void onShowingStateChanged(boolean showing) {
         mIsShowing = showing;
+
+        mCallback.onShowingChanged();
     }
 
     @Override // Binder interface
@@ -119,6 +121,7 @@ public class KeyguardStateMonitor extends IKeyguardStateCallback.Stub {
 
     public interface StateCallback {
         void onTrustedChanged();
+        void onShowingChanged();
     }
 
     public void dump(String prefix, PrintWriter pw) {
