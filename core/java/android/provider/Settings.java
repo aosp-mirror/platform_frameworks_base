@@ -3114,10 +3114,10 @@ public final class Settings {
 
         private static final Validator FONT_SCALE_VALIDATOR = new Validator() {
             @Override
-            public boolean validate(String value) {
+            public boolean validate(@Nullable String value) {
                 try {
                     return Float.parseFloat(value) >= 0;
-                } catch (NumberFormatException e) {
+                } catch (NumberFormatException | NullPointerException e) {
                     return false;
                 }
             }
@@ -3655,11 +3655,11 @@ public final class Settings {
         /** @hide */
         public static final Validator DATE_FORMAT_VALIDATOR = new Validator() {
             @Override
-            public boolean validate(String value) {
+            public boolean validate(@Nullable String value) {
                 try {
                     new SimpleDateFormat(value);
                     return true;
-                } catch (IllegalArgumentException e) {
+                } catch (IllegalArgumentException | NullPointerException e) {
                     return false;
                 }
             }
@@ -4066,7 +4066,7 @@ public final class Settings {
         /** @hide */
         public static final Validator EGG_MODE_VALIDATOR = new Validator() {
             @Override
-            public boolean validate(String value) {
+            public boolean validate(@Nullable String value) {
                 try {
                     return Long.parseLong(value) >= 0;
                 } catch (NumberFormatException e) {
@@ -5965,7 +5965,7 @@ public final class Settings {
         private static final Validator ACCESSIBILITY_BUTTON_TARGET_COMPONENT_VALIDATOR =
                 new Validator() {
                     @Override
-                    public boolean validate(String value) {
+                    public boolean validate(@Nullable String value) {
                         // technically either ComponentName or class name, but there's proper value
                         // validation at callsites, so allow any non-null string
                         return value != null;
@@ -6482,7 +6482,7 @@ public final class Settings {
 
         private static final Validator TTS_DEFAULT_LOCALE_VALIDATOR = new Validator() {
             @Override
-            public boolean validate(String value) {
+            public boolean validate(@Nullable String value) {
                 if (value == null || value.length() == 0) {
                     return false;
                 }
@@ -7720,7 +7720,7 @@ public final class Settings {
 
         private static final Validator QS_TILES_VALIDATOR = new Validator() {
             @Override
-            public boolean validate(String value) {
+            public boolean validate(@Nullable String value) {
                 if (value == null) {
                     return false;
                 }
@@ -7779,7 +7779,7 @@ public final class Settings {
 
         private static final Validator QS_AUTO_ADDED_TILES_VALIDATOR = new Validator() {
             @Override
-            public boolean validate(String value) {
+            public boolean validate(@Nullable String value) {
                 if (value == null) {
                     return false;
                 }
@@ -8653,7 +8653,7 @@ public final class Settings {
 
         private static final Validator STAY_ON_WHILE_PLUGGED_IN_VALIDATOR = new Validator() {
             @Override
-            public boolean validate(String value) {
+            public boolean validate(@Nullable String value) {
                 try {
                     int val = Integer.parseInt(value);
                     return (val == 0)
@@ -9687,7 +9687,7 @@ public final class Settings {
 
         private static final Validator USE_OPEN_WIFI_PACKAGE_VALIDATOR = new Validator() {
             @Override
-            public boolean validate(String value) {
+            public boolean validate(@Nullable String value) {
                 return (value == null) || PACKAGE_NAME_VALIDATOR.validate(value);
             }
         };
@@ -11382,7 +11382,7 @@ public final class Settings {
         private static final Validator ENCODED_SURROUND_OUTPUT_ENABLED_FORMATS_VALIDATOR =
                 new Validator() {
             @Override
-            public boolean validate(String value) {
+            public boolean validate(@Nullable String value) {
                 try {
                     String[] surroundFormats = TextUtils.split(value, ",");
                     for (String format : surroundFormats) {
