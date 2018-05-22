@@ -77,10 +77,25 @@ public class SettingsValidators {
         }
     };
 
+    /**
+     * Does not allow a setting to have a null {@link ComponentName}. Use {@link
+     * SettingsValidators#NULLABLE_COMPONENT_NAME_VALIDATOR} instead if a setting can have a
+     * nullable {@link ComponentName}.
+     */
     public static final Validator COMPONENT_NAME_VALIDATOR = new Validator() {
         @Override
         public boolean validate(@Nullable String value) {
             return value != null && ComponentName.unflattenFromString(value) != null;
+        }
+    };
+
+    /**
+     * Allows a setting to have a null {@link ComponentName}.
+     */
+    public static final Validator NULLABLE_COMPONENT_NAME_VALIDATOR = new Validator() {
+        @Override
+        public boolean validate(@Nullable String value) {
+            return value == null || COMPONENT_NAME_VALIDATOR.validate(value);
         }
     };
 
