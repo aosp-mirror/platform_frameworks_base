@@ -29,7 +29,7 @@ public class ApnDbInstallReceiver extends ConfigUpdateInstallReceiver {
             "update_db");
 
     public ApnDbInstallReceiver() {
-        super("/data/misc/", "apns-conf.xml", "metadata/", "version");
+        super("/data/misc/apns/", "apns-conf.xml", "metadata/", "version");
     }
 
     @Override
