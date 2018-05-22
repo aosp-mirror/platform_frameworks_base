@@ -33,8 +33,10 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.atLeast;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -115,7 +117,9 @@ public class RankingHelperTest extends UiServiceTestCase {
     @Mock PackageManager mPm;
     @Mock IContentProvider mTestIContentProvider;
     @Mock Context mContext;
+    @Mock ZenModeHelper mMockZenModeHelper;
 
+    private NotificationManager.Policy mTestNotificationPolicy;
     private Notification mNotiGroupGSortA;
     private Notification mNotiGroupGSortB;
     private Notification mNotiNoGroup;
@@ -172,12 +176,12 @@ public class RankingHelperTest extends UiServiceTestCase {
         when(mTestIContentProvider.uncanonicalize(any(), eq(CANONICAL_SOUND_URI)))
                 .thenReturn(SOUND_URI);
 
-        ZenModeHelper mockZenModeHelper = mock(ZenModeHelper.class);
-        mHelper = new RankingHelper(getContext(), mPm, mHandler, mockZenModeHelper,
+        mTestNotificationPolicy = new NotificationManager.Policy(0, 0, 0, 0,
+                NotificationManager.Policy.STATE_CHANNELS_BYPASSING_DND);
+        when(mMockZenModeHelper.getNotificationPolicy()).thenReturn(mTestNotificationPolicy);
+        mHelper = new RankingHelper(getContext(), mPm, mHandler, mMockZenModeHelper,
                 mUsageStats, new String[] {ImportanceExtractor.class.getName()});
-
-        when(mockZenModeHelper.getNotificationPolicy()).thenReturn(new NotificationManager.Policy(
-                0, 0, 0));
+        resetZenModeHelper();
 
         mNotiGroupGSortA = new Notification.Builder(mContext, TEST_CHANNEL_ID)
                 .setContentTitle("A")
@@ -297,6 +301,11 @@ public class RankingHelperTest extends UiServiceTestCase {
             }
         }
         return null;
+    }
+
+    private void resetZenModeHelper() {
+        reset(mMockZenModeHelper);
+        when(mMockZenModeHelper.getNotificationPolicy()).thenReturn(mTestNotificationPolicy);
     }
 
     @Test
@@ -1136,44 +1145,86 @@ public class RankingHelperTest extends UiServiceTestCase {
     public void testCreateAndDeleteCanChannelsBypassDnd() throws Exception {
         // create notification channel that can't bypass dnd
         // expected result: areChannelsBypassingDnd = false
+        // setNotificationPolicy isn't called since areChannelsBypassingDnd was already false
         NotificationChannel channel = new NotificationChannel("id1", "name1", IMPORTANCE_LOW);
         mHelper.createNotificationChannel(PKG, UID, channel, true, false);
         assertFalse(mHelper.areChannelsBypassingDnd());
+        verify(mMockZenModeHelper, never()).setNotificationPolicy(any());
+        resetZenModeHelper();
 
-        //  create notification channel that can bypass dnd
+        // create notification channel that can bypass dnd
         // expected result: areChannelsBypassingDnd = true
         NotificationChannel channel2 = new NotificationChannel("id2", "name2", IMPORTANCE_LOW);
         channel2.setBypassDnd(true);
         mHelper.createNotificationChannel(PKG, UID, channel2, true, true);
         assertTrue(mHelper.areChannelsBypassingDnd());
+        verify(mMockZenModeHelper, times(1)).setNotificationPolicy(any());
+        resetZenModeHelper();
 
         // delete channels
         mHelper.deleteNotificationChannel(PKG, UID, channel.getId());
         assertTrue(mHelper.areChannelsBypassingDnd()); // channel2 can still bypass DND
+        verify(mMockZenModeHelper, never()).setNotificationPolicy(any());
+        resetZenModeHelper();
+
         mHelper.deleteNotificationChannel(PKG, UID, channel2.getId());
         assertFalse(mHelper.areChannelsBypassingDnd());
-
+        verify(mMockZenModeHelper, times(1)).setNotificationPolicy(any());
+        resetZenModeHelper();
     }
 
     @Test
     public void testUpdateCanChannelsBypassDnd() throws Exception {
         // create notification channel that can't bypass dnd
         // expected result: areChannelsBypassingDnd = false
+        // setNotificationPolicy isn't called since areChannelsBypassingDnd was already false
         NotificationChannel channel = new NotificationChannel("id1", "name1", IMPORTANCE_LOW);
         mHelper.createNotificationChannel(PKG, UID, channel, true, false);
         assertFalse(mHelper.areChannelsBypassingDnd());
+        verify(mMockZenModeHelper, never()).setNotificationPolicy(any());
+        resetZenModeHelper();
 
         // update channel so it CAN bypass dnd:
         // expected result: areChannelsBypassingDnd = true
         channel.setBypassDnd(true);
         mHelper.updateNotificationChannel(PKG, UID, channel, true);
         assertTrue(mHelper.areChannelsBypassingDnd());
+        verify(mMockZenModeHelper, times(1)).setNotificationPolicy(any());
+        resetZenModeHelper();
 
         // update channel so it can't bypass dnd:
         // expected result: areChannelsBypassingDnd = false
         channel.setBypassDnd(false);
         mHelper.updateNotificationChannel(PKG, UID, channel, true);
         assertFalse(mHelper.areChannelsBypassingDnd());
+        verify(mMockZenModeHelper, times(1)).setNotificationPolicy(any());
+        resetZenModeHelper();
+    }
+
+    @Test
+    public void testSetupNewZenModeHelper_canBypass() {
+        // start notification policy off with mAreChannelsBypassingDnd = true, but
+        // RankingHelper should change to false
+        mTestNotificationPolicy = new NotificationManager.Policy(0, 0, 0, 0,
+                NotificationManager.Policy.STATE_CHANNELS_BYPASSING_DND);
+        when(mMockZenModeHelper.getNotificationPolicy()).thenReturn(mTestNotificationPolicy);
+        mHelper = new RankingHelper(getContext(), mPm, mHandler, mMockZenModeHelper,
+                mUsageStats, new String[] {ImportanceExtractor.class.getName()});
+        assertFalse(mHelper.areChannelsBypassingDnd());
+        verify(mMockZenModeHelper, times(1)).setNotificationPolicy(any());
+        resetZenModeHelper();
+    }
+
+    @Test
+    public void testSetupNewZenModeHelper_cannotBypass() {
+        // start notification policy off with mAreChannelsBypassingDnd = false
+        mTestNotificationPolicy = new NotificationManager.Policy(0, 0, 0, 0, 0);
+        when(mMockZenModeHelper.getNotificationPolicy()).thenReturn(mTestNotificationPolicy);
+        mHelper = new RankingHelper(getContext(), mPm, mHandler, mMockZenModeHelper,
+                mUsageStats, new String[] {ImportanceExtractor.class.getName()});
+        assertFalse(mHelper.areChannelsBypassingDnd());
+        verify(mMockZenModeHelper, never()).setNotificationPolicy(any());
+        resetZenModeHelper();
     }
 
     @Test

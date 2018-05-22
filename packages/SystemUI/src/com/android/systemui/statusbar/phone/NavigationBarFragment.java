@@ -608,7 +608,7 @@ public class NavigationBarFragment extends Fragment implements Callbacks {
     private int computeRotationProposalTimeout() {
         if (mAccessibilityFeedbackEnabled) return 20000;
         if (mHoveringRotationSuggestion) return 16000;
-        return 6000;
+        return 10000;
     }
 
     private boolean isRotateSuggestionIntroduced() {

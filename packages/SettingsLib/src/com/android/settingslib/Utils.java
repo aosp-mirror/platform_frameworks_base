@@ -202,13 +202,21 @@ public class Utils {
         return statusString;
     }
 
+    public static ColorStateList getColorAccent(Context context) {
+        return getColorAttr(context, android.R.attr.colorAccent);
+    }
+
+    public static ColorStateList getColorError(Context context) {
+        return getColorAttr(context, android.R.attr.colorError);
+    }
+
     @ColorInt
-    public static int getColorAccent(Context context) {
+    public static int getColorAccentDefaultColor(Context context) {
         return getColorAttrDefaultColor(context, android.R.attr.colorAccent);
     }
 
     @ColorInt
-    public static int getColorError(Context context) {
+    public static int getColorErrorDefaultColor(Context context) {
         return getColorAttrDefaultColor(context, android.R.attr.colorError);
     }
 
@@ -216,7 +224,6 @@ public class Utils {
     public static int getColorStateListDefaultColor(Context context, int resId) {
         final ColorStateList list =
                 context.getResources().getColorStateList(resId, context.getTheme());
-
         return list.getDefaultColor();
     }
 

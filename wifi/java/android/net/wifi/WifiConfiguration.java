@@ -903,38 +903,43 @@ public class WifiConfiguration implements Parcelable {
          */
         public static final int DISABLED_DNS_FAILURE = 5;
         /**
+         * This network is temporarily disabled because it has no Internet access.
+         */
+        public static final int DISABLED_NO_INTERNET_TEMPORARY = 6;
+        /**
          * This network is disabled because we started WPS
          */
-        public static final int DISABLED_WPS_START = 6;
+        public static final int DISABLED_WPS_START = 7;
         /**
          * This network is disabled because EAP-TLS failure
          */
-        public static final int DISABLED_TLS_VERSION_MISMATCH = 7;
+        public static final int DISABLED_TLS_VERSION_MISMATCH = 8;
         // Values above are for temporary disablement; values below are for permanent disablement.
         /**
          * This network is disabled due to absence of user credentials
          */
-        public static final int DISABLED_AUTHENTICATION_NO_CREDENTIALS = 8;
+        public static final int DISABLED_AUTHENTICATION_NO_CREDENTIALS = 9;
         /**
-         * This network is disabled because no Internet connected and user do not want
+         * This network is permanently disabled because it has no Internet access and user does not
+         * want to stay connected.
          */
-        public static final int DISABLED_NO_INTERNET = 9;
+        public static final int DISABLED_NO_INTERNET_PERMANENT = 10;
         /**
          * This network is disabled due to WifiManager disable it explicitly
          */
-        public static final int DISABLED_BY_WIFI_MANAGER = 10;
+        public static final int DISABLED_BY_WIFI_MANAGER = 11;
         /**
          * This network is disabled due to user switching
          */
-        public static final int DISABLED_DUE_TO_USER_SWITCH = 11;
+        public static final int DISABLED_DUE_TO_USER_SWITCH = 12;
         /**
          * This network is disabled due to wrong password
          */
-        public static final int DISABLED_BY_WRONG_PASSWORD = 12;
+        public static final int DISABLED_BY_WRONG_PASSWORD = 13;
         /**
          * This Maximum disable reason value
          */
-        public static final int NETWORK_SELECTION_DISABLED_MAX = 13;
+        public static final int NETWORK_SELECTION_DISABLED_MAX = 14;
 
         /**
          * Quality network selection disable reason String (for debug purpose)
@@ -946,10 +951,11 @@ public class WifiConfiguration implements Parcelable {
                 "NETWORK_SELECTION_DISABLED_AUTHENTICATION_FAILURE",
                 "NETWORK_SELECTION_DISABLED_DHCP_FAILURE",
                 "NETWORK_SELECTION_DISABLED_DNS_FAILURE",
+                "NETWORK_SELECTION_DISABLED_NO_INTERNET_TEMPORARY",
                 "NETWORK_SELECTION_DISABLED_WPS_START",
                 "NETWORK_SELECTION_DISABLED_TLS_VERSION",
                 "NETWORK_SELECTION_DISABLED_AUTHENTICATION_NO_CREDENTIALS",
-                "NETWORK_SELECTION_DISABLED_NO_INTERNET",
+                "NETWORK_SELECTION_DISABLED_NO_INTERNET_PERMANENT",
                 "NETWORK_SELECTION_DISABLED_BY_WIFI_MANAGER",
                 "NETWORK_SELECTION_DISABLED_BY_USER_SWITCH",
                 "NETWORK_SELECTION_DISABLED_BY_WRONG_PASSWORD"

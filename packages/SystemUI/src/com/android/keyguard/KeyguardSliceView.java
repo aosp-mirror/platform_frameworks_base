@@ -47,6 +47,7 @@ import com.android.systemui.Dependency;
 import com.android.systemui.Interpolators;
 import com.android.systemui.R;
 import com.android.systemui.keyguard.KeyguardSliceProvider;
+import com.android.systemui.statusbar.AlphaOptimizedTextView;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.tuner.TunerService;
 import com.android.systemui.util.wakelock.KeepAwakeAnimationListener;
@@ -197,6 +198,7 @@ public class KeyguardSliceView extends LinearLayout implements View.OnClickListe
 
             final SliceItem titleItem = rc.getTitleItem();
             button.setText(titleItem == null ? null : titleItem.getText());
+            button.setContentDescription(rc.getContentDescription());
 
             Drawable iconDrawable = null;
             SliceItem icon = SliceQuery.find(item.getSlice(),
@@ -245,7 +247,7 @@ public class KeyguardSliceView extends LinearLayout implements View.OnClickListe
      * @param charSequence Original text.
      * @return Optimal string.
      */
-    private CharSequence findBestLineBreak(CharSequence charSequence) {
+    private static CharSequence findBestLineBreak(CharSequence charSequence) {
         if (TextUtils.isEmpty(charSequence)) {
             return charSequence;
         }
@@ -369,27 +371,6 @@ public class KeyguardSliceView extends LinearLayout implements View.OnClickListe
     @Override
     public void onDensityOrFontScaleChanged() {
         mIconSize = mContext.getResources().getDimensionPixelSize(R.dimen.widget_icon_size);
-    }
-
-    @Override
-    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-        super.onMeasure(widthMeasureSpec, heightMeasureSpec);
-
-        // Find best ellipsis strategy for the title.
-        // Done on onMeasure since TextView#getLayout needs a measure pass to calculate its bounds.
-        Layout layout = mTitle.getLayout();
-        if (layout != null) {
-            final int lineCount = layout.getLineCount();
-            if (lineCount > 0) {
-                if (layout.getEllipsisCount(lineCount - 1) == 0) {
-                    CharSequence title = mTitle.getText();
-                    CharSequence bestLineBreak = findBestLineBreak(title);
-                    if (!TextUtils.equals(title, bestLineBreak)) {
-                        mTitle.setText(bestLineBreak);
-                    }
-                }
-            }
-        }
     }
 
     public void refresh() {
@@ -549,6 +530,46 @@ public class KeyguardSliceView extends LinearLayout implements View.OnClickListe
             for (Drawable drawable : getCompoundDrawables()) {
                 if (drawable != null) {
                     drawable.setTint(color);
+                }
+            }
+        }
+    }
+
+    /**
+     * A text view that will split its contents in 2 lines when possible.
+     */
+    static class TitleView extends AlphaOptimizedTextView {
+
+        public TitleView(Context context) {
+            super(context);
+        }
+
+        public TitleView(Context context, AttributeSet attrs) {
+            super(context, attrs);
+        }
+
+        public TitleView(Context context, AttributeSet attrs, int defStyleAttr) {
+            super(context, attrs, defStyleAttr);
+        }
+
+        public TitleView(Context context, AttributeSet attrs, int defStyleAttr,
+                int defStyleRes) {
+            super(context, attrs, defStyleAttr, defStyleRes);
+        }
+
+        @Override
+        protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+            super.onMeasure(widthMeasureSpec, heightMeasureSpec);
+
+            Layout layout = getLayout();
+            int lineCount = layout.getLineCount();
+            boolean ellipsizing = layout.getEllipsisCount(lineCount - 1) != 0;
+            if (lineCount > 0 && !ellipsizing) {
+                CharSequence title = getText();
+                CharSequence bestLineBreak = findBestLineBreak(title);
+                if (!TextUtils.equals(title, bestLineBreak)) {
+                    setText(bestLineBreak);
+                    super.onMeasure(widthMeasureSpec, heightMeasureSpec);
                 }
             }
         }

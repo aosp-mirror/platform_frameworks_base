@@ -88,7 +88,7 @@
     <dimen name="zen_mode_condition_detail_bottom_padding">4dp</dimen>
 
     <!-- SignalDrawable -->
-    <dimen name="signal_icon_size">17dp</dimen>
+    <dimen name="signal_icon_size">15dp</dimen>
     <!-- How far to inset the rounded edges -->
     <dimen name="stat_sys_mobile_signal_circle_inset">0.9dp</dimen>
 

@@ -33,17 +33,16 @@
 #include <SkImagePriv.h>
 #include <SkToSRGBColorFilter.h>
 
+#include <limits>
+
 namespace android {
 
+// returns true if rowBytes * height can be represented by a positive int32_t value
+// and places that value in size.
 static bool computeAllocationSize(size_t rowBytes, int height, size_t* size) {
-    int32_t rowBytes32 = SkToS32(rowBytes);
-    int64_t bigSize = (int64_t)height * rowBytes32;
-    if (rowBytes32 < 0 || !sk_64_isS32(bigSize)) {
-        return false;  // allocation will be too large
-    }
-
-    *size = sk_64_asS32(bigSize);
-    return true;
+    return 0 <= height && height <= std::numeric_limits<size_t>::max() &&
+           !__builtin_mul_overflow(rowBytes, (size_t)height, size) &&
+           *size <= std::numeric_limits<int32_t>::max();
 }
 
 typedef sk_sp<Bitmap> (*AllocPixelRef)(size_t allocSize, const SkImageInfo& info, size_t rowBytes);
