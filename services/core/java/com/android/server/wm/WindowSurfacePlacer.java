@@ -644,6 +644,11 @@ class WindowSurfacePlacer {
                 ? null : wallpaperTarget;
         final ArraySet<AppWindowToken> openingApps = mService.mOpeningApps;
         final ArraySet<AppWindowToken> closingApps = mService.mClosingApps;
+        final AppWindowToken topOpeningApp = getTopApp(mService.mOpeningApps,
+                false /* ignoreHidden */);
+        final AppWindowToken topClosingApp = getTopApp(mService.mClosingApps,
+                true /* ignoreHidden */);
+
         boolean openingCanBeWallpaperTarget = canBeWallpaperTarget(openingApps);
         if (DEBUG_APP_TRANSITIONS) Slog.v(TAG,
                 "New wallpaper target=" + wallpaperTarget
@@ -677,13 +682,15 @@ class WindowSurfacePlacer {
                         "New transit: " + AppTransition.appTransitionToString(transit));
             } else if (oldWallpaper != null && !mService.mOpeningApps.isEmpty()
                     && !openingApps.contains(oldWallpaper.mAppToken)
-                    && closingApps.contains(oldWallpaper.mAppToken)) {
+                    && closingApps.contains(oldWallpaper.mAppToken)
+                    && topClosingApp == oldWallpaper.mAppToken) {
                 // We are transitioning from an activity with a wallpaper to one without.
                 transit = TRANSIT_WALLPAPER_CLOSE;
                 if (DEBUG_APP_TRANSITIONS) Slog.v(TAG, "New transit away from wallpaper: "
                         + AppTransition.appTransitionToString(transit));
             } else if (wallpaperTarget != null && wallpaperTarget.isVisibleLw()
                     && openingApps.contains(wallpaperTarget.mAppToken)
+                    && topOpeningApp == wallpaperTarget.mAppToken
                     && transit != TRANSIT_TRANSLUCENT_ACTIVITY_CLOSE) {
                 // We are transitioning from an activity without
                 // a wallpaper to now showing the wallpaper
@@ -746,6 +753,31 @@ class WindowSurfacePlacer {
             }
         }
         return false;
+    }
+
+    /**
+     * Finds the top app in a list of apps, using its {@link AppWindowToken#getPrefixOrderIndex} to
+     * compare z-order.
+     *
+     * @param apps The list of apps to search.
+     * @param ignoreHidden If set to true, ignores apps that are {@link AppWindowToken#isHidden}.
+     * @return The top {@link AppWindowToken}.
+     */
+    private AppWindowToken getTopApp(ArraySet<AppWindowToken> apps, boolean ignoreHidden) {
+        int topPrefixOrderIndex = Integer.MIN_VALUE;
+        AppWindowToken topApp = null;
+        for (int i = apps.size() - 1; i >= 0; i--) {
+            final AppWindowToken app = apps.valueAt(i);
+            if (ignoreHidden && app.isHidden()) {
+                continue;
+            }
+            final int prefixOrderIndex = app.getPrefixOrderIndex();
+            if (prefixOrderIndex > topPrefixOrderIndex) {
+                topPrefixOrderIndex = prefixOrderIndex;
+                topApp = app;
+            }
+        }
+        return topApp;
     }
 
     private void processApplicationsAnimatingInPlace(int transit) {
