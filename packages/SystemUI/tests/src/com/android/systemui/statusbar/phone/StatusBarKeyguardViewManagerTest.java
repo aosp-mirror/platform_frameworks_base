@@ -162,6 +162,14 @@ public class StatusBarKeyguardViewManagerTest extends SysuiTestCase {
         verify(mBouncer, never()).show(eq(false), eq(false));
     }
 
+    @Test
+    public void onPanelExpansionChanged_neverTranslatesBouncerWhenOccluded() {
+        mStatusBarKeyguardViewManager.setOccluded(true /* occluded */, false /* animate */);
+        mStatusBarKeyguardViewManager.onPanelExpansionChanged(0.5f /* expansion */,
+                true /* tracking */);
+        verify(mBouncer, never()).setExpansion(eq(0.5f));
+    }
+
     private class TestableStatusBarKeyguardViewManager extends StatusBarKeyguardViewManager {
 
         public TestableStatusBarKeyguardViewManager(Context context,
