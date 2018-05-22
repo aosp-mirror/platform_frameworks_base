@@ -1851,7 +1851,7 @@ public class MediaSessionService extends SystemService implements Monitor {
                     }
                 });
             } else {
-                session.adjustVolume(packageName, pid, uid, asSystemService,
+                session.adjustVolume(packageName, pid, uid, null, asSystemService,
                         direction, flags, true);
             }
         }

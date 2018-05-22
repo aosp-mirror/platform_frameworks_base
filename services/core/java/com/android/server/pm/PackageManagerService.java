@@ -14090,13 +14090,9 @@ public class PackageManagerService extends IPackageManager.Stub
     public String[] setPackagesSuspendedAsUser(String[] packageNames, boolean suspended,
             PersistableBundle appExtras, PersistableBundle launcherExtras, String dialogMessage,
             String callingPackage, int userId) {
-        try {
-            mContext.enforceCallingOrSelfPermission(android.Manifest.permission.SUSPEND_APPS, null);
-        } catch (SecurityException e) {
-            mContext.enforceCallingOrSelfPermission(Manifest.permission.MANAGE_USERS,
-                    "Callers need to have either " + Manifest.permission.SUSPEND_APPS + " or "
-                            + Manifest.permission.MANAGE_USERS);
-        }
+        mContext.enforceCallingOrSelfPermission(android.Manifest.permission.SUSPEND_APPS,
+                "setPackagesSuspendedAsUser");
+
         final int callingUid = Binder.getCallingUid();
         if (callingUid != Process.ROOT_UID && callingUid != Process.SYSTEM_UID
                 && getPackageUid(callingPackage, 0, userId) != callingUid) {

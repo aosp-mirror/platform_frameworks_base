@@ -169,7 +169,7 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
         // • Full-screen user switcher is displayed.
         if (mNotificationPanelView.isUnlockHintRunning()) {
             mBouncer.setExpansion(KeyguardBouncer.EXPANSION_HIDDEN);
-        } else if (mBouncer.willDismissWithAction() || mBouncer.isShowingScrimmed()
+        } else if (mOccluded || mBouncer.willDismissWithAction() || mBouncer.isShowingScrimmed()
                 || mStatusBar.isFullScreenUserSwitcherState()) {
             mBouncer.setExpansion(KeyguardBouncer.EXPANSION_VISIBLE);
         } else if (mShowing && !mDozing) {
@@ -206,11 +206,15 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
         } else {
             mStatusBar.showKeyguard();
             if (hideBouncerWhenShowing) {
-                hideBouncer(false /* destroyView */);
+                hideBouncer(shouldDestroyViewOnReset() /* destroyView */);
                 mBouncer.prepare();
             }
         }
         updateStates();
+    }
+
+    protected boolean shouldDestroyViewOnReset() {
+        return false;
     }
 
     private void hideBouncer(boolean destroyView) {

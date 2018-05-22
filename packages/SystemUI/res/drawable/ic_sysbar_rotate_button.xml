@@ -29,13 +29,41 @@
         </vector>
     </aapt:attr>
 
-    <!-- Repeat all animations 3 times but don't fade out at the end -->
+    <!-- Repeat all animations 5 times but don't fade out at the end -->
     <target android:name="root">
         <aapt:attr name="android:animation">
             <set android:ordering="sequentially">
                 <!-- Linear fade in-->
                 <objectAnimator android:propertyName="alpha"
                                 android:duration="100"
+                                android:valueFrom="0"
+                                android:valueTo="1"
+                                android:interpolator="@android:anim/linear_interpolator" />
+                <!-- Linear fade out -->
+                <objectAnimator android:propertyName="alpha"
+                                android:duration="100"
+                                android:startOffset="1700"
+                                android:valueFrom="1"
+                                android:valueTo="0"
+                                android:interpolator="@android:anim/linear_interpolator"/>
+                <!-- Linear fade in-->
+                <objectAnimator android:propertyName="alpha"
+                                android:duration="100"
+                                android:startOffset="100"
+                                android:valueFrom="0"
+                                android:valueTo="1"
+                                android:interpolator="@android:anim/linear_interpolator" />
+                <!-- Linear fade out -->
+                <objectAnimator android:propertyName="alpha"
+                                android:duration="100"
+                                android:startOffset="1700"
+                                android:valueFrom="1"
+                                android:valueTo="0"
+                                android:interpolator="@android:anim/linear_interpolator"/>
+                <!-- Linear fade in-->
+                <objectAnimator android:propertyName="alpha"
+                                android:duration="100"
+                                android:startOffset="100"
                                 android:valueFrom="0"
                                 android:valueTo="1"
                                 android:interpolator="@android:anim/linear_interpolator" />
@@ -76,6 +104,40 @@
                 <!-- Icon rotation with start timing offset after fade in -->
                 <objectAnimator android:propertyName="rotation"
                                 android:startOffset="100"
+                                android:duration="600"
+                                android:valueFrom="?attr/rotateButtonStartAngle"
+                                android:valueTo="?attr/rotateButtonEndAngle">
+                    <aapt:attr name="android:interpolator">
+                        <pathInterpolator android:pathData="M 0.0,0.0 c0.408,1.181 0.674,1.08 1.0,1.0"/>
+                    </aapt:attr>
+                </objectAnimator>
+
+                <!-- Reset rotation position for fade in -->
+                <objectAnimator android:propertyName="rotation"
+                                android:startOffset="1300"
+                                android:duration="100"
+                                android:valueFrom="?attr/rotateButtonStartAngle"
+                                android:valueTo="?attr/rotateButtonStartAngle"/>
+
+                <!-- Icon rotation with start timing offset after fade in -->
+                <objectAnimator android:propertyName="rotation"
+                                android:duration="600"
+                                android:valueFrom="?attr/rotateButtonStartAngle"
+                                android:valueTo="?attr/rotateButtonEndAngle">
+                    <aapt:attr name="android:interpolator">
+                        <pathInterpolator android:pathData="M 0.0,0.0 c0.408,1.181 0.674,1.08 1.0,1.0"/>
+                    </aapt:attr>
+                </objectAnimator>
+
+                <!-- Reset rotation position for fade in -->
+                <objectAnimator android:propertyName="rotation"
+                                android:startOffset="1300"
+                                android:duration="100"
+                                android:valueFrom="?attr/rotateButtonStartAngle"
+                                android:valueTo="?attr/rotateButtonStartAngle"/>
+
+                <!-- Icon rotation with start timing offset after fade in -->
+                <objectAnimator android:propertyName="rotation"
                                 android:duration="600"
                                 android:valueFrom="?attr/rotateButtonStartAngle"
                                 android:valueTo="?attr/rotateButtonEndAngle">

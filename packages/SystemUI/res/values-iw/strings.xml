@@ -259,6 +259,7 @@
     <string name="accessibility_location_active" msgid="2427290146138169014">"בקשות מיקום פעילות"</string>
     <string name="accessibility_clear_all" msgid="5235938559247164925">"נקה את כל ההודעות."</string>
     <string name="notification_group_overflow_indicator" msgid="1863231301642314183">"+ <xliff:g id="NUMBER">%s</xliff:g>"</string>
+    <string name="notification_group_overflow_indicator_ambient" msgid="879560382990377886">"<xliff:g id="NOTIFICATION_TITLE">%s</xliff:g>, +<xliff:g id="OVERFLOW">%s</xliff:g>"</string>
     <plurals name="notification_group_overflow_description" formatted="false" msgid="4579313201268495404">
       <item quantity="two">יש בפנים עוד <xliff:g id="NUMBER_1">%s</xliff:g> הודעות.</item>
       <item quantity="many">יש בפנים עוד <xliff:g id="NUMBER_1">%s</xliff:g> הודעות.</item>
@@ -374,8 +375,7 @@
     <string name="recents_accessibility_split_screen_top" msgid="9056056469282256287">"פיצול מסך למעלה"</string>
     <string name="recents_accessibility_split_screen_left" msgid="8987144699630620019">"פיצול מסך לשמאל"</string>
     <string name="recents_accessibility_split_screen_right" msgid="275069779299592867">"פיצול מסך לימין"</string>
-    <!-- no translation found for quick_step_accessibility_toggle_overview (7171470775439860480) -->
-    <skip />
+    <string name="quick_step_accessibility_toggle_overview" msgid="7171470775439860480">"החלפת מצב של מסכים אחרונים"</string>
     <string name="expanded_header_battery_charged" msgid="5945855970267657951">"טעון"</string>
     <string name="expanded_header_battery_charging" msgid="205623198487189724">"טוען"</string>
     <string name="expanded_header_battery_charging_with_time" msgid="457559884275395376">"<xliff:g id="CHARGING_TIME">%s</xliff:g> עד למילוי"</string>
@@ -442,7 +442,8 @@
     <string name="media_projection_remember_text" msgid="3103510882172746752">"אל תציג שוב"</string>
     <string name="clear_all_notifications_text" msgid="814192889771462828">"נקה הכל"</string>
     <string name="manage_notifications_text" msgid="8035284146227267681">"ניהול התראות"</string>
-    <string name="dnd_suppressing_shade_text" msgid="5179021215370153526">"מצב \'נא לא להפריע\' מסתיר הודעות"</string>
+    <!-- no translation found for dnd_suppressing_shade_text (1904574852846769301) -->
+    <skip />
     <string name="media_projection_action_text" msgid="8470872969457985954">"התחל כעת"</string>
     <string name="empty_shade_text" msgid="708135716272867002">"אין הודעות"</string>
     <string name="profile_owned_footer" msgid="8021888108553696069">"ייתכן שהפרופיל נתון למעקב"</string>
@@ -549,12 +550,9 @@
     <string name="volume_stream_content_description_mute" msgid="3625049841390467354">"‏%1$s. הקש כדי להשתיק. ייתכן ששירותי הנגישות מושתקים."</string>
     <string name="volume_stream_content_description_vibrate_a11y" msgid="6427727603978431301">"‏%1$s. הקש כדי להעביר למצב רטט."</string>
     <string name="volume_stream_content_description_mute_a11y" msgid="8995013018414535494">"‏%1$s. הקש כדי להשתיק."</string>
-    <!-- no translation found for volume_ringer_hint_mute (9199811307292269601) -->
-    <skip />
-    <!-- no translation found for volume_ringer_hint_unmute (6602880133293060368) -->
-    <skip />
-    <!-- no translation found for volume_ringer_hint_vibrate (4036802135666515202) -->
-    <skip />
+    <string name="volume_ringer_hint_mute" msgid="9199811307292269601">"השתקה"</string>
+    <string name="volume_ringer_hint_unmute" msgid="6602880133293060368">"ביטול ההשתקה"</string>
+    <string name="volume_ringer_hint_vibrate" msgid="4036802135666515202">"רטט"</string>
     <string name="volume_dialog_title" msgid="7272969888820035876">"‏בקרי עוצמת שמע של %s"</string>
     <string name="volume_dialog_ringer_guidance_ring" msgid="3360373718388509040">"הטלפון יצלצל כשמתקבלות שיחות והודעות (<xliff:g id="VOLUME_LEVEL">%1$s</xliff:g>)"</string>
     <string name="output_title" msgid="5355078100792942802">"פלט מדיה"</string>
@@ -620,20 +618,13 @@
     <string name="inline_minimize_button" msgid="966233327974702195">"מזעור"</string>
     <string name="inline_keep_showing_app" msgid="1723113469580031041">"שנמשיך להציג לך הודעות מהאפליקציה הזאת?"</string>
     <string name="notification_unblockable_desc" msgid="1037434112919403708">"לא ניתן לכבות את ההודעות האלה"</string>
-    <!-- no translation found for appops_camera (8100147441602585776) -->
-    <skip />
-    <!-- no translation found for appops_microphone (741508267659494555) -->
-    <skip />
-    <!-- no translation found for appops_overlay (6165912637560323464) -->
-    <skip />
-    <!-- no translation found for appops_camera_mic (1576901651150187433) -->
-    <skip />
-    <!-- no translation found for appops_camera_overlay (8869400080809298814) -->
-    <skip />
-    <!-- no translation found for appops_mic_overlay (4835157962857919804) -->
-    <skip />
-    <!-- no translation found for appops_camera_mic_overlay (6718768197048030993) -->
-    <skip />
+    <string name="appops_camera" msgid="8100147441602585776">"האפליקציה הזו משתמשת במצלמה."</string>
+    <string name="appops_microphone" msgid="741508267659494555">"האפליקציה הזו משתמשת במיקרופון."</string>
+    <string name="appops_overlay" msgid="6165912637560323464">"האפליקציה הזו מוצגת מעל אפליקציות אחרות במסך."</string>
+    <string name="appops_camera_mic" msgid="1576901651150187433">"האפליקציה הזו משתמשת במיקרופון ובמצלמה."</string>
+    <string name="appops_camera_overlay" msgid="8869400080809298814">"האפליקציה הזו מוצגת מעל אפליקציות אחרות במסך ומשתמשת במצלמה."</string>
+    <string name="appops_mic_overlay" msgid="4835157962857919804">"האפליקציה הזו מוצגת מעל אפליקציות אחרות במסך ומשתמשת במיקרופון."</string>
+    <string name="appops_camera_mic_overlay" msgid="6718768197048030993">"האפליקציה הזו מוצגת מעל אפליקציות אחרות במסך, ומשתמשת במיקרופון ובמצלמה."</string>
     <string name="notification_appops_settings" msgid="1028328314935908050">"הגדרות"</string>
     <string name="notification_appops_ok" msgid="1156966426011011434">"אישור"</string>
     <string name="notification_channel_controls_opened_accessibility" msgid="6553950422055908113">"פקדי ההודעות של <xliff:g id="APP_NAME">%1$s</xliff:g> נפתחו"</string>

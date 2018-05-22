@@ -564,7 +564,7 @@
     <string name="permlab_setInputCalibration" msgid="4902620118878467615">"skift kalibrering for inputenheden"</string>
     <string name="permdesc_setInputCalibration" msgid="4527511047549456929">"Tillader, at appen ændrer kalibreringsparametrene for berøringsskærmen. Dette bør aldrig være nødvendigt for almindelige apps."</string>
     <string name="permlab_accessDrmCertificates" msgid="7436886640723203615">"få adgang til DRM-certifikater"</string>
-    <string name="permdesc_accessDrmCertificates" msgid="8073288354426159089">"Tillader, at en applikation leverer og anvender DRM-certfikater. Dette bør aldrig være nødvendigt for almindelige apps."</string>
+    <string name="permdesc_accessDrmCertificates" msgid="8073288354426159089">"Tillader, at en applikation provisionerer og anvender DRM-certifikater. Dette bør aldrig være nødvendigt for almindelige apps."</string>
     <string name="permlab_handoverStatus" msgid="7820353257219300883">"modtag status for Android Beam-overførsler"</string>
     <string name="permdesc_handoverStatus" msgid="4788144087245714948">"Tillader, at applikationen modtager oplysninger om aktuelle Android Beam-overførsler"</string>
     <string name="permlab_removeDrmCertificates" msgid="7044888287209892751">"fjerne DRM-certifikater"</string>
@@ -1781,8 +1781,8 @@
     <string name="language_picker_section_all" msgid="3097279199511617537">"Alle sprog"</string>
     <string name="region_picker_section_all" msgid="8966316787153001779">"Alle områder"</string>
     <string name="locale_search_menu" msgid="2560710726687249178">"Søg"</string>
-    <string name="app_suspended_title" msgid="1919029799438164552">"Appen kan ikke åbnes"</string>
-    <string name="app_suspended_default_message" msgid="7875306315686531621">"Appen <xliff:g id="APP_NAME_0">%1$s</xliff:g> er ikke tilgængelig lige nu. Dette administreres af <xliff:g id="APP_NAME_1">%2$s</xliff:g>."</string>
+    <string name="app_suspended_title" msgid="2075071241147969611">"Appen er ikke tilgængelig"</string>
+    <string name="app_suspended_default_message" msgid="123166680425711887">"<xliff:g id="APP_NAME_0">%1$s</xliff:g> er ikke tilgængelig lige nu. Dette administreres af <xliff:g id="APP_NAME_1">%2$s</xliff:g>."</string>
     <string name="app_suspended_more_details" msgid="1131804827776778187">"Få flere oplysninger"</string>
     <string name="work_mode_off_title" msgid="1118691887588435530">"Skal arbejdsprofilen slås til?"</string>
     <string name="work_mode_off_message" msgid="5130856710614337649">"Dine arbejdsapps, underretninger, data og andre funktioner til din arbejdsprofil deaktiveres"</string>
@@ -1879,5 +1879,8 @@
     <string name="zen_upgrade_notification_content" msgid="1794994264692424562">"Tryk for at se, hvad der er blokeret."</string>
     <string name="notification_app_name_system" msgid="4205032194610042794">"System"</string>
     <string name="notification_app_name_settings" msgid="7751445616365753381">"Indstillinger"</string>
+    <string name="notification_appops_camera_active" msgid="5050283058419699771">"Kamera"</string>
+    <string name="notification_appops_microphone_active" msgid="4335305527588191730">"Mikrofon"</string>
+    <string name="notification_appops_overlay_active" msgid="633813008357934729">"vises over andre apps på din skærm"</string>
     <string name="car_loading_profile" msgid="3545132581795684027">"Indlæser"</string>
 </resources>

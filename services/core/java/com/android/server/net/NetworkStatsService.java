@@ -184,6 +184,8 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
 
     private final PowerManager.WakeLock mWakeLock;
 
+    private final boolean mUseBpfTrafficStats;
+
     private IConnectivityManager mConnManager;
 
     @VisibleForTesting
@@ -347,6 +349,7 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
         mStatsObservers = checkNotNull(statsObservers, "missing NetworkStatsObservers");
         mSystemDir = checkNotNull(systemDir, "missing systemDir");
         mBaseDir = checkNotNull(baseDir, "missing baseDir");
+        mUseBpfTrafficStats = new File("/sys/fs/bpf/traffic_uid_stats_map").exists();
 
         LocalServices.addService(NetworkStatsManagerInternal.class,
                 new NetworkStatsManagerInternalImpl());
@@ -947,7 +950,7 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
     }
 
     private boolean checkBpfStatsEnable() {
-        return new File("/sys/fs/bpf/traffic_uid_stats_map").exists();
+        return mUseBpfTrafficStats;
     }
 
     /**
