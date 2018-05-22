@@ -91,10 +91,12 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.Process;
+import android.os.RemoteException;
 import android.os.UserHandle;
 import android.provider.MediaStore;
 import android.provider.Settings.Secure;
 import android.service.notification.Adjustment;
+import android.service.notification.INotificationListener;
 import android.service.notification.NotificationListenerService;
 import android.service.notification.NotificationStats;
 import android.service.notification.NotifyingApp;
@@ -159,6 +161,8 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     File mFile;
     @Mock
     private NotificationUsageStats mUsageStats;
+    @Mock
+    private UsageStatsManagerInternal mAppUsageStats;
     @Mock
     private AudioManager mAudioManager;
     @Mock
@@ -276,7 +280,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
                     mPackageManager, mPackageManagerClient, mockLightsManager,
                     mListeners, mAssistants, mConditionProviders,
                     mCompanionMgr, mSnoozeHelper, mUsageStats, mPolicyFile, mActivityManager,
-                    mGroupHelper, mAm, mock(UsageStatsManagerInternal.class),
+                    mGroupHelper, mAm, mAppUsageStats,
                     mock(DevicePolicyManagerInternal.class));
         } catch (SecurityException e) {
             if (!e.getMessage().contains("Permission Denial: not allowed to send broadcast")) {
@@ -3018,5 +3022,47 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         when(mContext.getResources()).thenReturn(mResources);
 
         assertEquals(true, mService.canUseManagedServices("d"));
+    }
+
+    @Test
+    public void testOnNotificationVisibilityChanged_triggersInterruptionUsageStat() {
+        final NotificationRecord r = generateNotificationRecord(
+                mTestNotificationChannel, 1, null, true);
+        r.setTextChanged(true);
+        mService.addNotification(r);
+
+        mService.mNotificationDelegate.onNotificationVisibilityChanged(new NotificationVisibility[]
+                {NotificationVisibility.obtain(r.getKey(), 1, 1, true)},
+                new NotificationVisibility[]{});
+
+        verify(mAppUsageStats).reportInterruptiveNotification(anyString(), anyString(), anyInt());
+    }
+
+    @Test
+    public void testSetNotificationsShownFromListener_triggersInterruptionUsageStat()
+            throws RemoteException {
+        final NotificationRecord r = generateNotificationRecord(
+                mTestNotificationChannel, 1, null, true);
+        r.setTextChanged(true);
+        mService.addNotification(r);
+
+        mBinderService.setNotificationsShownFromListener(null, new String[] {r.getKey()});
+
+        verify(mAppUsageStats).reportInterruptiveNotification(anyString(), anyString(), anyInt());
+    }
+
+    @Test
+    public void testMybeRecordInterruptionLocked_doesNotRecordTwice()
+            throws RemoteException {
+        final NotificationRecord r = generateNotificationRecord(
+                mTestNotificationChannel, 1, null, true);
+        r.setInterruptive(true);
+        mService.addNotification(r);
+
+        mService.maybeRecordInterruptionLocked(r);
+        mService.maybeRecordInterruptionLocked(r);
+
+        verify(mAppUsageStats, times(1)).reportInterruptiveNotification(
+                anyString(), anyString(), anyInt());
     }
 }
