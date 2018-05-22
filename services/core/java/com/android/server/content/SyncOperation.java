@@ -390,10 +390,10 @@ public class SyncOperation {
         switch (syncExemptionFlag) {
             case ContentResolver.SYNC_EXEMPTION_NONE:
                 break;
-            case ContentResolver.SYNC_EXEMPTION_ACTIVE:
+            case ContentResolver.SYNC_EXEMPTION_PROMOTE_BUCKET:
                 sb.append(" STANDBY-EXEMPTED");
                 break;
-            case ContentResolver.SYNC_EXEMPTION_ACTIVE_WITH_TEMP:
+            case ContentResolver.SYNC_EXEMPTION_PROMOTE_BUCKET_WITH_TEMP:
                 sb.append(" STANDBY-EXEMPTED(TOP)");
                 break;
             default:
