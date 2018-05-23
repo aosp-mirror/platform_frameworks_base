@@ -207,8 +207,9 @@ public abstract class Image implements AutoCloseable {
      * after  {@link Image#close Image.close()} has been called.
      * </p>
      * @return the HardwareBuffer associated with this Image or null if this Image doesn't support
-     * this feature (e.g. {@link android.media.ImageWriter ImageWriter} or
-     * {@link android.media.MediaCodec MediaCodec} don't).
+     * this feature. (Unsupported use cases include Image instances obtained through
+     * {@link android.media.MediaCodec MediaCodec}, and on versions prior to Android P,
+     * {@link android.media.ImageWriter ImageWriter}).
      */
     @Nullable
     public HardwareBuffer getHardwareBuffer() {
