@@ -12,7 +12,8 @@ LOCAL_SRC_FILES += \
 
 LOCAL_AIDL_INCLUDES = frameworks/native/cmds/dumpstate/binder
 
-LOCAL_STATIC_JAVA_LIBRARIES := android-support-v4
+LOCAL_STATIC_ANDROID_LIBRARIES := androidx.legacy_legacy-support-v4
+LOCAL_USE_AAPT2 := true
 
 LOCAL_PACKAGE_NAME := Shell
 LOCAL_PRIVATE_PLATFORM_APIS := true
