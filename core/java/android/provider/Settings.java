@@ -11603,6 +11603,13 @@ public final class Settings {
         /** @hide */ public static final int EMULATE_DISPLAY_CUTOUT_ON = 1;
 
         /**
+         * A colon separated list of keys for Settings Slices.
+         *
+         * @hide
+         */
+        public static final String BLOCKED_SLICES = "blocked_slices";
+
+        /**
          * Defines global zen mode.  ZEN_MODE_OFF, ZEN_MODE_IMPORTANT_INTERRUPTIONS,
          * or ZEN_MODE_NO_INTERRUPTIONS.
          *
