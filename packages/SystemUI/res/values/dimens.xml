@@ -960,6 +960,10 @@
             add about 88dp of height to the notifications. -->
     <dimen name="smart_reply_button_max_height">100dp</dimen>
 
+    <!-- The extra height that we allow a notification with a remote input history to be taller than
+         the regular notification, when we have remote input history texts present. -->
+    <dimen name="remote_input_history_extra_height">60dp</dimen>
+
     <!-- Fingerprint Dialog values -->
     <dimen name="fingerprint_dialog_fp_icon_size">64dp</dimen>
     <dimen name="fingerprint_dialog_animation_translation_offset">350dp</dimen>
