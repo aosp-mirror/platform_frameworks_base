@@ -2537,12 +2537,21 @@ public class LockSettingsService extends ILockSettings.Stub {
      * Returns a fixed pseudorandom byte string derived from the user's synthetic password.
      * This is used to salt the password history hash to protect the hash against offline
      * bruteforcing, since rederiving this value requires a successful authentication.
+     * If user is a managed profile with unified challenge, currentCredential is ignored.
      */
     @Override
     public byte[] getHashFactor(String currentCredential, int userId) throws RemoteException {
         checkPasswordReadPermission(userId);
         if (TextUtils.isEmpty(currentCredential)) {
             currentCredential = null;
+        }
+        if (isManagedProfileWithUnifiedLock(userId)) {
+            try {
+                currentCredential = getDecryptedPasswordForTiedProfile(userId);
+            } catch (Exception e) {
+                Slog.e(TAG, "Failed to get work profile credential", e);
+                return null;
+            }
         }
         synchronized (mSpManager) {
             if (!isSyntheticPasswordBasedCredentialLocked(userId)) {
