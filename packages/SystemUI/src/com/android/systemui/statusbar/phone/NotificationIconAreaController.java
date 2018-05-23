@@ -141,7 +141,7 @@ public class NotificationIconAreaController implements DarkReceiver {
     }
 
     protected boolean shouldShowNotificationIcon(NotificationData.Entry entry,
-            boolean showAmbient, boolean hideDismissed) {
+            boolean showAmbient, boolean hideDismissed, boolean hideRepliedMessages) {
         if (mEntryManager.getNotificationData().isAmbient(entry.key) && !showAmbient) {
             return false;
         }
@@ -152,6 +152,10 @@ public class NotificationIconAreaController implements DarkReceiver {
             return false;
         }
         if (entry.row.isDismissed() && hideDismissed) {
+            return false;
+        }
+
+        if (hideRepliedMessages && entry.isLastMessageFromReply()) {
             return false;
         }
 
@@ -170,14 +174,15 @@ public class NotificationIconAreaController implements DarkReceiver {
 
         updateStatusBarIcons();
         updateIconsForLayout(entry -> entry.expandedIcon, mShelfIcons,
-                NotificationShelf.SHOW_AMBIENT_ICONS, false /* hideDismissed */);
+                NotificationShelf.SHOW_AMBIENT_ICONS, false /* hideDismissed */,
+                false /* hideRepliedMessages */);
 
         applyNotificationIconsTint();
     }
 
-    private void updateStatusBarIcons() {
+    public void updateStatusBarIcons() {
         updateIconsForLayout(entry -> entry.icon, mNotificationIcons,
-                false /* showAmbient */, true /* hideDismissed */);
+                false /* showAmbient */, true /* hideDismissed */, true /* hideRepliedMessages */);
     }
 
     /**
@@ -187,9 +192,11 @@ public class NotificationIconAreaController implements DarkReceiver {
      * @param hostLayout which layout should be updated
      * @param showAmbient should ambient notification icons be shown
      * @param hideDismissed should dismissed icons be hidden
+     * @param hideRepliedMessages should messages that have been replied to be hidden
      */
     private void updateIconsForLayout(Function<NotificationData.Entry, StatusBarIconView> function,
-            NotificationIconContainer hostLayout, boolean showAmbient, boolean hideDismissed) {
+            NotificationIconContainer hostLayout, boolean showAmbient, boolean hideDismissed,
+            boolean hideRepliedMessages) {
         ArrayList<StatusBarIconView> toShow = new ArrayList<>(
                 mNotificationScrollLayout.getChildCount());
 
@@ -198,7 +205,8 @@ public class NotificationIconAreaController implements DarkReceiver {
             View view = mNotificationScrollLayout.getChildAt(i);
             if (view instanceof ExpandableNotificationRow) {
                 NotificationData.Entry ent = ((ExpandableNotificationRow) view).getEntry();
-                if (shouldShowNotificationIcon(ent, showAmbient, hideDismissed)) {
+                if (shouldShowNotificationIcon(ent, showAmbient, hideDismissed,
+                        hideRepliedMessages)) {
                     toShow.add(function.apply(ent));
                 }
             }
