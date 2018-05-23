@@ -20,6 +20,7 @@ import android.graphics.ImageFormat;
 import android.graphics.PixelFormat;
 import android.graphics.Rect;
 import android.hardware.camera2.utils.SurfaceUtils;
+import android.hardware.HardwareBuffer;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
@@ -58,12 +59,17 @@ import java.util.concurrent.CopyOnWriteArrayList;
  * </p>
  * <p>
  * If the application already has an Image from {@link ImageReader}, the
- * application can directly queue this Image into ImageWriter (via
- * {@link #queueInputImage}), potentially with zero buffer copies. For the
- * {@link ImageFormat#PRIVATE PRIVATE} format Images produced by
- * {@link ImageReader}, this is the only way to send Image data to ImageWriter,
- * as the Image data aren't accessible by the application.
+ * application can directly queue this Image into the ImageWriter (via
+ * {@link #queueInputImage}), potentially with zero buffer copies. This
+ * even works if the image format of the ImageWriter is
+ * {@link ImageFormat#PRIVATE PRIVATE}, and prior to Android P is the only
+ * way to enqueue images into such an ImageWriter. Starting in Android P
+ * private images may also be accessed through their hardware buffers
+ * (when available) through the {@link Image#getHardwareBuffer()} method.
+ * Attempting to access the planes of a private image, will return an
+ * empty array.
  * </p>
+ * <p>
  * Once new input Images are queued into an ImageWriter, it's up to the
  * downstream components (e.g. {@link ImageReader} or
  * {@link android.hardware.camera2.CameraDevice}) to consume the Images. If the
@@ -257,29 +263,26 @@ public class ImageWriter implements AutoCloseable {
      * <p>
      * If the format of ImageWriter is {@link ImageFormat#PRIVATE PRIVATE} (
      * {@link ImageWriter#getFormat()} == {@link ImageFormat#PRIVATE}), the
-     * image buffer is inaccessible to the application, and calling this method
-     * will result in an {@link IllegalStateException}. Instead, the application
-     * should acquire images from some other component (e.g. an
+     * image buffer is accessible to the application only through the hardware
+     * buffer obtained through {@link Image#getHardwareBuffer()}. (On Android
+     * versions prior to P, dequeueing private buffers will cause an
+     * {@link IllegalStateException} to be thrown). Alternatively,
+     * the application can acquire images from some other component (e.g. an
      * {@link ImageReader}), and queue them directly to this ImageWriter via the
      * {@link ImageWriter#queueInputImage queueInputImage()} method.
      * </p>
      *
      * @return The next available input Image from this ImageWriter.
      * @throws IllegalStateException if {@code maxImages} Images are currently
-     *             dequeued, or the ImageWriter format is
-     *             {@link ImageFormat#PRIVATE PRIVATE}, or the input
-     *             {@link android.view.Surface Surface} has been abandoned by the
-     *             consumer component that provided the {@link android.view.Surface Surface}.
+     *             dequeued, or the input {@link android.view.Surface Surface}
+     *             has been abandoned by the consumer component that provided
+     *             the {@link android.view.Surface Surface}. Prior to Android
+     *             P, throws if the ImageWriter format is
+     *             {@link ImageFormat#PRIVATE PRIVATE}.
      * @see #queueInputImage
      * @see Image#close
      */
     public Image dequeueInputImage() {
-        if (mWriterFormat == ImageFormat.PRIVATE) {
-            throw new IllegalStateException(
-                    "PRIVATE format ImageWriter doesn't support this operation since the images are"
-                            + " inaccessible to the application!");
-        }
-
         if (mDequeuedImages.size() >= mMaxImages) {
             throw new IllegalStateException("Already dequeued max number of Images " + mMaxImages);
         }
@@ -743,6 +746,13 @@ public class ImageWriter implements AutoCloseable {
         }
 
         @Override
+        public HardwareBuffer getHardwareBuffer() {
+            throwISEIfImageIsInvalid();
+
+            return nativeGetHardwareBuffer();
+        }
+
+        @Override
         public Plane[] getPlanes() {
             throwISEIfImageIsInvalid();
 
@@ -863,6 +873,8 @@ public class ImageWriter implements AutoCloseable {
         private synchronized native int nativeGetHeight();
 
         private synchronized native int nativeGetFormat();
+
+        private synchronized native HardwareBuffer nativeGetHardwareBuffer();
     }
 
     // Native implemented ImageWriter methods.
