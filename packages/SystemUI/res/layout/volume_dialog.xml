@@ -93,7 +93,7 @@
                     android:layout_gravity="center"
                     android:contentDescription="@string/accessibility_volume_settings"
                     android:background="@drawable/ripple_drawable_20dp"
-                    android:tint="?android:attr/textColorHint"
+                    android:tint="?android:attr/textColorSecondary"
                     android:soundEffectsEnabled="false" />
             </FrameLayout>
         </LinearLayout>
