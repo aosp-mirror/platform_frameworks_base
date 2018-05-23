@@ -238,6 +238,14 @@ public class ConnectivityManager {
     public static final String EXTRA_CAPTIVE_PORTAL_URL = "android.net.extra.CAPTIVE_PORTAL_URL";
 
     /**
+     * Key for passing a {@link android.net.captiveportal.CaptivePortalProbeSpec} to the captive
+     * portal login activity.
+     * {@hide}
+     */
+    public static final String EXTRA_CAPTIVE_PORTAL_PROBE_SPEC =
+            "android.net.extra.CAPTIVE_PORTAL_PROBE_SPEC";
+
+    /**
      * Key for passing a user agent string to the captive portal login activity.
      * {@hide}
      */
