@@ -873,9 +873,8 @@ public class UserManagerService extends IUserManager.Stub {
             throw new SecurityException("MANAGE_USERS permission is required to start intent "
                     + "after disabling quiet mode.");
         }
-        final boolean hasModifyQuietModePermission = ActivityManager.checkComponentPermission(
-                Manifest.permission.MODIFY_QUIET_MODE,
-                callingUid, -1, true) == PackageManager.PERMISSION_GRANTED;
+        final boolean hasModifyQuietModePermission = hasPermissionGranted(
+                Manifest.permission.MODIFY_QUIET_MODE, callingUid);
         if (hasModifyQuietModePermission) {
             return;
         }
@@ -1002,6 +1001,30 @@ public class UserManagerService extends IUserManager.Stub {
         }
     }
 
+    @Override
+    public void setUserAdmin(int userId) {
+        checkManageUserAndAcrossUsersFullPermission("set user admin");
+
+        synchronized (mPackagesLock) {
+            UserInfo info;
+            synchronized (mUsersLock) {
+                info = getUserInfoLU(userId);
+            }
+            if (info == null || info.isAdmin()) {
+                // Exit if no user found with that id, or the user is already an Admin.
+                return;
+            }
+
+            info.flags ^= UserInfo.FLAG_ADMIN;
+            writeUserLP(getUserDataLU(info.id));
+        }
+
+        // Remove non-admin restrictions.
+        // Keep synchronized with createUserEvenWhenDisallowed.
+        setUserRestriction(UserManager.DISALLOW_SMS, false, userId);
+        setUserRestriction(UserManager.DISALLOW_OUTGOING_CALLS, false, userId);
+    }
+
     /**
      * Evicts a user's CE key by stopping and restarting the user.
      *
@@ -1122,8 +1145,8 @@ public class UserManagerService extends IUserManager.Stub {
                 hasManageUsersPermission()) {
             return;
         }
-        if (ActivityManager.checkComponentPermission(Manifest.permission.INTERACT_ACROSS_USERS,
-                Binder.getCallingUid(), -1, true) != PackageManager.PERMISSION_GRANTED) {
+        if (!hasPermissionGranted(Manifest.permission.INTERACT_ACROSS_USERS,
+                Binder.getCallingUid())) {
             throw new SecurityException("You need INTERACT_ACROSS_USERS or MANAGE_USERS permission "
                     + "to: check " + name);
         }
@@ -1801,17 +1824,26 @@ public class UserManagerService extends IUserManager.Stub {
      */
     private static final void checkManageUserAndAcrossUsersFullPermission(String message) {
         final int uid = Binder.getCallingUid();
-        if (uid != Process.SYSTEM_UID && uid != 0
-                && ActivityManager.checkComponentPermission(
-                Manifest.permission.MANAGE_USERS,
-                uid, -1, true) != PackageManager.PERMISSION_GRANTED
-                && ActivityManager.checkComponentPermission(
-                Manifest.permission.INTERACT_ACROSS_USERS_FULL,
-                uid, -1, true) != PackageManager.PERMISSION_GRANTED) {
-            throw new SecurityException(
-                    "You need MANAGE_USERS and INTERACT_ACROSS_USERS_FULL permission to: "
-                            + message);
+
+        if (uid == Process.SYSTEM_UID || uid == 0) {
+            // System UID or root's UID are granted privilege.
+            return;
         }
+
+        if (hasPermissionGranted(Manifest.permission.MANAGE_USERS, uid)
+                && hasPermissionGranted(Manifest.permission.INTERACT_ACROSS_USERS_FULL, uid)) {
+            // Apps with both permissions are granted privilege.
+            return;
+        }
+
+        throw new SecurityException(
+                "You need MANAGE_USERS and INTERACT_ACROSS_USERS_FULL permission to: " + message);
+    }
+
+    private static boolean hasPermissionGranted(String permission, int uid) {
+        return ActivityManager.checkComponentPermission(
+                permission, uid, /* owningUid = */-1, /* exported = */ true) ==
+                PackageManager.PERMISSION_GRANTED;
     }
 
     /**
@@ -1872,9 +1904,7 @@ public class UserManagerService extends IUserManager.Stub {
         final int callingUid = Binder.getCallingUid();
         return UserHandle.isSameApp(callingUid, Process.SYSTEM_UID)
                 || callingUid == Process.ROOT_UID
-                || ActivityManager.checkComponentPermission(
-                        android.Manifest.permission.MANAGE_USERS,
-                        callingUid, -1, true) == PackageManager.PERMISSION_GRANTED;
+                || hasPermissionGranted(android.Manifest.permission.MANAGE_USERS, callingUid);
     }
 
     /**
@@ -1886,12 +1916,8 @@ public class UserManagerService extends IUserManager.Stub {
         final int callingUid = Binder.getCallingUid();
         return UserHandle.isSameApp(callingUid, Process.SYSTEM_UID)
                 || callingUid == Process.ROOT_UID
-                || ActivityManager.checkComponentPermission(
-                        android.Manifest.permission.MANAGE_USERS,
-                        callingUid, -1, true) == PackageManager.PERMISSION_GRANTED
-                || ActivityManager.checkComponentPermission(
-                        android.Manifest.permission.CREATE_USERS,
-                        callingUid, -1, true) == PackageManager.PERMISSION_GRANTED;
+                || hasPermissionGranted(android.Manifest.permission.MANAGE_USERS, callingUid)
+                || hasPermissionGranted(android.Manifest.permission.CREATE_USERS, callingUid);
     }
 
     /**
