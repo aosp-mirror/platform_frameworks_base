@@ -6655,6 +6655,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     }
 
     void launchVoiceAssistWithWakeLock() {
+        sendCloseSystemWindows(SYSTEM_DIALOG_REASON_ASSIST);
+
         final Intent voiceIntent;
         if (!keyguardOn()) {
             voiceIntent = new Intent(RecognizerIntent.ACTION_WEB_SEARCH);
