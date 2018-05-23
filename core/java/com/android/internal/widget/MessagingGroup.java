@@ -207,6 +207,8 @@ public class MessagingGroup extends LinearLayout implements MessagingLinearLayou
                 mAvatarView.setTranslationY(0.0f);
                 mSenderName.setAlpha(1.0f);
                 mSenderName.setTranslationY(0.0f);
+                mIsolatedMessage = null;
+                mMessages = null;
                 sInstancePool.release(MessagingGroup.this);
             }
         };
@@ -267,6 +269,11 @@ public class MessagingGroup extends LinearLayout implements MessagingLinearLayou
 
     @Override
     public int getMeasuredType() {
+        if (mIsolatedMessage != null) {
+            // We only want to show one group if we have an inline image, so let's return shortened
+            // to avoid displaying the other ones.
+            return MEASURED_SHORTENED;
+        }
         boolean hasNormal = false;
         for (int i = mMessageContainer.getChildCount() - 1; i >= 0; i--) {
             View child = mMessageContainer.getChildAt(i);
@@ -291,9 +298,6 @@ public class MessagingGroup extends LinearLayout implements MessagingLinearLayou
                     hasNormal = true;
                 }
             }
-        }
-        if (mMessageContainer.getChildCount() == 0 && mIsolatedMessage != null) {
-            return mIsolatedMessage.getMeasuredType();
         }
         return MEASURED_NORMAL;
     }
