@@ -211,7 +211,7 @@ interface IAudioService {
     oneway void playerHasOpPlayAudio(in int piid, in boolean hasOpPlayAudio);
 
     int setBluetoothA2dpDeviceConnectionStateSuppressNoisyIntent(in BluetoothDevice device,
-            int state, int profile, boolean suppressNoisyIntent);
+            int state, int profile, boolean suppressNoisyIntent, int a2dpVolume);
 
     oneway void setFocusRequestResultFromExtPolicy(in AudioFocusInfo afi, int requestResult,
             in IAudioPolicyCallback pcb);
