@@ -7393,7 +7393,14 @@ public class Notification implements Parcelable
                 return messages;
             }
 
-            static Message getMessageFromBundle(Bundle bundle) {
+            /**
+             * @return The message that is stored in the bundle or null if the message couldn't be
+             * resolved.
+             *
+             * @hide
+             */
+            @Nullable
+            public static Message getMessageFromBundle(Bundle bundle) {
                 try {
                     if (!bundle.containsKey(KEY_TEXT) || !bundle.containsKey(KEY_TIMESTAMP)) {
                         return null;
