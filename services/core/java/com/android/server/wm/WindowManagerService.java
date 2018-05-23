@@ -2846,6 +2846,11 @@ public class WindowManagerService extends IWindowManager.Stub
         mH.sendEmptyMessage(H.ANIMATION_FAILSAFE);
     }
 
+    @Override
+    public void onKeyguardShowingAndNotOccludedChanged() {
+        mH.sendEmptyMessage(H.RECOMPUTE_FOCUS);
+    }
+
     /**
      * Starts deferring layout passes. Useful when doing multiple changes but to optimize
      * performance, only one layout pass should be done. This can be called multiple times, and
@@ -4626,6 +4631,7 @@ public class WindowManagerService extends IWindowManager.Stub
         public static final int SET_HAS_OVERLAY_UI = 58;
         public static final int SET_RUNNING_REMOTE_ANIMATION = 59;
         public static final int ANIMATION_FAILSAFE = 60;
+        public static final int RECOMPUTE_FOCUS = 61;
 
         /**
          * Used to denote that an integer field in a message will not be used.
@@ -5049,6 +5055,13 @@ public class WindowManagerService extends IWindowManager.Stub
                         if (mRecentsAnimationController != null) {
                             mRecentsAnimationController.scheduleFailsafe();
                         }
+                    }
+                }
+                break;
+                case RECOMPUTE_FOCUS: {
+                    synchronized (mWindowMap) {
+                        updateFocusedWindowLocked(UPDATE_FOCUS_NORMAL,
+                                true /* updateInputWindows */);
                     }
                 }
                 break;
