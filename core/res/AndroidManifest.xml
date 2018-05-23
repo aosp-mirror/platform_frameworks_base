@@ -4287,21 +4287,6 @@
             </intent-filter>
         </receiver>
 
-        <receiver android:name="com.android.server.stats.StatsCompanionService$AnomalyAlarmReceiver"
-                  android:permission="android.permission.STATSCOMPANION"
-                  android:exported="false">
-        </receiver>
-
-        <receiver android:name="com.android.server.stats.StatsCompanionService$PullingAlarmReceiver"
-                  android:permission="android.permission.STATSCOMPANION"
-                  android:exported="false">
-        </receiver>
-
-        <receiver android:name="com.android.server.stats.StatsCompanionService$PeriodicAlarmReceiver"
-                  android:permission="android.permission.STATSCOMPANION"
-                  android:exported="false">
-        </receiver>
-
         <service android:name="android.hardware.location.GeofenceHardwareService"
             android:permission="android.permission.LOCATION_HARDWARE"
             android:exported="false" />
