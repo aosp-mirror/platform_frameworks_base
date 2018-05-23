@@ -821,6 +821,7 @@ public class NotificationManagerService extends SystemService {
                         }
                     }
                     r.setVisibility(true, nv.rank, nv.count);
+                    maybeRecordInterruptionLocked(r);
                     nv.recycle();
                 }
                 // Note that we might receive this event after notifications
@@ -1928,11 +1929,12 @@ public class NotificationManagerService extends SystemService {
 
     @GuardedBy("mNotificationLock")
     protected void maybeRecordInterruptionLocked(NotificationRecord r) {
-        if (r.isInterruptive()) {
+        if (r.isInterruptive() && !r.hasRecordedInterruption()) {
             mAppUsageStats.reportInterruptiveNotification(r.sbn.getPackageName(),
                     r.getChannel().getId(),
                     getRealUserId(r.sbn.getUserId()));
             logRecentLocked(r);
+            r.setRecordedInterruption(true);
         }
     }
 
@@ -2669,6 +2671,7 @@ public class NotificationManagerService extends SystemService {
                                 if (DBG) Slog.d(TAG, "Marking notification as seen " + keys[i]);
                                 reportSeen(r);
                                 r.setSeen();
+                                maybeRecordInterruptionLocked(r);
                             }
                         }
                     }
@@ -4440,7 +4443,7 @@ public class NotificationManagerService extends SystemService {
                     if (index < 0) {
                         mNotificationList.add(r);
                         mUsageStats.registerPostedByApp(r);
-                        r.setInterruptive(isVisuallyInterruptive(null, r));
+                        r.setInterruptive(true);
                     } else {
                         old = mNotificationList.get(index);
                         mNotificationList.set(index, r);
@@ -4449,7 +4452,7 @@ public class NotificationManagerService extends SystemService {
                         notification.flags |=
                                 old.getNotification().flags & FLAG_FOREGROUND_SERVICE;
                         r.isUpdate = true;
-                        r.setInterruptive(isVisuallyInterruptive(old, r));
+                        r.setTextChanged(isVisuallyInterruptive(old, r));
                     }
 
                     mNotificationsByKey.put(n.getKey(), r);

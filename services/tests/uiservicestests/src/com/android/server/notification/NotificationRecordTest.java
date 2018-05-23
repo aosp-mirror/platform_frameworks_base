@@ -602,4 +602,45 @@ public class NotificationRecordTest extends UiServiceTestCase {
         record.setIsAppImportanceLocked(false);
         assertEquals(false, record.getIsAppImportanceLocked());
     }
+
+    @Test
+    public void testIsInterruptive_textChanged_notSeen() {
+        StatusBarNotification sbn = getNotification(false /*preO */, false /* noisy */,
+                false /* defaultSound */, false /* buzzy */, false /* defaultBuzz */,
+                false /* lights */, false /* defaultLights */, null /* group */);
+        NotificationRecord record = new NotificationRecord(mMockContext, sbn, channel);
+
+        assertEquals(false, record.isInterruptive());
+
+        record.setTextChanged(true);
+        assertEquals(false, record.isInterruptive());
+    }
+
+    @Test
+    public void testIsInterruptive_textChanged_seen() {
+        StatusBarNotification sbn = getNotification(false /*preO */, false /* noisy */,
+                false /* defaultSound */, false /* buzzy */, false /* defaultBuzz */,
+                false /* lights */, false /* defaultLights */, null /* group */);
+        NotificationRecord record = new NotificationRecord(mMockContext, sbn, channel);
+
+        assertEquals(false, record.isInterruptive());
+
+        record.setTextChanged(true);
+        record.setSeen();
+        assertEquals(true, record.isInterruptive());
+    }
+
+    @Test
+    public void testIsInterruptive_textNotChanged_seen() {
+        StatusBarNotification sbn = getNotification(false /*preO */, false /* noisy */,
+                false /* defaultSound */, false /* buzzy */, false /* defaultBuzz */,
+                false /* lights */, false /* defaultLights */, null /* group */);
+        NotificationRecord record = new NotificationRecord(mMockContext, sbn, channel);
+
+        assertEquals(false, record.isInterruptive());
+
+        record.setTextChanged(false);
+        record.setSeen();
+        assertEquals(false, record.isInterruptive());
+    }
 }
