@@ -56,6 +56,7 @@ import com.android.systemui.statusbar.phone.ScrimState;
 import com.android.systemui.statusbar.phone.StatusBar;
 import com.android.systemui.statusbar.phone.StatusBarIconController;
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
+import com.android.systemui.statusbar.policy.RemoteInputQuickSettingsDisabler;
 import com.android.systemui.statusbar.policy.SmartReplyConstants;
 
 import java.util.function.Consumer;
@@ -148,5 +149,7 @@ public class SystemUIFactory {
         providers.put(NotificationEntryManager.class, () -> new NotificationEntryManager(context));
         providers.put(KeyguardDismissUtil.class, KeyguardDismissUtil::new);
         providers.put(SmartReplyController.class, () -> new SmartReplyController());
+        providers.put(RemoteInputQuickSettingsDisabler.class,
+                () -> new RemoteInputQuickSettingsDisabler(context));
     }
 }
