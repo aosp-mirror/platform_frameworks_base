@@ -43,8 +43,10 @@ import android.content.Intent;
 import android.content.res.ColorStateList;
 import android.content.res.Configuration;
 import android.content.res.Resources;
+import android.content.res.TypedArray;
 import android.graphics.Color;
 import android.graphics.PixelFormat;
+import android.graphics.PorterDuff;
 import android.graphics.drawable.ColorDrawable;
 import android.media.AudioManager;
 import android.media.AudioSystem;
@@ -90,6 +92,7 @@ import com.android.systemui.plugins.VolumeDialog;
 import com.android.systemui.plugins.VolumeDialogController;
 import com.android.systemui.plugins.VolumeDialogController.State;
 import com.android.systemui.plugins.VolumeDialogController.StreamState;
+import com.android.systemui.statusbar.phone.StatusBar;
 import com.android.systemui.statusbar.policy.AccessibilityManagerWrapper;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController;
 
@@ -131,8 +134,10 @@ public class VolumeDialogImpl implements VolumeDialog {
     private final AccessibilityManagerWrapper mAccessibilityMgr;
     private final Object mSafetyWarningLock = new Object();
     private final Accessibility mAccessibility = new Accessibility();
-    private final ColorStateList mActiveTint;
-    private final ColorStateList mInactiveTint;
+    private ColorStateList mActiveTint;
+    private int mActiveAlpha;
+    private ColorStateList mInactiveTint;
+    private int mInactiveAlpha;
 
     private boolean mShowing;
     private boolean mShowA11yStream;
@@ -150,8 +155,6 @@ public class VolumeDialogImpl implements VolumeDialog {
         mController = Dependency.get(VolumeDialogController.class);
         mKeyguard = (KeyguardManager) mContext.getSystemService(Context.KEYGUARD_SERVICE);
         mAccessibilityMgr = Dependency.get(AccessibilityManagerWrapper.class);
-        mActiveTint = Utils.getColorAccent(mContext);
-        mInactiveTint = loadColorStateList(R.color.volume_slider_inactive);
         mDeviceProvisionedController = Dependency.get(DeviceProvisionedController.class);
     }
 
@@ -224,6 +227,11 @@ public class VolumeDialogImpl implements VolumeDialog {
             return true;
         });
 
+        mActiveTint = Utils.getColorAccent(mContext);
+        mActiveAlpha = Color.alpha(mActiveTint.getDefaultColor());
+        mInactiveTint = Utils.getColorAttr(mContext, android.R.attr.colorForeground);
+        mInactiveAlpha = getAlphaAttr(android.R.attr.secondaryContentAlpha);
+
         mDialogRowsView = mDialog.findViewById(R.id.volume_dialog_rows);
         mRinger = mDialog.findViewById(R.id.ringer);
         mRingerIcon = mRinger.findViewById(R.id.ringer_icon);
@@ -263,8 +271,11 @@ public class VolumeDialogImpl implements VolumeDialog {
         return mDialogView;
     }
 
-    private ColorStateList loadColorStateList(int colorResId) {
-        return ColorStateList.valueOf(mContext.getColor(colorResId));
+    private int getAlphaAttr(int attr) {
+        TypedArray ta = mContext.obtainStyledAttributes(new int[]{attr});
+        float alpha = ta.getFloat(0, 0);
+        ta.recycle();
+        return (int) (alpha * 255);
     }
 
     private boolean isLandscape() {
@@ -890,12 +901,16 @@ public class VolumeDialogImpl implements VolumeDialog {
         if (isActive) {
             row.slider.requestFocus();
         }
-        final ColorStateList tint = isActive && row.slider.isEnabled() ? mActiveTint
-                : mInactiveTint;
+        boolean useActiveColoring = isActive && row.slider.isEnabled();
+        final ColorStateList tint = useActiveColoring ? mActiveTint : mInactiveTint;
+        final int alpha = useActiveColoring ? mActiveAlpha : mInactiveAlpha;
         if (tint == row.cachedTint) return;
         row.slider.setProgressTintList(tint);
         row.slider.setThumbTintList(tint);
+        row.slider.setProgressBackgroundTintList(tint);
+        row.slider.setAlpha(((float) alpha) / 255);
         row.icon.setImageTintList(tint);
+        row.icon.setImageAlpha(alpha);
         row.cachedTint = tint;
     }
 
