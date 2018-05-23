@@ -34,6 +34,7 @@ import android.widget.TextView;
 import com.android.internal.util.NotificationColorUtil;
 import com.android.internal.widget.NotificationActionListLayout;
 import com.android.systemui.Dependency;
+import com.android.systemui.R;
 import com.android.systemui.UiOffloadThread;
 import com.android.systemui.statusbar.CrossFadeHelper;
 import com.android.systemui.statusbar.ExpandableNotificationRow;
@@ -58,6 +59,7 @@ public class NotificationTemplateViewWrapper extends NotificationHeaderViewWrapp
     private NotificationActionListLayout mActions;
     private ArraySet<PendingIntent> mCancelledPendingIntents = new ArraySet<>();
     private UiOffloadThread mUiOffloadThread;
+    private View mRemoteInputHistory;
 
     protected NotificationTemplateViewWrapper(Context ctx, View view,
             ExpandableNotificationRow row) {
@@ -146,6 +148,8 @@ public class NotificationTemplateViewWrapper extends NotificationHeaderViewWrapp
         mActionsContainer = mView.findViewById(com.android.internal.R.id.actions_container);
         mActions = mView.findViewById(com.android.internal.R.id.actions);
         mReplyAction = mView.findViewById(com.android.internal.R.id.reply_icon_action);
+        mRemoteInputHistory = mView.findViewById(
+                com.android.internal.R.id.notification_material_reply_container);
         updatePendingIntentCancellations();
     }
 
@@ -328,6 +332,10 @@ public class NotificationTemplateViewWrapper extends NotificationHeaderViewWrapp
         int extra = 0;
         if (mActions != null) {
             extra = mActions.getExtraMeasureHeight();
+        }
+        if (mRemoteInputHistory != null && mRemoteInputHistory.getVisibility() != View.GONE) {
+            extra += mRow.getContext().getResources().getDimensionPixelSize(
+                    R.dimen.remote_input_history_extra_height);
         }
         return extra + super.getExtraMeasureHeight();
     }
