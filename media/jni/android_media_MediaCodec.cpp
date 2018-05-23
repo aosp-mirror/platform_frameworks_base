@@ -742,7 +742,12 @@ status_t JMediaCodec::setParameters(const sp<AMessage> &msg) {
 
 void JMediaCodec::setVideoScalingMode(int mode) {
     if (mSurfaceTextureClient != NULL) {
+        // this works for components that queue to surface
         native_window_set_scaling_mode(mSurfaceTextureClient.get(), mode);
+        // also signal via param for components that queue to IGBP
+        sp<AMessage> msg = new AMessage;
+        msg->setInt32("android._video-scaling", mode);
+        (void)mCodec->setParameters(msg);
     }
 }
 
