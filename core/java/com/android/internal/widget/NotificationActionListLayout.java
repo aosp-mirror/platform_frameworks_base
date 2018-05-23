@@ -206,7 +206,17 @@ public class NotificationActionListLayout extends LinearLayout {
         final boolean centerAligned = (mGravity & Gravity.CENTER_HORIZONTAL) != 0;
 
         int childTop;
-        int childLeft = centerAligned ? left + (right - left) / 2 - mTotalWidth / 2 : 0;
+        int childLeft;
+        if (centerAligned) {
+            childLeft = mPaddingLeft + left + (right - left) / 2 - mTotalWidth / 2;
+        } else {
+            childLeft = mPaddingLeft;
+            int absoluteGravity = Gravity.getAbsoluteGravity(Gravity.START, getLayoutDirection());
+            if (absoluteGravity == Gravity.RIGHT) {
+                childLeft += right - left - mTotalWidth;
+            }
+        }
+
 
         // Where bottom of child should go
         final int height = bottom - top;
@@ -215,18 +225,6 @@ public class NotificationActionListLayout extends LinearLayout {
         int innerHeight = height - paddingTop - mPaddingBottom;
 
         final int count = getChildCount();
-
-        final int layoutDirection = getLayoutDirection();
-        switch (Gravity.getAbsoluteGravity(Gravity.START, layoutDirection)) {
-            case Gravity.RIGHT:
-                childLeft += mPaddingLeft + right - left - mTotalWidth;
-                break;
-
-            case Gravity.LEFT:
-            default:
-                childLeft += mPaddingLeft;
-                break;
-        }
 
         int start = 0;
         int dir = 1;
