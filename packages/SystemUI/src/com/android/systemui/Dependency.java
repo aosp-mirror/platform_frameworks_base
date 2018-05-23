@@ -151,7 +151,6 @@ public class Dependency extends SystemUI {
 
     @Override
     public void start() {
-        sDependency = this;
         // TODO: Think about ways to push these creation rules out of Dependency to cut down
         // on imports.
         mProviders.put(TIME_TICK_HANDLER, () -> {
@@ -331,6 +330,8 @@ public class Dependency extends SystemUI {
 
         // Put all dependencies above here so the factory can override them if it wants.
         SystemUIFactory.getInstance().injectDependencies(mProviders, mContext);
+
+        sDependency = this;
     }
 
     @Override
