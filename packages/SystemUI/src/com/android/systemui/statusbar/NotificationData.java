@@ -32,10 +32,13 @@ import android.app.AppGlobals;
 import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
+import android.app.Person;
 import android.content.Context;
 import android.content.pm.IPackageManager;
 import android.content.pm.PackageManager;
 import android.graphics.drawable.Icon;
+import android.os.Bundle;
+import android.os.Parcelable;
 import android.os.RemoteException;
 import android.os.SystemClock;
 import android.service.notification.NotificationListenerService.Ranking;
@@ -50,6 +53,7 @@ import android.widget.RemoteViews;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.statusbar.StatusBarIcon;
+import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.NotificationColorUtil;
 import com.android.systemui.Dependency;
 import com.android.systemui.ForegroundServiceController;
@@ -116,6 +120,11 @@ public class NotificationData {
          * retrieve the info.
          */
         public Boolean mIsSystemNotification;
+
+        /**
+         * Has the user sent a reply through this Notification.
+         */
+        private boolean hasSentReply;
 
         public Entry(StatusBarNotification n) {
             this.key = n.getKey();
@@ -297,6 +306,40 @@ public class NotificationData {
         public void onRemoteInputInserted() {
             lastRemoteInputSent = NOT_LAUNCHED_YET;
             remoteInputTextWhenReset = null;
+        }
+
+        public void setHasSentReply() {
+            hasSentReply = true;
+        }
+
+        public boolean isLastMessageFromReply() {
+            if (!hasSentReply) {
+                return false;
+            }
+            Bundle extras = notification.getNotification().extras;
+            CharSequence[] replyTexts = extras.getCharSequenceArray(
+                    Notification.EXTRA_REMOTE_INPUT_HISTORY);
+            if (!ArrayUtils.isEmpty(replyTexts)) {
+                return true;
+            }
+            Parcelable[] messages = extras.getParcelableArray(Notification.EXTRA_MESSAGES);
+            if (messages != null && messages.length > 0) {
+                Parcelable message = messages[messages.length - 1];
+                if (message instanceof Bundle) {
+                    Notification.MessagingStyle.Message lastMessage =
+                            Notification.MessagingStyle.Message.getMessageFromBundle(
+                                    (Bundle) message);
+                    if (lastMessage != null) {
+                        Person senderPerson = lastMessage.getSenderPerson();
+                        if (senderPerson == null) {
+                            return true;
+                        }
+                        Person user = extras.getParcelable(Notification.EXTRA_MESSAGING_PERSON);
+                        return Objects.equals(user, senderPerson);
+                    }
+                }
+            }
+            return false;
         }
     }
 
