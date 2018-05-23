@@ -212,6 +212,7 @@ public class SmartReplyView extends ViewGroup {
             Intent intent = new Intent().addFlags(Intent.FLAG_RECEIVER_FOREGROUND);
             RemoteInput.addResultsToIntent(new RemoteInput[]{remoteInput}, intent, results);
             RemoteInput.setResultsSource(intent, RemoteInput.SOURCE_CHOICE);
+            entry.setHasSentReply();
             try {
                 pendingIntent.send(context, 0, intent);
             } catch (PendingIntent.CanceledException e) {
