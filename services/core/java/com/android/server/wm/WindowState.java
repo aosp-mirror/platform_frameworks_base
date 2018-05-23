@@ -2298,8 +2298,8 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
                     if (DEBUG_FOCUS_LIGHT) Slog.i(TAG,
                             "setAnimationLocked: setting mFocusMayChange true");
                     mService.mFocusMayChange = true;
-                    setDisplayLayoutNeeded();
                 }
+                setDisplayLayoutNeeded();
                 // Window is no longer visible -- make sure if we were waiting
                 // for it to be displayed before enabling the display, that
                 // we allow the display to be enabled now.
