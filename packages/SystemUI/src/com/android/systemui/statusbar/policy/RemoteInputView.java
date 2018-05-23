@@ -53,6 +53,7 @@ import android.widget.TextView;
 
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto;
+import com.android.systemui.Dependency;
 import com.android.systemui.Interpolators;
 import com.android.systemui.R;
 import com.android.systemui.statusbar.NotificationData;
@@ -81,6 +82,7 @@ public class RemoteInputView extends LinearLayout implements View.OnClickListene
     private RemoteInput[] mRemoteInputs;
     private RemoteInput mRemoteInput;
     private RemoteInputController mController;
+    private RemoteInputQuickSettingsDisabler mRemoteInputQuickSettingsDisabler;
 
     private NotificationData.Entry mEntry;
 
@@ -96,6 +98,7 @@ public class RemoteInputView extends LinearLayout implements View.OnClickListene
 
     public RemoteInputView(Context context, AttributeSet attrs) {
         super(context, attrs);
+        mRemoteInputQuickSettingsDisabler = Dependency.get(RemoteInputQuickSettingsDisabler.class);
     }
 
     @Override
@@ -233,6 +236,9 @@ public class RemoteInputView extends LinearLayout implements View.OnClickListene
                 }
             }
         }
+
+        mRemoteInputQuickSettingsDisabler.setRemoteInputActive(false);
+
         MetricsLogger.action(mContext, MetricsProto.MetricsEvent.ACTION_REMOTE_INPUT_CLOSE,
                 mEntry.notification.getPackageName());
     }
@@ -292,6 +298,9 @@ public class RemoteInputView extends LinearLayout implements View.OnClickListene
         mEditText.setSelection(mEditText.getText().length());
         mEditText.requestFocus();
         mController.addRemoteInput(mEntry, mToken);
+
+        mRemoteInputQuickSettingsDisabler.setRemoteInputActive(true);
+
         updateSendButton();
     }
 
@@ -555,6 +564,14 @@ public class RemoteInputView extends LinearLayout implements View.OnClickListene
         }
 
         @Override
+        public boolean onKeyPreIme(int keyCode, KeyEvent event) {
+            if (event.getKeyCode() == KeyEvent.KEYCODE_BACK) {
+                mRemoteInputView.mRemoteInputQuickSettingsDisabler.setRemoteInputActive(false);
+            }
+            return super.dispatchKeyEvent(event);
+        }
+
+        @Override
         public boolean onCheckIsTextEditor() {
             // Stop being editable while we're being removed. During removal, we get reattached,
             // and editable views get their spellchecking state re-evaluated which is too costly
@@ -566,11 +583,6 @@ public class RemoteInputView extends LinearLayout implements View.OnClickListene
         @Override
         public InputConnection onCreateInputConnection(EditorInfo outAttrs) {
             final InputConnection inputConnection = super.onCreateInputConnection(outAttrs);
-            //if pinned, set imeOption to keep the behavior like in portrait.
-            if (mRemoteInputView != null && mRemoteInputView.mEntry.row.isPinned()) {
-                outAttrs.imeOptions |= EditorInfo.IME_FLAG_NO_EXTRACT_UI
-                        | EditorInfo.IME_FLAG_NO_FULLSCREEN;
-            }
 
             if (mShowImeOnInputConnection && inputConnection != null) {
                 final InputMethodManager imm = InputMethodManager.getInstance();

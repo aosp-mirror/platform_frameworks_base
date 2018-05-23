@@ -234,6 +234,7 @@ import com.android.systemui.statusbar.policy.KeyguardUserSwitcher;
 import com.android.systemui.statusbar.policy.NetworkController;
 import com.android.systemui.statusbar.policy.OnHeadsUpChangedListener;
 import com.android.systemui.statusbar.policy.PreviewInflater;
+import com.android.systemui.statusbar.policy.RemoteInputQuickSettingsDisabler;
 import com.android.systemui.statusbar.policy.UserInfoController;
 import com.android.systemui.statusbar.policy.UserInfoControllerImpl;
 import com.android.systemui.statusbar.policy.UserSwitcherController;
@@ -398,6 +399,9 @@ public class StatusBar extends SystemUI implements DemoMode,
     // RemoteInputView to be activated after unlock
     private View mPendingRemoteInputView;
     private View mPendingWorkRemoteInputView;
+
+    private RemoteInputQuickSettingsDisabler mRemoteInputQuickSettingsDisabler =
+            Dependency.get(RemoteInputQuickSettingsDisabler.class);
 
     private View mReportRejectedTouch;
 
@@ -1759,6 +1763,8 @@ public class StatusBar extends SystemUI implements DemoMode,
      */
     @Override
     public void disable(int state1, int state2, boolean animate) {
+        state2 = mRemoteInputQuickSettingsDisabler.adjustDisableFlags(state2);
+
         animate &= mStatusBarWindowState != WINDOW_STATE_HIDDEN;
         final int old1 = mDisabled1;
         final int diff1 = state1 ^ old1;
