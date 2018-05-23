@@ -47,8 +47,6 @@ Landroid/app/TaskStackListener;->onTaskProfileLocked(II)V
 Landroid/app/TaskStackListener;->onTaskRemoved(I)V
 Landroid/app/TaskStackListener;->onTaskSnapshotChanged(ILandroid/app/ActivityManager$TaskSnapshot;)V
 Landroid/app/TaskStackListener;->onTaskStackChanged()V
-Landroid/app/VrStateCallback;-><init>()V
-Landroid/app/VrStateCallback;->onPersistentVrStateChanged(Z)V
 Landroid/app/WallpaperColors;-><init>(Landroid/graphics/Color;Landroid/graphics/Color;Landroid/graphics/Color;I)V
 Landroid/bluetooth/BluetoothHeadset;->phoneStateChanged(IIILjava/lang/String;I)V
 Landroid/bluetooth/IBluetooth;->sendConnectionStateChange(Landroid/bluetooth/BluetoothDevice;III)V
@@ -71,7 +69,6 @@ Landroid/content/ContentProvider;->getIContentProvider()Landroid/content/IConten
 Landroid/content/ContentResolver;->registerContentObserver(Landroid/net/Uri;ZLandroid/database/ContentObserver;I)V
 Landroid/content/ContentValues;->getStringArrayList(Ljava/lang/String;)Ljava/util/ArrayList;
 Landroid/content/ContentValues;->putStringArrayList(Ljava/lang/String;Ljava/util/ArrayList;)V
-Landroid/content/Context;->getOpPackageName()Ljava/lang/String;
 Landroid/content/Context;->registerReceiverAsUser(Landroid/content/BroadcastReceiver;Landroid/os/UserHandle;Landroid/content/IntentFilter;Ljava/lang/String;Landroid/os/Handler;)Landroid/content/Intent;
 Landroid/content/Context;->startActivityAsUser(Landroid/content/Intent;Landroid/os/UserHandle;)V
 Landroid/content/Context;->startServiceAsUser(Landroid/content/Intent;Landroid/os/UserHandle;)Landroid/content/ComponentName;
@@ -152,7 +149,6 @@ Landroid/net/INetd$Stub;->asInterface(Landroid/os/IBinder;)Landroid/net/INetd;
 Landroid/net/INetd;->interfaceAddAddress(Ljava/lang/String;Ljava/lang/String;I)V
 Landroid/net/INetworkPolicyManager;->getNetworkQuotaInfo(Landroid/net/NetworkState;)Landroid/net/NetworkQuotaInfo;
 Landroid/net/INetworkStatsService$Stub;->asInterface(Landroid/os/IBinder;)Landroid/net/INetworkStatsService;
-Landroid/net/INetworkStatsService;->openSession()Landroid/net/INetworkStatsSession;
 Landroid/net/INetworkStatsSession;->getHistoryForNetwork(Landroid/net/NetworkTemplate;I)Landroid/net/NetworkStatsHistory;
 Landroid/net/INetworkStatsSession;->getHistoryForUid(Landroid/net/NetworkTemplate;IIII)Landroid/net/NetworkStatsHistory;
 Landroid/net/InterfaceConfiguration;-><init>()V
@@ -516,7 +512,6 @@ Landroid/view/BatchedInputEventReceiver;-><init>(Landroid/view/InputChannel;Land
 Landroid/view/Choreographer;->getSfInstance()Landroid/view/Choreographer;
 Landroid/view/DisplayListCanvas;->drawRenderNode(Landroid/view/RenderNode;)V
 Landroid/view/IAppTransitionAnimationSpecsFuture$Stub;-><init>()V
-Landroid/view/InputEventReceiver;->onInputEvent(Landroid/view/InputEvent;I)V
 Landroid/view/IWindowManager;->destroyInputConsumer(Ljava/lang/String;)Z
 Landroid/view/IWindowManager;->endProlongedAnimations()V
 Landroid/view/IWindowManager;->getStableInsets(ILandroid/graphics/Rect;)V
