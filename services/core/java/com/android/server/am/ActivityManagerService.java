@@ -37,9 +37,7 @@ import static android.app.ActivityManagerInternal.ASSIST_KEY_DATA;
 import static android.app.ActivityManagerInternal.ASSIST_KEY_RECEIVER_EXTRAS;
 import static android.app.ActivityManagerInternal.ASSIST_KEY_STRUCTURE;
 import static android.app.ActivityThread.PROC_START_SEQ_IDENT;
-import static android.app.AppOpsManager.OP_ASSIST_STRUCTURE;
 import static android.app.AppOpsManager.OP_NONE;
-import static android.app.WindowConfiguration.ACTIVITY_TYPE_HOME;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_UNDEFINED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
@@ -5128,6 +5126,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         final ActivityRecord sourceRecord;
         final int targetUid;
         final String targetPackage;
+        final boolean isResolver;
         synchronized (this) {
             if (resultTo == null) {
                 throw new SecurityException("Must be called from an activity");
@@ -5165,6 +5164,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             }
             targetUid = sourceRecord.launchedFromUid;
             targetPackage = sourceRecord.launchedFromPackage;
+            isResolver = sourceRecord.isResolverOrChildActivity();
         }
 
         if (userId == UserHandle.USER_NULL) {
@@ -5184,6 +5184,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                     .setActivityOptions(bOptions)
                     .setMayWait(userId)
                     .setIgnoreTargetSecurity(ignoreTargetSecurity)
+                    .setFilterCallingUid(isResolver ? 0 /* system */ : targetUid)
                     .execute();
         } catch (SecurityException e) {
             // XXX need to figure out how to propagate to original app.
