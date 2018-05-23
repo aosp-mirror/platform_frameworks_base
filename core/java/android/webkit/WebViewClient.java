@@ -368,6 +368,15 @@ public class WebViewClient {
      * handler.proceed(). Note that the decision may be retained for use in
      * response to future SSL errors. The default behavior is to cancel the
      * load.
+     * <p>
+     * Applications are advised not to prompt the user about SSL errors, as
+     * the user is unlikely to be able to make an informed security decision
+     * and WebView does not provide any UI for showing the details of the
+     * error in a meaningful way.
+     * <p>
+     * Application overrides of this method may display custom error pages or
+     * silently log issues, but it is strongly recommended to always call
+     * handler.cancel() and never allow proceeding past errors.
      *
      * @param view The WebView that is initiating the callback.
      * @param handler An SslErrorHandler object that will handle the user's
