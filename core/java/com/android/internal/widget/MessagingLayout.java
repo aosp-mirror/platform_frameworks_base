@@ -82,7 +82,7 @@ public class MessagingLayout extends FrameLayout {
     private Paint mPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
     private Paint mTextPaint = new Paint();
     private CharSequence mConversationTitle;
-    private Icon mLargeIcon;
+    private Icon mAvatarReplacement;
     private boolean mIsOneToOne;
     private ArrayList<MessagingGroup> mAddedGroups = new ArrayList<>();
     private Person mUser;
@@ -125,8 +125,8 @@ public class MessagingLayout extends FrameLayout {
     }
 
     @RemotableViewMethod
-    public void setLargeIcon(Icon icon) {
-        mLargeIcon = icon;
+    public void setAvatarReplacement(Icon icon) {
+        mAvatarReplacement = icon;
     }
 
     @RemotableViewMethod
@@ -228,7 +228,7 @@ public class MessagingLayout extends FrameLayout {
             boolean isOwnMessage = group.getSender() == mUser;
             CharSequence senderName = group.getSenderName();
             if (!group.needsGeneratedAvatar() || TextUtils.isEmpty(senderName)
-                    || (mIsOneToOne && mLargeIcon != null && !isOwnMessage)) {
+                    || (mIsOneToOne && mAvatarReplacement != null && !isOwnMessage)) {
                 continue;
             }
             String symbol = uniqueNames.get(senderName);
@@ -246,8 +246,8 @@ public class MessagingLayout extends FrameLayout {
             if (!group.needsGeneratedAvatar() || TextUtils.isEmpty(senderName)) {
                 continue;
             }
-            if (mIsOneToOne && mLargeIcon != null && group.getSender() != mUser) {
-                group.setAvatar(mLargeIcon);
+            if (mIsOneToOne && mAvatarReplacement != null && group.getSender() != mUser) {
+                group.setAvatar(mAvatarReplacement);
             } else {
                 Icon cachedIcon = cachedAvatars.get(senderName);
                 if (cachedIcon == null) {
