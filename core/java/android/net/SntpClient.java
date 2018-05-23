@@ -84,6 +84,10 @@ public class SntpClient {
      * @return true if the transaction was successful.
      */
     public boolean requestTime(String host, int timeout, Network network) {
+        // This flag only affects DNS resolution and not other socket semantics,
+        // therefore it's safe to set unilaterally rather than take more
+        // defensive measures like making a copy.
+        network.setPrivateDnsBypass(true);
         InetAddress address = null;
         try {
             address = network.getByName(host);
