@@ -76,7 +76,6 @@ public class KeyguardStatusView extends GridLayout implements
     private float mDarkAmount = 0;
     private int mTextColor;
     private float mWidgetPadding;
-    private boolean mAnimateLayout;
     private int mLastLayoutHeight;
 
     private KeyguardUpdateMonitorCallback mInfoCallback = new KeyguardUpdateMonitorCallback() {
@@ -185,7 +184,7 @@ public class KeyguardStatusView extends GridLayout implements
         mClockView.addOnLayoutChangeListener(this);
         mClockSeparator.addOnLayoutChangeListener(this);
         mKeyguardSlice.setContentChangeListener(this::onSliceContentChanged);
-        onSliceContentChanged(false /* animated */);
+        onSliceContentChanged();
 
         boolean shouldMarquee = KeyguardUpdateMonitor.getInstance(mContext).isDeviceInteractive();
         setEnableMarquee(shouldMarquee);
@@ -199,8 +198,7 @@ public class KeyguardStatusView extends GridLayout implements
         mClockView.setElegantTextHeight(false);
     }
 
-    private void onSliceContentChanged(boolean animated) {
-        mAnimateLayout = animated;
+    private void onSliceContentChanged() {
         boolean smallClock = mKeyguardSlice.hasHeader() || mPulsing;
         float clockScale = smallClock ? mSmallClockScale : 1;
 
@@ -228,10 +226,12 @@ public class KeyguardStatusView extends GridLayout implements
         long duration = KeyguardSliceView.DEFAULT_ANIM_DURATION;
         long delay = smallClock ? 0 : duration / 4;
 
+        boolean shouldAnimate = mKeyguardSlice.getLayoutTransition() != null
+                && mKeyguardSlice.getLayoutTransition().isRunning();
         if (view == mClockView) {
             float clockScale = smallClock ? mSmallClockScale : 1;
             Paint.Style style = smallClock ? Paint.Style.FILL_AND_STROKE : Paint.Style.FILL;
-            if (mAnimateLayout) {
+            if (shouldAnimate) {
                 mClockView.setY(oldTop + heightOffset);
                 mClockView.animate().cancel();
                 mClockView.animate()
@@ -257,7 +257,7 @@ public class KeyguardStatusView extends GridLayout implements
         } else if (view == mClockSeparator) {
             boolean hasSeparator = hasHeader && !mPulsing;
             float alpha = hasSeparator ? 1 : 0;
-            if (mAnimateLayout) {
+            if (shouldAnimate) {
                 boolean isAwake = mDarkAmount != 0;
                 mClockSeparator.setY(oldTop + heightOffset);
                 mClockSeparator.animate().cancel();
