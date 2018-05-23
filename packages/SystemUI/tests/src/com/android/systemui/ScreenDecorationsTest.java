@@ -36,6 +36,7 @@ import android.app.Fragment;
 import android.content.res.Configuration;
 import android.support.test.filters.SmallTest;
 import android.testing.AndroidTestingRunner;
+import android.testing.TestableLooper.RunWithLooper;
 import android.view.Display;
 import android.view.View;
 import android.view.WindowManager;
@@ -54,6 +55,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+@RunWithLooper
 @RunWith(AndroidTestingRunner.class)
 @SmallTest
 public class ScreenDecorationsTest extends SysuiTestCase {
@@ -98,6 +100,8 @@ public class ScreenDecorationsTest extends SysuiTestCase {
         mContext.getOrCreateTestableResources().addOverride(
                 com.android.internal.R.bool.config_fillMainBuiltInDisplayCutout, false);
         mContext.getOrCreateTestableResources().addOverride(dimen.rounded_corner_radius, 0);
+        mContext.getOrCreateTestableResources().addOverride(dimen.rounded_corner_radius_top, 0);
+        mContext.getOrCreateTestableResources().addOverride(dimen.rounded_corner_radius_bottom, 0);
         mContext.getOrCreateTestableResources()
                 .addOverride(dimen.rounded_corner_content_padding, 0);
 
