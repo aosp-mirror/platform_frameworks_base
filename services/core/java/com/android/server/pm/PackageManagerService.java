@@ -2072,6 +2072,16 @@ public class PackageManagerService extends IPackageManager.Stub
                             installerPackageName, null /*finishedReceiver*/,
                             updateUserIds, instantUserIds);
                 }
+                // if the required verifier is defined, but, is not the installer of record
+                // for the package, it gets notified
+                final boolean notifyVerifier = mRequiredVerifierPackage != null
+                        && !mRequiredVerifierPackage.equals(installerPackageName);
+                if (notifyVerifier) {
+                    sendPackageBroadcast(Intent.ACTION_PACKAGE_ADDED, packageName,
+                            extras, 0 /*flags*/,
+                            mRequiredVerifierPackage, null /*finishedReceiver*/,
+                            updateUserIds, instantUserIds);
+                }
 
                 // Send replaced for users that don't see the package for the first time
                 if (update) {
@@ -2083,6 +2093,12 @@ public class PackageManagerService extends IPackageManager.Stub
                         sendPackageBroadcast(Intent.ACTION_PACKAGE_REPLACED, packageName,
                                 extras, 0 /*flags*/,
                                 installerPackageName, null /*finishedReceiver*/,
+                                updateUserIds, instantUserIds);
+                    }
+                    if (notifyVerifier) {
+                        sendPackageBroadcast(Intent.ACTION_PACKAGE_REPLACED, packageName,
+                                extras, 0 /*flags*/,
+                                mRequiredVerifierPackage, null /*finishedReceiver*/,
                                 updateUserIds, instantUserIds);
                     }
                     sendPackageBroadcast(Intent.ACTION_MY_PACKAGE_REPLACED,
