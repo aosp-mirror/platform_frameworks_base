@@ -34,6 +34,7 @@ import android.net.NetworkRequest;
 import android.net.ProxyInfo;
 import android.net.TrafficStats;
 import android.net.Uri;
+import android.net.captiveportal.CaptivePortalProbeResult;
 import android.net.dns.ResolvUtil;
 import android.net.metrics.IpConnectivityLog;
 import android.net.metrics.NetworkEvent;
@@ -558,47 +559,6 @@ public class NetworkMonitor extends StateMachine {
         public void exit() {
             Message message = obtainMessage(EVENT_PROVISIONING_NOTIFICATION, 0, mNetId, null);
             mConnectivityServiceHandler.sendMessage(message);
-        }
-    }
-
-    /**
-     * Result of calling isCaptivePortal().
-     * @hide
-     */
-    @VisibleForTesting
-    public static final class CaptivePortalProbeResult {
-        static final int SUCCESS_CODE = 204;
-        static final int FAILED_CODE = 599;
-
-        static final CaptivePortalProbeResult FAILED = new CaptivePortalProbeResult(FAILED_CODE);
-        static final CaptivePortalProbeResult SUCCESS = new CaptivePortalProbeResult(SUCCESS_CODE);
-
-        private final int mHttpResponseCode;  // HTTP response code returned from Internet probe.
-        final String redirectUrl;             // Redirect destination returned from Internet probe.
-        final String detectUrl;               // URL where a 204 response code indicates
-                                              // captive portal has been appeased.
-
-        public CaptivePortalProbeResult(
-                int httpResponseCode, String redirectUrl, String detectUrl) {
-            mHttpResponseCode = httpResponseCode;
-            this.redirectUrl = redirectUrl;
-            this.detectUrl = detectUrl;
-        }
-
-        public CaptivePortalProbeResult(int httpResponseCode) {
-            this(httpResponseCode, null, null);
-        }
-
-        boolean isSuccessful() {
-            return mHttpResponseCode == SUCCESS_CODE;
-        }
-
-        boolean isPortal() {
-            return !isSuccessful() && (mHttpResponseCode >= 200) && (mHttpResponseCode <= 399);
-        }
-
-        boolean isFailed() {
-            return !isSuccessful() && !isPortal();
         }
     }
 

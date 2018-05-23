@@ -198,8 +198,7 @@ public class NetworkRequest implements Parcelable {
          * @hide
          */
         public Builder setCapabilities(NetworkCapabilities nc) {
-            mNetworkCapabilities.clearAll();
-            mNetworkCapabilities.combineCapabilities(nc);
+            mNetworkCapabilities.set(nc);
             return this;
         }
 

@@ -11527,12 +11527,9 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 } else {
                     widgetType = TextClassifier.WIDGET_TYPE_UNSELECTABLE_TEXTVIEW;
                 }
-                // TODO: Tagged this widgetType with a * so it we can monitor if it reports
-                // SelectionEvents exactly as the older Logger does. Remove once investigations
-                // are complete.
                 final TextClassificationContext textClassificationContext =
                         new TextClassificationContext.Builder(
-                                mContext.getPackageName(), "*" + widgetType)
+                                mContext.getPackageName(), widgetType)
                                 .build();
                 if (mTextClassifier != null) {
                     mTextClassificationSession = tcm.createTextClassificationSession(

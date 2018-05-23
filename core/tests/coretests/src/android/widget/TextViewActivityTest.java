@@ -46,6 +46,7 @@ import static android.widget.espresso.TextViewAssertions.doesNotHaveStyledText;
 import static android.widget.espresso.TextViewAssertions.hasInsertionPointerAtIndex;
 import static android.widget.espresso.TextViewAssertions.hasSelection;
 
+import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertTrue;
 
@@ -77,6 +78,7 @@ import android.view.ActionMode;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.textclassifier.SelectionEvent;
 import android.view.textclassifier.TextClassificationManager;
 import android.view.textclassifier.TextClassifier;
 import android.view.textclassifier.TextLinks;
@@ -89,6 +91,9 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Tests the TextView widget from an Activity
@@ -975,6 +980,30 @@ public class TextViewActivityTest {
         onView(withId(R.id.textview)).perform(longPressOnTextAtIndex(password.indexOf('@')));
         sleepForFloatingToolbarPopup();
         assertFloatingToolbarDoesNotContainItem(android.R.id.textAssist);
+    }
+
+    @Test
+    public void testSelectionMetricsLogger_noAbandonAfterCopy() throws Throwable {
+        final List<SelectionEvent> selectionEvents = new ArrayList<>();
+        final TextClassifier classifier = new TextClassifier() {
+            @Override
+            public void onSelectionEvent(SelectionEvent event) {
+                selectionEvents.add(event);
+            }
+        };
+        final TextView textView = mActivity.findViewById(R.id.textview);
+        mActivityRule.runOnUiThread(() -> textView.setTextClassifier(classifier));
+        mInstrumentation.waitForIdleSync();
+        final String text = "andyroid@android.com";
+
+        onView(withId(R.id.textview)).perform(replaceText(text));
+        onView(withId(R.id.textview)).perform(longPressOnTextAtIndex(text.indexOf('@')));
+        sleepForFloatingToolbarPopup();
+        clickFloatingToolbarItem(mActivity.getString(com.android.internal.R.string.copy));
+        mInstrumentation.waitForIdleSync();
+
+        final SelectionEvent lastEvent = selectionEvents.get(selectionEvents.size() - 1);
+        assertEquals(SelectionEvent.ACTION_COPY, lastEvent.getEventType());
     }
 
     @Test

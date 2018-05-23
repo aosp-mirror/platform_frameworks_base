@@ -34,10 +34,10 @@
     <dimen name="status_bar_icon_size">@*android:dimen/status_bar_icon_size</dimen>
 
     <!-- Height of the battery icon in the status bar. -->
-    <dimen name="status_bar_battery_icon_height">14.5dp</dimen>
+    <dimen name="status_bar_battery_icon_height">13.0dp</dimen>
 
     <!-- Width of the battery icon in the status bar. -->
-    <dimen name="status_bar_battery_icon_width">9.5dp</dimen>
+    <dimen name="status_bar_battery_icon_width">8.5dp</dimen>
 
     <!-- The font size for the clock in the status bar. -->
     <dimen name="status_bar_clock_size">14sp</dimen>
@@ -959,6 +959,10 @@
             needs to start with a guess for the maximum size. Currently two-line smart reply buttons
             add about 88dp of height to the notifications. -->
     <dimen name="smart_reply_button_max_height">100dp</dimen>
+
+    <!-- The extra height that we allow a notification with a remote input history to be taller than
+         the regular notification, when we have remote input history texts present. -->
+    <dimen name="remote_input_history_extra_height">60dp</dimen>
 
     <!-- Fingerprint Dialog values -->
     <dimen name="fingerprint_dialog_fp_icon_size">64dp</dimen>

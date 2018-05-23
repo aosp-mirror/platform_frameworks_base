@@ -151,6 +151,7 @@ public class RemoteInputView extends LinearLayout implements View.OnClickListene
         mController.removeRemoteInput(mEntry, mToken);
         mEditText.mShowImeOnInputConnection = false;
         mController.remoteInputSent(mEntry);
+        mEntry.setHasSentReply();
 
         // Tell ShortcutManager that this package has been "activated".  ShortcutManager
         // will reset the throttling for this package.

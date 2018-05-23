@@ -245,8 +245,10 @@ public abstract class BatteryStats implements Parcelable {
      * New in version 31:
      *   - New cellular network types.
      *   - Deferred job metrics.
+     * New in version 32:
+     *   - Ambient display properly output in data dump.
      */
-    static final int CHECKIN_VERSION = 31;
+    static final int CHECKIN_VERSION = 32;
 
     /**
      * Old version, we hit 9 and ran out of room, need to remove.

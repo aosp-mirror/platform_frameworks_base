@@ -23,6 +23,7 @@ import static android.provider.SettingsValidators.COMPONENT_NAME_VALIDATOR;
 import static android.provider.SettingsValidators.LENIENT_IP_ADDRESS_VALIDATOR;
 import static android.provider.SettingsValidators.LOCALE_VALIDATOR;
 import static android.provider.SettingsValidators.NON_NEGATIVE_INTEGER_VALIDATOR;
+import static android.provider.SettingsValidators.NULLABLE_COMPONENT_NAME_VALIDATOR;
 import static android.provider.SettingsValidators.PACKAGE_NAME_VALIDATOR;
 import static android.provider.SettingsValidators.URI_VALIDATOR;
 
@@ -3114,10 +3115,10 @@ public final class Settings {
 
         private static final Validator FONT_SCALE_VALIDATOR = new Validator() {
             @Override
-            public boolean validate(String value) {
+            public boolean validate(@Nullable String value) {
                 try {
                     return Float.parseFloat(value) >= 0;
-                } catch (NumberFormatException e) {
+                } catch (NumberFormatException | NullPointerException e) {
                     return false;
                 }
             }
@@ -3655,11 +3656,11 @@ public final class Settings {
         /** @hide */
         public static final Validator DATE_FORMAT_VALIDATOR = new Validator() {
             @Override
-            public boolean validate(String value) {
+            public boolean validate(@Nullable String value) {
                 try {
                     new SimpleDateFormat(value);
                     return true;
-                } catch (IllegalArgumentException e) {
+                } catch (IllegalArgumentException | NullPointerException e) {
                     return false;
                 }
             }
@@ -4066,7 +4067,7 @@ public final class Settings {
         /** @hide */
         public static final Validator EGG_MODE_VALIDATOR = new Validator() {
             @Override
-            public boolean validate(String value) {
+            public boolean validate(@Nullable String value) {
                 try {
                     return Long.parseLong(value) >= 0;
                 } catch (NumberFormatException e) {
@@ -5452,7 +5453,8 @@ public final class Settings {
         @TestApi
         public static final String AUTOFILL_SERVICE = "autofill_service";
 
-        private static final Validator AUTOFILL_SERVICE_VALIDATOR = COMPONENT_NAME_VALIDATOR;
+        private static final Validator AUTOFILL_SERVICE_VALIDATOR =
+                NULLABLE_COMPONENT_NAME_VALIDATOR;
 
         /**
          * Boolean indicating if Autofill supports field classification.
@@ -5950,7 +5952,7 @@ public final class Settings {
                 "accessibility_shortcut_target_service";
 
         private static final Validator ACCESSIBILITY_SHORTCUT_TARGET_SERVICE_VALIDATOR =
-                COMPONENT_NAME_VALIDATOR;
+                NULLABLE_COMPONENT_NAME_VALIDATOR;
 
         /**
          * Setting specifying the accessibility service or feature to be toggled via the
@@ -5965,7 +5967,7 @@ public final class Settings {
         private static final Validator ACCESSIBILITY_BUTTON_TARGET_COMPONENT_VALIDATOR =
                 new Validator() {
                     @Override
-                    public boolean validate(String value) {
+                    public boolean validate(@Nullable String value) {
                         // technically either ComponentName or class name, but there's proper value
                         // validation at callsites, so allow any non-null string
                         return value != null;
@@ -6482,7 +6484,7 @@ public final class Settings {
 
         private static final Validator TTS_DEFAULT_LOCALE_VALIDATOR = new Validator() {
             @Override
-            public boolean validate(String value) {
+            public boolean validate(@Nullable String value) {
                 if (value == null || value.length() == 0) {
                     return false;
                 }
@@ -7112,6 +7114,35 @@ public final class Settings {
         public static final String UI_NIGHT_MODE = "ui_night_mode";
 
         /**
+         * The current device UI theme mode effect SystemUI and Launcher.<br/>
+         * <b>Values:</b><br/>
+         * 0 - The mode that theme will controlled by wallpaper color.<br/>
+         * 1 - The mode that will always light theme.<br/>
+         * 2 - The mode that will always dark theme.<br/>
+         *
+         * @hide
+         */
+        public static final String THEME_MODE = "theme_mode";
+
+        /**
+         * THEME_MODE value for wallpaper mode.
+         * @hide
+         */
+        public static final int THEME_MODE_WALLPAPER = 0;
+
+        /**
+         * THEME_MODE value for light theme mode.
+         * @hide
+         */
+        public static final int THEME_MODE_LIGHT = 1;
+
+        /**
+         * THEME_MODE value for dark theme mode.
+         * @hide
+         */
+        public static final int THEME_MODE_DARK = 2;
+
+        /**
          * Whether screensavers are enabled.
          * @hide
          */
@@ -7720,7 +7751,7 @@ public final class Settings {
 
         private static final Validator QS_TILES_VALIDATOR = new Validator() {
             @Override
-            public boolean validate(String value) {
+            public boolean validate(@Nullable String value) {
                 if (value == null) {
                     return false;
                 }
@@ -7779,7 +7810,7 @@ public final class Settings {
 
         private static final Validator QS_AUTO_ADDED_TILES_VALIDATOR = new Validator() {
             @Override
-            public boolean validate(String value) {
+            public boolean validate(@Nullable String value) {
                 if (value == null) {
                     return false;
                 }
@@ -8653,7 +8684,7 @@ public final class Settings {
 
         private static final Validator STAY_ON_WHILE_PLUGGED_IN_VALIDATOR = new Validator() {
             @Override
-            public boolean validate(String value) {
+            public boolean validate(@Nullable String value) {
                 try {
                     int val = Integer.parseInt(value);
                     return (val == 0)
@@ -9687,7 +9718,7 @@ public final class Settings {
 
         private static final Validator USE_OPEN_WIFI_PACKAGE_VALIDATOR = new Validator() {
             @Override
-            public boolean validate(String value) {
+            public boolean validate(@Nullable String value) {
                 return (value == null) || PACKAGE_NAME_VALIDATOR.validate(value);
             }
         };
@@ -11382,7 +11413,7 @@ public final class Settings {
         private static final Validator ENCODED_SURROUND_OUTPUT_ENABLED_FORMATS_VALIDATOR =
                 new Validator() {
             @Override
-            public boolean validate(String value) {
+            public boolean validate(@Nullable String value) {
                 try {
                     String[] surroundFormats = TextUtils.split(value, ",");
                     for (String format : surroundFormats) {
@@ -11562,6 +11593,13 @@ public final class Settings {
 
         /** @hide */ public static final int EMULATE_DISPLAY_CUTOUT_OFF = 0;
         /** @hide */ public static final int EMULATE_DISPLAY_CUTOUT_ON = 1;
+
+        /**
+         * A colon separated list of keys for Settings Slices.
+         *
+         * @hide
+         */
+        public static final String BLOCKED_SLICES = "blocked_slices";
 
         /**
          * Defines global zen mode.  ZEN_MODE_OFF, ZEN_MODE_IMPORTANT_INTERRUPTIONS,

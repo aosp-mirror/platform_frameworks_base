@@ -640,7 +640,7 @@ public class StorageNotification extends SystemUI {
     }
 
     private PendingIntent buildBrowsePendingIntent(VolumeInfo vol) {
-        final Intent intent = vol.buildBrowseIntent();
+        final Intent intent = vol.buildBrowseIntentForUser(vol.getMountUserId());
 
         final int requestKey = vol.getId().hashCode();
         return PendingIntent.getActivityAsUser(mContext, requestKey, intent,

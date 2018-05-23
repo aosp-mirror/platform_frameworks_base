@@ -113,6 +113,20 @@ public class WebChromeClient {
      * the new WebView as an argument. If the host application chooses not to
      * honor the request, it should return {@code false} from this method. The default
      * implementation of this method does nothing and hence returns {@code false}.
+     * <p>
+     * Applications should typically not allow windows to be created when the
+     * {@code isUserGesture} flag is false, as this may be an unwanted popup.
+     * <p>
+     * Applications should be careful how they display the new window: don't simply
+     * overlay it over the existing WebView as this may mislead the user about which
+     * site they are viewing. If your application displays the URL of the main page,
+     * make sure to also display the URL of the new window in a similar fashion. If
+     * your application does not display URLs, consider disallowing the creation of
+     * new windows entirely.
+     * <p class="note"><b>Note:</b> There is no trustworthy way to tell which page
+     * requested the new window: the request might originate from a third-party iframe
+     * inside the WebView.
+     *
      * @param view The WebView from which the request for a new window
      *             originated.
      * @param isDialog {@code true} if the new window should be a dialog, rather than
@@ -149,6 +163,11 @@ public class WebChromeClient {
      * from the view system if necessary. At this point, WebCore has stopped
      * any loading in this window and has removed any cross-scripting ability
      * in javascript.
+     * <p>
+     * As with {@link #onCreateWindow}, the application should ensure that any
+     * URL or security indicator displayed is updated so that the user can tell
+     * that the page they were interacting with has been closed.
+     *
      * @param window The WebView that needs to be closed.
      */
     public void onCloseWindow(WebView window) {}

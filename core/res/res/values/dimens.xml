@@ -55,7 +55,7 @@
     <!-- Width of the navigation bar when it is placed vertically on the screen in car mode -->
     <dimen name="navigation_bar_width_car_mode">96dp</dimen>
     <!-- Height of notification icons in the status bar -->
-    <dimen name="status_bar_icon_size">24dip</dimen>
+    <dimen name="status_bar_icon_size">22dip</dimen>
     <!-- Size of the giant number (unread count) in the notifications -->
     <dimen name="status_bar_content_number_size">48sp</dimen>
     <!-- Margin at the edge of the screen to ignore touch events for in the windowshade. -->

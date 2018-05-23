@@ -42,7 +42,7 @@ public class DozeScreenState implements DozeMachine.Part {
      * hiding the wallpaper and changing the display mode is necessary to hide
      * the black frame that's inherent to hardware specs.
      */
-    public static final int ENTER_DOZE_HIDE_WALLPAPER_DELAY = 2000;
+    public static final int ENTER_DOZE_HIDE_WALLPAPER_DELAY = 4500;
 
     private final DozeMachine.Service mDozeService;
     private final Handler mHandler;

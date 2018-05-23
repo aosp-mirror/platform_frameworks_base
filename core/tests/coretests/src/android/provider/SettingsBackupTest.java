@@ -132,6 +132,7 @@ public class SettingsBackupTest {
                     Settings.Global.BLE_SCAN_LOW_LATENCY_WINDOW_MS,
                     Settings.Global.BLE_SCAN_LOW_LATENCY_INTERVAL_MS,
                     Settings.Global.BLE_SCAN_BACKGROUND_MODE,
+                    Settings.Global.BLOCKED_SLICES,
                     Settings.Global.BLOCKING_HELPER_DISMISS_TO_VIEW_RATIO_LIMIT,
                     Settings.Global.BLOCKING_HELPER_STREAK_LIMIT,
                     Settings.Global.BLUETOOTH_A2DP_SINK_PRIORITY_PREFIX,
@@ -591,6 +592,7 @@ public class SettingsBackupTest {
                  Settings.Secure.SHOW_ROTATION_SUGGESTIONS,
                  Settings.Secure.SKIP_FIRST_USE_HINTS, // candidate?
                  Settings.Secure.SMS_DEFAULT_APPLICATION,
+                 Settings.Secure.THEME_MODE,
                  Settings.Secure.TRUST_AGENTS_INITIALIZED,
                  Settings.Secure.TV_INPUT_CUSTOM_LABELS,
                  Settings.Secure.TV_INPUT_HIDDEN_INPUTS,

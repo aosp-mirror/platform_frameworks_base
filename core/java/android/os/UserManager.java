@@ -2087,12 +2087,33 @@ public class UserManager {
      * Also ephemeral users can be disabled to indicate that their removal is in progress and they
      * shouldn't be re-entered. Therefore ephemeral users should not be re-enabled once disabled.
      *
-     * @param userHandle the id of the profile to enable
+     * @param userId the id of the profile to enable
      * @hide
      */
-    public void setUserEnabled(@UserIdInt int userHandle) {
+    public void setUserEnabled(@UserIdInt int userId) {
         try {
-            mService.setUserEnabled(userHandle);
+            mService.setUserEnabled(userId);
+        } catch (RemoteException re) {
+            throw re.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Assigns admin privileges to the user, if such a user exists.
+     *
+     * <p>Requires {@link android.Manifest.permission#MANAGE_USERS} and
+     * {@link android.Manifest.permission#INTERACT_ACROSS_USERS_FULL} permissions.
+     *
+     * @param userHandle the id of the user to become admin
+     * @hide
+     */
+    @RequiresPermission(allOf = {
+            Manifest.permission.INTERACT_ACROSS_USERS_FULL,
+            Manifest.permission.MANAGE_USERS
+    })
+    public void setUserAdmin(@UserIdInt int userHandle) {
+        try {
+            mService.setUserAdmin(userHandle);
         } catch (RemoteException re) {
             throw re.rethrowFromSystemServer();
         }

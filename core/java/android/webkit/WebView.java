@@ -1019,11 +1019,21 @@ public class WebView extends AbsoluteLayout
      * If {@code null}, defaults to 'text/html'.
      * <p>
      * The 'data' scheme URL formed by this method uses the default US-ASCII
-     * charset. If you need need to set a different charset, you should form a
+     * charset. If you need to set a different charset, you should form a
      * 'data' scheme URL which explicitly specifies a charset parameter in the
      * mediatype portion of the URL and call {@link #loadUrl(String)} instead.
      * Note that the charset obtained from the mediatype portion of a data URL
      * always overrides that specified in the HTML or XML document itself.
+     * <p>
+     * Content loaded using this method will have a {@code window.origin} value
+     * of {@code "null"}. This must not be considered to be a trusted origin
+     * by the application or by any JavaScript code running inside the WebView
+     * (for example, event sources in DOM event handlers or web messages),
+     * because malicious content can also create frames with a null origin. If
+     * you need to identify the main frame's origin in a trustworthy way, you
+     * should use {@link #loadDataWithBaseURL(String,String,String,String,String)
+     * loadDataWithBaseURL()} with a valid HTTP or HTTPS base URL to set the
+     * origin.
      *
      * @param data a String of data in the given encoding
      * @param mimeType the MIME type of the data, e.g. 'text/html'.
@@ -1057,6 +1067,15 @@ public class WebView extends AbsoluteLayout
      * <p>
      * Note that the baseUrl is sent in the 'Referer' HTTP header when
      * requesting subresources (images, etc.) of the page loaded using this method.
+     * <p>
+     * If a valid HTTP or HTTPS base URL is not specified in {@code baseUrl}, then
+     * content loaded using this method will have a {@code window.origin} value
+     * of {@code "null"}. This must not be considered to be a trusted origin
+     * by the application or by any JavaScript code running inside the WebView
+     * (for example, event sources in DOM event handlers or web messages),
+     * because malicious content can also create frames with a null origin. If
+     * you need to identify the main frame's origin in a trustworthy way, you
+     * should use a valid HTTP or HTTPS base URL to set the origin.
      *
      * @param baseUrl the URL to use as the page's base URL. If {@code null} defaults to
      *                'about:blank'.
@@ -2056,6 +2075,13 @@ public class WebView extends AbsoluteLayout
      * <p>
      * A target origin can be set as a wildcard ("*"). However this is not recommended.
      * See the page above for security issues.
+     * <p>
+     * Content loaded via {@link #loadData(String,String,String)} will not have a
+     * valid origin, and thus cannot be sent messages securely. If you need to send
+     * messages using this function, you should use
+     * {@link #loadDataWithBaseURL(String,String,String,String,String)} with a valid
+     * HTTP or HTTPS {@code baseUrl} to define a valid origin that can be used for
+     * messaging.
      *
      * @param message the WebMessage
      * @param targetOrigin the target origin.

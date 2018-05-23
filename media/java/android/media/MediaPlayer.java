@@ -2848,8 +2848,12 @@ public class MediaPlayer extends PlayerBase
                     mInbandTrackIndices.set(i);
                 }
 
+                if (tracks[i] == null) {
+                    Log.w(TAG, "unexpected NULL track at index " + i);
+                }
                 // newly appeared inband track
-                if (tracks[i].getTrackType() == TrackInfo.MEDIA_TRACK_TYPE_SUBTITLE) {
+                if (tracks[i] != null
+                        && tracks[i].getTrackType() == TrackInfo.MEDIA_TRACK_TYPE_SUBTITLE) {
                     SubtitleTrack track = mSubtitleController.addTrack(
                             tracks[i].getFormat());
                     mIndexTrackPairs.add(Pair.create(i, track));
