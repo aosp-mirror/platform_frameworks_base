@@ -37,6 +37,7 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
 import android.os.Message;
+import android.os.UserHandle;
 import android.provider.Settings;
 import android.util.Slog;
 import android.view.RemoteAnimationAdapter;
@@ -340,7 +341,7 @@ public class ActivityStartController {
                     // Collect information about the target of the Intent.
                     ActivityInfo aInfo = mSupervisor.resolveActivity(intent, resolvedTypes[i], 0,
                             null, userId, ActivityStarter.computeResolveFilterUid(
-                                    callingUid, realCallingUid));
+                                    callingUid, realCallingUid, UserHandle.USER_NULL));
                     // TODO: New, check if this is correct
                     aInfo = mService.getActivityInfoForUser(aInfo, userId);
 
