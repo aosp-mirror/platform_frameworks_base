@@ -409,10 +409,9 @@ public class BatteryStatsHelper {
         }
         mBluetoothPowerCalculator.reset();
 
-        if (mSensorPowerCalculator == null) {
-            mSensorPowerCalculator = new SensorPowerCalculator(mPowerProfile,
-                    (SensorManager) mContext.getSystemService(Context.SENSOR_SERVICE));
-        }
+        mSensorPowerCalculator = new SensorPowerCalculator(mPowerProfile,
+                (SensorManager) mContext.getSystemService(Context.SENSOR_SERVICE),
+                mStats, rawRealtimeUs, statsType);
         mSensorPowerCalculator.reset();
 
         if (mCameraPowerCalculator == null) {
