@@ -163,15 +163,6 @@ public class MessagingLinearLayout extends ViewGroup {
             }
             final LayoutParams lp = (LayoutParams) child.getLayoutParams();
             MessagingChild messagingChild = (MessagingChild) child;
-            if (lp.hide) {
-                if (shown && lp.visibleBefore) {
-                    messagingChild.hideAnimated();
-                }
-                lp.visibleBefore = false;
-                continue;
-            } else {
-                lp.visibleBefore = true;
-            }
 
             final int childWidth = child.getMeasuredWidth();
             final int childHeight = child.getMeasuredHeight();
@@ -181,6 +172,19 @@ public class MessagingLinearLayout extends ViewGroup {
                 childLeft = childRight - childWidth - lp.rightMargin;
             } else {
                 childLeft = paddingLeft + lp.leftMargin;
+            }
+            if (lp.hide) {
+                if (shown && lp.visibleBefore) {
+                    // We still want to lay out the child to have great animations
+                    child.layout(childLeft, childTop, childLeft + childWidth,
+                            childTop + lp.lastVisibleHeight);
+                    messagingChild.hideAnimated();
+                }
+                lp.visibleBefore = false;
+                continue;
+            } else {
+                lp.visibleBefore = true;
+                lp.lastVisibleHeight = childHeight;
             }
 
             if (!first) {
@@ -228,6 +232,18 @@ public class MessagingLinearLayout extends ViewGroup {
         return copy;
     }
 
+    public static boolean isGone(View view) {
+        if (view.getVisibility() == View.GONE) {
+            return true;
+        }
+        final ViewGroup.LayoutParams lp = view.getLayoutParams();
+        if (lp instanceof MessagingLinearLayout.LayoutParams
+                && ((MessagingLinearLayout.LayoutParams) lp).hide) {
+            return true;
+        }
+        return false;
+    }
+
     /**
      * Sets how many lines should be displayed at most
      */
@@ -263,6 +279,7 @@ public class MessagingLinearLayout extends ViewGroup {
 
         public boolean hide = false;
         public boolean visibleBefore = false;
+        public int lastVisibleHeight;
 
         public LayoutParams(Context c, AttributeSet attrs) {
             super(c, attrs);

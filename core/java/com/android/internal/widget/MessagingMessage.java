@@ -124,8 +124,7 @@ public interface MessagingMessage extends MessagingLinearLayout.MessagingChild {
     @Override
     default void hideAnimated() {
         setIsHidingAnimated(true);
-        getGroup().performRemoveAnimation(getState().getHostView(),
-                () -> setIsHidingAnimated(false));
+        getGroup().performRemoveAnimation(getView(), () -> setIsHidingAnimated(false));
     }
 
     default boolean hasOverlappingRendering() {
@@ -133,7 +132,7 @@ public interface MessagingMessage extends MessagingLinearLayout.MessagingChild {
     }
 
     default void recycle() {
-        getState().reset();
+        getState().recycle();
     }
 
     default View getView() {
