@@ -46,4 +46,64 @@ TEST(NoDefaultResourceRemoverTest, RemoveEntryWithNoDefaultAndOnlyLocales) {
   EXPECT_TRUE(table->FindResource(test::ParseNameOrDie("android:string/baz")));
 }
 
+TEST(NoDefaultResourceRemoverTest, KeepEntryWithLocalesAndDensities) {
+  std::unique_ptr<IAaptContext> context = test::ContextBuilder().SetMinSdkVersion(26).Build();
+  std::unique_ptr<ResourceTable> table =
+      test::ResourceTableBuilder()
+          .SetPackageId("android", 0x01)
+          .AddSimple("android:drawable/keep1", test::ParseConfigOrDie("mdpi")) // v4
+          .AddSimple("android:drawable/keep1", test::ParseConfigOrDie("en-rGB"))
+          .AddSimple("android:drawable/keep1", test::ParseConfigOrDie("fr-rFR"))
+          .AddSimple("android:drawable/keep2", test::ParseConfigOrDie("fr-rFR"))
+          .AddSimple("android:drawable/keep2", test::ParseConfigOrDie("en-rGB"))
+          .AddSimple("android:drawable/keep2", test::ParseConfigOrDie("xxxhdpi")) // v4
+          .AddSimple("android:drawable/remove1", test::ParseConfigOrDie("fr-rFR"))
+          .AddSimple("android:drawable/remove1", test::ParseConfigOrDie("en-rGB"))
+          .AddSimple("android:drawable/remove1", test::ParseConfigOrDie("w600dp-xhdpi")) // v13
+          .Build();
+
+  NoDefaultResourceRemover remover;
+  ASSERT_TRUE(remover.Consume(context.get(), table.get()));
+
+  EXPECT_TRUE(table->FindResource(test::ParseNameOrDie("android:drawable/keep1")));
+  EXPECT_TRUE(table->FindResource(test::ParseNameOrDie("android:drawable/keep2")));
+  EXPECT_FALSE(table->FindResource(test::ParseNameOrDie("android:drawable/remove1")));
+}
+
+TEST(NoDefaultResourceRemoverTest, RemoveEntryWithLocalesAndDensitiesLowVersion) {
+  std::unique_ptr<IAaptContext> context = test::ContextBuilder().SetMinSdkVersion(3).Build();
+  std::unique_ptr<ResourceTable> table =
+      test::ResourceTableBuilder()
+          .SetPackageId("android", 0x01)
+          .AddSimple("android:drawable/remove1", test::ParseConfigOrDie("mdpi")) // v4
+          .AddSimple("android:drawable/remove1", test::ParseConfigOrDie("en-rGB"))
+          .AddSimple("android:drawable/remove1", test::ParseConfigOrDie("fr-rFR"))
+          .Build();
+
+  NoDefaultResourceRemover remover;
+  ASSERT_TRUE(remover.Consume(context.get(), table.get()));
+
+  EXPECT_FALSE(table->FindResource(test::ParseNameOrDie("android:drawable/remove1")));
+}
+
+TEST(NoDefaultResourceRemoverTest, KeepEntryWithVersion) {
+  std::unique_ptr<IAaptContext> context = test::ContextBuilder().SetMinSdkVersion(8).Build();
+  std::unique_ptr<ResourceTable> table =
+      test::ResourceTableBuilder()
+          .SetPackageId("android", 0x01)
+          .AddSimple("android:drawable/keep1", test::ParseConfigOrDie("v8"))
+          .AddSimple("android:drawable/keep1", test::ParseConfigOrDie("en-rGB"))
+          .AddSimple("android:drawable/keep1", test::ParseConfigOrDie("fr-rFR"))
+          .AddSimple("android:drawable/remove1", test::ParseConfigOrDie("v9"))
+          .AddSimple("android:drawable/remove1", test::ParseConfigOrDie("en-rGB"))
+          .AddSimple("android:drawable/remove1", test::ParseConfigOrDie("fr-rFR"))
+          .Build();
+
+  NoDefaultResourceRemover remover;
+  ASSERT_TRUE(remover.Consume(context.get(), table.get()));
+
+  EXPECT_TRUE(table->FindResource(test::ParseNameOrDie("android:drawable/keep1")));
+  EXPECT_FALSE(table->FindResource(test::ParseNameOrDie("android:drawable/remove1")));
+}
+
 }  // namespace aapt
