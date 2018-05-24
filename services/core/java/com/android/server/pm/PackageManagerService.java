@@ -370,6 +370,7 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Predicate;
 
 /**
  * Keep track of all those APKs everywhere.
@@ -14294,28 +14295,50 @@ public class PackageManagerService extends IPackageManager.Stub
      * @param packageName The package holding {@link Manifest.permission#SUSPEND_APPS} permission
      * @param affectedUser The user for which the changes are taking place.
      */
-    void unsuspendForSuspendingPackage(String packageName, int affectedUser) {
+    void unsuspendForSuspendingPackage(final String packageName, int affectedUser) {
         final int[] userIds = (affectedUser == UserHandle.USER_ALL) ? sUserManager.getUserIds()
                 : new int[] {affectedUser};
         for (int userId : userIds) {
-            List<String> affectedPackages = new ArrayList<>();
-            synchronized (mPackages) {
-                for (PackageSetting ps : mSettings.mPackages.values()) {
-                    final PackageUserState pus = ps.readUserState(userId);
-                    if (pus.suspended && packageName.equals(pus.suspendingPackage)) {
-                        ps.setSuspended(false, null, null, null, null, userId);
-                        affectedPackages.add(ps.name);
-                    }
+            unsuspendForSuspendingPackages(packageName::equals, userId);
+        }
+    }
+
+    /**
+     * Immediately unsuspends any packages in the given users not suspended by the platform or root.
+     * To be called when a profile owner or a device owner is added.
+     *
+     * <p><b>Should not be used on a frequent code path</b> as it flushes state to disk
+     * synchronously
+     *
+     * @param userIds The users for which to unsuspend packages
+     */
+    void unsuspendForNonSystemSuspendingPackages(ArraySet<Integer> userIds) {
+        final int sz = userIds.size();
+        for (int i = 0; i < sz; i++) {
+            unsuspendForSuspendingPackages(
+                    (suspendingPackage) -> !PLATFORM_PACKAGE_NAME.equals(suspendingPackage),
+                    userIds.valueAt(i));
+        }
+    }
+
+    private void unsuspendForSuspendingPackages(Predicate<String> packagePredicate, int userId) {
+        final List<String> affectedPackages = new ArrayList<>();
+        synchronized (mPackages) {
+            for (PackageSetting ps : mSettings.mPackages.values()) {
+                final PackageUserState pus = ps.readUserState(userId);
+                if (pus.suspended && packagePredicate.test(pus.suspendingPackage)) {
+                    ps.setSuspended(false, null, null, null, null, userId);
+                    affectedPackages.add(ps.name);
                 }
             }
-            if (!affectedPackages.isEmpty()) {
-                final String[] packageArray = affectedPackages.toArray(
-                        new String[affectedPackages.size()]);
-                sendMyPackageSuspendedOrUnsuspended(packageArray, false, null, userId);
-                sendPackagesSuspendedForUser(packageArray, userId, false, null);
-                // Write package restrictions immediately to avoid an inconsistent state.
-                mSettings.writePackageRestrictionsLPr(userId);
-            }
+        }
+        if (!affectedPackages.isEmpty()) {
+            final String[] packageArray = affectedPackages.toArray(
+                    new String[affectedPackages.size()]);
+            sendMyPackageSuspendedOrUnsuspended(packageArray, false, null, userId);
+            sendPackagesSuspendedForUser(packageArray, userId, false, null);
+            // Write package restrictions immediately to avoid an inconsistent state.
+            mSettings.writePackageRestrictionsLPr(userId);
         }
     }
 
@@ -24011,6 +24034,18 @@ Slog.v(TAG, ":: stepped forward, applying functor at tag " + parser.getName());
                 SparseArray<String> profileOwnerPackages) {
             mProtectedPackages.setDeviceAndProfileOwnerPackages(
                     deviceOwnerUserId, deviceOwnerPackage, profileOwnerPackages);
+
+            final ArraySet<Integer> usersWithPoOrDo = new ArraySet<>();
+            if (deviceOwnerPackage != null) {
+                usersWithPoOrDo.add(deviceOwnerUserId);
+            }
+            final int sz = profileOwnerPackages.size();
+            for (int i = 0; i < sz; i++) {
+                if (profileOwnerPackages.valueAt(i) != null) {
+                    usersWithPoOrDo.add(profileOwnerPackages.keyAt(i));
+                }
+            }
+            unsuspendForNonSystemSuspendingPackages(usersWithPoOrDo);
         }
 
         @Override
