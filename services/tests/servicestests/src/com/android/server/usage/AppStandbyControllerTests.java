@@ -218,6 +218,11 @@ public class AppStandbyControllerTests {
                     + "stable_charging_threshold=" + STABLE_CHARGING_THRESHOLD;
         }
 
+        @Override
+        public boolean isDeviceIdleMode() {
+            return false;
+        }
+
         // Internal methods
 
         void setDisplayOn(boolean on) {
