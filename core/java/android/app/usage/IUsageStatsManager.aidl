@@ -36,6 +36,8 @@ interface IUsageStatsManager {
             String callingPackage);
     UsageEvents queryEvents(long beginTime, long endTime, String callingPackage);
     UsageEvents queryEventsForPackage(long beginTime, long endTime, String callingPackage);
+    UsageEvents queryEventsForUser(long beginTime, long endTime, int userId, String callingPackage);
+    UsageEvents queryEventsForPackageForUser(long beginTime, long endTime, int userId, String pkg, String callingPackage);
     void setAppInactive(String packageName, boolean inactive, int userId);
     boolean isAppInactive(String packageName, int userId);
     void whitelistAppTemporarily(String packageName, long duration, int userId);
