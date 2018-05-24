@@ -34,11 +34,12 @@ import android.widget.LinearLayout;
 import android.widget.Space;
 
 import com.android.systemui.Dependency;
+import com.android.systemui.OverviewProxyService;
 import com.android.systemui.R;
 import com.android.systemui.plugins.PluginListener;
 import com.android.systemui.plugins.PluginManager;
 import com.android.systemui.plugins.statusbar.phone.NavBarButtonProvider;
-import com.android.systemui.statusbar.phone.ReverseLinearLayout.ReverseFrameLayout;
+import com.android.systemui.statusbar.phone.ReverseLinearLayout.ReverseRelativeLayout;
 import com.android.systemui.statusbar.policy.KeyButtonView;
 import com.android.systemui.tuner.TunerService;
 import com.android.systemui.tuner.TunerService.Tunable;
@@ -67,6 +68,7 @@ public class NavigationBarInflaterView extends FrameLayout
     public static final String KEY = "key";
     public static final String LEFT = "left";
     public static final String RIGHT = "right";
+    public static final String CONTEXTUAL = "contextual";
 
     public static final String GRAVITY_SEPARATOR = ";";
     public static final String BUTTON_SEPARATOR = ",";
@@ -97,6 +99,9 @@ public class NavigationBarInflaterView extends FrameLayout
     private View mLastLandscape;
 
     private boolean mAlternativeOrder;
+    private boolean mUsingCustomLayout;
+
+    private OverviewProxyService mOverviewProxyService;
 
     public NavigationBarInflaterView(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -105,6 +110,7 @@ public class NavigationBarInflaterView extends FrameLayout
                 context.getSystemService(Context.WINDOW_SERVICE)).getDefaultDisplay();
         Mode displayMode = mDisplay.getMode();
         isRot0Landscape = displayMode.getPhysicalWidth() > displayMode.getPhysicalHeight();
+        mOverviewProxyService = Dependency.get(OverviewProxyService.class);
     }
 
     private void createInflaters() {
@@ -136,7 +142,10 @@ public class NavigationBarInflaterView extends FrameLayout
     }
 
     protected String getDefaultLayout() {
-        return mContext.getString(R.string.config_navBarLayout);
+        final int defaultResource = mOverviewProxyService.shouldShowSwipeUpUI()
+                ? R.string.config_navBarLayoutQuickstep
+                : R.string.config_navBarLayout;
+        return mContext.getString(defaultResource);
     }
 
     @Override
@@ -159,12 +168,25 @@ public class NavigationBarInflaterView extends FrameLayout
     public void onTuningChanged(String key, String newValue) {
         if (NAV_BAR_VIEWS.equals(key)) {
             if (!Objects.equals(mCurrentLayout, newValue)) {
+                mUsingCustomLayout = newValue != null;
                 clearViews();
                 inflateLayout(newValue);
             }
         } else if (NAV_BAR_LEFT.equals(key) || NAV_BAR_RIGHT.equals(key)) {
             clearViews();
             inflateLayout(mCurrentLayout);
+        }
+    }
+
+    public void onLikelyDefaultLayoutChange() {
+        // Don't override custom layouts
+        if (mUsingCustomLayout) return;
+
+        // Reevaluate new layout
+        final String newValue = getDefaultLayout();
+        if (!Objects.equals(mCurrentLayout, newValue)) {
+            clearViews();
+            inflateLayout(newValue);
         }
     }
 
@@ -178,10 +200,12 @@ public class NavigationBarInflaterView extends FrameLayout
     public void updateButtonDispatchersCurrentView() {
         if (mButtonDispatchers != null) {
             final int rotation = mDisplay.getRotation();
-            final View view = rotation == Surface.ROTATION_0 || rotation == Surface.ROTATION_180
-                    ? mRot0 : mRot90;
+            final boolean portrait = rotation == Surface.ROTATION_0
+                    || rotation == Surface.ROTATION_180;
+            final View view = portrait ? mRot0 : mRot90;
             for (int i = 0; i < mButtonDispatchers.size(); i++) {
-                mButtonDispatchers.valueAt(i).setCurrentView(view);
+                final ButtonDispatcher dispatcher = mButtonDispatchers.valueAt(i);
+                dispatcher.setCurrentView(view);
             }
         }
     }
@@ -288,8 +312,8 @@ public class NavigationBarInflaterView extends FrameLayout
         addToDispatchers(v);
         View lastView = landscape ? mLastLandscape : mLastPortrait;
         View accessibilityView = v;
-        if (v instanceof ReverseFrameLayout) {
-            accessibilityView = ((ReverseFrameLayout) v).getChildAt(0);
+        if (v instanceof ReverseRelativeLayout) {
+            accessibilityView = ((ReverseRelativeLayout) v).getChildAt(0);
         }
         if (lastView != null) {
             accessibilityView.setAccessibilityTraversalAfter(lastView.getId());
@@ -307,21 +331,33 @@ public class NavigationBarInflaterView extends FrameLayout
         if (sizeStr == null) return v;
 
         if (sizeStr.contains(WEIGHT_SUFFIX)) {
+            // To support gravity, wrap in RelativeLayout and apply gravity to it.
+            // Children wanting to use gravity must be smaller then the frame.
             float weight = Float.parseFloat(sizeStr.substring(0, sizeStr.indexOf(WEIGHT_SUFFIX)));
-            FrameLayout frame = new ReverseFrameLayout(mContext);
+            ReverseRelativeLayout frame = new ReverseRelativeLayout(mContext);
             LayoutParams childParams = new LayoutParams(v.getLayoutParams());
-            if (sizeStr.endsWith(WEIGHT_CENTERED_SUFFIX)) {
-                childParams.gravity = Gravity.CENTER;
-            } else {
-                childParams.gravity = landscape ? (start ? Gravity.BOTTOM : Gravity.TOP)
-                        : (start ? Gravity.START : Gravity.END);
-            }
+
+            // Compute gravity to apply
+            int gravity = (landscape) ? (start ? Gravity.TOP : Gravity.BOTTOM)
+                    : (start ? Gravity.START : Gravity.END);
+            if (sizeStr.endsWith(WEIGHT_CENTERED_SUFFIX)) gravity = Gravity.CENTER;
+
+            // Set default gravity, flipped if needed in reversed layouts (270 RTL and 90 LTR)
+            frame.setDefaultGravity(gravity);
+            frame.setGravity(gravity); // Apply gravity to root
+
             frame.addView(v, childParams);
+
+            // Use weighting to set the width of the frame
             frame.setLayoutParams(new LinearLayout.LayoutParams(0, MATCH_PARENT, weight));
+
+            // Ensure ripples can be drawn outside bounds
             frame.setClipChildren(false);
             frame.setClipToPadding(false);
+
             return frame;
         }
+
         float size = Float.parseFloat(sizeStr);
         ViewGroup.LayoutParams params = v.getLayoutParams();
         params.width = (int) (params.width * size);
@@ -355,6 +391,8 @@ public class NavigationBarInflaterView extends FrameLayout
             v = inflater.inflate(R.layout.nav_key_space, parent, false);
         } else if (CLIPBOARD.equals(button)) {
             v = inflater.inflate(R.layout.clipboard, parent, false);
+        } else if (CONTEXTUAL.equals(button)) {
+            v = inflater.inflate(R.layout.contextual, parent, false);
         } else if (button.startsWith(KEY)) {
             String uri = extractImage(button);
             int code = extractKeycode(button);
