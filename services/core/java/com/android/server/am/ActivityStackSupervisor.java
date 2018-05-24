@@ -1641,7 +1641,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
         final Configuration config = mWindowManager.updateOrientationFromAppTokens(
                 getDisplayOverrideConfiguration(displayId),
                 r != null && r.mayFreezeScreenLocked(r.app) ? r.appToken : null,
-                displayId);
+                displayId, true /* forceUpdate */);
         if (r != null && markFrozenIfConfigChanged && config != null) {
             r.frozenBeforeDestroy = true;
         }

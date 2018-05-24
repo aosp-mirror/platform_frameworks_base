@@ -2372,6 +2372,12 @@ public class WindowManagerService extends IWindowManager.Stub
     @Override
     public Configuration updateOrientationFromAppTokens(Configuration currentConfig,
             IBinder freezeThisOneIfNeeded, int displayId) {
+        return updateOrientationFromAppTokens(currentConfig, freezeThisOneIfNeeded, displayId,
+                false /* forceUpdate */);
+    }
+
+    public Configuration updateOrientationFromAppTokens(Configuration currentConfig,
+            IBinder freezeThisOneIfNeeded, int displayId, boolean forceUpdate) {
         if (!checkCallingPermission(MANAGE_APP_TOKENS, "updateOrientationFromAppTokens()")) {
             throw new SecurityException("Requires MANAGE_APP_TOKENS permission");
         }
@@ -2381,7 +2387,7 @@ public class WindowManagerService extends IWindowManager.Stub
         try {
             synchronized(mWindowMap) {
                 config = updateOrientationFromAppTokensLocked(currentConfig, freezeThisOneIfNeeded,
-                        displayId);
+                        displayId, forceUpdate);
             }
         } finally {
             Binder.restoreCallingIdentity(ident);
@@ -2391,13 +2397,13 @@ public class WindowManagerService extends IWindowManager.Stub
     }
 
     private Configuration updateOrientationFromAppTokensLocked(Configuration currentConfig,
-            IBinder freezeThisOneIfNeeded, int displayId) {
+            IBinder freezeThisOneIfNeeded, int displayId, boolean forceUpdate) {
         if (!mDisplayReady) {
             return null;
         }
         Configuration config = null;
 
-        if (updateOrientationFromAppTokensLocked(displayId)) {
+        if (updateOrientationFromAppTokensLocked(displayId, forceUpdate)) {
             // If we changed the orientation but mOrientationChangeComplete is already true,
             // we used seamless rotation, and we don't need to freeze the screen.
             if (freezeThisOneIfNeeded != null && !mRoot.mOrientationChangeComplete) {
@@ -2445,11 +2451,15 @@ public class WindowManagerService extends IWindowManager.Stub
      * @see android.view.IWindowManager#updateOrientationFromAppTokens(Configuration, IBinder, int)
      */
     boolean updateOrientationFromAppTokensLocked(int displayId) {
+        return updateOrientationFromAppTokensLocked(displayId, false /* forceUpdate */);
+    }
+
+    boolean updateOrientationFromAppTokensLocked(int displayId, boolean forceUpdate) {
         long ident = Binder.clearCallingIdentity();
         try {
             final DisplayContent dc = mRoot.getDisplayContent(displayId);
             final int req = dc.getOrientation();
-            if (req != dc.getLastOrientation()) {
+            if (req != dc.getLastOrientation() || forceUpdate) {
                 dc.setLastOrientation(req);
                 //send a message to Policy indicating orientation change to take
                 //action like disabling/enabling sensors etc.,
@@ -2457,12 +2467,8 @@ public class WindowManagerService extends IWindowManager.Stub
                 if (dc.isDefaultDisplay) {
                     mPolicy.setCurrentOrientationLw(req);
                 }
-                if (dc.updateRotationUnchecked()) {
-                    // changed
-                    return true;
-                }
+                return dc.updateRotationUnchecked(forceUpdate);
             }
-
             return false;
         } finally {
             Binder.restoreCallingIdentity(ident);
