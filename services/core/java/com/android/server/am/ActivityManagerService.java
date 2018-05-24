@@ -15821,7 +15821,10 @@ public class ActivityManagerService extends IActivityManager.Stub
     }
 
     @Override
-    public void getMyMemoryState(ActivityManager.RunningAppProcessInfo outInfo) {
+    public void getMyMemoryState(ActivityManager.RunningAppProcessInfo outState) {
+        if (outState == null) {
+            throw new IllegalArgumentException("outState is null");
+        }
         enforceNotIsolatedCaller("getMyMemoryState");
 
         final int callingUid = Binder.getCallingUid();
@@ -15832,7 +15835,9 @@ public class ActivityManagerService extends IActivityManager.Stub
             synchronized (mPidsSelfLocked) {
                 proc = mPidsSelfLocked.get(Binder.getCallingPid());
             }
-            fillInProcMemInfo(proc, outInfo, clientTargetSdk);
+            if (proc != null) {
+                fillInProcMemInfo(proc, outState, clientTargetSdk);
+            }
         }
     }
 
