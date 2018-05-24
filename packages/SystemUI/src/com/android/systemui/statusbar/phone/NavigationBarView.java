@@ -604,6 +604,7 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
         }
 
         updateNavButtonIcons();
+        updateSlippery();
     }
 
     public void updateNavButtonIcons() {
