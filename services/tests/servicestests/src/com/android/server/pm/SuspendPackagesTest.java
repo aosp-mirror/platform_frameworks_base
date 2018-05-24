@@ -22,6 +22,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
+import static org.junit.Assume.assumeTrue;
 
 import android.app.AppGlobals;
 import android.content.BroadcastReceiver;
@@ -59,6 +60,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.SynchronousQueue;
@@ -97,6 +99,9 @@ public class SuspendPackagesTest {
     private AppCommunicationReceiver mAppCommsReceiver;
     private StubbedCallback mTestCallback;
     private UiDevice mUiDevice;
+    private ComponentName mDeviceAdminComponent;
+    private boolean mPoSet;
+    private boolean mDoSet;
 
     private static final class AppCommunicationReceiver extends BroadcastReceiver {
         private Context context;
@@ -163,6 +168,8 @@ public class SuspendPackagesTest {
         mLauncherApps = (LauncherApps) mContext.getSystemService(Context.LAUNCHER_APPS_SERVICE);
         mReceiverHandler = new Handler(Looper.getMainLooper());
         mUiDevice = UiDevice.getInstance(InstrumentationRegistry.getInstrumentation());
+        mDeviceAdminComponent = new ComponentName(mContext,
+                "com.android.server.devicepolicy.DummyDeviceAdmins$Admin1");
         IPackageManager ipm = AppGlobals.getPackageManager();
         try {
             // Otherwise implicit broadcasts will not be delivered.
@@ -469,12 +476,83 @@ public class SuspendPackagesTest {
                 TEST_APP_PACKAGE_NAME, receivedPackageName);
     }
 
+    private boolean setProfileOwner() throws IOException {
+        final String result = mUiDevice.executeShellCommand("dpm set-profile-owner --user cur "
+                + mDeviceAdminComponent.flattenToString());
+        return mPoSet = result.trim().startsWith("Success");
+    }
+
+    private boolean setDeviceOwner() throws IOException {
+        final String result = mUiDevice.executeShellCommand("dpm set-device-owner --user cur "
+                + mDeviceAdminComponent.flattenToString());
+        return mDoSet = result.trim().startsWith("Success");
+    }
+
+    private void removeProfileOrDeviceOwner() throws IOException {
+        if (mPoSet || mDoSet) {
+            mUiDevice.executeShellCommand("dpm remove-active-admin --user cur "
+                    + mDeviceAdminComponent.flattenToString());
+            mPoSet = mDoSet = false;
+        }
+    }
+
+    @Test
+    public void testCannotSuspendWhenProfileOwner() throws IOException {
+        assumeTrue(mPackageManager.hasSystemFeature(PackageManager.FEATURE_DEVICE_ADMIN));
+        assertTrue("Profile-owner could not be set", setProfileOwner());
+        try {
+            suspendTestPackage(null, null, null);
+            fail("Suspend succeeded. Expected UnsupportedOperationException");
+        } catch (UnsupportedOperationException uex) {
+        }
+    }
+
+    @Test
+    public void testCannotSuspendWhenDeviceOwner() throws IOException {
+        assumeTrue(mPackageManager.hasSystemFeature(PackageManager.FEATURE_DEVICE_ADMIN));
+        assertTrue("Device-owner could not be set", setDeviceOwner());
+        try {
+            suspendTestPackage(null, null, null);
+            fail("Suspend succeeded. Expected UnsupportedOperationException");
+        } catch (UnsupportedOperationException uex) {
+        }
+    }
+
+    @Test
+    public void testPackageUnsuspendedOnAddingDeviceOwner() throws IOException {
+        assumeTrue(mPackageManager.hasSystemFeature(PackageManager.FEATURE_DEVICE_ADMIN));
+        mAppCommsReceiver.register(mReceiverHandler, ACTION_REPORT_MY_PACKAGE_UNSUSPENDED,
+                ACTION_REPORT_MY_PACKAGE_SUSPENDED);
+        mAppCommsReceiver.drainPendingBroadcasts();
+        suspendTestPackage(null, null, null);
+        Intent intentFromApp = mAppCommsReceiver.receiveIntentFromApp();
+        assertEquals(ACTION_REPORT_MY_PACKAGE_SUSPENDED, intentFromApp.getAction());
+        assertTrue("Device-owner could not be set", setDeviceOwner());
+        intentFromApp = mAppCommsReceiver.receiveIntentFromApp();
+        assertEquals(ACTION_REPORT_MY_PACKAGE_UNSUSPENDED, intentFromApp.getAction());
+    }
+
+    @Test
+    public void testPackageUnsuspendedOnAddingProfileOwner() throws IOException {
+        assumeTrue(mPackageManager.hasSystemFeature(PackageManager.FEATURE_DEVICE_ADMIN));
+        mAppCommsReceiver.register(mReceiverHandler, ACTION_REPORT_MY_PACKAGE_UNSUSPENDED,
+                ACTION_REPORT_MY_PACKAGE_SUSPENDED);
+        mAppCommsReceiver.drainPendingBroadcasts();
+        suspendTestPackage(null, null, null);
+        Intent intentFromApp = mAppCommsReceiver.receiveIntentFromApp();
+        assertEquals(ACTION_REPORT_MY_PACKAGE_SUSPENDED, intentFromApp.getAction());
+        assertTrue("Profile-owner could not be set", setProfileOwner());
+        intentFromApp = mAppCommsReceiver.receiveIntentFromApp();
+        assertEquals(ACTION_REPORT_MY_PACKAGE_UNSUSPENDED, intentFromApp.getAction());
+    }
+
     @After
-    public void tearDown() {
+    public void tearDown() throws IOException {
         mAppCommsReceiver.unregister();
         if (mTestCallback != null) {
             mLauncherApps.unregisterCallback(mTestCallback);
         }
+        removeProfileOrDeviceOwner();
         mContext.sendBroadcast(new Intent(ACTION_FINISH_TEST_ACTIVITY)
                 .setPackage(TEST_APP_PACKAGE_NAME));
     }
