@@ -22,6 +22,8 @@ import android.annotation.Nullable;
 import android.app.Fragment;
 import android.app.StatusBarManager;
 import android.os.Bundle;
+import android.os.Parcelable;
+import android.util.SparseArray;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -89,7 +91,8 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
         super.onViewCreated(view, savedInstanceState);
         mStatusBar = (PhoneStatusBarView) view;
         if (savedInstanceState != null && savedInstanceState.containsKey(EXTRA_PANEL_STATE)) {
-            mStatusBar.go(savedInstanceState.getInt(EXTRA_PANEL_STATE));
+            mStatusBar.restoreHierarchyState(
+                    savedInstanceState.getSparseParcelableArray(EXTRA_PANEL_STATE));
         }
         mDarkIconManager = new DarkIconManager(view.findViewById(R.id.statusIcons));
         mDarkIconManager.setShouldLog(true);
@@ -105,7 +108,9 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
     @Override
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-        outState.putInt(EXTRA_PANEL_STATE, mStatusBar.getState());
+        SparseArray<Parcelable> states = new SparseArray<>();
+        mStatusBar.saveHierarchyState(states);
+        outState.putSparseParcelableArray(EXTRA_PANEL_STATE, states);
     }
 
     @Override

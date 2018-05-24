@@ -21,6 +21,8 @@ import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.graphics.Point;
 import android.graphics.Rect;
+import android.os.Bundle;
+import android.os.Parcelable;
 import android.util.AttributeSet;
 import android.view.Display;
 import android.view.DisplayCutout;
@@ -38,6 +40,12 @@ import java.util.List;
  * The view in the statusBar that contains part of the heads-up information
  */
 public class HeadsUpStatusBarView extends AlphaOptimizedLinearLayout {
+    private static final String HEADS_UP_STATUS_BAR_VIEW_SUPER_PARCELABLE =
+            "heads_up_status_bar_view_super_parcelable";
+    private static final String FIRST_LAYOUT = "first_layout";
+    private static final String PUBLIC_MODE = "public_mode";
+    private static final String VISIBILITY = "visibility";
+    private static final String ALPHA = "alpha";
     private int mAbsoluteStartPadding;
     private int mEndMargin;
     private View mIconPlaceholder;
@@ -105,6 +113,39 @@ public class HeadsUpStatusBarView extends AlphaOptimizedLinearLayout {
     protected void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
         updateMaxWidth();
+    }
+
+    @Override
+    public Bundle onSaveInstanceState() {
+        Bundle bundle = new Bundle();
+        bundle.putParcelable(HEADS_UP_STATUS_BAR_VIEW_SUPER_PARCELABLE,
+                super.onSaveInstanceState());
+        bundle.putBoolean(FIRST_LAYOUT, mFirstLayout);
+        bundle.putBoolean(PUBLIC_MODE, mPublicMode);
+        bundle.putInt(VISIBILITY, getVisibility());
+        bundle.putFloat(ALPHA, getAlpha());
+
+        return bundle;
+    }
+
+    @Override
+    public void onRestoreInstanceState(Parcelable state) {
+        if (state == null || !(state instanceof Bundle)) {
+            super.onRestoreInstanceState(state);
+            return;
+        }
+
+        Bundle bundle = (Bundle) state;
+        Parcelable superState = bundle.getParcelable(HEADS_UP_STATUS_BAR_VIEW_SUPER_PARCELABLE);
+        super.onRestoreInstanceState(superState);
+        mFirstLayout = bundle.getBoolean(FIRST_LAYOUT, true);
+        mPublicMode = bundle.getBoolean(PUBLIC_MODE, false);
+        if (bundle.containsKey(VISIBILITY)) {
+            setVisibility(bundle.getInt(VISIBILITY));
+        }
+        if (bundle.containsKey(ALPHA)) {
+            setAlpha(bundle.getFloat(ALPHA));
+        }
     }
 
     @VisibleForTesting

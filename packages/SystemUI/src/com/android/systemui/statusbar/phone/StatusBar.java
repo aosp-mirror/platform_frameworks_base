@@ -843,13 +843,27 @@ public class StatusBar extends SystemUI implements DemoMode,
                     mStatusBarView.setBar(this);
                     mStatusBarView.setPanel(mNotificationPanel);
                     mStatusBarView.setScrimController(mScrimController);
+
+                    // CollapsedStatusBarFragment re-inflated PhoneStatusBarView and both of
+                    // mStatusBarView.mExpanded and mStatusBarView.mBouncerShowing are false.
+                    // PhoneStatusBarView's new instance will set to be gone in
+                    // PanelBar.updateVisibility after calling mStatusBarView.setBouncerShowing
+                    // that will trigger PanelBar.updateVisibility. If there is a heads up showing,
+                    // it needs to notify PhoneStatusBarView's new instance to update the correct
+                    // status by calling mNotificationPanel.notifyBarPanelExpansionChanged().
+                    if (mHeadsUpManager.hasPinnedHeadsUp()) {
+                        mNotificationPanel.notifyBarPanelExpansionChanged();
+                    }
                     mStatusBarView.setBouncerShowing(mBouncerShowing);
+
+                    HeadsUpAppearanceController oldController = mHeadsUpAppearanceController;
                     if (mHeadsUpAppearanceController != null) {
                         // This view is being recreated, let's destroy the old one
                         mHeadsUpAppearanceController.destroy();
                     }
                     mHeadsUpAppearanceController = new HeadsUpAppearanceController(
                             mNotificationIconAreaController, mHeadsUpManager, mStatusBarWindow);
+                    mHeadsUpAppearanceController.readFrom(oldController);
                     setAreThereNotifications();
                     checkBarModes();
                 }).getFragmentManager()
