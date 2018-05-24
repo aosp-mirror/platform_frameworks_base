@@ -123,10 +123,16 @@ public class RecentsImpl implements ActivityOptions.OnAnimationFinishedListener 
      */
     class TaskStackListenerImpl extends SysUiTaskStackChangeListener {
 
+        private OverviewProxyService mOverviewProxyService;
+
+        public TaskStackListenerImpl() {
+            mOverviewProxyService = Dependency.get(OverviewProxyService.class);
+        }
+
         @Override
         public void onTaskStackChangedBackground() {
             // Skip background preloading recents in SystemUI if the overview services is bound
-            if (Dependency.get(OverviewProxyService.class).isEnabled()) {
+            if (mOverviewProxyService.isEnabled()) {
                 return;
             }
 
