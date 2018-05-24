@@ -952,7 +952,8 @@ public class RingtoneManager {
 
         // Find a filename. Throws FileNotFoundException if none can be found.
         final File outFile = Utils.getUniqueExternalFile(mContext, subdirectory,
-                Utils.getFileDisplayNameFromUri(mContext, fileUri), mimeType);
+                FileUtils.buildValidFatFilename(Utils.getFileDisplayNameFromUri(mContext, fileUri)),
+                        mimeType);
 
         // Copy contents to external ringtone storage. Throws IOException if the copy fails.
         try (final InputStream input = mContext.getContentResolver().openInputStream(fileUri);
