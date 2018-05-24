@@ -21,6 +21,7 @@
     <dimen name="car_user_switcher_image_avatar_size">@dimen/car_large_avatar_size</dimen>
     <dimen name="car_user_switcher_vertical_spacing_between_users">@dimen/car_padding_5</dimen>
     <dimen name="car_user_switcher_vertical_spacing_between_name_and_avatar">@dimen/car_padding_4</dimen>
+    <dimen name="car_user_switcher_margin_top">@dimen/car_padding_4</dimen>
 
     <dimen name="car_navigation_button_width">64dp</dimen>
     <dimen name="car_navigation_bar_width">760dp</dimen>

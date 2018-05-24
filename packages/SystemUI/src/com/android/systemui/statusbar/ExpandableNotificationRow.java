@@ -2795,6 +2795,24 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
     }
 
     @Override
+    public boolean topAmountNeedsClipping() {
+        if (isGroupExpanded()) {
+            return true;
+        }
+        if (isGroupExpansionChanging()) {
+            return true;
+        }
+        if (getShowingLayout().shouldClipToRounding(true /* topRounded */,
+                false /* bottomRounded */)) {
+            return true;
+        }
+        if (mGuts != null && mGuts.getAlpha() != 0.0f) {
+            return true;
+        }
+        return false;
+    }
+
+    @Override
     protected boolean childNeedsClipping(View child) {
         if (child instanceof NotificationContentView) {
             NotificationContentView contentView = (NotificationContentView) child;

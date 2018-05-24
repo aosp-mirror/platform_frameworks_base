@@ -158,6 +158,8 @@ public final class NotificationRecord {
     private final NotificationStats mStats;
     private int mUserSentiment;
     private boolean mIsInterruptive;
+    private boolean mTextChanged;
+    private boolean mRecordedInterruption;
     private int mNumberOfSmartRepliesAdded;
     private boolean mHasSeenSmartReplies;
     /**
@@ -839,6 +841,9 @@ public final class NotificationRecord {
     /** Mark the notification as seen by the user. */
     public void setSeen() {
         mStats.setSeen();
+        if (mTextChanged) {
+            mIsInterruptive = true;
+        }
     }
 
     public void setAuthoritativeRank(int authoritativeRank) {
@@ -933,6 +938,18 @@ public final class NotificationRecord {
 
     public void setInterruptive(boolean interruptive) {
         mIsInterruptive = interruptive;
+    }
+
+    public void setTextChanged(boolean textChanged) {
+        mTextChanged = textChanged;
+    }
+
+    public void setRecordedInterruption(boolean recorded) {
+        mRecordedInterruption = recorded;
+    }
+
+    public boolean hasRecordedInterruption() {
+        return mRecordedInterruption;
     }
 
     public boolean isInterruptive() {

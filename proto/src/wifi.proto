@@ -619,6 +619,9 @@ message RssiPollCount {
 
   // Number of RSSI polls with 'rssi'
   optional int32 count = 2;
+
+  // Beacon frequency of the channel in MHz
+  optional int32 frequency = 3;
 }
 
 // Number of occurrences of a specific alert reason value

@@ -448,6 +448,39 @@ public class SyntheticPasswordTests extends BaseLockSettingsServiceTests {
         assertTrue(mLocalService.isEscrowTokenActive(handle, PRIMARY_USER_ID));
     }
 
+    public void testgetHashFactorPrimaryUser() throws RemoteException {
+        final String password = "password";
+        mService.setLockCredential(password, LockPatternUtils.CREDENTIAL_TYPE_PASSWORD, null,
+                PASSWORD_QUALITY_ALPHABETIC, PRIMARY_USER_ID);
+        final byte[] hashFactor = mService.getHashFactor(password, PRIMARY_USER_ID);
+        assertNotNull(hashFactor);
+
+        mService.setLockCredential(null, LockPatternUtils.CREDENTIAL_TYPE_NONE, password,
+                PASSWORD_QUALITY_UNSPECIFIED, PRIMARY_USER_ID);
+        final byte[] newHashFactor = mService.getHashFactor(null, PRIMARY_USER_ID);
+        assertNotNull(newHashFactor);
+        // Hash factor should never change after password change/removal
+        assertArrayEquals(hashFactor, newHashFactor);
+    }
+
+    public void testgetHashFactorManagedProfileUnifiedChallenge() throws RemoteException {
+        final String pattern = "1236";
+        mService.setLockCredential(pattern, LockPatternUtils.CREDENTIAL_TYPE_PATTERN, null,
+                PASSWORD_QUALITY_SOMETHING, PRIMARY_USER_ID);
+        mService.setSeparateProfileChallengeEnabled(MANAGED_PROFILE_USER_ID, false, null);
+        assertNotNull(mService.getHashFactor(null, MANAGED_PROFILE_USER_ID));
+    }
+
+    public void testgetHashFactorManagedProfileSeparateChallenge() throws RemoteException {
+        final String primaryPassword = "primary";
+        final String profilePassword = "profile";
+        mService.setLockCredential(primaryPassword, LockPatternUtils.CREDENTIAL_TYPE_PASSWORD, null,
+                PASSWORD_QUALITY_ALPHABETIC, PRIMARY_USER_ID);
+        mService.setLockCredential(profilePassword, LockPatternUtils.CREDENTIAL_TYPE_PASSWORD, null,
+                PASSWORD_QUALITY_ALPHABETIC, MANAGED_PROFILE_USER_ID);
+        assertNotNull(mService.getHashFactor(profilePassword, MANAGED_PROFILE_USER_ID));
+    }
+
     public void testPasswordData_serializeDeserialize() {
         PasswordData data = new PasswordData();
         data.scryptN = 11;

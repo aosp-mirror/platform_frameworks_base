@@ -59,6 +59,7 @@ import org.mockito.invocation.InvocationOnMock;
 public class WindowManagerServiceRule implements TestRule {
 
     private WindowManagerService mService;
+    private TestWindowManagerPolicy mPolicy;
 
     @Override
     public Statement apply(Statement base, Description description) {
@@ -108,7 +109,7 @@ public class WindowManagerServiceRule implements TestRule {
                 }
 
                 mService = WindowManagerService.main(context, ims, true, false,
-                        false, new TestWindowManagerPolicy(
+                        false, mPolicy = new TestWindowManagerPolicy(
                                 WindowManagerServiceRule.this::getWindowManagerService));
 
                 mService.onInitReady();
@@ -132,12 +133,17 @@ public class WindowManagerServiceRule implements TestRule {
                 waitUntilWindowManagerHandlersIdle();
                 removeServices();
                 mService = null;
+                mPolicy = null;
             }
         };
     }
 
     public WindowManagerService getWindowManagerService() {
         return mService;
+    }
+
+    public TestWindowManagerPolicy getWindowManagerPolicy() {
+        return mPolicy;
     }
 
     public void waitUntilWindowManagerHandlersIdle() {

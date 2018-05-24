@@ -760,7 +760,9 @@ public class NotificationStackScrollLayout extends ViewGroup
     }
 
     private void updateClippingToTopRoundedCorner() {
-        Float clipStart = (float) mTopPadding + mAmbientState.getExpandAnimationTopChange();
+        Float clipStart = (float) mTopPadding
+                                 + mStackTranslation
+                                 + mAmbientState.getExpandAnimationTopChange();
         Float clipEnd = clipStart + mCornerRadius;
         boolean first = true;
         for (int i = 0; i < getChildCount(); i++) {
@@ -769,8 +771,7 @@ public class NotificationStackScrollLayout extends ViewGroup
                 continue;
             }
             float start = child.getTranslationY();
-            float end = start + Math.max(child.getActualHeight() - child.getClipBottomAmount(),
-                    0);
+            float end = start + child.getActualHeight();
             boolean clip = clipStart > start && clipStart < end
                     || clipEnd >= start && clipEnd <= end;
             clip &= !(first && mOwnScrollY == 0);
@@ -3292,6 +3293,16 @@ public class NotificationStackScrollLayout extends ViewGroup
             if (!childWasSwipedOut) {
                 Rect clipBounds = child.getClipBounds();
                 childWasSwipedOut = clipBounds != null && clipBounds.height() == 0;
+
+                if (childWasSwipedOut && child instanceof ExpandableView) {
+                    // Clean up any potential transient views if the child has already been swiped
+                    // out, as we won't be animating it further (due to its height already being
+                    // clipped to 0.
+                    ViewGroup transientContainer = ((ExpandableView) child).getTransientContainer();
+                    if (transientContainer != null) {
+                        transientContainer.removeTransientView(child);
+                    }
+                }
             }
             int animationType = childWasSwipedOut
                     ? AnimationEvent.ANIMATION_TYPE_REMOVE_SWIPED_OUT

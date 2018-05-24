@@ -2706,6 +2706,9 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
     private void normalizePoliciesNL(NetworkPolicy[] policies) {
         mNetworkPolicy.clear();
         for (NetworkPolicy policy : policies) {
+            if (policy == null) {
+                continue;
+            }
             // When two normalized templates conflict, prefer the most
             // restrictive policy
             policy.template = NetworkTemplate.normalize(policy.template, mMergedSubscriberIds);

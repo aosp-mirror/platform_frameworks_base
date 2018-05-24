@@ -312,6 +312,7 @@ class ActivityStarter {
         Configuration globalConfig;
         int userId;
         WaitResult waitResult;
+        int filterCallingUid;
 
         /**
          * If set to {@code true}, allows this activity start to look into
@@ -367,6 +368,7 @@ class ActivityStarter {
             mayWait = false;
             avoidMoveToFront = false;
             allowPendingRemoteAnimationRegistryLookup = true;
+            filterCallingUid = UserHandle.USER_NULL;
         }
 
         /**
@@ -404,6 +406,7 @@ class ActivityStarter {
             avoidMoveToFront = request.avoidMoveToFront;
             allowPendingRemoteAnimationRegistryLookup
                     = request.allowPendingRemoteAnimationRegistryLookup;
+            filterCallingUid = request.filterCallingUid;
         }
     }
 
@@ -792,7 +795,8 @@ class ActivityStarter {
                 callingPid = realCallingPid;
 
                 rInfo = mSupervisor.resolveIntent(intent, resolvedType, userId, 0,
-                        computeResolveFilterUid(callingUid, realCallingUid));
+                        computeResolveFilterUid(
+                                callingUid, realCallingUid, mRequest.filterCallingUid));
                 aInfo = mSupervisor.resolveActivity(intent, rInfo, startFlags,
                         null /*profilerInfo*/);
 
@@ -984,7 +988,9 @@ class ActivityStarter {
         }
 
         ResolveInfo rInfo = mSupervisor.resolveIntent(intent, resolvedType, userId,
-                0 /* matchFlags */, computeResolveFilterUid(callingUid, realCallingUid));
+                0 /* matchFlags */,
+                        computeResolveFilterUid(
+                                callingUid, realCallingUid, mRequest.filterCallingUid));
         if (rInfo == null) {
             UserInfo userInfo = mSupervisor.getUserInfo(userId);
             if (userInfo != null && userInfo.isManagedProfile()) {
@@ -1006,7 +1012,8 @@ class ActivityStarter {
                     rInfo = mSupervisor.resolveIntent(intent, resolvedType, userId,
                             PackageManager.MATCH_DIRECT_BOOT_AWARE
                                     | PackageManager.MATCH_DIRECT_BOOT_UNAWARE,
-                            computeResolveFilterUid(callingUid, realCallingUid));
+                            computeResolveFilterUid(
+                                    callingUid, realCallingUid, mRequest.filterCallingUid));
                 }
             }
         }
@@ -1078,8 +1085,8 @@ class ActivityStarter {
                         callingPid = Binder.getCallingPid();
                         componentSpecified = true;
                         rInfo = mSupervisor.resolveIntent(intent, null /*resolvedType*/, userId,
-                                0 /* matchFlags */, computeResolveFilterUid(callingUid,
-                                        realCallingUid));
+                                0 /* matchFlags */, computeResolveFilterUid(
+                                        callingUid, realCallingUid, mRequest.filterCallingUid));
                         aInfo = rInfo != null ? rInfo.activityInfo : null;
                         if (aInfo != null) {
                             aInfo = mService.getActivityInfoForUser(aInfo, userId);
@@ -1173,10 +1180,14 @@ class ActivityStarter {
      *
      * @param customCallingUid The UID on whose behalf to make the call.
      * @param actualCallingUid The UID actually making the call.
+     * @param filterCallingUid The UID to be used to filter for instant apps.
      * @return The logical UID making the call.
      */
-    static int computeResolveFilterUid(int customCallingUid, int actualCallingUid) {
-        return customCallingUid >= 0 ? customCallingUid : actualCallingUid;
+    static int computeResolveFilterUid(int customCallingUid, int actualCallingUid,
+            int filterCallingUid) {
+        return filterCallingUid != UserHandle.USER_NULL
+                ? filterCallingUid
+                : (customCallingUid >= 0 ? customCallingUid : actualCallingUid);
     }
 
     private int startActivity(final ActivityRecord r, ActivityRecord sourceRecord,
@@ -2559,6 +2570,11 @@ class ActivityStarter {
 
     ActivityStarter setIgnoreTargetSecurity(boolean ignoreTargetSecurity) {
         mRequest.ignoreTargetSecurity = ignoreTargetSecurity;
+        return this;
+    }
+
+    ActivityStarter setFilterCallingUid(int filterCallingUid) {
+        mRequest.filterCallingUid = filterCallingUid;
         return this;
     }
 

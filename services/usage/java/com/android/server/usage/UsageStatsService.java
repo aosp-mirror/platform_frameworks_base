@@ -699,6 +699,29 @@ public class UsageStatsService extends SystemService implements
                     == PackageManager.PERMISSION_GRANTED;
         }
 
+        private void checkCallerIsSystemOrSameApp(String pkg) {
+            if (isCallingUidSystem()) {
+                return;
+            }
+            checkCallerIsSameApp(pkg);
+        }
+
+        private void checkCallerIsSameApp(String pkg) {
+            final int callingUid = Binder.getCallingUid();
+            final int callingUserId = UserHandle.getUserId(callingUid);
+
+            if (mPackageManagerInternal.getPackageUid(pkg, PackageManager.MATCH_ANY_USER,
+                    callingUserId) != callingUid) {
+                throw new SecurityException("Calling uid " + pkg + " cannot query events"
+                        + "for package " + pkg);
+            }
+        }
+
+        private boolean isCallingUidSystem() {
+            final int uid = Binder.getCallingUid();
+            return uid == Process.SYSTEM_UID;
+        }
+
         @Override
         public ParceledListSlice<UsageStats> queryUsageStats(int bucketType, long beginTime,
                 long endTime, String callingPackage) {
@@ -792,14 +815,57 @@ public class UsageStatsService extends SystemService implements
             final int callingUid = Binder.getCallingUid();
             final int callingUserId = UserHandle.getUserId(callingUid);
 
-            if (mPackageManagerInternal.getPackageUid(callingPackage, PackageManager.MATCH_ANY_USER,
-                    callingUserId) != callingUid) {
-                throw new SecurityException("Calling uid " + callingPackage + " cannot query events"
-                        + "for package " + callingPackage);
-            }
+            checkCallerIsSameApp(callingPackage);
             final long token = Binder.clearCallingIdentity();
             try {
                 return UsageStatsService.this.queryEventsForPackage(callingUserId, beginTime,
+                        endTime, callingPackage);
+            } finally {
+                Binder.restoreCallingIdentity(token);
+            }
+        }
+
+        @Override
+        public UsageEvents queryEventsForUser(long beginTime, long endTime, int userId,
+                String callingPackage) {
+            if (!hasPermission(callingPackage)) {
+                return null;
+            }
+
+            if (userId != UserHandle.getCallingUserId()) {
+                getContext().enforceCallingPermission(
+                        Manifest.permission.INTERACT_ACROSS_USERS_FULL,
+                        "No permission to query usage stats for this user");
+            }
+
+            final boolean obfuscateInstantApps = shouldObfuscateInstantAppsForCaller(
+                    Binder.getCallingUid(), UserHandle.getCallingUserId());
+
+            final long token = Binder.clearCallingIdentity();
+            try {
+                return UsageStatsService.this.queryEvents(userId, beginTime, endTime,
+                        obfuscateInstantApps);
+            } finally {
+                Binder.restoreCallingIdentity(token);
+            }
+        }
+
+        @Override
+        public UsageEvents queryEventsForPackageForUser(long beginTime, long endTime,
+                int userId, String pkg, String callingPackage) {
+            if (!hasPermission(callingPackage)) {
+                return null;
+            }
+            if (userId != UserHandle.getCallingUserId()) {
+                getContext().enforceCallingPermission(
+                        Manifest.permission.INTERACT_ACROSS_USERS_FULL,
+                        "No permission to query usage stats for this user");
+            }
+            checkCallerIsSystemOrSameApp(pkg);
+
+            final long token = Binder.clearCallingIdentity();
+            try {
+                return UsageStatsService.this.queryEventsForPackage(userId, beginTime,
                         endTime, callingPackage);
             } finally {
                 Binder.restoreCallingIdentity(token);
@@ -900,6 +966,7 @@ public class UsageStatsService extends SystemService implements
             } catch (RemoteException re) {
                 throw re.rethrowFromSystemServer();
             }
+            final boolean shellCaller = callingUid == 0 || callingUid == Process.SHELL_UID;
             final boolean systemCaller = UserHandle.isCore(callingUid);
             final int reason = systemCaller
                     ? UsageStatsManager.REASON_MAIN_FORCED
@@ -918,7 +985,7 @@ public class UsageStatsService extends SystemService implements
                                     + ")");
                 }
                 mAppStandby.setAppStandbyBucket(packageName, userId, bucket, reason,
-                        SystemClock.elapsedRealtime());
+                        SystemClock.elapsedRealtime(), shellCaller);
             } finally {
                 Binder.restoreCallingIdentity(token);
             }
@@ -985,7 +1052,7 @@ public class UsageStatsService extends SystemService implements
                         throw new IllegalArgumentException("Cannot set your own standby bucket");
                     }
                     mAppStandby.setAppStandbyBucket(packageName, userId, bucket, reason,
-                            elapsedRealtime);
+                            elapsedRealtime, shellCaller);
                 }
             } finally {
                 Binder.restoreCallingIdentity(token);

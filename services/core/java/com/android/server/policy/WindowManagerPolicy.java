@@ -660,6 +660,11 @@ public interface WindowManagerPolicy extends WindowManagerPolicyConstants {
          * abort animations that have no timeout, in case they got stuck.
          */
         void triggerAnimationFailsafe();
+
+        /**
+         * The keyguard showing state has changed
+         */
+        void onKeyguardShowingAndNotOccludedChanged();
     }
 
     /** Window has been added to the screen. */

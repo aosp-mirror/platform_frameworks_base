@@ -16,6 +16,7 @@
 
 package com.android.systemui.statusbar.car;
 
+import static android.content.DialogInterface.BUTTON_NEGATIVE;
 import static android.content.DialogInterface.BUTTON_POSITIVE;
 
 import android.app.AlertDialog;
@@ -27,7 +28,6 @@ import android.content.pm.UserInfo;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.os.AsyncTask;
-import android.os.UserHandle;
 import android.support.v4.graphics.drawable.RoundedBitmapDrawable;
 import android.support.v4.graphics.drawable.RoundedBitmapDrawableFactory;
 import android.support.v7.widget.RecyclerView;
@@ -167,6 +167,9 @@ public class UserGridRecyclerView extends PagedListView implements
         private AlertDialog mDialog;
         // View that holds the add user button.  Used to enable/disable the view
         private View mAddUserView;
+        // User record for the add user.  Need to call notifyUserSelected only if the user
+        // confirms adding a user
+        private UserRecord mAddUserRecord;
 
         public UserAdapter(Context context, List<UserRecord> users) {
             mRes = context.getResources();
@@ -201,18 +204,16 @@ public class UserGridRecyclerView extends PagedListView implements
             circleIcon.setCircular(true);
             holder.mUserAvatarImageView.setImageDrawable(circleIcon);
             holder.mUserNameTextView.setText(userRecord.mInfo.name);
+
             holder.mView.setOnClickListener(v -> {
                 if (userRecord == null) {
                     return;
                 }
 
-                // Notify the listener which user was selected
-                if (mUserSelectionListener != null) {
-                    mUserSelectionListener.onUserSelected(userRecord);
-                }
 
                 // If the user selects Guest, start the guest session.
                 if (userRecord.mIsStartGuestSession) {
+                    notifyUserSelected(userRecord);
                     mUserManagerHelper.startNewGuestSession(mGuestName);
                     return;
                 }
@@ -228,6 +229,7 @@ public class UserGridRecyclerView extends PagedListView implements
                         .concat(System.getProperty("line.separator"))
                         .concat(mRes.getString(R.string.user_add_user_message_update));
 
+                    mAddUserRecord = userRecord;
                     mDialog = new Builder(mContext, R.style.Theme_Car_Dark_Dialog_Alert)
                         .setTitle(R.string.user_add_user_title)
                         .setMessage(message)
@@ -240,9 +242,17 @@ public class UserGridRecyclerView extends PagedListView implements
                     return;
                 }
                 // If the user doesn't want to be a guest or add a user, switch to the user selected
+                notifyUserSelected(userRecord);
                 mUserManagerHelper.switchToUser(userRecord.mInfo);
             });
 
+        }
+
+        private void notifyUserSelected(UserRecord userRecord) {
+            // Notify the listener which user was selected
+            if (mUserSelectionListener != null) {
+                mUserSelectionListener.onUserSelected(userRecord);
+            }
         }
 
         private Bitmap getUserRecordIcon(UserRecord userRecord) {
@@ -260,12 +270,14 @@ public class UserGridRecyclerView extends PagedListView implements
 
         @Override
         public void onClick(DialogInterface dialog, int which) {
-            // Enable the add button
-            if (mAddUserView != null) {
-                mAddUserView.setEnabled(true);
-            }
             if (which == BUTTON_POSITIVE) {
+                notifyUserSelected(mAddUserRecord);
                 new AddNewUserTask().execute(mNewUserName);
+            } else if (which == BUTTON_NEGATIVE) {
+                // Enable the add button only if cancel
+                if (mAddUserView != null) {
+                    mAddUserView.setEnabled(true);
+                }
             }
         }
 

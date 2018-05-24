@@ -515,6 +515,13 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
         }
     }
 
+    @Override
+    public void setDistanceToTopRoundness(float distanceToTopRoundness) {
+        super.setDistanceToTopRoundness(distanceToTopRoundness);
+        mBackgroundNormal.setDistanceToTopRoundness(distanceToTopRoundness);
+        mBackgroundDimmed.setDistanceToTopRoundness(distanceToTopRoundness);
+    }
+
     /**
      * Set an override tint color that is used for the background.
      *
