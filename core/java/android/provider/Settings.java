@@ -7520,6 +7520,21 @@ public final class Settings {
         public static final int CAMERA_LIFT_TRIGGER_ENABLED_DEFAULT = 1;
 
         /**
+         * Whether or not the flashlight (camera torch mode) is available required to turn
+         * on flashlight.
+         *
+         * @hide
+         */
+        public static final String FLASHLIGHT_AVAILABLE = "flashlight_available";
+
+        /**
+         * Whether or not flashlight is enabled.
+         *
+         * @hide
+         */
+        public static final String FLASHLIGHT_ENABLED = "flashlight_enabled";
+
+        /**
          * Whether the assist gesture should be enabled.
          *
          * @hide
