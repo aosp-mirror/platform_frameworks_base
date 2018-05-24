@@ -57,7 +57,7 @@ public class BatteryMeterDrawableBase extends Drawable {
     private int mLevel = -1;
     private boolean mCharging;
     private boolean mPowerSaveEnabled;
-    private boolean mPowerSaveAsColorError = true;
+    protected boolean mPowerSaveAsColorError = true;
     private boolean mShowPercent;
 
     private static final boolean SINGLE_DIGIT_PERCENT = false;
