@@ -413,12 +413,12 @@ final class SaveUi {
     }
 
     private LogMaker newLogMaker(int category, int saveType) {
-        return Helper.newLogMaker(category, mComponentName, mServicePackageName, mCompatMode)
-                .addTaggedData(MetricsEvent.FIELD_AUTOFILL_SAVE_TYPE, saveType);
+        return newLogMaker(category).addTaggedData(MetricsEvent.FIELD_AUTOFILL_SAVE_TYPE, saveType);
     }
 
     private LogMaker newLogMaker(int category) {
-        return Helper.newLogMaker(category, mComponentName, mServicePackageName, mCompatMode);
+        return Helper.newLogMaker(category, mComponentName, mServicePackageName,
+                mPendingUi.sessionId, mCompatMode);
     }
 
     private void writeLog(int category, int saveType) {
