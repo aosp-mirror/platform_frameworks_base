@@ -53,6 +53,7 @@
     <dimen name="widget_big_font_size">64dp</dimen>
     <!-- Clock with header -->
     <dimen name="widget_small_font_size">24dp</dimen>
+    <dimen name="widget_small_font_stroke">0.6dp</dimen>
     <!-- Dash between clock and header -->
     <dimen name="widget_separator_width">12dp</dimen>
     <dimen name="widget_separator_thickness">1dp</dimen>
