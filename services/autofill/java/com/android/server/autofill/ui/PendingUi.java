@@ -35,7 +35,7 @@ public final class PendingUi {
 
     private final IBinder mToken;
     private int mState;
-    public final int id;
+    public final int sessionId;
     public final IAutoFillManagerClient client;
 
     /**
@@ -43,10 +43,11 @@ public final class PendingUi {
      *
      * @param token token used to identify this pending UI.
      */
-    public PendingUi(@NonNull IBinder token, int id, @NonNull IAutoFillManagerClient client) {
+    public PendingUi(@NonNull IBinder token, int sessionId,
+            @NonNull IAutoFillManagerClient client) {
         mToken = token;
         mState = STATE_CREATED;
-        this.id = id;
+        this.sessionId = sessionId;
         this.client = client;
     }
 
@@ -81,7 +82,7 @@ public final class PendingUi {
 
     @Override
     public String toString() {
-        return "PendingUi: [token=" + mToken + ", id=" + id + ", state="
+        return "PendingUi: [token=" + mToken + ", sessionId=" + sessionId + ", state="
                 + DebugUtils.flagsToString(PendingUi.class, "STATE_", mState) + "]";
     }
 }
