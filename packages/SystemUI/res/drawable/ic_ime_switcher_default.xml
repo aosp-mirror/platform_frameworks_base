@@ -15,11 +15,11 @@
   -->
 
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
-        android:width="24.0dp"
-        android:height="24.0dp"
-        android:viewportWidth="24.0"
-        android:viewportHeight="24.0">
+        android:width="20dp"
+        android:height="20dp"
+        android:viewportWidth="24"
+        android:viewportHeight="24">
     <path
-        android:pathData="M21,4H3C1.9,4 1,4.9 1,6v13c0,1.1 0.9,2 2,2h18c1.1,0 2,-0.9 2,-2V6C23,4.9 22.1,4 21,4zM21,19H3V6h18V19zM9,8h2v2H9V8zM5,8h2v2H5V8zM8,16h8v1H8V16zM13,8h2v2h-2V8zM9,12h2v2H9V12zM5,12h2v2H5V12zM13,12h2v2h-2V12zM17,8h2v2h-2V8zM17,12h2v2h-2V12z"
+        android:pathData="M19,7h2v2h-2V7zM15,7h2v2h-2V7zM3,7h2v2H3V7zM7,7h2v2H7V7zM11,7h2v2h-2V7zM19,11h2v2h-2V11zM15,11h2v2h-2V11zM3,11h2v2H3V11zM7,11h2v2H7V11zM11,11h2v2h-2V11zM7,15h10v2H7V15z"
         android:fillColor="?attr/singleToneColor"/>
 </vector>
