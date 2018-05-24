@@ -44,12 +44,10 @@ Caches* Caches::sInstance = nullptr;
 // Constructors/destructor
 ///////////////////////////////////////////////////////////////////////////////
 
-Caches::Caches(RenderState& renderState) : mRenderState(&renderState), mInitialized(false) {
+Caches::Caches(RenderState& renderState) : mInitialized(false) {
     INIT_LOGD("Creating OpenGL renderer caches");
     init();
-    initConstraints();
     initStaticProperties();
-    initExtensions();
 }
 
 bool Caches::init() {
@@ -66,23 +64,6 @@ bool Caches::init() {
     mTextureState->constructTexture(*this);
 
     return true;
-}
-
-void Caches::initExtensions() {
-    if (extensions().hasDebugMarker()) {
-        eventMark = glInsertEventMarkerEXT;
-
-        startMark = glPushGroupMarkerEXT;
-        endMark = glPopGroupMarkerEXT;
-    } else {
-        eventMark = eventMarkNull;
-        startMark = startMarkNull;
-        endMark = endMarkNull;
-    }
-}
-
-void Caches::initConstraints() {
-    maxTextureSize = DeviceInfo::get()->maxTextureSize();
 }
 
 void Caches::initStaticProperties() {
@@ -105,49 +86,6 @@ void Caches::terminate() {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-// Debug
-///////////////////////////////////////////////////////////////////////////////
-
-uint32_t Caches::getOverdrawColor(uint32_t amount) const {
-    static uint32_t sOverdrawColors[2][4] = {{0x2f0000ff, 0x2f00ff00, 0x3fff0000, 0x7fff0000},
-                                             {0x2f0000ff, 0x4fffff00, 0x5fff8ad8, 0x7fff0000}};
-    if (amount < 1) amount = 1;
-    if (amount > 4) amount = 4;
-
-    int overdrawColorIndex = static_cast<int>(Properties::overdrawColorSet);
-    return sOverdrawColors[overdrawColorIndex][amount - 1];
-}
-
-void Caches::dumpMemoryUsage() {
-    String8 stringLog;
-    dumpMemoryUsage(stringLog);
-    ALOGD("%s", stringLog.string());
-}
-
-void Caches::dumpMemoryUsage(String8& log) {
-    uint32_t total = 0;
-    log.appendFormat("Current memory usage / total memory usage (bytes):\n");
-    if (mRenderState) {
-        int memused = 0;
-        for (std::set<Layer*>::iterator it = mRenderState->mActiveLayers.begin();
-             it != mRenderState->mActiveLayers.end(); it++) {
-            const Layer* layer = *it;
-            LOG_ALWAYS_FATAL_IF(layer->getApi() != Layer::Api::OpenGL);
-            const GlLayer* glLayer = static_cast<const GlLayer*>(layer);
-            log.appendFormat("    GlLayer size %dx%d; texid=%u refs=%d\n", layer->getWidth(),
-                             layer->getHeight(), glLayer->getTextureId(), layer->getStrongCount());
-            memused += layer->getWidth() * layer->getHeight() * 4;
-        }
-        log.appendFormat("  Layers total   %8d (numLayers = %zu)\n", memused,
-                         mRenderState->mActiveLayers.size());
-        total += memused;
-    }
-
-    log.appendFormat("Total memory usage:\n");
-    log.appendFormat("  %d bytes, %.2f MB\n", total, total / 1024.0f / 1024.0f);
-}
-
-///////////////////////////////////////////////////////////////////////////////
 // Memory management
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -160,18 +98,6 @@ void Caches::flush(FlushMode mode) {
     // and move on. TODO: All errors or just errors like bad surface?
     GLUtils::dumpGLErrors();
 }
-
-///////////////////////////////////////////////////////////////////////////////
-// Regions
-///////////////////////////////////////////////////////////////////////////////
-
-TextureVertex* Caches::getRegionMesh() {
-    return nullptr;
-}
-
-///////////////////////////////////////////////////////////////////////////////
-// Temporary Properties
-///////////////////////////////////////////////////////////////////////////////
 
 };  // namespace uirenderer
 };  // namespace android

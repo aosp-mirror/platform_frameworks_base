@@ -48,7 +48,6 @@ namespace android {
 namespace uirenderer {
 
 class CanvasState;
-class OffscreenBuffer;
 class Rect;
 class SkiaShader;
 struct RenderNodeOp;
@@ -172,9 +171,6 @@ public:
     }
 
     const DisplayList* getDisplayList() const { return mDisplayList; }
-    OffscreenBuffer* getLayer() const { return mLayer; }
-    OffscreenBuffer** getLayerHandle() { return &mLayer; }  // ugh...
-    void setLayer(OffscreenBuffer* layer) { mLayer = layer; }
 
     // Note: The position callbacks are relying on the listener using
     // the frameNumber to appropriately batch/synchronize these transactions.
@@ -250,10 +246,6 @@ private:
     friend class AnimatorManager;
     AnimatorManager mAnimatorManager;
 
-    // Owned by RT. Lifecycle is managed by prepareTree(), with the exception
-    // being in ~RenderNode() which may happen on any thread.
-    OffscreenBuffer* mLayer = nullptr;
-
     /**
      * Draw time state - these properties are only set and used during rendering
      */
@@ -292,7 +284,7 @@ public:
      * Returns true if an offscreen layer from any renderPipeline is attached
      * to this node.
      */
-    bool hasLayer() const { return mLayer || mSkiaLayer.get(); }
+    bool hasLayer() const { return mSkiaLayer.get(); }
 
     /**
      * Used by the RenderPipeline to attach an offscreen surface to the RenderNode.

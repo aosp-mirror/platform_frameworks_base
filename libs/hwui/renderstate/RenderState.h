@@ -17,7 +17,6 @@
 #define RENDERSTATE_H
 
 #include "Caches.h"
-#include "renderstate/OffscreenBufferPool.h"
 #include "renderstate/PixelBufferState.h"
 #include "utils/Macros.h"
 
@@ -98,8 +97,6 @@ public:
     // more thinking...
     void postDecStrong(VirtualLightRefBase* object);
 
-    OffscreenBufferPool& layerPool() { return *mLayerPool; }
-
     GrContext* getGrContext() const;
 
     void dump();
@@ -114,8 +111,6 @@ private:
 
     renderthread::RenderThread& mRenderThread;
     Caches* mCaches = nullptr;
-
-    OffscreenBufferPool* mLayerPool = nullptr;
 
     std::set<Layer*> mActiveLayers;
     std::set<DeferredLayerUpdater*> mActiveLayerUpdaters;
