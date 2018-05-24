@@ -33,6 +33,7 @@ import android.database.Cursor;
 import android.media.MediaScannerConnection.MediaScannerConnectionClient;
 import android.net.Uri;
 import android.os.Environment;
+import android.os.FileUtils;
 import android.os.IBinder;
 import android.os.ParcelFileDescriptor;
 import android.os.Process;
@@ -955,7 +956,8 @@ public class RingtoneManager {
 
         // Find a filename. Throws FileNotFoundException if none can be found.
         final File outFile = Utils.getUniqueExternalFile(mContext, subdirectory,
-                Utils.getFileDisplayNameFromUri(mContext, fileUri), mimeType);
+                FileUtils.buildValidFatFilename(Utils.getFileDisplayNameFromUri(mContext, fileUri)),
+                        mimeType);
 
         // Copy contents to external ringtone storage. Throws IOException if the copy fails.
         try (final InputStream input = mContext.getContentResolver().openInputStream(fileUri);
