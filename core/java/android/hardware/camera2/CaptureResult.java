@@ -87,6 +87,15 @@ public class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
          *
          * @hide
          */
+        public Key(String name, String fallbackName, Class<T> type) {
+            mKey = new CameraMetadataNative.Key<T>(name, fallbackName, type);
+        }
+
+       /**
+         * Visible for testing and vendor extensions only.
+         *
+         * @hide
+         */
         public Key(String name, Class<T> type) {
             mKey = new CameraMetadataNative.Key<T>(name, type);
         }
