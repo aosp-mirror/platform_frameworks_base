@@ -3940,6 +3940,7 @@ public class AudioManager {
      * @param device Bluetooth device connected/disconnected
      * @param state  new connection state (BluetoothProfile.STATE_xxx)
      * @param profile profile for the A2DP device
+     * @param a2dpVolume New volume for the connecting device. Does nothing if disconnecting.
      * (either {@link android.bluetooth.BluetoothProfile.A2DP} or
      * {@link android.bluetooth.BluetoothProfile.A2DP_SINK})
      * @param suppressNoisyIntent if true the
@@ -3949,12 +3950,13 @@ public class AudioManager {
      * {@hide}
      */
     public int setBluetoothA2dpDeviceConnectionStateSuppressNoisyIntent(
-                BluetoothDevice device, int state, int profile, boolean suppressNoisyIntent) {
+                BluetoothDevice device, int state, int profile,
+                boolean suppressNoisyIntent, int a2dpVolume) {
         final IAudioService service = getService();
         int delay = 0;
         try {
             delay = service.setBluetoothA2dpDeviceConnectionStateSuppressNoisyIntent(device,
-                state, profile, suppressNoisyIntent);
+                state, profile, suppressNoisyIntent, a2dpVolume);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
