@@ -19,10 +19,7 @@
     android:height="28dp"
     android:viewportWidth="28"
     android:viewportHeight="28">
-
     <path
-        android:fillColor="?attr/singleToneColor"
-        android:pathData="M17.25,10.15V14v3.85L14,15.95L10.69,14L14,12.05L17.25,10.15 M18.16,7.71c-0.14,0-0.28,0.04-0.42,0.12 l-4.63,2.72l-4.73,2.78c-0.52,0.3-0.52,1.05,0,1.36l4.73,2.78l4.63,2.72c0.13,0.08,0.28,0.12,0.42,0.12c0.44,0,0.84-0.36,0.84-0.86 V14V8.58C19,8.08,18.6,7.71,18.16,7.71L18.16,7.71z" />
-    <path
-        android:pathData="M 0 0 H 28 V 28 H 0 V 0 Z" />
+        android:pathData="M16.78,10.03l-3.97,3.97l3.97,3.97l-1.06,1.06l-5.03,-5.03l5.03,-5.03z"
+        android:fillColor="?attr/singleToneColor" />
 </vector>
