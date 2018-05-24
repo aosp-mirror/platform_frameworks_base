@@ -16,6 +16,7 @@
 
 package com.android.server.backup;
 
+import android.annotation.Nullable;
 import android.app.IBackupAgent;
 import android.app.backup.IBackupManager;
 import android.app.backup.IBackupManagerMonitor;
@@ -131,6 +132,10 @@ public interface BackupManagerServiceInterface {
 
   // Report the name of the currently active transport
   String getCurrentTransport();
+
+  // Report the component name of the host service of the currently active transport
+  @Nullable
+  ComponentName getCurrentTransportComponent();
 
   // Report all known, available backup transports
   String[] listAllTransports();

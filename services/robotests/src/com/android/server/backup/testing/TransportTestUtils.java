@@ -55,6 +55,9 @@ public class TransportTestUtils {
             ShadowPackageManager shadowPackageManager, TransportData... transports)
             throws Exception {
         for (TransportData transport : transports) {
+            if (transport.transportStatus == TransportStatus.UNREGISTERED) {
+                continue;
+            }
             ComponentName transportComponent = transport.getTransportComponent();
             String packageName = transportComponent.getPackageName();
             ResolveInfo resolveInfo = resolveInfo(transportComponent);

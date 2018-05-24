@@ -76,10 +76,9 @@ import java.util.List;
 
 @RunWith(FrameworkRobolectricTestRunner.class)
 @Config(
-    manifest = Config.NONE,
-    sdk = 26,
-    shadows = {ShadowAppBackupUtils.class, ShadowBackupPolicyEnforcer.class}
-)
+        manifest = Config.NONE,
+        sdk = 26,
+        shadows = {ShadowAppBackupUtils.class, ShadowBackupPolicyEnforcer.class})
 @SystemLoaderPackages({"com.android.server.backup"})
 @Presubmit
 public class BackupManagerServiceTest {
@@ -404,6 +403,51 @@ public class BackupManagerServiceTest {
     private String getSettingsTransport() {
         return ShadowSettings.ShadowSecure.getString(
                 mContext.getContentResolver(), Settings.Secure.BACKUP_TRANSPORT);
+    }
+
+    /* Tests for transport attributes */
+
+    @Test
+    public void testGetCurrentTransportComponent() throws Exception {
+        mShadowContext.grantPermissions(android.Manifest.permission.BACKUP);
+        when(mTransportManager.getCurrentTransportComponent())
+                .thenReturn(mTransport.getTransportComponent());
+        BackupManagerService backupManagerService = createInitializedBackupManagerService();
+
+        ComponentName transportComponent = backupManagerService.getCurrentTransportComponent();
+
+        assertThat(transportComponent).isEqualTo(mTransport.getTransportComponent());
+    }
+
+    @Test
+    public void testGetCurrentTransportComponent_whenNoTransportSelected() throws Exception {
+        mShadowContext.grantPermissions(android.Manifest.permission.BACKUP);
+        when(mTransportManager.getCurrentTransportComponent()).thenReturn(null);
+        BackupManagerService backupManagerService = createInitializedBackupManagerService();
+
+        ComponentName transportComponent = backupManagerService.getCurrentTransportComponent();
+
+        assertThat(transportComponent).isNull();
+    }
+
+    @Test
+    public void testGetCurrentTransportComponent_whenTransportNotRegistered() throws Exception {
+        mShadowContext.grantPermissions(android.Manifest.permission.BACKUP);
+        when(mTransportManager.getCurrentTransportComponent())
+                .thenThrow(TransportNotRegisteredException.class);
+        BackupManagerService backupManagerService = createInitializedBackupManagerService();
+
+        ComponentName transportComponent = backupManagerService.getCurrentTransportComponent();
+
+        assertThat(transportComponent).isNull();
+    }
+
+    @Test
+    public void testGetCurrentTransportComponent_withoutPermission() throws Exception {
+        mShadowContext.denyPermissions(android.Manifest.permission.BACKUP);
+        BackupManagerService backupManagerService = createInitializedBackupManagerService();
+
+        expectThrows(SecurityException.class, backupManagerService::getCurrentTransportComponent);
     }
 
     /* Tests for updating transport attributes */
