@@ -120,7 +120,7 @@ public final class TextClassificationManager {
         synchronized (mLock) {
             if (mSettings == null) {
                 mSettings = TextClassificationConstants.loadFromString(Settings.Global.getString(
-                        mContext.getApplicationContext().getContentResolver(),
+                        getApplicationContext().getContentResolver(),
                         Settings.Global.TEXT_CLASSIFIER_CONSTANTS));
             }
             return mSettings;
@@ -186,8 +186,8 @@ public final class TextClassificationManager {
     protected void finalize() throws Throwable {
         try {
             // Note that fields could be null if the constructor threw.
-            if (mContext != null && mSettingsObserver != null) {
-                mContext.getApplicationContext().getContentResolver()
+            if (mSettingsObserver != null) {
+                getApplicationContext().getContentResolver()
                         .unregisterContentObserver(mSettingsObserver);
             }
         } finally {
@@ -240,6 +240,12 @@ public final class TextClassificationManager {
         }
     }
 
+    Context getApplicationContext() {
+        return mContext.getApplicationContext() != null
+                ? mContext.getApplicationContext()
+                : mContext;
+    }
+
     /** @hide */
     public static TextClassificationConstants getSettings(Context context) {
         Preconditions.checkNotNull(context);
@@ -261,7 +267,7 @@ public final class TextClassificationManager {
         SettingsObserver(TextClassificationManager tcm) {
             super(null);
             mTcm = new WeakReference<>(tcm);
-            tcm.mContext.getApplicationContext().getContentResolver().registerContentObserver(
+            tcm.getApplicationContext().getContentResolver().registerContentObserver(
                     Settings.Global.getUriFor(Settings.Global.TEXT_CLASSIFIER_CONSTANTS),
                     false /* notifyForDescendants */,
                     this);
