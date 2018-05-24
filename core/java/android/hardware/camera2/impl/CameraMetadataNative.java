@@ -84,6 +84,7 @@ public class CameraMetadataNative implements Parcelable {
         private final Class<T> mType;
         private final TypeReference<T> mTypeReference;
         private final String mName;
+        private final String mFallbackName;
         private final int mHash;
 
         /**
@@ -96,8 +97,25 @@ public class CameraMetadataNative implements Parcelable {
                 throw new NullPointerException("Type needs to be non-null");
             }
             mName = name;
+            mFallbackName = null;
             mType = type;
             mVendorId = vendorId;
+            mTypeReference = TypeReference.createSpecializedTypeReference(type);
+            mHash = mName.hashCode() ^ mTypeReference.hashCode();
+        }
+
+        /**
+         * @hide
+         */
+        public Key(String name, String fallbackName, Class<T> type) {
+            if (name == null) {
+                throw new NullPointerException("Key needs a valid name");
+            } else if (type == null) {
+                throw new NullPointerException("Type needs to be non-null");
+            }
+            mName = name;
+            mFallbackName = fallbackName;
+            mType = type;
             mTypeReference = TypeReference.createSpecializedTypeReference(type);
             mHash = mName.hashCode() ^ mTypeReference.hashCode();
         }
@@ -115,6 +133,7 @@ public class CameraMetadataNative implements Parcelable {
                 throw new NullPointerException("Type needs to be non-null");
             }
             mName = name;
+            mFallbackName = null;
             mType = type;
             mTypeReference = TypeReference.createSpecializedTypeReference(type);
             mHash = mName.hashCode() ^ mTypeReference.hashCode();
@@ -134,6 +153,7 @@ public class CameraMetadataNative implements Parcelable {
                 throw new NullPointerException("TypeReference needs to be non-null");
             }
             mName = name;
+            mFallbackName = null;
             mType = (Class<T>)typeReference.getRawType();
             mTypeReference = typeReference;
             mHash = mName.hashCode() ^ mTypeReference.hashCode();
@@ -494,7 +514,16 @@ public class CameraMetadataNative implements Parcelable {
         int tag = nativeGetTagFromKeyLocal(key.getName());
         byte[] values = readValues(tag);
         if (values == null) {
-            return null;
+            // If the key returns null, use the fallback key if exists.
+            // This is to support old key names for the newly published keys.
+            if (key.mFallbackName == null) {
+                return null;
+            }
+            tag = nativeGetTagFromKeyLocal(key.mFallbackName);
+            values = readValues(tag);
+            if (values == null) {
+                return null;
+            }
         }
 
         int nativeType = nativeGetTypeFromTagLocal(tag);
