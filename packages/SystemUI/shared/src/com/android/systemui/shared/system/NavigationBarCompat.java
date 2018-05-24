@@ -37,16 +37,12 @@ public class NavigationBarCompat {
         return convertDpToPixel(10);
     }
 
-    public static int getQuickScrubDragSlopPx() {
-        return convertDpToPixel(20);
-    }
-
     public static int getQuickStepTouchSlopPx() {
         return convertDpToPixel(24);
     }
 
     public static int getQuickScrubTouchSlopPx() {
-        return convertDpToPixel(35);
+        return convertDpToPixel(24);
     }
 
     @Retention(RetentionPolicy.SOURCE)
