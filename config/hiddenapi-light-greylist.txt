@@ -5433,6 +5433,7 @@ Landroid/telephony/SmsMessage;->mWrappedSmsMessage:Lcom/android/internal/telepho
 Landroid/telephony/SmsMessage;->setSubId(I)V
 Landroid/telephony/SmsMessage;->useCdmaFormatForMoSms()Z
 Landroid/telephony/SmsMessage;->useCdmaFormatForMoSms(I)Z
+Landroid/telephony/SubscriptionInfo;->getNameSource()I
 Landroid/telephony/SubscriptionManager;-><init>(Landroid/content/Context;)V
 Landroid/telephony/SubscriptionManager;->CONTENT_URI:Landroid/net/Uri;
 Landroid/telephony/SubscriptionManager;->DEFAULT_SUBSCRIPTION_ID:I
