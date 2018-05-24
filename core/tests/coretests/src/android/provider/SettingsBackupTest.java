@@ -617,7 +617,9 @@ public class SettingsBackupTest {
                  Settings.Secure.LOW_POWER_MANUAL_ACTIVATION_COUNT,
                  Settings.Secure.LOW_POWER_WARNING_ACKNOWLEDGED,
                  Settings.Secure.SUPPRESS_AUTO_BATTERY_SAVER_SUGGESTION,
-                 Settings.Secure.PACKAGES_TO_CLEAR_DATA_BEFORE_FULL_RESTORE);
+                 Settings.Secure.PACKAGES_TO_CLEAR_DATA_BEFORE_FULL_RESTORE,
+                 Settings.Secure.FLASHLIGHT_AVAILABLE,
+                 Settings.Secure.FLASHLIGHT_ENABLED);
 
     @Test
     public void systemSettingsBackedUpOrBlacklisted() {
