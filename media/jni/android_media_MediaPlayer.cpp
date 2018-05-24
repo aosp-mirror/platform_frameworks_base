@@ -384,6 +384,9 @@ android_media_MediaPlayer_getBufferingParams(JNIEnv *env, jobject thiz)
     process_media_player_call(
             env, thiz, mp->getBufferingSettings(&settings),
             "java/lang/IllegalStateException", "unexpected error");
+    if (env->ExceptionCheck()) {
+        return nullptr;
+    }
     ALOGV("getBufferingSettings:{%s}", settings.toString().string());
 
     return bp.asJobject(env, gBufferingParamsFields);
@@ -555,6 +558,9 @@ android_media_MediaPlayer_getPlaybackParams(JNIEnv *env, jobject thiz)
     process_media_player_call(
             env, thiz, mp->getPlaybackSettings(&audioRate),
             "java/lang/IllegalStateException", "unexpected error");
+    if (env->ExceptionCheck()) {
+        return nullptr;
+    }
     ALOGV("getPlaybackSettings: %f %f %d %d",
             audioRate.mSpeed, audioRate.mPitch, audioRate.mFallbackMode, audioRate.mStretchMode);
 
@@ -623,6 +629,9 @@ android_media_MediaPlayer_getSyncParams(JNIEnv *env, jobject thiz)
     process_media_player_call(
             env, thiz, mp->getSyncSettings(&scp.sync, &scp.frameRate),
             "java/lang/IllegalStateException", "unexpected error");
+    if (env->ExceptionCheck()) {
+        return nullptr;
+    }
 
     ALOGV("getSyncSettings: %d %d %f %f",
             scp.sync.mSource, scp.sync.mAudioAdjustMode, scp.sync.mTolerance, scp.frameRate);
