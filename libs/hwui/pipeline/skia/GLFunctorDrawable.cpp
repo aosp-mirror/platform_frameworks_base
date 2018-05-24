@@ -77,13 +77,20 @@ void GLFunctorDrawable::onDraw(SkCanvas* canvas) {
     // apply a simple clip with a scissor or a complex clip with a stencil
     SkRegion clipRegion;
     canvas->temporary_internal_getRgnClip(&clipRegion);
+    canvas->flush();
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    glViewport(0, 0, info.width, info.height);
     if (CC_UNLIKELY(clipRegion.isComplex())) {
+        //TODO: move stencil clear and canvas flush to SkAndroidFrameworkUtils::clipWithStencil
         glDisable(GL_SCISSOR_TEST);
         glStencilMask(0x1);
         glClearStencil(0);
         glClear(GL_STENCIL_BUFFER_BIT);
+        // GL ops get inserted here if previous flush is missing, which could dirty the stencil
         bool stencilWritten = SkAndroidFrameworkUtils::clipWithStencil(canvas);
-        canvas->flush();
+        canvas->flush(); //need this flush for the single op that draws into the stencil
+        glBindFramebuffer(GL_FRAMEBUFFER, 0);
+        glViewport(0, 0, info.width, info.height);
         if (stencilWritten) {
             glStencilMask(0x1);
             glStencilFunc(GL_EQUAL, 0x1, 0x1);
@@ -94,11 +101,9 @@ void GLFunctorDrawable::onDraw(SkCanvas* canvas) {
             glDisable(GL_STENCIL_TEST);
         }
     } else if (clipRegion.isEmpty()) {
-        canvas->flush();
         glDisable(GL_STENCIL_TEST);
         glDisable(GL_SCISSOR_TEST);
     } else {
-        canvas->flush();
         glDisable(GL_STENCIL_TEST);
         glEnable(GL_SCISSOR_TEST);
         setScissor(info.height, clipRegion.getBounds());
