@@ -216,9 +216,9 @@ public class RecentsOnboarding {
                         setHasSeenSwipeUpOnboarding(true);
                     }
                     if (fromHome) {
-                        setOpenedOverviewFromHomeCount(getOpenedOverviewFromHomeCount() + 1);
+                        incrementOpenedOverviewFromHomeCount();
                     }
-                    setOpenedOverviewCount(getOpenedOverviewCount() + 1);
+                    incrementOpenedOverviewCount();
 
                     if (getOpenedOverviewCount() >= QUICK_SCRUB_SHOW_ON_OVERVIEW_OPENED_COUNT) {
                         if (mHasDismissedQuickScrubTip) {
@@ -541,6 +541,15 @@ public class RecentsOnboarding {
         return Prefs.getInt(mContext, OVERVIEW_OPENED_FROM_HOME_COUNT, 0);
     }
 
+    private void incrementOpenedOverviewFromHomeCount() {
+        Log.d(TAG, "incrementOpenedOverviewFromHomeCount");
+        int openedOverviewFromHomeCount = getOpenedOverviewFromHomeCount();
+        if (openedOverviewFromHomeCount >= SWIPE_UP_SHOW_ON_OVERVIEW_OPENED_FROM_HOME_COUNT) {
+            return;
+        }
+        setOpenedOverviewFromHomeCount(openedOverviewFromHomeCount + 1);
+    }
+
     private void setOpenedOverviewFromHomeCount(int openedOverviewFromHomeCount) {
         Log.d(TAG, "setOpenedOverviewFromHomeCount: " + openedOverviewFromHomeCount);
         Prefs.putInt(mContext, OVERVIEW_OPENED_FROM_HOME_COUNT, openedOverviewFromHomeCount);
@@ -548,6 +557,15 @@ public class RecentsOnboarding {
 
     private int getOpenedOverviewCount() {
         return Prefs.getInt(mContext, OVERVIEW_OPENED_COUNT, 0);
+    }
+
+    private void incrementOpenedOverviewCount() {
+        Log.d(TAG, "incrementOpenedOverviewCount");
+        int openedOverviewCount = getOpenedOverviewCount();
+        if (openedOverviewCount >= QUICK_SCRUB_SHOW_ON_OVERVIEW_OPENED_COUNT) {
+            return;
+        }
+        setOpenedOverviewCount(openedOverviewCount + 1);
     }
 
     private void setOpenedOverviewCount(int openedOverviewCount) {
