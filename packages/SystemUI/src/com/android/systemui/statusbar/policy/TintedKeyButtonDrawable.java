@@ -21,6 +21,7 @@ import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 
 import com.android.internal.graphics.ColorUtils;
+import com.android.systemui.statusbar.phone.ShadowKeyDrawable;
 
 /**
  * Drawable for {@link KeyButtonView}s which contains a single asset and colors for light and dark
@@ -36,7 +37,8 @@ public class TintedKeyButtonDrawable extends KeyButtonDrawable {
 
     public static TintedKeyButtonDrawable create(Drawable drawable, @ColorInt int lightColor,
             @ColorInt int darkColor) {
-        return new TintedKeyButtonDrawable(new Drawable[] { drawable }, lightColor, darkColor);
+        return new TintedKeyButtonDrawable(new Drawable[] { drawable },
+                lightColor, darkColor);
     }
 
     private TintedKeyButtonDrawable(Drawable[] drawables, int lightColor, int darkColor){
