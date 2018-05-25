@@ -938,7 +938,7 @@
     <dimen name="rounded_corner_radius_bottom">0dp</dimen>
     <dimen name="rounded_corner_content_padding">0dp</dimen>
     <dimen name="nav_content_padding">0dp</dimen>
-    <dimen name="nav_quick_scrub_track_edge_padding">42dp</dimen>
+    <dimen name="nav_quick_scrub_track_edge_padding">24dp</dimen>
     <dimen name="nav_quick_scrub_track_thickness">2dp</dimen>
 
     <!-- Navigation bar shadow params. -->

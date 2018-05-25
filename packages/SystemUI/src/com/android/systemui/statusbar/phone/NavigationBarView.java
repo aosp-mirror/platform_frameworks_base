@@ -117,6 +117,7 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
     private Rect mRecentsButtonBounds = new Rect();
     private Rect mRotationButtonBounds = new Rect();
     private int[] mTmpPosition = new int[2];
+    private Rect mTmpRect = new Rect();
 
     private KeyButtonDrawable mBackIcon;
     private KeyButtonDrawable mBackCarModeIcon, mBackLandCarModeIcon;
@@ -876,14 +877,27 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
 
     public boolean isRotateButtonVisible() { return mShowRotateButton; }
 
-    public void setMenuContainerVisibility(boolean visible) {
-        getMenuContainer().setAlpha(visible ? 1 : 0, true /* animate */);
+    /**
+     * @return the button at the given {@param x} and {@param y}.
+     */
+    ButtonDispatcher getButtonAtPosition(int x, int y) {
+        for (int i = 0; i < mButtonDispatchers.size(); i++) {
+            ButtonDispatcher button = mButtonDispatchers.valueAt(i);
+            View buttonView = button.getCurrentView();
+            if (buttonView != null) {
+                buttonView.getHitRect(mTmpRect);
+                offsetDescendantRectToMyCoords(buttonView, mTmpRect);
+                if (mTmpRect.contains(x, y)) {
+                    return button;
+                }
+            }
+        }
+        return null;
     }
 
     @Override
     public void onFinishInflate() {
-        mNavigationInflaterView = (NavigationBarInflaterView) findViewById(
-                R.id.navigation_inflater);
+        mNavigationInflaterView = findViewById(R.id.navigation_inflater);
         mNavigationInflaterView.setButtonDispatchers(mButtonDispatchers);
 
         getImeSwitchButton().setOnClickListener(mImeSwitcherClickListener);
@@ -1176,10 +1190,11 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
                 + " " + visibilityToString(getWindowVisibility())
                 + (offscreen ? " OFFSCREEN!" : ""));
 
-        pw.println(String.format("      mCurrentView: id=%s (%dx%d) %s",
+        pw.println(String.format("      mCurrentView: id=%s (%dx%d) %s %f",
                         getResourceName(getCurrentView().getId()),
                         getCurrentView().getWidth(), getCurrentView().getHeight(),
-                        visibilityToString(getCurrentView().getVisibility())));
+                        visibilityToString(getCurrentView().getVisibility()),
+                        getCurrentView().getAlpha()));
 
         pw.println(String.format("      disabled=0x%08x vertical=%s menu=%s",
                         mDisabledFlags,
