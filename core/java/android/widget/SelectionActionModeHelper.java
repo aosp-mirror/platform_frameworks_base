@@ -285,10 +285,14 @@ public final class SelectionActionModeHelper {
         final Layout layout = mTextView.getLayout();
 
         final Runnable onAnimationEndCallback = () -> {
-            if (result.mStart >= 0 && result.mEnd <= getText(mTextView).length()
+            final SelectionResult startSelectionResult;
+            if (result != null && result.mStart >= 0 && result.mEnd <= getText(mTextView).length()
                     && result.mStart <= result.mEnd) {
-                startSelectionActionMode(result);
+                startSelectionResult = result;
+            } else {
+                startSelectionResult = null;
             }
+            startSelectionActionMode(startSelectionResult);
         };
         // TODO do not trigger the animation if the change included only non-printable characters
         final boolean didSelectionChange =
