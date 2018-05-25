@@ -20,6 +20,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.assist.AssistStructure;
 import android.app.assist.AssistStructure.ViewNode;
+import android.content.ComponentName;
 import android.metrics.LogMaker;
 import android.service.autofill.Dataset;
 import android.util.ArrayMap;
@@ -109,23 +110,27 @@ public final class Helper {
     }
 
     @NonNull
-    public static LogMaker newLogMaker(int category, String packageName,
-            String servicePackageName) {
-        final LogMaker log = new LogMaker(category).setPackageName(packageName);
-        if (servicePackageName != null) {
-            log.addTaggedData(MetricsEvent.FIELD_AUTOFILL_SERVICE, servicePackageName);
+    private static LogMaker newLogMaker(int category, @NonNull String servicePackageName,
+            boolean compatMode) {
+        final LogMaker log = new LogMaker(category)
+                .addTaggedData(MetricsEvent.FIELD_AUTOFILL_SERVICE, servicePackageName);
+        if (compatMode) {
+            log.addTaggedData(MetricsEvent.FIELD_AUTOFILL_COMPAT_MODE, 1);
         }
         return log;
     }
 
     @NonNull
-    public static LogMaker newLogMaker(int category, String packageName,
-            String servicePackageName, boolean compatMode) {
-        final LogMaker log = newLogMaker(category, packageName, servicePackageName);
-        if (compatMode) {
-            log.addTaggedData(MetricsEvent.FIELD_AUTOFILL_COMPAT_MODE, 1);
-        }
-        return log;
+    public static LogMaker newLogMaker(int category, @NonNull String packageName,
+            @NonNull String servicePackageName, boolean compatMode) {
+        return newLogMaker(category, servicePackageName, compatMode).setPackageName(packageName);
+    }
+
+    @NonNull
+    public static LogMaker newLogMaker(int category, @NonNull ComponentName componentName,
+            @NonNull String servicePackageName, boolean compatMode) {
+        return newLogMaker(category, servicePackageName, compatMode)
+                .setComponentName(componentName);
     }
 
     public static void printlnRedactedText(@NonNull PrintWriter pw, @Nullable CharSequence text) {
