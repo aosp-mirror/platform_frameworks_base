@@ -920,6 +920,7 @@ Landroid/app/Service;->setForeground(Z)V
 Landroid/app/ServiceConnectionLeaked;-><init>(Ljava/lang/String;)V
 Landroid/app/SharedPreferencesImpl;-><init>(Ljava/io/File;I)V
 Landroid/app/SharedPreferencesImpl;->mFile:Ljava/io/File;
+Landroid/app/SharedPreferencesImpl;->startLoadFromDisk()V
 Landroid/app/SharedPreferencesImpl;->startReloadIfChangedUnexpectedly()V
 Landroid/app/StatusBarManager;-><init>(Landroid/content/Context;)V
 Landroid/app/StatusBarManager;->collapsePanels()V
