@@ -41,6 +41,7 @@ public final class ProviderPropertiesUnbundled {
         mProperties = properties;
     }
 
+    /** @hide */
     public ProviderProperties getProviderProperties() {
         return mProperties;
     }
