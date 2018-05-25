@@ -672,10 +672,11 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                 Slog.d(TAG, message.toString());
             }
             if ((flags & FillResponse.FLAG_DISABLE_ACTIVITY_ONLY) != 0) {
-                mService.disableAutofillForActivity(mComponentName, disableDuration, mCompatMode);
+                mService.disableAutofillForActivity(mComponentName, disableDuration,
+                        id, mCompatMode);
             } else {
                 mService.disableAutofillForApp(mComponentName.getPackageName(), disableDuration,
-                        mCompatMode);
+                        id, mCompatMode);
             }
             sessionFinishedState = AutofillManager.STATE_DISABLED_BY_SERVICE;
         }
@@ -1649,8 +1650,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                 mPendingSaveUi = new PendingUi(mActivityToken, id, client);
                 getUiForShowing().showSaveUi(mService.getServiceLabel(), mService.getServiceIcon(),
                         mService.getServicePackageName(), saveInfo, this,
-                        mComponentName, this,
-                        mPendingSaveUi, mCompatMode);
+                        mComponentName, this, mPendingSaveUi, mCompatMode);
                 if (client != null) {
                     try {
                         client.setSaveUiState(id, true);
@@ -2128,7 +2128,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
 
         getUiForShowing().showFillUi(filledId, response, filterText,
                 mService.getServicePackageName(), mComponentName,
-                mService.getServiceLabel(), mService.getServiceIcon(), this, mCompatMode);
+                mService.getServiceLabel(), mService.getServiceIcon(), this, id, mCompatMode);
 
         synchronized (mLock) {
             if (mUiShownTime == 0) {
@@ -2834,7 +2834,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
     }
 
     private LogMaker newLogMaker(int category, String servicePackageName) {
-        return Helper.newLogMaker(category, mComponentName, servicePackageName, mCompatMode);
+        return Helper.newLogMaker(category, mComponentName, servicePackageName, id, mCompatMode);
     }
 
     private void writeLog(int category) {

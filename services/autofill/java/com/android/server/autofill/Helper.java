@@ -111,9 +111,10 @@ public final class Helper {
 
     @NonNull
     private static LogMaker newLogMaker(int category, @NonNull String servicePackageName,
-            boolean compatMode) {
+            int sessionId, boolean compatMode) {
         final LogMaker log = new LogMaker(category)
-                .addTaggedData(MetricsEvent.FIELD_AUTOFILL_SERVICE, servicePackageName);
+                .addTaggedData(MetricsEvent.FIELD_AUTOFILL_SERVICE, servicePackageName)
+                .addTaggedData(MetricsEvent.FIELD_AUTOFILL_SESSION_ID, sessionId);
         if (compatMode) {
             log.addTaggedData(MetricsEvent.FIELD_AUTOFILL_COMPAT_MODE, 1);
         }
@@ -122,14 +123,15 @@ public final class Helper {
 
     @NonNull
     public static LogMaker newLogMaker(int category, @NonNull String packageName,
-            @NonNull String servicePackageName, boolean compatMode) {
-        return newLogMaker(category, servicePackageName, compatMode).setPackageName(packageName);
+            @NonNull String servicePackageName, int sessionId, boolean compatMode) {
+        return newLogMaker(category, servicePackageName, sessionId, compatMode)
+                .setPackageName(packageName);
     }
 
     @NonNull
     public static LogMaker newLogMaker(int category, @NonNull ComponentName componentName,
-            @NonNull String servicePackageName, boolean compatMode) {
-        return newLogMaker(category, servicePackageName, compatMode)
+            @NonNull String servicePackageName, int sessionId, boolean compatMode) {
+        return newLogMaker(category, servicePackageName, sessionId, compatMode)
                 .setComponentName(componentName);
     }
 
