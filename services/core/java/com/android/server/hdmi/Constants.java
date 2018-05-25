@@ -200,6 +200,8 @@ final class Constants {
 
     static final int UNKNOWN_VOLUME = -1;
 
+    static final String PROPERTY_PREFERRED_ADDRESS_AUDIO_SYSTEM =
+            "persist.sys.hdmi.addr.audiosystem";
     static final String PROPERTY_PREFERRED_ADDRESS_PLAYBACK = "persist.sys.hdmi.addr.playback";
     static final String PROPERTY_PREFERRED_ADDRESS_TV = "persist.sys.hdmi.addr.tv";
 
