@@ -1144,6 +1144,8 @@ public class NavigationBarFragment extends Fragment implements Callbacks {
             mRoot.postOnAnimationDelayed(mRipple, RIPPLE_OFFSET_MS);
             mRoot.postOnAnimationDelayed(mRipple, RIPPLE_INTERVAL_MS);
             mRoot.postOnAnimationDelayed(mRipple, 2*RIPPLE_INTERVAL_MS);
+            mRoot.postOnAnimationDelayed(mRipple, 3*RIPPLE_INTERVAL_MS);
+            mRoot.postOnAnimationDelayed(mRipple, 4*RIPPLE_INTERVAL_MS);
         }
 
         public void stop() {
