@@ -5872,6 +5872,16 @@ public class Activity extends ContextThemeWrapper
     }
 
     /**
+     * Temporary method on O-MR1 only.
+     *
+     * @hide
+     */
+    @Override
+    public ComponentName getComponentNameForAutofill() {
+        return mComponent;
+    }
+
+    /**
      * Retrieve a {@link SharedPreferences} object for accessing preferences
      * that are private to this activity.  This simply calls the underlying
      * {@link #getSharedPreferences(String, int)} method by passing in this activity's
