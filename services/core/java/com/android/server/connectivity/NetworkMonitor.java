@@ -795,8 +795,9 @@ public class NetworkMonitor extends StateMachine {
         private void resolveStrictModeHostname() {
             try {
                 // Do a blocking DNS resolution using the network-assigned nameservers.
+                // Do not set AI_ADDRCONFIG in ai_flags so we get all address families in advance.
                 final InetAddress[] ips = ResolvUtil.blockingResolveAllLocally(
-                        mNetwork, mPrivateDnsProviderHostname);
+                        mNetwork, mPrivateDnsProviderHostname, 0 /* aiFlags */);
                 mPrivateDnsConfig = new PrivateDnsConfig(mPrivateDnsProviderHostname, ips);
             } catch (UnknownHostException uhe) {
                 mPrivateDnsConfig = null;
