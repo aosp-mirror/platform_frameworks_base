@@ -26,6 +26,9 @@ import static android.net.NetworkTemplate.buildTemplateMobileAll;
 import static android.os.Process.myUid;
 import static android.text.format.DateUtils.HOUR_IN_MILLIS;
 import static android.text.format.DateUtils.MINUTE_IN_MILLIS;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.fail;
 
 import static com.android.server.net.NetworkStatsCollection.multiplySafe;
 
@@ -37,11 +40,12 @@ import android.net.NetworkStatsHistory;
 import android.net.NetworkTemplate;
 import android.os.Process;
 import android.os.UserHandle;
+import android.support.test.InstrumentationRegistry;
+import android.support.test.filters.SmallTest;
+import android.support.test.runner.AndroidJUnit4;
 import android.telephony.SubscriptionPlan;
 import android.telephony.TelephonyManager;
-import android.test.AndroidTestCase;
 import android.test.MoreAsserts;
-import android.test.suitebuilder.annotation.SmallTest;
 import android.text.format.DateUtils;
 import android.util.RecurrenceRule;
 
@@ -64,11 +68,17 @@ import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+
 /**
  * Tests for {@link NetworkStatsCollection}.
  */
+@RunWith(AndroidJUnit4.class)
 @SmallTest
-public class NetworkStatsCollectionTest extends AndroidTestCase {
+public class NetworkStatsCollectionTest {
 
     private static final String TEST_FILE = "test.bin";
     private static final String TEST_IMSI = "310260000000000";
@@ -79,18 +89,15 @@ public class NetworkStatsCollectionTest extends AndroidTestCase {
 
     private static Clock sOriginalClock;
 
-    @Override
+    @Before
     public void setUp() throws Exception {
-        super.setUp();
         sOriginalClock = RecurrenceRule.sClock;
-
         // ignore any device overlay while testing
         NetworkTemplate.forceAllNetworkTypes();
     }
 
-    @Override
-    protected void tearDown() throws Exception {
-        super.tearDown();
+    @After
+    public void tearDown() throws Exception {
         RecurrenceRule.sClock = sOriginalClock;
     }
 
@@ -98,8 +105,10 @@ public class NetworkStatsCollectionTest extends AndroidTestCase {
         RecurrenceRule.sClock = Clock.fixed(instant, ZoneId.systemDefault());
     }
 
+    @Test
     public void testReadLegacyNetwork() throws Exception {
-        final File testFile = new File(getContext().getFilesDir(), TEST_FILE);
+        final File testFile =
+                new File(InstrumentationRegistry.getContext().getFilesDir(), TEST_FILE);
         stageFile(R.raw.netstats_v1, testFile);
 
         final NetworkStatsCollection collection = new NetworkStatsCollection(30 * MINUTE_IN_MILLIS);
@@ -124,8 +133,10 @@ public class NetworkStatsCollectionTest extends AndroidTestCase {
                 636016770L, 709306L, 88038768L, 518836L, NetworkStatsAccess.Level.DEVICE);
     }
 
+    @Test
     public void testReadLegacyUid() throws Exception {
-        final File testFile = new File(getContext().getFilesDir(), TEST_FILE);
+        final File testFile =
+                new File(InstrumentationRegistry.getContext().getFilesDir(), TEST_FILE);
         stageFile(R.raw.netstats_uid_v4, testFile);
 
         final NetworkStatsCollection collection = new NetworkStatsCollection(30 * MINUTE_IN_MILLIS);
@@ -150,8 +161,10 @@ public class NetworkStatsCollectionTest extends AndroidTestCase {
                 637076152L, 711413L, 88343717L, 521022L, NetworkStatsAccess.Level.DEVICE);
     }
 
+    @Test
     public void testReadLegacyUidTags() throws Exception {
-        final File testFile = new File(getContext().getFilesDir(), TEST_FILE);
+        final File testFile =
+                new File(InstrumentationRegistry.getContext().getFilesDir(), TEST_FILE);
         stageFile(R.raw.netstats_uid_v4, testFile);
 
         final NetworkStatsCollection collection = new NetworkStatsCollection(30 * MINUTE_IN_MILLIS);
@@ -176,6 +189,7 @@ public class NetworkStatsCollectionTest extends AndroidTestCase {
                 77017831L, 100995L, 35436758L, 92344L);
     }
 
+    @Test
     public void testStartEndAtomicBuckets() throws Exception {
         final NetworkStatsCollection collection = new NetworkStatsCollection(HOUR_IN_MILLIS);
 
@@ -190,6 +204,7 @@ public class NetworkStatsCollectionTest extends AndroidTestCase {
         assertEquals(2 * HOUR_IN_MILLIS, collection.getEndMillis());
     }
 
+    @Test
     public void testAccessLevels() throws Exception {
         final NetworkStatsCollection collection = new NetworkStatsCollection(HOUR_IN_MILLIS);
         final NetworkStats.Entry entry = new NetworkStats.Entry();
@@ -250,8 +265,10 @@ public class NetworkStatsCollectionTest extends AndroidTestCase {
                 0, NetworkStatsAccess.Level.DEVICE);
     }
 
+    @Test
     public void testAugmentPlan() throws Exception {
-        final File testFile = new File(getContext().getFilesDir(), TEST_FILE);
+        final File testFile =
+                new File(InstrumentationRegistry.getContext().getFilesDir(), TEST_FILE);
         stageFile(R.raw.netstats_v1, testFile);
 
         final NetworkStatsCollection emptyCollection = new NetworkStatsCollection(30 * MINUTE_IN_MILLIS);
@@ -439,6 +456,7 @@ public class NetworkStatsCollectionTest extends AndroidTestCase {
         }
     }
 
+    @Test
     public void testAugmentPlanGigantic() throws Exception {
         // We're in the future, but not that far off
         setClock(Instant.parse("2012-06-01T00:00:00.00Z"));
@@ -461,6 +479,7 @@ public class NetworkStatsCollectionTest extends AndroidTestCase {
         assertEquals(4_939_212_386L, getHistory(large, plan, TIME_A, TIME_C).getTotalBytes());
     }
 
+    @Test
     public void testRounding() throws Exception {
         final NetworkStatsCollection coll = new NetworkStatsCollection(HOUR_IN_MILLIS);
 
@@ -482,6 +501,7 @@ public class NetworkStatsCollectionTest extends AndroidTestCase {
         assertEquals(TIME_A - HOUR_IN_MILLIS, coll.roundDown(TIME_A - 1));
     }
 
+    @Test
     public void testMultiplySafe() {
         assertEquals(25, multiplySafe(50, 1, 2));
         assertEquals(100, multiplySafe(50, 2, 1));
@@ -510,7 +530,7 @@ public class NetworkStatsCollectionTest extends AndroidTestCase {
         InputStream in = null;
         OutputStream out = null;
         try {
-            in = getContext().getResources().openRawResource(rawId);
+            in = InstrumentationRegistry.getContext().getResources().openRawResource(rawId);
             out = new FileOutputStream(file);
             Streams.copy(in, out);
         } finally {
