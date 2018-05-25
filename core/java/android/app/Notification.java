@@ -6601,22 +6601,33 @@ public class Notification implements Parcelable
      * Helper class for generating large-format notifications that include multiple back-and-forth
      * messages of varying types between any number of people.
      *
-     * <br>
+     * <p>
      * If the platform does not provide large-format notifications, this method has no effect. The
      * user will always see the normal notification view.
-     * <br>
-     * This class is a "rebuilder": It attaches to a Builder object and modifies its behavior, like
-     * so:
+     *
+     * <p>
+     * If the app is targeting Android P and above, it is required to use the {@link Person}
+     * class in order to get an optimal rendering of the notification and its avatars. For
+     * conversations involving multiple people, the app should also make sure that it marks the
+     * conversation as a group with {@link #setGroupConversation(boolean)}.
+     *
+     * <p>
+     * This class is a "rebuilder": It attaches to a Builder object and modifies its behavior.
+     * Here's an example of how this may be used:
      * <pre class="prettyprint">
      *
+     * Person user = new Person.Builder().setIcon(userIcon).setName(userName).build();
+     * MessagingStyle style = new MessagingStyle(user)
+     *      .addMessage(messages[1].getText(), messages[1].getTime(), messages[1].getPerson())
+     *      .addMessage(messages[2].getText(), messages[2].getTime(), messages[2].getPerson())
+     *      .setGroupConversation(hasMultiplePeople());
+     *
      * Notification noti = new Notification.Builder()
-     *     .setContentTitle(&quot;2 new messages wtih &quot; + sender.toString())
+     *     .setContentTitle(&quot;2 new messages with &quot; + sender.toString())
      *     .setContentText(subject)
      *     .setSmallIcon(R.drawable.new_message)
      *     .setLargeIcon(aBitmap)
-     *     .setStyle(new Notification.MessagingStyle(resources.getString(R.string.reply_name))
-     *         .addMessage(messages[0].getText(), messages[0].getTime(), messages[0].getSender())
-     *         .addMessage(messages[1].getText(), messages[1].getTime(), messages[1].getSender()))
+     *     .setStyle(style)
      *     .build();
      * </pre>
      */
@@ -6826,7 +6837,9 @@ public class Notification implements Parcelable
         }
 
         /**
-         * Sets whether this conversation notification represents a group.
+         * Sets whether this conversation notification represents a group. If the app is targeting
+         * Android P, this is required if the app wants to display the largeIcon set with
+         * {@link Notification.Builder#setLargeIcon(Bitmap)}, otherwise it will be hidden.
          *
          * @param isGroupConversation {@code true} if the conversation represents a group,
          * {@code false} otherwise.
@@ -7048,12 +7061,21 @@ public class Notification implements Parcelable
             CharSequence conversationTitle = !TextUtils.isEmpty(super.mBigContentTitle)
                     ? super.mBigContentTitle
                     : mConversationTitle;
-            boolean isOneToOne = TextUtils.isEmpty(conversationTitle);
+            boolean atLeastP = mBuilder.mContext.getApplicationInfo().targetSdkVersion
+                    >= Build.VERSION_CODES.P;
+            boolean isOneToOne;
             CharSequence nameReplacement = null;
-            if (hasOnlyWhiteSpaceSenders()) {
-                isOneToOne = true;
-                nameReplacement = conversationTitle;
-                conversationTitle = null;
+            Icon avatarReplacement = null;
+            if (!atLeastP) {
+                isOneToOne = TextUtils.isEmpty(conversationTitle);
+                avatarReplacement = mBuilder.mN.mLargeIcon;
+                if (hasOnlyWhiteSpaceSenders()) {
+                    isOneToOne = true;
+                    nameReplacement = conversationTitle;
+                    conversationTitle = null;
+                }
+            } else {
+                isOneToOne = !isGroupConversation();
             }
             TemplateBindResult bindResult = new TemplateBindResult();
             RemoteViews contentView = mBuilder.applyStandardTemplateWithActions(
@@ -7076,8 +7098,8 @@ public class Notification implements Parcelable
                     mBuilder.getSecondaryTextColor());
             contentView.setBoolean(R.id.status_bar_latest_event_content, "setDisplayImagesAtEnd",
                     displayImagesAtEnd);
-            contentView.setIcon(R.id.status_bar_latest_event_content, "setLargeIcon",
-                    mBuilder.mN.mLargeIcon);
+            contentView.setIcon(R.id.status_bar_latest_event_content, "setAvatarReplacement",
+                    avatarReplacement);
             contentView.setCharSequence(R.id.status_bar_latest_event_content, "setNameReplacement",
                     nameReplacement);
             contentView.setBoolean(R.id.status_bar_latest_event_content, "setIsOneToOne",
