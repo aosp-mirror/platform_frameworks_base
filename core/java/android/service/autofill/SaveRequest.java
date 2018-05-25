@@ -19,9 +19,9 @@ package android.service.autofill;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.os.Bundle;
-import android.os.CancellationSignal;
 import android.os.Parcel;
 import android.os.Parcelable;
+
 import com.android.internal.util.Preconditions;
 
 import java.util.ArrayList;
@@ -45,7 +45,7 @@ public final class SaveRequest implements Parcelable {
     }
 
     private SaveRequest(@NonNull Parcel parcel) {
-        this(parcel.readTypedArrayList(null), parcel.readBundle());
+        this(parcel.createTypedArrayList(FillContext.CREATOR), parcel.readBundle());
     }
 
     /**
@@ -57,7 +57,7 @@ public final class SaveRequest implements Parcelable {
 
     /**
      * Gets the extra client state returned from the last {@link
-     * AutofillService#onFillRequest(FillRequest, CancellationSignal, FillCallback)}
+     * AutofillService#onFillRequest(FillRequest, android.os.CancellationSignal, FillCallback)}
      * fill request}.
      *
      * @return The client state.
@@ -73,7 +73,7 @@ public final class SaveRequest implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel parcel, int flags) {
-        parcel.writeTypedArrayList(mFillContexts, flags);
+        parcel.writeTypedList(mFillContexts, flags);
         parcel.writeBundle(mClientState);
     }
 
