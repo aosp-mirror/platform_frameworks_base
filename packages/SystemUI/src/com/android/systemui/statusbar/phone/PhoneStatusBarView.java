@@ -74,6 +74,10 @@ public class PhoneStatusBarView extends PanelBar {
     private View mCutoutSpace;
     @Nullable
     private DisplayCutout mDisplayCutout;
+    /**
+     * Draw this many pixels into the left/right side of the cutout to optimally use the space
+     */
+    private int mCutoutSideNudge = 0;
 
     public PhoneStatusBarView(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -98,6 +102,8 @@ public class PhoneStatusBarView extends PanelBar {
         mBarTransitions.init();
         mBattery = findViewById(R.id.battery);
         mCutoutSpace = findViewById(R.id.cutout_space_view);
+
+        updateResources();
     }
 
     @Override
@@ -280,6 +286,9 @@ public class PhoneStatusBarView extends PanelBar {
     }
 
     public void updateResources() {
+        mCutoutSideNudge = getResources().getDimensionPixelSize(
+                R.dimen.display_cutout_margin_consumption);
+
         ViewGroup.LayoutParams layoutParams = getLayoutParams();
         layoutParams.height = getResources().getDimensionPixelSize(
                 R.dimen.status_bar_height);
@@ -311,6 +320,8 @@ public class PhoneStatusBarView extends PanelBar {
         Rect bounds = new Rect();
         boundsFromDirection(mDisplayCutout, Gravity.TOP, bounds);
 
+        bounds.left = bounds.left + mCutoutSideNudge;
+        bounds.right = bounds.right - mCutoutSideNudge;
         lp.width = bounds.width();
         lp.height = bounds.height();
     }
