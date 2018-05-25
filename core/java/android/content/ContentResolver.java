@@ -520,27 +520,36 @@ public abstract class ContentResolver {
     public static final int SYNC_EXEMPTION_NONE = 0;
 
     /**
-     * When executing a sync with this exemption, we'll put the target app in the ACTIVE bucket
-     * for 10 minutes. This will allow the sync adapter to schedule/run further syncs and jobs.
+     * Exemption given to a sync request made by a foreground app (including
+     * PROCESS_STATE_IMPORTANT_FOREGROUND).
      *
-     * Note this will still *not* let RARE apps to run syncs, because they still won't get network
-     * connection.
+     * At the schedule time, we promote the sync adapter app for a higher bucket:
+     * - If the device is not dozing (so the sync will start right away)
+     *   promote to ACTIVE for 1 hour.
+     * - If the device is dozing (so the sync *won't* start right away),
+     * promote to WORKING_SET for 4 hours, so it'll get a higher chance to be started once the
+     * device comes out of doze.
+     * - When the sync actually starts, we promote the sync adapter app to ACTIVE for 10 minutes,
+     * so it can schedule and start more syncs without getting throttled, even when the first
+     * operation was canceled and now we're retrying.
+     *
+     *
      * @hide
      */
-    public static final int SYNC_EXEMPTION_ACTIVE = 1;
+    public static final int SYNC_EXEMPTION_PROMOTE_BUCKET = 1;
 
     /**
-     * In addition to {@link #SYNC_EXEMPTION_ACTIVE}, we put the sync adapter app in the
+     * In addition to {@link #SYNC_EXEMPTION_PROMOTE_BUCKET}, we put the sync adapter app in the
      * temp whitelist for 10 minutes, so that even RARE apps can run syncs right away.
      * @hide
      */
-    public static final int SYNC_EXEMPTION_ACTIVE_WITH_TEMP = 2;
+    public static final int SYNC_EXEMPTION_PROMOTE_BUCKET_WITH_TEMP = 2;
 
     /** @hide */
     @IntDef(flag = false, prefix = { "SYNC_EXEMPTION_" }, value = {
             SYNC_EXEMPTION_NONE,
-            SYNC_EXEMPTION_ACTIVE,
-            SYNC_EXEMPTION_ACTIVE_WITH_TEMP,
+            SYNC_EXEMPTION_PROMOTE_BUCKET,
+            SYNC_EXEMPTION_PROMOTE_BUCKET_WITH_TEMP,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface SyncExemption {}
