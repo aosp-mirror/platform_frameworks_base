@@ -76,17 +76,35 @@ public class VibratorService extends IVibratorService.Stub
 
     private static final long[] DOUBLE_CLICK_EFFECT_FALLBACK_TIMINGS = { 0, 30, 100, 30 };
 
-    private static final float GAMMA_SCALE_FACTOR_MINIMUM = 2.0f;
-    private static final float GAMMA_SCALE_FACTOR_LOW = 1.5f;
-    private static final float GAMMA_SCALE_FACTOR_HIGH = 0.5f;
-    private static final float GAMMA_SCALE_FACTOR_NONE = 1.0f;
+    // Scale levels. Each level is defined as the delta between the current setting and the default
+    // intensity for that type of vibration (i.e. current - default).
+    private static final int SCALE_VERY_LOW = -2;
+    private static final int SCALE_LOW = -1;
+    private static final int SCALE_NONE = 0;
+    private static final int SCALE_HIGH = 1;
+    private static final int SCALE_VERY_HIGH = 2;
 
-    private static final int MAX_AMPLITUDE_MINIMUM_INTENSITY = 168; // 2/3 * 255
-    private static final int MAX_AMPLITUDE_LOW_INTENSITY = 192; // 3/4 * 255
+    // Gamma adjustments for scale levels.
+    private static final float SCALE_VERY_LOW_GAMMA = 2.0f;
+    private static final float SCALE_LOW_GAMMA = 1.5f;
+    private static final float SCALE_NONE_GAMMA = 1.0f;
+    private static final float SCALE_HIGH_GAMMA = 0.5f;
+    private static final float SCALE_VERY_HIGH_GAMMA = 0.25f;
+
+    // Max amplitudes for scale levels. If one is not listed, then the max amplitude is the default
+    // max amplitude.
+    private static final int SCALE_VERY_LOW_MAX_AMPLITUDE = 168; // 2/3 * 255
+    private static final int SCALE_LOW_MAX_AMPLITUDE = 192; // 3/4 * 255
 
     // If a vibration is playing for longer than 5s, it's probably not haptic feedback.
     private static final long MAX_HAPTIC_FEEDBACK_DURATION = 5000;
 
+
+    // A mapping from the intensity adjustment to the scaling to apply, where the intensity
+    // adjustment is defined as the delta between the default intensity level and the user selected
+    // intensity level. It's important that we apply the scaling on the delta between the two so
+    // that the default intensity level applies no scaling to application provided effects.
+    private final SparseArray<ScaleLevel> mScaleLevels;
     private final LinkedList<VibrationInfo> mPreviousVibrations;
     private final int mPreviousVibrationsLimit;
     private final boolean mAllowPriorityVibrationsInLowPowerMode;
@@ -180,6 +198,8 @@ public class VibratorService extends IVibratorService.Stub
                     case VibrationEffect.EFFECT_DOUBLE_CLICK:
                     case VibrationEffect.EFFECT_HEAVY_CLICK:
                     case VibrationEffect.EFFECT_TICK:
+                    case VibrationEffect.EFFECT_POP:
+                    case VibrationEffect.EFFECT_THUD:
                         return true;
                     default:
                         Slog.w(TAG, "Unknown prebaked vibration effect, "
@@ -254,6 +274,25 @@ public class VibratorService extends IVibratorService.Stub
         }
     }
 
+    private static final class ScaleLevel {
+        public final float gamma;
+        public final int maxAmplitude;
+
+        public ScaleLevel(float gamma) {
+            this(gamma, VibrationEffect.MAX_AMPLITUDE);
+        }
+
+        public ScaleLevel(float gamma, int maxAmplitude) {
+            this.gamma = gamma;
+            this.maxAmplitude = maxAmplitude;
+        }
+
+        @Override
+        public String toString() {
+            return "ScaleLevel{gamma=" + gamma + ", maxAmplitude=" + maxAmplitude + "}";
+        }
+    }
+
     VibratorService(Context context) {
         vibratorInit();
         // Reset the hardware to a default state, in case this is a runtime
@@ -295,11 +334,19 @@ public class VibratorService extends IVibratorService.Stub
         VibrationEffect tickEffect = createEffectFromResource(
                 com.android.internal.R.array.config_clockTickVibePattern);
 
-        mFallbackEffects = new SparseArray<VibrationEffect>();
+        mFallbackEffects = new SparseArray<>();
         mFallbackEffects.put(VibrationEffect.EFFECT_CLICK, clickEffect);
         mFallbackEffects.put(VibrationEffect.EFFECT_DOUBLE_CLICK, doubleClickEffect);
         mFallbackEffects.put(VibrationEffect.EFFECT_TICK, tickEffect);
         mFallbackEffects.put(VibrationEffect.EFFECT_HEAVY_CLICK, heavyClickEffect);
+
+        mScaleLevels = new SparseArray<>();
+        mScaleLevels.put(SCALE_VERY_LOW,
+                new ScaleLevel(SCALE_VERY_LOW_GAMMA, SCALE_VERY_LOW_MAX_AMPLITUDE));
+        mScaleLevels.put(SCALE_LOW, new ScaleLevel(SCALE_LOW_GAMMA, SCALE_LOW_MAX_AMPLITUDE));
+        mScaleLevels.put(SCALE_NONE, new ScaleLevel(SCALE_NONE_GAMMA));
+        mScaleLevels.put(SCALE_HIGH, new ScaleLevel(SCALE_HIGH_GAMMA));
+        mScaleLevels.put(SCALE_VERY_HIGH, new ScaleLevel(SCALE_VERY_HIGH_GAMMA));
     }
 
     private VibrationEffect createEffectFromResource(int resId) {
@@ -675,41 +722,35 @@ public class VibratorService extends IVibratorService.Stub
             return;
         }
 
-        final float gamma;
-        final int maxAmplitude;
+        final int defaultIntensity;
         if (vib.isNotification() || vib.isRingtone()) {
-            if (intensity == Vibrator.VIBRATION_INTENSITY_LOW) {
-                gamma = GAMMA_SCALE_FACTOR_MINIMUM;
-                maxAmplitude = MAX_AMPLITUDE_MINIMUM_INTENSITY;
-            } else if (intensity == Vibrator.VIBRATION_INTENSITY_MEDIUM) {
-                gamma = GAMMA_SCALE_FACTOR_LOW;
-                maxAmplitude = MAX_AMPLITUDE_LOW_INTENSITY;
-            } else {
-                gamma = GAMMA_SCALE_FACTOR_NONE;
-                maxAmplitude = VibrationEffect.MAX_AMPLITUDE;
-            }
+            defaultIntensity = mVibrator.getDefaultNotificationVibrationIntensity();
+        } else if (vib.isHapticFeedback()) {
+            defaultIntensity = mVibrator.getDefaultHapticFeedbackIntensity();
         } else {
-            if (intensity == Vibrator.VIBRATION_INTENSITY_LOW) {
-                gamma = GAMMA_SCALE_FACTOR_LOW;
-                maxAmplitude = MAX_AMPLITUDE_LOW_INTENSITY;
-            } else if (intensity == Vibrator.VIBRATION_INTENSITY_HIGH) {
-                gamma = GAMMA_SCALE_FACTOR_HIGH;
-                maxAmplitude = VibrationEffect.MAX_AMPLITUDE;
-            } else {
-                gamma = GAMMA_SCALE_FACTOR_NONE;
-                maxAmplitude = VibrationEffect.MAX_AMPLITUDE;
-            }
+            // If we don't know what kind of vibration we're playing then just skip scaling for
+            // now.
+            return;
+        }
+
+        final ScaleLevel scale = mScaleLevels.get(intensity - defaultIntensity);
+        if (scale == null) {
+            // We should have scaling levels for all cases, so not being able to scale because of a
+            // missing level is unexpected.
+            Slog.e(TAG, "No configured scaling level!"
+                    + " (current=" + intensity + ", default= " + defaultIntensity + ")");
+            return;
         }
 
         VibrationEffect scaledEffect = null;
         if (vib.effect instanceof VibrationEffect.OneShot) {
             VibrationEffect.OneShot oneShot = (VibrationEffect.OneShot) vib.effect;
             oneShot = oneShot.resolve(mDefaultVibrationAmplitude);
-            scaledEffect = oneShot.scale(gamma, maxAmplitude);
+            scaledEffect = oneShot.scale(scale.gamma, scale.maxAmplitude);
         } else if (vib.effect instanceof VibrationEffect.Waveform) {
             VibrationEffect.Waveform waveform = (VibrationEffect.Waveform) vib.effect;
             waveform = waveform.resolve(mDefaultVibrationAmplitude);
-            scaledEffect = waveform.scale(gamma, maxAmplitude);
+            scaledEffect = waveform.scale(scale.gamma, scale.maxAmplitude);
         } else {
             Slog.w(TAG, "Unable to apply intensity scaling, unknown VibrationEffect type");
         }
