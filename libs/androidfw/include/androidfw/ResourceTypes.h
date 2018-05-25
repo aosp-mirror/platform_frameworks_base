@@ -1990,7 +1990,7 @@ public:
     // Return value: on success: NO_ERROR; caller is responsible for free-ing
     // outData (using free(3)). On failure, any status_t value other than
     // NO_ERROR; the caller should not free outData.
-    status_t createIdmap(const ResTable& overlay,
+    status_t createIdmap(const ResTable& targetResTable,
             uint32_t targetCrc, uint32_t overlayCrc,
             const char* targetPath, const char* overlayPath,
             void** outData, size_t* outSize) const;

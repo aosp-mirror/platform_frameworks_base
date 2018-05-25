@@ -349,7 +349,7 @@ bool AssetManager::createIdmap(const char* targetApkPath, const char* overlayApk
                 goto exit;
             }
         }
-        ret = tables[0].createIdmap(tables[1], targetCrc, overlayCrc,
+        ret = tables[1].createIdmap(tables[0], targetCrc, overlayCrc,
                 targetApkPath, overlayApkPath, (void**)outData, outSize) == NO_ERROR;
     }
 
