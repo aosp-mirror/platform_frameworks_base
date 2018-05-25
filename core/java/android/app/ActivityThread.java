@@ -964,7 +964,8 @@ public final class ActivityThread {
         }
 
         public void setHttpProxy(String host, String port, String exclList, Uri pacFileUrl) {
-            final ConnectivityManager cm = ConnectivityManager.from(getSystemContext());
+            final ConnectivityManager cm = ConnectivityManager.from(
+                getApplication() != null ? getApplication() : getSystemContext());
             final Network network = cm.getBoundNetworkForProcess();
             if (network != null) {
                 Proxy.setHttpProxySystemProperty(cm.getDefaultProxy());
