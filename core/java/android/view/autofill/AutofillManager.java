@@ -1899,10 +1899,17 @@ public final class AutofillManager {
     }
 
     private LogMaker newLog(int category) {
-        return new LogMaker(category)
-                .setPackageName(mContext.getPackageName())
+        final LogMaker log = new LogMaker(category)
                 .addTaggedData(MetricsEvent.FIELD_AUTOFILL_COMPAT_MODE,
                         isCompatibilityModeEnabledLocked() ? 1 : 0);
+        final AutofillClient client = getClient();
+        if (client == null) {
+            // Client should never be null here, but it doesn't hurt to check...
+            log.setPackageName(mContext.getPackageName());
+        } else {
+            log.setComponentName(client.autofillClientGetComponentName());
+        }
+        return log;
     }
 
     /**

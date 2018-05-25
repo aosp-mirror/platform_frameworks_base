@@ -1299,7 +1299,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
             mService.logContextCommittedLocked(id, mClientState, mSelectedDatasetIds,
                     ignoredDatasets, changedFieldIds, changedDatasetIds,
                     manuallyFilledFieldIds, manuallyFilledDatasetIds,
-                    mComponentName.getPackageName(), mCompatMode);
+                    mComponentName, mCompatMode);
         }
     }
 
@@ -1354,7 +1354,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                 mService.logContextCommittedLocked(id, mClientState, mSelectedDatasetIds,
                         ignoredDatasets, changedFieldIds, changedDatasetIds,
                         manuallyFilledFieldIds, manuallyFilledDatasetIds,
-                        mComponentName.getPackageName(), mCompatMode);
+                        mComponentName, mCompatMode);
                 return;
             }
             final Scores scores = result.getParcelable(EXTRA_SCORES);
@@ -1419,7 +1419,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
             mService.logContextCommittedLocked(id, mClientState, mSelectedDatasetIds,
                     ignoredDatasets, changedFieldIds, changedDatasetIds, manuallyFilledFieldIds,
                     manuallyFilledDatasetIds, detectedFieldIds, detectedFieldClassifications,
-                    mComponentName.getPackageName(), mCompatMode);
+                    mComponentName, mCompatMode);
         });
 
         fcStrategy.getScores(callback, algorithm, algorithmArgs, currentValues, userValues);
@@ -1649,7 +1649,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                 mPendingSaveUi = new PendingUi(mActivityToken, id, client);
                 getUiForShowing().showSaveUi(mService.getServiceLabel(), mService.getServiceIcon(),
                         mService.getServicePackageName(), saveInfo, this,
-                        mComponentName.getPackageName(), this,
+                        mComponentName, this,
                         mPendingSaveUi, mCompatMode);
                 if (client != null) {
                     try {
@@ -2127,7 +2127,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
         }
 
         getUiForShowing().showFillUi(filledId, response, filterText,
-                mService.getServicePackageName(), mComponentName.getPackageName(),
+                mService.getServicePackageName(), mComponentName,
                 mService.getServiceLabel(), mService.getServiceIcon(), this, mCompatMode);
 
         synchronized (mLock) {
@@ -2834,8 +2834,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
     }
 
     private LogMaker newLogMaker(int category, String servicePackageName) {
-        return Helper.newLogMaker(category, mComponentName.getPackageName(), servicePackageName,
-                mCompatMode);
+        return Helper.newLogMaker(category, mComponentName, servicePackageName, mCompatMode);
     }
 
     private void writeLog(int category) {
