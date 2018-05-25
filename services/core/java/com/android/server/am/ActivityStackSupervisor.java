@@ -2554,6 +2554,10 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
             final int displayId = mTmpOrderedDisplayIds.get(i);
             // If a display is registered in WM, it must also be available in AM.
             final ActivityDisplay display = getActivityDisplayOrCreateLocked(displayId);
+            if (display == null) {
+                // Looks like the display no longer exists in the system...
+                continue;
+            }
             for (int j = display.getChildCount() - 1; j >= 0; --j) {
                 final ActivityStack stack = display.getChildAt(j);
                 if (ignoreCurrent && stack == currentFocus) {
