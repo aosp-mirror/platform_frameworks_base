@@ -22,7 +22,9 @@ import static com.android.server.wm.AlphaAnimationSpecProto.TO;
 import static com.android.server.wm.AnimationSpecProto.ALPHA;
 
 import android.graphics.Rect;
+import android.util.Log;
 import android.util.proto.ProtoOutputStream;
+import android.view.Surface;
 import android.view.SurfaceControl;
 
 import com.android.internal.annotations.VisibleForTesting;
@@ -171,14 +173,18 @@ class Dimmer {
      */
     private DimState getDimState(WindowContainer container) {
         if (mDimState == null) {
-            final SurfaceControl ctl = makeDimLayer();
-            mDimState = new DimState(ctl);
-            /**
-             * See documentation on {@link #dimAbove} to understand lifecycle management of Dim's
-             * via state resetting for Dim's with containers.
-             */
-            if (container == null) {
-                mDimState.mDontReset = true;
+            try {
+                final SurfaceControl ctl = makeDimLayer();
+                mDimState = new DimState(ctl);
+                /**
+                 * See documentation on {@link #dimAbove} to understand lifecycle management of
+                 * Dim's via state resetting for Dim's with containers.
+                 */
+                if (container == null) {
+                    mDimState.mDontReset = true;
+                }
+            } catch (Surface.OutOfResourcesException e) {
+                Log.w(TAG, "OutOfResourcesException creating dim surface");
             }
         }
 
@@ -189,6 +195,11 @@ class Dimmer {
     private void dim(SurfaceControl.Transaction t, WindowContainer container, int relativeLayer,
             float alpha) {
         final DimState d = getDimState(container);
+
+        if (d == null) {
+            return;
+        }
+
         if (container != null) {
             // The dim method is called from WindowState.prepareSurfaces(), which is always called
             // in the correct Z from lowest Z to highest. This ensures that the dim layer is always
@@ -208,10 +219,11 @@ class Dimmer {
      * @param t A Transaction in which to finish the dim.
      */
     void stopDim(SurfaceControl.Transaction t) {
-        DimState d = getDimState(null);
-        t.hide(d.mDimLayer);
-        d.isVisible = false;
-        d.mDontReset = false;
+        if (mDimState != null) {
+            t.hide(mDimState.mDimLayer);
+            mDimState.isVisible = false;
+            mDimState.mDontReset = false;
+        }
     }
 
     /**
