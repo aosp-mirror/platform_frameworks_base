@@ -4029,8 +4029,6 @@ public class BatteryStatsImpl extends BatteryStats {
 
     public void addIsolatedUidLocked(int isolatedUid, int appUid) {
         mIsolatedUids.put(isolatedUid, appUid);
-        StatsLog.write(StatsLog.ISOLATED_UID_CHANGED, appUid, isolatedUid,
-                StatsLog.ISOLATED_UID_CHANGED__EVENT__CREATED);
         final Uid u = getUidStatsLocked(appUid);
         u.addIsolatedUid(isolatedUid);
     }
@@ -4054,9 +4052,6 @@ public class BatteryStatsImpl extends BatteryStats {
      */
     @GuardedBy("this")
     public void removeIsolatedUidLocked(int isolatedUid) {
-        StatsLog.write(
-                StatsLog.ISOLATED_UID_CHANGED, mIsolatedUids.get(isolatedUid, -1),
-                isolatedUid, StatsLog.ISOLATED_UID_CHANGED__EVENT__REMOVED);
         final int idx = mIsolatedUids.indexOfKey(isolatedUid);
         if (idx >= 0) {
             final int ownerUid = mIsolatedUids.valueAt(idx);

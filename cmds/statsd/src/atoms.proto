@@ -1484,6 +1484,7 @@ message ForegroundServiceStateChanged {
 message IsolatedUidChanged {
     // The host UID. Generally, we should attribute metrics from the isolated uid to the host uid.
     // NOTE: DO NOT annotate uid field in this atom. This atom is specially handled in statsd.
+    // This field is ignored when event == REMOVED.
     optional int32 parent_uid = 1;
 
     optional int32 isolated_uid = 2;
