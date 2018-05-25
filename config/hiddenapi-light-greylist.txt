@@ -741,6 +741,7 @@ Landroid/app/IWallpaperManager;->getHeightHint()I
 Landroid/app/IWallpaperManager;->getWallpaper(Ljava/lang/String;Landroid/app/IWallpaperManagerCallback;ILandroid/os/Bundle;I)Landroid/os/ParcelFileDescriptor;
 Landroid/app/IWallpaperManager;->getWallpaperInfo(I)Landroid/app/WallpaperInfo;
 Landroid/app/IWallpaperManager;->getWidthHint()I
+Landroid/app/IWallpaperManager;->hasNamedWallpaper(Ljava/lang/String;)Z
 Landroid/app/IWallpaperManager;->setWallpaperComponent(Landroid/content/ComponentName;)V
 Landroid/app/IWallpaperManagerCallback$Stub;-><init>()V
 Landroid/app/IWallpaperManagerCallback;->onWallpaperChanged()V
