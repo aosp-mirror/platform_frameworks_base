@@ -141,5 +141,7 @@
     <!-- Used to style rotate suggestion button AVD animations -->
     <attr name="rotateButtonStartAngle" format="float" />
     <attr name="rotateButtonEndAngle" format="float" />
+    <attr name="rotateButtonScaleX" format="float" />
+
 </resources>
 
