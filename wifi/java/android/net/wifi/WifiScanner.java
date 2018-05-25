@@ -594,17 +594,17 @@ public class WifiScanner {
             /** SSID of the network */
             public String ssid;
             /** Bitmask of the FLAG_XXX */
-            public byte flags;
+            public byte flags = 0;
             /** Bitmask of the ATUH_XXX */
-            public byte authBitField;
+            public byte authBitField = 0;
+            /** frequencies on which the particular network needs to be scanned for */
+            public int[] frequencies = {};
 
             /**
              * default constructor for PnoNetwork
              */
             public PnoNetwork(String ssid) {
                 this.ssid = ssid;
-                flags = 0;
-                authBitField = 0;
             }
         }
 
@@ -651,6 +651,7 @@ public class WifiScanner {
                     dest.writeString(networkList[i].ssid);
                     dest.writeByte(networkList[i].flags);
                     dest.writeByte(networkList[i].authBitField);
+                    dest.writeIntArray(networkList[i].frequencies);
                 }
             } else {
                 dest.writeInt(0);
@@ -677,6 +678,7 @@ public class WifiScanner {
                             PnoNetwork network = new PnoNetwork(ssid);
                             network.flags = in.readByte();
                             network.authBitField = in.readByte();
+                            network.frequencies = in.createIntArray();
                             settings.networkList[i] = network;
                         }
                         return settings;
