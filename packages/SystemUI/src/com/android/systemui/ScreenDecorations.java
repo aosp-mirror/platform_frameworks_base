@@ -196,6 +196,9 @@ public class ScreenDecorations extends SystemUI implements Tunable {
     @Override
     protected void onConfigurationChanged(Configuration newConfig) {
         updateOrientation();
+        if (shouldDrawCutout() && mOverlay == null) {
+            setupDecorations();
+        }
     }
 
     protected void updateOrientation() {
@@ -206,10 +209,6 @@ public class ScreenDecorations extends SystemUI implements Tunable {
             if (mOverlay != null) {
                 updateLayoutParams();
                 updateViews();
-            }
-
-            if (shouldDrawCutout() && mOverlay == null) {
-                setupDecorations();
             }
         }
     }
