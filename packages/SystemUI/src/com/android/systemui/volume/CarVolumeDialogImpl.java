@@ -344,13 +344,17 @@ public class CarVolumeDialogImpl implements VolumeDialog {
       int supplementalIconId, @Nullable View.OnClickListener supplementalIconOnClickListener) {
     SeekbarListItem listItem = new SeekbarListItem(mContext);
     listItem.setMax(getMaxSeekbarValue(mCarAudioManager, volumeGroupId));
+    int color = mContext.getResources().getColor(R.color.car_volume_dialog_tint);
     int progress = getSeekbarValue(mCarAudioManager, volumeGroupId);
     listItem.setProgress(progress);
     listItem.setOnSeekBarChangeListener(
         new CarVolumeDialogImpl.VolumeSeekBarChangeListener(volumeGroupId, mCarAudioManager));
-    listItem.setPrimaryActionIcon(mContext.getResources().getDrawable(volumeItem.icon));
+    Drawable primaryIcon = mContext.getResources().getDrawable(volumeItem.icon);
+    primaryIcon.setTint(color);
+    listItem.setPrimaryActionIcon(primaryIcon);
     if (supplementalIconId != 0) {
       Drawable supplementalIcon = mContext.getResources().getDrawable(supplementalIconId);
+      supplementalIcon.setTint(color);
       listItem.setSupplementalIcon(supplementalIcon, true,
           supplementalIconOnClickListener);
     } else {
