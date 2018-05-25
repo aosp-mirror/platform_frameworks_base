@@ -1540,7 +1540,7 @@ public class DeviceIdleController extends SystemService
 
                 mLocalActivityManager.registerScreenObserver(mScreenObserver);
 
-                passWhiteListToForceAppStandbyTrackerLocked();
+                passWhiteListsToForceAppStandbyTrackerLocked();
                 updateInteractivityLocked();
             }
             updateConnectivityState(null);
@@ -1631,7 +1631,7 @@ public class DeviceIdleController extends SystemService
                             mPowerSaveWhitelistAppsExceptIdle, mPowerSaveWhitelistUserApps,
                             mPowerSaveWhitelistExceptIdleAppIds);
 
-                    passWhiteListToForceAppStandbyTrackerLocked();
+                    passWhiteListsToForceAppStandbyTrackerLocked();
                 }
                 return true;
             } catch (PackageManager.NameNotFoundException e) {
@@ -1650,7 +1650,7 @@ public class DeviceIdleController extends SystemService
                         mPowerSaveWhitelistExceptIdleAppIds);
                 mPowerSaveWhitelistUserAppsExceptIdle.clear();
 
-                passWhiteListToForceAppStandbyTrackerLocked();
+                passWhiteListsToForceAppStandbyTrackerLocked();
             }
         }
     }
@@ -2589,7 +2589,7 @@ public class DeviceIdleController extends SystemService
             }
             mLocalPowerManager.setDeviceIdleWhitelist(mPowerSaveWhitelistAllAppIdArray);
         }
-        passWhiteListToForceAppStandbyTrackerLocked();
+        passWhiteListsToForceAppStandbyTrackerLocked();
     }
 
     private void updateTempWhitelistAppIdsLocked(int appId, boolean adding) {
@@ -2615,7 +2615,7 @@ public class DeviceIdleController extends SystemService
             }
             mLocalPowerManager.setDeviceIdleTempWhitelist(mTempWhitelistAppIdArray);
         }
-        passWhiteListToForceAppStandbyTrackerLocked();
+        passWhiteListsToForceAppStandbyTrackerLocked();
     }
 
     private void reportPowerSaveWhitelistChangedLocked() {
@@ -2630,9 +2630,10 @@ public class DeviceIdleController extends SystemService
         getContext().sendBroadcastAsUser(intent, UserHandle.SYSTEM);
     }
 
-    private void passWhiteListToForceAppStandbyTrackerLocked() {
+    private void passWhiteListsToForceAppStandbyTrackerLocked() {
         mAppStateTracker.setPowerSaveWhitelistAppIds(
                 mPowerSaveWhitelistExceptIdleAppIdArray,
+                mPowerSaveWhitelistUserAppIdArray,
                 mTempWhitelistAppIdArray);
     }
 

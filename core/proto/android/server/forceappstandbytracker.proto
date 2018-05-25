@@ -25,7 +25,7 @@ option java_multiple_files = true;
 
 // Dump from com.android.server.ForceAppStandbyTracker.
 //
-// Next ID: 12
+// Next ID: 13
 message ForceAppStandbyTrackerProto {
     option (.android.msg_privacy).dest = DEST_AUTOMATIC;
 
@@ -40,6 +40,9 @@ message ForceAppStandbyTrackerProto {
 
     // App ids that are in power-save whitelist.
     repeated int32 power_save_whitelist_app_ids = 3;
+
+    // App ids that are in power-save user whitelist.
+    repeated int32 power_save_user_whitelist_app_ids = 12;
 
     // App ids that are in temporary power-save whitelist.
     repeated int32 temp_power_save_whitelist_app_ids = 4;

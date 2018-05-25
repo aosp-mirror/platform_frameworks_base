@@ -117,6 +117,12 @@ public class AppStateTracker {
     @GuardedBy("mLock")
     private int[] mPowerWhitelistedAllAppIds = new int[0];
 
+    /**
+     * User whitelisted apps in the device idle controller.
+     */
+    @GuardedBy("mLock")
+    private int[] mPowerWhitelistedUserAppIds = new int[0];
+
     @GuardedBy("mLock")
     private int[] mTempWhitelistedAppIds = mPowerWhitelistedAllAppIds;
 
@@ -983,13 +989,16 @@ public class AppStateTracker {
      * Called by device idle controller to update the power save whitelists.
      */
     public void setPowerSaveWhitelistAppIds(
-            int[] powerSaveWhitelistAllAppIdArray, int[] tempWhitelistAppIdArray) {
+            int[] powerSaveWhitelistExceptIdleAppIdArray,
+            int[] powerSaveWhitelistUserAppIdArray,
+            int[] tempWhitelistAppIdArray) {
         synchronized (mLock) {
             final int[] previousWhitelist = mPowerWhitelistedAllAppIds;
             final int[] previousTempWhitelist = mTempWhitelistedAppIds;
 
-            mPowerWhitelistedAllAppIds = powerSaveWhitelistAllAppIdArray;
+            mPowerWhitelistedAllAppIds = powerSaveWhitelistExceptIdleAppIdArray;
             mTempWhitelistedAppIds = tempWhitelistAppIdArray;
+            mPowerWhitelistedUserAppIds = powerSaveWhitelistUserAppIdArray;
 
             if (isAnyAppIdUnwhitelisted(previousWhitelist, mPowerWhitelistedAllAppIds)) {
                 mHandler.notifyAllUnwhitelisted();
@@ -1194,6 +1203,16 @@ public class AppStateTracker {
     }
 
     /**
+     * @param uid the uid to check for
+     * @return whether a UID is in the user defined power-save whitelist or not.
+     */
+    public boolean isUidPowerSaveUserWhitelisted(int uid) {
+        synchronized (mLock) {
+            return ArrayUtils.contains(mPowerWhitelistedUserAppIds, UserHandle.getAppId(uid));
+        }
+    }
+
+    /**
      * @return whether a UID is in the temp power-save whitelist or not.
      *
      * Note clients normally shouldn't need to access it. It's only for dumpsys.
@@ -1231,8 +1250,11 @@ public class AppStateTracker {
             pw.print("Foreground uids: ");
             dumpUids(pw, mForegroundUids);
 
-            pw.print("Whitelist appids: ");
+            pw.print("Except-idle + user whitelist appids: ");
             pw.println(Arrays.toString(mPowerWhitelistedAllAppIds));
+
+            pw.print("User whitelist appids: ");
+            pw.println(Arrays.toString(mPowerWhitelistedUserAppIds));
 
             pw.print("Temp whitelist appids: ");
             pw.println(Arrays.toString(mTempWhitelistedAppIds));
@@ -1309,6 +1331,10 @@ public class AppStateTracker {
 
             for (int appId : mPowerWhitelistedAllAppIds) {
                 proto.write(ForceAppStandbyTrackerProto.POWER_SAVE_WHITELIST_APP_IDS, appId);
+            }
+
+            for (int appId : mPowerWhitelistedUserAppIds) {
+                proto.write(ForceAppStandbyTrackerProto.POWER_SAVE_USER_WHITELIST_APP_IDS, appId);
             }
 
             for (int appId : mTempWhitelistedAppIds) {
