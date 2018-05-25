@@ -5426,6 +5426,8 @@ Landroid/telephony/TelephonyManager;->getDefault()Landroid/telephony/TelephonyMa
 Landroid/telephony/TelephonyManager;->getDeviceSoftwareVersion(I)Ljava/lang/String;
 Landroid/telephony/TelephonyManager;->getGroupIdLevel1(I)Ljava/lang/String;
 Landroid/telephony/TelephonyManager;->getIccAuthentication(IIILjava/lang/String;)Ljava/lang/String;
+Landroid/telephony/TelephonyManager;->getImsConfig(II)Landroid/telephony/ims/aidl/IImsConfig;
+Landroid/telephony/TelephonyManager;->getImsRegistration(II)Landroid/telephony/ims/aidl/IImsRegistration;
 Landroid/telephony/TelephonyManager;->getIsimImpi()Ljava/lang/String;
 Landroid/telephony/TelephonyManager;->getIsimImpu()[Ljava/lang/String;
 Landroid/telephony/TelephonyManager;->getIsimPcscf()[Ljava/lang/String;
