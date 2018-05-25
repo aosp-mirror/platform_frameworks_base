@@ -1900,8 +1900,11 @@ public final class AutofillManager {
 
     private LogMaker newLog(int category) {
         final LogMaker log = new LogMaker(category)
-                .addTaggedData(MetricsEvent.FIELD_AUTOFILL_COMPAT_MODE,
-                        isCompatibilityModeEnabledLocked() ? 1 : 0);
+                .addTaggedData(MetricsEvent.FIELD_AUTOFILL_SESSION_ID, mSessionId);
+
+        if (isCompatibilityModeEnabledLocked()) {
+            log.addTaggedData(MetricsEvent.FIELD_AUTOFILL_COMPAT_MODE, 1);
+        }
         final AutofillClient client = getClient();
         if (client == null) {
             // Client should never be null here, but it doesn't hurt to check...

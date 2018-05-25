@@ -3993,8 +3993,9 @@ message MetricsEvent {
     // Tag FIELD_AUTOFILL_SERVICE: Package of service that processed the request
     // NOTE: starting on OS P, it also added the following field:
     // Tag FIELD_CLASS_NAME: Class name of the activity that is autofilled.
-    // Tag FIELD_AUTOFIL_FLAGS - Flags used to start the session
-    // Type FIELD_AUTOFILL_COMPAT_MODE: package is being autofilled on compatibility mode.
+    // Tag FIELD_AUTOFIL_FLAGS: flags used to start the session.
+    // Tag FIELD_AUTOFILL_SESSION_ID: id of the autofill session started.
+    // Tag FIELD_AUTOFILL_COMPAT_MODE: package is being autofilled on compatibility mode.
     AUTOFILL_SESSION_STARTED = 906;
 
     // An autofill request was processed by a service
@@ -4015,6 +4016,7 @@ message MetricsEvent {
     // Tag FIELD_AUTOFILL_AUTHENTICATION_STATUS: status of authenticated datasets or responses.
     // Tag FIELD_AUTOFILL_NUM_FIELD_CLASSIFICATION_IDS: if service requested field classification,
     //     number of entries field ids in the request.
+    // Tag FIELD_AUTOFILL_SESSION_ID: id of the autofill session associated with this metric.
     // Tag FIELD_AUTOFILL_COMPAT_MODE: package is being autofilled on compatibility mode.
     // NOTE: Prior to P, some of the fields above were logged by 5 different metrics:
     // - AUTOFILL_UI_LATENCY
@@ -4041,6 +4043,7 @@ message MetricsEvent {
     // NOTE: starting on OS P, it also added the following fields:
     // Tag FIELD_CLASS_NAME: Class name of the activity that is autofilled.
     // Tag FIELD_AUTOFILL_SERVICE: Package of service that processed the request
+    // Tag FIELD_AUTOFILL_SESSION_ID: id of the autofill session associated with this metric.
     // Tag FIELD_AUTOFILL_COMPAT_MODE: package is being autofilled on compatibility mode.
     AUTOFILL_FILL_UI = 910;
 
@@ -4059,6 +4062,7 @@ message MetricsEvent {
     // Tag FIELD_AUTOFILL_NUM_VIEWS_FILLED: Number of views that could be filled
     // NOTE: starting on OS P, it also added the following fields:
     // Tag FIELD_CLASS_NAME: Class name of the activity that is autofilled.
+    // Tag FIELD_AUTOFILL_SESSION_ID: id of the autofill session associated with this metric.
     // Tag FIELD_AUTOFILL_COMPAT_MODE: package is being autofilled on compatibility mode.
     AUTOFILL_DATASET_APPLIED = 913;
 
@@ -4077,6 +4081,7 @@ message MetricsEvent {
     // NOTE: starting on OS P, it also added the following fields:
     // Tag FIELD_CLASS_NAME: Class name of the activity that is autofilled.
     // Tag FIELD_AUTOFILL_SERVICE: Package of service that processed the request
+    // Tag FIELD_AUTOFILL_SESSION_ID: id of the autofill session associated with this metric.
     // Tag FIELD_AUTOFILL_COMPAT_MODE: package is being autofilled on compatibility mode.
     AUTOFILL_SAVE_UI = 916;
 
@@ -4091,6 +4096,7 @@ message MetricsEvent {
     // Tag FIELD_AUTOFILL_SERVICE: Package of service that processed the request
     // NOTE: starting on OS P, it also added the following fields:
     // Tag FIELD_CLASS_NAME: Class name of the activity that is autofilled.
+    // Tag FIELD_AUTOFILL_SESSION_ID: id of the autofill session associated with this metric.
     // Tag FIELD_AUTOFILL_COMPAT_MODE: package is being autofilled on compatibility mode.
     AUTOFILL_DATA_SAVE_REQUEST = 918;
 
@@ -4099,6 +4105,7 @@ message MetricsEvent {
     // Package: Package of app that was autofilled
     // NOTE: starting on OS P, it also added the following fields:
     // Tag FIELD_AUTOFILL_SERVICE: Package of service that processed the request
+    // Tag FIELD_AUTOFILL_SESSION_ID: id of the autofill session associated with this metric.
     // Tag FIELD_AUTOFILL_COMPAT_MODE: package is being autofilled on compatibility mode.
     // Tag FIELD_AUTOFILL_NUMBER_REQUESTS: number of requests made to the service (each request
     //     is logged by a separate AUTOFILL_REQUEST metric)
@@ -4688,6 +4695,7 @@ message MetricsEvent {
     // Tag FIELD_AUTOFILL_PREVIOUS_LENGTH: the previous length of the value
     // NOTE: starting on OS P, it also added the following fields:
     // Tag FIELD_CLASS_NAME: Class name of the activity that is autofilled.
+    // Tag FIELD_AUTOFILL_SESSION_ID: id of the autofill session associated with this metric.
     // Tag FIELD_AUTOFILL_COMPAT_MODE: package is being autofilled on compatibility mode.
     AUTOFILL_VALUE_RESET = 1124;
 
@@ -4722,6 +4730,7 @@ message MetricsEvent {
     // Tag FIELD_AUTOFILL_SAVE_TYPE: Type of save object passed by the service
     // NOTE: starting on OS P, it also added the following fields:
     // Tag FIELD_CLASS_NAME: Class name of the activity that is autofilled.
+    // Tag FIELD_AUTOFILL_SESSION_ID: id of the autofill session associated with this metric.
     // Tag FIELD_AUTOFILL_COMPAT_MODE: package is being autofilled on compatibility mode.
     AUTOFILL_SAVE_CUSTOM_DESCRIPTION = 1129;
 
@@ -4736,6 +4745,7 @@ message MetricsEvent {
     // Tag FIELD_AUTOFILL_SAVE_TYPE: Type of save object passed by the service
     // NOTE: starting on OS P, it also added the following fields:
     // Tag FIELD_CLASS_NAME: Class name of the activity that is autofilled.
+    // Tag FIELD_AUTOFILL_SESSION_ID: id of the autofill session associated with this metric.
     // Tag FIELD_AUTOFILL_COMPAT_MODE: package is being autofilled on compatibility mode.
     AUTOFILL_SAVE_CUSTOM_SUBTITLE = 1131;
 
@@ -4749,6 +4759,7 @@ message MetricsEvent {
     // Tag FIELD_AUTOFILL_SAVE_TYPE: Type of save object passed by the service
     // NOTE: starting on OS P, it also added the following fields:
     // Tag FIELD_CLASS_NAME: Class name of the activity that is autofilled.
+    // Tag FIELD_AUTOFILL_SESSION_ID: id of the autofill session associated with this metric.
     // Tag FIELD_AUTOFILL_COMPAT_MODE: package is being autofilled on compatibility mode.
     AUTOFILL_SAVE_LINK_TAPPED = 1132;
 
@@ -4762,6 +4773,7 @@ message MetricsEvent {
     // Tag FIELD_AUTOFILL_SAVE_TYPE: Type of save object passed by the service
     // NOTE: starting on OS P, it also added the following fields:
     // Tag FIELD_CLASS_NAME: Class name of the activity that is autofilled.
+    // Tag FIELD_AUTOFILL_SESSION_ID: id of the autofill session associated with this metric.
     // Tag FIELD_AUTOFILL_COMPAT_MODE: package is being autofilled on compatibility mode.
     AUTOFILL_SAVE_VALIDATION = 1133;
 
@@ -4774,6 +4786,7 @@ message MetricsEvent {
     // Type TYPE_FAILURE: An invalid opperation was reported by the app's AutofillManager
     // NOTE: starting on OS P, it also added the following fields:
     // Tag FIELD_CLASS_NAME: Class name of the activity that is autofilled.
+    // Tag FIELD_AUTOFILL_SESSION_ID: id of the autofill session associated with this metric.
     // Tag FIELD_AUTOFILL_COMPAT_MODE: package is being autofilled on compatibility mode.
     AUTOFILL_PENDING_SAVE_UI_OPERATION = 1134;
 
@@ -4956,6 +4969,7 @@ message MetricsEvent {
     // OS: P
     // Tag FIELD_CLASS_NAME: Class name of the activity that is autofilled.
     // Tag FIELD_AUTOFILL_SERVICE: Package of service that processed the request
+    // Tag FIELD_AUTOFILL_SESSION_ID: id of the autofill session associated with this metric.
     // Tag FIELD_AUTOFILL_COMPAT_MODE: package is being autofilled on compatibility mode.
     AUTOFILL_EXPLICIT_SAVE_TRIGGER_DEFINITION = 1228;
 
@@ -4964,6 +4978,7 @@ message MetricsEvent {
     // Package: Package of app that is autofilled
     // OS: P
     // Tag FIELD_CLASS_NAME: Class name of the activity that is autofilled.
+    // Tag FIELD_AUTOFILL_SESSION_ID: id of the autofill session associated with this metric.
     // Tag FIELD_AUTOFILL_COMPAT_MODE: package is being autofilled on compatibility mode.
     AUTOFILL_SAVE_EXPLICITLY_TRIGGERED = 1229;
 
@@ -4977,6 +4992,7 @@ message MetricsEvent {
     // OS: P
     // Tag FIELD_AUTOFILL_SERVICE: Package of service that processed the request
     // Tag FIELD_AUTOFILL_DURATION: duration (in ms) that autofill will be disabled
+    // Tag FIELD_AUTOFILL_SESSION_ID: id of the autofill session associated with this metric.
     // Tag FIELD_AUTOFILL_COMPAT_MODE: package is being autofilled on compatibility mode.
     AUTOFILL_SERVICE_DISABLED_APP = 1231;
 
@@ -4986,6 +5002,7 @@ message MetricsEvent {
     // Tag FIELD_AUTOFILL_SERVICE: Package of service that processed the request
     // Tag FIELD_CLASS_NAME: Class name of the activity that is being disabled for autofill
     // Tag FIELD_AUTOFILL_DURATION: duration (in ms) that autofill will be disabled
+    // Tag FIELD_AUTOFILL_SESSION_ID: id of the autofill session associated with this metric.
     // Tag FIELD_AUTOFILL_COMPAT_MODE: package is being autofilled on compatibility mode.
     AUTOFILL_SERVICE_DISABLED_ACTIVITY = 1232;
 
@@ -5199,6 +5216,7 @@ message MetricsEvent {
     // Tag FIELD_CLASS_NAME: Class name of the activity that is autofilled.
     // Tag FIELD_AUTOFILL_SERVICE: Package of service that processed the request
     // Tag FIELD_AUTOFILL_MATCH_SCORE: Average score of the matches, in the range of 0 to 100
+    // Tag FIELD_AUTOFILL_SESSION_ID: id of the autofill session associated with this metric.
     // Tag FIELD_AUTOFILL_COMPAT_MODE: package is being autofilled on compatibility mode.
     AUTOFILL_FIELD_CLASSIFICATION_MATCHES = 1273;
 
@@ -6093,6 +6111,10 @@ message MetricsEvent {
     // FIELD: Number of requests made to an autofill service during a session.
     // OS: P
     FIELD_AUTOFILL_NUMBER_REQUESTS = 1455;
+
+    // FIELD: Id of the autofill session associated with this metric.
+    // OS: P
+    FIELD_AUTOFILL_SESSION_ID = 1456;
 
     // ---- End P Constants, all P constants go above this line ----
 
