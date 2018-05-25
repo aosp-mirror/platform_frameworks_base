@@ -1776,7 +1776,7 @@ class AlarmManagerService extends SystemService {
             } else if (workSource == null && (callingUid < Process.FIRST_APPLICATION_UID
                     || UserHandle.isSameApp(callingUid, mSystemUiUid)
                     || ((mAppStateTracker != null)
-                        && mAppStateTracker.isUidPowerSaveWhitelisted(callingUid)))) {
+                        && mAppStateTracker.isUidPowerSaveUserWhitelisted(callingUid)))) {
                 flags |= AlarmManager.FLAG_ALLOW_WHILE_IDLE_UNRESTRICTED;
                 flags &= ~AlarmManager.FLAG_ALLOW_WHILE_IDLE;
             }

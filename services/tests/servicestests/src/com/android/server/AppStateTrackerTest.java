@@ -445,7 +445,7 @@ public class AppStateTrackerTest {
         areRestricted(instance, UID_10_3, PACKAGE_3, JOBS_AND_ALARMS);
         areRestricted(instance, Process.SYSTEM_UID, PACKAGE_SYSTEM, NONE);
 
-        instance.setPowerSaveWhitelistAppIds(new int[] {UID_1}, new int[] {UID_2});
+        instance.setPowerSaveWhitelistAppIds(new int[] {UID_1}, new int[] {}, new int[] {UID_2});
 
         areRestricted(instance, UID_1, PACKAGE_1, NONE);
         areRestricted(instance, UID_10_1, PACKAGE_1, NONE);
@@ -479,6 +479,15 @@ public class AppStateTrackerTest {
         assertFalse(instance.isUidTempPowerSaveWhitelisted(UID_10_1));
         assertTrue(instance.isUidTempPowerSaveWhitelisted(UID_2));
         assertTrue(instance.isUidTempPowerSaveWhitelisted(UID_10_2));
+    }
+
+    @Test
+    public void testPowerSaveUserWhitelist() throws Exception {
+        final AppStateTrackerTestable instance = newInstance();
+        instance.setPowerSaveWhitelistAppIds(new int[] {}, new int[] {UID_1, UID_2}, new int[] {});
+        assertTrue(instance.isUidPowerSaveUserWhitelisted(UID_1));
+        assertTrue(instance.isUidPowerSaveUserWhitelisted(UID_2));
+        assertFalse(instance.isUidPowerSaveUserWhitelisted(UID_3));
     }
 
     @Test
@@ -861,7 +870,7 @@ public class AppStateTrackerTest {
         // -------------------------------------------------------------------------
         // Tests with system/user/temp whitelist.
 
-        instance.setPowerSaveWhitelistAppIds(new int[] {UID_1, UID_2}, new int[] {});
+        instance.setPowerSaveWhitelistAppIds(new int[] {UID_1, UID_2}, new int[] {}, new int[] {});
 
         waitUntilMainHandlerDrain();
         verify(l, times(1)).updateAllJobs();
@@ -873,7 +882,7 @@ public class AppStateTrackerTest {
         verify(l, times(0)).unblockAlarmsForUidPackage(anyInt(), anyString());
         reset(l);
 
-        instance.setPowerSaveWhitelistAppIds(new int[] {UID_2}, new int[] {});
+        instance.setPowerSaveWhitelistAppIds(new int[] {UID_2}, new int[] {}, new int[] {});
 
         waitUntilMainHandlerDrain();
         verify(l, times(1)).updateAllJobs();
@@ -886,7 +895,8 @@ public class AppStateTrackerTest {
         reset(l);
 
         // Update temp whitelist.
-        instance.setPowerSaveWhitelistAppIds(new int[] {UID_2}, new int[] {UID_1, UID_3});
+        instance.setPowerSaveWhitelistAppIds(new int[] {UID_2}, new int[] {},
+                new int[] {UID_1, UID_3});
 
         waitUntilMainHandlerDrain();
         verify(l, times(1)).updateAllJobs();
@@ -898,7 +908,7 @@ public class AppStateTrackerTest {
         verify(l, times(0)).unblockAlarmsForUidPackage(anyInt(), anyString());
         reset(l);
 
-        instance.setPowerSaveWhitelistAppIds(new int[] {UID_2}, new int[] {UID_3});
+        instance.setPowerSaveWhitelistAppIds(new int[] {UID_2}, new int[] {}, new int[] {UID_3});
 
         waitUntilMainHandlerDrain();
         verify(l, times(1)).updateAllJobs();
@@ -924,7 +934,7 @@ public class AppStateTrackerTest {
         verify(l, times(0)).unblockAlarmsForUidPackage(anyInt(), anyString());
         reset(l);
 
-        instance.setPowerSaveWhitelistAppIds(new int[] {UID_1, UID_2}, new int[] {});
+        instance.setPowerSaveWhitelistAppIds(new int[] {UID_1, UID_2}, new int[] {}, new int[] {});
 
         waitUntilMainHandlerDrain();
         // Called once for updating all whitelist and once for updating temp whitelist
@@ -937,7 +947,7 @@ public class AppStateTrackerTest {
         verify(l, times(0)).unblockAlarmsForUidPackage(anyInt(), anyString());
         reset(l);
 
-        instance.setPowerSaveWhitelistAppIds(new int[] {UID_2}, new int[] {});
+        instance.setPowerSaveWhitelistAppIds(new int[] {UID_2}, new int[] {}, new int[] {});
 
         waitUntilMainHandlerDrain();
         verify(l, times(1)).updateAllJobs();
@@ -950,7 +960,8 @@ public class AppStateTrackerTest {
         reset(l);
 
         // Update temp whitelist.
-        instance.setPowerSaveWhitelistAppIds(new int[] {UID_2}, new int[] {UID_1, UID_3});
+        instance.setPowerSaveWhitelistAppIds(new int[] {UID_2}, new int[] {},
+                new int[] {UID_1, UID_3});
 
         waitUntilMainHandlerDrain();
         verify(l, times(1)).updateAllJobs();
@@ -962,7 +973,7 @@ public class AppStateTrackerTest {
         verify(l, times(0)).unblockAlarmsForUidPackage(anyInt(), anyString());
         reset(l);
 
-        instance.setPowerSaveWhitelistAppIds(new int[] {UID_2}, new int[] {UID_3});
+        instance.setPowerSaveWhitelistAppIds(new int[] {UID_2}, new int[] {}, new int[] {UID_3});
 
         waitUntilMainHandlerDrain();
         verify(l, times(1)).updateAllJobs();
