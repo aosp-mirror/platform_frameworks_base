@@ -173,7 +173,7 @@ public class RecentsOnboarding {
                                             : SWIPE_UP_SHOW_ON_APP_LAUNCH_AFTER_DISMISS_BACK_OFF;
                             mNumAppsLaunchedSinceSwipeUpTipDismiss++;
                             if (mNumAppsLaunchedSinceSwipeUpTipDismiss
-                                    == swipeUpShowOnAppLauncherAfterDismiss) {
+                                    >= swipeUpShowOnAppLauncherAfterDismiss) {
                                 mNumAppsLaunchedSinceSwipeUpTipDismiss = 0;
                                 shouldLog = show(R.string.recents_swipe_up_onboarding);
                             }
@@ -188,7 +188,7 @@ public class RecentsOnboarding {
                     if (getOpenedOverviewCount() >= QUICK_SCRUB_SHOW_ON_OVERVIEW_OPENED_COUNT) {
                         if (mHasDismissedQuickScrubTip) {
                             if (mOverviewOpenedCountSinceQuickScrubTipDismiss
-                                    == QUICK_SCRUB_SHOW_ON_OVERVIEW_OPENED_COUNT) {
+                                    >= QUICK_SCRUB_SHOW_ON_OVERVIEW_OPENED_COUNT) {
                                 mOverviewOpenedCountSinceQuickScrubTipDismiss = 0;
                                 shouldLog = show(R.string.recents_quick_scrub_onboarding);
                             }
