@@ -20,6 +20,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.assist.AssistStructure;
 import android.app.assist.AssistStructure.ViewNode;
+import android.content.ComponentName;
 import android.metrics.LogMaker;
 import android.service.autofill.Dataset;
 import android.util.ArrayMap;
@@ -109,20 +110,29 @@ public final class Helper {
     }
 
     @NonNull
-    public static LogMaker newLogMaker(int category, String packageName,
-            String servicePackageName) {
-        final LogMaker log = new LogMaker(category).setPackageName(packageName);
-        if (servicePackageName != null) {
-            log.addTaggedData(MetricsEvent.FIELD_AUTOFILL_SERVICE, servicePackageName);
+    private static LogMaker newLogMaker(int category, @NonNull String servicePackageName,
+            int sessionId, boolean compatMode) {
+        final LogMaker log = new LogMaker(category)
+                .addTaggedData(MetricsEvent.FIELD_AUTOFILL_SERVICE, servicePackageName)
+                .addTaggedData(MetricsEvent.FIELD_AUTOFILL_SESSION_ID, sessionId);
+        if (compatMode) {
+            log.addTaggedData(MetricsEvent.FIELD_AUTOFILL_COMPAT_MODE, 1);
         }
         return log;
     }
 
     @NonNull
-    public static LogMaker newLogMaker(int category, String packageName,
-            String servicePackageName, boolean compatMode) {
-        return newLogMaker(category, packageName, servicePackageName)
-                .addTaggedData(MetricsEvent.FIELD_AUTOFILL_COMPAT_MODE, compatMode ? 1 : 0);
+    public static LogMaker newLogMaker(int category, @NonNull String packageName,
+            @NonNull String servicePackageName, int sessionId, boolean compatMode) {
+        return newLogMaker(category, servicePackageName, sessionId, compatMode)
+                .setPackageName(packageName);
+    }
+
+    @NonNull
+    public static LogMaker newLogMaker(int category, @NonNull ComponentName componentName,
+            @NonNull String servicePackageName, int sessionId, boolean compatMode) {
+        return newLogMaker(category, servicePackageName, sessionId, compatMode)
+                .setComponentName(componentName);
     }
 
     public static void printlnRedactedText(@NonNull PrintWriter pw, @Nullable CharSequence text) {
@@ -191,6 +201,18 @@ public final class Helper {
             }
         }
         return urlBarNode;
+    }
+
+    /**
+     * Gets the value of a metric tag, or {@code 0} if not found or NaN.
+     */
+    static int getNumericValue(@NonNull LogMaker log, int tag) {
+        final Object value = log.getTaggedData(tag);
+        if (!(value instanceof Number)) {
+            return 0;
+        } else {
+            return ((Number) value).intValue();
+        }
     }
 
     private interface ViewNodeFilter {

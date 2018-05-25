@@ -711,6 +711,7 @@ public class LayoutTest {
             actual[i] = layout.primaryIsTrailingPrevious(i);
         }
         assertArrayEquals(expected, actual);
+        assertArrayEquals(actual, layout.primaryIsTrailingPreviousAllLineOffsets(0));
     }
 
     @Test
@@ -741,7 +742,6 @@ public class LayoutTest {
         assertPrimaryIsTrailingPrevious(
                 RTL + LRI + RTL + LTR + PDI + RTL,
                 new boolean[]{false, false, true, false, false, false, false});
-
     }
 }
 

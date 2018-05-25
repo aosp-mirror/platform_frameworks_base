@@ -189,6 +189,13 @@ public final class ColorDisplayService extends SystemService
         mController = new ColorDisplayController(getContext(), mCurrentUser);
         mController.setListener(this);
 
+        // Set the color mode, if valid, and immediately apply the updated tint matrix based on the
+        // existing activated state. This ensures consistency of tint across the color mode change.
+        onDisplayColorModeChanged(mController.getColorMode());
+
+        // Reset the activated state.
+        mIsActivated = null;
+
         setCoefficientMatrix(getContext(), DisplayTransformManager.needsLinearColorMatrix());
 
         // Prepare color transformation matrix.
@@ -201,9 +208,6 @@ public final class ColorDisplayService extends SystemService
         if (mIsActivated == null) {
             onActivated(mController.isActivated());
         }
-
-        // Transition the screen to the current temperature.
-        applyTint(false);
     }
 
     private void tearDown() {
@@ -223,8 +227,6 @@ public final class ColorDisplayService extends SystemService
             mColorMatrixAnimator.end();
             mColorMatrixAnimator = null;
         }
-
-        mIsActivated = null;
     }
 
     @Override
@@ -288,6 +290,10 @@ public final class ColorDisplayService extends SystemService
 
     @Override
     public void onDisplayColorModeChanged(int mode) {
+        if (mode == -1) {
+            return;
+        }
+
         // Cancel the night display tint animator if it's running.
         if (mColorMatrixAnimator != null) {
             mColorMatrixAnimator.cancel();
@@ -297,7 +303,8 @@ public final class ColorDisplayService extends SystemService
         setMatrix(mController.getColorTemperature(), mMatrixNight);
 
         final DisplayTransformManager dtm = getLocalService(DisplayTransformManager.class);
-        dtm.setColorMode(mode, mIsActivated ? mMatrixNight : MATRIX_IDENTITY);
+        dtm.setColorMode(mode, (mIsActivated != null && mIsActivated) ? mMatrixNight
+                : MATRIX_IDENTITY);
     }
 
     @Override

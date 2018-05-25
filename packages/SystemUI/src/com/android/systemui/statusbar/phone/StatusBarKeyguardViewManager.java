@@ -22,6 +22,7 @@ import static com.android.systemui.statusbar.phone.FingerprintUnlockController.M
 
 import android.content.ComponentCallbacks2;
 import android.content.Context;
+import android.content.res.ColorStateList;
 import android.os.Bundle;
 import android.os.SystemClock;
 import android.util.StatsLog;
@@ -699,8 +700,8 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
         mBouncer.notifyKeyguardAuthenticated(strongAuth);
     }
 
-    public void showBouncerMessage(String message, int color) {
-        mBouncer.showMessage(message, color);
+    public void showBouncerMessage(String message, ColorStateList colorState) {
+        mBouncer.showMessage(message, colorState);
     }
 
     public ViewRootImpl getViewRootImpl() {

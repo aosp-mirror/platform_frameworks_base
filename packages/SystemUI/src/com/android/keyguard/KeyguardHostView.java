@@ -20,6 +20,7 @@ import android.app.Activity;
 import android.app.ActivityManager;
 import android.content.Context;
 import android.content.res.Resources;
+import android.content.res.ColorStateList;
 import android.graphics.Canvas;
 import android.media.AudioManager;
 import android.os.SystemClock;
@@ -175,12 +176,12 @@ public class KeyguardHostView extends FrameLayout implements SecurityCallback {
         mSecurityContainer.showPromptReason(reason);
     }
 
-    public void showMessage(CharSequence message, int color) {
-        mSecurityContainer.showMessage(message, color);
+    public void showMessage(CharSequence message, ColorStateList colorState) {
+        mSecurityContainer.showMessage(message, colorState);
     }
 
     public void showErrorMessage(CharSequence message) {
-        showMessage(message, Utils.getColorErrorDefaultColor(mContext));
+        showMessage(message, Utils.getColorError(mContext));
     }
 
     /**

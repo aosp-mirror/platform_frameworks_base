@@ -3940,6 +3940,7 @@ public class AudioManager {
      * @param device Bluetooth device connected/disconnected
      * @param state  new connection state (BluetoothProfile.STATE_xxx)
      * @param profile profile for the A2DP device
+     * @param a2dpVolume New volume for the connecting device. Does nothing if disconnecting.
      * (either {@link android.bluetooth.BluetoothProfile.A2DP} or
      * {@link android.bluetooth.BluetoothProfile.A2DP_SINK})
      * @param suppressNoisyIntent if true the
@@ -3949,12 +3950,13 @@ public class AudioManager {
      * {@hide}
      */
     public int setBluetoothA2dpDeviceConnectionStateSuppressNoisyIntent(
-                BluetoothDevice device, int state, int profile, boolean suppressNoisyIntent) {
+                BluetoothDevice device, int state, int profile,
+                boolean suppressNoisyIntent, int a2dpVolume) {
         final IAudioService service = getService();
         int delay = 0;
         try {
             delay = service.setBluetoothA2dpDeviceConnectionStateSuppressNoisyIntent(device,
-                state, profile, suppressNoisyIntent);
+                state, profile, suppressNoisyIntent, a2dpVolume);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -4718,7 +4720,7 @@ public class AudioManager {
                 NativeEventHandlerDelegate delegate =
                         new NativeEventHandlerDelegate(callback, handler);
                 mDeviceCallbacks.put(callback, delegate);
-                broadcastDeviceListChange(delegate.getHandler());
+                broadcastDeviceListChange_sync(delegate.getHandler());
             }
         }
     }
@@ -4837,9 +4839,9 @@ public class AudioManager {
 
     /**
      * Internal method to compute and generate add/remove messages and then send to any
-     * registered callbacks.
+     * registered callbacks. Must be called synchronized on mDeviceCallbacks.
      */
-    private void broadcastDeviceListChange(Handler handler) {
+    private void broadcastDeviceListChange_sync(Handler handler) {
         int status;
 
         // Get the new current set of ports
@@ -4861,20 +4863,18 @@ public class AudioManager {
             AudioDeviceInfo[] removed_devices =
                     calcListDeltas(current_ports, mPreviousPorts, GET_DEVICES_ALL);
             if (added_devices.length != 0 || removed_devices.length != 0) {
-                synchronized (mDeviceCallbacks) {
-                    for (int i = 0; i < mDeviceCallbacks.size(); i++) {
-                        handler = mDeviceCallbacks.valueAt(i).getHandler();
-                        if (handler != null) {
-                            if (removed_devices.length != 0) {
-                                handler.sendMessage(Message.obtain(handler,
-                                                                   MSG_DEVICES_DEVICES_REMOVED,
-                                                                   removed_devices));
-                            }
-                            if (added_devices.length != 0) {
-                                handler.sendMessage(Message.obtain(handler,
-                                                                   MSG_DEVICES_DEVICES_ADDED,
-                                                                   added_devices));
-                            }
+                for (int i = 0; i < mDeviceCallbacks.size(); i++) {
+                    handler = mDeviceCallbacks.valueAt(i).getHandler();
+                    if (handler != null) {
+                        if (removed_devices.length != 0) {
+                            handler.sendMessage(Message.obtain(handler,
+                                    MSG_DEVICES_DEVICES_REMOVED,
+                                    removed_devices));
+                        }
+                        if (added_devices.length != 0) {
+                            handler.sendMessage(Message.obtain(handler,
+                                    MSG_DEVICES_DEVICES_ADDED,
+                                    added_devices));
                         }
                     }
                 }
@@ -4890,7 +4890,9 @@ public class AudioManager {
     private class OnAmPortUpdateListener implements AudioManager.OnAudioPortUpdateListener {
         static final String TAG = "OnAmPortUpdateListener";
         public void onAudioPortListUpdate(AudioPort[] portList) {
-            broadcastDeviceListChange(null);
+            synchronized (mDeviceCallbacks) {
+                broadcastDeviceListChange_sync(null);
+            }
         }
 
         /**
@@ -4904,7 +4906,9 @@ public class AudioManager {
          * Callback method called when the mediaserver dies
          */
         public void onServiceDied() {
-            broadcastDeviceListChange(null);
+            synchronized (mDeviceCallbacks) {
+                broadcastDeviceListChange_sync(null);
+            }
         }
     }
 

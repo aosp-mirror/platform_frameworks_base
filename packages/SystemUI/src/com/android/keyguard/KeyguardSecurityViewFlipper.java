@@ -19,6 +19,7 @@ package com.android.keyguard;
 import android.annotation.NonNull;
 import android.content.Context;
 import android.content.res.TypedArray;
+import android.content.res.ColorStateList;
 import android.graphics.Rect;
 import android.util.AttributeSet;
 import android.util.Log;
@@ -139,10 +140,10 @@ public class KeyguardSecurityViewFlipper extends ViewFlipper implements Keyguard
     }
 
     @Override
-    public void showMessage(CharSequence message, int color) {
+    public void showMessage(CharSequence message, ColorStateList colorState) {
         KeyguardSecurityView ksv = getSecurityView();
         if (ksv != null) {
-            ksv.showMessage(message, color);
+            ksv.showMessage(message, colorState);
         }
     }
 

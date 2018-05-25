@@ -170,6 +170,31 @@ public class UserManagerTest extends AndroidTestCase {
     }
 
     @MediumTest
+    public void testSetUserAdmin() throws Exception {
+        UserInfo userInfo = createUser("SecondaryUser", /*flags=*/ 0);
+
+        // Assert user is not admin and has SMS and calls restrictions.
+        assertFalse(userInfo.isAdmin());
+        assertTrue(mUserManager.hasUserRestriction(UserManager.DISALLOW_SMS,
+                userInfo.getUserHandle()));
+        assertTrue(mUserManager.hasUserRestriction(UserManager.DISALLOW_OUTGOING_CALLS,
+                userInfo.getUserHandle()));
+
+        // Assign admin privileges.
+        mUserManager.setUserAdmin(userInfo.id);
+
+        // Refresh.
+        userInfo = mUserManager.getUserInfo(userInfo.id);
+
+        // Verify user became admin and SMS and call restrictions are lifted.
+        assertTrue(userInfo.isAdmin());
+        assertFalse(mUserManager.hasUserRestriction(UserManager.DISALLOW_SMS,
+                userInfo.getUserHandle()));
+        assertFalse(mUserManager.hasUserRestriction(UserManager.DISALLOW_OUTGOING_CALLS,
+                userInfo.getUserHandle()));
+    }
+
+    @MediumTest
     public void testGetProfileParent() throws Exception {
         final int primaryUserId = mUserManager.getPrimaryUser().id;
 

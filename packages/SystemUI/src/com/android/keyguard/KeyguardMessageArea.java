@@ -17,6 +17,7 @@
 package com.android.keyguard;
 
 import android.content.Context;
+import android.content.res.ColorStateList;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.SystemClock;
@@ -42,10 +43,10 @@ class KeyguardMessageArea extends TextView implements SecurityMessageDisplay {
     private static final int DEFAULT_COLOR = -1;
 
     private final Handler mHandler;
-    private final int mDefaultColor;
+    private final ColorStateList mDefaultColorState;
 
     private CharSequence mMessage;
-    private int mNextMessageColor = DEFAULT_COLOR;
+    private ColorStateList mNextMessageColorState = ColorStateList.valueOf(DEFAULT_COLOR);
 
     private KeyguardUpdateMonitorCallback mInfoCallback = new KeyguardUpdateMonitorCallback() {
         public void onFinishedGoingToSleep(int why) {
@@ -71,13 +72,13 @@ class KeyguardMessageArea extends TextView implements SecurityMessageDisplay {
         monitor.registerCallback(mInfoCallback);
         mHandler = new Handler(Looper.myLooper());
 
-        mDefaultColor = getCurrentTextColor();
+        mDefaultColorState = getTextColors();
         update();
     }
 
     @Override
-    public void setNextMessageColor(int color) {
-        mNextMessageColor = color;
+    public void setNextMessageColor(ColorStateList colorState) {
+        mNextMessageColorState = colorState;
     }
 
     @Override
@@ -139,12 +140,12 @@ class KeyguardMessageArea extends TextView implements SecurityMessageDisplay {
         CharSequence status = mMessage;
         setVisibility(TextUtils.isEmpty(status) ? INVISIBLE : VISIBLE);
         setText(status);
-        int color = mDefaultColor;
-        if (mNextMessageColor != DEFAULT_COLOR) {
-            color = mNextMessageColor;
-            mNextMessageColor = DEFAULT_COLOR;
+        ColorStateList colorState = mDefaultColorState;
+        if (mNextMessageColorState.getDefaultColor() != DEFAULT_COLOR) {
+            colorState = mNextMessageColorState;
+            mNextMessageColorState = ColorStateList.valueOf(DEFAULT_COLOR);
         }
-        setTextColor(color);
+        setTextColor(colorState);
     }
 
 

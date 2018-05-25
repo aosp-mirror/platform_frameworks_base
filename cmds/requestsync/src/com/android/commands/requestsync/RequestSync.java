@@ -211,10 +211,10 @@ public class RequestSync {
                 mExtras.putBoolean(key, Boolean.valueOf(value));
 
             } else if (opt.equals("-f") || opt.equals("--foreground")) {
-                mExemptionFlag = ContentResolver.SYNC_EXEMPTION_ACTIVE;
+                mExemptionFlag = ContentResolver.SYNC_EXEMPTION_PROMOTE_BUCKET;
 
             } else if (opt.equals("-F") || opt.equals("--top")) {
-                mExemptionFlag = ContentResolver.SYNC_EXEMPTION_ACTIVE_WITH_TEMP;
+                mExemptionFlag = ContentResolver.SYNC_EXEMPTION_PROMOTE_BUCKET_WITH_TEMP;
 
             } else {
                 System.err.println("Error: Unknown option: " + opt);

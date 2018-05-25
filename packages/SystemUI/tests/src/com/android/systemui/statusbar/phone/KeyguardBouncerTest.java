@@ -35,6 +35,7 @@ import android.testing.TestableLooper;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
 import android.widget.FrameLayout;
+import android.content.res.ColorStateList;
 
 import com.android.internal.widget.LockPatternUtils;
 import com.android.keyguard.KeyguardHostView;
@@ -227,8 +228,8 @@ public class KeyguardBouncerTest extends SysuiTestCase {
     public void testShowMessage_propagates() {
         final String message = "a message";
         mBouncer.ensureView();
-        mBouncer.showMessage(message, Color.GREEN);
-        verify(mKeyguardHostView).showMessage(eq(message), eq(Color.GREEN));
+        mBouncer.showMessage(message, ColorStateList.valueOf(Color.GREEN));
+        verify(mKeyguardHostView).showMessage(eq(message), eq(ColorStateList.valueOf(Color.GREEN)));
     }
 
     @Test

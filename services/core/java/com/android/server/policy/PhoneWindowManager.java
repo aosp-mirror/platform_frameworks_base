@@ -234,7 +234,6 @@ import android.util.SparseArray;
 import android.util.proto.ProtoOutputStream;
 import android.view.Display;
 import android.view.DisplayCutout;
-import android.view.DisplayInfo;
 import android.view.Gravity;
 import android.view.HapticFeedbackConstants;
 import android.view.IApplicationToken;
@@ -2291,6 +2290,11 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     @Override
                     public void onTrustedChanged() {
                         mWindowManagerFuncs.notifyKeyguardTrustedChanged();
+                    }
+
+                    @Override
+                    public void onShowingChanged() {
+                        mWindowManagerFuncs.onKeyguardShowingAndNotOccludedChanged();
                     }
                 });
         mScreenshotHelper = new ScreenshotHelper(mContext);
@@ -6643,6 +6647,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     }
 
     void launchVoiceAssistWithWakeLock() {
+        sendCloseSystemWindows(SYSTEM_DIALOG_REASON_ASSIST);
+
         final Intent voiceIntent;
         if (!keyguardOn()) {
             voiceIntent = new Intent(RecognizerIntent.ACTION_WEB_SEARCH);

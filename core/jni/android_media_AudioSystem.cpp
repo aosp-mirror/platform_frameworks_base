@@ -1294,11 +1294,8 @@ android_media_AudioSystem_createAudioPatch(JNIEnv *env, jobject clazz,
         handle = (audio_patch_handle_t)env->GetIntField(jPatchHandle, gAudioHandleFields.mId);
     }
 
-    struct audio_patch nPatch;
+    struct audio_patch nPatch = { .id = handle };
 
-    nPatch.id = handle;
-    nPatch.num_sources = 0;
-    nPatch.num_sinks = 0;
     jobject jSource = NULL;
     jobject jSink = NULL;
 
@@ -1584,7 +1581,7 @@ android_media_AudioSystem_setAudioPortConfig(JNIEnv *env, jobject clazz,
     if (!env->IsInstanceOf(jAudioPortConfig, gAudioPortConfigClass)) {
         return AUDIO_JAVA_BAD_VALUE;
     }
-    struct audio_port_config nAudioPortConfig;
+    struct audio_port_config nAudioPortConfig = {};
     jint jStatus = convertAudioPortConfigToNative(env, &nAudioPortConfig, jAudioPortConfig, true);
     if (jStatus != AUDIO_JAVA_SUCCESS) {
         return jStatus;

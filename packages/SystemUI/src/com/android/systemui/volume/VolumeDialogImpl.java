@@ -727,6 +727,12 @@ public class VolumeDialogImpl implements VolumeDialog {
     }
 
     protected void onStateChangedH(State state) {
+        if (mState != null && state != null
+                && mState.ringerModeInternal != state.ringerModeInternal
+                && state.ringerModeInternal == AudioManager.RINGER_MODE_VIBRATE) {
+            mController.vibrate(VibrationEffect.get(VibrationEffect.EFFECT_HEAVY_CLICK));
+        }
+
         mState = state;
         mDynamic.clear();
         // add any new dynamic rows

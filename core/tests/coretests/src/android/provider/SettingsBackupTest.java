@@ -132,6 +132,7 @@ public class SettingsBackupTest {
                     Settings.Global.BLE_SCAN_LOW_LATENCY_WINDOW_MS,
                     Settings.Global.BLE_SCAN_LOW_LATENCY_INTERVAL_MS,
                     Settings.Global.BLE_SCAN_BACKGROUND_MODE,
+                    Settings.Global.BLOCKED_SLICES,
                     Settings.Global.BLOCKING_HELPER_DISMISS_TO_VIEW_RATIO_LIMIT,
                     Settings.Global.BLOCKING_HELPER_STREAK_LIMIT,
                     Settings.Global.BLUETOOTH_A2DP_SINK_PRIORITY_PREFIX,
@@ -155,6 +156,7 @@ public class SettingsBackupTest {
                     Settings.Global.CAPTIVE_PORTAL_HTTP_URL,
                     Settings.Global.CAPTIVE_PORTAL_MODE,
                     Settings.Global.CAPTIVE_PORTAL_OTHER_FALLBACK_URLS,
+                    Settings.Global.CAPTIVE_PORTAL_FALLBACK_PROBE_SPECS,
                     Settings.Global.CAPTIVE_PORTAL_SERVER,
                     Settings.Global.CAPTIVE_PORTAL_USE_HTTPS,
                     Settings.Global.CAPTIVE_PORTAL_USER_AGENT,
@@ -592,6 +594,7 @@ public class SettingsBackupTest {
                  Settings.Secure.SHOW_ROTATION_SUGGESTIONS,
                  Settings.Secure.SKIP_FIRST_USE_HINTS, // candidate?
                  Settings.Secure.SMS_DEFAULT_APPLICATION,
+                 Settings.Secure.THEME_MODE,
                  Settings.Secure.TRUST_AGENTS_INITIALIZED,
                  Settings.Secure.TV_INPUT_CUSTOM_LABELS,
                  Settings.Secure.TV_INPUT_HIDDEN_INPUTS,
@@ -614,7 +617,9 @@ public class SettingsBackupTest {
                  Settings.Secure.LOW_POWER_MANUAL_ACTIVATION_COUNT,
                  Settings.Secure.LOW_POWER_WARNING_ACKNOWLEDGED,
                  Settings.Secure.SUPPRESS_AUTO_BATTERY_SAVER_SUGGESTION,
-                 Settings.Secure.PACKAGES_TO_CLEAR_DATA_BEFORE_FULL_RESTORE);
+                 Settings.Secure.PACKAGES_TO_CLEAR_DATA_BEFORE_FULL_RESTORE,
+                 Settings.Secure.FLASHLIGHT_AVAILABLE,
+                 Settings.Secure.FLASHLIGHT_ENABLED);
 
     @Test
     public void systemSettingsBackedUpOrBlacklisted() {

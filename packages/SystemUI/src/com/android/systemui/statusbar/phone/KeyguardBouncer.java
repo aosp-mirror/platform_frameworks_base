@@ -20,6 +20,7 @@ import static com.android.keyguard.KeyguardHostView.OnDismissAction;
 import static com.android.keyguard.KeyguardSecurityModel.SecurityMode;
 
 import android.content.Context;
+import android.content.res.ColorStateList;
 import android.os.Handler;
 import android.os.UserHandle;
 import android.os.UserManager;
@@ -247,9 +248,9 @@ public class KeyguardBouncer {
         }
     }
 
-    public void showMessage(String message, int color) {
+    public void showMessage(String message, ColorStateList colorState) {
         if (mKeyguardView != null) {
-            mKeyguardView.showMessage(message, color);
+            mKeyguardView.showMessage(message, colorState);
         } else {
             Log.w(TAG, "Trying to show message on empty bouncer");
         }

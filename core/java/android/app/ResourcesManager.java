@@ -124,7 +124,7 @@ public class ResourcesManager {
     /**
      * The ApkAssets we are caching and intend to hold strong references to.
      */
-    private final LruCache<ApkKey, ApkAssets> mLoadedApkAssets = new LruCache<>(15);
+    private final LruCache<ApkKey, ApkAssets> mLoadedApkAssets = new LruCache<>(3);
 
     /**
      * The ApkAssets that are being referenced in the wild that we can reuse, even if they aren't

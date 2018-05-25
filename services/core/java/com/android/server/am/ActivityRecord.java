@@ -826,6 +826,18 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
         return ResolverActivity.class.getName().equals(realActivity.getClassName());
     }
 
+    boolean isResolverOrChildActivity() {
+        if (!"android".equals(packageName)) {
+            return false;
+        }
+        try {
+            return ResolverActivity.class.isAssignableFrom(
+                    Object.class.getClassLoader().loadClass(realActivity.getClassName()));
+        } catch (ClassNotFoundException e) {
+            return false;
+        }
+    }
+
     ActivityRecord(ActivityManagerService _service, ProcessRecord _caller, int _launchedFromPid,
             int _launchedFromUid, String _launchedFromPackage, Intent _intent, String _resolvedType,
             ActivityInfo aInfo, Configuration _configuration,
@@ -1075,6 +1087,11 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
     private boolean canLaunchHomeActivity(int uid, ActivityRecord sourceRecord) {
         if (uid == Process.myUid() || uid == 0) {
             // System process can launch home activity.
+            return true;
+        }
+        // Allow the recents component to launch the home activity.
+        final RecentTasks recentTasks = mStackSupervisor.mService.getRecentTasks();
+        if (recentTasks != null && recentTasks.isCallerRecents(uid)) {
             return true;
         }
         // Resolver activity can launch home activity.

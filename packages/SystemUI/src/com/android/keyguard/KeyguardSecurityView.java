@@ -16,6 +16,7 @@
 package com.android.keyguard;
 
 import com.android.internal.widget.LockPatternUtils;
+import android.content.res.ColorStateList;
 
 public interface KeyguardSecurityView {
     static public final int SCREEN_ON = 1;
@@ -104,9 +105,9 @@ public interface KeyguardSecurityView {
      * Show a message on the security view with a specified color
      *
      * @param message the message to show
-     * @param color the color to use
+     * @param colorState the color to use
      */
-    void showMessage(CharSequence message, int color);
+    void showMessage(CharSequence message, ColorStateList colorState);
 
     /**
      * Instruct the view to show usability hints, if any.

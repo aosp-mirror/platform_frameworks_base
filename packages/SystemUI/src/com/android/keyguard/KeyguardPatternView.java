@@ -19,6 +19,7 @@ import static com.android.internal.util.LatencyTracker.ACTION_CHECK_CREDENTIAL;
 import static com.android.internal.util.LatencyTracker.ACTION_CHECK_CREDENTIAL_UNLOCKED;
 
 import android.content.Context;
+import android.content.res.ColorStateList;
 import android.graphics.Rect;
 import android.os.AsyncTask;
 import android.os.CountDownTimer;
@@ -404,8 +405,8 @@ public class KeyguardPatternView extends LinearLayout implements KeyguardSecurit
     }
 
     @Override
-    public void showMessage(CharSequence message, int color) {
-        mSecurityMessageDisplay.setNextMessageColor(color);
+    public void showMessage(CharSequence message, ColorStateList colorState) {
+        mSecurityMessageDisplay.setNextMessageColor(colorState);
         mSecurityMessageDisplay.setMessage(message);
     }
 

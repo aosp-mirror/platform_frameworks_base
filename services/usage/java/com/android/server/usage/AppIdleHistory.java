@@ -340,14 +340,26 @@ public class AppIdleHistory {
 
     public void setAppStandbyBucket(String packageName, int userId, long elapsedRealtime,
             int bucket, int reason) {
+        setAppStandbyBucket(packageName, userId, elapsedRealtime, bucket, reason, false);
+    }
+
+    public void setAppStandbyBucket(String packageName, int userId, long elapsedRealtime,
+            int bucket, int reason, boolean resetTimeout) {
         ArrayMap<String, AppUsageHistory> userHistory = getUserHistory(userId);
         AppUsageHistory appUsageHistory =
                 getPackageHistory(userHistory, packageName, elapsedRealtime, true);
         appUsageHistory.currentBucket = bucket;
         appUsageHistory.bucketingReason = reason;
+
+        final long elapsed = getElapsedTime(elapsedRealtime);
+
         if ((reason & REASON_MAIN_MASK) == REASON_MAIN_PREDICTED) {
-            appUsageHistory.lastPredictedTime = getElapsedTime(elapsedRealtime);
+            appUsageHistory.lastPredictedTime = elapsed;
             appUsageHistory.lastPredictedBucket = bucket;
+        }
+        if (resetTimeout) {
+            appUsageHistory.bucketActiveTimeoutTime = elapsed;
+            appUsageHistory.bucketWorkingSetTimeoutTime = elapsed;
         }
         if (DEBUG) {
             Slog.d(TAG, "Moved " + packageName + " to bucket=" + appUsageHistory.currentBucket

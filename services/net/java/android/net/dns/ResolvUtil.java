@@ -16,6 +16,8 @@
 
 package android.net.dns;
 
+import static android.system.OsConstants.AI_ADDRCONFIG;
+
 import android.net.Network;
 import android.net.NetworkUtils;
 import android.system.GaiException;
@@ -41,12 +43,17 @@ public class ResolvUtil {
 
     public static InetAddress[] blockingResolveAllLocally(Network network, String name)
             throws UnknownHostException {
+        // Use AI_ADDRCONFIG by default
+        return blockingResolveAllLocally(network, name, AI_ADDRCONFIG);
+    }
+
+    public static InetAddress[] blockingResolveAllLocally(
+            Network network, String name, int aiFlags) throws UnknownHostException  {
         final StructAddrinfo hints = new StructAddrinfo();
-        // Unnecessary, but expressly no AI_ADDRCONFIG.
-        hints.ai_flags = 0;
-        // Fetch all IP addresses at once to minimize re-resolution.
+        hints.ai_flags = aiFlags;
+        // Other hints identical to the default Inet6AddressImpl implementation
         hints.ai_family = OsConstants.AF_UNSPEC;
-        hints.ai_socktype = OsConstants.SOCK_DGRAM;
+        hints.ai_socktype = OsConstants.SOCK_STREAM;
 
         final Network networkForResolv = getNetworkWithUseLocalNameserversFlag(network);
 

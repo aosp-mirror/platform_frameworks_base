@@ -489,6 +489,7 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
         mTemporaryScreenBrightness = -1;
         mPendingScreenBrightnessSetting = -1;
         mTemporaryAutoBrightnessAdjustment = Float.NaN;
+        mPendingAutoBrightnessAdjustment = Float.NaN;
     }
 
     /**
@@ -815,7 +816,7 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
             mAppliedTemporaryAutoBrightnessAdjustment = true;
         } else {
             autoBrightnessAdjustment = mAutoBrightnessAdjustment;
-            mAppliedTemporaryAutoBrightnessAdjustment = true;
+            mAppliedTemporaryAutoBrightnessAdjustment = false;
         }
 
         // Apply brightness boost.
@@ -1499,6 +1500,7 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
             return false;
         }
         if (mAutoBrightnessAdjustment == mPendingAutoBrightnessAdjustment) {
+            mPendingAutoBrightnessAdjustment = Float.NaN;
             return false;
         }
         mAutoBrightnessAdjustment = mPendingAutoBrightnessAdjustment;

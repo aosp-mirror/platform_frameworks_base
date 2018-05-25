@@ -20,8 +20,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 import android.app.WallpaperColors;
-import android.graphics.Color;
-import android.graphics.drawable.ColorDrawable;
 import android.os.Handler;
 import android.os.Message;
 import android.os.SystemClock;
@@ -86,18 +84,5 @@ public class WallpaperServiceTests {
         engine.notifyColorsChanged();
         assertEquals("OnComputeColors should have been deferred.",
                 0, eventCountdown.getCount());
-    }
-
-    @Test
-    public void testFromDrawableTest_doesntComputeHints() {
-        WallpaperColors wallpaperColors = WallpaperColors.fromDrawable(
-                new ColorDrawable(Color.BLACK));
-        assertEquals("WallpaperColors should not support dark theme.", 0,
-                wallpaperColors.getColorHints() & WallpaperColors.HINT_SUPPORTS_DARK_THEME);
-
-        wallpaperColors = WallpaperColors.fromDrawable(
-                new ColorDrawable(Color.WHITE));
-        assertEquals("WallpaperColors should not support dark text.", 0,
-                wallpaperColors.getColorHints() & WallpaperColors.HINT_SUPPORTS_DARK_TEXT);
     }
 }

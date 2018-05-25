@@ -900,6 +900,7 @@ public class UsageStatsService extends SystemService implements
             } catch (RemoteException re) {
                 throw re.rethrowFromSystemServer();
             }
+            final boolean shellCaller = callingUid == 0 || callingUid == Process.SHELL_UID;
             final boolean systemCaller = UserHandle.isCore(callingUid);
             final int reason = systemCaller
                     ? UsageStatsManager.REASON_MAIN_FORCED
@@ -918,7 +919,7 @@ public class UsageStatsService extends SystemService implements
                                     + ")");
                 }
                 mAppStandby.setAppStandbyBucket(packageName, userId, bucket, reason,
-                        SystemClock.elapsedRealtime());
+                        SystemClock.elapsedRealtime(), shellCaller);
             } finally {
                 Binder.restoreCallingIdentity(token);
             }
@@ -985,7 +986,7 @@ public class UsageStatsService extends SystemService implements
                         throw new IllegalArgumentException("Cannot set your own standby bucket");
                     }
                     mAppStandby.setAppStandbyBucket(packageName, userId, bucket, reason,
-                            elapsedRealtime);
+                            elapsedRealtime, shellCaller);
                 }
             } finally {
                 Binder.restoreCallingIdentity(token);
@@ -1301,6 +1302,11 @@ public class UsageStatsService extends SystemService implements
         @Override
         public void onAdminDataAvailable() {
             mAppStandby.onAdminDataAvailable();
+        }
+
+        @Override
+        public void reportExemptedSyncScheduled(String packageName, int userId) {
+            mAppStandby.postReportExemptedSyncScheduled(packageName, userId);
         }
 
         @Override

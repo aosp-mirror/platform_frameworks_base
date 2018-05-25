@@ -104,6 +104,9 @@
     <!-- The color of the navigation bar icons. Need to be in sync with ic_sysbar_* -->
     <color name="navigation_bar_icon_color">#E5FFFFFF</color>
 
+    <!-- The shadow color for light navigation bar icons. -->
+    <color name="nav_key_button_shadow_color">#30000000</color>
+
     <!-- Shadow color for the first pixels around the fake shadow for recents. -->
     <color name="fake_shadow_start_color">#44000000</color>
 

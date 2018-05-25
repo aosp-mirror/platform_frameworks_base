@@ -537,11 +537,17 @@ final class AutofillManagerServiceImpl {
             final String callingPackage = packages != null ? packages[0] : "uid-" + callingUid;
             Slog.w(TAG, "App (package=" + callingPackage + ", UID=" + callingUid
                     + ") passed component (" + componentName + ") owned by UID " + packageUid);
-            mMetricsLogger.write(
-                    Helper.newLogMaker(MetricsEvent.AUTOFILL_FORGED_COMPONENT_ATTEMPT,
-                            callingPackage, getServicePackageName(), compatMode)
+
+            // NOTE: not using Helper.newLogMaker() because we don't have the session id
+            final LogMaker log = new LogMaker(MetricsEvent.AUTOFILL_FORGED_COMPONENT_ATTEMPT)
+                    .setPackageName(callingPackage)
+                    .addTaggedData(MetricsEvent.FIELD_AUTOFILL_SERVICE, getServicePackageName())
                     .addTaggedData(MetricsEvent.FIELD_AUTOFILL_FORGED_COMPONENT_NAME,
-                            componentName == null ? "null" : componentName.flattenToShortString()));
+                            componentName == null ? "null" : componentName.flattenToShortString());
+            if (compatMode) {
+                log.addTaggedData(MetricsEvent.FIELD_AUTOFILL_COMPAT_MODE, 1);
+            }
+            mMetricsLogger.write(log);
 
             throw new SecurityException("Invalid component: " + componentName);
         }
@@ -780,10 +786,10 @@ final class AutofillManagerServiceImpl {
             @Nullable ArrayList<String> changedDatasetIds,
             @Nullable ArrayList<AutofillId> manuallyFilledFieldIds,
             @Nullable ArrayList<ArrayList<String>> manuallyFilledDatasetIds,
-            @NonNull String appPackageName, boolean compatMode) {
+            @NonNull ComponentName appComponentName, boolean compatMode) {
         logContextCommittedLocked(sessionId, clientState, selectedDatasets, ignoredDatasets,
                 changedFieldIds, changedDatasetIds, manuallyFilledFieldIds,
-                manuallyFilledDatasetIds, null, null, appPackageName, compatMode);
+                manuallyFilledDatasetIds, null, null, appComponentName, compatMode);
     }
 
     @GuardedBy("mLock")
@@ -796,7 +802,7 @@ final class AutofillManagerServiceImpl {
             @Nullable ArrayList<ArrayList<String>> manuallyFilledDatasetIds,
             @Nullable ArrayList<AutofillId> detectedFieldIdsList,
             @Nullable ArrayList<FieldClassification> detectedFieldClassificationsList,
-            @NonNull String appPackageName, boolean compatMode) {
+            @NonNull ComponentName appComponentName, boolean compatMode) {
         if (isValidEventLocked("logDatasetNotSelected()", sessionId)) {
             if (sVerbose) {
                 Slog.v(TAG, "logContextCommitted() with FieldClassification: id=" + sessionId
@@ -807,6 +813,7 @@ final class AutofillManagerServiceImpl {
                         + ", manuallyFilledFieldIds=" + manuallyFilledFieldIds
                         + ", detectedFieldIds=" + detectedFieldIdsList
                         + ", detectedFieldClassifications=" + detectedFieldClassificationsList
+                        + ", appComponentName=" + appComponentName.toShortString()
                         + ", compatMode=" + compatMode);
             }
             AutofillId[] detectedFieldsIds = null;
@@ -834,7 +841,7 @@ final class AutofillManagerServiceImpl {
                 final int averageScore = (int) ((totalScore * 100) / totalSize);
                 mMetricsLogger.write(Helper
                         .newLogMaker(MetricsEvent.AUTOFILL_FIELD_CLASSIFICATION_MATCHES,
-                                appPackageName, getServicePackageName(), compatMode)
+                                appComponentName, getServicePackageName(), sessionId, compatMode)
                         .setCounterValue(numberFields)
                         .addTaggedData(MetricsEvent.FIELD_AUTOFILL_MATCH_SCORE,
                                 averageScore));
@@ -889,9 +896,11 @@ final class AutofillManagerServiceImpl {
             }
             mUserData = userData;
             // Log it
-            int numberFields = mUserData == null ? 0: mUserData.getCategoryIds().length;
-            mMetricsLogger.write(Helper.newLogMaker(MetricsEvent.AUTOFILL_USERDATA_UPDATED,
-                    getServicePackageName(), null)
+            final int numberFields = mUserData == null ? 0: mUserData.getCategoryIds().length;
+            // NOTE: contrary to most metrics, the service name is logged as the main package name
+            // here, not as MetricsEvent.FIELD_AUTOFILL_SERVICE
+            mMetricsLogger.write(new LogMaker(MetricsEvent.AUTOFILL_USERDATA_UPDATED)
+                    .setPackageName(getServicePackageName())
                     .addTaggedData(MetricsEvent.FIELD_AUTOFILL_NUM_VALUES, numberFields));
         }
     }
@@ -1130,7 +1139,8 @@ final class AutofillManagerServiceImpl {
     /**
      * Called by {@link Session} when service asked to disable autofill for an app.
      */
-    void disableAutofillForApp(@NonNull String packageName, long duration, boolean compatMode) {
+    void disableAutofillForApp(@NonNull String packageName, long duration, int sessionId,
+            boolean compatMode) {
         synchronized (mLock) {
             if (mDisabledApps == null) {
                 mDisabledApps = new ArrayMap<>(1);
@@ -1143,7 +1153,7 @@ final class AutofillManagerServiceImpl {
             mDisabledApps.put(packageName, expiration);
             int intDuration = duration > Integer.MAX_VALUE ? Integer.MAX_VALUE : (int) duration;
             mMetricsLogger.write(Helper.newLogMaker(MetricsEvent.AUTOFILL_SERVICE_DISABLED_APP,
-                    packageName, getServicePackageName(), compatMode)
+                    packageName, getServicePackageName(), sessionId, compatMode)
                     .addTaggedData(MetricsEvent.FIELD_AUTOFILL_DURATION, intDuration));
         }
     }
@@ -1152,7 +1162,7 @@ final class AutofillManagerServiceImpl {
      * Called by {@link Session} when service asked to disable autofill an app.
      */
     void disableAutofillForActivity(@NonNull ComponentName componentName, long duration,
-            boolean compatMode) {
+            int sessionId, boolean compatMode) {
         synchronized (mLock) {
             if (mDisabledActivities == null) {
                 mDisabledActivities = new ArrayMap<>(1);
@@ -1163,14 +1173,20 @@ final class AutofillManagerServiceImpl {
                 expiration = Long.MAX_VALUE;
             }
             mDisabledActivities.put(componentName, expiration);
-            final int intDuration = duration > Integer.MAX_VALUE ? Integer.MAX_VALUE : (int) duration;
+            final int intDuration = duration > Integer.MAX_VALUE
+                    ? Integer.MAX_VALUE
+                    : (int) duration;
             // NOTE: not using Helper.newLogMaker() because we're setting the componentName instead
             // of package name
-            mMetricsLogger.write(new LogMaker(MetricsEvent.AUTOFILL_SERVICE_DISABLED_ACTIVITY)
+            final LogMaker log = new LogMaker(MetricsEvent.AUTOFILL_SERVICE_DISABLED_ACTIVITY)
                     .setComponentName(componentName)
                     .addTaggedData(MetricsEvent.FIELD_AUTOFILL_SERVICE, getServicePackageName())
                     .addTaggedData(MetricsEvent.FIELD_AUTOFILL_DURATION, intDuration)
-                    .addTaggedData(MetricsEvent.FIELD_AUTOFILL_COMPAT_MODE, compatMode ? 1 : 0));
+                    .addTaggedData(MetricsEvent.FIELD_AUTOFILL_SESSION_ID, sessionId);
+            if (compatMode) {
+                log.addTaggedData(MetricsEvent.FIELD_AUTOFILL_COMPAT_MODE, 1);
+            }
+            mMetricsLogger.write(log);
         }
     }
 

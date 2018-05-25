@@ -16,6 +16,8 @@
 
 package android.net.captiveportal;
 
+import android.annotation.Nullable;
+
 /**
  * Result of calling isCaptivePortal().
  * @hide
@@ -23,6 +25,7 @@ package android.net.captiveportal;
 public final class CaptivePortalProbeResult {
     public static final int SUCCESS_CODE = 204;
     public static final int FAILED_CODE = 599;
+    public static final int PORTAL_CODE = 302;
 
     public static final CaptivePortalProbeResult FAILED = new CaptivePortalProbeResult(FAILED_CODE);
     public static final CaptivePortalProbeResult SUCCESS =
@@ -32,15 +35,23 @@ public final class CaptivePortalProbeResult {
     public final String redirectUrl;      // Redirect destination returned from Internet probe.
     public final String detectUrl;        // URL where a 204 response code indicates
                                           // captive portal has been appeased.
+    @Nullable
+    public final CaptivePortalProbeSpec probeSpec;
 
     public CaptivePortalProbeResult(int httpResponseCode) {
         this(httpResponseCode, null, null);
     }
 
     public CaptivePortalProbeResult(int httpResponseCode, String redirectUrl, String detectUrl) {
+        this(httpResponseCode, redirectUrl, detectUrl, null);
+    }
+
+    public CaptivePortalProbeResult(int httpResponseCode, String redirectUrl, String detectUrl,
+            CaptivePortalProbeSpec probeSpec) {
         mHttpResponseCode = httpResponseCode;
         this.redirectUrl = redirectUrl;
         this.detectUrl = detectUrl;
+        this.probeSpec = probeSpec;
     }
 
     public boolean isSuccessful() {

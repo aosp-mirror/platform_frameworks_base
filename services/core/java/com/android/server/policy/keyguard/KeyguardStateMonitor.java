@@ -94,6 +94,7 @@ public class KeyguardStateMonitor extends IKeyguardStateCallback.Stub {
     public void onShowingStateChanged(boolean showing) {
         mIsShowing = showing;
 
+        mCallback.onShowingChanged();
         try {
             mKeystoreService.onKeyguardVisibilityChanged(showing, mCurrentUserId);
         } catch (RemoteException e) {
@@ -132,6 +133,7 @@ public class KeyguardStateMonitor extends IKeyguardStateCallback.Stub {
 
     public interface StateCallback {
         void onTrustedChanged();
+        void onShowingChanged();
     }
 
     public void dump(String prefix, PrintWriter pw) {

@@ -148,16 +148,31 @@ public class StatusBarSignalPolicy implements NetworkControllerImpl.SignalCallba
         boolean in = activityIn && mActivityEnabled && visible;
         boolean out = activityOut && mActivityEnabled && visible;
 
-        mWifiIconState.visible = visible;
-        mWifiIconState.resId = statusIcon.icon;
-        mWifiIconState.activityIn = in;
-        mWifiIconState.activityOut = out;
-        mWifiIconState.slot = mSlotWifi;
-        mWifiIconState.airplaneSpacerVisible = mIsAirplaneMode;
-        mWifiIconState.contentDescription = statusIcon.contentDescription;
+        WifiIconState newState = mWifiIconState.copy();
 
-        if (mWifiIconState.visible && mWifiIconState.resId > 0) {
-            mIconController.setSignalIcon(mSlotWifi, mWifiIconState.copy());
+        newState.visible = visible;
+        newState.resId = statusIcon.icon;
+        newState.activityIn = in;
+        newState.activityOut = out;
+        newState.slot = mSlotWifi;
+        newState.airplaneSpacerVisible = mIsAirplaneMode;
+        newState.contentDescription = statusIcon.contentDescription;
+
+        MobileIconState first = getFirstMobileState();
+        newState.signalSpacerVisible = first != null && first.typeId != 0;
+
+        updateWifiIconWithState(newState);
+        mWifiIconState = newState;
+    }
+
+    private void updateShowWifiSignalSpacer(WifiIconState state) {
+        MobileIconState first = getFirstMobileState();
+        state.signalSpacerVisible = first != null && first.typeId != 0;
+    }
+
+    private void updateWifiIconWithState(WifiIconState state) {
+        if (state.visible && state.resId > 0) {
+            mIconController.setSignalIcon(mSlotWifi, state);
             mIconController.setIconVisibility(mSlotWifi, true);
         } else {
             mIconController.setIconVisibility(mSlotWifi, false);
@@ -173,6 +188,9 @@ public class StatusBarSignalPolicy implements NetworkControllerImpl.SignalCallba
             return;
         }
 
+        // Visibility of the data type indicator changed
+        boolean typeChanged = statusType != state.typeId && (statusType == 0 || state.typeId == 0);
+
         state.visible = statusIcon.visible && !mBlockMobile;
         state.strengthId = statusIcon.icon;
         state.typeId = statusType;
@@ -184,6 +202,15 @@ public class StatusBarSignalPolicy implements NetworkControllerImpl.SignalCallba
 
         // Always send a copy to maintain value type semantics
         mIconController.setMobileIcons(mSlotMobile, MobileIconState.copyStates(mMobileStates));
+
+        if (typeChanged) {
+            WifiIconState wifiCopy = mWifiIconState.copy();
+            updateShowWifiSignalSpacer(wifiCopy);
+            if (!Objects.equals(wifiCopy, mWifiIconState)) {
+                updateWifiIconWithState(wifiCopy);
+                mWifiIconState = wifiCopy;
+            }
+        }
     }
 
     private MobileIconState getState(int subId) {
@@ -193,6 +220,14 @@ public class StatusBarSignalPolicy implements NetworkControllerImpl.SignalCallba
             }
         }
         Log.e(TAG, "Unexpected subscription " + subId);
+        return null;
+    }
+
+    private MobileIconState getFirstMobileState() {
+        if (mMobileStates.size() > 0) {
+            return mMobileStates.get(0);
+        }
+
         return null;
     }
 

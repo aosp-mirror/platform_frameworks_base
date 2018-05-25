@@ -2901,6 +2901,25 @@ public class BackupManagerService implements BackupManagerServiceInterface {
         return currentTransport;
     }
 
+    /**
+     * Returns the {@link ComponentName} of the host service of the selected transport or {@code
+     * null} if no transport selected or if the transport selected is not registered.
+     */
+    @Override
+    @Nullable
+    public ComponentName getCurrentTransportComponent() {
+        mContext.enforceCallingOrSelfPermission(
+                android.Manifest.permission.BACKUP, "getCurrentTransportComponent");
+        long oldId = Binder.clearCallingIdentity();
+        try {
+            return mTransportManager.getCurrentTransportComponent();
+        } catch (TransportNotRegisteredException e) {
+            return null;
+        } finally {
+            Binder.restoreCallingIdentity(oldId);
+        }
+    }
+
     // Report all known, available backup transports
     @Override
     public String[] listAllTransports() {

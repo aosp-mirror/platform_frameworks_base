@@ -335,7 +335,7 @@ public final class ColorDisplayController {
         if (colorTemperature == -1) {
             if (DEBUG) {
                 Slog.d(TAG, "Using default value for setting: "
-                    + Secure.NIGHT_DISPLAY_COLOR_TEMPERATURE);
+                        + Secure.NIGHT_DISPLAY_COLOR_TEMPERATURE);
             }
             colorTemperature = getDefaultColorTemperature();
         }
@@ -358,7 +358,7 @@ public final class ColorDisplayController {
      */
     public boolean setColorTemperature(int colorTemperature) {
         return Secure.putIntForUser(mContext.getContentResolver(),
-            Secure.NIGHT_DISPLAY_COLOR_TEMPERATURE, colorTemperature, mUserId);
+                Secure.NIGHT_DISPLAY_COLOR_TEMPERATURE, colorTemperature, mUserId);
     }
 
     /**
@@ -367,10 +367,10 @@ public final class ColorDisplayController {
      * See com.android.server.display.DisplayTransformManager.
      */
     private @ColorMode int getCurrentColorModeFromSystemProperties() {
-        int displayColorSetting = SystemProperties.getInt("persist.sys.sf.native_mode", 0);
+        final int displayColorSetting = SystemProperties.getInt("persist.sys.sf.native_mode", 0);
         if (displayColorSetting == 0) {
             return "1.0".equals(SystemProperties.get("persist.sys.sf.color_saturation"))
-                ? COLOR_MODE_NATURAL : COLOR_MODE_BOOSTED;
+                    ? COLOR_MODE_NATURAL : COLOR_MODE_BOOSTED;
         } else if (displayColorSetting == 1) {
             return COLOR_MODE_SATURATED;
         } else if (displayColorSetting == 2) {
@@ -381,16 +381,13 @@ public final class ColorDisplayController {
     }
 
     private boolean isColorModeAvailable(@ColorMode int colorMode) {
-        // SATURATED is always allowed
-        if (colorMode == COLOR_MODE_SATURATED) {
-            return true;
-        }
-
         final int[] availableColorModes = mContext.getResources().getIntArray(
                 R.array.config_availableColorModes);
-        for (int mode : availableColorModes) {
-            if (mode == colorMode) {
-                return true;
+        if (availableColorModes != null) {
+            for (int mode : availableColorModes) {
+                if (mode == colorMode) {
+                    return true;
+                }
             }
         }
         return false;
@@ -401,14 +398,18 @@ public final class ColorDisplayController {
      */
     public int getColorMode() {
         if (getAccessibilityTransformActivated()) {
-            return COLOR_MODE_SATURATED;
+            if (isColorModeAvailable(COLOR_MODE_SATURATED)) {
+                return COLOR_MODE_SATURATED;
+            } else if (isColorModeAvailable(COLOR_MODE_AUTOMATIC)) {
+                return COLOR_MODE_AUTOMATIC;
+            }
         }
 
         int colorMode = System.getIntForUser(mContext.getContentResolver(),
-            System.DISPLAY_COLOR_MODE, -1, mUserId);
+                System.DISPLAY_COLOR_MODE, -1, mUserId);
         if (colorMode == -1) {
-            // There still might be a legacy system property controlling color mode that we need to
-            // respect.
+            // There might be a system property controlling color mode that we need to respect; if
+            // not, this will set a suitable default.
             colorMode = getCurrentColorModeFromSystemProperties();
         }
 
@@ -418,10 +419,13 @@ public final class ColorDisplayController {
             if (colorMode == COLOR_MODE_BOOSTED && isColorModeAvailable(COLOR_MODE_NATURAL)) {
                 colorMode = COLOR_MODE_NATURAL;
             } else if (colorMode == COLOR_MODE_SATURATED
-                && isColorModeAvailable(COLOR_MODE_AUTOMATIC)) {
+                    && isColorModeAvailable(COLOR_MODE_AUTOMATIC)) {
                 colorMode = COLOR_MODE_AUTOMATIC;
-            } else {
+            } else if (colorMode == COLOR_MODE_AUTOMATIC
+                    && isColorModeAvailable(COLOR_MODE_SATURATED)) {
                 colorMode = COLOR_MODE_SATURATED;
+            } else {
+                colorMode = -1;
             }
         }
 

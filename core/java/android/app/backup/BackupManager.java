@@ -255,7 +255,7 @@ public class BackupManager {
     /**
      * @deprecated Since Android P app can no longer request restoring of its backup.
      *
-     * Restore the calling application from backup.  The data will be restored from the
+     * <p>Restore the calling application from backup.  The data will be restored from the
      * current backup dataset if the application has stored data there, or from
      * the dataset used during the last full device setup operation if the current
      * backup dataset has no matching data.  If no backup data exists for this application
@@ -282,7 +282,7 @@ public class BackupManager {
     /**
      * @deprecated Since Android P app can no longer request restoring of its backup.
      *
-     * Restore the calling application from backup.  The data will be restored from the
+     * <p>Restore the calling application from backup.  The data will be restored from the
      * current backup dataset if the application has stored data there, or from
      * the dataset used during the last full device setup operation if the current
      * backup dataset has no matching data.  If no backup data exists for this application
@@ -437,6 +437,27 @@ public class BackupManager {
                 return sService.getCurrentTransport();
             } catch (RemoteException e) {
                 Log.e(TAG, "getCurrentTransport() couldn't connect");
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Returns the {@link ComponentName} of the host service of the selected transport or {@code
+     * null} if no transport selected or if the transport selected is not registered.
+     *
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.BACKUP)
+    @Nullable
+    public ComponentName getCurrentTransportComponent() {
+        checkServiceBinder();
+        if (sService != null) {
+            try {
+                return sService.getCurrentTransportComponent();
+            } catch (RemoteException e) {
+                Log.e(TAG, "getCurrentTransportComponent() couldn't connect");
             }
         }
         return null;

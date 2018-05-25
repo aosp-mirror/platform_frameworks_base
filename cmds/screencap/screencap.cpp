@@ -182,8 +182,7 @@ int main(int argc, char** argv)
     sp<IBinder> display = SurfaceComposerClient::getBuiltInDisplay(displayId);
     if (display == NULL) {
         fprintf(stderr, "Unable to get handle for display %d\n", displayId);
-        // b/36066697: Avoid running static destructors.
-        _exit(1);
+        return 1;
     }
 
     Vector<DisplayInfo> configs;
@@ -192,8 +191,7 @@ int main(int argc, char** argv)
     if (static_cast<size_t>(activeConfig) >= configs.size()) {
         fprintf(stderr, "Active config %d not inside configs (size %zu)\n",
                 activeConfig, configs.size());
-        // b/36066697: Avoid running static destructors.
-        _exit(1);
+        return 1;
     }
     uint8_t displayOrientation = configs[activeConfig].orientation;
     uint32_t captureOrientation = ORIENTATION_MAP[displayOrientation];
@@ -204,14 +202,14 @@ int main(int argc, char** argv)
             &outBuffer);
     if (result != NO_ERROR) {
         close(fd);
-        _exit(1);
+        return 1;
     }
 
     result = outBuffer->lock(GraphicBuffer::USAGE_SW_READ_OFTEN, &base);
 
     if (base == NULL) {
         close(fd);
-        _exit(1);
+        return 1;
     }
 
     w = outBuffer->getWidth();
@@ -256,6 +254,5 @@ int main(int argc, char** argv)
         munmap((void *)mapbase, mapsize);
     }
 
-    // b/36066697: Avoid running static destructors.
-    _exit(0);
+    return 0;
 }

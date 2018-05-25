@@ -18,6 +18,7 @@ package com.android.server.stats;
 import android.annotation.Nullable;
 import android.app.ActivityManagerInternal;
 import android.app.AlarmManager;
+import android.app.AlarmManager.OnAlarmListener;
 import android.app.PendingIntent;
 import android.app.ProcessMemoryState;
 import android.app.StatsManager;
@@ -124,9 +125,9 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
     private static IStatsManager sStatsd;
     private static final Object sStatsdLock = new Object();
 
-    private final PendingIntent mAnomalyAlarmIntent;
-    private final PendingIntent mPullingAlarmIntent;
-    private final PendingIntent mPeriodicAlarmIntent;
+    private final OnAlarmListener mAnomalyAlarmListener = new AnomalyAlarmListener();
+    private final OnAlarmListener mPullingAlarmListener = new PullingAlarmListener();
+    private final OnAlarmListener mPeriodicAlarmListener = new PeriodicAlarmListener();
     private final BroadcastReceiver mAppUpdateReceiver;
     private final BroadcastReceiver mUserUpdateReceiver;
     private final ShutdownEventReceiver mShutdownEventReceiver;
@@ -158,12 +159,6 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
         mContext = context;
         mAlarmManager = (AlarmManager) mContext.getSystemService(Context.ALARM_SERVICE);
 
-        mAnomalyAlarmIntent = PendingIntent.getBroadcast(mContext, 0,
-                new Intent(mContext, AnomalyAlarmReceiver.class), 0);
-        mPullingAlarmIntent = PendingIntent.getBroadcast(
-                mContext, 0, new Intent(mContext, PullingAlarmReceiver.class), 0);
-        mPeriodicAlarmIntent = PendingIntent.getBroadcast(
-                mContext, 0, new Intent(mContext, PeriodicAlarmReceiver.class), 0);
         mAppUpdateReceiver = new AppUpdateReceiver();
         mUserUpdateReceiver = new BroadcastReceiver() {
             @Override
@@ -345,9 +340,9 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
         }
     }
 
-    public final static class AnomalyAlarmReceiver extends BroadcastReceiver {
+    public final static class AnomalyAlarmListener implements OnAlarmListener {
         @Override
-        public void onReceive(Context context, Intent intent) {
+        public void onAlarm() {
             Slog.i(TAG, "StatsCompanionService believes an anomaly has occurred at time "
                     + System.currentTimeMillis() + "ms.");
             synchronized (sStatsdLock) {
@@ -366,9 +361,9 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
         }
     }
 
-    public final static class PullingAlarmReceiver extends BroadcastReceiver {
+    public final static class PullingAlarmListener implements OnAlarmListener {
         @Override
-        public void onReceive(Context context, Intent intent) {
+        public void onAlarm() {
             if (DEBUG)
                 Slog.d(TAG, "Time to poll something.");
             synchronized (sStatsdLock) {
@@ -386,9 +381,9 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
         }
     }
 
-    public final static class PeriodicAlarmReceiver extends BroadcastReceiver {
+    public final static class PeriodicAlarmListener implements OnAlarmListener {
         @Override
-        public void onReceive(Context context, Intent intent) {
+        public void onAlarm() {
             if (DEBUG)
                 Slog.d(TAG, "Time to trigger periodic alarm.");
             synchronized (sStatsdLock) {
@@ -442,9 +437,9 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
         try {
             // using ELAPSED_REALTIME, not ELAPSED_REALTIME_WAKEUP, so if device is asleep, will
             // only fire when it awakens.
-            // This alarm is inexact, leaving its exactness completely up to the OS optimizations.
-            // AlarmManager will automatically cancel any previous mAnomalyAlarmIntent alarm.
-            mAlarmManager.setExact(AlarmManager.ELAPSED_REALTIME, timestampMs, mAnomalyAlarmIntent);
+            // AlarmManager will automatically cancel any previous mAnomalyAlarmListener alarm.
+            mAlarmManager.setExact(AlarmManager.ELAPSED_REALTIME, timestampMs, TAG + ".anomaly",
+                    mAnomalyAlarmListener, null);
         } finally {
             Binder.restoreCallingIdentity(callingToken);
         }
@@ -456,7 +451,7 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
         if (DEBUG) Slog.d(TAG, "Cancelling anomaly alarm");
         final long callingToken = Binder.clearCallingIdentity();
         try {
-            mAlarmManager.cancel(mAnomalyAlarmIntent);
+            mAlarmManager.cancel(mAnomalyAlarmListener);
         } finally {
             Binder.restoreCallingIdentity(callingToken);
         }
@@ -472,7 +467,8 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
         try {
             // using ELAPSED_REALTIME, not ELAPSED_REALTIME_WAKEUP, so if device is asleep, will
             // only fire when it awakens.
-            mAlarmManager.setExact(AlarmManager.ELAPSED_REALTIME, timestampMs, mPeriodicAlarmIntent);
+            mAlarmManager.setExact(AlarmManager.ELAPSED_REALTIME, timestampMs, TAG + ".periodic",
+                    mPeriodicAlarmListener, null);
         } finally {
             Binder.restoreCallingIdentity(callingToken);
         }
@@ -485,7 +481,7 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
             Slog.d(TAG, "Cancelling periodic alarm");
         final long callingToken = Binder.clearCallingIdentity();
         try {
-            mAlarmManager.cancel(mPeriodicAlarmIntent);
+            mAlarmManager.cancel(mPeriodicAlarmListener);
         } finally {
             Binder.restoreCallingIdentity(callingToken);
         }
@@ -493,31 +489,33 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
 
     @Override // Binder call
     public void setPullingAlarm(long nextPullTimeMs) {
-      enforceCallingPermission();
-      if (DEBUG)
-        Slog.d(TAG,
-            "Setting pulling alarm in about " + (nextPullTimeMs - SystemClock.elapsedRealtime()));
-      final long callingToken = Binder.clearCallingIdentity();
-      try {
-        // using ELAPSED_REALTIME, not ELAPSED_REALTIME_WAKEUP, so if device is asleep, will
-        // only fire when it awakens.
-        mAlarmManager.setExact(AlarmManager.ELAPSED_REALTIME, nextPullTimeMs, mPullingAlarmIntent);
-      } finally {
-        Binder.restoreCallingIdentity(callingToken);
-      }
+        enforceCallingPermission();
+        if (DEBUG) {
+            Slog.d(TAG, "Setting pulling alarm in about "
+                    + (nextPullTimeMs - SystemClock.elapsedRealtime()));
+        }
+        final long callingToken = Binder.clearCallingIdentity();
+        try {
+            // using ELAPSED_REALTIME, not ELAPSED_REALTIME_WAKEUP, so if device is asleep, will
+            // only fire when it awakens.
+            mAlarmManager.setExact(AlarmManager.ELAPSED_REALTIME, nextPullTimeMs, TAG + ".pull",
+                    mPullingAlarmListener, null);
+        } finally {
+            Binder.restoreCallingIdentity(callingToken);
+        }
     }
 
     @Override // Binder call
     public void cancelPullingAlarm() {
-      enforceCallingPermission();
-      if (DEBUG)
-        Slog.d(TAG, "Cancelling pulling alarm");
-      final long callingToken = Binder.clearCallingIdentity();
-      try {
-        mAlarmManager.cancel(mPullingAlarmIntent);
-      } finally {
-        Binder.restoreCallingIdentity(callingToken);
-      }
+        enforceCallingPermission();
+        if (DEBUG)
+            Slog.d(TAG, "Cancelling pulling alarm");
+        final long callingToken = Binder.clearCallingIdentity();
+        try {
+            mAlarmManager.cancel(mPullingAlarmListener);
+        } finally {
+            Binder.restoreCallingIdentity(callingToken);
+        }
     }
 
     private void addNetworkStats(

@@ -57,9 +57,7 @@ public class KeyguardSliceViewTest extends SysuiTestCase {
     public void showSlice_notifiesListener() {
         ListBuilder builder = new ListBuilder(getContext(), mSliceUri);
         AtomicBoolean notified = new AtomicBoolean();
-        mKeyguardSliceView.setContentChangeListener((hasHeader)-> {
-            notified.set(true);
-        });
+        mKeyguardSliceView.setContentChangeListener(()-> notified.set(true));
         mKeyguardSliceView.onChanged(builder.build());
         Assert.assertTrue("Listener should be notified about slice changes.",
                 notified.get());
@@ -68,9 +66,7 @@ public class KeyguardSliceViewTest extends SysuiTestCase {
     @Test
     public void showSlice_emptySliceNotifiesListener() {
         AtomicBoolean notified = new AtomicBoolean();
-        mKeyguardSliceView.setContentChangeListener((hasHeader)-> {
-            notified.set(true);
-        });
+        mKeyguardSliceView.setContentChangeListener(()-> notified.set(true));
         mKeyguardSliceView.onChanged(null);
         Assert.assertTrue("Listener should be notified about slice changes.",
                 notified.get());
@@ -92,9 +88,7 @@ public class KeyguardSliceViewTest extends SysuiTestCase {
     @Test
     public void refresh_replacesSliceContentAndNotifiesListener() {
         AtomicBoolean notified = new AtomicBoolean();
-        mKeyguardSliceView.setContentChangeListener((hasHeader)-> {
-            notified.set(true);
-        });
+        mKeyguardSliceView.setContentChangeListener(()-> notified.set(true));
         mKeyguardSliceView.refresh();
         Assert.assertTrue("Listener should be notified about slice changes.",
                 notified.get());

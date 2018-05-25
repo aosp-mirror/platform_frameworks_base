@@ -34,10 +34,10 @@
     <dimen name="status_bar_icon_size">@*android:dimen/status_bar_icon_size</dimen>
 
     <!-- Height of the battery icon in the status bar. -->
-    <dimen name="status_bar_battery_icon_height">14.5dp</dimen>
+    <dimen name="status_bar_battery_icon_height">13.0dp</dimen>
 
     <!-- Width of the battery icon in the status bar. -->
-    <dimen name="status_bar_battery_icon_width">9.5dp</dimen>
+    <dimen name="status_bar_battery_icon_width">8.5dp</dimen>
 
     <!-- The font size for the clock in the status bar. -->
     <dimen name="status_bar_clock_size">14sp</dimen>
@@ -201,7 +201,7 @@
     <dimen name="status_bar_padding_start">6dp</dimen>
 
     <!-- the padding on the end of the statusbar -->
-    <dimen name="status_bar_padding_end">8dp</dimen>
+    <dimen name="status_bar_padding_end">6dp</dimen>
 
     <!-- the radius of the overflow dot in the status bar -->
     <dimen name="overflow_dot_radius">1dp</dimen>
@@ -938,11 +938,13 @@
     <dimen name="rounded_corner_radius_bottom">0dp</dimen>
     <dimen name="rounded_corner_content_padding">0dp</dimen>
     <dimen name="nav_content_padding">0dp</dimen>
-    <dimen name="nav_quick_scrub_track_edge_padding">42dp</dimen>
+    <dimen name="nav_quick_scrub_track_edge_padding">24dp</dimen>
     <dimen name="nav_quick_scrub_track_thickness">2dp</dimen>
 
-    <!-- Home button padding for sizing -->
-    <dimen name="home_padding">16dp</dimen>
+    <!-- Navigation bar shadow params. -->
+    <dimen name="nav_key_button_shadow_offset_x">0dp</dimen>
+    <dimen name="nav_key_button_shadow_offset_y">1dp</dimen>
+    <dimen name="nav_key_button_shadow_radius">0.5dp</dimen>
 
     <!-- Smart reply button. Total height 48dp, visible height 32dp. -->
     <dimen name="smart_reply_button_spacing">8dp</dimen>
@@ -959,6 +961,10 @@
             needs to start with a guess for the maximum size. Currently two-line smart reply buttons
             add about 88dp of height to the notifications. -->
     <dimen name="smart_reply_button_max_height">100dp</dimen>
+
+    <!-- The extra height that we allow a notification with a remote input history to be taller than
+         the regular notification, when we have remote input history texts present. -->
+    <dimen name="remote_input_history_extra_height">60dp</dimen>
 
     <!-- Fingerprint Dialog values -->
     <dimen name="fingerprint_dialog_fp_icon_size">64dp</dimen>
@@ -1000,5 +1006,8 @@
     <dimen name="logout_button_padding_horizontal">16dp</dimen>
     <dimen name="logout_button_margin_bottom">12dp</dimen>
     <dimen name="logout_button_corner_radius">2dp</dimen>
+
+    <!-- How much into a DisplayCutout's bounds we can go, on each side -->
+    <dimen name="display_cutout_margin_consumption">0px</dimen>
 
 </resources>

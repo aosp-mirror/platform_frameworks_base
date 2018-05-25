@@ -176,9 +176,27 @@ public class TransportManager {
         return mTransportWhitelist;
     }
 
+    /** Returns the name of the selected transport or {@code null} if no transport selected. */
     @Nullable
     public String getCurrentTransportName() {
         return mCurrentTransportName;
+    }
+
+    /**
+     * Returns the {@link ComponentName} of the host service of the selected transport or
+     * {@code null} if no transport selected.
+     *
+     * @throws TransportNotRegisteredException if the selected transport is not registered.
+     */
+    @Nullable
+    public ComponentName getCurrentTransportComponent()
+            throws TransportNotRegisteredException {
+        synchronized (mTransportLock) {
+            if (mCurrentTransportName == null) {
+                return null;
+            }
+            return getRegisteredTransportComponentOrThrowLocked(mCurrentTransportName);
+        }
     }
 
     /**
@@ -322,6 +340,16 @@ public class TransportManager {
             description.dataManagementLabel = dataManagementLabel;
             Slog.d(TAG, "Transport " + name + " updated its attributes");
         }
+    }
+
+    @GuardedBy("mTransportLock")
+    private ComponentName getRegisteredTransportComponentOrThrowLocked(String transportName)
+            throws TransportNotRegisteredException {
+        ComponentName transportComponent = getRegisteredTransportComponentLocked(transportName);
+        if (transportComponent == null) {
+            throw new TransportNotRegisteredException(transportName);
+        }
+        return transportComponent;
     }
 
     @GuardedBy("mTransportLock")

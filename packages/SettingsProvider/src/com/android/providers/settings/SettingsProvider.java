@@ -2935,7 +2935,7 @@ public class SettingsProvider extends ContentProvider {
         }
 
         private final class UpgradeController {
-            private static final int SETTINGS_VERSION = 167;
+            private static final int SETTINGS_VERSION = 168;
 
             private final int mUserId;
 
@@ -3790,6 +3790,19 @@ public class SettingsProvider extends ContentProvider {
                                 SettingsState.SYSTEM_PACKAGE_NAME);
                     }
                     currentVersion = 167;
+                }
+
+                if (currentVersion == 167) {
+                    // Version 167: by default, vibrate for wireless charging
+                    final SettingsState globalSettings = getGlobalSettingsLocked();
+                    final Setting currentSetting = globalSettings.getSettingLocked(
+                            Global.CHARGING_VIBRATION_ENABLED);
+                    if (currentSetting.isNull()) {
+                        globalSettings.insertSettingLocked(
+                                Global.CHARGING_VIBRATION_ENABLED, "1",
+                                null, true, SettingsState.SYSTEM_PACKAGE_NAME);
+                    }
+                    currentVersion = 168;
                 }
 
                 // vXXX: Add new settings above this point.

@@ -16,6 +16,7 @@
 
 package android.provider;
 
+import android.annotation.Nullable;
 import android.content.ComponentName;
 import android.net.Uri;
 
@@ -36,14 +37,14 @@ public class SettingsValidators {
 
     public static final Validator ANY_STRING_VALIDATOR = new Validator() {
         @Override
-        public boolean validate(String value) {
+        public boolean validate(@Nullable String value) {
             return true;
         }
     };
 
     public static final Validator NON_NEGATIVE_INTEGER_VALIDATOR = new Validator() {
         @Override
-        public boolean validate(String value) {
+        public boolean validate(@Nullable String value) {
             try {
                 return Integer.parseInt(value) >= 0;
             } catch (NumberFormatException e) {
@@ -54,7 +55,7 @@ public class SettingsValidators {
 
     public static final Validator ANY_INTEGER_VALIDATOR = new Validator() {
         @Override
-        public boolean validate(String value) {
+        public boolean validate(@Nullable String value) {
             try {
                 Integer.parseInt(value);
                 return true;
@@ -66,7 +67,7 @@ public class SettingsValidators {
 
     public static final Validator URI_VALIDATOR = new Validator() {
         @Override
-        public boolean validate(String value) {
+        public boolean validate(@Nullable String value) {
             try {
                 Uri.decode(value);
                 return true;
@@ -76,16 +77,31 @@ public class SettingsValidators {
         }
     };
 
+    /**
+     * Does not allow a setting to have a null {@link ComponentName}. Use {@link
+     * SettingsValidators#NULLABLE_COMPONENT_NAME_VALIDATOR} instead if a setting can have a
+     * nullable {@link ComponentName}.
+     */
     public static final Validator COMPONENT_NAME_VALIDATOR = new Validator() {
         @Override
-        public boolean validate(String value) {
+        public boolean validate(@Nullable String value) {
             return value != null && ComponentName.unflattenFromString(value) != null;
+        }
+    };
+
+    /**
+     * Allows a setting to have a null {@link ComponentName}.
+     */
+    public static final Validator NULLABLE_COMPONENT_NAME_VALIDATOR = new Validator() {
+        @Override
+        public boolean validate(@Nullable String value) {
+            return value == null || COMPONENT_NAME_VALIDATOR.validate(value);
         }
     };
 
     public static final Validator PACKAGE_NAME_VALIDATOR = new Validator() {
         @Override
-        public boolean validate(String value) {
+        public boolean validate(@Nullable String value) {
             return value != null && isStringPackageName(value);
         }
 
@@ -122,7 +138,7 @@ public class SettingsValidators {
         private static final int MAX_IPV6_LENGTH = 45;
 
         @Override
-        public boolean validate(String value) {
+        public boolean validate(@Nullable String value) {
             if (value == null) {
                 return false;
             }
@@ -132,7 +148,7 @@ public class SettingsValidators {
 
     public static final Validator LOCALE_VALIDATOR = new Validator() {
         @Override
-        public boolean validate(String value) {
+        public boolean validate(@Nullable String value) {
             if (value == null) {
                 return false;
             }
@@ -147,7 +163,11 @@ public class SettingsValidators {
     };
 
     public interface Validator {
-        boolean validate(String value);
+        /**
+         * Returns whether the input value is valid. Subclasses should handle the case where the
+         * input value is {@code null}.
+         */
+        boolean validate(@Nullable String value);
     }
 
     public static final class DiscreteValueValidator implements Validator {
@@ -158,7 +178,7 @@ public class SettingsValidators {
         }
 
         @Override
-        public boolean validate(String value) {
+        public boolean validate(@Nullable String value) {
             return ArrayUtils.contains(mValues, value);
         }
     }
@@ -173,7 +193,7 @@ public class SettingsValidators {
         }
 
         @Override
-        public boolean validate(String value) {
+        public boolean validate(@Nullable String value) {
             try {
                 final int intValue = Integer.parseInt(value);
                 return intValue >= mMin && intValue <= mMax;
@@ -193,11 +213,11 @@ public class SettingsValidators {
         }
 
         @Override
-        public boolean validate(String value) {
+        public boolean validate(@Nullable String value) {
             try {
                 final float floatValue = Float.parseFloat(value);
                 return floatValue >= mMin && floatValue <= mMax;
-            } catch (NumberFormatException e) {
+            } catch (NumberFormatException | NullPointerException e) {
                 return false;
             }
         }
@@ -211,7 +231,7 @@ public class SettingsValidators {
         }
 
         @Override
-        public boolean validate(String value) {
+        public boolean validate(@Nullable String value) {
             if (value == null) {
                 return false;
             }
@@ -233,7 +253,7 @@ public class SettingsValidators {
         }
 
         @Override
-        public boolean validate(String value) {
+        public boolean validate(@Nullable String value) {
             if (value == null) {
                 return false;
             }

@@ -77,10 +77,9 @@ import java.util.stream.Stream;
 
 @RunWith(FrameworkRobolectricTestRunner.class)
 @Config(
-    manifest = Config.NONE,
-    sdk = 26,
-    shadows = {FrameworkShadowContextImpl.class}
-)
+        manifest = Config.NONE,
+        sdk = 26,
+        shadows = {FrameworkShadowContextImpl.class})
 @SystemLoaderPackages({"com.android.server.backup"})
 @Presubmit
 public class TransportManagerTest {
@@ -391,6 +390,36 @@ public class TransportManagerTest {
 
         assertThat(transport1).isNull();
         assertThat(transport2).isEqualTo(mTransportA1.transportName);
+    }
+
+    @Test
+    public void testGetCurrentTransportComponent() throws Exception {
+        TransportManager transportManager =
+                createTransportManagerWithRegisteredTransports(mTransportA1);
+
+        ComponentName transportComponent = transportManager.getCurrentTransportComponent();
+
+        assertThat(transportComponent).isEqualTo(mTransportA1.getTransportComponent());
+    }
+
+    @Test
+    public void testGetCurrentTransportComponent_whenNoTransportSelected() throws Exception {
+        TransportManager transportManager =
+                createTransportManagerWithRegisteredTransports(null, mTransportA1);
+
+        ComponentName transportComponent = transportManager.getCurrentTransportComponent();
+
+        assertThat(transportComponent).isNull();
+    }
+
+    @Test
+    public void testGetCurrentTransportComponent_whenTransportNotRegistered() throws Exception {
+        TransportManager transportManager =
+                createTransportManagerWithRegisteredTransports(mTransportA1.unregistered());
+
+        expectThrows(
+                TransportNotRegisteredException.class,
+                transportManager::getCurrentTransportComponent);
     }
 
     @Test
