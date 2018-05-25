@@ -44,9 +44,9 @@ namespace android {
 
 struct NativeFamilyBuilder {
     NativeFamilyBuilder(uint32_t langId, int variant)
-        : langId(langId), variant(static_cast<minikin::FontFamily::Variant>(variant)) {}
+        : langId(langId), variant(static_cast<minikin::FamilyVariant>(variant)) {}
     uint32_t langId;
-    minikin::FontFamily::Variant variant;
+    minikin::FamilyVariant variant;
     std::vector<minikin::Font> fonts;
     std::vector<minikin::FontVariation> axes;
 };

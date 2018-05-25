@@ -22,6 +22,11 @@
 #include <SkTypeface.h>
 #include <log/log.h>
 
+#include <minikin/Font.h>
+#include <minikin/MinikinExtent.h>
+#include <minikin/MinikinPaint.h>
+#include <minikin/MinikinRect.h>
+
 namespace android {
 
 MinikinFontSkia::MinikinFontSkia(sk_sp<SkTypeface> typeface, const void* fontData, size_t fontSize,
