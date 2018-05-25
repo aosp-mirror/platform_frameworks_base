@@ -1305,6 +1305,11 @@ public class UsageStatsService extends SystemService implements
         }
 
         @Override
+        public void reportExemptedSyncScheduled(String packageName, int userId) {
+            mAppStandby.postReportExemptedSyncScheduled(packageName, userId);
+        }
+
+        @Override
         public void reportExemptedSyncStart(String packageName, int userId) {
             mAppStandby.postReportExemptedSyncStart(packageName, userId);
         }

@@ -1310,10 +1310,10 @@ public final class ContentService extends IContentService.Stub {
                 : ActivityManager.PROCESS_STATE_NONEXISTENT;
 
         if (procState <= ActivityManager.PROCESS_STATE_TOP) {
-            return ContentResolver.SYNC_EXEMPTION_ACTIVE_WITH_TEMP;
+            return ContentResolver.SYNC_EXEMPTION_PROMOTE_BUCKET_WITH_TEMP;
         }
         if (procState <= ActivityManager.PROCESS_STATE_IMPORTANT_FOREGROUND) {
-            return ContentResolver.SYNC_EXEMPTION_ACTIVE;
+            return ContentResolver.SYNC_EXEMPTION_PROMOTE_BUCKET;
         }
         return ContentResolver.SYNC_EXEMPTION_NONE;
     }

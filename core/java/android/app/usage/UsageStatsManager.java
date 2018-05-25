@@ -184,7 +184,11 @@ public final class UsageStatsManager {
     /** @hide */
     public static final int REASON_SUB_USAGE_SLICE_PINNED_PRIV  = 0x000A;
     /** @hide */
-    public static final int REASON_SUB_USAGE_EXEMPTED_SYNC_START = 0x000B;
+    public static final int REASON_SUB_USAGE_EXEMPTED_SYNC_SCHEDULED_NON_DOZE = 0x000B;
+    /** @hide */
+    public static final int REASON_SUB_USAGE_EXEMPTED_SYNC_SCHEDULED_DOZE = 0x000C;
+    /** @hide */
+    public static final int REASON_SUB_USAGE_EXEMPTED_SYNC_START = 0x000D;
 
     /** @hide */
     public static final int REASON_SUB_PREDICTED_RESTORED       = 0x0001;
@@ -669,13 +673,19 @@ public final class UsageStatsManager {
                         sb.append("-sa");
                         break;
                     case REASON_SUB_USAGE_SLICE_PINNED:
-                        sb.append("slp");
+                        sb.append("-lp");
                         break;
                     case REASON_SUB_USAGE_SLICE_PINNED_PRIV:
-                        sb.append("slpp");
+                        sb.append("-lv");
+                        break;
+                    case REASON_SUB_USAGE_EXEMPTED_SYNC_SCHEDULED_NON_DOZE:
+                        sb.append("-en");
+                        break;
+                    case REASON_SUB_USAGE_EXEMPTED_SYNC_SCHEDULED_DOZE:
+                        sb.append("-ed");
                         break;
                     case REASON_SUB_USAGE_EXEMPTED_SYNC_START:
-                        sb.append("es");
+                        sb.append("-es");
                         break;
                 }
                 break;
