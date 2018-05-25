@@ -21,10 +21,12 @@
                 android:height="21dp"
                 android:viewportWidth="24.0"
                 android:viewportHeight="24.0">
-            <group android:name="icon" android:pivotX="12" android:pivotY="12">
+            <!-- Use scaleX to flip icon so arrows always point in the direction of motion -->
+            <group android:name="icon" android:pivotX="12" android:pivotY="12"
+                   android:scaleX="?attr/rotateButtonScaleX">
                 <!-- Tint color to be set directly -->
                 <path android:fillColor="#FFFFFFFF"
-                      android:pathData="M12,4c-0.06,0 -0.12,0.01 -0.18,0.01l1.09,-1.09L11.5,1.5L8,5l3.5,3.5l1.41,-1.41l-1.08,-1.08C11.89,6.01 11.95,6 12,6c3.31,0 6,2.69 6,6c0,1.7 -0.71,3.23 -1.85,4.32l1.41,1.41C19.06,16.28 20,14.25 20,12C20,7.59 16.41,4 12,4zM16,19l-3.5,3.5l-1.41,-1.41l1.1,-1.1C12.13,19.98 12.06,20 12,20c-4.41,0 -8,-3.59 -8,-8c0,-2.25 0.94,-4.28 2.43,-5.73l1.41,1.41C6.71,8.77 6,10.3 6,12c0,3.31 2.69,6 6,6c0.05,0 0.11,-0.01 0.16,-0.01l-1.07,-1.07l1.41,-1.41L16,19z"/>
+                      android:pathData="M19,12c0,1.72 -0.63,3.3 -1.66,4.52l-1.44,-1.44C16.58,14.23 17,13.17 17,12c0,-2.76 -2.24,-5 -5,-5c-0.06,0 -0.11,0.01 -0.17,0.01l1.08,1.08L11.5,9.5L8,6l3.5,-3.5l1.41,1.42l-1.09,1.09C11.88,5.01 11.94,5 12,5C15.87,5 19,8.13 19,12zM12.5,14.51l-1.41,1.41l1.06,1.06C12.1,16.99 12.05,17 12,17c-2.76,0 -5,-2.24 -5,-5c0,-1.17 0.42,-2.23 1.09,-3.08L6.66,7.48C5.62,8.7 5,10.28 5,12c0,3.87 3.13,7 7,7c0.06,0 0.13,-0.01 0.19,-0.01v0l-1.1,1.1l1.41,1.41L16,18L12.5,14.51z"/>
             </group>
         </vector>
     </aapt:attr>
