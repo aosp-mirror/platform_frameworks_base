@@ -5118,6 +5118,7 @@ Landroid/service/wallpaper/IWallpaperService$Stub;->asInterface(Landroid/os/IBin
 Landroid/service/wallpaper/WallpaperService$Engine;->mPendingXOffset:F
 Landroid/service/wallpaper/WallpaperService$Engine;->setFixedSizeAllowed(Z)V
 Landroid/service/wallpaper/WallpaperService;->MSG_WINDOW_RESIZED:I
+Landroid/speech/IRecognitionListener;->onEvent(ILandroid/os/Bundle;)V
 Landroid/speech/tts/TextToSpeech;->getCurrentEngine()Ljava/lang/String;
 Landroid/speech/tts/TextToSpeech;->mConnectingServiceConnection:Landroid/speech/tts/TextToSpeech$Connection;
 Landroid/speech/tts/TextToSpeech;->mCurrentEngine:Ljava/lang/String;
