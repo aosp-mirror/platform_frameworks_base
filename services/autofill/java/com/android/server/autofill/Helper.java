@@ -121,8 +121,11 @@ public final class Helper {
     @NonNull
     public static LogMaker newLogMaker(int category, String packageName,
             String servicePackageName, boolean compatMode) {
-        return newLogMaker(category, packageName, servicePackageName)
-                .addTaggedData(MetricsEvent.FIELD_AUTOFILL_COMPAT_MODE, compatMode ? 1 : 0);
+        final LogMaker log = newLogMaker(category, packageName, servicePackageName);
+        if (compatMode) {
+            log.addTaggedData(MetricsEvent.FIELD_AUTOFILL_COMPAT_MODE, 1);
+        }
+        return log;
     }
 
     public static void printlnRedactedText(@NonNull PrintWriter pw, @Nullable CharSequence text) {
@@ -191,6 +194,18 @@ public final class Helper {
             }
         }
         return urlBarNode;
+    }
+
+    /**
+     * Gets the value of a metric tag, or {@code 0} if not found or NaN.
+     */
+    static int getNumericValue(@NonNull LogMaker log, int tag) {
+        final Object value = log.getTaggedData(tag);
+        if (!(value instanceof Number)) {
+            return 0;
+        } else {
+            return ((Number) value).intValue();
+        }
     }
 
     private interface ViewNodeFilter {
