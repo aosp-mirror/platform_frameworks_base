@@ -374,7 +374,6 @@ public class TaskPositionerTests extends WindowTestsBase {
      * right things upon resizing when dragged from the top left corner.
      */
     @Test
-    @Ignore
     public void testPortraitPreservedWindowResizingDragTopLeft() throws Exception {
         final Rect r = new Rect(330, 100, 630, 600);
         mDimBounds.set(r);
@@ -390,8 +389,8 @@ public class TaskPositionerTests extends WindowTestsBase {
                 mPositioner.getWindowDragBounds());
 
         // Drag to a good portrait size.
-        mPositioner.resizeDrag(500.0f, 0.0f);
-        assertBoundsEquals(new Rect(500 + MOUSE_DELTA_X, MOUSE_DELTA_Y, r.right, r.bottom),
+        mPositioner.resizeDrag(400.0f, 0.0f);
+        assertBoundsEquals(new Rect(400 + MOUSE_DELTA_X, MOUSE_DELTA_Y, r.right, r.bottom),
                 mPositioner.getWindowDragBounds());
 
         // Drag to a too small size for the height and the the width shrinking.
