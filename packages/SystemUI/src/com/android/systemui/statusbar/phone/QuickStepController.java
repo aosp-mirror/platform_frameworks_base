@@ -29,14 +29,13 @@ import android.animation.AnimatorSet;
 import android.animation.ArgbEvaluator;
 import android.animation.ObjectAnimator;
 import android.animation.PropertyValuesHolder;
-import android.animation.ValueAnimator;
-import android.animation.ValueAnimator.AnimatorUpdateListener;
 import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Canvas;
+import android.graphics.Color;
 import android.graphics.Matrix;
-import android.graphics.Paint;
 import android.graphics.Rect;
+import android.graphics.drawable.Drawable;
 import android.os.Handler;
 import android.os.RemoteException;
 import android.util.FloatProperty;
@@ -55,6 +54,7 @@ import com.android.systemui.plugins.statusbar.phone.NavGesture.GestureHelper;
 import com.android.systemui.shared.recents.IOverviewProxy;
 import com.android.systemui.shared.recents.utilities.Utilities;
 import com.android.systemui.shared.system.NavigationBarCompat;
+import com.android.internal.graphics.ColorUtils;
 
 /**
  * Class to detect gestures on the navigation bar and implement quick scrub.
@@ -63,7 +63,8 @@ public class QuickStepController implements GestureHelper {
 
     private static final String TAG = "QuickStepController";
     private static final int ANIM_IN_DURATION_MS = 150;
-    private static final int ANIM_OUT_DURATION_MS = 100;
+    private static final int ANIM_OUT_DURATION_MS = 134;
+    private static final float TRACK_SCALE = 0.95f;
 
     private NavigationBarView mNavigationBarView;
 
@@ -76,6 +77,7 @@ public class QuickStepController implements GestureHelper {
     private boolean mIsVertical;
     private boolean mIsRTL;
     private float mTrackAlpha;
+    private float mTrackScale = TRACK_SCALE;
     private int mLightTrackColor;
     private int mDarkTrackColor;
     private float mDarkIntensity;
@@ -85,7 +87,7 @@ public class QuickStepController implements GestureHelper {
 
     private final Handler mHandler = new Handler();
     private final Rect mTrackRect = new Rect();
-    private final Paint mTrackPaint = new Paint();
+    private final Drawable mTrackDrawable;
     private final OverviewProxyService mOverviewEventSender;
     private final int mTrackThickness;
     private final int mTrackEndPadding;
@@ -105,6 +107,20 @@ public class QuickStepController implements GestureHelper {
         @Override
         public Float get(QuickStepController controller) {
             return mTrackAlpha;
+        }
+    };
+
+    private final FloatProperty<QuickStepController> mTrackScaleProperty =
+            new FloatProperty<QuickStepController>("TrackScale") {
+        @Override
+        public void setValue(QuickStepController controller, float scale) {
+            mTrackScale = scale;
+            mNavigationBarView.invalidate();
+        }
+
+        @Override
+        public Float get(QuickStepController controller) {
+            return mTrackScale;
         }
     };
 
@@ -139,7 +155,7 @@ public class QuickStepController implements GestureHelper {
         mOverviewEventSender = Dependency.get(OverviewProxyService.class);
         mTrackThickness = res.getDimensionPixelSize(R.dimen.nav_quick_scrub_track_thickness);
         mTrackEndPadding = res.getDimensionPixelSize(R.dimen.nav_quick_scrub_track_edge_padding);
-        mTrackPaint.setAlpha(0);
+        mTrackDrawable = context.getDrawable(R.drawable.qs_scrubber_track).mutate();
     }
 
     public void setComponents(NavigationBarView navigationBarView) {
@@ -296,9 +312,17 @@ public class QuickStepController implements GestureHelper {
         }
         int color = (int) mTrackColorEvaluator.evaluate(mDarkIntensity, mLightTrackColor,
                 mDarkTrackColor);
-        mTrackPaint.setColor(color);
-        mTrackPaint.setAlpha((int) (mTrackPaint.getAlpha() * mTrackAlpha));
-        canvas.drawRect(mTrackRect, mTrackPaint);
+        int colorAlpha = ColorUtils.setAlphaComponent(color,
+                (int) (Color.alpha(color) * mTrackAlpha));
+        mTrackDrawable.setTint(colorAlpha);
+
+        // Scale the track, but apply the inverse scale from the nav bar
+        canvas.save();
+        canvas.scale(mTrackScale / mNavigationBarView.getScaleX(),
+                1f / mNavigationBarView.getScaleY(),
+                mTrackRect.centerX(), mTrackRect.centerY());
+        mTrackDrawable.draw(canvas);
+        canvas.restore();
     }
 
     @Override
@@ -322,6 +346,7 @@ public class QuickStepController implements GestureHelper {
             x2 = x1 + width - 2 * mTrackEndPadding;
         }
         mTrackRect.set(x1, y1, x2, y2);
+        mTrackDrawable.setBounds(mTrackRect);
     }
 
     @Override
@@ -387,7 +412,9 @@ public class QuickStepController implements GestureHelper {
             mLightTrackColor = mContext.getColor(R.color.quick_step_track_background_light);
             mDarkTrackColor = mContext.getColor(R.color.quick_step_track_background_dark);
 
-            ObjectAnimator trackAnimator = ObjectAnimator.ofFloat(this, mTrackAlphaProperty, 1f);
+            ObjectAnimator trackAnimator = ObjectAnimator.ofPropertyValuesHolder(this,
+                    PropertyValuesHolder.ofFloat(mTrackAlphaProperty, 1f),
+                    PropertyValuesHolder.ofFloat(mTrackScaleProperty, 1f));
             trackAnimator.setInterpolator(ALPHA_IN);
             trackAnimator.setDuration(ANIM_IN_DURATION_MS);
             ObjectAnimator navBarAnimator = ObjectAnimator.ofFloat(this, mNavBarAlphaProperty, 0f);
@@ -438,7 +465,9 @@ public class QuickStepController implements GestureHelper {
             mTrackAnimator.cancel();
         }
 
-        ObjectAnimator trackAnimator = ObjectAnimator.ofFloat(this, mTrackAlphaProperty, 0f);
+        ObjectAnimator trackAnimator = ObjectAnimator.ofPropertyValuesHolder(this,
+                PropertyValuesHolder.ofFloat(mTrackAlphaProperty, 0f),
+                PropertyValuesHolder.ofFloat(mTrackScaleProperty, TRACK_SCALE));
         trackAnimator.setInterpolator(ALPHA_OUT);
         trackAnimator.setDuration(ANIM_OUT_DURATION_MS);
         ObjectAnimator navBarAnimator = ObjectAnimator.ofFloat(this, mNavBarAlphaProperty, 1f);
