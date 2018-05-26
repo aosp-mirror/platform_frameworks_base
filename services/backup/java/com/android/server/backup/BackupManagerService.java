@@ -353,6 +353,11 @@ public class BackupManagerService implements BackupManagerServiceInterface {
         mAlarmManager = alarmManager;
     }
 
+    @VisibleForTesting
+    void setPowerManager(PowerManager powerManager) {
+        mPowerManager = powerManager;
+    }
+
     public void setBackupManagerBinder(IBackupManager backupManagerBinder) {
         mBackupManagerBinder = backupManagerBinder;
     }
@@ -2410,25 +2415,30 @@ public class BackupManagerService implements BackupManagerServiceInterface {
     public void backupNow() {
         mContext.enforceCallingOrSelfPermission(android.Manifest.permission.BACKUP, "backupNow");
 
-        final PowerSaveState result =
-                mPowerManager.getPowerSaveState(ServiceType.KEYVALUE_BACKUP);
-        if (result.batterySaverEnabled) {
-            if (DEBUG) Slog.v(TAG, "Not running backup while in battery save mode");
-            KeyValueBackupJob.schedule(mContext, mConstants);   // try again in several hours
-        } else {
-            if (DEBUG) Slog.v(TAG, "Scheduling immediate backup pass");
-            synchronized (mQueueLock) {
-                // Fire the intent that kicks off the whole shebang...
-                try {
-                    mRunBackupIntent.send();
-                } catch (PendingIntent.CanceledException e) {
-                    // should never happen
-                    Slog.e(TAG, "run-backup intent cancelled!");
-                }
+        long oldId = Binder.clearCallingIdentity();
+        try {
+            final PowerSaveState result =
+                    mPowerManager.getPowerSaveState(ServiceType.KEYVALUE_BACKUP);
+            if (result.batterySaverEnabled) {
+                if (DEBUG) Slog.v(TAG, "Not running backup while in battery save mode");
+                KeyValueBackupJob.schedule(mContext, mConstants);   // try again in several hours
+            } else {
+                if (DEBUG) Slog.v(TAG, "Scheduling immediate backup pass");
+                synchronized (mQueueLock) {
+                    // Fire the intent that kicks off the whole shebang...
+                    try {
+                        mRunBackupIntent.send();
+                    } catch (PendingIntent.CanceledException e) {
+                        // should never happen
+                        Slog.e(TAG, "run-backup intent cancelled!");
+                    }
 
-                // ...and cancel any pending scheduled job, because we've just superseded it
-                KeyValueBackupJob.cancel(mContext);
+                    // ...and cancel any pending scheduled job, because we've just superseded it
+                    KeyValueBackupJob.cancel(mContext);
+                }
             }
+        } finally {
+            Binder.restoreCallingIdentity(oldId);
         }
     }
 

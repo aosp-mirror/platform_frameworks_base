@@ -565,10 +565,12 @@ public class RemoteInputView extends LinearLayout implements View.OnClickListene
 
         @Override
         public boolean onKeyPreIme(int keyCode, KeyEvent event) {
-            if (event.getKeyCode() == KeyEvent.KEYCODE_BACK) {
-                mRemoteInputView.mRemoteInputQuickSettingsDisabler.setRemoteInputActive(false);
+            // When BACK key is pressed, this method would be invoked twice.
+            if (event.getKeyCode() == KeyEvent.KEYCODE_BACK &&
+                    event.getAction() == KeyEvent.ACTION_UP) {
+                defocusIfNeeded(true /* animate */);
             }
-            return super.dispatchKeyEvent(event);
+            return super.onKeyPreIme(keyCode, event);
         }
 
         @Override

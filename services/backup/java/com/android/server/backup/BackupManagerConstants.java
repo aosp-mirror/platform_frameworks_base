@@ -32,7 +32,7 @@ import com.android.internal.annotations.VisibleForTesting;
  * <p>The backup manager constants are encoded as a key value list separated by commas and stored as
  * a Settings.Secure.
  */
-class BackupManagerConstants extends KeyValueSettingObserver {
+public class BackupManagerConstants extends KeyValueSettingObserver {
     private static final String TAG = "BackupManagerConstants";
     private static final String SETTING = Settings.Secure.BACKUP_MANAGER_CONSTANTS;
 

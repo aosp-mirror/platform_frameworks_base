@@ -737,6 +737,7 @@ Landroid/app/IWallpaperManager;->getHeightHint()I
 Landroid/app/IWallpaperManager;->getWallpaper(Ljava/lang/String;Landroid/app/IWallpaperManagerCallback;ILandroid/os/Bundle;I)Landroid/os/ParcelFileDescriptor;
 Landroid/app/IWallpaperManager;->getWallpaperInfo(I)Landroid/app/WallpaperInfo;
 Landroid/app/IWallpaperManager;->getWidthHint()I
+Landroid/app/IWallpaperManager;->hasNamedWallpaper(Ljava/lang/String;)Z
 Landroid/app/IWallpaperManager;->setWallpaperComponent(Landroid/content/ComponentName;)V
 Landroid/app/IWallpaperManagerCallback$Stub;-><init>()V
 Landroid/app/IWallpaperManagerCallback;->onWallpaperChanged()V
@@ -919,6 +920,7 @@ Landroid/app/Service;->setForeground(Z)V
 Landroid/app/ServiceConnectionLeaked;-><init>(Ljava/lang/String;)V
 Landroid/app/SharedPreferencesImpl;-><init>(Ljava/io/File;I)V
 Landroid/app/SharedPreferencesImpl;->mFile:Ljava/io/File;
+Landroid/app/SharedPreferencesImpl;->startLoadFromDisk()V
 Landroid/app/SharedPreferencesImpl;->startReloadIfChangedUnexpectedly()V
 Landroid/app/StatusBarManager;-><init>(Landroid/content/Context;)V
 Landroid/app/StatusBarManager;->collapsePanels()V
@@ -5075,6 +5077,7 @@ Landroid/service/wallpaper/IWallpaperService$Stub;->asInterface(Landroid/os/IBin
 Landroid/service/wallpaper/WallpaperService$Engine;->mPendingXOffset:F
 Landroid/service/wallpaper/WallpaperService$Engine;->setFixedSizeAllowed(Z)V
 Landroid/service/wallpaper/WallpaperService;->MSG_WINDOW_RESIZED:I
+Landroid/speech/IRecognitionListener;->onEvent(ILandroid/os/Bundle;)V
 Landroid/speech/tts/TextToSpeech;->getCurrentEngine()Ljava/lang/String;
 Landroid/speech/tts/TextToSpeech;->mConnectingServiceConnection:Landroid/speech/tts/TextToSpeech$Connection;
 Landroid/speech/tts/TextToSpeech;->mCurrentEngine:Ljava/lang/String;
@@ -5392,6 +5395,7 @@ Landroid/telephony/SmsMessage;->mWrappedSmsMessage:Lcom/android/internal/telepho
 Landroid/telephony/SmsMessage;->setSubId(I)V
 Landroid/telephony/SmsMessage;->useCdmaFormatForMoSms()Z
 Landroid/telephony/SmsMessage;->useCdmaFormatForMoSms(I)Z
+Landroid/telephony/SubscriptionInfo;->getNameSource()I
 Landroid/telephony/SubscriptionManager;-><init>(Landroid/content/Context;)V
 Landroid/telephony/SubscriptionManager;->CONTENT_URI:Landroid/net/Uri;
 Landroid/telephony/SubscriptionManager;->DEFAULT_SUBSCRIPTION_ID:I
