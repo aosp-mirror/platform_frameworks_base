@@ -117,6 +117,7 @@ message ActivityRecordProto {
     optional bool visible = 4;
     optional bool front_of_task = 5;
     optional int32 proc_id = 6;
+    optional bool translucent = 7;
 }
 
 message KeyguardControllerProto {

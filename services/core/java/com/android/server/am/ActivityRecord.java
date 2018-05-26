@@ -115,6 +115,7 @@ import static com.android.server.am.ActivityRecordProto.FRONT_OF_TASK;
 import static com.android.server.am.ActivityRecordProto.IDENTIFIER;
 import static com.android.server.am.ActivityRecordProto.PROC_ID;
 import static com.android.server.am.ActivityRecordProto.STATE;
+import static com.android.server.am.ActivityRecordProto.TRANSLUCENT;
 import static com.android.server.am.ActivityRecordProto.VISIBLE;
 import static com.android.server.policy.WindowManagerPolicy.NAV_BAR_LEFT;
 import static com.android.server.wm.IdentifierProto.HASH_CODE;
@@ -2980,6 +2981,7 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
         if (app != null) {
             proto.write(PROC_ID, app.pid);
         }
+        proto.write(TRANSLUCENT, !fullscreen);
         proto.end(token);
     }
 }
