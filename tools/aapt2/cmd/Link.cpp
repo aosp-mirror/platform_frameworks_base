@@ -2120,6 +2120,12 @@ int Link(const std::vector<StringPiece>& args, IDiagnostics* diagnostics) {
           .OptionalFlag("--version-name",
                         "Version name to inject into the AndroidManifest.xml if none is present.",
                         &options.manifest_fixer_options.version_name_default)
+          .OptionalSwitch("--replace-version",
+                         "If --version-code and/or --version-name are specified, these\n"
+                         "values will replace any value already in the manifest. By\n"
+                         "default, nothing is changed if the manifest already defines\n"
+                         "these attributes.",
+                         &options.manifest_fixer_options.replace_version)
           .OptionalFlag("--compile-sdk-version-code",
                         "Version code (integer) to inject into the AndroidManifest.xml if none is\n"
                         "present.",
