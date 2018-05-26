@@ -1188,6 +1188,7 @@ public class ActivityInfo extends ComponentInfo implements Parcelable {
      * Determines whether the {@link Activity} is considered translucent or floating.
      * @hide
      */
+    @TestApi
     public static boolean isTranslucentOrFloating(TypedArray attributes) {
         final boolean isTranslucent =
                 attributes.getBoolean(com.android.internal.R.styleable.Window_windowIsTranslucent,
