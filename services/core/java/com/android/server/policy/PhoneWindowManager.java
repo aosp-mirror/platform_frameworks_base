@@ -6161,7 +6161,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     sendSystemKeyToStatusBarAsync(event.getKeyCode());
 
                     TelecomManager telecomManager = getTelecommService();
-                    if (telecomManager != null) {
+                    if (telecomManager != null && !mHandleVolumeKeysInWM) {
+                        // When {@link #mHandleVolumeKeysInWM} is set, volume key events
+                        // should be dispatched to WM.
                         if (telecomManager.isRinging()) {
                             // If an incoming call is ringing, either VOLUME key means
                             // "silence ringer".  We handle these keys here, rather than
