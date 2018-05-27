@@ -138,6 +138,15 @@ public class Binder implements IBinder {
     }
 
     /**
+     * Dump proxy debug information.
+     *
+     * @hide
+     */
+    public static void dumpProxyDebugInfo() {
+        BinderProxy.dumpProxyDebugInfo();
+    }
+
+    /**
      * Check if binder transaction tracing is enabled.
      *
      * @hide
@@ -942,8 +951,7 @@ final class BinderProxy implements IBinder {
                     // about to crash.
                     final int totalUnclearedSize = unclearedSize();
                     if (totalUnclearedSize >= CRASH_AT_SIZE) {
-                        dumpProxyInterfaceCounts();
-                        dumpPerUidProxyCounts();
+                        dumpProxyDebugInfo();
                         Runtime.getRuntime().gc();
                         throw new AssertionError("Binder ProxyMap has too many entries: "
                                 + totalSize + " (total), " + totalUnclearedSize + " (uncleared), "
@@ -1026,6 +1034,14 @@ final class BinderProxy implements IBinder {
     }
 
     private static ProxyMap sProxyMap = new ProxyMap();
+
+    /**
+      * @hide
+      */
+    public static void dumpProxyDebugInfo() {
+        sProxyMap.dumpProxyInterfaceCounts();
+        sProxyMap.dumpPerUidProxyCounts();
+    }
 
     /**
      * Return a BinderProxy for IBinder.
