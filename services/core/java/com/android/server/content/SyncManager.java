@@ -1656,7 +1656,7 @@ public class SyncManager {
         }
 
         if (syncOperation.syncExemptionFlag
-                == ContentResolver.SYNC_EXEMPTION_ACTIVE_WITH_TEMP) {
+                == ContentResolver.SYNC_EXEMPTION_PROMOTE_BUCKET_WITH_TEMP) {
             DeviceIdleController.LocalService dic =
                     LocalServices.getService(DeviceIdleController.LocalService.class);
             if (dic != null) {
@@ -1665,6 +1665,15 @@ public class SyncManager {
                         mConstants.getKeyExemptionTempWhitelistDurationInSeconds() * 1000,
                         UserHandle.getUserId(syncOperation.owningUid),
                         /* sync=*/ false, "sync by top app");
+            }
+        }
+
+        if (syncOperation.isAppStandbyExempted()) {
+            final UsageStatsManagerInternal usmi = LocalServices.getService(
+                    UsageStatsManagerInternal.class);
+            if (usmi != null) {
+                usmi.reportExemptedSyncScheduled(syncOperation.owningPackage,
+                        UserHandle.getUserId(syncOperation.owningUid));
             }
         }
 

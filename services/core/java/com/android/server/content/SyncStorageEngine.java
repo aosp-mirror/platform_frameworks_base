@@ -341,6 +341,7 @@ public class SyncStorageEngine {
         boolean initialization;
         Bundle extras;
         int reason;
+        int syncExemptionFlag;
     }
 
     public static class DayStats {
@@ -1142,6 +1143,7 @@ public class SyncStorageEngine {
             item.reason = op.reason;
             item.extras = op.extras;
             item.event = EVENT_START;
+            item.syncExemptionFlag = op.syncExemptionFlag;
             mSyncHistory.add(0, item);
             while (mSyncHistory.size() > MAX_HISTORY) {
                 mSyncHistory.remove(mSyncHistory.size()-1);
@@ -1262,6 +1264,20 @@ public class SyncStorageEngine {
             SyncManager.formatDurationHMS(event, elapsedTime);
             event.append(" Reason=");
             event.append(SyncOperation.reasonToString(null, item.reason));
+            if (item.syncExemptionFlag != ContentResolver.SYNC_EXEMPTION_NONE) {
+                event.append(" Exemption=");
+                switch (item.syncExemptionFlag) {
+                    case ContentResolver.SYNC_EXEMPTION_PROMOTE_BUCKET:
+                        event.append("fg");
+                        break;
+                    case ContentResolver.SYNC_EXEMPTION_PROMOTE_BUCKET_WITH_TEMP:
+                        event.append("top");
+                        break;
+                    default:
+                        event.append(item.syncExemptionFlag);
+                        break;
+                }
+            }
             event.append(" Extras=");
             SyncOperation.extrasToStringBuilder(item.extras, event);
 

@@ -13943,6 +13943,43 @@ public class PackageManagerService extends IPackageManager.Stub
         return false;
     }
 
+    @Override
+    public boolean setSystemAppInstallState(String packageName, boolean installed, int userId) {
+        enforceSystemOrPhoneCaller("setSystemAppInstallState");
+        PackageSetting pkgSetting = mSettings.mPackages.get(packageName);
+        // The target app should always be in system
+        if (pkgSetting == null || !pkgSetting.isSystem()) {
+            return false;
+        }
+        // Check if the install state is the same
+        if (pkgSetting.getInstalled(userId) == installed) {
+            return false;
+        }
+
+        long callingId = Binder.clearCallingIdentity();
+        try {
+            if (installed) {
+                // install the app from uninstalled state
+                installExistingPackageAsUser(
+                        packageName,
+                        userId,
+                        0 /*installFlags*/,
+                        PackageManager.INSTALL_REASON_DEVICE_SETUP);
+                return true;
+            }
+
+            // uninstall the app from installed state
+            deletePackageVersioned(
+                    new VersionedPackage(packageName, PackageManager.VERSION_CODE_HIGHEST),
+                    new LegacyPackageDeleteObserver(null).getBinder(),
+                    userId,
+                    PackageManager.DELETE_SYSTEM_APP);
+            return true;
+        } finally {
+            Binder.restoreCallingIdentity(callingId);
+        }
+    }
+
     private void sendApplicationHiddenForUser(String packageName, PackageSetting pkgSetting,
             int userId) {
         final PackageRemovedInfo info = new PackageRemovedInfo(this);
@@ -14007,10 +14044,16 @@ public class PackageManagerService extends IPackageManager.Stub
     @Override
     public int installExistingPackageAsUser(String packageName, int userId, int installFlags,
             int installReason) {
-        mContext.enforceCallingOrSelfPermission(android.Manifest.permission.INSTALL_PACKAGES,
-                null);
-        PackageSetting pkgSetting;
         final int callingUid = Binder.getCallingUid();
+        if (mContext.checkCallingOrSelfPermission(android.Manifest.permission.INSTALL_PACKAGES)
+                != PackageManager.PERMISSION_GRANTED
+                && mContext.checkCallingOrSelfPermission(
+                        android.Manifest.permission.INSTALL_EXISTING_PACKAGES)
+                != PackageManager.PERMISSION_GRANTED) {
+            throw new SecurityException("Neither user " + callingUid + " nor current process has "
+                    + android.Manifest.permission.INSTALL_PACKAGES + ".");
+        }
+        PackageSetting pkgSetting;
         mPermissionManager.enforceCrossUserPermission(callingUid, userId,
                 true /* requireFullPermission */, true /* checkShell */,
                 "installExistingPackage for user " + userId);

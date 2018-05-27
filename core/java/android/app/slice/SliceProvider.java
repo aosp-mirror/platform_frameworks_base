@@ -15,6 +15,8 @@
  */
 package android.app.slice;
 
+import static android.app.slice.Slice.SUBTYPE_COLOR;
+
 import android.annotation.NonNull;
 import android.app.PendingIntent;
 import android.content.ComponentName;
@@ -29,6 +31,7 @@ import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.ProviderInfo;
 import android.database.ContentObserver;
 import android.database.Cursor;
+import android.graphics.drawable.Icon;
 import android.net.Uri;
 import android.os.Binder;
 import android.os.Bundle;
@@ -39,6 +42,8 @@ import android.os.StrictMode;
 import android.os.StrictMode.ThreadPolicy;
 import android.util.ArraySet;
 import android.util.Log;
+import android.util.TypedValue;
+import android.view.ContextThemeWrapper;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -472,11 +477,24 @@ public abstract class SliceProvider extends ContentProvider {
         }
         Slice.Builder parent = new Slice.Builder(sliceUri);
         Slice.Builder childAction = new Slice.Builder(parent)
+                .addIcon(Icon.createWithResource(context,
+                        com.android.internal.R.drawable.ic_permission), null,
+                        Collections.emptyList())
                 .addHints(Arrays.asList(Slice.HINT_TITLE, Slice.HINT_SHORTCUT))
                 .addAction(action, new Slice.Builder(parent).build(), null);
 
+        TypedValue tv = new TypedValue();
+        new ContextThemeWrapper(context, android.R.style.Theme_DeviceDefault_Light)
+                .getTheme().resolveAttribute(android.R.attr.colorAccent, tv, true);
+        int deviceDefaultAccent = tv.data;
+
         parent.addSubSlice(new Slice.Builder(sliceUri.buildUpon().appendPath("permission").build())
+                .addIcon(Icon.createWithResource(context,
+                        com.android.internal.R.drawable.ic_arrow_forward), null,
+                        Collections.emptyList())
                 .addText(getPermissionString(context, callingPackage), null,
+                        Collections.emptyList())
+                .addInt(deviceDefaultAccent, SUBTYPE_COLOR,
                         Collections.emptyList())
                 .addSubSlice(childAction.build(), null)
                 .build(), null);

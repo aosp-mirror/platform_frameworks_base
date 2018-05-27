@@ -23,6 +23,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.Dialog;
 import android.app.PendingIntent;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentSender;
@@ -133,14 +134,14 @@ final class SaveUi {
     private final CharSequence mSubTitle;
     private final PendingUi mPendingUi;
     private final String mServicePackageName;
-    private final String mPackageName;
+    private final ComponentName mComponentName;
     private final boolean mCompatMode;
 
     private boolean mDestroyed;
 
     SaveUi(@NonNull Context context, @NonNull PendingUi pendingUi,
            @NonNull CharSequence serviceLabel, @NonNull Drawable serviceIcon,
-           @Nullable String servicePackageName, @NonNull String packageName,
+           @Nullable String servicePackageName, @NonNull ComponentName componentName,
            @NonNull SaveInfo info, @NonNull ValueFinder valueFinder,
            @NonNull OverlayControl overlayControl, @NonNull OnSaveListener listener,
            boolean compatMode) {
@@ -148,7 +149,7 @@ final class SaveUi {
         mListener = new OneTimeListener(listener);
         mOverlayControl = overlayControl;
         mServicePackageName = servicePackageName;
-        mPackageName = packageName;
+        mComponentName = componentName;
         mCompatMode = compatMode;
 
         context = new ContextThemeWrapper(context, THEME_ID);
@@ -412,12 +413,12 @@ final class SaveUi {
     }
 
     private LogMaker newLogMaker(int category, int saveType) {
-        return Helper.newLogMaker(category, mPackageName, mServicePackageName, mCompatMode)
-                .addTaggedData(MetricsEvent.FIELD_AUTOFILL_SAVE_TYPE, saveType);
+        return newLogMaker(category).addTaggedData(MetricsEvent.FIELD_AUTOFILL_SAVE_TYPE, saveType);
     }
 
     private LogMaker newLogMaker(int category) {
-        return Helper.newLogMaker(category, mPackageName, mServicePackageName, mCompatMode);
+        return Helper.newLogMaker(category, mComponentName, mServicePackageName,
+                mPendingUi.sessionId, mCompatMode);
     }
 
     private void writeLog(int category, int saveType) {
@@ -505,7 +506,7 @@ final class SaveUi {
         pw.print(prefix); pw.print("subtitle: "); pw.println(mSubTitle);
         pw.print(prefix); pw.print("pendingUi: "); pw.println(mPendingUi);
         pw.print(prefix); pw.print("service: "); pw.println(mServicePackageName);
-        pw.print(prefix); pw.print("app: "); pw.println(mPackageName);
+        pw.print(prefix); pw.print("app: "); pw.println(mComponentName.toShortString());
         pw.print(prefix); pw.print("compat mode: "); pw.println(mCompatMode);
 
         final View view = mDialog.getWindow().getDecorView();
