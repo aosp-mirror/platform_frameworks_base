@@ -11253,6 +11253,14 @@ public final class Settings {
         public static final String EMERGENCY_AFFORDANCE_NEEDED = "emergency_affordance_needed";
 
         /**
+         * Enable faster emergency phone call feature.
+         * The value is a boolean (1 or 0).
+         * @hide
+         */
+        public static final String FASTER_EMERGENCY_PHONE_CALL_ENABLED =
+                "faster_emergency_phone_call_enabled";
+
+        /**
          * See RIL_PreferredNetworkType in ril.h
          * @hide
          */
