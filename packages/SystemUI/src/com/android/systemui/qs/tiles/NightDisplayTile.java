@@ -25,6 +25,7 @@ import android.metrics.LogMaker;
 import android.provider.Settings;
 import android.service.quicksettings.Tile;
 import androidx.annotation.StringRes;
+import android.text.TextUtils;
 import android.util.Log;
 import android.widget.Switch;
 
@@ -101,12 +102,14 @@ public class NightDisplayTile extends QSTileImpl<BooleanState>
     @Override
     protected void handleUpdateState(BooleanState state, Object arg) {
         state.value = mController.isActivated();
-        state.label = state.contentDescription =
-                mContext.getString(R.string.quick_settings_night_display_label);
+        state.label = mContext.getString(R.string.quick_settings_night_display_label);
         state.icon = ResourceIcon.get(R.drawable.ic_qs_night_display_on);
         state.expandedAccessibilityClassName = Switch.class.getName();
         state.state = state.value ? Tile.STATE_ACTIVE : Tile.STATE_INACTIVE;
         state.secondaryLabel = getSecondaryLabel(state.value);
+        state.contentDescription = TextUtils.isEmpty(state.secondaryLabel)
+                ? state.label
+                : TextUtils.concat(state.label, ", ", state.secondaryLabel);
     }
 
     /**
