@@ -91,8 +91,6 @@ import com.android.server.DeviceIdleController;
 import com.android.server.LocalServices;
 import com.android.server.net.BaseNetworkObserver;
 
-import libcore.io.IoUtils;
-
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -110,6 +108,8 @@ import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.concurrent.atomic.AtomicInteger;
+
+import libcore.io.IoUtils;
 
 /**
  * @hide
@@ -1056,6 +1056,18 @@ public class Vpn {
             final Set<UidRange> addedRanges = createUserAndRestrictedProfilesRanges(mUserHandle,
                     /* allowedApplications */ null,
                     /* disallowedApplications */ Collections.singletonList(mPackage));
+
+            // The UID range of the first user (0-99999) would block the IPSec traffic, which comes
+            // directly from the kernel and is marked as uid=0. So we adjust the range to allow
+            // it through (b/69873852).
+            for (UidRange range : addedRanges) {
+                if (range.start == 0) {
+                    addedRanges.remove(range);
+                    if (range.stop != 0) {
+                        addedRanges.add(new UidRange(1, range.stop));
+                    }
+                }
+            }
 
             removedRanges.removeAll(addedRanges);
             addedRanges.removeAll(mBlockedUsers);
