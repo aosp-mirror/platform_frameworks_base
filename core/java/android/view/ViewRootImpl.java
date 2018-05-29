@@ -1626,12 +1626,25 @@ public final class ViewRootImpl implements ViewParent,
                         contentInsets.top + outsets.top, contentInsets.right + outsets.right,
                         contentInsets.bottom + outsets.bottom);
             }
+            contentInsets = ensureInsetsNonNegative(contentInsets, "content");
+            stableInsets = ensureInsetsNonNegative(stableInsets, "stable");
             mLastWindowInsets = new WindowInsets(contentInsets,
                     null /* windowDecorInsets */, stableInsets,
                     mContext.getResources().getConfiguration().isScreenRound(),
                     mAttachInfo.mAlwaysConsumeNavBar, displayCutout);
         }
         return mLastWindowInsets;
+    }
+
+    private Rect ensureInsetsNonNegative(Rect insets, String kind) {
+        if (insets.left < 0  || insets.top < 0  || insets.right < 0  || insets.bottom < 0) {
+            Log.wtf(mTag, "Negative " + kind + "Insets: " + insets + ", mFirst=" + mFirst);
+            return new Rect(Math.max(0, insets.left),
+                    Math.max(0, insets.top),
+                    Math.max(0, insets.right),
+                    Math.max(0, insets.bottom));
+        }
+        return insets;
     }
 
     void dispatchApplyInsets(View host) {
