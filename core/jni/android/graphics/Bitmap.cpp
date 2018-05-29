@@ -62,7 +62,7 @@ public:
     }
 
     bool valid() {
-        return mBitmap;
+        return mBitmap != nullptr;
     }
 
     Bitmap& bitmap() {
