@@ -336,13 +336,14 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
                 int x = (int) event.getX();
                 int y = (int) event.getY();
                 mDownHitTarget = HIT_TARGET_NONE;
-                if (mBackButtonBounds.contains(x, y)) {
+                if (getBackButton().isVisible() && mBackButtonBounds.contains(x, y)) {
                     mDownHitTarget = HIT_TARGET_BACK;
-                } else if (mHomeButtonBounds.contains(x, y)) {
+                } else if (getHomeButton().isVisible() && mHomeButtonBounds.contains(x, y)) {
                     mDownHitTarget = HIT_TARGET_HOME;
-                } else if (mRecentsButtonBounds.contains(x, y)) {
+                } else if (getRecentsButton().isVisible() && mRecentsButtonBounds.contains(x, y)) {
                     mDownHitTarget = HIT_TARGET_OVERVIEW;
-                } else if (mRotationButtonBounds.contains(x, y)) {
+                } else if (getRotateSuggestionButton().isVisible()
+                        && mRotationButtonBounds.contains(x, y)) {
                     mDownHitTarget = HIT_TARGET_ROTATION;
                 }
                 break;
