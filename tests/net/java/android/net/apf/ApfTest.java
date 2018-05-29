@@ -77,7 +77,7 @@ import org.mockito.MockitoAnnotations;
 @SmallTest
 public class ApfTest {
     private static final int TIMEOUT_MS = 500;
-    private final static int MIN_APF_VERSION = 2;
+    private static final int MIN_APF_VERSION = 2;
 
     @Mock IpConnectivityLog mLog;
     @Mock Context mContext;
@@ -90,20 +90,30 @@ public class ApfTest {
     }
 
     // Expected return codes from APF interpreter.
-    private final static int PASS = 1;
-    private final static int DROP = 0;
+    private static final int PASS = 1;
+    private static final int DROP = 0;
     // Interpreter will just accept packets without link layer headers, so pad fake packet to at
     // least the minimum packet size.
-    private final static int MIN_PKT_SIZE = 15;
+    private static final int MIN_PKT_SIZE = 15;
 
     private static final ApfCapabilities MOCK_APF_CAPABILITIES =
       new ApfCapabilities(2, 1700, ARPHRD_ETHER);
 
-    private final static boolean DROP_MULTICAST = true;
-    private final static boolean ALLOW_MULTICAST = false;
+    private static final boolean DROP_MULTICAST = true;
+    private static final boolean ALLOW_MULTICAST = false;
 
-    private final static boolean DROP_802_3_FRAMES = true;
-    private final static boolean ALLOW_802_3_FRAMES = false;
+    private static final boolean DROP_802_3_FRAMES = true;
+    private static final boolean ALLOW_802_3_FRAMES = false;
+
+    // Constants for opcode encoding
+    private static final byte LI_OP   = (byte)(13 << 3);
+    private static final byte LDDW_OP = (byte)(22 << 3);
+    private static final byte STDW_OP = (byte)(23 << 3);
+    private static final byte SIZE0   = (byte)(0 << 1);
+    private static final byte SIZE8   = (byte)(1 << 1);
+    private static final byte SIZE16  = (byte)(2 << 1);
+    private static final byte SIZE32  = (byte)(3 << 1);
+    private static final byte R1 = 1;
 
     private static ApfConfiguration getDefaultConfig() {
         ApfFilter.ApfConfiguration config = new ApfConfiguration();
@@ -636,29 +646,28 @@ public class ApfTest {
      */
     @Test
     public void testImmediateEncoding() throws IllegalInstructionException {
-        final int LI_OPCODE = 13 << 3;
         ApfGenerator gen;
 
         // 0-byte immediate: li R0, 0
-        gen = new ApfGenerator(3);
+        gen = new ApfGenerator(4);
         gen.addLoadImmediate(Register.R0, 0);
-        assertProgramEquals(new byte[]{LI_OPCODE | (0 << 1)}, gen.generate());
+        assertProgramEquals(new byte[]{LI_OP | SIZE0}, gen.generate());
 
         // 1-byte immediate: li R0, 42
-        gen = new ApfGenerator(3);
+        gen = new ApfGenerator(4);
         gen.addLoadImmediate(Register.R0, 42);
-        assertProgramEquals(new byte[]{LI_OPCODE | (1 << 1), 42}, gen.generate());
+        assertProgramEquals(new byte[]{LI_OP | SIZE8, 42}, gen.generate());
 
         // 2-byte immediate: li R1, 0x1234
-        gen = new ApfGenerator(3);
+        gen = new ApfGenerator(4);
         gen.addLoadImmediate(Register.R1, 0x1234);
-        assertProgramEquals(new byte[]{LI_OPCODE | (2 << 1) | 1 , 0x12, 0x34}, gen.generate());
+        assertProgramEquals(new byte[]{LI_OP | SIZE16 | R1, 0x12, 0x34}, gen.generate());
 
         // 4-byte immediate: li R0, 0x12345678
         gen = new ApfGenerator(3);
         gen.addLoadImmediate(Register.R0, 0x12345678);
         assertProgramEquals(
-                new byte[]{LI_OPCODE | (3 << 1), 0x12, 0x34, 0x56, 0x78},
+                new byte[]{LI_OP | SIZE32, 0x12, 0x34, 0x56, 0x78},
                 gen.generate());
     }
 
@@ -667,28 +676,61 @@ public class ApfTest {
      */
     @Test
     public void testNegativeImmediateEncoding() throws IllegalInstructionException {
-        final int LI_OPCODE = 13 << 3;
         ApfGenerator gen;
 
         // 1-byte negative immediate: li R0, -42
         gen = new ApfGenerator(3);
         gen.addLoadImmediate(Register.R0, -42);
-        assertProgramEquals(new byte[]{LI_OPCODE | (1 << 1), -42}, gen.generate());
+        assertProgramEquals(new byte[]{LI_OP | SIZE8, -42}, gen.generate());
 
-        // 2-byte negative immediate: li R1, -0x1234
+        // 2-byte negative immediate: li R1, -0x1122
         gen = new ApfGenerator(3);
         gen.addLoadImmediate(Register.R1, -0x1122);
-        assertProgramEquals(new byte[]{LI_OPCODE | (2 << 1) | 1, (byte)0xEE, (byte)0xDE},
+        assertProgramEquals(new byte[]{LI_OP | SIZE16 | R1, (byte)0xEE, (byte)0xDE},
                 gen.generate());
 
         // 4-byte negative immediate: li R0, -0x11223344
         gen = new ApfGenerator(3);
         gen.addLoadImmediate(Register.R0, -0x11223344);
         assertProgramEquals(
-                new byte[]{LI_OPCODE | (3 << 1), (byte)0xEE, (byte)0xDD, (byte)0xCC, (byte)0xBC},
+                new byte[]{LI_OP | SIZE32, (byte)0xEE, (byte)0xDD, (byte)0xCC, (byte)0xBC},
                 gen.generate());
     }
 
+    /**
+     * Test that the generator correctly emits positive and negative immediates for LDDW/STDW.
+     */
+    @Test
+    public void testLoadStoreDataEncoding() throws IllegalInstructionException {
+        ApfGenerator gen;
+
+        // Load data with no offset: lddw R0, [0 + r1]
+        gen = new ApfGenerator(3);
+        gen.addLoadData(Register.R0, 0);
+        assertProgramEquals(new byte[]{LDDW_OP | SIZE0}, gen.generate());
+
+        // Store data with 8bit negative offset: lddw r0, [-42 + r1]
+        gen = new ApfGenerator(3);
+        gen.addStoreData(Register.R0, -42);
+        assertProgramEquals(new byte[]{STDW_OP | SIZE8, -42}, gen.generate());
+
+        // Store data to R1 with 16bit negative offset: stdw r1, [-0x1122 + r0]
+        gen = new ApfGenerator(3);
+        gen.addStoreData(Register.R1, -0x1122);
+        assertProgramEquals(new byte[]{STDW_OP | SIZE16 | R1, (byte)0xEE, (byte)0xDE},
+                gen.generate());
+
+        // Load data to R1 with 32bit negative offset: lddw r1, [0xDEADBEEF + r0]
+        gen = new ApfGenerator(3);
+        gen.addLoadData(Register.R1, 0xDEADBEEF);
+        assertProgramEquals(
+                new byte[]{LDDW_OP | SIZE32 | R1, (byte)0xDE, (byte)0xAD, (byte)0xBE, (byte)0xEF},
+                gen.generate());
+    }
+
+    /**
+     * Test that the interpreter correctly executes STDW with a negative 8bit offset
+     */
     @Test
     public void testApfDataWrite() throws IllegalInstructionException, Exception {
         byte[] packet = new byte[MIN_PKT_SIZE];
@@ -712,12 +754,15 @@ public class ApfTest {
         assertDataMemoryContents(PASS, gen.generate(), packet, data, expected_data);
     }
 
+    /**
+     * Test that the interpreter correctly executes LDDW with a negative 16bit offset
+     */
     @Test
     public void testApfDataRead() throws IllegalInstructionException, Exception {
         // Program that DROPs if address 10 (-6) contains 0x87654321.
         ApfGenerator gen = new ApfGenerator(3);
-        gen.addLoadImmediate(Register.R1, 10);
-        gen.addLoadData(Register.R0, -16);  // 10 + -16 = -6 (offset +10 with data_len=16)
+        gen.addLoadImmediate(Register.R1, 1000);
+        gen.addLoadData(Register.R0, -1006);  // 1000 + -1006 = -6 (offset +10 with data_len=16)
         gen.addJumpIfR0Equals(0x87654321, gen.DROP_LABEL);
         byte[] program = gen.generate();
         byte[] packet = new byte[MIN_PKT_SIZE];
@@ -737,6 +782,11 @@ public class ApfTest {
         assertDataMemoryContents(DROP, program, packet, data, expected_data);
     }
 
+    /**
+     * Test that the interpreter correctly executes LDDW followed by a STDW.
+     * To cover a few more edge cases, LDDW has a 0bit offset, while STDW has a positive 8bit
+     * offset.
+     */
     @Test
     public void testApfDataReadModifyWrite() throws IllegalInstructionException, Exception {
         ApfGenerator gen = new ApfGenerator(3);
@@ -844,7 +894,7 @@ public class ApfTest {
     }
 
     private static class TestApfFilter extends ApfFilter {
-        public final static byte[] MOCK_MAC_ADDR = {1,2,3,4,5,6};
+        public static final byte[] MOCK_MAC_ADDR = {1,2,3,4,5,6};
 
         private FileDescriptor mWriteSocket;
         private final long mFixedTimeMs = SystemClock.elapsedRealtime();
