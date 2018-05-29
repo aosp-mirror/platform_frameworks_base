@@ -68,6 +68,7 @@ import android.util.Slog;
 import android.util.SparseArray;
 import android.util.SparseIntArray;
 import com.android.internal.annotations.GuardedBy;
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.DumpUtils;
 import com.android.internal.util.IndentingPrintWriter;
 import com.android.server.SystemService;
@@ -290,6 +291,9 @@ public class HdmiControlService extends SystemService {
     @Nullable
     private PowerManager mPowerManager;
 
+    @Nullable
+    private Looper mIoLooper;
+
     // Last input port before switching to the MHL port. Should switch back to this port
     // when the mobile device sends the request one touch play with off.
     // Gets invalidated if we go to other port/input.
@@ -383,13 +387,18 @@ public class HdmiControlService extends SystemService {
 
     @Override
     public void onStart() {
-        mIoThread.start();
+        if (mIoLooper == null) {
+            mIoThread.start();
+            mIoLooper = mIoThread.getLooper();
+        }
         mPowerStatus = HdmiControlManager.POWER_STATUS_TRANSIENT_TO_ON;
         mProhibitMode = false;
         mHdmiControlEnabled = readBooleanSetting(Global.HDMI_CONTROL_ENABLED, true);
         mMhlInputChangeEnabled = readBooleanSetting(Global.MHL_INPUT_SWITCHING_ENABLED, true);
 
-        mCecController = HdmiCecController.create(this);
+        if (mCecController == null) {
+            mCecController = HdmiCecController.create(this);
+        }
         if (mCecController != null) {
             if (mHdmiControlEnabled) {
                 initializeCec(INITIATED_BY_BOOT_UP);
@@ -406,7 +415,9 @@ public class HdmiControlService extends SystemService {
         mMhlDevices = Collections.emptyList();
 
         initPortInfo();
-        mMessageValidator = new HdmiCecMessageValidator(this);
+        if (mMessageValidator == null) {
+            mMessageValidator = new HdmiCecMessageValidator(this);
+        }
         publishBinderService(Context.HDMI_CONTROL_SERVICE, new BinderService());
 
         if (mCecController != null) {
@@ -422,6 +433,11 @@ public class HdmiControlService extends SystemService {
             registerContentObserver();
         }
         mMhlController.setOption(OPTION_MHL_SERVICE_CONTROL, ENABLED);
+    }
+
+    @VisibleForTesting
+    void setCecController(HdmiCecController cecController) {
+        mCecController = cecController;
     }
 
     @Override
@@ -747,8 +763,19 @@ public class HdmiControlService extends SystemService {
      *
      * <p>Declared as package-private.
      */
+    @Nullable
     Looper getIoLooper() {
-        return mIoThread.getLooper();
+        return mIoLooper;
+    }
+
+    @VisibleForTesting
+    void setIoLooper(Looper ioLooper) {
+        mIoLooper = ioLooper;
+    }
+
+    @VisibleForTesting
+    void setMessageValidator(HdmiCecMessageValidator messageValidator) {
+        mMessageValidator = messageValidator;
     }
 
     /**

@@ -16,6 +16,7 @@
 
 package com.android.server.hdmi;
 
+import android.annotation.Nullable;
 import android.hardware.hdmi.HdmiDeviceInfo;
 import android.hardware.input.InputManager;
 import android.os.Handler;
@@ -31,6 +32,7 @@ import com.android.internal.annotations.GuardedBy;
 import com.android.internal.util.IndentingPrintWriter;
 import com.android.server.hdmi.HdmiAnnotations.ServiceThreadOnly;
 
+import com.android.server.hdmi.HdmiControlService.SendMessageCallback;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
@@ -249,11 +251,11 @@ abstract class HdmiCecLocalDevice {
             case Constants.MESSAGE_SET_MENU_LANGUAGE:
                 return handleSetMenuLanguage(message);
             case Constants.MESSAGE_GIVE_PHYSICAL_ADDRESS:
-                return handleGivePhysicalAddress();
+                return handleGivePhysicalAddress(null);
             case Constants.MESSAGE_GIVE_OSD_NAME:
                 return handleGiveOsdName(message);
             case Constants.MESSAGE_GIVE_DEVICE_VENDOR_ID:
-                return handleGiveDeviceVendorId();
+                return handleGiveDeviceVendorId(null);
             case Constants.MESSAGE_GET_CEC_VERSION:
                 return handleGetCecVersion(message);
             case Constants.MESSAGE_REPORT_PHYSICAL_ADDRESS:
@@ -325,23 +327,23 @@ abstract class HdmiCecLocalDevice {
     }
 
     @ServiceThreadOnly
-    protected boolean handleGivePhysicalAddress() {
+    protected boolean handleGivePhysicalAddress(@Nullable SendMessageCallback callback) {
         assertRunOnServiceThread();
 
         int physicalAddress = mService.getPhysicalAddress();
         HdmiCecMessage cecMessage = HdmiCecMessageBuilder.buildReportPhysicalAddressCommand(
                 mAddress, physicalAddress, mDeviceType);
-        mService.sendCecCommand(cecMessage);
+        mService.sendCecCommand(cecMessage, callback);
         return true;
     }
 
     @ServiceThreadOnly
-    protected boolean handleGiveDeviceVendorId() {
+    protected boolean handleGiveDeviceVendorId(@Nullable SendMessageCallback callback) {
         assertRunOnServiceThread();
         int vendorId = mService.getVendorId();
         HdmiCecMessage cecMessage = HdmiCecMessageBuilder.buildDeviceVendorIdCommand(
                 mAddress, vendorId);
-        mService.sendCecCommand(cecMessage);
+        mService.sendCecCommand(cecMessage, callback);
         return true;
     }
 
