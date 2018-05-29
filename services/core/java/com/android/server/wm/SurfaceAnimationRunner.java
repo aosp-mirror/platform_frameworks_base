@@ -206,6 +206,9 @@ class SurfaceAnimationRunner {
                 }
             }
         });
+        a.mAnim = anim;
+        mRunningAnimations.put(a.mLeash, a);
+
         anim.start();
         if (a.mAnimSpec.canSkipFirstFrame()) {
             // If we can skip the first frame, we start one frame later.
@@ -215,8 +218,6 @@ class SurfaceAnimationRunner {
         // Immediately start the animation by manually applying an animation frame. Otherwise, the
         // start time would only be set in the next frame, leading to a delay.
         anim.doAnimationFrame(mChoreographer.getFrameTime());
-        a.mAnim = anim;
-        mRunningAnimations.put(a.mLeash, a);
     }
 
     private void applyTransformation(RunningAnimation a, Transaction t, long currentPlayTime) {
