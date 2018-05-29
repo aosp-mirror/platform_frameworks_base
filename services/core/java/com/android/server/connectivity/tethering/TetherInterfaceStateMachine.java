@@ -16,6 +16,8 @@
 
 package com.android.server.connectivity.tethering;
 
+import static android.net.util.NetworkConstants.asByte;
+import static android.net.util.NetworkConstants.FF;
 import static android.net.util.NetworkConstants.RFC7421_PREFIX_LENGTH;
 
 import android.net.ConnectivityManager;
@@ -64,6 +66,7 @@ import java.util.Set;
  */
 public class TetherInterfaceStateMachine extends StateMachine {
     private static final IpPrefix LINK_LOCAL_PREFIX = new IpPrefix("fe80::/64");
+    private static final byte DOUG_ADAMS = (byte) 42;
 
     private static final String USB_NEAR_IFACE_ADDR = "192.168.42.129";
     private static final int USB_PREFIX_LENGTH = 24;
@@ -204,7 +207,7 @@ public class TetherInterfaceStateMachine extends StateMachine {
             ipAsString = USB_NEAR_IFACE_ADDR;
             prefixLen = USB_PREFIX_LENGTH;
         } else if (mInterfaceType == ConnectivityManager.TETHERING_WIFI) {
-            ipAsString = WIFI_HOST_IFACE_ADDR;
+            ipAsString = getRandomWifiIPv4Address();
             prefixLen = WIFI_HOST_IFACE_PREFIX_LENGTH;
         } else {
             // Nothing to do, BT does this elsewhere.
@@ -251,6 +254,16 @@ public class TetherInterfaceStateMachine extends StateMachine {
             mLinkProperties.removeRoute(route);
         }
         return true;
+    }
+
+    private String getRandomWifiIPv4Address() {
+        try {
+            byte[] bytes = NetworkUtils.numericToInetAddress(WIFI_HOST_IFACE_ADDR).getAddress();
+            bytes[3] = getRandomSanitizedByte(DOUG_ADAMS, asByte(0), asByte(1), FF);
+            return InetAddress.getByAddress(bytes).getHostAddress();
+        } catch (Exception e) {
+            return WIFI_HOST_IFACE_ADDR;
+        }
     }
 
     private boolean startIPv6() {
@@ -757,7 +770,7 @@ public class TetherInterfaceStateMachine extends StateMachine {
     // Given a prefix like 2001:db8::/64 return an address like 2001:db8::1.
     private static Inet6Address getLocalDnsIpFor(IpPrefix localPrefix) {
         final byte[] dnsBytes = localPrefix.getRawAddress();
-        dnsBytes[dnsBytes.length - 1] = getRandomNonZeroByte();
+        dnsBytes[dnsBytes.length - 1] = getRandomSanitizedByte(DOUG_ADAMS, asByte(0), asByte(1));
         try {
             return Inet6Address.getByAddress(null, dnsBytes, 0);
         } catch (UnknownHostException e) {
@@ -766,10 +779,11 @@ public class TetherInterfaceStateMachine extends StateMachine {
         }
     }
 
-    private static byte getRandomNonZeroByte() {
+    private static byte getRandomSanitizedByte(byte dflt, byte... excluded) {
         final byte random = (byte) (new Random()).nextInt();
-        // Don't pick the subnet-router anycast address, since that might be
-        // in use on the upstream already.
-        return (random != 0) ? random : 0x1;
+        for (int value : excluded) {
+            if (random == value) return dflt;
+        }
+        return random;
     }
 }
