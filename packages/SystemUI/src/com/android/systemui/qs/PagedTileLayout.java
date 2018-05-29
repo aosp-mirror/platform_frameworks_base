@@ -184,9 +184,15 @@ public class PagedTileLayout extends ViewPager implements QSTileLayout {
             return;
         }
         boolean selected = mLastExpansion == 1f;
+
+        // Disable accessibility temporarily while we update selected state purely for the
+        // marquee. This will ensure that accessibility doesn't announce the TYPE_VIEW_SELECTED
+        // event on any of the children.
+        setImportantForAccessibility(View.IMPORTANT_FOR_ACCESSIBILITY_NO_HIDE_DESCENDANTS);
         for (int i = 0; i < mPages.size(); i++) {
             mPages.get(i).setSelected(i == getCurrentItem() ? selected : false);
         }
+        setImportantForAccessibility(View.IMPORTANT_FOR_ACCESSIBILITY_AUTO);
     }
 
     public void setPageListener(PageListener listener) {
