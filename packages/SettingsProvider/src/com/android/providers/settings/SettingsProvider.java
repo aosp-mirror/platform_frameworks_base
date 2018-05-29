@@ -2935,7 +2935,7 @@ public class SettingsProvider extends ContentProvider {
         }
 
         private final class UpgradeController {
-            private static final int SETTINGS_VERSION = 168;
+            private static final int SETTINGS_VERSION = 169;
 
             private final int mUserId;
 
@@ -3803,6 +3803,21 @@ public class SettingsProvider extends ContentProvider {
                                 null, true, SettingsState.SYSTEM_PACKAGE_NAME);
                     }
                     currentVersion = 168;
+                }
+
+                if (currentVersion == 168) {
+                    // Version 168: by default, vibrate for phone calls
+                    final SettingsState systemSettings = getSystemSettingsLocked(userId);
+                    final Setting currentSetting = systemSettings.getSettingLocked(
+                            Settings.System.VIBRATE_WHEN_RINGING);
+                    if (currentSetting.isNull()) {
+                        systemSettings.insertSettingLocked(
+                                Settings.System.VIBRATE_WHEN_RINGING,
+                                getContext().getResources().getBoolean(
+                                        R.bool.def_vibrate_when_ringing) ? "1" : "0",
+                                null, true, SettingsState.SYSTEM_PACKAGE_NAME);
+                    }
+                    currentVersion = 169;
                 }
 
                 // vXXX: Add new settings above this point.
