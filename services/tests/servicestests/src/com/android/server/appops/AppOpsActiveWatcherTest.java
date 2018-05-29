@@ -18,6 +18,8 @@ package com.android.server.appops;
 
 import static com.google.common.truth.Truth.assertThat;
 
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.reset;
@@ -35,6 +37,8 @@ import android.support.test.runner.AndroidJUnit4;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
+
+import java.util.List;
 
 /**
  * Tests app ops version upgrades
@@ -105,6 +109,46 @@ public class AppOpsActiveWatcherTest {
 
         // We should not be getting any callbacks
         verifyNoMoreInteractions(listener);
+    }
+
+    @Test
+    public void testIsRunning() throws Exception {
+        final AppOpsManager appOpsManager = getContext().getSystemService(AppOpsManager.class);
+        // Start the op
+        appOpsManager.startOp(AppOpsManager.OP_CAMERA);
+
+        assertTrue("Camera should be running", isCameraOn(appOpsManager));
+
+        // Finish the op
+        appOpsManager.finishOp(AppOpsManager.OP_CAMERA);
+
+        assertFalse("Camera should not be running", isCameraOn(appOpsManager));
+    }
+
+    private boolean isCameraOn(AppOpsManager appOpsManager) {
+        List<AppOpsManager.PackageOps> packages
+                = appOpsManager.getPackagesForOps(new int[] {AppOpsManager.OP_CAMERA});
+        // AppOpsManager can return null when there is no requested data.
+        if (packages != null) {
+            final int numPackages = packages.size();
+            for (int packageInd = 0; packageInd < numPackages; packageInd++) {
+                AppOpsManager.PackageOps packageOp = packages.get(packageInd);
+                List<AppOpsManager.OpEntry> opEntries = packageOp.getOps();
+                if (opEntries != null) {
+                    final int numOps = opEntries.size();
+                    for (int opInd = 0; opInd < numOps; opInd++) {
+                        AppOpsManager.OpEntry opEntry = opEntries.get(opInd);
+                        if (opEntry.getOp() == AppOpsManager.OP_CAMERA) {
+                            if (opEntry.isRunning()) {
+                                return true;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        return false;
     }
 
     private static Context getContext() {

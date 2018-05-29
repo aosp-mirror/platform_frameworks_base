@@ -1555,6 +1555,7 @@ public class AppOpsManager {
         private final long[] mRejectTimes;
         private final int mDuration;
         private final int mProxyUid;
+        private final boolean mRunning;
         private final String mProxyPackageName;
 
         public OpEntry(int op, int mode, long time, long rejectTime, int duration,
@@ -1566,12 +1567,13 @@ public class AppOpsManager {
             mTimes[0] = time;
             mRejectTimes[0] = rejectTime;
             mDuration = duration;
+            mRunning = duration == -1;
             mProxyUid = proxyUid;
             mProxyPackageName = proxyPackage;
         }
 
         public OpEntry(int op, int mode, long[] times, long[] rejectTimes, int duration,
-                int proxyUid, String proxyPackage) {
+                boolean running, int proxyUid, String proxyPackage) {
             mOp = op;
             mMode = mode;
             mTimes = new long[_NUM_UID_STATE];
@@ -1579,8 +1581,14 @@ public class AppOpsManager {
             System.arraycopy(times, 0, mTimes, 0, _NUM_UID_STATE);
             System.arraycopy(rejectTimes, 0, mRejectTimes, 0, _NUM_UID_STATE);
             mDuration = duration;
+            mRunning = running;
             mProxyUid = proxyUid;
             mProxyPackageName = proxyPackage;
+        }
+
+        public OpEntry(int op, int mode, long[] times, long[] rejectTimes, int duration,
+                int proxyUid, String proxyPackage) {
+            this(op, mode, times, rejectTimes, duration, duration == -1, proxyUid, proxyPackage);
         }
 
         public int getOp() {
@@ -1632,7 +1640,7 @@ public class AppOpsManager {
         }
 
         public boolean isRunning() {
-            return mDuration == -1;
+            return mRunning;
         }
 
         public int getDuration() {
@@ -1659,6 +1667,7 @@ public class AppOpsManager {
             dest.writeLongArray(mTimes);
             dest.writeLongArray(mRejectTimes);
             dest.writeInt(mDuration);
+            dest.writeBoolean(mRunning);
             dest.writeInt(mProxyUid);
             dest.writeString(mProxyPackageName);
         }
@@ -1669,6 +1678,7 @@ public class AppOpsManager {
             mTimes = source.createLongArray();
             mRejectTimes = source.createLongArray();
             mDuration = source.readInt();
+            mRunning = source.readBoolean();
             mProxyUid = source.readInt();
             mProxyPackageName = source.readString();
         }
