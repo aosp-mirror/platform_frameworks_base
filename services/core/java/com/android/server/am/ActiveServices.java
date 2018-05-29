@@ -119,7 +119,7 @@ public final class ActiveServices {
 
     // How long the startForegroundService() grace period is to get around to
     // calling startForeground() before we ANR + stop it.
-    static final int SERVICE_START_FOREGROUND_TIMEOUT = 5*1000;
+    static final int SERVICE_START_FOREGROUND_TIMEOUT = 10*1000;
 
     final ActivityManagerService mAm;
 
