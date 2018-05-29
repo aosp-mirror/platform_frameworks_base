@@ -812,11 +812,12 @@ public class AppOpsService extends IAppOpsService.Stub {
             resOps = new ArrayList<>();
             for (int j=0; j<pkgOps.size(); j++) {
                 Op curOp = pkgOps.valueAt(j);
-                long duration = curOp.duration == -1
+                final boolean running = curOp.duration == -1;
+                long duration = running
                         ? (elapsedNow - curOp.startRealtime)
                         : curOp.duration;
                 resOps.add(new AppOpsManager.OpEntry(curOp.op, curOp.mode, curOp.time,
-                        curOp.rejectTime, (int) duration, curOp.proxyUid,
+                        curOp.rejectTime, (int) duration, running, curOp.proxyUid,
                         curOp.proxyPackageName));
             }
         } else {
@@ -826,11 +827,12 @@ public class AppOpsService extends IAppOpsService.Stub {
                     if (resOps == null) {
                         resOps = new ArrayList<>();
                     }
-                    long duration = curOp.duration == -1
+                    final boolean running = curOp.duration == -1;
+                    final long duration = running
                             ? (elapsedNow - curOp.startRealtime)
                             : curOp.duration;
                     resOps.add(new AppOpsManager.OpEntry(curOp.op, curOp.mode, curOp.time,
-                            curOp.rejectTime, (int) duration, curOp.proxyUid,
+                            curOp.rejectTime, (int) duration, running, curOp.proxyUid,
                             curOp.proxyPackageName));
                 }
             }
