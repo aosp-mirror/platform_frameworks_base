@@ -44,6 +44,7 @@
 #include <minikin/GraphemeBreak.h>
 #include <minikin/LocaleList.h>
 #include <minikin/Measurement.h>
+#include <minikin/MinikinPaint.h>
 #include <unicode/utf16.h>
 
 #include <cassert>
@@ -594,7 +595,7 @@ namespace PaintGlue {
         // restore the original settings.
         paint->setTextSkewX(saveSkewX);
         paint->setFakeBoldText(savefakeBold);
-        if (paint->getFamilyVariant() == minikin::FontFamily::Variant::ELEGANT) {
+        if (paint->getFamilyVariant() == minikin::FamilyVariant::ELEGANT) {
             SkScalar size = paint->getTextSize();
             metrics->fTop = -size * kElegantTop / 2048;
             metrics->fBottom = -size * kElegantBottom / 2048;
@@ -893,13 +894,13 @@ namespace PaintGlue {
 
     static jboolean isElegantTextHeight(jlong paintHandle) {
         Paint* obj = reinterpret_cast<Paint*>(paintHandle);
-        return obj->getFamilyVariant() == minikin::FontFamily::Variant::ELEGANT;
+        return obj->getFamilyVariant() == minikin::FamilyVariant::ELEGANT;
     }
 
     static void setElegantTextHeight(jlong paintHandle, jboolean aa) {
         Paint* obj = reinterpret_cast<Paint*>(paintHandle);
         obj->setFamilyVariant(
-                aa ? minikin::FontFamily::Variant::ELEGANT : minikin::FontFamily::Variant::DEFAULT);
+                aa ? minikin::FamilyVariant::ELEGANT : minikin::FamilyVariant::DEFAULT);
     }
 
     static jfloat getTextSize(jlong paintHandle) {

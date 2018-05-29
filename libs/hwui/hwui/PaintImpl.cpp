@@ -24,7 +24,7 @@ Paint::Paint()
         , mWordSpacing(0)
         , mFontFeatureSettings()
         , mMinikinLocaleListId(0)
-        , mFamilyVariant(minikin::FontFamily::Variant::DEFAULT) {}
+        , mFamilyVariant(minikin::FamilyVariant::DEFAULT) {}
 
 Paint::Paint(const Paint& paint)
         : SkPaint(paint)
@@ -42,7 +42,7 @@ Paint::Paint(const SkPaint& paint)
         , mWordSpacing(0)
         , mFontFeatureSettings()
         , mMinikinLocaleListId(0)
-        , mFamilyVariant(minikin::FontFamily::Variant::DEFAULT) {}
+        , mFamilyVariant(minikin::FamilyVariant::DEFAULT) {}
 
 Paint::~Paint() {}
 
