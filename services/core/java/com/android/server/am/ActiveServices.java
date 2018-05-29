@@ -501,6 +501,18 @@ public final class ActiveServices {
             }
         }
 
+        // At this point we've applied allowed-to-start policy based on whether this was
+        // an ordinary startService() or a startForegroundService().  Now, only require that
+        // the app follow through on the startForegroundService() -> startForeground()
+        // contract if it actually targets O+.
+        if (r.appInfo.targetSdkVersion < Build.VERSION_CODES.O && fgRequired) {
+            if (DEBUG_BACKGROUND_CHECK || DEBUG_FOREGROUND_SERVICE) {
+                Slog.i(TAG, "startForegroundService() but host targets "
+                        + r.appInfo.targetSdkVersion + " - not requiring startForeground()");
+            }
+            fgRequired = false;
+        }
+
         NeededUriGrants neededGrants = mAm.checkGrantUriPermissionFromIntentLocked(
                 callingUid, r.packageName, service, service.getFlags(), null, r.userId);
 
