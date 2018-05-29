@@ -47,6 +47,7 @@ import android.os.WorkSource;
 import android.provider.Settings;
 import android.util.EventLog;
 import android.util.Slog;
+import android.util.StatsLog;
 import android.view.inputmethod.InputMethodManagerInternal;
 
 import com.android.internal.app.IBatteryStats;
@@ -231,8 +232,13 @@ final class Notifier {
         try {
             if (workSource != null) {
                 mBatteryStats.noteLongPartialWakelockStartFromSource(tag, historyTag, workSource);
+                StatsLog.write(StatsLog.LONG_PARTIAL_WAKELOCK_STATE_CHANGED, workSource,
+                        tag, historyTag, StatsLog.LONG_PARTIAL_WAKELOCK_STATE_CHANGED__STATE__ON);
             } else {
                 mBatteryStats.noteLongPartialWakelockStart(tag, historyTag, ownerUid);
+                StatsLog.write_non_chained(StatsLog.LONG_PARTIAL_WAKELOCK_STATE_CHANGED,
+                        ownerUid, null, tag, historyTag,
+                        StatsLog.LONG_PARTIAL_WAKELOCK_STATE_CHANGED__STATE__ON);
             }
         } catch (RemoteException ex) {
             // Ignore
@@ -249,8 +255,13 @@ final class Notifier {
         try {
             if (workSource != null) {
                 mBatteryStats.noteLongPartialWakelockFinishFromSource(tag, historyTag, workSource);
+                StatsLog.write(StatsLog.LONG_PARTIAL_WAKELOCK_STATE_CHANGED, workSource,
+                        tag, historyTag, StatsLog.LONG_PARTIAL_WAKELOCK_STATE_CHANGED__STATE__OFF);
             } else {
                 mBatteryStats.noteLongPartialWakelockFinish(tag, historyTag, ownerUid);
+                StatsLog.write_non_chained(StatsLog.LONG_PARTIAL_WAKELOCK_STATE_CHANGED,
+                        ownerUid, null, tag, historyTag,
+                        StatsLog.LONG_PARTIAL_WAKELOCK_STATE_CHANGED__STATE__OFF);
             }
         } catch (RemoteException ex) {
             // Ignore
