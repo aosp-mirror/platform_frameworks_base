@@ -170,8 +170,6 @@ public class MessagingImageMessage extends ImageView implements MessagingMessage
 
     public void recycle() {
         MessagingMessage.super.recycle();
-        setAlpha(1.0f);
-        setTranslationY(0);
         setImageBitmap(null);
         mDrawable = null;
         sInstancePool.release(this);
