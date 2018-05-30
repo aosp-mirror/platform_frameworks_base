@@ -182,6 +182,9 @@ public class NotificationTemplateViewWrapper extends NotificationHeaderViewWrapp
             }
         }
         if (mReplyAction != null) {
+            // Let's reset the view on update, assuming the new pending intent isn't cancelled
+            // anymore. The color filter automatically resets when it's updated.
+            mReplyAction.setEnabled(true);
             performOnPendingIntentCancellation(mReplyAction, () -> {
                 if (mReplyAction != null && mReplyAction.isEnabled()) {
                     mReplyAction.setEnabled(false);
