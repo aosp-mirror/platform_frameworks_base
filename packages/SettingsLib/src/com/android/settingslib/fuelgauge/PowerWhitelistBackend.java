@@ -16,15 +16,19 @@
 
 package com.android.settingslib.fuelgauge;
 
+import android.content.ComponentName;
+import android.content.Context;
 import android.content.pm.PackageManager;
 import android.os.IDeviceIdleController;
 import android.os.RemoteException;
 import android.os.ServiceManager;
-import android.os.UserHandle;
 import android.support.annotation.VisibleForTesting;
+import android.telecom.DefaultDialerManager;
+import android.text.TextUtils;
 import android.util.ArraySet;
 import android.util.Log;
 
+import com.android.internal.telephony.SmsApplication;
 import com.android.internal.util.ArrayUtils;
 
 /**
@@ -38,19 +42,20 @@ public class PowerWhitelistBackend {
 
     private static PowerWhitelistBackend sInstance;
 
+    private final Context mAppContext;
     private final IDeviceIdleController mDeviceIdleService;
     private final ArraySet<String> mWhitelistedApps = new ArraySet<>();
     private final ArraySet<String> mSysWhitelistedApps = new ArraySet<>();
     private final ArraySet<String> mSysWhitelistedAppsExceptIdle = new ArraySet<>();
 
-    public PowerWhitelistBackend() {
-        mDeviceIdleService = IDeviceIdleController.Stub.asInterface(
-                ServiceManager.getService(DEVICE_IDLE_SERVICE));
-        refreshList();
+    public PowerWhitelistBackend(Context context) {
+        this(context, IDeviceIdleController.Stub.asInterface(
+                ServiceManager.getService(DEVICE_IDLE_SERVICE)));
     }
 
     @VisibleForTesting
-    PowerWhitelistBackend(IDeviceIdleController deviceIdleService) {
+    PowerWhitelistBackend(Context context, IDeviceIdleController deviceIdleService) {
+        mAppContext = context.getApplicationContext();
         mDeviceIdleService = deviceIdleService;
         refreshList();
     }
@@ -64,7 +69,27 @@ public class PowerWhitelistBackend {
     }
 
     public boolean isWhitelisted(String pkg) {
-        return mWhitelistedApps.contains(pkg);
+        if (mWhitelistedApps.contains(pkg)) {
+            return true;
+        }
+
+        // Additionally, check if pkg is default dialer/sms. They are considered essential apps and
+        // should be automatically whitelisted (otherwise user may be able to set restriction on
+        // them, leading to bad device behavior.)
+        if (!mAppContext.getPackageManager().hasSystemFeature(PackageManager.FEATURE_TELEPHONY)) {
+            return false;
+        }
+        final ComponentName defaultSms = SmsApplication.getDefaultSmsApplication(mAppContext,
+                true /* updateIfNeeded */);
+        if (defaultSms != null && TextUtils.equals(pkg, defaultSms.getPackageName())) {
+            return true;
+        }
+
+        final String defaultDialer = DefaultDialerManager.getDefaultDialerApplication(mAppContext);
+        if (TextUtils.equals(pkg, defaultDialer)) {
+            return true;
+        }
+        return false;
     }
 
     public boolean isWhitelisted(String[] pkgs) {
@@ -120,16 +145,19 @@ public class PowerWhitelistBackend {
         mSysWhitelistedApps.clear();
         mSysWhitelistedAppsExceptIdle.clear();
         mWhitelistedApps.clear();
+        if (mDeviceIdleService == null) {
+            return;
+        }
         try {
-            String[] whitelistedApps = mDeviceIdleService.getFullPowerWhitelist();
+            final String[] whitelistedApps = mDeviceIdleService.getFullPowerWhitelist();
             for (String app : whitelistedApps) {
                 mWhitelistedApps.add(app);
             }
-            String[] sysWhitelistedApps = mDeviceIdleService.getSystemPowerWhitelist();
+            final String[] sysWhitelistedApps = mDeviceIdleService.getSystemPowerWhitelist();
             for (String app : sysWhitelistedApps) {
                 mSysWhitelistedApps.add(app);
             }
-            String[] sysWhitelistedAppsExceptIdle =
+            final String[] sysWhitelistedAppsExceptIdle =
                     mDeviceIdleService.getSystemPowerWhitelistExceptIdle();
             for (String app : sysWhitelistedAppsExceptIdle) {
                 mSysWhitelistedAppsExceptIdle.add(app);
@@ -139,9 +167,9 @@ public class PowerWhitelistBackend {
         }
     }
 
-    public static PowerWhitelistBackend getInstance() {
+    public static PowerWhitelistBackend getInstance(Context context) {
         if (sInstance == null) {
-            sInstance = new PowerWhitelistBackend();
+            sInstance = new PowerWhitelistBackend(context);
         }
         return sInstance;
     }

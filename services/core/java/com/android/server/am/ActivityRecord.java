@@ -2413,11 +2413,16 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
         }
 
         // Compute configuration based on max supported width and height.
-        outBounds.set(0, 0, maxActivityWidth, maxActivityHeight);
-        // Position the activity frame on the opposite side of the nav bar.
-        final int navBarPosition = service.mWindowManager.getNavBarPosition();
-        final int left = navBarPosition == NAV_BAR_LEFT ? appBounds.right - outBounds.width() : 0;
-        outBounds.offsetTo(left, 0 /* top */);
+        // Also account for the left / top insets (e.g. from display cutouts), which will be clipped
+        // away later in StackWindowController.adjustConfigurationForBounds(). Otherwise, the app
+        // bounds would end up too small.
+        outBounds.set(0, 0, maxActivityWidth + appBounds.left, maxActivityHeight + appBounds.top);
+
+        if (service.mWindowManager.getNavBarPosition() == NAV_BAR_LEFT) {
+            // Position the activity frame on the opposite side of the nav bar.
+            outBounds.left = appBounds.right - maxActivityWidth;
+            outBounds.right = appBounds.right;
+        }
     }
 
     boolean ensureActivityConfiguration(int globalChanges, boolean preserveWindow) {

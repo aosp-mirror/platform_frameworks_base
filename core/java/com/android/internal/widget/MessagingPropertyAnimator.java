@@ -31,111 +31,125 @@ import com.android.internal.R;
  * A listener that automatically starts animations when the layout bounds change.
  */
 public class MessagingPropertyAnimator implements View.OnLayoutChangeListener {
-    static final long APPEAR_ANIMATION_LENGTH = 210;
+    private static final long APPEAR_ANIMATION_LENGTH = 210;
     private static final Interpolator ALPHA_IN = new PathInterpolator(0.4f, 0f, 1f, 1f);
     public static final Interpolator ALPHA_OUT = new PathInterpolator(0f, 0f, 0.8f, 1f);
-    private static final int TAG_LOCAL_TRANSLATION_ANIMATOR = R.id.tag_local_translation_y_animator;
-    private static final int TAG_LOCAL_TRANSLATION_Y = R.id.tag_local_translation_y;
+    private static final int TAG_TOP_ANIMATOR = R.id.tag_top_animator;
+    private static final int TAG_TOP = R.id.tag_top_override;
     private static final int TAG_LAYOUT_TOP = R.id.tag_layout_top;
+    private static final int TAG_FIRST_LAYOUT = R.id.tag_is_first_layout;
     private static final int TAG_ALPHA_ANIMATOR = R.id.tag_alpha_animator;
     private static final ViewClippingUtil.ClippingParameters CLIPPING_PARAMETERS =
             view -> view.getId() == com.android.internal.R.id.notification_messaging;
-    private static final IntProperty<View> LOCAL_TRANSLATION_Y =
-            new IntProperty<View>("localTranslationY") {
+    private static final IntProperty<View> TOP =
+            new IntProperty<View>("top") {
                 @Override
                 public void setValue(View object, int value) {
-                    setLocalTranslationY(object, value);
+                    setTop(object, value);
                 }
 
                 @Override
                 public Integer get(View object) {
-                    return getLocalTranslationY(object);
+                    return getTop(object);
                 }
             };
 
     @Override
     public void onLayoutChange(View v, int left, int top, int right, int bottom, int oldLeft,
             int oldTop, int oldRight, int oldBottom) {
-        int oldHeight = oldBottom - oldTop;
-        Integer layoutTop = (Integer) v.getTag(TAG_LAYOUT_TOP);
-        if (layoutTop != null) {
-            oldTop = layoutTop;
-        }
-        int topChange = oldTop - top;
-        if (oldHeight == 0 || topChange == 0 || !v.isShown() || isGone(v)) {
-            // First layout
+        setLayoutTop(v, top);
+        if (isFirstLayout(v)) {
+            setFirstLayout(v, false /* first */);
+            setTop(v, top);
             return;
         }
-        if (layoutTop != null) {
-            v.setTagInternal(TAG_LAYOUT_TOP, top);
-        }
-        int newHeight = bottom - top;
-        int heightDifference = oldHeight - newHeight;
-        // Only add the difference if the height changes and it's getting smaller
-        heightDifference = Math.max(heightDifference, 0);
-        startLocalTranslationFrom(v, topChange + heightDifference + getLocalTranslationY(v));
+        startTopAnimation(v, getTop(v), top, MessagingLayout.FAST_OUT_SLOW_IN);
     }
 
-    private boolean isGone(View view) {
-        if (view.getVisibility() == View.GONE) {
-            return true;
-        }
-        final ViewGroup.LayoutParams lp = view.getLayoutParams();
-        if (lp instanceof MessagingLinearLayout.LayoutParams
-                && ((MessagingLinearLayout.LayoutParams) lp).hide) {
-            return true;
-        }
-        return false;
-    }
-
-    public static void startLocalTranslationFrom(View v, int startTranslation) {
-        startLocalTranslationFrom(v, startTranslation, MessagingLayout.FAST_OUT_SLOW_IN);
-    }
-
-    public static void startLocalTranslationFrom(View v, int startTranslation,
-            Interpolator interpolator) {
-        startLocalTranslation(v, startTranslation, 0, interpolator);
-    }
-
-    public static void startLocalTranslationTo(View v, int endTranslation,
-            Interpolator interpolator) {
-        startLocalTranslation(v, getLocalTranslationY(v), endTranslation, interpolator);
-    }
-
-    public static int getLocalTranslationY(View v) {
-        Integer tag = (Integer) v.getTag(TAG_LOCAL_TRANSLATION_Y);
+    private static boolean isFirstLayout(View view) {
+        Boolean tag = (Boolean) view.getTag(TAG_FIRST_LAYOUT);
         if (tag == null) {
-            return 0;
+            return true;
         }
         return tag;
     }
 
-    private static void setLocalTranslationY(View v, int value) {
-        v.setTagInternal(TAG_LOCAL_TRANSLATION_Y, value);
+    public static void recycle(View view) {
+        setFirstLayout(view, true /* first */);
+    }
+
+    private static void setFirstLayout(View view, boolean first) {
+        view.setTagInternal(TAG_FIRST_LAYOUT, first);
+    }
+
+    private static void setLayoutTop(View view, int top) {
+        view.setTagInternal(TAG_LAYOUT_TOP, top);
+    }
+
+    public static int getLayoutTop(View view) {
+        Integer tag = (Integer) view.getTag(TAG_LAYOUT_TOP);
+        if (tag == null) {
+            return getTop(view);
+        }
+        return tag;
+    }
+
+    /**
+     * Start a translation animation from a start offset to the laid out location
+     * @param view The view to animate
+     * @param startTranslation The starting translation to start from.
+     * @param interpolator The interpolator to use.
+     */
+    public static void startLocalTranslationFrom(View view, int startTranslation,
+            Interpolator interpolator) {
+        startTopAnimation(view, getTop(view) + startTranslation, getLayoutTop(view), interpolator);
+    }
+
+    /**
+     * Start a translation animation from a start offset to the laid out location
+     * @param view The view to animate
+     * @param endTranslation The end translation to go to.
+     * @param interpolator The interpolator to use.
+     */
+    public static void startLocalTranslationTo(View view, int endTranslation,
+            Interpolator interpolator) {
+        int top = getTop(view);
+        startTopAnimation(view, top, top + endTranslation, interpolator);
+    }
+
+    public static int getTop(View v) {
+        Integer tag = (Integer) v.getTag(TAG_TOP);
+        if (tag == null) {
+            return v.getTop();
+        }
+        return tag;
+    }
+
+    private static void setTop(View v, int value) {
+        v.setTagInternal(TAG_TOP, value);
         updateTopAndBottom(v);
     }
 
     private static void updateTopAndBottom(View v) {
-        int layoutTop = (int) v.getTag(TAG_LAYOUT_TOP);
-        int localTranslation = getLocalTranslationY(v);
+        int top = getTop(v);
         int height = v.getHeight();
-        v.setTop(layoutTop + localTranslation);
-        v.setBottom(layoutTop + height + localTranslation);
+        v.setTop(top);
+        v.setBottom(height + top);
     }
 
-    private static void startLocalTranslation(final View v, int start, int end,
+    private static void startTopAnimation(final View v, int start, int end,
             Interpolator interpolator) {
-        ObjectAnimator existing = (ObjectAnimator) v.getTag(TAG_LOCAL_TRANSLATION_ANIMATOR);
+        ObjectAnimator existing = (ObjectAnimator) v.getTag(TAG_TOP_ANIMATOR);
         if (existing != null) {
             existing.cancel();
         }
-        ObjectAnimator animator = ObjectAnimator.ofInt(v, LOCAL_TRANSLATION_Y, start, end);
-        Integer layoutTop = (Integer) v.getTag(TAG_LAYOUT_TOP);
-        if (layoutTop == null) {
-            layoutTop = v.getTop();
-            v.setTagInternal(TAG_LAYOUT_TOP, layoutTop);
+        if (!v.isShown() || start == end
+                || (MessagingLinearLayout.isGone(v) && !isHidingAnimated(v))) {
+            setTop(v, end);
+            return;
         }
-        setLocalTranslationY(v, start);
+        ObjectAnimator animator = ObjectAnimator.ofInt(v, TOP, start, end);
+        setTop(v, start);
         animator.setInterpolator(interpolator);
         animator.setDuration(APPEAR_ANIMATION_LENGTH);
         animator.addListener(new AnimatorListenerAdapter() {
@@ -143,12 +157,8 @@ public class MessagingPropertyAnimator implements View.OnLayoutChangeListener {
 
             @Override
             public void onAnimationEnd(Animator animation) {
-                v.setTagInternal(TAG_LOCAL_TRANSLATION_ANIMATOR, null);
+                v.setTagInternal(TAG_TOP_ANIMATOR, null);
                 setClippingDeactivated(v, false);
-                if (!mCancelled) {
-                    setLocalTranslationY(v, 0);
-                    v.setTagInternal(TAG_LAYOUT_TOP, null);
-                }
             }
 
             @Override
@@ -157,8 +167,15 @@ public class MessagingPropertyAnimator implements View.OnLayoutChangeListener {
             }
         });
         setClippingDeactivated(v, true);
-        v.setTagInternal(TAG_LOCAL_TRANSLATION_ANIMATOR, animator);
+        v.setTagInternal(TAG_TOP_ANIMATOR, animator);
         animator.start();
+    }
+
+    private static boolean isHidingAnimated(View v) {
+        if (v instanceof MessagingLinearLayout.MessagingChild) {
+            return ((MessagingLinearLayout.MessagingChild) v).isHidingAnimated();
+        }
+        return false;
     }
 
     public static void fadeIn(final View v) {
@@ -199,6 +216,13 @@ public class MessagingPropertyAnimator implements View.OnLayoutChangeListener {
         if (existing != null) {
             existing.cancel();
         }
+        if (!view.isShown() || (MessagingLinearLayout.isGone(view) && !isHidingAnimated(view))) {
+            view.setAlpha(0.0f);
+            if (endAction != null) {
+                endAction.run();
+            }
+            return;
+        }
         ObjectAnimator animator = ObjectAnimator.ofFloat(view, View.ALPHA,
                 view.getAlpha(), 0.0f);
         animator.setInterpolator(ALPHA_OUT);
@@ -224,10 +248,14 @@ public class MessagingPropertyAnimator implements View.OnLayoutChangeListener {
     }
 
     public static boolean isAnimatingTranslation(View v) {
-        return v.getTag(TAG_LOCAL_TRANSLATION_ANIMATOR) != null;
+        return v.getTag(TAG_TOP_ANIMATOR) != null;
     }
 
     public static boolean isAnimatingAlpha(View v) {
         return v.getTag(TAG_ALPHA_ANIMATOR) != null;
+    }
+
+    public static void setToLaidOutPosition(View view) {
+        setTop(view, getLayoutTop(view));
     }
 }

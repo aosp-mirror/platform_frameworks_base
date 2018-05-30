@@ -214,4 +214,7 @@
 
     <!-- Default for Settings.Global.BACKUP_AGENT_TIMEOUT_PARAMETERS -->
     <string name="def_backup_agent_timeout_parameters"></string>
+
+    <!-- Default for Settings.System.VIBRATE_WHEN_RINGING -->
+    <bool name="def_vibrate_when_ringing">false</bool>
 </resources>

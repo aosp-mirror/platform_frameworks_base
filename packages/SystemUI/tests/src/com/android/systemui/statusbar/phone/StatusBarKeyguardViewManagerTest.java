@@ -16,14 +16,12 @@
 
 package com.android.systemui.statusbar.phone;
 
-import static com.google.common.truth.Truth.assertThat;
-
 import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.anyFloat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
 
 import android.content.Context;
@@ -168,6 +166,15 @@ public class StatusBarKeyguardViewManagerTest extends SysuiTestCase {
         mStatusBarKeyguardViewManager.onPanelExpansionChanged(0.5f /* expansion */,
                 true /* tracking */);
         verify(mBouncer, never()).setExpansion(eq(0.5f));
+    }
+
+    @Test
+    public void onPanelExpansionChanged_neverTranslatesBouncerWhenWakeAndUnlock() {
+        when(mFingerprintUnlockController.getMode())
+                .thenReturn(FingerprintUnlockController.MODE_WAKE_AND_UNLOCK);
+        mStatusBarKeyguardViewManager.onPanelExpansionChanged(KeyguardBouncer.EXPANSION_VISIBLE,
+                false /* tracking */);
+        verify(mBouncer, never()).setExpansion(anyFloat());
     }
 
     private class TestableStatusBarKeyguardViewManager extends StatusBarKeyguardViewManager {

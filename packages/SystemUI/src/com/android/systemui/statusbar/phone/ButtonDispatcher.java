@@ -114,6 +114,10 @@ public class ButtonDispatcher {
         return mVisibility != null ? mVisibility : View.VISIBLE;
     }
 
+    public boolean isVisible() {
+        return getVisibility() == View.VISIBLE;
+    }
+
     public float getAlpha() {
         return mAlpha != null ? mAlpha : 1;
     }
