@@ -84,6 +84,7 @@ public class QuickStepController implements GestureHelper {
     private AnimatorSet mTrackAnimator;
     private ButtonDispatcher mHitTarget;
     private View mCurrentNavigationBarView;
+    private boolean mIsInScreenPinning;
 
     private final Handler mHandler = new Handler();
     private final Rect mTrackRect = new Rect();
@@ -195,6 +196,7 @@ public class QuickStepController implements GestureHelper {
             case MotionEvent.ACTION_DOWN: {
                 int x = (int) event.getX();
                 int y = (int) event.getY();
+                mIsInScreenPinning = mNavigationBarView.inScreenPinning();
 
                 // End any existing quickscrub animations before starting the new transition
                 if (mTrackAnimator != null) {
@@ -298,8 +300,8 @@ public class QuickStepController implements GestureHelper {
 
         // Proxy motion events to launcher if not handled by quick scrub
         // Proxy motion events up/cancel that would be sent after long press on any nav button
-        if (!mQuickScrubActive && (mAllowGestureDetection || action == MotionEvent.ACTION_CANCEL
-                || action == MotionEvent.ACTION_UP)) {
+        if (!mQuickScrubActive && !mIsInScreenPinning && (mAllowGestureDetection
+                || action == MotionEvent.ACTION_CANCEL || action == MotionEvent.ACTION_UP)) {
             proxyMotionEvents(event);
         }
         return mQuickScrubActive || mQuickStepStarted;
@@ -382,6 +384,12 @@ public class QuickStepController implements GestureHelper {
     }
 
     private void startQuickStep(MotionEvent event) {
+        if (mIsInScreenPinning) {
+            mNavigationBarView.showPinningEscapeToast();
+            mAllowGestureDetection = false;
+            return;
+        }
+
         mQuickStepStarted = true;
         event.transform(mTransformGlobalMatrix);
         try {
@@ -407,6 +415,12 @@ public class QuickStepController implements GestureHelper {
     }
 
     private void startQuickScrub() {
+        if (mIsInScreenPinning) {
+            mNavigationBarView.showPinningEscapeToast();
+            mAllowGestureDetection = false;
+            return;
+        }
+
         if (!mQuickScrubActive) {
             mQuickScrubActive = true;
             mLightTrackColor = mContext.getColor(R.color.quick_step_track_background_light);

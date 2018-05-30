@@ -75,7 +75,6 @@ public class NavigationBarGestureHelper implements TunerService.Tunable, Gesture
     private int mTouchDownY;
     private boolean mDownOnRecents;
     private VelocityTracker mVelocityTracker;
-    private boolean mIsInScreenPinning;
     private boolean mNotificationsVisibleOnDown;
 
     private boolean mDockWindowEnabled;
@@ -110,7 +109,6 @@ public class NavigationBarGestureHelper implements TunerService.Tunable, Gesture
 
     public boolean onInterceptTouchEvent(MotionEvent event) {
         if (event.getActionMasked() == MotionEvent.ACTION_DOWN) {
-            mIsInScreenPinning = mNavigationBarView.inScreenPinning();
             mNotificationsVisibleOnDown = !mStatusBar.isPresenterFullyCollapsed();
         }
         if (!canHandleGestures()) {
@@ -277,8 +275,7 @@ public class NavigationBarGestureHelper implements TunerService.Tunable, Gesture
     }
 
     private boolean canHandleGestures() {
-        return !mIsInScreenPinning && !mStatusBar.isKeyguardShowing()
-                && !mNotificationsVisibleOnDown;
+        return !mStatusBar.isKeyguardShowing() && !mNotificationsVisibleOnDown;
     }
 
     private int calculateDragMode() {

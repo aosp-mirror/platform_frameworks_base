@@ -161,6 +161,13 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
 
     private int mRotateBtnStyle = R.style.RotateButtonCCWStart90;
 
+    /**
+     * Helper that is responsible for showing the right toast when a disallowed activity operation
+     * occurred. In pinned mode, we show instructions on how to break out of this mode, whilst in
+     * fully locked mode we only show that unlocking is blocked.
+     */
+    private ScreenPinningNotify mScreenPinningNotify;
+
     private class NavTransitionListener implements TransitionListener {
         private boolean mBackTransitioning;
         private boolean mHomeAppearing;
@@ -286,6 +293,7 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
         mConfiguration.updateFrom(context.getResources().getConfiguration());
         reloadNavIcons();
 
+        mScreenPinningNotify = new ScreenPinningNotify(mContext);
         mBarTransitions = new NavigationBarTransitions(this);
 
         mButtonDispatchers.put(R.id.back, new ButtonDispatcher(R.id.back));
@@ -981,6 +989,18 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
         mDockedIcon.setRotation(mDockedStackExists && mVertical ? 90 : 0);
         getRecentsButton().setImageDrawable(mDockedStackExists ? mDockedIcon : mRecentIcon);
         mBarTransitions.reapplyDarkIntensity();
+    }
+
+    public void showPinningEnterExitToast(boolean entering) {
+        if (entering) {
+            mScreenPinningNotify.showPinningStartToast();
+        } else {
+            mScreenPinningNotify.showPinningExitToast();
+        }
+    }
+
+    public void showPinningEscapeToast() {
+        mScreenPinningNotify.showEscapeToast(isRecentsButtonVisible());
     }
 
     public boolean isVertical() {
