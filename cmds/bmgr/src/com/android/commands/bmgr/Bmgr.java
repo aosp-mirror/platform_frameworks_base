@@ -704,34 +704,11 @@ public final class Bmgr {
                 return;
             }
         }
-
-        System.out.println("done");
     }
 
     private void doRestorePackage(String pkg) {
-        try {
-            mRestore = mBmgr.beginRestoreSession(pkg, null);
-            if (mRestore == null) {
-                System.err.println(BMGR_NOT_RUNNING_ERR);
-                return;
-            }
-
-            RestoreObserver observer = new RestoreObserver();
-            // TODO implement monitor here
-            int err = mRestore.restorePackage(pkg, observer, null );
-            if (err == 0) {
-                // Off and running -- wait for the restore to complete
-                observer.waitForCompletion();
-            } else {
-                System.err.println("Unable to restore package " + pkg);
-            }
-
-            // And finally shut down the session
-            mRestore.endRestoreSession();
-        } catch (RemoteException e) {
-            System.err.println(e.toString());
-            System.err.println(BMGR_NOT_RUNNING_ERR);
-        }
+        System.err.println("The syntax 'restore <package>' is no longer supported, please use ");
+        System.err.println("'restore <token> <package>'.");
     }
 
     private void doRestoreAll(long token, HashSet<String> filter) {
@@ -784,6 +761,8 @@ public final class Bmgr {
 
             // once the restore has finished, close down the session and we're done
             mRestore.endRestoreSession();
+
+            System.out.println("done");
         } catch (RemoteException e) {
             System.err.println(e.toString());
             System.err.println(BMGR_NOT_RUNNING_ERR);
@@ -823,7 +802,6 @@ public final class Bmgr {
         System.err.println("       bmgr transport WHICH|-c WHICH_COMPONENT");
         System.err.println("       bmgr restore TOKEN");
         System.err.println("       bmgr restore TOKEN PACKAGE...");
-        System.err.println("       bmgr restore PACKAGE");
         System.err.println("       bmgr run");
         System.err.println("       bmgr wipe TRANSPORT PACKAGE");
         System.err.println("       bmgr fullbackup PACKAGE...");
@@ -866,10 +844,6 @@ public final class Bmgr {
         System.err.println("set designated by the TOKEN argument.  It is effectively the same as the");
         System.err.println("'restore' operation supplying only a token, but applies a filter to the");
         System.err.println("set of applications to be restored.");
-        System.err.println("");
-        System.err.println("The 'restore' command when given just a package name intiates a restore of");
-        System.err.println("just that one package according to the restore set selection algorithm");
-        System.err.println("used by the RestoreSession.restorePackage() method.");
         System.err.println("");
         System.err.println("The 'run' command causes any scheduled backup operation to be initiated");
         System.err.println("immediately, without the usual waiting period for batching together");
