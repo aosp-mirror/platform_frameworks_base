@@ -317,6 +317,15 @@ public class TelecomManager {
             "android.telecom.extra.CALL_TECHNOLOGY_TYPE";
 
     /**
+     * Optional extra for communicating the call network technology used by a
+     * {@link android.telecom.Connection} to Telecom and InCallUI.
+     *
+     * @see {@code NETWORK_TYPE_*} in {@link android.telephony.TelephonyManager}.
+     */
+    public static final String EXTRA_CALL_NETWORK_TYPE =
+            "android.telecom.extra.CALL_NETWORK_TYPE";
+
+    /**
      * An optional {@link android.content.Intent#ACTION_CALL} intent extra denoting the
      * package name of the app specifying an alternative gateway for the call.
      * The value is a string.
