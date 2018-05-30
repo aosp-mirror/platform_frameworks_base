@@ -850,7 +850,7 @@
 
     <!-- Used for permissions that are associated telephony features. -->
     <permission-group android:name="android.permission-group.CALL_LOG"
-        android:icon="@drawable/perm_group_phone_calls"
+        android:icon="@drawable/perm_group_call_log"
         android:label="@string/permgrouplab_calllog"
         android:description="@string/permgroupdesc_calllog"
         android:request="@string/permgrouprequest_calllog"
