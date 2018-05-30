@@ -66,6 +66,7 @@ interface IConnectivityManager
 
     NetworkQuotaInfo getActiveNetworkQuotaInfo();
     boolean isActiveNetworkMetered();
+    boolean isActiveNetworkMeteredForUid(int uid);
 
     boolean requestRouteToHostAddress(int networkType, in byte[] hostAddress);
 
