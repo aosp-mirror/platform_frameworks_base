@@ -447,6 +447,7 @@ LOCAL_DROIDDOC_OPTIONS:=\
 		-showUnannotated \
 		-showAnnotation android.annotation.SystemApi \
 		-showAnnotation android.annotation.TestApi \
+		-dexApi $(INTERNAL_PLATFORM_DEX_API_FILE) \
 		-privateDexApi $(INTERNAL_PLATFORM_PRIVATE_DEX_API_FILE) \
 		-removedDexApi $(INTERNAL_PLATFORM_REMOVED_DEX_API_FILE) \
 		-nodocs
@@ -457,7 +458,8 @@ LOCAL_UNINSTALLABLE_MODULE := true
 
 include $(BUILD_DROIDDOC)
 
-$(full_target): .KATI_IMPLICIT_OUTPUTS := $(INTERNAL_PLATFORM_PRIVATE_DEX_API_FILE) \
+$(full_target): .KATI_IMPLICIT_OUTPUTS := $(INTERNAL_PLATFORM_DEX_API_FILE) \
+                                          $(INTERNAL_PLATFORM_PRIVATE_DEX_API_FILE) \
                                           $(INTERNAL_PLATFORM_REMOVED_DEX_API_FILE)
 
 # ====  check javadoc comments but don't generate docs ========
@@ -878,6 +880,7 @@ LOCAL_BLACKLIST := $(INTERNAL_PLATFORM_HIDDENAPI_BLACKLIST)
 LOCAL_SRC_GREYLIST := frameworks/base/config/hiddenapi-light-greylist.txt
 LOCAL_SRC_VENDOR_LIST := frameworks/base/config/hiddenapi-vendor-list.txt
 LOCAL_SRC_FORCE_BLACKLIST := frameworks/base/config/hiddenapi-force-blacklist.txt
+LOCAL_SRC_PUBLIC_API := $(INTERNAL_PLATFORM_DEX_API_FILE)
 LOCAL_SRC_PRIVATE_API := $(INTERNAL_PLATFORM_PRIVATE_DEX_API_FILE)
 LOCAL_SRC_REMOVED_API := $(INTERNAL_PLATFORM_REMOVED_DEX_API_FILE)
 
@@ -885,6 +888,7 @@ LOCAL_SRC_ALL := \
 	$(LOCAL_SRC_GREYLIST) \
 	$(LOCAL_SRC_VENDOR_LIST) \
 	$(LOCAL_SRC_FORCE_BLACKLIST) \
+	$(LOCAL_SRC_PUBLIC_API) \
 	$(LOCAL_SRC_PRIVATE_API) \
 	$(LOCAL_SRC_REMOVED_API)
 
@@ -957,7 +961,8 @@ $(LOCAL_LIGHT_GREYLIST): $(LOCAL_SRC_ALL)
 #   (4) subtract entries shared with LOCAL_LIGHT_GREYLIST
 $(LOCAL_DARK_GREYLIST): $(LOCAL_SRC_ALL) $(LOCAL_LIGHT_GREYLIST)
 	comm -13 <(sort $(LOCAL_LIGHT_GREYLIST) $(LOCAL_SRC_FORCE_BLACKLIST)) \
-	         <(sed 's/\->.*//' $(LOCAL_LIGHT_GREYLIST) | sed 's/\(.*\/\).*/\1/' | sort | uniq | \
+	         <(cat $(LOCAL_SRC_PUBLIC_API) $(LOCAL_LIGHT_GREYLIST) | \
+	               sed 's/\->.*//' | sed 's/\(.*\/\).*/\1/' | sort | uniq | \
 	               while read PKG_NAME; do \
 	                   grep -E "^$${PKG_NAME}[^/;]*;" $(LOCAL_SRC_PRIVATE_API); \
 	               done | sort | uniq) \
