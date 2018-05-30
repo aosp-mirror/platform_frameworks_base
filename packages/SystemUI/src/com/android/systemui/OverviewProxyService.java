@@ -166,9 +166,7 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
             long token = Binder.clearCallingIdentity();
             try {
                 mHandler.post(() -> {
-                    for (int i = mConnectionCallbacks.size() - 1; i >= 0; --i) {
-                        mConnectionCallbacks.get(i).onBackButtonAlphaChanged(alpha, animate);
-                    }
+                    notifyBackButtonAlphaChanged(alpha, animate);
                 });
             } finally {
                 Binder.restoreCallingIdentity(token);
@@ -355,7 +353,14 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
             mOverviewProxy.asBinder().unlinkToDeath(mOverviewServiceDeathRcpt, 0);
             mContext.unbindService(mOverviewServiceConnection);
             mOverviewProxy = null;
+            notifyBackButtonAlphaChanged(1f, false /* animate */);
             notifyConnectionChanged();
+        }
+    }
+
+    private void notifyBackButtonAlphaChanged(float alpha, boolean animate) {
+        for (int i = mConnectionCallbacks.size() - 1; i >= 0; --i) {
+            mConnectionCallbacks.get(i).onBackButtonAlphaChanged(alpha, animate);
         }
     }
 
