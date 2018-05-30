@@ -272,7 +272,7 @@ void UidMap::assignIsolatedUid(int isolatedUid, int parentUid) {
     mIsolatedUidMap[isolatedUid] = parentUid;
 }
 
-void UidMap::removeIsolatedUid(int isolatedUid, int parentUid) {
+void UidMap::removeIsolatedUid(int isolatedUid) {
     lock_guard<mutex> lock(mIsolatedMutex);
 
     auto it = mIsolatedUidMap.find(isolatedUid);
