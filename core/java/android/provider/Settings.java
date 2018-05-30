@@ -11039,6 +11039,15 @@ public final class Settings {
                 = "user_absent_radios_off_for_small_battery_enabled";
 
         /**
+         * Whether or not to enable the User Absent, Touch Off feature on small battery devices.
+         * Type: int (0 for false, 1 for true)
+         * Default: 0
+         * @hide
+         */
+        public static final String USER_ABSENT_TOUCH_OFF_FOR_SMALL_BATTERY_ENABLED
+                = "user_absent_touch_off_for_small_battery_enabled";
+
+        /**
          * Whether or not to turn on Wifi when proxy is disconnected.
          * Type: int (0 for false, 1 for true)
          * Default: 1
