@@ -261,6 +261,7 @@ Landroid/app/ActivityThread;->mNumVisibleActivities:I
 Landroid/app/ActivityThread;->mPackages:Landroid/util/ArrayMap;
 Landroid/app/ActivityThread;->mPendingConfiguration:Landroid/content/res/Configuration;
 Landroid/app/ActivityThread;->mProviderMap:Landroid/util/ArrayMap;
+Landroid/app/ActivityThread;->mProviderRefCountMap:Landroid/util/ArrayMap;
 Landroid/app/ActivityThread;->mResourcePackages:Landroid/util/ArrayMap;
 Landroid/app/ActivityThread;->mResourcesManager:Landroid/app/ResourcesManager;
 Landroid/app/ActivityThread;->mServices:Landroid/util/ArrayMap;
@@ -906,9 +907,14 @@ Landroid/app/SearchManager;->isVisible()Z
 Landroid/app/SearchManager;->launchAssist(Landroid/os/Bundle;)V
 Landroid/app/SearchManager;->mSearchDialog:Landroid/app/SearchDialog;
 Landroid/app/SearchManager;->startSearch(Ljava/lang/String;ZLandroid/content/ComponentName;Landroid/os/Bundle;ZLandroid/graphics/Rect;)V
+Landroid/app/servertransaction/ActivityResultItem;->mResultInfoList:Ljava/util/List;
+Landroid/app/servertransaction/ClientTransaction;->getActivityToken()Landroid/os/IBinder;
+Landroid/app/servertransaction/ClientTransaction;->getCallbacks()Ljava/util/List;
+Landroid/app/servertransaction/ClientTransaction;->getLifecycleStateRequest()Landroid/app/servertransaction/ActivityLifecycleItem;
 Landroid/app/servertransaction/ClientTransaction;->mActivityCallbacks:Ljava/util/List;
 Landroid/app/servertransaction/LaunchActivityItem;->mInfo:Landroid/content/pm/ActivityInfo;
 Landroid/app/servertransaction/LaunchActivityItem;->mIntent:Landroid/content/Intent;
+Landroid/app/servertransaction/NewIntentItem;->mIntents:Ljava/util/List;
 Landroid/app/Service;->attach(Landroid/content/Context;Landroid/app/ActivityThread;Ljava/lang/String;Landroid/os/IBinder;Landroid/app/Application;Ljava/lang/Object;)V
 Landroid/app/Service;->mActivityManager:Landroid/app/IActivityManager;
 Landroid/app/Service;->mApplication:Landroid/app/Application;
@@ -1693,6 +1699,12 @@ Landroid/content/pm/PackageParser$Provider;->syncable:Z
 Landroid/content/pm/PackageParser$ProviderIntentInfo;->provider:Landroid/content/pm/PackageParser$Provider;
 Landroid/content/pm/PackageParser$Service;->info:Landroid/content/pm/ServiceInfo;
 Landroid/content/pm/PackageParser$ServiceIntentInfo;->service:Landroid/content/pm/PackageParser$Service;
+Landroid/content/pm/PackageParser$SigningDetails$Builder;-><init>()V
+Landroid/content/pm/PackageParser$SigningDetails$Builder;->build()Landroid/content/pm/PackageParser$SigningDetails;
+Landroid/content/pm/PackageParser$SigningDetails$Builder;->setPastSigningCertificates([Landroid/content/pm/Signature;)Landroid/content/pm/PackageParser$SigningDetails$Builder;
+Landroid/content/pm/PackageParser$SigningDetails$Builder;->setPastSigningCertificatesFlags([I)Landroid/content/pm/PackageParser$SigningDetails$Builder;
+Landroid/content/pm/PackageParser$SigningDetails$Builder;->setSignatures([Landroid/content/pm/Signature;)Landroid/content/pm/PackageParser$SigningDetails$Builder;
+Landroid/content/pm/PackageParser$SigningDetails$Builder;->setSignatureSchemeVersion(I)Landroid/content/pm/PackageParser$SigningDetails$Builder;
 Landroid/content/pm/PackageParser$SigningDetails;->signatures:[Landroid/content/pm/Signature;
 Landroid/content/pm/PackageParser;-><init>()V
 Landroid/content/pm/PackageParser;->collectCertificates(Landroid/content/pm/PackageParser$Package;Ljava/io/File;Z)V
@@ -5820,6 +5832,7 @@ Landroid/view/animation/TranslateAnimation;->mToXValue:F
 Landroid/view/animation/TranslateAnimation;->mToYValue:F
 Landroid/view/animation/TranslateYAnimation;-><init>(IFIF)V
 Landroid/view/autofill/IAutoFillManager$Stub$Proxy;-><init>(Landroid/os/IBinder;)V
+Landroid/view/autofill/IAutoFillManager$Stub;->asInterface(Landroid/os/IBinder;)Landroid/view/autofill/IAutoFillManager;
 Landroid/view/Choreographer$CallbackQueue;->addCallbackLocked(JLjava/lang/Object;Ljava/lang/Object;)V
 Landroid/view/Choreographer$CallbackRecord;->run(J)V
 Landroid/view/Choreographer;->doFrame(JI)V
@@ -9029,6 +9042,10 @@ Lorg/w3c/dom/ls/LSSerializerFilter;->getWhatToShow()I
 Lorg/w3c/dom/traversal/NodeFilter;->acceptNode(Lorg/w3c/dom/Node;)S
 Lorg/w3c/dom/traversal/NodeIterator;->detach()V
 Lorg/w3c/dom/traversal/NodeIterator;->nextNode()Lorg/w3c/dom/Node;
+Lorg/xml/sax/ext/Attributes2Impl;->declared:[Z
+Lorg/xml/sax/ext/Attributes2Impl;->specified:[Z
+Lorg/xml/sax/ext/Locator2Impl;->encoding:Ljava/lang/String;
+Lorg/xml/sax/ext/Locator2Impl;->version:Ljava/lang/String;
 Lorg/xml/sax/helpers/AttributesImpl;->badIndex(I)V
 Lorg/xml/sax/helpers/AttributesImpl;->data:[Ljava/lang/String;
 Lorg/xml/sax/helpers/AttributesImpl;->ensureCapacity(I)V
