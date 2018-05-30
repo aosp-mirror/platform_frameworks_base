@@ -16,6 +16,10 @@
 
 package com.android.settingslib.drawer;
 
+import static com.android.settingslib.drawer.TileUtils.META_DATA_KEY_PROFILE;
+import static com.android.settingslib.drawer.TileUtils.PROFILE_ALL;
+import static com.android.settingslib.drawer.TileUtils.PROFILE_PRIMARY;
+
 import android.content.Intent;
 import android.graphics.drawable.Icon;
 import android.os.Bundle;
@@ -169,4 +173,11 @@ public class Tile implements Parcelable {
             return new Tile[size];
         }
     };
+
+    public boolean isPrimaryProfileOnly() {
+        String profile = metaData != null ?
+            metaData.getString(META_DATA_KEY_PROFILE) : PROFILE_ALL;
+        profile = (profile != null ? profile : PROFILE_ALL);
+        return TextUtils.equals(profile, PROFILE_PRIMARY);
+    }
 }

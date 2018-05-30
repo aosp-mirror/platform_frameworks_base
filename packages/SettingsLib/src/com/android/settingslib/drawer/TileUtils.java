@@ -35,6 +35,7 @@ import android.text.TextUtils;
 import android.util.Log;
 import android.util.Pair;
 
+import androidx.annotation.VisibleForTesting;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -167,6 +168,34 @@ public class TileUtils {
             "com.android.settings.summary_uri";
 
     public static final String SETTING_PKG = "com.android.settings";
+
+    /**
+     * Value for {@link #META_DATA_KEY_PROFILE}. When the device has a managed profile,
+     * the app will always be run in the primary profile.
+     *
+     * @see #META_DATA_KEY_PROFILE
+     */
+    public static final String PROFILE_PRIMARY = "primary_profile_only";
+
+    /**
+     * Value for {@link #META_DATA_KEY_PROFILE}. When the device has a managed profile, the user
+     * will be presented with a dialog to choose the profile the app will be run in.
+     *
+     * @see #META_DATA_KEY_PROFILE
+     */
+    public static final String PROFILE_ALL = "all_profiles";
+
+    /**
+     * Name of the meta-data item that should be set in the AndroidManifest.xml
+     * to specify the profile in which the app should be run when the device has a managed profile.
+     * The default value is {@link #PROFILE_ALL} which means the user will be presented with a
+     * dialog to choose the profile. If set to {@link #PROFILE_PRIMARY} the app will always be
+     * run in the primary profile.
+     *
+     * @see #PROFILE_PRIMARY
+     * @see #PROFILE_ALL
+     */
+    public static final String META_DATA_KEY_PROFILE = "com.android.settings.profile";
 
     /**
      * Build a list of DashboardCategory. Each category must be defined in manifest.
