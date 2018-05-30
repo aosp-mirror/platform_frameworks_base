@@ -710,6 +710,8 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
         updateClickAndFocus();
         if (mNotificationParent != null) {
             setOverrideTintColor(NO_COLOR, 0.0f);
+            // Let's reset the distance to top roundness, as this isn't applied to group children
+            setDistanceToTopRoundness(NO_ROUNDNESS);
             mNotificationParent.updateBackgroundForGroupState();
         }
         updateIconVisibilities();
