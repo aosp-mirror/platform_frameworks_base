@@ -1108,6 +1108,15 @@
     <string-array translatable="false" name="config_ringtoneEffectUris">
     </string-array>
 
+    <!-- The default intensity level for haptic feedback. See
+         Settings.System.HAPTIC_FEEDBACK_INTENSITY more details on the constant values and
+         meanings. -->
+    <integer name="config_defaultHapticFeedbackIntensity">2</integer>
+    <!-- The default intensity level for notification vibrations. See
+         Settings.System.NOTIFICATION_VIBRATION_INTENSITY more details on the constant values and
+         meanings. -->
+    <integer name="config_defaultNotificationVibrationIntensity">2</integer>
+
     <bool name="config_use_strict_phone_number_comparation">false</bool>
 
     <!-- Display low battery warning when battery level dips to this value.
