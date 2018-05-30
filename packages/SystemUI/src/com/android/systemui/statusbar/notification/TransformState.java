@@ -16,11 +16,8 @@
 
 package com.android.systemui.statusbar.notification;
 
-import android.util.ArraySet;
 import android.util.Pools;
 import android.view.View;
-import android.view.ViewGroup;
-import android.view.ViewParent;
 import android.view.animation.Interpolator;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
@@ -411,7 +408,8 @@ public class TransformState {
         mOwnPosition[1] -= (1.0f - mTransformedView.getScaleY()) * mTransformedView.getPivotY();
 
         // Remove local translations
-        mOwnPosition[1] -= MessagingPropertyAnimator.getLocalTranslationY(mTransformedView);
+        mOwnPosition[1] -= MessagingPropertyAnimator.getTop(mTransformedView)
+                - MessagingPropertyAnimator.getLayoutTop(mTransformedView);
         return mOwnPosition;
     }
 

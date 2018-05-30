@@ -72,7 +72,10 @@ public class MessagingMessageState {
         return mHostView;
     }
 
-    public void reset() {
+    public void recycle() {
+        mHostView.setAlpha(1.0f);
+        mHostView.setTranslationY(0);
+        MessagingPropertyAnimator.recycle(mHostView);
         mIsHidingAnimated = false;
         mIsHistoric = false;
         mGroup = null;
