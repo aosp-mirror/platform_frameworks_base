@@ -25,9 +25,11 @@ LOCAL_CFLAGS := -Wall -Werror -Wunused -Wunreachable-code
 
 LOCAL_SHARED_LIBRARIES := \
     libandroidthings \
+    libandroidthings_protos \
     libbase \
     libchrome \
     liblog \
+    libprotobuf-cpp-lite \
 
 LOCAL_STATIC_LIBRARIES += \
     libjsoncpp
