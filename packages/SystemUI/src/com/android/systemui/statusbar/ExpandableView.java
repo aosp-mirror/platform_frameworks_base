@@ -36,6 +36,7 @@ import java.util.ArrayList;
  */
 public abstract class ExpandableView extends FrameLayout {
 
+    public static final float NO_ROUNDNESS = -1;
     protected OnHeightChangedListener mOnHeightChangedListener;
     private int mActualHeight;
     protected int mClipTopAmount;
