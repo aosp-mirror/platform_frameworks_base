@@ -186,8 +186,6 @@
             file="/system/framework/android.test.mock.jar" />
     <library name="android.test.runner"
             file="/system/framework/android.test.runner.jar" />
-    <library name="javax.obex"
-            file="/system/framework/javax.obex.jar" />
 
     <!-- These are the standard packages that are white-listed to always have internet
          access while in power save mode, even if they aren't in the foreground. -->
