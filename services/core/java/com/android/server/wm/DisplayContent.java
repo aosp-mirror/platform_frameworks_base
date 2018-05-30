@@ -944,33 +944,50 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
     /**
      * Update rotation of the display.
      *
-     * Returns true if the rotation has been changed.  In this case YOU MUST CALL
-     * {@link WindowManagerService#sendNewConfiguration(int)} TO UNFREEZE THE SCREEN.
+     * @return {@code true} if the rotation has been changed.  In this case YOU MUST CALL
+     *         {@link WindowManagerService#sendNewConfiguration(int)} TO UNFREEZE THE SCREEN.
      */
     boolean updateRotationUnchecked() {
-        if (mService.mDeferredRotationPauseCount > 0) {
-            // Rotation updates have been paused temporarily.  Defer the update until
-            // updates have been resumed.
-            if (DEBUG_ORIENTATION) Slog.v(TAG_WM, "Deferring rotation, rotation is paused.");
-            return false;
-        }
+        return updateRotationUnchecked(false /* forceUpdate */);
+    }
 
-        ScreenRotationAnimation screenRotationAnimation =
-                mService.mAnimator.getScreenRotationAnimationLocked(mDisplayId);
-        if (screenRotationAnimation != null && screenRotationAnimation.isAnimating()) {
-            // Rotation updates cannot be performed while the previous rotation change
-            // animation is still in progress.  Skip this update.  We will try updating
-            // again after the animation is finished and the display is unfrozen.
-            if (DEBUG_ORIENTATION) Slog.v(TAG_WM, "Deferring rotation, animation in progress.");
-            return false;
-        }
-        if (mService.mDisplayFrozen) {
-            // Even if the screen rotation animation has finished (e.g. isAnimating
-            // returns false), there is still some time where we haven't yet unfrozen
-            // the display. We also need to abort rotation here.
-            if (DEBUG_ORIENTATION) Slog.v(TAG_WM,
-                    "Deferring rotation, still finishing previous rotation");
-            return false;
+    /**
+     * Update rotation of the display with an option to force the update.
+     * @param forceUpdate Force the rotation update. Sometimes in WM we might skip updating
+     *                    orientation because we're waiting for some rotation to finish or display
+     *                    to unfreeze, which results in configuration of the previously visible
+     *                    activity being applied to a newly visible one. Forcing the rotation
+     *                    update allows to workaround this issue.
+     * @return {@code true} if the rotation has been changed.  In this case YOU MUST CALL
+     *         {@link WindowManagerService#sendNewConfiguration(int)} TO UNFREEZE THE SCREEN.
+     */
+    boolean updateRotationUnchecked(boolean forceUpdate) {
+        ScreenRotationAnimation screenRotationAnimation;
+        if (!forceUpdate) {
+            if (mService.mDeferredRotationPauseCount > 0) {
+                // Rotation updates have been paused temporarily.  Defer the update until
+                // updates have been resumed.
+                if (DEBUG_ORIENTATION) Slog.v(TAG_WM, "Deferring rotation, rotation is paused.");
+                return false;
+            }
+
+            screenRotationAnimation =
+                    mService.mAnimator.getScreenRotationAnimationLocked(mDisplayId);
+            if (screenRotationAnimation != null && screenRotationAnimation.isAnimating()) {
+                // Rotation updates cannot be performed while the previous rotation change
+                // animation is still in progress.  Skip this update.  We will try updating
+                // again after the animation is finished and the display is unfrozen.
+                if (DEBUG_ORIENTATION) Slog.v(TAG_WM, "Deferring rotation, animation in progress.");
+                return false;
+            }
+            if (mService.mDisplayFrozen) {
+                // Even if the screen rotation animation has finished (e.g. isAnimating
+                // returns false), there is still some time where we haven't yet unfrozen
+                // the display. We also need to abort rotation here.
+                if (DEBUG_ORIENTATION) Slog.v(TAG_WM,
+                        "Deferring rotation, still finishing previous rotation");
+                return false;
+            }
         }
 
         if (!mService.mDisplayEnabled) {
@@ -992,7 +1009,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
 
         if (mayRotateSeamlessly) {
             final WindowState seamlessRotated = getWindow((w) -> w.mSeamlesslyRotated);
-            if (seamlessRotated != null) {
+            if (seamlessRotated != null && !forceUpdate) {
                 // We can't rotate (seamlessly or not) while waiting for the last seamless rotation
                 // to complete (that is, waiting for windows to redraw). It's tempting to check
                 // w.mSeamlessRotationCount but that could be incorrect in the case of
