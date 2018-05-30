@@ -22,6 +22,7 @@ import android.app.admin.DevicePolicyManager;
 import android.app.admin.IDevicePolicyManager;
 import android.app.job.IJobScheduler;
 import android.app.job.JobScheduler;
+import android.app.timedetector.TimeDetector;
 import android.app.timezone.RulesManager;
 import android.app.trust.TrustManager;
 import android.app.usage.IStorageStatsManager;
@@ -905,6 +906,14 @@ final class SystemServiceRegistry {
             public RulesManager createService(ContextImpl ctx) {
                 return new RulesManager(ctx.getOuterContext());
             }});
+
+        registerService(Context.TIME_DETECTOR_SERVICE, TimeDetector.class,
+                new CachedServiceFetcher<TimeDetector>() {
+                    @Override
+                    public TimeDetector createService(ContextImpl ctx)
+                            throws ServiceNotFoundException {
+                        return new TimeDetector();
+                    }});
     }
 
     /**
