@@ -436,7 +436,7 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
             return true;
         }
 
-        return (getViewRootImpl() != null) && getViewRootImpl().dispatchKeyFallbackEvent(event);
+        return (getViewRootImpl() != null) && getViewRootImpl().dispatchUnhandledKeyEvent(event);
     }
 
     public boolean superDispatchKeyShortcutEvent(KeyEvent event) {
