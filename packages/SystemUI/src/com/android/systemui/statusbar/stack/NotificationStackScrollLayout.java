@@ -776,7 +776,8 @@ public class NotificationStackScrollLayout extends ViewGroup
             boolean clip = clipStart > start && clipStart < end
                     || clipEnd >= start && clipEnd <= end;
             clip &= !(first && mOwnScrollY == 0);
-            child.setDistanceToTopRoundness(clip ? Math.max(start - clipStart, 0) : -1);
+            child.setDistanceToTopRoundness(clip ? Math.max(start - clipStart, 0)
+                    : ExpandableView.NO_ROUNDNESS);
             first = false;
         }
     }
