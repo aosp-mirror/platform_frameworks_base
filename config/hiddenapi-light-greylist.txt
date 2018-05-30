@@ -1474,6 +1474,7 @@ Landroid/content/pm/IPackageDeleteObserver2$Stub$Proxy;-><init>(Landroid/os/IBin
 Landroid/content/pm/IPackageDeleteObserver2$Stub$Proxy;->mRemote:Landroid/os/IBinder;
 Landroid/content/pm/IPackageDeleteObserver2$Stub;->asInterface(Landroid/os/IBinder;)Landroid/content/pm/IPackageDeleteObserver2;
 Landroid/content/pm/IPackageDeleteObserver2;->onPackageDeleted(Ljava/lang/String;ILjava/lang/String;)V
+Landroid/content/pm/IPackageInstaller;->uninstall(Landroid/content/pm/VersionedPackage;Ljava/lang/String;ILandroid/content/IntentSender;I)V
 Landroid/content/pm/IPackageInstallerCallback$Stub$Proxy;-><init>(Landroid/os/IBinder;)V
 Landroid/content/pm/IPackageInstallerCallback$Stub$Proxy;->mRemote:Landroid/os/IBinder;
 Landroid/content/pm/IPackageInstallerCallback$Stub;->asInterface(Landroid/os/IBinder;)Landroid/content/pm/IPackageInstallerCallback;
@@ -1522,6 +1523,7 @@ Landroid/content/pm/IPackageManager;->getInstallLocation()I
 Landroid/content/pm/IPackageManager;->getInstrumentationInfo(Landroid/content/ComponentName;I)Landroid/content/pm/InstrumentationInfo;
 Landroid/content/pm/IPackageManager;->getLastChosenActivity(Landroid/content/Intent;Ljava/lang/String;I)Landroid/content/pm/ResolveInfo;
 Landroid/content/pm/IPackageManager;->getNameForUid(I)Ljava/lang/String;
+Landroid/content/pm/IPackageManager;->getPackageInstaller()Landroid/content/pm/IPackageInstaller;
 Landroid/content/pm/IPackageManager;->getPackagesForUid(I)[Ljava/lang/String;
 Landroid/content/pm/IPackageManager;->getPackageUid(Ljava/lang/String;II)I
 Landroid/content/pm/IPackageManager;->getPermissionControllerPackageName()Ljava/lang/String;
@@ -5976,6 +5978,7 @@ Landroid/view/inputmethod/InputMethodManager;->getInputMethodWindowVisibleHeight
 Landroid/view/inputmethod/InputMethodManager;->getInstance()Landroid/view/inputmethod/InputMethodManager;
 Landroid/view/inputmethod/InputMethodManager;->isCursorAnchorInfoEnabled()Z
 Landroid/view/inputmethod/InputMethodManager;->mCurId:Ljava/lang/String;
+Landroid/view/inputmethod/InputMethodManager;->mCurMethod:Lcom/android/internal/view/IInputMethodSession;
 Landroid/view/inputmethod/InputMethodManager;->mCurRootView:Landroid/view/View;
 Landroid/view/inputmethod/InputMethodManager;->mCursorRect:Landroid/graphics/Rect;
 Landroid/view/inputmethod/InputMethodManager;->mH:Landroid/view/inputmethod/InputMethodManager$H;
@@ -6524,6 +6527,7 @@ Landroid/view/ViewRootImpl;->mWidth:I
 Landroid/view/ViewRootImpl;->mWindowSession:Landroid/view/IWindowSession;
 Landroid/view/ViewRootImpl;->scheduleTraversals()V
 Landroid/view/ViewRootImpl;->setLocalDragState(Ljava/lang/Object;)V
+Landroid/view/ViewRootImpl;->sRunQueues:Ljava/lang/ThreadLocal;
 Landroid/view/ViewTreeObserver$InternalInsetsInfo;-><init>()V
 Landroid/view/ViewTreeObserver$InternalInsetsInfo;->contentInsets:Landroid/graphics/Rect;
 Landroid/view/ViewTreeObserver$InternalInsetsInfo;->mTouchableInsets:I
