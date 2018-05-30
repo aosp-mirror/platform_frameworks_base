@@ -777,6 +777,13 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
         }
     }
 
+    /**
+     * See {@link AppWindowContainerController#setWillCloseOrEnterPip(boolean)}
+     */
+    void setWillCloseOrEnterPip(boolean willCloseOrEnterPip) {
+        getWindowContainerController().setWillCloseOrEnterPip(willCloseOrEnterPip);
+    }
+
     static class Token extends IApplicationToken.Stub {
         private final WeakReference<ActivityRecord> weakActivity;
         private final String name;
