@@ -3299,6 +3299,9 @@ public class AudioService extends IAudioService.Stub
                 .append(Binder.getCallingPid()).toString();
 
         synchronized (mBluetoothA2dpEnabledLock) {
+            if (mBluetoothA2dpEnabled == on) {
+                return;
+            }
             mBluetoothA2dpEnabled = on;
             sendMsg(mAudioHandler, MSG_SET_FORCE_BT_A2DP_USE, SENDMSG_QUEUE,
                     AudioSystem.FOR_MEDIA,

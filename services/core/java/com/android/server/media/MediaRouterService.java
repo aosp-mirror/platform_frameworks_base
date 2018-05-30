@@ -95,9 +95,8 @@ public final class MediaRouterService extends IMediaRouterService.Stub
 
     // State guarded by mLock.
     private final Object mLock = new Object();
-    private final SparseArray<UserRecord> mUserRecords = new SparseArray<UserRecord>();
-    private final ArrayMap<IBinder, ClientRecord> mAllClientRecords =
-            new ArrayMap<IBinder, ClientRecord>();
+    private final SparseArray<UserRecord> mUserRecords = new SparseArray<>();
+    private final ArrayMap<IBinder, ClientRecord> mAllClientRecords = new ArrayMap<>();
     private int mCurrentUserId = -1;
     private final IAudioService mAudioService;
     private final AudioPlayerStateMonitor mAudioPlayerStateMonitor;
@@ -106,7 +105,7 @@ public final class MediaRouterService extends IMediaRouterService.Stub
     private final IntArray mActivePlayerUidMinPriorityQueue = new IntArray();
 
     private final BroadcastReceiver mReceiver = new MediaRouterServiceBroadcastReceiver();
-    BluetoothDevice mBluetoothDevice;
+    BluetoothDevice mActiveBluetoothDevice;
     int mAudioRouteMainType = AudioRoutesInfo.MAIN_SPEAKER;
     boolean mGlobalBluetoothA2dpOn = false;
 
@@ -180,7 +179,8 @@ public final class MediaRouterService extends IMediaRouterService.Stub
                                     | AudioRoutesInfo.MAIN_HEADPHONES
                                     | AudioRoutesInfo.MAIN_USB)) == 0) {
                                 // headset was plugged out.
-                                mGlobalBluetoothA2dpOn = mBluetoothDevice != null;
+                                mGlobalBluetoothA2dpOn = (newRoutes.bluetoothName != null
+                                        || mActiveBluetoothDevice != null);
                             } else {
                                 // headset was plugged in.
                                 mGlobalBluetoothA2dpOn = false;
@@ -197,7 +197,7 @@ public final class MediaRouterService extends IMediaRouterService.Stub
             Slog.w(TAG, "RemoteException in the audio service.");
         }
 
-        IntentFilter intentFilter = new IntentFilter(BluetoothA2dp.ACTION_CONNECTION_STATE_CHANGED);
+        IntentFilter intentFilter = new IntentFilter(BluetoothA2dp.ACTION_ACTIVE_DEVICE_CHANGED);
         context.registerReceiverAsUser(mReceiver, UserHandle.ALL, intentFilter, null, null);
     }
 
@@ -406,12 +406,14 @@ public final class MediaRouterService extends IMediaRouterService.Stub
 
     void restoreBluetoothA2dp() {
         try {
-            boolean a2dpOn = false;
+            boolean a2dpOn;
+            BluetoothDevice btDevice;
             synchronized (mLock) {
                 a2dpOn = mGlobalBluetoothA2dpOn;
+                btDevice = mActiveBluetoothDevice;
             }
             // We don't need to change a2dp status when bluetooth is not connected.
-            if (mBluetoothDevice != null) {
+            if (btDevice != null) {
                 Slog.v(TAG, "restoreBluetoothA2dp(" + a2dpOn + ")");
                 mAudioService.setBluetoothA2dpOn(a2dpOn);
             }
@@ -653,17 +655,11 @@ public final class MediaRouterService extends IMediaRouterService.Stub
     final class MediaRouterServiceBroadcastReceiver extends BroadcastReceiver {
         @Override
         public void onReceive(Context context, Intent intent) {
-            if (intent.getAction().equals(BluetoothA2dp.ACTION_CONNECTION_STATE_CHANGED)) {
-                int state = intent.getIntExtra(BluetoothProfile.EXTRA_STATE,
-                        BluetoothProfile.STATE_DISCONNECTED);
-                if (state == BluetoothProfile.STATE_DISCONNECTED) {
-                    mGlobalBluetoothA2dpOn = false;
-                    mBluetoothDevice = null;
-                } else if (state == BluetoothProfile.STATE_CONNECTED) {
-                    mGlobalBluetoothA2dpOn = true;
-                    mBluetoothDevice = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
-                    // To ensure that BT A2DP is on, call restoreBluetoothA2dp().
-                    restoreBluetoothA2dp();
+            if (intent.getAction().equals(BluetoothA2dp.ACTION_ACTIVE_DEVICE_CHANGED)) {
+                BluetoothDevice btDevice = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
+                synchronized (mLock) {
+                    mActiveBluetoothDevice = btDevice;
+                    mGlobalBluetoothA2dpOn = btDevice != null;
                 }
             }
         }
