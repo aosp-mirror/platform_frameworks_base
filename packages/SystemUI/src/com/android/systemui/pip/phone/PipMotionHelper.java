@@ -225,9 +225,10 @@ public class PipMotionHelper implements Handler.Callback {
      */
     boolean shouldDismissPip() {
         Point displaySize = new Point();
-        mContext.getDisplay().getSize(displaySize);
-        if (mBounds.bottom > displaySize.y) {
-            float offscreenFraction = (float) (mBounds.bottom - displaySize.y) / mBounds.height();
+        mContext.getDisplay().getRealSize(displaySize);
+        final int y = displaySize.y - mStableInsets.bottom;
+        if (mBounds.bottom > y) {
+            float offscreenFraction = (float) (mBounds.bottom - y) / mBounds.height();
             return offscreenFraction >= DISMISS_OFFSCREEN_FRACTION;
         }
         return false;
