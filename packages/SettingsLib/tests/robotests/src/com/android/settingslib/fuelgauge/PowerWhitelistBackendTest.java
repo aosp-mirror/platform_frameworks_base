@@ -23,35 +23,52 @@ import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.verify;
 
+import android.content.ComponentName;
+import android.content.Context;
+import android.content.pm.PackageManager;
 import android.os.IDeviceIdleController;
 
 import com.android.settingslib.SettingsLibRobolectricTestRunner;
+import com.android.settingslib.testutils.shadow.ShadowDefaultDialerManager;
+import com.android.settingslib.testutils.shadow.ShadowSmsApplication;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.robolectric.RuntimeEnvironment;
+import org.robolectric.annotation.Config;
+import org.robolectric.shadow.api.Shadow;
+import org.robolectric.shadows.ShadowPackageManager;
 
 @RunWith(SettingsLibRobolectricTestRunner.class)
+@Config(shadows = {ShadowDefaultDialerManager.class, ShadowSmsApplication.class})
 public class PowerWhitelistBackendTest {
 
     private static final String PACKAGE_ONE = "com.example.packageone";
     private static final String PACKAGE_TWO = "com.example.packagetwo";
 
-    private PowerWhitelistBackend mPowerWhitelistBackend;
     @Mock
     private IDeviceIdleController mDeviceIdleService;
+
+    private PowerWhitelistBackend mPowerWhitelistBackend;
+    private ShadowPackageManager mPackageManager;
+    private Context mContext;
 
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
+        mContext = RuntimeEnvironment.application;
         doReturn(new String[] {}).when(mDeviceIdleService).getFullPowerWhitelist();
         doReturn(new String[] {}).when(mDeviceIdleService).getSystemPowerWhitelist();
         doReturn(new String[] {}).when(mDeviceIdleService).getSystemPowerWhitelistExceptIdle();
         doNothing().when(mDeviceIdleService).addPowerSaveWhitelistApp(anyString());
         doNothing().when(mDeviceIdleService).removePowerSaveWhitelistApp(anyString());
-        mPowerWhitelistBackend = new PowerWhitelistBackend(mDeviceIdleService);
+        mPackageManager = Shadow.extract(mContext.getPackageManager());
+        mPackageManager.setSystemFeature(PackageManager.FEATURE_TELEPHONY, true);
+
+        mPowerWhitelistBackend = new PowerWhitelistBackend(mContext, mDeviceIdleService);
     }
 
     @Test
@@ -61,8 +78,8 @@ public class PowerWhitelistBackendTest {
 
         assertThat(mPowerWhitelistBackend.isWhitelisted(PACKAGE_ONE)).isTrue();
         assertThat(mPowerWhitelistBackend.isWhitelisted(PACKAGE_TWO)).isFalse();
-        assertThat(mPowerWhitelistBackend.isWhitelisted(new String[]{PACKAGE_ONE})).isTrue();
-        assertThat(mPowerWhitelistBackend.isWhitelisted(new String[]{PACKAGE_TWO})).isFalse();
+        assertThat(mPowerWhitelistBackend.isWhitelisted(new String[] {PACKAGE_ONE})).isTrue();
+        assertThat(mPowerWhitelistBackend.isWhitelisted(new String[] {PACKAGE_TWO})).isFalse();
 
         mPowerWhitelistBackend.addApp(PACKAGE_TWO);
 
@@ -70,15 +87,15 @@ public class PowerWhitelistBackendTest {
         assertThat(mPowerWhitelistBackend.isWhitelisted(PACKAGE_ONE)).isTrue();
         assertThat(mPowerWhitelistBackend.isWhitelisted(PACKAGE_TWO)).isTrue();
         assertThat(mPowerWhitelistBackend.isWhitelisted(
-                new String[]{PACKAGE_ONE, PACKAGE_TWO})).isTrue();
+                new String[] {PACKAGE_ONE, PACKAGE_TWO})).isTrue();
 
         mPowerWhitelistBackend.removeApp(PACKAGE_TWO);
 
         verify(mDeviceIdleService, atLeastOnce()).removePowerSaveWhitelistApp(PACKAGE_TWO);
         assertThat(mPowerWhitelistBackend.isWhitelisted(PACKAGE_ONE)).isTrue();
         assertThat(mPowerWhitelistBackend.isWhitelisted(PACKAGE_TWO)).isFalse();
-        assertThat(mPowerWhitelistBackend.isWhitelisted(new String[]{PACKAGE_ONE})).isTrue();
-        assertThat(mPowerWhitelistBackend.isWhitelisted(new String[]{PACKAGE_TWO})).isFalse();
+        assertThat(mPowerWhitelistBackend.isWhitelisted(new String[] {PACKAGE_ONE})).isTrue();
+        assertThat(mPowerWhitelistBackend.isWhitelisted(new String[] {PACKAGE_TWO})).isFalse();
 
         mPowerWhitelistBackend.removeApp(PACKAGE_ONE);
 
@@ -86,7 +103,23 @@ public class PowerWhitelistBackendTest {
         assertThat(mPowerWhitelistBackend.isWhitelisted(PACKAGE_ONE)).isFalse();
         assertThat(mPowerWhitelistBackend.isWhitelisted(PACKAGE_TWO)).isFalse();
         assertThat(mPowerWhitelistBackend.isWhitelisted(
-                new String[]{PACKAGE_ONE, PACKAGE_TWO})).isFalse();
+                new String[] {PACKAGE_ONE, PACKAGE_TWO})).isFalse();
+    }
+
+    @Test
+    public void isWhitelisted_shouldWhitelistDefaultSms() {
+        final String testSms = "com.android.test.defaultsms";
+        ShadowSmsApplication.setDefaultSmsApplication(new ComponentName(testSms, "receiver"));
+
+        assertThat(mPowerWhitelistBackend.isWhitelisted(testSms)).isTrue();
+    }
+
+    @Test
+    public void isWhitelisted_shouldWhitelistDefaultDialer() {
+        final String testDialer = "com.android.test.defaultdialer";
+        ShadowDefaultDialerManager.setDefaultDialerApplication(testDialer);
+
+        assertThat(mPowerWhitelistBackend.isWhitelisted(testDialer)).isTrue();
     }
 
     @Test
@@ -101,7 +134,7 @@ public class PowerWhitelistBackendTest {
 
     @Test
     public void testIsSystemWhitelistedExceptIdle_onePackage() throws Exception {
-        doReturn(new String[]{PACKAGE_TWO}).when(
+        doReturn(new String[] {PACKAGE_TWO}).when(
                 mDeviceIdleService).getSystemPowerWhitelistExceptIdle();
         mPowerWhitelistBackend.refreshList();
 
@@ -111,7 +144,7 @@ public class PowerWhitelistBackendTest {
 
     @Test
     public void testIsSystemWhitelistedExceptIdle_packageArray() throws Exception {
-        doReturn(new String[]{PACKAGE_TWO}).when(
+        doReturn(new String[] {PACKAGE_TWO}).when(
                 mDeviceIdleService).getSystemPowerWhitelistExceptIdle();
         mPowerWhitelistBackend.refreshList();
 
