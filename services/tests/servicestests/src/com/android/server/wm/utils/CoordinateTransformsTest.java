@@ -99,7 +99,7 @@ public class CoordinateTransformsTest {
 
         checkPoint(0, W).transformsTo(0, 0);
         checkPoint(H, 0).transformsTo(W, H);
-}
+    }
 
     @Test
     public void transformLogicalToPhysicalCoordinates_rot180() {

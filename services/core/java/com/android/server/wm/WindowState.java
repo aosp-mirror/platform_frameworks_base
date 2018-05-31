@@ -280,6 +280,13 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     private boolean mDragResizing;
     private boolean mDragResizingChangeReported = true;
     private int mResizeMode;
+    /**
+     * Special mode that is intended only for the rounded corner overlay: during rotation
+     * transition, we un-rotate the window token such that the window appears as it did before the
+     * rotation.
+     */
+    final boolean mForceSeamlesslyRotate;
+    ForcedSeamlessRotator mPendingForcedSeamlessRotate;
 
     private RemoteCallbackList<IWindowFocusObserver> mFocusCallbacks;
 
@@ -669,6 +676,14 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
 
     private static final float DEFAULT_DIM_AMOUNT_DEAD_WINDOW = 0.5f;
 
+    void forceSeamlesslyRotateIfAllowed(int oldRotation, int rotation) {
+        if (mForceSeamlesslyRotate) {
+            mPendingForcedSeamlessRotate = new ForcedSeamlessRotator(
+                    oldRotation, rotation, getDisplayInfo());
+            mPendingForcedSeamlessRotate.unrotate(this.mToken);
+        }
+    }
+
     interface PowerManagerWrapper {
         void wakeUp(long time, String reason);
 
@@ -715,6 +730,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         mSeq = seq;
         mEnforceSizeCompat = (mAttrs.privateFlags & PRIVATE_FLAG_COMPATIBLE_WINDOW) != 0;
         mPowerManagerWrapper = powerManagerWrapper;
+        mForceSeamlesslyRotate = token.mRoundedCornerOverlay;
         if (localLOGV) Slog.v(
             TAG, "Window " + this + " client=" + c.asBinder()
             + " token=" + token + " (" + mAttrs.token + ")" + " params=" + a);
@@ -4700,7 +4716,10 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
 
         transformFrameToSurfacePosition(mFrame.left, mFrame.top, mSurfacePosition);
 
-        if (!mSurfaceAnimator.hasLeash() && !mLastSurfacePosition.equals(mSurfacePosition)) {
+        // Freeze position while we're unrotated, so the surface remains at the position it was
+        // prior to the rotation.
+        if (!mSurfaceAnimator.hasLeash() && mPendingForcedSeamlessRotate == null &&
+                !mLastSurfacePosition.equals(mSurfacePosition)) {
             t.setPosition(mSurfaceControl, mSurfacePosition.x, mSurfacePosition.y);
             mLastSurfacePosition.set(mSurfacePosition.x, mSurfacePosition.y);
             if (surfaceInsetsChanging() && mWinAnimator.hasSurface()) {
@@ -4855,7 +4874,9 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
 
     @Override
     void seamlesslyRotate(Transaction t, int oldRotation, int newRotation) {
-        if (!isVisibleNow() || mIsWallpaper) {
+        // Invisible windows, the wallpaper, and force seamlessly rotated windows do not participate
+        // in the regular seamless rotation animation.
+        if (!isVisibleNow() || mIsWallpaper || mForceSeamlesslyRotate) {
             return;
         }
         final Matrix transform = mTmpMatrix;

@@ -1106,6 +1106,10 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
             }
         }
 
+        forAllWindows(w -> {
+            w.forceSeamlesslyRotateIfAllowed(oldRotation, rotation);
+        }, true /* traverseTopToBottom */);
+
         if (rotateSeamlessly) {
             seamlesslyRotate(getPendingTransaction(), oldRotation, rotation);
         }
@@ -3691,6 +3695,19 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         }
 
         @Override
+        SurfaceControl.Builder makeChildSurface(WindowContainer child) {
+            final SurfaceControl.Builder builder = super.makeChildSurface(child);
+            if (child instanceof WindowToken && ((WindowToken) child).mRoundedCornerOverlay) {
+                // To draw above the ColorFade layer during the screen off transition, the
+                // rounded corner overlays need to be at the root of the surface hierarchy.
+                // TODO: move the ColorLayer into the display overlay layer such that this is not
+                // necessary anymore.
+                builder.setParent(null);
+            }
+            return builder;
+        }
+
+        @Override
         void assignChildLayers(SurfaceControl.Transaction t) {
             assignChildLayers(t, null /* imeContainer */);
         }
@@ -3704,6 +3721,10 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
                 // See {@link mSplitScreenDividerAnchor}
                 if (wt.windowType == TYPE_DOCK_DIVIDER) {
                     wt.assignRelativeLayer(t, mTaskStackContainers.getSplitScreenDividerAnchor(), 1);
+                    continue;
+                }
+                if (wt.mRoundedCornerOverlay) {
+                    wt.assignLayer(t, WindowManagerPolicy.COLOR_FADE_LAYER + 1);
                     continue;
                 }
                 wt.assignLayer(t, j);

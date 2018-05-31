@@ -685,8 +685,11 @@ class WindowStateAnimator {
         final int displayId = mWin.getDisplayId();
         final ScreenRotationAnimation screenRotationAnimation =
                 mAnimator.getScreenRotationAnimationLocked(displayId);
-        final boolean screenAnimation =
-                screenRotationAnimation != null && screenRotationAnimation.isAnimating();
+        final boolean windowParticipatesInScreenRotationAnimation =
+                !mWin.mForceSeamlesslyRotate;
+        final boolean screenAnimation = screenRotationAnimation != null
+                && screenRotationAnimation.isAnimating()
+                && windowParticipatesInScreenRotationAnimation;
 
         if (screenAnimation) {
             // cache often used attributes locally
@@ -795,6 +798,13 @@ class WindowStateAnimator {
         }
 
         if (w.inPinnedWindowingMode()) {
+            return false;
+        }
+
+        // During forced seamless rotation, the surface bounds get updated with the crop in the
+        // new rotation, which is not compatible with showing the surface in the old rotation.
+        // To work around that we disable cropping for such windows, as it is not necessary anyways.
+        if (w.mForceSeamlesslyRotate) {
             return false;
         }
 
