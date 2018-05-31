@@ -339,6 +339,98 @@ class TextLine {
     }
 
     /**
+     * @see #measure(int, boolean, FontMetricsInt)
+     * @return The measure results for all possible offsets
+     */
+    float[] measureAllOffsets(boolean[] trailing, FontMetricsInt fmi) {
+        float[] measurement = new float[mLen + 1];
+
+        int[] target = new int[mLen + 1];
+        for (int offset = 0; offset < target.length; ++offset) {
+            target[offset] = trailing[offset] ? offset - 1 : offset;
+        }
+        if (target[0] < 0) {
+            measurement[0] = 0;
+        }
+
+        float h = 0;
+
+        if (!mHasTabs) {
+            if (mDirections == Layout.DIRS_ALL_LEFT_TO_RIGHT) {
+                for (int offset = 0; offset <= mLen; ++offset) {
+                    measurement[offset] = measureRun(0, offset, mLen, false, fmi);
+                }
+                return measurement;
+            }
+            if (mDirections == Layout.DIRS_ALL_RIGHT_TO_LEFT) {
+                for (int offset = 0; offset <= mLen; ++offset) {
+                    measurement[offset] = measureRun(0, offset, mLen, true, fmi);
+                }
+                return measurement;
+            }
+        }
+
+        char[] chars = mChars;
+        int[] runs = mDirections.mDirections;
+        for (int i = 0; i < runs.length; i += 2) {
+            int runStart = runs[i];
+            int runLimit = runStart + (runs[i + 1] & Layout.RUN_LENGTH_MASK);
+            if (runLimit > mLen) {
+                runLimit = mLen;
+            }
+            boolean runIsRtl = (runs[i + 1] & Layout.RUN_RTL_FLAG) != 0;
+
+            int segstart = runStart;
+            for (int j = mHasTabs ? runStart : runLimit; j <= runLimit; ++j) {
+                int codept = 0;
+                if (mHasTabs && j < runLimit) {
+                    codept = chars[j];
+                    if (codept >= 0xD800 && codept < 0xDC00 && j + 1 < runLimit) {
+                        codept = Character.codePointAt(chars, j);
+                        if (codept > 0xFFFF) {
+                            ++j;
+                            continue;
+                        }
+                    }
+                }
+
+                if (j == runLimit || codept == '\t') {
+                    float oldh = h;
+                    boolean advance = (mDir == Layout.DIR_RIGHT_TO_LEFT) == runIsRtl;
+                    float w = measureRun(segstart, j, j, runIsRtl, fmi);
+                    h += advance ? w : -w;
+
+                    float baseh = advance ? oldh : h;
+                    FontMetricsInt crtfmi = advance ? fmi : null;
+                    for (int offset = segstart; offset <= j && offset <= mLen; ++offset) {
+                        if (target[offset] >= segstart && target[offset] < j) {
+                            measurement[offset] =
+                                    baseh + measureRun(segstart, offset, j, runIsRtl, crtfmi);
+                        }
+                    }
+
+                    if (codept == '\t') {
+                        if (target[j] == j) {
+                            measurement[j] = h;
+                        }
+                        h = mDir * nextTab(h * mDir);
+                        if (target[j + 1] == j) {
+                            measurement[j + 1] =  h;
+                        }
+                    }
+
+                    segstart = j + 1;
+                }
+            }
+        }
+        if (target[mLen] == mLen) {
+            measurement[mLen] = h;
+        }
+
+        return measurement;
+    }
+
+    /**
      * Draws a unidirectional (but possibly multi-styled) run of text.
      *
      *
