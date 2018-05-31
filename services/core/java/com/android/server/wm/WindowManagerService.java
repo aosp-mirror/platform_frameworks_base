@@ -4509,7 +4509,10 @@ public class WindowManagerService extends IWindowManager.Stub
         if (mSafeMode) {
             Log.i(TAG_WM, "SAFE MODE ENABLED (menu=" + menuState + " s=" + sState
                     + " dpad=" + dpadState + " trackball=" + trackballState + ")");
-            SystemProperties.set(ShutdownThread.RO_SAFEMODE_PROPERTY, "1");
+            // May already be set if (for instance) this process has crashed
+            if (SystemProperties.getInt(ShutdownThread.RO_SAFEMODE_PROPERTY, 0) == 0) {
+                SystemProperties.set(ShutdownThread.RO_SAFEMODE_PROPERTY, "1");
+            }
         } else {
             Log.i(TAG_WM, "SAFE MODE not enabled");
         }
