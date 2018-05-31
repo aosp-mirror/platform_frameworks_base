@@ -399,6 +399,160 @@ public final class ImsReasonInfo implements Parcelable {
      */
     public static final int CODE_UNOBTAINABLE_NUMBER = 1515;
 
+    /**
+     * The rejection cause is not known.
+     * <p>
+     * Used with implicit call rejection.
+     */
+    public static final int CODE_REJECT_UNKNOWN = 1600;
+
+    /**
+     * Ongoing call, and call waiting is disabled.
+     * <p>
+     * Used with implicit call rejection.
+     */
+    public static final int CODE_REJECT_ONGOING_CALL_WAITING_DISABLED = 1601;
+
+    /**
+     * A call is ongoing on another sub.
+     * <p>
+     * Used with implicit call rejection.
+     */
+    public static final int CODE_REJECT_CALL_ON_OTHER_SUB = 1602;
+
+    /**
+     * CDMA call collision.
+     * <p>
+     * Used with implicit call rejection.
+     */
+    public static final int CODE_REJECT_1X_COLLISION = 1603;
+
+    /**
+     * IMS is not registered for service yet.
+     * <p>
+     * Used with implicit call rejection.
+     */
+    public static final int CODE_REJECT_SERVICE_NOT_REGISTERED = 1604;
+
+    /**
+     * The call type is not allowed on the current RAT.
+     * <p>
+     * Used with implicit call rejection.
+     */
+    public static final int CODE_REJECT_CALL_TYPE_NOT_ALLOWED = 1605;
+
+    /**
+     * And emergency call is ongoing.
+     * <p>
+     * Used with implicit call rejection.
+     */
+    public static final int CODE_REJECT_ONGOING_E911_CALL = 1606;
+
+    /**
+     * Another call is in the process of being establilshed.
+     * <p>
+     * Used with implicit call rejection.
+     */
+    public static final int CODE_REJECT_ONGOING_CALL_SETUP = 1607;
+
+    /**
+     * Maximum number of allowed calls are already in progress.
+     * <p>
+     * Used with implicit call rejection.
+     */
+    public static final int CODE_REJECT_MAX_CALL_LIMIT_REACHED = 1608;
+
+    /**
+     * Invalid/unsupported SIP headers received.
+     * <p>
+     * Used with implicit call rejection.
+     */
+    public static final int CODE_REJECT_UNSUPPORTED_SIP_HEADERS = 1609;
+
+    /**
+     * Invalid/unsupported SDP headers received.
+     * <p>
+     * Used with implicit call rejection.
+     */
+    public static final int CODE_REJECT_UNSUPPORTED_SDP_HEADERS = 1610;
+
+    /**
+     * A call transfer is in progress.
+     * <p>
+     * Used with implicit call rejection.
+     */
+    public static final int CODE_REJECT_ONGOING_CALL_TRANSFER = 1611;
+
+    /**
+     * An internal error occured while processing the call.
+     * <p>
+     * Used with implicit call rejection.
+     */
+    public static final int CODE_REJECT_INTERNAL_ERROR = 1612;
+
+    /**
+     * Call failure due to lack of dedicated bearer.
+     * <p>
+     * Used with implicit call rejection.
+     */
+    public static final int CODE_REJECT_QOS_FAILURE = 1613;
+
+    /**
+     * A call handover is in progress.
+     * <p>
+     * Used with implicit call rejection.
+     */
+    public static final int CODE_REJECT_ONGOING_HANDOVER = 1614;
+
+    /**
+     * Video calling not supported with TTY.
+     * <p>
+     * Used with implicit call rejection.
+     */
+    public static final int CODE_REJECT_VT_TTY_NOT_ALLOWED = 1615;
+
+    /**
+     * A call upgrade is in progress.
+     * <p>
+     * Used with implicit call rejection.
+     */
+    public static final int CODE_REJECT_ONGOING_CALL_UPGRADE = 1616;
+
+    /**
+     * Call from conference server, when TTY mode is ON.
+     * <p>
+     * Used with implicit call rejection.
+     */
+    public static final int CODE_REJECT_CONFERENCE_TTY_NOT_ALLOWED = 1617;
+
+    /**
+     * A conference call is ongoing.
+     * <p>
+     * Used with implicit call rejection.
+     */
+    public static final int CODE_REJECT_ONGOING_CONFERENCE_CALL = 1618;
+
+    /**
+     * A video call with AVPF is not supported.
+     * <p>
+     * Used with implicit call rejection.
+     */
+    public static final int CODE_REJECT_VT_AVPF_NOT_ALLOWED = 1619;
+
+    /**
+     * And encrypted call is ongoing; other calls not supported.
+     * <p>
+     * Used with implicit call rejection.
+     */
+    public static final int CODE_REJECT_ONGOING_ENCRYPTED_CALL = 1620;
+
+    /**
+     * A CS call is ongoing.
+     * <p>
+     * Used with implicit call rejection.
+     */
+    public static final int CODE_REJECT_ONGOING_CS_CALL = 1621;
+
     /* OEM specific error codes. To be used by OEMs when they don't want to
    reveal error code which would be replaced by ERROR_UNSPECIFIED */
     public static final int CODE_OEM_CAUSE_1 = 0xf001;
