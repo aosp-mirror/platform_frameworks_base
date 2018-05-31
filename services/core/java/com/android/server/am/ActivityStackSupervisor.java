@@ -1628,27 +1628,36 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
 
     /**
      * Ensure all activities visibility, update orientation and configuration.
+     *
+     * @param starting The currently starting activity or {@code null} if there is none.
+     * @param displayId The id of the display where operation is executed.
+     * @param markFrozenIfConfigChanged Whether to set {@link ActivityRecord#frozenBeforeDestroy} to
+     *                                  {@code true} if config changed.
+     * @param deferResume Whether to defer resume while updating config.
      */
-    boolean ensureVisibilityAndConfig(ActivityRecord r, int displayId,
+    boolean ensureVisibilityAndConfig(ActivityRecord starting, int displayId,
             boolean markFrozenIfConfigChanged, boolean deferResume) {
         // First ensure visibility without updating the config just yet. We need this to know what
         // activities are affecting configuration now.
+        // Passing null here for 'starting' param value, so that visibility of actual starting
+        // activity will be properly updated.
         ensureActivitiesVisibleLocked(null /* starting */, 0 /* configChanges */,
-                false /* preserveWindows */, false /* updateConfiguration */);
+                false /* preserveWindows */, false /* notifyClients */);
 
         // Force-update the orientation from the WindowManager, since we need the true configuration
         // to send to the client now.
         final Configuration config = mWindowManager.updateOrientationFromAppTokens(
                 getDisplayOverrideConfiguration(displayId),
-                r != null && r.mayFreezeScreenLocked(r.app) ? r.appToken : null,
+                starting != null && starting.mayFreezeScreenLocked(starting.app)
+                        ? starting.appToken : null,
                 displayId, true /* forceUpdate */);
-        if (r != null && markFrozenIfConfigChanged && config != null) {
-            r.frozenBeforeDestroy = true;
+        if (starting != null && markFrozenIfConfigChanged && config != null) {
+            starting.frozenBeforeDestroy = true;
         }
 
         // Update the configuration of the activities on the display.
-        return mService.updateDisplayOverrideConfigurationLocked(config, r,
-                deferResume, displayId);
+        return mService.updateDisplayOverrideConfigurationLocked(config, starting, deferResume,
+                displayId);
     }
 
     private void logIfTransactionTooLarge(Intent intent, Bundle icicle) {
@@ -3675,14 +3684,14 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
     void ensureActivitiesVisibleLocked(ActivityRecord starting, int configChanges,
             boolean preserveWindows) {
         ensureActivitiesVisibleLocked(starting, configChanges, preserveWindows,
-                true /* updateConfiguration */);
+                true /* notifyClients */);
     }
 
     /**
      * @see #ensureActivitiesVisibleLocked(ActivityRecord, int, boolean)
      */
     void ensureActivitiesVisibleLocked(ActivityRecord starting, int configChanges,
-            boolean preserveWindows, boolean updateConfiguration) {
+            boolean preserveWindows, boolean notifyClients) {
         getKeyguardController().beginActivityVisibilityUpdate();
         try {
             // First the front stacks. In case any are not fullscreen and are in front of home.
@@ -3691,7 +3700,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
                 for (int stackNdx = display.getChildCount() - 1; stackNdx >= 0; --stackNdx) {
                     final ActivityStack stack = display.getChildAt(stackNdx);
                     stack.ensureActivitiesVisibleLocked(starting, configChanges, preserveWindows,
-                            updateConfiguration);
+                            notifyClients);
                 }
             }
         } finally {
