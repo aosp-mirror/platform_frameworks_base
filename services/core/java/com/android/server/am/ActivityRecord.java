@@ -1405,6 +1405,11 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
         newIntents.add(intent);
     }
 
+    final boolean isSleeping() {
+        final ActivityStack stack = getStack();
+        return stack != null ? stack.shouldSleepActivities() : service.isSleepingLocked();
+    }
+
     /**
      * Deliver a new Intent to an existing activity, so that its onNewIntent()
      * method will be called at the proper time.
@@ -1415,9 +1420,7 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
                 intent, getUriPermissionsLocked(), userId);
         final ReferrerIntent rintent = new ReferrerIntent(intent, referrer);
         boolean unsent = true;
-        final ActivityStack stack = getStack();
-        final boolean isTopActivityWhileSleeping = isTopRunningActivity()
-                && (stack != null ? stack.shouldSleepActivities() : service.isSleepingLocked());
+        final boolean isTopActivityWhileSleeping = isTopRunningActivity() && isSleeping();
 
         // We want to immediately deliver the intent to the activity if:
         // - It is currently resumed or paused. i.e. it is currently visible to the user and we want
@@ -1645,7 +1648,10 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
             parent.onActivityStateChanged(this, state, reason);
         }
 
-        if (state == STOPPING) {
+        // The WindowManager interprets the app stopping signal as
+        // an indication that the Surface will eventually be destroyed.
+        // This however isn't necessarily true if we are going to sleep.
+        if (state == STOPPING && !isSleeping()) {
             mWindowContainerController.notifyAppStopping();
         }
     }
