@@ -7641,7 +7641,7 @@ Lcom/android/internal/os/HandlerCaller;->obtainMessageOO(ILjava/lang/Object;Ljav
 Lcom/android/internal/os/HandlerCaller;->obtainMessageOOO(ILjava/lang/Object;Ljava/lang/Object;Ljava/lang/Object;)Landroid/os/Message;
 Lcom/android/internal/os/HandlerCaller;->sendMessage(Landroid/os/Message;)V
 Lcom/android/internal/os/IDropBoxManagerService$Stub;->asInterface(Landroid/os/IBinder;)Lcom/android/internal/os/IDropBoxManagerService;
-Lcom/android/internal/os/IDropBoxManagerService;->getNextEntry(Ljava/lang/String;J)Landroid/os/DropBoxManager$Entry;
+Lcom/android/internal/os/IDropBoxManagerService;->getNextEntry(Ljava/lang/String;JLjava/lang/String;)Landroid/os/DropBoxManager$Entry;
 Lcom/android/internal/os/PowerProfile;-><init>(Landroid/content/Context;)V
 Lcom/android/internal/os/PowerProfile;->getAveragePower(Ljava/lang/String;)D
 Lcom/android/internal/os/PowerProfile;->getAveragePower(Ljava/lang/String;I)D
