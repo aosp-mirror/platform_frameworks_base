@@ -4258,8 +4258,6 @@ public class BatteryStatsImpl extends BatteryStats {
                             workSourceName != null ? workSourceName : packageName);
                     pkg.noteWakeupAlarmLocked(tag);
                 }
-                StatsLog.write_non_chained(StatsLog.WAKEUP_ALARM_OCCURRED, workSource.get(i),
-                        workSource.getName(i), tag);
             }
 
             ArrayList<WorkChain> workChains = workSource.getWorkChains();
@@ -4272,7 +4270,6 @@ public class BatteryStatsImpl extends BatteryStats {
                         BatteryStatsImpl.Uid.Pkg pkg = getPackageStatsLocked(uid, packageName);
                         pkg.noteWakeupAlarmLocked(tag);
                     }
-                    StatsLog.write(StatsLog.WAKEUP_ALARM_OCCURRED, wc.getUids(), wc.getTags(), tag);
                 }
             }
         } else {
@@ -4280,7 +4277,6 @@ public class BatteryStatsImpl extends BatteryStats {
                 BatteryStatsImpl.Uid.Pkg pkg = getPackageStatsLocked(uid, packageName);
                 pkg.noteWakeupAlarmLocked(tag);
             }
-            StatsLog.write_non_chained(StatsLog.WAKEUP_ALARM_OCCURRED, uid, null, tag);
         }
     }
 
