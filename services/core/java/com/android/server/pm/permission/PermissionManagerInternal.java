@@ -174,6 +174,14 @@ public abstract class PermissionManagerInternal {
      */
     public abstract void enforceCrossUserPermission(int callingUid, int userId,
             boolean requireFullPermission, boolean checkShell, @NonNull String message);
+    /**
+     * @see #enforceCrossUserPermission(int, int, boolean, boolean, String)
+     * @param requirePermissionWhenSameUser When {@code true}, still require the cross user
+     * permission to be held even if the callingUid and userId reference the same user.
+     */
+    public abstract void enforceCrossUserPermission(int callingUid, int userId,
+            boolean requireFullPermission, boolean checkShell,
+            boolean requirePermissionWhenSameUser, @NonNull String message);
     public abstract void enforceGrantRevokeRuntimePermissionPermissions(@NonNull String message);
 
     public abstract @NonNull PermissionSettings getPermissionSettings();
