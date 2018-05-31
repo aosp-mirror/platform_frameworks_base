@@ -263,6 +263,12 @@ public class Camera {
      * supports external cameras and an external camera is connected or
      * disconnected.
      *
+     * If there is a
+     * {@link android.hardware.camera2.CameraCharacteristics#REQUEST_AVAILABLE_CAPABILITIES_LOGICAL_MULTI_CAMERA
+     * logical multi-camera} in the system, to maintain app backward compatibility, this method will
+     * only expose one camera for every logical camera and underlying physical cameras group.
+     * Use camera2 API to see all cameras.
+     *
      * @return total number of accessible camera devices, or 0 if there are no
      *   cameras or an error was encountered enumerating them.
      */
