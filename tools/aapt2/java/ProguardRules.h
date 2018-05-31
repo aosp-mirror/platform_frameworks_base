@@ -79,7 +79,7 @@ class KeepSet {
 bool CollectProguardRulesForManifest(xml::XmlResource* res, KeepSet* keep_set,
                                      bool main_dex_only = false);
 
-bool CollectProguardRules(xml::XmlResource* res, KeepSet* keep_set);
+bool CollectProguardRules(IAaptContext* context, xml::XmlResource* res, KeepSet* keep_set);
 
 bool CollectResourceReferences(IAaptContext* context, ResourceTable* table, KeepSet* keep_set);
 

@@ -500,7 +500,7 @@ std::vector<std::unique_ptr<xml::XmlResource>> ResourceFileFlattener::LinkAndVer
     return {};
   }
 
-  if (options_.update_proguard_spec && !proguard::CollectProguardRules(doc, keep_set_)) {
+  if (options_.update_proguard_spec && !proguard::CollectProguardRules(context_, doc, keep_set_)) {
     return {};
   }
 
