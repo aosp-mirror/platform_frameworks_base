@@ -1,2 +1,3 @@
 android.net.ConnectivityThread$Singleton
+android.os.FileObserver
 android.widget.Magnifier
