@@ -22,6 +22,7 @@ import android.content.res.Resources;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.util.AttributeSet;
+import android.view.Display;
 import android.view.DisplayCutout;
 import android.view.View;
 import android.widget.TextView;
@@ -30,6 +31,8 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.keyguard.AlphaOptimizedLinearLayout;
 import com.android.systemui.R;
 import com.android.systemui.statusbar.policy.DarkIconDispatcher;
+
+import java.util.List;
 
 /**
  * The view in the statusBar that contains part of the heads-up information
@@ -48,8 +51,9 @@ public class HeadsUpStatusBarView extends AlphaOptimizedLinearLayout {
     private View mRootView;
     private int mSysWinInset;
     private int mCutOutInset;
+    private List<Rect> mCutOutBounds;
     private Rect mIconDrawingRect = new Rect();
-    private Point mPoint;
+    private Point mDisplaySize;
     private Runnable mOnDrawingRectChangedListener;
 
     public HeadsUpStatusBarView(Context context) {
@@ -141,16 +145,19 @@ public class HeadsUpStatusBarView extends AlphaOptimizedLinearLayout {
         mLayoutedIconRect.set(left, top, right, bottom);
         updateDrawingRect();
         int targetPadding = mAbsoluteStartPadding + mSysWinInset + mCutOutInset;
-        if (left != targetPadding) {
-            int start;
-            if (isLayoutRtl()) {
-                if (mPoint == null) {
-                    mPoint = new Point();
+        boolean isRtl = isLayoutRtl();
+        int start = isRtl ? (mDisplaySize.x - right) : left;
+
+        if (start != targetPadding) {
+            if (mCutOutBounds != null) {
+                for (Rect cutOutRect : mCutOutBounds) {
+                    int cutOutStart = (isRtl)
+                            ? (mDisplaySize.x - cutOutRect.right) : cutOutRect.left;
+                    if (start > cutOutStart) {
+                        start -= cutOutRect.width();
+                        break;
+                    }
                 }
-                getDisplay().getRealSize(mPoint);
-                start = (mPoint.x - right);
-            } else {
-                start = left;
             }
 
             int newPadding = targetPadding - start + getPaddingStart();
@@ -165,6 +172,11 @@ public class HeadsUpStatusBarView extends AlphaOptimizedLinearLayout {
         }
     }
 
+    /** In order to do UI alignment, this view will be notified by
+     * {@link com.android.systemui.statusbar.stack.NotificationStackScrollLayout}.
+     * After scroller laid out, the scroller will tell this view about scroller's getX()
+     * @param translationX how to translate the horizontal position
+     */
     public void setPanelTranslation(float translationX) {
         if (isLayoutRtl()) {
             setTranslationX(translationX + mCutOutInset);
@@ -191,6 +203,15 @@ public class HeadsUpStatusBarView extends AlphaOptimizedLinearLayout {
         mCutOutInset = (displayCutout != null)
                 ? (isRtl ? displayCutout.getSafeInsetRight() : displayCutout.getSafeInsetLeft())
                 : 0;
+
+        getDisplaySize();
+
+        mCutOutBounds = null;
+        if (displayCutout != null && displayCutout.getSafeInsetRight() == 0
+                && displayCutout.getSafeInsetLeft() == 0) {
+            mCutOutBounds = displayCutout.getBoundingRects();
+        }
+
         // For Double Cut Out mode, the System window navigation bar is at the right
         // side of the left cut out. In this condition, mSysWinInset include the left cut
         // out width so we set mCutOutInset to be 0. For RTL, the condition is the same.
@@ -221,5 +242,18 @@ public class HeadsUpStatusBarView extends AlphaOptimizedLinearLayout {
 
     public void setOnDrawingRectChangedListener(Runnable onDrawingRectChangedListener) {
         mOnDrawingRectChangedListener = onDrawingRectChangedListener;
+    }
+
+    private void getDisplaySize() {
+        if (mDisplaySize == null) {
+            mDisplaySize = new Point();
+        }
+        getDisplay().getRealSize(mDisplaySize);
+    }
+
+    @Override
+    protected void onAttachedToWindow() {
+        super.onAttachedToWindow();
+        getDisplaySize();
     }
 }
