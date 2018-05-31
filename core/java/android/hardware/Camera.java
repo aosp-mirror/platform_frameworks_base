@@ -177,6 +177,7 @@ public class Camera {
     private OnZoomChangeListener mZoomListener;
     private FaceDetectionListener mFaceListener;
     private ErrorCallback mErrorCallback;
+    private ErrorCallback mDetailedErrorCallback;
     private boolean mOneShot;
     private boolean mWithBuffer;
     private boolean mFaceDetectionRunning = false;
@@ -1240,8 +1241,14 @@ public class Camera {
 
             case CAMERA_MSG_ERROR :
                 Log.e(TAG, "Error " + msg.arg1);
-                if (mErrorCallback != null) {
-                    mErrorCallback.onError(msg.arg1, mCamera);
+                if (mDetailedErrorCallback != null) {
+                    mDetailedErrorCallback.onError(msg.arg1, mCamera);
+                } else if (mErrorCallback != null) {
+                    if (msg.arg1 == CAMERA_ERROR_DISABLED) {
+                        mErrorCallback.onError(CAMERA_ERROR_EVICTED, mCamera);
+                    } else {
+                        mErrorCallback.onError(msg.arg1, mCamera);
+                    }
                 }
                 return;
 
@@ -2005,6 +2012,15 @@ public class Camera {
     public static final int CAMERA_ERROR_EVICTED = 2;
 
     /**
+     * Camera was disconnected due to device policy change or client
+     * application going to background.
+     * @see Camera.ErrorCallback
+     *
+     * @hide
+     */
+    public static final int CAMERA_ERROR_DISABLED = 3;
+
+    /**
      * Media server died. In this case, the application must release the
      * Camera object and instantiate a new one.
      * @see Camera.ErrorCallback
@@ -2041,6 +2057,24 @@ public class Camera {
     public final void setErrorCallback(ErrorCallback cb)
     {
         mErrorCallback = cb;
+    }
+
+    /**
+     * Registers a callback to be invoked when an error occurs.
+     * The detailed error callback may contain error code that
+     * gives more detailed information about the error.
+     *
+     * When a detailed callback is set, the callback set via
+     * #setErrorCallback(ErrorCallback) will stop receiving
+     * onError call.
+     *
+     * @param cb The callback to run
+     *
+     * @hide
+     */
+    public final void setDetailedErrorCallback(ErrorCallback cb)
+    {
+        mDetailedErrorCallback = cb;
     }
 
     private native final void native_setParameters(String params);
