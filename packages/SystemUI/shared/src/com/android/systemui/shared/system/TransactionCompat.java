@@ -25,9 +25,9 @@ import android.view.SurfaceControl.Transaction;
 
 public class TransactionCompat {
 
-    private final Transaction mTransaction;
+    final Transaction mTransaction;
 
-    private final float[] mTmpValues = new float[9];
+    final float[] mTmpValues = new float[9];
 
     public TransactionCompat() {
         mTransaction = new Transaction();
