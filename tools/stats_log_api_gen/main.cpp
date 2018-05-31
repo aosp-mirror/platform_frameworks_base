@@ -614,23 +614,19 @@ write_stats_log_header(FILE* out, const Atoms& atoms, const AtomDecl &attributio
     return 0;
 }
 
-static void write_java_usage(
-    FILE* out, const string& method_name, const string& atom_code_name,
-    const AtomDecl& atom, const AtomDecl &attributionDecl) {
+static void write_java_usage(FILE* out, const string& method_name, const string& atom_code_name,
+        const AtomDecl& atom) {
     fprintf(out, "     * Usage: StatsLog.%s(StatsLog.%s",
         method_name.c_str(), atom_code_name.c_str());
     for (vector<AtomField>::const_iterator field = atom.fields.begin();
         field != atom.fields.end(); field++) {
         if (field->javaType == JAVA_TYPE_ATTRIBUTION_CHAIN) {
-            for (auto chainField : attributionDecl.fields) {
-                fprintf(out, ", %s[] %s",
-                    java_type_name(chainField.javaType), chainField.name.c_str());
-            }
+            fprintf(out, ", android.os.WorkSource workSource");
         } else {
             fprintf(out, ", %s %s", java_type_name(field->javaType), field->name.c_str());
         }
     }
-    fprintf(out, ");\n");
+    fprintf(out, ");<br>\n");
 }
 
 static void write_java_method(
@@ -754,12 +750,11 @@ write_stats_log_java(FILE* out, const Atoms& atoms, const AtomDecl &attributionD
         string constant = make_constant_name(atom->name);
         fprintf(out, "\n");
         fprintf(out, "    /**\n");
-        fprintf(out, "     * %s %s\n", atom->message.c_str(), atom->name.c_str());
-        write_java_usage(out, "write", constant, *atom, attributionDecl);
+        fprintf(out, "     * %s %s<br>\n", atom->message.c_str(), atom->name.c_str());
+        write_java_usage(out, "write", constant, *atom);
         auto non_chained_decl = atom_code_to_non_chained_decl_map.find(atom->code);
         if (non_chained_decl != atom_code_to_non_chained_decl_map.end()) {
-            write_java_usage(out, "write_non_chained", constant, *non_chained_decl->second,
-             attributionDecl);
+            write_java_usage(out, "write_non_chained", constant, *non_chained_decl->second);
         }
         fprintf(out, "     */\n");
         fprintf(out, "    public static final int %s = %d;\n", constant.c_str(), atom->code);
