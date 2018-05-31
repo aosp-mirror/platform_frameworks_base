@@ -2953,6 +2953,9 @@ Landroid/media/MediaMetadataRetriever;->native_setup()V
 Landroid/media/MediaMuxer;->mCloseGuard:Ldalvik/system/CloseGuard;
 Landroid/media/MediaMuxer;->mNativeObject:J
 Landroid/media/MediaMuxer;->mState:I
+Landroid/media/MediaMuxer;->MUXER_STATE_STARTED:I
+Landroid/media/MediaMuxer;->MUXER_STATE_STOPPED:I
+Landroid/media/MediaMuxer;->MUXER_STATE_UNINITIALIZED:I
 Landroid/media/MediaMuxer;->nativeRelease(J)V
 Landroid/media/MediaMuxer;->nativeSetup(Ljava/io/FileDescriptor;I)J
 Landroid/media/MediaPlayer$TrackInfo;->CREATOR:Landroid/os/Parcelable$Creator;
