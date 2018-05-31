@@ -16,14 +16,22 @@
 
 package com.android.server.usb;
 
+import static com.android.internal.util.dump.DumpUtils.writeComponentName;
+import static com.android.server.usb.UsbProfileGroupSettingsManager.getAccessoryFilters;
+import static com.android.server.usb.UsbProfileGroupSettingsManager.getDeviceFilters;
+
 import android.annotation.NonNull;
 import android.app.PendingIntent;
 import android.content.ActivityNotFoundException;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
+import android.content.pm.ResolveInfo;
+import android.hardware.usb.AccessoryFilter;
+import android.hardware.usb.DeviceFilter;
 import android.hardware.usb.UsbAccessory;
 import android.hardware.usb.UsbConstants;
 import android.hardware.usb.UsbDevice;
@@ -32,6 +40,8 @@ import android.hardware.usb.UsbManager;
 import android.os.Binder;
 import android.os.Process;
 import android.os.UserHandle;
+import android.service.usb.UsbAccessoryAttachedActivities;
+import android.service.usb.UsbDeviceAttachedActivities;
 import android.service.usb.UsbSettingsAccessoryPermissionProto;
 import android.service.usb.UsbSettingsDevicePermissionProto;
 import android.service.usb.UsbUserSettingsManagerProto;
@@ -40,7 +50,9 @@ import android.util.SparseBooleanArray;
 
 import com.android.internal.util.dump.DualDumpOutputStream;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 class UsbUserSettingsManager {
     private static final String TAG = "UsbUserSettingsManager";
@@ -305,6 +317,18 @@ class UsbUserSettingsManager {
         }
     }
 
+    /**
+     * Get all activities that can handle the device/accessory attached intent.
+     *
+     * @param intent The intent to handle
+     *
+     * @return The resolve infos of the activities that can handle the intent
+     */
+    List<ResolveInfo> queryIntentActivities(@NonNull Intent intent) {
+        return mPackageManager.queryIntentActivitiesAsUser(intent, PackageManager.GET_META_DATA,
+                mUser.getIdentifier());
+    }
+
     public void dump(@NonNull DualDumpOutputStream dump, @NonNull String idName, long id) {
         long token = dump.start(idName, id);
 
@@ -340,6 +364,59 @@ class UsbUserSettingsManager {
                 }
 
                 dump.end(accessoryPermissionToken);
+            }
+
+            List<ResolveInfo> deviceAttachedActivities = queryIntentActivities(
+                    new Intent(UsbManager.ACTION_USB_DEVICE_ATTACHED));
+            int numDeviceAttachedActivities = deviceAttachedActivities.size();
+            for (int activityNum = 0; activityNum < numDeviceAttachedActivities; activityNum++) {
+                ResolveInfo deviceAttachedActivity = deviceAttachedActivities.get(activityNum);
+
+                long deviceAttachedActivityToken = dump.start("device_attached_activities",
+                        UsbUserSettingsManagerProto.DEVICE_ATTACHED_ACTIVITIES);
+
+                writeComponentName(dump, "activity", UsbDeviceAttachedActivities.ACTIVITY,
+                        new ComponentName(deviceAttachedActivity.activityInfo.packageName,
+                                deviceAttachedActivity.activityInfo.name));
+
+                ArrayList<DeviceFilter> deviceFilters = getDeviceFilters(mPackageManager,
+                        deviceAttachedActivity);
+                if (deviceFilters != null) {
+                    int numDeviceFilters = deviceFilters.size();
+                    for (int filterNum = 0; filterNum < numDeviceFilters; filterNum++) {
+                        deviceFilters.get(filterNum).dump(dump, "filters",
+                                UsbDeviceAttachedActivities.FILTERS);
+                    }
+                }
+
+                dump.end(deviceAttachedActivityToken);
+            }
+
+            List<ResolveInfo> accessoryAttachedActivities =
+                    queryIntentActivities(new Intent(UsbManager.ACTION_USB_ACCESSORY_ATTACHED));
+            int numAccessoryAttachedActivities = accessoryAttachedActivities.size();
+            for (int activityNum = 0; activityNum < numAccessoryAttachedActivities; activityNum++) {
+                ResolveInfo accessoryAttachedActivity =
+                        accessoryAttachedActivities.get(activityNum);
+
+                long accessoryAttachedActivityToken = dump.start("accessory_attached_activities",
+                        UsbUserSettingsManagerProto.ACCESSORY_ATTACHED_ACTIVITIES);
+
+                writeComponentName(dump, "activity", UsbAccessoryAttachedActivities.ACTIVITY,
+                        new ComponentName(accessoryAttachedActivity.activityInfo.packageName,
+                                accessoryAttachedActivity.activityInfo.name));
+
+                ArrayList<AccessoryFilter> accessoryFilters = getAccessoryFilters(mPackageManager,
+                        accessoryAttachedActivity);
+                if (accessoryFilters != null) {
+                    int numAccessoryFilters = accessoryFilters.size();
+                    for (int filterNum = 0; filterNum < numAccessoryFilters; filterNum++) {
+                        accessoryFilters.get(filterNum).dump(dump, "filters",
+                                UsbAccessoryAttachedActivities.FILTERS);
+                    }
+                }
+
+                dump.end(accessoryAttachedActivityToken);
             }
         }
 
