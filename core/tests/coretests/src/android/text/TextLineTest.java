@@ -21,6 +21,8 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
+import android.graphics.Canvas;
+import android.graphics.Paint;
 import android.graphics.Typeface;
 import android.platform.test.annotations.Presubmit;
 import android.support.test.InstrumentationRegistry;
@@ -28,6 +30,7 @@ import android.support.test.filters.SmallTest;
 import android.support.test.filters.Suppress;
 import android.support.test.runner.AndroidJUnit4;
 import android.text.Layout.TabStops;
+import android.text.style.ReplacementSpan;
 import android.text.style.TabStopSpan;
 
 import org.junit.Test;
@@ -43,7 +46,8 @@ public class TextLineTest {
         final TextPaint paint = new TextPaint();
         final TextLine tl = TextLine.obtain();
         tl.set(paint, line, 0, line.length(), Layout.DIR_LEFT_TO_RIGHT,
-                Layout.DIRS_ALL_LEFT_TO_RIGHT, false /* hasTabs */, null /* tabStops */);
+                Layout.DIRS_ALL_LEFT_TO_RIGHT, false /* hasTabs */, null /* tabStops */,
+                0, 0 /* no ellipsis */);
         final float originalWidth = tl.metrics(null);
         final float expandedWidth = 2 * originalWidth;
 
@@ -99,7 +103,8 @@ public class TextLineTest {
         TextLine tl = TextLine.obtain();
         tl.set(paint, str, 0, str.length(),
                 TextDirectionHeuristics.FIRSTSTRONG_LTR.isRtl(str, 0, str.length()) ? -1 : 1,
-                layout.getLineDirections(0), tabStops != null, tabStops);
+                layout.getLineDirections(0), tabStops != null, tabStops,
+                0, 0 /* no ellipsis */);
         return tl;
     }
 
@@ -246,5 +251,70 @@ public class TextLineTest {
                 new float[]{0.0f, -20.0f, -20.0f, -100.0f, -120.0f, -120.0f});
         assertMeasurements(tl, 5, true,
                 new float[]{0.0f, -10.0f, -10.0f, -100.0f, -110.0f, -110.0f});
+    }
+
+    @Test
+    public void testHandleRun_ellipsizedReplacementSpan_isSkipped() {
+        final Spannable text = new SpannableStringBuilder("This is a... text");
+
+        // Setup a replacement span that the measurement should not interact with.
+        final TestReplacementSpan span = new TestReplacementSpan();
+        text.setSpan(span, 9, 12, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+
+        final TextLine tl = TextLine.obtain();
+        tl.set(new TextPaint(), text, 0, text.length(), 1, Layout.DIRS_ALL_LEFT_TO_RIGHT,
+                false /* hasTabs */, null /* tabStops */, 9, 12);
+        tl.measure(text.length(), false /* trailing */, null /* fmi */);
+
+        assertFalse(span.mIsUsed);
+    }
+
+    @Test
+    public void testHandleRun_notEllipsizedReplacementSpan_isNotSkipped() {
+        final Spannable text = new SpannableStringBuilder("This is a... text");
+
+        // Setup a replacement span that the measurement should not interact with.
+        final TestReplacementSpan span = new TestReplacementSpan();
+        text.setSpan(span, 1, 5, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+
+        final TextLine tl = TextLine.obtain();
+        tl.set(new TextPaint(), text, 0, text.length(), 1, Layout.DIRS_ALL_LEFT_TO_RIGHT,
+                false /* hasTabs */, null /* tabStops */, 9, 12);
+        tl.measure(text.length(), false /* trailing */, null /* fmi */);
+
+        assertTrue(span.mIsUsed);
+    }
+
+    @Test
+    public void testHandleRun_halfEllipsizedReplacementSpan_isNotSkipped() {
+        final Spannable text = new SpannableStringBuilder("This is a... text");
+
+        // Setup a replacement span that the measurement should not interact with.
+        final TestReplacementSpan span = new TestReplacementSpan();
+        text.setSpan(span, 7, 11, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+
+        final TextLine tl = TextLine.obtain();
+        tl.set(new TextPaint(), text, 0, text.length(), 1, Layout.DIRS_ALL_LEFT_TO_RIGHT,
+                false /* hasTabs */, null /* tabStops */, 9, 12);
+        tl.measure(text.length(), false /* trailing */, null /* fmi */);
+        assertTrue(span.mIsUsed);
+    }
+
+    private static class TestReplacementSpan extends ReplacementSpan {
+        boolean mIsUsed;
+
+        @Override
+        public int getSize(Paint paint, CharSequence text, int start, int end,
+                Paint.FontMetricsInt fm) {
+            mIsUsed = true;
+            return 0;
+        }
+
+        @Override
+        public void draw(Canvas canvas, CharSequence text, int start, int end, float x, int top,
+                int y,
+                int bottom, Paint paint) {
+            mIsUsed = true;
+        }
     }
 }

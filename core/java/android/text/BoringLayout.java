@@ -258,7 +258,8 @@ public class BoringLayout extends Layout implements TextUtils.EllipsizeCallback 
              */
             TextLine line = TextLine.obtain();
             line.set(paint, source, 0, source.length(), Layout.DIR_LEFT_TO_RIGHT,
-                    Layout.DIRS_ALL_LEFT_TO_RIGHT, false, null);
+                    Layout.DIRS_ALL_LEFT_TO_RIGHT, false, null,
+                    mEllipsizedStart, mEllipsizedStart + mEllipsizedCount);
             mMax = (int) Math.ceil(line.metrics(null));
             TextLine.recycle(line);
         }
@@ -333,7 +334,7 @@ public class BoringLayout extends Layout implements TextUtils.EllipsizeCallback 
             Spanned sp = (Spanned) text;
             Object[] styles = sp.getSpans(0, textLength, ParagraphStyle.class);
             if (styles.length > 0) {
-                return null;  // There are some PargraphStyle spans. Not boring.
+                return null;  // There are some ParagraphStyle spans. Not boring.
             }
         }
 
@@ -346,7 +347,9 @@ public class BoringLayout extends Layout implements TextUtils.EllipsizeCallback 
 
         TextLine line = TextLine.obtain();
         line.set(paint, text, 0, textLength, Layout.DIR_LEFT_TO_RIGHT,
-                Layout.DIRS_ALL_LEFT_TO_RIGHT, false, null);
+                Layout.DIRS_ALL_LEFT_TO_RIGHT, false, null,
+                0 /* ellipsisStart, 0 since text has not been ellipsized at this point */,
+                0 /* ellipsisEnd, 0 since text has not been ellipsized at this point */);
         fm.width = (int) Math.ceil(line.metrics(fm));
         TextLine.recycle(line);
 
