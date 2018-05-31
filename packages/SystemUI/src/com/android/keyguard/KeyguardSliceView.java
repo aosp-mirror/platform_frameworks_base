@@ -52,6 +52,7 @@ import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.tuner.TunerService;
 import com.android.systemui.util.wakelock.KeepAwakeAnimationListener;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.function.Consumer;
@@ -158,7 +159,15 @@ public class KeyguardSliceView extends LinearLayout implements View.OnClickListe
 
         ListContent lc = new ListContent(getContext(), mSlice, null, 0, 0);
         mHasHeader = lc.hasHeader();
-        List<SliceItem> subItems = lc.getRowItems();
+        List<SliceItem> subItems = new ArrayList<SliceItem>();
+        for (int i = 0; i < lc.getRowItems().size(); i++) {
+            SliceItem subItem = lc.getRowItems().get(i);
+            String itemUri = subItem.getSlice().getUri().toString();
+            // Filter out the action row
+            if (!KeyguardSliceProvider.KEYGUARD_ACTION_URI.equals(itemUri)) {
+                subItems.add(subItem);
+            }
+        }
         if (!mHasHeader) {
             mTitle.setVisibility(GONE);
         } else {

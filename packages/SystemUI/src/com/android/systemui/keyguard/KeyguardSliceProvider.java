@@ -19,6 +19,7 @@ package com.android.systemui.keyguard;
 import android.app.ActivityManager;
 import android.app.AlarmManager;
 import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.ContentResolver;
 import android.content.Context;
@@ -48,6 +49,7 @@ import androidx.slice.Slice;
 import androidx.slice.SliceProvider;
 import androidx.slice.builders.ListBuilder;
 import androidx.slice.builders.ListBuilder.RowBuilder;
+import androidx.slice.builders.SliceAction;
 
 /**
  * Simple Slice provider that shows the current date.
@@ -60,6 +62,8 @@ public class KeyguardSliceProvider extends SliceProvider implements
     public static final String KEYGUARD_NEXT_ALARM_URI =
             "content://com.android.systemui.keyguard/alarm";
     public static final String KEYGUARD_DND_URI = "content://com.android.systemui.keyguard/dnd";
+    public static final String KEYGUARD_ACTION_URI =
+            "content://com.android.systemui.keyguard/action";
 
     /**
      * Only show alarms that will ring within N hours.
@@ -127,7 +131,20 @@ public class KeyguardSliceProvider extends SliceProvider implements
         builder.addRow(new RowBuilder(builder, mDateUri).setTitle(mLastText));
         addNextAlarm(builder);
         addZenMode(builder);
+        addPrimaryAction(builder);
         return builder.build();
+    }
+
+    protected void addPrimaryAction(ListBuilder builder) {
+        // Add simple action because API requires it; Keyguard handles presenting
+        // its own slices so this action + icon are actually never used.
+        PendingIntent pi = PendingIntent.getActivity(getContext(), 0, new Intent(), 0);
+        Icon icon = Icon.createWithResource(getContext(), R.drawable.ic_access_alarms_big);
+        SliceAction action = new SliceAction(pi, icon, mLastText);
+
+        RowBuilder primaryActionRow = new RowBuilder(builder, Uri.parse(KEYGUARD_ACTION_URI))
+            .setPrimaryAction(action);
+        builder.addRow(primaryActionRow);
     }
 
     protected void addNextAlarm(ListBuilder builder) {
