@@ -231,12 +231,12 @@
     <item msgid="1064373276095698656">"পৰীক্ষণ কৰা চিত্ৰাংকণ কমাণ্ডবোৰ সেউজীয়া ৰঙত হাইলাইট কৰক"</item>
   </string-array>
   <string-array name="track_frame_time_entries">
-    <item msgid="2193584639058893150">"অফ"</item>
+    <item msgid="2193584639058893150">"অফ হৈ আছে"</item>
     <item msgid="2751513398307949636">"স্ক্ৰীণত দণ্ড হিচাপে"</item>
     <item msgid="2355151170975410323">"<xliff:g id="AS_TYPED_COMMAND">adb shell dumpsys gfxinfo</xliff:g>ত"</item>
   </string-array>
   <string-array name="debug_hw_overdraw_entries">
-    <item msgid="8190572633763871652">"বন্ধ কৰক"</item>
+    <item msgid="8190572633763871652">"অফ কৰক"</item>
     <item msgid="7688197031296835369">"পিক্সেল একাধিকবাৰ ব্যৱহৃত অংশসমূহ দেখুৱাওক"</item>
     <item msgid="2290859360633824369">"ডিউটাৰএন\'মেলীৰ অংশসমূহ দেখুৱাওক"</item>
   </string-array>

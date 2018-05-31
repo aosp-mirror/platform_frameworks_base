@@ -118,7 +118,7 @@
     <string name="bluetooth_hearingaid_right_pairing_message" msgid="1550373802309160891">"সোঁফালৰ শ্ৰৱণ যন্ত্ৰটো যোৰ পতোৱা হৈছে…"</string>
     <string name="bluetooth_hearingaid_left_battery_level" msgid="8797811465352097562">"<xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> বেটাৰি বাকী আছে"</string>
     <string name="bluetooth_hearingaid_right_battery_level" msgid="7309476148173459677">"সোঁ - বেটাৰি <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
-    <string name="accessibility_wifi_off" msgid="1166761729660614716">"ৱাই-ফাই অফহৈ আছে।"</string>
+    <string name="accessibility_wifi_off" msgid="1166761729660614716">"ৱাই-ফাই অফ হৈ আছে।"</string>
     <string name="accessibility_no_wifi" msgid="8834610636137374508">"ৱাইফাই সংযোগ বিচ্ছিন্ন হৈ আছে।"</string>
     <string name="accessibility_wifi_one_bar" msgid="4869376278894301820">"ৱাই-ফাই এদাল দণ্ড।"</string>
     <string name="accessibility_wifi_two_bars" msgid="3569851234710034416">"ৱাই-ফাইৰ দুডাল দণ্ড।"</string>
@@ -133,7 +133,7 @@
     <string name="tether_settings_title_wifi" msgid="3277144155960302049">"প\'ৰ্টেবল হ\'টস্প\'ট"</string>
     <string name="tether_settings_title_bluetooth" msgid="355855408317564420">"ব্লুটুথ টেডাৰিং"</string>
     <string name="tether_settings_title_usb_bluetooth" msgid="5355828977109785001">"টেডাৰ কৰি থকা হৈছে"</string>
-    <string name="tether_settings_title_all" msgid="8356136101061143841">"টেদৰিং আৰু প\'ৰ্টেবল হ\'টস্পট"</string>
+    <string name="tether_settings_title_all" msgid="8356136101061143841">"টেডাৰিং আৰু প\'ৰ্টেবল হটস্পট"</string>
     <string name="managed_user_title" msgid="8109605045406748842">"কৰ্মস্থানৰ সকলো এপ"</string>
     <string name="user_guest" msgid="8475274842845401871">"অতিথি"</string>
     <string name="unknown" msgid="1592123443519355854">"অজ্ঞাত"</string>

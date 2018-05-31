@@ -4868,7 +4868,12 @@ public class ConnectivityService extends IConnectivityManager.Stub
      */
     private NetworkCapabilities mixInCapabilities(NetworkAgentInfo nai, NetworkCapabilities nc) {
         // Once a NetworkAgent is connected, complain if some immutable capabilities are removed.
+         // Don't complain for VPNs since they're not driven by requests and there is no risk of
+         // causing a connect/teardown loop.
+         // TODO: remove this altogether and make it the responsibility of the NetworkFactories to
+         // avoid connect/teardown loops.
         if (nai.everConnected &&
+                !nai.isVPN() &&
                 !nai.networkCapabilities.satisfiedByImmutableNetworkCapabilities(nc)) {
             // TODO: consider not complaining when a network agent degrades its capabilities if this
             // does not cause any request (that is not a listen) currently matching that agent to

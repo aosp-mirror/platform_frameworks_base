@@ -52,6 +52,7 @@ struct fields_t {
     jfieldID context;
 
     jmethodID cryptoInfoSetID;
+    jmethodID cryptoInfoSetPatternID;
 };
 
 static fields_t gFields;
@@ -654,6 +655,16 @@ static jboolean android_media_MediaExtractor_getSampleCryptoInfo(
             ivObj,
             mode);
 
+    int32_t encryptedByteBlock = 0, skipByteBlock = 0;
+    meta->findInt32(kKeyEncryptedByteBlock, &encryptedByteBlock);
+    meta->findInt32(kKeySkipByteBlock, &skipByteBlock);
+
+    env->CallVoidMethod(
+            cryptoInfoObj,
+            gFields.cryptoInfoSetPatternID,
+            encryptedByteBlock,
+            skipByteBlock);
+
     return JNI_TRUE;
 }
 
@@ -669,6 +680,9 @@ static void android_media_MediaExtractor_native_init(JNIEnv *env) {
 
     gFields.cryptoInfoSetID =
         env->GetMethodID(clazz, "set", "(I[I[I[B[BI)V");
+
+    gFields.cryptoInfoSetPatternID =
+        env->GetMethodID(clazz, "setPattern", "(II)V");
 }
 
 static void android_media_MediaExtractor_native_setup(

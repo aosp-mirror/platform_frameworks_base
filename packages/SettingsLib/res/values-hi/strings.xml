@@ -85,14 +85,14 @@
     <string name="bluetooth_a2dp_profile_summary_connected" msgid="963376081347721598">"मीडिया ऑडियो से कनेक्‍ट किया गया"</string>
     <string name="bluetooth_headset_profile_summary_connected" msgid="7661070206715520671">"फ़ोन ऑडियो से कनेक्‍ट किया गया"</string>
     <string name="bluetooth_opp_profile_summary_connected" msgid="2611913495968309066">"फ़ाइल स्‍थानांतरण सर्वर से कनेक्‍ट किया गया"</string>
-    <string name="bluetooth_map_profile_summary_connected" msgid="8191407438851351713">"मानचित्र से कनेक्ट किया गया"</string>
+    <string name="bluetooth_map_profile_summary_connected" msgid="8191407438851351713">"मैप से कनेक्ट किया गया"</string>
     <string name="bluetooth_sap_profile_summary_connected" msgid="8561765057453083838">"SAP से कनेक्ट किया गया"</string>
     <string name="bluetooth_opp_profile_summary_not_connected" msgid="1267091356089086285">"फ़ाइल स्‍थानांतरण सर्वर से कनेक्‍ट नहीं किया गया"</string>
     <string name="bluetooth_hid_profile_summary_connected" msgid="3381760054215168689">"इनपुट डिवाइस से कनेक्‍ट किया गया"</string>
     <string name="bluetooth_pan_user_profile_summary_connected" msgid="6436258151814414028">"इंटरनेट के लिए डिवाइस से कनेक्ट है"</string>
     <string name="bluetooth_pan_nap_profile_summary_connected" msgid="1322694224800769308">"डिवाइस से इंटरनेट शेयर हो रहा है"</string>
     <string name="bluetooth_pan_profile_summary_use_for" msgid="5736111170225304239">"इंटरनेट से जुड़ने के लिए इस्तेमाल करें"</string>
-    <string name="bluetooth_map_profile_summary_use_for" msgid="5154200119919927434">"मानचित्र के लिए उपयोग करें"</string>
+    <string name="bluetooth_map_profile_summary_use_for" msgid="5154200119919927434">"मैप के लिए उपयोग करें"</string>
     <string name="bluetooth_sap_profile_summary_use_for" msgid="7085362712786907993">"सिम ऐक्सेस के लिए उपयोग करें"</string>
     <string name="bluetooth_a2dp_profile_summary_use_for" msgid="4630849022250168427">"मीडिया ऑडियो के लिए उपयोग करें"</string>
     <string name="bluetooth_headset_profile_summary_use_for" msgid="8705753622443862627">"फ़ोन ऑडियो के लिए उपयोग करें"</string>
