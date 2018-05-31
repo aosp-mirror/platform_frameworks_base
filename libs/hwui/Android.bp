@@ -170,7 +170,6 @@ cc_defaults {
         "pipeline/skia/SkiaRecordingCanvas.cpp",
         "pipeline/skia/SkiaVulkanPipeline.cpp",
         "pipeline/skia/VectorDrawableAtlas.cpp",
-        "renderstate/OffscreenBufferPool.cpp",
         "renderstate/PixelBufferState.cpp",
         "renderstate/RenderState.cpp",
         "renderstate/TextureState.cpp",

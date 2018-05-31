@@ -19,14 +19,6 @@
 #include "Caches.h"
 #include "RenderNode.h"
 #include "renderstate/RenderState.h"
-#include "utils/TraceUtils.h"
-
-#include <utils/Log.h>
-
-#define ATRACE_LAYER_WORK(label)                                                       \
-    ATRACE_FORMAT("%s HW Layer DisplayList %s %ux%u", label,                           \
-                  (renderNode.get() != NULL) ? renderNode->getName() : "", getWidth(), \
-                  getHeight())
 
 namespace android {
 namespace uirenderer {

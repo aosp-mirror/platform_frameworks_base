@@ -50,11 +50,7 @@ public:
 
     inline GLuint getTextureId() const { return texture.id(); }
 
-    inline Texture& getTexture() { return texture; }
-
     inline GLenum getRenderTarget() const { return texture.target(); }
-
-    inline bool isRenderable() const { return texture.target() != GL_NONE; }
 
     void setRenderTarget(GLenum renderTarget);
 

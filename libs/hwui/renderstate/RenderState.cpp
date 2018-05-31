@@ -42,11 +42,6 @@ RenderState::~RenderState() {
 void RenderState::onGLContextCreated() {
     GpuMemoryTracker::onGpuContextCreated();
 
-    // Deferred because creation needs GL context for texture limits
-    if (!mLayerPool) {
-        mLayerPool = new OffscreenBufferPool();
-    }
-
     // This is delayed because the first access of Caches makes GL calls
     if (!mCaches) {
         mCaches = &Caches::createInstance(*this);
@@ -61,8 +56,6 @@ static void layerLostGlContext(Layer* layer) {
 }
 
 void RenderState::onGLContextDestroyed() {
-    mLayerPool->clear();
-
     // TODO: reset all cached state in state objects
     std::for_each(mActiveLayers.begin(), mActiveLayers.end(), layerLostGlContext);
 
@@ -93,15 +86,6 @@ GrContext* RenderState::getGrContext() const {
 }
 
 void RenderState::flush(Caches::FlushMode mode) {
-    switch (mode) {
-        case Caches::FlushMode::Full:
-        // fall through
-        case Caches::FlushMode::Moderate:
-        // fall through
-        case Caches::FlushMode::Layers:
-            if (mLayerPool) mLayerPool->clear();
-            break;
-    }
     if (mCaches) mCaches->flush(mode);
 }
 

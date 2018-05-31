@@ -193,8 +193,11 @@ void RenderProxy::fence() {
     mRenderThread.queue().runSync([]() {});
 }
 
-void RenderProxy::staticFence() {
-    RenderThread::getInstance().queue().runSync([]() {});
+int RenderProxy::maxTextureSize() {
+    static int maxTextureSize = RenderThread::getInstance().queue().runSync([]() {
+        return DeviceInfo::get()->maxTextureSize();
+    });
+    return maxTextureSize;
 }
 
 void RenderProxy::stopDrawing() {
