@@ -5072,8 +5072,6 @@ public class BatteryStatsImpl extends BatteryStats {
                     + Integer.toHexString(mHistoryCur.states));
             addHistoryRecordLocked(elapsedRealtime, uptime);
             mMobileRadioPowerState = powerState;
-            StatsLog.write_non_chained(StatsLog.MOBILE_RADIO_POWER_STATE_CHANGED, uid, null,
-                    powerState);
             if (active) {
                 mMobileRadioActiveTimer.startRunningLocked(elapsedRealtime);
                 mMobileRadioActivePerAppTimer.startRunningLocked(elapsedRealtime);
@@ -5826,8 +5824,6 @@ public class BatteryStatsImpl extends BatteryStats {
                     + Integer.toHexString(mHistoryCur.states));
             addHistoryRecordLocked(elapsedRealtime, uptime);
             mWifiRadioPowerState = powerState;
-            StatsLog.write_non_chained(StatsLog.WIFI_RADIO_POWER_STATE_CHANGED, uid, null,
-                    powerState);
         }
     }
 
