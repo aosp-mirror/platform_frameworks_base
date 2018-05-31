@@ -240,10 +240,10 @@
     <string name="wifi_unmetered_label" msgid="6124098729457992931">"मीटरने न मोजलेले"</string>
     <string name="select_logd_size_title" msgid="7433137108348553508">"लॉगर बफर आकार"</string>
     <string name="select_logd_size_dialog_title" msgid="1206769310236476760">"प्रति लॉग बफर लॉगर आकार निवडा"</string>
-    <string name="dev_logpersist_clear_warning_title" msgid="684806692440237967">"लॉगरवर सतत असणारा संचय साफ करायचा?"</string>
+    <string name="dev_logpersist_clear_warning_title" msgid="684806692440237967">"लॉगरवर सतत असणारा स्टोरेज साफ करायचा?"</string>
     <string name="dev_logpersist_clear_warning_message" msgid="2256582531342994562">"सातत्याच्या लॉगरसह आम्ही परीक्षण करीत नसतो तेव्हा, आम्हाला आपल्या डिव्हाइसवर असणारा लॉगर डेटा मिटविणे आवश्यक असते."</string>
     <string name="select_logpersist_title" msgid="7530031344550073166">"डिव्हाइसवर सातत्याने लॉगर डेटा स्टोअर करा"</string>
-    <string name="select_logpersist_dialog_title" msgid="4003400579973269060">"डिव्हाइसवर सातत्याने संचयित करण्यासाठी लॉग बफर निवडा"</string>
+    <string name="select_logpersist_dialog_title" msgid="4003400579973269060">"डिव्हाइसवर सातत्याने स्टोअर करण्यासाठी लॉग बफर निवडा"</string>
     <string name="select_usb_configuration_title" msgid="2649938511506971843">"USB कॉन्‍फिगरेशन निवडा"</string>
     <string name="select_usb_configuration_dialog_title" msgid="6385564442851599963">"USB कॉन्‍फिगरेशन निवडा"</string>
     <string name="allow_mock_location" msgid="2787962564578664888">"बनावट स्थानांना अनुमती द्या"</string>
@@ -426,7 +426,7 @@
     <string name="use_system_language_to_select_input_method_subtypes" msgid="5747329075020379587">"सिस्टम भाषा वापरा"</string>
     <string name="failed_to_open_app_settings_toast" msgid="1251067459298072462">"<xliff:g id="SPELL_APPLICATION_NAME">%1$s</xliff:g> साठी सेटिंग्ज उघडण्यात अयशस्वी"</string>
     <string name="ime_security_warning" msgid="4135828934735934248">"ही इनपुट पद्धत पासवर्ड आणि क्रेडिट कार्ड नंबर यासह, तुम्ही टाइप करता तो सर्व मजकूर संकलित करण्यात सक्षम होऊ शकते. ही <xliff:g id="IME_APPLICATION_NAME">%1$s</xliff:g> अॅपवरून येते. ही इनपुट पद्धत वापरायची?"</string>
-    <string name="direct_boot_unaware_dialog_message" msgid="7870273558547549125">"टीप: रीबूट केल्यानंतर, तुम्ही आपला फोन अनलॉक करे पर्यंत हे अॅप सुरू होऊ शकत नाही"</string>
+    <string name="direct_boot_unaware_dialog_message" msgid="7870273558547549125">"टीप: रीबूट केल्यानंतर, तुम्ही तुमचा फोन अनलॉक करे पर्यंत हे अॅप सुरू होऊ शकत नाही"</string>
     <string name="ims_reg_title" msgid="7609782759207241443">"IMS नोंदणी स्थिती"</string>
     <string name="ims_reg_status_registered" msgid="933003316932739188">"नोंदवलेले"</string>
     <string name="ims_reg_status_not_registered" msgid="6529783773485229486">"नोंदवलेले नाही"</string>
