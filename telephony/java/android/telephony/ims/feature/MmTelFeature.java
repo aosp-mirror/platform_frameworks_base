@@ -35,6 +35,7 @@ import android.telephony.ims.stub.ImsUtImplBase;
 import android.util.Log;
 
 import android.telephony.ims.ImsCallProfile;
+import android.telephony.ims.ImsReasonInfo;
 import com.android.ims.internal.IImsCallSession;
 import com.android.ims.internal.IImsEcbm;
 import com.android.ims.internal.IImsMultiEndpoint;
@@ -325,6 +326,16 @@ public class MmTelFeature extends ImsFeature {
         }
 
         /**
+         * Called when the IMS provider implicitly rejects an incoming call during setup.
+         * @param callProfile An {@link ImsCallProfile} with the call details.
+         * @param reason The {@link ImsReasonInfo} reason for call rejection.
+         */
+        @Override
+        public void onRejectedCall(ImsCallProfile callProfile, ImsReasonInfo reason) {
+
+        }
+
+        /**
          * Updates the Listener when the voice message count for IMS has changed.
          * @param count an integer representing the new message count.
          */
@@ -421,6 +432,26 @@ public class MmTelFeature extends ImsFeature {
             }
             try {
                 mListener.onIncomingCall(c.getServiceImpl(), extras);
+            } catch (RemoteException e) {
+                throw new RuntimeException(e);
+            }
+        }
+    }
+
+    /**
+     * Notify the framework that a call has been implicitly rejected by this MmTelFeature
+     * during call setup.
+     * @param callProfile The {@link ImsCallProfile} IMS call profile with details.
+     *        This can be null if no call information is available for the rejected call.
+     * @param reason The {@link ImsReasonInfo} call rejection reason.
+     */
+    public final void notifyRejectedCall(ImsCallProfile callProfile, ImsReasonInfo reason) {
+        synchronized (mLock) {
+            if (mListener == null) {
+                throw new IllegalStateException("Session is not available.");
+            }
+            try {
+                mListener.onRejectedCall(callProfile, reason);
             } catch (RemoteException e) {
                 throw new RuntimeException(e);
             }
