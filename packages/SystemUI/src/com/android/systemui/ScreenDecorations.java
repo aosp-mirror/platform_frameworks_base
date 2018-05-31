@@ -135,12 +135,14 @@ public class ScreenDecorations extends SystemUI implements Tunable {
     private void setupDecorations() {
         mOverlay = LayoutInflater.from(mContext)
                 .inflate(R.layout.rounded_corners, null);
-        ((ViewGroup)mOverlay).addView(new DisplayCutoutView(mContext, true,
-                this::updateWindowVisibilities));
+        DisplayCutoutView cutoutTop = new DisplayCutoutView(mContext, true,
+                this::updateWindowVisibilities);
+        ((ViewGroup)mOverlay).addView(cutoutTop);
         mBottomOverlay = LayoutInflater.from(mContext)
                 .inflate(R.layout.rounded_corners, null);
-        ((ViewGroup)mBottomOverlay).addView(new DisplayCutoutView(mContext, false,
-                this::updateWindowVisibilities));
+        DisplayCutoutView cutoutBottom = new DisplayCutoutView(mContext, false,
+                this::updateWindowVisibilities);
+        ((ViewGroup)mBottomOverlay).addView(cutoutBottom);
 
         mOverlay.setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_STABLE);
         mOverlay.setAlpha(0);
@@ -170,6 +172,8 @@ public class ScreenDecorations extends SystemUI implements Tunable {
                 ((ImageView) mOverlay.findViewById(R.id.right)).setImageTintList(tintList);
                 ((ImageView) mBottomOverlay.findViewById(R.id.left)).setImageTintList(tintList);
                 ((ImageView) mBottomOverlay.findViewById(R.id.right)).setImageTintList(tintList);
+                cutoutTop.setColor(tint);
+                cutoutBottom.setColor(tint);
             }
         };
         setting.setListening(true);
@@ -414,6 +418,7 @@ public class ScreenDecorations extends SystemUI implements Tunable {
         private final int[] mLocation = new int[2];
         private final boolean mStart;
         private final Runnable mVisibilityChangedListener;
+        private int mColor = Color.BLACK;
 
         public DisplayCutoutView(Context context, boolean start,
                 Runnable visibilityChangedListener) {
@@ -421,6 +426,11 @@ public class ScreenDecorations extends SystemUI implements Tunable {
             mStart = start;
             mVisibilityChangedListener = visibilityChangedListener;
             setId(R.id.display_cutout);
+        }
+
+        public void setColor(int color) {
+            mColor = color;
+            invalidate();
         }
 
         @Override
@@ -443,7 +453,7 @@ public class ScreenDecorations extends SystemUI implements Tunable {
             getLocationOnScreen(mLocation);
             canvas.translate(-mLocation[0], -mLocation[1]);
             if (!mBoundingPath.isEmpty()) {
-                mPaint.setColor(Color.BLACK);
+                mPaint.setColor(mColor);
                 mPaint.setStyle(Paint.Style.FILL);
                 mPaint.setAntiAlias(true);
                 canvas.drawPath(mBoundingPath, mPaint);
