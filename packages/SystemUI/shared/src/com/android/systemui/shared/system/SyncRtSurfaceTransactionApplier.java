@@ -20,10 +20,9 @@ import android.graphics.Matrix;
 import android.graphics.Rect;
 import android.view.Surface;
 import android.view.SurfaceControl;
+import android.view.SurfaceControl.Transaction;
 import android.view.View;
 import android.view.ViewRootImpl;
-
-import java.util.ArrayList;
 
 /**
  * Helper class to apply surface transactions in sync with RenderThread.
@@ -56,16 +55,12 @@ public class SyncRtSurfaceTransactionApplier {
                 if (mTargetSurface == null || !mTargetSurface.isValid()) {
                     return;
                 }
-                SurfaceControl.Transaction t = new SurfaceControl.Transaction();
+                Transaction t = new Transaction();
                 for (int i = params.length - 1; i >= 0; i--) {
                     SurfaceParams surfaceParams = params[i];
                     SurfaceControl surface = surfaceParams.surface;
                     t.deferTransactionUntilSurface(surface, mTargetSurface, frame);
-                    t.setMatrix(surface, surfaceParams.matrix, mTmpFloat9);
-                    t.setWindowCrop(surface, surfaceParams.windowCrop);
-                    t.setAlpha(surface, surfaceParams.alpha);
-                    t.setLayer(surface, surfaceParams.layer);
-                    t.show(surface);
+                    applyParams(t, surfaceParams, mTmpFloat9);
                 }
                 t.setEarlyWakeup();
                 t.apply();
@@ -73,6 +68,18 @@ public class SyncRtSurfaceTransactionApplier {
 
         // Make sure a frame gets scheduled.
         mTargetViewRootImpl.getView().invalidate();
+    }
+
+    public static void applyParams(TransactionCompat t, SurfaceParams params) {
+        applyParams(t.mTransaction, params, t.mTmpValues);
+    }
+
+    private static void applyParams(Transaction t, SurfaceParams params, float[] tmpFloat9) {
+        t.setMatrix(params.surface, params.matrix, tmpFloat9);
+        t.setWindowCrop(params.surface, params.windowCrop);
+        t.setAlpha(params.surface, params.alpha);
+        t.setLayer(params.surface, params.layer);
+        t.show(params.surface);
     }
 
     public static class SurfaceParams {
