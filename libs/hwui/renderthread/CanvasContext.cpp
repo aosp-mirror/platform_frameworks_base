@@ -42,6 +42,7 @@
 #include <algorithm>
 
 #include <cstdlib>
+#include <functional>
 
 #define TRIM_MEMORY_COMPLETE 80
 #define TRIM_MEMORY_UI_HIDDEN 20
@@ -347,6 +348,12 @@ void CanvasContext::prepareTree(TreeInfo& info, int64_t* uiFrameInfo, int64_t sy
         info.out.canDrawThisFrame = true;
     }
 
+    // TODO: Do we need to abort out if the backdrop is added but not ready? Should that even
+    // be an allowable combination?
+    if (mRenderNodes.size() > 2 && !mRenderNodes[1]->isRenderable()) {
+        info.out.canDrawThisFrame = false;
+    }
+
     if (!info.out.canDrawThisFrame) {
         mCurrentFrameInfo->addFlag(FrameInfoFlags::SkippedFrame);
     }
@@ -413,6 +420,8 @@ void CanvasContext::draw() {
                                       mContentDrawBounds, mOpaque, mWideColorGamut, mLightInfo,
                                       mRenderNodes, &(profiler()));
 
+    int64_t frameCompleteNr = mFrameCompleteCallbacks.size() ? getFrameNumber() : -1;
+
     waitOnFences();
 
     bool requireSwap = false;
@@ -472,6 +481,13 @@ void CanvasContext::draw() {
         ALOGD("Average frame time: %.4f", sBenchMma);
     }
 #endif
+
+    if (didSwap) {
+        for (auto& func : mFrameCompleteCallbacks) {
+            std::invoke(func, frameCompleteNr);
+        }
+        mFrameCompleteCallbacks.clear();
+    }
 
     mJankTracker.finishFrame(*mCurrentFrameInfo);
     if (CC_UNLIKELY(mFrameMetricsReporter.get() != nullptr)) {

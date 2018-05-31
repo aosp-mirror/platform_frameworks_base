@@ -3089,13 +3089,28 @@ public final class ViewRootImpl implements ViewParent,
             return;
         }
 
-        final boolean fullRedrawNeeded = mFullRedrawNeeded;
+        final boolean fullRedrawNeeded = mFullRedrawNeeded || mReportNextDraw;
         mFullRedrawNeeded = false;
 
         mIsDrawing = true;
         Trace.traceBegin(Trace.TRACE_TAG_VIEW, "draw");
+
+        boolean usingAsyncReport = false;
+        if (mReportNextDraw && mAttachInfo.mThreadedRenderer != null
+                && mAttachInfo.mThreadedRenderer.isEnabled()) {
+            usingAsyncReport = true;
+            mAttachInfo.mThreadedRenderer.setFrameCompleteCallback((long frameNr) -> {
+                // TODO: Use the frame number
+                pendingDrawFinished();
+            });
+        }
+
         try {
-            draw(fullRedrawNeeded);
+            boolean canUseAsync = draw(fullRedrawNeeded);
+            if (usingAsyncReport && !canUseAsync) {
+                mAttachInfo.mThreadedRenderer.setFrameCompleteCallback(null);
+                usingAsyncReport = false;
+            }
         } finally {
             mIsDrawing = false;
             Trace.traceEnd(Trace.TRACE_TAG_VIEW);
@@ -3125,7 +3140,6 @@ public final class ViewRootImpl implements ViewParent,
             }
 
             if (mAttachInfo.mThreadedRenderer != null) {
-                mAttachInfo.mThreadedRenderer.fence();
                 mAttachInfo.mThreadedRenderer.setStopped(mStopped);
             }
 
@@ -3138,16 +3152,19 @@ public final class ViewRootImpl implements ViewParent,
                 SurfaceHolder.Callback callbacks[] = mSurfaceHolder.getCallbacks();
 
                 sch.dispatchSurfaceRedrawNeededAsync(mSurfaceHolder, callbacks);
-            } else {
+            } else if (!usingAsyncReport) {
+                if (mAttachInfo.mThreadedRenderer != null) {
+                    mAttachInfo.mThreadedRenderer.fence();
+                }
                 pendingDrawFinished();
             }
         }
     }
 
-    private void draw(boolean fullRedrawNeeded) {
+    private boolean draw(boolean fullRedrawNeeded) {
         Surface surface = mSurface;
         if (!surface.isValid()) {
-            return;
+            return false;
         }
 
         if (DEBUG_FPS) {
@@ -3196,7 +3213,7 @@ public final class ViewRootImpl implements ViewParent,
             if (animating && mScroller != null) {
                 mScroller.abortAnimation();
             }
-            return;
+            return false;
         }
 
         if (fullRedrawNeeded) {
@@ -3242,6 +3259,7 @@ public final class ViewRootImpl implements ViewParent,
         mAttachInfo.mDrawingTime =
                 mChoreographer.getFrameTimeNanos() / TimeUtils.NANOS_PER_MS;
 
+        boolean useAsyncReport = false;
         if (!dirty.isEmpty() || mIsAnimating || accessibilityFocusDirty) {
             if (mAttachInfo.mThreadedRenderer != null && mAttachInfo.mThreadedRenderer.isEnabled()) {
                 // If accessibility focus moved, always invalidate the root.
@@ -3278,6 +3296,7 @@ public final class ViewRootImpl implements ViewParent,
                     requestDrawWindow();
                 }
 
+                useAsyncReport = true;
                 mAttachInfo.mThreadedRenderer.draw(mView, mAttachInfo, this, mNextRtFrameCallback);
                 mNextRtFrameCallback = null;
             } else {
@@ -3299,17 +3318,17 @@ public final class ViewRootImpl implements ViewParent,
                                 mWidth, mHeight, mAttachInfo, mSurface, surfaceInsets);
                     } catch (OutOfResourcesException e) {
                         handleOutOfResourcesException(e);
-                        return;
+                        return false;
                     }
 
                     mFullRedrawNeeded = true;
                     scheduleTraversals();
-                    return;
+                    return false;
                 }
 
                 if (!drawSoftware(surface, mAttachInfo, xOffset, yOffset,
                         scalingRequired, dirty, surfaceInsets)) {
-                    return;
+                    return false;
                 }
             }
         }
@@ -3318,6 +3337,7 @@ public final class ViewRootImpl implements ViewParent,
             mFullRedrawNeeded = true;
             scheduleTraversals();
         }
+        return useAsyncReport;
     }
 
     /**
