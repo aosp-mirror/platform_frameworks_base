@@ -186,6 +186,10 @@ public:
 
     IRenderPipeline* getRenderPipeline() { return mRenderPipeline.get(); }
 
+    void addFrameCompleteListener(std::function<void(int64_t)>&& func) {
+        mFrameCompleteCallbacks.push_back(std::move(func));
+    }
+
 private:
     CanvasContext(RenderThread& thread, bool translucent, RenderNode* rootRenderNode,
                   IContextFactory* contextFactory, std::unique_ptr<IRenderPipeline> renderPipeline);
@@ -263,6 +267,8 @@ private:
     std::vector<sp<FuncTask>> mFrameFences;
     sp<TaskProcessor<bool>> mFrameWorkProcessor;
     std::unique_ptr<IRenderPipeline> mRenderPipeline;
+
+    std::vector<std::function<void(int64_t)>> mFrameCompleteCallbacks;
 };
 
 } /* namespace renderthread */

@@ -377,12 +377,14 @@
                [Network Capabilities] Optional. A comma seprated list of network capabilities.
                    Values must be from NetworkCapabilities#NET_CAPABILITIES_* constants.
                [IP config] Optional. If empty or not specified - DHCP will be used, otherwise
-                    static IP address with the mask.
+                   use the following format to specify static IP configuration:
+		       ip=<ip-address/mask> gateway=<ip-address> dns=<comma-sep-ip-addresses>
+                       domains=<comma-sep-domains> 
          -->
     <string-array translatable="false" name="config_ethernet_interfaces">
         <!--
-        <item>eth1;12,13,14,15;192.168.0.10/24</item>
-        <item>eth2;;192.168.0.11/24</item>
+        <item>eth1;12,13,14,15;ip=192.168.0.10/24 gateway=192.168.0.1 dns=4.4.4.4,8.8.8.8</item>
+        <item>eth2;;ip=192.168.0.11/24</item>
         -->
     </string-array>
 
@@ -1107,6 +1109,15 @@
          RINGTONE_3 will be the returned effect -->
     <string-array translatable="false" name="config_ringtoneEffectUris">
     </string-array>
+
+    <!-- The default intensity level for haptic feedback. See
+         Settings.System.HAPTIC_FEEDBACK_INTENSITY more details on the constant values and
+         meanings. -->
+    <integer name="config_defaultHapticFeedbackIntensity">2</integer>
+    <!-- The default intensity level for notification vibrations. See
+         Settings.System.NOTIFICATION_VIBRATION_INTENSITY more details on the constant values and
+         meanings. -->
+    <integer name="config_defaultNotificationVibrationIntensity">2</integer>
 
     <bool name="config_use_strict_phone_number_comparation">false</bool>
 

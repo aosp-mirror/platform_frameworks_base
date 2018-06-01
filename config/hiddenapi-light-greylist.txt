@@ -261,6 +261,7 @@ Landroid/app/ActivityThread;->mNumVisibleActivities:I
 Landroid/app/ActivityThread;->mPackages:Landroid/util/ArrayMap;
 Landroid/app/ActivityThread;->mPendingConfiguration:Landroid/content/res/Configuration;
 Landroid/app/ActivityThread;->mProviderMap:Landroid/util/ArrayMap;
+Landroid/app/ActivityThread;->mProviderRefCountMap:Landroid/util/ArrayMap;
 Landroid/app/ActivityThread;->mResourcePackages:Landroid/util/ArrayMap;
 Landroid/app/ActivityThread;->mResourcesManager:Landroid/app/ResourcesManager;
 Landroid/app/ActivityThread;->mServices:Landroid/util/ArrayMap;
@@ -268,6 +269,7 @@ Landroid/app/ActivityThread;->mSystemContext:Landroid/app/ContextImpl;
 Landroid/app/ActivityThread;->peekPackageInfo(Ljava/lang/String;Z)Landroid/app/LoadedApk;
 Landroid/app/ActivityThread;->performNewIntents(Landroid/os/IBinder;Ljava/util/List;Z)V
 Landroid/app/ActivityThread;->performStopActivity(Landroid/os/IBinder;ZLjava/lang/String;)V
+Landroid/app/ActivityThread;->registerOnActivityPausedListener(Landroid/app/Activity;Landroid/app/OnActivityPausedListener;)V
 Landroid/app/ActivityThread;->releaseProvider(Landroid/content/IContentProvider;Z)Z
 Landroid/app/ActivityThread;->scheduleGcIdler()V
 Landroid/app/ActivityThread;->sCurrentActivityThread:Landroid/app/ActivityThread;
@@ -276,6 +278,7 @@ Landroid/app/ActivityThread;->sMainThreadHandler:Landroid/os/Handler;
 Landroid/app/ActivityThread;->sPackageManager:Landroid/content/pm/IPackageManager;
 Landroid/app/ActivityThread;->startActivityNow(Landroid/app/Activity;Ljava/lang/String;Landroid/content/Intent;Landroid/content/pm/ActivityInfo;Landroid/os/IBinder;Landroid/os/Bundle;Landroid/app/Activity$NonConfigurationInstances;)Landroid/app/Activity;
 Landroid/app/ActivityThread;->systemMain()Landroid/app/ActivityThread;
+Landroid/app/ActivityThread;->unregisterOnActivityPausedListener(Landroid/app/Activity;Landroid/app/OnActivityPausedListener;)V
 Landroid/app/admin/DeviceAdminInfo$PolicyInfo;->tag:Ljava/lang/String;
 Landroid/app/admin/DeviceAdminInfo;->getUsedPolicies()Ljava/util/ArrayList;
 Landroid/app/admin/DevicePolicyManager;->ACTION_DEVICE_POLICY_MANAGER_STATE_CHANGED:Ljava/lang/String;
@@ -702,6 +705,7 @@ Landroid/app/INotificationManager;->getZenModeConfig()Landroid/service/notificat
 Landroid/app/Instrumentation;->callActivityOnNewIntent(Landroid/app/Activity;Lcom/android/internal/content/ReferrerIntent;)V
 Landroid/app/Instrumentation;->checkStartActivityResult(ILjava/lang/Object;)V
 Landroid/app/Instrumentation;->execStartActivities(Landroid/content/Context;Landroid/os/IBinder;Landroid/os/IBinder;Landroid/app/Activity;[Landroid/content/Intent;Landroid/os/Bundle;)V
+Landroid/app/Instrumentation;->execStartActivitiesAsUser(Landroid/content/Context;Landroid/os/IBinder;Landroid/os/IBinder;Landroid/app/Activity;[Landroid/content/Intent;Landroid/os/Bundle;I)I
 Landroid/app/Instrumentation;->execStartActivity(Landroid/content/Context;Landroid/os/IBinder;Landroid/os/IBinder;Landroid/app/Activity;Landroid/content/Intent;ILandroid/os/Bundle;)Landroid/app/Instrumentation$ActivityResult;
 Landroid/app/Instrumentation;->execStartActivity(Landroid/content/Context;Landroid/os/IBinder;Landroid/os/IBinder;Ljava/lang/String;Landroid/content/Intent;ILandroid/os/Bundle;)Landroid/app/Instrumentation$ActivityResult;
 Landroid/app/Instrumentation;->execStartActivity(Landroid/content/Context;Landroid/os/IBinder;Landroid/os/IBinder;Ljava/lang/String;Landroid/content/Intent;ILandroid/os/Bundle;Landroid/os/UserHandle;)Landroid/app/Instrumentation$ActivityResult;
@@ -906,9 +910,14 @@ Landroid/app/SearchManager;->isVisible()Z
 Landroid/app/SearchManager;->launchAssist(Landroid/os/Bundle;)V
 Landroid/app/SearchManager;->mSearchDialog:Landroid/app/SearchDialog;
 Landroid/app/SearchManager;->startSearch(Ljava/lang/String;ZLandroid/content/ComponentName;Landroid/os/Bundle;ZLandroid/graphics/Rect;)V
+Landroid/app/servertransaction/ActivityResultItem;->mResultInfoList:Ljava/util/List;
+Landroid/app/servertransaction/ClientTransaction;->getActivityToken()Landroid/os/IBinder;
+Landroid/app/servertransaction/ClientTransaction;->getCallbacks()Ljava/util/List;
+Landroid/app/servertransaction/ClientTransaction;->getLifecycleStateRequest()Landroid/app/servertransaction/ActivityLifecycleItem;
 Landroid/app/servertransaction/ClientTransaction;->mActivityCallbacks:Ljava/util/List;
 Landroid/app/servertransaction/LaunchActivityItem;->mInfo:Landroid/content/pm/ActivityInfo;
 Landroid/app/servertransaction/LaunchActivityItem;->mIntent:Landroid/content/Intent;
+Landroid/app/servertransaction/NewIntentItem;->mIntents:Ljava/util/List;
 Landroid/app/Service;->attach(Landroid/content/Context;Landroid/app/ActivityThread;Ljava/lang/String;Landroid/os/IBinder;Landroid/app/Application;Ljava/lang/Object;)V
 Landroid/app/Service;->mActivityManager:Landroid/app/IActivityManager;
 Landroid/app/Service;->mApplication:Landroid/app/Application;
@@ -1386,6 +1395,7 @@ Landroid/content/IntentFilter;->hasExactDataType(Ljava/lang/String;)Z
 Landroid/content/IntentFilter;->isVerified()Z
 Landroid/content/IntentFilter;->mActions:Ljava/util/ArrayList;
 Landroid/content/IntentFilter;->mOrder:I
+Landroid/content/IntentFilter;->setAutoVerify(Z)V
 Landroid/content/IntentSender;-><init>(Landroid/content/IIntentSender;)V
 Landroid/content/IntentSender;->getTarget()Landroid/content/IIntentSender;
 Landroid/content/IntentSender;->mTarget:Landroid/content/IIntentSender;
@@ -1419,6 +1429,8 @@ Landroid/content/om/OverlayInfo;->packageName:Ljava/lang/String;
 Landroid/content/om/OverlayInfo;->state:I
 Landroid/content/om/OverlayInfo;->targetPackageName:Ljava/lang/String;
 Landroid/content/pm/ActivityInfo;->activityInfoConfigJavaToNative(I)I
+Landroid/content/pm/ActivityInfo;->FLAG_ALLOW_EMBEDDED:I
+Landroid/content/pm/ActivityInfo;->FLAG_SHOW_FOR_ALL_USERS:I
 Landroid/content/pm/ActivityInfo;->isResizeableMode(I)Z
 Landroid/content/pm/ActivityInfo;->resizeMode:I
 Landroid/content/pm/ActivityInfo;->supportsPictureInPicture()Z
@@ -1456,6 +1468,7 @@ Landroid/content/pm/IPackageDeleteObserver2$Stub$Proxy;-><init>(Landroid/os/IBin
 Landroid/content/pm/IPackageDeleteObserver2$Stub$Proxy;->mRemote:Landroid/os/IBinder;
 Landroid/content/pm/IPackageDeleteObserver2$Stub;->asInterface(Landroid/os/IBinder;)Landroid/content/pm/IPackageDeleteObserver2;
 Landroid/content/pm/IPackageDeleteObserver2;->onPackageDeleted(Ljava/lang/String;ILjava/lang/String;)V
+Landroid/content/pm/IPackageInstaller;->uninstall(Landroid/content/pm/VersionedPackage;Ljava/lang/String;ILandroid/content/IntentSender;I)V
 Landroid/content/pm/IPackageInstallerCallback$Stub$Proxy;-><init>(Landroid/os/IBinder;)V
 Landroid/content/pm/IPackageInstallerCallback$Stub$Proxy;->mRemote:Landroid/os/IBinder;
 Landroid/content/pm/IPackageInstallerCallback$Stub;->asInterface(Landroid/os/IBinder;)Landroid/content/pm/IPackageInstallerCallback;
@@ -1504,6 +1517,7 @@ Landroid/content/pm/IPackageManager;->getInstallLocation()I
 Landroid/content/pm/IPackageManager;->getInstrumentationInfo(Landroid/content/ComponentName;I)Landroid/content/pm/InstrumentationInfo;
 Landroid/content/pm/IPackageManager;->getLastChosenActivity(Landroid/content/Intent;Ljava/lang/String;I)Landroid/content/pm/ResolveInfo;
 Landroid/content/pm/IPackageManager;->getNameForUid(I)Ljava/lang/String;
+Landroid/content/pm/IPackageManager;->getPackageInstaller()Landroid/content/pm/IPackageInstaller;
 Landroid/content/pm/IPackageManager;->getPackagesForUid(I)[Ljava/lang/String;
 Landroid/content/pm/IPackageManager;->getPackageUid(Ljava/lang/String;II)I
 Landroid/content/pm/IPackageManager;->getPermissionControllerPackageName()Ljava/lang/String;
@@ -1693,6 +1707,12 @@ Landroid/content/pm/PackageParser$Provider;->syncable:Z
 Landroid/content/pm/PackageParser$ProviderIntentInfo;->provider:Landroid/content/pm/PackageParser$Provider;
 Landroid/content/pm/PackageParser$Service;->info:Landroid/content/pm/ServiceInfo;
 Landroid/content/pm/PackageParser$ServiceIntentInfo;->service:Landroid/content/pm/PackageParser$Service;
+Landroid/content/pm/PackageParser$SigningDetails$Builder;-><init>()V
+Landroid/content/pm/PackageParser$SigningDetails$Builder;->build()Landroid/content/pm/PackageParser$SigningDetails;
+Landroid/content/pm/PackageParser$SigningDetails$Builder;->setPastSigningCertificates([Landroid/content/pm/Signature;)Landroid/content/pm/PackageParser$SigningDetails$Builder;
+Landroid/content/pm/PackageParser$SigningDetails$Builder;->setPastSigningCertificatesFlags([I)Landroid/content/pm/PackageParser$SigningDetails$Builder;
+Landroid/content/pm/PackageParser$SigningDetails$Builder;->setSignatures([Landroid/content/pm/Signature;)Landroid/content/pm/PackageParser$SigningDetails$Builder;
+Landroid/content/pm/PackageParser$SigningDetails$Builder;->setSignatureSchemeVersion(I)Landroid/content/pm/PackageParser$SigningDetails$Builder;
 Landroid/content/pm/PackageParser$SigningDetails;->signatures:[Landroid/content/pm/Signature;
 Landroid/content/pm/PackageParser;-><init>()V
 Landroid/content/pm/PackageParser;->collectCertificates(Landroid/content/pm/PackageParser$Package;Ljava/io/File;Z)V
@@ -2606,6 +2626,7 @@ Landroid/inputmethodservice/InputMethodService;->onExtractedSetSpan(Ljava/lang/O
 Landroid/inputmethodservice/Keyboard;->mModifierKeys:Ljava/util/List;
 Landroid/inputmethodservice/Keyboard;->mTotalHeight:I
 Landroid/inputmethodservice/Keyboard;->mTotalWidth:I
+Landroid/inputmethodservice/Keyboard;->resize(II)V
 Landroid/inputmethodservice/KeyboardView;->mKeyBackground:Landroid/graphics/drawable/Drawable;
 Landroid/inputmethodservice/KeyboardView;->mLabelTextSize:I
 Landroid/inputmethodservice/KeyboardView;->mPreviewText:Landroid/widget/TextView;
@@ -2939,6 +2960,9 @@ Landroid/media/MediaMetadataRetriever;->native_setup()V
 Landroid/media/MediaMuxer;->mCloseGuard:Ldalvik/system/CloseGuard;
 Landroid/media/MediaMuxer;->mNativeObject:J
 Landroid/media/MediaMuxer;->mState:I
+Landroid/media/MediaMuxer;->MUXER_STATE_STARTED:I
+Landroid/media/MediaMuxer;->MUXER_STATE_STOPPED:I
+Landroid/media/MediaMuxer;->MUXER_STATE_UNINITIALIZED:I
 Landroid/media/MediaMuxer;->nativeRelease(J)V
 Landroid/media/MediaMuxer;->nativeSetup(Ljava/io/FileDescriptor;I)J
 Landroid/media/MediaPlayer$TrackInfo;->CREATOR:Landroid/os/Parcelable$Creator;
@@ -3691,6 +3715,7 @@ Landroid/nfc/ErrorCodes;->isError(I)Z
 Landroid/nfc/INfcAdapterExtras;->authenticate(Ljava/lang/String;[B)V
 Landroid/nfc/INfcAdapterExtras;->close(Ljava/lang/String;Landroid/os/IBinder;)Landroid/os/Bundle;
 Landroid/nfc/INfcAdapterExtras;->getCardEmulationRoute(Ljava/lang/String;)I
+Landroid/nfc/INfcAdapterExtras;->getDriverName(Ljava/lang/String;)Ljava/lang/String;
 Landroid/nfc/INfcAdapterExtras;->open(Ljava/lang/String;Landroid/os/IBinder;)Landroid/os/Bundle;
 Landroid/nfc/INfcAdapterExtras;->setCardEmulationRoute(Ljava/lang/String;I)V
 Landroid/nfc/INfcAdapterExtras;->transceive(Ljava/lang/String;[B)Landroid/os/Bundle;
@@ -4481,6 +4506,7 @@ Landroid/provider/Settings$Global;->HEADS_UP_NOTIFICATIONS_ENABLED:Ljava/lang/St
 Landroid/provider/Settings$Global;->HEADS_UP_OFF:I
 Landroid/provider/Settings$Global;->HEADS_UP_ON:I
 Landroid/provider/Settings$Global;->MOBILE_DATA:Ljava/lang/String;
+Landroid/provider/Settings$Global;->MOVED_TO_SECURE:Ljava/util/HashSet;
 Landroid/provider/Settings$Global;->MULTI_SIM_USER_PREFERRED_SUBS:[Ljava/lang/String;
 Landroid/provider/Settings$Global;->MULTI_SIM_VOICE_PROMPT:Ljava/lang/String;
 Landroid/provider/Settings$Global;->NETWORK_SCORER_APP:Ljava/lang/String;
@@ -4524,6 +4550,8 @@ Landroid/provider/Settings$Secure;->LOCK_SCREEN_LOCK_AFTER_TIMEOUT:Ljava/lang/St
 Landroid/provider/Settings$Secure;->LOCK_SCREEN_OWNER_INFO_ENABLED:Ljava/lang/String;
 Landroid/provider/Settings$Secure;->LOCK_SCREEN_SHOW_NOTIFICATIONS:Ljava/lang/String;
 Landroid/provider/Settings$Secure;->LONG_PRESS_TIMEOUT:Ljava/lang/String;
+Landroid/provider/Settings$Secure;->MOVED_TO_GLOBAL:Ljava/util/HashSet;
+Landroid/provider/Settings$Secure;->MOVED_TO_LOCK_SETTINGS:Ljava/util/HashSet;
 Landroid/provider/Settings$Secure;->NFC_PAYMENT_DEFAULT_COMPONENT:Ljava/lang/String;
 Landroid/provider/Settings$Secure;->PACKAGE_VERIFIER_USER_CONSENT:Ljava/lang/String;
 Landroid/provider/Settings$Secure;->putIntForUser(Landroid/content/ContentResolver;Ljava/lang/String;II)Z
@@ -5820,6 +5848,7 @@ Landroid/view/animation/TranslateAnimation;->mToXValue:F
 Landroid/view/animation/TranslateAnimation;->mToYValue:F
 Landroid/view/animation/TranslateYAnimation;-><init>(IFIF)V
 Landroid/view/autofill/IAutoFillManager$Stub$Proxy;-><init>(Landroid/os/IBinder;)V
+Landroid/view/autofill/IAutoFillManager$Stub;->asInterface(Landroid/os/IBinder;)Landroid/view/autofill/IAutoFillManager;
 Landroid/view/Choreographer$CallbackQueue;->addCallbackLocked(JLjava/lang/Object;Ljava/lang/Object;)V
 Landroid/view/Choreographer$CallbackRecord;->run(J)V
 Landroid/view/Choreographer;->doFrame(JI)V
@@ -5918,6 +5947,7 @@ Landroid/view/inputmethod/InputMethodManager;->getInputMethodWindowVisibleHeight
 Landroid/view/inputmethod/InputMethodManager;->getInstance()Landroid/view/inputmethod/InputMethodManager;
 Landroid/view/inputmethod/InputMethodManager;->isCursorAnchorInfoEnabled()Z
 Landroid/view/inputmethod/InputMethodManager;->mCurId:Ljava/lang/String;
+Landroid/view/inputmethod/InputMethodManager;->mCurMethod:Lcom/android/internal/view/IInputMethodSession;
 Landroid/view/inputmethod/InputMethodManager;->mCurRootView:Landroid/view/View;
 Landroid/view/inputmethod/InputMethodManager;->mCursorRect:Landroid/graphics/Rect;
 Landroid/view/inputmethod/InputMethodManager;->mH:Landroid/view/inputmethod/InputMethodManager$H;
@@ -6465,6 +6495,7 @@ Landroid/view/ViewRootImpl;->mWidth:I
 Landroid/view/ViewRootImpl;->mWindowSession:Landroid/view/IWindowSession;
 Landroid/view/ViewRootImpl;->scheduleTraversals()V
 Landroid/view/ViewRootImpl;->setLocalDragState(Ljava/lang/Object;)V
+Landroid/view/ViewRootImpl;->sRunQueues:Ljava/lang/ThreadLocal;
 Landroid/view/ViewTreeObserver$InternalInsetsInfo;-><init>()V
 Landroid/view/ViewTreeObserver$InternalInsetsInfo;->contentInsets:Landroid/graphics/Rect;
 Landroid/view/ViewTreeObserver$InternalInsetsInfo;->mTouchableInsets:I
@@ -6486,6 +6517,7 @@ Landroid/view/ViewTreeObserver;->mOnTouchModeChangeListeners:Ljava/util/concurre
 Landroid/view/ViewTreeObserver;->removeOnComputeInternalInsetsListener(Landroid/view/ViewTreeObserver$OnComputeInternalInsetsListener;)V
 Landroid/view/Window;->addPrivateFlags(I)V
 Landroid/view/Window;->alwaysReadCloseOnTouchAttr()V
+Landroid/view/Window;->FEATURE_MAX:I
 Landroid/view/Window;->isDestroyed()Z
 Landroid/view/Window;->mAppName:Ljava/lang/String;
 Landroid/view/Window;->mAppToken:Landroid/os/IBinder;
@@ -7133,6 +7165,7 @@ Landroid/widget/TextClock;->onTimeChanged()V
 Landroid/widget/TextView$SavedState;->text:Ljava/lang/CharSequence;
 Landroid/widget/TextView;->assumeLayout()V
 Landroid/widget/TextView;->bringTextIntoView()Z
+Landroid/widget/TextView;->canPaste()Z
 Landroid/widget/TextView;->checkForRelayout()V
 Landroid/widget/TextView;->compressText(F)Z
 Landroid/widget/TextView;->createEditorIfNeeded()V
@@ -7145,6 +7178,7 @@ Landroid/widget/TextView;->getLineAtCoordinate(F)I
 Landroid/widget/TextView;->getTextDirectionHeuristic()Landroid/text/TextDirectionHeuristic;
 Landroid/widget/TextView;->getTextForAccessibility()Ljava/lang/CharSequence;
 Landroid/widget/TextView;->getTextServicesLocale(Z)Ljava/util/Locale;
+Landroid/widget/TextView;->getTransformedText(II)Ljava/lang/CharSequence;
 Landroid/widget/TextView;->getUpdatedHighlightPath()Landroid/graphics/Path;
 Landroid/widget/TextView;->getVerticalOffset(Z)I
 Landroid/widget/TextView;->isSingleLine()Z
@@ -7180,6 +7214,7 @@ Landroid/widget/TextView;->mMaxMode:I
 Landroid/widget/TextView;->mMaxWidth:I
 Landroid/widget/TextView;->mMaxWidthMode:I
 Landroid/widget/TextView;->mMinimum:I
+Landroid/widget/TextView;->mMinMode:I
 Landroid/widget/TextView;->mMinWidth:I
 Landroid/widget/TextView;->mMinWidthMode:I
 Landroid/widget/TextView;->mOldMaximum:I
@@ -7606,7 +7641,7 @@ Lcom/android/internal/os/HandlerCaller;->obtainMessageOO(ILjava/lang/Object;Ljav
 Lcom/android/internal/os/HandlerCaller;->obtainMessageOOO(ILjava/lang/Object;Ljava/lang/Object;Ljava/lang/Object;)Landroid/os/Message;
 Lcom/android/internal/os/HandlerCaller;->sendMessage(Landroid/os/Message;)V
 Lcom/android/internal/os/IDropBoxManagerService$Stub;->asInterface(Landroid/os/IBinder;)Lcom/android/internal/os/IDropBoxManagerService;
-Lcom/android/internal/os/IDropBoxManagerService;->getNextEntry(Ljava/lang/String;J)Landroid/os/DropBoxManager$Entry;
+Lcom/android/internal/os/IDropBoxManagerService;->getNextEntry(Ljava/lang/String;JLjava/lang/String;)Landroid/os/DropBoxManager$Entry;
 Lcom/android/internal/os/PowerProfile;-><init>(Landroid/content/Context;)V
 Lcom/android/internal/os/PowerProfile;->getAveragePower(Ljava/lang/String;)D
 Lcom/android/internal/os/PowerProfile;->getAveragePower(Ljava/lang/String;I)D
@@ -8492,11 +8527,18 @@ Ldalvik/system/BaseDexClassLoader;->addDexPath(Ljava/lang/String;Z)V
 Ldalvik/system/BaseDexClassLoader;->getLdLibraryPath()Ljava/lang/String;
 Ldalvik/system/BaseDexClassLoader;->pathList:Ldalvik/system/DexPathList;
 Ldalvik/system/BlockGuard$BlockGuardPolicyException;-><init>(IILjava/lang/String;)V
+Ldalvik/system/BlockGuard$BlockGuardPolicyException;->mMessage:Ljava/lang/String;
+Ldalvik/system/BlockGuard$BlockGuardPolicyException;->mPolicyState:I
+Ldalvik/system/BlockGuard$BlockGuardPolicyException;->mPolicyViolated:I
 Ldalvik/system/BlockGuard$Policy;->onNetwork()V
 Ldalvik/system/BlockGuard$Policy;->onReadFromDisk()V
 Ldalvik/system/BlockGuard;->getThreadPolicy()Ldalvik/system/BlockGuard$Policy;
 Ldalvik/system/BlockGuard;->LAX_POLICY:Ldalvik/system/BlockGuard$Policy;
 Ldalvik/system/BlockGuard;->setThreadPolicy(Ldalvik/system/BlockGuard$Policy;)V
+Ldalvik/system/BlockGuard;->threadPolicy:Ljava/lang/ThreadLocal;
+Ldalvik/system/CloseGuard$DefaultReporter;-><init>()V
+Ldalvik/system/CloseGuard$Reporter;->report(Ljava/lang/String;Ljava/lang/Throwable;)V
+Ldalvik/system/CloseGuard;-><init>()V
 Ldalvik/system/CloseGuard;->close()V
 Ldalvik/system/CloseGuard;->get()Ldalvik/system/CloseGuard;
 Ldalvik/system/CloseGuard;->open(Ljava/lang/String;)V
@@ -9029,6 +9071,10 @@ Lorg/w3c/dom/ls/LSSerializerFilter;->getWhatToShow()I
 Lorg/w3c/dom/traversal/NodeFilter;->acceptNode(Lorg/w3c/dom/Node;)S
 Lorg/w3c/dom/traversal/NodeIterator;->detach()V
 Lorg/w3c/dom/traversal/NodeIterator;->nextNode()Lorg/w3c/dom/Node;
+Lorg/xml/sax/ext/Attributes2Impl;->declared:[Z
+Lorg/xml/sax/ext/Attributes2Impl;->specified:[Z
+Lorg/xml/sax/ext/Locator2Impl;->encoding:Ljava/lang/String;
+Lorg/xml/sax/ext/Locator2Impl;->version:Ljava/lang/String;
 Lorg/xml/sax/helpers/AttributesImpl;->badIndex(I)V
 Lorg/xml/sax/helpers/AttributesImpl;->data:[Ljava/lang/String;
 Lorg/xml/sax/helpers/AttributesImpl;->ensureCapacity(I)V

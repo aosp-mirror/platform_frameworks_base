@@ -184,7 +184,8 @@ public class AppLaunch extends InstrumentationTestCase {
         if (null != launchDirectory && !launchDirectory.isEmpty()) {
             launchRootDir = new File(launchDirectory);
             if (!launchRootDir.exists() && !launchRootDir.mkdirs()) {
-                throw new IOException("Unable to create the destination directory");
+                throw new IOException("Unable to create the destination directory "
+                    + launchRootDir + ". Try disabling selinux.");
             }
         }
 
@@ -192,7 +193,8 @@ public class AppLaunch extends InstrumentationTestCase {
             File launchSubDir = new File(launchRootDir, LAUNCH_SUB_DIRECTORY);
 
             if (!launchSubDir.exists() && !launchSubDir.mkdirs()) {
-                throw new IOException("Unable to create the lauch file sub directory");
+                throw new IOException("Unable to create the lauch file sub directory "
+                    + launchSubDir + ". Try disabling selinux.");
             }
             File file = new File(launchSubDir, LAUNCH_FILE);
             FileOutputStream outputStream = new FileOutputStream(file);
@@ -769,6 +771,8 @@ public class AppLaunch extends InstrumentationTestCase {
                              BufferedWriter writer =
                                 new BufferedWriter(new OutputStreamWriter(stream))) {
                             String cmd = String.format(SIMPLEPERF_APP_CMD, packageName, launchCmd);
+                            // In the file, we need to escape any "$".
+                            cmd = cmd.replace("$", "\\$");
                             writer.write(cmd);
                         }
                         launchCmd = launchFile.getAbsolutePath();

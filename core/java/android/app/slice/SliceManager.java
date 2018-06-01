@@ -221,7 +221,7 @@ public class SliceManager {
     @WorkerThread
     public @NonNull Collection<Uri> getSliceDescendants(@NonNull Uri uri) {
         ContentResolver resolver = mContext.getContentResolver();
-        try (ContentProviderClient provider = resolver.acquireContentProviderClient(uri)) {
+        try (ContentProviderClient provider = resolver.acquireUnstableContentProviderClient(uri)) {
             Bundle extras = new Bundle();
             extras.putParcelable(SliceProvider.EXTRA_BIND_URI, uri);
             final Bundle res = provider.call(SliceProvider.METHOD_GET_DESCENDANTS, null, extras);
@@ -243,7 +243,7 @@ public class SliceManager {
     public @Nullable Slice bindSlice(@NonNull Uri uri, @NonNull Set<SliceSpec> supportedSpecs) {
         Preconditions.checkNotNull(uri, "uri");
         ContentResolver resolver = mContext.getContentResolver();
-        try (ContentProviderClient provider = resolver.acquireContentProviderClient(uri)) {
+        try (ContentProviderClient provider = resolver.acquireUnstableContentProviderClient(uri)) {
             if (provider == null) {
                 Log.w(TAG, String.format("Unknown URI: %s", uri));
                 return null;
@@ -305,7 +305,7 @@ public class SliceManager {
         if (authority == null) return null;
         Uri uri = new Uri.Builder().scheme(ContentResolver.SCHEME_CONTENT)
                 .authority(authority).build();
-        try (ContentProviderClient provider = resolver.acquireContentProviderClient(uri)) {
+        try (ContentProviderClient provider = resolver.acquireUnstableContentProviderClient(uri)) {
             if (provider == null) {
                 Log.w(TAG, String.format("Unknown URI: %s", uri));
                 return null;
@@ -383,7 +383,7 @@ public class SliceManager {
         if (authority == null) return null;
         Uri uri = new Uri.Builder().scheme(ContentResolver.SCHEME_CONTENT)
                 .authority(authority).build();
-        try (ContentProviderClient provider = resolver.acquireContentProviderClient(uri)) {
+        try (ContentProviderClient provider = resolver.acquireUnstableContentProviderClient(uri)) {
             if (provider == null) {
                 Log.w(TAG, String.format("Unknown URI: %s", uri));
                 return null;

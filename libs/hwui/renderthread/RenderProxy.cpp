@@ -193,8 +193,11 @@ void RenderProxy::fence() {
     mRenderThread.queue().runSync([]() {});
 }
 
-void RenderProxy::staticFence() {
-    RenderThread::getInstance().queue().runSync([]() {});
+int RenderProxy::maxTextureSize() {
+    static int maxTextureSize = RenderThread::getInstance().queue().runSync([]() {
+        return DeviceInfo::get()->maxTextureSize();
+    });
+    return maxTextureSize;
 }
 
 void RenderProxy::stopDrawing() {
@@ -270,6 +273,10 @@ void RenderProxy::setContentDrawBounds(int left, int top, int right, int bottom)
 
 void RenderProxy::setFrameCallback(std::function<void(int64_t)>&& callback) {
     mDrawFrameTask.setFrameCallback(std::move(callback));
+}
+
+void RenderProxy::setFrameCompleteCallback(std::function<void(int64_t)>&& callback) {
+    mDrawFrameTask.setFrameCompleteCallback(std::move(callback));
 }
 
 void RenderProxy::addFrameMetricsObserver(FrameMetricsObserver* observerPtr) {

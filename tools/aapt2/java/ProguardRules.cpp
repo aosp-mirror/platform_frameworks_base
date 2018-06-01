@@ -189,6 +189,29 @@ class XmlResourceVisitor : public BaseVisitor {
   DISALLOW_COPY_AND_ASSIGN(XmlResourceVisitor);
 };
 
+class NavigationVisitor : public BaseVisitor {
+ public:
+  NavigationVisitor(const ResourceFile& file, KeepSet* keep_set, const std::string& package)
+      : BaseVisitor(file, keep_set), package_(package) {
+  }
+
+  void Visit(xml::Element* node) override {
+    const auto& attr = node->FindAttribute(xml::kSchemaAndroid, "name");
+    if (attr != nullptr && !attr->value.empty()) {
+      std::string name = (attr->value[0] == '.') ? package_ + attr->value : attr->value;
+      if (util::IsJavaClassName(name)) {
+        AddClass(node->line_number, name);
+      }
+    }
+
+    BaseVisitor::Visit(node);
+  }
+
+ private:
+  DISALLOW_COPY_AND_ASSIGN(NavigationVisitor);
+  const std::string package_;
+};
+
 class TransitionVisitor : public BaseVisitor {
  public:
   TransitionVisitor(const ResourceFile& file, KeepSet* keep_set) : BaseVisitor(file, keep_set) {
@@ -291,7 +314,7 @@ bool CollectProguardRulesForManifest(xml::XmlResource* res, KeepSet* keep_set, b
   return false;
 }
 
-bool CollectProguardRules(xml::XmlResource* res, KeepSet* keep_set) {
+bool CollectProguardRules(IAaptContext* context_, xml::XmlResource* res, KeepSet* keep_set) {
   if (!res->root) {
     return false;
   }
@@ -305,6 +328,12 @@ bool CollectProguardRules(xml::XmlResource* res, KeepSet* keep_set) {
 
     case ResourceType::kXml: {
       XmlResourceVisitor visitor(res->file, keep_set);
+      res->root->Accept(&visitor);
+      break;
+    }
+
+    case ResourceType::kNavigation: {
+      NavigationVisitor visitor(res->file, keep_set, context_->GetCompilationPackage());
       res->root->Accept(&visitor);
       break;
     }

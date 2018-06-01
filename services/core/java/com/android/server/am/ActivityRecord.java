@@ -1736,15 +1736,7 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
             mStackSupervisor.mStoppingActivities.remove(this);
             mStackSupervisor.mGoingToSleepActivities.remove(this);
 
-            // If the activity is stopped or stopping, cycle to the paused state. We avoid doing
-            // this when there is an activity waiting to become translucent as the extra binder
-            // calls will lead to noticeable jank. A later call to
-            // ActivityStack#ensureActivitiesVisibleLocked will bring the activity to the proper
-            // paused state. We also avoid doing this for the activity the stack supervisor
-            // considers the resumed activity, as normal means will bring the activity from STOPPED
-            // to RESUMED. Adding PAUSING in this scenario will lead to double lifecycles.
-            if (isState(STOPPED, STOPPING) && stack.mTranslucentActivityWaiting == null
-                    && mStackSupervisor.getResumedActivityLocked() != this) {
+            if (shouldPauseWhenBecomingVisible()) {
                 // Capture reason before state change
 
                 // An activity must be in the {@link PAUSING} state for the system to validate
@@ -1759,6 +1751,39 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
             Slog.w(TAG, "Exception thrown making visible: " + intent.getComponent(), e);
         }
         handleAlreadyVisible();
+    }
+
+    /** Check if activity should be moved to PAUSED state when it becomes visible. */
+    private boolean shouldPauseWhenBecomingVisible() {
+        // If the activity is stopped or stopping, cycle to the paused state. We avoid doing
+        // this when there is an activity waiting to become translucent as the extra binder
+        // calls will lead to noticeable jank. A later call to
+        // ActivityStack#ensureActivitiesVisibleLocked will bring the activity to the proper
+        // paused state. We also avoid doing this for the activity the stack supervisor
+        // considers the resumed activity, as normal means will bring the activity from STOPPED
+        // to RESUMED. Adding PAUSING in this scenario will lead to double lifecycles.
+        if (!isState(STOPPED, STOPPING) || getStack().mTranslucentActivityWaiting != null
+                || mStackSupervisor.getResumedActivityLocked() == this) {
+            return false;
+        }
+
+        // Check if position in task allows to become paused
+        final int positionInTask = task.mActivities.indexOf(this);
+        if (positionInTask == -1) {
+            throw new IllegalStateException("Activity not found in its task");
+        }
+        if (positionInTask == task.mActivities.size() - 1) {
+            // It's the topmost activity in the task - should become paused now
+            return true;
+        }
+        // Check if activity above is finishing now and this one becomes the topmost in task.
+        final ActivityRecord activityAbove = task.mActivities.get(positionInTask + 1);
+        if (activityAbove.finishing && results == null) {
+            // We will only allow pausing if activity above wasn't launched for result. Otherwise it
+            // will cause this activity to resume before getting result.
+            return true;
+        }
+        return false;
     }
 
     boolean handleAlreadyVisible() {
@@ -2413,11 +2438,16 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
         }
 
         // Compute configuration based on max supported width and height.
-        outBounds.set(0, 0, maxActivityWidth, maxActivityHeight);
-        // Position the activity frame on the opposite side of the nav bar.
-        final int navBarPosition = service.mWindowManager.getNavBarPosition();
-        final int left = navBarPosition == NAV_BAR_LEFT ? appBounds.right - outBounds.width() : 0;
-        outBounds.offsetTo(left, 0 /* top */);
+        // Also account for the left / top insets (e.g. from display cutouts), which will be clipped
+        // away later in StackWindowController.adjustConfigurationForBounds(). Otherwise, the app
+        // bounds would end up too small.
+        outBounds.set(0, 0, maxActivityWidth + appBounds.left, maxActivityHeight + appBounds.top);
+
+        if (service.mWindowManager.getNavBarPosition() == NAV_BAR_LEFT) {
+            // Position the activity frame on the opposite side of the nav bar.
+            outBounds.left = appBounds.right - maxActivityWidth;
+            outBounds.right = appBounds.right;
+        }
     }
 
     boolean ensureActivityConfiguration(int globalChanges, boolean preserveWindow) {

@@ -393,7 +393,20 @@ public class RecentsOnboarding {
         if (!mLayoutAttachedToWindow && orientation == Configuration.ORIENTATION_PORTRAIT) {
             mLayout.setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_STABLE);
 
-            mWindowManager.addView(mLayout, getWindowLayoutParams());
+            final int gravity;
+            final int x;
+            if (stringRes == R.string.recents_swipe_up_onboarding) {
+                gravity = Gravity.BOTTOM | Gravity.CENTER_HORIZONTAL;
+                x = 0;
+            } else {
+                int layoutDirection =
+                        mContext.getResources().getConfiguration().getLayoutDirection();
+                gravity = Gravity.BOTTOM | (layoutDirection == View.LAYOUT_DIRECTION_LTR
+                        ? Gravity.LEFT : Gravity.RIGHT);
+                x = mContext.getResources().getDimensionPixelSize(
+                        R.dimen.recents_quick_scrub_onboarding_margin_start);
+            }
+            mWindowManager.addView(mLayout, getWindowLayoutParams(gravity, x));
             mLayout.setAlpha(0);
             mLayout.animate()
                     .alpha(1f)
@@ -459,19 +472,19 @@ public class RecentsOnboarding {
         pw.println("    }");
     }
 
-    private WindowManager.LayoutParams getWindowLayoutParams() {
+    private WindowManager.LayoutParams getWindowLayoutParams(int gravity, int x) {
         int flags = WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS
                 | WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
         final WindowManager.LayoutParams lp = new WindowManager.LayoutParams(
-                ViewGroup.LayoutParams.MATCH_PARENT,
                 ViewGroup.LayoutParams.WRAP_CONTENT,
-                0, -mNavBarHeight / 2,
+                ViewGroup.LayoutParams.WRAP_CONTENT,
+                x, -mNavBarHeight / 2,
                 WindowManager.LayoutParams.TYPE_NAVIGATION_BAR_PANEL,
                 flags,
                 PixelFormat.TRANSLUCENT);
         lp.privateFlags |= WindowManager.LayoutParams.PRIVATE_FLAG_SHOW_FOR_ALL_USERS;
         lp.setTitle("RecentsOnboarding");
-        lp.gravity = Gravity.BOTTOM;
+        lp.gravity = gravity;
         return lp;
     }
 

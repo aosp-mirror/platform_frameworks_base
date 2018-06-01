@@ -17,21 +17,26 @@
 
 // cribbed from samples/native-audio
 
-#include "audioplay.h"
-
 #define CHATTY ALOGD
 #define LOG_TAG "audioplay"
+
+#include "audioplay.h"
 
 #include <string.h>
 
 #include <utils/Log.h>
+#include <utils/threads.h>
 
 // for native audio
 #include <SLES/OpenSLES.h>
 #include <SLES/OpenSLES_Android.h>
 
+#include "BootAnimationUtil.h"
+
 namespace audioplay {
 namespace {
+
+using namespace android;
 
 // engine interfaces
 static SLObjectItf engineObject = NULL;
@@ -305,6 +310,74 @@ bool parseClipBuf(const uint8_t* clipBuf, int clipBufSize, const ChunkFormat** o
     return true;
 }
 
+class InitAudioThread : public Thread {
+public:
+    InitAudioThread(uint8_t* exampleAudioData, int exampleAudioLength)
+        : Thread(false),
+          mExampleAudioData(exampleAudioData),
+          mExampleAudioLength(exampleAudioLength) {}
+private:
+    virtual bool threadLoop() {
+        audioplay::create(mExampleAudioData, mExampleAudioLength);
+        // Exit immediately
+        return false;
+    }
+
+    uint8_t* mExampleAudioData;
+    int mExampleAudioLength;
+};
+
+// Typedef to aid readability.
+typedef android::BootAnimation::Animation Animation;
+
+class AudioAnimationCallbacks : public android::BootAnimation::Callbacks {
+public:
+    void init(const Vector<Animation::Part>& parts) override {
+        const Animation::Part* partWithAudio = nullptr;
+        for (const Animation::Part& part : parts) {
+            if (part.audioData != nullptr) {
+                partWithAudio = &part;
+                break;
+            }
+        }
+
+        if (partWithAudio == nullptr) {
+            return;
+        }
+
+        ALOGD("found audio.wav, creating playback engine");
+        // The audioData is used to initialize the audio system. Different data
+        // can be played later for other parts BUT the assumption is that they
+        // will all be the same format and only the format of this audioData
+        // will work correctly.
+        initAudioThread = new InitAudioThread(partWithAudio->audioData,
+                partWithAudio->audioLength);
+        initAudioThread->run("BootAnimation::InitAudioThread", PRIORITY_NORMAL);
+    };
+
+    void playPart(int partNumber, const Animation::Part& part, int playNumber) override {
+        // only play audio file the first time we animate the part
+        if (playNumber == 0 && part.audioData && playSoundsAllowed()) {
+            ALOGD("playing clip for part%d, size=%d",
+                  partNumber, part.audioLength);
+            // Block until the audio engine is finished initializing.
+            if (initAudioThread != nullptr) {
+                initAudioThread->join();
+            }
+            audioplay::playClip(part.audioData, part.audioLength);
+        }
+    };
+
+    void shutdown() override {
+        // we've finally played everything we're going to play
+        audioplay::setPlaying(false);
+        audioplay::destroy();
+    };
+
+private:
+    sp<InitAudioThread> initAudioThread = nullptr;
+};
+
 } // namespace
 
 bool create(const uint8_t* exampleClipBuf, int exampleClipBufSize) {
@@ -395,6 +468,10 @@ void destroy() {
         engineObject = NULL;
         engineEngine = NULL;
     }
+}
+
+sp<BootAnimation::Callbacks> createAnimationCallbacks() {
+  return new AudioAnimationCallbacks();
 }
 
 }  // namespace audioplay

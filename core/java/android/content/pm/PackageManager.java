@@ -461,6 +461,7 @@ public abstract class PackageManager {
      * package.
      * @hide
      */
+    @TestApi
     public static final int MATCH_KNOWN_PACKAGES = MATCH_UNINSTALLED_PACKAGES | MATCH_ANY_USER;
 
     /**
@@ -1664,7 +1665,8 @@ public abstract class PackageManager {
     /**
      * Feature for {@link #getSystemAvailableFeatures} and
      * {@link #hasSystemFeature}: The device includes at least one form of audio
-     * output, such as speakers, audio jack or streaming over bluetooth
+     * output, as defined in the Android Compatibility Definition Document (CDD)
+     * <a href="https://source.android.com/compatibility/android-cdd#7_8_audio">section 7.8 Audio</a>.
      */
     @SdkConstant(SdkConstantType.FEATURE)
     public static final String FEATURE_AUDIO_OUTPUT = "android.hardware.audio.output";
@@ -3419,6 +3421,7 @@ public abstract class PackageManager {
      *         deleted with {@code DONT_DELETE_DATA} flag set).
      * @hide
      */
+    @TestApi
     @SystemApi
     @RequiresPermission(android.Manifest.permission.INTERACT_ACROSS_USERS_FULL)
     public abstract List<PackageInfo> getInstalledPackagesAsUser(@PackageInfoFlags int flags,

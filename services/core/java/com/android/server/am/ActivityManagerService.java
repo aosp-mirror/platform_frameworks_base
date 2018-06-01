@@ -12925,6 +12925,8 @@ public class ActivityManagerService extends IActivityManager.Stub
             // about the process state of the isolated UID *before* it is registered with the
             // owning application.
             mBatteryStatsService.addIsolatedUid(uid, info.uid);
+            StatsLog.write(StatsLog.ISOLATED_UID_CHANGED, info.uid, uid,
+                    StatsLog.ISOLATED_UID_CHANGED__EVENT__CREATED);
         }
         final ProcessRecord r = new ProcessRecord(this, stats, info, proc, uid);
         if (!mBooted && !mBooting

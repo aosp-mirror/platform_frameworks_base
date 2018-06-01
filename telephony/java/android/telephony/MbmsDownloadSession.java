@@ -207,23 +207,25 @@ public class MbmsDownloadSession implements AutoCloseable {
     public static final int STATUS_UNKNOWN = 0;
 
     /**
-     * Indicates that the file is actively downloading.
+     * Indicates that the file is actively being downloaded.
      */
     public static final int STATUS_ACTIVELY_DOWNLOADING = 1;
 
     /**
-     * TODO: I don't know...
+     * Indicates that the file is awaiting the next download or repair operations. When a more
+     * precise status is known, the status will change to either {@link #STATUS_PENDING_REPAIR} or
+     * {@link #STATUS_PENDING_DOWNLOAD_WINDOW}.
      */
     public static final int STATUS_PENDING_DOWNLOAD = 2;
 
     /**
-     * Indicates that the file is being repaired after the download being interrupted.
+     * Indicates that the file is awaiting file repair after the download has ended.
      */
     public static final int STATUS_PENDING_REPAIR = 3;
 
     /**
      * Indicates that the file is waiting to download because its download window has not yet
-     * started.
+     * started and is scheduled for a future time.
      */
     public static final int STATUS_PENDING_DOWNLOAD_WINDOW = 4;
 
@@ -609,6 +611,9 @@ public class MbmsDownloadSession implements AutoCloseable {
      * If the operation encountered an error, the error code will be delivered via
      * {@link MbmsDownloadSessionCallback#onError}.
      *
+     * Repeated calls to this method for the same {@link DownloadRequest} will replace the
+     * previously registered listener.
+     *
      * @param request The {@link DownloadRequest} that you want updates on.
      * @param executor The {@link Executor} on which calls to {@code listener } should be executed.
      * @param listener The listener that should be called when the middleware has information to
@@ -717,6 +722,9 @@ public class MbmsDownloadSession implements AutoCloseable {
      *
      * If the operation encountered an error, the error code will be delivered via
      * {@link MbmsDownloadSessionCallback#onError}.
+     *
+     * Repeated calls to this method for the same {@link DownloadRequest} will replace the
+     * previously registered listener.
      *
      * @param request The {@link DownloadRequest} that you want updates on.
      * @param executor The {@link Executor} on which calls to {@code listener} should be executed.

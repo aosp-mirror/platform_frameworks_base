@@ -4133,7 +4133,7 @@ public final class ActivityThread extends ClientTransactionHandler {
         }
 
         try {
-            r.activity.performStop(false /*preserveWindow*/, reason);
+            r.activity.performStop(r.mPreserveWindow, reason);
         } catch (SuperNotCalledException e) {
             throw e;
         } catch (Exception e) {

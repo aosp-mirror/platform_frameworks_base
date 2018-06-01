@@ -388,6 +388,7 @@ public class NotificationStackScrollLayout extends ViewGroup
                     return object.getDarkAmount();
                 }
             };
+    private ObjectAnimator mDarkAmountAnimator;
     private boolean mUsingLightTheme;
     private boolean mQsExpanded;
     private boolean mForwardScrollable;
@@ -775,7 +776,8 @@ public class NotificationStackScrollLayout extends ViewGroup
             boolean clip = clipStart > start && clipStart < end
                     || clipEnd >= start && clipEnd <= end;
             clip &= !(first && mOwnScrollY == 0);
-            child.setDistanceToTopRoundness(clip ? Math.max(start - clipStart, 0) : -1);
+            child.setDistanceToTopRoundness(clip ? Math.max(start - clipStart, 0)
+                    : ExpandableView.NO_ROUNDNESS);
             first = false;
         }
     }
@@ -3401,7 +3403,7 @@ public class NotificationStackScrollLayout extends ViewGroup
                             .animateY(mShelf));
             ev.darkAnimationOriginIndex = mDarkAnimationOriginIndex;
             mAnimationEvents.add(ev);
-            startBackgroundFade();
+            startDarkAmountAnimation();
         }
         mDarkNeedsAnimation = false;
     }
@@ -3979,6 +3981,9 @@ public class NotificationStackScrollLayout extends ViewGroup
             mDarkAnimationOriginIndex = findDarkAnimationOriginIndex(touchWakeUpScreenLocation);
             mNeedsAnimation =  true;
         } else {
+            if (mDarkAmountAnimator != null) {
+                mDarkAmountAnimator.cancel();
+            }
             setDarkAmount(dark ? 1f : 0f);
             updateBackground();
         }
@@ -4023,12 +4028,22 @@ public class NotificationStackScrollLayout extends ViewGroup
         return mDarkAmount;
     }
 
-    private void startBackgroundFade() {
-        ObjectAnimator fadeAnimator = ObjectAnimator.ofFloat(this, DARK_AMOUNT, mDarkAmount,
+    private void startDarkAmountAnimation() {
+        ObjectAnimator darkAnimator = ObjectAnimator.ofFloat(this, DARK_AMOUNT, mDarkAmount,
                 mAmbientState.isDark() ? 1f : 0);
-        fadeAnimator.setDuration(StackStateAnimator.ANIMATION_DURATION_WAKEUP);
-        fadeAnimator.setInterpolator(Interpolators.ALPHA_IN);
-        fadeAnimator.start();
+        darkAnimator.setDuration(StackStateAnimator.ANIMATION_DURATION_WAKEUP);
+        darkAnimator.setInterpolator(Interpolators.ALPHA_IN);
+        darkAnimator.addListener(new AnimatorListenerAdapter() {
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                mDarkAmountAnimator = null;
+            }
+        });
+        if (mDarkAmountAnimator != null) {
+            mDarkAmountAnimator.cancel();
+        }
+        mDarkAmountAnimator = darkAnimator;
+        mDarkAmountAnimator.start();
     }
 
     private int findDarkAnimationOriginIndex(@Nullable PointF screenLocation) {

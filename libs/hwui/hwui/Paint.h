@@ -25,6 +25,7 @@
 #include <string>
 
 #include <minikin/FontFamily.h>
+#include <minikin/FamilyVariant.h>
 
 namespace android {
 
@@ -73,9 +74,9 @@ public:
 
     uint32_t getMinikinLocaleListId() const { return mMinikinLocaleListId; }
 
-    void setFamilyVariant(minikin::FontFamily::Variant variant) { mFamilyVariant = variant; }
+    void setFamilyVariant(minikin::FamilyVariant variant) { mFamilyVariant = variant; }
 
-    minikin::FontFamily::Variant getFamilyVariant() const { return mFamilyVariant; }
+    minikin::FamilyVariant getFamilyVariant() const { return mFamilyVariant; }
 
     void setHyphenEdit(uint32_t hyphen) { mHyphenEdit = hyphen; }
 
@@ -90,7 +91,7 @@ private:
     float mWordSpacing = 0;
     std::string mFontFeatureSettings;
     uint32_t mMinikinLocaleListId;
-    minikin::FontFamily::Variant mFamilyVariant;
+    minikin::FamilyVariant mFamilyVariant;
     uint32_t mHyphenEdit = 0;
     // The native Typeface object has the same lifetime of the Java Typeface
     // object. The Java Paint object holds a strong reference to the Java Typeface

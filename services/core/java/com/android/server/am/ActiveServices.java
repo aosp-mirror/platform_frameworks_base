@@ -119,7 +119,7 @@ public final class ActiveServices {
 
     // How long the startForegroundService() grace period is to get around to
     // calling startForeground() before we ANR + stop it.
-    static final int SERVICE_START_FOREGROUND_TIMEOUT = 5*1000;
+    static final int SERVICE_START_FOREGROUND_TIMEOUT = 10*1000;
 
     final ActivityManagerService mAm;
 
@@ -499,6 +499,18 @@ public final class ActiveServices {
                 UidRecord uidRec = mAm.mActiveUids.get(r.appInfo.uid);
                 return new ComponentName("?", "app is in background uid " + uidRec);
             }
+        }
+
+        // At this point we've applied allowed-to-start policy based on whether this was
+        // an ordinary startService() or a startForegroundService().  Now, only require that
+        // the app follow through on the startForegroundService() -> startForeground()
+        // contract if it actually targets O+.
+        if (r.appInfo.targetSdkVersion < Build.VERSION_CODES.O && fgRequired) {
+            if (DEBUG_BACKGROUND_CHECK || DEBUG_FOREGROUND_SERVICE) {
+                Slog.i(TAG, "startForegroundService() but host targets "
+                        + r.appInfo.targetSdkVersion + " - not requiring startForeground()");
+            }
+            fgRequired = false;
         }
 
         NeededUriGrants neededGrants = mAm.checkGrantUriPermissionFromIntentLocked(

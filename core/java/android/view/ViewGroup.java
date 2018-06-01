@@ -5060,9 +5060,9 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
             child.assignParent(this);
         } else {
             child.mParent = this;
-            if (child.hasUnhandledKeyListener()) {
-                incrementChildUnhandledKeyListeners();
-            }
+        }
+        if (child.hasUnhandledKeyListener()) {
+            incrementChildUnhandledKeyListeners();
         }
 
         final boolean childHasFocus = child.hasFocus();

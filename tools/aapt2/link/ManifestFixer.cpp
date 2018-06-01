@@ -261,6 +261,9 @@ bool ManifestFixer::BuildRules(xml::XmlActionExecutor* executor,
   manifest_action.Action(FixCoreAppAttribute);
   manifest_action.Action([&](xml::Element* el) -> bool {
     if (options_.version_name_default) {
+      if (options_.replace_version) {
+        el->RemoveAttribute(xml::kSchemaAndroid, "versionName");
+      }
       if (el->FindAttribute(xml::kSchemaAndroid, "versionName") == nullptr) {
         el->attributes.push_back(
             xml::Attribute{xml::kSchemaAndroid, "versionName",
@@ -269,6 +272,9 @@ bool ManifestFixer::BuildRules(xml::XmlActionExecutor* executor,
     }
 
     if (options_.version_code_default) {
+      if (options_.replace_version) {
+        el->RemoveAttribute(xml::kSchemaAndroid, "versionCode");
+      }
       if (el->FindAttribute(xml::kSchemaAndroid, "versionCode") == nullptr) {
         el->attributes.push_back(
             xml::Attribute{xml::kSchemaAndroid, "versionCode",

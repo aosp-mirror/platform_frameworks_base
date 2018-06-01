@@ -215,6 +215,10 @@ public class AudioService extends IAudioService.Stub
         return mPlatformType == AudioSystem.PLATFORM_TELEVISION;
     }
 
+    private boolean isPlatformAutomotive() {
+        return mContext.getPackageManager().hasSystemFeature(PackageManager.FEATURE_AUTOMOTIVE);
+    }
+
     /** The controller for the volume UI. */
     private final VolumeController mVolumeController = new VolumeController();
 
@@ -2380,8 +2384,11 @@ public class AudioService extends IAudioService.Stub
         if (DEBUG_VOL) {
             Log.d(TAG, String.format("Master mute %s, %d, user=%d", mute, flags, userId));
         }
-        if (mUseFixedVolume) {
-            return; // If using fixed volume, we don't mute.
+        if (!isPlatformAutomotive() && mUseFixedVolume) {
+            // If using fixed volume, we don't mute.
+            // TODO: remove the isPlatformAutomotive check here.
+            // The isPlatformAutomotive check is added for safety but may not be necessary.
+            return;
         }
         if (getCurrentUserId() == userId) {
             if (mute != AudioSystem.getMasterMute()) {

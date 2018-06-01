@@ -329,6 +329,7 @@ public final class ThreadedRenderer {
     // in response, so it really just exists to differentiate from LOST_SURFACE
     // but possibly both can just be deleted.
     private static final int SYNC_CONTEXT_IS_STOPPED = 1 << 2;
+    private static final int SYNC_FRAME_DROPPED = 1 << 3;
 
     private static final String[] VISUALIZERS = {
         PROFILE_PROPERTY_VISUALIZE_BARS,
@@ -828,6 +829,10 @@ public final class ThreadedRenderer {
         }
     }
 
+    void setFrameCompleteCallback(FrameCompleteCallback callback) {
+        nSetFrameCompleteCallback(mNativeProxy, callback);
+    }
+
     static void invokeFunctor(long functor, boolean waitForCompletion) {
         nInvokeFunctor(functor, waitForCompletion);
     }
@@ -1059,6 +1064,18 @@ public final class ThreadedRenderer {
         void onFrameDraw(long frame);
     }
 
+    /**
+     * Interface used to be notified when a frame has finished rendering
+     */
+    public interface FrameCompleteCallback {
+        /**
+         * Invoked after a frame draw
+         *
+         * @param frameNr The id of the frame that was drawn.
+         */
+        void onFrameComplete(long frameNr);
+    }
+
     private static class ProcessInitializer {
         static ProcessInitializer sInstance = new ProcessInitializer();
 
@@ -1208,6 +1225,8 @@ public final class ThreadedRenderer {
     private static native void nSetContentDrawBounds(long nativeProxy, int left,
              int top, int right, int bottom);
     private static native void nSetFrameCallback(long nativeProxy, FrameDrawingCallback callback);
+    private static native void nSetFrameCompleteCallback(long nativeProxy,
+            FrameCompleteCallback callback);
 
     private static native long nAddFrameMetricsObserver(long nativeProxy, FrameMetricsObserver observer);
     private static native void nRemoveFrameMetricsObserver(long nativeProxy, long nativeObserver);

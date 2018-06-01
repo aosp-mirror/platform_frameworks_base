@@ -3260,9 +3260,10 @@
   <java-symbol type="id" name="message_name" />
   <java-symbol type="id" name="message_icon" />
   <java-symbol type="id" name="group_message_container" />
-  <java-symbol type="id" name="tag_local_translation_y_animator" />
-  <java-symbol type="id" name="tag_local_translation_y" />
+  <java-symbol type="id" name="tag_top_animator" />
+  <java-symbol type="id" name="tag_top_override" />
   <java-symbol type="id" name="tag_layout_top" />
+  <java-symbol type="id" name="tag_is_first_layout" />
   <java-symbol type="id" name="tag_alpha_animator" />
   <java-symbol type="id" name="clip_children_set_tag" />
   <java-symbol type="id" name="clip_to_padding_tag" />
@@ -3391,4 +3392,7 @@
   <java-symbol type="drawable" name="ic_lock_lockdown" />
   <java-symbol type="drawable" name="ic_arrow_forward" />
   <java-symbol type="drawable" name="ic_permission" />
+
+  <java-symbol type="integer" name="config_defaultHapticFeedbackIntensity" />
+  <java-symbol type="integer" name="config_defaultNotificationVibrationIntensity" />
 </resources>

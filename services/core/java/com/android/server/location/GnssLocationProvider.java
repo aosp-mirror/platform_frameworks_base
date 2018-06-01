@@ -1016,26 +1016,25 @@ public class GnssLocationProvider implements LocationProviderInterface, InjectNt
             locationListener = mFusedLocationListener;
         }
 
-        if (!locationManager.isProviderEnabled(provider)) {
-            Log.w(TAG, "Unable to request location since " + provider
-                    + " provider does not exist or is not enabled.");
-            return;
-        }
-
         Log.i(TAG,
                 String.format(
                         "GNSS HAL Requesting location updates from %s provider for %d millis.",
                         provider, durationMillis));
-        locationManager.requestLocationUpdates(provider,
-                LOCATION_UPDATE_MIN_TIME_INTERVAL_MILLIS, /*minDistance=*/ 0,
-                locationListener, mHandler.getLooper());
-        locationListener.numLocationUpdateRequest++;
-        mHandler.postDelayed(() -> {
-            if (--locationListener.numLocationUpdateRequest == 0) {
-                Log.i(TAG, String.format("Removing location updates from %s provider.", provider));
-                locationManager.removeUpdates(locationListener);
-            }
-        }, durationMillis);
+        try {
+            locationManager.requestLocationUpdates(provider,
+                    LOCATION_UPDATE_MIN_TIME_INTERVAL_MILLIS, /*minDistance=*/ 0,
+                    locationListener, mHandler.getLooper());
+            locationListener.numLocationUpdateRequest++;
+            mHandler.postDelayed(() -> {
+                if (--locationListener.numLocationUpdateRequest == 0) {
+                    Log.i(TAG,
+                            String.format("Removing location updates from %s provider.", provider));
+                    locationManager.removeUpdates(locationListener);
+                }
+            }, durationMillis);
+        } catch (IllegalArgumentException e) {
+            Log.w(TAG, "Unable to request location.", e);
+        }
     }
 
     private void injectBestLocation(Location location) {

@@ -1402,7 +1402,9 @@ public class PermissionManagerService {
                 "grantRuntimePermission");
 
         enforceCrossUserPermission(callingUid, userId,
-                true /* requireFullPermission */, true /* checkShell */,
+                true,  // requireFullPermission
+                true,  // checkShell
+                false, // requirePermissionWhenSameUser
                 "grantRuntimePermission");
 
         final PackageParser.Package pkg = mPackageManagerInt.getPackage(packageName);
@@ -1522,7 +1524,9 @@ public class PermissionManagerService {
                 "revokeRuntimePermission");
 
         enforceCrossUserPermission(Binder.getCallingUid(), userId,
-                true /* requireFullPermission */, true /* checkShell */,
+                true,  // requireFullPermission
+                true,  // checkShell
+                false, // requirePermissionWhenSameUser
                 "revokeRuntimePermission");
 
         final int appId;
@@ -1679,7 +1683,9 @@ public class PermissionManagerService {
         enforceGrantRevokeRuntimePermissionPermissions("getPermissionFlags");
 
         enforceCrossUserPermission(callingUid, userId,
-                true /* requireFullPermission */, false /* checkShell */,
+                true,  // requireFullPermission
+                false, // checkShell
+                false, // requirePermissionWhenSameUser
                 "getPermissionFlags");
 
         final PackageParser.Package pkg = mPackageManagerInt.getPackage(packageName);
@@ -1870,7 +1876,9 @@ public class PermissionManagerService {
         enforceGrantRevokeRuntimePermissionPermissions("updatePermissionFlags");
 
         enforceCrossUserPermission(callingUid, userId,
-                true /* requireFullPermission */, true /* checkShell */,
+                true,  // requireFullPermission
+                true,  // checkShell
+                false, // requirePermissionWhenSameUser
                 "updatePermissionFlags");
 
         // Only the system can change these flags and nothing else.
@@ -1925,7 +1933,9 @@ public class PermissionManagerService {
         enforceGrantRevokeRuntimePermissionPermissions(
                 "updatePermissionFlagsForAllApps");
         enforceCrossUserPermission(callingUid, userId,
-                true /* requireFullPermission */, true /* checkShell */,
+                true,  // requireFullPermission
+                true,  // checkShell
+                false, // requirePermissionWhenSameUser
                 "updatePermissionFlagsForAllApps");
 
         // Only the system can change system fixed flags.
@@ -1965,7 +1975,8 @@ public class PermissionManagerService {
      * @param message the message to log on security exception
      */
     private void enforceCrossUserPermission(int callingUid, int userId,
-            boolean requireFullPermission, boolean checkShell, String message) {
+            boolean requireFullPermission, boolean checkShell,
+            boolean requirePermissionWhenSameUser, String message) {
         if (userId < 0) {
             throw new IllegalArgumentException("Invalid userId " + userId);
         }
@@ -1973,7 +1984,7 @@ public class PermissionManagerService {
             PackageManagerServiceUtils.enforceShellRestriction(
                     UserManager.DISALLOW_DEBUGGING_FEATURES, callingUid, userId);
         }
-        if (userId == UserHandle.getUserId(callingUid)) return;
+        if (!requirePermissionWhenSameUser && userId == UserHandle.getUserId(callingUid)) return;
         if (callingUid != Process.SYSTEM_UID && callingUid != Process.ROOT_UID) {
             if (requireFullPermission) {
                 mContext.enforceCallingOrSelfPermission(
@@ -2160,7 +2171,14 @@ public class PermissionManagerService {
         public void enforceCrossUserPermission(int callingUid, int userId,
                 boolean requireFullPermission, boolean checkShell, String message) {
             PermissionManagerService.this.enforceCrossUserPermission(callingUid, userId,
-                    requireFullPermission, checkShell, message);
+                    requireFullPermission, checkShell, false, message);
+        }
+        @Override
+        public void enforceCrossUserPermission(int callingUid, int userId,
+                boolean requireFullPermission, boolean checkShell,
+                boolean requirePermissionWhenSameUser, String message) {
+            PermissionManagerService.this.enforceCrossUserPermission(callingUid, userId,
+                    requireFullPermission, checkShell, requirePermissionWhenSameUser, message);
         }
         @Override
         public void enforceGrantRevokeRuntimePermissionPermissions(String message) {

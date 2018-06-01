@@ -255,7 +255,7 @@ public class BackupManager {
     /**
      * @deprecated Since Android P app can no longer request restoring of its backup.
      *
-     * <p>Restore the calling application from backup.  The data will be restored from the
+     * Restore the calling application from backup.  The data will be restored from the
      * current backup dataset if the application has stored data there, or from
      * the dataset used during the last full device setup operation if the current
      * backup dataset has no matching data.  If no backup data exists for this application
@@ -282,7 +282,7 @@ public class BackupManager {
     /**
      * @deprecated Since Android P app can no longer request restoring of its backup.
      *
-     * <p>Restore the calling application from backup.  The data will be restored from the
+     * Restore the calling application from backup.  The data will be restored from the
      * current backup dataset if the application has stored data there, or from
      * the dataset used during the last full device setup operation if the current
      * backup dataset has no matching data.  If no backup data exists for this application

@@ -134,7 +134,6 @@ import android.os.Looper;
 import android.os.Message;
 import android.os.RemoteException;
 import android.os.SystemClock;
-import android.os.Trace;
 import android.os.UserHandle;
 import android.service.voice.IVoiceInteractionSession;
 import android.util.ArraySet;
@@ -1360,7 +1359,9 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
     }
 
     void goToSleep() {
-        ensureActivitiesVisibleLocked(null, 0, !PRESERVE_WINDOWS);
+        // Ensure visibility without updating configuration, as activities are about to sleep.
+        ensureActivitiesVisibleLocked(null /* starting */, 0 /* configChanges */, !PRESERVE_WINDOWS,
+                false /* updateConfiguration */);
 
         // Make sure any paused or stopped but visible activities are now sleeping.
         // This ensures that the activity's onStop() is called.
@@ -1829,12 +1830,23 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
     }
 
     /**
-     * Make sure that all activities that need to be visible (that is, they
-     * currently can be seen by the user) actually are.
+     * Make sure that all activities that need to be visible in the stack (that is, they
+     * currently can be seen by the user) actually are and update their configuration.
+     */
+    final void ensureActivitiesVisibleLocked(ActivityRecord starting, int configChanges,
+            boolean preserveWindows) {
+        ensureActivitiesVisibleLocked(starting, configChanges, preserveWindows,
+                true /* updateConfiguration */);
+    }
+
+    /**
+     * Ensure visibility with an option to also update the configuration of visible activities.
+     * @see #ensureActivitiesVisibleLocked(ActivityRecord, int, boolean)
+     * @see ActivityStackSupervisor#ensureActivitiesVisibleLocked(ActivityRecord, int, boolean)
      */
     // TODO: Should be re-worked based on the fact that each task as a stack in most cases.
     final void ensureActivitiesVisibleLocked(ActivityRecord starting, int configChanges,
-            boolean preserveWindows) {
+            boolean preserveWindows, boolean updateConfiguration) {
         mTopActivityOccludesKeyguard = false;
         mTopDismissingKeyguardActivity = null;
         mStackSupervisor.getKeyguardController().beginActivityVisibilityUpdate();
@@ -1886,9 +1898,7 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
                                 + " finishing=" + r.finishing + " state=" + r.getState());
                         // First: if this is not the current activity being started, make
                         // sure it matches the current configuration.
-                        if (r != starting) {
-                            // Ensure activity configuration ignoring stop state since we are
-                            // becoming visible.
+                        if (r != starting && updateConfiguration) {
                             r.ensureActivityConfiguration(0 /* globalChanges */, preserveWindows,
                                     true /* ignoreStopState */);
                         }
@@ -2608,25 +2618,16 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
                 boolean notUpdated = true;
 
                 if (mStackSupervisor.isFocusedStack(this)) {
-
-                    // We have special rotation behavior when Keyguard is locked. Make sure all
-                    // activity visibilities are set correctly as well as the transition is updated
-                    // if needed to get the correct rotation behavior.
+                    // We have special rotation behavior when here is some active activity that
+                    // requests specific orientation or Keyguard is locked. Make sure all activity
+                    // visibilities are set correctly as well as the transition is updated if needed
+                    // to get the correct rotation behavior. Otherwise the following call to update
+                    // the orientation may cause incorrect configurations delivered to client as a
+                    // result of invisible window resize.
                     // TODO: Remove this once visibilities are set correctly immediately when
                     // starting an activity.
-                    if (mStackSupervisor.getKeyguardController().isKeyguardLocked()) {
-                        mStackSupervisor.ensureActivitiesVisibleLocked(null /* starting */,
-                                0 /* configChanges */, false /* preserveWindows */);
-                    }
-                    final Configuration config = mWindowManager.updateOrientationFromAppTokens(
-                            mStackSupervisor.getDisplayOverrideConfiguration(mDisplayId),
-                            next.mayFreezeScreenLocked(next.app) ? next.appToken : null,
-                                    mDisplayId);
-                    if (config != null) {
-                        next.frozenBeforeDestroy = true;
-                    }
-                    notUpdated = !mService.updateDisplayOverrideConfigurationLocked(config, next,
-                            false /* deferResume */, mDisplayId);
+                    notUpdated = !mStackSupervisor.ensureVisibilityAndConfig(next, mDisplayId,
+                            true /* markFrozenIfConfigChanged */, false /* deferResume */);
                 }
 
                 if (notUpdated) {
@@ -3834,7 +3835,8 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
             if (finishingActivityInNonFocusedStack) {
                 // Finishing activity that was in paused state and it was in not currently focused
                 // stack, need to make something visible in its place.
-                mStackSupervisor.ensureActivitiesVisibleLocked(null, 0, !PRESERVE_WINDOWS);
+                mStackSupervisor.ensureVisibilityAndConfig(null, mDisplayId,
+                        false /* markFrozenIfConfigChanged */, true /* deferResume */);
             }
             if (activityRemoved) {
                 mStackSupervisor.resumeFocusedStackTopActivityLocked();
@@ -4784,6 +4786,10 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
             mWindowContainerController.resize(bounds, mTmpBounds, mTmpInsetBounds);
             setBounds(bounds);
         }
+    }
+
+    void onPipAnimationEndResize() {
+        mWindowContainerController.onPipAnimationEndResize();
     }
 
 

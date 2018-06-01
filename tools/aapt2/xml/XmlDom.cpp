@@ -423,6 +423,15 @@ const Attribute* Element::FindAttribute(const StringPiece& ns, const StringPiece
   return nullptr;
 }
 
+void Element::RemoveAttribute(const StringPiece& ns, const StringPiece& name) {
+  auto new_attr_end = std::remove_if(attributes.begin(), attributes.end(),
+    [&](const Attribute& attr) -> bool {
+      return ns == attr.namespace_uri && name == attr.name;
+    });
+
+  attributes.erase(new_attr_end, attributes.end());
+}
+
 Attribute* Element::FindOrCreateAttribute(const StringPiece& ns, const StringPiece& name) {
   Attribute* attr = FindAttribute(ns, name);
   if (attr == nullptr) {

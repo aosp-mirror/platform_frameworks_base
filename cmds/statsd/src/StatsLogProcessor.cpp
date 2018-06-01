@@ -152,7 +152,7 @@ void StatsLogProcessor::onIsolatedUidChangedEventLocked(const LogEvent& event) {
         if (is_create) {
             mUidMap->assignIsolatedUid(isolated_uid, parent_uid);
         } else {
-            mUidMap->removeIsolatedUid(isolated_uid, parent_uid);
+            mUidMap->removeIsolatedUid(isolated_uid);
         }
     } else {
         ALOGE("Failed to parse uid in the isolated uid change event.");

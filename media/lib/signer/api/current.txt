@@ -1,0 +1,21 @@
+package com.android.mediadrm.signer {
+
+  public final class MediaDrmSigner {
+    method public static com.android.mediadrm.signer.MediaDrmSigner.CertificateRequest getCertificateRequest(android.media.MediaDrm, int, java.lang.String);
+    method public static com.android.mediadrm.signer.MediaDrmSigner.Certificate provideCertificateResponse(android.media.MediaDrm, byte[]) throws android.media.DeniedByServerException;
+    method public static byte[] signRSA(android.media.MediaDrm, byte[], java.lang.String, byte[], byte[]);
+    field public static final int CERTIFICATE_TYPE_X509 = 1; // 0x1
+  }
+
+  public static final class MediaDrmSigner.Certificate {
+    method public byte[] getContent();
+    method public byte[] getWrappedPrivateKey();
+  }
+
+  public static final class MediaDrmSigner.CertificateRequest {
+    method public byte[] getData();
+    method public java.lang.String getDefaultUrl();
+  }
+
+}
+

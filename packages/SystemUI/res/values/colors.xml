@@ -125,9 +125,6 @@
     <color name="light_mode_icon_color_dual_tone_background">#4dffffff</color>
     <color name="light_mode_icon_color_dual_tone_fill">#ffffff</color>
 
-    <color name="volume_settings_icon_color">#7fffffff</color>
-    <color name="volume_slider_inactive">@*android:color/quaternary_device_default_settings</color>
-
     <color name="docked_divider_background">#ff000000</color>
     <color name="docked_divider_handle">#ffffff</color>
     <drawable name="forced_resizable_background">#59000000</drawable>

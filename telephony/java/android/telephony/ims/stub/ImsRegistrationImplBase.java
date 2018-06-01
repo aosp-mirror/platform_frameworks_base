@@ -213,6 +213,17 @@ public class ImsRegistrationImplBase {
 
     /**
      * Notify the framework that the device is disconnected from the IMS network.
+     * <p>
+     * Note: Prior to calling {@link #onDeregistered(ImsReasonInfo)}, you should ensure that any
+     * changes to {@link android.telephony.ims.feature.ImsFeature} capability availability is sent
+     * to the framework.  For example,
+     * {@link android.telephony.ims.feature.MmTelFeature.MmTelCapabilities#CAPABILITY_TYPE_VIDEO}
+     * and
+     * {@link android.telephony.ims.feature.MmTelFeature.MmTelCapabilities#CAPABILITY_TYPE_VOICE}
+     * may be set to unavailable to ensure the framework knows these services are no longer
+     * available due to de-registration.  If you do not report capability changes impacted by
+     * de-registration, the framework will not know which features are no longer available as a
+     * result.
      *
      * @param info the {@link ImsReasonInfo} associated with why registration was disconnected.
      */

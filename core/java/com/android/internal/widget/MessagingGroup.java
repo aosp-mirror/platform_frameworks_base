@@ -100,7 +100,6 @@ public class MessagingGroup extends LinearLayout implements MessagingLinearLayou
         super.onFinishInflate();
         mMessageContainer = findViewById(R.id.group_message_container);
         mSenderName = findViewById(R.id.message_name);
-        mSenderName.addOnLayoutChangeListener(MessagingLayout.MESSAGING_PROPERTY_ANIMATOR);
         mAvatarView = findViewById(R.id.message_icon);
         mImageContainer = findViewById(R.id.messaging_group_icon_container);
         mSendingSpinner = findViewById(R.id.messaging_group_sending_progress);
@@ -190,73 +189,66 @@ public class MessagingGroup extends LinearLayout implements MessagingLinearLayou
     }
 
     public void removeMessage(MessagingMessage messagingMessage) {
-        ViewGroup messageParent = (ViewGroup) messagingMessage.getView().getParent();
-        messageParent.removeView(messagingMessage.getView());
+        View view = messagingMessage.getView();
+        boolean wasShown = view.isShown();
+        ViewGroup messageParent = (ViewGroup) view.getParent();
+        if (messageParent == null) {
+            return;
+        }
+        messageParent.removeView(view);
         Runnable recycleRunnable = () -> {
-            messageParent.removeTransientView(messagingMessage.getView());
+            messageParent.removeTransientView(view);
             messagingMessage.recycle();
-            if (mMessageContainer.getChildCount() == 0
-                    && mMessageContainer.getTransientViewCount() == 0
-                    && mImageContainer.getChildCount() == 0) {
-                ViewParent parent = getParent();
-                if (parent instanceof ViewGroup) {
-                    ((ViewGroup) parent).removeView(MessagingGroup.this);
-                }
-                setAvatar(null);
-                mAvatarView.setAlpha(1.0f);
-                mAvatarView.setTranslationY(0.0f);
-                mSenderName.setAlpha(1.0f);
-                mSenderName.setTranslationY(0.0f);
-                mIsolatedMessage = null;
-                mMessages = null;
-                sInstancePool.release(MessagingGroup.this);
-            }
         };
-        if (isShown()) {
-            messageParent.addTransientView(messagingMessage.getView(), 0);
-            performRemoveAnimation(messagingMessage.getView(), recycleRunnable);
-            if (mMessageContainer.getChildCount() == 0
-                    && mImageContainer.getChildCount() == 0) {
-                removeGroupAnimated(null);
-            }
+        if (wasShown && !MessagingLinearLayout.isGone(view)) {
+            messageParent.addTransientView(view, 0);
+            performRemoveAnimation(view, recycleRunnable);
         } else {
             recycleRunnable.run();
         }
-
     }
 
-    private void removeGroupAnimated(Runnable endAction) {
-        performRemoveAnimation(mAvatarView, null);
-        performRemoveAnimation(mSenderName, null);
-        boolean endActionTriggered = false;
-        for (int i = mMessageContainer.getChildCount() - 1; i >= 0; i--) {
-            View child = mMessageContainer.getChildAt(i);
-            if (child.getVisibility() == View.GONE) {
-                continue;
-            }
-            final ViewGroup.LayoutParams lp = child.getLayoutParams();
-            if (lp instanceof MessagingLinearLayout.LayoutParams
-                    && ((MessagingLinearLayout.LayoutParams) lp).hide
-                    && !((MessagingLinearLayout.LayoutParams) lp).visibleBefore) {
-                continue;
-            }
-            Runnable childEndAction = endActionTriggered ? null : endAction;
-            performRemoveAnimation(child, childEndAction);
-            endActionTriggered = true;
-        }
+    public void recycle() {
         if (mIsolatedMessage != null) {
-            performRemoveAnimation(mIsolatedMessage, !endActionTriggered ? endAction : null);
-            endActionTriggered = true;
+            mImageContainer.removeView(mIsolatedMessage);
         }
-        if (!endActionTriggered && endAction != null) {
-            endAction.run();
+        for (int i = 0; i < mMessages.size(); i++) {
+            MessagingMessage message = mMessages.get(i);
+            mMessageContainer.removeView(message.getView());
+            message.recycle();
         }
+        setAvatar(null);
+        mAvatarView.setAlpha(1.0f);
+        mAvatarView.setTranslationY(0.0f);
+        mSenderName.setAlpha(1.0f);
+        mSenderName.setTranslationY(0.0f);
+        setAlpha(1.0f);
+        mIsolatedMessage = null;
+        mMessages = null;
+        mAddedMessages.clear();
+        mFirstLayout = true;
+        MessagingPropertyAnimator.recycle(this);
+        sInstancePool.release(MessagingGroup.this);
+    }
+
+    public void removeGroupAnimated(Runnable endAction) {
+        performRemoveAnimation(this, () -> {
+            setAlpha(1.0f);
+            MessagingPropertyAnimator.setToLaidOutPosition(this);
+            if (endAction != null) {
+                endAction.run();
+            }
+        });
     }
 
     public void performRemoveAnimation(View message, Runnable endAction) {
-        MessagingPropertyAnimator.fadeOut(message, endAction);
-        MessagingPropertyAnimator.startLocalTranslationTo(message,
-                (int) (-getHeight() * 0.5f), MessagingLayout.FAST_OUT_LINEAR_IN);
+        performRemoveAnimation(message, -message.getHeight(), endAction);
+    }
+
+    private void performRemoveAnimation(View view, int disappearTranslation, Runnable endAction) {
+        MessagingPropertyAnimator.startLocalTranslationTo(view, disappearTranslation,
+                MessagingLayout.FAST_OUT_LINEAR_IN);
+        MessagingPropertyAnimator.fadeOut(view, endAction);
     }
 
     public CharSequence getSenderName() {
@@ -339,6 +331,11 @@ public class MessagingGroup extends LinearLayout implements MessagingLinearLayou
         if (parent instanceof ViewGroup) {
             ((ViewGroup) parent).invalidate();
         }
+    }
+
+    @Override
+    public boolean hasOverlappingRendering() {
+        return false;
     }
 
     public Icon getAvatarSymbolIfMatching(CharSequence avatarName, String avatarSymbol,
@@ -458,6 +455,7 @@ public class MessagingGroup extends LinearLayout implements MessagingLinearLayou
     protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
         super.onLayout(changed, left, top, right, bottom);
         if (!mAddedMessages.isEmpty()) {
+            final boolean firstLayout = mFirstLayout;
             getViewTreeObserver().addOnPreDrawListener(new ViewTreeObserver.OnPreDrawListener() {
                 @Override
                 public boolean onPreDraw() {
@@ -466,7 +464,7 @@ public class MessagingGroup extends LinearLayout implements MessagingLinearLayou
                             continue;
                         }
                         MessagingPropertyAnimator.fadeIn(message.getView());
-                        if (!mFirstLayout) {
+                        if (!firstLayout) {
                             MessagingPropertyAnimator.startLocalTranslationFrom(message.getView(),
                                     message.getView().getHeight(),
                                     MessagingLayout.LINEAR_OUT_SLOW_IN);

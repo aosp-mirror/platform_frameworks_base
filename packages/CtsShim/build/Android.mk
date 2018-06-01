@@ -66,10 +66,11 @@ LOCAL_FULL_MANIFEST_FILE := $(gen)
 LOCAL_MULTILIB := both
 LOCAL_JNI_SHARED_LIBRARIES := libshim_jni
 
-# Disable AAPT2 to fix:
+LOCAL_USE_AAPT2 := true
+# Disable AAPT2 manifest checks to fix:
 # out/target/common/obj/APPS/CtsShimPriv_intermediates/AndroidManifest.xml:25: error: unexpected element <restrict-update> found in <manifest>.
-# TODO(b/79755007): Re-enable AAPT2 when it supports the missing features.
-LOCAL_USE_AAPT2 := false
+# TODO(b/79755007): Remove when AAPT2 recognizes the manifest elements.
+LOCAL_AAPT_FLAGS += --warn-manifest-validation
 
 include $(BUILD_PACKAGE)
 
@@ -111,10 +112,11 @@ LOCAL_PACKAGE_NAME := CtsShim
 
 LOCAL_MANIFEST_FILE := shim/AndroidManifest.xml
 
-# Disable AAPT2 to fix:
+LOCAL_USE_AAPT2 := true
+# Disable AAPT2 manifest checks to fix:
 # frameworks/base/packages/CtsShim/build/shim/AndroidManifest.xml:25: error: unexpected element <restrict-update> found in <manifest>.
-# TODO(b/79755007): Re-enable AAPT2 when it supports the missing features.
-LOCAL_USE_AAPT2 := false
+# TODO(b/79755007): Remove when AAPT2 recognizes the manifest elements.
+LOCAL_AAPT_FLAGS += --warn-manifest-validation
 
 include $(BUILD_PACKAGE)
 

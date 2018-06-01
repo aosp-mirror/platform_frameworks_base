@@ -92,8 +92,6 @@ public class MessagingTextMessage extends ImageFloatingTextView implements Messa
 
     public void recycle() {
         MessagingMessage.super.recycle();
-        setAlpha(1.0f);
-        setTranslationY(0);
         sInstancePool.release(this);
     }
 

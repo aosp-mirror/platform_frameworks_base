@@ -29,6 +29,7 @@ import static com.android.server.wm.WindowState.MINIMUM_VISIBLE_HEIGHT_IN_DP;
 import static com.android.server.wm.WindowState.MINIMUM_VISIBLE_WIDTH_IN_DP;
 
 import android.annotation.IntDef;
+import android.app.IActivityManager;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.os.Looper;
@@ -93,6 +94,7 @@ class TaskPositioner {
     static final float MIN_ASPECT = 1.2f;
 
     private final WindowManagerService mService;
+    private final IActivityManager mActivityManager;
     private WindowPositionerEventReceiver mInputEventReceiver;
     private Display mDisplay;
     private final DisplayMetrics mDisplayMetrics = new DisplayMetrics();
@@ -165,7 +167,7 @@ class TaskPositioner {
                             Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER,
                                     "wm.TaskPositioner.resizeTask");
                             try {
-                                mService.mActivityManager.resizeTask(
+                                mActivityManager.resizeTask(
                                         mTask.mTaskId, mWindowDragBounds, RESIZE_MODE_USER);
                             } catch (RemoteException e) {
                             }
@@ -198,7 +200,7 @@ class TaskPositioner {
                         if (wasResizing && !mTmpRect.equals(mWindowDragBounds)) {
                             // We were using fullscreen surface during resizing. Request
                             // resizeTask() one last time to restore surface to window size.
-                            mService.mActivityManager.resizeTask(
+                            mActivityManager.resizeTask(
                                     mTask.mTaskId, mWindowDragBounds, RESIZE_MODE_USER_FORCED);
                         }
                     } catch(RemoteException e) {}
@@ -216,9 +218,15 @@ class TaskPositioner {
         }
     }
 
+    @VisibleForTesting
+    TaskPositioner(WindowManagerService service, IActivityManager activityManager) {
+        mService = service;
+        mActivityManager = activityManager;
+    }
+
     /** Use {@link #create(WindowManagerService)} instead **/
     TaskPositioner(WindowManagerService service) {
-        mService = service;
+        this(service, service.mActivityManager);
     }
 
     @VisibleForTesting
@@ -349,8 +357,7 @@ class TaskPositioner {
         startDrag(resize, preserveOrientation, startX, startY, mTmpRect);
     }
 
-    @VisibleForTesting
-    void startDrag(boolean resize, boolean preserveOrientation,
+    protected void startDrag(boolean resize, boolean preserveOrientation,
                    float startX, float startY, Rect startBounds) {
         mCtrlType = CTRL_NONE;
         mStartDragX = startX;
@@ -394,7 +401,7 @@ class TaskPositioner {
             // guaranteed to happen before subsequent drag resizes.
             mService.mH.post(() -> {
                 try {
-                    mService.mActivityManager.resizeTask(
+                    mActivityManager.resizeTask(
                             mTask.mTaskId, startBounds, RESIZE_MODE_USER_FORCED);
                 } catch (RemoteException e) {
                 }

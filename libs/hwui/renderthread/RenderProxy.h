@@ -95,7 +95,7 @@ public:
     ANDROID_API static void overrideProperty(const char* name, const char* value);
 
     ANDROID_API void fence();
-    ANDROID_API static void staticFence();
+    ANDROID_API static int maxTextureSize();
     ANDROID_API void stopDrawing();
     ANDROID_API void notifyFramePending();
 
@@ -114,6 +114,7 @@ public:
     ANDROID_API void drawRenderNode(RenderNode* node);
     ANDROID_API void setContentDrawBounds(int left, int top, int right, int bottom);
     ANDROID_API void setFrameCallback(std::function<void(int64_t)>&& callback);
+    ANDROID_API void setFrameCompleteCallback(std::function<void(int64_t)>&& callback);
 
     ANDROID_API void addFrameMetricsObserver(FrameMetricsObserver* observer);
     ANDROID_API void removeFrameMetricsObserver(FrameMetricsObserver* observer);

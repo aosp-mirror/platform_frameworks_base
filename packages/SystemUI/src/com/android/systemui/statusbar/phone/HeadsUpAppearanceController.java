@@ -148,7 +148,6 @@ public class HeadsUpAppearanceController implements OnHeadsUpChangedListener,
      * @return the translation X value for RTL. In theory, it should be negative. i.e. -Y
      */
     private int getRtlTranslation() {
-        // TODO: Corner Cut Out still need to handle.
         if (mPoint == null) {
             mPoint = new Point();
         }

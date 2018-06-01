@@ -119,7 +119,7 @@ public:
     void OnConfigRemoved(const ConfigKey& key);
 
     void assignIsolatedUid(int isolatedUid, int parentUid);
-    void removeIsolatedUid(int isolatedUid, int parentUid);
+    void removeIsolatedUid(int isolatedUid);
 
     // Returns the host uid if it exists. Otherwise, returns the same uid that was passed-in.
     virtual int getHostUidOrSelf(int uid) const;

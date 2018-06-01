@@ -62,6 +62,11 @@ public class TextLine {
     private Spanned mSpanned;
     private PrecomputedText mComputed;
 
+    // The start and end of a potentially existing ellipsis on this text line.
+    // We use them to filter out replacement and metric affecting spans on ellipsized away chars.
+    private int mEllipsisStart;
+    private int mEllipsisEnd;
+
     // Additional width of whitespace for justification. This value is per whitespace, thus
     // the line width will increase by mAddedWidth x (number of stretchable whitespaces).
     private float mAddedWidth;
@@ -146,11 +151,15 @@ public class TextLine {
      * @param dir the paragraph direction of this line
      * @param directions the directions information of this line
      * @param hasTabs true if the line might contain tabs
-     * @param tabStops the tabStops. Can be null.
+     * @param tabStops the tabStops. Can be null
+     * @param ellipsisStart the start of the ellipsis relative to the line
+     * @param ellipsisEnd the end of the ellipsis relative to the line. When there
+     *                    is no ellipsis, this should be equal to ellipsisStart.
      */
     @VisibleForTesting(visibility = VisibleForTesting.Visibility.PACKAGE)
     public void set(TextPaint paint, CharSequence text, int start, int limit, int dir,
-            Directions directions, boolean hasTabs, TabStops tabStops) {
+            Directions directions, boolean hasTabs, TabStops tabStops,
+            int ellipsisStart, int ellipsisEnd) {
         mPaint = paint;
         mText = text;
         mStart = start;
@@ -196,7 +205,8 @@ public class TextLine {
                 char[] chars = mChars;
                 for (int i = start, inext; i < limit; i = inext) {
                     inext = mReplacementSpanSpanSet.getNextTransition(i, limit);
-                    if (mReplacementSpanSpanSet.hasSpansIntersecting(i, inext)) {
+                    if (mReplacementSpanSpanSet.hasSpansIntersecting(i, inext)
+                            && (i - start >= ellipsisEnd || inext - start <= ellipsisStart)) {
                         // transition into a span
                         chars[i - start] = '\ufffc';
                         for (int j = i - start + 1, e = inext - start; j < e; ++j) {
@@ -208,6 +218,9 @@ public class TextLine {
         }
         mTabs = tabStops;
         mAddedWidth = 0;
+
+        mEllipsisStart = ellipsisStart != ellipsisEnd ? ellipsisStart : 0;
+        mEllipsisEnd = ellipsisStart != ellipsisEnd ? ellipsisEnd : 0;
     }
 
     /**
@@ -1156,11 +1169,15 @@ public class TextLine {
             for (int j = 0; j < mMetricAffectingSpanSpanSet.numberOfSpans; j++) {
                 // Both intervals [spanStarts..spanEnds] and [mStart + i..mStart + mlimit] are NOT
                 // empty by construction. This special case in getSpans() explains the >= & <= tests
-                if ((mMetricAffectingSpanSpanSet.spanStarts[j] >= mStart + mlimit) ||
-                        (mMetricAffectingSpanSpanSet.spanEnds[j] <= mStart + i)) continue;
+                if ((mMetricAffectingSpanSpanSet.spanStarts[j] >= mStart + mlimit)
+                        || (mMetricAffectingSpanSpanSet.spanEnds[j] <= mStart + i)) continue;
+
+                boolean insideEllipsis =
+                        mStart + mEllipsisStart <= mMetricAffectingSpanSpanSet.spanStarts[j]
+                        && mMetricAffectingSpanSpanSet.spanEnds[j] <= mStart + mEllipsisEnd;
                 final MetricAffectingSpan span = mMetricAffectingSpanSpanSet.spans[j];
                 if (span instanceof ReplacementSpan) {
-                    replacement = (ReplacementSpan)span;
+                    replacement = !insideEllipsis ? (ReplacementSpan) span : null;
                 } else {
                     // We might have a replacement that uses the draw
                     // state, otherwise measure state would suffice.

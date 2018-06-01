@@ -114,7 +114,7 @@ bool LayerDrawable::DrawLayer(GrContext* context, SkCanvas* canvas, Layer* layer
         }
     }
 
-    return layerImage;
+    return layerImage != nullptr;
 }
 
 };  // namespace skiapipeline
