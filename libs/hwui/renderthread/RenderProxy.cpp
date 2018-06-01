@@ -274,6 +274,10 @@ void RenderProxy::setFrameCallback(std::function<void(int64_t)>&& callback) {
     mDrawFrameTask.setFrameCallback(std::move(callback));
 }
 
+void RenderProxy::setFrameCompleteCallback(std::function<void(int64_t)>&& callback) {
+    mDrawFrameTask.setFrameCompleteCallback(std::move(callback));
+}
+
 void RenderProxy::serializeDisplayListTree() {
     mRenderThread.queue().post([=]() { mContext->serializeDisplayListTree(); });
 }
