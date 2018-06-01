@@ -134,7 +134,6 @@ import android.os.Looper;
 import android.os.Message;
 import android.os.RemoteException;
 import android.os.SystemClock;
-import android.os.Trace;
 import android.os.UserHandle;
 import android.service.voice.IVoiceInteractionSession;
 import android.util.ArraySet;
@@ -4787,6 +4786,10 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
             mWindowContainerController.resize(bounds, mTmpBounds, mTmpInsetBounds);
             setBounds(bounds);
         }
+    }
+
+    void onPipAnimationEndResize() {
+        mWindowContainerController.onPipAnimationEndResize();
     }
 
 
