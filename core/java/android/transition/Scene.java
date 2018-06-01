@@ -224,8 +224,7 @@ public final class Scene {
      * @param action The runnable whose {@link Runnable#run() run()} method will
      * be called when this scene is entered
      * @see #setExitAction(Runnable)
-     * @see Scene#Scene(ViewGroup, int, Context)
-     * @see Scene#Scene(ViewGroup, ViewGroup)
+     * @see Scene#Scene(ViewGroup, View)
      */
     public void setEnterAction(Runnable action) {
         mEnterAction = action;
@@ -245,8 +244,7 @@ public final class Scene {
      * if an enter action is set.
      *
      * @see #setEnterAction(Runnable)
-     * @see Scene#Scene(ViewGroup, int, Context)
-     * @see Scene#Scene(ViewGroup, ViewGroup)
+     * @see Scene#Scene(ViewGroup, View)
      */
     public void setExitAction(Runnable action) {
         mExitAction = action;

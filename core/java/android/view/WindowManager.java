@@ -485,7 +485,6 @@ public interface WindowManager extends ViewManager {
          * @see #TYPE_APPLICATION_PANEL
          * @see #TYPE_APPLICATION_MEDIA
          * @see #TYPE_APPLICATION_SUB_PANEL
-         * @see #TYPE_APPLICATION_ABOVE_SUB_PANEL
          * @see #TYPE_APPLICATION_ATTACHED_DIALOG
          * @see #TYPE_STATUS_BAR
          * @see #TYPE_SEARCH_BAR

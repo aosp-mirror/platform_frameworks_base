@@ -85,8 +85,8 @@ public abstract class AccessibilityRequestPreparer {
      * are complete.
      *
      * @see View#addExtraDataToAccessibilityNodeInfo(AccessibilityNodeInfo, String, Bundle)
-     * @see AccessibilityDelegate#addExtraDataToAccessibilityNodeInfo(View, AccessibilityNodeInfo,
-     * String, Bundle)
+     * @see View.AccessibilityDelegate#addExtraDataToAccessibilityNodeInfo(
+     * View, AccessibilityNodeInfo, String, Bundle)
      * @see AccessibilityNodeProvider#addExtraDataToAccessibilityNodeInfo(
      * int, AccessibilityNodeInfo, String, Bundle)
      */

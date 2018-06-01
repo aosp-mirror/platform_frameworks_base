@@ -203,7 +203,7 @@ public final class MediaStore {
     /**
      * The name of the Intent-extra used to control the orientation of a ViewImage or a MovieView.
      * This is an int property that overrides the activity's requestedOrientation.
-     * @see android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
+     * @see android.content.pm.ActivityInfo#SCREEN_ORIENTATION_UNSPECIFIED
      */
     public static final String EXTRA_SCREEN_ORIENTATION = "android.intent.extra.screenOrientation";
 
