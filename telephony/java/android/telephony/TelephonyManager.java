@@ -3417,8 +3417,8 @@ public class TelephonyManager {
      *
      * @param settings The settings for the filter, or {@code null} to disable the filter.
      *
-     * @see {@link TelecomManager#getDefaultDialerPackage()}
-     * @see {@link CarrierConfigManager#KEY_CARRIER_VVM_PACKAGE_NAME_STRING_ARRAY}
+     * @see TelecomManager#getDefaultDialerPackage()
+     * @see CarrierConfigManager#KEY_CARRIER_VVM_PACKAGE_NAME_STRING_ARRAY
      */
     public void setVisualVoicemailSmsFilterSettings(VisualVoicemailSmsFilterSettings settings) {
         if (settings == null) {

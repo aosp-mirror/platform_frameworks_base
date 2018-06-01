@@ -766,7 +766,9 @@ public abstract class ContentResolver {
      * in the {@link Cursor} extras {@link Bundle}. See {@link #EXTRA_HONORED_ARGS}
      * for details.
      *
-     * @see #QUERY_ARG_SORT_COLUMNS, #QUERY_ARG_SORT_DIRECTION, #QUERY_ARG_SORT_COLLATION.
+     * @see #QUERY_ARG_SORT_COLUMNS
+     * @see #QUERY_ARG_SORT_DIRECTION
+     * @see #QUERY_ARG_SORT_COLLATION
      *
      * @param uri The URI, using the content:// scheme, for the content to
      *         retrieve.

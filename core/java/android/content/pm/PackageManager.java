@@ -3989,7 +3989,7 @@ public abstract class PackageManager {
      * <p>The sequence number starts at <code>0</code> and is
      * reset every boot.
      * @param sequenceNumber The first sequence number for which to retrieve package changes.
-     * @see Settings.Global#BOOT_COUNT
+     * @see android.provider.Settings.Global#BOOT_COUNT
      */
     public abstract @Nullable ChangedPackages getChangedPackages(
             @IntRange(from=0) int sequenceNumber);

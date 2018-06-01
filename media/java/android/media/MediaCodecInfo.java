@@ -412,7 +412,7 @@ public final class MediaCodecInfo {
          * Use this format with {@link Image}. This format corresponds to
          * {@link android.graphics.ImageFormat#FLEX_RGB_888}, and can represent
          * {@link #COLOR_Format24bitBGR888} and {@link #COLOR_Format24bitRGB888} formats.
-         * @see Image#getFormat.
+         * @see Image#getFormat()
          */
         public static final int COLOR_FormatRGBFlexible               = 0x7F36B888;
 
@@ -425,7 +425,7 @@ public final class MediaCodecInfo {
          * {@link #COLOR_Format32bitBGRA8888}, {@link #COLOR_Format32bitABGR8888} and
          * {@link #COLOR_Format32bitARGB8888} formats.
          *
-         * @see Image#getFormat
+         * @see Image#getFormat()
          */
         public static final int COLOR_FormatRGBAFlexible              = 0x7F36A888;
 
