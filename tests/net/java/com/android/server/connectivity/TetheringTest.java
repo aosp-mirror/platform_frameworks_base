@@ -775,11 +775,12 @@ public class TetheringTest {
         sendWifiApStateChanged(WIFI_AP_STATE_ENABLED, TEST_WLAN_IFNAME, IFACE_IP_MODE_TETHERED);
         mLooper.dispatchAll();
 
-        // We verify get/set called twice here: once for setup and once during
+        // We verify get/set called thrice here: once for setup and twice during
         // teardown because all events happen over the course of the single
-        // dispatchAll() above.
+        // dispatchAll() above. Note that once the TISM IPv4 address config
+        // code is refactored the two calls during shutdown will revert to one.
         verify(mNMService, times(2)).getInterfaceConfig(TEST_WLAN_IFNAME);
-        verify(mNMService, times(2))
+        verify(mNMService, times(3))
                 .setInterfaceConfig(eq(TEST_WLAN_IFNAME), any(InterfaceConfiguration.class));
         verify(mNMService, times(1)).tetherInterface(TEST_WLAN_IFNAME);
         verify(mWifiManager).updateInterfaceIpState(
