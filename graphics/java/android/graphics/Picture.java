@@ -123,6 +123,9 @@ public class Picture {
      * drawn to a hardware-accelerated canvas. If this returns true then this Picture can only
      * be drawn to another Picture or to a Canvas where canvas.isHardwareAccelerated() is true.
      *
+     * Note this value is only updated after recording has finished by a call to
+     * {@link #endRecording()}. Prior to that it will be the default value of false.
+     *
      * @return true if the Picture can only be drawn to a hardware-accelerated canvas,
      *         false otherwise.
      */
