@@ -8031,6 +8031,13 @@ public class PackageManagerService extends IPackageManager.Stub
         flags = updateFlagsForApplication(flags, userId, null);
         final boolean listUninstalled = (flags & MATCH_KNOWN_PACKAGES) != 0;
 
+        mPermissionManager.enforceCrossUserPermission(
+            callingUid,
+            userId,
+            false /* requireFullPermission */,
+            false /* checkShell */,
+            "get installed application info");
+
         // writer
         synchronized (mPackages) {
             ArrayList<ApplicationInfo> list;
