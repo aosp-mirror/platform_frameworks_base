@@ -697,6 +697,7 @@ Landroid/app/INotificationManager$Stub$Proxy;-><init>(Landroid/os/IBinder;)V
 Landroid/app/INotificationManager$Stub$Proxy;->areNotificationsEnabledForPackage(Ljava/lang/String;I)Z
 Landroid/app/INotificationManager$Stub;-><init>()V
 Landroid/app/INotificationManager$Stub;->asInterface(Landroid/os/IBinder;)Landroid/app/INotificationManager;
+Landroid/app/INotificationManager$Stub;->TRANSACTION_enqueueNotificationWithTag:I
 Landroid/app/INotificationManager;->areNotificationsEnabledForPackage(Ljava/lang/String;I)Z
 Landroid/app/INotificationManager;->cancelAllNotifications(Ljava/lang/String;I)V
 Landroid/app/INotificationManager;->cancelNotificationWithTag(Ljava/lang/String;Ljava/lang/String;II)V
@@ -1234,6 +1235,7 @@ Landroid/bluetooth/IBluetooth$Stub$Proxy;->getAddress()Ljava/lang/String;
 Landroid/bluetooth/IBluetooth$Stub$Proxy;->getConnectionState(Landroid/bluetooth/BluetoothDevice;)I
 Landroid/bluetooth/IBluetooth$Stub;-><init>()V
 Landroid/bluetooth/IBluetooth$Stub;->asInterface(Landroid/os/IBinder;)Landroid/bluetooth/IBluetooth;
+Landroid/bluetooth/IBluetooth$Stub;->TRANSACTION_enable:I
 Landroid/bluetooth/IBluetooth;->getAddress()Ljava/lang/String;
 Landroid/bluetooth/IBluetooth;->getRemoteAlias(Landroid/bluetooth/BluetoothDevice;)Ljava/lang/String;
 Landroid/bluetooth/IBluetooth;->isEnabled()Z
@@ -1260,6 +1262,7 @@ Landroid/bluetooth/IBluetoothHeadset;->setPriority(Landroid/bluetooth/BluetoothD
 Landroid/bluetooth/IBluetoothHidDeviceCallback$Stub;-><init>()V
 Landroid/bluetooth/IBluetoothManager$Stub$Proxy;-><init>(Landroid/os/IBinder;)V
 Landroid/bluetooth/IBluetoothManager$Stub;->asInterface(Landroid/os/IBinder;)Landroid/bluetooth/IBluetoothManager;
+Landroid/bluetooth/IBluetoothManager$Stub;->TRANSACTION_enable:I
 Landroid/bluetooth/IBluetoothManager;->getBluetoothGatt()Landroid/bluetooth/IBluetoothGatt;
 Landroid/bluetooth/IBluetoothManager;->registerStateChangeCallback(Landroid/bluetooth/IBluetoothStateChangeCallback;)V
 Landroid/bluetooth/IBluetoothManager;->unregisterStateChangeCallback(Landroid/bluetooth/IBluetoothStateChangeCallback;)V
@@ -1371,6 +1374,7 @@ Landroid/content/IContentProvider;->call(Ljava/lang/String;Ljava/lang/String;Lja
 Landroid/content/IContentProvider;->delete(Ljava/lang/String;Landroid/net/Uri;Ljava/lang/String;[Ljava/lang/String;)I
 Landroid/content/IContentProvider;->descriptor:Ljava/lang/String;
 Landroid/content/IContentProvider;->insert(Ljava/lang/String;Landroid/net/Uri;Landroid/content/ContentValues;)Landroid/net/Uri;
+Landroid/content/IContentProvider;->QUERY_TRANSACTION:I
 Landroid/content/IContentProvider;->update(Ljava/lang/String;Landroid/net/Uri;Landroid/content/ContentValues;Ljava/lang/String;[Ljava/lang/String;)I
 Landroid/content/IContentService$Stub$Proxy;-><init>(Landroid/os/IBinder;)V
 Landroid/content/IContentService$Stub;-><init>()V
@@ -1478,6 +1482,7 @@ Landroid/content/pm/IPackageDeleteObserver$Stub$Proxy;-><init>(Landroid/os/IBind
 Landroid/content/pm/IPackageDeleteObserver$Stub;->asInterface(Landroid/os/IBinder;)Landroid/content/pm/IPackageDeleteObserver;
 Landroid/content/pm/IPackageDeleteObserver2$Stub$Proxy;-><init>(Landroid/os/IBinder;)V
 Landroid/content/pm/IPackageDeleteObserver2$Stub$Proxy;->mRemote:Landroid/os/IBinder;
+Landroid/content/pm/IPackageDeleteObserver2$Stub;-><init>()V
 Landroid/content/pm/IPackageDeleteObserver2$Stub;->asInterface(Landroid/os/IBinder;)Landroid/content/pm/IPackageDeleteObserver2;
 Landroid/content/pm/IPackageDeleteObserver2;->onPackageDeleted(Ljava/lang/String;ILjava/lang/String;)V
 Landroid/content/pm/IPackageInstaller;->uninstall(Landroid/content/pm/VersionedPackage;Ljava/lang/String;ILandroid/content/IntentSender;I)V
@@ -1507,6 +1512,7 @@ Landroid/content/pm/IPackageManager$Stub$Proxy;->getPackagesForUid(I)[Ljava/lang
 Landroid/content/pm/IPackageManager$Stub$Proxy;->getSystemSharedLibraryNames()[Ljava/lang/String;
 Landroid/content/pm/IPackageManager$Stub;-><init>()V
 Landroid/content/pm/IPackageManager$Stub;->asInterface(Landroid/os/IBinder;)Landroid/content/pm/IPackageManager;
+Landroid/content/pm/IPackageManager$Stub;->TRANSACTION_getApplicationInfo:I
 Landroid/content/pm/IPackageManager;->addPermission(Landroid/content/pm/PermissionInfo;)Z
 Landroid/content/pm/IPackageManager;->addPermissionAsync(Landroid/content/pm/PermissionInfo;)Z
 Landroid/content/pm/IPackageManager;->canonicalToCurrentPackageNames([Ljava/lang/String;)[Ljava/lang/String;
@@ -1991,6 +1997,7 @@ Landroid/database/CursorWindow;->sWindowToPidMap:Landroid/util/LongSparseArray;
 Landroid/database/CursorWrapper;->mCursor:Landroid/database/Cursor;
 Landroid/database/DatabaseUtils;->cursorPickFillWindowStartPosition(II)I
 Landroid/database/DatabaseUtils;->getTypeOfObject(Ljava/lang/Object;)I
+Landroid/database/IContentObserver$Stub;-><init>()V
 Landroid/database/IContentObserver$Stub;->asInterface(Landroid/os/IBinder;)Landroid/database/IContentObserver;
 Landroid/database/IContentObserver;->onChange(ZLandroid/net/Uri;I)V
 Landroid/database/MatrixCursor;->data:[Ljava/lang/Object;
@@ -2699,6 +2706,7 @@ Landroid/location/ILocationListener;->onStatusChanged(Ljava/lang/String;ILandroi
 Landroid/location/ILocationManager$Stub$Proxy;-><init>(Landroid/os/IBinder;)V
 Landroid/location/ILocationManager$Stub;-><init>()V
 Landroid/location/ILocationManager$Stub;->asInterface(Landroid/os/IBinder;)Landroid/location/ILocationManager;
+Landroid/location/ILocationManager$Stub;->TRANSACTION_getAllProviders:I
 Landroid/location/ILocationManager;->getAllProviders()Ljava/util/List;
 Landroid/location/Location;->mElapsedRealtimeNanos:J
 Landroid/location/Location;->mProvider:Ljava/lang/String;
@@ -3564,6 +3572,7 @@ Landroid/net/WebAddress;->setPath(Ljava/lang/String;)V
 Landroid/net/wifi/IWifiManager$Stub$Proxy;-><init>(Landroid/os/IBinder;)V
 Landroid/net/wifi/IWifiManager$Stub;-><init>()V
 Landroid/net/wifi/IWifiManager$Stub;->asInterface(Landroid/os/IBinder;)Landroid/net/wifi/IWifiManager;
+Landroid/net/wifi/IWifiManager$Stub;->TRANSACTION_getScanResults:I
 Landroid/net/wifi/IWifiManager;->getCurrentNetwork()Landroid/net/Network;
 Landroid/net/wifi/IWifiManager;->getWifiApConfiguration()Landroid/net/wifi/WifiConfiguration;
 Landroid/net/wifi/IWifiManager;->getWifiApEnabledState()I
@@ -3751,6 +3760,7 @@ Landroid/nfc/cardemulation/ApduServiceInfo;->mService:Landroid/content/pm/Resolv
 Landroid/nfc/cardemulation/ApduServiceInfo;->mStaticAidGroups:Ljava/util/HashMap;
 Landroid/nfc/cardemulation/ApduServiceInfo;->requiresUnlock()Z
 Landroid/nfc/ErrorCodes;->isError(I)Z
+Landroid/nfc/INfcAdapter$Stub;->TRANSACTION_enable:I
 Landroid/nfc/INfcAdapterExtras;->authenticate(Ljava/lang/String;[B)V
 Landroid/nfc/INfcAdapterExtras;->close(Ljava/lang/String;Landroid/os/IBinder;)Landroid/os/Bundle;
 Landroid/nfc/INfcAdapterExtras;->getCardEmulationRoute(Ljava/lang/String;)I
@@ -4010,6 +4020,7 @@ Landroid/os/IPowerManager$Stub$Proxy;-><init>(Landroid/os/IBinder;)V
 Landroid/os/IPowerManager$Stub$Proxy;->isLightDeviceIdleMode()Z
 Landroid/os/IPowerManager$Stub;-><init>()V
 Landroid/os/IPowerManager$Stub;->asInterface(Landroid/os/IBinder;)Landroid/os/IPowerManager;
+Landroid/os/IPowerManager$Stub;->TRANSACTION_acquireWakeLock:I
 Landroid/os/IPowerManager$Stub;->TRANSACTION_goToSleep:I
 Landroid/os/IPowerManager;->isInteractive()Z
 Landroid/os/IPowerManager;->nap(J)V
@@ -8232,6 +8243,7 @@ Lcom/android/internal/telephony/IPhoneStateListener;->onSignalStrengthsChanged(L
 Lcom/android/internal/telephony/IPhoneSubInfo$Stub$Proxy;-><init>(Landroid/os/IBinder;)V
 Lcom/android/internal/telephony/IPhoneSubInfo$Stub;-><init>()V
 Lcom/android/internal/telephony/IPhoneSubInfo$Stub;->asInterface(Landroid/os/IBinder;)Lcom/android/internal/telephony/IPhoneSubInfo;
+Lcom/android/internal/telephony/IPhoneSubInfo$Stub;->TRANSACTION_getDeviceId:I
 Lcom/android/internal/telephony/IPhoneSubInfo;->getIccSerialNumber(Ljava/lang/String;)Ljava/lang/String;
 Lcom/android/internal/telephony/IPhoneSubInfo;->getSubscriberId(Ljava/lang/String;)Ljava/lang/String;
 Lcom/android/internal/telephony/ISms$Stub;-><init>()V
@@ -8251,6 +8263,7 @@ Lcom/android/internal/telephony/ITelephony$Stub;->asInterface(Landroid/os/IBinde
 Lcom/android/internal/telephony/ITelephony$Stub;->DESCRIPTOR:Ljava/lang/String;
 Lcom/android/internal/telephony/ITelephony$Stub;->TRANSACTION_answerRingingCall:I
 Lcom/android/internal/telephony/ITelephony$Stub;->TRANSACTION_call:I
+Lcom/android/internal/telephony/ITelephony$Stub;->TRANSACTION_dial:I
 Lcom/android/internal/telephony/ITelephony$Stub;->TRANSACTION_endCall:I
 Lcom/android/internal/telephony/ITelephony$Stub;->TRANSACTION_getDeviceId:I
 Lcom/android/internal/telephony/ITelephony;->answerRingingCall()V
