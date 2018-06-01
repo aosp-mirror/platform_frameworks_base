@@ -89,7 +89,7 @@
     <string name="EmergencyCallWarningSummary" msgid="1899692069750260619">"Շտապ կանչերը հասանելի չեն Wi‑Fi-ի միջոցով"</string>
     <string name="notification_channel_network_alert" msgid="4427736684338074967">"Ծանուցումներ"</string>
     <string name="notification_channel_call_forward" msgid="2419697808481833249">"Զանգի վերահասցեավորում"</string>
-    <string name="notification_channel_emergency_callback" msgid="6686166232265733921">"Շտապ հետկանչի ռեժիմ"</string>
+    <string name="notification_channel_emergency_callback" msgid="6686166232265733921">"Շտապ հետզանգի ռեժիմ"</string>
     <string name="notification_channel_mobile_data_status" msgid="4575131690860945836">"Բջջային ինտերնետի կարգավիճակը"</string>
     <string name="notification_channel_sms" msgid="3441746047346135073">"SMS հաղորդագրություններ"</string>
     <string name="notification_channel_voice_mail" msgid="3954099424160511919">"Ձայնային փոստի հաղորդագրություններ"</string>
@@ -657,7 +657,7 @@
     <string name="phoneTypeFaxHome" msgid="2067265972322971467">"Տան ֆաքս"</string>
     <string name="phoneTypePager" msgid="7582359955394921732">"Փեյջեր"</string>
     <string name="phoneTypeOther" msgid="1544425847868765990">"Այլ"</string>
-    <string name="phoneTypeCallback" msgid="2712175203065678206">"Ետզանգ"</string>
+    <string name="phoneTypeCallback" msgid="2712175203065678206">"Հետզանգ"</string>
     <string name="phoneTypeCar" msgid="8738360689616716982">"Մեքենա"</string>
     <string name="phoneTypeCompanyMain" msgid="540434356461478916">"Ընկերության հիմնական"</string>
     <string name="phoneTypeIsdn" msgid="8022453193171370337">"ISDN"</string>
@@ -1262,7 +1262,7 @@
     <string name="share_remote_bugreport_notification_message_finished" msgid="6029609949340992866">"Այս սարքի անսարքությունների վերացման նպատակով ձեր ադմինիստրատորին անհրաժեշտ է վրիպակի հաշվետվություն: Կարող են տրամադրվել տեղեկություններ հավելվածների մասին և այլ տվյալներ։"</string>
     <string name="share_remote_bugreport_action" msgid="6249476773913384948">"ՏՐԱՄԱԴՐԵԼ"</string>
     <string name="decline_remote_bugreport_action" msgid="6230987241608770062">"ՄԵՐԺԵԼ"</string>
-    <string name="select_input_method" msgid="8547250819326693584">"Փոխել ստեղնաշարը"</string>
+    <string name="select_input_method" msgid="4653387336791222978">"Ընտրեք ներածման եղանակը"</string>
     <string name="show_ime" msgid="2506087537466597099">"Պահել էկրանին, երբ ֆիզիկական ստեղնաշարն ակտիվ է"</string>
     <string name="hardware" msgid="194658061510127999">"Ցույց տալ վիրտուալ ստեղնաշարը"</string>
     <string name="select_keyboard_layout_notification_title" msgid="597189518763083494">"Կազմաձևեք ֆիզիկական ստեղնաշարը"</string>

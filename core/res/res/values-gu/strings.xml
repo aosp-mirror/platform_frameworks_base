@@ -1263,7 +1263,7 @@
     <string name="share_remote_bugreport_notification_message_finished" msgid="6029609949340992866">"તમારા વ્યવસ્થાપકે આ ઉપકરણના સમસ્યા નિવારણમાં સહાય માટે બગ રિપોર્ટની વિનંતી કરી છે. ઍપ્લિકેશનો અને ડેટા શેર કરવામાં આવી શકે છે."</string>
     <string name="share_remote_bugreport_action" msgid="6249476773913384948">"શેર કરો"</string>
     <string name="decline_remote_bugreport_action" msgid="6230987241608770062">"નકારો"</string>
-    <string name="select_input_method" msgid="8547250819326693584">"કીબોર્ડ બદલો"</string>
+    <string name="select_input_method" msgid="4653387336791222978">"ઇનપુટ પદ્ધતિ પસંદ કરો"</string>
     <string name="show_ime" msgid="2506087537466597099">"જ્યારે ભૌતિક કીબોર્ડ સક્રિય હોય ત્યારે તેને સ્ક્રીન પર રાખો"</string>
     <string name="hardware" msgid="194658061510127999">"વર્ચ્યુઅલ કીબોર્ડ બતાવો"</string>
     <string name="select_keyboard_layout_notification_title" msgid="597189518763083494">"ભૌતિક કીબોર્ડ ગોઠવો"</string>

@@ -1263,7 +1263,7 @@
     <string name="share_remote_bugreport_notification_message_finished" msgid="6029609949340992866">"Administratzaileak akatsen txostena eskatu du gailuko arazoa konpontzeko. Baliteke aplikazioak eta datuak partekatzea."</string>
     <string name="share_remote_bugreport_action" msgid="6249476773913384948">"PARTEKATU"</string>
     <string name="decline_remote_bugreport_action" msgid="6230987241608770062">"BAZTERTU"</string>
-    <string name="select_input_method" msgid="8547250819326693584">"Aldatu teklatua"</string>
+    <string name="select_input_method" msgid="4653387336791222978">"Aukeratu idazketa-metodoa"</string>
     <string name="show_ime" msgid="2506087537466597099">"Erakutsi pantailan teklatu fisikoa aktibo dagoen bitartean"</string>
     <string name="hardware" msgid="194658061510127999">"Erakutsi teklatu birtuala"</string>
     <string name="select_keyboard_layout_notification_title" msgid="597189518763083494">"Konfiguratu teklatu fisikoa"</string>
@@ -1818,8 +1818,8 @@
     <string name="app_category_productivity" msgid="3742083261781538852">"Produktibitatea"</string>
     <string name="device_storage_monitor_notification_channel" msgid="3295871267414816228">"Gailuaren memoria"</string>
     <string name="adb_debugging_notification_channel_tv" msgid="5537766997350092316">"USB arazketa"</string>
-    <string name="time_picker_hour_label" msgid="2979075098868106450">"orduak"</string>
-    <string name="time_picker_minute_label" msgid="5168864173796598399">"minutuak"</string>
+    <string name="time_picker_hour_label" msgid="2979075098868106450">"ordu"</string>
+    <string name="time_picker_minute_label" msgid="5168864173796598399">"minutu"</string>
     <string name="time_picker_header_text" msgid="143536825321922567">"Zehaztu ordua"</string>
     <string name="time_picker_input_error" msgid="7574999942502513765">"Idatzi balio duen ordu bat"</string>
     <string name="time_picker_prompt_label" msgid="7588093983899966783">"Idatzi ordua"</string>

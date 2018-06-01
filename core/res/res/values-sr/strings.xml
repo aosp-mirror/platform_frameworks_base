@@ -1284,7 +1284,7 @@
     <string name="share_remote_bugreport_notification_message_finished" msgid="6029609949340992866">"Администратор је затражио извештај о грешци ради лакшег решавања проблема у вези са овим уређајем. Апликације и подаци могу да се деле."</string>
     <string name="share_remote_bugreport_action" msgid="6249476773913384948">"ДЕЛИ"</string>
     <string name="decline_remote_bugreport_action" msgid="6230987241608770062">"ОДБИЈ"</string>
-    <string name="select_input_method" msgid="8547250819326693584">"Промените тастатуру"</string>
+    <string name="select_input_method" msgid="4653387336791222978">"Избор метода уноса"</string>
     <string name="show_ime" msgid="2506087537466597099">"Задржи је на екрану док је физичка тастатура активна"</string>
     <string name="hardware" msgid="194658061510127999">"Прикажи виртуелну тастатуру"</string>
     <string name="select_keyboard_layout_notification_title" msgid="597189518763083494">"Конфигуришите физичку тастатуру"</string>

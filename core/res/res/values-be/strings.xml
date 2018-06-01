@@ -1306,7 +1306,7 @@
     <string name="share_remote_bugreport_notification_message_finished" msgid="6029609949340992866">"Ваш адміністратар запытаў справаздачу пра памылку для яе ліквідацыі на гэтай прыладзе. Звесткі праграм і даныя могуць быць абагулены."</string>
     <string name="share_remote_bugreport_action" msgid="6249476773913384948">"АБАГУЛІЦЬ"</string>
     <string name="decline_remote_bugreport_action" msgid="6230987241608770062">"АДХІЛІЦЬ"</string>
-    <string name="select_input_method" msgid="8547250819326693584">"Змяніць клавіятуру"</string>
+    <string name="select_input_method" msgid="4653387336791222978">"Выберыце метад уводу"</string>
     <string name="show_ime" msgid="2506087537466597099">"Захоўваць яе на экране ў той час, калі фізічная клавіятура актыўная"</string>
     <string name="hardware" msgid="194658061510127999">"Паказаць віртуальную клавіятуру"</string>
     <string name="select_keyboard_layout_notification_title" msgid="597189518763083494">"Наладжванне фізічнай клавіятуры"</string>

@@ -1284,7 +1284,7 @@
     <string name="share_remote_bugreport_notification_message_finished" msgid="6029609949340992866">"Administrator je zatražio izvješće o programskoj pogrešci radi lakšeg rješavanja problema na uređaju. Moguće je da će se aplikacije i podaci dijeliti."</string>
     <string name="share_remote_bugreport_action" msgid="6249476773913384948">"DIJELI"</string>
     <string name="decline_remote_bugreport_action" msgid="6230987241608770062">"ODBIJ"</string>
-    <string name="select_input_method" msgid="8547250819326693584">"Promjena tipkovnice"</string>
+    <string name="select_input_method" msgid="4653387336791222978">"Odabir načina unosa"</string>
     <string name="show_ime" msgid="2506087537466597099">"Zadržava se na zaslonu dok je fizička tipkovnica aktivna"</string>
     <string name="hardware" msgid="194658061510127999">"Prikaži virtualnu tipkovnicu"</string>
     <string name="select_keyboard_layout_notification_title" msgid="597189518763083494">"Konfigurirajte fizičku tipkovnicu"</string>

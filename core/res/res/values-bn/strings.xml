@@ -120,7 +120,7 @@
     <string name="roamingText10" msgid="3992906999815316417">"রোমিং - আংশিক পরিষেবা কার্যকারিতা"</string>
     <string name="roamingText11" msgid="4154476854426920970">"রোমিং ব্যানার চালু আছে"</string>
     <string name="roamingText12" msgid="1189071119992726320">"রোমিং ব্যানার বন্ধ আছে"</string>
-    <string name="roamingTextSearching" msgid="8360141885972279963">"পরিষেবা অনুসন্ধান করা হচ্ছে"</string>
+    <string name="roamingTextSearching" msgid="8360141885972279963">"পরিষেবা সার্চ করা হচ্ছে"</string>
     <string name="wfcRegErrorTitle" msgid="3855061241207182194">"ওয়াই-ফাই কলিং সেট-আপ করা যায়নি"</string>
   <string-array name="wfcOperatorErrorAlertMessages">
     <item msgid="3910386316304772394">"ওয়াই-ফাই এর মাধ্যমে কল করতে ও মেসেজ পাঠাতে, প্রথমে আপনার পরিষেবা প্রদানকারীকে এই পরিষেবার সেট-আপ করতে বলুন। তারপর আবার সেটিংস থেকে ওয়াই-ফাই কলিং চালু করুন। (ত্রুটি কোড: <xliff:g id="CODE">%1$s</xliff:g>)"</item>
@@ -886,12 +886,12 @@
     <string name="menu_enter_shortcut_label" msgid="2743362785111309668">"enter"</string>
     <string name="menu_delete_shortcut_label" msgid="3658178007202748164">"মুছুন"</string>
     <string name="search_go" msgid="8298016669822141719">"খুঁজুন"</string>
-    <string name="search_hint" msgid="1733947260773056054">"অনুসন্ধান..."</string>
+    <string name="search_hint" msgid="1733947260773056054">"সার্চ..."</string>
     <string name="searchview_description_search" msgid="6749826639098512120">"খুঁজুন"</string>
-    <string name="searchview_description_query" msgid="5911778593125355124">"অনুসন্ধান ক্যোয়ারী"</string>
+    <string name="searchview_description_query" msgid="5911778593125355124">"সার্চ ক্যোয়ারী"</string>
     <string name="searchview_description_clear" msgid="1330281990951833033">"ক্যোয়ারী সাফ করুন"</string>
     <string name="searchview_description_submit" msgid="2688450133297983542">"ক্যোয়ারী জমা দিন"</string>
-    <string name="searchview_description_voice" msgid="2453203695674994440">"ভয়েস অনুসন্ধান"</string>
+    <string name="searchview_description_voice" msgid="2453203695674994440">"ভয়েস সার্চ"</string>
     <string name="enable_explore_by_touch_warning_title" msgid="7460694070309730149">"\'স্পর্শের মাধ্যমে অন্বেষণ করুন\' সক্ষম করতে চান?"</string>
     <string name="enable_explore_by_touch_warning_message" product="tablet" msgid="8655887539089910577">"<xliff:g id="ACCESSIBILITY_SERVICE_NAME">%1$s</xliff:g> \'স্পর্শের মাধ্যমে অন্বেষণ করুন\' সক্ষম করতে চাইছে৷ যখন \'স্পর্শের মাধ্যমে অন্বেষণ করুন\' চালু করা হবে তখন আপনার আঙ্গুলের নিয়ন্ত্রণে থাকা জিনিসের বর্ণনাগুলি শুনতে অথবা দেখতে পাবেন অথবা ট্যাবলেটের সাথে ইন্টারঅ্যাক্ট করার জন্য অঙ্গভঙ্গির সাহায্য নিতে পারবেন৷"</string>
     <string name="enable_explore_by_touch_warning_message" product="default" msgid="2708199672852373195">"<xliff:g id="ACCESSIBILITY_SERVICE_NAME">%1$s</xliff:g> \'স্পর্শের মাধ্যমে অন্বেষণ করুন\' সক্ষম করতে চাইছে৷ যখন \'স্পর্শের মাধ্যমে অন্বেষণ করুন\' চালু করা হবে তখন আপনার আঙ্গুলের নিয়ন্ত্রণে থাকা জিনিসের বর্ণনাগুলি শুনতে অথবা দেখতে পাবেন অথবা ফোনের সাথে ইন্টারঅ্যাক্ট করার জন্য অঙ্গভঙ্গির সাহায্য নিতে পারবেন৷"</string>
@@ -1263,7 +1263,7 @@
     <string name="share_remote_bugreport_notification_message_finished" msgid="6029609949340992866">"আপনার প্রশাসক এই ডিভাইসটির সমস্যা নিবারণে সহায়তা করতে একটি ত্রুটির প্রতিবেদন চেয়েছেন৷ অ্যাপ এবং ডেটা শেয়ার করা হতে পারে৷"</string>
     <string name="share_remote_bugreport_action" msgid="6249476773913384948">"শেয়ার করুন"</string>
     <string name="decline_remote_bugreport_action" msgid="6230987241608770062">"অস্বীকার করুন"</string>
-    <string name="select_input_method" msgid="8547250819326693584">"কীবোর্ড পরিবর্তন করুন"</string>
+    <string name="select_input_method" msgid="4653387336791222978">"ইনপুট পদ্ধতি বেছে নিন"</string>
     <string name="show_ime" msgid="2506087537466597099">"ফিজিক্যাল কীবোর্ড সক্রিয় থাকার সময় এটিকে স্ক্রীনে রাখুন"</string>
     <string name="hardware" msgid="194658061510127999">"ভার্চুয়াল কীবোর্ড দেখুন"</string>
     <string name="select_keyboard_layout_notification_title" msgid="597189518763083494">"ফিজিক্যাল কীবোর্ড কনফিগার করুন"</string>
@@ -1387,7 +1387,7 @@
     <string name="progress_erasing" product="default" msgid="6596988875507043042">"SD কার্ড মোছা হচ্ছে…"</string>
     <string name="share" msgid="1778686618230011964">"শেয়ার করুন"</string>
     <string name="find" msgid="4808270900322985960">"খুঁজুন"</string>
-    <string name="websearch" msgid="4337157977400211589">"ওয়েব অনুসন্ধান"</string>
+    <string name="websearch" msgid="4337157977400211589">"ওয়েব সার্চ"</string>
     <string name="find_next" msgid="5742124618942193978">"পরবর্তীটি খুঁজুন"</string>
     <string name="find_previous" msgid="2196723669388360506">"পূর্ববর্তীটি খুঁজুন"</string>
     <string name="gpsNotifTicker" msgid="5622683912616496172">"<xliff:g id="NAME">%s</xliff:g> এর থেকে অবস্থানের অনুরোধ"</string>
@@ -1495,7 +1495,7 @@
     <string name="media_route_button_content_description" msgid="591703006349356016">"কাস্ট করুন"</string>
     <string name="media_route_chooser_title" msgid="1751618554539087622">"ডিভাইসে সংযোগ করুন"</string>
     <string name="media_route_chooser_title_for_remote_display" msgid="3395541745872017583">"ডিভাইসে স্ক্রীণ কাস্ট করুন"</string>
-    <string name="media_route_chooser_searching" msgid="4776236202610828706">"ডিভাইসগুলি অনুসন্ধান করা হচ্ছে…"</string>
+    <string name="media_route_chooser_searching" msgid="4776236202610828706">"ডিভাইসগুলি সার্চ করা হচ্ছে…"</string>
     <string name="media_route_chooser_extended_settings" msgid="87015534236701604">"সেটিংস"</string>
     <string name="media_route_controller_disconnect" msgid="8966120286374158649">"সংযোগ বিচ্ছিন্ন করুন"</string>
     <string name="media_route_status_scanning" msgid="7279908761758293783">"স্ক্যান করা হচ্ছে…"</string>
