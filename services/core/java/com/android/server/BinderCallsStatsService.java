@@ -16,15 +16,23 @@
 
 package com.android.server;
 
+import android.app.AppGlobals;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
 import android.os.Binder;
+import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.SystemProperties;
+import android.os.UserHandle;
 import android.util.Slog;
 
 import com.android.internal.os.BinderCallsStats;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class BinderCallsStatsService extends Binder {
 
@@ -54,11 +62,11 @@ public class BinderCallsStatsService extends Binder {
 
     @Override
     protected void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
+        boolean verbose = false;
         if (args != null) {
             for (final String arg : args) {
                 if ("-a".equals(arg)) {
-                    // We currently dump all information by default
-                    continue;
+                    verbose = true;
                 } else if ("--reset".equals(arg)) {
                     reset();
                     pw.println("binder_calls_stats reset.");
@@ -84,6 +92,23 @@ public class BinderCallsStatsService extends Binder {
                 }
             }
         }
-        BinderCallsStats.getInstance().dump(pw);
+        BinderCallsStats.getInstance().dump(pw, getAppIdToPackagesMap(), verbose);
     }
+
+    private Map<Integer, String> getAppIdToPackagesMap() {
+        List<PackageInfo> packages;
+        try {
+            packages = AppGlobals.getPackageManager()
+                    .getInstalledPackages(PackageManager.MATCH_UNINSTALLED_PACKAGES,
+                            UserHandle.USER_SYSTEM).getList();
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+        Map<Integer,String> map = new HashMap<>();
+        for (PackageInfo pkg : packages) {
+            map.put(pkg.applicationInfo.uid, pkg.packageName);
+        }
+        return map;
+    }
+
 }
