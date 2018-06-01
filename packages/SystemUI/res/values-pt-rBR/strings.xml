@@ -790,7 +790,7 @@
     <string name="pip_phone_dismiss_hint" msgid="6351678169095923899">"Arraste para baixo para dispensar"</string>
     <string name="pip_menu_title" msgid="4707292089961887657">"Menu"</string>
     <string name="pip_notification_title" msgid="3204024940158161322">"<xliff:g id="NAME">%s</xliff:g> está em picture-in-picture"</string>
-    <string name="pip_notification_message" msgid="5619512781514343311">"Se você não deseja que o app <xliff:g id="NAME">%s</xliff:g> use este recurso, toque para abrir as configurações e desativá-lo."</string>
+    <string name="pip_notification_message" msgid="5619512781514343311">"Se você não quer que o app <xliff:g id="NAME">%s</xliff:g> use este recurso, toque para abrir as configurações e desativá-lo."</string>
     <string name="pip_play" msgid="1417176722760265888">"Reproduzir"</string>
     <string name="pip_pause" msgid="8881063404466476571">"Pausar"</string>
     <string name="pip_skip_to_next" msgid="1948440006726306284">"Pular para a próxima"</string>
