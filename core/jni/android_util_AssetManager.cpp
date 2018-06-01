@@ -179,6 +179,10 @@ static void NativeVerifySystemIdmaps(JNIEnv* /*env*/, jclass /*clazz*/) {
         argv[argc++] = AssetManager::PRODUCT_OVERLAY_DIR;
       }
 
+      if (stat(AssetManager::PRODUCT_SERVICES_OVERLAY_DIR, &st) == 0) {
+        argv[argc++] = AssetManager::PRODUCT_SERVICES_OVERLAY_DIR;
+      }
+
       // Finally, invoke idmap (if any overlay directory exists)
       if (argc > 5) {
         execv(AssetManager::IDMAP_BIN, (char* const*)argv);
