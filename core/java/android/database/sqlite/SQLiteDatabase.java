@@ -2413,8 +2413,7 @@ public final class SQLiteDatabase extends SQLiteClosable {
 
         /**
          * Returns <a href="https://sqlite.org/pragma.html#pragma_synchronous">synchronous mode</a>.
-         * This value will only be used when {@link SQLiteDatabase#ENABLE_WRITE_AHEAD_LOGGING} flag
-         * is not set, otherwise a system wide default will be used.
+         * If not set, a system wide default will be used.
          * @see Builder#setSynchronousMode(String)
          */
         @Nullable
@@ -2601,7 +2600,7 @@ public final class SQLiteDatabase extends SQLiteClosable {
 
             /**
              * Sets <a href="https://sqlite.org/pragma.html#pragma_synchronous">synchronous mode</a>
-             * to use when {@link SQLiteDatabase#ENABLE_WRITE_AHEAD_LOGGING} flag is not set.
+             * .
              * @return
              */
             @NonNull

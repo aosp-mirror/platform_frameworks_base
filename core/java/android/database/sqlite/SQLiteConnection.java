@@ -296,7 +296,9 @@ public final class SQLiteConnection implements CancellationSignal.OnCancelListen
             final boolean useCompatibilityWal = mConfiguration.useCompatibilityWal();
             if (walEnabled || useCompatibilityWal) {
                 setJournalMode("WAL");
-                if (useCompatibilityWal && SQLiteCompatibilityWalFlags.areFlagsSet()) {
+                if (mConfiguration.syncMode != null) {
+                    setSyncMode(mConfiguration.syncMode);
+                } else if (useCompatibilityWal && SQLiteCompatibilityWalFlags.areFlagsSet()) {
                     setSyncMode(SQLiteCompatibilityWalFlags.getWALSyncMode());
                 } else {
                     setSyncMode(SQLiteGlobal.getWALSyncMode());
