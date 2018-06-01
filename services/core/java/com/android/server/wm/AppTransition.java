@@ -2003,8 +2003,11 @@ public class AppTransition implements Dump {
             case TRANSIT_TRANSLUCENT_ACTIVITY_CLOSE: {
                 return "TRANSIT_TRANSLUCENT_ACTIVITY_CLOSE";
             }
+            case TRANSIT_CRASHING_ACTIVITY_CLOSE: {
+                return "TRANSIT_CRASHING_ACTIVITY_CLOSE";
+            }
             default: {
-                return "<UNKNOWN>";
+                return "<UNKNOWN: " + transition + ">";
             }
         }
     }
@@ -2133,15 +2136,17 @@ public class AppTransition implements Dump {
                 + " " + this
                 + " alwaysKeepCurrent=" + alwaysKeepCurrent
                 + " Callers=" + Debug.getCallers(3));
+        final boolean allowSetCrashing = !isKeyguardTransit(mNextAppTransition)
+                && transit == TRANSIT_CRASHING_ACTIVITY_CLOSE;
         if (forceOverride || isKeyguardTransit(transit) || !isTransitionSet()
-                || mNextAppTransition == TRANSIT_NONE) {
+                || mNextAppTransition == TRANSIT_NONE || allowSetCrashing) {
             setAppTransition(transit, flags);
         }
         // We never want to change from a Keyguard transit to a non-Keyguard transit, as our logic
         // relies on the fact that we always execute a Keyguard transition after preparing one. We
         // also don't want to change away from a crashing transition.
-        else if (!alwaysKeepCurrent && !isKeyguardTransit(transit)
-                && transit != TRANSIT_CRASHING_ACTIVITY_CLOSE) {
+        else if (!alwaysKeepCurrent && !isKeyguardTransit(mNextAppTransition)
+                && mNextAppTransition != TRANSIT_CRASHING_ACTIVITY_CLOSE) {
             if (transit == TRANSIT_TASK_OPEN && isTransitionEqual(TRANSIT_TASK_CLOSE)) {
                 // Opening a new task always supersedes a close for the anim.
                 setAppTransition(transit, flags);
