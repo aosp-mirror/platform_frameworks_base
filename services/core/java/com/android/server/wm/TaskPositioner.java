@@ -357,7 +357,7 @@ class TaskPositioner {
         startDrag(resize, preserveOrientation, startX, startY, mTmpRect);
     }
 
-    private void startDrag(boolean resize, boolean preserveOrientation,
+    protected void startDrag(boolean resize, boolean preserveOrientation,
                    float startX, float startY, Rect startBounds) {
         mCtrlType = CTRL_NONE;
         mStartDragX = startX;
