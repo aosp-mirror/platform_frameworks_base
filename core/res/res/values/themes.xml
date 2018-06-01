@@ -106,7 +106,6 @@ please see themes_device_defaults.xml.
 
         <item name="textAppearanceLargePopupMenu">@style/TextAppearance.Widget.PopupMenu.Large</item>
         <item name="textAppearanceSmallPopupMenu">@style/TextAppearance.Widget.PopupMenu.Small</item>
-        <item name="textAppearancePopupMenuHeader">@null</item>
 
         <!-- Button styles -->
         <item name="buttonStyle">@style/Widget.Button</item>
@@ -230,7 +229,6 @@ please see themes_device_defaults.xml.
 
         <item name="panelMenuIsCompact">false</item>
         <item name="panelMenuListWidth">296dip</item>
-        <item name="panelMenuListTheme">@null</item>
 
         <!-- Scrollbar attributes -->
         <item name="scrollbarFadeDuration">250</item>
@@ -308,8 +306,6 @@ please see themes_device_defaults.xml.
         <item name="quickContactBadgeStyleSmallWindowLarge">@style/Widget.QuickContactBadgeSmall.WindowLarge</item>
         <item name="listPopupWindowStyle">@style/Widget.ListPopupWindow</item>
         <item name="popupMenuStyle">@style/Widget.PopupMenu</item>
-        <item name="popupTheme">@null</item>
-        <item name="stackViewStyle">@null</item>
         <item name="activityChooserViewStyle">@style/Widget.ActivityChooserView</item>
         <item name="fragmentBreadCrumbsStyle">@style/Widget.FragmentBreadCrumbs</item>
         <item name="contextPopupMenuStyle">?attr/popupMenuStyle</item>
