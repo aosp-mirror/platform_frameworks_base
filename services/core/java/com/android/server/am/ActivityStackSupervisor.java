@@ -2968,6 +2968,12 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
                 insetBounds.right = tempPinnedTaskBounds.width();
                 insetBounds.bottom = tempPinnedTaskBounds.height();
             }
+            if (pinnedBounds != null && tempPinnedTaskBounds == null) {
+                // We have finished the animation into PiP, and are resizing the tasks to match the
+                // stack bounds, while layouts are deferred, update any task state as a part of
+                // transitioning it from fullscreen into a floating state.
+                stack.onPipAnimationEndResize();
+            }
             stack.resize(pinnedBounds, tempPinnedTaskBounds, insetBounds);
             stack.ensureVisibleActivitiesConfigurationLocked(r, false);
         } finally {
