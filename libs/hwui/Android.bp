@@ -41,6 +41,7 @@ cc_defaults {
         "external/skia/src/image",
         "external/skia/src/utils",
         "external/skia/src/gpu",
+        "external/skia/src/shaders",
     ],
 
     product_variables: {
