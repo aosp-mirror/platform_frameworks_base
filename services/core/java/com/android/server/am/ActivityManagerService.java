@@ -23749,8 +23749,10 @@ public class ActivityManagerService extends IActivityManager.Stub
                 }
                 if (procState > ActivityManager.PROCESS_STATE_IMPORTANT_FOREGROUND) {
                     procState = ActivityManager.PROCESS_STATE_IMPORTANT_FOREGROUND;
-                    reportOomAdjMessageLocked(TAG_OOM_ADJ,
-                            "Raise procstate to external provider: " + app);
+                    if (DEBUG_OOM_ADJ_REASON || logUid == appUid) {
+                        reportOomAdjMessageLocked(TAG_OOM_ADJ,
+                                "Raise procstate to external provider: " + app);
+                    }
                 }
             }
         }
