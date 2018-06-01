@@ -1232,6 +1232,7 @@ public final class Bitmap implements Parcelable {
         if (config == null) {
             throw new IllegalArgumentException("Config must not be null");
         }
+        source.endRecording();
         if (source.requiresHardwareAcceleration() && config != Config.HARDWARE) {
             StrictMode.noteSlowCall("GPU readback");
         }
