@@ -26,7 +26,7 @@ import android.os.Parcel;
  * <li> raw uninterpreted byte-array extracted directly from the container. </li>
  * </ul>
  *
- * @see MediaPlayer#setOnTimedMetaDataAvailableListener(android.media.MediaPlayer.OnTimedMetaDataListener)
+ * @see MediaPlayer#setOnTimedMetaDataAvailableListener(android.media.MediaPlayer.OnTimedMetaDataAvailableListener)
  */
 public final class TimedMetaData {
     private static final String TAG = "TimedMetaData";

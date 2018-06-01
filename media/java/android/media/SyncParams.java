@@ -86,7 +86,7 @@ public final class SyncParams {
     /**
      * Use audio track for sync source. This requires audio data and an audio track.
      *
-     * @see AudioTrack#getTimeStamp
+     * @see android.media.AudioTrack#getTimeStamp(android.media.AudioTimestamp)
      */
     public static final int SYNC_SOURCE_AUDIO = 2;
 

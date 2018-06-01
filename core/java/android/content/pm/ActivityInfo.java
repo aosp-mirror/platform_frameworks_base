@@ -18,6 +18,7 @@ package android.content.pm;
 
 import android.annotation.IntDef;
 import android.annotation.TestApi;
+import android.content.ComponentName;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.content.res.Configuration.NativeConfig;
@@ -400,7 +401,7 @@ public class ActivityInfo extends ComponentInfo implements Parcelable {
     /**
      * Bit in {@link #flags} indicating that this activity should be run with VR mode enabled.
      *
-     * {@see android.app.Activity#setVrMode(boolean)}.
+     * @see android.app.Activity#setVrModeEnabled(boolean, ComponentName)
      */
     public static final int FLAG_ENABLE_VR_MODE = 0x8000;
 

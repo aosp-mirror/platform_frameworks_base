@@ -1835,7 +1835,6 @@ public class StorageManager {
      * @throws IOException when the storage device isn't present, or when it
      *             doesn't support allocating space, or if the device had
      *             trouble allocating the requested space.
-     * @see #getAllocatableBytes(UUID, int)
      * @see #isAllocationSupported(FileDescriptor)
      * @see Environment#isExternalStorageEmulated(File)
      */

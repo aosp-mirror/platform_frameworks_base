@@ -36,7 +36,7 @@ import android.os.Parcelable;
  * {@link #canRender}.
  *
  * @see Slice
- * @see SliceProvider#onBindSlice(Uri)
+ * @see SliceProvider#onBindSlice(Uri, Set)
  */
 public final class SliceSpec implements Parcelable {
 
