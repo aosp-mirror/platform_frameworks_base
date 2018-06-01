@@ -650,12 +650,14 @@ public class MagnificationController implements Handler.Callback {
                             + ", nonNormOffsetY = " + nonNormOffsetY + ")");
         }
         boolean changed = false;
-        final float offsetX = MathUtils.constrain(nonNormOffsetX, getMinOffsetXLocked(), 0);
+        final float offsetX = MathUtils.constrain(
+            nonNormOffsetX, getMinOffsetXLocked(), getMaxOffsetXLocked());
         if (Float.compare(mCurrentMagnificationSpec.offsetX, offsetX) != 0) {
             mCurrentMagnificationSpec.offsetX = offsetX;
             changed = true;
         }
-        final float offsetY = MathUtils.constrain(nonNormOffsetY, getMinOffsetYLocked(), 0);
+        final float offsetY = MathUtils.constrain(
+            nonNormOffsetY, getMinOffsetYLocked(), getMaxOffsetYLocked());
         if (Float.compare(mCurrentMagnificationSpec.offsetY, offsetY) != 0) {
             mCurrentMagnificationSpec.offsetY = offsetY;
             changed = true;
@@ -665,12 +667,26 @@ public class MagnificationController implements Handler.Callback {
 
     private float getMinOffsetXLocked() {
         final float viewportWidth = mMagnificationBounds.width();
-        return viewportWidth - viewportWidth * mCurrentMagnificationSpec.scale;
+        final float viewportLeft = mMagnificationBounds.left;
+        return (viewportLeft + viewportWidth) -
+            (viewportLeft + viewportWidth) * mCurrentMagnificationSpec.scale;
+    }
+
+    private float getMaxOffsetXLocked() {
+        return mMagnificationBounds.left -
+            mMagnificationBounds.left * mCurrentMagnificationSpec.scale;
     }
 
     private float getMinOffsetYLocked() {
         final float viewportHeight = mMagnificationBounds.height();
-        return viewportHeight - viewportHeight * mCurrentMagnificationSpec.scale;
+        final float viewportTop = mMagnificationBounds.top;
+        return (viewportTop + viewportHeight) -
+            (viewportTop + viewportHeight) * mCurrentMagnificationSpec.scale;
+    }
+
+    private float getMaxOffsetYLocked() {
+        return mMagnificationBounds.top -
+            mMagnificationBounds.top * mCurrentMagnificationSpec.scale;
     }
 
     /**
