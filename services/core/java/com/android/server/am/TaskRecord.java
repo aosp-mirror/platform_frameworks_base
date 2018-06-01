@@ -1606,6 +1606,9 @@ class TaskRecord extends ConfigurationContainer implements TaskWindowContainerLi
             boolean topActivity = true;
             for (--activityNdx; activityNdx >= 0; --activityNdx) {
                 final ActivityRecord r = mActivities.get(activityNdx);
+                if (r.mTaskOverlay) {
+                    continue;
+                }
                 if (r.taskDescription != null) {
                     if (label == null) {
                         label = r.taskDescription.getLabel();
