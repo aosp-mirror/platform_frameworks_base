@@ -66,8 +66,7 @@ public class PipTouchHandler {
     private static final int SHOW_DISMISS_AFFORDANCE_DELAY = 225;
 
     // Allow dragging the PIP to a location to close it
-    private static final boolean ENABLE_DISMISS_DRAG_TO_EDGE = true;
-
+    private final boolean mEnableDimissDragToEdge;
     private final Context mContext;
     private final IActivityManager mActivityManager;
     private final ViewConfiguration mViewConfig;
@@ -101,7 +100,7 @@ public class PipTouchHandler {
     private Runnable mShowDismissAffordance = new Runnable() {
         @Override
         public void run() {
-            if (ENABLE_DISMISS_DRAG_TO_EDGE) {
+            if (mEnableDimissDragToEdge) {
                 mDismissViewController.showDismissTarget();
             }
         }
@@ -199,6 +198,8 @@ public class PipTouchHandler {
         mExpandedShortestEdgeSize = res.getDimensionPixelSize(
                 R.dimen.pip_expanded_shortest_edge_size);
         mImeOffset = res.getDimensionPixelSize(R.dimen.pip_ime_offset);
+
+        mEnableDimissDragToEdge = res.getBoolean(R.bool.config_pipEnableDismissDragToEdge);
 
         // Register the listener for input consumer touch events
         inputConsumerController.setTouchListener(this::handleTouchEvent);
@@ -598,7 +599,7 @@ public class PipTouchHandler {
                 mMenuController.pokeMenu();
             }
 
-            if (ENABLE_DISMISS_DRAG_TO_EDGE) {
+            if (mEnableDimissDragToEdge) {
                 mDismissViewController.createDismissTarget();
                 mHandler.postDelayed(mShowDismissAffordance, SHOW_DISMISS_AFFORDANCE_DELAY);
             }
@@ -613,7 +614,7 @@ public class PipTouchHandler {
             if (touchState.startedDragging()) {
                 mSavedSnapFraction = -1f;
 
-                if (ENABLE_DISMISS_DRAG_TO_EDGE) {
+                if (mEnableDimissDragToEdge) {
                     mHandler.removeCallbacks(mShowDismissAffordance);
                     mDismissViewController.showDismissTarget();
                 }
@@ -629,7 +630,7 @@ public class PipTouchHandler {
                 if (!touchState.allowDraggingOffscreen() || !ENABLE_MINIMIZE) {
                     left = Math.max(mMovementBounds.left, Math.min(mMovementBounds.right, left));
                 }
-                if (ENABLE_DISMISS_DRAG_TO_EDGE) {
+                if (mEnableDimissDragToEdge) {
                     // Allow pip to move past bottom bounds
                     top = Math.max(mMovementBounds.top, top);
                 } else {
@@ -644,7 +645,7 @@ public class PipTouchHandler {
                 mTmpBounds.offsetTo((int) left, (int) top);
                 mMotionHelper.movePip(mTmpBounds);
 
-                if (ENABLE_DISMISS_DRAG_TO_EDGE) {
+                if (mEnableDimissDragToEdge) {
                     updateDismissFraction();
                 }
 
@@ -666,7 +667,7 @@ public class PipTouchHandler {
 
         @Override
         public boolean onUp(PipTouchState touchState) {
-            if (ENABLE_DISMISS_DRAG_TO_EDGE) {
+            if (mEnableDimissDragToEdge) {
                 // Clean up the dismiss target regardless of the touch state in case the touch
                 // enabled state changes while the user is interacting
                 cleanUpDismissTarget();
@@ -686,7 +687,7 @@ public class PipTouchHandler {
                             vel.y, isFling);
             final boolean isFlingToBot = isFling && vel.y > 0 && !isHorizontal
                     && (mMovementWithinDismiss || isUpWithinDimiss);
-            if (ENABLE_DISMISS_DRAG_TO_EDGE) {
+            if (mEnableDimissDragToEdge) {
                 // Check if the user dragged or flung the PiP offscreen to dismiss it
                 if (mMotionHelper.shouldDismissPip() || isFlingToBot) {
                     MetricsLoggerWrapper.logPictureInPictureDismissByDrag(mContext,
@@ -830,7 +831,7 @@ public class PipTouchHandler {
         pw.println(innerPrefix + "mIsShelfShowing=" + mIsShelfShowing);
         pw.println(innerPrefix + "mShelfHeight=" + mShelfHeight);
         pw.println(innerPrefix + "mSavedSnapFraction=" + mSavedSnapFraction);
-        pw.println(innerPrefix + "mEnableDragToEdgeDismiss=" + ENABLE_DISMISS_DRAG_TO_EDGE);
+        pw.println(innerPrefix + "mEnableDragToEdgeDismiss=" + mEnableDimissDragToEdge);
         pw.println(innerPrefix + "mEnableMinimize=" + ENABLE_MINIMIZE);
         mSnapAlgorithm.dump(pw, innerPrefix);
         mTouchState.dump(pw, innerPrefix);
