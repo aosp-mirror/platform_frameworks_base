@@ -19,6 +19,7 @@
 
 #include <memory>
 #include <string>
+#include <unordered_set>
 #include <vector>
 
 #include "android-base/macros.h"
@@ -85,6 +86,10 @@ Maybe<android::FileMap> MmapPath(const std::string& path, std::string* out_error
 // Reads the file at path and appends each line to the outArgList vector.
 bool AppendArgsFromFile(const android::StringPiece& path, std::vector<std::string>* out_arglist,
                         std::string* out_error);
+
+// Reads the file at path and appends each line to the outargset set.
+bool AppendSetArgsFromFile(const android::StringPiece& path,
+                        std::unordered_set<std::string>* out_argset, std::string* out_error);
 
 // Filter that determines which resource files/directories are
 // processed by AAPT. Takes a pattern string supplied by the user.
