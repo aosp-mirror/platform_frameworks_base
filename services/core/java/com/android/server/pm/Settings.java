@@ -850,7 +850,8 @@ public final class Settings {
         pkgSetting.pkgPrivateFlags &= ~(ApplicationInfo.PRIVATE_FLAG_PRIVILEGED
                 | ApplicationInfo.PRIVATE_FLAG_OEM
                 | ApplicationInfo.PRIVATE_FLAG_VENDOR
-                | ApplicationInfo.PRIVATE_FLAG_PRODUCT);
+                | ApplicationInfo.PRIVATE_FLAG_PRODUCT
+                | ApplicationInfo.PRIVATE_FLAG_PRODUCT_SERVICES);
         pkgSetting.pkgFlags |= pkgFlags & ApplicationInfo.FLAG_SYSTEM;
         pkgSetting.pkgPrivateFlags |=
                 pkgPrivateFlags & ApplicationInfo.PRIVATE_FLAG_PRIVILEGED;
@@ -860,6 +861,8 @@ public final class Settings {
                 pkgPrivateFlags & ApplicationInfo.PRIVATE_FLAG_VENDOR;
         pkgSetting.pkgPrivateFlags |=
                 pkgPrivateFlags & ApplicationInfo.PRIVATE_FLAG_PRODUCT;
+        pkgSetting.pkgPrivateFlags |=
+                pkgPrivateFlags & ApplicationInfo.PRIVATE_FLAG_PRODUCT_SERVICES;
         pkgSetting.primaryCpuAbiString = primaryCpuAbi;
         pkgSetting.secondaryCpuAbiString = secondaryCpuAbi;
         if (childPkgNames != null) {
@@ -4445,6 +4448,7 @@ public final class Settings {
             ApplicationInfo.PRIVATE_FLAG_STATIC_SHARED_LIBRARY, "STATIC_SHARED_LIBRARY",
             ApplicationInfo.PRIVATE_FLAG_VENDOR, "VENDOR",
             ApplicationInfo.PRIVATE_FLAG_PRODUCT, "PRODUCT",
+            ApplicationInfo.PRIVATE_FLAG_PRODUCT_SERVICES, "PRODUCT_SERVICES",
             ApplicationInfo.PRIVATE_FLAG_VIRTUAL_PRELOAD, "VIRTUAL_PRELOAD",
     };
 

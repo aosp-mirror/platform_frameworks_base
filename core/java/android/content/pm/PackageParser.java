@@ -6785,6 +6785,11 @@ public class PackageParser {
         }
 
         /** @hide */
+        public boolean isProductServices() {
+            return applicationInfo.isProductServices();
+        }
+
+        /** @hide */
         public boolean isPrivileged() {
             return applicationInfo.isPrivilegedApp();
         }
