@@ -664,9 +664,6 @@ public class MbmsDownloadSession implements AutoCloseable {
      * If the operation encountered an error, the error code will be delivered via
      * {@link MbmsDownloadSessionCallback#onError}.
      *
-     * Repeated calls to this method for the same {@link DownloadRequest} will replace the
-     * previously registered listener.
-     *
      * @param request The {@link DownloadRequest} provided during registration
      * @param listener The listener provided during registration.
      */
@@ -725,6 +722,9 @@ public class MbmsDownloadSession implements AutoCloseable {
      *
      * If the operation encountered an error, the error code will be delivered via
      * {@link MbmsDownloadSessionCallback#onError}.
+     *
+     * Repeated calls to this method for the same {@link DownloadRequest} will replace the
+     * previously registered listener.
      *
      * @param request The {@link DownloadRequest} that you want updates on.
      * @param executor The {@link Executor} on which calls to {@code listener} should be executed.
