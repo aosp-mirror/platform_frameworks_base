@@ -19,6 +19,7 @@ package android.view;
 import static android.Manifest.permission.CONFIGURE_DISPLAY_COLOR_MODE;
 
 import android.annotation.IntDef;
+import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.app.KeyguardManager;
 import android.content.res.CompatibilityInfo;
@@ -751,6 +752,20 @@ public final class Display {
     @Surface.Rotation
     public int getOrientation() {
         return getRotation();
+    }
+
+
+    /**
+     * Returns the {@link DisplayCutout}, or {@code null} if there is none.
+     *
+     * @see DisplayCutout
+     */
+    @Nullable
+    public DisplayCutout getCutout() {
+        synchronized (this) {
+            updateDisplayInfoLocked();
+            return mDisplayInfo.displayCutout;
+        }
     }
 
     /**

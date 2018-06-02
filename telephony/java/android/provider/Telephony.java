@@ -25,8 +25,8 @@ import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
-import android.database.Cursor;
 import android.database.ContentObserver;
+import android.database.Cursor;
 import android.database.sqlite.SqliteWrapper;
 import android.net.Uri;
 import android.telephony.Rlog;
@@ -39,7 +39,6 @@ import android.util.Patterns;
 
 import com.android.internal.telephony.PhoneConstants;
 import com.android.internal.telephony.SmsApplication;
-
 
 import java.util.HashSet;
 import java.util.Set;
@@ -3436,7 +3435,6 @@ public final class Telephony {
 
     /**
      * Contains carrier identification information for the current subscriptions.
-     * @see SubscriptionManager#getActiveSubscriptionIdList()
      */
     public static final class CarrierId implements BaseColumns {
         /**

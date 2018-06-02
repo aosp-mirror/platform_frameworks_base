@@ -463,7 +463,7 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, OnCo
         if (mState == ScrimState.AOD && mDozeParameters.getAlwaysOn()
                 && mCurrentInFrontAlpha != alpha) {
             mCurrentInFrontAlpha = alpha;
-            scheduleUpdate();
+            updateScrims();
         }
 
         mState.AOD.setAodFrontScrimAlpha(alpha);

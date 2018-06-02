@@ -19,9 +19,7 @@ import android.annotation.NonNull;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.res.Resources;
-import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
-import android.os.Bundle;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.os.UserManager;
@@ -107,7 +105,7 @@ public class CrossProfileApps {
      * @return a label that calling app can show user for the semantic of launching its own
      *         activity in the specified user profile.
      *
-     * @see #startMainActivity(ComponentName, UserHandle, Rect, Bundle)
+     * @see #startMainActivity(ComponentName, UserHandle)
      */
     public @NonNull CharSequence getProfileSwitchingLabel(@NonNull UserHandle userHandle) {
         verifyCanAccessUser(userHandle);

@@ -3893,7 +3893,6 @@ public class Notification implements Parcelable
          *
 
          * @see Notification#FLAG_ONGOING_EVENT
-         * @see Service#setForeground(boolean)
          */
         public Builder setOngoing(boolean ongoing) {
             setFlag(FLAG_ONGOING_EVENT, ongoing);
@@ -3912,7 +3911,7 @@ public class Notification implements Parcelable
          * However, for {@link MediaStyle} and {@link DecoratedMediaCustomViewStyle} notifications
          * that have a media session attached there is no such requirement.
          *
-         * @see Builder#setColor(int)
+         * @see #setColor(int)
          * @see MediaStyle#setMediaSession(MediaSession.Token)
          */
         public Builder setColorized(boolean colorize) {

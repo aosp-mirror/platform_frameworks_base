@@ -22,6 +22,7 @@ import static android.view.DisplayInfoProto.LOGICAL_HEIGHT;
 import static android.view.DisplayInfoProto.LOGICAL_WIDTH;
 import static android.view.DisplayInfoProto.NAME;
 
+import android.annotation.Nullable;
 import android.content.res.CompatibilityInfo;
 import android.content.res.Configuration;
 import android.graphics.Rect;
@@ -153,6 +154,7 @@ public final class DisplayInfo implements Parcelable {
      *
      * @hide
      */
+    @Nullable
     public DisplayCutout displayCutout;
 
     /**

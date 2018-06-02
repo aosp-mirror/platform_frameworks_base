@@ -49,11 +49,11 @@ public abstract class CellSignalStrength {
     /**
      * Get signal level as an int from 0..4
      * <p>
-     * @see SIGNAL_STRENGTH_NONE_OR_UNKNOWN
-     * @see SIGNAL_STRENGTH_POOR
-     * @see SIGNAL_STRENGTH_MODERATE
-     * @see SIGNAL_STRENGTH_GOOD
-     * @see SIGNAL_STRENGTH_GREAT
+     * @see #SIGNAL_STRENGTH_NONE_OR_UNKNOWN
+     * @see #SIGNAL_STRENGTH_POOR
+     * @see #SIGNAL_STRENGTH_MODERATE
+     * @see #SIGNAL_STRENGTH_GOOD
+     * @see #SIGNAL_STRENGTH_GREAT
      */
     public abstract int getLevel();
 

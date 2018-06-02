@@ -334,7 +334,6 @@ public abstract class BackupAgent extends ContextWrapper {
      * @throws IOException
      *
      * @see Context#getNoBackupFilesDir()
-     * @see ApplicationInfo#fullBackupContent
      * @see #fullBackupFile(File, FullBackupDataOutput)
      * @see #onRestoreFile(ParcelFileDescriptor, long, File, int, long, long)
      */
