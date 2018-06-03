@@ -33,6 +33,8 @@ import android.util.SparseArray;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.util.dump.DualDumpOutputStream;
 
+import java.util.List;
+
 /**
  * Maintains all {@link UsbUserSettingsManager} for all users.
  */
@@ -140,9 +142,10 @@ class UsbSettingsManager {
         long token = dump.start(idName, id);
 
         synchronized (mSettingsByUser) {
-            int numUsers = mSettingsByUser.size();
+            List<UserInfo> users = mUserManager.getUsers();
+            int numUsers = users.size();
             for (int i = 0; i < numUsers; i++) {
-                mSettingsByUser.valueAt(i).dump(dump, "user_settings",
+                getSettingsForUser(users.get(i).id).dump(dump, "user_settings",
                         UsbSettingsManagerProto.USER_SETTINGS);
             }
         }

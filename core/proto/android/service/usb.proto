@@ -278,6 +278,8 @@ message UsbUserSettingsManagerProto {
     optional int32 user_id = 1;
     repeated UsbSettingsDevicePermissionProto device_permissions = 2;
     repeated UsbSettingsAccessoryPermissionProto accessory_permissions = 3;
+    repeated UsbDeviceAttachedActivities device_attached_activities = 4;
+    repeated UsbAccessoryAttachedActivities accessory_attached_activities = 5;
 }
 
 message UsbSettingsDevicePermissionProto {
@@ -342,4 +344,18 @@ message UsbAccessoryFilterProto {
     optional string manufacturer = 1;
     optional string model = 2;
     optional string version = 3;
+}
+
+message UsbDeviceAttachedActivities {
+    option (android.msg_privacy).dest = DEST_AUTOMATIC;
+
+    optional android.content.ComponentNameProto activity = 1;
+    repeated UsbDeviceFilterProto filters = 2;
+}
+
+message UsbAccessoryAttachedActivities {
+    option (android.msg_privacy).dest = DEST_AUTOMATIC;
+
+    optional android.content.ComponentNameProto activity = 1;
+    repeated UsbAccessoryFilterProto filters = 2;
 }
