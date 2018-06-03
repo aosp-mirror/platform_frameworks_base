@@ -248,6 +248,8 @@ package android.content.pm {
   public abstract class PackageManager {
     method public abstract java.lang.String getDefaultBrowserPackageNameAsUser(int);
     method public abstract int getInstallReason(java.lang.String, android.os.UserHandle);
+    method public abstract java.util.List<android.content.pm.PackageInfo> getInstalledPackagesAsUser(int, int);
+    method public abstract java.util.List<android.content.pm.ApplicationInfo> getInstalledApplicationsAsUser(int, int);
     method public abstract java.lang.String[] getNamesForUids(int[]);
     method public abstract java.lang.String getPermissionControllerPackageName();
     method public abstract java.lang.String getServicesSystemSharedLibraryPackageName();
@@ -256,6 +258,7 @@ package android.content.pm {
     field public static final java.lang.String FEATURE_ADOPTABLE_STORAGE = "android.software.adoptable_storage";
     field public static final java.lang.String FEATURE_FILE_BASED_ENCRYPTION = "android.software.file_based_encryption";
     field public static final int MATCH_FACTORY_ONLY = 2097152; // 0x200000
+    field public static final int MATCH_KNOWN_PACKAGES = 4202496; // 0x402000
   }
 
   public class PermissionInfo extends android.content.pm.PackageItemInfo implements android.os.Parcelable {

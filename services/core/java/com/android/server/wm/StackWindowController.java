@@ -192,6 +192,12 @@ public class StackWindowController
         }
     }
 
+    public void onPipAnimationEndResize() {
+        synchronized (mService.mWindowMap) {
+            mContainer.onPipAnimationEndResize();
+        }
+    }
+
     /**
      * @see TaskStack.getStackDockedModeBoundsLocked(Rect, Rect, Rect, boolean)
      */

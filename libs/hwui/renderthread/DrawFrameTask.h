@@ -46,6 +46,7 @@ enum {
     UIRedrawRequired = 1 << 0,
     LostSurfaceRewardIfFound = 1 << 1,
     ContextIsStopped = 1 << 2,
+    FrameDropped = 1 << 3,
 };
 }
 
@@ -78,6 +79,10 @@ public:
         mFrameCallback = std::move(callback);
     }
 
+    void setFrameCompleteCallback(std::function<void(int64_t)>&& callback) {
+        mFrameCompleteCallback = std::move(callback);
+    }
+
 private:
     void postAndWait();
     bool syncFrameState(TreeInfo& info);
@@ -102,6 +107,7 @@ private:
     int64_t mFrameInfo[UI_THREAD_FRAME_INFO_SIZE];
 
     std::function<void(int64_t)> mFrameCallback;
+    std::function<void(int64_t)> mFrameCompleteCallback;
 };
 
 } /* namespace renderthread */

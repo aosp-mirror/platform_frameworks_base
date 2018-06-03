@@ -323,7 +323,7 @@
     <string name="capability_title_canPerformGestures" msgid="7418984730362576862">"تنفيذ إيماءات"</string>
     <string name="capability_desc_canPerformGestures" msgid="8296373021636981249">"يمكن النقر والتمرير بسرعة والتصغير وتنفيذ إيماءات أخرى."</string>
     <string name="capability_title_canCaptureFingerprintGestures" msgid="6309568287512278670">"إيماءات بصمات الإصبع"</string>
-    <string name="capability_desc_canCaptureFingerprintGestures" msgid="4386487962402228670">"يمكن أن تلتقط الإيماءات التي تم تنفيذها على مستشعر بصمات الإصبع في الجهاز."</string>
+    <string name="capability_desc_canCaptureFingerprintGestures" msgid="4386487962402228670">"يمكن أن تلتقط الإيماءات التي تم تنفيذها على جهاز استشعار بصمات الإصبع في الجهاز."</string>
     <string name="permlab_statusBar" msgid="7417192629601890791">"إيقاف شريط الحالة أو تعديله"</string>
     <string name="permdesc_statusBar" msgid="8434669549504290975">"للسماح للتطبيق بإيقاف شريط الحالة أو إضافة رموز نظام وإزالتها."</string>
     <string name="permlab_statusBarService" msgid="4826835508226139688">"العمل كشريط للحالة"</string>
@@ -403,7 +403,7 @@
     <string name="permdesc_writeCallLog" product="tv" msgid="4225034892248398019">"يتيح للتطبيق تعديل سجل مكالمات التلفزيون، بما في ذلك البيانات عن المكالمات الواردة والصادرة. وربما تستخدم التطبيقات الضارة هذا لمسح سجل المكالمات أو تعديله."</string>
     <string name="permdesc_writeCallLog" product="default" msgid="683941736352787842">"للسماح للتطبيق بتعديل سجل مكالمات الهاتف، بما في ذلك البيانات عن المكالمات الواردة والصادرة. وربما تستخدم التطبيقات الضارة هذا لمحو سجل المكالمات أو تعديله."</string>
     <string name="permlab_bodySensors" msgid="4683341291818520277">"الوصول إلى أجهزة استشعار الجسم (مثل شاشات معدل ضربات القلب)"</string>
-    <string name="permdesc_bodySensors" product="default" msgid="4380015021754180431">"للسماح للتطبيق بالدخول إلى البيانات من المستشعرات التي تراقب الحالة البدنية، مثل معدل نبضات القلب."</string>
+    <string name="permdesc_bodySensors" product="default" msgid="4380015021754180431">"للسماح للتطبيق بالدخول إلى البيانات من أجهزة الاستشعار التي تراقب الحالة البدنية، مثل معدل نبضات القلب."</string>
     <string name="permlab_readCalendar" msgid="6716116972752441641">"قراءة أحداث التقويم والتفاصيل"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="4993979255403945892">"يمكن لهذا التطبيق قراءة جميع أحداث التقويم المخزَّنة على الجهاز اللوحي ومشاركة بيانات التقويم أو حفظها."</string>
     <string name="permdesc_readCalendar" product="tv" msgid="8837931557573064315">"يمكن لهذا التطبيق قراءة جميع أحداث التقويم المخزَّنة على التلفزيون ومشاركة بيانات التقويم أو حفظها."</string>
@@ -519,10 +519,10 @@
     <string name="fingerprint_error_canceled" msgid="4402024612660774395">"تم إلغاء تشغيل بصمة الإصبع."</string>
     <string name="fingerprint_error_user_canceled" msgid="7999639584615291494">"تم إلغاء تشغيل بصمة الإصبع بواسطة المستخدم."</string>
     <string name="fingerprint_error_lockout" msgid="5536934748136933450">"تم إجراء عدد كبير من المحاولات. أعد المحاولة لاحقًا."</string>
-    <string name="fingerprint_error_lockout_permanent" msgid="5033251797919508137">"تم إجراء عدد كبير جدًا من المحاولات. لذا تم إيقاف مستشعر بصمات الإصبع."</string>
+    <string name="fingerprint_error_lockout_permanent" msgid="5033251797919508137">"تم إجراء عدد كبير جدًا من المحاولات. لذا تم إيقاف جهاز استشعار بصمات الإصبع."</string>
     <string name="fingerprint_error_unable_to_process" msgid="6107816084103552441">"أعد المحاولة."</string>
     <string name="fingerprint_error_no_fingerprints" msgid="7654382120628334248">"ليست هناك بصمات إصبع مسجَّلة."</string>
-    <string name="fingerprint_error_hw_not_present" msgid="5729436878065119329">"لا يحتوي هذا الجهاز على مستشعر بصمات الأصابع."</string>
+    <string name="fingerprint_error_hw_not_present" msgid="5729436878065119329">"لا يحتوي هذا الجهاز على جهاز استشعار بصمات الأصابع."</string>
     <string name="fingerprint_name_template" msgid="5870957565512716938">"الإصبع <xliff:g id="FINGERID">%d</xliff:g>"</string>
   <string-array name="fingerprint_error_vendor">
   </string-array>

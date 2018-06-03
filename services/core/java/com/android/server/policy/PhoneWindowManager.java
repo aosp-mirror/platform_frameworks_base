@@ -549,7 +549,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     volatile boolean mGoingToSleep;
     volatile boolean mRequestedOrGoingToSleep;
     volatile boolean mRecentsVisible;
-    volatile boolean mNavBarVirtualKeyHapticFeedbackEnabled;
+    volatile boolean mNavBarVirtualKeyHapticFeedbackEnabled = true;
     volatile boolean mPictureInPictureVisible;
     // Written by vr manager thread, only read in this class.
     volatile private boolean mPersistentVrModeEnabled;
@@ -5760,11 +5760,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                         && mStatusBarController.isTransientShowing()) {
                     mStatusBarController.updateVisibilityLw(false /*transientAllowed*/,
                             mLastSystemUiFlags, mLastSystemUiFlags);
-                }
-                if (statusBarExpanded && mNavigationBar != null) {
-                    if (mNavigationBarController.setBarShowingLw(true)) {
-                        changes |= FINISH_LAYOUT_REDO_LAYOUT;
-                    }
                 }
             } else if (mTopFullscreenOpaqueWindowState != null) {
                 topIsFullscreen = topAppHidesStatusBar;

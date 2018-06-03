@@ -30,4 +30,8 @@ public class ChoreographerCompat {
     public static void postInputFrame(Choreographer choreographer, Runnable runnable) {
         choreographer.postCallback(CALLBACK_INPUT, runnable, null);
     }
+
+    public static Choreographer getSfInstance() {
+        return Choreographer.getSfInstance();
+    }
 }

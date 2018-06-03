@@ -112,7 +112,6 @@ please see themes_device_defaults.xml.
 
         <item name="textAppearanceLargePopupMenu">@style/TextAppearance.Holo.Widget.PopupMenu.Large</item>
         <item name="textAppearanceSmallPopupMenu">@style/TextAppearance.Holo.Widget.PopupMenu.Small</item>
-        <item name="textAppearancePopupMenuHeader">@null</item>
 
         <item name="textEditSuggestionItemLayout">@layout/text_edit_suggestion_item</item>
         <item name="textEditSuggestionContainerLayout">@layout/text_edit_suggestion_container</item>
@@ -257,7 +256,6 @@ please see themes_device_defaults.xml.
         <item name="gridViewStyle">@style/Widget.Holo.GridView</item>
         <item name="imageButtonStyle">@style/Widget.Holo.ImageButton</item>
         <item name="imageWellStyle">@style/Widget.Holo.ImageWell</item>
-        <item name="listMenuViewStyle">@null</item>
         <item name="listViewStyle">@style/Widget.Holo.ListView</item>
         <item name="listViewWhiteStyle">@style/Widget.Holo.ListView.White</item>
         <item name="popupWindowStyle">@style/Widget.Holo.PopupWindow</item>
@@ -298,7 +296,6 @@ please see themes_device_defaults.xml.
         <item name="quickContactBadgeStyleSmallWindowLarge">@style/Widget.Holo.QuickContactBadgeSmall.WindowLarge</item>
         <item name="listPopupWindowStyle">@style/Widget.Holo.ListPopupWindow</item>
         <item name="popupMenuStyle">@style/Widget.Holo.PopupMenu</item>
-        <item name="popupTheme">@null</item>
         <item name="stackViewStyle">@style/Widget.Holo.StackView</item>
         <item name="activityChooserViewStyle">@style/Widget.Holo.ActivityChooserView</item>
         <item name="fragmentBreadCrumbsStyle">@style/Widget.Holo.FragmentBreadCrumbs</item>
@@ -319,11 +316,6 @@ please see themes_device_defaults.xml.
         <item name="editTextPreferenceStyle">@style/Preference.Holo.DialogPreference.EditTextPreference</item>
         <item name="ringtonePreferenceStyle">@style/Preference.Holo.RingtonePreference</item>
         <item name="preferenceLayoutChild">@layout/preference_child_holo</item>
-        <item name="preferencePanelStyle">@null</item>
-        <item name="preferenceHeaderPanelStyle">@null</item>
-        <item name="preferenceListStyle">@null</item>
-        <item name="preferenceFragmentListStyle">@null</item>
-        <item name="preferenceFragmentPaddingSide">@null</item>
         <item name="detailsElementBackground">@drawable/panel_bg_holo_dark</item>
 
         <!-- PreferenceFrameLayout attributes -->
@@ -348,13 +340,10 @@ please see themes_device_defaults.xml.
         <item name="actionBarStyle">@style/Widget.Holo.ActionBar</item>
         <item name="actionBarSize">@dimen/action_bar_default_height</item>
         <item name="actionModePopupWindowStyle">@style/Widget.Holo.PopupWindow.ActionMode</item>
-        <item name="actionMenuTextAppearance">@null</item>
-        <item name="actionMenuTextColor">@null</item>
         <item name="actionBarWidgetTheme">@null</item>
         <item name="actionBarPopupTheme">?attr/popupTheme</item>
         <item name="actionBarTheme">@null</item>
         <item name="actionBarDivider">?attr/dividerVertical</item>
-        <item name="actionBarItemBackground">@null</item>
 
         <item name="actionModeCutDrawable">@drawable/ic_menu_cut_holo_dark</item>
         <item name="actionModeCopyDrawable">@drawable/ic_menu_copy_holo_dark</item>
@@ -363,8 +352,6 @@ please see themes_device_defaults.xml.
         <item name="actionModeShareDrawable">@drawable/ic_menu_share_holo_dark</item>
         <item name="actionModeFindDrawable">@drawable/ic_menu_find_holo_dark</item>
         <item name="actionModeWebSearchDrawable">@drawable/ic_menu_search_holo_dark</item>
-
-        <item name="toolbarStyle">@null</item>
 
         <item name="dividerVertical">?attr/listDivider</item>
         <item name="dividerHorizontal">?attr/listDivider</item>
@@ -415,10 +402,6 @@ please see themes_device_defaults.xml.
         <item name="colorControlHighlight">@color/holo_button_pressed</item>
         <item name="colorButtonNormal">@color/holo_button_normal</item>
         <item name="colorSwitchThumbNormal">@color/switch_thumb_material_light</item>
-
-        <!-- Tooltip popup properties -->
-        <item name="tooltipForegroundColor">@null</item>
-        <item name="tooltipBackgroundColor">@null</item>
 
         <!-- Holo-only color attributes -->
         <item name="colorPressedHighlight">@color/holo_gray_light</item>
@@ -496,7 +479,6 @@ please see themes_device_defaults.xml.
 
         <item name="textAppearanceLargePopupMenu">@style/TextAppearance.Holo.Light.Widget.PopupMenu.Large</item>
         <item name="textAppearanceSmallPopupMenu">@style/TextAppearance.Holo.Light.Widget.PopupMenu.Small</item>
-        <item name="textAppearancePopupMenuHeader">@null</item>
 
         <!-- Button styles -->
         <item name="buttonStyle">@style/Widget.Holo.Light.Button</item>
@@ -636,7 +618,6 @@ please see themes_device_defaults.xml.
         <item name="gridViewStyle">@style/Widget.Holo.Light.GridView</item>
         <item name="imageButtonStyle">@style/Widget.Holo.Light.ImageButton</item>
         <item name="imageWellStyle">@style/Widget.Holo.Light.ImageWell</item>
-        <item name="listMenuViewStyle">@null</item>
         <item name="listViewStyle">@style/Widget.Holo.Light.ListView</item>
         <item name="listViewWhiteStyle">@style/Widget.Holo.Light.ListView.White</item>
         <item name="popupWindowStyle">@style/Widget.Holo.Light.PopupWindow</item>
@@ -677,11 +658,9 @@ please see themes_device_defaults.xml.
         <item name="quickContactBadgeStyleSmallWindowLarge">@style/Widget.Holo.QuickContactBadgeSmall.WindowLarge</item>
         <item name="listPopupWindowStyle">@style/Widget.Holo.Light.ListPopupWindow</item>
         <item name="popupMenuStyle">@style/Widget.Holo.Light.PopupMenu</item>
-        <item name="popupTheme">@null</item>
         <item name="stackViewStyle">@style/Widget.Holo.StackView</item>
         <item name="activityChooserViewStyle">@style/Widget.Holo.Light.ActivityChooserView</item>
         <item name="fragmentBreadCrumbsStyle">@style/Widget.Holo.Light.FragmentBreadCrumbs</item>
-        <item name="contextPopupMenuStyle">@null</item>
 
         <!-- Preference styles -->
         <item name="preferenceScreenStyle">@style/Preference.Holo.PreferenceScreen</item>
@@ -698,11 +677,6 @@ please see themes_device_defaults.xml.
         <item name="editTextPreferenceStyle">@style/Preference.Holo.DialogPreference.EditTextPreference</item>
         <item name="ringtonePreferenceStyle">@style/Preference.Holo.RingtonePreference</item>
         <item name="preferenceLayoutChild">@layout/preference_child_holo</item>
-        <item name="preferencePanelStyle">@null</item>
-        <item name="preferenceHeaderPanelStyle">@null</item>
-        <item name="preferenceListStyle">@null</item>
-        <item name="preferenceFragmentListStyle">@null</item>
-        <item name="preferenceFragmentPaddingSide">@null</item>
         <item name="detailsElementBackground">@drawable/panel_bg_holo_light</item>
 
         <!-- PreferenceFrameLayout attributes -->
@@ -727,12 +701,9 @@ please see themes_device_defaults.xml.
         <item name="actionBarStyle">@style/Widget.Holo.Light.ActionBar.Solid</item>
         <item name="actionBarSize">@dimen/action_bar_default_height</item>
         <item name="actionModePopupWindowStyle">@style/Widget.Holo.Light.PopupWindow.ActionMode</item>
-        <item name="actionMenuTextAppearance">@null</item>
-        <item name="actionMenuTextColor">@null</item>
         <item name="actionBarWidgetTheme">@null</item>
         <item name="actionBarPopupTheme">?attr/popupTheme</item>
         <item name="actionBarTheme">@null</item>
-        <item name="actionBarItemBackground">@null</item>
 
         <item name="actionModeCutDrawable">@drawable/ic_menu_cut_holo_light</item>
         <item name="actionModeCopyDrawable">@drawable/ic_menu_copy_holo_light</item>
@@ -741,8 +712,6 @@ please see themes_device_defaults.xml.
         <item name="actionModeShareDrawable">@drawable/ic_menu_share_holo_light</item>
         <item name="actionModeFindDrawable">@drawable/ic_menu_find_holo_light</item>
         <item name="actionModeWebSearchDrawable">@drawable/ic_menu_search_holo_light</item>
-
-        <item name="toolbarStyle">@null</item>
 
         <item name="dividerVertical">?attr/listDivider</item>
         <item name="dividerHorizontal">?attr/listDivider</item>
@@ -790,10 +759,6 @@ please see themes_device_defaults.xml.
         <item name="colorControlHighlight">@color/holo_light_button_pressed</item>
         <item name="colorButtonNormal">@color/holo_light_button_normal</item>
         <item name="colorSwitchThumbNormal">@color/switch_thumb_material_light</item>
-
-        <!-- Tooltip popup properties -->
-        <item name="tooltipForegroundColor">@null</item>
-        <item name="tooltipBackgroundColor">@null</item>
 
         <!-- Holo-only color attributes -->
         <item name="colorPressedHighlight">@color/holo_gray_light</item>

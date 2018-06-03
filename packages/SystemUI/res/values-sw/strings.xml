@@ -436,8 +436,7 @@
     <string name="media_projection_remember_text" msgid="3103510882172746752">"Usionyeshe tena"</string>
     <string name="clear_all_notifications_text" msgid="814192889771462828">"Futa zote"</string>
     <string name="manage_notifications_text" msgid="8035284146227267681">"Dhibiti arifa"</string>
-    <!-- no translation found for dnd_suppressing_shade_text (1904574852846769301) -->
-    <skip />
+    <string name="dnd_suppressing_shade_text" msgid="1904574852846769301">"Kipengele cha Usinisumbue kimesitisha arifa"</string>
     <string name="media_projection_action_text" msgid="8470872969457985954">"Anza sasa"</string>
     <string name="empty_shade_text" msgid="708135716272867002">"Hakuna arifa"</string>
     <string name="profile_owned_footer" msgid="8021888108553696069">"Huenda wasifu ukafuatiliwa"</string>
@@ -707,7 +706,7 @@
     <string name="nav_bar_layout" msgid="3664072994198772020">"Mpangilio"</string>
     <string name="left_nav_bar_button_type" msgid="8555981238887546528">"Aina ya kitufe cha kushoto cha ziada"</string>
     <string name="right_nav_bar_button_type" msgid="2481056627065649656">"Aina ya kitufe cha kulia cha ziada"</string>
-    <string name="nav_bar_default" msgid="8587114043070993007">"(chaguo-msingi)"</string>
+    <string name="nav_bar_default" msgid="8587114043070993007">"(chaguo msingi)"</string>
   <string-array name="nav_bar_buttons">
     <item msgid="1545641631806817203">"Ubao wa kunakili"</item>
     <item msgid="5742013440802239414">"Msimbo wa ufunguo"</item>
@@ -737,12 +736,12 @@
     <string name="tuner_time" msgid="6572217313285536011">"Wakati"</string>
   <string-array name="clock_options">
     <item msgid="5965318737560463480">"Onyesha saa, dakika na sekunde"</item>
-    <item msgid="1427801730816895300">"Onyesha saa na dakika (chaguo-msingi)"</item>
+    <item msgid="1427801730816895300">"Onyesha saa na dakika (chaguo msingi)"</item>
     <item msgid="3830170141562534721">"Usionyeshe aikoni hii"</item>
   </string-array>
   <string-array name="battery_options">
     <item msgid="3160236755818672034">"Onyesha asilimia kila wakati"</item>
-    <item msgid="2139628951880142927">"Onyesha asilimia wakati inachaji (chaguo-msingi)"</item>
+    <item msgid="2139628951880142927">"Onyesha asilimia wakati inachaji (chaguo msingi)"</item>
     <item msgid="3327323682209964956">"Usionyeshe aikoni hii"</item>
   </string-array>
     <string name="other" msgid="4060683095962566764">"Nyingine"</string>
