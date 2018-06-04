@@ -13953,16 +13953,33 @@ public class PackageManagerService extends IPackageManager.Stub
     }
 
     @Override
+    public void setSystemAppHiddenUntilInstalled(String packageName, boolean hidden) {
+        enforceSystemOrPhoneCaller("setHiddenUntilInstalled");
+        synchronized (mPackages) {
+            final PackageSetting pkgSetting = mSettings.mPackages.get(packageName);
+            if (pkgSetting == null || !pkgSetting.isSystem()) {
+                return;
+            }
+            if (pkgSetting.pkg != null && pkgSetting.pkg.applicationInfo != null) {
+                ApplicationInfo ai = pkgSetting.pkg.applicationInfo;
+                ai.hiddenUntilInstalled = hidden;
+            }
+        }
+    }
+
+    @Override
     public boolean setSystemAppInstallState(String packageName, boolean installed, int userId) {
         enforceSystemOrPhoneCaller("setSystemAppInstallState");
-        PackageSetting pkgSetting = mSettings.mPackages.get(packageName);
-        // The target app should always be in system
-        if (pkgSetting == null || !pkgSetting.isSystem()) {
-            return false;
-        }
-        // Check if the install state is the same
-        if (pkgSetting.getInstalled(userId) == installed) {
-            return false;
+        synchronized (mPackages) {
+            PackageSetting pkgSetting = mSettings.mPackages.get(packageName);
+            // The target app should always be in system
+            if (pkgSetting == null || !pkgSetting.isSystem()) {
+                return false;
+            }
+            // Check if the install state is the same
+            if (pkgSetting.getInstalled(userId) == installed) {
+                return false;
+            }
         }
 
         long callingId = Binder.clearCallingIdentity();
