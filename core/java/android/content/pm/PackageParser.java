@@ -95,6 +95,7 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.os.ClassLoaderFactory;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.XmlUtils;
+import com.android.server.SystemConfig;
 
 import libcore.io.IoUtils;
 import libcore.util.EmptyArray;
@@ -640,9 +641,12 @@ public class PackageParser {
     private static boolean checkUseInstalledOrHidden(int flags, PackageUserState state,
             ApplicationInfo appInfo) {
         // Returns false if the package is hidden system app until installed.
-        if ((flags & PackageManager.MATCH_HIDDEN_UNTIL_INSTALLED_COMPONENTS) == 0
-                && !state.installed
-                && appInfo != null && appInfo.isSystemApp()) {
+        final ArraySet<String> hiddenSystemApps =
+                SystemConfig.getInstance().getDisabledUntilUsedPreinstalledCarrierApps();
+        if (!state.installed
+                && appInfo != null && appInfo.isSystemApp()
+                && hiddenSystemApps.contains(appInfo.packageName)
+                && (flags & PackageManager.MATCH_HIDDEN_UNTIL_INSTALLED_COMPONENTS) == 0) {
             return false;
         }
 
