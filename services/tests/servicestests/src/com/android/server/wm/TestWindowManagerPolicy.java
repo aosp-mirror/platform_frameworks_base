@@ -63,6 +63,7 @@ class TestWindowManagerPolicy implements WindowManagerPolicy {
     private static WindowManagerService sWm = null;
 
     int rotationToReport = 0;
+    boolean keyguardShowingAndNotOccluded = false;
 
     private Runnable mRunnableWhenAddingSplashScreen;
 
@@ -420,7 +421,7 @@ class TestWindowManagerPolicy implements WindowManagerPolicy {
 
     @Override
     public boolean isKeyguardLocked() {
-        return false;
+        return keyguardShowingAndNotOccluded;
     }
 
     @Override
@@ -440,7 +441,7 @@ class TestWindowManagerPolicy implements WindowManagerPolicy {
 
     @Override
     public boolean isKeyguardShowingAndNotOccluded() {
-        return false;
+        return keyguardShowingAndNotOccluded;
     }
 
     @Override
