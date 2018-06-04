@@ -148,7 +148,7 @@ public enum ScrimState {
             mCurrentInFrontAlpha = 0;
             mAnimationDuration = StatusBar.FADE_KEYGUARD_DURATION;
 
-            if (previousState == ScrimState.AOD) {
+            if (previousState == ScrimState.AOD || previousState == ScrimState.PULSING) {
                 // Fade from black to transparent when coming directly from AOD
                 updateScrimColor(mScrimInFront, 1, Color.BLACK);
                 updateScrimColor(mScrimBehind, 1, Color.BLACK);
