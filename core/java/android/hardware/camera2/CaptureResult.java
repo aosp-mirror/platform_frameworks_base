@@ -370,8 +370,8 @@ public class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
      *
      * @return int The ID for the sequence of requests that this capture result is a part of
      *
-     * @see CameraDevice.CaptureCallback#onCaptureSequenceCompleted
-     * @see CameraDevice.CaptureCallback#onCaptureSequenceAborted
+     * @see CameraCaptureSession.CaptureCallback#onCaptureSequenceCompleted
+     * @see CameraCaptureSession.CaptureCallback#onCaptureSequenceAborted
      */
     public int getSequenceId() {
         return mSequenceId;

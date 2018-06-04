@@ -16,27 +16,27 @@
 
 package android.hardware.camera2.params;
 
+import static com.android.internal.util.Preconditions.checkArrayElementsNotNull;
+import static com.android.internal.util.Preconditions.checkNotNull;
+
 import android.graphics.ImageFormat;
 import android.graphics.PixelFormat;
 import android.hardware.camera2.CameraCharacteristics;
 import android.hardware.camera2.CameraDevice;
 import android.hardware.camera2.CameraMetadata;
 import android.hardware.camera2.CaptureRequest;
+import android.hardware.camera2.legacy.LegacyCameraDevice;
 import android.hardware.camera2.utils.HashCodeHelpers;
 import android.hardware.camera2.utils.SurfaceUtils;
-import android.hardware.camera2.legacy.LegacyCameraDevice;
-import android.hardware.camera2.legacy.LegacyMetadataMapper;
-import android.view.Surface;
 import android.util.Range;
 import android.util.Size;
 import android.util.SparseIntArray;
+import android.view.Surface;
 
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Objects;
 import java.util.Set;
-
-import static com.android.internal.util.Preconditions.*;
 
 /**
  * Immutable class to store the available stream
@@ -609,7 +609,7 @@ public final class StreamConfigurationMap {
      * @see #getHighSpeedVideoSizesFor
      * @see CameraMetadata#REQUEST_AVAILABLE_CAPABILITIES_CONSTRAINED_HIGH_SPEED_VIDEO
      * @see CameraDevice#createConstrainedHighSpeedCaptureSession
-     * @see CameraDevice#createHighSpeedRequestList
+     * @see android.hardware.camera2.CameraConstrainedHighSpeedCaptureSession#createHighSpeedRequestList
      */
     @SuppressWarnings("unchecked")
     public Range<Integer>[] getHighSpeedVideoFpsRanges() {
