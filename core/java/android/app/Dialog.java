@@ -291,10 +291,7 @@ public class Dialog implements DialogInterface, Window.Callback,
                 if (mWindow.hasFeature(Window.FEATURE_ACTION_BAR)) {
                     mWindow.invalidatePanelMenu(Window.FEATURE_ACTION_BAR);
                 }
-                if (mDecor.getVisibility() != View.VISIBLE) {
-                    mDecor.setVisibility(View.VISIBLE);
-                    sendShowMessage();
-                }
+                mDecor.setVisibility(View.VISIBLE);
             }
             return;
         }
