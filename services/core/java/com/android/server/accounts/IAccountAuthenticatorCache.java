@@ -70,4 +70,7 @@ public interface IAccountAuthenticatorCache {
      * picked up by the cache.
      */
     void updateServices(int userId);
+
+    boolean getBindInstantServiceAllowed(int userId);
+    void setBindInstantServiceAllowed(int userId, boolean allowed);
 }
