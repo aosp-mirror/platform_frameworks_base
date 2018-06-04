@@ -1082,7 +1082,7 @@ public class TtsSpan implements ParcelableSpan {
          * Sets the {@link #ARG_UNIT} argument.
          * @param unit The unit of the measure.
          * @return This instance.
-         * @see TtsSpan.ARG_UNIT
+         * @see TtsSpan#ARG_UNIT
          */
         public MeasureBuilder setUnit(String unit) {
             return setStringArgument(TtsSpan.ARG_UNIT, unit);

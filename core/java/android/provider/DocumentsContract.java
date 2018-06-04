@@ -157,8 +157,6 @@ public final class DocumentsContract {
      * <li>When supplying information in {@link DocumentsProvider#queryChildDocuments}, include
      * {@link Document#FLAG_SUPPORTS_SETTINGS} in the flags for each document that supports
      * settings.
-     *
-     * @see DocumentsContact#Document#FLAG_SUPPORTS_SETTINGS
      */
     public static final String
             ACTION_DOCUMENT_SETTINGS = "android.provider.action.DOCUMENT_SETTINGS";
@@ -434,7 +432,7 @@ public final class DocumentsContract {
          * Flag indicating that a Web link can be obtained for the document.
          *
          * @see #COLUMN_FLAGS
-         * @see DocumentsContract#createWebLinkIntent(PackageManager, Uri, Bundle)
+         * @see DocumentsProvider#createWebLinkIntent(String, Bundle)
          */
         public static final int FLAG_WEB_LINKABLE = 1 << 12;
 

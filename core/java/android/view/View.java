@@ -3421,7 +3421,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      *
      * @see WindowManager.LayoutParams#layoutInDisplayCutoutMode
      * @see WindowManager.LayoutParams#LAYOUT_IN_DISPLAY_CUTOUT_MODE_DEFAULT
-     * @see WindowManager.LayoutParams#LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS
+     * @see WindowManager.LayoutParams#LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES
      * @see WindowManager.LayoutParams#LAYOUT_IN_DISPLAY_CUTOUT_MODE_NEVER
      */
     public static final int SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN = 0x00000400;
@@ -17303,7 +17303,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      *
      * @see #computeHorizontalScrollExtent()
      * @see #computeHorizontalScrollOffset()
-     * @see android.widget.ScrollBarDrawable
      */
     protected int computeHorizontalScrollRange() {
         return getWidth();
@@ -17324,7 +17323,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      *
      * @see #computeHorizontalScrollRange()
      * @see #computeHorizontalScrollExtent()
-     * @see android.widget.ScrollBarDrawable
      */
     protected int computeHorizontalScrollOffset() {
         return mScrollX;
@@ -17345,7 +17343,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      *
      * @see #computeHorizontalScrollRange()
      * @see #computeHorizontalScrollOffset()
-     * @see android.widget.ScrollBarDrawable
      */
     protected int computeHorizontalScrollExtent() {
         return getWidth();
@@ -17364,7 +17361,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      *
      * @see #computeVerticalScrollExtent()
      * @see #computeVerticalScrollOffset()
-     * @see android.widget.ScrollBarDrawable
      */
     protected int computeVerticalScrollRange() {
         return getHeight();
@@ -17385,7 +17381,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      *
      * @see #computeVerticalScrollRange()
      * @see #computeVerticalScrollExtent()
-     * @see android.widget.ScrollBarDrawable
      */
     protected int computeVerticalScrollOffset() {
         return mScrollY;
@@ -17406,7 +17401,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      *
      * @see #computeVerticalScrollRange()
      * @see #computeVerticalScrollOffset()
-     * @see android.widget.ScrollBarDrawable
      */
     protected int computeVerticalScrollExtent() {
         return getHeight();
@@ -17741,7 +17735,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * @see #computeHorizontalScrollRange()
      * @see #computeHorizontalScrollExtent()
      * @see #computeHorizontalScrollOffset()
-     * @see android.widget.ScrollBarDrawable
      * @hide
      */
     protected void onDrawHorizontalScrollBar(Canvas canvas, Drawable scrollBar,
@@ -17761,7 +17754,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * @see #computeVerticalScrollRange()
      * @see #computeVerticalScrollExtent()
      * @see #computeVerticalScrollOffset()
-     * @see android.widget.ScrollBarDrawable
      * @hide
      */
     protected void onDrawVerticalScrollBar(Canvas canvas, Drawable scrollBar,
@@ -27124,7 +27116,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
          * @param arguments A {@link Bundle} holding any arguments relevant for this request.
          *                  May be {@code null} if the if the service provided no arguments.
          *
-         * @see AccessibilityNodeInfo#setExtraAvailableData
+         * @see AccessibilityNodeInfo#setAvailableExtraData(List)
          */
         public void addExtraDataToAccessibilityNodeInfo(@NonNull View host,
                 @NonNull AccessibilityNodeInfo info, @NonNull String extraDataKey,

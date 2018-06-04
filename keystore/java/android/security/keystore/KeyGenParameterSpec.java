@@ -1132,7 +1132,7 @@ public final class KeyGenParameterSpec implements AlgorithmParameterSpec, UserAu
          * <p>This authorization applies only to secret key and private key operations. Public key
          * operations are not restricted.
          *
-         * @see {@link android.security.ConfirmationPrompter ConfirmationPrompter} class for
+         * See {@link android.security.ConfirmationPrompt} class for
          * more details about user confirmations.
          */
         @NonNull

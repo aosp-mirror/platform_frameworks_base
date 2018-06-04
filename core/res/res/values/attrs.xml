@@ -8854,7 +8854,7 @@
         <attr name="fontWeight" format="integer" />
         <!-- The index of the font in the ttc (TrueType Collection) font file. If the font file
          referenced is not in the ttc format, this attribute needs not be specified.
-         {@see android.graphics.Typeface#Builder.setTtcIndex(int)}.
+         {@link android.graphics.Typeface.Builder#setTtcIndex(int)}.
          The default value is 0. More details about the TrueType Collection font format can be found
          here: https://en.wikipedia.org/wiki/TrueType#TrueType_Collection. -->
         <attr name="ttcIndex" format="integer" />

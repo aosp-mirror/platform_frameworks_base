@@ -6756,7 +6756,7 @@ public class Notification implements Parcelable
          * Should be unique amongst all individuals in the conversation, and should be
          * consistent during re-posts of the notification.
          *
-         * @see Message#Message(CharSequence, long, CharSequence)
+         * @see Message#Notification.MessagingStyle.Message(CharSequence, long, CharSequence)
          *
          * @return this object for method chaining
          *
@@ -6776,7 +6776,7 @@ public class Notification implements Parcelable
          * Should be <code>null</code> for messages by the current user, in which case
          * the platform will insert the user set in {@code MessagingStyle(Person)}.
          *
-         * @see Message#Message(CharSequence, long, CharSequence)
+         * @see Message#Notification.MessagingStyle.Message(CharSequence, long, CharSequence)
          *
          * @return this object for method chaining
          */

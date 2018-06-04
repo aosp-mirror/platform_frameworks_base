@@ -481,7 +481,7 @@ public final class AccessibilityEvent extends AccessibilityRecord implements Par
 
     /**
      * Represents the event of scrolling a view. This event type is generally not sent directly.
-     * @see View#onScrollChanged(int, int, int, int)
+     * @see android.view.View#onScrollChanged(int, int, int, int)
      */
     public static final int TYPE_VIEW_SCROLLED = 0x00001000;
 
