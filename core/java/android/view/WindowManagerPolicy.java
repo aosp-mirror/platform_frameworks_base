@@ -611,6 +611,11 @@ public interface WindowManagerPolicy {
         void notifyKeyguardTrustedChanged();
 
         /**
+         * The keyguard showing state has changed
+         */
+        void onKeyguardShowingAndNotOccludedChanged();
+
+        /**
          * Notifies the window manager that screen is being turned off.
          *
          * @param listener callback to call when display can be turned off
