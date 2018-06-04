@@ -126,7 +126,8 @@ public class AppBackupUtils {
             case PackageManager.COMPONENT_ENABLED_STATE_DISABLED_USER:
             case PackageManager.COMPONENT_ENABLED_STATE_DISABLED_UNTIL_USED:
                 return true;
-
+            case PackageManager.COMPONENT_ENABLED_STATE_DEFAULT:
+                return !app.enabled;
             default:
                 return false;
         }
