@@ -21,6 +21,7 @@ import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_ATTACHED_DIALOG;
 import static android.view.WindowManager.LayoutParams.TYPE_BASE_APPLICATION;
+import static android.view.WindowManager.LayoutParams.TYPE_STATUS_BAR;
 import static android.view.WindowManager.LayoutParams.TYPE_VOICE_INTERACTION;
 import static com.android.server.wm.WindowContainer.POSITION_TOP;
 import static org.junit.Assert.assertEquals;
@@ -256,6 +257,25 @@ public class DisplayContentTests extends WindowTestsBase {
         // Move the first window to the to including parents, and make sure focus is updated
         window1.getParent().positionChildAt(POSITION_TOP, window1, true);
         assertEquals(window1, sWm.mRoot.computeFocusedWindow());
+    }
+
+    @Test
+    public void testKeyguard_preventsSecondaryDisplayFocus() throws Exception {
+        final WindowState keyguard = createWindow(null, TYPE_STATUS_BAR,
+                sWm.getDefaultDisplayContentLocked(), "keyguard");
+        assertEquals(keyguard, sWm.mRoot.computeFocusedWindow());
+
+        // Add a window to a second display, and it should be focused
+        final DisplayContent dc = createNewDisplay();
+        final WindowState win = createWindow(null, TYPE_BASE_APPLICATION, dc, "win");
+        assertEquals(win, sWm.mRoot.computeFocusedWindow());
+
+        ((TestWindowManagerPolicy)sWm.mPolicy).keyguardShowingAndNotOccluded = true;
+        try {
+            assertEquals(keyguard, sWm.mRoot.computeFocusedWindow());
+        } finally {
+            ((TestWindowManagerPolicy)sWm.mPolicy).keyguardShowingAndNotOccluded = false;
+        }
     }
 
     /**
