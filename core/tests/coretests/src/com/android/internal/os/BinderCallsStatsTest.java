@@ -155,6 +155,42 @@ public class BinderCallsStatsTest {
     }
 
     @Test
+    public void testMaxCpu() {
+        TestBinderCallsStats bcs = new TestBinderCallsStats(true);
+        Binder binder = new Binder();
+        BinderCallsStats.CallSession callSession = bcs.callStarted(binder, 1);
+        bcs.time += 50;
+        bcs.callEnded(callSession, REQUEST_SIZE, REPLY_SIZE);
+
+        callSession = bcs.callStarted(binder, 1);
+        bcs.time += 10;
+        bcs.callEnded(callSession, REQUEST_SIZE, REPLY_SIZE);
+
+        List<BinderCallsStats.CallStat> callStatsList =
+                bcs.getUidEntries().get(TEST_UID).getCallStatsList();
+
+        assertEquals(50, callStatsList.get(0).maxCpuTimeMicros);
+    }
+
+    @Test
+    public void testMaxLatency() {
+        TestBinderCallsStats bcs = new TestBinderCallsStats(true);
+        Binder binder = new Binder();
+        BinderCallsStats.CallSession callSession = bcs.callStarted(binder, 1);
+        bcs.elapsedTime += 5;
+        bcs.callEnded(callSession, REQUEST_SIZE, REPLY_SIZE);
+
+        callSession = bcs.callStarted(binder, 1);
+        bcs.elapsedTime += 1;
+        bcs.callEnded(callSession, REQUEST_SIZE, REPLY_SIZE);
+
+        List<BinderCallsStats.CallStat> callStatsList =
+                bcs.getUidEntries().get(TEST_UID).getCallStatsList();
+
+        assertEquals(5, callStatsList.get(0).maxLatencyMicros);
+    }
+
+    @Test
     public void testGetHighestValues() {
         List<Integer> list = Arrays.asList(1, 2, 3, 4);
         List<Integer> highestValues = BinderCallsStats
@@ -165,6 +201,7 @@ public class BinderCallsStatsTest {
     static class TestBinderCallsStats extends BinderCallsStats {
         int callingUid = TEST_UID;
         long time = 1234;
+        long elapsedTime = 0;
 
         TestBinderCallsStats(boolean detailedTracking) {
             super(detailedTracking);
@@ -173,6 +210,11 @@ public class BinderCallsStatsTest {
         @Override
         protected long getThreadTimeMicro() {
             return time;
+        }
+
+        @Override
+        protected long getElapsedRealtimeMicro() {
+            return elapsedTime;
         }
 
         @Override

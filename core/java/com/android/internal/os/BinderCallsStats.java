@@ -122,25 +122,25 @@ public class BinderCallsStats {
                 mUidEntries.put(callingUid, uidEntry);
             }
 
+            CallStat callStat;
             if (mDetailedTracking) {
                 // Find CallStat entry and update its total time
-                CallStat callStat = uidEntry.getOrCreate(s.callStat);
-                callStat.callCount++;
-                callStat.cpuTimeMicros += duration;
-                callStat.latencyMicros += latencyDuration;
+                callStat = uidEntry.getOrCreate(s.callStat);
                 callStat.exceptionCount += s.exceptionThrown ? 1 : 0;
-                callStat.maxLatencyMicros = Math.max(callStat.maxLatencyMicros, latencyDuration);
                 callStat.maxRequestSizeBytes =
                         Math.max(callStat.maxRequestSizeBytes, parcelRequestSize);
                 callStat.maxReplySizeBytes =
                         Math.max(callStat.maxReplySizeBytes, parcelReplySize);
             } else {
                 // update sampled timings in the beginning of each interval
-                if (s.cpuTimeStarted >= 0) {
-                    s.sampledCallStat.cpuTimeMicros += duration;
-                    s.sampledCallStat.latencyMicros += latencyDuration;
-                }
-                s.sampledCallStat.callCount++;
+                callStat = s.sampledCallStat;
+            }
+            callStat.callCount++;
+            if (s.cpuTimeStarted >= 0) {
+                callStat.cpuTimeMicros += duration;
+                callStat.maxCpuTimeMicros = Math.max(callStat.maxCpuTimeMicros, duration);
+                callStat.latencyMicros += latencyDuration;
+                callStat.maxLatencyMicros = Math.max(callStat.maxLatencyMicros, latencyDuration);
             }
 
             uidEntry.cpuTimeMicros += duration;
@@ -189,7 +189,7 @@ public class BinderCallsStats {
         StringBuilder sb = new StringBuilder();
         if (mDetailedTracking) {
             pw.println("Per-UID raw data " + datasetSizeDesc
-                    + "(uid, call_desc, cpu_time_micros, latency_time_micros, "
+                    + "(uid, call_desc, cpu_time_micros, max_cpu_time_micros, latency_time_micros, "
                     + "max_latency_time_micros, exception_count, max_request_size_bytes, "
                     + "max_reply_size_bytes, call_count):");
             List<UidEntry> topEntries = verbose ? entries
@@ -200,6 +200,7 @@ public class BinderCallsStats {
                     sb.append("    ")
                             .append(uidEntry.uid).append(",").append(e)
                             .append(',').append(e.cpuTimeMicros)
+                            .append(',').append(e.maxCpuTimeMicros)
                             .append(',').append(e.latencyMicros)
                             .append(',').append(e.maxLatencyMicros)
                             .append(',').append(e.exceptionCount)
@@ -260,7 +261,7 @@ public class BinderCallsStats {
         return Binder.getCallingUid();
     }
 
-    private long getElapsedRealtimeMicro() {
+    protected long getElapsedRealtimeMicro() {
         return SystemClock.elapsedRealtimeNanos() / 1000;
     }
 
@@ -288,11 +289,13 @@ public class BinderCallsStats {
         public String className;
         public int msg;
         public long cpuTimeMicros;
+        public long maxCpuTimeMicros;
         public long latencyMicros;
         public long maxLatencyMicros;
+        public long callCount;
+        // The following fields are only computed if mDetailedTracking is set.
         public long maxRequestSizeBytes;
         public long maxReplySizeBytes;
-        public long callCount;
         public long exceptionCount;
 
         CallStat() {
