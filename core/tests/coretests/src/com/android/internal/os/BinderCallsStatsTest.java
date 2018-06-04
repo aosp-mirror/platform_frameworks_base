@@ -35,7 +35,9 @@ import static org.junit.Assert.assertEquals;
 @RunWith(AndroidJUnit4.class)
 @Presubmit
 public class BinderCallsStatsTest {
-    public static final int TEST_UID = 1;
+    private static final int TEST_UID = 1;
+    private static final int REQUEST_SIZE = 2;
+    private static final int REPLY_SIZE = 3;
 
     @Test
     public void testDetailedOff() {
@@ -43,7 +45,7 @@ public class BinderCallsStatsTest {
         Binder binder = new Binder();
         BinderCallsStats.CallSession callSession = bcs.callStarted(binder, 1);
         bcs.time += 10;
-        bcs.callEnded(callSession);
+        bcs.callEnded(callSession, REQUEST_SIZE, REPLY_SIZE);
 
         SparseArray<BinderCallsStats.UidEntry> uidEntries = bcs.getUidEntries();
         assertEquals(1, uidEntries.size());
@@ -66,7 +68,7 @@ public class BinderCallsStatsTest {
 
         callSession = bcs.callStarted(binder, 1);
         bcs.time += 20;
-        bcs.callEnded(callSession);
+        bcs.callEnded(callSession, REQUEST_SIZE, REPLY_SIZE);
 
         uidEntry = bcs.getUidEntries().get(TEST_UID);
         assertEquals(2, uidEntry.callCount);
@@ -79,7 +81,7 @@ public class BinderCallsStatsTest {
 
         callSession = bcs.callStarted(binder, 2);
         bcs.time += 50;
-        bcs.callEnded(callSession);
+        bcs.callEnded(callSession, REQUEST_SIZE, REPLY_SIZE);
         uidEntry = bcs.getUidEntries().get(TEST_UID);
         assertEquals(3, uidEntry.callCount);
 
@@ -95,7 +97,7 @@ public class BinderCallsStatsTest {
         Binder binder = new Binder();
         BinderCallsStats.CallSession callSession = bcs.callStarted(binder, 1);
         bcs.time += 10;
-        bcs.callEnded(callSession);
+        bcs.callEnded(callSession, REQUEST_SIZE, REPLY_SIZE);
 
         SparseArray<BinderCallsStats.UidEntry> uidEntries = bcs.getUidEntries();
         assertEquals(1, uidEntries.size());
@@ -117,7 +119,7 @@ public class BinderCallsStatsTest {
 
         callSession = bcs.callStarted(binder, 1);
         bcs.time += 20;
-        bcs.callEnded(callSession);
+        bcs.callEnded(callSession, REQUEST_SIZE, REPLY_SIZE);
 
         uidEntry = bcs.getUidEntries().get(TEST_UID);
         assertEquals(2, uidEntry.callCount);
@@ -127,7 +129,7 @@ public class BinderCallsStatsTest {
 
         callSession = bcs.callStarted(binder, 2);
         bcs.time += 50;
-        bcs.callEnded(callSession);
+        bcs.callEnded(callSession, REQUEST_SIZE, REPLY_SIZE);
         uidEntry = bcs.getUidEntries().get(TEST_UID);
         assertEquals(3, uidEntry.callCount);
 
@@ -135,6 +137,21 @@ public class BinderCallsStatsTest {
         assertEquals(80, uidEntry.cpuTimeMicros);
         callStatsList = uidEntry.getCallStatsList();
         assertEquals(2, callStatsList.size());
+    }
+
+    @Test
+    public void testParcelSize() {
+        TestBinderCallsStats bcs = new TestBinderCallsStats(true);
+        Binder binder = new Binder();
+        BinderCallsStats.CallSession callSession = bcs.callStarted(binder, 1);
+        bcs.time += 10;
+        bcs.callEnded(callSession, REQUEST_SIZE, REPLY_SIZE);
+
+        List<BinderCallsStats.CallStat> callStatsList =
+                bcs.getUidEntries().get(TEST_UID).getCallStatsList();
+
+        assertEquals(REQUEST_SIZE, callStatsList.get(0).maxRequestSizeBytes);
+        assertEquals(REPLY_SIZE, callStatsList.get(0).maxReplySizeBytes);
     }
 
     @Test

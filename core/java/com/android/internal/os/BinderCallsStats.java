@@ -92,7 +92,7 @@ public class BinderCallsStats {
         return s;
     }
 
-    public void callEnded(CallSession s) {
+    public void callEnded(CallSession s, int parcelRequestSize, int parcelReplySize) {
         Preconditions.checkNotNull(s);
         synchronized (mLock) {
             long duration;
@@ -110,7 +110,7 @@ public class BinderCallsStats {
                     // callCount is always incremented, but time only once per sampling interval
                     long samplesCount = cs.callCount / PERIODIC_SAMPLING_INTERVAL + 1;
                     duration = cs.cpuTimeMicros / samplesCount;
-                    latencyDuration = cs.latencyMicros/ samplesCount;
+                    latencyDuration = cs.latencyMicros / samplesCount;
                 }
             }
 
@@ -129,6 +129,11 @@ public class BinderCallsStats {
                 callStat.cpuTimeMicros += duration;
                 callStat.latencyMicros += latencyDuration;
                 callStat.exceptionCount += s.exceptionThrown ? 1 : 0;
+                callStat.maxLatencyMicros = Math.max(callStat.maxLatencyMicros, latencyDuration);
+                callStat.maxRequestSizeBytes =
+                        Math.max(callStat.maxRequestSizeBytes, parcelRequestSize);
+                callStat.maxReplySizeBytes =
+                        Math.max(callStat.maxReplySizeBytes, parcelReplySize);
             } else {
                 // update sampled timings in the beginning of each interval
                 if (s.cpuTimeStarted >= 0) {
@@ -184,8 +189,9 @@ public class BinderCallsStats {
         StringBuilder sb = new StringBuilder();
         if (mDetailedTracking) {
             pw.println("Per-UID raw data " + datasetSizeDesc
-                    + "(uid, call_desc, cpu_time_micros, latency_time_micros, exception_count, "
-                    + "call_count):");
+                    + "(uid, call_desc, cpu_time_micros, latency_time_micros, "
+                    + "max_latency_time_micros, exception_count, max_request_size_bytes, "
+                    + "max_reply_size_bytes, call_count):");
             List<UidEntry> topEntries = verbose ? entries
                     : getHighestValues(entries, value -> value.cpuTimeMicros, 0.9);
             for (UidEntry uidEntry : topEntries) {
@@ -195,7 +201,10 @@ public class BinderCallsStats {
                             .append(uidEntry.uid).append(",").append(e)
                             .append(',').append(e.cpuTimeMicros)
                             .append(',').append(e.latencyMicros)
+                            .append(',').append(e.maxLatencyMicros)
                             .append(',').append(e.exceptionCount)
+                            .append(',').append(e.maxRequestSizeBytes)
+                            .append(',').append(e.maxReplySizeBytes)
                             .append(',').append(e.callCount);
                     pw.println(sb);
                 }
@@ -280,6 +289,9 @@ public class BinderCallsStats {
         public int msg;
         public long cpuTimeMicros;
         public long latencyMicros;
+        public long maxLatencyMicros;
+        public long maxRequestSizeBytes;
+        public long maxReplySizeBytes;
         public long callCount;
         public long exceptionCount;
 
