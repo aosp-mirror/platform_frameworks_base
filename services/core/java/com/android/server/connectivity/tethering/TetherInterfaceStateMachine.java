@@ -185,7 +185,12 @@ public class TetherInterfaceStateMachine extends StateMachine {
 
     private boolean startIPv4() { return configureIPv4(true); }
 
-    private void stopIPv4() { configureIPv4(false); }
+    private void stopIPv4() {
+        configureIPv4(false);
+        // NOTE: All of configureIPv4() will be refactored out of existence
+        // into calls to InterfaceController, shared with startIPv4().
+        mInterfaceCtrl.clearIPv4Address();
+    }
 
     // TODO: Refactor this in terms of calls to InterfaceController.
     private boolean configureIPv4(boolean enabled) {
