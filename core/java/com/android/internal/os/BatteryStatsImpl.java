@@ -4573,10 +4573,6 @@ public class BatteryStatsImpl extends BatteryStats {
     }
 
     public void noteLongPartialWakelockStart(String name, String historyName, int uid) {
-        StatsLog.write_non_chained(StatsLog.LONG_PARTIAL_WAKELOCK_STATE_CHANGED,
-                uid, null, name, historyName,
-                StatsLog.LONG_PARTIAL_WAKELOCK_STATE_CHANGED__STATE__ON);
-
         uid = mapUid(uid);
         noteLongPartialWakeLockStartInternal(name, historyName, uid);
     }
@@ -4587,9 +4583,6 @@ public class BatteryStatsImpl extends BatteryStats {
         for (int i = 0; i < N; ++i) {
             final int uid = mapUid(workSource.get(i));
             noteLongPartialWakeLockStartInternal(name, historyName, uid);
-            StatsLog.write_non_chained(StatsLog.LONG_PARTIAL_WAKELOCK_STATE_CHANGED,
-                    workSource.get(i), workSource.getName(i), name, historyName,
-                    StatsLog.LONG_PARTIAL_WAKELOCK_STATE_CHANGED__STATE__ON);
         }
 
         final ArrayList<WorkChain> workChains = workSource.getWorkChains();
@@ -4598,10 +4591,6 @@ public class BatteryStatsImpl extends BatteryStats {
                 final WorkChain workChain = workChains.get(i);
                 final int uid = workChain.getAttributionUid();
                 noteLongPartialWakeLockStartInternal(name, historyName, uid);
-
-                StatsLog.write(StatsLog.LONG_PARTIAL_WAKELOCK_STATE_CHANGED,
-                        workChain.getUids(), workChain.getTags(), name, historyName,
-                        StatsLog.LONG_PARTIAL_WAKELOCK_STATE_CHANGED__STATE__ON);
             }
         }
     }
@@ -4621,9 +4610,6 @@ public class BatteryStatsImpl extends BatteryStats {
     }
 
     public void noteLongPartialWakelockFinish(String name, String historyName, int uid) {
-        StatsLog.write_non_chained(StatsLog.LONG_PARTIAL_WAKELOCK_STATE_CHANGED, uid, null,
-                name, historyName, StatsLog.LONG_PARTIAL_WAKELOCK_STATE_CHANGED__STATE__OFF);
-
         uid = mapUid(uid);
         noteLongPartialWakeLockFinishInternal(name, historyName, uid);
     }
@@ -4634,9 +4620,6 @@ public class BatteryStatsImpl extends BatteryStats {
         for (int i = 0; i < N; ++i) {
             final int uid = mapUid(workSource.get(i));
             noteLongPartialWakeLockFinishInternal(name, historyName, uid);
-            StatsLog.write_non_chained(StatsLog.LONG_PARTIAL_WAKELOCK_STATE_CHANGED,
-                    workSource.get(i), workSource.getName(i), name, historyName,
-                    StatsLog.LONG_PARTIAL_WAKELOCK_STATE_CHANGED__STATE__OFF);
         }
 
         final ArrayList<WorkChain> workChains = workSource.getWorkChains();
@@ -4645,9 +4628,6 @@ public class BatteryStatsImpl extends BatteryStats {
                 final WorkChain workChain = workChains.get(i);
                 final int uid = workChain.getAttributionUid();
                 noteLongPartialWakeLockFinishInternal(name, historyName, uid);
-                StatsLog.write(StatsLog.LONG_PARTIAL_WAKELOCK_STATE_CHANGED,
-                        workChain.getUids(), workChain.getTags(), name, historyName,
-                        StatsLog.LONG_PARTIAL_WAKELOCK_STATE_CHANGED__STATE__OFF);
             }
         }
     }
