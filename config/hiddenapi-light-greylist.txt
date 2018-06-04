@@ -1908,6 +1908,7 @@ Landroid/content/res/ResourcesKey;->mResDir:Ljava/lang/String;
 Landroid/content/res/ResourcesKey;->mSplitResDirs:[Ljava/lang/String;
 Landroid/content/res/StringBlock;-><init>(JZ)V
 Landroid/content/res/StringBlock;->get(I)Ljava/lang/CharSequence;
+Landroid/content/res/ThemedResourceCache;->mThemedEntries:Landroid/util/ArrayMap;
 Landroid/content/res/ThemedResourceCache;->onConfigurationChange(I)V
 Landroid/content/res/TypedArray;->extractThemeAttrs()[I
 Landroid/content/res/TypedArray;->extractThemeAttrs([I)[I
