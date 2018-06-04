@@ -117,8 +117,9 @@ public final class SQLiteDatabaseConfiguration {
     public String journalMode;
 
     /**
-     * Synchronous mode to use when {@link SQLiteDatabase#ENABLE_WRITE_AHEAD_LOGGING} is not set.
+     * Synchronous mode to use.
      * <p>Default is returned by {@link SQLiteGlobal#getDefaultSyncMode()}
+     * or {@link SQLiteGlobal#getWALSyncMode()} depending on journal mode
      */
     public String syncMode;
 
