@@ -145,6 +145,18 @@ public final class CarrierAppUtils {
                         telephonyManager.checkCarrierPrivilegesForPackageAnyPhone(packageName) ==
                                 TelephonyManager.CARRIER_PRIVILEGE_STATUS_HAS_ACCESS;
 
+                // add hiddenUntilInstalled flag for carrier apps and associated apps
+                packageManager.setSystemAppHiddenUntilInstalled(packageName, true);
+                List<ApplicationInfo> associatedAppList = associatedApps.get(packageName);
+                if (associatedAppList != null) {
+                    for (ApplicationInfo associatedApp : associatedAppList) {
+                        packageManager.setSystemAppHiddenUntilInstalled(
+                                associatedApp.packageName,
+                                true
+                        );
+                    }
+                }
+
                 if (hasPrivileges) {
                     // Only update enabled state for the app on /system. Once it has been
                     // updated we shouldn't touch it.
@@ -169,7 +181,6 @@ public final class CarrierAppUtils {
                     }
 
                     // Also enable any associated apps for this carrier app.
-                    List<ApplicationInfo> associatedAppList = associatedApps.get(packageName);
                     if (associatedAppList != null) {
                         for (ApplicationInfo associatedApp : associatedAppList) {
                             if (associatedApp.enabledSetting ==
@@ -214,7 +225,6 @@ public final class CarrierAppUtils {
                     // run. We avoid doing this a second time because it is brittle to rely on the
                     // distinction between "default" and "enabled".
                     if (!hasRunOnce) {
-                        List<ApplicationInfo> associatedAppList = associatedApps.get(packageName);
                         if (associatedAppList != null) {
                             for (ApplicationInfo associatedApp : associatedAppList) {
                                 if (associatedApp.enabledSetting
