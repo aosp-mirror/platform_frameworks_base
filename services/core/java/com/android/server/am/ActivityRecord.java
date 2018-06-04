@@ -313,6 +313,7 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
                                         // process that it is hidden.
     boolean sleeping;       // have we told the activity to sleep?
     boolean nowVisible;     // is this activity's window visible?
+    boolean mClientVisibilityDeferred;// was the visibility change message to client deferred?
     boolean idle;           // has the activity gone idle?
     boolean hasBeenLaunched;// has this activity ever been launched?
     boolean frozenBeforeDestroy;// has been frozen but not yet destroyed.
@@ -1716,7 +1717,7 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
         return !behindFullscreenActivity || mLaunchTaskBehind;
     }
 
-    void makeVisibleIfNeeded(ActivityRecord starting) {
+    void makeVisibleIfNeeded(ActivityRecord starting, boolean reportToClient) {
         // This activity is not currently visible, but is running. Tell it to become visible.
         if (mState == RESUMED || this == starting) {
             if (DEBUG_VISIBILITY) Slog.d(TAG_VISIBILITY,
@@ -1736,15 +1737,28 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
             setVisible(true);
             sleeping = false;
             app.pendingUiClean = true;
-            service.getLifecycleManager().scheduleTransaction(app.thread, appToken,
-                    WindowVisibilityItem.obtain(true /* showWindow */));
+            if (reportToClient) {
+                makeClientVisible();
+            } else {
+                mClientVisibilityDeferred = true;
+            }
             // The activity may be waiting for stop, but that is no longer appropriate for it.
             mStackSupervisor.mStoppingActivities.remove(this);
             mStackSupervisor.mGoingToSleepActivities.remove(this);
+        } catch (Exception e) {
+            // Just skip on any failure; we'll make it visible when it next restarts.
+            Slog.w(TAG, "Exception thrown making visible: " + intent.getComponent(), e);
+        }
+        handleAlreadyVisible();
+    }
 
+    /** Send visibility change message to the client and pause if needed. */
+    void makeClientVisible() {
+        mClientVisibilityDeferred = false;
+        try {
+            service.getLifecycleManager().scheduleTransaction(app.thread, appToken,
+                    WindowVisibilityItem.obtain(true /* showWindow */));
             if (shouldPauseWhenBecomingVisible()) {
-                // Capture reason before state change
-
                 // An activity must be in the {@link PAUSING} state for the system to validate
                 // the move to {@link PAUSED}.
                 setState(PAUSING, "makeVisibleIfNeeded");
@@ -1753,10 +1767,8 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
                                 configChangeFlags, false /* dontReport */));
             }
         } catch (Exception e) {
-            // Just skip on any failure; we'll make it visible when it next restarts.
-            Slog.w(TAG, "Exception thrown making visible: " + intent.getComponent(), e);
+            Slog.w(TAG, "Exception thrown sending visibility update: " + intent.getComponent(), e);
         }
-        handleAlreadyVisible();
     }
 
     /** Check if activity should be moved to PAUSED state when it becomes visible. */
