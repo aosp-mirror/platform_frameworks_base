@@ -39,11 +39,15 @@ import android.content.pm.PackageManager;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.Color;
+import android.graphics.Typeface;
 import android.graphics.drawable.Icon;
 import android.net.Uri;
 import android.os.Build;
 import android.support.test.filters.SmallTest;
 import android.support.test.runner.AndroidJUnit4;
+import android.text.SpannableStringBuilder;
+import android.text.Spanned;
+import android.text.style.StyleSpan;
 import android.widget.RemoteViews;
 
 import com.android.server.UiServiceTestCase;
@@ -465,6 +469,25 @@ public class NotificationTest extends UiServiceTestCase {
     }
 
     @Test
+    public void testActionsDifferentSpannables() {
+        PendingIntent intent = mock(PendingIntent.class);
+        Icon icon = mock(Icon.class);
+
+        Notification n1 = new Notification.Builder(mContext, "test")
+                .addAction(new Notification.Action.Builder(icon,
+                        new SpannableStringBuilder().append("test1",
+                                new StyleSpan(Typeface.BOLD),
+                                Spanned.SPAN_EXCLUSIVE_EXCLUSIVE),
+                        intent).build())
+                .build();
+        Notification n2 = new Notification.Builder(mContext, "test")
+                .addAction(new Notification.Action.Builder(icon, "test1", intent).build())
+                .build();
+
+        assertFalse(Notification.areActionsVisiblyDifferent(n1, n2));
+    }
+
+    @Test
     public void testActionsDifferentNumber() {
         PendingIntent intent = mock(PendingIntent.class);
         Icon icon = mock(Icon.class);
@@ -497,29 +520,7 @@ public class NotificationTest extends UiServiceTestCase {
     }
 
     @Test
-    public void testActionsMoreOptionsThanChoices() {
-        PendingIntent intent1 = mock(PendingIntent.class);
-        PendingIntent intent2 = mock(PendingIntent.class);
-        Icon icon = mock(Icon.class);
-
-        Notification n1 = new Notification.Builder(mContext, "test")
-                .addAction(new Notification.Action.Builder(icon, "TEXT 1", intent1).build())
-                .addAction(new Notification.Action.Builder(icon, "TEXT 2", intent1)
-                        .addRemoteInput(new RemoteInput.Builder("a")
-                                .setChoices(new CharSequence[] {"i", "m"})
-                                .build())
-                        .build())
-                .build();
-        Notification n2 = new Notification.Builder(mContext, "test")
-                .addAction(new Notification.Action.Builder(icon, "TEXT 1", intent2).build())
-                .addAction(new Notification.Action.Builder(icon, "TEXT 2", intent1).build())
-                .build();
-
-        assertTrue(Notification.areActionsVisiblyDifferent(n1, n2));
-    }
-
-    @Test
-    public void testActionsDifferentRemoteInputs() {
+    public void testActionsIgnoresRemoteInputs() {
         PendingIntent intent = mock(PendingIntent.class);
         Icon icon = mock(Icon.class);
 
@@ -538,7 +539,7 @@ public class NotificationTest extends UiServiceTestCase {
                         .build())
                 .build();
 
-        assertTrue(Notification.areActionsVisiblyDifferent(n1, n2));
+        assertFalse(Notification.areActionsVisiblyDifferent(n1, n2));
     }
 }
 

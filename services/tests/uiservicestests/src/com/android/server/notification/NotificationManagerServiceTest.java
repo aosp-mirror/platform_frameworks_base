@@ -2919,6 +2919,29 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     }
 
     @Test
+    public void testVisualDifference_summary() {
+        Notification.Builder nb1 = new Notification.Builder(mContext, "")
+                .setGroup("bananas")
+                .setFlag(Notification.FLAG_GROUP_SUMMARY, true)
+                .setContentText("foo");
+        StatusBarNotification sbn1 = new StatusBarNotification(PKG, PKG, 0, "tag", mUid, 0,
+                nb1.build(), new UserHandle(mUid), null, 0);
+        NotificationRecord r1 =
+                new NotificationRecord(mContext, sbn1, mock(NotificationChannel.class));
+
+        Notification.Builder nb2 = new Notification.Builder(mContext, "")
+                .setGroup("bananas")
+                .setFlag(Notification.FLAG_GROUP_SUMMARY, true)
+                .setContentText("bar");
+        StatusBarNotification sbn2 = new StatusBarNotification(PKG, PKG, 0, "tag", mUid, 0,
+                nb2.build(), new UserHandle(mUid), null, 0);
+        NotificationRecord r2 =
+                new NotificationRecord(mContext, sbn2, mock(NotificationChannel.class));
+
+        assertFalse(mService.isVisuallyInterruptive(r1, r2));
+    }
+
+    @Test
     public void testHideAndUnhideNotificationsOnSuspendedPackageBroadcast() {
         // post 2 notification from this package
         final NotificationRecord notif1 = generateNotificationRecord(
