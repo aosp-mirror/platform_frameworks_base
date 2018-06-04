@@ -79,7 +79,7 @@ import java.util.List;
  * <li>On a small screen it may display only the headers as a single list when first launched.
  * Selecting one of the header items will only show the PreferenceFragment of that header (on
  * Android N and lower a new Activity is launched).
- * <li>On a large screen in may display both the headers and current PreferenceFragment together as
+ * <li>On a large screen it may display both the headers and current PreferenceFragment together as
  * panes. Selecting a header item switches to showing the correct PreferenceFragment for that item.
  * </ul>
  *
