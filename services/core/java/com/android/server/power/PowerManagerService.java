@@ -220,8 +220,8 @@ public final class PowerManagerService extends SystemService
     private static final int HALT_MODE_REBOOT = 1;
     private static final int HALT_MODE_REBOOT_SAFE_MODE = 2;
 
-    // Persistent property for last reboot reason
-    private static final String LAST_REBOOT_PROPERTY = "persist.sys.boot.reason";
+    // property for last reboot reason
+    private static final String REBOOT_PROPERTY = "sys.boot.reason";
 
     private final Context mContext;
     private final ServiceThread mHandlerThread;
@@ -4402,7 +4402,7 @@ public final class PowerManagerService extends SystemService
 
             final long ident = Binder.clearCallingIdentity();
             try {
-                return getLastShutdownReasonInternal(LAST_REBOOT_PROPERTY);
+                return getLastShutdownReasonInternal(REBOOT_PROPERTY);
             } finally {
                 Binder.restoreCallingIdentity(ident);
             }
