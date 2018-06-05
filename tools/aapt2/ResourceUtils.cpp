@@ -797,16 +797,20 @@ StringBuilder::StringBuilder(bool preserve_spaces)
     : preserve_spaces_(preserve_spaces), quote_(preserve_spaces) {
 }
 
-StringBuilder& StringBuilder::AppendText(const std::string& text) {
+StringBuilder& StringBuilder::AppendText(const std::string& text, bool preserve_spaces) {
   if (!error_.empty()) {
     return *this;
   }
+
+  // Enable preserving spaces if it is enabled for this append or the StringBuilder was constructed
+  // to preserve spaces
+  preserve_spaces = (preserve_spaces) ? preserve_spaces : preserve_spaces_;
 
   const size_t previous_len = xml_string_.text.size();
   Utf8Iterator iter(text);
   while (iter.HasNext()) {
     char32_t codepoint = iter.Next();
-    if (!quote_ && iswspace(codepoint)) {
+    if (!preserve_spaces && !quote_ && iswspace(codepoint)) {
       if (!last_codepoint_was_space_) {
         // Emit a space if it's the first.
         xml_string_.text += ' ';
@@ -827,7 +831,6 @@ StringBuilder& StringBuilder::AppendText(const std::string& text) {
           case U't':
             xml_string_.text += '\t';
             break;
-
           case U'n':
             xml_string_.text += '\n';
             break;
@@ -855,12 +858,12 @@ StringBuilder& StringBuilder::AppendText(const std::string& text) {
             break;
         }
       }
-    } else if (!preserve_spaces_ && codepoint == U'"') {
+    } else if (!preserve_spaces && codepoint == U'"') {
       // Only toggle the quote state when we are not preserving spaces.
       quote_ = !quote_;
 
-    } else if (!quote_ && codepoint == U'\'') {
-      // This should be escaped.
+    } else if (!preserve_spaces && !quote_ && codepoint == U'\'') {
+      // This should be escaped when we are not preserving spaces
       error_ = StringPrintf("unescaped apostrophe in string\n\"%s\"", text.c_str());
       return *this;
 
