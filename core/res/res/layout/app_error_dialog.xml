@@ -57,6 +57,14 @@
         style="@style/aerr_list_item" />
 
     <Button
+        android:id="@+id/aerr_copy"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/aerr_copy"
+        android:drawableStart="@drawable/ic_link"
+        style="@style/aerr_list_item" />
+
+    <Button
         android:id="@+id/aerr_mute"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
