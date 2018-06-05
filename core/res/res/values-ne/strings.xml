@@ -1268,7 +1268,7 @@
     <string name="share_remote_bugreport_notification_message_finished" msgid="6029609949340992866">"तपाईंका प्रशासकले यस यन्त्रको समस्या निवारण गर्नमा मद्दत गर्नाका लागि एउटा बग रिपोर्टको अनुरोध गर्नुभएको छ। अनुप्रयोगहरू र डेटा आदान प्रदान गर्न पनि सकिन्छ।"</string>
     <string name="share_remote_bugreport_action" msgid="6249476773913384948">"साझेदारी गर्नुहोस्"</string>
     <string name="decline_remote_bugreport_action" msgid="6230987241608770062">"अस्वीकार गर्नुहोस्"</string>
-    <string name="select_input_method" msgid="8547250819326693584">"कुञ्जीपाटी परिवर्तन गर्नुहोस्"</string>
+    <string name="select_input_method" msgid="4653387336791222978">"निवेश विधि छान्नुहोस्"</string>
     <string name="show_ime" msgid="2506087537466597099">"वास्तविक किबोर्ड सक्रिय हुँदा यसलाई स्क्रिनमा राख्नुहोस्"</string>
     <string name="hardware" msgid="194658061510127999">"भर्चुअल किबोर्ड देखाउनुहोस्"</string>
     <string name="select_keyboard_layout_notification_title" msgid="597189518763083494">"फिजिकल किबोर्डलाई कन्फिगर गर्नुहोस्"</string>

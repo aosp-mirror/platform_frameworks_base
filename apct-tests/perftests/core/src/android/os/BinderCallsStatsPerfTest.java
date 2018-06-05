@@ -59,7 +59,7 @@ public class BinderCallsStatsPerfTest {
         int i = 0;
         while (state.keepRunning()) {
             BinderCallsStats.CallSession s = mBinderCallsStats.callStarted(b, i % 100);
-            mBinderCallsStats.callEnded(s);
+            mBinderCallsStats.callEnded(s, 0, 0);
             i++;
         }
     }
@@ -71,7 +71,7 @@ public class BinderCallsStatsPerfTest {
         mBinderCallsStats = new BinderCallsStats(false);
         while (state.keepRunning()) {
             BinderCallsStats.CallSession s = mBinderCallsStats.callStarted(b, 0);
-            mBinderCallsStats.callEnded(s);
+            mBinderCallsStats.callEnded(s, 0, 0);
         }
     }
 

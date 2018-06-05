@@ -760,6 +760,8 @@ public class Binder implements IBinder {
             }
         }
         checkParcel(this, code, reply, "Unreasonably large binder reply buffer");
+        int replySizeBytes = reply.dataSize();
+        int requestSizeBytes = data.dataSize();
         reply.recycle();
         data.recycle();
 
@@ -769,7 +771,7 @@ public class Binder implements IBinder {
         // to the main transaction loop to wait for another incoming transaction.  Either
         // way, strict mode begone!
         StrictMode.clearGatheredViolations();
-        binderCallsStats.callEnded(callSession);
+        binderCallsStats.callEnded(callSession, requestSizeBytes, replySizeBytes);
 
         return res;
     }

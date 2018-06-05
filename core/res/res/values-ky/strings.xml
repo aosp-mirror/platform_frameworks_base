@@ -1264,7 +1264,7 @@
     <string name="share_remote_bugreport_notification_message_finished" msgid="6029609949340992866">"Бул түзмөктүн бузулууларын аныктап оңдоо үчүн администраторуңуз мүчүлүштүктөр тууралуу маалыматты сурап жатат. Колдонмолор менен дайындар бөлүшүлүшү мүмкүн."</string>
     <string name="share_remote_bugreport_action" msgid="6249476773913384948">"БӨЛҮШҮҮ"</string>
     <string name="decline_remote_bugreport_action" msgid="6230987241608770062">"ЧЕТКЕ КАГУУ"</string>
-    <string name="select_input_method" msgid="8547250819326693584">"Баскычтопту өзгөртүү"</string>
+    <string name="select_input_method" msgid="4653387336791222978">"Дайын киргизүү ыкмасын тандаңыз"</string>
     <string name="show_ime" msgid="2506087537466597099">"Баскычтоп иштетилгенде экранда көрүнүп турат"</string>
     <string name="hardware" msgid="194658061510127999">"Виртуалдык баскычтоп"</string>
     <string name="select_keyboard_layout_notification_title" msgid="597189518763083494">"Аппараттык баскычтопту конфигурациялоо"</string>

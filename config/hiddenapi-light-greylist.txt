@@ -875,6 +875,7 @@ Landroid/app/ProgressDialog;->mMessageView:Landroid/widget/TextView;
 Landroid/app/ProgressDialog;->mProgress:Landroid/widget/ProgressBar;
 Landroid/app/ProgressDialog;->mProgressNumber:Landroid/widget/TextView;
 Landroid/app/QueuedWork;->addFinisher(Ljava/lang/Runnable;)V
+Landroid/app/QueuedWork;->getHandler()Landroid/os/Handler;
 Landroid/app/QueuedWork;->removeFinisher(Ljava/lang/Runnable;)V
 Landroid/app/QueuedWork;->sFinishers:Ljava/util/LinkedList;
 Landroid/app/ResourcesManager;-><init>()V
@@ -1853,6 +1854,7 @@ Landroid/content/res/DrawableCache;->getInstance(JLandroid/content/res/Resources
 Landroid/content/res/ObbInfo;->salt:[B
 Landroid/content/res/Resources$Theme;->mThemeImpl:Landroid/content/res/ResourcesImpl$ThemeImpl;
 Landroid/content/res/Resources$Theme;->resolveAttributes([I[I)Landroid/content/res/TypedArray;
+Landroid/content/res/Resources;-><init>()V
 Landroid/content/res/Resources;-><init>(Ljava/lang/ClassLoader;)V
 Landroid/content/res/Resources;->getCompatibilityInfo()Landroid/content/res/CompatibilityInfo;
 Landroid/content/res/Resources;->getDisplayAdjustments()Landroid/view/DisplayAdjustments;
@@ -1894,6 +1896,7 @@ Landroid/content/res/ResourcesKey;->mResDir:Ljava/lang/String;
 Landroid/content/res/ResourcesKey;->mSplitResDirs:[Ljava/lang/String;
 Landroid/content/res/StringBlock;-><init>(JZ)V
 Landroid/content/res/StringBlock;->get(I)Ljava/lang/CharSequence;
+Landroid/content/res/ThemedResourceCache;->mThemedEntries:Landroid/util/ArrayMap;
 Landroid/content/res/ThemedResourceCache;->onConfigurationChange(I)V
 Landroid/content/res/TypedArray;->extractThemeAttrs()[I
 Landroid/content/res/TypedArray;->extractThemeAttrs([I)[I
@@ -5757,6 +5760,7 @@ Landroid/util/MathUtils;->constrain(FFF)F
 Landroid/util/MathUtils;->constrain(III)I
 Landroid/util/MathUtils;->lerp(FFF)F
 Landroid/util/MathUtils;->max(II)F
+Landroid/util/NtpTrustedTime;->currentTimeMillis()J
 Landroid/util/NtpTrustedTime;->forceRefresh()Z
 Landroid/util/NtpTrustedTime;->getCachedNtpTime()J
 Landroid/util/NtpTrustedTime;->getCachedNtpTimeReference()J
@@ -6428,6 +6432,7 @@ Landroid/view/ViewGroup$LayoutParams;-><init>()V
 Landroid/view/ViewGroup$MarginLayoutParams;->endMargin:I
 Landroid/view/ViewGroup$MarginLayoutParams;->setMarginsRelative(IIII)V
 Landroid/view/ViewGroup$MarginLayoutParams;->startMargin:I
+Landroid/view/ViewGroup$TouchTarget;-><init>()V
 Landroid/view/ViewGroup$TouchTarget;->child:Landroid/view/View;
 Landroid/view/ViewGroup;->addTransientView(Landroid/view/View;I)V
 Landroid/view/ViewGroup;->cancelTouchTarget(Landroid/view/View;)V
@@ -7087,6 +7092,7 @@ Landroid/widget/RemoteViewsAdapter;->mWorkerThread:Landroid/os/HandlerThread;
 Landroid/widget/RemoteViewsAdapter;->saveRemoteViewsCache()V
 Landroid/widget/RemoteViewsAdapter;->setRemoteViewsOnClickHandler(Landroid/widget/RemoteViews$OnClickHandler;)V
 Landroid/widget/RemoteViewsAdapter;->setVisibleRangeHint(II)V
+Landroid/widget/ScrollBarDrawable;-><init>()V
 Landroid/widget/ScrollBarDrawable;->mVerticalThumb:Landroid/graphics/drawable/Drawable;
 Landroid/widget/ScrollBarDrawable;->setHorizontalThumbDrawable(Landroid/graphics/drawable/Drawable;)V
 Landroid/widget/ScrollBarDrawable;->setVerticalThumbDrawable(Landroid/graphics/drawable/Drawable;)V
@@ -7256,6 +7262,7 @@ Landroid/widget/TextView;->setText(Ljava/lang/CharSequence;Landroid/widget/TextV
 Landroid/widget/TextView;->startMarquee()V
 Landroid/widget/TextView;->startStopMarquee(Z)V
 Landroid/widget/TextView;->stopTextActionMode()V
+Landroid/widget/TextView;->updateTextServicesLocaleLocked()V
 Landroid/widget/TextView;->viewportToContentVerticalOffset()I
 Landroid/widget/TimePicker;->mDelegate:Landroid/widget/TimePicker$TimePickerDelegate;
 Landroid/widget/Toast$TN;->handleHide()V

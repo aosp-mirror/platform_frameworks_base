@@ -1262,7 +1262,7 @@
     <string name="share_remote_bugreport_notification_message_finished" msgid="6029609949340992866">"Administratören har bett om en felrapport som hjälp vid felsökningen av enheten. Appar och data kan komma att delas."</string>
     <string name="share_remote_bugreport_action" msgid="6249476773913384948">"DELA"</string>
     <string name="decline_remote_bugreport_action" msgid="6230987241608770062">"AVVISA"</string>
-    <string name="select_input_method" msgid="8547250819326693584">"Byt tangentbord"</string>
+    <string name="select_input_method" msgid="4653387336791222978">"Välj inmatningsmetod"</string>
     <string name="show_ime" msgid="2506087537466597099">"Ha kvar det på skärmen när det fysiska tangentbordet används"</string>
     <string name="hardware" msgid="194658061510127999">"Visa virtuellt tangentbord"</string>
     <string name="select_keyboard_layout_notification_title" msgid="597189518763083494">"Konfigurera fysiskt tangentbord"</string>
@@ -1780,7 +1780,7 @@
     <string name="language_picker_section_suggested" msgid="8414489646861640885">"Förslag"</string>
     <string name="language_picker_section_all" msgid="3097279199511617537">"Alla språk"</string>
     <string name="region_picker_section_all" msgid="8966316787153001779">"Alla regioner"</string>
-    <string name="locale_search_menu" msgid="2560710726687249178">"Söka"</string>
+    <string name="locale_search_menu" msgid="2560710726687249178">"Sök"</string>
     <string name="app_suspended_title" msgid="2075071241147969611">"Appen är inte tillgänglig"</string>
     <string name="app_suspended_default_message" msgid="123166680425711887">"<xliff:g id="APP_NAME_0">%1$s</xliff:g> är inte tillgänglig just nu. Detta hanteras av <xliff:g id="APP_NAME_1">%2$s</xliff:g>."</string>
     <string name="app_suspended_more_details" msgid="1131804827776778187">"Läs mer"</string>

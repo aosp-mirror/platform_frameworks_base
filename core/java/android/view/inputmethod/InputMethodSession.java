@@ -117,7 +117,6 @@ public interface InputMethodSession {
      *
      * @return Whether the input method wants to handle this event.
      *
-     * @see #dispatchKeyUp
      * @see android.view.KeyEvent
      */
     public void dispatchKeyEvent(int seq, KeyEvent event, EventCallback callback);

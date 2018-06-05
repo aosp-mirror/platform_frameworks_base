@@ -577,7 +577,7 @@ public class AccessibilityNodeInfo implements Parcelable {
      * Integer argument specifying the start index of the requested text location data. Must be
      * valid inside the CharSequence returned by {@link #getText()}.
      *
-     * {@see EXTRA_DATA_TEXT_CHARACTER_LOCATION_KEY}
+     * @see #EXTRA_DATA_TEXT_CHARACTER_LOCATION_KEY
      */
     public static final String EXTRA_DATA_TEXT_CHARACTER_LOCATION_ARG_START_INDEX =
             "android.view.accessibility.extra.DATA_TEXT_CHARACTER_LOCATION_ARG_START_INDEX";
@@ -586,7 +586,7 @@ public class AccessibilityNodeInfo implements Parcelable {
      * Integer argument specifying the end index of the requested text location data. Must be
      * positive.
      *
-     * {@see EXTRA_DATA_TEXT_CHARACTER_LOCATION_KEY}
+     * @see #EXTRA_DATA_TEXT_CHARACTER_LOCATION_KEY
      */
     public static final String EXTRA_DATA_TEXT_CHARACTER_LOCATION_ARG_LENGTH =
             "android.view.accessibility.extra.DATA_TEXT_CHARACTER_LOCATION_ARG_LENGTH";

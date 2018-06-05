@@ -676,7 +676,8 @@ public class TextUtils {
      * Flatten a CharSequence and whatever styles can be copied across processes
      * into the parcel.
      */
-    public static void writeToParcel(CharSequence cs, Parcel p, int parcelableFlags) {
+    public static void writeToParcel(@Nullable CharSequence cs, @NonNull Parcel p,
+            int parcelableFlags) {
         if (cs instanceof Spanned) {
             p.writeInt(0);
             p.writeString(cs.toString());

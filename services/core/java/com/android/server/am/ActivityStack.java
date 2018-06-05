@@ -1360,8 +1360,8 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
 
     void goToSleep() {
         // Ensure visibility without updating configuration, as activities are about to sleep.
-        ensureActivitiesVisibleLocked(null /* starting */, 0 /* configChanges */, !PRESERVE_WINDOWS,
-                false /* updateConfiguration */);
+        ensureActivitiesVisibleLocked(null /* starting */, 0 /* configChanges */,
+                !PRESERVE_WINDOWS);
 
         // Make sure any paused or stopped but visible activities are now sleeping.
         // This ensures that the activity's onStop() is called.
@@ -1836,7 +1836,7 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
     final void ensureActivitiesVisibleLocked(ActivityRecord starting, int configChanges,
             boolean preserveWindows) {
         ensureActivitiesVisibleLocked(starting, configChanges, preserveWindows,
-                true /* updateConfiguration */);
+                true /* notifyClients */);
     }
 
     /**
@@ -1846,7 +1846,7 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
      */
     // TODO: Should be re-worked based on the fact that each task as a stack in most cases.
     final void ensureActivitiesVisibleLocked(ActivityRecord starting, int configChanges,
-            boolean preserveWindows, boolean updateConfiguration) {
+            boolean preserveWindows, boolean notifyClients) {
         mTopActivityOccludesKeyguard = false;
         mTopDismissingKeyguardActivity = null;
         mStackSupervisor.getKeyguardController().beginActivityVisibilityUpdate();
@@ -1898,7 +1898,7 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
                                 + " finishing=" + r.finishing + " state=" + r.getState());
                         // First: if this is not the current activity being started, make
                         // sure it matches the current configuration.
-                        if (r != starting && updateConfiguration) {
+                        if (r != starting && notifyClients) {
                             r.ensureActivityConfiguration(0 /* globalChanges */, preserveWindows,
                                     true /* ignoreStopState */);
                         }
@@ -1918,11 +1918,15 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
                             if (DEBUG_VISIBILITY) Slog.v(TAG_VISIBILITY,
                                     "Skipping: already visible at " + r);
 
+                            if (r.mClientVisibilityDeferred && notifyClients) {
+                                r.makeClientVisible();
+                            }
+
                             if (r.handleAlreadyVisible()) {
                                 resumeNextActivity = false;
                             }
                         } else {
-                            r.makeVisibleIfNeeded(starting);
+                            r.makeVisibleIfNeeded(starting, notifyClients);
                         }
                         // Aggregate current change flags.
                         configChanges |= r.configChangeFlags;
@@ -3835,7 +3839,7 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
             if (finishingActivityInNonFocusedStack) {
                 // Finishing activity that was in paused state and it was in not currently focused
                 // stack, need to make something visible in its place.
-                mStackSupervisor.ensureVisibilityAndConfig(null, mDisplayId,
+                mStackSupervisor.ensureVisibilityAndConfig(next, mDisplayId,
                         false /* markFrozenIfConfigChanged */, true /* deferResume */);
             }
             if (activityRemoved) {

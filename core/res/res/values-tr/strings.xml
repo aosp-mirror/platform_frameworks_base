@@ -1262,7 +1262,7 @@
     <string name="share_remote_bugreport_notification_message_finished" msgid="6029609949340992866">"Yöneticiniz, bu cihazda sorun gidermeye yardımcı olması için bir hata raporu istedi. Uygulamalar ve veriler paylaşılabilir."</string>
     <string name="share_remote_bugreport_action" msgid="6249476773913384948">"PAYLAŞ"</string>
     <string name="decline_remote_bugreport_action" msgid="6230987241608770062">"REDDET"</string>
-    <string name="select_input_method" msgid="8547250819326693584">"Klavyeyi değiştir"</string>
+    <string name="select_input_method" msgid="4653387336791222978">"Giriş yöntemini seçin"</string>
     <string name="show_ime" msgid="2506087537466597099">"Fiziksel klavye etkin durumdayken ekranda tut"</string>
     <string name="hardware" msgid="194658061510127999">"Sanal klavyeyi göster"</string>
     <string name="select_keyboard_layout_notification_title" msgid="597189518763083494">"Fiziksel klavyeyi yapılandırın"</string>

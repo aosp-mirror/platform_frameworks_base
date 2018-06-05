@@ -1787,8 +1787,8 @@ static sp<TiffWriter> DngCreator_setup(JNIEnv* env, jobject thiz, uint32_t image
                     results.find(ANDROID_LENS_DISTORTION);
             if (entry3.count == 5) {
                 gotDistortion = true;
-                float m_x = std::fmaxf(preWidth - cx, cx);
-                float m_y = std::fmaxf(preHeight - cy, cy);
+                float m_x = std::fmaxf(preWidth-1 - cx, cx);
+                float m_y = std::fmaxf(preHeight-1 - cy, cy);
                 float m_sq = m_x*m_x + m_y*m_y;
                 float m = sqrtf(m_sq); // distance to farthest corner from optical center
                 float f_sq = f * f;

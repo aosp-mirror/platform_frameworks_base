@@ -1263,7 +1263,7 @@
     <string name="share_remote_bugreport_notification_message_finished" msgid="6029609949340992866">"Әкімші осы құрылғы ақауларын жоюға көмектесу үшін қате туралы есепті сұрады. Қолданбалар мен деректер бөлісілуі мүмкін."</string>
     <string name="share_remote_bugreport_action" msgid="6249476773913384948">"БӨЛІСУ"</string>
     <string name="decline_remote_bugreport_action" msgid="6230987241608770062">"ҚАБЫЛДАМАУ"</string>
-    <string name="select_input_method" msgid="8547250819326693584">"Пернетақтаны өзгерту"</string>
+    <string name="select_input_method" msgid="4653387336791222978">"Енгізу әдісін таңдау"</string>
     <string name="show_ime" msgid="2506087537466597099">"Физикалық пернетақта белсенді кезде оны экранда ұстау"</string>
     <string name="hardware" msgid="194658061510127999">"Виртуалды пернетақтаны көрсету"</string>
     <string name="select_keyboard_layout_notification_title" msgid="597189518763083494">"Физикалық пернетақтаны конфигурациялау"</string>
