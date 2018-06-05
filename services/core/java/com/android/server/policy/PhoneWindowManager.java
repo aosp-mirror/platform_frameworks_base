@@ -2779,13 +2779,11 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 attrs.layoutInDisplayCutoutMode = LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS;
                 break;
             case TYPE_STATUS_BAR:
-
                 // If the Keyguard is in a hidden state (occluded by another window), we force to
-                // remove the wallpaper and keyguard flag so that any change in-flight after setting
-                // the keyguard as occluded wouldn't set these flags again.
+                // remove the keyguard flag so that any change in-flight after setting
+                // the keyguard as occluded wouldn't set the flag again.
                 // See {@link #processKeyguardSetHiddenResultLw}.
                 if (mKeyguardOccluded) {
-                    attrs.flags &= ~WindowManager.LayoutParams.FLAG_SHOW_WALLPAPER;
                     attrs.privateFlags &= ~WindowManager.LayoutParams.PRIVATE_FLAG_KEYGUARD;
                 }
                 break;
@@ -5843,17 +5841,13 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             mKeyguardDelegate.setOccluded(false, true /* animate */);
             if (mStatusBar != null) {
                 mStatusBar.getAttrs().privateFlags |= PRIVATE_FLAG_KEYGUARD;
-                if (!mKeyguardDelegate.hasLockscreenWallpaper()) {
-                    mStatusBar.getAttrs().flags |= FLAG_SHOW_WALLPAPER;
-                }
             }
             return true;
         } else if (isOccluded && changed && showing) {
             mKeyguardOccluded = true;
-            mKeyguardDelegate.setOccluded(true, false /* animate */);
+            mKeyguardDelegate.setOccluded(true, !mShowingDream /* animate */);
             if (mStatusBar != null) {
                 mStatusBar.getAttrs().privateFlags &= ~PRIVATE_FLAG_KEYGUARD;
-                mStatusBar.getAttrs().flags &= ~FLAG_SHOW_WALLPAPER;
             }
             return true;
         } else if (changed) {
