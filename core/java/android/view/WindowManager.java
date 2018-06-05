@@ -278,7 +278,8 @@ public interface WindowManager extends ViewManager {
             TRANSIT_KEYGUARD_OCCLUDE,
             TRANSIT_KEYGUARD_UNOCCLUDE,
             TRANSIT_TRANSLUCENT_ACTIVITY_OPEN,
-            TRANSIT_TRANSLUCENT_ACTIVITY_CLOSE
+            TRANSIT_TRANSLUCENT_ACTIVITY_CLOSE,
+            TRANSIT_CRASHING_ACTIVITY_CLOSE
     })
     @Retention(RetentionPolicy.SOURCE)
     @interface TransitionType {}
