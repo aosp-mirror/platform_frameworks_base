@@ -531,7 +531,6 @@ public class ViewDebug {
             throws IOException {
         RenderNode node = RenderNode.create("ViewDebug", null);
         profileViewAndChildren(view, node, out, true);
-        node.destroy();
     }
 
     private static void profileViewAndChildren(View view, RenderNode node, BufferedWriter out,
