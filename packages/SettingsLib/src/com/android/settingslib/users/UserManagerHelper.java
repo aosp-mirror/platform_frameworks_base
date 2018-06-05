@@ -25,6 +25,7 @@ import android.content.pm.UserInfo;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
+import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.util.Log;
@@ -42,6 +43,7 @@ import java.util.List;
 @Deprecated
 public final class UserManagerHelper {
     private static final String TAG = "UserManagerHelper";
+    private static final String HEADLESS_SYSTEM_USER = "android.car.systemuser.headless";
     private final Context mContext;
     private final UserManager mUserManager;
     private final ActivityManager mActivityManager;
@@ -74,6 +76,15 @@ public final class UserManagerHelper {
      */
     public void unregisterOnUsersUpdateListener() {
         unregisterReceiver();
+    }
+
+    /**
+     * Returns {@code true} if the system is in the headless user 0 model.
+     *
+     * @return {@boolean true} if headless system user.
+     */
+    public boolean isHeadlessSystemUser() {
+        return SystemProperties.getBoolean(HEADLESS_SYSTEM_USER, false);
     }
 
     /**
@@ -169,6 +180,9 @@ public final class UserManagerHelper {
      * Gets all the users on the system that are not currently being removed.
      */
     public List<UserInfo> getAllUsers() {
+        if (isHeadlessSystemUser()) {
+            return getAllUsersExcludesSystemUser();
+        }
         return mUserManager.getUsers(true /* excludeDying */);
     }
 

@@ -141,8 +141,14 @@ public class BatterySaverStateMachine {
         if (DEBUG) {
             Slog.d(TAG, "onBootCompleted");
         }
-        // This is called with the power manager lock held. Don't do any
+        // Just booted. We don't want LOW_POWER_MODE to be persisted, so just always clear it.
+        putGlobalSetting(Global.LOW_POWER_MODE, 0);
+
+        // This is called with the power manager lock held. Don't do anything that may call to
+        // upper services. (e.g. don't call into AM directly)
+        // So use a BG thread.
         runOnBgThread(() -> {
+
             final ContentResolver cr = mContext.getContentResolver();
             cr.registerContentObserver(Settings.Global.getUriFor(
                     Settings.Global.LOW_POWER_MODE),
