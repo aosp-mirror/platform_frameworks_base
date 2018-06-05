@@ -4789,7 +4789,8 @@ public class PackageManagerService extends IPackageManager.Stub
             // require the permission to be held; the calling uid and given user id referring
             // to the same user is not sufficient
             mPermissionManager.enforceCrossUserPermission(
-                    Binder.getCallingUid(), userId, false, false, true,
+                    Binder.getCallingUid(), userId, false, false,
+                    !isRecentsAccessingChildProfiles(Binder.getCallingUid(), userId),
                     "MATCH_ANY_USER flag requires INTERACT_ACROSS_USERS permission at "
                     + Debug.getCallers(5));
         } else if ((flags & PackageManager.MATCH_UNINSTALLED_PACKAGES) != 0 && isCallerSystemUser
