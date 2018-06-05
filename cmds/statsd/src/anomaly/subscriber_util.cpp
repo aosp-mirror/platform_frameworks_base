@@ -22,6 +22,7 @@
 #include <binder/IServiceManager.h>
 
 #include "external/Perfetto.h"
+#include "external/Perfprofd.h"
 #include "frameworks/base/libs/incident/proto/android/os/header.pb.h"
 #include "subscriber/IncidentdReporter.h"
 #include "subscriber/SubscriberReporter.h"
@@ -63,6 +64,12 @@ void triggerSubscribers(const int64_t rule_id,
             case Subscription::SubscriberInformationCase::kBroadcastSubscriberDetails:
                 SubscriberReporter::getInstance().alertBroadcastSubscriber(configKey, subscription,
                                                                            dimensionKey);
+                break;
+            case Subscription::SubscriberInformationCase::kPerfprofdDetails:
+                if (!CollectPerfprofdTraceAndUploadToDropbox(subscription.perfprofd_details(),
+                                                             rule_id, configKey)) {
+                    ALOGW("Failed to generate perfprofd traces.");
+                }
                 break;
             default:
                 break;
