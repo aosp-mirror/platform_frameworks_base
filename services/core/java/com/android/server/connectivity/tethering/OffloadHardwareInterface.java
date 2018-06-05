@@ -355,6 +355,7 @@ public class OffloadHardwareInterface {
         boolean success;
         String errMsg;
 
+        @Override
         public String toString() {
             if (success) {
                 return "ok";
