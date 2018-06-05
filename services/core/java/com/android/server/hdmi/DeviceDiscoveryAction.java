@@ -386,6 +386,7 @@ final class DeviceDiscoveryAction extends HdmiCecFeatureAction {
                 return;
             case STATE_WAITING_FOR_VENDOR_ID:
                 queryVendorId(address);
+                return;
             default:
                 return;
         }

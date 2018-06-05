@@ -64,7 +64,7 @@ final class SystemAudioStatusAction extends HdmiCecFeatureAction {
     }
 
     private void handleSendGiveAudioStatusFailure() {
-        // Inform to all application that the audio status (volumn, mute) of
+        // Inform to all application that the audio status (volume, mute) of
         // the audio amplifier is unknown.
         tv().setAudioStatus(false, Constants.UNKNOWN_VOLUME);
 
