@@ -132,7 +132,7 @@
     <item msgid="6830082633573257149">"%s"</item>
     <item msgid="4397097370387921767">"%s ৱাই- ফাই কলিং"</item>
   </string-array>
-    <string name="wifi_calling_off_summary" msgid="8720659586041656098">"বন্ধ হৈ আছে"</string>
+    <string name="wifi_calling_off_summary" msgid="8720659586041656098">"অফ হৈ আছে"</string>
     <string name="wfc_mode_wifi_preferred_summary" msgid="1994113411286935263">"ৱাই-ফাইক অগ্ৰাধিকাৰ দিয়া হৈছে"</string>
     <string name="wfc_mode_cellular_preferred_summary" msgid="1988279625335345908">"ম\'বাইলক অগ্ৰাধিকাৰ দিয়া হৈছে"</string>
     <string name="wfc_mode_wifi_only_summary" msgid="2379919155237869320">"কোৱল ৱাই-ফাই"</string>

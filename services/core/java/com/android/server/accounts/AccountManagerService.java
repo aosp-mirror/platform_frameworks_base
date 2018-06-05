@@ -79,6 +79,8 @@ import android.os.Parcelable;
 import android.os.Process;
 import android.os.RemoteCallback;
 import android.os.RemoteException;
+import android.os.ResultReceiver;
+import android.os.ShellCallback;
 import android.os.StrictMode;
 import android.os.SystemClock;
 import android.os.UserHandle;
@@ -406,6 +408,15 @@ public class AccountManagerService
                 }
             }
         });
+    }
+
+
+    boolean getBindInstantServiceAllowed(int userId) {
+        return  mAuthenticatorCache.getBindInstantServiceAllowed(userId);
+    }
+
+    void setBindInstantServiceAllowed(int userId, boolean allowed) {
+        mAuthenticatorCache.setBindInstantServiceAllowed(userId, allowed);
     }
 
     private void cancelAccountAccessRequestNotificationIfNeeded(int uid,
@@ -4647,6 +4658,14 @@ public class AccountManagerService
         }
     }
 
+    @Override
+    public void onShellCommand(FileDescriptor in, FileDescriptor out,
+            FileDescriptor err, String[] args, ShellCallback callback,
+            ResultReceiver resultReceiver) {
+        new AccountManagerServiceShellCommand(this).exec(this, in, out, err, args,
+                callback, resultReceiver);
+    }
+
     private abstract class Session extends IAccountAuthenticatorResponse.Stub
             implements IBinder.DeathRecipient, ServiceConnection {
         IAccountManagerResponse mResponse;
@@ -5018,8 +5037,11 @@ public class AccountManagerService
             if (Log.isLoggable(TAG, Log.VERBOSE)) {
                 Log.v(TAG, "performing bindService to " + authenticatorInfo.componentName);
             }
-            if (!mContext.bindServiceAsUser(intent, this, Context.BIND_AUTO_CREATE,
-                    UserHandle.of(mAccounts.userId))) {
+            int flags = Context.BIND_AUTO_CREATE;
+            if (mAuthenticatorCache.getBindInstantServiceAllowed(mAccounts.userId)) {
+                flags |= Context.BIND_ALLOW_INSTANT;
+            }
+            if (!mContext.bindServiceAsUser(intent, this, flags, UserHandle.of(mAccounts.userId))) {
                 if (Log.isLoggable(TAG, Log.VERBOSE)) {
                     Log.v(TAG, "bindService to " + authenticatorInfo.componentName + " failed");
                 }

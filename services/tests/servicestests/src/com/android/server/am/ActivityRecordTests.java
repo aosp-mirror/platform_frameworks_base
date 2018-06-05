@@ -131,7 +131,7 @@ public class ActivityRecordTests extends ActivityTestsBase {
         mActivity.setState(STOPPED, "testPausingWhenVisibleFromStopped");
 
         // The activity is in the focused stack so it should not move to paused.
-        mActivity.makeVisibleIfNeeded(null /* starting */);
+        mActivity.makeVisibleIfNeeded(null /* starting */, true /* reportToClient */);
         assertTrue(mActivity.isState(STOPPED));
         assertFalse(pauseFound.value);
 
@@ -139,14 +139,14 @@ public class ActivityRecordTests extends ActivityTestsBase {
         mActivity.mStackSupervisor.mFocusedStack = null;
 
         // In the unfocused stack, the activity should move to paused.
-        mActivity.makeVisibleIfNeeded(null /* starting */);
+        mActivity.makeVisibleIfNeeded(null /* starting */, true /* reportToClient */);
         assertTrue(mActivity.isState(PAUSING));
         assertTrue(pauseFound.value);
 
         // Make sure that the state does not change for current non-stopping states.
         mActivity.setState(INITIALIZING, "testPausingWhenVisibleFromStopped");
 
-        mActivity.makeVisibleIfNeeded(null /* starting */);
+        mActivity.makeVisibleIfNeeded(null /* starting */, true /* reportToClient */);
 
         assertTrue(mActivity.isState(INITIALIZING));
 
@@ -156,7 +156,7 @@ public class ActivityRecordTests extends ActivityTestsBase {
         // Make sure that the state does not change when we have an activity becoming translucent
         final ActivityRecord topActivity = new ActivityBuilder(mService).setTask(mTask).build();
         mStack.mTranslucentActivityWaiting = topActivity;
-        mActivity.makeVisibleIfNeeded(null /* starting */);
+        mActivity.makeVisibleIfNeeded(null /* starting */, true /* reportToClient */);
 
         assertTrue(mActivity.isState(STOPPED));
     }

@@ -3798,6 +3798,7 @@ public abstract class PackageManager {
      *         deleted with {@code DONT_DELETE_DATA} flag set).
      * @hide
      */
+    @TestApi
     public abstract List<ApplicationInfo> getInstalledApplicationsAsUser(
             @ApplicationInfoFlags int flags, @UserIdInt int userId);
 

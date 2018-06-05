@@ -1270,9 +1270,9 @@
     <string name="fast_scroll_alphabet" msgid="5433275485499039199">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="4030170524595123610">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="alert_windows_notification_channel_group_name" msgid="1463953341148606396">"显示在其他应用的上层"</string>
-    <string name="alert_windows_notification_channel_name" msgid="3116610965549449803">"<xliff:g id="NAME">%s</xliff:g>正在其他应用的上层显示内容"</string>
+    <string name="alert_windows_notification_channel_name" msgid="3116610965549449803">"“<xliff:g id="NAME">%s</xliff:g>”正在其他应用的上层显示内容"</string>
     <string name="alert_windows_notification_title" msgid="3697657294867638947">"“<xliff:g id="NAME">%s</xliff:g>”正在其他应用的上层显示内容"</string>
-    <string name="alert_windows_notification_message" msgid="8917232109522912560">"如果您不想让<xliff:g id="NAME">%s</xliff:g>使用此功能，请点按以打开设置，然后关闭此功能。"</string>
+    <string name="alert_windows_notification_message" msgid="8917232109522912560">"如果您不想让“<xliff:g id="NAME">%s</xliff:g>”使用此功能，请点按以打开设置，然后关闭此功能。"</string>
     <string name="alert_windows_notification_turn_off_action" msgid="2902891971380544651">"关闭"</string>
     <string name="ext_media_checking_notification_title" msgid="4411133692439308924">"正在检查<xliff:g id="NAME">%s</xliff:g>…"</string>
     <string name="ext_media_checking_notification_message" msgid="410185170877285434">"正在检查当前内容"</string>

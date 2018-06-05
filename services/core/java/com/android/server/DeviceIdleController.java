@@ -1535,7 +1535,8 @@ public class DeviceIdleController extends SystemService
                 filter.addAction(Intent.ACTION_SCREEN_ON);
                 getContext().registerReceiver(mInteractivityReceiver, filter);
 
-                mLocalActivityManager.setDeviceIdleWhitelist(mPowerSaveWhitelistAllAppIdArray);
+                mLocalActivityManager.setDeviceIdleWhitelist(
+                        mPowerSaveWhitelistAllAppIdArray, mPowerSaveWhitelistExceptIdleAppIdArray);
                 mLocalPowerManager.setDeviceIdleWhitelist(mPowerSaveWhitelistAllAppIdArray);
 
                 mLocalActivityManager.registerScreenObserver(mScreenObserver);
@@ -2576,11 +2577,8 @@ public class DeviceIdleController extends SystemService
         mPowerSaveWhitelistUserAppIdArray = buildAppIdArray(null,
                 mPowerSaveWhitelistUserApps, mPowerSaveWhitelistUserAppIds);
         if (mLocalActivityManager != null) {
-            if (DEBUG) {
-                Slog.d(TAG, "Setting activity manager whitelist to "
-                        + Arrays.toString(mPowerSaveWhitelistAllAppIdArray));
-            }
-            mLocalActivityManager.setDeviceIdleWhitelist(mPowerSaveWhitelistAllAppIdArray);
+            mLocalActivityManager.setDeviceIdleWhitelist(
+                    mPowerSaveWhitelistAllAppIdArray, mPowerSaveWhitelistExceptIdleAppIdArray);
         }
         if (mLocalPowerManager != null) {
             if (DEBUG) {
