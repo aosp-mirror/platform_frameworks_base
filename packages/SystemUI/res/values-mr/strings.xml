@@ -436,13 +436,13 @@
     <string name="media_projection_remember_text" msgid="3103510882172746752">"पुन्हा दर्शवू नका"</string>
     <string name="clear_all_notifications_text" msgid="814192889771462828">"सर्व साफ करा"</string>
     <string name="manage_notifications_text" msgid="8035284146227267681">"सूचना व्यवस्थापित करा"</string>
-    <string name="dnd_suppressing_shade_text" msgid="5179021215370153526">"व्यत्यय आणू नका सूचना लपवत आहे"</string>
+    <string name="dnd_suppressing_shade_text" msgid="1904574852846769301">"व्यत्यय आणून नकाद्वारे सूचना थांबवल्या"</string>
     <string name="media_projection_action_text" msgid="8470872969457985954">"आता सुरू करा"</string>
     <string name="empty_shade_text" msgid="708135716272867002">"सूचना नाहीत"</string>
     <string name="profile_owned_footer" msgid="8021888108553696069">"प्रोफाईलचे परीक्षण केले जाऊ शकते"</string>
     <string name="vpn_footer" msgid="2388611096129106812">"नेटवर्कचे परीक्षण केले जाऊ शकते"</string>
     <string name="branded_vpn_footer" msgid="2168111859226496230">"नेटवर्कचे परीक्षण केले जाऊ शकते"</string>
-    <string name="quick_settings_disclosure_management_monitoring" msgid="6645176135063957394">"आपली संस्था हे डिव्हाइस व्यवस्थापित करते आणि नेटवर्क रहदारीचे परीक्षण करू शकते"</string>
+    <string name="quick_settings_disclosure_management_monitoring" msgid="6645176135063957394">"तुमची संस्था हे डिव्हाइस व्यवस्थापित करते आणि नेटवर्क रहदारीचे परीक्षण करू शकते"</string>
     <string name="quick_settings_disclosure_named_management_monitoring" msgid="370622174777570853">"<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> हे डिव्हाइस व्यवस्थापित करते आणि नेटवर्क रहदारीचे परीक्षण करू शकते"</string>
     <string name="quick_settings_disclosure_management_named_vpn" msgid="1085137869053332307">"डिव्हाइस तुमच्या संस्थेद्वारे व्यवस्थापित केले जाते आणि ते <xliff:g id="VPN_APP">%1$s</xliff:g> शी कनेक्ट केलेले आहे"</string>
     <string name="quick_settings_disclosure_named_management_named_vpn" msgid="6290456493852584017">"डिव्हाइस <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> द्वारे व्यवस्थापित केले जाते आणि ते <xliff:g id="VPN_APP">%2$s</xliff:g> शी कनेक्ट केलेले आहे"</string>
@@ -450,7 +450,7 @@
     <string name="quick_settings_disclosure_named_management" msgid="1059403025094542908">"डिव्हाइस <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> द्वारे व्यवस्थापित केले जाते"</string>
     <string name="quick_settings_disclosure_management_vpns" msgid="3698767349925266482">"डिव्हाइस तुमच्या संस्थेद्वारे व्यवस्थापित केले जाते आणि ते VPN शी कनेक्ट केलेले आहे"</string>
     <string name="quick_settings_disclosure_named_management_vpns" msgid="7777821385318891527">"डिव्हाइस <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> द्वारे व्यवस्थापित केले जाते आणि ते VPN शी कनेक्ट केलेले आहे"</string>
-    <string name="quick_settings_disclosure_managed_profile_monitoring" msgid="5125463987558278215">"आपली संस्था आपल्या कार्य प्रोफाइलमधील नेटवर्क रहदारीचे परीक्षण करू शकते"</string>
+    <string name="quick_settings_disclosure_managed_profile_monitoring" msgid="5125463987558278215">"तुमची संस्था आपल्या कार्य प्रोफाइलमधील नेटवर्क रहदारीचे परीक्षण करू शकते"</string>
     <string name="quick_settings_disclosure_named_managed_profile_monitoring" msgid="8973606847896650284">"<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> आपल्या कार्य प्रोफाइलमधील नेटवर्क रहदारीचे परीक्षण करू शकते"</string>
     <string name="quick_settings_disclosure_monitoring" msgid="679658227269205728">"नेटवर्कचे परीक्षण केले जाऊ शकते"</string>
     <string name="quick_settings_disclosure_vpns" msgid="8170318392053156330">"डिव्हाइस VPN शी कनेक्ट केलेले आहे"</string>
@@ -817,7 +817,7 @@
     <string name="notification_channel_battery" msgid="5786118169182888462">"बॅटरी"</string>
     <string name="notification_channel_screenshot" msgid="6314080179230000938">"स्क्रीनशॉट"</string>
     <string name="notification_channel_general" msgid="4525309436693914482">"सर्वसाधारण मेसेज"</string>
-    <string name="notification_channel_storage" msgid="3077205683020695313">"संचय"</string>
+    <string name="notification_channel_storage" msgid="3077205683020695313">"स्टोरेज"</string>
     <string name="notification_channel_hints" msgid="7323870212489152689">"सूचना"</string>
     <string name="instant_apps" msgid="6647570248119804907">"इन्सटंट अ‍ॅप्स"</string>
     <string name="instant_apps_message" msgid="8116608994995104836">"इन्सटंट अॅप्सना स्थापनेची आवश्यकता नसते."</string>
