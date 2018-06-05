@@ -112,7 +112,7 @@ public class PhoneFallbackEventHandler implements FallbackEventHandler {
             }
 
             case KeyEvent.KEYCODE_CALL: {
-                if (getKeyguardManager().inKeyguardRestrictedInputMode() || dispatcher == null) {
+                if (isNotInstantAppAndKeyguardRestricted(dispatcher)) {
                     break;
                 }
                 if (event.getRepeatCount() == 0) {
@@ -139,7 +139,7 @@ public class PhoneFallbackEventHandler implements FallbackEventHandler {
             }
 
             case KeyEvent.KEYCODE_CAMERA: {
-                if (getKeyguardManager().inKeyguardRestrictedInputMode() || dispatcher == null) {
+                if (isNotInstantAppAndKeyguardRestricted(dispatcher)) {
                     break;
                 }
                 if (event.getRepeatCount() == 0) {
@@ -164,7 +164,7 @@ public class PhoneFallbackEventHandler implements FallbackEventHandler {
             }
 
             case KeyEvent.KEYCODE_SEARCH: {
-                if (getKeyguardManager().inKeyguardRestrictedInputMode() || dispatcher == null) {
+                if (isNotInstantAppAndKeyguardRestricted(dispatcher)) {
                     break;
                 }
                 if (event.getRepeatCount() == 0) {
@@ -200,6 +200,11 @@ public class PhoneFallbackEventHandler implements FallbackEventHandler {
             }
         }
         return false;
+    }
+
+    private boolean isNotInstantAppAndKeyguardRestricted(KeyEvent.DispatcherState dispatcher) {
+        return !mContext.getPackageManager().isInstantApp()
+                && (getKeyguardManager().inKeyguardRestrictedInputMode() || dispatcher == null);
     }
 
     boolean onKeyUp(int keyCode, KeyEvent event) {
@@ -239,7 +244,7 @@ public class PhoneFallbackEventHandler implements FallbackEventHandler {
             }
 
             case KeyEvent.KEYCODE_CAMERA: {
-                if (getKeyguardManager().inKeyguardRestrictedInputMode()) {
+                if (isNotInstantAppAndKeyguardRestricted(dispatcher)) {
                     break;
                 }
                 if (event.isTracking() && !event.isCanceled()) {
@@ -249,7 +254,7 @@ public class PhoneFallbackEventHandler implements FallbackEventHandler {
             }
 
             case KeyEvent.KEYCODE_CALL: {
-                if (getKeyguardManager().inKeyguardRestrictedInputMode()) {
+                if (isNotInstantAppAndKeyguardRestricted(dispatcher)) {
                     break;
                 }
                 if (event.isTracking() && !event.isCanceled()) {
