@@ -1262,7 +1262,7 @@
     <string name="share_remote_bugreport_notification_message_finished" msgid="6029609949340992866">"您的管理员希望获取错误报告，以便排查此设备的问题。报告可能会透露您设备上的应用和数据。"</string>
     <string name="share_remote_bugreport_action" msgid="6249476773913384948">"分享"</string>
     <string name="decline_remote_bugreport_action" msgid="6230987241608770062">"拒绝"</string>
-    <string name="select_input_method" msgid="8547250819326693584">"更改键盘"</string>
+    <string name="select_input_method" msgid="4653387336791222978">"选择输入法"</string>
     <string name="show_ime" msgid="2506087537466597099">"开启后，连接到实体键盘时，它会一直显示在屏幕上"</string>
     <string name="hardware" msgid="194658061510127999">"显示虚拟键盘"</string>
     <string name="select_keyboard_layout_notification_title" msgid="597189518763083494">"配置实体键盘"</string>
@@ -1270,9 +1270,9 @@
     <string name="fast_scroll_alphabet" msgid="5433275485499039199">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="4030170524595123610">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="alert_windows_notification_channel_group_name" msgid="1463953341148606396">"显示在其他应用的上层"</string>
-    <string name="alert_windows_notification_channel_name" msgid="3116610965549449803">"<xliff:g id="NAME">%s</xliff:g>正在其他应用的上层显示内容"</string>
+    <string name="alert_windows_notification_channel_name" msgid="3116610965549449803">"“<xliff:g id="NAME">%s</xliff:g>”正在其他应用的上层显示内容"</string>
     <string name="alert_windows_notification_title" msgid="3697657294867638947">"“<xliff:g id="NAME">%s</xliff:g>”正在其他应用的上层显示内容"</string>
-    <string name="alert_windows_notification_message" msgid="8917232109522912560">"如果您不想让<xliff:g id="NAME">%s</xliff:g>使用此功能，请点按以打开设置，然后关闭此功能。"</string>
+    <string name="alert_windows_notification_message" msgid="8917232109522912560">"如果您不想让“<xliff:g id="NAME">%s</xliff:g>”使用此功能，请点按以打开设置，然后关闭此功能。"</string>
     <string name="alert_windows_notification_turn_off_action" msgid="2902891971380544651">"关闭"</string>
     <string name="ext_media_checking_notification_title" msgid="4411133692439308924">"正在检查<xliff:g id="NAME">%s</xliff:g>…"</string>
     <string name="ext_media_checking_notification_message" msgid="410185170877285434">"正在检查当前内容"</string>

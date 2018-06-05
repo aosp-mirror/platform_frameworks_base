@@ -1284,7 +1284,7 @@
     <string name="share_remote_bugreport_notification_message_finished" msgid="6029609949340992866">"Administrator je zatražio izveštaj o grešci radi lakšeg rešavanja problema u vezi sa ovim uređajem. Aplikacije i podaci mogu da se dele."</string>
     <string name="share_remote_bugreport_action" msgid="6249476773913384948">"DELI"</string>
     <string name="decline_remote_bugreport_action" msgid="6230987241608770062">"ODBIJ"</string>
-    <string name="select_input_method" msgid="8547250819326693584">"Promenite tastaturu"</string>
+    <string name="select_input_method" msgid="4653387336791222978">"Izbor metoda unosa"</string>
     <string name="show_ime" msgid="2506087537466597099">"Zadrži je na ekranu dok je fizička tastatura aktivna"</string>
     <string name="hardware" msgid="194658061510127999">"Prikaži virtuelnu tastaturu"</string>
     <string name="select_keyboard_layout_notification_title" msgid="597189518763083494">"Konfigurišite fizičku tastaturu"</string>

@@ -1263,7 +1263,7 @@
     <string name="share_remote_bugreport_notification_message_finished" msgid="6029609949340992866">"இந்தச் சாதனத்தின் பிழைகாண்பதற்கு உதவ, உங்கள் நிர்வாகி பிழை அறிக்கையைக் கேட்டுள்ளார். பயன்பாடுகளும் தரவும் பகிரப்படலாம்."</string>
     <string name="share_remote_bugreport_action" msgid="6249476773913384948">"பகிர்"</string>
     <string name="decline_remote_bugreport_action" msgid="6230987241608770062">"வேண்டாம்"</string>
-    <string name="select_input_method" msgid="8547250819326693584">"விசைப்பலகையை மாற்று"</string>
+    <string name="select_input_method" msgid="4653387336791222978">"உள்ளீட்டு முறையைத் தேர்வுசெய்க"</string>
     <string name="show_ime" msgid="2506087537466597099">"கைமுறை விசைப்பலகை இயக்கத்தில் இருக்கும் போது IMEஐ திரையில் வைத்திரு"</string>
     <string name="hardware" msgid="194658061510127999">"விர்ச்சுவல் விசைப்பலகையை காட்டு"</string>
     <string name="select_keyboard_layout_notification_title" msgid="597189518763083494">"கைமுறை விசைப்பலகையை உள்ளமைக்கவும்"</string>

@@ -1262,7 +1262,7 @@
     <string name="share_remote_bugreport_notification_message_finished" msgid="6029609949340992866">"관리자가 이 기기의 문제해결을 위해 버그 신고를 요청했습니다. 앱과 데이터가 공유될 수 있습니다."</string>
     <string name="share_remote_bugreport_action" msgid="6249476773913384948">"공유"</string>
     <string name="decline_remote_bugreport_action" msgid="6230987241608770062">"거부"</string>
-    <string name="select_input_method" msgid="8547250819326693584">"키보드 변경"</string>
+    <string name="select_input_method" msgid="4653387336791222978">"입력 방법 선택"</string>
     <string name="show_ime" msgid="2506087537466597099">"물리적 키보드가 활성 상태인 경우 화면에 켜 둠"</string>
     <string name="hardware" msgid="194658061510127999">"가상 키보드 표시"</string>
     <string name="select_keyboard_layout_notification_title" msgid="597189518763083494">"물리적 키보드 설정"</string>

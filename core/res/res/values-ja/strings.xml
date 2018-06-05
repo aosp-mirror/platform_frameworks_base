@@ -1262,7 +1262,7 @@
     <string name="share_remote_bugreport_notification_message_finished" msgid="6029609949340992866">"管理者からこの端末のトラブルシューティングに役立てるためバグレポートを共有するようリクエストがありました。アプリやデータが共有される場合があります。"</string>
     <string name="share_remote_bugreport_action" msgid="6249476773913384948">"共有する"</string>
     <string name="decline_remote_bugreport_action" msgid="6230987241608770062">"共有しない"</string>
-    <string name="select_input_method" msgid="8547250819326693584">"キーボードの変更"</string>
+    <string name="select_input_method" msgid="4653387336791222978">"入力方法の選択"</string>
     <string name="show_ime" msgid="2506087537466597099">"物理キーボードが有効になっている間は、画面に表示されます"</string>
     <string name="hardware" msgid="194658061510127999">"仮想キーボードの表示"</string>
     <string name="select_keyboard_layout_notification_title" msgid="597189518763083494">"物理キーボードの設定"</string>

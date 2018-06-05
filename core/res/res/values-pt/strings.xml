@@ -281,7 +281,7 @@
     <string name="permgrouprequest_calendar" msgid="289900767793189421">"Permitir que &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; acesse sua agenda?"</string>
     <string name="permgrouplab_sms" msgid="228308803364967808">"SMS"</string>
     <string name="permgroupdesc_sms" msgid="4656988620100940350">"envie e veja mensagens SMS"</string>
-    <string name="permgrouprequest_sms" msgid="7168124215838204719">"Permitir que &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; envie e veja mensagens SMS?"</string>
+    <string name="permgrouprequest_sms" msgid="7168124215838204719">"Permitir que &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; acesse e envie mensagens SMS?"</string>
     <string name="permgrouplab_storage" msgid="1971118770546336966">"Armazenamento"</string>
     <string name="permgroupdesc_storage" msgid="637758554581589203">"acesse fotos, mídia e arquivos do dispositivo"</string>
     <string name="permgrouprequest_storage" msgid="7885942926944299560">"Permitir que &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; acesse fotos, mídia e arquivos no seu dispositivo?"</string>
@@ -296,7 +296,7 @@
     <string name="permgrouprequest_calllog" msgid="8487355309583773267">"Permitir que o app &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; acesse seu registro de chamadas telefônicas?"</string>
     <string name="permgrouplab_phone" msgid="5229115638567440675">"Telefone"</string>
     <string name="permgroupdesc_phone" msgid="6234224354060641055">"faça e gerencie chamadas telefônicas"</string>
-    <string name="permgrouprequest_phone" msgid="9166979577750581037">"Permitir que &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; faça e gerencie chamadas telefônicas?"</string>
+    <string name="permgrouprequest_phone" msgid="9166979577750581037">"Permitir que &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; gerencie e faça chamadas telefônicas?"</string>
     <string name="permgrouplab_sensors" msgid="416037179223226722">"Sensores corporais"</string>
     <string name="permgroupdesc_sensors" msgid="7147968539346634043">"acesse dados do sensor sobre seus sinais vitais"</string>
     <string name="permgrouprequest_sensors" msgid="6349806962814556786">"Permitir que &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; acesse os dados do sensor sobre seus sinais vitais?"</string>
@@ -1262,7 +1262,7 @@
     <string name="share_remote_bugreport_notification_message_finished" msgid="6029609949340992866">"Seu administrador solicitou um relatório do bug para ajudar a resolver problemas deste dispositivo. É possível que apps e dados sejam compartilhados."</string>
     <string name="share_remote_bugreport_action" msgid="6249476773913384948">"COMPARTILHAR"</string>
     <string name="decline_remote_bugreport_action" msgid="6230987241608770062">"RECUSAR"</string>
-    <string name="select_input_method" msgid="8547250819326693584">"Alterar teclado"</string>
+    <string name="select_input_method" msgid="4653387336791222978">"Selecione o método de entrada"</string>
     <string name="show_ime" msgid="2506087537466597099">"Manter na tela enquanto o teclado físico estiver ativo"</string>
     <string name="hardware" msgid="194658061510127999">"Mostrar teclado virtual"</string>
     <string name="select_keyboard_layout_notification_title" msgid="597189518763083494">"Configurar teclado físico"</string>
@@ -1272,7 +1272,7 @@
     <string name="alert_windows_notification_channel_group_name" msgid="1463953341148606396">"Sobrepor a outros apps"</string>
     <string name="alert_windows_notification_channel_name" msgid="3116610965549449803">"<xliff:g id="NAME">%s</xliff:g> exibido sobre outros apps"</string>
     <string name="alert_windows_notification_title" msgid="3697657294867638947">"<xliff:g id="NAME">%s</xliff:g> exibido sobre outros apps."</string>
-    <string name="alert_windows_notification_message" msgid="8917232109522912560">"Se você não deseja que o <xliff:g id="NAME">%s</xliff:g> use este recurso, toque para abrir as configurações e desativá-lo."</string>
+    <string name="alert_windows_notification_message" msgid="8917232109522912560">"Se você não quer que o <xliff:g id="NAME">%s</xliff:g> use este recurso, toque para abrir as configurações e desativá-lo."</string>
     <string name="alert_windows_notification_turn_off_action" msgid="2902891971380544651">"Desativar"</string>
     <string name="ext_media_checking_notification_title" msgid="4411133692439308924">"Verificando <xliff:g id="NAME">%s</xliff:g>…"</string>
     <string name="ext_media_checking_notification_message" msgid="410185170877285434">"Analisando conteúdo atual"</string>
