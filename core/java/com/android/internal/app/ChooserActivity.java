@@ -934,13 +934,15 @@ public class ChooserActivity extends ResolverActivity {
         public static final int TARGET_STANDARD = 2;
 
         private static final int MAX_SERVICE_TARGETS = 4;
-        private static final int MAX_TARGETS_PER_SERVICE = 4;
+        private static final int MAX_TARGETS_PER_SERVICE = 2;
 
         private final List<ChooserTargetInfo> mServiceTargets = new ArrayList<>();
         private final List<TargetInfo> mCallerTargets = new ArrayList<>();
         private boolean mShowServiceTargets;
 
         private float mLateFee = 1.f;
+
+        private boolean mTargetsNeedPruning = false;
 
         private final BaseChooserTargetComparator mBaseTargetComparator
                 = new BaseChooserTargetComparator();
@@ -1030,7 +1032,13 @@ public class ChooserActivity extends ResolverActivity {
             }
 
             if (mServiceTargets != null) {
-                pruneServiceTargets();
+                if (getDisplayInfoCount() == 0) {
+                    // b/109676071: When packages change, onListRebuilt() is called before
+                    // ResolverActivity.mDisplayList is re-populated; pruning now would cause the
+                    // list to disappear briefly, so instead we detect this case (the
+                    // set of targets suddenly dropping to zero) and remember to prune later.
+                    mTargetsNeedPruning = true;
+                }
             }
             if (DEBUG) Log.d(TAG, "List built querying services");
             queryTargetServices(this);
@@ -1117,6 +1125,14 @@ public class ChooserActivity extends ResolverActivity {
         public void addServiceResults(DisplayResolveInfo origTarget, List<ChooserTarget> targets) {
             if (DEBUG) Log.d(TAG, "addServiceResults " + origTarget + ", " + targets.size()
                     + " targets");
+
+            if (mTargetsNeedPruning && targets.size() > 0) {
+                // First proper update since we got an onListRebuilt() with (transient) 0 items.
+                // Clear out the target list and rebuild.
+                mServiceTargets.clear();
+                mTargetsNeedPruning = false;
+            }
+
             final float parentScore = getScore(origTarget);
             Collections.sort(targets, mBaseTargetComparator);
             float lastScore = 0;
@@ -1168,17 +1184,6 @@ public class ChooserActivity extends ResolverActivity {
                 }
             }
             mServiceTargets.add(chooserTargetInfo);
-        }
-
-        private void pruneServiceTargets() {
-            if (DEBUG) Log.d(TAG, "pruneServiceTargets");
-            for (int i = mServiceTargets.size() - 1; i >= 0; i--) {
-                final ChooserTargetInfo cti = mServiceTargets.get(i);
-                if (!hasResolvedTarget(cti.getResolveInfo())) {
-                    if (DEBUG) Log.d(TAG, " => " + i + " " + cti);
-                    mServiceTargets.remove(i);
-                }
-            }
         }
     }
 
