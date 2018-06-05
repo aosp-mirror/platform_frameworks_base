@@ -686,7 +686,9 @@ public final class AccessibilityEvent extends AccessibilityRecord implements Par
                     CONTENT_CHANGE_TYPE_SUBTREE,
                     CONTENT_CHANGE_TYPE_TEXT,
                     CONTENT_CHANGE_TYPE_CONTENT_DESCRIPTION,
-                    CONTENT_CHANGE_TYPE_PANE_TITLE
+                    CONTENT_CHANGE_TYPE_PANE_TITLE,
+                    CONTENT_CHANGE_TYPE_PANE_APPEARED,
+                    CONTENT_CHANGE_TYPE_PANE_DISAPPEARED
             })
     public @interface ContentChangeTypes {}
 
@@ -875,6 +877,8 @@ public final class AccessibilityEvent extends AccessibilityRecord implements Par
      *         <li>{@link #CONTENT_CHANGE_TYPE_TEXT}
      *         <li>{@link #CONTENT_CHANGE_TYPE_PANE_TITLE}
      *         <li>{@link #CONTENT_CHANGE_TYPE_UNDEFINED}
+     *         <li>{@link #CONTENT_CHANGE_TYPE_PANE_APPEARED}
+     *         <li>{@link #CONTENT_CHANGE_TYPE_PANE_DISAPPEARED}
      *         </ul>
      */
     @ContentChangeTypes
@@ -888,13 +892,15 @@ public final class AccessibilityEvent extends AccessibilityRecord implements Par
 
     private static String singleContentChangeTypeToString(int type) {
         switch (type) {
-            case CONTENT_CHANGE_TYPE_CONTENT_DESCRIPTION: {
+            case CONTENT_CHANGE_TYPE_CONTENT_DESCRIPTION:
                 return "CONTENT_CHANGE_TYPE_CONTENT_DESCRIPTION";
-            }
             case CONTENT_CHANGE_TYPE_SUBTREE: return "CONTENT_CHANGE_TYPE_SUBTREE";
             case CONTENT_CHANGE_TYPE_TEXT: return "CONTENT_CHANGE_TYPE_TEXT";
             case CONTENT_CHANGE_TYPE_PANE_TITLE: return "CONTENT_CHANGE_TYPE_PANE_TITLE";
             case CONTENT_CHANGE_TYPE_UNDEFINED: return "CONTENT_CHANGE_TYPE_UNDEFINED";
+            case CONTENT_CHANGE_TYPE_PANE_APPEARED: return "CONTENT_CHANGE_TYPE_PANE_APPEARED";
+            case CONTENT_CHANGE_TYPE_PANE_DISAPPEARED:
+                return "CONTENT_CHANGE_TYPE_PANE_DISAPPEARED";
             default: return Integer.toHexString(type);
         }
     }
@@ -945,6 +951,7 @@ public final class AccessibilityEvent extends AccessibilityRecord implements Par
                 return "WINDOWS_CHANGE_ACCESSIBILITY_FOCUSED";
             case WINDOWS_CHANGE_PARENT: return "WINDOWS_CHANGE_PARENT";
             case WINDOWS_CHANGE_CHILDREN: return "WINDOWS_CHANGE_CHILDREN";
+            case WINDOWS_CHANGE_PIP: return "WINDOWS_CHANGE_PIP";
             default: return Integer.toHexString(type);
         }
     }
