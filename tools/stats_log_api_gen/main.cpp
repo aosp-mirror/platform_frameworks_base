@@ -104,6 +104,7 @@ static int write_stats_log_cpp(FILE *out, const Atoms &atoms,
     fprintf(out, "#include <mutex>\n");
     fprintf(out, "#include <chrono>\n");
     fprintf(out, "#include <thread>\n");
+    fprintf(out, "#include <cutils/properties.h>\n");
     fprintf(out, "#include <stats_event_list.h>\n");
     fprintf(out, "#include <log/log.h>\n");
     fprintf(out, "#include <statslog.h>\n");
@@ -114,6 +115,7 @@ static int write_stats_log_cpp(FILE *out, const Atoms &atoms,
     fprintf(out, "namespace util {\n");
     fprintf(out, "// the single event tag id for all stats logs\n");
     fprintf(out, "const static int kStatsEventTag = 1937006964;\n");
+    fprintf(out, "const static bool kStatsdEnabled = property_get_bool(\"ro.statsd.enable\", true);\n");
 
     std::set<string> kTruncatingAtomNames = {"mobile_radio_power_state_changed",
                                              "audio_state_changed",
@@ -242,6 +244,7 @@ static int write_stats_log_cpp(FILE *out, const Atoms &atoms,
 
         fprintf(out, "{\n");
         argIndex = 1;
+        fprintf(out, "  if (kStatsdEnabled) {\n");
         fprintf(out, "    stats_event_list event(kStatsEventTag);\n");
         fprintf(out, "    event << android::elapsedRealtimeNano();\n\n");
         fprintf(out, "    event << code;\n\n");
@@ -286,6 +289,9 @@ static int write_stats_log_cpp(FILE *out, const Atoms &atoms,
         }
 
         fprintf(out, "    return event.write(LOG_ID_STATS);\n");
+        fprintf(out, "  } else {\n");
+        fprintf(out, "    return 1;\n");
+        fprintf(out, "  }\n");
         fprintf(out, "}\n");
         fprintf(out, "\n");
     }
@@ -375,6 +381,7 @@ static int write_stats_log_cpp(FILE *out, const Atoms &atoms,
 
         fprintf(out, "{\n");
         argIndex = 1;
+        fprintf(out, "  if (kStatsdEnabled) {\n");
         fprintf(out, "    stats_event_list event(kStatsEventTag);\n");
         fprintf(out, "    event << android::elapsedRealtimeNano();\n\n");
         fprintf(out, "    event << code;\n\n");
@@ -398,6 +405,9 @@ static int write_stats_log_cpp(FILE *out, const Atoms &atoms,
         }
 
         fprintf(out, "    return event.write(LOG_ID_STATS);\n");
+        fprintf(out, "  } else {\n");
+        fprintf(out, "    return 1;\n");
+        fprintf(out, "  }\n");
         fprintf(out, "}\n");
         fprintf(out, "\n");
     }
