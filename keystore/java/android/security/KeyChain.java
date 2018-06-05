@@ -352,8 +352,11 @@ public final class KeyChain {
      * selected alias or null will be returned via the
      * KeyChainAliasCallback callback.
      *
-     * <p>The device or profile owner can intercept this before the activity
-     * is shown, to pick a specific private key alias.
+     * <p>A device policy controller (as a device or profile owner) can
+     * intercept the request before the activity is shown, to pick a
+     * specific private key alias by implementing
+     * {@link android.app.admin.DeviceAdminReceiver#onChoosePrivateKeyAlias
+     * onChoosePrivateKeyAlias}.
      *
      * <p>{@code keyTypes} and {@code issuers} may be used to
      * highlight suggested choices to the user, although to cope with
@@ -363,7 +366,7 @@ public final class KeyChain {
      * <p>{@code host} and {@code port} may be used to give the user
      * more context about the server requesting the credentials.
      *
-     * <p>{@code alias} allows the chooser to preselect an existing
+     * <p>{@code alias} allows the caller to preselect an existing
      * alias which will still be subject to user confirmation.
      *
      * @param activity The {@link Activity} context to use for
@@ -403,18 +406,21 @@ public final class KeyChain {
      * selected alias or null will be returned via the
      * KeyChainAliasCallback callback.
      *
-     * <p>The device or profile owner can intercept this before the activity
-     * is shown, to pick a specific private key alias.</p>
+     * <p>A device policy controller (as a device or profile owner) can
+     * intercept the request before the activity is shown, to pick a
+     * specific private key alias by implementing
+     * {@link android.app.admin.DeviceAdminReceiver#onChoosePrivateKeyAlias
+     * onChoosePrivateKeyAlias}.
      *
      * <p>{@code keyTypes} and {@code issuers} may be used to
      * highlight suggested choices to the user, although to cope with
      * sometimes erroneous values provided by servers, the user may be
      * able to override these suggestions.
      *
-     * <p>{@code host} and {@code port} may be used to give the user
-     * more context about the server requesting the credentials.
+     * <p>{@code uri} may be used to give the user more context about
+     * the server requesting the credentials.
      *
-     * <p>{@code alias} allows the chooser to preselect an existing
+     * <p>{@code alias} allows the caller to preselect an existing
      * alias which will still be subject to user confirmation.
      *
      * @param activity The {@link Activity} context to use for
