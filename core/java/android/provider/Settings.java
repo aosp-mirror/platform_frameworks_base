@@ -7090,6 +7090,8 @@ public final class Settings {
          */
         public static final String DOZE_ALWAYS_ON = "doze_always_on";
 
+        private static final Validator DOZE_ALWAYS_ON_VALIDATOR = BOOLEAN_VALIDATOR;
+
         /**
          * Whether the device should pulse on pick up gesture.
          * @hide
@@ -8034,6 +8036,7 @@ public final class Settings {
             SYSTEM_NAVIGATION_KEYS_ENABLED,
             QS_TILES,
             DOZE_ENABLED,
+            DOZE_ALWAYS_ON,
             DOZE_PULSE_ON_PICK_UP,
             DOZE_PULSE_ON_DOUBLE_TAP,
             NFC_PAYMENT_DEFAULT_COMPONENT,
@@ -8172,6 +8175,7 @@ public final class Settings {
                     SYSTEM_NAVIGATION_KEYS_ENABLED_VALIDATOR);
             VALIDATORS.put(QS_TILES, QS_TILES_VALIDATOR);
             VALIDATORS.put(DOZE_ENABLED, DOZE_ENABLED_VALIDATOR);
+            VALIDATORS.put(DOZE_ALWAYS_ON, DOZE_ALWAYS_ON_VALIDATOR);
             VALIDATORS.put(DOZE_PULSE_ON_PICK_UP, DOZE_PULSE_ON_PICK_UP_VALIDATOR);
             VALIDATORS.put(DOZE_PULSE_ON_DOUBLE_TAP, DOZE_PULSE_ON_DOUBLE_TAP_VALIDATOR);
             VALIDATORS.put(NFC_PAYMENT_DEFAULT_COMPONENT, NFC_PAYMENT_DEFAULT_COMPONENT_VALIDATOR);
