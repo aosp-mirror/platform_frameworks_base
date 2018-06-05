@@ -1774,4 +1774,11 @@ public interface WindowManagerPolicy extends WindowManagerPolicyConstants {
      *                      {@link ActivityManager#LOCK_TASK_MODE_PINNED}.
      */
     void onLockTaskStateChangedLw(int lockTaskState);
+
+    /**
+     * Updates the flag about whether AOD is showing.
+     *
+     * @return whether the value was changed.
+     */
+    boolean setAodShowing(boolean aodShowing);
 }
