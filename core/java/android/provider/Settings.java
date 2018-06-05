@@ -12845,16 +12845,6 @@ public final class Settings {
                 "zram_enabled";
 
         /**
-         * Whether we have enable CPU frequency scaling for this device.
-         * For Wear, default is disable.
-         *
-         * The value is "1" for enable, "0" for disable.
-         * @hide
-         */
-        public static final String CPU_SCALING_ENABLED =
-                "cpu_frequency_scaling_enabled";
-
-        /**
          * Configuration flags for smart replies in notifications.
          * This is encoded as a key=value list, separated by commas. Ex:
          *
@@ -12939,15 +12929,6 @@ public final class Settings {
          */
         public static final String BACKUP_AGENT_TIMEOUT_PARAMETERS =
                 "backup_agent_timeout_parameters";
-
-        /**
-         * Whether we have enabled swapping on this device. For Wear, default is
-         * enabled.
-         *
-         * The value is "1" for enable, "0" for disable.
-         * @hide
-         */
-         public static final String SWAP_ENABLED = "swap_enabled";
 
         /**
          * Blacklist of GNSS satellites.
