@@ -579,7 +579,7 @@ message WakeupAlarmOccurred {
  * Changing from LOW to MEDIUM or HIGH can be considered the app waking the mobile radio.
  *
  * Logged from:
- *   frameworks/base/core/java/com/android/internal/os/BatteryStatsImpl.java
+ *   frameworks/base/services/core/java/com/android/server/NetworkManagementService.java
  */
 message MobileRadioPowerStateChanged {
     repeated AttributionNode attribution_node = 1;
@@ -593,7 +593,7 @@ message MobileRadioPowerStateChanged {
  * Changing from LOW to MEDIUM or HIGH can be considered the app waking the wifi radio.
  *
  * Logged from:
- *   frameworks/base/core/java/com/android/internal/os/BatteryStatsImpl.java
+ *   frameworks/base/services/core/java/com/android/server/NetworkManagementService.java
  */
 message WifiRadioPowerStateChanged {
     repeated AttributionNode attribution_node = 1;
