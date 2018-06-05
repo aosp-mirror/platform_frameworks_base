@@ -9432,6 +9432,12 @@ public final class Settings {
        public static final String USE_GOOGLE_MAIL = "use_google_mail";
 
         /**
+         * Whether or not switching/creating users is enabled by user.
+         * @hide
+         */
+        public static final String USER_SWITCHER_ENABLED = "user_switcher_enabled";
+
+        /**
          * Webview Data reduction proxy key.
          * @hide
          */

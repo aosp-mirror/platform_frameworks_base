@@ -2667,6 +2667,12 @@ public class UserManager {
         if (isDeviceInDemoMode(mContext)) {
             return false;
         }
+        // If user disabled this feature, don't show switcher
+        final boolean userSwitcherEnabled = Settings.Global.getInt(mContext.getContentResolver(),
+                Settings.Global.USER_SWITCHER_ENABLED, 1) != 0;
+        if (!userSwitcherEnabled) {
+            return false;
+        }
         List<UserInfo> users = getUsers(true);
         if (users == null) {
            return false;
