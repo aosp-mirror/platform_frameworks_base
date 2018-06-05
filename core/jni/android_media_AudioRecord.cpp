@@ -368,10 +368,19 @@ android_media_AudioRecord_setup(JNIEnv *env, jobject thiz, jobject weak_this,
     // of the Java object (in mNativeCallbackCookie) so we can free the memory in finalize()
     env->SetLongField(thiz, javaAudioRecordFields.nativeCallbackCookie, (jlong)lpCallbackData);
 
+    if (paa != NULL) {
+        // audio attributes were copied in AudioRecord creation
+        free(paa);
+        paa = NULL;
+    }
+
     return (jint) AUDIO_JAVA_SUCCESS;
 
     // failure:
 native_init_failure:
+    if (paa != NULL) {
+        free(paa);
+    }
     env->DeleteGlobalRef(lpCallbackData->audioRecord_class);
     env->DeleteGlobalRef(lpCallbackData->audioRecord_ref);
     delete lpCallbackData;
