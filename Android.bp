@@ -100,6 +100,7 @@ java_library {
         "core/java/android/app/backup/ISelectBackupTransportCallback.aidl",
         "core/java/android/app/slice/ISliceManager.aidl",
         "core/java/android/app/slice/ISliceListener.aidl",
+        "core/java/android/app/timedetector/ITimeDetectorService.aidl",
         "core/java/android/app/timezone/ICallback.aidl",
         "core/java/android/app/timezone/IRulesManager.aidl",
         "core/java/android/app/usage/ICacheQuotaService.aidl",

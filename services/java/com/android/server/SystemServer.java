@@ -229,6 +229,8 @@ public final class SystemServer {
             "com.android.server.slice.SliceManagerService$Lifecycle";
     private static final String CAR_SERVICE_HELPER_SERVICE_CLASS =
             "com.android.internal.car.CarServiceHelperService";
+    private static final String TIME_DETECTOR_SERVICE_CLASS =
+            "com.android.server.timedetector.TimeDetectorService$Lifecycle";
 
     private static final String PERSISTENT_DATA_BLOCK_PROP = "ro.frp.pst";
 
@@ -1234,6 +1236,14 @@ public final class SystemServer {
                 ServiceManager.addService(Context.COUNTRY_DETECTOR, countryDetector);
             } catch (Throwable e) {
                 reportWtf("starting Country Detector", e);
+            }
+            traceEnd();
+
+            traceBeginAndSlog("StartTimeDetectorService");
+            try {
+                mSystemServiceManager.startService(TIME_DETECTOR_SERVICE_CLASS);
+            } catch (Throwable e) {
+                reportWtf("starting StartTimeDetectorService service", e);
             }
             traceEnd();
 
