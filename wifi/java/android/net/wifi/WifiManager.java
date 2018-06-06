@@ -1763,6 +1763,19 @@ public class WifiManager {
     }
 
     /**
+     * Check if the chipset requires conversion of 5GHz Only apBand to ANY.
+     * @return {@code true} if required, {@code false} otherwise.
+     * @hide
+     */
+    public boolean isDualModeSupported() {
+        try {
+            return mService.needs5GHzToAnyApBandConversion();
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
      * Return the DHCP-assigned addresses from the last successful DHCP request,
      * if any.
      * @return the DHCP information
