@@ -384,7 +384,7 @@ public abstract class Uri implements Parcelable, Comparable<Uri> {
         if (scheme != null) {
             if (scheme.equalsIgnoreCase("tel") || scheme.equalsIgnoreCase("sip")
                     || scheme.equalsIgnoreCase("sms") || scheme.equalsIgnoreCase("smsto")
-                    || scheme.equalsIgnoreCase("mailto")) {
+                    || scheme.equalsIgnoreCase("mailto") || scheme.equalsIgnoreCase("nfc")) {
                 StringBuilder builder = new StringBuilder(64);
                 builder.append(scheme);
                 builder.append(':');
