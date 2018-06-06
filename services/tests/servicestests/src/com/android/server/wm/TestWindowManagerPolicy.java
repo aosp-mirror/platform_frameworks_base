@@ -598,4 +598,9 @@ class TestWindowManagerPolicy implements WindowManagerPolicy {
     @Override
     public void onLockTaskStateChangedLw(int lockTaskState) {
     }
+
+    @Override
+    public boolean setAodShowing(boolean aodShowing) {
+        return false;
+    }
 }
