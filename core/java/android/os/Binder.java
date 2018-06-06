@@ -138,15 +138,6 @@ public class Binder implements IBinder {
     }
 
     /**
-     * Dump proxy debug information.
-     *
-     * @hide
-     */
-    public static void dumpProxyDebugInfo() {
-        BinderProxy.dumpProxyDebugInfo();
-    }
-
-    /**
      * Check if binder transaction tracing is enabled.
      *
      * @hide
@@ -953,7 +944,8 @@ final class BinderProxy implements IBinder {
                     // about to crash.
                     final int totalUnclearedSize = unclearedSize();
                     if (totalUnclearedSize >= CRASH_AT_SIZE) {
-                        dumpProxyDebugInfo();
+                        dumpProxyInterfaceCounts();
+                        dumpPerUidProxyCounts();
                         Runtime.getRuntime().gc();
                         throw new AssertionError("Binder ProxyMap has too many entries: "
                                 + totalSize + " (total), " + totalUnclearedSize + " (uncleared), "
@@ -1038,11 +1030,21 @@ final class BinderProxy implements IBinder {
     private static ProxyMap sProxyMap = new ProxyMap();
 
     /**
+      * Dump proxy debug information.
+      *
+      * Note: this method is not thread-safe; callers must serialize with other
+      * accesses to sProxyMap, in particular {@link #getInstance(long, long)}.
+      *
       * @hide
       */
-    public static void dumpProxyDebugInfo() {
-        sProxyMap.dumpProxyInterfaceCounts();
-        sProxyMap.dumpPerUidProxyCounts();
+    private static void dumpProxyDebugInfo() {
+        if (Build.IS_DEBUGGABLE) {
+            sProxyMap.dumpProxyInterfaceCounts();
+            // Note that we don't call dumpPerUidProxyCounts(); this is because this
+            // method may be called as part of the uid limit being hit, and calling
+            // back into the UID tracking code would cause us to try to acquire a mutex
+            // that is held during that callback.
+        }
     }
 
     /**
