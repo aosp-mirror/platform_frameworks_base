@@ -53,7 +53,7 @@ public final class NetworkConstants {
 
     public static final int ETHER_HEADER_LEN = 14;
 
-    private static final byte FF = asByte(0xff);
+    public static final byte FF = asByte(0xff);
     public static final byte[] ETHER_ADDR_BROADCAST = {
         FF, FF, FF, FF, FF, FF
     };
