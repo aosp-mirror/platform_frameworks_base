@@ -20,8 +20,6 @@ import static android.app.ActivityManager.StackId.INVALID_STACK_ID;
 import static android.app.AppOpsManager.MODE_ALLOWED;
 import static android.app.AppOpsManager.MODE_DEFAULT;
 import static android.app.AppOpsManager.OP_NONE;
-import static android.app.AppOpsManager.OP_SYSTEM_ALERT_WINDOW;
-import static android.app.AppOpsManager.OP_TOAST_WINDOW;
 import static android.os.PowerManager.DRAW_WAKE_LOCK;
 import static android.os.Trace.TRACE_TAG_WINDOW_MANAGER;
 import static android.view.Display.DEFAULT_DISPLAY;
@@ -2737,8 +2735,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     }
 
     boolean isClosing() {
-        return mAnimatingExit || (mAppToken != null && mAppToken.isAnimating()
-                && mAppToken.hiddenRequested);
+        return mAnimatingExit || (mAppToken != null && mAppToken.isClosingOrEnteringPip());
     }
 
     void addWinAnimatorToList(ArrayList<WindowStateAnimator> animators) {
