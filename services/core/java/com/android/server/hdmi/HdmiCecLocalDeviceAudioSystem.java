@@ -15,9 +15,9 @@
  */
 package com.android.server.hdmi;
 
-
 import android.hardware.hdmi.HdmiDeviceInfo;
 import android.os.SystemProperties;
+import com.android.server.hdmi.HdmiAnnotations.ServiceThreadOnly;
 
 /**
  * Represent a logical device of type {@link HdmiDeviceInfo#DEVICE_AUDIO_SYSTEM} residing in
@@ -25,12 +25,14 @@ import android.os.SystemProperties;
  */
 public class HdmiCecLocalDeviceAudioSystem extends HdmiCecLocalDevice {
 
+    private static final String TAG = "HdmiCecLocalDeviceAudioSystem";
+
     protected HdmiCecLocalDeviceAudioSystem(HdmiControlService service) {
         super(service, HdmiDeviceInfo.DEVICE_AUDIO_SYSTEM);
     }
 
     @Override
-    @HdmiAnnotations.ServiceThreadOnly
+    @ServiceThreadOnly
     protected void onAddressAllocated(int logicalAddress, int reason) {
         assertRunOnServiceThread();
         mService.sendCecCommand(HdmiCecMessageBuilder.buildReportPhysicalAddressCommand(
@@ -41,7 +43,7 @@ public class HdmiCecLocalDeviceAudioSystem extends HdmiCecLocalDevice {
     }
 
     @Override
-    @HdmiAnnotations.ServiceThreadOnly
+    @ServiceThreadOnly
     protected int getPreferredAddress() {
         assertRunOnServiceThread();
         return SystemProperties.getInt(Constants.PROPERTY_PREFERRED_ADDRESS_AUDIO_SYSTEM,
@@ -49,10 +51,46 @@ public class HdmiCecLocalDeviceAudioSystem extends HdmiCecLocalDevice {
     }
 
     @Override
-    @HdmiAnnotations.ServiceThreadOnly
+    @ServiceThreadOnly
     protected void setPreferredAddress(int addr) {
         assertRunOnServiceThread();
         SystemProperties.set(Constants.PROPERTY_PREFERRED_ADDRESS_AUDIO_SYSTEM,
                 String.valueOf(addr));
+    }
+
+    @Override
+    @ServiceThreadOnly
+    protected boolean handleReportAudioStatus(HdmiCecMessage message) {
+        assertRunOnServiceThread();
+        // TODO(amyjojo): implement report audio status handler
+        HdmiLogger.debug(TAG + "Stub handleReportAudioStatus");
+        return true;
+    }
+
+    @Override
+    @ServiceThreadOnly
+    protected boolean handleInitiateArc(HdmiCecMessage message) {
+        assertRunOnServiceThread();
+        // TODO(amyjojo): implement initiate arc handler
+        HdmiLogger.debug(TAG + "Stub handleInitiateArc");
+        return true;
+    }
+
+    @Override
+    @ServiceThreadOnly
+    protected boolean handleReportArcInitiate(HdmiCecMessage message) {
+        assertRunOnServiceThread();
+        // TODO(amyjojo): implement report arc initiate handler
+        HdmiLogger.debug(TAG + "Stub handleReportArcInitiate");
+        return true;
+    }
+
+    @Override
+    @ServiceThreadOnly
+    protected boolean handleReportArcTermination(HdmiCecMessage message) {
+        assertRunOnServiceThread();
+        // TODO(amyjojo): implement report arc terminate handler
+        HdmiLogger.debug(TAG + "Stub handleReportArcTermination");
+        return true;
     }
 }
