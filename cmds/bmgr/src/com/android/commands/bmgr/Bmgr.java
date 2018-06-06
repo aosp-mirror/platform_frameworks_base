@@ -71,9 +71,7 @@ public final class Bmgr {
             return;
         }
 
-        mBmgr = IBackupManager.Stub.asInterface(ServiceManager.getService("backup"));
-        if (mBmgr == null) {
-            System.err.println(BMGR_NOT_RUNNING_ERR);
+        if (!isBmgrActive()) {
             return;
         }
 
@@ -148,6 +146,27 @@ public final class Bmgr {
 
         System.err.println("Unknown command");
         showUsage();
+    }
+
+    private boolean isBmgrActive() {
+        mBmgr = IBackupManager.Stub.asInterface(ServiceManager.getService("backup"));
+        if (mBmgr == null) {
+            System.err.println(BMGR_NOT_RUNNING_ERR);
+            return false;
+        }
+
+        try {
+            if (!mBmgr.isBackupServiceActive(UserHandle.USER_SYSTEM)) {
+                System.err.println(BMGR_NOT_RUNNING_ERR);
+                return false;
+            }
+        } catch (RemoteException e) {
+            System.err.println(e.toString());
+            System.err.println(BMGR_NOT_RUNNING_ERR);
+            return false;
+        }
+
+        return true;
     }
 
     private String enableToString(boolean enabled) {
