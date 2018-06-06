@@ -20,6 +20,7 @@ import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
 
 import android.app.ActivityManager;
 import android.app.KeyguardManager;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
@@ -102,9 +103,14 @@ public class RecentsTaskLoadPlan {
             ActivityManager.RecentTaskInfo t = mRawTasks.get(i);
 
             // Compose the task key
+            final ComponentName sourceComponent = t.origActivity != null
+                    // Activity alias if there is one
+                    ? t.origActivity
+                    // The real activity if there is no alias (or the target if there is one)
+                    : t.realActivity;
             final int windowingMode = t.configuration.windowConfiguration.getWindowingMode();
             TaskKey taskKey = new TaskKey(t.persistentId, windowingMode, t.baseIntent,
-                    t.userId, t.lastActiveTime);
+                    sourceComponent, t.userId, t.lastActiveTime);
 
             boolean isFreeformTask = windowingMode == WINDOWING_MODE_FREEFORM;
             boolean isStackTask = !isFreeformTask;

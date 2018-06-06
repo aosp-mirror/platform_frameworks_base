@@ -26,6 +26,7 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import android.content.ComponentName;
 import android.os.Looper;
 import android.support.test.filters.SmallTest;
 import android.support.test.runner.AndroidJUnit4;
@@ -61,7 +62,7 @@ public class HighResThumbnailLoaderTest extends SysuiSharedLibTestCase {
         MockitoAnnotations.initMocks(this);
         mLoader = new HighResThumbnailLoader(mMockActivityManagerWrapper, Looper.getMainLooper(),
                 false /* reducedResolution */);
-        mTask.key = new TaskKey(0, WINDOWING_MODE_UNDEFINED, null, 0, 0);
+        mTask.key = new TaskKey(0, WINDOWING_MODE_UNDEFINED, null, null, 0, 0);
         when(mMockActivityManagerWrapper.getTaskThumbnail(anyInt(), anyBoolean()))
                 .thenReturn(mThumbnailData);
         mLoader.setVisible(true);
