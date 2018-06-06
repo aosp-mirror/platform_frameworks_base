@@ -214,6 +214,40 @@ public class AppBackupUtilsTest {
     }
 
     @Test
+    public void appIsDisabled_stateDefaultManifestEnabled_returnsFalse() throws Exception {
+        ApplicationInfo applicationInfo = new ApplicationInfo();
+        applicationInfo.flags = 0;
+        applicationInfo.uid = Process.FIRST_APPLICATION_UID;
+        applicationInfo.backupAgentName = CUSTOM_BACKUP_AGENT_NAME;
+        applicationInfo.packageName = TEST_PACKAGE_NAME;
+        applicationInfo.enabled = true;
+
+        PackageManagerStub.sApplicationEnabledSetting =
+                PackageManager.COMPONENT_ENABLED_STATE_DEFAULT;
+
+        boolean isDisabled = AppBackupUtils.appIsDisabled(applicationInfo, mPackageManagerStub);
+
+        assertThat(isDisabled).isFalse();
+    }
+
+    @Test
+    public void appIsDisabled_stateDefaultManifestDisabled_returnsTrue() throws Exception {
+        ApplicationInfo applicationInfo = new ApplicationInfo();
+        applicationInfo.flags = 0;
+        applicationInfo.uid = Process.FIRST_APPLICATION_UID;
+        applicationInfo.backupAgentName = CUSTOM_BACKUP_AGENT_NAME;
+        applicationInfo.packageName = TEST_PACKAGE_NAME;
+        applicationInfo.enabled = false;
+
+        PackageManagerStub.sApplicationEnabledSetting =
+                PackageManager.COMPONENT_ENABLED_STATE_DEFAULT;
+
+        boolean isDisabled = AppBackupUtils.appIsDisabled(applicationInfo, mPackageManagerStub);
+
+        assertThat(isDisabled).isTrue();
+    }
+
+    @Test
     public void appIsDisabled_stateEnabled_returnsFalse() throws Exception {
         ApplicationInfo applicationInfo = new ApplicationInfo();
         applicationInfo.flags = 0;
