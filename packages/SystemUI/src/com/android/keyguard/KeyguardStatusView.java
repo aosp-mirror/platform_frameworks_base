@@ -231,9 +231,9 @@ public class KeyguardStatusView extends GridLayout implements
         if (view == mClockView) {
             float clockScale = smallClock ? mSmallClockScale : 1;
             Paint.Style style = smallClock ? Paint.Style.FILL_AND_STROKE : Paint.Style.FILL;
+            mClockView.animate().cancel();
             if (shouldAnimate) {
                 mClockView.setY(oldTop + heightOffset);
-                mClockView.animate().cancel();
                 mClockView.animate()
                         .setInterpolator(Interpolators.FAST_OUT_SLOW_IN)
                         .setDuration(duration)
@@ -257,10 +257,10 @@ public class KeyguardStatusView extends GridLayout implements
         } else if (view == mClockSeparator) {
             boolean hasSeparator = hasHeader && !mPulsing;
             float alpha = hasSeparator ? 1 : 0;
+            mClockSeparator.animate().cancel();
             if (shouldAnimate) {
                 boolean isAwake = mDarkAmount != 0;
                 mClockSeparator.setY(oldTop + heightOffset);
-                mClockSeparator.animate().cancel();
                 mClockSeparator.animate()
                         .setInterpolator(Interpolators.FAST_OUT_SLOW_IN)
                         .setDuration(duration)
