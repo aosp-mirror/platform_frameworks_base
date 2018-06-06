@@ -35,8 +35,7 @@
         android:layout_gravity="start"
         android:gravity="center_vertical"
         android:singleLine="true"
-        android:textAppearance="@style/TextAppearance.StatusBar.Expanded.Date"
-        android:textSize="@dimen/qs_time_collapsed_size"
+        android:textAppearance="@style/TextAppearance.QS.TileLabel"
         systemui:datePattern="@string/abbrev_wday_month_day_no_year_alarm" />
 
     <com.android.systemui.statusbar.phone.StatusIconContainer
