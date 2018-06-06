@@ -7588,4 +7588,17 @@ public class WindowManagerService extends IWindowManager.Stub
             mPolicy.onLockTaskStateChangedLw(lockTaskState);
         }
     }
+
+    /**
+     * Updates {@link WindowManagerPolicy} with new value about whether AOD  is showing. If AOD
+     * has changed, this will trigger a {@link WindowSurfacePlacer#performSurfacePlacement} to
+     * ensure the new value takes effect.
+     */
+    public void setAodShowing(boolean aodShowing) {
+        synchronized (mWindowMap) {
+            if (mPolicy.setAodShowing(aodShowing)) {
+                mWindowPlacerLocked.performSurfacePlacement();
+            }
+        }
+    }
 }
