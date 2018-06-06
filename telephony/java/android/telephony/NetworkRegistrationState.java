@@ -21,6 +21,7 @@ import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.telephony.AccessNetworkConstants.TransportType;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -59,15 +60,15 @@ public class NetworkRegistrationState implements Parcelable {
     /** Not registered. The device is not currently searching a new operator to register */
     public static final int REG_STATE_NOT_REG_NOT_SEARCHING = 0;
     /** Registered on home network */
-    public static final int REG_STATE_HOME = 1;
+    public static final int REG_STATE_HOME                  = 1;
     /** Not registered. The device is currently searching a new operator to register */
-    public static final int REG_STATE_NOT_REG_SEARCHING = 2;
+    public static final int REG_STATE_NOT_REG_SEARCHING     = 2;
     /** Registration denied */
-    public static final int REG_STATE_DENIED = 3;
+    public static final int REG_STATE_DENIED                = 3;
     /** Registration state is unknown */
-    public static final int REG_STATE_UNKNOWN = 4;
+    public static final int REG_STATE_UNKNOWN               = 4;
     /** Registered on roaming network */
-    public static final int REG_STATE_ROAMING = 5;
+    public static final int REG_STATE_ROAMING               = 5;
 
     /**
      * Supported service type
@@ -79,16 +80,16 @@ public class NetworkRegistrationState implements Parcelable {
                     SERVICE_TYPE_EMERGENCY})
     public @interface ServiceType {}
 
-    public static final int SERVICE_TYPE_VOICE = 1;
-    public static final int SERVICE_TYPE_DATA = 2;
-    public static final int SERVICE_TYPE_SMS = 3;
-    public static final int SERVICE_TYPE_VIDEO = 4;
-    public static final int SERVICE_TYPE_EMERGENCY = 5;
+    public static final int SERVICE_TYPE_VOICE      = 1;
+    public static final int SERVICE_TYPE_DATA       = 2;
+    public static final int SERVICE_TYPE_SMS        = 3;
+    public static final int SERVICE_TYPE_VIDEO      = 4;
+    public static final int SERVICE_TYPE_EMERGENCY  = 5;
 
     @Domain
     private final int mDomain;
 
-    /** {@link AccessNetworkConstants.TransportType}*/
+    /** {@link TransportType} */
     private final int mTransportType;
 
     @RegState
@@ -96,7 +97,7 @@ public class NetworkRegistrationState implements Parcelable {
 
     private final int mAccessNetworkTechnology;
 
-    private final int mReasonForDenial;
+    private final int mRejectCause;
 
     private final boolean mEmergencyOnly;
 
@@ -112,22 +113,35 @@ public class NetworkRegistrationState implements Parcelable {
     private DataSpecificRegistrationStates mDataSpecificStates;
 
     /**
-     * @param domain Network domain. Must be DOMAIN_CS or DOMAIN_PS.
-     * @param transportType Transport type. Must be {@link AccessNetworkConstants.TransportType}
-     * @param regState Network registration state.
-     * @param accessNetworkTechnology See TelephonyManager NETWORK_TYPE_XXXX.
-     * @param reasonForDenial Reason for denial if the registration state is DENIED.
-     * @param availableServices The supported service.
-     * @param cellIdentity The identity representing a unique cell
+     * @param domain Network domain. Must be a {@link Domain}. For {@link TransportType#WLAN}
+     * transport, this must set to {@link #DOMAIN_PS}.
+     * @param transportType Transport type. Must be one of the{@link TransportType}.
+     * @param regState Network registration state. Must be one of the {@link RegState}. For
+     * {@link TransportType#WLAN} transport, only {@link #REG_STATE_HOME} and
+     * {@link #REG_STATE_NOT_REG_NOT_SEARCHING} are valid states.
+     * @param accessNetworkTechnology Access network technology. Must be one of TelephonyManager
+     * NETWORK_TYPE_XXXX. For {@link TransportType#WLAN} transport, set to
+     * {@link TelephonyManager#NETWORK_TYPE_IWLAN}.
+     * @param rejectCause Reason for denial if the registration state is {@link #REG_STATE_DENIED}.
+     * Depending on {@code accessNetworkTechnology}, the values are defined in 3GPP TS 24.008
+     * 10.5.3.6 for UMTS, 3GPP TS 24.301 9.9.3.9 for LTE, and 3GPP2 A.S0001 6.2.2.44 for CDMA. If
+     * the reject cause is not supported or unknown, set it to 0.
+     * // TODO: Add IWLAN reject cause reference
+     * @param emergencyOnly True if this registration is for emergency only.
+     * @param availableServices The list of the supported services. Each element must be one of
+     * the {@link ServiceType}.
+     * @param cellIdentity The identity representing a unique cell or wifi AP. Set to null if the
+     * information is not available.
      */
-    public NetworkRegistrationState(int domain, int transportType, int regState,
-            int accessNetworkTechnology, int reasonForDenial, boolean emergencyOnly,
-            int[] availableServices, @Nullable CellIdentity cellIdentity) {
+    public NetworkRegistrationState(@Domain int domain, int transportType, @RegState int regState,
+                                    int accessNetworkTechnology, int rejectCause,
+                                    boolean emergencyOnly, int[] availableServices,
+                                    @Nullable CellIdentity cellIdentity) {
         mDomain = domain;
         mTransportType = transportType;
         mRegState = regState;
         mAccessNetworkTechnology = accessNetworkTechnology;
-        mReasonForDenial = reasonForDenial;
+        mRejectCause = rejectCause;
         mAvailableServices = availableServices;
         mCellIdentity = cellIdentity;
         mEmergencyOnly = emergencyOnly;
@@ -138,11 +152,13 @@ public class NetworkRegistrationState implements Parcelable {
      * @hide
      */
     public NetworkRegistrationState(int domain, int transportType, int regState,
-            int accessNetworkTechnology, int reasonForDenial, boolean emergencyOnly,
-            int[] availableServices, @Nullable CellIdentity cellIdentity, boolean cssSupported,
-            int roamingIndicator, int systemIsInPrl, int defaultRoamingIndicator) {
-        this(domain, transportType, regState, accessNetworkTechnology,
-                reasonForDenial, emergencyOnly, availableServices, cellIdentity);
+                                    int accessNetworkTechnology, int rejectCause,
+                                    boolean emergencyOnly, int[] availableServices,
+                                    @Nullable CellIdentity cellIdentity, boolean cssSupported,
+                                    int roamingIndicator, int systemIsInPrl,
+                                    int defaultRoamingIndicator) {
+        this(domain, transportType, regState, accessNetworkTechnology, rejectCause, emergencyOnly,
+                availableServices, cellIdentity);
 
         mVoiceSpecificStates = new VoiceSpecificRegistrationStates(cssSupported, roamingIndicator,
                 systemIsInPrl, defaultRoamingIndicator);
@@ -153,10 +169,11 @@ public class NetworkRegistrationState implements Parcelable {
      * @hide
      */
     public NetworkRegistrationState(int domain, int transportType, int regState,
-            int accessNetworkTechnology, int reasonForDenial, boolean emergencyOnly,
-            int[] availableServices, @Nullable CellIdentity cellIdentity, int maxDataCalls) {
-        this(domain, transportType, regState, accessNetworkTechnology,
-                reasonForDenial, emergencyOnly, availableServices, cellIdentity);
+                                    int accessNetworkTechnology, int rejectCause,
+                                    boolean emergencyOnly, int[] availableServices,
+                                    @Nullable CellIdentity cellIdentity, int maxDataCalls) {
+        this(domain, transportType, regState, accessNetworkTechnology, rejectCause, emergencyOnly,
+                availableServices, cellIdentity);
 
         mDataSpecificStates = new DataSpecificRegistrationStates(maxDataCalls);
     }
@@ -166,7 +183,7 @@ public class NetworkRegistrationState implements Parcelable {
         mTransportType = source.readInt();
         mRegState = source.readInt();
         mAccessNetworkTechnology = source.readInt();
-        mReasonForDenial = source.readInt();
+        mRejectCause = source.readInt();
         mEmergencyOnly = source.readBoolean();
         mAvailableServices = source.createIntArray();
         mCellIdentity = source.readParcelable(CellIdentity.class.getClassLoader());
@@ -211,10 +228,10 @@ public class NetworkRegistrationState implements Parcelable {
     }
 
     /**
-     * @return Reason for denial from network.
+     * @return Network reject cause
      */
-    public int getReasonForDenial() {
-        return mReasonForDenial;
+    public int getRejectCause() {
+        return mRejectCause;
     }
 
     /**
@@ -265,7 +282,7 @@ public class NetworkRegistrationState implements Parcelable {
                 .append(" regState=").append(regStateToString(mRegState))
                 .append(" accessNetworkTechnology=")
                 .append(TelephonyManager.getNetworkTypeName(mAccessNetworkTechnology))
-                .append(" reasonForDenial=").append(mReasonForDenial)
+                .append(" rejectCause=").append(mRejectCause)
                 .append(" emergencyEnabled=").append(mEmergencyOnly)
                 .append(" supportedServices=").append(mAvailableServices)
                 .append(" cellIdentity=").append(mCellIdentity)
@@ -276,8 +293,8 @@ public class NetworkRegistrationState implements Parcelable {
 
     @Override
     public int hashCode() {
-        return Objects.hash(mTransportType, mDomain, mRegState, mAccessNetworkTechnology,
-                mReasonForDenial, mEmergencyOnly, mAvailableServices, mCellIdentity,
+        return Objects.hash(mDomain, mTransportType, mRegState, mAccessNetworkTechnology,
+                mRejectCause, mEmergencyOnly, mAvailableServices, mCellIdentity,
                 mVoiceSpecificStates, mDataSpecificStates);
     }
 
@@ -294,7 +311,7 @@ public class NetworkRegistrationState implements Parcelable {
                 && mTransportType == other.mTransportType
                 && mRegState == other.mRegState
                 && mAccessNetworkTechnology == other.mAccessNetworkTechnology
-                && mReasonForDenial == other.mReasonForDenial
+                && mRejectCause == other.mRejectCause
                 && mEmergencyOnly == other.mEmergencyOnly
                 && (mAvailableServices == other.mAvailableServices
                     || Arrays.equals(mAvailableServices, other.mAvailableServices))
@@ -309,7 +326,7 @@ public class NetworkRegistrationState implements Parcelable {
         dest.writeInt(mTransportType);
         dest.writeInt(mRegState);
         dest.writeInt(mAccessNetworkTechnology);
-        dest.writeInt(mReasonForDenial);
+        dest.writeInt(mRejectCause);
         dest.writeBoolean(mEmergencyOnly);
         dest.writeIntArray(mAvailableServices);
         dest.writeParcelable(mCellIdentity, 0);
