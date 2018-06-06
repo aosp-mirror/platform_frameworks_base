@@ -607,6 +607,7 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
 
         updateNavButtonIcons();
         updateSlippery();
+        setUpSwipeUpOnboarding(isQuickStepSwipeUpEnabled());
     }
 
     public void updateNavButtonIcons() {
