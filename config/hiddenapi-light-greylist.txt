@@ -3370,6 +3370,7 @@ Landroid/net/INetworkScoreService$Stub;->asInterface(Landroid/os/IBinder;)Landro
 Landroid/net/INetworkStatsService$Stub$Proxy;-><init>(Landroid/os/IBinder;)V
 Landroid/net/INetworkStatsService$Stub$Proxy;->getMobileIfaces()[Ljava/lang/String;
 Landroid/net/INetworkStatsService;->forceUpdate()V
+Landroid/net/INetworkStatsService;->getDataLayerSnapshotForUid(I)Landroid/net/NetworkStats;
 Landroid/net/INetworkStatsService;->getMobileIfaces()[Ljava/lang/String;
 Landroid/net/INetworkStatsService;->openSession()Landroid/net/INetworkStatsSession;
 Landroid/net/INetworkStatsService;->openSessionForUsageStats(ILjava/lang/String;)Landroid/net/INetworkStatsSession;
@@ -3802,6 +3803,7 @@ Landroid/os/AsyncTask;->mTaskInvoked:Ljava/util/concurrent/atomic/AtomicBoolean;
 Landroid/os/AsyncTask;->mWorker:Landroid/os/AsyncTask$WorkerRunnable;
 Landroid/os/AsyncTask;->sDefaultExecutor:Ljava/util/concurrent/Executor;
 Landroid/os/AsyncTask;->setDefaultExecutor(Ljava/util/concurrent/Executor;)V
+Landroid/os/BaseBundle;->isParcelled()Z
 Landroid/os/BaseBundle;->mMap:Landroid/util/ArrayMap;
 Landroid/os/BaseBundle;->mParcelledData:Landroid/os/Parcel;
 Landroid/os/BaseBundle;->unparcel()V
