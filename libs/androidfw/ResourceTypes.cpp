@@ -459,7 +459,7 @@ status_t ResStringPool::setTo(const void* data, size_t size, bool copyData)
 
     // The chunk must be at least the size of the string pool header.
     if (size < sizeof(ResStringPool_header)) {
-        LOG_ALWAYS_FATAL("Bad string block: data size %zu is too small to be a string block", size);
+        ALOGW("Bad string block: data size %zu is too small to be a string block", size);
         return (mError=BAD_TYPE);
     }
 
@@ -469,7 +469,7 @@ status_t ResStringPool::setTo(const void* data, size_t size, bool copyData)
     if (validate_chunk(reinterpret_cast<const ResChunk_header*>(data), sizeof(ResStringPool_header),
                        reinterpret_cast<const uint8_t*>(data) + size,
                        "ResStringPool_header") != NO_ERROR) {
-        LOG_ALWAYS_FATAL("Bad string block: malformed block dimensions");
+        ALOGW("Bad string block: malformed block dimensions");
         return (mError=BAD_TYPE);
     }
 
