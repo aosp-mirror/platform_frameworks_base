@@ -204,7 +204,7 @@
     <dimen name="status_bar_padding_end">6dp</dimen>
 
     <!-- the radius of the overflow dot in the status bar -->
-    <dimen name="overflow_dot_radius">1dp</dimen>
+    <dimen name="overflow_dot_radius">2dp</dimen>
 
     <!-- the padding between dots in the icon overflow -->
     <dimen name="overflow_icon_dot_padding">3dp</dimen>
