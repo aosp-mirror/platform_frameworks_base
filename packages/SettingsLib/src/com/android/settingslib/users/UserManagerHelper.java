@@ -164,7 +164,7 @@ public final class UserManagerHelper {
      * @return All users other than user with userId.
      */
     public List<UserInfo> getAllUsersExceptUser(int userId) {
-        List<UserInfo> others = getAllUsers();
+        List<UserInfo> others = mUserManager.getUsers(/* excludeDying= */true);
 
         for (Iterator<UserInfo> iterator = others.iterator(); iterator.hasNext(); ) {
             UserInfo userInfo = iterator.next();
@@ -183,7 +183,7 @@ public final class UserManagerHelper {
         if (isHeadlessSystemUser()) {
             return getAllUsersExcludesSystemUser();
         }
-        return mUserManager.getUsers(true /* excludeDying */);
+        return mUserManager.getUsers(/* excludeDying= */true);
     }
 
     // User information accessors

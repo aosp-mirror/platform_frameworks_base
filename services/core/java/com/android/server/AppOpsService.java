@@ -1335,10 +1335,10 @@ public class AppOpsService extends IAppOpsService.Stub {
         int watchedUid = -1;
         final int callingUid = Binder.getCallingUid();
         final int callingPid = Binder.getCallingPid();
-        if (mContext.checkCallingOrSelfPermission(Manifest.permission.WATCH_APPOPS)
-                != PackageManager.PERMISSION_GRANTED) {
-            watchedUid = callingUid;
-        }
+        // TODO: should have a privileged permission to protect this.
+        // Also, if the caller has requested WATCH_FOREGROUND_CHANGES, should we require
+        // the USAGE_STATS permission since this can provide information about when an
+        // app is in the foreground?
         Preconditions.checkArgumentInRange(op, AppOpsManager.OP_NONE,
                 AppOpsManager._NUM_OP - 1, "Invalid op code: " + op);
         if (callback == null) {

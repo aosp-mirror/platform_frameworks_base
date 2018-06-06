@@ -114,7 +114,7 @@ public final class Helper {
             int sessionId, boolean compatMode) {
         final LogMaker log = new LogMaker(category)
                 .addTaggedData(MetricsEvent.FIELD_AUTOFILL_SERVICE, servicePackageName)
-                .addTaggedData(MetricsEvent.FIELD_AUTOFILL_SESSION_ID, sessionId);
+                .addTaggedData(MetricsEvent.FIELD_AUTOFILL_SESSION_ID, Integer.toString(sessionId));
         if (compatMode) {
             log.addTaggedData(MetricsEvent.FIELD_AUTOFILL_COMPAT_MODE, 1);
         }

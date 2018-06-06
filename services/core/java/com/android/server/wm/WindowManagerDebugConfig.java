@@ -54,7 +54,7 @@ public class WindowManagerDebugConfig {
     static final boolean DEBUG_STARTING_WINDOW_VERBOSE = false;
     static final boolean DEBUG_STARTING_WINDOW = DEBUG_STARTING_WINDOW_VERBOSE || false;
     static final boolean DEBUG_WALLPAPER = false;
-    static final boolean DEBUG_WALLPAPER_LIGHT = true || DEBUG_WALLPAPER;
+    static final boolean DEBUG_WALLPAPER_LIGHT = false || DEBUG_WALLPAPER;
     static final boolean DEBUG_DRAG = false;
     static final boolean DEBUG_SCREEN_ON = false;
     static final boolean DEBUG_SCREENSHOT = false;
