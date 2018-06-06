@@ -1556,6 +1556,7 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
         if (DEBUG_PAUSE) Slog.v(TAG_PAUSE, "Complete pause: " + prev);
 
         if (prev != null) {
+            prev.setWillCloseOrEnterPip(false);
             final boolean wasStopping = prev.isState(STOPPING);
             prev.setState(PAUSED, "completePausedLocked");
             if (prev.finishing) {
@@ -2421,11 +2422,12 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
         mStackSupervisor.setLaunchSource(next.info.applicationInfo.uid);
 
         boolean lastResumedCanPip = false;
+        ActivityRecord lastResumed = null;
         final ActivityStack lastFocusedStack = mStackSupervisor.getLastStack();
         if (lastFocusedStack != null && lastFocusedStack != this) {
             // So, why aren't we using prev here??? See the param comment on the method. prev doesn't
             // represent the last resumed activity. However, the last focus stack does if it isn't null.
-            final ActivityRecord lastResumed = lastFocusedStack.mResumedActivity;
+            lastResumed = lastFocusedStack.mResumedActivity;
             if (userLeaving && inMultiWindowMode() && lastFocusedStack.shouldBeVisible(next)) {
                 // The user isn't leaving if this stack is the multi-window mode and the last
                 // focused stack should still be visible.
@@ -2460,6 +2462,9 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
                 mService.updateLruProcessLocked(next.app, true, null);
             }
             if (DEBUG_STACK) mStackSupervisor.validateTopActivitiesLocked();
+            if (lastResumed != null) {
+                lastResumed.setWillCloseOrEnterPip(true);
+            }
             return true;
         } else if (mResumedActivity == next && next.isState(RESUMED)
                 && mStackSupervisor.allResumedActivitiesComplete()) {
