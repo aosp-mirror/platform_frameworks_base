@@ -816,6 +816,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
     private final MutableBoolean mTmpBoolean = new MutableBoolean(false);
 
+    private boolean mAodShowing;
+
     private static final int MSG_ENABLE_POINTER_LOCATION = 1;
     private static final int MSG_DISABLE_POINTER_LOCATION = 2;
     private static final int MSG_DISPATCH_MEDIA_KEY_WITH_WAKE_LOCK = 3;
@@ -3058,8 +3060,15 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         boolean keyguardLocked = isKeyguardLocked();
         boolean hideDockDivider = attrs.type == TYPE_DOCK_DIVIDER
                 && !mWindowManagerInternal.isStackVisible(WINDOWING_MODE_SPLIT_SCREEN_PRIMARY);
+        // If AOD is showing, the IME should be hidden. However, sometimes the AOD is considered
+        // hidden because it's in the process of hiding, but it's still being shown on screen.
+        // In that case, we want to continue hiding the IME until the windows have completed
+        // drawing. This way, we know that the IME can be safely shown since the other windows are
+        // now shown.
+        final boolean hideIme =
+                win.isInputMethodWindow() && (mAodShowing || !mWindowManagerDrawComplete);
         return (keyguardLocked && !allowWhenLocked && win.getDisplayId() == DEFAULT_DISPLAY)
-                || hideDockDivider;
+                || hideDockDivider || hideIme;
     }
 
     /** {@inheritDoc} */
@@ -8976,5 +8985,14 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     @Override
     public void onLockTaskStateChangedLw(int lockTaskState) {
         mImmersiveModeConfirmation.onLockTaskModeChangedLw(lockTaskState);
+    }
+
+    @Override
+    public boolean setAodShowing(boolean aodShowing) {
+        if (mAodShowing != aodShowing) {
+            mAodShowing = aodShowing;
+            return true;
+        }
+        return false;
     }
 }
