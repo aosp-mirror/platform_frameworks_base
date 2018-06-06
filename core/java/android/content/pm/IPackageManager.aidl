@@ -598,7 +598,6 @@ interface IPackageManager {
     boolean setApplicationHiddenSettingAsUser(String packageName, boolean hidden, int userId);
     boolean getApplicationHiddenSettingAsUser(String packageName, int userId);
 
-    void setSystemAppHiddenUntilInstalled(String packageName, boolean hidden);
     boolean setSystemAppInstallState(String packageName, boolean installed, int userId);
 
     IPackageInstaller getPackageInstaller();

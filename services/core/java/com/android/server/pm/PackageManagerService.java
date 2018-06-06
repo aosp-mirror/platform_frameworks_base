@@ -4789,7 +4789,8 @@ public class PackageManagerService extends IPackageManager.Stub
             // require the permission to be held; the calling uid and given user id referring
             // to the same user is not sufficient
             mPermissionManager.enforceCrossUserPermission(
-                    Binder.getCallingUid(), userId, false, false, true,
+                    Binder.getCallingUid(), userId, false, false,
+                    !isRecentsAccessingChildProfiles(Binder.getCallingUid(), userId),
                     "MATCH_ANY_USER flag requires INTERACT_ACROSS_USERS permission at "
                     + Debug.getCallers(5));
         } else if ((flags & PackageManager.MATCH_UNINSTALLED_PACKAGES) != 0 && isCallerSystemUser
@@ -13953,33 +13954,16 @@ public class PackageManagerService extends IPackageManager.Stub
     }
 
     @Override
-    public void setSystemAppHiddenUntilInstalled(String packageName, boolean hidden) {
-        enforceSystemOrPhoneCaller("setHiddenUntilInstalled");
-        synchronized (mPackages) {
-            final PackageSetting pkgSetting = mSettings.mPackages.get(packageName);
-            if (pkgSetting == null || !pkgSetting.isSystem()) {
-                return;
-            }
-            if (pkgSetting.pkg != null && pkgSetting.pkg.applicationInfo != null) {
-                ApplicationInfo ai = pkgSetting.pkg.applicationInfo;
-                ai.hiddenUntilInstalled = hidden;
-            }
-        }
-    }
-
-    @Override
     public boolean setSystemAppInstallState(String packageName, boolean installed, int userId) {
         enforceSystemOrPhoneCaller("setSystemAppInstallState");
-        synchronized (mPackages) {
-            PackageSetting pkgSetting = mSettings.mPackages.get(packageName);
-            // The target app should always be in system
-            if (pkgSetting == null || !pkgSetting.isSystem()) {
-                return false;
-            }
-            // Check if the install state is the same
-            if (pkgSetting.getInstalled(userId) == installed) {
-                return false;
-            }
+        PackageSetting pkgSetting = mSettings.mPackages.get(packageName);
+        // The target app should always be in system
+        if (pkgSetting == null || !pkgSetting.isSystem()) {
+            return false;
+        }
+        // Check if the install state is the same
+        if (pkgSetting.getInstalled(userId) == installed) {
+            return false;
         }
 
         long callingId = Binder.clearCallingIdentity();

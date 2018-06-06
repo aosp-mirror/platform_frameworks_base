@@ -642,7 +642,7 @@ public class PackageParser {
         // Returns false if the package is hidden system app until installed.
         if ((flags & PackageManager.MATCH_HIDDEN_UNTIL_INSTALLED_COMPONENTS) == 0
                 && !state.installed
-                && appInfo != null && appInfo.hiddenUntilInstalled) {
+                && appInfo != null && appInfo.isSystemApp()) {
             return false;
         }
 
