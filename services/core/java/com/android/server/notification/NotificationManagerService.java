@@ -4443,7 +4443,7 @@ public class NotificationManagerService extends SystemService {
                     if (index < 0) {
                         mNotificationList.add(r);
                         mUsageStats.registerPostedByApp(r);
-                        r.setInterruptive(true);
+                        r.setInterruptive(isVisuallyInterruptive(null, r));
                     } else {
                         old = mNotificationList.get(index);
                         mNotificationList.set(index, r);
@@ -4530,6 +4530,14 @@ public class NotificationManagerService extends SystemService {
             return true;
         }
 
+        if (r == null) {
+            if (DEBUG_INTERRUPTIVENESS) {
+                Log.v(TAG, "INTERRUPTIVENESS: "
+                        +  r.getKey() + " is not interruptive: null");
+            }
+            return false;
+        }
+
         Notification oldN = old.sbn.getNotification();
         Notification newN = r.sbn.getNotification();
 
@@ -4543,10 +4551,19 @@ public class NotificationManagerService extends SystemService {
 
         // Ignore visual interruptions from foreground services because users
         // consider them one 'session'. Count them for everything else.
-        if (r != null && (r.sbn.getNotification().flags & FLAG_FOREGROUND_SERVICE) != 0) {
+        if ((r.sbn.getNotification().flags & FLAG_FOREGROUND_SERVICE) != 0) {
             if (DEBUG_INTERRUPTIVENESS) {
                 Log.v(TAG, "INTERRUPTIVENESS: "
                         +  r.getKey() + " is not interruptive: foreground service");
+            }
+            return false;
+        }
+
+        // Ignore summary updates because we don't display most of the information.
+        if (r.sbn.isGroup() && r.sbn.getNotification().isGroupSummary()) {
+            if (DEBUG_INTERRUPTIVENESS) {
+                Log.v(TAG, "INTERRUPTIVENESS: "
+                        +  r.getKey() + " is not interruptive: summary");
             }
             return false;
         }
