@@ -252,7 +252,14 @@ static jlong ImageWriter_init(JNIEnv* env, jobject thiz, jobject weakThiz, jobje
      * after disconnect. MEDIA or CAMERA are treated the same internally. The producer listener
      * will be cleared after disconnect call.
      */
-    producer->connect(/*api*/NATIVE_WINDOW_API_CAMERA, /*listener*/ctx);
+    res = producer->connect(/*api*/NATIVE_WINDOW_API_CAMERA, /*listener*/ctx);
+    if (res != OK) {
+        ALOGE("%s: Connecting to surface producer interface failed: %s (%d)",
+                __FUNCTION__, strerror(-res), res);
+        jniThrowRuntimeException(env, "Failed to connect to native window");
+        return 0;
+    }
+
     jlong nativeCtx = reinterpret_cast<jlong>(ctx.get());
 
     // Get the dimension and format of the producer.
