@@ -1064,30 +1064,6 @@ public final class AutofillManagerService extends SystemService {
         }
 
         @Override
-        public int updateOrRestartSession(IBinder activityToken, IBinder appCallback,
-                AutofillId autoFillId, Rect bounds, AutofillValue value, int userId,
-                boolean hasCallback, int flags, ComponentName componentName, int sessionId,
-                int action, boolean compatMode) {
-            boolean restart = false;
-            synchronized (mLock) {
-                final AutofillManagerServiceImpl service = peekServiceForUserLocked(userId);
-                if (service != null) {
-                    restart = service.updateSessionLocked(sessionId, getCallingUid(), autoFillId,
-                            bounds, value, action, flags);
-                } else if (sVerbose) {
-                    Slog.v(TAG, "updateOrRestartSession(): no service for " + userId);
-                }
-            }
-            if (restart) {
-                return startSession(activityToken, appCallback, autoFillId, bounds, value, userId,
-                        hasCallback, flags, componentName, compatMode);
-            }
-
-            // Nothing changed...
-            return sessionId;
-        }
-
-        @Override
         public void setAutofillFailure(int sessionId, @NonNull List<AutofillId> ids, int userId) {
             synchronized (mLock) {
                 final AutofillManagerServiceImpl service = peekServiceForUserLocked(userId);
