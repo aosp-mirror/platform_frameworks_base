@@ -16,6 +16,7 @@
 package com.android.server.hdmi;
 
 import android.hardware.hdmi.HdmiDeviceInfo;
+import android.media.AudioManager;
 import android.os.SystemProperties;
 import com.android.server.hdmi.HdmiAnnotations.ServiceThreadOnly;
 
@@ -92,5 +93,26 @@ public class HdmiCecLocalDeviceAudioSystem extends HdmiCecLocalDevice {
         // TODO(amyjojo): implement report arc terminate handler
         HdmiLogger.debug(TAG + "Stub handleReportArcTermination");
         return true;
+    }
+
+    @Override
+    @ServiceThreadOnly
+    protected boolean handleGiveAudioStatus(HdmiCecMessage message) {
+        assertRunOnServiceThread();
+
+        reportAudioStatus(message);
+        return true;
+    }
+
+    private void reportAudioStatus(HdmiCecMessage message) {
+        assertRunOnServiceThread();
+
+        int volume = mService.getAudioManager().getStreamVolume(AudioManager.STREAM_MUSIC);
+        boolean mute = mService.getAudioManager().isStreamMute(AudioManager.STREAM_MUSIC);
+        int maxVolume = mService.getAudioManager().getStreamMaxVolume(AudioManager.STREAM_MUSIC);
+        int scaledVolume = VolumeControlAction.scaleToCecVolume(volume, maxVolume);
+
+        mService.sendCecCommand(HdmiCecMessageBuilder
+            .buildReportAudioStatus(mAddress, message.getSource(), scaledVolume, mute));
     }
 }
