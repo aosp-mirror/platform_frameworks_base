@@ -2143,7 +2143,13 @@ public class PackageManagerService extends IPackageManager.Stub
                         // app's nature doesn't depend on the user, so we can just check
                         // its browser nature in any user and generalize.
                         if (packageIsBrowser(packageName, userId)) {
-                            mSettings.setDefaultBrowserPackageNameLPw(null, userId);
+                            // If this browser is restored from user's backup, do not clear
+                            // default-browser state for this user
+                            final PackageSetting pkgSetting = mSettings.mPackages.get(packageName);
+                            if (pkgSetting.getInstallReason(userId)
+                                    != PackageManager.INSTALL_REASON_DEVICE_RESTORE) {
+                                mSettings.setDefaultBrowserPackageNameLPw(null, userId);
+                            }
                         }
 
                         // We may also need to apply pending (restored) runtime
