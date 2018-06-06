@@ -1194,3 +1194,87 @@ filegroup {
         "core/java/com/android/internal/util/HexDump.java",
     ],
 }
+
+metalava_framework_docs_args = "--manifest $(location core/res/AndroidManifest.xml) " +
+    "--hide-package com.android.okhttp " +
+    "--hide-package com.android.org.conscrypt --hide-package com.android.server " +
+    "--hide RequiresPermission " +
+    "--hide MissingPermission --hide BroadcastBehavior " +
+    "--hide HiddenSuperclass --hide DeprecationMismatch --hide UnavailableSymbol " +
+    "--hide SdkConstant --hide HiddenTypeParameter --hide Todo --hide Typo"
+
+doc_defaults {
+    name: "metalava-framework-docs-default",
+    srcs: [
+        // test mock src files.
+        "test-mock/src/android/test/mock/**/*.java",
+        // test runner excluding mock src files.
+        "test-runner/src/**/*.java",
+        "test-base/src/**/*.java",
+        ":opt-telephony-srcs",
+        ":opt-net-voip-srcs",
+        ":openjdk_javadoc_files",
+        ":non_openjdk_javadoc_files",
+        ":android_icu4j_src_files_for_docs",
+        ":gen-ojluni-jaif-annotated-srcs",
+    ],
+    exclude_srcs: [
+        ":annotated_ojluni_files",
+    ],
+    srcs_lib: "framework",
+    srcs_lib_whitelist_dirs: frameworks_base_subdirs,
+    srcs_lib_whitelist_pkgs: packages_to_document,
+    libs: [
+        "core-oj",
+        "core-libart",
+        "conscrypt",
+        "bouncycastle",
+        "okhttp",
+        "ext",
+        "framework",
+        "voip-common",
+        "android.test.mock",
+    ],
+    local_sourcepaths: frameworks_base_subdirs,
+    installable: false,
+    metalava_enabled: true,
+}
+
+droiddoc {
+    name: "metalava-api-stubs-docs",
+    defaults: ["metalava-framework-docs-default"],
+    api_tag_name: "METALAVA_PUBLIC",
+    api_filename: "public_api.txt",
+    private_api_filename: "private.txt",
+    removed_api_filename: "removed.txt",
+    arg_files: [
+        "core/res/AndroidManifest.xml",
+    ],
+    args: metalava_framework_docs_args,
+}
+
+droiddoc {
+    name: "metalava-system-api-stubs-docs",
+    defaults: ["metalava-framework-docs-default"],
+    api_tag_name: "METALAVA_SYSTEM",
+    api_filename: "system-api.txt",
+    private_api_filename: "system-private.txt",
+    private_dex_api_filename: "system-private-dex.txt",
+    removed_api_filename: "system-removed.txt",
+    arg_files: [
+        "core/res/AndroidManifest.xml",
+    ],
+    args: metalava_framework_docs_args + " --show-annotation android.annotation.SystemApi",
+}
+
+droiddoc {
+    name: "metalava-test-api-stubs-docs",
+    defaults: ["metalava-framework-docs-default"],
+    api_tag_name: "METALAVA_TEST",
+    api_filename: "test-api.txt",
+    removed_api_filename: "test-removed.txt",
+    arg_files: [
+        "core/res/AndroidManifest.xml",
+    ],
+    args: metalava_framework_docs_args + " --show-annotation android.annotation.TestApi",
+}
