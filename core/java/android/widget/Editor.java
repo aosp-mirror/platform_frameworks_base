@@ -1688,6 +1688,11 @@ public class Editor {
         if (ims == null) {
             return false;
         }
+        final boolean wasContentChanged = ims.mContentChanged;
+        if (!wasContentChanged && !ims.mSelectionModeChanged) {
+            return false;
+        }
+        ims.mContentChanged = false;
         ims.mSelectionModeChanged = false;
         final ExtractedTextRequest req = ims.mExtractedTextRequest;
         if (req == null) {
@@ -1703,7 +1708,7 @@ public class Editor {
                     + " end=" + ims.mChangedEnd
                     + " delta=" + ims.mChangedDelta);
         }
-        if (ims.mChangedStart < 0 && !ims.mContentChanged) {
+        if (ims.mChangedStart < 0 && !wasContentChanged) {
             ims.mChangedStart = EXTRACT_NOTHING;
         }
         if (extractTextInternal(req, ims.mChangedStart, ims.mChangedEnd,
