@@ -335,10 +335,7 @@
         <item name="*android:errorColor">?android:attr/colorError</item>
     </style>
 
-    <!-- Overlay manager may replace this theme -->
-    <style name="qs_base" parent="@*android:style/Theme.DeviceDefault.QuickSettings" />
-
-    <style name="qs_theme" parent="qs_base">
+    <style name="qs_theme" parent="@*android:style/Theme.DeviceDefault.QuickSettings">
         <item name="lightIconTheme">@style/QSIconTheme</item>
         <item name="darkIconTheme">@style/QSIconTheme</item>
         <item name="android:windowIsFloating">true</item>
@@ -501,7 +498,7 @@
            parent="@*android:style/TextAppearance.Material.Notification.Info">
     </style>
 
-    <style name="edit_theme" parent="qs_base">
+    <style name="edit_theme" parent="qs_theme">
         <item name="android:colorBackground">?android:attr/colorSecondary</item>
     </style>
 

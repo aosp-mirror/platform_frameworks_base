@@ -61,7 +61,7 @@ public class VolumeDialogComponent implements VolumeComponent, TunerService.Tuna
     private final VolumeDialogControllerImpl mController;
     private final InterestingConfigChanges mConfigChanges = new InterestingConfigChanges(
             ActivityInfo.CONFIG_FONT_SCALE | ActivityInfo.CONFIG_LOCALE
-            | ActivityInfo.CONFIG_ASSETS_PATHS);
+            | ActivityInfo.CONFIG_ASSETS_PATHS | ActivityInfo.CONFIG_UI_MODE);
     private VolumeDialog mDialog;
     private VolumePolicy mVolumePolicy = new VolumePolicy(
             DEFAULT_VOLUME_DOWN_TO_ENTER_SILENT,  // volumeDownToEnterSilent

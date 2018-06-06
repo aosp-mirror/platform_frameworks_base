@@ -265,7 +265,7 @@ class GlobalActionsDialog implements DialogInterface.OnDismissListener,
         if (!mHasVibrator) {
             mSilentModeAction = new SilentModeToggleAction();
         } else {
-            mSilentModeAction = new SilentModeTriStateAction(mContext, mAudioManager, mHandler);
+            mSilentModeAction = new SilentModeTriStateAction(mAudioManager, mHandler);
         }
         mAirplaneModeOn = new ToggleAction(
                 R.drawable.ic_lock_airplane_mode,
@@ -1211,12 +1211,10 @@ class GlobalActionsDialog implements DialogInterface.OnDismissListener,
 
         private final AudioManager mAudioManager;
         private final Handler mHandler;
-        private final Context mContext;
 
-        SilentModeTriStateAction(Context context, AudioManager audioManager, Handler handler) {
+        SilentModeTriStateAction(AudioManager audioManager, Handler handler) {
             mAudioManager = audioManager;
             mHandler = handler;
-            mContext = context;
         }
 
         private int ringerModeToIndex(int ringerMode) {
