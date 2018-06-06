@@ -122,7 +122,7 @@ public class StatusBarIconView extends AnimatedImageView implements StatusIconDi
     private final boolean mBlocked;
     private int mDensity;
     private float mIconScale = 1.0f;
-    private final Paint mDotPaint = new Paint();
+    private final Paint mDotPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
     private float mDotRadius;
     private int mStaticDotRadius;
     private int mVisibleState = STATE_ICON;
@@ -425,13 +425,12 @@ public class StatusBarIconView extends AnimatedImageView implements StatusIconDi
         }
         if (mDotAppearAmount != 0.0f) {
             float radius;
-            float alpha;
+            float alpha = Color.alpha(mDecorColor) / 255.f;
             if (mDotAppearAmount <= 1.0f) {
                 radius = mDotRadius * mDotAppearAmount;
-                alpha = 1.0f;
             } else {
                 float fadeOutAmount = mDotAppearAmount - 1.0f;
-                alpha = 1.0f - fadeOutAmount;
+                alpha = alpha * (1.0f - fadeOutAmount);
                 radius = NotificationUtils.interpolate(mDotRadius, getWidth() / 4, fadeOutAmount);
             }
             mDotPaint.setAlpha((int) (alpha * 255));
