@@ -15187,7 +15187,6 @@ public class ActivityManagerService extends IActivityManager.Stub
                         public void onLimitReached(int uid) {
                             Slog.wtf(TAG, "Uid " + uid + " sent too many Binders to uid "
                                     + Process.myUid());
-                            Binder.dumpProxyDebugInfo();
                             if (uid == Process.SYSTEM_UID) {
                                 Slog.i(TAG, "Skipping kill (uid is SYSTEM)");
                             } else {
