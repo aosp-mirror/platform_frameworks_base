@@ -46,7 +46,6 @@ import android.service.notification.NotificationListenerService;
 import android.service.notification.StatusBarNotification;
 import android.support.test.annotation.UiThreadTest;
 import android.support.test.filters.SmallTest;
-import android.support.test.runner.AndroidJUnit4;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper.RunWithLooper;
 import android.util.ArraySet;
@@ -61,6 +60,8 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+
+import java.util.ArrayList;
 
 @SmallTest
 @RunWith(AndroidTestingRunner.class)
@@ -277,6 +278,24 @@ public class NotificationDataTest extends SysuiTestCase {
         when(mMockStatusBarNotification.getKey()).thenReturn("not hidden");
         entry = new NotificationData.Entry(mMockStatusBarNotification);
         assertFalse(mNotificationData.shouldFilterOut(entry));
+    }
+
+    @Test
+    public void testGetNotificationsForCurrentUser_shouldFilterNonCurrentUserNotifications()
+            throws Exception {
+        mNotificationData.add(mRow.getEntry());
+        ExpandableNotificationRow row2 = new NotificationTestHelper(getContext()).createRow();
+        mNotificationData.add(row2.getEntry());
+
+        when(mEnvironment.isNotificationForCurrentProfiles(
+                mRow.getEntry().notification)).thenReturn(false);
+        when(mEnvironment.isNotificationForCurrentProfiles(
+                row2.getEntry().notification)).thenReturn(true);
+        ArrayList<NotificationData.Entry> reuslt =
+                mNotificationData.getNotificationsForCurrentUser();
+
+        assertEquals(reuslt.size(), 1);
+        assertEquals(reuslt.get(0), row2.getEntry());
     }
 
     @Test

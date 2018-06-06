@@ -681,10 +681,10 @@ public class NotificationEntryManager implements Dumpable, NotificationInflater.
     }
 
     public void updateNotificationsOnDensityOrFontScaleChanged() {
-        ArrayList<NotificationData.Entry> activeNotifications =
-                mNotificationData.getActiveNotifications();
-        for (int i = 0; i < activeNotifications.size(); i++) {
-            NotificationData.Entry entry = activeNotifications.get(i);
+        ArrayList<NotificationData.Entry> userNotifications =
+                mNotificationData.getNotificationsForCurrentUser();
+        for (int i = 0; i < userNotifications.size(); i++) {
+            NotificationData.Entry entry = userNotifications.get(i);
             boolean exposedGuts = mGutsManager.getExposedGuts() != null
                     && entry.row.getGuts() == mGutsManager.getExposedGuts();
             entry.row.onDensityOrFontScaleChanged();
