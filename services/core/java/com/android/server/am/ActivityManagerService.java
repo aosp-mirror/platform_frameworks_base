@@ -14587,6 +14587,11 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
 
         mBatteryStatsService.noteWakupAlarm(sourcePkg, sourceUid, workSource, tag);
+        if (workSource != null) {
+            StatsLog.write(StatsLog.WAKEUP_ALARM_OCCURRED, workSource, tag);
+        } else {
+            StatsLog.write_non_chained(StatsLog.WAKEUP_ALARM_OCCURRED, sourceUid, null, tag);
+        }
     }
 
     @Override
