@@ -253,6 +253,11 @@ package android.net {
     field public static final int INVALID_SECURITY_PARAMETER_INDEX = 0; // 0x0
   }
 
+  public final class NetworkCapabilities implements android.os.Parcelable {
+    method public int[] getCapabilities();
+    method public int[] getTransportTypes();
+  }
+
   public class TrafficStats {
     method public static long getLoopbackRxBytes();
     method public static long getLoopbackRxPackets();
