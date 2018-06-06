@@ -141,7 +141,8 @@ public class StatusBarWifiView extends FrameLayout implements DarkReceiver,
                 break;
             case STATE_HIDDEN:
             default:
-                setVisibility(View.GONE);
+                mWifiGroup.setVisibility(View.GONE);
+                mDotView.setVisibility(View.GONE);
                 break;
         }
     }
