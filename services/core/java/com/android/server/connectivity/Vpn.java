@@ -172,10 +172,13 @@ public class Vpn {
     private PendingIntent mStatusIntent;
     private volatile boolean mEnableTeardown = true;
     private final INetworkManagementService mNetd;
-    private VpnConfig mConfig;
-    private NetworkAgent mNetworkAgent;
+    @VisibleForTesting
+    protected VpnConfig mConfig;
+    @VisibleForTesting
+    protected NetworkAgent mNetworkAgent;
     private final Looper mLooper;
-    private final NetworkCapabilities mNetworkCapabilities;
+    @VisibleForTesting
+    protected final NetworkCapabilities mNetworkCapabilities;
     private final SystemServices mSystemServices;
 
     /**
@@ -316,15 +319,12 @@ public class Vpn {
         boolean roaming = false;
         boolean congested = false;
 
-        if (ArrayUtils.isEmpty(underlyingNetworks)) {
-            // No idea what the underlying networks are; assume sane defaults
-            metered = true;
-            roaming = false;
-            congested = false;
-        } else {
+        boolean hadUnderlyingNetworks = false;
+        if (null != underlyingNetworks) {
             for (Network underlying : underlyingNetworks) {
                 final NetworkCapabilities underlyingCaps = cm.getNetworkCapabilities(underlying);
                 if (underlyingCaps == null) continue;
+                hadUnderlyingNetworks = true;
                 for (int underlyingType : underlyingCaps.getTransportTypes()) {
                     transportTypes = ArrayUtils.appendInt(transportTypes, underlyingType);
                 }
@@ -339,6 +339,12 @@ public class Vpn {
                 roaming |= !underlyingCaps.hasCapability(NET_CAPABILITY_NOT_ROAMING);
                 congested |= !underlyingCaps.hasCapability(NET_CAPABILITY_NOT_CONGESTED);
             }
+        }
+        if (!hadUnderlyingNetworks) {
+            // No idea what the underlying networks are; assume sane defaults
+            metered = true;
+            roaming = false;
+            congested = false;
         }
 
         caps.setTransportTypes(transportTypes);
@@ -1071,7 +1077,8 @@ public class Vpn {
 
     // Returns true if the VPN has been established and the calling UID is its owner. Used to check
     // that a call to mutate VPN state is admissible.
-    private boolean isCallerEstablishedOwnerLocked() {
+    @VisibleForTesting
+    protected boolean isCallerEstablishedOwnerLocked() {
         return isRunningLocked() && Binder.getCallingUid() == mOwnerUID;
     }
 
