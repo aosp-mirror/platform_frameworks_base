@@ -519,6 +519,10 @@
     <!-- Boolean indicating whether the wifi chipset has dual frequency band support -->
     <bool translatable="false" name="config_wifi_dual_band_support">false</bool>
 
+    <!-- Boolean indicating whether the wifi chipset requires the softap band be -->
+    <!-- converted from 5GHz to ANY due to hardware restrictions -->
+    <bool translatable="false" name="config_wifi_convert_apband_5ghz_to_any">false</bool>
+
     <!-- Boolean indicating whether 802.11r Fast BSS Transition is enabled on this platform -->
     <bool translatable="false" name="config_wifi_fast_bss_transition_enabled">false</bool>
 
