@@ -224,15 +224,14 @@ public class Nat464Xlat extends BaseNetworkObserver {
     }
 
     /**
-     * Copies the stacked clat link in oldLp, if any, to the LinkProperties in mNetwork.
+     * Copies the stacked clat link in oldLp, if any, to the passed LinkProperties.
      * This is necessary because the LinkProperties in mNetwork come from the transport layer, which
      * has no idea that 464xlat is running on top of it.
      */
-    public void fixupLinkProperties(LinkProperties oldLp) {
+    public void fixupLinkProperties(LinkProperties oldLp, LinkProperties lp) {
         if (!isRunning()) {
             return;
         }
-        LinkProperties lp = mNetwork.linkProperties;
         if (lp == null || lp.getAllInterfaceNames().contains(mIface)) {
             return;
         }
