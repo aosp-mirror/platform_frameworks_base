@@ -482,8 +482,8 @@ public class NotificationShelf extends ActivatableNotificationView implements
         iconTransformDistance = Math.min(iconTransformDistance, fullHeight);
         if (isLastChild) {
             fullHeight = Math.min(fullHeight, row.getMinHeight() - getIntrinsicHeight());
-            iconTransformDistance = Math.min(iconTransformDistance, row.getMinHeight()
-                    - getIntrinsicHeight());
+            iconTransformDistance = Math.min(iconTransformDistance,
+                    row.getMinHeight() - getIntrinsicHeight() * icon.getIconScale());
         }
         float viewEnd = viewStart + fullHeight;
         if (expandingAnimated && mAmbientState.getScrollY() == 0
