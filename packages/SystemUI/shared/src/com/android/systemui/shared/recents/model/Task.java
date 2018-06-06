@@ -60,12 +60,17 @@ public class Task {
         @ViewDebug.ExportedProperty(category="recents")
         public long lastActiveTime;
 
+        // The source component name which started this task
+        public final ComponentName sourceComponent;
+
         private int mHashCode;
 
-        public TaskKey(int id, int windowingMode, Intent intent, int userId, long lastActiveTime) {
+        public TaskKey(int id, int windowingMode, Intent intent,
+                ComponentName sourceComponent, int userId, long lastActiveTime) {
             this.id = id;
             this.windowingMode = windowingMode;
             this.baseIntent = intent;
+            this.sourceComponent = sourceComponent;
             this.userId = userId;
             this.lastActiveTime = lastActiveTime;
             updateHashCode();
