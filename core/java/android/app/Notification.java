@@ -2678,7 +2678,8 @@ public class Notification implements Parcelable
                 return true;
             }
             for (int i = 0; i < firstAs.length; i++) {
-                if (!Objects.equals(firstAs[i].title, secondAs[i].title)) {
+                if (!Objects.equals(String.valueOf(firstAs[i].title),
+                        String.valueOf(secondAs[i].title))) {
                     return true;
                 }
                 RemoteInput[] firstRs = firstAs[i].getRemoteInputs();
@@ -2693,24 +2694,9 @@ public class Notification implements Parcelable
                     return true;
                 }
                 for (int j = 0; j < firstRs.length; j++) {
-                    if (!Objects.equals(firstRs[j].getLabel(), secondRs[j].getLabel())) {
+                    if (!Objects.equals(String.valueOf(firstRs[j].getLabel()),
+                            String.valueOf(secondRs[j].getLabel()))) {
                         return true;
-                    }
-                    CharSequence[] firstCs = firstRs[j].getChoices();
-                    CharSequence[] secondCs = secondRs[j].getChoices();
-                    if (firstCs == null) {
-                        firstCs = new CharSequence[0];
-                    }
-                    if (secondCs == null) {
-                        secondCs = new CharSequence[0];
-                    }
-                    if (firstCs.length != secondCs.length) {
-                        return true;
-                    }
-                    for (int k = 0; k < firstCs.length; k++) {
-                        if (!Objects.equals(firstCs[k], secondCs[k])) {
-                            return true;
-                        }
                     }
                 }
             }
