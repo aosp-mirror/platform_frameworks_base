@@ -560,31 +560,34 @@ public class ScreenDecorations extends SystemUI implements Tunable {
                     resolveSizeAndState(mBoundingRect.height(), heightMeasureSpec, 0));
         }
 
-        public static void boundsFromDirection(DisplayCutout displayCutout, int gravity, Rect out) {
+        public static void boundsFromDirection(DisplayCutout displayCutout, int gravity,
+                Rect out) {
+            Region bounds = boundsFromDirection(displayCutout, gravity);
+            out.set(bounds.getBounds());
+            bounds.recycle();
+        }
+
+        public static Region boundsFromDirection(DisplayCutout displayCutout, int gravity) {
             Region bounds = displayCutout.getBounds();
             switch (gravity) {
                 case Gravity.TOP:
                     bounds.op(0, 0, Integer.MAX_VALUE, displayCutout.getSafeInsetTop(),
                             Region.Op.INTERSECT);
-                    out.set(bounds.getBounds());
                     break;
                 case Gravity.LEFT:
                     bounds.op(0, 0, displayCutout.getSafeInsetLeft(), Integer.MAX_VALUE,
                             Region.Op.INTERSECT);
-                    out.set(bounds.getBounds());
                     break;
                 case Gravity.BOTTOM:
                     bounds.op(0, displayCutout.getSafeInsetTop() + 1, Integer.MAX_VALUE,
                             Integer.MAX_VALUE, Region.Op.INTERSECT);
-                    out.set(bounds.getBounds());
                     break;
                 case Gravity.RIGHT:
                     bounds.op(displayCutout.getSafeInsetLeft() + 1, 0, Integer.MAX_VALUE,
                             Integer.MAX_VALUE, Region.Op.INTERSECT);
-                    out.set(bounds.getBounds());
                     break;
             }
-            bounds.recycle();
+            return bounds;
         }
 
         private void localBounds(Rect out) {
