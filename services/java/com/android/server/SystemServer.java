@@ -736,7 +736,6 @@ public final class SystemServer {
         WindowManagerService wm = null;
         SerialService serial = null;
         NetworkTimeUpdateService networkTimeUpdater = null;
-        CommonTimeManagementService commonTimeMgmtService = null;
         InputManagerService inputManager = null;
         TelephonyRegistry telephonyRegistry = null;
         ConsumerIrService consumerIr = null;
@@ -1420,15 +1419,6 @@ public final class SystemServer {
                 traceEnd();
             }
 
-            traceBeginAndSlog("StartCommonTimeManagementService");
-            try {
-                commonTimeMgmtService = new CommonTimeManagementService(context);
-                ServiceManager.addService("commontime_management", commonTimeMgmtService);
-            } catch (Throwable e) {
-                reportWtf("starting CommonTimeManagementService service", e);
-            }
-            traceEnd();
-
             traceBeginAndSlog("CertBlacklister");
             try {
                 CertBlacklister blacklister = new CertBlacklister(context);
@@ -1742,7 +1732,6 @@ public final class SystemServer {
         final LocationManagerService locationF = location;
         final CountryDetectorService countryDetectorF = countryDetector;
         final NetworkTimeUpdateService networkTimeUpdaterF = networkTimeUpdater;
-        final CommonTimeManagementService commonTimeMgmtServiceF = commonTimeMgmtService;
         final InputManagerService inputManagerF = inputManager;
         final TelephonyRegistry telephonyRegistryF = telephonyRegistry;
         final MediaRouterService mediaRouterF = mediaRouter;
@@ -1879,15 +1868,6 @@ public final class SystemServer {
                 if (networkTimeUpdaterF != null) networkTimeUpdaterF.systemRunning();
             } catch (Throwable e) {
                 reportWtf("Notifying NetworkTimeService running", e);
-            }
-            traceEnd();
-            traceBeginAndSlog("MakeCommonTimeManagementServiceReady");
-            try {
-                if (commonTimeMgmtServiceF != null) {
-                    commonTimeMgmtServiceF.systemRunning();
-                }
-            } catch (Throwable e) {
-                reportWtf("Notifying CommonTimeManagementService running", e);
             }
             traceEnd();
             traceBeginAndSlog("MakeInputManagerServiceReady");
