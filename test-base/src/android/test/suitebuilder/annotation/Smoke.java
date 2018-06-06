@@ -26,8 +26,6 @@ import java.lang.annotation.Target;
  * The <code>android.test.suitebuilder.SmokeTestSuiteBuilder</code>
  * will run all tests with this annotation.
  *
- * @see android.test.suitebuilder.SmokeTestSuiteBuilder
- *
  * @deprecated New tests should be written using the
  * <a href="{@docRoot}tools/testing-support-library/index.html">Android Testing Support Library</a>.
  */

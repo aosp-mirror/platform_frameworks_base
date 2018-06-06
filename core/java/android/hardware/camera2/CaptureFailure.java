@@ -15,8 +15,8 @@
  */
 package android.hardware.camera2;
 
-import android.annotation.NonNull;
 import android.annotation.IntDef;
+import android.annotation.NonNull;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -150,7 +150,7 @@ public class CaptureFailure {
      *
      * @return int The ID for the sequence of requests that this capture failure is the result of
      *
-     * @see CameraDevice.CaptureCallback#onCaptureSequenceCompleted
+     * @see CameraCaptureSession.CaptureCallback#onCaptureSequenceCompleted
      */
     public int getSequenceId() {
         return mSequenceId;
