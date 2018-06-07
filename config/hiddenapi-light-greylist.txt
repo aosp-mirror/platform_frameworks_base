@@ -3024,6 +3024,8 @@ Landroid/media/MediaPlayer;->BYPASS_METADATA_FILTER:Z
 Landroid/media/MediaPlayer;->getMediaTimeProvider()Landroid/media/MediaTimeProvider;
 Landroid/media/MediaPlayer;->getMetadata(ZZ)Landroid/media/Metadata;
 Landroid/media/MediaPlayer;->invoke(Landroid/os/Parcel;Landroid/os/Parcel;)V
+Landroid/media/MediaPlayer;->MEDIA_INFO_EXTERNAL_METADATA_UPDATE:I
+Landroid/media/MediaPlayer;->MEDIA_INFO_TIMED_TEXT_ERROR:I
 Landroid/media/MediaPlayer;->METADATA_ALL:Z
 Landroid/media/MediaPlayer;->mEventHandler:Landroid/media/MediaPlayer$EventHandler;
 Landroid/media/MediaPlayer;->mOnCompletionListener:Landroid/media/MediaPlayer$OnCompletionListener;
