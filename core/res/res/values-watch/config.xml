@@ -68,4 +68,7 @@
     <bool name="config_supportsMultiWindow">true</bool>
     <bool name="config_supportsMultiDisplay">true</bool>
     <bool name="config_supportsSplitScreenMultiWindow">false</bool>
+
+     <!-- Default Gravity setting for the system Toast view. Equivalent to: Gravity.CENTER -->
+     <integer name="config_toastDefaultGravity">0x00000011</integer>
 </resources>
