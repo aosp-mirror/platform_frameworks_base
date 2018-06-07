@@ -407,8 +407,9 @@ public class HdmiControlService extends SystemService {
             Slog.i(TAG, "Device does not support HDMI-CEC.");
             return;
         }
-
-        mMhlController = HdmiMhlControllerStub.create(this);
+        if (mMhlController == null) {
+            mMhlController = HdmiMhlControllerStub.create(this);
+        }
         if (!mMhlController.isReady()) {
             Slog.i(TAG, "Device does not support MHL-control.");
         }
@@ -438,6 +439,11 @@ public class HdmiControlService extends SystemService {
     @VisibleForTesting
     void setCecController(HdmiCecController cecController) {
         mCecController = cecController;
+    }
+
+    @VisibleForTesting
+    void setHdmiMhlController(HdmiMhlControllerStub hdmiMhlController) {
+        mMhlController = hdmiMhlController;
     }
 
     @Override
@@ -598,7 +604,8 @@ public class HdmiControlService extends SystemService {
     }
 
     @ServiceThreadOnly
-    private void allocateLogicalAddress(final ArrayList<HdmiCecLocalDevice> allocatingDevices,
+    @VisibleForTesting
+    protected void allocateLogicalAddress(final ArrayList<HdmiCecLocalDevice> allocatingDevices,
             final int initiatedBy) {
         assertRunOnServiceThread();
         mCecController.clearLogicalAddress();
@@ -665,7 +672,8 @@ public class HdmiControlService extends SystemService {
     // Initialize HDMI port information. Combine the information from CEC and MHL HAL and
     // keep them in one place.
     @ServiceThreadOnly
-    private void initPortInfo() {
+    @VisibleForTesting
+    protected void initPortInfo() {
         assertRunOnServiceThread();
         HdmiPortInfo[] cecPortInfo = null;
 
