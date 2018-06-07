@@ -257,6 +257,15 @@ framework_docs_LOCAL_DROIDDOC_OPTIONS += \
 		-federate AndroidX https://developer.android.com \
 		-federationapi AndroidX prebuilts/sdk/current/androidx-api.txt
 
+framework_metalava_docs_LOCAL_DROIDDOC_OPTIONS := \
+    --manifest ./frameworks/base/core/res/AndroidManifest.xml \
+    --hide-package com.android.okhttp \
+    --hide-package com.android.org.conscrypt --hide-package com.android.server \
+    --hide RequiresPermission \
+    --hide MissingPermission --hide BroadcastBehavior \
+    --hide HiddenSuperclass --hide DeprecationMismatch --hide UnavailableSymbol \
+    --hide SdkConstant --hide HiddenTypeParameter --hide Todo --hide Typo
+
 # ====  Public API diff ===========================
 include $(CLEAR_VARS)
 
@@ -351,6 +360,40 @@ $(full_target): .KATI_IMPLICIT_OUTPUTS := $(INTERNAL_PLATFORM_API_FILE) \
                                           $(INTERNAL_PLATFORM_REMOVED_API_FILE)
 $(call dist-for-goals,sdk,$(INTERNAL_PLATFORM_API_FILE))
 
+# ====  the metalava api stubs and current.xml ===========================
+include $(CLEAR_VARS)
+
+LOCAL_SRC_FILES:=$(framework_docs_LOCAL_API_CHECK_SRC_FILES)
+LOCAL_GENERATED_SOURCES:=$(framework_docs_LOCAL_GENERATED_SOURCES)
+LOCAL_SRCJARS:=$(framework_docs_LOCAL_SRCJARS)
+LOCAL_JAVA_LIBRARIES:=$(framework_docs_LOCAL_API_CHECK_JAVA_LIBRARIES)
+LOCAL_MODULE_CLASS:=$(framework_docs_LOCAL_MODULE_CLASS)
+LOCAL_DROIDDOC_SOURCE_PATH:=$(framework_docs_LOCAL_DROIDDOC_SOURCE_PATH)
+LOCAL_ADDITIONAL_JAVA_DIR:=$(framework_docs_LOCAL_API_CHECK_ADDITIONAL_JAVA_DIR)
+LOCAL_ADDITIONAL_DEPENDENCIES:=$(framework_docs_LOCAL_ADDITIONAL_DEPENDENCIES)
+
+LOCAL_MODULE := metalava-api-stubs
+LOCAL_DROIDDOC_USE_METALAVA := true
+
+LOCAL_DROIDDOC_STUB_OUT_DIR := $(TARGET_OUT_COMMON_INTERMEDIATES)/JAVA_LIBRARIES/metalava_android_stubs_current_intermediates/src
+
+INTERNAL_PLATFORM_METALAVA_PUBLIC_API_FILE := $(TARGET_OUT_COMMON_INTERMEDIATES)/PACKAGING/metalava_public_api.txt
+INTERNAL_PLATFORM_METALAVA_PUBLIC_REMOVED_API_FILE := $(TARGET_OUT_COMMON_INTERMEDIATES)/PACKAGING/metalava_removed.txt
+
+LOCAL_DROIDDOC_OPTIONS:=\
+		$(framework_metalava_docs_LOCAL_DROIDDOC_OPTIONS) \
+		--api $(INTERNAL_PLATFORM_METALAVA_PUBLIC_API_FILE) \
+		--removed-api $(INTERNAL_PLATFORM_METALAVA_PUBLIC_REMOVED_API_FILE) \
+		-nodocs
+
+LOCAL_UNINSTALLABLE_MODULE := true
+
+include $(BUILD_DROIDDOC)
+
+$(full_target): .KATI_IMPLICIT_OUTPUTS := $(INTERNAL_PLATFORM_METALAVA_PUBLIC_API_FILE) \
+                                          $(INTERNAL_PLATFORM_METALAVA_PUBLIC_REMOVED_API_FILE)
+$(call dist-for-goals,sdk,$(INTERNAL_PLATFORM_METALAVA_PUBLIC_API_FILE))
+
 # ====  the system api stubs ===================================
 include $(CLEAR_VARS)
 
@@ -387,6 +430,41 @@ $(full_target): .KATI_IMPLICIT_OUTPUTS := $(INTERNAL_PLATFORM_SYSTEM_API_FILE) \
                                           $(INTERNAL_PLATFORM_SYSTEM_REMOVED_API_FILE) \
                                           $(INTERNAL_PLATFORM_SYSTEM_EXACT_API_FILE)
 $(call dist-for-goals,sdk,$(INTERNAL_PLATFORM_SYSTEM_API_FILE))
+
+# ====  the metalava system api stubs ===================================
+include $(CLEAR_VARS)
+
+LOCAL_SRC_FILES:=$(framework_docs_LOCAL_API_CHECK_SRC_FILES)
+LOCAL_GENERATED_SOURCES:=$(framework_docs_LOCAL_GENERATED_SOURCES)
+LOCAL_SRCJARS:=$(framework_docs_LOCAL_SRCJARS)
+LOCAL_JAVA_LIBRARIES:=$(framework_docs_LOCAL_API_CHECK_JAVA_LIBRARIES)
+LOCAL_MODULE_CLASS:=$(framework_docs_LOCAL_MODULE_CLASS)
+LOCAL_DROIDDOC_SOURCE_PATH:=$(framework_docs_LOCAL_DROIDDOC_SOURCE_PATH)
+LOCAL_ADDITIONAL_JAVA_DIR:=$(framework_docs_LOCAL_API_CHECK_ADDITIONAL_JAVA_DIR)
+LOCAL_ADDITIONAL_DEPENDENCIES:=$(framework_docs_LOCAL_ADDITIONAL_DEPENDENCIES)
+
+LOCAL_MODULE := metalava-system-api-stubs
+LOCAL_DROIDDOC_USE_METALAVA := true
+
+LOCAL_DROIDDOC_STUB_OUT_DIR := $(TARGET_OUT_COMMON_INTERMEDIATES)/JAVA_LIBRARIES/metalava_android_system_stubs_current_intermediates/src
+
+INTERNAL_PLATFORM_METALAVA_SYSTEM_API_FILE := $(TARGET_OUT_COMMON_INTERMEDIATES)/PACKAGING/metalava-system-api.txt
+INTERNAL_PLATFORM_METALAVA_SYSTEM_REMOVED_API_FILE := $(TARGET_OUT_COMMON_INTERMEDIATES)/PACKAGING/metalava-system-removed.txt
+
+LOCAL_DROIDDOC_OPTIONS:=\
+		$(framework_metalava_docs_LOCAL_DROIDDOC_OPTIONS) \
+		--show-annotation android.annotation.SystemApi \
+		--api $(INTERNAL_PLATFORM_METALAVA_SYSTEM_API_FILE) \
+		--removed-api $(INTERNAL_PLATFORM_METALAVA_SYSTEM_REMOVED_API_FILE) \
+		-nodocs
+
+LOCAL_UNINSTALLABLE_MODULE := true
+
+include $(BUILD_DROIDDOC)
+
+$(full_target): .KATI_IMPLICIT_OUTPUTS := $(INTERNAL_PLATFORM_METALAVA_SYSTEM_API_FILE) \
+                                          $(INTERNAL_PLATFORM_METALAVA_SYSTEM_REMOVED_API_FILE) \
+$(call dist-for-goals,sdk,$(INTERNAL_PLATFORM_METALAVA_SYSTEM_API_FILE))
 
 # ====  the test api stubs ===================================
 include $(CLEAR_VARS)
@@ -425,6 +503,41 @@ $(full_target): .KATI_IMPLICIT_OUTPUTS := $(INTERNAL_PLATFORM_TEST_API_FILE) \
                                           $(INTERNAL_PLATFORM_TEST_REMOVED_API_FILE) \
                                           $(INTERNAL_PLATFORM_TEST_EXACT_API_FILE)
 $(call dist-for-goals,sdk,$(INTERNAL_PLATFORM_TEST_API_FILE))
+
+# ====  the metalava test api stubs ===================================
+include $(CLEAR_VARS)
+
+LOCAL_SRC_FILES:=$(framework_docs_LOCAL_API_CHECK_SRC_FILES)
+LOCAL_GENERATED_SOURCES:=$(framework_docs_LOCAL_GENERATED_SOURCES)
+LOCAL_SRCJARS:=$(framework_docs_LOCAL_SRCJARS)
+LOCAL_JAVA_LIBRARIES:=$(framework_docs_LOCAL_API_CHECK_JAVA_LIBRARIES)
+LOCAL_MODULE_CLASS:=$(framework_docs_LOCAL_MODULE_CLASS)
+LOCAL_DROIDDOC_SOURCE_PATH:=$(framework_docs_LOCAL_DROIDDOC_SOURCE_PATH)
+LOCAL_ADDITIONAL_JAVA_DIR:=$(framework_docs_LOCAL_API_CHECK_ADDITIONAL_JAVA_DIR)
+LOCAL_ADDITIONAL_DEPENDENCIES:=$(framework_docs_LOCAL_ADDITIONAL_DEPENDENCIES)
+
+LOCAL_MODULE := metalava-test-api-stubs
+LOCAL_DROIDDOC_USE_METALAVA := true
+
+LOCAL_DROIDDOC_STUB_OUT_DIR := $(TARGET_OUT_COMMON_INTERMEDIATES)/JAVA_LIBRARIES/metalava_android_test_stubs_current_intermediates/src
+
+INTERNAL_PLATFORM_METALAVA_TEST_API_FILE := $(TARGET_OUT_COMMON_INTERMEDIATES)/PACKAGING/metalava-test-api.txt
+INTERNAL_PLATFORM_METALAVA_TEST_REMOVED_API_FILE := $(TARGET_OUT_COMMON_INTERMEDIATES)/PACKAGING/metalava-test-removed.txt
+
+LOCAL_DROIDDOC_OPTIONS:=\
+               $(framework_metalava_docs_LOCAL_DROIDDOC_OPTIONS) \
+               --show-annotation android.annotation.TestApi \
+               --api $(INTERNAL_PLATFORM_METALAVA_TEST_API_FILE) \
+               --removed-api $(INTERNAL_PLATFORM_METALAVA_TEST_REMOVED_API_FILE) \
+               -nodocs
+
+LOCAL_UNINSTALLABLE_MODULE := true
+
+include $(BUILD_DROIDDOC)
+
+$(full_target): .KATI_IMPLICIT_OUTPUTS := $(INTERNAL_PLATFORM_METALAVA_TEST_API_FILE) \
+                                          $(INTERNAL_PLATFORM_METALAVA_TEST_REMOVED_API_FILE) \
+$(call dist-for-goals,sdk,$(INTERNAL_PLATFORM_METALAVA_TEST_API_FILE))
 
 # ====  the complete hidden api list ===================================
 include $(CLEAR_VARS)
