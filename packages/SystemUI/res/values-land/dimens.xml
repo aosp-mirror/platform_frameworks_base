@@ -22,7 +22,7 @@
     <dimen name="docked_divider_handle_width">2dp</dimen>
     <dimen name="docked_divider_handle_height">16dp</dimen>
 
-    <dimen name="brightness_mirror_height">96dp</dimen>
+    <dimen name="brightness_mirror_height">40dp</dimen>
 
     <!-- Width for the spacer, used between QS tiles. -->
     <dimen name="qs_quick_tile_space_width">38dp</dimen>
