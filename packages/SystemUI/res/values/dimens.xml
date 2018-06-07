@@ -287,7 +287,7 @@
 
     <dimen name="notification_panel_width">@dimen/match_parent</dimen>
 
-    <dimen name="brightness_mirror_height">108dp</dimen>
+    <dimen name="brightness_mirror_height">48dp</dimen>
 
     <!-- The width of the panel that holds the quick settings. -->
     <dimen name="qs_panel_width">@dimen/notification_panel_width</dimen>
