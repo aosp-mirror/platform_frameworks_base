@@ -179,19 +179,13 @@ final class OverlayManagerSettings {
 
     List<OverlayInfo> getOverlaysForTarget(@NonNull final String targetPackageName,
             final int userId) {
-        // Static RROs targeting "android" are loaded from AssetManager, and so they should be
-        // ignored in OverlayManagerService.
         return selectWhereTarget(targetPackageName, userId)
-                .filter((i) -> !(i.isStatic() && "android".equals(i.getTargetPackageName())))
                 .map(SettingsItem::getOverlayInfo)
                 .collect(Collectors.toList());
     }
 
     ArrayMap<String, List<OverlayInfo>> getOverlaysForUser(final int userId) {
-        // Static RROs targeting "android" are loaded from AssetManager, and so they should be
-        // ignored in OverlayManagerService.
         return selectWhereUser(userId)
-                .filter((i) -> !(i.isStatic() && "android".equals(i.getTargetPackageName())))
                 .map(SettingsItem::getOverlayInfo)
                 .collect(Collectors.groupingBy(info -> info.targetPackageName, ArrayMap::new,
                         Collectors.toList()));
