@@ -19,10 +19,15 @@ package com.android.server.connectivity;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.Context;
+import android.content.Intent;
+import android.net.Proxy;
 import android.net.ProxyInfo;
 import android.net.Uri;
+import android.os.Binder;
 import android.os.Handler;
+import android.os.UserHandle;
 import android.text.TextUtils;
+import android.util.Slog;
 
 import com.android.internal.annotations.GuardedBy;
 
@@ -34,6 +39,12 @@ import java.util.Objects;
  * @hide
  */
 public class ProxyTracker {
+    private static final String TAG = ProxyTracker.class.getSimpleName();
+    private static final boolean DBG = true;
+
+    @NonNull
+    private final Context mContext;
+
     // TODO : make this private and import as much managing logic from ConnectivityService as
     // possible
     @NonNull
@@ -52,6 +63,7 @@ public class ProxyTracker {
 
     public ProxyTracker(@NonNull final Context context,
             @NonNull final Handler connectivityServiceInternalHandler, final int pacChangedEvent) {
+        mContext = context;
         mPacManager = new PacManager(context, connectivityServiceInternalHandler, pacChangedEvent);
     }
 
@@ -104,5 +116,22 @@ public class ProxyTracker {
 
     public boolean setCurrentProxyScriptUrl(@NonNull final ProxyInfo proxy) {
         return mPacManager.setCurrentProxyScriptUrl(proxy);
+    }
+
+    // TODO : make the argument NonNull final
+    public void sendProxyBroadcast(@Nullable ProxyInfo proxy) {
+        if (proxy == null) proxy = new ProxyInfo("", 0, "");
+        if (setCurrentProxyScriptUrl(proxy)) return;
+        if (DBG) Slog.d(TAG, "sending Proxy Broadcast for " + proxy);
+        Intent intent = new Intent(Proxy.PROXY_CHANGE_ACTION);
+        intent.addFlags(Intent.FLAG_RECEIVER_REPLACE_PENDING |
+                Intent.FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT);
+        intent.putExtra(Proxy.EXTRA_PROXY_INFO, proxy);
+        final long ident = Binder.clearCallingIdentity();
+        try {
+            mContext.sendStickyBroadcastAsUser(intent, UserHandle.ALL);
+        } finally {
+            Binder.restoreCallingIdentity(ident);
+        }
     }
 }

@@ -3341,7 +3341,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
             if (mProxyTracker.mGlobalProxy == null) {
                 proxyProperties = mProxyTracker.mDefaultProxy;
             }
-            sendProxyBroadcast(proxyProperties);
+            mProxyTracker.sendProxyBroadcast(proxyProperties);
         }
     }
 
@@ -3400,14 +3400,14 @@ public class ConnectivityService extends IConnectivityManager.Stub
                     && (!Uri.EMPTY.equals(proxy.getPacFileUrl()))
                     && proxy.getPacFileUrl().equals(mProxyTracker.mGlobalProxy.getPacFileUrl())) {
                 mProxyTracker.mGlobalProxy = proxy;
-                sendProxyBroadcast(mProxyTracker.mGlobalProxy);
+                mProxyTracker.sendProxyBroadcast(mProxyTracker.mGlobalProxy);
                 return;
             }
             mProxyTracker.mDefaultProxy = proxy;
 
             if (mProxyTracker.mGlobalProxy != null) return;
             if (!mProxyTracker.mDefaultProxyDisabled) {
-                sendProxyBroadcast(proxy);
+                mProxyTracker.sendProxyBroadcast(proxy);
             }
         }
     }
@@ -3422,7 +3422,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
         ProxyInfo oldProxyInfo = oldLp == null ? null : oldLp.getHttpProxy();
 
         if (!ProxyTracker.proxyInfoEqual(newProxyInfo, oldProxyInfo)) {
-            sendProxyBroadcast(mProxyTracker.getDefaultProxy());
+            mProxyTracker.sendProxyBroadcast(mProxyTracker.getDefaultProxy());
         }
     }
 
@@ -3446,22 +3446,6 @@ public class ConnectivityService extends IConnectivityManager.Stub
             }
             final ProxyInfo p = new ProxyInfo(proxyHost, proxyPort, "");
             setGlobalProxy(p);
-        }
-    }
-
-    private void sendProxyBroadcast(ProxyInfo proxy) {
-        if (proxy == null) proxy = new ProxyInfo("", 0, "");
-        if (mProxyTracker.setCurrentProxyScriptUrl(proxy)) return;
-        if (DBG) log("sending Proxy Broadcast for " + proxy);
-        Intent intent = new Intent(Proxy.PROXY_CHANGE_ACTION);
-        intent.addFlags(Intent.FLAG_RECEIVER_REPLACE_PENDING |
-            Intent.FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT);
-        intent.putExtra(Proxy.EXTRA_PROXY_INFO, proxy);
-        final long ident = Binder.clearCallingIdentity();
-        try {
-            mContext.sendStickyBroadcastAsUser(intent, UserHandle.ALL);
-        } finally {
-            Binder.restoreCallingIdentity(ident);
         }
     }
 
@@ -5483,7 +5467,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
                         mProxyTracker.mDefaultProxyDisabled = true;
                         if (mProxyTracker.mGlobalProxy == null
                                 && mProxyTracker.mDefaultProxy != null) {
-                            sendProxyBroadcast(null);
+                            mProxyTracker.sendProxyBroadcast(null);
                         }
                     }
                 }
@@ -5513,7 +5497,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
                         mProxyTracker.mDefaultProxyDisabled = false;
                         if (mProxyTracker.mGlobalProxy == null
                                 && mProxyTracker.mDefaultProxy != null) {
-                            sendProxyBroadcast(mProxyTracker.mDefaultProxy);
+                            mProxyTracker.sendProxyBroadcast(mProxyTracker.mDefaultProxy);
                         }
                     }
                 }
