@@ -3292,57 +3292,10 @@ public class ConnectivityService extends IConnectivityManager.Stub
         }
     }
 
-    public void setGlobalProxy(ProxyInfo proxyProperties) {
+    @Override
+    public void setGlobalProxy(final ProxyInfo proxyProperties) {
         enforceConnectivityInternalPermission();
-
-        synchronized (mProxyTracker.mProxyLock) {
-            if (proxyProperties == mProxyTracker.mGlobalProxy) return;
-            if (proxyProperties != null && proxyProperties.equals(mProxyTracker.mGlobalProxy)) {
-                return;
-            }
-            if (mProxyTracker.mGlobalProxy != null
-                    && mProxyTracker.mGlobalProxy.equals(proxyProperties)) {
-                return;
-            }
-
-            String host = "";
-            int port = 0;
-            String exclList = "";
-            String pacFileUrl = "";
-            if (proxyProperties != null && (!TextUtils.isEmpty(proxyProperties.getHost()) ||
-                    !Uri.EMPTY.equals(proxyProperties.getPacFileUrl()))) {
-                if (!proxyProperties.isValid()) {
-                    if (DBG)
-                        log("Invalid proxy properties, ignoring: " + proxyProperties.toString());
-                    return;
-                }
-                mProxyTracker.mGlobalProxy = new ProxyInfo(proxyProperties);
-                host = mProxyTracker.mGlobalProxy.getHost();
-                port = mProxyTracker.mGlobalProxy.getPort();
-                exclList = mProxyTracker.mGlobalProxy.getExclusionListAsString();
-                if (!Uri.EMPTY.equals(proxyProperties.getPacFileUrl())) {
-                    pacFileUrl = proxyProperties.getPacFileUrl().toString();
-                }
-            } else {
-                mProxyTracker.mGlobalProxy = null;
-            }
-            ContentResolver res = mContext.getContentResolver();
-            final long token = Binder.clearCallingIdentity();
-            try {
-                Settings.Global.putString(res, Settings.Global.GLOBAL_HTTP_PROXY_HOST, host);
-                Settings.Global.putInt(res, Settings.Global.GLOBAL_HTTP_PROXY_PORT, port);
-                Settings.Global.putString(res, Settings.Global.GLOBAL_HTTP_PROXY_EXCLUSION_LIST,
-                        exclList);
-                Settings.Global.putString(res, Settings.Global.GLOBAL_HTTP_PROXY_PAC, pacFileUrl);
-            } finally {
-                Binder.restoreCallingIdentity(token);
-            }
-
-            if (mProxyTracker.mGlobalProxy == null) {
-                proxyProperties = mProxyTracker.mDefaultProxy;
-            }
-            mProxyTracker.sendProxyBroadcast(proxyProperties);
-        }
+        mProxyTracker.setGlobalProxy(proxyProperties);
     }
 
     private void loadGlobalProxy() {

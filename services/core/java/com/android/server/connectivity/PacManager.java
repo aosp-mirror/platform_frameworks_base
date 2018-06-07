@@ -90,7 +90,7 @@ public class PacManager {
     private volatile boolean mHasDownloaded;
 
     private Handler mConnectivityHandler;
-    private int mProxyMessage;
+    private final int mProxyMessage;
 
     /**
      * Used for locking when setting mProxyService and all references to mCurrentPac.
@@ -99,7 +99,7 @@ public class PacManager {
 
     /**
      * Runnable to download PAC script.
-     * The behavior relies on the assamption it always run on mNetThread to guarantee that the
+     * The behavior relies on the assumption it always runs on mNetThread to guarantee that the
      * latest data fetched from mPacUrl is stored in mProxyService.
      */
     private Runnable mPacDownloader = new Runnable() {
@@ -133,8 +133,6 @@ public class PacManager {
         }
     };
 
-    private final HandlerThread mNetThread = new HandlerThread("android.pacmanager",
-            android.os.Process.THREAD_PRIORITY_DEFAULT);
     private final Handler mNetThreadHandler;
 
     class PacRefreshIntentReceiver extends BroadcastReceiver {
@@ -146,8 +144,10 @@ public class PacManager {
     public PacManager(Context context, Handler handler, int proxyMessage) {
         mContext = context;
         mLastPort = -1;
-        mNetThread.start();
-        mNetThreadHandler = new Handler(mNetThread.getLooper());
+        final HandlerThread netThread = new HandlerThread("android.pacmanager",
+                android.os.Process.THREAD_PRIORITY_DEFAULT);
+        netThread.start();
+        mNetThreadHandler = new Handler(netThread.getLooper());
 
         mPacRefreshIntent = PendingIntent.getBroadcast(
                 context, 0, new Intent(ACTION_PAC_REFRESH), 0);
@@ -208,7 +208,7 @@ public class PacManager {
     /**
      * Does a post and reports back the status code.
      *
-     * @throws IOException
+     * @throws IOException if the URL is malformed, or the PAC file is too big.
      */
     private static String get(Uri pacUri) throws IOException {
         URL url = new URL(pacUri.toString());
@@ -254,7 +254,7 @@ public class PacManager {
     private String getPacChangeDelay() {
         final ContentResolver cr = mContext.getContentResolver();
 
-        /** Check system properties for the default value then use secure settings value, if any. */
+        // Check system properties for the default value then use secure settings value, if any.
         String defaultDelay = SystemProperties.get(
                 "conn." + Settings.Global.PAC_CHANGE_DELAY,
                 DEFAULT_DELAYS);
@@ -276,10 +276,9 @@ public class PacManager {
         getAlarmManager().set(AlarmManager.ELAPSED_REALTIME, timeTillTrigger, mPacRefreshIntent);
     }
 
-    private boolean setCurrentProxyScript(String script) {
+    private void setCurrentProxyScript(String script) {
         if (mProxyService == null) {
             Log.e(TAG, "setCurrentProxyScript: no proxy service");
-            return false;
         }
         try {
             mProxyService.setPacFile(script);
@@ -287,7 +286,6 @@ public class PacManager {
         } catch (RemoteException e) {
             Log.e(TAG, "Unable to set PAC file", e);
         }
-        return true;
     }
 
     private void bind() {
@@ -351,7 +349,7 @@ public class PacManager {
                     try {
                         callbackService.getProxyPort(new IProxyPortListener.Stub() {
                             @Override
-                            public void setProxyPort(int port) throws RemoteException {
+                            public void setProxyPort(int port) {
                                 if (mLastPort != -1) {
                                     // Always need to send if port changed
                                     mHasSentBroadcast = false;

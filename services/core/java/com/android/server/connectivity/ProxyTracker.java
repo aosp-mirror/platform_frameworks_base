@@ -18,6 +18,7 @@ package com.android.server.connectivity;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Proxy;
@@ -26,6 +27,7 @@ import android.net.Uri;
 import android.os.Binder;
 import android.os.Handler;
 import android.os.UserHandle;
+import android.provider.Settings;
 import android.text.TextUtils;
 import android.util.Slog;
 
@@ -132,6 +134,51 @@ public class ProxyTracker {
             mContext.sendStickyBroadcastAsUser(intent, UserHandle.ALL);
         } finally {
             Binder.restoreCallingIdentity(ident);
+        }
+    }
+
+    public void setGlobalProxy(@Nullable ProxyInfo proxyProperties) {
+        synchronized (mProxyLock) {
+            if (proxyProperties == mGlobalProxy) return;
+            if (proxyProperties != null && proxyProperties.equals(mGlobalProxy)) return;
+            if (mGlobalProxy != null && mGlobalProxy.equals(proxyProperties)) return;
+
+            String host = "";
+            int port = 0;
+            String exclList = "";
+            String pacFileUrl = "";
+            if (proxyProperties != null && (!TextUtils.isEmpty(proxyProperties.getHost()) ||
+                    !Uri.EMPTY.equals(proxyProperties.getPacFileUrl()))) {
+                if (!proxyProperties.isValid()) {
+                    if (DBG) Slog.d(TAG, "Invalid proxy properties, ignoring: " + proxyProperties);
+                    return;
+                }
+                mGlobalProxy = new ProxyInfo(proxyProperties);
+                host = mGlobalProxy.getHost();
+                port = mGlobalProxy.getPort();
+                exclList = mGlobalProxy.getExclusionListAsString();
+                if (!Uri.EMPTY.equals(proxyProperties.getPacFileUrl())) {
+                    pacFileUrl = proxyProperties.getPacFileUrl().toString();
+                }
+            } else {
+                mGlobalProxy = null;
+            }
+            final ContentResolver res = mContext.getContentResolver();
+            final long token = Binder.clearCallingIdentity();
+            try {
+                Settings.Global.putString(res, Settings.Global.GLOBAL_HTTP_PROXY_HOST, host);
+                Settings.Global.putInt(res, Settings.Global.GLOBAL_HTTP_PROXY_PORT, port);
+                Settings.Global.putString(res, Settings.Global.GLOBAL_HTTP_PROXY_EXCLUSION_LIST,
+                        exclList);
+                Settings.Global.putString(res, Settings.Global.GLOBAL_HTTP_PROXY_PAC, pacFileUrl);
+            } finally {
+                Binder.restoreCallingIdentity(token);
+            }
+
+            if (mGlobalProxy == null) {
+                proxyProperties = mDefaultProxy;
+            }
+            sendProxyBroadcast(proxyProperties);
         }
     }
 }
