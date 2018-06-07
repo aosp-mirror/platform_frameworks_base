@@ -1334,18 +1334,25 @@ def verify_clone(clazz):
             error(clazz, m, None, "Provide an explicit copy constructor instead of implementing clone()")
 
 
+def is_interesting(clazz):
+    """Test if given class is interesting from an Android PoV."""
+
+    if clazz.pkg.name.startswith("java"): return False
+    if clazz.pkg.name.startswith("junit"): return False
+    if clazz.pkg.name.startswith("org.apache"): return False
+    if clazz.pkg.name.startswith("org.xml"): return False
+    if clazz.pkg.name.startswith("org.json"): return False
+    if clazz.pkg.name.startswith("org.w3c"): return False
+    if clazz.pkg.name.startswith("android.icu."): return False
+    return True
+
+
 def examine_clazz(clazz):
     """Find all style issues in the given class."""
 
     notice(clazz)
 
-    if clazz.pkg.name.startswith("java"): return
-    if clazz.pkg.name.startswith("junit"): return
-    if clazz.pkg.name.startswith("org.apache"): return
-    if clazz.pkg.name.startswith("org.xml"): return
-    if clazz.pkg.name.startswith("org.json"): return
-    if clazz.pkg.name.startswith("org.w3c"): return
-    if clazz.pkg.name.startswith("android.icu."): return
+    if not is_interesting(clazz): return
 
     verify_constants(clazz)
     verify_enums(clazz)
@@ -1479,6 +1486,7 @@ def show_deprecations_at_birth(cur, prev):
     # Remove all existing things so we're left with new
     for prev_clazz in prev.values():
         cur_clazz = cur[prev_clazz.fullname]
+        if not is_interesting(cur_clazz): continue
 
         sigs = { i.ident: i for i in prev_clazz.ctors }
         cur_clazz.ctors = [ i for i in cur_clazz.ctors if i.ident not in sigs ]
@@ -1506,6 +1514,38 @@ def show_deprecations_at_birth(cur, prev):
         print
 
 
+def show_stats(cur, prev):
+    """Show API stats."""
+
+    stats = collections.defaultdict(int)
+    for cur_clazz in cur.values():
+        if not is_interesting(cur_clazz): continue
+
+        if cur_clazz.fullname not in prev:
+            stats['new_classes'] += 1
+            stats['new_ctors'] += len(cur_clazz.ctors)
+            stats['new_methods'] += len(cur_clazz.methods)
+            stats['new_fields'] += len(cur_clazz.fields)
+        else:
+            prev_clazz = prev[cur_clazz.fullname]
+
+            sigs = { i.ident: i for i in prev_clazz.ctors }
+            ctors = len([ i for i in cur_clazz.ctors if i.ident not in sigs ])
+            sigs = { i.ident: i for i in prev_clazz.methods }
+            methods = len([ i for i in cur_clazz.methods if i.ident not in sigs ])
+            sigs = { i.ident: i for i in prev_clazz.fields }
+            fields = len([ i for i in cur_clazz.fields if i.ident not in sigs ])
+
+            if ctors + methods + fields > 0:
+                stats['extend_classes'] += 1
+                stats['extend_ctors'] += ctors
+                stats['extend_methods'] += methods
+                stats['extend_fields'] += fields
+
+    print "#", "".join([ k.ljust(20) for k in sorted(stats.keys()) ])
+    print " ", "".join([ str(stats[k]).ljust(20) for k in sorted(stats.keys()) ])
+
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Enforces common Android public API design \
             patterns. It ignores lint messages from a previous API level, if provided.")
@@ -1520,6 +1560,8 @@ if __name__ == "__main__":
             help="Show API changes noticed")
     parser.add_argument("--show-deprecations-at-birth", action='store_const', const=True,
             help="Show API deprecations at birth")
+    parser.add_argument("--show-stats", action='store_const', const=True,
+            help="Show API stats")
     args = vars(parser.parse_args())
 
     if args['no_color']:
@@ -1537,6 +1579,14 @@ if __name__ == "__main__":
         with previous_file as f:
             prev = _parse_stream(f)
         show_deprecations_at_birth(cur, prev)
+        sys.exit()
+
+    if args['show_stats']:
+        with current_file as f:
+            cur = _parse_stream(f)
+        with previous_file as f:
+            prev = _parse_stream(f)
+        show_stats(cur, prev)
         sys.exit()
 
     with current_file as f:
