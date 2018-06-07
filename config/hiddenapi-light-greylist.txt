@@ -3370,6 +3370,7 @@ Landroid/net/INetworkScoreService$Stub;->asInterface(Landroid/os/IBinder;)Landro
 Landroid/net/INetworkStatsService$Stub$Proxy;-><init>(Landroid/os/IBinder;)V
 Landroid/net/INetworkStatsService$Stub$Proxy;->getMobileIfaces()[Ljava/lang/String;
 Landroid/net/INetworkStatsService;->forceUpdate()V
+Landroid/net/INetworkStatsService;->getDataLayerSnapshotForUid(I)Landroid/net/NetworkStats;
 Landroid/net/INetworkStatsService;->getMobileIfaces()[Ljava/lang/String;
 Landroid/net/INetworkStatsService;->openSession()Landroid/net/INetworkStatsSession;
 Landroid/net/INetworkStatsService;->openSessionForUsageStats(ILjava/lang/String;)Landroid/net/INetworkStatsSession;
@@ -3802,6 +3803,7 @@ Landroid/os/AsyncTask;->mTaskInvoked:Ljava/util/concurrent/atomic/AtomicBoolean;
 Landroid/os/AsyncTask;->mWorker:Landroid/os/AsyncTask$WorkerRunnable;
 Landroid/os/AsyncTask;->sDefaultExecutor:Ljava/util/concurrent/Executor;
 Landroid/os/AsyncTask;->setDefaultExecutor(Ljava/util/concurrent/Executor;)V
+Landroid/os/BaseBundle;->isParcelled()Z
 Landroid/os/BaseBundle;->mMap:Landroid/util/ArrayMap;
 Landroid/os/BaseBundle;->mParcelledData:Landroid/os/Parcel;
 Landroid/os/BaseBundle;->unparcel()V
@@ -5504,6 +5506,7 @@ Landroid/telephony/TelephonyManager$MultiSimVariants;->UNKNOWN:Landroid/telephon
 Landroid/telephony/TelephonyManager$MultiSimVariants;->values()[Landroid/telephony/TelephonyManager$MultiSimVariants;
 Landroid/telephony/TelephonyManager;-><init>()V
 Landroid/telephony/TelephonyManager;-><init>(Landroid/content/Context;)V
+Landroid/telephony/TelephonyManager;-><init>(Landroid/content/Context;I)V
 Landroid/telephony/TelephonyManager;->ACTION_PRECISE_DATA_CONNECTION_STATE_CHANGED:Ljava/lang/String;
 Landroid/telephony/TelephonyManager;->from(Landroid/content/Context;)Landroid/telephony/TelephonyManager;
 Landroid/telephony/TelephonyManager;->getCallState(I)I
@@ -6790,6 +6793,7 @@ Landroid/widget/AbsListView;->resurrectSelectionIfNeeded()Z
 Landroid/widget/AbsListView;->smoothScrollBy(IIZZ)V
 Landroid/widget/AbsListView;->trackMotionScroll(II)Z
 Landroid/widget/AbsListView;->updateSelectorState()V
+Landroid/widget/AbsSeekBar;->drawThumb(Landroid/graphics/Canvas;)V
 Landroid/widget/AbsSeekBar;->mDisabledAlpha:F
 Landroid/widget/AbsSeekBar;->mIsDragging:Z
 Landroid/widget/AbsSeekBar;->mIsUserSeekable:Z
@@ -8269,6 +8273,7 @@ Lcom/android/internal/telephony/ITelephony$Stub$Proxy;-><init>(Landroid/os/IBind
 Lcom/android/internal/telephony/ITelephony$Stub$Proxy;->endCall()Z
 Lcom/android/internal/telephony/ITelephony$Stub$Proxy;->endCallForSubscriber(I)Z
 Lcom/android/internal/telephony/ITelephony$Stub$Proxy;->getDeviceId(Ljava/lang/String;)Ljava/lang/String;
+Lcom/android/internal/telephony/ITelephony$Stub$Proxy;->isRadioOn(Ljava/lang/String;)Z
 Lcom/android/internal/telephony/ITelephony$Stub$Proxy;->mRemote:Landroid/os/IBinder;
 Lcom/android/internal/telephony/ITelephony$Stub;->asInterface(Landroid/os/IBinder;)Lcom/android/internal/telephony/ITelephony;
 Lcom/android/internal/telephony/ITelephony$Stub;->DESCRIPTOR:Ljava/lang/String;

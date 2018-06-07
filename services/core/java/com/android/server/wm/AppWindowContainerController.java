@@ -753,6 +753,21 @@ public class AppWindowContainerController
         return mListener != null && mListener.keyDispatchingTimedOut(reason, windowPid);
     }
 
+    /**
+     * Notifies AWT that this app is waiting to pause in order to determine if it will enter PIP.
+     * This information helps AWT know that the app is in the process of pausing before it gets the
+     * signal on the WM side.
+     */
+    public void setWillCloseOrEnterPip(boolean willCloseOrEnterPip) {
+        synchronized (mWindowMap) {
+            if (mContainer == null) {
+                return;
+            }
+
+            mContainer.setWillCloseOrEnterPip(willCloseOrEnterPip);
+        }
+    }
+
     @Override
     public String toString() {
         return "AppWindowContainerController{"

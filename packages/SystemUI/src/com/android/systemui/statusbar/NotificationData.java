@@ -345,6 +345,7 @@ public class NotificationData {
 
     private final ArrayMap<String, Entry> mEntries = new ArrayMap<>();
     private final ArrayList<Entry> mSortedAndFiltered = new ArrayList<>();
+    private final ArrayList<Entry> mFilteredForUser = new ArrayList<>();
 
     private NotificationGroupManager mGroupManager;
 
@@ -427,6 +428,23 @@ public class NotificationData {
      */
     public ArrayList<Entry> getActiveNotifications() {
         return mSortedAndFiltered;
+    }
+
+    public ArrayList<Entry> getNotificationsForCurrentUser() {
+        mFilteredForUser.clear();
+
+        synchronized (mEntries) {
+            final int N = mEntries.size();
+            for (int i = 0; i < N; i++) {
+                Entry entry = mEntries.valueAt(i);
+                final StatusBarNotification sbn = entry.notification;
+                if (!mEnvironment.isNotificationForCurrentProfiles(sbn)) {
+                    continue;
+                }
+                mFilteredForUser.add(entry);
+            }
+        }
+        return mFilteredForUser;
     }
 
     public Entry get(String key) {

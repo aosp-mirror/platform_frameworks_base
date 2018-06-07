@@ -1682,6 +1682,10 @@ public class TaskStack extends WindowContainer<Task> implements
 
             if (finalStackSize != null) {
                 setPinnedStackSize(finalStackSize, null);
+            } else {
+                // We have been canceled, so the final stack size is null, still run the
+                // animation-end logic
+                onPipAnimationEndResize();
             }
 
             try {
@@ -1693,6 +1697,9 @@ public class TaskStack extends WindowContainer<Task> implements
             } catch (RemoteException e) {
                 // I don't believe you...
             }
+        } else {
+            // No PiP animation, just run the normal animation-end logic
+            onPipAnimationEndResize();
         }
     }
 
