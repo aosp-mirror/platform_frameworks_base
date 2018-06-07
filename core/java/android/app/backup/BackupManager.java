@@ -253,19 +253,26 @@ public class BackupManager {
     }
 
     /**
-     * @deprecated Since Android P app can no longer request restoring of its backup.
+     * @deprecated Applications shouldn't request a restore operation using this method. In Android
+     * P and later, this method is a no-op.
      *
-     * Restore the calling application from backup.  The data will be restored from the
+     * <p>Restore the calling application from backup. The data will be restored from the
      * current backup dataset if the application has stored data there, or from
      * the dataset used during the last full device setup operation if the current
      * backup dataset has no matching data.  If no backup data exists for this application
-     * in either source, a nonzero value will be returned.
+     * in either source, a non-zero value is returned.
      *
-     * <p>If this method returns zero (meaning success), the OS will attempt to retrieve
-     * a backed-up dataset from the remote transport, instantiate the application's
-     * backup agent, and pass the dataset to the agent's
+     * <p>If this method returns zero (meaning success), the OS attempts to retrieve a backed-up
+     * dataset from the remote transport, instantiate the application's backup agent, and pass the
+     * dataset to the agent's
      * {@link android.app.backup.BackupAgent#onRestore(BackupDataInput, int, android.os.ParcelFileDescriptor) onRestore()}
      * method.
+     *
+     * <p class="caution">Unlike other restore operations, this method doesn't terminate the
+     * application after the restore. The application continues running to receive the
+     * {@link RestoreObserver} callbacks on the {@code observer} argument. Full backups use an
+     * {@link android.app.Application Application} base class while key-value backups use the
+     * application subclass declared in the AndroidManifest.xml {@code <application>} tag.
      *
      * @param observer The {@link RestoreObserver} to receive callbacks during the restore
      * operation. This must not be null.
@@ -282,7 +289,7 @@ public class BackupManager {
     /**
      * @deprecated Since Android P app can no longer request restoring of its backup.
      *
-     * Restore the calling application from backup.  The data will be restored from the
+     * <p>Restore the calling application from backup.  The data will be restored from the
      * current backup dataset if the application has stored data there, or from
      * the dataset used during the last full device setup operation if the current
      * backup dataset has no matching data.  If no backup data exists for this application
@@ -635,7 +642,7 @@ public class BackupManager {
         }
         return false;
     }
-    
+
     /**
      * Request an immediate backup, providing an observer to which results of the backup operation
      * will be published. The Android backup system will decide for each package whether it will
