@@ -105,7 +105,7 @@ public class IccUtils {
     /**
      * PLMN (MCC/MNC) is encoded as per 24.008 10.5.1.3
      * Returns a concatenated string of MCC+MNC, stripping
-     * all invalid character 'f'
+     * all invalid character 'F'
      */
     public static String bcdPlmnToString(byte[] data, int offset) {
         if (offset + 3 > data.length) {
@@ -117,9 +117,9 @@ public class IccUtils {
         trans[2] = (byte) ((data[2 + offset] & 0xF0) | ((data[1 + offset] >> 4) & 0xF));
         String ret = bytesToHexString(trans);
 
-        // For a valid plmn we trim all character 'f'
-        if (ret.contains("f")) {
-            ret = ret.replaceAll("f", "");
+        // For a valid plmn we trim all character 'F'
+        if (ret.contains("F")) {
+            ret = ret.replaceAll("F", "");
         }
         return ret;
     }
