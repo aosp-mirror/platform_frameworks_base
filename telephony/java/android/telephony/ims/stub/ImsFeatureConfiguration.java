@@ -77,6 +77,11 @@ public final class ImsFeatureConfiguration implements Parcelable {
             result = 31 * result + featureType;
             return result;
         }
+
+        @Override
+        public String toString() {
+            return "{s=" + slotId + ", f=" + featureType + "}";
+        }
     }
 
     /**
