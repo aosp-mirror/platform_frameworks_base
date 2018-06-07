@@ -106,4 +106,16 @@ public class HdmiCecLocalDeviceAudioSystemTest {
 
         assertTrue(mResultMessage.equals(expectMessage));
     }
+
+    @Test
+    public void handleGiveSystemAudioModeStatus_off() {
+        HdmiCecMessage expectMessage = HdmiCecMessageBuilder
+            .buildReportSystemAudioMode(ADDR_UNREGISTERED, ADDR_TV, false);
+
+        HdmiCecMessage message = HdmiCecMessageBuilder
+            .buildGiveSystemAudioModeStatus(ADDR_TV, ADDR_AUDIO_SYSTEM);
+        assertTrue(mHdmiCecLocalDeviceAudioSystem.handleGiveSystemAudioModeStatus(message));
+
+        assertTrue(mResultMessage.equals(expectMessage));
+    }
 }
