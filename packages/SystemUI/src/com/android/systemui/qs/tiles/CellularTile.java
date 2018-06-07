@@ -176,8 +176,8 @@ public class CellularTile extends QSTileImpl<SignalState> {
             cb = mSignalCallback.mInfo;
         }
 
+        DataUsageController.DataUsageInfo carrierLabelInfo = mDataController.getDataUsageInfo();
         final Resources r = mContext.getResources();
-        state.label = r.getString(R.string.mobile_data);
         boolean mobileDataEnabled = mDataController.isMobileDataSupported()
                 && mDataController.isMobileDataEnabled();
         state.value = mobileDataEnabled;
@@ -185,8 +185,14 @@ public class CellularTile extends QSTileImpl<SignalState> {
         state.activityOut = mobileDataEnabled && cb.activityOut;
         state.expandedAccessibilityClassName = Switch.class.getName();
         if (cb.noSim) {
+            state.label = r.getString(R.string.mobile_data);
             state.icon = ResourceIcon.get(R.drawable.ic_qs_no_sim);
         } else {
+            if (carrierLabelInfo != null) {
+                state.label = carrierLabelInfo.carrier;
+            } else {
+                state.label = r.getString(R.string.mobile_data);
+            }
             state.icon = ResourceIcon.get(R.drawable.ic_swap_vert);
         }
 
