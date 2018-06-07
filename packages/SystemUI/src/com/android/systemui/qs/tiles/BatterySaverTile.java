@@ -70,6 +70,9 @@ public class BatterySaverTile extends QSTileImpl<BooleanState> implements
 
     @Override
     protected void handleClick() {
+        if (getState().state == Tile.STATE_UNAVAILABLE) {
+            return;
+        }
         mBatteryController.setPowerSaveMode(!mPowerSave);
     }
 
