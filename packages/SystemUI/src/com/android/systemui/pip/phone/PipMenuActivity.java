@@ -342,7 +342,7 @@ public class PipMenuActivity extends Activity {
                 mHandler.post(() -> {
                     event.getAnimationTrigger().decrement();
                 });
-            }, true /* notifyMenuVisibility */);
+            }, true /* notifyMenuVisibility */, false /* isDismissing */);
         }
     }
 
@@ -396,10 +396,12 @@ public class PipMenuActivity extends Activity {
     }
 
     private void hideMenu() {
-        hideMenu(null /* animationFinishedRunnable */, true /* notifyMenuVisibility */);
+        hideMenu(null /* animationFinishedRunnable */, true /* notifyMenuVisibility */,
+                false /* isDismissing */);
     }
 
-    private void hideMenu(final Runnable animationFinishedRunnable, boolean notifyMenuVisibility) {
+    private void hideMenu(final Runnable animationFinishedRunnable, boolean notifyMenuVisibility,
+            boolean isDismissing) {
         if (mMenuState != MENU_STATE_NONE) {
             cancelDelayedFinish();
             if (notifyMenuVisibility) {
@@ -422,7 +424,12 @@ public class PipMenuActivity extends Activity {
                     if (animationFinishedRunnable != null) {
                         animationFinishedRunnable.run();
                     }
-                    finish();
+
+                    if (!isDismissing) {
+                        // If we are dismissing the PiP, then don't try to pre-emptively finish the
+                        // menu activity
+                        finish();
+                    }
                 }
             });
             mMenuContainerAnimator.start();
@@ -583,7 +590,7 @@ public class PipMenuActivity extends Activity {
         hideMenu(() -> {
             sendEmptyMessage(PipMenuActivityController.MESSAGE_EXPAND_PIP,
                     "Could not notify controller to expand PIP");
-        }, false /* notifyMenuVisibility */);
+        }, false /* notifyMenuVisibility */, false /* isDismissing */);
     }
 
     private void minimizePip() {
@@ -597,7 +604,7 @@ public class PipMenuActivity extends Activity {
         hideMenu(() -> {
             sendEmptyMessage(PipMenuActivityController.MESSAGE_DISMISS_PIP,
                     "Could not notify controller to dismiss PIP");
-        }, false /* notifyMenuVisibility */);
+        }, false /* notifyMenuVisibility */, true /* isDismissing */);
     }
 
     private void showPipMenu() {
