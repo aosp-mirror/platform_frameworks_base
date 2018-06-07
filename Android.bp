@@ -476,6 +476,8 @@ java_library {
         "media/java/android/media/tv/ITvRemoteServiceInput.aidl",
         "media/java/android/service/media/IMediaBrowserService.aidl",
         "media/java/android/service/media/IMediaBrowserServiceCallbacks.aidl",
+        "telecomm/java/com/android/internal/telecom/ICallRedirectionAdapter.aidl",
+        "telecomm/java/com/android/internal/telecom/ICallRedirectionService.aidl",
         "telecomm/java/com/android/internal/telecom/ICallScreeningAdapter.aidl",
         "telecomm/java/com/android/internal/telecom/ICallScreeningService.aidl",
         "telecomm/java/com/android/internal/telecom/IVideoCallback.aidl",
