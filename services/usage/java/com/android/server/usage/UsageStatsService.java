@@ -710,7 +710,7 @@ public class UsageStatsService extends SystemService implements
             final int callingUid = Binder.getCallingUid();
             final int callingUserId = UserHandle.getUserId(callingUid);
 
-            if (mPackageManagerInternal.getPackageUid(pkg, PackageManager.MATCH_ANY_USER,
+            if (mPackageManagerInternal.getPackageUid(pkg, /*flags=*/ 0,
                     callingUserId) != callingUid) {
                 throw new SecurityException("Calling uid " + pkg + " cannot query events"
                         + "for package " + pkg);
