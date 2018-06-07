@@ -450,8 +450,10 @@ public class DateTimeView extends TextView {
 
         public void removeView(DateTimeView v) {
             synchronized (mAttachedViews) {
-                mAttachedViews.remove(v);
-                if (mAttachedViews.isEmpty()) {
+                final boolean removed = mAttachedViews.remove(v);
+                // Only unregister once when we remove the last view in the list otherwise we risk
+                // trying to unregister a receiver that is no longer registered.
+                if (removed && mAttachedViews.isEmpty()) {
                     unregister(getApplicationContextIfAvailable(v.getContext()));
                 }
             }

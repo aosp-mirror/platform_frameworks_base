@@ -23,7 +23,7 @@
            reminders="false" events="false" repeatCallers="true" />
 
     <!-- all visual effects that exist as of P -->
-    <disallow suppressedVisualEffect="511" />
+    <disallow visualEffects="511" />
 
     <!-- whether there are notification channels that can bypass dnd -->
     <state areChannelsBypassingDnd="false" />
