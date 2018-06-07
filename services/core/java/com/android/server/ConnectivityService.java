@@ -971,7 +971,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
         throw new IllegalStateException("No free netIds");
     }
 
-    private NetworkState getFilteredNetworkState(int networkType, int uid, boolean ignoreBlocked) {
+    private NetworkState getFilteredNetworkState(int networkType, int uid) {
         if (mLegacyTypeTracker.isTypeSupported(networkType)) {
             final NetworkAgentInfo nai = mLegacyTypeTracker.getNetworkForType(networkType);
             final NetworkState state;
@@ -989,7 +989,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
                 state = new NetworkState(info, new LinkProperties(), capabilities,
                         null, null, null);
             }
-            filterNetworkStateForUid(state, uid, ignoreBlocked);
+            filterNetworkStateForUid(state, uid, false);
             return state;
         } else {
             return NetworkState.EMPTY;
@@ -1194,7 +1194,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
                 return state.networkInfo;
             }
         }
-        final NetworkState state = getFilteredNetworkState(networkType, uid, false);
+        final NetworkState state = getFilteredNetworkState(networkType, uid);
         return state.networkInfo;
     }
 
@@ -1229,7 +1229,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
     public Network getNetworkForType(int networkType) {
         enforceAccessPermission();
         final int uid = Binder.getCallingUid();
-        NetworkState state = getFilteredNetworkState(networkType, uid, false);
+        NetworkState state = getFilteredNetworkState(networkType, uid);
         if (!isNetworkWithLinkPropertiesBlocked(state.linkProperties, uid, false)) {
             return state.network;
         }
