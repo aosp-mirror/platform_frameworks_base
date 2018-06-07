@@ -3058,7 +3058,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         }
 
         boolean keyguardLocked =
-                mKeyguardDelegate != null && (mKeyguardDelegate.isShowing() || mKeyguardOccluded);
+                mKeyguardDelegate != null && mKeyguardDelegate.isShowing();
         boolean hideDockDivider = attrs.type == TYPE_DOCK_DIVIDER
                 && !mWindowManagerInternal.isStackVisible(WINDOWING_MODE_SPLIT_SCREEN_PRIMARY);
         // If AOD is showing, the IME should be hidden. However, sometimes the AOD is considered
