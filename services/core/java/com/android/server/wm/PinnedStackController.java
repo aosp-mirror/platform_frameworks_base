@@ -589,6 +589,7 @@ class PinnedStackController {
         pw.println(prefix + "  mImeHeight=" + mImeHeight);
         pw.println(prefix + "  mIsShelfShowing=" + mIsShelfShowing);
         pw.println(prefix + "  mShelfHeight=" + mShelfHeight);
+        pw.println(prefix + "  mReentrySnapFraction=" + mReentrySnapFraction);
         pw.println(prefix + "  mIsMinimized=" + mIsMinimized);
         if (mActions.isEmpty()) {
             pw.println(prefix + "  mActions=[]");
@@ -601,6 +602,7 @@ class PinnedStackController {
             }
             pw.println(prefix + "  ]");
         }
+        pw.println(prefix + " mDisplayInfo=" + mDisplayInfo);
     }
 
     void writeToProto(ProtoOutputStream proto, long fieldId) {

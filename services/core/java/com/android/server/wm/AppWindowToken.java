@@ -1334,8 +1334,20 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
             // for the next re-entry into PiP (assuming the activity is not hidden or destroyed)
             final TaskStack pinnedStack = mDisplayContent.getPinnedStack();
             if (pinnedStack != null) {
+                final Rect stackBounds;
+                if (pinnedStack.lastAnimatingBoundsWasToFullscreen()) {
+                    // We are animating the bounds, use the pre-animation bounds to save the snap
+                    // fraction
+                    stackBounds = pinnedStack.mPreAnimationBounds;
+                } else {
+                    // We skip the animation if the fullscreen configuration is not compatible, so
+                    // use the current bounds to calculate the saved snap fraction instead
+                    // (see PinnedActivityStack.skipResizeAnimation())
+                    stackBounds = mTmpRect;
+                    pinnedStack.getBounds(stackBounds);
+                }
                 mDisplayContent.mPinnedStackControllerLocked.saveReentrySnapFraction(this,
-                        pinnedStack.mPreAnimationBounds);
+                        stackBounds);
             }
         }
     }
