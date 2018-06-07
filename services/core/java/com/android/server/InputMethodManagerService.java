@@ -324,6 +324,15 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
 
     // Used to bring IME service up to visible adjustment while it is being shown.
     final ServiceConnection mVisibleConnection = new ServiceConnection() {
+        @Override public void onBindingDied(ComponentName name) {
+            synchronized (mMethodMap) {
+                if (mVisibleBound) {
+                    mContext.unbindService(mVisibleConnection);
+                    mVisibleBound = false;
+                }
+            }
+        }
+
         @Override public void onServiceConnected(ComponentName name, IBinder service) {
         }
 
@@ -4587,8 +4596,8 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                     InputMethodClient.softInputModeToString(mCurFocusedWindowSoftInputMode)
                     + " client=" + mCurFocusedWindowClient);
             focusedWindowClient = mCurFocusedWindowClient;
-            p.println("  mCurId=" + mCurId + " mHaveConnect=" + mHaveConnection
-                    + " mBoundToMethod=" + mBoundToMethod);
+            p.println("  mCurId=" + mCurId + " mHaveConnection=" + mHaveConnection
+                    + " mBoundToMethod=" + mBoundToMethod + " mVisibleBound=" + mVisibleBound);
             p.println("  mCurToken=" + mCurToken);
             p.println("  mCurIntent=" + mCurIntent);
             method = mCurMethod;
