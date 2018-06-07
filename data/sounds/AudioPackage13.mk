@@ -13,7 +13,7 @@ NOTIFICATION_FILES := Ariel Ceres Carme Elara Europa Iapetus Io Rhea Salacia Tit
 RINGTONE_FILES := Atria Callisto Dione Ganymede Luna Oberon Phobos Pyxis Sedna Titania Triton \
 	Umbriel
 EFFECT_FILES := Effect_Tick KeypressReturn KeypressInvalid KeypressDelete KeypressSpacebar KeypressStandard \
-	camera_focus Dock Undock Lock Unlock Trusted
+	camera_focus Dock Undock Lock Unlock Trusted ChargingStarted InCallNotification
 MATERIAL_EFFECT_FILES := camera_click VideoRecord WirelessChargingStarted LowBattery VideoStop
 
 PRODUCT_COPY_FILES += $(foreach fn,$(ALARM_FILES),\
