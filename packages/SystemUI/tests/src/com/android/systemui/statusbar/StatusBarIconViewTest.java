@@ -42,7 +42,7 @@ import android.support.test.filters.SmallTest;
 import android.support.test.runner.AndroidJUnit4;
 
 import com.android.internal.statusbar.StatusBarIcon;
-import com.android.internal.util.NotificationColorUtil;
+import com.android.internal.util.ContrastColorUtil;
 import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
 
@@ -115,7 +115,7 @@ public class StatusBarIconViewTest extends SysuiTestCase {
         mIconView.setStaticDrawableColor(Color.WHITE);
         color = mIconView.getContrastedStaticDrawableColor(Color.WHITE);
         assertTrue("Similar colors should be shifted to satisfy contrast",
-                NotificationColorUtil.satisfiesTextContrast(Color.WHITE, color));
+                ContrastColorUtil.satisfiesTextContrast(Color.WHITE, color));
 
         mIconView.setStaticDrawableColor(Color.GREEN);
         color = mIconView.getContrastedStaticDrawableColor(0xcc000000);

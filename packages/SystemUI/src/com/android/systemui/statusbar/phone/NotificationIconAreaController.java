@@ -11,7 +11,7 @@ import android.view.View;
 import android.widget.FrameLayout;
 
 import com.android.internal.statusbar.StatusBarIcon;
-import com.android.internal.util.NotificationColorUtil;
+import com.android.internal.util.ContrastColorUtil;
 import com.android.systemui.Dependency;
 import com.android.systemui.R;
 import com.android.systemui.statusbar.ExpandableNotificationRow;
@@ -32,7 +32,7 @@ import java.util.function.Function;
  * normally reserved for notifications.
  */
 public class NotificationIconAreaController implements DarkReceiver {
-    private final NotificationColorUtil mNotificationColorUtil;
+    private final ContrastColorUtil mContrastColorUtil;
     private final NotificationEntryManager mEntryManager;
     private final Runnable mUpdateStatusBarIcons = this::updateStatusBarIcons;
 
@@ -50,7 +50,7 @@ public class NotificationIconAreaController implements DarkReceiver {
 
     public NotificationIconAreaController(Context context, StatusBar statusBar) {
         mStatusBar = statusBar;
-        mNotificationColorUtil = NotificationColorUtil.getInstance(context);
+        mContrastColorUtil = ContrastColorUtil.getInstance(context);
         mContext = context;
         mEntryManager = Dependency.get(NotificationEntryManager.class);
 
@@ -312,7 +312,7 @@ public class NotificationIconAreaController implements DarkReceiver {
     private void updateTintForIcon(StatusBarIconView v) {
         boolean isPreL = Boolean.TRUE.equals(v.getTag(R.id.icon_is_pre_L));
         int color = StatusBarIconView.NO_COLOR;
-        boolean colorize = !isPreL || NotificationUtils.isGrayscale(v, mNotificationColorUtil);
+        boolean colorize = !isPreL || NotificationUtils.isGrayscale(v, mContrastColorUtil);
         if (colorize) {
             color = DarkIconDispatcher.getTint(mTintArea, v, mIconTint);
         }

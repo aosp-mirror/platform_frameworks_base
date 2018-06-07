@@ -54,7 +54,7 @@ import android.widget.RemoteViews;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.statusbar.StatusBarIcon;
 import com.android.internal.util.ArrayUtils;
-import com.android.internal.util.NotificationColorUtil;
+import com.android.internal.util.ContrastColorUtil;
 import com.android.systemui.Dependency;
 import com.android.systemui.ForegroundServiceController;
 import com.android.systemui.statusbar.notification.InflationException;
@@ -254,7 +254,7 @@ public class NotificationData {
             if (mCachedContrastColorIsFor == rawColor && mCachedContrastColor != COLOR_INVALID) {
                 return mCachedContrastColor;
             }
-            final int contrasted = NotificationColorUtil.resolveContrastColor(context, rawColor,
+            final int contrasted = ContrastColorUtil.resolveContrastColor(context, rawColor,
                     backgroundColor);
             mCachedContrastColorIsFor = rawColor;
             mCachedContrastColor = contrasted;

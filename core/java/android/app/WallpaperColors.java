@@ -25,12 +25,15 @@ import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.util.Log;
 import android.util.Size;
 
 import com.android.internal.graphics.ColorUtils;
 import com.android.internal.graphics.palette.Palette;
 import com.android.internal.graphics.palette.VariationalKMeansQuantizer;
+import com.android.internal.util.ContrastColorUtil;
 
+import java.io.FileOutputStream;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -43,6 +46,8 @@ import java.util.List;
  * or {@link WallpaperColors#getTertiaryColor()}.
  */
 public final class WallpaperColors implements Parcelable {
+
+    private static final boolean DEBUG_DARK_PIXELS = false;
 
     /**
      * Specifies that dark text is preferred over the current wallpaper for best presentation.
@@ -83,8 +88,8 @@ public final class WallpaperColors implements Parcelable {
     private static final float BRIGHT_IMAGE_MEAN_LUMINANCE = 0.75f;
     // We also check if the image has dark pixels in it,
     // to avoid bright images with some dark spots.
-    private static final float DARK_PIXEL_LUMINANCE = 0.45f;
-    private static final float MAX_DARK_AREA = 0.05f;
+    private static final float DARK_PIXEL_CONTRAST = 6f;
+    private static final float MAX_DARK_AREA = 0.025f;
 
     private final ArrayList<Color> mMainColors;
     private int mColorHints;
@@ -382,8 +387,13 @@ public final class WallpaperColors implements Parcelable {
             final int alpha = Color.alpha(pixels[i]);
             // Make sure we don't have a dark pixel mass that will
             // make text illegible.
-            if (luminance < DARK_PIXEL_LUMINANCE && alpha != 0) {
+            final boolean satisfiesTextContrast = ContrastColorUtil
+                    .calculateContrast(pixels[i], Color.BLACK) > DARK_PIXEL_CONTRAST;
+            if (!satisfiesTextContrast && alpha != 0) {
                 darkPixels++;
+                if (DEBUG_DARK_PIXELS) {
+                    pixels[i] = Color.RED;
+                }
             }
             totalLuminance += luminance;
         }
@@ -395,6 +405,18 @@ public final class WallpaperColors implements Parcelable {
         }
         if (meanLuminance < DARK_THEME_MEAN_LUMINANCE) {
             hints |= HINT_SUPPORTS_DARK_THEME;
+        }
+
+        if (DEBUG_DARK_PIXELS) {
+            try (FileOutputStream out = new FileOutputStream("/data/pixels.png")) {
+                source.setPixels(pixels, 0, source.getWidth(), 0, 0, source.getWidth(),
+                        source.getHeight());
+                source.compress(Bitmap.CompressFormat.PNG, 100, out);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            Log.d("WallpaperColors", "l: " + meanLuminance + ", d: " + darkPixels +
+                    " maxD: " + maxDarkPixels + " numPixels: " + pixels.length);
         }
 
         return hints;

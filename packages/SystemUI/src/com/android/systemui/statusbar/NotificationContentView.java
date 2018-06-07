@@ -36,7 +36,7 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.internal.util.NotificationColorUtil;
+import com.android.internal.util.ContrastColorUtil;
 import com.android.systemui.Dependency;
 import com.android.systemui.R;
 import com.android.systemui.statusbar.notification.HybridGroupManager;
@@ -1323,7 +1323,7 @@ public class NotificationContentView extends FrameLayout {
                 if (color == Notification.COLOR_DEFAULT) {
                     color = mContext.getColor(R.color.default_remote_input_background);
                 }
-                existing.setBackgroundColor(NotificationColorUtil.ensureTextBackgroundColor(color,
+                existing.setBackgroundColor(ContrastColorUtil.ensureTextBackgroundColor(color,
                         mContext.getColor(R.color.remote_input_text_enabled),
                         mContext.getColor(R.color.remote_input_hint)));
 
