@@ -171,6 +171,7 @@ Landroid/app/ActivityManagerNative;->getDefault()Landroid/app/IActivityManager;
 Landroid/app/ActivityManagerNative;->isSystemReady()Z
 Landroid/app/ActivityOptions;->makeCustomAnimation(Landroid/content/Context;IILandroid/os/Handler;Landroid/app/ActivityOptions$OnAnimationStartedListener;)Landroid/app/ActivityOptions;
 Landroid/app/ActivityOptions;->makeMultiThumbFutureAspectScaleAnimation(Landroid/content/Context;Landroid/os/Handler;Landroid/view/IAppTransitionAnimationSpecsFuture;Landroid/app/ActivityOptions$OnAnimationStartedListener;Z)Landroid/app/ActivityOptions;
+Landroid/app/ActivityThread$ActivityClientRecord;-><init>()V
 Landroid/app/ActivityThread$ActivityClientRecord;->activity:Landroid/app/Activity;
 Landroid/app/ActivityThread$ActivityClientRecord;->activityInfo:Landroid/content/pm/ActivityInfo;
 Landroid/app/ActivityThread$ActivityClientRecord;->compatInfo:Landroid/content/res/CompatibilityInfo;
@@ -180,6 +181,7 @@ Landroid/app/ActivityThread$ActivityClientRecord;->packageInfo:Landroid/app/Load
 Landroid/app/ActivityThread$ActivityClientRecord;->paused:Z
 Landroid/app/ActivityThread$ActivityClientRecord;->stopped:Z
 Landroid/app/ActivityThread$ActivityClientRecord;->token:Landroid/os/IBinder;
+Landroid/app/ActivityThread$AppBindData;-><init>()V
 Landroid/app/ActivityThread$AppBindData;->appInfo:Landroid/content/pm/ApplicationInfo;
 Landroid/app/ActivityThread$AppBindData;->compatInfo:Landroid/content/res/CompatibilityInfo;
 Landroid/app/ActivityThread$AppBindData;->info:Landroid/app/LoadedApk;
@@ -504,6 +506,7 @@ Landroid/app/ContentProviderHolder;-><init>(Landroid/os/Parcel;)V
 Landroid/app/ContentProviderHolder;->info:Landroid/content/pm/ProviderInfo;
 Landroid/app/ContentProviderHolder;->noReleaseNeeded:Z
 Landroid/app/ContentProviderHolder;->provider:Landroid/content/IContentProvider;
+Landroid/app/ContextImpl$ApplicationContentResolver;->acquireProvider(Landroid/content/Context;Ljava/lang/String;)Landroid/content/IContentProvider;
 Landroid/app/ContextImpl$ApplicationContentResolver;->mMainThread:Landroid/app/ActivityThread;
 Landroid/app/ContextImpl;->createActivityContext(Landroid/app/ActivityThread;Landroid/app/LoadedApk;Landroid/content/pm/ActivityInfo;Landroid/os/IBinder;ILandroid/content/res/Configuration;)Landroid/app/ContextImpl;
 Landroid/app/ContextImpl;->createAppContext(Landroid/app/ActivityThread;Landroid/app/LoadedApk;)Landroid/app/ContextImpl;
@@ -880,8 +883,10 @@ Landroid/app/ProgressDialog;->mProgress:Landroid/widget/ProgressBar;
 Landroid/app/ProgressDialog;->mProgressNumber:Landroid/widget/TextView;
 Landroid/app/QueuedWork;->addFinisher(Ljava/lang/Runnable;)V
 Landroid/app/QueuedWork;->getHandler()Landroid/os/Handler;
+Landroid/app/QueuedWork;->queue(Ljava/lang/Runnable;Z)V
 Landroid/app/QueuedWork;->removeFinisher(Ljava/lang/Runnable;)V
 Landroid/app/QueuedWork;->sFinishers:Ljava/util/LinkedList;
+Landroid/app/ResourcesManager$ActivityResources;-><init>()V
 Landroid/app/ResourcesManager;-><init>()V
 Landroid/app/ResourcesManager;->appendLibAssetForMainAssetPath(Ljava/lang/String;Ljava/lang/String;)V
 Landroid/app/ResourcesManager;->createAssetManager(Landroid/content/res/ResourcesKey;)Landroid/content/res/AssetManager;
@@ -1356,8 +1361,10 @@ Landroid/content/Context;->sendOrderedBroadcastAsUser(Landroid/content/Intent;La
 Landroid/content/Context;->startActivityAsUser(Landroid/content/Intent;Landroid/os/Bundle;Landroid/os/UserHandle;)V
 Landroid/content/Context;->startActivityForResult(Ljava/lang/String;Landroid/content/Intent;ILandroid/os/Bundle;)V
 Landroid/content/Context;->STATUS_BAR_SERVICE:Ljava/lang/String;
+Landroid/content/ContextWrapper;->createApplicationContext(Landroid/content/pm/ApplicationInfo;I)Landroid/content/Context;
 Landroid/content/ContextWrapper;->getBasePackageName()Ljava/lang/String;
 Landroid/content/ContextWrapper;->getDisplay()Landroid/view/Display;
+Landroid/content/ContextWrapper;->getOpPackageName()Ljava/lang/String;
 Landroid/content/ContextWrapper;->mBase:Landroid/content/Context;
 Landroid/content/ContextWrapper;->registerReceiverAsUser(Landroid/content/BroadcastReceiver;Landroid/os/UserHandle;Landroid/content/IntentFilter;Ljava/lang/String;Landroid/os/Handler;)Landroid/content/Intent;
 Landroid/content/ContextWrapper;->startActivityAsUser(Landroid/content/Intent;Landroid/os/UserHandle;)V
@@ -1848,6 +1855,7 @@ Landroid/content/res/CompatibilityInfo$Translator;->translateRectInScreenToAppWi
 Landroid/content/res/CompatibilityInfo$Translator;->translateRectInScreenToAppWinFrame(Landroid/graphics/Rect;)V
 Landroid/content/res/CompatibilityInfo$Translator;->translateRegionInWindowToScreen(Landroid/graphics/Region;)V
 Landroid/content/res/CompatibilityInfo$Translator;->translateWindowLayout(Landroid/view/WindowManager$LayoutParams;)V
+Landroid/content/res/CompatibilityInfo;-><init>()V
 Landroid/content/res/CompatibilityInfo;-><init>(Landroid/content/pm/ApplicationInfo;IIZ)V
 Landroid/content/res/CompatibilityInfo;->applicationScale:F
 Landroid/content/res/CompatibilityInfo;->computeCompatibleScaling(Landroid/util/DisplayMetrics;Landroid/util/DisplayMetrics;)F
@@ -1861,6 +1869,7 @@ Landroid/content/res/Configuration;->makeDefault()V
 Landroid/content/res/Configuration;->resourceQualifierString(Landroid/content/res/Configuration;)Ljava/lang/String;
 Landroid/content/res/Configuration;->seq:I
 Landroid/content/res/Configuration;->userSetLocale:Z
+Landroid/content/res/ConfigurationBoundResourceCache;-><init>()V
 Landroid/content/res/DrawableCache;-><init>()V
 Landroid/content/res/DrawableCache;->getInstance(JLandroid/content/res/Resources;Landroid/content/res/Resources$Theme;)Landroid/graphics/drawable/Drawable;
 Landroid/content/res/ObbInfo;->salt:[B
