@@ -32,6 +32,7 @@ import java.util.Collections;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Objects;
+import java.util.StringJoiner;
 
 /**
  * Describes the properties of a network link.
@@ -48,13 +49,13 @@ import java.util.Objects;
 public final class LinkProperties implements Parcelable {
     // The interface described by the network link.
     private String mIfaceName;
-    private ArrayList<LinkAddress> mLinkAddresses = new ArrayList<LinkAddress>();
-    private ArrayList<InetAddress> mDnses = new ArrayList<InetAddress>();
-    private ArrayList<InetAddress> mValidatedPrivateDnses = new ArrayList<InetAddress>();
+    private ArrayList<LinkAddress> mLinkAddresses = new ArrayList<>();
+    private ArrayList<InetAddress> mDnses = new ArrayList<>();
+    private ArrayList<InetAddress> mValidatedPrivateDnses = new ArrayList<>();
     private boolean mUsePrivateDns;
     private String mPrivateDnsServerName;
     private String mDomains;
-    private ArrayList<RouteInfo> mRoutes = new ArrayList<RouteInfo>();
+    private ArrayList<RouteInfo> mRoutes = new ArrayList<>();
     private ProxyInfo mHttpProxy;
     private int mMtu;
     // in the format "rmem_min,rmem_def,rmem_max,wmem_min,wmem_def,wmem_max"
@@ -66,15 +67,14 @@ public final class LinkProperties implements Parcelable {
 
     // Stores the properties of links that are "stacked" above this link.
     // Indexed by interface name to allow modification and to prevent duplicates being added.
-    private Hashtable<String, LinkProperties> mStackedLinks =
-        new Hashtable<String, LinkProperties>();
+    private Hashtable<String, LinkProperties> mStackedLinks = new Hashtable<>();
 
     /**
      * @hide
      */
     public static class CompareResult<T> {
-        public final List<T> removed = new ArrayList<T>();
-        public final List<T> added = new ArrayList<T>();
+        public final List<T> removed = new ArrayList<>();
+        public final List<T> added = new ArrayList<>();
 
         public CompareResult() {}
 
@@ -93,12 +93,9 @@ public final class LinkProperties implements Parcelable {
 
         @Override
         public String toString() {
-            String retVal = "removed=[";
-            for (T addr : removed) retVal += addr.toString() + ",";
-            retVal += "] added=[";
-            for (T addr : added) retVal += addr.toString() + ",";
-            retVal += "]";
-            return retVal;
+            return "removed=[" + TextUtils.join(",", removed)
+                    + "] added=[" + TextUtils.join(",", added)
+                    + "]";
         }
     }
 
@@ -120,7 +117,7 @@ public final class LinkProperties implements Parcelable {
     public static ProvisioningChange compareProvisioning(
             LinkProperties before, LinkProperties after) {
         if (before.isProvisioned() && after.isProvisioned()) {
-            // On dualstack networks, DHCPv4 renewals can occasionally fail.
+            // On dual-stack networks, DHCPv4 renewals can occasionally fail.
             // When this happens, IPv6-reachable services continue to function
             // normally but IPv4-only services (naturally) fail.
             //
@@ -131,7 +128,7 @@ public final class LinkProperties implements Parcelable {
             //
             // For users, this is confusing and unexpected behaviour, and is
             // not necessarily easy to diagnose.  Therefore, we treat changing
-            // from a dualstack network to an IPv6-only network equivalent to
+            // from a dual-stack network to an IPv6-only network equivalent to
             // a total loss of provisioning.
             //
             // For one such example of this, see b/18867306.
@@ -139,7 +136,7 @@ public final class LinkProperties implements Parcelable {
             // Additionally, losing IPv6 provisioning can result in TCP
             // connections getting stuck until timeouts fire and other
             // baffling failures. Therefore, loss of either IPv4 or IPv6 on a
-            // previously dualstack network is deemed a lost of provisioning.
+            // previously dual-stack network is deemed a lost of provisioning.
             if ((before.isIPv4Provisioned() && !after.isIPv4Provisioned()) ||
                 (before.isIPv6Provisioned() && !after.isIPv6Provisioned())) {
                 return ProvisioningChange.LOST_PROVISIONING;
@@ -165,22 +162,19 @@ public final class LinkProperties implements Parcelable {
      */
     public LinkProperties(LinkProperties source) {
         if (source != null) {
-            mIfaceName = source.getInterfaceName();
-            for (LinkAddress l : source.getLinkAddresses()) mLinkAddresses.add(l);
-            for (InetAddress i : source.getDnsServers()) mDnses.add(i);
-            for (InetAddress i : source.getValidatedPrivateDnsServers()) {
-                mValidatedPrivateDnses.add(i);
-            }
+            mIfaceName = source.mIfaceName;
+            mLinkAddresses.addAll(source.mLinkAddresses);
+            mDnses.addAll(source.mDnses);
+            mValidatedPrivateDnses.addAll(source.mValidatedPrivateDnses);
             mUsePrivateDns = source.mUsePrivateDns;
             mPrivateDnsServerName = source.mPrivateDnsServerName;
-            mDomains = source.getDomains();
-            for (RouteInfo r : source.getRoutes()) mRoutes.add(r);
-            mHttpProxy = (source.getHttpProxy() == null)  ?
-                    null : new ProxyInfo(source.getHttpProxy());
+            mDomains = source.mDomains;
+            mRoutes.addAll(source.mRoutes);
+            mHttpProxy = (source.mHttpProxy == null) ? null : new ProxyInfo(source.mHttpProxy);
             for (LinkProperties l: source.mStackedLinks.values()) {
                 addStackedLink(l);
             }
-            setMtu(source.getMtu());
+            setMtu(source.mMtu);
             mTcpBufferSizes = source.mTcpBufferSizes;
         }
     }
@@ -194,7 +188,7 @@ public final class LinkProperties implements Parcelable {
      */
     public void setInterfaceName(String iface) {
         mIfaceName = iface;
-        ArrayList<RouteInfo> newRoutes = new ArrayList<RouteInfo>(mRoutes.size());
+        ArrayList<RouteInfo> newRoutes = new ArrayList<>(mRoutes.size());
         for (RouteInfo route : mRoutes) {
             newRoutes.add(routeWithInterface(route));
         }
@@ -214,8 +208,8 @@ public final class LinkProperties implements Parcelable {
      * @hide
      */
     public List<String> getAllInterfaceNames() {
-        List<String> interfaceNames = new ArrayList<String>(mStackedLinks.size() + 1);
-        if (mIfaceName != null) interfaceNames.add(new String(mIfaceName));
+        List<String> interfaceNames = new ArrayList<>(mStackedLinks.size() + 1);
+        if (mIfaceName != null) interfaceNames.add(mIfaceName);
         for (LinkProperties stacked: mStackedLinks.values()) {
             interfaceNames.addAll(stacked.getAllInterfaceNames());
         }
@@ -229,11 +223,11 @@ public final class LinkProperties implements Parcelable {
      * prefix lengths for each address.  This is a simplified utility alternative to
      * {@link LinkProperties#getLinkAddresses}.
      *
-     * @return An umodifiable {@link List} of {@link InetAddress} for this link.
+     * @return An unmodifiable {@link List} of {@link InetAddress} for this link.
      * @hide
      */
     public List<InetAddress> getAddresses() {
-        List<InetAddress> addresses = new ArrayList<InetAddress>();
+        List<InetAddress> addresses = new ArrayList<>();
         for (LinkAddress linkAddress : mLinkAddresses) {
             addresses.add(linkAddress.getAddress());
         }
@@ -245,7 +239,7 @@ public final class LinkProperties implements Parcelable {
      * @hide
      */
     public List<InetAddress> getAllAddresses() {
-        List<InetAddress> addresses = new ArrayList<InetAddress>();
+        List<InetAddress> addresses = new ArrayList<>();
         for (LinkAddress linkAddress : mLinkAddresses) {
             addresses.add(linkAddress.getAddress());
         }
@@ -322,8 +316,7 @@ public final class LinkProperties implements Parcelable {
      * @hide
      */
     public List<LinkAddress> getAllLinkAddresses() {
-        List<LinkAddress> addresses = new ArrayList<LinkAddress>();
-        addresses.addAll(mLinkAddresses);
+        List<LinkAddress> addresses = new ArrayList<>(mLinkAddresses);
         for (LinkProperties stacked: mStackedLinks.values()) {
             addresses.addAll(stacked.getAllLinkAddresses());
         }
@@ -391,7 +384,7 @@ public final class LinkProperties implements Parcelable {
     /**
      * Returns all the {@link InetAddress} for DNS servers on this link.
      *
-     * @return An umodifiable {@link List} of {@link InetAddress} for DNS servers on
+     * @return An unmodifiable {@link List} of {@link InetAddress} for DNS servers on
      *         this link.
      */
     public List<InetAddress> getDnsServers() {
@@ -643,7 +636,7 @@ public final class LinkProperties implements Parcelable {
      * @hide
      */
     public void ensureDirectlyConnectedRoutes() {
-        for (LinkAddress addr: mLinkAddresses) {
+        for (LinkAddress addr : mLinkAddresses) {
             addRoute(new RouteInfo(addr, null, mIfaceName));
         }
     }
@@ -653,8 +646,7 @@ public final class LinkProperties implements Parcelable {
      * @hide
      */
     public List<RouteInfo> getAllRoutes() {
-        List<RouteInfo> routes = new ArrayList<>();
-        routes.addAll(mRoutes);
+        List<RouteInfo> routes = new ArrayList<>(mRoutes);
         for (LinkProperties stacked: mStackedLinks.values()) {
             routes.addAll(stacked.getAllRoutes());
         }
@@ -685,7 +677,7 @@ public final class LinkProperties implements Parcelable {
     /**
      * Adds a stacked link.
      *
-     * If there is already a stacked link with the same interfacename as link,
+     * If there is already a stacked link with the same interface name as link,
      * that link is replaced with link. Otherwise, link is added to the list
      * of stacked links. If link is null, nothing changes.
      *
@@ -725,9 +717,9 @@ public final class LinkProperties implements Parcelable {
      */
     public @NonNull List<LinkProperties> getStackedLinks() {
         if (mStackedLinks.isEmpty()) {
-            return Collections.EMPTY_LIST;
+            return Collections.emptyList();
         }
-        List<LinkProperties> stacked = new ArrayList<LinkProperties>();
+        List<LinkProperties> stacked = new ArrayList<>();
         for (LinkProperties link : mStackedLinks.values()) {
             stacked.add(new LinkProperties(link));
         }
@@ -761,57 +753,76 @@ public final class LinkProperties implements Parcelable {
 
     @Override
     public String toString() {
-        String ifaceName = (mIfaceName == null ? "" : "InterfaceName: " + mIfaceName + " ");
+        // Space as a separator, so no need for spaces at start/end of the individual fragments.
+        final StringJoiner resultJoiner = new StringJoiner(" ", "{", "}");
 
-        String linkAddresses = "LinkAddresses: [";
-        for (LinkAddress addr : mLinkAddresses) linkAddresses += addr.toString() + ",";
-        linkAddresses += "] ";
+        if (mIfaceName != null) {
+            resultJoiner.add("InterfaceName:");
+            resultJoiner.add(mIfaceName);
+        }
 
-        String dns = "DnsAddresses: [";
-        for (InetAddress addr : mDnses) dns += addr.getHostAddress() + ",";
-        dns += "] ";
+        resultJoiner.add("LinkAddresses: [");
+        if (!mLinkAddresses.isEmpty()) {
+            resultJoiner.add(TextUtils.join(",", mLinkAddresses));
+        }
+        resultJoiner.add("]");
 
-        String usePrivateDns = "UsePrivateDns: " + mUsePrivateDns + " ";
+        resultJoiner.add("DnsAddresses: [");
+        if (!mDnses.isEmpty()) {
+            resultJoiner.add(TextUtils.join(",", mDnses));
+        }
+        resultJoiner.add("]");
 
-        String privateDnsServerName = "";
+        if (mUsePrivateDns) {
+            resultJoiner.add("UsePrivateDns: true");
+        }
+
         if (mPrivateDnsServerName != null) {
-            privateDnsServerName = "PrivateDnsServerName: " + mPrivateDnsServerName + " ";
+            resultJoiner.add("PrivateDnsServerName:");
+            resultJoiner.add(mPrivateDnsServerName);
         }
 
-        String validatedPrivateDns = "";
         if (!mValidatedPrivateDnses.isEmpty()) {
-            validatedPrivateDns = "ValidatedPrivateDnsAddresses: [";
-            for (InetAddress addr : mValidatedPrivateDnses) {
-                validatedPrivateDns += addr.getHostAddress() + ",";
+            final StringJoiner validatedPrivateDnsesJoiner =
+                    new StringJoiner(",", "ValidatedPrivateDnsAddresses: [", "]");
+            for (final InetAddress addr : mValidatedPrivateDnses) {
+                validatedPrivateDnsesJoiner.add(addr.getHostAddress());
             }
-            validatedPrivateDns += "] ";
+            resultJoiner.add(validatedPrivateDnsesJoiner.toString());
         }
 
-        String domainName = "Domains: " + mDomains;
+        resultJoiner.add("Domains:");
+        resultJoiner.add(mDomains);
 
-        String mtu = " MTU: " + mMtu;
+        resultJoiner.add("MTU:");
+        resultJoiner.add(Integer.toString(mMtu));
 
-        String tcpBuffSizes = "";
         if (mTcpBufferSizes != null) {
-            tcpBuffSizes = " TcpBufferSizes: " + mTcpBufferSizes;
+            resultJoiner.add("TcpBufferSizes:");
+            resultJoiner.add(mTcpBufferSizes);
         }
 
-        String routes = " Routes: [";
-        for (RouteInfo route : mRoutes) routes += route.toString() + ",";
-        routes += "] ";
-        String proxy = (mHttpProxy == null ? "" : " HttpProxy: " + mHttpProxy.toString() + " ");
+        resultJoiner.add("Routes: [");
+        if (!mRoutes.isEmpty()) {
+            resultJoiner.add(TextUtils.join(",", mRoutes));
+        }
+        resultJoiner.add("]");
 
-        String stacked = "";
-        if (mStackedLinks.values().size() > 0) {
-            stacked += " Stacked: [";
-            for (LinkProperties link: mStackedLinks.values()) {
-                stacked += " [" + link.toString() + " ],";
+        if (mHttpProxy != null) {
+            resultJoiner.add("HttpProxy:");
+            resultJoiner.add(mHttpProxy.toString());
+        }
+
+        final Collection<LinkProperties> stackedLinksValues = mStackedLinks.values();
+        if (!stackedLinksValues.isEmpty()) {
+            final StringJoiner stackedLinksJoiner = new StringJoiner(",", "Stacked: [", "]");
+            for (final LinkProperties lp : stackedLinksValues) {
+                stackedLinksJoiner.add("[ " + lp + " ]");
             }
-            stacked += "] ";
+            resultJoiner.add(stackedLinksJoiner.toString());
         }
-        return "{" + ifaceName + linkAddresses + routes + dns + usePrivateDns
-            + privateDnsServerName + validatedPrivateDns + domainName + mtu + tcpBuffSizes + proxy
-            + stacked + "}";
+
+        return resultJoiner.toString();
     }
 
     /**
@@ -1028,7 +1039,7 @@ public final class LinkProperties implements Parcelable {
         if (mDomains == null) {
             if (targetDomains != null) return false;
         } else {
-            if (mDomains.equals(targetDomains) == false) return false;
+            if (!mDomains.equals(targetDomains)) return false;
         }
         return (mDnses.size() == targetDnses.size()) ?
                 mDnses.containsAll(targetDnses) : false;
@@ -1130,7 +1141,6 @@ public final class LinkProperties implements Parcelable {
         return Objects.equals(mTcpBufferSizes, target.mTcpBufferSizes);
     }
 
-    @Override
     /**
      * Compares this {@code LinkProperties} instance against the target
      * LinkProperties in {@code obj}. Two LinkPropertieses are equal if
@@ -1145,13 +1155,14 @@ public final class LinkProperties implements Parcelable {
      * @param obj the object to be tested for equality.
      * @return {@code true} if both objects are equal, {@code false} otherwise.
      */
+    @Override
     public boolean equals(Object obj) {
         if (this == obj) return true;
 
         if (!(obj instanceof LinkProperties)) return false;
 
         LinkProperties target = (LinkProperties) obj;
-        /**
+        /*
          * This method does not check that stacked interfaces are equal, because
          * stacked interfaces are not so much a property of the link as a
          * description of connections between links.
@@ -1258,12 +1269,13 @@ public final class LinkProperties implements Parcelable {
     }
 
 
-    @Override
     /**
-     * generate hashcode based on significant fields
+     * Generate hashcode based on significant fields
+     *
      * Equal objects must produce the same hash code, while unequal objects
      * may have the same hash codes.
      */
+    @Override
     public int hashCode() {
         return ((null == mIfaceName) ? 0 : mIfaceName.hashCode()
                 + mLinkAddresses.size() * 31
@@ -1313,7 +1325,7 @@ public final class LinkProperties implements Parcelable {
         } else {
             dest.writeByte((byte)0);
         }
-        ArrayList<LinkProperties> stackedLinks = new ArrayList(mStackedLinks.values());
+        ArrayList<LinkProperties> stackedLinks = new ArrayList<>(mStackedLinks.values());
         dest.writeList(stackedLinks);
     }
 
@@ -1331,7 +1343,7 @@ public final class LinkProperties implements Parcelable {
                 }
                 int addressCount = in.readInt();
                 for (int i = 0; i < addressCount; i++) {
-                    netProp.addLinkAddress((LinkAddress) in.readParcelable(null));
+                    netProp.addLinkAddress(in.readParcelable(null));
                 }
                 addressCount = in.readInt();
                 for (int i = 0; i < addressCount; i++) {
@@ -1353,10 +1365,10 @@ public final class LinkProperties implements Parcelable {
                 netProp.setTcpBufferSizes(in.readString());
                 addressCount = in.readInt();
                 for (int i = 0; i < addressCount; i++) {
-                    netProp.addRoute((RouteInfo) in.readParcelable(null));
+                    netProp.addRoute(in.readParcelable(null));
                 }
                 if (in.readByte() == 1) {
-                    netProp.setHttpProxy((ProxyInfo) in.readParcelable(null));
+                    netProp.setHttpProxy(in.readParcelable(null));
                 }
                 ArrayList<LinkProperties> stackedLinks = new ArrayList<LinkProperties>();
                 in.readList(stackedLinks, LinkProperties.class.getClassLoader());
@@ -1377,10 +1389,9 @@ public final class LinkProperties implements Parcelable {
      */
     public static boolean isValidMtu(int mtu, boolean ipv6) {
         if (ipv6) {
-            if (mtu >= MIN_MTU_V6 && mtu <= MAX_MTU) return true;
+            return mtu >= MIN_MTU_V6 && mtu <= MAX_MTU;
         } else {
-            if (mtu >= MIN_MTU && mtu <= MAX_MTU) return true;
+            return mtu >= MIN_MTU && mtu <= MAX_MTU;
         }
-        return false;
     }
 }
