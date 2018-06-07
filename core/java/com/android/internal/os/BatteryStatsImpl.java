@@ -158,11 +158,11 @@ public class BatteryStatsImpl extends BatteryStats {
 
     static {
         if (ActivityManager.isLowRamDeviceStatic()) {
-            MAX_HISTORY_ITEMS = 800;
-            MAX_MAX_HISTORY_ITEMS = 1200;
-            MAX_WAKELOCKS_PER_UID = 40;
-            MAX_HISTORY_BUFFER = 96*1024;  // 96KB
-            MAX_MAX_HISTORY_BUFFER = 128*1024; // 128KB
+            MAX_HISTORY_ITEMS = 2000;
+            MAX_MAX_HISTORY_ITEMS = 3000;
+            MAX_WAKELOCKS_PER_UID = 100;
+            MAX_HISTORY_BUFFER = 256*1024;  // 256KB
+            MAX_MAX_HISTORY_BUFFER = 320*1024;  // 320KB
         } else {
             MAX_HISTORY_ITEMS = 4000;
             MAX_MAX_HISTORY_ITEMS = 6000;
