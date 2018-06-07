@@ -2736,6 +2736,7 @@ Landroid/media/AudioGainConfig;->mRampDurationMs:I
 Landroid/media/AudioGainConfig;->mValues:[I
 Landroid/media/AudioHandle;-><init>(I)V
 Landroid/media/AudioHandle;->mId:I
+Landroid/media/AudioManager;-><init>()V
 Landroid/media/AudioManager;-><init>(Landroid/content/Context;)V
 Landroid/media/AudioManager;->abandonAudioFocusForCall()V
 Landroid/media/AudioManager;->createAudioPatch([Landroid/media/AudioPatch;[Landroid/media/AudioPortConfig;[Landroid/media/AudioPortConfig;)I
@@ -3365,6 +3366,7 @@ Landroid/net/LinkProperties;->addLinkAddress(Landroid/net/LinkAddress;)Z
 Landroid/net/LinkProperties;->getAddresses()Ljava/util/List;
 Landroid/net/LinkProperties;->getAllAddresses()Ljava/util/List;
 Landroid/net/LinkProperties;->getAllLinkAddresses()Ljava/util/List;
+Landroid/net/LinkProperties;->getTcpBufferSizes()Ljava/lang/String;
 Landroid/net/LinkProperties;->isIdenticalHttpProxy(Landroid/net/LinkProperties;)Z
 Landroid/net/LinkProperties;->isIdenticalInterfaceName(Landroid/net/LinkProperties;)Z
 Landroid/net/LinkProperties;->mIfaceName:Ljava/lang/String;
@@ -6900,6 +6902,7 @@ Landroid/widget/Gallery;->mSelectedChild:Landroid/view/View;
 Landroid/widget/Gallery;->mSpacing:I
 Landroid/widget/Gallery;->trackMotionScroll(I)V
 Landroid/widget/GridLayout;->UNDEFINED_ALIGNMENT:Landroid/widget/GridLayout$Alignment;
+Landroid/widget/GridView;->determineColumns(I)Z
 Landroid/widget/GridView;->fillDown(II)Landroid/view/View;
 Landroid/widget/GridView;->fillUp(II)Landroid/view/View;
 Landroid/widget/GridView;->mColumnWidth:I
