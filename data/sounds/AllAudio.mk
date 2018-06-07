@@ -233,3 +233,4 @@ PRODUCT_COPY_FILES += \
     $(LOCAL_PATH)/effects/ogg/camera_click_48k.ogg:system/media/audio/ui/camera_click.ogg \
     $(LOCAL_PATH)/effects/ogg/camera_focus.ogg:system/media/audio/ui/camera_focus.ogg \
     $(LOCAL_PATH)/effects/ogg/ChargingStarted.ogg:system/media/audio/ui/ChargingStarted.ogg \
+    $(LOCAL_PATH)/effects/ogg/InCallNotification.ogg:system/media/audio/ui/InCallNotification.ogg \
