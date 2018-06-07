@@ -73,4 +73,22 @@ public class ProxyTracker {
         // hosts even when PAC URLs are present to account for the legacy PAC resolver.
         return Objects.equals(pa, pb) && (pa == null || Objects.equals(pa.getHost(), pb.getHost()));
     }
+
+    @Nullable
+    public ProxyInfo getDefaultProxy() {
+        // This information is already available as a world read/writable jvm property.
+        synchronized (mProxyLock) {
+            final ProxyInfo ret = mGlobalProxy;
+            if ((ret == null) && !mDefaultProxyDisabled) return mDefaultProxy;
+            return ret;
+        }
+    }
+
+    @Nullable
+    public ProxyInfo getGlobalProxy() {
+        // This information is already available as a world read/writable jvm property.
+        synchronized (mProxyLock) {
+            return mGlobalProxy;
+        }
+    }
 }

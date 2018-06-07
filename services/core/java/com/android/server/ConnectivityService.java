@@ -3278,24 +3278,10 @@ public class ConnectivityService extends IConnectivityManager.Stub
         nai.networkMonitor.forceReevaluation(uid);
     }
 
-    private ProxyInfo getDefaultProxy() {
-        // this information is already available as a world read/writable jvm property
-        // so this API change wouldn't have a benefit.  It also breaks the passing
-        // of proxy info to all the JVMs.
-        // enforceAccessPermission();
-        synchronized (mProxyTracker.mProxyLock) {
-            ProxyInfo ret = mProxyTracker.mGlobalProxy;
-            if ((ret == null) && !mProxyTracker.mDefaultProxyDisabled) {
-                ret = mProxyTracker.mDefaultProxy;
-            }
-            return ret;
-        }
-    }
-
     @Override
     public ProxyInfo getProxyForNetwork(Network network) {
-        if (network == null) return getDefaultProxy();
-        final ProxyInfo globalProxy = getGlobalProxy();
+        if (network == null) return mProxyTracker.getDefaultProxy();
+        final ProxyInfo globalProxy = mProxyTracker.getGlobalProxy();
         if (globalProxy != null) return globalProxy;
         if (!NetworkUtils.queryUserAccess(Binder.getCallingUid(), network.netId)) return null;
         // Don't call getLinkProperties() as it requires ACCESS_NETWORK_STATE permission, which
@@ -3387,14 +3373,10 @@ public class ConnectivityService extends IConnectivityManager.Stub
         }
     }
 
+    @Override
+    @Nullable
     public ProxyInfo getGlobalProxy() {
-        // this information is already available as a world read/writable jvm property
-        // so this API change wouldn't have a benefit.  It also breaks the passing
-        // of proxy info to all the JVMs.
-        // enforceAccessPermission();
-        synchronized (mProxyTracker.mProxyLock) {
-            return mProxyTracker.mGlobalProxy;
-        }
+        return mProxyTracker.getGlobalProxy();
     }
 
     private void handleApplyDefaultProxy(ProxyInfo proxy) {
@@ -3443,7 +3425,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
         ProxyInfo oldProxyInfo = oldLp == null ? null : oldLp.getHttpProxy();
 
         if (!ProxyTracker.proxyInfoEqual(newProxyInfo, oldProxyInfo)) {
-            sendProxyBroadcast(getDefaultProxy());
+            sendProxyBroadcast(mProxyTracker.getDefaultProxy());
         }
     }
 
