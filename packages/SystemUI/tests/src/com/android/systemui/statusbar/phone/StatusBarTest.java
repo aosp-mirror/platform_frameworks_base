@@ -597,7 +597,7 @@ public class StatusBarTest extends SysuiTestCase {
 
     @Test
     public void testInflateFooterView() {
-        mStatusBar.reevaluateStyles();
+        mStatusBar.inflateFooterView();
         ArgumentCaptor<FooterView> captor = ArgumentCaptor.forClass(FooterView.class);
         verify(mStackScroller).setFooterView(captor.capture());
 
@@ -661,7 +661,7 @@ public class StatusBarTest extends SysuiTestCase {
     @Test
     public void testUpdateFooter_atEnd() {
         // add footer
-        mStatusBar.reevaluateStyles();
+        mStatusBar.inflateFooterView();
 
         // add notification
         ExpandableNotificationRow row = mock(ExpandableNotificationRow.class);
@@ -698,6 +698,13 @@ public class StatusBarTest extends SysuiTestCase {
         when(mStatusBar.mUserSwitcherController.useFullscreenUserSwitcher()).thenReturn(true);
         mStatusBar.showKeyguardImpl();
         assertTrue(mStatusBar.mState == StatusBarState.FULLSCREEN_USER_SWITCHER);
+    }
+
+    @Test
+    public void testOnDensityOrFontScaleChanged_reInflatesFooterViews() {
+        mStatusBar.onDensityOrFontScaleChanged();
+        verify(mStackScroller).setFooterView(any());
+        verify(mStackScroller).setEmptyShadeView(any());
     }
 
     static class TestableStatusBar extends StatusBar {
