@@ -429,9 +429,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
 
     // A helper object to track the current default HTTP proxy. ConnectivityService needs to tell
     // the world when it changes.
-    private final ProxyTracker mProxyTracker = new ProxyTracker();
-
-    private PacManager mPacManager = null;
+    private final ProxyTracker mProxyTracker;
 
     final private SettingsObserver mSettingsObserver;
 
@@ -730,6 +728,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
         mPolicyManagerInternal = checkNotNull(
                 LocalServices.getService(NetworkPolicyManagerInternal.class),
                 "missing NetworkPolicyManagerInternal");
+        mProxyTracker = new ProxyTracker(context, mHandler, EVENT_PROXY_HAS_CHANGED);
 
         mKeyStore = KeyStore.getInstance();
         mTelephonyManager = (TelephonyManager) mContext.getSystemService(Context.TELEPHONY_SERVICE);
@@ -839,8 +838,6 @@ public class ConnectivityService extends IConnectivityManager.Stub
 
         final DataConnectionStats dataConnectionStats = new DataConnectionStats(mContext);
         dataConnectionStats.startMonitoring();
-
-        mPacManager = new PacManager(mContext, mHandler, EVENT_PROXY_HAS_CHANGED);
 
         mUserManager = (UserManager) context.getSystemService(Context.USER_SERVICE);
 
@@ -3454,7 +3451,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
 
     private void sendProxyBroadcast(ProxyInfo proxy) {
         if (proxy == null) proxy = new ProxyInfo("", 0, "");
-        if (mPacManager.setCurrentProxyScriptUrl(proxy)) return;
+        if (mProxyTracker.setCurrentProxyScriptUrl(proxy)) return;
         if (DBG) log("sending Proxy Broadcast for " + proxy);
         Intent intent = new Intent(Proxy.PROXY_CHANGE_ACTION);
         intent.addFlags(Intent.FLAG_RECEIVER_REPLACE_PENDING |

@@ -18,8 +18,10 @@ package com.android.server.connectivity;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.content.Context;
 import android.net.ProxyInfo;
 import android.net.Uri;
+import android.os.Handler;
 import android.text.TextUtils;
 
 import com.android.internal.annotations.GuardedBy;
@@ -44,6 +46,14 @@ public class ProxyTracker {
     public volatile ProxyInfo mDefaultProxy = null;
     @GuardedBy("mProxyLock")
     public boolean mDefaultProxyDisabled = false;
+
+    @NonNull
+    private final PacManager mPacManager;
+
+    public ProxyTracker(@NonNull final Context context,
+            @NonNull final Handler connectivityServiceInternalHandler, final int pacChangedEvent) {
+        mPacManager = new PacManager(context, connectivityServiceInternalHandler, pacChangedEvent);
+    }
 
     // Convert empty ProxyInfo's to null as null-checks are used to determine if proxies are present
     // (e.g. if mGlobalProxy==null fall back to network-specific proxy, if network-specific
@@ -90,5 +100,9 @@ public class ProxyTracker {
         synchronized (mProxyLock) {
             return mGlobalProxy;
         }
+    }
+
+    public boolean setCurrentProxyScriptUrl(@NonNull final ProxyInfo proxy) {
+        return mPacManager.setCurrentProxyScriptUrl(proxy);
     }
 }
