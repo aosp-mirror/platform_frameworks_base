@@ -100,6 +100,7 @@ import static com.android.server.wm.WindowManagerService.MAX_ANIMATION_DURATION;
 import static com.android.server.wm.WindowManagerService.TYPE_LAYER_MULTIPLIER;
 import static com.android.server.wm.WindowManagerService.TYPE_LAYER_OFFSET;
 import static com.android.server.wm.WindowManagerService.UPDATE_FOCUS_NORMAL;
+import static com.android.server.wm.WindowManagerService.UPDATE_FOCUS_REMOVING_FOCUS;
 import static com.android.server.wm.WindowManagerService.UPDATE_FOCUS_WILL_PLACE_SURFACES;
 import static com.android.server.wm.WindowManagerService.WINDOWS_FREEZING_SCREENS_TIMEOUT;
 import static com.android.server.wm.WindowManagerService.localLOGV;
@@ -2061,7 +2062,10 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             if (wasVisible && mService.updateOrientationFromAppTokensLocked(displayId)) {
                 mService.mH.obtainMessage(SEND_NEW_CONFIGURATION, displayId).sendToTarget();
             }
-            mService.updateFocusedWindowLocked(UPDATE_FOCUS_NORMAL, true /*updateInputWindows*/);
+            mService.updateFocusedWindowLocked(mService.mCurrentFocus == this
+                            ? UPDATE_FOCUS_REMOVING_FOCUS
+                            : UPDATE_FOCUS_NORMAL,
+                    true /*updateInputWindows*/);
         } finally {
             Binder.restoreCallingIdentity(origId);
         }
