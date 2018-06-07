@@ -843,6 +843,19 @@
         android:description="@string/permdesc_accessCoarseLocation"
         android:protectionLevel="dangerous|instant" />
 
+    <!-- Allows an app to access location in the background.  If you
+         are requesting this, you should also request {@link #ACCESS_FINE_LOCATION}.
+         Requesting this by itself is not sufficient to give you
+         location access.
+         <p>Protection level: dangerous
+         @hide
+    -->
+    <permission android:name="android.permission.ACCESS_BACKGROUND_LOCATION"
+        android:permissionGroup="android.permission-group.LOCATION"
+        android:label="@string/permlab_accessBackgroundLocation"
+        android:description="@string/permdesc_accessBackgroundLocation"
+        android:protectionLevel="dangerous|instant" />
+
     <!-- ====================================================================== -->
     <!-- Permissions for accessing the call log                                 -->
     <!-- ====================================================================== -->
