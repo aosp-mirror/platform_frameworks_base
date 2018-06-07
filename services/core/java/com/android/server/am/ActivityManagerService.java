@@ -15311,6 +15311,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             mStackSupervisor.resumeFocusedStackTopActivityLocked();
             mUserController.sendUserSwitchBroadcasts(-1, currentUserId);
 
+            BinderInternal.nSetBinderProxyCountWatermarks(6000,5500);
             BinderInternal.nSetBinderProxyCountEnabled(true);
             BinderInternal.setBinderProxyCountCallback(
                     new BinderInternal.BinderProxyLimitListener() {
