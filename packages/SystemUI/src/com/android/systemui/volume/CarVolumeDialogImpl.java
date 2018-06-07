@@ -527,7 +527,7 @@ public class CarVolumeDialogImpl implements VolumeDialog {
 
   private final ICarVolumeCallback mVolumeChangeCallback = new ICarVolumeCallback.Stub() {
     @Override
-    public void onGroupVolumeChanged(int groupId) {
+    public void onGroupVolumeChanged(int groupId, int flags) {
       VolumeItem volumeItem = mAvailableVolumeItems.get(groupId);
       int value = getSeekbarValue(mCarAudioManager, groupId);
       // Do not update the progress if it is the same as before. When car audio manager sets its
@@ -541,7 +541,7 @@ public class CarVolumeDialogImpl implements VolumeDialog {
     }
 
     @Override
-    public void onMasterMuteChanged() {
+    public void onMasterMuteChanged(int flags) {
       // ignored
     }
   };
