@@ -896,6 +896,7 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, OnCo
 
     public void setKeyguardOccluded(boolean keyguardOccluded) {
         mKeyguardOccluded = keyguardOccluded;
+        updateScrims();
     }
 
     public interface Callback {
