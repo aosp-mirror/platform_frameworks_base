@@ -139,14 +139,15 @@ public class ProxyTracker {
 
     public void setGlobalProxy(@Nullable ProxyInfo proxyProperties) {
         synchronized (mProxyLock) {
+            // ProxyInfo#equals is not commutative :( and is public API, so it can't be fixed.
             if (proxyProperties == mGlobalProxy) return;
             if (proxyProperties != null && proxyProperties.equals(mGlobalProxy)) return;
             if (mGlobalProxy != null && mGlobalProxy.equals(proxyProperties)) return;
 
-            String host = "";
-            int port = 0;
-            String exclList = "";
-            String pacFileUrl = "";
+            final String host;
+            final int port;
+            final String exclList;
+            final String pacFileUrl;
             if (proxyProperties != null && (!TextUtils.isEmpty(proxyProperties.getHost()) ||
                     !Uri.EMPTY.equals(proxyProperties.getPacFileUrl()))) {
                 if (!proxyProperties.isValid()) {
@@ -157,10 +158,13 @@ public class ProxyTracker {
                 host = mGlobalProxy.getHost();
                 port = mGlobalProxy.getPort();
                 exclList = mGlobalProxy.getExclusionListAsString();
-                if (!Uri.EMPTY.equals(proxyProperties.getPacFileUrl())) {
-                    pacFileUrl = proxyProperties.getPacFileUrl().toString();
-                }
+                pacFileUrl = Uri.EMPTY.equals(proxyProperties.getPacFileUrl())
+                        ? "" : proxyProperties.getPacFileUrl().toString();
             } else {
+                host = "";
+                port = 0;
+                exclList = "";
+                pacFileUrl = "";
                 mGlobalProxy = null;
             }
             final ContentResolver res = mContext.getContentResolver();
@@ -175,10 +179,7 @@ public class ProxyTracker {
                 Binder.restoreCallingIdentity(token);
             }
 
-            if (mGlobalProxy == null) {
-                proxyProperties = mDefaultProxy;
-            }
-            sendProxyBroadcast(proxyProperties);
+            sendProxyBroadcast(mGlobalProxy == null ? mDefaultProxy : proxyProperties);
         }
     }
 }
