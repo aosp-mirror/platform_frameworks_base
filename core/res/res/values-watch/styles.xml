@@ -16,7 +16,7 @@
 
 <resources>
     <style name="TextAppearance.Toast">
-        <item name="fontFamily">roboto</item>
+        <item name="fontFamily">sans-serif-regular</item>
         <item name="textSize">@dimen/toast_text_size</item>
     </style>
 </resources>
