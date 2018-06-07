@@ -3892,13 +3892,25 @@ public class PackageManagerService extends IPackageManager.Stub {
      */
     void enforceCrossUserPermission(int callingUid, int userId, boolean requireFullPermission,
             boolean checkShell, String message) {
+        enforceCrossUserPermission(
+              callingUid,
+              userId,
+              requireFullPermission,
+              checkShell,
+              false,
+              message);
+    }
+
+    private void enforceCrossUserPermission(int callingUid, int userId,
+            boolean requireFullPermission, boolean checkShell,
+            boolean requirePermissionWhenSameUser, String message) {
         if (userId < 0) {
             throw new IllegalArgumentException("Invalid userId " + userId);
         }
         if (checkShell) {
             enforceShellRestriction(UserManager.DISALLOW_DEBUGGING_FEATURES, callingUid, userId);
         }
-        if (userId == UserHandle.getUserId(callingUid)) return;
+        if (!requirePermissionWhenSameUser && userId == UserHandle.getUserId(callingUid)) return;
         if (callingUid != Process.SYSTEM_UID && callingUid != 0) {
             if (requireFullPermission) {
                 mContext.enforceCallingOrSelfPermission(
@@ -6292,7 +6304,7 @@ public class PackageManagerService extends IPackageManager.Stub {
         flags = updateFlagsForPackage(flags, userId, null);
         final boolean listUninstalled = (flags & MATCH_UNINSTALLED_PACKAGES) != 0;
         enforceCrossUserPermission(Binder.getCallingUid(), userId,
-                true /* requireFullPermission */, false /* checkShell */,
+                false /* requireFullPermission */, false /* checkShell */,
                 "get installed packages");
 
         // writer
@@ -6400,9 +6412,17 @@ public class PackageManagerService extends IPackageManager.Stub {
 
     @Override
     public ParceledListSlice<ApplicationInfo> getInstalledApplications(int flags, int userId) {
+        final int callingUid = Binder.getCallingUid();
         if (!sUserManager.exists(userId)) return ParceledListSlice.emptyList();
         flags = updateFlagsForApplication(flags, userId, null);
         final boolean listUninstalled = (flags & MATCH_UNINSTALLED_PACKAGES) != 0;
+
+        enforceCrossUserPermission(
+            callingUid,
+            userId,
+            false /* requireFullPermission */,
+            false /* checkShell */,
+            "get installed application info");
 
         // writer
         synchronized (mPackages) {
