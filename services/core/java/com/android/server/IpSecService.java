@@ -24,6 +24,8 @@ import static android.system.OsConstants.IPPROTO_UDP;
 import static android.system.OsConstants.SOCK_DGRAM;
 import static com.android.internal.util.Preconditions.checkNotNull;
 
+import android.annotation.NonNull;
+import android.app.AppOpsManager;
 import android.content.Context;
 import android.net.ConnectivityManager;
 import android.net.IIpSecService;
@@ -42,6 +44,7 @@ import android.net.NetworkUtils;
 import android.net.TrafficStats;
 import android.net.util.NetdService;
 import android.os.Binder;
+import android.os.DeadSystemException;
 import android.os.IBinder;
 import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
@@ -973,6 +976,13 @@ public class IpSecService extends IIpSecService.Stub {
         return service;
     }
 
+    @NonNull
+    private AppOpsManager getAppOpsManager() {
+        AppOpsManager appOps = (AppOpsManager) mContext.getSystemService(Context.APP_OPS_SERVICE);
+        if(appOps == null) throw new RuntimeException("System Server couldn't get AppOps");
+        return appOps;
+    }
+
     /** @hide */
     @VisibleForTesting
     public IpSecService(Context context, IpSecServiceConfiguration config) {
@@ -1090,9 +1100,11 @@ public class IpSecService extends IIpSecService.Stub {
                     new RefcountedResource<SpiRecord>(
                             new SpiRecord(resourceId, "", destinationAddress, spi), binder));
         } catch (ServiceSpecificException e) {
-            // TODO: Add appropriate checks when other ServiceSpecificException types are supported
-            return new IpSecSpiResponse(
-                    IpSecManager.Status.SPI_UNAVAILABLE, INVALID_RESOURCE_ID, spi);
+            if (e.errorCode == OsConstants.ENOENT) {
+                return new IpSecSpiResponse(
+                        IpSecManager.Status.SPI_UNAVAILABLE, INVALID_RESOURCE_ID, spi);
+            }
+            throw e;
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -1104,7 +1116,6 @@ public class IpSecService extends IIpSecService.Stub {
      */
     private void releaseResource(RefcountedResourceArray resArray, int resourceId)
             throws RemoteException {
-
         resArray.getRefcountedResourceOrThrow(resourceId).userRelease();
     }
 
@@ -1239,7 +1250,9 @@ public class IpSecService extends IIpSecService.Stub {
      */
     @Override
     public synchronized IpSecTunnelInterfaceResponse createTunnelInterface(
-            String localAddr, String remoteAddr, Network underlyingNetwork, IBinder binder) {
+            String localAddr, String remoteAddr, Network underlyingNetwork, IBinder binder,
+            String callingPackage) {
+        enforceTunnelPermissions(callingPackage);
         checkNotNull(binder, "Null Binder passed to createTunnelInterface");
         checkNotNull(underlyingNetwork, "No underlying network was specified");
         checkInetAddress(localAddr);
@@ -1302,15 +1315,12 @@ public class IpSecService extends IIpSecService.Stub {
             releaseNetId(ikey);
             releaseNetId(okey);
             throw e.rethrowFromSystemServer();
-        } catch (ServiceSpecificException e) {
-            // FIXME: get the error code and throw is at an IOException from Errno Exception
+        } catch (Throwable t) {
+            // Release keys if we got an error.
+            releaseNetId(ikey);
+            releaseNetId(okey);
+            throw t;
         }
-
-        // If we make it to here, then something has gone wrong and we couldn't create a VTI.
-        // Release the keys that we reserved, and return an error status.
-        releaseNetId(ikey);
-        releaseNetId(okey);
-        return new IpSecTunnelInterfaceResponse(IpSecManager.Status.RESOURCE_UNAVAILABLE);
     }
 
     /**
@@ -1319,8 +1329,8 @@ public class IpSecService extends IIpSecService.Stub {
      */
     @Override
     public synchronized void addAddressToTunnelInterface(
-            int tunnelResourceId, LinkAddress localAddr) {
-        enforceNetworkStackPermission();
+            int tunnelResourceId, LinkAddress localAddr, String callingPackage) {
+        enforceTunnelPermissions(callingPackage);
         UserRecord userRecord = mUserResourceTracker.getUserRecord(Binder.getCallingUid());
 
         // Get tunnelInterface record; if no such interface is found, will throw
@@ -1339,9 +1349,6 @@ public class IpSecService extends IIpSecService.Stub {
                             localAddr.getPrefixLength());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
-        } catch (ServiceSpecificException e) {
-            // If we get here, one of the arguments provided was invalid. Wrap the SSE, and throw.
-            throw new IllegalArgumentException(e);
         }
     }
 
@@ -1351,10 +1358,10 @@ public class IpSecService extends IIpSecService.Stub {
      */
     @Override
     public synchronized void removeAddressFromTunnelInterface(
-            int tunnelResourceId, LinkAddress localAddr) {
-        enforceNetworkStackPermission();
-        UserRecord userRecord = mUserResourceTracker.getUserRecord(Binder.getCallingUid());
+            int tunnelResourceId, LinkAddress localAddr, String callingPackage) {
+        enforceTunnelPermissions(callingPackage);
 
+        UserRecord userRecord = mUserResourceTracker.getUserRecord(Binder.getCallingUid());
         // Get tunnelInterface record; if no such interface is found, will throw
         // IllegalArgumentException
         TunnelInterfaceRecord tunnelInterfaceInfo =
@@ -1371,9 +1378,6 @@ public class IpSecService extends IIpSecService.Stub {
                             localAddr.getPrefixLength());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
-        } catch (ServiceSpecificException e) {
-            // If we get here, one of the arguments provided was invalid. Wrap the SSE, and throw.
-            throw new IllegalArgumentException(e);
         }
     }
 
@@ -1382,7 +1386,9 @@ public class IpSecService extends IIpSecService.Stub {
      * server
      */
     @Override
-    public synchronized void deleteTunnelInterface(int resourceId) throws RemoteException {
+    public synchronized void deleteTunnelInterface(
+            int resourceId, String callingPackage) throws RemoteException {
+        enforceTunnelPermissions(callingPackage);
         UserRecord userRecord = mUserResourceTracker.getUserRecord(Binder.getCallingUid());
         releaseResource(userRecord.mTunnelInterfaceRecords, resourceId);
     }
@@ -1468,7 +1474,6 @@ public class IpSecService extends IIpSecService.Stub {
             case IpSecTransform.MODE_TRANSPORT:
                 break;
             case IpSecTransform.MODE_TUNNEL:
-                enforceNetworkStackPermission();
                 break;
             default:
                 throw new IllegalArgumentException(
@@ -1476,9 +1481,24 @@ public class IpSecService extends IIpSecService.Stub {
         }
     }
 
-    private void enforceNetworkStackPermission() {
-        mContext.enforceCallingOrSelfPermission(android.Manifest.permission.NETWORK_STACK,
-                "IpSecService");
+    private static final String TUNNEL_OP = "STOPSHIP"; // = AppOpsManager.OP_MANAGE_IPSEC_TUNNELS;
+
+    private void enforceTunnelPermissions(String callingPackage) {
+        checkNotNull(callingPackage, "Null calling package cannot create IpSec tunnels");
+        if (false) { // STOPSHIP if this line is present
+            switch (getAppOpsManager().noteOp(
+                        TUNNEL_OP,
+                        Binder.getCallingUid(), callingPackage)) {
+                case AppOpsManager.MODE_DEFAULT:
+                    mContext.enforceCallingOrSelfPermission(
+                            android.Manifest.permission.MANAGE_IPSEC_TUNNELS, "IpSecService");
+                    break;
+                case AppOpsManager.MODE_ALLOWED:
+                    return;
+                default:
+                    throw new SecurityException("Request to ignore AppOps for non-legacy API");
+            }
+        }
     }
 
     private void createOrUpdateTransform(
@@ -1534,8 +1554,12 @@ public class IpSecService extends IIpSecService.Stub {
      * result in all of those sockets becoming unable to send or receive data.
      */
     @Override
-    public synchronized IpSecTransformResponse createTransform(IpSecConfig c, IBinder binder)
-            throws RemoteException {
+    public synchronized IpSecTransformResponse createTransform(
+            IpSecConfig c, IBinder binder, String callingPackage) throws RemoteException {
+        checkNotNull(c);
+        if (c.getMode() == IpSecTransform.MODE_TUNNEL) {
+            enforceTunnelPermissions(callingPackage);
+        }
         checkIpSecConfig(c);
         checkNotNull(binder, "Null Binder passed to createTransform");
         final int resourceId = mNextResourceId++;
@@ -1561,12 +1585,7 @@ public class IpSecService extends IIpSecService.Stub {
         dependencies.add(refcountedSpiRecord);
         SpiRecord spiRecord = refcountedSpiRecord.getResource();
 
-        try {
-            createOrUpdateTransform(c, resourceId, spiRecord, socketRecord);
-        } catch (ServiceSpecificException e) {
-            // FIXME: get the error code and throw is at an IOException from Errno Exception
-            return new IpSecTransformResponse(IpSecManager.Status.RESOURCE_UNAVAILABLE);
-        }
+        createOrUpdateTransform(c, resourceId, spiRecord, socketRecord);
 
         // SA was created successfully, time to construct a record and lock it away
         userRecord.mTransformRecords.put(
@@ -1613,23 +1632,15 @@ public class IpSecService extends IIpSecService.Stub {
                 c.getMode() == IpSecTransform.MODE_TRANSPORT,
                 "Transform mode was not Transport mode; cannot be applied to a socket");
 
-        try {
-            mSrvConfig
-                    .getNetdInstance()
-                    .ipSecApplyTransportModeTransform(
-                            socket.getFileDescriptor(),
-                            resourceId,
-                            direction,
-                            c.getSourceAddress(),
-                            c.getDestinationAddress(),
-                            info.getSpiRecord().getSpi());
-        } catch (ServiceSpecificException e) {
-            if (e.errorCode == EINVAL) {
-                throw new IllegalArgumentException(e.toString());
-            } else {
-                throw e;
-            }
-        }
+        mSrvConfig
+                .getNetdInstance()
+                .ipSecApplyTransportModeTransform(
+                        socket.getFileDescriptor(),
+                        resourceId,
+                        direction,
+                        c.getSourceAddress(),
+                        c.getDestinationAddress(),
+                        info.getSpiRecord().getSpi());
     }
 
     /**
@@ -1641,13 +1652,9 @@ public class IpSecService extends IIpSecService.Stub {
     @Override
     public synchronized void removeTransportModeTransforms(ParcelFileDescriptor socket)
             throws RemoteException {
-        try {
-            mSrvConfig
-                    .getNetdInstance()
-                    .ipSecRemoveTransportModeTransform(socket.getFileDescriptor());
-        } catch (ServiceSpecificException e) {
-            // FIXME: get the error code and throw is at an IOException from Errno Exception
-        }
+        mSrvConfig
+                .getNetdInstance()
+                .ipSecRemoveTransportModeTransform(socket.getFileDescriptor());
     }
 
     /**
@@ -1656,8 +1663,9 @@ public class IpSecService extends IIpSecService.Stub {
      */
     @Override
     public synchronized void applyTunnelModeTransform(
-            int tunnelResourceId, int direction, int transformResourceId) throws RemoteException {
-        enforceNetworkStackPermission();
+            int tunnelResourceId, int direction,
+            int transformResourceId, String callingPackage) throws RemoteException {
+        enforceTunnelPermissions(callingPackage);
         checkDirection(direction);
 
         UserRecord userRecord = mUserResourceTracker.getUserRecord(Binder.getCallingUid());
