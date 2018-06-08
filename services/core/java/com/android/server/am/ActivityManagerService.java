@@ -12048,14 +12048,17 @@ public class ActivityManagerService extends IActivityManager.Stub
             if (providerRunning) {
                 cpi = cpr.info;
                 String msg;
-                checkTime(startTime, "getContentProviderImpl: before checkContentProviderPermission");
-                if ((msg = checkContentProviderPermissionLocked(cpi, r, userId, checkCrossUser))
-                        != null) {
-                    throw new SecurityException(msg);
-                }
-                checkTime(startTime, "getContentProviderImpl: after checkContentProviderPermission");
 
                 if (r != null && cpr.canRunHere(r)) {
+                    checkTime(startTime,
+                            "getContentProviderImpl: before checkContentProviderPermission");
+                    if ((msg = checkContentProviderPermissionLocked(cpi, r, userId, checkCrossUser))
+                            != null) {
+                        throw new SecurityException(msg);
+                    }
+                    checkTime(startTime,
+                            "getContentProviderImpl: after checkContentProviderPermission");
+
                     // This provider has been published or is in the process
                     // of being published...  but it is also allowed to run
                     // in the caller's process, so don't make a connection
@@ -12066,6 +12069,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                     holder.provider = null;
                     return holder;
                 }
+
                 // Don't expose providers between normal apps and instant apps
                 try {
                     if (AppGlobals.getPackageManager()
@@ -12074,6 +12078,15 @@ public class ActivityManagerService extends IActivityManager.Stub
                     }
                 } catch (RemoteException e) {
                 }
+
+                checkTime(startTime,
+                        "getContentProviderImpl: before checkContentProviderPermission");
+                if ((msg = checkContentProviderPermissionLocked(cpi, r, userId, checkCrossUser))
+                        != null) {
+                    throw new SecurityException(msg);
+                }
+                checkTime(startTime,
+                        "getContentProviderImpl: after checkContentProviderPermission");
 
                 final long origId = Binder.clearCallingIdentity();
 
@@ -14574,6 +14587,11 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
 
         mBatteryStatsService.noteWakupAlarm(sourcePkg, sourceUid, workSource, tag);
+        if (workSource != null) {
+            StatsLog.write(StatsLog.WAKEUP_ALARM_OCCURRED, workSource, tag);
+        } else {
+            StatsLog.write_non_chained(StatsLog.WAKEUP_ALARM_OCCURRED, sourceUid, null, tag);
+        }
     }
 
     @Override
@@ -15182,6 +15200,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             mStackSupervisor.resumeFocusedStackTopActivityLocked();
             mUserController.sendUserSwitchBroadcasts(-1, currentUserId);
 
+            BinderInternal.nSetBinderProxyCountWatermarks(6000,5500);
             BinderInternal.nSetBinderProxyCountEnabled(true);
             BinderInternal.setBinderProxyCountCallback(
                     new BinderInternal.BinderProxyLimitListener() {
@@ -15189,7 +15208,6 @@ public class ActivityManagerService extends IActivityManager.Stub
                         public void onLimitReached(int uid) {
                             Slog.wtf(TAG, "Uid " + uid + " sent too many Binders to uid "
                                     + Process.myUid());
-                            Binder.dumpProxyDebugInfo();
                             if (uid == Process.SYSTEM_UID) {
                                 Slog.i(TAG, "Skipping kill (uid is SYSTEM)");
                             } else {

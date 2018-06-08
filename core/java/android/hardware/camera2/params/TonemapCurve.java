@@ -40,9 +40,6 @@ import java.util.Arrays;
  * <p>The coordinate system for each point is within the inclusive range
  * [{@value #LEVEL_BLACK}, {@value #LEVEL_WHITE}].</p>
  *
- * @see CaptureRequest#TONEMAP_CURVE_BLUE
- * @see CaptureRequest#TONEMAP_CURVE_GREEN
- * @see CaptureRequest#TONEMAP_CURVE_RED
  * @see CameraMetadata#TONEMAP_MODE_CONTRAST_CURVE
  * @see CameraCharacteristics#TONEMAP_MAX_CURVE_POINTS
  */
@@ -223,9 +220,6 @@ public final class TonemapCurve {
      *          If there's not enough room to write the elements at the specified destination and
      *          offset.
      *
-     * @see CaptureRequest#TONEMAP_CURVE_BLUE
-     * @see CaptureRequest#TONEMAP_CURVE_RED
-     * @see CaptureRequest#TONEMAP_CURVE_GREEN
      * @see #LEVEL_BLACK
      * @see #LEVEL_WHITE
      */

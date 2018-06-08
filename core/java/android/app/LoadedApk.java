@@ -745,6 +745,44 @@ public final class LoadedApk {
             }
         }
 
+        // /vendor/lib, /odm/lib and /product/lib are added to the native lib search
+        // paths of the classloader. Note that this is done AFTER the classloader is
+        // created by ApplicationLoaders.getDefault().getClassLoader(...). The
+        // reason is because if we have added the paths when creating the classloader
+        // above, the paths are also added to the search path of the linker namespace
+        // 'classloader-namespace', which will allow ALL libs in the paths to apps.
+        // Since only the libs listed in <partition>/etc/public.libraries.txt can be
+        // available to apps, we shouldn't add the paths then.
+        //
+        // However, we need to add the paths to the classloader (Java) though. This
+        // is because when a native lib is requested via System.loadLibrary(), the
+        // classloader first tries to find the requested lib in its own native libs
+        // search paths. If a lib is not found in one of the paths, dlopen() is not
+        // called at all. This can cause a problem that a vendor public native lib
+        // is accessible when directly opened via dlopen(), but inaccesible via
+        // System.loadLibrary(). In order to prevent the problem, we explicitly
+        // add the paths only to the classloader, and not to the native loader
+        // (linker namespace).
+        List<String> extraLibPaths = new ArrayList<>(3);
+        String abiSuffix = VMRuntime.getRuntime().is64Bit() ? "64" : "";
+        if (!defaultSearchPaths.contains("/vendor/lib")) {
+            extraLibPaths.add("/vendor/lib" + abiSuffix);
+        }
+        if (!defaultSearchPaths.contains("/odm/lib")) {
+            extraLibPaths.add("/odm/lib" + abiSuffix);
+        }
+        if (!defaultSearchPaths.contains("/product/lib")) {
+            extraLibPaths.add("/product/lib" + abiSuffix);
+        }
+        if (!extraLibPaths.isEmpty()) {
+            StrictMode.ThreadPolicy oldPolicy = StrictMode.allowThreadDiskReads();
+            try {
+                ApplicationLoaders.getDefault().addNative(mClassLoader, extraLibPaths);
+            } finally {
+                StrictMode.setThreadPolicy(oldPolicy);
+            }
+        }
+
         if (addedPaths != null && addedPaths.size() > 0) {
             final String add = TextUtils.join(File.pathSeparator, addedPaths);
             ApplicationLoaders.getDefault().addPath(mClassLoader, add);

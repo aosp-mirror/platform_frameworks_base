@@ -106,6 +106,7 @@ cc_library_shared {
     shared_libs: [
         "liblog",
         "libutils",
+        "libcutils",
     ],
     static_libs: ["libstatssocket"],
 }

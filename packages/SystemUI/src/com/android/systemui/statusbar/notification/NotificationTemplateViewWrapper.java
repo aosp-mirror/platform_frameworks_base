@@ -31,7 +31,7 @@ import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
-import com.android.internal.util.NotificationColorUtil;
+import com.android.internal.util.ContrastColorUtil;
 import com.android.internal.widget.NotificationActionListLayout;
 import com.android.systemui.Dependency;
 import com.android.systemui.R;
@@ -210,7 +210,7 @@ public class NotificationTemplateViewWrapper extends NotificationHeaderViewWrapp
 
     private int blendColorWithBackground(int color, float alpha) {
         // alpha doesn't go well for color filters, so let's blend it manually
-        return NotificationColorUtil.compositeColors(Color.argb((int) (alpha * 255),
+        return ContrastColorUtil.compositeColors(Color.argb((int) (alpha * 255),
                 Color.red(color), Color.green(color), Color.blue(color)), resolveBackgroundColor());
     }
 

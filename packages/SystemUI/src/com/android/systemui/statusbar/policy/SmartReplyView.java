@@ -27,7 +27,7 @@ import android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction;
 import android.widget.Button;
 
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.internal.util.NotificationColorUtil;
+import com.android.internal.util.ContrastColorUtil;
 import com.android.keyguard.KeyguardHostView.OnDismissAction;
 import com.android.systemui.Dependency;
 import com.android.systemui.R;
@@ -114,7 +114,7 @@ public class SmartReplyView extends ViewGroup {
         mRippleColor = mContext.getColor(R.color.notification_ripple_untinted_color);
         mRippleColorDarkBg = Color.argb(Color.alpha(mRippleColor),
                 255 /* red */, 255 /* green */, 255 /* blue */);
-        mMinStrokeContrast = NotificationColorUtil.calculateContrast(mDefaultStrokeColor,
+        mMinStrokeContrast = ContrastColorUtil.calculateContrast(mDefaultStrokeColor,
                 mDefaultBackgroundColor);
 
         int spacing = 0;
@@ -574,12 +574,12 @@ public class SmartReplyView extends ViewGroup {
         }
         mCurrentBackgroundColor = backgroundColor;
 
-        final boolean dark = !NotificationColorUtil.isColorLight(backgroundColor);
+        final boolean dark = !ContrastColorUtil.isColorLight(backgroundColor);
 
-        int textColor = NotificationColorUtil.ensureTextContrast(
+        int textColor = ContrastColorUtil.ensureTextContrast(
                 dark ? mDefaultTextColorDarkBg : mDefaultTextColor,
                 backgroundColor | 0xff000000, dark);
-        int strokeColor = NotificationColorUtil.ensureContrast(
+        int strokeColor = ContrastColorUtil.ensureContrast(
                 mDefaultStrokeColor, backgroundColor | 0xff000000, dark, mMinStrokeContrast);
         int rippleColor = dark ? mRippleColorDarkBg : mRippleColor;
 

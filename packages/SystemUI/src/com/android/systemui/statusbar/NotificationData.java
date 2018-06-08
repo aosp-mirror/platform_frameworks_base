@@ -54,7 +54,7 @@ import android.widget.RemoteViews;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.statusbar.StatusBarIcon;
 import com.android.internal.util.ArrayUtils;
-import com.android.internal.util.NotificationColorUtil;
+import com.android.internal.util.ContrastColorUtil;
 import com.android.systemui.Dependency;
 import com.android.systemui.ForegroundServiceController;
 import com.android.systemui.statusbar.notification.InflationException;
@@ -254,7 +254,7 @@ public class NotificationData {
             if (mCachedContrastColorIsFor == rawColor && mCachedContrastColor != COLOR_INVALID) {
                 return mCachedContrastColor;
             }
-            final int contrasted = NotificationColorUtil.resolveContrastColor(context, rawColor,
+            final int contrasted = ContrastColorUtil.resolveContrastColor(context, rawColor,
                     backgroundColor);
             mCachedContrastColorIsFor = rawColor;
             mCachedContrastColor = contrasted;
@@ -345,6 +345,7 @@ public class NotificationData {
 
     private final ArrayMap<String, Entry> mEntries = new ArrayMap<>();
     private final ArrayList<Entry> mSortedAndFiltered = new ArrayList<>();
+    private final ArrayList<Entry> mFilteredForUser = new ArrayList<>();
 
     private NotificationGroupManager mGroupManager;
 
@@ -427,6 +428,23 @@ public class NotificationData {
      */
     public ArrayList<Entry> getActiveNotifications() {
         return mSortedAndFiltered;
+    }
+
+    public ArrayList<Entry> getNotificationsForCurrentUser() {
+        mFilteredForUser.clear();
+
+        synchronized (mEntries) {
+            final int N = mEntries.size();
+            for (int i = 0; i < N; i++) {
+                Entry entry = mEntries.valueAt(i);
+                final StatusBarNotification sbn = entry.notification;
+                if (!mEnvironment.isNotificationForCurrentProfiles(sbn)) {
+                    continue;
+                }
+                mFilteredForUser.add(entry);
+            }
+        }
+        return mFilteredForUser;
     }
 
     public Entry get(String key) {

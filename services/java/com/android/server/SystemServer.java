@@ -199,8 +199,6 @@ public final class SystemServer {
             "com.android.server.search.SearchManagerService$Lifecycle";
     private static final String THERMAL_OBSERVER_CLASS =
             "com.google.android.clockwork.ThermalObserver";
-    private static final String WEAR_CONFIG_SERVICE_CLASS =
-            "com.google.android.clockwork.WearConfigManagerService";
     private static final String WEAR_CONNECTIVITY_SERVICE_CLASS =
             "com.android.clockwork.connectivity.WearConnectivityService";
     private static final String WEAR_SIDEKICK_SERVICE_CLASS =
@@ -229,6 +227,8 @@ public final class SystemServer {
             "com.android.server.slice.SliceManagerService$Lifecycle";
     private static final String CAR_SERVICE_HELPER_SERVICE_CLASS =
             "com.android.internal.car.CarServiceHelperService";
+    private static final String TIME_DETECTOR_SERVICE_CLASS =
+            "com.android.server.timedetector.TimeDetectorService$Lifecycle";
 
     private static final String PERSISTENT_DATA_BLOCK_PROP = "ro.frp.pst";
 
@@ -734,7 +734,6 @@ public final class SystemServer {
         WindowManagerService wm = null;
         SerialService serial = null;
         NetworkTimeUpdateService networkTimeUpdater = null;
-        CommonTimeManagementService commonTimeMgmtService = null;
         InputManagerService inputManager = null;
         TelephonyRegistry telephonyRegistry = null;
         ConsumerIrService consumerIr = null;
@@ -1237,6 +1236,14 @@ public final class SystemServer {
             }
             traceEnd();
 
+            traceBeginAndSlog("StartTimeDetectorService");
+            try {
+                mSystemServiceManager.startService(TIME_DETECTOR_SERVICE_CLASS);
+            } catch (Throwable e) {
+                reportWtf("starting StartTimeDetectorService service", e);
+            }
+            traceEnd();
+
             if (!isWatch) {
                 traceBeginAndSlog("StartSearchManagerService");
                 try {
@@ -1410,15 +1417,6 @@ public final class SystemServer {
                 traceEnd();
             }
 
-            traceBeginAndSlog("StartCommonTimeManagementService");
-            try {
-                commonTimeMgmtService = new CommonTimeManagementService(context);
-                ServiceManager.addService("commontime_management", commonTimeMgmtService);
-            } catch (Throwable e) {
-                reportWtf("starting CommonTimeManagementService service", e);
-            }
-            traceEnd();
-
             traceBeginAndSlog("CertBlacklister");
             try {
                 CertBlacklister blacklister = new CertBlacklister(context);
@@ -1551,10 +1549,6 @@ public final class SystemServer {
         }
 
         if (isWatch) {
-            traceBeginAndSlog("StartWearConfigService");
-            mSystemServiceManager.startService(WEAR_CONFIG_SERVICE_CLASS);
-            traceEnd();
-
             traceBeginAndSlog("StartWearConnectivityService");
             mSystemServiceManager.startService(WEAR_CONNECTIVITY_SERVICE_CLASS);
             traceEnd();
@@ -1732,7 +1726,6 @@ public final class SystemServer {
         final LocationManagerService locationF = location;
         final CountryDetectorService countryDetectorF = countryDetector;
         final NetworkTimeUpdateService networkTimeUpdaterF = networkTimeUpdater;
-        final CommonTimeManagementService commonTimeMgmtServiceF = commonTimeMgmtService;
         final InputManagerService inputManagerF = inputManager;
         final TelephonyRegistry telephonyRegistryF = telephonyRegistry;
         final MediaRouterService mediaRouterF = mediaRouter;
@@ -1869,15 +1862,6 @@ public final class SystemServer {
                 if (networkTimeUpdaterF != null) networkTimeUpdaterF.systemRunning();
             } catch (Throwable e) {
                 reportWtf("Notifying NetworkTimeService running", e);
-            }
-            traceEnd();
-            traceBeginAndSlog("MakeCommonTimeManagementServiceReady");
-            try {
-                if (commonTimeMgmtServiceF != null) {
-                    commonTimeMgmtServiceF.systemRunning();
-                }
-            } catch (Throwable e) {
-                reportWtf("Notifying CommonTimeManagementService running", e);
             }
             traceEnd();
             traceBeginAndSlog("MakeInputManagerServiceReady");

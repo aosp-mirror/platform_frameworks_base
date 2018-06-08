@@ -36,4 +36,4 @@ shift 2
 extra_classes_files=("$@")
 
 # Disable locale to enable lexicographical sorting
-LC_ALL=C sort "$input" "${extra_classes_files[@]}" | uniq | grep -f "$blacklist" -v -F -x
+LC_ALL=C sort "$input" "${extra_classes_files[@]}" | uniq | grep -f "$blacklist" -v -F -x | grep -v "\$NoPreloadHolder"

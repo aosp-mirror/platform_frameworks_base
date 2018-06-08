@@ -27,7 +27,7 @@ import androidx.annotation.VisibleForTesting;
 import androidx.palette.graphics.Palette;
 import android.util.LayoutDirection;
 
-import com.android.internal.util.NotificationColorUtil;
+import com.android.internal.util.ContrastColorUtil;
 import com.android.systemui.R;
 
 import java.util.List;
@@ -155,7 +155,7 @@ public class MediaNotificationProcessor {
     }
 
     private int selectForegroundColor(int backgroundColor, Palette palette) {
-        if (NotificationColorUtil.isColorLight(backgroundColor)) {
+        if (ContrastColorUtil.isColorLight(backgroundColor)) {
             return selectForegroundColorForSwatches(palette.getDarkVibrantSwatch(),
                     palette.getVibrantSwatch(),
                     palette.getDarkMutedSwatch(),

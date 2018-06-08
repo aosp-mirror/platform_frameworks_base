@@ -28,6 +28,7 @@ import android.app.ActivityManager.TaskSnapshot;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.GraphicBuffer;
+import android.graphics.PixelFormat;
 import android.graphics.Rect;
 import android.os.Environment;
 import android.os.Handler;
@@ -266,7 +267,7 @@ class TaskSnapshotController {
 
         final GraphicBuffer buffer = SurfaceControl.captureLayers(
                 task.getSurfaceControl().getHandle(), mTmpRect, scaleFraction);
-
+        final boolean isWindowTranslucent = mainWindow.getAttrs().format != PixelFormat.OPAQUE;
         if (buffer == null || buffer.getWidth() <= 1 || buffer.getHeight() <= 1) {
             if (DEBUG_SCREENSHOT) {
                 Slog.w(TAG_WM, "Failed to take screenshot for " + task);
@@ -276,7 +277,7 @@ class TaskSnapshotController {
         return new TaskSnapshot(buffer, top.getConfiguration().orientation,
                 getInsets(mainWindow), isLowRamDevice /* reduced */, scaleFraction /* scale */,
                 true /* isRealSnapshot */, task.getWindowingMode(), getSystemUiVisibility(task),
-                !top.fillsParent());
+                !top.fillsParent() || isWindowTranslucent);
     }
 
     private boolean shouldDisableSnapshots() {
@@ -363,11 +364,13 @@ class TaskSnapshotController {
         if (hwBitmap == null) {
             return null;
         }
+        // Note, the app theme snapshot is never translucent because we enforce a non-translucent
+        // color above
         return new TaskSnapshot(hwBitmap.createGraphicBufferHandle(),
                 topChild.getConfiguration().orientation, mainWindow.mStableInsets,
                 ActivityManager.isLowRamDeviceStatic() /* reduced */, 1.0f /* scale */,
                 false /* isRealSnapshot */, task.getWindowingMode(), getSystemUiVisibility(task),
-                !topChild.fillsParent());
+                false);
     }
 
     /**

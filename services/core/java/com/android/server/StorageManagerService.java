@@ -220,8 +220,12 @@ class StorageManagerService extends IStorageManager.Stub
     private static final boolean DEBUG_EVENTS = false;
     private static final boolean DEBUG_OBB = false;
 
-    // Disable this since it messes up long-running cryptfs operations.
-    private static final boolean WATCHDOG_ENABLE = false;
+    /**
+     * We now talk to vold over Binder, and it has its own internal lock to
+     * serialize certain calls. All long-running operations have been migrated
+     * to be async with callbacks, so we want watchdog to fire if vold wedges.
+     */
+    private static final boolean WATCHDOG_ENABLE = true;
 
     /**
      * Our goal is for all Android devices to be usable as development devices,

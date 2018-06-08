@@ -329,7 +329,7 @@ public class KeyguardSliceView extends LinearLayout implements View.OnClickListe
     }
 
     public boolean hasHeader() {
-        return mTitle.getVisibility() == VISIBLE;
+        return mHasHeader;
     }
 
     /**

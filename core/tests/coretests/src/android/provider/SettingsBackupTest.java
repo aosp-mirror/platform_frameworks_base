@@ -176,7 +176,6 @@ public class SettingsBackupTest {
                     Settings.Global.CONNECTIVITY_SAMPLING_INTERVAL_IN_SECONDS,
                     Settings.Global.CONTACT_METADATA_SYNC_ENABLED,
                     Settings.Global.CONTACTS_DATABASE_WAL_ENABLED,
-                    Settings.Global.CPU_SCALING_ENABLED,
                     Settings.Global.DATA_ACTIVITY_TIMEOUT_MOBILE,
                     Settings.Global.DATA_ACTIVITY_TIMEOUT_WIFI,
                     Settings.Global.DATABASE_CREATION_BUILDID,
@@ -403,7 +402,6 @@ public class SettingsBackupTest {
                     Settings.Global.SQLITE_COMPATIBILITY_WAL_FLAGS,
                     Settings.Global.STORAGE_BENCHMARK_INTERVAL,
                     Settings.Global.STORAGE_SETTINGS_CLOBBER_THRESHOLD,
-                    Settings.Global.SWAP_ENABLED,
                     Settings.Global.SYNC_MANAGER_CONSTANTS,
                     Settings.Global.SYNC_MAX_RETRY_DELAY_IN_SECONDS,
                     Settings.Global.SYS_FREE_STORAGE_LOG_INTERVAL,
@@ -536,7 +534,6 @@ public class SettingsBackupTest {
                  Settings.Secure.DISABLED_PRINT_SERVICES,
                  Settings.Secure.DISABLED_SYSTEM_INPUT_METHODS,
                  Settings.Secure.DISPLAY_DENSITY_FORCED,
-                 Settings.Secure.DOZE_ALWAYS_ON,
                  Settings.Secure.DOZE_PULSE_ON_LONG_PRESS,
                  Settings.Secure.EMERGENCY_ASSISTANCE_APPLICATION,
                  Settings.Secure.ENABLED_INPUT_METHODS,  // Intentionally removed in P

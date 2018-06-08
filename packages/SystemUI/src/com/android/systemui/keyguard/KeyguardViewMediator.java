@@ -495,6 +495,7 @@ public class KeyguardViewMediator extends SystemUI {
                     break;
                 case READY:
                     synchronized (KeyguardViewMediator.this) {
+                        if (DEBUG_SIM_STATES) Log.d(TAG, "READY, reset state? " + mShowing);
                         if (mShowing) {
                             resetStateLocked();
                         }

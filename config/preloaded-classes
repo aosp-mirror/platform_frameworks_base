@@ -2771,10 +2771,8 @@ android.security.net.config.PinSet
 android.security.net.config.RootTrustManager
 android.security.net.config.RootTrustManagerFactorySpi
 android.security.net.config.SystemCertificateSource
-android.security.net.config.SystemCertificateSource$NoPreloadHolder
 android.security.net.config.TrustedCertificateStoreAdapter
 android.security.net.config.UserCertificateSource
-android.security.net.config.UserCertificateSource$NoPreloadHolder
 android.security.net.config.XmlConfigSource
 android.security.net.config.XmlConfigSource$ParserException
 android.service.media.IMediaBrowserService
@@ -4556,7 +4554,6 @@ com.android.org.conscrypt.OpenSSLX509CertificateFactory$ParsingException
 com.android.org.conscrypt.PeerInfoProvider
 com.android.org.conscrypt.PeerInfoProvider$1
 com.android.org.conscrypt.Platform
-com.android.org.conscrypt.Platform$NoPreloadHolder
 com.android.org.conscrypt.Preconditions
 com.android.org.conscrypt.SSLClientSessionCache
 com.android.org.conscrypt.SSLParametersImpl
@@ -6072,7 +6069,6 @@ javax.net.ssl.ExtendedSSLSession
 javax.net.ssl.HandshakeCompletedListener
 javax.net.ssl.HostnameVerifier
 javax.net.ssl.HttpsURLConnection
-javax.net.ssl.HttpsURLConnection$NoPreloadHolder
 javax.net.ssl.KeyManager
 javax.net.ssl.KeyManagerFactory
 javax.net.ssl.KeyManagerFactory$1

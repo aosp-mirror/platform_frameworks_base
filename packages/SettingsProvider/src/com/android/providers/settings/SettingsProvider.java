@@ -3726,17 +3726,7 @@ public class SettingsProvider extends ContentProvider {
                 }
 
                 if (currentVersion == 164) {
-                    // Version 164: show zen upgrade notification
-                    final SettingsState settings = getGlobalSettingsLocked();
-                    final Setting currentSetting = settings.getSettingLocked(
-                            Global.SHOW_ZEN_UPGRADE_NOTIFICATION);
-                    if (!currentSetting.isNull()
-                            && TextUtils.equals("0", currentSetting.getValue())) {
-                        settings.insertSettingLocked(
-                                Global.SHOW_ZEN_UPGRADE_NOTIFICATION, "1",
-                                null, true, SettingsState.SYSTEM_PACKAGE_NAME);
-                    }
-
+                    // Version 164: REMOVED: show zen upgrade notification
                     currentVersion = 165;
                 }
 

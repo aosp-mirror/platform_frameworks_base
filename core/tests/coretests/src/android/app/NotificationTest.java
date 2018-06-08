@@ -16,7 +16,7 @@
 
 package android.app;
 
-import static com.android.internal.util.NotificationColorUtil.satisfiesTextContrast;
+import static com.android.internal.util.ContrastColorUtil.satisfiesTextContrast;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;

@@ -231,9 +231,9 @@ public class KeyguardStatusView extends GridLayout implements
         if (view == mClockView) {
             float clockScale = smallClock ? mSmallClockScale : 1;
             Paint.Style style = smallClock ? Paint.Style.FILL_AND_STROKE : Paint.Style.FILL;
+            mClockView.animate().cancel();
             if (shouldAnimate) {
                 mClockView.setY(oldTop + heightOffset);
-                mClockView.animate().cancel();
                 mClockView.animate()
                         .setInterpolator(Interpolators.FAST_OUT_SLOW_IN)
                         .setDuration(duration)
@@ -257,10 +257,10 @@ public class KeyguardStatusView extends GridLayout implements
         } else if (view == mClockSeparator) {
             boolean hasSeparator = hasHeader && !mPulsing;
             float alpha = hasSeparator ? 1 : 0;
+            mClockSeparator.animate().cancel();
             if (shouldAnimate) {
                 boolean isAwake = mDarkAmount != 0;
                 mClockSeparator.setY(oldTop + heightOffset);
-                mClockSeparator.animate().cancel();
                 mClockSeparator.animate()
                         .setInterpolator(Interpolators.FAST_OUT_SLOW_IN)
                         .setDuration(duration)
@@ -282,6 +282,7 @@ public class KeyguardStatusView extends GridLayout implements
         mClockView.setPivotX(mClockView.getWidth() / 2);
         mClockView.setPivotY(0);
         mLastLayoutHeight = getHeight();
+        layoutOwnerInfo();
     }
 
     @Override
@@ -418,9 +419,11 @@ public class KeyguardStatusView extends GridLayout implements
         if (mLogoutView != null) {
             mLogoutView.setAlpha(dark ? 0 : 1);
         }
+
         if (mOwnerInfo != null) {
             boolean hasText = !TextUtils.isEmpty(mOwnerInfo.getText());
-            mOwnerInfo.setVisibility(hasText && mDarkAmount != 1 ? VISIBLE : GONE);
+            mOwnerInfo.setVisibility(hasText ? VISIBLE : GONE);
+            layoutOwnerInfo();
         }
 
         final int blendedTextColor = ColorUtils.blendARGB(mTextColor, Color.WHITE, mDarkAmount);
@@ -428,6 +431,20 @@ public class KeyguardStatusView extends GridLayout implements
         mKeyguardSlice.setDarkAmount(mDarkAmount);
         mClockView.setTextColor(blendedTextColor);
         mClockSeparator.setBackgroundColor(blendedTextColor);
+    }
+
+    private void layoutOwnerInfo() {
+        if (mOwnerInfo != null && mOwnerInfo.getVisibility() != GONE) {
+            // Animate owner info during wake-up transition
+            mOwnerInfo.setAlpha(1f - mDarkAmount);
+
+            float ratio = mDarkAmount;
+            // Calculate how much of it we should crop in order to have a smooth transition
+            int collapsed = mOwnerInfo.getTop() - mOwnerInfo.getPaddingTop();
+            int expanded = mOwnerInfo.getBottom() + mOwnerInfo.getPaddingBottom();
+            int toRemove = (int) ((expanded - collapsed) * ratio);
+            setBottom(getMeasuredHeight() - toRemove);
+        }
     }
 
     public void setPulsing(boolean pulsing, boolean animate) {

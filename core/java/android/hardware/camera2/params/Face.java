@@ -31,7 +31,6 @@ public final class Face {
     /**
      * The ID is {@code -1} when the optional set of fields is unsupported.
      *
-     * @see Face#Face(Rect, int)
      * @see #getId()
      */
     public static final int ID_UNSUPPORTED = -1;

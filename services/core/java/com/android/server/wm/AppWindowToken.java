@@ -32,12 +32,11 @@ import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_STARTING;
 import static android.view.WindowManager.LayoutParams.TYPE_BASE_APPLICATION;
 
-import static android.view.WindowManager.TRANSIT_DOCK_TASK_FROM_RECENTS;
 import static android.view.WindowManager.TRANSIT_WALLPAPER_OPEN;
 import static com.android.server.policy.WindowManagerPolicy.FINISH_LAYOUT_REDO_ANIM;
 import static com.android.server.policy.WindowManagerPolicy.FINISH_LAYOUT_REDO_WALLPAPER;
 import static android.view.WindowManager.TRANSIT_UNSET;
-import static com.android.server.wm.AppTransition.isKeyguardGoingAwayTransit;
+
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_ADD_REMOVE;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_ANIM;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_APP_TRANSITIONS;
@@ -256,6 +255,13 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
     private final Rect mTmpRect = new Rect();
     private RemoteAnimationDefinition mRemoteAnimationDefinition;
     private AnimatingAppWindowTokenRegistry mAnimatingAppWindowTokenRegistry;
+
+    /**
+     * A flag to determine if this AWT is in the process of closing or entering PIP. This is needed
+     * to help AWT know that the app is in the process of closing but hasn't yet started closing on
+     * the WM side.
+     */
+    private boolean mWillCloseOrEnterPip;
 
     AppWindowToken(WindowManagerService service, IApplicationToken token, boolean voiceInteraction,
             DisplayContent dc, long inputDispatchingTimeoutNanos, boolean fullscreen,
@@ -1328,8 +1334,20 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
             // for the next re-entry into PiP (assuming the activity is not hidden or destroyed)
             final TaskStack pinnedStack = mDisplayContent.getPinnedStack();
             if (pinnedStack != null) {
+                final Rect stackBounds;
+                if (pinnedStack.lastAnimatingBoundsWasToFullscreen()) {
+                    // We are animating the bounds, use the pre-animation bounds to save the snap
+                    // fraction
+                    stackBounds = pinnedStack.mPreAnimationBounds;
+                } else {
+                    // We skip the animation if the fullscreen configuration is not compatible, so
+                    // use the current bounds to calculate the saved snap fraction instead
+                    // (see PinnedActivityStack.skipResizeAnimation())
+                    stackBounds = mTmpRect;
+                    pinnedStack.getBounds(stackBounds);
+                }
                 mDisplayContent.mPinnedStackControllerLocked.saveReentrySnapFraction(this,
-                        pinnedStack.mPreAnimationBounds);
+                        stackBounds);
             }
         }
     }
@@ -2234,5 +2252,22 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
      */
     boolean isLetterboxOverlappingWith(Rect rect) {
         return mLetterbox != null && mLetterbox.isOverlappingWith(rect);
+    }
+
+    /**
+     * Sets if this AWT is in the process of closing or entering PIP.
+     * {@link #mWillCloseOrEnterPip}}
+     */
+    void setWillCloseOrEnterPip(boolean willCloseOrEnterPip) {
+        mWillCloseOrEnterPip = willCloseOrEnterPip;
+    }
+
+    /**
+     * Returns whether this AWT is considered closing. Conditions are either
+     * 1. Is this app animating and was requested to be hidden
+     * 2. App is delayed closing since it might enter PIP.
+     */
+    boolean isClosingOrEnteringPip() {
+        return (isAnimating() && hiddenRequested) || mWillCloseOrEnterPip;
     }
 }

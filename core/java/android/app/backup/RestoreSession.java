@@ -17,10 +17,6 @@
 package android.app.backup;
 
 import android.annotation.SystemApi;
-import android.app.backup.RestoreObserver;
-import android.app.backup.RestoreSet;
-import android.app.backup.IRestoreObserver;
-import android.app.backup.IRestoreSession;
 import android.content.Context;
 import android.os.Bundle;
 import android.os.Handler;
@@ -198,6 +194,10 @@ public class RestoreSession {
      * the dataset used during the last full device setup operation if the current
      * backup dataset has no matching data.  If no backup data exists for this package
      * in either source, a nonzero value will be returned.
+     *
+     * <p class="caution">Note: Unlike other restore operations, this method doesn't terminate the
+     * application after the restore. The application continues running to receive the
+     * {@link RestoreObserver} callbacks on the {@code observer} argument.
      *
      * @return Zero on success; nonzero on error.  The observer will only receive
      *   progress callbacks if this method returned zero.

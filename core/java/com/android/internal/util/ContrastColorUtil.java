@@ -48,13 +48,13 @@ import java.util.WeakHashMap;
  *
  * @hide
  */
-public class NotificationColorUtil {
+public class ContrastColorUtil {
 
-    private static final String TAG = "NotificationColorUtil";
+    private static final String TAG = "ContrastColorUtil";
     private static final boolean DEBUG = false;
 
     private static final Object sLock = new Object();
-    private static NotificationColorUtil sInstance;
+    private static ContrastColorUtil sInstance;
 
     private final ImageUtils mImageUtils = new ImageUtils();
     private final WeakHashMap<Bitmap, Pair<Boolean, Integer>> mGrayscaleBitmapCache =
@@ -62,16 +62,16 @@ public class NotificationColorUtil {
 
     private final int mGrayscaleIconMaxSize; // @dimen/notification_large_icon_width (64dp)
 
-    public static NotificationColorUtil getInstance(Context context) {
+    public static ContrastColorUtil getInstance(Context context) {
         synchronized (sLock) {
             if (sInstance == null) {
-                sInstance = new NotificationColorUtil(context);
+                sInstance = new ContrastColorUtil(context);
             }
             return sInstance;
         }
     }
 
-    private NotificationColorUtil(Context context) {
+    private ContrastColorUtil(Context context) {
         mGrayscaleIconMaxSize = context.getResources().getDimensionPixelSize(
                 com.android.internal.R.dimen.notification_large_icon_width);
     }
@@ -470,7 +470,7 @@ public class NotificationColorUtil {
      */
     public static int resolveContrastColor(Context context, int notificationColor,
             int backgroundColor) {
-        return NotificationColorUtil.resolveContrastColor(context, notificationColor,
+        return ContrastColorUtil.resolveContrastColor(context, notificationColor,
                 backgroundColor, false /* isDark */);
     }
 
@@ -489,7 +489,7 @@ public class NotificationColorUtil {
         final int resolvedColor = resolveColor(context, notificationColor);
 
         int color = resolvedColor;
-        color = NotificationColorUtil.ensureTextContrast(color, backgroundColor, isDark);
+        color = ContrastColorUtil.ensureTextContrast(color, backgroundColor, isDark);
 
         if (color != resolvedColor) {
             if (DEBUG){
@@ -497,7 +497,7 @@ public class NotificationColorUtil {
                         "Enhanced contrast of notification for %s"
                                 + " and %s (over background) by changing #%s to %s",
                         context.getPackageName(),
-                        NotificationColorUtil.contrastChange(resolvedColor, color, backgroundColor),
+                        ContrastColorUtil.contrastChange(resolvedColor, color, backgroundColor),
                         Integer.toHexString(resolvedColor), Integer.toHexString(color)));
             }
         }
@@ -523,7 +523,7 @@ public class NotificationColorUtil {
         final int resolvedColor = resolveColor(context, notificationColor);
 
         int color = resolvedColor;
-        color = NotificationColorUtil.ensureTextContrastOnBlack(color);
+        color = ContrastColorUtil.ensureTextContrastOnBlack(color);
 
         if (color != resolvedColor) {
             if (DEBUG){
@@ -531,7 +531,7 @@ public class NotificationColorUtil {
                         "Ambient contrast of notification for %s is %s (over black)"
                                 + " by changing #%s to #%s",
                         context.getPackageName(),
-                        NotificationColorUtil.contrastChange(resolvedColor, color, Color.BLACK),
+                        ContrastColorUtil.contrastChange(resolvedColor, color, Color.BLACK),
                         Integer.toHexString(resolvedColor), Integer.toHexString(color)));
             }
         }
@@ -609,7 +609,7 @@ public class NotificationColorUtil {
     }
 
     public static boolean satisfiesTextContrast(int backgroundColor, int foregroundColor) {
-        return NotificationColorUtil.calculateContrast(foregroundColor, backgroundColor) >= 4.5;
+        return ContrastColorUtil.calculateContrast(foregroundColor, backgroundColor) >= 4.5;
     }
 
     /**

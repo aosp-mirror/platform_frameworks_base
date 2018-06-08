@@ -63,7 +63,7 @@ import android.widget.RemoteViews;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
-import com.android.internal.util.NotificationColorUtil;
+import com.android.internal.util.ContrastColorUtil;
 import com.android.internal.widget.CachingIconView;
 import com.android.systemui.Dependency;
 import com.android.systemui.Interpolators;
@@ -496,7 +496,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
         StatusBarIconView expandedIcon = mEntry.expandedIcon;
         boolean isPreL = Boolean.TRUE.equals(expandedIcon.getTag(R.id.icon_is_pre_L));
         boolean colorize = !isPreL || NotificationUtils.isGrayscale(expandedIcon,
-                NotificationColorUtil.getInstance(mContext));
+                ContrastColorUtil.getInstance(mContext));
         int color = StatusBarIconView.NO_COLOR;
         if (colorize) {
             NotificationHeaderView header = getVisibleNotificationHeader();
@@ -1120,10 +1120,10 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
     }
 
     private void updateNotificationColor() {
-        mNotificationColor = NotificationColorUtil.resolveContrastColor(mContext,
+        mNotificationColor = ContrastColorUtil.resolveContrastColor(mContext,
                 getStatusBarNotification().getNotification().color,
                 getBackgroundColorWithoutTint());
-        mNotificationColorAmbient = NotificationColorUtil.resolveAmbientColor(mContext,
+        mNotificationColorAmbient = ContrastColorUtil.resolveAmbientColor(mContext,
                 getStatusBarNotification().getNotification().color);
     }
 

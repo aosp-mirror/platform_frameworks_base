@@ -2143,7 +2143,13 @@ public class PackageManagerService extends IPackageManager.Stub
                         // app's nature doesn't depend on the user, so we can just check
                         // its browser nature in any user and generalize.
                         if (packageIsBrowser(packageName, userId)) {
-                            mSettings.setDefaultBrowserPackageNameLPw(null, userId);
+                            // If this browser is restored from user's backup, do not clear
+                            // default-browser state for this user
+                            final PackageSetting pkgSetting = mSettings.mPackages.get(packageName);
+                            if (pkgSetting.getInstallReason(userId)
+                                    != PackageManager.INSTALL_REASON_DEVICE_RESTORE) {
+                                mSettings.setDefaultBrowserPackageNameLPw(null, userId);
+                            }
                         }
 
                         // We may also need to apply pending (restored) runtime
@@ -4795,7 +4801,8 @@ public class PackageManagerService extends IPackageManager.Stub
             // require the permission to be held; the calling uid and given user id referring
             // to the same user is not sufficient
             mPermissionManager.enforceCrossUserPermission(
-                    Binder.getCallingUid(), userId, false, false, true,
+                    Binder.getCallingUid(), userId, false, false,
+                    !isRecentsAccessingChildProfiles(Binder.getCallingUid(), userId),
                     "MATCH_ANY_USER flag requires INTERACT_ACROSS_USERS permission at "
                     + Debug.getCallers(5));
         } else if ((flags & PackageManager.MATCH_UNINSTALLED_PACKAGES) != 0 && isCallerSystemUser
@@ -6662,7 +6669,8 @@ public class PackageManagerService extends IPackageManager.Stub
                 }
             }
             return applyPostResolutionFilter(
-                    list, instantAppPkgName, allowDynamicSplits, filterCallingUid, userId, intent);
+                    list, instantAppPkgName, allowDynamicSplits, filterCallingUid, resolveForStart,
+                    userId, intent);
         }
 
         // reader
@@ -6681,7 +6689,7 @@ public class PackageManagerService extends IPackageManager.Stub
                     xpResult.add(xpResolveInfo);
                     return applyPostResolutionFilter(
                             filterIfNotSystemUser(xpResult, userId), instantAppPkgName,
-                            allowDynamicSplits, filterCallingUid, userId, intent);
+                            allowDynamicSplits, filterCallingUid, resolveForStart, userId, intent);
                 }
 
                 // Check for results in the current profile.
@@ -6721,14 +6729,16 @@ public class PackageManagerService extends IPackageManager.Stub
                             // result straight away.
                             result.add(xpDomainInfo.resolveInfo);
                             return applyPostResolutionFilter(result, instantAppPkgName,
-                                    allowDynamicSplits, filterCallingUid, userId, intent);
+                                    allowDynamicSplits, filterCallingUid, resolveForStart, userId,
+                                    intent);
                         }
                     } else if (result.size() <= 1 && !addInstant) {
                         // No result in parent user and <= 1 result in current profile, and we
                         // are not going to add emphemeral app, so we can return the result without
                         // further processing.
                         return applyPostResolutionFilter(result, instantAppPkgName,
-                                allowDynamicSplits, filterCallingUid, userId, intent);
+                                allowDynamicSplits, filterCallingUid, resolveForStart, userId,
+                                intent);
                     }
                     // We have more than one candidate (combining results from current and parent
                     // profile), so we need filtering and sorting.
@@ -6764,7 +6774,8 @@ public class PackageManagerService extends IPackageManager.Stub
             Collections.sort(result, mResolvePrioritySorter);
         }
         return applyPostResolutionFilter(
-                result, instantAppPkgName, allowDynamicSplits, filterCallingUid, userId, intent);
+                result, instantAppPkgName, allowDynamicSplits, filterCallingUid, resolveForStart,
+                userId, intent);
     }
 
     private List<ResolveInfo> maybeAddInstantAppInstaller(List<ResolveInfo> result, Intent intent,
@@ -6974,8 +6985,8 @@ public class PackageManagerService extends IPackageManager.Stub
      * @return A filtered list of resolved activities.
      */
     private List<ResolveInfo> applyPostResolutionFilter(List<ResolveInfo> resolveInfos,
-            String ephemeralPkgName, boolean allowDynamicSplits, int filterCallingUid, int userId,
-            Intent intent) {
+            String ephemeralPkgName, boolean allowDynamicSplits, int filterCallingUid,
+            boolean resolveForStart, int userId, Intent intent) {
         final boolean blockInstant = intent.isWebIntent() && areWebInstantAppsDisabled();
         for (int i = resolveInfos.size() - 1; i >= 0; i--) {
             final ResolveInfo info = resolveInfos.get(i);
@@ -7033,6 +7044,13 @@ public class PackageManagerService extends IPackageManager.Stub
                 continue;
             } else if (ephemeralPkgName.equals(info.activityInfo.packageName)) {
                 // caller is same app; don't need to apply any other filtering
+                continue;
+            } else if (resolveForStart
+                    && (intent.isWebIntent()
+                            || (intent.getFlags() & Intent.FLAG_ACTIVITY_MATCH_EXTERNAL) != 0)
+                    && intent.getPackage() == null
+                    && intent.getComponent() == null) {
+                // ephemeral apps can launch other ephemeral apps indirectly
                 continue;
             }
             // allow activities that have been explicitly exposed to ephemeral apps
@@ -7612,7 +7630,8 @@ public class PackageManagerService extends IPackageManager.Stub
                 }
             }
             return applyPostResolutionFilter(
-                    list, instantAppPkgName, allowDynamicSplits, callingUid, userId, intent);
+                    list, instantAppPkgName, allowDynamicSplits, callingUid, false, userId,
+                    intent);
         }
 
         // reader
@@ -7622,14 +7641,16 @@ public class PackageManagerService extends IPackageManager.Stub
                 final List<ResolveInfo> result =
                         mReceivers.queryIntent(intent, resolvedType, flags, userId);
                 return applyPostResolutionFilter(
-                        result, instantAppPkgName, allowDynamicSplits, callingUid, userId, intent);
+                        result, instantAppPkgName, allowDynamicSplits, callingUid, false, userId,
+                        intent);
             }
             final PackageParser.Package pkg = mPackages.get(pkgName);
             if (pkg != null) {
                 final List<ResolveInfo> result = mReceivers.queryIntentForPackage(
                         intent, resolvedType, flags, pkg.receivers, userId);
                 return applyPostResolutionFilter(
-                        result, instantAppPkgName, allowDynamicSplits, callingUid, userId, intent);
+                        result, instantAppPkgName, allowDynamicSplits, callingUid, false, userId,
+                        intent);
             }
             return Collections.emptyList();
         }
@@ -13988,43 +14009,6 @@ public class PackageManagerService extends IPackageManager.Stub
         return false;
     }
 
-    @Override
-    public boolean setSystemAppInstallState(String packageName, boolean installed, int userId) {
-        enforceSystemOrPhoneCaller("setSystemAppInstallState");
-        PackageSetting pkgSetting = mSettings.mPackages.get(packageName);
-        // The target app should always be in system
-        if (pkgSetting == null || !pkgSetting.isSystem()) {
-            return false;
-        }
-        // Check if the install state is the same
-        if (pkgSetting.getInstalled(userId) == installed) {
-            return false;
-        }
-
-        long callingId = Binder.clearCallingIdentity();
-        try {
-            if (installed) {
-                // install the app from uninstalled state
-                installExistingPackageAsUser(
-                        packageName,
-                        userId,
-                        0 /*installFlags*/,
-                        PackageManager.INSTALL_REASON_DEVICE_SETUP);
-                return true;
-            }
-
-            // uninstall the app from installed state
-            deletePackageVersioned(
-                    new VersionedPackage(packageName, PackageManager.VERSION_CODE_HIGHEST),
-                    new LegacyPackageDeleteObserver(null).getBinder(),
-                    userId,
-                    PackageManager.DELETE_SYSTEM_APP);
-            return true;
-        } finally {
-            Binder.restoreCallingIdentity(callingId);
-        }
-    }
-
     private void sendApplicationHiddenForUser(String packageName, PackageSetting pkgSetting,
             int userId) {
         final PackageRemovedInfo info = new PackageRemovedInfo(this);
@@ -14089,16 +14073,10 @@ public class PackageManagerService extends IPackageManager.Stub
     @Override
     public int installExistingPackageAsUser(String packageName, int userId, int installFlags,
             int installReason) {
-        final int callingUid = Binder.getCallingUid();
-        if (mContext.checkCallingOrSelfPermission(android.Manifest.permission.INSTALL_PACKAGES)
-                != PackageManager.PERMISSION_GRANTED
-                && mContext.checkCallingOrSelfPermission(
-                        android.Manifest.permission.INSTALL_EXISTING_PACKAGES)
-                != PackageManager.PERMISSION_GRANTED) {
-            throw new SecurityException("Neither user " + callingUid + " nor current process has "
-                    + android.Manifest.permission.INSTALL_PACKAGES + ".");
-        }
+        mContext.enforceCallingOrSelfPermission(android.Manifest.permission.INSTALL_PACKAGES,
+                null);
         PackageSetting pkgSetting;
+        final int callingUid = Binder.getCallingUid();
         mPermissionManager.enforceCrossUserPermission(callingUid, userId,
                 true /* requireFullPermission */, true /* checkShell */,
                 "installExistingPackage for user " + userId);

@@ -22,6 +22,7 @@ option java_package = "com.android.internal.os";
 option java_outer_classname = "StatsdConfigProto";
 
 import "frameworks/base/cmds/statsd/src/perfetto/perfetto_config.proto";
+import "frameworks/base/cmds/statsd/src/perfprofd/perfprofd_config.proto";
 
 enum Position {
   POSITION_UNKNOWN = 0;
@@ -303,6 +304,10 @@ message PerfettoDetails {
   optional perfetto.protos.TraceConfig trace_config = 1;
 }
 
+message PerfprofdDetails {
+  optional android.perfprofd.ProfilingConfig perfprofd_config = 1;
+}
+
 message BroadcastSubscriberDetails {
   optional int64 subscriber_id = 1;
   repeated string cookie = 2;
@@ -324,6 +329,7 @@ message Subscription {
     IncidentdDetails incidentd_details = 4;
     PerfettoDetails perfetto_details = 5;
     BroadcastSubscriberDetails broadcast_subscriber_details = 6;
+    PerfprofdDetails perfprofd_details = 8;
   }
 
   optional float probability_of_informing = 7 [default = 1.1];

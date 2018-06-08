@@ -1531,6 +1531,14 @@ public abstract class ConnectionService extends Service {
                     new DisconnectCause(DisconnectCause.ERROR, "IMPL_RETURNED_NULL_CONNECTION"));
         }
 
+        boolean isSelfManaged =
+                (connection.getConnectionProperties() & Connection.PROPERTY_SELF_MANAGED)
+                        == Connection.PROPERTY_SELF_MANAGED;
+        // Self-managed Connections should always use voip audio mode; we default here so that the
+        // local state within the ConnectionService matches the default we assume in Telecom.
+        if (isSelfManaged) {
+            connection.setAudioModeIsVoip(true);
+        }
         connection.setTelecomCallId(callId);
         if (connection.getState() != Connection.STATE_DISCONNECTED) {
             addConnection(request.getAccountHandle(), callId, connection);
@@ -1570,9 +1578,7 @@ public abstract class ConnectionService extends Service {
                         createIdList(connection.getConferenceables()),
                         connection.getExtras()));
 
-        if (isIncoming && request.shouldShowIncomingCallUi() &&
-                (connection.getConnectionProperties() & Connection.PROPERTY_SELF_MANAGED) ==
-                        Connection.PROPERTY_SELF_MANAGED) {
+        if (isIncoming && request.shouldShowIncomingCallUi() && isSelfManaged) {
             // Tell ConnectionService to show its incoming call UX.
             connection.onShowIncomingCallUi();
         }
