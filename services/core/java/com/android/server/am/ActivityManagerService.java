@@ -21036,15 +21036,9 @@ public class ActivityManagerService extends IActivityManager.Stub
     }
 
     private List<ResolveInfo> collectReceiverComponents(Intent intent, String resolvedType,
-            int callingUid, boolean callerInstantApp, int[] users) {
+            int callingUid, int[] users) {
         // TODO: come back and remove this assumption to triage all broadcasts
         int pmFlags = STOCK_PM_FLAGS | MATCH_DEBUG_TRIAGED_MISSING;
-        // Instant apps should be able to send broadcasts to themselves, so we would
-        // match instant receivers and later the broadcast queue would enforce that
-        // the broadcast cannot be sent to a receiver outside the instant UID.
-        if (callerInstantApp) {
-            pmFlags |= PackageManager.MATCH_INSTANT;
-        }
 
         List<ResolveInfo> receivers = null;
         try {
@@ -21673,8 +21667,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         // Need to resolve the intent to interested receivers...
         if ((intent.getFlags()&Intent.FLAG_RECEIVER_REGISTERED_ONLY)
                  == 0) {
-            receivers = collectReceiverComponents(intent, resolvedType, callingUid,
-                    callerInstantApp, users);
+            receivers = collectReceiverComponents(intent, resolvedType, callingUid, users);
         }
         if (intent.getComponent() == null) {
             if (userId == UserHandle.USER_ALL && callingUid == SHELL_UID) {
