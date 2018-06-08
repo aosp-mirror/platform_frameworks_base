@@ -2037,7 +2037,7 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
                  * Do this in onKeyUp since the Search key is also used for
                  * chording quick launch shortcuts.
                  */
-                if (getKeyguardManager().inKeyguardRestrictedInputMode()) {
+                if (isNotInstantAppAndKeyguardRestricted()) {
                     break;
                 }
                 if (event.isTracking() && !event.isCanceled()) {
@@ -2055,6 +2055,11 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
         }
 
         return false;
+    }
+
+    private boolean isNotInstantAppAndKeyguardRestricted() {
+        return !getContext().getPackageManager().isInstantApp()
+            && getKeyguardManager().inKeyguardRestrictedInputMode();
     }
 
     @Override
