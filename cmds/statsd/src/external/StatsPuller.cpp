@@ -18,10 +18,10 @@
 #include "Log.h"
 
 #include "StatsPuller.h"
+#include "StatsPullerManager.h"
 #include "guardrail/StatsdStats.h"
 #include "puller_util.h"
 #include "stats_log_util.h"
-#include "StatsPullerManagerImpl.h"
 
 namespace android {
 namespace os {
@@ -35,7 +35,7 @@ void StatsPuller::SetUidMap(const sp<UidMap>& uidMap) { mUidMap = uidMap; }
 // ValueMetric has a minimum bucket size of 10min so that we don't pull too frequently
 StatsPuller::StatsPuller(const int tagId)
     : mTagId(tagId) {
-    mCoolDownNs = StatsPullerManagerImpl::kAllPullAtomInfo.find(tagId)->second.coolDownNs;
+    mCoolDownNs = StatsPullerManager::kAllPullAtomInfo.find(tagId)->second.coolDownNs;
     VLOG("Puller for tag %d created. Cooldown set to %lld", mTagId, (long long)mCoolDownNs);
 }
 

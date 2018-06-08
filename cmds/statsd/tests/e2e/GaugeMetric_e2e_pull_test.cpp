@@ -66,7 +66,7 @@ TEST(GaugeMetricE2eTest, TestRandomSamplePulledEvents) {
         baseTimeNs, configAddedTimeNs, config, cfgKey);
     EXPECT_EQ(processor->mMetricsManagers.size(), 1u);
     EXPECT_TRUE(processor->mMetricsManagers.begin()->second->isConfigValid());
-    processor->mStatsPullerManager.ForceClearPullerCache();
+    processor->mPullerManager->ForceClearPullerCache();
 
     int startBucketNum = processor->mMetricsManagers.begin()->second->
             mAllMetricProducers[0]->getCurrentBucketNum();
@@ -74,12 +74,11 @@ TEST(GaugeMetricE2eTest, TestRandomSamplePulledEvents) {
 
     // When creating the config, the gauge metric producer should register the alarm at the
     // end of the current bucket.
-    EXPECT_EQ((size_t)1, StatsPullerManagerImpl::GetInstance().mReceivers.size());
+    EXPECT_EQ((size_t)1, processor->mPullerManager->mReceivers.size());
     EXPECT_EQ(bucketSizeNs,
-              StatsPullerManagerImpl::GetInstance().mReceivers.begin()->
-                    second.front().intervalNs);
-    int64_t& nextPullTimeNs = StatsPullerManagerImpl::GetInstance().mReceivers.begin()->
-            second.front().nextPullTimeNs;
+              processor->mPullerManager->mReceivers.begin()->second.front().intervalNs);
+    int64_t& nextPullTimeNs =
+            processor->mPullerManager->mReceivers.begin()->second.front().nextPullTimeNs;
     EXPECT_EQ(baseTimeNs + startBucketNum * bucketSizeNs + bucketSizeNs, nextPullTimeNs);
 
     auto screenOffEvent = CreateScreenStateChangedEvent(android::view::DISPLAY_STATE_OFF,
@@ -212,7 +211,7 @@ TEST(GaugeMetricE2eTest, TestAllConditionChangesSamplePulledEvents) {
         baseTimeNs, configAddedTimeNs, config, cfgKey);
     EXPECT_EQ(processor->mMetricsManagers.size(), 1u);
     EXPECT_TRUE(processor->mMetricsManagers.begin()->second->isConfigValid());
-    processor->mStatsPullerManager.ForceClearPullerCache();
+    processor->mPullerManager->ForceClearPullerCache();
 
     int startBucketNum = processor->mMetricsManagers.begin()->second->
             mAllMetricProducers[0]->getCurrentBucketNum();
@@ -313,7 +312,7 @@ TEST(GaugeMetricE2eTest, TestRandomSamplePulledEvent_LateAlarm) {
         baseTimeNs, configAddedTimeNs, config, cfgKey);
     EXPECT_EQ(processor->mMetricsManagers.size(), 1u);
     EXPECT_TRUE(processor->mMetricsManagers.begin()->second->isConfigValid());
-    processor->mStatsPullerManager.ForceClearPullerCache();
+    processor->mPullerManager->ForceClearPullerCache();
 
     int startBucketNum = processor->mMetricsManagers.begin()->second->
             mAllMetricProducers[0]->getCurrentBucketNum();
@@ -321,12 +320,11 @@ TEST(GaugeMetricE2eTest, TestRandomSamplePulledEvent_LateAlarm) {
 
     // When creating the config, the gauge metric producer should register the alarm at the
     // end of the current bucket.
-    EXPECT_EQ((size_t)1, StatsPullerManagerImpl::GetInstance().mReceivers.size());
+    EXPECT_EQ((size_t)1, processor->mPullerManager->mReceivers.size());
     EXPECT_EQ(bucketSizeNs,
-              StatsPullerManagerImpl::GetInstance().mReceivers.begin()->
-                    second.front().intervalNs);
-    int64_t& nextPullTimeNs = StatsPullerManagerImpl::GetInstance().mReceivers.begin()->
-            second.front().nextPullTimeNs;
+              processor->mPullerManager->mReceivers.begin()->second.front().intervalNs);
+    int64_t& nextPullTimeNs =
+            processor->mPullerManager->mReceivers.begin()->second.front().nextPullTimeNs;
     EXPECT_EQ(baseTimeNs + startBucketNum * bucketSizeNs + bucketSizeNs, nextPullTimeNs);
 
     auto screenOffEvent = CreateScreenStateChangedEvent(android::view::DISPLAY_STATE_OFF,

@@ -41,7 +41,7 @@ statsd_common_src := \
     src/external/SubsystemSleepStatePuller.cpp \
     src/external/ResourceHealthManagerPuller.cpp \
     src/external/ResourceThermalManagerPuller.cpp \
-    src/external/StatsPullerManagerImpl.cpp \
+    src/external/StatsPullerManager.cpp \
     src/external/puller_util.cpp \
     src/logd/LogEvent.cpp \
     src/logd/LogListener.cpp \

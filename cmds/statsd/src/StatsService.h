@@ -246,9 +246,9 @@ private:
     sp<UidMap> mUidMap;
 
     /**
-     * Fetches external metrics.
+     * Fetches external metrics
      */
-    StatsPullerManager mStatsPullerManager;
+    sp<StatsPullerManager> mPullerManager;
 
     /**
      * Tracks the configurations that have been passed to statsd.
