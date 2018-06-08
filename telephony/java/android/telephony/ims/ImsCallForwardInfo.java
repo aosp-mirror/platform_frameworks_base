@@ -29,25 +29,45 @@ import android.os.Parcelable;
 public final class ImsCallForwardInfo implements Parcelable {
     // Refer to ImsUtInterface#CDIV_CF_XXX
     /** @hide */
+    // TODO: Make private, do not modify this field directly, use getter.
     public int mCondition;
     // 0: disabled, 1: enabled
     /** @hide */
+    // TODO: Make private, do not modify this field directly, use getter.
     public int mStatus;
     // 0x91: International, 0x81: Unknown
     /** @hide */
+    // TODO: Make private, do not modify this field directly, use getter.
     public int mToA;
     // Service class
     /** @hide */
+    // TODO: Make private, do not modify this field directly, use getter.
     public int mServiceClass;
     // Number (it will not include the "sip" or "tel" URI scheme)
     /** @hide */
+    // TODO: Make private, do not modify this field directly, use getter.
     public String mNumber;
     // No reply timer for CF
     /** @hide */
+    // TODO: Make private, do not modify this field directly, use getter.
     public int mTimeSeconds;
 
     /** @hide */
+    // TODO: Will be removed in the future, use public constructor instead.
     public ImsCallForwardInfo() {
+    }
+
+    /**
+     * IMS Call Forward Information.
+     */
+    public ImsCallForwardInfo(int condition, int status, int toA, int serviceClass, String number,
+            int replyTimerSec) {
+        mCondition = condition;
+        mStatus = status;
+        mToA = toA;
+        mServiceClass = serviceClass;
+        mNumber = number;
+        mTimeSeconds = replyTimerSec;
     }
 
     /** @hide */
