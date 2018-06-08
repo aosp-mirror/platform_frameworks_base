@@ -11905,6 +11905,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             if ((getVisibility() == VISIBLE)
                     || (changeType == AccessibilityEvent.CONTENT_CHANGE_TYPE_PANE_DISAPPEARED)) {
                 final AccessibilityEvent event = AccessibilityEvent.obtain();
+                onInitializeAccessibilityEvent(event);
                 event.setEventType(AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED);
                 event.setContentChangeTypes(changeType);
                 event.setSource(this);
