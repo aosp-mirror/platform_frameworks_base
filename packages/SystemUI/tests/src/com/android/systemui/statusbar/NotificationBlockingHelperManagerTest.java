@@ -147,6 +147,7 @@ public class NotificationBlockingHelperManagerTest extends SysuiTestCase {
         // of the child row.
         ExpandableNotificationRow childRow = groupRow.getChildrenContainer().getViewAtPosition(0);
         childRow.getEntry().userSentiment = USER_SENTIMENT_NEGATIVE;
+        assertFalse(childRow.getIsNonblockable());
 
         assertTrue(mBlockingHelperManager.perhapsShowBlockingHelper(childRow, mMenuRow));
 
@@ -218,6 +219,24 @@ public class NotificationBlockingHelperManagerTest extends SysuiTestCase {
         assertTrue(mBlockingHelperManager.isBlockingHelperRowNull());
 
         verify(mEntryManager).updateNotifications();
+    }
+
+    @Test
+    public void testNonBlockable_package() {
+        mBlockingHelperManager.setNonBlockablePkgs(new String[] {"banana", "strawberry:pie"});
+
+        assertFalse(mBlockingHelperManager.isNonblockable("orange", "pie"));
+
+        assertTrue(mBlockingHelperManager.isNonblockable("banana", "pie"));
+    }
+
+    @Test
+    public void testNonBlockable_channel() {
+        mBlockingHelperManager.setNonBlockablePkgs(new String[] {"banana", "strawberry:pie"});
+
+        assertFalse(mBlockingHelperManager.isNonblockable("strawberry", "shortcake"));
+
+        assertTrue(mBlockingHelperManager.isNonblockable("strawberry", "pie"));
     }
 
     private ExpandableNotificationRow createBlockableRowSpy() throws Exception {
