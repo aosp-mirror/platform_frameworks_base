@@ -666,7 +666,7 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
             @Override
             void process() {
                 synchronized (mEventCbLock) {
-                    for (Pair<Executor, MediaPlayer2EventCallback> cb : mEventCallbackRecords) {
+                    for (Pair<Executor, EventCallback> cb : mEventCallbackRecords) {
                         cb.first.execute(() -> cb.second.onCommandLabelReached(
                                 MediaPlayer2Impl.this, label));
                     }
@@ -1305,9 +1305,9 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
      *
      * @return the width of the video, or 0 if there is no video,
      * no display surface was set, or the width has not been determined
-     * yet. The {@code MediaPlayer2EventCallback} can be registered via
-     * {@link #setMediaPlayer2EventCallback(Executor, MediaPlayer2EventCallback)} to provide a
-     * notification {@code MediaPlayer2EventCallback.onVideoSizeChanged} when the width
+     * yet. The {@code EventCallback} can be registered via
+     * {@link #setEventCallback(Executor, EventCallback)} to provide a
+     * notification {@code EventCallback.onVideoSizeChanged} when the width
      * is available.
      */
     @Override
@@ -1318,9 +1318,9 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
      *
      * @return the height of the video, or 0 if there is no video,
      * no display surface was set, or the height has not been determined
-     * yet. The {@code MediaPlayer2EventCallback} can be registered via
-     * {@link #setMediaPlayer2EventCallback(Executor, MediaPlayer2EventCallback)} to provide a
-     * notification {@code MediaPlayer2EventCallback.onVideoSizeChanged} when the height
+     * yet. The {@code EventCallback} can be registered via
+     * {@link #setEventCallback(Executor, EventCallback)} to provide a
+     * notification {@code EventCallback.onVideoSizeChanged} when the height
      * is available.
      */
     @Override
@@ -2820,7 +2820,7 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
 
                 if (dsd != null) {
                     synchronized (mEventCbLock) {
-                        for (Pair<Executor, MediaPlayer2EventCallback> cb : mEventCallbackRecords) {
+                        for (Pair<Executor, EventCallback> cb : mEventCallbackRecords) {
                             cb.first.execute(() -> cb.second.onInfo(
                                     mMediaPlayer, dsd, MEDIA_INFO_PREPARED, 0));
                         }
@@ -2882,7 +2882,7 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
                 }
 
                 synchronized (mEventCbLock) {
-                    for (Pair<Executor, MediaPlayer2EventCallback> cb : mEventCallbackRecords) {
+                    for (Pair<Executor, EventCallback> cb : mEventCallbackRecords) {
                         cb.first.execute(() -> cb.second.onInfo(
                                 mMediaPlayer, dsd, MEDIA_INFO_PLAYBACK_COMPLETE, 0));
                     }
@@ -2916,7 +2916,7 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
                 synchronized (mEventCbLock) {
                     if (srcId == mCurrentSrcId) {
                         mBufferedPercentageCurrent.set(percent);
-                        for (Pair<Executor, MediaPlayer2EventCallback> cb : mEventCallbackRecords) {
+                        for (Pair<Executor, EventCallback> cb : mEventCallbackRecords) {
                             cb.first.execute(() -> cb.second.onInfo(
                                     mMediaPlayer, mCurrentDSD, MEDIA_INFO_BUFFERING_UPDATE,
                                     percent));
@@ -2924,7 +2924,7 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
                     } else if (srcId == mNextSrcId && !mNextDSDs.isEmpty()) {
                         mBufferedPercentageNext.set(percent);
                         DataSourceDesc nextDSD = mNextDSDs.get(0);
-                        for (Pair<Executor, MediaPlayer2EventCallback> cb : mEventCallbackRecords) {
+                        for (Pair<Executor, EventCallback> cb : mEventCallbackRecords) {
                             cb.first.execute(() -> cb.second.onInfo(
                                     mMediaPlayer, nextDSD, MEDIA_INFO_BUFFERING_UPDATE,
                                     percent));
@@ -2962,7 +2962,7 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
                 final int width = msg.arg1;
                 final int height = msg.arg2;
                 synchronized (mEventCbLock) {
-                    for (Pair<Executor, MediaPlayer2EventCallback> cb : mEventCallbackRecords) {
+                    for (Pair<Executor, EventCallback> cb : mEventCallbackRecords) {
                         cb.first.execute(() -> cb.second.onVideoSizeChanged(
                                 mMediaPlayer, mCurrentDSD, width, height));
                     }
@@ -2974,7 +2974,7 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
             {
                 Log.e(TAG, "Error (" + msg.arg1 + "," + msg.arg2 + ")");
                 synchronized (mEventCbLock) {
-                    for (Pair<Executor, MediaPlayer2EventCallback> cb : mEventCallbackRecords) {
+                    for (Pair<Executor, EventCallback> cb : mEventCallbackRecords) {
                         cb.first.execute(() -> cb.second.onError(
                                 mMediaPlayer, mCurrentDSD, what, extra));
                         cb.first.execute(() -> cb.second.onInfo(
@@ -3027,7 +3027,7 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
                 }
 
                 synchronized (mEventCbLock) {
-                    for (Pair<Executor, MediaPlayer2EventCallback> cb : mEventCallbackRecords) {
+                    for (Pair<Executor, EventCallback> cb : mEventCallbackRecords) {
                         cb.first.execute(() -> cb.second.onInfo(
                                 mMediaPlayer, mCurrentDSD, what, extra));
                     }
@@ -3057,7 +3057,7 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
                 }
 
                 synchronized (mEventCbLock) {
-                    for (Pair<Executor, MediaPlayer2EventCallback> cb : mEventCallbackRecords) {
+                    for (Pair<Executor, EventCallback> cb : mEventCallbackRecords) {
                         cb.first.execute(() -> cb.second.onTimedText(mMediaPlayer, mCurrentDSD, text));
                     }
                 }
@@ -3091,7 +3091,7 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
                 }
 
                 synchronized (mEventCbLock) {
-                    for (Pair<Executor, MediaPlayer2EventCallback> cb : mEventCallbackRecords) {
+                    for (Pair<Executor, EventCallback> cb : mEventCallbackRecords) {
                         cb.first.execute(() -> cb.second.onTimedMetaDataAvailable(
                                 mMediaPlayer, mCurrentDSD, data));
                     }
@@ -3196,8 +3196,8 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
     }
 
     private final Object mEventCbLock = new Object();
-    private ArrayList<Pair<Executor, MediaPlayer2EventCallback> > mEventCallbackRecords
-        = new ArrayList<Pair<Executor, MediaPlayer2EventCallback> >();
+    private ArrayList<Pair<Executor, EventCallback> > mEventCallbackRecords
+        = new ArrayList<Pair<Executor, EventCallback> >();
 
     /**
      * Register a callback to be invoked when the media source is ready
@@ -3207,14 +3207,14 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
      * @param executor the executor through which the callback should be invoked
      */
     @Override
-    public void setMediaPlayer2EventCallback(@NonNull @CallbackExecutor Executor executor,
-            @NonNull MediaPlayer2EventCallback eventCallback) {
+    public void setEventCallback(@NonNull @CallbackExecutor Executor executor,
+            @NonNull EventCallback eventCallback) {
         if (eventCallback == null) {
-            throw new IllegalArgumentException("Illegal null MediaPlayer2EventCallback");
+            throw new IllegalArgumentException("Illegal null EventCallback");
         }
         if (executor == null) {
             throw new IllegalArgumentException(
-                    "Illegal null Executor for the MediaPlayer2EventCallback");
+                    "Illegal null Executor for the EventCallback");
         }
         synchronized (mEventCbLock) {
             mEventCallbackRecords.add(new Pair(executor, eventCallback));
@@ -3222,10 +3222,10 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
     }
 
     /**
-     * Clears the {@link MediaPlayer2EventCallback}.
+     * Clears the {@link EventCallback}.
      */
     @Override
-    public void clearMediaPlayer2EventCallback() {
+    public void clearEventCallback() {
         synchronized (mEventCbLock) {
             mEventCallbackRecords.clear();
         }
@@ -3281,11 +3281,11 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
     public void setDrmEventCallback(@NonNull @CallbackExecutor Executor executor,
             @NonNull DrmEventCallback eventCallback) {
         if (eventCallback == null) {
-            throw new IllegalArgumentException("Illegal null MediaPlayer2EventCallback");
+            throw new IllegalArgumentException("Illegal null EventCallback");
         }
         if (executor == null) {
             throw new IllegalArgumentException(
-                    "Illegal null Executor for the MediaPlayer2EventCallback");
+                    "Illegal null Executor for the EventCallback");
         }
         synchronized (mDrmEventCbLock) {
             mDrmEventCallbackRecords.add(new Pair(executor, eventCallback));
@@ -4786,7 +4786,7 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
                 return;
             }
             synchronized (mEventCbLock) {
-                for (Pair<Executor, MediaPlayer2EventCallback> cb : mEventCallbackRecords) {
+                for (Pair<Executor, EventCallback> cb : mEventCallbackRecords) {
                     cb.first.execute(() -> cb.second.onCallCompleted(
                             MediaPlayer2Impl.this, mDSD, mMediaCallType, status));
                 }

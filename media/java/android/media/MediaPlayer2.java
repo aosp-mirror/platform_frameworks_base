@@ -116,9 +116,9 @@ import java.util.concurrent.Executor;
  *         these circumstances. Sometimes, due to programming errors, invoking a playback
  *         control operation in an invalid state may also occur. Under all these
  *         error conditions, the internal player engine invokes a user supplied
- *         MediaPlayer2EventCallback.onError() method if an MediaPlayer2EventCallback has been
+ *         EventCallback.onError() method if an EventCallback has been
  *         registered beforehand via
- *         {@link #setMediaPlayer2EventCallback(Executor, MediaPlayer2EventCallback)}.
+ *         {@link #setEventCallback(Executor, EventCallback)}.
  *         <ul>
  *         <li>It is important to note that once an error occurs, the
  *         MediaPlayer2 object enters the <em>Error</em> state (except as noted
@@ -159,9 +159,9 @@ import java.util.concurrent.Executor;
  *         player engine continues working on the rest of preparation work
  *         until the preparation work completes. When the preparation completes,
  *         the internal player engine then calls a user supplied callback method,
- *         onInfo() of the MediaPlayer2EventCallback interface with {@link #MEDIA_INFO_PREPARED},
- *         if an MediaPlayer2EventCallback is registered beforehand via
- *         {@link #setMediaPlayer2EventCallback(Executor, MediaPlayer2EventCallback)}.</li>
+ *         onInfo() of the EventCallback interface with {@link #MEDIA_INFO_PREPARED},
+ *         if an EventCallback is registered beforehand via
+ *         {@link #setEventCallback(Executor, EventCallback)}.</li>
  *         <li>It is important to note that
  *         the <em>Preparing</em> state is a transient state, and the behavior
  *         of calling any method with side effect while a MediaPlayer2 object is
@@ -180,10 +180,10 @@ import java.util.concurrent.Executor;
  *         whether the MediaPlayer2 object is in the <em>Started</em> state.
  *         <ul>
  *         <li>While in the <em>Started</em> state, the internal player engine calls
- *         a user supplied callback method MediaPlayer2EventCallback.onInfo() with
- *         {@link #MEDIA_INFO_BUFFERING_UPDATE} if an MediaPlayer2EventCallback has been
+ *         a user supplied callback method EventCallback.onInfo() with
+ *         {@link #MEDIA_INFO_BUFFERING_UPDATE} if an EventCallback has been
  *         registered beforehand via
- *         {@link #setMediaPlayer2EventCallback(Executor, MediaPlayer2EventCallback)}.
+ *         {@link #setEventCallback(Executor, EventCallback)}.
  *         This callback allows applications to keep track of the buffering status
  *         while streaming audio/video.</li>
  *         <li>Calling {@link #play()} has not effect
@@ -215,10 +215,10 @@ import java.util.concurrent.Executor;
  *         call returns right away, the actual seek operation may take a while to
  *         finish, especially for audio/video being streamed. When the actual
  *         seek operation completes, the internal player engine calls a user
- *         supplied MediaPlayer2EventCallback.onCallCompleted() with
+ *         supplied EventCallback.onCallCompleted() with
  *         {@link #CALL_COMPLETED_SEEK_TO}
- *         if an MediaPlayer2EventCallback has been registered beforehand via
- *         {@link #setMediaPlayer2EventCallback(Executor, MediaPlayer2EventCallback)}.</li>
+ *         if an EventCallback has been registered beforehand via
+ *         {@link #setEventCallback(Executor, EventCallback)}.</li>
  *         <li>Please
  *         note that {@link #seekTo(long, int)} can also be called in the other states,
  *         such as <em>Prepared</em>, <em>Paused</em> and <em>PlaybackCompleted
@@ -238,9 +238,9 @@ import java.util.concurrent.Executor;
  *         the MediaPlayer2 object shall remain in the <em>Started</em> state.</li>
  *         <li>If the looping mode was set to <var>false
  *         </var>, the player engine calls a user supplied callback method,
- *         MediaPlayer2EventCallback.onCompletion(), if an MediaPlayer2EventCallback is
+ *         EventCallback.onCompletion(), if an EventCallback is
  *         registered beforehand via
- *         {@link #setMediaPlayer2EventCallback(Executor, MediaPlayer2EventCallback)}.
+ *         {@link #setEventCallback(Executor, EventCallback)}.
  *         The invoke of the callback signals that the object is now in the <em>
  *         PlaybackCompleted</em> state.</li>
  *         <li>While in the <em>PlaybackCompleted</em>
@@ -387,7 +387,7 @@ import java.util.concurrent.Executor;
  *     <td>{} </p></td>
  *     <td>This method can be called in any state and calling it does not change
  *         the object state. </p></td></tr>
- * <tr><td>setMediaPlayer2EventCallback </p></td>
+ * <tr><td>setEventCallback </p></td>
  *     <td>any </p></td>
  *     <td>{} </p></td>
  *     <td>This method can be called in any state and calling it does not change
@@ -445,7 +445,7 @@ import java.util.concurrent.Executor;
  * possible runtime errors during playback or streaming. Registration for
  * these events is done by properly setting the appropriate listeners (via calls
  * to
- * {@link #setMediaPlayer2EventCallback(Executor, MediaPlayer2EventCallback)},
+ * {@link #setEventCallback(Executor, EventCallback)},
  * {@link #setDrmEventCallback(Executor, DrmEventCallback)}).
  * In order to receive the respective callback
  * associated with these listeners, applications are required to create
@@ -812,10 +812,10 @@ public abstract class MediaPlayer2 extends MediaPlayerBase
     /**
      * Insert a task in the command queue to help the client to identify whether a batch
      * of commands has been finished. When this command is processed, a notification
-     * {@code MediaPlayer2EventCallback.onCommandLabelReached} will be fired with the
+     * {@code EventCallback.onCommandLabelReached} will be fired with the
      * given {@code label}.
      *
-     * @see android.media.MediaPlayer2.MediaPlayer2EventCallback#onCommandLabelReached
+     * @see android.media.MediaPlayer2.EventCallback#onCommandLabelReached
      *
      * @param label An application specific Object used to help to identify the completeness
      * of a batch of commands.
@@ -1010,9 +1010,9 @@ public abstract class MediaPlayer2 extends MediaPlayerBase
      *
      * @return the width of the video, or 0 if there is no video,
      * no display surface was set, or the width has not been determined
-     * yet. The {@code MediaPlayer2EventCallback} can be registered via
-     * {@link #setMediaPlayer2EventCallback(Executor, MediaPlayer2EventCallback)} to provide a
-     * notification {@code MediaPlayer2EventCallback.onVideoSizeChanged} when the width
+     * yet. The {@code EventCallback} can be registered via
+     * {@link #setEventCallback(Executor, EventCallback)} to provide a
+     * notification {@code EventCallback.onVideoSizeChanged} when the width
      * is available.
      */
     public abstract int getVideoWidth();
@@ -1022,9 +1022,9 @@ public abstract class MediaPlayer2 extends MediaPlayerBase
      *
      * @return the height of the video, or 0 if there is no video,
      * no display surface was set, or the height has not been determined
-     * yet. The {@code MediaPlayer2EventCallback} can be registered via
-     * {@link #setMediaPlayer2EventCallback(Executor, MediaPlayer2EventCallback)} to provide a
-     * notification {@code MediaPlayer2EventCallback.onVideoSizeChanged} when the height is available.
+     * yet. The {@code EventCallback} can be registered via
+     * {@link #setEventCallback(Executor, EventCallback)} to provide a
+     * notification {@code EventCallback.onVideoSizeChanged} when the height is available.
      */
     public abstract int getVideoHeight();
 
@@ -1706,7 +1706,7 @@ public abstract class MediaPlayer2 extends MediaPlayerBase
      * Interface definition for callbacks to be invoked when the player has the corresponding
      * events.
      */
-    public abstract static class MediaPlayer2EventCallback {
+    public abstract static class EventCallback {
         /**
          * Called to indicate the video size
          *
@@ -1814,14 +1814,14 @@ public abstract class MediaPlayer2 extends MediaPlayerBase
      * @param executor the executor through which the callback should be invoked
      */
     // This is a synchronous call.
-    public abstract void setMediaPlayer2EventCallback(@NonNull @CallbackExecutor Executor executor,
-            @NonNull MediaPlayer2EventCallback eventCallback);
+    public abstract void setEventCallback(@NonNull @CallbackExecutor Executor executor,
+            @NonNull EventCallback eventCallback);
 
     /**
-     * Clears the {@link MediaPlayer2EventCallback}.
+     * Clears the {@link EventCallback}.
      */
     // This is a synchronous call.
-    public abstract void clearMediaPlayer2EventCallback();
+    public abstract void clearEventCallback();
 
     /**
      * Interface definition of a callback to be invoked when a
@@ -1849,14 +1849,14 @@ public abstract class MediaPlayer2 extends MediaPlayerBase
      * in include/media/mediaplayer2.h!
      */
     /** Unspecified media player error.
-     * @see android.media.MediaPlayer2.MediaPlayer2EventCallback#onError
+     * @see android.media.MediaPlayer2.EventCallback#onError
      */
     public static final int MEDIA_ERROR_UNKNOWN = 1;
 
     /** The video is streamed and its container is not valid for progressive
      * playback i.e the video's index (e.g moov atom) is not at the start of the
      * file.
-     * @see android.media.MediaPlayer2.MediaPlayer2EventCallback#onError
+     * @see android.media.MediaPlayer2.EventCallback#onError
      */
     public static final int MEDIA_ERROR_NOT_VALID_FOR_PROGRESSIVE_PLAYBACK = 200;
 
@@ -1872,7 +1872,7 @@ public abstract class MediaPlayer2 extends MediaPlayerBase
 
     /** Unspecified low-level system error. This value originated from UNKNOWN_ERROR in
      * system/core/include/utils/Errors.h
-     * @see android.media.MediaPlayer2.MediaPlayer2EventCallback#onError
+     * @see android.media.MediaPlayer2.EventCallback#onError
      * @hide
      */
     public static final int MEDIA_ERROR_SYSTEM = -2147483648;
@@ -1896,62 +1896,62 @@ public abstract class MediaPlayer2 extends MediaPlayerBase
      * in include/media/mediaplayer2.h!
      */
     /** Unspecified media player info.
-     * @see android.media.MediaPlayer2.MediaPlayer2EventCallback#onInfo
+     * @see android.media.MediaPlayer2.EventCallback#onInfo
      */
     public static final int MEDIA_INFO_UNKNOWN = 1;
 
     /** The player switched to this datas source because it is the
      * next-to-be-played in the playlist.
-     * @see android.media.MediaPlayer2.MediaPlayer2EventCallback#onInfo
+     * @see android.media.MediaPlayer2.EventCallback#onInfo
      */
     public static final int MEDIA_INFO_STARTED_AS_NEXT = 2;
 
     /** The player just pushed the very first video frame for rendering.
-     * @see android.media.MediaPlayer2.MediaPlayer2EventCallback#onInfo
+     * @see android.media.MediaPlayer2.EventCallback#onInfo
      */
     public static final int MEDIA_INFO_VIDEO_RENDERING_START = 3;
 
     /** The player just rendered the very first audio sample.
-     * @see android.media.MediaPlayer2.MediaPlayer2EventCallback#onInfo
+     * @see android.media.MediaPlayer2.EventCallback#onInfo
      */
     public static final int MEDIA_INFO_AUDIO_RENDERING_START = 4;
 
     /** The player just completed the playback of this data source.
-     * @see android.media.MediaPlayer2.MediaPlayer2EventCallback#onInfo
+     * @see android.media.MediaPlayer2.EventCallback#onInfo
      */
     public static final int MEDIA_INFO_PLAYBACK_COMPLETE = 5;
 
     /** The player just completed the playback of the full playlist.
-     * @see android.media.MediaPlayer2.MediaPlayer2EventCallback#onInfo
+     * @see android.media.MediaPlayer2.EventCallback#onInfo
      */
     public static final int MEDIA_INFO_PLAYLIST_END = 6;
 
     /** The player just prepared a data source.
-     * @see android.media.MediaPlayer2.MediaPlayer2EventCallback#onInfo
+     * @see android.media.MediaPlayer2.EventCallback#onInfo
      */
     public static final int MEDIA_INFO_PREPARED = 100;
 
     /** The video is too complex for the decoder: it can't decode frames fast
      *  enough. Possibly only the audio plays fine at this stage.
-     * @see android.media.MediaPlayer2.MediaPlayer2EventCallback#onInfo
+     * @see android.media.MediaPlayer2.EventCallback#onInfo
      */
     public static final int MEDIA_INFO_VIDEO_TRACK_LAGGING = 700;
 
     /** MediaPlayer2 is temporarily pausing playback internally in order to
      * buffer more data.
-     * @see android.media.MediaPlayer2.MediaPlayer2EventCallback#onInfo
+     * @see android.media.MediaPlayer2.EventCallback#onInfo
      */
     public static final int MEDIA_INFO_BUFFERING_START = 701;
 
     /** MediaPlayer2 is resuming playback after filling buffers.
-     * @see android.media.MediaPlayer2.MediaPlayer2EventCallback#onInfo
+     * @see android.media.MediaPlayer2.EventCallback#onInfo
      */
     public static final int MEDIA_INFO_BUFFERING_END = 702;
 
     /** Estimated network bandwidth information (kbps) is available; currently this event fires
      * simultaneously as {@link #MEDIA_INFO_BUFFERING_START} and {@link #MEDIA_INFO_BUFFERING_END}
      * when playing network files.
-     * @see android.media.MediaPlayer2.MediaPlayer2EventCallback#onInfo
+     * @see android.media.MediaPlayer2.EventCallback#onInfo
      * @hide
      */
     public static final int MEDIA_INFO_NETWORK_BANDWIDTH = 703;
@@ -1963,26 +1963,26 @@ public abstract class MediaPlayer2 extends MediaPlayerBase
      * has already been played indicates that the next 30 percent of the
      * content to play has been buffered.
      *
-     * The {@code extra} parameter in {@code MediaPlayer2EventCallback.onInfo} is the
+     * The {@code extra} parameter in {@code EventCallback.onInfo} is the
      * percentage (0-100) of the content that has been buffered or played thus far.
-     * @see android.media.MediaPlayer2.MediaPlayer2EventCallback#onInfo
+     * @see android.media.MediaPlayer2.EventCallback#onInfo
      */
     public static final int MEDIA_INFO_BUFFERING_UPDATE = 704;
 
     /** Bad interleaving means that a media has been improperly interleaved or
      * not interleaved at all, e.g has all the video samples first then all the
      * audio ones. Video is playing but a lot of disk seeks may be happening.
-     * @see android.media.MediaPlayer2.MediaPlayer2EventCallback#onInfo
+     * @see android.media.MediaPlayer2.EventCallback#onInfo
      */
     public static final int MEDIA_INFO_BAD_INTERLEAVING = 800;
 
     /** The media cannot be seeked (e.g live stream)
-     * @see android.media.MediaPlayer2.MediaPlayer2EventCallback#onInfo
+     * @see android.media.MediaPlayer2.EventCallback#onInfo
      */
     public static final int MEDIA_INFO_NOT_SEEKABLE = 801;
 
     /** A new set of metadata is available.
-     * @see android.media.MediaPlayer2.MediaPlayer2EventCallback#onInfo
+     * @see android.media.MediaPlayer2.EventCallback#onInfo
      */
     public static final int MEDIA_INFO_METADATA_UPDATE = 802;
 
@@ -1994,30 +1994,30 @@ public abstract class MediaPlayer2 extends MediaPlayerBase
 
     /** Informs that audio is not playing. Note that playback of the video
      * is not interrupted.
-     * @see android.media.MediaPlayer2.MediaPlayer2EventCallback#onInfo
+     * @see android.media.MediaPlayer2.EventCallback#onInfo
      */
     public static final int MEDIA_INFO_AUDIO_NOT_PLAYING = 804;
 
     /** Informs that video is not playing. Note that playback of the audio
      * is not interrupted.
-     * @see android.media.MediaPlayer2.MediaPlayer2EventCallback#onInfo
+     * @see android.media.MediaPlayer2.EventCallback#onInfo
      */
     public static final int MEDIA_INFO_VIDEO_NOT_PLAYING = 805;
 
     /** Failed to handle timed text track properly.
-     * @see android.media.MediaPlayer2.MediaPlayer2EventCallback#onInfo
+     * @see android.media.MediaPlayer2.EventCallback#onInfo
      *
      * {@hide}
      */
     public static final int MEDIA_INFO_TIMED_TEXT_ERROR = 900;
 
     /** Subtitle track was not supported by the media framework.
-     * @see android.media.MediaPlayer2.MediaPlayer2EventCallback#onInfo
+     * @see android.media.MediaPlayer2.EventCallback#onInfo
      */
     public static final int MEDIA_INFO_UNSUPPORTED_SUBTITLE = 901;
 
     /** Reading the subtitle track takes too long.
-     * @see android.media.MediaPlayer2.MediaPlayer2EventCallback#onInfo
+     * @see android.media.MediaPlayer2.EventCallback#onInfo
      */
     public static final int MEDIA_INFO_SUBTITLE_TIMED_OUT = 902;
 
@@ -2052,129 +2052,129 @@ public abstract class MediaPlayer2 extends MediaPlayerBase
 
     //--------------------------------------------------------------------------
     /** The player just completed a call {@link #attachAuxEffect}.
-     * @see android.media.MediaPlayer2.MediaPlayer2EventCallback#onCallCompleted
+     * @see android.media.MediaPlayer2.EventCallback#onCallCompleted
      */
     public static final int CALL_COMPLETED_ATTACH_AUX_EFFECT = 1;
 
     /** The player just completed a call {@link #deselectTrack}.
-     * @see android.media.MediaPlayer2.MediaPlayer2EventCallback#onCallCompleted
+     * @see android.media.MediaPlayer2.EventCallback#onCallCompleted
      */
     public static final int CALL_COMPLETED_DESELECT_TRACK = 2;
 
     /** The player just completed a call {@link #loopCurrent}.
-     * @see android.media.MediaPlayer2.MediaPlayer2EventCallback#onCallCompleted
+     * @see android.media.MediaPlayer2.EventCallback#onCallCompleted
      */
     public static final int CALL_COMPLETED_LOOP_CURRENT = 3;
 
     /** The player just completed a call {@link #pause}.
-     * @see android.media.MediaPlayer2.MediaPlayer2EventCallback#onCallCompleted
+     * @see android.media.MediaPlayer2.EventCallback#onCallCompleted
      */
     public static final int CALL_COMPLETED_PAUSE = 4;
 
     /** The player just completed a call {@link #play}.
-     * @see android.media.MediaPlayer2.MediaPlayer2EventCallback#onCallCompleted
+     * @see android.media.MediaPlayer2.EventCallback#onCallCompleted
      */
     public static final int CALL_COMPLETED_PLAY = 5;
 
     /** The player just completed a call {@link #prepare}.
-     * @see android.media.MediaPlayer2.MediaPlayer2EventCallback#onCallCompleted
+     * @see android.media.MediaPlayer2.EventCallback#onCallCompleted
      */
     public static final int CALL_COMPLETED_PREPARE = 6;
 
     /** The player just completed a call {@link #releaseDrm}.
-     * @see android.media.MediaPlayer2.MediaPlayer2EventCallback#onCallCompleted
+     * @see android.media.MediaPlayer2.EventCallback#onCallCompleted
      */
     public static final int CALL_COMPLETED_RELEASE_DRM = 12;
 
     /** The player just completed a call {@link #restoreDrmKeys}.
-     * @see android.media.MediaPlayer2.MediaPlayer2EventCallback#onCallCompleted
+     * @see android.media.MediaPlayer2.EventCallback#onCallCompleted
      */
     public static final int CALL_COMPLETED_RESTORE_DRM_KEYS = 13;
 
     /** The player just completed a call {@link #seekTo}.
-     * @see android.media.MediaPlayer2.MediaPlayer2EventCallback#onCallCompleted
+     * @see android.media.MediaPlayer2.EventCallback#onCallCompleted
      */
     public static final int CALL_COMPLETED_SEEK_TO = 14;
 
     /** The player just completed a call {@link #selectTrack}.
-     * @see android.media.MediaPlayer2.MediaPlayer2EventCallback#onCallCompleted
+     * @see android.media.MediaPlayer2.EventCallback#onCallCompleted
      */
     public static final int CALL_COMPLETED_SELECT_TRACK = 15;
 
     /** The player just completed a call {@link #setAudioAttributes}.
-     * @see android.media.MediaPlayer2.MediaPlayer2EventCallback#onCallCompleted
+     * @see android.media.MediaPlayer2.EventCallback#onCallCompleted
      */
     public static final int CALL_COMPLETED_SET_AUDIO_ATTRIBUTES = 16;
 
     /** The player just completed a call {@link #setAudioSessionId}.
-     * @see android.media.MediaPlayer2.MediaPlayer2EventCallback#onCallCompleted
+     * @see android.media.MediaPlayer2.EventCallback#onCallCompleted
      */
     public static final int CALL_COMPLETED_SET_AUDIO_SESSION_ID = 17;
 
     /** The player just completed a call {@link #setAuxEffectSendLevel}.
-     * @see android.media.MediaPlayer2.MediaPlayer2EventCallback#onCallCompleted
+     * @see android.media.MediaPlayer2.EventCallback#onCallCompleted
      */
     public static final int CALL_COMPLETED_SET_AUX_EFFECT_SEND_LEVEL = 18;
 
     /** The player just completed a call {@link #setDataSource}.
-     * @see android.media.MediaPlayer2.MediaPlayer2EventCallback#onCallCompleted
+     * @see android.media.MediaPlayer2.EventCallback#onCallCompleted
      */
     public static final int CALL_COMPLETED_SET_DATA_SOURCE = 19;
 
     /** The player just completed a call {@link #setNextDataSource}.
-     * @see android.media.MediaPlayer2.MediaPlayer2EventCallback#onCallCompleted
+     * @see android.media.MediaPlayer2.EventCallback#onCallCompleted
      */
     public static final int CALL_COMPLETED_SET_NEXT_DATA_SOURCE = 22;
 
     /** The player just completed a call {@link #setNextDataSources}.
-     * @see android.media.MediaPlayer2.MediaPlayer2EventCallback#onCallCompleted
+     * @see android.media.MediaPlayer2.EventCallback#onCallCompleted
      */
     public static final int CALL_COMPLETED_SET_NEXT_DATA_SOURCES = 23;
 
     /** The player just completed a call {@link #setPlaybackParams}.
-     * @see android.media.MediaPlayer2.MediaPlayer2EventCallback#onCallCompleted
+     * @see android.media.MediaPlayer2.EventCallback#onCallCompleted
      */
     public static final int CALL_COMPLETED_SET_PLAYBACK_PARAMS = 24;
 
     /** The player just completed a call {@link #setPlaybackSpeed}.
-     * @see android.media.MediaPlayer2.MediaPlayer2EventCallback#onCallCompleted
+     * @see android.media.MediaPlayer2.EventCallback#onCallCompleted
      */
     public static final int CALL_COMPLETED_SET_PLAYBACK_SPEED = 25;
 
     /** The player just completed a call {@link #setPlayerVolume}.
-     * @see android.media.MediaPlayer2.MediaPlayer2EventCallback#onCallCompleted
+     * @see android.media.MediaPlayer2.EventCallback#onCallCompleted
      */
     public static final int CALL_COMPLETED_SET_PLAYER_VOLUME = 26;
 
     /** The player just completed a call {@link #setSurface}.
-     * @see android.media.MediaPlayer2.MediaPlayer2EventCallback#onCallCompleted
+     * @see android.media.MediaPlayer2.EventCallback#onCallCompleted
      */
     public static final int CALL_COMPLETED_SET_SURFACE = 27;
 
     /** The player just completed a call {@link #setSyncParams}.
-     * @see android.media.MediaPlayer2.MediaPlayer2EventCallback#onCallCompleted
+     * @see android.media.MediaPlayer2.EventCallback#onCallCompleted
      */
     public static final int CALL_COMPLETED_SET_SYNC_PARAMS = 28;
 
     /** The player just completed a call {@link #skipToNext}.
-     * @see android.media.MediaPlayer2.MediaPlayer2EventCallback#onCallCompleted
+     * @see android.media.MediaPlayer2.EventCallback#onCallCompleted
      */
     public static final int CALL_COMPLETED_SKIP_TO_NEXT = 29;
 
     /** The player just completed a call {@link #setBufferingParams}.
-     * @see android.media.MediaPlayer2.MediaPlayer2EventCallback#onCallCompleted
+     * @see android.media.MediaPlayer2.EventCallback#onCallCompleted
      * @hide
      */
     public static final int CALL_COMPLETED_SET_BUFFERING_PARAMS = 1001;
 
     /** The player just completed a call {@code setVideoScalingMode}.
-     * @see android.media.MediaPlayer2.MediaPlayer2EventCallback#onCallCompleted
+     * @see android.media.MediaPlayer2.EventCallback#onCallCompleted
      * @hide
      */
     public static final int CALL_COMPLETED_SET_VIDEO_SCALING_MODE = 1002;
 
     /** The player just completed a call {@code notifyWhenCommandLabelReached}.
-     * @see android.media.MediaPlayer2.MediaPlayer2EventCallback#onCommandLabelReached
+     * @see android.media.MediaPlayer2.EventCallback#onCommandLabelReached
      * @hide
      */
     public static final int CALL_COMPLETED_NOTIFY_WHEN_COMMAND_LABEL_REACHED = 1003;
@@ -2213,38 +2213,38 @@ public abstract class MediaPlayer2 extends MediaPlayerBase
     public @interface CallCompleted {}
 
     /** Status code represents that call is completed without an error.
-     * @see android.media.MediaPlayer2.MediaPlayer2EventCallback#onCallCompleted
+     * @see android.media.MediaPlayer2.EventCallback#onCallCompleted
      */
     public static final int CALL_STATUS_NO_ERROR = 0;
 
     /** Status code represents that call is ended with an unknown error.
-     * @see android.media.MediaPlayer2.MediaPlayer2EventCallback#onCallCompleted
+     * @see android.media.MediaPlayer2.EventCallback#onCallCompleted
      */
     public static final int CALL_STATUS_ERROR_UNKNOWN = Integer.MIN_VALUE;
 
     /** Status code represents that the player is not in valid state for the operation.
-     * @see android.media.MediaPlayer2.MediaPlayer2EventCallback#onCallCompleted
+     * @see android.media.MediaPlayer2.EventCallback#onCallCompleted
      */
     public static final int CALL_STATUS_INVALID_OPERATION = 1;
 
     /** Status code represents that the argument is illegal.
-     * @see android.media.MediaPlayer2.MediaPlayer2EventCallback#onCallCompleted
+     * @see android.media.MediaPlayer2.EventCallback#onCallCompleted
      */
     public static final int CALL_STATUS_BAD_VALUE = 2;
 
     /** Status code represents that the operation is not allowed.
-     * @see android.media.MediaPlayer2.MediaPlayer2EventCallback#onCallCompleted
+     * @see android.media.MediaPlayer2.EventCallback#onCallCompleted
      */
     public static final int CALL_STATUS_PERMISSION_DENIED = 3;
 
     /** Status code represents a file or network related operation error.
-     * @see android.media.MediaPlayer2.MediaPlayer2EventCallback#onCallCompleted
+     * @see android.media.MediaPlayer2.EventCallback#onCallCompleted
      */
     public static final int CALL_STATUS_ERROR_IO = 4;
 
     /** Status code represents that DRM operation is called before preparing a DRM scheme through
      *  {@link #prepareDrm}.
-     * @see android.media.MediaPlayer2.MediaPlayer2EventCallback#onCallCompleted
+     * @see android.media.MediaPlayer2.EventCallback#onCallCompleted
      */
     public static final int CALL_STATUS_NO_DRM_SCHEME = 5;
 
