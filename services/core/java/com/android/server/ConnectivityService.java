@@ -1837,7 +1837,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
     }
 
     void systemReady() {
-        loadGlobalProxy();
+        mProxyTracker.loadGlobalProxy();
         registerNetdEventCallback();
 
         synchronized (this) {
@@ -3453,31 +3453,6 @@ public class ConnectivityService extends IConnectivityManager.Stub
     public void setGlobalProxy(final ProxyInfo proxyProperties) {
         enforceConnectivityInternalPermission();
         mProxyTracker.setGlobalProxy(proxyProperties);
-    }
-
-    private void loadGlobalProxy() {
-        ContentResolver res = mContext.getContentResolver();
-        String host = Settings.Global.getString(res, Settings.Global.GLOBAL_HTTP_PROXY_HOST);
-        int port = Settings.Global.getInt(res, Settings.Global.GLOBAL_HTTP_PROXY_PORT, 0);
-        String exclList = Settings.Global.getString(res,
-                Settings.Global.GLOBAL_HTTP_PROXY_EXCLUSION_LIST);
-        String pacFileUrl = Settings.Global.getString(res, Settings.Global.GLOBAL_HTTP_PROXY_PAC);
-        if (!TextUtils.isEmpty(host) || !TextUtils.isEmpty(pacFileUrl)) {
-            ProxyInfo proxyProperties;
-            if (!TextUtils.isEmpty(pacFileUrl)) {
-                proxyProperties = new ProxyInfo(pacFileUrl);
-            } else {
-                proxyProperties = new ProxyInfo(host, port, exclList);
-            }
-            if (!proxyProperties.isValid()) {
-                if (DBG) log("Invalid proxy properties, ignoring: " + proxyProperties.toString());
-                return;
-            }
-
-            synchronized (mProxyTracker.mProxyLock) {
-                mProxyTracker.mGlobalProxy = proxyProperties;
-            }
-        }
     }
 
     @Override

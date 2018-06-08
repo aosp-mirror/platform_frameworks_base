@@ -142,6 +142,35 @@ public class ProxyTracker {
     }
 
     /**
+     * Read the global proxy settings and cache them in memory.
+     */
+    public void loadGlobalProxy() {
+        ContentResolver res = mContext.getContentResolver();
+        String host = Settings.Global.getString(res, Settings.Global.GLOBAL_HTTP_PROXY_HOST);
+        int port = Settings.Global.getInt(res, Settings.Global.GLOBAL_HTTP_PROXY_PORT, 0);
+        String exclList = Settings.Global.getString(res,
+                Settings.Global.GLOBAL_HTTP_PROXY_EXCLUSION_LIST);
+        String pacFileUrl = Settings.Global.getString(res, Settings.Global.GLOBAL_HTTP_PROXY_PAC);
+        if (!TextUtils.isEmpty(host) || !TextUtils.isEmpty(pacFileUrl)) {
+            ProxyInfo proxyProperties;
+            if (!TextUtils.isEmpty(pacFileUrl)) {
+                proxyProperties = new ProxyInfo(pacFileUrl);
+            } else {
+                proxyProperties = new ProxyInfo(host, port, exclList);
+            }
+            if (!proxyProperties.isValid()) {
+                if (DBG) Slog.d(TAG, "Invalid proxy properties, ignoring: " + proxyProperties);
+                return;
+            }
+
+            synchronized (mProxyLock) {
+                mGlobalProxy = proxyProperties;
+            }
+        }
+        // TODO : shouldn't this function call mPacManager.setCurrentProxyScriptUrl ?
+    }
+
+    /**
      * Sends the system broadcast informing apps about a new proxy configuration.
      *
      * Confusingly this method also sets the PAC file URL. TODO : separate this, it has nothing
