@@ -365,7 +365,7 @@ void WriteKeepSet(const KeepSet& keep_set, OutputStream* out) {
     for (const UsageLocation& location : entry.second) {
       printer.Print("# Referenced at ").Println(location.source.to_string());
     }
-    printer.Print("-keep class ").Print(entry.first).Println(" { <init>(...); }");
+    printer.Print("-keep class ").Print(entry.first).Println(" { <init>(); }");
   }
 
   for (const auto& entry : keep_set.conditional_class_set_) {
