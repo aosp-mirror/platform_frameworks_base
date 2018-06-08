@@ -194,7 +194,7 @@ public final class PendingIntent implements Parcelable {
      */
     public interface OnFinished {
         /**
-         * Called when a send operation as completed.
+         * Called when a send operation has completed.
          *
          * @param pendingIntent The PendingIntent this operation was sent through.
          * @param intent The original Intent that was sent.
