@@ -219,6 +219,15 @@ public class KeyStore {
     }
 
     public byte[] get(String key, int uid) {
+        return get(key, uid, false);
+    }
+
+    @UnsupportedAppUsage
+    public byte[] get(String key) {
+        return get(key, UID_SELF);
+    }
+
+    public byte[] get(String key, int uid, boolean suppressKeyNotFoundWarning) {
         try {
             key = key != null ? key : "";
             return mBinder.get(key, uid);
@@ -226,15 +235,17 @@ public class KeyStore {
             Log.w(TAG, "Cannot connect to keystore", e);
             return null;
         } catch (android.os.ServiceSpecificException e) {
-            Log.w(TAG, "KeyStore exception", e);
+            if (!suppressKeyNotFoundWarning || e.errorCode != KEY_NOT_FOUND) {
+                Log.w(TAG, "KeyStore exception", e);
+            }
             return null;
         }
     }
 
-    @UnsupportedAppUsage
-    public byte[] get(String key) {
-        return get(key, UID_SELF);
+    public byte[] get(String key, boolean suppressKeyNotFoundWarning) {
+        return get(key, UID_SELF, suppressKeyNotFoundWarning);
     }
+
 
     public boolean put(String key, byte[] value, int uid, int flags) {
         return insert(key, value, uid, flags) == NO_ERROR;
